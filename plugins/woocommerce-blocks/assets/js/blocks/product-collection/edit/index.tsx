@@ -2,19 +2,36 @@
  * External dependencies
  */
 import { store as blockEditorStore } from '@wordpress/block-editor';
-import { useState } from '@wordpress/element';
+import { createContext, useContext, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import type { ProductCollectionEditComponentProps } from '../types';
+import type {
+	PreviewState,
+	ProductCollectionEditComponentProps,
+} from '../types';
 import ProductCollectionPlaceholder from './product-collection-placeholder';
-import ProductCollectionContent, {
-	ProductCollectionPreviewModeContext,
-} from './product-collection-content';
+import ProductCollectionContent from './product-collection-content';
 import CollectionSelectionModal from './collection-selection-modal';
 import './editor.scss';
+
+export const ProductCollectionPreviewModeContext = createContext<
+	PreviewState | undefined
+>( undefined );
+
+// Hook to use values of ProductCollectionContext in child components.
+export const usePreviewStateContext = () => {
+	const context = useContext( ProductCollectionPreviewModeContext );
+	if ( ! context ) {
+		console.log(
+			'usePreviewStateContext must be used within a Product Collection block'
+		);
+		return;
+	}
+	return context;
+};
 
 const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	const { clientId, attributes } = props;
@@ -31,13 +48,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 		: ProductCollectionPlaceholder;
 
 	return (
-		<ProductCollectionPreviewModeContext.Provider
-			value={ {
-				isPreview: true,
-				previewMessage:
-					'This preview message should be visible in Product Template',
-			} }
-		>
+		<>
 			<Component
 				{ ...props }
 				openCollectionSelectionModal={ () =>
@@ -53,7 +64,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 					}
 				/>
 			) }
-		</ProductCollectionPreviewModeContext.Provider>
+		</>
 	);
 };
 

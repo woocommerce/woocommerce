@@ -3,7 +3,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { memo, useMemo, useState } from '@wordpress/element';
+import { memo, useContext, useMemo, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import {
@@ -27,7 +27,10 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
  */
 import { useGetLocation, useProductCollectionQueryContext } from './utils';
 import './editor.scss';
-import { usePreviewStateContext } from '../product-collection/edit/product-collection-content';
+import {
+	ProductCollectionPreviewModeContext,
+	usePreviewStateContext,
+} from '../product-collection/edit';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection', 'previewState' ];
 
@@ -134,7 +137,8 @@ const ProductTemplateEdit = (
 		__unstableLayoutClassNames: string;
 	}
 ) => {
-	const previewState = usePreviewStateContext();
+	// const previewState = usePreviewStateContext();
+	const previewState = useContext( ProductCollectionPreviewModeContext );
 	// Here the context value should be visible but it is not.
 	// I am trying to figure out why. 😭
 	console.warn( 'localState->Product Template', previewState );

@@ -34,22 +34,7 @@ import {
 import InspectorControls from './inspector-controls';
 import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
-
-export const ProductCollectionPreviewModeContext = createContext<
-	PreviewState | undefined
->( undefined );
-
-// Hook to use values of ProductCollectionContext in child components.
-export const usePreviewStateContext = () => {
-	const context = useContext( ProductCollectionPreviewModeContext );
-	if ( ! context ) {
-		console.log(
-			'usePreviewStateContext must be used within a Product Collection block'
-		);
-		return;
-	}
-	return context;
-};
+import { ProductCollectionPreviewModeContext } from '.';
 
 const ProductCollectionContent = ( {
 	preview: { setPreviewState, initialPreviewState } = {},
@@ -144,10 +129,7 @@ const ProductCollectionContent = ( {
 
 	return (
 		<ProductCollectionPreviewModeContext.Provider
-			value={ {
-				localPreviewState,
-				setLocalPreviewState,
-			} }
+			value={ localPreviewState }
 		>
 			<div { ...blockProps }>
 				{ localPreviewState?.isPreview && (
