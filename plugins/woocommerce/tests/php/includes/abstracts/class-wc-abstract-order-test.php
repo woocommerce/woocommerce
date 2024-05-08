@@ -209,6 +209,15 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order->set_status( 'cancelled' );
 		$order->save();
 		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+
+		// Failed order should reduce coupon count.
+		$order->set_status( 'failed' );
+		$order->save();
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+
+		// Trashed order should reduce coupon count.
+		$order->delete();
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
 	}
 
 	/**
@@ -242,6 +251,20 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		// Cancelling order should reduce coupon count.
 		$order->set_status( 'cancelled' );
+		$order->save();
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_1 ) )->get_usage_count() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_2 ) )->get_usage_count() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_3 ) )->get_usage_count() );
+
+		// Failed order should reduce coupon count.
+		$order->set_status( 'failed' );
+		$order->save();
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_1 ) )->get_usage_count() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_2 ) )->get_usage_count() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_3 ) )->get_usage_count() );
+
+		// Trashed order should reduce coupon count.
+		$order->delete();
 		$order->save();
 		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_1 ) )->get_usage_count() );
 		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_2 ) )->get_usage_count() );
