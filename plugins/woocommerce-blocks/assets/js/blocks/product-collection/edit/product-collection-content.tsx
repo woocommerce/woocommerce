@@ -59,7 +59,7 @@ const ProductCollectionContent = ( {
 	const { clientId, attributes, setAttributes } = props;
 	const location = useGetLocation( props.context, props.clientId );
 
-	const [ localPreviewState ] = useSetPreviewState( {
+	const [ localPreviewState, setLocalPreviewState ] = useSetPreviewState( {
 		setPreviewState,
 		location,
 		attributes,
@@ -145,9 +145,8 @@ const ProductCollectionContent = ( {
 	return (
 		<ProductCollectionPreviewModeContext.Provider
 			value={ {
-				isPreview: true,
-				previewMessage:
-					'Maybe this should be visible in Product Template?',
+				localPreviewState,
+				setLocalPreviewState,
 			} }
 		>
 			<div { ...blockProps }>
