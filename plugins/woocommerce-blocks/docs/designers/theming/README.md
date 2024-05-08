@@ -38,8 +38,8 @@ For example, let's imagine you are building a theme and would like to customize 
 ```
 
 Before                                                                                                                                                                                                      | After
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-<img src="https://github.com/woocommerce/woocommerce/assets/3616980/fbc11b83-f47b-4b25-bdeb-df798b251cce" width="210" alt="Product Collection block showing the Product Price block with default styles" /> | <img src="https://github.com/woocommerce/woocommerce/assets/3616980/c9730445-b9df-4e96-8204-a10896ac2c5a" width="210" alt="Product Collection block showing the Product Price styled with background and text colors and italic and bold typography" />
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+<img src="https://github.com/woocommerce/woocommerce/assets/3616980/fbc11b83-f47b-4b25-bdeb-df798b251cce" width="210" alt="Product Collection block showing the Product Price block with default styles" /> | <img src="https://github.com/woocommerce/woocommerce/assets/3616980/c9730445-b9df-4e96-8204-a10896ac2c5a" width="210" alt="Product Collection block showing the Product Price styled with background and text colors and italic and bold typography" /> <!-- markdownlint-disable-line no-inline-html -->
 
 You can find more [documentation on global styles](https://developer.wordpress.org/themes/global-settings-and-styles/styles/) in developer.wordpress.org. You can also find the [list of WooCommerce blocks and their names in the docs](../../block-references/block-references.md).
 
@@ -78,12 +78,12 @@ Some of our components have responsive classes depending on the container width.
 
 Those classes are:
 
-| Container width | Class name  |
-|-----------------|-------------|
-| >700px          | `is-large`  |
-| 521px-700px     | `is-medium` |
-| 401px-520px     | `is-small`  |
-| <=400px         | `is-mobile` |
+Container width | Class name
+----------------|------------
+\>700px         | `is-large`
+521px-700px     | `is-medium`
+401px-520px     | `is-small`
+<=400px         | `is-mobile`
 
 As an example, if we wanted to do the Checkout font size 10% larger when the container has a width of 521px or wider, we could do so with this code:
 
