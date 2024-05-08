@@ -41,7 +41,7 @@ class BlockPatterns {
 	const PATTERNS_AI_DATA_POST_TYPE = 'patterns_ai_data';
 
 	/**
-	 * Path to the patterns directory.
+	 * Path to the patterns' directory.
 	 *
 	 * @var string $patterns_path
 	 */
@@ -90,7 +90,9 @@ class BlockPatterns {
 	}
 
 	/**
-	 * Registers the block patterns and categories under `./patterns/`.
+	 * Register block patterns from core and PTK.
+	 *
+	 * @return void
 	 */
 	public function register_block_patterns() {
 		if ( ! class_exists( 'WP_Block_Patterns_Registry' ) ) {
@@ -125,6 +127,18 @@ class BlockPatterns {
 			'featureFlag'   => 'Feature Flag',
 		);
 
+		$this->register_block_patterns_from_files($default_headers);
+	}
+
+	/**
+	 * Registers the block patterns and categories under `./patterns/`.
+	 *
+	 * @param array $default_headers The default headers a pattern can have.
+	 *
+	 * @return void
+	 */
+	private function register_block_patterns_from_files(array $default_headers)
+	{
 		if ( ! file_exists( $this->patterns_path ) ) {
 			return;
 		}
@@ -146,21 +160,22 @@ class BlockPatterns {
 	/**
 	 * Register a block pattern.
 	 *
-	 * @param string $file The file path.
+	 * @param string $source The pattern source.
 	 * @param array  $pattern_data The pattern data.
 	 * @param array  $dictionary The patterns' dictionary.
 	 *
 	 * @return void
 	 */
-	public function register_block_pattern( $file, $pattern_data, $dictionary ) {
+	private function register_block_pattern($source, $pattern_data, $dictionary)
+	{
 		if ( empty( $pattern_data['slug'] ) ) {
 			_doing_it_wrong(
 				'register_block_patterns',
 				esc_html(
 					sprintf(
 					/* translators: %s: file name. */
-						__( 'Could not register file "%s" as a block pattern ("Slug" field missing)', 'woocommerce' ),
-						$file
+						__('Could not register "%s" as a block pattern ("Slug" field missing)', 'woocommerce'),
+						$source
 					)
 				),
 				'6.0.0'
@@ -174,8 +189,8 @@ class BlockPatterns {
 				esc_html(
 					sprintf(
 					/* translators: %1s: file name; %2s: slug value found. */
-						__( 'Could not register file "%1$s" as a block pattern (invalid slug "%2$s")', 'woocommerce' ),
-						$file,
+						__('Could not register "%1$s" as a block pattern (invalid slug "%2$s")', 'woocommerce'),
+						$source,
 						$pattern_data['slug']
 					)
 				),
@@ -199,8 +214,8 @@ class BlockPatterns {
 				esc_html(
 					sprintf(
 					/* translators: %1s: file name; %2s: slug value found. */
-						__( 'Could not register file "%s" as a block pattern ("Title" field missing)', 'woocommerce' ),
-						$file
+						__('Could not register "%s" as a block pattern ("Title" field missing)', 'woocommerce'),
+						$source
 					)
 				),
 				'6.0.0'
@@ -272,7 +287,7 @@ class BlockPatterns {
 			$content = $pattern_data_from_dictionary['content'];
 			$images  = $pattern_data_from_dictionary['images'] ?? array();
 		}
-		include $file;
+		include $source;
 		$pattern_data['content'] = ob_get_clean();
 
 		if ( ! $pattern_data['content'] ) {
