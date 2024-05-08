@@ -124,7 +124,7 @@ jobs:
             - name: 'Run tests'
               env:
                   BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_ANALYTICS_TOKEN }}
-                    BUILDKITE_ANALYTICS_MESSAGE: ${{ github.event.head_commit.message }}
+                  BUILDKITE_ANALYTICS_MESSAGE: ${{ github.event.head_commit.message }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
             - name: 'Upload artifacts'
