@@ -33,7 +33,7 @@ class WC_Helper {
 	 * @return string The absolute path to the view file.
 	 */
 	public static function get_view_filename( $view ) {
-		return dirname( __FILE__ ) . "/views/$view";
+		return __DIR__ . "/views/$view";
 	}
 
 	/**
@@ -119,7 +119,7 @@ class WC_Helper {
 		$subscriptions_list_data   = self::get_subscription_list_data();
 		$subscriptions             = array_filter(
 			$subscriptions_list_data,
-			function( $subscription ) {
+			function ( $subscription ) {
 				return ! empty( $subscription['product_key'] );
 			}
 		);
@@ -362,9 +362,9 @@ class WC_Helper {
 	 */
 	public static function add_utm_params_to_url_for_subscription_link( $url, $utm_content ) {
 		$utm_params = 'utm_source=subscriptionsscreen&' .
-					  'utm_medium=product&' .
-					  'utm_campaign=wcaddons&' .
-					  'utm_content=' . $utm_content;
+						'utm_medium=product&' .
+						'utm_campaign=wcaddons&' .
+						'utm_content=' . $utm_content;
 
 		// there are already some URL parameters
 		if ( strpos( $url, '?' ) ) {
@@ -879,7 +879,8 @@ class WC_Helper {
 		$request = WC_Helper_API::post(
 			'oauth/access_token',
 			array(
-				'body' => array(
+				'timeout' => 30,
+				'body'    => array(
 					'request_token' => wp_unslash( $_GET['request_token'] ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 					'home_url'      => home_url(),
 				),
@@ -1618,7 +1619,7 @@ class WC_Helper {
 		// Sort subscriptions by name and expiration date.
 		usort(
 			$subscriptions,
-			function( $a, $b ) {
+			function ( $a, $b ) {
 				$compare_value = strcasecmp( $a['product_name'], $b['product_name'] );
 				if ( 0 === $compare_value ) {
 					return strcasecmp( $a['expires'], $b['expires'] );
@@ -1938,7 +1939,7 @@ class WC_Helper {
 			);
 
 			if ( wp_remote_retrieve_response_code( $deactivation_response ) === 200 ) {
-				$deactivated++;
+				++$deactivated;
 
 				/**
 				 * Fires when the Helper activates a product successfully.
@@ -2011,7 +2012,7 @@ class WC_Helper {
 
 			$product_id = $data['_product_id'];
 			if ( version_compare( $updates[ $product_id ]['version'], $data['Version'], '>' ) ) {
-				$available++;
+				++$available;
 			}
 		}
 
@@ -2065,6 +2066,7 @@ class WC_Helper {
 			'oauth/me',
 			array(
 				'authenticated' => true,
+				'timeout'       => 30,
 			)
 		);
 
