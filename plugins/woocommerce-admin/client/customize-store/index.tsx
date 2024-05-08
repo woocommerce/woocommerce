@@ -323,7 +323,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					target: 'designWithAi',
 				},
 				DESIGN_WITHOUT_AI: {
-					actions: [ 'recordTracksDesignWithAIClicked' ],
+					actions: [ 'recordTracksDesignWithoutAIClicked' ],
 					target: 'designWithoutAi',
 				},
 				SELECTED_NEW_THEME: {
