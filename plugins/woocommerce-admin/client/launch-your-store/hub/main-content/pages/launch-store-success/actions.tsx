@@ -18,7 +18,7 @@ export const assignCompleteSurvey = {
 				status: 'yes',
 			},
 			method: 'POST',
-		} );
+		} ).catch( () => {} );
 
 		return {
 			...context.congratsScreen,
