@@ -535,7 +535,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$should_load = wc_string_to_bool( $should_load );
 		}
 
-		// Notify stores that are using the `woocommerce_should_load_paypal_standard` filter that it is no longer supported.
+		/**
+		 * Trigger this deprecated filter (`woocommerce_should_load_paypal_standard`) and display a notice on stores that are still using it.
+		 *
+		 * @since 8.9.0
+		 *
+		 * @param bool              $should_load Whether PayPal Standard should be loaded.
+		 * @param WC_Gateway_Paypal $this        The WC_Gateway_Paypal instance.
+		 */
 		if ( ! $should_load && apply_filters( 'woocommerce_should_load_paypal_standard', $should_load, $this ) ) {
 			WC_Admin_Notices::add_custom_notice(
 				'woocommerce_load_paypal_standard_filter_unsupported',
