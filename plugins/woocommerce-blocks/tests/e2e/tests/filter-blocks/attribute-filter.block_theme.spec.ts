@@ -97,6 +97,19 @@ test.describe( 'Product Filter: Attribute Block', () => {
 			} );
 		} );
 
+		test( 'clear button is not shown on initial page load', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( defaultBlockPost.link );
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			await expect( button ).toBeHidden();
+		} );
+
 		test( 'renders a checkbox list with the available attribute filters', async ( {
 			page,
 			defaultBlockPost,
@@ -132,9 +145,89 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 			await expect( products ).toHaveCount( 2 );
 		} );
+
+		test( 'clear button appears after a filter is applied', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( defaultBlockPost.link );
+
+			const grayCheckbox = page.getByText( 'Gray' );
+			await grayCheckbox.click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_color=gray.*/ );
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			await expect( button ).toBeVisible();
+		} );
+
+		test( 'clear button hides after deselecting all filters', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( defaultBlockPost.link );
+
+			const grayCheckbox = page.getByText( 'Gray' );
+			await grayCheckbox.click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_color=gray.*/ );
+
+			await grayCheckbox.click();
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			await expect( button ).toBeHidden();
+		} );
+
+		test( 'filters are cleared after clear button is clicked', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( defaultBlockPost.link );
+
+			const grayCheckbox = page.getByText( 'Gray' );
+			await grayCheckbox.click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_color=gray.*/ );
+
+			const button = page
+				.locator( '.wp-block-woocommerce-product-filter-clear-button' )
+				.locator( 'button' );
+
+			await button.click();
+
+			COLOR_ATTRIBUTE_VALUES.map( async ( color ) => {
+				const element = page.locator(
+					`input[value="${ color.toLowerCase() }"]`
+				);
+
+				await expect( element ).not.toBeChecked();
+			} );
+		} );
 	} );
 
 	test.describe( "With display style 'dropdown'", () => {
+		test( 'clear button is not shown on initial page load', async ( {
+			page,
+			dropdownBlockPost,
+		} ) => {
+			await page.goto( dropdownBlockPost.link );
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			await expect( button ).toBeHidden();
+		} );
+
 		test( 'renders a dropdown list with the available attribute filters', async ( {
 			page,
 			dropdownBlockPost,
@@ -177,6 +270,96 @@ test.describe( 'Product Filter: Attribute Block', () => {
 			const products = page.locator( '.wc-block-product' );
 
 			await expect( products ).toHaveCount( 1 );
+		} );
+
+		test( 'clear button appears after a filter is applied', async ( {
+			page,
+			dropdownBlockPost,
+		} ) => {
+			await page.goto( dropdownBlockPost.link );
+
+			const dropdownLocator = page.locator(
+				'.wc-interactivity-dropdown'
+			);
+
+			await expect( dropdownLocator ).toBeVisible();
+			await dropdownLocator.click();
+
+			const yellowOption = page.getByText( 'Yellow' );
+			await yellowOption.click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_color=yellow.*/ );
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			await expect( button ).toBeVisible();
+		} );
+
+		test( 'clear button hides after deselecting all filters', async ( {
+			page,
+			dropdownBlockPost,
+		} ) => {
+			await page.goto( dropdownBlockPost.link );
+
+			const dropdownLocator = page.locator(
+				'.wc-interactivity-dropdown'
+			);
+
+			await dropdownLocator.click();
+
+			const yellowOption = page.getByText( 'Yellow' );
+			await yellowOption.click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_color=yellow.*/ );
+
+			await dropdownLocator.click();
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			const removeFilter = page.locator(
+				'.wc-interactivity-dropdown__badge-remove'
+			);
+
+			await removeFilter.click();
+
+			await expect( button ).toBeHidden();
+		} );
+
+		test( 'filters are cleared after clear button is clicked', async ( {
+			page,
+			dropdownBlockPost,
+		} ) => {
+			await page.goto( dropdownBlockPost.link );
+
+			const dropdownLocator = page.locator(
+				'.wc-interactivity-dropdown'
+			);
+
+			await dropdownLocator.click();
+
+			const yellowOption = page.getByText( 'Yellow' );
+			await yellowOption.click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_color=yellow.*/ );
+
+			const button = page
+				.locator( '.wp-block-woocommerce-product-filter-clear-button' )
+				.locator( 'button' );
+
+			await button.click();
+
+			const placeholder = await page
+				.locator( '.wc-interactivity-dropdown__placeholder' )
+				.textContent();
+
+			expect( placeholder ).toEqual( 'Select Color' );
 		} );
 	} );
 } );
