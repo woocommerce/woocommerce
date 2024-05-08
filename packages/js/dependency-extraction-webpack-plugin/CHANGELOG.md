@@ -2,12 +2,16 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin/v/3.0.1) - 2024-05-07 
+
+-   Patch - Add @woocommerce/price-format package. [#47099]
+
 ## [3.0.0](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin/v/3.0.0) - 2024-04-23 
 
 -   Patch - Fix a bug where the assets folder was not distributed with @woocommerce/dependency-extraction-webpack-plugin [#46755]
--   Major [ **BREAKING CHANGE** ] - Bump node to version 20 [#46702]
--   Minor - Bump node version. [#45148]
 -   Patch - bump php version in packages/js/*/composer.json [#42020]
+-    - Bump node to version 20 [#46702]
+-   Minor - Bump node version. [#45148]
 
 ## [2.3.0](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin/v/2.3.0) - 2023-10-27 
 
