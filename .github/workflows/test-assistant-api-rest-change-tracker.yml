@@ -15,6 +15,9 @@ jobs:
         run: sleep 2m
         shell: bash
 
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Calculate test date
         id: calculate_date
         run: |
