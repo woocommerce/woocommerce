@@ -20,8 +20,8 @@ WooCommerce blocks rely on [global styles](https://developer.wordpress.org/theme
 
 WooCommerce Blocks follows BEM for class names, as [stated in our coding guidelines](../../contributors/coding-guidelines.md). All classes start with one of these two prefixes:
 
--   `.wc-block-`: class names specific to a single block.
--   `.wc-block-components-`: class names specific to a component. The component might be reused by different blocks.
+* `.wc-block-`: class names specific to a single block.
+* `.wc-block-components-`: class names specific to a component. The component might be reused by different blocks.
 
 The combination of block class names and component class names allows themes to style each component either globally or only in specific blocks. As an example, you could style all prices to be italics with:
 
@@ -50,7 +50,7 @@ Some of our components have responsive classes depending on the container width.
 Those classes are:
 
 | Container width | Class name  |
-| --------------- | ----------- |
+|-----------------|-------------|
 | >700px          | `is-large`  |
 | 521px-700px     | `is-medium` |
 | 401px-520px     | `is-small`  |
@@ -81,16 +81,16 @@ WooCommerce Blocks avoids using legacy unprefixed classes as much as possible. H
 
 ## Blocks
 
--   [Filter blocks](filter-blocks.md)
--   [Cart and Checkout](cart-and-checkout.md)
+* [Filter blocks](filter-blocks.md)
+* [Cart and Checkout](cart-and-checkout.md)
 
 ## Other docs
 
--   [Product grid blocks style update in 2.7.0](product-grid-270.md)
--   [Class names update in 2.8.0](class-names-update-280.md)
--   [Class names update in 3.3.0](class-names-update-330.md)
--   [Class names update in 3.4.0](class-names-update-340.md)
--   [Class names update in 4.6.0](class-names-update-460.md)
+* [Product grid blocks style update in 2.7.0](product-grid-270.md)
+* [Class names update in 2.8.0](class-names-update-280.md)
+* [Class names update in 3.3.0](class-names-update-330.md)
+* [Class names update in 3.4.0](class-names-update-340.md)
+* [Class names update in 4.6.0](class-names-update-460.md)
 
 <!-- FEEDBACK -->
 
