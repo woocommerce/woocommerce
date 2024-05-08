@@ -152,6 +152,9 @@ export const NumberControl: React.FC< NumberProps > = ( {
 								<Button
 									className="woocommerce-number-control__increment"
 									icon={ plus }
+									disabled={
+										parseFloat( value || '0' ) >= max
+									}
 									onMouseDown={ () =>
 										handleIncrement( step )
 									}
@@ -168,6 +171,9 @@ export const NumberControl: React.FC< NumberProps > = ( {
 								/>
 								<Button
 									icon={ reset }
+									disabled={
+										parseFloat( value || '0' ) <= min
+									}
 									className="woocommerce-number-control__decrement"
 									onBlur={ unfocusIfOutside }
 									onMouseDown={ () =>
