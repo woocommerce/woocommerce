@@ -43,7 +43,7 @@ function parsePercentage( value: string ) {
 	return Number( stringNumber );
 }
 
-function addFixedOrPercentage(
+export function addFixedOrPercentage(
 	value: string,
 	fixedOrPercentage: string,
 	increaseOrDecrease: 1 | -1 = 1

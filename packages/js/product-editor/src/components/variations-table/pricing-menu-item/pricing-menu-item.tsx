@@ -17,6 +17,7 @@ import {
 	VariationQuickUpdateFill,
 	VariationQuickUpdateMenuItem,
 } from '../variation-actions-menus';
+import { addFixedOrPercentage } from '../../../blocks/product-fields/regular-price/edit';
 
 export function PricingMenuItem( {
 	selection,
