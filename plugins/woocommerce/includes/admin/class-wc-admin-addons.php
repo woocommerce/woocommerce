@@ -1027,19 +1027,46 @@ class WC_Admin_Addons {
 		<?php
 	}
 
-
 	/**
-	 * Handles output of the addons page in admin.
+	 * Process requests to legacy marketplace menu and redirect to correct in-app pages.
+	 *
+	 * @return void
 	 */
-	public static function output() {
+	public static function handle_legacy_marketplace_redirects() {
 		$section = isset( $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : '_featured';
 		$search  = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
 
-		if ( isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
-			do_action( 'woocommerce_helper_output' );
-			return;
+		self::handle_legacy_marketplace_addon_installation_requests( $section );
+
+		if ( 'helper' === $section ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions' ) );
+			exit();
 		}
 
+		if ( 'search' === $section ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&term=' . $search . '&tab=search&path=%2Fextensions' ) );
+			exit();
+		}
+
+		$sections         = self::get_sections();
+		$allowed_sections = array_map( fn( $section_object ) => $section_object->slug, $sections );
+		// Validate if the category is supported.
+		$section = in_array( $section, $allowed_sections ) ? $section : '_featured';
+
+		if ( '_featured' === $section ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=%2Fextensions' ) );
+			exit();
+		}
+
+		wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&tab=extensions&path=%2Fextensions&category=' . $section ) );
+	}
+
+	/**
+	 * Process installation requests to legacy marketplace menu.
+	 *
+	 * @return void
+	 */
+	private static function handle_legacy_marketplace_addon_installation_requests( string $section ) {
 		if ( isset( $_GET['install-addon'] ) ) {
 			switch ( $_GET['install-addon'] ) {
 				case 'woocommerce-services':
@@ -1048,54 +1075,8 @@ class WC_Admin_Addons {
 				case 'woocommerce-payments':
 					self::install_woocommerce_payments_addon( $section );
 					break;
-				default:
-					// Do nothing.
-					break;
 			}
 		}
-
-		$sections        = self::get_sections();
-		$theme           = wp_get_theme();
-		$current_section = isset( $_GET['section'] ) ? $section : '_featured';
-		$promotions      = array();
-		$addons          = array();
-
-		if ( '_featured' !== $current_section ) {
-			$category       = $section ? $section : null;
-			$term           = $search ? $search : null;
-			$country        = WC()->countries->get_base_country();
-			$extension_data = self::get_extension_data( $category, $term, $country );
-			$addons         = is_wp_error( $extension_data ) ? $extension_data : $extension_data->products;
-			$promotions     = ! empty( $extension_data->promotions ) ? $extension_data->promotions : array();
-		}
-
-		// We need Automattic\WooCommerce\Admin\RemoteInboxNotifications for the next part, if not remove all promotions.
-		if ( ! WC()->is_wc_admin_active() ) {
-			$promotions = array();
-		}
-		// Check for existence of promotions and evaluate out if we should show them.
-		if ( ! empty( $promotions ) ) {
-			foreach ( $promotions as $promo_id => $promotion ) {
-				$evaluator = new RuleEvaluator();
-				$passed    = $evaluator->evaluate( $promotion->rules );
-				if ( ! $passed ) {
-					unset( $promotions[ $promo_id ] );
-				}
-			}
-			// Transform promotions to the correct format ready for output.
-			$promotions = self::format_promotions( $promotions );
-		}
-
-		/**
-		 * Addon page view.
-		 *
-		 * @uses $addons
-		 * @uses $search
-		 * @uses $sections
-		 * @uses $theme
-		 * @uses $current_section
-		 */
-		include_once dirname( __FILE__ ) . '/views/html-admin-page-addons.php';
 	}
 
 	/**
