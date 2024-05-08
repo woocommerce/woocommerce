@@ -7,7 +7,12 @@ import {
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
-import { useEffect, useRef } from '@wordpress/element';
+import {
+	createContext,
+	useContext,
+	useEffect,
+	useRef,
+} from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
@@ -19,6 +24,7 @@ import type {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
 	ProductCollectionEditComponentProps,
+	PreviewState,
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import {
@@ -29,6 +35,22 @@ import InspectorControls from './inspector-controls';
 import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
 
+export const ProductCollectionPreviewModeContext = createContext<
+	PreviewState | undefined
+>( undefined );
+
+// Hook to use values of ProductCollectionContext in child components.
+export const usePreviewStateContext = () => {
+	const context = useContext( ProductCollectionPreviewModeContext );
+	if ( ! context ) {
+		console.log(
+			'usePreviewStateContext must be used within a Product Collection block'
+		);
+		return;
+	}
+	return context;
+};
+
 const ProductCollectionContent = ( {
 	preview: { setPreviewState, initialPreviewState } = {},
 	...props
@@ -37,12 +59,15 @@ const ProductCollectionContent = ( {
 	const { clientId, attributes, setAttributes } = props;
 	const location = useGetLocation( props.context, props.clientId );
 
-	useSetPreviewState( {
+	const [ localPreviewState ] = useSetPreviewState( {
 		setPreviewState,
-		setAttributes,
 		location,
 		attributes,
+		setAttributes,
+		initialPreviewState,
 	} );
+
+	console.log( 'localPreviewState', localPreviewState );
 
 	const blockProps = useBlockProps();
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
@@ -118,30 +143,38 @@ const ProductCollectionContent = ( {
 	}
 
 	return (
-		<div { ...blockProps }>
-			{ attributes.previewState?.isPreview && (
-				<Button
-					variant="primary"
-					size="small"
-					style={ {
-						position: 'absolute',
-						top: 0,
-						right: 0,
-						zIndex: 1000,
-					} }
-					showTooltip
-					label={ attributes.previewState?.previewMessage }
-					className="wc-block-product-collection__preview-button"
-				>
-					Preview
-				</Button>
-			) }
+		<ProductCollectionPreviewModeContext.Provider
+			value={ {
+				isPreview: true,
+				previewMessage:
+					'Maybe this should be visible in Product Template?',
+			} }
+		>
+			<div { ...blockProps }>
+				{ localPreviewState?.isPreview && (
+					<Button
+						variant="primary"
+						size="small"
+						style={ {
+							position: 'absolute',
+							top: 0,
+							right: 0,
+							zIndex: 1000,
+						} }
+						showTooltip
+						label={ localPreviewState?.previewMessage }
+						className="wc-block-product-collection__preview-button"
+					>
+						Preview
+					</Button>
+				) }
 
-			<InspectorControls { ...props } />
-			<InspectorAdvancedControls { ...props } />
-			<ToolbarControls { ...props } />
-			<div { ...innerBlocksProps } />
-		</div>
+				<InspectorControls { ...props } />
+				<InspectorAdvancedControls { ...props } />
+				<ToolbarControls { ...props } />
+				<div { ...innerBlocksProps } />
+			</div>
+		</ProductCollectionPreviewModeContext.Provider>
 	);
 };
 

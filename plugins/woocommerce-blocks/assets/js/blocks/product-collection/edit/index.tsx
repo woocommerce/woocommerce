@@ -10,7 +10,9 @@ import { useSelect } from '@wordpress/data';
  */
 import type { ProductCollectionEditComponentProps } from '../types';
 import ProductCollectionPlaceholder from './product-collection-placeholder';
-import ProductCollectionContent from './product-collection-content';
+import ProductCollectionContent, {
+	ProductCollectionPreviewModeContext,
+} from './product-collection-content';
 import CollectionSelectionModal from './collection-selection-modal';
 import './editor.scss';
 
@@ -29,7 +31,13 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 		: ProductCollectionPlaceholder;
 
 	return (
-		<>
+		<ProductCollectionPreviewModeContext.Provider
+			value={ {
+				isPreview: true,
+				previewMessage:
+					'This preview message should be visible in Product Template',
+			} }
+		>
 			<Component
 				{ ...props }
 				openCollectionSelectionModal={ () =>
@@ -45,7 +53,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 					}
 				/>
 			) }
-		</>
+		</ProductCollectionPreviewModeContext.Provider>
 	);
 };
 

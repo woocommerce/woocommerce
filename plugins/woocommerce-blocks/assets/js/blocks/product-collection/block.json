@@ -38,9 +38,6 @@
 		"forcePageReload": {
 			"type": "boolean",
 			"default": false
-		},
-		"previewState": {
-			"type": "object"
 		}
 	},
 	"providesContext": {
@@ -48,8 +45,7 @@
 		"query": "query",
 		"displayLayout": "displayLayout",
 		"queryContextIncludes": "queryContextIncludes",
-		"collection": "collection",
-		"productCollectionPreviewState": "previewState"
+		"collection": "collection"
 	},
 	"usesContext": [ "templateSlug" ],
 	"supports": {

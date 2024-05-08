@@ -28,7 +28,6 @@ export interface ProductCollectionAttributes {
 	 */
 	queryContextIncludes: string[];
 	forcePageReload: boolean;
-	previewState?: PreviewState;
 }
 
 export enum LayoutOptions {

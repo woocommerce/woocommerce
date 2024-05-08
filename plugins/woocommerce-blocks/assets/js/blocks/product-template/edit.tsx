@@ -27,6 +27,7 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
  */
 import { useGetLocation, useProductCollectionQueryContext } from './utils';
 import './editor.scss';
+import { usePreviewStateContext } from '../product-collection/edit/product-collection-content';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection', 'previewState' ];
 
@@ -133,6 +134,11 @@ const ProductTemplateEdit = (
 		__unstableLayoutClassNames: string;
 	}
 ) => {
+	const previewState = usePreviewStateContext();
+	// Here the context value should be visible but it is not.
+	// I am trying to figure out why. 😭
+	console.warn( 'localState->Product Template', previewState );
+
 	const {
 		clientId,
 		context: {
@@ -247,6 +253,7 @@ const ProductTemplateEdit = (
 				products: getEntityRecords( 'postType', postType, {
 					...query,
 					...restQueryArgs,
+					previewState,
 					location,
 					productCollectionQueryContext,
 				} ),
@@ -270,6 +277,7 @@ const ProductTemplateEdit = (
 			location,
 			productCollectionQueryContext,
 			loopShopPerPage,
+			previewState,
 		]
 	);
 	const blockContexts = useMemo(
