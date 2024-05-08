@@ -103,6 +103,25 @@ const ProductCollectionContent = ( {
 		[]
 	);
 
+	const isSelectedOrInnerBlockSelected = useSelect(
+		( select ) => {
+			const { getSelectedBlockClientId, hasSelectedInnerBlock } =
+				select( 'core/block-editor' );
+
+			// Check if the current block is selected.
+			const isSelected = getSelectedBlockClientId() === clientId;
+
+			// Check if any inner block of the current block is selected.
+			const isInnerBlockSelected = hasSelectedInnerBlock(
+				clientId,
+				true
+			);
+
+			return isSelected || isInnerBlockSelected;
+		},
+		[ clientId ]
+	);
+
 	/**
 	 * If inherit is not a boolean, then we haven't set default attributes yet.
 	 * We don't wanna render anything until default attributes are set.
@@ -119,17 +138,18 @@ const ProductCollectionContent = ( {
 
 	return (
 		<div { ...blockProps }>
-			{ attributes.previewState?.isPreview && props.isSelected && (
-				<Button
-					variant="primary"
-					size="small"
-					showTooltip
-					label={ attributes.previewState?.previewMessage }
-					className="wc-block-product-collection__preview-button"
-				>
-					Preview
-				</Button>
-			) }
+			{ attributes.previewState?.isPreview &&
+				isSelectedOrInnerBlockSelected && (
+					<Button
+						variant="primary"
+						size="small"
+						showTooltip
+						label={ attributes.previewState?.previewMessage }
+						className="wc-block-product-collection__preview-button"
+					>
+						Preview
+					</Button>
+				) }
 
 			<InspectorControls { ...props } />
 			<InspectorAdvancedControls { ...props } />
