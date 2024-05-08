@@ -136,9 +136,9 @@ class ReceiptRenderingEngine {
 		$formatted_line_items = array();
 		$row_index            = 0;
 		foreach ( $data['line_items'] as $line_item_data ) {
-			$quantity_data          = isset( $line_item_data['quantity'] ) ? " × ${line_item_data['quantity']}" : '';
+			$quantity_data          = isset( $line_item_data['quantity'] ) ? " × {$line_item_data['quantity']}" : '';
 			$line_item_display_data = array(
-				'inner_html'    => "<td>${line_item_data['title']}$quantity_data</td><td>${line_item_data['amount']}</td>",
+				'inner_html'    => "<td>{$line_item_data['title']}$quantity_data</td><td>{$line_item_data['amount']}</td>",
 				'tr_attributes' => array(),
 				'row_index'     => $row_index++,
 			);
@@ -175,7 +175,7 @@ class ReceiptRenderingEngine {
 				$attribute_value = esc_attr( $attribute_value );
 				$attributes     .= " $attribute_name=\"$attribute_value\"";
 			}
-			$formatted_line_items[] = wp_kses_post( "<tr$attributes>${line_item_display_data['inner_html']}</tr>" );
+			$formatted_line_items[] = wp_kses_post( "<tr$attributes>{$line_item_display_data['inner_html']}</tr>" );
 		}
 		$data['formatted_line_items'] = $formatted_line_items;
 
