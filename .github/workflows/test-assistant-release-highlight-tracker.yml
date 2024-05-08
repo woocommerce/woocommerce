@@ -11,8 +11,8 @@ jobs:
     if: "${{ github.event.label.name == 'release: highlight' && (github.event.pull_request.state == 'open' || github.event.pull_request.merged) }}"
     runs-on: ubuntu-20.04
     steps:
-      - name: Wait 2 minutes for other labelling jobs to finish
-        run: sleep 2m
+      - name: Wait 1 minutes for other labelling jobs to finish
+        run: sleep 1m
         shell: bash
 
       - name: Checkout repository
