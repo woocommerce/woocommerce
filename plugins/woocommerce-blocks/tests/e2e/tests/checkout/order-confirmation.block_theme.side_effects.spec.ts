@@ -116,7 +116,7 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 
 		await test.step( 'Logout the user and revisit the order received page to verify that details are displayed when woocommerce_order_received_verify_known_shoppers is disabled', async () => {
 			await requestUtils.activatePlugin(
-				'woocommerce-blocks-order-confirmation-filters'
+				'woocommerce-blocks-test-order-confirmation-filters'
 			);
 			await page.goto( '/my-account' );
 			await page
