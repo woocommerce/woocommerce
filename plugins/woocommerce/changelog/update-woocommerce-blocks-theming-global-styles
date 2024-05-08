@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update docs about blocks styling to clearly state global styles are the recommended approach
