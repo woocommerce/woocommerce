@@ -28,7 +28,8 @@ export interface ProductCollectionAttributes {
 	 */
 	queryContextIncludes: string[];
 	forcePageReload: boolean;
-	previewState?: PreviewState;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	__privatePreviewState?: PreviewState;
 }
 
 export enum LayoutOptions {

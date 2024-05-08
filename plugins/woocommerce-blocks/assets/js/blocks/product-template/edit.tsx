@@ -28,7 +28,7 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 import { useGetLocation, useProductCollectionQueryContext } from './utils';
 import './editor.scss';
 
-const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection', 'previewState' ];
+const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
@@ -156,6 +156,7 @@ const ProductTemplateEdit = (
 				shrinkColumns: false,
 			},
 			queryContextIncludes = [],
+			__privateProductCollectionPreviewState,
 		},
 		__unstableLayoutClassNames,
 	} = props;
@@ -249,6 +250,7 @@ const ProductTemplateEdit = (
 					...restQueryArgs,
 					location,
 					productCollectionQueryContext,
+					previewState: __privateProductCollectionPreviewState,
 				} ),
 				blocks: getBlocks( clientId ),
 			};
@@ -270,6 +272,7 @@ const ProductTemplateEdit = (
 			location,
 			productCollectionQueryContext,
 			loopShopPerPage,
+			__privateProductCollectionPreviewState,
 		]
 	);
 	const blockContexts = useMemo(

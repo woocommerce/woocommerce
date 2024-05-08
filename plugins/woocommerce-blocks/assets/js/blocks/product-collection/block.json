@@ -39,7 +39,7 @@
 			"type": "boolean",
 			"default": false
 		},
-		"previewState": {
+		"__privatePreviewState": {
 			"type": "object"
 		}
 	},
@@ -49,7 +49,7 @@
 		"displayLayout": "displayLayout",
 		"queryContextIncludes": "queryContextIncludes",
 		"collection": "collection",
-		"productCollectionPreviewState": "previewState"
+		"__privateProductCollectionPreviewState": "__privatePreviewState"
 	},
 	"usesContext": [ "templateSlug" ],
 	"supports": {

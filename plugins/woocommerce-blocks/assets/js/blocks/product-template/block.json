@@ -16,7 +16,7 @@
 		"postId",
 		"queryContextIncludes",
 		"collection",
-		"productCollectionPreviewState"
+		"__privateProductCollectionPreviewState"
 	],
 	"supports": {
 		"inserter": false,

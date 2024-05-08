@@ -66,10 +66,6 @@ const registerProductCollection = ( {
 
 	registerBlockVariation( blockJson.name, {
 		...blockVariationArgs,
-		attributes: {
-			...blockVariationArgs.attributes,
-			previewState: initialPreviewState,
-		},
 	} );
 };
 

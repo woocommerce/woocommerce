@@ -135,8 +135,8 @@ export const useSetPreviewState = ( {
 } ) => {
 	const setState = ( newPreviewState: PreviewState ) => {
 		setAttributes( {
-			previewState: {
-				...attributes.previewState,
+			__privatePreviewState: {
+				...attributes.__privatePreviewState,
 				...newPreviewState,
 			},
 		} );
@@ -176,7 +176,7 @@ export const useSetPreviewState = ( {
 				location.sourceData?.termId === null;
 			if ( isGenericArchiveTemplate ) {
 				setAttributes( {
-					previewState: {
+					__privatePreviewState: {
 						isPreview: !! attributes?.query?.inherit,
 						previewMessage:
 							'Actual products will vary depending on the page being viewed.',

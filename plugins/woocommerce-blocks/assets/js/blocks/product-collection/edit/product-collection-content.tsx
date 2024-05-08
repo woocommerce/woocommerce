@@ -92,7 +92,7 @@ const ProductCollectionContent = ( {
 				queryId,
 				// If initialPreviewState is provided, set it as previewState.
 				...( !! attributes.collection && {
-					previewState: initialPreviewState,
+					__privatePreviewState: initialPreviewState,
 				} ),
 			} );
 
@@ -138,13 +138,15 @@ const ProductCollectionContent = ( {
 
 	return (
 		<div { ...blockProps }>
-			{ attributes.previewState?.isPreview &&
+			{ attributes.__privatePreviewState?.isPreview &&
 				isSelectedOrInnerBlockSelected && (
 					<Button
 						variant="primary"
 						size="small"
 						showTooltip
-						label={ attributes.previewState?.previewMessage }
+						label={
+							attributes.__privatePreviewState?.previewMessage
+						}
 						className="wc-block-product-collection__preview-button"
 					>
 						Preview
