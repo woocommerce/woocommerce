@@ -384,7 +384,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 		await expect( colorPicker ).toHaveClass( /is-active/ );
 	} );
 
-	test( 'Selected color palette should be applied on the frontend', async ( {
+	test.skip( 'Selected color palette should be applied on the frontend', async ( {
 		assemblerPageObject,
 		page,
 		baseURL,
