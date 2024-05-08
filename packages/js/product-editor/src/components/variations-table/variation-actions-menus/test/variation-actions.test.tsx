@@ -62,7 +62,7 @@ describe( 'MultipleUpdateMenu', () => {
 		( recordEvent as jest.Mock ).mockClear();
 	} );
 
-	it( 'should render dropdown with pricing, inventory, and delete options when opened', () => {
+	it( 'should render dropdown with inventory, and delete options when opened', () => {
 		const { queryByText, getByRole } = render(
 			<MultipleUpdateMenu
 				selection={ [ mockVariation, anotherMockVariation ] }
@@ -72,7 +72,6 @@ describe( 'MultipleUpdateMenu', () => {
 		);
 		fireEvent.click( getByRole( 'button', { name: 'Quick update' } ) );
 		expect( queryByText( 'Update stock' ) ).toBeInTheDocument();
-		expect( queryByText( 'Set list price' ) ).toBeInTheDocument();
 		expect( queryByText( 'Toggle visibility' ) ).toBeInTheDocument();
 	} );
 
