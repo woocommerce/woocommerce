@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
 import {
 	BaseControl,
 	ComboboxControl as CoreComboboxControl,
@@ -15,18 +14,11 @@ import {
 	useRef,
 	useState,
 } from '@wordpress/element';
-import {
-	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
-	type ProductAttributesActions,
-	WPDataActions,
-} from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
 import classnames from 'classnames';
 
 /**
  * Internal dependencies
  */
-import { TRACKS_SOURCE } from '../../constants';
 import type {
 	AttributesComboboxControlItem,
 	AttributesComboboxControlComponent,
@@ -101,21 +93,12 @@ const AttributesComboboxControl: React.FC<
 	help,
 	current = null,
 	items = [],
-	createNewAttributesAsGlobal = false,
 	instanceNumber = 0,
 	isLoading = false,
 	onChange,
 } ) => {
-	const createErrorNotice = useDispatch( 'core/notices' )?.createErrorNotice;
-	const { createProductAttribute } = useDispatch(
-		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
-	) as unknown as ProductAttributesActions & WPDataActions;
-
 	const [ createNewAttributeOption, updateCreateNewAttributeOption ] =
 		useState< ComboboxControlOption >( createNewAttributeOptionDefault );
-
-	const clearCreateNewAttributeItem = () =>
-		updateCreateNewAttributeOption( createNewAttributeOptionDefault );
 
 	/**
 	 * Map the items to the Combobox options.
@@ -154,48 +137,6 @@ const AttributesComboboxControl: React.FC<
 	if ( createNewAttributeOption.state === 'creating' ) {
 		currentValue = 'create-attribute';
 	}
-
-	const addNewAttribute = ( name: string ) => {
-		recordEvent( 'product_attribute_add_custom_attribute', {
-			source: TRACKS_SOURCE,
-		} );
-		if ( createNewAttributesAsGlobal ) {
-			createProductAttribute(
-				{
-					name,
-					generate_slug: true,
-				},
-				{
-					optimisticQueryUpdate: {
-						order_by: 'name',
-					},
-				}
-			).then(
-				( newAttr ) => {
-					onChange( newAttr );
-					clearCreateNewAttributeItem();
-					setAttributeSelected( true );
-				},
-				( error ) => {
-					let message = __(
-						'Failed to create new attribute.',
-						'woocommerce'
-					);
-					if ( error.code === 'woocommerce_rest_cannot_create' ) {
-						message = error.message;
-					}
-
-					createErrorNotice?.( message, {
-						explicitDismiss: true,
-					} );
-
-					clearCreateNewAttributeItem();
-				}
-			);
-		} else {
-			onChange( items.find( ( i ) => i.name === name ) );
-		}
-	};
 
 	const comboRef = useRef< HTMLDivElement | null >( null );
 
@@ -292,8 +233,11 @@ const AttributesComboboxControl: React.FC<
 								...createNewAttributeOption,
 								state: 'creating',
 							} );
-							addNewAttribute( createNewAttributeOption.label );
-							return;
+
+							return onChange( {
+								id: -99,
+								name: createNewAttributeOption.label,
+							} );
 						}
 
 						setAttributeSelected( true );
