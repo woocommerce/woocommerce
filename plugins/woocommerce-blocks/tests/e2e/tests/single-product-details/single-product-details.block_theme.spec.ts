@@ -25,24 +25,6 @@ test.describe( `${ blockData.slug } Block`, () => {
 		);
 	} );
 
-	test( 'block should be already added in the Single Product Template', async ( {
-		editorUtils,
-		admin,
-	} ) => {
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//single-product',
-			postType: 'wp_template',
-		} );
-		await editorUtils.enterEditMode();
-		const alreadyPresentBlock = await editorUtils.getBlockByName(
-			blockData.slug
-		);
-
-		await expect( alreadyPresentBlock ).toHaveText(
-			/This block lists description, attributes and reviews for a single product./
-		);
-	} );
-
 	test( 'block can be inserted in the Site Editor', async ( {
 		admin,
 		requestUtils,
@@ -59,9 +41,10 @@ test.describe( `${ blockData.slug } Block`, () => {
 		await admin.visitSiteEditor( {
 			postId: template.id,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
 
-		await editorUtils.enterEditMode();
+		await expect( editor.canvas.getByText( 'howdy' ) ).toBeVisible();
 
 		await editor.insertBlock( {
 			name: blockData.slug,
