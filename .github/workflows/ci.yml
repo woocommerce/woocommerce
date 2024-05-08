@@ -121,10 +121,10 @@ jobs:
               run: |
                   if [[ "${{ github.event_name }}" == "push" ]]; then
                     echo "Commit message is ${{ github.event.head_commit.message }}"
-                    echo "::set-output name=commit_message::${{ github.event.head_commit.message }}"
+                    echo "COMMIT_MESSAGE=${{ github.event.head_commit.message }}" >> "$GITHUB_OUTPUT"
                   elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
                     echo "Commit message is ${{ github.event.pull_request.title }}"
-                    echo "::set-output name=commit_message::${{ github.event.pull_request.title }}"
+                    echo "COMMIT_MESSAGE=${{ github.event.pull_request.title }}" >> "$GITHUB_OUTPUT"
                   else
                     echo "Workflow triggered by other event"
                   fi
@@ -138,7 +138,7 @@ jobs:
             - name: 'Run tests'
               env:
                   BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_ANALYTICS_TOKEN }}
-                  BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.commit_message }}
+                  BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
             - name: 'Upload artifacts'
@@ -175,10 +175,10 @@ jobs:
               run: |
                   if [[ "${{ github.event_name }}" == "push" ]]; then
                     echo "Commit message is ${{ github.event.head_commit.message }}"
-                    echo "::set-output name=commit_message::${{ github.event.head_commit.message }}"
+                    echo "COMMIT_MESSAGE=${{ github.event.head_commit.message }}" >> "$GITHUB_OUTPUT"
                   elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
                     echo "Commit message is ${{ github.event.pull_request.title }}"
-                    echo "::set-output name=commit_message::${{ github.event.pull_request.title }}"
+                    echo "COMMIT_MESSAGE=${{ github.event.pull_request.title }}" >> "$GITHUB_OUTPUT"
                   else
                     echo "Workflow triggered by other event"
                   fi
@@ -192,7 +192,7 @@ jobs:
             - name: 'Run tests'
               env:
                   BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_API_ANALYTICS_TOKEN }}
-                  BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.commit_message }}
+                  BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
             - name: 'Upload artifacts'
