@@ -218,6 +218,7 @@ class WC_Admin_Addons {
 		}
 
 		wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&tab=extensions&path=%2Fextensions&category=' . $section ) );
+		exit();
 	}
 
 	/**
