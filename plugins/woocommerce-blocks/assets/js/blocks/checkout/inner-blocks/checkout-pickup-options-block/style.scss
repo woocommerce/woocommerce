@@ -34,17 +34,19 @@
 		.wc-block-components-radio-control__option-checked {
 			.wc-block-components-radio-control__description-group {
 				.read-more-content {
-					visibility: visible;
+					margin-left: em($gap-small * 0.25);
 					position: initial;
+					visibility: visible;
 					z-index: initial;
-					width: 100%;
+					hyphens: auto;
+					word-break: normal;
 				}
 			}
 		}
 
 		.wc-block-components-radio-control__description-group {
 			display: block;
-			width: calc(100% + em($gap-huge));
+			width: calc(100% + em($gap-huge / 0.875));
 			box-sizing: border-box;
 			border-radius: $universal-border-radius;
 			padding: 1px em($gap-small);
@@ -53,20 +55,9 @@
 			@include font-size(regular);
 
 			.read-more-content {
-				visibility: hidden;
 				position: absolute;
+				visibility: hidden;
 				z-index: -1;
-				width: 99%;
-
-				div {
-					margin-right: em(5 * $grid-unit);
-				}
-				a.read-more-content__read_more {
-					position: relative;
-					bottom: 20px;
-					float: right;
-					right: 0;
-				}
 			}
 		}
 		.wc-block-components-radio-control__description,
