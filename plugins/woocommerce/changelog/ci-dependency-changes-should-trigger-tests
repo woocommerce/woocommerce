@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update the ci-job utility to trigger tests when a dependency is changed
