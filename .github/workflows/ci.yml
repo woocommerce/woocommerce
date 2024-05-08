@@ -266,11 +266,6 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - name: 'Install Allure CLI'
-              env:
-                  DESTINATION_PATH: ../
-              run: ./.github/workflows/scripts/install-allure.sh
-
             - name: 'Download blob reports from artifacts'
               uses: actions/download-artifact@v4
               with:
@@ -281,7 +276,7 @@ jobs:
 
             - name: 'Generate Allure report'
               id: generate_allure_report
-              run: allure generate --clean ./out/allure-results --output ./out/allure-report
+              run: pnpm allure generate --clean ./out/allure-results --output ./out/allure-report
 
             - name: 'Archive reports'
               uses: actions/upload-artifact@v4
@@ -334,11 +329,6 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - name: 'Install Allure CLI'
-              env:
-                  DESTINATION_PATH: ../
-              run: ./.github/workflows/scripts/install-allure.sh
-
             - name: 'Download blob reports from artifacts'
               uses: actions/download-artifact@v4
               with:
@@ -349,7 +339,7 @@ jobs:
 
             - name: 'Generate Allure report'
               id: generate_allure_report
-              run: allure generate --clean ./out/allure-results --output ./out/allure-report
+              run: pnpm allure generate --clean ./out/allure-results --output ./out/allure-report
 
             - name: 'Archive reports'
               uses: actions/upload-artifact@v4
