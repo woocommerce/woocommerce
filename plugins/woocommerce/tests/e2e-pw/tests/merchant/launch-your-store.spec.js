@@ -1,7 +1,9 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
 
-test.describe( 'Launch Your Store front end - logged out', () => {
+test.describe( 'Launch Your Store front end - logged in', () => {
+	test.use( { storageState: process.env.ADMINSTATE } );
+
 	test.afterAll( async ( { baseURL } ) => {
 		try {
 			await setOption(
@@ -15,7 +17,7 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 		}
 	} );
 
-	test.skip( 'Entire site coming soon mode', async ( { page, baseURL } ) => {
+	test( 'Entire site coming soon mode', async ( { page, baseURL } ) => {
 		try {
 			await setOption(
 				request,
@@ -38,12 +40,12 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 
 		await expect(
 			page.getByText(
-				'Pardon our dust! We’re working on something amazing — check back soon!'
+				'This page is in "Coming soon" mode and is only visible to you and those who have permission. To make it public to everyone, change visibility settings'
 			)
 		).toBeVisible();
 	} );
 
-	test.skip( 'Store only coming soon mode', async ( { page, baseURL } ) => {
+	test( 'Store only coming soon mode', async ( { page, baseURL } ) => {
 		try {
 			await setOption(
 				request,
@@ -65,12 +67,8 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 		await page.goto( baseURL + '/shop/' );
 
 		await expect(
-			page.getByText( 'Great things are on the horizon' )
-		).toBeVisible();
-
-		await expect(
 			page.getByText(
-				'Something big is brewing! Our store is in the works and will be launching soon!'
+				'This page is in "Coming soon" mode and is only visible to you and those who have permission. To make it public to everyone, change visibility settings'
 			)
 		).toBeVisible();
 	} );
