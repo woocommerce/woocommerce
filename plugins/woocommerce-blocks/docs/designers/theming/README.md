@@ -14,6 +14,35 @@ WooCommerce blocks rely on [global styles](https://developer.wordpress.org/theme
 * Are not affected by markup or class name updates into individual blocks or components.
 * Don't depend on a specific nesting order of blocks: users can freely move blocks around without styles breaking.
 
+#### Example
+
+For example, let's imagine you are building a theme and would like to customize the Product Price block styles, you can do so adding these properties in your `theme.json`:
+
+```JSON
+"styles": {
+	"blocks": {
+		"woocommerce/product-price": {
+			"color": {
+				"background": "#00cc00",
+				"text": "#fff"
+			},
+			"typography": {
+				"fontStyle": "italic",
+				"fontWeight": "700"
+			}
+		}
+		...
+	}
+	...
+}
+```
+
+Before                                                                                                                                                                                                      | After
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+<img src="https://github.com/woocommerce/woocommerce/assets/3616980/fbc11b83-f47b-4b25-bdeb-df798b251cce" width="210" alt="Product Collection block showing the Product Price block with default styles" /> | <img src="https://github.com/woocommerce/woocommerce/assets/3616980/c9730445-b9df-4e96-8204-a10896ac2c5a" width="210" alt="Product Collection block showing the Product Price styled with background and text colors and italic and bold typography" />
+
+You can find more [documentation on global styles](https://developer.wordpress.org/themes/global-settings-and-styles/styles/) in developer.wordpress.org. You can also find the [list of WooCommerce blocks and their names in the docs](../../block-references/block-references.md).
+
 ### Block and component class names
 
 **Important: we strongly discourage writing CSS code based on existing block class names, prioritize using global styles when possible. We specially discourage writing CSS selectors that rely on a specific block being a descendant of another one, as users can move blocks around freely, so they are prone to breaking. Similar to WordPress itself, we consider the HTML structure within components, blocks, and block templates to be “private”, and subject to further change in the future, so using CSS to target the internals of a block or a block template is _not recommended or supported_.**
