@@ -23,7 +23,7 @@ Note: some blocks might fail to render because they are based on products having
 <div class="wp-block-button aligncenter">
 	<a
 		class="wp-block-button__link"
-		href="https://ephemeral-aljullu-20200929.atomicsites.blog/product/beanie/"
+		href=""
 		>Shop now</a
 	>
 </div>
@@ -35,7 +35,7 @@ Note: some blocks might fail to render because they are based on products having
 <div class="wp-block-button aligncenter">
 	<a
 		class="wp-block-button__link"
-		href="https://ephemeral-aljullu-20200929.atomicsites.blog/product-category/clothing/"
+		href=""
 		>Shop now</a
 	>
 </div>
