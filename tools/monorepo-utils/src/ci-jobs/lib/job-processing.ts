@@ -181,7 +181,6 @@ async function createTestJob(
 	shardNumber: number
 ): Promise< TestJob | null > {
 	let triggered = false;
-
 	// When we're forcing changes for all projects we don't need to check
 	// for any changed files before triggering the job.
 	if ( changes === true ) {
@@ -276,6 +275,9 @@ async function createJobsForProject(
 	// In order to simplify the way that cascades work we're going to recurse depth-first and check our dependencies
 	// for jobs before ourselves. This lets any cascade keys created in dependencies cascade to dependents.
 	const newCascadeKeys = [];
+
+	let dependencyChanges = false;
+
 	for ( const dependency of node.dependencies ) {
 		// Each dependency needs to have its own cascade keys so that they don't cross-contaminate.
 
@@ -291,6 +293,16 @@ async function createJobsForProject(
 			options,
 			dependencyCascade
 		);
+
+		if (
+			dependencyChanges === false &&
+			Object.values( dependencyJobs ).some(
+				( array ) => array.length > 0
+			)
+		) {
+			dependencyChanges = true;
+		}
+
 		newJobs.lint.push( ...dependencyJobs.lint );
 
 		testTypes.forEach( ( type ) => {
@@ -369,8 +381,12 @@ async function createJobsForProject(
 				newJobs.lint.push( created );
 				break;
 			}
-
 			case JobType.Test: {
+				// If there are dependency changes, we need to trigger the job
+				if ( dependencyChanges ) {
+					projectChanges = true;
+				}
+
 				const created = await createTestJob(
 					node.name,
 					node.path,
