@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Blocks E2E: Fix flaky Product Collection tests

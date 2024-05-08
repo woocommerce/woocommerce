@@ -3,7 +3,7 @@
  */
 import { Locator, Page } from '@playwright/test';
 import { TemplateApiUtils, EditorUtils } from '@woocommerce/e2e-utils';
-import { Editor, Admin } from '@wordpress/e2e-test-utils-playwright';
+import { expect, Editor, Admin } from '@wordpress/e2e-test-utils-playwright';
 
 /**
  * Internal dependencies
@@ -124,15 +124,13 @@ class ProductCollectionPage {
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		await this.admin.page
-			.frameLocator( 'iframe[name="editor-canvas"]' )
+		await this.editor.canvas
 			.getByRole( 'button', { name: buttonName } )
 			.click();
 	}
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
 		await this.admin.createNewPost( { legacyCanvas: true } );
-		await this.editorUtils.closeWelcomeGuideModal();
 		await this.insertProductCollection();
 		await this.chooseCollectionInPost( collection );
 		await this.refreshLocators( 'editor' );
@@ -145,7 +143,6 @@ class ProductCollectionPage {
 		collection: Collections;
 	} ) {
 		await this.admin.createNewPost();
-		await this.editorUtils.closeWelcomeGuideModal();
 		await this.insertProductCollection();
 
 		const productResponsePromise = this.page.waitForResponse(
@@ -167,10 +164,8 @@ class ProductCollectionPage {
 	}
 
 	async publishAndGoToFrontend() {
-		await this.editor.publishPost();
-		const url = new URL( this.page.url() );
-		const postId = url.searchParams.get( 'post' );
-		await this.page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
+		const postId = await this.editor.publishPost();
+		await this.page.goto( `/?p=${ postId }` );
 		await this.refreshLocators( 'frontend' );
 	}
 
@@ -178,13 +173,17 @@ class ProductCollectionPage {
 		template: string,
 		collection?: Collections
 	) {
-		await this.templateApiUtils.revertTemplate( template );
 		await this.admin.visitSiteEditor( {
 			postId: template,
 			postType: 'wp_template',
 		} );
-		await this.editorUtils.waitForSiteEditorFinishLoading();
+
 		await this.editorUtils.enterEditMode();
+
+		await expect(
+			this.editor.canvas.locator( `[data-type="core/query"]` )
+		).toBeVisible();
+
 		await this.editorUtils.replaceBlockByBlockName(
 			'core/query',
 			this.BLOCK_SLUG
@@ -212,17 +211,15 @@ class ProductCollectionPage {
 		template: string,
 		collection?: Collections
 	) {
-		await this.templateApiUtils.revertTemplate( template );
 		await this.admin.visitSiteEditor( {
 			postId: template,
 			postType: 'wp_template',
 		} );
-		await this.editorUtils.waitForSiteEditorFinishLoading();
-		await this.page.click( 'body' );
+		await this.editorUtils.enterEditMode();
+		await this.editor.canvas.locator( 'body' ).click();
 		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
 		await this.refreshLocators( 'editor' );
-		await this.editor.saveSiteEditorEntities();
 	}
 
 	async goToHomePageAndInsertCollection( collection?: Collections ) {
@@ -542,7 +539,6 @@ class ProductCollectionPage {
 		name: string;
 		attributes: object;
 	} ) {
-		await this.waitForProductsToLoad();
 		const productTemplate = await this.editorUtils.getBlockByName(
 			'woocommerce/product-template'
 		);
@@ -609,8 +605,6 @@ class ProductCollectionPage {
 	}
 
 	async refreshLocators( currentUI: 'editor' | 'frontend' ) {
-		await this.waitForProductsToLoad();
-
 		if ( currentUI === 'editor' ) {
 			await this.initializeLocatorsForEditor();
 		} else {
@@ -656,20 +650,6 @@ class ProductCollectionPage {
 			SELECTORS.addToCartButton.onFrontend
 		);
 		this.pagination = this.page.locator( SELECTORS.pagination.onFrontend );
-	}
-
-	private async waitForProductsToLoad() {
-		const loaderInTemplate = this.page
-			.frameLocator( 'iframe[name="editor-canvas"]' )
-			.getByLabel( 'Block: Product Template' )
-			.locator( 'circle' );
-		const loaderInPost = this.page
-			.getByLabel( 'Block: Product Template' )
-			.locator( 'circle' );
-		await Promise.all( [
-			loaderInTemplate.waitFor( { state: 'hidden', timeout: 100000 } ),
-			loaderInPost.waitFor( { state: 'hidden', timeout: 100000 } ),
-		] );
 	}
 }
 

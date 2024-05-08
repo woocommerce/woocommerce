@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import type { Request, Locator } from '@playwright/test';
+import type { Request } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -79,73 +79,90 @@ test.describe( 'Product Collection', () => {
 				},
 			];
 
-			await Promise.all(
-				productElements.map( async ( productElement ) => {
-					await pageObject.insertBlockInProductCollection(
-						productElement
-					);
-				} )
-			);
+			for ( const productElement of productElements ) {
+				await pageObject.insertBlockInProductCollection(
+					productElement
+				);
+			}
 		};
 
-		const verifyProductContent = async ( product: Locator ) => {
-			await expect( product ).toContainText( 'Beanie' ); // core/post-title
-			await expect( product ).toContainText(
-				'$20.00 Original price was: $20.00.$18.00Current price is: $18.00.'
-			); // woocommerce/product-price
-			await expect( product ).toContainText( 'woo-beanie' ); // woocommerce/product-sku
-			await expect( product ).toContainText( 'In stock' ); // woocommerce/product-stock-indicator
-			await expect( product ).toContainText(
-				'This is a simple product.'
-			); // core/post-excerpt
-			await expect( product ).toContainText( 'Accessories' ); // core/post-terms - product_cat
-			await expect( product ).toContainText( 'Recommended' ); // core/post-terms - product_tag
-			await expect( product ).toContainText( 'SaleProduct on sale' ); // woocommerce/product-sale-badge
-			await expect( product ).toContainText( 'Add to cart' ); // woocommerce/product-button
-		};
+		const expectedProductContent = [
+			'Beanie', // core/post-title
+			'$20.00 Original price was: $20.00.$18.00Current price is: $18.00.', // woocommerce/product-price
+			'woo-beanie', // woocommerce/product-sku
+			'In stock', // woocommerce/product-stock-indicator
+			'This is a simple product.', // core/post-excerpt
+			'Accessories', // core/post-terms - product_cat
+			'Recommended', // core/post-terms - product_tag
+			'SaleProduct on sale', // woocommerce/product-sale-badge
+			'Add to cart', // woocommerce/product-button
+		];
 
-		// Expects are collected in verifyProductContent function
-		// eslint-disable-next-line playwright/expect-expect
-		test( 'In a post', async ( { pageObject } ) => {
+		test( 'In a post', async ( { page, pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock();
+
+			await expect(
+				page.locator( '[data-testid="product-image"]:visible' )
+			).toHaveCount( 9 );
+
 			await insertProductElements( pageObject );
 			await pageObject.publishAndGoToFrontend();
 
-			const product = pageObject.products.nth( 1 );
-
-			await verifyProductContent( product );
+			for ( const content of expectedProductContent ) {
+				await expect(
+					page.locator( '.wc-block-product-template' )
+				).toContainText( content );
+			}
 		} );
 
-		// Expects are collected in verifyProductContent function
-		// eslint-disable-next-line playwright/expect-expect
 		test( 'In a Product Archive (Product Catalog)', async ( {
-			pageObject,
+			page,
 			editor,
+			pageObject,
 		} ) => {
 			await pageObject.replaceProductsWithProductCollectionInTemplate(
 				'woocommerce/woocommerce//archive-product'
 			);
+
+			await expect(
+				editor.canvas.locator( '[data-testid="product-image"]:visible' )
+			).toHaveCount( 16 );
+
 			await insertProductElements( pageObject );
 			await editor.saveSiteEditorEntities();
 			await pageObject.goToProductCatalogFrontend();
 
-			const product = pageObject.products.nth( 1 );
+			// Workaround for the issue with the product change not being
+			// reflected in the frontend yet.
+			try {
+				await page.getByText( 'woo-beanie' ).waitFor();
+			} catch ( _error ) {
+				await page.reload();
+			}
 
-			await verifyProductContent( product );
+			for ( const content of expectedProductContent ) {
+				await expect(
+					page.locator( '.wc-block-product-template' )
+				).toContainText( content );
+			}
 		} );
 
-		// Expects are collected in verifyProductContent function
-		// eslint-disable-next-line playwright/expect-expect
-		test( 'On a Home Page', async ( { pageObject, editor } ) => {
+		test( 'On a Home Page', async ( { page, editor, pageObject } ) => {
 			await pageObject.goToHomePageAndInsertCollection();
+
+			await expect(
+				editor.canvas.locator( '[data-testid="product-image"]:visible' )
+			).toHaveCount( 9 );
 
 			await insertProductElements( pageObject );
 			await editor.saveSiteEditorEntities();
 			await pageObject.goToHomePageFrontend();
 
-			const product = pageObject.products.nth( 1 );
-
-			await verifyProductContent( product );
+			for ( const content of expectedProductContent ) {
+				await expect(
+					page.locator( '.wc-block-product-template' )
+				).toContainText( content );
+			}
 		} );
 	} );
 
