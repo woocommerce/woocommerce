@@ -3,7 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 
-export const defaultPlaceOrderButtonLabel = __(
-	'Place Order · <price/>',
-	'woocommerce'
+export const defaultPlaceOrderButtonLabel = sprintf(
+	// translators: %s: is the price.
+	__( 'Place Order · %s', 'woocommerce' ),
+	'<price/>'
 );
