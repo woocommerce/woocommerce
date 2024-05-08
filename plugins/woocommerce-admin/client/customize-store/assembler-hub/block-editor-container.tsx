@@ -3,8 +3,11 @@
 /**
  * External dependencies
  */
-// @ts-expect-error No types for this exist yet.
-import { store as blockEditorStore } from '@wordpress/block-editor';
+import {
+	store as blockEditorStore,
+	privateApis as blockEditorPrivateApis,
+	// @ts-expect-error No types for this exist yet.
+} from '@wordpress/block-editor';
 // @ts-expect-error No types for this exist yet.
 import { store as coreStore, useEntityRecords } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -32,6 +35,13 @@ import { BlockEditor } from './block-editor';
 import { HighlightedBlockContext } from './context/highlighted-block-context';
 import { useEditorBlocks } from './hooks/use-editor-blocks';
 import { useScrollOpacity } from './hooks/use-scroll-opacity';
+import { isEqual } from 'lodash';
+import { COLOR_PALETTES } from './sidebar/global-styles/color-palette-variations/constants';
+import { BlockInstance } from '@wordpress/blocks';
+import {
+	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
+	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
+} from './utils/hero-pattern';
 
 const { useHistory } = unlock( routerPrivateApis );
 
@@ -69,6 +79,8 @@ const findPageIdByBlockClientId = ( event: MouseEvent ) => {
 // We only show the edit option when page count is <= MAX_PAGE_COUNT
 // Performance of Navigation Links is not good past this value.
 const MAX_PAGE_COUNT = 100;
+
+const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
 export const BlockEditorContainer = () => {
 	const history = useHistory();
@@ -168,6 +180,38 @@ export const BlockEditorContainer = () => {
 
 	// @ts-expect-error No types for this exist yet.
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );
+
+	// @ts-expect-error No types for this exist yet.
+	const { user } = useContext( GlobalStylesContext );
+
+	useEffect( () => {
+		const isActiveNewNeutralVariation = isEqual(
+			COLOR_PALETTES[ 0 ].settings.color,
+			user.settings.color
+		);
+
+		if ( ! isActiveNewNeutralVariation ) {
+			findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+				blocks,
+				( block: BlockInstance ) => {
+					updateBlockAttributes( block.clientId, {
+						style: {},
+					} );
+				}
+			);
+			return;
+		}
+		findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+			blocks,
+			( block: BlockInstance ) => {
+				updateBlockAttributes( block.clientId, {
+					style: PRODUCT_HERO_PATTERN_BUTTON_STYLE,
+					// This is necessary; otherwise, the style won't be applied on the frontend during the style variation change.
+					className: '',
+				} );
+			}
+		);
+	}, [ blocks, updateBlockAttributes, user.settings.color ] );
 
 	useEffect( () => {
 		const { blockIdToHighlight, restOfBlockIds } = clientIds.reduce(

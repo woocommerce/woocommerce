@@ -13,10 +13,15 @@ import {
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
+// @ts-expect-error Missing type.
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-expect-error No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
-// @ts-expect-error Missing type in core-data.
-import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
+import {
+	privateApis as blockEditorPrivateApis,
+	__experimentalBlockPatternsList as BlockPatternList,
+	// @ts-expect-error No types for this exist yet.
+} from '@wordpress/block-editor';
 // @ts-expect-error Missing type in core-data.
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 
@@ -33,7 +38,16 @@ import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { useSelect } from '@wordpress/data';
+
 import { trackEvent } from '~/customize-store/tracking';
+import {
+	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
+	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
+} from '../utils/hero-pattern';
+import { isEqual } from 'lodash';
+import { COLOR_PALETTES } from './global-styles/color-palette-variations/constants';
+
+const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
 export const SidebarNavigationScreenHomepage = () => {
 	const { scroll } = useEditorScroll( {
@@ -72,9 +86,47 @@ export const SidebarNavigationScreenHomepage = () => {
 
 	const isEditorLoading = useIsSiteEditorLoading();
 
+	// @ts-expect-error No types for this exist yet.
+	const { user } = useContext( GlobalStylesContext );
+
+	const isActiveNewNeutralVariation = useMemo(
+		() =>
+			isEqual( COLOR_PALETTES[ 0 ].settings.color, user.settings.color ),
+		[ user ]
+	);
+
 	const homePatterns = useMemo( () => {
 		return Object.entries( homeTemplates ).map(
 			( [ templateName, patterns ] ) => {
+				if ( templateName === 'template1' ) {
+					return {
+						name: templateName,
+						title: templateName,
+						blocks: patterns.reduce(
+							( acc: BlockInstance[], pattern ) => {
+								if ( ! isActiveNewNeutralVariation ) {
+									return [ ...acc, ...pattern.blocks ];
+								}
+								const updatedBlocks =
+									findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+										pattern.blocks,
+										( buttonBlock: BlockInstance ) => {
+											buttonBlock.attributes.style =
+												PRODUCT_HERO_PATTERN_BUTTON_STYLE;
+										}
+									);
+
+								return [ ...acc, ...updatedBlocks ];
+							},
+							[]
+						),
+						blockTypes: [ '' ],
+						categories: [ '' ],
+						content: '',
+						source: '',
+					};
+				}
+
 				return {
 					name: templateName,
 					title: templateName,
@@ -92,7 +144,7 @@ export const SidebarNavigationScreenHomepage = () => {
 				};
 			}
 		);
-	}, [ homeTemplates ] );
+	}, [ homeTemplates, isActiveNewNeutralVariation ] );
 
 	useEffect( () => {
 		if (
