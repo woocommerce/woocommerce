@@ -61,4 +61,20 @@ export default {
 	...collection,
 	attributes,
 	innerBlocks,
+	preview: {
+		setPreviewState: ( { setState } ) => {
+			const timeoutID = setTimeout( () => {
+				setState( {
+					isPreview: false,
+					previewMessage: '',
+				} );
+			}, 5000 );
+
+			return () => clearTimeout( timeoutID );
+		},
+		initialPreviewState: {
+			isPreview: true,
+			previewMessage: 'This is in preview mode',
+		},
+	},
 };

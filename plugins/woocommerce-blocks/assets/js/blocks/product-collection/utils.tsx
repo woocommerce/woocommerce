@@ -6,7 +6,7 @@ import { addFilter } from '@wordpress/hooks';
 import { select } from '@wordpress/data';
 import { isWpVersion } from '@woocommerce/settings';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
-import { useLayoutEffect } from '@wordpress/element';
+import { useLayoutEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -124,21 +124,28 @@ export const useSetPreviewState = ( {
 	setPreviewState,
 	location,
 	attributes,
+	initialPreviewState,
 	setAttributes,
 }: {
-	setPreviewState?: SetPreviewState | undefined;
 	location: WooCommerceBlockLocation;
 	attributes: ProductCollectionAttributes;
 	setAttributes: (
 		attributes: Partial< ProductCollectionAttributes >
 	) => void;
-} ) => {
+	setPreviewState?: SetPreviewState | undefined;
+	initialPreviewState?: PreviewState;
+} ): [ PreviewState, ( newPreviewState: PreviewState ) => void ] => {
+	const [ localPreviewState, setLocalPreviewState ] =
+		useState< PreviewState >(
+			initialPreviewState || {
+				isPreview: false,
+				previewMessage: '',
+			}
+		);
 	const setState = ( newPreviewState: PreviewState ) => {
-		setAttributes( {
-			previewState: {
-				...attributes.previewState,
-				...newPreviewState,
-			},
+		setLocalPreviewState( {
+			...localPreviewState,
+			...newPreviewState,
 		} );
 	};
 
@@ -169,26 +176,28 @@ export const useSetPreviewState = ( {
 	 * - Products by tag
 	 * - Products by attribute
 	 */
-	useLayoutEffect( () => {
-		if ( ! setPreviewState ) {
-			const isGenericArchiveTemplate =
-				location.type === LocationType.Archive &&
-				location.sourceData?.termId === null;
-			if ( isGenericArchiveTemplate ) {
-				setAttributes( {
-					previewState: {
-						isPreview: !! attributes?.query?.inherit,
-						previewMessage:
-							'Actual products will vary depending on the page being viewed.',
-					},
-				} );
-			}
-		}
-	}, [
-		attributes?.query?.inherit,
-		location.sourceData?.termId,
-		location.type,
-		setAttributes,
-		setPreviewState,
-	] );
+	// useLayoutEffect( () => {
+	// 	if ( ! setPreviewState ) {
+	// 		const isGenericArchiveTemplate =
+	// 			location.type === LocationType.Archive &&
+	// 			location.sourceData?.termId === null;
+	// 		if ( isGenericArchiveTemplate ) {
+	// 			setAttributes( {
+	// 				previewState: {
+	// 					isPreview: !! attributes?.query?.inherit,
+	// 					previewMessage:
+	// 						'Actual products will vary depending on the page being viewed.',
+	// 				},
+	// 			} );
+	// 		}
+	// 	}
+	// }, [
+	// 	attributes?.query?.inherit,
+	// 	location.sourceData?.termId,
+	// 	location.type,
+	// 	setAttributes,
+	// 	setPreviewState,
+	// ] );
+
+	return [ localPreviewState, setLocalPreviewState ];
 };
