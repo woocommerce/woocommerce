@@ -325,10 +325,11 @@
 
 					h2 {
 						margin: 0;
+						font-size: 16px;
 					}
 
 					p {
-						font-size: 14px;
+						font-size: 13px;
 						font-weight: normal;
 					}
 				}
@@ -336,7 +337,7 @@
 				&__badge {
 					> span {
 						font-weight: 400;
-						font-size: 12px;
+						font-size: 11px;
 						line-height: 18px;
 						padding: 2px 4px;
 						background: $studio-gray-0;
