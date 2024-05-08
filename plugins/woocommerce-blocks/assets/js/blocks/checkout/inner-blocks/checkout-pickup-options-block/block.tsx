@@ -130,13 +130,7 @@ const renderPickupLocation = (
 		) : undefined,
 
 		secondaryDescription: (
-			<ReadMore
-				maxLines={ 2 }
-				moreText={ __( 'more', 'woocommerce' ) }
-				lessText={ __( 'less', 'woocommerce' ) }
-			>
-				{ decodeEntities( details ) }
-			</ReadMore>
+			<ReadMore maxLines={ 2 }>{ decodeEntities( details ) }</ReadMore>
 		),
 	};
 };
