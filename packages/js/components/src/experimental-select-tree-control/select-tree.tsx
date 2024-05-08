@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { chevronDown } from '@wordpress/icons';
+import { chevronDown, chevronUp } from '@wordpress/icons';
 import classNames from 'classnames';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
@@ -23,7 +23,6 @@ interface SelectTreeProps extends TreeControlProps {
 	id: string;
 	selected?: Item | Item[];
 	treeRef?: React.ForwardedRef< HTMLOListElement >;
-	suffix?: JSX.Element | null;
 	isLoading?: boolean;
 	disabled?: boolean;
 	label: string | JSX.Element;
@@ -34,8 +33,6 @@ interface SelectTreeProps extends TreeControlProps {
 export const SelectTree = function SelectTree( {
 	items,
 	treeRef: ref,
-	suffix = <SuffixIcon icon={ chevronDown } />,
-	placeholder,
 	isLoading,
 	disabled,
 	initialInputValue,
@@ -93,6 +90,13 @@ export const SelectTree = function SelectTree( {
 			setInputValue( initialInputValue as string );
 		}
 	}, [ isFocused ] );
+
+	let placeholder: string | undefined = '';
+	if ( Array.isArray( props.selected ) ) {
+		placeholder = props.selected.length === 0 ? props.placeholder : '';
+	} else if ( props.selected ) {
+		placeholder = props.placeholder;
+	}
 
 	const inputProps: React.InputHTMLAttributes< HTMLInputElement > = {
 		className: 'woocommerce-experimental-select-control__input',
@@ -179,7 +183,11 @@ export const SelectTree = function SelectTree( {
 								'aria-owns': `${ props.id }-menu`,
 							} }
 							inputProps={ inputProps }
-							suffix={ suffix }
+							suffix={
+								<SuffixIcon
+									icon={ isOpen ? chevronUp : chevronDown }
+								/>
+							}
 						>
 							<SelectedItems
 								isReadOnly={ isReadOnly }

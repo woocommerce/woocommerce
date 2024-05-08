@@ -24,7 +24,7 @@
 			"dependencyTypes": [
 				"engines"
 			],
-			"pinVersion": "^16.14.1",
+			"pinVersion": "^20.11.1",
 			"packages": [
 				"**"
 			]
@@ -247,6 +247,15 @@
 		},
 		{
 			"dependencies": [
+				"glob"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^10.3.10"
+		},
+		{
+			"dependencies": [
 				"postcss-loader"
 			],
 			"packages": [
@@ -262,6 +271,15 @@
 				"**"
 			],
 			"pinVersion": "^8.4.32"
+		},
+		{
+			"dependencies": [
+				"rimraf"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "5.0.5"
 		},
 		{
 			"dependencies": [
@@ -289,6 +307,15 @@
 				"**"
 			],
 			"pinVersion": "^14.16.1"
+		},
+		{
+			"dependencies": [
+				"uuid"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^9.0.1"
 		},
 		{
 			"dependencies": [

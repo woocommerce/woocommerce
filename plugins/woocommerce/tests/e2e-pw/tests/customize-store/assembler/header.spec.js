@@ -1,7 +1,15 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
-const { activateTheme } = require( '../../../utils/themes' );
+const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
+
+const extractHeaderClass = ( headerPickerClass ) => {
+	const regex = /\bwc-blocks-pattern-header\S*/;
+
+	const match = headerPickerClass.match( regex );
+
+	return match ? match[ 0 ] : null;
+};
 
 const test = base.extend( {
 	assemblerPage: async ( { page }, use ) => {
@@ -43,7 +51,7 @@ test.describe( 'Assembler -> headers', () => {
 				'no'
 			);
 
-			await activateTheme( 'twentynineteen' );
+			await activateTheme( DEFAULT_THEME );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
@@ -80,31 +88,6 @@ test.describe( 'Assembler -> headers', () => {
 		await expect( header ).toHaveClass( /is-selected/ );
 	} );
 
-	test( 'The Done button should be visible after clicking save', async ( {
-		assemblerPage,
-		page,
-	} ) => {
-		const assembler = await assemblerPage.getAssembler();
-		const header = assembler
-			.locator( '.block-editor-block-patterns-list__item' )
-			.nth( 2 );
-
-		await header.click();
-
-		const saveButton = assembler.getByText( 'Save' );
-		const waitResponse = page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wp-json/wp/v2/template-parts' ) &&
-				response.status() === 200
-		);
-
-		await saveButton.click();
-
-		await waitResponse;
-
-		await expect( assembler.getByText( 'Done' ) ).toBeEnabled();
-	} );
-
 	test( 'The selected header should be applied on the frontend', async ( {
 		assemblerPage,
 		page,
@@ -117,9 +100,13 @@ test.describe( 'Assembler -> headers', () => {
 			.frameLocator( 'iframe' )
 			.locator( '.wc-blocks-header-pattern' );
 
-		const expectedHeaderClass = extractHeaderClass( await header.getAttribute( 'class' ) );
+		const expectedHeaderClass = extractHeaderClass(
+			await header.getAttribute( 'class' )
+		);
 
 		await header.click();
+
+		await assembler.locator( '[aria-label="Back"]' ).click();
 
 		const saveButton = assembler.getByText( 'Save' );
 
@@ -134,7 +121,9 @@ test.describe( 'Assembler -> headers', () => {
 		await waitResponse;
 
 		await page.goto( baseURL );
-		const selectedHeaderClasses = await page.locator( 'header div.wc-blocks-header-pattern' ).getAttribute( 'class' );
+		const selectedHeaderClasses = await page
+			.locator( 'header div.wc-blocks-header-pattern' )
+			.getAttribute( 'class' );
 
 		expect( selectedHeaderClasses ).toContain( expectedHeaderClass );
 	} );
@@ -155,7 +144,6 @@ test.describe( 'Assembler -> headers', () => {
 			.locator( '.block-editor-block-patterns-list__list-item' )
 			.all();
 
-		let index = 0;
 		for ( const headerPicker of headerPickers ) {
 			await headerPicker.waitFor();
 			await headerPicker.click();
@@ -174,16 +162,6 @@ test.describe( 'Assembler -> headers', () => {
 			await expect(
 				await headerPattern.getAttribute( 'class' )
 			).toContain( expectedHeaderClass );
-
-			index++;
 		}
 	} );
 } );
-
-const extractHeaderClass = ( headerPickerClass ) => {
-	const regex = /\bwc-blocks-pattern-header\S*/;
-
-	const match = headerPickerClass.match( regex );
-
-	return match ? match[ 0 ] : null;
-};

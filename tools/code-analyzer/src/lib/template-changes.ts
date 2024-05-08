@@ -37,6 +37,7 @@ export const scanForTemplateChanges = async (
 	) }).*`;
 
 	const versionRegex = new RegExp( matchVersion, 'g' );
+	const deletedRegex = new RegExp( '^deleted file mode [0-9]+' );
 
 	for ( const p in patches ) {
 		const patch = patches[ p ];
@@ -51,9 +52,16 @@ export const scanForTemplateChanges = async (
 		for ( const l in lines ) {
 			const line = lines[ l ];
 
+			if ( line.match( deletedRegex ) ) {
+				code = 'notice';
+				message = 'Template deleted';
+				break;
+			}
+
 			if ( line.match( versionRegex ) ) {
 				code = 'notice';
 				message = 'Version bump found';
+				break;
 			}
 
 			if ( repositoryPath ) {

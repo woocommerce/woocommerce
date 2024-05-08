@@ -96,6 +96,7 @@ const PaymentMethodOptions = () => {
 	} );
 	return isExpressPaymentMethodActive ? null : (
 		<RadioControlAccordion
+			highlightChecked={ true }
 			id={ 'wc-payment-method-options' }
 			className={ singleOptionClass }
 			selected={ activeSavedToken ? null : activePaymentMethod }

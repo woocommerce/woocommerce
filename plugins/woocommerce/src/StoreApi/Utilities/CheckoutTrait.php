@@ -194,17 +194,16 @@ trait CheckoutTrait {
 		$request_fields = $request['additional_fields'] ?? [];
 		foreach ( $request_fields as $key => $value ) {
 			try {
-				$this->additional_fields_controller->validate_field_for_location( $key, $value, 'additional' );
+				$this->additional_fields_controller->validate_field_for_location( $key, $value, 'order' );
 			} catch ( \Exception $e ) {
 				$errors[] = $e->getMessage();
 				continue;
 			}
-			$this->additional_fields_controller->persist_field_for_order( $key, $value, $this->order, false );
+			$this->additional_fields_controller->persist_field_for_order( $key, $value, $this->order, 'other', false );
 		}
 
 		if ( $errors->has_errors() ) {
 			throw new RouteException( 'woocommerce_rest_checkout_invalid_additional_fields', $errors->get_error_messages(), 400 );
 		}
-
 	}
 }

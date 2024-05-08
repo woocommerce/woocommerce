@@ -72,22 +72,13 @@ const getBoundingClientRect = async ( {
 };
 test.describe( `${ blockData.name }`, () => {
 	test.describe( `On the Single Product Template`, () => {
-		test.beforeEach(
-			async ( { requestUtils, admin, editorUtils, editor } ) => {
-				await requestUtils.deleteAllTemplates( 'wp_template' );
-				await requestUtils.deleteAllTemplates( 'wp_template_part' );
-				await admin.visitSiteEditor( {
-					postId: `woocommerce/woocommerce//${ blockData.slug }`,
-					postType: 'wp_template',
-				} );
-				await editorUtils.enterEditMode();
-				await editor.setContent( '' );
-			}
-		);
-
-		test.afterEach( async ( { requestUtils } ) => {
-			await requestUtils.deleteAllTemplates( 'wp_template' );
-			await requestUtils.deleteAllTemplates( 'wp_template_part' );
+		test.beforeEach( async ( { admin, editorUtils, editor } ) => {
+			await admin.visitSiteEditor( {
+				postId: `woocommerce/woocommerce//${ blockData.slug }`,
+				postType: 'wp_template',
+			} );
+			await editorUtils.enterEditMode();
+			await editor.setContent( '' );
 		} );
 
 		test( 'should be rendered on the editor side', async ( {

@@ -198,7 +198,10 @@ export const VariationsTable = forwardRef<
 			} );
 	}
 
-	function handleVariationChange( variation: PartialProductVariation ) {
+	function handleVariationChange(
+		variation: PartialProductVariation,
+		showSuccess = true
+	) {
 		onUpdate( variation )
 			.then( ( response ) => {
 				recordEvent( 'product_variations_change', {
@@ -206,9 +209,15 @@ export const VariationsTable = forwardRef<
 					product_id: productId,
 					variation_id: variation.id,
 				} );
-				createSuccessNotice(
-					getSnackbarText( response as ProductVariation, 'update' )
-				);
+				if ( showSuccess ) {
+					createSuccessNotice(
+						getSnackbarText(
+							response as ProductVariation,
+							'update'
+						)
+					);
+				}
+
 				onVariationTableChange( 'update', [ variation ] );
 			} )
 			.catch( () => {

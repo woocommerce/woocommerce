@@ -1,7 +1,7 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( '../assembler.page' );
 const { LogoPickerPage } = require( './logo-picker.page' );
-const { activateTheme } = require( '../../../../utils/themes' );
+const { activateTheme, DEFAULT_THEME } = require( '../../../../utils/themes' );
 const { CustomizeStorePage } = require( '../../customize-store.page' );
 const { setOption } = require( '../../../../utils/options' );
 
@@ -59,7 +59,8 @@ test.describe( 'Assembler -> Logo Picker', () => {
 			await customizeStorePageObject.resetCustomizeStoreChanges(
 				baseURL
 			);
-			await activateTheme( 'twentynineteen' );
+			// Reset theme back to default.
+			await activateTheme( DEFAULT_THEME );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
@@ -119,12 +120,10 @@ test.describe( 'Assembler -> Logo Picker', () => {
 		await expect(
 			logoPickerPageObject.getLogoLocator( editor )
 		).toBeVisible();
-		await expect( assembler.getByText( 'Save' ) ).toBeEnabled();
 
 		await expect( imageWidth ).toBeVisible();
 		await expect( linkLogoToHomepage ).toBeVisible();
 		await expect( useAsSiteIcon ).toBeVisible();
-		await assembler.getByText( 'Save' ).click();
 	} );
 
 	test( 'Changing the image width should update the site preview and the frontend', async ( {
