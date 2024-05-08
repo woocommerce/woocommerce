@@ -102,3 +102,11 @@ $max-button-width: calc((100% - #{ $total-gap-width }) / #{ $max-columns });
 		pointer-events: none;
 	}
 }
+
+// Preview mode
+.wc-block-product-collection__preview-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	transform: translateY(-100%);
+}

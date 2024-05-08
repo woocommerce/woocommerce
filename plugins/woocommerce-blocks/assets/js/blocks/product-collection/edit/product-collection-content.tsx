@@ -119,16 +119,10 @@ const ProductCollectionContent = ( {
 
 	return (
 		<div { ...blockProps }>
-			{ attributes.previewState?.isPreview && (
+			{ attributes.previewState?.isPreview && props.isSelected && (
 				<Button
 					variant="primary"
 					size="small"
-					style={ {
-						position: 'absolute',
-						top: 0,
-						right: 0,
-						zIndex: 1000,
-					} }
 					showTooltip
 					label={ attributes.previewState?.previewMessage }
 					className="wc-block-product-collection__preview-button"
