@@ -528,7 +528,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( '' === $should_load ) {
 			// Set default `_should_load` to 'yes' on existing stores with PayPal Standard enabled or with existing PayPal Standard orders.
-			$should_load = 'yes' === $this->enabled || $this->has_paypal_orders() ? true : false;
+			$should_load = 'yes' === $this->enabled || $this->has_paypal_orders();
 
 			$this->update_option( $option_key, wc_bool_to_string( $should_load ) );
 		} else {
