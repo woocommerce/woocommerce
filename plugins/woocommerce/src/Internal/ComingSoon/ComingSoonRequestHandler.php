@@ -27,7 +27,6 @@ class ComingSoonRequestHandler {
 		$this->coming_soon_helper = $coming_soon_helper;
 		add_filter( 'template_include', array( $this, 'handle_template_include' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'deregister_unnecessary_styles' ), 100 );
-		add_filter( 'wp_robots', array( $this, 'disable_seo_indexing' ) );
 	}
 
 	/**
@@ -97,27 +96,6 @@ class ComingSoonRequestHandler {
 			// We need to exit to prevent further processing.
 			exit();
 		}
-	}
-
-	/**
-	 * Disable search engines in coming soon pages
-	 *
-	 * @since 9.0.0
-	 * @param array $robots Associative array of robots directives.
-	 * @return array Filtered robots directives.
-	 */
-	public function disable_seo_indexing( $robots ) {
-		// Early exit if LYS feature is disabled.
-		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
-			return $robots;
-		}
-
-		// Set no index when site is in coming soon mode.
-		if ( ! $this->coming_soon_helper->is_site_live() ) {
-			return wp_robots_no_robots( $robots );
-		}
-
-		return $robots;
 	}
 
 	/**

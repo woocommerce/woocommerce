@@ -12,14 +12,8 @@
 		background-color: white;
 
 		> .components-flex {
-			height: 32px;
+			height: 34px;
 		}
-	}
-
-	.components-combobox-control__suggestions-container {
-		margin: 0px;
-		padding: 0px;
-		max-height: 128px;
 	}
 
 	.components-form-token-field__suggestion {
@@ -29,7 +23,10 @@
 		align-items: center;
 
 		.item-wrapper {
-			padding: 8px 12px;
+			padding: 0 12px;
+			height: 36px;
+			line-height: 36px;
+			width: 100%;
 
 			&.is-disabled {
 				background-color: #fafafa;
