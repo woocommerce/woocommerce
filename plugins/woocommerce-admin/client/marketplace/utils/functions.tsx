@@ -139,6 +139,9 @@ async function fetchSearchResults(
 							averageRating: product.rating ?? null,
 							reviewsCount: product.reviews_count ?? null,
 							isInstallable: product.is_installable,
+							featuredImage: product.featured_image,
+							productCategory: product.product_category,
+							color: product.color,
 						};
 					}
 				);

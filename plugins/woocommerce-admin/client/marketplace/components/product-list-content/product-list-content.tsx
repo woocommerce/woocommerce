@@ -101,6 +101,9 @@ export default function ProductListContent( props: {
 								reviewsCount: product.reviewsCount,
 								description: product.description,
 								isInstallable: product.isInstallable,
+								color: product.color,
+								featuredImage: product.featuredImage,
+								productCategory: product.productCategory,
 							} }
 							tracksData={ {
 								position: index + 1,
