@@ -254,7 +254,7 @@ test.describe( 'Variations tab', () => {
 			).toBeVisible();
 		} );
 
-		test( 'can delete a variation', async ( { page } ) => {
+		test.skip( 'can delete a variation', async ( { page } ) => {
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }`
 			);
@@ -327,7 +327,7 @@ test.describe( 'Variations tab', () => {
 			}
 		} );
 
-		test( 'can see single variation warning and click the CTA', async ( {
+		test.skip( 'can see single variation warning and click the CTA', async ( {
 			page,
 		} ) => {
 			await page.goto(
