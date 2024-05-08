@@ -1100,6 +1100,7 @@ describe( 'Job Processing', () => {
 						shouldCreate: false,
 						envVars: {},
 					},
+					optional: false,
 				},
 				{
 					type: JobType.Test,
@@ -1121,6 +1122,7 @@ describe( 'Job Processing', () => {
 						name: 'Default 1/2',
 						command: 'test-cmd --shard-arg-1',
 						shardNumber: 1,
+						optional: false,
 						testEnv: {
 							shouldCreate: false,
 							envVars: {},
@@ -1132,6 +1134,7 @@ describe( 'Job Processing', () => {
 						name: 'Default 2/2',
 						command: 'test-cmd --shard-arg-2',
 						shardNumber: 2,
+						optional: false,
 						testEnv: {
 							shouldCreate: false,
 							envVars: {},
@@ -1155,6 +1158,7 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
+						optional: false,
 					},
 					{
 						type: JobType.Test,
@@ -1174,6 +1178,7 @@ describe( 'Job Processing', () => {
 					name: 'Default',
 					command: 'test-cmd',
 					shardNumber: 0,
+					optional: false,
 					testEnv: {
 						shouldCreate: false,
 						envVars: {},
