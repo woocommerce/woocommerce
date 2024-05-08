@@ -260,9 +260,6 @@ class ProductCollectionPage {
 		await this.page
 			.getByRole( 'button', { name: 'Filters options' } )
 			.click();
-		// We should refactor this code. We should not wait for timeout.
-		// eslint-disable-next-line playwright/no-wait-for-timeout
-		await this.page.waitForTimeout( 500 );
 		await this.page
 			.getByRole( 'menuitemcheckbox', {
 				name,
@@ -431,9 +428,6 @@ class ProductCollectionPage {
 		const input = sidebarSettings.getByLabel( 'Keyword' );
 		await input.clear();
 		await input.fill( keyword );
-		// Timeout is needed because of debounce in the block.
-		// eslint-disable-next-line playwright/no-wait-for-timeout
-		await this.page.waitForTimeout( 300 );
 		await this.refreshLocators( 'editor' );
 	}
 
