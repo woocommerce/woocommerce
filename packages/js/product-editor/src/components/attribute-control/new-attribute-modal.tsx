@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createElement, Fragment, useEffect } from '@wordpress/element';
-import { resolveSelect, useSelect } from '@wordpress/data';
+import { resolveSelect, useSelect, useDispatch } from '@wordpress/data';
 import { closeSmall } from '@wordpress/icons';
 import {
 	Form,
@@ -12,21 +12,26 @@ import {
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
+	type ProductAttributesActions,
+	type WPDataActions,
 	type ProductAttributeTerm,
+	type ProductAttribute,
 } from '@woocommerce/data';
 import { Button, Modal, Notice } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { AttributeInputField } from '../attribute-input-field';
 import {
 	AttributeTermInputField,
 	CustomAttributeTermInputField,
 } from '../attribute-term-input-field';
-import { getProductAttributeObject } from './utils';
+import { TRACKS_SOURCE } from '../../constants';
 import type { AttributeInputFieldItemProps } from '../attribute-input-field/types';
 import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
+import AttributesComboboxControl from '../attribute-combobox-field';
+import { AttributesComboboxControlItem } from '../attribute-combobox-field/types';
 
 type NewAttributeModalProps = {
 	title?: string;
@@ -225,6 +230,11 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		};
 	} );
 
+	const { createErrorNotice } = useDispatch( 'core/notices' );
+	const { createProductAttribute } = useDispatch(
+		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
+	) as unknown as ProductAttributesActions & WPDataActions;
+
 	return (
 		<>
 			<Form< AttributeForm >
@@ -240,89 +250,160 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					setValue: ( name: string, value: any ) => void;
 				} ) => {
-					function getAttributeOnChange( index: number ) {
-						return function handleAttributeChange(
-							value?: AttributeInputFieldItemProps | string
-						) {
-							if (
-								termsAutoSelection &&
-								value &&
-								! ( typeof value === 'string' )
-							) {
-								const selectedAttribute =
-									getProductAttributeObject(
-										value
-									) as EnhancedProductAttribute;
+					/**
+					 * Set the attribute values in the form state,
+					 * and populate the terms if termsAutoSelection is enabled.
+					 *
+					 * @param {AttributeInputFieldItemProps} attribute - The attribute value.
+					 * @param {number}                       index     - The index of the attribute in the form state.
+					 */
+					function setAttributeValues(
+						attribute: AttributeInputFieldItemProps,
+						index: number,
+						populateTerms = true
+					) {
+						/*
+						 * When the attribute exists,
+						 * set the attribute in the form state and populate the terms.
+						 */
+						if ( termsAutoSelection && populateTerms ) {
+							const selectedAttribute =
+								attribute as EnhancedProductAttribute;
 
-								setValue( 'attributes[' + index + ']', {
-									...selectedAttribute,
-								} );
+							setValue( 'attributes[' + index + ']', {
+								...selectedAttribute,
+							} );
 
-								resolveSelect(
-									EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-								)
-									.getProductAttributeTerms<
-										ProductAttributeTerm[]
-									>( {
-										// Send search parameter as empty to avoid a second
-										// request when focusing the attribute-term-input-field
-										// which perform the same request to get all the terms
-										search: '',
-										attribute_id: value.id,
-									} )
-									.then( ( terms ) => {
-										if ( termsAutoSelection === 'all' ) {
-											selectedAttribute.terms = terms;
-										} else if ( terms.length > 0 ) {
-											selectedAttribute.terms = [
-												terms[ 0 ],
-											];
-										}
-										setValue( 'attributes[' + index + ']', {
-											...selectedAttribute,
-										} );
-										focusValueField( index );
+							return resolveSelect(
+								EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+							)
+								.getProductAttributeTerms<
+									ProductAttributeTerm[]
+								>( {
+									// Send search parameter as empty to avoid a second
+									// request when focusing the attribute-term-input-field
+									// which perform the same request to get all the terms
+									search: '',
+									attribute_id: attribute.id,
+								} )
+								.then( ( terms ) => {
+									if ( termsAutoSelection === 'all' ) {
+										selectedAttribute.terms = terms;
+									} else if ( terms.length > 0 ) {
+										selectedAttribute.terms = [
+											terms[ 0 ],
+										];
+									}
+									setValue( 'attributes[' + index + ']', {
+										...selectedAttribute,
 									} );
-							} else {
-								setValue(
-									'attributes[' + index + ']',
-									value && getProductAttributeObject( value )
-								);
-								if ( value ) {
 									focusValueField( index );
-								}
+								} );
+						}
+
+						/*
+						 * When the attribute does not exist,
+						 * set the attribute in the form state without terms.
+						 */
+						setValue( 'attributes[' + index + ']', attribute );
+						focusValueField( index );
+					}
+
+					function selectAttributeHandler(
+						nextAttribute: AttributesComboboxControlItem,
+						index: number
+					) {
+						recordEvent( 'product_attribute_add_custom_attribute', {
+							source: TRACKS_SOURCE,
+						} );
+
+						const attributeExists = nextAttribute.id !== -99;
+
+						/*
+						 * When the attribute exists,
+						 * set the attribute values.
+						 */
+						if ( attributeExists ) {
+							return setAttributeValues( nextAttribute, index );
+						}
+
+						/*
+						 * When the attribute does not exist,
+						 * and it should not be created as a global attribute,
+						 * only set the attribute values.
+						 */
+						if ( ! createNewAttributesAsGlobal ) {
+							return setAttributeValues(
+								{
+									id: 0,
+									name: nextAttribute.name,
+									slug: nextAttribute.name,
+								},
+								index,
+								false
+							);
+						}
+
+						/*
+						 * If the attribute does not exist,
+						 * and it should be created as a global attribute,
+						 * create the new attribute and set the attribute values.
+						 */
+						createProductAttribute(
+							{
+								name: nextAttribute.name,
+								generate_slug: true,
+							},
+							{
+								optimisticQueryUpdate: sortCriteria,
 							}
-						};
+						)
+							.then( ( newAttribute ) => {
+								setAttributeValues( newAttribute, index );
+							} )
+							.catch( ( error ) => {
+								let message = __(
+									'Failed to create new attribute.',
+									'woocommerce'
+								);
+								if (
+									error.code ===
+									'woocommerce_rest_cannot_create'
+								) {
+									message = error.message;
+								}
+
+								createErrorNotice( message, {
+									explicitDismiss: true,
+								} );
+							} );
 					}
 
 					/*
-					 * Get the attribute ids that should be ignored when filtering the attributes
-					 * to show in the attribute input field.
+					 * Get the attribute ids that are already selected
+					 * by other form fields.
 					 */
-					const ignoredAttributeIds = [
-						...selectedAttributeIds,
-						...values.attributes
-							.map( ( attr ) => attr?.id )
-							.filter(
-								( attrId ): attrId is number =>
-									attrId !== undefined
-							),
-					];
+					const attributeBelongTo = values.attributes.map( ( attr ) =>
+						attr ? attr.id : null
+					);
 
 					/*
 					 * Compute the available attributes to show in the attribute input field,
-					 * filtering out the ignored attributes and marking the disabled ones.
+					 * filtering out the ignored attributes,
+					 * marking the disabled ones,
+					 * and setting the takenBy property.
 					 */
 					const availableAttributes = attributes
 						?.filter(
-							( attribute: EnhancedProductAttribute ) =>
-								! ignoredAttributeIds.includes( attribute.id )
+							( attribute: ProductAttribute ) =>
+								! selectedAttributeIds.includes( attribute.id )
 						)
-						.map( ( attribute: EnhancedProductAttribute ) => ( {
+						?.map( ( attribute: ProductAttribute ) => ( {
 							...attribute,
 							isDisabled: disabledAttributeIds.includes(
 								attribute.id
 							),
+							takenBy: attributeBelongTo.indexOf( attribute.id ),
 						} ) );
 
 					return (
@@ -364,28 +445,36 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 													className={ `woocommerce-new-attribute-modal__table-row woocommerce-new-attribute-modal__table-row-${ index }` }
 												>
 													<td className="woocommerce-new-attribute-modal__table-attribute-column">
-														<AttributeInputField
+														<AttributesComboboxControl
 															placeholder={
 																attributePlaceholder
 															}
-															value={ attribute }
-															items={
-																availableAttributes
+															current={
+																attribute
 															}
+															instanceNumber={
+																index
+															}
+															items={ availableAttributes?.filter(
+																(
+																	attr: AttributesComboboxControlItem
+																) =>
+																	( attr.takenBy &&
+																		attr.takenBy <
+																			0 ) ||
+																	attr.takenBy ===
+																		index
+															) }
 															isLoading={
 																isLoading
 															}
-															label={
-																attributeLabel
-															}
-															onChange={ getAttributeOnChange(
-																index
-															) }
-															createNewAttributesAsGlobal={
-																createNewAttributesAsGlobal
-															}
-															disabledAttributeIds={
-																disabledAttributeIds
+															onChange={ (
+																nextAttribute
+															) =>
+																selectAttributeHandler(
+																	nextAttribute,
+																	index
+																)
 															}
 															disabledAttributeMessage={
 																disabledAttributeMessage

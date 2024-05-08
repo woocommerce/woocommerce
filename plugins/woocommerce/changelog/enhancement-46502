@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Create a hook to filter the woocommerce blocks that can be registered
