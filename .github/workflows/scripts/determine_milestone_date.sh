@@ -73,7 +73,7 @@ if [[ -v "MILESTONE_DATES[${MILESTONE_TITLE}]" ]]; then
 fi
 
 # Export for later steps
-echo "MILESTONE_DATE=${MILESTONE_DATE}"
+echo "MILESTONE_DATE=${MILESTONE_DATE}" >> $GITHUB_ENV
 
 # Print the array in the desired format for display purposes
 echo "MILESTONE_DATES=("
