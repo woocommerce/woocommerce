@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Return HPOS edit links for calls to `get_edit_post_link()` on placeholder posts.
