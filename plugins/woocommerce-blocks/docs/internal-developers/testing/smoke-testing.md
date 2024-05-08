@@ -12,8 +12,8 @@ To make future testing more efficient, we recommend setting up some Blocks in ad
 
 ### 1. Create a page with most blocks
 
-<details>
-<summary>You can copy and paste (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) the following code into a new page to add all the blocks (click):</summary>
+<details><!-- markdownlint-disable-line no-inline-html -->
+<summary>You can copy and paste (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) the following code into a new page to add all the blocks (click):</summary><!-- markdownlint-disable-line no-inline-html -->
 
 Note: some blocks might fail to render because they are based on products having a specific id or depend on the site URL. You will need to remove and re-insert them.
 
@@ -23,7 +23,7 @@ Note: some blocks might fail to render because they are based on products having
 <div class="wp-block-button aligncenter">
 	<a
 		class="wp-block-button__link"
-		href="https://ephemeral-aljullu-20200929.atomicsites.blog/product/beanie/"
+		href=""
 		>Shop now</a
 	>
 </div>
@@ -35,7 +35,7 @@ Note: some blocks might fail to render because they are based on products having
 <div class="wp-block-button aligncenter">
 	<a
 		class="wp-block-button__link"
-		href="https://ephemeral-aljullu-20200929.atomicsites.blog/product-category/clothing/"
+		href=""
 		>Shop now</a
 	>
 </div>
@@ -115,8 +115,8 @@ Note: some blocks might fail to render because they are based on products having
 
 ### 2. Create a page with the Product Collection block, and filter blocks, setup to test that functionality in isolation. Using the columns block here too is a good idea to keep things organized
 
-<details>
-<summary>You can copy and paste (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) the following code into a new page to add all the blocks (click):</summary>
+<details><!-- markdownlint-disable-line no-inline-html -->
+<summary>You can copy and paste (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) the following code into a new page to add all the blocks (click):</summary><!-- markdownlint-disable-line no-inline-html -->
 
 ```html
 <!-- wp:columns {"align":"wide"} -->
