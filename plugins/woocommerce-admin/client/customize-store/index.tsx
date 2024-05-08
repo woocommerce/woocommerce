@@ -394,22 +394,22 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			initial: 'fetchActiveThemeHasMods',
+			initial: 'fetchCustomizeStoreCompleted',
 			states: {
-				fetchActiveThemeHasMods: {
+				fetchCustomizeStoreCompleted: {
 					invoke: {
-						src: 'fetchActiveThemeHasMods',
+						src: 'fetchCustomizeStoreCompleted',
 						onDone: {
-							actions: 'assignActiveThemeHasMods',
-							target: 'checkActiveThemeHasMods',
+							actions: 'assignCustomizeStoreCompleted',
+							target: 'checkCustomizeStoreCompleted',
 						},
 					},
 				},
-				checkActiveThemeHasMods: {
+				checkCustomizeStoreCompleted: {
 					always: [
 						{
 							// Redirect to the "intro step" if the active theme has no modifications.
-							cond: 'activeThemeHasNoMods',
+							cond: 'customizeTaskIsNotCompleted',
 							actions: [
 								{ type: 'updateQueryStep', step: 'intro' },
 							],
@@ -417,7 +417,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						},
 						{
 							// Otherwise, proceed to the next step.
-							cond: 'activeThemeHasMods',
+							cond: 'customizeTaskIsCompleted',
 							target: 'assemblerHub',
 						},
 					],

@@ -89,6 +89,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 				hasErrors: false,
 			},
 			aiOnline: true,
+			isBlockTheme: false,
 		},
 		initial: 'navigate',
 		states: {

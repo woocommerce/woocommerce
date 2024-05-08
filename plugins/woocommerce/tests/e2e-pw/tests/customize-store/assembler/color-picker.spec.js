@@ -289,7 +289,6 @@ test.describe( 'Assembler -> Color Pickers', () => {
 	) ) {
 		test( `Color palette ${ colorPaletteName } should be applied`, async ( {
 			assemblerPageObject,
-			page,
 		} ) => {
 			const assembler = await assemblerPageObject.getAssembler();
 			const editor = await assemblerPageObject.getEditor();
@@ -299,18 +298,6 @@ test.describe( 'Assembler -> Color Pickers', () => {
 			await colorPicker.click();
 
 			await assembler.locator( '[aria-label="Back"]' ).click();
-
-			const saveButton = assembler.getByText( 'Save' );
-
-			const waitResponse = page.waitForResponse(
-				( response ) =>
-					response.url().includes( 'wp-json/wp/v2/global-styles' ) &&
-					response.status() === 200
-			);
-
-			await saveButton.click();
-
-			await waitResponse;
 
 			const buttons = await editor
 				.locator( '.wp-block-button > .wp-block-button__link' )

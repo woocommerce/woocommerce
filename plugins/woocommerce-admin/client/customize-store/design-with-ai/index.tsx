@@ -3,8 +3,9 @@
  */
 import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useState } from '@wordpress/element';
-import { AnyInterpreter, Sender } from 'xstate';
 import { getNewPath } from '@woocommerce/navigation';
+import { useSelect } from '@wordpress/data';
+import { AnyInterpreter, Sender } from 'xstate';
 
 /**
  * Internal dependencies
@@ -47,6 +48,16 @@ export const DesignWithAiController = ( {
 	sendEventToParent?: Sender< customizeStoreStateMachineEvents >;
 	parentContext?: customizeStoreStateMachineContext;
 } ) => {
+	interface Theme {
+		is_block_theme?: boolean;
+	}
+
+	const currentTheme = useSelect( ( select ) => {
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
+
+	const isBlockTheme = currentTheme?.is_block_theme;
+
 	// Assign aiOnline value from the parent context if it exists. Otherwise, ai is online by default.
 	designWithAiStateMachineDefinition.context.aiOnline =
 		parentContext?.flowType === FlowType.AIOnline;
@@ -57,6 +68,10 @@ export const DesignWithAiController = ( {
 		{
 			devTools: versionEnabled === 'V4',
 			parent: parentMachine,
+			context: {
+				...designWithAiStateMachineDefinition.context,
+				isBlockTheme,
+			},
 		}
 	);
 
