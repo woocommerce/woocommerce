@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { encodeCredentials } from './plugin-utils';
 
 export const setOption = async (
