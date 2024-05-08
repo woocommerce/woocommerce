@@ -12,7 +12,7 @@ import { noticeContexts } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { CART_STORE_KEY } from '@woocommerce/block-data';
-import { select } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { formatPrice } from '@woocommerce/price-format';
 
 /**
@@ -34,8 +34,11 @@ const Block = ( {
 } ): JSX.Element => {
 	const { paymentMethodButtonLabel } = useCheckoutSubmit();
 
-	const store = select( CART_STORE_KEY );
-	const cartTotals = store.getCartTotals();
+	const cartTotals = useSelect( ( select ) => {
+		const store = select( CART_STORE_KEY );
+		return store.getCartTotals();
+	}, [] );
+
 	const totalPrice = formatPrice( cartTotals.total_price );
 
 	let label = applyCheckoutFilter( {
