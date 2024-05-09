@@ -299,7 +299,7 @@ test.describe( 'Shopper → Shipping (customer user)', () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( 'Beanie' );
 		await frontendUtils.goToCheckout();
-		await expect(
+		expect(
 			await checkoutPageObject.selectAndVerifyShippingOption(
 				FREE_SHIPPING_NAME,
 				FREE_SHIPPING_PRICE
@@ -314,7 +314,7 @@ test.describe( 'Shopper → Shipping (customer user)', () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( 'Beanie' );
 		await frontendUtils.goToCheckout();
-		await expect(
+		expect(
 			await checkoutPageObject.selectAndVerifyShippingOption(
 				FLAT_RATE_SHIPPING_NAME,
 				FLAT_RATE_SHIPPING_PRICE
@@ -333,7 +333,7 @@ test.describe( 'Shopper → Shipping (customer user)', () => {
 			name: 'Billing address',
 		} );
 
-		await expect( shippingForm.getByLabel( 'Phone' ).inputValue ).toEqual(
+		expect( shippingForm.getByLabel( 'Phone' ).inputValue ).toEqual(
 			billingForm.getByLabel( 'Phone' ).inputValue
 		);
 
@@ -371,7 +371,7 @@ test.describe( 'Shopper → Place Guest Order', () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
-		await expect(
+		expect(
 			await checkoutPageObject.selectAndVerifyShippingOption(
 				FREE_SHIPPING_NAME,
 				FREE_SHIPPING_PRICE
@@ -565,62 +565,35 @@ test.describe( 'Billing Address Form', () => {
 			await checkoutPageObject.fillShippingDetails( shippingTestData );
 			await page.getByLabel( 'Use same address for billing' ).uncheck();
 
+			const shippingLocatorsMapping = {
+				firstname: '#shipping-first_name',
+				lastname: '#shipping-last_name',
+				addressfirstline: '#shipping-address_1',
+				addresssecondline: '#shipping-address_2',
+				country: '#shipping-country input',
+				state: '#shipping-state input',
+			} as Record< string, string >;
+
 			// Check shipping fields are filled.
 			for ( const [ key, value ] of Object.entries( shippingTestData ) ) {
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				switch ( key ) {
-					case 'firstname':
-						await expect(
-							page.locator( '#shipping-first_name' )
-						).toHaveValue( value );
-						break;
-					case 'lastname':
-						await expect(
-							page.locator( '#shipping-last_name' )
-						).toHaveValue( value );
-						break;
-					case 'country':
-						await expect(
-							page.locator( '#shipping-country input' )
-						).toHaveValue( value );
-						break;
-					case 'addressfirstline':
-						await expect(
-							page.locator( '#shipping-address_1' )
-						).toHaveValue( value );
-						break;
-					case 'addresssecondline':
-						await expect(
-							page.locator( '#shipping-address_2' )
-						).toHaveValue( value );
-						break;
-					case 'state':
-						await expect(
-							page.locator( '#shipping-state input' )
-						).toHaveValue( value );
-						break;
-					default:
-						await expect(
-							page.locator( `#shipping-${ key }` )
-						).toHaveValue( value );
-				}
+				await expect(
+					page.locator(
+						shippingLocatorsMapping[ key ] || `#shipping-${ key }`
+					)
+				).toHaveValue( value );
 			}
+
+			const billingLocatorsMapping = {
+				country: '#billing-country input',
+				state: '#billing-state input',
+			} as Record< string, string >;
 
 			// Check billing fields are empty.
 			for ( const [ key, value ] of Object.entries( billingTestData ) ) {
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				switch ( key ) {
-					case 'country':
-						await expect(
-							page.locator( '#billing-country input' )
-						).toHaveValue( value );
-						break;
-					case 'state':
-						await expect(
-							page.locator( '#billing-state input' )
-						).toHaveValue( value );
-						break;
-				}
+				expect( billingLocatorsMapping[ key ] ).toBeDefined();
+				await expect(
+					page.locator( billingLocatorsMapping[ key ] )
+				).toHaveValue( value );
 			}
 		} );
 	} );

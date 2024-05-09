@@ -22,11 +22,11 @@ test.describe( `${ blockData.name } Block`, () => {
 	test( "can't be added in the Post Editor", async ( { admin, editor } ) => {
 		await admin.createNewPost();
 
-		try {
-			await editor.insertBlock( { name: blockData.slug } );
-		} catch ( e ) {
-			expect( e.message ).toContain( 'is not registered' );
-		}
+		await expect(
+			editor.insertBlock( { name: blockData.slug } )
+		).rejects.toThrow(
+			new RegExp( `Block type '${ blockData.slug }' is not registered.` )
+		);
 	} );
 
 	test( "can't be added in the Post Editor - Product Catalog Template", async ( {
@@ -40,11 +40,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		} );
 		await editorUtils.enterEditMode();
 
-		try {
-			await editor.insertBlock( { name: blockData.slug } );
-		} catch ( e ) {
-			expect( e.message ).toContain( 'is not registered' );
-		}
+		await expect(
+			editor.insertBlock( { name: blockData.slug } )
+		).rejects.toThrow(
+			new RegExp( `Block type '${ blockData.slug }' is not registered.` )
+		);
 	} );
 
 	test( 'can be added in the Post Editor - Single Product Template', async ( {

@@ -225,7 +225,7 @@ test.describe( 'Shopper → Order Confirmation → Downloadable Products', () =>
 
 		// Update last order status to completed.
 		await admin.visitAdminPage( 'edit.php', 'post_type=shop_order' );
-		await admin.page.waitForSelector( '.wp-list-table' );
+		await admin.page.locator( '.wp-list-table' ).waitFor();
 		await admin.page.click(
 			'.wp-list-table tbody tr:first-child a.order-view'
 		);

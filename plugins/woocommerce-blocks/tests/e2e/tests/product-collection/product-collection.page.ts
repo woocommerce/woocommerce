@@ -130,7 +130,7 @@ class ProductCollectionPage {
 	}
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
-		await this.admin.createNewPost( { legacyCanvas: true } );
+		await this.admin.createNewPost();
 		await this.insertProductCollection();
 		await this.chooseCollectionInPost( collection );
 		await this.refreshLocators( 'editor' );
@@ -289,7 +289,7 @@ class ProductCollectionPage {
 			name: 'Order by',
 		} );
 		await orderByComboBox.selectOption( orderBy );
-		await this.page.waitForSelector( SELECTORS.product );
+		await this.page.locator( SELECTORS.product ).waitFor();
 		await this.refreshLocators( 'editor' );
 	}
 
@@ -554,7 +554,7 @@ class ProductCollectionPage {
 	}
 
 	async insertProductCollectionInSingleProductBlock() {
-		this.insertSingleProductBlock();
+		await this.insertSingleProductBlock();
 
 		const siblingBlock = await this.editorUtils.getBlockByName(
 			'woocommerce/product-price'

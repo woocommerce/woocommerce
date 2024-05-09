@@ -30,8 +30,8 @@ const prepareAttributes = async () => {
 
 	// Intercept the dialog event. This is needed because when the regenerate
 	// button is clicked, a dialog is shown.
-	page.on( 'dialog', async ( dialog ) => {
-		await dialog.accept();
+	page.on( 'dialog', ( dialog ) => {
+		return async () => await dialog.accept();
 	} );
 
 	await page.goto( '/wp-admin/admin.php?page=wc-status&tab=tools' );

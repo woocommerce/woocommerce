@@ -54,7 +54,7 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 				/Checkbox: Rated \d out of 5/
 			);
 
-			ratingCheckboxes.nth( 0 ).check();
+			await ratingCheckboxes.nth( 0 ).check();
 
 			// wait for navigation
 			await page.waitForURL(

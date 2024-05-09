@@ -68,7 +68,7 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'should be enabled by default', async ( { pageObject } ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			const zoomWhileHoveringSetting =
-				await pageObject.getZoomWhileHoveringSetting();
+				pageObject.getZoomWhileHoveringSetting();
 
 			await expect( zoomWhileHoveringSetting ).toBeChecked();
 		} );
@@ -91,7 +91,7 @@ test.describe( `${ blockData.name }`, () => {
 			const imgElement = blockFrontend.locator( 'img' ).first();
 			const style = await imgElement.evaluate( ( el ) => el.style );
 
-			await expect( style.transform ).toBe( 'scale(1)' );
+			expect( style.transform ).toBe( 'scale(1)' );
 
 			await imgElement.hover();
 
@@ -99,7 +99,7 @@ test.describe( `${ blockData.name }`, () => {
 				( el ) => el.style
 			);
 
-			await expect( styleOnHover.transform ).toBe( 'scale(1.3)' );
+			expect( styleOnHover.transform ).toBe( 'scale(1.3)' );
 		} );
 
 		test( 'should not work on frontend when is disabled', async ( {
@@ -124,7 +124,7 @@ test.describe( `${ blockData.name }`, () => {
 			const imgElement = blockFrontend.locator( 'img' ).first();
 			const style = await imgElement.evaluate( ( el ) => el.style );
 
-			await expect( style.transform ).toBe( '' );
+			expect( style.transform ).toBe( '' );
 
 			await imgElement.hover();
 
@@ -132,7 +132,7 @@ test.describe( `${ blockData.name }`, () => {
 				( el ) => el.style
 			);
 
-			await expect( styleOnHover.transform ).toBe( '' );
+			expect( styleOnHover.transform ).toBe( '' );
 		} );
 	} );
 
