@@ -35,10 +35,10 @@ export default function Content(): JSX.Element {
 	// On initial load of the in-app marketplace, fetch extensions, themes and business services
 	// and check if there are any business services available on WCCOM
 	useEffect( () => {
-		const abortController = new AbortController();
 		const categories = [ '', 'themes', 'business-services' ];
+		const abortControllers = categories.map( () => new AbortController() );
 
-		categories.forEach( ( category: string ) => {
+		categories.forEach( ( category: string, index ) => {
 			const params = new URLSearchParams();
 			if ( category !== '' ) {
 				params.append( 'category', category );
@@ -49,13 +49,18 @@ export default function Content(): JSX.Element {
 				params.append( 'country', wccomSettings.storeCountry );
 			}
 
-			fetchSearchResults( params, abortController.signal ).then(
+			fetchSearchResults( params, abortControllers[ index ].signal ).then(
 				( productList ) => {
 					if ( category === 'business-services' ) {
 						setHasBusinessServices( productList.length > 0 );
 					}
 				}
 			);
+			return () => {
+				abortControllers.forEach( ( controller ) => {
+					controller.abort();
+				} );
+			};
 		} );
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
