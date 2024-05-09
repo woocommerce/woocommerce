@@ -44,6 +44,8 @@ test.describe( 'Shopper Account Email Receiving', () => {
 		// create a new customer
 		await page.goto( 'wp-admin/user-new.php' );
 
+		await page.waitForLoadState( 'networkidle' );
+
 		await page.getByLabel( ' Username (required) ' ).fill( username );
 		await page.getByLabel( ' Email (required) ' ).fill( email );
 		await page.getByLabel( ' First Name ' ).fill( 'New' );
@@ -85,6 +87,8 @@ test.describe( 'Shopper Account Email Receiving', () => {
 	} ) => {
 		// create a new customer
 		await page.goto( 'wp-admin/user-new.php' );
+
+		await page.waitForLoadState( 'networkidle' );
 
 		await page.getByLabel( ' Username (required) ' ).fill( username );
 		await page.getByLabel( ' Email (required) ' ).fill( email );
@@ -179,7 +183,9 @@ test.describe( 'Shopper Password Reset Email Receiving', () => {
 			.fill( 'customer@woocommercecoree2etestsuite.com' );
 		await page.getByRole( 'button', { name: 'Reset password' } ).click();
 
-		await page.waitForSelector( '.woocommerce-message' );
+		await expect(
+			await page.getByText( 'Password reset email has been sent' ).count()
+		).toBeGreaterThan( 0 );
 
 		// verify that the email was sent
 		await page.goto( 'wp-login.php' );

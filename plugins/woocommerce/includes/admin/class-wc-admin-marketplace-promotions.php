@@ -17,7 +17,7 @@ class WC_Admin_Marketplace_Promotions {
 
 	const TRANSIENT_NAME            = 'woocommerce_marketplace_promotions';
 	const SCHEDULED_ACTION_HOOK     = 'woocommerce_marketplace_fetch_promotions';
-	const PROMOTIONS_API_URL        = 'https://woo.com/wp-json/wccom-extensions/3.0/promotions';
+	const PROMOTIONS_API_URL        = 'https://woocommerce.com/wp-json/wccom-extensions/3.0/promotions';
 	const SCHEDULED_ACTION_INTERVAL = 12 * HOUR_IN_SECONDS;
 
 	/**
@@ -38,18 +38,16 @@ class WC_Admin_Marketplace_Promotions {
 	 * @return void
 	 */
 	public static function init() {
-		register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
-
 		/**
 		 * Filter to suppress the requests for and showing of marketplace promotions.
 		 *
 		 * @since 8.8
 		 */
 		if ( apply_filters( 'woocommerce_marketplace_suppress_promotions', false ) ) {
-			add_action( 'init', array( __CLASS__, 'clear_scheduled_event' ), 13 );
-
 			return;
 		}
+
+		register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
 
 		// Add the callback for our scheduled action.
 		if ( ! has_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) ) ) {
@@ -77,7 +75,11 @@ class WC_Admin_Marketplace_Promotions {
 	 */
 	public static function schedule_promotion_fetch() {
 		// Schedule the action twice a day using Action Scheduler.
-		if ( false === as_has_scheduled_action( self::SCHEDULED_ACTION_HOOK ) ) {
+		if (
+			function_exists( 'as_has_scheduled_action' )
+			&& function_exists( 'as_schedule_recurring_action' )
+			&& false === as_has_scheduled_action( self::SCHEDULED_ACTION_HOOK )
+		) {
 			as_schedule_recurring_action( time(), self::SCHEDULED_ACTION_INTERVAL, self::SCHEDULED_ACTION_HOOK );
 		}
 	}
@@ -248,7 +250,7 @@ class WC_Admin_Marketplace_Promotions {
 	 * Adds a bubble to the menu item.
 	 *
 	 * @param array  $menu_items  Arrays representing items in nav menu.
-	 * @param ?array $promotion   Data about a promotion from the Woo.com API.
+	 * @param ?array $promotion   Data about a promotion from the WooCommerce.com API.
 	 *
 	 * @return array
 	 */
@@ -295,11 +297,13 @@ class WC_Admin_Marketplace_Promotions {
 	 * @return void
 	 */
 	public static function clear_scheduled_event() {
-		as_unschedule_all_actions( self::SCHEDULED_ACTION_HOOK );
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			as_unschedule_all_actions( self::SCHEDULED_ACTION_HOOK );
+		}
 	}
 }
 
-// Fetch list of promotions from Woo.com for WooCommerce admin UI.
+// Fetch list of promotions from WooCommerce.com for WooCommerce admin UI.
 if ( ! has_action( 'init', array( 'WC_Admin_Marketplace_Promotions', 'init' ) ) ) {
 	add_action( 'init', array( 'WC_Admin_Marketplace_Promotions', 'init' ), 11 );
 }

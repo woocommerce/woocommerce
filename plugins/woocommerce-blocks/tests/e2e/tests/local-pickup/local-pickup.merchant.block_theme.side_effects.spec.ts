@@ -25,11 +25,6 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		await localPickupUtils.enableLocalPickup();
 	} );
 
-	test.afterEach( async ( { localPickupUtils } ) => {
-		await localPickupUtils.deleteLocations();
-		await localPickupUtils.setLocalPickupTitle( 'Local Pickup' );
-	} );
-
 	test( 'Updating the title in WC Settings updates the local pickup text in the block and vice/versa', async ( {
 		page,
 		localPickupUtils,
@@ -49,7 +44,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			'woocommerce/checkout-shipping-method-block'
 		);
 		await editor.selectBlocks( block );
-		const fakeInput = editor.canvas.getByLabel( 'Local Pickup' );
+		const fakeInput = editor.canvas.getByLabel( 'Pickup', { exact: true } );
 		await fakeInput.click();
 
 		const isMacOS = process.platform === 'darwin'; // darwin is macOS
@@ -64,6 +59,8 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		await fakeInput.pressSequentially( 'This is a test' );
 		await editor.canvas.getByText( 'This is a test' ).isVisible();
 		await editor.saveSiteEditorEntities();
+
+		// Now check if it's visible in the local pickup settings.
 		await localPickupUtils.openLocalPickupSettings();
 		await expect( page.getByLabel( 'Title' ) ).toHaveValue(
 			'This is a test'

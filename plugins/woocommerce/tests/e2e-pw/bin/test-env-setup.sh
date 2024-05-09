@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
 
+DISABLE_HPOS="${DISABLE_HPOS:-0}"
+
+echo -e "DISABLE_HPOS: $DISABLE_HPOS"
+if [ $DISABLE_HPOS == 1 ]; then
+	echo -e 'Disabling HPOS\n'
+	wp-env run tests-cli wp option update woocommerce_custom_orders_table_enabled 'no'
+fi
+
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
-echo -e 'Activate twentynineteen theme \n'
-wp-env run tests-cli wp theme activate twentynineteen
+echo -e 'Activate default theme \n'
+wp-env run tests-cli wp theme activate twentytwentythree
 
 echo -e 'Update URL structure \n'
 wp-env run tests-cli wp rewrite structure '/%postname%/' --hard
@@ -38,6 +46,8 @@ if [ $ENABLE_TRACKING == 1 ]; then
 	wp-env run tests-cli wp option update woocommerce_allow_tracking 'yes'
 fi
 
+echo -e 'Disabling coming soon option\n'
+wp-env run tests-cli wp option update woocommerce_coming_soon 'no'
+
 echo -e 'Upload test images \n'
 wp-env run tests-cli wp media import './test-data/images/image-01.png' './test-data/images/image-02.png' './test-data/images/image-03.png'
-

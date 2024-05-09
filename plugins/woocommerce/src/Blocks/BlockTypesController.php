@@ -54,14 +54,14 @@ final class BlockTypesController {
 		add_action( 'woocommerce_delete_product_transients', array( $this, 'delete_product_transients' ) );
 		add_filter(
 			'woocommerce_is_checkout',
-			function( $return ) {
-				return $return || $this->has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'checkout' );
+			function ( $ret ) {
+				return $ret || $this->has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'checkout' );
 			}
 		);
 		add_filter(
 			'woocommerce_is_cart',
-			function( $return ) {
-				return $return || $this->has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'cart' );
+			function ( $ret ) {
+				return $ret || $this->has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'cart' );
 			}
 		);
 	}
@@ -225,6 +225,7 @@ final class BlockTypesController {
 			'CatalogSorting',
 			'ClassicTemplate',
 			'ClassicShortcode',
+			'ComingSoon',
 			'CustomerAccount',
 			'FeaturedCategory',
 			'FeaturedProduct',
@@ -233,7 +234,6 @@ final class BlockTypesController {
 			'MiniCart',
 			'StoreNotices',
 			'PriceFilter',
-			'ProductAddToCart',
 			'ProductBestSellers',
 			'ProductButton',
 			'ProductCategories',
@@ -350,7 +350,13 @@ final class BlockTypesController {
 			);
 		}
 
-		return $block_types;
+		/**
+		 * Filters the list of allowed block types.
+		 *
+		 * @since 9.0.0
+		 *
+		 * @param array $block_types List of block types.
+		 */
+		return apply_filters( 'woocommerce_get_block_types', $block_types );
 	}
-
 }

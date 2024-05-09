@@ -94,9 +94,9 @@ test.describe( 'Customer can manage downloadable file in My Account > Downloads 
 		await page.locator( 'text=Log in' ).click();
 
 		// verify that the downloadable product exist in downloads
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Downloads'
-		);
+		await expect(
+			page.getByRole( 'heading', { name: 'Downloads' } )
+		).toBeVisible();
 		await expect( page.locator( 'td.download-product' ) ).toContainText(
 			product.name
 		);
@@ -110,14 +110,16 @@ test.describe( 'Customer can manage downloadable file in My Account > Downloads 
 		// click to simulate downloading and verify the file doesn't exist anymore in downloads
 		await page.locator( '.woocommerce-MyAccount-downloads-file' ).click();
 		await page.goto( 'my-account/downloads/' );
-		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
-			'No downloads available yet.'
-		);
-		await expect( page.locator( '.wc-forward' ) ).toContainText(
-			'Browse products'
-		);
+		await expect(
+			page.getByText( 'No downloads available yet.' )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'link', { name: 'Browse products' } )
+		).toBeVisible();
 
-		await page.locator( '.wc-forward' ).click();
-		await expect( page.locator( 'h1.page-title' ) ).toContainText( 'Shop' );
+		await page.getByRole( 'link', { name: 'Browse products' } ).click();
+		await expect(
+			page.getByRole( 'heading', { name: 'Shop' } )
+		).toBeVisible();
 	} );
 } );

@@ -60,10 +60,10 @@ export class CheckoutPage {
 				billing?: Record< string, string >;
 			};
 			contact?: Record< string, string >;
-			additional?: Record< string, string >;
+			order?: Record< string, string >;
 		} = {
 			address: { shipping: {}, billing: {} },
-			additional: {},
+			order: {},
 			contact: {},
 		}
 	) {
@@ -100,11 +100,11 @@ export class CheckoutPage {
 		}
 
 		if (
-			typeof additionalFields.additional !== 'undefined' &&
-			Object.keys( additionalFields.additional ).length > 0
+			typeof additionalFields.order !== 'undefined' &&
+			Object.keys( additionalFields.order ).length > 0
 		) {
 			await this.fillAdditionalInformationSection(
-				additionalFields.additional
+				additionalFields.order
 			);
 		}
 
@@ -196,7 +196,7 @@ export class CheckoutPage {
 				// your road?" field.
 			} );
 		await this.waitForCheckoutToFinishUpdating();
-		await this.page.getByText( 'Place Order', { exact: true } ).click();
+		await this.page.getByText( 'Place Order' ).click();
 		if ( waitForRedirect ) {
 			await this.page.waitForURL( /order-received/ );
 		}

@@ -2,10 +2,6 @@
  * External dependencies
  */
 import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
-import {
-	installPluginFromPHPFile,
-	uninstallPluginFromPHPFile,
-} from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
@@ -23,19 +19,11 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Merchant → Additional Checkout Fields', () => {
-	test.beforeAll( async () => {
-		await installPluginFromPHPFile(
-			`${ __dirname }/additional-checkout-fields-plugin.php`
+	test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-additional-checkout-fields'
 		);
-	} );
-	test.afterAll( async () => {
-		await uninstallPluginFromPHPFile(
-			`${ __dirname }/additional-checkout-fields-plugin.php`
-		);
-	} );
 
-	test.beforeEach( async ( { frontendUtils } ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -67,7 +55,7 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 						'Confirm government ID': '54321',
 					},
 				},
-				additional: {
+				order: {
 					'How did you hear about us?': 'Other',
 					'What is your favourite colour?': 'Blue',
 				},
@@ -203,7 +191,7 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 						'Confirm government ID': '54321',
 					},
 				},
-				additional: {
+				order: {
 					'How did you hear about us?': 'Other',
 					'What is your favourite colour?': 'Blue',
 				},
@@ -283,7 +271,9 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 
 		// Use Locator here because the select2 box is duplicated in shipping.
 		await admin.page
-			.locator( '[id="\\/billing\\/first-plugin-namespace\\/road-size"]' )
+			.locator(
+				'[id="\\_wc_billing\\/first-plugin-namespace\\/road-size"]'
+			)
 			.selectOption( 'wide' );
 
 		// Handle changing the contact fields.
@@ -297,10 +287,16 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 			.getByLabel( 'Is this a personal purchase or a business purchase?' )
 			.selectOption( 'personal' );
 
-		await admin.page
+		const clickPromise = admin.page
 			.getByRole( 'button', { name: 'Update' } )
 			.first()
 			.click();
+
+		const navigationPromise = admin.page.waitForEvent( 'domcontentloaded' );
+
+		// When update is clicked without waiting for DOMContentLoaded the page becomes
+		// available before click handlers are attached to the shipping edit link.
+		await Promise.all( [ clickPromise, navigationPromise ] );
 
 		await admin.page
 			.getByRole( 'heading', { name: 'Shipping Edit' } )
@@ -329,7 +325,7 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 		// Use Locator here because the select2 box is duplicated in billing.
 		await admin.page
 			.locator(
-				'[id="\\/shipping\\/first-plugin-namespace\\/road-size"]'
+				'[id="\\_wc_shipping\\/first-plugin-namespace\\/road-size"]'
 			)
 			.selectOption( 'super-wide' );
 

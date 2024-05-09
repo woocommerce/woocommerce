@@ -11,6 +11,7 @@ export type ProductTemplate = {
 	icon: string | null;
 	order: number;
 	layoutTemplateId: string;
+	isSelectableByUser: boolean;
 	productData: Partial< Product >;
 };
 
@@ -18,6 +19,7 @@ export interface ProductEditorContext {
 	postId: number;
 	postType: string;
 	selectedTab: string | null;
+	isInSelectedTab?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

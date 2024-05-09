@@ -19,21 +19,9 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Translations', () => {
-	test.beforeAll( async () => {
-		await cli(
-			`npm run wp-env run tests-cli -- wp language core install nl_NL`
-		);
+	test.beforeEach( async () => {
 		await cli(
 			`npm run wp-env run tests-cli -- wp site switch-language nl_NL`
-		);
-		await cli(
-			`npm run wp-env run tests-cli -- wp language plugin install woocommerce nl_NL`
-		);
-	} );
-
-	test.afterAll( async () => {
-		await cli(
-			`npm run wp-env run tests-cli -- wp site switch-language en_US`
 		);
 	} );
 
@@ -42,7 +30,15 @@ test.describe( 'Shopper → Translations', () => {
 		page,
 	} ) => {
 		await frontendUtils.goToShop();
-		await page.getByLabel( 'Toevoegen aan winkelwagen: “Beanie“' ).click();
+
+		const beanieAddToCartButton = page.getByLabel(
+			'Toevoegen aan winkelwagen: “Beanie“'
+		);
+		await beanieAddToCartButton.click();
+
+		// Add to cart initiates a request that could be interrupted by navigation, wait till it's done.
+		await expect( beanieAddToCartButton ).toHaveText( /in winkelwagen/ );
+
 		await frontendUtils.goToCart();
 
 		const totalsHeader = page
@@ -57,7 +53,7 @@ test.describe( 'Shopper → Translations', () => {
 		await expect( page.getByText( 'Totalen winkelwagen' ) ).toBeVisible();
 
 		await expect(
-			page.getByLabel( 'Een waardebon toevoegen' )
+			page.getByRole( 'button', { name: 'Een waardebon toevoegen' } )
 		).toBeVisible();
 
 		await expect(
@@ -70,7 +66,16 @@ test.describe( 'Shopper → Translations', () => {
 		page,
 	} ) => {
 		await frontendUtils.goToShop();
+		const beanieAddToCartButton = page.getByLabel(
+			'Toevoegen aan winkelwagen: “Beanie“'
+		);
+
+		await beanieAddToCartButton.click();
 		await page.getByLabel( 'Toevoegen aan winkelwagen: “Beanie“' ).click();
+
+		// Add to cart initiates a request that could be interrupted by navigation, wait till it's done.
+		await expect( beanieAddToCartButton ).toHaveText( /in winkelwagen/ );
+
 		await frontendUtils.goToCheckout();
 
 		await expect(
@@ -97,9 +102,13 @@ test.describe( 'Shopper → Translations', () => {
 			page.getByRole( 'link', { name: 'Terug naar winkelwagen' } )
 		).toBeVisible();
 
-		await expect(
-			page.getByRole( 'button', { name: 'Bestel en betaal' } )
-		).toBeVisible();
+		/**
+		 * @todo Uncomment and update when WooCommerce 9.0.0 is released and a translation for the new string is available.
+		 * @see https://github.com/woocommerce/woocommerce/issues/47260
+		 */
+		// await expect(
+		// 	page.getByRole( 'button', { name: 'Bestel en betaal' } )
+		// ).toBeVisible();
 
 		await expect(
 			page.getByRole( 'button', {
@@ -109,7 +118,7 @@ test.describe( 'Shopper → Translations', () => {
 
 		await expect( page.getByText( 'Subtotaal' ) ).toBeVisible();
 
-		await expect( page.getByText( 'Verzendmethoden' ) ).toBeVisible();
+		await expect( page.getByText( 'Verzending' ) ).toBeVisible();
 
 		await expect(
 			page.getByText( 'Totaal', { exact: true } )

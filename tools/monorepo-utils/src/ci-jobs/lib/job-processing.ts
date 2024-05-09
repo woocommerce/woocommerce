@@ -178,7 +178,6 @@ async function createTestJob(
 	shardNumber: number
 ): Promise< TestJob | null > {
 	let triggered = false;
-
 	// When we're forcing changes for all projects we don't need to check
 	// for any changed files before triggering the job.
 	if ( changes === true ) {
@@ -272,10 +271,13 @@ async function createJobsForProject(
 	// In order to simplify the way that cascades work we're going to recurse depth-first and check our dependencies
 	// for jobs before ourselves. This lets any cascade keys created in dependencies cascade to dependents.
 	const newCascadeKeys = [];
+
+	let dependencyChanges = false;
+
 	for ( const dependency of node.dependencies ) {
 		// Each dependency needs to have its own cascade keys so that they don't cross-contaminate.
 
-		// Keey in mind that arrays are passed by reference in JavaScript. This means that any changes
+		// Keep in mind that arrays are passed by reference in JavaScript. This means that any changes
 		// we make to the cascade keys array will be reflected in the parent scope. We need to copy
 		// the array before recursing our dependencies so that we don't accidentally add keys from
 		// one dependency to a sibling and accidentally trigger jobs that shouldn't be run.
@@ -287,6 +289,16 @@ async function createJobsForProject(
 			options,
 			dependencyCascade
 		);
+
+		if (
+			dependencyChanges === false &&
+			Object.values( dependencyJobs ).some(
+				( array ) => array.length > 0
+			)
+		) {
+			dependencyChanges = true;
+		}
+
 		newJobs.lint.push( ...dependencyJobs.lint );
 
 		testTypes.forEach( ( type ) => {
@@ -323,6 +335,20 @@ async function createJobsForProject(
 			continue;
 		}
 
+		// Do not create a job if:
+		// - there is an event argument in ci-job cli,
+		// - a non-empty list of events is defined in the job config,
+		// - the event argument is not in the defined list of events.
+		if (
+			options.commandVars?.event &&
+			jobConfig.events.length > 0 &&
+			! jobConfig.events
+				.map( ( e ) => e.toLowerCase() )
+				.includes( options.commandVars.event.toLowerCase() )
+		) {
+			continue;
+		}
+
 		// Jobs will check to see whether or not they should trigger based on the files
 		// that have been changed in the project. When "true" is given, however, it
 		// means that we should consider ALL files to have been changed and
@@ -351,8 +377,12 @@ async function createJobsForProject(
 				newJobs.lint.push( created );
 				break;
 			}
-
 			case JobType.Test: {
+				// If there are dependency changes, we need to trigger the job
+				if ( dependencyChanges ) {
+					projectChanges = true;
+				}
+
 				const created = await createTestJob(
 					node.name,
 					node.path,

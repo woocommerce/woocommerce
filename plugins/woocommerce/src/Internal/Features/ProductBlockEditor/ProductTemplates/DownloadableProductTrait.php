@@ -38,11 +38,14 @@ trait DownloadableProductTrait {
 			$product_downloads_section_group->add_block(
 				array(
 					'id'         => 'product-downloadable',
-					'blockName'  => 'woocommerce/product-checkbox-field',
+					'blockName'  => 'woocommerce/product-toggle-field',
 					'order'      => 10,
 					'attributes' => array(
-						'property' => 'downloadable',
-						'label'    => __( 'Include downloads', 'woocommerce' ),
+						'property'      => 'downloadable',
+						'label'         => __( 'Include downloads', 'woocommerce' ),
+						'checkedHelp'   => __( 'Add any files you\'d like to make available for the customer to download after purchasing, such as instructions or warranty info.', 'woocommerce' ),
+						'uncheckedHelp' => __( 'Add any files you\'d like to make available for the customer to download after purchasing, such as instructions or warranty info.', 'woocommerce' ),
+
 					),
 				)
 			);

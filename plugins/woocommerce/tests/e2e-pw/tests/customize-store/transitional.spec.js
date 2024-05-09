@@ -1,6 +1,6 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
-const { activateTheme } = require( '../../utils/themes' );
+const { activateTheme, DEFAULT_THEME } = require( '../../utils/themes' );
 const { AssemblerPage } = require( './assembler/assembler.page' );
 
 const CUSTOMIZE_STORE_URL =
@@ -45,8 +45,8 @@ test.describe( 'Store owner can view the Transitional page', () => {
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		// Reset theme back to twentynineteen
-		await activateTheme( 'twentynineteen' );
+		// Reset theme back to default.
+		await activateTheme( DEFAULT_THEME );
 
 		// Reset tour to visible.
 		await setOption(
@@ -69,7 +69,7 @@ test.describe( 'Store owner can view the Transitional page', () => {
 		await expect( page.url() ).toBe( `${ baseURL }${ INTRO_URL }` );
 	} );
 
-	test( 'Clicking on "Done" in the assembler should go to the transitional page', async ( {
+	test( 'Clicking on "Save" in the assembler should go to the transitional page', async ( {
 		pageObject,
 		baseURL,
 	} ) => {
@@ -77,7 +77,7 @@ test.describe( 'Store owner can view the Transitional page', () => {
 		await pageObject.waitForLoadingScreenFinish();
 
 		const assembler = await pageObject.getAssembler();
-		await assembler.getByRole( 'button', { name: 'Done' } ).click();
+		await assembler.getByRole( 'button', { name: 'Save' } ).click();
 
 		await expect(
 			assembler.locator( 'text=Your store looks great!' )

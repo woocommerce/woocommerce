@@ -63,6 +63,7 @@ export {
 export {
 	BlockFill as __experimentalBlockFill,
 	BlockSlot as __experimentalBlockSlot,
+	SectionActions as __experimentalSectionActions,
 	BlockFillProps,
 	BlockSlotProps,
 } from './block-slot-fill';
@@ -100,3 +101,5 @@ export {
 	CustomFields as __experimentalCustomFields,
 	CustomFieldsProps,
 } from './custom-fields';
+
+export { PluginSidebar as __experimentalModalBlockEditorPluginSidebar } from './iframe-editor';
