@@ -48,16 +48,9 @@ jobs:
                   const issue = context.payload.issue;
                   const pullRequestUrl = issue.pull_request.url;
                   const prDetails = await github.request(pullRequestUrl);
-                  console.log("PR Base Ref:", prDetails.data.base.ref);
                   core.setOutput('base_ref', prDetails.data.base.ref);
-                  core.setOutput('head_ref', prDetails.data.head.ref);
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Use Pull Request Details
-              run: |
-                echo "Base branch of the PR is ${{ steps.fetch_pr_details.outputs.base_ref }}"
-                echo "Head branch of the PR is ${{ steps.fetch_pr_details.outputs.head_ref }}"
 
             - name: check
               id: check
@@ -77,16 +70,9 @@ jobs:
 
                       const isBot = context.payload.pull_request && ( context.payload.pull_request.user.login == 'github-actions[bot]' || context.payload.pull_request.user.type == 'Bot' );
 
-                      console.log("isManualTrigger:", isManualTrigger);
-                      console.log("isMergedMilestonedIssue:", isMergedMilestonedIssue);
-                      console.log("isMergedMilestonedPR:", isMergedMilestonedPR);
-                      console.log("isBot:", isBot);
-
                       if ( !isBot && ( isManualTrigger || isMergedMilestonedIssue || isMergedMilestonedPR ) ) {
-                        console.log("Setting 'run' to true");
                         core.setOutput( 'run', 'true' );
                       } else {
-                        console.log("Setting 'run' to false");
                         core.setOutput( 'run', 'false' );
                       }
               env:
