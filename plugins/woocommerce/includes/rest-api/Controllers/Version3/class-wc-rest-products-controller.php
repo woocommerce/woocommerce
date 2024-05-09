@@ -561,6 +561,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$product->set_sku( wc_clean( $request['sku'] ) );
 		}
 
+		// SKU.
+		if ( isset( $request['unique_id'] ) ) {
+			$product->set_unique_id( wc_clean( $request['unique_id'] ) );
+		}
+
 		// Attributes.
 		if ( isset( $request['attributes'] ) ) {
 			$attributes = array();
@@ -987,6 +992,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'sku'                   => array(
+					'description' => __( 'Unique identifier.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'unique_id'             => array(
 					'description' => __( 'Unique identifier.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -1660,6 +1670,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			if ( in_array( 'post_password', $fields, true ) ) {
 				$data['post_password'] = $product->get_post_password( $context );
+			}
+
+			if ( in_array( 'unique_id', $fields, true ) ) {
+				$data['unique_id'] = $product->get_unique_id( $context );
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );

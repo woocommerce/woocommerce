@@ -29,6 +29,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected $internal_meta_keys = array(
 		'_visibility',
 		'_sku',
+		'_unique_id',
 		'_price',
 		'_regular_price',
 		'_sale_price',
@@ -386,6 +387,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$post_meta_values  = get_post_meta( $id );
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
+			'_unique_id'             => 'unique_id',
 			'_regular_price'         => 'regular_price',
 			'_sale_price'            => 'sale_price',
 			'_price'                 => 'price',
@@ -577,6 +579,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected function update_post_meta( &$product, $force = false ) {
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
+			'_unique_id'             => 'unique_id',
 			'_regular_price'         => 'regular_price',
 			'_sale_price'            => 'sale_price',
 			'_sale_price_dates_from' => 'date_on_sale_from',

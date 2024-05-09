@@ -65,6 +65,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'description'        => '',
 		'short_description'  => '',
 		'sku'                => '',
+		'unique_id'          => '',
 		'price'              => '',
 		'regular_price'      => '',
 		'sale_price'         => '',
@@ -258,6 +259,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_sku( $context = 'view' ) {
 		return $this->get_prop( 'sku', $context );
+	}
+
+	/**
+	 * TODO
+	 *
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return string
+	 */
+	public function get_unique_id( $context = 'view' ) {
+		return $this->get_prop( 'unique_id', $context );
 	}
 
 	/**
@@ -833,6 +844,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			);
 		}
 		$this->set_prop( 'sku', $sku );
+	}
+
+	/**
+	 * Set unique_id
+	 *
+	 * @since TODO
+	 * @param string $unique_id unique_id
+	 */
+	public function set_unique_id( $unique_id ) {
+		$this->set_prop( 'unique_id', $unique_id );
 	}
 
 	/**
