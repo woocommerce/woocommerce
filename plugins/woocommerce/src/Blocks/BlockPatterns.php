@@ -48,13 +48,21 @@ class BlockPatterns {
 	private $patterns_path;
 
 	/**
+	 * PatternsToolkit instance.
+	 *
+	 * @var PatternsToolkit $patterns_toolkit
+	 */
+	private $patterns_toolkit;
+
+	/**
 	 * Constructor for class
 	 *
 	 * @param Package         $package An instance of Package.
 	 * @param PatternsToolkit $patterns_toolkit An instance of PatternsToolkit.
 	 */
 	public function __construct( Package $package, PatternsToolkit $patterns_toolkit ) {
-		$this->patterns_path = $package->get_path( 'patterns' );
+		$this->patterns_path    = $package->get_path( 'patterns' );
+		$this->patterns_toolkit = $patterns_toolkit;
 
 		add_action( 'init', array( $this, 'register_block_patterns' ) );
 		add_action( 'update_option_woo_ai_describe_store_description', array( $this, 'schedule_on_option_update' ), 10, 2 );
@@ -127,18 +135,22 @@ class BlockPatterns {
 			'featureFlag'   => 'Feature Flag',
 		);
 
-		$this->register_block_patterns_from_files($default_headers);
+		$dictionary = PatternsHelper::get_patterns_dictionary();
+
+		$this->register_block_patterns_from_files( $default_headers, $dictionary );
+
+		$this->register_block_patterns_from_ptk( $dictionary );
 	}
 
 	/**
 	 * Registers the block patterns and categories under `./patterns/`.
 	 *
 	 * @param array $default_headers The default headers a pattern can have.
+	 * @param array $dictionary The patterns' dictionary.
 	 *
 	 * @return void
 	 */
-	private function register_block_patterns_from_files(array $default_headers)
-	{
+	private function register_block_patterns_from_files( array $default_headers, array $dictionary ) {
 		if ( ! file_exists( $this->patterns_path ) ) {
 			return;
 		}
@@ -148,12 +160,36 @@ class BlockPatterns {
 			return;
 		}
 
-		$dictionary = PatternsHelper::get_patterns_dictionary();
-
 		foreach ( $files as $file ) {
 			$pattern_data = get_file_data( $file, $default_headers );
 
 			$this->register_block_pattern( $file, $pattern_data, $dictionary );
+		}
+	}
+
+	/**
+	 * Register block patterns from the Patterns Toolkit.
+	 *
+	 * @param array $dictionary The patterns' dictionary.
+	 *
+	 * @return void
+	 */
+	private function register_block_patterns_from_ptk( array $dictionary ) {
+		$patterns = $this->patterns_toolkit->fetch_patterns(
+			array(
+				'categories' => array( 'intro', 'about', 'services', 'testimonials' ),
+			)
+		);
+
+		if ( is_wp_error( $patterns ) ) {
+			return;
+		}
+
+		foreach ( $this->filter_patterns( $patterns, array() ) as $pattern ) {
+			$pattern['slug']    = $pattern['name'];
+			$pattern['content'] = $pattern['html'];
+
+			$this->register_block_pattern( $pattern['ID'], $pattern, $dictionary );
 		}
 	}
 
@@ -166,15 +202,14 @@ class BlockPatterns {
 	 *
 	 * @return void
 	 */
-	private function register_block_pattern($source, $pattern_data, $dictionary)
-	{
+	private function register_block_pattern( $source, $pattern_data, $dictionary ) {
 		if ( empty( $pattern_data['slug'] ) ) {
 			_doing_it_wrong(
 				'register_block_patterns',
 				esc_html(
 					sprintf(
 					/* translators: %s: file name. */
-						__('Could not register "%s" as a block pattern ("Slug" field missing)', 'woocommerce'),
+						__( 'Could not register pattern "%s" as a block pattern ("Slug" field missing)', 'woocommerce' ),
 						$source
 					)
 				),
@@ -189,7 +224,7 @@ class BlockPatterns {
 				esc_html(
 					sprintf(
 					/* translators: %1s: file name; %2s: slug value found. */
-						__('Could not register "%1$s" as a block pattern (invalid slug "%2$s")', 'woocommerce'),
+						__( 'Could not register pattern "%1$s" as a block pattern (invalid slug "%2$s")', 'woocommerce' ),
 						$source,
 						$pattern_data['slug']
 					)
@@ -203,7 +238,7 @@ class BlockPatterns {
 			return;
 		}
 
-		if ( $pattern_data['featureFlag'] && ! Features::is_enabled( $pattern_data['featureFlag'] ) ) {
+		if ( isset( $pattern_data['featureFlag'] ) && '' !== $pattern_data['featureFlag'] && ! Features::is_enabled( $pattern_data['featureFlag'] ) ) {
 			return;
 		}
 
@@ -214,7 +249,7 @@ class BlockPatterns {
 				esc_html(
 					sprintf(
 					/* translators: %1s: file name; %2s: slug value found. */
-						__('Could not register "%s" as a block pattern ("Title" field missing)', 'woocommerce'),
+						__( 'Could not register pattern "%s" as a block pattern ("Title" field missing)', 'woocommerce' ),
 						$source
 					)
 				),
@@ -226,12 +261,23 @@ class BlockPatterns {
 		// For properties of type array, parse data as comma-separated.
 		foreach ( array( 'categories', 'keywords', 'blockTypes' ) as $property ) {
 			if ( ! empty( $pattern_data[ $property ] ) ) {
-				$pattern_data[ $property ] = array_filter(
-					preg_split(
-						self::COMMA_SEPARATED_REGEX,
-						(string) $pattern_data[ $property ]
-					)
-				);
+				if ( is_array( $pattern_data[ $property ] ) ) {
+					$pattern_data[ $property ] = array_values(
+						array_map(
+							function ( $property ) {
+								return $property['title'];
+							},
+							$pattern_data[ $property ]
+						)
+					);
+				} else {
+					$pattern_data[ $property ] = array_filter(
+						preg_split(
+							self::COMMA_SEPARATED_REGEX,
+							(string) $pattern_data[ $property ]
+						)
+					);
+				}
 			} else {
 				unset( $pattern_data[ $property ] );
 			}
@@ -268,30 +314,33 @@ class BlockPatterns {
 
 		$pattern_data_from_dictionary = $this->get_pattern_from_dictionary( $dictionary, $pattern_data['slug'] );
 
-		// The actual pattern content is the output of the file.
-		ob_start();
+		if ( file_exists( $source ) ) {
+			// The actual pattern content is the output of the file.
+			ob_start();
 
-		/*
-			For patterns that can have AI-generated content, we need to get its content from the dictionary and pass
-			it to the pattern file through the "$content" and "$images" variables.
-			This is to avoid having to access the dictionary for each pattern when it's registered or inserted.
-			Before the "$content" and "$images" variables were populated in each pattern. Since the pattern
-			registration happens in the init hook, the dictionary was being access one for each pattern and
-			for each page load. This way we only do it once on registration.
-			For more context: https://github.com/woocommerce/woocommerce-blocks/pull/11733
-		*/
+			/*
+				For patterns that can have AI-generated content, we need to get its content from the dictionary and pass
+				it to the pattern file through the "$content" and "$images" variables.
+				This is to avoid having to access the dictionary for each pattern when it's registered or inserted.
+				Before the "$content" and "$images" variables were populated in each pattern. Since the pattern
+				registration happens in the init hook, the dictionary was being access one for each pattern and
+				for each page load. This way we only do it once on registration.
+				For more context: https://github.com/woocommerce/woocommerce-blocks/pull/11733
+			*/
 
-		$content = array();
-		$images  = array();
-		if ( ! is_null( $pattern_data_from_dictionary ) ) {
-			$content = $pattern_data_from_dictionary['content'];
-			$images  = $pattern_data_from_dictionary['images'] ?? array();
-		}
-		include $source;
-		$pattern_data['content'] = ob_get_clean();
+			$content = array();
+			$images  = array();
+			if ( ! is_null( $pattern_data_from_dictionary ) ) {
+				$content = $pattern_data_from_dictionary['content'];
+				$images  = $pattern_data_from_dictionary['images'] ?? array();
+			}
 
-		if ( ! $pattern_data['content'] ) {
-			return;
+			include $source;
+			$pattern_data['content'] = ob_get_clean();
+
+			if ( ! $pattern_data['content'] ) {
+				return;
+			}
 		}
 
 		foreach ( $pattern_data['categories'] as $key => $category ) {
@@ -436,5 +485,21 @@ class BlockPatterns {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Filter patterns to only include those with the given IDs.
+	 *
+	 * @param array $patterns The patterns to filter.
+	 * @param array $pattern_ids The pattern IDs to exclude.
+	 * @return array
+	 */
+	private function filter_patterns( array $patterns, array $pattern_ids ) {
+		return array_filter(
+			$patterns,
+			function ( $pattern ) use ( $pattern_ids ) {
+				return ! in_array( (string) $pattern['ID'], $pattern_ids, true );
+			}
+		);
 	}
 }

@@ -50,7 +50,7 @@ class PatternsToolkit {
 			);
 		}
 
-		$decoded_body = json_decode( $body );
+		$decoded_body = json_decode( $body, true );
 
 		if ( ! is_array( $decoded_body ) ) {
 			return new WP_Error(
