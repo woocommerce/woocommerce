@@ -532,7 +532,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			$this->update_option( $option_key, wc_bool_to_string( $should_load ) );
 		} else {
-			$should_load = wc_string_to_bool( $should_load );
+			// Enabled always takes precedence over the option.
+			$should_load = $this->enabled || wc_string_to_bool( $should_load );
 		}
 
 		/**
@@ -544,10 +545,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 * @param WC_Gateway_Paypal $this        The WC_Gateway_Paypal instance.
 		 */
 		if ( ! $should_load && apply_filters( 'woocommerce_should_load_paypal_standard', $should_load, $this ) ) {
-			WC_Admin_Notices::add_custom_notice(
-				'woocommerce_load_paypal_standard_filter_unsupported',
-				__( '<strong>⚠️ Loading PayPal Standard using a filter is no longer supported.</strong> We have detected that a plugin or code snippet on your site is using the deprecated filter <code>woocommerce_should_load_paypal_standard</code>. Please note that as of WooCommerce 8.9, this filter can no longer be used to enable PayPal Standard.', 'woocommerce' ),
-			);
+			if ( ! WC_Admin_Notices::user_has_dismissed_notice( 'woocommerce_load_paypal_standard_filter_unsupported') ) {
+				WC_Admin_Notices::add_custom_notice(
+					'woocommerce_load_paypal_standard_filter_unsupported',
+					__( '<strong>⚠️ Loading PayPal Standard using a filter is no longer supported.</strong> We have detected that a plugin or code snippet on your site is using the deprecated filter <code>woocommerce_should_load_paypal_standard</code>. Please note that as of WooCommerce 8.9, this filter can no longer be used to enable PayPal Standard.', 'woocommerce' ),
+				);
+			}
 		}
 
 		return $should_load;
