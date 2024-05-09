@@ -15,15 +15,18 @@ import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
 // @ts-expect-error Missing type.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
+
 // @ts-expect-error No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 import {
 	privateApis as blockEditorPrivateApis,
 	__experimentalBlockPatternsList as BlockPatternList,
+	store as blockEditorStore,
 	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/block-editor';
 // @ts-expect-error Missing type in core-data.
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
+import { useDispatch, useSelect, select } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -37,7 +40,6 @@ import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { useSelect } from '@wordpress/data';
 
 import { trackEvent } from '~/customize-store/tracking';
 import {
@@ -47,7 +49,9 @@ import {
 import { isEqual } from 'lodash';
 import { COLOR_PALETTES } from './global-styles/color-palette-variations/constants';
 
-const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
+const { GlobalStylesContext, __experimentalGetParsedPattern } = unlock(
+	blockEditorPrivateApis
+);
 
 export const SidebarNavigationScreenHomepage = () => {
 	const { scroll } = useEditorScroll( {
@@ -69,19 +73,30 @@ export const SidebarNavigationScreenHomepage = () => {
 		'wp_template',
 		currentTemplate.id
 	);
+
+	const { selectBlock } = useDispatch( blockEditorStore );
+
 	const onClickPattern = useCallback(
 		( pattern, selectedBlocks ) => {
 			if ( pattern === selectedPattern ) {
 				return;
 			}
 			setSelectedPattern( pattern );
+			selectBlock( selectedBlocks[ 0 ].clientId );
 			onChange(
 				[ blocks[ 0 ], ...selectedBlocks, blocks[ blocks.length - 1 ] ],
 				{ selection: {} }
 			);
 			scroll();
 		},
-		[ selectedPattern, setSelectedPattern, onChange, blocks, scroll ]
+		[
+			selectedPattern,
+			setSelectedPattern,
+			selectBlock,
+			onChange,
+			blocks,
+			scroll,
+		]
 	);
 
 	const isEditorLoading = useIsSiteEditorLoading();
@@ -104,12 +119,22 @@ export const SidebarNavigationScreenHomepage = () => {
 						title: templateName,
 						blocks: patterns.reduce(
 							( acc: BlockInstance[], pattern ) => {
+								const parsedPattern = unlock(
+									select( blockEditorStore )
+								).__experimentalGetParsedPattern(
+									pattern.name
+								);
+
+								if ( ! parsedPattern ) {
+									return acc;
+								}
+
 								if ( ! isActiveNewNeutralVariation ) {
-									return [ ...acc, ...pattern.blocks ];
+									return [ ...acc, ...parsedPattern.blocks ];
 								}
 								const updatedBlocks =
 									findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
-										pattern.blocks,
+										parsedPattern.blocks,
 										( buttonBlock: BlockInstance ) => {
 											buttonBlock.attributes.style =
 												PRODUCT_HERO_PATTERN_BUTTON_STYLE;
@@ -121,7 +146,7 @@ export const SidebarNavigationScreenHomepage = () => {
 							[]
 						),
 						blockTypes: [ '' ],
-						categories: [ '' ],
+						categories: [ 'homepage' ],
 						content: '',
 						source: '',
 					};
@@ -131,14 +156,21 @@ export const SidebarNavigationScreenHomepage = () => {
 					name: templateName,
 					title: templateName,
 					blocks: patterns.reduce(
-						( acc: BlockInstance[], pattern ) => [
-							...acc,
-							...pattern.blocks,
-						],
+						( acc: BlockInstance[], pattern ) => {
+							const parsedPattern = unlock(
+								select( blockEditorStore )
+							).__experimentalGetParsedPattern( pattern.name );
+
+							if ( ! parsedPattern ) {
+								return acc;
+							}
+
+							return [ ...acc, ...parsedPattern.blocks ];
+						},
 						[]
 					),
 					blockTypes: [ '' ],
-					categories: [ '' ],
+					categories: [ 'homepage' ],
 					content: '',
 					source: '',
 				};

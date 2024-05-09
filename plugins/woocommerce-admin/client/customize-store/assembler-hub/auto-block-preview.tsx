@@ -29,6 +29,7 @@ import { FontFamily } from '../types/font';
 import { FontFamiliesLoaderDotCom } from './sidebar/global-styles/font-pairing-variations/font-families-loader-dot-com';
 import { CustomizeStoreContext } from '.';
 import { isAIFlow } from '../guards';
+import { Toolbar } from './toolbar/toolbar';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
