@@ -33,6 +33,15 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Cleanup after each test.
+	 */
+	public function tearDown(): void {
+		deactivate_plugins( 'akismet/akismet.php', true );
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Test that installation without permission is unauthorized.
 	 */
 	public function test_install_without_permission() {
@@ -49,17 +58,20 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
 		$request->set_query_params(
 			array(
-				'plugins' => 'facebook-for-woocommerce',
+				'plugins' => 'woocommerce-legacy-rest-api',
 			)
 		);
 		$response = $this->server->dispatch( $request );
+
+		// TODO: This test should be skipped if WordPress.org's plugins API endpoint cannot be reached.
+
 		$data     = $response->get_data();
 		$plugins  = get_plugins();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( array( 'facebook-for-woocommerce' ), $data['data']['installed'] );
+		$this->assertEquals( array( 'woocommerce-legacy-rest-api' ), $data['data']['installed'] );
 		$this->assertEquals( true, $data['success'] );
-		$this->assertArrayHasKey( 'facebook-for-woocommerce/facebook-for-woocommerce.php', $plugins );
+		$this->assertArrayHasKey( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php', $plugins );
 	}
 
 	/**
@@ -72,10 +84,13 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 		$request->set_query_params(
 			array(
 				'async'   => true,
-				'plugins' => 'facebook-for-woocommerce',
+				'plugins' => 'woocommerce-legacy-rest-api',
 			)
 		);
 		$response = $this->server->dispatch( $request );
+
+		// TODO: This test should be skipped if WordPress.org's plugins API endpoint cannot be reached.
+
 		$data     = $response->get_data();
 		$plugins  = get_plugins();
 
@@ -105,7 +120,7 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', $this->endpoint . '/activate' );
 		$request->set_query_params(
 			array(
-				'plugins' => 'facebook-for-woocommerce',
+				'plugins' => 'akismet',
 			)
 		);
 		$response       = $this->server->dispatch( $request );
@@ -113,9 +128,9 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 		$active_plugins = Plugins::get_active_plugins();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertContains( 'facebook-for-woocommerce', $data['data']['activated'] );
+		$this->assertContains( 'akismet', $data['data']['activated'] );
 		$this->assertEquals( true, $data['success'] );
-		$this->assertContains( 'facebook-for-woocommerce', $active_plugins );
+		$this->assertContains( 'akismet', $active_plugins );
 	}
 
 	/**
@@ -128,7 +143,7 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 		$request->set_query_params(
 			array(
 				'async'   => true,
-				'plugins' => 'facebook-for-woocommerce',
+				'plugins' => 'akismet',
 			)
 		);
 		$response = $this->server->dispatch( $request );
