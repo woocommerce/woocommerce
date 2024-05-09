@@ -17,6 +17,7 @@ import { useShortcut } from '@wordpress/keyboard-shortcuts';
 import { useValidations } from '../../../../contexts/validation-context';
 import { WPError } from '../../../../utils/get-product-error-message';
 import { SaveDraftButtonProps } from '../../save-draft-button';
+import { recordProductEvent } from '../../../../utils/record-product-event';
 
 export function useSaveDraft( {
 	productStatus,
@@ -89,6 +90,12 @@ export function useSaveDraft( {
 			);
 
 			if ( onSaveSuccess ) {
+				if ( productStatus === 'publish' ) {
+					recordProductEvent(
+						'product_switch_draft',
+						publishedProduct
+					);
+				}
 				onSaveSuccess( publishedProduct );
 			}
 		} catch ( error ) {
