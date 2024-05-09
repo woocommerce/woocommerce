@@ -11,6 +11,7 @@ import {
 	useState,
 	createInterpolateElement,
 	createElement,
+	useEffect,
 } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
@@ -18,6 +19,7 @@ import classNames from 'classnames';
 import { useCopyToClipboard } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting } from '@woocommerce/settings';
+import { isEqual } from 'lodash';
 
 /**
  * Internal dependencies
@@ -42,12 +44,31 @@ const SiteVisibility = () => {
 	);
 	const [ storePagesOnly, setStorePagesOnly ] = useState(
 		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_store_pages_only
+			?.woocommerce_store_pages_only || 'no'
 	);
 	const [ privateLink, setPrivateLink ] = useState(
 		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_private_link
+			?.woocommerce_private_link || 'no'
 	);
+
+	useEffect( () => {
+		const setting = window?.wcSettings?.admin?.siteVisibilitySettings || {};
+		const initValues = {
+			comingSoon: setting.woocommerce_coming_soon,
+			storePagesOnly:
+				setting.woocommerce_store_pages_only === false ? 'no' : 'yes',
+			privateLink:
+				setting.woocommerce_private_link === false ? 'no' : 'yes',
+		};
+
+		const currentValues = { comingSoon, storePagesOnly, privateLink };
+		const saveButton = document.getElementsByClassName(
+			'woocommerce-save-button'
+		)[ 0 ];
+		if ( saveButton ) {
+			saveButton.disabled = isEqual( initValues, currentValues );
+		}
+	}, [ comingSoon, storePagesOnly, privateLink ] );
 
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
