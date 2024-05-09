@@ -141,7 +141,7 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 			await button.click();
 
-			await page.waitForTimeout( 1000 );
+			await new Promise( ( resolve ) => setTimeout( resolve, 1000 ) );
 
 			const defaultRangePrice = await page
 				.locator( '.wp-block-woocommerce-product-filter-price' )

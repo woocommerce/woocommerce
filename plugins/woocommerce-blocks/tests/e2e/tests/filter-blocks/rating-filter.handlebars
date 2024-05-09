@@ -15,6 +15,14 @@
 	<h3 class="wp-block-heading">Filter by Rating</h3>
 	<!-- /wp:heading -->
 
+	<!-- wp:woocommerce/product-filter-clear-button {"lock":{"remove":true,"move":false}} -->
+	<!-- wp:buttons {"layout":{"type":"flex"}} -->
+	<div class="wp-block-buttons"><!-- wp:button {"style":{"border":{"width":"0px","style":"none"},"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium"},"className":"wc-block-product-filter-clear-button is-style-outline"} -->
+	<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline" style="text-decoration:underline"><a class="wp-block-button__link wp-element-button" style="border-style:none;border-width:0px">Clear</a></div>
+	<!-- /wp:button --></div>
+	<!-- /wp:buttons -->
+	<!-- /wp:woocommerce/product-filter-clear-button -->
+
 	{{#> wp-block blockName='woocommerce/product-filter-rating' attributes=attributes }}
 	{{/ wp-block }}
 </div>
