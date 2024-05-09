@@ -50,9 +50,9 @@ jobs:
 
                       const isManualTrigger = context.payload.inputs && context.payload.inputs.release_branch && context.payload.inputs.release_branch != null;
                       
-                      const isMergedMilestonedIssue = context.payload.issue && context.payload.issue.pull_request && context.payload.issue.pull_request.merged_at && context.payload.issue.milestone && context.payload.issue.pull_request.base && context.payload.issue.pull_request.base.ref == 'trunk';
+                      const isMergedMilestonedIssue = context.payload.issue && context.payload.issue.pull_request && context.payload.issue.pull_request.merged_at && context.payload.issue.milestone && context.payload.issue.pull_request.base && context.payload.issue.pull_request.base.ref && context.payload.issue.pull_request.base.ref == 'trunk';
 
-                      const isMergedMilestonedPR = context.payload.pull_request && context.payload.pull_request.merged && context.payload.pull_request.milestone && context.payload.pull_request.base && context.payload.pull_request.base.ref == 'trunk';
+                      const isMergedMilestonedPR = context.payload.pull_request && context.payload.pull_request.merged && context.payload.pull_request.milestone && context.payload.pull_request.base && context.payload.issue.pull_request.base.ref && context.payload.pull_request.base.ref == 'trunk';
 
                       const isBot = context.payload.pull_request && ( context.payload.pull_request.user.login == 'github-actions[bot]' || context.payload.pull_request.user.type == 'Bot' );
 
