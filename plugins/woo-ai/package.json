@@ -68,7 +68,7 @@
 		"watch:build:project:wp-scripts": "wireit"
 	},
 	"dependencies": {
-		"@automattic/tour-kit": "^1.1.1",
+		"@automattic/tour-kit": "^1.1.3",
 		"@emotion/react": "^11.11.1",
 		"@types/prop-types": "^15.7.11",
 		"@types/react-outside-click-handler": "^1.3.3",
@@ -133,6 +133,7 @@
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
 				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/src/",
+				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/assets/",
 				"node_modules/@woocommerce/tracks/build",
 				"node_modules/@woocommerce/tracks/build-module",
 				"node_modules/@woocommerce/tracks/build-types",
