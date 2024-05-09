@@ -21,6 +21,7 @@ const Edit = ( {
 	heading: string;
 	filterType: FilterType;
 	isPreview: boolean;
+	attributeId: number | undefined;
 } > ) => {
 	const blockProps = useBlockProps();
 
@@ -55,6 +56,11 @@ const Edit = ( {
 								remove: true,
 							},
 							isPreview: attributes.isPreview,
+							attributeId:
+								attributes.filterType === 'attribute-filter' &&
+								attributes.attributeId
+									? attributes.attributeId
+									: undefined,
 						},
 					],
 				] }
