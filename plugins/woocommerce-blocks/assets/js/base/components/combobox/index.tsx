@@ -245,6 +245,7 @@ const Combobox = ( {
 								type="text"
 								onFocus={ () => {
 									setSearchTerm( '' );
+									store.setOpen( true );
 								} }
 								{ ...restOfProps }
 							/>
