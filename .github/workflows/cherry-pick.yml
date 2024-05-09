@@ -57,35 +57,34 @@ jobs:
                       const isBot = context.payload.pull_request && ( context.payload.pull_request.user.login == 'github-actions[bot]' || context.payload.pull_request.user.type == 'Bot' );
 
                       console.log("isManualTrigger:");
-                      console.log("context.payload.inputs:",context.payload.inputs);
-                      console.log("context.payload.inputs.release_branch:",context.payload.inputs.release_branch);
+                      console.log("context.payload.inputs:", context.payload.inputs);
+                      console.log("context.payload.inputs.release_branch:", context.payload.inputs?.release_branch);
+
 
                       console.log("isMergedMilestonedIssue:");
-                      console.log("context.payload.issue:",context.payload.issue);
-                      console.log("context.payload.issue.pull_request:",context.payload.issue.pull_request);
-                      console.log("context.payload.issue.pull_request.merged_at:",context.payload.issue.pull_request.merged_at);
-                      console.log("context.payload.issue.milestone:",context.payload.issue.milestone);
-                      console.log("context.payload.pull_request.base:",context.payload.pull_request.base);
-                      console.log("context.payload.issue.pull_request.base.ref:",context.payload.issue.pull_request.base.ref);
-                      
-                      console.log("isMergedMilestonedPR:",isMergedMilestonedPR);
-                      console.log("context.payload.pull_request:",context.payload.pull_request);
-                      console.log("context.payload.pull_request.merged:",context.payload.pull_request.merged);
-                      console.log("context.payload.pull_request.milestone:",context.payload.pull_request.milestone);
-                      console.log("context.payload.pull_request.base:",context.payload.pull_request.base);
-                      console.log("context.payload.issue.pull_request.base.ref:",context.payload.issue.pull_request.base.ref);
-                      
-                      
-                      console.log("isBot:",isBot);
-                      console.log("context.payload.pull_request:",context.payload.pull_request);
-                      console.log("context.payload.pull_request.user.login:",context.payload.pull_request.user.login);
-                      console.log("context.payload.pull_request.user.type:",context.payload.pull_request.user.type);
+                      console.log("context.payload.issue:", context.payload.issue);
+                      console.log("context.payload.issue.pull_request:", context.payload.issue?.pull_request);
+                      console.log("context.payload.issue.pull_request.merged_at:", context.payload.issue?.pull_request?.merged_at);
+                      console.log("context.payload.issue.milestone:", context.payload.issue?.milestone);
+                      console.log("context.payload.issue.pull_request.base:", context.payload.issue?.pull_request?.base);
+                      console.log("context.payload.issue.pull_request.base.ref:", context.payload.issue?.pull_request?.base?.ref);
 
+                      console.log("isMergedMilestonedPR:");
+                      console.log("context.payload.pull_request:", context.payload.pull_request);
+                      console.log("context.payload.pull_request.merged:", context.payload.pull_request?.merged);
+                      console.log("context.payload.pull_request.milestone:", context.payload.pull_request?.milestone);
+                      console.log("context.payload.pull_request.base:", context.payload.pull_request?.base);
+                      console.log("context.payload.pull_request.base.ref:", context.payload.pull_request?.base?.ref);
 
-                      console.log("isManualTrigger:",isManualTrigger);
-                      console.log("isMergedMilestonedIssue:",isMergedMilestonedIssue);
-                      console.log("isMergedMilestonedPR:",isMergedMilestonedPR);
-                      console.log("isBot:",isBot);
+                      console.log("isBot:");
+                      console.log("context.payload.pull_request:", context.payload.pull_request);
+                      console.log("context.payload.pull_request.user.login:", context.payload.pull_request?.user?.login);
+                      console.log("context.payload.pull_request.user.type:", context.payload.pull_request?.user?.type);
+
+                      console.log("isManualTrigger:", isManualTrigger);
+                      console.log("isMergedMilestonedIssue:", isMergedMilestonedIssue);
+                      console.log("isMergedMilestonedPR:", isMergedMilestonedPR);
+                      console.log("isBot:", isBot);
 
                       if ( !isBot && ( isManualTrigger || isMergedMilestonedIssue || isMergedMilestonedPR ) ) {
                         console.log("Setting 'run' to true");
