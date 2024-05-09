@@ -80,8 +80,6 @@
 			border-top: 0;
 			border-bottom: 0;
 			padding: 0;
-			max-height: 300px;
-			overflow: auto;
 			color: $input-text-active;
 			border-bottom-left-radius: $universal-border-radius;
 			border-bottom-right-radius: $universal-border-radius;
@@ -99,6 +97,7 @@
 				list-style: none;
 				margin: 0;
 				padding: em($gap-smallest) $gap;
+				box-sizing: border-box;
 
 				&.is-selected {
 					background-color: $gray-300;
@@ -159,7 +158,7 @@
 	&.is-active,
 	&:focus-within {
 		.wc-block-components-combobox-control
-		label.components-base-control__label {
+			label.components-base-control__label {
 			transform: translateY(em($gap-smaller)) scale(0.875);
 		}
 	}

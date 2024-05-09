@@ -4,6 +4,7 @@
 import {
 	Combobox as AriakitCombobox,
 	ComboboxLabel,
+	ComboboxList,
 	ComboboxPopover,
 	ComboboxProvider,
 	ComboboxItem,
@@ -25,16 +26,13 @@ import { ValidationInputError } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import deprecated from '@wordpress/deprecated';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import {
-	findBestMatchByLabel,
-	findExactMatchBy,
-	findMatchingSuggestions,
-} from './util';
+import { findExactMatchBy, findMatchingSuggestions } from './util';
 
 export interface ComboboxControlOption {
 	label: string;
@@ -68,6 +66,7 @@ const Combobox = ( {
 	className,
 	...restOfProps
 }: ComboboxProps ): JSX.Element => {
+	const scrollerRef = useRef( null );
 	const controlRef = useRef< HTMLDivElement >( null );
 	const fallbackId = useId();
 	const controlId = id || 'control-' + fallbackId;
@@ -116,6 +115,12 @@ const Combobox = ( {
 	const matchingSuggestions = useMemo( () => {
 		return findMatchingSuggestions( searchTerm, options );
 	}, [ searchTerm, options ] );
+
+	const rowVirtualizer = useVirtualizer( {
+		count: matchingSuggestions.length,
+		getScrollElement: () => scrollerRef.current,
+		estimateSize: () => 35,
+	} );
 
 	useEffect( () => {
 		if ( ! required || value ) {
@@ -175,6 +180,11 @@ const Combobox = ( {
 			setSearchTerm( selectedOption?.label || '' );
 		}
 	}, [ setSearchTerm, selectedOption, searchTerm, onChange, options ] );
+
+	const minHeight =
+		matchingSuggestions.length * 35 > 300
+			? 300
+			: matchingSuggestions.length * 35;
 
 	return (
 		<div
@@ -238,26 +248,62 @@ const Combobox = ( {
 								} }
 								{ ...restOfProps }
 							/>
+
 							<ComboboxPopover
 								className="components-form-token-field__suggestions-list"
 								sameWidth
 								flip={ false }
 								onClose={ onClose }
 							>
-								{ matchingSuggestions.map( ( option ) => (
-									<ComboboxItem
-										// For backwards compatibility we retain the is-selected class, in future we could target aria or data attributes in CSS instead.
-										className={ `components-form-token-field__suggestion ${
-											activeValue === option.label
-												? 'is-selected'
-												: ''
-										}` }
-										key={ option.label }
-										value={ option.label }
+								<div
+									ref={ scrollerRef }
+									style={ {
+										height: minHeight,
+										overflow: 'auto',
+										width: '100%',
+									} }
+								>
+									<ComboboxList
+										style={ {
+											height: rowVirtualizer.getTotalSize(),
+											position: 'relative',
+										} }
 									>
-										{ option.label }
-									</ComboboxItem>
-								) ) }
+										{ rowVirtualizer
+											.getVirtualItems()
+											.map( ( virtualItem ) => {
+												const option =
+													matchingSuggestions[
+														virtualItem.index
+													];
+
+												return (
+													<ComboboxItem
+														key={ virtualItem.key }
+														// For backwards compatibility we retain the is-selected class, in future we could target aria or data attributes in CSS instead.
+														className={ `components-form-token-field__suggestion ${
+															activeValue ===
+															option.label
+																? 'is-selected'
+																: ''
+														}` }
+														value={ option.label }
+														style={ {
+															height: `${ virtualItem.size }px`,
+															transform: `translateY(${ virtualItem.start }px)`,
+															position:
+																'absolute',
+															top: 0,
+															left: 0,
+															width: '100%',
+														} }
+													>
+														{ option.label }
+													</ComboboxItem>
+												);
+											} ) }
+									</ComboboxList>
+								</div>
 							</ComboboxPopover>
 						</div>
 					</div>
