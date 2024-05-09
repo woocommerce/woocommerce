@@ -344,16 +344,18 @@ class BlockPatterns {
 			}
 		}
 
-		foreach ( $pattern_data['categories'] as $key => $category ) {
-			$category_slug = _wp_to_kebab_case( $category );
+		if ( ! empty( $pattern_data['categories'] ) ) {
+			foreach ( $pattern_data['categories'] as $key => $category ) {
+				$category_slug = _wp_to_kebab_case( $category );
 
-			$pattern_data['categories'][ $key ] = $category_slug;
+				$pattern_data['categories'][ $key ] = $category_slug;
 
-			register_block_pattern_category(
-				$category_slug,
-				// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
-				array( 'label' => __( $category, 'woocommerce' ) )
-			);
+				register_block_pattern_category(
+					$category_slug,
+                    // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+					array( 'label' => __( $category, 'woocommerce' ) )
+				);
+			}
 		}
 
 		register_block_pattern( $pattern_data['slug'], $pattern_data );
@@ -499,6 +501,10 @@ class BlockPatterns {
 		return array_filter(
 			$patterns,
 			function ( $pattern ) use ( $pattern_ids ) {
+				if ( 'wp_block' !== $pattern['post_type'] ) {
+					return false;
+				}
+
 				return ! in_array( (string) $pattern['ID'], $pattern_ids, true );
 			}
 		);
