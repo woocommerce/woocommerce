@@ -24,6 +24,19 @@ const test = base.extend< {
 
 test.describe( 'Product Filter: Price Filter Block', () => {
 	test.describe( 'frontend', () => {
+		test( 'clear button is not shown on initial page load', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( defaultBlockPost.link );
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			await expect( button ).toBeHidden();
+		} );
+
 		test( 'With price filters applied it shows the correct price', async ( {
 			page,
 			defaultBlockPost,
@@ -60,6 +73,86 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 			const maxPriceThumb = priceSlider.locator( 'input[name="max"]' );
 
 			await expect( maxPriceThumb ).toHaveValue( '67' );
+		} );
+
+		test( 'clear button appears after a filter is applied', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto(
+				`${ defaultBlockPost.link }?min_price=20&max_price=67`
+			);
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			await expect( button ).toBeVisible();
+		} );
+
+		test( 'clear button hides after deselecting all filters', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto(
+				`${ defaultBlockPost.link }?min_price=20&max_price=67`
+			);
+
+			const defaultRange = await page
+				.locator( '.wp-block-woocommerce-product-filter-price' )
+				.getAttribute( 'data-wc-context' );
+			const defaultMinRange = JSON.parse( defaultRange ).minRange;
+			const defaultMaxRange = JSON.parse( defaultRange ).maxRange;
+
+			// Min price input field
+			const leftInputContainer = page.locator(
+				'.wp-block-woocommerce-product-filter-price-content-left-input'
+			);
+			const minPriceInput = leftInputContainer.locator( '.min' );
+			await minPriceInput.fill( String( defaultMinRange ) );
+			await minPriceInput.blur();
+
+			// Max price input field
+			const rightInputContainer = page.locator(
+				'.wp-block-woocommerce-product-filter-price-content-right-input'
+			);
+			const maxPriceInput = rightInputContainer.locator( '.max' );
+			await maxPriceInput.fill( String( defaultMaxRange ) );
+			await maxPriceInput.blur();
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			await expect( button ).toBeHidden();
+		} );
+
+		test( 'filters are cleared after clear button is clicked', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto(
+				`${ defaultBlockPost.link }?min_price=20&max_price=67`
+			);
+
+			const button = page
+				.locator( '.wp-block-woocommerce-product-filter-clear-button' )
+				.locator( 'button' );
+
+			await button.click();
+
+			await page.waitForTimeout( 1000 );
+
+			const defaultRangePrice = await page
+				.locator( '.wp-block-woocommerce-product-filter-price' )
+				.getAttribute( 'data-wc-context' );
+			const defaultMinRange = JSON.parse( defaultRangePrice ).minRange;
+			const defaultMaxRange = JSON.parse( defaultRangePrice ).maxRange;
+			const defaultMinPrice = JSON.parse( defaultRangePrice ).minPrice;
+			const defaultMaxPrice = JSON.parse( defaultRangePrice ).maxPrice;
+
+			expect( defaultMinRange ).toEqual( defaultMinPrice );
+			expect( defaultMaxRange ).toEqual( defaultMaxPrice );
 		} );
 
 		test( 'Changes in the price input field triggers price slider updates', async ( {
