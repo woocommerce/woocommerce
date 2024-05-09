@@ -3020,6 +3020,9 @@ importers:
       '@wordpress/browserslist-config':
         specifier: wp-6.0
         version: 4.1.3
+      buildkite-test-collector:
+        specifier: ^1.7.1
+        version: 1.7.1
     devDependencies:
       '@babel/cli':
         specifier: 7.12.8
@@ -5150,19 +5153,6 @@ packages:
       react-dom: 17.0.2(react@17.0.2)
     dev: false
 
-  /@automattic/calypso-analytics@1.1.1:
-    resolution: {integrity: sha512-yk8okslaliV2cwqVCmT9y6XNDT34CqNjtyBZEmHSY35xUohxRoAMvLk68QfHJLOO9LZ4KMwm1Mb6w17477ruDA==}
-    dependencies:
-      '@automattic/load-script': 1.0.0
-      cookie: 0.4.2
-      debug: 4.3.4(supports-color@9.4.0)
-      hash.js: 1.1.7
-      tslib: 2.6.2
-      uuid: 8.3.2
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
   /@automattic/calypso-analytics@1.1.2:
     resolution: {integrity: sha512-+pPM41BL8XYxHKoEidk3/J3XjKxinVZfB0/t8E2KPBqGclDSVg7PXxslOzWsQsNju64rSWcjIY5+c8fnnWRW5g==}
     dependencies:
@@ -5357,13 +5347,8 @@ packages:
       react-popper: 2.3.0(@popperjs/core@2.11.8)(react-dom@17.0.2)(react@17.0.2)
       redux: 4.2.1
     transitivePeerDependencies:
-      - '@babel/helper-module-imports'
-      - '@babel/types'
       - '@types/react'
-      - aslemammad-vite-plugin-macro
-      - babel-plugin-macros
       - supports-color
-      - vite
     dev: false
 
   /@automattic/typography@1.0.0:
@@ -26764,6 +26749,16 @@ packages:
       - debug
     dev: false
 
+  /axios@1.6.8:
+    resolution: {integrity: sha512-v/ZHtJDU39mDpyBoFVkETcd/uNdxrWRrg3bKpOKzXFA6Bvqopts6ALSMU3y6ijYxbw2B+wPrIv46egTzJXCLGQ==}
+    dependencies:
+      follow-redirects: 1.15.6
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
   /axobject-query@3.2.1:
     resolution: {integrity: sha512-jsyHu61e6N4Vbz/v18DHwWYKK0bSWLqn47eeDSKPB7m8tqMHF9YJ+mhIk2lVteyZrY8tnSj/jHOv4YiTCuCJgg==}
     dependencies:
@@ -28269,6 +28264,19 @@ packages:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
+
+  /buildkite-test-collector@1.7.1:
+    resolution: {integrity: sha512-xYjBp9xbL8rwbt+cfOQSitCyrS+qWcli6Uy2UzUpENnVD+lviP+fpYQ9lc29QgFdCY5fFI6j6O0od179TgfA+w==}
+    engines: {npm: '>=7.0.0'}
+    dependencies:
+      axios: 1.6.8
+      dotenv: 16.3.1
+      request-spy: 0.0.10
+      strip-ansi: 6.0.1
+      uuid: 8.3.2
+    transitivePeerDependencies:
+      - debug
+    dev: false
 
   /builtin-status-codes@3.0.0:
     resolution: {integrity: sha512-HpGFw18DgFWlncDfjTa2rcQ4W88O1mC8e8yZ2AvQY5KDaktSTwo+KRf6nHK6FRI5FyRyb/5T6+TSxfP7QyGsmQ==}
@@ -31214,7 +31222,6 @@ packages:
   /dotenv@16.3.1:
     resolution: {integrity: sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ==}
     engines: {node: '>=12'}
-    dev: true
 
   /dotenv@8.6.0:
     resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
@@ -33903,6 +33910,16 @@ packages:
         optional: true
     dependencies:
       debug: 4.3.4(supports-color@9.4.0)
+
+  /follow-redirects@1.15.6:
+    resolution: {integrity: sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dev: false
 
   /follow-redirects@1.5.10:
     resolution: {integrity: sha512-0V5l4Cizzvqt5D44aTXbFZz+FtyXV1vrDN6qrelxtfYQKW0KO0W2T/hkE8xvGa/540LkZlkaUjO4ailYTFtHVQ==}
@@ -41989,6 +42006,10 @@ packages:
   /moment@2.29.4:
     resolution: {integrity: sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==}
 
+  /monkeypatch@1.0.0:
+    resolution: {integrity: sha512-6tG0IrCUUIBuAspnbdmOAd+D/AptB/ya9JLujp88NIAuFuTGdGvCKtDkc6pwNOcIJ6nKLm3FjJlaCdx8vr3r2w==}
+    dev: false
+
   /moo@0.5.2:
     resolution: {integrity: sha512-iSAJLHYKnX41mKcJKjqvnAN9sf0LMDTXDEvFv+ffuRR9a1MIuXLjMNL6EsnDHSkKLTWNqQQ5uo61P4EbU4NU+Q==}
 
@@ -47137,6 +47158,12 @@ packages:
       stealthy-require: 1.1.1
       tough-cookie: 2.5.0
     dev: true
+
+  /request-spy@0.0.10:
+    resolution: {integrity: sha512-va+4vLamK9Pwu/WJnJrQcTjCjYdIcl0KDKOKEkfvNmer4f+K+OhgbpU4DCiPyzBGnTpYXbrVLrnD8O5fS/cmKA==}
+    dependencies:
+      monkeypatch: 1.0.0
+    dev: false
 
   /request@2.88.2:
     resolution: {integrity: sha512-MsvtOrfG9ZcrOwAW+Qi+F6HbD0CWXEh9ou77uOb7FM2WPhwT7smM833PzanhJLsgXjN89Ir6V2PczXNnMpwKhw==}
