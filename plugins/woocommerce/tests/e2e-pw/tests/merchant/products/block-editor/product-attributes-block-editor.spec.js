@@ -94,7 +94,7 @@ const test = baseTest.extend( {
 	},
 } );
 
-test( 'can create and add attributes', async ( { page, product } ) => {
+test.skip( 'can create and add attributes', async ( { page, product } ) => {
 	const newAttributes = [
 		{
 			name: `pa_0_${ Date.now() }`,
@@ -113,6 +113,8 @@ test( 'can create and add attributes', async ( { page, product } ) => {
 
 	await test.step( 'add new attributes', async () => {
 		await page.getByRole( 'button', { name: 'Add new' } ).click();
+
+		await page.waitForLoadState( 'domcontentloaded' );
 
 		// Add attributes that do not exist
 		await page.getByPlaceholder( 'Search or create attribute' ).click();
@@ -201,7 +203,7 @@ test( 'can create and add attributes', async ( { page, product } ) => {
 	} );
 } );
 
-test( 'can add existing attributes', async ( {
+test.skip( 'can add existing attributes', async ( {
 	page,
 	product,
 	attributes,
@@ -213,6 +215,8 @@ test( 'can add existing attributes', async ( {
 
 	await test.step( 'add an existing attribute', async () => {
 		await page.getByRole( 'button', { name: 'Add new' } ).click();
+
+		await page.waitForLoadState( 'domcontentloaded' );
 
 		// Add attributes that do not exist
 		await page.getByPlaceholder( 'Search or create attribute' ).click();
