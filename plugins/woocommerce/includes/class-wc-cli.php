@@ -6,7 +6,8 @@
  * @version 3.0.0
  */
 
-use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\CLIRunner;
+use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\CLIRunner as CustomOrdersTableCLIRunner;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\CLIRunner as ProductAttributesLookupCLIRunner;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -26,13 +27,13 @@ class WC_CLI {
 	 * Load command files.
 	 */
 	private function includes() {
-		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-runner.php';
-		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-rest-command.php';
-		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-tool-command.php';
-		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-update-command.php';
-		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-tracker-command.php';
-		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-com-command.php';
-		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-com-extension-command.php';
+		require_once __DIR__ . '/cli/class-wc-cli-runner.php';
+		require_once __DIR__ . '/cli/class-wc-cli-rest-command.php';
+		require_once __DIR__ . '/cli/class-wc-cli-tool-command.php';
+		require_once __DIR__ . '/cli/class-wc-cli-update-command.php';
+		require_once __DIR__ . '/cli/class-wc-cli-tracker-command.php';
+		require_once __DIR__ . '/cli/class-wc-cli-com-command.php';
+		require_once __DIR__ . '/cli/class-wc-cli-com-extension-command.php';
 	}
 
 	/**
@@ -45,8 +46,10 @@ class WC_CLI {
 		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_Tracker_Command::register_commands' );
 		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_COM_Command::register_commands' );
 		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_COM_Extension_Command::register_commands' );
-		$cli_runner = wc_get_container()->get( CLIRunner::class );
+		$cli_runner = wc_get_container()->get( CustomOrdersTableCLIRunner::class );
 		WP_CLI::add_hook( 'after_wp_load', array( $cli_runner, 'register_commands' ) );
+		$cli_runner = wc_get_container()->get( ProductAttributesLookupCLIRunner::class );
+		WP_CLI::add_hook( 'after_wp_load', fn() => \WP_CLI::add_command( 'wc palt', $cli_runner ) );
 	}
 }
 
