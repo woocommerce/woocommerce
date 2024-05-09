@@ -84,13 +84,16 @@ const setUrlTabParam = ( tabKey: string ) => {
 	} );
 };
 
-const getVisibleTabs = ( selectedTab: string ) => {
+const getVisibleTabs = ( selectedTab: string, hasBusinessServices = false ) => {
 	if ( selectedTab === '' ) {
 		return tabs;
 	}
 	const currentVisibleTabs = { ...tabs };
 	if ( selectedTab !== 'search' ) {
 		delete currentVisibleTabs.search;
+	}
+	if ( ! hasBusinessServices ) {
+		delete currentVisibleTabs[ 'business-services' ];
 	}
 
 	return currentVisibleTabs;
@@ -154,7 +157,8 @@ const renderTabs = (
 const Tabs = ( props: TabsProps ): JSX.Element => {
 	const { additionalClassNames } = props;
 	const marketplaceContextValue = useContext( MarketplaceContext );
-	const { selectedTab, setSelectedTab } = marketplaceContextValue;
+	const { selectedTab, setSelectedTab, hasBusinessServices } =
+		marketplaceContextValue;
 	const [ visibleTabs, setVisibleTabs ] = useState( getVisibleTabs( '' ) );
 
 	const query: Record< string, string > = useQuery();
@@ -168,8 +172,8 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	}, [ query, setSelectedTab ] );
 
 	useEffect( () => {
-		setVisibleTabs( getVisibleTabs( selectedTab ) );
-	}, [ selectedTab ] );
+		setVisibleTabs( getVisibleTabs( selectedTab, hasBusinessServices ) );
+	}, [ selectedTab, hasBusinessServices ] );
 	return (
 		<nav
 			className={ classNames(

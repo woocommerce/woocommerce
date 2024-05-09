@@ -28,14 +28,51 @@ import ConnectNotice from '~/marketplace/components/connect-notice/connect-notic
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const [ products, setProducts ] = useState< Product[] >( [] );
-	const { setIsLoading, selectedTab } = marketplaceContextValue;
+	const { setIsLoading, selectedTab, setHasBusinessServices } =
+		marketplaceContextValue;
 	const query = useQuery();
+
+	// On initial load of the in-app marketplace, fetch extensions, themes and business services
+	// and check if there are any business services available on WCCOM
+	useEffect( () => {
+		const categories = [ '', 'themes', 'business-services' ];
+		const abortControllers = categories.map( () => new AbortController() );
+
+		categories.forEach( ( category: string, index ) => {
+			const params = new URLSearchParams();
+			if ( category !== '' ) {
+				params.append( 'category', category );
+			}
+
+			const wccomSettings = getAdminSetting( 'wccomHelper', false );
+			if ( wccomSettings.storeCountry ) {
+				params.append( 'country', wccomSettings.storeCountry );
+			}
+
+			fetchSearchResults( params, abortControllers[ index ].signal ).then(
+				( productList ) => {
+					if ( category === 'business-services' ) {
+						setHasBusinessServices( productList.length > 0 );
+					}
+				}
+			);
+			return () => {
+				abortControllers.forEach( ( controller ) => {
+					controller.abort();
+				} );
+			};
+		} );
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
 
 	// Get the content for this screen
 	useEffect( () => {
 		const abortController = new AbortController();
 
-		if ( query.tab && [ '', 'discover' ].includes( query.tab ) ) {
+		if (
+			query.tab === undefined ||
+			( query.tab && [ '', 'discover' ].includes( query.tab ) )
+		) {
 			return;
 		}
 
