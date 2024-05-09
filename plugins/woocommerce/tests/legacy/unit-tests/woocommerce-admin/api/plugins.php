@@ -125,7 +125,6 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 		$response       = $this->server->dispatch( $request );
 		$data           = $response->get_data();
 		$active_plugins = Plugins::get_active_plugins();
-		var_dump($data);
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertContains( 'akismet', $data['data']['activated'] );
