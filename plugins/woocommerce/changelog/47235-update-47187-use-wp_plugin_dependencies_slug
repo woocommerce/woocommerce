@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Applies `wp_plugin_dependencies_slug` filter to get the correct plugin name in PluginVersionRuleProcessor.
