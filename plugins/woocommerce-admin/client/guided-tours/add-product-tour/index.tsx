@@ -287,8 +287,8 @@ export const ProductTour = () => {
 				} );
 			}
 		},
-		onNextStepHandler: ( stepIndex ) => {
-			const stepName = tourConfig.steps[ stepIndex ].meta.name;
+		onNextStepHandler: ( newStepIndex ) => {
+			const stepName = tourConfig.steps[ newStepIndex - 1 ].meta.name;
 
 			// This records all "next" steps and ignores the final "publish" step.
 			recordEvent( 'walkthrough_product_step_completed', {
