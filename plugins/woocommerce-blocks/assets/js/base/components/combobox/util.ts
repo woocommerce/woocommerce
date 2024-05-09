@@ -17,21 +17,6 @@ export const findExactMatchBy = (
 	);
 };
 
-// Find an option based on whether it's label starts with the search term.
-export const findBestMatchByLabel = (
-	searchTerm: string,
-	options: ComboboxControlOption[]
-) => {
-	// String startsWith empty string always returns true, so we need to check for searchTerm length.
-	return searchTerm.length
-		? options.find( ( option ) => {
-				return normalizeTextString( option.label ).startsWith(
-					normalizeTextString( searchTerm )
-				);
-		  } )
-		: undefined;
-};
-
 export const findMatchingSuggestions = (
 	searchTerm: string,
 	options: ComboboxControlOption[]
