@@ -39,18 +39,34 @@ jobs:
         outputs:
             run: ${{ steps.check.outputs.run }}
         steps:
+            - name: Fetch Pull Request Details
+              if: github.event.issue.pull_request
+              id: fetch_pr_details
+              uses: actions/github-script@v6
+              with:
+                script: |
+                  const issue = context.payload.issue;
+                  const pullRequestUrl = issue.pull_request.url;
+                  const prDetails = await github.request(pullRequestUrl);
+                  core.setOutput('base_ref', prDetails.data.base.ref);
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
             - name: check
               id: check
               uses: actions/github-script@v6
               with:
                   script: |
+                      const baseRef = process.env.BASE_REF;
+                      console.log("baseRef:", baseRef);
+
                       let run = false;
 
                       const isManualTrigger = context.payload.inputs && context.payload.inputs.release_branch && context.payload.inputs.release_branch != null;
 
-                      const isMergedMilestonedIssue = context.payload.issue && context.payload.issue.pull_request != null && context.payload.issue.pull_request.merged_at != null && context.payload.issue.milestone != null;
+                      const isMergedMilestonedIssue = context.payload.issue && context.payload.issue.pull_request != null && context.payload.issue.pull_request.merged_at != null && context.payload.issue.milestone != null && baseRef == 'trunk';
 
-                      const isMergedMilestonedPR = context.payload.pull_request && context.payload.pull_request != null && context.payload.pull_request.merged == true && context.payload.pull_request.milestone != null;
+                      const isMergedMilestonedPR = context.payload.pull_request && context.payload.pull_request != null && context.payload.pull_request.merged == true && context.payload.pull_request.milestone != null && baseRef == 'trunk';
 
                       const isBot = context.payload.pull_request && ( context.payload.pull_request.user.login == 'github-actions[bot]' || context.payload.pull_request.user.type == 'Bot' );
 
@@ -59,6 +75,9 @@ jobs:
                       } else {
                         core.setOutput( 'run', 'false' );
                       }
+              env:
+                BASE_REF: ${{ steps.fetch_pr_details.outputs.base_ref }}
+
     prep:
         name: Prep inputs
         runs-on: ubuntu-20.04
@@ -344,7 +363,7 @@ jobs:
               if: ${{ failure() && inputs.skipSlackPing != true }}
               uses: archive/github-actions-slack@v2.0.0
               with:
-                  slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+                  slack-bot-user-oauth-access-token: ${{ secrets.TEST_ASSISTANCE_BOT_TOKEN }}
                   slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
                   slack-text: |
                       :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ needs.prep.outputs.release }}' :ice_cube:
@@ -355,7 +374,7 @@ jobs:
               if: ${{ success() && inputs.skipSlackPing != true }}
               uses: archive/github-actions-slack@v2.0.0
               with:
-                  slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+                  slack-bot-user-oauth-access-token: ${{ secrets.TEST_ASSISTANCE_BOT_TOKEN }}
                   slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
                   slack-text: |
                       :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ needs.prep.outputs.release }}' :ice_cube:
