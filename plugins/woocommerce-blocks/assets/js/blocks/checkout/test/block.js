@@ -104,6 +104,10 @@ describe( 'Testing cart', () => {
 
 	it( 'Renders checkout if there are items in the cart', async () => {
 		render( <CheckoutBlock /> );
+
+		// TODO: Fix a recent deprecation of showSpinner prop of Button called in this component.
+		expect( console ).toHaveWarned();
+
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 
 		expect( screen.getByText( /Place Order/i ) ).toBeInTheDocument();
