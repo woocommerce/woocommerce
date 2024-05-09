@@ -9,11 +9,6 @@
 import { BlockEditorProvider } from '@wordpress/block-editor';
 import { memo } from '@wordpress/element';
 import { BlockInstance } from '@wordpress/blocks';
-import {
-	Popover,
-	SlotFillProvider,
-	KeyboardShortcuts,
-} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -24,6 +19,7 @@ import {
 } from './auto-block-preview';
 import { ChangeHandler } from './hooks/use-editor-blocks';
 import { Toolbar } from './toolbar/toolbar';
+import { IS_TOOLBAR_ENABLED_FEATURE_FLAG } from './toolbar/feature-flag';
 
 export const BlockPreview = ( {
 	blocks,
@@ -48,7 +44,7 @@ export const BlockPreview = ( {
 				onChange={ onChange }
 				useSubRegistry={ useSubRegistry }
 			>
-				<Toolbar />
+				{ IS_TOOLBAR_ENABLED_FEATURE_FLAG && <Toolbar /> }
 				<AutoHeightBlockPreview settings={ settings } { ...props } />
 			</BlockEditorProvider>
 		</>
