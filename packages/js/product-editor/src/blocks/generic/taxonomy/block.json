@@ -47,5 +47,5 @@
 		"__experimentalToolbar": false
 	},
 	"editorStyle": "file:./editor.css",
-	"usesContext": [ "postType" ]
+	"usesContext": [ "postType", "isInSelectedTab" ]
 }

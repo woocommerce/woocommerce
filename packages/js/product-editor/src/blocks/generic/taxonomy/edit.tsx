@@ -39,7 +39,7 @@ interface TaxonomyBlockAttributes extends BlockAttributes {
 
 export function Edit( {
 	attributes,
-	context: { postType },
+	context: { postType, isInSelectedTab },
 }: ProductEditorBlockEditProps< TaxonomyBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { hierarchical }: TaxonomyMetadata = useSelect(
@@ -77,8 +77,10 @@ export function Edit( {
 	);
 
 	useEffect( () => {
-		searchDelayed( '' );
-	}, [] );
+		if ( isInSelectedTab ) {
+			searchDelayed( '' );
+		}
+	}, [ isInSelectedTab ] );
 
 	const [ selectedEntries, setSelectedEntries ] = useProductEntityProp<
 		Taxonomy[]
