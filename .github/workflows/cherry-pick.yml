@@ -39,6 +39,26 @@ jobs:
         outputs:
             run: ${{ steps.check.outputs.run }}
         steps:
+            - name: Fetch Pull Request Details
+              if: github.event.issue.pull_request
+              id: fetch_pr_details
+              uses: actions/github-script@v6
+              with:
+                script: |
+                  const issue = context.payload.issue;
+                  const pullRequestUrl = issue.pull_request.url;
+                  const prDetails = await github.request(pullRequestUrl);
+                  console.log("PR Base Ref:", prDetails.data.base.ref);
+                  core.setOutput('base_ref', prDetails.data.base.ref);
+                  core.setOutput('head_ref', prDetails.data.head.ref);
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Use Pull Request Details
+              run: |
+                echo "Base branch of the PR is ${{ steps.fetch_pr_details.outputs.base_ref }}"
+                echo "Head branch of the PR is ${{ steps.fetch_pr_details.outputs.head_ref }}"
+
             - name: check
               id: check
               uses: actions/github-script@v6
