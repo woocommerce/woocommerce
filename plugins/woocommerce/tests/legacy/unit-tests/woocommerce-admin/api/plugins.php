@@ -65,8 +65,8 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 
 		// TODO: This test should be skipped if WordPress.org's plugins API endpoint cannot be reached.
 
-		$data     = $response->get_data();
-		$plugins  = get_plugins();
+		$data    = $response->get_data();
+		$plugins = get_plugins();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( array( 'woocommerce-legacy-rest-api' ), $data['data']['installed'] );
@@ -91,8 +91,8 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 
 		// TODO: This test should be skipped if WordPress.org's plugins API endpoint cannot be reached.
 
-		$data     = $response->get_data();
-		$plugins  = get_plugins();
+		$data    = $response->get_data();
+		$plugins = get_plugins();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertArrayHasKey( 'job_id', $data['data'] );
