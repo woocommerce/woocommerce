@@ -239,6 +239,7 @@
 					"name": "Core API tests",
 					"testType": "api",
 					"command": "test:api-pw",
+					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.lock",
@@ -259,6 +260,7 @@
 					"name": "Core API tests - HPOS disabled",
 					"testType": "api",
 					"command": "test:api-pw",
+					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.lock",
@@ -280,6 +282,7 @@
 					"name": "Core Performance tests (K6)",
 					"testType": "performance",
 					"command": "test:perf",
+					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.lock",
@@ -299,6 +302,7 @@
 					"name": "Metrics",
 					"testType": "performance",
 					"command": "test:metrics:ci",
+					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.lock",
