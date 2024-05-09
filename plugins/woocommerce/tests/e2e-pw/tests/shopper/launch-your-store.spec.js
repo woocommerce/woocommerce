@@ -15,7 +15,7 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 		}
 	} );
 
-	test.skip( 'Entire site coming soon mode', async ( { page, baseURL } ) => {
+	test( 'Entire site coming soon mode', async ( { page, baseURL } ) => {
 		try {
 			await setOption(
 				request,
@@ -43,7 +43,7 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 		).toBeVisible();
 	} );
 
-	test.skip( 'Store only coming soon mode', async ( { page, baseURL } ) => {
+	test( 'Store only coming soon mode', async ( { page, baseURL } ) => {
 		try {
 			await setOption(
 				request,
