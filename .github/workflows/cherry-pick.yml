@@ -56,11 +56,19 @@ jobs:
 
                       const isBot = context.payload.pull_request && ( context.payload.pull_request.user.login == 'github-actions[bot]' || context.payload.pull_request.user.type == 'Bot' );
 
+                      console.log("isManualTrigger:",isManualTrigger);
+                      console.log("isMergedMilestonedIssue:",isMergedMilestonedIssue);
+                      console.log("isMergedMilestonedPR:",isMergedMilestonedPR);
+                      console.log("isBot:",isBot);
+
                       if ( !isBot && ( isManualTrigger || isMergedMilestonedIssue || isMergedMilestonedPR ) ) {
+                        console.log("Setting 'run' to true");
                         core.setOutput( 'run', 'true' );
                       } else {
+                        console.log("Setting 'run' to false");
                         core.setOutput( 'run', 'false' );
                       }
+
     prep:
         name: Prep inputs
         runs-on: ubuntu-20.04
