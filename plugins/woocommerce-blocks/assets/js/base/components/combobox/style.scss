@@ -61,7 +61,7 @@
 				background-color: #fff;
 				color: $input-text-active;
 				outline: 0;
-				border: 1.5px solid $input-border-gray;
+				border: 2px solid $input-border-gray;
 				border-bottom: 0;
 			}
 
@@ -78,7 +78,7 @@
 				&:focus {
 					background-color: $input-background-dark;
 					color: $input-text-dark;
-					border: 1.5px solid $input-border-gray;
+					border: 2px solid $input-border-gray;
 					border-bottom: 0;
 				}
 			}
@@ -87,7 +87,7 @@
 			position: absolute;
 			z-index: 10;
 			background-color: $select-dropdown-light;
-			border: 1.5px solid $input-border-gray;
+			border: 2px solid $input-border-gray;
 			border-top: 0;
 			border-bottom: 1;
 			margin: 3em 0 0 0;
