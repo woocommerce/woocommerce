@@ -207,7 +207,9 @@ test.describe( 'Checkout page', () => {
 
 		// first try submitting the form with no fields complete
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
-		await expect( page.locator( 'form[name="checkout"]' ) ).toBeVisible();
+		await expect(
+			page.locator( 'form[name="checkout"]' ).getByRole( 'alert' )
+		).toBeVisible();
 		await expect(
 			page.getByText( 'Billing First name is a required field.' )
 		).toBeVisible();
