@@ -39,6 +39,7 @@ class BlockPatterns {
 	const SLUG_REGEX                 = '/^[A-z0-9\/_-]+$/';
 	const COMMA_SEPARATED_REGEX      = '/[\s,]+/';
 	const PATTERNS_AI_DATA_POST_TYPE = 'patterns_ai_data';
+	const EXCLUDED_PATTERNS          = array( '13923', '14781', '14779', '13666', '13664', '13660' );
 
 	/**
 	 * Path to the patterns' directory.
@@ -185,7 +186,7 @@ class BlockPatterns {
 			return;
 		}
 
-		foreach ( $this->filter_patterns( $patterns, array() ) as $pattern ) {
+		foreach ( $this->filter_patterns( $patterns, self::EXCLUDED_PATTERNS ) as $pattern ) {
 			$pattern['slug']    = $pattern['name'];
 			$pattern['content'] = $pattern['html'];
 
