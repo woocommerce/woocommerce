@@ -388,8 +388,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 		assemblerPageObject,
 		page,
 		baseURL,
-	}, testInfo ) => {
-		testInfo.snapshotSuffix = '';
+	} ) => {
 		const assembler = await assemblerPageObject.getAssembler();
 		const colorPicker = assembler
 			.locator(
@@ -403,15 +402,23 @@ test.describe( 'Assembler -> Color Pickers', () => {
 
 		const saveButton = assembler.getByText( 'Save' );
 
-		const waitResponse = page.waitForResponse(
+		const waitResponseGlobalStyles = page.waitForResponse(
 			( response ) =>
 				response.url().includes( 'wp-json/wp/v2/global-styles' ) &&
 				response.status() === 200
 		);
 
+		const waitResponseTemplate = page.waitForResponse(
+			( response ) =>
+				response.url().includes(
+					// When CYS will support all block themes, this URL will change.
+					'wp-json/wp/v2/templates/twentytwentyfour//home'
+				) && response.status() === 200
+		);
+
 		await saveButton.click();
 
-		await waitResponse;
+		await Promise.all( [ waitResponseGlobalStyles, waitResponseTemplate ] );
 
 		await page.goto( baseURL );
 
