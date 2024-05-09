@@ -40,6 +40,19 @@ const test = base.extend< {
 
 test.describe( 'Product Filter: Stock Status Block', () => {
 	test.describe( 'With default display style', () => {
+		test( 'clear button is not shown on initial page load', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( defaultBlockPost.link );
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			await expect( button ).toBeHidden();
+		} );
+
 		test( 'renders a checkbox list with the available stock statuses', async ( {
 			page,
 			defaultBlockPost,
@@ -71,9 +84,80 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 			await expect( products ).toHaveCount( 1 );
 		} );
+
+		test( 'clear button appears after a filter is applied', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( defaultBlockPost.link );
+
+			const outOfStockCheckbox = page.getByText( 'Out of stock' );
+			await outOfStockCheckbox.click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_stock_status=outofstock.*/ );
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			await expect( button ).toBeVisible();
+		} );
+
+		test( 'clear button hides after deselecting all filters', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto(
+				`${ defaultBlockPost.link }?filter_stock_status=outofstock`
+			);
+
+			const outOfStockCheckbox = page.getByText( 'Out of stock' );
+			await outOfStockCheckbox.click();
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			await expect( button ).toBeHidden();
+		} );
+
+		test( 'filters are cleared after clear button is clicked', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto(
+				`${ defaultBlockPost.link }?filter_stock_status=outofstock`
+			);
+
+			const button = page
+				.locator( '.wp-block-woocommerce-product-filter-clear-button' )
+				.locator( 'button' );
+
+			await button.click();
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 1000 ) );
+
+			const outOfStockCheckbox = page.getByText( 'Out of stock' );
+
+			await expect( outOfStockCheckbox ).not.toBeChecked();
+		} );
 	} );
 
 	test.describe( 'With dropdown display style', () => {
+		test( 'clear button is not shown on initial page load', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( defaultBlockPost.link );
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			await expect( button ).toBeHidden();
+		} );
+
 		test( 'a dropdown is displayed with the available stock statuses', async ( {
 			page,
 			dropdownBlockPost,
@@ -89,6 +173,80 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 			await expect( page.getByText( 'In stock' ) ).toBeVisible();
 			await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
+		} );
+
+		test( 'clear button appears after a filter is applied', async ( {
+			page,
+			dropdownBlockPost,
+		} ) => {
+			await page.goto( dropdownBlockPost.link );
+
+			const dropdownLocator = page.locator(
+				'.wc-interactivity-dropdown'
+			);
+
+			await dropdownLocator.click();
+
+			await page.getByText( 'In stock' ).click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_stock_status=instock.*/ );
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			await expect( button ).toBeVisible();
+		} );
+
+		test( 'clear button hides after deselecting all filters', async ( {
+			page,
+			dropdownBlockPost,
+		} ) => {
+			await page.goto(
+				`${ dropdownBlockPost.link }?filter_stock_status=instock`
+			);
+
+			const dropdownLocator = page.locator(
+				'.wc-interactivity-dropdown'
+			);
+
+			await dropdownLocator.click();
+
+			const button = page.locator(
+				'.wp-block-woocommerce-product-filter-clear-button'
+			);
+
+			const removeFilter = page.locator(
+				'.wc-interactivity-dropdown__badge-remove'
+			);
+
+			await removeFilter.click();
+
+			await expect( button ).toBeHidden();
+		} );
+
+		test( 'filters are cleared after clear button is clicked', async ( {
+			page,
+			dropdownBlockPost,
+		} ) => {
+			await page.goto(
+				`${ dropdownBlockPost.link }?filter_stock_status=instock`
+			);
+
+			const button = page
+				.locator( '.wp-block-woocommerce-product-filter-clear-button' )
+				.locator( 'button' );
+
+			await button.click();
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 1000 ) );
+
+			const placeholder = await page
+				.locator( '.wc-interactivity-dropdown__placeholder' )
+				.textContent();
+
+			expect( placeholder ).toEqual( 'Select stock statuses' );
 		} );
 	} );
 } );
