@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Allow category and tag texonomy filters on the Product Collection block to see more than the first 10 categories.
+Allow category and tag taxonomy filters on the Product Collection block to see more than the first 10.

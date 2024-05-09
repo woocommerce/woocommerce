@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __, sprintf } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
@@ -186,7 +187,7 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 		if ( term ) {
 			// Terms that are missing will be identified as such.
 			if ( ! term.name ) {
-				display = `(#${ term.id } Missing)`;
+				display = `(#${ term.id } ${ __( 'Missing', 'woocommerce' ) })`;
 			}
 			// Terms with names that are non-unique will have the ID appended.
 			else if ( duplicateNames.has( term.name ) ) {
