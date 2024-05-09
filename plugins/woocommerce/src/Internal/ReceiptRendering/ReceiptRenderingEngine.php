@@ -6,8 +6,8 @@ use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
-use \Exception;
-use \WC_Order;
+use Exception;
+use WC_Order;
 
 /**
  * This class generates printable order receipts as transient files (see src/Internal/TransientFiles).
@@ -90,7 +90,7 @@ class ReceiptRenderingEngine {
 	 * @throws \InvalidArgumentException Invalid expiration date (wrongly formatted, or it's a date in the past).
 	 * @throws Exception The directory to store the file doesn't exist and can't be created.
 	 */
-	public function generate_receipt( $order, $expiration_date = null, bool $force_new = false ) : ?string {
+	public function generate_receipt( $order, $expiration_date = null, bool $force_new = false ): ?string {
 		if ( ! $order instanceof WC_Order ) {
 			$order = wc_get_order( $order );
 			if ( false === $order ) {
@@ -119,7 +119,7 @@ class ReceiptRenderingEngine {
 		extract( $this->get_order_data( $order ) );
 
 		ob_start();
-		include __dir__ . '/Templates/order-receipt.php';
+		include __DIR__ . '/Templates/order-receipt.php';
 		$rendered_template = ob_get_contents();
 		ob_end_clean();
 
