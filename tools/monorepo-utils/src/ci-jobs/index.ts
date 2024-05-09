@@ -77,7 +77,10 @@ const program = new Command( 'ci-jobs' )
 		if ( jobs.lint.length > 0 ) {
 			Logger.notice( 'Lint Jobs' );
 			for ( const job of jobs.lint ) {
-				Logger.notice( `-  ${ job.projectName } - ${ job.command }` );
+				const optional = job.optional ? '(optional)' : '';
+				Logger.notice(
+					`-  ${ job.projectName } - ${ job.command }${ optional }`
+				);
 			}
 		} else {
 			Logger.notice( 'No lint jobs to run.' );
@@ -87,7 +90,10 @@ const program = new Command( 'ci-jobs' )
 			if ( jobs[ `${ type }Test` ].length > 0 ) {
 				Logger.notice( `${ type } test Jobs` );
 				for ( const job of jobs[ `${ type }Test` ] ) {
-					Logger.notice( `-  ${ job.projectName } - ${ job.name }` );
+					const optional = job.optional ? ' (optional)' : '';
+					Logger.notice(
+						`-  ${ job.projectName } - ${ job.name }${ optional }`
+					);
 				}
 			} else {
 				Logger.notice( `No ${ type } test jobs to run.` );
