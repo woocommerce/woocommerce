@@ -533,7 +533,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$this->update_option( $option_key, wc_bool_to_string( $should_load ) );
 		} else {
 			// Enabled always takes precedence over the option.
-			$should_load = $this->enabled || wc_string_to_bool( $should_load );
+			$should_load = wc_string_to_bool( $this->enabled ) || wc_string_to_bool( $should_load );
 		}
 
 		return $should_load;
