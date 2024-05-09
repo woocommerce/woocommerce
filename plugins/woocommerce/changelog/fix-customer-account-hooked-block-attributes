@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Don't automatically insert hooked customer account block into header for sites running less than WP 6.5
