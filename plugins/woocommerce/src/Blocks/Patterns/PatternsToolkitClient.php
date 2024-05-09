@@ -6,7 +6,7 @@ use WP_Error;
 /**
  * PatternsToolkit class.
  */
-class PatternsToolkit {
+class PatternsToolkitClient {
 	/**
 	 *  The Patterns Toolkit API URL
 	 */
@@ -33,7 +33,6 @@ class PatternsToolkit {
 		}
 
 		$patterns = wp_safe_remote_get( $ptk_url );
-
 		if ( is_wp_error( $patterns ) || 200 !== wp_remote_retrieve_response_code( $patterns ) ) {
 			return new WP_Error(
 				'patterns_toolkit_api_error',

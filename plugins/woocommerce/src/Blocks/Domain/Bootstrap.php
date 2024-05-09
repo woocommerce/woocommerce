@@ -37,7 +37,7 @@ use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Domain\Services\OnboardingTasks\TasksController;
-use Automattic\WooCommerce\Blocks\Patterns\PatternsToolkit;
+use Automattic\WooCommerce\Blocks\Patterns\PatternsToolkitClient;
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -377,7 +377,7 @@ class Bootstrap {
 		$this->container->register(
 			BlockPatterns::class,
 			function () {
-				return new BlockPatterns($this->package, new PatternsToolkit());
+				return new BlockPatterns($this->package, new PatternsToolkitClient());
 			}
 		);
 		$this->container->register(

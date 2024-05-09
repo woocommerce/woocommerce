@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 use Automattic\WooCommerce\Blocks\AIContent\UpdatePatterns;
 use Automattic\WooCommerce\Blocks\AIContent\UpdateProducts;
-use Automattic\WooCommerce\Blocks\Patterns\PatternsToolkit;
+use Automattic\WooCommerce\Blocks\Patterns\PatternsToolkitClient;
 
 /**
  * Registers patterns under the `./patterns/` directory and updates their content.
@@ -51,17 +51,17 @@ class BlockPatterns {
 	/**
 	 * PatternsToolkit instance.
 	 *
-	 * @var PatternsToolkit $patterns_toolkit
+	 * @var PatternsToolkitClient $patterns_toolkit
 	 */
 	private $patterns_toolkit;
 
 	/**
 	 * Constructor for class
 	 *
-	 * @param Package         $package An instance of Package.
-	 * @param PatternsToolkit $patterns_toolkit An instance of PatternsToolkit.
+	 * @param Package               $package An instance of Package.
+	 * @param PatternsToolkitClient $patterns_toolkit An instance of PatternsToolkit.
 	 */
-	public function __construct( Package $package, PatternsToolkit $patterns_toolkit ) {
+	public function __construct( Package $package, PatternsToolkitClient $patterns_toolkit ) {
 		$this->patterns_path    = $package->get_path( 'patterns' );
 		$this->patterns_toolkit = $patterns_toolkit;
 
