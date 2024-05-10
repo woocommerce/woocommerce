@@ -77,7 +77,7 @@ export function Edit( {
 		if ( isInSelectedTab ) {
 			fetchAttributes();
 		}
-	}, [ entityAttributes, isInSelectedTab ] );
+	}, [ isInSelectedTab ] );
 
 	const localAttributeNames = attributes
 		.filter( ( attr ) => attr.id === 0 )

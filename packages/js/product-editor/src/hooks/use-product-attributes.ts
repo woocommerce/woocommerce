@@ -167,7 +167,7 @@ export function useProductAttributes( {
 		}
 	};
 
-	const fetchAttributes = () => {
+	const fetchAttributes = useCallback( () => {
 		const [
 			localAttributes,
 			globalAttributes,
@@ -186,7 +186,7 @@ export function useProductAttributes( {
 				...localAttributes,
 			] );
 		} );
-	};
+	}, [ allAttributes, isVariationAttributes, fetchTerms ] );
 
 	return {
 		attributes,
