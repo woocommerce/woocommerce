@@ -129,7 +129,6 @@
 
 		&:hover,
 		&.components-button:not(:disabled):not([aria-disabled="true"]):hover {
-			background-color: $gray-100;
 			box-shadow: none;
 
 			&.has-unread::after,
