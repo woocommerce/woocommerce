@@ -262,6 +262,8 @@ const Combobox = ( {
 										height: minHeight,
 										overflow: 'auto',
 										width: '100%',
+										position: 'relative',
+										zIndex: 10,
 									} }
 								>
 									<ComboboxList
