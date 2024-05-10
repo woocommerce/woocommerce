@@ -39,7 +39,7 @@ class BlockPatterns {
 	const SLUG_REGEX                 = '/^[A-z0-9\/_-]+$/';
 	const COMMA_SEPARATED_REGEX      = '/[\s,]+/';
 	const PATTERNS_AI_DATA_POST_TYPE = 'patterns_ai_data';
-	const EXCLUDED_PATTERNS          = array( '13923', '14781', '14779', '13666', '13664', '13660' );
+	const EXCLUDED_PATTERNS          = array( '13923', '14781', '14779', '13666', '13664', '13660', '13588' );
 
 	/**
 	 * Path to the patterns' directory.
