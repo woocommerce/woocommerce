@@ -35,6 +35,7 @@ describe( 'Job Processing', () => {
 								type: JobType.Lint,
 								changes: [ /test.js$/ ],
 								command: 'test-lint',
+								events: [],
 							},
 						],
 					},
@@ -66,6 +67,7 @@ describe( 'Job Processing', () => {
 								type: JobType.Lint,
 								changes: [ /test.js$/ ],
 								command: 'test-lint <baseRef>',
+								events: [],
 							},
 						],
 					},
@@ -77,6 +79,7 @@ describe( 'Job Processing', () => {
 				{
 					commandVars: {
 						baseRef: 'test-base-ref',
+						event: '',
 					},
 				}
 			);
@@ -101,6 +104,7 @@ describe( 'Job Processing', () => {
 								type: JobType.Lint,
 								changes: [ /test.js$/ ],
 								command: 'test-lint <invalid>',
+								events: [],
 							},
 						],
 					},
@@ -126,6 +130,7 @@ describe( 'Job Processing', () => {
 								type: JobType.Lint,
 								changes: [ /test.js$/ ],
 								command: 'test-lint',
+								events: [],
 								jobCreated: true,
 							},
 						],
@@ -153,6 +158,7 @@ describe( 'Job Processing', () => {
 								type: JobType.Lint,
 								changes: [ /test.js$/ ],
 								command: 'test-lint',
+								events: [],
 							},
 						],
 					},
@@ -177,6 +183,7 @@ describe( 'Job Processing', () => {
 								type: JobType.Lint,
 								changes: [ /test.js$/ ],
 								command: 'test-lint',
+								events: [],
 							},
 						],
 					},
@@ -190,6 +197,7 @@ describe( 'Job Processing', () => {
 										type: JobType.Lint,
 										changes: [ /test-a.js$/ ],
 										command: 'test-lint-a',
+										events: [],
 									},
 								],
 							},
@@ -204,6 +212,7 @@ describe( 'Job Processing', () => {
 										type: JobType.Lint,
 										changes: [ /test-b.js$/ ],
 										command: 'test-lint-b',
+										events: [],
 									},
 								],
 							},
@@ -248,6 +257,7 @@ describe( 'Job Processing', () => {
 										type: JobType.Lint,
 										changes: [ /test-a.js$/ ],
 										command: 'test-lint-a',
+										events: [],
 									},
 								],
 							},
@@ -262,6 +272,7 @@ describe( 'Job Processing', () => {
 										type: JobType.Lint,
 										changes: [ /test-b.js$/ ],
 										command: 'test-lint-b',
+										events: [],
 									},
 								],
 							},
@@ -304,6 +315,7 @@ describe( 'Job Processing', () => {
 								type: JobType.Test,
 								testType,
 								shardingArguments: [],
+								events: [],
 								name: 'Default',
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
@@ -346,6 +358,7 @@ describe( 'Job Processing', () => {
 								testType,
 								name: 'Default',
 								shardingArguments: [],
+								events: [],
 								changes: [ /test.js$/ ],
 								command: 'test-cmd <baseRef>',
 							},
@@ -359,6 +372,7 @@ describe( 'Job Processing', () => {
 				{
 					commandVars: {
 						baseRef: 'test-base-ref',
+						event: '',
 					},
 				}
 			);
@@ -391,6 +405,7 @@ describe( 'Job Processing', () => {
 								testType,
 								name: 'Default',
 								shardingArguments: [],
+								events: [],
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
 								jobCreated: true,
@@ -422,6 +437,7 @@ describe( 'Job Processing', () => {
 								testType,
 								name: 'Default',
 								shardingArguments: [],
+								events: [],
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
 							},
@@ -450,6 +466,7 @@ describe( 'Job Processing', () => {
 								testType,
 								name: 'Default',
 								shardingArguments: [],
+								events: [],
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
 							},
@@ -466,6 +483,7 @@ describe( 'Job Processing', () => {
 										testType: 'default',
 										name: 'Default A',
 										shardingArguments: [],
+										events: [],
 										changes: [ /test-b.js$/ ],
 										command: 'test-cmd-a',
 									},
@@ -483,6 +501,7 @@ describe( 'Job Processing', () => {
 										testType: 'default',
 										name: 'Default B',
 										shardingArguments: [],
+										events: [],
 										changes: [ /test-b.js$/ ],
 										command: 'test-cmd-b',
 									},
@@ -540,6 +559,7 @@ describe( 'Job Processing', () => {
 									testType,
 									name: 'Default',
 									shardingArguments: [],
+									events: [],
 									changes: [ /test.js$/ ],
 									command: 'test-cmd',
 								},
@@ -582,6 +602,7 @@ describe( 'Job Processing', () => {
 								testType,
 								name: 'Default',
 								shardingArguments: [],
+								events: [],
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
 								cascadeKeys: [ 'test' ],
@@ -599,6 +620,7 @@ describe( 'Job Processing', () => {
 										testType: 'default',
 										name: 'Default A',
 										shardingArguments: [],
+										events: [],
 										changes: [ /test-a.js$/ ],
 										command: 'test-cmd-a',
 										cascadeKeys: [ 'test-a', 'test' ],
@@ -654,6 +676,7 @@ describe( 'Job Processing', () => {
 								testType,
 								name: 'Default',
 								shardingArguments: [],
+								events: [],
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
 								cascadeKeys: [ 'test' ],
@@ -671,6 +694,7 @@ describe( 'Job Processing', () => {
 										testType: 'default',
 										name: 'Default A',
 										shardingArguments: [],
+										events: [],
 										changes: [ /test-a.js$/ ],
 										command: 'test-cmd-a',
 										cascadeKeys: [ 'test-a', 'test' ],
@@ -689,6 +713,7 @@ describe( 'Job Processing', () => {
 										testType: 'default',
 										name: 'Default B',
 										shardingArguments: [],
+										events: [],
 										changes: [ /test-b.js$/ ],
 										command: 'test-cmd-b',
 										cascadeKeys: [ 'test-b', 'test' ],
@@ -748,6 +773,7 @@ describe( 'Job Processing', () => {
 								testType,
 								name: 'Default',
 								shardingArguments: [],
+								events: [],
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
 								testEnv: {
@@ -767,6 +793,7 @@ describe( 'Job Processing', () => {
 				{
 					commandVars: {
 						baseRef: 'test-base-ref',
+						event: '',
 					},
 				}
 			);
@@ -801,12 +828,14 @@ describe( 'Job Processing', () => {
 								type: JobType.Lint,
 								changes: [ /test.js$/ ],
 								command: 'test-lint',
+								events: [],
 							},
 							{
 								type: JobType.Test,
 								testType,
 								name: 'Default',
 								shardingArguments: [],
+								events: [],
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
 							},
@@ -854,6 +883,7 @@ describe( 'Job Processing', () => {
 									'--shard=1/2',
 									'--shard=2/2',
 								],
+								events: [],
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
 							},
@@ -896,6 +926,253 @@ describe( 'Job Processing', () => {
 				] )
 			);
 		} );
+
+		it( 'should trigger job with event configured but no event cli argument', async () => {
+			const testType = 'default';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [
+									'--shard=1/2',
+									'--shard=2/2',
+								],
+								events: [ 'push' ],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 2 );
+			expect( jobs[ `${ testType }Test` ] ).toEqual(
+				expect.arrayContaining( [
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 1/2',
+						command: 'test-cmd --shard=1/2',
+						shardNumber: 1,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+					},
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 2/2',
+						command: 'test-cmd --shard=2/2',
+						shardNumber: 2,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+					},
+				] )
+			);
+		} );
+
+		it( 'should trigger job with event configured and matching event cli argument', async () => {
+			const testType = 'default';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [
+									'--shard=1/2',
+									'--shard=2/2',
+								],
+								events: [ 'push' ],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{ commandVars: { baseRef: 'test-base-ref', event: 'push' } }
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 2 );
+			expect( jobs[ `${ testType }Test` ] ).toEqual(
+				expect.arrayContaining( [
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 1/2',
+						command: 'test-cmd --shard=1/2',
+						shardNumber: 1,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+					},
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 2/2',
+						command: 'test-cmd --shard=2/2',
+						shardNumber: 2,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+					},
+				] )
+			);
+		} );
+
+		it( 'should not trigger job with event configured but not matching event cli argument', async () => {
+			const testType = 'default';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [
+									'--shard=1/2',
+									'--shard=2/2',
+								],
+								events: [ 'push' ],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+						event: 'pull_request',
+					},
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should create non-optional lint job', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint <baseRef>',
+								events: [],
+								optional: false,
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+						event: 'foo',
+					},
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 1 );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				command: 'test-lint test-base-ref',
+				optional: false,
+			} );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should create optional test job', async () => {
+			const testType = 'default';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd <baseRef>',
+								optional: true,
+								events: [],
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+						event: 'foo',
+					},
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 1 );
+			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd test-base-ref',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				optional: true,
+			} );
+		} );
 	} );
 
 	describe( 'getShardedJobs', () => {
@@ -911,12 +1188,14 @@ describe( 'Job Processing', () => {
 						shouldCreate: false,
 						envVars: {},
 					},
+					optional: false,
 				},
 				{
 					type: JobType.Test,
 					testType: 'e2e',
 					name: 'Default',
 					shardingArguments: [ '--shard-arg-1', '--shard-arg-2' ],
+					events: [],
 					changes: [ /test.js$/ ],
 					command: 'test-cmd',
 				}
@@ -931,6 +1210,7 @@ describe( 'Job Processing', () => {
 						name: 'Default 1/2',
 						command: 'test-cmd --shard-arg-1',
 						shardNumber: 1,
+						optional: false,
 						testEnv: {
 							shouldCreate: false,
 							envVars: {},
@@ -942,6 +1222,7 @@ describe( 'Job Processing', () => {
 						name: 'Default 2/2',
 						command: 'test-cmd --shard-arg-2',
 						shardNumber: 2,
+						optional: false,
 						testEnv: {
 							shouldCreate: false,
 							envVars: {},
@@ -965,12 +1246,14 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
+						optional: false,
 					},
 					{
 						type: JobType.Test,
 						testType: 'e2e',
 						name: 'Default',
 						shardingArguments,
+						events: [],
 						changes: [ /test.js$/ ],
 						command: 'test-cmd',
 					}
@@ -983,6 +1266,7 @@ describe( 'Job Processing', () => {
 					name: 'Default',
 					command: 'test-cmd',
 					shardNumber: 0,
+					optional: false,
 					testEnv: {
 						shouldCreate: false,
 						envVars: {},

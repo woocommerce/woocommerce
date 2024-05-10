@@ -48,9 +48,7 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 	},
 } );
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { requestUtils, admin, editorUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
+	test.beforeEach( async ( { admin, editorUtils } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
@@ -143,11 +141,11 @@ test.describe( `${ blockData.name }`, () => {
 				.locator( blockData.selectors.editor.noThumbnailsOption )
 				.click();
 
-			const isVisible = await page
-				.locator( blockData.selectors.editor.thumbnails )
-				.isVisible();
+			const element = page.locator(
+				blockData.selectors.editor.thumbnails
+			);
 
-			expect( isVisible ).toBe( false );
+			await expect( element ).toBeHidden();
 
 			await editor.saveSiteEditorEntities();
 
@@ -190,10 +188,6 @@ test.describe( `${ blockData.name }`, () => {
 					blockData.selectors.editor.leftPositionThumbnailsOption
 				)
 				.click();
-
-			// We should refactor this.
-			// eslint-disable-next-line playwright/no-wait-for-timeout
-			await page.waitForTimeout( 500 );
 
 			const groupBlock = (
 				await editorUtils.getBlockByTypeWithParent(
@@ -281,10 +275,6 @@ test.describe( `${ blockData.name }`, () => {
 				)
 				.click();
 
-			// We should refactor this.
-			// eslint-disable-next-line playwright/no-wait-for-timeout
-			await page.waitForTimeout( 500 );
-
 			const groupBlock = (
 				await editorUtils.getBlockByTypeWithParent(
 					'core/group',
@@ -371,10 +361,6 @@ test.describe( `${ blockData.name }`, () => {
 					blockData.selectors.editor.rightPositionThumbnailsOption
 				)
 				.click();
-
-			// We should refactor this.
-			// eslint-disable-next-line playwright/no-wait-for-timeout
-			await page.waitForTimeout( 500 );
 
 			const groupBlock = (
 				await editorUtils.getBlockByTypeWithParent(

@@ -49,12 +49,7 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		await editorUtils.transformIntoBlocks();
 	} );
 
-	test.afterEach( async ( { localPickupUtils } ) => {
-		await localPickupUtils.enableLocalPickup();
-	} );
-
 	test( 'Place order', async ( { frontendUtils, pageObject, page } ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
@@ -131,7 +126,6 @@ test.describe( 'Shopper → Order Confirmation (guest user)', () => {
 			'User is not logged out'
 		).toBeVisible();
 
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -185,9 +179,7 @@ test.describe( 'Shopper → Order Confirmation → Local Pickup', () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
-		await pageObject.page
-			.getByRole( 'radio', { name: 'Local Pickup free' } )
-			.click();
+		await pageObject.page.getByRole( 'radio', { name: 'Pickup' } ).click();
 		await pageObject.fillInCheckoutWithTestData();
 		await pageObject.placeOrder();
 		await expect(
@@ -203,7 +195,6 @@ test.describe( 'Shopper → Order Confirmation → Downloadable Products', () =>
 	let confirmationPageUrl: string;
 
 	test.beforeEach( async ( { frontendUtils, pageObject } ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();

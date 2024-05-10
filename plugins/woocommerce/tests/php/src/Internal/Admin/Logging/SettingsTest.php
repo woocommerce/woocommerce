@@ -117,8 +117,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$upload_dir = wp_upload_dir();
 		$path       = $upload_dir['basedir'] . '/wc-logs-test/';
 
-		$this->assertFalse( wp_is_writable( $path ) );
-
 		$callback = fn() => $path;
 		add_filter( 'woocommerce_log_directory', $callback );
 

@@ -12,7 +12,7 @@ import {
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	Product,
-	ProductAttribute,
+	ProductProductAttribute,
 	useUserPreferences,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -47,7 +47,7 @@ export function Edit( {
 	} = useUserPreferences();
 
 	const [ entityAttributes, setEntityAttributes ] = useEntityProp<
-		ProductAttribute[]
+		ProductProductAttribute[]
 	>( 'postType', 'product', 'attributes' );
 
 	const [ entityDefaultAttributes, setEntityDefaultAttributes ] =

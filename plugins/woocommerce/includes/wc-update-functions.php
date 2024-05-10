@@ -18,8 +18,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
+use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
@@ -2668,8 +2671,42 @@ function wc_update_870_prevent_listing_of_transient_files_directory() {
 }
 
 /**
- * Add woocommerce_show_lys_tour.
+ * If it exists, remove and recreate the inbox note that asks users to connect to `Woo.com` so that the domain name is changed to the updated `WooCommerce.com`.
  */
-function wc_update_890_add_launch_your_store_tour_option() {
-	update_option( 'woocommerce_show_lys_tour', 'yes' );
+function wc_update_890_update_connect_to_woocommerce_note() {
+	$note = Notes::get_note_by_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
+	if ( ! is_a( $note, 'Automattic\WooCommerce\Admin\Notes\Note' ) ) {
+		return;
+	}
+	if ( ! str_contains( $note->get_title(), 'Woo.com' ) ) {
+		return;
+	}
+	if ( $note->get_status() !== Note::E_WC_ADMIN_NOTE_SNOOZED && $note->get_status() !== Note::E_WC_ADMIN_NOTE_UNACTIONED ) {
+		return;
+	}
+	Notes::delete_notes_with_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
+	$new_note = WooSubscriptionsNotes::get_note();
+	$new_note->save();
+}
+
+/**
+ * Disables the PayPal Standard gateway for stores that aren't using it.
+ *
+ * PayPal Standard has been deprecated since WooCommerce 5.5, but there are some stores that have it showing up in their
+ * list of available Payment methods even if it's not setup. In WooComerce 8.9 we will disable PayPal Standard for those stores
+ * to reduce the amount of new connections to the legacy gateway.
+ *
+ * Shows an admin notice to inform the store owner that PayPal Standard has been disabled and suggests installing PayPal Payments.
+ */
+function wc_update_890_update_paypal_standard_load_eligibility() {
+	$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
+
+	if ( ! $paypal ) {
+		return;
+	}
+
+	// If PayPal is enabled or set to load, but the store hasn't setup PayPal Standard live API keys and doesn't have any PayPal Orders, disable it.
+	if ( ( 'yes' === $paypal->enabled || 'yes' === $paypal->get_option( '_should_load' ) ) && ! $paypal->get_option( 'api_username' ) && ! $paypal->has_paypal_orders() ) {
+		$paypal->update_option( '_should_load', wc_bool_to_string( false ) );
+	}
 }

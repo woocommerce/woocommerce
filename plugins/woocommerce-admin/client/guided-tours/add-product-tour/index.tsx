@@ -195,7 +195,7 @@ const getTourConfig = ( {
 	 *
 	 * @filter experimental_woocommerce_admin_product_tour_steps
 	 * @param {Object} WooStep Array of Woo tour guide steps.
-	 * @param string tutorialType The type of tutorial to display.
+	 * @param          string  tutorialType The type of tutorial to display.
 	 */
 	const steps: TourKitTypes.WooStep[] = applyFilters(
 		'experimental_woocommerce_admin_product_tour_steps',
@@ -287,8 +287,8 @@ export const ProductTour = () => {
 				} );
 			}
 		},
-		onNextStepHandler: ( stepIndex ) => {
-			const stepName = tourConfig.steps[ stepIndex ].meta.name;
+		onNextStepHandler: ( newStepIndex ) => {
+			const stepName = tourConfig.steps[ newStepIndex - 1 ].meta.name;
 
 			// This records all "next" steps and ignores the final "publish" step.
 			recordEvent( 'walkthrough_product_step_completed', {
