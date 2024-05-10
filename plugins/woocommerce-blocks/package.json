@@ -320,7 +320,8 @@
 		"trim-html": "0.1.9",
 		"use-debounce": "9.0.4",
 		"usehooks-ts": "^2.9.1",
-		"wordpress-components": "npm:@wordpress/components@14.2.0"
+		"wordpress-components": "npm:@wordpress/components@14.2.0",
+		"wordpress-components-slotfill": "npm:@wordpress/components@wp-6.5"
 	},
 	"peerDependencies": {
 		"react": "^17.0.0",
