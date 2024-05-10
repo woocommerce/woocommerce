@@ -123,13 +123,13 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$address = array_intersect_key( $address, $field_schema );
 		$address = array_reduce(
 			array_keys( $address ),
-			function( $carry, $key ) use ( $address, $validation_util, $field_schema ) {
+			function ( $carry, $key ) use ( $address, $validation_util, $field_schema ) {
 				switch ( $key ) {
 					case 'country':
 						$carry[ $key ] = wc_strtoupper( sanitize_text_field( wp_unslash( $address[ $key ] ) ) );
 						break;
 					case 'state':
-						$carry[ $key ] = $validation_util->format_state( sanitize_text_field( wp_unslash( $address[ $key ] ) ), $address['country'] );
+						$carry[ $key ] = $validation_util->validate_state( $address['state'], $address['country'] ) ? $validation_util->format_state( sanitize_text_field( wp_unslash( $address[ $key ] ) ), $address['country'] ) : '';
 						break;
 					case 'postcode':
 						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
@@ -281,7 +281,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 
 		$address_fields = array_filter(
 			$fields,
-			function( $key ) use ( $additional_fields_keys ) {
+			function ( $key ) use ( $additional_fields_keys ) {
 				return in_array( $key, $additional_fields_keys, true );
 			},
 			ARRAY_FILTER_USE_KEY
@@ -298,7 +298,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 
 			if ( 'select' === $field['type'] ) {
 				$field_schema['enum'] = array_map(
-					function( $option ) {
+					function ( $option ) {
 						return $option['value'];
 					},
 					$field['options']
