@@ -129,6 +129,7 @@ async function fetchSearchResults(
 							title: product.title,
 							image: product.image,
 							type: product.type,
+							freemium_type: product.freemium_type,
 							description: product.excerpt,
 							vendorName: product.vendor_name,
 							vendorUrl: product.vendor_url,

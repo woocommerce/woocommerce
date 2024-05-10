@@ -72,6 +72,7 @@ export default function ProductListContent( props: {
 								title: product.title,
 								image: product.image,
 								type: product.type,
+								freemium_type: product.freemium_type,
 								icon: product.icon,
 								label: product.label,
 								primary_color: product.primary_color,

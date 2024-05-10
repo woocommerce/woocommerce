@@ -67,6 +67,30 @@ function ProductCardFooter( props: { product: Product } ) {
 	// We hardcode this for now while we only display prices in USD.
 	const currencySymbol = '$';
 
+	function getPriceLabel(): string {
+		if ( product.price === 0 ) {
+			return __( 'Free download', 'woocommerce' );
+		}
+
+		if ( product.freemium_type === 'primary' ) {
+			return __( 'Free plan available', 'woocommerce' );
+		}
+
+		return currencySymbol + product.price;
+	}
+
+	function getBillingText(): string {
+		if ( product.freemium_type === 'primary' ) {
+			return '';
+		}
+
+		if ( product.price !== 0 ) {
+			return __( ' annually', 'woocommerce' );
+		}
+
+		return '';
+	}
+
 	if ( shouldShowAddToStore( product ) ) {
 		return (
 			<>
@@ -83,17 +107,10 @@ function ProductCardFooter( props: { product: Product } ) {
 		<>
 			<div className="woocommerce-marketplace__product-card__price">
 				<span className="woocommerce-marketplace__product-card__price-label">
-					{
-						// '0' is a free product
-						product.price === 0
-							? __( 'Free download', 'woocommerce' )
-							: currencySymbol + product.price
-					}
+					{ getPriceLabel() }
 				</span>
 				<span className="woocommerce-marketplace__product-card__price-billing">
-					{ product.price === 0
-						? ''
-						: __( ' annually', 'woocommerce' ) }
+					{ getBillingText() }
 				</span>
 			</div>
 			<div className="woocommerce-marketplace__product-card__rating">

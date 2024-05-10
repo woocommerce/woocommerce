@@ -6,6 +6,7 @@ export type SearchAPIProductType = {
 	title: string;
 	image: string;
 	type: ProductType;
+	freemium_type: 'unset' | 'primary';
 	excerpt: string;
 	link: string;
 	demo_url: string;
@@ -29,6 +30,7 @@ export interface Product {
 	title: string;
 	image: string;
 	type: ProductType;
+	freemium_type?: 'unset' | 'primary';
 	description: string;
 	vendorName: string;
 	vendorUrl: string;
