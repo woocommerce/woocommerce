@@ -49,6 +49,8 @@ We have an alias to the 14.2.0 version of `@wordpress/components` called `wordpr
 
 We also have one other alias `wordpress-components-slotfill` which is used to import the `SlotFill` and `Fill` components from `@wordpress/components`. This alias **should not be used to import any other dependencies from `@wordpress/components`**. Note that it is tree-shaken so should only bundle the small amount of code directly needed to support slot fill functionality.
 
+If you need to build front-end components in future, you should use Ariakit to build them. See examples like the [Button](../../assets/js/base/components/button/index.tsx) component for how to build components using Ariakit.
+
 ## Aliases
 
 There are several aliases for internal imports which make importing files across the file tree easier. Instead of having to write a long relative path, they allow writing an alias:
