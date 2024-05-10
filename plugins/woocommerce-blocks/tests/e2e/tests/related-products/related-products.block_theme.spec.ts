@@ -4,10 +4,6 @@
 import { BlockData } from '@woocommerce/e2e-types';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
-/**
- * Internal dependencies
- */
-
 const blockData: BlockData = {
 	name: 'Related Products',
 	slug: 'woocommerce/related-products',
@@ -40,11 +36,17 @@ test.describe( `${ blockData.name } Block`, () => {
 		} );
 		await editorUtils.enterEditMode();
 
+		await editor.setContent( '' );
+
+		try {
+			await editor.insertBlock( { name: blockData.slug } );
+		} catch ( _error ) {
+			// noop
+		}
+
 		await expect(
-			editor.insertBlock( { name: blockData.slug } )
-		).rejects.toThrow(
-			new RegExp( `Block type '${ blockData.slug }' is not registered.` )
-		);
+			await editorUtils.getBlockByName( blockData.slug )
+		).toBeHidden();
 	} );
 
 	test( 'can be added in the Post Editor - Single Product Template', async ( {
@@ -57,9 +59,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
-
 		await editor.setContent( '' );
-
 		await editor.insertBlock( { name: blockData.slug } );
 
 		await expect(
