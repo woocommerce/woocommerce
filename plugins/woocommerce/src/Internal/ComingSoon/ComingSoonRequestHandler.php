@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\Internal\ComingSoon;
 use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
- * Handles the parse_request hook to determine whether the current page needs
+ * Handles the template_include hook to determine whether the current page needs
  * to be replaced with a comiing soon screen.
  */
 class ComingSoonRequestHandler {
@@ -73,10 +73,6 @@ class ComingSoonRequestHandler {
 
 		// A coming soon page needs to be displayed. Don't cache this response.
 		nocache_headers();
-
-		// Optimize search engine by returning 503 status code and set retry-after header to 12 hours.
-		status_header( 503 );
-		header( 'Retry-After: ' . 12 * HOUR_IN_SECONDS );
 
 		add_theme_support( 'block-templates' );
 		wp_dequeue_style( 'global-styles' );

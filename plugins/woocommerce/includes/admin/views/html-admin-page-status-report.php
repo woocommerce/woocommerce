@@ -30,6 +30,20 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 $active_plugins_count   = is_countable( $active_plugins ) ? count( $active_plugins ) : 0;
 $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_plugins ) : 0;
 
+// Include necessary WordPress file to use get_plugin_data()
+if ( ! function_exists( 'get_plugin_data' ) ) {
+    require_once ABSPATH . 'wp-admin/includes/plugin.php';
+}
+// Define the path to the main WooCommerce plugin file using the correct constant
+$plugin_path = WP_PLUGIN_DIR . '/woocommerce/woocommerce.php';
+// Initialize the WooCommerce version variable
+$wc_version = '';
+// Check if the plugin file exists before trying to access it
+if (file_exists($plugin_path)) {
+    $plugin_data = get_plugin_data($plugin_path);
+    $wc_version = $plugin_data["Version"] ?? ''; // Use null coalescing operator to handle undefined index
+}
+
 ?>
 <div class="updated woocommerce-message inline">
 	<p>
@@ -49,6 +63,9 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 			</button>
 			<button id="copy-for-support" class="button" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>">
 				<?php esc_html_e( 'Copy for support', 'woocommerce' ); ?>
+			</button>
+			<button id="copy-for-github" class="button" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>">
+				<?php esc_html_e( 'Copy for GitHub', 'woocommerce' ); ?>
 			</button>
 		</p>
 		<p class="copy-error hidden">
@@ -76,7 +93,8 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 		<tr>
 			<td data-export-label="WC Version"><?php esc_html_e( 'WooCommerce version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of WooCommerce installed on your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td><?php echo esc_html( $environment['version'] ); ?></td>
+			<td><?php echo esc_html( !empty($wc_version) ? $wc_version : $environment['version'] ); ?></td>
+
 		</tr>
 		<tr>
 			<td data-export-label="Legacy REST API Package Version"><?php esc_html_e( 'WooCommerce Legacy REST API package', 'woocommerce' ); ?>:</td>

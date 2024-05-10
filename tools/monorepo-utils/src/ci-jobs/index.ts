@@ -23,10 +23,23 @@ const program = new Command( 'ci-jobs' )
 		'Base ref to compare the current ref against for change detection. If not specified, all projects will be considered changed.',
 		''
 	)
+	.option(
+		'-e --event <event>',
+		'Github event for which to run the jobs. If not specified, all events will be considered.',
+		''
+	)
 	.action( async ( options ) => {
 		Logger.startTask( 'Parsing Project Graph', true );
 		const projectGraph = buildProjectGraph();
 		Logger.endTask( true );
+
+		if ( options.event === '' ) {
+			Logger.warn( 'No event was specified, considering all projects.' );
+		} else {
+			Logger.warn(
+				`Only projects configured for '${ options.event }' event will be considered.`
+			);
+		}
 
 		let fileChanges;
 		if ( options.baseRef === '' ) {
@@ -44,6 +57,7 @@ const program = new Command( 'ci-jobs' )
 		const jobs = await createJobsForChanges( projectGraph, fileChanges, {
 			commandVars: {
 				baseRef: options.baseRef,
+				event: options.event,
 			},
 		} );
 		Logger.endTask( true );
@@ -63,7 +77,10 @@ const program = new Command( 'ci-jobs' )
 		if ( jobs.lint.length > 0 ) {
 			Logger.notice( 'Lint Jobs' );
 			for ( const job of jobs.lint ) {
-				Logger.notice( `-  ${ job.projectName } - ${ job.command }` );
+				const optional = job.optional ? '(optional)' : '';
+				Logger.notice(
+					`-  ${ job.projectName } - ${ job.command }${ optional }`
+				);
 			}
 		} else {
 			Logger.notice( 'No lint jobs to run.' );
@@ -73,7 +90,10 @@ const program = new Command( 'ci-jobs' )
 			if ( jobs[ `${ type }Test` ].length > 0 ) {
 				Logger.notice( `${ type } test Jobs` );
 				for ( const job of jobs[ `${ type }Test` ] ) {
-					Logger.notice( `-  ${ job.projectName } - ${ job.name }` );
+					const optional = job.optional ? ' (optional)' : '';
+					Logger.notice(
+						`-  ${ job.projectName } - ${ job.name }${ optional }`
+					);
 				}
 			} else {
 				Logger.notice( `No ${ type } test jobs to run.` );
