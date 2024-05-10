@@ -588,8 +588,8 @@ class CustomOrdersTableController {
 					sprintf(
 						// translators: %s: number of pending orders.
 						_n(
-							"There's %s order pending sync. <b>Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!</b>",
-							'There are %s orders pending sync. <b>Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!</b>',
+							"There's %s order pending sync. <strong>Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!</strong>",
+							'There are %s orders pending sync. <strong>Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!</strong>',
 							$orders_pending_sync_count,
 							'woocommerce'
 						),
