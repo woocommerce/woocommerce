@@ -31,6 +31,8 @@ class CustomOrdersTableController {
 
 	private const SYNC_QUERY_ARG = 'wc_hpos_sync_now';
 
+	private const STOP_SYNC_QUERY_ARG = 'wc_hpos_stop_sync';
+
 	/**
 	 * The name of the option for enabling the usage of the custom orders tables
 	 */
@@ -419,17 +421,30 @@ class CustomOrdersTableController {
 			return;
 		}
 
-		if ( ! filter_input( INPUT_GET, self::SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
+		if ( filter_input( INPUT_GET, self::SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
+			$action = 'sync-now';
+		} elseif ( filter_input( INPUT_GET, self::STOP_SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
+			$action = 'stop-sync';
+		} else {
 			return;
 		}
 
-		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'hpos-sync-now' ) ) {
-			WC_Admin_Settings::add_error( esc_html__( 'Unable to start synchronization. The link you followed may have expired.', 'woocommerce' ) );
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), "hpos-{$action}" ) ) {
+			WC_Admin_Settings::add_error(
+				'sync-now' === $action ?
+					esc_html__( 'Unable to start synchronization. The link you followed may have expired.', 'woocommerce' )
+					: esc_html__( 'Unable to stop synchronization. The link you followed may have expired.', 'woocommerce' )
+			);
 			return;
 		}
 
 		$this->data_cleanup->toggle_flag( false );
-		$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
+
+		if ( 'sync-now' === $action ) {
+			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
+		} else {
+			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );
+		}
 	}
 
 	/**
@@ -441,6 +456,7 @@ class CustomOrdersTableController {
 	 */
 	private function register_removable_query_arg( $query_args ) {
 		$query_args[] = self::SYNC_QUERY_ARG;
+		$query_args[] = self::STOP_SYNC_QUERY_ARG;
 
 		return $query_args;
 	}
@@ -608,6 +624,24 @@ class CustomOrdersTableController {
 					__( 'Currently syncing orders... %s pending', 'woocommerce' ),
 					number_format_i18n( $orders_pending_sync_count )
 				);
+
+				if ( ! $sync_enabled ) {
+					$stop_sync_url = wp_nonce_url(
+						add_query_arg(
+							array(
+								self::STOP_SYNC_QUERY_ARG => true,
+							),
+							wc_get_container()->get( FeaturesController::class )->get_features_page_url()
+						),
+						'hpos-stop-sync'
+					);
+
+					$sync_message[] = sprintf(
+						'<a href="%1$s" class="button button-link">%2$s</a>',
+						esc_url( $stop_sync_url ),
+						__( 'Stop sync', 'woocommerce' )
+					);
+				}
 			} elseif ( $sync_is_pending ) {
 				$sync_now_url = wp_nonce_url(
 					add_query_arg(
