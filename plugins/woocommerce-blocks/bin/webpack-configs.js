@@ -38,9 +38,6 @@ let initialBundleAnalyzerPort = 8888;
 const getSharedPlugins = ( {
 	bundleAnalyzerReportTitle,
 	checkCircularDeps = true,
-	// Override Dependency Extraction Webpack Plugin handlers if needed.
-	requestToExternalFn = requestToExternal,
-	requestToHandleFn = requestToHandle,
 } ) =>
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
@@ -61,8 +58,8 @@ const getSharedPlugins = ( {
 			injectPolyfill: true,
 			combineAssets: ASSET_CHECK,
 			outputFormat: ASSET_CHECK ? 'json' : 'php',
-			requestToExternal: requestToExternalFn,
-			requestToHandle: requestToHandleFn,
+			requestToExternal,
+			requestToHandle,
 		} ),
 	].filter( Boolean );
 
@@ -349,7 +346,6 @@ const getFrontConfig = ( options = {} ) => {
 			},
 			uniqueName: 'webpackWcBlocksFrontendJsonp',
 			library: [ 'wc', '[name]' ],
-			libraryTarget: 'this',
 		},
 		module: {
 			rules: [
@@ -434,22 +430,6 @@ const getFrontConfig = ( options = {} ) => {
 		plugins: [
 			...getSharedPlugins( {
 				bundleAnalyzerReportTitle: 'Frontend',
-				requestToExternalFn: ( req ) => {
-					//  We don't want to use the WordPress bundled `@wordpress/components` in front-end.
-					if ( req === '@wordpress/components' ) {
-						return false;
-					}
-
-					return requestToExternal( req );
-				},
-				requestToHandleFn: ( req ) => {
-					//  We don't want to use the WordPress bundled `@wordpress/components` in front-end.
-					if ( req === '@wordpress/components' ) {
-						return false;
-					}
-
-					return requestToHandle( req );
-				},
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Frontend' ) ),
 		],
