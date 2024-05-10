@@ -79,6 +79,10 @@
 				min-height: 34px;
 			}
 
+			&.is-disabled {
+				border-color: $gray-600;
+			}
+
 			&.is-active {
 				z-index: 10;
 			}
