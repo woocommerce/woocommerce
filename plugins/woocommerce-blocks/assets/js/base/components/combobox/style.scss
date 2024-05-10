@@ -91,7 +91,7 @@
 			}
 
 			.components-form-token-field__suggestions-list-inner {
-				touch-action: none;
+				z-index: 9;
 			}
 
 			.components-form-token-field__suggestion {
