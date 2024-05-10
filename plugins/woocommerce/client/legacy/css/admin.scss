@@ -5133,6 +5133,10 @@ img.help_tip {
 
 			p.description {
 				margin-bottom: 8px;
+
+				&.is-error, span.is-error {
+					color: $red;
+				}
 			}
 
 			&:first-child {
