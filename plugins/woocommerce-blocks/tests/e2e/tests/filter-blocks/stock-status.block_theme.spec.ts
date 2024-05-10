@@ -128,9 +128,9 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 			await button.click();
 
-			await new Promise( ( resolve ) => setTimeout( resolve, 1000 ) );
-
 			const outOfStockCheckbox = page.getByText( 'Out of stock' );
+
+			await expect( outOfStockCheckbox ).toBeVisible();
 
 			await expect( outOfStockCheckbox ).not.toBeChecked();
 		} );
@@ -224,13 +224,15 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 			await button.click();
 
-			await new Promise( ( resolve ) => setTimeout( resolve, 1000 ) );
+			const placeholder = page.locator(
+				'.wc-interactivity-dropdown__placeholder'
+			);
 
-			const placeholder = await page
-				.locator( '.wc-interactivity-dropdown__placeholder' )
-				.textContent();
+			await expect( placeholder ).toBeVisible();
 
-			expect( placeholder ).toEqual( 'Select stock statuses' );
+			const placeholderText = await placeholder.textContent();
+
+			expect( placeholderText ).toEqual( 'Select stock statuses' );
 		} );
 	} );
 } );

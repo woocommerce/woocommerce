@@ -133,11 +133,12 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 			await button.click();
 
-			await new Promise( ( resolve ) => setTimeout( resolve, 1000 ) );
+			await page.waitForURL( defaultBlockPost.link );
 
 			const defaultRangePrice = await page
 				.locator( '.wp-block-woocommerce-product-filter-price' )
 				.getAttribute( 'data-wc-context' );
+
 			const defaultMinRange = JSON.parse( defaultRangePrice ).minRange;
 			const defaultMaxRange = JSON.parse( defaultRangePrice ).maxRange;
 			const defaultMinPrice = JSON.parse( defaultRangePrice ).minPrice;

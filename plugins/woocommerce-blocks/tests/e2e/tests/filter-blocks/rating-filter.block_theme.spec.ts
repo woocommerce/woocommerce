@@ -73,12 +73,11 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 
 			await button.click();
 
-			await new Promise( ( resolve ) => setTimeout( resolve, 1000 ) );
-
 			const ratingCheckbox = page.getByLabel(
 				/Checkbox: Rated 1 out of 5/
 			);
 
+			await expect( ratingCheckbox ).toBeVisible();
 			await expect( ratingCheckbox ).not.toBeChecked();
 		} );
 
