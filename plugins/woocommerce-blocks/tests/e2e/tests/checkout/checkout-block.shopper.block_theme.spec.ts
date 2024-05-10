@@ -249,11 +249,13 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
-		await editor.openDocumentSettingsSidebar();
+
 		await editor.selectBlocks(
 			blockSelectorInEditor +
 				'  [data-type="woocommerce/checkout-shipping-address-block"]'
 		);
+
+		await editor.openDocumentSettingsSidebar();
 
 		const checkbox = page.getByRole( 'checkbox', {
 			name: 'Company',
