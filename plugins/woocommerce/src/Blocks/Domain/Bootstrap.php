@@ -384,10 +384,8 @@ class Bootstrap {
 				);
 			}
 		);
-//        var_dump(BlockPatterns::class);
-//        var_dump(AIPatterns::class);   die();
 		$this->container->register(
-            AIPatterns::class,
+			AIPatterns::class,
 			function () {
 				return new AIPatterns();
 			}

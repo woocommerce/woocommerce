@@ -8,7 +8,7 @@ use WP_Error;
 /**
  * Unit tests for the Patterns Toolkit class.
  */
-class PatternsToolkitClientTest extends \WP_UnitTestCase {
+class PTKClientTest extends \WP_UnitTestCase {
 	/**
 	 * The client instance.
 	 *
