@@ -121,6 +121,19 @@ test.describe( 'Refunds API tests', () => {
 		expect( responseJSON.id ).toEqual( expectedRefund.id );
 	} );
 
+	test( 'can retrieve refund info from refund endpoint', async ( {
+		request,
+	} ) => {
+		// call API to retrieve the refund from the order
+		const response = await request.get( `/wp-json/wc/v3/refunds/` );
+		const responseJSON = await response.json();
+		expect( response.status() ).toEqual( 200 );
+		expect( responseJSON ).toHaveLength( 1 );
+		expect( responseJSON[ 0 ].id ).toEqual( expectedRefund.id );
+		expect( responseJSON[ 0 ].reason ).toEqual( expectedRefund.reason );
+		expect( responseJSON[ 0 ].amount ).toEqual( expectedRefund.amount );
+	} );
+
 	test( 'can list all refunds', async ( { request } ) => {
 		// call API to retrieve all the refunds
 		const response = await request.get(
