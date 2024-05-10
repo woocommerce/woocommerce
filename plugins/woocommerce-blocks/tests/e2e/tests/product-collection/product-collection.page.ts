@@ -289,7 +289,7 @@ class ProductCollectionPage {
 			name: 'Order by',
 		} );
 		await orderByComboBox.selectOption( orderBy );
-		await this.page.locator( SELECTORS.product ).waitFor();
+		await this.page.locator( SELECTORS.product ).first().waitFor();
 		await this.refreshLocators( 'editor' );
 	}
 
