@@ -183,6 +183,13 @@ class BlockPatterns {
 		);
 
 		if ( is_wp_error( $patterns ) ) {
+			wc_get_logger()->warning(
+				sprintf(
+					// translators: %s is a generated error message.
+					__( 'Failed to get the patterns from the PTK: "%s"', 'woocommerce' ),
+					$patterns->get_error_message()
+				),
+			);
 			return;
 		}
 

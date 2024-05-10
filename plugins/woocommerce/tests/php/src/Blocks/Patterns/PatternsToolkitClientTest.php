@@ -38,7 +38,7 @@ class PatternsToolkitClientTest extends \WP_UnitTestCase {
 		);
 
 		$response = $this->client->fetch_patterns();
-		$this->assertErrorResponse( $response );
+		$this->assertErrorResponse( $response, 'Failed to connect with the Patterns Toolkit API: try again later.' );
 
 		remove_filter( 'pre_http_request', array( $this, 'return_wp_error' ) );
 	}
@@ -60,7 +60,7 @@ class PatternsToolkitClientTest extends \WP_UnitTestCase {
 		);
 
 		$response = $this->client->fetch_patterns();
-		$this->assertErrorResponse( $response );
+		$this->assertErrorResponse( $response, 'Failed to connect with the Patterns Toolkit API: try again later.' );
 
 		remove_filter( 'pre_http_request', array( $this, 'return_request_failed' ) );
 	}
@@ -82,7 +82,7 @@ class PatternsToolkitClientTest extends \WP_UnitTestCase {
 		);
 
 		$response = $this->client->fetch_patterns();
-		$this->assertErrorResponse( $response );
+		$this->assertErrorResponse( $response, 'Empty response received from the Patterns Toolkit API.' );
 
 		remove_filter( 'pre_http_request', array( $this, 'return_request_failed' ) );
 	}
@@ -104,7 +104,7 @@ class PatternsToolkitClientTest extends \WP_UnitTestCase {
 		);
 
 		$response = $this->client->fetch_patterns( array( 'categories' => array( 'pepe' ) ) );
-		$this->assertErrorResponse( $response );
+		$this->assertErrorResponse( $response, 'Wrong response received from the Patterns Toolkit API: try again later.' );
 
 		remove_filter( 'pre_http_request', array( $this, 'return_request_failed' ) );
 	}
@@ -125,11 +125,11 @@ class PatternsToolkitClientTest extends \WP_UnitTestCase {
                             "name": "review-a-quote-with-scattered-images",
                             "html": "<!-- /wp:spacer -->",
                             "categories": {
-                              "testimonials": {
-                                "slug": "testimonials",
-                                "title": "Testimonials",
-                                "description": "Share reviews and feedback about your brand/business."
-                              }
+                                "testimonials": {
+                                    "slug": "testimonials",
+                                    "title": "Testimonials",
+                                    "description": "Share reviews and feedback about your brand/business."
+                                }
                             }
                         }
                     ]',
@@ -151,15 +151,16 @@ class PatternsToolkitClientTest extends \WP_UnitTestCase {
 	 * Asserts that the response is an error with the expected error code and message.
 	 *
 	 * @param array|WP_Error $response The response to assert.
+	 * @param string         $expected_error_message The expected error message.
 	 * @return void
 	 */
-	public function assertErrorResponse( $response ) {
+	public function assertErrorResponse( $response, $expected_error_message ) {
 		$this->assertInstanceOf( WP_Error::class, $response );
 
 		$error_code = $response->get_error_code();
 		$this->assertEquals( 'patterns_toolkit_api_error', $error_code );
 
 		$error_message = $response->get_error_message();
-		$this->assertEquals( 'Failed to connect with the Patterns Toolkit API: try again later.', $error_message );
+		$this->assertEquals( $expected_error_message, $error_message );
 	}
 }

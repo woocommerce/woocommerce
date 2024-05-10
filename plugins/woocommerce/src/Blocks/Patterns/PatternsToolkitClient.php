@@ -45,7 +45,7 @@ class PatternsToolkitClient {
 		if ( empty( $body ) ) {
 			return new WP_Error(
 				'patterns_toolkit_api_error',
-				__( 'Failed to connect with the Patterns Toolkit API: try again later.', 'woocommerce' )
+				__( 'Empty response received from the Patterns Toolkit API.', 'woocommerce' )
 			);
 		}
 
@@ -54,7 +54,7 @@ class PatternsToolkitClient {
 		if ( ! is_array( $decoded_body ) ) {
 			return new WP_Error(
 				'patterns_toolkit_api_error',
-				__( 'Failed to connect with the Patterns Toolkit API: try again later.', 'woocommerce' )
+				__( 'Wrong response received from the Patterns Toolkit API: try again later.', 'woocommerce' )
 			);
 		}
 
