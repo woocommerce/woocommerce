@@ -104,6 +104,17 @@ class CheckoutFields {
 				'autocapitalize' => 'none',
 				'index'          => 0,
 			],
+			'country'    => [
+				'label'         => __( 'Country/Region', 'woocommerce' ),
+				'optionalLabel' => __(
+					'Country/Region (optional)',
+					'woocommerce'
+				),
+				'required'      => true,
+				'hidden'        => false,
+				'autocomplete'  => 'country',
+				'index'         => 1,
+			],
 			'first_name' => [
 				'label'          => __( 'First name', 'woocommerce' ),
 				'optionalLabel'  => __(
@@ -163,17 +174,6 @@ class CheckoutFields {
 				'autocomplete'   => 'address-line2',
 				'autocapitalize' => 'sentences',
 				'index'          => 50,
-			],
-			'country'    => [
-				'label'         => __( 'Country/Region', 'woocommerce' ),
-				'optionalLabel' => __(
-					'Country/Region (optional)',
-					'woocommerce'
-				),
-				'required'      => true,
-				'hidden'        => false,
-				'autocomplete'  => 'country',
-				'index'         => 50,
 			],
 			'city'       => [
 				'label'          => __( 'City', 'woocommerce' ),

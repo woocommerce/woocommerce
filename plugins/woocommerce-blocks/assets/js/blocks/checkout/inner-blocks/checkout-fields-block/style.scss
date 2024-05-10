@@ -25,11 +25,6 @@
 			.wc-block-components-select-input {
 				flex: 1 0 calc(50% - #{$gap-small}); // "flex-grow = 1" allows the input to grow to fill the space
 				box-sizing: border-box;
-
-				&:nth-of-type(2),
-				&:first-of-type {
-					margin-top: 0;
-				}
 			}
 
 			.wc-block-components-address-form__company,
