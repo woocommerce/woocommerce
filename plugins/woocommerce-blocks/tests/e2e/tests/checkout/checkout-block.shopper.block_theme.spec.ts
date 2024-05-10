@@ -527,29 +527,6 @@ test.describe( 'Billing Address Form', () => {
 		await editorUtils.saveSiteEditorEntities();
 	} );
 
-	const shippingTestData = {
-		firstname: 'John',
-		lastname: 'Doe',
-		addressfirstline: '123 Easy Street',
-		addresssecondline: 'Testville',
-		country: 'United States (US)',
-		city: 'New York',
-		state: 'New York',
-		postcode: '90210',
-		phone: '01234567890',
-	};
-	const billingTestData = {
-		first_name: '',
-		last_name: '',
-		address_1: '',
-		address_2: '',
-		country: 'United States (US)',
-		city: '',
-		state: 'New York',
-		postcode: '',
-		phone: '',
-	};
-
 	test.describe( 'Guest user', () => {
 		test.use( { storageState: guestFile } );
 
@@ -562,39 +539,81 @@ test.describe( 'Billing Address Form', () => {
 			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
 
-			await checkoutPageObject.fillShippingDetails( shippingTestData );
+			await checkoutPageObject.fillShippingDetails( {
+				firstname: 'John',
+				lastname: 'Doe',
+				addressfirstline: '123 Easy Street',
+				addresssecondline: 'Testville',
+				country: 'United States (US)',
+				city: 'New York',
+				state: 'New York',
+				postcode: '90210',
+				phone: '01234567890',
+			} );
+
+			const shippingForm = page.getByRole( 'group', {
+				name: 'Shipping address',
+			} );
+
 			await page.getByLabel( 'Use same address for billing' ).uncheck();
 
-			const shippingLocatorsMapping = {
-				firstname: '#shipping-first_name',
-				lastname: '#shipping-last_name',
-				addressfirstline: '#shipping-address_1',
-				addresssecondline: '#shipping-address_2',
-				country: '#shipping-country input',
-				state: '#shipping-state input',
-			} as Record< string, string >;
+			await expect( shippingForm.getByLabel( 'First name' ) ).toHaveValue(
+				'John'
+			);
+			await expect( shippingForm.getByLabel( 'Last name' ) ).toHaveValue(
+				'Doe'
+			);
+			await expect(
+				shippingForm.getByLabel( 'Address', { exact: true } )
+			).toHaveValue( '123 Easy Street' );
+			await expect(
+				shippingForm.getByLabel( 'Apartment, suite, etc. (' )
+			).toHaveValue( 'Testville' );
+			await expect(
+				shippingForm.getByLabel( 'United States (US), Country/' )
+			).toHaveValue( 'United States (US)' );
+			await expect( shippingForm.getByLabel( 'City' ) ).toHaveValue(
+				'New York'
+			);
+			await expect(
+				shippingForm.getByLabel( 'New York, State' )
+			).toHaveValue( 'New York' );
+			await expect( shippingForm.getByLabel( 'ZIP Code' ) ).toHaveValue(
+				'90210'
+			);
+			await expect(
+				shippingForm.getByLabel( 'Phone (optional)' )
+			).toHaveValue( '01234567890' );
 
-			// Check shipping fields are filled.
-			for ( const [ key, value ] of Object.entries( shippingTestData ) ) {
-				await expect(
-					page.locator(
-						shippingLocatorsMapping[ key ] || `#shipping-${ key }`
-					)
-				).toHaveValue( value );
-			}
+			const billingForm = page.getByRole( 'group', {
+				name: 'Billing address',
+			} );
 
-			const billingLocatorsMapping = {
-				country: '#billing-country input',
-				state: '#billing-state input',
-			} as Record< string, string >;
-
-			// Check billing fields are empty.
-			for ( const [ key, value ] of Object.entries( billingTestData ) ) {
-				expect( billingLocatorsMapping[ key ] ).toBeDefined();
-				await expect(
-					page.locator( billingLocatorsMapping[ key ] )
-				).toHaveValue( value );
-			}
+			await expect( billingForm.getByLabel( 'First name' ) ).toHaveValue(
+				''
+			);
+			await expect( billingForm.getByLabel( 'Last name' ) ).toHaveValue(
+				''
+			);
+			await expect(
+				billingForm.getByLabel( 'Address', { exact: true } )
+			).toHaveValue( '' );
+			await expect(
+				billingForm.getByLabel( 'Apartment, suite, etc. (' )
+			).toHaveValue( '' );
+			await expect(
+				billingForm.getByLabel( 'United States (US), Country/' )
+			).toHaveValue( 'United States (US)' );
+			await expect( billingForm.getByLabel( 'City' ) ).toHaveValue( '' );
+			await expect(
+				billingForm.getByLabel( 'New York, State' )
+			).toHaveValue( 'New York' );
+			await expect( billingForm.getByLabel( 'ZIP Code' ) ).toHaveValue(
+				''
+			);
+			await expect(
+				billingForm.getByLabel( 'Phone (optional)' )
+			).toHaveValue( '' );
 		} );
 	} );
 } );
