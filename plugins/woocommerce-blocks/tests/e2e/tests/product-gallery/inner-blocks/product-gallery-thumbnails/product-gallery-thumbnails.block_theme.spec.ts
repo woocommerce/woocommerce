@@ -413,17 +413,17 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'Ensure entered Number of Thumbnails rounds to integer', async ( {
 			page,
 			editor,
-			pageObject,
 		} ) => {
 			await editor.insertBlock( {
 				name: 'woocommerce/product-gallery',
 			} );
 
-			const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
-				page: 'editor',
-			} );
+			await editor.selectBlocks(
+				'[data-type="woocommerce/product-gallery"]'
+			);
 
 			await editor.openDocumentSettingsSidebar();
+
 			const numberOfThumbnailInput = page.getByRole( 'spinbutton', {
 				name: 'Number of Thumbnails',
 			} );
@@ -434,7 +434,7 @@ test.describe( `${ blockData.name }`, () => {
 				'4.2'
 			);
 
-			let numberOfThumbnailsOnScreen = thumbnailsBlock.locator(
+			const numberOfThumbnailsOnScreen = editor.canvas.locator(
 				'.wc-block-product-gallery-thumbnails__thumbnail'
 			);
 
@@ -444,10 +444,6 @@ test.describe( `${ blockData.name }`, () => {
 				page,
 				numberOfThumbnailInput,
 				'4.7'
-			);
-
-			numberOfThumbnailsOnScreen = thumbnailsBlock.locator(
-				'.wc-block-product-gallery-thumbnails__thumbnail'
 			);
 
 			await expect( numberOfThumbnailsOnScreen ).toHaveCount( 5 );
