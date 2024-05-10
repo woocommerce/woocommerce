@@ -38,7 +38,6 @@ use Automattic\WooCommerce\Blocks\Patterns\PatternsToolkitClient;
  */
 class BlockPatterns {
 	const PATTERNS_AI_DATA_POST_TYPE = 'patterns_ai_data';
-	const EXCLUDED_PATTERNS          = array( '13923', '14781', '14779', '13666', '13664', '13660', '13588' );
 
 	/**
 	 * Path to the patterns' directory.
@@ -46,13 +45,6 @@ class BlockPatterns {
 	 * @var string $patterns_path
 	 */
 	private $patterns_path;
-
-	/**
-	 * PatternsToolkit instance.
-	 *
-	 * @var PatternsToolkitClient $patterns_toolkit
-	 */
-	private $patterns_toolkit;
 
 	/**
 	 * PatternRegistry instance.
@@ -64,13 +56,11 @@ class BlockPatterns {
 	/**
 	 * Constructor for class
 	 *
-	 * @param Package               $package An instance of Package.
-	 * @param PatternsToolkitClient $patterns_toolkit An instance of PatternsToolkit.
-	 * @param PatternRegistry       $pattern_registry An instance of PatternRegistry.
+	 * @param Package         $package An instance of Package.
+	 * @param PatternRegistry $pattern_registry An instance of PatternRegistry.
 	 */
-	public function __construct( Package $package, PatternsToolkitClient $patterns_toolkit, PatternRegistry $pattern_registry ) {
+	public function __construct( Package $package, PatternRegistry $pattern_registry ) {
 		$this->patterns_path    = $package->get_path( 'patterns' );
-		$this->patterns_toolkit = $patterns_toolkit;
 		$this->pattern_registry = $pattern_registry;
 
 		add_action( 'init', array( $this, 'register_block_patterns' ) );
@@ -147,8 +137,6 @@ class BlockPatterns {
 		$dictionary = PatternsHelper::get_patterns_dictionary();
 
 		$this->register_block_patterns_from_files( $default_headers, $dictionary );
-
-		$this->register_block_patterns_from_ptk( $dictionary );
 	}
 
 	/**
@@ -176,38 +164,7 @@ class BlockPatterns {
 		}
 	}
 
-	/**
-	 * Register block patterns from the Patterns Toolkit.
-	 *
-	 * @param array $dictionary The patterns' dictionary.
-	 *
-	 * @return void
-	 */
-	private function register_block_patterns_from_ptk( array $dictionary ) {
-		$patterns = $this->patterns_toolkit->fetch_patterns(
-			array(
-				'categories' => array( 'intro', 'about', 'services', 'testimonials' ),
-			)
-		);
 
-		if ( is_wp_error( $patterns ) ) {
-			wc_get_logger()->warning(
-				sprintf(
-					// translators: %s is a generated error message.
-					__( 'Failed to get the patterns from the PTK: "%s"', 'woocommerce' ),
-					$patterns->get_error_message()
-				),
-			);
-			return;
-		}
-
-		foreach ( $this->filter_patterns( $patterns, self::EXCLUDED_PATTERNS ) as $pattern ) {
-			$pattern['slug']    = $pattern['name'];
-			$pattern['content'] = $pattern['html'];
-
-			$this->pattern_registry->register_block_pattern( $pattern['ID'], $pattern, $dictionary );
-		}
-	}
 
 	/**
 	 * Update the patterns content when the store description is changed.
@@ -318,25 +275,5 @@ class BlockPatterns {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Filter patterns to only include those with the given IDs.
-	 *
-	 * @param array $patterns The patterns to filter.
-	 * @param array $pattern_ids The pattern IDs to exclude.
-	 * @return array
-	 */
-	private function filter_patterns( array $patterns, array $pattern_ids ) {
-		return array_filter(
-			$patterns,
-			function ( $pattern ) use ( $pattern_ids ) {
-				if ( 'wp_block' !== $pattern['post_type'] ) {
-					return false;
-				}
-
-				return ! in_array( (string) $pattern['ID'], $pattern_ids, true );
-			}
-		);
 	}
 }

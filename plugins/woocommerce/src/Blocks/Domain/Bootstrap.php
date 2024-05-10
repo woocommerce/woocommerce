@@ -380,7 +380,6 @@ class Bootstrap {
 			function () {
 				return new BlockPatterns(
                     $this->package,
-                    new PatternsToolkitClient(),
                     new PatternRegistry()
                 );
 			}
