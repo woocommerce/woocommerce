@@ -25,8 +25,8 @@ class DataSynchronizer implements BatchProcessorInterface {
 
 	use AccessiblePrivateMethods;
 
-	public const ORDERS_DATA_SYNC_ENABLED_OPTION           = 'woocommerce_custom_orders_table_data_sync_enabled';
-	public const PLACEHOLDER_ORDER_POST_TYPE               = 'shop_order_placehold';
+	public const ORDERS_DATA_SYNC_ENABLED_OPTION = 'woocommerce_custom_orders_table_data_sync_enabled';
+	public const PLACEHOLDER_ORDER_POST_TYPE     = 'shop_order_placehold';
 
 	public const DELETED_RECORD_META_KEY        = '_deleted_from';
 	public const DELETED_FROM_POSTS_META_VALUE  = 'posts_table';
@@ -1049,5 +1049,4 @@ ORDER BY orders.id ASC
 			$order->delete( true );
 		}
 	}
-
 }

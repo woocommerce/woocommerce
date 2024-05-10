@@ -805,7 +805,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$description = $value['desc'];
 			}
 
-			$error_class = ( ! empty ($value['description_is_error'] ) ) ? 'is-error' : '';
+			$error_class = ( ! empty( $value['description_is_error'] ) ) ? 'is-error' : '';
 
 			if ( $description && in_array( $value['type'], array( 'textarea', 'radio' ), true ) ) {
 				$description = '<p style="margin-top:0">' . wp_kses_post( $description ) . '</p>';
