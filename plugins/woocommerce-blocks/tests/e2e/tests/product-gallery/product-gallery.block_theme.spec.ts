@@ -83,12 +83,20 @@ const getThumbnailImageIdByNth = async (
 };
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editorUtils } ) => {
-		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//${ blockData.slug }`,
-			postType: 'wp_template',
+	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
+		const template = await requestUtils.createTemplate( 'wp_template', {
+			slug: blockData.slug,
+			title: 'Custom Single Product',
+			content: 'placeholder',
 		} );
-		await editorUtils.enterEditMode();
+
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+
+		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
 	} );
 
 	test.describe( 'with thumbnails', () => {
