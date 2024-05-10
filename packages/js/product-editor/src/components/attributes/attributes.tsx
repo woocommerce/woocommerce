@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, useEffect } from '@wordpress/element';
 import { ProductProductAttribute } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
@@ -23,11 +23,17 @@ export const Attributes: React.FC< AttributesProps > = ( {
 	onChange,
 	productId,
 } ) => {
-	const { attributes, handleChange } = useProductAttributes( {
-		allAttributes: value,
-		onChange,
-		productId,
-	} );
+	const { attributes, fetchAttributes, handleChange } = useProductAttributes(
+		{
+			allAttributes: value,
+			onChange,
+			productId,
+		}
+	);
+
+	useEffect( () => {
+		fetchAttributes();
+	}, [ value ] );
 
 	return (
 		<AttributeControl
