@@ -252,7 +252,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get SKU (Stock-keeping unit) - product unique ID.
+	 * Get SKU (Stock-keeping unit).
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return string
@@ -262,8 +262,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * TODO
+	 * Get Unique ID.
 	 *
+	 * @since 9.0.0
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
@@ -849,8 +850,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set unique_id
 	 *
-	 * @since TODO
-	 * @param string $unique_id unique_id
+	 * @since 9.0.0
+	 * @param string $unique_id Unique ID.
 	 */
 	public function set_unique_id( $unique_id ) {
 		$this->set_prop( 'unique_id', $unique_id );
