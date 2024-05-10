@@ -456,7 +456,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 		global $wpdb;
 
 		if ( $use_cache ) {
-			$pending_count = wp_cache_get( 'woocommerce_hpos_pending_sync_count' );
+			$pending_count = wp_cache_get( 'woocommerce_hpos_pending_sync_count', 'counts' );
 			if ( false !== $pending_count ) {
 				return (int) $pending_count;
 			}
@@ -548,7 +548,7 @@ SELECT(
 		);
 		$pending_count += $deleted_count;
 
-		wp_cache_set( 'woocommerce_hpos_pending_sync_count', $pending_count );
+		wp_cache_set( 'woocommerce_hpos_pending_sync_count', $pending_count, 'counts' );
 		return $pending_count;
 	}
 
