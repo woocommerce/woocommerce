@@ -582,7 +582,7 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Enqueue scripts for connect notice.
+	 * Enqueue scripts for connect notice in WooCommerce settings page.
 	 *
 	 * @return void
 	 */
@@ -601,6 +601,11 @@ class PluginsHelper {
 		wp_enqueue_script( 'woo-connect-notice' );
 	}
 
+	/**
+	 * Enqueue scripts for connect notice in plugin list page.
+	 *
+	 * @return void
+	 */
 	public static function maybe_enqueue_scripts_for_connect_notice_in_plugins() {
 		if ( 'plugins' !== get_current_screen()->id ) {
 			return;
