@@ -91,11 +91,11 @@ export const LaunchYourStoreStatus = ( {
 								{ isComingSoon &&
 									getSetting( 'currentThemeIsFSETheme' ) && (
 										<MenuItem
-                                        	onClick={ () => {
-											    recordEvent(
-												    'launch_your_store_badge_menu_customize_coming_soon_click'
-											    );
-									    	} }
+											onClick={ () => {
+												recordEvent(
+													'launch_your_store_badge_menu_customize_coming_soon_click'
+												);
+											} }
 											// @ts-expect-error Prop gets passed down to underlying button https://developer.wordpress.org/block-editor/reference-guides/components/menu-item/#props
 											href={
 												COMING_SOON_PAGE_EDITOR_LINK
