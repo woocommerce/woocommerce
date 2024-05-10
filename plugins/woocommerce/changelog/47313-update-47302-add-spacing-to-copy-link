@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Added `padding-left: 15px` to the copy link to provide equal spacing around the button
