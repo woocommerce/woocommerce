@@ -180,7 +180,7 @@
 		"@wordpress/block-editor": "8.2.0",
 		"@wordpress/blocks": "11.1.5",
 		"@wordpress/browserslist-config": "5.21.0",
-		"@wordpress/components": "27.4.0",
+		"@wordpress/components": "19.17.0",
 		"@wordpress/core-data": "5.5.0",
 		"@wordpress/data": "6.15.0",
 		"@wordpress/data-controls": "2.2.7",
