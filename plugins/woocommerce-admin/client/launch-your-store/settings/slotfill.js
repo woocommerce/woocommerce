@@ -34,25 +34,20 @@ import {
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
 const SiteVisibility = () => {
-	const shareKey =
-		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_share_key;
+	const setting = window?.wcSettings?.admin?.siteVisibilitySettings || {};
+	const shareKey = setting?.woocommerce_share_key;
 
 	const [ comingSoon, setComingSoon ] = useState(
-		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_coming_soon || 'no'
+		setting?.woocommerce_coming_soon || 'no'
 	);
 	const [ storePagesOnly, setStorePagesOnly ] = useState(
-		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_store_pages_only || 'no'
+		setting?.woocommerce_store_pages_only || 'no'
 	);
 	const [ privateLink, setPrivateLink ] = useState(
-		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_private_link || 'no'
+		setting?.woocommerce_private_link || 'no'
 	);
 
 	useEffect( () => {
-		const setting = window?.wcSettings?.admin?.siteVisibilitySettings || {};
 		const initValues = {
 			comingSoon: setting.woocommerce_coming_soon,
 			storePagesOnly: setting.woocommerce_store_pages_only,
