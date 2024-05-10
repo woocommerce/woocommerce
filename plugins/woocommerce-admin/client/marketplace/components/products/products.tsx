@@ -55,7 +55,7 @@ const LABELS = {
 
 export default function Products( props: ProductsProps ) {
 	const marketplaceContextValue = useContext( MarketplaceContext );
-	const { isLoading } = marketplaceContextValue;
+	const { isLoading, selectedTab } = marketplaceContextValue;
 	const label = LABELS[ props.type ].label;
 	const singularLabel = LABELS[ props.type ].singularLabel;
 	const query = useQuery();
@@ -64,6 +64,7 @@ export default function Products( props: ProductsProps ) {
 	interface Theme {
 		stylesheet?: string;
 	}
+	const tab = selectedTab;
 
 	const currentTheme = useSelect( ( select ) => {
 		return select( 'core' ).getCurrentTheme() as Theme;
@@ -169,9 +170,11 @@ export default function Products( props: ProductsProps ) {
 	return (
 		<div className={ containerClassName }>
 			<PluginInstallNotice />
-			<h2 className={ productListTitleClassName }>
-				{ isLoading ? ' ' : title }
-			</h2>
+			{ tab !== 'business-services' && (
+				<h2 className={ productListTitleClassName }>
+					{ isLoading ? ' ' : title }
+				</h2>
+			) }
 			<div className="woocommerce-marketplace__sub-header">
 				{ props.categorySelector && (
 					<CategorySelector type={ props.type } />
