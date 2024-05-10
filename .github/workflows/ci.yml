@@ -120,14 +120,14 @@ jobs:
               id: get_commit_message
               run: |
                   if [[ "${{ github.event_name }}" == "push" ]]; then
-                    echo "Commit message is ${{ github.event.head_commit.message }}"
-                    echo "COMMIT_MESSAGE=${{ github.event.head_commit.message }}" >> "$GITHUB_OUTPUT"
+                    COMMIT_MESSAGE=`echo "${{ github.event.head_commit.message }}" | head -1`
                   elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                    echo "Commit message is ${{ github.event.pull_request.title }}"
-                    echo "COMMIT_MESSAGE=${{ github.event.pull_request.title }}" >> "$GITHUB_OUTPUT"
+                    COMMIT_MESSAGE="${{ github.event.pull_request.title }}"
                   else
-                    echo "Workflow triggered by other event"
+                    COMMIT_MESSAGE="${{ github.event_name }}"
                   fi
+                
+                  echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
               shell: bash
 
             - name: 'Prepare Test Environment'
@@ -174,14 +174,14 @@ jobs:
               id: get_commit_message
               run: |
                   if [[ "${{ github.event_name }}" == "push" ]]; then
-                    echo "Commit message is ${{ github.event.head_commit.message }}"
-                    echo "COMMIT_MESSAGE=${{ github.event.head_commit.message }}" >> "$GITHUB_OUTPUT"
+                    COMMIT_MESSAGE=`echo "${{ github.event.head_commit.message }}" | head -1`
                   elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                    echo "Commit message is ${{ github.event.pull_request.title }}"
-                    echo "COMMIT_MESSAGE=${{ github.event.pull_request.title }}" >> "$GITHUB_OUTPUT"
+                    COMMIT_MESSAGE="${{ github.event.pull_request.title }}"
                   else
-                    echo "Workflow triggered by other event"
+                    COMMIT_MESSAGE="${{ github.event_name }}"
                   fi
+                
+                  echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
               shell: bash
 
             - name: 'Prepare Test Environment'
