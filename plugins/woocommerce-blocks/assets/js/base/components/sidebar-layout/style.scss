@@ -48,6 +48,10 @@
 
 .is-large {
 	.wc-block-components-sidebar {
+		position: sticky;
+		top: $gap-largest;
+		align-self: flex-start;
+
 		.wc-block-components-totals-item,
 		.wc-block-components-panel,
 		.wc-block-components-totals-coupon {
