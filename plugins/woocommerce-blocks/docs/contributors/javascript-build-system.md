@@ -43,11 +43,11 @@ In practice, that means the dependency version is:
 
 [`@wordpress/dependency-extraction-webpack-plugin`](https://developer.wordpress.org/block-editor/packages/packages-dependency-extraction-webpack-plugin/) script is applied to each of the build processes: Core, Main, Frontend, Payments, Extensions.
 
-### `wordpress-components` alias
+### `wordpress-components` and `wordpress-components-slotfill` alias
 
-`@wordpress/components` is one of the dependencies that gets externalized by the plugin. You can see the external `components.min.js` file being loaded on the Editor pages containing blocks that depend on the `@wordpress/components`, while the code is not bundled within WooCommerce Blocks files.
+We have an alias to the 14.2.0 version of `@wordpress/components` called `wordpress-components`. This alias was used to import a limited set of components in front-end components. This alias is deprecated and **should no longer be used**. When the `FormTokenField` component is removed from the codebase, the alias will be removed as well.
 
-For optimization purposes, there's a `wordpress-components` alias created, which is used in the frontend code. Thanks to that, the dependency omits the Dependency Extraction Plugin and behaves like any other dependency: it's tree-shaken and only the necessary code is bundled with the block. That allows us to avoid loading the whole `@wordpress/components` on the frontend pages.
+We also have one other alias `wordpress-components-slotfill` which is used to import the `SlotFill` and `Fill` components from `@wordpress/components`. This alias **should not be used to import any other dependencies from `@wordpress/components`**. Note that it is tree-shaken so should only bundle the small amount of code directly needed to support slot fill functionality.
 
 ## Aliases
 
@@ -84,4 +84,3 @@ Webpack config is split between several files:
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/javascript-build-system.md)
 
 <!-- /FEEDBACK -->
-
