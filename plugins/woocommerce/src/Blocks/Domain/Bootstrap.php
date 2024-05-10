@@ -38,7 +38,7 @@ use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Domain\Services\OnboardingTasks\TasksController;
-use Automattic\WooCommerce\Blocks\Patterns\PatternsToolkitClient;
+use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 
 /**
  * Takes care of bootstrapping the plugin.

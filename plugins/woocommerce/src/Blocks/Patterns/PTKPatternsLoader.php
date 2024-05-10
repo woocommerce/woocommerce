@@ -11,7 +11,7 @@ class PTKPatternsLoader {
 	/**
 	 * PatternsToolkit instance.
 	 *
-	 * @var PatternsToolkitClient $ptk_client
+	 * @var PTKClient $ptk_client
 	 */
 	private $ptk_client;
 
@@ -25,7 +25,7 @@ class PTKPatternsLoader {
 	/**
 	 * Constructor for the class.
 	 *
-	 * @param PatternsToolkitClient $ptk_client An instance of PatternsToolkit.
+	 * @param PTKClient $ptk_client An instance of PatternsToolkit.
 	 * @param PatternRegistry       $pattern_registry An instance of PatternRegistry.
 	 */
 	public function __construct( $ptk_client, $pattern_registry ) {

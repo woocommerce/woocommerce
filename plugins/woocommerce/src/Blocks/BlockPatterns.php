@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 use Automattic\WooCommerce\Blocks\AIContent\UpdatePatterns;
 use Automattic\WooCommerce\Blocks\AIContent\UpdateProducts;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
-use Automattic\WooCommerce\Blocks\Patterns\PatternsToolkitClient;
+use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 
 /**
  * Registers patterns under the `./patterns/` directory and updates their content.

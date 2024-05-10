@@ -6,7 +6,7 @@ use WP_Error;
 /**
  * PatternsToolkit class.
  */
-class PatternsToolkitClient {
+class PTKClient {
 	/**
 	 *  The Patterns Toolkit API URL
 	 */

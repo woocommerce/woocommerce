@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\Patterns;
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsToolkitClient;
+use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 use WP_Error;
 
 /**
@@ -12,7 +12,7 @@ class PatternsToolkitClientTest extends \WP_UnitTestCase {
 	/**
 	 * The client instance.
 	 *
-	 * @var PatternsToolkitClient $client
+	 * @var PTKClient $client
 	 */
 	private $client;
 
@@ -23,7 +23,7 @@ class PatternsToolkitClientTest extends \WP_UnitTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
-		$this->client = new PatternsToolkitClient();
+		$this->client = new PTKClient();
 	}
 
 	/**
