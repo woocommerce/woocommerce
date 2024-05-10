@@ -122,9 +122,9 @@ jobs:
                   if [[ "${{ github.event_name }}" == "push" ]]; then
                     COMMIT_MESSAGE=`echo "${{ github.event.head_commit.message }}" | head -1`
                   elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                    COMMIT_MESSAGE=${{ github.event.pull_request.title }}
+                    COMMIT_MESSAGE="${{ github.event.pull_request.title }}"
                   else
-                    COMMIT_MESSAGE=${{ github.event_name }}
+                    COMMIT_MESSAGE="${{ github.event_name }}"
                   fi
                 
                   echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
@@ -176,9 +176,9 @@ jobs:
                   if [[ "${{ github.event_name }}" == "push" ]]; then
                     COMMIT_MESSAGE=`echo "${{ github.event.head_commit.message }}" | head -1`
                   elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                    COMMIT_MESSAGE=${{ github.event.pull_request.title }}
+                    COMMIT_MESSAGE="${{ github.event.pull_request.title }}"
                   else
-                    COMMIT_MESSAGE=${{ github.event_name }}
+                    COMMIT_MESSAGE="${{ github.event_name }}"
                   fi
                 
                   echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
