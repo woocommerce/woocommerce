@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Replace Options API usage with LaunchYourStore endpoint for LYS
