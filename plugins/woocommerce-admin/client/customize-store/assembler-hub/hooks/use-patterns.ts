@@ -7,25 +7,13 @@ import { useSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 import { useEffect, useMemo, useState } from '@wordpress/element';
-import { BlockInstance, parse } from '@wordpress/blocks';
+import { parse } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
 import { useLogoAttributes } from '../hooks/use-logo-attributes';
 import { setLogoWidth } from '../../utils';
-
-export type Pattern = {
-	blockTypes: string[];
-	categories: string[];
-	content: string;
-	name: string;
-	source: string;
-	title: string;
-};
-
-export type PatternWithBlocks = Pattern & {
-	blocks: BlockInstance[];
-};
+import { Pattern } from '~/customize-store/types/pattern';
 
 export const usePatterns = () => {
 	const { blockPatterns, isLoading } = useSelect(

@@ -9,8 +9,9 @@ import { parse } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { usePatterns, Pattern, PatternWithBlocks } from './use-patterns';
+import { usePatterns } from './use-patterns';
 import { HOMEPAGE_TEMPLATES } from '~/customize-store/data/homepageTemplates';
+import { Pattern, PatternWithBlocks } from '~/customize-store/types/pattern';
 
 export const getTemplatePatterns = (
 	template: string[],

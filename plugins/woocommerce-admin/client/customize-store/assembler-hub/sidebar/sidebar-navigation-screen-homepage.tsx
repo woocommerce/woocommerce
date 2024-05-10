@@ -38,7 +38,7 @@ import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { select, useDispatch, useSelect } from '@wordpress/data';
 
 import { trackEvent } from '~/customize-store/tracking';
 import {
@@ -48,7 +48,9 @@ import {
 import { isEqual } from 'lodash';
 import { COLOR_PALETTES } from './global-styles/color-palette-variations/constants';
 
-const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
+const { GlobalStylesContext, __experimentalGetParsedPattern } = unlock(
+	blockEditorPrivateApis
+);
 
 export const SidebarNavigationScreenHomepage = () => {
 	const { scroll } = useEditorScroll( {
@@ -117,12 +119,22 @@ export const SidebarNavigationScreenHomepage = () => {
 						title: templateName,
 						blocks: patterns.reduce(
 							( acc: BlockInstance[], pattern ) => {
+								const parsedPattern = unlock(
+									select( blockEditorStore )
+								).__experimentalGetParsedPattern(
+									pattern.name
+								);
+
+								if ( ! parsedPattern ) {
+									return acc;
+								}
+
 								if ( ! isActiveNewNeutralVariation ) {
-									return [ ...acc, ...pattern.blocks ];
+									return [ ...acc, ...parsedPattern.blocks ];
 								}
 								const updatedBlocks =
 									findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
-										pattern.blocks,
+										parsedPattern.blocks,
 										( buttonBlock: BlockInstance ) => {
 											buttonBlock.attributes.style =
 												PRODUCT_HERO_PATTERN_BUTTON_STYLE;
@@ -144,10 +156,13 @@ export const SidebarNavigationScreenHomepage = () => {
 					name: templateName,
 					title: templateName,
 					blocks: patterns.reduce(
-						( acc: BlockInstance[], pattern ) => [
-							...acc,
-							...pattern.blocks,
-						],
+						( acc: BlockInstance[], pattern ) => {
+							const parsedPattern = unlock(
+								select( blockEditorStore )
+							).__experimentalGetParsedPattern( pattern.name );
+
+							return [ ...acc, ...parsedPattern.blocks ];
+						},
 						[]
 					),
 					blockTypes: [ '' ],
