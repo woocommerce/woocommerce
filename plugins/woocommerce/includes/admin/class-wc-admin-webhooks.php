@@ -369,8 +369,8 @@ class WC_Admin_Webhooks {
 					sprintf(
 						/* translators: %s = URL */
 						_n(
-							'This webhook has the ⚠ symbol in front of its name in the list below. Please either edit the webhook to use a different delivery format, or install and activate <a href="%s" target="_blank">the WooCommerce Legacy REST API extension</a>.',
-							'These webhooks have the ⚠ symbol in front of their names in the list below. Please either edit the webhooks to use a different delivery format, or install and activate <a href="%s" target="_blank">the WooCommerce Legacy REST API extension</a>.',
+							'This webhook has the ⚠️ symbol in front of its name in the list below. Please either edit the webhook to use a different delivery format, or install and activate <a href="%s" target="_blank">the WooCommerce Legacy REST API extension</a>.',
+							'These webhooks have the ⚠️ symbol in front of their names in the list below. Please either edit the webhooks to use a different delivery format, or install and activate <a href="%s" target="_blank">the WooCommerce Legacy REST API extension</a>.',
 							$legacy_api_webhooks_count,
 							'woocommerce'
 						),

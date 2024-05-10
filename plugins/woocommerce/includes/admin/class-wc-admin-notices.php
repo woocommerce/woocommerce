@@ -175,7 +175,7 @@ class WC_Admin_Notices {
 					),
 					sprintf(
 					// translators: Placeholders are URLs.
-						wpautop( __( '⚠ The WooCommerce Legacy REST API has been removed from WooCommerce, this will cause <a href="%1$s">webhooks on this site that are configured to use the Legacy REST API</a> to stop working. <a target="_blank" href="%2$s">A separate WooCommerce extension is available</a> to allow these webhooks to keep using the Legacy REST API without interruption. You can also edit these webhooks to use the current REST API version to generate the payload instead. <b><a target="_blank" href="%3$s">Learn more about this change.</a></b>', 'woocommerce' ) ),
+						wpautop( __( '⚠️ The WooCommerce Legacy REST API has been removed from WooCommerce, this will cause <a href="%1$s">webhooks on this site that are configured to use the Legacy REST API</a> to stop working. <a target="_blank" href="%2$s">A separate WooCommerce extension is available</a> to allow these webhooks to keep using the Legacy REST API without interruption. You can also edit these webhooks to use the current REST API version to generate the payload instead. <b><a target="_blank" href="%3$s">Learn more about this change.</a></b>', 'woocommerce' ) ),
 						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&legacy=true' ),
 						'https://wordpress.org/plugins/woocommerce-legacy-rest-api/',
 						'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
