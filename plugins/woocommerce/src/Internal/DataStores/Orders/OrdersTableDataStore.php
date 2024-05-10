@@ -1167,6 +1167,21 @@ WHERE
 			return array();
 		}
 
+		$order_types = array();
+
+		$cache_engine = wc_get_container()->get( WPCacheEngine::class );
+		$order_data   = $cache_engine->get_cached_objects( $order_ids, $this->get_cache_group() );
+		foreach ( $order_data as $order_id => $order_datum ) {
+			if ( ! empty( $order_datum->type ) ) {
+				$order_types[ $order_id ] = $order_datum->type;
+			}
+		}
+
+		$order_ids = array_diff( $order_ids, array_keys( $order_types ) );
+		if ( empty( $order_ids ) ) {
+			return $order_types;
+		}
+
 		$orders_table          = self::get_orders_table_name();
 		$order_ids_placeholder = implode( ', ', array_fill( 0, count( $order_ids ), '%d' ) );
 
@@ -1178,7 +1193,6 @@ WHERE
 			)
 		);
 		// phpcs:enable
-		$order_types = array();
 		foreach ( $results as $row ) {
 			$order_types[ $row->id ] = $row->type;
 		}
