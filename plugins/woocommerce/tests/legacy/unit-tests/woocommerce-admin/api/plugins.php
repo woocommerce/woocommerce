@@ -117,9 +117,6 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 	public function test_activate_plugin() {
 		wp_set_current_user( $this->user );
 		$request = new WP_REST_Request( 'POST', $this->endpoint . '/activate' );
-		if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-			activate_plugin( 'woocommerce/woocommerce.php' );
-		}
 		$request->set_query_params(
 			array(
 				'plugins' => 'akismet',
