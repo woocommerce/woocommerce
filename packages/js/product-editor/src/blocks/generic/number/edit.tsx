@@ -95,6 +95,8 @@ export function Edit( {
 				tooltip={ tooltip }
 				disabled={ disabled }
 				step={ step }
+				min={ min }
+				max={ max }
 			/>
 		</div>
 	);
