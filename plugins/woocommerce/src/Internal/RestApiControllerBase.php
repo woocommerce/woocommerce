@@ -202,7 +202,7 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 	 * @return bool|WP_Error True if the current user has the capability, otherwise an "Unauthorized" error or False if no error is available for the request method.
 	 */
 	protected function check_permission( WP_REST_Request $request, string $required_capability_name, ...$extra_args ) {
-		if ( current_user_can( $required_capability_name, $extra_args ) ) {
+		if ( current_user_can( $required_capability_name, ...$extra_args ) ) {
 			return true;
 		}
 
