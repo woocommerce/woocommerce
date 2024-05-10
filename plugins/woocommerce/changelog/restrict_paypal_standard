@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Only load the PayPal Standard payment method on stores that have connected their account or have existing PayPal orders.

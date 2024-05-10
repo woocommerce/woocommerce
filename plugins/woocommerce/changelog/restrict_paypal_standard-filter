@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Deprecate the woocommerce_should_load_paypal_standard filter used to bypass loading PayPal Standard.
