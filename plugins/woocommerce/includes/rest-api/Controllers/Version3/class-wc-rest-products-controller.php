@@ -561,7 +561,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$product->set_sku( wc_clean( $request['sku'] ) );
 		}
 
-		// SKU.
+		// Unique ID.
 		if ( isset( $request['unique_id'] ) ) {
 			$product->set_unique_id( wc_clean( $request['unique_id'] ) );
 		}
