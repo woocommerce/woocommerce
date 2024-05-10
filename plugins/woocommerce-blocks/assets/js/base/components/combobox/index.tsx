@@ -270,6 +270,7 @@ const Combobox = ( {
 										style={ {
 											height: rowVirtualizer.getTotalSize(),
 											position: 'relative',
+											zIndex: 9,
 										} }
 										className="components-form-token-field__suggestions-list-inner"
 									>
