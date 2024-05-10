@@ -119,8 +119,6 @@ class DataSynchronizer implements BatchProcessorInterface {
 		if ( self::BACKGROUND_SYNC_MODE_CONTINUOUS === $this->get_background_sync_mode() ) {
 			self::add_action( 'shutdown', array( $this, 'handle_continuous_background_sync' ) );
 		}
-
-		self::add_filter( 'woocommerce_feature_description_tip', array( $this, 'handle_feature_description_tip' ), 10, 3 );
 	}
 
 	/**
@@ -1054,68 +1052,4 @@ ORDER BY orders.id ASC
 		}
 	}
 
-	/**
-	 * Handle the 'woocommerce_feature_description_tip' filter.
-	 *
-	 * When the COT feature is enabled and there are orders pending sync (in either direction),
-	 * show a "you should ync before disabling" warning under the feature in the features page.
-	 * Skip this if the UI prevents changing the feature enable status.
-	 *
-	 * @param string $desc_tip The original description tip for the feature.
-	 * @param string $feature_id The feature id.
-	 * @param bool   $ui_disabled True if the UI doesn't allow to enable or disable the feature.
-	 * @return string The new description tip for the feature.
-	 */
-	private function handle_feature_description_tip( $desc_tip, $feature_id, $ui_disabled ): string {
-		if ( 'custom_order_tables' !== $feature_id || $ui_disabled ) {
-			return $desc_tip;
-		}
-
-		$features_controller = wc_get_container()->get( FeaturesController::class );
-		$feature_is_enabled  = $features_controller->feature_is_enabled( 'custom_order_tables' );
-		if ( ! $feature_is_enabled ) {
-			return $desc_tip;
-		}
-
-		$pending_sync_count = $this->get_current_orders_pending_sync_count();
-		if ( ! $pending_sync_count ) {
-			return $desc_tip;
-		}
-
-		if ( $this->custom_orders_table_is_authoritative() ) {
-			$extra_tip = sprintf(
-				_n(
-					"⚠ There's one order pending sync from the orders table to the posts table. The feature shouldn't be disabled until this order is synchronized.",
-					"⚠ There are %1\$d orders pending sync from the orders table to the posts table. The feature shouldn't be disabled until these orders are synchronized.",
-					$pending_sync_count,
-					'woocommerce'
-				),
-				$pending_sync_count
-			);
-		} else {
-			$extra_tip = sprintf(
-				_n(
-					"⚠ There's one order pending sync from the posts table to the orders table. The feature shouldn't be disabled until this order is synchronized.",
-					"⚠ There are %1\$d orders pending sync from the posts table to the orders table. The feature shouldn't be disabled until these orders are synchronized.",
-					$pending_sync_count,
-					'woocommerce'
-				),
-				$pending_sync_count
-			);
-		}
-
-		$cot_settings_url = add_query_arg(
-			array(
-				'page'    => 'wc-settings',
-				'tab'     => 'advanced',
-				'section' => 'custom_data_stores',
-			),
-			admin_url( 'admin.php' )
-		);
-
-		/* translators: %s = URL of the custom data stores settings page */
-		$manage_cot_settings_link = sprintf( __( "<a href='%s'>Manage orders synchronization</a>", 'woocommerce' ), $cot_settings_url );
-
-		return $desc_tip ? "{$desc_tip}<br/>{$extra_tip} {$manage_cot_settings_link}" : "{$extra_tip} {$manage_cot_settings_link}";
-	}
 }
