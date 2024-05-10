@@ -19,7 +19,7 @@ class PatternRegistry {
 	 *
 	 * @return void
 	 */
-	public function register_block_pattern( $source, $pattern_data, $dictionary ) {
+    public function register_block_pattern( $source, $pattern_data, $dictionary ) {
 		if ( empty( $pattern_data['slug'] ) ) {
 			_doing_it_wrong(
 				'register_block_patterns',

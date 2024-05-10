@@ -6,6 +6,9 @@ namespace Automattic\WooCommerce\Blocks\Patterns;
  * PTKPatterns class.
  */
 class PTKPatternsLoader {
+	// Some patterns need to be excluded because they have dependencies which
+	// are not installed by default (like Jetpack). Otherwise, the user
+	// would see an error when trying to insert them in the editor.
 	const EXCLUDED_PATTERNS = array( '13923', '14781', '14779', '13666', '13664', '13660', '13588' );
 
 	/**
@@ -25,8 +28,8 @@ class PTKPatternsLoader {
 	/**
 	 * Constructor for the class.
 	 *
-	 * @param PTKClient $ptk_client An instance of PatternsToolkit.
-	 * @param PatternRegistry       $pattern_registry An instance of PatternRegistry.
+	 * @param PTKClient       $ptk_client An instance of PatternsToolkit.
+	 * @param PatternRegistry $pattern_registry An instance of PatternRegistry.
 	 */
 	public function __construct( $ptk_client, $pattern_registry ) {
 		$this->ptk_client       = $ptk_client;
