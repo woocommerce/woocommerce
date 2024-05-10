@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Move country to be the first field in Checkout block.
