@@ -15,6 +15,7 @@ import {
 	Fragment,
 	forwardRef,
 	useMemo,
+	useEffect,
 } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -35,6 +36,7 @@ import { VariationsTableRow } from './variations-table-row';
 import { MultipleUpdateMenu } from './variation-actions-menus';
 
 type VariationsTableProps = {
+	isVisible?: boolean;
 	noticeText?: string;
 	noticeStatus?: 'error' | 'warning' | 'success' | 'info';
 	onNoticeDismiss?: () => void;
@@ -97,6 +99,7 @@ export const VariationsTable = forwardRef<
 	VariationsTableProps
 >( function Table(
 	{
+		isVisible = false,
 		noticeText,
 		noticeActions = [],
 		noticeStatus = 'error',
@@ -158,7 +161,14 @@ export const VariationsTable = forwardRef<
 		isGenerating,
 		variationsError,
 		onGenerate,
+		getCurrentVariations,
 	} = useVariations( { productId } );
+
+	useEffect( () => {
+		if ( isVisible ) {
+			getCurrentVariations();
+		}
+	}, [ isVisible, isGenerating, productId ] );
 
 	function handleEmptyTableStateActionClick() {
 		onGenerate( productAttributes );

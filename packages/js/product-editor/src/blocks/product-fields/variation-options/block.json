@@ -22,5 +22,6 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
+	"usesContext": [ "postType", "isInSelectedTab" ],
 	"editorStyle": "file:./editor.css"
 }

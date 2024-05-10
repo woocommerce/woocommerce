@@ -8,13 +8,7 @@ import {
 	ProductVariation,
 } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { useCallback, useMemo, useRef, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -487,7 +481,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 	const wasGenerating = useRef( false );
 
-	useEffect( () => {
+	function getCurrentVariations() {
 		if ( isGenerating ) {
 			setFilters( [] );
 			onClearSelection();
@@ -508,7 +502,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		}
 
 		wasGenerating.current = Boolean( isGenerating );
-	}, [ productId, isGenerating ] );
+	}
 
 	return {
 		isLoading,
@@ -541,5 +535,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		isGenerating,
 		onGenerate,
 		variationsError: generateError ?? getVariationsError,
+		getCurrentVariations,
 	};
 }
