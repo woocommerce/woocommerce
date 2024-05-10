@@ -55,10 +55,8 @@ const SiteVisibility = () => {
 		const setting = window?.wcSettings?.admin?.siteVisibilitySettings || {};
 		const initValues = {
 			comingSoon: setting.woocommerce_coming_soon,
-			storePagesOnly:
-				setting.woocommerce_store_pages_only === false ? 'no' : 'yes',
-			privateLink:
-				setting.woocommerce_private_link === false ? 'no' : 'yes',
+			storePagesOnly: setting.woocommerce_store_pages_only,
+			privateLink: setting.woocommerce_private_link || 'no',
 		};
 
 		const currentValues = { comingSoon, storePagesOnly, privateLink };
