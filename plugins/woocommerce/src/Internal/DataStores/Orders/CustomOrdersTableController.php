@@ -658,8 +658,8 @@ class CustomOrdersTableController {
 						sprintf(
 							// translators: %s: number of pending orders.
 							_n(
-								"There's %s order pending sync. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.",
-								'There are %s orders pending sync. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
+								"You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>. There's currently %s order out of sync.",
+								'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>. There are currently %s orders out of sync. ',
 								$orders_pending_sync_count,
 								'woocommerce'
 							),
@@ -671,16 +671,7 @@ class CustomOrdersTableController {
 				$sync_message[] = sprintf(
 					'<a href="%1$s" class="button button-link">%2$s</a>',
 					esc_url( $sync_now_url ),
-					sprintf(
-						// translators: %d: number of pending orders.
-						_n(
-							'Sync %s pending order',
-							'Sync %s pending orders',
-							$orders_pending_sync_count,
-							'woocommerce'
-						),
-						number_format_i18n( $orders_pending_sync_count )
-					)
+					__( 'Sync orders now', 'woocommerce' )
 				);
 			}
 
