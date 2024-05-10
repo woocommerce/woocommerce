@@ -46,9 +46,7 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 		} ) => {
 			await page.goto( defaultBlockPost.link );
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeHidden();
 		} );
@@ -97,9 +95,7 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 			// wait for navigation
 			await page.waitForURL( /.*filter_stock_status=outofstock.*/ );
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeVisible();
 		} );
@@ -115,9 +111,7 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 			const outOfStockCheckbox = page.getByText( 'Out of stock' );
 			await outOfStockCheckbox.click();
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeHidden();
 		} );
@@ -130,9 +124,7 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 				`${ defaultBlockPost.link }?filter_stock_status=outofstock`
 			);
 
-			const button = page
-				.locator( '.wp-block-woocommerce-product-filter-clear-button' )
-				.locator( 'button' );
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await button.click();
 
@@ -151,9 +143,7 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 		} ) => {
 			await page.goto( defaultBlockPost.link );
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeHidden();
 		} );
@@ -192,9 +182,7 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 			// wait for navigation
 			await page.waitForURL( /.*filter_stock_status=instock.*/ );
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeVisible();
 		} );
@@ -213,9 +201,7 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 			await dropdownLocator.click();
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			const removeFilter = page.locator(
 				'.wc-interactivity-dropdown__badge-remove'
@@ -234,9 +220,7 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 				`${ dropdownBlockPost.link }?filter_stock_status=instock`
 			);
 
-			const button = page
-				.locator( '.wp-block-woocommerce-product-filter-clear-button' )
-				.locator( 'button' );
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await button.click();
 

@@ -30,9 +30,7 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 		} ) => {
 			await page.goto( defaultBlockPost.link );
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeHidden();
 		} );
@@ -83,9 +81,7 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 				`${ defaultBlockPost.link }?min_price=20&max_price=67`
 			);
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeVisible();
 		} );
@@ -120,9 +116,7 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 			await maxPriceInput.fill( String( defaultMaxRange ) );
 			await maxPriceInput.blur();
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeHidden();
 		} );
@@ -135,9 +129,7 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 				`${ defaultBlockPost.link }?min_price=20&max_price=67`
 			);
 
-			const button = page
-				.locator( '.wp-block-woocommerce-product-filter-clear-button' )
-				.locator( 'button' );
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await button.click();
 

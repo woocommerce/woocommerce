@@ -30,9 +30,7 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 		} ) => {
 			await page.goto( defaultBlockPost.link );
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeHidden();
 		} );
@@ -43,9 +41,7 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 		} ) => {
 			await page.goto( `${ defaultBlockPost.link }?rating_filter=1` );
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeVisible();
 		} );
@@ -62,9 +58,7 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 
 			await ratingCheckboxes.nth( 0 ).uncheck();
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeHidden();
 		} );
@@ -75,9 +69,7 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 		} ) => {
 			await page.goto( `${ defaultBlockPost.link }?rating_filter=1` );
 
-			const button = page
-				.locator( '.wp-block-woocommerce-product-filter-clear-button' )
-				.locator( 'button' );
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await button.click();
 

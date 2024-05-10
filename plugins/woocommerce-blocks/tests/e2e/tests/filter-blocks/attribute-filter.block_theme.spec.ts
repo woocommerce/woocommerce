@@ -103,9 +103,7 @@ test.describe( 'Product Filter: Attribute Block', () => {
 		} ) => {
 			await page.goto( defaultBlockPost.link );
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeHidden();
 		} );
@@ -158,9 +156,7 @@ test.describe( 'Product Filter: Attribute Block', () => {
 			// wait for navigation
 			await page.waitForURL( /.*filter_color=gray.*/ );
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeVisible();
 		} );
@@ -179,9 +175,7 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 			await grayCheckbox.click();
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeHidden();
 		} );
@@ -198,9 +192,7 @@ test.describe( 'Product Filter: Attribute Block', () => {
 			// wait for navigation
 			await page.waitForURL( /.*filter_color=gray.*/ );
 
-			const button = page
-				.locator( '.wp-block-woocommerce-product-filter-clear-button' )
-				.locator( 'button' );
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await button.click();
 
@@ -221,9 +213,7 @@ test.describe( 'Product Filter: Attribute Block', () => {
 		} ) => {
 			await page.goto( dropdownBlockPost.link );
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeHidden();
 		} );
@@ -291,9 +281,7 @@ test.describe( 'Product Filter: Attribute Block', () => {
 			// wait for navigation
 			await page.waitForURL( /.*filter_color=yellow.*/ );
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await expect( button ).toBeVisible();
 		} );
@@ -318,9 +306,7 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 			await dropdownLocator.click();
 
-			const button = page.locator(
-				'.wp-block-woocommerce-product-filter-clear-button'
-			);
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			const removeFilter = page.locator(
 				'.wc-interactivity-dropdown__badge-remove'
@@ -349,17 +335,13 @@ test.describe( 'Product Filter: Attribute Block', () => {
 			// wait for navigation
 			await page.waitForURL( /.*filter_color=yellow.*/ );
 
-			const button = page
-				.locator( '.wp-block-woocommerce-product-filter-clear-button' )
-				.locator( 'button' );
+			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await button.click();
 
-			const placeholder = await page
-				.locator( '.wc-interactivity-dropdown__placeholder' )
-				.textContent();
+			const placeholder = page.getByText( 'Select Color' );
 
-			expect( placeholder ).toEqual( 'Select Color' );
+			await expect( placeholder ).toBeVisible();
 		} );
 	} );
 } );
