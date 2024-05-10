@@ -1092,7 +1092,7 @@ test.describe( 'Product Collection', () => {
 					'iframe[name="editor-canvas"]'
 				);
 				const previewButtonLocator = editorFrame.locator(
-					'button.wc-block-product-collection__preview-button:has-text("Preview")'
+					'button[data-test-id="product-collection-preview-button"]'
 				);
 
 				// The preview button should be visible
