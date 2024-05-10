@@ -7,6 +7,7 @@ import { select } from '@wordpress/data';
 import { isWpVersion } from '@woocommerce/settings';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
 import { useLayoutEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -179,8 +180,10 @@ export const useSetPreviewState = ( {
 				setAttributes( {
 					__privatePreviewState: {
 						isPreview: !! attributes?.query?.inherit,
-						previewMessage:
+						previewMessage: __(
 							'Actual products will vary depending on the page being viewed.',
+							'woocommerce'
+						),
 					},
 				} );
 			}
