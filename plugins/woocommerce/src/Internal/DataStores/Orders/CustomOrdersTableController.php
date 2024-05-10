@@ -586,14 +586,14 @@ class CustomOrdersTableController {
 			if ( $is_dangerous ) {
 				$sync_message[] = wp_kses_data(
 					sprintf(
-					// translators: %d: number of pending orders.
+						// translators: %s: number of pending orders.
 						_n(
-							"There's %d order pending sync. <b>Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!</b>",
-							'There are %d orders pending sync. <b>Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!</b>',
+							"There's %s order pending sync. <b>Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!</b>",
+							'There are %s orders pending sync. <b>Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!</b>',
 							$orders_pending_sync_count,
 							'woocommerce'
 						),
-						$orders_pending_sync_count,
+						number_format_i18n( $orders_pending_sync_count ),
 					)
 				);
 			}
@@ -604,9 +604,9 @@ class CustomOrdersTableController {
 
 			if ( $sync_in_progress && $sync_is_pending ) {
 				$sync_message[] = sprintf(
-					// translators: %d: number of pending orders.
-					__( 'Currently syncing orders... %d pending', 'woocommerce' ),
-					$orders_pending_sync_count
+					// translators: %s: number of pending orders.
+					__( 'Currently syncing orders... %s pending', 'woocommerce' ),
+					number_format_i18n( $orders_pending_sync_count )
 				);
 			} elseif ( $sync_is_pending ) {
 				$sync_now_url = wp_nonce_url(
@@ -622,14 +622,14 @@ class CustomOrdersTableController {
 				if ( ! $is_dangerous ) {
 					$sync_message[] = wp_kses_data(
 						sprintf(
-						// translators: %d: number of pending orders.
+							// translators: %s: number of pending orders.
 							_n(
-								"There's %d order pending sync. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.",
-								'There are %d orders pending sync. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
+								"There's %s order pending sync. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.",
+								'There are %s orders pending sync. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
 								$orders_pending_sync_count,
 								'woocommerce'
 							),
-							$orders_pending_sync_count
+							number_format_i18n( $orders_pending_sync_count )
 						)
 					);
 				}
