@@ -94,6 +94,11 @@
 			&:not(.is-disabled) {
 				background-color: white;
 			}
+
+			&:focus-within {
+				outline: none;
+				box-shadow: none;
+			}
 		}
 
 		.components-form-token-field__input {
