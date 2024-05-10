@@ -48,6 +48,7 @@ const config = {
 					'./test-results/test-results.json',
 			},
 		],
+		[ 'buildkite-test-collector/playwright/reporter' ],
 	],
 	use: {
 		screenshot: 'only-on-failure',

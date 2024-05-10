@@ -29,7 +29,7 @@
 		"env:start": "pnpm wp-env start",
 		"env:stop": "pnpm wp-env stop",
 		"env:test": "pnpm env:dev && pnpm playwright install chromium",
-		"env:test:cot": "ENABLE_HPOS=1 pnpm env:test",
+		"env:test:no-hpos": "DISABLE_HPOS=1 pnpm env:test",
 		"env:perf:install-k6": "curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1",
 		"env:perf": "pnpm env:dev && pnpm env:performance-init && pnpm env:perf:install-k6",
 		"preinstall": "npx only-allow pnpm",
@@ -208,9 +208,38 @@
 					}
 				},
 				{
+					"name": "Core e2e tests - HPOS disabled",
+					"testType": "e2e",
+					"command": "test:e2e-pw",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"events": [
+						"push"
+					],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/e2e-pw/**"
+					],
+					"testEnv": {
+						"start": "env:test:no-hpos"
+					}
+				},
+				{
 					"name": "Core API tests",
 					"testType": "api",
 					"command": "test:api-pw",
+					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.lock",
@@ -228,9 +257,32 @@
 					}
 				},
 				{
+					"name": "Core API tests - HPOS disabled",
+					"testType": "api",
+					"command": "test:api-pw",
+					"optional": false,
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/api-core-tests/**"
+					],
+					"events": [
+						"push"
+					],
+					"testEnv": {
+						"start": "env:test:no-hpos"
+					}
+				},
+				{
 					"name": "Core Performance tests (K6)",
 					"testType": "performance",
 					"command": "test:perf",
+					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.lock",
@@ -250,6 +302,7 @@
 					"name": "Metrics",
 					"testType": "performance",
 					"command": "test:metrics:ci",
+					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.lock",
@@ -326,7 +379,8 @@
 		"@woocommerce/admin-library": "workspace:*",
 		"@woocommerce/block-library": "workspace:*",
 		"@woocommerce/classic-assets": "workspace:*",
-		"@wordpress/browserslist-config": "wp-6.0"
+		"@wordpress/browserslist-config": "wp-6.0",
+		"buildkite-test-collector": "^1.7.1"
 	},
 	"nodemonConfig": {
 		"delay": 2500,

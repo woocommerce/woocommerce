@@ -15,7 +15,7 @@ export type VariationsTableRowProps = {
 	isSelected?: boolean;
 	isSelectionDisabled?: boolean;
 	hideActionButtons?: boolean;
-	onChange( variation: PartialProductVariation ): void;
+	onChange( variation: PartialProductVariation, showSuccess: boolean ): void;
 	onDelete( variation: PartialProductVariation ): void;
 	onEdit( event: MouseEvent< HTMLAnchorElement > ): void;
 	onSelect( value: boolean ): void;
