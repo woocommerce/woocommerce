@@ -27,7 +27,6 @@ class DataSynchronizer implements BatchProcessorInterface {
 	use AccessiblePrivateMethods;
 
 	public const ORDERS_DATA_SYNC_ENABLED_OPTION           = 'woocommerce_custom_orders_table_data_sync_enabled';
-	private const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_initial_orders_pending_sync_count';
 	public const PLACEHOLDER_ORDER_POST_TYPE               = 'shop_order_placehold';
 
 	public const DELETED_RECORD_META_KEY        = '_deleted_from';
@@ -430,7 +429,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 */
 	public function get_sync_status() {
 		return array(
-			'initial_pending_count' => (int) get_option( self::INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION, 0 ),
+			'initial_pending_count' => (int) 0,
 			'current_pending_count' => $this->get_total_pending_count(),
 		);
 	}
@@ -686,7 +685,7 @@ ORDER BY orders.id ASC
 	 * or because there's nothing left to synchronize.
 	 */
 	public function cleanup_synchronization_state() {
-		delete_option( self::INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION );
+		delete_option( 'woocommerce_initial_orders_pending_sync_count' );
 	}
 
 	/**
