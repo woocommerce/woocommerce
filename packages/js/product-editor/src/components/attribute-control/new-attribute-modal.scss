@@ -26,6 +26,10 @@
 	&__body {
 		min-height: 200px;
 		flex: 1 1 auto;
+
+		.woocommerce-new-attribute-modal__table-row {
+			min-height: 80px;
+		}
 	}
 
 	&__table {
