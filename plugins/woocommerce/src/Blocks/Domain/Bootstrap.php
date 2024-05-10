@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\BlockPatterns;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
+use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
 use Automattic\WooCommerce\Blocks\Domain\Services\Notices;
@@ -377,7 +378,11 @@ class Bootstrap {
 		$this->container->register(
 			BlockPatterns::class,
 			function () {
-				return new BlockPatterns($this->package, new PatternsToolkitClient());
+				return new BlockPatterns(
+                    $this->package,
+                    new PatternsToolkitClient(),
+                    new PatternRegistry()
+                );
 			}
 		);
 		$this->container->register(
