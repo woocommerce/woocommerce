@@ -529,7 +529,7 @@ class CustomOrdersTableController {
 
 		$get_disabled = function () {
 			$plugin_compatibility = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
-			$sync_complete        = 0 === $this->get_orders_pending_sync_count();
+			$sync_complete        = 0 === $this->data_synchronizer->get_current_orders_pending_sync_count();
 			$disabled             = array();
 			// Changing something here? might also want to look at `enable|disable` functions in CLIRunner.
 			$incompatible_plugins = array_merge( $plugin_compatibility['uncertain'], $plugin_compatibility['incompatible'] );
@@ -575,7 +575,7 @@ class CustomOrdersTableController {
 		};
 
 		$get_sync_message = function () {
-			$orders_pending_sync_count = $this->get_orders_pending_sync_count();
+			$orders_pending_sync_count = $this->data_synchronizer->get_current_orders_pending_sync_count( true );
 			$sync_in_progress          = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
 			$sync_enabled              = $this->data_synchronizer->data_sync_is_enabled();
 			$sync_is_pending           = $orders_pending_sync_count > 0;
@@ -654,7 +654,7 @@ class CustomOrdersTableController {
 		};
 
 		$get_description_is_error = function () {
-			$sync_is_pending = $this->get_orders_pending_sync_count() > 0;
+			$sync_is_pending = $this->data_synchronizer->get_current_orders_pending_sync_count( true ) > 0;
 
 			return $sync_is_pending && $this->changing_data_source_with_sync_pending_is_allowed();
 		};
@@ -689,15 +689,6 @@ class CustomOrdersTableController {
 		 * @since 8.3.0
 		 */
 		return apply_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending', false );
-	}
-
-	/**
-	 * Returns the count of orders pending synchronization.
-	 *
-	 * @return int
-	 */
-	private function get_orders_pending_sync_count(): int {
-		return $this->data_synchronizer->get_sync_status()['current_pending_count'];
 	}
 
 	/**
