@@ -157,9 +157,10 @@ export const useSetPreviewState = ( {
 		if ( cleanup ) {
 			return cleanup;
 		}
-		// We want this to run only once, adding deps will cause performance issues.
+
+		// It should re-run only when setPreviewState changes to avoid performance issues.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [] );
+	}, [ setPreviewState ] );
 
 	/**
 	 * For all Product Collection blocks that inherit query from the template,
