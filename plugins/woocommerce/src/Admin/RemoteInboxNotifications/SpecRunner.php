@@ -114,7 +114,7 @@ class SpecRunner {
 		$matching_wp_locales = array_values(
 			array_filter(
 				$locales,
-				function( $l ) use ( $wp_locale ) {
+				function ( $l ) use ( $wp_locale ) {
 					return $wp_locale === $l->locale;
 				}
 			)
@@ -128,7 +128,7 @@ class SpecRunner {
 		$en_us_locales = array_values(
 			array_filter(
 				$locales,
-				function( $l ) {
+				function ( $l ) {
 					return $l->locale === 'en_US';
 				}
 			)
@@ -168,7 +168,7 @@ class SpecRunner {
 		$en_us_locales = array_values(
 			array_filter(
 				$action_locales,
-				function( $l ) {
+				function ( $l ) {
 					return $l->locale === 'en_US';
 				}
 			)
