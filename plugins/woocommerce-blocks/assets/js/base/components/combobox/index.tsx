@@ -269,6 +269,7 @@ const Combobox = ( {
 											height: rowVirtualizer.getTotalSize(),
 											position: 'relative',
 										} }
+										className="components-form-token-field__suggestions-list-inner"
 									>
 										{ rowVirtualizer
 											.getVirtualItems()

@@ -90,6 +90,10 @@
 				color: $input-text-dark;
 			}
 
+			.components-form-token-field__suggestions-list-inner {
+				touch-action: none;
+			}
+
 			.components-form-token-field__suggestion {
 				@include font-size(regular);
 				color: $gray-700;
