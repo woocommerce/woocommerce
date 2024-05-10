@@ -9,7 +9,7 @@ import {
 	ProductDefaultAttribute,
 } from '@woocommerce/data';
 import { resolveSelect } from '@wordpress/data';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -167,7 +167,7 @@ export function useProductAttributes( {
 		}
 	};
 
-	useEffect( () => {
+	const fetchAttributes = () => {
 		const [
 			localAttributes,
 			globalAttributes,
@@ -186,10 +186,11 @@ export function useProductAttributes( {
 				...localAttributes,
 			] );
 		} );
-	}, [ allAttributes, isVariationAttributes, fetchTerms ] );
+	};
 
 	return {
 		attributes,
+		fetchAttributes,
 		handleChange,
 		setAttributes,
 	};

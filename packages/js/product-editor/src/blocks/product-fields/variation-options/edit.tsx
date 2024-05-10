@@ -7,6 +7,7 @@ import { Button } from '@wordpress/components';
 import {
 	createElement,
 	createInterpolateElement,
+	useEffect,
 	useMemo,
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -37,7 +38,7 @@ import { ProductTShirt } from './images';
 
 export function Edit( {
 	attributes: blockAttributes,
-	context,
+	context: { postType, isInSelectedTab },
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( blockAttributes );
 	const { generateProductVariations } = useProductVariationsHelper();
@@ -57,19 +58,26 @@ export function Edit( {
 			'default_attributes'
 		);
 
-	const { postType } = context;
 	const productId = useEntityId( 'postType', postType );
 
-	const { attributes, handleChange } = useProductAttributes( {
-		allAttributes: entityAttributes,
-		isVariationAttributes: true,
-		productId: useEntityId( 'postType', 'product' ),
-		onChange( values, defaultAttributes ) {
-			setEntityAttributes( values );
-			setEntityDefaultAttributes( defaultAttributes );
-			generateProductVariations( values, defaultAttributes );
-		},
-	} );
+	const { attributes, fetchAttributes, handleChange } = useProductAttributes(
+		{
+			allAttributes: entityAttributes,
+			isVariationAttributes: true,
+			productId: useEntityId( 'postType', 'product' ),
+			onChange( values, defaultAttributes ) {
+				setEntityAttributes( values );
+				setEntityDefaultAttributes( defaultAttributes );
+				generateProductVariations( values, defaultAttributes );
+			},
+		}
+	);
+
+	useEffect( () => {
+		if ( isInSelectedTab ) {
+			fetchAttributes();
+		}
+	}, [ entityAttributes, isInSelectedTab ] );
 
 	const localAttributeNames = attributes
 		.filter( ( attr ) => attr.id === 0 )
