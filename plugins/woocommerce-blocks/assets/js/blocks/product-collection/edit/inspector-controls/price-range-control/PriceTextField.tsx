@@ -82,38 +82,24 @@ const PriceTextField: React.FC< PriceTextFieldProps > = ( {
 		val: string
 	): number | undefined => {
 		/**
-		 * First, remove the currency symbol from the value.
-		 * For example, if the currency is USD, the value is $1,000.00
-		 * It should be converted to 1,000.00 before converting to a number.
+		 * 1. Remove all characters that are not numbers or the decimal separator.
+		 * 2. Replace the decimal separator with a period.
+		 * 3. Parse the string as a float.
 		 */
-		const valueWithoutCurrencySymbol = val
-			.replace( currency.prefix, '' )
-			.replace( currency.suffix, '' );
-
-		/**
-		 * Then, normalize the value to a number.
-		 * - Replace the decimal separator with a dot
-		 * - Remove the thousand separator
-		 *
-		 * For example, if the value is 1,000:00
-		 * - Replace the decimal separator with a dot: 1,000.00
-		 * - Remove the thousand separator: 1000.00
-		 */
-		let normalizedValue = valueWithoutCurrencySymbol;
-		if ( currency.decimalSeparator ) {
-			normalizedValue = normalizedValue.replace(
-				new RegExp( `\\${ currency.decimalSeparator }` ),
-				'.'
-			);
-		}
-		if ( currency.thousandSeparator ) {
-			normalizedValue = normalizedValue.replace(
-				new RegExp( `\\${ currency.thousandSeparator }`, 'g' ),
-				''
-			);
-		}
-
-		const parsedNumericValue = Number( normalizedValue );
+		const parsedNumericValue = Number(
+			val
+				.replace(
+					new RegExp(
+						`[^0-9\\${ currency.decimalSeparator || '' }]`,
+						'g'
+					),
+					''
+				)
+				.replace(
+					new RegExp( `\\${ currency.decimalSeparator }`, 'g' ),
+					'.'
+				)
+		);
 		if ( isNaN( parsedNumericValue ) ) {
 			return undefined;
 		}
