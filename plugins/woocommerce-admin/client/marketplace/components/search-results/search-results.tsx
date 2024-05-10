@@ -37,7 +37,8 @@ export default function SearchResults( props: SearchResultProps ): JSX.Element {
 	const hasThemes = themeList.length > 0;
 	const hasBusinessServices = businessServiceList.length > 0;
 	const marketplaceContextValue = useContext( MarketplaceContext );
-	const { isLoading } = marketplaceContextValue;
+	const { isLoading, hasBusinessServices: canShowBusinessServices } =
+		marketplaceContextValue;
 
 	const query = useQuery();
 	const showCategorySelector = query.section ? true : false;
@@ -123,10 +124,17 @@ export default function SearchResults( props: SearchResultProps ): JSX.Element {
 				<NoResults
 					type={ SearchResultType.all }
 					showHeading={ true }
-					heading={ __(
-						'No extensions, themes or business services found…',
-						'woocommerce'
-					) }
+					heading={
+						canShowBusinessServices
+							? __(
+									'No extensions, themes or business services found…',
+									'woocommerce'
+							  )
+							: __(
+									'No extensions or themes found…',
+									'woocommerce'
+							  )
+					}
 				/>
 			);
 		}
