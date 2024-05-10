@@ -19,7 +19,7 @@ if ( wc_current_theme_is_fse_theme() ) {
 }
 ?>
 
-<!-- wp:group {"layout":{"type":"flow"}} -->
+<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center","orientation":"vertical"}} -->
 <div class="wp-block-group"><!-- wp:spacer -->
 <div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
