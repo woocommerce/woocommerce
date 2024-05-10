@@ -32,6 +32,14 @@ jest.mock( '@woocommerce/admin-layout', () => {
 	};
 } );
 
+jest.mock( '~/launch-your-store', () => ( {
+	useLaunchYourStore: jest.fn( () => ( {
+		comingSoon: 'yes',
+		launchYourStoreEnabled: true,
+		isLoading: true,
+	} ) ),
+} ) );
+
 jest.mock( '@woocommerce/data', () => ( {
 	...jest.requireActual( '@woocommerce/data' ),
 	useUser: jest.fn().mockReturnValue( { currentUserCan: () => true } ),
