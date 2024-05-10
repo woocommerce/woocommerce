@@ -64,7 +64,7 @@ export function Edit( {
 		{
 			allAttributes: entityAttributes,
 			isVariationAttributes: true,
-			productId: useEntityId( 'postType', 'product' ),
+			productId,
 			onChange( values, defaultAttributes ) {
 				setEntityAttributes( values );
 				setEntityDefaultAttributes( defaultAttributes );
@@ -77,7 +77,7 @@ export function Edit( {
 		if ( isInSelectedTab ) {
 			fetchAttributes();
 		}
-	}, [ isInSelectedTab ] );
+	}, [ isInSelectedTab, entityAttributes ] );
 
 	const localAttributeNames = attributes
 		.filter( ( attr ) => attr.id === 0 )
