@@ -87,8 +87,13 @@ const setup = ( params: SetupParams = {} ) => {
 	};
 
 	const { container, ...utils } = render(
-		<Block attributes={ attributes } />
+		<Block attributes={ attributes } />,
+		{ legacyRoot: true }
 	);
+
+	// We need to switch to React 17 rendering to allow these tests to keep passing, but as a result the React
+	// rendering error will be shown.
+	expect( console ).toHaveErrored();
 
 	const getList = () => container.querySelector( selectors.list );
 	const getDropdown = () => screen.queryByRole( 'combobox' );
@@ -261,7 +266,8 @@ describe( 'Filter by Stock block', () => {
 			expect( getOnBackorderChips() ).toBeNull();
 		} );
 
-		test( 'replaces chosen option when another one is clicked', () => {
+		test( 'replaces chosen option when another one is clicked', async () => {
+			const user = userEvent.setup();
 			const ratingParam = 'instock';
 			const {
 				getDropdown,
@@ -276,20 +282,25 @@ describe( 'Filter by Stock block', () => {
 			const dropdown = getDropdown();
 
 			if ( dropdown ) {
-				userEvent.click( dropdown );
+				await act( async () => {
+					await user.click( dropdown );
+				} );
 			}
 
 			const outOfStockSuggestion = getOutOfStockSuggestion();
 
 			if ( outOfStockSuggestion ) {
-				userEvent.click( outOfStockSuggestion );
+				await act( async () => {
+					await user.click( outOfStockSuggestion );
+				} );
 			}
 
 			expect( getInStockChips() ).toBeNull();
 			expect( getOutOfStockChips() ).toBeInTheDocument();
 		} );
 
-		test( 'removes the option when the X button is clicked', () => {
+		test( 'removes the option when the X button is clicked', async () => {
+			const user = userEvent.setup();
 			const ratingParam = 'outofstock';
 			const {
 				getInStockChips,
@@ -298,23 +309,27 @@ describe( 'Filter by Stock block', () => {
 				getRemoveButtonFromChips,
 			} = setupMultipleChoiceDropdown( ratingParam );
 
-			expect( getInStockChips() ).toBeNull();
-			expect( getOutOfStockChips() ).toBeInTheDocument();
-			expect( getOnBackorderChips() ).toBeNull();
+			await waitFor( () => {
+				expect( getInStockChips() ).toBeNull();
+				expect( getOutOfStockChips() ).toBeInTheDocument();
+				expect( getOnBackorderChips() ).toBeNull();
+			} );
 
 			const removeOutOfStockButton = getRemoveButtonFromChips(
 				getOutOfStockChips()
 			);
 
 			if ( removeOutOfStockButton ) {
-				act( () => {
-					userEvent.click( removeOutOfStockButton );
+				act( async () => {
+					await user.click( removeOutOfStockButton );
 				} );
 			}
 
-			expect( getInStockChips() ).toBeNull();
-			expect( getOutOfStockChips() ).toBeNull();
-			expect( getOnBackorderChips() ).toBeNull();
+			await waitFor( () => {
+				expect( getInStockChips() ).toBeNull();
+				expect( getOutOfStockChips() ).toBeNull();
+				expect( getOnBackorderChips() ).toBeNull();
+			} );
 		} );
 	} );
 
@@ -336,6 +351,7 @@ describe( 'Filter by Stock block', () => {
 		} );
 
 		test( 'adds chosen option to another one that is clicked', async () => {
+			const user = userEvent.setup();
 			const ratingParam = 'onbackorder';
 			const {
 				getDropdown,
@@ -346,20 +362,25 @@ describe( 'Filter by Stock block', () => {
 				getOutOfStockSuggestion,
 			} = setupMultipleChoiceDropdown( ratingParam );
 
-			expect( getInStockChips() ).toBeNull();
-			expect( getOutOfStockChips() ).toBeNull();
-			expect( getOnBackorderChips() ).toBeInTheDocument();
-
+			await waitFor( () => {
+				expect( getInStockChips() ).toBeNull();
+				expect( getOutOfStockChips() ).toBeNull();
+				expect( getOnBackorderChips() ).toBeInTheDocument();
+			} );
 			const dropdown = getDropdown();
 
 			if ( dropdown ) {
-				userEvent.click( dropdown );
+				await act( async () => {
+					await user.click( dropdown );
+				} );
 			}
 
 			const inStockSuggestion = getInStockSuggestion();
 
 			if ( inStockSuggestion ) {
-				userEvent.click( inStockSuggestion );
+				await act( async () => {
+					await user.click( inStockSuggestion );
+				} );
 			}
 
 			expect( getInStockChips() ).toBeInTheDocument();
@@ -368,7 +389,9 @@ describe( 'Filter by Stock block', () => {
 
 			const freshDropdown = getDropdown();
 			if ( freshDropdown ) {
-				userEvent.click( freshDropdown );
+				await act( async () => {
+					await user.click( freshDropdown );
+				} );
 			}
 
 			const outOfStockSuggestion = getOutOfStockSuggestion();
@@ -384,7 +407,8 @@ describe( 'Filter by Stock block', () => {
 			} );
 		} );
 
-		test( 'removes the option when the X button is clicked', () => {
+		test( 'removes the option when the X button is clicked', async () => {
+			const user = userEvent.setup();
 			const ratingParam = 'instock,outofstock,onbackorder';
 			const {
 				getInStockChips,
@@ -393,23 +417,27 @@ describe( 'Filter by Stock block', () => {
 				getRemoveButtonFromChips,
 			} = setupMultipleChoiceDropdown( ratingParam );
 
-			expect( getInStockChips() ).toBeInTheDocument();
-			expect( getOutOfStockChips() ).toBeInTheDocument();
-			expect( getOnBackorderChips() ).toBeInTheDocument();
+			await waitFor( () => {
+				expect( getInStockChips() ).toBeInTheDocument();
+				expect( getOutOfStockChips() ).toBeInTheDocument();
+				expect( getOnBackorderChips() ).toBeInTheDocument();
+			} );
 
 			const removeOutOfStockButton = getRemoveButtonFromChips(
 				getOutOfStockChips()
 			);
 
 			if ( removeOutOfStockButton ) {
-				act( () => {
-					userEvent.click( removeOutOfStockButton );
+				act( async () => {
+					await user.click( removeOutOfStockButton );
 				} );
 			}
 
-			expect( getInStockChips() ).toBeInTheDocument();
-			expect( getOutOfStockChips() ).toBeNull();
-			expect( getOnBackorderChips() ).toBeInTheDocument();
+			await waitFor( () => {
+				expect( getInStockChips() ).toBeInTheDocument();
+				expect( getOutOfStockChips() ).toBeNull();
+				expect( getOnBackorderChips() ).toBeInTheDocument();
+			} );
 		} );
 	} );
 
@@ -434,6 +462,7 @@ describe( 'Filter by Stock block', () => {
 		} );
 
 		test( 'replaces chosen option when another one is clicked', async () => {
+			const user = userEvent.setup();
 			const ratingParam = 'outofstock';
 			const {
 				getInStockCheckbox,
@@ -448,7 +477,9 @@ describe( 'Filter by Stock block', () => {
 			const onBackorderCheckbox = getOnBackorderCheckbox();
 
 			if ( onBackorderCheckbox ) {
-				userEvent.click( onBackorderCheckbox );
+				await act( async () => {
+					await user.click( onBackorderCheckbox );
+				} );
 			}
 
 			expect( getInStockCheckbox()?.checked ).toBeFalsy();
