@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, fireEvent, findByText } from '@testing-library/react';
+import { render, findByText, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -62,7 +62,9 @@ describe( 'NoticeBanner', () => {
 			</NoticeBanner>
 		);
 		const closeButton = getByRole( 'button' );
-		await userEvent.click( closeButton );
+		await act( async () => {
+			await userEvent.click( closeButton );
+		} );
 		expect( onRemoveMock ).toHaveBeenCalled();
 	} );
 
@@ -74,7 +76,9 @@ describe( 'NoticeBanner', () => {
 			</NoticeBanner>
 		);
 		const closeButton = getByRole( 'button' );
-		await userEvent.click( closeButton );
+		await act( async () => {
+			await userEvent.click( closeButton );
+		} );
 		expect( onRemoveMock ).toHaveBeenCalled();
 	} );
 
