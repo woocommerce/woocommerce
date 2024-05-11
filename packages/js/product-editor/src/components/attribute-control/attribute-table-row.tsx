@@ -211,6 +211,8 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					current={ attribute }
 					items={ filteredAttributes }
 					isLoading={ isLoadingAttributes }
+					// eslint-disable-next-line jsx-a11y/no-autofocus
+					autoFocus={ true }
 					onChange={ ( nextAttribute ) => {
 						if ( nextAttribute.id === attributeId ) {
 							return;
