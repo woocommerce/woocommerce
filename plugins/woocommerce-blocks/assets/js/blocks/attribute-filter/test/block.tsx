@@ -106,7 +106,12 @@ const setup = ( params: SetupParams ) => {
 		results: stubCollectionData(),
 		isLoading: false,
 	} );
-	const utils = render( <AttributeFilterBlock attributes={ attributes } /> );
+	const utils = render( <AttributeFilterBlock attributes={ attributes } />, {
+		legacyRoot: true,
+	} );
+	// We need to switch to React 17 rendering to allow these tests to keep passing, but as a result the React
+	// rendering error will be shown.
+	expect( console ).toHaveErrored();
 	const applyButton = screen.getByRole( 'button', { name: /apply/i } );
 	const smallAttributeCheckbox = screen.getByRole( 'checkbox', {
 		name: /small/i,
