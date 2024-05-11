@@ -154,10 +154,10 @@ describe( 'Filter by Attribute block', () => {
 			expect( applyButton ).toBeDisabled();
 		} );
 
-		test( 'should enable Apply button when filter attributes are changed', () => {
+		test( 'should enable Apply button when filter attributes are changed', async () => {
 			const { applyButton, smallAttributeCheckbox } =
 				setupWithoutSelectedFilterAttributes();
-			userEvent.click( smallAttributeCheckbox );
+			await userEvent.click( smallAttributeCheckbox );
 
 			expect( applyButton ).not.toBeDisabled();
 		} );
@@ -170,21 +170,21 @@ describe( 'Filter by Attribute block', () => {
 			expect( applyButton ).toBeDisabled();
 		} );
 
-		test( 'should enable Apply button when filter attributes are changed', () => {
+		test( 'should enable Apply button when filter attributes are changed', async () => {
 			const { applyButton, smallAttributeCheckbox } =
 				setupWithSelectedFilterAttributes();
-			userEvent.click( smallAttributeCheckbox );
+			await userEvent.click( smallAttributeCheckbox );
 
 			expect( applyButton ).not.toBeDisabled();
 		} );
 
-		test( 'should disable Apply button when deselecting the same previously selected attribute', () => {
+		test( 'should disable Apply button when deselecting the same previously selected attribute', async () => {
 			const { applyButton, smallAttributeCheckbox } =
 				setupWithSelectedFilterAttributes( { filterSize: 'small' } );
-			userEvent.click( smallAttributeCheckbox );
+			await userEvent.click( smallAttributeCheckbox );
 			expect( applyButton ).not.toBeDisabled();
 
-			userEvent.click( smallAttributeCheckbox );
+			await userEvent.click( smallAttributeCheckbox );
 			expect( applyButton ).toBeDisabled();
 		} );
 	} );

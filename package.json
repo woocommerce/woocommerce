@@ -72,7 +72,6 @@
 	"pnpm": {
 		"overrides": {
 			"@types/react": "^17.0.71",
-			"react": "^17.0.2",
 			"react-resize-aware": "3.1.1"
 		}
 	}

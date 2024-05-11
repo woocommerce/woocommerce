@@ -76,8 +76,10 @@ const inputAddress = async ( {
 		} );
 		// State input might be a select or a text input.
 		if ( stateButton ) {
-			userEvent.click( stateButton );
-			userEvent.click( screen.getByRole( 'option', { name: state } ) );
+			await userEvent.click( stateButton );
+			await userEvent.click(
+				screen.getByRole( 'option', { name: state } )
+			);
 		} else {
 			const stateInput = screen.getByLabelText( stateRegExp );
 			userEvent.type( stateInput, state );

@@ -23,6 +23,8 @@ jest.mock( '@wordpress/data', () => ( {
 
 describe( 'ValidatedTextInput', () => {
 	it( 'Removes related validation error on change', async () => {
+		const user = userEvent.setup();
+
 		render(
 			<ValidatedTextInput
 				instanceId={ '0' }
@@ -46,9 +48,14 @@ describe( 'ValidatedTextInput', () => {
 		await expect(
 			select( VALIDATION_STORE_KEY ).getValidationError( 'test-input' )
 		).not.toBe( undefined );
+
 		const textInputElement = await screen.getByLabelText( 'Test Input' );
-		await userEvent.type( textInputElement, 'New value' );
-		await expect(
+
+		await act( async () => {
+			await user.type( textInputElement, 'New value' );
+		} );
+
+		expect(
 			select( VALIDATION_STORE_KEY ).getValidationError( 'test-input' )
 		).toBe( undefined );
 	} );
@@ -75,7 +82,11 @@ describe( 'ValidatedTextInput', () => {
 			select( VALIDATION_STORE_KEY ).getValidationError( 'textinput-1' )
 		).not.toBe( undefined );
 		const textInputElement = await screen.getByLabelText( 'Test Input' );
-		await userEvent.type( textInputElement, 'New value' );
+
+		await act( async () => {
+			await userEvent.type( textInputElement, 'New value' );
+		} );
+
 		await expect(
 			select( VALIDATION_STORE_KEY ).getValidationError( 'textinput-1' )
 		).toBe( undefined );
@@ -129,6 +140,7 @@ describe( 'ValidatedTextInput', () => {
 		await expect( errorMessageElement ).toBeInTheDocument();
 	} );
 	it( 'Runs custom validation on the input', async () => {
+		const user = userEvent.setup();
 		const TestComponent = () => {
 			const [ inputValue, setInputValue ] = useState( 'Test' );
 			return (
@@ -147,17 +159,26 @@ describe( 'ValidatedTextInput', () => {
 		render( <TestComponent /> );
 
 		const textInputElement = await screen.getByLabelText( 'Test Input' );
-		await userEvent.type( textInputElement, 'Invalid Value' );
+		await act( async () => {
+			await user.type( textInputElement, 'Invalid Value' );
+		} );
+
 		await expect(
 			select( VALIDATION_STORE_KEY ).getValidationError( 'test-input' )
 		).not.toBe( undefined );
-		await userEvent.type( textInputElement, '{selectall}{del}Valid Value' );
+
+		await act( async () => {
+			await user.clear( textInputElement );
+			await user.type( textInputElement, 'Valid Value' );
+		} );
+
 		await expect( textInputElement.value ).toBe( 'Valid Value' );
 		await expect(
 			select( VALIDATION_STORE_KEY ).getValidationError( 'test-input' )
 		).toBe( undefined );
 	} );
 	it( 'Shows a custom error message for an invalid required input', async () => {
+		const user = userEvent.setup();
 		const TestComponent = () => {
 			const [ inputValue, setInputValue ] = useState( '' );
 			return (
@@ -173,9 +194,13 @@ describe( 'ValidatedTextInput', () => {
 		};
 		render( <TestComponent /> );
 		const textInputElement = await screen.getByLabelText( 'Test Input' );
-		await userEvent.type( textInputElement, 'test' );
-		await userEvent.type( textInputElement, '{selectall}{del}' );
-		await textInputElement.blur();
+
+		await act( async () => {
+			await user.type( textInputElement, 'test' );
+			await user.clear( textInputElement );
+			await textInputElement.blur();
+		} );
+
 		await expect(
 			screen.queryByText( 'Please enter a valid test input' )
 		).not.toBeNull();

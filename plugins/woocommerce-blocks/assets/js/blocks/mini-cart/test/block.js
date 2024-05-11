@@ -102,7 +102,7 @@ describe( 'Testing Mini-Cart', () => {
 	it( 'opens Mini-Cart drawer when clicking on button', async () => {
 		render( <MiniCartBlock /> );
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-		userEvent.click( screen.getByLabelText( /items/i ) );
+		await userEvent.click( screen.getByLabelText( /items/i ) );
 
 		await waitFor( () =>
 			expect( screen.getByText( /your cart/i ) ).toBeInTheDocument()
@@ -114,7 +114,7 @@ describe( 'Testing Mini-Cart', () => {
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 
 		// Open drawer.
-		userEvent.click( screen.getByLabelText( /items/i ) );
+		await userEvent.click( screen.getByLabelText( /items/i ) );
 
 		// Close drawer.
 		let closeButton = null;
@@ -122,7 +122,7 @@ describe( 'Testing Mini-Cart', () => {
 			closeButton = screen.getByLabelText( /close/i );
 		} );
 		if ( closeButton ) {
-			userEvent.click( closeButton );
+			await userEvent.click( closeButton );
 		}
 
 		await waitFor( () => {
@@ -137,7 +137,7 @@ describe( 'Testing Mini-Cart', () => {
 		render( <MiniCartBlock /> );
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-		userEvent.click( screen.getByLabelText( /items/i ) );
+		await userEvent.click( screen.getByLabelText( /items/i ) );
 
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );

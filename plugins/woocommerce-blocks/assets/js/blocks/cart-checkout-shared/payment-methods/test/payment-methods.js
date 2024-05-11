@@ -192,7 +192,7 @@ describe( 'PaymentMethods', () => {
 			expect( savedToken ).toBeNull();
 		} );
 
-		userEvent.click( screen.getByText( 'Select new payment' ) );
+		await userEvent.click( screen.getByText( 'Select new payment' ) );
 
 		await waitFor( () => {
 			const activePaymentMethod = screen.queryByText(

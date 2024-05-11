@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, fireEvent, findByText } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -49,7 +50,7 @@ describe( 'NoticeBanner', () => {
 		expect( summaryElement ).toBeInTheDocument();
 	} );
 
-	test( 'can be dismissed when isDismissible prop is true', () => {
+	test( 'can be dismissed when isDismissible prop is true', async () => {
 		const onRemoveMock = jest.fn();
 		const { getByRole } = render(
 			<NoticeBanner
@@ -61,11 +62,11 @@ describe( 'NoticeBanner', () => {
 			</NoticeBanner>
 		);
 		const closeButton = getByRole( 'button' );
-		fireEvent.click( closeButton );
+		await userEvent.click( closeButton );
 		expect( onRemoveMock ).toHaveBeenCalled();
 	} );
 
-	test( 'calls onRemove function when the notice is dismissed', () => {
+	test( 'calls onRemove function when the notice is dismissed', async () => {
 		const onRemoveMock = jest.fn();
 		const { getByRole } = render(
 			<NoticeBanner status="info" isDismissible onRemove={ onRemoveMock }>
@@ -73,7 +74,7 @@ describe( 'NoticeBanner', () => {
 			</NoticeBanner>
 		);
 		const closeButton = getByRole( 'button' );
-		fireEvent.click( closeButton );
+		await userEvent.click( closeButton );
 		expect( onRemoveMock ).toHaveBeenCalled();
 	} );
 

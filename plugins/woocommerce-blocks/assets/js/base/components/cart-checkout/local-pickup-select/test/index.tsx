@@ -102,7 +102,7 @@ describe( 'LocalPickupSelect', () => {
 
 		expect( screen.getByText( 'Package 1' ) ).toBeInTheDocument();
 	} );
-	it( 'Calls the correct functions when changing selected option', () => {
+	it( 'Calls the correct functions when changing selected option', async () => {
 		const setSelectedOption = jest.fn();
 		const onSelectRate = jest.fn();
 		render(
@@ -111,10 +111,10 @@ describe( 'LocalPickupSelect', () => {
 				onSelectRateOverride={ onSelectRate }
 			/>
 		);
-		userEvent.click( screen.getByText( 'Store 2' ) );
+		await userEvent.click( screen.getByText( 'Store 2' ) );
 		expect( setSelectedOption ).toHaveBeenLastCalledWith( '2' );
 		expect( onSelectRate ).toHaveBeenLastCalledWith( '2' );
-		userEvent.click( screen.getByText( 'Store 1' ) );
+		await userEvent.click( screen.getByText( 'Store 1' ) );
 		expect( setSelectedOption ).toHaveBeenLastCalledWith( '1' );
 		expect( onSelectRate ).toHaveBeenLastCalledWith( '1' );
 	} );

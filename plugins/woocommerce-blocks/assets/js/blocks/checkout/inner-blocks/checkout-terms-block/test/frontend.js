@@ -70,7 +70,7 @@ describe( 'FrontendBlock', () => {
 			container,
 			'I agree to the terms and conditions'
 		);
-		userEvent.click( checkbox );
+		await userEvent.click( checkbox );
 		expect( actionCreators.clearValidationError ).toHaveBeenLastCalledWith(
 			expect.stringMatching( /terms-and-conditions-\d/ )
 		);
