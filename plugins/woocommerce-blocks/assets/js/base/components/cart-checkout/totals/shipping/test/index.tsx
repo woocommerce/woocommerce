@@ -18,6 +18,12 @@ jest.mock( '@wordpress/data', () => ( {
 	useSelect: jest.fn(),
 } ) );
 
+jest.mock( '@wordpress/element', () => ( {
+	...jest.requireActual( '@wordpress/element' ),
+	// Cart and checkout frontend are actually on React 18, but in jest still on React 17.
+	useSyncExternalStore: jest.fn(),
+} ) );
+
 // Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
 wpData.useSelect.mockImplementation(
 	jest.fn().mockImplementation( ( passedMapSelect ) => {
