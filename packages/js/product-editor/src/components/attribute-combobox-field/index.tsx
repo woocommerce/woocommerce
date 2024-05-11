@@ -95,6 +95,7 @@ const AttributesComboboxControl: React.FC<
 	items = [],
 	instanceNumber = 0,
 	isLoading = false,
+	autoFocus = false,
 	onChange,
 } ) => {
 	const [ createNewAttributeOption, updateCreateNewAttributeOption ] =
@@ -177,6 +178,23 @@ const AttributesComboboxControl: React.FC<
 			Object.assign( listContainerElement.style, style );
 		}
 	}, [ instanceNumber ] );
+
+	// Autofocus the input.
+	useEffect( () => {
+		if ( ! comboRef?.current ) {
+			return;
+		}
+
+		const inputElement = comboRef.current.querySelector(
+			'input.components-combobox-control__input'
+		) as HTMLInputElement;
+
+		if ( ! inputElement || ! autoFocus ) {
+			return;
+		}
+
+		inputElement.focus();
+	}, [ autoFocus ] );
 
 	if ( ! help ) {
 		help = ! attributeSelected ? (

@@ -20,6 +20,7 @@ export type AttributesComboboxControlComponent = {
 	label?: string;
 	help?: JSX.Element | string | null;
 	isLoading: boolean;
+	autoFocus?: boolean;
 	placeholder?: string;
 	disabled?: boolean;
 	instanceNumber?: number;
