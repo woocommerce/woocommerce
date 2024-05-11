@@ -8,6 +8,7 @@ import {
 	fireEvent,
 	findByPlaceholderText,
 	queryByPlaceholderText,
+	act,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -18,6 +19,8 @@ import OrderNotes from '../index';
 
 describe( 'Checkout order notes', () => {
 	it( 'Shows a textarea when the checkbox to add order notes is toggled', async () => {
+		const user = userEvent.setup();
+
 		const { container } = render(
 			<OrderNotes
 				disabled={ false }
@@ -31,7 +34,10 @@ describe( 'Checkout order notes', () => {
 			'Add a note to your order'
 		);
 
-		await userEvent.click( checkbox );
+		await act( async () => {
+			await user.click( checkbox );
+		} );
+
 		const textarea = await findByPlaceholderText(
 			container,
 			'Enter a note'
@@ -59,6 +65,7 @@ describe( 'Checkout order notes', () => {
 	} );
 
 	it( 'Retains the order note when toggling the textarea on and off', async () => {
+		const user = userEvent.setup();
 		const onChange = jest.fn();
 		const { container, rerender } = render(
 			<OrderNotes
@@ -74,7 +81,9 @@ describe( 'Checkout order notes', () => {
 			'Add a note to your order'
 		);
 
-		await userEvent.click( checkbox );
+		await act( async () => {
+			await user.click( checkbox );
+		} );
 
 		// The onChange handler should not have been called because the value is the same as what was stored
 		expect( onChange ).not.toHaveBeenCalled();
@@ -83,7 +92,10 @@ describe( 'Checkout order notes', () => {
 			container,
 			'Enter a note'
 		);
-		fireEvent.change( textarea, { target: { value: 'Test message' } } );
+		// eslint-disable-next-line testing-library/no-unnecessary-act -- Act warnings still happen without wrapping in act.
+		await act( async () => {
+			fireEvent.change( textarea, { target: { value: 'Test message' } } );
+		} );
 		expect( onChange ).toHaveBeenLastCalledWith( 'Test message' );
 
 		// Rerender here with the new value to simulate the onChange updating the value
@@ -97,7 +109,10 @@ describe( 'Checkout order notes', () => {
 		);
 
 		// Toggle off.
-		await userEvent.click( checkbox );
+		await act( async () => {
+			await user.click( checkbox );
+		} );
+
 		expect( onChange ).toHaveBeenLastCalledWith( '' );
 
 		// Rerender here with an empty value to simulate the onChange updating the value
@@ -111,7 +126,9 @@ describe( 'Checkout order notes', () => {
 		);
 
 		// Toggle back on.
-		await userEvent.click( checkbox );
+		await act( async () => {
+			await user.click( checkbox );
+		} );
 		expect( onChange ).toHaveBeenLastCalledWith( 'Test message' );
 	} );
 } );
