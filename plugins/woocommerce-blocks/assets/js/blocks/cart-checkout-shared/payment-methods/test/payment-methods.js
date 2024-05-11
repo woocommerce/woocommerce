@@ -133,6 +133,8 @@ describe( 'PaymentMethods', () => {
 	} );
 
 	test( 'selecting new payment method', async () => {
+		const user = userEvent.setup();
+
 		const ShowActivePaymentMethod = () => {
 			const { activePaymentMethod, activeSavedToken } =
 				wpDataFunctions.useSelect( ( select ) => {
@@ -192,7 +194,9 @@ describe( 'PaymentMethods', () => {
 			expect( savedToken ).toBeNull();
 		} );
 
-		await userEvent.click( screen.getByText( 'Select new payment' ) );
+		await act( async () => {
+			await user.click( screen.getByText( 'Select new payment' ) );
+		} );
 
 		await waitFor( () => {
 			const activePaymentMethod = screen.queryByText(
