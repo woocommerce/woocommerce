@@ -12,7 +12,7 @@ import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { TotalsCoupon } from '..';
 
 describe( 'TotalsCoupon', async () => {
-	it( "Shows a validation error when one is in the wc/store/validation data store and doesn't show one when there isn't", () => {
+	it( "Shows a validation error when one is in the wc/store/validation data store and doesn't show one when there isn't", async () => {
 		const { rerender } = render( <TotalsCoupon instanceId={ 'coupon' } /> );
 
 		const openCouponFormButton = screen.getByText( 'Add a coupon' );

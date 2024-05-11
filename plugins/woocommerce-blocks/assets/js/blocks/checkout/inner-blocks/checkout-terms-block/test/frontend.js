@@ -5,6 +5,7 @@ import {
 	render,
 	findByLabelText,
 	queryByLabelText,
+	act,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -60,6 +61,7 @@ describe( 'FrontendBlock', () => {
 	} );
 
 	it( 'Clears any validation errors when the checkbox is checked', async () => {
+		const user = userEvent.setup();
 		const { container } = render(
 			<FrontendBlock
 				checkbox={ true }
@@ -70,7 +72,9 @@ describe( 'FrontendBlock', () => {
 			container,
 			'I agree to the terms and conditions'
 		);
-		await userEvent.click( checkbox );
+		await act( async () => {
+			await user.click( checkbox );
+		} );
 		expect( actionCreators.clearValidationError ).toHaveBeenLastCalledWith(
 			expect.stringMatching( /terms-and-conditions-\d/ )
 		);
