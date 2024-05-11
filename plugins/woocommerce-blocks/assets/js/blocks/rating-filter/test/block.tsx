@@ -78,8 +78,13 @@ const setup = ( params: SetupParams ) => {
 	} );
 
 	const { container, ...utils } = render(
-		<RatingFilterBlock attributes={ attributes } />
+		<RatingFilterBlock attributes={ attributes } />,
+		{ legacyRoot: true }
 	);
+
+	// We need to switch to React 17 rendering to allow these tests to keep passing, but as a result the React
+	// rendering error will be shown.
+	expect( console ).toHaveErrored();
 
 	const getList = () => container.querySelector( selectors.list );
 	const getDropdown = () => screen.queryByRole( 'combobox' );
@@ -309,7 +314,7 @@ describe( 'Filter by Rating block', () => {
 			const rating4Suggestion = getRating4Suggestion();
 
 			if ( rating4Suggestion ) {
-				userEvent.click( rating4Suggestion );
+				await userEvent.click( rating4Suggestion );
 			}
 
 			expect( getRating2Chips() ).toBeInTheDocument();
