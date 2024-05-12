@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import {
-	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
-	Product,
-} from '@woocommerce/data';
+import { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 type VariationSwitcherProps = {
