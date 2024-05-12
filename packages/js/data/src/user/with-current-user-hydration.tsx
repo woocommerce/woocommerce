@@ -25,6 +25,8 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				if ( ! currentUser ) {
 					return;
 				}
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				const { isResolving, hasFinishedResolution } =
 					select( STORE_NAME );
 				return (
@@ -33,6 +35,8 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				);
 			} );
 
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			const { startResolution, finishResolution, receiveCurrentUser } =
 				useDispatch( STORE_NAME );
 
