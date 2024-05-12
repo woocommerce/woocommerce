@@ -2,12 +2,14 @@
  * External dependencies
  */
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
-const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 
 /**
  * Internal dependencies
  */
-const { webpackConfig } = require( '@woocommerce/internal-style-build' );
+const {
+	webpackConfig,
+	plugin,
+} = require( '@woocommerce/internal-style-build' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -24,7 +26,7 @@ module.exports = {
 		rules: webpackConfig.rules,
 	},
 	plugins: [
-		new MiniCssExtractPlugin( {
+		new plugin( {
 			filename: ( data ) => {
 				return data.chunk.name.startsWith( '/build/blocks' )
 					? `[name].css`

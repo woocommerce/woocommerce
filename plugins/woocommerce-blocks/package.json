@@ -277,7 +277,7 @@
 	},
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.1.0"
 	},
 	"dependencies": {
 		"@ariakit/react": "^0.4.4",
