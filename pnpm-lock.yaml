@@ -78,7 +78,7 @@ importers:
         version: 9.0.11
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       lint-staged:
         specifier: ^12.5.0
         version: 12.5.0(enquirer@2.4.1)
@@ -172,10 +172,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-mock-extended:
         specifier: ^1.0.18
         version: 1.0.18(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)))(typescript@5.3.3)
@@ -230,10 +230,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       postcss-loader:
         specifier: ^4.3.0
         version: 4.3.0(postcss@8.4.32)(webpack@5.89.0(webpack-cli@3.3.12))
@@ -360,10 +360,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       mini-css-extract-plugin:
         specifier: ^2.7.6
         version: 2.7.6(webpack@5.89.0(webpack-cli@3.3.12))
@@ -445,7 +445,7 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.6)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.23.6))(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)))(typescript@5.3.3)
@@ -466,7 +466,7 @@ importers:
         version: 10.0.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-allure:
         specifier: ^0.1.3
         version: 0.1.3
@@ -561,10 +561,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       postcss:
         specifier: ^8.4.32
         version: 8.4.32
@@ -895,10 +895,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       postcss:
         specifier: ^8.4.32
         version: 8.4.32
@@ -974,10 +974,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
@@ -1032,10 +1032,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
@@ -1141,10 +1141,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       postcss:
         specifier: ^8.4.32
         version: 8.4.32
@@ -1292,10 +1292,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       redux:
         specifier: ^4.2.1
         version: 4.2.1
@@ -1368,10 +1368,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
@@ -1402,10 +1402,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
@@ -1523,7 +1523,7 @@ importers:
         version: 3.3.7
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-circus:
         specifier: 27.5.1
         version: 27.5.1
@@ -1706,10 +1706,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
@@ -1830,10 +1830,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       postcss:
         specifier: ^8.4.32
         version: 8.4.32
@@ -1915,10 +1915,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
@@ -1961,10 +1961,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
@@ -2058,10 +2058,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.23.5))(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)))(typescript@5.3.3)
@@ -2140,10 +2140,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       resize-observer-polyfill:
         specifier: 1.5.1
         version: 1.5.1
@@ -2204,10 +2204,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
@@ -2289,10 +2289,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
@@ -2353,10 +2353,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       redux:
         specifier: ^4.2.1
         version: 4.2.1
@@ -2405,10 +2405,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
@@ -2505,10 +2505,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       postcss:
         specifier: ^8.4.32
         version: 8.4.32
@@ -2764,10 +2764,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       mini-css-extract-plugin:
         specifier: ^2.7.6
         version: 2.7.6(webpack@5.89.0(webpack-cli@3.3.12))
@@ -2834,10 +2834,10 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-cli:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
@@ -3136,7 +3136,7 @@ importers:
         version: 1.0.0-alpha.2
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       mocha:
         specifier: 7.2.0
         version: 7.2.0
@@ -3638,7 +3638,7 @@ importers:
         version: 11.1.1
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-environment-jsdom:
         specifier: ~27.5.1
         version: 27.5.1
@@ -4609,7 +4609,7 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.6)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.23.6))(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)))(typescript@5.3.3)
@@ -4791,7 +4791,7 @@ importers:
         version: 8.55.0
       jest:
         specifier: ~27.5.1
-        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+        version: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       replace:
         specifier: ^1.2.2
         version: 1.2.2
@@ -29384,7 +29384,7 @@ snapshots:
       - ts-node
       - utf-8-validate
 
-  '@jest/core@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))':
+  '@jest/core@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))':
     dependencies:
       '@jest/console': 27.5.1
       '@jest/reporters': 27.5.1(node-notifier@8.0.2)
@@ -29398,7 +29398,7 @@ snapshots:
       exit: 0.1.2
       graceful-fs: 4.2.11
       jest-changed-files: 27.5.1
-      jest-config: 27.5.1(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      jest-config: 27.5.1(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-haste-map: 27.5.1
       jest-message-util: 27.5.1
       jest-regex-util: 27.5.1
@@ -38827,7 +38827,7 @@ snapshots:
       '@babel/runtime': 7.23.5
       '@wordpress/keycodes': 2.19.3
       '@wordpress/url': 2.22.2(react-native@0.73.0(@babel/core@7.12.9)(@babel/preset-env@7.12.7(@babel/core@7.12.9))(encoding@0.1.13)(react@17.0.2))
-      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       lodash: 4.17.21
       node-fetch: 2.7.0(encoding@0.1.13)
       puppeteer: 2.1.1
@@ -39631,7 +39631,7 @@ snapshots:
   '@wordpress/jest-console@4.1.1(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)))':
     dependencies:
       '@babel/runtime': 7.23.6
-      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-matcher-utils: 26.6.2
       lodash: 4.17.21
 
@@ -39644,7 +39644,7 @@ snapshots:
   '@wordpress/jest-console@5.4.0(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)))':
     dependencies:
       '@babel/runtime': 7.23.5
-      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-matcher-utils: 27.5.1
 
   '@wordpress/jest-console@5.4.0(jest@29.7.0(@types/node@16.18.68)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.2)))':
@@ -39690,7 +39690,7 @@ snapshots:
       babel-jest: 26.6.3(@babel/core@7.12.9)
       enzyme: 3.11.0
       enzyme-to-json: 3.6.2(enzyme@3.11.0)
-      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
     transitivePeerDependencies:
       - '@babel/core'
       - react
@@ -39733,7 +39733,7 @@ snapshots:
       babel-jest: 27.5.1(@babel/core@7.23.5)
       enzyme: 3.11.0
       enzyme-to-json: 3.6.2(enzyme@3.11.0)
-      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
     transitivePeerDependencies:
@@ -45508,7 +45508,7 @@ snapshots:
       eslint: 8.55.0
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.55.0)(typescript@5.3.3))(eslint@8.55.0)(typescript@5.3.3)
-      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -49129,16 +49129,16 @@ snapshots:
       - ts-node
       - utf-8-validate
 
-  jest-cli@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3)):
+  jest-cli@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)):
     dependencies:
-      '@jest/core': 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      '@jest/core': 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       '@jest/test-result': 27.5.1
       '@jest/types': 27.5.1
       chalk: 4.1.2
       exit: 0.1.2
       graceful-fs: 4.2.11
       import-local: 3.1.0
-      jest-config: 27.5.1(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      jest-config: 27.5.1(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-util: 27.5.1
       jest-validate: 27.5.1
       prompts: 2.4.2
@@ -49307,7 +49307,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  jest-config@27.5.1(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3)):
+  jest-config@27.5.1(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)):
     dependencies:
       '@babel/core': 7.23.6
       '@jest/test-sequencer': 27.5.1
@@ -50028,7 +50028,7 @@ snapshots:
 
   jest-mock-extended@1.0.18(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)))(typescript@5.3.3):
     dependencies:
-      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       ts-essentials: 7.0.3(typescript@5.3.3)
       typescript: 5.3.3
 
@@ -50849,11 +50849,11 @@ snapshots:
       - ts-node
       - utf-8-validate
 
-  jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3)):
+  jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)):
     dependencies:
-      '@jest/core': 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      '@jest/core': 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       import-local: 3.1.0
-      jest-cli: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      jest-cli: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
     optionalDependencies:
       node-notifier: 8.0.2
     transitivePeerDependencies:
@@ -58354,7 +58354,7 @@ snapshots:
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
-      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-util: 29.7.0
       json5: 2.2.3
       lodash.memoize: 4.1.2
@@ -58371,7 +58371,7 @@ snapshots:
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
-      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-util: 29.7.0
       json5: 2.2.3
       lodash.memoize: 4.1.2
@@ -58388,7 +58388,7 @@ snapshots:
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
-      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-util: 29.7.0
       json5: 2.2.3
       lodash.memoize: 4.1.2

@@ -58,7 +58,7 @@ export function Header( {
 		{ enabled: productId !== -1 }
 	);
 
-	const lastPersistedProduct = useSelect(
+	const lastPersistedProduct = useSelect< Product | null >(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
 			return productId !== -1
@@ -88,6 +88,8 @@ export function Header( {
 			} );
 	}, [ sidebarWidth ] );
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const isVariation = lastPersistedProduct?.parent_id > 0;
 
 	const selectedImage = isVariation ? product?.image : product?.images;
@@ -222,6 +224,8 @@ export function Header( {
 						) : (
 							getHeaderTitle(
 								editedProductName,
+								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								// @ts-ignore - Arg is not typed correctly.
 								lastPersistedProduct?.name
 							)
 						) }
@@ -235,12 +239,16 @@ export function Header( {
 					{ ! isVariation && (
 						<SaveDraftButton
 							productType={ productType }
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore - Prop is not typed correctly.
 							productStatus={ lastPersistedProduct?.status }
 						/>
 					) }
 
 					<PreviewButton
 						productType={ productType }
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore - Prop is not typed correctly.
 						productStatus={ lastPersistedProduct?.status }
 					/>
 

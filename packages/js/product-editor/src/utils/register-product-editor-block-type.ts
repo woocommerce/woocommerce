@@ -21,7 +21,8 @@ export function useEvaluationContext( context: Record< string, unknown > ) {
 	const productId = useEntityId( 'postType', postType );
 
 	const getEvaluationContext = ( select: typeof WPSelect ) => {
-		// @ts-expect-error There are no types for this.
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		const editedProduct = select( 'core' ).getEditedEntityRecord(
 			'postType',
 			postType,

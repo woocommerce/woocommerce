@@ -61,7 +61,8 @@ export function useProductManager< T = Product >( postType: string ) {
 	const { isValidating, validate } = useValidations< T >();
 	const { isDirty } = useSelect(
 		( select ) => ( {
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			isDirty: select( 'core' ).hasEditsForEntityRecord(
 				'postType',
 				postType,
@@ -78,8 +79,11 @@ export function useProductManager< T = Product >( postType: string ) {
 			await validate( extraProps );
 			const { saveEntityRecord } = dispatch( 'core' );
 
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			const { blocks, content, selection, ...editedProduct } =
-				// @ts-expect-error There are no types for this.
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				wpSelect( 'core' ).getEntityRecordEdits(
 					'postType',
 					postType,
@@ -94,7 +98,8 @@ export function useProductManager< T = Product >( postType: string ) {
 					...extraProps,
 					id,
 				},
-				// @ts-expect-error There are no types for this.
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				{
 					throwOnError: true,
 				}
@@ -148,7 +153,8 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			await validate();
 
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			const { deleteEntityRecord, saveEditedEntityRecord } =
 				dispatch( 'core' );
 
