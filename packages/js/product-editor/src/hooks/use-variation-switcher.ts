@@ -31,7 +31,9 @@ export function useVariationSwitcher( {
 				return {};
 			}
 			const { getEntityRecord } = select( 'core' );
-			const parentProduct = getEntityRecord< Product >(
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			const parentProduct = getEntityRecord(
 				'postType',
 				parentProductType || 'product',
 				parentId
@@ -39,13 +41,19 @@ export function useVariationSwitcher( {
 			if (
 				variationId !== undefined &&
 				parentProduct &&
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				parentProduct.variations
 			) {
 				const activeVariationIndex =
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore
 					parentProduct.variations.indexOf( variationId );
 				const previousVariationIndex =
 					activeVariationIndex > 0 ? activeVariationIndex - 1 : null;
 				const nextVariationIndex =
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore
 					activeVariationIndex !== parentProduct.variations.length - 1
 						? activeVariationIndex + 1
 						: null;
@@ -54,14 +62,20 @@ export function useVariationSwitcher( {
 					activeVariationIndex,
 					nextVariationIndex,
 					previousVariationIndex,
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore
 					numberOfVariations: parentProduct.variations.length,
 					previousVariationId:
 						previousVariationIndex !== null
-							? parentProduct.variations[ previousVariationIndex ]
+							? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							  // @ts-ignore
+							  parentProduct.variations[ previousVariationIndex ]
 							: null,
 					nextVariationId:
 						nextVariationIndex !== null
-							? parentProduct.variations[ nextVariationIndex ]
+							? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							  // @ts-ignore
+							  parentProduct.variations[ nextVariationIndex ]
 							: null,
 				};
 			}

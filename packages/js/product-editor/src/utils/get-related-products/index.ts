@@ -28,15 +28,15 @@ export default async function getRelatedProducts(
 	options: getRelatedProductsOptions = {}
 ): Promise< Product[] | undefined > {
 	const { getEntityRecord } = select( 'core' );
-	const product = getEntityRecord< Product | null >(
-		'postType',
-		'product',
-		productId
-	);
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	const product = getEntityRecord( 'postType', 'product', productId );
 	if ( ! product ) {
 		return;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	let relatedProductIds = product?.related_ids;
 	if ( ! relatedProductIds?.length ) {
 		if ( ! options?.fallbackToRandomProducts ) {
@@ -83,6 +83,7 @@ type getSuggestedProductsForOptions = {
 
 /**
  * Get suggested products for a given post ID.
+ *
  *
  * @param { getSuggestedProductsForOptions } options - Options.
  * @return { Promise<Product[] | undefined> } Suggested products.

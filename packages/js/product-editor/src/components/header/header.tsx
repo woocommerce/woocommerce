@@ -59,6 +59,8 @@ export function Header( {
 	);
 
 	const lastPersistedProduct = useSelect< Product | null >(
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
 			return productId !== -1
