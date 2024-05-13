@@ -273,24 +273,22 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures[ 'product-variation-management' ] ) {
-		pages.push( {
-			container: ProductVariationPage,
-			layout: {
-				header: false,
-			},
-			path: '/product/:productId/variation/:variationId',
-			breadcrumbs: [
-				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
-				__( 'Edit Product Variation', 'woocommerce' ),
-			],
-			navArgs: {
-				id: 'woocommerce-edit-product',
-			},
-			wpOpenMenu: 'menu-posts-product',
-			capability: 'edit_products',
-		} );
-	}
+	pages.push( {
+		container: ProductVariationPage,
+		layout: {
+			header: false,
+		},
+		path: '/product/:productId/variation/:variationId',
+		breadcrumbs: [
+			[ '/edit-product', __( 'Product', 'woocommerce' ) ],
+			__( 'Edit Product Variation', 'woocommerce' ),
+		],
+		navArgs: {
+			id: 'woocommerce-edit-product',
+		},
+		wpOpenMenu: 'menu-posts-product',
+		capability: 'edit_products',
+	} );
 
 	if ( window.wcAdminFeatures.onboarding ) {
 		if ( ! window.wcAdminFeatures[ 'core-profiler' ] ) {
