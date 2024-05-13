@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { compose } from '@wordpress/compose';
-import { MenuItem } from '@woocommerce/components';
+import { MenuItem } from '@wordpress/components';
 import { withPluginContext } from '@wordpress/plugins';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
