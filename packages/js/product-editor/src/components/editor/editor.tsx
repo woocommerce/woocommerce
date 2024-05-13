@@ -65,9 +65,7 @@ export function Editor( { product, productType = 'product' }: EditorProps ) {
 		apiFetch< OptionsResponse >( {
 			path: productConfig.baseURL,
 			method: 'OPTIONS',
-		} ).then( ( results ) => {
-			setSchema( results.schema );
-		} );
+		} ).then( ( results ) => setSchema( results.schema ) );
 	}, [ productConfig ] );
 
 	const updatedLayoutContext = useExtendLayout( 'product-block-editor' );
