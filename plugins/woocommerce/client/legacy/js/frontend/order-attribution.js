@@ -15,14 +15,15 @@
 	/**
 	 * Get the order attribution data.
 	 *
-	 * Returns object full of `null`s if tracking is disabled.
+	 * Returns object full of `null`s if tracking is disabled or if sourcebuster.js is blocked.
 	 *
 	 * @returns {Object} Schema compatible object.
 	 */
-	function getData() {
-		const accessor = params.allowTracking ? propertyAccessor : returnNull;
+	wc_order_attribution.getAttributionData = function() {
+		const accessor = params.allowTracking && isSbjsAvailable() ? propertyAccessor : returnNull;
+		const getter  = isSbjsAvailable() ? sbjs.get : {};
 		const entries = Object.entries( wc_order_attribution.fields )
-				.map( ( [ key, property ] ) => [ key, accessor( sbjs.get, property ) ] );
+			.map( ( [ key, property ] ) => [ key, accessor( getter, property ) ] );
 		return Object.fromEntries( entries );
 	}
 
@@ -56,6 +57,15 @@
 	}
 
 	/**
+	 * Determin whether sourcebuster.js is available.
+	 *
+	 * @returns {boolean} Whether sourcebuster.js is available.
+	 */
+	function isSbjsAvailable() {
+		return typeof sbjs !== 'undefined';
+	}
+
+	/**
 	 * Initialize sourcebuster & set data, or clear cookies & data.
 	 *
 	 * @param {boolean} allow Whether to allow tracking or disable it.
@@ -65,7 +75,7 @@
 		if ( ! allow ) {
 			// Reset cookies, and clear form data.
 			removeTrackingCookies();
-		} else if ( typeof sbjs === 'undefined' ) {
+		} else if ( ! isSbjsAvailable() ) {
 			return; // Do nothing, as sourcebuster.js is not loaded.
 		} else {
 			// If not done yet, initialize sourcebuster.js which populates `sbjs.get` object.
@@ -75,7 +85,7 @@
 				timezone_offset: '0', // utc
 			} );
 		}
-		const values = getData();
+		const values = wc_order_attribution.getAttributionData();
 		updateFormValues( values );
 		updateCheckoutBlockData( values );
 	}
@@ -117,7 +127,7 @@
 			// Update checkout block data once more if the checkout store was loaded after this script.
 			const unsubscribe = window.wp.data.subscribe( function () {
 				unsubscribe();
-				updateCheckoutBlockData( getData() );
+				updateCheckoutBlockData( wc_order_attribution.getAttributionData() );
 			}, CHECKOUT_STORE_KEY );
 		}
 	};
@@ -142,10 +152,10 @@
 			this._fieldNames = Object.keys( wc_order_attribution.fields );
 			// Allow values to be lazily set before CE upgrade.
 			if ( this.hasOwnProperty( '_values' ) ) {
-			  let values = this.values;
-			  // Restore the setter.
-			  delete this.values;
-			  this.values = values || {};
+				let values = this.values;
+				// Restore the setter.
+				delete this.values;
+				this.values = values || {};
 			}
 		}
 		/**
@@ -157,7 +167,7 @@
 		connectedCallback() {
 			let inputs = '';
 			for( const fieldName of this._fieldNames ) {
-				const value = stringifyFalsyInputValue( this.values[ fieldName ] );
+				const value = stringifyFalsyInputValue( ( this.values && this.values[ fieldName ] ) || '' );
 				inputs += `<input type="hidden" name="${params.prefix}${fieldName}" value="${value}"/>`;
 			}
 			this.innerHTML = inputs;
