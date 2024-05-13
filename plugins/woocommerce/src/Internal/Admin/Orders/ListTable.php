@@ -599,20 +599,7 @@ class ListTable extends WP_List_Table {
 
 		// Compute all counts and cache if necessary.
 		if ( is_null( $this->status_count_cache ) ) {
-			$orders_table = OrdersTableDataStore::get_orders_table_name();
-
-			$res = $wpdb->get_results(
-				$wpdb->prepare(
-					"SELECT status, COUNT(*) AS cnt FROM {$orders_table} WHERE type = %s GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$this->order_type
-				),
-				ARRAY_A
-			);
-
-			$this->status_count_cache =
-				$res
-				? array_combine( array_column( $res, 'status' ), array_map( 'absint', array_column( $res, 'cnt' ) ) )
-				: array();
+			$this->status_count_cache = OrderUtil::get_count_for_type( $this->order_type );
 		}
 
 		$status = (array) $status;
@@ -773,15 +760,24 @@ class ListTable extends WP_List_Table {
 		$orders_table = esc_sql( OrdersTableDataStore::get_orders_table_name() );
 		$utc_offset   = wc_timezone_offset();
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$order_dates = $wpdb->get_results(
-			"
-				SELECT DISTINCT YEAR( t.date_created_local ) AS year,
-								MONTH( t.date_created_local ) AS month
-				FROM ( SELECT DATE_ADD( date_created_gmt, INTERVAL $utc_offset SECOND ) AS date_created_local FROM $orders_table WHERE status != 'trash' ) t
-				ORDER BY year DESC, month DESC
-			"
-		);
+		$cache_key   = \WC_Cache_Helper::get_cache_prefix( 'orders' ) . $this->order_type . $utc_offset;
+		$order_dates = wp_cache_get( $cache_key, 'orders' );
+		if ( false === $order_dates ) {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$order_dates = $wpdb->get_results(
+				$wpdb->prepare(
+					"
+						SELECT DISTINCT YEAR( t.date_created_local ) AS year,
+										MONTH( t.date_created_local ) AS month
+						FROM ( SELECT DATE_ADD( date_created_gmt, INTERVAL $utc_offset SECOND ) AS date_created_local FROM $orders_table WHERE type = %s AND status != 'trash' ) t
+						ORDER BY year DESC, month DESC
+					",
+					$this->order_type
+				)
+			);
+
+			wp_cache_set( $cache_key, $order_dates, 'orders' );
+		}
 
 		$m = isset( $_GET['m'] ) ? (int) $_GET['m'] : 0;
 		echo '<select name="m" id="filter-by-date">';
