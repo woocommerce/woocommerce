@@ -103,3 +103,4 @@ export {
 } from './custom-fields';
 
 export { PluginSidebar as __experimentalModalBlockEditorPluginSidebar } from './iframe-editor';
+export { PluginMoreMenuItem as __experimentalModalBlockEditorPluginMoreMenuItem } from './iframe-editor';
