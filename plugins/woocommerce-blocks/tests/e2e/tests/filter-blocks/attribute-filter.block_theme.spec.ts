@@ -4,8 +4,11 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import path from 'path';
 
-const PRODUCT_CATALOG_LINK = '/shop';
-const PRODUCT_CATALOG_TEMPLATE_ID = 'woocommerce/woocommerce//archive-product';
+/**
+ * Internal dependencies
+ */
+import { PRODUCT_CATALOG_LINK, PRODUCT_CATALOG_TEMPLATE_ID } from './constants';
+
 const TEMPLATE_PATH = path.join( __dirname, './attribute-filter.handlebars' );
 
 const COLOR_ATTRIBUTE_VALUES = [ 'Blue', 'Gray', 'Green', 'Red', 'Yellow' ];
