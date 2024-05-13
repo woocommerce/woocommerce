@@ -232,6 +232,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - [CYS] - Fix color inconsistencies in the color palette buttons. [#46216](https://github.com/woocommerce/woocommerce/pull/46216)
 * Fix - [CYS] Fix logo position styles while saving. [#46833](https://github.com/woocommerce/woocommerce/pull/46833)
 * Fix - [CYS] Fix the AI-generated site title comparison. [#46819](https://github.com/woocommerce/woocommerce/pull/46819)
+* Add - Send tracks event for woocommerce.com connect notices [#47003](https://github.com/woocommerce/woocommerce/pull/47003)
 * Add - Add a connect to woocommerce.com notices for unconnected stores in the wc settings and wc marketplace page. [#45536](https://github.com/woocommerce/woocommerce/pull/45536)
 * Add - Add a new task (connect to WooCommerce.com) in WC onboarding tasklist [#46259](https://github.com/woocommerce/woocommerce/pull/46259)
 * Add - Add a tour for the homescreen site status badge. [#46203](https://github.com/woocommerce/woocommerce/pull/46203)
