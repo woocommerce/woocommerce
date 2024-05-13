@@ -67,20 +67,28 @@ const Address2Field = ( {
 		[]
 	);
 
-	const [ userChangedAddress2Field, setUserChangedAddress2Field ] =
+	const [ hasSellerChangedAddress2Field, setSellerChangedAddress2Field ] =
 		useState( false );
 
 	// Toggle address 2 visibility.
 	useEffect( () => {
-		setIsAddress2FieldVisible(
+		/**
+		 * Determine if the address 2 input field should be shown based on the following conditions:
+		 *
+		 * 1. If the address 2 field is required.
+		 * 2. If the address 2 field has a value.
+		 * 3. If the seller has edited the address 2 field.
+		 */
+		const shouldShowAddress2Field =
 			isAddress2FieldRequired ||
-				hasAddress2FieldValue ||
-				userChangedAddress2Field
-		);
+			hasAddress2FieldValue ||
+			hasSellerChangedAddress2Field;
+
+		setIsAddress2FieldVisible( shouldShowAddress2Field );
 	}, [
 		isAddress2FieldRequired,
 		hasAddress2FieldValue,
-		userChangedAddress2Field,
+		hasSellerChangedAddress2Field,
 	] );
 
 	return (
@@ -102,7 +110,7 @@ const Address2Field = ( {
 							...values,
 							[ field.key ]: newValue,
 						} );
-						setUserChangedAddress2Field( true );
+						setSellerChangedAddress2Field( true );
 					} }
 					customValidation={ ( inputObject: HTMLInputElement ) =>
 						customValidationHandler(
@@ -122,7 +130,7 @@ const Address2Field = ( {
 					}
 					onClick={ toggleAddress2FieldVisibility }
 				>
-					{ __( '+ Add apartment, suite, etc.', 'woocommerce' ) }
+					{ __( 'Add apartment, suite, etc.', 'woocommerce' ) }
 				</button>
 			) }
 		</Fragment>
