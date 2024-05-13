@@ -191,6 +191,7 @@ export function PublishButtonMenu( {
 							source: TRACKS_SOURCE,
 						} );
 					}
+					props.onToggle?.( isOpen );
 				} }
 				renderMenu={ renderMenu }
 			/>
