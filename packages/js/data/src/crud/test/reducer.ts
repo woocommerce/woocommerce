@@ -404,11 +404,12 @@ describe( 'crud reducer', () => {
 				options.optimisticQueryUpdate
 			);
 
+			// ItemsCount Key
+			const itemsCountKey = Object.keys( state.itemsCount );
+
 			// ItemsCount should be 1
 			expect( state.itemsCount[ itemsCountQuery ] ).toEqual( 1 ); // Items count
 
-			// ItemsCount Key
-			const itemsCountKey = Object.keys( state.itemsCount );
 			expect( itemsCountKey ).toHaveLength( 1 );
 			expect( itemsCountKey[ 0 ] ).toEqual( itemsCountQuery );
 		} );
