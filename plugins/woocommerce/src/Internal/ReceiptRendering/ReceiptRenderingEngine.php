@@ -272,10 +272,14 @@ class ReceiptRenderingEngine {
 		$line_items      = $order->get_items( 'line_item' );
 		foreach ( $line_items as $line_item ) {
 			$line_item_product = $line_item->get_product();
-			$line_item_title   =
-				( $line_item_product instanceof \WC_Product_Variation ) ?
-					( wc_get_product( $line_item_product->get_parent_id() )->get_name() ) . '. ' . $line_item_product->get_attribute_summary() :
-					$line_item_product->get_name();
+			if ( false === $line_item_product ) {
+				$line_item_title = $line_item->get_name();
+			} else {
+				$line_item_title =
+					( $line_item_product instanceof \WC_Product_Variation ) ?
+						( wc_get_product( $line_item_product->get_parent_id() )->get_name() ) . '. ' . $line_item_product->get_attribute_summary() :
+						$line_item_product->get_name();
+			}
 			$line_items_info[] = array(
 				'type'     => 'product',
 				'item'     => $line_item,

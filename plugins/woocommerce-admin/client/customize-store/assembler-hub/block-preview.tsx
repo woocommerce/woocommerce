@@ -19,7 +19,6 @@ import {
 } from './auto-block-preview';
 import { ChangeHandler } from './hooks/use-editor-blocks';
 import { Toolbar } from './toolbar/toolbar';
-import { IS_TOOLBAR_ENABLED_FEATURE_FLAG } from './toolbar/feature-flag';
 
 export const BlockPreview = ( {
 	blocks,
@@ -44,7 +43,9 @@ export const BlockPreview = ( {
 				onChange={ onChange }
 				useSubRegistry={ useSubRegistry }
 			>
-				{ IS_TOOLBAR_ENABLED_FEATURE_FLAG && <Toolbar /> }
+				{ window.wcAdminFeatures[
+					'pattern-toolkit-full-composability'
+				] && <Toolbar /> }
 				<AutoHeightBlockPreview settings={ settings } { ...props } />
 			</BlockEditorProvider>
 		</>

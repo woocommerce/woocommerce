@@ -39,6 +39,7 @@ declare global {
 			onboarding: boolean;
 			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
+			'pattern-toolkit-full-composability': boolean;
 			'product-variation-management': boolean;
 			'product-virtual-downloadable': boolean;
 			'product-external-affiliate': boolean;
