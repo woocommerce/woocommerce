@@ -97,7 +97,7 @@
           "post_title": "Customizing checkout fields using actions and filters",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/customising-checkout-fields.md",
-          "hash": "95cdfe40544c35e1918a56654d3fe2c42490b3b91ac10713cc1c005baa003686",
+          "hash": "3b0ce072c92206279fc6d49f3aa4cb0e4fbc2da71a2a5f0ffada81c030c397df",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/customising-checkout-fields.md",
           "id": "83097d3b7414557fc80dcf9f8f1a708bbdcdd884"
         },
@@ -1266,5 +1266,5 @@
       "categories": []
     }
   ],
-  "hash": "24c95fd5e28dc3e1fd03ffa495e1487bafc1dc8c3ffa91334f05ac2ea3b12e78"
+  "hash": "556bb0eab0e99ed385dbc32b96008add0b64f01888d4aae6f7051345aae045cc"
 }

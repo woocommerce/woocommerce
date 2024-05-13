@@ -7,6 +7,10 @@ If you are unfamiliar with code and resolving potential conflicts, we have an ex
 
 Custom code should be copied into your child theme's **functions.php** file.
 
+## Note
+
+Some parts of this document only applies to the shortcode Checkout, for adding fields to the Checkout block, [consult this document.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/checkout-block/additional-checkout-fields.md)
+
 ## How Are Checkout Fields Loaded to WooCommerce?
 
 The billing and shipping fields for checkout pull from the countries class `class-wc-countries.php` and the **`get_address_fields`** function. This allows WooCommerce to enable/disable fields based on the user's location.
