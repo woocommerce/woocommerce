@@ -1244,7 +1244,7 @@ importers:
         version: 12.1.3(react-dom@17.0.2)(react@17.0.2)
       '@testing-library/react-hooks':
         specifier: 7.0.2
-        version: 7.0.2(react-dom@17.0.2)(react@17.0.2)
+        version: 7.0.2(react-dom@17.0.2)(react-test-renderer@17.0.2)(react@17.0.2)
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -1293,6 +1293,9 @@ importers:
       jest-cli:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
+      react-test-renderer:
+        specifier: 17.0.2
+        version: 17.0.2(react@17.0.2)
       redux:
         specifier: ^4.2.1
         version: 4.2.1
@@ -2946,7 +2949,7 @@ importers:
         version: 12.1.5(react-dom@17.0.2)(react@17.0.2)
       '@testing-library/react-hooks':
         specifier: 7.0.2
-        version: 7.0.2(react-dom@17.0.2)(react@17.0.2)
+        version: 7.0.2(react-dom@17.0.2)(react-test-renderer@17.0.2)(react@17.0.2)
       '@testing-library/user-event':
         specifier: 13.5.0
         version: 13.5.0(@testing-library/dom@9.3.3)
@@ -3398,7 +3401,7 @@ importers:
         version: 12.1.3(react-dom@17.0.2)(react@17.0.2)
       '@testing-library/react-hooks':
         specifier: 7.0.2
-        version: 7.0.2(react-dom@17.0.2)(react@17.0.2)
+        version: 7.0.2(react-dom@17.0.2)(react-test-renderer@17.0.2)(react@17.0.2)
       '@testing-library/user-event':
         specifier: 13.5.0
         version: 13.5.0(@testing-library/dom@8.11.3)
@@ -19340,7 +19343,7 @@ packages:
       redent: 3.0.0
     dev: true
 
-  /@testing-library/react-hooks@7.0.2(react-dom@17.0.2)(react@17.0.2):
+  /@testing-library/react-hooks@7.0.2(react-dom@17.0.2)(react-test-renderer@17.0.2)(react@17.0.2):
     resolution: {integrity: sha512-dYxpz8u9m4q1TuzfcUApqi8iFfR6R0FaMbr2hjZJy1uC8z+bO/K4v8Gs9eogGKYQop7QsrBTFkv/BCF7MzD2Cg==}
     engines: {node: '>=12'}
     peerDependencies:
@@ -19360,6 +19363,7 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
       react-error-boundary: 3.1.4(react@17.0.2)
+      react-test-renderer: 17.0.2(react@17.0.2)
     dev: true
 
   /@testing-library/react-hooks@8.0.1(@types/react@17.0.71)(react-dom@17.0.2)(react@17.0.2):
@@ -46400,7 +46404,7 @@ packages:
     dependencies:
       '@jest/schemas': 29.6.3
       ansi-styles: 5.2.0
-      react-is: 18.2.0
+      react-is: 18.3.1
 
   /pretty-hrtime@1.0.3:
     resolution: {integrity: sha512-66hKPCr+72mlfiSjlEB1+45IjXSqvVAIy6mocupoww4tBFE9R9IhwwUGoI4G++Tc9Aq+2rxOt0RFU6gPcrte0A==}
@@ -47563,9 +47567,6 @@ packages:
   /react-is@18.1.0:
     resolution: {integrity: sha512-Fl7FuabXsJnV5Q1qIOQwx/sagGF18kogb4gpfcG4gjLBWO0WDiiz1ko/ExayuxE7InyQkBLkxRFG5oxY6Uu3Kg==}
     dev: true
-
-  /react-is@18.2.0:
-    resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
 
   /react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
