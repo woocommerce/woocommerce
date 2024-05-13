@@ -8,10 +8,11 @@ import {
 	useLayoutEffect,
 	useEffect,
 	useState,
+	lazy,
+	Suspense,
 } from '@wordpress/element';
 import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
-import { PluginArea } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
@@ -46,11 +47,22 @@ import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved
 import { useProductTemplate } from '../../hooks/use-product-template';
 import { PostTypeContext } from '../../contexts/post-type-context';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
-import { ModalEditor } from '../modal-editor';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { ProductTemplate } from '../../types';
 import { LoadingState } from './loading-state';
+
+const PluginArea = lazy( () =>
+	import( '@wordpress/plugins' ).then( ( { PluginArea } ) => ( {
+		default: PluginArea,
+	} ) )
+);
+
+const ModalEditor = lazy( () =>
+	import( '../modal-editor' ).then( ( { ModalEditor } ) => ( {
+		default: ModalEditor,
+	} ) )
+);
 
 function getLayoutTemplateId(
 	productTemplate: ProductTemplate | undefined,
@@ -243,10 +255,12 @@ export function BlockEditor( {
 
 	if ( isModalEditorOpen ) {
 		return (
-			<ModalEditor
-				onClose={ closeModalEditor }
-				title={ __( 'Edit description', 'woocommerce' ) }
-			/>
+			<Suspense fallback={ null }>
+				<ModalEditor
+					onClose={ closeModalEditor }
+					title={ __( 'Edit description', 'woocommerce' ) }
+				/>
+			</Suspense>
 		);
 	}
 
@@ -274,8 +288,10 @@ export function BlockEditor( {
 					</BlockTools>
 					{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }
 					<PostTypeContext.Provider value={ context.postType! }>
-						{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-						<PluginArea scope="woocommerce-product-block-editor" />
+						<Suspense fallback={ null }>
+							{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+							<PluginArea scope="woocommerce-product-block-editor" />
+						</Suspense>
 					</PostTypeContext.Provider>
 				</BlockEditorProvider>
 			</BlockContextProvider>
