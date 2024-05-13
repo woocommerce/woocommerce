@@ -26,6 +26,10 @@
 	&__body {
 		min-height: 200px;
 		flex: 1 1 auto;
+
+		.woocommerce-new-attribute-modal__table-row {
+			min-height: 80px;
+		}
 	}
 
 	&__table {
@@ -65,7 +69,7 @@
 
 		.components-form-token-field__help {
 			position: absolute;
-			top: 32px;
+			top: 36px;
 			z-index: 0;
 		}
 
@@ -89,6 +93,11 @@
 
 			&:not(.is-disabled) {
 				background-color: white;
+			}
+
+			&:focus-within {
+				outline: none;
+				box-shadow: none;
 			}
 		}
 
