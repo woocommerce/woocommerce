@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent "woocommerce_new_order" from being triggered on orders with "checkout-draft" status
