@@ -1,41 +1,40 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import path from 'path';
 
-/**
- * Internal dependencies
- */
-import { ExtendedTemplate } from '../../types/e2e-test-utils-playwright';
-
+const PRODUCT_CATALOG_LINK = '/shop';
+const PRODUCT_CATALOG_TEMPLATE_ID = 'woocommerce/woocommerce//archive-product';
 const TEMPLATE_PATH = path.join( __dirname, './price-filter.handlebars' );
-
-const test = base.extend< {
-	defaultBlockTemplate: ExtendedTemplate;
-} >( {
-	defaultBlockTemplate: async ( { requestUtils, templateApiUtils }, use ) => {
-		const testingTemplate = await requestUtils.updateProductCatalogTemplate(
-			TEMPLATE_PATH,
-			{
-				attributes: {
-					attributeId: 1,
-				},
-			}
-		);
-		await use( testingTemplate );
-		await templateApiUtils.revertTemplate( testingTemplate.id );
-	},
-} );
 
 test.describe( 'Product Filter: Price Filter Block', () => {
 	test.describe( 'frontend', () => {
+		let testingTemplateId = '';
+
+		test.beforeAll( async ( { requestUtils } ) => {
+			const testingTemplate = await requestUtils.updateTemplateContents(
+				PRODUCT_CATALOG_TEMPLATE_ID,
+				TEMPLATE_PATH,
+				{
+					attributes: {
+						attributeId: 1,
+					},
+				}
+			);
+
+			testingTemplateId = testingTemplate.id;
+		} );
+
+		test.afterAll( async ( { templateApiUtils } ) => {
+			await templateApiUtils.revertTemplate( testingTemplateId );
+		} );
+
 		test( 'With price filters applied it shows the correct price', async ( {
 			page,
-			defaultBlockTemplate,
 		} ) => {
 			await page.goto(
-				`${ defaultBlockTemplate.link }?min_price=20&max_price=67`
+				`${ PRODUCT_CATALOG_LINK }?min_price=20&max_price=67`
 			);
 
 			// Min price input field
@@ -70,10 +69,9 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 		test( 'Changes in the price input field triggers price slider updates', async ( {
 			page,
-			defaultBlockTemplate,
 		} ) => {
 			await page.goto(
-				`${ defaultBlockTemplate.link }?min_price=20&max_price=67`
+				`${ PRODUCT_CATALOG_LINK }?min_price=20&max_price=67`
 			);
 
 			// Min price input field
@@ -112,10 +110,9 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 		test( 'Price input field rejects min price higher than max price', async ( {
 			page,
-			defaultBlockTemplate,
 		} ) => {
 			await page.goto(
-				`${ defaultBlockTemplate.link }?min_price=20&max_price=67`
+				`${ PRODUCT_CATALOG_LINK }?min_price=20&max_price=67`
 			);
 
 			// Min price input field
@@ -137,10 +134,9 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 		test( 'Price input field rejects max price lower than min price', async ( {
 			page,
-			defaultBlockTemplate,
 		} ) => {
 			await page.goto(
-				`${ defaultBlockTemplate.link }?min_price=20&max_price=67`
+				`${ PRODUCT_CATALOG_LINK }?min_price=20&max_price=67`
 			);
 
 			// Max price input field
