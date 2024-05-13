@@ -48,12 +48,9 @@ class AIPatterns {
 	/**
 	 * Make sure the 'woocommerce_blocks_allow_ai_connection' option is set to true if the site is connected to AI.
 	 *
-	 * @param string $option The option name.
-	 * @param string $value The option value.
-	 *
 	 * @return bool
 	 */
-	public function update_ai_connection_allowed_option( $option, $value ): bool {
+	public function update_ai_connection_allowed_option(): bool {
 		$ai_connection = new Connection();
 
 		$site_id = $ai_connection->get_site_id();
@@ -131,11 +128,9 @@ class AIPatterns {
 	/**
 	 * Update the patterns content.
 	 *
-	 * @param string $value The new value saved for the add_option_woo_ai_describe_store_description option.
-	 *
 	 * @return bool|string|\WP_Error
 	 */
-	public function update_patterns_content( $value ) {
+	public function update_patterns_content() {
 		$allow_ai_connection = get_option( 'woocommerce_blocks_allow_ai_connection' );
 
 		if ( ! $allow_ai_connection ) {
