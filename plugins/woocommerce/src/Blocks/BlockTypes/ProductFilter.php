@@ -54,6 +54,25 @@ final class ProductFilter extends AbstractBlock {
 	}
 
 	/**
+	 * Check array for checked item.
+	 *
+	 * @param array $items Items to check.
+	 */
+	private function hasSelectedFilter( $items ) {
+		foreach ( $items as $key => $value ) {
+			if ( 'checked' === $key && true === $value ) {
+				return true;
+			}
+
+			if ( is_array( $value ) && $this->hasSelectedFilter( $value ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -66,8 +85,38 @@ final class ProductFilter extends AbstractBlock {
 			return $content;
 		}
 
+		$tags                = new WP_HTML_Tag_Processor( $content );
+		$has_selected_filter = false;
+
+		while ( $tags->next_tag( 'div' ) ) {
+			$items = $tags->get_attribute( 'data-wc-context' ) ? json_decode( $tags->get_attribute( 'data-wc-context' ), true ) : null;
+
+			// For checked box filters.
+			if ( $items && array_key_exists( 'items', $items ) ) {
+				$has_selected_filter = $this->hasSelectedFilter( $items['items'] );
+				break;
+			}
+
+			// For price range filter.
+			if ( $items && array_key_exists( 'minPrice', $items ) ) {
+				if ( $items['minPrice'] > $items['minRange'] || $items['maxPrice'] < $items['maxRange'] ) {
+					$has_selected_filter = true;
+					break;
+				}
+			}
+
+			// For dropdown filters.
+			if ( $items && array_key_exists( 'selectedItems', $items ) ) {
+				if ( count( $items['selectedItems'] ) > 0 ) {
+					$has_selected_filter = true;
+					break;
+				}
+			}
+		}
+
 		$attributes_data = array(
 			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+			'data-wc-context'     => wp_json_encode( array( 'hasSelectedFilter' => $has_selected_filter ) ),
 			'class'               => 'wc-block-product-filters',
 		);
 
