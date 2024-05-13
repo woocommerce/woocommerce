@@ -189,7 +189,16 @@ class Loader {
 	 * See https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/PromotingAppswithAppBanners/PromotingAppswithAppBanners.html
 	 */
 	public static function smart_app_banner() {
-		if ( PageController::is_admin_or_embed_page() ) {
+		$exlude_paths = array(
+			'/customize-store',
+			'/setup-wizard',
+			'/launch-your-store',
+		);
+
+		/* phpcs:ignore */
+		$path = $_GET['path'] ?? '';
+
+		if ( PageController::is_admin_or_embed_page() && ! in_array( $path, $exlude_paths, true ) ) {
 			echo "
 				<meta name='apple-itunes-app' content='app-id=1389130815'>
 			";
@@ -319,7 +328,7 @@ class Loader {
 			);
 		}
 
-		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
+		$preload_data_endpoints                  = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
 		$preload_data_endpoints['jetpackStatus'] = '/jetpack/v4/connection';
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$preload_data = array_reduce(
