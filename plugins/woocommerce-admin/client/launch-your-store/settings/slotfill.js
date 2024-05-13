@@ -19,7 +19,6 @@ import classNames from 'classnames';
 import { useCopyToClipboard } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting } from '@woocommerce/settings';
-import { isEqual } from 'lodash';
 
 /**
  * Internal dependencies
@@ -59,7 +58,10 @@ const SiteVisibility = () => {
 			'woocommerce-save-button'
 		)[ 0 ];
 		if ( saveButton ) {
-			saveButton.disabled = isEqual( initValues, currentValues );
+			saveButton.disabled =
+				initValues.comingSoon === currentValues.comingSoon &&
+				initValues.storePagesOnly === currentValues.storePagesOnly &&
+				initValues.privateLink === currentValues.privateLink;
 		}
 	}, [ comingSoon, storePagesOnly, privateLink ] );
 
