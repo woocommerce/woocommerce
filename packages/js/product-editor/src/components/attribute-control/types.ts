@@ -1,12 +1,16 @@
 /**
  * External dependencies
  */
-import { ProductProductAttribute } from '@woocommerce/data';
+import {
+	ProductAttributeTerm,
+	ProductProductAttribute,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
+import { AttributesComboboxControlItem } from '../attribute-combobox-field/types';
 
 export type AttributeControlEmptyStateProps = {
 	addAttribute: ( search?: string ) => void;
@@ -48,4 +52,34 @@ export type AttributeControlProps = {
 		globalAttributeHelperMessage?: string;
 		disabledAttributeMessage?: string;
 	};
+};
+
+export type AttributeTableRowProps = {
+	index: number;
+	attribute: EnhancedProductAttribute | null;
+	attributePlaceholder: string;
+	disabledAttributeMessage: string;
+
+	isLoadingAttributes: boolean;
+	attributes: AttributesComboboxControlItem[];
+
+	termPlaceholder: string;
+	termLabel?: string;
+	termsAutoSelection?: 'first' | 'all';
+
+	clearButtonDisabled?: boolean;
+	removeLabel: string;
+
+	onAttributeSelect: (
+		attribute: AttributesComboboxControlItem,
+		index: number
+	) => void;
+
+	onTermsSelect: (
+		terms: ProductAttributeTerm[] | string[],
+		index: number,
+		attribute: EnhancedProductAttribute
+	) => void;
+
+	onRemove: ( index: number ) => void;
 };
