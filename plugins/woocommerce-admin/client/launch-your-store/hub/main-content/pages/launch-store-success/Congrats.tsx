@@ -92,7 +92,18 @@ export const Congrats = ( {
 
 	return (
 		<div className="woocommerce-launch-store__congrats">
-			<ConfettiAnimation delay={ 1000 } />
+			<ConfettiAnimation
+				delay={ 1000 }
+				colors={ [
+					'#DFD1FB',
+					'#FB79D9',
+					'#FFA60E',
+					'#03D479',
+					'#AD86E9',
+					'#7F54B3',
+					'#3C2861',
+				] }
+			/>
 			<div className="woocommerce-launch-store__congrats-header-container">
 				<span className="woologo">
 					<WooLogo />

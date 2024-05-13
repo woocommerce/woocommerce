@@ -17,6 +17,8 @@ type Props = {
 	onChange: ( value: string ) => void;
 	onFocus?: ( event: React.FocusEvent< HTMLInputElement > ) => void;
 	onKeyDown?: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
+	min?: number;
+	max?: number;
 };
 
 const NOT_NUMBERS_OR_SEPARATORS_REGEX = /[^0-9,.]/g;
@@ -26,6 +28,8 @@ export const useNumberInputProps = ( {
 	onChange,
 	onFocus,
 	onKeyDown,
+	min = -Infinity,
+	max = +Infinity,
 }: Props ) => {
 	const { formatNumber, parseNumber } = useProductHelper();
 
@@ -47,20 +51,27 @@ export const useNumberInputProps = ( {
 			const step = Number( event.currentTarget.step || '1' );
 			if ( event.code === 'ArrowUp' ) {
 				event.preventDefault();
-				onChange( String( amount + step ) );
+				if ( amount + step <= max ) onChange( String( amount + step ) );
 			}
 			if ( event.code === 'ArrowDown' ) {
 				event.preventDefault();
-				onChange( String( amount - step ) );
+				if ( amount - step >= min ) onChange( String( amount - step ) );
 			}
 			if ( onKeyDown ) {
 				onKeyDown( event );
 			}
 		},
 		onChange( newValue: string ) {
-			const sanitizeValue = parseNumber(
+			let sanitizeValue = parseNumber(
 				newValue.replace( NOT_NUMBERS_OR_SEPARATORS_REGEX, '' )
 			);
+			const numberValue = Number( sanitizeValue );
+			if ( sanitizeValue && numberValue >= max ) {
+				sanitizeValue = String( max );
+			}
+			if ( sanitizeValue && numberValue <= min ) {
+				sanitizeValue = String( min );
+			}
 			onChange( sanitizeValue );
 		},
 	};
