@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix fatal error when trying to download log files [#47398](https://github.com/woocommerce/woocommerce/pull/47398)
 * Fix - Don't automatically insert hooked customer account block into header for sites running less than WP 6.5 [#47171](https://github.com/woocommerce/woocommerce/pull/47171)
 * Fix - Fix HPOS order searches involving terms with characters resembling URL-encoded characters. [#46972](https://github.com/woocommerce/woocommerce/pull/46972)
 * Fix - Add a bailout to prevent JavaScript errors if Sourcebuster isn't loaded [#46723](https://github.com/woocommerce/woocommerce/pull/46723)
