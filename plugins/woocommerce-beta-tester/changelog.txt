@@ -1,5 +1,8 @@
 *** WooCommerce Beta Tester Changelog ***
 
+2024-05-13 - version 2.3.1
+* Minor - Add Remote Spec Validator to WooCommerce Admin Tester
+
 2023-11-16 - version 2.3.0
 * Minor - Add ability to update block templates logging threshold.
 * Minor - Add Product Editor Developer Tools
