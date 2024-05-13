@@ -109,4 +109,9 @@ $max-button-width: calc((100% - #{ $total-gap-width }) / #{ $max-columns });
 	top: 0;
 	right: 0;
 	transform: translateY(-100%);
+
+	&.is-primary:focus:not(:disabled) {
+		outline: none;
+		box-shadow: none;
+	}
 }
