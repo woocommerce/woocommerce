@@ -1,14 +1,11 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import path from 'path';
 
-/**
- * Internal dependencies
- */
-import { ExtendedTemplate } from '../../types/e2e-test-utils-playwright';
-
+const PRODUCT_CATALOG_LINK = '/shop';
+const PRODUCT_CATALOG_TEMPLATE_ID = 'woocommerce/woocommerce//archive-product';
 const TEMPLATE_PATH = path.join( __dirname, './attribute-filter.handlebars' );
 
 const COLOR_ATTRIBUTE_VALUES = [ 'Blue', 'Gray', 'Green', 'Red', 'Yellow' ];
@@ -21,91 +18,32 @@ const COLOR_ATTRIBUTES_WITH_COUNTS = [
 	'Yellow (1)',
 ];
 
-const test = base.extend< {
-	templateWithShowCounts: ExtendedTemplate;
-	defaultBlockTemplate: ExtendedTemplate;
-	dropdownBlockTemplate: ExtendedTemplate;
-} >( {
-	defaultBlockTemplate: async ( { requestUtils, templateApiUtils }, use ) => {
-		const testingTemplate = await requestUtils.updateProductCatalogTemplate(
-			TEMPLATE_PATH,
-			{
-				attributes: {
-					attributeId: 1,
-				},
-			}
-		);
-		await use( testingTemplate );
-		await templateApiUtils.revertTemplate( testingTemplate.id );
-	},
-
-	templateWithShowCounts: async (
-		{ requestUtils, templateApiUtils },
-		use
-	) => {
-		const testingTemplate = await requestUtils.updateProductCatalogTemplate(
-			TEMPLATE_PATH,
-			{
-				attributes: {
-					attributeId: 1,
-					showCounts: true,
-				},
-			}
-		);
-		await use( testingTemplate );
-		await templateApiUtils.revertTemplate( testingTemplate.id );
-	},
-
-	dropdownBlockTemplate: async (
-		{ requestUtils, templateApiUtils },
-		use
-	) => {
-		const testingTemplate = await requestUtils.updateProductCatalogTemplate(
-			TEMPLATE_PATH,
-			{
-				attributes: {
-					attributeId: 1,
-					displayStyle: 'dropdown',
-				},
-			}
-		);
-		await use( testingTemplate );
-		await templateApiUtils.revertTemplate( testingTemplate.id );
-	},
-} );
-
 test.describe( 'Product Filter: Attribute Block', () => {
 	test.describe( 'With default display style', () => {
-		test.describe( 'With show counts enabled', () => {
-			test( 'Renders checkboxes with associated product counts', async ( {
-				page,
-				templateWithShowCounts,
-			} ) => {
-				await page.goto( templateWithShowCounts.link );
+		let testingTemplateId = '';
 
-				const attributes = page.locator(
-					'.wc-block-components-checkbox__label'
-				);
-
-				await expect( attributes ).toHaveCount( 5 );
-
-				for (
-					let i = 0;
-					i < COLOR_ATTRIBUTES_WITH_COUNTS.length;
-					i++
-				) {
-					await expect( attributes.nth( i ) ).toHaveText(
-						COLOR_ATTRIBUTES_WITH_COUNTS[ i ]
-					);
+		test.beforeAll( async ( { requestUtils } ) => {
+			const testingTemplate = await requestUtils.updateTemplateContents(
+				PRODUCT_CATALOG_TEMPLATE_ID,
+				TEMPLATE_PATH,
+				{
+					attributes: {
+						attributeId: 1,
+					},
 				}
-			} );
+			);
+
+			testingTemplateId = testingTemplate.id;
+		} );
+
+		test.afterAll( async ( { templateApiUtils } ) => {
+			await templateApiUtils.revertTemplate( testingTemplateId );
 		} );
 
 		test( 'renders a checkbox list with the available attribute filters', async ( {
 			page,
-			defaultBlockTemplate,
 		} ) => {
-			await page.goto( defaultBlockTemplate.link );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const attributes = page.locator(
 				'.wc-block-components-checkbox__label'
@@ -122,9 +60,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'filters the list of products by selecting an attribute', async ( {
 			page,
-			defaultBlockTemplate,
 		} ) => {
-			await page.goto( defaultBlockTemplate.link );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const grayCheckbox = page.getByText( 'Gray' );
 			await grayCheckbox.click();
@@ -138,12 +75,73 @@ test.describe( 'Product Filter: Attribute Block', () => {
 		} );
 	} );
 
+	test.describe( 'With show counts enabled', () => {
+		let testingTemplateId = '';
+
+		test.beforeAll( async ( { requestUtils } ) => {
+			const testingTemplate = await requestUtils.updateTemplateContents(
+				PRODUCT_CATALOG_TEMPLATE_ID,
+				TEMPLATE_PATH,
+				{
+					attributes: {
+						attributeId: 1,
+						showCounts: true,
+					},
+				}
+			);
+
+			testingTemplateId = testingTemplate.id;
+		} );
+
+		test.afterAll( async ( { templateApiUtils } ) => {
+			await templateApiUtils.revertTemplate( testingTemplateId );
+		} );
+
+		test( 'Renders checkboxes with associated product counts', async ( {
+			page,
+		} ) => {
+			await page.goto( PRODUCT_CATALOG_LINK );
+
+			const attributes = page.locator(
+				'.wc-block-components-checkbox__label'
+			);
+
+			await expect( attributes ).toHaveCount( 5 );
+
+			for ( let i = 0; i < COLOR_ATTRIBUTES_WITH_COUNTS.length; i++ ) {
+				await expect( attributes.nth( i ) ).toHaveText(
+					COLOR_ATTRIBUTES_WITH_COUNTS[ i ]
+				);
+			}
+		} );
+	} );
+
 	test.describe( "With display style 'dropdown'", () => {
+		let testingTemplateId = '';
+
+		test.beforeAll( async ( { requestUtils } ) => {
+			const testingTemplate = await requestUtils.updateTemplateContents(
+				PRODUCT_CATALOG_TEMPLATE_ID,
+				TEMPLATE_PATH,
+				{
+					attributes: {
+						attributeId: 1,
+						displayStyle: 'dropdown',
+					},
+				}
+			);
+
+			testingTemplateId = testingTemplate.id;
+		} );
+
+		test.afterAll( async ( { templateApiUtils } ) => {
+			await templateApiUtils.revertTemplate( testingTemplateId );
+		} );
+
 		test( 'renders a dropdown list with the available attribute filters', async ( {
 			page,
-			dropdownBlockTemplate,
 		} ) => {
-			await page.goto( dropdownBlockTemplate.link );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'
@@ -161,9 +159,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'Clicking a dropdown option should filter the displayed products', async ( {
 			page,
-			dropdownBlockTemplate,
 		} ) => {
-			await page.goto( dropdownBlockTemplate.link );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'
