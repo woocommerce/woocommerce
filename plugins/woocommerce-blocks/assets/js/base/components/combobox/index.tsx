@@ -112,6 +112,18 @@ const Combobox = ( {
 
 	const [ selectedOption, setSelectedOption ] = useState( initialOption );
 
+	// If the list of options changes and the currently selected option is no longer available,
+	// we should unset the search term and deselect the option.
+	useEffect( () => {
+		if (
+			options.length > 0 &&
+			! options.some( ( option ) => option.value === value )
+		) {
+			setSearchTerm( initialOption?.label || '' );
+			setSelectedOption( initialOption );
+		}
+	}, [ initialOption, value, options ] );
+
 	const matchingSuggestions = useMemo( () => {
 		return findMatchingSuggestions( searchTerm, options );
 	}, [ searchTerm, options ] );
