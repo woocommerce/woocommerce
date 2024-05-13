@@ -7,7 +7,9 @@ on:
         types: [opened]
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
+    # For pull_request_target, cancel concurrent jobs with the same type and branch.
+    # Don't cancel for other events, by grouping on the unique run_id.
+    group: community-label-${{ github.event_name }}-${{ github.event.action }}-${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.ref || github.run_id }}
     cancel-in-progress: true
 
 permissions: {}
