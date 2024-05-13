@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix fatal error when trying to download log files
