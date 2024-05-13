@@ -83,22 +83,3 @@ export const updateTemplateContents = async (
 		data: { ...payload },
 	} );
 };
-
-export const updateProductCatalogTemplate = async (
-	requestUtils: RequestUtils,
-	templatePath: string,
-	data: unknown
-) => {
-	const productCatalogTemplateId = 'woocommerce/woocommerce//archive-product';
-	const productCatalogLink = '/shop';
-
-	const template = await updateTemplateContents(
-		requestUtils,
-		productCatalogTemplateId,
-		templatePath,
-		data
-	);
-
-	template.link = productCatalogLink;
-	return template;
-};
