@@ -89,16 +89,16 @@ export function useSaveDraft( {
 				}
 			);
 
-			const statusToEventMap: {
+			const statusMap: {
 				[ key in Product[ 'status' ] ]?: string;
 			} = {
 				publish: 'product_switch_draft',
 				draft: 'product_save_draft',
 			};
 
-			const eventKey = statusToEventMap[ productStatus ];
-			if ( eventKey ) {
-				recordProductEvent( eventKey, publishedProduct );
+			const eventName = statusMap[ productStatus ];
+			if ( eventName ) {
+				recordProductEvent( eventName, publishedProduct );
 			}
 
 			if ( onSaveSuccess ) {
