@@ -350,7 +350,7 @@ describe( 'crud reducer', () => {
 			expect( state.itemsCount ).toEqual( {} );
 		} );
 
-		it( 'when optimisticQueryUpdate is {}', () => {
+		it( 'when optimisticQueryUpdate is defined', () => {
 			const item: Item = {
 				id: 7,
 				name: 'Off the hook!',
@@ -362,7 +362,7 @@ describe( 'crud reducer', () => {
 			};
 
 			const options = {
-				optimisticQueryUpdate: {},
+				optimisticQueryUpdate: { order_by: 'name' },
 			};
 
 			const state = reducer( defaultState, {
@@ -389,15 +389,28 @@ describe( 'crud reducer', () => {
 				options.optimisticQueryUpdate
 			);
 
+			// Items should have the item id
 			expect( state.items[ itemQuery ].data ).toHaveLength( 1 );
-			expect( state.items[ itemQuery ].data[ 0 ] ).toEqual( item.id );
+			expect( state.items[ itemQuery ].data[ 0 ] ).toEqual( 7 ); // Item id
 
-			// Items Count
+			// Items Key
+			const itemsKey = Object.keys( state.items );
+			expect( itemsKey ).toHaveLength( 1 );
+			expect( itemsKey[ 0 ] ).toEqual( itemQuery );
+
+			// ItemsCount
 			const itemsCountQuery = getRequestIdentifier(
 				CRUD_ACTIONS.GET_ITEMS,
 				options.optimisticQueryUpdate
 			);
-			expect( state.itemsCount[ itemsCountQuery ] ).toEqual( 1 );
+
+			// ItemsCount should be 1
+			expect( state.itemsCount[ itemsCountQuery ] ).toEqual( 1 ); // Items count
+
+			// ItemsCount Key
+			const itemsCountKey = Object.keys( state.itemsCount );
+			expect( itemsCountKey ).toHaveLength( 1 );
+			expect( itemsCountKey[ 0 ] ).toEqual( itemsCountQuery );
 		} );
 	} );
 
