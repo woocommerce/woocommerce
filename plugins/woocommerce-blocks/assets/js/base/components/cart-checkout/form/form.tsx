@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { isPostcode } from '@woocommerce/blocks-checkout';
 import {
 	ValidatedTextInput,
 	type ValidatedTextInputHandle,
@@ -164,22 +163,12 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 							{ ...fieldProps }
 							value={ values.country }
 							onChange={ ( newCountry ) => {
-								const newValues = {
+								onChange( {
 									...values,
 									country: newCountry,
 									state: '',
-								};
-								// Country will impact postcode too. Do we need to clear it?
-								if (
-									values.postcode &&
-									! isPostcode( {
-										postcode: values.postcode,
-										country: newCountry,
-									} )
-								) {
-									newValues.postcode = '';
-								}
-								onChange( newValues );
+									postcode: '',
+								} );
 							} }
 						/>
 					);
