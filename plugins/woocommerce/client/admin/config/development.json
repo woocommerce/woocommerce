@@ -19,6 +19,7 @@
 		"new-product-management-experience": false,
 		"onboarding": true,
 		"onboarding-tasks": true,
+		"pattern-toolkit-full-composability": false,
 		"payment-gateway-suggestions": true,
 		"product-variation-management": true,
 		"product-virtual-downloadable": true,

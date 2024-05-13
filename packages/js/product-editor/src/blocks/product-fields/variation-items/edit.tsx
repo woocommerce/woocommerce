@@ -32,12 +32,8 @@ import { EmptyState } from './empty-state';
 
 export function Edit( {
 	attributes,
-	context,
-}: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > & {
-	context: {
-		isInSelectedTab?: boolean;
-	};
-} ) {
+	context: { isInSelectedTab },
+}: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > ) {
 	const noticeDimissed = useRef( false );
 	const { invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
@@ -83,14 +79,19 @@ export function Edit( {
 			);
 
 			return {
-				totalCountWithoutPrice: productHasOptions
-					? getProductVariationsTotalCount< number >(
-							totalCountWithoutPriceRequestParams
-					  )
-					: 0,
+				totalCountWithoutPrice:
+					isInSelectedTab && productHasOptions
+						? getProductVariationsTotalCount< number >(
+								totalCountWithoutPriceRequestParams
+						  )
+						: 0,
 			};
 		},
-		[ productHasOptions, totalCountWithoutPriceRequestParams ]
+		[
+			isInSelectedTab,
+			productHasOptions,
+			totalCountWithoutPriceRequestParams,
+		]
 	);
 
 	const {
@@ -188,6 +189,7 @@ export function Edit( {
 	return (
 		<div { ...blockProps }>
 			<VariationsTable
+				isVisible={ isInSelectedTab }
 				ref={ variationTableRef as React.Ref< HTMLDivElement > }
 				noticeText={ noticeText }
 				onNoticeDismiss={ () => {
@@ -224,7 +226,7 @@ export function Edit( {
 					}
 				} }
 			/>
-			{ context.isInSelectedTab && <VariableProductTour /> }
+			{ isInSelectedTab && <VariableProductTour /> }
 		</div>
 	);
 }
