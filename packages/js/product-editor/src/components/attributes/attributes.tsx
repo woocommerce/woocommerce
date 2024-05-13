@@ -17,6 +17,11 @@ type AttributesProps = {
 	onChange: ( value: ProductProductAttribute[] ) => void;
 };
 
+/**
+ * This component is no longer in active use.
+ * It is kept here for backward compatibility because is being used in the `AttributesField` component, under
+ * `plugins/woocommerce-admin/client/products/fills/attributes-section/attributes-field.tsx`.
+ */
 export const Attributes: React.FC< AttributesProps > = ( {
 	value,
 	onChange,
