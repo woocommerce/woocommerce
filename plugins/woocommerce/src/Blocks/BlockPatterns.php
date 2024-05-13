@@ -3,6 +3,9 @@ namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
+use Automattic\WooCommerce\Blocks\Domain\Package;
+use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
+use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsLoader;
 
 /**
  * Registers patterns under the `./patterns/` directory and updates their content.
@@ -47,10 +50,12 @@ class BlockPatterns {
 	/**
 	 * Constructor for class
 	 *
+	 * @param Package         $package An instance of Package.
 	 * @param PatternRegistry $pattern_registry An instance of PatternRegistry.
 	 */
-	public function __construct( PatternRegistry $pattern_registry ) {
+	public function __construct( Package $package, PatternRegistry $pattern_registry ) {
 		$this->pattern_registry = $pattern_registry;
+		$this->patterns_path    = $package->get_path( 'patterns' );
 
 		add_action( 'init', array( $this, 'register_block_patterns' ) );
 	}
