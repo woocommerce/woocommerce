@@ -24,6 +24,63 @@ const test = base.extend< {
 
 test.describe( 'Product Filter: Rating Filter Block', () => {
 	test.describe( 'frontend', () => {
+		test( 'clear button is not shown on initial page load', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( defaultBlockPost.link );
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await expect( button ).toBeHidden();
+		} );
+
+		test( 'clear button appears after a filter is applied', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( `${ defaultBlockPost.link }?rating_filter=1` );
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await expect( button ).toBeVisible();
+		} );
+
+		test( 'clear button hides after deselecting all filters', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( `${ defaultBlockPost.link }?rating_filter=1` );
+
+			const ratingCheckboxes = page.getByLabel(
+				/Checkbox: Rated \d out of 5/
+			);
+
+			await ratingCheckboxes.nth( 0 ).uncheck();
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await expect( button ).toBeHidden();
+		} );
+
+		test( 'filters are cleared after clear button is clicked', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( `${ defaultBlockPost.link }?rating_filter=1` );
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await button.click();
+
+			const ratingCheckbox = page.getByLabel(
+				/Checkbox: Rated 1 out of 5/
+			);
+
+			await expect( ratingCheckbox ).toBeVisible();
+			await expect( ratingCheckbox ).not.toBeChecked();
+		} );
+
 		test( 'Renders a checkbox list with the available ratings', async ( {
 			page,
 			defaultBlockPost,
