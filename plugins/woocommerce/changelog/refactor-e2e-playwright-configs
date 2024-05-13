@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Blocks E2E: Refactor Playwright configs and CI workflow
