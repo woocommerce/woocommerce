@@ -114,7 +114,14 @@ class WC_Legacy_API {
 		 * @since 8.5.0
 		 */
 		if ( apply_filters( 'woocommerce_log_legacy_rest_api_usages', true ) ) {
-			wc_get_logger()->info( 'Version: ' . WC_API_REQUEST_VERSION . ", Route: $route, User agent: $user_agent", array( 'source' => 'legacy_rest_api_usages' ) );
+            $user_agent = sanitize_text_field( wp_unslash( $user_agent ) );
+            $route = sanitize_text_field( wp_unslash( $route ) );
+            $info = 'Version: ' . WC_API_REQUEST_VERSION . ", Route: $route, User agent: $user_agent";
+            $ip_address = WC_Geolocation::get_ip_address();
+            if( '' !== $ip_address ) {
+                $info .= ", IP: $ip_address";
+            }
+			wc_get_logger()->info( $info, array( 'source' => 'legacy_rest_api_usages' ) );
 		}
 	}
 

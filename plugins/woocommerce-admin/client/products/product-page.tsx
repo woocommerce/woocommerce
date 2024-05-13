@@ -5,15 +5,15 @@ import {
 	__experimentalEditor as Editor,
 	__experimentalInitBlocks as initBlocks,
 	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
-	ProductEditorSettings,
 	productApiFetchMiddleware,
+	productEditorHeaderApiFetchMiddleware,
 	TRACKS_SOURCE,
 	__experimentalProductMVPCESFooter as FeedbackBar,
-	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
-	ProductPageSkeleton,
+	__experimentalEditorLoadingContext as EditorLoadingContext,
 } from '@woocommerce/product-editor';
+import { Spinner } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { useEffect } from '@wordpress/element';
+import React, { lazy, Suspense, useContext, useEffect } from 'react';
 import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
 import { useParams } from 'react-router-dom';
 import { WooFooterItem } from '@woocommerce/admin-layout';
@@ -22,13 +22,21 @@ import { WooFooterItem } from '@woocommerce/admin-layout';
  * Internal dependencies
  */
 import { useProductEntityRecord } from './hooks/use-product-entity-record';
-import BlockEditorTourWrapper from './tour/block-editor/block-editor-tour-wrapper';
 import { MoreMenuFill } from './fills/product-block-editor-fills';
 import './product-page.scss';
 
-declare const productBlockEditorSettings: ProductEditorSettings;
-
+productEditorHeaderApiFetchMiddleware();
 productApiFetchMiddleware();
+
+// Lazy load components
+const BlockEditorTourWrapper = lazy(
+	() => import( './tour/block-editor/block-editor-tour-wrapper' )
+);
+const ProductMVPFeedbackModalContainer = lazy( () =>
+	import( '@woocommerce/product-editor' ).then( ( module ) => ( {
+		default: module.__experimentalProductMVPFeedbackModalContainer,
+	} ) )
+);
 
 export default function ProductPage() {
 	const { productId } = useParams();
@@ -36,27 +44,57 @@ export default function ProductPage() {
 	const product = useProductEntityRecord( productId );
 
 	useEffect( () => {
-		registerPlugin( 'wc-admin-more-menu', {
+		document.body.classList.add( 'is-product-editor' );
+		registerPlugin( 'wc-admin-product-editor', {
 			// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 			scope: 'woocommerce-product-block-editor',
-			render: () => (
-				<>
-					<WooProductMoreMenuItem>
-						{ ( { onClose }: { onClose: () => void } ) => (
-							<MoreMenuFill onClose={ onClose } />
-						) }
-					</WooProductMoreMenuItem>
-				</>
-			),
+			render: () => {
+				// eslint-disable-next-line react-hooks/rules-of-hooks
+				const isEditorLoading = useContext( EditorLoadingContext );
+
+				if ( isEditorLoading ) {
+					return null;
+				}
+
+				return (
+					<>
+						<WooProductMoreMenuItem>
+							{ ( { onClose }: { onClose: () => void } ) => (
+								<MoreMenuFill onClose={ onClose } />
+							) }
+						</WooProductMoreMenuItem>
+
+						<WooFooterItem>
+							<>
+								<FeedbackBar productType="product" />
+								<Suspense fallback={ <Spinner /> }>
+									<ProductMVPFeedbackModalContainer
+										productId={
+											productId
+												? parseInt( productId, 10 )
+												: undefined
+										}
+									/>
+								</Suspense>
+							</>
+						</WooFooterItem>
+
+						<Suspense fallback={ <Spinner /> }>
+							<BlockEditorTourWrapper />
+						</Suspense>
+					</>
+				);
+			},
 		} );
 
 		const unregisterBlocks = initBlocks();
 
 		return () => {
+			document.body.classList.remove( 'is-product-editor' );
 			unregisterPlugin( 'wc-admin-more-menu' );
 			unregisterBlocks();
 		};
-	}, [] );
+	}, [ productId ] );
 
 	useEffect(
 		function trackViewEvents() {
@@ -74,25 +112,9 @@ export default function ProductPage() {
 		[ productId ]
 	);
 
-	if ( ! product?.id ) {
-		return <ProductPageSkeleton />;
-	}
-
 	return (
 		<>
-			<Editor
-				product={ product }
-				settings={ productBlockEditorSettings || {} }
-			/>
-			<WooFooterItem>
-				<>
-					<FeedbackBar productType="product" />
-					<ProductMVPFeedbackModalContainer
-						productId={ product.id }
-					/>
-				</>
-			</WooFooterItem>
-			<BlockEditorTourWrapper />
+			<Editor product={ product } />
 		</>
 	);
 }

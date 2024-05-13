@@ -66,24 +66,65 @@ test.describe( 'Bulk edit orders', () => {
 
 	test( 'can bulk update order status', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
-		
+
 		// expect order status 'processing' to show
-		await expect( page.locator( `:is(#order-${ orderId1 }, #post-${ orderId1 })` ).getByText( 'Processing' ) ).toBeVisible();
-		await expect( page.locator( `:is(#order-${ orderId2 }, #post-${ orderId2 })` ).getByText( 'Processing' ) ).toBeVisible();
-		await expect( page.locator( `:is(#order-${ orderId3 }, #post-${ orderId3 })` ).getByText( 'Processing' ) ).toBeVisible();
-		await expect( page.locator( `:is(#order-${ orderId4 }, #post-${ orderId4 })` ).getByText( 'Processing' ) ).toBeVisible();
-		await expect( page.locator( `:is(#order-${ orderId5 }, #post-${ orderId5 })` ).getByText( 'Processing' ) ).toBeVisible();
+		await expect(
+			page
+				.locator( `:is(#order-${ orderId1 }, #post-${ orderId1 })` )
+				.getByText( 'Processing' )
+		).toBeVisible();
+		await expect(
+			page
+				.locator( `:is(#order-${ orderId2 }, #post-${ orderId2 })` )
+				.getByText( 'Processing' )
+		).toBeVisible();
+		await expect(
+			page
+				.locator( `:is(#order-${ orderId3 }, #post-${ orderId3 })` )
+				.getByText( 'Processing' )
+		).toBeVisible();
+		await expect(
+			page
+				.locator( `:is(#order-${ orderId4 }, #post-${ orderId4 })` )
+				.getByText( 'Processing' )
+		).toBeVisible();
+		await expect(
+			page
+				.locator( `:is(#order-${ orderId5 }, #post-${ orderId5 })` )
+				.getByText( 'Processing' )
+		).toBeVisible();
 
 		await page.locator( '#cb-select-all-1' ).click();
-		await page.locator( '#bulk-action-selector-top' ).selectOption( 'Change status to completed' );
-		await page.locator('#doaction').click();
+		await page
+			.locator( '#bulk-action-selector-top' )
+			.selectOption( 'Change status to completed' );
+		await page.locator( '#doaction' ).click();
 
 		// expect order status 'completed' to show
-		await expect( page.locator( `:is(#order-${ orderId1 }, #post-${ orderId1 })`).getByText( 'Completed' ) ).toBeVisible();
-		await expect( page.locator( `:is(#order-${ orderId2 }, #post-${ orderId2 })`).getByText( 'Completed' ) ).toBeVisible();
-		await expect( page.locator( `:is(#order-${ orderId3 }, #post-${ orderId3 })`).getByText( 'Completed' ) ).toBeVisible();
-		await expect( page.locator( `:is(#order-${ orderId4 }, #post-${ orderId4 })`).getByText( 'Completed' ) ).toBeVisible();
-		await expect( page.locator( `:is(#order-${ orderId5 }, #post-${ orderId5 })`).getByText( 'Completed' ) ).toBeVisible();
+		await expect(
+			page
+				.locator( `:is(#order-${ orderId1 }, #post-${ orderId1 })` )
+				.getByText( 'Completed' )
+		).toBeVisible();
+		await expect(
+			page
+				.locator( `:is(#order-${ orderId2 }, #post-${ orderId2 })` )
+				.getByText( 'Completed' )
+		).toBeVisible();
+		await expect(
+			page
+				.locator( `:is(#order-${ orderId3 }, #post-${ orderId3 })` )
+				.getByText( 'Completed' )
+		).toBeVisible();
+		await expect(
+			page
+				.locator( `:is(#order-${ orderId4 }, #post-${ orderId4 })` )
+				.getByText( 'Completed' )
+		).toBeVisible();
+		await expect(
+			page
+				.locator( `:is(#order-${ orderId5 }, #post-${ orderId5 })` )
+				.getByText( 'Completed' )
+		).toBeVisible();
 	} );
-
 } );

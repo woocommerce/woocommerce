@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Logging\Settings;
 use PclZip;
 use WC_Cache_Helper;
 use WP_Error;
@@ -76,20 +77,6 @@ class FileController {
 	private const SEARCH_CACHE_KEY = 'logs_previous_search';
 
 	/**
-	 * The absolute path to the log directory.
-	 *
-	 * @var string
-	 */
-	private $log_directory;
-
-	/**
-	 * Class FileController
-	 */
-	public function __construct() {
-		$this->log_directory = trailingslashit( Constants::get_constant( 'WC_LOG_DIR' ) );
-	}
-
-	/**
 	 * Get the file size limit that determines when to rotate a file.
 	 *
 	 * @return int
@@ -141,7 +128,7 @@ class FileController {
 		}
 
 		if ( ! $file instanceof File ) {
-			$new_path = $this->log_directory . $this->generate_filename( $source, $time );
+			$new_path = Settings::get_log_directory() . $this->generate_filename( $source, $time );
 			$file     = new File( $new_path );
 		}
 
@@ -217,7 +204,7 @@ class FileController {
 		$args = wp_parse_args( $args, self::DEFAULTS_GET_FILES );
 
 		$pattern = $args['source'] . '*.log';
-		$paths   = glob( $this->log_directory . $pattern );
+		$paths   = glob( Settings::get_log_directory() . $pattern );
 
 		if ( false === $paths ) {
 			return new WP_Error(
@@ -332,14 +319,15 @@ class FileController {
 	 * @return File[]
 	 */
 	public function get_files_by_id( array $file_ids ): array {
-		$paths = array();
+		$log_directory = Settings::get_log_directory();
+		$paths         = array();
 
 		foreach ( $file_ids as $file_id ) {
 			// Look for the standard filename format first, which includes a hash.
-			$glob = glob( $this->log_directory . $file_id . '-*.log' );
+			$glob = glob( $log_directory . $file_id . '-*.log' );
 
 			if ( ! $glob ) {
-				$glob = glob( $this->log_directory . $file_id . '.log' );
+				$glob = glob( $log_directory . $file_id . '.log' );
 			}
 
 			if ( is_array( $glob ) ) {
@@ -423,7 +411,7 @@ class FileController {
 
 		$created_pattern = $created ? '-' . gmdate( 'Y-m-d', $created ) . '-' : '';
 
-		$rotation_pattern = $this->log_directory . $source . $rotations_pattern . $created_pattern . '*.log';
+		$rotation_pattern = Settings::get_log_directory() . $source . $rotations_pattern . $created_pattern . '*.log';
 		$rotation_paths   = glob( $rotation_pattern );
 		$rotation_files   = $this->convert_paths_to_objects( $rotation_paths );
 		foreach ( $rotation_files as $rotation_file ) {
@@ -462,7 +450,7 @@ class FileController {
 	 * @return array|WP_Error
 	 */
 	public function get_file_sources() {
-		$paths = glob( $this->log_directory . '*.log' );
+		$paths = glob( Settings::get_log_directory() . '*.log' );
 		if ( false === $paths ) {
 			return new WP_Error(
 				'wc_log_directory_error',
@@ -493,10 +481,7 @@ class FileController {
 
 		$files = $this->get_files_by_id( $file_ids );
 		foreach ( $files as $file ) {
-			$result = false;
-			if ( $file->is_writable() ) {
-				$result = $file->delete();
-			}
+			$result = $file->delete();
 
 			if ( true === $result ) {
 				$deleted ++;
@@ -662,6 +647,26 @@ class FileController {
 		}
 
 		return array_slice( $matched_lines, $args['offset'], $args['per_page'] );
+	}
+
+	/**
+	 * Calculate the size, in bytes, of the log directory.
+	 *
+	 * @return int
+	 */
+	public function get_log_directory_size(): int {
+		$bytes = 0;
+		$path  = realpath( Settings::get_log_directory() );
+
+		if ( wp_is_writable( $path ) ) {
+			$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $path, \FilesystemIterator::SKIP_DOTS ), \RecursiveIteratorIterator::CATCH_GET_CHILD );
+
+			foreach ( $iterator as $file ) {
+				$bytes += $file->getSize();
+			}
+		}
+
+		return $bytes;
 	}
 
 	/**

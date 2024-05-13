@@ -1,5 +1,6 @@
 ---
 post_title: Add or modify states
+tags: code-snippet
 ---
 
 Add this code to your child theme's `functions.php` file or via a plugin that allows custom functions to be added, such as the [Code Snippets](https://wordpress.org/plugins/code-snippets/) plugin. Avoid adding custom code directly to your parent theme's functions.php file, as this will be wiped entirely when you update the theme.

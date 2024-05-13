@@ -20,6 +20,7 @@ import * as icons from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -31,6 +32,7 @@ import { useEntityId } from '@wordpress/core-data';
 import { ProductEditorSettings } from '../../../components';
 import { BlockFill } from '../../../components/block-slot-fill';
 import { useValidations } from '../../../contexts/validation-context';
+import { TRACKS_SOURCE } from '../../../constants';
 import {
 	WPError,
 	getProductErrorMessage,
@@ -40,6 +42,7 @@ import type {
 	ProductTemplate,
 } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
+import * as wooIcons from '../../../icons';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
@@ -57,10 +60,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const [ supportedProductTemplates, unsupportedProductTemplates ] =
 		productTemplates.reduce< [ ProductTemplate[], ProductTemplate[] ] >(
 			( [ supported, unsupported ], productTemplate ) => {
-				if ( productTemplate.layoutTemplateId ) {
-					supported.push( productTemplate );
-				} else {
-					unsupported.push( productTemplate );
+				if ( productTemplate.isSelectableByUser ) {
+					if ( productTemplate.layoutTemplateId ) {
+						supported.push( productTemplate );
+					} else {
+						unsupported.push( productTemplate );
+					}
 				}
 				return [ supported, unsupported ];
 			},
@@ -111,6 +116,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	) {
 		return async function handleMenuItemClick() {
 			try {
+				recordEvent( 'product_template_selector_selected', {
+					source: TRACKS_SOURCE,
+					selected_template: productTemplate.id,
+					unsupported_template: ! productTemplate.layoutTemplateId,
+				} );
+
 				if ( ! productTemplate.layoutTemplateId ) {
 					setUnsupportedProductTemplate( productTemplate );
 					onClose();
@@ -145,6 +156,11 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 				createSuccessNotice(
 					__( 'Product type changed.', 'woocommerce' )
 				);
+
+				recordEvent( 'product_template_changed', {
+					source: TRACKS_SOURCE,
+					template: productTemplate.id,
+				} );
 			} catch ( error ) {
 				const message = getProductErrorMessage( error as WPError );
 				createErrorNotice( message );
@@ -163,9 +179,9 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		if ( /^https?:\/\//.test( iconId ) ) {
 			icon = <img src={ iconId } alt={ alt } />;
 		} else {
-			if ( ! ( iconId in icons ) ) return undefined;
+			if ( ! ( iconId in icons || iconId in wooIcons ) ) return undefined;
 
-			icon = icons[ iconId as never ];
+			icon = icons[ iconId as never ] || wooIcons[ iconId as never ];
 		}
 
 		return <Icon icon={ icon } size={ 24 } />;
@@ -201,7 +217,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		};
 	}
 
-	async function handleModelChangeClick() {
+	async function handleModalChangeClick() {
 		try {
 			if ( isSaving ) return;
 
@@ -245,6 +261,11 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 			createSuccessNotice( __( 'Product type changed.', 'woocommerce' ) );
 
+			recordEvent( 'product_template_changed', {
+				source: TRACKS_SOURCE,
+				template: productTemplateId,
+			} );
+
 			// Let the server manage the redirection when the product is not supported
 			// by the product editor.
 			window.location.href = getNewPath( {}, `/product/${ productId }` );
@@ -252,6 +273,24 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 			const message = getProductErrorMessage( error as WPError );
 			createErrorNotice( message );
 		}
+	}
+
+	function toogleButtonClickHandler( isOpen: boolean, onToggle: () => void ) {
+		return function onClick() {
+			onToggle();
+
+			if ( ! isOpen ) {
+				recordEvent( 'product_template_selector_open', {
+					source: TRACKS_SOURCE,
+					supported_templates: supportedProductTemplates.map(
+						( productTemplate ) => productTemplate.id
+					),
+					unsupported_template: unsupportedProductTemplates.map(
+						( productTemplate ) => productTemplate.id
+					),
+				} );
+			}
+		};
 	}
 
 	return (
@@ -275,8 +314,8 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 				</p>
 
 				<Dropdown
-					focusOnMount={ false }
 					// @ts-expect-error Property does exists
+					focusOnMount={ true }
 					popoverProps={ {
 						placement: 'bottom-start',
 					} }
@@ -284,7 +323,10 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						<Button
 							aria-expanded={ isOpen }
 							variant="link"
-							onClick={ onToggle }
+							onClick={ toogleButtonClickHandler(
+								isOpen,
+								onToggle
+							) }
 						>
 							<span>
 								{ __( 'Change product type', 'woocommerce' ) }
@@ -302,7 +344,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 							{ unsupportedProductTemplates.length > 0 && (
 								<MenuGroup>
 									<Dropdown
-										focusOnMount={ false }
 										// @ts-expect-error Property does exists
 										popoverProps={ {
 											placement: 'right-start',
@@ -383,7 +424,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 								variant="primary"
 								isBusy={ isSaving }
 								aria-disabled={ isSaving }
-								onClick={ handleModelChangeClick }
+								onClick={ handleModalChangeClick }
 							>
 								{ __( 'Change', 'woocommerce' ) }
 							</Button>

@@ -19,9 +19,27 @@ import { ProductListProps } from './types';
 export function ProductList( {
 	products,
 	onRemove,
+	onEdit,
+	onPreview,
 	className,
 	...props
 }: ProductListProps ) {
+	function nameLinkClickHandler( product: Product ) {
+		return function handleNameLinkClick() {
+			if ( onEdit ) {
+				onEdit( product );
+			}
+		};
+	}
+
+	function previewLinkClickHandler( product: Product ) {
+		return function handlePreviewLinkClick() {
+			if ( onPreview ) {
+				onPreview( product );
+			}
+		};
+	}
+
 	function removeClickHandler( product: Product ) {
 		return function handleRemoveClick() {
 			if ( onRemove ) {
@@ -66,6 +84,9 @@ export function ProductList( {
 										) }
 										target="_blank"
 										rel="noreferrer"
+										onClick={ nameLinkClickHandler(
+											product
+										) }
 									>
 										{ product.name }
 									</a>
@@ -89,6 +110,9 @@ export function ProductList( {
 									href={ product.permalink }
 									target="_blank"
 									rel="noreferrer"
+									onClick={ previewLinkClickHandler(
+										product
+									) }
 								/>
 								<Button
 									icon={ closeSmall }

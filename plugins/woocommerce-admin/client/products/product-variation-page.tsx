@@ -5,12 +5,11 @@ import {
 	__experimentalEditor as Editor,
 	__experimentalInitBlocks as initBlocks,
 	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
-	ProductEditorSettings,
 	productApiFetchMiddleware,
+	productEditorHeaderApiFetchMiddleware,
 	TRACKS_SOURCE,
 	__experimentalVariationSwitcherFooter as VariationSwitcherFooter,
 	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
-	ProductPageSkeleton,
 } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
@@ -26,8 +25,7 @@ import { useProductVariationEntityRecord } from './hooks/use-product-variation-e
 import { DeleteVariationMenuItem } from './fills/more-menu-items';
 import './product-page.scss';
 
-declare const productBlockEditorSettings: ProductEditorSettings;
-
+productEditorHeaderApiFetchMiddleware();
 productApiFetchMiddleware();
 
 export default function ProductPage() {
@@ -80,26 +78,18 @@ export default function ProductPage() {
 		[ productId ]
 	);
 
-	if ( ! variation?.id ) {
-		return <ProductPageSkeleton />;
-	}
-
 	return (
 		<>
-			<Editor
-				product={ variation }
-				productType="product_variation"
-				settings={ productBlockEditorSettings || {} }
-			/>
+			<Editor product={ variation } productType="product_variation" />
 			<WooFooterItem order={ 0 }>
 				<>
 					<VariationSwitcherFooter
-						parentId={ variation.parent_id }
-						variationId={ variation.id }
+						parentId={ variation?.parent_id }
+						variationId={ variation?.id }
 					/>
 
 					<ProductMVPFeedbackModalContainer
-						productId={ variation.parent_id }
+						productId={ variation?.parent_id }
 					/>
 				</>
 			</WooFooterItem>

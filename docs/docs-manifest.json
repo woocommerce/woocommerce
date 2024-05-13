@@ -1,16 +1,9 @@
 {
   "posts": [
     {
-      "post_title": "Webhooks",
-      "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/webhooks.md",
-      "hash": "6b227e0f2eecece15cf0bbb82aa4fdb630ce3405d07253fd4a5683369e43be8e",
-      "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/webhooks.md",
-      "id": "2c687171ced32ac451780d6ac95b29d19c70b0b5"
-    },
-    {
       "post_title": "WooCommerce developer documentation",
       "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/README.md",
-      "hash": "5090b3208cadaa22f3c85d563ccd8f86194ff9e61c614df6021be805050713f2",
+      "hash": "4859cef0db714b893c202eeda0aec07131a840aa22efba21e1c031c3160d1416",
       "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/README.md",
       "id": "65f434b31529b2793f7f7adcadfec487c797bdd2",
       "links": {
@@ -26,16 +19,28 @@
       "category_title": "Building a Woo Store",
       "posts": [
         {
-          "post_title": "Configuring caching plugins for WooCommerce",
+          "post_title": "Working with Webhooks in WooCommerce",
+          "menu_title": "Using Webhooks",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/webhooks.md",
+          "hash": "102727c5217162eb5a363f95664f0c1554dce96c58e4b506cd350d50800a5381",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/webhooks.md",
+          "id": "1629a329b1f4f1f24bba60f89e6f17c695b7ad0d"
+        },
+        {
+          "post_title": "How to configure caching plugins for WooCommerce",
+          "menu_title": "Configure caching plugins",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/configuring-caching-plugins.md",
-          "hash": "3f9ccfcf6ebfe03d0f2fd03e3ed2d8d0b0413ae0ca3e19da4ac55163c9b0092c",
+          "hash": "5f0d999813ace7d5a9b2ae830d67b50c05806d87d1ba1cbb2d2c88a69aec1328",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/configuring-caching-plugins.md",
           "id": "9f484f8db1111fa6c1b6108d40939c967eea7f47"
         },
         {
-          "post_title": "Adding a custom field to simple and variable products",
+          "post_title": "How to add a custom field to simple and variable products",
+          "menu_title": "Add custom fields to products",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
-          "hash": "efe8f62dbeee2af886d0e0919d6af921ce2eba4e1f888923028dd1c152eb7ce1",
+          "hash": "72eba9999d9f1a152a10d27df349e666d1c3735fd3f1328a50c69c846dd18bed",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
           "id": "64b686dcd5fdd4842be2fc570108231d5a8bfc1b"
         }
@@ -49,78 +54,100 @@
       "posts": [
         {
           "post_title": "Useful core functions",
+          "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/useful-functions.md",
-          "hash": "c70827126f487ab779fe5e2b5763e6118845a6d991a6d3e0bd2cc1bf779b9344",
+          "hash": "3d102e671585a2de818fd5fdb84110c99ca55b5adc2698d07118beac27e59c94",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/useful-functions.md",
           "id": "0d99f1dee7c104b5899fd62b96157fb6709ebfb8"
         },
         {
           "post_title": "Unhook and remove WooCommerce emails",
+          "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/unhook--remove-woocommerce-emails.md",
-          "hash": "e43b34f7d7e7a6bd3ccd8d02cd4e3f0c7438d7d5fcab62f4272d5d3379343ace",
+          "hash": "9b10cc18f64970b1c919dc1b320497e66444befcae6733d2dc7c8ec07b564e6d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/unhook--remove-woocommerce-emails.md",
           "id": "0fdfe3b483ae74a9e5dc1fc21b80814462222ec3"
         },
         {
           "post_title": "Rename a country",
+          "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/rename-a-country.md",
-          "hash": "cd55e0d6af7053c2e9922410e22778051d6f33df4e472aca5f0dd0d90b68391b",
+          "hash": "80086f76587535c16e79d987ba00544766b167fe33fd435544c8b80683c5f946",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/rename-a-country.md",
           "id": "67a49394f2e8ad0f8f81333207679be770bc8038"
         },
         {
-          "post_title": "Change number of related products output",
+          "post_title": "Change number of related products displayed",
+          "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/number-of-products-per-row.md",
-          "hash": "aaa609cd4081b02d107c0be27a9a401ce97e2137c011cc9913e077dea39c4e4a",
+          "hash": "58287de9fc0318daa8a604602d1384a7298d1227f9b99063c5402ccd521f8549",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/number-of-products-per-row.md",
           "id": "7369dc328c49206771a2f8d0da5d920c480b5207"
         },
         {
+          "post_title": "Add link to logged data",
+          "menu_title": "Add link to logged data",
+          "tags": "code-snippets",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/link-to-logged-data.md",
+          "hash": "fd1c3a58da8b7eed11da841d901b4d3cc117c6753c3b3834f3de41ea266490b9",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/link-to-logged-data.md",
+          "id": "34da337f79be5ce857024f541a99d302174ca37d"
+        },
+        {
           "post_title": "Customizing checkout fields using actions and filters",
+          "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/customising-checkout-fields.md",
-          "hash": "383cefe759727f38880a6549973ddaa0ed2cf9d21b9fbab137510f723c7cfa37",
+          "hash": "95cdfe40544c35e1918a56654d3fe2c42490b3b91ac10713cc1c005baa003686",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/customising-checkout-fields.md",
           "id": "83097d3b7414557fc80dcf9f8f1a708bbdcdd884"
         },
         {
           "post_title": "Change a currency symbol",
+          "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/change-a-currency-symbol.md",
-          "hash": "3df10541bb3323e769a9b605a1145e1af69f06d4386c0c986e2ce7f48827ab85",
+          "hash": "1e25d4cf42f3b5907befc8d3b6d3999ca31c2f97b9512eadb749935685d1a7d6",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/change-a-currency-symbol.md",
           "id": "35ff98a542ad0b092aa44a049c6015cd43ed5857"
         },
         {
           "post_title": "Add a message above the login / register form",
+          "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/before-login--register-form.md",
-          "hash": "253c76e47f0c2d8fd5e71da3de1fee1b5f7e4ac94b030f2f60e1e634683c9ae4",
+          "hash": "49f0d942364ea6815e799972894406cb0963164adfb6c373222dcf7fb0ee6fb9",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/before-login--register-form.md",
           "id": "26ea2036f16952c8c965f2ab38ab214e421aa615"
         },
         {
           "post_title": "Adjust the quantity input values",
+          "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/adjust-quantity-input-values.md",
-          "hash": "0f6a6b924bc11d269e318c0fabe98aecc974e719cb84b6e1cbb4d56ee42071c3",
+          "hash": "2dce454ba4247b8ef604cf0f4dd42c6d9eedfc02115b7add4551c47e7c242c71",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/adjust-quantity-input-values.md",
           "id": "e4d92076cbd872380edb6beb1ff944f749d2d0e1"
         },
         {
           "post_title": "Add or modify states",
+          "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/add-or-modify-states.md",
-          "hash": "77507b3476cdfef7902fadf3a96d219922d8a5afe714bb5d52e2014fc57bda23",
+          "hash": "0f58428d8db1c7bc3e118362c25d129985a0a17957938d4003e64d4a56ea929b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/add-or-modify-states.md",
           "id": "59ff38edfc09669967a06dd1dd3e6fb967422367"
         },
         {
-          "post_title": "Add a currency and symbol",
+          "post_title": "Add currencies and symbols",
+          "menu_title": "Add currencies and symbols",
+          "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/add-a-currency-symbol.md",
-          "hash": "1af81b3d09b93a8e4c97d0e2ded47f14e44304cd8d26e681266677a73e0c7505",
+          "hash": "f91b76a0ebe65b6095157e904435c563b477be639a70795890656a29871cea76",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/add-a-currency-symbol.md",
           "id": "1c031c2af4a1461253e798daa3304baa89a83979"
         },
         {
           "post_title": "Add a country",
+          "menu_title": "Add a country",
+          "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/add-a-country.md",
-          "hash": "06f0ef12da3af684ed67511bad5c7347f075a72e4a30f1ed088cacd966b0b19f",
+          "hash": "2b5488637e3ecad6113abea73f26fab79e953d84b7e034d4aa71767f6b7338a6",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/add-a-country.md",
           "id": "3f20affcf41e51989b0a7408aefe32b95d1da073"
         }
@@ -128,75 +155,94 @@
       "categories": []
     },
     {
-      "content": "\nJoin the WooCommerce community of contributors. Find out how to build with WooCommerce and help enhance the Woo ecosystem.\n",
+      "content": "\nInterested in joining the Woo contributor community? The links in this doc summarize and direct you to the order of operations you will need to make your first contribution. If you are a seasoned WooCommerce developer, feel free to skip ahead and utilize the template links, or the reference docs and guides below.\n\n## Contributing to WooCommerce Core\n\nThe WooCommerce core plugin code can be found in our [monorepo](https://github.com/woocommerce/woocommerce). Here you can contribute to: \n\n- [WooCommerce Core Plugin](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce)\n- [WooCommerce Admin](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-admin)\n- [WooCommerce Blocks](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks) \n\n### Code of Conduct\n\nContributing to an open source project requires cooperation amongst individuals and organziations all working to make our project a stable and safe place to build and ask questions. Please thoroughly read our [Code of Conduct](https://github.com/woocommerce/woocommerce/blob/trunk/SECURITY.md) to get familiar with our standards and processes.\n\n### Contributor Guidelines\n\nOur [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) layout the first steps to contributing.\n\n- [Prerequisites and developer tools to get started](https://github.com/woocommerce/woocommerce/blob/trunk/README.md#getting-started)\n- [PNPM commands, plugin development environment packages, and troubleshooting](https://github.com/woocommerce/woocommerce/blob/trunk/DEVELOPMENT.md)\n- [Coding standards, E2E testing links](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) \n\n### Templates, Bug Reports, and Feature Requests\n\n- [Pull Request template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/PULL_REQUEST_TEMPLATE.md)\n- [Core Issue template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE.md)\n- [Bug Report template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/1-bug-report.yml)\n- [Enhancement template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/2-enhancement.yml)\n- [Feature requests](https://woocommerce.com/feature-requests/woocommerce/)\n\n### Security\n\nSecurity and safety for data management are incredibly important to us at Woo. Please check out the [Automattic security policy](https://automattic.com/security/) to learn about our foundational requirements.\n\nPlease report any vulnerabilities or security issues by reading through Woo's security policy [here](https://github.com/woocommerce/woocommerce/blob/trunk/SECURITY.md).\n\n\n\n\n\n",
       "category_slug": "contributing",
       "category_title": "Contribute to Woo",
       "posts": [
         {
           "post_title": "WooCommerce Git flow",
+          "menu_title": "WooCommerce Git flow",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/woocommerce-git-flow.md",
-          "hash": "8af49829a2bd2f92259f789f20c6f8e2fad0db378e871c7c0135fa2ca8238fa2",
+          "hash": "aefe3ba553a618ace6b52fbfaff276893ac955fe9b204214f3718e95911b5d15",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/woocommerce-git-flow.md",
           "id": "9e5c2da0c341b88f32483ec2435740cd16d48676"
         },
         {
           "post_title": "String localization guidelines",
+          "menu_title": "String localization guidelines",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/string-localisation-guidelines.md",
-          "hash": "e945b634f356c7f02a6e09221b2ed8e421445bca5f0e395d229577294f19fe51",
+          "hash": "8d3de270132d5c8c863d61159a76fac06ddc1a3ee1ecfb031bfefea4c137aa3d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/string-localisation-guidelines.md",
           "id": "b7a92f1f63f72a2263be940b362fd90aa0ea2cdb"
         },
         {
           "post_title": "Reporting security issues",
+          "menu_title": "Reporting security issues",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/reporting-security-issues.md",
-          "hash": "bcde607b3fcfc6db19c6dec2b05f25197bc668bc63df92ad9bb4ddf3718a4d9b",
+          "hash": "736020b27cb453139f57cd49ee1f3e4dcf2da8d00c209d1d0f43db5326150cf0",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/reporting-security-issues.md",
           "id": "363d7eb1b42e6974cfab7f62659b4effc8417774"
         },
         {
           "post_title": "Naming conventions",
+          "menu_title": "Naming conventions",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/naming-conventions.md",
-          "hash": "23650be6b072cfef58dcb70593d6fbcbe95856f027b305e27baca9e0c75d67a4",
+          "hash": "c553a158e2641547376939f9e2b9ac9c336371bb1cf9eba59b552685a81112bf",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/naming-conventions.md",
           "id": "019d7e8eefc341de559728b9c3e9c5e17dfc1d6d"
         },
         {
-          "post_title": "Minification of SCSS and JS",
+          "post_title": "Handling SCSS and JS minification in WooCommerce",
+          "menu_title": "Minification of SCSS and JS",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/minification-of-SCSS-and-JS.md",
-          "hash": "6ea93ef5c047f313bab25bb7ee901ee68bbb18aaa0f011b653f2a072c1f7a9ba",
+          "hash": "da3f198acde56106e6d09136038d523cc612021923f5f0b3334663c9e787ceaf",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/minification-of-SCSS-and-JS.md",
           "id": "bb50c2ce61a6c5465c95e6a94982c4c1e7944fd7"
         },
         {
           "post_title": "Deprecation in core",
+          "menu_title": "Deprecation in core",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/deprecation-in-core.md",
-          "hash": "de1b2018548acdbcbd12f9e980ea799bb13fd599c24d92f1d8a04ebcc6f32cd8",
+          "hash": "2fd2e73b7de1bbde028a998f8d375c365ea77979ad5ac16e192aaa6c7dc46c97",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/deprecation-in-core.md",
           "id": "d4eee11fdec129af35c471b2366df285217c6ec6"
         },
         {
-          "post_title": "How to decide if a pull request is high impact",
+          "post_title": "How to assess the impact of a pull request",
+          "menu_title": "Assessing PR impact",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/deciding-pr-high-impact.md",
-          "hash": "1dc1aba939dbc19f6ecf007846dd0e825cba97c723a97fe99c9d0057d95d796e",
+          "hash": "091fd9acb51a272439d2c0378cc54ee45bbb90211b2a8953d25a5cbddd40ad70",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/deciding-pr-high-impact.md",
           "id": "40d381fdc10bff338677228736249ba87df9e102"
         },
         {
           "post_title": "Common issues",
+          "menu_title": "Common issues",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/common-issues.md",
-          "hash": "1b2bd5cb506d7843ec6e6687e3e6a96717fdd0501ca37a9269054ee64afcf389",
+          "hash": "9d8f0b78a0597ab22dce58e2b3707e3a08770bc22e2b901c0c6690928b1596bf",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/common-issues.md",
           "id": "5766fb43cf9135d5a2cceaf0d386ec14b57c9ba0"
         },
         {
-          "post_title": "API critical flows",
+          "post_title": "Critical flows within the WooCommerce Core API",
+          "menu_title": "API critical flows",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/api-critical-flows.md",
-          "hash": "f940663e50879e172f0f717e7de6b4a906bf99cb15b0a328d94fbaf4c29cabb5",
+          "hash": "7e9a1f26c64b1f2dd5f8edb67c74b652a1fb852f2152ba7868ee0cd4bf228a14",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/api-critical-flows.md",
           "id": "0fa8b2fa4bcb3b00c647504523a05857a90c434a"
         },
         {
           "post_title": "CSS SASS coding guidelines and naming conventions",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/CSS-SASS-coding-guidelines-and-naming-conventions.md",
           "hash": "5dcdb00ab0209a277ead39ac21ad3a6befe2d23ae80548e3a405c513d00f712e",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/CSS-SASS-coding-guidelines-and-naming-conventions.md",
@@ -222,7 +268,7 @@
           "post_title": "Contributing Technical Documentation",
           "menu_title": "Contributing Docs",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing-docs/contributing-docs.md",
-          "hash": "08c51b50b47987639aa1df68563748a001435404411780517667057dfca984db",
+          "hash": "9675e241e87c899fab5371ceac75d55c5d0e1df1ae900bacaedaf793f25cd187",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing-docs/contributing-docs.md",
           "id": "71c1a72bfd4d5ae6aa656d4264b1bf3beb6eca1c"
         }
@@ -235,16 +281,18 @@
       "category_title": "Data Management",
       "posts": [
         {
-          "post_title": "Data stores",
+          "post_title": "How to manage WooCommerce Data Stores",
+          "menu_title": "Manage data stores",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/data-management/data-stores.md",
-          "hash": "683ceedca4c6d6f5a2139a72131fb8df5b0d83b64e364354b392bbd5fff924ba",
+          "hash": "9b9c1f8c1bbafdd669c191340032330e055fffef2b5e25f39be199f8b1a884a1",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/data-management/data-stores.md",
           "id": "34b4a3e14d6dfabca889035bf67876b9404d0dfb"
         },
         {
           "post_title": "Developing using WooCommerce CRUD objects",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/data-management/crud-objects.md",
-          "hash": "80bca6e03171fe142b6d409cb2df10ac610a6fd10f08d5c6b9f2425bc8ba993c",
+          "hash": "9a3624adc70b6a30bc89ecd86519909c90335f75fcbc925e5b417fac20712e54",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/data-management/crud-objects.md",
           "id": "eaf29a28f438c0d03b4e7056dc3b6eaead4937b5"
         }
@@ -257,34 +305,38 @@
       "category_title": "Extension Development",
       "posts": [
         {
-          "post_title": "Working with WooCommerce Admin Pages",
+          "post_title": "Integrating admin pages into WooCommerce extensions",
+          "menu_title": "Integrating admin pages",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/working-with-woocommerce-admin-pages.md",
-          "hash": "a100da95efd610b77c795ae210d27c43ce7ca7501ffb029eccb84f7ca65d4de5",
+          "hash": "9d01da78347ee7379fe096cce5e3982cd13e46617f90ad78e03af72bc3fb8aba",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/working-with-woocommerce-admin-pages.md",
-          "id": "6f9cc63bc4c614b9e01174069a5ddc4f3d7aa467",
-          "links": {
-            "../../plugins/woocommerce/includes/react-admin/connect-existing-pages.php": "19af727c05cd2eaf8ee8a3c29f95387ca41e0c98",
-            "../../plugins/woocommerce/src/Internal/Admin/Analytics.php": "15aadab6f196323e46081508e2ff3a37b36a659a"
-          }
+          "id": "6f9cc63bc4c614b9e01174069a5ddc4f3d7aa467"
         },
         {
-          "post_title": "WooCommerce Plugin API Callback Documentation",
+          "post_title": "WooCommerce plugin API callbacks",
+          "menu_title": "Plugin API callbacks",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/woocommerce-plugin-api-callback.md",
-          "hash": "dfd21502ce715a8f40a516ea28057aeee111aaa9c9b1adff52a9e95fd88ff2a9",
+          "hash": "fc8eb47b9e31c412838a6426965f26dad89454234692a8f26b045da3a8ed872f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/woocommerce-plugin-api-callback.md",
           "id": "9c1985429ab05bf7abc3e0a8676fb3d92a2c62eb"
         },
         {
-          "post_title": "Using custom attributes in menus and taxonomy archives",
+          "post_title": "Managing custom attributes in WooCommerce menus and taxonomy archives",
+          "menu_title": "Custom attributes in menus",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/using-custom-attributes-in-menus.md",
-          "hash": "bd9778e5a0da0f7071c4595789827d378ce5cfea04404872f5ac7780144ab797",
+          "hash": "fbcf2bc205057602d56c6f3f92ea3809cd0d9c8fedb16dd6438ee671d6589966",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/using-custom-attributes-in-menus.md",
           "id": "fe5975a11d45e9d95e91c256ca89a1ec2ca76556"
         },
         {
-          "post_title": "Building blocks for low code builders",
+          "post_title": "Tools for low-code development",
+          "menu_title": "Low-code tools",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/tools-for-low-code-development.md",
-          "hash": "595d4c3c915c20430d6c04440058dd0e4d9519d296a6abe0530030249c641268",
+          "hash": "a2fd746404451bd34cc4fb237a6a16d83641694ec050f77bf779a7d3e117a056",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/tools-for-low-code-development.md",
           "id": "9320859027f950ceb36e13451ec8696d606426ec"
         },
@@ -298,70 +350,130 @@
         {
           "post_title": "Logging in WooCommerce",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/logging.md",
-          "hash": "85ac9f1ae9cac4f32b673aec872a78dbb2cdec6c26016d4c5d222b9a9089892b",
+          "hash": "844689b6d9c482fb217a512db6ddab0afd4d76b2b9e378a9302681d2a8dfe517",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/logging.md",
           "id": "c684e2efba45051a4e1f98eb5e6ef6bab194f25c"
         },
         {
-          "post_title": "Implementing settings for extensions",
+          "post_title": "Creating custom settings for WooCommerce extensions",
+          "menu_title": "Creating custom settings",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/implementing-settings.md",
-          "hash": "7a5512c974be6d7ce9eec3c561ea75d1f7e95996b44ab4ae160c0cacadc0aec1",
+          "hash": "604d455f9e413c23a208c174ba25611c333e02eef0bafb0d38253f8dd8e3a04c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/implementing-settings.md",
           "id": "58bcbd3a0cd3b3e5fe738c3bb625cf9b7747c99a"
         },
         {
           "post_title": "How to design a simple extension",
+          "menu_title": "Design a simple extension",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/how-to-design-a-simple-extension.md",
-          "hash": "29a7f4863dc22c2ab28c05402651342e2223b2f343e75f706080ce70c30f8abd",
+          "hash": "10afdef1875fb51e6163589535b6bfec86fe09624559e0dbed916e7e1c0bd777",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/how-to-design-a-simple-extension.md",
           "id": "375f7e18a2e656e662d3189041caeb9c80e7c9e3"
         },
         {
-          "post_title": "Adding store management links",
+          "post_title": "How to add store management links",
+          "menu_title": "Add store management links",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/how-to-add-your-own-store-management-links.md",
-          "hash": "7302122881bb9d1e54606a32d787bdace34f4467ec4ee70f38bb9383686695eb",
+          "hash": "98b2f2edeec0afb88a5b138bee9ff46f582e350709c64e61abfa2c1e4a9939b0",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/how-to-add-your-own-store-management-links.md",
           "id": "ae8fc356aa7555b87477462eaa80130a044d00f9"
         },
         {
-          "post_title": "Handling merchant onboarding",
+          "post_title": "How to implement merchant onboarding",
+          "menu_title": "Implement merchant onboarding",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/handling-merchant-onboarding.md",
-          "hash": "961fa3696fcfe073f14f4451e3c8c33282e8568f6f148b34d2ce2357dd5dca2f",
+          "hash": "a34e2c637ac47adb1dd2e7b2510fb3eb7ff517b8f31e9cfa6fe4d3920f2567e7",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/handling-merchant-onboarding.md",
           "id": "89fe15dc232379f546852822230c334d3d940b93"
         },
         {
-          "post_title": "Handling deactivation and uninstallation",
+          "post_title": "Managing extension deactivation and uninstallation",
+          "menu_title": "Manage deactivation and uninstallation",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/handling-deactivation-and-uninstallation.md",
-          "hash": "7e0d5a34e6f427705e349c168b358d8558dba1d2098dab4c01247b665237379e",
+          "hash": "52992f047f6088cf93f72c87e27143ef896e9ccbb0ea55e77c9fa8c17df80404",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/handling-deactivation-and-uninstallation.md",
           "id": "549d92ad5518998ddcdcaa96beb6e25f09e4b1e5"
         },
         {
-          "post_title": "WooCommerce extension developer handbook",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/extension-developer-handbook.md",
-          "hash": "9404dd99496520469ffaf733de7e2ec4622a84ff6d5ff81747619b5ebfcf0de9",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/extension-developer-handbook.md",
-          "id": "2158c631d7e34f2c2d7c9ae16371f501fb47e37f"
+          "post_title": "WooCommerce extension development best practices",
+          "menu_title": "Best Practices",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/extension-development-best-practices.md",
+          "hash": "671f19d378c8ad3ebe0eb009524054bd5769d4fb3d8f48dd6a410e0c9de2b953",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/extension-development-best-practices.md",
+          "id": "83050f0142b6de00b73b3638d46ddddc5a2f8b12",
+          "links": {
+            "./check-if-woo-is-active.md": "2c2e89013ad76ff2596680224047723163512bc2",
+            "./data-storage.md": "b3e0b17ca74596e858c26887c1e4c8ee6c8f6102",
+            "../security/prevent-data-leaks.md": "91b86abe2953e1cd4e9d6d407238093245346cf9",
+            "./example-plugin-header-comment.md": "2fb49dc6ccad894e02f123940a9db98c7724dddc",
+            "../code-snippets/link-to-logged-data.md": "34da337f79be5ce857024f541a99d302174ca37d"
+          }
         },
         {
-          "post_title": "Building your first extension",
+          "post_title": "Example WordPress plugin header comment for WooCommerce extensions",
+          "menu_title": "Plugin header comments",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/example-plugin-header-comment.md",
+          "hash": "0745d2f89373776a45701061e6bc9250231067a73a2ff118ceb63f1fe41cf231",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/example-plugin-header-comment.md",
+          "id": "2fb49dc6ccad894e02f123940a9db98c7724dddc"
+        },
+        {
+          "post_title": "Data storage primer",
+          "menu_title": "Data storage",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/data-storage.md",
+          "hash": "ea827670b3a888f69cb50bc78dc10827c802abb135a5846f31cfa55e882f7faa",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/data-storage.md",
+          "id": "b3e0b17ca74596e858c26887c1e4c8ee6c8f6102"
+        },
+        {
+          "post_title": "Classes in WooCommerce",
+          "menu_title": "Classes in WooCommerce",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/class-reference.md",
+          "hash": "72afd8f0332d676c1c8c46534a62dfed5db1adf97d4ddf0aa40882d3a23da839",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/class-reference.md",
+          "id": "d5f4d8e645707552d013b4be2cd5fd1c943f2122"
+        },
+        {
+          "post_title": "How to check if WooCommerce is active",
+          "menu_title": "Check if WooCommerce is active",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/check-if-woo-is-active.md",
+          "hash": "dca930ebe334bb3bb276ec912d050830b784ec9f755be491d41c3c32f5b65637",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/check-if-woo-is-active.md",
+          "id": "2c2e89013ad76ff2596680224047723163512bc2"
+        },
+        {
+          "post_title": "How to build your first extension",
+          "menu_title": "Build your first extension",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/building-your-first-extension.md",
-          "hash": "67af7bfecec7da7c6275baafea2a8e1dc963984ca184ace48710e6e5633605de",
+          "hash": "b875dda72e3d4b26a06969f76abc1d99e55137d85ba22aa1671915625de851da",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/building-your-first-extension.md",
           "id": "278c2822fe06f1ab72499a757ef0c4981cfbffb5"
         },
         {
-          "post_title": "Adding actions and filters",
+          "post_title": "How to add actions and filters",
+          "menu_title": "Add actions and filters",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/adding-actions-and-filters.md",
-          "hash": "5225b301591a0cdfb13f2dd8aae8b9f62061b5be9cf052ee878eccd9aedc398d",
+          "hash": "ac6b6db9a4bc92d13c71b9d7d81614df4e4cd80120875e5f274238af062a8744",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/adding-actions-and-filters.md",
           "id": "6f461e2f0ca9195097b36f987ee6c0212a65e8ab"
         },
         {
-          "post_title": "Adding a section to a settings tab",
+          "post_title": "How to add a section to a settings tab",
+          "menu_title": "Add a section to a settings tab",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/adding-a-section-to-a-settings-tab.md",
-          "hash": "eff211b425c8ad26db8862765e5406f5c6f6ea67ab85c25cc07052aa3ff2e077",
+          "hash": "400124b03f0d2f53736012100d2be87e77a7bc9c72a5c6af143f62d84321b09d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/adding-a-section-to-a-settings-tab.md",
           "id": "a88144dff894408f31a80c96dcee3bd5126ecd28"
         }
@@ -374,61 +486,120 @@
       "category_title": "Getting Started",
       "posts": [
         {
-          "post_title": "WooCommerce Endpoints",
+          "post_title": "Understanding WooCommerce Endpoints",
+          "menu_title": "WooCommerce Endpoints",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/woocommerce-endpoints.md",
-          "hash": "e50a3aa2753924b13209e50cfb7d06a63cd587a565bf02a79f65c7b7247e186e",
+          "hash": "26318dce3085e8100d29115248495852ab4e425de9297b00e474e24a8ef979f6",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/woocommerce-endpoints.md",
-          "id": "31a11f74bcd9f21f97cd4c6c719240b3d84e40f4"
+          "id": "31a11f74bcd9f21f97cd4c6c719240b3d84e40f4",
+          "links": {
+            "./customizing-endpoint-urls.md": "c19e1b1da6543f8a95ee04ba120f4f171f8e6e40",
+            "./troubleshooting-endpoints.md": "dff57bd736ae83850bfc7e4ac994bd22141d96ee"
+          }
+        },
+        {
+          "post_title": "Troubleshooting WooCommerce Endpoints",
+          "menu_title": "Troubleshooting Endpoints",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/troubleshooting-endpoints.md",
+          "hash": "1a015d82f4d82cc2d9f13f188f03c4e6e03b98ea9d22c5a7710547e7d3c8c78f",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/troubleshooting-endpoints.md",
+          "id": "dff57bd736ae83850bfc7e4ac994bd22141d96ee",
+          "links": {
+            "./woocommerce-endpoints.md": "31a11f74bcd9f21f97cd4c6c719240b3d84e40f4",
+            "./customizing-endpoint-urls.md": "c19e1b1da6543f8a95ee04ba120f4f171f8e6e40"
+          }
         },
         {
           "post_title": "Setting up your development environment",
+          "menu_title": "Development environment setup",
+          "tags": "tutorial, setup",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/development-environment.md",
-          "hash": "0dc9f1da3bd3bc3bed845b7ef562bcf9cc22f241616ac2297b9c5e5c9892daca",
+          "hash": "b9f56987247aee67eaa2c74d1059e1cadfd335fa81c77b76c0717648d5631c0f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/development-environment.md",
           "id": "9080572a3904349c44c565ca7e1bef1212c58757"
         },
         {
           "post_title": "WooCommerce developer tools",
+          "menu_title": "Developer tools",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-tools.md",
-          "hash": "4895f3369cfba841462d99ab642777fcba9758fcbff3814ab02dab1088311ee5",
+          "hash": "ef24e32109d66f96a990fea7a5eb32f9e0b98ae7ca766dcae12244449956997b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-tools.md",
           "id": "2ed3659ae0153c8fb3252c417bb0eb43ea60f862"
         },
         {
-          "post_title": "WooCommerce developer resources",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-resources.md",
-          "hash": "5be1916615913aa8ed17e77eadc78d7baba0d4655e9196e9025c923fe2574c33",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-resources.md",
-          "id": "77008656b040d376b7cea7b3c7cc8860c6aec70e"
+          "post_title": "Resources for debugging",
+          "menu_title": "Debugging",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/debugging.md",
+          "hash": "68ce2cf0aae27b9214ea5da1ad7474cd2274547732f6212bef39e9d7e60edd49",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/debugging.md",
+          "id": "75c020ee52329c09f4dc04e33dc8aeb11c088534",
+          "links": {
+            "../extension-development/logging.md": "c684e2efba45051a4e1f98eb5e6ef6bab194f25c"
+          }
         },
         {
-          "post_title": "Resources for debugging",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/debugging.md",
-          "hash": "1f68b6f584251fe863be5d48c5e40d3fb846a8111be3633761bfb7a4d86dfb29",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/debugging.md",
-          "id": "75c020ee52329c09f4dc04e33dc8aeb11c088534"
+          "post_title": "Customizing WooCommerce Endpoint URLs",
+          "menu_title": "Customizing Endpoint URLs",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/customizing-endpoint-urls.md",
+          "hash": "7feda75b07a1c11d533afabc7781abb80438ce2fa2c3fb37c173e1275098e720",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/customizing-endpoint-urls.md",
+          "id": "c19e1b1da6543f8a95ee04ba120f4f171f8e6e40",
+          "links": {
+            "./woocommerce-endpoints.md": "31a11f74bcd9f21f97cd4c6c719240b3d84e40f4"
+          }
         }
       ],
       "categories": []
     },
     {
-      "content": "\nExplore High Performance Order Storage (HPOS) - a solution that provides an easy-to-understand and solid database structure - specifically designed for eCommerce needs.\n\n[High-Performance Order Storage (HPOS)](https://developer.woo.com/2022/09/14/high-performance-order-storage-progress-report/) also previously known as \"Custom Order Tables\" is a solution that provides an easy-to-understand and solid database structure - specifically designed for eCommerce needs. It uses the WooCommerce CRUD design to store order data in custom tables - optimized for WooCommerce queries with minimal impact on the store's performance.\n",
+      "content": "\nWooCommerce has traditionally stored store orders and related order information (like refunds) as custom WordPress post types or post meta records. This comes with performance issues.\n\n[High-Performance Order Storage (HPOS)](https://developer.woocommerce.com/2022/09/14/high-performance-order-storage-progress-report/) also previously known as \"Custom Order Tables\" is a solution that provides an easy-to-understand and solid database structure - specifically designed for eCommerce needs. It uses the WooCommerce CRUD design to store order data in custom tables - optimized for WooCommerce queries with minimal impact on the store's performance.\n\nIn January 2022, we published the [initial plan for the Custom Order Tables feature](https://developer.woocommerce.com/2022/01/17/the-plan-for-the-woocommerce-custom-order-table/) and since then, we've been working hard to bring the High-Performance Order Storage (HPOS) to WooCommerce Core. In May 2022, we invited you to [test the order migration process](https://developer.woocommerce.com/2022/05/16/call-for-early-testing-custom-order-table-migrations/) and provide feedback on how our initial work performs on real stores of varied configurations.\n\nFrom WooCommerce 8.2, released on October 2023, [High-Performance Order Storage (HPOS)](https://developer.woocommerce.com/2022/09/14/high-performance-order-storage-progress-report/)  is officially released under the stable flag and will be enabled by default for new installations.\n\n## What's New with High-Performance Order Storage?\n\nBringing High-Performance Order Storage (HPOS) to WooCommerce improves these three essential properties for eCommerce stores.\n\n### Scalability\n\nThe rise in the number of customers and customer orders increases the load on your store's database - making it difficult to handle customer order requests and deliver a seamless user experience.\n\nWith High-Performance Order Storage, you get dedicated tables for data like orders and order addresses and thus dedicated indexes which results in fewer read/write operations and fewer busy tables. This feature enables eCommerce stores of all shapes and sizes to scale their business to their maximum potential - without expert intervention.\n\n### Reliability\n\nHigh-Performance Order Storage makes implementing and restoring targeted data backup easier. You'll no longer need to worry about losing orders, inventory numbers, or client information with reliable backup in these custom order tables. It'll also facilitate implementing read/write locks and prevent race conditions.\n\n### Simplicity\n\nYou no longer have to go through a single huge database to locate underlying data and WooCommerce entries.\n\nWith High-Performance Order Storage, you can easily browse through the separate tables and easy-to-handle entries, independent of the table  `_posts`, to find data or understand the table structure. It also lets you easily develop new plugins, implement designs for shops and products, and modify WooCommerce with more flexibility.\n\n## Background\n\nBefore the release of version 8.2, WooCommerce relied on the `_post` and `_postmeta` table structures to store order information, which has served well over the years.\n\nHowever, High-Performance Order Storage introduces dedicated tables for data like orders and order addresses and thus dedicated indexes which results in fewer read/write operations and fewer busy tables. This feature enables eCommerce stores of all shapes and sizes to scale their business to their maximum potential - without expert intervention.\n\nThe order data is synced from `_posts` and `_postmeta` table to four custom order tables:\n\n1. `_wc_orders`\n2. `_wc_order_addresses`\n3. `_wc_order_operational_data`\n4. `_wc_orders_meta`\n\n\n## Enabling the feature\n\nFrom WooCommerce 8.2, released on October 2023, HPOS is enabled by default for new installations. Existing stores can check [How to enable HPOS](https://developer.woocommerce.com/docs/how-to-enable-high-performance-order-storage/)\n\n## Database tables\n\nA number of database tables are used to store order data by HPOS. The `get_all_table_names` method in [the OrdersTableDataStore class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/OrdersTableDataStore.php) will return the names of all the tables.\n\n## Authoritative tables\n\nAt any given time, while the HPOS feature is enabled, there are two roles for the involved database tables: _authoritative_ and _backup_. The authoritative tables are the working tables, where order data will be stored to and retrieved from during normal operation of the store. The _backup_ tables will receive a copy of the authoritative data whenever [synchronization](#synchronization) happens.\n\nIf the `woocommerce_custom_orders_table_enabled` options is set to true, HPOS is active and [the new tables](#database-tables) are authoritative, while the posts and post meta tables act as the backup tables. If the option is set to false, it's the other way around. The option can be changed via admin UI (WooCommerce - Settings - Advanced - Custom data stores).\n\n[The CustomOrdersTableController class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/CustomOrdersTableController.php) hooks on the `woocommerce_order_data_store` filter so that `WC_Data_Store::load( 'order' );` will return either an instance of [OrdersTableDataStore](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/OrdersTableDataStore.php) or an instance of [WC_Order_Data_Store_CPT](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/data-stores/class-wc-order-data-store-cpt.php), depending on which are the authoritative tables.\n\nIn order to preserve data integrity, switching the authoritative tables (from the new tables to the posts table or the other way around) isn't allowed while there are orders pending synchronization.\n\n## Synchronization\n\n_Synchronization_ is the process of applying all the pending changes in the authoritative tables to the backup tables. _Orders pending synchronization_ are orders that have been modified in the authoritative tables but the changes haven't been applied to the backup tables yet.\n\nThis can happen in a number of ways:\n\n\n### Immediate synchronization\n\nIf the `woocommerce_custom_orders_table_data_sync_enabled` setting is set to true, synchronization happens automatically and immediately as soon as the orders are changed in the authoritative tables.\n\n\n### Manual synchronization\n\nWhen immediate synchronization is disabled, it can be triggered manually via command line as follows: `wp wc cot sync`. It can also be triggered programmatically as follows:\n\n```php\n$synchronizer = wc_get_container()->get(Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\DataSynchronizer::class);\n$order_ids = $synchronizer->get_next_batch_to_process( $batch_size );\nif ( count( $order_ids ) ) {\n\t$synchronizer->process_batch( $order_ids );\n}\n```\n\nwhere `$batch_size` is the maximum count of orders to process.\n\n\n### Scheduled synchronization\n\nIf immediate synchronization gets activated (`woocommerce_custom_orders_table_data_sync_enabled` is set to true) while there are orders pending synchronization, an instance of [DataSynchronizer](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/DataSynchronizer.php) will be enqueued using [BatchProcessingController](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/BatchProcessing/BatchProcessingController.php) so that the synchronization of created/modified/deleted orders will happen in batches via scheduled actions. This scheduling happens inside [CustomOrdersTableController](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/CustomOrdersTableController.php), by means of hooking into `woocommerce_update_options_advanced_custom_data_stores`.\n\nIf for some reason immediate synchronization is already active but synchronization is not scheduled, a trick to restart it is to go to the settings page (WooCommerce - Settings - Advanced - Custom data stores) and hit \"Save\" even without making any changes. As long as \"Keep the posts table and the orders tables synchronized\" is checked the synchronization scheduling will happen, even if it was checked before.\n\nIf the `woocommerce_auto_flip_authoritative_table_roles` option is set to true (there's a checkbox for it in the settings page), the authoritative tables will be switched automatically once all the orders have been synchronized. This is handled by [the CustomOrdersTableController class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/CustomOrdersTableController.php).\n\n\n### Deletion synchronization\n\nSynchronization of order deletions is tricky: if an order exists in one set of tables (new tables or posts) but not in the other, it's not clear if the missing orders need to be created or if the existing orders need to be deleted. Theoretically, the orders missing from the backup tables imply the former and the orders missing from the authoritative tables imply the latter; but that's dangerous as a bug in the involved code could easily lead to the deletion of legitimate orders.\n\nTo achieve a robust order deletion synchronization mechanism the following is done. Whenever an order is deleted and immediate synchronization is disabled, a record is created in the `wp_wc_orders_meta` table that has `deleted_from` as the key and the name of the authoritative table the order was deleted from (`wp_wc_orders` or the posts table). Then at synchronization time these records are processed (the corresponding orders are deleted from the corresponding tables) and deleted afterwards.\n\nAn exception to the above are the [placeholder records](#placeholder-records): these are deleted immediately when the corresponding order is deleted from `wp_wc_orders`, even if immediate synchronization is disabled.\n\nWhen the \"**High-Performance Order Storage**\" and \"**Compatibility mode**\" are enabled, WooCommerce populates the HPOS tables with data from posts & postmeta tables. The synchronization between the tables is [explained in detail in this document](https://developer.woocommerce.com/2022/09/29/high-performance-order-storage-backward-compatibility-and-synchronization/#synchronization).\n\n\n> You can find a deeper explanation about the synchronization between the tables in [this document about high-performance-order-storage-backward-compatibility-and-synchronization](https://developer.woocommerce.com/2022/09/29/high-performance-order-storage-backward-compatibility-and-synchronization/#synchronization).\n\n## Placeholder records\n\nOrder IDs must match in both the authoritative tables and the backup tables, otherwise synchronization wouldn't be possible. The order IDs that are compared for order identification and synchronization purposes are the ones from the `id` field in both the `wp_wc_orders` table and the posts table.\n\nIf the posts table is authoritative, achieving an order ID match is easy: the record in `wp_wc_orders` is created with the same ID and that's it. However, when the new orders tables are authoritative there's a problem: the posts table is used to store multiple types of data, not only orders; and by the time synchronization needs to happen, a non-order post could already exist having the same ID as the order to synchronize.\n\nTo solve this, _placeholder records_ are used. Whenever the new orders tables are authoritative and immediate synchronization is disabled, creating a new order will cause a record with post type `shop_order_placehold` and the same ID as the order to be created in the posts table; this effectively \"reserves\" the order ID in the posts table. Then, at synchronization time, the record is filled appropriately and its post type is changed to `shop_order`.\n\n\n## Order Data Storage\n\nYou can switch between data stores freely to sync the data between the tables.\n\n-   If you select  **\"WordPress Post Tables\"**, the system will save the order data within  `_post`  and  `_postmeta`  tables. The order tables are not utilized in this scenario.\n\n![Select WordPress Post Tables](https://woocommerce.com/wp-content/uploads/2023/10/image-18.png?w=650)\n\n-   If you select  **\"High-Performance Order Storage\"**, the system will save the order data within the new WooCommerce order tables\n\n![Select High-Performance Order Storage](https://woocommerce.com/wp-content/uploads/2023/10/image-19.png?w=650)\n\n-   If you select  **\"WordPress Post Tables\"** and **\"Enable compatibility mode\"**, the system will sync the order data between the posts/postmeta and the WooCommerce order tables.\n\n![Select WordPress Post Tables and Enable compatibility mode](https://woocommerce.com/wp-content/uploads/2023/10/image-20.png?w=650)\n\n\n## Incompatible Plugins\n\nIf you are using a plugin that is not compatible with High-Performance Order Storage, then the HPOS option will be disabled under  **WooCommerce > Settings > Advanced > Features**.\n\n![Incompatible plugin](https://woocommerce.com/wp-content/uploads/2023/10/image-21.png?w=650)\n\n-   You can click on \"**View and manage**\" to review the list of incompatible plugins\n-   Or you can visit  `https://example.com/wp-admin/plugins.php?plugin_status=incompatible_with_feature&feature_id=custom_order_tables`  to review the list of incompatible plugins (please replace  `example.com`  with your site domain)\n\n![Plugins page](https://woocommerce.com/wp-content/uploads/2023/10/image-22.png?w=650)\n\n> **Note:** If you are using a third-party extension that isn't working properly with High-Performance Order Storage then please notify the developers of the extension and ask them to update their extension to add support for HPOS. It's up to the extension developers to add support for HPOS. We have [developer resources and documentation](https://developer.woocommerce.com/2022/09/14/high-performance-order-storage-progress-report/)  available to help with their integration efforts.\n\n\n## Disabling HPOS\n\nIf you encounter problems or if you need to continue working with plugins that are not yet compatible with HPOS, then we recommend temporarily switching back to  **WordPress posts storage**.\n\nTo do this, navigate to  **WooCommerce ▸ Settings ▸ Advanced ▸ Features**  and start by making sure that  **compatibility mode** is enabled. If it was not already enabled, you may find you need to wait for some time while order data is synchronized across data-stores.\n\n![WooCommerce ▸ Settings ▸ Advanced ▸ Features Screen](https://woocommerce.com/wp-content/uploads/2023/10/hpos-feature-settings.png?w=650)\n\nOnce synchronization has completed, you can select  **WordPress posts storage (legacy)**  as your preferred option. You can also disable compatibility mode at this point. Once you are ready to re-enable HPOS, simply follow the instructions posted at the  [start of this doc](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-3). Finally, remember to save this page between changes!\n\nAs noted earlier, we also strongly recommend reaching out to the support teams of any plugins that are incompatible, so they can take corrective action.\n",
       "category_slug": "hpos",
       "category_title": "High Performance Order Storage",
       "posts": [
         {
-          "post_title": "High Performance Order Storage (HPOS)",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/high-performance-order-storage.md",
-          "hash": "a24a2294821ad67ec635ef66643fed6b883e21c5ca8221682dde7c5ee0223ad9",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/high-performance-order-storage.md",
-          "id": "c561a02fbac3a6036007b12b65d6f34a972e4b62"
+          "post_title": "HPOS order querying APIs",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/wc-order-query-improvements.md",
+          "hash": "e6a82fd1551296d1f104cb70921ecf13d63e04760ed2f24a3d57d4b2da2217e3",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/wc-order-query-improvements.md",
+          "id": "94261c0a5d954f409ce6c207c9ae624dd577cf64"
         },
         {
-          "post_title": "How to enable HPOS",
+          "post_title": "HPOS extension recipe book",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/recipe-book.md",
+          "hash": "f5dc57939c8278a9de9a7ddd9fdd968ca672e998ba43a080a03203c499d98709",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/recipe-book.md",
+          "id": "991c19edd20b1df6683f31f106d74689248cd102"
+        },
+        {
+          "post_title": "A large store's guide to enable HPOS on WooCommerce",
+          "menu_title": "Enable HPOS for large stores",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/guide-large-store.md",
+          "hash": "77c0815ce6044a7e331a9cecd42c7a277392aa10dfe801b689d53880ef72064c",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/guide-large-store.md",
+          "id": "b6156ac7b77d75022867e9ebb968bc9c1c35f0da"
+        },
+        {
+          "post_title": "How to enable High Performance Order Storage",
+          "menu_title": "Enable HPOS",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/enable-hpos.md",
-          "hash": "de0068eaf7ac9f994b51ccafa1e17a8919a50bde78d579b3d5d0a21d961d87de",
+          "hash": "c8c75c274eb52a48729589220cfd6b5c091b6699d3bf44e6c808cf62f1680310",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/enable-hpos.md",
           "id": "9d41c63f3d0cb17ada82a65bf4a26a1978cc34b0"
+        },
+        {
+          "post_title": "HPOS CLI Tools",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/cli-tools.md",
+          "hash": "8cd823759ce20551d582c39f57ae79f9e0227a8cb0131146e6b7dac5e7312708",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/cli-tools.md",
+          "id": "cdd9d9ad5777d978ba953e3478fbb61cab8fdf59"
         }
       ],
       "categories": []
@@ -439,9 +610,11 @@
       "category_title": "Localization and Translation",
       "posts": [
         {
-          "post_title": "Translating WooCommerce",
+          "post_title": "How to translate WooCommerce",
+          "menu_title": "Translating WooCommerce",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/localization-translation/translating-woocommerce.md",
-          "hash": "0762e8a7e27c881263dbe8e175228337421b6f317ac25bfc88f114fd23f8b356",
+          "hash": "f35b7458ea38f7c95f56888c76f139059bf38661991d7f0c37fbdd860786f5fc",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/localization-translation/translating-woocommerce.md",
           "id": "017b9f80a086d119f8bac193c9b4d87d1efff67d"
         }
@@ -454,23 +627,28 @@
       "category_title": "Payments",
       "posts": [
         {
-          "post_title": "Payment token API",
+          "post_title": "WooCommerce Payment Token API",
+          "menu_title": "Payment Token API",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/payments/payment-token-api.md",
-          "hash": "1531003c792a4cb811382edf4c9876c946b5434722ccbfc06828eba8cac54da9",
+          "hash": "441908f0678b9ff90f33adc3831ac75a5c49038a0b068dfc41456c232a851c7d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/payments/payment-token-api.md",
           "id": "5f345b53875981703d4b80e8d04eae2daafe4c81"
         },
         {
           "post_title": "WooCommerce payment gateway plugin base",
+          "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/payments/payment-gateway-plugin-base.md",
-          "hash": "e49f284c18bdf940df3a6ab7c6e275eb0597c65137d2cde808c3b93f06307606",
+          "hash": "707cf9e5386c1d66fc84d6fc09fb0b0f2f3ed8c20376a66b3e0fa7b0802a363a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/payments/payment-gateway-plugin-base.md",
           "id": "1934a5305524d7111a91f1e52a7495cf126f33f2"
         },
         {
-          "post_title": "Payment gateway API",
+          "post_title": "WooCommerce Payment Gateway API",
+          "menu_title": "Payment Gateway API",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/payments/payment-gateway-api.md",
-          "hash": "2c1d4639d61370a7a8121b5a2cb54dcd4942eb551e6c6baf3ef5f7da26ef2592",
+          "hash": "812b0beff6b99ca3ac54a896be7daf3c2baca79cc0ba6caa6010c5563c97bd8f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/payments/payment-gateway-api.md",
           "id": "b337203996650b567f91c70306e1010d6f1ae552"
         }
@@ -483,31 +661,31 @@
       "category_title": "Product Editor",
       "posts": [
         {
-          "post_title": "Product Editor Development Handbook",
+          "post_title": "Product editor development handbook",
+          "menu_title": "Development handbook",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor.md",
-          "hash": "9a72e3dc08ddee4a6daa62c8486beab3c3884ef1bb9420429d223632db622e33",
+          "hash": "cc5f82b66e949e3df2928b5e6b1217e8804c43b8e7b75ebc930cd0f90aef7bbe",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor.md",
           "id": "59450404de2750d918137e7cf523e52bedfd7214",
           "links": {
             "./product-editor-extensibility-guidelines.md": "a837eb947d31fcff3c6e1f775926ba5eb13cd790",
-            "./block-template-lifecycle.md": "0c29c74a7e7e9fd88562df1afa489659f460879e",
-            "../../packages/js/product-editor/src/blocks/generic/README.md": "367c19c887466222eb368521da5cafe8a1bfa729",
-            "../../packages/js/create-product-editor-block/README.md": "18d14d005baff2f085e8b5f399e573d62851d620",
-            "../../plugins/woocommerce/src/Admin/Features/ProductBlockEditor/ProductTemplates/README.md": "31035d872a3984b1164cee8d3168bbbebf23969f",
-            "../../plugins/woocommerce/src/Admin/BlockTemplates/README.md": "3f2d4de8d78bed2166f3b4f6f8f275ba4c1ffd0b"
+            "./block-template-lifecycle.md": "0c29c74a7e7e9fd88562df1afa489659f460879e"
           }
         },
         {
           "post_title": "Product editor extensibility guidelines",
+          "menu_title": "Extensibility guidelines",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor-extensibility-guidelines.md",
-          "hash": "1594ef93eb48cc8462b5e0b555a1a89d3067e766c998b517caf2223159881fc0",
+          "hash": "4e42c13decac01baccb57fa4f7542c3f14347ad60a53272a328bbc290e2a2625",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor-extensibility-guidelines.md",
           "id": "a837eb947d31fcff3c6e1f775926ba5eb13cd790"
         },
         {
-          "post_title": "Block template lifecycle",
+          "post_title": "Managing the lifecycle of WooCommerce block templates",
+          "menu_title": "Block template lifecycle",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/block-template-lifecycle.md",
-          "hash": "219ca8603a4a9393e9da0eb19fe9b82cdfae9a0842ebe2c04f9645c088d6c001",
+          "hash": "8412c1fc634341ef4d4e81cd3212e368acca7e2c8c3ded15de1726cbec88424f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/block-template-lifecycle.md",
           "id": "0c29c74a7e7e9fd88562df1afa489659f460879e"
         }
@@ -521,22 +699,36 @@
       "posts": [
         {
           "post_title": "Writing high quality testing instructions",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/writing-high-quality-testing-instructions.md",
-          "hash": "9cdc5b121fa81b6da6fb6dda3eef93227df3d69b94922de749598ed13e1ce7d2",
+          "hash": "51fb384f8b1dfcb82fdbad6db08145b2c51dba6227529b8b54e2a281fc4b8ef7",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/writing-high-quality-testing-instructions.md",
           "id": "56a8ef0ef0afec9c884f655e7fdd23d9666c9d00"
         },
         {
-          "post_title": "Performance optimization for WooCommerce stores",
+          "post_title": "Understanding the risks of removing URL bases in WooCommerce",
+          "menu_title": "Risks of removing URL bases",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/removing-product-product-category-or-shop-from-the-url.md",
+          "hash": "414970e7d53ddcafb186f2f3a253eed0d01800df2182f8bd2a4310c53079a795",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/removing-product-product-category-or-shop-from-the-url.md",
+          "id": "827bfa56d40c2155542147ea5afe7cc756e18c5d"
+        },
+        {
+          "post_title": "How to optimize performance for WooCommerce stores",
+          "menu_title": "Optimize store performance",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/performance-optimization.md",
-          "hash": "04405e0c7f04065164096bb25478116759d244e197e421204f277b781d334fc4",
+          "hash": "25588fe2fab942f8db82a47d98594a3b0b6f35748185719b5c3b453876a9714b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/performance-optimization.md",
           "id": "4a616a12defd72bf5a16fb48db4dccd63000d98f"
         },
         {
           "post_title": "Naming conventions",
+          "menu_title": "Naming conventions",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/naming-conventions.md",
-          "hash": "42a6379b601a89035248697a293bb5400c1b04d6eb5c55865e2efc2589f7a400",
+          "hash": "b9412bed82b46bf0232ca59caaeb48a868ab62b965d5f2756135a58ee0d80a66",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/naming-conventions.md",
           "id": "7a64e9ba2411bdae46c6ff274a8f65c10d9ba59f",
           "links": {
@@ -545,15 +737,19 @@
         },
         {
           "post_title": "WooCommerce grammar, punctuation and capitalization guide",
+          "menu_title": "Grammar, punctuation and capitalization",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/grammar-punctuation-capitalization.md",
-          "hash": "065fd3dd1a0746278c97658a99dc3706a2beb2c52ca25c689edfcdee6e65ea31",
+          "hash": "6415e94dcfd13940409b28e063b5cd6e251f971c19d8910ed7faab143759fd30",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/grammar-punctuation-capitalization.md",
           "id": "af9f21747d93f0ab504e3713b1844c59c70b1d0e"
         },
         {
-          "post_title": "GDPR Compliance Guidelines for WooCommerce Extensions",
+          "post_title": "GDPR compliance guidelines for WooCommerce extensions",
+          "menu_title": "GDPR compliance",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/gdpr-compliance.md",
-          "hash": "b0de2c17867c065375dbbcc3408311197ae63ee8748df8b5041e53e184b059bd",
+          "hash": "3ef669780d26a71106f9b01a64d079adc5f2bf1c78ed1ef026fa8fe17c20cdf8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/gdpr-compliance.md",
           "id": "af392a92b41b69b543c5ec77a07af770f6bb1587"
         },
@@ -566,15 +762,19 @@
         },
         {
           "post_title": "WooCommerce core critical flows",
+          "menu_title": "Core critical flows",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/core-critical-flows.md",
-          "hash": "a43196f19e872edf55e28bcdcb47e411e3fc291bac3db7108e0079135971c500",
+          "hash": "fe3f8ccf5f2096b28bb86214b71f0e7232a14bee1b4ad01b45b7ebecf5665de0",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/core-critical-flows.md",
           "id": "e561b46694dba223c38b87613ce4907e4e14333a"
         },
         {
-          "post_title": "Coding standards",
+          "post_title": "WooCommerce coding standards",
+          "menu_title": "Coding standards",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/coding-standards.md",
-          "hash": "cf20404a26327b978f9181b23225772359b52a540bb543ecd22a8db25f81656e",
+          "hash": "f23b9ab30de8af1356e92999d492ddb5bfb1303e88e64c4e58a26fbc9b93e6d4",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/coding-standards.md",
           "id": "b09a572b8a452b6cd795e0985daa85f06e5889fb"
         }
@@ -587,16 +787,20 @@
       "category_title": "Reporting",
       "posts": [
         {
-          "post_title": "Extending WooCommerce Analytics reports",
+          "post_title": "How to extend WooCommerce analytics reports",
+          "menu_title": "Extend analytics reports",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/reporting/extending-woocommerce-admin-reports.md",
-          "hash": "3411b7d43aa8abeabd096506e8ace97b7425f4b5c99919fa49d2816c9cf76402",
+          "hash": "f0da86ad096c564e54550a880a755ff7915ab892e1828d2b019937cbb330dc9f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/reporting/extending-woocommerce-admin-reports.md",
           "id": "3ef20148084c97d7f62b565b92df844392ac27f7"
         },
         {
-          "post_title": "Adding columns to analytics reports and CSV downloads",
+          "post_title": "How to add columns to analytics reports and CSV downloads",
+          "menu_title": "Add columns to analytics reports",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/reporting/adding-columns-to-analytics-reports-and-csv-downloads.md",
-          "hash": "bc268138ca4d5b6834b77c73f40520445adc5ae6be7f0fac1ac3e171d8134d21",
+          "hash": "8b7d43f66fff68a0b96917d25bceca7bc3505a30ce5b36542b73f5a555b30ab0",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/reporting/adding-columns-to-analytics-reports-and-csv-downloads.md",
           "id": "044aac1c58553a34049a77168d247fd42ede994b",
           "links": {
@@ -612,9 +816,10 @@
       "category_title": "REST API",
       "posts": [
         {
-          "post_title": "Getting started with the REST API",
+          "post_title": "Getting started with the WooCommerce REST API",
+          "menu_title": "Getting started",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/rest-api/getting-started.md",
-          "hash": "d9181c5a8f7f45ecee8b830be7d30661fd73c130567e564f76bc9cdd301ae68f",
+          "hash": "2f0d989ee0e95ee87a764b69b2448e641a38b845e2d9bbfbf716b078fb200eb8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/rest-api/getting-started.md",
           "id": "ad7fceb11d06571fb060f72c414896b425d6b72b"
         }
@@ -628,10 +833,21 @@
       "posts": [
         {
           "post_title": "WooCommerce security best practices",
+          "menu_title": "Security best practices",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/security/security-best-practices.md",
-          "hash": "bbd5d2ca8549d6836a326eb5bede47fb53cdd00ea1c45bf672f376b37844a47f",
+          "hash": "c2fdc86ba61ba0ad33ed2795f4f00eb90b7fc8545b007b2c14dbc1b7aa97a6ed",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/security/security-best-practices.md",
           "id": "d579f1c5174c67421dff64719e001b31a015a3d2"
+        },
+        {
+          "post_title": "How to Prevent Data Leaks in WooCommerce",
+          "menu_title": "Prevent Data Leaks",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/security/prevent-data-leaks.md",
+          "hash": "762a6725340711063688e33c0107dbcf3a7aed1674bc0bcd9ed4157b3b49ea2e",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/security/prevent-data-leaks.md",
+          "id": "91b86abe2953e1cd4e9d6d407238093245346cf9"
         }
       ],
       "categories": []
@@ -643,10 +859,31 @@
       "posts": [
         {
           "post_title": "Shipping method API",
+          "menu_title": "Shipping method API",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/shipping/shipping-method-api.md",
-          "hash": "b8c43a44b7a3a483afbabc69905e74e1a81d92ef4ff528995f68147a70c04d60",
+          "hash": "40bf33d540692608fccec48e9a6cc08e51c510c894c32414723c75cc2d2dc3a8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/shipping/shipping-method-api.md",
-          "id": "70270a01c8f1f2b630c809c0b9611940e99293a9"
+          "id": "70270a01c8f1f2b630c809c0b9611940e99293a9",
+          "links": {
+            "../extension-development/building-your-first-extension.md": "278c2822fe06f1ab72499a757ef0c4981cfbffb5"
+          }
+        }
+      ],
+      "categories": []
+    },
+    {
+      "content": "\nProperly setting up your test environment and writing tests when contributing to WooCommrece core are essential parts of our development pipeline. The links below are also included in our [Contributing Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) on GitHub.\n\nIf you have any questions about testing please reach out to the developer community in our public channels([Developer Blog](https://developer.woocommerce.com/blog/), [GitHub Discussions](https://github.com/woocommerce/woocommerce/discussions), or [Community Slack](https://woocommerce.com/community-slack/)).\n\n## Unit Testing\n\n[End-to-end tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw) are powered by `Playwright`. The test site is spun up using `wp-env` ([recommended](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/)), but we will continue to support `e2e-environment` in the meantime, and slowly [deprecate](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) `Puppeteer` testing. \n\n## API Testing\n\n`api-core-tests` is a [package](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests#guide-for-writing-api-tests) that contains automated API tests for WooCommerce, based on `Playwright` and `wp-env`. It supersedes the SuperTest based `api-core-tests` package and `e2e-environment` setup, which we will gradually deprecate.\n\n## Calls for Testing\n\nKeep tabs on calls for testing on our developer blog, and make sure to read our beta testing instructions to help us build new features and enhancements.\n",
+      "category_slug": "testing",
+      "category_title": "Testing",
+      "posts": [
+        {
+          "post_title": "Beta Testing",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/testing/beta-testing.md",
+          "hash": "09be54c71d8805df451263a1cddd12d744b2b1d81f669fb539bd2f14cfdefeeb",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/testing/beta-testing.md",
+          "id": "01f266904647aad0d44b5687fb5f143560dabc67"
         }
       ],
       "categories": []
@@ -657,51 +894,73 @@
       "category_title": "Theme Development",
       "posts": [
         {
-          "post_title": "Thumbnail Image Regeneration",
+          "post_title": "Thumbnail image regeneration",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/thumbnail-image-regeneration.md",
-          "hash": "1f32e423fe3c4eddb7e78e5957d043445e65fada3b11265b380ae59adeab327e",
+          "hash": "326d3f142bffb477750e5fc1211f9213a0cbf2083368043a3ee7f5358032fd88",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/thumbnail-image-regeneration.md",
           "id": "733e1b16276d64f128ba0e337ca68ec3de0bf68f"
         },
         {
           "post_title": "Theme design and user experience guidelines",
+          "menu_title": "Theme design and user experience guidelines",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/theme-design-ux-guidelines.md",
-          "hash": "ea35724cb5d673c95427f50e15ef144b5361ba896d46c0a99c2926c23bcc2bbd",
+          "hash": "360270ccb4a695a7b2fc089fe2b092ce4005fd63ae98c84b9014221ffb7e8015",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/theme-design-ux-guidelines.md",
           "id": "ec1f05ca7c14ed81a52553fa1c3f1045df5f6a4f"
         },
         {
-          "post_title": "Set up and use a child theme",
+          "post_title": "Template structure & Overriding templates via a theme",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/template-structure.md",
+          "hash": "e96f02bb6256e7f80bbe5bf5fa2b5006dd0d49cd67c8825414a64a6e34d0768a",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/template-structure.md",
+          "id": "34bfebec9fc45e680976814928a7b8a1778af14e"
+        },
+        {
+          "post_title": "How to set up and use a child theme",
+          "menu_title": "Set up and use a child theme",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/set-up-a-child-theme.md",
-          "hash": "6e5fed7cd96613913be68203dc00c2d5c21843bbeaefe6df8104c922d1db8cb7",
+          "hash": "78e003139277d0e47b71921d64fd7c3225a8ada819f0989e1c0a605ac3d2e2f7",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/set-up-a-child-theme.md",
           "id": "00b6916595cbde7766f080260a9ea26f53f3271c"
         },
         {
           "post_title": "Image sizing for theme developers",
+          "menu_title": "Image sizing",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/image-sizes.md",
-          "hash": "1ae54a077180106ac78eaa4f041d6b09c5e3f9323f84cdbb29c93f9d9a451a08",
+          "hash": "c0c60cfd163c9fe935f1a6a8d1934eaf118668dd411212001f7f9f35a5cdcc8d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/image-sizes.md",
-          "id": "3f5301ac3040d38bc449b440733da6a466209df3"
+          "id": "3f5301ac3040d38bc449b440733da6a466209df3",
+          "links": {
+            "./thumbnail-image-regeneration.md": "733e1b16276d64f128ba0e337ca68ec3de0bf68f"
+          }
         },
         {
-          "post_title": "Fixing outdated WooCommerce templates",
+          "post_title": "How to fix outdated WooCommerce templates",
+          "menu_title": "Fix outdated templates",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/fixing-outdated-woocommerce-templates.md",
-          "hash": "cb1af5e4810b903e733123ddadd6d08379fd7c9cdf8977c0ed8fffd79dc06d58",
+          "hash": "1b57eba543bb25708fbc4d4ff5802385d06ff2df6f2486f77e6924cb1d44b8d1",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/fixing-outdated-woocommerce-templates.md",
           "id": "1fa09bbc2137a65288cc1576c1053224db7187ed"
         },
         {
-          "post_title": "Conditional tags",
+          "post_title": "Conditional tags in WooCommerce",
+          "menu_title": "Conditional tags",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/conditional-tags.md",
-          "hash": "5305f0b98e1e6deca909d42863afd4d5c0cb4f294cb02540af70469fa636966d",
+          "hash": "897a95ac13aba64eecc2bb5c521dd5e390abbb6a8be421940e5eaae465949d43",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/conditional-tags.md",
           "id": "a08cc0796290477cad7d9bc6737960985f5f6f41"
         },
         {
-          "post_title": "Classic Theme Developer Handbook",
+          "post_title": "Classic theme development handbook",
+          "menu_title": "Classic theme development",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/classic-theme-developer-handbook.md",
-          "hash": "910e11309ddc67659ce6c58a5d2c927ee776b87000dbd5e1789a8c8d3ffe462b",
+          "hash": "5b39b6db8ab9f08b8270e5803e19ee2abf6fc0fc6458780447fd8b24213d3100",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/classic-theme-developer-handbook.md",
           "id": "c2fde53e1dc3efbded3cfe1fb4df27136a3799a4"
         }
@@ -709,121 +968,303 @@
       "categories": []
     },
     {
-      "content": "\nCreate engaging user experiences in WooCommerce stores, focusing on UX design, checkout customization, and user interaction.\n",
-      "category_slug": "user-experience",
-      "category_title": "User Experience",
+      "content": "\nThis section covers general guidelines, and best practices to follow in order to ensure your product experience aligns with WooCommerce for ease of use, seamless integration, and strong adoption.\n\nWe strongly recommend you review the current [WooCommerce setup experience](https://woocommerce.com/documentation/plugins/woocommerce/getting-started/) to get familiar with the user experience and taxonomy.\n\nWe also recommend you review the [WordPress core guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/) to ensure your product isn't breaking any rules, and review [this helpful resource](https://woocommerce.com/document/grammar-punctuation-style-guide/) on content style.\n\n## General\n\nUse existing WordPress/WooCommerce UI, built in components (text fields, checkboxes, etc) and existing menu structures.\n\nPlugins which draw on WordPress' core design aesthetic will benefit from future updates to this design as WordPress continues to evolve. If you need to make an exception for your product, be prepared to provide a valid use case.\n\n- [WordPress Components library](https://wordpress.github.io/gutenberg/?path=/story/docs-introduction--page)\n- [Figma for WordPress](https://make.wordpress.org/design/2018/11/19/figma-for-wordpress/) | ([WordPress Design Library Figma](https://www.figma.com/file/e4tLacmlPuZV47l7901FEs/WordPress-Design-Library))\n- [WooCommerce Component Library](https://woocommerce.github.io/woocommerce-admin/)\n",
+      "category_slug": "user-experience-extensions",
+      "category_title": "Extension Guidelines",
       "posts": [
         {
-          "post_title": "User Experience Guidelines",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/user-experience-guidelines.md",
-          "hash": "b2881ac87be14871a68290453c2dd0c81955fd6c4094ec2b20958d09da78e008",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/user-experience-guidelines.md",
-          "id": "3688c201cc09c7e848cf6c279637c08584ccc334"
-        },
-        {
-          "post_title": "User Experience Guidelines - Testing",
+          "post_title": "WooCommerce Extension Guidelines - Testing",
           "menu_title": "Testing",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/testing.md",
-          "hash": "dfe153a3e082e3f0011b6bf82c274917deab4e3da93a5bc87da8e93457cf1c11",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/testing.md",
-          "id": "b84afc5cff54e84581a115ea589c3d86da0682fe"
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-extensions/testing.md",
+          "hash": "8b5d6418f4f5c8281b8122640d738b833d734b4ffd6357e740953691d948faf6",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-extensions/testing.md",
+          "id": "0299f640abe2127807b1765c526cabd93120d60f"
         },
         {
-          "post_title": "User Experience Guidelines - Task List and Inbox",
-          "menu_title": "Task List and Inbox",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/task-list-and-inbox.md",
-          "hash": "9cd1800dd853be77245388de27a4fbac3d71c901d265f61bfb970e78c0369478",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/task-list-and-inbox.md",
-          "id": "b461277e71a10e801d0d454a8578b83462991753"
+          "post_title": "WooCommerce Extension Guidelines - Task List and Inbox",
+          "menu_title": "Task list and Inbox",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-extensions/task-list-and-inbox.md",
+          "hash": "e49078090e1cff1a184d6a2841f14f0a79551a99d990b0227f3475bac01febe2",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-extensions/task-list-and-inbox.md",
+          "id": "4790569835c89da9f1a85e9afe59a4f53ba11943"
         },
         {
-          "post_title": "User Experience Guidelines - Settings",
+          "post_title": "WooCommerce Extension Guidelines - Settings",
           "menu_title": "Settings",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/settings.md",
-          "hash": "2ac3f4d4c2b7d70a5433bd99f6cb90ccd66f66538ede29c898deca51eb21c3ee",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/settings.md",
-          "id": "6dea5dda4ebbd3a320383267fd2099be140aeb46"
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-extensions/settings.md",
+          "hash": "3f0f6af91e9cf96a2adbc9071d69c37fa1baf9d67f5ff42e3adbc6261a9e10bc",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-extensions/settings.md",
+          "id": "1066428802afb323fbf38c64f5480edbabd93178"
         },
         {
-          "post_title": "User Experience Guidelines - Payments Onboarding and Setup",
-          "menu_title": "Payments Onboarding and Setup",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/payments-design-guidelines.md",
-          "hash": "0044999640d84a55a0fa5749e6cdb6761a0e16aec76588d95b0b09b96ab8f446",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/payments-design-guidelines.md",
-          "id": "7102e90d66b86ce2bdacc86d3e631a78a35738ca"
-        },
-        {
-          "post_title": "User Experience Guidelines - Onboarding",
+          "post_title": "WooCommerce Extension Guidelines - Onboarding",
           "menu_title": "Onboarding",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/onboarding.md",
-          "hash": "f7bfa2a779451bac9cecf905ac7533db84bdc686780e6f48cbc5e57f75e20235",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/onboarding.md",
-          "id": "0a68990f3a0c3ddc1994372f7f35389340ca8ff5"
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-extensions/onboarding.md",
+          "hash": "99361db29b6142c96bba6d087b6cc1740e693b340b83bf26d6356d3bd2aca96f",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-extensions/onboarding.md",
+          "id": "38cce49e3e334ad30aa2bcf304a15375e88e66fa"
         },
         {
-          "post_title": "User Experience Guidelines - Notices",
+          "post_title": "WooCommerce Extension Guidelines - Notices",
           "menu_title": "Notices",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/notices.md",
-          "hash": "23f85d0ee88d80d3bf2bf73f0d216539f9a249defaddb86dc6ca2fddadd278ef",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/notices.md",
-          "id": "8c5de3126ef21043cfc064a6c7105f7b64ff3ecf"
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-extensions/notices.md",
+          "hash": "70f5b6c955c30ea3f4b15d08ef59f13247bdf62e97af518824e35f2f47ec16c5",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-extensions/notices.md",
+          "id": "2f3ffb30344bc45b5ff3bc17a59520fcd16b2598"
         },
         {
-          "post_title": "User Experience Guidelines - Navigation",
+          "post_title": "WooCommerce Extension Guidelines - Navigation",
           "menu_title": "Navigation",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/navigation.md",
-          "hash": "25b4920a23e4e7c15c83b2f5cfd7d2c01e598946b8b3604e920efe03f242a73e",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/navigation.md",
-          "id": "c86422f15d038c5142c31f2c05b82b79c938142b"
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-extensions/navigation.md",
+          "hash": "f14cbd3750451934d173ec43aa996067699bdd8fc05f5c34097d1967a79145db",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-extensions/navigation.md",
+          "id": "9922abbcea787a91b3360f49fa53d5402a604e6b"
         },
         {
-          "post_title": "User Experience Guidelines - Colors",
+          "post_title": "WooCommerce Extension Guidelines - Colors",
           "menu_title": "Colors",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/colors.md",
-          "hash": "f1374f36cb32b7e3f3a61bfd5d5cba20da8119e6c6df5be4c44d2afb3bd2528c",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/colors.md",
-          "id": "b1a24b922f58b754e87ea5a1b83ec54a946a795a"
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-extensions/colors.md",
+          "hash": "6812fdef13376c61091732078018df44fda52e9bc49e1f8a4a24cb0eaf3464a3",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-extensions/colors.md",
+          "id": "7ca89c550a36bee4df33635c6fe861bc769c43cb"
         },
         {
           "post_title": "User Experience Best Practices",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/best-practices.md",
-          "hash": "346e8d7e252d3674cc4c280c0c71f0112501e3db430e5139a9c030bcdccd7464",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/best-practices.md",
-          "id": "dd2c00da004cf6dfa2366c0d01928c84a2ae016a"
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-extensions/best-practices.md",
+          "hash": "c9083117020c65b5c4a2c31ccfa8a4456c0e8420e922be86ba3346d29e8875c4",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-extensions/best-practices.md",
+          "id": "27838fbdf66db197a21d4a765cd9309423c33e83"
         },
         {
-          "post_title": "User Experience Guidelines - Accessibility",
+          "post_title": "WooCommerce Extension Guidelines - Accessibility",
           "menu_title": "Accessibility",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/user-experience/accessibility.md",
-          "hash": "d98d1b962a943a41734cb3f9ae2cb0c78dd78f76f13ef0eb3daa73a91a2d7767",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/user-experience/accessibility.md",
-          "id": "f16c7944f4acdaf71c1719df6ac0440738670070"
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-extensions/accessibility.md",
+          "hash": "b147dbdb658b941e7bd45bec21f68ca83667915a1ba51f0d4b0e856899d0202d",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-extensions/accessibility.md",
+          "id": "e085da13824f41a311b3eeb391386a1c2f67da32"
         }
       ],
       "categories": []
     },
     {
-      "content": "\nMaster the WooCommerce Command Line Interface for efficient store management and automation with detailed command line tutorials.\n",
-      "category_slug": "wc-cli",
-      "category_title": "WC CLI",
+      "content": "\nWhen building payments extensions, you should ensure you follow the [WooCommerce Extension Guidelines](https://developer.woocommerce.com/docs/category/extension-guidelines/).\n\nPayments plugins come in many types: payment processors and gateways, wallets, Buy Now Pay Later, crypto, and more.\n\nThe choice between payment plugins depends on the specific needs and preferences of the merchant and their customers. Some merchants may choose to use multiple types of payment plugins to offer their customers a wider range of payment options.\n\nA merchant can discover a payments plugin in the following ways:\n\n- Through direct installation from WordPress plugins.\n- Through Woo's public list of payment services on the Marketplace.\n- Through the admin onboarding tasks and payments settings. To be added to the list of payment gateways in the Woo admin, the payments plugin must meet the criteria listed in these guidelines.\n\n",
+      "category_slug": "user-experience-payments",
+      "category_title": "Payments Guidelines",
       "posts": [
         {
-          "post_title": "WC CLI - overview",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/overview.md",
-          "hash": "f26db8ffd02e48e051f00a1202627dcba38a2536a8c8a3dfcaa00a711ee62fc9",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/overview.md",
-          "id": "9aa95de8a6969e40e773b1a95d8391ad178f7dc0"
+          "post_title": "User Experience Guidelines - Payments Onboarding and Setup",
+          "menu_title": "Payments Onboarding and Setup",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payments-onboarding.md",
+          "hash": "b564c61dbaca4c883b94f3a82051e3baf1738337ea38ac29d2eb95bb1dfe8269",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payments-onboarding.md",
+          "id": "9e100f5d1c5e52bb337a294456f75cd60929d9e3",
+          "links": {
+            "../ux-guidelines-extensions/settings.md": "1066428802afb323fbf38c64f5480edbabd93178",
+            "../ux-guidelines-extensions/navigation.md": "9922abbcea787a91b3360f49fa53d5402a604e6b"
+          }
         },
         {
-          "post_title": "WC CLI - commands",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/commands.md",
-          "hash": "8061af691424a74dde66ef8d091cfde6329ade4b36377149f068e87591831e3d",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/commands.md",
-          "id": "54b133043c8d87cb02efb70f941a8c668fc0802d"
+          "post_title": "User Experience Guidelines - Payment Button Style",
+          "menu_title": "Payment Button Style",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payment-button-style.md",
+          "hash": "3d8e829f6ca8b8c120bb4ca87f7a53203480709b56b603ee8c48102af8f285a1",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payment-button-style.md",
+          "id": "83d869cec0b2268ae30a6517c7c8f424de284cad"
+        },
+        {
+          "post_title": "User Experience Guidelines - Payment Button Size and Anatomy",
+          "menu_title": "Payment Button Size",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payment-button-size.md",
+          "hash": "b9165eb27a79bb696d7f0fcea1ef8a36f56ffd01501447f4c266c95f515a8ee1",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payment-button-size.md",
+          "id": "0920df1611e1b1b3e2f33c810a8f8e8ae09dd67c"
+        },
+        {
+          "post_title": "User Experience Guidelines - Payment Button Layout",
+          "menu_title": "Payment Button Layout",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payment-button-layout.md",
+          "hash": "bc518454d8552c5da08d9635799c578d730341b115f7f8a63e9123628242c772",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payment-button-layout.md",
+          "id": "96caecc340794e5c80af271e5cc844e0b3d80a04"
+        }
+      ],
+      "categories": []
+    },
+    {
+      "content": "\nOur research shows that merchants think in terms of tasks and goals while creating new products in Woo. For example, adding or editing a product price is a separate task from uploading images or managing inventory.\n\nFor this reason, the new product form features groups (tabs) that correspond with these tasks. Simply speaking, they are separate views where different form features live. As a developer, you can extend any of these views and offer merchants the information and tools they need to create better, more successful products.\n\nThere are several ways to extend the new product form: from a single field to a whole group or section containing multiple fields and tables. These extension points are linked to the form structure, giving you plenty of freedom to create a great user experience.\n",
+      "category_slug": "user-experience-product-editor",
+      "category_title": "Product Editor Guidelines",
+      "posts": [
+        {
+          "post_title": "Product Editor Guidelines - Top Bar Extensions (future feature)",
+          "menu_title": "Top Bar Extensions",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-product-editor/product-editor-form-top-bar.md",
+          "hash": "24e079a4d79b0b692dc39493e5097584e4aa2c540f599756beed028586c6e468",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-product-editor/product-editor-form-top-bar.md",
+          "id": "d9f9789cd181147412e83cf227d6ffccbb88ee4a"
+        },
+        {
+          "post_title": "Product Editor Guidelines - Subsections",
+          "menu_title": "Subsections",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-product-editor/product-editor-form-subsections.md",
+          "hash": "3fe49c097ac3aab24358b9b3f3d48dafa90541be7f2dff8eb057964d17902fca",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-product-editor/product-editor-form-subsections.md",
+          "id": "1c1063b1d3b33af035da4f82dc2b06ce0a20900c"
+        },
+        {
+          "post_title": "Product Editor Guidelines - Sections",
+          "menu_title": "Sections",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-product-editor/product-editor-form-sections.md",
+          "hash": "d9414496ad3d2f1048bc5771bdb7e3eb2fcc571ec240d220c394e956e9e55675",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-product-editor/product-editor-form-sections.md",
+          "id": "cfd01b51ad0811704c28401e6d755eb54f884640"
+        },
+        {
+          "post_title": "Product Editor Guidelines - Groups",
+          "menu_title": "Groups",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-product-editor/product-editor-form-groups.md",
+          "hash": "798c7cf96dd1a88be7a7763dae751dafa81acf0f0fba65a868d5ebe875ed75ea",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-product-editor/product-editor-form-groups.md",
+          "id": "03000dc9341d0d55a113c506e6e0bc87c98e3e1e",
+          "links": {
+            "./product-editor-form-custom-product-types.md": "8a21ebd4b75fdb5a311d2fda46e00a9132fe6d58"
+          }
+        },
+        {
+          "post_title": "Product Editor Guidelines - Fields",
+          "menu_title": "Fields",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-product-editor/product-editor-form-fields.md",
+          "hash": "b6027444ea4c1ebe5444316e6cb5bfcb25fb6082408e93cdad165085f4a336e8",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-product-editor/product-editor-form-fields.md",
+          "id": "a76c0a435ceacc15962738418edeff41e40bfde7"
+        },
+        {
+          "post_title": "Product Editor Guidelines - Dialogue Extensions (future feature)",
+          "menu_title": "Dialogue Extensions",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-product-editor/product-editor-form-dialogue-extensions.md",
+          "hash": "82d4fdafc013f762ee929a38adcf2a2a0117526c67467002468fc465f8494d5f",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-product-editor/product-editor-form-dialogue-extensions.md",
+          "id": "e3308f1c2958076d6718321e004e77ff4136c99d"
+        },
+        {
+          "post_title": "Product Editor Guidelines - Custom Product Types",
+          "menu_title": "Custom Product Types",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-product-editor/product-editor-form-custom-product-types.md",
+          "hash": "8a68ffcd82d0ff4e477fd339e97177b751d475914853e37be60fb1247e476f81",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-product-editor/product-editor-form-custom-product-types.md",
+          "id": "8a21ebd4b75fdb5a311d2fda46e00a9132fe6d58"
+        },
+        {
+          "post_title": "Product Editor Guidelines - Example Use-Cases",
+          "menu_title": "Example Use-Cases",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-product-editor/product-editor-examples.md",
+          "hash": "611d4ef7e0463187855f4d330f79ec80ba9463d15930d8cb4aba6d809e02ff90",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-product-editor/product-editor-examples.md",
+          "id": "b48948ec307b17cc33a9357ae3e4add9678891b6",
+          "links": {
+            "./product-editor-form-fields.md": "a76c0a435ceacc15962738418edeff41e40bfde7",
+            "./product-editor-form-custom-product-types.md": "8a21ebd4b75fdb5a311d2fda46e00a9132fe6d58"
+          }
+        }
+      ],
+      "categories": []
+    },
+    {
+      "content": "\nThis section covers general guidelines and best practices to follow in order to ensure your theme experience aligns with ecommerce industry standards and WooCommerce for providing a great online shopping experience, maximizing sales, ensuring ease of use, seamless integration, and strong UX adoption.\n\nWe recommend you review the [UI best practices for WordPress](https://developer.wordpress.org/themes/advanced-topics/ui-best-practices/) to ensure your theme is aligned with the WordPress theme requirements.\n\nMake sure your theme fits one or more industries currently available in the [WooCommerce themes store](https://woocommerce.com/product-category/themes). It's important that the theme offers enough originality and distinctiveness in its design, while keeping it familiar, in order to be distinguished from other themes on the WooCommerce theme store. Your theme should avoid copying existing themes on the WooCommerce theme store or other WordPress theme marketplaces.\n",
+      "category_slug": "user-experience-themes",
+      "category_title": "Theme Design Guidelines",
+      "posts": [
+        {
+          "post_title": "Theme Design Guidelines - Branding",
+          "menu_title": "Branding",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-themes/theme-design.md",
+          "hash": "403210a2ec97e0f1a21d373a2de380f685183a8ae52d2c4a2cc53bd8c7f12649",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-themes/theme-design.md",
+          "id": "f0e73cda245eb43650f53211bf5e3182dbf487f2"
+        },
+        {
+          "post_title": "WooCommerce Theme Guidelines - Demos and Sample Content",
+          "menu_title": "Demos and Sample Content",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-themes/theme-demos-and-sample-content.md",
+          "hash": "88154329e0315dbc5ad095435fb70996e2f4211c2b70390a38c49b0f9f8bb9ac",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-themes/theme-demos-and-sample-content.md",
+          "id": "00dbd2b474b3ff30a460a96d8b106ce973c3e73a"
+        },
+        {
+          "post_title": "WooCommerce Theme Guidelines - Customization",
+          "menu_title": "Customization",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-themes/theme-customization.md",
+          "hash": "d1cd80d06816549f3693dec98b0084077a9433e55a37c2f5b57a69409b831b4d",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-themes/theme-customization.md",
+          "id": "e72fd0cc8651b27224859dc7349775f8e3142ffe"
+        },
+        {
+          "post_title": "WooCommerce Theme Guidelines - Branding",
+          "menu_title": "Branding",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-themes/theme-branding.md",
+          "hash": "5b2728331c54ade0223c9ed34eb46acc21d2066cc128b840cf37be870fa8e018",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-themes/theme-branding.md",
+          "id": "a7e8fd9fa7cd4f813324d89a15db3b7c8badf74c"
+        },
+        {
+          "post_title": "WooCommerce Theme Guidelines - Accessibility",
+          "menu_title": "Accessibility",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-themes/theme-accessibility.md",
+          "hash": "28c3931662bd44b20704f47b6c176491d4e47bf2af056ffb2558765fb081ca01",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-themes/theme-accessibility.md",
+          "id": "9004b7f3768b6781dae24484c5aaad365bd21b12"
+        }
+      ],
+      "categories": []
+    },
+    {
+      "content": "\n## Introduction to WooCommerce CLI\n\nWooCommerce CLI (WC-CLI) offers an efficient way to manage WooCommerce (WC) stores via the command line. This tool is a part of WC from version 3.0.0 onwards and leverages the capabilities of the WC REST API. This means that most tasks achievable through the REST API can also be performed via the command line.\n\nFor documentation on WC versions 2.5 and 2.6's CLI, visit [Legacy CLI commands](https://github.com/woocommerce/woocommerce/wiki/Legacy-CLI-commands-(v2.6-and-below)).\n\n## About WP-CLI\n\nWP-CLI is a powerful set of command-line tools for managing WordPress installations. You can update plugins, configure multisite installations, and much more, all without using a web browser. For more information, visit the [official WP-CLI website](http://wp-cli.org/).\n\n## Getting Started with WooCommerce CLI\n\nTo begin using WC-CLI, ensure that you have WP-CLI installed and that you are running WooCommerce 3.0.0 or later. The CLI commands are accessed through the `wp wc` command. For a full list of available commands, type `wp wc` in your command-line interface.\n\nFor specific details on commands and their usage, refer to the Command Reference section. The How-to Guide provides a practical approach to common tasks, ideal for those new to WC-CLI or looking for quick solutions.\n\n## Additional Resources\n\nFor those interested in exploring further, the following resources might be helpful:\n\n- [WC REST API Documentation](https://developer.woocommerce.com/docs/category/rest-api/)\n- [Testing files for our CLI tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/cli/features)\n",
+      "category_slug": "wc-cli",
+      "category_title": "WooCommerce CLI",
+      "posts": [
+        {
+          "post_title": "WooCommerce CLI Examples",
+          "menu_title": "Examples",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/wc-cli-examples.md",
+          "hash": "c656a5e47b0b15091372170a94c9ba741b815c715a4b2c9b340a7dcd38b87b09",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/wc-cli-examples.md",
+          "id": "d82ab48101db443ea9ed60f1deeaa89dad5d00cd"
+        },
+        {
+          "post_title": "WooCommerce CLI Commands",
+          "menu_title": "Commands",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/wc-cli-commands.md",
+          "hash": "a926ff45642539e0edc6b4e3dfeba4b31c2d01082700af132a2e8d56cfa25ec5",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/wc-cli-commands.md",
+          "id": "73d6bc6468d23a9e93d16d574399105b143e43af"
+        },
+        {
+          "post_title": "How to Use WooCommerce CLI",
+          "menu_title": "Using WooCommerce CLI",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/using-wc-cli.md",
+          "hash": "f25bbfa7c85f05878b5f569414f46bb11974d1e9cacf3a6f5d708c6141edf0cd",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/using-wc-cli.md",
+          "id": "cfdf72385ec51c15ad9c57aa7a6d83f699416849",
+          "links": {
+            "./wc-cli-commands.md": "73d6bc6468d23a9e93d16d574399105b143e43af"
+          }
+        },
+        {
+          "post_title": "WooCommerce CLI Frequently Asked Questions",
+          "menu_title": "Frequently Asked Questions",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/cli-faq.md",
+          "hash": "cdf02b0a30693f3659f26a774953cb56c85e0319c9472447a4b9563ac3d9b2a4",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/cli-faq.md",
+          "id": "86857f8924e3bd3fe6fdcc06cd8f4351f5e6f4c1"
         }
       ],
       "categories": []
     }
   ],
-  "hash": "501d5de5b74ba52cc5e921fa670f5879b3e88494992f171da1e3e56148b860b7"
+  "hash": "24c95fd5e28dc3e1fd03ffa495e1487bafc1dc8c3ffa91334f05ac2ea3b12e78"
 }

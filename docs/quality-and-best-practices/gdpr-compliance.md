@@ -1,5 +1,7 @@
 ---
-post_title: GDPR Compliance Guidelines for WooCommerce Extensions
+post_title: GDPR compliance guidelines for WooCommerce extensions
+menu_title: GDPR compliance
+tags: reference
 ---
 
 ## Introduction

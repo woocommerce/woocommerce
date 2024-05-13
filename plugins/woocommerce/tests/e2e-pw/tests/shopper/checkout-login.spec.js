@@ -1,4 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
+const { getOrderIdFromUrl } = require( '../../utils/order' );
+const { addAProductToCart } = require( '../../utils/cart' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const customer = {
@@ -111,8 +113,7 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		await context.clearCookies();
 
 		// all tests use the first product
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
+		await addAProductToCart( page, productId );
 	} );
 
 	test( 'can login to an existing account during checkout', async ( {
@@ -154,20 +155,13 @@ test.describe( 'Shopper Checkout Login Account', () => {
 
 		// place an order
 		await page.locator( 'text=Place order' ).click();
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
-		);
+		await expect(
+			page.getByText( 'Your order has been received' )
+		).toBeVisible();
 
-		await page.waitForLoadState( 'networkidle' );
-		// get order ID from the page
-		const orderReceivedText = await page
-			.locator( '.woocommerce-order-overview__order.order' )
-			.textContent();
-		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
+		orderId = getOrderIdFromUrl( page );
 
-		await expect( page.locator( 'ul > li.email' ) ).toContainText(
-			customer.email
-		);
+		await expect( page.getByText( customer.email ) ).toBeVisible();
 
 		// check my account page
 		await page.goto( '/my-account/' );

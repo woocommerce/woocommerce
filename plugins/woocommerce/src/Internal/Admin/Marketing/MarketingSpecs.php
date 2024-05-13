@@ -2,7 +2,7 @@
 /**
  * Marketing Specs Handler
  *
- * Fetches the specifications for the marketing feature from Woo.com API.
+ * Fetches the specifications for the marketing feature from WooCommerce.com API.
  */
 
 namespace Automattic\WooCommerce\Internal\Admin\Marketing;
@@ -22,7 +22,7 @@ class MarketingSpecs {
 	const KNOWLEDGE_BASE_TRANSIENT = 'wc_marketing_knowledge_base';
 
 	/**
-	 * Load knowledge base posts from Woo.com
+	 * Load knowledge base posts from WooCommerce.com
 	 *
 	 * @param string|null $topic The topic of marketing knowledgebase to retrieve.
 	 * @return array
@@ -53,21 +53,21 @@ class MarketingSpecs {
 					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 				)
 			);
-			$posts   = [];
+			$posts   = array();
 
 			if ( ! is_wp_error( $request ) && 200 === $request['response']['code'] ) {
 				$raw_posts = json_decode( $request['body'], true );
 
 				foreach ( $raw_posts as $raw_post ) {
-					$post = [
+					$post = array(
 						'title'         => html_entity_decode( $raw_post['title']['rendered'] ),
 						'date'          => $raw_post['date_gmt'],
 						'link'          => $raw_post['link'],
 						'author_name'   => isset( $raw_post['author_name'] ) ? html_entity_decode( $raw_post['author_name'] ) : '',
 						'author_avatar' => isset( $raw_post['author_avatar_url'] ) ? $raw_post['author_avatar_url'] : '',
-					];
+					);
 
-					$featured_media = $raw_post['_embedded']['wp:featuredmedia'] ?? [];
+					$featured_media = isset( $raw_post['_embedded']['wp:featuredmedia'] ) && is_array( $raw_post['_embedded']['wp:featuredmedia'] ) ? $raw_post['_embedded']['wp:featuredmedia'] : array();
 					if ( count( $featured_media ) > 0 ) {
 						$image         = current( $featured_media );
 						$post['image'] = add_query_arg(

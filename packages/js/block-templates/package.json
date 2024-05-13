@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/block-templates",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Utilities for working with block templates in WooCommerce admin.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -80,7 +80,7 @@
 		"postcss-loader": "^4.3.0",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2",
-		"rimraf": "^3.0.2",
+		"rimraf": "5.0.5",
 		"sass-loader": "^10.5.0",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
@@ -121,6 +121,12 @@
 		"build:project:bundle": {
 			"command": "webpack",
 			"clean": "if-file-deleted",
+			"env": {
+				"NODE_ENV": {
+					"external": true,
+					"default": "production"
+				}
+			},
 			"files": [
 				"webpack.config.js",
 				"src/**/*.scss"

@@ -10,6 +10,11 @@
 		@include reset-typography();
 		@include reset-box();
 
+		// Fixes width in the editor.
+		.components-flex {
+			width: 100%;
+		}
+
 		.components-base-control__field {
 			@include reset-box();
 			position: relative;
@@ -72,7 +77,8 @@
 			background-color: $select-dropdown-light;
 			border: 1px solid $input-border-gray;
 			border-top: 0;
-			margin: 3em 0 0 -1px;
+			border-bottom: 0;
+			margin: 3em 0 0 0;
 			padding: 0;
 			max-height: 300px;
 			min-width: 100%;
@@ -80,6 +86,8 @@
 			color: $input-text-active;
 			border-bottom-left-radius: $universal-border-radius;
 			border-bottom-right-radius: $universal-border-radius;
+			box-shadow: 0 1px 0 1px $input-border-gray;
+			box-sizing: border-box;
 
 			.has-dark-controls & {
 				background-color: $select-dropdown-dark;
@@ -99,6 +107,12 @@
 					.has-dark-controls & {
 						background-color: $select-item-dark;
 					}
+				}
+
+				// Force empty rows to have a height.
+				&::after {
+					content: " ";
+					display: inline-block;
 				}
 
 				&:hover,

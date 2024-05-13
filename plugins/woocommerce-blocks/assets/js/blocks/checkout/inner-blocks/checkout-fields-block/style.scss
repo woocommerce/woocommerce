@@ -23,7 +23,7 @@
 			.wc-block-components-text-input,
 			.wc-block-components-state-input,
 			.wc-block-components-select-input {
-				flex: 1 0 calc(50% - #{$gap-smaller}); // "flex-grow = 1" allows the input to grow to fill the space
+				flex: 1 0 calc(50% - #{$gap-small}); // "flex-grow = 1" allows the input to grow to fill the space
 				box-sizing: border-box;
 
 				&:nth-of-type(2),
@@ -38,6 +38,17 @@
 			.wc-block-components-country-input,
 			.wc-block-components-checkbox {
 				flex: 0 0 100%;
+			}
+		}
+	}
+	.wc-block-components-address-form {
+		.wc-block-components-checkbox {
+			margin-top: $gap;
+		}
+
+		.wc-block-components-text-input.wc-block-components-address-form__email {
+			&:only-child {
+				margin-top: 0;
 			}
 		}
 	}

@@ -18,6 +18,11 @@ export interface ProductCollectionAttributes {
 	convertedFromProducts: boolean;
 	collection?: string;
 	hideControls: FilterName[];
+	/**
+	 * Contain the list of attributes that should be included in the queryContext
+	 */
+	queryContextIncludes: string[];
+	forcePageReload: boolean;
 }
 
 export enum LayoutOptions {
@@ -76,16 +81,19 @@ export interface ProductCollectionQuery {
 	 * ),
 	 * ```
 	 */
-	woocommerceStockStatus?: string[];
-	woocommerceAttributes?: AttributeMetadata[];
-	isProductCollectionBlock?: boolean;
-	woocommerceHandPickedProducts?: string[];
-	priceRange?: undefined | PriceRange;
+	woocommerceStockStatus: string[];
+	woocommerceAttributes: AttributeMetadata[];
+	isProductCollectionBlock: boolean;
+	woocommerceHandPickedProducts: string[];
+	priceRange: undefined | PriceRange;
 }
 
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
 		openCollectionSelectionModal: () => void;
+		context: {
+			templateSlug: string;
+		};
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';
@@ -95,9 +103,13 @@ export type TProductCollectionOrderBy =
 	| 'popularity'
 	| 'rating';
 
+export type ProductCollectionSetAttributes = (
+	attrs: Partial< ProductCollectionAttributes >
+) => void;
+
 export type DisplayLayoutControlProps = {
 	displayLayout: ProductCollectionDisplayLayout;
-	setAttributes: ( attrs: Partial< ProductCollectionAttributes > ) => void;
+	setAttributes: ProductCollectionSetAttributes;
 };
 export type QueryControlProps = {
 	query: ProductCollectionQuery;

@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Always fallback to the standard product template in case the given product type is variable

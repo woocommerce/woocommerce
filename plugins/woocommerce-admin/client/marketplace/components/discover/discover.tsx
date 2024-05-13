@@ -13,6 +13,7 @@ import ProductLoader from '../product-loader/product-loader';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { ProductType } from '../product-list/types';
 import './discover.scss';
+import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
 
 export default function Discover(): JSX.Element | null {
 	const [ productGroups, setProductGroups ] = useState<
@@ -70,6 +71,7 @@ export default function Discover(): JSX.Element | null {
 	const groupsList = productGroups.flatMap( ( group ) => group );
 	return (
 		<div className="woocommerce-marketplace__discover">
+			<PluginInstallNotice />
 			{ groupsList.map( ( groups ) => (
 				<ProductList
 					key={ groups.id }

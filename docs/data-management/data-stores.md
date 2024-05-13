@@ -1,5 +1,7 @@
 ---
-post_title: Data stores
+post_title: How to manage WooCommerce Data Stores
+menu_title: Manage data stores
+Tags: how-to
 ---
 
 ## Introduction
@@ -265,7 +267,7 @@ Does your extension create a new product type? Each product type has a data stor
 
 For example, the external product data store handles "button text" and "external URL". The variable data store handles the relationship between parent products and their variations.
 
-Check out [this walkthrough](https://developer.woo.com/2017/02/06/wc-2-7-extension-compatibility-examples-3-bookings/) for more information on this process.
+Check out [this walkthrough](https://developer.woocommerce.com/2017/02/06/wc-2-7-extension-compatibility-examples-3-bookings/) for more information on this process.
 
 ### Data store for custom data
 

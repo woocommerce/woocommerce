@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix PHP warnings and remove opinionated styles from the `Banner` button.

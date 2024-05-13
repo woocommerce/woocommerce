@@ -63,8 +63,8 @@ async function clickAddNewMenuItem( page ) {
  */
 async function expectOldProductEditor( page ) {
 	await expect(
-		page.locator( '#woocommerce-product-data h2' )
-	).toContainText( 'Product data' );
+		page.getByRole( 'heading', { name: 'Product data' } )
+	).toBeVisible();
 }
 
 /**
@@ -86,7 +86,6 @@ async function expectBlockProductEditor( page ) {
  */
 async function clickOnTab( tabName, page ) {
 	await page
-		// .locator( '.woocommerce-product-tab__general-content' )
 		.locator( '.woocommerce-product-tabs' )
 		.getByRole( 'button', { name: tabName } )
 		.click();

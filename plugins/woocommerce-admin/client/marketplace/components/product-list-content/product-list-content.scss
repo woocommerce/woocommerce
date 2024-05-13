@@ -1,4 +1,4 @@
-@import '../../stylesheets/_variables.scss';
+@import "../../stylesheets/_variables.scss";
 
 .woocommerce-marketplace {
 	&__product-list-content {
@@ -11,6 +11,25 @@
 		background-color: #3c3c3c;
 		color: $white;
 		height: 270px;
+	}
+
+	.woocommerce-customize-store-banner {
+		grid-column: 1 / -1;
+		display: block;
+		width: 100%;
+		margin: 16px 0;
+	}
+
+	.woocommerce-customize-store-banner-content {
+		margin-top: 63px;
+	}
+
+	&__browse-wp-theme-directory {
+		margin-top: 24px;
+
+		a {
+			text-decoration: none;
+		}
 	}
 }
 

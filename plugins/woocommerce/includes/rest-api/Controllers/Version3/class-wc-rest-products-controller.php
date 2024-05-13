@@ -37,6 +37,82 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	private $search_sku_in_product_lookup_table = '';
 
 	/**
+	 * Suggested product ids.
+	 *
+	 * @var array
+	 */
+	private $suggested_products_ids = array();
+
+	/**
+	 * Register the routes for products.
+	 */
+	public function register_routes() {
+		parent::register_routes();
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/suggested-products',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_suggested_products' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_suggested_products_collection_params(),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/duplicate',
+			array(
+				'args'   => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'duplicate_product' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+	}
+
+	/**
+	 * Duplicate a product and returns the duplicated product.
+	 * The product status is set to "draft" and the name includes a "(copy)" at the end by default.
+	 *
+	 * @param WP_REST_Request $request Request data.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function duplicate_product( $request ) {
+		$product_id = $request->get_param( 'id' );
+		$product    = wc_get_product( $product_id );
+
+		if ( ! $product ) {
+			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		// Creating product object from request data in preparation for copying.
+		$updated_product    = $this->prepare_object_for_database( $request );
+		$duplicated_product = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $updated_product );
+
+		if ( is_wp_error( $duplicated_product ) ) {
+			return new WP_Error( 'woocommerce_rest_product_duplicate_error', $duplicated_product->get_error_message(), array( 'status' => 400 ) );
+		}
+
+		$response_data = $duplicated_product->get_data();
+
+		return new WP_REST_Response( $response_data, 200 );
+	}
+
+	/**
 	 * Get the images for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product Product instance.
@@ -235,6 +311,15 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$args['meta_key'] = $ordering_args['meta_key']; // WPCS: slow query ok.
 		}
 
+		/*
+		 * When the suggested products ids is not empty,
+		 * filter the query to return only the suggested products,
+		 * overwriting the post__in parameter.
+		 */
+		if ( ! empty( $this->suggested_products_ids ) ) {
+			$args['post__in'] = $this->suggested_products_ids;
+		}
+
 		return $args;
 	}
 
@@ -288,7 +373,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		global $wpdb;
 		if ( ! empty( $this->search_sku_in_product_lookup_table ) ) {
 			$like_search = '%' . $wpdb->esc_like( $this->search_sku_in_product_lookup_table ) . '%';
-			$where .= ' AND ' . $wpdb->prepare( '(wc_product_meta_lookup.sku LIKE %s)', $like_search );
+			$where      .= ' AND ' . $wpdb->prepare( '(wc_product_meta_lookup.sku LIKE %s)', $like_search );
 		}
 		return $where;
 	}
@@ -333,7 +418,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 				if ( 0 === $index ) {
 					$product->set_image_id( $attachment_id );
-					wc_product_attach_featured_image( $attachment_id, $product );
+					wc_product_attach_featured_image( $attachment_id, $product, false );
 				} else {
 					$gallery[] = $attachment_id;
 				}
@@ -1075,7 +1160,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'low_stock_amount'       => array(
+				'low_stock_amount'      => array(
 					'description' => __( 'Low Stock amount for the product.', 'woocommerce' ),
 					'type'        => array( 'integer', 'null' ),
 					'context'     => array( 'view', 'edit' ),
@@ -1307,7 +1392,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 						),
 					),
 				),
-				'has_options'     => array(
+				'has_options'           => array(
 					'description' => __( 'Shows if the product needs to be configured before it can be bought.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
@@ -1484,6 +1569,72 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
+	 * Add new options for the suggested-products endpoint.
+	 *
+	 * @return array
+	 */
+	public function get_suggested_products_collection_params() {
+		$params = parent::get_collection_params();
+
+		$params['categories'] = array(
+			'description'       => __( 'Limit result set to specific product categorie ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['tags'] = array(
+			'description'       => __( 'Limit result set to specific product tag ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'wp_parse_id_list',
+		);
+
+		$params['limit'] = array(
+			'description'       => __( 'Limit result set to specific amount of suggested products.', 'woocommerce' ),
+			'type'              => 'integer',
+			'default'           => 5,
+			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'absint',
+		);
+
+		return $params;
+	}
+
+	/**
+	 * Get the downloads for a product.
+	 *
+	 * @param WC_Product $product Product instance.
+	 *
+	 * @return array
+	 */
+	protected function get_downloads( $product ) {
+		$downloads = array();
+
+		$context = isset( $this->request ) && isset( $this->request['context'] ) ? $this->request['context'] : 'view';
+
+		if ( $product->is_downloadable() || 'edit' === $context ) {
+			foreach ( $product->get_downloads() as $file_id => $file ) {
+				$downloads[] = array(
+					'id'   => $file_id, // MD5 hash.
+					'name' => $file['name'],
+					'file' => $file['file'],
+				);
+			}
+		}
+
+		return $downloads;
+	}
+
+	/**
 	 * Get product data.
 	 *
 	 * @param WC_Product $product Product instance.
@@ -1537,5 +1688,37 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Get the suggested products.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return object
+	 */
+	public function get_suggested_products( $request ) {
+		$categories  = $request->get_param( 'categories' );
+		$tags        = $request->get_param( 'tags' );
+		$exclude_ids = $request->get_param( 'exclude' );
+		$limit       = $request->get_param( 'limit' ) ? $request->get_param( 'limit' ) : 5;
+
+		$data_store                   = WC_Data_Store::load( 'product' );
+		$this->suggested_products_ids = $data_store->get_related_products(
+			$categories,
+			$tags,
+			$exclude_ids,
+			$limit,
+			null // No need to pass the product ID.
+		);
+
+		// When no suggested products are found, return an empty array.
+		if ( empty( $this->suggested_products_ids ) ) {
+			return array();
+		}
+
+		// Ensure to respect the limit, since the data store may return more than the limit.
+		$this->suggested_products_ids = array_slice( $this->suggested_products_ids, 0, $limit );
+
+		return parent::get_items( $request );
 	}
 }

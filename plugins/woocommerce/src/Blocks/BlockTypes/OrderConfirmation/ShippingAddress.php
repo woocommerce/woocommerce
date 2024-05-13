@@ -36,7 +36,7 @@ class ShippingAddress extends AbstractOrderConfirmationBlock {
 
 		$controller = Package::container()->get( CheckoutFields::class );
 		$custom     = $this->render_additional_fields(
-			$controller->get_order_additional_fields_with_values( $order, 'address', 'shipping' )
+			$controller->get_order_additional_fields_with_values( $order, 'address', 'shipping', 'view' )
 		);
 
 		return $address . $phone . $custom;
@@ -51,6 +51,6 @@ class ShippingAddress extends AbstractOrderConfirmationBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
-		$this->asset_data_registry->add( 'additionalAddressFields', Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'address' ), true );
+		$this->asset_data_registry->add( 'additionalAddressFields', Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'address' ) );
 	}
 }

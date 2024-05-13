@@ -78,12 +78,18 @@ test.describe( 'Edit order', () => {
 		// load the orders listing and confirm order is completed
 		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 
-		await expect( page.locator( `:is(#order-${orderId}, #post-${orderId})` ).getByRole( 'cell', { name: 'Completed' }) ).toBeVisible();
+		await expect(
+			page
+				.locator( `:is(#order-${ orderId }, #post-${ orderId })` )
+				.getByRole( 'cell', { name: 'Completed' } )
+		).toBeVisible();
 	} );
 
 	test( 'can update order status to cancelled', async ( { page } ) => {
 		// open order we created
-		await page.goto( `wp-admin/post.php?post=${ orderToCancel }&action=edit` );
+		await page.goto(
+			`wp-admin/post.php?post=${ orderToCancel }&action=edit`
+		);
 
 		// update order status to Completed
 		await page.locator( '#order_status' ).selectOption( 'Cancelled' );
@@ -93,12 +99,22 @@ test.describe( 'Edit order', () => {
 		await expect( page.locator( '#order_status' ) ).toHaveValue(
 			'wc-cancelled'
 		);
-		await expect( page.getByText( 'Order status changed from Processing to Cancelled.' ) ).toBeVisible();
+		await expect(
+			page.getByText(
+				'Order status changed from Processing to Cancelled.'
+			)
+		).toBeVisible();
 
 		// load the orders listing and confirm order is cancelled
 		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 
-		await expect( page.locator( `:is(#order-${orderToCancel}, #post-${orderToCancel})` ).getByRole( 'cell', { name: 'Cancelled' }) ).toBeVisible();
+		await expect(
+			page
+				.locator(
+					`:is(#order-${ orderToCancel }, #post-${ orderToCancel })`
+				)
+				.getByRole( 'cell', { name: 'Cancelled' } )
+		).toBeVisible();
 	} );
 
 	test( 'can update order details', async ( { page } ) => {
@@ -123,35 +139,65 @@ test.describe( 'Edit order', () => {
 	test( 'can add and delete order notes', async ( { page } ) => {
 		// open order we created
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
-		await page.on( 'dialog', dialog => dialog.accept() );
+		page.on( 'dialog', ( dialog ) => dialog.accept() );
 
 		// add an order note
-		await page.getByLabel( 'Add note' ).fill( 'This order is a test order. It is only a test. This note is a private note.' );
+		await page
+			.getByLabel( 'Add note' )
+			.fill(
+				'This order is a test order. It is only a test. This note is a private note.'
+			);
 		await page.getByRole( 'button', { name: 'Add', exact: true } ).click();
 
 		// verify the note saved
-		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).toBeVisible();
+		await expect(
+			page.getByText(
+				'This order is a test order. It is only a test. This note is a private note.'
+			)
+		).toBeVisible();
 
 		// delete the note
-		await page.getByRole( 'button', { name: 'Delete note' } ).first().click();
+		await page
+			.getByRole( 'button', { name: 'Delete note' } )
+			.first()
+			.click();
 
 		// verify the note is gone
-		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).not.toBeVisible();
+		await expect(
+			page.getByText(
+				'This order is a test order. It is only a test. This note is a private note.'
+			)
+		).toBeHidden();
 
 		// add note to customer
 		// add an order note
-		await page.getByLabel( 'Add note' ).fill( 'This order is a test order. It is only a test. This note is a note to the customer.' );
-		await page.getByLabel('Note type').selectOption( 'Note to customer' );
+		await page
+			.getByLabel( 'Add note' )
+			.fill(
+				'This order is a test order. It is only a test. This note is a note to the customer.'
+			);
+		await page.getByLabel( 'Note type' ).selectOption( 'Note to customer' );
 		await page.getByRole( 'button', { name: 'Add', exact: true } ).click();
 
 		// verify the note saved
-		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a note to the customer.' ) ).toBeVisible();
+		await expect(
+			page.getByText(
+				'This order is a test order. It is only a test. This note is a note to the customer.'
+			)
+		).toBeVisible();
 
 		// delete the note
-		await page.getByRole( 'button', { name: 'Delete note' } ).first().click();
+		await page
+			.getByRole( 'button', { name: 'Delete note' } )
+			.first()
+			.click();
 
 		// verify the note is gone
-		await expect( page.getByText( 'This order is a test order. It is only a test. This note is a private note.' ) ).not.toBeVisible();
+		await expect(
+			page.getByText(
+				'This order is a test order. It is only a test. This note is a private note.'
+			)
+		).toBeHidden();
 	} );
 
 	test( 'can load billing details', async ( { page, baseURL } ) => {
@@ -182,37 +228,35 @@ test.describe( 'Edit order', () => {
 					postcode: '94107',
 					phone: '123456789',
 					email: 'archie123@email.addr',
-				}
+				},
 			} )
 			.then( ( response ) => {
 				customerId = response.data.id;
 			} );
 
 		// Open our test order and select the customer we just created.
-		await page.goto( `wp-admin/post.php?post=${orderId}&action=edit` );
+		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// Simulate the ajax `woocommerce_get_customer_details` call normally done inside meta-boxes-order.js.
-		const response = await page.evaluate(
-			async ( customerId ) => {
-				const simulateCustomerDetailsCall = new Promise( ( resolve ) => {
-					jQuery.ajax( {
-						url: woocommerce_admin_meta_boxes.ajax_url,
-						data: {
-							user_id : customerId,
-							action  : 'woocommerce_get_customer_details',
-							security: woocommerce_admin_meta_boxes.get_customer_details_nonce
-						},
-						type: 'POST',
-						success: function( response ) {
-							resolve( response );
-						}
-					} );
+		const response = await page.evaluate( async ( customerId ) => {
+			const simulateCustomerDetailsCall = new Promise( ( resolve ) => {
+				jQuery.ajax( {
+					url: woocommerce_admin_meta_boxes.ajax_url,
+					data: {
+						user_id: customerId,
+						action: 'woocommerce_get_customer_details',
+						security:
+							woocommerce_admin_meta_boxes.get_customer_details_nonce,
+					},
+					type: 'POST',
+					success( response ) {
+						resolve( response );
+					},
 				} );
+			} );
 
-				return await simulateCustomerDetailsCall;
-			},
-			customerId
-		);
+			return await simulateCustomerDetailsCall;
+		}, customerId );
 
 		// Response should contain billing address info, but should not contain user meta data.
 		expect( 'billing' in response ).toBeTruthy();
@@ -283,8 +327,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 					{
 						id: uuid.v4(),
 						name: 'Single',
-						file:
-							'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+						file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
 					},
 				],
 			} )
@@ -303,8 +346,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 					{
 						id: uuid.v4(),
 						name: 'Single',
-						file:
-							'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+						file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
 					},
 				],
 			} )

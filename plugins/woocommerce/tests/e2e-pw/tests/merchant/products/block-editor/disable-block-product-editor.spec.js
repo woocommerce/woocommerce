@@ -14,7 +14,9 @@ const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 
 async function dismissFeedbackModalIfShown( page ) {
 	try {
-		await page.getByText( 'Skip' ).nth( 3 ).click( { timeout: 5000 } );
+		await page
+			.getByRole( 'button', { name: 'Skip' } )
+			.click( { timeout: 10000 } );
 	} catch ( error ) {}
 }
 
@@ -53,18 +55,19 @@ test.describe.serial( 'Disable block product editor', () => {
 	} );
 
 	test( 'can be disabled from the header', async ( { page } ) => {
-		await page.goto( '/wp-admin/admin.php?page=wc-admin&path=%2Fadd-product' );
+		await page.goto(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fadd-product'
+		);
 
 		try {
 			// dismiss feature highlight if shown
-			await page.getByRole( 'button', { name: 'Close Tour' } ).click( { timeout: 5000 } );
-		} catch (e) {}
+			await page
+				.getByRole( 'button', { name: 'Close Tour' } )
+				.click( { timeout: 5000 } );
+		} catch ( e ) {}
 
 		// turn off block product editor from the header
-		await page
-			.locator( '.components-dropdown-menu' )
-			.getByRole( 'button', { name: 'Options' } )
-			.click();
+		await page.locator( 'button[aria-label="Options"]' ).click();
 		await page
 			.getByRole( 'menuitem', {
 				name: 'Turn off the new product form',

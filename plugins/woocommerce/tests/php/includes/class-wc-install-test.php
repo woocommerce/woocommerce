@@ -183,4 +183,64 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		// cleanup.
 		delete_option( \WC_Install::STORE_ID_OPTION );
 	}
+
+	/**
+	 * Documents the expected behavior of `WC_Install::is_new_install()`, and describes certain characteristics such as
+	 * a lazy approach to invoking post counts.
+	 *
+	 * @return void
+	 */
+	public function test_is_new_install(): void {
+		// Determining if we are in a new install is based on the following three factors.
+		$version       = null;
+		$shop_id       = null;
+		$post_count    = 0;
+		$counted_posts = false;
+
+		$supply_version = function () use ( &$version ) {
+			return $version;
+		};
+
+		$supply_shop_id = function () use ( &$shop_id ) {
+			return $shop_id;
+		};
+
+		$supply_post_count = function () use ( &$post_count ) {
+			$counted_posts = true;
+			return $post_count;
+		};
+
+		// Make it straightforward to test different values for our key variables.
+		add_filter( 'option_woocommerce_version', $supply_version );
+		add_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
+		add_filter( 'wp_count_posts', $supply_post_count );
+
+		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is null.' );
+
+		$shop_id = 1;
+		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is null (even if the shop ID is set).' );
+
+		$post_count = 1;
+		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is null (even if the shop ID is set and we have one or more products).' );
+
+		$version = '9.0.0';
+		$this->assertFalse( WC_Install::is_new_install(), 'We are not in a new install if the WC version is set, we have a shop ID and we have one or more products.' );
+
+		$shop_id = null;
+		$this->assertFalse( WC_Install::is_new_install(), 'We are not in a new install if the WC version is set and we have one or more products (even if the shop ID is not set).' );
+
+		$post_count = 0;
+		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is set but the shop ID is not set and we do not have any products.' );
+
+		$counted_posts = false;
+		$version       = '9.0.0';
+		$shop_id       = 10;
+		WC_Install::is_new_install();
+		$this->assertFalse( $counted_posts, 'For established stores (version and shop ID both set), we do not need to count the number of existing products.' );
+
+		// Cleanup.
+		remove_filter( 'option_woocommerce_db_version', $supply_version );
+		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
+		remove_filter( 'wp_count_posts', $supply_post_count );
+	}
 }

@@ -3,43 +3,55 @@
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
-const permalink = '/product/hoodie';
-const templateName = 'Single Product';
-const templatePath = 'woocommerce/woocommerce//single-product';
-const templateType = 'wp_template';
-
-test.describe( 'Single Product template', async () => {
-	test( 'can be modified and reverted', async ( {
+test.describe( 'Single Product template', () => {
+	test( 'loads the Single Product template for a specific product', async ( {
 		admin,
+		editor,
 		editorUtils,
 		page,
 	} ) => {
-		// Verify the template can be edited.
-		await admin.visitSiteEditor( {
-			postId: templatePath,
-			postType: templateType,
-		} );
-		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
-		await editorUtils.editor.insertBlock( {
-			name: 'core/paragraph',
-			attributes: { content: 'Hello World in the template' },
-		} );
-		await editorUtils.saveTemplate();
-		await page.goto( permalink );
-		await expect(
-			page.getByText( 'Hello World in the template' ).first()
-		).toBeVisible();
+		const testData = {
+			productName: 'Belt',
+			permalink: '/product/belt',
+			templateName: 'Product: Belt',
+			templatePath: 'single-product-belt',
+			templateType: 'wp_template',
+		};
+		const userText = 'Hello World in the Belt template';
 
-		// Verify the edition can be reverted.
-		await admin.visitAdminPage(
-			'site-editor.php',
-			`path=/${ templateType }/all`
-		);
-		await editorUtils.revertTemplateCustomizations( templateName );
-		await page.goto( permalink );
-		await expect(
-			page.getByText( 'Hello World in the template' )
-		).toHaveCount( 0 );
+		// Create the specific product template.
+		await admin.visitSiteEditor( { path: `/${ testData.templateType }` } );
+		await page.getByLabel( 'Add New Template' ).click();
+		await page
+			.getByRole( 'button', { name: 'Single item: Product' } )
+			.click();
+		await page
+			.getByPlaceholder( 'Search products' )
+			.fill( testData.productName );
+		await page
+			.getByRole( 'option', { name: testData.productName } )
+			.click();
+		await page.getByLabel( 'Fallback content' ).click();
+
+		// Edit the template.
+		await editor.insertBlock( {
+			name: 'core/paragraph',
+			attributes: { content: userText },
+		} );
+		await editor.saveSiteEditorEntities();
+
+		// Verify edits are visible.
+		await page.goto( testData.permalink );
+		await expect( page.getByText( userText ).first() ).toBeVisible();
+
+		// Revert edition.
+		await admin.visitSiteEditor( {
+			path: `/${ testData.templateType }/all`,
+		} );
+		await editorUtils.revertTemplateCreation( testData.templateName );
+		await page.goto( testData.permalink );
+
+		// Verify the edits are no longer visible.
+		await expect( page.getByText( userText ) ).toHaveCount( 0 );
 	} );
 } );

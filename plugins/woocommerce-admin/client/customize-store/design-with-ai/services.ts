@@ -5,7 +5,6 @@
  */
 import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 import apiFetch from '@wordpress/api-fetch';
-import { recordEvent } from '@woocommerce/tracks';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { Sender, assign, createMachine, actions } from 'xstate';
 import { dispatch, resolveSelect } from '@wordpress/data';
@@ -21,6 +20,9 @@ import { FONT_PAIRINGS } from '../assembler-hub/sidebar/global-styles/font-pairi
 import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
 import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
 import { updateTemplate } from '../data/actions';
+import { installAndActivateTheme as setTheme } from '../data/service';
+import { THEME_SLUG } from '../data/constants';
+import { trackEvent } from '../tracking';
 
 const { escalate } = actions;
 
@@ -73,7 +75,7 @@ export const getCompletion = async < ValidResponseObject >( {
 			signal: abortSignal,
 		} );
 	} catch ( error ) {
-		recordEvent( 'customize_your_store_ai_completion_api_error', {
+		trackEvent( 'customize_your_store_ai_completion_api_error', {
 			query_id: queryId,
 			version,
 			retry_count: retryCount,
@@ -85,7 +87,7 @@ export const getCompletion = async < ValidResponseObject >( {
 	try {
 		parsedCompletionJson = JSON.parse( data.completion );
 	} catch {
-		recordEvent( 'customize_your_store_ai_completion_response_error', {
+		trackEvent( 'customize_your_store_ai_completion_response_error', {
 			query_id: queryId,
 			version,
 			retry_count: retryCount,
@@ -99,14 +101,14 @@ export const getCompletion = async < ValidResponseObject >( {
 
 	try {
 		const validatedResponse = responseValidation( parsedCompletionJson );
-		recordEvent( 'customize_your_store_ai_completion_success', {
+		trackEvent( 'customize_your_store_ai_completion_success', {
 			query_id: queryId,
 			version,
 			retry_count: retryCount,
 		} );
 		return validatedResponse;
 	} catch ( error ) {
-		recordEvent( 'customize_your_store_ai_completion_response_error', {
+		trackEvent( 'customize_your_store_ai_completion_response_error', {
 			query_id: queryId,
 			version,
 			retry_count: retryCount,
@@ -251,8 +253,8 @@ export const updateStorePatterns = async (
 			method: 'GET',
 		} );
 
-		if ( ! images.images.length ) {
-			if ( is_ai_generated ) {
+		if ( ! images ) {
+			if ( ! is_ai_generated ) {
 				throw new Error(
 					'AI content not generated: images not available'
 				);
@@ -336,7 +338,7 @@ export const updateStorePatterns = async (
 			);
 		}
 	} catch ( error ) {
-		recordEvent( 'customize_your_store_update_store_pattern_api_error', {
+		trackEvent( 'customize_your_store_update_store_pattern_api_error', {
 			error: error instanceof Error ? error.message : 'unknown',
 		} );
 		throw error;
@@ -400,11 +402,11 @@ export const assembleSite = async (
 			colorPaletteName: context.aiSuggestions.defaultColorPalette.default,
 			fontPairingName: context.aiSuggestions.fontPairing,
 		} );
-		recordEvent( 'customize_your_store_ai_update_global_styles_success' );
+		trackEvent( 'customize_your_store_ai_update_global_styles_success' );
 	} catch ( error ) {
 		// eslint-disable-next-line no-console
 		console.error( error );
-		recordEvent(
+		trackEvent(
 			'customize_your_store_ai_update_global_styles_response_error',
 			{
 				error: error instanceof Error ? error.message : 'unknown',
@@ -419,11 +421,11 @@ export const assembleSite = async (
 			homepageTemplateId: context.aiSuggestions
 				.homepageTemplate as keyof typeof HOMEPAGE_TEMPLATES,
 		} );
-		recordEvent( 'customize_your_store_ai_update_template_success' );
+		trackEvent( 'customize_your_store_ai_update_template_success' );
 	} catch ( error ) {
 		// eslint-disable-next-line no-console
 		console.error( error );
-		recordEvent( 'customize_your_store_ai_update_template_response_error', {
+		trackEvent( 'customize_your_store_ai_update_template_response_error', {
 			error: error instanceof Error ? error.message : 'unknown',
 		} );
 		throw error;
@@ -431,23 +433,13 @@ export const assembleSite = async (
 };
 
 const installAndActivateTheme = async () => {
-	const themeSlug = 'twentytwentyfour';
-
 	try {
-		await apiFetch( {
-			path: `/wc-admin/onboarding/themes/install?theme=${ themeSlug }`,
-			method: 'POST',
-		} );
-
-		await apiFetch( {
-			path: `/wc-admin/onboarding/themes/activate?theme=${ themeSlug }&theme_switch_via_cys_ai_loader=1`,
-			method: 'POST',
-		} );
+		await setTheme( THEME_SLUG );
 	} catch ( error ) {
-		recordEvent(
+		trackEvent(
 			'customize_your_store_ai_install_and_activate_theme_error',
 			{
-				theme: themeSlug,
+				theme: THEME_SLUG,
 				error: error instanceof Error ? error.message : 'unknown',
 			}
 		);

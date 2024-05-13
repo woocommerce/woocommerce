@@ -46,6 +46,7 @@ import { getUrlParams } from '~/utils';
 import { useActiveSetupTasklist } from '~/task-lists';
 import { getSegmentsFromPath } from '~/utils/url-helpers';
 import { FeedbackIcon } from '~/products/images/feedback-icon';
+import { useLaunchYourStore } from '~/launch-your-store';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -72,6 +73,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const hasExtendedNotifications = Boolean( fills?.length );
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 	const activeSetupList = useActiveSetupTasklist();
+	const { comingSoon } = useLaunchYourStore();
 
 	const closePanel = () => {
 		setIsPanelClosing( true );
@@ -338,7 +340,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		const help = {
 			name: 'help',
-			title: __( 'Help', 'woocommerce' ),
 			icon: <Icon icon={ helpIcon } />,
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
@@ -373,8 +374,11 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		const previewStore = {
 			name: 'previewStore',
-			title: __( 'Preview store', 'woocommerce' ),
-			icon: <Icon icon={ external } />,
+			title:
+				( comingSoon === 'yes' &&
+					__( 'Preview store', 'woocommerce' ) ) ||
+				( comingSoon === 'no' && __( 'View store', 'woocommerce' ) ) ||
+				'',
 			visible: isHomescreen() && query.task !== 'appearance',
 			onClick: () => {
 				window.open( getAdminSetting( 'shopUrl' ) );

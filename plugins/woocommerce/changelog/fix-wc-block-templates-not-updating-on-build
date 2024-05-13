@@ -1,5 +1,0 @@
-Significance: patch
-Type: dev
-Comment: This does not change functionality of the product. It only changes the build to ensure that @woocommerce/block-templates updates are picked up when running.
-
-

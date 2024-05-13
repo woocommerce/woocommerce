@@ -1,25 +1,34 @@
 # See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
 
-".github/*":
+"*":
   - team: vortex
 
+".github/**/*":
+  - team: vortex
+
+"bin/*":
+  - team: vortex
+
+"docs/**/*":
+  - team: developer-advocacy
+
 "packages/js/api/**/*":
-  - team: solaris
+  - team: vortex
 
 "packages/js/e2e-utils/**/*":
-  - team: solaris
+  - team: vortex
 
 "packages/js/e2e-environment/**/*":
-  - team: solaris
+  - team: vortex
 
 "packages/js/api-core-tests/**/*":
-  - team: solaris
+  - team: vortex
 
 "packages/js/e2e-core-tests/**/*":
-  - team: solaris
+  - team: vortex
 
 "packages/js/admin-e2e-tests/**/*":
-  - team: solaris
+  - team: vortex
 
 "packages/js/components/**/*":
   - team: mothra
@@ -42,10 +51,10 @@
   - team: mothra
 
 "packages/js/dependency-extraction-webpack-plugin/**/*":
-  - team: mothra
+  - team: vortex
 
 "packages/js/eslint-plugin/**/*":
-  - team: mothra
+  - team: vortex
 
 "packages/js/experimental/**/*":
   - team: mothra
@@ -63,6 +72,9 @@
 "packages/js/onboarding/**/*":
   - team: ghidorah
 
+"packages/js/product-editor/**/*":
+  - team: mothra
+
 "packages/js/tracks/**/*":
   - team: mothra
 
@@ -73,13 +85,34 @@
   - team: mothra
   - team: ghidorah
 
+"plugins/woocommerce/src/Blocks/**/*":
+  - team: rubik
+  - team: woo-fse
+
 "plugins/woocommerce/src/Internal/Admin/**/*":
   - team: mothra
   - team: ghidorah
-  
+
+"plugins/woocommerce/src/StoreApi/**/*":
+  - team: rubik
+  - team: woo-fse
+
 "plugins/woocommerce-admin/**/*":
   - team: mothra
   - team: ghidorah
 
+"plugins/woocommerce-blocks/**/*":
+  - team: rubik
+  - team: woo-fse
+
 "plugins/woocommerce-beta-tester/**/*":
+  - team: vortex
+
+"tools/**/*":
+  - team: vortex
+
+'**/composer.json':
+  - team: vortex
+
+'**/package.json':
   - team: vortex

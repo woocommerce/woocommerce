@@ -1,5 +1,7 @@
 ---
-post_title: Extending WooCommerce Analytics reports
+post_title: How to extend WooCommerce analytics reports
+menu_title: Extend analytics reports
+tags: how-to
 ---
 
 ## Introduction
@@ -43,7 +45,7 @@ Next, set up some orders to have sample data. Using WooCommerce > Settings > Cur
 
 After doing so, check out WC-Admin to make sure the orders are showing up by going to `/wp-admin/admin.php?page=wc-admin&period=today&path=%2Fanalytics%2Forders&compare=previous_year`. Note that without any modification currency figures show according to what I have currently in WooCommerce settings, which is New Zealand Dollar in this case.
 
-![screenshot of wp-admin showing processing orders](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-12.11.34-pm.png?w=851)
+![screenshot of wp-admin showing processing orders](https://developer.woocommerce.com/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-12.11.34-pm.png?w=851)
 
 We can confirm each order's currency by running the following query on the `wp_posts` table and joining `wp_postmeta` to gather currency meta values. Results show an order in NZD, USD, and MXN. This query is similar to the one we'll implement later in the guide to gather and display currency values.
 
@@ -60,7 +62,7 @@ ORDER BY wp_posts.post_date DESC
 LIMIT 3
 ```
 
-![screenshot of resulting query](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-12.33.45-pm.png?w=756)
+![screenshot of resulting query](https://developer.woocommerce.com/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-12.33.45-pm.png?w=756)
 
 ## Add a UI dropdown
 
@@ -97,7 +99,7 @@ add_action( 'init', 'add_currency_settings' );
 
 In the console, you can confirm the data has safely made its way to the client.
 
-![screnshot of console](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-1.11.50-pm.png?w=476)
+![screnshot of console](https://developer.woocommerce.com/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-1.11.50-pm.png?w=476)
 
 In `index.js` create the custom currency filter and add it the Orders Report.
 
@@ -128,7 +130,7 @@ addFilter(
 
 If we check out the Orders Report, we can see our new dropdown. Play around with it and you'll notice the currency query parameter gets added to the url. If you check out the Network tab, you'll also see this value included in requests for data used to populate the report. For example, see the requests to orders stats endpoint, `/wp-json/wc-analytics/reports/orders/stats`. Next we'll use that query parameter to adjust report results.
 
-![screenshot showing UI dropdown in wp-admin](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-1.16.44-pm.png?w=512)
+![screenshot showing UI dropdown in wp-admin](https://developer.woocommerce.com/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-1.16.44-pm.png?w=512)
 
 ## Handle currency parameters on the server
 
@@ -205,7 +207,7 @@ add_filter( 'woocommerce_analytics_clauses_select_orders_stats_interval', 'add_s
 
 Lets head back to the Orders Report and see if it works. You can manipulate the dropdown and see the relevant order reflected in the table.
 
-![screenshot of WooCommerce Orders tab in wp-admin showing the relevant order reflected in the table.](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-1.38.54-pm.png?w=585)
+![screenshot of WooCommerce Orders tab in wp-admin showing the relevant order reflected in the table.](https://developer.woocommerce.com/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-1.38.54-pm.png?w=585)
 
 ## Finishing touches
 
@@ -245,15 +247,15 @@ const addTableColumn = (reportTableData) => {
 addFilter("woocommerce_admin_report_table", "dev-blog-example", addTableColumn);
 ```
 
-![screenshot of customized table](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-4.02.15-pm.png?w=861)
+![screenshot of customized table](https://developer.woocommerce.com/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-4.02.15-pm.png?w=861)
 
 While adding a column is certainly helpful, currency figures in the table and chart only reflect the store currency.
 
-![screenshot of report](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-4.03.42-pm.png?w=865)
+![screenshot of report](https://developer.woocommerce.com/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-4.03.42-pm.png?w=865)
 
 In order to change a Report's currency and number formatting, we can make use of the `woocommerce_admin_report_currency` JS hook. You can see the store's default sent to the client in `wcSettings.currency`, but we'll need to change these depending on the currency being viewed and designated by the query parameter `?currency=NZD`.
 
-![screenshot of currency settings](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/screen-shot-2020-04-03-at-11.18.42-am.png?w=238)
+![screenshot of currency settings](https://developer.woocommerce.com/wp-content/uploads/2023/12/screen-shot-2020-04-03-at-11.18.42-am.png?w=238)
 
 First, lets create some configs in index.js.
 
@@ -297,7 +299,7 @@ addFilter(
 
 🎉 We can now view our Orders Report and see the currency reflected in monetary values throughout the report.
 
-![Screenshot of customized order report](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/screen-shot-2020-04-03-at-11.29.05-am.png?w=912)
+![Screenshot of customized order report](https://developer.woocommerce.com/wp-content/uploads/2023/12/screen-shot-2020-04-03-at-11.29.05-am.png?w=912)
 
 ## Conclusion
 

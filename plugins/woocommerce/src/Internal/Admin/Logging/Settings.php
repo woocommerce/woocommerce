@@ -4,10 +4,16 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
 use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Exception;
 use WC_Admin_Settings;
-use WC_Log_Handler, WC_Log_Handler_DB, WC_Log_Handler_File, WC_Log_Levels;
+use WC_Log_Handler_DB, WC_Log_Handler_File, WC_Log_Levels;
+use WP_Filesystem_Direct;
 
 /**
  * Settings class.
@@ -22,11 +28,10 @@ class Settings {
 	 * @const array
 	 */
 	private const DEFAULTS = array(
-		'logging_enabled'           => true,
-		'default_handler'           => LogHandlerFileV2::class,
-		'retention_period_days'     => 30,
-		'level_threshold'           => 'none',
-		'file_entry_collapse_lines' => true,
+		'logging_enabled'       => true,
+		'default_handler'       => LogHandlerFileV2::class,
+		'retention_period_days' => 30,
+		'level_threshold'       => 'none',
 	);
 
 	/**
@@ -41,6 +46,51 @@ class Settings {
 	 */
 	public function __construct() {
 		self::add_action( 'wc_logs_load_tab', array( $this, 'save_settings' ) );
+	}
+
+	/**
+	 * Get the directory for storing log files.
+	 *
+	 * The `wp_upload_dir` function takes into account the possibility of multisite, and handles changing
+	 * the directory if the context is switched to a different site in the network mid-request.
+	 *
+	 * @return string The full directory path, with trailing slash.
+	 */
+	public static function get_log_directory(): string {
+		if ( true === Constants::get_constant( 'WC_LOG_DIR_CUSTOM' ) ) {
+			$dir = Constants::get_constant( 'WC_LOG_DIR' );
+		} else {
+			$upload_dir = wc_get_container()->get( LegacyProxy::class )->call_function( 'wp_upload_dir' );
+
+			/**
+			 * Filter to change the directory for storing WooCommerce's log files.
+			 *
+			 * @param string $dir The full directory path, with trailing slash.
+			 *
+			 * @since 8.8.0
+			 */
+			$dir = apply_filters( 'woocommerce_log_directory', $upload_dir['basedir'] . '/wc-logs/' );
+		}
+
+		$dir = trailingslashit( $dir );
+
+		$realpath = realpath( $dir );
+		if ( false === $realpath ) {
+			$result = wp_mkdir_p( $dir );
+
+			if ( true === $result ) {
+				// Create infrastructure to prevent listing contents of the logs directory.
+				try {
+					$filesystem = FilesystemUtil::get_wp_filesystem();
+					$filesystem->put_contents( $dir . '.htaccess', 'deny from all' );
+					$filesystem->put_contents( $dir . 'index.html', '' );
+				} catch ( Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+					// Creation failed.
+				}
+			}
+		}
+
+		return $dir;
 	}
 
 	/**
@@ -77,13 +127,13 @@ class Settings {
 			$settings['default_handler']       = $this->get_default_handler_setting_definition();
 			$settings['retention_period_days'] = $this->get_retention_period_days_setting_definition();
 			$settings['level_threshold']       = $this->get_level_threshold_setting_definition();
-		}
 
-		$default_handler = $this->get_default_handler();
-		if ( in_array( $default_handler, array( LogHandlerFileV2::class, WC_Log_Handler_File::class ), true ) ) {
-			$settings += $this->get_filesystem_settings_definitions();
-		} elseif ( WC_Log_Handler_DB::class === $default_handler ) {
-			$settings += $this->get_database_settings_definitions();
+			$default_handler = $this->get_default_handler();
+			if ( in_array( $default_handler, array( LogHandlerFileV2::class, WC_Log_Handler_File::class ), true ) ) {
+				$settings += $this->get_filesystem_settings_definitions();
+			} elseif ( WC_Log_Handler_DB::class === $default_handler ) {
+				$settings += $this->get_database_settings_definitions();
+			}
 		}
 
 		return $settings;
@@ -153,15 +203,25 @@ class Settings {
 			'step' => 1,
 		);
 
+		$desc = array();
+
 		$hardcoded = has_filter( 'woocommerce_logger_days_to_retain_logs' );
-		$desc      = '';
 		if ( $hardcoded ) {
 			$custom_attributes['disabled'] = 'true';
 
-			$desc = sprintf(
+			$desc[] = sprintf(
 				// translators: %s is the name of a filter hook.
 				__( 'This setting cannot be changed here because it is being set by a filter on the %s hook.', 'woocommerce' ),
 				'<code>woocommerce_logger_days_to_retain_logs</code>'
+			);
+		}
+
+		$file_delete_has_filter = LogHandlerFileV2::class === $this->get_default_handler() && has_filter( 'woocommerce_logger_delete_expired_file' );
+		if ( $file_delete_has_filter ) {
+			$desc[] = sprintf(
+				// translators: %s is the name of a filter hook.
+				__( 'The %s hook has a filter set, so some log files may have different retention settings.', 'woocommerce' ),
+				'<code>woocommerce_logger_delete_expired_file</code>'
 			);
 		}
 
@@ -180,7 +240,7 @@ class Settings {
 				' %s',
 				__( 'days', 'woocommerce' ),
 			),
-			'desc'              => $desc,
+			'desc'              => implode( '<br><br>', $desc ),
 		);
 	}
 
@@ -231,7 +291,21 @@ class Settings {
 	 */
 	private function get_filesystem_settings_definitions(): array {
 		$location_info = array();
-		$directory     = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) );
+		$directory     = self::get_log_directory();
+
+		$status_info = array();
+		try {
+			$filesystem = FilesystemUtil::get_wp_filesystem();
+			if ( $filesystem instanceof WP_Filesystem_Direct ) {
+				$status_info[] = __( '✅ Ready', 'woocommerce' );
+			} else {
+				$status_info[] = __( '⚠️ The file system is not configured for direct writes. This could cause problems for the logger.', 'woocommerce' );
+				$status_info[] = __( 'You may want to switch to the database for log storage.', 'woocommerce' );
+			}
+		} catch ( Exception $exception ) {
+			$status_info[] = __( '⚠️ The file system connection could not be initialized.', 'woocommerce' );
+			$status_info[] = __( 'You may want to switch to the database for log storage.', 'woocommerce' );
+		}
 
 		$location_info[] = sprintf(
 			// translators: %s is a location in the filesystem.
@@ -247,10 +321,9 @@ class Settings {
 		}
 
 		$location_info[] = sprintf(
-			// translators: %1$s is a code variable. %2$s is the name of a file.
-			__( 'Change the location by defining the %1$s constant in your %2$s file with a new path.', 'woocommerce' ),
-			'<code>WC_LOG_DIR</code>',
-			'<code>wp-config.php</code>'
+			// translators: %s is an amount of computer disk space, e.g. 5 KB.
+			__( 'Directory size: %s', 'woocommerce' ),
+			size_format( wc_get_container()->get( FileController::class )->get_log_directory_size() )
 		);
 
 		return array(
@@ -259,9 +332,15 @@ class Settings {
 				'id'    => self::PREFIX . 'settings',
 				'type'  => 'title',
 			),
+			'file_status'   => array(
+				'title' => __( 'Status', 'woocommerce' ),
+				'type'  => 'info',
+				'text'  => implode( "\n\n", $status_info ),
+			),
 			'log_directory' => array(
-				'type' => 'info',
-				'text' => implode( "\n\n", $location_info ),
+				'title' => __( 'Location', 'woocommerce' ),
+				'type'  => 'info',
+				'text'  => implode( "\n\n", $location_info ),
 			),
 			'entry_format'  => array(),
 			'file_end'      => array(
@@ -281,7 +360,7 @@ class Settings {
 		$table = "{$wpdb->prefix}woocommerce_log";
 
 		$location_info = sprintf(
-			// translators: %s is a location in the filesystem.
+			// translators: %s is the name of a table in the database.
 			__( 'Log entries are stored in this database table: %s', 'woocommerce' ),
 			"<code>$table</code>"
 		);
@@ -293,8 +372,9 @@ class Settings {
 				'type'  => 'title',
 			),
 			'database_table' => array(
-				'type' => 'info',
-				'text' => $location_info,
+				'title' => __( 'Location', 'woocommerce' ),
+				'type'  => 'info',
+				'text'  => $location_info,
 			),
 			'file_end'       => array(
 				'id'   => self::PREFIX . 'settings',

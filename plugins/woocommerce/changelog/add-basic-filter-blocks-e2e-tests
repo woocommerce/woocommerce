@@ -1,5 +1,0 @@
-Significance: patch
-Type: add
-Comment: Experimental: Add basic E2E tests for filter blocks to verify block registration and rendering in the editor.
-
-

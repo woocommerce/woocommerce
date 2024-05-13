@@ -98,7 +98,9 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		await page.locator( 'button.add-coupon' ).click();
 
 		await expect(
-			page.locator('#woocommerce-order-items li').filter({ hasText: couponCode })
+			page
+				.locator( '#woocommerce-order-items li' )
+				.filter( { hasText: couponCode } )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'cell', { name: 'Coupon(s)' } )
@@ -107,7 +109,10 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 			page.getByRole( 'cell', { name: `- $${ couponAmount }.00` } )
 		).toBeVisible();
 		await expect(
-			page.getByRole('cell', { name: `$${ discountedPrice }`, exact: true })
+			page.getByRole( 'cell', {
+				name: `$${ discountedPrice }`,
+				exact: true,
+			} )
 		).toBeVisible();
 	} );
 
@@ -115,7 +120,9 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		await page.goto( `/wp-admin/post.php?post=${ orderId }&action=edit` );
 		// assert that there is a coupon on the order
 		await expect(
-			page.locator('#woocommerce-order-items li').filter({ hasText: couponCode })
+			page
+				.locator( '#woocommerce-order-items li' )
+				.filter( { hasText: couponCode } )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'cell', { name: 'Coupon(s)' } )
@@ -124,7 +131,10 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 			page.getByRole( 'cell', { name: `- $${ couponAmount }.00` } )
 		).toBeVisible();
 		await expect(
-			page.getByRole('cell', { name: `$${ discountedPrice }`, exact: true })
+			page.getByRole( 'cell', {
+				name: `$${ discountedPrice }`,
+				exact: true,
+			} )
 		).toBeVisible();
 		// remove the coupon
 		await page.locator( 'a.remove-coupon' ).dispatchEvent( 'click' ); // have to use dispatchEvent because nothing visible to click on
@@ -132,9 +142,9 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		// make sure the coupon was removed
 		await expect(
 			page.locator( '.wc_coupon_list li', { hasText: couponCode } )
-		).not.toBeVisible();
+		).toBeHidden();
 		await expect(
-			page.getByRole('cell', { name: `$${ productPrice }` }).nth(1)
+			page.getByRole( 'cell', { name: `$${ productPrice }` } ).nth( 1 )
 		).toBeVisible();
 	} );
 } );

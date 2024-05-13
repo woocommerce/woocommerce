@@ -89,6 +89,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 				$order = wc_get_order( $order_id );
 			}
 
+			$email_already_sent = false;
 			if ( is_a( $order, 'WC_Order' ) ) {
 				$this->object                         = $order;
 				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );

@@ -15,20 +15,26 @@ jobs:
 
             - name: Get repo changed files
               id: repo-changed-files
-              uses: tj-actions/changed-files@v37
+              uses: tj-actions/changed-files@v41
               with:
                   files: |
                       **/*.md
                   files_ignore: |
                       docs/**/*.md
-                      plugins/woocommerce-docs/tests/src/Blocks/fixtures/*.md
 
             - name: Get docs changed files
               id: docs-changed-files
-              uses: tj-actions/changed-files@v37
+              uses: tj-actions/changed-files@v41
               with:
                 files: |
                   docs/**/*.md
+
+            - name: Get docs manifest
+              id: docs-manifest
+              uses: tj-actions/changed-files@v41
+              with:
+                files: |
+                  docs/docs-manifest.json
 
             - name: Setup PNPM
               uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
@@ -45,6 +51,7 @@ jobs:
             - name: Install prerequisites
               run: |
                   pnpm i -g markdownlint-cli
+                  npm --prefix .github/workflows/scripts install @actions/core
 
             - name: Lint repo changed markdown files
               run: |
@@ -73,6 +80,10 @@ jobs:
                     echo "No repo markdown files changed."
                   fi
 
+            - name: Check if docs manifest is valid JSON
+              id: is-valid-json
+              run: node .github/workflows/scripts/is-valid-json.js docs/docs-manifest.json
+
             - name: Lint docs changed markdown files
               run: |
                 RED="\e[1;31m"
@@ -80,21 +91,50 @@ jobs:
                 NC="\e[0m"
                 set -e
                 rc=0
-                changed_files="${{ steps.docs-changed-files.outputs.all_changed_files  }}"
+                changed_files="${{ steps.docs-changed-files.outputs.all_changed_files }}"
+                changed_manifest="${{ steps.docs-manifest.outputs.all_changed_files }}"
+                is_valid_json="${{ steps.is-valid-json.outputs.is-valid-json }}"
+                storybook="no"
+                for L in ${{github.event.pull_request.labels.*.name}}
+                do
+                  if [ $L == "type: storybook" ]; then
+                    storybook="yes"
+                  fi
+                done
                 if [ -n "$changed_files" ]; then
                   lint_results=""
+                  failed_check=""
                   for file in $changed_files; do
                     lint_result=$( { cat "$file" | markdownlint --stdin -c docs/.markdownlint.json ; } 2>&1 ) || rc="$?"
                     if [ $rc -ne 0 ]; then
                       lint_results="$lint_results\n>>>Linting failed for file: $file <<<\n$lint_result\n--------"
                     fi
                   done
+
                   if [ $rc -ne 0 ]; then
                     echo -e "${RED}Linting failed for one or more files${NC}"
                     echo -e "$lint_results"
-                    exit 1
+                    failed_check="lint"
                   else
                     echo -e "${GREEN}Linting successful for all files.${NC}"
+                  fi
+
+                  if [ "$storybook" == "no" ]; then
+                    if [ -z "$changed_manifest" ]; then
+                      echo -e "${RED}Changes in the docs folder require updating the manifest${NC}"
+                      failed_check="manifest"
+                    fi
+                    if [ "$is_valid_json" == "no" ]; then
+                      echo -e "${RED}'docs/docs-manifest.json' is not valid JSON${NC}"
+                      failed_check="manifest"
+                    fi
+                    if [ "$failed_check" == "manifest" ]; then
+                      echo -e "Generate a manifest with 'pnpm utils md-docs create docs woocommerce -o docs/docs-manifest.json'"
+                    fi
+                  fi
+
+                  if [ -n "$failed_check" ]; then
+                    exit 1
                   fi
                 else
                   echo "No docs markdown files changed."

@@ -61,7 +61,7 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as admin...' );
-			await adminPage.goto( `/wp-admin`, { waitUntil: 'networkidle' } );
+			await adminPage.goto( `/wp-admin` );
 			await adminPage
 				.locator( 'input[name="log"]' )
 				.fill( admin.username );
@@ -69,6 +69,7 @@ module.exports = async ( config ) => {
 				.locator( 'input[name="pwd"]' )
 				.fill( admin.password );
 			await adminPage.locator( 'text=Log In' ).click();
+			// eslint-disable-next-line playwright/no-networkidle
 			await adminPage.waitForLoadState( 'networkidle' );
 			await adminPage.goto( `/wp-admin` );
 			await adminPage.waitForLoadState( 'domcontentloaded' );
@@ -142,9 +143,7 @@ module.exports = async ( config ) => {
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as customer...' );
-			await customerPage.goto( `/wp-admin`, {
-				waitUntil: 'networkidle',
-			} );
+			await customerPage.goto( `/wp-admin` );
 			await customerPage
 				.locator( 'input[name="log"]' )
 				.fill( customer.username );
@@ -190,29 +189,45 @@ module.exports = async ( config ) => {
 	// (if a value for ENABLE_HPOS was set)
 	// This was always being set to 'yes' after login in wp-env so this step ensures the
 	// correct value is set before we begin our tests
-	if (ENABLE_HPOS) {
+	console.log( `ENABLE_HPOS: ${ ENABLE_HPOS }` );
+
+	const api = new wcApi( {
+		url: baseURL,
+		consumerKey: process.env.CONSUMER_KEY,
+		consumerSecret: process.env.CONSUMER_SECRET,
+		version: 'wc/v3',
+	} );
+
+	if ( ENABLE_HPOS ) {
 		const hposSettingRetries = 5;
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
 
 		const value = ENABLE_HPOS === '0' ? 'no' : 'yes';
 
-		for (let i = 0; i < hposSettingRetries; i++) {
+		for ( let i = 0; i < hposSettingRetries; i++ ) {
 			try {
-				console.log( `Trying to switch ${ value === 'yes' ? 'on' : 'off' } HPOS...` );
-				const response = await api.post( 'settings/advanced/woocommerce_custom_orders_table_enabled', { value } );
+				console.log(
+					`Trying to switch ${
+						value === 'yes' ? 'on' : 'off'
+					} HPOS...`
+				);
+				const response = await api.post(
+					'settings/advanced/woocommerce_custom_orders_table_enabled',
+					{ value }
+				);
 				if ( response.data.value === value ) {
-					console.log( `HPOS Switched ${ value === 'yes' ? 'on' : 'off' } successfully` );
+					console.log(
+						`HPOS Switched ${
+							value === 'yes' ? 'on' : 'off'
+						} successfully`
+					);
 					hposConfigured = true;
 					break;
 				}
-			} catch (e) {
-				console.log( `HPOS setup failed. Retrying... ${ i }/${ hposSettingRetries }` );
-				console.log(e);
+			} catch ( e ) {
+				console.log(
+					`HPOS setup failed. Retrying... ${ i }/${ hposSettingRetries }`
+				);
+				console.log( e );
 			}
 		}
 
@@ -223,6 +238,12 @@ module.exports = async ( config ) => {
 			process.exit( 1 );
 		}
 	}
+
+	const response = await api.get(
+		'settings/advanced/woocommerce_custom_orders_table_enabled'
+	);
+
+	console.log( `HPOS configuration ${ response.data.value }` );
 
 	await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
 

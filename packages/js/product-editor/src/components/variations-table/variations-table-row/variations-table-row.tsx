@@ -4,7 +4,7 @@
 
 import { Tag, __experimentalTooltip as Tooltip } from '@woocommerce/components';
 import { CurrencyContext } from '@woocommerce/currency';
-import { ProductVariation } from '@woocommerce/data';
+import { PartialProductVariation, ProductVariation } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { Button, CheckboxControl, Spinner } from '@wordpress/components';
 import {
@@ -13,9 +13,10 @@ import {
 	useContext,
 	useMemo,
 } from '@wordpress/element';
+import { plus, info, Icon } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
-import { Icon, info } from '@wordpress/icons';
 import classNames from 'classnames';
+import { MediaUpload } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
@@ -27,8 +28,9 @@ import {
 	getProductStockStatusClass,
 	truncate,
 } from '../../../utils';
-import { VariationActionsMenu } from '../variation-actions-menu';
+import { SingleUpdateMenu } from '../variation-actions-menus';
 import { VariationsTableRowProps } from './types';
+import { mapUploadImageToImage } from '../../../utils/map-upload-image-to-image';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 
@@ -90,11 +92,15 @@ export function VariationsTableRow( {
 		[ variableAttributes, variation ]
 	);
 
-	function handleChange( value: Partial< ProductVariation > ) {
-		onChange( {
-			...variation,
-			...value,
-		} );
+	function handleChange(
+		values: PartialProductVariation[],
+		showSuccess: boolean
+	) {
+		onChange( values[ 0 ], showSuccess );
+	}
+
+	function handleDelete( values: PartialProductVariation[] ) {
+		onDelete( values[ 0 ] );
 	}
 
 	return (
@@ -133,35 +139,79 @@ export function VariationsTableRow( {
 				) }
 			</div>
 			<div
-				className="woocommerce-product-variations__attributes"
+				className="woocommerce-product-variations__attributes-cell"
 				role="cell"
 			>
-				{ tags.map( ( tagInfo ) => {
-					const tag = (
-						<Tag
-							id={ tagInfo.id }
-							className="woocommerce-product-variations__attribute"
-							key={ tagInfo.id }
-							label={ truncate(
-								tagInfo.label,
-								PRODUCT_VARIATION_TITLE_LIMIT
+				<MediaUpload
+					value={ variation.id }
+					onSelect={ ( image ) =>
+						handleChange(
+							[
+								{
+									id: variation.id,
+									image:
+										mapUploadImageToImage( image ) ||
+										undefined,
+								},
+							],
+							false
+						)
+					}
+					allowedTypes={ [ 'image' ] }
+					multiple={ false }
+					render={ ( { open } ) => (
+						<Button
+							className={ classNames(
+								variation.image
+									? 'woocommerce-product-variations__image-button'
+									: 'woocommerce-product-variations__add-image-button'
 							) }
-							screenReaderLabel={ tagInfo.label }
-						/>
-					);
-
-					return tags.length <= PRODUCT_VARIATION_TITLE_LIMIT ? (
-						tag
-					) : (
-						<Tooltip
-							key={ tagInfo.id }
-							text={ tagInfo.label }
-							position="top center"
+							icon={ variation.image ? undefined : plus }
+							iconSize={ variation.image ? undefined : 16 }
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore this exists in the props but is not typed
+							size="compact"
+							onClick={ open }
 						>
-							<span>{ tag }</span>
-						</Tooltip>
-					);
-				} ) }
+							{ variation.image && (
+								<img
+									className="woocommerce-product-variations__image"
+									src={ variation.image.src }
+									alt={ variation.image.alt }
+								/>
+							) }
+						</Button>
+					) }
+				/>
+
+				<div className="woocommerce-product-variations__attributes">
+					{ tags.map( ( tagInfo ) => {
+						const tag = (
+							<Tag
+								id={ tagInfo.id }
+								className="woocommerce-product-variations__attribute"
+								key={ tagInfo.id }
+								label={ truncate(
+									tagInfo.label,
+									PRODUCT_VARIATION_TITLE_LIMIT
+								) }
+								screenReaderLabel={ tagInfo.label }
+							/>
+						);
+
+						return tags.length <= PRODUCT_VARIATION_TITLE_LIMIT ? (
+							tag
+						) : (
+							<Tooltip
+								key={ tagInfo.id }
+								text={ tagInfo.label }
+								position="top center"
+							>
+								<span>{ tag }</span>
+							</Tooltip>
+						);
+					} ) }
+				</div>
 			</div>
 			<div
 				className={ classNames(
@@ -240,10 +290,10 @@ export function VariationsTableRow( {
 							{ __( 'Edit', 'woocommerce' ) }
 						</Button>
 
-						<VariationActionsMenu
-							selection={ variation }
+						<SingleUpdateMenu
+							selection={ [ variation ] }
 							onChange={ handleChange }
-							onDelete={ onDelete }
+							onDelete={ handleDelete }
 						/>
 					</>
 				) }

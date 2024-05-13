@@ -321,9 +321,9 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		foreach ( $order->get_items( 'coupon' ) as $coupon_item_id => $coupon_item ) {
 			$coupon_line = array(
 				'id'           => $coupon_item_id,
-				'code'         => $coupon_item['name'],
-				'discount'     => wc_format_decimal( $coupon_item['discount_amount'], $dp ),
-				'discount_tax' => wc_format_decimal( $coupon_item['discount_amount_tax'], $dp ),
+				'code'         => $coupon_item->get_name(),
+				'discount'     => wc_format_decimal( $coupon_item->get_discount(), $dp ),
+				'discount_tax' => wc_format_decimal( $coupon_item->get_discount_tax(), $dp ),
 			);
 
 			$data['coupon_lines'][] = $coupon_line;

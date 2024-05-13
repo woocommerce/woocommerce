@@ -10,9 +10,8 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplateLogger;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
+use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
+use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
 
 use WP_Block_Editor_Context;
 
@@ -77,6 +76,10 @@ class Init {
 			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
 
 			add_action( 'rest_api_init', array( $this, 'register_layout_templates' ) );
+			add_action( 'rest_api_init', array( $this, 'register_user_metas' ) );
+
+			add_filter( 'register_block_type_args', array( $this, 'register_metadata_attribute' ) );
+			add_filter( 'woocommerce_get_block_types', array( $this, 'get_block_types' ), 999, 1 );
 
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
@@ -84,10 +87,6 @@ class Init {
 			$tracks = new Tracks();
 			$tracks->init();
 
-			// Make sure the block template logger is initialized before any templates are created.
-			BlockTemplateLogger::get_instance();
-
-			$this->register_layout_templates();
 			$this->register_product_templates();
 		}
 	}
@@ -117,6 +116,9 @@ class Init {
 		);
 		wp_tinymce_inline_scripts();
 		wp_enqueue_media();
+		wp_register_style( 'wc-global-presets', false ); // phpcs:ignore
+		wp_add_inline_style( 'wc-global-presets', wp_get_global_stylesheet( array( 'presets' ) ) );
+		wp_enqueue_style( 'wc-global-presets' );
 	}
 
 	/**
@@ -383,5 +385,84 @@ class Init {
 		);
 
 		$this->redirection_controller->set_product_templates( $this->product_templates );
+	}
+
+	/**
+	 * Register user metas.
+	 */
+	public function register_user_metas() {
+		register_rest_field(
+			'user',
+			'metaboxhidden_product',
+			array(
+				'get_callback'    => function ( $object, $attr ) {
+					$hidden = get_user_meta( $object['id'], $attr, true );
+
+					if ( is_array( $hidden ) ) {
+						// Ensures to always return a string array.
+						return array_values( $hidden );
+					}
+
+					return array( 'postcustom' );
+				},
+				'update_callback' => function ( $value, $object, $attr ) {
+					// Update the field/meta value.
+					update_user_meta( $object->ID, $attr, $value );
+				},
+				'schema'          => array(
+					'type'        => 'array',
+					'description' => __( 'The metaboxhidden_product meta from the user metas.', 'woocommerce' ),
+					'items'       => array(
+						'type' => 'string',
+					),
+					'arg_options' => array(
+						'sanitize_callback' => 'wp_parse_list',
+						'validate_callback' => 'rest_validate_request_arg',
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Registers the metadata block attribute for all block types.
+	 * This is a fallback/temporary solution until
+	 * the Gutenberg core version registers the metadata attribute.
+	 *
+	 * @see https://github.com/WordPress/gutenberg/blob/6aaa3686ae67adc1a6a6b08096d3312859733e1b/lib/compat/wordpress-6.5/blocks.php#L27-L47
+	 * To do: Remove this method once the Gutenberg core version registers the metadata attribute.
+	 *
+	 * @param array $args Array of arguments for registering a block type.
+	 * @return array $args
+	 */
+	public function register_metadata_attribute( $args ) {
+		// Setup attributes if needed.
+		if ( ! isset( $args['attributes'] ) || ! is_array( $args['attributes'] ) ) {
+			$args['attributes'] = array();
+		}
+
+		// Add metadata attribute if it doesn't exist.
+		if ( ! array_key_exists( 'metadata', $args['attributes'] ) ) {
+			$args['attributes']['metadata'] = array(
+				'type' => 'object',
+			);
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Filters woocommerce block types.
+	 *
+	 * @param string[] $block_types Array of woocommerce block types.
+	 * @return array
+	 */
+	public function get_block_types( $block_types ) {
+		if ( PageController::is_admin_page() ) {
+			// Ignore all woocommerce blocks.
+			return array();
+		}
+
+		return $block_types;
 	}
 }

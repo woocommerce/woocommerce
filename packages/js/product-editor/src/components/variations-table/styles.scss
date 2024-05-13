@@ -1,28 +1,33 @@
-@import "./variations-actions-menu/styles.scss";
+@import "./variation-actions-menus/styles.scss";
 @import "./downloads-menu-item/styles.scss";
 @import "./pagination/styles.scss";
 @import "./table-empty-or-error-state/styles.scss";
 @import "./variations-filter/styles.scss";
 @import "./table-row-skeleton/styles.scss";
+@import "./add-image-menu-item/style.scss";
 
 .woocommerce-product-variations {
 	display: flex;
 	flex-direction: column;
 	position: relative;
 
+	&__attributes-cell {
+		display: flex;
+		align-items: center;
+	}
+
 	&__table {
 		&-header {
 			.woocommerce-product-variations__table-row {
 				min-height: auto;
-
-				&:last-child {
-					text-transform: uppercase;
-					color: $gray-700;
-					font-weight: 500;
-					font-size: 11px;
-					line-height: $grid-unit-20;
-					border-bottom: 1px solid $gray-200;
-				}
+			}
+			.woocommerce-product-variations__table-rowheader {
+				text-transform: uppercase;
+				color: $gray-700;
+				font-weight: 500;
+				font-size: 11px;
+				line-height: $grid-unit-20;
+				border-bottom: 1px solid $gray-200;
 			}
 		}
 		&-body {
@@ -180,5 +185,22 @@
 		.components-button--hidden {
 			color: $alert-red;
 		}
+	}
+	&__add-image-button {
+		border-radius: 2px;
+		border: 1px dashed $gray-400;
+		margin-right: $gap-small;
+		width: 32px;
+		padding: 0;
+	}
+	&__image-button {
+		margin-right: $gap-small;
+		width: 32px;
+		max-height: 32px;
+		padding: 0;
+	}
+	&__image {
+		width: 32px;
+		max-height: 32px;
 	}
 }

@@ -4,13 +4,13 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 export * from './use-onboarding-tour';
 import { FlowType } from '~/customize-store/types';
+import { trackEvent } from '~/customize-store/tracking';
 
 type OnboardingTourProps = {
 	onClose: () => void;
@@ -44,7 +44,7 @@ const getLabels = ( flowType: FlowType.AIOnline | FlowType.noAI ) => {
 				),
 				descriptions: {
 					desktop: __(
-						"Start designing your store, including adding your logo, changing color schemes, and choosing layouts. Take a quick tour to discover what's possible.",
+						"Start designing your store, including adding your logo, changing color schemes, and choosing layouts. To help you get started, we've added some layouts for you to customize. Take a quick tour to discover what's possible.",
 						'woocommerce'
 					),
 				},
@@ -238,11 +238,11 @@ export const OnboardingTour = ( {
 				],
 				closeHandler: ( _steps, _currentStepIndex, source ) => {
 					if ( source === 'done-btn' ) {
-						recordEvent(
+						trackEvent(
 							'customize_your_store_assembler_hub_tour_complete'
 						);
 					} else {
-						recordEvent(
+						trackEvent(
 							'customize_your_store_assembler_hub_tour_close'
 						);
 					}

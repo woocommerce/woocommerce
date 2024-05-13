@@ -4,6 +4,8 @@ namespace Automattic\WooCommerce\LayoutTemplates;
 
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
 
+use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplateLogger;
+
 /**
  * Layout template registry.
  */
@@ -100,13 +102,21 @@ final class LayoutTemplateRegistry {
 	 * @param array $query_params Query params.
 	 */
 	public function instantiate_layout_templates( array $query_params = array() ): array {
+		// Make sure the block template logger is initialized before the templates are created,
+		// so that the logger will collect the template events.
+		$logger = BlockTemplateLogger::get_instance();
+
 		$layout_templates = array();
 
 		$layout_templates_info = $this->get_matching_layout_templates_info( $query_params );
 		foreach ( $layout_templates_info as $layout_template_info ) {
 			$layout_template = $this->get_layout_template_instance( $layout_template_info );
 
-			$layout_templates[ $layout_template->get_id() ] = $layout_template;
+			$layout_template_id = $layout_template->get_id();
+
+			$layout_templates[ $layout_template_id ] = $layout_template;
+
+			$logger->log_template_events_to_file( $layout_template_id );
 		}
 
 		return $layout_templates;
@@ -148,16 +158,8 @@ final class LayoutTemplateRegistry {
 		 */
 		do_action( 'woocommerce_layout_template_after_instantiation', $layout_template_info['id'], $layout_template_info['area'], $layout_template_instance );
 
-		// Call the old, soon-to-be-deprecated, register hook.
-
-		/**
-		 * Fires when a template is registered.
-		 *
-		 * @param BlockTemplateInterface $template Template that was registered.
-		 *
-		 * @since 8.2.0
-		 */
-		do_action( 'woocommerce_block_template_register', $layout_template_instance );
+		// Call the old, deprecated, register hook.
+		wc_do_deprecated_action( 'woocommerce_block_template_register', array( $layout_template_instance ), '8.6.0', 'woocommerce_layout_template_after_instantiation' );
 
 		return $layout_template_instance;
 	}

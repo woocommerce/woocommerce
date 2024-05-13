@@ -50,7 +50,6 @@ export type customizeStoreStateMachineContext = {
 		hasErrors: boolean;
 		themeData: RecommendThemesAPIResponse;
 		activeTheme: string;
-		activeThemeHasMods: boolean;
 		customizeStoreTaskCompleted: boolean;
 		currentThemeIsAiGenerated: boolean;
 	};
@@ -58,4 +57,6 @@ export type customizeStoreStateMachineContext = {
 		hasCompleteSurvey: boolean;
 	};
 	flowType: FlowType;
+	isFontLibraryAvailable: boolean | null;
+	activeThemeHasMods: boolean | undefined;
 };

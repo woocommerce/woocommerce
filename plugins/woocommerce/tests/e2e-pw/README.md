@@ -1,6 +1,6 @@
 # WooCommerce Playwright End to End Tests
 
-This is the documentation for the new e2e testing setup based on Playwright and wp-env. It superseedes the Puppeteer and e2e-environment [setup](../tests/e2e), which we will gradually deprecate.
+This is the documentation for the e2e testing setup based on Playwright and wp-env. It superseedes the Puppeteer and e2e-environment [setup](../tests/e2e), which we will gradually deprecate.
 
 ## Table of contents
 
@@ -19,10 +19,8 @@ This is the documentation for the new e2e testing setup based on Playwright and 
 
 ## Pre-requisites
 
--   Node.js ([Installation instructions](https://nodejs.org/en/download/))
--   NVM ([Installation instructions](https://github.com/nvm-sh/nvm))
--   PNPM ([Installation instructions](https://pnpm.io/installation))
--   Docker and Docker Compose ([Installation instructions](https://docs.docker.com/engine/install/))
+-   Go through the [WooCommerce Monorepo prerequisites](https://github.com/woocommerce/woocommerce/blob/trunk/README.md#prerequisites) first, including the commands to get everything working.
+-   Install Docker and Docker Compose ([Installation instructions](https://docs.docker.com/engine/install/)). Docker Compose comes installed in Docker Desktop by default.
 
 Note, that if you are on Mac and you install docker through other methods such as homebrew, for example, your steps to set it up might be different. The commands listed in steps below may also vary.
 
@@ -30,7 +28,7 @@ If you are using Windows, we recommend using [Windows Subsystem for Linux (WSL)]
 
 ### Introduction
 
-End-to-end tests are powered by Playwright. The test site is spinned up using `wp-env` (recommended), but we will continue to support `e2e-environment` in the meantime.
+End-to-end tests are powered by Playwright. The test site is spun up using `wp-env` (recommended), but we will continue to support `e2e-environment` in the meantime.
 
 **Running tests for the first time:**
 
@@ -135,7 +133,7 @@ After you run a test, it's best to restart the environment to start from a fresh
 
 ### Creating test structure
 
-It is a good practice to start working on the test by identifying what needs to be tested on the higher and lower levels. For example, if you are writing a test to verify that merchant can create a virtual product, the overview of the test will be as follows:
+It is a good practice to start working on the test by identifying what needs to be tested at the higher and lower levels. For example, if you are writing a test to verify that merchant can create a virtual product, the overview of the test will be as follows:
 
 -   Merchant can create virtual product
     -   Merchant can log in

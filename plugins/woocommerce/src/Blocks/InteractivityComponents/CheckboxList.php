@@ -16,6 +16,7 @@ class CheckboxList {
 	 *                      - id: string of the id to use for the checkbox (optional).
 	 *                      - checked: boolean to indicate if the checkbox is checked.
 	 *                      - label: string of the label to display (plaintext or HTML).
+	 *                      - aria_label: string of the aria label to use for the checkbox. (optional, plaintext only).
 	 *                      - value: string of the value to use.
 	 *                  on_change: string of the action to perform when the dropdown changes.
 	 * @return string|false
@@ -35,17 +36,22 @@ class CheckboxList {
 		<div data-wc-interactive='<?php echo esc_attr( $namespace ); ?>'>
 			<div data-wc-context='<?php echo esc_attr( wp_json_encode( $checkbox_list_context ) ); ?>' >
 			<div class="wc-block-stock-filter style-list">
-					<ul class="wc-block-checkbox-list wc-block-components-checkbox-list wc-block-stock-filter-list">
+					<ul class="wc-block-components-checkbox-list">
 						<?php foreach ( $items as $item ) { ?>
-							<?php $item['id'] = $item['id'] ?? uniqid( 'checkbox-' ); ?>
-							<li>
-								<div class="wc-block-components-checkbox wc-block-checkbox-list__checkbox">
+							<?php
+							$item['id'] = $item['id'] ?? uniqid( 'checkbox-' );
+							// translators: %s: checkbox label.
+							$i18n_label = sprintf( __( 'Checkbox: %s', 'woocommerce' ), $item['aria_label'] ?? '' );
+							?>
+							<li data-wc-key="<?php echo esc_attr( $item['id'] ); ?>">
+								<div class="wc-block-components-checkbox">
 									<label for="<?php echo esc_attr( $item['id'] ); ?>">
-										<input 
-											id="<?php echo esc_attr( $item['id'] ); ?>" 
-											class="wc-block-components-checkbox__input" 
-											type="checkbox" 
+										<input
+											id="<?php echo esc_attr( $item['id'] ); ?>"
+											class="wc-block-components-checkbox__input"
+											type="checkbox"
 											aria-invalid="false"
+											aria-label="<?php echo esc_attr( $i18n_label ); ?>"
 											data-wc-on--change--select-item="actions.selectCheckboxItem"
 											data-wc-on--change--parent-action="<?php echo esc_attr( $on_change ); ?>"
 											value="<?php echo esc_attr( $item['value'] ); ?>"

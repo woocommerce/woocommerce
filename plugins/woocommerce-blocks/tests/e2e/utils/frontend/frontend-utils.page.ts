@@ -13,8 +13,12 @@ export class FrontendUtils {
 		this.requestUtils = requestUtils;
 	}
 
-	async getBlockByName( name: string ) {
-		return this.page.locator( `[data-block-name="${ name }"]` );
+	async getBlockByName( name: string, parentSelector?: string ) {
+		let selector = `[data-block-name="${ name }"]`;
+		if ( parentSelector ) {
+			selector = `${ parentSelector } [data-block-name="${ name }"]`;
+		}
+		return this.page.locator( selector );
 	}
 
 	async getBlockByClassWithParent( blockClass: string, parentName: string ) {
@@ -29,10 +33,10 @@ export class FrontendUtils {
 	async addToCart( itemName = '' ) {
 		await this.page.waitForLoadState( 'domcontentloaded' );
 		if ( itemName !== '' ) {
+			// We can't use `getByRole()` here because the Add to Cart button
+			// might be a button (in blocks) or a link (in the legacy template).
 			await this.page
-				.getByRole( 'button', {
-					name: `Add to cart: “${ itemName }”`,
-				} )
+				.getByLabel( `Add to cart: “${ itemName }”` )
 				.click();
 		} else {
 			await this.page.click( 'text=Add to cart' );
@@ -48,10 +52,18 @@ export class FrontendUtils {
 		await this.page.goto( '/checkout', {
 			waitUntil: 'domcontentloaded',
 		} );
+
+		await this.page.waitForSelector( '#email' );
 	}
 
 	async goToCart() {
 		await this.page.goto( '/cart', {
+			waitUntil: 'commit',
+		} );
+	}
+
+	async goToCartShortcode() {
+		await this.page.goto( '/cart-shortcode', {
 			waitUntil: 'commit',
 		} );
 	}

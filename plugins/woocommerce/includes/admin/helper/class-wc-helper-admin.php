@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Helper
  */
 
+use Automattic\WooCommerce\Internal\Admin\Marketplace;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -14,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * The main entry-point for all things related to the Helper.
  * The Helper manages the connection between the store and
- * an account on Woo.com.
+ * an account on WooCommerce.com.
  */
 class WC_Helper_Admin {
 
@@ -39,20 +41,38 @@ class WC_Helper_Admin {
 		$auth_user_data  = WC_Helper_Options::get( 'auth_user_data', array() );
 		$auth_user_email = isset( $auth_user_data['email'] ) ? $auth_user_data['email'] : '';
 
+		// Get the all installed themes and plugins. Knowing this will help us decide to show Add to Store button on product cards.
+		$installed_products = array_merge( WC_Helper::get_local_plugins(), WC_Helper::get_local_themes() );
+		$installed_products = array_map(
+			function ( $product ) {
+				return $product['slug'];
+			},
+			$installed_products
+		);
+
+		$woo_connect_notice_type = WC_Helper_Updater::get_woo_connect_notice_type();
+
 		$settings['wccomHelper'] = array(
-			'isConnected' => WC_Helper::is_site_connected(),
-			'connectURL'  => self::get_connection_url(),
-			'userEmail'   => $auth_user_email,
-			'userAvatar'  => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
-			'storeCountry' => wc_get_base_location()['country'],
-			'inAppPurchaseURLParams' => WC_Admin_Addons::get_in_app_purchase_url_params(),
+			'isConnected'                => WC_Helper::is_site_connected(),
+			'connectURL'                 => self::get_connection_url(),
+			'userEmail'                  => $auth_user_email,
+			'userAvatar'                 => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
+			'storeCountry'               => wc_get_base_location()['country'],
+			'inAppPurchaseURLParams'     => WC_Admin_Addons::get_in_app_purchase_url_params(),
+			'installedProducts'          => $installed_products,
+			'wooUpdateManagerInstalled'  => WC_Woo_Update_Manager_Plugin::is_plugin_installed(),
+			'wooUpdateManagerActive'     => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
+			'wooUpdateManagerInstallUrl' => WC_Woo_Update_Manager_Plugin::generate_install_url(),
+			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
+			'wooUpdateCount'             => WC_Helper_Updater::get_updates_count_based_on_site_status(),
+			'woocomConnectNoticeType'    => $woo_connect_notice_type,
 		);
 
 		return $settings;
 	}
 
 	/**
-	 * Generates the URL for connecting or disconnecting the store to/from Woo.com.
+	 * Generates the URL for connecting or disconnecting the store to/from WooCommerce.com.
 	 * Approach taken from existing helper code that isn't exposed.
 	 *
 	 * @return string
@@ -106,7 +126,7 @@ class WC_Helper_Admin {
 	}
 
 	/**
-	 * Fetch featured products from Woo.com and serve them
+	 * Fetch featured products from WooCommerce.com and serve them
 	 * as JSON.
 	 */
 	public static function get_featured() {

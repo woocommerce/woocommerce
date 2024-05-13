@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Remove putting template layouts on the productBlockEditorSettings JS global.

@@ -29,13 +29,13 @@ abstract class AbstractTemplateCompatibility {
 
 		add_filter(
 			'render_block_data',
-			function( $parsed_block, $source_block, $parent_block ) {
+			function ( $parsed_block, $source_block, $parent_block ) {
 				/**
 				* Filter to disable the compatibility layer for the blockified templates.
 				*
 				* This hook allows to disable the compatibility layer for the blockified templates.
 				*
-				* @since TBD
+				* @since 7.6.0
 				* @param boolean.
 				*/
 				$is_disabled_compatility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
@@ -45,7 +45,6 @@ abstract class AbstractTemplateCompatibility {
 				}
 
 				return $this->update_render_block_data( $parsed_block, $source_block, $parent_block );
-
 			},
 			10,
 			3
@@ -59,7 +58,7 @@ abstract class AbstractTemplateCompatibility {
 				*
 				* This hook allows to disable the compatibility layer for the blockified.
 				*
-				* @since TBD
+				* @since 7.6.0
 				* @param boolean.
 				*/
 				$is_disabled_compatility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
@@ -136,6 +135,7 @@ abstract class AbstractTemplateCompatibility {
 				remove_action( $hook, $callback, $priority );
 			}
 		}
+		$class_name = basename( str_replace( '\\', '/', get_class( $this ) ) );
 
 		/**
 		 * When extensions implement their equivalent blocks of the template
@@ -161,8 +161,10 @@ abstract class AbstractTemplateCompatibility {
 		 *
 		 * @since 9.5.0
 		 * @param array $data Additional hooked data. Default to empty
+		 * @param string $class_name Class name within which the hook is called.
+		 * Either ArchiveProductTemplatesCompatibility or SingleProductTemplateCompatibility.
 		 */
-		$additional_hook_data = apply_filters( 'woocommerce_blocks_hook_compatibility_additional_data', array() );
+		$additional_hook_data = apply_filters( 'woocommerce_blocks_hook_compatibility_additional_data', array(), $class_name );
 
 		if ( empty( $additional_hook_data ) || ! is_array( $additional_hook_data ) ) {
 			return;

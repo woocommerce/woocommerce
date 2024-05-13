@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-Comment: Add e2e tests to verify Products by Category/Tag/Attribute templates default to Product Catalog template
-

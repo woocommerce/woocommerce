@@ -13,6 +13,8 @@ export type MarketplaceContextType = {
 	setIsLoading: ( isLoading: boolean ) => void;
 	selectedTab: string;
 	setSelectedTab: ( tab: string ) => void;
+	isProductInstalled: ( slug: string ) => boolean;
+	addInstalledProduct: ( slug: string ) => void;
 };
 
 export type SubscriptionsContextType = {

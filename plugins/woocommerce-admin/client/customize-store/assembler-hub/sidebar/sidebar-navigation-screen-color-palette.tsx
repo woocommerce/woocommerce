@@ -7,7 +7,6 @@ import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useContext } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { PanelBody } from '@wordpress/components';
-import { recordEvent } from '@woocommerce/tracks';
 // @ts-ignore No types for this exist yet.
 import { privateApis as blockEditorPrivateApis } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
@@ -21,6 +20,7 @@ import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { ColorPalette, ColorPanel } from './global-styles';
 import { FlowType } from '~/customize-store/types';
+import { trackEvent } from '~/customize-store/tracking';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
@@ -60,25 +60,29 @@ export const SidebarNavigationScreenColorPalette = () => {
 		context: { flowType },
 	} = useContext( CustomizeStoreContext );
 
-	const description =
-		flowType === FlowType.AIOnline
-			? __(
-					'Based on the info you shared, our AI tool recommends using this color palette. Want to change it? You can select or add new colors below, or update them later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
-					'woocommerce'
-			  )
-			: __(
-					'Choose the color palette that best suits your brand. Want to change it? Create your custom color palette below, or update it later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
-					'woocommerce'
-			  );
+	const aiOnline = flowType === FlowType.AIOnline;
+
+	const title = aiOnline
+		? __( 'Change the color palette', 'woocommerce' )
+		: __( 'Choose your color palette', 'woocommerce' );
+	const description = aiOnline
+		? __(
+				'Based on the info you shared, our AI tool recommends using this color palette. Want to change it? You can select or add new colors below, or update them later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
+				'woocommerce'
+		  )
+		: __(
+				'Choose the color palette that best suits your brand. Want to change it? Create your custom color palette below, or update it later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
+				'woocommerce'
+		  );
 
 	return (
 		<SidebarNavigationScreen
-			title={ __( 'Change the color palette', 'woocommerce' ) }
+			title={ title }
 			description={ createInterpolateElement( description, {
 				EditorLink: (
 					<Link
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_assembler_hub_editor_link_click',
 								{
 									source: 'color-palette',
@@ -96,7 +100,7 @@ export const SidebarNavigationScreenColorPalette = () => {
 				StyleLink: (
 					<Link
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_assembler_hub_style_link_click',
 								{
 									source: 'color-palette',

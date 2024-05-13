@@ -9,4 +9,11 @@ export type DesignWithoutAIStateMachineContext = {
 		hasErrors: boolean;
 	};
 	flowType: FlowType.noAI;
+	isFontLibraryAvailable: boolean;
 };
+
+export interface Theme {
+	_links: {
+		'wp:user-global-styles': { href: string }[];
+	};
+}

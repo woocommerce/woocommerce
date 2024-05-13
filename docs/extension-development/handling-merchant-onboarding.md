@@ -1,5 +1,7 @@
 ---
-post_title: Handling merchant onboarding
+post_title: How to implement merchant onboarding
+menu_title: Implement merchant onboarding
+tags: how-to
 ---
 
 ## Introduction
@@ -21,293 +23,271 @@ Setup tasks appear on the WooCommerce Admin home screen and prompt a merchant to
 
 ### Registering the task with PHP
 
-To register your task as an extended task list item, you'll need to hook in to the `woocommerce_get_registered_extended_tasks` filter with a function that appends your task to the array the filter provides.
+To register your task as an extended task list item, you'll need to start by creating a new PHP class that extends the Task class. This class will define the properties and behavior of your custom task.
 
 ```php
-// Task registration
-function my_extension_register_the_task( $registered_tasks_list_items ) {
-    $new_task_name = 'your_task_name';
-    if ( ! in_array( $new_task_name, $registered_tasks_list_items, true ) ) {
-        array_push( $registered_tasks_list_items, $new_task_name );
-    }
-    return $registered_tasks_list_items;
+<?php
+/**
+ * Custom task example.
+ *
+ */
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+
+/**
+ * Custom task class.
+ */
+class MyTask extends Task {
+	/**
+	 * Get the task ID.
+	 *
+	 * @return string
+	 */
+	public function get_id() {
+		return 'my-task';
+	}
+
+	/**
+	 * Title.
+	 *
+	 * @return string
+	 */
+	public function get_title() {
+		return __( 'My task', 'woocommerce' );
+	}
+
+	/**
+	 * Content.
+	 *
+	 * @return string
+	 */
+	public function get_content() {
+		return __( 'Add your task description here for display in the task list.', 'woocommerce' );
+	}
+
+	/**
+	 * Time.
+	 *
+	 * @return string
+	 */
+	public function get_time() {
+		return __( '2 minutes', 'woocommerce' );
+	}
 }
-add_filter( 'woocommerce_get_registered_extended_tasks', 'my_extension_register_the_task', 10, 1 );
 ```
 
-### Registering the task's JavaScript
-
-In addition to registering the task name, you'll also need to register and enqueue the transpiled JavaScript file containing your task component, its configuration, and its event-handlers. A common way to do this is to create a dedicated registration function that hooks into the `admin_enqueue_scripts` action in WordPress. If you do things this way, you can nest the `add_filter` call for `woocommerce_get_registered_extended_tasks` in this function as well. Below is an annotated example of how this registration might look:
+After defining your custom task class, add it to the task list by calling the `add_task` method on the `TaskLists` class. Please note that you need to call the add_task method before or in the `init` hook because onboarding tasks are registered in the `init` hook.
 
 ```php
-// Register the task list item and the JS.
-function add_task_register_script() {
- 
-    // Check to make sure that this is a request for an Admin page.
-    if (
-        ! class_exists( 'Automattic\WooCommerce\Admin\Loader' ) ||
-        ! \Automattic\WooCommerce\Admin\Loader::is_admin_page() ||
-        ! Onboarding::should_show_tasks()
-    ) {
-        return;
-    }
- 
-    // Register a handle for your extension's transpiled JavaScript file.
-    wp_register_script(
-        'add-task',
-        plugins_url( '/dist/index.js', __FILE__ ),
-        array(
-            'wp-hooks',
-            'wp-element',
-            'wp-i18n',
-            'wc-components',
-        ),
-        filemtime( dirname( __FILE__ ) . '/dist/index.js' ),
-        true
+# Register the task.
+function register_custom_task() {
+    // Register the task.
+    use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
+
+    TaskLists::add_task(
+        'extended', // The task list ID (e.g., 'extended' for "Things to do next").
+        new MyCustomTask(
+            TaskLists::get_list( 'extended' ) // Retrieve the task list object.
+        )
     );
- 
-    // Get server-side data via PHP and send it to the JavaScript using wp_localize_script
-    $client_data = array(
-        'isComplete' => get_option( 'woocommerce_admin_add_task_example_complete', false ),
-    );
-    wp_localize_script( 'add-task', 'addTaskData', $client_data );
- 
-    // Enqueue the script in WordPress
-    wp_enqueue_script( 'add-task' );
- 
-    // Hook your task registration script to the relevant extended tasks filter
-    add_filter( 'woocommerce_get_registered_extended_tasks', 'my_extension_register_the_task', 10, 1 );
 }
+
+// Hook the registration function to the 'init' action.
+add_action('init', 'register_custom_task');
 ```
 
-### Unregistering the task upon deactivation
+The `TaskList` class represents a task list. It contains properties and methods for managing task list. We currently have three predefined task lists
 
-It is also helpful to define a function that will unregister your task when your extension is deactivated.
-
-```php
-// Unregister task.
-function my_extension_deactivate_task() {
-    remove_filter( 'woocommerce_get_registered_extended_tasks', 'my_extension_register_the_task', 10, 1 );
-}
- 
-register_deactivation_hook( __FILE__, 'my_extension_deactivate_task' );
-
-```
+- `setup`: The default task list
+- `extended`: The "Things to do next" task list
+- `secret_tasklist`: The "Secret" task list that is used for having tasks that are accessed by other means.
 
 ### Adding the task using JavaScript
 
-Once the task has been registered in WooCommerce, you need to build the task component, set its configuration, and add it to the task list. For example, the JavaScript file for a simple task might look something like this:
+In addition to registering the task in PHP, You need to build the task component with JavaScript, set its configuration, and add it to the task list. For example, the JavaScript file for a simple task might look something like this:
 
 ```js
-// External dependencies.
-import { addFilter } from '@wordpress/hooks';
-import apiFetch from '@wordpress/api-fetch';
-import { Card, CardBody } from '@wordpress/components';
- 
-// WooCommerce dependencies.
-import { getHistory, getNewPath } from '@woocommerce/navigation';
- 
-// Event handler for handling mouse clicks that mark a task complete.
-const markTaskComplete = () => {
-    // Here we're using apiFetch to set option values in WooCommerce.
-    apiFetch( {
-        path: '/wc-admin/options',
-        method: 'POST',
-        data: { woocommerce_admin_add_task_example_complete: true },
-    } )
-        .then( () => {
-            // Set the local `isComplete` to `true` so that task appears complete on the list.
-            addTaskData.isComplete = true;
-            // Redirect back to the root WooCommerce Admin page.
-            getHistory().push( getNewPath( {}, '/', {} ) );
-        } )
-        .catch( ( error ) => {
-            // Something went wrong with our update.
-            console.log( error );
-        } );
+import { createElement } from '@wordpress/element';
+import {
+	WooOnboardingTask,
+	WooOnboardingTaskListItem,
+} from '@woocommerce/onboarding';
+import { registerPlugin } from '@wordpress/plugins';
+
+const Task = ( { onComplete, task, query } ) => {
+	// Implement your task UI/feature here.
+	return <div></div>;
 };
- 
-// Event handler for handling mouse clicks that mark a task incomplete.
-const markTaskIncomplete = () => {
-    apiFetch( {
-        path: '/wc-admin/options',
-        method: 'POST',
-        data: { woocommerce_admin_add_task_example_complete: false },
-    } )
-        .then( () => {
-            addTaskData.isComplete = false;
-            getHistory().push( getNewPath( {}, '/', {} ) );
-        } )
-        .catch( ( error ) => {
-            console.log( error );
-        } );
-};
- 
-// Build the Task component.
-const Task = () => {
-    return (
-        <Card className="woocommerce-task-card">
-            <CardBody>
-                Example task card content.
-                <br />
-                <br />
-                <div>
-                    { addTaskData.isComplete ? (
-                        <button onClick={ markTaskIncomplete }>
-                            Mark task incomplete
-                        </button>
-                    ) : (
-                        <button onClick={ markTaskComplete }>
-                            Mark task complete
-                        </button>
-                    ) }
-                </div>
-            </CardBody>
-        </Card>
-    );
-};
- 
-// Use the 'woocommerce_admin_onboarding_task_list' filter to add a task.
-addFilter(
-    'woocommerce_admin_onboarding_task_list',
-    'plugin-domain',
-    ( tasks ) => {
-        return [
-            ...tasks,
-            {
-                key: 'example',
-                title: 'Example',
-                content: 'This is an example task.',
-                container: <Task />,
-                completed: addTaskData.isComplete,
-                visible: true,
-                additionalInfo: 'Additional info here',
-                time: '2 minutes',
-                isDismissable: true,
-                onDismiss: () => console.log( 'The task was dismissed' ),
-            },
-        ];
-    }
-);
+
+registerPlugin( 'add-task-content', {
+	render: () => (
+		<WooOnboardingTask id="my-task">
+			{ ( { onComplete, query, task } ) => (
+				<Task onComplete={ onComplete } task={ task } query={ query } />
+			) }
+		</WooOnboardingTask>
+	),
+} );
+
+registerPlugin( 'add-task-list-item', {
+	scope: 'woocommerce-tasks',
+	render: () => (
+		<WooOnboardingTaskListItem id="my-task">
+			{ ( { defaultTaskItem: DefaultTaskItem } ) => (
+				// Add a custom wrapper around the default task item.
+				<div
+					className="woocommerce-custom-tasklist-item"
+					style={ {
+						border: '1px solid red',
+					} }
+				>
+					<DefaultTaskItem />
+				</div>
+			) }
+		</WooOnboardingTaskListItem>
+	),
+} );
 ```
 
 In the example above, the extension does a few different things. Let's break it down:
 
 #### Handle imports
 
-First, import any functions, components, or other utilities from external dependencies. We've kept WooCommerce-related dependencies separate from others for the sake of keeping things tidy. In a real-world extension, you may be importing other local modules. In those cases, we recommend creating a visually separate section for those imports as well.
+First, import any functions, components, or other utilities from external dependencies.
 
 ```js
-// External dependencies
-import { addFilter } from '@wordpress/hooks'``;
-import apiFetch from '@wordpress/api-fetch'``;
-import { Card, CardBody } from '@wordpress/components'``;
-
-// WooCommerce dependencies
-import { getHistory, getNewPath } from '@woocommerce/navigation'``;
+import { createElement } from '@wordpress/element';
+import {
+	WooOnboardingTask,
+	WooOnboardingTaskListItem,
+} from '@woocommerce/onboarding';
+import { registerPlugin } from '@wordpress/plugins';
 ```
-
-The `addFilter` function allows us to hook in to JavaScript filters the same way that the traditional PHP call to `add_filter()` does. The `apiFetch` utility allows our extension to query the WordPress REST API without needing to deal with keys or authentication. Finally, the `Card` and `CardBody` are predefined React components that we'll use as building blocks for our extension's Task component.
-
-#### Create Event Handlers
-
-Next we define the logic for the functions that will handle events for our task. In the example above, we created two functions to handle mouse clicks that toggle the completion status of our task.
-
-```js
-const markTaskComplete = () => {
-    apiFetch( {
-        path: '/wc-admin/options',
-        method: 'POST',
-        data: { woocommerce_admin_add_task_example_complete: true },
-    } )
-        .then( () => {
-            addTaskData.isComplete = true;
-            getHistory().push( getNewPath( {}, '/', {} ) );
-        } )
-        .catch( ( error ) => {
-            console.log( error );
-        } );
-};
-```
-
-In the example above, the event handler uses `apiFetch` to set the `woocommerce_admin_add_task_example_complete` option's value to `true` and then updates the component's state data and redirects the browser to the Admin root. In the case of an error, we're simply logging it to the console, but you may want to implement your own solution here.
-
-The `markTaskIncomplete` function is more or less an inverse of `markTaskComplete` that toggles the task's completion status in the opposite direction.
 
 #### Construct the component
 
 Next, we create a [functional component](https://reactjs.org/docs/components-and-props.html) that returns our task card. The intermixed JavaScript/HTML syntax we're using here is called JSX. If you're unfamiliar with it, you can [read more about it in the React docs](https://reactjs.org/docs/introducing-jsx.html).
 
 ```js
-const Task = () => {
-    return (
-        <Card className="woocommerce-task-card">
-            <CardBody>
-                Example task card content.
-                <br />
-                <br />
-                <div>
-                    { addTaskData.isComplete ? (
-                        <button onClick={ markTaskIncomplete }>
-                            Mark task incomplete
-                        </button>
-                    ) : (
-                        <button onClick={ markTaskComplete }>
-                            Mark task complete
-                        </button>
-                    ) }
-                </div>
-            </CardBody>
-        </Card>
-    );
+const Task = ( { onComplete, task } ) => {
+	const { actionTask } = useDispatch( ONBOARDING_STORE_NAME );
+	const { isActioned } = task;
+
+	return (
+		<Card className="woocommerce-task-card">
+			<CardBody>
+				{ __(
+					"This task's completion status is dependent on being actioned. The action button below will action this task, while the complete button will optimistically complete the task in the task list and redirect back to the task list. Note that in this example, the task must be actioned for completion to persist.",
+					'plugin-domain'
+				) }{ ' ' }
+				<br />
+				<br />
+				{ __( 'Task actioned status: ', 'plugin-domain' ) }{ ' ' }
+				{ isActioned ? 'actioned' : 'not actioned' }
+				<br />
+				<br />
+				<div>
+					<button
+						onClick={ () => {
+							actionTask( 'my-task' );
+						} }
+					>
+						{ __( 'Action task', 'plugin-domain' ) }
+					</button>
+					<button onClick={ onComplete }>
+						{ __( 'Complete', 'plugin-domain' ) }
+					</button>
+				</div>
+			</CardBody>
+		</Card>
+	);
 };
 ```
 
 In the example above, we're using the `Card` and `CardBody` components to construct our task's component. The `div` inside the `CardBody` uses a [JavaScript expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Expressions_and_Operators#Expressions) (`{}`) to embed a ternary operator that uses the component's state to determine whether to display the task as complete or incomplete.
 
-#### Configure task and add it to the WooCommerce task list
+#### Register the Plugin for Task Content
 
-Finally, we'll set some configuration values for our task and then use the `addFilter` function to append our task to the WooCommerce Admin Onboarding Task List.
+Next, we register the Task component as a plugin named "add-task-content" using [SlotFills](https://developer.wordpress.org/block-editor/reference-guides/slotfills/). This plugin nests the Task component within a WooOnboardingTask component and passes the necessary properties. We also specify the scope of the plugin as "woocommerce-tasks" to make it effective only within WooCommerce's task list.
 
 ```js
-addFilter(
-    'woocommerce_admin_onboarding_task_list',
-    'plugin-domain',
-    ( tasks ) => {
-        return [
-            ...tasks,
-            {
-                key: 'example',
-                title: 'Example',
-                content: 'This is an example task.',
-                container: <Task />,
-                completed: addTaskData.isComplete,
-                visible: true,
-                additionalInfo: 'Additional info here',
-                time: '2 minutes',
-                isDismissable: true,
-                onDismiss: () => console.log( 'The task was dismissed' ),
-            },
-        ];
-    }
-);
+registerPlugin( 'add-task-content', {
+	render: () => (
+		
+			{ ( {
+				onComplete,
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				query,
+				task,
+			} ) =>  }
+		
+	),
+	scope: 'woocommerce-tasks',
+} );
 ```
 
-In the example above, we're setting our task's configuration as we pass it into the filter for simplicity, but in a real-world extension, you might encapsulate this somewhere else for better separation of concerns. Below is a list of properties that the task-list component supports for tasks.
+#### Register the Plugin for Task List Item Customization
 
-| Name           | Type       | Required | Description |
-|----------------|------------|----------|-------------|
-| key            | String     | Yes      | Identifier  |
-| title          | String     | Yes      | Task title  |
-| content        | String     | No       | The content that will be visible in the Extensions setup list |
-| container      | Component  | Yes      | The task component that will be visible after selecting the item |
-| completed      | Boolean    | Yes      | Whether the task is completed or not |
-| visible        | Boolean    | Yes      | Whether the task is visible or not |
-| additionalInfo | String     | No       | Additional information |
-| time           | String     | Yes      | Time it takes to finish up the task |
-| isDismissable  | Boolean    | No       | Whether the task is dismissable or not. If false the Dismiss button won't be visible |
-| onDismiss      | Function   | No       | Callback method that it's triggered on dismission |
-| type           | String     | Yes      | Type of task list item, setup items will be in the store setup and extension in the extensions setup |
+Finally, we register another plugin named "my-task-list-item-plugin." This plugin is used to customize the appearance of task list items. It also targets WooCommerce's task list and wraps the DefaultTaskItem component within a custom wrapper with additional styling.
+
+```js
+registerPlugin( 'my-task-list-item-plugin', {
+  scope: 'woocommerce-tasks',
+  render: () => (
+    <WooOnboardingTaskListItem id="my-task">
+      { ( { defaultTaskItem: DefaultTaskItem } ) => (
+        // Add a custom wrapper around the default task item.
+        <div
+          className="woocommerce-custom-tasklist-item"
+          style={ {
+            border: '1px solid red',
+          } }
+        >
+          <DefaultTaskItem />
+        </div>
+      ) }
+    </WooOnboardingTaskListItem>
+  ),
+} );
+```
+
+In summary, the JavaScript file for a simple task extends and customizes the functionality of WooCommerce's task list, allowing users to better manage tasks and personalize the appearance of task list items.
+
+### Registering the task with JavaScript
+
+In addition to registering the task in php, you'll also need to register and enqueue the transpiled JavaScript file containing your task component and its configuration. A common way to do this is to create a dedicated registration function that hooks into the `admin_enqueue_scripts` action in WordPress. Below is an annotated example of how this registration might look:
+
+```php
+/**
+ * Register the scripts to fill the task content on the frontend.
+ */
+function add_task_register_script() {
+	if (
+		! class_exists( 'Automattic\WooCommerce\Internal\Admin\Loader' ) ||
+		! \Automattic\WooCommerce\Admin\PageController::is_admin_or_embed_page()
+	) {
+		return;
+	}
+
+	$asset_file = require __DIR__ . '/dist/index.asset.php';
+	wp_register_script(
+		'add-task',
+		plugins_url( '/dist/index.js', __FILE__ ), // task registration JS
+		$asset_file['dependencies'],
+		$asset_file['version'],
+		true
+	);
+
+	wp_enqueue_script( 'add-task' );
+}
+
+add_action( 'admin_enqueue_scripts', 'add_task_register_script' );
+```
+
+By following these steps, your custom task should appear in the WooCommerce onboarding tasklist.
+
+For a complete example of adding a custom task as a WordPress plugin, you can check out the [add-task examples directory](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-admin/docs/examples/extensions/add-task).
+
+To learn more about the tasklist, you can refer to the [tasklist documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-admin/docs/features/onboarding-tasks.md).
 
 
 ---

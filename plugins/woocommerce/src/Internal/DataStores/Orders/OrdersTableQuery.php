@@ -346,6 +346,7 @@ class OrdersTableQuery {
 			'day'   => '',
 		);
 
+		$precision = null;
 		if ( is_numeric( $date ) ) {
 			$date      = new \WC_DateTime( "@{$date}", new \DateTimeZone( 'UTC' ) );
 			$precision = 'second';
@@ -919,6 +920,23 @@ class OrdersTableQuery {
 		}
 		$orders_table    = $this->tables['orders'];
 		$this->count_sql = "SELECT COUNT(DISTINCT $fields) FROM  $orders_table $join WHERE $where";
+
+		if ( ! $this->suppress_filters ) {
+			/**
+			 * Filters the count SQL query.
+			 *
+			 * @since 8.6.0
+			 *
+			 * @param string           $sql   The count SQL query.
+			 * @param OrdersTableQuery $query The OrdersTableQuery instance (passed by reference).
+			 * @param array            $args  Query args.
+			 * @param string           $fields Prepared fields for SELECT clause.
+			 * @param string           $join Prepared JOIN clause.
+			 * @param string           $where Prepared WHERE clause.
+			 * @param string           $groupby Prepared GROUP BY clause.
+			 */
+			$this->count_sql = apply_filters_ref_array( 'woocommerce_orders_table_query_count_sql', array( $this->count_sql, &$this, $this->args, $fields, $join, $where, $groupby ) );
+		}
 	}
 
 	/**
@@ -1131,7 +1149,7 @@ class OrdersTableQuery {
 		$values = is_array( $values ) ? $values : array( $values );
 		$ids    = array();
 		$emails = array();
-
+		$pieces = array();
 		foreach ( $values as $value ) {
 			if ( is_array( $value ) ) {
 				$sql      = $this->generate_customer_query( $value, 'AND' );

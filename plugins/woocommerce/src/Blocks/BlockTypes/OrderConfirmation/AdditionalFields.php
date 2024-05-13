@@ -33,9 +33,11 @@ class AdditionalFields extends AbstractOrderConfirmationBlock {
 
 		$controller = Package::container()->get( CheckoutFields::class );
 		$content   .= $this->render_additional_fields(
-			array_merge(
-				$controller->get_order_additional_fields_with_values( $order, 'contact' ),
-				$controller->get_order_additional_fields_with_values( $order, 'additional' )
+			$controller->filter_fields_for_order_confirmation(
+				array_merge(
+					$controller->get_order_additional_fields_with_values( $order, 'contact', 'other', 'view' ),
+					$controller->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' ),
+				)
 			)
 		);
 

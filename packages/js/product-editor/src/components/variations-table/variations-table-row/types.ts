@@ -2,17 +2,21 @@
  * External dependencies
  */
 import { MouseEvent } from 'react';
-import { ProductAttribute, ProductVariation } from '@woocommerce/data';
+import {
+	PartialProductVariation,
+	ProductProductAttribute,
+	ProductVariation,
+} from '@woocommerce/data';
 
 export type VariationsTableRowProps = {
 	variation: ProductVariation;
-	variableAttributes: ProductAttribute[];
+	variableAttributes: ProductProductAttribute[];
 	isUpdating?: boolean;
 	isSelected?: boolean;
 	isSelectionDisabled?: boolean;
 	hideActionButtons?: boolean;
-	onChange( variation: ProductVariation ): void;
-	onDelete( variation: ProductVariation ): void;
+	onChange( variation: PartialProductVariation, showSuccess: boolean ): void;
+	onDelete( variation: PartialProductVariation ): void;
 	onEdit( event: MouseEvent< HTMLAnchorElement > ): void;
 	onSelect( value: boolean ): void;
 };

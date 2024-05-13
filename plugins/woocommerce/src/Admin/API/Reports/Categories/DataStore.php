@@ -162,7 +162,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Returns an array of ids of included categories, based on query arguments from the user.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
-	 * @return string
+	 * @return array
 	 */
 	protected function get_included_categories_array( $query_args ) {
 		if ( isset( $query_args['category_includes'] ) && is_array( $query_args['category_includes'] ) && count( $query_args['category_includes'] ) > 0 ) {

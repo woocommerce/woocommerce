@@ -11,6 +11,10 @@ export { DetailsSummaryField as __experimentalDetailsSummaryField } from './deta
 export { DetailsDescriptionField as __experimentalDetailsDescriptionField } from './details-description-field';
 export { WooProductMoreMenuItem as __experimentalWooProductMoreMenuItem } from './header';
 export {
+	PluginHeaderItemModal as __experimentalPluginHeaderItemModal,
+	PluginHeaderItemPopover as __experimentalPluginHeaderItemPopover,
+} from './header';
+export {
 	Editor as __experimentalEditor,
 	initBlocks as __experimentalInitBlocks,
 	ProductEditorSettings,
@@ -32,6 +36,7 @@ export { AttributeControl as __experimentalAttributeControl } from './attribute-
 export { Attributes as __experimentalAttributes } from './attributes';
 export * from './add-new-shipping-class-modal';
 export { VariationSwitcherFooter as __experimentalVariationSwitcherFooter } from './variation-switcher-footer';
+export { VariationQuickUpdateMenuItem as __experimentalVariationQuickUpdateMenuItem } from './variations-table/variation-actions-menus';
 
 export * from './remove-confirmation-modal';
 
@@ -42,8 +47,6 @@ export {
 
 export { Checkbox as __experimentalCheckboxControl } from './checkbox-control';
 export { NumberControl as __experimentalNumberControl } from './number-control';
-
-export * from './product-page-skeleton';
 
 export * from './modal-editor-welcome-guide';
 
@@ -60,6 +63,7 @@ export {
 export {
 	BlockFill as __experimentalBlockFill,
 	BlockSlot as __experimentalBlockSlot,
+	SectionActions as __experimentalSectionActions,
 	BlockFillProps,
 	BlockSlotProps,
 } from './block-slot-fill';
@@ -85,3 +89,17 @@ export {
 	ProductImage as __experimentalProductImage,
 	ProductImageProps,
 } from './product-image';
+
+export { Notice as __experimentalNotice } from './notice';
+
+export {
+	SchedulePublishModal as __experimentalSchedulePublishModal,
+	SchedulePublishModalProps,
+} from './schedule-publish-modal';
+
+export {
+	CustomFields as __experimentalCustomFields,
+	CustomFieldsProps,
+} from './custom-fields';
+
+export { PluginSidebar as __experimentalModalBlockEditorPluginSidebar } from './iframe-editor';

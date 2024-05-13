@@ -284,7 +284,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	public function test_wc_get_log_file_path() {
 		$this->setExpectedDeprecated( 'wc_get_log_file_path' );
 
-		$log_dir   = trailingslashit( WC_LOG_DIR );
+		$log_dir   = LoggingUtil::get_log_directory();
 		$hash_name = sanitize_file_name( wp_hash( 'unit-tests' ) );
 		$file_id   = LoggingUtil::generate_log_file_id( 'unit-tests', null, time() );
 		$hash      = LoggingUtil::generate_log_file_hash( $file_id );
@@ -961,8 +961,10 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 'MasterCard', wc_get_credit_card_type_label( 'Mastercard' ) );
 		$this->assertEquals( 'American Express', wc_get_credit_card_type_label( 'american_express' ) );
 		$this->assertEquals( 'American Express', wc_get_credit_card_type_label( 'american-express' ) );
+		$this->assertEquals( 'Cartes Bancaires', wc_get_credit_card_type_label( 'cartes_bancaires' ) );
+		$this->assertEquals( 'Cartes Bancaires', wc_get_credit_card_type_label( 'cartes-bancaires' ) );
 		$this->assertEquals( '', wc_get_credit_card_type_label( '' ) );
-		$this->assertEquals( 'Random name', wc_get_credit_card_type_label( 'random-name' ) );
+		$this->assertEquals( 'Random Name', wc_get_credit_card_type_label( 'random-name' ) );
 	}
 
 	/**

@@ -12,66 +12,93 @@ import { buildProjectGraph } from './lib/project-graph';
 import { getFileChanges } from './lib/file-changes';
 import { createJobsForChanges } from './lib/job-processing';
 import { isGithubCI } from '../core/environment';
+import { testTypes } from './lib/config';
 
 const program = new Command( 'ci-jobs' )
 	.description(
 		'Generates CI workflow jobs based on the changes since the base ref.'
 	)
-	.argument(
-		'<base-ref>',
-		'Base ref to compare the current ref against for change detection.'
+	.option(
+		'-r --base-ref <baseRef>',
+		'Base ref to compare the current ref against for change detection. If not specified, all projects will be considered changed.',
+		''
 	)
 	.option(
-		'-f --force',
-		'Forces all projects to be marked as changed.',
-		false
+		'-e --event <event>',
+		'Github event for which to run the jobs. If not specified, all events will be considered.',
+		''
 	)
-	.action( async ( baseRef: string, options ) => {
+	.action( async ( options ) => {
 		Logger.startTask( 'Parsing Project Graph', true );
 		const projectGraph = buildProjectGraph();
 		Logger.endTask( true );
 
+		if ( options.event === '' ) {
+			Logger.warn( 'No event was specified, considering all projects.' );
+		} else {
+			Logger.warn(
+				`Only projects configured for '${ options.event }' event will be considered.`
+			);
+		}
+
 		let fileChanges;
-		if ( options.force ) {
-			Logger.warn( 'Forcing all projects to be marked as changed.' );
+		if ( options.baseRef === '' ) {
+			Logger.warn(
+				'No base ref was specified, forcing all projects to be marked as changed.'
+			);
 			fileChanges = true;
 		} else {
 			Logger.startTask( 'Pulling File Changes', true );
-			fileChanges = getFileChanges( projectGraph, baseRef );
+			fileChanges = getFileChanges( projectGraph, options.baseRef );
 			Logger.endTask( true );
 		}
 
 		Logger.startTask( 'Creating Jobs', true );
 		const jobs = await createJobsForChanges( projectGraph, fileChanges, {
 			commandVars: {
-				baseRef,
+				baseRef: options.baseRef,
+				event: options.event,
 			},
 		} );
 		Logger.endTask( true );
 
 		if ( isGithubCI() ) {
 			setOutput( 'lint-jobs', JSON.stringify( jobs.lint ) );
-			setOutput( 'test-jobs', JSON.stringify( jobs.test ) );
+
+			testTypes.forEach( ( type ) => {
+				setOutput(
+					`${ type }-test-jobs`,
+					JSON.stringify( jobs[ `${ type }Test` ] )
+				);
+			} );
 			return;
 		}
 
 		if ( jobs.lint.length > 0 ) {
 			Logger.notice( 'Lint Jobs' );
 			for ( const job of jobs.lint ) {
-				Logger.notice( `-  ${ job.projectName } - ${ job.command }` );
+				const optional = job.optional ? '(optional)' : '';
+				Logger.notice(
+					`-  ${ job.projectName } - ${ job.command }${ optional }`
+				);
 			}
 		} else {
 			Logger.notice( 'No lint jobs to run.' );
 		}
 
-		if ( jobs.test.length > 0 ) {
-			Logger.notice( 'Test Jobs' );
-			for ( const job of jobs.test ) {
-				Logger.notice( `-  ${ job.projectName } - ${ job.name }` );
+		testTypes.forEach( ( type ) => {
+			if ( jobs[ `${ type }Test` ].length > 0 ) {
+				Logger.notice( `${ type } test Jobs` );
+				for ( const job of jobs[ `${ type }Test` ] ) {
+					const optional = job.optional ? ' (optional)' : '';
+					Logger.notice(
+						`-  ${ job.projectName } - ${ job.name }${ optional }`
+					);
+				}
+			} else {
+				Logger.notice( `No ${ type } test jobs to run.` );
 			}
-		} else {
-			Logger.notice( 'No test jobs to run.' );
-		}
+		} );
 	} );
 
 export default program;

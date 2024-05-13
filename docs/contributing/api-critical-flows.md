@@ -1,5 +1,6 @@
 ---
-post_title: API critical flows
+post_title: Critical flows within the WooCommerce Core API
+menu_title: API critical flows
 tags: reference
 ---
 

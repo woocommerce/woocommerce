@@ -22,11 +22,17 @@ export const enum JobType {
 }
 
 /**
+ * The type of the test job.
+ */
+export const testTypes = [ 'default', 'e2e', 'api', 'performance' ] as const;
+
+/**
  * The variables that can be used in tokens on command strings
  * that will be replaced during job creation.
  */
 export enum CommandVarOptions {
 	BaseRef = 'baseRef',
+	Event = 'event',
 }
 
 /**
@@ -47,6 +53,17 @@ interface BaseJobConfig {
 	 * The command to run for the job.
 	 */
 	command: string;
+
+	/**
+	 * The type of GitHub events this job is supposed to run on.
+	 * Example: push, pull_request
+	 */
+	events: string[];
+
+	/**
+	 * Indicates whether a job should be required to pass in CI for merging to be allowed.
+	 */
+	optional?: boolean;
 
 	/**
 	 * Indicates whether or not a job has been created for this config.
@@ -154,29 +171,52 @@ function validateCommandVars( command: string ) {
 }
 
 /**
- * Parses the lint job configuration.
+ * Parses the base job configuration.
  *
  * @param {Object} raw The raw config to parse.
  */
-function parseLintJobConfig( raw: any ): LintJobConfig {
+function parseBaseJobConfig( raw: any ): BaseJobConfig {
 	if ( ! raw.changes ) {
-		throw new ConfigError(
-			'A "changes" option is required for the lint job.'
-		);
+		throw new ConfigError( 'A "changes" option is required for the job.' );
 	}
 
 	if ( ! raw.command || typeof raw.command !== 'string' ) {
 		throw new ConfigError(
-			'A string "command" option is required for the lint job.'
+			'A string "command" option is required for the job.'
 		);
 	}
 
 	validateCommandVars( raw.command );
 
+	let optional = false;
+	if ( raw.optional ) {
+		if ( typeof raw.optional !== 'boolean' ) {
+			throw new ConfigError(
+				'The "optional" property must be a boolean.'
+			);
+		}
+		optional = raw.optional;
+	}
+
 	return {
-		type: JobType.Lint,
+		type: null,
 		changes: parseChangesConfig( raw.changes, [ 'package.json' ] ),
 		command: raw.command,
+		events: raw.events || [],
+		optional,
+	};
+}
+
+/**
+ * Parses the lint job configuration.
+ *
+ * @param {Object} raw The raw config to parse.
+ */
+function parseLintJobConfig( raw: any ): LintJobConfig {
+	const baseJob = parseBaseJobConfig( raw );
+	return {
+		...baseJob,
+		type: JobType.Lint,
 	};
 }
 
@@ -252,9 +292,19 @@ export interface TestJobConfig extends BaseJobConfig {
 	type: JobType.Test;
 
 	/**
+	 * The type of the test.
+	 */
+	testType: ( typeof testTypes )[ number ];
+
+	/**
 	 * The name for the job.
 	 */
 	name: string;
+
+	/**
+	 * The number of shards to be created for this job.
+	 */
+	shardingArguments: string[];
 
 	/**
 	 * The configuration for the test environment if one is needed.
@@ -302,31 +352,28 @@ function parseTestCascade( raw: unknown ): string[] {
  * @param {Object} raw The raw config to parse.
  */
 function parseTestJobConfig( raw: any ): TestJobConfig {
+	const baseJob = parseBaseJobConfig( raw );
+
 	if ( ! raw.name || typeof raw.name !== 'string' ) {
 		throw new ConfigError(
 			'A string "name" option is required for test jobs.'
 		);
 	}
 
-	if ( ! raw.changes ) {
-		throw new ConfigError(
-			'A "changes" option is required for the test jobs.'
-		);
+	let testType: ( typeof testTypes )[ number ] = 'default';
+	if (
+		raw.testType &&
+		testTypes.includes( raw.testType.toString().toLowerCase() )
+	) {
+		testType = raw.testType.toLowerCase();
 	}
-
-	if ( ! raw.command || typeof raw.command !== 'string' ) {
-		throw new ConfigError(
-			'A string "command" option is required for the test jobs.'
-		);
-	}
-
-	validateCommandVars( raw.command );
 
 	const config: TestJobConfig = {
+		...baseJob,
 		type: JobType.Test,
+		testType,
+		shardingArguments: raw.shardingArguments || [],
 		name: raw.name,
-		changes: parseChangesConfig( raw.changes, [ 'package.json' ] ),
-		command: raw.command,
 	};
 
 	if ( raw.testEnv ) {

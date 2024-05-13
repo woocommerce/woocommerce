@@ -1,12 +1,14 @@
 ---
-post_title: Removing /product/ , /product-category/ , or /shop/ from URLs
+post_title: Understanding the risks of removing URL bases in WooCommerce
+menu_title: Risks of removing URL bases
+tags: reference
 ---
 
-## [In sum](https://github.com/woocommerce/woocommerce/blob/trunk/docs/quality-and-best-practices/removing-product-product-category-or-shop-from-the-urls.md#section-1)
+## In sum
 
 Removing  `/product/`,  `/product-category/`, or  `/shop/`  from the URLs is not advisable due to the way WordPress resolves its URLs. It uses the  `product-category`  (or any other text for that matter) base of a URL to detect that it is a URL leading to a product category. There are SEO plugins that allow you to remove this base, but that can lead to a number of problems with performance and duplicate URLs.
 
-## [Better to avoid](https://github.com/woocommerce/woocommerce/blob/trunk/docs/quality-and-best-practices/removing-product-product-category-or-shop-from-the-urls.md#section-2)
+## Better to avoid
 
 You will make it harder for WordPress to detect what page you are trying to reach when you type in a product category URL. Also, understand that the standard "Page" in WordPress always has no base text in the URL. For example:
 

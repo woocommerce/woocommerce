@@ -1,19 +1,24 @@
-const {test, expect} = require('@playwright/test');
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
-test.describe('WordPress', async () => {
-	test.use({storageState: process.env.CUSTOMERSTATE});
+const test = baseTest.extend( {
+	storageState: process.env.CUSTOMERSTATE,
+} );
 
-	test.beforeEach(async ({page}) => {
-		await page.goto('hello-world/');
-		await expect(page.getByRole('heading', { name: 'Hello world!' })).toBeVisible();
-	});
+test( 'logged-in customer can comment on a post', async ( { page } ) => {
+	await page.goto( 'hello-world/' );
+	await expect(
+		page.getByRole( 'heading', { name: 'Hello world!', exact: true } )
+	).toBeVisible();
 
-	test('logged-in customer can comment on a post', async ({page}) => {
-		let comment = `This is a test comment ${Date.now()}`;
-		await page.getByRole('textbox', {name: 'comment'}).fill(comment);
-		await page.getByRole('button', {name: 'Post Comment'}).click();
-		await expect(page.getByText(comment)).toBeVisible();
-	});
-});
+	await expect( page.getByText( `Logged in as` ) ).toBeVisible();
 
+	const comment = `This is a test comment ${ Date.now() }`;
+	await page.getByRole( 'textbox', { name: 'comment' } ).fill( comment );
 
+	await expect(
+		page.getByRole( 'textbox', { name: 'comment' } )
+	).toHaveValue( comment );
+
+	await page.getByRole( 'button', { name: 'Post Comment' } ).click();
+	await expect( page.getByText( comment ) ).toBeVisible();
+} );

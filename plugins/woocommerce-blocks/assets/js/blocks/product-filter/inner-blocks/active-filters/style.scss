@@ -1,0 +1,119 @@
+@import "../../../../../../packages/components/chip/style";
+
+.wp-block-woocommerce-product-filter-active {
+	margin-bottom: $gap-large;
+	overflow: hidden;
+
+	.clear-all {
+		@include filter-link-button();
+		@include font-size(small);
+		border: none;
+		margin-top: 15px;
+		padding: 0;
+		cursor: pointer;
+		float: right;
+
+		&,
+		&:hover,
+		&:focus,
+		&:active {
+			background: transparent;
+			color: inherit;
+		}
+	}
+
+	.filter-list {
+		margin: 0 0 $gap-smallest;
+		padding: 0;
+		list-style: none outside;
+		clear: both;
+
+		li {
+			margin: 9px 0 0;
+			padding: 0;
+			list-style: none outside;
+
+			ul {
+				margin: 0;
+				padding: 0;
+				list-style: none outside;
+			}
+
+			&:first-child {
+				.list-item-type {
+					margin: 0;
+				}
+			}
+		}
+
+		> li:first-child {
+			margin: 0;
+		}
+
+		> .list-item .list-item-name {
+			margin: 9px 0 0;
+		}
+	}
+
+	.list-item-type {
+		@include font-size(smaller);
+		font-weight: bold;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		margin: $gap 0 0;
+		display: block;
+	}
+
+	.list-item-name {
+		@include font-size(small);
+		display: flex;
+		align-items: center;
+		position: relative;
+		padding: 0;
+	}
+
+	.list-item-remove {
+		@include font-size(smaller);
+		cursor: pointer;
+		background: $gray-200;
+		border: 0;
+		border-radius: 25px;
+		appearance: none;
+		padding: 0;
+		height: 16px;
+		width: 16px;
+		line-height: 16px;
+		margin: 0 0.5em 0 0;
+		color: currentColor;
+
+		&:hover,
+		&:focus {
+			background: $gray-600;
+
+			.wc-block-components-chip__remove-icon {
+				fill: #fff;
+			}
+		}
+
+		&:disabled {
+			color: $gray-200;
+			cursor: not-allowed;
+		}
+	}
+
+	.list-chips {
+		ul,
+		li {
+			display: inline;
+		}
+
+		.list-item-type {
+			display: none;
+		}
+
+		.wc-block-components-chip {
+			margin-top: em($gap-small * 0.25);
+			margin-bottom: em($gap-small * 0.25);
+		}
+	}
+}

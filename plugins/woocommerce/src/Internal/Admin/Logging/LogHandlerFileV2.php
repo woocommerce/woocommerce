@@ -80,13 +80,15 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		$time_string  = static::format_time( $timestamp );
 		$level_string = strtoupper( $level );
 
-		unset( $context['source'] );
-		if ( ! empty( $context ) ) {
-			if ( isset( $context['backtrace'] ) && true === filter_var( $context['backtrace'], FILTER_VALIDATE_BOOLEAN ) ) {
-				$context['backtrace'] = static::get_backtrace();
-			}
+		if ( isset( $context['backtrace'] ) && true === filter_var( $context['backtrace'], FILTER_VALIDATE_BOOLEAN ) ) {
+			$context['backtrace'] = static::get_backtrace();
+		}
 
-			$formatted_context = wp_json_encode( $context );
+		$context_for_entry = $context;
+		unset( $context_for_entry['source'] );
+
+		if ( ! empty( $context_for_entry ) ) {
+			$formatted_context = wp_json_encode( $context_for_entry );
 			$message          .= " CONTEXT: $formatted_context";
 		}
 
@@ -123,6 +125,10 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		$backtrace = static::get_backtrace();
 
 		foreach ( $backtrace as $frame ) {
+			if ( ! isset( $frame['file'] ) ) {
+				continue;
+			}
+
 			foreach ( $source_roots as $type => $path ) {
 				if ( 0 === strpos( $frame['file'], $path ) ) {
 					$relative_path = trim( substr( $frame['file'], strlen( $path ) ), DIRECTORY_SEPARATOR );
@@ -233,7 +239,29 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 			)
 		);
 
-		if ( is_wp_error( $files ) || count( $files ) < 1 ) {
+		if ( is_wp_error( $files ) ) {
+			return 0;
+		}
+
+		$files = array_filter(
+			$files,
+			function( $file ) use ( $timestamp ) {
+				/**
+				 * Allows preventing an expired log file from being deleted.
+				 *
+				 * @param bool $delete    True to delete the file.
+				 * @param File $file      The log file object.
+				 * @param int  $timestamp The expiration threshold.
+				 *
+				 * @since 8.7.0
+				 */
+				$delete = apply_filters( 'woocommerce_logger_delete_expired_file', true, $file, $timestamp );
+
+				return boolval( $delete );
+			}
+		);
+
+		if ( count( $files ) < 1 ) {
 			return 0;
 		}
 
@@ -250,31 +278,16 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 				time(),
 				'info',
 				sprintf(
-					'%s %s',
-					sprintf(
-						esc_html(
-							// translators: %s is a number of log files.
-							_n(
-								'%s expired log file was deleted.',
-								'%s expired log files were deleted.',
-								$deleted,
-								'woocommerce'
-							)
-						),
-						number_format_i18n( $deleted )
+					esc_html(
+						// translators: %s is a number of log files.
+						_n(
+							'%s expired log file was deleted.',
+							'%s expired log files were deleted.',
+							$deleted,
+							'woocommerce'
+						)
 					),
-					sprintf(
-						esc_html(
-							// translators: %s is a number of days.
-							_n(
-								'The retention period for log files is %s day.',
-								'The retention period for log files is %s days.',
-								$retention_days,
-								'woocommerce'
-							)
-						),
-						number_format_i18n( $retention_days )
-					)
+					number_format_i18n( $deleted )
 				),
 				array(
 					'source' => 'wc_logger',

@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { BlockAttributes } from '@wordpress/blocks';
+import { Button } from '@wordpress/components';
 import {
 	createElement,
 	createInterpolateElement,
@@ -11,7 +12,7 @@ import {
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	Product,
-	ProductAttribute,
+	ProductProductAttribute,
 	useUserPreferences,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -26,9 +27,13 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { useProductAttributes } from '../../../hooks/use-product-attributes';
-import { AttributeControl } from '../../../components/attribute-control';
+import {
+	AttributeControl,
+	AttributeControlEmptyStateProps,
+} from '../../../components/attribute-control';
 import { useProductVariationsHelper } from '../../../hooks/use-product-variations-helper';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { ProductTShirt } from './images';
 
 export function Edit( {
 	attributes: blockAttributes,
@@ -42,7 +47,7 @@ export function Edit( {
 	} = useUserPreferences();
 
 	const [ entityAttributes, setEntityAttributes ] = useEntityProp<
-		ProductAttribute[]
+		ProductProductAttribute[]
 	>( 'postType', 'product', 'attributes' );
 
 	const [ entityDefaultAttributes, setEntityDefaultAttributes ] =
@@ -113,6 +118,49 @@ export function Edit( {
 		} ) );
 	}
 
+	function renderCustomEmptyState( {
+		addAttribute,
+	}: AttributeControlEmptyStateProps ) {
+		return (
+			<div className="wp-block-woocommerce-product-variations-options-field__empty-state">
+				<div className="wp-block-woocommerce-product-variations-options-field__empty-state-image">
+					<ProductTShirt className="wp-block-woocommerce-product-variations-options-field__empty-state-image-product" />
+					<ProductTShirt className="wp-block-woocommerce-product-variations-options-field__empty-state-image-product" />
+					<ProductTShirt className="wp-block-woocommerce-product-variations-options-field__empty-state-image-product" />
+				</div>
+
+				<p className="wp-block-woocommerce-product-variations-options-field__empty-state-description">
+					{ __(
+						'Sell your product in multiple variations like size or color.',
+						'woocommerce'
+					) }
+				</p>
+
+				<div className="wp-block-woocommerce-product-variations-options-field__empty-state-actions">
+					<Button variant="primary" onClick={ () => addAttribute() }>
+						{ __( 'Add options', 'woocommerce' ) }
+					</Button>
+					<Button
+						variant="secondary"
+						onClick={ () =>
+							addAttribute( __( 'Size', 'woocommerce' ) )
+						}
+					>
+						{ __( 'Add sizes', 'woocommerce' ) }
+					</Button>
+					<Button
+						variant="secondary"
+						onClick={ () =>
+							addAttribute( __( 'Color', 'woocommerce' ) )
+						}
+					>
+						{ __( 'Add colors', 'woocommerce' ) }
+					</Button>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div { ...blockProps }>
 			<AttributeControl
@@ -160,6 +208,7 @@ export function Edit( {
 						'product_remove_option_confirmation_cancel_click'
 					)
 				}
+				renderCustomEmptyState={ renderCustomEmptyState }
 				disabledAttributeIds={ entityAttributes
 					.filter( ( attr ) => ! attr.variation )
 					.map( ( attr ) => attr.id ) }

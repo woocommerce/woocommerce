@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Do not set WOOCOMMERCE_BLOCKS_PHASE in the build-zip.sh script, pass it when calling the script in relevant workflows.

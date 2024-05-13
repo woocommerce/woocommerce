@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { getResourceName } from '../utils';
-import { ProductQuery } from './types';
+import type { GetSuggestedProductsOptions, ProductQuery } from './types';
 
 const PRODUCT_PREFIX = 'product';
 
@@ -30,4 +30,25 @@ export function getTotalProductCountResourceName(
 ) {
 	const { _fields, page, per_page, ...totalsQuery } = query;
 	return getProductResourceName( totalsQuery );
+}
+
+/**
+ * Create a unique string ID based the options object.
+ *
+ * @param {GetSuggestedProductsOptions} options - Options to create the ID from.
+ * @return {string} Unique ID.
+ */
+export function createIdFromOptions(
+	options: GetSuggestedProductsOptions = {}
+): string {
+	if ( ! Object.keys( options ).length ) {
+		return 'default';
+	}
+
+	const optionsForKey = { ...options };
+	options.categories?.sort();
+	options.tags?.sort();
+	options.attributes?.sort();
+
+	return JSON.stringify( optionsForKey );
 }

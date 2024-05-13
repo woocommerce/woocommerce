@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import { ProductVariation } from '@woocommerce/data';
+import { PartialProductVariation, ProductVariation } from '@woocommerce/data';
 
 export type VariationActionsMenuItemProps = {
-	selection: ProductVariation | ProductVariation[];
-	onChange(
-		variation: Partial< ProductVariation > | Partial< ProductVariation >[]
-	): void;
+	selection: ProductVariation[];
+	onChange( values: PartialProductVariation[], showSuccess?: boolean ): void;
 	onClose(): void;
+	supportsMultipleSelection?: boolean;
 };

@@ -1,5 +1,6 @@
 ---
-post_title: How to decide if a pull request is high impact
+post_title: How to assess the impact of a pull request
+menu_title: Assessing PR impact
 tags: how-to
 ---
 

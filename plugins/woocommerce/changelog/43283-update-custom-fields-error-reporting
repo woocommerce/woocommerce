@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Change the way errors are reported when incorrectly registering custom checkout fields.

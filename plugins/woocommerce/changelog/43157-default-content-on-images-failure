@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Ensure the user is led to the Assembler with the default content whenever the Pexels API is down on the initial store setup.

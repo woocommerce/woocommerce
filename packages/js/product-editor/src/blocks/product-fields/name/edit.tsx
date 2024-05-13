@@ -1,27 +1,24 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { useInstanceId } from '@wordpress/compose';
+import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	createElement,
 	Fragment,
 	useEffect,
 	useState,
 } from '@wordpress/element';
-
-import { useInstanceId } from '@wordpress/compose';
+import { __ } from '@wordpress/i18n';
+import { starEmpty, starFilled } from '@wordpress/icons';
 import { cleanForSlug } from '@wordpress/url';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { Product } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import {
-	PRODUCTS_STORE_NAME,
-	WCDataSelector,
-	Product,
-} from '@woocommerce/data';
 import classNames from 'classnames';
 import {
 	Button,
 	BaseControl,
+	Tooltip,
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
@@ -33,15 +30,16 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { AUTO_DRAFT_NAME } from '../../../utils';
 import { EditProductLinkModal } from '../../../components/edit-product-link-modal';
-import { useValidation } from '../../../contexts/validation-context';
-import { NameBlockAttributes } from './types';
-import { useProductEdits } from '../../../hooks/use-product-edits';
-import { ProductEditorBlockEditProps } from '../../../types';
 import { Label } from '../../../components/label/label';
+import { useValidation } from '../../../contexts/validation-context';
+import { useProductEdits } from '../../../hooks/use-product-edits';
+import useProductEntityProp from '../../../hooks/use-product-entity-prop';
+import { ProductEditorBlockEditProps } from '../../../types';
+import { AUTO_DRAFT_NAME, getPermalinkParts } from '../../../utils';
+import { NameBlockAttributes } from './types';
 
-export function Edit( {
+export function NameBlockEdit( {
 	attributes,
 	clientId,
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
@@ -72,21 +70,8 @@ export function Edit( {
 		'name'
 	);
 
-	const { permalinkPrefix, permalinkSuffix } = useSelect(
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		( select: WCDataSelector ) => {
-			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
-			if ( productId ) {
-				const parts = getPermalinkParts( productId );
-				return {
-					permalinkPrefix: parts?.prefix,
-					permalinkSuffix: parts?.suffix,
-				};
-			}
-			return {};
-		}
-	);
+	const { prefix: permalinkPrefix, suffix: permalinkSuffix } =
+		getPermalinkParts( product );
 
 	const {
 		ref: nameRef,
@@ -156,6 +141,37 @@ export function Edit( {
 		}
 	}, [] );
 
+	const [ featured, setFeatured ] =
+		useProductEntityProp< boolean >( 'featured' );
+
+	function handleSuffixClick() {
+		setFeatured( ! featured );
+	}
+
+	function renderFeaturedSuffix() {
+		const markedText = __( 'Mark as featured', 'woocommerce' );
+		const unmarkedText = __( 'Unmark as featured', 'woocommerce' );
+		const tooltipText = featured ? unmarkedText : markedText;
+
+		return (
+			<Tooltip text={ tooltipText } position="top center">
+				{ featured ? (
+					<Button
+						icon={ starFilled }
+						aria-label={ unmarkedText }
+						onClick={ handleSuffixClick }
+					/>
+				) : (
+					<Button
+						icon={ starEmpty }
+						aria-label={ markedText }
+						onClick={ handleSuffixClick }
+					/>
+				) }
+			</Tooltip>
+		);
+	}
+
 	return (
 		<>
 			<div { ...blockProps }>
@@ -189,6 +205,7 @@ export function Edit( {
 								validateName();
 							}
 						} }
+						suffix={ renderFeaturedSuffix() }
 					/>
 				</BaseControl>
 

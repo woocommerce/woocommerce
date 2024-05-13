@@ -1,5 +1,6 @@
 ---
 post_title: Change a currency symbol
+tags: code-snippet
 ---
 
 See the [currency list](https://woocommerce.github.io/code-reference/files/woocommerce-includes-wc-core-functions.html#source-view.475) for reference on currency codes.

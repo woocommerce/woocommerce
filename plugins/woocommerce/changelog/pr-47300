@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes regarding authentication and non-existing products in the receipts rendering engine

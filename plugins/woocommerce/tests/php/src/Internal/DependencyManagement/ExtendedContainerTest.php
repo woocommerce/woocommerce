@@ -13,6 +13,14 @@ use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProx
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithDependencies;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\DependencyClass;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\DerivedDependencyClass;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleProviders\ClassA;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleProviders\ClassAWithInterface1;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleProviders\ClassAWithInterface2;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleProviders\ClassBWithInterface1;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleProviders\ClassBWithInterface2;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleProviders\ProviderA;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleProviders\ProviderB;
+use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleProviders\TheInterface;
 
 /**
  * Tests for ExtendedContainer.
@@ -255,5 +263,27 @@ class ExtendedContainerTest extends \WC_Unit_Test_Case {
 		$sut->reset_all_replacements();
 
 		$this->assertInstanceOf( MockableLegacyProxy::class, $sut->get( LegacyProxy::class ) );
+	}
+
+	/**
+	 * @testdox Classes implementing a given interface can be registered in different providers and they are all returned even if a 'get' by class name is executed first.
+	 *
+	 * Note: see the comment inside ExtendedContainer::get for a detailed explanation about the fix that is being tested here.
+	 */
+	public function test_all_classes_implementing_an_interface_are_registered_correctly() {
+		$this->sut->addServiceProvider( ProviderA::class );
+		$this->sut->addServiceProvider( ProviderB::class );
+
+		$this->sut->get( ClassA::class );
+
+		$actual   = array_map( 'get_class', $this->sut->get( TheInterface::class ) );
+		$expected = array(
+			ClassAWithInterface1::class,
+			ClassAWithInterface2::class,
+			ClassBWithInterface1::class,
+			ClassBWithInterface2::class,
+		);
+
+		$this->assertEquals( $expected, $actual );
 	}
 }

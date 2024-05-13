@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix "rm: .git/hooks: No such file or directory" error in `pnpm install`.

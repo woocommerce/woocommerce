@@ -2,15 +2,10 @@
  * External dependencies
  */
 import { Button, TextControl } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { cleanForSlug } from '@wordpress/url';
 import { useFormContext } from '@woocommerce/components';
-import {
-	Product,
-	PRODUCTS_STORE_NAME,
-	WCDataSelector,
-} from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import {
 	useState,
 	createElement,
@@ -23,6 +18,7 @@ import {
 import { PRODUCT_DETAILS_SLUG } from '../../constants';
 import { EditProductLinkModal } from '../edit-product-link-modal';
 import { useProductHelper } from '../../hooks/use-product-helper';
+import { getPermalinkParts } from '../../utils';
 
 export const DetailsNameField = ( {} ) => {
 	const { updateProductWithStatus } = useProductHelper();
@@ -31,21 +27,8 @@ export const DetailsNameField = ( {} ) => {
 	const { getInputProps, values, touched, errors, setValue, resetForm } =
 		useFormContext< Product >();
 
-	const { permalinkPrefix, permalinkSuffix } = useSelect(
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		( select: WCDataSelector ) => {
-			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
-			if ( values.id ) {
-				const parts = getPermalinkParts( values.id );
-				return {
-					permalinkPrefix: parts?.prefix,
-					permalinkSuffix: parts?.suffix,
-				};
-			}
-			return {};
-		}
-	);
+	const { prefix: permalinkPrefix, suffix: permalinkSuffix } =
+		getPermalinkParts( values );
 
 	const hasNameError = () => {
 		return Boolean( touched.name ) && Boolean( errors.name );

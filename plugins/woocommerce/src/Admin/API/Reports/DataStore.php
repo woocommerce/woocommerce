@@ -1345,6 +1345,7 @@ class DataStore extends SqlQuery {
 					continue;
 				}
 
+				$term_id = '';
 				// If the tuple is numeric, assume these are IDs.
 				if ( is_numeric( $attribute_term[0] ) && is_numeric( $attribute_term[1] ) ) {
 					$attribute_id = intval( $attribute_term[0] );
@@ -1374,6 +1375,10 @@ class DataStore extends SqlQuery {
 					// Assume these are a custom attribute slug/value pair.
 					$meta_key   = esc_sql( $attribute_term[0] );
 					$meta_value = esc_sql( $attribute_term[1] );
+					$attr_term  = get_term_by( 'slug', $meta_value, $meta_key );
+					if ( false !== $attr_term ) {
+						$term_id = $attr_term->term_id;
+					}
 				}
 
 				$join_alias       = 'orderitemmeta1';
@@ -1391,8 +1396,23 @@ class DataStore extends SqlQuery {
 					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_itemmeta as {$join_alias} ON {$join_alias}.order_item_id = {$table_to_join_on}.order_item_id";
 				}
 
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$sql_clauses['where'][] = $wpdb->prepare( "( {$join_alias}.meta_key = %s AND {$join_alias}.meta_value {$comparator} %s )", $meta_key, $meta_value );
+				$in_comparator = '=' === $comparator ? 'in' : 'not in';
+
+				// Add subquery for products ordered using attributes not used in variations.
+				$term_attribute_subquery = "select product_id from {$wpdb->prefix}wc_product_attributes_lookup where is_variation_attribute=0 and term_id = %s";
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+				$sql_clauses['where'][] = $wpdb->prepare(
+					"
+					( ( {$join_alias}.meta_key = %s AND {$join_alias}.meta_value {$comparator} %s ) or (
+						{$wpdb->prefix}wc_order_product_lookup.variation_id = 0 and {$wpdb->prefix}wc_order_product_lookup.product_id {$in_comparator} ({$term_attribute_subquery})
+					) )",
+					$meta_key,
+					$meta_value,
+					$term_id,
+				);
+				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				// phpcs:enable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 			}
 		}
 

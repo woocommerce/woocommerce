@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\RestApi;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
 
 /**
@@ -37,9 +38,14 @@ class Server {
 	 * Register REST API routes.
 	 */
 	public function register_rest_routes() {
+		$container    = wc_get_container();
+		$legacy_proxy = $container->get( LegacyProxy::class );
 		foreach ( $this->get_rest_namespaces() as $namespace => $controllers ) {
 			foreach ( $controllers as $controller_name => $controller_class ) {
-				$this->controllers[ $namespace ][ $controller_name ] = new $controller_class();
+				$this->controllers[ $namespace ][ $controller_name ] =
+					$container->has( $controller_class ) ?
+					$container->get( $controller_class ) :
+					$legacy_proxy->get_instance_of( $controller_class );
 				$this->controllers[ $namespace ][ $controller_name ]->register_routes();
 			}
 		}
@@ -156,6 +162,7 @@ class Server {
 			'product-tags'             => 'WC_REST_Product_Tags_Controller',
 			'products'                 => 'WC_REST_Products_Controller',
 			'product-variations'       => 'WC_REST_Product_Variations_Controller',
+			'refunds'                  => 'WC_REST_Refunds_Controller',
 			'reports-sales'            => 'WC_REST_Report_Sales_Controller',
 			'reports-top-sellers'      => 'WC_REST_Report_Top_Sellers_Controller',
 			'reports-orders-totals'    => 'WC_REST_Report_Orders_Totals_Controller',

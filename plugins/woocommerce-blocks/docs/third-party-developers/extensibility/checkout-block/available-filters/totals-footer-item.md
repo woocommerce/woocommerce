@@ -1,19 +1,22 @@
+<!-- markdownlint-disable MD024 -->
+<!-- markdownlint-disable MD033 -->
+
 # Totals Footer Item
 
-The following Totals Footer Item filter is available:
+The following Totals Footer Item filter are available:
 
--   [totalLabel](#totallabel)
+-   [`totalLabel`](#totallabel)
+-   [`totalValue`](#totalvalue)
 
 ## `totalLabel`
 
-The following objects are used in the filter:
+The following object is used in the filter:
 
 -   [Cart object](#cart-object)
--   [Cart Item object](#cart-item-object)
 
 ### Description <!-- omit in toc -->
 
-The `totalLabel` filter allows you to change the label of the total item in the footer of the Cart and Checkout blocks.
+The `totalLabel` filter allows to change the label of the total item in the footer of the Cart and Checkout blocks.
 
 ### Parameters <!-- omit in toc -->
 
@@ -53,6 +56,59 @@ registerCheckoutFilters( 'example-extension', {
 <td valign="top">After:
 <br><br>
 <img width="355" alt="After applying the Total Label filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/07955eea-cb17-48e9-9cb5-6548dd6a3b24">
+</td>
+</tr>
+</table>
+
+## `totalValue`
+
+The following object is used in the filter:
+
+-   [Cart object](#cart-object)
+
+### Description <!-- omit in toc -->
+
+The `totalValue` filter allows to format the total price in the footer of the Cart and Checkout blocks.
+
+### Parameters <!-- omit in toc -->
+
+-   _defaultValue_ `string` (default: `Total`) - The total label.
+-   _extensions_ `object` (default: `{}`) - The extensions object.
+-   _args_ `object` - The arguments object with the following keys:
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
+-   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
+
+### Returns <!-- omit in toc -->
+
+-   `string` - The modified format of the total price, which must contain the substring `<price/>`, or the original price format.
+
+### Code example <!-- omit in toc -->
+
+```ts
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+
+const modifyTotalsPrice = ( defaultValue, extensions, args, validation ) => {
+	return 'Pay <price/> now';
+};
+
+registerCheckoutFilters( 'my-extension', {
+	totalValue: modifyTotalsPrice,
+} );
+```
+
+> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+
+### Screenshots <!-- omit in toc -->
+
+<table>
+<tr>
+<td valign="top">Before:
+<br><br>
+<img width="361" alt="Before applying the Total Value filter" src="https://github.com/woocommerce/woocommerce/assets/3323310/4b788bdd-6fbd-406c-a9ad-4fb13f901c23">
+</td>
+<td valign="top">After:
+<br><br>
+<img width="355" alt="After applying the Total Value filter" src="https://github.com/woocommerce/woocommerce/assets/3323310/1b1b5f72-7f2f-4ee5-b2a4-1d8eb2208deb">
 </td>
 </tr>
 </table>
@@ -175,6 +231,6 @@ The Cart Item object of the filters above has the following keys:
 
 ---
 
-[We're hiring!](https://woo.com/careers/) Come work with us!
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/available-filters/totals-footer-item.md)

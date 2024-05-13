@@ -33,16 +33,18 @@
 }
 .wc-block-components-checkout-step--with-step-number .wc-block-components-checkout-step__content > :last-child {
 	margin-bottom: 0;
-	padding-bottom: $gap;
 }
-
+.wc-block-checkout__contact-fields .wc-block-components-checkout-step__heading {
+	margin-top: em($gap-smaller);
+}
 .wc-block-components-checkout-step__heading {
-	margin: em($gap-small) 0 em($gap);
+	margin: $gap-larger 0 $gap-smaller;
 	position: relative;
 
 	.wc-block-components-express-payment-continue-rule + .wc-block-components-checkout-step & {
 		margin-top: 0;
 	}
+
 }
 
 .wc-block-components-checkout-step:first-child .wc-block-components-checkout-step__heading {
@@ -62,10 +64,14 @@
 	}
 }
 
+.wc-block-checkout__payment-method .wc-block-components-checkout-step__content {
+	padding-top: $gap-smaller;
+}
+
 .wc-block-components-checkout-step__description {
 	@include font-size(small);
-	line-height: 1.25;
-	margin-bottom: $gap;
+	line-height: 1.2;
+	margin: 0 0 $gap;
 }
 
 .wc-block-components-checkout-step--with-step-number {

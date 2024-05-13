@@ -1,5 +1,4 @@
 .product-details-section {
-
 	&__product-link {
 		color: #757575;
 		font-size: 12px;
@@ -29,5 +28,9 @@
 		.components-base-control__help {
 			color: $studio-red-50;
 		}
+	}
+
+	.components-input-control__suffix {
+		margin-right: 0;
 	}
 }

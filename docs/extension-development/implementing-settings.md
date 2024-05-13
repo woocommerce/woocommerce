@@ -1,5 +1,7 @@
 ---
-post_title: Implementing settings for extensions
+post_title: Creating custom settings for WooCommerce extensions
+menu_title: Creating custom settings
+tags: how-to
 ---
 
 If you're customizing WooCommerce or adding your own functionality to it you'll probably need a settings page of some sort. One of the easiest ways to create a settings page is by taking advantage of the [`WC_Integration` class](https://woocommerce.github.io/code-reference/classes/WC-Integration.html 'WC_Integration Class'). Using the Integration class will automatically create a new settings page under **WooCommerce > Settings > Integrations** and it will automatically save, and sanitize your data for you. We've created this tutorial so you can see how to create a new integration.
@@ -177,7 +179,7 @@ And these settings have attributes which you can use. These affect the way the s
 
 ### Creating Your Own Settings
 
-The built-in settings are great but you may need extra controls to create your settings page. That's why we included some methods to do this for you. First, define a setting by adding it to the `$this->form_fields` array, entering the kind of form control you want under `type`. You can override the default HTML for your form inputs by creating a method with a name of the format `generate_{ type }_html` which outputs HTML markup. To specify how buttons are rendered, you'd add a method called `generate_button_html`. For textareas, you'd add a `generate_textarea_html` method, and so on. (Check out the `generate_settings_html` method of the `WC_Settings_API` class in the WooCommerce source code to see how WooCommerce uses this.) The below example creates a button that goes to Woo.com.
+The built-in settings are great but you may need extra controls to create your settings page. That's why we included some methods to do this for you. First, define a setting by adding it to the `$this->form_fields` array, entering the kind of form control you want under `type`. You can override the default HTML for your form inputs by creating a method with a name of the format `generate_{ type }_html` which outputs HTML markup. To specify how buttons are rendered, you'd add a method called `generate_button_html`. For textareas, you'd add a `generate_textarea_html` method, and so on. (Check out the `generate_settings_html` method of the `WC_Settings_API` class in the WooCommerce source code to see how WooCommerce uses this.) The below example creates a button that goes to WooCommerce.com.
 
 ```php
 /**
@@ -192,7 +194,7 @@ public function init_form_fields() {
 			'title'             => __( 'Customize!', 'woocommerce-integration-demo' ),
 			'type'              => 'button',
 			'custom_attributes' => array(
-				'onclick' => "location.href='https://woo.com'",
+				'onclick' => "location.href='https://woocommerce.com'",
 			),
 			'description'       => __( 'Customize your settings by going to the integration site directly.', 'woocommerce-integration-demo' ),
 			'desc_tip'          => true,

@@ -4,8 +4,8 @@
 import { sprintf, __ } from '@wordpress/i18n';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	PartialProductVariation,
 	Product,
-	ProductVariation,
 	useUserPreferences,
 } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -22,20 +22,18 @@ import { useEntityId, useEntityProp } from '@wordpress/core-data';
  */
 import { VariationsTable } from '../../../components/variations-table';
 import { useValidation } from '../../../contexts/validation-context';
+import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { VariationOptionsBlockAttributes } from './types';
 import { VariableProductTour } from './variable-product-tour';
 import { TRACKS_SOURCE } from '../../../constants';
 import { handlePrompt } from '../../../utils/handle-prompt';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { EmptyState } from './empty-state';
 
 export function Edit( {
 	attributes,
 	context,
-}: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > & {
-	context: {
-		isInSelectedTab?: boolean;
-	};
-} ) {
+}: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > ) {
 	const noticeDimissed = useRef( false );
 	const { invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
@@ -46,6 +44,22 @@ export function Edit( {
 		'postType',
 		'product',
 		'status'
+	);
+	const [ productHasOptions ] = useEntityProp< string >(
+		'postType',
+		'product',
+		'has_options'
+	);
+	const [ productAttributes ] =
+		useProductEntityProp< Product[ 'attributes' ] >( 'attributes' );
+
+	const hasVariationOptions = useMemo(
+		function hasAttributesUsedForVariations() {
+			return productAttributes?.some(
+				( productAttribute ) => productAttribute.variation
+			);
+		},
+		[ productAttributes ]
 	);
 
 	const totalCountWithoutPriceRequestParams = useMemo(
@@ -65,13 +79,14 @@ export function Edit( {
 			);
 
 			return {
-				totalCountWithoutPrice:
-					getProductVariationsTotalCount< number >(
-						totalCountWithoutPriceRequestParams
-					),
+				totalCountWithoutPrice: productHasOptions
+					? getProductVariationsTotalCount< number >(
+							totalCountWithoutPriceRequestParams
+					  )
+					: 0,
 			};
 		},
-		[ totalCountWithoutPriceRequestParams ]
+		[ productHasOptions, totalCountWithoutPriceRequestParams ]
 	);
 
 	const {
@@ -115,14 +130,14 @@ export function Edit( {
 	);
 
 	function onSetPrices(
-		handleUpdateAll: ( update: Partial< ProductVariation >[] ) => void
+		handleUpdateAll: ( update: PartialProductVariation[] ) => void
 	) {
 		recordEvent( 'product_variations_set_prices_select', {
 			source: TRACKS_SOURCE,
 		} );
 		const productVariationsListPromise = resolveSelect(
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
-		).getProductVariations< Pick< ProductVariation, 'id' >[] >( {
+		).getProductVariations< PartialProductVariation[] >( {
 			product_id: productId,
 			order: 'asc',
 			orderby: 'menu_order',
@@ -161,6 +176,10 @@ export function Edit( {
 					totalCountWithoutPrice
 			  )
 			: '';
+
+	if ( ! hasVariationOptions ) {
+		return <EmptyState />;
+	}
 
 	return (
 		<div { ...blockProps }>

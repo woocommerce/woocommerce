@@ -13,6 +13,7 @@ import { Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { reusableBlock } from '@wordpress/icons';
+import { recordEvent } from '@woocommerce/tracks';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -25,6 +26,7 @@ import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { ProductList, Skeleton } from '../../../components/product-list';
 import { ProductSelect } from '../../../components/product-select';
 import { AdviceCard } from '../../../components/advice-card';
+import { TRACKS_SOURCE } from '../../../constants';
 import { ShoppingBags } from '../../../images/shopping-bags';
 import { CashRegister } from '../../../images/cash-register';
 import { ProductEditorBlockEditProps } from '../../../types';
@@ -39,7 +41,7 @@ import {
 	LinkedProductListBlockAttributes,
 	LinkedProductListBlockEmptyState,
 } from './types';
-import getRelatedProducts from '../../../utils/get-related-products';
+import { getSuggestedProductsFor } from '../../../utils/get-related-products';
 import { SectionActions } from '../../../components/block-slot-fill';
 
 export function EmptyStateImage( {
@@ -68,7 +70,7 @@ export function EmptyStateImage( {
 
 export function LinkedProductListBlockEdit( {
 	attributes,
-	context: { postType },
+	context: { postType, isInSelectedTab },
 }: ProductEditorBlockEditProps< LinkedProductListBlockAttributes > ) {
 	const { property, emptyState } = attributes;
 	const blockProps = useWooBlockProps( attributes );
@@ -110,8 +112,13 @@ export function LinkedProductListBlockEdit( {
 	);
 
 	useEffect( () => {
+		// Only filter when the tab is selected.
+		if ( ! isInSelectedTab ) {
+			return;
+		}
+
 		filter();
-	}, [ filter ] );
+	}, [ filter, isInSelectedTab ] );
 
 	function handleSelect( product: Product ) {
 		const newLinkedProductIds = selectSearchedProductDispatcher(
@@ -120,20 +127,57 @@ export function LinkedProductListBlockEdit( {
 		);
 
 		setLinkedProductIds( newLinkedProductIds );
+
+		recordEvent( 'linked_products_product_add', {
+			source: TRACKS_SOURCE,
+			field: property,
+			product_id: productId,
+			linked_product_id: product.id,
+		} );
 	}
 
-	function handleRemoveProductClick( product: Product ) {
+	function handleProductListRemove( product: Product ) {
 		const newLinkedProductIds = removeLinkedProductDispatcher(
 			product,
 			state.linkedProducts
 		);
 
 		setLinkedProductIds( newLinkedProductIds );
+
+		recordEvent( 'linked_products_product_remove', {
+			source: TRACKS_SOURCE,
+			field: property,
+			product_id: productId,
+			linked_product_id: product.id,
+		} );
+	}
+
+	function handleProductListEdit( product: Product ) {
+		recordEvent( 'linked_products_product_select', {
+			source: TRACKS_SOURCE,
+			field: property,
+			product_id: productId,
+			linked_product_id: product.id,
+		} );
+	}
+
+	function handleProductListPreview( product: Product ) {
+		recordEvent( 'linked_products_product_preview_click', {
+			source: TRACKS_SOURCE,
+			field: property,
+			product_id: productId,
+			linked_product_id: product.id,
+		} );
 	}
 
 	const [ isChoosingProducts, setIsChoosingProducts ] = useState( false );
 
 	async function chooseProductsForMe() {
+		recordEvent( 'linked_products_choose_related_click', {
+			source: TRACKS_SOURCE,
+			field: property,
+		} );
+
 		dispatch( {
 			type: 'LOADING_LINKED_PRODUCTS',
 			payload: {
@@ -143,8 +187,9 @@ export function LinkedProductListBlockEdit( {
 
 		setIsChoosingProducts( true );
 
-		const relatedProducts = ( await getRelatedProducts( productId, {
-			fallbackToRandomProducts: true,
+		const linkedProducts = ( await getSuggestedProductsFor( {
+			postId: productId,
+			forceRequest: true,
 		} ) ) as Product[];
 
 		dispatch( {
@@ -156,16 +201,23 @@ export function LinkedProductListBlockEdit( {
 
 		setIsChoosingProducts( false );
 
-		if ( ! relatedProducts ) {
+		if ( ! linkedProducts ) {
 			return;
 		}
 
 		const newLinkedProducts = selectSearchedProductDispatcher(
-			relatedProducts,
+			linkedProducts,
 			[]
 		);
 
 		setLinkedProductIds( newLinkedProducts );
+	}
+
+	function handleAdviceCardDissmiss() {
+		recordEvent( 'linked_products_placeholder_dismiss', {
+			source: TRACKS_SOURCE,
+			field: property,
+		} );
 	}
 
 	return (
@@ -196,7 +248,9 @@ export function LinkedProductListBlockEdit( {
 			{ ! state.isLoading && state.linkedProducts.length === 0 && (
 				<AdviceCard
 					tip={ emptyState.tip }
+					dismissPreferenceId={ `woocommerce-product-${ property }-advice-card-dismissed` }
 					isDismissible={ emptyState.isDismissible }
+					onDismiss={ handleAdviceCardDissmiss }
 				>
 					<EmptyStateImage { ...emptyState } />
 				</AdviceCard>
@@ -205,7 +259,9 @@ export function LinkedProductListBlockEdit( {
 			{ ! state.isLoading && state.linkedProducts.length > 0 && (
 				<ProductList
 					products={ state.linkedProducts }
-					onRemove={ handleRemoveProductClick }
+					onRemove={ handleProductListRemove }
+					onEdit={ handleProductListEdit }
+					onPreview={ handleProductListPreview }
 				/>
 			) }
 		</div>

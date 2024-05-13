@@ -15,10 +15,20 @@ import {
 } from '@wordpress/block-editor';
 import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductCollectionAttributes } from '@woocommerce/blocks/product-collection/types';
 import { getSettingWithCoercion } from '@woocommerce/settings';
-import { isNumber } from '@woocommerce/types';
+import { isNumber, ProductResponseItem } from '@woocommerce/types';
+import { ProductDataContextProvider } from '@woocommerce/shared-context';
+import { withProduct } from '@woocommerce/block-hocs';
+import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
+
+/**
+ * Internal dependencies
+ */
+import { useGetLocation, useProductCollectionQueryContext } from './utils';
+import './editor.scss';
+
+const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
@@ -28,17 +38,19 @@ const ProductTemplateInnerBlocks = () => {
 	return <li { ...innerBlocksProps } />;
 };
 
+type ProductTemplateBlockPreviewProps = {
+	blocks: object[];
+	blockContextId: string;
+	isHidden: boolean;
+	setActiveBlockContextId: ( blockContextId: string ) => void;
+};
+
 const ProductTemplateBlockPreview = ( {
 	blocks,
 	blockContextId,
 	isHidden,
 	setActiveBlockContextId,
-}: {
-	blocks: object[];
-	blockContextId: string;
-	isHidden: boolean;
-	setActiveBlockContextId: ( blockContextId: string ) => void;
-} ) => {
+}: ProductTemplateBlockPreviewProps ) => {
 	const blockPreviewProps = useBlockPreview( {
 		blocks,
 		props: {
@@ -69,44 +81,108 @@ const ProductTemplateBlockPreview = ( {
 
 const MemoizedProductTemplateBlockPreview = memo( ProductTemplateBlockPreview );
 
-const ProductTemplateEdit = ( {
-	clientId,
-	context: {
-		query: {
-			perPage,
-			offset = 0,
-			order,
-			orderBy,
-			search,
-			exclude,
-			inherit,
-			taxQuery,
-			pages,
-			...restQueryArgs
+type ProductContentProps = {
+	attributes: { productId: string };
+	isLoading: boolean;
+	product: ProductResponseItem;
+	displayTemplate: boolean;
+	blocks: BlockInstance[];
+	blockContext: {
+		postType: string;
+		postId: string;
+	};
+	setActiveBlockContextId: ( id: string ) => void;
+};
+
+const ProductContent = withProduct(
+	( {
+		isLoading,
+		product,
+		displayTemplate,
+		blocks,
+		blockContext,
+		setActiveBlockContextId,
+	}: ProductContentProps ) => {
+		return (
+			<BlockContextProvider
+				key={ blockContext.postId }
+				value={ blockContext }
+			>
+				<ProductDataContextProvider
+					product={ product }
+					isLoading={ isLoading }
+				>
+					{ displayTemplate ? <ProductTemplateInnerBlocks /> : null }
+					<MemoizedProductTemplateBlockPreview
+						blocks={ blocks }
+						blockContextId={ blockContext.postId }
+						setActiveBlockContextId={ setActiveBlockContextId }
+						isHidden={ displayTemplate }
+					/>
+				</ProductDataContextProvider>
+			</BlockContextProvider>
+		);
+	}
+);
+
+const ProductTemplateEdit = (
+	props: BlockEditProps< {
+		clientId: string;
+	} > & {
+		context: ProductCollectionAttributes;
+		__unstableLayoutClassNames: string;
+	}
+) => {
+	const {
+		clientId,
+		context: {
+			query: {
+				perPage,
+				offset = 0,
+				order,
+				orderBy,
+				search,
+				exclude,
+				inherit,
+				taxQuery,
+				pages,
+				...restQueryArgs
+			},
+			queryContext = [ { page: 1 } ],
+			templateSlug,
+			displayLayout: { type: layoutType, columns, shrinkColumns } = {
+				type: 'flex',
+				columns: 3,
+				shrinkColumns: false,
+			},
+			queryContextIncludes = [],
 		},
-		queryContext = [ { page: 1 } ],
-		templateSlug,
-		displayLayout: { type: layoutType, columns, shrinkColumns } = {
-			type: 'flex',
-			columns: 3,
-			shrinkColumns: false,
-		},
-	},
-	__unstableLayoutClassNames,
-}: BlockEditProps< {
-	clientId: string;
-} > & {
-	context: ProductCollectionAttributes;
-	__unstableLayoutClassNames: string;
-} ) => {
+		__unstableLayoutClassNames,
+	} = props;
+	const location = useGetLocation( props.context, props.clientId );
+
 	const [ { page } ] = queryContext;
-	const [ activeBlockContextId, setActiveBlockContextId ] = useState();
+	const [ activeBlockContextId, setActiveBlockContextId ] =
+		useState< string >();
 	const postType = 'product';
 	const loopShopPerPage = getSettingWithCoercion(
 		'loopShopPerPage',
 		12,
 		isNumber
 	);
+
+	// Add default query context attributes to queryContextIncludes
+	const queryContextIncludesWithDefaults = [
+		...new Set(
+			queryContextIncludes.concat( DEFAULT_QUERY_CONTEXT_ATTRIBUTES )
+		),
+	];
+
+	const productCollectionQueryContext = useProductCollectionQueryContext( {
+		clientId,
+		queryContextIncludes: queryContextIncludesWithDefaults,
+	} );
+
 	const { products, blocks } = useSelect(
 		( select ) => {
 			const { getEntityRecords, getTaxonomies } = select( coreStore );
@@ -171,6 +247,8 @@ const ProductTemplateEdit = ( {
 				products: getEntityRecords( 'postType', postType, {
 					...query,
 					...restQueryArgs,
+					location,
+					productCollectionQueryContext,
 				} ),
 				blocks: getBlocks( clientId ),
 			};
@@ -189,6 +267,9 @@ const ProductTemplateEdit = ( {
 			templateSlug,
 			taxQuery,
 			restQueryArgs,
+			location,
+			productCollectionQueryContext,
+			loopShopPerPage,
 		]
 	);
 	const blockContexts = useMemo(
@@ -241,28 +322,26 @@ const ProductTemplateEdit = ( {
 	return (
 		<ul { ...blockProps }>
 			{ blockContexts &&
-				blockContexts.map( ( blockContext ) => (
-					<BlockContextProvider
-						key={ blockContext.postId }
-						value={ blockContext }
-					>
-						{ blockContext.postId ===
-						( activeBlockContextId ||
-							blockContexts[ 0 ]?.postId ) ? (
-							<ProductTemplateInnerBlocks />
-						) : null }
-						<MemoizedProductTemplateBlockPreview
+				blockContexts.map( ( blockContext ) => {
+					const displayTemplate =
+						blockContext.postId ===
+						( activeBlockContextId || blockContexts[ 0 ]?.postId );
+
+					return (
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore isLoading and product props are missing as they're coming from untyped withProduct HOC.
+						<ProductContent
+							key={ blockContext.postId }
+							attributes={ {
+								productId: blockContext.postId,
+							} }
 							blocks={ blocks }
-							blockContextId={ blockContext.postId }
+							displayTemplate={ displayTemplate }
+							blockContext={ blockContext }
 							setActiveBlockContextId={ setActiveBlockContextId }
-							isHidden={
-								blockContext.postId ===
-								( activeBlockContextId ||
-									blockContexts[ 0 ]?.postId )
-							}
 						/>
-					</BlockContextProvider>
-				) ) }
+					);
+				} ) }
 		</ul>
 	);
 };

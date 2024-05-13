@@ -1,4 +1,4 @@
-<!-- Learn how to maintain this file at https://github.com/WordPress/gutenberg/tree/master/packages#maintaining-changelogs. -->
+<!-- Learn how to maintain this file at https://github.com/WordPress/gutenberg/tree/trunk/packages#maintaining-changelogs. -->
 
 # Unreleased
 
@@ -18,16 +18,18 @@
 ## 3.1.0
 
 -   Fix commonjs module build, allow package to be built in isolation. #7286
+
 ## 3.0.0 (2021-06-03)
 
 ## Breaking changes
 
 -   Move Lodash to a peer dependency.
+
 ## 2.0.0 (2020-02-10)
 
 ### Breaking Change
 
--   A notices message is no longer spoken as a result of notice creation, but rather by its display in the interface by its corresponding [`Notice` component](https://github.com/WordPress/gutenberg/tree/master/packages/components/src/notice).
+-   A notices message is no longer spoken as a result of notice creation, but rather by its display in the interface by its corresponding [`Notice` component](https://github.com/WordPress/gutenberg/tree/trunk/packages/components/src/notice).
 
 ## 1.5.0 (2019-06-12)
 

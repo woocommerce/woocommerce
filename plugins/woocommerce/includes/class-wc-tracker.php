@@ -15,6 +15,8 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\{ FeaturesUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -364,7 +366,7 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Check to see if the helper is connected to Woo.com
+	 * Check to see if the helper is connected to WooCommerce.com
 	 *
 	 * @return string
 	 */
@@ -625,8 +627,8 @@ class WC_Tracker {
 				$curr_tokens = preg_split( '/[ :,\-_]+/', $key );
 				$prev_tokens = preg_split( '/[ :,\-_]+/', $prev );
 
-				$len_curr = count( $curr_tokens );
-				$len_prev = count( $prev_tokens );
+				$len_curr = is_array( $curr_tokens ) ? count( $curr_tokens ) : 0;
+				$len_prev = is_array( $prev_tokens ) ? count( $prev_tokens ) : 0;
 
 				$index_unique = -1;
 				// Gather the common tokens.
@@ -640,7 +642,7 @@ class WC_Tracker {
 				}
 
 				// If only one token is different, and those tokens contain digits, then that could be the unique id.
-				if ( count( $curr_tokens ) - count( $comm_tokens ) <= 1 && count( $comm_tokens ) > 0 && $index_unique > -1 ) {
+				if ( $len_curr - count( $comm_tokens ) <= 1 && count( $comm_tokens ) > 0 && $index_unique > -1 ) {
 					$objects[ $key ]->group_key  = implode( ' ', $comm_tokens );
 					$objects[ $prev ]->group_key = implode( ' ', $comm_tokens );
 				} else {
@@ -958,7 +960,6 @@ class WC_Tracker {
 			'enable_myaccount_registration'         => get_option( 'woocommerce_enable_myaccount_registration' ),
 			'registration_generate_username'        => get_option( 'woocommerce_registration_generate_username' ),
 			'registration_generate_password'        => get_option( 'woocommerce_registration_generate_password' ),
-			'hpos_enabled'                          => get_option( 'woocommerce_feature_custom_order_tables_enabled' ),
 			'hpos_sync_enabled'                     => get_option( 'woocommerce_custom_orders_table_data_sync_enabled' ),
 			'hpos_cot_authoritative'                => get_option( 'woocommerce_custom_orders_table_enabled' ),
 			'hpos_transactions_enabled'             => get_option( 'woocommerce_use_db_transactions_for_custom_orders_table_data_sync' ),
@@ -1072,8 +1073,9 @@ class WC_Tracker {
 	 * - pickup_locations_count
 	 */
 	public static function get_pickup_location_data() {
-		$pickup_location_enabled = false;
-		$pickup_locations_count  = count( get_option( 'pickup_location_pickup_locations', array() ) );
+		$pickup_location_enabled          = false;
+		$pickup_location_pickup_locations = get_option( 'pickup_location_pickup_locations', array() );
+		$pickup_locations_count           = is_countable( $pickup_location_pickup_locations ) ? count( $pickup_location_pickup_locations ) : 0;
 
 		// Get the available shipping methods.
 		$shipping_methods = WC()->shipping()->get_shipping_methods();
@@ -1090,6 +1092,19 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Get tracker data for additional fields on the checkout page.
+	 *
+	 * @return array Array of fields count and names.
+	 */
+	public static function get_checkout_additional_fields_data() {
+		$additional_fields_controller = Package::container()->get( CheckoutFields::class );
+
+		return array(
+			'fields_count' => count( $additional_fields_controller->get_additional_fields() ),
+			'fields_names' => array_keys( $additional_fields_controller->get_additional_fields() ),
+		);
+	}
+	/**
 	 * Get info about the cart & checkout pages.
 	 *
 	 * @return array
@@ -1102,6 +1117,8 @@ class WC_Tracker {
 		$checkout_block_data = self::get_block_tracker_data( 'woocommerce/checkout', 'checkout' );
 
 		$pickup_location_data = self::get_pickup_location_data();
+
+		$additional_fields_data = self::get_checkout_additional_fields_data();
 
 		return array(
 			'cart_page_contains_cart_shortcode'         => self::post_contains_text(
@@ -1118,6 +1135,7 @@ class WC_Tracker {
 			'checkout_page_contains_checkout_block'     => $checkout_block_data['page_contains_block'],
 			'checkout_block_attributes'                 => $checkout_block_data['block_attributes'],
 			'pickup_location'                           => $pickup_location_data,
+			'additional_fields'                         => $additional_fields_data,
 		);
 	}
 

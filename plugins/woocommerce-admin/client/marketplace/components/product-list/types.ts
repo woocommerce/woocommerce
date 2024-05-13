@@ -6,6 +6,7 @@ export type SearchAPIProductType = {
 	title: string;
 	image: string;
 	type: ProductType;
+	freemium_type: 'unset' | 'primary';
 	excerpt: string;
 	link: string;
 	demo_url: string;
@@ -19,14 +20,17 @@ export type SearchAPIProductType = {
 	vendor_name: string;
 	vendor_url: string;
 	icon: string;
+	is_installable: boolean;
 };
 
 export interface Product {
 	id?: number;
+	slug?: string;
 	position?: number;
 	title: string;
 	image: string;
 	type: ProductType;
+	freemium_type?: 'unset' | 'primary';
 	description: string;
 	vendorName: string;
 	vendorUrl: string;
@@ -37,9 +41,11 @@ export interface Product {
 	averageRating?: number | null;
 	reviewsCount?: number | null;
 	label?: string;
+	primary_color?: string;
 	group?: string;
 	searchTerm?: string;
 	category?: string;
+	isInstallable: boolean;
 }
 
 export interface ProductTracksData {

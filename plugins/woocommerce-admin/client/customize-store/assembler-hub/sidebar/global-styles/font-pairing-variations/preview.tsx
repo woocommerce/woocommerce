@@ -11,7 +11,7 @@ import {
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { useResizeObserver, useViewportMatch } from '@wordpress/compose';
-import { useMemo, useState } from '@wordpress/element';
+import { useContext, useMemo, useRef, useState } from '@wordpress/element';
 import {
 	privateApis as blockEditorPrivateApis,
 	// @ts-ignore no types exist yet.
@@ -19,13 +19,17 @@ import {
 // @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { GlobalStylesVariationIframe } from '../global-styles-variation-iframe';
-import { FontFamiliesLoader, FontFamily } from './font-families-loader';
 import {
 	FONT_PREVIEW_LARGE_WIDTH,
 	FONT_PREVIEW_LARGE_HEIGHT,
 	FONT_PREVIEW_WIDTH,
 	FONT_PREVIEW_HEIGHT,
 } from './constants';
+import { FontFamily } from '~/customize-store/types/font';
+import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
+import { isAIFlow, isNoAIFlow } from '~/customize-store/guards';
+import { FontFamiliesLoaderDotCom } from './font-families-loader-dot-com';
+import { FontFamiliesLoader } from './font-families-loader';
 
 const { useGlobalStyle, useGlobalSetting } = unlock( blockEditorPrivateApis );
 
@@ -33,6 +37,21 @@ const DEFAULT_LARGE_FONT_STYLES: React.CSSProperties = {
 	fontSize: '13vw', // 18px for min-width wide breakpoint and 15px for max-width wide
 	lineHeight: '20px',
 	color: '#000000',
+};
+
+// For some reason, Chrome doesn't render the fonts correctly if the font-family with spaces is not wrapped in single quotes.
+// Example: "Bodoni Moda", serif => '"Bodoni Moda"', serif
+const formatFontFamily = ( input: string ) => {
+	return input
+		.split( ',' )
+		.map( ( font ) => {
+			font = font.trim();
+			if ( font.startsWith( '"' ) ) {
+				return `'${ font }'`;
+			}
+			return font;
+		} )
+		.join( ', ' );
 };
 
 export const FontPairingVariationPreview = () => {
@@ -72,12 +91,19 @@ export const FontPairingVariationPreview = () => {
 	const defaultHeight = isDesktop
 		? FONT_PREVIEW_LARGE_HEIGHT
 		: FONT_PREVIEW_HEIGHT;
+
 	const ratio = width ? width / defaultWidth : 1;
 	const normalizedHeight = Math.ceil( defaultHeight * ratio );
 	const externalFontFamilies = fontFamilies.filter(
 		( { slug } ) => slug !== 'system-font'
 	);
-	const [ isLoaded, setIsLoaded ] = useState( ! externalFontFamilies.length );
+
+	const { context } = useContext( CustomizeStoreContext );
+
+	const [ isLoaded, setIsLoaded ] = useState(
+		( isAIFlow( context.flowType ) && ! externalFontFamilies.length ) ||
+			isNoAIFlow( context.flowType )
+	);
 
 	const getFontFamilyName = ( targetFontFamily: string ) => {
 		const fontFamily = fontFamilies.find(
@@ -98,11 +124,14 @@ export const FontPairingVariationPreview = () => {
 
 	const handleOnLoad = () => setIsLoaded( true );
 
+	const iframeInstance = useRef< HTMLObjectElement | null >( null );
+
 	return (
 		<GlobalStylesVariationIframe
 			width={ width }
 			height={ normalizedHeight }
 			containerResizeListener={ containerResizeListener }
+			iframeInstance={ iframeInstance }
 		>
 			<>
 				<div
@@ -143,7 +172,10 @@ export const FontPairingVariationPreview = () => {
 										...DEFAULT_LARGE_FONT_STYLES,
 										letterSpacing: headingLetterSpacing,
 										fontWeight: headingFontWeight,
-										fontFamily: headingFontFamily,
+										fontFamily:
+											formatFontFamily(
+												headingFontFamily
+											),
 										fontStyle: headingFontStyle,
 									} }
 								>
@@ -156,7 +188,8 @@ export const FontPairingVariationPreview = () => {
 										fontSize: '13px',
 										letterSpacing: textLetterSpacing,
 										fontWeight: textFontWeight,
-										fontFamily: textFontFamily,
+										fontFamily:
+											formatFontFamily( textFontFamily ),
 										fontStyle: textFontStyle,
 									} }
 								>
@@ -166,10 +199,19 @@ export const FontPairingVariationPreview = () => {
 						</HStack>
 					</div>
 				</div>
-				<FontFamiliesLoader
-					fontFamilies={ fontFamilies }
-					onLoad={ handleOnLoad }
-				/>
+				{ isAIFlow( context.flowType ) && (
+					<FontFamiliesLoaderDotCom
+						fontFamilies={ fontFamilies }
+						onLoad={ handleOnLoad }
+					/>
+				) }
+				{ isNoAIFlow( context.flowType ) && (
+					<FontFamiliesLoader
+						fontFamilies={ fontFamilies }
+						onLoad={ handleOnLoad }
+						iframeInstance={ iframeInstance.current }
+					/>
+				) }
 			</>
 		</GlobalStylesVariationIframe>
 	);

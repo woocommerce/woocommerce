@@ -1,10 +1,10 @@
 ---
-post_title: Using custom attributes in menus and taxonomy archives
+post_title: Managing custom attributes in WooCommerce menus and taxonomy archives
+menu_title: Custom attributes in menus
+tags: how-to
 ---
 
 Attributes that can be used for the layered nav are a custom taxonomy, which means you can display them in menus, or display products by attributes. This requires some work on your part, and archives must be enabled.
-
-> **Note:**  This is a  **Developer level**  doc. If you are unfamiliar with code/templates and resolving potential conflicts, select a  [WooExpert or Developer](https://woo.com/customizations/) for assistance. We are unable to provide support for customizations under our  [Support Policy](https://woo.com/support-policy/).
 
 ## Register the taxonomy for menus
 

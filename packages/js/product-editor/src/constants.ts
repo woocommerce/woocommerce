@@ -5,6 +5,8 @@ export const NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME =
 	'woocommerce_new_product_management_enabled';
 export const SINGLE_VARIATION_NOTICE_DISMISSED_OPTION =
 	'woocommerce_single_variation_notice_dismissed';
+export const SHOW_PREPUBLISH_CHECKS_ENABLED_OPTION_NAME =
+	'woocommerce_show_prepublish_checks_enabled';
 
 export const NUMBERS_AND_ALLOWED_CHARS = '[^-0-9%s1%s2]';
 export const NUMBERS_AND_DECIMAL_SEPARATOR = '[^-\\d\\%s]+';
@@ -54,6 +56,8 @@ export const PRODUCT_DETAILS_SLUG = 'product-details';
 export const PRODUCT_SCHEDULED_SALE_SLUG = 'product-scheduled-sale';
 
 export const TRACKS_SOURCE = 'product-block-editor-v1';
+
+export const HEADER_PINNED_ITEMS_SCOPE = 'woocommerce/product-editor';
 
 /**
  * Since the pagination component does not exposes the way of

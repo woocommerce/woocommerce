@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/product-editor",
-	"version": "1.2.0",
+	"version": "1.5.0",
 	"description": "React components for the WooCommerce admin product editor.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -70,6 +70,7 @@
 		"@wordpress/keycodes": "wp-6.0",
 		"@wordpress/media-utils": "wp-6.0",
 		"@wordpress/plugins": "wp-6.0",
+		"@wordpress/preferences": "wp-6.0",
 		"@wordpress/url": "wp-6.0",
 		"classnames": "^2.3.2",
 		"dompurify": "^2.4.7",
@@ -118,7 +119,7 @@
 		"postcss-loader": "^4.3.0",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2",
-		"rimraf": "^3.0.2",
+		"rimraf": "5.0.5",
 		"sass-loader": "^10.5.0",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
@@ -180,6 +181,12 @@
 		"build:project:bundle": {
 			"command": "webpack",
 			"clean": "if-file-deleted",
+			"env": {
+				"NODE_ENV": {
+					"external": true,
+					"default": "production"
+				}
+			},
 			"files": [
 				"webpack.config.js",
 				"src/**/*.scss"

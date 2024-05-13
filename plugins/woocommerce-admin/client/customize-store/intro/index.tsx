@@ -4,7 +4,10 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
+import interpolateComponents from '@automattic/interpolate-components';
+
 import {
+	Notice,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
@@ -31,6 +34,7 @@ import {
 	ExistingAiThemeBanner,
 	ExistingThemeBanner,
 	NoAIBanner,
+	ExistingNoAiThemeBanner,
 } from './intro-banners';
 
 export type events =
@@ -54,6 +58,7 @@ const BANNER_COMPONENTS = {
 	'existing-ai-theme': ExistingAiThemeBanner,
 	'existing-theme': ExistingThemeBanner,
 	[ FlowType.noAI ]: NoAIBanner,
+	'existing-no-ai-theme': ExistingNoAiThemeBanner,
 	default: DefaultBanner,
 };
 
@@ -69,31 +74,48 @@ type ModalStatus = keyof typeof MODAL_COMPONENTS;
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
 		intro: {
+			activeTheme,
 			themeData,
-			activeThemeHasMods,
 			customizeStoreTaskCompleted,
 			currentThemeIsAiGenerated,
 		},
+		activeThemeHasMods,
 	} = context;
 
 	const isJetpackOffline = false;
 
 	const isNetworkOffline = useNetworkStatus();
 
+	const [ showError, setShowError ] = useState(
+		context.flowType === FlowType.noAI && context.intro.hasErrors
+	);
+
 	const [ openDesignChangeWarningModal, setOpenDesignChangeWarningModal ] =
 		useState( false );
 
 	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'default';
+
+	const isDefaultTheme = activeTheme === 'twentytwentyfour';
+
 	switch ( true ) {
-		case context.flowType === FlowType.noAI:
-			bannerStatus = FlowType.noAI;
-			break;
 		case isNetworkOffline:
 			bannerStatus = 'network-offline';
 			break;
 		case isJetpackOffline as boolean:
 			bannerStatus = 'jetpack-offline';
+			break;
+		case context.flowType === FlowType.noAI &&
+			! customizeStoreTaskCompleted:
+			bannerStatus = FlowType.noAI;
+			break;
+		case context.flowType === FlowType.noAI &&
+			customizeStoreTaskCompleted &&
+			! isDefaultTheme:
+			bannerStatus = FlowType.noAI;
+			break;
+		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
+			bannerStatus = 'existing-no-ai-theme';
 			break;
 		case ! customizeStoreTaskCompleted && activeThemeHasMods:
 			bannerStatus = 'task-incomplete-active-theme-has-mods';
@@ -128,7 +150,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const sidebarMessage =
 		context.flowType === FlowType.AIOnline
 			? __(
-					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI',
+					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI.',
 					'woocommerce'
 			  )
 			: __(
@@ -173,9 +195,37 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 				</div>
 
 				<div className="woocommerce-customize-store-main">
+					{ showError && (
+						<Notice
+							onRemove={ () => setShowError( false ) }
+							className="woocommerce-cys-design-with-ai__error-notice"
+							status="error"
+						>
+							{ interpolateComponents( {
+								mixedString: __(
+									'Oops! We encountered a problem while setting up the foundations. {{anchor}}Please try again{{/anchor}} or start with a theme.',
+									'woocommerce'
+								),
+								components: {
+									anchor: (
+										// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions, jsx-a11y/anchor-is-valid
+										<a
+											className="woocommerce-customize-store-error-link"
+											onClick={ () =>
+												sendEvent( 'DESIGN_WITHOUT_AI' )
+											}
+										/>
+									),
+								},
+							} ) }
+						</Notice>
+					) }
 					<BannerComponent
 						setOpenDesignChangeWarningModal={
 							setOpenDesignChangeWarningModal
+						}
+						redirectToCYSFlow={ () =>
+							sendEvent( 'DESIGN_WITHOUT_AI' )
 						}
 						sendEvent={ sendEvent }
 					/>
@@ -199,6 +249,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 								total_palettes={ theme.total_palettes }
 								link_url={ theme?.link_url }
 								is_active={ theme.is_active }
+								price={ theme.price }
 								onClick={ () => {
 									if ( theme.is_active ) {
 										sendEvent( {

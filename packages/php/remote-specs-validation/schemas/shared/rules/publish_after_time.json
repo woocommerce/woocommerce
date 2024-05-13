@@ -1,0 +1,13 @@
+{
+	"type": "object",
+	"required": ["type", "publish_after"],
+	"properties": {
+		"type": {
+			"type": "string",
+			"enum": ["publish_after_time"]
+		},
+		"publish_after": {
+			"type": "string"
+		}
+	}
+}

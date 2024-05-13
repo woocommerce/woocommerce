@@ -3,7 +3,8 @@
  */
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
-	ProductAttribute,
+	PartialProductVariation,
+	ProductProductAttribute,
 	ProductVariation,
 } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
@@ -36,7 +37,10 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	const [ filters, setFilters ] = useState< AttributeFilters[] >( [] );
 	const perPageRef = useRef( DEFAULT_VARIATION_PER_PAGE_OPTION );
 
-	async function getCurrentVariationsPage( params: GetVariationsRequest ) {
+	async function getCurrentVariationsPage(
+		params: GetVariationsRequest,
+		invalidateResolutionBeforeRequest = false
+	) {
 		const requestParams: GetVariationsRequest = {
 			page: 1,
 			per_page: perPageRef.current,
@@ -47,6 +51,19 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		};
 
 		try {
+			const { invalidateResolution } = dispatch(
+				EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+			);
+
+			if ( invalidateResolutionBeforeRequest ) {
+				await invalidateResolution( 'getProductVariations', [
+					requestParams,
+				] );
+				await invalidateResolution( 'getProductVariationsTotalCount', [
+					requestParams,
+				] );
+			}
+
 			const { getProductVariations, getProductVariationsTotalCount } =
 				resolveSelect( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
@@ -191,7 +208,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 	// Filters
 
-	function onFilter( attribute: ProductAttribute ) {
+	function onFilter( attribute: ProductProductAttribute ) {
 		return function handleFilter( options: string[] ) {
 			let isPresent = false;
 
@@ -227,7 +244,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		};
 	}
 
-	function getFilters( attribute: ProductAttribute ) {
+	function getFilters( attribute: ProductProductAttribute ) {
 		return (
 			filters.find( ( filter ) => filter.attribute === attribute.slug )
 				?.terms ?? []
@@ -238,8 +255,12 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		return Boolean( filters.length );
 	}
 
-	function clearFilters() {
+	async function clearFilters() {
 		setFilters( [] );
+
+		return getCurrentVariationsPage( {
+			product_id: productId,
+		} );
 	}
 
 	// Updating
@@ -251,7 +272,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	async function onUpdate( {
 		id: variationId,
 		...variation
-	}: Partial< ProductVariation > ) {
+	}: PartialProductVariation ) {
 		if ( isUpdating[ variationId ] ) return;
 
 		const { updateProductVariation } = dispatch(
@@ -315,13 +336,16 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		} );
 	}
 
-	async function onBatchUpdate( values: Partial< ProductVariation >[] ) {
+	async function onBatchUpdate( values: PartialProductVariation[] ) {
 		// @ts-expect-error There are no types for this.
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
 
 		const { batchUpdateProductVariations, invalidateResolutionForStore } =
 			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+
+		selectedVariationsRef.current = {};
+		setSelectedCount( 0 );
 
 		let currentPage = 1;
 		const offset = 50;
@@ -354,14 +378,18 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 			currentPage++;
 
-			result.push( ...( response?.update ?? [] ) );
+			const updatedVariations = response?.update ?? [];
+			result.push( ...updatedVariations );
 
-			for ( const variation of subset ) {
+			for ( const variation of updatedVariations ) {
 				await coreInvalidateResolution( 'getEntityRecord', [
 					'postType',
 					'product_variation',
 					variation.id,
 				] );
+
+				selectedVariationsRef.current[ variation.id ] = variation;
+				setSelectedCount( ( current ) => current + 1 );
 			}
 		}
 
@@ -376,13 +404,16 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		return { update: result };
 	}
 
-	async function onBatchDelete( values: Pick< ProductVariation, 'id' >[] ) {
+	async function onBatchDelete( values: PartialProductVariation[] ) {
 		// @ts-expect-error There are no types for this.
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
 
 		const { batchUpdateProductVariations, invalidateResolutionForStore } =
 			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+
+		selectedVariationsRef.current = {};
+		setSelectedCount( 0 );
 
 		let currentPage = 1;
 		const offset = 50;
@@ -409,22 +440,24 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			} >(
 				{ product_id: productId },
 				{
-					delete: subset,
+					delete: subset.map( ( { id } ) => id ),
 				}
 			);
 
 			currentPage++;
 
+			const deletedVariations = response?.delete ?? [];
 			result.push( ...( response?.delete ?? [] ) );
 
-			for ( const variation of subset ) {
+			for ( const variation of deletedVariations ) {
 				await coreInvalidateResolution( 'getEntityRecord', [
 					'postType',
 					'product_variation',
 					variation.id,
 				] );
 
-				onSelect( variation as never )( false );
+				delete selectedVariationsRef.current[ variation.id ];
+				setSelectedCount( ( current ) => current - 1 );
 			}
 		}
 
@@ -455,28 +488,27 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	const wasGenerating = useRef( false );
 
 	useEffect( () => {
-		if ( ! isGenerating ) {
-			getCurrentVariationsPage( { product_id: productId } );
-		}
-	}, [ productId, isGenerating ] );
-
-	useEffect( () => {
 		if ( isGenerating ) {
-			clearFilters();
+			setFilters( [] );
 			onClearSelection();
 		}
 
+		const didMount =
+			wasGenerating.current === false && isGenerating === false;
 		const didGenerate =
 			wasGenerating.current === true && isGenerating === false;
 
-		if ( didGenerate ) {
-			getCurrentVariationsPage( {
-				product_id: productId,
-			} );
+		if ( didMount || didGenerate ) {
+			getCurrentVariationsPage(
+				{
+					product_id: productId,
+				},
+				true
+			);
 		}
 
 		wasGenerating.current = Boolean( isGenerating );
-	}, [ isGenerating ] );
+	}, [ productId, isGenerating ] );
 
 	return {
 		isLoading,

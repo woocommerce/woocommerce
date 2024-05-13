@@ -10,7 +10,7 @@ import {
 	// @ts-ignore no types exist yet.
 } from '@wordpress/block-editor';
 import { useRefEffect } from '@wordpress/compose';
-import { useMemo } from 'react';
+import { MutableRefObject, useMemo } from 'react';
 // @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 
@@ -28,6 +28,7 @@ interface Props {
 	inlineCss?: string;
 	containerResizeListener: JSX.Element;
 	children: JSX.Element;
+	iframeInstance?: MutableRefObject< HTMLObjectElement | null >;
 	onFocusOut?: () => void;
 }
 
@@ -38,6 +39,7 @@ export const GlobalStylesVariationIframe = ( {
 	containerResizeListener,
 	children,
 	onFocusOut,
+	iframeInstance,
 	...props
 }: Props ) => {
 	const [ styles ] = useGlobalStylesOutput();
@@ -65,6 +67,7 @@ export const GlobalStylesVariationIframe = ( {
 
 	return (
 		<Iframe
+			ref={ iframeInstance }
 			className="global-styles-variation-container__iframe"
 			style={ {
 				height,

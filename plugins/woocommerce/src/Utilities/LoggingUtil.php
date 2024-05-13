@@ -4,7 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Utilities;
 
 use Automattic\WooCommerce\Internal\Admin\Logging\{ PageController, Settings };
-use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ File, FileController };
 
 /**
  * A class of utilities for dealing with logging.
@@ -81,5 +81,23 @@ final class LoggingUtil {
 	 */
 	public static function generate_log_file_hash( string $file_id ): string {
 		return File::generate_hash( $file_id );
+	}
+
+	/**
+	 * Get the directory for storing log files.
+	 *
+	 * @return string The full directory path, with trailing slash.
+	 */
+	public static function get_log_directory(): string {
+		return Settings::get_log_directory();
+	}
+
+	/**
+	 * Calculate the size, in bytes, of the log directory.
+	 *
+	 * @return int
+	 */
+	public static function get_log_directory_size(): int {
+		return wc_get_container()->get( FileController::class )->get_log_directory_size();
 	}
 }
