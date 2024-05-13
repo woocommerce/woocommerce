@@ -1695,12 +1695,15 @@ class WC_Countries {
 			$address_fields[ $type . $key ] = $value;
 		}
 
-		// Add email and phone fields.
-		if ( 'billing_' === $type ) {
-			if ( 'hidden' !== get_option( 'woocommerce_checkout_phone_field', 'required' ) ) {
-				$address_fields['billing_phone'] = array(
+		// Add fields to address forms.
+		if ( in_array( $type, array( 'billing_', 'shipping_' ), true ) ) {
+			// Add phone to billing/shipping address form.
+			$show_phone_field = get_option( 'woocommerce_checkout_phone_field', 'required' );
+
+			if ( 'hidden' !== $show_phone_field ) {
+				$address_fields[ $type . 'phone' ] = array(
 					'label'        => __( 'Phone', 'woocommerce' ),
-					'required'     => 'required' === get_option( 'woocommerce_checkout_phone_field', 'required' ),
+					'required'     => 'required' === $show_phone_field,
 					'type'         => 'tel',
 					'class'        => array( 'form-row-wide' ),
 					'validate'     => array( 'phone' ),
@@ -1708,15 +1711,19 @@ class WC_Countries {
 					'priority'     => 100,
 				);
 			}
-			$address_fields['billing_email'] = array(
-				'label'        => __( 'Email address', 'woocommerce' ),
-				'required'     => true,
-				'type'         => 'email',
-				'class'        => array( 'form-row-wide' ),
-				'validate'     => array( 'email' ),
-				'autocomplete' => 'no' === get_option( 'woocommerce_registration_generate_username' ) ? 'email' : 'email username',
-				'priority'     => 110,
-			);
+
+			// Add email to billing address form.
+			if ( 'billing_' === $type ) {
+				$address_fields['billing_email'] = array(
+					'label'        => __( 'Email address', 'woocommerce' ),
+					'required'     => true,
+					'type'         => 'email',
+					'class'        => array( 'form-row-wide' ),
+					'validate'     => array( 'email' ),
+					'autocomplete' => 'no' === get_option( 'woocommerce_registration_generate_username' ) ? 'email' : 'email username',
+					'priority'     => 110,
+				);
+			}
 		}
 
 		/**

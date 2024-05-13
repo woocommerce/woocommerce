@@ -333,7 +333,9 @@ test.describe( 'Checkout page', () => {
 			await page
 				.getByRole( 'textbox', { name: 'ZIP Code *' } )
 				.fill( '97403' );
-			await page.getByLabel( 'Phone *' ).fill( '555 555-5555' );
+			await page
+				.getByRole( 'textbox', { name: 'Phone *' } )
+				.fill( '555 555-5555' );
 			await page.getByLabel( 'Email address *' ).fill( guestEmail );
 
 			await page.getByText( 'Cash on delivery' ).click();
