@@ -15,14 +15,7 @@ import {
 	BillingStateInput,
 	ShippingStateInput,
 } from '@woocommerce/base-components/state-input';
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-	Fragment,
-} from '@wordpress/element';
+import { useEffect, useMemo, useRef } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { useShallowEqual } from '@woocommerce/base-hooks';
 import isShallowEqual from '@wordpress/is-shallow-equal';
@@ -33,7 +26,6 @@ import {
 	FormFieldsConfig,
 } from '@woocommerce/settings';
 import { objectHasProp } from '@woocommerce/types';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -42,6 +34,7 @@ import { AddressFormProps, AddressFormFields } from './types';
 import prepareFormFields from './prepare-form-fields';
 import validateShippingCountry from './validate-shipping-country';
 import customValidationHandler from './custom-validation-handler';
+import Address2Field from './address-2-field';
 import Combobox from '../../combobox';
 
 /**
@@ -80,50 +73,10 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 		};
 	}, [ currentFields, currentFieldConfig, currentCountry, addressType ] );
 
-	const address2Field = addressFormFields.fields.find(
-		( field ) => field.key === 'address_2'
-	);
-
-	const hasAddress2FieldValue = useMemo( () => {
-		return objectHasProp( values, 'address_2' ) && values.address_2 !== '';
-	}, [ values ] );
-
-	const isAddress2FieldRequired = address2Field
-		? address2Field.required
-		: false;
-
-	const [ isAddress2FieldVisible, setIsAddress2FieldVisible ] = useState(
-		hasAddress2FieldValue || isAddress2FieldRequired
-	);
-
-	const toggleAddress2FieldVisibility = useCallback(
-		( event: React.MouseEvent< HTMLElement > ) => {
-			event.preventDefault();
-			setIsAddress2FieldVisible( ( prevVisibility ) => ! prevVisibility );
-		},
-		[]
-	);
-
-	const [ userChangedAddress2Field, setUserChangedAddress2Field ] =
-		useState( false );
-
 	// Stores refs for rendered fields so we can access them later.
 	const fieldsRef = useRef<
 		Record< string, ValidatedTextInputHandle | null >
 	>( {} );
-
-	// Toggle address 2 visibility.
-	useEffect( () => {
-		setIsAddress2FieldVisible(
-			isAddress2FieldRequired ||
-				hasAddress2FieldValue ||
-				userChangedAddress2Field
-		);
-	}, [
-		isAddress2FieldRequired,
-		hasAddress2FieldValue,
-		userChangedAddress2Field,
-	] );
 
 	// Clear values for hidden fields.
 	useEffect( () => {
@@ -200,50 +153,15 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 
 				if ( field.key === 'address_2' ) {
 					return (
-						<Fragment key={ field.key }>
-							{ isAddress2FieldVisible ? (
-								<ValidatedTextInput
-									key={ field.key }
-									ref={ ( el ) =>
-										( fieldsRef.current[ field.key ] = el )
-									}
-									{ ...fieldProps }
-									type={ field.type }
-									value={ values[ field.key ] }
-									onChange={ ( newValue: string ) => {
-										onChange( {
-											...values,
-											[ field.key ]: newValue,
-										} );
-										setUserChangedAddress2Field( true );
-									} }
-									customValidation={ (
-										inputObject: HTMLInputElement
-									) =>
-										customValidationHandler(
-											inputObject,
-											field.key,
-											objectHasProp( values, 'country' )
-												? values.country
-												: ''
-										)
-									}
-								/>
-							) : (
-								<button
-									key={ field.key }
-									className={
-										'wc-block-components-address-form__address_2-toggle'
-									}
-									onClick={ toggleAddress2FieldVisibility }
-								>
-									{ __(
-										'+ Add apartment, suite, etc.',
-										'woocommerce'
-									) }
-								</button>
-							) }
-						</Fragment>
+						<Address2Field
+							key={ field.key }
+							{ ...fieldProps }
+							addressFormFields={ addressFormFields }
+							field={ field }
+							fieldsRef={ fieldsRef }
+							values={ values }
+							onChange={ onChange }
+						/>
 					);
 				}
 
