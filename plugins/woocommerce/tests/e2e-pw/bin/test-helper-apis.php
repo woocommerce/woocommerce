@@ -73,9 +73,6 @@ function reset_feature_flags() {
 function enable_experimental_features( $features ) {
 	$stored_features = get_option( 'e2e_feature_flags', array() );
 
-	// We always enable this for tests at the moment.
-	$features['product-variation-management'] = true;
-
 	return array_merge( $features, $stored_features );
 }
 
