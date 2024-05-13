@@ -33,8 +33,8 @@ import { AddressFormProps, AddressFormFields } from './types';
 import prepareFormFields from './prepare-form-fields';
 import validateShippingCountry from './validate-shipping-country';
 import customValidationHandler from './custom-validation-handler';
-import Address2Field from './address-2-field';
 import Combobox from '../../combobox';
+import AddressField from './address-field';
 
 /**
  * Checkout form.
@@ -150,19 +150,40 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 					);
 				}
 
-				if ( field.key === 'address_2' ) {
+				if ( field.key === 'address_1' ) {
 					return (
-						<Address2Field
+						<AddressField
 							key={ field.key }
-							{ ...fieldProps }
-							addressFormFields={ addressFormFields }
-							field={ field }
-							fieldsRef={ fieldsRef }
+							address1={ fieldProps }
+							address2={ addressFormFields.fields.find(
+								( customField ) =>
+									customField.key === 'address_2'
+							) }
 							values={ values }
 							onChange={ onChange }
+							fieldsRef={ fieldsRef }
+							{ ...fieldProps }
 						/>
 					);
 				}
+
+				if ( field.key === 'address_2' ) {
+					return null;
+				}
+
+				// if ( field.key === 'address_2' ) {
+				// 	return (
+				// 		<Address2Field
+				// 			key={ field.key }
+				// 			{ ...fieldProps }
+				// 			addressFormFields={ addressFormFields }
+				// 			field={ field }
+				// 			fieldsRef={ fieldsRef }
+				// 			values={ values }
+				// 			onChange={ onChange }
+				// 		/>
+				// 	);
+				// }
 
 				if (
 					field.key === 'country' &&
