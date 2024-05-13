@@ -59,9 +59,6 @@ class WC_Unit_Tests_Bootstrap {
 		// load test function so tests_add_filter() is available.
 		require_once $this->wp_tests_dir . '/includes/functions.php';
 
-		// Always load PayPal Standard for unit tests.
-		tests_add_filter( 'woocommerce_should_load_paypal_standard', '__return_true' );
-
 		// load WC.
 		tests_add_filter( 'muplugins_loaded', array( $this, 'load_wc' ) );
 
@@ -228,6 +225,12 @@ class WC_Unit_Tests_Bootstrap {
 
 		if ( ! getenv( 'HPOS' ) ) {
 			add_filter( 'woocommerce_enable_hpos_by_default_for_new_shops', '__return_false' );
+		}
+
+		// Always load PayPal Standard for unit tests.
+		$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
+		if ( $paypal ) {
+			$paypal->update_option( '_should_load', wc_bool_to_string( true ) );
 		}
 
 		WC_Install::install();
