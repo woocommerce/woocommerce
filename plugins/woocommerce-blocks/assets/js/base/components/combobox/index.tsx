@@ -71,6 +71,7 @@ const Combobox = ( {
 	const fallbackId = useId();
 	const controlId = id || 'control-' + fallbackId;
 	const errorId = incomingErrorId || controlId;
+	const store = useComboboxStore();
 
 	let autoCompleteValue = autoComplete;
 
@@ -93,10 +94,10 @@ const Combobox = ( {
 	const [ , startTransition ] = useTransition();
 
 	const { error, validationErrorId } = useSelect( ( select ) => {
-		const store = select( VALIDATION_STORE_KEY );
+		const validationStore = select( VALIDATION_STORE_KEY );
 		return {
-			error: store.getValidationError( errorId ),
-			validationErrorId: store.getValidationErrorId( errorId ),
+			error: validationStore.getValidationError( errorId ),
+			validationErrorId: validationStore.getValidationErrorId( errorId ),
 		};
 	} );
 
@@ -119,10 +120,9 @@ const Combobox = ( {
 			options.length > 0 &&
 			! options.some( ( option ) => option.value === value )
 		) {
-			setSearchTerm( initialOption?.label || '' );
-			setSelectedOption( initialOption );
+			store.setSelectedValue( initialOption?.value || '' );
 		}
-	}, [ initialOption, value, options ] );
+	}, [ initialOption, value, options, store ] );
 
 	const matchingSuggestions = useMemo( () => {
 		return findMatchingSuggestions( searchTerm, options );
@@ -167,8 +167,8 @@ const Combobox = ( {
 	);
 
 	const ariaInvalid = error?.message && ! error?.hidden ? 'true' : 'false';
-	const store = useComboboxStore();
 	const activeValue = store.useState( 'activeValue' );
+	const [ inputFocussed, setInputFocussed ] = useState( false );
 
 	const onClose = useCallback( () => {
 		// If the search term doesn't match the selected option, try do an exact value match.
@@ -182,16 +182,14 @@ const Combobox = ( {
 			);
 
 			if ( exactValueMatch ) {
-				setSelectedOption( exactValueMatch );
-				onChange( exactValueMatch.value );
-				setSearchTerm( exactValueMatch.label );
+				store.setSelectedValue( exactValueMatch.value );
 			} else {
 				setSearchTerm( selectedOption?.label || '' );
 			}
 		} else {
 			setSearchTerm( selectedOption?.label || '' );
 		}
-	}, [ setSearchTerm, selectedOption, searchTerm, onChange, options ] );
+	}, [ setSearchTerm, selectedOption, searchTerm, options, store ] );
 
 	const minHeight =
 		matchingSuggestions.length * 35 > 300
@@ -213,7 +211,17 @@ const Combobox = ( {
 						startTransition( () => {
 							setSearchTerm( val );
 
-							if ( val?.length ) {
+							// If the input is not focussed, it's autofill, attempt the best match.
+							if ( ! inputFocussed ) {
+								const bestMatch = findMatchingSuggestions(
+									val,
+									options
+								)[ 0 ];
+
+								if ( bestMatch ) {
+									store.setSelectedValue( bestMatch.value );
+								}
+							} else if ( val?.length ) {
 								const exactLabelMatch = findExactMatchBy(
 									'label',
 									val,
@@ -225,8 +233,9 @@ const Combobox = ( {
 									exactLabelMatch.value !==
 										selectedOption?.value
 								) {
-									setSelectedOption( exactLabelMatch );
-									onChange( exactLabelMatch.value );
+									store.setSelectedValue(
+										exactLabelMatch.value
+									);
 								}
 							}
 						} );
@@ -240,6 +249,7 @@ const Combobox = ( {
 							setSearchTerm( option.label );
 							setSelectedOption( option );
 							onChange( option.value );
+							store.setOpen( false );
 						}
 					} }
 				>
@@ -256,8 +266,10 @@ const Combobox = ( {
 								aria-errormessage={ validationErrorId }
 								type="text"
 								onFocus={ () => {
-									setSearchTerm( '' );
-									store.setOpen( true );
+									setInputFocussed( true );
+								} }
+								onBlur={ () => {
+									setInputFocussed( false );
 								} }
 								{ ...restOfProps }
 							/>
