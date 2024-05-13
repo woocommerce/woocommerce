@@ -624,7 +624,7 @@ class PageController {
 					}
 
 					if ( is_wp_error( $export_error ) ) {
-						wp_die( wp_kses_post( $export_error ) );
+						wp_die( wp_kses_post( $export_error->get_error_message() ) );
 					}
 					break;
 				case 'delete':
