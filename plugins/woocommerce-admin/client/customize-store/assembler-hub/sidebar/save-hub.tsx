@@ -28,7 +28,6 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as noticesStore } from '@wordpress/notices';
 // @ts-ignore No types for this exist yet.
 import { useEntitiesSavedStatesIsDirty as useIsDirty } from '@wordpress/editor';
-import { recordEvent } from '@woocommerce/tracks';
 // @ts-ignore No types for this exist yet.
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 
@@ -36,6 +35,7 @@ import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/compon
  * Internal dependencies
  */
 import { CustomizeStoreContext } from '../';
+import { trackEvent } from '~/customize-store/tracking';
 
 const PUBLISH_ON_SAVE_ENTITIES = [
 	{
@@ -133,7 +133,7 @@ export const SaveHub = () => {
 	}, [ isEditorLoading, isDirty, isMainScreen, save ] );
 
 	const onDone = async () => {
-		recordEvent( 'customize_your_store_assembler_hub_done_click' );
+		trackEvent( 'customize_your_store_assembler_hub_done_click' );
 		setIsResolving( true );
 
 		try {

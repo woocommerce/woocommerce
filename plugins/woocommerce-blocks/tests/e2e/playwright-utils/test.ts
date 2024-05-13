@@ -13,6 +13,7 @@ import {
 import {
 	TemplateApiUtils,
 	STORAGE_STATE_PATH,
+	DB_EXPORT_FILE,
 	EditorUtils,
 	FrontendUtils,
 	StoreApiUtils,
@@ -21,6 +22,7 @@ import {
 	LocalPickupUtils,
 	MiniCartUtils,
 	WPCLIUtils,
+	cli,
 } from '@woocommerce/e2e-utils';
 import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
 
@@ -170,14 +172,21 @@ const test = base.extend<
 		await page.evaluate( () => {
 			window.localStorage.clear();
 		} );
+
+		const cliOutput = await cli(
+			`npm run wp-env run tests-cli wp db import ${ DB_EXPORT_FILE }`
+		);
+		if ( ! cliOutput.stdout.includes( 'Success: Imported ' ) ) {
+			throw new Error( `Failed to import ${ DB_EXPORT_FILE }` );
+		}
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
 	},
 	templateApiUtils: async ( {}, use ) =>
 		await use( new TemplateApiUtils( baseRequest ) ),
-	editorUtils: async ( { editor, page }, use ) => {
-		await use( new EditorUtils( editor, page ) );
+	editorUtils: async ( { editor, page, admin }, use ) => {
+		await use( new EditorUtils( editor, page, admin ) );
 	},
 	frontendUtils: async ( { page, requestUtils }, use ) => {
 		await use( new FrontendUtils( page, requestUtils ) );

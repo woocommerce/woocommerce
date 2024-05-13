@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+CYS > Ensure get_patterns_ai_data_post is triggered only if AI enabled and improve performance.

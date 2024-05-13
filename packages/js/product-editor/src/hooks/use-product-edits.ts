@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useEntityProp } from '@wordpress/core-data';
+import { useEntityId } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
@@ -22,11 +22,7 @@ function filterProductEdits( edits: EntityEdits ) {
 }
 
 export function useProductEdits( productType = <string>'product' ) {
-	const [ productId ] = useEntityProp< number >(
-		'postType',
-		productType,
-		'id'
-	);
+	const productId = useEntityId( 'postType', productType );
 
 	const { edits } = useSelect(
 		( select ) => {

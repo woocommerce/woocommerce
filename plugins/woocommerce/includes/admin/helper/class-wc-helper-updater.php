@@ -184,10 +184,11 @@ class WC_Helper_Updater {
 		printf(
 			wp_kses(
 			/* translators: 1: Woo Update Manager plugin install URL */
-				__( ' <a href="%1$s">Connect your store</a> to woocommerce.com to update.', 'woocommerce' ),
+				__( ' <a href="%1$s" class="woocommerce-connect-your-store">Connect your store</a> to woocommerce.com to update.', 'woocommerce' ),
 				array(
 					'a' => array(
-						'href' => array(),
+						'href'  => array(),
+						'class' => array(),
 					),
 				)
 			),
@@ -546,7 +547,7 @@ class WC_Helper_Updater {
 	 */
 	public static function get_updates_count_based_on_site_status() {
 		if ( ! WC_Helper::is_site_connected() ) {
-			return 1;
+			return 0;
 		}
 
 		$count = self::get_updates_count() ?? 0;

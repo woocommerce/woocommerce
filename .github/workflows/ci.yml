@@ -41,8 +41,11 @@ jobs:
                       if ( baseRef ) {
                         baseRef = `--base-ref origin/${ baseRef }`;
                       }
+
+                      let githubEvent = ${{ toJson( github.event_name ) }};
+
                       const child_process = require( 'node:child_process' );
-                      child_process.execSync( `pnpm utils ci-jobs ${ baseRef }` );
+                      child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
 
     project-lint-jobs:
         name: 'Lint - ${{ matrix.projectName }}'
@@ -113,19 +116,36 @@ jobs:
                   install: '${{ matrix.projectName }}...'
                   build: '${{ matrix.projectName }}'
 
+            - name: Get commit message
+              id: get_commit_message
+              run: |
+                  if [[ "${{ github.event_name }}" == "push" ]]; then
+                    COMMIT_MESSAGE=`echo "${{ github.event.head_commit.message }}" | head -1`
+                  elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+                    COMMIT_MESSAGE="${{ github.event.pull_request.title }}"
+                  else
+                    COMMIT_MESSAGE="${{ github.event_name }}"
+                  fi
+                
+                  echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
+              shell: bash
+
             - name: 'Prepare Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
 
             - name: 'Run tests'
+              env:
+                  BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_ANALYTICS_TOKEN }}
+                  BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
             - name: 'Upload artifacts'
               if: ${{ always() }}
               uses: actions/upload-artifact@v4
               with:
-                  name: all-blob-e2e-reports-${{ matrix.shardNumber }}
+                  name: all-blob-e2e-reports-${{ strategy.job-index }}
                   path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results
                   retention-days: 1
                   compression-level: 9
@@ -150,19 +170,36 @@ jobs:
                   install: '${{ matrix.projectName }}...'
                   build: '${{ matrix.projectName }}'
 
+            - name: Get commit message
+              id: get_commit_message
+              run: |
+                  if [[ "${{ github.event_name }}" == "push" ]]; then
+                    COMMIT_MESSAGE=`echo "${{ github.event.head_commit.message }}" | head -1`
+                  elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+                    COMMIT_MESSAGE="${{ github.event.pull_request.title }}"
+                  else
+                    COMMIT_MESSAGE="${{ github.event_name }}"
+                  fi
+                
+                  echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
+              shell: bash
+
             - name: 'Prepare Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
 
             - name: 'Run tests'
+              env:
+                  BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_API_ANALYTICS_TOKEN }}
+                  BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
             - name: 'Upload artifacts'
               if: ${{ always() }}
               uses: actions/upload-artifact@v4
               with:
-                  name: all-blob-api-reports-${{ matrix.shardNumber }}
+                  name: all-blob-api-reports-${{ strategy.job-index }}
                   path: ${{ matrix.projectPath }}/tests/api-core-tests/test-results/allure-results
                   retention-days: 1
                   compression-level: 9
@@ -290,7 +327,7 @@ jobs:
 
             - name: 'Send workflow dispatch'
               env:
-                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   PR_NUMBER: ${{ github.event.pull_request.number }}
                   RUN_ID: ${{ github.run_id }}
               run: |
@@ -358,7 +395,7 @@ jobs:
 
             - name: 'Publish reports'
               env:
-                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   PR_NUMBER: ${{ github.event.pull_request.number }}
                   RUN_ID: ${{ github.run_id }}
               run: |

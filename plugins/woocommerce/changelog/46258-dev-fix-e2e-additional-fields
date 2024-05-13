@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Fix blocks e2e test for additional-fields.merchant.block_theme.side_effects.spec.ts
-

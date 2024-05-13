@@ -9,7 +9,7 @@ import {
 	createInterpolateElement,
 } from '@wordpress/element';
 import { Button, Notice } from '@wordpress/components';
-import { ProductAttribute } from '@woocommerce/data';
+import { ProductProductAttribute } from '@woocommerce/data';
 import {
 	Sortable,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
@@ -77,7 +77,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	const [ defaultAttributeSearch, setDefaultAttributeSearch ] =
 		useState< string >();
 	const [ removingAttribute, setRemovingAttribute ] =
-		useState< null | ProductAttribute >();
+		useState< null | ProductProductAttribute >();
 	const [ currentAttributeId, setCurrentAttributeId ] = useState<
 		null | string
 	>( null );
@@ -97,7 +97,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		);
 	};
 
-	const handleRemove = ( attribute: ProductAttribute ) => {
+	const handleRemove = ( attribute: ProductProductAttribute ) => {
 		handleChange(
 			value.filter(
 				( attr ) =>
@@ -108,7 +108,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		setRemovingAttribute( null );
 	};
 
-	const showRemoveConfirmation = ( attribute: ProductAttribute ) => {
+	const showRemoveConfirmation = ( attribute: ProductProductAttribute ) => {
 		if ( useRemoveConfirmationModal ) {
 			setRemovingAttribute( attribute );
 			return;
@@ -132,7 +132,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		onNewModalClose();
 	};
 
-	const openEditModal = ( attribute: ProductAttribute ) => {
+	const openEditModal = ( attribute: ProductProductAttribute ) => {
 		recordEvent( 'product_options_edit', {
 			source: TRACKS_SOURCE,
 			attribute: attribute.name,
@@ -141,7 +141,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		onEditModalOpen( attribute );
 	};
 
-	const closeEditModal = ( attribute: ProductAttribute ) => {
+	const closeEditModal = ( attribute: ProductProductAttribute ) => {
 		setCurrentAttributeId( null );
 		onEditModalClose( attribute );
 	};
@@ -150,7 +150,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		const addedAttributesOnly = newAttributes.filter(
 			( newAttr ) =>
 				! value.some(
-					( current: ProductAttribute ) =>
+					( current: ProductProductAttribute ) =>
 						getAttributeId( newAttr ) === getAttributeId( current )
 				)
 		);
@@ -188,13 +188,13 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const attributeKeyValues = value.reduce(
 		(
-			keyValue: Record< number | string, ProductAttribute >,
-			attribute: ProductAttribute
+			keyValue: Record< number | string, ProductProductAttribute >,
+			attribute: ProductProductAttribute
 		) => {
 			keyValue[ getAttributeKey( attribute ) ] = attribute;
 			return keyValue;
 		},
-		{} as Record< number | string, ProductAttribute >
+		{} as Record< number | string, ProductProductAttribute >
 	);
 
 	const currentAttribute = value.find(

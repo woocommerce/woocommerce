@@ -20,11 +20,7 @@ for ( const testData of testToRun ) {
 	const userText = `Hello World in the ${ testData.templateName } template`;
 	const woocommerceTemplateUserText = `Hello World in the WooCommerce ${ testData.templateName } template`;
 
-	test.describe( `${ testData.templateName } template`, async () => {
-		test.afterAll( async ( { requestUtils } ) => {
-			await requestUtils.deleteAllTemplates( testData.templateType );
-		} );
-
+	test.describe( `${ testData.templateName } template`, () => {
 		test( `user-modified ${ testData.templateName } template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
 			page,
 			admin,
@@ -73,10 +69,9 @@ for ( const testData of testToRun ) {
 			// `deleteAllTemplates()`). This way, we verify there are no
 			// duplicate templates with the same name.
 			// See: https://github.com/woocommerce/woocommerce/issues/42220
-			await admin.visitAdminPage(
-				'site-editor.php',
-				`path=/${ testData.templateType }/all`
-			);
+			await admin.visitSiteEditor( {
+				path: `/${ testData.templateType }/all`,
+			} );
 			await editorUtils.revertTemplateCustomizations(
 				testData.templateName
 			);
