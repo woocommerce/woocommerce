@@ -1,5 +1,7 @@
 # Filter blocks
 
+**Important: we strongly discourage writing CSS code based on existing block class names, prioritize using global styles when possible. We specially discourage writing CSS selectors that rely on a specific block being a descendant of another one, as users can move blocks around freely, so they are prone to breaking. Similar to WordPress itself, we consider the HTML structure within components, blocks, and block templates to be “private”, and subject to further change in the future, so using CSS to target the internals of a block or a block template is _not recommended or supported_.**
+
 ## Price slider accent color
 
 The Filter by Price block includes a price slider which uses an accent color to show the selected range.
