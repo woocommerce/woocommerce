@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Patterns;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use WP_Upgrader;
 
 /**
@@ -30,8 +31,10 @@ class PTKPatternsStore {
 	public function __construct( PTKClient $ptk_client ) {
 		$this->ptk_client = $ptk_client;
 
-		register_activation_hook( WC_PLUGIN_FILE, array( $this, 'reset_cached_patterns' ) );
-		add_action( 'upgrader_process_complete', array( $this, 'woocommerce_plugin_update' ), 10, 2 );
+		if ( Features::is_enabled( 'pattern-toolkit-full-composability' ) ) {
+			register_activation_hook( WC_PLUGIN_FILE, array( $this, 'reset_cached_patterns' ) );
+			add_action( 'upgrader_process_complete', array( $this, 'woocommerce_plugin_update' ), 10, 2 );
+		}
 	}
 
 	/**

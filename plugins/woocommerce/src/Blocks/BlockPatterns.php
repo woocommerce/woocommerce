@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
@@ -67,7 +68,10 @@ class BlockPatterns {
 		$this->dictionary = PatternsHelper::get_patterns_dictionary();
 
 		add_action( 'init', array( $this, 'register_block_patterns' ) );
-		add_action( 'init', array( $this, 'register_ptk_patterns' ) );
+
+		if ( Features::is_enabled( 'pattern-toolkit-full-composability' ) ) {
+			add_action( 'init', array( $this, 'register_ptk_patterns' ) );
+		}
 	}
 
 	/**
