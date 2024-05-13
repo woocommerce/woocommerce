@@ -43,7 +43,9 @@ const PackageRates = ( {
 			return selectedRateId;
 		}
 		// Default to first rate if no rate is selected.
-		return rates[ 0 ]?.rate_id;
+		if ( rates.length > 0 ) {
+			return rates[ 0 ].rate_id;
+		}
 	} );
 
 	// Update the selected option if cart state changes in the data store.
@@ -57,20 +59,21 @@ const PackageRates = ( {
 		}
 	}, [ selectedRateId, selectedOption, previousSelectedRateId ] );
 
+	// Update the selected option if there is no rate selected on mount.
+	useEffect( () => {
+		// The useState callback run only once, so we need this to update it right fetching new rates.
+		if ( ! selectedOption && rates.length > 0 ) {
+			setSelectedOption( rates[ 0 ].rate_id );
+			onSelectRate( rates[ 0 ].rate_id );
+		}
+	}, [ onSelectRate, rates, selectedOption ] );
+
 	// Update the data store when the local selected rate changes.
 	useEffect( () => {
 		if ( selectedOption ) {
 			onSelectRate( selectedOption );
 		}
 	}, [ onSelectRate, selectedOption ] );
-
-	// Update the selected option if there is no rate selected on mount.
-	useEffect( () => {
-		if ( ! selectedOption && rates.length > 0 ) {
-			setSelectedOption( rates[ 0 ].rate_id );
-			onSelectRate( rates[ 0 ].rate_id );
-		}
-	}, [ onSelectRate, rates, selectedOption ] );
 
 	if ( rates.length === 0 ) {
 		return noResultsMessage;
