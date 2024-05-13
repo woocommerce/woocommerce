@@ -33,7 +33,7 @@ const StateInput = ( {
 	country,
 	label,
 	onChange,
-	autoComplete = 'off',
+	autoComplete,
 	value = '',
 	required = false,
 	errorId = '',
@@ -102,6 +102,7 @@ const StateInput = ( {
 				options={ options }
 				value={ value }
 				errorMessage={ __( 'Please select a state.', 'woocommerce' ) }
+				autoComplete={ autoComplete }
 				errorId={ errorId }
 				required={ required }
 			/>

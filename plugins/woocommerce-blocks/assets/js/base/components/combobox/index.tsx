@@ -32,7 +32,11 @@ import { useVirtualizer } from '@tanstack/react-virtual';
  * Internal dependencies
  */
 import './style.scss';
-import { findExactMatchBy, findMatchingSuggestions } from './util';
+import {
+	findBestMatchByLabel,
+	findExactMatchBy,
+	findMatchingSuggestions,
+} from './util';
 
 export interface ComboboxControlOption {
 	label: string;
@@ -73,21 +77,6 @@ const Combobox = ( {
 	const errorId = incomingErrorId || controlId;
 	const store = useComboboxStore();
 
-	let autoCompleteValue = autoComplete;
-
-	if (
-		! [ 'list', 'inline', 'both', 'none' ].includes( autoCompleteValue )
-	) {
-		deprecated( `Passing browser autocomplete hints to combobox`, {
-			since: '9.0.0',
-			plugin: '@woocommerce/components',
-			hint: 'Passing autocomplete hints to combobox has no effect, please use the values supported by Ariakit combobox: https://ariakit.org/reference/combobox#autocomplete',
-		} );
-
-		// Reset the value to the default.
-		autoCompleteValue = 'list';
-	}
-
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( VALIDATION_STORE_KEY );
 
@@ -107,11 +96,12 @@ const Combobox = ( {
 		initialOption?.label || ''
 	);
 
+	const [ selectedOption, setSelectedOption ] = useState( initialOption );
+
 	useEffect( () => {
 		setSearchTerm( initialOption?.label || '' );
+		setSelectedOption( initialOption );
 	}, [ initialOption ] );
-
-	const [ selectedOption, setSelectedOption ] = useState( initialOption );
 
 	// If the list of options changes and the currently selected option is no longer available,
 	// we should unset the search term and deselect the option.
@@ -213,10 +203,10 @@ const Combobox = ( {
 
 							// If the input is not focussed, it's autofill, attempt the best match.
 							if ( ! inputFocussed ) {
-								const bestMatch = findMatchingSuggestions(
+								const bestMatch = findBestMatchByLabel(
 									val,
 									options
-								)[ 0 ];
+								);
 
 								if ( bestMatch ) {
 									store.setSelectedValue( bestMatch.value );
@@ -261,13 +251,19 @@ const Combobox = ( {
 						<div className="components-combobox-control__suggestions-container">
 							<AriakitCombobox
 								className="components-combobox-control__input components-form-token-field__input"
-								autoComplete={ autoCompleteValue }
+								autoComplete="list"
 								aria-invalid={ ariaInvalid }
 								aria-errormessage={ validationErrorId }
 								type="text"
 								onFocus={ () => {
 									setInputFocussed( true );
 								} }
+								render={
+									<input
+										autoComplete={ autoComplete }
+										type="text"
+									/>
+								}
 								onBlur={ () => {
 									setInputFocussed( false );
 								} }

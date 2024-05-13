@@ -43,3 +43,17 @@ export const findMatchingSuggestions = (
 
 	return matches;
 };
+
+export const findBestMatchByLabel = (
+	searchTerm: string,
+	options: ComboboxControlOption[]
+) => {
+	// String startsWith empty string always returns true, so we need to check for searchTerm length.
+	return searchTerm.length
+		? options.find( ( option ) => {
+				return normalizeTextString( option.label ).startsWith(
+					normalizeTextString( searchTerm )
+				);
+		  } )
+		: undefined;
+};
