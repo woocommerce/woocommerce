@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { BlockAttributes } from '@wordpress/blocks';
-import { createElement } from '@wordpress/element';
+import { createElement, useEffect } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { ProductProductAttribute } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -15,9 +15,11 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
  */
 import { Attributes as AttributesContainer } from '../../../components/attributes/attributes';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { useProductAttributes } from '../../../hooks/use-product-attributes';
 
 export function AttributesBlockEdit( {
 	attributes,
+	context: { isInSelectedTab },
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const [ entityAttributes, setEntityAttributes ] = useEntityProp<
 		ProductProductAttribute[]
@@ -27,12 +29,28 @@ export function AttributesBlockEdit( {
 
 	const blockProps = useWooBlockProps( attributes );
 
+	const {
+		attributes: attributeList,
+		fetchAttributes,
+		handleChange,
+	} = useProductAttributes( {
+		allAttributes: entityAttributes,
+		onChange: setEntityAttributes,
+		productId,
+	} );
+
+	useEffect( () => {
+		if ( isInSelectedTab ) {
+			fetchAttributes();
+		}
+	}, [ entityAttributes, isInSelectedTab ] );
+
 	return (
 		<div { ...blockProps }>
 			<AttributesContainer
-				productId={ productId }
+				attributeList={ attributeList }
+				onChange={ handleChange }
 				value={ entityAttributes }
-				onChange={ setEntityAttributes }
 			/>
 		</div>
 	);
