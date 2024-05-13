@@ -38,7 +38,8 @@ export function useSaveDraft( {
 
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
 			const isSaving = isSavingEntityRecord< boolean >(
@@ -67,7 +68,8 @@ export function useSaveDraft( {
 		( productStatus !== 'publish' && ! hasEdits ) ||
 		isValidating;
 
-	// @ts-expect-error There are no types for this.
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	async function saveDraft() {

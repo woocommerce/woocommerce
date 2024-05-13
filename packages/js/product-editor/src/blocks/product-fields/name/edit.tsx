@@ -45,7 +45,8 @@ export function NameBlockEdit( {
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
-	// @ts-expect-error There are no types for this.
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
 
 	const { hasEdit } = useProductEdits();
@@ -55,7 +56,8 @@ export function NameBlockEdit( {
 
 	const productId = useEntityId( 'postType', 'product' );
 	const product: Product = useSelect( ( select ) =>
-		// @ts-expect-error There are no types for this.
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		select( 'core' ).getEditedEntityRecord(
 			'postType',
 			'product',
@@ -217,7 +219,8 @@ export function NameBlockEdit( {
 						onCancel={ () => setShowProductLinkEditModal( false ) }
 						onSaved={ () => setShowProductLinkEditModal( false ) }
 						saveHandler={ async ( updatedSlug ) => {
-							// @ts-expect-error There are no types for this.
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore
 							const { slug, permalink }: Product =
 								await saveEntityRecord( 'postType', 'product', {
 									id: product.id,

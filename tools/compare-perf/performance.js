@@ -87,7 +87,7 @@ function median( array ) {
  */
 async function runTestSuite( testSuite, testRunnerDir, runKey ) {
 	await runShellScript(
-		`${ config.testCommand } ${ testSuite }`,
+		`${ config.getTestCommand( testRunnerDir ) } ${ testSuite }`,
 		testRunnerDir,
 		{
 			...process.env,
@@ -211,7 +211,9 @@ async function runPerformanceTests( branches, options ) {
 
 	logAtIndent( 2, 'Installing dependencies and building' );
 	await runShellScript(
-		`bash -c "source $HOME/.nvm/nvm.sh && nvm install && ${ config.setupTestRunner }"`,
+		`bash -c "source $HOME/.nvm/nvm.sh && nvm install && ${ config.getSetupTestRunner(
+			testRunnerDir
+		) }"`,
 		testRunnerDir
 	);
 
@@ -252,7 +254,9 @@ async function runPerformanceTests( branches, options ) {
 
 		logAtIndent( 3, 'Installing dependencies and building' );
 		await runShellScript(
-			`bash -c "source $HOME/.nvm/nvm.sh && nvm install && ${ config.setupCommand }"`,
+			`bash -c "source $HOME/.nvm/nvm.sh && nvm install && ${ config.getSetupCommand(
+				buildDir
+			) }"`,
 			buildDir
 		);
 

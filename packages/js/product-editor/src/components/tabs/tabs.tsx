@@ -37,7 +37,8 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 		'id'
 	);
 	const product: Product = useSelect( ( select ) =>
-		// @ts-expect-error There are no types for this.
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		select( 'core' ).getEditedEntityRecord(
 			'postType',
 			'product',
