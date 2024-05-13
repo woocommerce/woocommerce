@@ -1,6 +1,12 @@
+/**
+ * External dependencies
+ */
+import { recordEvent } from '@woocommerce/tracks';
+
 window.jQuery( document ).ready( function () {
 	// hide the notice when the customer clicks the dismiss button up until 1 month, then it will be shown again.
 	const wooConnectNoticeSelector = '.woo-connect-notice';
+	const wooConnectNoticeLinkSelector = '#woo-connect-notice-url';
 	const localStorageKey = 'woo-connect-notice-settings-dismissed';
 
 	window
@@ -10,7 +16,13 @@ window.jQuery( document ).ready( function () {
 				localStorageKey,
 				new Date().toString()
 			);
+			recordEvent( 'woo_connect_notice_in_settings_dismissed' );
 		} );
+
+	window.jQuery( wooConnectNoticeLinkSelector ).on( 'click', function () {
+		recordEvent( 'woo_connect_notice_in_settings_clicked' );
+		return true;
+	} );
 
 	let shouldHideNotice = false;
 
@@ -28,5 +40,7 @@ window.jQuery( document ).ready( function () {
 
 	if ( shouldHideNotice ) {
 		window.jQuery( wooConnectNoticeSelector ).remove();
+	} else {
+		recordEvent( 'woo_connect_notice_in_settings_shown' );
 	}
 } );
