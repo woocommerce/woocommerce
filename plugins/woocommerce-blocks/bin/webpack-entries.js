@@ -115,6 +115,10 @@ const blocks = {
 		customDir: 'product-filter/inner-blocks/active-filters',
 		isExperimental: true,
 	},
+	'product-filter-clear-button': {
+		customDir: 'product-filter/inner-blocks/clear-button',
+		isExperimental: true,
+	},
 	'order-confirmation-summary': {
 		customDir: 'order-confirmation/summary',
 	},
