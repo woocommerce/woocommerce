@@ -84,7 +84,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 		( field ) => field.key === 'address_2'
 	);
 
-	const hasAddress2FieldValue = useCallback( () => {
+	const hasAddress2FieldValue = useMemo( () => {
 		return objectHasProp( values, 'address_2' ) && values.address_2 !== '';
 	}, [ values ] );
 
@@ -116,7 +116,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 	useEffect( () => {
 		setIsAddress2FieldVisible(
 			isAddress2FieldRequired ||
-				hasAddress2FieldValue() ||
+				hasAddress2FieldValue ||
 				userChangedAddress2Field
 		);
 	}, [
