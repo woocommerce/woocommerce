@@ -33,6 +33,19 @@ use Automattic\WooCommerce\Admin\Features\Features;
  * Main WooCommerce Class.
  *
  * @class WooCommerce
+ * @property WC_Cart $cart Cart class.
+ * @property WC_Customer $customer Customer class.
+ * @property WC_Integrations $integrations Integrations class.
+ * @property WC_Order_Factory $order_factory Order factory class.
+ * @property WC_Product_Factory $product_factory Product factory class.
+ * @property WC_Query $query Query class.
+ * @property WC_Session|WC_Session_Handler $session Session class.
+ * @property WC_Structured_Data $structured_data Structured data class.
+ * @property WC_Countries $countries Countries class.
+ * @property WC_API $api API class.
+ * @property WC_Deprecated_Hooks[] $deprecated_hook_handlers Array of deprecated hook handlers.
+ * @property WC_Payment_Gateways $payment_gateways
+ * @since 2.1
  */
 final class WooCommerce {
 
