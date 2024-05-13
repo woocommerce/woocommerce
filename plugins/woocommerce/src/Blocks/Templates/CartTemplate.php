@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-
 /**
  * CartTemplate class.
  *
@@ -33,7 +31,6 @@ class CartTemplate extends AbstractPageTemplate {
 	 */
 	public function get_template_title() {
 		return _x( 'Page: Cart', 'Template name', 'woocommerce' );
-
 	}
 
 	/**
@@ -43,7 +40,6 @@ class CartTemplate extends AbstractPageTemplate {
 	 */
 	public function get_template_description() {
 		return __( 'The Cart template displays the items selected by the user for purchase, including quantities, prices, and discounts. It allows users to review their choices before proceeding to checkout.', 'woocommerce' );
-
 	}
 
 	/**

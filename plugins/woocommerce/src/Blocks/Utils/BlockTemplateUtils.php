@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
@@ -296,9 +297,8 @@ class BlockTemplateUtils {
 	 * @return array $path_list A list of paths to all template part files.
 	 */
 	public static function get_template_paths( $template_type ) {
-		$wp_template_filenames      = array(
+		$wp_template_filenames = array(
 			'archive-product.html',
-			'coming-soon.html',
 			'order-confirmation.html',
 			'page-cart.html',
 			'page-checkout.html',
@@ -308,6 +308,11 @@ class BlockTemplateUtils {
 			'taxonomy-product_cat.html',
 			'taxonomy-product_tag.html',
 		);
+
+		if ( Features::is_enabled( 'launch-your-store' ) ) {
+			$wp_template_filenames[] = 'coming-soon.html';
+		}
+
 		$wp_template_part_filenames = array(
 			'checkout-header.html',
 			'mini-cart.html',
@@ -702,16 +707,6 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Returns whether the passed `$template` has a title, and it's different from the slug.
-	 *
-	 * @param object $template The template object.
-	 * @return boolean
-	 */
-	public static function template_has_title( $template ) {
-		return ! empty( $template->title ) && $template->title !== $template->slug;
-	}
-
-	/**
 	 * Returns whether the passed `$template` has the legacy template block.
 	 *
 	 * @param object $template The template object.
@@ -719,6 +714,37 @@ class BlockTemplateUtils {
 	 */
 	public static function template_has_legacy_template_block( $template ) {
 		return has_block( 'woocommerce/legacy-template', $template->content );
+	}
+
+	/**
+	 * Updates the title, description and area of a template to the correct values and to make them more user-friendly.
+	 * For example, instead of:
+	 * - Title: `Tag (product_tag)`
+	 * - Description: `Displays taxonomy: Tag.`
+	 * we display:
+	 * - Title: `Products by Tag`
+	 * - Description: `Displays products filtered by a tag.`.
+	 *
+	 * @param WP_Block_Template $template The template object.
+	 * @param string            $template_type wp_template or wp_template_part.
+	 *
+	 * @return WP_Block_Template
+	 */
+	public static function update_template_data( $template, $template_type ) {
+		if ( ! $template ) {
+			return $template;
+		}
+		if ( empty( $template->title ) || $template->title === $template->slug ) {
+			$template->title = self::get_block_template_title( $template->slug );
+		}
+		if ( empty( $template->description ) ) {
+			$template->description = self::get_block_template_description( $template->slug );
+		}
+		if ( empty( $template->area ) || 'uncategorized' === $template->area ) {
+			$template->area = self::get_block_template_area( $template->slug, $template_type );
+		}
+
+		return $template;
 	}
 
 	/**

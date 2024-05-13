@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix undefined error with current_screen in lys class.

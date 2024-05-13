@@ -14,7 +14,6 @@ export function* validate( jsonString ) {
 		const response = yield apiFetch( {
 			method: 'POST',
 			path: `${ API_NAMESPACE }/remote-spec-validator/validate`,
-			headers: { 'content-type': 'application/json' },
 			data: {
 				spec: JSON.stringify( JSON.parse( jsonString ) ),
 			},

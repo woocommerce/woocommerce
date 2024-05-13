@@ -1,12 +1,16 @@
 /**
  * External dependencies
  */
-import { ProductAttribute } from '@woocommerce/data';
+import {
+	ProductAttributeTerm,
+	ProductProductAttribute,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
+import { AttributesComboboxControlItem } from '../attribute-combobox-field/types';
 
 export type AttributeControlEmptyStateProps = {
 	addAttribute: ( search?: string ) => void;
@@ -17,16 +21,16 @@ export type AttributeControlProps = {
 	onAdd?: ( attribute: EnhancedProductAttribute[] ) => void;
 	onAddAnother?: () => void;
 	onRemoveItem?: () => void;
-	onChange: ( value: ProductAttribute[] ) => void;
-	onEdit?: ( attribute: ProductAttribute ) => void;
-	onRemove?: ( attribute: ProductAttribute ) => void;
-	onRemoveCancel?: ( attribute: ProductAttribute ) => void;
+	onChange: ( value: ProductProductAttribute[] ) => void;
+	onEdit?: ( attribute: ProductProductAttribute ) => void;
+	onRemove?: ( attribute: ProductProductAttribute ) => void;
+	onRemoveCancel?: ( attribute: ProductProductAttribute ) => void;
 	onNewModalCancel?: () => void;
 	onNewModalClose?: () => void;
 	onNewModalOpen?: () => void;
-	onEditModalCancel?: ( attribute?: ProductAttribute ) => void;
-	onEditModalClose?: ( attribute?: ProductAttribute ) => void;
-	onEditModalOpen?: ( attribute?: ProductAttribute ) => void;
+	onEditModalCancel?: ( attribute?: ProductProductAttribute ) => void;
+	onEditModalClose?: ( attribute?: ProductProductAttribute ) => void;
+	onEditModalOpen?: ( attribute?: ProductProductAttribute ) => void;
 	onNoticeDismiss?: () => void;
 	renderCustomEmptyState?: ( props: AttributeControlEmptyStateProps ) => void;
 	createNewAttributesAsGlobal?: boolean;
@@ -48,4 +52,34 @@ export type AttributeControlProps = {
 		globalAttributeHelperMessage?: string;
 		disabledAttributeMessage?: string;
 	};
+};
+
+export type AttributeTableRowProps = {
+	index: number;
+	attribute: EnhancedProductAttribute | null;
+	attributePlaceholder: string;
+	disabledAttributeMessage: string;
+
+	isLoadingAttributes: boolean;
+	attributes: AttributesComboboxControlItem[];
+
+	termPlaceholder: string;
+	termLabel?: string;
+	termsAutoSelection?: 'first' | 'all';
+
+	clearButtonDisabled?: boolean;
+	removeLabel: string;
+
+	onAttributeSelect: (
+		attribute: AttributesComboboxControlItem,
+		index: number
+	) => void;
+
+	onTermsSelect: (
+		terms: ProductAttributeTerm[] | string[],
+		index: number,
+		attribute: EnhancedProductAttribute
+	) => void;
+
+	onRemove: ( index: number ) => void;
 };

@@ -1,10 +1,11 @@
-const { test, expect } = require( '@playwright/test' );
-const { disableWelcomeModal } = require( '../../utils/editor' );
-
-const wooPatternsPageTitle = `Insert Woo Patterns ${ Date.now() }`;
-const wooPatternsPageSlug = wooPatternsPageTitle
-	.replace( / /gi, '-' )
-	.toLowerCase();
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+const {
+	goToPageEditor,
+	fillPageTitle,
+	insertBlock,
+	getCanvas,
+	publishPage,
+} = require( '../../utils/editor' );
 
 // some WooCommerce Patterns to use
 const wooPatterns = [
@@ -26,75 +27,54 @@ const wooPatterns = [
 	},
 ];
 
-test.describe( 'Insert WooCommerce Patterns Into Page', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+baseTest.describe( 'Add WooCommerce Patterns Into Page', () => {
+	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
+		testPageTitlePrefix: 'Woocommerce Patterns',
+	} );
 
-	test( 'can insert WooCommerce patterns into page', async ( { page } ) => {
-		// go to create a new page
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
+	test( 'can insert WooCommerce patterns into page', async ( {
+		page,
+		testPage,
+	} ) => {
+		await goToPageEditor( { page } );
+		await fillPageTitle( page, testPage.title );
 
-		await disableWelcomeModal( { page } );
-
-		// fill page title
-		await page
-			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( wooPatternsPageTitle );
-
-		// add Woo Patterns and verify them as added into page
 		for ( let i = 0; i < wooPatterns.length; i++ ) {
-			// click title field for block inserter to show up
-			await page.getByRole( 'textbox', { name: 'Add title' } ).click();
+			await test.step( `Insert ${ wooPatterns[ i ].name } pattern`, async () => {
+				await insertBlock( page, wooPatterns[ i ].name );
 
-			// add pattern into page
-			await page.getByLabel( 'Add block' ).click();
-			await page
-				.getByPlaceholder( 'Search', { exact: true } )
-				.fill( wooPatterns[ i ].name );
-			await page
-				.getByRole( 'option', {
-					name: wooPatterns[ i ].name,
-					exact: true,
-				} )
-				.click();
-			await expect(
-				page.getByLabel( 'Dismiss this notice' ).filter( {
-					hasText: `Block pattern "${ wooPatterns[ i ].name }" inserted.`,
-				} )
-			).toBeVisible();
+				await expect(
+					page.getByLabel( 'Dismiss this notice' ).filter( {
+						hasText: `Block pattern "${ wooPatterns[ i ].name }" inserted.`,
+					} )
+				).toBeVisible();
 
-			// verify added patterns into page
-			await expect(
-				page
-					.getByRole( 'textbox' )
-					.filter( { hasText: `${ wooPatterns[ i ].button }` } )
-			).toBeVisible();
+				const canvas = await getCanvas( page );
+				await expect(
+					canvas
+						.getByRole( 'textbox' )
+						.filter( { hasText: `${ wooPatterns[ i ].button }` } )
+				).toBeVisible();
+			} );
 		}
 
-		// save and publish the page
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ wooPatternsPageTitle } is now live.` )
-		).toBeVisible();
+		await publishPage( page, testPage.title );
 
 		// check again added patterns after publishing
+		const canvas = await getCanvas( page );
 		for ( let i = 1; i < wooPatterns.length; i++ ) {
 			await expect(
-				page
+				canvas
 					.getByRole( 'textbox' )
 					.filter( { hasText: `${ wooPatterns[ i ].button }` } )
 			).toBeVisible();
 		}
 
 		// go to the frontend page to verify patterns
-		await page.goto( wooPatternsPageSlug );
+		await page.goto( testPage.slug );
 		await expect(
-			page.getByRole( 'heading', { name: wooPatternsPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
 		// check some elements from added patterns
