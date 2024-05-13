@@ -425,8 +425,16 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * The information is meaningful only if pending_data_sync_is_in_progress return true.
 	 *
 	 * @return array
+	 *
+	 * @deprecated 9.0.0
 	 */
 	public function get_sync_status() {
+		wc_deprecated_function(
+			__METHOD__,
+			'9.0.0',
+			'get_current_orders_pending_sync_count()'
+		);
+
 		return array(
 			'initial_pending_count' => (int) 0,
 			'current_pending_count' => $this->get_total_pending_count(),
