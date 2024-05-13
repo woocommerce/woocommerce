@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Respect locale settings when formatting order counts in admin orders page.
