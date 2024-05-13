@@ -48,9 +48,7 @@ import {
 import { isEqual } from 'lodash';
 import { COLOR_PALETTES } from './global-styles/color-palette-variations/constants';
 
-const { GlobalStylesContext, __experimentalGetParsedPattern } = unlock(
-	blockEditorPrivateApis
-);
+const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
 export const SidebarNavigationScreenHomepage = () => {
 	const { scroll } = useEditorScroll( {
@@ -62,9 +60,9 @@ export const SidebarNavigationScreenHomepage = () => {
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
 	const currentTemplate = useSelect(
-		( select ) =>
+		( sel ) =>
 			// @ts-expect-error No types for this exist yet.
-			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+			sel( coreStore ).__experimentalGetTemplateForLink( '/' ),
 		[]
 	);
 
