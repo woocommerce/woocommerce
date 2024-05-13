@@ -329,7 +329,11 @@ class Loader {
 			);
 		}
 
-		/* phpcs:ignore */
+		/**
+		 * The woocommerce_component_settings_preload_endpoints filter
+		 *
+		 * @since 6.5.0
+		 */
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
 
 		$preload_data_endpoints['jetpackStatus'] = '/jetpack/v4/connection';
@@ -340,7 +344,11 @@ class Loader {
 			);
 		}
 
-		/* phpcs:ignore */
+		/**
+		 * The woocommerce_admin_preload_options filter
+		 *
+		 * @since 6.5.0
+		 */
 		$preload_options = apply_filters( 'woocommerce_admin_preload_options', array() );
 		if ( ! empty( $preload_options ) ) {
 			foreach ( $preload_options as $option ) {
@@ -348,7 +356,11 @@ class Loader {
 			}
 		}
 
-		/* phpcs:ignore */
+		/**
+		 * The woocommerce_admin_preload_settings filter
+		 *
+		 * @since 6.5.0
+		 */
 		$preload_settings = apply_filters( 'woocommerce_admin_preload_settings', array() );
 		if ( ! empty( $preload_settings ) ) {
 			$setting_options = new \WC_REST_Setting_Options_V2_Controller();
@@ -542,7 +554,11 @@ class Loader {
 	public static function get_currency_settings() {
 		$code = get_woocommerce_currency();
 
-		/* phpcs:ignore */
+		/**
+		 * The wc_currency_settings hook
+		 *
+		 * @since 6.5.0
+		 */
 		return apply_filters(
 			'wc_currency_settings',
 			array(
