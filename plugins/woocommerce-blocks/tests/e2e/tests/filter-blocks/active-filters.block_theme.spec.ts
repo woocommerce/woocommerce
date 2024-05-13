@@ -1,36 +1,35 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import path from 'path';
 
-/**
- * Internal dependencies
- */
-import { ExtendedTemplate } from '../../types/e2e-test-utils-playwright';
-
+const PRODUCT_CATALOG_LINK = '/shop';
+const PRODUCT_CATALOG_TEMPLATE_ID = 'woocommerce/woocommerce//archive-product';
 const TEMPLATE_PATH = path.join( __dirname, './active-filters.handlebars' );
-
-const test = base.extend< {
-	defaultBlockTemplate: ExtendedTemplate;
-} >( {
-	defaultBlockTemplate: async ( { requestUtils, templateApiUtils }, use ) => {
-		const testingTemplate = await requestUtils.updateProductCatalogTemplate(
-			TEMPLATE_PATH,
-			{}
-		);
-		await use( testingTemplate );
-		await templateApiUtils.revertTemplate( testingTemplate.id );
-	},
-} );
 
 test.describe( 'Product Filter: Active Filters Block', () => {
 	test.describe( 'frontend', () => {
+		let testingTemplateId = '';
+
+		test.beforeAll( async ( { requestUtils } ) => {
+			const testingTemplate = await requestUtils.updateTemplateContents(
+				PRODUCT_CATALOG_TEMPLATE_ID,
+				TEMPLATE_PATH,
+				{}
+			);
+
+			testingTemplateId = testingTemplate.id;
+		} );
+
+		test.afterAll( async ( { templateApiUtils } ) => {
+			await templateApiUtils.revertTemplate( testingTemplateId );
+		} );
+
 		test( 'Without any filters selected, only a wrapper block is rendered', async ( {
 			page,
-			defaultBlockTemplate,
 		} ) => {
-			await page.goto( defaultBlockTemplate.link );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const locator = page.locator(
 				'.wp-block-woocommerce-product-filter'
@@ -44,11 +43,8 @@ test.describe( 'Product Filter: Active Filters Block', () => {
 
 		test( 'With rating filters applied it shows the correct active filters', async ( {
 			page,
-			defaultBlockTemplate,
 		} ) => {
-			await page.goto(
-				`${ defaultBlockTemplate.link }?rating_filter=1,2,5`
-			);
+			await page.goto( `${ PRODUCT_CATALOG_LINK }?rating_filter=1,2,5` );
 
 			await expect( page.getByText( 'Rating:' ) ).toBeVisible();
 			await expect( page.getByText( 'Rated 1 out of 5' ) ).toBeVisible();
@@ -58,10 +54,9 @@ test.describe( 'Product Filter: Active Filters Block', () => {
 
 		test( 'With stock filters applied it shows the correct active filters', async ( {
 			page,
-			defaultBlockTemplate,
 		} ) => {
 			await page.goto(
-				`${ defaultBlockTemplate.link }?filter_stock_status=instock,onbackorder`
+				`${ PRODUCT_CATALOG_LINK }?filter_stock_status=instock,onbackorder`
 			);
 
 			await expect( page.getByText( 'Stock Status:' ) ).toBeVisible();
@@ -71,10 +66,9 @@ test.describe( 'Product Filter: Active Filters Block', () => {
 
 		test( 'With attribute filters applied it shows the correct active filters', async ( {
 			page,
-			defaultBlockTemplate,
 		} ) => {
 			await page.goto(
-				`${ defaultBlockTemplate.link }?filter_color=blue,gray&query_type_color=or`
+				`${ PRODUCT_CATALOG_LINK }?filter_color=blue,gray&query_type_color=or`
 			);
 
 			await expect( page.getByText( 'Color:' ) ).toBeVisible();
@@ -84,10 +78,9 @@ test.describe( 'Product Filter: Active Filters Block', () => {
 
 		test( 'With price filters applied it shows the correct active filters', async ( {
 			page,
-			defaultBlockTemplate,
 		} ) => {
 			await page.goto(
-				`${ defaultBlockTemplate.link }?min_price=17&max_price=71`
+				`${ PRODUCT_CATALOG_LINK }?min_price=17&max_price=71`
 			);
 
 			await expect( page.getByText( 'Price:' ) ).toBeVisible();
