@@ -49,17 +49,9 @@ class Init {
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( Features::is_enabled( 'product-variation-management' ) ) {
-			array_push( $this->supported_product_types, 'variable' );
-		}
-
-		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
-			array_push( $this->supported_product_types, 'external' );
-		}
-
-		if ( Features::is_enabled( 'product-grouped' ) ) {
-			array_push( $this->supported_product_types, 'grouped' );
-		}
+		array_push( $this->supported_product_types, 'variable' );
+		array_push( $this->supported_product_types, 'external' );
+		array_push( $this->supported_product_types, 'grouped' );
 
 		$this->redirection_controller = new RedirectionController();
 
@@ -79,6 +71,7 @@ class Init {
 			add_action( 'rest_api_init', array( $this, 'register_user_metas' ) );
 
 			add_filter( 'register_block_type_args', array( $this, 'register_metadata_attribute' ) );
+			add_filter( 'woocommerce_get_block_types', array( $this, 'get_block_types' ), 999, 1 );
 
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
@@ -448,5 +441,20 @@ class Init {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Filters woocommerce block types.
+	 *
+	 * @param string[] $block_types Array of woocommerce block types.
+	 * @return array
+	 */
+	public function get_block_types( $block_types ) {
+		if ( PageController::is_admin_page() ) {
+			// Ignore all woocommerce blocks.
+			return array();
+		}
+
+		return $block_types;
 	}
 }

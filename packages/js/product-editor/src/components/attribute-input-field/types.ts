@@ -21,7 +21,7 @@ export type AttributeInputFieldItemProps = Pick<
 
 export type AttributeInputFieldProps = {
 	value?: EnhancedProductAttribute | null;
-	onChange: ( value?: AttributeInputFieldItemProps | string ) => void;
+	onChange: ( value: AttributeInputFieldItemProps ) => void;
 	label?: string;
 	items?: AttributeInputFieldItemProps[];
 	isLoading?: boolean;

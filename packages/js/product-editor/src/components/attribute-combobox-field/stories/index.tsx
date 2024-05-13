@@ -3,99 +3,91 @@
  */
 import { __ } from '@wordpress/i18n';
 import React, { useState } from 'react';
+import type { ProductAttribute } from '@woocommerce/data';
 import '@wordpress/interface/src/style.scss';
-import { ProductAttribute } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import AttributesComboboxControl from '../';
-import type { AttributesComboboxControlComponent } from '../types';
+import type {
+	AttributesComboboxControlComponent,
+	AttributesComboboxControlItem,
+} from '../types';
 
 export default {
 	title: 'Product Editor/components/AttributesComboboxControl',
 	component: AttributesComboboxControl,
 };
 
-const items = [
+const items: AttributesComboboxControlItem[] = [
 	{
 		id: 1,
 		name: 'Color',
-		slug: 'pa_color',
-		takenBy: 1,
 	},
 	{
 		id: 2,
 		name: 'Size',
-		slug: 'pa_size',
-		takenBy: 1,
 	},
 	{
 		id: 3,
 		name: 'Material',
-		slug: 'pa_material',
-		takenBy: 1,
+		isDisabled: true,
 	},
 	{
 		id: 4,
 		name: 'Style',
-		slug: 'pa_style',
-		takenBy: 1,
 	},
 	{
 		id: 5,
 		name: 'Brand',
-		slug: 'pa_brand',
-		takenBy: 1,
 	},
 	{
 		id: 6,
 		name: 'Pattern',
-		slug: 'pa_pattern',
-		takenBy: 1,
 	},
 	{
 		id: 7,
 		name: 'Theme',
-		slug: 'pa_theme',
-		takenBy: 1,
+		isDisabled: true,
 	},
 	{
 		id: 8,
 		name: 'Collection',
-		slug: 'pa_collection',
-		takenBy: 1,
+		isDisabled: true,
 	},
 	{
 		id: 9,
 		name: 'Occasion',
-		slug: 'pa_occasion',
-		takenBy: 1,
 	},
 	{
 		id: 10,
 		name: 'Season',
-		slug: 'pa_season',
-		takenBy: 1,
 	},
 ];
 
 export const Default = ( args: AttributesComboboxControlComponent ) => {
-	const [ selectedAttribute, setSelectedAttribute ] = useState<
-		ProductAttribute | undefined
-	>();
+	const [ selectedAttribute, setSelectedAttribute ] =
+		useState< AttributesComboboxControlItem | null >( null );
 
-	function selectAttribute( item: ProductAttribute | string | undefined ) {
+	function selectAttribute( item: AttributesComboboxControlItem ) {
 		if ( typeof item === 'string' ) {
 			return;
 		}
 
 		setSelectedAttribute( item );
+		args.onChange( item );
 	}
 
 	return (
 		<AttributesComboboxControl
 			{ ...args }
+			label={ __( 'Attributes', 'woocommerce' ) }
+			items={ items }
+			help={ __(
+				'Select or create attributes for this product.',
+				'woocommerce'
+			) }
 			onChange={ selectAttribute }
 			current={ selectedAttribute }
 		/>
@@ -103,11 +95,31 @@ export const Default = ( args: AttributesComboboxControlComponent ) => {
 };
 
 Default.args = {
-	label: __( 'Attributes', 'woocommerce' ),
-	items,
-	help: __( 'Select or create attributes for this product.', 'woocommerce' ),
-
 	onChange: ( newValue: ProductAttribute ) => {
 		console.log( '(onChange) newValue:', newValue ); // eslint-disable-line no-console
 	},
 };
+
+export const MultipleInstances = (
+	args: AttributesComboboxControlComponent
+) => {
+	return (
+		<>
+			<AttributesComboboxControl
+				{ ...args }
+				label={ __( 'Attributes 1', 'woocommerce' ) }
+				items={ items }
+				instanceNumber={ 1 }
+			/>
+
+			<AttributesComboboxControl
+				{ ...args }
+				label={ __( 'Attributes 2', 'woocommerce' ) }
+				items={ items }
+				instanceNumber={ 2 }
+			/>
+		</>
+	);
+};
+
+MultipleInstances.args = Default.args;
