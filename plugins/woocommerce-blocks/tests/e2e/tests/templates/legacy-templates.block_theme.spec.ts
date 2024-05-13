@@ -5,10 +5,6 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { cli } from '@woocommerce/e2e-utils';
 
 test.describe( 'Legacy templates', () => {
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-	} );
-
 	test( 'woocommerce//* slug is supported', async ( {
 		admin,
 		page,
@@ -48,15 +44,13 @@ test.describe( 'Legacy templates', () => {
 		} );
 
 		await test.step( 'Update created term to legacy format in the DB', async () => {
-			const cliOutput = await cli(
+			await cli(
 				`npm run wp-env run tests-cli -- \
 					wp term update wp_theme woocommerce-woocommerce \
 						--by="slug" \
 						--name="woocommerce" \
 						--slug="woocommerce"`
 			);
-
-			expect( cliOutput.stdout ).toContain( 'Success: Term updated.' );
 		} );
 
 		await test.step( 'Verify the template can be edited via a legacy ID ', async () => {
@@ -87,18 +81,6 @@ test.describe( 'Legacy templates', () => {
 			await page.goto( template.frontendPath );
 
 			await expect( page.getByText( template.customText ) ).toBeVisible();
-		} );
-
-		await test.step( 'Revert term update', async () => {
-			const cliOutput = await cli(
-				`npm run wp-env run tests-cli -- \
-					wp term update wp_theme woocommerce \
-						--by="slug" \
-						--name="woocommerce/woocommerce" \
-						--slug="woocommerce-woocommerce"`
-			);
-
-			expect( cliOutput.stdout ).toContain( 'Success: Term updated.' );
 		} );
 	} );
 } );

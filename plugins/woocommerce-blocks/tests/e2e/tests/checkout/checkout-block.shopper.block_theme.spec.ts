@@ -64,16 +64,17 @@ test.describe( 'Shopper → Account (guest user)', () => {
 		requestUtils,
 		checkoutPageObject,
 		page,
+		baseURL,
 	} ) => {
 		//Get the login link from checkout page.
-		const loginLink = page.getByText( 'Log in.' );
-		const loginLinkHref = await loginLink.getAttribute( 'href' );
+		const loginLink = page.getByRole( 'link', { name: 'Log in.' } );
 
-		//Confirm login link is correct.
-		expect( loginLinkHref ).toContain(
-			`${ process.env.WORDPRESS_BASE_URL }/my-account/?redirect_to`
+		await expect( loginLink ).toHaveAttribute(
+			'href',
+			baseURL +
+				'/my-account/?redirect_to=' +
+				encodeURIComponent( baseURL + '/checkout/' )
 		);
-		expect( loginLinkHref ).toContain( `checkout` );
 
 		await requestUtils.rest( {
 			method: 'PUT',
@@ -85,7 +86,8 @@ test.describe( 'Shopper → Account (guest user)', () => {
 
 		const createAccount = page.getByLabel( 'Create an account?' );
 		await createAccount.check();
-		const testEmail = `test${ Math.random() * 10 }@example.com`;
+
+		const testEmail = `test-${ Date.now() }@example.com`;
 		await checkoutPageObject.fillInCheckoutWithTestData( {
 			email: testEmail,
 		} );
