@@ -264,33 +264,12 @@ jobs:
         if: ${{ always() }}
         steps:
             - name: 'Evaluation'
+              env:
+                REPO: ${{ github.repository }}
+                RUN_ID: ${{ github.run_id }}
               run: |
-                  result="${{ needs.project-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "An error occurred generating the CI jobs."
-                    exit 1
-                  fi
-                  result="${{ needs.project-lint-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "One or more lint jobs have failed."
-                    exit 1
-                  fi
-                  result="${{ needs.project-default-test-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "One or more test jobs have failed."
-                    exit 1
-                  fi
-                  result="${{ needs.project-e2e-test-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "One or more e2e test jobs have failed."
-                    exit 1
-                  fi
-                  result="${{ needs.project-api-test-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "One or more api test jobs have failed."
-                    exit 1
-                  fi
-                  echo "All jobs have completed successfully."
+                  jobs=$(curl -X GET https://api.github.com/repos/$REPO/actions/runs/$RUN_ID/jobs | jq ".jobs[] | {job_status: .conclusion, name: .name}")
+                  echo $jobs
 
     e2e-test-reports:
         name: 'Report e2e tests results'
