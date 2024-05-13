@@ -325,10 +325,6 @@ describe( 'crud reducer', () => {
 				status: 'draft',
 			};
 
-			const options = {
-				optimisticQueryUpdate: {},
-			};
-
 			const resourceName = getRequestIdentifier(
 				CRUD_ACTIONS.CREATE_ITEM,
 				item.id,
@@ -340,12 +336,18 @@ describe( 'crud reducer', () => {
 				key: item.id,
 				item,
 				query,
-				options,
+				options: {},
 			} );
 
 			expect( state.data[ 2 ].name ).toEqual( item.name );
 			expect( state.data[ 2 ].status ).toEqual( item.status );
 			expect( state.requesting[ resourceName ] ).toEqual( false );
+
+			// Test the items object is an empty object
+			expect( state.items ).toEqual( {} );
+
+			// Test the itemsCount object is an empty object
+			expect( state.itemsCount ).toEqual( {} );
 		} );
 
 		it( 'when optimisticQueryUpdate is {}', () => {
@@ -371,16 +373,6 @@ describe( 'crud reducer', () => {
 				options,
 			} );
 
-			const itemQuery = getRequestIdentifier(
-				CRUD_ACTIONS.GET_ITEMS,
-				options.optimisticQueryUpdate
-			);
-
-			const itemsCountQuery = getRequestIdentifier(
-				CRUD_ACTIONS.GET_ITEMS,
-				options.optimisticQueryUpdate
-			);
-
 			expect( state.data[ 7 ].name ).toEqual( item.name );
 			expect( state.data[ 7 ].status ).toEqual( item.status );
 
@@ -392,10 +384,19 @@ describe( 'crud reducer', () => {
 			expect( state.requesting[ resourceName ] ).toEqual( false );
 
 			// Items
+			const itemQuery = getRequestIdentifier(
+				CRUD_ACTIONS.GET_ITEMS,
+				options.optimisticQueryUpdate
+			);
+
 			expect( state.items[ itemQuery ].data ).toHaveLength( 1 );
 			expect( state.items[ itemQuery ].data[ 0 ] ).toEqual( item.id );
 
 			// Items Count
+			const itemsCountQuery = getRequestIdentifier(
+				CRUD_ACTIONS.GET_ITEMS,
+				options.optimisticQueryUpdate
+			);
 			expect( state.itemsCount[ itemsCountQuery ] ).toEqual( 1 );
 		} );
 	} );
