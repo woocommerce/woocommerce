@@ -104,7 +104,7 @@ class PageController {
 		if ( ! $this->settings->logging_is_enabled() ) {
 			add_action(
 				'admin_notices',
-				function() {
+				function () {
 					?>
 					<div class="notice notice-warning">
 						<p>
@@ -395,7 +395,7 @@ class PageController {
 				if ( is_string( $line ) ) {
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- format_line does the escaping.
 					echo $this->format_line( $line, $line_number );
-					$line_number ++;
+					++$line_number;
 				}
 				?>
 			<?php endwhile; ?>
@@ -464,7 +464,7 @@ class PageController {
 			array(
 				'file_id' => array(
 					'filter'  => FILTER_CALLBACK,
-					'options' => function( $file_id ) {
+					'options' => function ( $file_id ) {
 						return sanitize_file_name( wp_unslash( $file_id ) );
 					},
 				),
@@ -484,13 +484,13 @@ class PageController {
 				),
 				'search'  => array(
 					'filter'  => FILTER_CALLBACK,
-					'options' => function( $search ) {
+					'options' => function ( $search ) {
 						return esc_html( wp_unslash( $search ) );
 					},
 				),
 				'source'  => array(
 					'filter'  => FILTER_CALLBACK,
-					'options' => function( $source ) {
+					'options' => function ( $source ) {
 						return File::sanitize_source( wp_unslash( $source ) );
 					},
 				),
@@ -654,7 +654,7 @@ class PageController {
 		if ( is_numeric( $deleted ) ) {
 			add_action(
 				'admin_notices',
-				function() use ( $deleted ) {
+				function () use ( $deleted ) {
 					?>
 					<div class="notice notice-info is-dismissible">
 						<p>
