@@ -259,6 +259,7 @@ jobs:
                 'project-default-test-jobs',
                 'project-e2e-test-jobs',
                 'project-api-test-jobs',
+                'project-performance-test-jobs'
             ]
         if: ${{ always() }}
         steps:
