@@ -39,7 +39,7 @@
 
 <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 <div class="wp-block-group"><!-- wp:heading {"textAlign":"center","level":1,"align":"wide","className":"woocommerce-coming-soon-banner"} -->
-<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner">Pardon our dust! We're working on something amazing -- check back soon!</h1>
+<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner">Pardon our dust! We're working on something amazing — check back soon!</h1>
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 
