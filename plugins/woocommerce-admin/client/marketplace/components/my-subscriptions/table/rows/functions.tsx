@@ -226,7 +226,13 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 								subscription.owner_email
 							),
 							{
-								email: <strong style={ { overflowWrap: 'anywhere' } }>email</strong>,
+								email: (
+									<strong
+										style={ { overflowWrap: 'anywhere' } }
+									>
+										email
+									</strong>
+								),
 								link: (
 									<a
 										href={ MARKETPLACE_SHARING_PATH }

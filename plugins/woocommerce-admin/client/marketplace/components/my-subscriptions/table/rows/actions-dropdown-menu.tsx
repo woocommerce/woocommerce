@@ -25,18 +25,16 @@ export default function ActionsDropdownMenu( props: {
 	];
 
 	if ( ! props.subscription.is_shared ) {
-		controls.unshift(
-			{
-				title: __( 'Manage on WooCommerce.com', 'woocommerce' ),
-				icon: <></>,
-				onClick: () => {
-					window.open(
-						'https://woocommerce.com/my-account/my-subscriptions',
-						'_blank'
-					);
-				},
+		controls.unshift( {
+			title: __( 'Manage on WooCommerce.com', 'woocommerce' ),
+			icon: <></>,
+			onClick: () => {
+				window.open(
+					'https://woocommerce.com/my-account/my-subscriptions',
+					'_blank'
+				);
 			},
-		);
+		} );
 	}
 
 	if ( props.subscription.documentation_url ) {
