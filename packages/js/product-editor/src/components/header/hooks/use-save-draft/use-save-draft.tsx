@@ -95,6 +95,11 @@ export function useSaveDraft( {
 						'product_switch_draft',
 						publishedProduct
 					);
+				} else if ( productStatus === 'draft' ) {
+					recordProductEvent(
+						'product_save_draft',
+						publishedProduct
+					);
 				}
 				onSaveSuccess( publishedProduct );
 			}
