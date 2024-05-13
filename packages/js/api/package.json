@@ -49,7 +49,7 @@
 		]
 	},
 	"dependencies": {
-		"axios": "^0.24.0",
+		"axios": "^0.28.0",
 		"create-hmac": "1.1.7",
 		"oauth-1.0a": "2.2.6"
 	},
