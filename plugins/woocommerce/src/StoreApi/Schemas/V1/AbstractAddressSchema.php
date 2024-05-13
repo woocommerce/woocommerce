@@ -129,10 +129,10 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 						$carry[ $key ] = wc_strtoupper( sanitize_text_field( wp_unslash( $address[ $key ] ) ) );
 						break;
 					case 'state':
-						$carry[ $key ] = $validation_util->validate_state( $address['state'], $address['country'] ) ? $validation_util->format_state( sanitize_text_field( wp_unslash( $address[ $key ] ) ), $address['country'] ) : '';
+						$carry[ $key ] = $validation_util->format_state( sanitize_text_field( wp_unslash( $address[ $key ] ) ), $address['country'] );
 						break;
 					case 'postcode':
-						$carry[ $key ] = \WC_Validation::is_postcode( $address['postcode'], $address['country'] ) ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
+						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
 						break;
 					default:
 						$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $field_schema[ $key ], $key );
