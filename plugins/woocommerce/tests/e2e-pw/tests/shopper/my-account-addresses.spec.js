@@ -108,6 +108,7 @@ test.describe( 'Customer can manage addresses in My Account > Addresses page', (
 		await page.locator( '#shipping_country' ).selectOption( 'US' );
 		await page.locator( '#shipping_state' ).selectOption( 'NY' );
 		await page.locator( '#shipping_postcode' ).fill( '10010' );
+		await page.locator( '#shipping_phone' ).fill( '555 555-5555' );
 		await page.locator( 'text=Save address' ).click();
 
 		// verify shipping address has been applied
