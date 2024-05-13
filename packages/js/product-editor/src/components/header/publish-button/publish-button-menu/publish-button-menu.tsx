@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
 import type { ProductStatus } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -21,6 +22,7 @@ import { ButtonWithDropdownMenu } from '../../../button-with-dropdown-menu';
 import { SchedulePublishModal } from '../../../schedule-publish-modal';
 import { showSuccessNotice } from '../utils';
 import type { PublishButtonMenuProps } from './types';
+import { TRACKS_SOURCE } from '../../../../constants';
 
 export function PublishButtonMenu( {
 	postType,
@@ -97,6 +99,9 @@ export function PublishButtonMenu( {
 					) : (
 						<MenuItem
 							onClick={ () => {
+								recordEvent( 'product_schedule_publish', {
+									source: TRACKS_SOURCE,
+								} );
 								setShowScheduleModal( 'schedule' );
 								onClose();
 							} }
@@ -178,7 +183,17 @@ export function PublishButtonMenu( {
 
 	return (
 		<>
-			<ButtonWithDropdownMenu { ...props } renderMenu={ renderMenu } />
+			<ButtonWithDropdownMenu
+				{ ...props }
+				onToggle={ ( isOpen: boolean ) => {
+					if ( isOpen ) {
+						recordEvent( 'product_publish_dropdown_open', {
+							source: TRACKS_SOURCE,
+						} );
+					}
+				} }
+				renderMenu={ renderMenu }
+			/>
 
 			{ renderSchedulePublishModal() }
 		</>
