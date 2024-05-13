@@ -173,6 +173,7 @@ class Loader {
 		 * This class needs to be removed by those feature components (like <ProfileWizard />).
 		 *
 		 * @param bool $is_loading If WooCommerce Admin is loading a fullscreen view.
+		 * @since 6.5.0
 		 */
 		$is_loading = apply_filters( 'woocommerce_admin_is_loading', false );
 
@@ -328,7 +329,9 @@ class Loader {
 			);
 		}
 
-		$preload_data_endpoints                  = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
+		/* phpcs:ignore */
+		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
+
 		$preload_data_endpoints['jetpackStatus'] = '/jetpack/v4/connection';
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$preload_data = array_reduce(
@@ -337,6 +340,7 @@ class Loader {
 			);
 		}
 
+		/* phpcs:ignore */
 		$preload_options = apply_filters( 'woocommerce_admin_preload_options', array() );
 		if ( ! empty( $preload_options ) ) {
 			foreach ( $preload_options as $option ) {
@@ -344,6 +348,7 @@ class Loader {
 			}
 		}
 
+		/* phpcs:ignore */
 		$preload_settings = apply_filters( 'woocommerce_admin_preload_settings', array() );
 		if ( ! empty( $preload_settings ) ) {
 			$setting_options = new \WC_REST_Setting_Options_V2_Controller();
@@ -391,6 +396,7 @@ class Loader {
 		// E.g An extension that added statuses is now inactive or removed.
 		$settings['unregisteredOrderStatuses'] = self::get_unregistered_order_statuses();
 		// The separator used for attributes found in Variation titles.
+		/* phpcs:ignore */
 		$settings['variationTitleAttributesSeparator'] = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
 
 		if ( ! empty( $preload_data_endpoints ) ) {
@@ -536,6 +542,7 @@ class Loader {
 	public static function get_currency_settings() {
 		$code = get_woocommerce_currency();
 
+		/* phpcs:ignore */
 		return apply_filters(
 			'wc_currency_settings',
 			array(
