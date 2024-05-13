@@ -89,18 +89,19 @@ export function useSaveDraft( {
 				}
 			);
 
+			const statusToEventMap: {
+				[ key in Product[ 'status' ] ]?: string;
+			} = {
+				publish: 'product_switch_draft',
+				draft: 'product_save_draft',
+			};
+
+			const eventKey = statusToEventMap[ productStatus ];
+			if ( eventKey ) {
+				recordProductEvent( eventKey, publishedProduct );
+			}
+
 			if ( onSaveSuccess ) {
-				if ( productStatus === 'publish' ) {
-					recordProductEvent(
-						'product_switch_draft',
-						publishedProduct
-					);
-				} else if ( productStatus === 'draft' ) {
-					recordProductEvent(
-						'product_save_draft',
-						publishedProduct
-					);
-				}
 				onSaveSuccess( publishedProduct );
 			}
 		} catch ( error ) {
