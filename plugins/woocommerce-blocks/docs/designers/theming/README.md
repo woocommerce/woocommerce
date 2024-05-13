@@ -16,7 +16,7 @@ WooCommerce blocks rely on [global styles](https://developer.wordpress.org/theme
 
 #### Example
 
-For example, let's imagine you are building a theme and would like to customize the Product Price block styles, you can do so adding these properties in your `theme.json`:
+For example, let's imagine you are building a theme and would like to customize the Product Price block styles, you can do so by adding these properties in your `theme.json`:
 
 ```JSON
 "styles": {
