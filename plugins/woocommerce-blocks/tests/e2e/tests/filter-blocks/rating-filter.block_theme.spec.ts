@@ -1,36 +1,39 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import path from 'path';
 
-/**
- * Internal dependencies
- */
-import { ExtendedTemplate } from '../../types/e2e-test-utils-playwright';
-
+const PRODUCT_CATALOG_LINK = '/shop';
+const PRODUCT_CATALOG_TEMPLATE_ID = 'woocommerce/woocommerce//archive-product';
 const TEMPLATE_PATH = path.join( __dirname, './rating-filter.handlebars' );
-
-const test = base.extend< {
-	defaultBlockTemplate: ExtendedTemplate;
-} >( {
-	defaultBlockTemplate: async ( { requestUtils, templateApiUtils }, use ) => {
-		const testingTemplate = await requestUtils.updateProductCatalogTemplate(
-			TEMPLATE_PATH,
-			{}
-		);
-		await use( testingTemplate );
-		await templateApiUtils.revertTemplate( testingTemplate.id );
-	},
-} );
 
 test.describe( 'Product Filter: Rating Filter Block', () => {
 	test.describe( 'frontend', () => {
+		let testingTemplateId = '';
+
+		test.beforeAll( async ( { requestUtils } ) => {
+			const testingTemplate = await requestUtils.updateTemplateContents(
+				PRODUCT_CATALOG_TEMPLATE_ID,
+				TEMPLATE_PATH,
+				{
+					attributes: {
+						attributeId: 1,
+					},
+				}
+			);
+
+			testingTemplateId = testingTemplate.id;
+		} );
+
+		test.afterAll( async ( { templateApiUtils } ) => {
+			await templateApiUtils.revertTemplate( testingTemplateId );
+		} );
+
 		test( 'Renders a checkbox list with the available ratings', async ( {
 			page,
-			defaultBlockTemplate,
 		} ) => {
-			await page.goto( defaultBlockTemplate.link );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const ratingStars = page.getByLabel( /^Rated \d out of 5/ );
 			await expect( ratingStars ).toHaveCount( 2 );
@@ -48,9 +51,8 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 
 		test( 'Selecting a checkbox filters down the products', async ( {
 			page,
-			defaultBlockTemplate,
 		} ) => {
-			await page.goto( defaultBlockTemplate.link );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const ratingCheckboxes = page.getByLabel(
 				/Checkbox: Rated \d out of 5/
