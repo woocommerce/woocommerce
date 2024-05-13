@@ -721,7 +721,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore Generic.Commenting.Todo.TaskFound
-				// TODO: use the %i placeholder to prepare the table name when available in the the minimum required WordPress version.
+				// TODO: use the %i placeholder to prepare the table name when available in the minimum required WordPress version.
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"UPDATE {$orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
 				$order_id,

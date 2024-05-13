@@ -116,7 +116,7 @@ class Package {
 	}
 
 	/**
-	 * Returns an instance of the the FeatureGating class.
+	 * Returns an instance of the FeatureGating class.
 	 *
 	 * @return FeatureGating
 	 */

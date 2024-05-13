@@ -43,7 +43,6 @@ import {
 /**
  * Internal dependencies
  */
-import useProductEntityProp from '../../hooks/use-product-entity-prop';
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
 import { useProductTemplate } from '../../hooks/use-product-template';
 import { PostTypeContext } from '../../contexts/post-type-context';
@@ -171,16 +170,18 @@ export function BlockEditor( {
 		};
 	}, [ settingsGlobal, canUserCreateMedia ] );
 
-	const [ productTemplateId ] = useProductEntityProp< string >(
-		'meta_data._product_template_id',
-		{ postType }
-	);
-
 	const { editedRecord: product } = useEntityRecord< Product >(
 		'postType',
 		postType,
-		productId
+		productId,
+		// Only perform the query when the productId is valid.
+		{ enabled: productId !== -1 }
 	);
+
+	const productTemplateId = product?.meta_data?.find(
+		( metaEntry: { key: string } ) =>
+			metaEntry.key === '_product_template_id'
+	)?.value;
 
 	const { productTemplate } = useProductTemplate(
 		productTemplateId,
@@ -194,7 +195,8 @@ export function BlockEditor( {
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
 		postType,
-		{ id: productId }
+		// useEntityBlockEditor will not try to fetch the product if productId is falsy.
+		{ id: productId !== -1 ? productId : 0 }
 	);
 
 	const { updateEditorSettings } = useDispatch( 'core/editor' );

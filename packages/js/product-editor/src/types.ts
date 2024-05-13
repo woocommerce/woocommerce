@@ -24,6 +24,7 @@ export interface ProductEditorContext {
 	postId: number;
 	postType: string;
 	selectedTab: string | null;
+	isInSelectedTab?: boolean;
 	validationErrors: ErrorDictionary;
 }
 

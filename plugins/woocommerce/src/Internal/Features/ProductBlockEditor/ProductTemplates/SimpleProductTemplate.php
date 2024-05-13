@@ -439,6 +439,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'createTitle'        => __( 'Create new category', 'woocommerce' ),
 					'dialogNameHelpText' => __( 'Shown to customers on the product page.', 'woocommerce' ),
 					'parentTaxonomyText' => __( 'Parent category', 'woocommerce' ),
+					'placeholder'        => __( 'Search or create categories…', 'woocommerce' ),
 				),
 			)
 		);
