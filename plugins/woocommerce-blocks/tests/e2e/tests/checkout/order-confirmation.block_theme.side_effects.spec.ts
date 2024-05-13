@@ -124,7 +124,9 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 					'li.woocommerce-MyAccount-navigation-link--customer-logout a'
 				)
 				.click();
-			await expect( page ).toHaveURL( '/my-account' );
+			await expect(
+				page.getByRole( 'button', { name: 'Log in' } )
+			).toBeVisible();
 			await page.goto( orderReceivedURL );
 			await pageObject.verifyOrderConfirmationDetails( page );
 		} );
