@@ -874,7 +874,7 @@ class DefaultFreeExtensions {
 				'label'            => __( 'Reach your customers with MailPoet', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-mailpoet.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Send purchase follow-up emails, newsletters, and promotional campaigns.', 'woocommerce' ),
-				'learn_more_link'  => 'https://woocommerce.com/products/mailpoet',
+				'learn_more_link'  => 'https://woocommerce.com/products/mailpoet?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 7,
 			),
 			'tiktok-for-business'           => array(
