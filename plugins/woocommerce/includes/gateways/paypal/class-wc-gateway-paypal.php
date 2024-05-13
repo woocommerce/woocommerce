@@ -527,27 +527,32 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$should_load = $this->get_option( $option_key );
 
 		if ( '' === $should_load ) {
-
-			// New installs without PayPal Standard enabled don't load it.
-			if ( 'no' === $this->enabled && WC_Install::is_new_install() ) {
-				$should_load = false;
-			} else {
-				$should_load = true;
-			}
+			// Set default `_should_load` to 'yes' on existing stores with PayPal Standard enabled or with existing PayPal Standard orders.
+			$should_load = 'yes' === $this->enabled || $this->has_paypal_orders();
 
 			$this->update_option( $option_key, wc_bool_to_string( $should_load ) );
 		} else {
-			$should_load = wc_string_to_bool( $should_load );
+			// Enabled always takes precedence over the option.
+			$should_load = wc_string_to_bool( $this->enabled ) || wc_string_to_bool( $should_load );
 		}
 
-		/**
-		 * Allow third-parties to filter whether PayPal Standard should be loaded or not.
-		 *
-		 * @since 5.5.0
-		 *
-		 * @param bool              $should_load Whether PayPal Standard should be loaded.
-		 * @param WC_Gateway_Paypal $this        The WC_Gateway_Paypal instance.
-		 */
-		return apply_filters( 'woocommerce_should_load_paypal_standard', $should_load, $this );
+		return $should_load;
+	}
+
+	/**
+	 * Checks if the store has at least one PayPal Standand order.
+	 *
+	 * @return bool
+	 */
+	public function has_paypal_orders() {
+		$paypal_orders = wc_get_orders(
+			array(
+				'limit'          => 1,
+				'return'         => 'ids',
+				'payment_method' => 'paypal',
+			)
+		);
+
+		return is_countable( $paypal_orders ) ? 1 === count( $paypal_orders ) : false;
 	}
 }
