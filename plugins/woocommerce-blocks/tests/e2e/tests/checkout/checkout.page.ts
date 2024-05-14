@@ -342,7 +342,7 @@ export class CheckoutPage {
 
 		if ( customerBillingDetails.addresssecondline ) {
 			if ( await address2Link.isVisible() ) {
-				address2Link.click();
+				await address2Link.click();
 			}
 
 			await address2.fill( customerBillingDetails.addresssecondline );
@@ -412,7 +412,7 @@ export class CheckoutPage {
 
 		if ( customerShippingDetails.addresssecondline ) {
 			if ( await address2Link.isVisible() ) {
-				address2Link.click();
+				await address2Link.click();
 			}
 
 			await address2.fill( customerShippingDetails.addresssecondline );

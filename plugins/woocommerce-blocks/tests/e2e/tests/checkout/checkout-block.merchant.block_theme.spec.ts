@@ -559,7 +559,7 @@ test.describe( 'Merchant → Checkout', () => {
 				);
 
 				// Make the apartment field optional.
-				billingApartmentOptionalToggle.check();
+				await billingApartmentOptionalToggle.check();
 
 				// Verify that the apartment link is visible.
 				await expect( billingApartmentLink ).toBeVisible();
@@ -673,7 +673,7 @@ test.describe( 'Merchant → Checkout', () => {
 				);
 
 				// Make the phone field optional.
-				billingPhoneOptionalToggle.check();
+				await billingPhoneOptionalToggle.check();
 
 				// Verify that the phone field is optional.
 				await expect( billingPhoneOptionalToggle ).toBeChecked();
