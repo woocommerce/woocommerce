@@ -215,7 +215,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 	} );
 
 	test( 'should show all products', async ( { page } ) => {
-		await page.goto( `PRODUCT_CATALOG_LINK` );
+		await page.goto( PRODUCT_CATALOG_LINK );
 		const products = page
 			.locator( '.wp-block-woocommerce-product-template' )
 			.getByRole( 'listitem' );
@@ -226,7 +226,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 	test( 'should show only products that match the filter', async ( {
 		page,
 	} ) => {
-		await page.goto( `PRODUCT_CATALOG_LINK` );
+		await page.goto( PRODUCT_CATALOG_LINK );
 		await page.getByRole( 'checkbox', { name: 'Small' } ).click();
 
 		await expect( page ).toHaveURL(
@@ -263,7 +263,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await page.getByText( "Show 'Apply filters' button" ).click();
 
 		await editor.saveSiteEditorEntities();
-		await page.goto( `PRODUCT_CATALOG_LINK` );
+		await page.goto( PRODUCT_CATALOG_LINK );
 
 		await page.getByRole( 'checkbox', { name: 'Small' } ).click();
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
