@@ -49,7 +49,12 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		await editorUtils.transformIntoBlocks();
 	} );
 
-	test( 'Place order', async ( { frontendUtils, pageObject, page } ) => {
+	test( 'Place order', async ( {
+		frontendUtils,
+		pageObject,
+		page,
+		requestUtils,
+	} ) => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
@@ -74,7 +79,7 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		// Open order we created
 		const orderId = pageObject.getOrderId();
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
-		// Update order status to Processing
+		// Update order status to 'Processing'
 		await page.locator( '#order_status' ).selectOption( 'wc-processing' );
 		await page.locator( 'button.save_order' ).click();
 		// Go back to order received page
@@ -109,9 +114,22 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		// Confirm order details are not visible
 		await pageObject.verifyOrderConfirmationDetails( page, false );
 
-		// The following tests are skipped until the multiple sign in roles is implemented
-		// - Confirm details are hidden when logged out
-		// - Confirm data is hidden without valid session/key
+		await test.step( 'Logout the user and revisit the order received page to verify that details are displayed when woocommerce_order_received_verify_known_shoppers is disabled', async () => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-order-confirmation-filters'
+			);
+			await page.goto( '/my-account' );
+			await page
+				.locator(
+					'li.woocommerce-MyAccount-navigation-link--customer-logout a'
+				)
+				.click();
+			await expect(
+				page.getByRole( 'button', { name: 'Log in' } )
+			).toBeVisible();
+			await page.goto( orderReceivedURL );
+			await pageObject.verifyOrderConfirmationDetails( page );
+		} );
 	} );
 } );
 
