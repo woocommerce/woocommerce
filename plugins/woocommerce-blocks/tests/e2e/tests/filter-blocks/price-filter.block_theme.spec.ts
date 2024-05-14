@@ -19,11 +19,7 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 			const testingTemplate = await requestUtils.updateTemplateContents(
 				PRODUCT_CATALOG_TEMPLATE_ID,
 				TEMPLATE_PATH,
-				{
-					attributes: {
-						attributeId: 1,
-					},
-				}
+				{}
 			);
 
 			testingTemplateId = testingTemplate.id;
@@ -31,6 +27,16 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 		test.afterAll( async ( { templateApiUtils } ) => {
 			await templateApiUtils.revertTemplate( testingTemplateId );
+		} );
+
+		test( 'clear button is not shown on initial page load', async ( {
+			page,
+		} ) => {
+			await page.goto( PRODUCT_CATALOG_LINK );
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await expect( button ).toBeHidden();
 		} );
 
 		test( 'With price filters applied it shows the correct price', async ( {
@@ -68,16 +74,6 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 			const maxPriceThumb = priceSlider.locator( 'input[name="max"]' );
 
 			await expect( maxPriceThumb ).toHaveValue( '67' );
-		} );
-
-		test( 'clear button is not shown on initial page load', async ( {
-			page,
-		} ) => {
-			await page.goto( PRODUCT_CATALOG_LINK );
-
-			const button = page.getByRole( 'button', { name: 'Clear' } );
-
-			await expect( button ).toBeHidden();
 		} );
 
 		test( 'clear button appears after a filter is applied', async ( {
