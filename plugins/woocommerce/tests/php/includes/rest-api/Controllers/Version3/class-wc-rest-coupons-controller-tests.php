@@ -128,4 +128,19 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $coupon->get_id(), $response->data['id'] );
 		$this->assertEquals( $coupon->get_status(), $response->data['status'] );
 	}
+
+	/**
+	 * @testDox Coupon is deleted as expected.
+	 */
+	public function test_delete_coupon() {
+		wp_set_current_user( $this->user );
+		$coupon = WC_Helper_Coupon::create_coupon();
+		$coupon->save();
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v3/coupons/' . $coupon->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'trash', get_post_status( $coupon->get_id() ) );
+	}
 }
