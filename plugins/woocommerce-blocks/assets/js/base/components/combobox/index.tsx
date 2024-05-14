@@ -25,7 +25,6 @@ import {
 import { ValidationInputError } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
-import deprecated from '@wordpress/deprecated';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 /**
@@ -203,12 +202,18 @@ const Combobox = ( {
 
 							// If the input is not focussed, it's autofill, attempt the best match.
 							if ( ! inputFocussed ) {
+								const valueMatch = options.find(
+									( opt ) => opt.value === val
+								);
+
 								const bestMatch = findBestMatchByLabel(
 									val,
 									options
 								);
 
-								if ( bestMatch ) {
+								if ( valueMatch ) {
+									store.setSelectedValue( valueMatch.value );
+								} else if ( bestMatch ) {
 									store.setSelectedValue( bestMatch.value );
 								}
 							} else if ( val?.length ) {
@@ -230,7 +235,7 @@ const Combobox = ( {
 							}
 						} );
 					} }
-					setSelectedValue={ ( val ) => {
+					setSelectedValue={ ( val: string ) => {
 						const option = options.find(
 							( opt ) => opt.value === val
 						);
