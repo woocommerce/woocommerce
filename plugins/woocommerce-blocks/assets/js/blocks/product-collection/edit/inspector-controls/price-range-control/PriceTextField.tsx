@@ -45,7 +45,7 @@ const formatNumber = ( val: number, currency: Currency ): string => {
 	return `${ whole }${ decimalSeparator }${ decimal }`;
 };
 
-const formatValueAsCurrency = (
+const formatNumberAsCurrency = (
 	val: number | undefined,
 	currency: Currency
 ) => {
@@ -70,57 +70,68 @@ const formatValueAsCurrency = (
 	return formattedNumber;
 };
 
+const convertCurrencyStringToNumber = (
+	currencyString: string,
+	currency: Currency
+): number | undefined => {
+	/**
+	 * 1. Remove all characters that are not numbers or the decimal separator.
+	 * 2. Replace the decimal separator with a period.
+	 * 3. Parse the string as a float.
+	 */
+	const parsedNumericValue = Number(
+		currencyString
+			.replace(
+				new RegExp(
+					`[^0-9\\${ currency.decimalSeparator || '' }]`,
+					'g'
+				),
+				''
+			)
+			.replace(
+				new RegExp( `\\${ currency.decimalSeparator }`, 'g' ),
+				'.'
+			)
+	);
+	if ( isNaN( parsedNumericValue ) ) {
+		return undefined;
+	}
+
+	/**
+	 * If the value is negative, return 0.
+	 */
+	if ( parsedNumericValue < 0 ) {
+		return 0;
+	}
+
+	return parsedNumericValue;
+};
+
 const PriceTextField: React.FC< PriceTextFieldProps > = ( {
 	value,
 	onChange,
 	label,
 } ) => {
-	const [ newValue, setNewValue ] = useState< number | undefined >( value );
+	const [ inputValue, setInputValue ] = useState< string >(
+		`${ value || '' }`
+	);
+
 	const currency = getCurrency();
-
-	const convertCurrencyStringToNumber = (
-		val: string
-	): number | undefined => {
-		/**
-		 * 1. Remove all characters that are not numbers or the decimal separator.
-		 * 2. Replace the decimal separator with a period.
-		 * 3. Parse the string as a float.
-		 */
-		const parsedNumericValue = Number(
-			val
-				.replace(
-					new RegExp(
-						`[^0-9\\${ currency.decimalSeparator || '' }]`,
-						'g'
-					),
-					''
-				)
-				.replace(
-					new RegExp( `\\${ currency.decimalSeparator }`, 'g' ),
-					'.'
-				)
-		);
-		if ( isNaN( parsedNumericValue ) ) {
-			return undefined;
-		}
-
-		/**
-		 * If the value is negative, return 0.
-		 */
-		if ( parsedNumericValue < 0 ) {
-			return 0;
-		}
-
-		return parsedNumericValue;
-	};
+	const parsedNumericValue = convertCurrencyStringToNumber(
+		inputValue,
+		currency
+	);
+	const formattedValue = formatNumberAsCurrency(
+		parsedNumericValue,
+		currency
+	);
 
 	const handleOnChange = ( val: string ) => {
-		const numberValue = convertCurrencyStringToNumber( val );
-		setNewValue( numberValue );
+		setInputValue( val );
 	};
 
 	const handleOnBlur = () => {
-		onChange( newValue );
+		onChange( parsedNumericValue );
 	};
 
 	/**
@@ -130,13 +141,13 @@ const PriceTextField: React.FC< PriceTextFieldProps > = ( {
 		event: React.KeyboardEvent< HTMLInputElement >
 	) => {
 		if ( event.key === 'Enter' ) {
-			onChange( newValue );
+			onChange( parsedNumericValue );
 		}
 	};
 
 	return (
 		<InputControl
-			value={ formatValueAsCurrency( newValue, currency ) }
+			value={ formattedValue }
 			onChange={ handleOnChange }
 			onBlur={ handleOnBlur }
 			onKeyDown={ handleEnterKeyPress }
