@@ -263,6 +263,9 @@ jobs:
             ]
         if: ${{ always() }}
         steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+              
             - name: 'Evaluation'
               env:
                 REPO: ${{ github.repository }}
