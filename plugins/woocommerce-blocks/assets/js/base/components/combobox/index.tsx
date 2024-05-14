@@ -157,7 +157,6 @@ const Combobox = ( {
 
 	const ariaInvalid = error?.message && ! error?.hidden ? 'true' : 'false';
 	const activeValue = store.useState( 'activeValue' );
-	const [ inputFocussed, setInputFocussed ] = useState( false );
 
 	const onClose = useCallback( () => {
 		// If the search term doesn't match the selected option, try do an exact value match.
@@ -170,8 +169,12 @@ const Combobox = ( {
 				options
 			);
 
-			if ( exactValueMatch ) {
-				store.setSelectedValue( exactValueMatch.value );
+			const bestMatch = findBestMatchByLabel( searchTerm, options );
+
+			const match = exactValueMatch || bestMatch;
+
+			if ( match ) {
+				store.setSelectedValue( match.value );
 			} else {
 				setSearchTerm( selectedOption?.label || '' );
 			}
@@ -207,33 +210,27 @@ const Combobox = ( {
 									options
 								);
 
-								const valueMatch = options.find(
-									( opt ) =>
-										opt.value.toLocaleLowerCase() ===
-										val.toLocaleLowerCase()
-								);
-
-								const bestMatch = findBestMatchByLabel(
-									val,
-									options
+								const exactValueMatch = options.find(
+									( option ) => option.value === val
 								);
 
 								const match =
-									exactLabelMatch || valueMatch || bestMatch;
+									exactLabelMatch || exactValueMatch;
 
-								if ( match ) {
-									if (
-										match.value !== selectedOption?.value
-									) {
-										store.setSelectedValue( match.value );
-									} else {
-										setSearchTerm( selectedOption?.label );
-									}
+								if (
+									match &&
+									match.value !== selectedOption?.value
+								) {
+									store.setSelectedValue( match.value );
+								} else {
+									setSearchTerm(
+										selectedOption?.label || ''
+									);
 								}
 							}
 						} );
 					} }
-					setSelectedValue={ ( val: string ) => {
+					setSelectedValue={ ( val ) => {
 						const option = options.find(
 							( opt ) => opt.value === val
 						);
@@ -260,7 +257,6 @@ const Combobox = ( {
 								type="text"
 								onFocus={ () => {
 									setSearchTerm( '' );
-									setInputFocussed( true );
 								} }
 								render={
 									<input
@@ -268,9 +264,6 @@ const Combobox = ( {
 										type="text"
 									/>
 								}
-								onBlur={ () => {
-									setInputFocussed( false );
-								} }
 								{ ...restOfProps }
 							/>
 
