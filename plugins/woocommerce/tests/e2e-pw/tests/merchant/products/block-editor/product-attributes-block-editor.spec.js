@@ -210,7 +210,13 @@ test.skip( 'can add existing attributes', async ( {
 } ) => {
 	await test.step( 'go to product editor, Organization tab', async () => {
 		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+		const getAttributesResponsePromise = page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/terms?attribute_id=' ) &&
+				response.status() === 200
+		);
 		await page.getByRole( 'button', { name: 'Organization' } ).click();
+		await getAttributesResponsePromise;
 	} );
 
 	await test.step( 'add an existing attribute', async () => {
@@ -382,8 +388,13 @@ test( 'can remove product attributes', async ( {
 		await page.goto(
 			`wp-admin/post.php?post=${ productWithAttributes.id }&action=edit`
 		);
+		const getAttributesResponsePromise = page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/terms?attribute_id=' ) &&
+				response.status() === 200
+		);
 		await page.getByRole( 'button', { name: 'Organization' } ).click();
-		await page.waitForSelector( '[data-title="Product attributes"]' );
+		await getAttributesResponsePromise;
 	} );
 
 	const attributeItemLocator = page.getByRole( 'listitem' ).filter( {

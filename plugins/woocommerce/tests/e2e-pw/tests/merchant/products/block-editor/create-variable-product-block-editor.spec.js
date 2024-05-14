@@ -209,11 +209,18 @@ test.describe( 'Variations tab', () => {
 				} )
 				.click();
 
+			const getVariationsResponsePromise = page.waitForResponse(
+				( response ) =>
+					response
+						.url()
+						.includes(
+							`/wp-json/wc/v3/products/${ productId_editVariations }/variations`
+						) && response.status() === 200
+			);
+
 			await clickOnTab( 'Variations', page );
 
-			await page.waitForSelector(
-				'[data-title="Product variations items"]'
-			);
+			await getVariationsResponsePromise;
 
 			await page
 				.locator( '.woocommerce-product-variations__table-body > div' )
@@ -271,11 +278,18 @@ test.describe( 'Variations tab', () => {
 				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }`
 			);
 
+			const getVariationsResponsePromise = page.waitForResponse(
+				( response ) =>
+					response
+						.url()
+						.includes(
+							`/wp-json/wc/v3/products/${ productId_deleteVariations }/variations`
+						) && response.status() === 200
+			);
+
 			await clickOnTab( 'Variations', page );
 
-			await page.waitForSelector(
-				'[data-title="Product variations items"]'
-			);
+			await getVariationsResponsePromise;
 
 			await page
 				.locator(
