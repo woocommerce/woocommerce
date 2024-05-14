@@ -275,6 +275,8 @@ jobs:
                     exit 1
                   fi
                 
+                  echo "results: ${{ toJson(needs.*.result) }}"
+                
                   if [[ ${{contains(needs.*.result, 'failure')}} ]]; then
                     echo "There were failures."
                     exit 1
