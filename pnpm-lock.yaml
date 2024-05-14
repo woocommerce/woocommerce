@@ -34406,7 +34406,7 @@ snapshots:
     dependencies:
       '@babel/generator': 7.23.5
       '@babel/parser': 7.23.5
-      '@babel/preset-env': 7.23.6(@babel/core@7.23.5)
+      '@babel/preset-env': 7.23.5(@babel/core@7.23.5)
       '@babel/types': 7.23.5
       '@mdx-js/mdx': 1.6.22
       '@types/lodash': 4.14.202
