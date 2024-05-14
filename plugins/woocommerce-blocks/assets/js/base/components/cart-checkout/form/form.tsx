@@ -34,7 +34,7 @@ import prepareFormFields from './prepare-form-fields';
 import validateShippingCountry from './validate-shipping-country';
 import customValidationHandler from './custom-validation-handler';
 import Combobox from '../../combobox';
-import AddressField from './address-field';
+import AddressFields from './address-fields';
 
 /**
  * Checkout form.
@@ -152,17 +152,22 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 
 				if ( field.key === 'address_1' ) {
 					return (
-						<AddressField
+						<AddressFields
+							id={ id }
+							addressType={ addressType }
 							key={ field.key }
-							address1={ fieldProps }
+							address1={ addressFormFields.fields.find(
+								( customField ) =>
+									customField.key === 'address_1'
+							) }
 							address2={ addressFormFields.fields.find(
 								( customField ) =>
 									customField.key === 'address_2'
 							) }
-							values={ values }
-							onChange={ onChange }
+							addressFormFields={ addressFormFields }
 							fieldsRef={ fieldsRef }
-							{ ...fieldProps }
+							onChange={ onChange }
+							values={ values }
 						/>
 					);
 				}
@@ -170,20 +175,6 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 				if ( field.key === 'address_2' ) {
 					return null;
 				}
-
-				// if ( field.key === 'address_2' ) {
-				// 	return (
-				// 		<Address2Field
-				// 			key={ field.key }
-				// 			{ ...fieldProps }
-				// 			addressFormFields={ addressFormFields }
-				// 			field={ field }
-				// 			fieldsRef={ fieldsRef }
-				// 			values={ values }
-				// 			onChange={ onChange }
-				// 		/>
-				// 	);
-				// }
 
 				if (
 					field.key === 'country' &&

@@ -20,55 +20,44 @@ import {
 import { objectHasProp } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 
-/**
- * Internal dependencies
- */
-import { AddressFormFields } from './types';
-import customValidationHandler from './custom-validation-handler';
-
-const Address2Field = ( {
-	addressFormFields,
-	field,
-	fieldProps,
-	fieldsRef,
-	onChange,
-	values,
-}: {
-	addressFormFields: AddressFormFields;
+type Address2FieldProps = {
+	address2: KeyedFormField | undefined;
+	address2FieldProps: Record< string, undefined >;
 	field: KeyedFormField;
-	fieldProps: Record< string, undefined >;
 	fieldsRef: React.MutableRefObject<
 		Record< string, ValidatedTextInputHandle | null >
 	>;
 	onChange: ( values: AddressFormValues | ContactFormValues ) => void;
 	values: AddressFormValues | ContactFormValues;
-} ): JSX.Element => {
-	const address2Field = addressFormFields.fields.find(
-		( customField ) => customField.key === 'address_2'
-	);
+};
 
-	const hasAddress2FieldValue = useMemo( () => {
+const Address2Field = ( {
+	address2,
+	address2FieldProps,
+	field,
+	fieldsRef,
+	onChange,
+	values,
+}: Address2FieldProps ): JSX.Element => {
+	const hasFieldValue = useMemo( () => {
 		return objectHasProp( values, 'address_2' ) && values.address_2 !== '';
 	}, [ values ] );
 
-	const isAddress2FieldRequired = address2Field
-		? address2Field.required
-		: false;
+	const isFieldRequired = address2 ? address2.required : false;
 
-	const [ isAddress2FieldVisible, setIsAddress2FieldVisible ] = useState(
-		hasAddress2FieldValue || isAddress2FieldRequired
+	const [ isFieldVisible, setFieldVisible ] = useState(
+		hasFieldValue || isFieldRequired
 	);
 
-	const toggleAddress2FieldVisibility = useCallback(
+	const toggleFieldVisibility = useCallback(
 		( event: React.MouseEvent< HTMLElement > ) => {
 			event.preventDefault();
-			setIsAddress2FieldVisible( ( prevVisibility ) => ! prevVisibility );
+			setFieldVisible( ( prevVisibility ) => ! prevVisibility );
 		},
 		[]
 	);
 
-	const [ hasSellerChangedAddress2Field, setSellerChangedAddress2Field ] =
-		useState( false );
+	const [ hasFieldBeenModified, setHasFieldBeenModified ] = useState( false );
 
 	// Toggle address 2 visibility.
 	useEffect( () => {
@@ -79,48 +68,32 @@ const Address2Field = ( {
 		 * 2. If the address 2 field has a value.
 		 * 3. If the seller has edited the address 2 field.
 		 */
-		const shouldShowAddress2Field =
-			isAddress2FieldRequired ||
-			hasAddress2FieldValue ||
-			hasSellerChangedAddress2Field;
+		const shouldShowField =
+			isFieldRequired || hasFieldValue || hasFieldBeenModified;
 
-		setIsAddress2FieldVisible( shouldShowAddress2Field );
-	}, [
-		isAddress2FieldRequired,
-		hasAddress2FieldValue,
-		hasSellerChangedAddress2Field,
-	] );
+		setFieldVisible( shouldShowField );
+	}, [ isFieldRequired, hasFieldValue, hasFieldBeenModified ] );
 
 	return (
 		<Fragment key={ field.key }>
-			{ isAddress2FieldVisible ? (
+			{ isFieldVisible ? (
 				<ValidatedTextInput
+					{ ...address2FieldProps }
 					key={ field.key }
 					ref={ ( el ) => ( fieldsRef.current[ field.key ] = el ) }
-					{ ...fieldProps }
 					type={ field.type }
 					label={
-						isAddress2FieldRequired
-							? field.label
-							: field.optionalLabel
+						isFieldRequired ? field.label : field.optionalLabel
 					}
+					className={ `wc-block-components-address-form__${ field.key }` }
 					value={ values[ field.key ] }
 					onChange={ ( newValue: string ) => {
 						onChange( {
 							...values,
 							[ field.key ]: newValue,
 						} );
-						setSellerChangedAddress2Field( true );
+						setHasFieldBeenModified( true );
 					} }
-					customValidation={ ( inputObject: HTMLInputElement ) =>
-						customValidationHandler(
-							inputObject,
-							field.key,
-							objectHasProp( values, 'country' )
-								? values.country
-								: ''
-						)
-					}
 				/>
 			) : (
 				<button
@@ -128,7 +101,7 @@ const Address2Field = ( {
 					className={
 						'wc-block-components-address-form__address_2-toggle'
 					}
-					onClick={ toggleAddress2FieldVisibility }
+					onClick={ toggleFieldVisibility }
 				>
 					{ __( 'Add apartment, suite, etc.', 'woocommerce' ) }
 				</button>
