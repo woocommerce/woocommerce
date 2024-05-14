@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add hooks to customize the order receipt generation

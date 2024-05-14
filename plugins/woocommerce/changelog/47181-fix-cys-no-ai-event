@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+[CYS]: Fix event name when starting the no-AI flow.

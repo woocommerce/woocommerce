@@ -120,14 +120,12 @@ export function VariationActions( {
 					onClose={ onClose }
 					supportsMultipleSelection={ supportsMultipleSelection }
 				/>
-				{ window.wcAdminFeatures[ 'product-virtual-downloadable' ] && (
-					<DownloadsMenuItem
-						selection={ selection }
-						onChange={ onChange }
-						onClose={ onClose }
-						supportsMultipleSelection={ supportsMultipleSelection }
-					/>
-				) }
+				<DownloadsMenuItem
+					selection={ selection }
+					onChange={ onChange }
+					onClose={ onClose }
+					supportsMultipleSelection={ supportsMultipleSelection }
+				/>
 			</MenuGroup>
 			<VariationQuickUpdateMenuItem.Slot
 				group={ 'secondary' }

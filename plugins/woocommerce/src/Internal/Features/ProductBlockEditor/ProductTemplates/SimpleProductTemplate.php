@@ -78,30 +78,24 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 
 		// Variations tab.
-		if ( Features::is_enabled( 'product-variation-management' ) ) {
-			$variations_hide_conditions = array();
-			if ( Features::is_enabled( 'product-grouped' ) ) {
-				$variations_hide_conditions[] = array(
-					'expression' => 'editedProduct.type === "grouped"',
-				);
-			}
-			if ( Features::is_enabled( 'product-external-affiliate' ) ) {
-				$variations_hide_conditions[] = array(
-					'expression' => 'editedProduct.type === "external"',
-				);
-			}
+		$variations_hide_conditions   = array();
+		$variations_hide_conditions[] = array(
+			'expression' => 'editedProduct.type === "grouped"',
+		);
+		$variations_hide_conditions[] = array(
+			'expression' => 'editedProduct.type === "external"',
+		);
 
-			$this->add_group(
-				array(
-					'id'             => $this::GROUP_IDS['VARIATIONS'],
-					'order'          => 20,
-					'attributes'     => array(
-						'title' => __( 'Variations', 'woocommerce' ),
-					),
-					'hideConditions' => $variations_hide_conditions,
-				)
-			);
-		}
+		$this->add_group(
+			array(
+				'id'             => $this::GROUP_IDS['VARIATIONS'],
+				'order'          => 20,
+				'attributes'     => array(
+					'title' => __( 'Variations', 'woocommerce' ),
+				),
+				'hideConditions' => $variations_hide_conditions,
+			)
+		);
 
 		$this->add_group(
 			array(
@@ -119,11 +113,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'attributes'     => array(
 					'title' => __( 'Pricing', 'woocommerce' ),
 				),
-				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+				'hideConditions' => array(
 					array(
 						'expression' => 'editedProduct.type === "grouped"',
 					),
-				) : null,
+				),
 			)
 		);
 		$this->add_group(
@@ -135,17 +129,13 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$shipping_hide_conditions = array();
-		if ( Features::is_enabled( 'product-grouped' ) ) {
-			$shipping_hide_conditions[] = array(
-				'expression' => 'editedProduct.type === "grouped"',
-			);
-		}
-		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
-			$shipping_hide_conditions[] = array(
-				'expression' => 'editedProduct.type === "external"',
-			);
-		}
+		$shipping_hide_conditions   = array();
+		$shipping_hide_conditions[] = array(
+			'expression' => 'editedProduct.type === "grouped"',
+		);
+		$shipping_hide_conditions[] = array(
+			'expression' => 'editedProduct.type === "external"',
+		);
 
 		$this->add_group(
 			array(
@@ -159,17 +149,15 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 
 		// Linked Products tab.
-		if ( Features::is_enabled( 'product-linked' ) ) {
-			$this->add_group(
-				array(
-					'id'         => $this::GROUP_IDS['LINKED_PRODUCTS'],
-					'order'      => 70,
-					'attributes' => array(
-						'title' => __( 'Linked products', 'woocommerce' ),
-					),
-				)
-			);
-		}
+		$this->add_group(
+			array(
+				'id'         => $this::GROUP_IDS['LINKED_PRODUCTS'],
+				'order'      => 70,
+				'attributes' => array(
+					'title' => __( 'Linked products', 'woocommerce' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -279,105 +267,101 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 
 		// External/Affiliate section.
-		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
-			$buy_button_section = $general_group->add_section(
-				array(
-					'id'             => 'product-buy-button-section',
-					'order'          => 30,
-					'attributes'     => array(
-						'title'       => __( 'Buy button', 'woocommerce' ),
-						'description' => __( 'Add a link and choose a label for the button linked to a product sold elsewhere.', 'woocommerce' ),
+		$buy_button_section = $general_group->add_section(
+			array(
+				'id'             => 'product-buy-button-section',
+				'order'          => 30,
+				'attributes'     => array(
+					'title'       => __( 'Buy button', 'woocommerce' ),
+					'description' => __( 'Add a link and choose a label for the button linked to a product sold elsewhere.', 'woocommerce' ),
+				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type !== "external"',
 					),
-					'hideConditions' => array(
-						array(
-							'expression' => 'editedProduct.type !== "external"',
-						),
+				),
+			)
+		);
+
+		$buy_button_section->add_block(
+			array(
+				'id'         => 'product-external-url',
+				'blockName'  => 'woocommerce/product-text-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property'    => 'external_url',
+					'label'       => __( 'Link to the external product', 'woocommerce' ),
+					'placeholder' => __( 'Enter the external URL to the product', 'woocommerce' ),
+					'suffix'      => true,
+					'type'        => array(
+						'value'   => 'url',
+						'message' => __( 'Link to the external product is an invalid URL.', 'woocommerce' ),
 					),
-				)
-			);
+				),
+			)
+		);
 
-			$buy_button_section->add_block(
-				array(
-					'id'         => 'product-external-url',
-					'blockName'  => 'woocommerce/product-text-field',
-					'order'      => 10,
-					'attributes' => array(
-						'property'    => 'external_url',
-						'label'       => __( 'Link to the external product', 'woocommerce' ),
-						'placeholder' => __( 'Enter the external URL to the product', 'woocommerce' ),
-						'suffix'      => true,
-						'type'        => array(
-							'value'   => 'url',
-							'message' => __( 'Link to the external product is an invalid URL.', 'woocommerce' ),
-						),
-					),
-				)
-			);
+		$button_text_columns = $buy_button_section->add_block(
+			array(
+				'id'        => 'product-button-text-columns',
+				'blockName' => 'core/columns',
+				'order'     => 20,
+			)
+		);
 
-			$button_text_columns = $buy_button_section->add_block(
-				array(
-					'id'        => 'product-button-text-columns',
-					'blockName' => 'core/columns',
-					'order'     => 20,
-				)
-			);
+		$button_text_columns->add_block(
+			array(
+				'id'        => 'product-button-text-column1',
+				'blockName' => 'core/column',
+				'order'     => 10,
+			)
+		)->add_block(
+			array(
+				'id'         => 'product-button-text',
+				'blockName'  => 'woocommerce/product-text-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property' => 'button_text',
+					'label'    => __( 'Buy button text', 'woocommerce' ),
+				),
+			)
+		);
 
-			$button_text_columns->add_block(
-				array(
-					'id'        => 'product-button-text-column1',
-					'blockName' => 'core/column',
-					'order'     => 10,
-				)
-			)->add_block(
-				array(
-					'id'         => 'product-button-text',
-					'blockName'  => 'woocommerce/product-text-field',
-					'order'      => 10,
-					'attributes' => array(
-						'property' => 'button_text',
-						'label'    => __( 'Buy button text', 'woocommerce' ),
-					),
-				)
-			);
-
-			$button_text_columns->add_block(
-				array(
-					'id'        => 'product-button-text-column2',
-					'blockName' => 'core/column',
-					'order'     => 20,
-				)
-			);
-		}
+		$button_text_columns->add_block(
+			array(
+				'id'        => 'product-button-text-column2',
+				'blockName' => 'core/column',
+				'order'     => 20,
+			)
+		);
 
 		// Product list section.
-		if ( Features::is_enabled( 'product-grouped' ) ) {
-			$product_list_section = $general_group->add_section(
-				array(
-					'id'             => 'product-list-section',
-					'order'          => 35,
-					'attributes'     => array(
-						'title'       => __( 'Products in this group', 'woocommerce' ),
-						'description' => __( 'Make a collection of related products, enabling customers to purchase multiple items together.', 'woocommerce' ),
+		$product_list_section = $general_group->add_section(
+			array(
+				'id'             => 'product-list-section',
+				'order'          => 35,
+				'attributes'     => array(
+					'title'       => __( 'Products in this group', 'woocommerce' ),
+					'description' => __( 'Make a collection of related products, enabling customers to purchase multiple items together.', 'woocommerce' ),
+				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type !== "grouped"',
 					),
-					'hideConditions' => array(
-						array(
-							'expression' => 'editedProduct.type !== "grouped"',
-						),
-					),
-				)
-			);
+				),
+			)
+		);
 
-			$product_list_section->add_block(
-				array(
-					'id'         => 'product-list',
-					'blockName'  => 'woocommerce/product-list-field',
-					'order'      => 10,
-					'attributes' => array(
-						'property' => 'grouped_products',
-					),
-				)
-			);
-		}
+		$product_list_section->add_block(
+			array(
+				'id'         => 'product-list',
+				'blockName'  => 'woocommerce/product-list-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property' => 'grouped_products',
+				),
+			)
+		);
 
 		// Images section.
 		$images_section = $general_group->add_section(
@@ -827,11 +811,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'</a>'
 					) : null,
 				),
-				'hideConditions'    => Features::is_enabled( 'product-external-affiliate' ) || Features::is_enabled( 'product-grouped' ) ? array(
+				'hideConditions'    => array(
 					array(
 						'expression' => 'editedProduct.type === "external" || editedProduct.type === "grouped"',
 					),
-				) : null,
+				),
 				'disableConditions' => array(
 					array(
 						'expression' => 'editedProduct.type === "variable"',
@@ -839,16 +823,14 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$product_inventory_quantity_hide_conditions = array(
+		$product_inventory_quantity_hide_conditions   = array(
 			array(
 				'expression' => 'editedProduct.manage_stock === false',
 			),
 		);
-		if ( Features::is_enabled( 'product-grouped' ) ) {
-			$product_inventory_quantity_hide_conditions[] = array(
-				'expression' => 'editedProduct.type === "grouped"',
-			);
-		}
+		$product_inventory_quantity_hide_conditions[] = array(
+			'expression' => 'editedProduct.type === "grouped"',
+		);
 		$product_inventory_inner_section->add_block(
 			array(
 				'id'             => 'product-inventory-quantity',
@@ -857,16 +839,14 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'hideConditions' => $product_inventory_quantity_hide_conditions,
 			)
 		);
-		$product_stock_status_hide_conditions = array(
+		$product_stock_status_hide_conditions   = array(
 			array(
 				'expression' => 'editedProduct.manage_stock === true',
 			),
 		);
-		if ( Features::is_enabled( 'product-grouped' ) ) {
-			$product_stock_status_hide_conditions[] = array(
-				'expression' => 'editedProduct.type === "grouped"',
-			);
-		}
+		$product_stock_status_hide_conditions[] = array(
+			'expression' => 'editedProduct.type === "grouped"',
+		);
 		$product_inventory_section->add_block(
 			array(
 				'id'                => 'product-stock-status',
@@ -922,11 +902,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'initialCollapsed' => true,
 					'persistRender'    => true,
 				),
-				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+				'hideConditions' => array(
 					array(
 						'expression' => 'editedProduct.type === "grouped"',
 					),
-				) : null,
+				),
 			)
 		);
 		$product_inventory_advanced_wrapper = $product_inventory_advanced->add_block(
@@ -1026,32 +1006,30 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			)
 		);
 		// Virtual section.
-		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
-			$shipping_group->add_section(
-				array(
-					'id'             => 'product-virtual-section',
-					'order'          => 10,
-					'hideConditions' => array(
-						array(
-							'expression' => 'editedProduct.type !== "simple"',
-						),
+		$shipping_group->add_section(
+			array(
+				'id'             => 'product-virtual-section',
+				'order'          => 10,
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type !== "simple"',
 					),
-				)
-			)->add_block(
-				array(
-					'id'         => 'product-virtual',
-					'blockName'  => 'woocommerce/product-toggle-field',
-					'order'      => 10,
-					'attributes' => array(
-						'property'       => 'virtual',
-						'checkedValue'   => false,
-						'uncheckedValue' => true,
-						'label'          => __( 'This product requires shipping or pickup', 'woocommerce' ),
-						'uncheckedHelp'  => __( 'This product will not trigger your customer\'s shipping calculator in cart or at checkout. This product also won\'t require your customers to enter their shipping details at checkout. <a href="https://woocommerce.com/document/managing-products/#adding-a-virtual-product" target="_blank" rel="noreferrer">Read more about virtual products</a>.', 'woocommerce' ),
-					),
-				)
-			);
-		}
+				),
+			)
+		)->add_block(
+			array(
+				'id'         => 'product-virtual',
+				'blockName'  => 'woocommerce/product-toggle-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property'       => 'virtual',
+					'checkedValue'   => false,
+					'uncheckedValue' => true,
+					'label'          => __( 'This product requires shipping or pickup', 'woocommerce' ),
+					'uncheckedHelp'  => __( 'This product will not trigger your customer\'s shipping calculator in cart or at checkout. This product also won\'t require your customers to enter their shipping details at checkout. <a href="https://woocommerce.com/document/managing-products/#adding-a-virtual-product" target="_blank" rel="noreferrer">Read more about virtual products</a>.', 'woocommerce' ),
+				),
+			)
+		);
 		// Product Shipping Section.
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
 			array(

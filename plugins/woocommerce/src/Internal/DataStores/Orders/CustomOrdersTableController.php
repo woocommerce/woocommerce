@@ -145,6 +145,7 @@ class CustomOrdersTableController {
 		self::add_action( 'woocommerce_sections_advanced', array( $this, 'sync_now' ) );
 		self::add_filter( 'removable_query_args', array( $this, 'register_removable_query_arg' ) );
 		self::add_action( 'woocommerce_register_feature_definitions', array( $this, 'add_feature_definition' ) );
+		self::add_filter( 'get_edit_post_link', array( $this, 'maybe_rewrite_order_edit_link' ), 10, 2 );
 	}
 
 	/**
@@ -697,5 +698,23 @@ class CustomOrdersTableController {
 	 */
 	private function get_orders_pending_sync_count(): int {
 		return $this->data_synchronizer->get_sync_status()['current_pending_count'];
+	}
+
+	/**
+	 * Rewrites post edit links for HPOS placeholder posts so that they go to the HPOS order itself.
+	 * Hooked onto `get_edit_post_link`.
+	 *
+	 * @since 9.0.0
+	 *
+	 * @param string $link    The edit link.
+	 * @param int    $post_id Post ID.
+	 * @return string
+	 */
+	private function maybe_rewrite_order_edit_link( $link, $post_id ) {
+		if ( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE === get_post_type( $post_id ) ) {
+			$link = OrderUtil::get_order_admin_edit_url( $post_id );
+		}
+
+		return $link;
 	}
 }

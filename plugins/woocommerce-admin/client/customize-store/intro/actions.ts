@@ -53,6 +53,10 @@ export const recordTracksDesignWithAIClicked = () => {
 	trackEvent( 'customize_your_store_intro_design_with_ai_click' );
 };
 
+export const recordTracksDesignWithoutAIClicked = () => {
+	trackEvent( 'customize_your_store_intro_design_without_ai_click' );
+};
+
 export const recordTracksThemeSelected = (
 	_context: customizeStoreStateMachineContext,
 	event: Extract<
