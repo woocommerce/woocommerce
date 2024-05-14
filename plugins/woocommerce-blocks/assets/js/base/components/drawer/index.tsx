@@ -17,7 +17,6 @@ import {
 } from '@wordpress/element';
 import { close, Icon } from '@wordpress/icons';
 import {
-	useFocusReturn,
 	useFocusOnMount,
 	useConstrainedTabbing,
 	useMergeRefs,
@@ -28,6 +27,7 @@ import {
  */
 import Button from '../button';
 import * as ariaHelper from './utils/aria-helper';
+import useFocusReturn from './utils/use-focus-return';
 import './style.scss';
 
 interface DrawerProps {
