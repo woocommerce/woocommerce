@@ -211,6 +211,10 @@ test.describe( 'Variations tab', () => {
 
 			await clickOnTab( 'Variations', page );
 
+			await page.waitForSelector(
+				'[data-title="Product variations items"]'
+			);
+
 			await page
 				.locator( '.woocommerce-product-variations__table-body > div' )
 				.first()
@@ -268,6 +272,10 @@ test.describe( 'Variations tab', () => {
 			);
 
 			await clickOnTab( 'Variations', page );
+
+			await page.waitForSelector(
+				'[data-title="Product variations items"]'
+			);
 
 			await page
 				.locator(

@@ -383,6 +383,7 @@ test( 'can remove product attributes', async ( {
 			`wp-admin/post.php?post=${ productWithAttributes.id }&action=edit`
 		);
 		await page.getByRole( 'button', { name: 'Organization' } ).click();
+		await page.waitForSelector( '[data-title="Product attributes"]' );
 	} );
 
 	const attributeItemLocator = page.getByRole( 'listitem' ).filter( {
