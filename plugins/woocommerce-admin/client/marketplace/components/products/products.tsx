@@ -168,11 +168,13 @@ export default function Products( props: ProductsProps ) {
 
 	return (
 		<div className={ containerClassName }>
-			<PluginInstallNotice />
 			{ selectedTab !== 'business-services' && (
-				<h2 className={ productListTitleClassName }>
-					{ isLoading ? ' ' : title }
-				</h2>
+				<>
+					<PluginInstallNotice />
+					<h2 className={ productListTitleClassName }>
+						{ isLoading ? ' ' : title }
+					</h2>
+				</>
 			) }
 			<div className="woocommerce-marketplace__sub-header">
 				{ props.categorySelector && (
