@@ -37,16 +37,16 @@ class WC_Helper_Updater {
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_update_plugins_messages' ), 11 );
 		}
 		if ( WC_Helper::is_site_connected() ) {
-			add_action( 'load-plugins.php', array( __CLASS__, 'maybe_display_message_for_expiry_plugins' ), 11 );
+			add_action( 'load-plugins.php', array( __CLASS__, 'setup_message_for_expired_and_expiring_subscriptions' ), 11 );
 		}
 	}
 
 	/**
 	 * Add the hook for modifying default WPCore update notices on the plugins management page.
 	 */
-	public static function maybe_display_message_for_expiry_plugins() {
+	public static function setup_message_for_expired_and_expiring_subscriptions() {
 		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
-			add_action( 'in_plugin_update_message-' . $plugin['_filename'], array( __CLASS__, 'display_subscription_expiry_message' ), 10, 2 );
+			add_action( 'in_plugin_update_message-' . $plugin['_filename'], array( __CLASS__, 'display_notice_for_expired_and_expiring_subscriptions' ), 10, 2 );
 		}
 	}
 
@@ -250,7 +250,7 @@ class WC_Helper_Updater {
 	 *
 	 * @return void.
 	 */
-	public static function display_subscription_expiry_message( $plugin_data, $response ) {
+	public static function display_notice_for_expired_and_expiring_subscriptions( $plugin_data, $response ) {
 
 		// Extract product ID from the response.
 		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
