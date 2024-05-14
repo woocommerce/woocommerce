@@ -16,6 +16,9 @@ import {
 	CoreCollectionNames,
 	CoreFilterNames,
 	ETimeFrameOperator,
+	LayoutOptions,
+	ProductCollectionAttributes,
+	ProductCollectionQuery,
 } from '../types';
 
 const collection = {
@@ -27,15 +30,14 @@ const collection = {
 	scope: [],
 };
 
-const attributes = {
-	...DEFAULT_ATTRIBUTES,
-	displayLayout: {
-		type: 'flex',
-		columns: 5,
-		shrinkColumns: true,
+const attributes: ProductCollectionAttributes = {
+	...( DEFAULT_ATTRIBUTES as ProductCollectionAttributes ),
+	templateLayout: {
+		type: LayoutOptions.GRID,
+		columnCount: 5,
 	},
 	query: {
-		...DEFAULT_ATTRIBUTES.query,
+		...( DEFAULT_ATTRIBUTES.query as ProductCollectionQuery ),
 		inherit: false,
 		orderBy: 'date',
 		order: 'desc',

@@ -12,7 +12,13 @@ import {
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 } from '../constants';
-import { CoreCollectionNames, CoreFilterNames } from '../types';
+import {
+	CoreCollectionNames,
+	CoreFilterNames,
+	LayoutOptions,
+	ProductCollectionAttributes,
+	ProductCollectionQuery,
+} from '../types';
 
 const collection = {
 	name: CoreCollectionNames.ON_SALE,
@@ -26,15 +32,14 @@ const collection = {
 	scope: [],
 };
 
-const attributes = {
-	...DEFAULT_ATTRIBUTES,
-	displayLayout: {
-		type: 'flex',
-		columns: 5,
-		shrinkColumns: true,
+const attributes: ProductCollectionAttributes = {
+	...( DEFAULT_ATTRIBUTES as ProductCollectionAttributes ),
+	templateLayout: {
+		type: LayoutOptions.GRID,
+		columnCount: 5,
 	},
 	query: {
-		...DEFAULT_ATTRIBUTES.query,
+		...( DEFAULT_ATTRIBUTES.query as ProductCollectionQuery ),
 		inherit: false,
 		woocommerceOnSale: true,
 		perPage: 5,

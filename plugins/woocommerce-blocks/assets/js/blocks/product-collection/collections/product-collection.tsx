@@ -9,7 +9,7 @@ import { Icon, loop } from '@wordpress/icons';
  * Internal dependencies
  */
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
-import { CoreCollectionNames } from '../types';
+import { CoreCollectionNames, ProductCollectionAttributes } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.PRODUCT_CATALOG,
@@ -21,11 +21,8 @@ const collection = {
 	scope: [],
 };
 
-const attributes = {
-	...DEFAULT_ATTRIBUTES,
-	query: {
-		...DEFAULT_ATTRIBUTES.query,
-	},
+const attributes: ProductCollectionAttributes = {
+	...( DEFAULT_ATTRIBUTES as ProductCollectionAttributes ),
 	collection: collection.name,
 	hideControls: [],
 };

@@ -47,6 +47,10 @@ class ProductTemplate extends AbstractBlock {
 		}
 
 		$classnames = '';
+
+		// For backward compatibility we need to keep the `displayLayout` handling even though we've
+		// replaced it with Gutenberg's native `layout` support type. This is because the
+		// deprecation won't run until they edit a post or page with the block and save.
 		if ( isset( $block->context['displayLayout'] ) && isset( $block->context['query'] ) ) {
 			if ( isset( $block->context['displayLayout']['type'] ) && 'flex' === $block->context['displayLayout']['type'] ) {
 				if ( isset( $block->context['displayLayout']['shrinkColumns'] ) && $block->context['displayLayout']['shrinkColumns'] ) {
@@ -56,6 +60,7 @@ class ProductTemplate extends AbstractBlock {
 				}
 			}
 		}
+
 		if ( isset( $attributes['style']['elements']['link']['color']['text'] ) ) {
 			$classnames .= ' has-link-color';
 		}

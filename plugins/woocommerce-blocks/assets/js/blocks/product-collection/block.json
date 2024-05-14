@@ -18,7 +18,7 @@
 		"tagName": {
 			"type": "string"
 		},
-		"displayLayout": {
+		"templateLayout": {
 			"type": "object"
 		},
 		"convertedFromProducts": {
@@ -44,6 +44,7 @@
 		"queryId": "queryId",
 		"query": "query",
 		"displayLayout": "displayLayout",
+		"templateLayout": "templateLayout",
 		"queryContextIncludes": "queryContextIncludes",
 		"collection": "collection"
 	},
@@ -52,7 +53,12 @@
 		"align": [ "wide", "full" ],
 		"anchor": true,
 		"html": false,
-		"__experimentalLayout": true,
+		"layout": true,
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"blockGap": true
+		},
 		"interactivity": true
 	}
 }

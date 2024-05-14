@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Replace Product Collection's custom `displayLayout` with native `layout` block support.

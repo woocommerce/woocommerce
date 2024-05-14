@@ -9,6 +9,7 @@ import { registerBlockType } from '@wordpress/blocks';
 import metadata from './block.json';
 import edit from './edit';
 import save from './save';
+import deprecated from './deprecated';
 import icon from './icon';
 import registerProductSummaryVariation from './variations/elements/product-summary';
 import registerProductTitleVariation from './variations/elements/product-title';
@@ -19,6 +20,7 @@ registerBlockType( metadata, {
 	icon,
 	edit,
 	save,
+	deprecated,
 } );
 registerProductSummaryVariation();
 registerProductTitleVariation();
