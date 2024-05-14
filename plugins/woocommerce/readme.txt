@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, che
 Requires at least: 6.4
 Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 8.8.2
+Stable tag: 8.8.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -317,7 +317,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - [CYS - E2E tests] Add E2E tests for the intro screen. [#45356](https://github.com/woocommerce/woocommerce/pull/45356)
 * Update - [CYS - E2E tests] Add E2E tests for the transitional screen. [#45894](https://github.com/woocommerce/woocommerce/pull/45894)
 * Update - [CYS] Remove the "Save" button from inside the different sections. [#46526](https://github.com/woocommerce/woocommerce/pull/46526)
-* Dev - Deprecate the woocommerce_should_load_paypal_standard filter used to bypass loading PayPal Standard. [#47205](https://github.com/woocommerce/woocommerce/pull/47205)
+* Dev - Deprecate the woocommerce_should_load_paypal_standard filter used to bypass loading PayPal Standard. Only load the PayPal Standard payment method on stores that have connected their account or have existing PayPal orders. [#47205](https://github.com/woocommerce/woocommerce/pull/47205)
 * Dev - Add an e2e test to ensure that each <CheckboxControl> component has a unique ID. [#45655](https://github.com/woocommerce/woocommerce/pull/45655)
 * Dev - Add API Rest endpoint to duplicate product #46141 [#46141](https://github.com/woocommerce/woocommerce/pull/46141)
 * Dev - Add a stalebot workflow for the flaky e2e test reporter [#46585](https://github.com/woocommerce/woocommerce/pull/46585)
