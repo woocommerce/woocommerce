@@ -33,9 +33,10 @@ import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
 import { RemoveConfirmationModal } from '../remove-confirmation-modal';
 import { TRACKS_SOURCE } from '../../constants';
-import { AttributeEmptyStateSkeleton } from './attribute-empty-state-skeleton';
+import { EmptyState } from '../empty-state';
 import { SectionActions } from '../block-slot-fill';
 import { AttributeControlProps } from './types';
+import { getEmptyStateSequentialNames } from '../../utils';
 
 export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	value,
@@ -215,7 +216,11 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			} );
 		}
 
-		return <AttributeEmptyStateSkeleton />;
+		return (
+			<EmptyState
+				names={ getEmptyStateSequentialNames( 'Attribute', 3 ) }
+			/>
+		);
 	}
 
 	function renderSectionActions() {
