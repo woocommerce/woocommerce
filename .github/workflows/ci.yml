@@ -268,7 +268,7 @@ jobs:
               
             - name: 'Evaluation'
               env:
-                REPO: ${{ github.repository }}
+                REPOSITORY: ${{ github.repository }}
                 RUN_ID: ${{ github.run_id }}
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |

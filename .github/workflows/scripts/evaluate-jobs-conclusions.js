@@ -42,8 +42,16 @@ const isJobFailed = (job) => {
 	return job.conclusion !== 'success' && job.conclusion !== 'skipped';
 }
 
-if (!REPOSITORY || !RUN_ID || !GITHUB_TOKEN) {
-	console.error('Missing required environment variables');
+if (!REPOSITORY) {
+	console.error(`Missing REPOSITORY environment variable`);
+	process.exit(1);
+}
+if (!RUN_ID) {
+	console.error('Missing RUN_ID environment variables');
+	process.exit(1);
+}
+if (!GITHUB_TOKEN) {
+	console.error('Missing GITHUB_TOKEN environment variables');
 	process.exit(1);
 }
 
