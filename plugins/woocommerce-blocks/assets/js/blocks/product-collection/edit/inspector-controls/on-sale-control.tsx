@@ -12,16 +12,17 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../../types';
+import { CoreFilterNames, QueryControlProps } from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
 const OnSaleControl = ( props: QueryControlProps ) => {
-	const { query, setQueryAttribute } = props;
+	const { query, trackInteraction, setQueryAttribute } = props;
 
 	const deselectCallback = () => {
 		setQueryAttribute( {
 			woocommerceOnSale: DEFAULT_FILTERS.woocommerceOnSale,
 		} );
+		trackInteraction( CoreFilterNames.ON_SALE );
 	};
 
 	return (
@@ -39,6 +40,7 @@ const OnSaleControl = ( props: QueryControlProps ) => {
 					setQueryAttribute( {
 						woocommerceOnSale,
 					} );
+					trackInteraction( CoreFilterNames.ON_SALE );
 				} }
 			/>
 		</ToolsPanelItem>
