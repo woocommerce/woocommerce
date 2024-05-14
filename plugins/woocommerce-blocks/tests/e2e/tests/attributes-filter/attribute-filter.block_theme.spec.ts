@@ -3,11 +3,18 @@
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 import { cli } from '@woocommerce/e2e-utils';
+import path from 'path';
 
 /**
  * Internal dependencies
  */
 import ProductCollectionPage from '../product-collection/product-collection.page';
+
+const PRODUCT_CATALOG_LINK = '/shop';
+const TEMPLATE_PATH = path.join(
+	__dirname,
+	'./filters-with-product-collection.handlebars'
+);
 
 const blockData = {
 	name: 'Filter by Attribute',
@@ -145,7 +152,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await attributeFilter.getByText( 'Done' ).click();
 
 		await editor.saveSiteEditorEntities();
-		await page.goto( `/shop` );
+		await page.goto( PRODUCT_CATALOG_LINK );
 	} );
 
 	test( 'should show all products', async ( { frontendUtils, page } ) => {
@@ -195,45 +202,20 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test.beforeAll( async ( { admin, editor, editorUtils } ) => {
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//archive-product',
-			postType: 'wp_template',
-		} );
-
-		await editorUtils.enterEditMode();
-
-		await expect(
-			editor.canvas.locator( `[data-type="core/query"]` )
-		).toBeVisible();
-
-		await editorUtils.replaceBlockByBlockName(
-			'core/query',
-			'woocommerce/product-collection'
+	test.beforeAll( async ( { requestUtils } ) => {
+		await requestUtils.updateTemplateContents(
+			'woocommerce/woocommerce//archive-product',
+			TEMPLATE_PATH,
+			{}
 		);
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'attribute-filter',
-				heading: 'Filter By Attribute',
-			},
-		} );
-
-		const attributeFilter = await editorUtils.getBlockByName(
-			blockData.slug
-		);
-
-		await attributeFilter.getByText( 'Size' ).click();
-		await attributeFilter.getByText( 'Done' ).click();
-
-		await editor.saveSiteEditorEntities();
 	} );
+
 	test.afterAll( async ( { editorUtils } ) => {
 		await editorUtils.revertTemplateCustomizations( 'Product Catalog' );
 	} );
 
 	test( 'should show all products', async ( { page } ) => {
-		await page.goto( `/shop` );
+		await page.goto( `PRODUCT_CATALOG_LINK` );
 		const products = page
 			.locator( '.wp-block-woocommerce-product-template' )
 			.getByRole( 'listitem' );
@@ -244,7 +226,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 	test( 'should show only products that match the filter', async ( {
 		page,
 	} ) => {
-		await page.goto( `/shop` );
+		await page.goto( `PRODUCT_CATALOG_LINK` );
 		await page.getByRole( 'checkbox', { name: 'Small' } ).click();
 
 		await expect( page ).toHaveURL(
@@ -281,7 +263,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await page.getByText( "Show 'Apply filters' button" ).click();
 
 		await editor.saveSiteEditorEntities();
-		await page.goto( `/shop` );
+		await page.goto( `PRODUCT_CATALOG_LINK` );
 
 		await page.getByRole( 'checkbox', { name: 'Small' } ).click();
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
