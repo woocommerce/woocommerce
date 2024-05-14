@@ -53,14 +53,14 @@ import { ProductTemplate } from '../../types';
 import { LoadingState } from './loading-state';
 
 const PluginArea = lazy( () =>
-	import( '@wordpress/plugins' ).then( ( { PluginArea } ) => ( {
-		default: PluginArea,
+	import( '@wordpress/plugins' ).then( ( module ) => ( {
+		default: module.PluginArea,
 	} ) )
 );
 
 const ModalEditor = lazy( () =>
-	import( '../modal-editor' ).then( ( { ModalEditor } ) => ( {
-		default: ModalEditor,
+	import( '../modal-editor' ).then( ( module ) => ( {
+		default: module.ModalEditor,
 	} ) )
 );
 
