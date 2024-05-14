@@ -57,6 +57,7 @@
 			&[aria-expanded="true"] {
 				border-bottom-right-radius: 0;
 				border-bottom-left-radius: 0;
+				border-bottom: none;
 			}
 
 			.has-dark-controls & {
@@ -71,27 +72,26 @@
 				}
 			}
 		}
+
 		.components-form-token-field__suggestions-list {
-			position: absolute;
 			z-index: 10;
 			background-color: $select-dropdown-light;
 			border: 1px solid $input-border-gray;
 			border-top: 0;
 			border-bottom: 0;
-			margin: 3em 0 0 0;
 			padding: 0;
-			max-height: 300px;
-			min-width: 100%;
-			overflow: auto;
 			color: $input-text-active;
 			border-bottom-left-radius: $universal-border-radius;
 			border-bottom-right-radius: $universal-border-radius;
 			box-shadow: 0 1px 0 1px $input-border-gray;
-			box-sizing: border-box;
 
 			.has-dark-controls & {
 				background-color: $select-dropdown-dark;
 				color: $input-text-dark;
+			}
+
+			.components-form-token-field__suggestions-list-inner {
+				z-index: 9;
 			}
 
 			.components-form-token-field__suggestion {
@@ -101,6 +101,7 @@
 				list-style: none;
 				margin: 0;
 				padding: em($gap-smallest) $gap;
+				box-sizing: border-box;
 
 				&.is-selected {
 					background-color: $gray-300;
@@ -121,7 +122,6 @@
 				&:active {
 					background-color: #00669e;
 					color: #fff;
-
 				}
 			}
 		}
@@ -161,7 +161,8 @@
 
 	&.is-active,
 	&:focus-within {
-		.wc-block-components-combobox-control label.components-base-control__label {
+		.wc-block-components-combobox-control
+			label.components-base-control__label {
 			transform: translateY(em($gap-smaller)) scale(0.875);
 		}
 	}

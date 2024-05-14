@@ -48,6 +48,15 @@ jest.mock( '@wordpress/element', () => {
 		useId: () => {
 			return 'mock-id';
 		},
+		// In prod we use React 18, but in Jest React 17 is still loaded. This needs to be fixed at some point.
+		useTransition: () => {
+			return [
+				false,
+				( cb ) => {
+					cb();
+				},
+			];
+		},
 	};
 } );
 

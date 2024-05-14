@@ -1,68 +1,126 @@
 /**
  * External dependencies
  */
+import {
+	Combobox as AriakitCombobox,
+	ComboboxLabel,
+	ComboboxList,
+	ComboboxPopover,
+	ComboboxProvider,
+	ComboboxItem,
+	useComboboxStore,
+} from '@ariakit/react';
+import type { ComboboxProps as AriakitComboboxProps } from '@ariakit/react';
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
-import { useEffect, useId, useRef } from '@wordpress/element';
-import { ComboboxControl } from 'wordpress-components';
+import {
+	useCallback,
+	useEffect,
+	useId,
+	useMemo,
+	useRef,
+	useState,
+	useTransition,
+} from '@wordpress/element';
 import { ValidationInputError } from '@woocommerce/blocks-components';
-import { isObject } from '@woocommerce/types';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import {
+	findBestMatchByLabel,
+	findExactMatchBy,
+	findMatchingSuggestions,
+} from './util';
 
 export interface ComboboxControlOption {
 	label: string;
 	value: string;
 }
 
-export interface ComboboxProps {
-	autoComplete?: string;
-	className?: string;
+export type ComboboxProps = Omit< AriakitComboboxProps, 'onChange' > & {
 	errorId: string | null;
 	errorMessage?: string | undefined;
-	id: string;
 	instanceId?: string;
-	label: string;
-	onChange: ( filterValue: string ) => void;
+	onChange: ( newValue: string ) => void;
 	options: ComboboxControlOption[];
-	required?: boolean;
 	value: string;
-}
+	label: string;
+};
 
 /**
- * Wrapper for the WordPress ComboboxControl which supports validation.
+ * Wrapper for the Ariakit Combobox with validation support.
  */
 const Combobox = ( {
 	id,
-	className,
 	label,
-	onChange,
 	options,
 	value,
-	required = false,
+	// Not the native onChange, a custom onChange that is called when the selected value changes.
+	onChange,
 	errorId: incomingErrorId,
-	autoComplete = 'off',
+	required = false,
+	autoComplete = 'list',
 	errorMessage = __( 'Please select a valid option', 'woocommerce' ),
+	className,
+	...restOfProps
 }: ComboboxProps ): JSX.Element => {
+	const scrollerRef = useRef( null );
 	const controlRef = useRef< HTMLDivElement >( null );
 	const fallbackId = useId();
 	const controlId = id || 'control-' + fallbackId;
 	const errorId = incomingErrorId || controlId;
+	const store = useComboboxStore();
 
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( VALIDATION_STORE_KEY );
 
+	const [ , startTransition ] = useTransition();
+
 	const { error, validationErrorId } = useSelect( ( select ) => {
-		const store = select( VALIDATION_STORE_KEY );
+		const validationStore = select( VALIDATION_STORE_KEY );
 		return {
-			error: store.getValidationError( errorId ),
-			validationErrorId: store.getValidationErrorId( errorId ),
+			error: validationStore.getValidationError( errorId ),
+			validationErrorId: validationStore.getValidationErrorId( errorId ),
 		};
+	} );
+
+	const initialOption = options.find( ( option ) => option.value === value );
+
+	const [ searchTerm, setSearchTerm ] = useState(
+		initialOption?.label || ''
+	);
+
+	const [ selectedOption, setSelectedOption ] = useState( initialOption );
+
+	useEffect( () => {
+		setSearchTerm( initialOption?.label || '' );
+		setSelectedOption( initialOption );
+	}, [ initialOption ] );
+
+	// If the list of options changes and the currently selected option is no longer available,
+	// we should unset the search term and deselect the option.
+	useEffect( () => {
+		if (
+			options.length > 0 &&
+			! options.some( ( option ) => option.value === value )
+		) {
+			store.setSelectedValue( initialOption?.value || '' );
+		}
+	}, [ initialOption, value, options, store ] );
+
+	const matchingSuggestions = useMemo( () => {
+		return findMatchingSuggestions( searchTerm, options );
+	}, [ searchTerm, options ] );
+
+	const rowVirtualizer = useVirtualizer( {
+		count: matchingSuggestions.length,
+		getScrollElement: () => scrollerRef.current,
+		estimateSize: () => 35,
 	} );
 
 	useEffect( () => {
@@ -88,72 +146,198 @@ const Combobox = ( {
 		setValidationErrors,
 	] );
 
-	// @todo Remove patch for ComboboxControl once https://github.com/WordPress/gutenberg/pull/33928 is released
-	// Also see https://github.com/WordPress/gutenberg/pull/34090
+	const outerWrapperClasses = classnames(
+		'wc-block-components-combobox',
+		className || '',
+		{
+			'is-active': selectedOption?.value,
+			'has-error': error?.message && ! error?.hidden,
+		}
+	);
+
+	const ariaInvalid = error?.message && ! error?.hidden ? 'true' : 'false';
+	const activeValue = store.useState( 'activeValue' );
+	const [ inputFocussed, setInputFocussed ] = useState( false );
+
+	const onClose = useCallback( () => {
+		// If the search term doesn't match the selected option, try do an exact value match.
+		// e.g. if the user leaves "NZ" in the search box, select "New Zealand" on close.
+		// If not just leave the last selected value.
+		if ( searchTerm && selectedOption?.label !== searchTerm ) {
+			const exactValueMatch = findExactMatchBy(
+				'value',
+				searchTerm,
+				options
+			);
+
+			if ( exactValueMatch ) {
+				store.setSelectedValue( exactValueMatch.value );
+			} else {
+				setSearchTerm( selectedOption?.label || '' );
+			}
+		} else {
+			setSearchTerm( selectedOption?.label || '' );
+		}
+	}, [ setSearchTerm, selectedOption, searchTerm, options, store ] );
+
+	const minHeight =
+		matchingSuggestions.length * 35 > 300
+			? 300
+			: matchingSuggestions.length * 35;
+
 	return (
 		<div
-			id={ controlId }
-			className={ classnames( 'wc-block-components-combobox', className, {
-				'is-active': value,
-				'has-error': error?.message && ! error?.hidden,
-			} ) }
 			ref={ controlRef }
+			id={ controlId }
+			className={ outerWrapperClasses }
 		>
-			<ComboboxControl
-				className={ 'wc-block-components-combobox-control' }
-				label={ label }
-				onChange={ onChange }
-				onFilterValueChange={ ( filterValue: string ) => {
-					if ( filterValue.length ) {
-						// If we have a value and the combobox is not focussed, this could be from browser autofill.
-						const activeElement = isObject( controlRef.current )
-							? controlRef.current.ownerDocument.activeElement
-							: undefined;
+			<div className="components-combobox-control components-base-control wc-block-components-combobox-control">
+				<ComboboxProvider
+					store={ store }
+					value={ searchTerm }
+					selectedValue={ selectedOption?.value || '' }
+					setValue={ ( val: string ) => {
+						startTransition( () => {
+							setSearchTerm( val );
 
-						if (
-							activeElement &&
-							isObject( controlRef.current ) &&
-							controlRef.current.contains( activeElement )
-						) {
-							return;
-						}
+							if ( val?.length ) {
+								const exactLabelMatch = findExactMatchBy(
+									'label',
+									val,
+									options
+								);
 
-						// Try to match.
-						const normalizedFilterValue =
-							filterValue.toLocaleUpperCase();
+								const valueMatch = options.find(
+									( opt ) =>
+										opt.value.toLocaleLowerCase() ===
+										val.toLocaleLowerCase()
+								);
 
-						// Try to find an exact match first using values.
-						const foundValue = options.find(
-							( option ) =>
-								option.value.toLocaleUpperCase() ===
-								normalizedFilterValue
+								const bestMatch = findBestMatchByLabel(
+									val,
+									options
+								);
+
+								const match =
+									exactLabelMatch || valueMatch || bestMatch;
+
+								if ( match ) {
+									if (
+										match.value !== selectedOption?.value
+									) {
+										store.setSelectedValue( match.value );
+									} else {
+										setSearchTerm( selectedOption?.label );
+									}
+								}
+							}
+						} );
+					} }
+					setSelectedValue={ ( val: string ) => {
+						const option = options.find(
+							( opt ) => opt.value === val
 						);
 
-						if ( foundValue ) {
-							onChange( foundValue.value );
-							return;
+						if ( option ) {
+							setSearchTerm( option.label );
+							setSelectedOption( option );
+							onChange( option.value );
+							store.setOpen( false );
 						}
+					} }
+				>
+					<div className="components-base-control__field">
+						<ComboboxLabel className="components-base-control__label">
+							{ label }
+						</ComboboxLabel>
 
-						// Fallback to a label match.
-						const foundOption = options.find( ( option ) =>
-							option.label
-								.toLocaleUpperCase()
-								.startsWith( normalizedFilterValue )
-						);
+						<div className="components-combobox-control__suggestions-container">
+							<AriakitCombobox
+								className="components-combobox-control__input components-form-token-field__input"
+								autoComplete="list"
+								aria-invalid={ ariaInvalid }
+								aria-errormessage={ validationErrorId }
+								type="text"
+								onFocus={ () => {
+									setSearchTerm( '' );
+									setInputFocussed( true );
+								} }
+								render={
+									<input
+										autoComplete={ autoComplete }
+										type="text"
+									/>
+								}
+								onBlur={ () => {
+									setInputFocussed( false );
+								} }
+								{ ...restOfProps }
+							/>
 
-						if ( foundOption ) {
-							onChange( foundOption.value );
-						}
-					}
-				} }
-				options={ options }
-				value={ value || '' }
-				allowReset={ false }
-				autoComplete={ autoComplete }
-				// Note these aria properties are ignored by ComboboxControl. When we replace ComboboxControl we should support them.
-				aria-invalid={ error?.message && ! error?.hidden }
-				aria-errormessage={ validationErrorId }
-			/>
+							<ComboboxPopover
+								className="components-form-token-field__suggestions-list"
+								sameWidth
+								flip={ false }
+								onClose={ onClose }
+							>
+								<div
+									ref={ scrollerRef }
+									style={ {
+										height: minHeight,
+										overflow: 'auto',
+										width: '100%',
+										position: 'relative',
+										zIndex: 10,
+									} }
+								>
+									<ComboboxList
+										style={ {
+											height: rowVirtualizer.getTotalSize(),
+											position: 'relative',
+											zIndex: 9,
+										} }
+										className="components-form-token-field__suggestions-list-inner"
+									>
+										{ rowVirtualizer
+											.getVirtualItems()
+											.map( ( virtualItem ) => {
+												const option =
+													matchingSuggestions[
+														virtualItem.index
+													];
+
+												return (
+													<ComboboxItem
+														key={ virtualItem.key }
+														// For backwards compatibility we retain the is-selected class, in future we could target aria or data attributes in CSS instead.
+														className={ `components-form-token-field__suggestion ${
+															activeValue ===
+															option.label
+																? 'is-selected'
+																: ''
+														}` }
+														value={ option.label }
+														style={ {
+															height: `${ virtualItem.size }px`,
+															transform: `translateY(${ virtualItem.start }px)`,
+															position:
+																'absolute',
+															top: 0,
+															left: 0,
+															width: '100%',
+														} }
+													>
+														{ option.label }
+													</ComboboxItem>
+												);
+											} ) }
+									</ComboboxList>
+								</div>
+							</ComboboxPopover>
+						</div>
+					</div>
+				</ComboboxProvider>
+			</div>
 			<ValidationInputError propertyName={ errorId } />
 		</div>
 	);
