@@ -83,9 +83,14 @@ class PTKPatternsStore {
 		return array_filter(
 			$patterns,
 			function ( $pattern ) use ( $pattern_ids ) {
+				if ( ! isset( $pattern['ID'] ) ) {
+					return true;
+				}
+
 				if ( isset( $pattern['post_type'] ) && 'wp_block' !== $pattern['post_type'] ) {
 					return false;
 				}
+
 				return ! in_array( (string) $pattern['ID'], $pattern_ids, true );
 			}
 		);
