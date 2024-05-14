@@ -595,8 +595,6 @@ class ListTable extends WP_List_Table {
 	 * @return int
 	 */
 	private function count_orders_by_status( $status ): int {
-		global $wpdb;
-
 		// Compute all counts and cache if necessary.
 		if ( is_null( $this->status_count_cache ) ) {
 			$this->status_count_cache = OrderUtil::get_count_for_type( $this->order_type );
