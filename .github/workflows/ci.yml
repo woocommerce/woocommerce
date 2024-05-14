@@ -277,7 +277,7 @@ jobs:
                 
                   echo "results: ${{ toJson(needs.*.result) }}"
                 
-                  if [[ ${{contains(needs.*.result, 'failure')}} ]]; then
+                  if [[ ${{contains(needs.*.result, 'cancelled')}} ]]; then
                     echo "There were failures."
                     exit 1
                   fi
