@@ -119,8 +119,8 @@ jobs:
             - name: Get commit message
               id: get_commit_message
               env:
-                HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-                PR_TITLE: ${{ github.event.pull_request.title }}
+                  HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                  PR_TITLE: ${{ github.event.pull_request.title }}
               run: |
                   if [[ "${{ github.event_name }}" == "push" ]]; then
                     COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
@@ -176,8 +176,8 @@ jobs:
             - name: Get commit message
               id: get_commit_message
               env:
-                HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-                PR_TITLE: ${{ github.event.pull_request.title }}
+                  HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                  PR_TITLE: ${{ github.event.pull_request.title }}
               run: |
                   if [[ "${{ github.event_name }}" == "push" ]]; then
                     COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
