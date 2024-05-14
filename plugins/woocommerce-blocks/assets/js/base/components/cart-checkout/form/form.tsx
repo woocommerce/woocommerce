@@ -35,6 +35,7 @@ import validateShippingCountry from './validate-shipping-country';
 import customValidationHandler from './custom-validation-handler';
 import Combobox from '../../combobox';
 import AddressFields from './address-fields';
+import { createFieldProps } from './utils';
 
 /**
  * Checkout form.
@@ -114,18 +115,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 					return null;
 				}
 
-				const fieldProps = {
-					id: `${ id }-${ field.key }`,
-					errorId: `${ addressType }_${ field.key }`,
-					label: field.required ? field.label : field.optionalLabel,
-					// These may come from core locale settings or the attributes option on custom fields.
-					autoCapitalize: field.autocapitalize,
-					autoComplete: field.autocomplete,
-					errorMessage: field.errorMessage,
-					required: field.required,
-					className: `wc-block-components-address-form__${ field.key }`,
-					...field.attributes,
-				};
+				const fieldProps = createFieldProps( field, id, addressType );
 
 				if ( field.key === 'email' ) {
 					fieldProps.id = 'email';

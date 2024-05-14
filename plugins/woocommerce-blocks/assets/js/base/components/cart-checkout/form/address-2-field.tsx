@@ -1,10 +1,8 @@
 /**
  * External dependencies
  */
-import {
-	ValidatedTextInput,
-	type ValidatedTextInputHandle,
-} from '@woocommerce/blocks-components';
+import { ValidatedTextInput } from '@woocommerce/blocks-components';
+import { AddressFormValues, ContactFormValues } from '@woocommerce/settings';
 import {
 	useCallback,
 	useEffect,
@@ -12,38 +10,28 @@ import {
 	useState,
 	Fragment,
 } from '@wordpress/element';
-import {
-	AddressFormValues,
-	ContactFormValues,
-	KeyedFormField,
-} from '@woocommerce/settings';
 import { objectHasProp } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 
-type Address2FieldProps = {
-	address2: KeyedFormField | undefined;
-	address2FieldProps: Record< string, undefined >;
-	field: KeyedFormField;
-	fieldsRef: React.MutableRefObject<
-		Record< string, ValidatedTextInputHandle | null >
-	>;
-	onChange: ( values: AddressFormValues | ContactFormValues ) => void;
-	values: AddressFormValues | ContactFormValues;
-};
+/**
+ * Internal dependencies
+ */
+import { AddressFieldProps } from './types';
 
-const Address2Field = ( {
-	address2,
-	address2FieldProps,
+const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 	field,
+	fieldProps,
 	fieldsRef,
 	onChange,
 	values,
-}: Address2FieldProps ): JSX.Element => {
+}: AddressFieldProps< T > ): JSX.Element => {
 	const hasFieldValue = useMemo( () => {
 		return objectHasProp( values, 'address_2' ) && values.address_2 !== '';
 	}, [ values ] );
 
-	const isFieldRequired = address2 ? address2.required : false;
+	const [ hasFieldBeenModified, setHasFieldBeenModified ] = useState( false );
+
+	const isFieldRequired = field ? field.required : false;
 
 	const [ isFieldVisible, setFieldVisible ] = useState(
 		hasFieldValue || isFieldRequired
@@ -52,14 +40,11 @@ const Address2Field = ( {
 	const toggleFieldVisibility = useCallback(
 		( event: React.MouseEvent< HTMLElement > ) => {
 			event.preventDefault();
-			setFieldVisible( ( prevVisibility ) => ! prevVisibility );
+			setFieldVisible( ( prevVisibility: boolean ) => ! prevVisibility );
 		},
 		[]
 	);
 
-	const [ hasFieldBeenModified, setHasFieldBeenModified ] = useState( false );
-
-	// Toggle address 2 visibility.
 	useEffect( () => {
 		/**
 		 * Determine if the address 2 input field should be shown based on the following conditions:
@@ -78,7 +63,7 @@ const Address2Field = ( {
 		<Fragment key={ field.key }>
 			{ isFieldVisible ? (
 				<ValidatedTextInput
-					{ ...address2FieldProps }
+					{ ...fieldProps }
 					key={ field.key }
 					ref={ ( el ) => ( fieldsRef.current[ field.key ] = el ) }
 					type={ field.type }
