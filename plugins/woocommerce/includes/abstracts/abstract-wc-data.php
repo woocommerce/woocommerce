@@ -362,7 +362,6 @@ abstract class WC_Data {
 			}
 		}
 
-		$this->maybe_read_meta_data();
 		$meta_data  = $this->get_meta_data();
 		$array_keys = array_keys( wp_list_pluck( $meta_data, 'key' ), $key, true );
 		$value      = $single ? '' : array();
