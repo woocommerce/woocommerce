@@ -45,7 +45,6 @@ use Automattic\WooCommerce\Admin\Features\Features;
  * @property WC_API $api API class.
  * @property WC_Deprecated_Hooks[] $deprecated_hook_handlers Array of deprecated hook handlers.
  * @property WC_Payment_Gateways $payment_gateways
- * @since 2.1
  */
 final class WooCommerce {
 
