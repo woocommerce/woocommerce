@@ -21,13 +21,12 @@ import {
 	useConstrainedTabbing,
 	useMergeRefs,
 } from '@wordpress/compose';
-
+import { useFocusReturn } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
 import Button from '../button';
 import * as ariaHelper from './utils/aria-helper';
-import useFocusReturn from './utils/use-focus-return';
 import './style.scss';
 
 interface DrawerProps {

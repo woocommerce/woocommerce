@@ -1,8 +1,4 @@
 /**
- * Some code of the Drawer component is based on the Modal component from Gutenberg:
- * https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/modal/index.tsx
- */
-/**
  * External dependencies
  */
 import { useEffect, useRef, useCallback } from '@wordpress/element';
@@ -15,12 +11,10 @@ let origin: Element | null = null;
  *
  * This function is copied from Gutenberg's hook under the same name.
  */
-export default function useFocusReturn(
+export function useFocusReturn(
 	onFocusReturn?: () => void
 ): ( node: HTMLElement | null ) => void {
-	/** @type {import('react').MutableRefObject<null | HTMLElement>} */
 	const ref = useRef< HTMLElement >( null );
-	/** @type {import('react').MutableRefObject<null | Element>} */
 	const focusedBeforeMount = useRef< Element >( null );
 	const onFocusReturnRef = useRef( onFocusReturn );
 	useEffect( () => {
