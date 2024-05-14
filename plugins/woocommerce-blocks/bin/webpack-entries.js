@@ -25,6 +25,7 @@ const blocks = {
 	cart: {},
 	'catalog-sorting': {},
 	checkout: {},
+	'coming-soon': {},
 	'customer-account': {},
 	'featured-category': {
 		customDir: 'featured-items/featured-category',
@@ -109,6 +110,10 @@ const blocks = {
 	},
 	'product-filter-active': {
 		customDir: 'product-filter/inner-blocks/active-filters',
+		isExperimental: true,
+	},
+	'product-filter-clear-button': {
+		customDir: 'product-filter/inner-blocks/clear-button',
 		isExperimental: true,
 	},
 	'order-confirmation-summary': {
@@ -217,6 +222,7 @@ const entries = {
 		wcBlocksSharedContext: './assets/js/shared/context/index.js',
 		wcBlocksSharedHocs: './assets/js/shared/hocs/index.js',
 		priceFormat: './packages/prices/index.js',
+		wcTypes: './assets/js/types/index.ts',
 
 		// interactivity components, exported as separate entries for now
 		'wc-interactivity-dropdown':

@@ -3,6 +3,7 @@
  * Title: Coming Soon
  * Slug: woocommerce/coming-soon
  * Categories: WooCommerce
+ * Feature Flag: launch-your-store
  *
  * @package WooCommerce\Blocks
  */

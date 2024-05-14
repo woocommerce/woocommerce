@@ -113,6 +113,7 @@ export type DisplayLayoutControlProps = {
 };
 export type QueryControlProps = {
 	query: ProductCollectionQuery;
+	trackInteraction: ( filter: CoreFilterNames | string ) => void;
 	setQueryAttribute: ( attrs: Partial< ProductCollectionQuery > ) => void;
 };
 
@@ -137,6 +138,7 @@ export enum CoreFilterNames {
 	ORDER = 'order',
 	STOCK_STATUS = 'stock-status',
 	TAXONOMY = 'taxonomy',
+	PRICE_RANGE = 'price-range',
 }
 
 export type CollectionName = CoreCollectionNames | string;

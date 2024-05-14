@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix bug parsing memory_limit in product importer

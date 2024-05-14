@@ -31,7 +31,7 @@ const filterBlocks = [
 	},
 ];
 
-test.describe( 'Filter blocks registration', async () => {
+test.describe( 'Filter blocks registration', () => {
 	test.beforeEach( async ( { admin } ) => {
 		await admin.createNewPost();
 	} );

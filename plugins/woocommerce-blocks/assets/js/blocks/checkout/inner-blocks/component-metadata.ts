@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import CHECKOUT_ACTIONS from './checkout-actions-block/block.json';
-import CHECKOUT_ADDITIONAL_INFORMATION from './checkout-additional-information-block/block.json';
+import CHECKOUT_ORDER_INFORMATION from './checkout-additional-information-block/block.json';
 import CHECKOUT_BILLING_ADDRESS from './checkout-billing-address-block/block.json';
 import CHECKOUT_CONTACT_INFORMATION from './checkout-contact-information-block/block.json';
 import CHECKOUT_EXPRESS_PAYMENT from './checkout-express-payment-block/block.json';
@@ -27,7 +27,7 @@ import CHECKOUT_ORDER_SUMMARY_TOTALS from './checkout-order-summary-totals/block
 
 export default {
 	CHECKOUT_ACTIONS,
-	CHECKOUT_ADDITIONAL_INFORMATION,
+	CHECKOUT_ORDER_INFORMATION,
 	CHECKOUT_BILLING_ADDRESS,
 	CHECKOUT_CONTACT_INFORMATION,
 	CHECKOUT_EXPRESS_PAYMENT,

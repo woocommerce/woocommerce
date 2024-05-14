@@ -62,6 +62,11 @@ export default function MySubscriptions(): JSX.Element {
 	);
 
 	if ( ! wccomSettings?.isConnected ) {
+		const connectMessage = __(
+			"Connect your store to WooCommerce.com using the WooCommerce.com Update Manager. Once connected, you'll be able to manage your subscriptions, receive product updates, and access streamlined support from this screen.",
+			'woocommerce'
+		);
+
 		return (
 			<div className="woocommerce-marketplace__my-subscriptions--connect">
 				<InstallModal />
@@ -70,10 +75,7 @@ export default function MySubscriptions(): JSX.Element {
 					{ __( 'Manage your subscriptions', 'woocommerce' ) }
 				</h2>
 				<p className="woocommerce-marketplace__my-subscriptions__description">
-					{ __(
-						"Connect your store to WooCommerce.com using the WooCommerce.com Update Manager. Once connected, you'll be able to manage your subscriptions, receive product updates, and access streamlined support from this screen.",
-						'woocommerce'
-					) }
+					{ connectMessage }
 				</p>
 				<Button href={ connectUrl() } variant="primary">
 					{ __( 'Connect your store', 'woocommerce' ) }

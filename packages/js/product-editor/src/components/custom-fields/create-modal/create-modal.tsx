@@ -14,7 +14,11 @@ import type { FocusEvent } from 'react';
  */
 import { TRACKS_SOURCE } from '../../../constants';
 import { TextControl } from '../../text-control';
-import { validate, type ValidationErrors } from '../utils/validations';
+import {
+	ValidationError,
+	validate,
+	type ValidationErrors,
+} from '../utils/validations';
 import type { Metadata } from '../../../types';
 import type { CreateModalProps } from './types';
 
@@ -25,6 +29,7 @@ const DEFAULT_CUSTOM_FIELD = {
 } satisfies Metadata< string >;
 
 export function CreateModal( {
+	values,
 	onCreate,
 	onCancel,
 	...props
@@ -86,14 +91,20 @@ export function CreateModal( {
 		prop: keyof Metadata< string >
 	) {
 		return function handleBlur( event: FocusEvent< HTMLInputElement > ) {
-			const error = validate( {
-				...customField,
-				[ prop ]: event.target.value,
-			} );
+			const error = validate(
+				{
+					...customField,
+					[ prop ]: event.target.value,
+				},
+				[ ...customFields, ...values ]
+			);
 			const id = String( customField.id );
 			setValidationError( ( current ) => ( {
 				...current,
-				[ id ]: error,
+				[ id ]: {
+					...( current[ id ] as ValidationError ),
+					[ prop ]: error[ prop ],
+				},
 			} ) );
 		};
 	}
@@ -133,7 +144,10 @@ export function CreateModal( {
 	function handleAddButtonClick() {
 		const { errors, hasErrors } = customFields.reduce(
 			( prev, customField ) => {
-				const _errors = validate( customField );
+				const _errors = validate( customField, [
+					...customFields,
+					...values,
+				] );
 				prev.errors[ String( customField.id ) ] = _errors;
 
 				if ( _errors.key ) {
@@ -165,7 +179,10 @@ export function CreateModal( {
 		}
 
 		onCreate(
-			customFields.map( ( { id, ...customField } ) => customField )
+			customFields.map( ( { id, ...customField } ) => ( {
+				key: customField.key.trim(),
+				value: customField.value?.trim(),
+			} ) )
 		);
 
 		recordEvent( 'product_custom_fields_add_new_button_click', {

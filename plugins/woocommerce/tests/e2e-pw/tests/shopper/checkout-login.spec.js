@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const { getOrderIdFromUrl } = require( '../../utils/order' );
+const { addAProductToCart } = require( '../../utils/cart' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const customer = {
@@ -112,8 +113,7 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		await context.clearCookies();
 
 		// all tests use the first product
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
+		await addAProductToCart( page, productId );
 	} );
 
 	test( 'can login to an existing account during checkout', async ( {

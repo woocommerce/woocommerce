@@ -78,24 +78,13 @@ test.describe( 'Merchant → Checkout', () => {
 	} );
 
 	test.describe( 'Can adjust T&S and Privacy Policy options', () => {
-		test.beforeAll( async ( { browser } ) => {
+		test.beforeEach( async ( { browser } ) => {
 			const page = await browser.newPage();
 			await page.goto(
 				`${ process.env.WORDPRESS_BASE_URL }/?setup_terms_and_privacy`
 			);
 			await expect(
 				page.getByText( 'Terms & Privacy pages set up.' )
-			).toBeVisible();
-			await page.close();
-		} );
-
-		test.afterAll( async ( { browser } ) => {
-			const page = await browser.newPage();
-			await page.goto(
-				`${ process.env.WORDPRESS_BASE_URL }/?teardown_terms_and_privacy`
-			);
-			await expect(
-				page.getByText( 'Terms & Privacy pages teared down.' )
 			).toBeVisible();
 			await page.close();
 		} );

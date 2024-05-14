@@ -6,6 +6,7 @@
 -   [Internal developers](#internal-developers)
 -   [Third-party developers](#third-party-developers)
 -   [Designers](#designers)
+-   [Block References](#block-references)
 -   [Developer Resources](#developer-resources)
     -   [Tools](#tools)
     -   [Articles](#articles)
@@ -118,6 +119,10 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
     -   [Class names update in 3.3.0](designers/theming/class-names-update-330.md)
     -   [Class names update in 2.8.0](designers/theming/class-names-update-280.md)
     -   [Product grid blocks style update in 2.7.0](designers/theming/product-grid-270.md)
+
+## Block References
+
+- [Block References](block-references/block-references.md)
 
 ## Developer Resources
 

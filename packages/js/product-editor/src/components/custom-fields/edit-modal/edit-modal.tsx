@@ -19,6 +19,7 @@ import type { EditModalProps } from './types';
 
 export function EditModal( {
 	initialValue,
+	values,
 	onUpdate,
 	onCancel,
 	...props
@@ -49,16 +50,19 @@ export function EditModal( {
 
 	function blurHandler( prop: keyof Metadata< string > ) {
 		return function handleBlur( event: FocusEvent< HTMLInputElement > ) {
-			const error = validate( {
-				...customField,
-				[ prop ]: event.target.value,
-			} );
+			const error = validate(
+				{
+					...customField,
+					[ prop ]: event.target.value,
+				},
+				values
+			);
 			setValidationError( error );
 		};
 	}
 
 	function handleUpdateButtonClick() {
-		const errors = validate( customField );
+		const errors = validate( customField, values );
 
 		if ( errors.key || errors.value ) {
 			setValidationError( errors );
@@ -72,7 +76,11 @@ export function EditModal( {
 			return;
 		}
 
-		onUpdate( customField );
+		onUpdate( {
+			...customField,
+			key: customField.key.trim(),
+			value: customField.value?.trim(),
+		} );
 
 		recordEvent( 'product_custom_fields_update_button_click', {
 			source: TRACKS_SOURCE,

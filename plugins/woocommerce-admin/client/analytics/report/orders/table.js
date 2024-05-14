@@ -92,9 +92,9 @@ class OrdersReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Origin', 'woocommerce' ),
-				screenReaderLabel: __( 'Origin', 'woocommerce' ),
-				key: 'origin',
+				label: __( 'Attribution', 'woocommerce' ),
+				screenReaderLabel: __( 'Attribution', 'woocommerce' ),
+				key: 'attribution',
 				required: false,
 				isSortable: false,
 			},

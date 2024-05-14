@@ -960,7 +960,6 @@ class WC_Tracker {
 			'enable_myaccount_registration'         => get_option( 'woocommerce_enable_myaccount_registration' ),
 			'registration_generate_username'        => get_option( 'woocommerce_registration_generate_username' ),
 			'registration_generate_password'        => get_option( 'woocommerce_registration_generate_password' ),
-			'hpos_enabled'                          => get_option( 'woocommerce_feature_custom_order_tables_enabled' ),
 			'hpos_sync_enabled'                     => get_option( 'woocommerce_custom_orders_table_data_sync_enabled' ),
 			'hpos_cot_authoritative'                => get_option( 'woocommerce_custom_orders_table_enabled' ),
 			'hpos_transactions_enabled'             => get_option( 'woocommerce_use_db_transactions_for_custom_orders_table_data_sync' ),

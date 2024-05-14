@@ -12,7 +12,6 @@ import {
 import { useSelect } from '@wordpress/data';
 import { Link } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
 import { Button, Modal, CheckboxControl } from '@wordpress/components';
 import interpolateComponents from '@automattic/interpolate-components';
 
@@ -25,6 +24,7 @@ import { FontPairing } from './global-styles';
 import { CustomizeStoreContext } from '..';
 import { FlowType } from '~/customize-store/types';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
+import { trackEvent } from '~/customize-store/tracking';
 export const SidebarNavigationScreenTypography = () => {
 	const { context, sendEvent } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
@@ -69,13 +69,13 @@ export const SidebarNavigationScreenTypography = () => {
 	}
 
 	const optIn = () => {
-		recordEvent(
+		trackEvent(
 			'customize_your_store_assembler_hub_opt_in_usage_tracking'
 		);
 	};
 
 	const skipOptIn = () => {
-		recordEvent(
+		trackEvent(
 			'customize_your_store_assembler_hub_skip_opt_in_usage_tracking'
 		);
 	};
@@ -95,7 +95,7 @@ export const SidebarNavigationScreenTypography = () => {
 				EditorLink: (
 					<Link
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_assembler_hub_editor_link_click',
 								{
 									source: 'typography',
@@ -113,7 +113,7 @@ export const SidebarNavigationScreenTypography = () => {
 				StyleLink: (
 					<Link
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_assembler_hub_style_link_click',
 								{
 									source: 'typography',

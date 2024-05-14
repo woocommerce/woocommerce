@@ -11,6 +11,7 @@ import {
 	useState,
 	createInterpolateElement,
 	createElement,
+	useEffect,
 } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
@@ -24,27 +25,45 @@ import { getSetting } from '@woocommerce/settings';
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
 import './style.scss';
-import { COMING_SOON_PAGE_EDITOR_LINK } from '../constants';
+import {
+	COMING_SOON_PAGE_EDITOR_LINK,
+	SITE_VISIBILITY_DOC_LINK,
+} from '../constants';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
 const SiteVisibility = () => {
-	const shareKey =
-		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_share_key;
+	const setting = window?.wcSettings?.admin?.siteVisibilitySettings || {};
+	const shareKey = setting?.woocommerce_share_key;
 
 	const [ comingSoon, setComingSoon ] = useState(
-		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_coming_soon || 'no'
+		setting?.woocommerce_coming_soon || 'no'
 	);
 	const [ storePagesOnly, setStorePagesOnly ] = useState(
-		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_store_pages_only
+		setting?.woocommerce_store_pages_only || 'no'
 	);
 	const [ privateLink, setPrivateLink ] = useState(
-		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_private_link
+		setting?.woocommerce_private_link || 'no'
 	);
+
+	useEffect( () => {
+		const initValues = {
+			comingSoon: setting.woocommerce_coming_soon,
+			storePagesOnly: setting.woocommerce_store_pages_only,
+			privateLink: setting.woocommerce_private_link || 'no',
+		};
+
+		const currentValues = { comingSoon, storePagesOnly, privateLink };
+		const saveButton = document.getElementsByClassName(
+			'woocommerce-save-button'
+		)[ 0 ];
+		if ( saveButton ) {
+			saveButton.disabled =
+				initValues.comingSoon === currentValues.comingSoon &&
+				initValues.storePagesOnly === currentValues.storePagesOnly &&
+				initValues.privateLink === currentValues.privateLink;
+		}
+	}, [ comingSoon, storePagesOnly, privateLink ] );
 
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
@@ -144,9 +163,16 @@ const SiteVisibility = () => {
 									'woocommerce'
 								) }
 								<p>
-									{ __(
-										'Hide store pages only behind a “Coming soon” page. The rest of your site will remain public.',
-										'woocommerce'
+									{ createInterpolateElement(
+										__(
+											'Display a "coming soon" message on your <a>store pages</a> — the rest of your site will remain visible.',
+											'woocommerce'
+										),
+										{
+											a: createElement( 'a', {
+												href: SITE_VISIBILITY_DOC_LINK,
+											} ),
+										}
 									) }
 								</p>
 							</>
@@ -173,7 +199,7 @@ const SiteVisibility = () => {
 								) }
 								<p>
 									{ __(
-										'“Coming soon” sites are only visible to Admins and Shop managers. Enable “Share site” to let other users view your site.',
+										'Share your site with anyone using a private link.',
 										'woocommerce'
 									) }
 								</p>

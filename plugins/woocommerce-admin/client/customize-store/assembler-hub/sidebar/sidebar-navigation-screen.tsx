@@ -31,6 +31,7 @@ import { GoBackWarningModal } from '../go-back-warning-modal';
  */
 import { CustomizeStoreContext } from '../';
 import { isAIFlow } from '~/customize-store/guards';
+import { isEntrepreneurFlow } from '~/customize-store/design-with-ai/entrepreneur-flow';
 const { useLocation } = unlock( routerPrivateApis );
 
 export const SidebarNavigationScreen = ( {
@@ -98,7 +99,7 @@ export const SidebarNavigationScreen = ( {
 							showTooltip={ false }
 						/>
 					) }
-					{ isRoot && (
+					{ isRoot && ! isEntrepreneurFlow() && (
 						<SidebarButton
 							onClick={ () => {
 								setOpenWarningModal( true );
@@ -110,6 +111,9 @@ export const SidebarNavigationScreen = ( {
 					) }
 					<Heading
 						className="edit-site-sidebar-navigation-screen__title"
+						style={
+							isEntrepreneurFlow() ? { padding: '0 16px' } : {}
+						}
 						color={ '#e0e0e0' /* $gray-200 */ }
 						level={ 1 }
 						size={ 20 }

@@ -22,7 +22,7 @@ const test = base.extend< {
 	},
 } );
 
-test.describe( 'Product Filter: Active Filters Block', async () => {
+test.describe( 'Product Filter: Active Filters Block', () => {
 	test.describe( 'frontend', () => {
 		test( 'Without any filters selected, only a wrapper block is rendered', async ( {
 			page,

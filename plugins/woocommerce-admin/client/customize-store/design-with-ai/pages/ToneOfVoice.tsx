@@ -5,7 +5,6 @@ import { Button, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
 import { useState, createInterpolateElement } from '@wordpress/element';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -14,6 +13,8 @@ import { Tone, designWithAiStateMachineContext } from '../types';
 import { Choice } from '../components/choice/choice';
 import { CloseButton } from '../components/close-button/close-button';
 import { aiWizardClosedBeforeCompletionEvent } from '../events';
+import { isEntrepreneurFlow } from '../entrepreneur-flow';
+import { trackEvent } from '~/customize-store/tracking';
 
 export type toneOfVoiceCompleteEvent = {
 	type: 'TONE_OF_VOICE_COMPLETE';
@@ -66,7 +67,7 @@ export const ToneOfVoice = ( {
 			context.toneOfVoice.aiRecommended &&
 			context.toneOfVoice.aiRecommended !== sound
 		) {
-			recordEvent( 'customize_your_store_ai_wizard_changed_ai_option', {
+			trackEvent( 'customize_your_store_ai_wizard_changed_ai_option', {
 				step: 'tone-of-voice',
 				ai_recommended: context.toneOfVoice.aiRecommended,
 				user_choice: sound,
@@ -86,14 +87,16 @@ export const ToneOfVoice = ( {
 				color={ 'var(--wp-admin-theme-color)' }
 				bgcolor={ 'transparent' }
 			/>
-			<CloseButton
-				onClick={ () => {
-					sendEvent( {
-						type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
-						payload: { step: 'tone-of-voice' },
-					} );
-				} }
-			/>
+			{ ! isEntrepreneurFlow() && (
+				<CloseButton
+					onClick={ () => {
+						sendEvent( {
+							type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
+							payload: { step: 'tone-of-voice' },
+						} );
+					} }
+				/>
+			) }
 			<div className="woocommerce-cys-design-with-ai-tone-of-voice woocommerce-cys-layout">
 				<div className="woocommerce-cys-page">
 					<h1>

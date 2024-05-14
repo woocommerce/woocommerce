@@ -7,7 +7,7 @@ const permalink = '/checkout';
 const templatePath = 'woocommerce/woocommerce//page-checkout';
 const templateType = 'wp_template';
 
-test.describe( 'Test the checkout template', async () => {
+test.describe( 'Test the checkout template', () => {
 	test( 'Template can be opened in the site editor', async ( {
 		admin,
 		page,
@@ -36,7 +36,7 @@ test.describe( 'Test the checkout template', async () => {
 			postId: templatePath,
 			postType: templateType,
 		} );
-		await admin.visitAdminPage( 'site-editor.php', 'path=%2Fpage' );
+		await admin.visitSiteEditor( { path: '/page' } );
 		await editor.page
 			.getByRole( 'button', { name: 'Checkout', exact: true } )
 			.click();
@@ -72,12 +72,7 @@ test.describe( 'Test the checkout template', async () => {
 	} );
 } );
 
-test.describe( 'Test editing the checkout template', async () => {
-	test.afterAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
-	} );
-
+test.describe( 'Test editing the checkout template', () => {
 	test( 'Merchant can transform shortcode block into blocks', async ( {
 		admin,
 		editorUtils,

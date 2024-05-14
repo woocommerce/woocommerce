@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update deprecated node 16 action to the latest in ci.yml
