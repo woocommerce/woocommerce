@@ -223,6 +223,15 @@
 				"@wordpress/**"
 			],
 			"packages": [
+				"@woocommerce/data"
+			],
+			"pinVersion": "wp-6.4"
+		},
+		{
+			"dependencies": [
+				"@wordpress/**"
+			],
+			"packages": [
 				"**"
 			],
 			"pinVersion": "wp-6.0"
