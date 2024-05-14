@@ -45,9 +45,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'clear button is not shown on initial page load', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const button = page.getByRole( 'button', { name: 'Clear' } );
 
