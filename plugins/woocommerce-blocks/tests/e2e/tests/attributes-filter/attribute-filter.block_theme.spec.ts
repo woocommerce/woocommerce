@@ -195,30 +195,39 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test.beforeAll(
-		async ( { productCollectionPageObject, editor, editorUtils } ) => {
-			await productCollectionPageObject.replaceProductsWithProductCollectionInTemplate(
-				'woocommerce/woocommerce//archive-product',
-				'productCatalog'
-			);
-			await editor.insertBlock( {
-				name: 'woocommerce/filter-wrapper',
-				attributes: {
-					filterType: 'attribute-filter',
-					heading: 'Filter By Attribute',
-				},
-			} );
+	test.beforeAll( async ( { admin, editor, editorUtils } ) => {
+		await admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//archive-product',
+			postType: 'wp_template',
+		} );
 
-			const attributeFilter = await editorUtils.getBlockByName(
-				blockData.slug
-			);
+		await editorUtils.enterEditMode();
 
-			await attributeFilter.getByText( 'Size' ).click();
-			await attributeFilter.getByText( 'Done' ).click();
+		await expect(
+			editor.canvas.locator( `[data-type="core/query"]` )
+		).toBeVisible();
 
-			await editor.saveSiteEditorEntities();
-		}
-	);
+		await editorUtils.replaceBlockByBlockName(
+			'core/query',
+			'woocommerce/product-collection'
+		);
+		await editor.insertBlock( {
+			name: 'woocommerce/filter-wrapper',
+			attributes: {
+				filterType: 'attribute-filter',
+				heading: 'Filter By Attribute',
+			},
+		} );
+
+		const attributeFilter = await editorUtils.getBlockByName(
+			blockData.slug
+		);
+
+		await attributeFilter.getByText( 'Size' ).click();
+		await attributeFilter.getByText( 'Done' ).click();
+
+		await editor.saveSiteEditorEntities();
+	} );
 	test.afterAll( async ( { editorUtils } ) => {
 		await editorUtils.revertTemplateCustomizations( 'Product Catalog' );
 	} );
