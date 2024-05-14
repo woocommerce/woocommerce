@@ -31,7 +31,7 @@ module.exports = async ( config ) => {
 	}
 	try {
 		fs.unlinkSync( process.env.CUSTOMERSTATE );
-		console.log( 'Customer state file deleted successfully.' );
+		console.log( 'Customer state file deleted successfully' );
 	} catch ( err ) {
 		if ( err.code === 'ENOENT' ) {
 			console.log( 'Customer state file does not exist.' );
