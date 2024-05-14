@@ -11,6 +11,7 @@ import { isExperimentalBuild } from '@woocommerce/block-settings';
 import metadata from './block.json';
 import Edit from './edit';
 import save from './save';
+import './style.scss';
 
 if ( isExperimentalBuild() ) {
 	registerBlockType( metadata, {
