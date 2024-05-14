@@ -162,7 +162,7 @@ const Combobox = ( {
 
 	const onClose = useCallback( () => {
 		// If the search term doesn't match the selected option, try do an exact value match.
-		// e.g. if the user leaves "NZ" in the search box, select "New Zealand" on close.
+		// e.g. if the user leaves "NZ" value in the search box, select "New Zealand" on close.
 		// If not just leave the last selected value.
 		if ( searchTerm && selectedOption?.label !== searchTerm ) {
 			const exactValueMatch = findExactMatchBy(
@@ -274,10 +274,9 @@ const Combobox = ( {
 								autoComplete="list"
 								aria-invalid={ ariaInvalid }
 								aria-errormessage={ validationErrorId }
-								type="text"
 								onFocus={ () => {
 									setInputFocussed( true );
-									setSearchTerm( '' );
+									store.setOpen( true );
 								} }
 								onBlur={ () => {
 									setInputFocussed( false );
