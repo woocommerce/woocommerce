@@ -29,7 +29,6 @@ declare global {
 			'activity-panels': boolean;
 			analytics: boolean;
 			coupons: boolean;
-			'customer-effort-score-tracks': boolean;
 			homescreen: boolean;
 			marketing: boolean;
 			'minified-js': boolean;
@@ -40,11 +39,6 @@ declare global {
 			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
 			'pattern-toolkit-full-composability': boolean;
-			'product-variation-management': boolean;
-			'product-virtual-downloadable': boolean;
-			'product-external-affiliate': boolean;
-			'product-grouped': boolean;
-			'product-linked': boolean;
 			'product-pre-publish-modal': boolean;
 			'product-custom-fields': boolean;
 			'remote-inbox-notifications': boolean;
