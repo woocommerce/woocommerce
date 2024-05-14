@@ -5,6 +5,9 @@ import { useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
+// @ts-expect-error missing types.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { isAppleOS } from '@wordpress/keycodes';
 
 export const RegisterKeyboardShortcuts = () => {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -20,6 +23,28 @@ export const RegisterKeyboardShortcuts = () => {
 				modifier: 'primary',
 				character: 'z',
 			},
+		} );
+
+		registerShortcut( {
+			name: 'woocommerce/product-editor/modal-block-editor/redo',
+			category: 'global',
+			description: __( 'Redo your last undo.', 'woocommerce' ),
+			keyCombination: {
+				modifier: 'primaryShift',
+				character: 'z',
+			},
+			// Disable on Apple OS because it conflicts with the browser's
+			// history shortcut. It's a fine alias for both Windows and Linux.
+			// Since there's no conflict for Ctrl+Shift+Z on both Windows and
+			// Linux, we keep it as the default for consistency.
+			aliases: isAppleOS()
+				? []
+				: [
+						{
+							modifier: 'primary',
+							character: 'y',
+						},
+				  ],
 		} );
 	}, [ registerShortcut ] );
 

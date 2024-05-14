@@ -10,12 +10,20 @@ import { useShortcut } from '@wordpress/keyboard-shortcuts';
 import { EditorContext } from '../context';
 
 export const KeyboardShortcuts = () => {
-	const { undo } = useContext( EditorContext );
+	const { redo, undo } = useContext( EditorContext );
 
 	useShortcut(
 		'woocommerce/product-editor/modal-block-editor/undo',
 		( event ) => {
 			undo();
+			event.preventDefault();
+		}
+	);
+
+	useShortcut(
+		'woocommerce/product-editor/modal-block-editor/redo',
+		( event ) => {
+			redo();
 			event.preventDefault();
 		}
 	);
