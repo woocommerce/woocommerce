@@ -163,57 +163,24 @@ export default function SearchResults( props: SearchResultProps ): JSX.Element {
 			} );
 		}
 
-		if ( hasExtensions && hasThemes && ! hasBusinessServices ) {
-			return (
-				<>
-					{ extensionsComponent( {
-						perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-					} ) }
-					{ themesComponent( {
-						perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-					} ) }
-				</>
-			);
-		}
-
-		if ( hasExtensions && hasBusinessServices && ! hasThemes ) {
-			return (
-				<>
-					{ extensionsComponent( {
-						perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-					} ) }
-					{ businessServicesComponent( {
-						perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-					} ) }
-				</>
-			);
-		}
-
-		if ( hasThemes && hasBusinessServices && ! hasExtensions ) {
-			return (
-				<>
-					{ themesComponent( {
-						perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-					} ) }
-					{ businessServicesComponent( {
-						perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-					} ) }
-				</>
-			);
-		}
-
 		// If we're done loading, we can put these components on the page.
 		return (
 			<>
-				{ extensionsComponent( {
-					perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-				} ) }
-				{ themesComponent( {
-					perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-				} ) }
-				{ businessServicesComponent( {
-					perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-				} ) }
+				{ hasExtensions
+					? extensionsComponent( {
+							perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
+					  } )
+					: null }
+				{ hasThemes
+					? themesComponent( {
+							perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
+					  } )
+					: null }
+				{ hasBusinessServices
+					? businessServicesComponent( {
+							perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
+					  } )
+					: null }
 			</>
 		);
 	};
