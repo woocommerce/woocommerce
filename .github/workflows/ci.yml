@@ -119,14 +119,18 @@ jobs:
             - name: Get commit message
               id: get_commit_message
               run: |
+                  escape() {
+                    echo "$1" | sed -e 's/`/\\`/g' -e 's/\$/\\$/g' -e 's/"/\\"/g'
+                  }
+
                   if [[ "${{ github.event_name }}" == "push" ]]; then
-                    COMMIT_MESSAGE=$(printf '%q' "${{ github.event.head_commit.message }}" | head -1)
+                    COMMIT_MESSAGE=`escape "${{ github.event.head_commit.message }}" | head -1`
                   elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                    COMMIT_MESSAGE=$(printf '%q' "${{ github.event.pull_request.title }}")
+                    COMMIT_MESSAGE=`escape "${{ github.event.pull_request.title }}"`
                   else
-                    COMMIT_MESSAGE=$(printf '%q' "${{ github.event_name }}")
+                    COMMIT_MESSAGE=`escape "${{ github.event_name }}"`
                   fi
-                
+
                   echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
               shell: bash
 
@@ -173,14 +177,18 @@ jobs:
             - name: Get commit message
               id: get_commit_message
               run: |
+                  escape() {
+                    echo "$1" | sed -e 's/`/\\`/g' -e 's/\$/\\$/g' -e 's/"/\\"/g'
+                  }
+
                   if [[ "${{ github.event_name }}" == "push" ]]; then
-                    COMMIT_MESSAGE=$(printf '%q' "${{ github.event.head_commit.message }}" | head -1)
+                    COMMIT_MESSAGE=`escape "${{ github.event.head_commit.message }}" | head -1`
                   elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                    COMMIT_MESSAGE=$(printf '%q' "${{ github.event.pull_request.title }}")
+                    COMMIT_MESSAGE=`escape "${{ github.event.pull_request.title }}"`
                   else
-                    COMMIT_MESSAGE=$(printf '%q' "${{ github.event_name }}")
+                    COMMIT_MESSAGE=`escape "${{ github.event_name }}"`
                   fi
-                
+
                   echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
               shell: bash
 
