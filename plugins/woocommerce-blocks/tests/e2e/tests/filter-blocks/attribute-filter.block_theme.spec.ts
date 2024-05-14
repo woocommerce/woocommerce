@@ -89,9 +89,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'clear button appears after a filter is applied', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const grayCheckbox = page.getByText( 'Gray' );
 			await grayCheckbox.click();
@@ -106,9 +105,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'clear button hides after deselecting all filters', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const grayCheckbox = page.getByText( 'Gray' );
 			await grayCheckbox.click();
@@ -125,9 +123,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'filters are cleared after clear button is clicked', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const grayCheckbox = page.getByText( 'Gray' );
 			await grayCheckbox.click();
