@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Correctly clear out state and postcode when switching countries.
