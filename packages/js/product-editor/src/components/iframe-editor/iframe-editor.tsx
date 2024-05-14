@@ -156,9 +156,6 @@ export function IframeEditor( {
 					undo,
 				} }
 			>
-				<KeyboardShortcuts />
-				<RegisterKeyboardShortcuts />
-
 				<BlockEditorProvider
 					settings={ {
 						...settings,
@@ -180,6 +177,10 @@ export function IframeEditor( {
 					useSubRegistry={ true }
 				>
 					<RegisterStores />
+
+					<KeyboardShortcuts />
+					<RegisterKeyboardShortcuts />
+
 					<HeaderToolbar
 						onSave={ () => {
 							setBlocks( temporalBlocks );
