@@ -227,9 +227,7 @@ const Combobox = ( {
 								) {
 									store.setSelectedValue( match.value );
 								}
-							}
-
-							if ( val?.length ) {
+							} else if ( val?.length ) {
 								const exactLabelMatch = findExactMatchBy(
 									'label',
 									val,
