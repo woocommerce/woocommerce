@@ -1,4 +1,4 @@
-changelog/fix-months-filterSignificance: patch
+Significance: patch
 Type: fix
 
 Fix dates dropdown in admin list order page where it wasn't filtered by order type.
