@@ -1,7 +1,11 @@
 /**
  * Internal dependencies
  */
-import { findExactMatchBy, findMatchingSuggestions } from '../util';
+import {
+	findExactMatchBy,
+	findMatchingSuggestions,
+	findBestMatchByLabel,
+} from '../util';
 
 export const OPTIONS = [
 	{
@@ -199,6 +203,34 @@ export const OPTIONS = [
 ];
 
 describe( 'Combobox option matching utilities', () => {
+	describe( 'findBestMatchByLabel', () => {
+		test( 'When providing a search term and there is a label that starts with those characters it returns the match', () => {
+			const result = findBestMatchByLabel( 'Tia', OPTIONS );
+			expect( result ).toEqual( {
+				value: 'DZ-14',
+				label: 'Tiaret',
+			} );
+		} );
+
+		test( 'When providing a search term it matches when there are special characters', () => {
+			const result = findBestMatchByLabel( 'Set', OPTIONS );
+			expect( result ).toEqual( {
+				value: 'DZ-19',
+				label: 'Sétif',
+			} );
+		} );
+
+		test( 'Empty strings always return no match', () => {
+			const result = findBestMatchByLabel( '', OPTIONS );
+			expect( result ).toBeUndefined();
+		} );
+
+		test( 'When there is no label starting with search term no match is returned', () => {
+			const result = findBestMatchByLabel( 'Zz', OPTIONS );
+			expect( result ).toBeUndefined();
+		} );
+	} );
+
 	describe( 'findExactMatchBy label', () => {
 		test( 'When providing a search term that is an exact label match it returns one item', () => {
 			const result = findExactMatchBy( 'label', 'Algiers', OPTIONS );
