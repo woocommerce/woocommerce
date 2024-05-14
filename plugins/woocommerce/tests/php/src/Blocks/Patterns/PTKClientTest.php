@@ -103,7 +103,7 @@ class PTKClientTest extends \WP_UnitTestCase {
 			},
 		);
 
-		$response = $this->client->fetch_patterns( array( 'categories' => array( 'pepe' ) ) );
+		$response = $this->client->fetch_patterns();
 		$this->assertErrorResponse( $response, 'Wrong response received from the Patterns Toolkit API: try again later.' );
 
 		remove_filter( 'pre_http_request', array( $this, 'return_request_failed' ) );
@@ -140,7 +140,7 @@ class PTKClientTest extends \WP_UnitTestCase {
 			},
 		);
 
-		$response = $this->client->fetch_patterns( array( 'categories' => array( 'pepe' ) ) );
+		$response = $this->client->fetch_patterns();
 		$this->assertIsArray( $response );
 		$this->assertCount( 1, $response );
 
