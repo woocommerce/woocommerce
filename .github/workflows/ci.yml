@@ -268,6 +268,19 @@ jobs:
                 REPO: ${{ github.repository }}
                 RUN_ID: ${{ github.run_id }}
               run: |
+                  # Check if project-jobs was successful. Fail for any other status, including skipped. 
+                  result="${{ needs.project-jobs.result }}"
+                  if [[ $result != "success" ]]; then
+                    echo "Generating CI jobs was not successful."
+                    exit 1
+                  fi
+                
+                  if [[ ${{contains(needs.*.result, 'failure')}} ]]; then
+                    echo "There were failures."
+                    exit 1
+                  fi
+                
+                  lintJobs=${{ fromJSON( needs.project-jobs.outputs.lint-jobs ) }}
                   jobs=$(curl -X GET https://api.github.com/repos/$REPO/actions/runs/$RUN_ID/jobs | jq ".jobs[] | {job_status: .conclusion, name: .name}")
                   echo $jobs
 
