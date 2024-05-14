@@ -244,7 +244,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				)
 			);
 
-			if ( property_exists( $this, 'status_transition' ) && $saved === false) {
+			if ( property_exists( $this, 'status_transition' ) && $saved === false ) {
 				$this->status_transition = false;
 			}
 		}
