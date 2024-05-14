@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Cache some queries in admin order list page
