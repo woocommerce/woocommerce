@@ -930,7 +930,7 @@ return array(
 		'fr_NC'   => $global_formats['rs_comma_space_ltr'],
 		'fr_PF'   => $global_formats['rs_comma_space_ltr'],
 		'fr_WF'   => $global_formats['rs_comma_space_ltr'],
-		'default' => $global_formats['rs_comma_space_ltr'],
+		'default' => $global_formats['ls_dot_comma_ltr'],
 	),
 	'YER' => array(
 		'ar_YE'   => $global_formats['rs_comma_dot_rtl'],
