@@ -60,7 +60,7 @@ class PatternRegistry {
 		}
 
 		// Title is a required property.
-		if ( ! $pattern_data['title'] ) {
+		if ( ! isset( $pattern_data['title'] ) || ! $pattern_data['title'] ) {
 			_doing_it_wrong(
 				'register_block_patterns',
 				esc_html(
