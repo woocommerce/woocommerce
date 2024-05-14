@@ -190,7 +190,7 @@ class Loader {
 	 * See https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/PromotingAppswithAppBanners/PromotingAppswithAppBanners.html
 	 */
 	public static function smart_app_banner() {
-		$exlude_paths = array(
+		$exclude_paths = array(
 			'/customize-store',
 			'/setup-wizard',
 			'/launch-your-store',
