@@ -195,16 +195,15 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test.beforeEach(
+	test.beforeAll(
 		async ( {
-			admin,
-			editorUtils,
 			productCollectionPageObject,
+			page,
 			editor,
+			editorUtils,
 		} ) => {
-			await admin.createNewPost();
-			await productCollectionPageObject.insertProductCollection();
-			await productCollectionPageObject.chooseCollectionInPost(
+			await productCollectionPageObject.replaceProductsWithProductCollectionInTemplate(
+				'woocommerce/woocommerce//archive-product',
 				'productCatalog'
 			);
 			await editor.insertBlock( {
@@ -222,9 +221,13 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 			await attributeFilter.getByText( 'Size' ).click();
 			await attributeFilter.getByText( 'Done' ).click();
 
-			await editorUtils.publishAndVisitPost();
+			await editor.saveSiteEditorEntities();
+			await page.goto( `/shop` );
 		}
 	);
+	test.afterAll( async ( { editorUtils } ) => {
+		await editorUtils.revertTemplateCustomizations( 'Product Catalog' );
+	} );
 
 	test( 'should show all products', async ( { page } ) => {
 		const products = page
@@ -255,20 +258,13 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		admin,
 		editor,
 		editorUtils,
-		productCollectionPageObject,
 	} ) => {
-		await admin.createNewPost();
-		await productCollectionPageObject.insertProductCollection();
-		await productCollectionPageObject.chooseCollectionInPost(
-			'productCatalog'
-		);
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'attribute-filter',
-				heading: 'Filter By Attribute',
-			},
+		await admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//archive-product',
+			postType: 'wp_template',
 		} );
+
+		await editorUtils.enterEditMode();
 		const attributeFilterControl = await editorUtils.getBlockByName(
 			blockData.slug
 		);
@@ -278,7 +274,9 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await editor.selectBlocks( attributeFilterControl );
 		await editor.openDocumentSettingsSidebar();
 		await page.getByText( "Show 'Apply filters' button" ).click();
-		await editorUtils.publishAndVisitPost();
+
+		await editor.saveSiteEditorEntities();
+		await page.goto( `/shop` );
 
 		await page.getByRole( 'checkbox', { name: 'Small' } ).click();
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
