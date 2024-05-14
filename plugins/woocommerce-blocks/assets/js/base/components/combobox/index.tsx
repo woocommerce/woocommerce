@@ -113,6 +113,8 @@ const Combobox = ( {
 		}
 	}, [ initialOption, value, options, store ] );
 
+	const [ inputFocussed, setInputFocussed ] = useState( false );
+
 	const matchingSuggestions = useMemo( () => {
 		return findMatchingSuggestions( searchTerm, options );
 	}, [ searchTerm, options ] );
@@ -203,6 +205,30 @@ const Combobox = ( {
 						startTransition( () => {
 							setSearchTerm( val );
 
+							if ( ! inputFocussed && val.length ) {
+								// Autofill via 1Password will be a label match, via Chrome will be a value.
+								// Label match may not be exact, e.g. in the case of "United States" versus our label "United States (US)".
+								// Note that if it is focussed and autofilled as a single field, the user will just have to choose
+								// the most appropriate option.
+								const valueMatch = options.find(
+									( option ) => option.value === val
+								);
+
+								const bestLabelMatch = findBestMatchByLabel(
+									val,
+									options
+								);
+
+								const match = valueMatch || bestLabelMatch;
+
+								if (
+									match &&
+									match.value !== selectedOption?.value
+								) {
+									store.setSelectedValue( match.value );
+								}
+							}
+
 							if ( val?.length ) {
 								const exactLabelMatch = findExactMatchBy(
 									'label',
@@ -222,10 +248,6 @@ const Combobox = ( {
 									match.value !== selectedOption?.value
 								) {
 									store.setSelectedValue( match.value );
-								} else if ( match ) {
-									setSearchTerm(
-										selectedOption?.label || ''
-									);
 								}
 							}
 						} );
@@ -256,7 +278,11 @@ const Combobox = ( {
 								aria-errormessage={ validationErrorId }
 								type="text"
 								onFocus={ () => {
+									setInputFocussed( true );
 									setSearchTerm( '' );
+								} }
+								onBlur={ () => {
+									setInputFocussed( false );
 								} }
 								render={
 									<input
