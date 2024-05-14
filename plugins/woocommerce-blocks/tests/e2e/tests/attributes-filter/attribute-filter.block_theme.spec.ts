@@ -196,12 +196,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 	test.beforeAll(
-		async ( {
-			productCollectionPageObject,
-			page,
-			editor,
-			editorUtils,
-		} ) => {
+		async ( { productCollectionPageObject, editor, editorUtils } ) => {
 			await productCollectionPageObject.replaceProductsWithProductCollectionInTemplate(
 				'woocommerce/woocommerce//archive-product',
 				'productCatalog'
@@ -222,7 +217,6 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 			await attributeFilter.getByText( 'Done' ).click();
 
 			await editor.saveSiteEditorEntities();
-			await page.goto( `/shop` );
 		}
 	);
 	test.afterAll( async ( { editorUtils } ) => {
@@ -230,6 +224,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 	} );
 
 	test( 'should show all products', async ( { page } ) => {
+		await page.goto( `/shop` );
 		const products = page
 			.locator( '.wp-block-woocommerce-product-template' )
 			.getByRole( 'listitem' );
@@ -240,6 +235,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 	test( 'should show only products that match the filter', async ( {
 		page,
 	} ) => {
+		await page.goto( `/shop` );
 		await page.getByRole( 'checkbox', { name: 'Small' } ).click();
 
 		await expect( page ).toHaveURL(
