@@ -93,7 +93,7 @@ const QuantitySelector = ( {
 				);
 			}
 
-			// Select the biggest between what's inserted, the the minimum value in steps.
+			// Select the biggest between what's inserted, the minimum value in steps.
 			value = Math.max( value, Math.ceil( minimum / step ) * step );
 
 			// We round off the value to our steps.

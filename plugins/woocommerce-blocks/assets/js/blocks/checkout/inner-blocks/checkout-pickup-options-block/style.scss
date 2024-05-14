@@ -24,28 +24,41 @@
 				margin-left: auto;
 			}
 		}
-		.wc-block-components-radio-control__description-group {
-			display: none;
-		}
-		.wc-block-components-radio-control__option-checked {
-			.wc-block-components-radio-control__description-group {
-				display: block;
-			}
-		}
 		.wc-block-components-radio-control__label-group {
 			em {
 				text-transform: uppercase;
 				font-style: inherit;
 			}
 		}
+
+		.wc-block-components-radio-control__option-checked {
+			.wc-block-components-radio-control__description-group {
+				.read-more-content {
+					margin-left: em($gap-small * 0.25);
+					position: initial;
+					visibility: visible;
+					z-index: initial;
+					hyphens: auto;
+					word-break: normal;
+				}
+			}
+		}
+
 		.wc-block-components-radio-control__description-group {
-			width: 100%;
+			display: block;
+			width: calc(100% + em($gap-huge / 0.875));
 			box-sizing: border-box;
-			background-color: $universal-background;
 			border-radius: $universal-border-radius;
 			padding: 1px em($gap-small);
+			margin-left: -(em($gap-huge));
 			margin-top: em($gap-smaller);
 			@include font-size(regular);
+
+			.read-more-content {
+				position: absolute;
+				visibility: hidden;
+				z-index: -1;
+			}
 		}
 		.wc-block-components-radio-control__description,
 		.wc-block-components-radio-control__secondary-description {
@@ -54,7 +67,7 @@
 			margin: em($gap-small) 0;
 			display: block;
 		}
-		.wc-block-components-radio-control__secondary-description {
+		.wc-block-components-radio-control__description {
 			color: $gray-700;
 
 			> svg {

@@ -92,6 +92,10 @@ describe( 'Testing cart', () => {
 
 	it( 'renders cart if there are items in the cart', async () => {
 		render( <CartBlock /> );
+
+		// TODO: Fix a recent deprecation of showSpinner prop of Button called in this component.
+		expect( console ).toHaveWarned();
+
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 
 		expect(
