@@ -5,9 +5,7 @@ $total-gap-width: calc(#{$gap-count} * #{$gap-small});
 $max-button-width: calc((100% - #{$total-gap-width}) / #{$max-columns});
 
 .wc-block-editor-product-collection-inspector-toolspanel__filters {
-	.wc-block-editor-product-collection-inspector__taxonomy-control:not(
-			:last-child
-		) {
+	.wc-block-editor-product-collection-inspector__taxonomy-control:not(:last-child) {
 		margin-bottom: $grid-unit-30;
 	}
 }
@@ -37,10 +35,7 @@ $max-button-width: calc((100% - #{$total-gap-width}) / #{$max-columns});
 
 	.wc-blocks-product-collection__collections-section {
 		display: grid;
-		grid-template-columns: repeat(
-			auto-fill,
-			minmax(max(#{$min-button-width}, #{$max-button-width}), 1fr)
-		);
+		grid-template-columns: repeat(auto-fill, minmax(max(#{$min-button-width}, #{$max-button-width}), 1fr));
 		grid-auto-rows: 1fr;
 		grid-gap: $gap-small;
 		margin: $gap-large auto;
@@ -102,9 +97,7 @@ $max-button-width: calc((100% - #{$total-gap-width}) / #{$max-columns});
 	}
 }
 
-.editor-styles-wrapper
-	.wp-block-woocommerce-product-collection
-	.wp-block-post-title {
+.editor-styles-wrapper .wp-block-woocommerce-product-collection .wp-block-post-title {
 	a:where(:not(.wp-element-button)) {
 		pointer-events: none;
 	}
