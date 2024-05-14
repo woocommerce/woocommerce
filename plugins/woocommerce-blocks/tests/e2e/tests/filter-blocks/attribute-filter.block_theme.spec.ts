@@ -43,6 +43,17 @@ test.describe( 'Product Filter: Attribute Block', () => {
 			await templateApiUtils.revertTemplate( testingTemplateId );
 		} );
 
+		test( 'clear button is not shown on initial page load', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( defaultBlockPost.link );
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await expect( button ).toBeHidden();
+		} );
+
 		test( 'renders a checkbox list with the available attribute filters', async ( {
 			page,
 		} ) => {
@@ -75,6 +86,67 @@ test.describe( 'Product Filter: Attribute Block', () => {
 			const products = page.locator( '.wc-block-product' );
 
 			await expect( products ).toHaveCount( 2 );
+		} );
+
+		test( 'clear button appears after a filter is applied', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( defaultBlockPost.link );
+
+			const grayCheckbox = page.getByText( 'Gray' );
+			await grayCheckbox.click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_color=gray.*/ );
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await expect( button ).toBeVisible();
+		} );
+
+		test( 'clear button hides after deselecting all filters', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( defaultBlockPost.link );
+
+			const grayCheckbox = page.getByText( 'Gray' );
+			await grayCheckbox.click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_color=gray.*/ );
+
+			await grayCheckbox.click();
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await expect( button ).toBeHidden();
+		} );
+
+		test( 'filters are cleared after clear button is clicked', async ( {
+			page,
+			defaultBlockPost,
+		} ) => {
+			await page.goto( defaultBlockPost.link );
+
+			const grayCheckbox = page.getByText( 'Gray' );
+			await grayCheckbox.click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_color=gray.*/ );
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await button.click();
+
+			COLOR_ATTRIBUTE_VALUES.map( async ( color ) => {
+				const element = page.locator(
+					`input[value="${ color.toLowerCase() }"]`
+				);
+
+				await expect( element ).not.toBeChecked();
+			} );
 		} );
 	} );
 
@@ -141,6 +213,16 @@ test.describe( 'Product Filter: Attribute Block', () => {
 			await templateApiUtils.revertTemplate( testingTemplateId );
 		} );
 
+		test( 'clear button is not shown on initial page load', async ( {
+			page,
+		} ) => {
+			await page.goto( PRODUCT_CATALOG_LINK );
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await expect( button ).toBeHidden();
+		} );
+
 		test( 'renders a dropdown list with the available attribute filters', async ( {
 			page,
 		} ) => {
@@ -181,6 +263,88 @@ test.describe( 'Product Filter: Attribute Block', () => {
 			const products = page.locator( '.wc-block-product' );
 
 			await expect( products ).toHaveCount( 1 );
+		} );
+
+		test( 'clear button appears after a filter is applied', async ( {
+			page,
+			dropdownBlockPost,
+		} ) => {
+			await page.goto( dropdownBlockPost.link );
+
+			const dropdownLocator = page.locator(
+				'.wc-interactivity-dropdown'
+			);
+
+			await expect( dropdownLocator ).toBeVisible();
+			await dropdownLocator.click();
+
+			const yellowOption = page.getByText( 'Yellow' );
+			await yellowOption.click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_color=yellow.*/ );
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await expect( button ).toBeVisible();
+		} );
+
+		test( 'clear button hides after deselecting all filters', async ( {
+			page,
+			dropdownBlockPost,
+		} ) => {
+			await page.goto( dropdownBlockPost.link );
+
+			const dropdownLocator = page.locator(
+				'.wc-interactivity-dropdown'
+			);
+
+			await dropdownLocator.click();
+
+			const yellowOption = page.getByText( 'Yellow' );
+			await yellowOption.click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_color=yellow.*/ );
+
+			await dropdownLocator.click();
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			const removeFilter = page.locator(
+				'.wc-interactivity-dropdown__badge-remove'
+			);
+
+			await removeFilter.click();
+
+			await expect( button ).toBeHidden();
+		} );
+
+		test( 'filters are cleared after clear button is clicked', async ( {
+			page,
+			dropdownBlockPost,
+		} ) => {
+			await page.goto( dropdownBlockPost.link );
+
+			const dropdownLocator = page.locator(
+				'.wc-interactivity-dropdown'
+			);
+
+			await dropdownLocator.click();
+
+			const yellowOption = page.getByText( 'Yellow' );
+			await yellowOption.click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_color=yellow.*/ );
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await button.click();
+
+			const placeholder = page.getByText( 'Select Color' );
+
+			await expect( placeholder ).toBeVisible();
 		} );
 	} );
 } );

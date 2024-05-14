@@ -33,6 +33,59 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 			await templateApiUtils.revertTemplate( testingTemplateId );
 		} );
 
+		test( 'clear button is not shown on initial page load', async ( {
+			page,
+		} ) => {
+			await page.goto( PRODUCT_CATALOG_LINK );
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await expect( button ).toBeHidden();
+		} );
+
+		test( 'clear button appears after a filter is applied', async ( {
+			page,
+		} ) => {
+			await page.goto( `${ PRODUCT_CATALOG_LINK }?rating_filter=1` );
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await expect( button ).toBeVisible();
+		} );
+
+		test( 'clear button hides after deselecting all filters', async ( {
+			page,
+		} ) => {
+			await page.goto( `${ PRODUCT_CATALOG_LINK }?rating_filter=1` );
+
+			const ratingCheckboxes = page.getByLabel(
+				/Checkbox: Rated \d out of 5/
+			);
+
+			await ratingCheckboxes.nth( 0 ).uncheck();
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await expect( button ).toBeHidden();
+		} );
+
+		test( 'filters are cleared after clear button is clicked', async ( {
+			page,
+		} ) => {
+			await page.goto( `${ PRODUCT_CATALOG_LINK }?rating_filter=1` );
+
+			const button = page.getByRole( 'button', { name: 'Clear' } );
+
+			await button.click();
+
+			const ratingCheckbox = page.getByLabel(
+				/Checkbox: Rated 1 out of 5/
+			);
+
+			await expect( ratingCheckbox ).toBeVisible();
+			await expect( ratingCheckbox ).not.toBeChecked();
+		} );
+
 		test( 'Renders a checkbox list with the available ratings', async ( {
 			page,
 		} ) => {
@@ -61,7 +114,7 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 				/Checkbox: Rated \d out of 5/
 			);
 
-			ratingCheckboxes.nth( 0 ).check();
+			await ratingCheckboxes.nth( 0 ).check();
 
 			// wait for navigation
 			await page.waitForURL(
