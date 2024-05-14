@@ -56,6 +56,19 @@ export const RegisterKeyboardShortcuts = () => {
 				character: 'o',
 			},
 		} );
+
+		registerShortcut( {
+			name: 'woocommerce/product-editor/modal-block-editor/toggle-sidebar',
+			category: 'global',
+			description: __(
+				'Show or hide the Settings sidebar.',
+				'woocommerce'
+			),
+			keyCombination: {
+				modifier: 'primaryShift',
+				character: ',',
+			},
+		} );
 	}, [ registerShortcut ] );
 
 	return null;

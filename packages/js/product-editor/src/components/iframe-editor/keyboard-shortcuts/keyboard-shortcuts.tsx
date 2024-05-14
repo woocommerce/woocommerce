@@ -1,13 +1,22 @@
 /**
  * External dependencies
  */
+import { useDispatch, useSelect } from '@wordpress/data';
 import { useContext } from '@wordpress/element';
 import { useShortcut } from '@wordpress/keyboard-shortcuts';
+import {
+	store as interfaceStore,
+	// @ts-expect-error No types for this exist yet.
+} from '@wordpress/interface';
 
 /**
  * Internal dependencies
  */
 import { EditorContext } from '../context';
+import {
+	SETTINGS_SIDEBAR_IDENTIFIER,
+	SIDEBAR_COMPLEMENTARY_AREA_SCOPE,
+} from '../constants';
 
 export const KeyboardShortcuts = () => {
 	const {
@@ -16,6 +25,22 @@ export const KeyboardShortcuts = () => {
 		setIsDocumentOverviewOpened: setIsListViewOpened,
 		undo,
 	} = useContext( EditorContext );
+
+	const { isSettingsSidebarOpen } = useSelect( ( select ) => {
+		// @ts-expect-error These selectors are available in the interface data store.
+		const { getActiveComplementaryArea } = select( interfaceStore );
+
+		return {
+			isSettingsSidebarOpen:
+				getActiveComplementaryArea(
+					SIDEBAR_COMPLEMENTARY_AREA_SCOPE
+				) === SETTINGS_SIDEBAR_IDENTIFIER,
+		};
+	}, [] );
+
+	// @ts-expect-error These actions are available in the interface data store.
+	const { disableComplementaryArea, enableComplementaryArea } =
+		useDispatch( interfaceStore );
 
 	useShortcut(
 		'woocommerce/product-editor/modal-block-editor/undo',
@@ -37,6 +62,21 @@ export const KeyboardShortcuts = () => {
 		'woocommerce/product-editor/modal-block-editor/toggle-list-view',
 		( event ) => {
 			setIsListViewOpened( ! isListViewOpened );
+			event.preventDefault();
+		}
+	);
+
+	useShortcut(
+		'woocommerce/product-editor/modal-block-editor/toggle-sidebar',
+		( event ) => {
+			if ( isSettingsSidebarOpen ) {
+				disableComplementaryArea( SIDEBAR_COMPLEMENTARY_AREA_SCOPE );
+			} else {
+				enableComplementaryArea(
+					SIDEBAR_COMPLEMENTARY_AREA_SCOPE,
+					SETTINGS_SIDEBAR_IDENTIFIER
+				);
+			}
 			event.preventDefault();
 		}
 	);
