@@ -1,8 +1,4 @@
 /**
- * External dependencies
- */
-import { renderHook } from '@testing-library/react';
-/**
  * Internal dependencies
  */
 import { registerCheckoutFilters, applyCheckoutFilter } from '../';
