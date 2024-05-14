@@ -27,7 +27,6 @@ import { Product, ProductType, SearchResultType } from '../product-list/types';
 import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
-import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
 
 interface ProductsProps {
 	categorySelector?: boolean;
@@ -169,12 +168,9 @@ export default function Products( props: ProductsProps ) {
 	return (
 		<div className={ containerClassName }>
 			{ selectedTab !== 'business-services' && (
-				<>
-					<PluginInstallNotice />
-					<h2 className={ productListTitleClassName }>
-						{ isLoading ? ' ' : title }
-					</h2>
-				</>
+				<h2 className={ productListTitleClassName }>
+					{ isLoading ? ' ' : title }
+				</h2>
 			) }
 			<div className="woocommerce-marketplace__sub-header">
 				{ props.categorySelector && (

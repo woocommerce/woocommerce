@@ -24,6 +24,7 @@ import {
 import InstallNewProductModal from '../install-flow/install-new-product-modal';
 import Promotions from '../promotions/promotions';
 import ConnectNotice from '~/marketplace/components/connect-notice/connect-notice';
+import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
@@ -185,7 +186,12 @@ export default function Content(): JSX.Element {
 		<div className="woocommerce-marketplace__content">
 			<Promotions />
 			<InstallNewProductModal products={ products } />
-			<ConnectNotice />
+			{ selectedTab !== 'business-services' && (
+				<>
+					<ConnectNotice />
+					<PluginInstallNotice />
+				</>
+			) }
 			{ renderContent() }
 		</div>
 	);
