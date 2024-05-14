@@ -12,8 +12,6 @@ import userEvent from '@testing-library/user-event';
 import { CartEventsProvider } from '../index';
 import Block from '../../../../../../blocks/cart/inner-blocks/proceed-to-checkout-block/block';
 
-let ref = null;
-
 describe( 'CartEventsProvider', () => {
 	it( 'allows observers to unsubscribe', async () => {
 		const user = userEvent.setup();
