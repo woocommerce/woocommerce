@@ -51,6 +51,27 @@ jest.mock( '@wordpress/element', () => {
 	};
 } );
 
+jest.mock( '../context', () => {
+	return {
+		...jest.requireActual( '../context' ),
+		useCheckoutBlockContext: jest.fn().mockReturnValue( {
+			showFormStepNumbers: false,
+			cartPageId: 0,
+			requireCompanyField: false,
+			requirePhoneField: false,
+			showApartmentField: false,
+			showCompanyField: false,
+			showOrderNotes: false,
+			showPhoneField: false,
+			showPolicyLinks: false,
+			showRateAfterTaxName: false,
+			showReturnToCart: false,
+		} ),
+	};
+} );
+
+import { useCheckoutBlockContext } from '../context';
+
 const CheckoutBlock = () => {
 	return (
 		<Checkout attributes={ {} }>
@@ -255,5 +276,43 @@ describe( 'Testing cart', () => {
 			allSettings.checkoutAllowsSignup = undefined;
 			dispatch( CHECKOUT_STORE_KEY ).__internalSetCustomerId( 1 );
 		} );
+	} );
+
+	it( 'Ensures correct classes are applied to FormStep when step numbers are shown/hidden', async () => {
+		const mockReturnValue = {
+			showFormStepNumbers: false,
+			cartPageId: 0,
+			requireCompanyField: false,
+			requirePhoneField: false,
+			showApartmentField: false,
+			showCompanyField: false,
+			showOrderNotes: false,
+			showPhoneField: false,
+			showPolicyLinks: false,
+			showRateAfterTaxName: false,
+			showReturnToCart: false,
+		};
+		useCheckoutBlockContext.mockReturnValue( mockReturnValue );
+		// Render the CheckoutBlock
+		const { container, rerender } = render( <CheckoutBlock /> );
+
+		let formStepsWithNumber = container.querySelectorAll(
+			'.wc-block-components-checkout-step--with-step-number'
+		);
+
+		expect( formStepsWithNumber ).toHaveLength( 0 );
+
+		useCheckoutBlockContext.mockReturnValue( {
+			...mockReturnValue,
+			showFormStepNumbers: true,
+		} );
+
+		rerender( <CheckoutBlock /> );
+
+		formStepsWithNumber = container.querySelectorAll(
+			'.wc-block-components-checkout-step--with-step-number'
+		);
+
+		expect( formStepsWithNumber.length ).not.toBe( 0 );
 	} );
 } );
