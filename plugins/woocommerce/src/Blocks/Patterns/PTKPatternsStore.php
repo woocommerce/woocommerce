@@ -73,7 +73,7 @@ class PTKPatternsStore {
 	}
 
 	/**
-	 * Filter patterns to only include those with the given IDs.
+	 * Filter patterns to exclude those with the given IDs.
 	 *
 	 * @param array $patterns The patterns to filter.
 	 * @param array $pattern_ids The pattern IDs to exclude.
@@ -83,10 +83,9 @@ class PTKPatternsStore {
 		return array_filter(
 			$patterns,
 			function ( $pattern ) use ( $pattern_ids ) {
-				if ( 'wp_block' !== $pattern['post_type'] ) {
+				if ( isset( $pattern['post_type'] ) && 'wp_block' !== $pattern['post_type'] ) {
 					return false;
 				}
-
 				return ! in_array( (string) $pattern['ID'], $pattern_ids, true );
 			}
 		);
