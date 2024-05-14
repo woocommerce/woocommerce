@@ -15,12 +15,7 @@ import {
  * Internal dependencies
  */
 import TaxonomyItem from './taxonomy-item';
-import { ProductCollectionQuery } from '../../../types';
-
-interface TaxonomyControlProps {
-	query: ProductCollectionQuery;
-	setQueryAttribute: ( value: Partial< ProductCollectionQuery > ) => void;
-}
+import { QueryControlProps, CoreFilterNames } from '../../../types';
 
 /**
  * Hook that returns the taxonomies associated with product post type.
@@ -43,8 +38,9 @@ export const useTaxonomies = (): Taxonomy[] => {
 
 function TaxonomyControls( {
 	setQueryAttribute,
+	trackInteraction,
 	query,
-}: TaxonomyControlProps ) {
+}: QueryControlProps ) {
 	const { taxQuery } = query;
 
 	const taxonomies = useTaxonomies();
@@ -55,27 +51,37 @@ function TaxonomyControls( {
 	return (
 		<>
 			{ taxonomies.map( ( taxonomy: Taxonomy ) => {
-				const termIds = taxQuery?.[ taxonomy.slug ] || [];
-				const handleChange = ( newTermIds: number[] ) =>
+				const { slug, name } = taxonomy;
+				const termIds = taxQuery?.[ slug ] || [];
+				const handleChange = ( newTermIds: number[] ) => {
 					setQueryAttribute( {
 						taxQuery: {
 							...taxQuery,
-							[ taxonomy.slug ]: newTermIds,
+							[ slug ]: newTermIds,
 						},
 					} );
+					trackInteraction(
+						`${ CoreFilterNames.TAXONOMY }__${ slug }`
+					);
+				};
 
-				const deselectCallback = () => handleChange( [] );
+				const deselectCallback = () => {
+					handleChange( [] );
+					trackInteraction(
+						`${ CoreFilterNames.TAXONOMY }__${ slug }`
+					);
+				};
 
 				return (
 					<ToolsPanelItem
-						key={ taxonomy.slug }
-						label={ taxonomy.name }
+						key={ slug }
+						label={ name }
 						hasValue={ () => termIds.length }
 						onDeselect={ deselectCallback }
 						resetAllFilter={ deselectCallback }
 					>
 						<TaxonomyItem
-							key={ taxonomy.slug }
+							key={ slug }
 							taxonomy={ taxonomy }
 							termIds={ termIds }
 							onChange={ handleChange }

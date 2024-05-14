@@ -16,6 +16,7 @@ import {
 	TProductCollectionOrder,
 	TProductCollectionOrderBy,
 	QueryControlProps,
+	CoreFilterNames,
 } from '../../types';
 import { getDefaultQuery } from '../../constants';
 
@@ -47,12 +48,13 @@ const orderOptions = [
 ];
 
 const OrderByControl = ( props: QueryControlProps ) => {
-	const { query, setQueryAttribute } = props;
+	const { query, trackInteraction, setQueryAttribute } = props;
 	const { order, orderBy } = query;
 	const defaultQuery = getDefaultQuery( query );
 
 	const deselectCallback = () => {
 		setQueryAttribute( { orderBy: defaultQuery.orderBy } );
+		trackInteraction( CoreFilterNames.ORDER );
 	};
 
 	return (
@@ -76,6 +78,7 @@ const OrderByControl = ( props: QueryControlProps ) => {
 						order: newOrder as TProductCollectionOrder,
 						orderBy: newOrderBy as TProductCollectionOrderBy,
 					} );
+					trackInteraction( CoreFilterNames.ORDER );
 				} }
 			/>
 		</ToolsPanelItem>
