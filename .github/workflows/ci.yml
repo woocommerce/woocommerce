@@ -123,9 +123,9 @@ jobs:
                 PR_TITLE: ${{ github.event.pull_request.title }}
               run: |
                   if [[ "${{ github.event_name }}" == "push" ]]; then
-                    COMMIT_MESSAGE="${{ env.HEAD_COMMIT_MESSAGE }}"
+                    COMMIT_MESSAGE="$HEAD_COMMIT_MESSAGE"
                   elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                    COMMIT_MESSAGE="${{ env.PR_TITLE }}"
+                    COMMIT_MESSAGE="$PR_TITLE"
                   else
                     COMMIT_MESSAGE="${{ github.event_name }}"
                   fi
@@ -180,9 +180,9 @@ jobs:
                 PR_TITLE: ${{ github.event.pull_request.title }}
               run: |
                   if [[ "${{ github.event_name }}" == "push" ]]; then
-                    COMMIT_MESSAGE="${{ env.HEAD_COMMIT_MESSAGE }}"
+                    COMMIT_MESSAGE="$HEAD_COMMIT_MESSAGE"
                   elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                    COMMIT_MESSAGE="${{ env.PR_TITLE }}"
+                    COMMIT_MESSAGE="$PR_TITLE"
                   else
                     COMMIT_MESSAGE="${{ github.event_name }}"
                   fi
