@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update `get_commit_message` CI to use environment variables for commit message and PR title
