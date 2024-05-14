@@ -200,10 +200,17 @@ const Combobox = ( {
 						startTransition( () => {
 							setSearchTerm( val );
 
-							// If the input is not focussed, it's autofill, attempt the best match.
-							if ( ! inputFocussed ) {
+							if ( val?.length ) {
+								const exactLabelMatch = findExactMatchBy(
+									'label',
+									val,
+									options
+								);
+
 								const valueMatch = options.find(
-									( opt ) => opt.value === val
+									( opt ) =>
+										opt.value.toLocaleLowerCase() ===
+										val.toLocaleLowerCase()
 								);
 
 								const bestMatch = findBestMatchByLabel(
@@ -211,26 +218,17 @@ const Combobox = ( {
 									options
 								);
 
-								if ( valueMatch ) {
-									store.setSelectedValue( valueMatch.value );
-								} else if ( bestMatch ) {
-									store.setSelectedValue( bestMatch.value );
-								}
-							} else if ( val?.length ) {
-								const exactLabelMatch = findExactMatchBy(
-									'label',
-									val,
-									options
-								);
+								const match =
+									exactLabelMatch || valueMatch || bestMatch;
 
-								if (
-									exactLabelMatch &&
-									exactLabelMatch.value !==
-										selectedOption?.value
-								) {
-									store.setSelectedValue(
-										exactLabelMatch.value
-									);
+								if ( match ) {
+									if (
+										match.value !== selectedOption?.value
+									) {
+										store.setSelectedValue( match.value );
+									} else {
+										setSearchTerm( selectedOption?.label );
+									}
 								}
 							}
 						} );
@@ -261,6 +259,7 @@ const Combobox = ( {
 								aria-errormessage={ validationErrorId }
 								type="text"
 								onFocus={ () => {
+									setSearchTerm( '' );
 									setInputFocussed( true );
 								} }
 								render={
