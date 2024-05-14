@@ -123,14 +123,14 @@ jobs:
                 PR_TITLE: ${{ github.event.pull_request.title }}
               run: |
                   if [[ "${{ github.event_name }}" == "push" ]]; then
-                    COMMIT_MESSAGE="$HEAD_COMMIT_MESSAGE"
+                    COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
                   elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
                     COMMIT_MESSAGE="$PR_TITLE"
                   else
                     COMMIT_MESSAGE="${{ github.event_name }}"
                   fi
 
-                  echo "COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | head -1 | xargs printf '%q')" >> "$GITHUB_OUTPUT"
+                  echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
               shell: bash
 
             - name: 'Prepare Test Environment'
@@ -180,14 +180,14 @@ jobs:
                 PR_TITLE: ${{ github.event.pull_request.title }}
               run: |
                   if [[ "${{ github.event_name }}" == "push" ]]; then
-                    COMMIT_MESSAGE="$HEAD_COMMIT_MESSAGE"
+                    COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
                   elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
                     COMMIT_MESSAGE="$PR_TITLE"
                   else
                     COMMIT_MESSAGE="${{ github.event_name }}"
                   fi
 
-                  echo "COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | head -1 | xargs printf '%q')" >> "$GITHUB_OUTPUT"
+                  echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
               shell: bash
 
             - name: 'Prepare Test Environment'
