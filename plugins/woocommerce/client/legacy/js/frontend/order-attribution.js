@@ -82,6 +82,7 @@
 			sbjs.init( {
 				lifetime: Number( params.lifetime ),
 				session_length: Number( params.session ),
+				base64: Boolean( params.base64 ),
 				timezone_offset: '0', // utc
 			} );
 		}
