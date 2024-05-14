@@ -276,7 +276,7 @@ jobs:
                     exit 1
                   fi
                 
-                  node ./.github/actions/evaluate-project-jobs.js
+                  node ./.github/workflows/scripts/evaluate-project-jobs.js
 
     e2e-test-reports:
         name: 'Report e2e tests results'
