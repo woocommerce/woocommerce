@@ -36,7 +36,7 @@ const templates = [
 ];
 const userText = 'Hello World in the page';
 
-templates.forEach( async ( template ) => {
+for ( const template of templates ) {
 	test.describe( 'Page Content Wrapper', () => {
 		test( `the content of the ${ template.title } page is correctly rendered in the ${ template.title } template`, async ( {
 			page,
@@ -70,4 +70,4 @@ templates.forEach( async ( template ) => {
 			await expect( page.getByText( userText ).first() ).toBeVisible();
 		} );
 	} );
-} );
+}

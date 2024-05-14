@@ -83,12 +83,20 @@ const getThumbnailImageIdByNth = async (
 };
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editorUtils } ) => {
-		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//${ blockData.slug }`,
-			postType: 'wp_template',
+	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
+		const template = await requestUtils.createTemplate( 'wp_template', {
+			slug: blockData.slug,
+			title: 'Custom Single Product',
+			content: 'placeholder',
 		} );
-		await editorUtils.enterEditMode();
+
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+
+		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
 	} );
 
 	test.describe( 'with thumbnails', () => {
@@ -342,7 +350,7 @@ test.describe( `${ blockData.name }`, () => {
 			const largeImageBlock = await pageObject.getMainImageBlock( {
 				page: 'frontend',
 			} );
-			largeImageBlock.click();
+			await largeImageBlock.click();
 
 			const productGalleryPopUpContent = page.locator(
 				'.wc-block-product-gallery-dialog__body'
@@ -401,7 +409,7 @@ test.describe( `${ blockData.name }`, () => {
 				secondImageThumbnailId
 			);
 
-			largeImageBlock.click();
+			await largeImageBlock.click();
 
 			const productGalleryPopUpContent = page.locator(
 				'.wc-block-product-gallery-dialog__body'
@@ -434,7 +442,7 @@ test.describe( `${ blockData.name }`, () => {
 			const closePopUpButton = productGalleryPopUpHeader.locator(
 				'.wc-block-product-gallery-dialog__close'
 			);
-			closePopUpButton.click();
+			await closePopUpButton.click();
 
 			await page.waitForFunction( () => {
 				const isPopUpOpen = document
@@ -459,8 +467,7 @@ test.describe( `${ blockData.name }`, () => {
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			await editor.openDocumentSettingsSidebar();
-			const fullScreenOption =
-				await pageObject.getFullScreenOnClickSetting();
+			const fullScreenOption = pageObject.getFullScreenOnClickSetting();
 
 			await expect( fullScreenOption ).toBeChecked();
 		} );

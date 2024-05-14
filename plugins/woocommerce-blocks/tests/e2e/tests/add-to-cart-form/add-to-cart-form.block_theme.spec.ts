@@ -36,7 +36,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		editorUtils,
 	} ) => {
 		// Add to Cart with Options in the Post Editor is only available as inner block of the Single Product Block.
-		await admin.createNewPost( { legacyCanvas: true } );
+		await admin.createNewPost();
 		await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
 		await configureSingleProductBlock( editorUtils );
@@ -57,13 +57,24 @@ test.describe( `${ blockData.name } Block`, () => {
 		admin,
 		editor,
 		editorUtils,
+		requestUtils,
 	} ) => {
-		// Add to Cart with Options in the Site Editor is only available as inner block of the Single Product Block except for the Single Product Template
-		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//archive-product`,
-			postType: 'wp_template',
+		// Add to Cart with Options in the Site Editor is only available as
+		// inner block of the Single Product Block except for the Single Product
+		// Template
+		const template = await requestUtils.createTemplate( 'wp_template', {
+			slug: 'product-catalog',
+			title: 'Custom Product Catalog',
+			content: 'placeholder',
 		} );
-		await editorUtils.enterEditMode();
+
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+
+		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
 
 		await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
@@ -85,14 +96,21 @@ test.describe( `${ blockData.name } Block`, () => {
 		admin,
 		editor,
 		editorUtils,
+		requestUtils,
 	} ) => {
-		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//single-product`,
-			postType: 'wp_template',
+		const template = await requestUtils.createTemplate( 'wp_template', {
+			slug: 'single-product',
+			title: 'Custom Single Product',
+			content: 'placeholder',
 		} );
-		await editorUtils.enterEditMode();
 
-		await editor.setContent( '' );
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+
+		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
 
 		await editor.insertBlock( { name: blockData.slug } );
 

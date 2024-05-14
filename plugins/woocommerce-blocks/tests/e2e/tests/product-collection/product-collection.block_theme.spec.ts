@@ -492,7 +492,7 @@ test.describe( 'Product Collection', () => {
 				).toBeVisible();
 
 				// "On sale control" should retain its state when inherit query from template is enabled again
-				pageObject.setShowOnlyProductsOnSale( {
+				await pageObject.setShowOnlyProductsOnSale( {
 					onSale: true,
 					isLocatorsRefreshNeeded: false,
 				} );

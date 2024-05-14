@@ -7,7 +7,6 @@ import { Locator, Page } from '@playwright/test';
 /**
  * Internal dependencies
  */
-import { addBlock } from './utils';
 import { ProductGalleryPage } from '../../product-gallery.page';
 
 const blockData = {
@@ -48,12 +47,17 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 	},
 } );
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editorUtils } ) => {
+	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editorUtils.enterEditMode();
+
+		await editor.canvas
+			.locator( '[data-testid="product-image"]' )
+			.first()
+			.waitFor();
 	} );
 
 	test( 'Renders Product Gallery Thumbnails block on the editor and frontend side', async ( {
@@ -126,30 +130,26 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test.describe( `${ blockData.name } Settings`, () => {
-		test( 'Hide correctly the thumbnails', async ( {
-			page,
-			editor,
-			editorUtils,
-			admin,
-		} ) => {
-			await addBlock( admin, editor, editorUtils );
-			await (
-				await editorUtils.getBlockByName( blockData.name )
-			 ).click();
+		test( 'Hide correctly the thumbnails', async ( { page, editor } ) => {
+			await editor.insertBlock( {
+				name: 'woocommerce/product-gallery',
+			} );
+
+			await editor.canvas
+				.locator( `[data-type="${ blockData.name }"]` )
+				.click();
+
 			await editor.openDocumentSettingsSidebar();
+
 			await page
 				.locator( blockData.selectors.editor.noThumbnailsOption )
 				.click();
 
-			const element = page.locator(
-				blockData.selectors.editor.thumbnails
-			);
-
-			await expect( element ).toBeHidden();
+			await expect(
+				page.locator( blockData.selectors.editor.thumbnails )
+			).toBeHidden();
 
 			await editor.saveSiteEditorEntities();
-
-			await page.goto( blockData.productPage );
 		} );
 
 		// We can test the left position of thumbnails by cross-checking:
@@ -413,17 +413,17 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'Ensure entered Number of Thumbnails rounds to integer', async ( {
 			page,
 			editor,
-			pageObject,
 		} ) => {
 			await editor.insertBlock( {
 				name: 'woocommerce/product-gallery',
 			} );
 
-			const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
-				page: 'editor',
-			} );
+			await editor.selectBlocks(
+				'[data-type="woocommerce/product-gallery"]'
+			);
 
 			await editor.openDocumentSettingsSidebar();
+
 			const numberOfThumbnailInput = page.getByRole( 'spinbutton', {
 				name: 'Number of Thumbnails',
 			} );
@@ -434,7 +434,7 @@ test.describe( `${ blockData.name }`, () => {
 				'4.2'
 			);
 
-			let numberOfThumbnailsOnScreen = thumbnailsBlock.locator(
+			const numberOfThumbnailsOnScreen = editor.canvas.locator(
 				'.wc-block-product-gallery-thumbnails__thumbnail'
 			);
 
@@ -444,10 +444,6 @@ test.describe( `${ blockData.name }`, () => {
 				page,
 				numberOfThumbnailInput,
 				'4.7'
-			);
-
-			numberOfThumbnailsOnScreen = thumbnailsBlock.locator(
-				'.wc-block-product-gallery-thumbnails__thumbnail'
 			);
 
 			await expect( numberOfThumbnailsOnScreen ).toHaveCount( 5 );

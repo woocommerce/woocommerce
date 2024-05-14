@@ -402,7 +402,7 @@ test.describe( `${ blockData.name }`, () => {
 				parentClientId
 			);
 			await (
-				await await pageObject.getNextPreviousButtonsBlock( {
+				await pageObject.getNextPreviousButtonsBlock( {
 					page: 'editor',
 				} )
 			 ).click();

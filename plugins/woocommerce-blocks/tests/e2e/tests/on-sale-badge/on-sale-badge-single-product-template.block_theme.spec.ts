@@ -164,7 +164,7 @@ test.describe( `${ blockData.name }`, () => {
 				isFrontend: false,
 			} );
 
-			await expect(
+			expect(
 				editorBoundingClientRect.productSaleBadge.x - blockData.margin
 			).toEqual( editorBoundingClientRect.productSaleBadgeContainer.x );
 
@@ -178,7 +178,7 @@ test.describe( `${ blockData.name }`, () => {
 				isFrontend: true,
 			} );
 
-			await expect(
+			expect(
 				clientBoundingClientRect.productSaleBadge.x - blockData.margin
 			).toEqual( clientBoundingClientRect.productSaleBadgeContainer.x );
 		} );
@@ -209,7 +209,7 @@ test.describe( `${ blockData.name }`, () => {
 				isFrontend: false,
 			} );
 
-			await expect(
+			expect(
 				editorBoundingClientRect.productSaleBadge.right
 			).toBeLessThan(
 				editorBoundingClientRect.productSaleBadgeContainer.right
@@ -225,7 +225,7 @@ test.describe( `${ blockData.name }`, () => {
 				isFrontend: true,
 			} );
 
-			await expect(
+			expect(
 				clientBoundingClientRect.productSaleBadge.right
 			).toBeLessThan(
 				clientBoundingClientRect.productSaleBadgeContainer.right
@@ -251,7 +251,7 @@ test.describe( `${ blockData.name }`, () => {
 				isFrontend: false,
 			} );
 
-			await expect(
+			expect(
 				editorBoundingClientRect.productSaleBadge.right +
 					blockData.margin
 			).toEqual(
@@ -268,7 +268,7 @@ test.describe( `${ blockData.name }`, () => {
 				isFrontend: true,
 			} );
 
-			await expect(
+			expect(
 				clientBoundingClientRect.productSaleBadge.right +
 					blockData.margin
 			).toEqual(

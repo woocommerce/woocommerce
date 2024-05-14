@@ -122,7 +122,7 @@ test.describe( `${ blockData.name } Block`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
-	test.beforeEach( async ( { admin, page, editor, editorUtils } ) => {
+	test.beforeEach( async ( { admin, page, editor } ) => {
 		await cli(
 			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
@@ -130,9 +130,14 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
 
-		await editorUtils.enterEditMode();
+		await editor.canvas
+			.locator(
+				'.wp-block-woocommerce-classic-template__placeholder-image'
+			)
+			.waitFor();
 
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',

@@ -19,6 +19,7 @@ const config: PlaywrightTestConfig = {
 	// We're running our tests in serial, so we only need one worker.
 	workers: 1,
 	fullyParallel: false,
+	forbidOnly: !! CI,
 	// Don't report slow test "files", as we're running our tests in serial.
 	reportSlowTests: null,
 	reporter: process.env.CI ? [ [ 'github' ], [ 'list' ] ] : 'list',
