@@ -10,7 +10,12 @@ import { useShortcut } from '@wordpress/keyboard-shortcuts';
 import { EditorContext } from '../context';
 
 export const KeyboardShortcuts = () => {
-	const { redo, undo } = useContext( EditorContext );
+	const {
+		isDocumentOverviewOpened: isListViewOpened,
+		redo,
+		setIsDocumentOverviewOpened: setIsListViewOpened,
+		undo,
+	} = useContext( EditorContext );
 
 	useShortcut(
 		'woocommerce/product-editor/modal-block-editor/undo',
@@ -24,6 +29,14 @@ export const KeyboardShortcuts = () => {
 		'woocommerce/product-editor/modal-block-editor/redo',
 		( event ) => {
 			redo();
+			event.preventDefault();
+		}
+	);
+
+	useShortcut(
+		'woocommerce/product-editor/modal-block-editor/toggle-list-view',
+		( event ) => {
+			setIsListViewOpened( ! isListViewOpened );
 			event.preventDefault();
 		}
 	);

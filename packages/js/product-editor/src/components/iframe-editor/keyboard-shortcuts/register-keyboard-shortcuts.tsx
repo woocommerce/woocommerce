@@ -46,6 +46,16 @@ export const RegisterKeyboardShortcuts = () => {
 						},
 				  ],
 		} );
+
+		registerShortcut( {
+			name: 'woocommerce/product-editor/modal-block-editor/toggle-list-view',
+			category: 'global',
+			description: __( 'Open the block list view.', 'woocommerce' ),
+			keyCombination: {
+				modifier: 'access',
+				character: 'o',
+			},
+		} );
 	}, [ registerShortcut ] );
 
 	return null;
