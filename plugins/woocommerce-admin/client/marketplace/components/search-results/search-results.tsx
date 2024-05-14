@@ -33,9 +33,16 @@ export default function SearchResults( props: SearchResultProps ): JSX.Element {
 	const businessServiceList = props.products.filter(
 		( product ) => product.type === ProductType.businessService
 	);
+
 	const hasExtensions = extensionList.length > 0;
 	const hasThemes = themeList.length > 0;
 	const hasBusinessServices = businessServiceList.length > 0;
+	const hasOnlyExtensions =
+		hasExtensions && ! hasThemes && ! hasBusinessServices;
+	const hasOnlyThemes = hasThemes && ! hasExtensions && ! hasBusinessServices;
+	const hasOnlyBusinessServices =
+		hasBusinessServices && ! hasExtensions && ! hasThemes;
+
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const { isLoading, hasBusinessServices: canShowBusinessServices } =
 		marketplaceContextValue;
@@ -139,81 +146,41 @@ export default function SearchResults( props: SearchResultProps ): JSX.Element {
 			);
 		}
 
-		if ( hasExtensions && ! hasThemes && ! hasBusinessServices ) {
-			return extensionsComponent( {
-				categorySelector: true,
-				showAllButton: false,
-				perPage: MARKETPLACE_ITEMS_PER_PAGE,
-			} );
-		}
-
-		if ( hasThemes && ! hasBusinessServices && ! hasExtensions ) {
-			return themesComponent( {
-				categorySelector: true,
-				showAllButton: false,
-				perPage: MARKETPLACE_ITEMS_PER_PAGE,
-			} );
-		}
-
-		if ( hasBusinessServices && ! hasThemes && ! hasExtensions ) {
-			return businessServicesComponent( {
-				categorySelector: true,
-				showAllButton: false,
-				perPage: MARKETPLACE_ITEMS_PER_PAGE,
-			} );
-		}
-
-		if ( hasExtensions && hasThemes && ! hasBusinessServices ) {
-			return (
-				<>
-					{ extensionsComponent( {
-						perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-					} ) }
-					{ themesComponent( {
-						perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-					} ) }
-				</>
-			);
-		}
-
-		if ( hasExtensions && hasBusinessServices && ! hasThemes ) {
-			return (
-				<>
-					{ extensionsComponent( {
-						perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-					} ) }
-					{ businessServicesComponent( {
-						perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-					} ) }
-				</>
-			);
-		}
-
-		if ( hasThemes && hasBusinessServices && ! hasExtensions ) {
-			return (
-				<>
-					{ themesComponent( {
-						perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-					} ) }
-					{ businessServicesComponent( {
-						perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-					} ) }
-				</>
-			);
-		}
-
 		// If we're done loading, we can put these components on the page.
 		return (
 			<>
-				{ extensionsComponent( {
-					perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-				} ) }
-				{ themesComponent( {
-					perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-				} ) }
-				{ businessServicesComponent( {
-					perPage: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-				} ) }
+				{ hasExtensions
+					? extensionsComponent( {
+							categorySelector: hasOnlyExtensions || undefined,
+							showAllButton: hasOnlyExtensions
+								? false
+								: undefined,
+							perPage: hasOnlyExtensions
+								? MARKETPLACE_ITEMS_PER_PAGE
+								: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
+					  } )
+					: null }
+				{ hasThemes
+					? themesComponent( {
+							categorySelector: hasOnlyThemes || undefined,
+							showAllButton: hasOnlyThemes ? false : undefined,
+							perPage: hasOnlyThemes
+								? MARKETPLACE_ITEMS_PER_PAGE
+								: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
+					  } )
+					: null }
+				{ hasBusinessServices
+					? businessServicesComponent( {
+							categorySelector:
+								hasOnlyBusinessServices || undefined,
+							showAllButton: hasOnlyBusinessServices
+								? false
+								: undefined,
+							perPage: hasOnlyBusinessServices
+								? MARKETPLACE_ITEMS_PER_PAGE
+								: MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
+					  } )
+					: null }
 			</>
 		);
 	};
