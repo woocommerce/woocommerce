@@ -97,6 +97,8 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\Taxes',
 			'Automattic\WooCommerce\Admin\API\MobileAppMagicLink',
 			'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
+			'Automattic\WooCommerce\Admin\API\Blueprint',
+
 		);
 
 		$product_form_controllers = array();
