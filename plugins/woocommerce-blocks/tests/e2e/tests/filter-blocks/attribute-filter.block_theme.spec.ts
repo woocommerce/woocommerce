@@ -263,9 +263,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'clear button appears after a filter is applied', async ( {
 			page,
-			dropdownBlockPost,
 		} ) => {
-			await page.goto( dropdownBlockPost.link );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'
@@ -287,9 +286,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'clear button hides after deselecting all filters', async ( {
 			page,
-			dropdownBlockPost,
 		} ) => {
-			await page.goto( dropdownBlockPost.link );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'
@@ -318,9 +316,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'filters are cleared after clear button is clicked', async ( {
 			page,
-			dropdownBlockPost,
 		} ) => {
-			await page.goto( dropdownBlockPost.link );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'
