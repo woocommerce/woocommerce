@@ -104,7 +104,7 @@ const CheckoutBlock = () => {
 	);
 };
 
-describe( 'Testing cart', () => {
+describe( 'Testing Checkout', () => {
 	beforeEach( () => {
 		act( () => {
 			fetchMock.mockResponse( ( req ) => {
