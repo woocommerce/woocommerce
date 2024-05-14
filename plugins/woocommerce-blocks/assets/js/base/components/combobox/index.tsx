@@ -222,7 +222,7 @@ const Combobox = ( {
 									match.value !== selectedOption?.value
 								) {
 									store.setSelectedValue( match.value );
-								} else {
+								} else if ( match ) {
 									setSearchTerm(
 										selectedOption?.label || ''
 									);
