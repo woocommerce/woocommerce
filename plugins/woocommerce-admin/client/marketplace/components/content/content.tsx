@@ -186,12 +186,9 @@ export default function Content(): JSX.Element {
 		<div className="woocommerce-marketplace__content">
 			<Promotions />
 			<InstallNewProductModal products={ products } />
-			{ selectedTab !== 'business-services' && (
-				<>
-					<ConnectNotice />
-					<PluginInstallNotice />
-				</>
-			) }
+			{ selectedTab !== 'business-services' &&
+				selectedTab !== 'my-subscriptions' && <ConnectNotice /> }
+			{ selectedTab !== 'business-services' && <PluginInstallNotice /> }
 			{ renderContent() }
 		</div>
 	);
