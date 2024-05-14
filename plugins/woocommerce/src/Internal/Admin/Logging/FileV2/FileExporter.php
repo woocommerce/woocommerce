@@ -52,7 +52,7 @@ class FileExporter {
 	public function emit_file() {
 		try {
 			$filesystem  = FilesystemUtil::get_wp_filesystem();
-			$is_readable = ! $filesystem->is_file( $this->path ) || ! $filesystem->is_readable( $this->path );
+			$is_readable = $filesystem->is_file( $this->path ) && $filesystem->is_readable( $this->path );
 		} catch ( Exception $exception ) {
 			$is_readable = false;
 		}
@@ -106,11 +106,11 @@ class FileExporter {
 	 * @return void
 	 */
 	private function send_contents(): void {
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen -- No suitable alternative.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- No suitable alternative.
 		$stream = fopen( $this->path, 'rb' );
 
 		while ( is_resource( $stream ) && ! feof( $stream ) ) {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fread -- No suitable alternative.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- No suitable alternative.
 			$chunk = fread( $stream, self::CHUNK_SIZE );
 
 			if ( is_string( $chunk ) ) {
@@ -119,7 +119,7 @@ class FileExporter {
 			}
 		}
 
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose -- No suitable alternative.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- No suitable alternative.
 		fclose( $stream );
 	}
 
