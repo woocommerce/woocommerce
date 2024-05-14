@@ -9,7 +9,7 @@ The page contains two parts, the WooCommerce.com marketplace and a list of produ
 - **Discover**: A curated list of extensions and themes.
 - **Browse**: All extensions.
 - **Themes**: All themes.
-- **Business Services**: All business services
+- **Business Services**: All business services.
 - **Search**: Search results.
 
 ### Marketplace API
