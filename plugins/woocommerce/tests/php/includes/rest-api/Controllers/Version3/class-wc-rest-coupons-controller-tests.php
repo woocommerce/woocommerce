@@ -137,7 +137,7 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon();
 		$coupon->save();
 
-		$request = new WP_REST_Request( 'DELETE', '/wc/v3/coupons/' . $coupon->get_id() );
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v3/coupons/' . $coupon->get_id() );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
