@@ -275,7 +275,7 @@ class WC_Helper_Updater {
 			/* translators: 1: URL to My Subscriptions page 2: Product price */
 				__( ' Your subscription expired, <a href="%1$s">renew for %2$s</a> to update.', 'woocommerce' ),
 				'https://woocommerce.com/my-account/my-subscriptions/',
-				$subscription['product_price']
+				$subscription['product_regular_price']
 			);
 		} elseif ( ! empty( $subscription['expiring'] ) && ! $subscription['autorenew'] ) {
 			$expiry_notice = sprintf(
