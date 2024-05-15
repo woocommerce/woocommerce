@@ -1,7 +1,7 @@
 {
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
-	"title": "WooCommerce",
+	"title": "WooCommerce-",
 	"version": "9.0.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
