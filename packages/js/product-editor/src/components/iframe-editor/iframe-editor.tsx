@@ -170,7 +170,6 @@ export function IframeEditor( {
 						onChange( updatedBlocks );
 					} }
 					onInput={ ( updatedBlocks: BlockInstance[] ) => {
-						appendToEditorHistory( updatedBlocks );
 						setTemporalBlocks( updatedBlocks );
 						onInput( updatedBlocks );
 					} }
