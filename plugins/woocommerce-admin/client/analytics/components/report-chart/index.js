@@ -34,7 +34,7 @@ import {
 	getChartMode,
 	getSelectedFilter,
 	createDateFormatter,
-	dataHasLeapYear,
+	dataContainsLeapYear,
 } from './utils';
 
 /**
@@ -98,8 +98,8 @@ export class ReportChart extends Component {
 			defaultDateRange
 		);
 
-		const primaryDataHasLeapYear = dataHasLeapYear( primaryData );
-		const secondaryDataHasLeapYear = dataHasLeapYear( secondaryData );
+		const primarydataContainsLeapYear = dataContainsLeapYear( primaryData );
+		const secondarydataContainsLeapYear = dataContainsLeapYear( secondaryData );
 		const primaryDataIntervals = [ ...primaryData.data.intervals ];
 		const secondaryDataIntervals = [ ...secondaryData.data.intervals ];
 
@@ -136,8 +136,8 @@ export class ReportChart extends Component {
 
 			if ( currentInterval === 'day' ) {
 				if (
-					primaryDataHasLeapYear &&
-					! secondaryDataHasLeapYear &&
+					primarydataContainsLeapYear &&
+					! secondarydataContainsLeapYear &&
 					secondaryDataIntervals?.[ index ]
 				) {
 					// Only fix the data if the date is in 29th Feb and secondary data is in 1st March,
@@ -167,8 +167,8 @@ export class ReportChart extends Component {
 						);
 					}
 				} else if (
-					! primaryDataHasLeapYear &&
-					secondaryDataHasLeapYear
+					! primarydataContainsLeapYear &&
+					secondarydataContainsLeapYear
 				) {
 					// Todo: Do something about secondary data having leap year while first does not.
 					// Currently, there are issues to render chart where primary data does not have the date since

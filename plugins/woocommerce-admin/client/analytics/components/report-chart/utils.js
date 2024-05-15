@@ -50,7 +50,13 @@ export function createDateFormatter( format ) {
 	return ( date ) => formatDate( format, date );
 }
 
-export function dataHasLeapYear( data ) {
+/**
+ * Returns true if the data contains a leap year.
+ *
+ * @param {Object} data Chart interval data
+ * @return {boolean} True if data contains a leap year.
+ */
+export function dataContainsLeapYear( data ) {
 	if ( data.data.intervals.length > 1 ) {
 		const start = data.data.intervals[ 0 ].date_start;
 		const end =
