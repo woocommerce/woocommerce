@@ -73,6 +73,13 @@ export function useSaveDraft( {
 	// @ts-ignore
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
+	const productStatusMap: {
+		[ key in Product[ 'status' ] ]?: string;
+	} = {
+		publish: 'product_switch_draft',
+		draft: 'product_save_draft',
+	};
+
 	async function saveDraft() {
 		try {
 			await validate( { status: 'draft' } );
@@ -89,14 +96,7 @@ export function useSaveDraft( {
 				}
 			);
 
-			const statusMap: {
-				[ key in Product[ 'status' ] ]?: string;
-			} = {
-				publish: 'product_switch_draft',
-				draft: 'product_save_draft',
-			};
-
-			const eventName = statusMap[ productStatus ];
+			const eventName = productStatusMap[ productStatus ];
 			if ( eventName ) {
 				recordProductEvent( eventName, publishedProduct );
 			}
