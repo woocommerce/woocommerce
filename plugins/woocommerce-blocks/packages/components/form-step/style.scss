@@ -6,8 +6,8 @@
 	position: relative;
 	border: none;
 	background: none;
-	margin: 0;
 	padding: 0;
+	margin: 0 0 2.5rem 0;
 
 	.is-mobile &,
 	.is-small & {
@@ -30,6 +30,10 @@
 
 .wc-block-components-checkout-step__content > * {
 	margin-bottom: $gap;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
 }
 .wc-block-components-checkout-step--with-step-number .wc-block-components-checkout-step__content > :last-child {
 	margin-bottom: 0;
@@ -38,7 +42,7 @@
 	margin-top: em($gap-smaller);
 }
 .wc-block-components-checkout-step__heading {
-	margin: $gap-larger 0 $gap-smaller;
+	margin: 0 0 $gap-smaller;
 	position: relative;
 
 	.wc-block-components-express-payment-continue-rule + .wc-block-components-checkout-step & {
