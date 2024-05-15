@@ -5,7 +5,14 @@
  */
 import { chromium, request } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
-import { BASE_URL, adminFile, cli, customerFile } from '@woocommerce/e2e-utils';
+import {
+	BASE_URL,
+	adminFile,
+	cli,
+	customerFile,
+	BLOCK_THEME_SLUG,
+	DB_EXPORT_FILE,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -23,8 +30,8 @@ const prepareAttributes = async () => {
 
 	// Intercept the dialog event. This is needed because when the regenerate
 	// button is clicked, a dialog is shown.
-	page.on( 'dialog', async ( dialog ) => {
-		await dialog.accept();
+	page.on( 'dialog', ( dialog ) => {
+		void dialog.accept();
 	} );
 
 	await page.goto( '/wp-admin/admin.php?page=wc-status&tab=tools' );
@@ -53,36 +60,51 @@ const prepareAttributes = async () => {
 };
 
 async function globalSetup() {
-	const timers = {
-		total: '└ Total time',
-		authentication: '├ Authentication time',
-		attributes: '├ Attributes preparation time',
-	};
+	console.log( 'Running global setup:' );
+	console.time( '└ Total time' );
 
-	console.log( 'Running global setup...' );
-	console.time( timers.total );
+	let databaseImported = false;
+
+	try {
+		console.log( '├ Attempting database import…' );
+		await cli(
+			`npm run wp-env run tests-cli wp db import ${ DB_EXPORT_FILE }`
+		);
+		databaseImported = true;
+	} catch ( _error ) {
+		// noop
+	}
 
 	const requestContext = await request.newContext( {
 		baseURL: BASE_URL,
 	} );
 
-	console.time( timers.authentication );
-	await new RequestUtils( requestContext, {
-		user: admin,
-		storageStatePath: adminFile,
-	} ).setupRest();
+	console.log( '├ Pre-authenticating users…' );
 	await new RequestUtils( requestContext, {
 		user: customer,
 		storageStatePath: customerFile,
 	} ).setupRest();
-	console.timeEnd( timers.authentication );
+	const requestUtils = new RequestUtils( requestContext, {
+		user: admin,
+		storageStatePath: adminFile,
+	} );
+	await requestUtils.setupRest();
 
-	console.time( timers.attributes );
-	await prepareAttributes();
-	console.timeEnd( timers.attributes );
+	if ( ! databaseImported ) {
+		console.log( '├ Activating default theme…' );
+		await requestUtils.activateTheme( BLOCK_THEME_SLUG );
+
+		console.log( '├ Preparing product attributes…' );
+		await prepareAttributes();
+	}
+
+	console.log( '├ Exporting database…' );
+	await cli(
+		`npm run wp-env run tests-cli wp db export ${ DB_EXPORT_FILE }`
+	);
 
 	await requestContext.dispose();
-	console.timeEnd( timers.total );
+	console.timeEnd( '└ Total time' );
 }
 
 export default globalSetup;
