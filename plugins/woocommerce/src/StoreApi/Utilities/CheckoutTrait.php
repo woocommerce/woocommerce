@@ -91,7 +91,7 @@ trait CheckoutTrait {
 				];
 			}
 
-			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ), 400, $additional_data=[] );
+			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ), 400, $additional_data );
 		}
 	}
 
