@@ -40,6 +40,10 @@ export const useTracksLocation = ( templateSlug: string ) => {
 		return postType;
 	}
 
+	if ( ! templateSlug ) {
+		return Locations.OTHER;
+	}
+
 	const template = templateSlugToTemplateMap[ templateSlug ];
 
 	if ( template ) {
