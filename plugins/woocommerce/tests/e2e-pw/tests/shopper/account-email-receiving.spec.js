@@ -5,7 +5,7 @@ const username = `newcustomer-${ Math.random() }`;
 const emailContent = '#wp-mail-logging-modal-content-body-content';
 const emailContentJson = '#wp-mail-logging-modal-format-json';
 
-test.describe( 'Shopper Account Email Receiving - ', () => {
+test.describe( 'Shopper Account Email Receiving', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {
