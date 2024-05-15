@@ -31,10 +31,10 @@ const evaluateJobs = async () => {
 	nonSuccessfulCompletedJobs.forEach(job => {
 		const jobPrintName = `'${job.name}': ${job.status}, ${job.conclusion}`
 		if (isJobRequired(job)) {
-			console.error(`❌ ${jobPrintName} - is required`);
+			console.error(`❌ ${jobPrintName}, required`);
 			failed.push(job.name);
 		} else {
-			console.warn(`✅ ${jobPrintName} - is not required`);
+			console.warn(`✅ ${jobPrintName}, optional`);
 		}
 	})
 
