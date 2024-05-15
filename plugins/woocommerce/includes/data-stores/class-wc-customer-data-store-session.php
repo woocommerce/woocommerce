@@ -97,6 +97,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 				$allowed_keys      = apply_filters( 'woocommerce_customer_allowed_session_meta_keys', array(), $customer );
 				$session_value     = array_map(
 					function ( $meta_data ) {
+						// Data comes to us a WC_Meta_Data, we cast it to an array to ensure it is serializable when doing WC()->session->set.
 							return array(
 								'key'   => $meta_data->key,
 								'value' => $meta_data->value,
