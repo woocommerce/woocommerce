@@ -1,4 +1,4 @@
-const {REPOSITORY, RUN_ID, GITHUB_TOKEN} = process.env;
+const {REPOSITORY, RUN_ID, GITHUB_TOKEN, TEST_MODE} = process.env;
 const IGNORED_JOBS = ['Evaluate Project Job Statuses', 'Report e2e tests results', 'Report API tests results'];
 
 const fetchJobs = async () => {
@@ -18,7 +18,13 @@ const fetchJobs = async () => {
 };
 
 const evaluateJobs = async () => {
-	const jobs = await fetchJobs();
+	let jobs = [];
+
+	if( TEST_MODE ) {
+		jobs = require('./evaluate-jobs-conclusions-test-data.json');
+	} else {
+		jobs = await fetchJobs();
+	}
 	const nonSuccessfulCompletedJobs = jobs.filter(job =>
 		job.status === 'completed' && (job.conclusion !== 'success' && job.conclusion !== 'skipped')
 	);
@@ -49,6 +55,10 @@ const isJobRequired = (job) => {
 }
 
 const validateEnvironmentVariables = (variables) => {
+	if ( TEST_MODE ) {
+		return;
+	}
+
 	variables.forEach((variable) => {
 		if (!process.env[variable]) {
 			console.error(`Missing ${variable} environment variable`);
