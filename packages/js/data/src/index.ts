@@ -55,6 +55,8 @@ export {
 	getReportTableQuery,
 	getReportChartData,
 	getTooltipValueFormat,
+	isLeapYear,
+	containsLeapYear,
 } from './reports/utils';
 
 // Export constants

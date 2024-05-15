@@ -84,14 +84,6 @@ export class ReportChart extends Component {
 		return chartData;
 	}
 
-	// hasLeapYear() {
-	// 	const { primaryData, secondaryData } = this.props;
-
-	// 	return (
-	// 		dataHasLeapYear( primaryData ) || dataHasLeapYear( secondaryData )
-	// 	);
-	// }
-
 	getTimeChartData() {
 		const {
 			query,
@@ -105,24 +97,11 @@ export class ReportChart extends Component {
 			query,
 			defaultDateRange
 		);
-		// console.log(
-		// 	'Primary',
-		// 	primaryData.data.intervals,
-		// 	currentInterval,
-		// 	query,
-		// 	defaultDateRange
-		// );
 
 		const primaryDataHasLeapYear = dataHasLeapYear( primaryData );
 		const secondaryDataHasLeapYear = dataHasLeapYear( secondaryData );
 		const primaryDataIntervals = [ ...primaryData.data.intervals ];
 		const secondaryDataIntervals = [ ...secondaryData.data.intervals ];
-
-		// In time series, we need to add placeholder data and adjust subtotals in non-leap years
-		// to account for the extra day in leap years to ensure an accurate comparison.
-		if ( currentInterval === 'day' && secondaryDataHasLeapYear ) {
-			// Append data for the missing leap day so everything else is shifted to the right correctly.
-		} // Assume secondaryDataHasLeapYear is true if the secondary dataset includes a leap year
 
 		const chartData = [];
 
@@ -137,13 +116,13 @@ export class ReportChart extends Component {
 				currentInterval
 			);
 
-			let today = formatDate( 'Y-m-d\\TH:i:s', interval.date_start );
-			let primaryLabel = `${ primary.label } (${ primary.range })`;
-			let primaryLabelDate = interval.date_start;
-			let primaryValue = interval.subtotals[ selectedChart.key ] || 0;
+			const today = formatDate( 'Y-m-d\\TH:i:s', interval.date_start );
+			const primaryLabel = `${ primary.label } (${ primary.range })`;
+			const primaryLabelDate = interval.date_start;
+			const primaryValue = interval.subtotals[ selectedChart.key ] || 0;
 
 			const secondaryInterval = secondaryDataIntervals[ index ];
-			let secondaryLabel = `${ secondary.label } (${ secondary.range })`;
+			const secondaryLabel = `${ secondary.label } (${ secondary.range })`;
 			let secondaryLabelDate = secondaryDate.format(
 				'YYYY-MM-DD HH:mm:ss'
 			);
@@ -153,53 +132,33 @@ export class ReportChart extends Component {
 				0;
 
 			if ( currentInterval === 'day' ) {
-				if ( primaryDataHasLeapYear ) {
+				if ( primaryDataHasLeapYear && ! secondaryDataHasLeapYear ) {
 					const date = new Date( interval.date_start );
 					if (
 						isLeapYear( date.getFullYear() ) &&
 						date.getMonth() === 1 &&
 						date.getDate() === 29
 					) {
-						secondaryLabel = __(
-							'Leap day placeholder',
-							'woocommerce'
-						);
-						secondaryLabelDate = null;
+						// This is going to be displayed as "Invalid date" label from D3.js, but desirable imo since
+						// 29th February is not a valid date for non-leap years.
+						secondaryLabelDate = '-';
 						secondaryValue = 0;
 
-						// Append data for the missing leap day so everything else is shifted to the right correctly.
+						// Move the data up by 1 day for the missing leap day
+						// so everything else is shifted to the right correctly.
 						secondaryDataIntervals.splice(
 							index,
 							0,
 							secondaryDataIntervals[ index ]
 						);
 					}
-				} else if ( secondaryDataHasLeapYear ) {
-					const date = new Date( secondaryInterval.date_start );
-					console.log('YES!! eap', date, secondaryInterval )
-					if (
-						isLeapYear( date.getFullYear() ) &&
-						date.getMonth() === 1 &&
-						date.getDate() === 28
-					) {
-						primaryLabel = __(
-							'Leap day placeholder',
-							'woocommerce'
-						);
-						primaryLabelDate = null;
-						primaryValue = 0;
-						// today = '2021-02-29T00:00:00';
-
-						// Append data for the missing leap day so everything else is shifted to the right correctly.
-						console.log('Before', primaryDataIntervals.length)
-						primaryDataIntervals.splice(
-							index + 1,
-							0,
-							primaryDataIntervals[ index ]
-						);
-
-						console.log(primaryDataIntervals.length)
-					}
+				} else if (
+					! primaryDataHasLeapYear &&
+					secondaryDataHasLeapYear
+				) {
+					// Todo: Do something about secondary data having leap year while first does not.
+					// Currently, there are issues to render chart where primary data does not have the date since
+					// the x-axis is based on primary data.
 				}
 			}
 
@@ -217,68 +176,6 @@ export class ReportChart extends Component {
 				},
 			} );
 		}
-
-		console.log('Chart data', chartData)
-
-		// const chartData = primaryData.data.intervals.map( function (
-		// 	interval,
-		// 	index
-		// ) {
-		// 	const secondaryDate = getPreviousDate(
-		// 		interval.date_start,
-		// 		primary.after,
-		// 		secondary.after,
-		// 		query.compare,
-		// 		currentInterval
-		// 	);
-
-		// 	const secondaryInterval = secondaryDataIntervals[ index ];
-		// 	let secondaryLabel = `${ secondary.label } (${ secondary.range })`;
-		// 	let secondaryLabelDate = secondaryDate.format(
-		// 		'YYYY-MM-DD HH:mm:ss'
-		// 	);
-		// 	let secondaryValue =
-		// 		( secondaryInterval &&
-		// 			secondaryInterval.subtotals[ selectedChart.key ] ) ||
-		// 		0;
-
-		// 	if ( currentInterval === 'day' && primaryDataHasLeapYear ) {
-		// 		const date = new Date( interval.date_start );
-		// 		if (
-		// 			isLeapYear( date.getFullYear() ) &&
-		// 			date.getMonth() === 1 &&
-		// 			date.getDate() === 29
-		// 		) {
-		// 			secondaryLabel = __(
-		// 				'Leap day placeholder',
-		// 				'woocommerce'
-		// 			);
-		// 			secondaryLabelDate = null;
-		// 			secondaryValue = 0;
-
-		// 			// Append data for the missing leap day so everything else is shifted to the right correctly.
-		// 			secondaryDataIntervals.splice(
-		// 				index,
-		// 				0,
-		// 				secondaryDataIntervals[ index ]
-		// 			);
-		// 		}
-		// 	}
-
-		// 	return {
-		// 		date: formatDate( 'Y-m-d\\TH:i:s', interval.date_start ),
-		// 		primary: {
-		// 			label: `${ primary.label } (${ primary.range })`,
-		// 			labelDate: interval.date_start,
-		// 			value: interval.subtotals[ selectedChart.key ] || 0,
-		// 		},
-		// 		secondary: {
-		// 			label: secondaryLabel,
-		// 			labelDate: secondaryLabelDate,
-		// 			value: secondaryValue,
-		// 		},
-		// 	};
-		// } );
 
 		return chartData;
 	}

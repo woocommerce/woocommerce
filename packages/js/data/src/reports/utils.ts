@@ -641,11 +641,9 @@ export function containsLeapYear( startDate: string, endDate: string ) {
 	// Check each year in the range
 	for ( let year = startYear; year <= endYear; year++ ) {
 		if ( isLeapYear( year ) ) {
-			console.log( `${ year } is a leap year.` );
-			return true; // Found a leap year, no need to continue
+			return true;
 		}
 	}
 
-	console.log( 'No leap years found.' );
 	return false; // No leap years in the range
 }
