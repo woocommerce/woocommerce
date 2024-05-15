@@ -479,17 +479,6 @@ export default compose(
 			fields,
 		} );
 
-		// console.log(
-		// 	'Hehehe',
-		// 	query,
-		// 	defaultDateRange,
-		// 	filters,
-		// 	reportStoreSelector,
-		// 	fields,
-		// 	primaryData,
-		// 	secondaryData
-		// );
-
 		return {
 			...newProps,
 			primaryData,
