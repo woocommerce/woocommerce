@@ -379,6 +379,7 @@ test.skip( 'can update product attributes', async ( {
 	} );
 } );
 
+// Disabled because it's too flaky.
 test.skip( 'can remove product attributes', async ( {
 	page,
 	productWithAttributes,
