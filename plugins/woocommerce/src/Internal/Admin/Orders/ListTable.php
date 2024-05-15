@@ -775,12 +775,15 @@ class ListTable extends WP_List_Table {
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$order_dates = $wpdb->get_results(
-			"
-				SELECT DISTINCT YEAR( t.date_created_local ) AS year,
-								MONTH( t.date_created_local ) AS month
-				FROM ( SELECT DATE_ADD( date_created_gmt, INTERVAL $utc_offset SECOND ) AS date_created_local FROM $orders_table WHERE status != 'trash' ) t
-				ORDER BY year DESC, month DESC
-			"
+			$wpdb->prepare(
+				"
+					SELECT DISTINCT YEAR( t.date_created_local ) AS year,
+									MONTH( t.date_created_local ) AS month
+					FROM ( SELECT DATE_ADD( date_created_gmt, INTERVAL $utc_offset SECOND ) AS date_created_local FROM $orders_table WHERE type = %s AND status != 'trash' ) t
+					ORDER BY year DESC, month DESC
+				",
+				$this->order_type
+			)
 		);
 
 		$m = isset( $_GET['m'] ) ? (int) $_GET['m'] : 0;

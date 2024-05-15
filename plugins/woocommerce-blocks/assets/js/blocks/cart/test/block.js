@@ -231,6 +231,13 @@ describe( 'Testing cart', () => {
 		} );
 
 		expect( quantityInput.value ).toBe( '5' );
+
+		// React Transition Group uses deprecated findDOMNode, so we need to suppress the warning. This will have to be fixed in React 19.
+		expect( console ).toHaveErroredWith(
+			`Warning: findDOMNode is deprecated and will be removed in the next major release. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s`,
+			// The stack trace
+			expect.any( String )
+		);
 	} );
 
 	it( 'does not show the remove item button when a filter prevents this', async () => {
