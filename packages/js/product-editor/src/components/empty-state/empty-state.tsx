@@ -7,7 +7,7 @@ type EmptyStateProps = React.DetailedHTMLProps<
 	React.HTMLAttributes< HTMLDivElement >,
 	HTMLDivElement
 > & {
-	names?: string[];
+	names: string[];
 };
 
 export function EmptyState( { names = [], ...props }: EmptyStateProps ) {
@@ -22,7 +22,11 @@ export function EmptyState( { names = [], ...props }: EmptyStateProps ) {
 					key={ name }
 					className="woocommerce-product-empty-state__row"
 				>
-					<div>{ name }</div>
+					{ name === '' ? (
+						<div className="woocommerce-product-empty-state__name" />
+					) : (
+						<div>{ name }</div>
+					) }
 					<div>
 						<div className="woocommerce-product-empty-state__value" />
 					</div>
