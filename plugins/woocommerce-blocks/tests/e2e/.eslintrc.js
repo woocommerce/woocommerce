@@ -35,6 +35,7 @@ const config = {
 		'@typescript-eslint/no-floating-promises': 'error',
 		'@typescript-eslint/no-misused-promises': 'error',
 		'rulesdir/no-raw-playwright-test-import': 'error',
+		'playwright/no-hooks': [ 'error', { allow: [ 'beforeEach' ] } ],
 	},
 };
 
