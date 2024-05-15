@@ -30,10 +30,10 @@
 	.wc-block-components-totals-shipping__change-address__link {
 		font-weight: normal;
 		background: none;
-    border: none;
-    padding: 0;
-    text-decoration: underline;
-    cursor: pointer;
+		border: none;
+		padding: 0;
+		text-decoration: underline;
+		cursor: pointer;
 	}
 	.wc-block-components-totals-shipping__change-address-button {
 		@include link-button();
