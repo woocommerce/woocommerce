@@ -20,8 +20,8 @@ class Blueprint {
 				/**
 				 * @var $stepProcessor StepProcessor
 				 */
-				$stepProcessor = new $stepProcessor( $stepSchema );
-				$stepProcessor->process();
+				$stepProcessor = new $stepProcessor();
+				$stepProcessor->process($stepSchema);
 			}
 		}
 	}
