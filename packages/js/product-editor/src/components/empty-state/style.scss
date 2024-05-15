@@ -15,11 +15,13 @@
 		grid-template-columns: 1.5fr 1fr 0.5fr;
 		height: $grid-unit-80;
 		align-items: center;
-		border-top: 1px solid $gray-100;
 
-		&:first-child {
-			border-top: none;
+		// Apply border-top to all rows except the first one
+		&:not( :first-child ) {
+			border-top: 1px solid $gray-100;
+		}
 
+		&:nth-of-type( 3n + 1 ) {
 			.woocommerce-product-empty-state__name {
 				width: 85px;
 			}
@@ -29,9 +31,7 @@
 			}
 		}
 
-		&:nth-child(2) {
-			opacity: 0.7;
-
+		&:nth-of-type( 3n + 2 ) {
 			.woocommerce-product-empty-state__name {
 				width: 120px;
 			}
@@ -41,15 +41,28 @@
 			}
 		}
 
-		&:nth-child(3) {
-			opacity: 0.5;
-
+		&:nth-of-type( 3n + 3 ) {
 			.woocommerce-product-empty-state__name {
 				width: 100px;
 			}
 
 			.woocommerce-product-empty-state__value {
 				width: 114px;
+			}
+		}
+
+		// Decreasing opacity based on position
+		@for $i from 1 through 100 {
+			&:nth-of-type( #{ $i } ) {
+				@if $i == 1 {
+					opacity: 1;
+				} @else if $i == 2 {
+					opacity: 0.7;
+				} @else if $i == 3 {
+					opacity: 0.5;
+				} @else {
+					opacity: calc(0.5 - 0.04 * ($i - 3));
+				}
 			}
 		}
 
