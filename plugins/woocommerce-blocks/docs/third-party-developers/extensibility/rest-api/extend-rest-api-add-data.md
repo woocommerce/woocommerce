@@ -55,10 +55,10 @@ function my_schema_callback() {
 	return [
 		'custom-key' => [
 			'description' => __( 'My custom data', 'plugin-namespace' ),
-			'type' => 'string'
+			'type' => 'string',
 			'readonly' => true,
 		]
-	]
+	];
 }
 ```
 
