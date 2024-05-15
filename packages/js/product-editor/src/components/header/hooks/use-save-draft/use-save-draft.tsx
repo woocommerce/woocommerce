@@ -17,6 +17,7 @@ import { useShortcut } from '@wordpress/keyboard-shortcuts';
 import { useValidations } from '../../../../contexts/validation-context';
 import { WPError } from '../../../../utils/get-product-error-message';
 import { SaveDraftButtonProps } from '../../save-draft-button';
+import { recordProductEvent } from '../../../../utils/record-product-event';
 
 export function useSaveDraft( {
 	productStatus,
@@ -72,6 +73,13 @@ export function useSaveDraft( {
 	// @ts-ignore
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
+	const productStatusMap: {
+		[ key in Product[ 'status' ] ]?: string;
+	} = {
+		publish: 'product_switch_draft',
+		draft: 'product_save_draft',
+	};
+
 	async function saveDraft() {
 		try {
 			await validate( { status: 'draft' } );
@@ -87,6 +95,11 @@ export function useSaveDraft( {
 					throwOnError: true,
 				}
 			);
+
+			const eventName = productStatusMap[ productStatus ];
+			if ( eventName ) {
+				recordProductEvent( eventName, publishedProduct );
+			}
 
 			if ( onSaveSuccess ) {
 				onSaveSuccess( publishedProduct );
