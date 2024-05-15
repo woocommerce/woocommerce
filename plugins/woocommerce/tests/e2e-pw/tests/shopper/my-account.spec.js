@@ -9,6 +9,8 @@ test.describe( 'My account page', () => {
 	test( 'allows customer to login and navigate', async ( { page } ) => {
 		await page.goto( 'my-account/' );
 
+		expect( 1 ).toBe( 2 );
+
 		await expect(
 			page.getByRole( 'heading', { name: 'My account' } )
 		).toBeVisible();
