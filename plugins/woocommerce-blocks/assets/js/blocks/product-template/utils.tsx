@@ -63,7 +63,14 @@ const prepareIsInGenericTemplate =
 	( entitySlug: string ): boolean =>
 		templateSlug === entitySlug;
 
-const createLocationObject = ( type: LocationType, sourceData = {} ) => ( {
+export type WooCommerceBlockLocation = ReturnType<
+	typeof createLocationObject
+>;
+
+const createLocationObject = (
+	type: LocationType,
+	sourceData: Record< string, unknown > = {}
+) => ( {
 	type,
 	sourceData,
 } );
