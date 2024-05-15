@@ -3,11 +3,18 @@
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 import { BASE_URL, cli } from '@woocommerce/e2e-utils';
+import path from 'path';
 
 /**
  * Internal dependencies
  */
 import ProductCollectionPage from '../product-collection/product-collection.page';
+
+const PRODUCT_CATALOG_LINK = '/shop';
+const TEMPLATE_PATH = path.join(
+	__dirname,
+	'../shared/filters-with-product-collection.handlebars'
+);
 
 export const blockData = {
 	slug: 'woocommerce/price-filter',
@@ -299,42 +306,28 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test.beforeEach(
-		async ( {
-			admin,
-			editorUtils,
-			productCollectionPageObject,
-			editor,
-		} ) => {
-			await admin.createNewPost();
-			await productCollectionPageObject.insertProductCollection();
-			await productCollectionPageObject.chooseCollectionInPost(
-				'productCatalog'
-			);
-
-			await editor.insertBlock( {
-				name: 'woocommerce/filter-wrapper',
-				attributes: {
-					filterType: 'price-filter',
-					heading: 'Filter By Price',
-				},
-			} );
-			await editorUtils.publishAndVisitPost();
-		}
-	);
+	test.beforeEach( async ( { requestUtils } ) => {
+		await requestUtils.updateTemplateContents(
+			'woocommerce/woocommerce//archive-product',
+			TEMPLATE_PATH,
+			{}
+		);
+	} );
 
 	test( 'should show all products', async ( { page } ) => {
+		await page.goto( PRODUCT_CATALOG_LINK );
 		const products = page
 			.locator( '.wp-block-woocommerce-product-template' )
 			.getByRole( 'listitem' );
 
-		await expect( products ).toHaveCount( 9 );
+		await expect( products ).toHaveCount( 16 );
 	} );
 
 	test( 'should show only products that match the filter', async ( {
 		page,
 		frontendUtils,
 	} ) => {
+		await page.goto( PRODUCT_CATALOG_LINK );
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
 		} );
@@ -358,21 +351,13 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		admin,
 		editor,
 		editorUtils,
-		productCollectionPageObject,
 	} ) => {
-		await admin.createNewPost();
-		await productCollectionPageObject.insertProductCollection();
-		await productCollectionPageObject.chooseCollectionInPost(
-			'productCatalog'
-		);
-
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'price-filter',
-				heading: 'Filter By Price',
-			},
+		await admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//archive-product',
+			postType: 'wp_template',
 		} );
+
+		await editorUtils.enterEditMode();
 
 		const priceFilterControls = await editorUtils.getBlockByName(
 			blockData.slug
@@ -380,7 +365,9 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await editor.selectBlocks( priceFilterControls );
 		await editor.openDocumentSettingsSidebar();
 		await page.getByText( "Show 'Apply filters' button" ).click();
-		await editorUtils.publishAndVisitPost();
+
+		await editor.saveSiteEditorEntities();
+		await page.goto( PRODUCT_CATALOG_LINK );
 
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
