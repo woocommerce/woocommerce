@@ -29,7 +29,7 @@ const templateSlugToTemplateMap: {
 	'page-checkout': Locations.CHECKOUT,
 };
 
-export const useTracksLocation = ( templateSlug: string ) => {
+export const useTracksLocation = ( templateSlug: string | undefined ) => {
 	const postType = useSelect( ( select ) => {
 		// @ts-expect-error Type definitions are missing
 		// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
