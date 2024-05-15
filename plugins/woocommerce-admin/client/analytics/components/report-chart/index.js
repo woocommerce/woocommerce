@@ -99,7 +99,8 @@ export class ReportChart extends Component {
 		);
 
 		const primarydataContainsLeapYear = dataContainsLeapYear( primaryData );
-		const secondarydataContainsLeapYear = dataContainsLeapYear( secondaryData );
+		const secondarydataContainsLeapYear =
+			dataContainsLeapYear( secondaryData );
 		const primaryDataIntervals = [ ...primaryData.data.intervals ];
 		const secondaryDataIntervals = [ ...secondaryData.data.intervals ];
 
