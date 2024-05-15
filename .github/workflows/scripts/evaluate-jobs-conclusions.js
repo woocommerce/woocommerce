@@ -22,6 +22,7 @@ const evaluateJobs = async () => {
 	console.log('Matrix:', matrix);
 
 	const jobs = await fetchJobs();
+	const failedOrCancelledJobs = jobs.find(job => isJobFailed(job));
 
 	const failed = [];
 
