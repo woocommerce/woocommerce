@@ -45,10 +45,10 @@ class Blueprint {
 	public function process() {
 		$blueprint_schema = constant( 'WOOCOMMERCE_BLUEPRINT_PATH' );
 		if ( ! $blueprint_schema ) {
-			return new WP_HTTP_Response( null, 404 );
+			return new \WP_HTTP_Response( null, 404 );
 		}
 		$blueprint = new \Automattic\WooCommerce\Admin\Features\Blueprint\Blueprint( $blueprint_schema );
 		$blueprint->process();
-		return new WP_HTTP_Response( null, 200 );
+		return new \WP_HTTP_Response( null, 200 );
 	}
 }
