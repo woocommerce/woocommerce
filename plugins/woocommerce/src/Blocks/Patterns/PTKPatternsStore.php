@@ -14,7 +14,7 @@ class PTKPatternsStore {
 	// Some patterns need to be excluded because they have dependencies which
 	// are not installed by default (like Jetpack). Otherwise, the user
 	// would see an error when trying to insert them in the editor.
-	const EXCLUDED_PATTERNS = array( '13923', '14781', '14779', '13666', '13664', '13660', '13588' );
+	const EXCLUDED_PATTERNS = array( '13923', '14781', '14779', '13666', '13664', '13660', '13588', '14922', '14880', '13596', '13967', '13958' );
 
 	/**
 	 * PatternsToolkit instance.
