@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add 'type' property to product variations API response.
