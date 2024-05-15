@@ -12,8 +12,7 @@ export const findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate = (
 	blocks: BlockInstance[],
 	callback: ( buttonBlock: BlockInstance ) => void
 ) => {
-	const clonedBlocks = structuredClone( blocks );
-	const coverBlock = clonedBlocks.find(
+	const coverBlock = blocks.find(
 		( block ) =>
 			block.name === 'core/cover' &&
 			block.attributes.url.includes(
@@ -28,11 +27,11 @@ export const findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate = (
 	const buttonBlock = buttonsBlock?.innerBlocks[ 0 ];
 
 	if ( ! buttonBlock ) {
-		return clonedBlocks;
+		return blocks;
 	}
 
 	callback( buttonBlock );
-	return clonedBlocks;
+	return blocks;
 };
 
 export const PRODUCT_HERO_PATTERN_BUTTON_STYLE = {
