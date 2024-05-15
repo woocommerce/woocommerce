@@ -51,8 +51,6 @@ test.describe( 'General tab', () => {
 				.last()
 				.fill( productData.summary );
 
-			await clickOnTab( 'Pricing', page );
-
 			const regularPrice = page
 				.locator( 'input[name="regular_price"]' )
 				.first();
@@ -111,7 +109,6 @@ test.describe( 'General tab', () => {
 				)
 				.fill( productData.summary );
 
-			await clickOnTab( 'Pricing', page );
 			await page
 				.locator(
 					'[id^="wp-block-woocommerce-product-regular-price-field"]'

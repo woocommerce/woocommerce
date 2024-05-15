@@ -45,8 +45,6 @@ test.describe( 'General tab', () => {
 				.last()
 				.fill( productData.summary );
 
-			await clickOnTab( 'Pricing', page );
-
 			const regularPrice = page
 				.locator( 'input[name="regular_price"]' )
 				.first();
