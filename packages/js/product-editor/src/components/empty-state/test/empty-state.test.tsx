@@ -60,5 +60,5 @@ describe( 'EmptyState', () => {
 			);
 			expect( rows.length ).toBe( expectedLength );
 		} );
-	});
+	} );
 } );
