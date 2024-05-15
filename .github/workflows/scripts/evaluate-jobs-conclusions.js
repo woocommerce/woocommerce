@@ -19,11 +19,17 @@ const fetchJobs = async () => {
 
 const evaluateJobs = async () => {
 	const jobs = await fetchJobs();
-	const nonSuccessfulCompletedJobs = jobs.find(job => isJobCompletedAndFailed(job));
+	const nonSuccessfulCompletedJobs = jobs.filter(job =>
+		job.status === 'completed' && (job.conclusion !== 'success' && job.conclusion !== 'skipped')
+	);
+
+	console.log('Jobs:', jobs.length);
+	console.log('nonSuccessfulCompletedJobs:', nonSuccessfulCompletedJobs.length);
 
 	const failed = [];
 
 	nonSuccessfulCompletedJobs.forEach(job => {
+		console.log(`Checking job '${job.name}': ${job.status}, ${job.conclusion}`);
 		if (isJobRequired(job)) {
 			console.error(`Job '${job.name}' is required and was not successful`);
 			failed.push(job.name);
@@ -41,7 +47,7 @@ const isJobRequired = (job) => {
 }
 
 const isJobCompletedAndFailed = (job) => {
-	return job.conclusion === 'completed' && (job.conclusion !== 'success' && job.conclusion !== 'skipped');
+	return job.status === 'completed' && (job.conclusion !== 'success' && job.conclusion !== 'skipped');
 }
 
 const validateEnvironmentVariables = (variables) => {
