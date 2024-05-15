@@ -11,10 +11,13 @@ import {
 	isValidElement,
 	useCallback,
 	useRef,
+	useMemo,
 } from '@wordpress/element';
 import { useEditorContext } from '@woocommerce/base-context';
 import deprecated from '@wordpress/deprecated';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { getSetting } from '@woocommerce/settings';
+import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
 
 /**
  * Internal dependencies
@@ -24,6 +27,18 @@ import { STORE_KEY as PAYMENT_STORE_KEY } from '../../../data/payment/constants'
 
 const ExpressPaymentMethods = () => {
 	const { isEditor } = useEditorContext();
+
+	const { hasDarkControls } = useCheckoutBlockContext();
+
+	const buttonAttributes = useMemo(
+		() => getSetting( 'expressPaymentStyles' ),
+		[]
+	);
+	buttonAttributes.height = 'clamp(40px, 48px, 56px)';
+	buttonAttributes.defaultHeight = '48px';
+	buttonAttributes.minWidth = '118px';
+	buttonAttributes.darkMode = hasDarkControls;
+	buttonAttributes.label = 'buy';
 
 	const { activePaymentMethod, paymentMethodData } = useSelect(
 		( select ) => {
@@ -150,6 +165,7 @@ const ExpressPaymentMethods = () => {
 							onError: onExpressPaymentError,
 							setExpressPaymentError:
 								deprecatedSetExpressPaymentError,
+							buttonAttributes,
 						} ) }
 					</li>
 				) : null;
