@@ -565,7 +565,7 @@ class Loader {
 		wc_admin_record_tracks_event( 'appearance_theme_view', array() );
 	}
 
-	public function maybe_configure_with_blueprint() {
+	public static function maybe_configure_with_blueprint() {
 		$path = constant( 'WOOCOMMERCE_BLUEPRINT_PATH' );
 		if ( constant( 'USE_WOOCOMMERCE_BLUEPRINT' ) === true && file_exists( $path )) {
 			$blueprint = new Blueprint( $path );
