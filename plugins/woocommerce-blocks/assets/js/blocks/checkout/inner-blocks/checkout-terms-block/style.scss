@@ -1,6 +1,11 @@
 .wc-block-checkout__terms {
 	margin: 0 0 2.5rem 0;
 
+	.is-mobile &,
+	.is-small & {
+		padding-top: 2.5rem;
+	}
+
 	textarea {
 		top: -5px;
 		position: relative;
