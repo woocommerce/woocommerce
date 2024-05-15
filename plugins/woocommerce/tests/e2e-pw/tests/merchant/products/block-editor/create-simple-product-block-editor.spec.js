@@ -72,13 +72,6 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			await page
-				.locator( '.woocommerce-product-publish-panel__header' )
-				.getByRole( 'button', {
-					name: 'Publish',
-				} )
-				.click();
-
 			await expect(
 				page.getByLabel( 'Dismiss this notice' )
 			).toContainText( 'Product published' );
@@ -117,13 +110,6 @@ test.describe( 'General tab', () => {
 				.fill( productData.productPrice );
 			await page
 				.locator( '.woocommerce-product-header__actions' )
-				.getByRole( 'button', {
-					name: 'Publish',
-				} )
-				.click();
-
-			await page
-				.locator( '.woocommerce-product-publish-panel__header' )
 				.getByRole( 'button', {
 					name: 'Publish',
 				} )

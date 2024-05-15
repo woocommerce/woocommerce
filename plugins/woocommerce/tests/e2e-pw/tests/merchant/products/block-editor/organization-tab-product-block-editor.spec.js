@@ -112,13 +112,6 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			await page
-				.locator( '.woocommerce-product-publish-panel__header' )
-				.getByRole( 'button', {
-					name: 'Publish',
-				} )
-				.click();
-
 			await expect(
 				page.getByLabel( 'Dismiss this notice' )
 			).toContainText( 'Product published' );
