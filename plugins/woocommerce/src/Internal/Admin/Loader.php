@@ -567,7 +567,7 @@ class Loader {
 
 	public static function maybe_configure_with_blueprint() {
 		$path = constant( 'WOOCOMMERCE_BLUEPRINT_PATH' );
-		if ( constant( 'USE_WOOCOMMERCE_BLUEPRINT' ) === true && file_exists( $path )) {
+		if ( true === constant( 'USE_WOOCOMMERCE_BLUEPRINT' ) && file_exists( $path ) ) {
 			$blueprint = new Blueprint( $path );
 			$blueprint->process();
 		}
