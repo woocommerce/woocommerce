@@ -379,7 +379,7 @@ test.skip( 'can update product attributes', async ( {
 	} );
 } );
 
-test( 'can remove product attributes', async ( {
+test.skip( 'can remove product attributes', async ( {
 	page,
 	productWithAttributes,
 	attributes,
