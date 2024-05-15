@@ -39,6 +39,7 @@ class WC_Admin_Marketplace_Promotions {
 	public static function init() {
 		// A legacy hook that can be triggered by action scheduler.
 		add_action( 'woocommerce_marketplace_fetch_promotions', '__return_true' );
+		register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
 
 		if (
 			defined( 'DOING_AJAX' ) && DOING_AJAX
@@ -325,7 +326,7 @@ class WC_Admin_Marketplace_Promotions {
 	}
 
 	/**
-	 * Clear event that was used for fetching promotions in WC Core 8.8.
+	 * Clear the scheduled action that was used to fetch promotions in WooCommerce 8.8.
 	 * It's no longer needed as a transient is used to store the data.
 	 *
 	 * @return void

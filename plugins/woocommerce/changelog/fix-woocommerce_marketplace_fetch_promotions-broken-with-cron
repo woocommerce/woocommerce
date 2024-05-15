@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Switch marketplace promotions from Action Scheduler to cron.
+Switch marketplace promotions from Action Scheduler to transient.
