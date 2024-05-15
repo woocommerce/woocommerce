@@ -237,6 +237,7 @@ jobs:
                 REPOSITORY: ${{ github.repository }}
                 RUN_ID: ${{ github.run_id }}
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                MATRIX: ${{ toJson(needs.project-jobs.outputs.*)}}
               run: |
                   # Check if project-jobs was successful. Fail for any other status, including skipped. 
                   result="${{ needs.project-jobs.result }}"
@@ -244,7 +245,7 @@ jobs:
                     echo "Generating CI jobs was not successful."
                     exit 1
                   fi
-                
+                  
                   node .github/workflows/scripts/evaluate-jobs-conclusions.js
 
     e2e-test-reports:

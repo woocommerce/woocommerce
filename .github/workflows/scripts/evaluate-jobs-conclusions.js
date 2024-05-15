@@ -1,4 +1,4 @@
-const {REPOSITORY, RUN_ID, GITHUB_TOKEN} = process.env;
+const {REPOSITORY, RUN_ID, GITHUB_TOKEN, MATRIX} = process.env;
 
 const fetchJobs = async () => {
 	try {
@@ -17,6 +17,10 @@ const fetchJobs = async () => {
 };
 
 const evaluateJobs = async () => {
+	const matrix = JSON.parse(MATRIX).flat();
+
+	console.log('Matrix:', matrix);
+
 	const jobs = await fetchJobs();
 
 	const failed = [];
@@ -52,6 +56,10 @@ if (!RUN_ID) {
 }
 if (!GITHUB_TOKEN) {
 	console.error('Missing GITHUB_TOKEN environment variables');
+	process.exit(1);
+}
+if (!MATRIX) {
+	console.error('Missing MATRIX environment variables');
 	process.exit(1);
 }
 
