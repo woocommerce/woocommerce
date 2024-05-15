@@ -32,8 +32,9 @@ class PTKPatternsStore {
 		$this->ptk_client = $ptk_client;
 
 		if ( Features::is_enabled( 'pattern-toolkit-full-composability' ) ) {
-			register_activation_hook( WC_PLUGIN_FILE, array( $this, 'reset_cached_patterns' ) );
+			add_action( 'deactivated_plugin', array( $this, 'reset_cached_patterns' ), 10, 2 );
 			add_action( 'upgrader_process_complete', array( $this, 'woocommerce_plugin_update' ), 10, 2 );
+			add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'reset_cached_patterns' ), 10, 2 );
 		}
 	}
 
@@ -101,7 +102,7 @@ class PTKPatternsStore {
 	 *
 	 * @return void
 	 */
-	private function reset_cached_patterns() {
+	public function reset_cached_patterns() {
 		delete_transient( self::TRANSIENT_NAME );
 	}
 
