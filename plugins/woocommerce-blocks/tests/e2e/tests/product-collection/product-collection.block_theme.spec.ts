@@ -1120,7 +1120,7 @@ test.describe( 'Product Collection', () => {
 				await expect( previewButtonLocator ).toBeHidden();
 
 				// Preview button should be visible when any of inner block is selected
-				editorFrame
+				await editorFrame
 					.getByLabel( 'Block: Product Template' )
 					.getByLabel( 'Block: Product Image' )
 					.first()
