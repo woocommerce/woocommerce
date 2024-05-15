@@ -1,5 +1,19 @@
 *** WooCommerce Beta Tester Changelog ***
 
+2024-05-13 - version 2.3.1
+* Minor - Add Remote Spec Validator to WooCommerce Admin Tester
+* Minor - Remove the patterns_ai_data post from DB when resetting the CYS.
+* Patch - Comment: Fix Gutenberg links in the docs pointing to incorrect branch.
+* Patch - Add missing live-branches/install.php require to API.php
+* Minor - Add feature flag options to wc-live-branches user script
+* Patch - Update WooCommerce import path in WC Admin Tester Helper
+* Minor - Fix option search that accidentally had its wildcards removed
+* Patch - Fix beta test plugin deprecated creation dynamic property
+* Patch - add composer install to changelog script
+* Patch - [Woo Beta Tester]: add User Preference dev tool panel
+* Patch - Update @wordpress-env package to version 9.0.7
+* Patch - Update pnpm to 9.1.0
+
 2023-11-16 - version 2.3.0
 * Minor - Add ability to update block templates logging threshold.
 * Minor - Add Product Editor Developer Tools
