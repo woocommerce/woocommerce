@@ -42,15 +42,7 @@ test.describe( 'Shopper → Translations', () => {
 		page,
 	} ) => {
 		await frontendUtils.goToShop();
-
-		const beanieAddToCartButton = page.getByLabel(
-			'Toevoegen aan winkelwagen: “Beanie“'
-		);
-		await beanieAddToCartButton.click();
-
-		// Add to cart initiates a request that could be interrupted by navigation, wait till it's done.
-		await expect( beanieAddToCartButton ).toHaveText( /in winkelwagen/ );
-
+		await page.getByLabel( 'Toevoegen aan winkelwagen: “Beanie“' ).click();
 		await frontendUtils.goToCart();
 
 		const totalsHeader = page
@@ -78,16 +70,7 @@ test.describe( 'Shopper → Translations', () => {
 		page,
 	} ) => {
 		await frontendUtils.goToShop();
-		const beanieAddToCartButton = page.getByLabel(
-			'Toevoegen aan winkelwagen: “Beanie“'
-		);
-
-		await beanieAddToCartButton.click();
 		await page.getByLabel( 'Toevoegen aan winkelwagen: “Beanie“' ).click();
-
-		// Add to cart initiates a request that could be interrupted by navigation, wait till it's done.
-		await expect( beanieAddToCartButton ).toHaveText( /in winkelwagen/ );
-
 		await frontendUtils.goToCheckout();
 
 		await expect(
