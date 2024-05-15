@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use Automattic\WooCommerce\Admin\Features\Blueprint\Blueprint;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
@@ -91,6 +92,7 @@ class Loader {
 		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
 
 		add_action( 'load-themes.php', array( __CLASS__, 'add_appearance_theme_view_tracks_event' ) );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'maybe_configure_with_blueprint' ) );
 	}
 
 	/**
@@ -561,5 +563,13 @@ class Loader {
 	 */
 	public static function add_appearance_theme_view_tracks_event() {
 		wc_admin_record_tracks_event( 'appearance_theme_view', array() );
+	}
+
+	public function maybe_configure_with_blueprint() {
+		$path = constant( 'WOOCOMMERCE_BLUEPRINT_PATH' );
+		if ( constant( 'USE_WOOCOMMERCE_BLUEPRINT' ) === true && file_exists( $path )) {
+			$blueprint = new Blueprint( $path );
+			$blueprint->process();
+		}
 	}
 }
