@@ -13,7 +13,7 @@ import ProductCollectionPage from '../product-collection/product-collection.page
 const PRODUCT_CATALOG_LINK = '/shop';
 const TEMPLATE_PATH = path.join(
 	__dirname,
-	'./filters-with-product-collection.handlebars'
+	'../shared/filters-with-product-collection.handlebars'
 );
 
 const blockData = {
