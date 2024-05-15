@@ -37,7 +37,7 @@ const config = {
 		'rulesdir/no-raw-playwright-test-import': 'error',
 		// Since we're restoring the database for each test, hooks other than
 		// `beforeEach` don't make sense.
-		// {@see https://github.com/woocommerce/woocommerce/pull/46432}
+		// See https://github.com/woocommerce/woocommerce/pull/46432.
 		'playwright/no-hooks': [ 'error', { allow: [ 'beforeEach' ] } ],
 	},
 };
