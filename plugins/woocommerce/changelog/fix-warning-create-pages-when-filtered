@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+fix PHP 8 warning in Blocks\Installer\create_pages() callback when other filters have removed pages
