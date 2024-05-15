@@ -304,6 +304,7 @@ final class BlockTypesController {
 			$block_types[] = 'ProductFilterAttribute';
 			$block_types[] = 'ProductFilterRating';
 			$block_types[] = 'ProductFilterActive';
+			$block_types[] = 'ProductFilterClearButton';
 		}
 
 		/**
@@ -350,6 +351,13 @@ final class BlockTypesController {
 			);
 		}
 
-		return $block_types;
+		/**
+		 * Filters the list of allowed block types.
+		 *
+		 * @since 9.0.0
+		 *
+		 * @param array $block_types List of block types.
+		 */
+		return apply_filters( 'woocommerce_get_block_types', $block_types );
 	}
 }

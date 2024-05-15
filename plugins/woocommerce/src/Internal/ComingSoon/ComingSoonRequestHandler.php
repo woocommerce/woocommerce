@@ -26,36 +26,8 @@ class ComingSoonRequestHandler {
 	final public function init( ComingSoonHelper $coming_soon_helper ) {
 		$this->coming_soon_helper = $coming_soon_helper;
 		add_filter( 'template_include', array( $this, 'handle_template_include' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'deregister_unnecessary_styles' ), 100 );
-		add_filter( 'wp_robots', array( $this, 'disable_seo_indexing' ) );
 	}
 
-	/**
-	 * Deregisters unnecessary styles for the coming soon page.
-	 *
-	 * @return void
-	 */
-	public function deregister_unnecessary_styles() {
-		global $wp;
-
-		if ( ! $this->should_show_coming_soon( $wp ) ) {
-			return;
-		}
-
-		if ( $this->coming_soon_helper->is_site_coming_soon() ) {
-			global $wp_styles;
-
-			foreach ( $wp_styles->registered as $handle => $registered_style ) {
-				// Deregister all styles except for block styles.
-				if (
-					strpos( $handle, 'wp-block' ) !== 0 &&
-					strpos( $handle, 'core-block' ) !== 0
-				) {
-					wp_deregister_style( $handle );
-				}
-			}
-		}
-	}
 
 	/**
 	 * Replaces the page template with a 'coming soon' when the site is in coming soon mode.
@@ -76,7 +48,7 @@ class ComingSoonRequestHandler {
 		nocache_headers();
 
 		add_theme_support( 'block-templates' );
-		wp_dequeue_style( 'global-styles' );
+
 		$coming_soon_template = get_query_template( 'coming-soon' );
 
 		if ( ! wc_current_theme_is_fse_theme() && $this->coming_soon_helper->is_store_coming_soon() ) {
@@ -97,27 +69,6 @@ class ComingSoonRequestHandler {
 			// We need to exit to prevent further processing.
 			exit();
 		}
-	}
-
-	/**
-	 * Disable search engines in coming soon pages
-	 *
-	 * @since 9.0.0
-	 * @param array $robots Associative array of robots directives.
-	 * @return array Filtered robots directives.
-	 */
-	public function disable_seo_indexing( $robots ) {
-		// Early exit if LYS feature is disabled.
-		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
-			return $robots;
-		}
-
-		// Set no index when site is in coming soon mode.
-		if ( ! $this->coming_soon_helper->is_site_live() ) {
-			return wp_robots_no_robots( $robots );
-		}
-
-		return $robots;
 	}
 
 	/**
