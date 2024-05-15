@@ -359,12 +359,13 @@
 					"name": "JavaScript",
 					"command": "test:js",
 					"changes": [
-						"jest.config.js",
 						"webpack.config.js",
 						"babel.config.js",
 						"tsconfig.json",
 						"assets/**/*.{js,ts,tsx,scss}",
-						"packages/**/*.{js,ts,tsx,scss}"
+						"packages/**/*.{js,ts,tsx,scss}",
+						"tests/js/*",
+						"tests/utils/*"
 					],
 					"cascade": "test:js"
 				}
