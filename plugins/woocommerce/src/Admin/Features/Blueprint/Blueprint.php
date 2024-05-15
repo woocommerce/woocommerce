@@ -16,8 +16,6 @@ class Blueprint {
 		$schema = json_decode( file_get_contents( $this->schemaPath ) );
 		foreach ( $schema->steps as $stepSchema ) {
 			$stepProcessor = __NAMESPACE__ . '\\StepProcessors\\' . ucfirst( $stepSchema->step ) . 'Processor';
-			wplog( $stepProcessor );
-
 			if ( class_exists( $stepProcessor ) ) {
 				/**
 				 * @var $stepProcessor StepProcessor
