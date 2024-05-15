@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Free some in-memory usage when doing batch processing in HPOS
