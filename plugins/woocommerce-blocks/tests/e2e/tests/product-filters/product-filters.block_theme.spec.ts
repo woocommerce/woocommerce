@@ -103,7 +103,7 @@ test.describe( `${ blockData.name }`, () => {
 		 )[ 0 ].split( '\n' );
 		await expect( colorHeading ).toBeVisible();
 		await expect( colorFilterBlock ).toBeVisible();
-		await expect( colorFilterOptions ).toEqual(
+		expect( colorFilterOptions ).toEqual(
 			expect.arrayContaining( expectedColorFilterOptions )
 		);
 

@@ -5,10 +5,6 @@ import { Page } from '@playwright/test';
 import { EditorUtils, FrontendUtils } from '@woocommerce/e2e-utils';
 import { Editor } from '@wordpress/e2e-test-utils-playwright';
 
-const selectors = {
-	editor: {},
-};
-
 export class ProductFiltersPage {
 	editor: Editor;
 	page: Page;
