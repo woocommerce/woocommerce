@@ -145,6 +145,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'meta_data'             => $object->get_meta_data(),
 			'name'                  => wc_get_formatted_variation( $object, true, false, false ),
 			'parent_id'             => $object->get_parent_id(),
+			'type'                 => $object->get_type(),
 		);
 
 		$data     = $this->add_additional_fields_to_object( $data, $request );
@@ -839,6 +840,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 							),
 						),
 					),
+				),
+				'type'                  => array(
+					'description' => __( 'Product type.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
 				),
 			),
 		);
