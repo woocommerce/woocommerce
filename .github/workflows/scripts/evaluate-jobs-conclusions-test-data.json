@@ -58,5 +58,25 @@
 		"status": "in_progress",
 		"conclusion": "",
 		"name": "In progress job (optional)"
+	},
+	{
+		"status": "unknown_status",
+		"conclusion": "",
+		"name": "Required job with unknown status"
+	},
+	{
+		"status": "unknown_status",
+		"conclusion": "",
+		"name": "Job with unknown status (optional)"
+	},
+	{
+		"status": "completed",
+		"conclusion": "unknown_conclusion",
+		"name": "Required job with unknown conclusion"
+	},
+	{
+		"status": "completed",
+		"conclusion": "unknown_conclusion",
+		"name": "Job with unknown conclusion (optional)"
 	}
 ]
