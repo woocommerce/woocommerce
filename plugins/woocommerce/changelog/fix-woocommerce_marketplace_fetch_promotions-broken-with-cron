@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Ensure that callback to woocommerce_marketplace_fetch_promotions scheduled action is always registered.
+Switch marketplace promotions from Action Scheduler to cron.
