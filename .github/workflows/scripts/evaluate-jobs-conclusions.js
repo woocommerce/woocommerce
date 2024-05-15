@@ -1,5 +1,5 @@
 const {REPOSITORY, RUN_ID, GITHUB_TOKEN} = process.env;
-const IGNORE_JOBS = ['Evaluate Project Job Statuses', 'Report e2e tests results', 'Report API tests results'];
+const IGNORED_JOBS = ['Evaluate Project Job Statuses', 'Report e2e tests results', 'Report API tests results'];
 
 const fetchJobs = async () => {
 	try {
@@ -23,16 +23,18 @@ const evaluateJobs = async () => {
 		job.status === 'completed' && (job.conclusion !== 'success' && job.conclusion !== 'skipped')
 	);
 
-	console.log('Jobs:', jobs.length);
-	console.log('nonSuccessfulCompletedJobs:', nonSuccessfulCompletedJobs.length);
+	console.log('Workflow jobs:', jobs.length);
+	console.log('Non successful completed jobs:', nonSuccessfulCompletedJobs.length);
 
 	const failed = [];
 
 	nonSuccessfulCompletedJobs.forEach(job => {
-		console.log(`Checking job '${job.name}': ${job.status}, ${job.conclusion}`);
+		const jobPrintName = `'${job.name}': ${job.status}, ${job.conclusion}`
 		if (isJobRequired(job)) {
-			console.error(`Job '${job.name}' is required and was not successful`);
+			console.error(`❌ ${jobPrintName} - is required`);
 			failed.push(job.name);
+		} else {
+			console.warn(`✅ ${jobPrintName} - is not required`);
 		}
 	})
 
@@ -43,7 +45,7 @@ const evaluateJobs = async () => {
 }
 
 const isJobRequired = (job) => {
-	return !job.name.endsWith('(optional)') && !IGNORE_JOBS.includes(job.name)
+	return !job.name.endsWith('(optional)') && !IGNORED_JOBS.includes(job.name)
 }
 
 const isJobCompletedAndFailed = (job) => {
