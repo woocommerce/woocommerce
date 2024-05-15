@@ -400,7 +400,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 39, count( $properties ) );
+		$this->assertEquals( 38, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_modified', $properties );
@@ -436,8 +436,6 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'attributes', $properties );
 		$this->assertArrayHasKey( 'menu_order', $properties );
 		$this->assertArrayHasKey( 'meta_data', $properties );
-		$this->assertArrayHasKey( 'type', $properties );
-
 	}
 
 	/**
@@ -569,7 +567,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 			'regular_price' => '4.99'
 		) ) );
 		$response  = $this->server->dispatch( $request );
-
+		
 		$variation = $response->get_data();
 		$product   = wc_get_product( $product->get_id() );
 		$children  = $product->get_children();
