@@ -97,6 +97,16 @@ export const useProductTemplate = (
 
 		// If there are multiple matching templates, we should use the one with the most matching fields.
 		matchingProductTemplate = findBetterMatchTemplate( matchingTemplates );
+
+		if ( product.type === 'variation' && parent ) {
+			matchingProductTemplate = applyFilters(
+				'woocommerce.product.variations.getMatchingTemplate',
+				matchingProductTemplate,
+				productTemplates,
+				product,
+				parent
+			) as ProductTemplate;
+		}
 	}
 
 	// When we switch to getting the product template from the API,
