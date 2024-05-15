@@ -569,7 +569,7 @@ test.describe( 'Billing Address Form', () => {
 				shippingForm.getByLabel( 'Address', { exact: true } )
 			).toHaveValue( '123 Easy Street' );
 			await expect(
-				shippingForm.getByLabel( 'Apartment, suite, etc.' )
+				shippingForm.getByLabel( 'Apartment, suite, etc. (optional)' )
 			).toHaveValue( 'Testville' );
 			await expect(
 				shippingForm.getByLabel( 'United States (US), Country/' )
