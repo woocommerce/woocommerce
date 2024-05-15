@@ -458,7 +458,7 @@ test.describe( 'Merchant → Checkout', () => {
 				const shippingApartmentLink = shippingAddressBlock.getByRole(
 					'button',
 					{
-						name: '+ Add apartment, suite, etc.',
+						name: 'Add apartment, suite, etc.',
 					}
 				);
 
@@ -522,7 +522,7 @@ test.describe( 'Merchant → Checkout', () => {
 				const billingApartmentLink = billingAddressBlock.getByRole(
 					'button',
 					{
-						name: '+ Add apartment, suite, etc.',
+						name: 'Add apartment, suite, etc.',
 					}
 				);
 
