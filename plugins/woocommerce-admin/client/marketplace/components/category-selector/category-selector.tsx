@@ -19,6 +19,7 @@ import { ProductType } from '../product-list/types';
 const ALL_CATEGORIES_SLUGS = {
 	[ ProductType.extension ]: '_all',
 	[ ProductType.theme ]: 'themes',
+	[ ProductType.businessService ]: 'business-services',
 };
 
 interface CategorySelectorProps {
