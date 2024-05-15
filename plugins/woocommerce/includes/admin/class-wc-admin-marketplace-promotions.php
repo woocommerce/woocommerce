@@ -15,9 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Admin_Marketplace_Promotions {
 
-	const TRANSIENT_NAME            = 'woocommerce_marketplace_promotions_v2';
-	const TRANSIENT_LIFE_SPAN       = DAY_IN_SECONDS;
-	const PROMOTIONS_API_URL        = 'https://woocommerce.com/wp-json/wccom-extensions/3.0/promotions';
+	const TRANSIENT_NAME      = 'woocommerce_marketplace_promotions_v2';
+	const TRANSIENT_LIFE_SPAN = DAY_IN_SECONDS;
+	const PROMOTIONS_API_URL  = 'https://woocommerce.com/wp-json/wccom-extensions/3.0/promotions';
 
 	/**
 	 * The user's locale, for example en_US.
@@ -37,7 +37,7 @@ class WC_Admin_Marketplace_Promotions {
 	 * @return void
 	 */
 	public static function init() {
-		// legacy hook that can be triggered by action scheduler
+		// A legacy hook that can be triggered by action scheduler.
 		add_action( 'woocommerce_marketplace_fetch_promotions', '__return_true' );
 
 		if (
