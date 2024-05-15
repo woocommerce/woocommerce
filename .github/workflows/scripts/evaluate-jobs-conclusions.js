@@ -61,7 +61,7 @@ const validateEnvironmentVariables = (variables) => {
 	});
 }
 
-validateEnvironmentVariables(['REPOSITORY', 'RUN_ID', 'GITHUB_TOKEN', 'MATRIX']);
+validateEnvironmentVariables(['REPOSITORY', 'RUN_ID', 'GITHUB_TOKEN']);
 evaluateJobs().then(() => {
 	console.log('All required jobs passed');
 });
