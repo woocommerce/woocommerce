@@ -156,6 +156,7 @@ const ProductTemplateEdit = (
 				shrinkColumns: false,
 			},
 			queryContextIncludes = [],
+			__privateProductCollectionPreviewState,
 		},
 		__unstableLayoutClassNames,
 	} = props;
@@ -249,6 +250,7 @@ const ProductTemplateEdit = (
 					...restQueryArgs,
 					location,
 					productCollectionQueryContext,
+					previewState: __privateProductCollectionPreviewState,
 				} ),
 				blocks: getBlocks( clientId ),
 			};
@@ -270,6 +272,7 @@ const ProductTemplateEdit = (
 			location,
 			productCollectionQueryContext,
 			loopShopPerPage,
+			__privateProductCollectionPreviewState,
 		]
 	);
 	const blockContexts = useMemo(

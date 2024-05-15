@@ -4,6 +4,11 @@
 import type { BlockEditProps } from '@wordpress/blocks';
 import { type AttributeMetadata } from '@woocommerce/types';
 
+/**
+ * Internal dependencies
+ */
+import { WooCommerceBlockLocation } from '../product-template/utils';
+
 export interface ProductCollectionAttributes {
 	query: ProductCollectionQuery;
 	queryId: number;
@@ -23,6 +28,8 @@ export interface ProductCollectionAttributes {
 	 */
 	queryContextIncludes: string[];
 	forcePageReload: boolean;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	__privatePreviewState?: PreviewState;
 }
 
 export enum LayoutOptions {
@@ -91,6 +98,10 @@ export interface ProductCollectionQuery {
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
 		openCollectionSelectionModal: () => void;
+		preview: {
+			initialPreviewState?: PreviewState;
+			setPreviewState?: SetPreviewState;
+		};
 		context: {
 			templateSlug: string;
 		};
@@ -143,3 +154,14 @@ export enum CoreFilterNames {
 
 export type CollectionName = CoreCollectionNames | string;
 export type FilterName = CoreFilterNames | string;
+
+export interface PreviewState {
+	isPreview: boolean;
+	previewMessage: string;
+}
+
+export type SetPreviewState = ( args: {
+	setState: ( previewState: PreviewState ) => void;
+	location: WooCommerceBlockLocation;
+	attributes: ProductCollectionAttributes;
+} ) => void | ( () => void );

@@ -7,8 +7,10 @@ import {
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
+import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
+import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
 
 /**
  * Internal dependencies
@@ -19,15 +21,28 @@ import type {
 	ProductCollectionEditComponentProps,
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
-import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
+import {
+	getDefaultValueOfInheritQueryFromTemplate,
+	useSetPreviewState,
+} from '../utils';
 import InspectorControls from './inspector-controls';
 import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
 
-const ProductCollectionContent = (
-	props: ProductCollectionEditComponentProps
-) => {
+const ProductCollectionContent = ( {
+	preview: { setPreviewState, initialPreviewState } = {},
+	...props
+}: ProductCollectionEditComponentProps ) => {
+	const isInitialAttributesSet = useRef( false );
 	const { clientId, attributes, setAttributes } = props;
+	const location = useGetLocation( props.context, props.clientId );
+
+	useSetPreviewState( {
+		setPreviewState,
+		setAttributes,
+		location,
+		attributes,
+	} );
 
 	const blockProps = useBlockProps();
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
@@ -75,11 +90,36 @@ const ProductCollectionContent = (
 				},
 				...( attributes as Partial< ProductCollectionAttributes > ),
 				queryId,
+				// If initialPreviewState is provided, set it as previewState.
+				...( !! attributes.collection && {
+					__privatePreviewState: initialPreviewState,
+				} ),
 			} );
+
+			isInitialAttributesSet.current = true;
 		},
 		// This hook is only needed on initialization and sets default attributes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[]
+	);
+
+	const isSelectedOrInnerBlockSelected = useSelect(
+		( select ) => {
+			const { getSelectedBlockClientId, hasSelectedInnerBlock } =
+				select( 'core/block-editor' );
+
+			// Check if the current block is selected.
+			const isSelected = getSelectedBlockClientId() === clientId;
+
+			// Check if any inner block of the current block is selected.
+			const isInnerBlockSelected = hasSelectedInnerBlock(
+				clientId,
+				true
+			);
+
+			return isSelected || isInnerBlockSelected;
+		},
+		[ clientId ]
 	);
 
 	/**
@@ -91,8 +131,29 @@ const ProductCollectionContent = (
 		return null;
 	}
 
+	// Let's not render anything until default attributes are set.
+	if ( ! isInitialAttributesSet.current ) {
+		return null;
+	}
+
 	return (
 		<div { ...blockProps }>
+			{ attributes.__privatePreviewState?.isPreview &&
+				isSelectedOrInnerBlockSelected && (
+					<Button
+						variant="primary"
+						size="small"
+						showTooltip
+						label={
+							attributes.__privatePreviewState?.previewMessage
+						}
+						className="wc-block-product-collection__preview-button"
+						data-test-id="product-collection-preview-button"
+					>
+						Preview
+					</Button>
+				) }
+
 			<InspectorControls { ...props } />
 			<InspectorAdvancedControls { ...props } />
 			<ToolbarControls { ...props } />
