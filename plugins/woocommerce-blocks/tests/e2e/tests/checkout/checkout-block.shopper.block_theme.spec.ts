@@ -249,11 +249,13 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
-		await editor.openDocumentSettingsSidebar();
+
 		await editor.selectBlocks(
 			blockSelectorInEditor +
 				'  [data-type="woocommerce/checkout-shipping-address-block"]'
 		);
+
+		await editor.openDocumentSettingsSidebar();
 
 		const checkbox = page.getByRole( 'checkbox', {
 			name: 'Company',
@@ -299,7 +301,7 @@ test.describe( 'Shopper → Shipping (customer user)', () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( 'Beanie' );
 		await frontendUtils.goToCheckout();
-		await expect(
+		expect(
 			await checkoutPageObject.selectAndVerifyShippingOption(
 				FREE_SHIPPING_NAME,
 				FREE_SHIPPING_PRICE
@@ -314,7 +316,7 @@ test.describe( 'Shopper → Shipping (customer user)', () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( 'Beanie' );
 		await frontendUtils.goToCheckout();
-		await expect(
+		expect(
 			await checkoutPageObject.selectAndVerifyShippingOption(
 				FLAT_RATE_SHIPPING_NAME,
 				FLAT_RATE_SHIPPING_PRICE
@@ -333,7 +335,7 @@ test.describe( 'Shopper → Shipping (customer user)', () => {
 			name: 'Billing address',
 		} );
 
-		await expect( shippingForm.getByLabel( 'Phone' ).inputValue ).toEqual(
+		expect( shippingForm.getByLabel( 'Phone' ).inputValue ).toEqual(
 			billingForm.getByLabel( 'Phone' ).inputValue
 		);
 
@@ -371,7 +373,7 @@ test.describe( 'Shopper → Place Guest Order', () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
-		await expect(
+		expect(
 			await checkoutPageObject.selectAndVerifyShippingOption(
 				FREE_SHIPPING_NAME,
 				FREE_SHIPPING_PRICE
@@ -527,29 +529,6 @@ test.describe( 'Billing Address Form', () => {
 		await editorUtils.saveSiteEditorEntities();
 	} );
 
-	const shippingTestData = {
-		firstname: 'John',
-		lastname: 'Doe',
-		addressfirstline: '123 Easy Street',
-		addresssecondline: 'Testville',
-		country: 'United States (US)',
-		city: 'New York',
-		state: 'New York',
-		postcode: '90210',
-		phone: '01234567890',
-	};
-	const billingTestData = {
-		first_name: '',
-		last_name: '',
-		address_1: '',
-		address_2: '',
-		country: 'United States (US)',
-		city: '',
-		state: 'New York',
-		postcode: '',
-		phone: '',
-	};
-
 	test.describe( 'Guest user', () => {
 		test.use( { storageState: guestFile } );
 
@@ -562,66 +541,81 @@ test.describe( 'Billing Address Form', () => {
 			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
 
-			await checkoutPageObject.fillShippingDetails( shippingTestData );
+			await checkoutPageObject.fillShippingDetails( {
+				firstname: 'John',
+				lastname: 'Doe',
+				addressfirstline: '123 Easy Street',
+				addresssecondline: 'Testville',
+				country: 'United States (US)',
+				city: 'New York',
+				state: 'New York',
+				postcode: '90210',
+				phone: '01234567890',
+			} );
+
+			const shippingForm = page.getByRole( 'group', {
+				name: 'Shipping address',
+			} );
+
 			await page.getByLabel( 'Use same address for billing' ).uncheck();
 
-			// Check shipping fields are filled.
-			for ( const [ key, value ] of Object.entries( shippingTestData ) ) {
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				switch ( key ) {
-					case 'firstname':
-						await expect(
-							page.locator( '#shipping-first_name' )
-						).toHaveValue( value );
-						break;
-					case 'lastname':
-						await expect(
-							page.locator( '#shipping-last_name' )
-						).toHaveValue( value );
-						break;
-					case 'country':
-						await expect(
-							page.locator( '#shipping-country input' )
-						).toHaveValue( value );
-						break;
-					case 'addressfirstline':
-						await expect(
-							page.locator( '#shipping-address_1' )
-						).toHaveValue( value );
-						break;
-					case 'addresssecondline':
-						await expect(
-							page.locator( '#shipping-address_2' )
-						).toHaveValue( value );
-						break;
-					case 'state':
-						await expect(
-							page.locator( '#shipping-state input' )
-						).toHaveValue( value );
-						break;
-					default:
-						await expect(
-							page.locator( `#shipping-${ key }` )
-						).toHaveValue( value );
-				}
-			}
+			await expect( shippingForm.getByLabel( 'First name' ) ).toHaveValue(
+				'John'
+			);
+			await expect( shippingForm.getByLabel( 'Last name' ) ).toHaveValue(
+				'Doe'
+			);
+			await expect(
+				shippingForm.getByLabel( 'Address', { exact: true } )
+			).toHaveValue( '123 Easy Street' );
+			await expect(
+				shippingForm.getByLabel( 'Apartment, suite, etc. (' )
+			).toHaveValue( 'Testville' );
+			await expect(
+				shippingForm.getByLabel( 'United States (US), Country/' )
+			).toHaveValue( 'United States (US)' );
+			await expect( shippingForm.getByLabel( 'City' ) ).toHaveValue(
+				'New York'
+			);
+			await expect(
+				shippingForm.getByLabel( 'New York, State' )
+			).toHaveValue( 'New York' );
+			await expect( shippingForm.getByLabel( 'ZIP Code' ) ).toHaveValue(
+				'90210'
+			);
+			await expect(
+				shippingForm.getByLabel( 'Phone (optional)' )
+			).toHaveValue( '01234567890' );
 
-			// Check billing fields are empty.
-			for ( const [ key, value ] of Object.entries( billingTestData ) ) {
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				switch ( key ) {
-					case 'country':
-						await expect(
-							page.locator( '#billing-country input' )
-						).toHaveValue( value );
-						break;
-					case 'state':
-						await expect(
-							page.locator( '#billing-state input' )
-						).toHaveValue( value );
-						break;
-				}
-			}
+			const billingForm = page.getByRole( 'group', {
+				name: 'Billing address',
+			} );
+
+			await expect( billingForm.getByLabel( 'First name' ) ).toHaveValue(
+				''
+			);
+			await expect( billingForm.getByLabel( 'Last name' ) ).toHaveValue(
+				''
+			);
+			await expect(
+				billingForm.getByLabel( 'Address', { exact: true } )
+			).toHaveValue( '' );
+			await expect(
+				billingForm.getByLabel( 'Apartment, suite, etc. (' )
+			).toHaveValue( '' );
+			await expect(
+				billingForm.getByLabel( 'United States (US), Country/' )
+			).toHaveValue( 'United States (US)' );
+			await expect( billingForm.getByLabel( 'City' ) ).toHaveValue( '' );
+			await expect(
+				billingForm.getByLabel( 'New York, State' )
+			).toHaveValue( 'New York' );
+			await expect( billingForm.getByLabel( 'ZIP Code' ) ).toHaveValue(
+				''
+			);
+			await expect(
+				billingForm.getByLabel( 'Phone (optional)' )
+			).toHaveValue( '' );
 		} );
 	} );
 } );
