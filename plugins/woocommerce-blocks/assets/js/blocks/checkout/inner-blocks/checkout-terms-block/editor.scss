@@ -1,3 +1,12 @@
+.edit-post-visual-editor {
+
+	.is-small, .is-medium {
+		.wc-block-checkout__terms {
+			padding: 4px;
+		}
+	}
+}
+
 // Adjust padding and margins in the editor to improve selected block outlines.
 .wc-block-checkout__terms {
 	margin: 0 0 2.5rem 0;
