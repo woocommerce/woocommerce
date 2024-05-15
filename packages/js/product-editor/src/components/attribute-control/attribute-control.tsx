@@ -218,7 +218,10 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 		return (
 			<EmptyState
-				names={ getEmptyStateSequentialNames( 'Attribute', 3 ) }
+				names={ getEmptyStateSequentialNames(
+					__( 'Attribute', 'woocommerce' ),
+					3
+				) }
 			/>
 		);
 	}
