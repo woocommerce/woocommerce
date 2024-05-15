@@ -251,11 +251,10 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		const attributeFilterControl = await editorUtils.getBlockByName(
 			blockData.slug
 		);
-		await attributeFilterControl.getByText( 'Size' ).click();
-		await attributeFilterControl.getByText( 'Done' ).click();
 
-		await editor.selectBlocks( attributeFilterControl );
 		await editor.openDocumentSettingsSidebar();
+		await editor.selectBlocks( attributeFilterControl.nth( 1 ) );
+
 		await page.getByText( "Show 'Apply filters' button" ).click();
 
 		await editor.saveSiteEditorEntities();
