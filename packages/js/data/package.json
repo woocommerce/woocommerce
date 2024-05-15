@@ -56,16 +56,16 @@
 		"@woocommerce/date": "workspace:*",
 		"@woocommerce/navigation": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
-		"@wordpress/api-fetch": "wp-6.4",
-		"@wordpress/compose": "wp-6.4",
-		"@wordpress/core-data": "wp-6.4",
-		"@wordpress/data": "wp-6.4",
-		"@wordpress/data-controls": "wp-6.4",
-		"@wordpress/deprecated": "wp-6.4",
-		"@wordpress/element": "wp-6.4",
-		"@wordpress/hooks": "wp-6.4",
-		"@wordpress/i18n": "wp-6.4",
-		"@wordpress/url": "wp-6.4",
+		"@wordpress/api-fetch": "6.39.13",
+		"@wordpress/compose": "6.19.13",
+		"@wordpress/core-data": "6.19.14",
+		"@wordpress/data": "9.12.13",
+		"@wordpress/data-controls": "3.11.13",
+		"@wordpress/deprecated": "3.42.13",
+		"@wordpress/element": "5.19.13",
+		"@wordpress/hooks": "3.42.13",
+		"@wordpress/i18n": "4.42.13",
+		"@wordpress/url": "3.43.13",
 		"md5": "^2.3.0",
 		"qs": "^6.11.2",
 		"rememo": "^4.0.2"
@@ -103,7 +103,6 @@
 		"wireit": "0.14.3"
 	},
 	"peerDependencies": {
-		"@wordpress/core-data": "wp-6.4",
 		"moment": "^2.18.1",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
@@ -132,7 +131,7 @@
 	},
 	"wireit": {
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json || pnpm babel src --out-dir build --extensions \".ts,.tsx\" --watch",
+			"command": "tsc --project tsconfig-cjs.json || tsc --emitDeclarationOnly || pnpm babel src --out-dir build --extensions \".ts,.tsx\"",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig-cjs.json",
@@ -151,7 +150,7 @@
 			"service": true
 		},
 		"build:project:esm": {
-			"command": "tsc --project tsconfig.json || pnpm babel src --out-dir build --extensions \".ts,.tsx\"",
+			"command": "tsc --project tsconfig.json || tsc --emitDeclarationOnly || pnpm babel src --out-dir build --extensions \".ts,.tsx\"",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig.json",
