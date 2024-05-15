@@ -48,7 +48,7 @@ jobs:
                       child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
 
     project-lint-jobs:
-        name: "Lint - ${{ matrix.projectName }} ${{ matrix.optional && ' (optional)'}}"
+        name: "Lint - ${{ matrix.projectName }} ${{ matrix.optional && ' (optional)' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.lint-jobs != '[]' }}
@@ -71,7 +71,7 @@ jobs:
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
     project-default-test-jobs:
-        name: "Test - ${{ matrix.projectName }} - ${{ matrix.name }} ${{ matrix.optional && ' (optional)'}}"
+        name: "Test - ${{ matrix.projectName }} - ${{ matrix.name }} ${{ matrix.optional && ' (optional)' || '' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.default-test-jobs != '[]' }}
@@ -97,7 +97,7 @@ jobs:
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
     project-e2e-test-jobs:
-        name: "E2E - ${{ matrix.name }} ${{ matrix.optional && ' (optional)'}}"
+        name: "E2E - ${{ matrix.name }} ${{ matrix.optional && ' (optional)' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.e2e-test-jobs != '[]' }}
@@ -134,7 +134,7 @@ jobs:
                   compression-level: 9
 
     project-api-test-jobs:
-        name: "API - ${{ matrix.name }} ${{ matrix.optional && ' (optional)'}}"
+        name: "API - ${{ matrix.name }} ${{ matrix.optional && ' (optional)' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.api-test-jobs != '[]' }}
@@ -171,7 +171,7 @@ jobs:
                   compression-level: 9
 
     project-performance-test-jobs:
-        name: "Performance - ${{ matrix.name }} ${{ matrix.optional && ' (optional)'}}"
+        name: "Performance - ${{ matrix.name }} ${{ matrix.optional && ' (optional)' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.performance-test-jobs != '[]' }}

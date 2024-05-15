@@ -1,4 +1,5 @@
-const {REPOSITORY, RUN_ID, GITHUB_TOKEN, MATRIX} = process.env;
+const {REPOSITORY, RUN_ID, GITHUB_TOKEN} = process.env;
+const IGNORE_JOBS = ['Evaluate Project Job Statuses', 'Report e2e tests results', 'Report API tests results'];
 
 const fetchJobs = async () => {
 	try {
@@ -17,17 +18,13 @@ const fetchJobs = async () => {
 };
 
 const evaluateJobs = async () => {
-	const matrix = JSON.parse(MATRIX).flat();
-
-	console.log('Matrix:', matrix);
-
 	const jobs = await fetchJobs();
-	const failedOrCancelledJobs = jobs.find(job => isJobFailed(job));
+	const nonSuccessfulCompletedJobs = jobs.find(job => isJobCompletedAndFailed(job));
 
 	const failed = [];
 
-	jobs.forEach(job => {
-		if (isJobRequired(job) && isJobFailed(job)) {
+	nonSuccessfulCompletedJobs.forEach(job => {
+		if (isJobRequired(job)) {
 			console.error(`Job '${job.name}' is required and was not successful`);
 			failed.push(job.name);
 		}
@@ -40,30 +37,23 @@ const evaluateJobs = async () => {
 }
 
 const isJobRequired = (job) => {
-	return !job.name.endsWith('(optional)');
+	return !job.name.endsWith('(optional)') && !IGNORE_JOBS.includes(job.name)
 }
 
-const isJobFailed = (job) => {
-	return job.conclusion !== 'success' && job.conclusion !== 'skipped';
+const isJobCompletedAndFailed = (job) => {
+	return job.conclusion === 'completed' && (job.conclusion !== 'success' && job.conclusion !== 'skipped');
 }
 
-if (!REPOSITORY) {
-	console.error(`Missing REPOSITORY environment variable`);
-	process.exit(1);
-}
-if (!RUN_ID) {
-	console.error('Missing RUN_ID environment variables');
-	process.exit(1);
-}
-if (!GITHUB_TOKEN) {
-	console.error('Missing GITHUB_TOKEN environment variables');
-	process.exit(1);
-}
-if (!MATRIX) {
-	console.error('Missing MATRIX environment variables');
-	process.exit(1);
+const validateEnvironmentVariables = (variables) => {
+	variables.forEach((variable) => {
+		if (!process.env[variable]) {
+			console.error(`Missing ${variable} environment variable`);
+			process.exit(1);
+		}
+	});
 }
 
+validateEnvironmentVariables(['REPOSITORY', 'RUN_ID', 'GITHUB_TOKEN', 'MATRIX']);
 evaluateJobs().then(() => {
 	console.log('All required jobs passed');
 });

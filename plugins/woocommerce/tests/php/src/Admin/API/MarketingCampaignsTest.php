@@ -1,6 +1,6 @@
 <?php
 /**
- * Test the API controller class that handles the marketing campaigns REST response
+ * Test the API controller class that handles the marketing campaigns REST response.
  *
  * @package WooCommerce\Admin\Tests\Admin\API
  */
