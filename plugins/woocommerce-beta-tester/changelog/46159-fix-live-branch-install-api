@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add missing live-branches/install.php require to API.php
