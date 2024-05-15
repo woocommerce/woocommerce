@@ -125,7 +125,7 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 			await button.click();
 
-			await page.waitForURL( PRODUCT_CATALOG_LINK );
+			await page.waitForURL( `${ PRODUCT_CATALOG_LINK }/` );
 
 			const defaultRangePrice = await page
 				.locator( '.wp-block-woocommerce-product-filter-price' )
