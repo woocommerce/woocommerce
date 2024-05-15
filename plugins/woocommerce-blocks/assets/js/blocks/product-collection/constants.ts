@@ -63,7 +63,14 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 	priceRange: undefined,
 };
 
-export const DEFAULT_ATTRIBUTES: Partial< ProductCollectionAttributes > = {
+export const DEFAULT_ATTRIBUTES: Pick<
+	ProductCollectionAttributes,
+	| 'query'
+	| 'tagName'
+	| 'displayLayout'
+	| 'queryContextIncludes'
+	| 'forcePageReload'
+> = {
 	query: DEFAULT_QUERY,
 	tagName: 'div',
 	displayLayout: {
