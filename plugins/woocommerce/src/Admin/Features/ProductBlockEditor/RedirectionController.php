@@ -77,7 +77,7 @@ class RedirectionController {
 			// for variable products.
 			$product_type = $product->get_type() === 'variable' ? 'simple' : $product->get_type();
 
-			if ( isset( $product_data_type ) && $product_data_type !== $product_type ) {
+			if ( isset( $product_data_type ) && is_array( $product_data_type ) ? ! in_array( $product_type, $product_data_type, true ) : $product_data_type !== $product_type ) {
 				continue;
 			}
 

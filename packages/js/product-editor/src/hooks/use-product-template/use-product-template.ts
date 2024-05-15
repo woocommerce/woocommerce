@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { Product } from '@woocommerce/data';
+import { applyFilters } from '@wordpress/hooks';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -41,7 +43,9 @@ function templateDataMatchesProductData(
 				);
 			}
 
-			return product[ key ] === value;
+			return Array.isArray( value )
+				? value.includes( product[ key ] )
+				: product[ key ] === value;
 		}
 	);
 }
@@ -64,18 +68,24 @@ export const useProductTemplate = (
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
 
-	const productType = product?.type;
+	const productType = product?.type || 'simple';
 
-	const productTemplateIdToFind =
-		productTemplateId || 'standard-product-template';
+	const parent = useSelect( ( select ) => {
+		if ( ! product || product.type !== 'variation' ) {
+			return;
+		}
+		return select( 'core' ).getEntityRecord(
+			'postType',
+			'product',
+			product.parent_id
+		);
+	} );
 
-	const productTypeToFind =
-		productType === 'variable' ? 'simple' : productType;
-
-	let matchingProductTemplate = productTemplates.find(
-		( productTemplate ) =>
-			productTemplate.id === productTemplateIdToFind &&
-			productTemplate.productData.type === productTypeToFind
+	let matchingProductTemplate = productTemplates.find( ( productTemplate ) =>
+		productTemplate.id === productTemplateId &&
+		Array.isArray( productTemplate.productData.type )
+			? productTemplate.productData.type.includes( productType )
+			: productTemplate.productData.type === productType
 	);
 
 	if ( ! matchingProductTemplate && product ) {

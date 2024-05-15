@@ -254,7 +254,7 @@ class Init {
 				'icon'               => 'shipping',
 				'layout_template_id' => 'simple-product',
 				'product_data'       => array(
-					'type' => 'simple',
+					'type' => array( 'simple', 'variable' ),
 				),
 			)
 		);
