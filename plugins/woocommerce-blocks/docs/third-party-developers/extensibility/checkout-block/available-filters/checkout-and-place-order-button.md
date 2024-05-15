@@ -191,16 +191,16 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Description <!-- omit in toc -->
 
-The `placeOrderButtonLabel` filter allows change the label of the "Place order" button.
+The `placeOrderButtonLabel` filter allows change the label of the "Place order · <price/>" button.
 
 ### Parameters <!-- omit in toc -->
 
--   _defaultValue_ (type: `string`, default: `Place order`) - The label of the "Place order" button.
+-   _defaultValue_ (type: `string`, default: `Place order · <price/>`) - The label of the "Place order · <price/>" button.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 
 ### Returns <!-- omit in toc -->
 
--   `string` - The label of the "Place order" button.
+-   `string` - The label of the "Place order · <price/>" button.
 
 ### Code example <!-- omit in toc -->
 
