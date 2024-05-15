@@ -85,10 +85,13 @@ trait CheckoutTrait {
 				throw new RouteException( 'woocommerce_rest_checkout_invalid_payment_result', __( 'Invalid payment result received from payment method.', 'woocommerce' ), 500 );
 			}
 		} catch ( \Exception $e ) {
-			$additional_data = [
-				'previous' => get_class( $e->getPrevious() )
-			];
-			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ), 400, $additional_data );
+			if ( $e->getPrevious() ) {
+				$additional_data = [
+					'previous' => get_class( $e->getPrevious() )
+				];
+			}
+
+			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ), 400, $additional_data=[] );
 		}
 	}
 
