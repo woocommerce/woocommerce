@@ -84,7 +84,7 @@ export function IframeEditor( {
 		useDispatch( productEditorUiStore );
 
 	const {
-		appendEdit: tempAppendEdit,
+		appendEdit: appendToEditorHistory,
 		hasRedo,
 		hasUndo,
 		redo,
@@ -98,7 +98,7 @@ export function IframeEditor( {
 	 * @todo: probably we can get rid of the initialBlocks prop.
 	 */
 	useEffect( () => {
-		tempAppendEdit( blocks );
+		appendToEditorHistory( blocks );
 		setTemporalBlocks( blocks );
 	}, [] ); // eslint-disable-line
 
@@ -165,12 +165,12 @@ export function IframeEditor( {
 					} }
 					value={ temporalBlocks }
 					onChange={ ( updatedBlocks: BlockInstance[] ) => {
-						tempAppendEdit( updatedBlocks );
+						appendToEditorHistory( updatedBlocks );
 						setTemporalBlocks( updatedBlocks );
 						onChange( updatedBlocks );
 					} }
 					onInput={ ( updatedBlocks: BlockInstance[] ) => {
-						tempAppendEdit( updatedBlocks );
+						appendToEditorHistory( updatedBlocks );
 						setTemporalBlocks( updatedBlocks );
 						onInput( updatedBlocks );
 					} }
