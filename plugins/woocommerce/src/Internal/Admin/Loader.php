@@ -199,7 +199,7 @@ class Loader {
 		/* phpcs:ignore */
 		$path = $_GET['path'] ?? '';
 
-		if ( PageController::is_admin_or_embed_page() && ! in_array( $path, $exlude_paths, true ) ) {
+		if ( PageController::is_admin_or_embed_page() && ! in_array( $path, $exclude_paths, true ) ) {
 			echo "
 				<meta name='apple-itunes-app' content='app-id=1389130815'>
 			";
