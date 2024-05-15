@@ -48,10 +48,6 @@ const isJobRequired = (job) => {
 	return !job.name.endsWith('(optional)') && !IGNORED_JOBS.includes(job.name)
 }
 
-const isJobCompletedAndFailed = (job) => {
-	return job.status === 'completed' && (job.conclusion !== 'success' && job.conclusion !== 'skipped');
-}
-
 const validateEnvironmentVariables = (variables) => {
 	variables.forEach((variable) => {
 		if (!process.env[variable]) {
