@@ -108,7 +108,7 @@ export class ReportChart extends Component {
 		for ( let index = 0; index < primaryDataIntervals.length; index++ ) {
 			const interval = primaryDataIntervals[ index ];
 
-			const secondaryDate = getPreviousDate(
+			const secondaryDateMoment = getPreviousDate(
 				interval.date_start,
 				primary.after,
 				secondary.after,
@@ -116,14 +116,17 @@ export class ReportChart extends Component {
 				currentInterval
 			);
 
-			const today = formatDate( 'Y-m-d\\TH:i:s', interval.date_start );
+			const primaryDateFormatted = formatDate(
+				'Y-m-d\\TH:i:s',
+				interval.date_start
+			);
 			const primaryLabel = `${ primary.label } (${ primary.range })`;
 			const primaryLabelDate = interval.date_start;
 			const primaryValue = interval.subtotals[ selectedChart.key ] || 0;
 
 			const secondaryInterval = secondaryDataIntervals[ index ];
 			const secondaryLabel = `${ secondary.label } (${ secondary.range })`;
-			let secondaryLabelDate = secondaryDate.format(
+			let secondaryLabelDate = secondaryDateMoment.format(
 				'YYYY-MM-DD HH:mm:ss'
 			);
 			let secondaryValue =
@@ -132,12 +135,23 @@ export class ReportChart extends Component {
 				0;
 
 			if ( currentInterval === 'day' ) {
-				if ( primaryDataHasLeapYear && ! secondaryDataHasLeapYear ) {
-					const date = new Date( interval.date_start );
+				if (
+					primaryDataHasLeapYear &&
+					! secondaryDataHasLeapYear &&
+					secondaryDataIntervals?.[ index ]
+				) {
+					// Only fix the data if the date is in 29th Feb and secondary data is in 1st March,
+					// which signifies incorrect comparison.
+					const primaryDate = new Date( interval.date_start );
+					const secondaryDate = new Date(
+						secondaryDataIntervals[ index ].date_start
+					);
 					if (
-						isLeapYear( date.getFullYear() ) &&
-						date.getMonth() === 1 &&
-						date.getDate() === 29
+						isLeapYear( primaryDate.getFullYear() ) &&
+						primaryDate.getMonth() === 1 &&
+						primaryDate.getDate() === 29 &&
+						secondaryDate.getMonth() === 2 &&
+						secondaryDate.getDate() === 1
 					) {
 						// This is going to be displayed as "Invalid date" label from D3.js, but desirable imo since
 						// 29th February is not a valid date for non-leap years.
@@ -163,7 +177,7 @@ export class ReportChart extends Component {
 			}
 
 			chartData.push( {
-				date: today,
+				date: primaryDateFormatted,
 				primary: {
 					label: primaryLabel,
 					labelDate: primaryLabelDate,
