@@ -9,7 +9,6 @@ import { isExperimentalBuild } from '@woocommerce/block-settings';
  */
 import metadata from './block.json';
 import { ProductFiltersBlockSettings } from './settings';
-import './style.scss';
 
 if ( isExperimentalBuild() ) {
 	registerBlockType( metadata, ProductFiltersBlockSettings );
