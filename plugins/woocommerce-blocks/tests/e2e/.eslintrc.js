@@ -35,6 +35,10 @@ const config = {
 		'@typescript-eslint/no-floating-promises': 'error',
 		'@typescript-eslint/no-misused-promises': 'error',
 		'rulesdir/no-raw-playwright-test-import': 'error',
+		// Since we're restoring the database for each test, hooks other than
+		// `beforeEach` don't make sense.
+		// See https://github.com/woocommerce/woocommerce/pull/46432.
+		'playwright/no-hooks': [ 'error', { allow: [ 'beforeEach' ] } ],
 	},
 };
 
