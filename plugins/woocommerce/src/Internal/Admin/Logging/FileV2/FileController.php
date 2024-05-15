@@ -481,10 +481,7 @@ class FileController {
 
 		$files = $this->get_files_by_id( $file_ids );
 		foreach ( $files as $file ) {
-			$result = false;
-			if ( $file->is_writable() ) {
-				$result = $file->delete();
-			}
+			$result = $file->delete();
 
 			if ( true === $result ) {
 				$deleted ++;

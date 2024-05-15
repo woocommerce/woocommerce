@@ -2671,13 +2671,6 @@ function wc_update_870_prevent_listing_of_transient_files_directory() {
 }
 
 /**
- * Add woocommerce_show_lys_tour.
- */
-function wc_update_890_add_launch_your_store_tour_option() {
-	update_option( 'woocommerce_show_lys_tour', 'yes' );
-}
-
-/**
  * If it exists, remove and recreate the inbox note that asks users to connect to `Woo.com` so that the domain name is changed to the updated `WooCommerce.com`.
  */
 function wc_update_890_update_connect_to_woocommerce_note() {
@@ -2694,4 +2687,26 @@ function wc_update_890_update_connect_to_woocommerce_note() {
 	Notes::delete_notes_with_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
 	$new_note = WooSubscriptionsNotes::get_note();
 	$new_note->save();
+}
+
+/**
+ * Disables the PayPal Standard gateway for stores that aren't using it.
+ *
+ * PayPal Standard has been deprecated since WooCommerce 5.5, but there are some stores that have it showing up in their
+ * list of available Payment methods even if it's not setup. In WooComerce 8.9 we will disable PayPal Standard for those stores
+ * to reduce the amount of new connections to the legacy gateway.
+ *
+ * Shows an admin notice to inform the store owner that PayPal Standard has been disabled and suggests installing PayPal Payments.
+ */
+function wc_update_890_update_paypal_standard_load_eligibility() {
+	$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
+
+	if ( ! $paypal ) {
+		return;
+	}
+
+	// If PayPal is enabled or set to load, but the store hasn't setup PayPal Standard live API keys and doesn't have any PayPal Orders, disable it.
+	if ( ( 'yes' === $paypal->enabled || 'yes' === $paypal->get_option( '_should_load' ) ) && ! $paypal->get_option( 'api_username' ) && ! $paypal->has_paypal_orders() ) {
+		$paypal->update_option( '_should_load', wc_bool_to_string( false ) );
+	}
 }

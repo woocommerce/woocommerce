@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: fix cleanup of created test pages and migrate to using fixtures

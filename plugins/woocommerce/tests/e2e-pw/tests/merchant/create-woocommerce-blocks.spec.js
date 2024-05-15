@@ -1,8 +1,11 @@
-const { test, expect } = require( '@playwright/test' );
-const { disableWelcomeModal } = require( '../../utils/editor' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-
-const allWooBlocksPageTitle = `Insert All Woo Blocks ${ Date.now() }`;
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+const {
+	goToPageEditor,
+	fillPageTitle,
+	insertBlock,
+	getCanvas,
+	publishPage,
+} = require( '../../utils/editor' );
 
 const simpleProductName = 'Simplest Product';
 const singleProductPrice = '555.00';
@@ -86,16 +89,13 @@ const blocks = [
 
 let productId, shippingZoneId, productTagId, attributeId, productCategoryId;
 
-test.describe( 'Insert All WooCommerce Blocks Into Page', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+baseTest.describe( 'Add WooCommerce Blocks Into Page', () => {
+	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
+		testPageTitlePrefix: 'Woocommerce Blocks',
+	} );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.beforeAll( async ( { api } ) => {
 		// add product attribute
 		await api
 			.post( 'products/attributes', {
@@ -165,13 +165,7 @@ test.describe( 'Insert All WooCommerce Blocks Into Page', () => {
 		} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.afterAll( async ( { api } ) => {
 		await api.delete( `products/${ productId }`, {
 			force: true,
 		} );
@@ -189,67 +183,49 @@ test.describe( 'Insert All WooCommerce Blocks Into Page', () => {
 		} );
 	} );
 
-	test( `can insert all WooCommerce blocks into page`, async ( { page } ) => {
-		// go to create a new page
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
+	test( `can insert all WooCommerce blocks into page`, async ( {
+		page,
+		testPage,
+	} ) => {
+		await goToPageEditor( { page } );
 
-		await disableWelcomeModal( { page } );
+		await fillPageTitle( page, testPage.title );
 
-		// fill page title
-		await page
-			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( allWooBlocksPageTitle );
-
-		// add all WC blocks and verify them as added into page
 		for ( let i = 0; i < blocks.length; i++ ) {
-			// click title field for block inserter to show up
-			await page.getByRole( 'textbox', { name: 'Add title' } ).click();
+			await test.step( `Insert ${ blocks[ i ].name } block`, async () => {
+				await insertBlock( page, blocks[ i ].name );
 
-			// add block into page
-			await page.getByLabel( 'Add block' ).click();
-			await page
-				.getByPlaceholder( 'Search', { exact: true } )
-				.fill( blocks[ i ].name );
-			await page
-				.getByRole( 'option', { name: blocks[ i ].name, exact: true } )
-				.click();
+				const canvas = await getCanvas( page );
 
-			if ( blocks[ i ].name === 'Reviews by Product' ) {
-				await page.getByLabel( simpleProductName ).check();
-				await page
-					.getByRole( 'button', { name: 'Done', exact: true } )
-					.click();
-			}
+				// eslint-disable-next-line playwright/no-conditional-in-test
+				if ( blocks[ i ].name === 'Reviews by Product' ) {
+					await canvas.getByLabel( simpleProductName ).check();
+					await canvas
+						.getByRole( 'button', { name: 'Done', exact: true } )
+						.click();
+				}
 
-			// verify added blocks into page
-			await expect(
-				page
-					.getByRole( 'document', {
-						name: `Block: ${ blocks[ i ].name }`,
-						exact: true,
-					} )
-					.first()
-			).toBeVisible();
+				// verify added blocks into page
+				await expect(
+					canvas
+						.getByRole( 'document', {
+							name: `Block: ${ blocks[ i ].name }`,
+							exact: true,
+						} )
+						.first()
+				).toBeVisible();
+			} );
 		}
 
-		// save and publish the page
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ allWooBlocksPageTitle } is now live.` )
-		).toBeVisible();
+		await publishPage( page, testPage.title );
 
 		// check all blocks inside the page after publishing
 		// except the product price due to invisibility and false-positive
+		const canvas = await getCanvas( page );
 		for ( let i = 1; i < blocks.length; i++ ) {
 			// verify added blocks into page
 			await expect(
-				page
+				canvas
 					.getByRole( 'document', {
 						name: `Block: ${ blocks[ i ].name }`,
 						exact: true,

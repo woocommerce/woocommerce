@@ -5,6 +5,10 @@
 	"attributes": {
 		"color": {
 			"type": "string"
+		},
+		"storeOnly": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {

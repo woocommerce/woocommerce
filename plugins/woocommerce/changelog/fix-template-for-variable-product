@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Change private methods to protected in ProductVariationTemplate

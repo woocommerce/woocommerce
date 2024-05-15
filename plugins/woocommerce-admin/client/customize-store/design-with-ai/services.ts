@@ -253,8 +253,8 @@ export const updateStorePatterns = async (
 			method: 'GET',
 		} );
 
-		if ( ! images.images.length ) {
-			if ( is_ai_generated ) {
+		if ( ! images ) {
+			if ( ! is_ai_generated ) {
 				throw new Error(
 					'AI content not generated: images not available'
 				);

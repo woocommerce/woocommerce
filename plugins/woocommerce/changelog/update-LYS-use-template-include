@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Update to use template_include instead, handle 404 for restrict store pages only

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix sanitization of special letters in Additional fields API

@@ -26,7 +26,9 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Notice Templates', () => {
-	test.beforeEach( async ( { wpCliUtils, frontendUtils } ) => {
+	test.beforeEach( async ( { requestUtils, wpCliUtils, frontendUtils } ) => {
+		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
+
 		const cartShortcodeID = await wpCliUtils.getPostIDByTitle(
 			'Cart Shortcode'
 		);
@@ -34,18 +36,8 @@ test.describe( 'Shopper → Notice Templates', () => {
 			`npm run wp-env run tests-cli -- wp option update woocommerce_cart_page_id ${ cartShortcodeID }`
 		);
 
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-	} );
-
-	test.afterEach( async ( { wpCliUtils, frontendUtils } ) => {
-		const cartID = await wpCliUtils.getPostIDByTitle( 'Cart Shortcode' );
-		await cli(
-			`npm run wp-env run tests-cli -- wp option update woocommerce_cart_page_id ${ cartID }`
-		);
-
-		await frontendUtils.emptyCart();
 	} );
 
 	test( 'default classic notice templates are visible', async ( {

@@ -74,6 +74,7 @@ const wpAdminScripts = [
 	'command-palette',
 	'command-palette-analytics',
 	'woo-connect-notice',
+	'woo-plugin-update-connect-notice',
 	'woo-subscriptions-notice',
 ];
 const getEntryPoints = () => {

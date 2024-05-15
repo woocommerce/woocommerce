@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Removed unused local variable 'discount_amount_html' to improve code clarity and efficiency.

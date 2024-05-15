@@ -1,27 +1,39 @@
 const rulesDirPlugin = require( 'eslint-plugin-rulesdir' );
-rulesDirPlugin.RULES_DIR = `${ __dirname }/wc-blocks-eslint-rules`;
+rulesDirPlugin.RULES_DIR = `${ __dirname }/rules`;
 
 const config = {
-	extends: [ '../../.eslintrc.js', 'plugin:playwright/recommended' ],
+	extends: [
+		'plugin:playwright/recommended',
+		'plugin:@typescript-eslint/base',
+	],
 	plugins: [ 'rulesdir' ],
+	parserOptions: {
+		tsconfigRootDir: __dirname,
+		project: './tsconfig.json',
+	},
 	rules: {
-		'playwright/expect-expect': 'error',
-		'playwright/max-nested-describe': 'error',
-		'playwright/missing-playwright-await': 'error',
-		'playwright/no-conditional-in-test': 'error',
-		'playwright/no-element-handle': 'error',
-		'playwright/no-eval': 'error',
-		'playwright/no-focused-test': 'error',
-		'playwright/no-force-option': 'error',
-		'playwright/no-nested-step': 'error',
-		'playwright/no-networkidle': 'error',
-		'playwright/no-page-pause': 'error',
-		'playwright/no-skipped-test': 'error',
-		'playwright/no-useless-await': 'error',
-		'playwright/no-useless-not': 'error',
-		'playwright/no-wait-for-timeout': 'error',
-		'playwright/prefer-web-first-assertions': 'error',
-		'playwright/valid-expect': 'error',
+		'@wordpress/no-global-active-element': 'off',
+		'@wordpress/no-global-get-selection': 'off',
+		'no-restricted-syntax': [
+			'error',
+			{
+				selector: 'CallExpression[callee.property.name="$"]',
+				message: '`$` is discouraged, please use `locator` instead',
+			},
+			{
+				selector: 'CallExpression[callee.property.name="$$"]',
+				message: '`$$` is discouraged, please use `locator` instead',
+			},
+			{
+				selector:
+					'CallExpression[callee.object.name="page"][callee.property.name="waitForTimeout"]',
+				message: 'Prefer page.locator instead.',
+			},
+		],
+		'playwright/no-conditional-in-test': 'off',
+		'@typescript-eslint/await-thenable': 'error',
+		'@typescript-eslint/no-floating-promises': 'error',
+		'@typescript-eslint/no-misused-promises': 'error',
 		'rulesdir/no-raw-playwright-test-import': 'error',
 	},
 };

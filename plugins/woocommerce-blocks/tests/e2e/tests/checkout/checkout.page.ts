@@ -196,7 +196,7 @@ export class CheckoutPage {
 				// your road?" field.
 			} );
 		await this.waitForCheckoutToFinishUpdating();
-		await this.page.getByText( 'Place Order', { exact: true } ).click();
+		await this.page.getByText( 'Place Order' ).click();
 		if ( waitForRedirect ) {
 			await this.page.waitForURL( /order-received/ );
 		}
@@ -504,7 +504,13 @@ export class CheckoutPage {
 				currentPage.getByText( SIMPLE_PHYSICAL_PRODUCT_NAME )
 			).toBeVisible();
 			await expect(
-				currentPage.getByText( SIMPLE_VIRTUAL_PRODUCT_NAME )
+				currentPage
+					.locator(
+						'table.wc-block-order-confirmation-totals__table '
+					)
+					.getByRole( 'link', {
+						name: SIMPLE_VIRTUAL_PRODUCT_NAME,
+					} )
 			).toBeVisible();
 			await expect(
 				currentPage

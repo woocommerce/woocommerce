@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add a bailout to prevent JavaScript errors if Sourcebuster isn't loaded

@@ -12,11 +12,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import { starEmpty, starFilled } from '@wordpress/icons';
 import { cleanForSlug } from '@wordpress/url';
-import {
-	PRODUCTS_STORE_NAME,
-	WCDataSelector,
-	Product,
-} from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import classNames from 'classnames';
 import {
@@ -40,7 +36,7 @@ import { useValidation } from '../../../contexts/validation-context';
 import { useProductEdits } from '../../../hooks/use-product-edits';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { ProductEditorBlockEditProps } from '../../../types';
-import { AUTO_DRAFT_NAME } from '../../../utils';
+import { AUTO_DRAFT_NAME, getPermalinkParts } from '../../../utils';
 import { NameBlockAttributes } from './types';
 
 export function NameBlockEdit( {
@@ -49,7 +45,8 @@ export function NameBlockEdit( {
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
-	// @ts-expect-error There are no types for this.
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
 
 	const { hasEdit } = useProductEdits();
@@ -59,7 +56,8 @@ export function NameBlockEdit( {
 
 	const productId = useEntityId( 'postType', 'product' );
 	const product: Product = useSelect( ( select ) =>
-		// @ts-expect-error There are no types for this.
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		select( 'core' ).getEditedEntityRecord(
 			'postType',
 			'product',
@@ -74,21 +72,8 @@ export function NameBlockEdit( {
 		'name'
 	);
 
-	const { permalinkPrefix, permalinkSuffix } = useSelect(
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		( select: WCDataSelector ) => {
-			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
-			if ( productId ) {
-				const parts = getPermalinkParts( productId );
-				return {
-					permalinkPrefix: parts?.prefix,
-					permalinkSuffix: parts?.suffix,
-				};
-			}
-			return {};
-		}
-	);
+	const { prefix: permalinkPrefix, suffix: permalinkSuffix } =
+		getPermalinkParts( product );
 
 	const {
 		ref: nameRef,
@@ -234,7 +219,8 @@ export function NameBlockEdit( {
 						onCancel={ () => setShowProductLinkEditModal( false ) }
 						onSaved={ () => setShowProductLinkEditModal( false ) }
 						saveHandler={ async ( updatedSlug ) => {
-							// @ts-expect-error There are no types for this.
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore
 							const { slug, permalink }: Product =
 								await saveEntityRecord( 'postType', 'product', {
 									id: product.id,

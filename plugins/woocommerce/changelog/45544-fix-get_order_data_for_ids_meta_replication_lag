@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Only query order meta for orders that were successfully retrieved from the DB

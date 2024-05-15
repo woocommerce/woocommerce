@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Remove unused order type registration property.

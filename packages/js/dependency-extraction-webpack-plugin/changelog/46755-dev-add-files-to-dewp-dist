@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a bug where the assets folder was not distributed with @woocommerce/dependency-extraction-webpack-plugin

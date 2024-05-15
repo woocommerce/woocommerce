@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent PHP warning if local pickup has not been set up in your store

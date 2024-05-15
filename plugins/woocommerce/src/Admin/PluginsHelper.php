@@ -64,6 +64,7 @@ class PluginsHelper {
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_expired_subscriptions_notice' ), 10 );
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_expiring_subscriptions_notice' ), 11 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice_in_plugins' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_subscription_notice' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'woo_subscriptions_notice_dismiss_api' ) );
 	}
@@ -597,7 +598,7 @@ class PluginsHelper {
 
 		$notice_string .= sprintf(
 			/* translators: %s: Connect page URL */
-			__( '<a href="%s">Connect your store</a> to WooCommerce.com to get updates and streamlined support for your subscriptions.', 'woocommerce' ),
+			__( '<a id="woo-connect-notice-url" href="%s">Connect your store</a> to WooCommerce.com to get updates and streamlined support for your subscriptions.', 'woocommerce' ),
 			esc_url( $connect_page_url )
 		);
 
@@ -607,7 +608,7 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Enqueue scripts for connect notice.
+	 * Enqueue scripts for connect notice in WooCommerce settings page.
 	 *
 	 * @return void
 	 */
@@ -624,6 +625,20 @@ class PluginsHelper {
 
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-connect-notice' );
 		wp_enqueue_script( 'woo-connect-notice' );
+	}
+
+	/**
+	 * Enqueue scripts for connect notice in plugin list page.
+	 *
+	 * @return void
+	 */
+	public static function maybe_enqueue_scripts_for_connect_notice_in_plugins() {
+		if ( 'plugins' !== get_current_screen()->id ) {
+			return;
+		}
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-plugin-update-connect-notice' );
+		wp_enqueue_script( 'woo-plugin-update-connect-notice' );
 	}
 
 	/**
