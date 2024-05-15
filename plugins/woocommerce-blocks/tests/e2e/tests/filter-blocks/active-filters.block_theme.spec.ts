@@ -13,20 +13,12 @@ const TEMPLATE_PATH = path.join( __dirname, './active-filters.handlebars' );
 
 test.describe( 'Product Filter: Active Filters Block', () => {
 	test.describe( 'frontend', () => {
-		let testingTemplateId = '';
-
-		test.beforeAll( async ( { requestUtils } ) => {
-			const testingTemplate = await requestUtils.updateTemplateContents(
+		test.beforeEach( async ( { requestUtils } ) => {
+			await requestUtils.updateTemplateContents(
 				PRODUCT_CATALOG_TEMPLATE_ID,
 				TEMPLATE_PATH,
 				{}
 			);
-
-			testingTemplateId = testingTemplate.id;
-		} );
-
-		test.afterAll( async ( { templateApiUtils } ) => {
-			await templateApiUtils.revertTemplate( testingTemplateId );
 		} );
 
 		test( 'Without any filters selected, only a wrapper block is rendered', async ( {

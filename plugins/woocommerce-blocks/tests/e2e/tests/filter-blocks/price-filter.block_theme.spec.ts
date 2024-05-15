@@ -13,20 +13,12 @@ const TEMPLATE_PATH = path.join( __dirname, './price-filter.handlebars' );
 
 test.describe( 'Product Filter: Price Filter Block', () => {
 	test.describe( 'frontend', () => {
-		let testingTemplateId = '';
-
-		test.beforeAll( async ( { requestUtils } ) => {
-			const testingTemplate = await requestUtils.updateTemplateContents(
+		test.beforeEach( async ( { requestUtils } ) => {
+			await requestUtils.updateTemplateContents(
 				PRODUCT_CATALOG_TEMPLATE_ID,
 				TEMPLATE_PATH,
 				{}
 			);
-
-			testingTemplateId = testingTemplate.id;
-		} );
-
-		test.afterAll( async ( { templateApiUtils } ) => {
-			await templateApiUtils.revertTemplate( testingTemplateId );
 		} );
 
 		test( 'clear button is not shown on initial page load', async ( {

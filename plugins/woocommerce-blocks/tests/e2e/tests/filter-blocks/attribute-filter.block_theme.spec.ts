@@ -23,10 +23,8 @@ const COLOR_ATTRIBUTES_WITH_COUNTS = [
 
 test.describe( 'Product Filter: Attribute Block', () => {
 	test.describe( 'With default display style', () => {
-		let testingTemplateId = '';
-
-		test.beforeAll( async ( { requestUtils } ) => {
-			const testingTemplate = await requestUtils.updateTemplateContents(
+		test.beforeEach( async ( { requestUtils } ) => {
+			await requestUtils.updateTemplateContents(
 				PRODUCT_CATALOG_TEMPLATE_ID,
 				TEMPLATE_PATH,
 				{
@@ -35,12 +33,6 @@ test.describe( 'Product Filter: Attribute Block', () => {
 					},
 				}
 			);
-
-			testingTemplateId = testingTemplate.id;
-		} );
-
-		test.afterAll( async ( { templateApiUtils } ) => {
-			await templateApiUtils.revertTemplate( testingTemplateId );
 		} );
 
 		test( 'clear button is not shown on initial page load', async ( {
@@ -147,10 +139,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 	} );
 
 	test.describe( 'With show counts enabled', () => {
-		let testingTemplateId = '';
-
-		test.beforeAll( async ( { requestUtils } ) => {
-			const testingTemplate = await requestUtils.updateTemplateContents(
+		test.beforeEach( async ( { requestUtils } ) => {
+			await requestUtils.updateTemplateContents(
 				PRODUCT_CATALOG_TEMPLATE_ID,
 				TEMPLATE_PATH,
 				{
@@ -160,12 +150,6 @@ test.describe( 'Product Filter: Attribute Block', () => {
 					},
 				}
 			);
-
-			testingTemplateId = testingTemplate.id;
-		} );
-
-		test.afterAll( async ( { templateApiUtils } ) => {
-			await templateApiUtils.revertTemplate( testingTemplateId );
 		} );
 
 		test( 'Renders checkboxes with associated product counts', async ( {
@@ -188,10 +172,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 	} );
 
 	test.describe( "With display style 'dropdown'", () => {
-		let testingTemplateId = '';
-
-		test.beforeAll( async ( { requestUtils } ) => {
-			const testingTemplate = await requestUtils.updateTemplateContents(
+		test.beforeEach( async ( { requestUtils } ) => {
+			await requestUtils.updateTemplateContents(
 				PRODUCT_CATALOG_TEMPLATE_ID,
 				TEMPLATE_PATH,
 				{
@@ -201,12 +183,6 @@ test.describe( 'Product Filter: Attribute Block', () => {
 					},
 				}
 			);
-
-			testingTemplateId = testingTemplate.id;
-		} );
-
-		test.afterAll( async ( { templateApiUtils } ) => {
-			await templateApiUtils.revertTemplate( testingTemplateId );
 		} );
 
 		test( 'clear button is not shown on initial page load', async ( {

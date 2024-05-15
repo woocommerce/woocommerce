@@ -13,10 +13,8 @@ const TEMPLATE_PATH = path.join( __dirname, './rating-filter.handlebars' );
 
 test.describe( 'Product Filter: Rating Filter Block', () => {
 	test.describe( 'frontend', () => {
-		let testingTemplateId = '';
-
-		test.beforeAll( async ( { requestUtils } ) => {
-			const testingTemplate = await requestUtils.updateTemplateContents(
+		test.beforeEach( async ( { requestUtils } ) => {
+			await requestUtils.updateTemplateContents(
 				PRODUCT_CATALOG_TEMPLATE_ID,
 				TEMPLATE_PATH,
 				{
@@ -25,12 +23,6 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 					},
 				}
 			);
-
-			testingTemplateId = testingTemplate.id;
-		} );
-
-		test.afterAll( async ( { templateApiUtils } ) => {
-			await templateApiUtils.revertTemplate( testingTemplateId );
 		} );
 
 		test( 'clear button is not shown on initial page load', async ( {

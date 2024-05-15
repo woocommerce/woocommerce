@@ -130,6 +130,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 				heading: 'Filter By Rating',
 			},
 		} );
+
 		await editor.saveSiteEditorEntities();
 		await page.goto( `/shop` );
 	} );

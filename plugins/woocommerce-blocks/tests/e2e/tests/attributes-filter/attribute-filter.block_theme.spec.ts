@@ -202,16 +202,12 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test.beforeAll( async ( { requestUtils } ) => {
+	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.updateTemplateContents(
 			'woocommerce/woocommerce//archive-product',
 			TEMPLATE_PATH,
 			{}
 		);
-	} );
-
-	test.afterAll( async ( { editorUtils } ) => {
-		await editorUtils.revertTemplateCustomizations( 'Product Catalog' );
 	} );
 
 	test( 'should show all products', async ( { page } ) => {
