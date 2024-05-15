@@ -6,10 +6,21 @@
 .is-small,
 .is-medium {
 	.wc-block-checkout__add-note {
+		padding: 0;
+		margin-top: 0;
+
+		.wc-block-components-checkbox {
+			line-height: 1;
+			margin-top: 0;
+			margin-bottom: -3px;
+		}
+	}
+}
+
+.is-medium {
+	.wc-block-checkout__add-note {
 		border-bottom: 1px solid $universal-border-light;
-		margin-bottom: em($gap);
-		margin-top: em($gap);
-		padding: em($gap) 0;
+		padding-bottom: 2.5rem;
 	}
 }
 
