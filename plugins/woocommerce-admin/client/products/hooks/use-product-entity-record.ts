@@ -17,11 +17,16 @@ export function useProductEntityRecord(
 			return;
 		}
 
-		dispatch( 'core' )
-			.saveEntityRecord< Promise< Product > >( 'postType', 'product', {
+		const createProductPromise = dispatch( 'core' ).saveEntityRecord(
+			'postType',
+			'product',
+			{
 				title: AUTO_DRAFT_NAME,
 				status: 'auto-draft',
-			} )
+			}
+		) as never as Promise< Product >;
+
+		createProductPromise
 			.then( ( autoDraftProduct: Product ) =>
 				setId( autoDraftProduct.id )
 			)

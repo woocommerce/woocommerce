@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { Product } from '@woocommerce/data';
 import {
 	EditorSettings,
 	EditorBlockListSettings,
