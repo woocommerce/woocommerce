@@ -75,14 +75,14 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Fetch featured products from WCCOM's the Featured 2.0 Endpoint and cache the data for a day.
+	 * Fetch featured products from WCCOM's the Featured 3.0 Endpoint and cache the data for a day.
 	 *
 	 * @return array|WP_Error
 	 */
 	public static function fetch_featured() {
 		$transient_name = 'wc_addons_featured';
-		// Important: WCCOM Extensions API v2.0 is used.
-		$url      = 'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured';
+		// Important: WCCOM Extensions API v3.0 is used.
+		$url      = 'https://woocommerce.com/wp-json/wccom-extensions/3.0/featured';
 		$locale   = get_user_locale();
 		$featured = self::get_locale_data_from_transient( $transient_name, $locale );
 
