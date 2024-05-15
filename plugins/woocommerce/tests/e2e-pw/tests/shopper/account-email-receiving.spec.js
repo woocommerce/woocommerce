@@ -44,7 +44,7 @@ test.describe( 'Shopper Account Email Receiving', () => {
 		// create a new customer
 		await page.goto( 'wp-admin/user-new.php' );
 
-		await page.waitForLoadState( 'networkidle' );
+		await page.waitForLoadState( ' networkidle' );
 
 		await page.getByLabel( ' Username (required) ' ).fill( username );
 		await page.getByLabel( ' Email (required) ' ).fill( email );
