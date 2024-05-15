@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "woocommerce/product-filters",
+	"version": "1.0.0",
+	"title": "Product Filters (Beta)",
+	"description": "Let shoppers filter products displayed on the page.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"supports": {
+		"align": true,
+		"multiple": false,
+		"interactivity": true
+	},
+	"textdomain": "woocommerce",
+	"usesContext": [ "postId" ],
+	"providesContext": {},
+	"attributes": {},
+	"viewScript": "wc-product-filters-frontend",
+	"example": {}
+}
