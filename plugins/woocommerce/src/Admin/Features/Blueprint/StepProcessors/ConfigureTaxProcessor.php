@@ -6,13 +6,8 @@ use Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessor;
 use WC_Tax;
 
 class ConfigureTaxProcessor implements StepProcessor {
-	private $schema;
-	public function __construct( $schema ) {
-		$this->schema = $schema;
-	}
-
-	public function process() {
-		foreach($this->schema->rates as $rate) {
+	public function process($schema) {
+		foreach($schema->rates as $rate) {
 			$tax_rate = array_intersect_key(
 				(array) $rate,
 				array(
