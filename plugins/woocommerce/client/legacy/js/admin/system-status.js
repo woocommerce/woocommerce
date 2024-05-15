@@ -106,6 +106,10 @@ jQuery( function ( $ ) {
 				{
 					regex: /(Site address \(URL\):)[^\n]*/,
 					replacement: "$1 [Redacted]"
+				},
+				{
+					regex: /(### Database ###\n)([\s\S]*?)(\n### Post Type Counts ###)/,
+					replacement: "$1\n[REDACTED]\n$3"
 				}
 			];
 
