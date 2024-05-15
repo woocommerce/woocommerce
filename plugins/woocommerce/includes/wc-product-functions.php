@@ -900,11 +900,14 @@ function wc_get_product_stock_status_options() {
  * @return array
  */
 function wc_get_product_backorder_options() {
-	return array(
-		'no'     => __( 'Do not allow', 'woocommerce' ),
-		'notify' => __( 'Allow, but notify customer', 'woocommerce' ),
-		'yes'    => __( 'Allow', 'woocommerce' ),
-	);
+    return apply_filters(
+        'woocommerce_product_backorder_options',
+        array(
+            'no' => __('Do not allow', 'woocommerce'),
+            'notify' => __('Allow, but notify customer', 'woocommerce'),
+            'yes' => __('Allow', 'woocommerce'),
+        )
+    );
 }
 
 /**
