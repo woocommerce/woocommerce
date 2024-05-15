@@ -4,6 +4,7 @@
 import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
 import {
 	createElement,
+	useContext,
 	useMemo,
 	useLayoutEffect,
 	useEffect,
@@ -51,6 +52,7 @@ import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { ProductTemplate } from '../../types';
 import { LoadingState } from './loading-state';
+import { ValidationContext } from '../validation-provider/validation-context';
 
 function getLayoutTemplateId(
 	productTemplate: ProductTemplate | undefined,
@@ -75,6 +77,7 @@ export function BlockEditor( {
 	setIsEditorLoading,
 }: BlockEditorProps ) {
 	useConfirmUnsavedProductChanges( postType );
+	const { errors } = useContext( ValidationContext );
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' );
@@ -252,7 +255,9 @@ export function BlockEditor( {
 
 	return (
 		<div className="woocommerce-product-block-editor">
-			<BlockContextProvider value={ context }>
+			<BlockContextProvider
+				value={ { ...context, validationErrors: errors } }
+			>
 				<BlockEditorProvider
 					value={ blocks }
 					onInput={ onInput }

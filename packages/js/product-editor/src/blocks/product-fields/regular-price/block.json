@@ -36,6 +36,6 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
-	"usesContext": [ "postType" ],
+	"usesContext": [ "postType", "validationErrors" ],
 	"editorStyle": "file:./editor.css"
 }
