@@ -95,28 +95,26 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 				 * @param WC_Customer $customer The customer object.
 				 */
 				$allowed_keys  = apply_filters( 'woocommerce_customer_allowed_session_meta_keys', array(), $customer );
-				$session_value = maybe_serialize(
-					array_map(
-						function ( $meta_data ) {
-							// Data comes to us a WC_Meta_Data, we cast it to an array to ensure it is serializable.
-								return array(
-									'key'   => $meta_data->key,
-									'value' => $meta_data->value,
-								);
-						},
-						array_filter(
-							$customer->get_meta_data(),
-							function ( $meta_data ) use ( $allowed_keys ) {
-									return in_array( $meta_data->key, $allowed_keys, true );
-							}
-						)
+				$session_value = array_map(
+					function ( $meta_data ) {
+						// Data comes to us a WC_Meta_Data, we cast it to an array to ensure it is serializable.
+							return array(
+								'key'   => $meta_data->key,
+								'value' => $meta_data->value,
+							);
+					},
+					array_filter(
+						$customer->get_meta_data(),
+						function ( $meta_data ) use ( $allowed_keys ) {
+								return in_array( $meta_data->key, $allowed_keys, true );
+						}
 					)
 				);
 
 			} else {
 				$session_value = $customer->{"get_$function_key"}( 'edit' );
 			}
-			$data[ $session_key ] = (string) $session_value;
+			$data[ $session_key ] = $session_value;
 		}
 		WC()->session->set( 'customer', $data );
 	}
@@ -147,8 +145,8 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 				}
 				if ( ! empty( $data[ $session_key ] ) && is_callable( array( $customer, "set_{$function_key}" ) ) ) {
 					if ( 'meta_data' === $session_key ) {
-						$meta_data_values = maybe_unserialize( $data[ $session_key ] );
-						if ( $meta_data_values ) {
+						$meta_data_values = is_serialized( $data[ $session_key ], true ) ? maybe_unserialize( $data[ $session_key ] ) : $data[ $session_key ];
+						if ( is_array( $meta_data_values ) ) {
 							foreach ( $meta_data_values as $meta_data_value ) {
 								if ( ! isset( $meta_data_value['key'], $meta_data_value['value'] ) ) {
 									continue;
