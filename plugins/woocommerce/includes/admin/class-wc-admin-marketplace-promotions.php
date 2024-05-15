@@ -38,8 +38,8 @@ class WC_Admin_Marketplace_Promotions {
 	 */
 	public static function init() {
 		// A legacy hook that can be triggered by action scheduler.
-		add_action( 'woocommerce_marketplace_fetch_promotions', '__return_true' );
-		register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
+		add_action( 'woocommerce_marketplace_fetch_promotions', array( __CLASS__, 'clear_deprecated_action' ) );
+		add_action( 'woocommerce_marketplace_fetch_promotions_clear', array( __CLASS__, 'clear_scheduled_event' ) );
 
 		if (
 			defined( 'DOING_AJAX' ) && DOING_AJAX
@@ -334,6 +334,17 @@ class WC_Admin_Marketplace_Promotions {
 	public static function clear_scheduled_event() {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions( 'woocommerce_marketplace_fetch_promotions' );
+		}
+	}
+
+	/**
+	 * We can't clear deprecated action from AS when it's running,
+	 * so we schedule a new single action to clear the deprecated
+	 * `woocommerce_marketplace_fetch_promotions` action.
+	 */
+	public static function clear_deprecated_action() {
+		if ( function_exists( 'as_schedule_single_action' ) ) {
+			as_schedule_single_action( time(), 'woocommerce_marketplace_fetch_promotions_clear' );
 		}
 	}
 }
