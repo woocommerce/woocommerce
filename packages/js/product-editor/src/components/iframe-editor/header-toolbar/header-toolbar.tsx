@@ -122,10 +122,7 @@ export function HeaderToolbar( {
 		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.3;
 
 	return (
-		<NavigableToolbar
-			className="woocommerce-iframe-editor__header-toolbar"
-			aria-label={ toolbarAriaLabel }
-		>
+		<div className="woocommerce-iframe-editor__header-toolbar">
 			<div className="woocommerce-iframe-editor__header-toolbar-left">
 				<div className="woocommerce-iframe-editor-document-tools">
 					<ToolbarItem
@@ -217,6 +214,6 @@ export function HeaderToolbar( {
 				<PinnedItems.Slot scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE } />
 				<ToolbarItem as={ MoreMenu } />
 			</div>
-		</NavigableToolbar>
+		</div>
 	);
 }
