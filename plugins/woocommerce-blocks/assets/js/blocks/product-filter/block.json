@@ -21,6 +21,10 @@
 		"isPreview": {
 			"type": "boolean",
 			"default": false
+		},
+		"attributeId": {
+			"type": "number",
+			"default": 0
 		}
 	},
 	"example": {
