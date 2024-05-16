@@ -21,8 +21,6 @@ export const BuilderIntro = () => {
 
 		const formData = new FormData();
 		formData.append( 'file', file );
-		formData.append( 'action', 'my_plugin_handle_file_upload' );
-		// formData.append( 'nonce', 'myPlugin.nonce' );
 
 		fetch( '/wp-json/blueprint/process', {
 			method: 'POST',
@@ -30,10 +28,10 @@ export const BuilderIntro = () => {
 		} )
 			.then( ( response ) => response.json() )
 			.then( ( data ) => {
-				if ( data.success ) {
+				if ( data.status === 'success' ) {
 					setMessage( 'File uploaded successfully.' );
 				} else {
-					setMessage( `Error: ${ data.data }` );
+					setMessage( `Error: ${ data.message }` );
 				}
 			} )
 			.catch( ( error ) => {

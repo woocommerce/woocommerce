@@ -43,13 +43,31 @@ class Blueprint {
 	}
 
 	public function process( $request ) {
-		return new \WP_HTTP_Response( 'This is working', 200 );
-		// $blueprint_schema = constant( 'WOOCOMMERCE_BLUEPRINT_PATH' );
-		// if ( ! $blueprint_schema ) {
-		// 	return new \WP_HTTP_Response( null, 404 );
-		// }
-		// $blueprint = new \Automattic\WooCommerce\Admin\Features\Blueprint\Blueprint( $blueprint_schema );
-		// $blueprint->process();
-		// return new \WP_HTTP_Response( null, 200 );
+		if ( !empty($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK ) {
+			$uploaded_file = $_FILES['file']['tmp_name'];
+        	$file_content = file_get_contents($uploaded_file);
+
+			$data = json_decode($file_content, true);
+
+			if ( json_last_error() !== JSON_ERROR_NONE ) {
+				return new \WP_REST_Response(array(
+					'status' => 'error',
+					'message' => 'Invalid JSON data',
+				), 400);
+			}
+
+			$blueprint = new \Automattic\WooCommerce\Admin\Features\Blueprint\Blueprint( $data );
+			$blueprint->process();
+			
+			return new \WP_HTTP_Response( array(
+				'status' => 'success',
+				'message' => 'Data processed successfully',
+			), 200 );
+		}
+
+		return new \WP_REST_Response(array(
+			'status' => 'error',
+			'message' => 'No file uploaded',
+		), 400);
 	}
 }
