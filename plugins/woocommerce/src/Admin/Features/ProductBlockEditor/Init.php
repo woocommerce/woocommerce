@@ -253,17 +253,13 @@ class Init {
 		);
 		$templates[] = new ProductTemplate(
 			array(
-				'id'                 => 'variable-product-template',
-				'title'              => __( 'Variable product', 'woocommerce' ),
-				'description'        => '',
-				'order'              => 10,
-				'icon'               => 'shipping',
-				'layout_template_id' => 'simple-product',
-				'product_data'       => array(
+				'id'                    => 'variable-product-template',
+				'title'                 => __( 'Variable product', 'woocommerce' ),
+				'layout_template_id'    => 'simple-product',
+				'product_data'          => array(
 					'type' => 'variable',
 				),
 				'is_selectable_by_user' => false,
-				'supported_types'    => array( 'variable' ),
 			)
 		);
 		$templates[] = new ProductTemplate(
