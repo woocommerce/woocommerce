@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update color contrast for Checkout fields. Update color contrast for notice buttons. Return focus when closing mini cart drawer. Return focus when closing shipping calculator.
