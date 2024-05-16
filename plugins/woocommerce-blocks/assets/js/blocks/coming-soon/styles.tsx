@@ -30,6 +30,7 @@ export const generateStyles = ( color = '#bea0f2' ) => {
         margin: 0;
         background-color: ${ color };
         font-family: 'Inter', sans-serif;
+        min-width: 320px;
         --wp--preset--color--contrast: #111111;
         --wp--style--global--wide-size: 1280px;
     }
@@ -92,6 +93,11 @@ export const generateStyles = ( color = '#bea0f2' ) => {
         flex-direction: column;
         justify-content: space-between;
     }
+	@media (max-width: 660px) {
+		.woocommerce-coming-soon-banner-container {
+			padding-inline: 0;
+		}
+	}
     .woocommerce-coming-soon-banner-container > .wp-block-group__inner-container {
         height: 100%;
         display: flex;
@@ -129,7 +135,7 @@ export const generateStyles = ( color = '#bea0f2' ) => {
         height: 40px;
     }
     .woocommerce-coming-soon-banner {
-        font-size: 48px;
+        font-size: clamp(27px, 1.74rem + ((1vw - 3px) * 2), 48px);
         font-weight: 400;
         line-height: 58px;
         font-family: 'Cardo', serif;
@@ -139,5 +145,6 @@ export const generateStyles = ( color = '#bea0f2' ) => {
         max-width: 820px;
         color: var(--wp--preset--color--contrast);
         margin: 0 auto;
+        text-wrap: balance;
     }`;
 };
