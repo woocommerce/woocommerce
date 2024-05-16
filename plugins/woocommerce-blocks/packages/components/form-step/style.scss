@@ -20,6 +20,11 @@
 		@include breakpoint( "<600px" ) {
 			padding-top: 2.5rem;
 
+			// Remove padding from the first checkout step. First of type is required here as the first-child is the express payment methods block.
+			&:first-of-type {
+				padding-top: 0;
+			}
+
 			&::after {
 				position: absolute;
 				content: '';
