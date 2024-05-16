@@ -1,14 +1,9 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { cli } from '@woocommerce/e2e-utils';
 import path from 'path';
-
-/**
- * Internal dependencies
- */
-import ProductCollectionPage from '../product-collection/product-collection.page';
 
 const PRODUCT_CATALOG_LINK = '/shop';
 const TEMPLATE_PATH = path.join(
@@ -21,24 +16,6 @@ const blockData = {
 	slug: 'woocommerce/attribute-filter',
 	urlSearchParamWhenFilterIsApplied: 'filter_size=small&query_type_size=or',
 };
-
-const test = base.extend< {
-	productCollectionPageObject: ProductCollectionPage;
-} >( {
-	productCollectionPageObject: async (
-		{ page, admin, editor, templateApiUtils, editorUtils },
-		use
-	) => {
-		const pageObject = new ProductCollectionPage( {
-			page,
-			admin,
-			editor,
-			templateApiUtils,
-			editorUtils,
-		} );
-		await use( pageObject );
-	},
-} );
 
 test.describe( `${ blockData.name } Block`, () => {
 	test.beforeEach( async ( { admin, editor, editorUtils } ) => {
