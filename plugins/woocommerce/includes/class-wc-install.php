@@ -269,11 +269,6 @@ class WC_Install {
 	const STORE_ID_OPTION = 'woocommerce_store_id';
 
 	/**
-	 * Option key, used to record if the Legacy REST API was installed by us.
-	 */
-	private const INSTALLED_LEGACY_REST_API_PLUGIN = 'woocommerce_installed_legacy_rest_api';
-
-	/**
 	 * Hook in tabs.
 	 */
 	public static function init() {
