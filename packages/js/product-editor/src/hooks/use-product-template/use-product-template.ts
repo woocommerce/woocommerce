@@ -74,8 +74,8 @@ export const useProductTemplate = (
 
 	let matchingProductTemplate = productTemplates.find(
 		( productTemplate ) =>
-			productTemplate.id === productTemplateIdToFind &&
-			productTemplate.productData.type === productTypeToFind
+			productTemplate.id === productTemplateId &&
+			productTemplate.supportedTypes.includes( productType )
 	);
 
 	if ( ! matchingProductTemplate && product ) {
