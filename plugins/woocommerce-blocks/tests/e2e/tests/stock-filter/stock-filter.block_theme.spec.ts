@@ -221,13 +221,6 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		} );
 
 		await editorUtils.enterEditMode();
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'stock-filter',
-				heading: 'Filter By Price',
-			},
-		} );
 		const stockFilterControls = await editorUtils.getBlockByName(
 			blockData.slug
 		);
