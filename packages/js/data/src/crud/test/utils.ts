@@ -51,6 +51,11 @@ describe( 'utils', () => {
 		expect( key ).toEqual( '5/3' );
 	} );
 
+	it( 'should get the key when a parents are provided', () => {
+		const key = getKey( 3, [ 200, 10 ] );
+		expect( key ).toEqual( '200/10/3' );
+	} );
+
 	it( 'should get the correct ID information when only an ID is given', () => {
 		const parsed = parseId( 3 );
 		expect( parsed.key ).toEqual( 3 );
