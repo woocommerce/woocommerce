@@ -1,8 +1,4 @@
 /**
- * External dependencies
- */
-import { renderHook } from '@testing-library/react-hooks';
-/**
  * Internal dependencies
  */
 import { registerCheckoutFilters, applyCheckoutFilter } from '../';
@@ -19,6 +15,7 @@ jest.mock( '@woocommerce/settings', () => {
 
 describe( 'Checkout registry (as admin user)', () => {
 	test( 'should throw if the filter throws and user is an admin', () => {
+		expect.assertions( 1 );
 		const filterName = 'ErrorTestFilter';
 		const value = 'Hello World';
 		registerCheckoutFilters( filterName, {
@@ -27,30 +24,35 @@ describe( 'Checkout registry (as admin user)', () => {
 			},
 		} );
 
-		const { result } = renderHook( () =>
+		try {
 			applyCheckoutFilter( {
 				filterName,
 				defaultValue: value,
-			} )
-		);
-		expect( result.error ).toEqual( Error( 'test error' ) );
+			} );
+		} catch ( e ) {
+			// eslint-disable-next-line  -- The toThrow helper does not stop wordpress/jest-console from erroring.
+			expect( e.message ).toBe( 'test error' );
+		}
 	} );
 
 	test( 'should throw if validation throws and user is an admin', () => {
+		expect.assertions( 1 );
 		const filterName = 'ValidationTestFilter';
 		const value = 'Hello World';
 		registerCheckoutFilters( filterName, {
 			[ filterName ]: ( val ) => val,
 		} );
-		const { result } = renderHook( () =>
+		try {
 			applyCheckoutFilter( {
 				filterName,
 				defaultValue: value,
 				validation: () => {
 					throw Error( 'validation error' );
 				},
-			} )
-		);
-		expect( result.error ).toEqual( Error( 'validation error' ) );
+			} );
+		} catch ( e ) {
+			// eslint-disable-next-line  -- The toThrow helper does not stop wordpress/jest-console from erroring.
+			expect( e.message ).toBe( 'validation error' );
+		}
 	} );
 } );

@@ -59,10 +59,7 @@ export function usePublish< T = Product >( {
 	}
 
 	function getButtonText() {
-		if (
-			window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
-			isScheduled
-		) {
+		if ( isScheduled ) {
 			return __( 'Schedule', 'woocommerce' );
 		}
 

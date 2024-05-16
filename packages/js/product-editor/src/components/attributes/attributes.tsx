@@ -10,28 +10,26 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { AttributeControl } from '../attribute-control';
-import { useProductAttributes } from '../../hooks/use-product-attributes';
 
 type AttributesProps = {
+	attributeList?: ProductProductAttribute[];
 	value: ProductProductAttribute[];
 	onChange: ( value: ProductProductAttribute[] ) => void;
-	productId?: number;
 };
 
+/**
+ * This component is no longer in active use.
+ * It is kept here for backward compatibility because is being used in the `AttributesField` component, under
+ * `plugins/woocommerce-admin/client/products/fills/attributes-section/attributes-field.tsx`.
+ */
 export const Attributes: React.FC< AttributesProps > = ( {
 	value,
 	onChange,
-	productId,
+	attributeList = [],
 } ) => {
-	const { attributes, handleChange } = useProductAttributes( {
-		allAttributes: value,
-		onChange,
-		productId,
-	} );
-
 	return (
 		<AttributeControl
-			value={ attributes }
+			value={ attributeList }
 			disabledAttributeIds={ value
 				.filter( ( attr ) => !! attr.variation )
 				.map( ( attr ) => attr.id ) }
@@ -44,14 +42,14 @@ export const Attributes: React.FC< AttributesProps > = ( {
 			onAdd={ () => {
 				recordEvent( 'product_add_attributes_modal_add_button_click' );
 			} }
-			onChange={ handleChange }
+			onChange={ onChange }
 			onNewModalCancel={ () => {
 				recordEvent(
 					'product_add_attributes_modal_cancel_button_click'
 				);
 			} }
 			onNewModalOpen={ () => {
-				if ( ! attributes.length ) {
+				if ( ! attributeList.length ) {
 					recordEvent( 'product_add_first_attribute_button_click' );
 					return;
 				}
