@@ -248,7 +248,6 @@ class Init {
 				'product_data'       => array(
 					'type' => 'simple',
 				),
-				'supported_types'    => array( 'simple' ),
 			)
 		);
 		$templates[] = new ProductTemplate(
@@ -334,12 +333,11 @@ class Init {
 
 			$templates[] = new ProductTemplate(
 				array(
-					'id'              => $product_type . '-product-template',
-					'title'           => $title,
-					'product_data'    => array(
+					'id'           => $product_type . '-product-template',
+					'title'        => $title,
+					'product_data' => array(
 						'type' => $product_type,
 					),
-					'supported_types' => array( $product_type ),
 				)
 			);
 		}
