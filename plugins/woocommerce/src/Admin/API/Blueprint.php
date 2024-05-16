@@ -42,12 +42,12 @@ class Blueprint {
 		);
 	}
 
-	public function process( $request ) {
+	public function process() {
 		if ( !empty($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK ) {
 			$uploaded_file = $_FILES['file']['tmp_name'];
-        	$file_content = file_get_contents($uploaded_file);
+        	$file_content = file_get_contents( $uploaded_file );
 
-			$data = json_decode($file_content, true);
+			$data = json_decode( $file_content );
 
 			if ( json_last_error() !== JSON_ERROR_NONE ) {
 				return new \WP_REST_Response(array(
@@ -57,11 +57,12 @@ class Blueprint {
 			}
 
 			$blueprint = new \Automattic\WooCommerce\Admin\Features\Blueprint\Blueprint( $data );
-			$blueprint->process();
+			$paul = $blueprint->process();
 			
 			return new \WP_HTTP_Response( array(
 				'status' => 'success',
 				'message' => 'Data processed successfully',
+				'data' => $paul,
 			), 200 );
 		}
 
