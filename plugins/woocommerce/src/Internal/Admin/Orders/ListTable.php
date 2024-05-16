@@ -693,7 +693,7 @@ class ListTable extends WP_List_Table {
 		$base_url = get_admin_url( null, 'admin.php?page=wc-orders' . ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type ) );
 		$url      = esc_url( add_query_arg( 'status', $slug, $base_url ) );
 		$name     = esc_html( $name );
-		$count    = absint( $count );
+		$count    = number_format_i18n( $count );
 		$class    = $current ? 'class="current"' : '';
 
 		return "<a href='$url' $class>$name <span class='count'>($count)</span></a>";
@@ -775,12 +775,15 @@ class ListTable extends WP_List_Table {
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$order_dates = $wpdb->get_results(
-			"
-				SELECT DISTINCT YEAR( t.date_created_local ) AS year,
-								MONTH( t.date_created_local ) AS month
-				FROM ( SELECT DATE_ADD( date_created_gmt, INTERVAL $utc_offset SECOND ) AS date_created_local FROM $orders_table WHERE status != 'trash' ) t
-				ORDER BY year DESC, month DESC
-			"
+			$wpdb->prepare(
+				"
+					SELECT DISTINCT YEAR( t.date_created_local ) AS year,
+									MONTH( t.date_created_local ) AS month
+					FROM ( SELECT DATE_ADD( date_created_gmt, INTERVAL $utc_offset SECOND ) AS date_created_local FROM $orders_table WHERE type = %s AND status != 'trash' ) t
+					ORDER BY year DESC, month DESC
+				",
+				$this->order_type
+			)
 		);
 
 		$m = isset( $_GET['m'] ) ? (int) $_GET['m'] : 0;
