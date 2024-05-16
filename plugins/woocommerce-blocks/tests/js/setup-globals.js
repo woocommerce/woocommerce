@@ -254,8 +254,13 @@ global.jQuery = () => ( {
 
 global.IntersectionObserver = function () {
 	return {
+		root: null,
+		rootMargin: '',
+		thresholds: [],
 		observe: () => void null,
 		unobserve: () => void null,
+		disconnect: () => void null,
+		takeRecords: () => [],
 	};
 };
 
