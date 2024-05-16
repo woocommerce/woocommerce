@@ -3,13 +3,11 @@
  */
 import { Button, VisuallyHidden } from '@wordpress/components';
 import { close } from '@wordpress/icons';
-import {
-	useViewportMatch,
-	__experimentalUseDialog as useDialog,
-} from '@wordpress/compose';
+import { useViewportMatch } from '@wordpress/compose';
 import { createElement, useCallback, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
+import { ESCAPE } from '@wordpress/keycodes';
 import {
 	store as blockEditorStore,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -40,18 +38,22 @@ export default function InserterSidebar() {
 		return setIsInserterOpened( false );
 	}, [ setIsInserterOpened ] );
 
+	const closeOnEscape = useCallback(
+		( event ) => {
+			if ( event.keyCode === ESCAPE && ! event.defaultPrevented ) {
+				event.preventDefault();
+				closeInserter();
+			}
+		},
+		[ closeInserter ]
+	);
+
 	const TagName = ! isMobileViewport ? VisuallyHidden : 'div';
-	const [ inserterDialogRef, inserterDialogProps ] = useDialog( {
-		onClose: closeInserter,
-		focusOnMount: false,
-	} );
 
 	return (
+		// eslint-disable-next-line jsx-a11y/no-static-element-interactions
 		<div
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore Types are not provided by useDialog.
-			ref={ inserterDialogRef }
-			{ ...inserterDialogProps }
+			onKeyDown={ closeOnEscape }
 			className="woocommerce-iframe-editor__inserter-panel"
 		>
 			<TagName className="woocommerce-iframe-editor__inserter-panel-header">
