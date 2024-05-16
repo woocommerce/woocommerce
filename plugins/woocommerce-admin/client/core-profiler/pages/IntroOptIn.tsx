@@ -66,6 +66,19 @@ export const IntroOptIn = ( {
 					{ __( 'Set up my store', 'woocommerce' ) }
 				</Button>
 
+				<Button
+					className="woocommerce-profiler-setup-store__button"
+					variant="tertiary"
+					onClick={ () =>
+						sendEvent( {
+							type: 'INTRO_BUILDER',
+							payload: { optInDataSharing: false },
+						} )
+					}
+				>
+					{ __( 'Builder setup', 'woocommerce' ) }
+				</Button>
+
 				<div className="woocommerce-profiler-intro-opt-in__footer">
 					<CheckboxControl
 						className="core-profiler__checkbox"

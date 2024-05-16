@@ -56,6 +56,7 @@ import {
 	IndustryChoice,
 	POSSIBLY_DEFAULT_STORE_NAMES,
 } from './pages/BusinessInfo';
+import { BuilderIntro } from './pages/BuilderIntro';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
 import { CoreProfilerLoader } from './components/loader/Loader';
@@ -82,7 +83,8 @@ export type InitializationCompleteEvent = {
 
 export type IntroOptInEvent =
 	| { type: 'INTRO_COMPLETED'; payload: { optInDataSharing: boolean } } // can be true or false depending on whether the user opted in or not
-	| { type: 'INTRO_SKIPPED'; payload: { optInDataSharing: false } }; // always false for now
+	| { type: 'INTRO_SKIPPED'; payload: { optInDataSharing: false } } // always false for now
+	| { type: 'INTRO_BUILDER'; payload: { optInDataSharing: false } }; // always false for now
 
 export type UserProfileEvent =
 	| {
@@ -783,6 +785,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					cond: { type: 'hasStepInUrl', step: 'skip-guided-setup' },
 				},
 				{
+					target: '#introBuilder',
+					cond: { type: 'hasStepInUrl', step: 'intro-builder' },
+				},
+				{
 					target: 'introOptIn',
 				},
 			],
@@ -850,6 +856,13 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						INTRO_SKIPPED: {
 							// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
 							target: '#skipGuidedSetup',
+							actions: [
+								'assignOptInDataSharing',
+								'updateTrackingOption',
+							],
+						},
+						INTRO_BUILDER: {
+							target: '#introBuilder',
 							actions: [
 								'assignOptInDataSharing',
 								'updateTrackingOption',
@@ -1133,6 +1146,18 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onError: {
 							target: '#plugins',
 						},
+					},
+				},
+			},
+		},
+		introBuilder: {
+			id: 'introBuilder',
+			initial: 'uploadConfig',
+			entry: [ { type: 'updateQueryStep', step: 'intro-builder' } ],
+			states: {
+				uploadConfig: {
+					meta: {
+						component: BuilderIntro,
 					},
 				},
 			},
