@@ -750,8 +750,7 @@ class PluginsHelper {
 			return array();
 		}
 
-		$is_notice_dismiss = get_user_meta( get_current_user_id(), self::DISMISS_EXPIRING_SUBS_NOTICE, true );
-		if ( ! empty( $is_notice_dismiss ) ) {
+		if ( ! self::should_show_notice( self::DISMISS_EXPIRING_SUBS_NOTICE ) ) {
 			return array();
 		}
 
@@ -801,8 +800,7 @@ class PluginsHelper {
 			return array();
 		}
 
-		$is_notice_dismiss = get_user_meta( get_current_user_id(), self::DISMISS_EXPIRED_SUBS_NOTICE, true );
-		if ( ! empty( $is_notice_dismiss ) ) {
+		if ( ! self::should_show_notice( self::DISMISS_EXPIRED_SUBS_NOTICE ) ) {
 			return array();
 		}
 
@@ -854,5 +852,31 @@ class PluginsHelper {
 
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-subscriptions-notice' );
 		wp_enqueue_script( 'woo-subscriptions-notice' );
+	}
+
+	/**
+	 * Determine whether a specific notice should be shown to the current user.
+	 *
+	 * @param string $type The type of notice to check for.
+	 * @return bool True if the notice should be shown, false otherwise.
+	 */
+	public static function should_show_notice( $dismiss_notice_meta ) {
+		// Get the current user ID.
+		$user_id = get_current_user_id();
+
+		// Get the timestamp when the notice was dismissed.
+		$dismissed_timestamp = get_user_meta( $user_id, $dismiss_notice_meta, true );
+
+		// If the notice was dismissed within the last month, do not show it.
+		if ( !empty( $dismissed_timestamp ) && ( time() - $dismissed_timestamp ) < 30 * DAY_IN_SECONDS ) {
+			return false;
+		}
+
+		// If the notice was dismissed more than a month ago, delete the meta value and show the notice.
+		if ( !empty( $dismissed_timestamp ) ) {
+			delete_user_meta( $user_id, $dismiss_notice_meta );
+		}
+
+		return true;
 	}
 }
