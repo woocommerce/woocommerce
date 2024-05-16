@@ -71,29 +71,22 @@ const formatNumberAsCurrency = (
 };
 
 const convertCurrencyStringToNumber = (
-	currencyString: string,
+	currencyString = '',
 	currency: Currency
 ): number | undefined => {
 	/**
 	 * 1. Remove all characters that are not numbers or the decimal separator.
 	 * 2. Replace the decimal separator with a period.
-	 * 3. Parse the string as a float.
 	 */
-	const parsedNumericValue = Number(
-		currencyString
-			.replace(
-				new RegExp(
-					`[^0-9\\${ currency.decimalSeparator || '' }]`,
-					'g'
-				),
-				''
-			)
-			.replace(
-				new RegExp( `\\${ currency.decimalSeparator }`, 'g' ),
-				'.'
-			)
-	);
-	if ( isNaN( parsedNumericValue ) ) {
+	const cleanedCurrencyString = currencyString
+		.replace(
+			new RegExp( `[^0-9\\${ currency.decimalSeparator || '' }]`, 'g' ),
+			''
+		)
+		.replace( new RegExp( `\\${ currency.decimalSeparator }`, 'g' ), '.' );
+
+	const parsedNumericValue = Number( cleanedCurrencyString );
+	if ( cleanedCurrencyString === '' || isNaN( parsedNumericValue ) ) {
 		return undefined;
 	}
 
