@@ -169,6 +169,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Prevent calling woocommerce.com on empty update-check and update-check-public payload. [#47507](https://github.com/woocommerce/woocommerce/pull/47507)
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
 /trunk/changelog.txt).
