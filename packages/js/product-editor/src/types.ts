@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
-import { Product, ProductType } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 
 export type ProductTemplate = {
 	id: string;
@@ -12,7 +12,7 @@ export type ProductTemplate = {
 	order: number;
 	layoutTemplateId: string;
 	isSelectableByUser: boolean;
-	supportedTypes: ProductType[];
+	priority: number;
 	productData: Partial< Product >;
 };
 

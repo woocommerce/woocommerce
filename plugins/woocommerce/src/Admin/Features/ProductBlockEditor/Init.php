@@ -245,7 +245,25 @@ class Init {
 				'order'              => 10,
 				'icon'               => 'shipping',
 				'layout_template_id' => 'simple-product',
-				'supported_types'    => array( 'simple', 'variable' ),
+				'product_data'       => array(
+					'type' => 'simple',
+				),
+				'supported_types'    => array( 'simple' ),
+			)
+		);
+		$templates[] = new ProductTemplate(
+			array(
+				'id'                 => 'variable-product-template',
+				'title'              => __( 'Variable product', 'woocommerce' ),
+				'description'        => '',
+				'order'              => 10,
+				'icon'               => 'shipping',
+				'layout_template_id' => 'simple-product',
+				'product_data'       => array(
+					'type' => 'variable',
+				),
+				'is_selectable_by_user' => false,
+				'supported_types'    => array( 'variable' ),
 			)
 		);
 		$templates[] = new ProductTemplate(
@@ -256,7 +274,9 @@ class Init {
 				'order'              => 20,
 				'icon'               => 'group',
 				'layout_template_id' => 'simple-product',
-				'supported_types'    => array( 'grouped' ),
+				'product_data'       => array(
+					'type' => 'grouped',
+				),
 			)
 		);
 		$templates[] = new ProductTemplate(
@@ -267,7 +287,9 @@ class Init {
 				'order'              => 30,
 				'icon'               => 'link',
 				'layout_template_id' => 'simple-product',
-				'supported_types'    => array( 'external' ),
+				'product_data'       => array(
+					'type' => 'external',
+				),
 			)
 		);
 
@@ -318,6 +340,9 @@ class Init {
 				array(
 					'id'              => $product_type . '-product-template',
 					'title'           => $title,
+					'product_data'    => array(
+						'type' => $product_type,
+					),
 					'supported_types' => array( $product_type ),
 				)
 			);

@@ -69,12 +69,12 @@ class ProductTemplate {
 	private $is_selectable_by_user = true;
 
 	/**
-	 * The supported product types.
+	 * The priority of the template.
 	 *
-	 * @var array
+	 * @var int
 	 */
 
-	private $supported_types = array();
+	private $priority = 10;
 
 	/**
 	 * ProductTemplate constructor
@@ -84,7 +84,6 @@ class ProductTemplate {
 	public function __construct( array $data ) {
 		$this->id              = $data['id'];
 		$this->title           = $data['title'];
-		$this->supported_types = $data['supported_types'];
 
 		if ( isset( $data['order'] ) ) {
 			$this->order = $data['order'];
@@ -108,6 +107,10 @@ class ProductTemplate {
 
 		if ( isset( $data['is_selectable_by_user'] ) ) {
 			$this->is_selectable_by_user = $data['is_selectable_by_user'];
+		}
+
+		if ( isset( $data['priority'] ) ) {
+			$this->priority = $data['priority'];
 		}
 	}
 
@@ -204,6 +207,15 @@ class ProductTemplate {
 	}
 
 	/**
+	 * Get the priority of the template.
+	 *
+	 * @return int The priority.
+	 */
+	public function get_priority() {
+		return $this->priority;
+	}
+
+	/**
 	 * Get the selectable attribute.
 	 *
 	 * @return boolean Selectable.
@@ -219,14 +231,6 @@ class ProductTemplate {
 	 */
 	public function set_order( int $order ) {
 		$this->order = $order;
-	}
-	/**
-	 * Get the supported types.
-	 *
-	 * @return string The supported types.
-	 */
-	public function get_supported_types() {
-		return $this->supported_types;
 	}
 
 	/**
@@ -244,7 +248,7 @@ class ProductTemplate {
 			'layoutTemplateId'   => $this->get_layout_template_id(),
 			'productData'        => $this->get_product_data(),
 			'isSelectableByUser' => $this->get_is_selectable_by_user(),
-			'supportedTypes'     => $this->get_supported_types(),
+			'priority'           => $this->get_priority(),
 		);
 	}
 }

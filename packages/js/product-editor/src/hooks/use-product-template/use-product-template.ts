@@ -48,14 +48,16 @@ function templateDataMatchesProductData(
 }
 
 function findBetterMatchTemplate( matchingTemplates: ProductTemplate[] ) {
-	return matchingTemplates.reduce(
-		( previous, current ) =>
-			Object.keys( current.productData ).length >
-			Object.keys( previous.productData ).length
-				? current
-				: previous,
-		matchingTemplates[ 0 ]
-	);
+	return matchingTemplates
+		.sort( ( a, b ) => a.priority - b.priority )
+		.reduce(
+			( previous, current ) =>
+				Object.keys( current.productData ).length >
+				Object.keys( previous.productData ).length
+					? current
+					: previous,
+			matchingTemplates[ 0 ]
+		);
 }
 
 export const useProductTemplate = (
@@ -79,7 +81,7 @@ export const useProductTemplate = (
 	let matchingProductTemplate = productTemplates.find(
 		( productTemplate ) =>
 			productTemplate.id === productTemplateId &&
-			productTemplate.supportedTypes.includes( productType )
+			productTemplate.productData.type === productType
 	);
 
 	if ( ! matchingProductTemplate ) {
