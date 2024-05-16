@@ -857,7 +857,7 @@ class PluginsHelper {
 	/**
 	 * Determine whether a specific notice should be shown to the current user.
 	 *
-	 * @param string $type The type of notice to check for.
+	 * @param $dismiss_notice_meta string User meta that includes the timestamp when a store notice was dismissed.
 	 * @return bool True if the notice should be shown, false otherwise.
 	 */
 	public static function should_show_notice( $dismiss_notice_meta ) {
@@ -868,12 +868,12 @@ class PluginsHelper {
 		$dismissed_timestamp = get_user_meta( $user_id, $dismiss_notice_meta, true );
 
 		// If the notice was dismissed within the last month, do not show it.
-		if ( !empty( $dismissed_timestamp ) && ( time() - $dismissed_timestamp ) < 30 * DAY_IN_SECONDS ) {
+		if ( ! empty( $dismissed_timestamp ) && ( time() - $dismissed_timestamp ) < 30 * DAY_IN_SECONDS ) {
 			return false;
 		}
 
 		// If the notice was dismissed more than a month ago, delete the meta value and show the notice.
-		if ( !empty( $dismissed_timestamp ) ) {
+		if ( ! empty( $dismissed_timestamp ) ) {
 			delete_user_meta( $user_id, $dismiss_notice_meta );
 		}
 
