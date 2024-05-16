@@ -187,7 +187,7 @@ body .is-layout-constrained > .woocommerce-coming-soon-banner.alignwide {
 	height: 40px;
 }
 .woocommerce-coming-soon-banner {
-	font-size: clamp(27.894px, 1.743rem + ((1vw - 3.2px) * 2.094), 48px);
+	font-size: clamp(27px, 1.74rem + ((1vw - 3px) * 2), 48px);
 	font-weight: 400;
 	line-height: 58px;
 	font-family: 'Cardo', serif;
