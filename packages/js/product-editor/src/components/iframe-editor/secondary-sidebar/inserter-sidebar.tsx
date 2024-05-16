@@ -7,13 +7,7 @@ import {
 	useViewportMatch,
 	__experimentalUseDialog as useDialog,
 } from '@wordpress/compose';
-import {
-	createElement,
-	useCallback,
-	useContext,
-	useEffect,
-	useRef,
-} from '@wordpress/element';
+import { createElement, useCallback, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import {
@@ -52,11 +46,6 @@ export default function InserterSidebar() {
 		focusOnMount: false,
 	} );
 
-	const libraryRef = useRef< Library | null >( null );
-	useEffect( () => {
-		libraryRef.current?.focusSearch();
-	}, [] );
-
 	return (
 		<div
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -77,7 +66,6 @@ export default function InserterSidebar() {
 					showInserterHelpPanel
 					shouldFocusBlock={ isMobileViewport }
 					rootClientId={ rootClientId }
-					ref={ libraryRef }
 				/>
 			</div>
 		</div>
