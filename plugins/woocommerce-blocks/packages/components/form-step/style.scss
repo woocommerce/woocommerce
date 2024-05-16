@@ -12,13 +12,14 @@
 	.is-mobile &,
 	.is-small & {
 		padding-left: 0;
+		margin-bottom: $gap-larger;
 
 		// The below CSS rules are to show a separator between Checkout steps on mobile.
 		// This media query is required because on themes where the Checkout block is rendered alongside something else,
 		// e.g. Storefront using the "Default Template" (which has a sidebar) the checkout block can get the `.is-small`
 		// class, but the screen itself is larger than 400px.
 		@include breakpoint( "<600px" ) {
-			padding-top: 2.5rem;
+			padding-top: $gap-larger;
 
 			// Remove padding from the first checkout step. First of type is required here as the first-child is the express payment methods block.
 			&:first-of-type {
@@ -28,7 +29,7 @@
 			&::after {
 				position: absolute;
 				content: '';
-				bottom: -2.5rem;
+				bottom: -$gap-larger;
 				left: -100vw;
 				width: 200vw;
 				height: 1px;
