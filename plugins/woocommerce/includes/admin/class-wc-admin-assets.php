@@ -558,7 +558,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			// Marketplace promotions.
 			if ( in_array( $screen_id, array( 'woocommerce_page_wc-admin' ), true ) ) {
 
-				$promotions = get_transient( WC_Admin_Marketplace_Promotions::TRANSIENT_NAME );
+				$promotions = WC_Admin_Marketplace_Promotions::get_active_promotions();
 
 				if ( false === $promotions ) {
 					return;
