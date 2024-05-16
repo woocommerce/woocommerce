@@ -223,7 +223,14 @@ export class EditorUtils {
 			} )
 			.dispatchEvent( 'click' );
 
-		await this.page.locator( '.edit-site-layout__sidebar' ).waitFor( {
+		const sidebar = this.page.locator( '.edit-site-layout__sidebar' );
+		const canvasLoader = this.page.locator( '.edit-site-canvas-loader' );
+
+		await sidebar.waitFor( {
+			state: 'hidden',
+		} );
+
+		await canvasLoader.waitFor( {
 			state: 'hidden',
 		} );
 	}
