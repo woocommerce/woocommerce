@@ -2263,32 +2263,23 @@ class WC_Helper {
 	}
 
 	/**
-	 * Retrieve notice for connected users.
+	 * Retrieve notice for connected store.
 	 *
-	 * @param string $notice_slug The unique slug for the notice.
 	 * @return array An array containing notice data.
 	 */
-	public static function get_notice( $notice_slug ) {
+	public static function get_notices() {
 
-		if ( empty( $notice_slug ) ) {
-			return array();
-		}
-
-		$cache_key = '_woocommerce_connected_user_notice_' . $notice_slug;
+		$cache_key = '_woocommerce_helper_notices';
 		$cached_data = get_transient( $cache_key );
 
 		if ( false !== $cached_data ) {
 			return $cached_data;
 		}
 
-		// Fetch notice data for connected users.
+		// Fetch notice data for connected store.
 		$request = WC_Helper_API::get(
-			add_query_arg(
-				[
-					'notice_type' => sanitize_text_field( $notice_slug ),
-				],
-				'notice'
-			),
+			'notices'
+			,
 			[
 				'authenticated' => true,
 			]
@@ -2308,7 +2299,6 @@ class WC_Helper {
 		set_transient( $cache_key, $data, 12 * HOUR_IN_SECONDS );
 		return $data;
 	}
-
 }
 
 WC_Helper::load();
