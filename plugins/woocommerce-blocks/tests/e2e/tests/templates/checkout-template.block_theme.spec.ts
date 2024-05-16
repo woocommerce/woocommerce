@@ -21,7 +21,7 @@ test.describe( 'Test the checkout template', () => {
 		await expect(
 			page
 				.frameLocator( 'iframe[title="Editor canvas"i]' )
-				.locator( 'h1:has-text("Checkout")' )
+				.locator( 'div:has-text("Place Order · <price/>")' )
 				.first()
 		).toBeVisible();
 	} );
@@ -43,7 +43,9 @@ test.describe( 'Test the checkout template', () => {
 		await editorUtils.enterEditMode();
 
 		await expect(
-			editor.canvas.locator( 'h1:has-text("Checkout")' ).first()
+			editor.canvas
+				.locator( 'div:has-text("Place Order · <price/>")' )
+				.first()
 		).toBeVisible();
 
 		await editor.openDocumentSettingsSidebar();
@@ -51,7 +53,9 @@ test.describe( 'Test the checkout template', () => {
 		await page.getByRole( 'menuitem', { name: 'Edit template' } ).click();
 
 		await expect(
-			editor.canvas.locator( 'h1:has-text("Checkout")' ).first()
+			editor.canvas
+				.locator( 'div:has-text("Place Order · <price/>")' )
+				.first()
 		).toBeVisible();
 	} );
 
@@ -66,7 +70,7 @@ test.describe( 'Test the checkout template', () => {
 		await expect(
 			admin.page
 				.frameLocator( 'iframe[title="Editor canvas"i]' )
-				.locator( 'h1:has-text("Checkout")' )
+				.locator( 'div:has-text("Place Order · <price/>")' )
 				.first()
 		).toBeVisible();
 	} );

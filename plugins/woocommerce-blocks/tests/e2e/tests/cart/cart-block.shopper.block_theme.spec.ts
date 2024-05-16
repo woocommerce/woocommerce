@@ -238,9 +238,9 @@ test.describe( 'Shopper → Cart block', () => {
 		// Click on "Proceed to Checkout" button
 		await page.getByRole( 'link', { name: 'Proceed to Checkout' } ).click();
 
-		// Verify that you see the Checkout Block page
+		// Verify that the "Place Order" button is visible, then we're on the checkout page
 		await expect(
-			page.getByRole( 'heading', { name: 'Checkout' } )
+			page.getByRole( 'button', { name: 'Place Order' } )
 		).toBeVisible();
 	} );
 
