@@ -186,7 +186,6 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 			return newTerm;
 		} );
 
-		// Catch the new items
 		const newItems = await Promise.all( promises );
 
 		/*
