@@ -16,6 +16,7 @@ import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 function ProductCardFooter( props: { product: Product } ) {
 	const { product } = props;
+	product.freemium_type = 'primary';
 	const { user, currentUserCan } = useUser();
 	const { selectedTab, isProductInstalled } =
 		useContext( MarketplaceContext );
