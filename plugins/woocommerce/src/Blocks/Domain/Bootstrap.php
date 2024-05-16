@@ -11,6 +11,8 @@ use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
 use Automattic\WooCommerce\Blocks\Patterns\AIPatterns;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
+use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
+use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
 use Automattic\WooCommerce\Blocks\Domain\Services\Notices;
@@ -156,6 +158,7 @@ class Bootstrap {
 			$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
 			$this->container->get( SingleProductTemplateCompatibility::class )->init();
 			$this->container->get( Notices::class )->init();
+			$this->container->get( PTKPatternsStore::class );
 		}
 
 		$this->container->get( QueryFilters::class )->init();
@@ -377,11 +380,18 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
+			PTKPatternsStore::class,
+			function () {
+				return new PTKPatternsStore( new PTKClient() );
+			}
+		);
+		$this->container->register(
 			BlockPatterns::class,
 			function () {
 				return new BlockPatterns(
 					$this->package,
-					new PatternRegistry()
+					new PatternRegistry(),
+					$this->container->get( PTKPatternsStore::class )
 				);
 			}
 		);
