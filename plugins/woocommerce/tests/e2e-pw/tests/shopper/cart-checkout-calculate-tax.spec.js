@@ -159,7 +159,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'cell', {
-						name: '$250.00 (includes $50.00 Nasty Tax)',
+						name: '$250.00 (includes $50.00 Tax)',
 					} )
 				).toBeVisible();
 			} );
@@ -180,8 +180,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 					} )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', {
-						name: 'Total $250.00 (includes $50.00 Nasty Tax)',
+					page.getByRole( 'cell', {
+						name: '$250.00 (includes $50.00 Tax)',
 					} )
 				).toBeVisible();
 			} );
@@ -274,7 +274,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 					page.getByRole( 'row', { name: 'Subtotal $200.00' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'Nasty Tax $50.00' } )
+					page.getByRole( 'row', { name: 'Tax $50.00' } )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'row', { name: 'Total $250.00' } )
@@ -966,7 +966,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 					.getByRole( 'textbox', { name: 'ZIP Code *' } )
 					.type( customer.billing.us.zip );
 				await page
-					.getByLabel( 'Phone *' )
+					.getByRole( 'textbox', { name: 'Phone *' } )
 					.fill( customer.billing.us.phone );
 				await page
 					.getByLabel( 'Email address *' )

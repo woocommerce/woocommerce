@@ -196,10 +196,11 @@ class WC_Helper_Updater {
 		printf(
 			wp_kses(
 			/* translators: 1: Woo Update Manager plugin install URL */
-				__( ' <a href="%1$s">Connect your store</a> to woocommerce.com to update.', 'woocommerce' ),
+				__( ' <a href="%1$s" class="woocommerce-connect-your-store">Connect your store</a> to woocommerce.com to update.', 'woocommerce' ),
 				array(
 					'a' => array(
-						'href' => array(),
+						'href'  => array(),
+						'class' => array(),
 					),
 				)
 			),
@@ -507,6 +508,9 @@ class WC_Helper_Updater {
 	 * @return array Update data for each requested product.
 	 */
 	private static function _update_check( $payload ) {
+		if ( empty( $payload ) ) {
+			return array();
+		}
 		ksort( $payload );
 		$hash = md5( wp_json_encode( $payload ) );
 

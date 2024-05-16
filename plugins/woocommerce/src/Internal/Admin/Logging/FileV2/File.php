@@ -430,6 +430,10 @@ class File {
 	 * @return bool
 	 */
 	public function write( string $text ): bool {
+		if ( '' === $text ) {
+			return false;
+		}
+
 		if ( ! $this->is_writable() ) {
 			$created = $this->create();
 

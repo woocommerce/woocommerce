@@ -1,16 +1,8 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
 import { Spinner } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
-import {
-	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
-	ProductAttributesActions,
-	WPDataActions,
-} from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
 import {
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
@@ -19,7 +11,6 @@ import {
 /**
  * Internal dependencies
  */
-import { TRACKS_SOURCE } from '../../constants';
 import { MenuAttributeList } from './menu-attribute-list';
 import {
 	AttributeInputFieldProps,
@@ -41,23 +32,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	disabledAttributeMessage,
 	createNewAttributesAsGlobal = false,
 } ) => {
-	const { createErrorNotice } = useDispatch( 'core/notices' );
-	const { createProductAttribute } = useDispatch(
-		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
-	) as unknown as ProductAttributesActions & WPDataActions;
-
-	/*
-	 * todo: It should be moved out of this component
-	 * together with the addNewAttribute function
-	 */
-	const sortCriteria = { order_by: 'name' };
-
-	function isNewAttributeListItem(
-		attribute: AttributeInputFieldItemProps
-	): boolean {
-		return attribute.id === -99;
-	}
-
 	const getFilteredItems = (
 		allItems: AttributeInputFieldItemProps[],
 		inputValue: string
@@ -88,39 +62,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 		return filteredItems;
 	};
 
-	const addNewAttribute = ( attribute: AttributeInputFieldItemProps ) => {
-		recordEvent( 'product_attribute_add_custom_attribute', {
-			source: TRACKS_SOURCE,
-		} );
-		if ( createNewAttributesAsGlobal ) {
-			createProductAttribute(
-				{
-					name: attribute.name,
-					generate_slug: true,
-				},
-				{
-					optimisticQueryUpdate: sortCriteria,
-				}
-			)
-				.then( onChange )
-				.catch( ( error ) => {
-					let message = __(
-						'Failed to create new attribute.',
-						'woocommerce'
-					);
-					if ( error.code === 'woocommerce_rest_cannot_create' ) {
-						message = error.message;
-					}
-
-					createErrorNotice( message, {
-						explicitDismiss: true,
-					} );
-				} );
-		} else {
-			onChange( attribute.name );
-		}
-	};
-
 	return (
 		<SelectControl< AttributeInputFieldItemProps >
 			className="woocommerce-attribute-input-field"
@@ -132,14 +73,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			getItemLabel={ ( item ) => item?.name || '' }
 			getItemValue={ ( item ) => item?.id || '' }
 			selected={ value }
-			onSelect={ ( attribute: AttributeInputFieldItemProps ) => {
-				if ( isNewAttributeListItem( attribute ) ) {
-					return addNewAttribute( attribute );
-				}
-
-				onChange( attribute );
-			} }
-			onRemove={ () => onChange() }
+			onSelect={ onChange }
 			__experimentalOpenMenuOnFocus
 		>
 			{ ( {

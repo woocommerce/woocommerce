@@ -39,17 +39,14 @@
 
 <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 <div class="wp-block-group"><!-- wp:heading {"textAlign":"center","level":1,"align":"wide","className":"woocommerce-coming-soon-banner"} -->
-<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner">Pardon our dust! We're working on something amazing -- check back soon!</h1>
+<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner">Pardon our dust! We're working on something amazing — check back soon!</h1>
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|10"}}},"className":"woocommerce-coming-soon-powered-by-woo","layout":{"type":"constrained"}} -->
 <div class="wp-block-group woocommerce-coming-soon-powered-by-woo" style="padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--10)"><!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"0"}}}} -->
 <div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--30);padding-bottom:0"><!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|contrast"}}}},"textColor":"contrast-2","fontSize":"small"} -->
-<p class="has-text-align-center has-contrast-2-color has-text-color has-link-color has-small-font-size">
-Powered by
-<a style="text-decoration: none;" href="https://woocommerce.com" rel="nofollow">WooCommerce</a>
-</p>
+<p class="has-text-align-center has-contrast-2-color has-text-color has-link-color has-small-font-size">&nbsp;</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
@@ -85,6 +82,7 @@ body.custom-background {
 	margin: 0;
 	background-color: #bea0f2;
 	font-family: 'Inter', sans-serif;
+	min-width: 320px;
 	--wp--preset--color--contrast: #111111;
 	--wp--style--global--wide-size: 1280px;
 }
@@ -147,6 +145,11 @@ body .is-layout-constrained > .alignwide {
 	flex-direction: column;
 	justify-content: space-between;
 }
+@media (max-width: 660px) {
+	.woocommerce-coming-soon-banner-container {
+		padding-inline: 0;
+	}
+}
 .woocommerce-coming-soon-banner-container > .wp-block-group__inner-container {
 	height: 100%;
 	display: flex;
@@ -184,7 +187,7 @@ body .is-layout-constrained > .woocommerce-coming-soon-banner.alignwide {
 	height: 40px;
 }
 .woocommerce-coming-soon-banner {
-	font-size: 48px;
+	font-size: clamp(27px, 1.74rem + ((1vw - 3px) * 2), 48px);
 	font-weight: 400;
 	line-height: 58px;
 	font-family: 'Cardo', serif;
@@ -194,5 +197,6 @@ body .is-layout-constrained > .woocommerce-coming-soon-banner.alignwide {
 	max-width: 820px;
 	color: var(--wp--preset--color--contrast);
 	margin: 0 auto;
+	text-wrap: balance;
 }</style></div>
 <!-- /wp:woocommerce/coming-soon -->

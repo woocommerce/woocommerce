@@ -104,6 +104,18 @@ class CLIRunner {
 	}
 
 	/**
+	 * Free some in-memory usage.
+	 */
+	private function free_in_memory_usage() {
+		$GLOBALS['wpdb']->flush();
+		$GLOBALS['wpdb']->queries = array(); // Query log.
+
+		if ( function_exists( 'wp_cache_supports' ) && wp_cache_supports( 'flush_runtime' ) ) {
+			wp_cache_flush_runtime();
+		}
+	}
+
+	/**
 	 * Count how many orders have yet to be migrated into the custom orders table.
 	 *
 	 * ## EXAMPLES
@@ -230,11 +242,7 @@ class CLIRunner {
 			$orders_remaining = count( $this->synchronizer->get_next_batch_to_process( 1 ) ) > 0;
 			$order_count      = $remaining_count - $batch_size;
 
-			if ( function_exists( 'wp_cache_supports' ) && wp_cache_supports( 'flush_runtime' ) ) {
-				wp_cache_flush_runtime();
-			}
-
-			$GLOBALS['wpdb']->flush();
+			$this->free_in_memory_usage();
 		}
 
 		$progress->finish();
@@ -991,6 +999,8 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				WP_CLI::warning( __( 'Failed to clean up all orders in a batch. Aborting.', 'woocommerce' ) );
 				break;
 			}
+
+			$this->free_in_memory_usage();
 		} while ( $order_ids );
 
 		$progress->finish();

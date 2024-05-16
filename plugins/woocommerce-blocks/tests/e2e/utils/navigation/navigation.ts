@@ -35,6 +35,6 @@ export const editBlockPage = async (
 		.getByRole( 'link', { name: `“${ name } block” (Edit)` } )
 		.click();
 
-	await page.waitForSelector( blockSelector );
+	await page.locator( blockSelector as string ).waitFor();
 	await closeModalIfExists( page );
 };

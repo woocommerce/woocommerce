@@ -66,11 +66,7 @@ export function PublishButton( {
 		},
 	} );
 
-	if (
-		productType === 'product' &&
-		window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
-		isMenuButton
-	) {
+	if ( productType === 'product' && isMenuButton ) {
 		function renderPublishButtonMenu(
 			menuProps: Dropdown.RenderProps
 		): React.ReactElement {
@@ -82,6 +78,7 @@ export function PublishButton( {
 		if (
 			editedStatus !== 'publish' &&
 			editedStatus !== 'future' &&
+			window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
 			isPrePublishPanelVisible
 		) {
 			function handlePrePublishButtonClick(
