@@ -124,7 +124,12 @@ export function HeaderToolbar( {
 	return (
 		<div className="woocommerce-iframe-editor__header">
 			<div className="woocommerce-iframe-editor__header-left">
-				<div className="woocommerce-iframe-editor-document-tools">
+				<NavigableToolbar
+					className="woocommerce-iframe-editor-document-tools"
+					aria-label={ __( 'Document tools', 'woocommerce' ) }
+					// @ts-expect-error variant prop exists
+					variant="unstyled"
+				>
 					<ToolbarItem
 						ref={ inserterButton }
 						as={ Button }
@@ -155,7 +160,7 @@ export function HeaderToolbar( {
 					<ToolbarItem as={ EditorHistoryUndo } />
 					<ToolbarItem as={ EditorHistoryRedo } />
 					<ToolbarItem as={ DocumentOverview } />
-				</div>
+				</NavigableToolbar>
 				{ hasFixedToolbar && isLargeViewport && renderBlockToolbar && (
 					<>
 						<div
