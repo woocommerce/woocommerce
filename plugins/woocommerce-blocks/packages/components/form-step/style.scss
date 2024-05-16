@@ -27,7 +27,8 @@
 				left: -100vw;
 				width: 200vw;
 				height: 1px;
-				background: $universal-border-light;
+				background: currentColor;
+				opacity: 0.11;
 			}
 		}
 	}
