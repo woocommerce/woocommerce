@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Prevent calling woocommerce.com on empty update-check and update-check-public payload.
