@@ -41,8 +41,20 @@
 	margin-bottom: 2.5rem;
 	border-bottom: 1px solid $universal-border-light;
 
-	.is-medium &, .is-small &, .is-mobile & {
+	// When the order notes are the last item in the checkout (before the place order button) the margin should be removed.
+	&:nth-last-child( 2 ) {
+		margin-bottom: 0;
+	}
+
+	.is-medium &,
+	.is-small &,
+	.is-mobile & {
 		border-bottom: 0;
 		padding-bottom: 0;
+
+		// Restore margin removed above when the order notes are the last item in the checkout on smaller screens.
+		&:nth-last-child( 2 ) {
+			margin-bottom: 2.5rem;
+		}
 	}
 }
