@@ -228,7 +228,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 
 		$customer->save();
 
-		$this->cart_controller->calculate_totals();
+		$this->cart_controller->calculate_totals( true );
 
 		return rest_ensure_response( $this->schema->get_item_response( $cart ) );
 	}

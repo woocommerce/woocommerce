@@ -75,7 +75,7 @@ class CartExtensionsSchema extends AbstractSchema {
 		if ( is_callable( $callback ) ) {
 			$callback( $request['data'] );
 			// We recalculate the cart if we had something to run.
-			$controller->calculate_totals();
+			$controller->calculate_totals( true );
 		}
 
 		$cart = $controller->get_cart_instance();

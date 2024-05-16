@@ -35,11 +35,14 @@ class CartController {
 	/**
 	 * Recalculates the cart totals.
 	 */
-	public function calculate_totals() {
+	public function calculate_totals( $all = false ) {
 		$cart = $this->get_cart_instance();
 		$cart->get_cart();
 		$cart->calculate_fees();
 		$cart->calculate_shipping();
+		if ( $all ) {
+			$cart->calculate_totals();
+		}
 	}
 
 	/**
