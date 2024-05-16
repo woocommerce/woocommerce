@@ -116,12 +116,31 @@ jobs:
                   install: '${{ matrix.projectName }}...'
                   build: '${{ matrix.projectName }}'
 
+            - name: Get commit message
+              id: get_commit_message
+              env:
+                  HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                  PR_TITLE: ${{ github.event.pull_request.title }}
+              run: |
+                  if [[ "${{ github.event_name }}" == "push" ]]; then
+                    COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+                  elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+                    COMMIT_MESSAGE="$PR_TITLE"
+                  else
+                    COMMIT_MESSAGE="${{ github.event_name }}"
+                  fi
+                  echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
+              shell: bash
+
             - name: 'Prepare Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
 
             - name: 'Run tests'
+              env:
+                  BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
+                  BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
             - name: 'Upload artifacts'
