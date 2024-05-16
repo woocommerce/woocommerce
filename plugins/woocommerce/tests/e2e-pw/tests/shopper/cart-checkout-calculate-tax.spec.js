@@ -167,7 +167,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 			await test.step( 'Load checkout page and confirm price display', async () => {
 				await page.goto( '/checkout/' );
 				await expect(
-					page.getByRole( 'heading', { name: 'Checkout' } )
+					page.getByRole( 'button', { name: 'Pay for order' } )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'row', {
