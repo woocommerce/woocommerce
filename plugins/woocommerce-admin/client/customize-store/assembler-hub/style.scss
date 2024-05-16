@@ -822,3 +822,8 @@
 .woocommerce-customize-store__logo-menu-item-delete {
 	color: #cc1818;
 }
+
+.components-resizable-box__container.has-show-handle.block-library-cover__resize-container,
+.components-resizable-box__handle.components-resizable-box__side-handle.components-resizable-box__handle-left {
+	display: none;
+}
