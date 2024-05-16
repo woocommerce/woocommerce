@@ -2,7 +2,13 @@
  * External dependencies
  */
 import { useViewportMatch } from '@wordpress/compose';
-import { createElement, useCallback, useContext } from '@wordpress/element';
+import {
+	createElement,
+	useCallback,
+	useContext,
+	useEffect,
+	useRef,
+} from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { ESCAPE } from '@wordpress/keycodes';
 import {
@@ -45,6 +51,13 @@ export default function InserterSidebar() {
 		[ closeInserter ]
 	);
 
+	const libraryRef = useRef< Library | null >( null );
+	useEffect( () => {
+		// Focus the search input when the inserter is opened,
+		// if using an older version of the Library.
+		libraryRef.current?.focusSearch?.();
+	}, [] );
+
 	return (
 		// eslint-disable-next-line jsx-a11y/no-static-element-interactions
 		<div
@@ -56,6 +69,7 @@ export default function InserterSidebar() {
 					showInserterHelpPanel
 					shouldFocusBlock={ isMobileViewport }
 					rootClientId={ rootClientId }
+					ref={ libraryRef }
 					onClose={ closeInserter }
 				/>
 			</div>
