@@ -229,8 +229,8 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 			blockData.slug
 		);
 
+		await editor.selectBlocks( attributeFilterControl );
 		await editor.openDocumentSettingsSidebar();
-		await editor.selectBlocks( attributeFilterControl.nth( 1 ) );
 
 		await page.getByText( "Show 'Apply filters' button" ).click();
 
