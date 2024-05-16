@@ -61,7 +61,7 @@ export function createDateFormatter( format ) {
  * @return {boolean} True if data contains a leap year.
  */
 export function dataContainsLeapYear( data ) {
-	if ( data.data.intervals.length > 1 ) {
+	if ( data?.data?.intervals?.length > 1 ) {
 		const start = data.data.intervals[ 0 ].date_start;
 		const end =
 			data.data.intervals[ data.data.intervals.length - 1 ].date_end;
