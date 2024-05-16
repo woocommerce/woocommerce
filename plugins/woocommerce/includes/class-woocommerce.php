@@ -81,6 +81,8 @@ final class WooCommerce {
 	/**
 	 * API instance
 	 *
+	 * @deprecated 9.0.0 The Legacy REST API has been removed from WooCommerce core. This property will be null unless the WooCommerce Legacy REST API plugin is installed.
+	 *
 	 * @var WC_API
 	 */
 	public $api;
