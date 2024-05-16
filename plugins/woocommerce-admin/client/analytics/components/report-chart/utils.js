@@ -4,7 +4,7 @@
 import { find, get } from 'lodash';
 import { flattenFilters } from '@woocommerce/navigation';
 import { format as formatDate } from '@wordpress/date';
-import { containsLeapYear } from '@woocommerce/data';
+import { containsLeapYear } from '@woocommerce/date';
 
 export const DEFAULT_FILTER = 'all';
 

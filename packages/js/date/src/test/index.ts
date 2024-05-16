@@ -26,6 +26,8 @@ import {
 	getDateFormatsForIntervalPhp,
 	getDateFormatsForIntervalD3,
 	dayTicksThreshold,
+	isLeapYear,
+	containsLeapYear,
 } from '..';
 declare global {
 	interface Window {
@@ -1111,4 +1113,54 @@ describe( 'getDateFormatsForIntervalPhp', () => {
 			);
 		}
 	);
+
+	describe( 'isLeapYear', () => {
+		test( 'returns true for a leap year divisible by 4 but not by 100', () => {
+			expect( isLeapYear( 2024 ) ).toBe( true );
+		} );
+
+		test( 'returns true for a leap year divisible by 400', () => {
+			expect( isLeapYear( 2000 ) ).toBe( true );
+		} );
+
+		test( 'returns false for a non-leap year divisible by 100 but not by 400', () => {
+			expect( isLeapYear( 1900 ) ).toBe( false );
+		} );
+
+		test( 'returns false for a non-leap year not divisible by 4', () => {
+			expect( isLeapYear( 2019 ) ).toBe( false );
+		} );
+	} );
+
+	describe( 'containsLeapYear', () => {
+		test( 'returns true when date range contains at least one leap year', () => {
+			expect( containsLeapYear( '2020-01-01', '2022-12-31' ) ).toBe(
+				true
+			);
+		} );
+
+		test( 'returns false when date range does not contain any leap years', () => {
+			expect( containsLeapYear( '2018-01-01', '2019-12-31' ) ).toBe(
+				false
+			);
+		} );
+
+		test( 'returns true when the date range starts and ends in the same leap year', () => {
+			expect( containsLeapYear( '2024-01-01', '2024-12-31' ) ).toBe(
+				true
+			);
+		} );
+
+		test( 'returns true when the start and end dates are the same and it’s a leap year', () => {
+			expect( containsLeapYear( '2024-02-29', '2024-02-29' ) ).toBe(
+				true
+			);
+		} );
+
+		test( 'handles incorrect date formats gracefully', () => {
+			expect( containsLeapYear( 'invalid-date', '2022-12-31' ) ).toBe(
+				false
+			);
+		} );
+	} );
 } );

@@ -14,7 +14,6 @@ import {
 	getTooltipValueFormat,
 	SETTINGS_STORE_NAME,
 	REPORTS_STORE_NAME,
-	isLeapYear,
 } from '@woocommerce/data';
 import {
 	getAllowedIntervalsForQuery,
@@ -23,6 +22,7 @@ import {
 	getIntervalForQuery,
 	getChartTypeForQuery,
 	getPreviousDate,
+	isLeapYear,
 } from '@woocommerce/date';
 import { CurrencyContext } from '@woocommerce/currency';
 
