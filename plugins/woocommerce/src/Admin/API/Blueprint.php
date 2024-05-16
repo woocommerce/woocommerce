@@ -32,7 +32,7 @@ class Blueprint {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'process' ),
 					'permission_callback' => function () {
 						return true;
@@ -42,13 +42,14 @@ class Blueprint {
 		);
 	}
 
-	public function process() {
-		$blueprint_schema = constant( 'WOOCOMMERCE_BLUEPRINT_PATH' );
-		if ( ! $blueprint_schema ) {
-			return new \WP_HTTP_Response( null, 404 );
-		}
-		$blueprint = new \Automattic\WooCommerce\Admin\Features\Blueprint\Blueprint( $blueprint_schema );
-		$blueprint->process();
-		return new \WP_HTTP_Response( null, 200 );
+	public function process( $request ) {
+		return new \WP_HTTP_Response( 'This is working', 200 );
+		// $blueprint_schema = constant( 'WOOCOMMERCE_BLUEPRINT_PATH' );
+		// if ( ! $blueprint_schema ) {
+		// 	return new \WP_HTTP_Response( null, 404 );
+		// }
+		// $blueprint = new \Automattic\WooCommerce\Admin\Features\Blueprint\Blueprint( $blueprint_schema );
+		// $blueprint->process();
+		// return new \WP_HTTP_Response( null, 200 );
 	}
 }
