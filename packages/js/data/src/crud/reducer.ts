@@ -8,10 +8,10 @@ import { Reducer } from 'redux';
  */
 import { Actions } from './actions';
 import CRUD_ACTIONS from './crud-actions';
-import { getKey, getRequestIdentifier } from './utils';
+import { getRequestIdentifier, organizeItemsById } from './utils';
 import { getTotalCountResourceName } from '../utils';
-import { IdType, Item, ItemQuery } from './types';
 import { TYPES } from './action-types';
+import type { IdType, Item, ItemQuery } from './types';
 
 export type Data = Record< IdType, Item >;
 export type ResourceState = {
@@ -291,19 +291,11 @@ export const createReducer = (
 					};
 
 				case TYPES.GET_ITEMS_SUCCESS:
-					const ids: IdType[] = [];
-
-					const nextResources = payload.items.reduce<
-						Record< string, Item >
-					>( ( result, item ) => {
-						const key = getKey( item.id, payload.urlParameters );
-						ids.push( key );
-						result[ key ] = {
-							...( state.data[ key ] || {} ),
-							...item,
-						};
-						return result;
-					}, {} );
+					const { objItems, ids } = organizeItemsById(
+						payload.items,
+						payload.urlParameters,
+						itemData
+					);
 
 					const itemQuery = getRequestIdentifier(
 						CRUD_ACTIONS.GET_ITEMS,
@@ -318,7 +310,7 @@ export const createReducer = (
 						},
 						data: {
 							...state.data,
-							...nextResources,
+							...objItems,
 						},
 					};
 
