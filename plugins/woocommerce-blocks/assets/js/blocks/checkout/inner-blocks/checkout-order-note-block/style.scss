@@ -37,4 +37,12 @@
 
 .wc-block-components-form .wc-block-checkout__order-notes.wc-block-components-checkout-step {
 	padding-left: 0;
+	padding-bottom: 2.5rem;
+	margin-bottom: 2.5rem;
+	border-bottom: 1px solid $universal-border-light;
+
+	.is-medium &, .is-small &, .is-mobile & {
+		border-bottom: 0;
+		padding-bottom: 0;
+	}
 }
