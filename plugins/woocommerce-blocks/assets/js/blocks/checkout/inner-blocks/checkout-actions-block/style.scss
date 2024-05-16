@@ -1,4 +1,13 @@
 .wc-block-checkout__actions {
+
+	.is-small &,
+	.is-mobile & {
+		padding-top: 2.5rem;
+	}
+	.is-medium & {
+		padding-top: $gap-large;
+	}
+
 	&_row {
 		display: flex;
 		justify-content: space-between;
