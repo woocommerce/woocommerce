@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix warning when loading guest sessions from previous sessions. [#47514](https://github.com/woocommerce/woocommerce/pull/47514)
 * Fix - Prevent calling woocommerce.com on empty update-check and update-check-public payload. [#47507](https://github.com/woocommerce/woocommerce/pull/47507)
 
 
