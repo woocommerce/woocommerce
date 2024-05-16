@@ -32,6 +32,11 @@ if ( ! function_exists( 'get_plugins' ) ) {
 class PluginsHelper {
 
 	/**
+	 * Meta key for dismissing missing payment method notice.
+	 */
+	const DISMISS_MISSING_PAYMENT_MATHOD_NOTICE = 'woo_missing_payment_method_notice_dismiss';
+
+	/**
 	 * Initialize hooks.
 	 */
 	public static function init() {
@@ -39,6 +44,7 @@ class PluginsHelper {
 		add_action( 'woocommerce_plugins_install_and_activate_async_callback', array( __CLASS__, 'install_and_activate_plugins_async_callback' ), 10, 2 );
 		add_action( 'woocommerce_plugins_activate_callback', array( __CLASS__, 'activate_plugins' ), 10, 2 );
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_connect_notice_in_plugin_list' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_missing_payment_method_notice' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
 	}
 
@@ -598,6 +604,75 @@ class PluginsHelper {
 
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-connect-notice' );
 		wp_enqueue_script( 'woo-connect-notice' );
+	}
+
+	public static function maybe_show_missing_payment_method_notice(){
+
+		if ( ! WC_Helper::is_site_connected() ) {
+			return;
+		}
+
+		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
+			return;
+		}
+
+		$message = self::get_missing_payment_method_notice();
+
+		if ( !empty( $message ) ) {
+			echo '<div id="woo-subscription-missing-payment-method" class="woo-subscription-missing-payment-method woo-subscription-notices notice notice-error is-dismissible">
+	    		<p class="widefat">' . wp_kses_post( $message ) . '</p>
+	    	</div>';
+		}
+	}
+
+	/**
+	 * Retrieves the missing payment method notice.
+	 *
+	 * @return string The missing payment method notice message.
+	 */
+	public static function get_missing_payment_method_notice() {
+		if ( ! self::should_show_notice( self::DISMISS_MISSING_PAYMENT_MATHOD_NOTICE ) ) {
+			return '';
+		}
+
+		$notices = WC_Helper::get_notices();
+		$message = '';
+		if ( ! empty( $notices['missing_payment_method_notice'] ) ) {
+
+			$message = sprintf(
+			/* translators: %s: Add card page URL */
+				__( 'Your WooCommerce extension subscriptions are missing a payment method for renewal. <a href="%s">Add a payment method</a> to ensure you continue receiving updates and streamlined support.', 'woocommerce' ),
+				esc_url( 'https://woocommerce.com/my-account/add-payment-method/' )
+			);
+		}
+
+		return $message;
+	}
+
+	/**
+	 * Determine whether a specific notice should be shown to the current user.
+	 *
+	 * @param string $type The type of notice to check for.
+	 * @return bool True if the notice should be shown, false otherwise.
+	 */
+	public static function should_show_notice( $dismiss_notice_meta ) {
+		// Get the current user ID.
+		$user_id = get_current_user_id();
+
+		// Get the timestamp when the notice was dismissed.
+		$dismissed_timestamp = get_user_meta( $user_id, $dismiss_notice_meta, true );
+
+		// If the notice was dismissed within the last month, do not show it.
+		if ( !empty( $dismissed_timestamp ) && ( time() - $dismissed_timestamp ) < 30 * DAY_IN_SECONDS ) {
+			return false;
+		}
+
+		// If the notice was dismissed more than a month ago, delete the meta value and show the notice.
+		if ( !empty( $dismissed_timestamp ) ) {
+			delete_user_meta( $user_id, $dismiss_notice_meta );
+		}
+
+		return true;
 	}
 
 }
