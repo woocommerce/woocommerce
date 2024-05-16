@@ -21,8 +21,6 @@ import {
 	getDateFormatsForInterval,
 	getIntervalForQuery,
 	getChartTypeForQuery,
-	getPreviousDate,
-	isLeapYear,
 } from '@woocommerce/date';
 import { CurrencyContext } from '@woocommerce/currency';
 
@@ -34,7 +32,7 @@ import {
 	getChartMode,
 	getSelectedFilter,
 	createDateFormatter,
-	dataContainsLeapYear,
+	buildChartData,
 } from './utils';
 
 /**
@@ -98,101 +96,15 @@ export class ReportChart extends Component {
 			defaultDateRange
 		);
 
-		const primarydataContainsLeapYear = dataContainsLeapYear( primaryData );
-		const secondarydataContainsLeapYear =
-			dataContainsLeapYear( secondaryData );
-		const primaryDataIntervals = [ ...primaryData.data.intervals ];
-		const secondaryDataIntervals = [ ...secondaryData.data.intervals ];
-
-		const chartData = [];
-
-		for ( let index = 0; index < primaryDataIntervals.length; index++ ) {
-			const interval = primaryDataIntervals[ index ];
-
-			const secondaryDateMoment = getPreviousDate(
-				interval.date_start,
-				primary.after,
-				secondary.after,
-				query.compare,
-				currentInterval
-			);
-
-			const primaryDateFormatted = formatDate(
-				'Y-m-d\\TH:i:s',
-				interval.date_start
-			);
-			const primaryLabel = `${ primary.label } (${ primary.range })`;
-			const primaryLabelDate = interval.date_start;
-			const primaryValue = interval.subtotals[ selectedChart.key ] || 0;
-
-			const secondaryInterval = secondaryDataIntervals[ index ];
-			const secondaryLabel = `${ secondary.label } (${ secondary.range })`;
-			let secondaryLabelDate = secondaryDateMoment.format(
-				'YYYY-MM-DD HH:mm:ss'
-			);
-			let secondaryValue =
-				( secondaryInterval &&
-					secondaryInterval.subtotals[ selectedChart.key ] ) ||
-				0;
-
-			if ( currentInterval === 'day' ) {
-				if (
-					primarydataContainsLeapYear &&
-					! secondarydataContainsLeapYear &&
-					secondaryDataIntervals?.[ index ]
-				) {
-					// Only fix the data if the date is in 29th Feb and secondary data is in 1st March,
-					// which signifies incorrect comparison.
-					const primaryDate = new Date( interval.date_start );
-					const secondaryDate = new Date(
-						secondaryDataIntervals[ index ].date_start
-					);
-					if (
-						isLeapYear( primaryDate.getFullYear() ) &&
-						primaryDate.getMonth() === 1 &&
-						primaryDate.getDate() === 29 &&
-						secondaryDate.getMonth() === 2 &&
-						secondaryDate.getDate() === 1
-					) {
-						// This is going to be displayed as "Invalid date" label from D3.js, but desirable imo since
-						// 29th February is not a valid date for non-leap years.
-						secondaryLabelDate = '-';
-						secondaryValue = 0;
-
-						// Move the data up by 1 day for the missing leap day
-						// so everything else is shifted to the right correctly.
-						secondaryDataIntervals.splice(
-							index,
-							0,
-							secondaryDataIntervals[ index ]
-						);
-					}
-				} else if (
-					! primarydataContainsLeapYear &&
-					secondarydataContainsLeapYear
-				) {
-					// Todo: Do something about secondary data having leap year while first does not.
-					// Currently, there are issues to render chart where primary data does not have the date since
-					// the x-axis is based on primary data.
-				}
-			}
-
-			chartData.push( {
-				date: primaryDateFormatted,
-				primary: {
-					label: primaryLabel,
-					labelDate: primaryLabelDate,
-					value: primaryValue,
-				},
-				secondary: {
-					label: secondaryLabel,
-					labelDate: secondaryLabelDate,
-					value: secondaryValue,
-				},
-			} );
-		}
-
-		return chartData;
+		return buildChartData(
+			primaryData,
+			secondaryData,
+			primary,
+			secondary,
+			query.compare,
+			selectedChart.key,
+			currentInterval
+		);
 	}
 
 	getTimeChartTotals() {
