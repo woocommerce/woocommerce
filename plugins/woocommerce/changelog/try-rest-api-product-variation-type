@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+REST API: Add product variation type to response when getting variations.
