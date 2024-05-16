@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix warning when loading guest sessions from previous sessions.
