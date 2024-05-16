@@ -144,7 +144,7 @@ test.describe( 'Template customization', () => {
 					postType: testData.templateType,
 				} );
 				await editorUtils.enterEditMode();
-				await editorUtils.waitForSiteEditorFinishLoading();
+
 				await editorUtils.editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: userText },

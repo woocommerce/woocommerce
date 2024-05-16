@@ -279,17 +279,6 @@ export class EditorUtils {
 		return firstBlockIndex < secondBlockIndex;
 	}
 
-	async waitForSiteEditorFinishLoading() {
-		await this.page
-			.frameLocator( 'iframe[title="Editor canvas"i]' )
-			.locator( 'body > *' )
-			.first()
-			.waitFor();
-		await this.page
-			.locator( '.edit-site-canvas-loader' )
-			.waitFor( { state: 'hidden' } );
-	}
-
 	async setLayoutOption(
 		option:
 			| 'Align Top'
@@ -417,9 +406,6 @@ export class EditorUtils {
 			await this.admin.visitSiteEditor( {
 				path: `/${ templateType }/all`,
 			} );
-			await this.page.goto(
-				`/wp-admin/site-editor.php?path=/${ templateType }/all`
-			);
 			const templateLink = this.page.getByRole( 'link', {
 				name: templateName,
 				exact: true,
@@ -437,7 +423,6 @@ export class EditorUtils {
 		}
 
 		await this.enterEditMode();
-		await this.waitForSiteEditorFinishLoading();
 
 		// Verify we are editing the correct template and it has the correct title.
 		const templateTypeName =
