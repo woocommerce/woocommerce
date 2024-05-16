@@ -202,7 +202,7 @@ class WC_Admin_Addons {
 			exit();
 		}
 
-		if ( 'search' === $section ) {
+		if ( 'search' === $section || ! empty( $search ) ) {
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&term=' . $search . '&tab=search&path=%2Fextensions' ) );
 			exit();
 		}
