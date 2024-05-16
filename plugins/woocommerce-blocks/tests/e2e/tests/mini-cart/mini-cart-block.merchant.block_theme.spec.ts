@@ -34,9 +34,8 @@ test.describe( 'Merchant → Mini Cart', () => {
 
 			await editor.insertBlock( { name: blockData.slug } );
 			await expect(
-				await editorUtils.getBlockByName( blockData.slug )
+				editor.canvas.getByLabel( 'Block: Mini-Cart' )
 			).toBeVisible();
-			await editor.saveSiteEditorEntities();
 		} );
 
 		test( 'can only be inserted once', async ( { editorUtils, admin } ) => {

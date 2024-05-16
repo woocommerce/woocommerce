@@ -198,9 +198,8 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
-
-		const block = await editorUtils.getBlockByName(
-			'woocommerce/checkout-shipping-method-block'
+		const block = editor.canvas.locator(
+			'[data-type="woocommerce/checkout-shipping-method-block"]'
 		);
 		await editor.selectBlocks( block );
 

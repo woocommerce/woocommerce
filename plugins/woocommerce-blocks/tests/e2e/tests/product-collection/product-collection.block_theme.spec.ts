@@ -492,7 +492,7 @@ test.describe( 'Product Collection', () => {
 				).toBeVisible();
 
 				// "On sale control" should retain its state when inherit query from template is enabled again
-				pageObject.setShowOnlyProductsOnSale( {
+				await pageObject.setShowOnlyProductsOnSale( {
 					onSale: true,
 					isLocatorsRefreshNeeded: false,
 				} );
@@ -1080,6 +1080,53 @@ test.describe( 'Product Collection', () => {
 			expect( collectionName ).toBe(
 				'woocommerce/product-collection/on-sale'
 			);
+		} );
+	} );
+
+	test.describe( 'Preview mode in generic archive templates', () => {
+		const genericArchiveTemplates = [
+			{
+				name: 'Products by Tag',
+				path: 'woocommerce/woocommerce//taxonomy-product_tag',
+			},
+			{
+				name: 'Products by Category',
+				path: 'woocommerce/woocommerce//taxonomy-product_cat',
+			},
+			{
+				name: 'Products by Attribute',
+				path: 'woocommerce/woocommerce//taxonomy-product_attribute',
+			},
+		];
+
+		genericArchiveTemplates.forEach( ( { name, path } ) => {
+			test( `${ name } template`, async ( { page, pageObject } ) => {
+				await pageObject.replaceProductsWithProductCollectionInTemplate(
+					path
+				);
+
+				const editorFrame = page.frameLocator(
+					'iframe[name="editor-canvas"]'
+				);
+				const previewButtonLocator = editorFrame.locator(
+					'button[data-test-id="product-collection-preview-button"]'
+				);
+
+				// The preview button should be visible
+				await expect( previewButtonLocator ).toBeVisible();
+
+				// The preview button should be hidden when the block is not selected
+				await page.click( 'body' );
+				await expect( previewButtonLocator ).toBeHidden();
+
+				// Preview button should be visible when any of inner block is selected
+				await editorFrame
+					.getByLabel( 'Block: Product Template' )
+					.getByLabel( 'Block: Product Image' )
+					.first()
+					.click();
+				await expect( previewButtonLocator ).toBeVisible();
+			} );
 		} );
 	} );
 } );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Correct the close days for the flaky test stalebot workflow
