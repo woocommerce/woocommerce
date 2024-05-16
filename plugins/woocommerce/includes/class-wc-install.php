@@ -269,6 +269,11 @@ class WC_Install {
 	const STORE_ID_OPTION = 'woocommerce_store_id';
 
 	/**
+	 * Option key, used to record if the Legacy REST API was installed by us.
+	 */
+	private const INSTALLED_LEGACY_REST_API_PLUGIN = 'woocommerce_installed_legacy_rest_api';
+
+	/**
 	 * Hook in tabs.
 	 */
 	public static function init() {
@@ -1187,16 +1192,24 @@ class WC_Install {
 			return;
 		}
 
+		// Did we previously install this plugin?
+		$legacy_api_plugin          = 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php';
+		$autoinstalled              = (array) get_site_option( 'woocommerce_autoinstalled_plugins', array() );
+		$previously_installed_by_us = isset( $autoinstalled[ $legacy_api_plugin ] );
+
 		/**
 		 * Filter to skip the automatic installation of the WooCommerce Legacy REST API plugin
 		 * from the WordPress.org plugins directory.
+		 *
+		 * By default, this is true (skip installation) if we have a record of previously installing the legacy plugin,
+		 * and false (do not skip) if we have no record of previously installing the plugin.
 		 *
 		 * @since 8.8.0
 		 *
 		 * @param bool $skip_auto_install False, defaulting to "don't skip the plugin automatic installation".
 		 * @returns bool True to skip the plugin automatic installation, false to install the plugin if necessary.
 		 */
-		if ( apply_filters( 'woocommerce_skip_legacy_rest_api_plugin_auto_install', false ) ) {
+		if ( apply_filters( 'woocommerce_skip_legacy_rest_api_plugin_auto_install', $previously_installed_by_us ) ) {
 			return;
 		}
 
@@ -1205,19 +1218,17 @@ class WC_Install {
 			return;
 		}
 
-		$plugin_name = 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php';
-
 		wp_clean_plugins_cache();
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
-		if ( isset( get_plugins()[ $plugin_name ] ) ) {
-			if ( ! ( get_site_option( 'woocommerce_autoinstalled_plugins', array() )[ $plugin_name ] ?? null ) ) {
+		if ( isset( get_plugins()[ $legacy_api_plugin ] ) ) {
+			if ( ! $previously_installed_by_us ) {
 				// The plugin was installed manually so let's not interfere.
 				return;
 			}
 
-			if ( in_array( $plugin_name, wp_get_active_and_valid_plugins(), true ) ) {
+			if ( in_array( $legacy_api_plugin, wp_get_active_and_valid_plugins(), true ) ) {
 				return;
 			}
 
@@ -1248,7 +1259,7 @@ class WC_Install {
 		$site_logs_url                = get_admin_url( null, '/admin.php?page=wc-status&tab=logs' );
 
 		if ( $install_ok ) {
-			$activation_result = activate_plugin( $plugin_name );
+			$activation_result = activate_plugin( $legacy_api_plugin );
 			if ( $activation_result instanceof \WP_Error ) {
 				$message = sprintf(
 				/* translators: 1 = URL of Legacy REST API plugin page, 2 = URL of Legacy API settings in current site, 3 = URL of webhooks settings in current site, 4 = URL of logs page in current site, 5 = URL of plugins page in current site, 6 = URL of blog post about the Legacy REST API removal */
