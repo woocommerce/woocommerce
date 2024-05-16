@@ -36,6 +36,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	disabledAttributeMessage,
 	isLoadingAttributes,
 	attributes,
+	onNewAttributeAdd,
 	onAttributeSelect,
 
 	termLabel = undefined,
@@ -211,6 +212,9 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					current={ attribute }
 					items={ filteredAttributes }
 					isLoading={ isLoadingAttributes }
+					onAddNew={ ( newValue ) =>
+						onNewAttributeAdd?.( newValue, index )
+					}
 					onChange={ ( nextAttribute ) => {
 						if ( nextAttribute.id === attributeId ) {
 							return;

@@ -70,6 +70,7 @@ export type AttributeTableRowProps = {
 	clearButtonDisabled?: boolean;
 	removeLabel: string;
 
+	onNewAttributeAdd?: ( value: string, index: number ) => void;
 	onAttributeSelect: (
 		attribute: AttributesComboboxControlItem,
 		index: number
