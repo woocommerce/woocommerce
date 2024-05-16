@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Tweak useProductTemplate's logic and add new filter to allow changing the product template

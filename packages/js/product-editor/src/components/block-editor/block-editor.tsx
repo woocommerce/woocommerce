@@ -175,6 +175,13 @@ export function BlockEditor( {
 		{ enabled: productId !== -1 }
 	);
 
+	const { record: parent } = useEntityRecord< Product >(
+		'postType',
+		'product',
+		product.parent_id,
+		{ enabled: Boolean( product.parent_id ) }
+	);
+
 	const productTemplateId = product?.meta_data?.find(
 		( metaEntry: { key: string } ) =>
 			metaEntry.key === '_product_template_id'
@@ -182,7 +189,8 @@ export function BlockEditor( {
 
 	const { productTemplate } = useProductTemplate(
 		productTemplateId,
-		product
+		product,
+		parent
 	);
 
 	const { layoutTemplate } = useLayoutTemplate(
@@ -198,12 +206,7 @@ export function BlockEditor( {
 
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
-	const isEditorLoading =
-		! settings ||
-		! layoutTemplate ||
-		// variations don't have a product template
-		( postType !== 'product_variation' && ! productTemplate ) ||
-		productId === -1;
+	const isEditorLoading = ! settings || ! layoutTemplate || productId === -1;
 
 	useLayoutEffect( () => {
 		if ( isEditorLoading ) {

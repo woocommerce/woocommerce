@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Product } from '@woocommerce/data';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -59,18 +60,21 @@ function findBetterMatchTemplate( matchingTemplates: ProductTemplate[] ) {
 
 export const useProductTemplate = (
 	productTemplateId: string | undefined,
-	product: Partial< Product > | undefined | null
+	product: Partial< Product >,
+	parent: Partial< Product >
 ) => {
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
 
-	const productType = product?.type;
+	const productType = product?.type || 'simple';
 
-	const productTemplateIdToFind =
-		productTemplateId || 'standard-product-template';
-
-	const productTypeToFind =
-		productType === 'variable' ? 'simple' : productType;
+	// product has not yet loaded or is not a variation with a parent loaded.
+	if (
+		Object.keys( product ).length === 0 ||
+		( productType === 'variation' && ! parent )
+	) {
+		return { productTemplate: undefined, isResolving: true };
+	}
 
 	let matchingProductTemplate = productTemplates.find(
 		( productTemplate ) =>
@@ -78,7 +82,7 @@ export const useProductTemplate = (
 			productTemplate.supportedTypes.includes( productType )
 	);
 
-	if ( ! matchingProductTemplate && product ) {
+	if ( ! matchingProductTemplate ) {
 		// Look for matching templates based on product data described on each template.
 		const matchingTemplates = productTemplates.filter(
 			( productTemplate ) =>
@@ -87,6 +91,16 @@ export const useProductTemplate = (
 
 		// If there are multiple matching templates, we should use the one with the most matching fields.
 		matchingProductTemplate = findBetterMatchTemplate( matchingTemplates );
+
+		if ( product.type === 'variation' ) {
+			matchingProductTemplate = applyFilters(
+				'woocommerce.product.variations.getMatchingTemplate',
+				matchingProductTemplate,
+				productTemplates,
+				product,
+				parent
+			) as ProductTemplate;
+		}
 	}
 
 	// When we switch to getting the product template from the API,
