@@ -21,7 +21,7 @@ export default function SubscriptionsExpiredNotice(): JSX.Element | null {
 	const handleClose = () => {
 		const data = { notice_id: 'woo-subscription-expired-notice' };
 		apiFetch( {
-			path: `/wc-admin/woo_subscription_notice_dissmiss/`,
+			path: `/wc-admin/notice/dismiss`,
 			method: 'POST',
 			data,
 		} );

@@ -45,7 +45,7 @@ class Notice extends \WC_REST_Data_Controller {
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'dissmiss_notice' ),
 					'permission_callback' => array( $this, 'get_permission' ),
-				)
+				),
 			)
 		);
 	}
@@ -56,7 +56,7 @@ class Notice extends \WC_REST_Data_Controller {
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
-	public function dissmiss_notice( $request ){
+	public function dissmiss_notice( $request ) {
 		$notice_id = isset( $request['notice_id'] ) ? sanitize_text_field( wp_unslash( $request['notice_id'] ) ) : '';
 		$dismissed = false;
 		switch ( $notice_id ) {

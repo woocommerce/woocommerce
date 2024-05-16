@@ -66,7 +66,6 @@ class PluginsHelper {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice_in_plugins' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_subscription_notice' ) );
-		add_action( 'rest_api_init', array( __CLASS__, 'woo_subscriptions_notice_dismiss_api' ) );
 	}
 
 	/**
@@ -855,58 +854,5 @@ class PluginsHelper {
 
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-subscriptions-notice' );
 		wp_enqueue_script( 'woo-subscriptions-notice' );
-	}
-
-	/**
-	 * Register the routes for  dismissal subscriptions notice.
-	 */
-	public static function woo_subscriptions_notice_dismiss_api() {
-		register_rest_route(
-			'wc-admin',
-			'/woo_subscription_notice_dissmiss',
-			array(
-				array(
-					'methods'             => 'POST',
-					'callback'            => array( static::class, 'dismiss_woo_subscription_notice' ),
-					'permission_callback' => array( static::class, 'get_permission' ),
-				),
-			)
-		);
-	}
-
-	/**
-	 * Save notice dismiss information in user meta.
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 * @return mixed
-	 */
-	public static function dismiss_woo_subscription_notice( $request ) {
-		$notice_id = isset( $request['notice_id'] ) ? sanitize_text_field( wp_unslash( $request['notice_id'] ) ) : '';
-		$dismissed = false;
-		switch ( $notice_id ) {
-			case 'woo-subscription-expired-notice':
-				update_user_meta( get_current_user_id(), self::DISMISS_EXPIRED_SUBS_NOTICE, time() );
-				$dismissed = true;
-				break;
-			case 'woo-subscription-expiring-notice':
-				update_user_meta( get_current_user_id(), self::DISMISS_EXPIRING_SUBS_NOTICE, time() );
-				$dismissed = true;
-				break;
-		}
-
-		return rest_ensure_response(
-			array(
-				'success' => $dismissed,
-			)
-		);
-	}
-
-	/**
-	 * Check user has the necessary permissions to perform this action.
-	 *
-	 * @return bool
-	 */
-	public static function get_permission(): bool {
-		return current_user_can( 'manage_woocommerce' );
 	}
 }
