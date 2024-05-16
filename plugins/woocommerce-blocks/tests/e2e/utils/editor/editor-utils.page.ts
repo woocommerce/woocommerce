@@ -211,7 +211,7 @@ export class EditorUtils {
 	async openGlobalBlockInserter() {
 		if ( ! ( await this.isGlobalInserterOpen() ) ) {
 			await this.toggleGlobalBlockInserter();
-			await this.page.waitForSelector( '.block-editor-inserter__menu' );
+			await this.page.locator( '.block-editor-inserter__menu' ).waitFor();
 		}
 	}
 
