@@ -5,4 +5,21 @@
 	&-content {
 		height: 100%;
 	}
+
+	/*
+	 * styling copied from Gutenberg;
+	 * ideally we would use the entire Gutenberg InserterSidebar component
+	 * once it is exported from the editor package
+	 */
+	.block-editor-inserter-sidebar__header {
+		border-bottom: $border-width solid $gray-300;
+		padding-right: $grid-unit-10;
+		display: flex;
+		justify-content: space-between;
+
+		.block-editor-inserter-sidebar__close-button {
+			order: 1;
+			align-self: center;
+		}
+	}
 }
