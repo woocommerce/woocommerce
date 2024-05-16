@@ -101,12 +101,13 @@ if (file_exists($plugin_path)) {
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce Legacy REST API plugin running on this site.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
-				$version = is_null( wc()->api ) ? null : get_plugin_data( WP_PLUGIN_DIR . '/woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' )['Version'] ?? '';
-
-				if ( ! is_null( $version ) ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code></mark> ';
-				} else {
+				if( is_null( wc()->api ) ) {
 					echo '<mark class="info-icon"><span class="dashicons dashicons-info"></span> ' . esc_html__( 'The Legacy REST API plugin is not installed on this site.', 'woocommerce' ) . '</mark>';
+				}
+				else {
+					$plugin_path =  wc_get_container()->get(\Automattic\WooCommerce\Utilities\PluginUtil::class)->get_wp_plugin_id('woocommerce-legacy-rest-api');
+					$version = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin_path )['Version'] ?? '';
+					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code></mark> ';
 				}
 				?>
 			</td>
