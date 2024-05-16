@@ -66,6 +66,7 @@ export default function InserterSidebar() {
 					showInserterHelpPanel
 					shouldFocusBlock={ isMobileViewport }
 					rootClientId={ rootClientId }
+					onClose={ closeInserter }
 				/>
 			</div>
 		</div>
