@@ -33,8 +33,12 @@ function recordMarketplaceView( props: MarketplaceViewProps ) {
 		...( category && { category } ),
 	};
 
-	// User sees the default extensions or themes view
-	if ( view && [ 'extensions', 'themes' ].includes( view ) && ! category ) {
+	// User sees the default extensions, themes or business services view
+	if (
+		view &&
+		[ 'extensions', 'themes', 'business-services' ].includes( view ) &&
+		! category
+	) {
 		eventProps.category = '_all';
 	}
 

@@ -592,6 +592,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/queue/class-wc-action-queue.php';
 		include_once WC_ABSPATH . 'includes/queue/class-wc-queue.php';
 		include_once WC_ABSPATH . 'includes/admin/marketplace-suggestions/class-wc-marketplace-updater.php';
+		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-marketplace-promotions.php';
 		include_once WC_ABSPATH . 'includes/blocks/class-wc-blocks-utils.php';
 
 		/**
@@ -655,10 +656,6 @@ final class WooCommerce {
 
 		if ( $this->is_request( 'admin' ) ) {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin.php';
-		}
-
-		if ( $this->is_request( 'admin' ) || $this->is_request( 'cron' ) ) {
-			include_once WC_ABSPATH . 'includes/admin/class-wc-admin-marketplace-promotions.php';
 		}
 
 		// We load frontend includes in the post editor, because they may be invoked via pre-loading of blocks.

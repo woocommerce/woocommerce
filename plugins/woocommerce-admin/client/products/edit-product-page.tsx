@@ -134,14 +134,12 @@ const EditProductPage: React.FC = () => {
 						</div>
 					</ProductFormLayout>
 				) }
-			{ window.wcAdminFeatures[ 'product-variation-management' ] &&
-				productVariation &&
-				product && (
-					<ProductVariationForm
-						product={ product }
-						productVariation={ productVariation }
-					/>
-				) }
+			{ productVariation && product && (
+				<ProductVariationForm
+					product={ product }
+					productVariation={ productVariation }
+				/>
+			) }
 			{ ! isProductVariation &&
 				product &&
 				( product.status !== 'trash' || wasDeletedUsingAction ) && (

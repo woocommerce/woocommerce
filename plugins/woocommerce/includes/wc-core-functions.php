@@ -824,7 +824,7 @@ function get_woocommerce_currency_symbols() {
 			'XAF' => 'CFA',
 			'XCD' => '&#36;',
 			'XOF' => 'CFA',
-			'XPF' => 'Fr',
+			'XPF' => 'XPF',
 			'YER' => '&#xfdfc;',
 			'ZAR' => '&#82;',
 			'ZMW' => 'ZK',

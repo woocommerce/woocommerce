@@ -211,7 +211,7 @@ export class EditorUtils {
 	async openGlobalBlockInserter() {
 		if ( ! ( await this.isGlobalInserterOpen() ) ) {
 			await this.toggleGlobalBlockInserter();
-			await this.page.waitForSelector( '.block-editor-inserter__menu' );
+			await this.page.locator( '.block-editor-inserter__menu' ).waitFor();
 		}
 	}
 
@@ -223,7 +223,14 @@ export class EditorUtils {
 			} )
 			.dispatchEvent( 'click' );
 
-		await this.page.locator( '.edit-site-layout__sidebar' ).waitFor( {
+		const sidebar = this.page.locator( '.edit-site-layout__sidebar' );
+		const canvasLoader = this.page.locator( '.edit-site-canvas-loader' );
+
+		await sidebar.waitFor( {
+			state: 'hidden',
+		} );
+
+		await canvasLoader.waitFor( {
 			state: 'hidden',
 		} );
 	}

@@ -39,7 +39,7 @@
 
 <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 <div class="wp-block-group"><!-- wp:heading {"textAlign":"center","level":1,"align":"wide","className":"woocommerce-coming-soon-banner"} -->
-<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner">Pardon our dust! We're working on something amazing -- check back soon!</h1>
+<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner">Pardon our dust! We're working on something amazing — check back soon!</h1>
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 
@@ -82,6 +82,7 @@ body.custom-background {
 	margin: 0;
 	background-color: #bea0f2;
 	font-family: 'Inter', sans-serif;
+	min-width: 320px;
 	--wp--preset--color--contrast: #111111;
 	--wp--style--global--wide-size: 1280px;
 }
@@ -144,6 +145,11 @@ body .is-layout-constrained > .alignwide {
 	flex-direction: column;
 	justify-content: space-between;
 }
+@media (max-width: 660px) {
+	.woocommerce-coming-soon-banner-container {
+		padding-inline: 0;
+	}
+}
 .woocommerce-coming-soon-banner-container > .wp-block-group__inner-container {
 	height: 100%;
 	display: flex;
@@ -181,7 +187,7 @@ body .is-layout-constrained > .woocommerce-coming-soon-banner.alignwide {
 	height: 40px;
 }
 .woocommerce-coming-soon-banner {
-	font-size: 48px;
+	font-size: clamp(27px, 1.74rem + ((1vw - 3px) * 2), 48px);
 	font-weight: 400;
 	line-height: 58px;
 	font-family: 'Cardo', serif;
@@ -191,5 +197,6 @@ body .is-layout-constrained > .woocommerce-coming-soon-banner.alignwide {
 	max-width: 820px;
 	color: var(--wp--preset--color--contrast);
 	margin: 0 auto;
+	text-wrap: balance;
 }</style></div>
 <!-- /wp:woocommerce/coming-soon -->

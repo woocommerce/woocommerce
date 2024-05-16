@@ -368,7 +368,7 @@
 	},
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.1.0"
 	},
 	"browserslist": [
 		"> 0.1%",
@@ -379,7 +379,8 @@
 		"@woocommerce/admin-library": "workspace:*",
 		"@woocommerce/block-library": "workspace:*",
 		"@woocommerce/classic-assets": "workspace:*",
-		"@wordpress/browserslist-config": "wp-6.0"
+		"@wordpress/browserslist-config": "wp-6.0",
+		"buildkite-test-collector": "^1.7.1"
 	},
 	"nodemonConfig": {
 		"delay": 2500,
@@ -417,7 +418,6 @@
 				"node_modules/@woocommerce/e2e-core-tests/CHANGELOG.md",
 				"node_modules/@woocommerce/api/dist/",
 				"node_modules/@woocommerce/admin-e2e-tests/build",
-				"node_modules/@woocommerce/classic-assets/build",
 				"node_modules/@woocommerce/block-library/build",
 				"node_modules/@woocommerce/block-library/blocks.ini",
 				"node_modules/@woocommerce/admin-library/build",
