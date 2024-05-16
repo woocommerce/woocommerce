@@ -228,7 +228,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		const attributeFilterControl = await editorUtils.getBlockByName(
 			blockData.slug
 		);
-
+		await expect( attributeFilterControl ).toBeVisible();
 		await editor.selectBlocks( attributeFilterControl );
 		await editor.openDocumentSettingsSidebar();
 

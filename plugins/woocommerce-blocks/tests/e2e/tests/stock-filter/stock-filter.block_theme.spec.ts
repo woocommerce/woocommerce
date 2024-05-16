@@ -224,6 +224,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		const stockFilterControls = await editorUtils.getBlockByName(
 			blockData.slug
 		);
+		await expect( stockFilterControls ).toBeVisible();
 		await editor.selectBlocks( stockFilterControls );
 		await editor.openDocumentSettingsSidebar();
 		await page.getByText( "Show 'Apply filters' button" ).click();

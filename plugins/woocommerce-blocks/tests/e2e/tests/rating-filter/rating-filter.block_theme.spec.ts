@@ -212,6 +212,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		const ratingFilterControls = await editorUtils.getBlockByName(
 			'woocommerce/rating-filter'
 		);
+		await expect( ratingFilterControls ).toBeVisible();
 		await editor.selectBlocks( ratingFilterControls );
 		await editor.openDocumentSettingsSidebar();
 		await page.getByText( "Show 'Apply filters' button" ).click();
