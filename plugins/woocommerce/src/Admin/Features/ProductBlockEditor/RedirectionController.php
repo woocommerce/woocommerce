@@ -63,7 +63,6 @@ class RedirectionController {
 			return false;
 		}
 
-		$digital_product     = $product->is_downloadable() || $product->is_virtual();
 		$product_template_id = $product->get_meta( '_product_template_id' );
 
 		foreach ( $this->product_templates as $product_template ) {
@@ -71,13 +70,10 @@ class RedirectionController {
 				continue;
 			}
 
-			$product_data      = $product_template->get_product_data();
-			$product_data_type = $product_data['type'];
-			// Treat a variable product as a simple product since there is not a product template
-			// for variable products.
-			$product_type = $product->get_type() === 'variable' ? 'simple' : $product->get_type();
+			$product_supported_types = $product_template->get_supported_types();
+			$product_type            = $product->get_type();
 
-			if ( isset( $product_data_type ) && $product_data_type !== $product_type ) {
+			if ( isset( $product_supported_types ) && ! in_array( $product_type, $product_supported_types, true ) ) {
 				continue;
 			}
 
@@ -85,7 +81,7 @@ class RedirectionController {
 				return true;
 			}
 
-			if ( isset( $product_data_type ) ) {
+			if ( isset( $product_supported_types ) ) {
 				return true;
 			}
 		}

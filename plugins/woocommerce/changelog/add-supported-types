@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add 'supportedTypes' array in ProductTemplate to support having multiple product types for a single template

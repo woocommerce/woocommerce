@@ -31,7 +31,7 @@ class ProductTemplate {
 	 *
 	 * @var array
 	 */
-	private $product_data;
+	private $product_data = array();
 
 	/**
 	 * The template order.
@@ -69,17 +69,29 @@ class ProductTemplate {
 	private $is_selectable_by_user = true;
 
 	/**
+	 * The supported product types.
+	 *
+	 * @var array
+	 */
+
+	private $supported_types = array();
+
+	/**
 	 * ProductTemplate constructor
 	 *
 	 * @param array $data The data.
 	 */
 	public function __construct( array $data ) {
-		$this->id           = $data['id'];
-		$this->title        = $data['title'];
-		$this->product_data = $data['product_data'];
+		$this->id              = $data['id'];
+		$this->title           = $data['title'];
+		$this->supported_types = $data['supported_types'];
 
 		if ( isset( $data['order'] ) ) {
 			$this->order = $data['order'];
+		}
+
+		if ( isset( $data['product_data'] ) ) {
+			$this->product_data = $data['product_data'];
 		}
 
 		if ( isset( $data['layout_template_id'] ) ) {
@@ -208,6 +220,14 @@ class ProductTemplate {
 	public function set_order( int $order ) {
 		$this->order = $order;
 	}
+	/**
+	 * Get the supported types.
+	 *
+	 * @return string The supported types.
+	 */
+	public function get_supported_types() {
+		return $this->supported_types;
+	}
 
 	/**
 	 * Get the product template as JSON like.
@@ -224,6 +244,7 @@ class ProductTemplate {
 			'layoutTemplateId'   => $this->get_layout_template_id(),
 			'productData'        => $this->get_product_data(),
 			'isSelectableByUser' => $this->get_is_selectable_by_user(),
+			'supportedTypes'     => $this->get_supported_types(),
 		);
 	}
 }

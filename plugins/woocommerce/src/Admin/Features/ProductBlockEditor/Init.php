@@ -245,9 +245,7 @@ class Init {
 				'order'              => 10,
 				'icon'               => 'shipping',
 				'layout_template_id' => 'simple-product',
-				'product_data'       => array(
-					'type' => 'simple',
-				),
+				'supported_types'    => array( 'simple', 'variable' ),
 			)
 		);
 		$templates[] = new ProductTemplate(
@@ -258,9 +256,7 @@ class Init {
 				'order'              => 20,
 				'icon'               => 'group',
 				'layout_template_id' => 'simple-product',
-				'product_data'       => array(
-					'type' => 'grouped',
-				),
+				'supported_types'    => array( 'grouped' ),
 			)
 		);
 		$templates[] = new ProductTemplate(
@@ -271,9 +267,7 @@ class Init {
 				'order'              => 30,
 				'icon'               => 'link',
 				'layout_template_id' => 'simple-product',
-				'product_data'       => array(
-					'type' => 'external',
-				),
+				'supported_types'    => array( 'external' ),
 			)
 		);
 
@@ -322,11 +316,9 @@ class Init {
 
 			$templates[] = new ProductTemplate(
 				array(
-					'id'           => $product_type . '-product-template',
-					'title'        => $title,
-					'product_data' => array(
-						'type' => $product_type,
-					),
+					'id'              => $product_type . '-product-template',
+					'title'           => $title,
+					'supported_types' => array( $product_type ),
 				)
 			);
 		}
