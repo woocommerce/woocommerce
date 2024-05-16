@@ -122,13 +122,13 @@ export function HeaderToolbar( {
 		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.3;
 
 	return (
-		<div className="woocommerce-iframe-editor__header-toolbar">
-			<div className="woocommerce-iframe-editor__header-toolbar-left">
+		<div className="woocommerce-iframe-editor__header">
+			<div className="woocommerce-iframe-editor__header-left">
 				<div className="woocommerce-iframe-editor-document-tools">
 					<ToolbarItem
 						ref={ inserterButton }
 						as={ Button }
-						className="woocommerce-iframe-editor__header-toolbar-inserter-toggle"
+						className="woocommerce-iframe-editor__header-inserter-toggle"
 						variant="primary"
 						isPressed={ isInserterOpened }
 						onMouseDown={ (
@@ -196,7 +196,7 @@ export function HeaderToolbar( {
 					</>
 				) }
 			</div>
-			<div className="woocommerce-iframe-editor__header-toolbar-right">
+			<div className="woocommerce-iframe-editor__header-right">
 				<ToolbarItem
 					as={ Button }
 					variant="tertiary"

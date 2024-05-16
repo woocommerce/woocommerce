@@ -1,4 +1,4 @@
-.woocommerce-iframe-editor__header-toolbar {
+.woocommerce-iframe-editor__header {
 	height: 60px;
 	border: 0;
 	border-bottom: 1px solid $gray-400;
@@ -6,7 +6,7 @@
 	align-items: center;
 	justify-content: space-between;
 
-	.woocommerce-iframe-editor__header-toolbar-inserter-toggle.components-button.has-icon {
+	.woocommerce-iframe-editor__header-inserter-toggle.components-button.has-icon {
 		height: 32px;
 		margin-right: 8px;
 		min-width: 32px;
