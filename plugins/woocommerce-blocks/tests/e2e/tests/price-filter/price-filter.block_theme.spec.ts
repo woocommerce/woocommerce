@@ -339,6 +339,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		const priceFilterControls = await editorUtils.getBlockByName(
 			blockData.slug
 		);
+		await expect( priceFilterControls ).toBeVisible();
 		await editor.selectBlocks( priceFilterControls );
 		await editor.openDocumentSettingsSidebar();
 		await page.getByText( "Show 'Apply filters' button" ).click();
