@@ -48,7 +48,7 @@ jobs:
                       child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
 
     project-lint-jobs:
-        name: 'Lint - ${{ matrix.projectName }}'
+        name: "Lint - ${{ matrix.projectName }} ${{ matrix.optional && ' (optional)' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.lint-jobs != '[]' }}
@@ -71,7 +71,7 @@ jobs:
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
     project-default-test-jobs:
-        name: 'Test - ${{ matrix.projectName }} - ${{ matrix.name }}'
+        name: "Test - ${{ matrix.projectName }} - ${{ matrix.name }} ${{ matrix.optional && ' (optional)' || '' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.default-test-jobs != '[]' }}
@@ -97,7 +97,7 @@ jobs:
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
     project-e2e-test-jobs:
-        name: 'E2E - ${{ matrix.name }}'
+        name: "E2E - ${{ matrix.name }} ${{ matrix.optional && ' (optional)' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.e2e-test-jobs != '[]' }}
@@ -153,7 +153,7 @@ jobs:
                   compression-level: 9
 
     project-api-test-jobs:
-        name: 'API - ${{ matrix.name }}'
+        name: "API - ${{ matrix.name }} ${{ matrix.optional && ' (optional)' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.api-test-jobs != '[]' }}
@@ -190,7 +190,7 @@ jobs:
                   compression-level: 9
 
     project-performance-test-jobs:
-        name: 'Performance - ${{ matrix.name }}'
+        name: "Performance - ${{ matrix.name }} ${{ matrix.optional && ' (optional)' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.performance-test-jobs != '[]' }}
@@ -244,37 +244,27 @@ jobs:
                 'project-default-test-jobs',
                 'project-e2e-test-jobs',
                 'project-api-test-jobs',
+                'project-performance-test-jobs'
             ]
         if: ${{ always() }}
         steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+              
             - name: 'Evaluation'
+              env:
+                REPOSITORY: ${{ github.repository }}
+                RUN_ID: ${{ github.run_id }}
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
+                  # Check if project-jobs was successful. Fail for any other status, including skipped. 
                   result="${{ needs.project-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "An error occurred generating the CI jobs."
+                  if [[ $result != "success" ]]; then
+                    echo "Generating CI jobs was not successful."
                     exit 1
                   fi
-                  result="${{ needs.project-lint-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "One or more lint jobs have failed."
-                    exit 1
-                  fi
-                  result="${{ needs.project-default-test-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "One or more test jobs have failed."
-                    exit 1
-                  fi
-                  result="${{ needs.project-e2e-test-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "One or more e2e test jobs have failed."
-                    exit 1
-                  fi
-                  result="${{ needs.project-api-test-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "One or more api test jobs have failed."
-                    exit 1
-                  fi
-                  echo "All jobs have completed successfully."
+                  
+                  node .github/workflows/scripts/evaluate-jobs-conclusions.js
 
     e2e-test-reports:
         name: 'Report e2e tests results'
