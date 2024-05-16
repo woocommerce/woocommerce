@@ -439,6 +439,9 @@ class WC_Helper_Updater {
 	 * @return array Update data for each requested product.
 	 */
 	private static function _update_check( $payload ) {
+		if ( empty( $payload ) ) {
+			return array();
+		}
 		ksort( $payload );
 		$hash = md5( wp_json_encode( $payload ) );
 
