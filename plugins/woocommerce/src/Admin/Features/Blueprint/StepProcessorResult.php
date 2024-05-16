@@ -8,7 +8,7 @@ use InvalidArgumentException;
  * A class returned by StepProcessor classes containing result of the process and messages.
  */
 class StepProcessorResult {
-	const MESSAGE_TYPES = array( 'error', 'info' );
+	const MESSAGE_TYPES = array( 'error', 'info', 'debug' );
 
 	/**
 	 * Messages
@@ -24,13 +24,20 @@ class StepProcessorResult {
 	 */
 	private bool $success;
 
+	private string $step_name;
+
 	/**
 	 * Construct.
 	 *
 	 * @param bool $success Indicate whether the process was success or not.
 	 */
-	public function __construct( bool $success ) {
+	public function __construct( bool $success, string $step_name ) {
 		$this->success = $success;
+		$this->step_name = $step_name;
+	}
+
+	public function set_step_name($step_name) {
+	    $this->step_name = $step_name;
 	}
 
 	/**
@@ -38,8 +45,8 @@ class StepProcessorResult {
 	 *
 	 * @return StepProcessorResult
 	 */
-	public static function success(): self {
-		return ( new self( true ) );
+	public static function success(string $stp_name): self {
+		return ( new self( true, $stp_name ) );
 	}
 
 
@@ -71,6 +78,18 @@ class StepProcessorResult {
 	public function add_error( string $message ) {
 		$this->add_message( $message );
 	}
+
+	/**
+	 * Add a new debug message.
+	 *
+	 * @param string $message message.
+	 *
+	 * @return void
+	 */
+	public function add_debug( string $message ) {
+		$this->add_message( $message, 'debug' );
+	}
+
 
 	/**
 	 * Add a new info message.
@@ -110,5 +129,9 @@ class StepProcessorResult {
 	 */
 	public function is_success(): bool {
 		return true === $this->success && 0 === count( $this->get_messages( 'error' ) );
+	}
+
+	public function get_step_name() {
+	    return $this->step_name;
 	}
 }

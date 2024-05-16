@@ -5,27 +5,27 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessors;
 use Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessorResult;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Util;
+use Automattic\WooCommerce\Admin\Notes\Note;
+use RecursiveArrayIterator;
+use RecursiveIteratorIterator;
 use WC_Tax;
 
 class ConfigureSettings implements StepProcessor {
 	public function process($schema): StepProcessorResult {
-		foreach ($schema->tabs as $tabName => $tab) {
-			if ($tabName !== 'advanced') {
-				continue;
-			}
-			$stepProcessor = __NAMESPACE__ . '\\Settings\\ConfigureSettings' .  Util::snake_to_camel($tabName);
-
-			if ( class_exists( $stepProcessor ) ) {
-				/**
-				 * @var $stepProcessor StepProcessor
-				 * @todo Use container.
-				 */
-				$stepProcessor = new $stepProcessor();
-				$stepProcessor->process($tab);
-			}
+		$options = array();
+		foreach ($schema->values->options as $option) {
+			$options[$option->id] = $option->value;
 		}
 
-		return StepProcessorResult::success();
+		$result =  (new SetOptions())->process((object) array(
+			'options' => $options
+		));
+
+		$result->set_step_name("ConfigureSettings");
+		return $result;
 	}
 
+	public function get_supported_step(): string {
+		return 'configureSettings';
+	}
 }

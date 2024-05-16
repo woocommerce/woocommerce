@@ -44,6 +44,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			'webhooks'        => __( 'Webhooks', 'woocommerce' ),
 			'legacy_api'      => __( 'Legacy API', 'woocommerce' ),
 			'woocommerce_com' => __( 'WooCommerce.com', 'woocommerce' ),
+			'blueprint'       => __( 'Blueprint', 'woocommerce' ),
 		);
 	}
 
@@ -424,6 +425,22 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			);
 
 		return apply_filters( 'woocommerce_settings_rest_api', $settings );
+	}
+
+	protected function get_settings_for_blueprint_section() {
+		$settings =
+			array(
+				array(
+					'title' => esc_html__( 'Blueprint', 'woocommerce' ),
+					'type'  => 'title',
+				),
+				array(
+					'id'   => 'wc_settings_blueprint_slotfill',
+					'type' => 'slotfill_placeholder',
+				),
+			);
+
+		return $settings;
 	}
 
 	/**

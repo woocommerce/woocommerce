@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use Automattic\WooCommerce\Admin\Features\Blueprint\Blueprint;
+use Automattic\WooCommerce\Admin\Features\Blueprint\ImportSchema;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
@@ -598,10 +598,19 @@ class Loader {
 	}
 
 	public static function maybe_configure_with_blueprint() {
-		$path = constant( 'WOOCOMMERCE_BLUEPRINT_PATH' );
-		if ( true === constant( 'USE_WOOCOMMERCE_BLUEPRINT' ) && file_exists( $path ) ) {
-			$blueprint = new Blueprint( $path );
+		if (!defined('WOO_BLUEPRINT_PATH') ) {
+			return;
+		}
+
+		if (!defined('USE_WOO_BLUEPRINT')) {
+			return;
+		}
+
+		$path = constant( 'WOO_BLUEPRINT_PATH' );
+		if ( true === constant( 'USE_WOO_BLUEPRINT' ) && file_exists( $path )) {
+			$blueprint = ImportSchema::crate_from_file($path);
 			$blueprint->process();
+			// @todo -- process any errors
 		}
 	}
 }

@@ -68,13 +68,21 @@ class ImportProducts implements StepProcessor {
 			'parse'              => true,
 		);
 
-		$importer         = \WC_Product_CSV_Importer_Controller::get_importer( WP_CONTENT_DIR . '/' . $schema->file, $params );
+		$importer         = \WC_Product_CSV_Importer_Controller::get_importer( $this->get_content_dir() . '/' . $schema->file, $params );
 		$results          = $importer->import();
 		$percent_complete = $importer->get_percent_complete();
 		if (100===$percent_complete) {
 			$this->cleanup();
 		}
 		// @todo check for errors.
-		return StepProcessorResult::success();
+		return StepProcessorResult::success('ImportProducts');
+	}
+
+	protected function get_content_dir() {
+		return WP_CONTENT_DIR;
+	}
+
+	public function get_supported_step(): string {
+		return 'importProducts';
 	}
 }

@@ -1,0 +1,7 @@
+{
+  "step": "configureTaskOptions",
+  "options": {
+	"woocommerce_admin_customize_store_completed": "yes",
+	"woocommerce_task_list_tracked_completed_actions": []
+  }
+}

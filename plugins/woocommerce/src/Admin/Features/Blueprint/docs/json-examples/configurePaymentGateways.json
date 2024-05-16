@@ -1,0 +1,20 @@
+{
+  "step": "configurePaymentGateways",
+  "payment_gateways": {
+	"bacs": {
+	  "title": "Direct bank transfer",
+	  "description": "Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.",
+	  "enabled": "no"
+	},
+	"cheque": {
+	  "title": "Check payments",
+	  "description": "Please send a check to Store Name, Store Street, Store Town, Store State \/ County, Store Postcode.",
+	  "enabled": "no"
+	},
+	"cod": {
+	  "title": "Cash on delivery",
+	  "description": "Pay with cash upon delivery.",
+	  "enabled": "no"
+	}
+  }
+}

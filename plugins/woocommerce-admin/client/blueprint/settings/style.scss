@@ -1,0 +1,16 @@
+.blueprint-settings-slotfill{
+	label {
+		cursor: pointer;
+	}
+
+	button.is-primary {
+		margin-bottom: 7px;
+	}
+	button.is-link {
+		text-decoration: none;
+		&:active, &:focus {
+			outline: none;
+			box-shadow: none;
+		}
+	}
+}

@@ -5,7 +5,19 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 
-export const BuilderIntro = () => {
+/**
+ * Internal dependencies
+ */
+import { Navigation } from '../components/navigation/navigation';
+import { IntroOptInEvent } from '../index';
+
+export const BuilderIntro = ( {
+	sendEvent,
+	navigationProgress = 80,
+}: {
+	sendEvent: ( event: IntroOptInEvent ) => void;
+	navigationProgress: number;
+} ) => {
 	const [ file, setFile ] = useState( null );
 	const [ message, setMessage ] = useState( '' );
 
@@ -21,8 +33,6 @@ export const BuilderIntro = () => {
 
 		const formData = new FormData();
 		formData.append( 'file', file );
-		formData.append( 'action', 'my_plugin_handle_file_upload' );
-		// formData.append( 'nonce', 'myPlugin.nonce' );
 
 		fetch( '/wp-json/blueprint/process', {
 			method: 'POST',
@@ -30,10 +40,18 @@ export const BuilderIntro = () => {
 		} )
 			.then( ( response ) => response.json() )
 			.then( ( data ) => {
-				if ( data.success ) {
-					setMessage( 'File uploaded successfully.' );
+				if ( data.status === 'success' ) {
+					setMessage(
+						'File uploaded successfully. Redirecting to ' +
+							data.data.redirect
+					);
+
+					window.setTimeout( () => {
+						window.location.href = data.data.redirect;
+					}, 2000 );
 				} else {
-					setMessage( `Error: ${ data.data }` );
+					setMessage( JSON.stringify( data.data.result, null, 2 ) );
+					// setMessage( `Error: ${ data.message }` );
 				}
 			} )
 			.catch( ( error ) => {
@@ -41,23 +59,37 @@ export const BuilderIntro = () => {
 			} );
 	};
 	return (
-		<div className="woocommerce-profiler-builder-intro">
-			<h1>
-				{ __(
-					'Upload your Blueprint to provision your site',
-					'woocommerce'
-				) }{ ' ' }
-			</h1>
-
-			<input
-				className="woocommerce-profiler-builder-intro-file-input"
-				type="file"
-				onChange={ handleFileChange }
+		<>
+			<Navigation
+				percentage={ navigationProgress }
+				skipText={ __( 'Skip setup', 'woocommerce' ) }
+				onSkip={ () =>
+					sendEvent( {
+						type: 'INTRO_SKIPPED',
+						payload: { optInDataSharing: false },
+					} )
+				}
 			/>
-			<Button variant="primary" onClick={ handleUpload }>
-				{ __( 'Upload Blueprint' ) }
-			</Button>
-			<div>{ message }</div>
-		</div>
+			<div className="woocommerce-profiler-builder-intro">
+				<h1>
+					{ __(
+						'Upload your Blueprint to provision your site',
+						'woocommerce'
+					) }{ ' ' }
+				</h1>
+
+				<input
+					className="woocommerce-profiler-builder-intro-file-input"
+					type="file"
+					onChange={ handleFileChange }
+				/>
+				<Button variant="primary" onClick={ handleUpload }>
+					{ __( 'Import', 'woocommerce' ) }
+				</Button>
+				<div>
+					<pre>{ message }</pre>
+				</div>
+			</div>
+		</>
 	);
 };

@@ -1,0 +1,15 @@
+{
+  "step": "installThemes",
+  "themes": [
+	{
+	  "slug": "twentytwenty",
+	  "resource": "wordpress.org\/themes",
+	  "activate": false
+	},
+	{
+	  "slug": "twentytwentyfour",
+	  "resource": "wordpress.org\/themes",
+	  "activate": true
+	}
+  ]
+}

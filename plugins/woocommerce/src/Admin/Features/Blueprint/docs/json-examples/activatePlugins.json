@@ -1,0 +1,4 @@
+{
+  "step": "activatePlugins",
+  "plugins": ["woocommerce"]
+}

@@ -1,0 +1,4 @@
+{
+  "step": "deactivatePlugins",
+  "plugins": ["woocommerce"]
+}

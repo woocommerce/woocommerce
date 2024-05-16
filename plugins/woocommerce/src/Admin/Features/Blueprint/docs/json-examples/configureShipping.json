@@ -1,0 +1,56 @@
+{
+  "step": "configureShipping",
+  "values": {
+	"classes": [
+	  {
+		"term_taxonomy_id": "19",
+		"term_id": "19",
+		"taxonomy": "product_shipping_class",
+		"description": "test",
+		"parent": "0",
+		"count": "0"
+	  }
+	],
+	"terms": [
+	  {
+		"term_id": "19",
+		"name": "test",
+		"slug": "test",
+		"term_group": "0"
+	  }
+	],
+	"local_pickup": {
+	  "general": {
+		"enabled": "yes",
+		"title": "Pickup",
+		"tax_status": "taxable",
+		"cost": ""
+	  },
+	  "locations": []
+	},
+	"shipping_methods": [
+	  {
+		"zone_id": "1",
+		"instance_id": "1",
+		"method_id": "free_shipping",
+		"method_order": "1",
+		"is_enabled": "1"
+	  }
+	],
+	"shipping_locations": [
+	  {
+		"location_id": "1",
+		"zone_id": "1",
+		"location_code": "US",
+		"location_type": "country"
+	  }
+	],
+	"shipping_zones": [
+	  {
+		"zone_id": "1",
+		"zone_name": "Test",
+		"zone_order": "0"
+	  }
+	]
+  }
+}

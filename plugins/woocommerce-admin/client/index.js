@@ -23,6 +23,7 @@ import { registerTaxSettingsConflictErrorFill } from './settings/conflict-error-
 import { registerPaymentsSettingsBannerFill } from './payments/payments-settings-banner-slotfill';
 import { registerSiteVisibilitySlotFill } from './launch-your-store';
 import { ErrorBoundary } from './error-boundary';
+import { registerBlueprintSlotfill } from './blueprint';
 
 const appRoot = document.getElementById( 'root' );
 const embeddedRoot = document.getElementById( 'woocommerce-embedded-root' );
@@ -101,6 +102,8 @@ if ( appRoot ) {
 	) {
 		registerSiteVisibilitySlotFill();
 	}
+
+	registerBlueprintSlotfill();
 }
 
 // Render the CustomerEffortScoreTracksContainer only if

@@ -99,7 +99,6 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\MobileAppMagicLink',
 			'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
 			'Automattic\WooCommerce\Admin\API\Blueprint',
-
 		);
 
 		if ( Features::is_enabled( 'launch-your-store' ) ) {
