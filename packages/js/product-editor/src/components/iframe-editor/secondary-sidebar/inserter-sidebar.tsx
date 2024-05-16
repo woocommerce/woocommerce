@@ -1,12 +1,9 @@
 /**
  * External dependencies
  */
-import { Button, VisuallyHidden } from '@wordpress/components';
-import { close } from '@wordpress/icons';
 import { useViewportMatch } from '@wordpress/compose';
 import { createElement, useCallback, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { __ } from '@wordpress/i18n';
 import { ESCAPE } from '@wordpress/keycodes';
 import {
 	store as blockEditorStore,
@@ -48,21 +45,12 @@ export default function InserterSidebar() {
 		[ closeInserter ]
 	);
 
-	const TagName = ! isMobileViewport ? VisuallyHidden : 'div';
-
 	return (
 		// eslint-disable-next-line jsx-a11y/no-static-element-interactions
 		<div
 			onKeyDown={ closeOnEscape }
 			className="woocommerce-iframe-editor__inserter-panel"
 		>
-			<TagName className="woocommerce-iframe-editor__inserter-panel-header">
-				<Button
-					icon={ close }
-					onClick={ closeInserter }
-					label={ __( 'Close block inserter', 'woocommerce' ) }
-				/>
-			</TagName>
 			<div className="woocommerce-iframe-editor__inserter-panel-content">
 				<Library
 					showInserterHelpPanel
