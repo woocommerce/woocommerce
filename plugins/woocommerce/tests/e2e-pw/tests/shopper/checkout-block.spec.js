@@ -689,7 +689,7 @@ baseTest.describe( 'Checkout Block page', () => {
 		).toBeVisible();
 
 		// if edit address is present click it, otherwise fill shipping details
-		// eslint-disable-next-line no-networkidle
+		// eslint-disable-next-line playwright/no-networkidle
 		await page.waitForLoadState( 'networkidle' ); // need to wait for the page to load
 		if (
 			await page
