@@ -49,6 +49,10 @@ import { useEditorHistory } from './hooks/use-editor-history';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { getGutenbergVersion } from '../../utils/get-gutenberg-version';
 import { SIDEBAR_COMPLEMENTARY_AREA_SCOPE } from './constants';
+import {
+	KeyboardShortcuts,
+	RegisterKeyboardShortcuts,
+} from './keyboard-shortcuts';
 
 type IframeEditorProps = {
 	initialBlocks?: BlockInstance[];
@@ -173,6 +177,10 @@ export function IframeEditor( {
 					useSubRegistry={ true }
 				>
 					<RegisterStores />
+
+					<KeyboardShortcuts />
+					<RegisterKeyboardShortcuts />
+
 					<HeaderToolbar
 						onSave={ () => {
 							setBlocks( temporalBlocks );
