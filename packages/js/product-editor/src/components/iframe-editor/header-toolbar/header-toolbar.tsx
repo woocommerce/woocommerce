@@ -103,13 +103,17 @@ export function HeaderToolbar( {
 		};
 	}, [] );
 
-	/* translators: accessibility text for the editor toolbar */
-	const toolbarAriaLabel = __( 'Document tools', 'woocommerce' );
-
-	const toggleInserter = useCallback(
-		() => setIsInserterOpened( ! isInserterOpened ),
-		[ isInserterOpened, setIsInserterOpened ]
-	);
+	const toggleInserter = useCallback( () => {
+		if ( isInserterOpened ) {
+			// Focusing the inserter button should close the inserter popover.
+			// However, there are some cases it won't close when the focus is lost.
+			// See https://github.com/WordPress/gutenberg/issues/43090 for more details.
+			inserterButton.current?.focus();
+			setIsInserterOpened( false );
+		} else {
+			setIsInserterOpened( true );
+		}
+	}, [ isInserterOpened, setIsInserterOpened ] );
 
 	useEffect( () => {
 		// If we have a new block selection, show the block tools
