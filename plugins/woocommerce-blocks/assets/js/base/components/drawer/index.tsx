@@ -17,12 +17,11 @@ import {
 } from '@wordpress/element';
 import { close, Icon } from '@wordpress/icons';
 import {
-	useFocusReturn,
 	useFocusOnMount,
 	useConstrainedTabbing,
 	useMergeRefs,
 } from '@wordpress/compose';
-
+import { useFocusReturn } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
