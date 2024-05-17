@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 8.5.0
+ * @version 9.0.0
  *
  * @var bool $show_downloads Controls whether the downloads table should be rendered.
  */
