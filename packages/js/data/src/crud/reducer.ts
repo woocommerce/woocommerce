@@ -100,7 +100,7 @@ export const createReducer = (
 						},
 					};
 
-					let items = state.items;
+					let currentItems = state.items;
 					let queryItems = Object.keys( data ).map( ( key ) => +key );
 
 					let itemsCount = state.itemsCount;
@@ -152,10 +152,10 @@ export const createReducer = (
 							options.optimisticQueryUpdate
 						);
 
-						items = {
-							...state.items,
+						currentItems = {
+							...currentItems,
 							[ getItemQuery ]: {
-								...state.items[ getItemQuery ],
+								...currentItems[ getItemQuery ],
 								data: queryItems,
 							},
 						};
@@ -168,7 +168,7 @@ export const createReducer = (
 
 					return {
 						...state,
-						items,
+						items: currentItems,
 						itemsCount,
 						data,
 						requesting: {
