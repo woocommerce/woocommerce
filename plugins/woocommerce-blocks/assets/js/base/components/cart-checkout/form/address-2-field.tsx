@@ -34,7 +34,7 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 	const isFieldRequired = field ? field.required : false;
 
 	const [ isFieldVisible, setFieldVisible ] = useState(
-		hasFieldValue || isFieldRequired
+		() => hasFieldValue || isFieldRequired
 	);
 
 	const toggleFieldVisibility = useCallback(
