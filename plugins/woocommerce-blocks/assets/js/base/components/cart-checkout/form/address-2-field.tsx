@@ -11,7 +11,7 @@ import {
 	Fragment,
 } from '@wordpress/element';
 import { objectHasProp } from '@woocommerce/types';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -88,7 +88,11 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 					}
 					onClick={ toggleFieldVisibility }
 				>
-					{ __( 'Add apartment, suite, etc.', 'woocommerce' ) }
+					{ sprintf(
+						// translators: %s: address 2 field label.
+						__( 'Add %s', 'woocommerce' ),
+						field.label.toLowerCase()
+					) }
 				</button>
 			) }
 		</Fragment>
