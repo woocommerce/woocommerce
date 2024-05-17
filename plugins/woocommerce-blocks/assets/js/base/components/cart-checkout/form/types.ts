@@ -3,6 +3,8 @@
  */
 import type { ValidatedTextInputHandle } from '@woocommerce/blocks-components';
 import type {
+	AddressFormValues,
+	ContactFormValues,
 	FormFields,
 	FormType,
 	KeyedFormField,
@@ -31,7 +33,7 @@ export interface AddressFormProps< T > {
 	// Field configuration for fields in form.
 	fieldConfig?: FormFieldsConfig;
 	// Called with the new address data when the address form changes. This is only called when all required fields are filled and there are no validation errors.
-	onChange: ( newValue: T ) => void;
+	onChange: ( newValue: AddressFormValues | ContactFormValues ) => void;
 	// Values for fields.
 	values: T;
 	// support inserting children at end of form
