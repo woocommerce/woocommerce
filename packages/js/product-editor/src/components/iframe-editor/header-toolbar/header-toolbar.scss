@@ -33,6 +33,8 @@
 		display: flex;
 
 		.woocommerce-iframe-editor-document-tools {
+			display: block;
+
 			padding-right: $gap-smaller;
 			margin-right: $gap-smaller;
 		}
