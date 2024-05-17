@@ -111,7 +111,7 @@ describe( 'crud reducer', () => {
 			type: TYPES.GET_ITEMS_SUCCESS,
 			items,
 			query,
-			urlParameters: [ 5 ],
+			urlParameters: [ 100, 5 ],
 		} );
 
 		const resourceName = getRequestIdentifier(
@@ -120,8 +120,8 @@ describe( 'crud reducer', () => {
 		);
 
 		expect( state.items[ resourceName ].data ).toHaveLength( 2 );
-		expect( state.data[ '5/1' ] ).toEqual( items[ 0 ] );
-		expect( state.data[ '5/2' ] ).toEqual( items[ 1 ] );
+		expect( state.data[ '100/5/1' ] ).toEqual( items[ 0 ] );
+		expect( state.data[ '100/5/2' ] ).toEqual( items[ 1 ] );
 	} );
 
 	it( 'GET_ITEMS_SUCCESS should not remove previously added fields, only update new ones', () => {
