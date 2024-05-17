@@ -4,7 +4,7 @@
 import { Actions } from '../actions';
 import { createReducer, ResourceState } from '../reducer';
 import { CRUD_ACTIONS } from '../crud-actions';
-import { getResourceName } from '../../utils';
+import { getResourceName, getTotalCountResourceName } from '../../utils';
 import { getRequestIdentifier } from '..//utils';
 import { Item, ItemQuery } from '../types';
 import TYPES from '../action-types';
@@ -347,7 +347,7 @@ describe( 'crud reducer', () => {
 			expect( state.itemsCount ).toEqual( {} );
 		} );
 
-		it( 'when optimisticQueryUpdate is defined', () => {
+		it( 'with optimisticQueryUpdate', () => {
 			const item: Item = {
 				id: 7,
 				name: 'Off the hook!',
@@ -370,8 +370,13 @@ describe( 'crud reducer', () => {
 				options,
 			} );
 
-			expect( state.data[ 7 ].name ).toEqual( item.name );
-			expect( state.data[ 7 ].status ).toEqual( item.status );
+			expect( state.data ).toEqual( {
+				7: {
+					id: 7,
+					name: 'Off the hook!',
+					status: 'draft',
+				},
+			} );
 
 			const resourceName = getRequestIdentifier(
 				CRUD_ACTIONS.CREATE_ITEM,
@@ -404,6 +409,45 @@ describe( 'crud reducer', () => {
 
 			expect( itemsCountKey ).toHaveLength( 1 );
 			expect( itemsCountKey[ 0 ] ).toEqual( itemsCountQuery );
+		} );
+
+		it( 'with optimisticUrlParameters', () => {
+			const item: Item = {
+				id: 7,
+				name: 'Off the hook!',
+				status: 'draft',
+			};
+			const query = {
+				name: 'Off the hook!',
+				status: 'draft',
+			};
+
+			const options = {
+				optimisticUrlParameters: [ 200, 10 ],
+			};
+
+			const state = reducer( defaultState, {
+				type: TYPES.CREATE_ITEM_SUCCESS,
+				key: item.id,
+				item,
+				query,
+				options,
+			} );
+
+			expect( state.data ).toEqual( {
+				'200/10/7': {
+					id: 7,
+					name: 'Off the hook!',
+					status: 'draft',
+				},
+			} );
+
+			const resourceName = getRequestIdentifier(
+				CRUD_ACTIONS.CREATE_ITEM,
+				item.id,
+				query
+			);
+			expect( state.requesting[ resourceName ] ).toEqual( false );
 		} );
 	} );
 
