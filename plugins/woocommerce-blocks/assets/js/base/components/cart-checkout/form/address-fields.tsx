@@ -28,7 +28,6 @@ const AddressFields = < T extends AddressFormValues | ContactFormValues >( {
 			{ address1 && (
 				<ValidatedTextInput
 					{ ...address1FieldProps }
-					key={ address1.key }
 					ref={ ( el ) => ( fieldsRef.current[ address1.key ] = el ) }
 					type={ address1.type }
 					label={ address1.label }
@@ -44,7 +43,6 @@ const AddressFields = < T extends AddressFormValues | ContactFormValues >( {
 			) }
 			{ address2 && ! address2.hidden && (
 				<Address2Field
-					key={ address2.key }
 					field={ address2 }
 					fieldProps={ address2FieldProps }
 					fieldsRef={ fieldsRef }

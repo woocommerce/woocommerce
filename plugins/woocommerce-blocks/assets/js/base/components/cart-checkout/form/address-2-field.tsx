@@ -3,13 +3,7 @@
  */
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
 import { AddressFormValues, ContactFormValues } from '@woocommerce/settings';
-import {
-	useEffect,
-	useCallback,
-	useMemo,
-	useState,
-	Fragment,
-} from '@wordpress/element';
+import { useEffect, useState, Fragment } from '@wordpress/element';
 import { objectHasProp } from '@woocommerce/types';
 import { __, sprintf } from '@wordpress/i18n';
 
@@ -25,9 +19,8 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 	onChange,
 	values,
 }: AddressFieldProps< T > ): JSX.Element => {
-	const hasFieldValue = useMemo( () => {
-		return objectHasProp( values, 'address_2' ) && values.address_2 !== '';
-	}, [ values ] );
+	const hasFieldValue =
+		objectHasProp( values, 'address_2' ) && values.address_2 !== '';
 
 	const isFieldRequired = field ? field.required : false;
 
@@ -35,13 +28,9 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 		() => hasFieldValue || isFieldRequired
 	);
 
-	const toggleFieldVisibility = useCallback(
-		( event: React.MouseEvent< HTMLElement > ) => {
-			event.preventDefault();
-			setFieldVisible( ( prevVisibility: boolean ) => ! prevVisibility );
-		},
-		[]
-	);
+	const toggleFieldVisibility = () => {
+		setFieldVisible( ( prevVisibility: boolean ) => ! prevVisibility );
+	};
 
 	useEffect( () => {
 		setFieldVisible( isFieldRequired );
@@ -52,7 +41,6 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 			{ isFieldVisible ? (
 				<ValidatedTextInput
 					{ ...fieldProps }
-					key={ field.key }
 					ref={ ( el ) => ( fieldsRef.current[ field.key ] = el ) }
 					type={ field.type }
 					label={
@@ -70,7 +58,6 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 				/>
 			) : (
 				<button
-					key={ field.key }
 					className={
 						'wc-block-components-address-form__address_2-toggle'
 					}

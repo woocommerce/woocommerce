@@ -144,9 +144,6 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 				if ( field.key === 'address_1' ) {
 					return (
 						<AddressFields
-							id={ id }
-							addressType={ addressType }
-							key={ field.key }
 							address1={ addressFormFields.fields.find(
 								( customField ) =>
 									customField.key === 'address_1'
@@ -156,7 +153,10 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 									customField.key === 'address_2'
 							) }
 							addressFormFields={ addressFormFields }
+							addressType={ addressType }
 							fieldsRef={ fieldsRef }
+							id={ id }
+							key={ field.key }
 							onChange={ onChange }
 							values={ values }
 						/>
