@@ -1189,8 +1189,8 @@ class WC_Install {
 
 		// Did we previously install this plugin?
 		$legacy_api_plugin          = 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php';
-		$autoinstalled              = (array) get_site_option( 'woocommerce_autoinstalled_plugins', array() );
-		$previously_installed_by_us = isset( $autoinstalled[ $legacy_api_plugin ] );
+		$autoinstalled_plugins      = (array) get_site_option( 'woocommerce_history_of_autoinstalled_plugins', array() );
+		$previously_installed_by_us = isset( $autoinstalled_plugins[ $legacy_api_plugin ] );
 
 		/**
 		 * Filter to skip the automatic installation of the WooCommerce Legacy REST API plugin
