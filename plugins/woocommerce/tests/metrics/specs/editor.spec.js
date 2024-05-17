@@ -16,18 +16,6 @@ const BROWSER_IDLE_WAIT = 1000;
 
 const results = {};
 
-async function editPost( admin, page, postId ) {
-	const query = new URLSearchParams();
-	query.set( 'post', String( postId ) );
-	query.set( 'action', 'edit' );
-
-	await admin.visitAdminPage( 'post.php', query.toString() );
-	await setPreferences( page, 'core/edit-post', {
-		welcomeGuide: false,
-		fullscreenMode: false,
-	} );
-}
-
 async function setPreferences( page, context, preferences ) {
 	await page.waitForFunction( () => window?.wp?.data );
 
@@ -43,6 +31,18 @@ async function setPreferences( page, context, preferences ) {
 		},
 		{ context, preferences }
 	);
+}
+
+async function editPost( admin, page, postId ) {
+	const query = new URLSearchParams();
+	query.set( 'post', String( postId ) );
+	query.set( 'action', 'edit' );
+
+	await admin.visitAdminPage( 'post.php', query.toString() );
+	await setPreferences( page, 'core/edit-post', {
+		welcomeGuide: false,
+		fullscreenMode: false,
+	} );
 }
 
 test.describe( 'Editor Performance', () => {
