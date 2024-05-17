@@ -360,8 +360,7 @@ test.describe( 'Merchant → Checkout', () => {
 				await expect( shippingCompanyInput ).toBeVisible();
 				await expect( shippingCompanyOptionalToggle ).toBeChecked();
 				await expect( shippingCompanyInput ).not.toHaveAttribute(
-					'required',
-					''
+					'required'
 				);
 
 				// Make the company field required.
@@ -418,8 +417,7 @@ test.describe( 'Merchant → Checkout', () => {
 				// Verify that the company field is currently required.
 				await expect( billingCompanyRequiredToggle ).toBeChecked();
 				await expect( billingCompanyInput ).toHaveAttribute(
-					'required',
-					''
+					'required'
 				);
 
 				// Make the company field optional.
@@ -428,8 +426,7 @@ test.describe( 'Merchant → Checkout', () => {
 				// Verify that the company field is optional.
 				await expect( billingCompanyOptionalToggle ).toBeChecked();
 				await expect( billingCompanyInput ).not.toHaveAttribute(
-					'required',
-					''
+					'required'
 				);
 
 				// Disable the company field.
@@ -491,8 +488,7 @@ test.describe( 'Merchant → Checkout', () => {
 				// Verify that the apartment field is required.
 				await expect( shippingApartmentRequiredToggle ).toBeChecked();
 				await expect( shippingApartmentInput ).toHaveAttribute(
-					'required',
-					''
+					'required'
 				);
 
 				// Disable the apartment field.
@@ -554,8 +550,7 @@ test.describe( 'Merchant → Checkout', () => {
 				// Verify that the apartment field is currently required.
 				await expect( billingApartmentRequiredToggle ).toBeChecked();
 				await expect( billingApartmentInput ).toHaveAttribute(
-					'required',
-					''
+					'required'
 				);
 
 				// Make the apartment field optional.
@@ -609,8 +604,7 @@ test.describe( 'Merchant → Checkout', () => {
 				await expect( shippingPhoneInput ).toBeVisible();
 				await expect( shippingPhoneOptionalToggle ).toBeChecked();
 				await expect( shippingPhoneInput ).not.toHaveAttribute(
-					'required',
-					''
+					'required'
 				);
 
 				// Make the phone number required.
@@ -619,8 +613,7 @@ test.describe( 'Merchant → Checkout', () => {
 				// Verify that the phone field is required.
 				await expect( shippingPhoneRequiredToggle ).toBeChecked();
 				await expect( shippingPhoneInput ).toHaveAttribute(
-					'required',
-					''
+					'required'
 				);
 
 				// Disable the phone field.
@@ -667,10 +660,7 @@ test.describe( 'Merchant → Checkout', () => {
 
 				// Verify that the phone field is currently required.
 				await expect( billingPhoneRequiredToggle ).toBeChecked();
-				await expect( billingPhoneInput ).toHaveAttribute(
-					'required',
-					''
-				);
+				await expect( billingPhoneInput ).toHaveAttribute( 'required' );
 
 				// Make the phone field optional.
 				await billingPhoneOptionalToggle.check();
@@ -678,8 +668,7 @@ test.describe( 'Merchant → Checkout', () => {
 				// Verify that the phone field is optional.
 				await expect( billingPhoneOptionalToggle ).toBeChecked();
 				await expect( billingPhoneInput ).not.toHaveAttribute(
-					'required',
-					''
+					'required'
 				);
 
 				// Disable the phone field.
