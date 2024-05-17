@@ -11,7 +11,7 @@ const simpleProductName = 'Simplest Product';
 const singleProductPrice = '555.00';
 
 // all WooCommerce blocks except:
-// default cart and checkout blocks, mini-cart, product collection (beta)
+// default cart and checkout blocks, mini-cart
 const blocks = [
 	{
 		name: 'Product Price',
@@ -47,19 +47,10 @@ const blocks = [
 		name: 'Filter by Rating',
 	},
 	{
-		name: 'Hand-picked Products',
+		name: 'New Arrivals',
 	},
 	{
-		name: 'Products by Category',
-	},
-	{
-		name: 'Newest Products',
-	},
-	{
-		name: 'Products by Tag',
-	},
-	{
-		name: 'Top Rated Products',
+		name: 'Top Rated',
 	},
 	{
 		name: 'Customer account',
@@ -74,16 +65,22 @@ const blocks = [
 		name: 'Store Notices',
 	},
 	{
-		name: 'Best Selling Products',
+		name: 'Best Sellers',
 	},
 	{
 		name: 'Product Categories List',
 	},
 	{
-		name: 'On Sale Products',
+		name: 'On Sale',
 	},
 	{
 		name: 'Reviews by Category',
+	},
+	{
+		name: 'Product Collection',
+	},
+	{
+		name: 'Featured',
 	},
 ];
 
