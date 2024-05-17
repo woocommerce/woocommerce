@@ -1159,6 +1159,16 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					meta: {
 						component: BuilderIntro,
 					},
+					on: {
+						INTRO_SKIPPED: {
+							// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
+							target: '#skipGuidedSetup',
+							actions: [
+								'assignOptInDataSharing',
+								'updateTrackingOption',
+							],
+						},
+					},
 				},
 			},
 		},
