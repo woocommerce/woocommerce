@@ -2715,7 +2715,7 @@ function wc_update_890_update_paypal_standard_load_eligibility() {
  * Create the woocommerce_history_of_autoinstalled_plugins option if it doesn't exist
  * as a copy of woocommerce_autoinstalled_plugins if it exists.
  */
-function wc_update_900_create_plugin_autoinstall_history_option() {
+function wc_update_891_create_plugin_autoinstall_history_option() {
 	$autoinstalled_plugins_history_info = get_site_option( 'woocommerce_history_of_autoinstalled_plugins' );
 	if ( false === $autoinstalled_plugins_history_info ) {
 		$autoinstalled_plugins_info = get_site_option( 'woocommerce_autoinstalled_plugins' );
