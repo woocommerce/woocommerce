@@ -8,7 +8,11 @@ import { Reducer } from 'redux';
  */
 import { Actions } from './actions';
 import CRUD_ACTIONS from './crud-actions';
-import { getRequestIdentifier, organizeItemsById } from './utils';
+import {
+	filterDataByKeys,
+	getRequestIdentifier,
+	organizeItemsById,
+} from './utils';
 import { getTotalCountResourceName } from '../utils';
 import { TYPES } from './action-types';
 import type { IdType, Item, ItemQuery } from './types';
@@ -144,23 +148,30 @@ export const createReducer = (
 							const order_by = options.optimisticQueryUpdate
 								?.order_by as OrderBy;
 
-							let sortingData = Object.values( data );
+							/*
+							 * Pick the data to sort by the order_by property,
+							 * from the data store,
+							 * based on the nextItemsData ids.
+							 */
+							let sourceDataToOrderBy = Object.values(
+								filterDataByKeys( data, nextItemsData )
+							) as Item[];
 
-							sortingData = sortingData.sort( ( a, b ) =>
-								( a[ order_by ] as string )
-									.toLowerCase()
-									.localeCompare(
-										(
-											b[ order_by ] as string
-										 ).toLowerCase()
-									)
+							sourceDataToOrderBy = sourceDataToOrderBy.sort(
+								( a, b ) =>
+									String( a[ order_by ] as IdType )
+										.toLowerCase()
+										.localeCompare(
+											String(
+												b[ order_by ] as IdType
+											).toLowerCase()
+										)
 							);
 
 							// Pick the ids from the sorted data.
 							const { ids: sortedIds } = organizeItemsById(
-								sortingData,
-								options.optimisticUrlParameters,
-								itemData
+								sourceDataToOrderBy,
+								options.optimisticUrlParameters
 							);
 
 							// Update the items data with the sorted ids.
@@ -176,7 +187,7 @@ export const createReducer = (
 
 						itemsCount = {
 							...state.itemsCount,
-							[ getItemCountQueryId ]: Object.keys( data ).length,
+							[ getItemCountQueryId ]: nextItemsData.length,
 						};
 					}
 
