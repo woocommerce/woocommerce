@@ -202,22 +202,20 @@ export function HeaderToolbar( {
 				) }
 			</div>
 			<div className="woocommerce-iframe-editor__header-right">
-				<ToolbarItem
-					as={ Button }
+				<Button
 					variant="tertiary"
 					className="woocommerce-modal-actions__cancel-button"
 					onClick={ onCancel }
 					text={ __( 'Cancel', 'woocommerce' ) }
 				/>
-				<ToolbarItem
-					as={ Button }
+				<Button
 					variant="primary"
 					className="woocommerce-modal-actions__done-button"
 					onClick={ onSave }
 					text={ __( 'Done', 'woocommerce' ) }
 				/>
 				<PinnedItems.Slot scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE } />
-				<ToolbarItem as={ MoreMenu } />
+				<MoreMenu />
 			</div>
 		</div>
 	);
