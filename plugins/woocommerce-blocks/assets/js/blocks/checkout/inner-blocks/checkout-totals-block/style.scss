@@ -20,3 +20,11 @@
 		order: 0;
 	}
 }
+
+.is-large {
+	.wc-block-checkout__sidebar {
+		position: sticky;
+		top: $gap-largest;
+		align-self: flex-start;
+	}
+}
