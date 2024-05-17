@@ -364,8 +364,8 @@
 						"tsconfig.json",
 						"assets/**/*.{js,ts,tsx,scss}",
 						"packages/**/*.{js,ts,tsx,scss}",
-						"tests/js/*",
-						"tests/utils/*"
+						"tests/js/**/*.{js,ts,tsx,scss,json}",
+						"tests/utils/**/.{js,ts,tsx,scss,json}"
 					],
 					"cascade": "test:js"
 				}
