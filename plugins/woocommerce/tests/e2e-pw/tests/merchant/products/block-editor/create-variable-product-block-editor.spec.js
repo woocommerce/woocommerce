@@ -38,11 +38,6 @@ const tabs = [
 			"This product has options, such as size or color. You can manage each variation's images, downloads, and other details individually.",
 	},
 	{
-		name: 'Pricing',
-		noteText:
-			"This product has options, such as size or color. You can now manage each variation's price and other details individually.",
-	},
-	{
 		name: 'Inventory',
 		noteText:
 			"This product has options, such as size or color. You can now manage each variation's inventory and other details individually.",

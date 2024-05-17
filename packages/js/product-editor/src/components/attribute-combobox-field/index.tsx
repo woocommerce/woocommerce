@@ -95,6 +95,7 @@ const AttributesComboboxControl: React.FC<
 	items = [],
 	instanceNumber = 0,
 	isLoading = false,
+	onAddNew,
 	onChange,
 } ) => {
 	const [ createNewAttributeOption, updateCreateNewAttributeOption ] =
@@ -234,10 +235,7 @@ const AttributesComboboxControl: React.FC<
 								state: 'creating',
 							} );
 
-							return onChange( {
-								id: -99,
-								name: createNewAttributeOption.label,
-							} );
+							return onAddNew?.( createNewAttributeOption.label );
 						}
 
 						setAttributeSelected( true );
