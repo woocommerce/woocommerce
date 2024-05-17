@@ -20,7 +20,10 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: true
+                  install: 
+                    '@woocommerce/plugin-woocommerce'
+                    '@woocommerce/plugin-woocommerce-beta-tester'
+                  build: '@woocommerce/plugin-woocommerce'
 
             - name: Lint
               working-directory: plugins/woocommerce-beta-tester
