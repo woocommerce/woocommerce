@@ -36,11 +36,13 @@ export const BusinessInfoDescription = ( {
 
 	return (
 		<div>
-			<ProgressBar
-				percent={ 20 }
-				color={ 'var(--wp-admin-theme-color)' }
-				bgcolor={ 'transparent' }
-			/>
+			{ ! isEntrepreneurFlow() && (
+				<ProgressBar
+					percent={ 20 }
+					color={ 'var(--wp-admin-theme-color)' }
+					bgcolor={ 'transparent' }
+				/>
+			) }
 			{ ! isEntrepreneurFlow() && (
 				<CloseButton
 					onClick={ () => {

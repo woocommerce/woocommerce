@@ -82,11 +82,13 @@ export const ToneOfVoice = ( {
 
 	return (
 		<div>
-			<ProgressBar
-				percent={ 80 }
-				color={ 'var(--wp-admin-theme-color)' }
-				bgcolor={ 'transparent' }
-			/>
+			{ ! isEntrepreneurFlow() && (
+				<ProgressBar
+					percent={ 80 }
+					color={ 'var(--wp-admin-theme-color)' }
+					bgcolor={ 'transparent' }
+				/>
+			) }
 			{ ! isEntrepreneurFlow() && (
 				<CloseButton
 					onClick={ () => {
