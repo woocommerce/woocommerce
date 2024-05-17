@@ -560,6 +560,77 @@ describe( 'crud reducer', () => {
 			expect( itemsCountKey[ 0 ] ).toEqual( getItemsCountQueryId );
 		} );
 
+		it( `with previous state,
+	 and optimisticQueryUpdate options with order_by: name`, () => {
+			const item: Item = {
+				id: 7,
+				name: 'kiwi',
+				status: 'draft',
+			};
+
+			const query = {
+				name: 'kiwi',
+				status: 'draft',
+			};
+
+			const options = {
+				optimisticQueryUpdate: { order_by: 'name' },
+			};
+
+			const getItemsQueryId = getRequestIdentifier(
+				CRUD_ACTIONS.GET_ITEMS,
+				options.optimisticQueryUpdate
+			);
+
+			const getItemsCountQueryId = getTotalCountResourceName(
+				CRUD_ACTIONS.GET_ITEMS,
+				options.optimisticQueryUpdate
+			);
+
+			const initialState: ResourceState = {
+				items: {
+					[ getItemsQueryId ]: {
+						data: [ 1, 2 ],
+					},
+				},
+				itemsCount: {
+					[ getItemsCountQueryId ]: 2,
+				},
+				errors: {},
+				data: {
+					1: { id: 1, name: 'apple', status: 'draft' },
+					2: { id: 2, name: 'orange', status: 'publish' },
+				},
+				requesting: {},
+			};
+
+			const state = reducer( initialState, {
+				type: TYPES.CREATE_ITEM_SUCCESS,
+				key: item.id,
+				item,
+				query,
+				options,
+			} );
+
+			expect( state.data ).toEqual( {
+				1: { id: 1, name: 'apple', status: 'draft' },
+				2: { id: 2, name: 'orange', status: 'publish' },
+				7: { id: 7, name: 'kiwi', status: 'draft' },
+			} );
+
+			const resourceName = getRequestIdentifier(
+				CRUD_ACTIONS.CREATE_ITEM,
+				item.id,
+				query
+			);
+			expect( state.requesting[ resourceName ] ).toEqual( false );
+
+			expect( state.items[ getItemsQueryId ].data ).toEqual( [
+				// order by name: apple(1), kiwi(7), orange(2)
+				1, 7, 2,
+			] );
+		} );
+
 		it( `when empty previous state,
 	 and optimisticQueryUpdate and
 	 optimisticUrlParameters options`, () => {
