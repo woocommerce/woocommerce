@@ -26,6 +26,7 @@ import { Link } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
+import { isEntrepreneurFlow } from '~/customize-store/design-with-ai/entrepreneur-flow';
 
 const HUB_ANIMATION_DURATION = 0.3;
 
@@ -98,29 +99,31 @@ export const SiteHub = forwardRef(
 							</Link>
 						</div>
 
-						<AnimatePresence>
-							<motion.div
-								layout={ false }
-								animate={ {
-									opacity: 1,
-								} }
-								exit={ {
-									opacity: 0,
-								} }
-								className={ classnames(
-									'edit-site-site-hub__site-title',
-									{ 'is-transparent': isTransparent }
-								) }
-								transition={ {
-									type: 'tween',
-									duration: disableMotion ? 0 : 0.2,
-									ease: 'easeOut',
-									delay: 0.1,
-								} }
-							>
-								{ decodeEntities( siteTitle ) }
-							</motion.div>
-						</AnimatePresence>
+						{ ! isEntrepreneurFlow() && (
+							<AnimatePresence>
+								<motion.div
+									layout={ false }
+									animate={ {
+										opacity: 1,
+									} }
+									exit={ {
+										opacity: 0,
+									} }
+									className={ classnames(
+										'edit-site-site-hub__site-title',
+										{ 'is-transparent': isTransparent }
+									) }
+									transition={ {
+										type: 'tween',
+										duration: disableMotion ? 0 : 0.2,
+										ease: 'easeOut',
+										delay: 0.1,
+									} }
+								>
+									{ decodeEntities( siteTitle ) }
+								</motion.div>
+							</AnimatePresence>
+						) }
 					</HStack>
 				</HStack>
 			</motion.div>
