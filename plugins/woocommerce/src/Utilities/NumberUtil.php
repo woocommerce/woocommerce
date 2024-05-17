@@ -40,12 +40,12 @@ final class NumberUtil {
 	 *
 	 * Note that, unlike the built-in array_sum, this one will always return a float, never an int.
 	 *
-	 * @param array $array The array of values to sum.
+	 * @param array $arr The array of values to sum.
 	 *
 	 * @return float
 	 */
-	public static function array_sum( array $array ): float {
-		$sanitized_array = array_map( 'floatval', $array );
+	public static function array_sum( array $arr ): float {
+		$sanitized_array = array_map( 'floatval', $arr );
 
 		return array_sum( $sanitized_array );
 	}
