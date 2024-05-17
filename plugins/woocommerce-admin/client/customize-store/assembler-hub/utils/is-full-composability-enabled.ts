@@ -11,7 +11,9 @@ export const isPatternToolkitFullComposabilityFeatureFlagEnabled = () => {
 };
 
 export const isGutenbergAPIAvailableForFullComposability = () => {
-	return [ BlockPopover ].filter( Boolean ).length > 0;
+	return [ BlockPopover ].every(
+		( api ) => api !== undefined && api !== null
+	);
 };
 
 export const isFullComposabilityFeatureAndAPIAvailable = () => {
