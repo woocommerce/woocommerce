@@ -54,12 +54,7 @@ export const getKey = ( query: IdQuery, urlParameters: IdType[] = [] ) => {
 		return id;
 	}
 
-	let prefix = '';
-	urlParameters.forEach( ( param ) => {
-		prefix = param + '/';
-	} );
-
-	return `${ prefix }${ id }`;
+	return urlParameters.join( '/' ) + '/' + id;
 };
 
 /**
