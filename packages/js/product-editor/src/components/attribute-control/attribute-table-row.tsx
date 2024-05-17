@@ -73,13 +73,20 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		[ attributeId ]
 	);
 
-	/**
+	/*
 	 * Local terms to handle not global attributes.
 	 * Set initially with the attribute options.
 	 */
 	const [ localTerms, setLocalTerms ] = useState< string[] | undefined >(
 		attribute?.options
 	);
+
+	/**
+	 * Use the temporary terms to store and show
+	 * the new terms on the fly,
+	 * before they are created by hitting the API.
+	 */
+	const [ temporaryTerms, setTemporaryTerms ] = useState< string[] >( [] );
 
 	// By convention, it's a global attribute if the attribute ID is 0.
 	const isGlobalAttribute = attribute?.id === 0;
@@ -90,9 +97,17 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	 * if it's not a global attribute
 	 * set the suggestions with the terms names.
 	 */
-	const suggestions = isGlobalAttribute
+	const allTerms = isGlobalAttribute
 		? localTerms
 		: terms?.map( ( term: ProductAttributeTerm ) => term.name );
+
+	/*
+	 * Combine the temporary terms with the attribute options or terms,
+	 * removing duplicates.
+	 */
+	const suggestions = [ ...( allTerms || [] ), ...temporaryTerms ].filter(
+		( value, i, self ) => self.indexOf( value ) === i
+	);
 
 	/*
 	 * Build selected options object from the attribute,
@@ -100,16 +115,23 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	 * When the attribute is global, uses straigh the attribute options.
 	 * Otherwise, maps the terms to their names.
 	 */
-	const selectedValues = isGlobalAttribute
+	const allSelectedValues = isGlobalAttribute
 		? attribute.options
 		: attribute?.terms?.map( ( option ) => option.name );
+
+	/*
+	 * Combine the temporary terms with the selected values,
+	 * removing duplicates.
+	 */
+	const selectedValues = [
+		...( allSelectedValues || [] ),
+		...temporaryTerms,
+	].filter( ( value, i, self ) => self.indexOf( value ) === i );
 
 	// Flag to track if the terms are initially populated.
 	const [ initiallyPopulated, setInitiallyPopulated ] = useState( false );
 
-	/*
-	 * Auto select terms based on the termsAutoSelection prop.
-	 */
+	// Auto select terms based on the termsAutoSelection prop.
 	useEffect( () => {
 		// If the terms are not set, bail early.
 		if ( ! termsAutoSelection ) {
@@ -174,6 +196,16 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 			return;
 		}
 
+		/*
+		 * Create the temporary terms.
+		 * It will show the tokens in the token field
+		 * optimistically, before the terms are created.
+		 */
+		setTemporaryTerms( ( prevTerms = [] ) => [
+			...prevTerms,
+			...termNames,
+		] );
+
 		// Create the new terms.
 		const promises = termNames.map( async ( termName ) => {
 			const newTerm = ( await createProductAttributeTerm( {
@@ -187,14 +219,8 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 
 		const newItems = await Promise.all( promises );
 
-		/*
-		 * Refresh attribute terms, invalidating the resolution
-		 * to include the newly created terms.
-		 * ToDo: Implement it optimally.
-		 */
-		invalidateResolutionForStoreSelector( 'getProductAttributeTerms', [
-			{ search: '', attribute_id: attributeId },
-		] );
+		// clean up temporary terms
+		setTemporaryTerms( [] );
 
 		onTermsSelect( [ ...selectedTerms, ...newItems ], index, attribute );
 	}
