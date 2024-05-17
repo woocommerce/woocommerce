@@ -23,6 +23,9 @@ import { forwardRef } from '@wordpress/element';
 import SiteIcon from '@wordpress/edit-site/build-module/components/site-icon';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
+import { isEntrepreneurFlow } from '~/customize-store/design-with-ai/entrepreneur-flow';
+import WordPressLogo from '~/lib/wordpress-logo';
+
 /**
  * Internal dependencies
  */
@@ -95,7 +98,14 @@ export const SiteHub = forwardRef(
 								) }
 								type="wp-admin"
 							>
-								<SiteIcon className="edit-site-layout__view-mode-toggle-icon" />
+								{ isEntrepreneurFlow() ? (
+									<WordPressLogo
+										size={ 24 }
+										className="woocommerce-cys-wordpress-header-logo"
+									/>
+								) : (
+									<SiteIcon className="edit-site-layout__view-mode-toggle-icon" />
+								) }
 							</Link>
 						</div>
 

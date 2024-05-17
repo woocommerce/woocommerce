@@ -15,7 +15,7 @@ import { CloseButton } from '../components/close-button/close-button';
 import { aiWizardClosedBeforeCompletionEvent } from '../events';
 import { isEntrepreneurFlow } from '../entrepreneur-flow';
 import { trackEvent } from '~/customize-store/tracking';
-import WordPressLogo from '../../../lib/wordpress-logo';
+import WordPressLogo from '~/lib/wordpress-logo';
 
 export type toneOfVoiceCompleteEvent = {
 	type: 'TONE_OF_VOICE_COMPLETE';
