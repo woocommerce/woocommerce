@@ -252,6 +252,9 @@ class WC_Install {
 			'wc_update_890_update_connect_to_woocommerce_note',
 			'wc_update_890_update_paypal_standard_load_eligibility',
 		),
+		'9.0.0' => array(
+			'wc_update_900_create_plugin_autoinstall_history_option',
+		),
 	);
 
 	/**
