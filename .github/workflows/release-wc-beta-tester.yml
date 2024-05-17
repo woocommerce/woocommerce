@@ -29,12 +29,3 @@ jobs:
             - name: Build WooCommerce Beta Tester Zip
               working-directory: plugins/woocommerce-beta-tester
               run: pnpm build:zip
-
-            - name: Create release
-              id: create_release
-              uses: woocommerce/action-gh-release@master
-              with:
-                  tag_name: wc-beta-tester-${{ inputs.version }}
-                  name: WooCommerce Beta Tester Release ${{ inputs.version }}
-                  draft: false
-                  files: plugins/woocommerce-beta-tester/woocommerce-beta-tester.zip
