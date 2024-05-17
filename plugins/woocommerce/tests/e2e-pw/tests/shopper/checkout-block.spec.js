@@ -162,6 +162,31 @@ baseTest.describe( 'Checkout Block page', () => {
 
 			await api.delete( `customers/${ customerId }`, { force: true } );
 		}
+		// make sure our customer user has a pre-defined billing/shipping address
+		await api.put( `customers/2`, {
+			shipping: {
+				first_name: 'Maggie',
+				last_name: 'Simpson',
+				company: '',
+				address_1: '123 Evergreen Terrace',
+				address_2: '',
+				city: 'Springfield',
+				state: 'OR',
+				postcode: '97403',
+				country: 'US',
+			},
+			billing: {
+				first_name: 'Maggie',
+				last_name: 'Simpson',
+				company: '',
+				address_1: '123 Evergreen Terrace',
+				address_2: '',
+				city: 'Springfield',
+				state: 'OR',
+				postcode: '97403',
+				country: 'US',
+			},
+		} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -688,26 +713,10 @@ baseTest.describe( 'Checkout Block page', () => {
 			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
-		// if edit address is present click it, otherwise fill shipping details
-		// eslint-disable-next-line playwright/no-networkidle
-		await page.waitForLoadState( 'networkidle' ); // need to wait for the page to load
-		if (
-			await page
-				.getByLabel( 'Edit address', { exact: true } )
-				.first()
-				.isVisible()
-		) {
-			await page
-				.getByLabel( 'Edit address', { exact: true } )
-				.first()
-				.click();
-		} else {
-			console.log(
-				'No saved shipping address found, filling it instead.'
-			);
-			// fill shipping address
-			await fillShippingCheckoutBlocks( page );
-		}
+		await page
+			.getByLabel( 'Edit address', { exact: true } )
+			.first()
+			.click();
 
 		// check COD payment method
 		await page.getByLabel( 'Cash on delivery' ).check();
