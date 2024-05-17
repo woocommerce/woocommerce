@@ -272,6 +272,7 @@ class WC_Helper_Updater {
 		// Prepare the expiry notice based on subscription status.
 		$expiry_notice = '';
 		if ( ! empty( $subscription['expired'] ) && ! $subscription['lifetime'] ) {
+			/* translators: 1: Product regular price */
 			$producr_price = ! empty( $subscription['product_regular_price'] ) ? sprintf( __( 'for %s ', 'woocommerce' ), esc_html( $subscription['product_regular_price'] ) ) : '';
 
 			$expiry_notice = sprintf(
