@@ -272,18 +272,20 @@ class WC_Helper_Updater {
 		// Prepare the expiry notice based on subscription status.
 		$expiry_notice = '';
 		if ( ! empty( $subscription['expired'] ) && ! $subscription['lifetime'] ) {
+			$producr_price = ! empty( $subscription['product_regular_price'] ) ? sprintf( __( 'for %s ', 'woocommerce' ), esc_html( $subscription['product_regular_price'] ) ) : '';
+
 			$expiry_notice = sprintf(
 			/* translators: 1: URL to My Subscriptions page 2: Product price */
-				__( ' Your subscription expired, <a href="%1$s" class="woocommerce-renew-subscription">renew for %2$s</a> to update.', 'woocommerce' ),
-				'https://woocommerce.com/my-account/my-subscriptions/',
-				$subscription['product_regular_price']
+				__( ' Your subscription expired, <a href="%1$s" class="woocommerce-renew-subscription">renew %2$s</a>to update.', 'woocommerce' ),
+				esc_url( 'https://woocommerce.com/my-account/my-subscriptions/' ),
+				$producr_price
 			);
 		} elseif ( ! empty( $subscription['expiring'] ) && ! $subscription['autorenew'] ) {
 			$expiry_notice = sprintf(
 			/* translators: 1: Expiry date 1: URL to My Subscriptions page */
 				__( ' Your subscription expires on %1$s, <a href="%2$s" class="woocommerce-enable-autorenew">enable auto-renew</a> to continue receiving updates.', 'woocommerce' ),
 				date_i18n( 'F jS', $subscription['expires'] ),
-				'https://woocommerce.com/my-account/my-subscriptions/'
+				esc_url( 'https://woocommerce.com/my-account/my-subscriptions/' )
 			);
 		}
 
