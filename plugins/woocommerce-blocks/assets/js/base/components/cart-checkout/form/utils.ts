@@ -14,6 +14,7 @@ export interface FieldProps {
 	className: string;
 }
 
+// Create field props for a given address field.
 export const createFieldProps = (
 	address: KeyedFormField | undefined,
 	fieldId: string,
