@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Blocks\Patterns;
 use Automattic\WooCommerce\Admin\Features\Features;
 use WP_Error;
 use WP_Upgrader;
-use function cli\err;
 
 /**
  * PTKPatterns class.
