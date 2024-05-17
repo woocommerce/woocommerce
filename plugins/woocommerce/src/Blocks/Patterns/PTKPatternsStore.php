@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Blocks\Patterns;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use WP_Error;
 use WP_Upgrader;
 use function cli\err;
 
@@ -87,35 +88,20 @@ class PTKPatternsStore {
 	}
 
 	/**
-	 * Register block patterns from the Patterns Toolkit.
+	 * Get the patterns from the Patterns Toolkit cache.
 	 *
-	 * @return void
+	 * @return array|WP_Error
 	 */
 	public function get_patterns() {
 		$patterns = get_transient( self::TRANSIENT_NAME );
 
 		// Only if the transient is not set, we fetch the patterns from the PTK.
 		if ( false === $patterns ) {
-			$patterns = $this->ptk_client->fetch_patterns(
-				array(
-					'categories' => array( 'intro', 'about', 'services', 'testimonials' ),
-				)
+			$this->schedule_fetch_patterns();
+			return new WP_Error(
+				'patterns_store_error',
+				__( 'Failed to get the cached PTK patterns.', 'woocommerce' )
 			);
-
-			if ( is_wp_error( $patterns ) ) {
-				wc_get_logger()->warning(
-					sprintf(
-					// translators: %s is a generated error message.
-						__( 'Failed to get the patterns from the PTK: "%s"', 'woocommerce' ),
-						$patterns->get_error_message()
-					),
-				);
-				return;
-			}
-
-			$patterns = $this->filter_patterns( $patterns, self::EXCLUDED_PATTERNS );
-
-			set_transient( self::TRANSIENT_NAME, $patterns );
 		}
 
 		return $patterns;
@@ -180,7 +166,27 @@ class PTKPatternsStore {
 	 */
 	public function fetch_patterns() {
 		$this->flush_cached_patterns();
-		$this->get_patterns();
+
+		$patterns = $this->ptk_client->fetch_patterns(
+			array(
+				'categories' => array( 'intro', 'about', 'services', 'testimonials' ),
+			)
+		);
+
+		if ( is_wp_error( $patterns ) ) {
+			wc_get_logger()->warning(
+				sprintf(
+				// translators: %s is a generated error message.
+					__( 'Failed to get the patterns from the PTK: "%s"', 'woocommerce' ),
+					$patterns->get_error_message()
+				),
+			);
+			return;
+		}
+
+		$patterns = $this->filter_patterns( $patterns, self::EXCLUDED_PATTERNS );
+
+		set_transient( self::TRANSIENT_NAME, $patterns );
 	}
 
 	/**

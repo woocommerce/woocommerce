@@ -141,6 +141,9 @@ class BlockPatterns {
 		$this->ptk_patterns_store = new PTKPatternsStore( new PTKClient() );
 
 		$patterns = $this->ptk_patterns_store->get_patterns();
+		if ( is_wp_error( $patterns ) ) {
+			return;
+		}
 
 		foreach ( $patterns as $pattern ) {
 			$pattern['slug']    = $pattern['name'];
