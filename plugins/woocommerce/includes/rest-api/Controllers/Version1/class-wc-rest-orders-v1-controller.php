@@ -10,8 +10,7 @@
  * @since    3.0.0
  */
 
-use Automattic\WooCommerce\Utilities\ArrayUtil;
-use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Utilities\{ ArrayUtil, NumberUtil, StringUtil };
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -268,12 +267,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$shipping_taxes = $shipping_item->get_taxes();
 
 			if ( ! empty( $shipping_taxes['total'] ) ) {
-				// Ensure tax totals are all numeric before attempting to sum them, for PHP 8.3+ compatibility.
-				$tax_totals = array_filter(
-					$shipping_taxes['total'],
-					fn( $txtotal ) => is_numeric( $txtotal )
-				);
-				$total_tax = array_sum( $tax_totals );
+				$total_tax = NumberUtil::array_sum( $shipping_taxes['total'] );
 
 				$shipping_line['total_tax'] = wc_format_decimal( $total_tax, $dp );
 
