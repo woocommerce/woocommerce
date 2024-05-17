@@ -293,7 +293,7 @@ class WC_Helper_Updater {
 				$expiry_notice,
 				array(
 					'a' => array(
-						'href' => array(),
+						'href'  => array(),
 						'class' => array(),
 					),
 				)
