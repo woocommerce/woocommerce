@@ -140,6 +140,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 					);
 				}
 
+				// Handle both address_1 and address_2 fields together.
 				if ( field.key === 'address_1' ) {
 					return (
 						<AddressFields
@@ -162,6 +163,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 					);
 				}
 
+				// Skip address_2 field as it's handled with the address_1 field above.
 				if ( field.key === 'address_2' ) {
 					return null;
 				}
