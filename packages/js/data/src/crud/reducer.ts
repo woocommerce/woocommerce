@@ -85,15 +85,9 @@ export const createReducer = (
 					};
 
 				case TYPES.CREATE_ITEM_SUCCESS: {
-					const createItemSuccessRequestId = getRequestIdentifier(
-						CRUD_ACTIONS.CREATE_ITEM,
-						payload.key,
-						payload.query
-					);
-
 					const { options } = payload;
 
-					const { objItems } = organizeItemsById(
+					const { objItems, ids } = organizeItemsById(
 						[ payload.item ],
 						options.optimisticUrlParameters,
 						itemData
@@ -104,8 +98,14 @@ export const createReducer = (
 						...objItems,
 					};
 
+					const createItemSuccessRequestId = getRequestIdentifier(
+						CRUD_ACTIONS.CREATE_ITEM,
+						ids[ 0 ],
+						payload.query
+					);
+
 					let currentItems = state.items;
-					let queryItems = Object.keys( data ).map( ( key ) => +key );
+					let queryItems = ids;
 
 					let itemsCount = state.itemsCount;
 
@@ -146,23 +146,26 @@ export const createReducer = (
 							);
 						}
 
-						const getItemQuery = getRequestIdentifier(
+						const getItemQueryId = getRequestIdentifier(
 							CRUD_ACTIONS.GET_ITEMS,
 							options.optimisticQueryUpdate
 						);
+
+						const currentItemsByQueryId =
+							currentItems[ getItemQueryId ] || [];
+
+						currentItems = {
+							...currentItems,
+							[ getItemQueryId ]: {
+								...currentItemsByQueryId,
+								data: queryItems,
+							},
+						};
 
 						const getItemCountQuery = getTotalCountResourceName(
 							CRUD_ACTIONS.GET_ITEMS,
 							options.optimisticQueryUpdate
 						);
-
-						currentItems = {
-							...currentItems,
-							[ getItemQuery ]: {
-								...currentItems[ getItemQuery ],
-								data: queryItems,
-							},
-						};
 
 						itemsCount = {
 							...state.itemsCount,
