@@ -70,21 +70,35 @@ class PTKPatternsStore {
 	}
 
 	/**
-	 * Schedule an async action to fetch the PTK patterns.
+	 * Schedule an async action to fetch the PTK patterns when the scheduler is initialized.
 	 *
 	 * @return void
 	 */
 	private function schedule_fetch_patterns() {
 		if ( did_action( 'action_scheduler_init' ) ) {
-			as_schedule_single_action( time(), 'fetch_patterns' );
+			$this->schedule_action_if_not_pending( 'fetch_patterns' );
 		} else {
 			add_action(
 				'action_scheduler_init',
 				function () {
-					as_schedule_single_action( time(), 'fetch_patterns' );
+					$this->schedule_action_if_not_pending( 'fetch_patterns' );
 				}
 			);
 		}
+	}
+
+	/**
+	 * Schedule an action if it's not already pending.
+	 *
+	 * @param string $action The action name to schedule.
+	 * @return void
+	 */
+	private function schedule_action_if_not_pending( $action ) {
+		if ( as_has_scheduled_action( $action ) ) {
+			return;
+		}
+
+		as_schedule_single_action( time(), $action );
 	}
 
 	/**
@@ -94,7 +108,6 @@ class PTKPatternsStore {
 	 */
 	public function get_patterns() {
 		$patterns = get_transient( self::TRANSIENT_NAME );
-
 		// Only if the transient is not set, we fetch the patterns from the PTK.
 		if ( false === $patterns ) {
 			$this->schedule_fetch_patterns();
