@@ -196,6 +196,13 @@ export const createDispatchActions = ( {
 			} );
 			const { key } = parseId( item.id, urlParameters );
 
+			// Populats the URL parameters into the options
+			options = {
+				...options,
+				optimisticQueryUpdate: query,
+				optimisticUrlParameters: urlParameters,
+			};
+
 			yield createItemSuccess( key, item, query, options );
 			return item;
 		} catch ( error ) {

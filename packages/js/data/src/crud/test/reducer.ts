@@ -5,7 +5,7 @@ import { Actions } from '../actions';
 import { createReducer, ResourceState } from '../reducer';
 import { CRUD_ACTIONS } from '../crud-actions';
 import { getResourceName, getTotalCountResourceName } from '../../utils';
-import { getRequestIdentifier } from '..//utils';
+import { getRequestIdentifier } from '../utils';
 import { Item, ItemQuery } from '../types';
 import TYPES from '../action-types';
 
@@ -314,7 +314,7 @@ describe( 'crud reducer', () => {
 	} );
 
 	describe( 'should handle CREATE_ITEM_SUCCESS', () => {
-		it( 'when no options are passed', () => {
+		it( 'when empty previous state', () => {
 			const item: Item = {
 				id: 2,
 				name: 'Off the hook!',
@@ -325,12 +325,6 @@ describe( 'crud reducer', () => {
 				status: 'draft',
 			};
 
-			const resourceName = getRequestIdentifier(
-				CRUD_ACTIONS.CREATE_ITEM,
-				item.id,
-				query
-			);
-
 			const state = reducer( defaultState, {
 				type: TYPES.CREATE_ITEM_SUCCESS,
 				key: item.id,
@@ -339,15 +333,90 @@ describe( 'crud reducer', () => {
 				options: {},
 			} );
 
+			const resourceName = getRequestIdentifier(
+				CRUD_ACTIONS.CREATE_ITEM,
+				item.id,
+				query
+			);
+
 			expect( state.data[ 2 ].name ).toEqual( item.name );
 			expect( state.data[ 2 ].status ).toEqual( item.status );
 			expect( state.requesting[ resourceName ] ).toEqual( false );
 
+			// Not optimitic query update
 			expect( state.items ).toEqual( {} );
 			expect( state.itemsCount ).toEqual( {} );
 		} );
 
-		it( 'with optimisticQueryUpdate', () => {
+		it( 'when previous state', () => {
+			const item: Item = {
+				id: 3,
+				name: 'banana!',
+				status: 'draft',
+			};
+
+			const query = {
+				name: 'banana!',
+				status: 'draft',
+			};
+
+			const queryId = { type: 'fruit' };
+
+			const getItemsQueryId = getRequestIdentifier(
+				CRUD_ACTIONS.GET_ITEMS,
+				queryId
+			);
+
+			const getItemsCountQueryId = getTotalCountResourceName(
+				CRUD_ACTIONS.GET_ITEMS,
+				queryId
+			);
+
+			const initialState: ResourceState = {
+				items: {
+					[ getItemsQueryId ]: {
+						data: [ 1, 2 ],
+					},
+				},
+				itemsCount: {
+					[ getItemsCountQueryId ]: 2,
+				},
+				errors: {},
+				data: {
+					1: { id: 1, name: 'apple', status: 'draft' },
+					2: { id: 2, name: 'orange', status: 'publish' },
+				},
+				requesting: {},
+			};
+
+			const state = reducer( initialState, {
+				type: TYPES.CREATE_ITEM_SUCCESS,
+				key: item.id,
+				item,
+				query,
+				options: {},
+			} );
+
+			expect( state.data ).toEqual( {
+				1: { id: 1, name: 'apple', status: 'draft' },
+				2: { id: 2, name: 'orange', status: 'publish' },
+				3: { id: 3, name: 'banana!', status: 'draft' },
+			} );
+
+			const resourceName = getRequestIdentifier(
+				CRUD_ACTIONS.CREATE_ITEM,
+				item.id,
+				query
+			);
+			expect( state.requesting[ resourceName ] ).toEqual( false );
+
+			// Not optimitic query update
+			expect( state.items[ getItemsQueryId ].data ).toHaveLength( 2 );
+			expect( state.items[ getItemsQueryId ].data ).toEqual( [ 1, 2 ] );
+			expect ( state.itemsCount[ getItemsCountQueryId ] ).toEqual( 2 );
+		} );
+
+		it( 'when empty previous state, and optimisticQueryUpdate options', () => {
 			const item: Item = {
 				id: 7,
 				name: 'Off the hook!',
@@ -385,19 +454,19 @@ describe( 'crud reducer', () => {
 			);
 			expect( state.requesting[ resourceName ] ).toEqual( false );
 
-			const itemQueryId = getRequestIdentifier(
+			const getItemsQueryId = getRequestIdentifier(
 				CRUD_ACTIONS.GET_ITEMS,
 				options.optimisticQueryUpdate
 			);
 
-			expect( state.items[ itemQueryId ].data ).toHaveLength( 1 );
-			expect( state.items[ itemQueryId ].data[ 0 ] ).toEqual( 7 ); // Item id
+			expect( state.items[ getItemsQueryId ].data ).toHaveLength( 1 );
+			expect( state.items[ getItemsQueryId ].data[ 0 ] ).toEqual( 7 ); // Item id
 
 			const itemsKey = Object.keys( state.items );
 			expect( itemsKey ).toHaveLength( 1 );
-			expect( itemsKey[ 0 ] ).toEqual( itemQueryId );
+			expect( itemsKey[ 0 ] ).toEqual( getItemsQueryId );
 
-			const itemsCountQuery = getRequestIdentifier(
+			const getItemsCountQueryId = getTotalCountResourceName(
 				CRUD_ACTIONS.GET_ITEMS,
 				options.optimisticQueryUpdate
 			);
@@ -405,25 +474,28 @@ describe( 'crud reducer', () => {
 			const itemsCountKey = Object.keys( state.itemsCount );
 
 			// ItemsCount should be 1
-			expect( state.itemsCount[ itemsCountQuery ] ).toEqual( 1 );
+			expect( state.itemsCount[ getItemsCountQueryId ] ).toEqual( 1 );
 
 			expect( itemsCountKey ).toHaveLength( 1 );
-			expect( itemsCountKey[ 0 ] ).toEqual( itemsCountQuery );
+			expect( itemsCountKey[ 0 ] ).toEqual( getItemsCountQueryId );
 		} );
 
-		it( 'with optimisticUrlParameters', () => {
+		it( 'when empty previous state, and optimisticQueryUpdate and optimisticUrlParameters options', () => {
 			const item: Item = {
 				id: 7,
 				name: 'Off the hook!',
 				status: 'draft',
 			};
+
 			const query = {
 				name: 'Off the hook!',
 				status: 'draft',
+				parent_id: 200,
 			};
 
 			const options = {
-				optimisticUrlParameters: [ 200, 10 ],
+				optimisticQueryUpdate: { parent_id: 200 },
+				optimisticUrlParameters: [ 200 ],
 			};
 
 			const state = reducer( defaultState, {
@@ -435,7 +507,7 @@ describe( 'crud reducer', () => {
 			} );
 
 			expect( state.data ).toEqual( {
-				'200/10/7': {
+				'200/7': {
 					id: 7,
 					name: 'Off the hook!',
 					status: 'draft',
@@ -444,10 +516,32 @@ describe( 'crud reducer', () => {
 
 			const resourceName = getRequestIdentifier(
 				CRUD_ACTIONS.CREATE_ITEM,
-				item.id,
+				'200/7',
 				query
 			);
+
 			expect( state.requesting[ resourceName ] ).toEqual( false );
+
+			const getItemsQueryId = getRequestIdentifier(
+				CRUD_ACTIONS.GET_ITEMS,
+				options.optimisticQueryUpdate
+			);
+
+			expect( state.items[ getItemsQueryId ] ).toBeDefined();
+			expect( state.items[ getItemsQueryId ].data ).toEqual( [
+				'200/7',
+			] );
+
+			const getItemsCountQueryId = getTotalCountResourceName(
+				CRUD_ACTIONS.GET_ITEMS,
+				options.optimisticQueryUpdate
+			);
+
+			expect( state.itemsCount[ getItemsCountQueryId ] ).toEqual( 1 );
+
+			const itemsCountKey = Object.keys( state.itemsCount );
+			expect( itemsCountKey ).toHaveLength( 1 );
+			expect( itemsCountKey[ 0 ] ).toEqual( getItemsCountQueryId );
 		} );
 	} );
 
