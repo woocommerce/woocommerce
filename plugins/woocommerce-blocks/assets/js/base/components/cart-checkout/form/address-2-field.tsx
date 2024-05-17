@@ -23,6 +23,8 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 		return objectHasProp( values, 'address_2' ) && values.address_2 !== '';
 	}, [ values ] );
 
+	const [ hasFieldBeenModified, setHasFieldBeenModified ] = useState( false );
+
 	const isFieldRequired = field ? field.required : false;
 
 	const [ isFieldVisible, setFieldVisible ] = useState(
@@ -36,6 +38,20 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 		},
 		[]
 	);
+
+	useEffect( () => {
+		/**
+		 * Determine if the address 2 input field should be shown based on the following conditions:
+		 *
+		 * 1. If the address 2 field is required.
+		 * 2. If the address 2 field has a value.
+		 * 3. If the seller has edited the address 2 field.
+		 */
+		const shouldShowField =
+			isFieldRequired || hasFieldValue || hasFieldBeenModified;
+
+		setFieldVisible( shouldShowField );
+	}, [ isFieldRequired, hasFieldValue, hasFieldBeenModified ] );
 
 	return (
 		<Fragment key={ field.key }>
@@ -55,6 +71,7 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 							...values,
 							[ field.key ]: newValue,
 						} );
+						setHasFieldBeenModified( true );
 					} }
 				/>
 			) : (
