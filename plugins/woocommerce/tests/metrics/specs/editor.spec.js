@@ -1,4 +1,4 @@
-/* eslint-disable playwright/no-conditional-in-test, playwright/expect-expect */
+/* eslint-disable @woocommerce/dependency-group, jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */
 
 /**
  * WordPress dependencies
@@ -125,12 +125,7 @@ test.describe( 'Editor Performance', () => {
 			console.log( draftId );
 		} );
 
-		test( 'Run the test', async ( {
-			admin,
-			page,
-			perfUtils,
-			metrics,
-		} ) => {
+		test( 'Run the test', async ( { admin, page, perfUtils, metrics } ) => {
 			await editPost( admin, page, draftId );
 			await perfUtils.disableAutosave();
 			const canvas = await perfUtils.getCanvas();
@@ -175,4 +170,4 @@ test.describe( 'Editor Performance', () => {
 	} );
 } );
 
-/* eslint-enable playwright/no-conditional-in-test, playwright/expect-expect */
+/* eslint-enable @woocommerce/dependency-group, jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */
