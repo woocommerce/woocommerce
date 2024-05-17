@@ -385,17 +385,17 @@ describe( 'crud reducer', () => {
 			);
 			expect( state.requesting[ resourceName ] ).toEqual( false );
 
-			const itemQuery = getRequestIdentifier(
+			const itemQueryId = getRequestIdentifier(
 				CRUD_ACTIONS.GET_ITEMS,
 				options.optimisticQueryUpdate
 			);
 
-			expect( state.items[ itemQuery ].data ).toHaveLength( 1 );
-			expect( state.items[ itemQuery ].data[ 0 ] ).toEqual( 7 ); // Item id
+			expect( state.items[ itemQueryId ].data ).toHaveLength( 1 );
+			expect( state.items[ itemQueryId ].data[ 0 ] ).toEqual( 7 ); // Item id
 
 			const itemsKey = Object.keys( state.items );
 			expect( itemsKey ).toHaveLength( 1 );
-			expect( itemsKey[ 0 ] ).toEqual( itemQuery );
+			expect( itemsKey[ 0 ] ).toEqual( itemQueryId );
 
 			const itemsCountQuery = getRequestIdentifier(
 				CRUD_ACTIONS.GET_ITEMS,
