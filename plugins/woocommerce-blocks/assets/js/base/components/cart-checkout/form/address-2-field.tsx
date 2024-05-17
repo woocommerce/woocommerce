@@ -3,13 +3,7 @@
  */
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
 import { AddressFormValues, ContactFormValues } from '@woocommerce/settings';
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useState,
-	Fragment,
-} from '@wordpress/element';
+import { useCallback, useMemo, useState, Fragment } from '@wordpress/element';
 import { objectHasProp } from '@woocommerce/types';
 import { __, sprintf } from '@wordpress/i18n';
 
