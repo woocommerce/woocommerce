@@ -268,7 +268,14 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$shipping_taxes = $shipping_item->get_taxes();
 
 			if ( ! empty( $shipping_taxes['total'] ) ) {
-				$shipping_line['total_tax'] = wc_format_decimal( array_sum( $shipping_taxes['total'] ), $dp );
+				// Ensure tax totals are all numeric before attempting to sum them, for PHP 8.3+ compatibility.
+				$tax_totals = array_filter(
+					$shipping_taxes['total'],
+					fn( $txtotal ) => is_numeric( $txtotal )
+				);
+				$total_tax = array_sum( $tax_totals );
+
+				$shipping_line['total_tax'] = wc_format_decimal( $total_tax, $dp );
 
 				foreach ( $shipping_taxes['total'] as $tax_rate_id => $tax ) {
 					$shipping_line['taxes'][] = array(
