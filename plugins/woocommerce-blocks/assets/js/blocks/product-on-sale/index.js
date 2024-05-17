@@ -30,6 +30,7 @@ registerBlockType( 'woocommerce/product-on-sale', {
 		'woocommerce'
 	),
 	supports: {
+		inserter: 'false',
 		align: [ 'wide', 'full' ],
 		html: false,
 	},

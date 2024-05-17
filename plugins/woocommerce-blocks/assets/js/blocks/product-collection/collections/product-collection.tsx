@@ -17,7 +17,7 @@ const collection = {
 	icon: ( <Icon icon={ loop } /> ) as BlockIcon,
 	description:
 		'Display all products in your catalog. Results can (change to) match the current template, page, or search term.',
-	keywords: [ 'all products' ],
+	keywords: [ 'all products', 'products (beta)' ],
 	scope: [],
 };
 

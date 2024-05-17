@@ -22,8 +22,8 @@ const collection = {
 		'Highlight products that are currently on sale.',
 		'woocommerce'
 	),
-	keywords: [ 'product collection' ],
-	scope: [],
+	keywords: [ 'product collection', 'products' ],
+	scope: [ 'inserter' ],
 };
 
 const attributes = {

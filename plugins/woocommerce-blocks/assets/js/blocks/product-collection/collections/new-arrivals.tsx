@@ -23,8 +23,8 @@ const collection = {
 	title: __( 'New Arrivals', 'woocommerce' ),
 	icon: ( <Icon icon={ calendar } /> ) as BlockIcon,
 	description: __( 'Recommend your newest products.', 'woocommerce' ),
-	keywords: [ 'newest products', 'product collection' ],
-	scope: [],
+	keywords: [ 'newest products', 'product collection', 'products' ],
+	scope: [ 'inserter' ],
 };
 
 const attributes = {

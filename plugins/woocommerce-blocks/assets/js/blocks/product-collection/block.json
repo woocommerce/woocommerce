@@ -6,7 +6,13 @@
 	"title": "Product Collection (Beta)",
 	"description": "Display a collection of products from your store.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce", "Products (Beta)" ],
+	"keywords": [
+		"WooCommerce",
+		"Products (Beta)",
+		"products by categories",
+		"products by tags",
+		"products by attributes"
+	],
 	"textdomain": "woocommerce",
 	"attributes": {
 		"queryId": {
