@@ -92,12 +92,16 @@ export const createReducer = (
 					);
 
 					const { options } = payload;
+
+					const { objItems } = organizeItemsById(
+						[ payload.item ],
+						options.optimisticUrlParameters,
+						itemData
+					);
+
 					const data = {
 						...itemData,
-						[ payload.key ]: {
-							...( itemData[ payload.key ] || {} ),
-							...payload.item,
-						},
+						...objItems,
 					};
 
 					let currentItems = state.items;
