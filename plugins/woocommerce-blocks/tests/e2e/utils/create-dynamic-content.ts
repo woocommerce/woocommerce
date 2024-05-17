@@ -3,16 +3,8 @@
  */
 import { readFile } from 'fs/promises';
 import Handlebars from 'handlebars';
-import {
-	CreatePostPayload,
-	Post,
-} from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
+import { CreatePostPayload } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
-
-export type TestingPost = {
-	post: Post;
-	deletePost: () => Promise< void >;
-};
 
 Handlebars.registerPartial(
 	'wp-block',
@@ -37,8 +29,6 @@ export const deletePost = async ( requestUtils: RequestUtils, id: number ) => {
 	} );
 };
 
-const posts: number[] = [];
-
 const createPost = async (
 	requestUtils: RequestUtils,
 	payload: CreatePostPayload
@@ -50,7 +40,6 @@ const createPost = async (
 		path: `/wp/v2/posts`,
 		data: { ...payload },
 	} );
-	posts.push( post.id );
 	return post;
 };
 
@@ -73,4 +62,24 @@ export const createPostFromTemplate = async (
 	};
 
 	return createPost( requestUtils, payload );
+};
+
+export const updateTemplateContents = async (
+	requestUtils: RequestUtils,
+	templateId: string,
+	templatePath: string,
+	data: unknown
+) => {
+	const templateContent = await readFile( templatePath, 'utf8' );
+	const content = Handlebars.compile( templateContent )( data );
+
+	const payload = {
+		content,
+	};
+
+	return requestUtils.rest( {
+		method: 'POST',
+		path: `/wp/v2/templates/${ templateId }`,
+		data: { ...payload },
+	} );
 };
