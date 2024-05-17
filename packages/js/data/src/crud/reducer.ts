@@ -104,8 +104,22 @@ export const createReducer = (
 						payload.query
 					);
 
+					const getItemQueryId = getRequestIdentifier(
+						CRUD_ACTIONS.GET_ITEMS,
+						options.optimisticQueryUpdate
+					);
+
+					const getItemCountQueryId = getTotalCountResourceName(
+						CRUD_ACTIONS.GET_ITEMS,
+						options?.optimisticQueryUpdate || {}
+					);
+
 					let currentItems = state.items;
-					let queryItems = ids;
+
+					const currentItemsByQueryId =
+						currentItems[ getItemQueryId ]?.data || [];
+
+					let nextItemsData = [ ...currentItemsByQueryId, ...ids ];
 
 					let itemsCount = state.itemsCount;
 
@@ -141,35 +155,21 @@ export const createReducer = (
 									)
 							);
 
-							queryItems = sortingData.map( ( item ) =>
+							nextItemsData = sortingData.map( ( item ) =>
 								Number( item.id )
 							);
 						}
 
-						const getItemQueryId = getRequestIdentifier(
-							CRUD_ACTIONS.GET_ITEMS,
-							options.optimisticQueryUpdate
-						);
-
-						const currentItemsByQueryId =
-							currentItems[ getItemQueryId ] || [];
-
 						currentItems = {
 							...currentItems,
 							[ getItemQueryId ]: {
-								...currentItemsByQueryId,
-								data: queryItems,
+								data: nextItemsData,
 							},
 						};
 
-						const getItemCountQuery = getTotalCountResourceName(
-							CRUD_ACTIONS.GET_ITEMS,
-							options.optimisticQueryUpdate
-						);
-
 						itemsCount = {
 							...state.itemsCount,
-							[ getItemCountQuery ]: Object.keys( data ).length,
+							[ getItemCountQueryId ]: Object.keys( data ).length,
 						};
 					}
 
