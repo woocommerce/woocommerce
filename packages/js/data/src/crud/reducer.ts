@@ -145,6 +145,7 @@ export const createReducer = (
 								?.order_by as OrderBy;
 
 							let sortingData = Object.values( data );
+
 							sortingData = sortingData.sort( ( a, b ) =>
 								( a[ order_by ] as string )
 									.toLowerCase()
@@ -155,9 +156,15 @@ export const createReducer = (
 									)
 							);
 
-							nextItemsData = sortingData.map( ( item ) =>
-								Number( item.id )
+							// Pick the ids from the sorted data.
+							const { ids: sortedIds } = organizeItemsById(
+								sortingData,
+								options.optimisticUrlParameters,
+								itemData
 							);
+
+							// Update the items data with the sorted ids.
+							nextItemsData = sortedIds;
 						}
 
 						currentItems = {
