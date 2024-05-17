@@ -1696,29 +1696,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @param array $check_emails Array of customer email addresses.
 	 * @param array $restrictions Array of allowed email addresses.
+	 *
 	 * @return bool
+	 * @deprecated 9.0.0 In favor of WC_Discounts->is_coupon_emails_allowed.
 	 */
 	public function is_coupon_emails_allowed( $check_emails, $restrictions ) {
+		$discounts = new WC_Discounts( $this );
 
-		foreach ( $check_emails as $check_email ) {
-			// With a direct match we return true.
-			if ( in_array( $check_email, $restrictions, true ) ) {
-				return true;
-			}
-
-			// Go through the allowed emails and return true if the email matches a wildcard.
-			foreach ( $restrictions as $restriction ) {
-				// Convert to PHP-regex syntax.
-				$regex = '/^' . str_replace( '*', '(.+)?', $restriction ) . '$/';
-				preg_match( $regex, $check_email, $match );
-				if ( ! empty( $match ) ) {
-					return true;
-				}
-			}
-		}
-
-		// No matches, this one isn't allowed.
-		return false;
+		return $discounts->is_coupon_emails_allowed( $check_emails, $restrictions );
 	}
 
 
