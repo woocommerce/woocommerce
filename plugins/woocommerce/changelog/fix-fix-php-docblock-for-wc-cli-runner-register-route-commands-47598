@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Fixed PHP DocBlock parameter for WC_CLI_Runner::register_route_commands

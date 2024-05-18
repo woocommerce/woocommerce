@@ -98,7 +98,7 @@ class WC_CLI_Runner {
 	 * Generates command information and tells WP CLI about all
 	 * commands available from a route.
 	 *
-	 * @param string $rest_command WC-API command.
+	 * @param WC_CLI_REST_Command $rest_command WC-API command.
 	 * @param string $route Path to route endpoint.
 	 * @param array  $route_data Command data.
 	 * @param array  $command_args WP-CLI command arguments.
