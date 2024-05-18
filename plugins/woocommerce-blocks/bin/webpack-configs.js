@@ -14,6 +14,7 @@ const CreateFileWebpack = require( 'create-file-webpack' );
 const CircularDependencyPlugin = require( 'circular-dependency-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+const StorybookPlugin = require( '@woocommerce/webpack-storyblock' );
 
 /**
  * Internal dependencies
@@ -432,6 +433,7 @@ const getFrontConfig = ( options = {} ) => {
 				bundleAnalyzerReportTitle: 'Frontend',
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Frontend' ) ),
+			new StorybookPlugin(),
 		],
 		resolve: {
 			...resolve,

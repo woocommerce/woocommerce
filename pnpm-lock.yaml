@@ -2854,6 +2854,8 @@ importers:
         specifier: 0.14.3
         version: 0.14.3
 
+  packages/js/webpack-storyblock: {}
+
   packages/php/remote-specs-validation:
     dependencies:
       commander:
@@ -3892,6 +3894,9 @@ importers:
       '@woocommerce/tracks':
         specifier: workspace:^
         version: link:../../packages/js/tracks
+      '@woocommerce/webpack-storyblock':
+        specifier: workspace:^
+        version: link:../../packages/js/webpack-storyblock
       '@wordpress/autop':
         specifier: 3.16.0
         version: 3.16.0

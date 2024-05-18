@@ -283,6 +283,7 @@
 		"@emotion/styled": "^11.11.0",
 		"@preact/signals": "^1.2.2",
 		"@woocommerce/tracks": "workspace:^",
+		"@woocommerce/webpack-storyblock": "workspace:^",
 		"@wordpress/autop": "3.16.0",
 		"@wordpress/compose": "5.5.0",
 		"@wordpress/deprecated": "3.41.0",
@@ -392,6 +393,7 @@
 			"files": [
 				"webpack.config.js",
 				"bin/webpack-*.js",
+				"bin/storybook-plugin.js",
 				"tsconfig.json",
 				"tsconfig.base.json",
 				"babel.config.js",
