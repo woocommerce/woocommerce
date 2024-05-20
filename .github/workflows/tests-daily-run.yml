@@ -2,7 +2,8 @@ name: 'Daily tests run'
 on: [pull_request]
 
 jobs:
-  trigger:
+  run-tests:
+    name: 'Run tests'
     uses: ./.github/workflows/ci.yml
     with:
       runType: 'run type'
