@@ -136,19 +136,21 @@ export const Transitional = ( {
 						{ __( 'View store', 'woocommerce' ) }
 					</Button>
 
-					<Button
-						variant="primary"
-						onClick={ () => {
-							trackEvent(
-								'customize_your_store_transitional_home_click'
-							);
-							sendEvent( {
-								type: 'GO_BACK_TO_HOME',
-							} );
-						} }
-					>
-						{ __( 'Back to Home', 'woocommerce' ) }
-					</Button>
+					{ isEntrepreneurFlow() && (
+						<Button
+							variant="primary"
+							onClick={ () => {
+								trackEvent(
+									'customize_your_store_transitional_home_click'
+								);
+								sendEvent( {
+									type: 'GO_BACK_TO_HOME',
+								} );
+							} }
+						>
+							{ __( 'Back to Home', 'woocommerce' ) }
+						</Button>
+					) }
 				</div>
 				{ ! isEntrepreneurFlow() && (
 					<>
