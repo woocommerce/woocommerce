@@ -82,6 +82,33 @@ defined( 'ABSPATH' ) || exit;
 			</span>
 		<?php endif; ?>
 
+		<?php if ( array_key_exists('utm_source_platform', $meta ) ) : ?>
+		<h4>
+			<?php esc_html_e( 'Source platform', 'woocommerce' ); ?>
+		</h4>
+		<span class="order-attribution-utm-source-platform">
+				<?php echo esc_html( $meta['utm_source_platform'] ); ?>
+			</span>
+		<?php endif; ?>
+
+		<?php if ( array_key_exists( 'utm_creative_format', $meta ) ) : ?>
+			<h4>
+				<?php esc_html_e( 'Creative format', 'woocommerce' ); ?>
+			</h4>
+			<span class="order-attribution-utm-creative-format">
+				<?php echo esc_html( $meta['utm_creative_format'] ); ?>
+			</span>
+		<?php endif; ?>
+
+		<?php if ( array_key_exists( 'utm_marketing_tactic', $meta ) ) : ?>
+			<h4>
+				<?php esc_html_e( 'Marketing tactic', 'woocommerce' ); ?>
+			</h4>
+			<span class="order-attribution-utm-marketing-tactic">
+				<?php echo esc_html( $meta['utm_marketing_tactic'] ); ?>
+			</span>
+		<?php endif; ?>
+
 	</div>
 
 	<?php if ( array_key_exists( 'device_type', $meta ) ) : ?>
