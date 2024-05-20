@@ -5,6 +5,6 @@ jobs:
   trigger:
     uses: ./.github/workflows/ci.yml
     with:
-      myInput: 'inputValue'
+      runType: 'run type'
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
