@@ -139,14 +139,16 @@ test.describe( 'Product editor Performance', () => {
 	} );
 
 	test.describe( 'Typing', () => {
-		test( 'Run the test', async ( { page, perfUtils, metrics } ) => {
+		test( 'Run the test', async ( { page, metrics } ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
 
-			const interfaceSkeleton = await perfUtils.getInterfaceSkeleton();
+			// Wait for the Preview button.
+			await page
+				.locator( '[aria-label="Preview in new tab"]' )
+				.first()
+				.waitFor();
 
-			const input = interfaceSkeleton.getByPlaceholder(
-				'e.g. 12 oz Coffee Mug'
-			);
+			const input = page.getByPlaceholder( 'e.g. 12 oz Coffee Mug' );
 
 			// The first character typed triggers a longer time (isTyping change).
 			// It can impact the stability of the metric, so we exclude it. It
