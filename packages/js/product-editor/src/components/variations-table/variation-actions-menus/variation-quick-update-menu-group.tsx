@@ -9,22 +9,22 @@ import { createElement, Fragment } from '@wordpress/element';
  * Internal dependencies
  */
 
-import { Test } from './types';
+import { VariationQuickUpdateSelectionProps } from './types';
 
 export const VariationQuickUpdateMenuGroup: React.FC< {
 	name?: string;
 	label?: string;
-	children?: ( props: Test ) => React.ReactNode;
+	children?: ( props: VariationQuickUpdateSelectionProps ) => React.ReactNode;
 } > & {
 	Slot: React.FC<
 		Slot.Props & {
 			name?: string;
-		} & Test
+		} & VariationQuickUpdateSelectionProps
 	>;
 } = ( { children, name = '', label } ) => {
 	return (
 		<Fill name={ name }>
-			{ ( fillProps: Fill.Props & Test ) => {
+			{ ( fillProps: VariationQuickUpdateSelectionProps ) => {
 				return (
 					<MenuGroup label={ label }>
 						{ children && children( fillProps ) }
