@@ -3,7 +3,7 @@
  */
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
 import { AddressFormValues, ContactFormValues } from '@woocommerce/settings';
-import { useEffect, useState, Fragment } from '@wordpress/element';
+import { useState, Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
