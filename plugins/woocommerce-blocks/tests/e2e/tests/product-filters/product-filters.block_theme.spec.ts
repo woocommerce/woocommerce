@@ -43,14 +43,14 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test( 'should be visible and contain correct inner blocks', async ( {
-		page,
+		editor,
 		pageObject,
 	} ) => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
-		const block = page
-			.frameLocator( 'iframe[name="editor-canvas"]' )
-			.getByLabel( 'Block: Product Filters (Beta)' );
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Beta)'
+		);
 		await expect( block ).toBeVisible();
 
 		const filtersbBlockHeading = block.getByRole( 'document', {

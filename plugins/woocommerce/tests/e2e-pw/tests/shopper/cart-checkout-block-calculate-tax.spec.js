@@ -73,7 +73,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 				cities: '*',
 				postcodes: '*',
 				rate: '25',
-				name: 'Nasty Tax',
+				name: 'Tax',
 				shipping: false,
 			} )
 			.then( ( response ) => {
@@ -145,7 +145,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 			).toContainText( '$125.00' );
 			await expect(
 				page.locator( '.wc-block-components-totals-footer-item-tax' )
-			).toHaveText( 'Including $25.00 Nasty Tax' );
+			).toHaveText( 'Including $25.00 Tax' );
 		} );
 
 		await test.step( 'Load checkout page and confirm price display', async () => {
@@ -164,7 +164,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 			).toContainText( '$125.00' );
 			await expect(
 				page.locator( '.wc-block-components-totals-footer-item-tax' )
-			).toHaveText( 'Including $25.00 Nasty Tax' );
+			).toHaveText( 'Including $25.00 Tax' );
 		} );
 	} );
 
