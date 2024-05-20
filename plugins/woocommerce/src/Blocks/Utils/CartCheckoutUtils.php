@@ -62,7 +62,7 @@ class CartCheckoutUtils {
 			$country_data[ $country_code ] = [
 				'allowBilling'  => isset( $billing_countries[ $country_code ] ),
 				'allowShipping' => isset( $shipping_countries[ $country_code ] ),
-				'states'        => self::deep_sort_with_accents( $country_states[ $country_code ] ?? [] ),
+				'states'        => $country_states[ $country_code ] ?? [],
 				'locale'        => $country_locales[ $country_code ] ?? [],
 			];
 		}
