@@ -5,7 +5,7 @@ import { BlockInstance } from '@wordpress/blocks';
 import { Popover } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement, useEffect, useState } from '@wordpress/element';
-import { useResizeObserver } from '@wordpress/compose';
+import { useDebounce, useResizeObserver } from '@wordpress/compose';
 import { PluginArea } from '@wordpress/plugins';
 import classNames from 'classnames';
 import { isWpVersion } from '@woocommerce/settings';
@@ -137,10 +137,15 @@ export function IframeEditor( {
 		updateSettings( productBlockEditorSettings );
 	}, [] );
 
+	const debouncedAppendToEditorHistory = useDebounce(
+		appendToEditorHistory,
+		250
+	);
+
 	const handleBlockEditorProviderOnChange = (
 		updatedBlocks: BlockInstance[]
 	) => {
-		appendToEditorHistory( updatedBlocks );
+		debouncedAppendToEditorHistory( updatedBlocks );
 		setTemporalBlocks( updatedBlocks );
 		onChange( updatedBlocks );
 	};
@@ -148,6 +153,7 @@ export function IframeEditor( {
 	const handleBlockEditorProviderOnInput = (
 		updatedBlocks: BlockInstance[]
 	) => {
+		debouncedAppendToEditorHistory( updatedBlocks );
 		setTemporalBlocks( updatedBlocks );
 		onInput( updatedBlocks );
 	};
