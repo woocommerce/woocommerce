@@ -13,7 +13,7 @@ export interface ValidatedTextInputProps
 	// Unique instance ID. id will be used instead if provided.
 	instanceId?: string | undefined;
 	// Type of input, defaults to text.
-	type?: string;
+	type?: string | undefined;
 	// Class name to add to the input.
 	className?: string | undefined;
 	// aria-describedby attribute to add to the input.
