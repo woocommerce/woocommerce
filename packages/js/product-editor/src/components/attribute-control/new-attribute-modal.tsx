@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement, Fragment, useEffect } from '@wordpress/element';
+import {
+	createElement,
+	Fragment,
+	useEffect,
+	useMemo,
+} from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	Form,
@@ -193,7 +198,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		name: defaultSearch,
 	} as EnhancedProductAttribute;
 
-	const attributeSortCriteria = { order_by: 'name' };
+	// Memoize attribute sort criteria to prevent re-renders.
+	const attributeSortCriteria = useMemo( () => ( { order_by: 'name' } ), [] );
 
 	const { attributes, isLoadingAttributes } = useSelect(
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -211,7 +217,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 				),
 				attributes: getAttributes( attributeSortCriteria ),
 			};
-		}
+		},
+		[ attributeSortCriteria ]
 	);
 
 	const { createErrorNotice } = useDispatch( 'core/notices' );
