@@ -54,6 +54,7 @@
 		"test:api": "API_TEST_REPORT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
 		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
 		"test:e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js",
+		"test:e2e-pw:gb": "PLUGIN_REPOSITORY='WordPress/gutenberg' PLUGIN_NAME=Gutenberg PLUGIN_SLUG=gutenberg ./tests/e2e-pw/bin/install-plugin.sh && test:e2e-pw",
 		"test:perf": "./k6 run ./tests/performance/tests/gh-action-pr-requests.js",
 		"test:env:start": "pnpm env:test",
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
@@ -202,6 +203,25 @@
 						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php",
 						"tests/e2e-pw/**"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - Gutenberg",
+					"testType": "e2e",
+					"command": "test:e2e-pw",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"events": [
+						"daily-e2e"
 					],
 					"testEnv": {
 						"start": "env:test"
