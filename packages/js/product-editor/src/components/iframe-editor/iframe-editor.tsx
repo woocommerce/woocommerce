@@ -137,6 +137,21 @@ export function IframeEditor( {
 		updateSettings( productBlockEditorSettings );
 	}, [] );
 
+	const handleBlockEditorProviderOnChange = (
+		updatedBlocks: BlockInstance[]
+	) => {
+		appendToEditorHistory( updatedBlocks );
+		setTemporalBlocks( updatedBlocks );
+		onChange( updatedBlocks );
+	};
+
+	const handleBlockEditorProviderOnInput = (
+		updatedBlocks: BlockInstance[]
+	) => {
+		setTemporalBlocks( updatedBlocks );
+		onInput( updatedBlocks );
+	};
+
 	const settings = __settings || parentEditorSettings;
 
 	const inlineFixedBlockToolbar =
@@ -164,15 +179,8 @@ export function IframeEditor( {
 						templateLock: false,
 					} }
 					value={ temporalBlocks }
-					onChange={ ( updatedBlocks: BlockInstance[] ) => {
-						appendToEditorHistory( updatedBlocks );
-						setTemporalBlocks( updatedBlocks );
-						onChange( updatedBlocks );
-					} }
-					onInput={ ( updatedBlocks: BlockInstance[] ) => {
-						setTemporalBlocks( updatedBlocks );
-						onInput( updatedBlocks );
-					} }
+					onChange={ handleBlockEditorProviderOnChange }
+					onInput={ handleBlockEditorProviderOnInput }
 					useSubRegistry={ true }
 				>
 					<RegisterStores />
