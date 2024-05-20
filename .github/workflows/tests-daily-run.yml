@@ -6,4 +6,4 @@ jobs:
     name: 'Run tests'
     uses: ./.github/workflows/ci.yml
     with:
-      runType: 'run type'
+      runType: 'daily-e2e'
