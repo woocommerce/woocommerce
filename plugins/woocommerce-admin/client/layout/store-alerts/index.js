@@ -76,6 +76,7 @@ export class StoreAlerts extends Component {
 					isSecondary={ ! action.primary }
 					href={ action.url || undefined }
 					onClick={ async ( event ) => {
+						event.currentTarget.classList.add( 'is-busy' );
 						const url = event.currentTarget.getAttribute( 'href' );
 						event.preventDefault();
 
