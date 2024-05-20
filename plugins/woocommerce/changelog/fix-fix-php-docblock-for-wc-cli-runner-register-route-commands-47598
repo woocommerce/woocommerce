@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Updated the PHP DocBlock for WC_CLI_Runner::register_route_commands to correctly specify the first parameter's type as being a WC_CLI_REST_Command object rather than a string.
