@@ -49,7 +49,7 @@ async function getTotalBlockingTime( page, idleWait ) {
 	return totalBlockingTime;
 }
 
-test.describe( 'Product editor Performance', () => {
+test.describe( 'Product editor performance', () => {
 	test.use( {
 		perfUtils: async ( { page }, use ) => {
 			await use( new PerfUtils( { page } ) );
