@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Automated installation of the Legacy REST API plugin should only happen once. After that, it must be installed manually (if needed). [#47563](https://github.com/woocommerce/woocommerce/pull/47563)
 * Fix - Fix warning when loading guest sessions from previous sessions. [#47514](https://github.com/woocommerce/woocommerce/pull/47514)
 * Fix - Prevent calling woocommerce.com on empty update-check and update-check-public payload. [#47507](https://github.com/woocommerce/woocommerce/pull/47507)
 * Fix - Fixes a crash in the modal block editor when the Add button is clicked with Gutenberg 18.3.0 and later [#47561](https://github.com/woocommerce/woocommerce/pull/47561)
