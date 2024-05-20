@@ -14,8 +14,8 @@ import { TRACKS_SOURCE } from '../../../constants';
 import { handlePrompt } from '../../../utils/handle-prompt';
 import { VariationActionsMenuItemProps } from '../types';
 import { VariationQuickUpdateMenuItem } from '../variation-actions-menus';
-import { addFixedOrPercentage } from '../../../blocks/product-fields/regular-price/edit';
 import { VariationQuickUpdateMenuGroup } from '../variation-actions-menus/variation-quick-update-menu-group';
+import { addFixedOrPercentage } from '../../../blocks/product-fields/regular-price/regular-price-menu-group';
 
 export function PricingMenuItem( {
 	selection,
