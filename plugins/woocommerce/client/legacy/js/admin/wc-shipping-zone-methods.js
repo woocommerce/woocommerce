@@ -264,10 +264,12 @@
 				setUnloadConfirmation: function() {
 					this.needsUnloadConfirm = true;
 					$save_button.prop( 'disabled', false );
+					$save_button.removeClass( 'is-busy' );
 				},
 				clearUnloadConfirmation: function() {
 					this.needsUnloadConfirm = false;
 					$save_button.attr( 'disabled', 'disabled' );
+					$save_button.addClass( 'is-busy' );
 				},
 				unloadConfirmation: function( event ) {
 					if ( event.data.view.needsUnloadConfirm ) {
