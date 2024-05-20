@@ -1,7 +1,17 @@
 /**
  * External dependencies
  */
-import { KeyedFormField } from '@woocommerce/settings';
+import {
+	AddressFormValues,
+	ContactFormValues,
+	KeyedFormField,
+} from '@woocommerce/settings';
+import { objectHasProp } from '@woocommerce/types';
+
+/**
+ * Internal dependencies
+ */
+import { AddressFormFields } from './types';
 
 export interface FieldProps {
 	id: string;
@@ -14,7 +24,6 @@ export interface FieldProps {
 	className: string;
 }
 
-// Create field props for a given address field.
 export const createFieldProps = (
 	address: KeyedFormField | undefined,
 	fieldId: string,
@@ -30,3 +39,16 @@ export const createFieldProps = (
 	className: `wc-block-components-address-form__${ address?.key }`,
 	...address?.attributes,
 } );
+
+export const getFieldData = < T extends AddressFormValues | ContactFormValues >(
+	key: 'address_1' | 'address_2',
+	fields: AddressFormFields[ 'fields' ],
+	values: T
+) => {
+	const addressFields = fields.find( ( field ) => field.key === key );
+	const addressValue = objectHasProp( values, key )
+		? values[ key ]
+		: undefined;
+
+	return { fields: addressFields, value: addressValue };
+};

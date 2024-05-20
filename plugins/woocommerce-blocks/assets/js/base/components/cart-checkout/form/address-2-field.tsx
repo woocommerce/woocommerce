@@ -4,7 +4,6 @@
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
 import { AddressFormValues, ContactFormValues } from '@woocommerce/settings';
 import { useEffect, useState, Fragment } from '@wordpress/element';
-import { objectHasProp } from '@woocommerce/types';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
@@ -13,15 +12,14 @@ import { __, sprintf } from '@wordpress/i18n';
 import { AddressFieldProps } from './types';
 
 const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
-	field,
-	fieldProps,
+	fields,
+	props,
 	onChange,
-	values,
+	value,
 }: AddressFieldProps< T > ): JSX.Element => {
-	const hasFieldValue =
-		objectHasProp( values, 'address_2' ) && values.address_2 !== '';
+	const hasFieldValue = Boolean( value );
 
-	const isFieldRequired = field ? field.required : false;
+	const isFieldRequired = fields?.required ?? false;
 
 	const [ isFieldVisible, setFieldVisible ] = useState(
 		() => hasFieldValue || isFieldRequired
@@ -36,22 +34,19 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 	}, [ isFieldRequired ] );
 
 	return (
-		<Fragment key={ field.key }>
+		<Fragment key={ fields.key }>
 			{ isFieldVisible ? (
 				<ValidatedTextInput
-					{ ...fieldProps }
-					type={ field.type }
+					{ ...props }
+					type={ fields.type }
 					label={
-						isFieldRequired ? field.label : field.optionalLabel
+						isFieldRequired ? fields.label : fields.optionalLabel
 					}
-					className={ `wc-block-components-address-form__${ field.key }` }
-					value={ values[ field.key ] }
-					onChange={ ( newValue: string ) => {
-						onChange( {
-							...values,
-							[ field.key ]: newValue,
-						} );
-					} }
+					className={ `wc-block-components-address-form__${ fields.key }` }
+					value={ value }
+					onChange={ ( newValue: string ) =>
+						onChange( fields.key as keyof T, newValue )
+					}
 				/>
 			) : (
 				<button
@@ -63,7 +58,7 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 					{ sprintf(
 						// translators: %s: address 2 field label.
 						__( 'Add %s', 'woocommerce' ),
-						field.label.toLowerCase()
+						fields.label.toLowerCase()
 					) }
 				</button>
 			) }

@@ -35,7 +35,7 @@ import validateShippingCountry from './validate-shipping-country';
 import customValidationHandler from './custom-validation-handler';
 import Combobox from '../../combobox';
 import AddressFields from './address-fields';
-import { createFieldProps } from './utils';
+import { createFieldProps, getFieldData } from './utils';
 
 /**
  * Checkout form.
@@ -142,22 +142,25 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 
 				// Handle both address_1 and address_2 fields together.
 				if ( field.key === 'address_1' ) {
+					const address1 = getFieldData(
+						'address_1',
+						addressFormFields.fields,
+						values
+					);
+					const address2 = getFieldData(
+						'address_2',
+						addressFormFields.fields,
+						values
+					);
+
 					return (
 						<AddressFields
-							address1={ addressFormFields.fields.find(
-								( customField ) =>
-									customField.key === 'address_1'
-							) }
-							address2={ addressFormFields.fields.find(
-								( customField ) =>
-									customField.key === 'address_2'
-							) }
-							addressFormFields={ addressFormFields }
+							address1={ address1 }
+							address2={ address2 }
 							addressType={ addressType }
 							id={ id }
 							key={ field.key }
 							onChange={ onChange }
-							values={ values }
 						/>
 					);
 				}

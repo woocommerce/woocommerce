@@ -27,7 +27,7 @@ export interface ValidatedTextInputProps
 	// Optional label for the field.
 	label?: string | undefined;
 	// Field value.
-	value: string;
+	value?: string | undefined;
 	// If true, validation errors will be shown.
 	showError?: boolean;
 	// Error message to display alongside the field regardless of validation.

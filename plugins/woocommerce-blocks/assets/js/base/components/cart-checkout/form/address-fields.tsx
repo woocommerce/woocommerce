@@ -17,34 +17,34 @@ const AddressFields = < T extends AddressFormValues | ContactFormValues >( {
 	address2,
 	addressType,
 	onChange,
-	values,
 }: AddressFieldsProps< T > ): JSX.Element => {
-	const address1FieldProps = createFieldProps( address1, id, addressType );
-	const address2FieldProps = createFieldProps( address2, id, addressType );
+	const address1FieldProps = address1
+		? createFieldProps( address1.fields, id, addressType )
+		: undefined;
+	const address2FieldProps = address2
+		? createFieldProps( address2.fields, id, addressType )
+		: undefined;
 
 	return (
 		<>
 			{ address1 && (
 				<ValidatedTextInput
 					{ ...address1FieldProps }
-					type={ address1.type }
-					label={ address1.label }
-					className={ `wc-block-components-address-form__${ address1.key }` }
-					value={ values[ address1.key ] }
+					type={ address1.fields?.type }
+					label={ address1.fields?.label }
+					className={ `wc-block-components-address-form__${ address1.fields?.key }` }
+					value={ address1.values }
 					onChange={ ( newValue: string ) =>
-						onChange( {
-							...values,
-							[ address1.key ]: newValue,
-						} )
+						onChange( address1.fields?.key as keyof T, newValue )
 					}
 				/>
 			) }
-			{ address2 && ! address2.hidden && (
+			{ address2?.fields && ! address2?.fields?.hidden && (
 				<Address2Field
-					field={ address2 }
-					fieldProps={ address2FieldProps }
+					fields={ address2.fields }
+					props={ address2FieldProps }
 					onChange={ onChange }
-					values={ values }
+					value={ address2?.values }
 				/>
 			) }
 		</>

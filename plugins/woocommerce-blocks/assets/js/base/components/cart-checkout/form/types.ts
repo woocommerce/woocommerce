@@ -39,28 +39,34 @@ export interface AddressFormProps< T > {
 	children?: React.ReactNode;
 }
 
-// export interface AddressFieldsProps< T > extends AddressFormProps< T > {
+interface AddressFieldData {
+	// Form fields.
+	fields?: KeyedFormField | undefined;
+	// Field value.
+	values?: string | undefined;
+}
+
 export interface AddressFieldsProps< T >
-	extends Omit< AddressFormProps< T >, 'fields' > {
+	extends Omit< AddressFormProps< T >, 'fields' | 'values' | 'onChange' > {
 	// Overwriting the id for the fields.
 	id: string;
+	// Address 1 fields and value.
+	address1: AddressFieldData;
+	// Address 2 fields and value.
+	address2: AddressFieldData;
 	// Overwriting the address type for the fields.
 	addressType: FormType;
-	// Address 1 fields.
-	address1?: KeyedFormField | undefined;
-	// Address 2 fields.
-	address2?: KeyedFormField | undefined;
-	// Address form fields.
-	addressFormFields: AddressFormFields;
+	// Called with the new address data when the address form changes. This is only called when all required fields are filled and there are no validation errors.
+	onChange: ( key: keyof T, value: string ) => void;
 }
 
 export interface AddressFieldProps< T > {
-	// The specific form field.
-	field: KeyedFormField;
+	// Form fields.
+	fields: KeyedFormField;
 	// Props for the form field.
-	fieldProps: FieldProps;
+	props?: FieldProps | undefined;
 	// Called with the new address data when the address form changes. This is only called when all required fields are filled and there are no validation errors.
-	onChange: ( newValue: T ) => void;
-	// Values for fields.
-	values: T;
+	onChange: ( key: keyof T, value: string ) => void;
+	// Value for field.
+	value?: string | undefined;
 }
