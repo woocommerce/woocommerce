@@ -292,10 +292,13 @@
 						"tests/api-core-tests/**"
 					],
 					"events": [
-						"push"
+						"pull_request"
 					],
 					"testEnv": {
-						"start": "env:test:no-hpos"
+						"start": "env:test:no-hpos",
+						"config": {
+							"disableHpos": "true"
+						}
 					}
 				},
 				{
