@@ -28,8 +28,6 @@ export function useEditorHistory( {
 				);
 				setEdits( newEdits );
 				setOffsetIndex( newEdits.length - 1 );
-
-				console.log( 'appendEdit', newEdits );
 			},
 			[ edits, maxHistory, offsetIndex ]
 		),
