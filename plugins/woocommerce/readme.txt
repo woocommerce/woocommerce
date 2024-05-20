@@ -165,12 +165,13 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 8.9.1 2024-05-20 =
+= 8.9.1 2024-05-21 =
 
 **WooCommerce**
 
 * Fix - Fix warning when loading guest sessions from previous sessions. [#47514](https://github.com/woocommerce/woocommerce/pull/47514)
 * Fix - Prevent calling woocommerce.com on empty update-check and update-check-public payload. [#47507](https://github.com/woocommerce/woocommerce/pull/47507)
+* Fix - Fixes a crash in the modal block editor when the Add button is clicked with Gutenberg 18.3.0 and later [#47561](https://github.com/woocommerce/woocommerce/pull/47561)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
