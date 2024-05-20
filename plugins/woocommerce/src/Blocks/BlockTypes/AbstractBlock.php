@@ -194,7 +194,7 @@ abstract class AbstractBlock {
 		if ( ! is_dir( $build_path . $chunks_folder ) ) {
 			return [];
 		}
-		foreach ( new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $build_path . $chunks_folder ) ) as $block_name ) {
+		foreach ( new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $build_path . $chunks_folder, \FilesystemIterator::UNIX_PATHS ) ) as $block_name ) {
 			$blocks[] = str_replace( $build_path, '', $block_name );
 		}
 
