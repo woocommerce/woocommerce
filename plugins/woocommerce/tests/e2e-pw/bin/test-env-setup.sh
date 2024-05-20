@@ -8,6 +8,9 @@ if [ $DISABLE_HPOS == 1 ]; then
 	wp-env run tests-cli wp option update woocommerce_custom_orders_table_enabled 'no'
 fi
 
+echo 'Getting value of "woocommerce_custom_orders_table_enabled" option'
+wp-env run tests-cli wp option get woocommerce_custom_orders_table_enabled
+
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
 echo -e 'Activate default theme \n'
