@@ -30,6 +30,7 @@ export type AttributesComboboxControlComponent = {
 	disabledAttributeMessage?: string;
 	createNewAttributesAsGlobal?: boolean;
 
+	onAddNew?: ( value: string ) => void;
 	onChange: ( value: AttributesComboboxControlItem ) => void;
 };
 

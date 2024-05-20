@@ -38,11 +38,6 @@ const tabs = [
 			"This product has options, such as size or color. You can manage each variation's images, downloads, and other details individually.",
 	},
 	{
-		name: 'Pricing',
-		noteText:
-			"This product has options, such as size or color. You can now manage each variation's price and other details individually.",
-	},
-	{
 		name: 'Inventory',
 		noteText:
 			"This product has options, such as size or color. You can now manage each variation's inventory and other details individually.",
@@ -209,7 +204,18 @@ test.describe( 'Variations tab', () => {
 				} )
 				.click();
 
+			const getVariationsResponsePromise = page.waitForResponse(
+				( response ) =>
+					response
+						.url()
+						.includes(
+							`/wp-json/wc/v3/products/${ productId_editVariations }/variations`
+						) && response.status() === 200
+			);
+
 			await clickOnTab( 'Variations', page );
+
+			await getVariationsResponsePromise;
 
 			await page
 				.locator( '.woocommerce-product-variations__table-body > div' )
@@ -267,7 +273,18 @@ test.describe( 'Variations tab', () => {
 				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }`
 			);
 
+			const getVariationsResponsePromise = page.waitForResponse(
+				( response ) =>
+					response
+						.url()
+						.includes(
+							`/wp-json/wc/v3/products/${ productId_deleteVariations }/variations`
+						) && response.status() === 200
+			);
+
 			await clickOnTab( 'Variations', page );
+
+			await getVariationsResponsePromise;
 
 			await page
 				.locator(
