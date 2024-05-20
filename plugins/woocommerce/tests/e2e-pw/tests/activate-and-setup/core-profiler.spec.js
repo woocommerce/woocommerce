@@ -298,8 +298,8 @@ test.describe( 'Store owner can complete the core profiler', () => {
 
 		await test.step( 'Clean up installed extensions', async () => {
 			await page.goto( 'wp-admin/plugins.php' );
-			await page.
-			getByLabel( 'Deactivate Google for WooCommerce' )
+			await page
+				.getByLabel( 'Deactivate Google for WooCommerce' )
 				.click();
 			await expect(
 				page.getByText( 'Plugin deactivated.' )
