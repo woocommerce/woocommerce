@@ -47,6 +47,7 @@ import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { WooHomescreenHeaderBanner } from './header-banner-slot';
 import { WooHomescreenWCPayFeature } from './wcpay-feature-slot';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 const TaskLists = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../task-lists' ).then(
@@ -84,6 +85,17 @@ export const Layout = ( {
 	const maybeToggleColumns = useCallback( () => {
 		isWideViewport.current = window.innerWidth >= 782;
 	}, [] );
+
+	useLayoutEffect(() => {
+		// Catch-all to redirect to LYS dashboard when previously opened.
+		const url = new URL( window.location.href );
+		const params = new URLSearchParams( url.search );
+		const isTask = params.has('task');
+		const isLYSOpen = sessionStorage.getItem( 'lysTaskOpen' ) === 'yes';
+		if ( ! isTask && isLYSOpen ) {
+			navigateTo({ url: getNewPath({}, '/launch-your-store') } );
+		}
+	}, [isDashboardShown]);
 
 	useLayoutEffect( () => {
 		maybeToggleColumns();

@@ -84,6 +84,7 @@ export function taskClickedAction( event: {
 } ) {
 	const recentlyActionedTasks = getRecentlyActionedTasks() ?? [];
 	saveRecentlyActionedTask( [ ...recentlyActionedTasks, event.task.id ] );
+	sessionStorage.setItem( 'lysTaskOpen', 'yes' );
 	recordEvent( 'launch_your_store_hub_task_clicked', {
 		task: event.task.id,
 	} );
