@@ -61,12 +61,12 @@ class OnboardingIndustries {
 					'use_description'   => false,
 					'description_label' => '',
 				),
-				'sports-and-recreation'          => array(
+				'sports-and-recreation'           => array(
 					'label'             => __( 'Sports and recreation', 'woocommerce' ),
 					'use_description'   => false,
 					'description_label' => '',
 				),
-				'arts-and-crafts'          => array(
+				'arts-and-crafts'                 => array(
 					'label'             => __( 'Arts and crafts', 'woocommerce' ),
 					'use_description'   => false,
 					'description_label' => '',
