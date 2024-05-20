@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import type { ValidatedTextInputHandle } from '@woocommerce/blocks-components';
 import type {
 	AddressFormValues,
 	ContactFormValues,
