@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make REST order queries involving 'customer' field compatible with HPOS in v2 API.

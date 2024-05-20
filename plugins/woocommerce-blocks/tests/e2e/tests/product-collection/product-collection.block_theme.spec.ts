@@ -47,6 +47,125 @@ test.describe( 'Product Collection', () => {
 		await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
 	} );
 
+	test.describe( 'Renders correctly with all Product Elements', () => {
+		const insertProductElements = async (
+			pageObject: ProductCollectionPage
+		) => {
+			// By default there are inner blocks:
+			// - woocommerce/product-image
+			// - core/post-title
+			// - woocommerce/product-price
+			// - woocommerce/product-button
+			// We're adding remaining ones
+			const productElements = [
+				{ name: 'woocommerce/product-rating', attributes: {} },
+				{ name: 'woocommerce/product-sku', attributes: {} },
+				{ name: 'woocommerce/product-stock-indicator', attributes: {} },
+				{ name: 'woocommerce/product-sale-badge', attributes: {} },
+				{
+					name: 'core/post-excerpt',
+					attributes: {
+						__woocommerceNamespace:
+							'woocommerce/product-collection/product-summary',
+					},
+				},
+				{
+					name: 'core/post-terms',
+					attributes: { term: 'product_tag' },
+				},
+				{
+					name: 'core/post-terms',
+					attributes: { term: 'product_cat' },
+				},
+			];
+
+			for ( const productElement of productElements ) {
+				await pageObject.insertBlockInProductCollection(
+					productElement
+				);
+			}
+		};
+
+		const expectedProductContent = [
+			'Beanie', // core/post-title
+			'$20.00 Original price was: $20.00.$18.00Current price is: $18.00.', // woocommerce/product-price
+			'woo-beanie', // woocommerce/product-sku
+			'In stock', // woocommerce/product-stock-indicator
+			'This is a simple product.', // core/post-excerpt
+			'Accessories', // core/post-terms - product_cat
+			'Recommended', // core/post-terms - product_tag
+			'SaleProduct on sale', // woocommerce/product-sale-badge
+			'Add to cart', // woocommerce/product-button
+		];
+
+		test( 'In a post', async ( { page, pageObject } ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
+			await expect(
+				page.locator( '[data-testid="product-image"]:visible' )
+			).toHaveCount( 9 );
+
+			await insertProductElements( pageObject );
+			await pageObject.publishAndGoToFrontend();
+
+			for ( const content of expectedProductContent ) {
+				await expect(
+					page.locator( '.wc-block-product-template' )
+				).toContainText( content );
+			}
+		} );
+
+		test( 'In a Product Archive (Product Catalog)', async ( {
+			page,
+			editor,
+			pageObject,
+		} ) => {
+			await pageObject.replaceProductsWithProductCollectionInTemplate(
+				'woocommerce/woocommerce//archive-product'
+			);
+
+			await expect(
+				editor.canvas.locator( '[data-testid="product-image"]:visible' )
+			).toHaveCount( 16 );
+
+			await insertProductElements( pageObject );
+			await editor.saveSiteEditorEntities();
+			await pageObject.goToProductCatalogFrontend();
+
+			// Workaround for the issue with the product change not being
+			// reflected in the frontend yet.
+			try {
+				await page.getByText( 'woo-beanie' ).waitFor();
+			} catch ( _error ) {
+				await page.reload();
+			}
+
+			for ( const content of expectedProductContent ) {
+				await expect(
+					page.locator( '.wc-block-product-template' )
+				).toContainText( content );
+			}
+		} );
+
+		test( 'On a Home Page', async ( { page, editor, pageObject } ) => {
+			await pageObject.goToHomePageAndInsertCollection();
+
+			await expect(
+				editor.canvas.locator( '[data-testid="product-image"]:visible' )
+			).toHaveCount( 9 );
+
+			await insertProductElements( pageObject );
+			await editor.saveSiteEditorEntities();
+			await pageObject.goToHomePageFrontend();
+
+			for ( const content of expectedProductContent ) {
+				await expect(
+					page.locator( '.wc-block-product-template' )
+				).toContainText( content );
+			}
+		} );
+	} );
+
 	test.describe( 'Product Collection Sidebar Settings', () => {
 		test.beforeEach( async ( { pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock();
@@ -75,21 +194,23 @@ test.describe( 'Product Collection', () => {
 		test( 'Order By - sort products by title in descending order correctly', async ( {
 			pageObject,
 		} ) => {
-			await pageObject.setOrderBy( 'title/desc' );
-			const allTitles = await pageObject.productTitles.allInnerTexts();
-			const expectedTitles = [ ...allTitles ].sort().reverse();
+			const sortedTitles = [
+				'WordPress Pennant',
+				'V-Neck T-Shirt',
+				'T-Shirt with Logo',
+				'T-Shirt',
+				/Sunglasses/, // In the frontend it's "Protected: Sunglasses"
+				'Single',
+				'Polo',
+				'Long Sleeve Tee',
+				'Logo Collection',
+			];
 
-			expect( allTitles ).toStrictEqual( expectedTitles );
+			await pageObject.setOrderBy( 'title/desc' );
+			await expect( pageObject.productTitles ).toHaveText( sortedTitles );
 
 			await pageObject.publishAndGoToFrontend();
-
-			const frontendTitles =
-				await pageObject.productTitles.allInnerTexts();
-			expect(
-				frontendTitles.map( ( title ) =>
-					title.replace( 'Protected: ', '' )
-				)
-			).toStrictEqual( expectedTitles );
+			await expect( pageObject.productTitles ).toHaveText( sortedTitles );
 		} );
 
 		// Products can be filtered based on 'on sale' status.
@@ -156,7 +277,7 @@ test.describe( 'Product Collection', () => {
 			pageObject,
 		} ) => {
 			const filterName = 'Product categories';
-			await pageObject.addFilter( 'Show Taxonomies' );
+			await pageObject.addFilter( 'Show product categories' );
 			await pageObject.setFilterComboboxValue( filterName, [
 				'Clothing',
 			] );
@@ -196,14 +317,20 @@ test.describe( 'Product Collection', () => {
 			pageObject,
 		} ) => {
 			const filterName = 'Product tags';
-			await pageObject.addFilter( 'Show Taxonomies' );
+			await pageObject.addFilter( 'Show product tags' );
 			await pageObject.setFilterComboboxValue( filterName, [
 				'Recommended',
 			] );
-			await expect( pageObject.productTitles ).toHaveText( [ 'Hoodie' ] );
+			await expect( pageObject.productTitles ).toHaveText( [
+				'Beanie',
+				'Hoodie',
+			] );
 
 			await pageObject.publishAndGoToFrontend();
-			await expect( pageObject.productTitles ).toHaveText( [ 'Hoodie' ] );
+			await expect( pageObject.productTitles ).toHaveText( [
+				'Beanie',
+				'Hoodie',
+			] );
 		} );
 
 		test( 'Products can be filtered based on product attributes like color, size etc.', async ( {
@@ -316,7 +443,7 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 
-		test.describe( 'Sync with current template (former "Inherit query from template")', () => {
+		test.describe( 'Sync with current template', () => {
 			test( 'should not be visible on posts', async ( {
 				pageObject,
 			} ) => {
@@ -333,8 +460,10 @@ test.describe( 'Product Collection', () => {
 
 			test( 'should work as expected in Product Catalog template', async ( {
 				pageObject,
+				editor,
 			} ) => {
 				await pageObject.goToProductCatalogAndInsertCollection();
+				await editor.openDocumentSettingsSidebar();
 
 				const sidebarSettings =
 					await pageObject.locateSidebarSettings();
@@ -363,7 +492,7 @@ test.describe( 'Product Collection', () => {
 				).toBeVisible();
 
 				// "On sale control" should retain its state when inherit query from template is enabled again
-				pageObject.setShowOnlyProductsOnSale( {
+				await pageObject.setShowOnlyProductsOnSale( {
 					onSale: true,
 					isLocatorsRefreshNeeded: false,
 				} );
@@ -385,10 +514,12 @@ test.describe( 'Product Collection', () => {
 
 			test( 'is enabled by default in 1st Product Collection and disabled in 2nd+', async ( {
 				pageObject,
+				editor,
 			} ) => {
 				// First Product Catalog
 				// Option should be visible & ENABLED by default
 				await pageObject.goToProductCatalogAndInsertCollection();
+				await editor.openDocumentSettingsSidebar();
 
 				const sidebarSettings =
 					await pageObject.locateSidebarSettings();
@@ -531,22 +662,14 @@ test.describe( 'Product Collection', () => {
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock( 'newArrivals' );
 
-			const newArrivalsProducts = [
-				'WordPress Pennant',
-				'Logo Collection',
-				'Beanie with Logo',
-				'T-Shirt with Logo',
-				'Single',
-			];
-
-			await expect( pageObject.products ).toHaveCount( 5 );
-			await expect( pageObject.productTitles ).toHaveText(
-				newArrivalsProducts
-			);
+			// New Arrivals are by default filtered to display products from last 7 days.
+			// Products in our test env have creation date set to much older, hence
+			// no products are expected to be displayed by default.
+			await expect( pageObject.products ).toHaveCount( 0 );
 
 			await pageObject.publishAndGoToFrontend();
 
-			await expect( pageObject.products ).toHaveCount( 5 );
+			await expect( pageObject.products ).toHaveCount( 0 );
 		} );
 
 		// When creating reviews programmatically the ratings are not propagated
@@ -646,7 +769,7 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 
-		test( "Product Catalog Collection can be added in post and doesn't inherit query from template", async ( {
+		test( "Product Catalog Collection can be added in post and doesn't sync query with template", async ( {
 			pageObject,
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock( 'productCatalog' );
@@ -664,12 +787,14 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 9 );
 		} );
 
-		test( 'Product Catalog Collection can be added in product archive and inherits query from template', async ( {
+		test( 'Product Catalog Collection can be added in product archive and syncs query with template', async ( {
 			pageObject,
+			editor,
 		} ) => {
 			await pageObject.goToProductCatalogAndInsertCollection(
 				'productCatalog'
 			);
+			await editor.openDocumentSettingsSidebar();
 
 			const sidebarSettings = await pageObject.locateSidebarSettings();
 			const input = sidebarSettings.locator(
@@ -896,7 +1021,7 @@ test.describe( 'Product Collection', () => {
 			expect( termId ).toBe( '' );
 		} );
 
-		test( 'as generic in post', async ( {
+		test( 'as site in post', async ( {
 			admin,
 			editorUtils,
 			pageObject,
@@ -913,7 +1038,7 @@ test.describe( 'Product Collection', () => {
 			const { type, sourceData } =
 				getLocationDetailsFromRequest( locationRequest );
 
-			expect( type ).toBe( 'generic' );
+			expect( type ).toBe( 'site' );
 			// Field is not sent at all. URLSearchParams get method returns a null
 			// if field is not available.
 			expect( sourceData ).toBe( null );
@@ -941,26 +1066,6 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Query Context in Editor', () => {
-		test( 'Product Catalog: Sends only ID in Query Context', async ( {
-			pageObject,
-		} ) => {
-			const url = await pageObject.setupAndFetchQueryContextURL( {
-				collection: 'productCatalog',
-			} );
-
-			expect(
-				url.searchParams.has( 'productCollectionQueryContext[id]' )
-			).toBeTruthy();
-
-			// There shouldn't be collection in the query context
-			// Because Product Catalog isn't a collection
-			expect(
-				url.searchParams.has(
-					'productCollectionQueryContext[collection]'
-				)
-			).toBeFalsy();
-		} );
-
 		test( 'Collections: collection should be present in query context', async ( {
 			pageObject,
 		} ) => {
@@ -975,6 +1080,53 @@ test.describe( 'Product Collection', () => {
 			expect( collectionName ).toBe(
 				'woocommerce/product-collection/on-sale'
 			);
+		} );
+	} );
+
+	test.describe( 'Preview mode in generic archive templates', () => {
+		const genericArchiveTemplates = [
+			{
+				name: 'Products by Tag',
+				path: 'woocommerce/woocommerce//taxonomy-product_tag',
+			},
+			{
+				name: 'Products by Category',
+				path: 'woocommerce/woocommerce//taxonomy-product_cat',
+			},
+			{
+				name: 'Products by Attribute',
+				path: 'woocommerce/woocommerce//taxonomy-product_attribute',
+			},
+		];
+
+		genericArchiveTemplates.forEach( ( { name, path } ) => {
+			test( `${ name } template`, async ( { page, pageObject } ) => {
+				await pageObject.replaceProductsWithProductCollectionInTemplate(
+					path
+				);
+
+				const editorFrame = page.frameLocator(
+					'iframe[name="editor-canvas"]'
+				);
+				const previewButtonLocator = editorFrame.locator(
+					'button[data-test-id="product-collection-preview-button"]'
+				);
+
+				// The preview button should be visible
+				await expect( previewButtonLocator ).toBeVisible();
+
+				// The preview button should be hidden when the block is not selected
+				await page.click( 'body' );
+				await expect( previewButtonLocator ).toBeHidden();
+
+				// Preview button should be visible when any of inner block is selected
+				await editorFrame
+					.getByLabel( 'Block: Product Template' )
+					.getByLabel( 'Block: Product Image' )
+					.first()
+					.click();
+				await expect( previewButtonLocator ).toBeVisible();
+			} );
 		} );
 	} );
 } );

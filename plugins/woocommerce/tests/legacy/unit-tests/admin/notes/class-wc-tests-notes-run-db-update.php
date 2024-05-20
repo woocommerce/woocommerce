@@ -81,7 +81,7 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 			array(
 				'name'    => 'update-db_learn-more',
 				'label'   => __( 'Learn more about updates', 'woocommerce' ),
-				'url'     => 'https://woo.com/document/how-to-update-woocommerce/',
+				'url'     => 'https://woocommerce.com/document/how-to-update-woocommerce/',
 				'status'  => 'unactioned',
 				'primary' => false,
 			),

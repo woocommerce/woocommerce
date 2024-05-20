@@ -90,7 +90,7 @@ export function Edit( {
 			onFocus: () => setHighlightSide( side ),
 			onBlur: () => setHighlightSide( undefined ),
 			suffix: dimensionUnit,
-			disabled: virtual,
+			disabled: attributes.disabled || virtual,
 		};
 	}
 
@@ -185,7 +185,7 @@ export function Edit( {
 		suffix: weightUnit,
 		ref: weightRef,
 		onBlur: validateWeight,
-		disabled: virtual,
+		disabled: attributes.disabled || virtual,
 	};
 
 	return (

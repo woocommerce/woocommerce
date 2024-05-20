@@ -1,50 +1,15 @@
 /**
  * External dependencies
  */
-import { getNewPath } from '@woocommerce/navigation';
 import { sendParent } from 'xstate';
 
 /**
  * Internal dependencies
  */
-import { attachIframeListeners, onIframeLoad } from '../utils';
 import { DesignWithoutAIStateMachineContext } from './types';
 import { DesignWithoutAIStateMachineEvents } from './state-machine';
 
 const redirectToAssemblerHub = async () => {
-	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
-	const iframe = document.createElement( 'iframe' );
-	iframe.classList.add( 'cys-fullscreen-iframe' );
-	iframe.src = assemblerUrl;
-
-	const showIframe = () => {
-		if ( iframe.style.opacity === '1' ) {
-			// iframe is already visible
-			return;
-		}
-
-		const loader = document.getElementsByClassName(
-			'woocommerce-onboarding-loader'
-		);
-		if ( loader[ 0 ] ) {
-			( loader[ 0 ] as HTMLElement ).style.display = 'none';
-		}
-
-		iframe.style.opacity = '1';
-	};
-
-	iframe.onload = () => {
-		// Hide loading UI
-		attachIframeListeners( iframe );
-		onIframeLoad( showIframe );
-
-		// Ceiling wait time set to 60 seconds
-		setTimeout( showIframe, 60 * 1000 );
-		window.history?.pushState( {}, '', assemblerUrl );
-	};
-
-	document.body.appendChild( iframe );
-
 	// This is a workaround to update the "activeThemeHasMods" in the parent's machine
 	// state context. We should find a better way to do this using xstate actions,
 	// since state machines should rely only on their context.

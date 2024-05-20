@@ -13,6 +13,7 @@ import {
 import {
 	TemplateApiUtils,
 	STORAGE_STATE_PATH,
+	DB_EXPORT_FILE,
 	EditorUtils,
 	FrontendUtils,
 	StoreApiUtils,
@@ -21,6 +22,7 @@ import {
 	LocalPickupUtils,
 	MiniCartUtils,
 	WPCLIUtils,
+	cli,
 } from '@woocommerce/e2e-utils';
 import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
 
@@ -28,10 +30,12 @@ import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-u
  * Internal dependencies
  */
 import {
-	PostPayload,
+	type PostPayload,
 	createPostFromTemplate,
+	updateTemplateContents,
 	deletePost,
 } from '../utils/create-dynamic-content';
+import type { ExtendedTemplate } from '../types/e2e-test-utils-playwright';
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -140,11 +144,16 @@ const test = base.extend<
 				data: unknown
 			) => Promise< Post >;
 			deletePost: ( id: number ) => Promise< void >;
+			updateTemplateContents: (
+				templateId: string,
+				templatePath: string,
+				data: unknown
+			) => Promise< ExtendedTemplate >;
 		};
 	}
 >( {
-	admin: async ( { page, pageUtils }, use ) => {
-		await use( new Admin( { page, pageUtils } ) );
+	admin: async ( { page, pageUtils, editor }, use ) => {
+		await use( new Admin( { page, pageUtils, editor } ) );
 	},
 	editor: async ( { page }, use ) => {
 		await use( new Editor( { page } ) );
@@ -159,15 +168,17 @@ const test = base.extend<
 			window.localStorage.clear();
 		} );
 
-		await page.close();
+		await cli(
+			`npm run wp-env run tests-cli wp db import ${ DB_EXPORT_FILE }`
+		);
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
 	},
 	templateApiUtils: async ( {}, use ) =>
 		await use( new TemplateApiUtils( baseRequest ) ),
-	editorUtils: async ( { editor, page }, use ) => {
-		await use( new EditorUtils( editor, page ) );
+	editorUtils: async ( { editor, page, admin }, use ) => {
+		await use( new EditorUtils( editor, page, admin ) );
 	},
 	frontendUtils: async ( { page, requestUtils }, use ) => {
 		await use( new FrontendUtils( page, requestUtils ) );
@@ -212,9 +223,22 @@ const test = base.extend<
 			const utilDeletePost = ( id: number ) =>
 				deletePost( requestUtils, id );
 
+			const utilUpdateTemplateContents = (
+				templateId: string,
+				templatePath: string,
+				data: unknown
+			) =>
+				updateTemplateContents(
+					requestUtils,
+					templateId,
+					templatePath,
+					data
+				);
+
 			await use( {
 				...requestUtils,
 				createPostFromTemplate: utilCreatePostFromTemplate,
+				updateTemplateContents: utilUpdateTemplateContents,
 				deletePost: utilDeletePost,
 			} );
 		},

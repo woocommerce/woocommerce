@@ -13,8 +13,12 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../../types';
-import { STOCK_STATUS_OPTIONS, getDefaultStockStatuses } from '../../constants';
+import { CoreFilterNames, QueryControlProps } from '../../types';
+import {
+	STOCK_STATUS_OPTIONS,
+	DEFAULT_FILTERS,
+	getDefaultStockStatuses,
+} from '../../constants';
 
 /**
  * Gets the id of a specific stock status from its text label
@@ -34,7 +38,14 @@ function getStockStatusIdByLabel( statusLabel: FormTokenField.Value ) {
 }
 
 const StockStatusControl = ( props: QueryControlProps ) => {
-	const { query, setQueryAttribute } = props;
+	const { query, trackInteraction, setQueryAttribute } = props;
+
+	const deselectCallback = () => {
+		setQueryAttribute( {
+			woocommerceStockStatus: DEFAULT_FILTERS.woocommerceStockStatus,
+		} );
+		trackInteraction( CoreFilterNames.STOCK_STATUS );
+	};
 
 	return (
 		<ToolsPanelItem
@@ -45,11 +56,8 @@ const StockStatusControl = ( props: QueryControlProps ) => {
 					getDefaultStockStatuses()
 				)
 			}
-			onDeselect={ () => {
-				setQueryAttribute( {
-					woocommerceStockStatus: getDefaultStockStatuses(),
-				} );
-			} }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 			isShownByDefault
 		>
 			<FormTokenField
@@ -62,6 +70,7 @@ const StockStatusControl = ( props: QueryControlProps ) => {
 					setQueryAttribute( {
 						woocommerceStockStatus,
 					} );
+					trackInteraction( CoreFilterNames.STOCK_STATUS );
 				} }
 				suggestions={ Object.values( STOCK_STATUS_OPTIONS ) }
 				validateInput={ ( value: string ) =>

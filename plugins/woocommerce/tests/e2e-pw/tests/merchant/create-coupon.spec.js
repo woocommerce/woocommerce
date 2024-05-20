@@ -1,4 +1,4 @@
-const { test: baseTest, expect } = require( '../../fixtures' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 baseTest.describe( 'Coupon management', () => {
 	const couponData = {

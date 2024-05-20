@@ -26,7 +26,7 @@ In order to prepare a package for release, a changelog will need to be compiled 
 
 ![image](https://user-images.githubusercontent.com/1922453/179435048-ad2cd168-55b1-471a-b05f-3aed4a9e499b.png)
 
-2. Confirm the package has been updated by visiting NPM. For example see https://www.npmjs.com/package/@woocommerce/components.
+2. Confirm the package has been updated by visiting NPM. For example see https://www.npmjs.com/package/@woocommerce/components. Note: it may take several minutes after a release for the update to be reflected on NPM.
 
 ## Release packages using the command line
 

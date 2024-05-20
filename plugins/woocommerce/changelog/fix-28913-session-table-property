@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix regression (and inconsistency) in the way the session handler references its database table.

@@ -26,26 +26,16 @@ test.describe( 'Shopper → Coupon', () => {
 		);
 	} );
 
-	test.afterEach( async ( { wpCliUtils } ) => {
-		const couponId = await wpCliUtils.getCouponIDByCode(
-			'single-use-coupon'
-		);
-		await cli(
-			`npm run wp-env run tests-cli -- wp wc shop_coupon delete ${ couponId } --force=1 --user=1`
-		);
-	} );
-
 	test( 'Logged in user can apply single-use coupon and place order', async ( {
 		checkoutPageObject,
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCart();
 
-		await page.getByLabel( 'Add a coupon' ).click();
+		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
 		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
@@ -60,7 +50,7 @@ test.describe( 'Shopper → Coupon', () => {
 		).toBeHidden();
 
 		await frontendUtils.goToCheckout();
-		await page.getByLabel( 'Add a coupon' ).click();
+		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
 		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
@@ -89,14 +79,17 @@ test.describe( 'Shopper → Coupon', () => {
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		await page.getByLabel( 'Add a coupon' ).click();
+		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
 		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
+
+		await expect(
+			page.getByLabel( 'Remove coupon "single-use-coupon"' )
+		).toBeVisible();
 
 		await checkoutPageObject.fillInCheckoutWithTestData();
 		await checkoutPageObject.placeOrder();
@@ -106,7 +99,7 @@ test.describe( 'Shopper → Coupon', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		await page.getByLabel( 'Add a coupon' ).click();
+		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
 		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 

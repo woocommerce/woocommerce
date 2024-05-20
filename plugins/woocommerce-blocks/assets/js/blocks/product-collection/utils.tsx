@@ -6,13 +6,24 @@ import { addFilter } from '@wordpress/hooks';
 import { select } from '@wordpress/data';
 import { isWpVersion } from '@woocommerce/settings';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
+import { useLayoutEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { ProductCollectionAttributes, ProductCollectionQuery } from './types';
+import {
+	PreviewState,
+	ProductCollectionAttributes,
+	ProductCollectionQuery,
+	SetPreviewState,
+} from './types';
 import { coreQueryPaginationBlockName } from './constants';
 import blockJson from './block.json';
+import {
+	LocationType,
+	WooCommerceBlockLocation,
+} from '../product-template/utils';
 
 /**
  * Sets the new query arguments of a Product Query block
@@ -108,4 +119,80 @@ export const addProductCollectionBlockToParentOfPaginationBlock = () => {
 			}
 		);
 	}
+};
+
+export const useSetPreviewState = ( {
+	setPreviewState,
+	location,
+	attributes,
+	setAttributes,
+}: {
+	setPreviewState?: SetPreviewState | undefined;
+	location: WooCommerceBlockLocation;
+	attributes: ProductCollectionAttributes;
+	setAttributes: (
+		attributes: Partial< ProductCollectionAttributes >
+	) => void;
+} ) => {
+	const setState = ( newPreviewState: PreviewState ) => {
+		setAttributes( {
+			__privatePreviewState: {
+				...attributes.__privatePreviewState,
+				...newPreviewState,
+			},
+		} );
+	};
+
+	// Running setPreviewState function provided by Collection, if it exists.
+	useLayoutEffect( () => {
+		if ( ! setPreviewState ) {
+			return;
+		}
+
+		const cleanup = setPreviewState?.( {
+			setState,
+			location,
+			attributes,
+		} );
+
+		if ( cleanup ) {
+			return cleanup;
+		}
+
+		// It should re-run only when setPreviewState changes to avoid performance issues.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ setPreviewState ] );
+
+	/**
+	 * For all Product Collection blocks that inherit query from the template,
+	 * we want to show a preview message in the editor if the block is in
+	 * generic archive template i.e.
+	 * - Products by category
+	 * - Products by tag
+	 * - Products by attribute
+	 */
+	useLayoutEffect( () => {
+		if ( ! setPreviewState ) {
+			const isGenericArchiveTemplate =
+				location.type === LocationType.Archive &&
+				location.sourceData?.termId === null;
+			if ( isGenericArchiveTemplate ) {
+				setAttributes( {
+					__privatePreviewState: {
+						isPreview: !! attributes?.query?.inherit,
+						previewMessage: __(
+							'Actual products will vary depending on the page being viewed.',
+							'woocommerce'
+						),
+					},
+				} );
+			}
+		}
+	}, [
+		attributes?.query?.inherit,
+		location.sourceData?.termId,
+		location.type,
+		setAttributes,
+		setPreviewState,
+	] );
 };

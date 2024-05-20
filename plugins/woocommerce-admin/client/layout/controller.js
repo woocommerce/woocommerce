@@ -86,6 +86,10 @@ const CustomizeStore = lazy( () =>
 	import( /* webpackChunkName: "customize-store" */ '../customize-store' )
 );
 
+const LaunchStore = lazy( () =>
+	import( /* webpackChunkName: "launch-store" */ '../launch-your-store/hub' )
+);
+
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
 
 export const getPages = () => {
@@ -269,24 +273,22 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures[ 'product-variation-management' ] ) {
-		pages.push( {
-			container: ProductVariationPage,
-			layout: {
-				header: false,
-			},
-			path: '/product/:productId/variation/:variationId',
-			breadcrumbs: [
-				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
-				__( 'Edit Product Variation', 'woocommerce' ),
-			],
-			navArgs: {
-				id: 'woocommerce-edit-product',
-			},
-			wpOpenMenu: 'menu-posts-product',
-			capability: 'edit_products',
-		} );
-	}
+	pages.push( {
+		container: ProductVariationPage,
+		layout: {
+			header: false,
+		},
+		path: '/product/:productId/variation/:variationId',
+		breadcrumbs: [
+			[ '/edit-product', __( 'Product', 'woocommerce' ) ],
+			__( 'Edit Product Variation', 'woocommerce' ),
+		],
+		navArgs: {
+			id: 'woocommerce-edit-product',
+		},
+		wpOpenMenu: 'menu-posts-product',
+		capability: 'edit_products',
+	} );
 
 	if ( window.wcAdminFeatures.onboarding ) {
 		if ( ! window.wcAdminFeatures[ 'core-profiler' ] ) {
@@ -331,6 +333,25 @@ export const getPages = () => {
 			breadcrumbs: [
 				...initialBreadcrumbs,
 				__( 'Customize Your Store', 'woocommerce' ),
+			],
+			layout: {
+				header: false,
+				footer: true,
+				showNotices: true,
+				showStoreAlerts: false,
+				showPluginArea: false,
+			},
+			capability: 'manage_woocommerce',
+		} );
+	}
+
+	if ( window.wcAdminFeatures[ 'launch-your-store' ] ) {
+		pages.push( {
+			container: LaunchStore,
+			path: '/launch-your-store/*',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				__( 'Launch Your Store', 'woocommerce' ),
 			],
 			layout: {
 				header: false,

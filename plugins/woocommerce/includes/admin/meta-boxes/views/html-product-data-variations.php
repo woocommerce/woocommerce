@@ -27,7 +27,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 								/* translators: %1$s: url for attributes tab, %2$s: url for variable product documentation */
 								__( 'Add some attributes in the <a class="variations-add-attributes-link" href="%1$s">Attributes</a> tab to generate variations. Make sure to check the <b>Used for variations</b> box. <a class="variations-learn-more-link" href="%2$s" target="_blank" rel="noreferrer">Learn more</a>', 'woocommerce' ),
 								esc_url( '#product_attributes' ),
-								esc_url( 'https://woo.com/document/variable-product/' )
+								esc_url( 'https://woocommerce.com/document/variable-product/' )
 							)
 						);
 					?>

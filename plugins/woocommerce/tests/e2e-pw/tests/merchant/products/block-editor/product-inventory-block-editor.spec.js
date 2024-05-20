@@ -1,5 +1,7 @@
-const { test: baseTest } = require( './block-editor-fixtures' );
-const { expect } = require( '../../../../fixtures' );
+const {
+	test: baseTest,
+} = require( '../../../../fixtures/block-editor-fixtures' );
+const { expect } = require( '../../../../fixtures/fixtures' );
 
 const test = baseTest.extend( {
 	product: async ( { api }, use ) => {
@@ -89,7 +91,7 @@ test( 'can update stock status', async ( { page, product } ) => {
 
 test( 'can track stock quantity', async ( { page, product } ) => {
 	await test.step( 'enable track stock quantity', async () => {
-		await page.getByLabel( 'Track stock quantity for this' ).check();
+		await page.getByLabel( 'Track inventory' ).check();
 		// await closeTourModal( { page, timeout: 2000 } );
 		await page.getByRole( 'button', { name: 'Advanced' } ).click();
 		await page.getByLabel( "Don't allow purchases" ).check();
@@ -173,7 +175,7 @@ test( 'can limit purchases', async ( { page, product } ) => {
 		await page.goto( product.permalink );
 
 		await page.getByLabel( 'Product quantity' ).fill( '2' );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.locator( 'button[name="add-to-cart"]' ).click();
 		await expect(
 			page.getByText(
 				`2 × “${ product.name }” have been added to your cart.`
@@ -203,11 +205,14 @@ test( 'can limit purchases', async ( { page, product } ) => {
 		// Verify image in store frontend
 		await page.goto( product.permalink );
 
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.locator( 'button[name="add-to-cart"]' ).click();
+		await page.locator( 'button[name="add-to-cart"]' ).click();
+
 		await expect(
 			page.getByText(
-				`You cannot add another "${ product.name }" to your cart.`
+				new RegExp(
+					`You cannot add another .${ product.name }. to your cart`
+				)
 			)
 		).toBeVisible();
 	} );

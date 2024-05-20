@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Move LYS coming soon initialization to core profiler flow

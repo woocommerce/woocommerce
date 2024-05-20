@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Proxies;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\Definition;
+use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Vendor\Psr\Container\ContainerInterface;
 
 /**
@@ -31,12 +32,12 @@ class LegacyProxy {
 	 * @param mixed  ...$args Parameters to be passed to the class constructor or to the appropriate internal 'get_instance_of_' method.
 	 *
 	 * @return object The instance of the class.
-	 * @throws \Exception The requested class belongs to the `src` directory, or there was an error creating an instance of the class.
+	 * @throws \Exception The requested class has a namespace starting with ' Automattic\WooCommerce', or there was an error creating an instance of the class.
 	 */
 	public function get_instance_of( string $class_name, ...$args ) {
-		if ( false !== strpos( $class_name, '\\' ) ) {
+		if ( StringUtil::starts_with( $class_name, 'Automattic\\WooCommerce\\' ) ) {
 			throw new \Exception(
-				'The LegacyProxy class is not intended for getting instances of classes in the src directory, please use ' .
+				'The LegacyProxy class is not intended for getting instances of classes whose namespace starts with \'Automattic\\WooCommerce\', please use ' .
 				Definition::INJECTION_METHOD . ' method injection or the instance of ' . ContainerInterface::class . ' for that.'
 			);
 		}

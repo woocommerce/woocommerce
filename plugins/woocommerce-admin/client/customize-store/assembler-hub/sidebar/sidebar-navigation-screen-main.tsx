@@ -24,7 +24,6 @@ import {
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 import { Link } from '@woocommerce/components';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -33,6 +32,7 @@ import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
+import { trackEvent } from '~/customize-store/tracking';
 
 export const SidebarNavigationScreenMain = () => {
 	const {
@@ -53,7 +53,7 @@ export const SidebarNavigationScreenMain = () => {
 					EditorLink: (
 						<Link
 							onClick={ () => {
-								recordEvent(
+								trackEvent(
 									'customize_your_store_assembler_hub_editor_link_click',
 									{
 										source: 'main',
@@ -84,7 +84,7 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ siteLogo }
 							onClick={ () => {
-								recordEvent(
+								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'logo',
@@ -100,7 +100,7 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ color }
 							onClick={ () => {
-								recordEvent(
+								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'color-palette',
@@ -124,7 +124,7 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ typography }
 							onClick={ () => {
-								recordEvent(
+								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'typography',
@@ -149,7 +149,7 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ header }
 							onClick={ () => {
-								recordEvent(
+								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'header',
@@ -167,7 +167,7 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ home }
 							onClick={ () => {
-								recordEvent(
+								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'home',
@@ -185,7 +185,7 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ footer }
 							onClick={ () => {
-								recordEvent(
+								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'footer',

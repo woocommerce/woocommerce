@@ -18,7 +18,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "^16.18.68",
-		"@wordpress/stylelint-config": "19.1.0",
+		"@wordpress/stylelint-config": "^21.36.0",
 		"autoprefixer": "9.8.6",
 		"browserslist": "4.19.3",
 		"caniuse-lite": "1.0.30001146",
@@ -38,7 +38,7 @@
 		"grunt-stylelint": "0.16.0",
 		"gruntify-eslint": "5.0.0",
 		"sass": "^1.69.5",
-		"stylelint": "13.8.0",
+		"stylelint": "^14.16.1",
 		"wireit": "0.14.3"
 	},
 	"dependencies": {

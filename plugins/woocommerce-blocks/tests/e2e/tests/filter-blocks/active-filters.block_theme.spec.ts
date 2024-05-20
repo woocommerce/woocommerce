@@ -2,20 +2,35 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import path from 'path';
 
-test.describe( 'Product Filter: Active Filters Block', async () => {
+/**
+ * Internal dependencies
+ */
+import { PRODUCT_CATALOG_LINK, PRODUCT_CATALOG_TEMPLATE_ID } from './constants';
+
+const TEMPLATE_PATH = path.join( __dirname, './active-filters.handlebars' );
+
+test.describe( 'Product Filter: Active Filters Block', () => {
 	test.describe( 'frontend', () => {
+		test.beforeEach( async ( { requestUtils } ) => {
+			await requestUtils.updateTemplateContents(
+				PRODUCT_CATALOG_TEMPLATE_ID,
+				TEMPLATE_PATH,
+				{}
+			);
+		} );
+
 		test( 'Without any filters selected, only a wrapper block is rendered', async ( {
 			page,
 		} ) => {
-			await page.goto( '/product-filters-active-block/' );
+			await page.goto( PRODUCT_CATALOG_LINK );
 
 			const locator = page.locator(
 				'.wp-block-woocommerce-product-filter'
 			);
 
-			const count = await locator.count();
-			expect( count ).toBe( 1 );
+			await expect( locator ).toHaveCount( 1 );
 
 			const html = await locator.innerHTML();
 			expect( html.trim() ).toBe( '' );
@@ -24,80 +39,49 @@ test.describe( 'Product Filter: Active Filters Block', async () => {
 		test( 'With rating filters applied it shows the correct active filters', async ( {
 			page,
 		} ) => {
-			await page.goto(
-				'/product-filters-active-block/?rating_filter=1,2,5'
-			);
+			await page.goto( `${ PRODUCT_CATALOG_LINK }?rating_filter=1,2,5` );
 
-			const hasTitle =
-				( await page.locator( 'text=Rating:' ).count() ) === 1;
-
-			expect( hasTitle ).toBe( true );
-
-			for ( const text of [
-				'Rated 1 out of 5',
-				'Rated 2 out of 5',
-				'Rated 5 out of 5',
-			] ) {
-				const hasFilter =
-					( await page.locator( `text=${ text }` ).count() ) === 1;
-				expect( hasFilter ).toBe( true );
-			}
+			await expect( page.getByText( 'Rating:' ) ).toBeVisible();
+			await expect( page.getByText( 'Rated 1 out of 5' ) ).toBeVisible();
+			await expect( page.getByText( 'Rated 2 out of 5' ) ).toBeVisible();
+			await expect( page.getByText( 'Rated 5 out of 5' ) ).toBeVisible();
 		} );
 
 		test( 'With stock filters applied it shows the correct active filters', async ( {
 			page,
 		} ) => {
 			await page.goto(
-				'/product-filters-active-block/?filter_stock_status=instock,onbackorder'
+				`${ PRODUCT_CATALOG_LINK }?filter_stock_status=instock,onbackorder`
 			);
 
-			const hasTitle =
-				( await page.locator( 'text=Stock Status:' ).count() ) === 1;
-
-			expect( hasTitle ).toBe( true );
-
-			for ( const text of [ 'In stock', 'On backorder' ] ) {
-				const hasFilter =
-					( await page.locator( `text=${ text }` ).count() ) === 1;
-				expect( hasFilter ).toBe( true );
-			}
+			await expect( page.getByText( 'Stock Status:' ) ).toBeVisible();
+			await expect( page.getByText( 'In stock' ) ).toBeVisible();
+			await expect( page.getByText( 'On backorder' ) ).toBeVisible();
 		} );
 
 		test( 'With attribute filters applied it shows the correct active filters', async ( {
 			page,
 		} ) => {
 			await page.goto(
-				'/product-filters-active-block/?filter_color=blue,gray&query_type_color=or'
+				`${ PRODUCT_CATALOG_LINK }?filter_color=blue,gray&query_type_color=or`
 			);
 
-			const hasTitle =
-				( await page.locator( 'text=Color:' ).count() ) === 1;
-
-			expect( hasTitle ).toBe( true );
-
-			for ( const text of [ 'Blue', 'Gray' ] ) {
-				const hasFilter =
-					( await page.locator( `text=${ text }` ).count() ) === 1;
-				expect( hasFilter ).toBe( true );
-			}
+			await expect( page.getByText( 'Color:' ) ).toBeVisible();
+			await expect( page.getByText( 'Blue' ) ).toBeVisible();
+			await expect( page.getByText( 'Gray' ) ).toBeVisible();
 		} );
 
 		test( 'With price filters applied it shows the correct active filters', async ( {
 			page,
 		} ) => {
 			await page.goto(
-				'/product-filters-active-block/?min_price=17&max_price=71'
+				`${ PRODUCT_CATALOG_LINK }?min_price=17&max_price=71`
 			);
 
-			const hasTitle =
-				( await page.locator( 'text=Price:' ).count() ) === 1;
-
-			expect( hasTitle ).toBe( true );
-
-			const hasFilter =
-				( await page.locator( `text=Between $17 and $71` ).count() ) ===
-				1;
-			expect( hasFilter ).toBe( true );
+			await expect( page.getByText( 'Price:' ) ).toBeVisible();
+			await expect(
+				page.getByText( 'Between $17 and $71' )
+			).toBeVisible();
 		} );
 	} );
 } );

@@ -5,7 +5,7 @@ menu_title: Groups
 
 The new product form consists of groups currently displayed as tabs. Each is a separate view and may contain any number of sections and subsections. All areas serve a specific purpose, allowing merchants to quickly find the information they're looking for (both in default Woo features and extensions).
 
-![Product form groups](https://developer.woo.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-form-groups.gif)
+![Product form groups](https://developer.woocommerce.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-form-groups.gif)
 
 If a tab doesn't contain any sections, it won't be shown to merchants.
 
@@ -18,4 +18,4 @@ If a tab doesn't contain any sections, it won't be shown to merchants.
 
 Custom product types manage the visibility of the default groups and add new ones. This is particularly useful if a custom product has a unique structure and requires extra information that isn't included in the default groups.
 
-[Learn more about custom product types](./product-editor-form-custom-product-types)
+[Learn more about custom product types](./product-editor-form-custom-product-types.md)

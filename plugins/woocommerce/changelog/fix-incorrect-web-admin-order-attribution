@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix orders being attributed to Web Admin incorrectly in certain cases.

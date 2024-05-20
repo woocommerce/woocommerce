@@ -10,6 +10,11 @@
 		@include reset-typography();
 		@include reset-box();
 
+		// Fixes width in the editor.
+		.components-flex {
+			width: 100%;
+		}
+
 		.components-base-control__field {
 			@include reset-box();
 			position: relative;

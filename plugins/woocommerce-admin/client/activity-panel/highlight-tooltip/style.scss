@@ -21,7 +21,7 @@
 		bottom: 0;
 		left: 0;
 		background-color: rgba($black, 0.35);
-		z-index: z-index('.components-modal__screen-overlay');
+		z-index: z-index(".components-modal__screen-overlay");
 
 		@include edit-post__fade-in-animation();
 	}

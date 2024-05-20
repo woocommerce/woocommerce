@@ -14,10 +14,10 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../../types';
+import { CoreFilterNames, QueryControlProps } from '../../types';
 
 const KeywordControl = ( props: QueryControlProps ) => {
-	const { query, setQueryAttribute } = props;
+	const { query, trackInteraction, setQueryAttribute } = props;
 	const [ querySearch, setQuerySearch ] = useState( query.search );
 
 	const onChangeDebounced = useDebounce( () => {
@@ -25,6 +25,7 @@ const KeywordControl = ( props: QueryControlProps ) => {
 			setQueryAttribute( {
 				search: querySearch,
 			} );
+			trackInteraction( CoreFilterNames.KEYWORD );
 		}
 	}, 250 );
 
@@ -33,12 +34,17 @@ const KeywordControl = ( props: QueryControlProps ) => {
 		return onChangeDebounced.cancel;
 	}, [ querySearch, onChangeDebounced ] );
 
+	const deselectCallback = () => {
+		setQuerySearch( '' );
+		trackInteraction( CoreFilterNames.KEYWORD );
+	};
+
 	return (
 		<ToolsPanelItem
 			hasValue={ () => !! querySearch }
 			label={ __( 'Keyword', 'woocommerce' ) }
-			onDeselect={ () => setQuerySearch( '' ) }
-			resetAllFilter={ () => setQuerySearch( '' ) }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			<TextControl
 				label={ __( 'Keyword', 'woocommerce' ) }

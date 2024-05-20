@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { ADMIN_URL, getSetting } from '@woocommerce/settings';
 import { CHECKOUT_PAGE_ID } from '@woocommerce/block-settings';
@@ -22,7 +22,7 @@ import { useSettingsContext } from './settings-context';
 
 const GeneralSettingsDescription = () => (
 	<>
-		<h2>{ __( 'General', 'woocommerce' ) }</h2>
+		<h2>{ _x( 'General', 'Admin settings', 'woocommerce' ) }</h2>
 		<p>
 			{ __(
 				'Enable or disable local pickup on your store, and define costs. Local pickup is only available from the block checkout.',
@@ -59,7 +59,7 @@ const GeneralSettings = () => {
 					<StyledNotice status="warning" isDismissible={ false }>
 						{ createInterpolateElement(
 							__(
-								'Enabling this will produce duplicate options at checkout. Remove the local pickup shipping method from your <a>shipping zones</a>.',
+								"By enabling Local Pickup with more valuable features for your store, it's recommended that you remove the legacy Local Pickup option from your <a>shipping zones</a>.",
 								'woocommerce'
 							),
 							{
@@ -67,8 +67,6 @@ const GeneralSettings = () => {
 									// eslint-disable-next-line jsx-a11y/anchor-has-content
 									<a
 										href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
-										target="_blank"
-										rel="noopener noreferrer"
 									/>
 								),
 							}
@@ -105,7 +103,7 @@ const GeneralSettings = () => {
 						'This is the shipping method title shown to customers.',
 						'woocommerce'
 					) }
-					placeholder={ __( 'Local Pickup', 'woocommerce' ) }
+					placeholder={ __( 'Pickup', 'woocommerce' ) }
 					value={ settings.title }
 					onChange={ setSettingField( 'title' ) }
 					disabled={ false }

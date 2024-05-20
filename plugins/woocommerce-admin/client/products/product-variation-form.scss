@@ -9,11 +9,11 @@
 	right: 0;
 	padding-left: 160px;
 
-	@include breakpoint('782px-960px') {
+	@include breakpoint("782px-960px") {
 		padding-left: 18px;
 	}
 
-	@include breakpoint('<782px') {
+	@include breakpoint("<782px") {
 		padding-left: 0;
 		bottom: calc(69px + 16px);
 	}

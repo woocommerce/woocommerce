@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the Site Editor showing the template slug instead of the template title when saving a WooCommerce block template customized by the theme.

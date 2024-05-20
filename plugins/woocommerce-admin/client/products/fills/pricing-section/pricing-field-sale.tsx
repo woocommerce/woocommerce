@@ -154,7 +154,7 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 									),
 									moreLink: (
 										<Link
-											href="https://woo.com/document/managing-products/#product-data"
+											href="https://woocommerce.com/document/managing-products/#product-data"
 											target="_blank"
 											type="external"
 											onClick={ () =>

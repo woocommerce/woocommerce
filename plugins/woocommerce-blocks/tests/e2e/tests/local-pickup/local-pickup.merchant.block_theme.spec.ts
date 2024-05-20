@@ -3,9 +3,13 @@
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
+/**
+ * Internal dependencies
+ */
+import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
+
 test.describe( 'Merchant → Local Pickup Settings', () => {
 	test.beforeEach( async ( { localPickupUtils } ) => {
-		await localPickupUtils.deleteLocations();
 		await localPickupUtils.disableLocalPickupCosts();
 		await localPickupUtils.enableLocalPickup();
 	} );
@@ -24,23 +28,19 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 	} );
 
 	test( 'user can change the title', async ( { page, localPickupUtils } ) => {
-		await page
-			.getByPlaceholder( 'Local Pickup' )
-			.fill( 'Local Pickup Test #1' );
+		await page.getByPlaceholder( 'Pickup' ).fill( 'Local Pickup Test #1' );
 
 		await localPickupUtils.saveLocalPickupSettings();
 
-		await expect( page.getByPlaceholder( 'Local Pickup' ) ).toHaveValue(
+		await expect( page.getByPlaceholder( 'Pickup' ) ).toHaveValue(
 			'Local Pickup Test #1'
 		);
 
-		await page
-			.getByPlaceholder( 'Local Pickup' )
-			.fill( 'Local Pickup Test #2' );
+		await page.getByPlaceholder( 'Pickup' ).fill( 'Local Pickup Test #2' );
 
 		await localPickupUtils.saveLocalPickupSettings();
 
-		await expect( page.getByPlaceholder( 'Local Pickup' ) ).toHaveValue(
+		await expect( page.getByPlaceholder( 'Pickup' ) ).toHaveValue(
 			'Local Pickup Test #2'
 		);
 	} );
@@ -100,7 +100,6 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		localPickupUtils,
 	} ) => {
 		await localPickupUtils.addPickupLocation( {
-			page,
 			location: {
 				name: 'Automattic, Inc.',
 				address: '60 29th Street, Suite 343',
@@ -120,7 +119,6 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 
 	test( 'user can edit a location', async ( { page, localPickupUtils } ) => {
 		await localPickupUtils.addPickupLocation( {
-			page,
 			location: {
 				name: 'Automattic, Inc.',
 				address: '60 29th Street, Suite 343',
@@ -138,7 +136,6 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		).toBeVisible();
 
 		await localPickupUtils.editPickupLocation( {
-			page,
 			location: {
 				name: 'Ministry of Automattic Limited',
 				address: '100 New Bridge Street',
@@ -161,7 +158,6 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		localPickupUtils,
 	} ) => {
 		await localPickupUtils.addPickupLocation( {
-			page,
 			location: {
 				name: 'Ausomattic Pty Ltd',
 				address:
@@ -185,6 +181,65 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			page.getByRole( 'cell', {
 				name: 'When you add a pickup location, it will appear here.',
 			} )
+		).toBeVisible();
+	} );
+
+	test( 'updating the title in WC Settings updates the local pickup text in the block and vice/versa', async ( {
+		page,
+		localPickupUtils,
+		admin,
+		editor,
+		editorUtils,
+		frontendUtils,
+	} ) => {
+		// First update the title via the site editor then check the local pickup settings.
+		await admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//page-checkout',
+			postType: 'wp_template',
+		} );
+		await editorUtils.enterEditMode();
+		const block = editor.canvas.locator(
+			'[data-type="woocommerce/checkout-shipping-method-block"]'
+		);
+		await editor.selectBlocks( block );
+
+		const fakeInput = editor.canvas.getByLabel( 'Pickup', { exact: true } );
+		await fakeInput.focus();
+		await fakeInput.dblclick(); // Select all text.
+		await fakeInput.pressSequentially( 'This is a test' ); // We can't use locator.fill() because it's not a valid input element.
+
+		await editor.canvas.getByText( 'This is a test' ).isVisible();
+		await editor.saveSiteEditorEntities();
+
+		// Now check if it's visible in the local pickup settings.
+		await localPickupUtils.openLocalPickupSettings();
+		await expect( page.getByLabel( 'Title' ) ).toHaveValue(
+			'This is a test'
+		);
+
+		// Now update the title via local pickup settings and check it reflects in the site editor and front end.
+		await localPickupUtils.setLocalPickupTitle(
+			'Edited from settings page'
+		);
+		await localPickupUtils.saveLocalPickupSettings();
+
+		await admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//page-checkout',
+			postType: 'wp_template',
+		} );
+		await editorUtils.enterEditMode();
+
+		await expect(
+			editor.canvas.getByText( 'Edited from settings page' )
+		).toBeVisible();
+
+		await frontendUtils.emptyCart();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await frontendUtils.goToCheckout();
+
+		await expect(
+			page.getByText( 'Edited from settings page' )
 		).toBeVisible();
 	} );
 } );

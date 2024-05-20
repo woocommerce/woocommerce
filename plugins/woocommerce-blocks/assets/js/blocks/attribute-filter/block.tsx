@@ -139,9 +139,7 @@ const AttributeFilterBlock = ( {
 				taxonomy: attributeObject?.taxonomy || '',
 				queryType: blockAttributes.queryType,
 			},
-			queryState: {
-				...queryState,
-			},
+			queryState,
 			isEditor,
 		} );
 

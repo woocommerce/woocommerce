@@ -91,6 +91,11 @@
 
 	.wc-block-components-product-rating {
 		margin-bottom: 0;
+		display: flex;
+
+		.wc-block-components-product-rating-count {
+			margin-left: 4px;
+		}
 	}
 }
 

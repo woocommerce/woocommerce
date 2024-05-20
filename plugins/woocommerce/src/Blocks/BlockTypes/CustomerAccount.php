@@ -3,11 +3,14 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 
 /**
  * CustomerAccount class.
  */
 class CustomerAccount extends AbstractBlock {
+	use BlockHooksTrait;
+
 	const TEXT_ONLY   = 'text_only';
 	const ICON_ONLY   = 'icon_only';
 	const DISPLAY_ALT = 'alt';
@@ -18,6 +21,85 @@ class CustomerAccount extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'customer-account';
+
+	/**
+	 * Block Hook API placements.
+	 *
+	 * @var array
+	 */
+	protected $hooked_block_placements = array(
+		array(
+			'position' => 'after',
+			'anchor'   => 'core/navigation',
+			'area'     => 'header',
+			'callback' => 'should_unhook_block',
+		),
+	);
+
+	/**
+	 * Initialize this block type.
+	 */
+	protected function initialize() {
+		parent::initialize();
+		/**
+		 * The hooked_block_{$hooked_block_type} filter was added in WordPress 6.5.
+		 * We are the only code adding the filter 'hooked_block_woocommerce/customer-account'.
+		 * Using has_filter() for a compatibility check won't work because add_filter() is used in the same file.
+		 */
+		if ( version_compare( get_bloginfo( 'version' ), '6.5', '>=' ) ) {
+			add_filter( 'hooked_block_woocommerce/customer-account', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
+			add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
+		}
+	}
+
+	/**
+	 * Callback for the Block Hooks API to modify the attributes of the hooked block.
+	 *
+	 * @param array|null                      $parsed_hooked_block The parsed block array for the given hooked block type, or null to suppress the block.
+	 * @param string                          $hooked_block_type   The hooked block type name.
+	 * @param string                          $relative_position   The relative position of the hooked block.
+	 * @param array                           $parsed_anchor_block The anchor block, in parsed block array format.
+	 * @param WP_Block_Template|WP_Post|array $context             The block template, template part, `wp_navigation` post type,
+	 *                                                             or pattern that the anchor block belongs to.
+	 * @return array|null
+	 */
+	public function modify_hooked_block_attributes( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block, $context ) {
+		$parsed_hooked_block['attrs']['displayStyle'] = 'icon_only';
+
+		/*
+		* The Mini Cart block (which is hooked into the header) has a margin of 0.5em on the left side.
+		* We want to match that margin for the Customer Account block so it looks consistent.
+		*/
+		$parsed_hooked_block['attrs']['style']['spacing']['margin']['left'] = '0.5em';
+		return $parsed_hooked_block;
+	}
+
+	/**
+	 * Callback for the Block Hooks API to determine if the block should be auto-inserted.
+	 *
+	 * @param array                             $hooked_blocks An array of block slugs hooked into a given context.
+	 * @param string                            $position      Position of the block insertion point.
+	 * @param string                            $anchor_block  The block acting as the anchor for the inserted block.
+	 * @param array|\WP_Post|\WP_Block_Template $context       Where the block is embedded.
+	 *
+	 * @return array
+	 */
+	protected function should_unhook_block( $hooked_blocks, $position, $anchor_block, $context ) {
+		$block_name      = $this->namespace . '/' . $this->block_name;
+		$block_is_hooked = in_array( $block_name, $hooked_blocks, true );
+
+		if ( $block_is_hooked ) {
+			$active_theme   = wp_get_theme()->get( 'Name' );
+			$exclude_themes = array( 'Twenty Twenty-Two', 'Twenty Twenty-Three' );
+
+			if ( in_array( $active_theme, $exclude_themes, true ) ) {
+				$key = array_search( $block_name, $hooked_blocks, true );
+				unset( $hooked_blocks[ $key ] );
+			}
+		}
+
+		return $hooked_blocks;
+	}
 
 	/**
 	 * Render the block.
@@ -47,9 +129,14 @@ class CustomerAccount extends AbstractBlock {
 			),
 		);
 
+		// Only provide aria-label if the display style is icon only.
+		$aria_label = self::ICON_ONLY === $attributes['displayStyle'] ? 'aria-label="' . esc_attr( $this->render_label() ) . '"' : '';
+
+		$label_markup = self::ICON_ONLY === $attributes['displayStyle'] ? '' : '<span class="label">' . wp_kses( $this->render_label(), array() ) . '</span>';
+
 		return "<div class='wp-block-woocommerce-customer-account " . esc_attr( $classes_and_styles['classes'] ) . "' style='" . esc_attr( $classes_and_styles['styles'] ) . "'>
-			<a href='" . esc_attr( $account_link ) . "'>
-				" . wp_kses( $this->render_icon( $attributes ), $allowed_svg ) . "<span class='label'>" . wp_kses( $this->render_label( $attributes ), array() ) . '</span>
+			<a " . $aria_label . " href='" . esc_attr( $account_link ) . "'>
+				" . wp_kses( $this->render_icon( $attributes ), $allowed_svg ) . $label_markup . '
 			</a>
 		</div>';
 	}
@@ -93,15 +180,9 @@ class CustomerAccount extends AbstractBlock {
 	/**
 	 * Gets the label to render depending on the displayStyle.
 	 *
-	 * @param array $attributes Block attributes.
-	 *
 	 * @return string Label to render on the block.
 	 */
-	private function render_label( $attributes ) {
-		if ( self::ICON_ONLY === $attributes['displayStyle'] ) {
-			return '';
-		}
-
+	private function render_label() {
 		return get_current_user_id()
 			? __( 'My Account', 'woocommerce' )
 			: __( 'Login', 'woocommerce' );

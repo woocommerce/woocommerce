@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Product Collection: improve flaky E2E test when block was nested in Single Product block

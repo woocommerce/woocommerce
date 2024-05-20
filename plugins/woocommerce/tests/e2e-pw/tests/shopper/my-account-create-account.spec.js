@@ -75,9 +75,9 @@ test.describe( 'Shopper My Account Create Account', () => {
 		await page.locator( 'input#reg_email' ).fill( customerEmailAddress );
 		await page.locator( 'button[name="register"]' ).click();
 
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'My account'
-		);
+		await expect(
+			page.getByRole( 'heading', { name: 'My account' } )
+		).toBeVisible();
 		await expect( page.locator( 'text=Log out' ).first() ).toBeVisible();
 
 		await page.goto( 'my-account/edit-account/' );

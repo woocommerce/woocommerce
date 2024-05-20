@@ -3,7 +3,7 @@
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
-test.describe( 'Test the order confirmation template', async () => {
+test.describe( 'Test the order confirmation template', () => {
 	test( 'Template can be opened in the site editor', async ( {
 		page,
 		editorUtils,
@@ -14,7 +14,6 @@ test.describe( 'Test the order confirmation template', async () => {
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
 		await editorUtils.transformIntoBlocks();
 		await expect(
 			page

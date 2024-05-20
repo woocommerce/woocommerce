@@ -27,19 +27,19 @@ const wcPages = [
 			},
 			{
 				name: 'Reports',
-				heading: 'Orders',
+				heading: 'Reports',
 				element: '.nav-tab-wrapper > .nav-tab-active',
 				text: 'Orders',
 			},
 			{
 				name: 'Settings',
-				heading: 'General',
+				heading: 'Settings',
 				element: '#store_address-description',
 				text: 'This is where your business is located. Tax rates and shipping rates will use this address.',
 			},
 			{
 				name: 'Status',
-				heading: 'System status',
+				heading: 'Status',
 				element: '.nav-tab-active',
 				text: 'System status',
 			},
@@ -127,9 +127,9 @@ for ( const currentPage of wcPages ) {
 			const httpStatus = response.status;
 			const { status, message } = response.data;
 
-			expect( httpStatus ).toEqual( 200 );
-			expect( status ).toEqual( 'success' );
-			expect( message ).toEqual(
+			test.expect( httpStatus ).toEqual( 200 );
+			test.expect( status ).toEqual( 'success' );
+			test.expect( message ).toEqual(
 				'Onboarding profile data has been updated.'
 			);
 			const api = new wcApi( {
@@ -145,8 +145,8 @@ for ( const currentPage of wcPages ) {
 					type: 'simple',
 					regular_price: productPrice,
 				} )
-				.then( ( response ) => {
-					productId = response.data.id;
+				.then( ( _response ) => {
+					productId = _response.data.id;
 				} );
 			// create an order
 			await api
@@ -158,13 +158,13 @@ for ( const currentPage of wcPages ) {
 						},
 					],
 				} )
-				.then( ( response ) => {
-					orderId = response.data.id;
+				.then( ( _response ) => {
+					orderId = _response.data.id;
 				} );
 			// create customer
 			await api
 				.post( 'customers', customer )
-				.then( ( response ) => ( customer.id = response.data.id ) );
+				.then( ( _response ) => ( customer.id = _response.data.id ) );
 		} );
 
 		test.afterAll( async ( { baseURL } ) => {

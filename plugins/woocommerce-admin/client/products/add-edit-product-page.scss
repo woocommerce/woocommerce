@@ -85,7 +85,7 @@
 		position: relative;
 		display: inline-block;
 		&::after {
-			content: '';
+			content: "";
 			display: inline-block;
 			position: absolute;
 			width: 100%;
@@ -101,7 +101,7 @@
 		}
 	}
 	.half-width-field {
-		@include breakpoint( '<960px' ) {
+		@include breakpoint( "<960px" ) {
 			width: 100%;
 		}
 		width: 50%;

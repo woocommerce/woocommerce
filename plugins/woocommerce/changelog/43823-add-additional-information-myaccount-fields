@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Introduced `woocommerce_my_account_after_my_address`, `woocommerce_order_details_after_customer_address`, and `woocommerce_edit_account_form_fields` hooks.

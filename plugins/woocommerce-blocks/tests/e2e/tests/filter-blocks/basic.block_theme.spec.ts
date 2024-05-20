@@ -31,36 +31,36 @@ const filterBlocks = [
 	},
 ];
 
-test.describe( 'Filter blocks registration', async () => {
+test.describe( 'Filter blocks registration', () => {
 	test.beforeEach( async ( { admin } ) => {
 		await admin.createNewPost();
 	} );
 
 	test( 'Variations can be inserted through the inserter.', async ( {
-		editor,
+		page,
 		editorUtils,
 	} ) => {
 		for ( const block of filterBlocks ) {
 			await editorUtils.insertBlockUsingGlobalInserter( block.title );
 
 			await expect(
-				editor.canvas.getByLabel( `Block: ${ block.title }` )
+				page.getByLabel( `Block: ${ block.title }` )
 			).toBeVisible();
 		}
 	} );
 
 	test( 'Each filter block comes with a default title', async ( {
-		editor,
 		editorUtils,
+		page,
 	} ) => {
 		for ( const block of filterBlocks ) {
 			await editorUtils.insertBlockUsingGlobalInserter( block.title );
 
 			await expect(
-				editor.canvas
+				page
 					.getByLabel( `Block: Product Filter` )
 					.getByLabel( 'Block: Heading' )
-					.and( editor.canvas.getByText( block.heading ) )
+					.and( page.getByText( block.heading ) )
 			).toBeVisible();
 		}
 	} );

@@ -1,11 +1,8 @@
 /**
  * External dependencies
  */
-import {
-	getSetting,
-	STORE_PAGES,
-	LocaleSpecificFormField,
-} from '@woocommerce/settings';
+import { getSetting, STORE_PAGES } from '@woocommerce/settings';
+import { CountryData } from '@woocommerce/types';
 
 export type WordCountType =
 	| 'words'
@@ -51,17 +48,10 @@ export const LOCAL_PICKUP_ENABLED = getSetting< boolean >(
 	false
 );
 
-type CountryData = {
-	allowBilling: boolean;
-	allowShipping: boolean;
-	states: Record< string, string >;
-	locale: Record< string, LocaleSpecificFormField >;
-};
-
 type FieldsLocations = {
 	address: string[];
 	contact: string[];
-	additional: string[];
+	order: string[];
 };
 
 // Contains country names.
@@ -133,7 +123,7 @@ const defaultFieldsLocations: FieldsLocations = {
 		'phone',
 	],
 	contact: [ 'email' ],
-	additional: [],
+	order: [],
 };
 
 export const ADDRESS_FORM_KEYS = getSetting< FieldsLocations >(
@@ -146,10 +136,10 @@ export const CONTACT_FORM_KEYS = getSetting< FieldsLocations >(
 	defaultFieldsLocations
 ).contact;
 
-export const ADDITIONAL_FORM_KEYS = getSetting< FieldsLocations >(
+export const ORDER_FORM_KEYS = getSetting< FieldsLocations >(
 	'addressFieldsLocations',
 	defaultFieldsLocations
-).additional;
+).order;
 
 export interface CheckoutField {
 	label: string;
@@ -157,8 +147,8 @@ export interface CheckoutField {
 	options: { label: string; value: string }[];
 }
 
-export const ADDITIONAL_FORM_FIELDS = getSetting< CheckoutField[] >(
-	'additionalFields',
+export const ORDER_FORM_FIELDS = getSetting< CheckoutField[] >(
+	'additionalOrderFields',
 	{}
 );
 export const CONTACT_FORM_FIELDS = getSetting< CheckoutField[] >(

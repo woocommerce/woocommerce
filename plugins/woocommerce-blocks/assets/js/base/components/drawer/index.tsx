@@ -15,14 +15,13 @@ import {
 	useRef,
 	forwardRef,
 } from '@wordpress/element';
-import { close } from '@wordpress/icons';
+import { close, Icon } from '@wordpress/icons';
 import {
-	useFocusReturn,
 	useFocusOnMount,
 	useConstrainedTabbing,
 	useMergeRefs,
 } from '@wordpress/compose';
-
+import { useFocusReturn } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
@@ -56,11 +55,12 @@ const CloseButtonPortal = ( {
 		? createPortal(
 				<Button
 					className="wc-block-components-drawer__close"
-					icon={ close }
 					onClick={ onClick }
-					label={ __( 'Close', 'woocommerce' ) }
-					showTooltip={ false }
-				/>,
+					removeTextWrap
+					aria-label={ __( 'Close', 'woocommerce' ) }
+				>
+					<Icon icon={ close } />
+				</Button>,
 				closeButtonWrapper
 		  )
 		: null;

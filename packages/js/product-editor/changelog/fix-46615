@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove block appender below the custom fields block

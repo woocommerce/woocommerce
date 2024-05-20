@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Prevent prefilling of the billing address with the shipping address in the Checkout block for the Guest Shopper.

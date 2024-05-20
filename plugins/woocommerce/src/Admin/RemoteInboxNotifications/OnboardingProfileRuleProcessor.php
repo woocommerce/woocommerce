@@ -8,58 +8,26 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
+
 /**
  * Rule processor that performs a comparison operation against a value in the
  * onboarding profile.
+ *
+ * @deprecated 8.8.0
  */
-class OnboardingProfileRuleProcessor implements RuleProcessorInterface {
+class OnboardingProfileRuleProcessor extends DeprecatedClassFacade {
 	/**
-	 * Performs a comparison operation against a value in the onboarding
-	 * profile.
+	 * The name of the non-deprecated class that this facade covers.
 	 *
-	 * @param object $rule         The rule being processed by this rule processor.
-	 * @param object $stored_state Stored state.
-	 *
-	 * @return bool The result of the operation.
+	 * @var string
 	 */
-	public function process( $rule, $stored_state ) {
-		$onboarding_profile = get_option( 'woocommerce_onboarding_profile' );
-
-		if ( empty( $onboarding_profile ) || ! is_array( $onboarding_profile ) ) {
-			return false;
-		}
-
-		if ( ! isset( $onboarding_profile[ $rule->index ] ) ) {
-			return false;
-		}
-
-		return ComparisonOperation::compare(
-			$onboarding_profile[ $rule->index ],
-			$rule->value,
-			$rule->operation
-		);
-	}
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\OnboardingProfileRuleProcessor';
 
 	/**
-	 * Validates the rule.
+	 * The version that this class was deprecated in.
 	 *
-	 * @param object $rule The rule to validate.
-	 *
-	 * @return bool Pass/fail.
+	 * @var string
 	 */
-	public function validate( $rule ) {
-		if ( ! isset( $rule->index ) ) {
-			return false;
-		}
-
-		if ( ! isset( $rule->value ) ) {
-			return false;
-		}
-
-		if ( ! isset( $rule->operation ) ) {
-			return false;
-		}
-
-		return true;
-	}
+	protected static $deprecated_in_version = '8.8.0';
 }

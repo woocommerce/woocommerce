@@ -42,6 +42,7 @@ import type {
 	ProductTemplate,
 } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
+import * as wooIcons from '../../../icons';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
@@ -59,10 +60,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const [ supportedProductTemplates, unsupportedProductTemplates ] =
 		productTemplates.reduce< [ ProductTemplate[], ProductTemplate[] ] >(
 			( [ supported, unsupported ], productTemplate ) => {
-				if ( productTemplate.layoutTemplateId ) {
-					supported.push( productTemplate );
-				} else {
-					unsupported.push( productTemplate );
+				if ( productTemplate.isSelectableByUser ) {
+					if ( productTemplate.layoutTemplateId ) {
+						supported.push( productTemplate );
+					} else {
+						unsupported.push( productTemplate );
+					}
 				}
 				return [ supported, unsupported ];
 			},
@@ -72,7 +75,8 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const productId = useEntityId( 'postType', 'product' );
 
 	const { validate } = useValidations< Product >();
-	// @ts-expect-error There are no types for this.
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const { editEntityRecord, saveEditedEntityRecord, saveEntityRecord } =
 		useDispatch( 'core' );
 	const { createSuccessNotice, createErrorNotice } =
@@ -91,7 +95,8 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	const { isSaving } = useSelect(
 		( select ) => {
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
@@ -176,9 +181,9 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		if ( /^https?:\/\//.test( iconId ) ) {
 			icon = <img src={ iconId } alt={ alt } />;
 		} else {
-			if ( ! ( iconId in icons ) ) return undefined;
+			if ( ! ( iconId in icons || iconId in wooIcons ) ) return undefined;
 
-			icon = icons[ iconId as never ];
+			icon = icons[ iconId as never ] || wooIcons[ iconId as never ];
 		}
 
 		return <Icon icon={ icon } size={ 24 } />;
@@ -250,7 +255,8 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						},
 					],
 				},
-				// @ts-expect-error Expected 3 arguments, but got 4.
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				{
 					throwOnError: true,
 				}

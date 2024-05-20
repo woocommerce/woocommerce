@@ -1,5 +1,7 @@
-const { test: baseTest } = require( './block-editor-fixtures' );
-const { expect } = require( '../../../../fixtures' );
+const {
+	test: baseTest,
+} = require( '../../../../fixtures/block-editor-fixtures' );
+const { expect } = require( '../../../../fixtures/fixtures' );
 
 const test = baseTest.extend( {
 	product: async ( { api }, use ) => {
@@ -35,8 +37,6 @@ test( 'can update the general information of a product', async ( {
 		name: `Product ${ Date.now() }`,
 		description: `Updated description for the awesome product ${ Date.now() }`,
 		short_description: `Updated summary for the awesome product ${ Date.now() }`,
-		regularPrice: '100.05',
-		salePrice: '99.05',
 	};
 
 	const nameTextbox = page.getByLabel( 'Name' ).getByRole( 'textbox' );
@@ -46,20 +46,9 @@ test( 'can update the general information of a product', async ( {
 	const descriptionTextbox = page
 		.getByLabel( 'Block: Product description' )
 		.getByRole( 'textbox' );
-	const listPriceTextbox = page.getByRole( 'textbox', {
-		name: 'List price',
-	} );
-	const salePriceTextbox = page.getByRole( 'textbox', {
-		name: 'Sale price',
-	} );
 
 	await test.step( 'edit the product name', async () => {
 		await nameTextbox.fill( updatedProduct.name );
-	} );
-
-	await test.step( 'edit the product price', async () => {
-		await listPriceTextbox.fill( updatedProduct.regularPrice );
-		await salePriceTextbox.fill( updatedProduct.salePrice );
 	} );
 
 	await test.step( 'edit the product description and summary', async () => {
@@ -89,12 +78,86 @@ test( 'can update the general information of a product', async ( {
 		await expect
 			.soft( descriptionTextbox )
 			.toHaveText( updatedProduct.description );
+	} );
+} );
 
-		await expect
-			.soft( listPriceTextbox )
-			.toHaveValue( updatedProduct.regularPrice );
-		await expect
-			.soft( salePriceTextbox )
-			.toHaveValue( updatedProduct.salePrice );
+test.describe( 'Publish dropdown options', () => {
+	test( 'can schedule a product publication', async ( { page, product } ) => {
+		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+
+		await page
+			.locator( '.woocommerce-product-header__actions' )
+			.first()
+			.locator( 'button[aria-label="More options"]' )
+			.click();
+
+		await page.getByText( 'Schedule publish' ).click();
+
+		await expect(
+			page.getByRole( 'heading', { name: 'Schedule product' } )
+		).toBeVisible();
+
+		await page
+			.locator( '.woocommerce-schedule-publish-modal' )
+			.locator( 'button[aria-label="View next month"]' )
+			.click();
+
+		await page
+			.locator( '.woocommerce-schedule-publish-modal' )
+			.getByText( '14' )
+			.click();
+
+		await page.getByRole( 'button', { name: 'Schedule' } ).click();
+
+		await expect(
+			page.getByLabel( 'Dismiss this notice' ).first()
+		).toContainText( 'Product scheduled for' );
+	} );
+	test( 'can duplicate a product', async ( { page, product } ) => {
+		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+		await page
+			.locator( '.woocommerce-product-header__actions' )
+			.first()
+			.locator( 'button[aria-label="More options"]' )
+			.click();
+
+		await page.getByText( 'Copy to a new draft' ).click();
+
+		await expect(
+			page.getByLabel( 'Dismiss this notice' ).first()
+		).toContainText( 'Product successfully duplicated' );
+
+		await expect(
+			page.getByRole( 'heading', { name: `${ product.name } (Copy)` } )
+		).toBeVisible();
+
+		await expect(
+			page
+				.locator( '.woocommerce-product-header__visibility-tags' )
+				.getByText( 'Draft' )
+				.first()
+		).toBeVisible();
+
+		await page
+			.locator( '.woocommerce-product-header__actions' )
+			.first()
+			.locator( 'button[aria-label="More options"]' )
+			.click();
+
+		await page.getByText( 'Move to trash' ).click();
+	} );
+	test( 'can delete a product', async ( { page, product } ) => {
+		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+		await page
+			.locator( '.woocommerce-product-header__actions' )
+			.first()
+			.locator( 'button[aria-label="More options"]' )
+			.click();
+
+		await page.getByText( 'Move to trash' ).click();
+
+		await expect(
+			page.getByRole( 'heading', { name: 'Products' } ).first()
+		).toBeVisible();
 	} );
 } );

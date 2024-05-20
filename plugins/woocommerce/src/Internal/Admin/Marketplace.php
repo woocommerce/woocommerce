@@ -7,6 +7,8 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use WC_Helper_Updater;
+use WC_Woo_Update_Manager_Plugin;
 
 /**
  * Contains backend logic for the Marketplace feature.
@@ -17,6 +19,8 @@ class Marketplace {
 
 	/**
 	 * Class initialization, to be executed when the class is resolved by the container.
+	 *
+	 * @internal
 	 */
 	final public function init() {
 		if ( false === FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
@@ -55,10 +59,11 @@ class Marketplace {
 	public static function get_marketplace_pages() {
 		$marketplace_pages = array(
 			array(
-				'id'     => 'woocommerce-marketplace',
-				'parent' => 'woocommerce',
-				'title'  => __( 'Extensions', 'woocommerce' ),
-				'path'   => '/extensions',
+				'id'         => 'woocommerce-marketplace',
+				'parent'     => 'woocommerce',
+				'title'      => __( 'Extensions', 'woocommerce' ) . WC_Helper_Updater::get_updates_count_html(),
+				'page_title' => __( 'Extensions', 'woocommerce' ),
+				'path'       => '/extensions',
 			),
 		);
 
@@ -79,7 +84,7 @@ class Marketplace {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( 'woocommerce_page_wc-admin' !== $hook_suffix ) {
 			return;
-		};
+		}
 
 		if ( ! isset( $_GET['path'] ) || '/extensions' !== $_GET['path'] ) {
 			return;

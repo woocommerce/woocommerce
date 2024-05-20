@@ -3,7 +3,12 @@
  */
 import { Locator, Page } from '@playwright/test';
 import { TemplateApiUtils, EditorUtils } from '@woocommerce/e2e-utils';
-import { Editor, Admin } from '@wordpress/e2e-test-utils-playwright';
+import { expect, Editor, Admin } from '@wordpress/e2e-test-utils-playwright';
+
+/**
+ * Internal dependencies
+ */
+import { BLOCK_THEME_SLUG } from '../../utils/constants';
 
 export const SELECTORS = {
 	productTemplate: '.wc-block-product-template',
@@ -119,14 +124,13 @@ class ProductCollectionPage {
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		await this.admin.page
-			.frameLocator( 'iframe[name="editor-canvas"]' )
+		await this.editor.canvas
 			.getByRole( 'button', { name: buttonName } )
 			.click();
 	}
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
-		await this.admin.createNewPost( { legacyCanvas: true } );
+		await this.admin.createNewPost();
 		await this.insertProductCollection();
 		await this.chooseCollectionInPost( collection );
 		await this.refreshLocators( 'editor' );
@@ -139,29 +143,29 @@ class ProductCollectionPage {
 		collection: Collections;
 	} ) {
 		await this.admin.createNewPost();
-		await this.editorUtils.closeWelcomeGuideModal();
 		await this.insertProductCollection();
-		await this.chooseCollectionInPost( collection );
 
-		// Wait for response with productCollectionQueryContext query parameter.
-		const WP_PRODUCT_ENDPOINT = '/wp/v2/product';
-		const QUERY_CONTEXT_PARAM = 'productCollectionQueryContext';
-		const response = await this.page.waitForResponse(
-			( currentResponse ) =>
-				currentResponse.url().includes( WP_PRODUCT_ENDPOINT ) &&
-				currentResponse.url().includes( QUERY_CONTEXT_PARAM ) &&
-				currentResponse.status() === 200
+		const productResponsePromise = this.page.waitForResponse(
+			( response ) => {
+				return (
+					response.url().includes( '/wp/v2/product' ) &&
+					response
+						.url()
+						.includes( 'productCollectionQueryContext' ) &&
+					response.status() === 200
+				);
+			}
 		);
 
-		const url = new URL( response.url() );
-		return url;
+		await this.chooseCollectionInPost( collection );
+		const productResponse = await productResponsePromise;
+
+		return new URL( productResponse.url() );
 	}
 
 	async publishAndGoToFrontend() {
-		await this.editor.publishPost();
-		const url = new URL( this.page.url() );
-		const postId = url.searchParams.get( 'post' );
-		await this.page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
+		const postId = await this.editor.publishPost();
+		await this.page.goto( `/?p=${ postId }` );
 		await this.refreshLocators( 'frontend' );
 	}
 
@@ -169,44 +173,67 @@ class ProductCollectionPage {
 		template: string,
 		collection?: Collections
 	) {
-		await this.templateApiUtils.revertTemplate( template );
 		await this.admin.visitSiteEditor( {
 			postId: template,
 			postType: 'wp_template',
 		} );
-		await this.editorUtils.waitForSiteEditorFinishLoading();
+
 		await this.editorUtils.enterEditMode();
+
+		await expect(
+			this.editor.canvas.locator( `[data-type="core/query"]` )
+		).toBeVisible();
+
 		await this.editorUtils.replaceBlockByBlockName(
 			'core/query',
 			this.BLOCK_SLUG
 		);
 		await this.chooseCollectionInTemplate( collection );
+		await this.refreshLocators( 'editor' );
 		await this.editor.saveSiteEditorEntities();
 	}
 
 	async goToProductCatalogFrontend() {
 		await this.page.goto( `/shop` );
+		await this.refreshLocators( 'frontend' );
+	}
+
+	async goToHomePageFrontend() {
+		await this.page.goto( `/` );
+		await this.refreshLocators( 'frontend' );
 	}
 
 	async insertProductCollection() {
 		await this.editor.insertBlock( { name: this.BLOCK_SLUG } );
 	}
 
-	async goToProductCatalogAndInsertCollection( collection?: Collections ) {
-		await this.templateApiUtils.revertTemplate(
-			'woocommerce/woocommerce//archive-product'
-		);
-
+	async goToTemplateAndInsertCollection(
+		template: string,
+		collection?: Collections
+	) {
 		await this.admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//archive-product',
+			postId: template,
 			postType: 'wp_template',
 		} );
-		await this.editorUtils.waitForSiteEditorFinishLoading();
-		await this.editor.canvas.click( 'body' );
+		await this.editorUtils.enterEditMode();
+		await this.editor.canvas.locator( 'body' ).click();
 		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
-		await this.editor.openDocumentSettingsSidebar();
-		await this.editor.saveSiteEditorEntities();
+		await this.refreshLocators( 'editor' );
+	}
+
+	async goToHomePageAndInsertCollection( collection?: Collections ) {
+		await this.goToTemplateAndInsertCollection(
+			`${ BLOCK_THEME_SLUG }//home`,
+			collection
+		);
+	}
+
+	async goToProductCatalogAndInsertCollection( collection?: Collections ) {
+		await this.goToTemplateAndInsertCollection(
+			'woocommerce/woocommerce//archive-product',
+			collection
+		);
 	}
 
 	async searchProducts( phrase: string ) {
@@ -220,7 +247,8 @@ class ProductCollectionPage {
 		name:
 			| 'Show Hand-picked Products'
 			| 'Keyword'
-			| 'Show Taxonomies'
+			| 'Show product categories'
+			| 'Show product tags'
 			| 'Show Product Attributes'
 			| 'Featured'
 			| 'Created'
@@ -229,9 +257,6 @@ class ProductCollectionPage {
 		await this.page
 			.getByRole( 'button', { name: 'Filters options' } )
 			.click();
-		// We should refactor this code. We should not wait for timeout.
-		// eslint-disable-next-line playwright/no-wait-for-timeout
-		await this.page.waitForTimeout( 500 );
 		await this.page
 			.getByRole( 'menuitemcheckbox', {
 				name,
@@ -264,6 +289,7 @@ class ProductCollectionPage {
 			name: 'Order by',
 		} );
 		await orderByComboBox.selectOption( orderBy );
+		await this.page.locator( SELECTORS.product ).first().waitFor();
 		await this.refreshLocators( 'editor' );
 	}
 
@@ -399,9 +425,6 @@ class ProductCollectionPage {
 		const input = sidebarSettings.getByLabel( 'Keyword' );
 		await input.clear();
 		await input.fill( keyword );
-		// Timeout is needed because of debounce in the block.
-		// eslint-disable-next-line playwright/no-wait-for-timeout
-		await this.page.waitForTimeout( 300 );
 		await this.refreshLocators( 'editor' );
 	}
 
@@ -512,8 +535,26 @@ class ProductCollectionPage {
 		await this.page.setViewportSize( { width, height } );
 	}
 
+	async insertBlockInProductCollection( block: {
+		name: string;
+		attributes: object;
+	} ) {
+		const productTemplate = await this.editorUtils.getBlockByName(
+			'woocommerce/product-template'
+		);
+		const productTemplateId =
+			( await productTemplate.getAttribute( 'data-block' ) ) ?? '';
+
+		await this.editor.selectBlocks( productTemplate );
+		await this.editorUtils.insertBlock(
+			block,
+			undefined,
+			productTemplateId
+		);
+	}
+
 	async insertProductCollectionInSingleProductBlock() {
-		this.insertSingleProductBlock();
+		await this.insertSingleProductBlock();
 
 		const siblingBlock = await this.editorUtils.getBlockByName(
 			'woocommerce/product-price'
@@ -564,8 +605,6 @@ class ProductCollectionPage {
 	}
 
 	async refreshLocators( currentUI: 'editor' | 'frontend' ) {
-		await this.waitForProductsToLoad();
-
 		if ( currentUI === 'editor' ) {
 			await this.initializeLocatorsForEditor();
 		} else {
@@ -611,14 +650,6 @@ class ProductCollectionPage {
 			SELECTORS.addToCartButton.onFrontend
 		);
 		this.pagination = this.page.locator( SELECTORS.pagination.onFrontend );
-	}
-
-	private async waitForProductsToLoad() {
-		// Wait for the product blocks to be loaded.
-		await this.page.waitForSelector( SELECTORS.product );
-		await this.page.waitForSelector( 'wc-block-product-template__spinner', {
-			state: 'detached',
-		} );
 	}
 }
 

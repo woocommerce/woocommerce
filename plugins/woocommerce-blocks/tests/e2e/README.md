@@ -170,10 +170,10 @@ below
 import { test as base } from '@playwright/test';
 
 const test = base.extend< {
-	dropdownBlockPostPage: TestingPost;
-	defaultBlockPostPage: TestingPost;
+	dropdownBlockPost: Post;
+	defaultBlockPost: Post;
 } >( {
-	defaultBlockPostPage: async ( { requestUtils }, use ) => {
+	defaultBlockPost: async ( { requestUtils }, use ) => {
 		const testingPost = await requestUtils.createPostFromTemplate(
 			requestUtils,
 			{ title: 'Product Filter Stock Status Block' },
@@ -185,7 +185,7 @@ const test = base.extend< {
 		await requestUtils.deletePost( post.id );
 	},
 
-	dropdownBlockPostPage: async ( { requestUtils }, use ) => {
+	dropdownBlockPost: async ( { requestUtils }, use ) => {
 		const testingPost = await requestUtils.createPostFromTemplate(
 			requestUtils,
 			{ title: 'Product Filter Stock Status Block' },
@@ -207,8 +207,8 @@ In your test you can navigate to the page. You won't need to clean it up, becaus
 the fixture will take care of that for you.
 
 ```js
-test( 'Test the block', async ( { page, defaultBlockPostPage } ) => {
-	await page.goto( defaultBlockPostPage.link );
+test( 'Test the block', async ( { page, defaultBlockPost } ) => {
+	await page.goto( defaultBlockPost.link );
 	// do your tests here
 } );
 ```

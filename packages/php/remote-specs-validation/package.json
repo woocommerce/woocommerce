@@ -7,8 +7,8 @@
 	},
 	"license": "GPL-3.0-or-later",
 	"dependencies": {
-    	"js-yaml": "^4.1.0",
-    	"json-refs": "^3.0.15",
+		"js-yaml": "^4.1.0",
+		"json-refs": "^3.0.15",
 		"commander": "^5.1.0"
-  	}
+	}
 }

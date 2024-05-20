@@ -1,5 +1,7 @@
-const { test: baseTest } = require( './block-editor-fixtures' );
-const { expect } = require( '../../../../fixtures' );
+const {
+	test: baseTest,
+} = require( '../../../../fixtures/block-editor-fixtures' );
+const { expect } = require( '../../../../fixtures/fixtures' );
 
 async function selectImagesInLibrary( page, imagesNames ) {
 	const dataIds = [];
@@ -201,7 +203,7 @@ test( 'can remove an image', async ( { page, productWithGallery } ) => {
 		// Verify image in store frontend
 		await page.goto( productWithGallery.permalink );
 		await expect(
-			page.locator( `#product-${ productWithGallery.id } ol img` )
+			page.locator( '.woocommerce-product-gallery ol img' )
 		).toHaveCount( initialImagesCount - 1 );
 	} );
 } );

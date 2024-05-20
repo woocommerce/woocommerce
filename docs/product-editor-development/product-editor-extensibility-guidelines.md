@@ -43,7 +43,7 @@ Like everything in the new product form, each extension point is a separate bloc
 
 The new product form consists of groups currently displayed as tabs. Each is a separate view and may contain any number of sections and subsections. All areas serve a specific purpose, allowing merchants to quickly find the information they're looking for (both in default Woo features and extensions).
 
-![Product form groups](https://developer.woo.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-form-groups.gif)
+![Product form groups](https://developer.woocommerce.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-form-groups.gif)
 
 If a tab doesn't contain any sections, it won't be shown to merchants.
 
@@ -92,7 +92,7 @@ With so much advanced functionality, the plugin would best register a new produc
 
 ### Fields
 
-![Fields example](https://developer.woo.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-fields.png)
+![Fields example](https://developer.woocommerce.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-fields.png)
 
 Fields are the simplest type of extension. They let users add extra product information, replace or manage the visibility of other fields assigned to a specific product type, and control the contents of other fields.
 
@@ -117,7 +117,7 @@ Field extensions should always be logically related to the form area they are in
 
 ### Subsections
 
-![Subsections example](https://developer.woo.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-subsections.png)
+![Subsections example](https://developer.woocommerce.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-subsections.png)
 
 Subsections add extra fields to existing form groups. They are small forms with a low to medium level of complexity. This interface location works best for extensions that add extra features that build off an existing Woo functionality.
 
@@ -145,7 +145,7 @@ If you're developing an extension that allows merchants to upload 360 images or 
 
 ### Sections
 
-![Sections example](https://developer.woo.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-sections.png)
+![Sections example](https://developer.woocommerce.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-sections.png)
 
 Sections are significant parts of the form that may consist of multiple subsections and fields. They should be used sparsely throughout the form, so merchants are not overwhelmed with options while filling out the information about their products.
 
@@ -173,7 +173,7 @@ If you're working on an extension that allows merchants to offer discounts based
 
 ### Top bar (header) *(future feature)*
 
-![Top bar example](https://developer.woo.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-top-bar.png)
+![Top bar example](https://developer.woocommerce.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-top-bar.png)
 
 Top bar extensions offer supplementary experiences **not vital** to the critical product creation flows. They're secondary, meaning that they shouldn't contain information that may impact the product's overall quality or completeness.
 
@@ -189,7 +189,7 @@ Depending on their roles, top bar extensions can be displayed in either a **popo
 
 ### Dialog extensions *(future feature)*
 
-![Dialog example](https://developer.woo.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-dialog-extensions.png)
+![Dialog example](https://developer.woocommerce.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-dialog-extensions.png)
 
 Dialog extensions differ from other extensions as they are unrelated to any section or functionality within the product form. They can connect to third-party systems or come with complex interfaces that require a separate, focused experience.
 

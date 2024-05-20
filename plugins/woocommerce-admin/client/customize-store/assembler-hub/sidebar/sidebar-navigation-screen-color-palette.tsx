@@ -7,7 +7,6 @@ import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useContext } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { PanelBody } from '@wordpress/components';
-import { recordEvent } from '@woocommerce/tracks';
 // @ts-ignore No types for this exist yet.
 import { privateApis as blockEditorPrivateApis } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
@@ -21,6 +20,7 @@ import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { ColorPalette, ColorPanel } from './global-styles';
 import { FlowType } from '~/customize-store/types';
+import { trackEvent } from '~/customize-store/tracking';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
@@ -82,7 +82,7 @@ export const SidebarNavigationScreenColorPalette = () => {
 				EditorLink: (
 					<Link
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_assembler_hub_editor_link_click',
 								{
 									source: 'color-palette',
@@ -100,7 +100,7 @@ export const SidebarNavigationScreenColorPalette = () => {
 				StyleLink: (
 					<Link
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_assembler_hub_style_link_click',
 								{
 									source: 'color-palette',

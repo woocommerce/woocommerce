@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-fix fatal string to array conversion error in get_full_size_image_dimensions

@@ -10,6 +10,8 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonCacheInvalidator;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -23,7 +25,9 @@ use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Utilities\TimeUtil;
+use Automattic\WooCommerce\Utilities\{ LoggingUtil, TimeUtil };
+use Automattic\WooCommerce\Admin\WCAdminHelper;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * Main WooCommerce Class.
@@ -37,7 +41,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '8.7.0';
+	public $version = '9.0.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -253,6 +257,8 @@ final class WooCommerce {
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 
+		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
+
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
 		$container->get( ProductDownloadDirectories::class );
@@ -269,6 +275,8 @@ final class WooCommerce {
 		$container->get( WebhookUtil::class );
 		$container->get( Marketplace::class );
 		$container->get( TimeUtil::class );
+		$container->get( ComingSoonCacheInvalidator::class );
+		$container->get( ComingSoonRequestHandler::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -366,9 +374,18 @@ final class WooCommerce {
 		$this->define( 'WC_DISCOUNT_ROUNDING_MODE', 2 );
 		$this->define( 'WC_TAX_ROUNDING_MODE', 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1 );
 		$this->define( 'WC_DELIMITER', '|' );
-		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
+
+		/**
+		 * As of 8.8.0, it is preferable to use the `woocommerce_log_directory` filter hook to change the log
+		 * directory. WC_LOG_DIR_CUSTOM is a back-compatibility measure so we can tell if `WC_LOG_DIR` has been
+		 * defined outside of WC Core.
+		 */
+		if ( defined( 'WC_LOG_DIR' ) ) {
+			$this->define( 'WC_LOG_DIR_CUSTOM', true );
+		}
+		$this->define( 'WC_LOG_DIR', LoggingUtil::get_log_directory() );
 
 		// These three are kept defined for compatibility, but are no longer used.
 		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.2' );
@@ -386,7 +403,6 @@ final class WooCommerce {
 		 * The SSR in the name is preserved for bw compatibility, as this was initially used in System Status Report.
 		 */
 		$this->define( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE', 'none' );
-
 	}
 
 	/**
@@ -569,6 +585,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/queue/class-wc-action-queue.php';
 		include_once WC_ABSPATH . 'includes/queue/class-wc-queue.php';
 		include_once WC_ABSPATH . 'includes/admin/marketplace-suggestions/class-wc-marketplace-updater.php';
+		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-marketplace-promotions.php';
 		include_once WC_ABSPATH . 'includes/blocks/class-wc-blocks-utils.php';
 
 		/**
@@ -974,7 +991,7 @@ final class WooCommerce {
 	 * @param string $filename The filename of the activated plugin.
 	 */
 	public function activated_plugin( $filename ) {
-		include_once dirname( __FILE__ ) . '/admin/helper/class-wc-helper.php';
+		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
 
 		if ( '/woocommerce.php' === substr( $filename, -16 ) ) {
 			set_transient( 'woocommerce_activated_plugin', $filename );
@@ -990,7 +1007,7 @@ final class WooCommerce {
 	 * @param string $filename The filename of the deactivated plugin.
 	 */
 	public function deactivated_plugin( $filename ) {
-		include_once dirname( __FILE__ ) . '/admin/helper/class-wc-helper.php';
+		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
 
 		WC_Helper::deactivated_plugin( $filename );
 	}
@@ -1153,5 +1170,21 @@ final class WooCommerce {
 	 */
 	public function get_global( string $global_name ) {
 		return wc_get_container()->get( LegacyProxy::class )->get_global( $global_name );
+	}
+
+	/**
+	 * Converts the WooCommerce slug to the correct slug for the current version.
+	 * This ensures that when the plugin is installed in a different folder name, the correct slug is used so that dependent plugins can be installed/activated.
+	 *
+	 * @since 9.0.0
+	 * @param string $slug The plugin slug to convert.
+	 *
+	 * @return string
+	 */
+	public function convert_woocommerce_slug( $slug ) {
+		if ( 'woocommerce' === $slug ) {
+			$slug = dirname( WC_PLUGIN_BASENAME );
+		}
+		return $slug;
 	}
 }

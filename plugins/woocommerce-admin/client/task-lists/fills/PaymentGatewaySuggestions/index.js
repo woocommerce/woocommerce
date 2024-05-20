@@ -231,7 +231,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			markConfigured={ markConfigured }
 			footerLink={
 				<Button
-					href="https://woo.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
+					href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
 					target="_blank"
 					onClick={ trackSeeMore }
 					isTertiary

@@ -192,7 +192,7 @@ This formatter should be used when returning HTML from the StoreAPI regardless o
 
 ---
 
-[We're hiring!](https://woo.com/careers/) Come work with us!
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/rest-api/extend-rest-api-formatters.md)
 

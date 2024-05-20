@@ -6,7 +6,7 @@ tags: reference
 
 For core development, we use the following structure and flow.
 
-![Git Flow WooCommerce uses for core development](https://developer.woo.com/wp-content/uploads/2023/12/flow-1.png)
+![Git Flow WooCommerce uses for core development](https://developer.woocommerce.com/wp-content/uploads/2023/12/flow-1.png)
 
 ## Branches
 

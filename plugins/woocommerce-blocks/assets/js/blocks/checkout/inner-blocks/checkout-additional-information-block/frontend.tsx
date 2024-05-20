@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { FormStep } from '@woocommerce/blocks-components';
-import { ADDITIONAL_FORM_KEYS } from '@woocommerce/block-settings';
+import { ORDER_FORM_KEYS } from '@woocommerce/block-settings';
 import { useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { withFilteredAttributes } from '@woocommerce/shared-hocs';
@@ -31,7 +31,7 @@ const FrontendBlock = ( {
 		select( CHECKOUT_STORE_KEY ).isProcessing()
 	);
 
-	if ( ADDITIONAL_FORM_KEYS.length === 0 ) {
+	if ( ORDER_FORM_KEYS.length === 0 ) {
 		return null;
 	}
 

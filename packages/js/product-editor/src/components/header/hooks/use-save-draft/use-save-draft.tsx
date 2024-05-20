@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
 import { check } from '@wordpress/icons';
 import { createElement, Fragment } from '@wordpress/element';
 import { MouseEvent, ReactNode } from 'react';
+import { useShortcut } from '@wordpress/keyboard-shortcuts';
 
 /**
  * Internal dependencies
@@ -16,6 +17,7 @@ import { MouseEvent, ReactNode } from 'react';
 import { useValidations } from '../../../../contexts/validation-context';
 import { WPError } from '../../../../utils/get-product-error-message';
 import { SaveDraftButtonProps } from '../../save-draft-button';
+import { recordProductEvent } from '../../../../utils/record-product-event';
 
 export function useSaveDraft( {
 	productStatus,
@@ -37,7 +39,8 @@ export function useSaveDraft( {
 
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
 			const isSaving = isSavingEntityRecord< boolean >(
@@ -66,25 +69,24 @@ export function useSaveDraft( {
 		( productStatus !== 'publish' && ! hasEdits ) ||
 		isValidating;
 
-	// @ts-expect-error There are no types for this.
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
-	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
-		if ( ariaDisabled ) {
-			return event.preventDefault();
-		}
+	const productStatusMap: {
+		[ key in Product[ 'status' ] ]?: string;
+	} = {
+		publish: 'product_switch_draft',
+		draft: 'product_save_draft',
+	};
 
-		if ( onClick ) {
-			onClick( event );
-		}
-
+	async function saveDraft() {
 		try {
 			await validate( { status: 'draft' } );
 
 			await editEntityRecord( 'postType', productType, productId, {
 				status: 'draft',
 			} );
-			// @ts-expect-error There are no types for this.
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
 				productType,
@@ -94,6 +96,11 @@ export function useSaveDraft( {
 				}
 			);
 
+			const eventName = productStatusMap[ productStatus ];
+			if ( eventName ) {
+				recordProductEvent( eventName, publishedProduct );
+			}
+
 			if ( onSaveSuccess ) {
 				onSaveSuccess( publishedProduct );
 			}
@@ -102,6 +109,17 @@ export function useSaveDraft( {
 				onSaveError( error as WPError );
 			}
 		}
+	}
+
+	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+		if ( ariaDisabled ) {
+			return event.preventDefault();
+		}
+
+		if ( onClick ) {
+			onClick( event );
+		}
+		await saveDraft();
 	}
 
 	let children: ReactNode;
@@ -117,6 +135,16 @@ export function useSaveDraft( {
 			</>
 		);
 	}
+
+	useShortcut( 'core/editor/save', ( event ) => {
+		event.preventDefault();
+		if (
+			! ariaDisabled &&
+			( productStatus === 'draft' || productStatus === 'auto-draft' )
+		) {
+			saveDraft();
+		}
+	} );
 
 	return {
 		children,

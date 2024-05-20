@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers\ArrayFlatten;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\ArrayFlatten;
 
 /**
  * class WC_Admin_Tests_RemoteInboxNotifications_Transformers_ArrayKeys
