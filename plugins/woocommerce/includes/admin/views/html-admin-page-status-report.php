@@ -30,18 +30,18 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 $active_plugins_count   = is_countable( $active_plugins ) ? count( $active_plugins ) : 0;
 $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_plugins ) : 0;
 
-// Include necessary WordPress file to use get_plugin_data()
+// Include necessary WordPress file to use get_plugin_data().
 if ( ! function_exists( 'get_plugin_data' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 }
-// Define the path to the main WooCommerce plugin file using the correct constant
+// Define the path to the main WooCommerce plugin file using the correct constant.
 $plugin_path = WP_PLUGIN_DIR . '/woocommerce/woocommerce.php';
-// Initialize the WooCommerce version variable
+// Initialize the WooCommerce version variable.
 $wc_version = '';
-// Check if the plugin file exists before trying to access it
+// Check if the plugin file exists before trying to access it.
 if ( file_exists( $plugin_path ) ) {
 	$plugin_data = get_plugin_data( $plugin_path );
-	$wc_version  = $plugin_data['Version'] ?? ''; // Use null coalescing operator to handle undefined index
+	$wc_version  = $plugin_data['Version'] ?? ''; // Use null coalescing operator to handle undefined index.
 }
 
 ?>
@@ -421,7 +421,12 @@ if ( file_exists( $plugin_path ) ) {
 			</td>
 		</tr>
 		<?php
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		/**
+		 * Filters the environment rows to show in the WooCommerce status report.
+		 */
 		$rows = apply_filters( 'woocommerce_system_status_environment_rows', array() );
+		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceVersionComment
 		foreach ( $rows as $row ) {
 			if ( ! empty( $row['success'] ) ) {
 				$css_class = 'yes';
@@ -861,14 +866,12 @@ if ( 0 < $mu_plugins_count ) :
 				/* Translators: %s: docs link. */
 				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . wp_kses_post( sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://wordpress.org/support/article/content-visibility/' ) ) . '</mark>';
 				$found_error = true;
-			} else {
+			} elseif ( $_page['shortcode_required'] || $_page['block_required'] ) {
 				// Shortcode and block check.
-				if ( $_page['shortcode_required'] || $_page['block_required'] ) {
-					if ( ! $_page['shortcode_present'] && ! $_page['block_present'] ) {
-						/* Translators: %1$s: shortcode text, %2$s: block slug. */
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . ( $_page['block_required'] ? sprintf( esc_html__( 'Page does not contain the %1$s shortcode or the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) : sprintf( esc_html__( 'Page does not contain the %s shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
-						$found_error = true;
-					}
+				if ( ! $_page['shortcode_present'] && ! $_page['block_present'] ) {
+					/* Translators: %1$s: shortcode text, %2$s: block slug. */
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . ( $_page['block_required'] ? sprintf( esc_html__( 'Page does not contain the %1$s shortcode or the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) : sprintf( esc_html__( 'Page does not contain the %s shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
+					$found_error = true;
 				}
 			}
 
@@ -1035,7 +1038,14 @@ if ( 0 < $mu_plugins_count ) :
 	</tbody>
 </table>
 
-<?php do_action( 'woocommerce_system_status_report' ); ?>
+<?php
+	// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+	/**
+	 * Action fired when the WooCommerce system status report is rendered.
+	 */
+	do_action( 'woocommerce_system_status_report' );
+	// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+?>
 
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
