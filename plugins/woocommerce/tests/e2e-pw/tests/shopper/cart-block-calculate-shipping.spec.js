@@ -184,7 +184,7 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 		await page.getByRole( 'group' ).getByText( 'Local pickup' ).click();
 
 		// Verify updated shipping costs
-		await expect( page.getByText( 'Shipping$0.00Local' ) ).toBeVisible();
+		await expect( page.getByText( 'ShippingFreeLocal' ) ).toBeVisible();
 		await expect( page.getByText( '$' ).nth( 5 ) ).toContainText(
 			firstProductPrice
 		);
@@ -257,7 +257,7 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 		await page.getByRole( 'group' ).getByText( 'Local pickup' ).click();
 
 		// Verify updated shipping costs
-		await expect( page.getByText( 'Shipping$0.00Local' ) ).toBeVisible();
+		await expect( page.getByText( 'ShippingFreeLocal' ) ).toBeVisible();
 		await expect(
 			page
 				.locator( 'div' )
