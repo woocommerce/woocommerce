@@ -87,7 +87,7 @@ function getMarketingItems( props ) {
 			link: 'https://kb.mailpoet.com/category/114-getting-started',
 		},
 		activePlugins.includes( 'google-listings-and-ads' ) && {
-			title: __( 'Set up Google Listing & Ads', 'woocommerce' ),
+			title: __( 'Set up Google for WooCommerce', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/google-listings-and-ads/?utm_medium=product#get-started',
 		},
 		activePlugins.includes( 'pinterest-for-woocommerce' ) && {

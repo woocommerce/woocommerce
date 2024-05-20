@@ -66,7 +66,7 @@ describe( 'DiscoverTools component', () => {
 				isLoading: false,
 				data: [
 					{
-						title: 'Google Listings and Ads',
+						title: 'Google for WooCommerce',
 						description:
 							'Get in front of shoppers and drive traffic so you can grow your business with Smart Shopping Campaigns and free listings.',
 						url: 'https://woocommerce.com/products/google-listings-and-ads/?utm_source=marketingtab&utm_medium=product&utm_campaign=wcaddons',
@@ -95,7 +95,7 @@ describe( 'DiscoverTools component', () => {
 			// Assert that we have the "Sales channels" tab, the plugin name, the "Built by WooCommerce" pill, and the "Install extension" button.
 			expect( screen.getByText( 'Sales channels' ) ).toBeInTheDocument();
 			expect(
-				screen.getByText( 'Google Listings and Ads' )
+				screen.getByText( 'Google for WooCommerce' )
 			).toBeInTheDocument();
 			expect(
 				screen.getByText( 'Built by WooCommerce' )

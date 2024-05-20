@@ -118,7 +118,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			await expect( page.getByText( 'MailPoet' ) ).not.toBeAttached();
 			await expect( page.getByText( 'Pinterest' ) ).not.toBeAttached();
 			await expect(
-				page.getByText( 'Google Listings & Ads' )
+				page.getByText( 'Google for WooCommerce' )
 			).not.toBeAttached();
 		} );
 
@@ -270,7 +270,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				page.getByText( 'Pinterest for WooCommerce', { exact: true } )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Google Listings and Ads', { exact: true } )
+				page.getByText( 'Google for WooCommerce', { exact: true } )
 			).toBeVisible();
 		} );
 
@@ -298,14 +298,14 @@ test.describe( 'Store owner can complete the core profiler', () => {
 
 		await test.step( 'Clean up installed extensions', async () => {
 			await page.goto( 'wp-admin/plugins.php' );
-			await page.getByLabel( 'Deactivate Google Listings' ).click();
+			await page.getByLabel( 'Deactivate Google for WooCommerce' ).click();
 			await expect(
 				page.getByText( 'Plugin deactivated.' )
 			).toBeVisible();
-			await page.getByLabel( 'Delete Google Listings' ).click();
+			await page.getByLabel( 'Delete Google for WooCommerce' ).click();
 			await expect(
 				page.getByText(
-					'Google Listings and Ads was successfully deleted.'
+					'Google for WooCommerce was successfully deleted.'
 				)
 			).toBeVisible();
 			await page.getByLabel( 'Deactivate Pinterest for' ).click();
