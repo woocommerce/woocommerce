@@ -12,12 +12,12 @@ import { __, sprintf } from '@wordpress/i18n';
 import { AddressFieldProps } from './types';
 
 const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
-	fields,
+	field,
 	props,
 	onChange,
 	value,
 }: AddressFieldProps< T > ): JSX.Element => {
-	const isFieldRequired = fields?.required ?? false;
+	const isFieldRequired = field?.required ?? false;
 
 	// Display the input field if it has a value or if it is required.
 	const [ isFieldVisible, setFieldVisible ] = useState(
@@ -30,18 +30,18 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 	}, [ isFieldRequired ] );
 
 	return (
-		<Fragment key={ fields.key }>
+		<Fragment key={ field.key }>
 			{ isFieldVisible ? (
 				<ValidatedTextInput
 					{ ...props }
-					type={ fields.type }
+					type={ field.type }
 					label={
-						isFieldRequired ? fields.label : fields.optionalLabel
+						isFieldRequired ? field.label : field.optionalLabel
 					}
-					className={ `wc-block-components-address-form__${ fields.key }` }
+					className={ `wc-block-components-address-form__${ field.key }` }
 					value={ value }
 					onChange={ ( newValue: string ) =>
-						onChange( fields.key as keyof T, newValue )
+						onChange( field.key as keyof T, newValue )
 					}
 				/>
 			) : (
@@ -54,7 +54,7 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 					{ sprintf(
 						// translators: %s: address 2 field label.
 						__( '+ Add %s', 'woocommerce' ),
-						fields.label.toLowerCase()
+						field.label.toLowerCase()
 					) }
 				</button>
 			) }

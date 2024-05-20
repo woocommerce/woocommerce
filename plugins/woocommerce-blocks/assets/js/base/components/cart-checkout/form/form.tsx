@@ -160,7 +160,12 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 							addressType={ addressType }
 							id={ id }
 							key={ field.key }
-							onChange={ onChange }
+							onChange={ ( key, value ) => {
+								onChange( {
+									...values,
+									[ key ]: value,
+								} );
+							} }
 						/>
 					);
 				}

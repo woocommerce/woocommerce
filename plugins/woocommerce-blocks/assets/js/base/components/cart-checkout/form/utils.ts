@@ -45,10 +45,10 @@ export const getFieldData = < T extends AddressFormValues | ContactFormValues >(
 	fields: AddressFormFields[ 'fields' ],
 	values: T
 ) => {
-	const addressFields = fields.find( ( field ) => field.key === key );
+	const addressField = fields.find( ( field ) => field.key === key );
 	const addressValue = objectHasProp( values, key )
 		? values[ key ]
 		: undefined;
 
-	return { fields: addressFields, value: addressValue };
+	return { field: addressField, value: addressValue };
 };

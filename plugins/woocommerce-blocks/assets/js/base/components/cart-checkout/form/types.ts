@@ -41,9 +41,9 @@ export interface AddressFormProps< T > {
 
 interface AddressFieldData {
 	// Form fields.
-	fields?: KeyedFormField | undefined;
+	field?: KeyedFormField | undefined;
 	// Field value.
-	values?: string | undefined;
+	value?: string | undefined;
 }
 
 export interface AddressFieldsProps< T >
@@ -62,7 +62,7 @@ export interface AddressFieldsProps< T >
 
 export interface AddressFieldProps< T > {
 	// Form fields.
-	fields: KeyedFormField;
+	field: KeyedFormField;
 	// Props for the form field.
 	props?: FieldProps | undefined;
 	// Called with the new address data when the address form changes. This is only called when all required fields are filled and there are no validation errors.
