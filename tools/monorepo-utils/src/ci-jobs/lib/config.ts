@@ -233,11 +233,6 @@ export interface TestEnvConfigVars {
 	 * The version of PHP that should be used.
 	 */
 	phpVersion?: string;
-
-	/**
-	 * Whether to disable the HPOS feature in the test environment.
-	 */
-	disableHpos?: string;
 }
 
 /**
@@ -265,8 +260,6 @@ function parseTestEnvConfigVars( raw: any ): TestEnvConfigVars {
 				'The "phpVersion" option must be a string.'
 			);
 		}
-
-		config.phpVersion = raw.phpVersion;
 	}
 
 	return config;
