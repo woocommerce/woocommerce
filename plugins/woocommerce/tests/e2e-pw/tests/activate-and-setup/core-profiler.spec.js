@@ -118,7 +118,8 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			await expect( page.getByText( 'MailPoet' ) ).not.toBeAttached();
 			await expect( page.getByText( 'Pinterest' ) ).not.toBeAttached();
 			await expect(
-				page.getByText( 'Google for WooCommerce' )
+				page.
+				getByText( 'Google for WooCommerce' )
 			).not.toBeAttached();
 		} );
 
