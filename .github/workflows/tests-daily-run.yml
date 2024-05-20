@@ -1,0 +1,10 @@
+name: 'Daily tests run'
+on: [pull_request]
+
+jobs:
+  trigger:
+    uses: ./.github/workflows/ci.yml@ci/add-workflow-call-event
+    with:
+      myInput: 'inputValue'
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
