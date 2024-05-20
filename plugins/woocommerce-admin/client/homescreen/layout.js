@@ -95,7 +95,7 @@ export const Layout = ( {
 		if ( ! isTask && isLYSOpen ) {
 			navigateTo( { url: getNewPath( {}, '/launch-your-store' ) } );
 		}
-	}, [isDashboardShown]);
+	}, [ isDashboardShown ] );
 
 	useLayoutEffect( () => {
 		maybeToggleColumns();
