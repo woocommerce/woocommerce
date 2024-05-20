@@ -6,7 +6,7 @@
  *
  * @see     Automattic\WooCommerce\Internal\Orders\OrderAttributionController
  * @package WooCommerce\Templates
- * @version 8.6.0-dev
+ * @version 9.0.0
  */
 
 declare( strict_types=1 );
