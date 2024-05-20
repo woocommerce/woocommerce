@@ -2,12 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	createElement,
-	Fragment,
-	useEffect,
-	useMemo,
-} from '@wordpress/element';
+import { createElement, Fragment, useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	Form,
@@ -61,6 +56,11 @@ type NewAttributeModalProps = {
 type AttributeForm = {
 	attributes: Array< EnhancedProductAttribute | null >;
 };
+
+/*
+ * Sort criteria for the attributes.
+ */
+const attributeSortCriteria = { order_by: 'name' };
 
 export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
@@ -198,9 +198,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		name: defaultSearch,
 	} as EnhancedProductAttribute;
 
-	// Memoize attribute sort criteria to prevent re-renders.
-	const attributeSortCriteria = useMemo( () => ( { order_by: 'name' } ), [] );
-
 	const { attributes, isLoadingAttributes } = useSelect(
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
@@ -218,7 +215,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 				attributes: getAttributes( attributeSortCriteria ),
 			};
 		},
-		[ attributeSortCriteria ]
+		[]
 	);
 
 	const { createErrorNotice } = useDispatch( 'core/notices' );
