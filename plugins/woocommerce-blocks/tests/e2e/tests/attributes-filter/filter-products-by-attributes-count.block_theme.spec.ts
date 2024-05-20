@@ -5,7 +5,10 @@ import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
 import path from 'path';
 
-const TEMPLATE_PATH = path.join( __dirname, './active-filters.handlebars' );
+const TEMPLATE_PATH = path.join(
+	__dirname,
+	'./filters-with-all-products.handlebars'
+);
 
 const test = base.extend< {
 	defaultBlockPost: Post;

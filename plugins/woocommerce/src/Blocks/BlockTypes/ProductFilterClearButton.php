@@ -14,6 +14,15 @@ final class ProductFilterClearButton extends AbstractBlock {
 	protected $block_name = 'product-filter-clear-button';
 
 	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_style() {
+		return null;
+	}
+
+	/**
 	 * Include and render the block.
 	 *
 	 * @param array    $attributes Block attributes. Default empty array.
