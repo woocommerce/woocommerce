@@ -51,7 +51,6 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 							...values,
 							[ field.key ]: newValue,
 						} );
-						setHasFieldBeenModified( true );
 					} }
 				/>
 			) : (
