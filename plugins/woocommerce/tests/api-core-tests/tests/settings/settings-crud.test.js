@@ -1,14 +1,10 @@
 const { test, expect } = require( '@playwright/test' );
 const { API_BASE_URL } = process.env;
-const shouldSkip = API_BASE_URL != undefined;
+const shouldSkip = API_BASE_URL !== undefined;
 
-const exp = require( 'constants' );
-const { keys } = require( 'lodash' );
 const {
 	countries,
 	currencies,
-	externalCurrencies,
-	externalCountries,
 	stateOptions,
 } = require( '../../data/settings' );
 
@@ -677,7 +673,6 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					},
 				}
 			);
-			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
 
 			// retrieve the updated settings values
@@ -1422,11 +1417,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 							'Remove personal data from orders on request',
 						type: 'checkbox',
 						default: 'no',
-						tip: expect.stringContaining(
-							'When handling an <a href='
-						),
-						tip: expect.stringContaining(
-							'wp-admin/erase-personal-data.php">account erasure request</a>, should personal data within orders be retained or removed?'
+						tip: expect.stringMatching(
+							'When handling an <a href="[^"]*wp-admin/erase-personal-data.php">account erasure request</a>, should personal data within orders be retained or removed?'
 						),
 						value: 'no',
 					} ),
@@ -1440,11 +1432,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						description: 'Remove access to downloads on request',
 						type: 'checkbox',
 						default: 'no',
-						tip: expect.stringContaining(
-							'When handling an <a href='
-						),
-						tip: expect.stringContaining(
-							'wp-admin/erase-personal-data.php">account erasure request</a>, should access to downloadable files be revoked and download logs cleared?'
+						tip: expect.stringMatching(
+							'When handling an <a href="[^"]*wp-admin/erase-personal-data.php">account erasure request</a>, should access to downloadable files be revoked and download logs cleared?'
 						),
 						value: 'no',
 					} ),
