@@ -273,13 +273,13 @@ class WC_Helper_Updater {
 		$expiry_notice = '';
 		if ( ! empty( $subscription['expired'] ) && ! $subscription['lifetime'] ) {
 			/* translators: 1: Product regular price */
-			$producr_price = ! empty( $subscription['product_regular_price'] ) ? sprintf( __( 'for %s ', 'woocommerce' ), esc_html( $subscription['product_regular_price'] ) ) : '';
+			$product_price = ! empty( $subscription['product_regular_price'] ) ? sprintf( __( 'for %s ', 'woocommerce' ), esc_html( $subscription['product_regular_price'] ) ) : '';
 
 			$expiry_notice = sprintf(
 			/* translators: 1: URL to My Subscriptions page 2: Product price */
 				__( ' Your subscription expired, <a href="%1$s" class="woocommerce-renew-subscription">renew %2$s</a>to update.', 'woocommerce' ),
 				esc_url( 'https://woocommerce.com/my-account/my-subscriptions/' ),
-				$producr_price
+				$product_price
 			);
 		} elseif ( ! empty( $subscription['expiring'] ) && ! $subscription['autorenew'] ) {
 			$expiry_notice = sprintf(
