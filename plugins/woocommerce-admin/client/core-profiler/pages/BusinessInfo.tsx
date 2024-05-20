@@ -44,24 +44,24 @@ export const industryChoices = [
 		key: 'clothing_and_accessories' as const,
 	},
 	{
-		label: __( 'Health and beauty', 'woocommerce' ),
-		key: 'health_and_beauty' as const,
-	},
-	{
 		label: __( 'Food and drink', 'woocommerce' ),
 		key: 'food_and_drink' as const,
 	},
 	{
-		label: __( 'Home, furniture and garden', 'woocommerce' ),
-		key: 'home_furniture_and_garden' as const,
+		label: __( 'Electronics and computers', 'woocommerce' ),
+		key: 'electronics_and_computers' as const,
+	},
+	{
+		label: __( 'Health and beauty', 'woocommerce' ),
+		key: 'health_and_beauty' as const,
 	},
 	{
 		label: __( 'Education and learning', 'woocommerce' ),
 		key: 'education_and_learning' as const,
 	},
 	{
-		label: __( 'Electronics and computers', 'woocommerce' ),
-		key: 'electronics_and_computers' as const,
+		label: __( 'Home, furniture and garden', 'woocommerce' ),
+		key: 'home_furniture_and_garden' as const,
 	},
 	{
 		label: __( 'Other', 'woocommerce' ),
