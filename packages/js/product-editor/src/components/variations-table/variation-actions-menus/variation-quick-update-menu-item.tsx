@@ -84,6 +84,7 @@ VariationQuickUpdateMenuItem.Slot = ( {
 	onClose,
 	selection,
 	supportsMultipleSelection,
+	renderGroup = true,
 } ) => {
 	return (
 		<Slot
@@ -95,7 +96,11 @@ VariationQuickUpdateMenuItem.Slot = ( {
 					return null;
 				}
 
-				return <MenuGroup>{ sortFillsByOrder( fills ) }</MenuGroup>;
+				return renderGroup ? (
+					<MenuGroup>{ sortFillsByOrder( fills ) }</MenuGroup>
+				) : (
+					sortFillsByOrder( fills )
+				);
 			} }
 		</Slot>
 	);

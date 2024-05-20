@@ -13,7 +13,6 @@ import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
-	MenuGroup,
 	MenuItem,
 } from '@wordpress/components';
 
@@ -29,7 +28,8 @@ import type { SalePriceBlockAttributes } from './types';
 import { TRACKS_SOURCE } from '../../../constants';
 import { handlePrompt } from '../../../utils';
 import { SetListPriceMenuItem } from '../../../components/variations-table/set-list-price-menu-item';
-import { VariationQuickUpdateFill } from '../../../components/variations-table';
+import { VariationQuickUpdateMenuItem } from '../../../components/variations-table';
+import { VariationQuickUpdateMenuGroup } from '../../../components/variations-table/variation-actions-menus/variation-quick-update-menu-group';
 
 function isPercentage( value: string ) {
 	return value.endsWith( '%' );
@@ -172,11 +172,14 @@ export function Edit( {
 					/>
 				</BaseControl>
 			</div>
-			<VariationQuickUpdateFill name="list-price">
+			<VariationQuickUpdateMenuGroup
+				name="list-price"
+				label={ __( 'List price', 'woocommerce' ) }
+			>
 				{ ( { selection, onChange, onClose } ) => {
 					const ids = selection.map( ( { id } ) => id );
 					return (
-						<MenuGroup label={ __( 'List price', 'woocommerce' ) }>
+						<>
 							<SetListPriceMenuItem
 								selection={ selection }
 								onChange={ onChange }
@@ -275,19 +278,44 @@ export function Edit( {
 							>
 								{ __( 'Decrease list price', 'woocommerce' ) }
 							</MenuItem>
-						</MenuGroup>
+						</>
 					);
 				} }
-			</VariationQuickUpdateFill>
-			<VariationQuickUpdateFill name="multiple-selections">
-				{ ( { selection, onChange, onClose } ) => (
-					<SetListPriceMenuItem
-						selection={ selection }
-						onChange={ onChange }
-						onClose={ onClose }
-					/>
-				) }
-			</VariationQuickUpdateFill>
+			</VariationQuickUpdateMenuGroup>
+			<VariationQuickUpdateMenuItem
+				group="multiple-selections"
+				supportsMultipleSelection
+				onClick={ ( { selection, onChange, onClose } ) => {
+					const ids = selection.map( ( { id } ) => id );
+
+					recordEvent( 'product_variations_menu_pricing_select', {
+						source: TRACKS_SOURCE,
+						action: 'list_price_set',
+						variation_id: ids,
+					} );
+					handlePrompt( {
+						onOk( value ) {
+							recordEvent(
+								'product_variations_menu_pricing_update',
+								{
+									source: TRACKS_SOURCE,
+									action: 'list_price_set',
+									variation_id: ids,
+								}
+							);
+							onChange(
+								selection.map( ( { id } ) => ( {
+									id,
+									regular_price: value,
+								} ) )
+							);
+						},
+					} );
+					onClose();
+				} }
+			>
+				{ __( 'Set list price', 'woocommerce' ) }
+			</VariationQuickUpdateMenuItem>
 		</>
 	);
 }

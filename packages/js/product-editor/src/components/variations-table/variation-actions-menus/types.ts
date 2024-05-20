@@ -10,13 +10,17 @@ export type VariationActionsMenuProps = {
 	onDelete( values: PartialProductVariation[] ): void;
 };
 
-export type VariationQuickUpdateSlotProps = {
-	group: string;
-	supportsMultipleSelection: boolean;
+export type Test = {
 	selection: ProductVariation[];
 	onChange( values: PartialProductVariation[], showSuccess?: boolean ): void;
 	onClose: () => void;
 };
+
+export type VariationQuickUpdateSlotProps = {
+	group: string;
+	supportsMultipleSelection: boolean;
+	renderGroup?: boolean;
+} & Test;
 
 export type MenuItemProps = {
 	children?: React.ReactNode;

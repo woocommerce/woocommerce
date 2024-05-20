@@ -13,11 +13,9 @@ import { chevronRight } from '@wordpress/icons';
 import { TRACKS_SOURCE } from '../../../constants';
 import { handlePrompt } from '../../../utils/handle-prompt';
 import { VariationActionsMenuItemProps } from '../types';
-import {
-	VariationQuickUpdateFill,
-	VariationQuickUpdateMenuItem,
-} from '../variation-actions-menus';
+import { VariationQuickUpdateMenuItem } from '../variation-actions-menus';
 import { addFixedOrPercentage } from '../../../blocks/product-fields/regular-price/edit';
+import { VariationQuickUpdateMenuGroup } from '../variation-actions-menus/variation-quick-update-menu-group';
 
 export function PricingMenuItem( {
 	selection,
@@ -51,9 +49,11 @@ export function PricingMenuItem( {
 			) }
 			renderContent={ () => (
 				<div className="components-dropdown-menu__menu">
-					<VariationQuickUpdateFill.Slot
+					<VariationQuickUpdateMenuGroup.Slot
 						name="list-price"
-						fillProps={ { selection, onChange, onClose } }
+						onChange={ onChange }
+						onClose={ onClose }
+						selection={ selection }
 					/>
 					<MenuGroup label={ __( 'Sale price', 'woocommerce' ) }>
 						<MenuItem
