@@ -25,20 +25,32 @@ import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
 import PaymentMethodErrorBoundary from './payment-method-error-boundary';
 import { STORE_KEY as PAYMENT_STORE_KEY } from '../../../data/payment/constants';
 
-const ExpressPaymentMethods = () => {
+const ExpressPaymentMethods = ( {
+	buttonHeight: buttonHeight,
+	buttonLabel,
+}: {
+	buttonHeight: string;
+	buttonLabel: string;
+} ) => {
 	const { isEditor } = useEditorContext();
 
 	const { hasDarkControls } = useCheckoutBlockContext();
 
-	const buttonAttributes = useMemo(
-		() => getSetting( 'expressPaymentStyles' ),
-		[]
-	);
-	buttonAttributes.height = 'clamp(40px, 48px, 56px)';
+	// Get attributes set on the server
+	const buttonAttributes: {
+		height: string;
+		borderRadius: string;
+		defaultHeight: string;
+		minWidth: string;
+		darkMode: boolean;
+		label: string;
+	} = useMemo( () => getSetting( 'expressPaymentStyles' ), [] );
+	// any attritutes defined on client
+	buttonAttributes.height = buttonHeight;
 	buttonAttributes.defaultHeight = '48px';
 	buttonAttributes.minWidth = '118px';
 	buttonAttributes.darkMode = hasDarkControls;
-	buttonAttributes.label = 'buy';
+	buttonAttributes.label = buttonLabel;
 
 	const { activePaymentMethod, paymentMethodData } = useSelect(
 		( select ) => {

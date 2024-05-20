@@ -1,9 +1,11 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { PanelBody, RadioControl } from '@wordpress/components';
 import { useExpressPaymentMethods } from '@woocommerce/base-context/hooks';
 import classnames from 'classnames';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -13,14 +15,18 @@ import './editor.scss';
 
 export const Edit = ( {
 	attributes,
+	setAttributes,
 }: {
 	attributes: {
 		className?: string;
+		buttonHeight: string;
+		buttonLabel: string;
 		lock: {
 			move: boolean;
 			remove: boolean;
 		};
 	};
+	setAttributes: ( attributes: Record< string, unknown > ) => undefined;
 } ): JSX.Element | null => {
 	const { paymentMethods, isInitialized } = useExpressPaymentMethods();
 	const hasExpressPaymentMethods = Object.keys( paymentMethods ).length > 0;
@@ -41,6 +47,35 @@ export const Edit = ( {
 
 	return (
 		<div { ...blockProps }>
+			<InspectorControls>
+				<PanelBody title={ __( 'Button Settings', 'woocommerce' ) }>
+					<RadioControl
+						label="Button size"
+						selected={ attributes.buttonHeight }
+						options={ [
+							{ label: 'Small (40px)', value: '40px' },
+							{ label: 'Medium (48px)', value: '48px' },
+							{ label: 'Large (56px)', value: '56px' },
+						] }
+						onChange={ ( newValue ) =>
+							setAttributes( { buttonHeight: newValue } )
+						}
+					/>
+					<RadioControl
+						label="Button label"
+						selected={ attributes.buttonLabel }
+						options={ [
+							{ label: 'Only icon', value: 'none' },
+							{ label: 'Buy', value: 'buy' },
+							{ label: 'Donate', value: 'donate' },
+							{ label: 'Book', value: 'book' },
+						] }
+						onChange={ ( newValue ) =>
+							setAttributes( { buttonLabel: newValue } )
+						}
+					/>
+				</PanelBody>
+			</InspectorControls>
 			<Block />
 		</div>
 	);
