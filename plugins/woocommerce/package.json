@@ -29,6 +29,7 @@
 		"env:start": "pnpm wp-env start",
 		"env:stop": "pnpm wp-env stop",
 		"env:test": "pnpm env:dev && pnpm playwright install chromium",
+		"env:test:gutenberg": "PLUGIN_REPOSITORY='WordPress/gutenberg' PLUGIN_NAME=Gutenberg PLUGIN_SLUG=gutenberg pnpm env:test && ./tests/e2e-pw/bin/install-plugin.sh",
 		"env:test:no-hpos": "DISABLE_HPOS=1 pnpm env:test",
 		"env:perf:install-k6": "curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1",
 		"env:perf": "pnpm env:dev && pnpm env:performance-init && pnpm env:perf:install-k6",
@@ -54,7 +55,6 @@
 		"test:api": "API_TEST_REPORT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
 		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
 		"test:e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js",
-		"test:e2e-pw:gb": "PLUGIN_REPOSITORY='WordPress/gutenberg' PLUGIN_NAME=Gutenberg PLUGIN_SLUG=gutenberg ./tests/e2e-pw/bin/install-plugin.sh && test:e2e-pw",
 		"test:perf": "./k6 run ./tests/performance/tests/gh-action-pr-requests.js",
 		"test:env:start": "pnpm env:test",
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
@@ -224,7 +224,7 @@
 						"daily-e2e"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test:gutenberg"
 					}
 				},
 				{
