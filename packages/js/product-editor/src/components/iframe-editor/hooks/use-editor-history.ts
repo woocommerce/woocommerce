@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { BlockInstance } from '@wordpress/blocks';
+import { useDebounce } from '@wordpress/compose';
 import { useCallback, useState } from '@wordpress/element';
 
 type useEditorHistoryProps = {
@@ -18,16 +19,21 @@ export function useEditorHistory( {
 	const [ edits, setEdits ] = useState< BlockInstance[][] >( [] );
 	const [ offsetIndex, setOffsetIndex ] = useState< number >( 0 );
 
-	const appendEdit = useCallback(
-		( edit: BlockInstance[] ) => {
-			const currentEdits = edits.slice( 0, offsetIndex + 1 );
-			const newEdits = [ ...currentEdits, edit ].slice( maxHistory * -1 );
-			setEdits( newEdits );
-			setOffsetIndex( newEdits.length - 1 );
+	const appendEdit = useDebounce(
+		useCallback(
+			( edit: BlockInstance[] ) => {
+				const currentEdits = edits.slice( 0, offsetIndex + 1 );
+				const newEdits = [ ...currentEdits, edit ].slice(
+					maxHistory * -1
+				);
+				setEdits( newEdits );
+				setOffsetIndex( newEdits.length - 1 );
 
-			console.log( 'appendEdit', newEdits );
-		},
-		[ edits, maxHistory, offsetIndex ]
+				console.log( 'appendEdit', newEdits );
+			},
+			[ edits, maxHistory, offsetIndex ]
+		),
+		500
 	);
 
 	const undo = useCallback( () => {
