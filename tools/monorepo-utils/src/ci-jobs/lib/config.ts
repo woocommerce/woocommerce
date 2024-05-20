@@ -260,6 +260,8 @@ function parseTestEnvConfigVars( raw: any ): TestEnvConfigVars {
 				'The "phpVersion" option must be a string.'
 			);
 		}
+
+		config.phpVersion = raw.phpVersion;
 	}
 
 	return config;
