@@ -243,7 +243,9 @@ module.exports = async ( config ) => {
 		'settings/advanced/woocommerce_custom_orders_table_enabled'
 	);
 
-	console.log( `HPOS configuration ${ response.data.value }` );
+	console.log(
+		`HPOS configuration: woocommerce_custom_orders_table_enabled: ${ response.data.value }`
+	);
 
 	await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
 
