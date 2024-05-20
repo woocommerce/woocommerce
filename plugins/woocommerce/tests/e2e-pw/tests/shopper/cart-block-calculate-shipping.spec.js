@@ -148,8 +148,10 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 		await expect(
 			page.getByRole( 'group' ).getByText( 'Free shipping' )
 		).toBeVisible();
-		await expect( page.getByText( 'Free', { exact: true } ) ).toBeVisible();
-		await expect( page.getByText( '$' ).nth( 4 ) ).toContainText(
+		await expect(
+			page.getByRole( 'strong' ).getByText( 'Free', { exact: true } )
+		).toBeVisible();
+		await expect( page.getByText( '$' ).nth( 2 ) ).toContainText(
 			firstProductPrice
 		);
 	} );
@@ -185,7 +187,7 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 
 		// Verify updated shipping costs
 		await expect( page.getByText( 'ShippingFreeLocal' ) ).toBeVisible();
-		await expect( page.getByText( '$' ).nth( 5 ) ).toContainText(
+		await expect( page.getByText( '$' ).nth( 2 ) ).toContainText(
 			firstProductPrice
 		);
 	} );
