@@ -87,7 +87,7 @@ export const Layout = ( {
 	}, [] );
 
 	useLayoutEffect(() => {
-		// Catch-all to redirect to LYS dashboard when previously opened.
+		// Catch-all to redirect to LYS hub when it was previously opened.
 		const url = new URL( window.location.href );
 		const params = new URLSearchParams( url.search );
 		const isTask = params.has('task');
