@@ -2487,7 +2487,7 @@
 * Fix - Fix get orders REST API endpoint when using 'search' or 'parent' and HPOS is enabled [#35818](https://github.com/woocommerce/woocommerce/pull/35818)
 * Fix - Fix handling of non-ASCII product attributes when the attributes lookup table is in use [#34432](https://github.com/woocommerce/woocommerce/pull/34432)
 * Fix - Fix handling of statuses in orders list table (HPOS). [#35370](https://github.com/woocommerce/woocommerce/pull/35370)
-* Fix - Fix logo icon for Google for WooCommerce. [#35732](https://github.com/woocommerce/woocommerce/pull/35732)
+* Fix - Fix logo icon for Google Listings and Ads. [#35732](https://github.com/woocommerce/woocommerce/pull/35732)
 * Fix - Fix product tab to be shown on production build [#35976](https://github.com/woocommerce/woocommerce/pull/35976)
 * Fix - Fix regexp used for filtering country dropdown on the store details step #35941 [#35942](https://github.com/woocommerce/woocommerce/pull/35942)
 * Fix - Fix the gap in the featured product checkbox [#35710](https://github.com/woocommerce/woocommerce/pull/35710)
