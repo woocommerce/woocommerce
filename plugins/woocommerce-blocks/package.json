@@ -40,7 +40,7 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "https://github.com:woocommerce/woocommerce.git"
+		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
 	"license": "GPL-3.0+",
 	"scripts": {
@@ -315,7 +315,8 @@
 		"trim-html": "0.1.9",
 		"use-debounce": "9.0.4",
 		"usehooks-ts": "^2.9.1",
-		"wordpress-components": "npm:@wordpress/components@14.2.0"
+		"wordpress-components": "npm:@wordpress/components@14.2.0",
+		"wordpress-components-slotfill": "npm:@wordpress/components@wp-6.5"
 	},
 	"peerDependencies": {
 		"react": "^18.3.0",
@@ -359,12 +360,13 @@
 					"name": "JavaScript",
 					"command": "test:js",
 					"changes": [
-						"jest.config.js",
 						"webpack.config.js",
 						"babel.config.js",
 						"tsconfig.json",
 						"assets/**/*.{js,ts,tsx,scss}",
-						"packages/**/*.{js,ts,tsx,scss}"
+						"packages/**/*.{js,ts,tsx,scss}",
+						"tests/js/**/*.{js,ts,tsx,scss,json}",
+						"tests/utils/**/.{js,ts,tsx,scss,json}"
 					],
 					"cascade": "test:js"
 				}

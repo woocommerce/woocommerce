@@ -588,6 +588,14 @@
 	}
 }
 
+@media screen and (max-height: 850px) {
+	.woocommerce-profiler-select-control__industry {
+		.woocommerce-select-control__listbox {
+			max-height: 162px;
+		}
+	}
+}
+
 // Override WP Core style where it applies padding-top: 46px
 // This style fixes devices with width between 601px and 782px (iPad and iPad Mini)
 @media screen and (min-width: 601px) and (max-width: 782px) {

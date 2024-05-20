@@ -16,6 +16,16 @@ export default function ActionsDropdownMenu( props: {
 } ) {
 	const controls = [
 		{
+			title: __( 'Manage in Plugins', 'woocommerce' ),
+			icon: <></>,
+			onClick: () => {
+				window.location.href = ADMIN_URL + 'plugins.php';
+			},
+		},
+	];
+
+	if ( ! props.subscription.is_shared ) {
+		controls.unshift( {
 			title: __( 'Manage on WooCommerce.com', 'woocommerce' ),
 			icon: <></>,
 			onClick: () => {
@@ -24,15 +34,8 @@ export default function ActionsDropdownMenu( props: {
 					'_blank'
 				);
 			},
-		},
-		{
-			title: __( 'Manage in Plugins', 'woocommerce' ),
-			icon: <></>,
-			onClick: () => {
-				window.location.href = ADMIN_URL + 'plugins.php';
-			},
-		},
-	];
+		} );
+	}
 
 	if ( props.subscription.documentation_url ) {
 		controls.unshift( {
