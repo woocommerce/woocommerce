@@ -62,8 +62,6 @@ const program = new Command( 'ci-jobs' )
 		} );
 		Logger.endTask( true );
 
-		console.log(JSON.stringify(jobs));
-
 		if ( isGithubCI() ) {
 			setOutput( 'lint-jobs', JSON.stringify( jobs.lint ) );
 
