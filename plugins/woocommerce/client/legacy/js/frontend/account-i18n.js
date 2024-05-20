@@ -8,6 +8,6 @@ jQuery( function( $ ) {
     if (notices.length > 0) {
         setTimeout(function() {
             $(notices[0]).attr('tabindex', '-1').focus();
-        }, 1);
+        });
     }
 });
