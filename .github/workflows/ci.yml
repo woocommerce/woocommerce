@@ -5,6 +5,13 @@ on:
         branches:
             - 'trunk'
             - 'release/*'
+    workflow_call:
+      inputs: 
+        runType:
+          description: 'Type of run to trigger'
+          required: true
+          default: 'default'
+          type: string
 concurrency:
     group: '${{ github.workflow }}-${{ github.ref }}'
     cancel-in-progress: true
