@@ -30,23 +30,23 @@ export function useEditorHistory( {
 		[ edits, maxHistory, offsetIndex ]
 	);
 
-	function undo() {
+	const undo = useCallback( () => {
 		const newIndex = Math.max( 0, offsetIndex - 1 );
 		if ( ! edits[ newIndex ] ) {
 			return;
 		}
 		setBlocks( edits[ newIndex ] );
 		setOffsetIndex( newIndex );
-	}
+	}, [ edits, offsetIndex, setBlocks ] );
 
-	function redo() {
+	const redo = useCallback( () => {
 		const newIndex = Math.min( edits.length - 1, offsetIndex + 1 );
 		if ( ! edits[ newIndex ] ) {
 			return;
 		}
 		setBlocks( edits[ newIndex ] );
 		setOffsetIndex( newIndex );
-	}
+	}, [ edits, offsetIndex, setBlocks ] );
 
 	function hasUndo() {
 		return !! edits.length && offsetIndex > 0;
