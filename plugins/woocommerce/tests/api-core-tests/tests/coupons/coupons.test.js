@@ -12,7 +12,6 @@ test.describe( 'Coupons API tests', () => {
 	let couponId;
 
 	test( 'can create a coupon', async ( { request } ) => {
-		expect( 1 ).toBe( 2 ); // This will fail
 		//create testCoupon
 		const testCoupon = {
 			...coupon,
