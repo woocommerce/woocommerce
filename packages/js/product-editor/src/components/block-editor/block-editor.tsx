@@ -246,8 +246,8 @@ export function BlockEditor( {
 	}, [ isEditorLoading, productId ] );
 
 	// Check if the Modal editor is open from the store.
-	const isModalEditorOpen = useSelect( ( select ) => {
-		return select( productEditorUiStore ).isModalEditorOpen();
+	const isModalEditorOpen = useSelect( ( selectCore ) => {
+		return selectCore( productEditorUiStore ).isModalEditorOpen();
 	}, [] );
 
 	if ( isEditorLoading ) {

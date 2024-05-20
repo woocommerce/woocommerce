@@ -33,7 +33,6 @@ import { getHeaderTitle } from '../../utils';
 import { MoreMenu } from './more-menu';
 import { PreviewButton } from './preview-button';
 import { SaveDraftButton } from './save-draft-button';
-// import { PublishButton } from './publish-button';
 import { LoadingState } from './loading-state';
 import { Tabs } from '../tabs';
 import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
