@@ -510,7 +510,11 @@ class Universal {
 	 */
 	public function capture_created_customer( $customer_id, $new_customer_data ) {
 		$session = WC()->session;
-		if ( is_object( $session ) ) {
+		if (
+			is_object( $session )
+			&& is_array( $new_customer_data )
+			&& ! empty( $new_customer_data['source'] )
+		) {
 			if ( str_contains( $new_customer_data['source'], 'store-api' ) ) {
 				$session->set( 'wc_checkout_createaccount_used', true );
 				$session->save_data();
