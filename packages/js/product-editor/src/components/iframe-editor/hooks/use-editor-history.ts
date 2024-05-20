@@ -37,22 +37,26 @@ export function useEditorHistory( {
 	);
 
 	const undo = useCallback( () => {
+		appendEdit.flush();
+
 		const newIndex = Math.max( 0, offsetIndex - 1 );
 		if ( ! edits[ newIndex ] ) {
 			return;
 		}
 		setBlocks( edits[ newIndex ] );
 		setOffsetIndex( newIndex );
-	}, [ edits, offsetIndex, setBlocks ] );
+	}, [ appendEdit, edits, offsetIndex, setBlocks ] );
 
 	const redo = useCallback( () => {
+		appendEdit.flush();
+
 		const newIndex = Math.min( edits.length - 1, offsetIndex + 1 );
 		if ( ! edits[ newIndex ] ) {
 			return;
 		}
 		setBlocks( edits[ newIndex ] );
 		setOffsetIndex( newIndex );
-	}, [ edits, offsetIndex, setBlocks ] );
+	}, [ appendEdit, edits, offsetIndex, setBlocks ] );
 
 	function hasUndo() {
 		return !! edits.length && offsetIndex > 0;
