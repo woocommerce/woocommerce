@@ -418,6 +418,9 @@ class WC_Install {
 			self::update();
 			WC_Admin_Notices::add_notice( 'update', true );
 		}
+		if ( ! empty( $_GET['return_url'] ) ) { // WPCS: input var ok.
+			wp_safe_redirect( $_GET['return_url'] ); // WPCS: input var ok.
+		}
 	}
 
 	/**
