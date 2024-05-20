@@ -136,7 +136,9 @@ jobs:
             - name: 'Prepare Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
-              run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+              run: | 
+                pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }} > env-setup.log 2>&1 || true
+                cat env-setup.log
 
             - name: 'Run tests'
               env:

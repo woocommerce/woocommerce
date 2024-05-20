@@ -242,9 +242,10 @@ module.exports = async ( config ) => {
 	const response = await api.get(
 		'settings/advanced/woocommerce_custom_orders_table_enabled'
 	);
-
+	const dataValue = response.data.value;
+	const enabledOption = response.data.options[ dataValue ];
 	console.log(
-		`HPOS configuration: woocommerce_custom_orders_table_enabled: ${ response.data.value }`
+		`HPOS configuration (woocommerce_custom_orders_table_enabled): ${ dataValue } - ${ enabledOption }`
 	);
 
 	await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
