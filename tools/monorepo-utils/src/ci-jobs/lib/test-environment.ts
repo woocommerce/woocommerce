@@ -169,7 +169,7 @@ async function parseWPVersion( wpVersion: string ): Promise< string > {
 export interface TestEnvVars {
 	WP_ENV_CORE?: string;
 	WP_ENV_PHP_VERSION?: string;
-	DISABLE_HPOS?: string;
+	DISABLE_HPOS?: number;
 }
 
 /**
@@ -199,7 +199,7 @@ export async function parseTestEnvConfig(
 	}
 
 	if ( config.disableHpos ) {
-		envVars.DISABLE_HPOS = config.disableHpos;
+		envVars.DISABLE_HPOS = 1;
 	}
 
 	return envVars;

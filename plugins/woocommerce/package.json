@@ -218,7 +218,7 @@
 						"--shard=5/5"
 					],
 					"events": [
-						"push"
+						"push", "pull_request"
 					],
 					"changes": [
 						"client/admin/config/*.json",
@@ -233,7 +233,7 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"disableHPOS": "true"
+							"disableHpos": true
 						}
 					}
 				},
@@ -274,12 +274,12 @@
 						"tests/api-core-tests/**"
 					],
 					"events": [
-						"push"
+						"push", "pull_request"
 					],
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"disableHPOS": "true"
+							"disableHpos": true
 						}
 					}
 				},
