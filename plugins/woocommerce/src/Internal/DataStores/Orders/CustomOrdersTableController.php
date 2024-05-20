@@ -603,14 +603,13 @@ class CustomOrdersTableController {
 				$sync_message[] = wp_kses_data(
 					sprintf(
 						// translators: %s: number of pending orders.
-						_n(
-							"There's %s order pending sync. <strong>Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!</strong>",
-							'There are %s orders pending sync. <strong>Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!</strong>',
-							$orders_pending_sync_count,
-							'woocommerce'
-						),
+						_n( "There's %s order pending sync.", 'There are %s orders pending sync.', $orders_pending_sync_count, 'woocommerce' ),
 						number_format_i18n( $orders_pending_sync_count ),
 					)
+					. ' '
+					. '<strong>'
+					. __( 'Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!', 'woocommerce' )
+					. '</strong>'
 				);
 			}
 
