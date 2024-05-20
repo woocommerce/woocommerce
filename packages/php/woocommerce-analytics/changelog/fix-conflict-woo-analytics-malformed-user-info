@@ -1,4 +1,0 @@
-Significance: patch
-Type: fixed
-
-Customer creation: avoid PHP warnings when other plugins hook into customer creation process and return malformed user data.
