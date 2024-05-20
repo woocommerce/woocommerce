@@ -8,7 +8,6 @@ import { test, Metrics } from '@wordpress/e2e-test-utils-playwright';
 /**
  * Internal dependencies
  */
-import { PerfUtils } from '../fixtures';
 import { median } from '../utils';
 import { toggleBlockProductEditor } from '../../e2e-pw/utils/simple-products';
 
@@ -51,9 +50,6 @@ async function getTotalBlockingTime( page, idleWait ) {
 
 test.describe( 'Product editor performance', () => {
 	test.use( {
-		perfUtils: async ( { page }, use ) => {
-			await use( new PerfUtils( { page } ) );
-		},
 		metrics: async ( { page }, use ) => {
 			await use( new Metrics( { page } ) );
 		},
@@ -81,7 +77,6 @@ test.describe( 'Product editor performance', () => {
 		for ( let i = 1; i <= iterations; i++ ) {
 			test( `Run the test (${ i } of ${ iterations })`, async ( {
 				page,
-				// perfUtils,
 				metrics,
 			} ) => {
 				await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
