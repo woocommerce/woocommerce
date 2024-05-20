@@ -52,7 +52,7 @@ jobs:
                         baseRef = `--base-ref origin/${ baseRef }`;
                       }
                     
-                      console.log("$GH_CONTEXT");
+                      console.log(${{ toJson(github) }});
 
                       let githubEvent = ${{ toJson( github.event_name ) }};
 
