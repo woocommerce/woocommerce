@@ -69,8 +69,4 @@
 	margin-top: $gap;
 	text-align: left;
 	width: 100%;
-
-	&::before {
-		content: "+ ";
-	}
 }

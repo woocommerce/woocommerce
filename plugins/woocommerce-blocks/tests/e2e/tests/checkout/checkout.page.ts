@@ -328,7 +328,7 @@ export class CheckoutPage {
 		const address1 = billingForm.getByLabel( 'Address', { exact: true } );
 		const address2 = billingForm.getByLabel( 'Apartment, suite, etc.' );
 		const address2Link = billingForm.getByText(
-			'Add apartment, suite, etc.'
+			'+ Add apartment, suite, etc.'
 		);
 
 		const city = billingForm.getByLabel( 'City' );
@@ -400,7 +400,7 @@ export class CheckoutPage {
 		const address1 = shippingForm.getByLabel( 'Address', { exact: true } );
 		const address2 = shippingForm.getByLabel( 'Apartment, suite, etc.' );
 		const address2Link = shippingForm.getByText(
-			'Add apartment, suite, etc.'
+			'+ Add apartment, suite, etc.'
 		);
 		const city = shippingForm.getByLabel( 'City' );
 		const phone = shippingForm.getByLabel( 'Phone' );

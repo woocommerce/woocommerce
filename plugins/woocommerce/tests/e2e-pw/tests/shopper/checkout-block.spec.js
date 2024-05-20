@@ -332,7 +332,7 @@ baseTest.describe( 'Checkout Block page', () => {
 			page.getByLabel( 'Address', { exact: true } )
 		).toBeEditable();
 		await expect(
-			page.getByText( 'Add apartment, suite, etc.' )
+			page.getByText( '+ Add apartment, suite, etc.' )
 		).toBeEnabled();
 		await expect(
 			page.getByLabel( 'United States (US), Country/Region' )
