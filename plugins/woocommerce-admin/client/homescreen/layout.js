@@ -1,26 +1,4 @@
 /**
- * External dependencies
- */
-import {
-	Suspense,
-	lazy,
-	useCallback,
-	useLayoutEffect,
-	useRef,
-} from '@wordpress/element';
-import { compose } from '@wordpress/compose';
-import { withDispatch, withSelect } from '@wordpress/data';
-import classnames from 'classnames';
-import PropTypes from 'prop-types';
-import {
-	useUserPreferences,
-	NOTES_STORE_NAME,
-	ONBOARDING_STORE_NAME,
-	OPTIONS_STORE_NAME,
-} from '@woocommerce/data';
-import { __ } from '@wordpress/i18n';
-
-/**
  * Internal dependencies
  */
 import ActivityHeader from '~/activity-panel/activity-header';
@@ -48,6 +26,28 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { WooHomescreenHeaderBanner } from './header-banner-slot';
 import { WooHomescreenWCPayFeature } from './wcpay-feature-slot';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
+
+/**
+ * External dependencies
+ */
+import {
+	Suspense,
+	lazy,
+	useCallback,
+	useLayoutEffect,
+	useRef,
+} from '@wordpress/element';
+import { compose } from '@wordpress/compose';
+import { withDispatch, withSelect } from '@wordpress/data';
+import classnames from 'classnames';
+import PropTypes from 'prop-types';
+import {
+	useUserPreferences,
+	NOTES_STORE_NAME,
+	ONBOARDING_STORE_NAME,
+	OPTIONS_STORE_NAME,
+} from '@woocommerce/data';
+import { __ } from '@wordpress/i18n';
 
 const TaskLists = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../task-lists' ).then(
@@ -86,14 +86,14 @@ export const Layout = ( {
 		isWideViewport.current = window.innerWidth >= 782;
 	}, [] );
 
-	useLayoutEffect(() => {
+	useLayoutEffect( () => {
 		// Catch-all to redirect to LYS hub when it was previously opened.
 		const url = new URL( window.location.href );
 		const params = new URLSearchParams( url.search );
-		const isTask = params.has('task');
-		const isLYSOpen = sessionStorage.getItem( 'lysTaskOpen' ) === 'yes';
+		const isTask = params.has( 'task' );
+		const isLYSOpen = window.sessionStorage.getItem( 'lysTaskOpen' ) === 'yes';
 		if ( ! isTask && isLYSOpen ) {
-			navigateTo({ url: getNewPath({}, '/launch-your-store') } );
+			navigateTo( { url: getNewPath( {}, '/launch-your-store' ) } );
 		}
 	}, [isDashboardShown]);
 
