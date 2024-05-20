@@ -24,13 +24,8 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 		() => Boolean( value ) || isFieldRequired
 	);
 
-	// Toggle the visibility of the field, in teh page editor, based on whether it is required.
-	useEffect( () => {
-		setFieldVisible( isFieldRequired );
-	}, [ isFieldRequired ] );
-
 	return (
-		<Fragment key={ field.key }>
+		<Fragment>
 			{ isFieldVisible ? (
 				<ValidatedTextInput
 					{ ...props }
