@@ -64,6 +64,10 @@ export const industryChoices = [
 		key: 'home_furniture_and_garden' as const,
 	},
 	{
+		label: __( 'Arts and crafts', 'woocommerce' ),
+		key: 'arts_and_crafts' as const,
+	},
+	{
 		label: __( 'Other', 'woocommerce' ),
 		key: 'other' as const,
 	},

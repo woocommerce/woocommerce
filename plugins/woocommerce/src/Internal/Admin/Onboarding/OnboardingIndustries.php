@@ -61,6 +61,11 @@ class OnboardingIndustries {
 					'use_description'   => false,
 					'description_label' => '',
 				),
+				'arts-and-crafts'          => array(
+					'label'             => __( 'Arts and crafts', 'woocommerce' ),
+					'use_description'   => false,
+					'description_label' => '',
+				),
 				'other'                           => array(
 					'label'             => __( 'Other', 'woocommerce' ),
 					'use_description'   => true,
