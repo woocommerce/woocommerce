@@ -72,6 +72,12 @@ export const LookAndFeel = ( {
 					bgcolor={ 'transparent' }
 				/>
 			) }
+			{ isEntrepreneurFlow() && (
+				<WordPressLogo
+					size={ 24 }
+					className="woocommerce-cys-wordpress-header-logo"
+				/>
+			) }
 			{ ! isEntrepreneurFlow() && (
 				<CloseButton
 					onClick={ () => {
