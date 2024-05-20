@@ -75,6 +75,8 @@ const wpAdminScripts = [
 	'command-palette-analytics',
 	'woo-connect-notice',
 	'woo-plugin-update-connect-notice',
+	'woo-enable-autorenew',
+	'woo-renew-subscription',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
