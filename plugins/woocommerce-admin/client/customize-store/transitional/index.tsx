@@ -150,7 +150,7 @@ export const Transitional = ( {
 						{ __( 'Back to Home', 'woocommerce' ) }
 					</Button>
 				</div>
-				{ ! isEntrepreneurFlow && (
+				{ ! isEntrepreneurFlow() && (
 					<>
 						<h2 className="woocommerce-customize-store__transitional-main-actions-title">
 							{ __( "What's next?", 'woocommerce' ) }
