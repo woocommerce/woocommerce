@@ -17,18 +17,14 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 	onChange,
 	value,
 }: AddressFieldProps< T > ): JSX.Element => {
-	const hasFieldValue = Boolean( value );
-
 	const isFieldRequired = fields?.required ?? false;
 
+	// Display the input field if it has a value or if it is required.
 	const [ isFieldVisible, setFieldVisible ] = useState(
-		() => hasFieldValue || isFieldRequired
+		() => Boolean( value ) || isFieldRequired
 	);
 
-	const toggleFieldVisibility = () => {
-		setFieldVisible( ( prevVisibility: boolean ) => ! prevVisibility );
-	};
-
+	// Toggle the visibility of the field, in teh page editor, based on whether it is required.
 	useEffect( () => {
 		setFieldVisible( isFieldRequired );
 	}, [ isFieldRequired ] );
@@ -53,11 +49,11 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 					className={
 						'wc-block-components-address-form__address_2-toggle'
 					}
-					onClick={ toggleFieldVisibility }
+					onClick={ () => setFieldVisible( true ) }
 				>
 					{ sprintf(
 						// translators: %s: address 2 field label.
-						__( 'Add %s', 'woocommerce' ),
+						__( '+ Add %s', 'woocommerce' ),
 						fields.label.toLowerCase()
 					) }
 				</button>
