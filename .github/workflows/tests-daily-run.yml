@@ -3,7 +3,7 @@ on: [pull_request]
 
 jobs:
   trigger:
-    uses: ./.github/workflows/ci.yml@ci/add-workflow-call-event
+    uses: ./.github/workflows/ci.yml
     with:
       myInput: 'inputValue'
     secrets:
