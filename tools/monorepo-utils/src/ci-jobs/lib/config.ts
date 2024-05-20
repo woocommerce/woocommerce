@@ -233,6 +233,11 @@ export interface TestEnvConfigVars {
 	 * The version of PHP that should be used.
 	 */
 	phpVersion?: string;
+
+	/**
+	 * Whether the HPOS feature should be disabled in the test environment setup.
+	 */
+	disableHpos?: string;
 }
 
 /**
