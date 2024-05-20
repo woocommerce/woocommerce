@@ -64,11 +64,13 @@ export const LookAndFeel = ( {
 
 	return (
 		<div>
-			<ProgressBar
-				percent={ 60 }
-				color={ 'var(--wp-admin-theme-color)' }
-				bgcolor={ 'transparent' }
-			/>
+			{ ! isEntrepreneurFlow() && (
+				<ProgressBar
+					percent={ 60 }
+					color={ 'var(--wp-admin-theme-color)' }
+					bgcolor={ 'transparent' }
+				/>
+			) }
 			{ ! isEntrepreneurFlow() && (
 				<CloseButton
 					onClick={ () => {
