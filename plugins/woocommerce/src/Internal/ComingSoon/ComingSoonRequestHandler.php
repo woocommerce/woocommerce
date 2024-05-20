@@ -120,7 +120,7 @@ class ComingSoonRequestHandler {
 	 * @param WP_Theme_JSON $theme_json The theme json object.
 	 */
 	public function experimental_filter_theme_json_theme( $theme_json ) {
-		if ( ! Features::is_enabled( 'launch-your-store' ) || ! wp_is_block_theme() ) {
+		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
 			return $theme_json;
 		}
 
