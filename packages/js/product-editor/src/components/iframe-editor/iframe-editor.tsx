@@ -139,7 +139,7 @@ export function IframeEditor( {
 
 	const debouncedAppendToEditorHistory = useDebounce(
 		appendToEditorHistory,
-		250
+		500
 	);
 
 	const handleBlockEditorProviderOnChange = (
