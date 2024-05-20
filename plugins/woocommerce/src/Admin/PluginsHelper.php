@@ -66,6 +66,7 @@ class PluginsHelper {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice_in_plugins' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_subscription_notice' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_notices_in_plugins' ) );
 	}
 
 	/**
@@ -627,17 +628,21 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Enqueue scripts for connect notice in plugin list page.
+	 * Enqueue scripts for notices in plugin list page.
 	 *
 	 * @return void
 	 */
-	public static function maybe_enqueue_scripts_for_connect_notice_in_plugins() {
+	public static function maybe_enqueue_scripts_for_notices_in_plugins() {
 		if ( 'plugins' !== get_current_screen()->id ) {
 			return;
 		}
 
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-plugin-update-connect-notice' );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-enable-autorenew' );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-renew-subscription' );
 		wp_enqueue_script( 'woo-plugin-update-connect-notice' );
+		wp_enqueue_script( 'woo-enable-autorenew' );
+		wp_enqueue_script( 'woo-renew-subscription' );
 	}
 
 	/**
