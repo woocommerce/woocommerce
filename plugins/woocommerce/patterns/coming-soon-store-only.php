@@ -8,6 +8,15 @@
  * @package WooCommerce\Blocks
  */
 
+ $current_theme = wp_get_theme()->get_stylesheet();
+ $inter_font_family = 'inter';
+ $cardo_font_family = 'cardo';
+
+ if ( 'twentytwentyfour' === $current_theme ) {
+	$inter_font_family = 'body';
+	$cardo_font_family = 'heading';
+ }
+
 ?>
 
 <!-- wp:woocommerce/coming-soon {"storeOnly":true} -->
@@ -24,16 +33,16 @@ if ( wc_current_theme_is_fse_theme() ) {
 <div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
 
-<!-- wp:heading {"textAlign":"center","level":1} -->
-<h1 class="wp-block-heading has-text-align-center"><?php echo esc_html__( 'Great things are on the horizon', 'woocommerce' ); ?></h1>
+<!-- wp:heading {"textAlign":"center","level":1,"fontFamily":"<?= $cardo_font_family ?>"} -->
+<h1 class="wp-block-heading has-text-align-center has-<?= $cardo_font_family ?>-font-family"><?php echo esc_html__( 'Great things are on the horizon', 'woocommerce' ); ?></h1>
 <!-- /wp:heading -->
 
 <!-- wp:spacer {"height":"10px"} -->
 <div style="height:10px" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
 
-<!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center"><?php echo esc_html__( 'Something big is brewing! Our store is in the works and will be launching soon!', 'woocommerce' ); ?></p>
+<!-- wp:paragraph {"align":"center","fontFamily":"<?= $inter_font_family ?>"} -->
+<p class="has-text-align-center has-<?= $inter_font_family ?>-font-family"><?php echo esc_html__( 'Something big is brewing! Our store is in the works and will be launching soon!', 'woocommerce' ); ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:spacer -->

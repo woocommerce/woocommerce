@@ -8,6 +8,14 @@
  * @package WooCommerce\Blocks
  */
 
+$current_theme = wp_get_theme()->get_stylesheet();
+$inter_font_family = 'inter';
+$cardo_font_family = 'cardo';
+
+if ( 'twentytwentyfour' === $current_theme ) {
+	$inter_font_family = 'body';
+	$cardo_font_family = 'heading';
+}
 ?>
 
 <!-- wp:woocommerce/coming-soon {"color":"#bea0f2","storeOnly":false,"className":"wp-block-woocommerce-background-color"} -->
@@ -19,7 +27,7 @@
 <div class="wp-block-group"><!-- wp:site-logo {"width":60} /-->
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"0px"}}} -->
-<div class="wp-block-group"><!-- wp:site-title {"level":0,"fontFamily":"inter"} /--></div>
+<div class="wp-block-group"><!-- wp:site-title {"level":0,"fontFamily":"<?= $inter_font_family ?>"} /--></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
@@ -32,14 +40,14 @@
 <!-- wp:social-link {"url":"https://www.facebook.com","service":"facebook"} /--></ul>
 <!-- /wp:social-links -->
 
-<!-- wp:loginout {"fontFamily":"inter"} /--></div>
+<!-- wp:loginout {"fontFamily":"<?= $inter_font_family ?>"} /--></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
-<div class="wp-block-group"><!-- wp:heading {"textAlign":"center","level":1,"align":"wide","className":"woocommerce-coming-soon-banner","fontFamily":"cardo"} -->
-<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner has-cardo-font-family">Pardon our dust! We're working on something amazing — check back soon!</h1>
+<div class="wp-block-group"><!-- wp:heading {"textAlign":"center","level":1,"align":"wide","className":"woocommerce-coming-soon-banner","fontFamily":"<?= $cardo_font_family ?>"} -->
+<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner has-<?= $cardo_font_family ?>-font-family">Pardon our dust! We're working on something amazing — check back soon!</h1>
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 
