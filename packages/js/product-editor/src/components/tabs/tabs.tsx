@@ -32,6 +32,38 @@ export type TabsFillProps = {
 	onClick: ( tabId: string ) => void;
 };
 
+function TabFills( {
+	fills,
+	onDefaultSelection,
+}: {
+	fills: readonly ( readonly ReactElement[] )[];
+	onDefaultSelection( tabId: string ): void;
+} ) {
+	const sortedFills = useMemo(
+		function sortFillsByOrder() {
+			return [ ...fills ].sort(
+				( [ { props: a } ], [ { props: b } ] ) => a.order - b.order
+			);
+		},
+		[ fills ]
+	);
+
+	useEffect( () => {
+		for ( let i = 0; i < sortedFills.length; i++ ) {
+			const [ { props } ] = fills[ i ];
+			if ( ! props.disabled ) {
+				const tabId = props.children?.key;
+				if ( tabId ) {
+					onDefaultSelection( tabId );
+				}
+				return;
+			}
+		}
+	}, [ sortedFills ] );
+
+	return <>{ sortedFills }</>;
+}
+
 export function Tabs( { onChange = () => {} }: TabsProps ) {
 	const [ selected, setSelected ] = useState< string | null >( null );
 	const query = getQuery() as Record< string, string >;
@@ -85,9 +117,11 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 								url: getNewPath( { tab: tabId } ),
 							} );
 
-							const product: Product = select(
-								'core'
-							).getEditedEntityRecord(
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore
+							const { getEditedEntityRecord } = select( 'core' );
+
+							const product: Product = getEditedEntityRecord(
 								'postType',
 								'product',
 								productId
@@ -106,36 +140,4 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 			</Slot>
 		</NavigableMenu>
 	);
-}
-
-function TabFills( {
-	fills,
-	onDefaultSelection,
-}: {
-	fills: readonly ( readonly ReactElement[] )[];
-	onDefaultSelection( tabId: string ): void;
-} ) {
-	const sortedFills = useMemo(
-		function sortFillsByOrder() {
-			return [ ...fills ].sort(
-				( [ { props: a } ], [ { props: b } ] ) => a.order - b.order
-			);
-		},
-		[ fills ]
-	);
-
-	useEffect( () => {
-		for ( let i = 0; i < sortedFills.length; i++ ) {
-			const [ { props } ] = fills[ i ];
-			if ( ! props.disabled ) {
-				const tabId = props.children?.key;
-				if ( tabId ) {
-					onDefaultSelection( tabId );
-				}
-				return;
-			}
-		}
-	}, [ sortedFills ] );
-
-	return <>{ sortedFills }</>;
 }

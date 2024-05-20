@@ -2,7 +2,7 @@
  * External dependencies
  */
 import React from 'react';
-import { render, fireEvent, screen, act } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { getQuery, navigateTo } from '@woocommerce/navigation';
 import { SlotFillProvider } from '@wordpress/components';
 import { useState, createElement } from '@wordpress/element';
