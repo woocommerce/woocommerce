@@ -82,6 +82,7 @@
 			sbjs.init( {
 				lifetime: Number( params.lifetime ),
 				session_length: Number( params.session ),
+				base64: Boolean( params.base64 ),
 				timezone_offset: '0', // utc
 			} );
 		}
@@ -184,7 +185,10 @@
 					if( input ) {
 						input.value = stringifyFalsyInputValue( this.values[ fieldName ] );
 					} else {
-						console.warn( `Field "${fieldName}" not found. Most likely, the '<wc-order-attribution-inputs>' element was manipulated.`);
+						console.warn(
+							`Field "${fieldName}" not found. ` +
+							`Most likely, the '<wc-order-attribution-inputs>' element was manipulated.`
+						);
 					}
 				}
 			}
