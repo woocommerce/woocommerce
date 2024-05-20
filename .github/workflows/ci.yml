@@ -43,12 +43,16 @@ jobs:
             - uses: actions/github-script@v7
               name: 'Build Matrix'
               id: 'project-jobs'
+              env:
+                GH_CONTEXT: ${{ toJson(github) }}
               with:
                   script: |
                       let baseRef = ${{ toJson( github.base_ref ) }};
                       if ( baseRef ) {
                         baseRef = `--base-ref origin/${ baseRef }`;
                       }
+                    
+                      console.log("$GH_CONTEXT");
 
                       let githubEvent = ${{ toJson( github.event_name ) }};
 
