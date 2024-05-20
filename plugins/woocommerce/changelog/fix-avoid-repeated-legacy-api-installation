@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Automated installation of the Legacy REST API plugin should only happen once. After that, it must be installed manually (if needed).
