@@ -17,6 +17,8 @@
  * @var bool $show_downloads Controls whether the downloads table should be rendered.
  */
 
+ // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+
 defined( 'ABSPATH' ) || exit;
 
 $order = wc_get_order( $order_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
