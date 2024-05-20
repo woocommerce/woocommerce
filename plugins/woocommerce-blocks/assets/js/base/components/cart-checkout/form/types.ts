@@ -40,15 +40,17 @@ export interface AddressFormProps< T > {
 	children?: React.ReactNode;
 }
 
-export interface AddressFieldsProps< T > extends AddressFormProps< T > {
+// export interface AddressFieldsProps< T > extends AddressFormProps< T > {
+export interface AddressFieldsProps< T >
+	extends Omit< AddressFormProps< T >, 'fields' > {
 	// Overwriting the id for the fields.
 	id: string;
 	// Overwriting the address type for the fields.
 	addressType: FormType;
 	// Address 1 fields.
-	address1?: KeyedFormField;
+	address1?: KeyedFormField | undefined;
 	// Address 2 fields.
-	address2?: KeyedFormField;
+	address2?: KeyedFormField | undefined;
 	// Address form fields.
 	addressFormFields: AddressFormFields;
 	// Ref for fields.
