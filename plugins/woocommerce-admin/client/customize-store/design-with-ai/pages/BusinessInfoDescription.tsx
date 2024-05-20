@@ -13,6 +13,7 @@ import { designWithAiStateMachineContext } from '../types';
 import { CloseButton } from '../components/close-button/close-button';
 import { aiWizardClosedBeforeCompletionEvent } from '../events';
 import { isEntrepreneurFlow } from '../entrepreneur-flow';
+import WordPressLogo from '~/lib/wordpress-logo';
 
 export type businessInfoDescriptionCompleteEvent = {
 	type: 'BUSINESS_INFO_DESCRIPTION_COMPLETE';
@@ -41,6 +42,12 @@ export const BusinessInfoDescription = ( {
 					percent={ 20 }
 					color={ 'var(--wp-admin-theme-color)' }
 					bgcolor={ 'transparent' }
+				/>
+			) }
+			{ isEntrepreneurFlow() && (
+				<WordPressLogo
+					size={ 24 }
+					className="woocommerce-cys-wordpress-header-logo"
 				/>
 			) }
 			{ ! isEntrepreneurFlow() && (
