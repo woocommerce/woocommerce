@@ -53,10 +53,6 @@ export interface AddressFieldsProps< T >
 	address2?: KeyedFormField | undefined;
 	// Address form fields.
 	addressFormFields: AddressFormFields;
-	// Ref for fields.
-	fieldsRef: React.MutableRefObject<
-		Record< string, ValidatedTextInputHandle | null >
-	>;
 }
 
 export interface AddressFieldProps< T > {
@@ -64,10 +60,6 @@ export interface AddressFieldProps< T > {
 	field: KeyedFormField;
 	// Props for the form field.
 	fieldProps: FieldProps;
-	// Ref for the fields.
-	fieldsRef: React.MutableRefObject<
-		Record< string, ValidatedTextInputHandle | null >
-	>;
 	// Called with the new address data when the address form changes. This is only called when all required fields are filled and there are no validation errors.
 	onChange: ( newValue: T ) => void;
 	// Values for fields.

@@ -15,7 +15,6 @@ import { AddressFieldProps } from './types';
 const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 	field,
 	fieldProps,
-	fieldsRef,
 	onChange,
 	values,
 }: AddressFieldProps< T > ): JSX.Element => {
@@ -41,7 +40,6 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 			{ isFieldVisible ? (
 				<ValidatedTextInput
 					{ ...fieldProps }
-					ref={ ( el ) => ( fieldsRef.current[ field.key ] = el ) }
 					type={ field.type }
 					label={
 						isFieldRequired ? field.label : field.optionalLabel

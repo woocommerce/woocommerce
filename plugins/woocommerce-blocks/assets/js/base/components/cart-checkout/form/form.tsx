@@ -154,7 +154,6 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 							) }
 							addressFormFields={ addressFormFields }
 							addressType={ addressType }
-							fieldsRef={ fieldsRef }
 							id={ id }
 							key={ field.key }
 							onChange={ onChange }

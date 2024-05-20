@@ -16,7 +16,6 @@ const AddressFields = < T extends AddressFormValues | ContactFormValues >( {
 	address1,
 	address2,
 	addressType,
-	fieldsRef,
 	onChange,
 	values,
 }: AddressFieldsProps< T > ): JSX.Element => {
@@ -28,7 +27,6 @@ const AddressFields = < T extends AddressFormValues | ContactFormValues >( {
 			{ address1 && (
 				<ValidatedTextInput
 					{ ...address1FieldProps }
-					ref={ ( el ) => ( fieldsRef.current[ address1.key ] = el ) }
 					type={ address1.type }
 					label={ address1.label }
 					className={ `wc-block-components-address-form__${ address1.key }` }
@@ -45,7 +43,6 @@ const AddressFields = < T extends AddressFormValues | ContactFormValues >( {
 				<Address2Field
 					field={ address2 }
 					fieldProps={ address2FieldProps }
-					fieldsRef={ fieldsRef }
 					onChange={ onChange }
 					values={ values }
 				/>
