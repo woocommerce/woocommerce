@@ -1,6 +1,6 @@
 /* global Cookies */
 jQuery( function( $ ) {	
-    // Select all elements with the class 'wc-block-components-notice-banner' that contain text
+    // Select all elements with the class [role="alert"] attribute that contain text
     var notices = $('[role="alert"]').filter(function() {
         return $(this).text().trim().length > 0;
     });
@@ -8,6 +8,6 @@ jQuery( function( $ ) {
     if (notices.length > 0) {
         setTimeout(function() {
             $(notices[0]).attr('tabindex', '-1').focus();
-        }, 1000);
+        }, 1);
     }
 });
