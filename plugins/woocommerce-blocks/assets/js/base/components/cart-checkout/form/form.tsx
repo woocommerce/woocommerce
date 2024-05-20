@@ -140,7 +140,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 					);
 				}
 
-				// Handle both address_1 and address_2 fields together.
+				// If the current field is 'address_1', we handle both 'address_1' and 'address_2' fields together.
 				if ( field.key === 'address_1' ) {
 					const address1 = getFieldData(
 						'address_1',
@@ -165,7 +165,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 					);
 				}
 
-				// Skip address_2 field as it's handled with the address_1 field above.
+				// If the current field is 'address_2', we skip it because it's already handled above.
 				if ( field.key === 'address_2' ) {
 					return null;
 				}
