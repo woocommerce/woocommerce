@@ -119,9 +119,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$sanitization_util = new SanitizationUtils();
 		$address           = (array) $address;
 		$field_schema      = $this->get_properties();
-		// omit all keys from address that are not in the schema. This should account for email.
-		$address = array_intersect_key( $address, $field_schema );
-		$address = array_reduce(
+		$address           = array_reduce(
 			array_keys( $address ),
 			function ( $carry, $key ) use ( $address, $validation_util, $field_schema ) {
 				switch ( $key ) {
@@ -164,6 +162,8 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$address         = (array) $address;
 		$validation_util = new ValidationUtils();
 		$schema          = $this->get_properties();
+		// omit all keys from address that are not in the schema. This should account for email.
+		$address = array_intersect_key( $address, $schema );
 
 		// The flow is Validate -> Sanitize -> Re-Validate
 		// First validation step is to ensure fields match their schema, then we sanitize to put them in the
