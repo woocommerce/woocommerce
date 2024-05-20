@@ -118,8 +118,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			await expect( page.getByText( 'MailPoet' ) ).not.toBeAttached();
 			await expect( page.getByText( 'Pinterest' ) ).not.toBeAttached();
 			await expect(
-				page.
-				getByText( 'Google for WooCommerce' )
+				page.getByText( 'Google for WooCommerce' )
 			).not.toBeAttached();
 		} );
 
@@ -299,7 +298,9 @@ test.describe( 'Store owner can complete the core profiler', () => {
 
 		await test.step( 'Clean up installed extensions', async () => {
 			await page.goto( 'wp-admin/plugins.php' );
-			await page.getByLabel( 'Deactivate Google for WooCommerce' ).click();
+			await page.
+			getByLabel( 'Deactivate Google for WooCommerce' )
+				.click();
 			await expect(
 				page.getByText( 'Plugin deactivated.' )
 			).toBeVisible();
