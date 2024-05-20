@@ -6,5 +6,3 @@ jobs:
     uses: ./.github/workflows/ci.yml
     with:
       runType: 'run type'
-    secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
