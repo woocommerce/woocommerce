@@ -467,7 +467,9 @@
 
 					priceInputs.addClass( `wc-shipping-currency-size-${ symbol.length }` );
 					priceInputs.addClass( `wc-shipping-currency-position-${ symbolPosition }` );
-					priceInputs.before( `<div class="wc-shipping-zone-method-currency wc-shipping-currency-position-${ symbolPosition }">${ symbol }</div>` );
+					priceInputs.before(
+						`<div class="wc-shipping-zone-method-currency wc-shipping-currency-position-${ symbolPosition }">${ symbol }</div>`
+					);
 
 					priceInputs.each( ( i ) => {
 						const priceInput = $( priceInputs[ i ] );
@@ -480,7 +482,11 @@
 				},
 				moveHTMLHelpTips: function( html ) {
 					// These help tips aren't moved.
-					const helpTipsToRetain = [ 'woocommerce_flat_rate_cost', 'woocommerce_flat_rate_no_class_cost', 'woocommerce_flat_rate_class_cost_' ];
+					const helpTipsToRetain = [
+						'woocommerce_flat_rate_cost',
+						'woocommerce_flat_rate_no_class_cost',
+						'woocommerce_flat_rate_class_cost_'
+					];
 
 					const htmlContent = $( html );
 					const labels = htmlContent.find( 'label' );
@@ -500,7 +506,8 @@
 							return;
 						}
 
-						// woocommerce_free_shipping_ignore_discounts gets a helpTip appended to its label. Otherwise, add the text as the last element in the fieldset.
+						// woocommerce_free_shipping_ignore_discounts gets a helpTip appended to its label.
+						// Otherwise, add the text as the last element in the fieldset.
 						if ( id === 'woocommerce_free_shipping_ignore_discounts' ) {
 							const input = htmlContent.find( `#${ id }` );
 							const fieldset = input.closest( 'fieldset' );
@@ -566,7 +573,8 @@
 									}
 								}
 
-								// Avoid triggering a rerender here because we don't want to show the method in the table in case merchant doesn't finish flow.
+								// Avoid triggering a rerender here because we don't want to show the method
+								// in the table in case merchant doesn't finish flow.
 								
 								shippingMethodView.model.set( 'methods', response.data.methods );
 
