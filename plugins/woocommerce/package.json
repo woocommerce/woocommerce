@@ -218,7 +218,7 @@
 						"--shard=5/5"
 					],
 					"events": [
-						"push", "pull_request"
+						"push"
 					],
 					"changes": [
 						"client/admin/config/*.json",
@@ -274,7 +274,7 @@
 						"tests/api-core-tests/**"
 					],
 					"events": [
-						"push", "pull_request"
+						"push"
 					],
 					"testEnv": {
 						"start": "env:test",
