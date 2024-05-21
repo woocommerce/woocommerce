@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { assign, DoneInvokeEvent } from 'xstate';
+import { TaskReferralRecord } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
@@ -15,7 +16,6 @@ import {
 import { events } from './';
 import { isIframe } from '~/customize-store/utils';
 import { trackEvent } from '../tracking';
-import { TaskReferralRecord } from '@woocommerce/onboarding';
 
 export const assignThemeData = assign<
 	customizeStoreStateMachineContext,
@@ -55,9 +55,11 @@ export const assignTaskReferral = assign<
 	customizeStoreStateMachineEvents
 >( {
 	intro: ( context, event ) => {
-		const taskReferral = (event as DoneInvokeEvent<{
-			taskReferral: TaskReferralRecord | null;
-		}>).data.taskReferral;
+		const taskReferral = (
+			event as DoneInvokeEvent< {
+				taskReferral: TaskReferralRecord | null;
+			} >
+		 ).data.taskReferral;
 		return { ...context.intro, taskReferral };
 	},
 } );

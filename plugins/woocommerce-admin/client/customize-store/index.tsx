@@ -146,10 +146,8 @@ const CYSSpinner = () => (
 );
 
 const redirectToReferrer = () => {
-	const {
-		getWithExpiry: getCYSTaskReferral,
-		remove: removeCYSTaskReferral,
-	} = accessTaskReferralStorage( { taskId: 'customize-store' } );
+	const { getWithExpiry: getCYSTaskReferral, remove: removeCYSTaskReferral } =
+		accessTaskReferralStorage( { taskId: 'customize-store' } );
 
 	const taskReferral = getCYSTaskReferral();
 
@@ -600,11 +598,12 @@ export const CustomizeStoreController = ( {
 					return ! _ctx.intro.customizeStoreTaskCompleted;
 				},
 				hasTaskReferral: () => {
-					const {
-						getWithExpiry: getCYSTaskReferral,
-					} = accessTaskReferralStorage( { taskId: 'customize-store' } );
+					const { getWithExpiry: getCYSTaskReferral } =
+						accessTaskReferralStorage( {
+							taskId: 'customize-store',
+						} );
 					return getCYSTaskReferral() !== null;
-				}
+				},
 			},
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
