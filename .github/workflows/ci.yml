@@ -51,7 +51,7 @@ jobs:
         name: "Lint - ${{ matrix.projectName }} ${{ matrix.optional && ' (optional)' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
-        if: ${{ needs.project-jobs.outputs.lint-jobs != '[]' && github.event_name == 'push' }}
+        if: ${{ needs.project-jobs.outputs.lint-jobs != '[]' && github.event_name == 'pull_request' }}
         strategy:
             fail-fast: false
             matrix:
