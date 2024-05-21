@@ -104,17 +104,11 @@ export class TemplateChangeDetector implements TemplateChangeDetectorSubject {
 	public checkIfTemplateHasChangedAndNotifySubscribers(): void {
 		this.previousTemplateId = this.currentTemplateId;
 
-		const postOrPageId = select( 'core/editor' )?.getCurrentPostId<
-			string | number | undefined
-		>();
-
-		this.isPostOrPage = Boolean( postOrPageId );
-
-		const editedPostId = this.getCurrentTemplateIdFromUrl(
+		const templateId = this.getCurrentTemplateIdFromUrl(
 			window.location.href
 		);
 
-		this.currentTemplateId = this.parseTemplateId( editedPostId );
+		this.currentTemplateId = this.parseTemplateId( templateId );
 
 		const hasChangedTemplate =
 			this.previousTemplateId !== this.currentTemplateId;

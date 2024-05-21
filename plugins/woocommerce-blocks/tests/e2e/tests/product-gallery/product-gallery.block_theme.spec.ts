@@ -83,8 +83,9 @@ const getThumbnailImageIdByNth = async (
 };
 
 test.describe( `${ blockData.name }`, () => {
+	let template;
 	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
-		const template = await requestUtils.createTemplate( 'wp_template', {
+		template = await requestUtils.createTemplate( 'wp_template', {
 			slug: blockData.slug,
 			title: 'Custom Single Product',
 			content: 'placeholder',
@@ -599,5 +600,28 @@ test.describe( `${ blockData.name }`, () => {
 		expect(
 			width === height + 1 || width === height - 1 || width === height
 		).toBeTruthy();
+	} );
+
+	test( 'should persistently display the block when navigating back to the template without a page reload', async ( {
+		editor,
+		pageObject,
+		page,
+	} ) => {
+		await pageObject.addProductGalleryBlock( { cleanContent: true } );
+		await editor.saveSiteEditorEntities();
+
+		await page.getByLabel( 'Open Navigation' ).click();
+		await page.getByLabel( 'Back' ).click();
+		await page
+			.getByRole( 'button', { name: 'Custom Single Product' } )
+			.click();
+
+		const editorFrame = page.frameLocator( 'iframe[name="editor-canvas"]' );
+
+		const productGalleryBlock = editorFrame.getByLabel(
+			'Block: Product Gallery (Beta)'
+		);
+
+		await expect( productGalleryBlock ).toBeVisible();
 	} );
 } );
