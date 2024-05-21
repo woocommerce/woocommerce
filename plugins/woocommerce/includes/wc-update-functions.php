@@ -2729,6 +2729,6 @@ function wc_update_891_create_plugin_autoinstall_history_option() {
  * Add woocommerce_show_lys_tour.
  */
 function wc_update_900_add_launch_your_store_tour_option() {
-	update_option( 'woocommerce_show_lys_tour', 'yes' );
+	add_option( 'woocommerce_show_lys_tour', 'yes' );
 }
 
