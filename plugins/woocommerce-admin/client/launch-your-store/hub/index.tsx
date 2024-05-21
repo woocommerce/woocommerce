@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useMachine } from '@xstate5/react';
-import React from 'react';
+import { React, useEffect } from 'react';
 import classnames from 'classnames';
 
 /**
@@ -34,6 +34,9 @@ export type LaunchYourStoreComponentProps = {
 
 const LaunchStoreController = () => {
 	useFullScreen( [ 'woocommerce-launch-your-store' ] );
+	useEffect( () => {
+		window.sessionStorage.setItem( 'lysWaiting', 'no' );
+	}, [] );
 	const { xstateV5Inspector: inspect } = useXStateInspect( 'V5' );
 
 	const [ mainContentState, sendToMainContent, mainContentMachineService ] =

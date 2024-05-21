@@ -48,7 +48,6 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 	const sidebarTitle = (
 		<Button
 			onClick={ () => {
-				window.sessionStorage.setItem( 'lysTaskOpen', 'no' );
 				props.sendEventToSidebar( {
 					type: 'POP_BROWSER_STACK', // go back to previous URL
 				} );

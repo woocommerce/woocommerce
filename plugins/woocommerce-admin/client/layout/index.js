@@ -201,9 +201,9 @@ function _Layout( {
 		query.page && query.page === 'wc-admin' && ! query.path && ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
 	useEffect( () => {
 		// Catch-all to redirect to LYS hub when it was previously opened.
-		const isLYSOpen =
-			window.sessionStorage.getItem( 'lysTaskOpen' ) === 'yes';
-		if ( isDashboardShown && isLYSOpen ) {
+		const isLYSWaiting =
+			window.sessionStorage.getItem( 'lysWaiting' ) === 'yes';
+		if ( isDashboardShown && isLYSWaiting ) {
 			navigateTo( {
 				url: getNewPath( {}, '/launch-your-store' ),
 			} );
