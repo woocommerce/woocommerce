@@ -34,7 +34,7 @@ import prepareFormFields from './prepare-form-fields';
 import validateShippingCountry from './validate-shipping-country';
 import customValidationHandler from './custom-validation-handler';
 import Combobox from '../../combobox';
-import AddressFields from './address-fields';
+import AddressLineFields from './address-line-fields';
 import { createFieldProps, getFieldData } from './utils';
 
 /**
@@ -154,11 +154,11 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 					);
 
 					return (
-						<AddressFields
+						<AddressLineFields
 							address1={ address1 }
 							address2={ address2 }
 							addressType={ addressType }
-							id={ id }
+							formId={ id }
 							key={ field.key }
 							onChange={ ( key, value ) => {
 								onChange( {

@@ -25,19 +25,19 @@ export interface FieldProps {
 }
 
 export const createFieldProps = (
-	address: KeyedFormField | undefined,
-	fieldId: string,
+	field: KeyedFormField,
+	formId: string,
 	fieldAddressType: string
 ): FieldProps => ( {
-	id: `${ fieldId }-${ address?.key }`,
-	errorId: `${ fieldAddressType }_${ address?.key }`,
-	label: address?.required ? address?.label : address?.optionalLabel,
-	autoCapitalize: address?.autocapitalize,
-	autoComplete: address?.autocomplete,
-	errorMessage: address?.errorMessage,
-	required: address?.required,
-	className: `wc-block-components-address-form__${ address?.key }`,
-	...address?.attributes,
+	id: `${ formId }-${ field?.key }`.replaceAll( '/', '-' ), // Replace all slashes with hyphens to avoid invalid HTML ID.
+	errorId: `${ fieldAddressType }_${ field?.key }`,
+	label: field?.required ? field?.label : field?.optionalLabel,
+	autoCapitalize: field?.autocapitalize,
+	autoComplete: field?.autocomplete,
+	errorMessage: field?.errorMessage,
+	required: field?.required,
+	className: `wc-block-components-field-form__${ field?.key }`,
+	...field?.attributes,
 } );
 
 export const getFieldData = < T extends AddressFormValues | ContactFormValues >(
