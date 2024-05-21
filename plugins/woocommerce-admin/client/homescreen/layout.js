@@ -19,6 +19,7 @@ import {
 	OPTIONS_STORE_NAME,
 } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -47,7 +48,6 @@ import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { WooHomescreenHeaderBanner } from './header-banner-slot';
 import { WooHomescreenWCPayFeature } from './wcpay-feature-slot';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 const TaskLists = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../task-lists' ).then(
@@ -91,7 +91,8 @@ export const Layout = ( {
 		const url = new URL( window.location.href );
 		const params = new URLSearchParams( url.search );
 		const isTask = params.has( 'task' );
-		const isLYSOpen = window.sessionStorage.getItem( 'lysTaskOpen' ) === 'yes';
+		const isLYSOpen =
+			window.sessionStorage.getItem( 'lysTaskOpen' ) === 'yes';
 		if ( ! isTask && isLYSOpen ) {
 			navigateTo( {
 				url: getNewPath( {}, '/launch-your-store' ),
