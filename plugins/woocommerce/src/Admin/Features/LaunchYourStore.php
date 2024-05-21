@@ -80,7 +80,10 @@ class LaunchYourStore {
 
 		$current_screen  = get_current_screen();
 		$is_setting_page = $current_screen && 'woocommerce_page_wc-settings' === $current_screen->id;
-		$is_woopayments_connect = ( '/payments/connect' === $_GET['path'] || '/payments/onboarding' === $_GET['path'] ) && 'wc-admin' === $_GET['page'];
+		$is_woopayments_connect = isset( $_GET['path'] ) &&
+								  isset( $_GET['page'] ) &&
+								  ( '/payments/connect' === $_GET['path'] || '/payments/onboarding' === $_GET['path'] ) &&
+								  'wc-admin' === $_GET['page'];
 
 		if ( $is_setting_page || $is_woopayments_connect ) {
 			// Regnerate the share key if it's not set.
