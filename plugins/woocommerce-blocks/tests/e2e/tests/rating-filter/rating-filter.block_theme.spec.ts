@@ -1,21 +1,29 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { cli } from '@woocommerce/e2e-utils';
-import path from 'path';
-
-const PRODUCT_CATALOG_LINK = '/shop';
-const TEMPLATE_PATH = path.join(
-	__dirname,
-	'../shared/filters-with-product-collection.handlebars'
-);
+import {
+	test as base,
+	expect,
+	cli,
+	TemplateCompiler,
+} from '@woocommerce/e2e-playwright-utils';
 
 const blockData = {
 	name: 'Filter by Rating',
 	slug: 'woocommerce/rating-filter',
 	urlSearchParamWhenFilterIsApplied: 'rating_filter=1',
 };
+
+const test = base.extend< {
+	templateCompiler: TemplateCompiler;
+} >( {
+	templateCompiler: async ( { requestUtils }, use ) => {
+		const template = await requestUtils.createTemplateFromFile(
+			'archive-product_filters-with-product-collection'
+		);
+		await use( template );
+	},
+} );
 
 test.describe( `${ blockData.name } Block`, () => {
 	test.beforeEach( async ( { admin, editor } ) => {
@@ -115,8 +123,10 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			},
 		} );
 
+		await page.keyboard.press( 'Escape' );
 		await editor.saveSiteEditorEntities();
-		await page.goto( `/shop` );
+
+		await page.goto( '/shop' );
 	} );
 
 	test( 'should show all products', async ( { frontendUtils, page } ) => {
@@ -160,16 +170,10 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.updateTemplateContents(
-			'woocommerce/woocommerce//archive-product',
-			TEMPLATE_PATH,
-			{}
-		);
-	} );
+	test( 'should show all products', async ( { page, templateCompiler } ) => {
+		await templateCompiler.compile();
 
-	test( 'should show all products', async ( { page } ) => {
-		await page.goto( PRODUCT_CATALOG_LINK );
+		await page.goto( '/shop' );
 		const products = page
 			.locator( '.wp-block-woocommerce-product-template' )
 			.getByRole( 'listitem' );
@@ -179,8 +183,11 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 
 	test( 'should show only products that match the filter', async ( {
 		page,
+		templateCompiler,
 	} ) => {
-		await page.goto( PRODUCT_CATALOG_LINK );
+		await templateCompiler.compile();
+
+		await page.goto( '/shop' );
 		await page
 			.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
 			.click();
@@ -201,10 +208,13 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		admin,
 		editor,
 		editorUtils,
+		templateCompiler,
 	} ) => {
+		const template = await templateCompiler.compile();
+
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//archive-product',
-			postType: 'wp_template',
+			postId: template.id,
+			postType: template.type,
 		} );
 
 		await editorUtils.enterEditMode();
@@ -218,7 +228,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await page.getByText( "Show 'Apply filters' button" ).click();
 
 		await editor.saveSiteEditorEntities();
-		await page.goto( PRODUCT_CATALOG_LINK );
+		await page.goto( '/shop' );
 
 		await page
 			.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )

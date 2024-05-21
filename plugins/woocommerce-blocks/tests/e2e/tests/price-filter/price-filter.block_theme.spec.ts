@@ -1,17 +1,15 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { BASE_URL, cli } from '@woocommerce/e2e-utils';
-import path from 'path';
+import {
+	test as base,
+	expect,
+	TemplateCompiler,
+	BASE_URL,
+	cli,
+} from '@woocommerce/e2e-playwright-utils';
 
-const PRODUCT_CATALOG_LINK = '/shop';
-const TEMPLATE_PATH = path.join(
-	__dirname,
-	'../shared/filters-with-product-collection.handlebars'
-);
-
-export const blockData = {
+const blockData = {
 	slug: 'woocommerce/price-filter',
 	name: 'Filter by Price',
 	mainClass: '.wc-block-price-filter',
@@ -23,6 +21,17 @@ export const blockData = {
 	endpointAPI: 'max_price=500',
 	placeholderUrl: `${ BASE_URL }/wp-content/plugins/woocommerce/assets/images/placeholder.png`,
 };
+
+const test = base.extend< {
+	templateCompiler: TemplateCompiler;
+} >( {
+	templateCompiler: async ( { requestUtils }, use ) => {
+		const template = await requestUtils.createTemplateFromFile(
+			'archive-product_filters-with-product-collection'
+		);
+		await use( template );
+	},
+} );
 
 test.describe( `${ blockData.name } Block - editor side`, () => {
 	test.beforeEach( async ( { admin, editor } ) => {
@@ -116,7 +125,7 @@ test.describe( `${ blockData.name } Block - editor side`, () => {
 
 test.describe( `${ blockData.name } Block - with All products Block`, () => {
 	test.beforeEach( async ( { admin, page, editor } ) => {
-		await admin.createNewPost( { legacyCanvas: true } );
+		await admin.createNewPost();
 		await editor.insertBlock( { name: 'woocommerce/all-products' } );
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -240,7 +249,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			},
 		} );
 		await editor.saveSiteEditorEntities();
-		await page.goto( `/shop` );
+		await page.goto( '/shop' );
 	} );
 
 	test( 'should show all products', async ( { frontendUtils } ) => {
@@ -283,16 +292,9 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.updateTemplateContents(
-			'woocommerce/woocommerce//archive-product',
-			TEMPLATE_PATH,
-			{}
-		);
-	} );
-
-	test( 'should show all products', async ( { page } ) => {
-		await page.goto( PRODUCT_CATALOG_LINK );
+	test( 'should show all products', async ( { page, templateCompiler } ) => {
+		await templateCompiler.compile();
+		await page.goto( '/shop' );
 		const products = page
 			.locator( '.wp-block-woocommerce-product-template' )
 			.getByRole( 'listitem' );
@@ -303,8 +305,10 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 	test( 'should show only products that match the filter', async ( {
 		page,
 		frontendUtils,
+		templateCompiler,
 	} ) => {
-		await page.goto( PRODUCT_CATALOG_LINK );
+		await templateCompiler.compile();
+		await page.goto( '/shop' );
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
 		} );
@@ -328,10 +332,13 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		admin,
 		editor,
 		editorUtils,
+		templateCompiler,
 	} ) => {
+		const template = await templateCompiler.compile();
+
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//archive-product',
-			postType: 'wp_template',
+			postId: template.id,
+			postType: template.type,
 		} );
 
 		await editorUtils.enterEditMode();
@@ -345,7 +352,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await page.getByText( "Show 'Apply filters' button" ).click();
 
 		await editor.saveSiteEditorEntities();
-		await page.goto( PRODUCT_CATALOG_LINK );
+		await page.goto( '/shop' );
 
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',

@@ -162,7 +162,7 @@ It looks like this in the template:
 {{/wp-block}}
 ```
 
-In your tests you can use `createPostFromTemplate` to create a post containing your template. If you use it
+In your tests you can use `createPostFromFile` to create a post containing your template. If you use it
 more than once in your test you can extend the test suite and provide the posts as fixtures, like in the example
 below
 
@@ -174,7 +174,7 @@ const test = base.extend< {
 	defaultBlockPost: Post;
 } >( {
 	defaultBlockPost: async ( { requestUtils }, use ) => {
-		const testingPost = await requestUtils.createPostFromTemplate(
+		const testingPost = await requestUtils.createPostFromFile(
 			requestUtils,
 			{ title: 'Product Filter Stock Status Block' },
 			TEMPLATE_PATH,
@@ -186,7 +186,7 @@ const test = base.extend< {
 	},
 
 	dropdownBlockPost: async ( { requestUtils }, use ) => {
-		const testingPost = await requestUtils.createPostFromTemplate(
+		const testingPost = await requestUtils.createPostFromFile(
 			requestUtils,
 			{ title: 'Product Filter Stock Status Block' },
 			TEMPLATE_PATH,

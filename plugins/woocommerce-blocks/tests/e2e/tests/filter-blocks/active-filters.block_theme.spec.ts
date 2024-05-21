@@ -1,30 +1,26 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import path from 'path';
+import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 
-/**
- * Internal dependencies
- */
-import { PRODUCT_CATALOG_LINK, PRODUCT_CATALOG_TEMPLATE_ID } from './constants';
-
-const TEMPLATE_PATH = path.join( __dirname, './active-filters.handlebars' );
+const test = base.extend( {
+	templateCompiler: async ( { requestUtils }, use ) => {
+		const template = await requestUtils.createTemplateFromFile(
+			'archive-product_acvitve-filters'
+		);
+		await use( template );
+	},
+} );
 
 test.describe( 'Product Filter: Active Filters Block', () => {
 	test.describe( 'frontend', () => {
-		test.beforeEach( async ( { requestUtils } ) => {
-			await requestUtils.updateTemplateContents(
-				PRODUCT_CATALOG_TEMPLATE_ID,
-				TEMPLATE_PATH,
-				{}
-			);
-		} );
-
 		test( 'Without any filters selected, only a wrapper block is rendered', async ( {
 			page,
+			templateCompiler,
 		} ) => {
-			await page.goto( PRODUCT_CATALOG_LINK );
+			await templateCompiler.compile();
+
+			await page.goto( '/shop' );
 
 			const locator = page.locator(
 				'.wp-block-woocommerce-product-filter'
@@ -38,8 +34,11 @@ test.describe( 'Product Filter: Active Filters Block', () => {
 
 		test( 'With rating filters applied it shows the correct active filters', async ( {
 			page,
+			templateCompiler,
 		} ) => {
-			await page.goto( `${ PRODUCT_CATALOG_LINK }?rating_filter=1,2,5` );
+			await templateCompiler.compile();
+
+			await page.goto( `${ '/shop' }?rating_filter=1,2,5` );
 
 			await expect( page.getByText( 'Rating:' ) ).toBeVisible();
 			await expect( page.getByText( 'Rated 1 out of 5' ) ).toBeVisible();
@@ -49,9 +48,12 @@ test.describe( 'Product Filter: Active Filters Block', () => {
 
 		test( 'With stock filters applied it shows the correct active filters', async ( {
 			page,
+			templateCompiler,
 		} ) => {
+			await templateCompiler.compile();
+
 			await page.goto(
-				`${ PRODUCT_CATALOG_LINK }?filter_stock_status=instock,onbackorder`
+				`${ '/shop' }?filter_stock_status=instock,onbackorder`
 			);
 
 			await expect( page.getByText( 'Stock Status:' ) ).toBeVisible();
@@ -61,9 +63,12 @@ test.describe( 'Product Filter: Active Filters Block', () => {
 
 		test( 'With attribute filters applied it shows the correct active filters', async ( {
 			page,
+			templateCompiler,
 		} ) => {
+			await templateCompiler.compile();
+
 			await page.goto(
-				`${ PRODUCT_CATALOG_LINK }?filter_color=blue,gray&query_type_color=or`
+				`${ '/shop' }?filter_color=blue,gray&query_type_color=or`
 			);
 
 			await expect( page.getByText( 'Color:' ) ).toBeVisible();
@@ -73,10 +78,11 @@ test.describe( 'Product Filter: Active Filters Block', () => {
 
 		test( 'With price filters applied it shows the correct active filters', async ( {
 			page,
+			templateCompiler,
 		} ) => {
-			await page.goto(
-				`${ PRODUCT_CATALOG_LINK }?min_price=17&max_price=71`
-			);
+			await templateCompiler.compile();
+
+			await page.goto( `${ '/shop' }?min_price=17&max_price=71` );
 
 			await expect( page.getByText( 'Price:' ) ).toBeVisible();
 			await expect(

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Locator, Page } from '@playwright/test';
-import { TemplateApiUtils, EditorUtils } from '@woocommerce/e2e-utils';
+import { EditorUtils } from '@woocommerce/e2e-utils';
 import { expect, Editor, Admin } from '@wordpress/e2e-test-utils-playwright';
 
 /**
@@ -78,7 +78,6 @@ class ProductCollectionPage {
 	private page: Page;
 	private admin: Admin;
 	private editor: Editor;
-	private templateApiUtils: TemplateApiUtils;
 	private editorUtils: EditorUtils;
 	BLOCK_NAME = 'Product Collection (Beta)';
 	productTemplate!: Locator;
@@ -93,19 +92,16 @@ class ProductCollectionPage {
 		page,
 		admin,
 		editor,
-		templateApiUtils,
 		editorUtils,
 	}: {
 		page: Page;
 		admin: Admin;
 		editor: Editor;
-		templateApiUtils: TemplateApiUtils;
 		editorUtils: EditorUtils;
 	} ) {
 		this.page = page;
 		this.admin = admin;
 		this.editor = editor;
-		this.templateApiUtils = templateApiUtils;
 		this.editorUtils = editorUtils;
 	}
 
@@ -194,7 +190,7 @@ class ProductCollectionPage {
 	}
 
 	async goToProductCatalogFrontend() {
-		await this.page.goto( `/shop` );
+		await this.page.goto( '/shop' );
 		await this.refreshLocators( 'frontend' );
 	}
 

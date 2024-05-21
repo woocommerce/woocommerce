@@ -1,34 +1,31 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import path from 'path';
+import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 
-/**
- * Internal dependencies
- */
-import { PRODUCT_CATALOG_LINK, PRODUCT_CATALOG_TEMPLATE_ID } from './constants';
-
-const TEMPLATE_PATH = path.join( __dirname, './rating-filter.handlebars' );
+const test = base.extend( {
+	templateCompiler: async ( { requestUtils }, use ) => {
+		const template = await requestUtils.createTemplateFromFile(
+			'archive-product_rating-filter'
+		);
+		await use( template );
+	},
+} );
 
 test.describe( 'Product Filter: Rating Filter Block', () => {
 	test.describe( 'frontend', () => {
-		test.beforeEach( async ( { requestUtils } ) => {
-			await requestUtils.updateTemplateContents(
-				PRODUCT_CATALOG_TEMPLATE_ID,
-				TEMPLATE_PATH,
-				{
-					attributes: {
-						attributeId: 1,
-					},
-				}
-			);
+		test.beforeEach( async ( { templateCompiler } ) => {
+			await templateCompiler.compile( {
+				attributes: {
+					attributeId: 1,
+				},
+			} );
 		} );
 
 		test( 'clear button is not shown on initial page load', async ( {
 			page,
 		} ) => {
-			await page.goto( PRODUCT_CATALOG_LINK );
+			await page.goto( '/shop' );
 
 			const button = page.getByRole( 'button', { name: 'Clear' } );
 
@@ -38,7 +35,7 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 		test( 'clear button appears after a filter is applied', async ( {
 			page,
 		} ) => {
-			await page.goto( `${ PRODUCT_CATALOG_LINK }?rating_filter=1` );
+			await page.goto( '/shop?rating_filter=1' );
 
 			const button = page.getByRole( 'button', { name: 'Clear' } );
 
@@ -48,7 +45,7 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 		test( 'clear button hides after deselecting all filters', async ( {
 			page,
 		} ) => {
-			await page.goto( `${ PRODUCT_CATALOG_LINK }?rating_filter=1` );
+			await page.goto( '/shop?rating_filter=1' );
 
 			const ratingCheckboxes = page.getByLabel(
 				/Checkbox: Rated \d out of 5/
@@ -64,7 +61,7 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 		test( 'filters are cleared after clear button is clicked', async ( {
 			page,
 		} ) => {
-			await page.goto( `${ PRODUCT_CATALOG_LINK }?rating_filter=1` );
+			await page.goto( '/shop?rating_filter=1' );
 
 			const button = page.getByRole( 'button', { name: 'Clear' } );
 
@@ -81,7 +78,7 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 		test( 'Renders a checkbox list with the available ratings', async ( {
 			page,
 		} ) => {
-			await page.goto( PRODUCT_CATALOG_LINK );
+			await page.goto( '/shop' );
 
 			const ratingStars = page.getByLabel( /^Rated \d out of 5/ );
 			await expect( ratingStars ).toHaveCount( 2 );
@@ -100,7 +97,7 @@ test.describe( 'Product Filter: Rating Filter Block', () => {
 		test( 'Selecting a checkbox filters down the products', async ( {
 			page,
 		} ) => {
-			await page.goto( PRODUCT_CATALOG_LINK );
+			await page.goto( '/shop' );
 
 			const ratingCheckboxes = page.getByLabel(
 				/Checkbox: Rated \d out of 5/

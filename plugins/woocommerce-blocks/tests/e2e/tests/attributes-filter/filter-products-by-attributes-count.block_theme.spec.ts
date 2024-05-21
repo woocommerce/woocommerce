@@ -2,40 +2,27 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
-import path from 'path';
 
-const TEMPLATE_PATH = path.join(
-	__dirname,
-	'./filters-with-all-products.handlebars'
-);
-
-const test = base.extend< {
-	defaultBlockPost: Post;
-} >( {
-	defaultBlockPost: async ( { requestUtils }, use ) => {
-		const testingPost = await requestUtils.createPostFromTemplate(
-			{ title: 'Active Filters Block' },
-			TEMPLATE_PATH,
-			{}
+const test = base.extend( {
+	postWithFilters: async ( { requestUtils }, use ) => {
+		const post = await requestUtils.createPostFromFile(
+			'filters-with-all-products'
 		);
 
-		await use( testingPost );
-		await requestUtils.deletePost( testingPost.id );
+		await use( post );
 	},
 } );
 
 test.describe( 'Filter by Attributes Block - with All products Block', () => {
 	test( 'should show correct attrs count (color=blue|query_type_color=or)', async ( {
 		page,
-		defaultBlockPost,
+		postWithFilters,
 	} ) => {
-		await page.goto(
-			`${ defaultBlockPost.link }?filter_color=blue&query_type_color=or`
-		);
+		const post = await postWithFilters.compile( {} );
 
-		// Check if the page has loaded successfully.
-		await expect( page.getByText( 'Active Filters block' ) ).toBeVisible();
+		await page.goto(
+			`${ post.link }?filter_color=blue&query_type_color=or`
+		);
 
 		const expectedValues = [ '4', '2', '3', '4', '1' ];
 
@@ -51,14 +38,13 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 
 	test( 'should show correct attrs count (color=blue,gray|query_type_color=or)', async ( {
 		page,
-		defaultBlockPost,
+		postWithFilters,
 	} ) => {
-		await page.goto(
-			`${ defaultBlockPost.link }?filter_color=blue,gray&query_type_color=or`
-		);
+		const post = await postWithFilters.compile( {} );
 
-		// Check if the page has loaded successfully.
-		await expect( page.getByText( 'Active Filters block' ) ).toBeVisible();
+		await page.goto(
+			`${ post.link }?filter_color=blue,gray&query_type_color=or`
+		);
 
 		const expectedValues = [ '4', '2', '3', '4', '1' ];
 
@@ -74,14 +60,13 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 
 	test( 'should show correct attrs count (color=blue|query_type_color=or|min_price=15|max_price=40)', async ( {
 		page,
-		defaultBlockPost,
+		postWithFilters,
 	} ) => {
-		await page.goto(
-			`${ defaultBlockPost.link }?filter_color=blue&query_type_color=or&min_price=15&max_price=40`
-		);
+		const post = await postWithFilters.compile( {} );
 
-		// Check if the page has loaded successfully.
-		await expect( page.getByText( 'Active Filters block' ) ).toBeVisible();
+		await page.goto(
+			`${ post.link }?filter_color=blue&query_type_color=or&min_price=15&max_price=40`
+		);
 
 		const expectedValues = [ '2', '2', '2', '3', '1' ];
 

@@ -12,14 +12,13 @@ import ProductCollectionPage from '../product-collection/product-collection.page
 
 const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 	productCollectionPage: async (
-		{ page, admin, editor, templateApiUtils, editorUtils },
+		{ page, admin, editor, editorUtils },
 		use
 	) => {
 		const pageObject = new ProductCollectionPage( {
 			page,
 			admin,
 			editor,
-			templateApiUtils,
 			editorUtils,
 		} );
 		await use( pageObject );
