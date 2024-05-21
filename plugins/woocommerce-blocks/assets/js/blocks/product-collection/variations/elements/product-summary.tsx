@@ -23,6 +23,7 @@ const registerProductSummary = () => {
 		blockIcon: <Icon icon={ page } />,
 		blockTitle: BLOCK_TITLE,
 		variationName: VARIATION_NAME,
+		attributes: { excerptLength: 100 },
 	} );
 };
 

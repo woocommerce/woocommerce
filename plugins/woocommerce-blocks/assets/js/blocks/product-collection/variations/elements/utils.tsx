@@ -8,11 +8,18 @@ interface VariationDetails {
 	blockIcon: JSX.Element;
 	blockTitle: string;
 	variationName: string;
+	attributes?: object;
 }
 
 export function registerElementVariation(
 	coreName: string,
-	{ blockDescription, blockIcon, blockTitle, variationName }: VariationDetails
+	{
+		blockDescription,
+		blockIcon,
+		blockTitle,
+		variationName,
+		attributes = {},
+	}: VariationDetails
 ) {
 	registerBlockVariation( coreName, {
 		description: blockDescription,
@@ -25,6 +32,7 @@ export function registerElementVariation(
 		},
 		attributes: {
 			__woocommerceNamespace: variationName,
+			...attributes,
 		},
 		scope: [ 'block', 'inserter' ],
 	} );
