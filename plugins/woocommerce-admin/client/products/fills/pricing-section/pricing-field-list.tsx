@@ -98,7 +98,7 @@ export const PricingListField: React.FC< PricingListFieldProps > = ( {
 				<InputControl
 					{ ...regularPriceProps }
 					name="regular_price"
-					label={ __( 'List price', 'woocommerce' ) }
+					label={ __( 'Regular price', 'woocommerce' ) }
 					value={ formatCurrencyDisplayValue(
 						String( regularPriceProps?.value ),
 						currencyConfig,
