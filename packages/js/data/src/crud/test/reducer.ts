@@ -111,7 +111,7 @@ describe( 'crud reducer', () => {
 			type: TYPES.GET_ITEMS_SUCCESS,
 			items,
 			query,
-			urlParameters: [ 5 ],
+			urlParameters: [ 100, 5 ],
 		} );
 
 		const resourceName = getRequestIdentifier(
@@ -120,8 +120,8 @@ describe( 'crud reducer', () => {
 		);
 
 		expect( state.items[ resourceName ].data ).toHaveLength( 2 );
-		expect( state.data[ '5/1' ] ).toEqual( items[ 0 ] );
-		expect( state.data[ '5/2' ] ).toEqual( items[ 1 ] );
+		expect( state.data[ '100/5/1' ] ).toEqual( items[ 0 ] );
+		expect( state.data[ '100/5/2' ] ).toEqual( items[ 1 ] );
 	} );
 
 	it( 'GET_ITEMS_SUCCESS should not remove previously added fields, only update new ones', () => {
@@ -343,10 +343,7 @@ describe( 'crud reducer', () => {
 			expect( state.data[ 2 ].status ).toEqual( item.status );
 			expect( state.requesting[ resourceName ] ).toEqual( false );
 
-			// Test the items object is an empty object
 			expect( state.items ).toEqual( {} );
-
-			// Test the itemsCount object is an empty object
 			expect( state.itemsCount ).toEqual( {} );
 		} );
 
@@ -383,32 +380,27 @@ describe( 'crud reducer', () => {
 			);
 			expect( state.requesting[ resourceName ] ).toEqual( false );
 
-			// Items
 			const itemQuery = getRequestIdentifier(
 				CRUD_ACTIONS.GET_ITEMS,
 				options.optimisticQueryUpdate
 			);
 
-			// Items should have the item id
 			expect( state.items[ itemQuery ].data ).toHaveLength( 1 );
 			expect( state.items[ itemQuery ].data[ 0 ] ).toEqual( 7 ); // Item id
 
-			// Items Key
 			const itemsKey = Object.keys( state.items );
 			expect( itemsKey ).toHaveLength( 1 );
 			expect( itemsKey[ 0 ] ).toEqual( itemQuery );
 
-			// ItemsCount
 			const itemsCountQuery = getRequestIdentifier(
 				CRUD_ACTIONS.GET_ITEMS,
 				options.optimisticQueryUpdate
 			);
 
-			// ItemsCount Key
 			const itemsCountKey = Object.keys( state.itemsCount );
 
 			// ItemsCount should be 1
-			expect( state.itemsCount[ itemsCountQuery ] ).toEqual( 1 ); // Items count
+			expect( state.itemsCount[ itemsCountQuery ] ).toEqual( 1 );
 
 			expect( itemsCountKey ).toHaveLength( 1 );
 			expect( itemsCountKey[ 0 ] ).toEqual( itemsCountQuery );
