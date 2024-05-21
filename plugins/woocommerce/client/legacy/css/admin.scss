@@ -3069,6 +3069,10 @@ ul.wc_coupon_list_block {
 
 		.column-order_number {
 			width: 20ch;
+
+			.order-date-and-status {
+				display: none;
+			}
 		}
 
 		.column-order_total {
@@ -3390,33 +3394,44 @@ ul.wc_coupon_list_block {
 		}
 	}
 
+	.woocommerce_page_wc-orders .wc-orders-list-table.wp-list-table,
 	.post-type-shop_order .wp-list-table {
-		td.check-column {
+		.check-column {
 			width: 1em;
+			vertical-align: top;
+		}
+
+		thead th.column-order_number {
+			width: 100%;
 		}
 
 		td.column-order_number {
-			padding-left: 0;
 			padding-bottom: 0.5em;
-		}
 
-		td.column-order_status,
-		td.column-order_date {
-			display: inline-block !important;
-			padding: 0 1em 1em 1em !important;
+			.order-date-and-status {
+				position: absolute;
+				display: block;
+				right: 60px;
 
-			&::before {
-				display: none !important;
+				time {
+					margin-right: 1.5em;
+				}
+			}
+
+			.order-preview {
+				margin-top: 13px;
 			}
 		}
 
-		td.column-order_date {
-			padding-left: 0 !important;
+		td.column-order_total,
+		td.column-wc_actions {
+			text-align: left;
 		}
 
-		td.column-order_status {
-			float: right;
+		td.column-wc_actions {
+			min-height: 2.0em !important;
 		}
+
 	}
 }
 
@@ -7539,9 +7554,9 @@ table.bar_chart {
 				overflow: visible;
 			}
 
-			.toggle-row {
-				top: -15px;
-			}
+			// .toggle-row {
+			// 	top: -15px;
+			// }
 		}
 	}
 }

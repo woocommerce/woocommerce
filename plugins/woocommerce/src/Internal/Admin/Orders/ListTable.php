@@ -948,6 +948,11 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function render_order_number_column( WC_Order $order ): void {
+		echo '<div class="order-date-and-status">';
+			echo $this->render_order_date_column( $order );
+			echo $this->render_order_status_column( $order );
+		echo '</div>';
+
 		$buyer = '';
 
 		if ( $order->get_billing_first_name() || $order->get_billing_last_name() ) {
