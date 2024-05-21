@@ -107,7 +107,8 @@ class PTKPatternsStore {
 	 */
 	public function get_patterns() {
 		$patterns = get_transient( self::TRANSIENT_NAME );
-		// Only if the transient is not set, we fetch the patterns from the PTK.
+
+		// Only if the transient is not set, we schedule fetching the patterns from the PTK.
 		if ( false === $patterns ) {
 			$this->schedule_fetch_patterns();
 			return new WP_Error(
