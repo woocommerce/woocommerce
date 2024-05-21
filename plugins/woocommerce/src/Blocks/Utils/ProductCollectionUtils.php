@@ -207,6 +207,10 @@ class ProductCollectionUtils {
 	 * @return array The filters data for tracking.
 	 */
 	public static function get_query_filters_track_data( $block ) {
+		
+		if ( ! isset( $block['attrs' ] ) ) {
+			return array();
+		}
 
 		$query_attrs = $block['attrs']['query'] ?? array();
 		$filters     = array(
@@ -215,7 +219,8 @@ class ProductCollectionUtils {
 			'handpicked'   => 0,
 			'keyword'      => 0,
 			'attributes'   => 0,
-			'taxonomy'     => 0,
+			'category'     => 0,
+			'tag'          => 0,
 			'featured'     => 0,
 			'created'      => 0,
 			'price'        => 0,
@@ -238,7 +243,14 @@ class ProductCollectionUtils {
 		}
 
 		if ( ! empty( $query_attrs['taxQuery'] ) ) {
-			$filters['taxonomy'] = 1;
+
+			if ( ! empty( $query_attrs['taxQuery']['product_cat'] ) ) {
+				$filters['category'] = 1;
+			}
+			
+			if ( ! empty( $query_attrs['taxQuery']['product_tag'] ) ) {
+				$filters['tag'] = 1;
+			}
 		}
 
 		if ( ! empty( $query_attrs['woocommerceHandPickedProducts'] ) ) {
