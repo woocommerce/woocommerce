@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Admin\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * Takes care of Launch Your Store related actions.
@@ -19,6 +20,7 @@ class LaunchYourStore {
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
 		add_action( 'wp_footer', array( $this, 'maybe_add_coming_soon_banner_on_frontend' ) );
 		add_action( 'init', array( $this, 'register_launch_your_store_user_meta_fields' ) );
+		add_filter( 'woocommerce_tracks_event_properties', array( $this, 'append_coming_soon_global_tracks' ), 10, 2 );
 		add_action( 'wp_login', array( $this, 'reset_woocommerce_coming_soon_banner_dismissed' ), 10, 2 );
 	}
 
@@ -65,6 +67,33 @@ class LaunchYourStore {
 		}
 		wc_admin_record_tracks_event( 'site_visibility_saved', $event_data );
 	}
+
+	/**
+	 * Append coming soon prop tracks globally.
+	 *
+	 * @param array $event_properties Event properties array.
+	 *
+	 * @return array
+	 */
+	public function append_coming_soon_global_tracks( $event_properties ) {
+		if ( is_array( $event_properties ) ) {
+			$coming_soon = 'disabled';
+			if ( Features::is_enabled( 'launch-your-store' ) ) {
+				$coming_soon = 'no';
+				if ( 'yes' === get_option( 'woocommerce_coming_soon', 'no' ) ) {
+					$coming_soon = 'yes';
+					if ( 'yes' === get_option( 'woocommerce_store_pages_only', 'no' ) ) {
+						$coming_soon = 'store';
+					} else {
+						$coming_soon = 'site';
+					}
+				}
+			}
+			$event_properties['coming_soon'] = $coming_soon;
+		}
+		return $event_properties;
+	}
+
 
 	/**
 	 * Preload settings for Site Visibility.
