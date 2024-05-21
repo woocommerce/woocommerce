@@ -203,6 +203,7 @@
 					$( '.tips' ).tipTip({ 'attribute': 'data-tip', 'fadeIn': 50, 'fadeOut': 50, 'delay': 50 });
 				},
 				onSubmit: function( event ) {
+					$save_button.addClass( 'is-busy' );
 					event.data.view.block();
 					event.data.view.model.save();
 					event.preventDefault();
@@ -269,7 +270,6 @@
 				clearUnloadConfirmation: function() {
 					this.needsUnloadConfirm = false;
 					$save_button.attr( 'disabled', 'disabled' );
-					$save_button.addClass( 'is-busy' );
 				},
 				unloadConfirmation: function( event ) {
 					if ( event.data.view.needsUnloadConfirm ) {
