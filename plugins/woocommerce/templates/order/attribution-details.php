@@ -66,7 +66,6 @@ defined( 'ABSPATH' ) || exit;
 		<?php if ( array_key_exists( 'utm_source', $meta ) ) : ?>
 			<h4>
 				<?php esc_html_e( 'Source', 'woocommerce' ); ?>
-
 			</h4>
 			<span class="order-attribution-utm-source">
 				<?php echo esc_html( $meta['utm_source'] ); ?>
@@ -82,11 +81,11 @@ defined( 'ABSPATH' ) || exit;
 			</span>
 		<?php endif; ?>
 
-		<?php if ( array_key_exists('utm_source_platform', $meta ) ) : ?>
-		<h4>
-			<?php esc_html_e( 'Source platform', 'woocommerce' ); ?>
-		</h4>
-		<span class="order-attribution-utm-source-platform">
+		<?php if ( array_key_exists( 'utm_source_platform', $meta ) ) : ?>
+			<h4>
+				<?php esc_html_e( 'Source platform', 'woocommerce' ); ?>
+			</h4>
+			<span class="order-attribution-utm-source-platform">
 				<?php echo esc_html( $meta['utm_source_platform'] ); ?>
 			</span>
 		<?php endif; ?>
