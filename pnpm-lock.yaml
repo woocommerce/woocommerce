@@ -4500,8 +4500,8 @@ importers:
   plugins/woocommerce/client/legacy:
     dependencies:
       sourcebuster:
-        specifier: github:woocommerce/sourcebuster-js#v1.1.2
-        version: https://codeload.github.com/woocommerce/sourcebuster-js/tar.gz/411d8dffaa37d7602d678c2ec02baacee93c12d5
+        specifier: github:woocommerce/sourcebuster-js#v1.2.0
+        version: https://codeload.github.com/woocommerce/sourcebuster-js/tar.gz/d7f4616d5a17e17db925ca1842457f309379d861
     devDependencies:
       '@types/node':
         specifier: ^16.18.68
@@ -22431,8 +22431,8 @@ packages:
     resolution: {integrity: sha512-l3BikUxvPOcn5E74dZiq5BGsTb5yEwhaTSzccU6t4sDOH8NWJCstKO5QT2CvtFoK6F0saL7p9xHAqHOlCPJygA==}
     engines: {node: '>= 8'}
 
-  sourcebuster@https://codeload.github.com/woocommerce/sourcebuster-js/tar.gz/411d8dffaa37d7602d678c2ec02baacee93c12d5:
-    resolution: {tarball: https://codeload.github.com/woocommerce/sourcebuster-js/tar.gz/411d8dffaa37d7602d678c2ec02baacee93c12d5}
+  sourcebuster@https://codeload.github.com/woocommerce/sourcebuster-js/tar.gz/d7f4616d5a17e17db925ca1842457f309379d861:
+    resolution: {tarball: https://codeload.github.com/woocommerce/sourcebuster-js/tar.gz/d7f4616d5a17e17db925ca1842457f309379d861}
     version: 1.1.2
 
   space-separated-tokens@1.1.5:
@@ -58641,7 +58641,7 @@ snapshots:
 
   source-map@0.7.4: {}
 
-  sourcebuster@https://codeload.github.com/woocommerce/sourcebuster-js/tar.gz/411d8dffaa37d7602d678c2ec02baacee93c12d5: {}
+  sourcebuster@https://codeload.github.com/woocommerce/sourcebuster-js/tar.gz/d7f4616d5a17e17db925ca1842457f309379d861: {}
 
   space-separated-tokens@1.1.5: {}
 
