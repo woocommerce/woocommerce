@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move the PHP tests with WP nightly back into CI
