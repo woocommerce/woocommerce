@@ -646,6 +646,20 @@ class PluginsHelper {
 	}
 
 	/**
+	 * Enqueue scripts for connect notice in plugin list page.
+	 *
+	 * @return void
+	 */
+	public static function maybe_enqueue_scripts_for_connect_notice_in_plugins() {
+		if ( 'plugins' !== get_current_screen()->id ) {
+			return;
+		}
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-plugin-update-connect-notice' );
+		wp_enqueue_script( 'woo-plugin-update-connect-notice' );
+	}
+
+	/**
 	 * Show notice about to expired subscription on WC settings page.
 	 *
 	 * @return void
