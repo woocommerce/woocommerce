@@ -83,9 +83,8 @@ const getThumbnailImageIdByNth = async (
 };
 
 test.describe( `${ blockData.name }`, () => {
-	let template;
 	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
-		template = await requestUtils.createTemplate( 'wp_template', {
+		const template = await requestUtils.createTemplate( 'wp_template', {
 			slug: blockData.slug,
 			title: 'Custom Single Product',
 			content: 'placeholder',
