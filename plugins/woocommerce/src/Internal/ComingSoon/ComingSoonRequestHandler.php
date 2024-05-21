@@ -26,7 +26,7 @@ class ComingSoonRequestHandler {
 	final public function init( ComingSoonHelper $coming_soon_helper ) {
 		$this->coming_soon_helper = $coming_soon_helper;
 		add_filter( 'template_include', array( $this, 'handle_template_include' ) );
-		add_filter( 'wp_theme_json_data_theme', array( $this, 'filter_theme_json_theme' ) );
+		add_filter( 'wp_theme_json_data_theme', array( $this, 'experimental_filter_theme_json_theme' ) );
 	}
 
 
@@ -119,13 +119,13 @@ class ComingSoonRequestHandler {
 	 *
 	 * @param WP_Theme_JSON $theme_json The theme json object.
 	 */
-	public function filter_theme_json_theme( $theme_json ) {
+	public function experimental_filter_theme_json_theme( $theme_json ) {
 		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
 			return $theme_json;
 		}
 
 		$theme_data = $theme_json->get_data();
-		$font_data  = $theme_data['settings']['typography']['fontFamilies']['theme'];
+		$font_data  = $theme_data['settings']['typography']['fontFamilies']['theme'] ?? array();
 
 		$fonts_to_add = array(
 			array(
