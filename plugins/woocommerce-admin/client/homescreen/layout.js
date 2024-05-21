@@ -74,7 +74,7 @@ export const Layout = ( {
 	const shouldShowWCPayFeature = taskListComplete || isTaskListHidden;
 	const hasTwoColumnContent =
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
-	const isDashboardShown = ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
+	const isDashboardShown = Object.keys( query ).length > 0 && ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
 	const activeSetupTaskList = useActiveSetupTasklist();
 
 	const twoColumns =
@@ -88,12 +88,9 @@ export const Layout = ( {
 
 	useLayoutEffect( () => {
 		// Catch-all to redirect to LYS hub when it was previously opened.
-		const url = new URL( window.location.href );
-		const params = new URLSearchParams( url.search );
-		const isTask = params.has( 'task' );
 		const isLYSOpen =
 			window.sessionStorage.getItem( 'lysTaskOpen' ) === 'yes';
-		if ( ! isTask && isLYSOpen ) {
+		if ( isDashboardShown && isLYSOpen ) {
 			navigateTo( {
 				url: getNewPath( {}, '/launch-your-store' ),
 			} );
