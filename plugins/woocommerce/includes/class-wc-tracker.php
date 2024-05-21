@@ -1175,6 +1175,14 @@ class WC_Tracker {
 
 		$instances = array();
 		foreach ( $templates as $template_id => $template_name ) {
+
+			// Group collection names by template_name.
+			if ( ! isset( $instances[ $template_name ] ) || ! is_array( $instances[ $template_name ] ) ) {
+				$instances[ $template_name ] = array(
+					'collections' => array(),
+				);
+			}
+
 			$template_type = $woo_prefix . '//mini-cart' === $template_id ? 'wp_template_part' : 'wp_template';
 			$template      = get_block_template( $template_id, $template_type );
 			if ( ! $template instanceof \WP_Block_Template ) {
@@ -1186,40 +1194,17 @@ class WC_Tracker {
 			}
 
 			if ( ! has_block( 'woocommerce/product-collection', $template->content ) ) {
-				$instances[] = array(
-					'collection'       => '',
-					'location_context' => $template_name,
-				);
 				continue;
 			}
 
 			$blocks     = parse_blocks( $template->content );
 			$track_data = ProductCollectionUtils::parse_blocks_track_data( $blocks );
-			// Decorate.
-			$track_data = array_map(
-				function ( $data ) use ( $template_name ) {
-					$data['location_context'] = $template_name;
-					return $data;
-				},
-				$track_data
-			);
-
-			$instances = array_merge( $instances, $track_data );
+			foreach ( $track_data as $data ) {
+				if ( isset( $data['collection'] ) ) {
+					$instances[ $template_name ]['collections'][] = $data['collection'];
+				}
+			}
 		}
-
-		error_log( '************ DEBUG SNAPSHOT ************' );
-		error_log(
-			print_r(
-				array_map(
-					function ( $i ) {
-						return array( $i['collection'], $i['location_context'] );
-					},
-					$instances
-				),
-				true
-			)
-		);
-		error_log( '************ DEBUG SNAPSHOT END ************' );
 
 		return $instances;
 	}
