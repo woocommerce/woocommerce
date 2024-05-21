@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, useEffect, useRef, useState } from '@wordpress/element';
+import { createElement, useEffect, useState } from '@wordpress/element';
 import { closeSmall } from '@wordpress/icons';
 import {
 	Button,
@@ -39,7 +39,6 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	onNewAttributeAdd,
 	onAttributeSelect,
 
-	termLabel = undefined,
 	termPlaceholder,
 	onTermsSelect,
 
@@ -200,40 +199,19 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		onTermsSelect( [ ...selectedTerms, ...newItems ], index, attribute );
 	}
 
-	const rowElementRef = useRef< HTMLTableRowElement >( null );
-
 	/*
-	 * Visual hack to tweak the row height
-	 * when the token field is expanded
+	 * Check if there are available suggestions
+	 * to show the values column,
+	 * comparing the suggestions length with the selected values length.
 	 */
-	useEffect( () => {
-		if ( ! rowElementRef.current ) {
-		}
-
-		const tokenFieldElement = rowElementRef.current?.querySelector(
-			'.components-form-token-field'
-		) as HTMLElement;
-
-		const optionsWrapperElement = tokenFieldElement?.querySelector(
-			'.components-form-token-field__input-container .components-flex'
-		);
-
-		if ( ! tokenFieldElement || ! optionsWrapperElement ) {
-			return;
-		}
-
-		// Options wrapper height
-		const height = optionsWrapperElement.clientHeight;
-
-		// Set the height of the token field
-		tokenFieldElement.style.height = `${ height }px`;
-	}, [ selectedValues ] ); // need to know the height when the selected values change
+	const hasAvailableSuggestions =
+		suggestions?.length &&
+		suggestions.length > ( selectedValues?.length || 0 );
 
 	return (
 		<tr
 			key={ index }
 			className={ `woocommerce-new-attribute-modal__table-row woocommerce-new-attribute-modal__table-row-${ index }` }
-			ref={ rowElementRef }
 		>
 			<td className="woocommerce-new-attribute-modal__table-attribute-column">
 				<AttributesComboboxControl
@@ -257,9 +235,12 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 				/>
 			</td>
 
-			<td className="woocommerce-new-attribute-modal__table-attribute-value-column">
+			<td
+				className={ `woocommerce-new-attribute-modal__table-attribute-value-column${
+					hasAvailableSuggestions ? ' has-values' : ''
+				}` }
+			>
 				<FormTokenField
-					label={ termLabel }
 					placeholder={ termPlaceholder }
 					disabled={ ! attribute }
 					suggestions={ suggestions }
