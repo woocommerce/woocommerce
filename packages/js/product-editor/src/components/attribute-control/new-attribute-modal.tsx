@@ -57,6 +57,11 @@ type AttributeForm = {
 	attributes: Array< EnhancedProductAttribute | null >;
 };
 
+/*
+ * Sort criteria for the attributes.
+ */
+const attributeSortCriteria = { order_by: 'name' };
+
 export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
 	description = '',
@@ -193,8 +198,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		name: defaultSearch,
 	} as EnhancedProductAttribute;
 
-	const attributeSortCriteria = { order_by: 'name' };
-
 	const { attributes, isLoadingAttributes } = useSelect(
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
@@ -211,7 +214,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 				),
 				attributes: getAttributes( attributeSortCriteria ),
 			};
-		}
+		},
+		[]
 	);
 
 	const { createErrorNotice } = useDispatch( 'core/notices' );
