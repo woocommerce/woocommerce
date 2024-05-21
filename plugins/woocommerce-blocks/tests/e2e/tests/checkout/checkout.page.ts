@@ -47,7 +47,7 @@ export class CheckoutPage {
 			.getByText( shippingName )
 			.isVisible();
 		const priceIsVisible = await shippingLine
-			.getByText( shippingPrice )
+			.getByText( shippingPrice, { exact: true } )
 			.isVisible();
 		return nameIsVisible && priceIsVisible;
 	}
