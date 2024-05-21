@@ -578,7 +578,7 @@ Payment options for your store.
 
 ## Pickup Method - woocommerce/checkout-pickup-options-block
 
-Shows local pickup options.
+Shows local pickup locations.
 
 -	**Name:** woocommerce/checkout-pickup-options-block
 -	**Category:** woocommerce
@@ -598,7 +598,7 @@ Collect your customer's shipping address.
 -	**Supports:** ~~align~~,~~html~~,~~multiple~~,~~reusable~~,~~inserter~~,~~lock~~
 -	**Attributes:** lock
 
-## Shipping Method - woocommerce/checkout-shipping-method-block
+## Delivery - woocommerce/checkout-shipping-method-block
 
 Select between shipping or local pickup.
 
@@ -652,6 +652,17 @@ Renders classic WooCommerce shortcodes.
 -   **Parent:** 
 -	**Supports:** align,~~html~~,~~multiple~~,~~reusable~~,inserter
 -	**Attributes:** shortcode,align
+
+## Coming Soon - woocommerce/coming-soon
+
+
+
+-	**Name:** woocommerce/coming-soon
+-	**Category:** woocommerce
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** color (text, ~~background~~)
+-	**Attributes:** color,storeOnly
 
 ## Customer account - woocommerce/customer-account
 
@@ -853,7 +864,7 @@ Display the list of additional field values from the current order.
 
 ## Additional Fields - woocommerce/order-confirmation-additional-fields-wrapper
 
-Display additional checkout fields from the 'contact' and 'additional' locations.
+Display additional checkout fields from the 'contact' and 'order' locations.
 
 -	**Name:** woocommerce/order-confirmation-additional-fields-wrapper
 -	**Category:** woocommerce
@@ -1038,7 +1049,7 @@ Display a grid of products from your selected categories.
 -	**Supports:** align (full, wide),~~html~~
 -	**Attributes:** columns,rows,alignButtons,contentVisibility,categories,catOperator,isPreview,stockStatus,editMode,orderby
 
-## Product Collection (Beta) - woocommerce/product-collection
+## Product Collection - woocommerce/product-collection
 
 Display a collection of products from your store.
 
@@ -1047,7 +1058,7 @@ Display a collection of products from your store.
 -   **Ancestor:** 
 -   **Parent:** 
 -	**Supports:** align (full, wide),anchor,~~html~~,interactivity
--	**Attributes:** queryId,query,tagName,displayLayout,convertedFromProducts,collection,hideControls,queryContextIncludes,forcePageReload
+-	**Attributes:** queryId,query,tagName,displayLayout,convertedFromProducts,collection,hideControls,queryContextIncludes,forcePageReload,__privatePreviewState
 
 ## No results - woocommerce/product-collection-no-results
 
@@ -1069,7 +1080,7 @@ A block that adds product filters to the product collection.
 -   **Ancestor:** 
 -   **Parent:** 
 -	**Supports:** ~~html~~,~~reusable~~
--	**Attributes:** filterType,heading,isPreview
+-	**Attributes:** filterType,heading,isPreview,attributeId
 
 ## Product Filter: Active Filters (Beta) - woocommerce/product-filter-active
 
@@ -1092,6 +1103,17 @@ Enable customers to filter the product grid by selecting one or more attributes,
 -   **Parent:** 
 -	**Supports:** interactivity,~~inserter~~,color (text, ~~background~~)
 -	**Attributes:** attributeId,showCounts,queryType,displayStyle,selectType,isPreview
+
+## Clear - woocommerce/product-filter-clear-button
+
+Allows shoppers to reset this filter.
+
+-	**Name:** woocommerce/product-filter-clear-button
+-	**Category:** woocommerce
+-   **Ancestor:** woocommerce/product-filter
+-   **Parent:** 
+-	**Supports:** interactivity,~~inserter~~
+-	**Attributes:** 
 
 ## Product Filter: Price (Beta) - woocommerce/product-filter-price
 
@@ -1125,6 +1147,17 @@ Enable customers to filter the product collection by stock status.
 -   **Parent:** 
 -	**Supports:** interactivity,~~html~~,~~multiple~~,~~inserter~~,color (text, ~~background~~)
 -	**Attributes:** className,showCounts,displayStyle,selectType,isPreview
+
+## Product Filters (Beta) - woocommerce/product-filters
+
+Let shoppers filter products displayed on the page.
+
+-	**Name:** woocommerce/product-filters
+-	**Category:** woocommerce
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** align,~~multiple~~,interactivity
+-	**Attributes:** 
 
 ## Product Gallery (Beta) - woocommerce/product-gallery
 
