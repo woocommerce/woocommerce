@@ -87,17 +87,6 @@ export const Layout = ( {
 	}, [] );
 
 	useLayoutEffect( () => {
-		// Catch-all to redirect to LYS hub when it was previously opened.
-		const isLYSOpen =
-			window.sessionStorage.getItem( 'lysTaskOpen' ) === 'yes';
-		if ( isDashboardShown && isLYSOpen ) {
-			navigateTo( {
-				url: getNewPath( {}, '/launch-your-store' ),
-			} );
-		}
-	}, [ isDashboardShown ] );
-
-	useLayoutEffect( () => {
 		maybeToggleColumns();
 		window.addEventListener( 'resize', maybeToggleColumns );
 
