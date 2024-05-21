@@ -4,3 +4,5 @@ export type aiWizardClosedBeforeCompletionEvent = {
 		step: string;
 	};
 };
+
+export type goBackToHomeEvent = { type: 'GO_BACK_TO_HOME' };

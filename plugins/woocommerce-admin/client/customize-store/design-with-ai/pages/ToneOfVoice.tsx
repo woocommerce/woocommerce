@@ -12,7 +12,11 @@ import { useState, createInterpolateElement } from '@wordpress/element';
 import { Tone, designWithAiStateMachineContext } from '../types';
 import { Choice } from '../components/choice/choice';
 import { CloseButton } from '../components/close-button/close-button';
-import { aiWizardClosedBeforeCompletionEvent } from '../events';
+import { SkipButton } from '../components/skip-button/skip-button';
+import {
+	aiWizardClosedBeforeCompletionEvent,
+	goBackToHomeEvent,
+} from '../events';
 import { isEntrepreneurFlow } from '../entrepreneur-flow';
 import { trackEvent } from '~/customize-store/tracking';
 import WordPressLogo from '../../../lib/wordpress-logo';
@@ -27,7 +31,10 @@ export const ToneOfVoice = ( {
 	context,
 }: {
 	sendEvent: (
-		event: toneOfVoiceCompleteEvent | aiWizardClosedBeforeCompletionEvent
+		event:
+			| toneOfVoiceCompleteEvent
+			| aiWizardClosedBeforeCompletionEvent
+			| goBackToHomeEvent
 	) => void;
 	context: designWithAiStateMachineContext;
 } ) => {
@@ -102,6 +109,21 @@ export const ToneOfVoice = ( {
 						sendEvent( {
 							type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
 							payload: { step: 'tone-of-voice' },
+						} );
+					} }
+				/>
+			) }
+			{ isEntrepreneurFlow() && (
+				<SkipButton
+					onClick={ () => {
+						trackEvent(
+							'customize_your_store_entrepreneur_skip_click',
+							{
+								step: 'tone-of-voice',
+							}
+						);
+						sendEvent( {
+							type: 'GO_BACK_TO_HOME',
 						} );
 					} }
 				/>

@@ -11,9 +11,14 @@ import { ProgressBar } from '@woocommerce/components';
  */
 import { designWithAiStateMachineContext } from '../types';
 import { CloseButton } from '../components/close-button/close-button';
-import { aiWizardClosedBeforeCompletionEvent } from '../events';
+import { SkipButton } from '../components/skip-button/skip-button';
+import {
+	aiWizardClosedBeforeCompletionEvent,
+	goBackToHomeEvent,
+} from '../events';
 import { isEntrepreneurFlow } from '../entrepreneur-flow';
 import WordPressLogo from '~/lib/wordpress-logo';
+import { trackEvent } from '~/customize-store/tracking';
 
 export type businessInfoDescriptionCompleteEvent = {
 	type: 'BUSINESS_INFO_DESCRIPTION_COMPLETE';
@@ -27,6 +32,7 @@ export const BusinessInfoDescription = ( {
 		event:
 			| businessInfoDescriptionCompleteEvent
 			| aiWizardClosedBeforeCompletionEvent
+			| goBackToHomeEvent
 	) => void;
 	context: designWithAiStateMachineContext;
 } ) => {
@@ -56,6 +62,21 @@ export const BusinessInfoDescription = ( {
 						sendEvent( {
 							type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
 							payload: { step: 'business-info-description' },
+						} );
+					} }
+				/>
+			) }
+			{ isEntrepreneurFlow() && (
+				<SkipButton
+					onClick={ () => {
+						trackEvent(
+							'customize_your_store_entrepreneur_skip_click',
+							{
+								step: 'business-info-description',
+							}
+						);
+						sendEvent( {
+							type: 'GO_BACK_TO_HOME',
 						} );
 					} }
 				/>

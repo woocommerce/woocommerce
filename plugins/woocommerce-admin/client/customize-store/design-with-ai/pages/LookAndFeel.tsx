@@ -12,7 +12,11 @@ import { useState } from '@wordpress/element';
 import { Look, designWithAiStateMachineContext } from '../types';
 import { Choice } from '../components/choice/choice';
 import { CloseButton } from '../components/close-button/close-button';
-import { aiWizardClosedBeforeCompletionEvent } from '../events';
+import { SkipButton } from '../components/skip-button/skip-button';
+import {
+	aiWizardClosedBeforeCompletionEvent,
+	goBackToHomeEvent,
+} from '../events';
 import { isEntrepreneurFlow } from '../entrepreneur-flow';
 import { trackEvent } from '~/customize-store/tracking';
 import WordPressLogo from '~/lib/wordpress-logo';
@@ -27,7 +31,10 @@ export const LookAndFeel = ( {
 	context,
 }: {
 	sendEvent: (
-		event: lookAndFeelCompleteEvent | aiWizardClosedBeforeCompletionEvent
+		event:
+			| lookAndFeelCompleteEvent
+			| aiWizardClosedBeforeCompletionEvent
+			| goBackToHomeEvent
 	) => void;
 	context: designWithAiStateMachineContext;
 } ) => {
@@ -84,6 +91,21 @@ export const LookAndFeel = ( {
 						sendEvent( {
 							type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
 							payload: { step: 'look-and-feel' },
+						} );
+					} }
+				/>
+			) }
+			{ isEntrepreneurFlow() && (
+				<SkipButton
+					onClick={ () => {
+						trackEvent(
+							'customize_your_store_entrepreneur_skip_click',
+							{
+								step: 'look-and-feel',
+							}
+						);
+						sendEvent( {
+							type: 'GO_BACK_TO_HOME',
 						} );
 					} }
 				/>
