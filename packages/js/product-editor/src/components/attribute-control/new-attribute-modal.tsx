@@ -273,7 +273,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					function addNewAttribute(
 						newAttributeName: string,
 						index: number
-					) {
+					): void {
 						if ( ! createNewAttributesAsGlobal ) {
 							return setValue( `attributes[${ index }]`, {
 								id: 0,
@@ -382,6 +382,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								}
 							} }
 							className="woocommerce-new-attribute-modal"
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore
+							size="medium"
 						>
 							{ notice && (
 								<Notice isDismissible={ false }>
