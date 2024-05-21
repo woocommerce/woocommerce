@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Admin\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
-use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * Takes care of Launch Your Store related actions.
@@ -77,16 +76,13 @@ class LaunchYourStore {
 	 */
 	public function append_coming_soon_global_tracks( $event_properties ) {
 		if ( is_array( $event_properties ) ) {
-			$coming_soon = 'disabled';
-			if ( Features::is_enabled( 'launch-your-store' ) ) {
-				$coming_soon = 'no';
-				if ( 'yes' === get_option( 'woocommerce_coming_soon', 'no' ) ) {
-					$coming_soon = 'yes';
-					if ( 'yes' === get_option( 'woocommerce_store_pages_only', 'no' ) ) {
-						$coming_soon = 'store';
-					} else {
-						$coming_soon = 'site';
-					}
+			$coming_soon = 'no';
+			if ( 'yes' === get_option( 'woocommerce_coming_soon', 'no' ) ) {
+				$coming_soon = 'yes';
+				if ( 'yes' === get_option( 'woocommerce_store_pages_only', 'no' ) ) {
+					$coming_soon = 'store';
+				} else {
+					$coming_soon = 'site';
 				}
 			}
 			$event_properties['coming_soon'] = $coming_soon;
