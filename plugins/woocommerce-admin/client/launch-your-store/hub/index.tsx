@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useMachine } from '@xstate5/react';
-import React, { useEffect } from 'react';
+import React from 'react';
 import classnames from 'classnames';
 
 /**
@@ -25,8 +25,6 @@ import {
 	MainContentContainer,
 } from './main-content/xstate';
 import { useXStateInspect } from '~/xstate';
-import { addAction } from '@wordpress/hooks';
-import { navigateTo } from '@woocommerce/navigation';
 
 export type LaunchYourStoreComponentProps = {
 	sendEventToSidebar: ( arg0: SidebarMachineEvents ) => void;
@@ -64,24 +62,6 @@ const LaunchStoreController = () => {
 		useComponentFromXStateService< MainContentComponentProps >(
 			mainContentMachineService
 		);
-
-	useEffect( () => {
-		addAction(
-			'woocommerce_launch_your_store_task_clicked',
-			'woocommerce-admin-lys',
-			( taskId: string ) => {
-				console.log( 'Task clicked:', taskId );
-			}
-		);
-		addAction(
-			'woocommerce_lys_cys_redirect',
-			'woocommerce-admin-lys',
-			( taskId: string ) => {
-				console.log( 'Return to LYS', taskId );
-				navigateTo( { url: '/launch-your-store' } );
-			}
-		);
-	}, [] );
 
 	return (
 		<div className={ 'launch-your-store-layout__container' }>

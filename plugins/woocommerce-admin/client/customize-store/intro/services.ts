@@ -15,7 +15,6 @@ import { FlowType, aiStatusResponse } from '../types';
 import { isIframe } from '~/customize-store/utils';
 import { isWooExpress } from '~/utils/is-woo-express';
 import { trackEvent } from '../tracking';
-import { accessTaskReferralStorage } from '@woocommerce/onboarding';
 
 export const fetchAiStatus = async (): Promise< aiStatusResponse > => {
 	const response = await fetch(
