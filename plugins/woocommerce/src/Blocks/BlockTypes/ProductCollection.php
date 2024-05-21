@@ -167,8 +167,8 @@ class ProductCollection extends AbstractBlock {
 	/**
 	 * Track feature usage of the Product Collection block within the site editor.
 	 *
-	 * @param int      $post_id
-	 * @param \WP_Post $post
+	 * @param int      $post_id  The post ID.
+	 * @param \WP_Post $post     The post object.
 	 *
 	 * @return void
 	 */

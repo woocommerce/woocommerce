@@ -1148,8 +1148,6 @@ class WC_Tracker {
 	/**
 	 * Get info about the Product Collection Block.
 	 *
-	 * TODO: Make it private once testing done.
-	 *
 	 * @return array
 	 */
 	public static function get_product_collection_info() {
