@@ -4,7 +4,7 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import { FormStepBlock } from '@woocommerce/blocks/checkout/form-step';
 import classnames from 'classnames';
-import { ADDITIONAL_FORM_KEYS } from '@woocommerce/block-settings';
+import { ORDER_FORM_KEYS } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -24,7 +24,7 @@ export const Edit = ( {
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ) => {
-	if ( ADDITIONAL_FORM_KEYS.length === 0 ) {
+	if ( ORDER_FORM_KEYS.length === 0 ) {
 		return null;
 	}
 

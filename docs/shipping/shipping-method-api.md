@@ -76,7 +76,7 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 
 ## Defining settings/options
 
-You can then define your options using the settings API. In the snippets above you'll notice we init_form_fields and init_settings. These load up the settings API. To see how to add settings, see [WooCommerce settings API](https://woocommerce.com/document/settings-api/).
+You can then define your options using the settings API. In the snippets above you'll notice we init_form_fields and init_settings. These load up the settings API. To see how to add settings, see [WooCommerce settings API](https://developer.woocommerce.com/docs/settings-api/).
 
 ## The calculate_shipping() method
 

@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Added a "manual_update" parameter to the Orders REST API endpoint that will make it so that, when set to "true", status changes to an order will be attributed to a specific user in the order notes.

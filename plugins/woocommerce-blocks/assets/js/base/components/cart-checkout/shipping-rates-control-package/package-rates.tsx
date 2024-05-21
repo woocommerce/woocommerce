@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { useState, useEffect } from '@wordpress/element';
-import {
-	RadioControl,
-	RadioControlOptionLayout,
-} from '@woocommerce/blocks-components';
+import { RadioControl } from '@woocommerce/blocks-components';
 import type { CartShippingPackageShippingRate } from '@woocommerce/types';
 import { usePrevious } from '@woocommerce/base-hooks';
 
@@ -46,7 +43,9 @@ const PackageRates = ( {
 			return selectedRateId;
 		}
 		// Default to first rate if no rate is selected.
-		return rates[ 0 ]?.rate_id;
+		if ( rates.length > 0 ) {
+			return rates[ 0 ].rate_id;
+		}
 	} );
 
 	// Update the selected option if cart state changes in the data store.
@@ -60,6 +59,15 @@ const PackageRates = ( {
 		}
 	}, [ selectedRateId, selectedOption, previousSelectedRateId ] );
 
+	// Update the selected option if there is no rate selected on mount.
+	useEffect( () => {
+		// The useState callback run only once, so we need this to update it right fetching new rates.
+		if ( ! selectedOption && rates.length > 0 ) {
+			setSelectedOption( rates[ 0 ].rate_id );
+			onSelectRate( rates[ 0 ].rate_id );
+		}
+	}, [ onSelectRate, rates, selectedOption ] );
+
 	// Update the data store when the local selected rate changes.
 	useEffect( () => {
 		if ( selectedOption ) {
@@ -71,31 +79,17 @@ const PackageRates = ( {
 		return noResultsMessage;
 	}
 
-	if ( rates.length > 1 ) {
-		return (
-			<RadioControl
-				className={ className }
-				onChange={ ( value: string ) => {
-					setSelectedOption( value );
-					onSelectRate( value );
-				} }
-				highlightChecked={ highlightChecked }
-				disabled={ disabled }
-				selected={ selectedOption }
-				options={ rates.map( renderOption ) }
-			/>
-		);
-	}
-
-	const { label, secondaryLabel, description, secondaryDescription } =
-		renderOption( rates[ 0 ] );
-
 	return (
-		<RadioControlOptionLayout
-			label={ label }
-			secondaryLabel={ secondaryLabel }
-			description={ description }
-			secondaryDescription={ secondaryDescription }
+		<RadioControl
+			className={ className }
+			onChange={ ( value: string ) => {
+				setSelectedOption( value );
+				onSelectRate( value );
+			} }
+			highlightChecked={ highlightChecked }
+			disabled={ disabled }
+			selected={ selectedOption }
+			options={ rates.map( renderOption ) }
 		/>
 	);
 };

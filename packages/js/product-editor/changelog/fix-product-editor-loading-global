@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-BlockEditor loads global settings itself instead of having them passed in. Handles case where global is set after initial render.

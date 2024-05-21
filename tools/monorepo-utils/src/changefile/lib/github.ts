@@ -45,7 +45,7 @@ export const getPullRequestData = async (
  */
 export const shouldAutomateChangelog = ( body: string ) => {
 	const regex =
-		/\[x\] Automatically create a changelog entry from the details/gm;
+		/\[(?:x|X)\] Automatically create a changelog entry from the details/gm;
 	return regex.test( body );
 };
 
@@ -56,7 +56,7 @@ export const shouldAutomateChangelog = ( body: string ) => {
  * @return {void|string} changelog significance.
  */
 export const getChangelogSignificance = ( body: string ) => {
-	const regex = /\[x\] (Patch|Minor|Major)\r\n/gm;
+	const regex = /\[(?:x|X)\] (Patch|Minor|Major)\r\n/gm;
 	const matches = body.match( regex );
 
 	if ( matches === null ) {
@@ -85,7 +85,7 @@ export const getChangelogSignificance = ( body: string ) => {
  */
 export const getChangelogType = ( body: string ) => {
 	const regex =
-		/\[x\] (Fix|Add|Update|Dev|Tweak|Performance|Enhancement) -/gm;
+		/\[(?:x|X)\] (Fix|Add|Update|Dev|Tweak|Performance|Enhancement) -/gm;
 	const matches = body.match( regex );
 
 	if ( matches === null ) {

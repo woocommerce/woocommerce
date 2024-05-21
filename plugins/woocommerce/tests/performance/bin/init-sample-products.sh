@@ -22,6 +22,7 @@ wp-env run tests-cli wp option set woocommerce_product_type 'both'
 wp-env run tests-cli wp option set woocommerce_allow_tracking 'no'
 wp-env run tests-cli wp option set woocommerce_enable_checkout_login_reminder 'yes'
 wp-env run tests-cli wp option set --format=json woocommerce_cod_settings '{"enabled":"yes"}'
+wp-env run tests-cli wp option set woocommerce_coming_soon 'no'
 
 #  WooCommerce shop pages
 wp-env run tests-cli wp wc --user=admin tool run install_pages

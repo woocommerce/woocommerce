@@ -90,68 +90,6 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Track feature usage of the Product Collection block within the site editor.
-	 *
-	 * @param int      $post_id
-	 * @param \WP_Post $post
-	 *
-	 * @return void
-	 */
-	public function track_collection_instances( $post_id, $post ) {
-
-		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST || ! wc_current_theme_is_fse_theme() ) {
-			return;
-		}
-
-		if ( ! $post instanceof \WP_Post ) {
-			return;
-		}
-
-		// Important: don't track revisions.
-		$post_type = $post->post_type;
-		if ( ! in_array( $post_type, array( 'post', 'page', 'wp_template', 'wp_template_part' ), true ) ) {
-			return;
-		}
-
-		if ( ! class_exists( 'WC_Tracks' ) || ! class_exists( 'WC_Site_Tracking' ) || ! \WC_Site_Tracking::is_tracking_enabled() ) {
-			return;
-		}
-
-		if ( ! has_block( $this->get_full_block_name(), $post ) ) {
-			return;
-		}
-
-		$blocks = parse_blocks( $post->post_content );
-		if ( empty( $blocks ) ) {
-			return;
-		}
-		// Count orders.
-		// Hint: Product count included in Track event. See WC_Tracks::get_blog_details().
-		$order_count = 0;
-		foreach ( wc_get_order_statuses() as $status_slug => $status_name ) {
-			$order_count += wc_orders_count( $status_slug );
-		}
-		$additional_data = array(
-			'editor_location' => ProductCollectionUtils::parse_editor_location_context( $post ),
-			'order_count'     => $order_count,
-		);
-		$instances       = ProductCollectionUtils::parse_blocks_track_data( $blocks );
-
-		foreach ( $instances as $instance ) {
-
-			$event_properties = array_merge(
-				$additional_data,
-				$instance
-			);
-
-			\WC_Tracks::record_event(
-				'product_collection_instance',
-				$event_properties
-			);
-		}
-	}
-
-	/**
 	 * Enhances the Product Collection block with client-side pagination.
 	 *
 	 * This function identifies Product Collection blocks and adds necessary data attributes
@@ -224,6 +162,68 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		return $block_content;
+	}
+
+	/**
+	 * Track feature usage of the Product Collection block within the site editor.
+	 *
+	 * @param int      $post_id
+	 * @param \WP_Post $post
+	 *
+	 * @return void
+	 */
+	public function track_collection_instances( $post_id, $post ) {
+
+		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST || ! wc_current_theme_is_fse_theme() ) {
+			return;
+		}
+
+		if ( ! $post instanceof \WP_Post ) {
+			return;
+		}
+
+		// Important: don't track revisions.
+		$post_type = $post->post_type;
+		if ( ! in_array( $post_type, array( 'post', 'page', 'wp_template', 'wp_template_part' ), true ) ) {
+			return;
+		}
+
+		if ( ! class_exists( 'WC_Tracks' ) || ! class_exists( 'WC_Site_Tracking' ) || ! \WC_Site_Tracking::is_tracking_enabled() ) {
+			return;
+		}
+
+		if ( ! has_block( $this->get_full_block_name(), $post ) ) {
+			return;
+		}
+
+		$blocks = parse_blocks( $post->post_content );
+		if ( empty( $blocks ) ) {
+			return;
+		}
+		// Count orders.
+		// Hint: Product count included in Track event. See WC_Tracks::get_blog_details().
+		$order_count = 0;
+		foreach ( wc_get_order_statuses() as $status_slug => $status_name ) {
+			$order_count += wc_orders_count( $status_slug );
+		}
+		$additional_data = array(
+			'editor_location' => ProductCollectionUtils::parse_editor_location_context( $post ),
+			'order_count'     => $order_count,
+		);
+		$instances       = ProductCollectionUtils::parse_blocks_track_data( $blocks );
+
+		foreach ( $instances as $instance ) {
+
+			$event_properties = array_merge(
+				$additional_data,
+				$instance
+			);
+
+			\WC_Tracks::record_event(
+				'product_collection_instance',
+				$event_properties
+			);
+		}
 	}
 
 	/**
@@ -434,6 +434,14 @@ class ProductCollection extends AbstractBlock {
 			return $args;
 		}
 
+		// Is this a preview mode request?
+		// If yes, short-circuit the query and return the preview query args.
+		$product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
+		$is_preview                       = $product_collection_query_context['previewState']['isPreview'] ?? false;
+		if ( 'true' === $is_preview ) {
+			return $this->get_preview_query_args( $args, $request );
+		}
+
 		$orderby             = $request->get_param( 'orderBy' );
 		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
 		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
@@ -509,7 +517,9 @@ class ProductCollection extends AbstractBlock {
 		// phpcs:ignore WordPress.DB.SlowDBQuery
 		$block_context_query['tax_query'] = ! empty( $query['tax_query'] ) ? $query['tax_query'] : array();
 
-		return $this->get_final_frontend_query( $block_context_query, $page );
+		$is_exclude_applied_filters = ! ( $block->context['query']['inherit'] ?? false );
+
+		return $this->get_final_frontend_query( $block_context_query, $page, $is_exclude_applied_filters );
 	}
 
 
@@ -593,6 +603,29 @@ class ProductCollection extends AbstractBlock {
 		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
 
 		return $result;
+	}
+
+	/**
+	 * Get query args for preview mode. These query args will be used with WP_Query to fetch the products.
+	 *
+	 * @param array           $args    Query args.
+	 * @param WP_REST_Request $request Request.
+	 */
+	private function get_preview_query_args( $args, $request ) {
+		$collection_query = array();
+
+		/**
+		 * In future, Here we will modify the preview query based on the collection name. For example:
+		 *
+		 * $product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
+		 * $collection_name                  = $product_collection_query_context['collection'] ?? '';
+		 * if ( 'woocommerce/product-collection/on-sale' === $collection_name ) {
+		 *      $collection_query = $this->get_on_sale_products_query( true );
+		 * }.
+		 */
+
+		$args = $this->merge_queries( $args, $collection_query );
+		return $args;
 	}
 
 	/**

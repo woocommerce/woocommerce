@@ -562,7 +562,7 @@ class OrderController {
 			if (
 				false === $chosen_shipping_method ||
 				! is_string( $chosen_shipping_method ) ||
-				! in_array( current( explode( ':', $chosen_shipping_method ) ), $valid_methods, true )
+				! ArrayUtils::string_contains_array( $chosen_shipping_method, $valid_methods )
 			) {
 				throw $exception;
 			}

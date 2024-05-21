@@ -32,3 +32,5 @@ export const customerFile = path.join(
 	'customer.json'
 );
 export const guestFile = { cookies: [], origins: [] };
+
+export const DB_EXPORT_FILE = 'blocks_e2e.sql';

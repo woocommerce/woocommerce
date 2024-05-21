@@ -18,8 +18,8 @@
 		"storybook-rtl": "USE_RTL_STYLE=true pnpm storybook"
 	},
 	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.12.1"
+		"node": "^20.11.1",
+		"pnpm": "^9.1.0"
 	},
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"

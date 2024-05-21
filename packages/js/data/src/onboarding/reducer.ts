@@ -437,6 +437,34 @@ const reducer: Reducer< OnboardingState, Action > = (
 					[ action.redirectUrl ]: action.results,
 				},
 			};
+		case TYPES.CORE_PROFILER_COMPLETED_REQUEST:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					coreProfilerCompleted: true,
+				},
+			};
+		case TYPES.CORE_PROFILER_COMPLETED_SUCCESS:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					coreProfilerCompleted: false,
+				},
+			};
+		case TYPES.CORE_PROFILER_COMPLETED_ERROR:
+			return {
+				...state,
+				errors: {
+					...state.errors,
+					coreProfilerCompleted: action.error,
+				},
+				requesting: {
+					...state.requesting,
+					coreProfilerCompleted: false,
+				},
+			};
 		default:
 			return state;
 	}

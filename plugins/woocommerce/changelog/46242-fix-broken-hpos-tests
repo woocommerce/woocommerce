@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix tests that were failing against HPOS environment setup.

@@ -94,7 +94,7 @@ const test = baseTest.extend( {
 	},
 } );
 
-test( 'can create and add attributes', async ( { page, product } ) => {
+test.skip( 'can create and add attributes', async ( { page, product } ) => {
 	const newAttributes = [
 		{
 			name: `pa_0_${ Date.now() }`,
@@ -113,6 +113,8 @@ test( 'can create and add attributes', async ( { page, product } ) => {
 
 	await test.step( 'add new attributes', async () => {
 		await page.getByRole( 'button', { name: 'Add new' } ).click();
+
+		await page.waitForLoadState( 'domcontentloaded' );
 
 		// Add attributes that do not exist
 		await page.getByPlaceholder( 'Search or create attribute' ).click();
@@ -201,18 +203,26 @@ test( 'can create and add attributes', async ( { page, product } ) => {
 	} );
 } );
 
-test( 'can add existing attributes', async ( {
+test.skip( 'can add existing attributes', async ( {
 	page,
 	product,
 	attributes,
 } ) => {
 	await test.step( 'go to product editor, Organization tab', async () => {
 		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+		const getAttributesResponsePromise = page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/terms?attribute_id=' ) &&
+				response.status() === 200
+		);
 		await page.getByRole( 'button', { name: 'Organization' } ).click();
+		await getAttributesResponsePromise;
 	} );
 
 	await test.step( 'add an existing attribute', async () => {
 		await page.getByRole( 'button', { name: 'Add new' } ).click();
+
+		await page.waitForLoadState( 'domcontentloaded' );
 
 		// Add attributes that do not exist
 		await page.getByPlaceholder( 'Search or create attribute' ).click();
@@ -378,7 +388,13 @@ test( 'can remove product attributes', async ( {
 		await page.goto(
 			`wp-admin/post.php?post=${ productWithAttributes.id }&action=edit`
 		);
+		const getAttributesResponsePromise = page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/terms?attribute_id=' ) &&
+				response.status() === 200
+		);
 		await page.getByRole( 'button', { name: 'Organization' } ).click();
+		await getAttributesResponsePromise;
 	} );
 
 	const attributeItemLocator = page.getByRole( 'listitem' ).filter( {

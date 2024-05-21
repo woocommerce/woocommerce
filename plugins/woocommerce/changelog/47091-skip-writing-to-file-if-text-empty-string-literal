@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Avoid writing an empty line to a log file if the log entry is empty.

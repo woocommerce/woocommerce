@@ -3,7 +3,7 @@
  */
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import {
-	ADDITIONAL_FORM_FIELDS,
+	ORDER_FORM_FIELDS,
 	CONTACT_FORM_FIELDS,
 } from '@woocommerce/block-settings';
 
@@ -26,7 +26,7 @@ const Edit = ( {
 	} );
 
 	const additionalFields = {
-		...ADDITIONAL_FORM_FIELDS,
+		...ORDER_FORM_FIELDS,
 		...CONTACT_FORM_FIELDS,
 	};
 

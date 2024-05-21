@@ -285,6 +285,7 @@ class Cart extends AbstractBlock {
 			'Cart',
 			'CartOrderSummaryTaxesBlock',
 			'CartOrderSummarySubtotalBlock',
+			'CartOrderSummaryTotalsBlock',
 			'FilledCartBlock',
 			'EmptyCartBlock',
 			'CartTotalsBlock',

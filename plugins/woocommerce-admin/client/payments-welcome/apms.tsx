@@ -46,14 +46,6 @@ export const apms: Apm[] = [
 		link: 'https://woocommerce.com/products/pay-with-amazon/',
 		extension: 'woocommerce-gateway-amazon-payments-advanced',
 	},
-	{
-		id: 'klarna',
-		title: strings.apms.klarna.title,
-		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/klarna.png`,
-		description: strings.apms.klarna.description,
-		link: 'https://woocommerce.com/products/klarna-payments/',
-		extension: 'klarna-payments-for-woocommerce',
-	},
 ];
 
 interface ApmListProps {

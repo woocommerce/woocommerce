@@ -77,7 +77,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'duplicate_product' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -97,10 +97,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		if ( ! $product ) {
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		if ( 'simple' !== $product->get_type() ) {
-			$request['type'] = $product->get_type();
 		}
 
 		// Creating product object from request data in preparation for copying.
@@ -422,7 +418,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 				if ( 0 === $index ) {
 					$product->set_image_id( $attachment_id );
-					wc_product_attach_featured_image( $attachment_id, $product );
+					wc_product_attach_featured_image( $attachment_id, $product, false );
 				} else {
 					$gallery[] = $attachment_id;
 				}

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Product Editor: Prevent description full editor usage if a version of Gutenberg plugin is installed that causes crashes.

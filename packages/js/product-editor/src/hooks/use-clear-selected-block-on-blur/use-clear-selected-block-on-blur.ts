@@ -15,11 +15,12 @@ export const useClearSelectedBlockOnBlur = () => {
 	function handleBlur( event: {
 		relatedTarget: ( EventTarget & Element ) | null;
 	} ) {
-		const isToolbar = event?.relatedTarget?.closest(
-			'.block-editor-block-contextual-toolbar'
-		);
+		const isToolbarOrLinkPopover =
+			event?.relatedTarget?.closest(
+				'.block-editor-block-contextual-toolbar'
+			) || event?.relatedTarget?.closest( '.block-editor-link-control' );
 
-		if ( ! isToolbar ) {
+		if ( ! isToolbarOrLinkPopover ) {
 			clearSelectedBlock();
 		}
 	}

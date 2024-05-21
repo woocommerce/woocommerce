@@ -417,6 +417,12 @@
 			height: 100%;
 			max-width: 404px;
 			width: 100%;
+
+			&:has(.woocommerce-profiler-geolocation-notice) {
+				@include breakpoint( "<782px" ) {
+					margin-bottom: 82px;
+				}
+			}
 		}
 
 		.woocommerce-profiler-question-label,
@@ -542,10 +548,6 @@
 			padding-right: 0;
 			color: $gray-900;
 
-			@include breakpoint( "<782px" ) {
-				margin-bottom: 100px;
-			}
-
 			.components-notice__dismiss > svg {
 				height: 16px;
 				fill: #000;
@@ -582,6 +584,14 @@
 		.woocommerce-profiler-button-container {
 			position: inherit;
 			padding: 0;
+		}
+	}
+}
+
+@media screen and (max-height: 850px) {
+	.woocommerce-profiler-select-control__industry {
+		.woocommerce-select-control__listbox {
+			max-height: 162px;
 		}
 	}
 }

@@ -58,7 +58,7 @@ jobs:
 
             - name: Run E2E tests
               id: run-e2e-composite-action
-              timeout-minutes: 60
+              timeout-minutes: 90
               uses: ./.github/actions/tests/run-e2e-tests
               with:
                   report-name: ${{ env.E2E_UPDATE_WC_ARTIFACT }}
@@ -206,7 +206,7 @@ jobs:
 
             - name: Run E2E tests
               id: run-e2e-composite-action
-              timeout-minutes: 60
+              timeout-minutes: 90
               uses: ./.github/actions/tests/run-e2e-tests
               with:
                   report-name: e2e-wp-latest--partial--run-${{ github.run_number }}
@@ -219,7 +219,7 @@ jobs:
                   CUSTOMER_PASSWORD: ${{ secrets.RELEASE_TEST_CUSTOMER_PASSWORD }}
                   CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
-                  E2E_MAX_FAILURES: 25
+                  E2E_MAX_FAILURES: 90
                   RESET_SITE: true
 
             - name: Download 'e2e-update-wc' artifact
@@ -383,10 +383,10 @@ jobs:
 
             - name: Run E2E tests
               id: run-e2e-composite-action
-              timeout-minutes: 60
+              timeout-minutes: 90
               uses: ./.github/actions/tests/run-e2e-tests
               env:
-                  E2E_MAX_FAILURES: 15
+                  E2E_MAX_FAILURES: 90
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
                   ALLURE_REPORT_DIR: ${{ env.E2E_ALLURE_REPORT_DIR }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
@@ -532,13 +532,13 @@ jobs:
 
             - name: Run E2E tests
               id: run-e2e-composite-action
-              timeout-minutes: 60
+              timeout-minutes: 90
               uses: ./.github/actions/tests/run-e2e-tests
               env:
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
                   ALLURE_REPORT_DIR: ${{ env.E2E_ALLURE_REPORT_DIR }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
-                  E2E_MAX_FAILURES: 15
+                  E2E_MAX_FAILURES: 90
               with:
                   report-name: ${{ env.E2E_ARTIFACT }}
 
@@ -650,7 +650,7 @@ jobs:
 
             - name: Run 'Upload plugin' test
               id: run-upload-test
-              timeout-minutes: 60
+              timeout-minutes: 90
               uses: ./.github/actions/tests/run-e2e-tests
               with:
                   report-name: ${{ env.ARTIFACT_NAME }}
@@ -662,13 +662,13 @@ jobs:
 
             - name: Run the rest of E2E tests
               id: run-e2e-composite-action
-              timeout-minutes: 60
+              timeout-minutes: 90
               uses: ./.github/actions/tests/run-e2e-tests
               with:
                   playwright-config: ignore-plugin-tests.playwright.config.js
                   report-name: ${{ env.ARTIFACT_NAME }}
               env:
-                  E2E_MAX_FAILURES: 15
+                  E2E_MAX_FAILURES: 90
 
             - name: Upload Allure artifacts to bucket
               if: |

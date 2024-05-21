@@ -25,7 +25,6 @@ import { RefreshButton } from './table/actions/refresh-button';
 import Notices from './notices';
 import InstallModal from './table/actions/install-modal';
 import { connectUrl } from '../../utils/functions';
-import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
@@ -62,6 +61,11 @@ export default function MySubscriptions(): JSX.Element {
 	);
 
 	if ( ! wccomSettings?.isConnected ) {
+		const connectMessage = __(
+			"Connect your store to WooCommerce.com using the WooCommerce.com Update Manager. Once connected, you'll be able to manage your subscriptions, receive product updates, and access streamlined support from this screen.",
+			'woocommerce'
+		);
+
 		return (
 			<div className="woocommerce-marketplace__my-subscriptions--connect">
 				<InstallModal />
@@ -70,10 +74,7 @@ export default function MySubscriptions(): JSX.Element {
 					{ __( 'Manage your subscriptions', 'woocommerce' ) }
 				</h2>
 				<p className="woocommerce-marketplace__my-subscriptions__description">
-					{ __(
-						"Connect your store to WooCommerce.com using the WooCommerce.com Update Manager. Once connected, you'll be able to manage your subscriptions, receive product updates, and access streamlined support from this screen.",
-						'woocommerce'
-					) }
+					{ connectMessage }
 				</p>
 				<Button href={ connectUrl() } variant="primary">
 					{ __( 'Connect your store', 'woocommerce' ) }
@@ -88,7 +89,6 @@ export default function MySubscriptions(): JSX.Element {
 			<section className="woocommerce-marketplace__my-subscriptions__notices">
 				<Notices />
 			</section>
-			<PluginInstallNotice />
 			<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__installed">
 				<header className="woocommerce-marketplace__my-subscriptions__header">
 					<div className="woocommerce-marketplace__my-subscriptions__header-content">

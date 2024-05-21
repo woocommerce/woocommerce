@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent product from being saved prematurely when updated via REST API

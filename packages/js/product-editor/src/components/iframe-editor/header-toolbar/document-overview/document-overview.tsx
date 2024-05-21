@@ -4,6 +4,7 @@
 import { Button } from '@wordpress/components';
 import { createElement, forwardRef, useContext } from '@wordpress/element';
 import { listView as listViewIcon } from '@wordpress/icons';
+import { displayShortcut } from '@wordpress/keycodes';
 import { __ } from '@wordpress/i18n';
 import { Ref } from 'react';
 
@@ -33,6 +34,7 @@ export const DocumentOverview = forwardRef(
 				isPressed={ isDocumentOverviewOpened }
 				/* translators: button label text should, if possible, be under 16 characters. */
 				label={ __( 'Document overview', 'woocommerce' ) }
+				shortcut={ displayShortcut.access( 'o' ) }
 				onClick={ handleClick }
 				className="document-overview"
 			/>

@@ -32,7 +32,7 @@ class CheckoutFieldsFrontend {
 	public function init() {
 		// Show custom checkout fields on the order details page.
 		add_action( 'woocommerce_order_details_after_customer_address', array( $this, 'render_order_address_fields' ), 10, 2 );
-		add_action( 'woocommerce_order_details_after_customer_details', array( $this, 'render_order_additional_fields' ), 10 );
+		add_action( 'woocommerce_order_details_after_customer_details', array( $this, 'render_order_other_fields' ), 10 );
 
 		// Show custom checkout fields on the My Account page.
 		add_action( 'woocommerce_my_account_after_my_address', array( $this, 'render_address_fields' ), 10, 1 );
@@ -87,10 +87,10 @@ class CheckoutFieldsFrontend {
 	 *
 	 * @param WC_Order $order Order object.
 	 */
-	public function render_order_additional_fields( $order ) {
+	public function render_order_other_fields( $order ) {
 		$fields = array_merge(
-			$this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'contact', 'additional', 'view' ),
-			$this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'additional', 'additional', 'view' ),
+			$this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'contact', 'other', 'view' ),
+			$this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' ),
 		);
 
 		if ( ! $fields ) {
@@ -160,7 +160,7 @@ class CheckoutFieldsFrontend {
 		$fields   = $this->checkout_fields_controller->get_fields_for_location( 'contact' );
 
 		foreach ( $fields as $key => $field ) {
-			$field_key           = CheckoutFields::get_group_key( 'additional' ) . $key;
+			$field_key           = CheckoutFields::get_group_key( 'other' ) . $key;
 			$form_field          = $field;
 			$form_field['id']    = $field_key;
 			$form_field['value'] = $this->checkout_fields_controller->get_field_from_object( $key, $customer, 'contact' );
@@ -192,7 +192,7 @@ class CheckoutFieldsFrontend {
 		$field_values      = array();
 
 		foreach ( array_keys( $additional_fields ) as $key ) {
-			$post_key = CheckoutFields::get_group_key( 'additional' ) . $key;
+			$post_key = CheckoutFields::get_group_key( 'other' ) . $key;
 			if ( ! isset( $_POST[ $post_key ] ) ) {
 				continue;
 			}
@@ -210,11 +210,11 @@ class CheckoutFieldsFrontend {
 
 		// Persist individual additional fields to customer.
 		foreach ( $field_values as $key => $value ) {
-			$this->checkout_fields_controller->persist_field_for_customer( $key, $value, $customer, 'additional' );
+			$this->checkout_fields_controller->persist_field_for_customer( $key, $value, $customer, 'other' );
 		}
 
 		// Validate all fields for this location.
-		$location_validation = $this->checkout_fields_controller->validate_fields_for_location( $field_values, 'contact', 'additional' );
+		$location_validation = $this->checkout_fields_controller->validate_fields_for_location( $field_values, 'contact', 'other' );
 
 		if ( is_wp_error( $location_validation ) && $location_validation->has_errors() ) {
 			wc_add_notice( $location_validation->get_error_message(), 'error' );

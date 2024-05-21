@@ -11,12 +11,11 @@ import {
 	useState,
 } from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,
 	// @ts-ignore No types for this exist yet.
-	__experimentalUseNavigator as useNavigator,
 	Button,
 	Spinner,
 } from '@wordpress/components';
@@ -29,7 +28,6 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as noticesStore } from '@wordpress/notices';
 // @ts-ignore No types for this exist yet.
 import { useEntitiesSavedStatesIsDirty as useIsDirty } from '@wordpress/editor';
-import { recordEvent } from '@woocommerce/tracks';
 // @ts-ignore No types for this exist yet.
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 
@@ -37,7 +35,7 @@ import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/compon
  * Internal dependencies
  */
 import { CustomizeStoreContext } from '../';
-import { HighlightedBlockContext } from '../context/highlighted-block-context';
+import { trackEvent } from '~/customize-store/tracking';
 
 const PUBLISH_ON_SAVE_ENTITIES = [
 	{
@@ -51,10 +49,7 @@ export const SaveHub = () => {
 	const urlParams = useQuery();
 	const { sendEvent } = useContext( CustomizeStoreContext );
 	const [ isResolving, setIsResolving ] = useState< boolean >( false );
-	const navigator = useNavigator();
-	const { resetHighlightedBlockClientId } = useContext(
-		HighlightedBlockContext
-	);
+
 	const isEditorLoading = useIsSiteEditorLoading();
 	// @ts-ignore No types for this exist yet.
 	const { __unstableMarkLastChangeAsPersistent } =
@@ -77,22 +72,6 @@ export const SaveHub = () => {
 		}[];
 		isDirty: boolean;
 	} = useIsDirty();
-
-	const { isSaving } = useSelect(
-		( select ) => {
-			return {
-				isSaving: dirtyEntityRecords.some( ( record ) =>
-					// @ts-ignore No types for this exist yet.
-					select( coreStore ).isSavingEntityRecord(
-						record.kind,
-						record.name,
-						record.key
-					)
-				),
-			};
-		},
-		[ dirtyEntityRecords ]
-	);
 
 	const {
 		// @ts-ignore No types for this exist yet.
@@ -153,30 +132,8 @@ export const SaveHub = () => {
 		}
 	}, [ isEditorLoading, isDirty, isMainScreen, save ] );
 
-	const onClickSaveButton = async () => {
-		const source = `${ urlParams.path.replace(
-			'/customize-store/assembler-hub/',
-			''
-		) }`;
-		recordEvent( 'customize_your_store_assembler_hub_save_click', {
-			source,
-		} );
-
-		try {
-			await save();
-			resetHighlightedBlockClientId();
-			navigator.goToParent();
-		} catch ( error ) {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore The types for this are incorrect.
-			createErrorNotice(
-				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
-			);
-		}
-	};
-
 	const onDone = async () => {
-		recordEvent( 'customize_your_store_assembler_hub_done_click' );
+		trackEvent( 'customize_your_store_assembler_hub_done_click' );
 		setIsResolving( true );
 
 		try {
@@ -192,9 +149,13 @@ export const SaveHub = () => {
 		}
 	};
 
-	const renderButton = () => {
-		if ( isMainScreen ) {
-			return (
+	if ( isMainScreen ) {
+		return (
+			<HStack
+				className="edit-site-save-hub"
+				alignment="right"
+				spacing={ 4 }
+			>
 				<Button
 					variant="primary"
 					onClick={ onDone }
@@ -204,36 +165,11 @@ export const SaveHub = () => {
 					// @ts-ignore No types for this exist yet.
 					__next40pxDefaultSize
 				>
-					{ isResolving ? <Spinner /> : __( 'Done', 'woocommerce' ) }
+					{ isResolving ? <Spinner /> : __( 'Save', 'woocommerce' ) }
 				</Button>
-			);
-		}
-
-		// if we have only one unsaved change and it matches current context, we can show a more specific label
-		const label = isSaving
-			? __( 'Saving', 'woocommerce' )
-			: __( 'Save', 'woocommerce' );
-
-		const isDisabled = ! isDirty || isSaving;
-
-		return (
-			<Button
-				variant="primary"
-				onClick={ onClickSaveButton }
-				disabled={ isDisabled }
-				aria-disabled={ isDisabled }
-				className="edit-site-save-hub__button"
-				// @ts-ignore No types for this exist yet.
-				__next40pxDefaultSize
-			>
-				{ isSaving ? <Spinner /> : label }
-			</Button>
+			</HStack>
 		);
-	};
+	}
 
-	return (
-		<HStack className="edit-site-save-hub" alignment="right" spacing={ 4 }>
-			{ renderButton() }
-		</HStack>
-	);
+	return null;
 };

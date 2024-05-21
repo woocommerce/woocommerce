@@ -35,7 +35,7 @@
 	// and right of the selected element, and top and bottom of the first/last elements.
 	label.wc-block-components-radio-control__option--checked-option-highlighted,
 	.wc-block-components-radio-control-accordion-option--checked-option-highlighted {
-		box-shadow: 0 0 0 1.5px currentColor inset;
+		box-shadow: 0 0 0 2px currentColor inset;
 		border-radius: 4px;
 	}
 
@@ -150,7 +150,7 @@
 .wc-block-components-radio-control__description,
 .wc-block-components-radio-control__secondary-description {
 	@include font-size(small);
-	line-height: 20px;
+	line-height: 1.55;
 }
 
 // Extra class for specificity.
