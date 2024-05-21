@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { AnyInterpreter, Sender, StateValue } from 'xstate';
+import { TaskReferralRecord } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
@@ -52,6 +53,7 @@ export type customizeStoreStateMachineContext = {
 		activeTheme: string;
 		customizeStoreTaskCompleted: boolean;
 		currentThemeIsAiGenerated: boolean;
+		taskReferral: TaskReferralRecord | null;
 	};
 	transitionalScreen: {
 		hasCompleteSurvey: boolean;

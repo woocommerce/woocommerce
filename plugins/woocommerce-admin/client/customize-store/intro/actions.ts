@@ -15,6 +15,7 @@ import {
 import { events } from './';
 import { isIframe } from '~/customize-store/utils';
 import { trackEvent } from '../tracking';
+import { TaskReferralRecord } from '@woocommerce/onboarding';
 
 export const assignThemeData = assign<
 	customizeStoreStateMachineContext,
@@ -46,6 +47,18 @@ export const assignActiveTheme = assign<
 			} >
 		 ).data.activeTheme;
 		return { ...context.intro, activeTheme };
+	},
+} );
+
+export const assignTaskReferral = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	intro: ( context, event ) => {
+		const taskReferral = (event as DoneInvokeEvent<{
+			taskReferral: TaskReferralRecord | null;
+		}>).data.taskReferral;
+		return { ...context.intro, taskReferral };
 	},
 } );
 

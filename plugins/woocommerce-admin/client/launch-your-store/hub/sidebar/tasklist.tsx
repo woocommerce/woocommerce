@@ -14,9 +14,13 @@ import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/
 /**
  * Internal dependencies
  */
-import { createStorageUtils } from '~/utils/localStorage';
 import { taskCompleteIcon, taskIcons } from './components/icons';
 import { recordEvent } from '@woocommerce/tracks';
+import {
+	accessTaskReferralStorage,
+	createStorageUtils,
+} from '@woocommerce/onboarding';
+import { getAdminLink } from '@woocommerce/settings';
 
 const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
 export const LYS_RECENTLY_ACTIONED_TASKS_KEY = 'lys_recently_actioned_tasks';
@@ -27,6 +31,10 @@ export const {
 } = createStorageUtils< string[] >(
 	LYS_RECENTLY_ACTIONED_TASKS_KEY,
 	SEVEN_DAYS_IN_SECONDS
+);
+
+export const { setWithExpiry: saveCYSTaskReferral } = accessTaskReferralStorage(
+	{ taskId: 'customize-store', referralLifetime: 60 * 60 * 24 } // 24 hours
 );
 
 export const getLysTasklist = async () => {
@@ -84,6 +92,14 @@ export function taskClickedAction( event: {
 } ) {
 	const recentlyActionedTasks = getRecentlyActionedTasks() ?? [];
 	saveRecentlyActionedTask( [ ...recentlyActionedTasks, event.task.id ] );
+
+	saveCYSTaskReferral( {
+		referrer: 'launch_your_store',
+		returnUrl: getAdminLink(
+			'admin.php?page=wc-admin&path=/launch-your-store'
+		),
+	} );
+
 	recordEvent( 'launch_your_store_hub_task_clicked', {
 		task: event.task.id,
 	} );
