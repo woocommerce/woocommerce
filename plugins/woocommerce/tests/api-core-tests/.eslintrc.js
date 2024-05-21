@@ -7,5 +7,7 @@ module.exports = {
 		'jest/no-disabled-tests': 'off',
 		'no-shadow': 'off',
 		'jest/no-identical-title': 'off',
+		'jest/no-standalone-expect': 'off',
+		'no-console': 'off',
 	},
 };
