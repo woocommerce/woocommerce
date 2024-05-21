@@ -277,7 +277,9 @@ Capitalize job titles, the names of teams, and departments.
 
 #### Pronouns
 
-Use he/him/his and she/her/her as appropriate. Don't use "one" as a pronoun. Use they/them/their if gender is unknown or when referring to a group.
+Use personal pronouns such as he/him/his, she/her/hers, and they/them/theirs as appropriate when referring to a specific person. When talking abstractly (rather than about a specific person), default to they/them/theirs, not he/him/his. For example: "when a developer needs to troubleshoot, they might choose to use Xdebug".
+
+Don't use "one" as a pronoun. Instead, use "you" when talking directly to the reader. For example, use "if you encounter an error, you should try deactivating the plugin" rather than "if one encounters an error, they should try deactivating the plugin".
 
 #### Quotations
 
