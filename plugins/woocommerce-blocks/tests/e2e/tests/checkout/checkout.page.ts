@@ -47,7 +47,7 @@ export class CheckoutPage {
 			.getByText( shippingName )
 			.isVisible();
 		const priceIsVisible = await shippingLine
-			.getByText( shippingPrice )
+			.getByText( shippingPrice, { exact: true } )
 			.isVisible();
 		return nameIsVisible && priceIsVisible;
 	}
@@ -504,7 +504,13 @@ export class CheckoutPage {
 				currentPage.getByText( SIMPLE_PHYSICAL_PRODUCT_NAME )
 			).toBeVisible();
 			await expect(
-				currentPage.getByText( SIMPLE_VIRTUAL_PRODUCT_NAME )
+				currentPage
+					.locator(
+						'table.wc-block-order-confirmation-totals__table '
+					)
+					.getByRole( 'link', {
+						name: SIMPLE_VIRTUAL_PRODUCT_NAME,
+					} )
 			).toBeVisible();
 			await expect(
 				currentPage

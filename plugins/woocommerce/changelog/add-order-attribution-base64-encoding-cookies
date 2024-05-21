@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Filter to apply Base64 encoding to order attribution cookies

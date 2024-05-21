@@ -10,8 +10,7 @@
  * @since    3.0.0
  */
 
-use Automattic\WooCommerce\Utilities\ArrayUtil;
-use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Utilities\{ ArrayUtil, NumberUtil, StringUtil };
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -268,7 +267,9 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$shipping_taxes = $shipping_item->get_taxes();
 
 			if ( ! empty( $shipping_taxes['total'] ) ) {
-				$shipping_line['total_tax'] = wc_format_decimal( array_sum( $shipping_taxes['total'] ), $dp );
+				$total_tax = NumberUtil::array_sum( $shipping_taxes['total'] );
+
+				$shipping_line['total_tax'] = wc_format_decimal( $total_tax, $dp );
 
 				foreach ( $shipping_taxes['total'] as $tax_rate_id => $tax ) {
 					$shipping_line['taxes'][] = array(

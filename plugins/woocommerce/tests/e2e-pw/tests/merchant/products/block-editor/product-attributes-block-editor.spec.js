@@ -114,6 +114,8 @@ test.skip( 'can create and add attributes', async ( { page, product } ) => {
 	await test.step( 'add new attributes', async () => {
 		await page.getByRole( 'button', { name: 'Add new' } ).click();
 
+		await page.waitForLoadState( 'domcontentloaded' );
+
 		// Add attributes that do not exist
 		await page.getByPlaceholder( 'Search or create attribute' ).click();
 
@@ -208,11 +210,19 @@ test.skip( 'can add existing attributes', async ( {
 } ) => {
 	await test.step( 'go to product editor, Organization tab', async () => {
 		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+		const getAttributesResponsePromise = page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/terms?attribute_id=' ) &&
+				response.status() === 200
+		);
 		await page.getByRole( 'button', { name: 'Organization' } ).click();
+		await getAttributesResponsePromise;
 	} );
 
 	await test.step( 'add an existing attribute', async () => {
 		await page.getByRole( 'button', { name: 'Add new' } ).click();
+
+		await page.waitForLoadState( 'domcontentloaded' );
 
 		// Add attributes that do not exist
 		await page.getByPlaceholder( 'Search or create attribute' ).click();
@@ -378,7 +388,13 @@ test( 'can remove product attributes', async ( {
 		await page.goto(
 			`wp-admin/post.php?post=${ productWithAttributes.id }&action=edit`
 		);
+		const getAttributesResponsePromise = page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/terms?attribute_id=' ) &&
+				response.status() === 200
+		);
 		await page.getByRole( 'button', { name: 'Organization' } ).click();
+		await getAttributesResponsePromise;
 	} );
 
 	const attributeItemLocator = page.getByRole( 'listitem' ).filter( {
