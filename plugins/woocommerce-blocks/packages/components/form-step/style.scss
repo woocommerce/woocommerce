@@ -9,6 +9,19 @@
 	margin: 0;
 	padding: 0;
 
+	// The below CSS targets form steps, but only when the global option to show form step numbers is off (hence the :not)
+	&:not(.wc-block-checkout__main--with-step-numbers &) {
+		padding: 0;
+
+		.wc-block-components-checkout-step__title::before {
+			display: none;
+		}
+	}
+
+	&.wc-block-components-checkout-step--with-step-number {
+		padding: 0 0 0 $gap-larger;
+	}
+
 	.is-mobile &,
 	.is-small & {
 		padding-left: 0;
