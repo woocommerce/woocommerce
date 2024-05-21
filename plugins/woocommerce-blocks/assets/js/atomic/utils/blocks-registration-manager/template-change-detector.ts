@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { subscribe, select } from '@wordpress/data';
+import { subscribe } from '@wordpress/data';
 import { getPath, getQueryArg } from '@wordpress/url';
 import { isNumber } from '@woocommerce/types';
 
