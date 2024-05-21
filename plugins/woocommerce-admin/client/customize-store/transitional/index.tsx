@@ -141,7 +141,7 @@ export const Transitional = ( {
 							variant="primary"
 							onClick={ () => {
 								trackEvent(
-									'customize_your_store_transitional_home_click'
+									'customize_your_store_entrepreneur_home_click'
 								);
 								sendEvent( {
 									type: 'GO_BACK_TO_HOME',
