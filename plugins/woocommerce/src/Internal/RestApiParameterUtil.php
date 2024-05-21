@@ -6,13 +6,13 @@
 namespace Automattic\WooCommerce\Internal;
 
 /**
- * Helper methos for the REST API.
+ * Helper methods for the REST API.
  *
  * Class ApiUtil
  *
  * @package Automattic\WooCommerce\Internal
  */
-class RestApiUtil {
+class RestApiParameterUtil {
 
 	/**
 	 * Converts a create refund request from the public API format:
@@ -193,10 +193,10 @@ class RestApiUtil {
 	/**
 	 * Is an array sequential or associative?
 	 *
-	 * @param array $array The array to check.
+	 * @param array $the_array The array to check.
 	 * @return bool True if the array is associative, false if it's sequential.
 	 */
-	private static function is_associative( array $array ) {
-		return array_keys( $array ) !== range( 0, count( $array ) - 1 );
+	private static function is_associative( array $the_array ) {
+		return array_keys( $the_array ) !== range( 0, count( $the_array ) - 1 );
 	}
 }
