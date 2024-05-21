@@ -221,10 +221,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function get_all_table_names() {
 		return array(
-			$this->get_orders_table_name(),
-			$this->get_addresses_table_name(),
-			$this->get_operational_data_table_name(),
-			$this->get_meta_table_name(),
+			self::get_orders_table_name(),
+			self::get_addresses_table_name(),
+			self::get_operational_data_table_name(),
+			self::get_meta_table_name(),
 		);
 	}
 
@@ -2863,10 +2863,10 @@ FROM $order_meta_table
 
 		$collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
 
-		$orders_table_name           = $this->get_orders_table_name();
-		$addresses_table_name        = $this->get_addresses_table_name();
-		$operational_data_table_name = $this->get_operational_data_table_name();
-		$meta_table                  = $this->get_meta_table_name();
+		$orders_table_name           = self::get_orders_table_name();
+		$addresses_table_name        = self::get_addresses_table_name();
+		$operational_data_table_name = self::get_operational_data_table_name();
+		$meta_table                  = self::get_meta_table_name();
 
 		$max_index_length                   = $this->database_util->get_max_index_length();
 		$composite_meta_value_index_length  = max( $max_index_length - 8 - 100 - 1, 20 ); // 8 for order_id, 100 for meta_key, 10 minimum for meta_value.
