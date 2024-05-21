@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add a product template for variable products and remove special handling of variable product type

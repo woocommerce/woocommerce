@@ -252,6 +252,20 @@ class Init {
 		);
 		$templates[] = new ProductTemplate(
 			array(
+				'id'                    => 'variable-product-template',
+				'title'                 => __( 'Variable product', 'woocommerce' ),
+				'description'           => '',
+				'is_selectable_by_user' => false,
+				'order'                 => 15,
+				'icon'                  => 'shipping',
+				'layout_template_id'    => 'simple-product',
+				'product_data'          => array(
+					'type' => 'variable',
+				),
+			)
+		);
+		$templates[] = new ProductTemplate(
+			array(
 				'id'                 => 'grouped-product-template',
 				'title'              => __( 'Grouped product', 'woocommerce' ),
 				'description'        => __( 'A set of products that go well together, e.g. camera kit.', 'woocommerce' ),
