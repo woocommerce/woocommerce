@@ -8,6 +8,14 @@
  * @package WooCommerce\Blocks
  */
 
+$current_theme     = wp_get_theme()->get_stylesheet();
+$inter_font_family = 'inter';
+$cardo_font_family = 'cardo';
+
+if ( 'twentytwentyfour' === $current_theme ) {
+	$inter_font_family = 'body';
+	$cardo_font_family = 'heading';
+}
 ?>
 
 <!-- wp:woocommerce/coming-soon {"color":"#bea0f2","storeOnly":false,"className":"wp-block-woocommerce-background-color"} -->
@@ -19,7 +27,7 @@
 <div class="wp-block-group"><!-- wp:site-logo {"width":60} /-->
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"0px"}}} -->
-<div class="wp-block-group"><!-- wp:site-title {"level":0} /--></div>
+<div class="wp-block-group"><!-- wp:site-title {"level":0,"fontFamily":"<?php echo esc_html( $inter_font_family ); ?>"} /--></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
@@ -32,14 +40,14 @@
 <!-- wp:social-link {"url":"https://www.facebook.com","service":"facebook"} /--></ul>
 <!-- /wp:social-links -->
 
-<!-- wp:loginout /--></div>
+<!-- wp:loginout {"fontFamily":"<?php echo esc_html( $inter_font_family ); ?>"} /--></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
-<div class="wp-block-group"><!-- wp:heading {"textAlign":"center","level":1,"align":"wide","className":"woocommerce-coming-soon-banner"} -->
-<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner">Pardon our dust! We're working on something amazing -- check back soon!</h1>
+<div class="wp-block-group"><!-- wp:heading {"textAlign":"center","level":1,"align":"wide","className":"woocommerce-coming-soon-banner","fontFamily":"<?php echo esc_html( $cardo_font_family ); ?>"} -->
+<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner has-<?php echo esc_html( $cardo_font_family ); ?>-font-family">Pardon our dust! We're working on something amazing — check back soon!</h1>
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 
@@ -51,19 +59,7 @@
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div></div>
-<!-- /wp:cover --><style>@font-face {
-	font-family: 'Inter';
-	src: url( &lt;?php echo esc_url( WC()->plugin_url() . '/assets/fonts/Inter-VariableFont_slnt,wght.woff2' ); ?>) format('woff2');
-	font-weight: 300 900;
-	font-style: normal;
-}
-
-@font-face {
-	font-family: 'Cardo';
-	src: url( &lt;?php echo esc_url( WC()->plugin_url() . '/assets/fonts/cardo_normal_400.woff2' ); ?>) format('woff2');
-	font-weight: 400;
-	font-style: normal;
-}
+<!-- /wp:cover --><style>
 /* Reset */
 h1, p, a {
 	margin: 0;
@@ -82,6 +78,7 @@ body.custom-background {
 	margin: 0;
 	background-color: #bea0f2;
 	font-family: 'Inter', sans-serif;
+	min-width: 320px;
 	--wp--preset--color--contrast: #111111;
 	--wp--style--global--wide-size: 1280px;
 }
@@ -144,6 +141,11 @@ body .is-layout-constrained > .alignwide {
 	flex-direction: column;
 	justify-content: space-between;
 }
+@media (max-width: 660px) {
+	.woocommerce-coming-soon-banner-container {
+		padding-inline: 0;
+	}
+}
 .woocommerce-coming-soon-banner-container > .wp-block-group__inner-container {
 	height: 100%;
 	display: flex;
@@ -181,7 +183,7 @@ body .is-layout-constrained > .woocommerce-coming-soon-banner.alignwide {
 	height: 40px;
 }
 .woocommerce-coming-soon-banner {
-	font-size: 48px;
+	font-size: clamp(27px, 1.74rem + ((1vw - 3px) * 2), 48px);
 	font-weight: 400;
 	line-height: 58px;
 	font-family: 'Cardo', serif;
@@ -191,5 +193,6 @@ body .is-layout-constrained > .woocommerce-coming-soon-banner.alignwide {
 	max-width: 820px;
 	color: var(--wp--preset--color--contrast);
 	margin: 0 auto;
+	text-wrap: balance;
 }</style></div>
 <!-- /wp:woocommerce/coming-soon -->

@@ -946,7 +946,7 @@ class WC_Tracker {
 			'base_state'                            => WC()->countries->get_base_state(),
 			'base_postcode'                         => WC()->countries->get_base_postcode(),
 			'selling_locations'                     => WC()->countries->get_allowed_countries(),
-			'api_enabled'                           => get_option( 'woocommerce_api_enabled' ),
+			'api_enabled'                           => get_option( 'woocommerce_api_enabled', 'no' ),
 			'weight_unit'                           => get_option( 'woocommerce_weight_unit' ),
 			'dimension_unit'                        => get_option( 'woocommerce_dimension_unit' ),
 			'download_method'                       => get_option( 'woocommerce_file_download_method' ),

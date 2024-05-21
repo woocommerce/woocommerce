@@ -9,8 +9,6 @@
 @import '@wordpress/base-styles/z-index.scss';
 @import '@wordpress/base-styles/default-custom-properties.scss';
 
-@include wordpress-admin-schemes;
-
 $fallback-gutter: 24px;
 $fallback-gutter-large: 40px;
 $gutter: var(--main-gap);

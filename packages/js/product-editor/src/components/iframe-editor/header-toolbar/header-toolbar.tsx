@@ -36,6 +36,10 @@ import {
 	ToolSelector,
 	BlockToolbar,
 } from '@wordpress/block-editor';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { PinnedItems } from '@wordpress/interface';
 
 /**
  * Internal dependencies
@@ -44,9 +48,9 @@ import { EditorContext } from '../context';
 import EditorHistoryRedo from './editor-history-redo';
 import EditorHistoryUndo from './editor-history-undo';
 import { DocumentOverview } from './document-overview';
-import { ShowBlockInspectorPanel } from './show-block-inspector-panel';
 import { MoreMenu } from './more-menu';
 import { getGutenbergVersion } from '../../../utils/get-gutenberg-version';
+import { SIDEBAR_COMPLEMENTARY_AREA_SCOPE } from '../constants';
 
 type HeaderToolbarProps = {
 	onSave?: () => void;
@@ -102,17 +106,10 @@ export function HeaderToolbar( {
 	/* translators: accessibility text for the editor toolbar */
 	const toolbarAriaLabel = __( 'Document tools', 'woocommerce' );
 
-	const toggleInserter = useCallback( () => {
-		if ( isInserterOpened ) {
-			// Focusing the inserter button should close the inserter popover.
-			// However, there are some cases it won't close when the focus is lost.
-			// See https://github.com/WordPress/gutenberg/issues/43090 for more details.
-			inserterButton.current?.focus();
-			setIsInserterOpened( false );
-		} else {
-			setIsInserterOpened( true );
-		}
-	}, [ isInserterOpened, setIsInserterOpened ] );
+	const toggleInserter = useCallback(
+		() => setIsInserterOpened( ! isInserterOpened ),
+		[ isInserterOpened, setIsInserterOpened ]
+	);
 
 	useEffect( () => {
 		// If we have a new block selection, show the block tools
@@ -217,10 +214,7 @@ export function HeaderToolbar( {
 					onClick={ onSave }
 					text={ __( 'Done', 'woocommerce' ) }
 				/>
-				<ToolbarItem
-					as={ ShowBlockInspectorPanel }
-					className="woocommerce-show-block-inspector-panel"
-				/>
+				<PinnedItems.Slot scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE } />
 				<ToolbarItem as={ MoreMenu } />
 			</div>
 		</NavigableToolbar>

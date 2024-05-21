@@ -59,6 +59,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 	private $proxy;
 
 	/**
+	 *  Whether the `stamp_checkout_html_element` method has been called.
+	 *
+	 * @var bool
+	 */
+	private static $is_stamp_checkout_html_called = false;
+
+	/**
 	 * Initialization method.
 	 *
 	 * Takes the place of the constructor within WooCommerce Dependency injection.
@@ -118,7 +125,27 @@ class OrderAttributionController implements RegisterHooksInterface {
 			}
 		);
 
-		add_action( 'woocommerce_checkout_after_customer_details', array( $this, 'stamp_html_element' ) );
+		/**
+		 * Filter set of actions used to stamp the unique checkout order attribution HTML container element.
+		 *
+		 * @since 9.0.0
+		 *
+		 * @param array $stamp_checkout_html_actions The set of actions used to stamp the unique checkout order attribution HTML container element.
+		 */
+		$stamp_checkout_html_actions = apply_filters(
+			'wc_order_attribution_stamp_checkout_html_actions',
+			array(
+				'woocommerce_checkout_billing',
+				'woocommerce_after_checkout_billing_form',
+				'woocommerce_checkout_shipping',
+				'woocommerce_after_order_notes',
+				'woocommerce_checkout_after_customer_details',
+			)
+		);
+		foreach ( $stamp_checkout_html_actions as $action ) {
+			add_action( $action, array( $this, 'stamp_checkout_html_element_once' ) );
+		}
+
 		add_action( 'woocommerce_register_form', array( $this, 'stamp_html_element' ) );
 
 		// Update order based on submitted fields.
@@ -269,6 +296,15 @@ class OrderAttributionController implements RegisterHooksInterface {
 		$session_length = (int) apply_filters( 'wc_order_attribution_session_length_minutes', 30 );
 
 		/**
+		 * Filter to enable base64 encoding for cookie values.
+		 *
+		 * @since 9.0.0
+		 *
+		 * @param bool $use_base64_cookies True to enable base64 encoding, default is false.
+		 */
+		$use_base64_cookies = apply_filters( 'wc_order_attribution_use_base64_cookies', false );
+
+		/**
 		 * Filter to allow tracking.
 		 *
 		 * @since 8.5.0
@@ -282,6 +318,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 			'params' => array(
 				'lifetime'      => $lifetime,
 				'session'       => $session_length,
+				'base64'        => $use_base64_cookies,
 				'ajaxurl'       => admin_url( 'admin-ajax.php' ),
 				'prefix'        => $this->field_prefix,
 				'allowTracking' => 'yes' === $allow_tracking,
@@ -346,8 +383,25 @@ class OrderAttributionController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Add `<wc-order-attribution-inputs>` element that contributes the order attribution values to the enclosing form.
-	 * Used for checkout & customer register forms.
+	 * Handles the `<wc-order-attribution-inputs>` element for checkout forms, ensuring that the field is only output once.
+	 *
+	 * @since 9.0.0
+	 *
+	 * @return void
+	 */
+	public function stamp_checkout_html_element_once() {
+		if ( self::$is_stamp_checkout_html_called ) {
+			return;
+		}
+		$this->stamp_html_element();
+		self::$is_stamp_checkout_html_called = true;
+	}
+
+	/**
+	 * Output `<wc-order-attribution-inputs>` element that contributes the order attribution values to the enclosing form.
+	 * Used customer register forms, and for checkout forms through `stamp_checkout_html_element()`.
+	 *
+	 * @return void
 	 */
 	public function stamp_html_element() {
 		printf( '<wc-order-attribution-inputs></wc-order-attribution-inputs>' );
