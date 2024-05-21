@@ -207,8 +207,8 @@ class ProductCollection extends AbstractBlock {
 			$order_count += wc_orders_count( $status_slug );
 		}
 		$additional_data = array(
-			'editor_location' => ProductCollectionUtils::parse_editor_location_context( $post ),
-			'order_count'     => $order_count,
+			'editor_context' => ProductCollectionUtils::parse_editor_location_context( $post ),
+			'order_count'    => $order_count,
 		);
 		$instances       = ProductCollectionUtils::parse_blocks_track_data( $blocks );
 

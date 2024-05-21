@@ -115,20 +115,19 @@ class ProductCollectionUtils {
 	 *
 	 * @param WP_Post $post The Post instance.
 	 *
-	 * @return string|false Returns the context. False for unknown or invalid context.
+	 * @return string Returns the context.
 	 */
 	public static function parse_editor_location_context( $post ) {
+		$context = 'site';
 
 		if ( ! $post instanceof \WP_Post ) {
-			return false;
+			return $context;
 		}
 
 		$post_type = $post->post_type;
 		if ( ! in_array( $post_type, array( 'post', 'page', 'wp_template', 'wp_template_part' ), true ) ) {
-			return false;
+			return $context;
 		}
-
-		$context = false;
 
 		if ( in_array( $post_type, array( 'wp_template', 'wp_template_part' ), true ) ) {
 
@@ -168,7 +167,7 @@ class ProductCollectionUtils {
 	 * Track usage of the Product Collection block within the given blocks.
 	 *
 	 * @param array $blocks     The parsed blocks to check.
-	 * @param bool  $in_single  Whether we are in a single product container (used for keeping state in the recurring process.)
+	 * @param bool  $in_single  Whether we are in a single product container (used for keeping state in the recurring process).
 	 *
 	 * @return array Parsed instances of the Product Collection block.
 	 */
@@ -181,7 +180,7 @@ class ProductCollectionUtils {
 
 				$instances[] = array(
 					'collection'        => $block['attrs']['collection'] ?? 'catalog',
-					'in-single-product' => $in_single,
+					'in-single-product' => $in_single ? '1' : '0',
 					'filters'           => self::get_query_filters_track_data( $block ),
 				);
 			}
@@ -207,8 +206,8 @@ class ProductCollectionUtils {
 	 * @return array The filters data for tracking.
 	 */
 	public static function get_query_filters_track_data( $block ) {
-		
-		if ( ! isset( $block['attrs' ] ) ) {
+
+		if ( ! isset( $block['attrs'] ) ) {
 			return array();
 		}
 
@@ -247,7 +246,7 @@ class ProductCollectionUtils {
 			if ( ! empty( $query_attrs['taxQuery']['product_cat'] ) ) {
 				$filters['category'] = 1;
 			}
-			
+
 			if ( ! empty( $query_attrs['taxQuery']['product_tag'] ) ) {
 				$filters['tag'] = 1;
 			}
