@@ -274,7 +274,7 @@
 						"tests/api-core-tests/**"
 					],
 					"events": [
-						"push"
+						"push", "pull_request"
 					],
 					"testEnv": {
 						"start": "env:test",
