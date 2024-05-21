@@ -611,12 +611,22 @@ test.describe( `${ blockData.name }`, () => {
 		await editor.saveSiteEditorEntities();
 
 		await page.getByLabel( 'Open Navigation' ).click();
-		await page.getByLabel( 'Back' ).click();
+		const navigationSidebar = page.getByLabel( 'Navigation' );
+		const navigationBackButton = navigationSidebar.getByLabel( 'Back' );
+		await expect( navigationBackButton ).toBeVisible();
+		await navigationSidebar.getByLabel( 'Back' ).click();
+		await page.getByRole( 'button', { name: 'Index' } ).click();
+
+		const editorFrame = page.frameLocator( 'iframe[name="editor-canvas"]' );
+		const headerTitle = editorFrame.getByRole( 'document', {
+			name: 'Block: Site Title',
+		} );
+		await expect( headerTitle ).toBeVisible();
+
+		await navigationSidebar.getByLabel( 'Back' ).click();
 		await page
 			.getByRole( 'button', { name: 'Custom Single Product' } )
 			.click();
-
-		const editorFrame = page.frameLocator( 'iframe[name="editor-canvas"]' );
 
 		const productGalleryBlock = editorFrame.getByLabel(
 			'Block: Product Gallery (Beta)'
