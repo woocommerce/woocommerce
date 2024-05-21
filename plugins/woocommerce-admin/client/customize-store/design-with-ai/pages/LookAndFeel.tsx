@@ -5,6 +5,7 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -13,10 +14,7 @@ import { Look, designWithAiStateMachineContext } from '../types';
 import { Choice } from '../components/choice/choice';
 import { CloseButton } from '../components/close-button/close-button';
 import { SkipButton } from '../components/skip-button/skip-button';
-import {
-	aiWizardClosedBeforeCompletionEvent,
-	goBackToHomeEvent,
-} from '../events';
+import { aiWizardClosedBeforeCompletionEvent } from '../events';
 import { isEntrepreneurFlow } from '../entrepreneur-flow';
 import { trackEvent } from '~/customize-store/tracking';
 import WordPressLogo from '~/lib/wordpress-logo';
@@ -31,10 +29,7 @@ export const LookAndFeel = ( {
 	context,
 }: {
 	sendEvent: (
-		event:
-			| lookAndFeelCompleteEvent
-			| aiWizardClosedBeforeCompletionEvent
-			| goBackToHomeEvent
+		event: lookAndFeelCompleteEvent | aiWizardClosedBeforeCompletionEvent
 	) => void;
 	context: designWithAiStateMachineContext;
 } ) => {
@@ -104,9 +99,9 @@ export const LookAndFeel = ( {
 								step: 'look-and-feel',
 							}
 						);
-						sendEvent( {
-							type: 'GO_BACK_TO_HOME',
-						} );
+						window.location.href = getAdminLink(
+							'admin.php?page=wc-admin&ref=entrepreneur-signup'
+						);
 					} }
 				/>
 			) }

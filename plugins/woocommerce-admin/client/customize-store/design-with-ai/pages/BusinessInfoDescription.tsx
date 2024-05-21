@@ -5,6 +5,7 @@ import { useState } from '@wordpress/element';
 import { TextareaControl, Button, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -12,10 +13,7 @@ import { ProgressBar } from '@woocommerce/components';
 import { designWithAiStateMachineContext } from '../types';
 import { CloseButton } from '../components/close-button/close-button';
 import { SkipButton } from '../components/skip-button/skip-button';
-import {
-	aiWizardClosedBeforeCompletionEvent,
-	goBackToHomeEvent,
-} from '../events';
+import { aiWizardClosedBeforeCompletionEvent } from '../events';
 import { isEntrepreneurFlow } from '../entrepreneur-flow';
 import WordPressLogo from '~/lib/wordpress-logo';
 import { trackEvent } from '~/customize-store/tracking';
@@ -32,7 +30,6 @@ export const BusinessInfoDescription = ( {
 		event:
 			| businessInfoDescriptionCompleteEvent
 			| aiWizardClosedBeforeCompletionEvent
-			| goBackToHomeEvent
 	) => void;
 	context: designWithAiStateMachineContext;
 } ) => {
@@ -75,9 +72,9 @@ export const BusinessInfoDescription = ( {
 								step: 'business-info-description',
 							}
 						);
-						sendEvent( {
-							type: 'GO_BACK_TO_HOME',
-						} );
+						window.location.href = getAdminLink(
+							'admin.php?page=wc-admin&ref=entrepreneur-signup'
+						);
 					} }
 				/>
 			) }

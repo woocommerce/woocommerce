@@ -63,8 +63,7 @@ export type customizeStoreStateMachineEvents =
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'INSTALL_FONTS' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
-	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean }
-	| { type: 'GO_BACK_TO_HOME' };
+	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean };
 
 const updateQueryStep = (
 	_context: unknown,
@@ -240,9 +239,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		INSTALL_FONTS: {
 			target: 'designWithoutAi.installFonts',
-		},
-		GO_BACK_TO_HOME: {
-			actions: 'redirectToWooHome',
 		},
 	},
 	states: {

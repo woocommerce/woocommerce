@@ -55,9 +55,6 @@ export type designWithAiStateMachineEvents =
 	  }
 	| {
 			type: 'EXTERNAL_URL_UPDATE';
-	  }
-	| {
-			type: 'GO_BACK_TO_HOME';
 	  };
 
 export const VALID_LOOKS = [ 'Contemporary', 'Classic', 'Bold' ] as const;
