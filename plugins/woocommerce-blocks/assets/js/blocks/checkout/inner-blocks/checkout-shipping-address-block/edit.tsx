@@ -34,8 +34,9 @@ export const Edit = ( {
 } ): JSX.Element | null => {
 	const {
 		showCompanyField,
-		showApartmentField,
 		requireCompanyField,
+		showApartmentField,
+		requireApartmentField,
 		showPhoneField,
 		requirePhoneField,
 	} = useCheckoutBlockContext();
@@ -46,6 +47,11 @@ export const Edit = ( {
 	if ( ! showShippingFields ) {
 		return null;
 	}
+
+	// This is needed to force the block to re-render when the requireApartmentField changes.
+	const blockKey = `shipping-address-${
+		requireApartmentField ? 'visible' : 'hidden'
+	}-address-2`;
 
 	return (
 		<FormStepBlock
@@ -58,9 +64,11 @@ export const Edit = ( {
 		>
 			<Controls />
 			<Block
+				key={ blockKey }
 				showCompanyField={ showCompanyField }
-				showApartmentField={ showApartmentField }
 				requireCompanyField={ requireCompanyField }
+				showApartmentField={ showApartmentField }
+				requireApartmentField={ requireApartmentField }
 				showPhoneField={ showPhoneField }
 				requirePhoneField={ requirePhoneField }
 			/>

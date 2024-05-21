@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update the display logic of company name, address line 2 and phone number fields and allow making the address line 2 field required.
