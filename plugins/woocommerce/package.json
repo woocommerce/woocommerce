@@ -179,6 +179,28 @@
 							"wpVersion": "latest-2"
 						}
 					}
+				}, 
+				{
+					"name": "PHP WP: nightly",
+					"command": "test:php:env",
+					"optional": true,
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
+						"tests/unit-tests/**/*.php"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "nightly"
+						}
+					}
 				},
 				{
 					"name": "Core e2e tests",
