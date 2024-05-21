@@ -19,7 +19,6 @@ import {
 	OPTIONS_STORE_NAME,
 } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
