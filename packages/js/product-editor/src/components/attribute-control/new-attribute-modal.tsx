@@ -273,7 +273,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					function addNewAttribute(
 						newAttributeName: string,
 						index: number
-					) {
+					): void {
 						if ( ! createNewAttributesAsGlobal ) {
 							return setValue( `attributes[${ index }]`, {
 								id: 0,
