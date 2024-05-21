@@ -1,15 +1,5 @@
 #!/usr/bin/env bash
 
-DISABLE_HPOS="${DISABLE_HPOS:-0}"
-
-echo -e "DISABLE_HPOS: $DISABLE_HPOS"
-if [ $DISABLE_HPOS == 1 ]; then
-	echo -e 'Disabling HPOS\n'
-	wp-env run tests-cli wp option update woocommerce_custom_orders_table_enabled 'no'
-fi
-
-ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
-
 echo -e 'Activate default theme \n'
 wp-env run tests-cli wp theme activate twentytwentythree
 
@@ -40,6 +30,8 @@ wp-env run tests-cli wp option update blogname 'WooCommerce Core E2E Test Suite'
 
 echo -e 'Preparing Test Files \n'
 wp-env run tests-cli sudo cp /var/www/html/wp-content/plugins/woocommerce/tests/legacy/unit-tests/importer/sample.csv /var/www/sample.csv
+
+ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
 if [ $ENABLE_TRACKING == 1 ]; then
 	echo -e 'Enable tracking\n'

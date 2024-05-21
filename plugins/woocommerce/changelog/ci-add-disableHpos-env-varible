@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add new disableHpos test env variable in ci-job utility

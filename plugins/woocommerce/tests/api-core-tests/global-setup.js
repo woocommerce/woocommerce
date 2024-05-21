@@ -1,4 +1,4 @@
-const { ENABLE_HPOS, GITHUB_TOKEN, UPDATE_WC } = process.env;
+const { DISABLE_HPOS, GITHUB_TOKEN, UPDATE_WC } = process.env;
 const { downloadZip, deleteZip } = require( './utils/plugin-utils' );
 const axios = require( 'axios' ).default;
 const playwrightConfig = require( './playwright.config' );
@@ -210,10 +210,10 @@ module.exports = async ( config ) => {
 			console.log( 'No DB update needed' );
 		}
 	} else {
-		// running on localhost using wp-env so ensure HPOS is set if ENABLE_HPOS env variable is passed
-		if ( ENABLE_HPOS ) {
+		// running on localhost using wp-env so ensure HPOS is set if DISABLE_HPOS env variable is passed
+		if ( DISABLE_HPOS ) {
 			let hposConfigured = false;
-			const value = ENABLE_HPOS === '0' ? 'no' : 'yes';
+			const value = DISABLE_HPOS === '1' ? 'no' : 'yes';
 			try {
 				const auth = {
 					username: playwrightConfig.userKey,
@@ -240,7 +240,7 @@ module.exports = async ( config ) => {
 			}
 			if ( ! hposConfigured ) {
 				console.error(
-					'Cannot proceed to api tests, HPOS configuration failed. Please check if the correct ENABLE_HPOS value was used and the test site has been setup correctly.'
+					'Cannot proceed to api tests, HPOS configuration failed. Please check if the correct DISABLE_HPOS value was used and the test site has been setup correctly.'
 				);
 				process.exit( 1 );
 			}

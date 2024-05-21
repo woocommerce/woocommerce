@@ -233,6 +233,11 @@ export interface TestEnvConfigVars {
 	 * The version of PHP that should be used.
 	 */
 	phpVersion?: string;
+
+	/**
+	 * Whether the HPOS feature should be disabled in the test environment setup.
+	 */
+	disableHpos?: boolean;
 }
 
 /**
@@ -262,6 +267,16 @@ function parseTestEnvConfigVars( raw: any ): TestEnvConfigVars {
 		}
 
 		config.phpVersion = raw.phpVersion;
+	}
+
+	if ( raw.disableHpos ) {
+		if ( typeof raw.disableHpos !== 'boolean' ) {
+			throw new ConfigError(
+				'The "disableHpos" option must be a boolean.'
+			);
+		}
+
+		config.disableHpos = raw.disableHpos;
 	}
 
 	return config;
