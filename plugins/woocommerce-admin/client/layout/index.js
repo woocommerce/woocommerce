@@ -39,7 +39,7 @@ import {
  * Internal dependencies
  */
 import './style.scss';
-import { Controller, getPages } from './controller';
+import { Controller, usePages } from './controller';
 import { Header } from '../header';
 import { Footer } from './footer';
 import Notices from './notices';
@@ -313,6 +313,7 @@ const Layout = compose(
 
 const _PageLayout = () => {
 	const { currentUserCan } = useUser();
+	const pages = usePages();
 
 	// get the basename, usually 'wp-admin/' but can be something else if the site installation changed it
 	const path = document.location.pathname;
@@ -321,7 +322,7 @@ const _PageLayout = () => {
 	return (
 		<HistoryRouter history={ getHistory() }>
 			<Routes basename={ basename }>
-				{ getPages()
+				{ pages
 					.filter(
 						( page ) =>
 							! page.capability ||
