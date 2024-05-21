@@ -3,7 +3,7 @@ const { admin, customer } = require( './test-data/data' );
 const fs = require( 'fs' );
 const { site } = require( './utils' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { ENABLE_HPOS } = process.env;
+const { DISABLE_HPOS } = process.env;
 
 /**
  * @param {import('@playwright/test').FullConfig} config
@@ -185,11 +185,11 @@ module.exports = async ( config ) => {
 		process.exit( 1 );
 	}
 
-	// While we're here, let's set HPOS according to the passed in ENABLE_HPOS env variable
-	// (if a value for ENABLE_HPOS was set)
+	// While we're here, let's set HPOS according to the passed in DISABLE_HPOS env variable
+	// (if a value for DISABLE_HPOS was set)
 	// This was always being set to 'yes' after login in wp-env so this step ensures the
 	// correct value is set before we begin our tests
-	console.log( `ENABLE_HPOS: ${ ENABLE_HPOS }` );
+	console.log( `DISABLE_HPOS: ${ DISABLE_HPOS }` );
 
 	const api = new wcApi( {
 		url: baseURL,
@@ -198,10 +198,10 @@ module.exports = async ( config ) => {
 		version: 'wc/v3',
 	} );
 
-	if ( ENABLE_HPOS ) {
+	if ( DISABLE_HPOS ) {
 		const hposSettingRetries = 5;
 
-		const value = ENABLE_HPOS === '0' ? 'no' : 'yes';
+		const value = DISABLE_HPOS === '1' ? 'no' : 'yes';
 
 		for ( let i = 0; i < hposSettingRetries; i++ ) {
 			try {
@@ -233,7 +233,7 @@ module.exports = async ( config ) => {
 
 		if ( ! hposConfigured ) {
 			console.error(
-				'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct ENABLE_HPOS value was used and the test site has been setup correctly.'
+				'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct DISABLE_HPOS value was used and the test site has been setup correctly.'
 			);
 			process.exit( 1 );
 		}
