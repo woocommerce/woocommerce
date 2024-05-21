@@ -33,10 +33,6 @@ export const {
 	SEVEN_DAYS_IN_SECONDS
 );
 
-export const { setWithExpiry: saveCYSTaskReferral } = accessTaskReferralStorage(
-	{ taskId: 'customize-store', referralLifetime: 60 * 60 * 24 } // 24 hours
-);
-
 export const getLysTasklist = async () => {
 	const LYS_TASKS_WHITELIST = [
 		'products',
@@ -93,8 +89,12 @@ export function taskClickedAction( event: {
 	const recentlyActionedTasks = getRecentlyActionedTasks() ?? [];
 	saveRecentlyActionedTask( [ ...recentlyActionedTasks, event.task.id ] );
 
-	saveCYSTaskReferral( {
-		referrer: 'launch_your_store',
+	const { setWithExpiry: saveTaskReferral } = accessTaskReferralStorage(
+		{ taskId: event.task.id, referralLifetime: 60 * 60 * 24 } // 24 hours
+	);
+
+	saveTaskReferral( {
+		referrer: 'launch-your-store',
 		returnUrl: getAdminLink(
 			'admin.php?page=wc-admin&path=/launch-your-store'
 		),
