@@ -4,12 +4,12 @@ The Compatibility Layer ensures that blockified templates work correctly with ex
 
 The Compatibility Layer is disabled when either of classic template blocks are added on the page:
 
-- `Single Product Classic Template`,
-- `Product Attribute Classic Template`,
-- `Product Taxonomy Classic Template`,
-- `Product Tag Classic Template`,
-- `Product Search Results Classic Template`,
-- `Product Grid Classic Template`.
+- `Product (Classic)`,
+- `Product Attribute (Classic)`,
+- `Product Taxonomy (Classic)`,
+- `Product Tag (Classic)`,
+- `Product Search Results (Classic)`,
+- `Product Grid (Classic)`.
 
 Please note these blocks represent classic templates. As an example, using Single Product block won't disable Compatibility Layer.
 
