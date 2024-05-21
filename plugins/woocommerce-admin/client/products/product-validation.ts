@@ -119,7 +119,7 @@ export const validate = (
 				parseFloat( values?.regular_price ) )
 	) {
 		errors.sale_price = __(
-			'Sale price cannot be equal to or higher than list price.',
+			'Sale price cannot be equal to or higher than regular price.',
 			'woocommerce'
 		);
 	}
