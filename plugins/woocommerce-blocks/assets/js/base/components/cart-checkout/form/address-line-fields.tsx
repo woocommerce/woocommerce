@@ -7,22 +7,22 @@ import { AddressFormValues, ContactFormValues } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import Address2Field from './address-2-field';
-import { AddressFieldsProps } from './types';
+import AddressLine2Field from './address-line-2-field';
+import { AddressLineFieldsProps } from './types';
 import { createFieldProps } from './utils';
 
-const AddressFields = < T extends AddressFormValues | ContactFormValues >( {
-	id,
+const AddressLineFields = < T extends AddressFormValues | ContactFormValues >( {
+	formId,
 	address1,
 	address2,
 	addressType,
 	onChange,
-}: AddressFieldsProps< T > ): JSX.Element => {
+}: AddressLineFieldsProps< T > ): JSX.Element => {
 	const address1FieldProps = address1
-		? createFieldProps( address1.field, id, addressType )
+		? createFieldProps( address1.field, formId, addressType )
 		: undefined;
 	const address2FieldProps = address2
-		? createFieldProps( address2.field, id, addressType )
+		? createFieldProps( address2.field, formId, addressType )
 		: undefined;
 
 	return (
@@ -40,7 +40,7 @@ const AddressFields = < T extends AddressFormValues | ContactFormValues >( {
 				/>
 			) }
 			{ address2?.field && ! address2?.field?.hidden && (
-				<Address2Field
+				<AddressLine2Field
 					field={ address2.field }
 					props={ address2FieldProps }
 					onChange={ onChange }
@@ -51,4 +51,4 @@ const AddressFields = < T extends AddressFormValues | ContactFormValues >( {
 	);
 };
 
-export default AddressFields;
+export default AddressLineFields;

@@ -9,14 +9,14 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { AddressFieldProps } from './types';
+import { AddressLineFieldProps } from './types';
 
-const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
+const AddressLine2Field = < T extends AddressFormValues | ContactFormValues >( {
 	field,
 	props,
 	onChange,
 	value,
-}: AddressFieldProps< T > ): JSX.Element => {
+}: AddressLineFieldProps< T > ): JSX.Element => {
 	const isFieldRequired = field?.required ?? false;
 
 	// Display the input field if it has a value or if it is required.
@@ -57,4 +57,4 @@ const Address2Field = < T extends AddressFormValues | ContactFormValues >( {
 	);
 };
 
-export default Address2Field;
+export default AddressLine2Field;
