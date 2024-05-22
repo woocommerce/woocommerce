@@ -78,8 +78,9 @@ class LaunchYourStore {
 			return $settings;
 		}
 
-		$current_screen         = get_current_screen();
-		$is_setting_page        = $current_screen && 'woocommerce_page_wc-settings' === $current_screen->id;
+		$current_screen  = get_current_screen();
+		$is_setting_page = $current_screen && 'woocommerce_page_wc-settings' === $current_screen->id;
+		
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$is_woopayments_connect = isset( $_GET['path'] ) &&
 								isset( $_GET['page'] ) &&
