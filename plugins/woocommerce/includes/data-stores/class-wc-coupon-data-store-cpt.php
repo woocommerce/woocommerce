@@ -190,6 +190,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$this->update_post_meta( $coupon );
 		$coupon->apply_changes();
 		delete_transient( 'rest_api_coupons_type_count' );
+
+		// The cache must be cleared when the coupon's status transitions from 'publish' to 'future', otherwise the coupon will remain available for use.
+		if ( 'future' === $coupon->get_status() ) {
+			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $coupon->get_code(), 'coupons' );
+		}
+
 		do_action( 'woocommerce_update_coupon', $coupon->get_id(), $coupon );
 	}
 
