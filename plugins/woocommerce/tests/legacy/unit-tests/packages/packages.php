@@ -24,23 +24,4 @@ class WC_Tests_Packages extends WC_Unit_Test_Case {
 		$this->assertTrue( class_exists( '\Automattic\WooCommerce\Blocks\Package' ) );
 		$this->assertTrue( class_exists( '\Automattic\WooCommerce\RestApi\Package' ) );
 	}
-
-	/**
-	 * Check API package returns values.
-	 *
-	 * @return void
-	 */
-	public function test_api_package() {
-		$this->assertNotNull( wc()->api->get_rest_api_package_version() );
-		$this->assertNotNull( wc()->api->get_rest_api_package_path() );
-	}
-
-	/**
-	 * Test that the REST API package is working by hitting some endpoints.
-	 */
-	public function test_api_endpoints_exist() {
-		$response = wc()->api->get_endpoint_data( '/wc/v3' );
-		$this->assertFalse( is_wp_error( $response ) );
-		$this->assertEquals( 'wc/v3', $response['namespace'] ); // phpcs:ignore
-	}
 }

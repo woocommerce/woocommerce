@@ -114,6 +114,7 @@ jobs:
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.e2e-test-jobs != '[]' }}
+        env: ${{ matrix.testEnv.envVars }}
         strategy:
             fail-fast: false
             matrix:
@@ -170,6 +171,7 @@ jobs:
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.api-test-jobs != '[]' }}
+        env: ${{ matrix.testEnv.envVars }}
         strategy:
             fail-fast: false
             matrix:
@@ -259,7 +261,7 @@ jobs:
                 'project-api-test-jobs',
                 'project-performance-test-jobs'
             ]
-        if: ${{ always() }}
+        if: ${{ always() && github.event_name == 'pull_request' }}
         steps:
             - uses: 'actions/checkout@v4'
               name: 'Checkout'
