@@ -31,6 +31,8 @@ class AdditionalFieldsWrapper extends AbstractOrderConfirmationBlock {
 		}
 
 		// Contact and additional fields are currently grouped in this section.
+		// If none of the additional fields for contact or order have values then the "Additional fields' section should
+		// not show in the order confirmation.
 		$additional_field_values = array_merge(
 			Package::container()->get( CheckoutFields::class )->get_order_additional_fields_with_values( $order, 'contact' ),
 			Package::container()->get( CheckoutFields::class )->get_order_additional_fields_with_values( $order, 'order' )
