@@ -10,7 +10,10 @@ import type { TemplateArray } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { useCheckoutBlockControlsContext } from '../../context';
+import {
+	useCheckoutBlockContext,
+	useCheckoutBlockControlsContext,
+} from '../../context';
 import {
 	useForcedLayout,
 	getAllowedBlocks,
@@ -35,6 +38,7 @@ export const Edit = ( {
 	} );
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CHECKOUT_FIELDS );
 
+	const { showFormStepNumbers } = useCheckoutBlockContext();
 	const { addressFieldControls: Controls } =
 		useCheckoutBlockControlsContext();
 
@@ -62,7 +66,15 @@ export const Edit = ( {
 	return (
 		<Main { ...blockProps }>
 			<Controls />
-			<form className="wc-block-components-form wc-block-checkout__form">
+			<form
+				className={ classnames(
+					'wc-block-components-form wc-block-checkout__form',
+					{
+						'wc-block-checkout__form--with-step-numbers':
+							showFormStepNumbers,
+					}
+				) }
+			>
 				<InnerBlocks
 					allowedBlocks={ allowedBlocks }
 					templateLock={ false }

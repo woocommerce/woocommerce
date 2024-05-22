@@ -17,13 +17,11 @@ import { useCheckoutBlockContext } from '../../context';
 const FrontendBlock = ( {
 	title,
 	description,
-	showStepNumber,
 	children,
 	className,
 }: {
 	title: string;
 	description: string;
-	showStepNumber: boolean;
 	children: JSX.Element;
 	className?: string;
 } ) => {
@@ -38,6 +36,7 @@ const FrontendBlock = ( {
 		requireApartmentField,
 		showPhoneField,
 		requirePhoneField,
+		showFormStepNumbers,
 	} = useCheckoutBlockContext();
 
 	if ( ! showShippingFields ) {
@@ -54,7 +53,7 @@ const FrontendBlock = ( {
 			) }
 			title={ title }
 			description={ description }
-			showStepNumber={ showStepNumber }
+			showStepNumber={ showFormStepNumbers }
 		>
 			<Block
 				showCompanyField={ showCompanyField }

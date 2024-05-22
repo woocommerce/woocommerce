@@ -66,6 +66,7 @@ export const Edit = ( {
 		showRateAfterTaxName,
 		cartPageId,
 		isPreview = false,
+		showFormStepNumbers = false,
 	} = attributes;
 
 	// This focuses on the block when a certain query param is found. This is used on the link from the task list.
@@ -97,6 +98,17 @@ export const Edit = ( {
 
 	const addressFieldControls = (): JSX.Element => (
 		<InspectorControls>
+			<PanelBody title={ __( 'Form Step Options', 'woocommerce' ) }>
+				<ToggleControl
+					label={ __( 'Show form step numbers', 'woocommerce' ) }
+					checked={ showFormStepNumbers }
+					onChange={ () =>
+						setAttributes( {
+							showFormStepNumbers: ! showFormStepNumbers,
+						} )
+					}
+				/>
+			</PanelBody>
 			<PanelBody title={ __( 'Address Fields', 'woocommerce' ) }>
 				<p className="wc-block-checkout__controls-text">
 					{ __(
@@ -215,6 +227,7 @@ export const Edit = ( {
 										showReturnToCart,
 										cartPageId,
 										showRateAfterTaxName,
+										showFormStepNumbers,
 									} }
 								>
 									<InnerBlocks

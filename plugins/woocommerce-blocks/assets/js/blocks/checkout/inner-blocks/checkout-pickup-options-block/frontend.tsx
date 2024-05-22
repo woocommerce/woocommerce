@@ -7,6 +7,8 @@ import { FormStep } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
+import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
+
 /**
  * Internal dependencies
  */
@@ -16,7 +18,6 @@ import attributes from './attributes';
 const FrontendBlock = ( {
 	title,
 	description,
-	showStepNumber,
 	children,
 	className,
 }: {
@@ -36,6 +37,8 @@ const FrontendBlock = ( {
 		}
 	);
 
+	const { showFormStepNumbers } = useCheckoutBlockContext();
+
 	if ( ! prefersCollection || ! LOCAL_PICKUP_ENABLED ) {
 		return null;
 	}
@@ -50,7 +53,7 @@ const FrontendBlock = ( {
 			) }
 			title={ title }
 			description={ description }
-			showStepNumber={ showStepNumber }
+			showStepNumber={ showFormStepNumbers }
 		>
 			<Block />
 			{ children }
