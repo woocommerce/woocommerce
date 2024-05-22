@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockData } from '@woocommerce/e2e-types';
-import { test, expect } from '@woocommerce/e2e-utils';
+import { test, expect, BlockData } from '@woocommerce/e2e-utils';
 
 const blockData: BlockData = {
 	name: 'Related Products',

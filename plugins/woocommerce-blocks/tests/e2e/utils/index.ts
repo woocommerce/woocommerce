@@ -13,3 +13,5 @@ export * from './storeApi';
 export * from './wpCli';
 
 export * from './test';
+
+export * from './types';

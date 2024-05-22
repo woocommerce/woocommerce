@@ -167,7 +167,6 @@ module.exports = {
 			'@wordpress/keycodes',
 			'@wordpress/url',
 			'@woocommerce/blocks-test-utils',
-			'@woocommerce/e2e-types',
 			'@woocommerce/e2e-utils',
 			'babel-jest',
 			'dotenv',
