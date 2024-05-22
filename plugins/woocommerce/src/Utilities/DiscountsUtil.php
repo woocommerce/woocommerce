@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Utilities;
 
-
 /**
  * The DiscountsUtil class provides utilities to assist discounts calculation and validation.
  */
@@ -41,5 +40,4 @@ class DiscountsUtil {
 		// No matches, this one isn't allowed.
 		return false;
 	}
-
 }
