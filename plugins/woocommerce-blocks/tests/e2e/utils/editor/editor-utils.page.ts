@@ -348,8 +348,7 @@ export class EditorUtils {
 
 	async transformIntoBlocks() {
 		// Select the block, so the button is visible.
-		const block = this.page
-			.frameLocator( 'iframe[name="editor-canvas"]' )
+		const block = this.editor.canvas
 			.locator( `[data-type="woocommerce/legacy-template"]` )
 			.first();
 
