@@ -78,6 +78,7 @@ const wpAdminScripts = [
 	'woo-enable-autorenew',
 	'woo-renew-subscription',
 	'woo-subscriptions-notice',
+	'woo-check-subscription',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
