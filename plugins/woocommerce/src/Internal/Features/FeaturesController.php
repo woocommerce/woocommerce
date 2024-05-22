@@ -203,6 +203,27 @@ class FeaturesController {
 						return $string;
 					},
 				),
+				'experimental_blocks'  => array(
+					'name'            => __( 'Experimental blocks', 'woocommerce' ),
+					'description'     => __( 'Try blocks that are in an experimental state', 'woocommerce' ),
+					'is_experimental' => true,
+					'disable_ui'      => false,
+					'is_legacy'       => true,
+					'disabled'        => function () {
+						return version_compare( get_bloginfo( 'version' ), '6.2', '<' );
+					},
+					'desc_tip'        => function () {
+						$string = '';
+						if ( version_compare( get_bloginfo( 'version' ), '6.2', '<' ) ) {
+							$string = __(
+								'⚠ This feature is compatible with WordPress version 6.2 or higher.',
+								'woocommerce'
+							);
+						}
+
+						return $string;
+					},
+				),
 				'cart_checkout_blocks' => array(
 					'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 					'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
