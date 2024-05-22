@@ -88,6 +88,7 @@ export function taskClickedAction( event: {
 } ) {
 	const recentlyActionedTasks = getRecentlyActionedTasks() ?? [];
 	saveRecentlyActionedTask( [ ...recentlyActionedTasks, event.task.id ] );
+	window.sessionStorage.setItem( 'lysWaiting', 'yes' );
 
 	const { setWithExpiry: saveTaskReferral } = accessTaskReferralStorage(
 		{ taskId: event.task.id, referralLifetime: 60 * 60 * 24 } // 24 hours
