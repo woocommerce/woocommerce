@@ -113,9 +113,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	private function obtain_lock_on_sku_for_concurrent_requests( $product ) {
 		global $wpdb;
-		$query  = "INSERT INTO $wpdb->wc_product_meta_lookup (product_id, sku)
-		SELECT {$product->get_id()},{$product->get_sku()} FROM $wpdb->wc_product_meta_lookup
-		WHERE NOT EXISTS (SELECT * FROM $wpdb->wc_product_meta_lookup WHERE sku = '{$product->get_sku()}') limit 1;";
+		$query = $wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"INSERT INTO $wpdb->wc_product_meta_lookup (product_id, sku)
+			SELECT {$product->get_id()},{$product->get_sku()} FROM $wpdb->wc_product_meta_lookup
+			WHERE NOT EXISTS (SELECT * FROM $wpdb->wc_product_meta_lookup WHERE sku = '{$product->get_sku()}') limit 1;"
+		);
 		$result = $wpdb->query( $query );
 
 		return (bool) $result;
@@ -131,6 +134,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Method to create a new product in the database.
 	 *
 	 * @param WC_Product $product Product object.
+	 * @throws Exception If SKU is already under processing.
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created( 'edit' ) ) {
