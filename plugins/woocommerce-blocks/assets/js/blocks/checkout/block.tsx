@@ -62,6 +62,7 @@ const Checkout = ( {
 		showCompanyField,
 		requireCompanyField,
 		showApartmentField,
+		requireApartmentField,
 		showPhoneField,
 		requirePhoneField,
 	} = attributes;
@@ -93,6 +94,7 @@ const Checkout = ( {
 					showCompanyField,
 					requireCompanyField,
 					showApartmentField,
+					requireApartmentField,
 					showPhoneField,
 					requirePhoneField,
 				} as Attributes

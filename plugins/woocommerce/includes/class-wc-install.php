@@ -255,6 +255,9 @@ class WC_Install {
 		'8.9.1' => array(
 			'wc_update_891_create_plugin_autoinstall_history_option',
 		),
+		'9.0.0' => array(
+			'wc_update_900_add_launch_your_store_tour_option',
+		),
 	);
 
 	/**
@@ -463,6 +466,7 @@ class WC_Install {
 		self::maybe_update_db_version();
 		self::maybe_set_store_id();
 		self::maybe_install_legacy_api_plugin();
+		self::maybe_activate_legacy_api_enabled_option();
 
 		delete_transient( 'wc_installing' );
 
@@ -575,7 +579,6 @@ class WC_Install {
 		WC_Post_types::register_taxonomies();
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
-		WC_API::add_endpoint();
 		WC_Auth::add_endpoint();
 		TransientFilesEngine::add_endpoint();
 	}
@@ -1314,6 +1317,17 @@ class WC_Install {
 		}
 
 		\WC_Admin_Notices::store_notices();
+	}
+
+	/**
+	 * If in a previous version of WooCommerce the Legacy REST API plugin was installed manually but the core Legacy REST API was kept disabled,
+	 * now the Legacy API is still disabled and can't be manually enabled from settings UI (the plugin, which is now in control, won't allow that),
+	 * which is weird and confusing. So we detect this case and explicitly enable it.
+	 */
+	private static function maybe_activate_legacy_api_enabled_option() {
+		if ( ! self::is_new_install() && is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) && 'yes' !== get_option( 'woocommerce_api_enabled' ) ) {
+			update_option( 'woocommerce_api_enabled', 'yes' );
+		}
 	}
 
 	/**
