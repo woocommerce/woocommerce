@@ -25,13 +25,16 @@ const FrontendBlock = ( {
 	}, [] );
 
 	return (
-		<Main
-			className={ classnames( 'wc-block-checkout__main', className, {
-				'wc-block-checkout__main--with-step-numbers':
-					showFormStepNumbers,
-			} ) }
-		>
-			<form className="wc-block-components-form wc-block-checkout__form">
+		<Main className={ classnames( 'wc-block-checkout__main', className ) }>
+			<form
+				className={ classnames(
+					'wc-block-components-form wc-block-checkout__form',
+					{
+						'wc-block-checkout__form--with-step-numbers':
+							showFormStepNumbers,
+					}
+				) }
+			>
 				{ children }
 			</form>
 		</Main>
