@@ -5,6 +5,7 @@ import { Button, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
 import { useState, createInterpolateElement } from '@wordpress/element';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -12,6 +13,7 @@ import { useState, createInterpolateElement } from '@wordpress/element';
 import { Tone, designWithAiStateMachineContext } from '../types';
 import { Choice } from '../components/choice/choice';
 import { CloseButton } from '../components/close-button/close-button';
+import { SkipButton } from '../components/skip-button/skip-button';
 import { aiWizardClosedBeforeCompletionEvent } from '../events';
 import { isEntrepreneurFlow } from '../entrepreneur-flow';
 import { trackEvent } from '~/customize-store/tracking';
@@ -103,6 +105,21 @@ export const ToneOfVoice = ( {
 							type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
 							payload: { step: 'tone-of-voice' },
 						} );
+					} }
+				/>
+			) }
+			{ isEntrepreneurFlow() && (
+				<SkipButton
+					onClick={ () => {
+						trackEvent(
+							'customize_your_store_entrepreneur_skip_click',
+							{
+								step: 'tone-of-voice',
+							}
+						);
+						window.location.href = getAdminLink(
+							'admin.php?page=wc-admin&ref=entrepreneur-signup'
+						);
 					} }
 				/>
 			) }

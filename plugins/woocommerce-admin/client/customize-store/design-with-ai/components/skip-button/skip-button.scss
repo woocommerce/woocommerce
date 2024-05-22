@@ -1,0 +1,13 @@
+.skip-cys-design-with-ai {
+	/* This follows the same styling and positioning
+       as seen on the Entrepreneur signup flow. */
+	position: absolute;
+	top: 30px;
+	right: 24px;
+
+	&.components-button.is-link {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #101517;
+	}
+}
