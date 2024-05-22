@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Reduce the number of tags in the plugin's readme file, to avoid warnings.
