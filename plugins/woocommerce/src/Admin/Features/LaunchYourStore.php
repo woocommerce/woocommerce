@@ -82,7 +82,7 @@ class LaunchYourStore {
 		$is_setting_page        = $current_screen && 'woocommerce_page_wc-settings' === $current_screen->id;
 		$is_woopayments_connect = isset( $_GET['path'] ) &&
 								isset( $_GET['page'] ) &&
-								( '/payments/connect' === sanitize_text_field( $_GET['path'] ) || '/payments/onboarding' === sanitize_text_field( $_GET['path'] ) ) &&
+								( '/payments/connect' === sanitize_text_field( wp_unslash( $_GET['path'] ) ) || '/payments/onboarding' === sanitize_text_field( wp_unslash( $_GET['path'] ) ) ) &&
 								'wc-admin' === $_GET['page'];
 
 		if ( $is_setting_page || $is_woopayments_connect ) {
