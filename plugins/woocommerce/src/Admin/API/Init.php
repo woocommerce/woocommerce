@@ -57,6 +57,10 @@ class Init {
 	 * Init REST API.
 	 */
 	public function rest_api_init() {
+		if ( ! wc_rest_should_load_namespace( 'wc-admin' ) ) {
+			return;
+		}
+
 		$controllers = array(
 			'Automattic\WooCommerce\Admin\API\Features',
 			'Automattic\WooCommerce\Admin\API\Notes',
