@@ -671,10 +671,38 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		foreach ( $db_rows as $db_update ) {
 			ksort( $db_update['data'] );
 			ksort( $db_update['format'] );
-			$this->database_util->insert_on_duplicate_key_update( $db_update['table'], $db_update['data'], array_values( $db_update['format'] ) );
+			$this->persist_db_row( $db_update );
 		}
 
 		return true;
+	}
+
+	/**
+	 * Helper method to persist a DB row to database. Uses insert_or_update when possible.
+	 *
+	 * @param array $update Data containing atleast `table`, `data` and `format` keys, but also preferably `where` and `where_format` to use `insert_or_update`.
+	 *
+	 * @return bool|int Number of rows affected, boolean false on error.
+	 */
+	private function persist_db_row( $update ) {
+		if ( isset( $update['where'] ) ) {
+			$row_updated = $this->database_util->insert_or_update(
+				$update['table'],
+				$update['data'],
+				$update['where'],
+				$update['format'],
+				$update['where_format']
+			);
+			// row_updated can be 0 when there are no changes. So we check for type as well as row count.
+			$result = false !== $row_updated;
+		} else {
+			$result = $this->database_util->insert_on_duplicate_key_update(
+				$update['table'],
+				$update['data'],
+				array_values( $update['format'] ),
+			);
+		}
+		return $result;
 	}
 
 	/**
@@ -1861,12 +1889,7 @@ FROM $order_meta_table
 			ksort( $update['data'] );
 			ksort( $update['format'] );
 
-			$result = $this->database_util->insert_on_duplicate_key_update(
-				$update['table'],
-				$update['data'],
-				array_values( $update['format'] )
-			);
-
+			$result = $this->persist_db_row( $update );
 			if ( false === $result ) {
 				// translators: %s is a table name.
 				throw new \Exception( esc_html( sprintf( __( 'Could not persist order to database table "%s".', 'woocommerce' ), $update['table'] ) ) );
@@ -2042,21 +2065,26 @@ FROM $order_meta_table
 
 			if ( $row ) {
 				$result[] = array(
-					'table'  => self::get_addresses_table_name(),
-					'data'   => array_merge(
+					'table'        => self::get_addresses_table_name(),
+					'data'         => array_merge(
 						$row['data'],
 						array(
 							'order_id'     => $order->get_id(),
 							'address_type' => $address_type,
 						)
 					),
-					'format' => array_merge(
+					'format'       => array_merge(
 						$row['format'],
 						array(
 							'order_id'     => '%d',
 							'address_type' => '%s',
 						)
 					),
+					'where'        => array(
+						'order_id'     => $order->get_id(),
+						'address_type' => $address_type,
+					),
+					'where_format' => array( '%d', '%s' ),
 				);
 			}
 		}
