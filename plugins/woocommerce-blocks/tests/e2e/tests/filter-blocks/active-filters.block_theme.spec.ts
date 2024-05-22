@@ -6,7 +6,7 @@ import { TemplateCompiler, test as base, expect } from '@woocommerce/e2e-utils';
 const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 	templateCompiler: async ( { requestUtils }, use ) => {
 		const compiler = await requestUtils.createTemplateFromFile(
-			'archive-product_acvitve-filters'
+			'archive-product_active-filters'
 		);
 		await use( compiler );
 	},
