@@ -22,14 +22,12 @@ const blockData = {
 	placeholderUrl: `${ BASE_URL }/wp-content/plugins/woocommerce/assets/images/placeholder.png`,
 };
 
-const test = base.extend< {
-	templateCompiler: TemplateCompiler;
-} >( {
+const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 	templateCompiler: async ( { requestUtils }, use ) => {
-		const template = await requestUtils.createTemplateFromFile(
+		const compiler = await requestUtils.createTemplateFromFile(
 			'archive-product_filters-with-product-collection'
 		);
-		await use( template );
+		await use( compiler );
 	},
 } );
 

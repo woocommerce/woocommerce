@@ -14,14 +14,12 @@ export const blockData = {
 	urlSearchParamWhenFilterIsApplied: 'filter_stock_status=outofstock',
 };
 
-const test = base.extend< {
-	templateCompiler: TemplateCompiler;
-} >( {
+const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 	templateCompiler: async ( { requestUtils }, use ) => {
-		const template = await requestUtils.createTemplateFromFile(
+		const compiler = await requestUtils.createTemplateFromFile(
 			'archive-product_filters-with-product-collection'
 		);
-		await use( template );
+		await use( compiler );
 	},
 } );
 

@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { test as base, expect, cli } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	cli,
+	TemplateCompiler,
+} from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'Filter by Attribute',
@@ -9,12 +14,12 @@ const blockData = {
 	urlSearchParamWhenFilterIsApplied: 'filter_size=small&query_type_size=or',
 };
 
-const test = base.extend( {
+const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 	templateCompiler: async ( { requestUtils }, use ) => {
-		const template = await requestUtils.createTemplateFromFile(
+		const compiler = await requestUtils.createTemplateFromFile(
 			'archive-product_filters-with-product-collection'
 		);
-		await use( template );
+		await use( compiler );
 	},
 } );
 
