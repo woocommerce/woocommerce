@@ -125,8 +125,6 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 				if ( field.type === 'checkbox' ) {
 					return (
 						<CheckboxControl
-							className={ `wc-block-components-address-form__${ field.key }` }
-							label={ field.label }
 							key={ field.key }
 							checked={ Boolean( values[ field.key ] ) }
 							onChange={ ( checked: boolean ) => {
@@ -235,7 +233,10 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 							{ ...fieldProps }
 							className={ classnames(
 								'wc-block-components-select-input',
-								`wc-block-components-select-input-${ field.key }`
+								`wc-block-components-select-input-${ field.key }`.replaceAll(
+									'/',
+									'-'
+								)
 							) }
 							value={ values[ field.key ] }
 							onChange={ ( newValue: string ) => {
