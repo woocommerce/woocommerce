@@ -147,7 +147,13 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return WC_Data
 	 */
 	protected function get_object( $id ) {
-		return wc_get_product( $id );
+		/**
+		 * Filter the product object that is fetched in the context of the REST API.
+		 *
+		 * @param WC_Product $product The product.
+		 * @since 9.0.0
+		 */
+		return apply_filters( 'woocommerce_rest_get_product', wc_get_product( $id ) );
 	}
 
 	/**
