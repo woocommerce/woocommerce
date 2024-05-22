@@ -7,6 +7,7 @@ import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
  * Internal dependencies
  */
 import { ProductFiltersPage } from './product-filters.page';
+import { cli } from '../../utils';
 
 const blockData = {
 	name: 'woocommerce/product-filters',
@@ -35,6 +36,10 @@ const test = base.extend< { pageObject: ProductFiltersPage } >( {
 
 test.describe( `${ blockData.name }`, () => {
 	test.beforeEach( async ( { admin, editorUtils } ) => {
+		await cli(
+			'npm run wp-env run tests-cli -- wp option update woocommerce_feature_experimental_blocks_enabled yes'
+		);
+
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
