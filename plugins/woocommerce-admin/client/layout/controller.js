@@ -529,6 +529,10 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 		item.href = href;
 
 		item.onclick = ( e ) => {
+			if ( path === 'homescreen' ) {
+				// It's unexpected to show LYS from a WP menu click.
+				window.sessionStorage.removeItem( 'lysWaiting' );
+			}
 			e.preventDefault();
 			getHistory().push( href );
 		};
