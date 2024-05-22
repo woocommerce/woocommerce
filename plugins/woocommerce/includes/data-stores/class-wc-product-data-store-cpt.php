@@ -98,10 +98,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 
 	/**
-	 * Method to obtain lock on SKU to make sure
-	 * we have product with unique SKU for concurrent requests.
+	 * Method to obtain DB lock on SKU to make sure we only
+	 * create product with unique SKU for concurrent requests.
+	 * 
+	 * We are doing so by inserting a row in the wc_product_meta_lookup table
+	 * upfront with the SKU of the product we are trying to insert.
+	 * 
+	 * If the SKU is already present in the table, it means that another
+	 * request is already processing the same SKU and we should not proceed
+	 * with the insert.
 	 *
 	 * @param WC_Product $product Product object.
+	 * @return bool True if lock is obtained, false otherwise.
 	 */
 	private function obtain_lock_on_sku_for_concurrent_requests( $product ) {
 		global $wpdb;
