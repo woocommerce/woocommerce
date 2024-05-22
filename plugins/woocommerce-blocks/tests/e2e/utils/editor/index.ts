@@ -24,7 +24,21 @@ export class Editor extends CoreEditor {
 		return true;
 	}
 
+	/**
+	 * Checks if the editor is inside an iframe.
+	 */
+	private async isEditorInsideIframe() {
+		try {
+			return ( await this.canvas.locator( '*' ).count() ) > 0;
+		} catch ( e ) {
+			return false;
+		}
+	}
+
 	async getBlockByName( name: string ) {
+		if ( await this.isEditorInsideIframe() ) {
+			return this.canvas.locator( `[data-type="${ name }"]` );
+		}
 		return this.page.locator( `[data-type="${ name }"]` );
 	}
 
