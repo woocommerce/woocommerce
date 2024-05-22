@@ -36,7 +36,7 @@ export const createFieldProps = (
 	autoComplete: field?.autocomplete,
 	errorMessage: field?.errorMessage,
 	required: field?.required,
-	className: `wc-block-components-field-form__${ field?.key }`.replaceAll(
+	className: `wc-block-components-address-form__${ field?.key }`.replaceAll(
 		'/',
 		'-'
 	), // Replace all slashes with hyphens to avoid invalid HTML classes.,
