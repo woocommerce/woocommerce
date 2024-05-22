@@ -61,8 +61,8 @@ class ShippingLabelBanner {
 				class_exists( '\WC_Shipping_UPS_Init' ) ||
 				class_exists( '\WC_Integration_ShippingEasy' ) ||
 				class_exists( '\WC_ShipStation_Integration' ) ||
-				class_exists( '\WooShipping_Connect_Loader' ) ||
-				class_exists( '\WooTax\Loader' );
+				class_exists( '\Automattic\WCShipping\Loader' ) ||
+				class_exists( '\Automattic\WCTax\Loader' );
 
 			$this->shipping_label_banner_display_rules =
 				new ShippingLabelBannerDisplayRules(

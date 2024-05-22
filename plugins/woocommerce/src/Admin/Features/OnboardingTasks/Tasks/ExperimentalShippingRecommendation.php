@@ -80,7 +80,8 @@ class ExperimentalShippingRecommendation extends Task {
 	 * @return bool
 	 */
 	public static function has_plugins_active() {
-		return PluginsHelper::is_plugin_active( 'woocommerce-services' );
+		return PluginsHelper::is_plugin_active( 'woocommerce-services' ) ||
+		       PluginsHelper::is_plugin_active( 'woocommerce-shipping' );
 	}
 
 	/**
