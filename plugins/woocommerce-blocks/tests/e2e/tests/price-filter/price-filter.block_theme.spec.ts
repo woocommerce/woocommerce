@@ -26,9 +26,6 @@ export const blockData = {
 
 test.describe( `${ blockData.name } Block - editor side`, () => {
 	test.beforeEach( async ( { admin, editor } ) => {
-		await cli(
-			'npm run wp-env run tests-cli -- wp option update woocommerce_feature_experimental_blocks_enabled yes'
-		);
 		await admin.createNewPost();
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -224,6 +221,10 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 } );
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 	test.beforeEach( async ( { admin, page, editor, editorUtils } ) => {
+		await cli(
+			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
+		);
+
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
