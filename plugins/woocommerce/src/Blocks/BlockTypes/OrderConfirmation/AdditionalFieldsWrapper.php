@@ -31,12 +31,12 @@ class AdditionalFieldsWrapper extends AbstractOrderConfirmationBlock {
 		}
 
 		// Contact and additional fields are currently grouped in this section.
-		$additional_fields = array_merge(
-			Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'contact' ),
-			Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'order' )
+		$additional_field_values = array_merge(
+			Package::container()->get( CheckoutFields::class )->get_order_additional_fields_with_values( $order, 'contact' ),
+			Package::container()->get( CheckoutFields::class )->get_order_additional_fields_with_values( $order, 'order' )
 		);
 
-		return empty( $additional_fields ) ? '' : $content;
+		return empty( $additional_field_values ) ? '' : $content;
 	}
 
 	/**
