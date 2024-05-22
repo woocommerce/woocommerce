@@ -18,14 +18,12 @@ const blockData = {
 	mainClass: '.wp-block-woocommerce-product-sale-badge',
 	selectors: {
 		frontend: {
-			productSaleBadge: '.wc-block-components-product-sale-badge',
-			productSaleBadgeContainer:
-				'.wp-block-woocommerce-product-sale-badge',
+			badge: '.wc-block-components-product-sale-badge',
+			badgeContainer: '.wp-block-woocommerce-product-sale-badge',
 		},
 		editor: {
-			productSaleBadge: '.wc-block-components-product-sale-badge',
-			productSaleBadgeContainer:
-				'.wp-block-woocommerce-product-sale-badge',
+			badge: '.wc-block-components-product-sale-badge',
+			badgeContainer: '.wp-block-woocommerce-product-sale-badge',
 		},
 	},
 	// This margin is applied via Block Styles to the product sale badge. It's necessary to take it into account when calculating the position of the badge. https://github.com/woocommerce/woocommerce-blocks/blob/445b9431ccba460f9badd41d52ed991958524e33/assets/js/blocks/product-gallery/edit.tsx/#L44-L53
@@ -35,44 +33,63 @@ const blockData = {
 	productPageNotOnSale: '/product/album/',
 };
 
-const test = base.extend< { pageObject: ProductGalleryPage } >( {
+class BlockUtils {
+	editor: Editor;
+	frontendUtils: FrontendUtils;
+
+	constructor( {
+		editor,
+		frontendUtils,
+	}: {
+		editor: Editor;
+		frontendUtils: FrontendUtils;
+	} ) {
+		this.editor = editor;
+		this.frontendUtils = frontendUtils;
+	}
+
+	async getSaleBadgeBoundingClientRect( isFrontend: boolean ): Promise< {
+		badge: DOMRect;
+		badgeContainer: DOMRect;
+	} > {
+		const page = isFrontend ? this.frontendUtils.page : this.editor.canvas;
+		return {
+			badge: await page
+				.locator(
+					blockData.selectors[ isFrontend ? 'frontend' : 'editor' ]
+						.badge
+				)
+				.first()
+				.evaluate( ( el ) => el.getBoundingClientRect() ),
+			badgeContainer: await page
+				.locator(
+					blockData.selectors[ isFrontend ? 'frontend' : 'editor' ]
+						.badgeContainer
+				)
+				.first()
+				.evaluate( ( el ) => el.getBoundingClientRect() ),
+		};
+	}
+}
+
+const test = base.extend< {
+	pageObject: ProductGalleryPage;
+	blockUtils: BlockUtils;
+} >( {
 	pageObject: async ( { page, editor, frontendUtils }, use ) => {
-		const pageObject = new ProductGalleryPage( {
-			page,
-			editor,
-			frontendUtils,
-		} );
-		await use( pageObject );
+		await use(
+			new ProductGalleryPage( {
+				page,
+				editor,
+				frontendUtils,
+			} )
+		);
+	},
+	blockUtils: async ( { editor, frontendUtils }, use ) => {
+		await use( new BlockUtils( { editor, frontendUtils } ) );
 	},
 } );
 
-const getBoundingClientRect = async ( {
-	frontendUtils,
-	editor,
-	isFrontend,
-}: {
-	frontendUtils: FrontendUtils;
-	editor: Editor;
-	isFrontend: boolean;
-} ) => {
-	const page = isFrontend ? frontendUtils.page : editor.canvas;
-	return {
-		productSaleBadge: await page
-			.locator(
-				blockData.selectors[ isFrontend ? 'frontend' : 'editor' ]
-					.productSaleBadge
-			)
-			.first()
-			.evaluate( ( el ) => el.getBoundingClientRect() ),
-		productSaleBadgeContainer: await page
-			.locator(
-				blockData.selectors[ isFrontend ? 'frontend' : 'editor' ]
-					.productSaleBadgeContainer
-			)
-			.first()
-			.evaluate( ( el ) => el.getBoundingClientRect() ),
-	};
-};
 test.describe( `${ blockData.name }`, () => {
 	test.describe( `On the Single Product Template`, () => {
 		test.beforeEach( async ( { admin, editor } ) => {
@@ -138,11 +155,11 @@ test.describe( `${ blockData.name }`, () => {
 			await expect( block ).toBeHidden();
 		} );
 
-		test( 'should be aligned on the left', async ( {
-			frontendUtils,
+		test( 'should be aligned to the left', async ( {
 			editor,
 			page,
 			pageObject,
+			blockUtils,
 		} ) => {
 			await editor.openDocumentSettingsSidebar();
 			await editor.insertBlock( {
@@ -157,36 +174,36 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.setAlignOption( 'Align Left' );
 
-			const editorBoundingClientRect = await getBoundingClientRect( {
-				frontendUtils,
-				editor,
-				isFrontend: false,
-			} );
+			await expect
+				.poll( async () => {
+					const { badge, badgeContainer } =
+						await blockUtils.getSaleBadgeBoundingClientRect(
+							false
+						);
 
-			expect(
-				editorBoundingClientRect.productSaleBadge.x - blockData.margin
-			).toEqual( editorBoundingClientRect.productSaleBadgeContainer.x );
+					return badge.x - badgeContainer.x;
+				} )
+				.toEqual( blockData.margin );
 
 			await editor.saveSiteEditorEntities();
 
 			await page.goto( blockData.productPage );
 
-			const clientBoundingClientRect = await getBoundingClientRect( {
-				frontendUtils,
-				editor,
-				isFrontend: true,
-			} );
+			await expect
+				.poll( async () => {
+					const { badge, badgeContainer } =
+						await blockUtils.getSaleBadgeBoundingClientRect( true );
 
-			expect(
-				clientBoundingClientRect.productSaleBadge.x - blockData.margin
-			).toEqual( clientBoundingClientRect.productSaleBadgeContainer.x );
+					return badge.x - badgeContainer.x;
+				} )
+				.toEqual( blockData.margin );
 		} );
 
-		test( 'should be aligned on the center', async ( {
-			frontendUtils,
+		test( 'should be aligned to the center', async ( {
 			editor,
 			page,
 			pageObject,
+			blockUtils,
 		} ) => {
 			await editor.openDocumentSettingsSidebar();
 			await editor.insertBlock( {
@@ -201,40 +218,36 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.setAlignOption( 'Align Center' );
 
-			const editorBoundingClientRect = await getBoundingClientRect( {
-				frontendUtils,
-				editor,
-				isFrontend: false,
-			} );
+			await expect
+				.poll( async () => {
+					const { badge, badgeContainer } =
+						await blockUtils.getSaleBadgeBoundingClientRect(
+							false
+						);
 
-			expect(
-				editorBoundingClientRect.productSaleBadge.right
-			).toBeLessThan(
-				editorBoundingClientRect.productSaleBadgeContainer.right
-			);
+					return badge.right < badgeContainer.right;
+				} )
+				.toBe( true );
 
 			await editor.saveSiteEditorEntities();
 
 			await page.goto( blockData.productPage );
 
-			const clientBoundingClientRect = await getBoundingClientRect( {
-				frontendUtils,
-				editor,
-				isFrontend: true,
-			} );
+			await expect
+				.poll( async () => {
+					const { badge, badgeContainer } =
+						await blockUtils.getSaleBadgeBoundingClientRect( true );
 
-			expect(
-				clientBoundingClientRect.productSaleBadge.right
-			).toBeLessThan(
-				clientBoundingClientRect.productSaleBadgeContainer.right
-			);
+					return badge.right < badgeContainer.right;
+				} )
+				.toBe( true );
 		} );
 
-		test( 'should be aligned on the right by default', async ( {
-			frontendUtils,
+		test( 'should be aligned to the right by default', async ( {
 			editor,
 			page,
 			pageObject,
+			blockUtils,
 		} ) => {
 			await editor.openDocumentSettingsSidebar();
 			await editor.insertBlock( {
@@ -242,35 +255,29 @@ test.describe( `${ blockData.name }`, () => {
 			} );
 			await pageObject.toggleFullScreenOnClickSetting( false );
 
-			const editorBoundingClientRect = await getBoundingClientRect( {
-				frontendUtils,
-				editor,
-				isFrontend: false,
-			} );
+			await expect
+				.poll( async () => {
+					const { badge, badgeContainer } =
+						await blockUtils.getSaleBadgeBoundingClientRect(
+							false
+						);
 
-			expect(
-				editorBoundingClientRect.productSaleBadge.right +
-					blockData.margin
-			).toEqual(
-				editorBoundingClientRect.productSaleBadgeContainer.right
-			);
+					return badgeContainer.right - badge.right;
+				} )
+				.toEqual( blockData.margin );
 
 			await editor.saveSiteEditorEntities();
 
 			await page.goto( blockData.productPage );
 
-			const clientBoundingClientRect = await getBoundingClientRect( {
-				frontendUtils,
-				editor,
-				isFrontend: true,
-			} );
+			await expect
+				.poll( async () => {
+					const { badge, badgeContainer } =
+						await blockUtils.getSaleBadgeBoundingClientRect( true );
 
-			expect(
-				clientBoundingClientRect.productSaleBadge.right +
-					blockData.margin
-			).toEqual(
-				clientBoundingClientRect.productSaleBadgeContainer.right
-			);
+					return badgeContainer.right - badge.right;
+				} )
+				.toEqual( blockData.margin );
 		} );
 	} );
 } );
