@@ -37,10 +37,6 @@ class WC_Woo_Update_Manager_Plugin {
 	 * @return bool
 	 */
 	public static function is_plugin_active(): bool {
-		if ( ! function_exists( 'is_plugin_active' ) ) {
-			include_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-
 		return is_plugin_active_for_network( self::WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE ) || is_plugin_active( self::WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE );
 	}
 
