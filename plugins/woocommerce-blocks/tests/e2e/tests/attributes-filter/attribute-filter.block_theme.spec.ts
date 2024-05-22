@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { cli } from '@woocommerce/e2e-utils';
+import { test as base, expect, cli } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'Filter by Attribute',

@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import type { Request } from '@playwright/test';
+import { Request } from '@playwright/test';
+import { test as base, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies

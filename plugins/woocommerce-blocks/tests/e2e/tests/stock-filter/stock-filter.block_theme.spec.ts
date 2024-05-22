@@ -1,8 +1,12 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { TemplateCompiler, cli } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	TemplateCompiler,
+	cli,
+} from '@woocommerce/e2e-utils';
 
 export const blockData = {
 	name: 'Filter by Stock',

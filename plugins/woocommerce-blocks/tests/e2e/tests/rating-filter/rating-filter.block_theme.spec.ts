@@ -6,7 +6,7 @@ import {
 	expect,
 	cli,
 	TemplateCompiler,
-} from '@woocommerce/e2e-playwright-utils';
+} from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'Filter by Rating',

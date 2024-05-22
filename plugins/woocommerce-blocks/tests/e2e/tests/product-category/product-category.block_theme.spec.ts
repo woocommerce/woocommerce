@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test } from '@woocommerce/e2e-playwright-utils';
+import { expect, test } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'Products by Category',

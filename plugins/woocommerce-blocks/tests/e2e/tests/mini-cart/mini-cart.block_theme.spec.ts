@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { BlockData } from '@woocommerce/e2e-types';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies

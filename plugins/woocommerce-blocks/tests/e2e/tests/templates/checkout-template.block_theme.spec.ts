@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 const permalink = '/checkout';
 const templatePath = 'woocommerce/woocommerce//page-checkout';

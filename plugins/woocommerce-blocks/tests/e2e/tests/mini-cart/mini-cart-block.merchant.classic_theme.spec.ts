@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-import { CLASSIC_THEME_SLUG } from '@woocommerce/e2e-utils';
-import { expect, test } from '@woocommerce/e2e-playwright-utils';
 import { BlockData } from '@woocommerce/e2e-types';
+import { expect, test, CLASSIC_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 const blockData: BlockData = {
 	name: 'Mini-Cart',

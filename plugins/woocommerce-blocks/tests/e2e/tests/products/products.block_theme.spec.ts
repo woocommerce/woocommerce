@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { BlockData } from '@woocommerce/e2e-types';
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -14,6 +14,7 @@ import {
 
 const blockData: BlockData = {
 	name: 'core/query',
+	slug: '',
 	mainClass: '.wc-block-price-filter',
 	selectors: {
 		frontend: {},

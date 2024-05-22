@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-utils';
 
 const COLOR_ATTRIBUTE_VALUES = [ 'Blue', 'Gray', 'Green', 'Red', 'Yellow' ];
 const COLOR_ATTRIBUTES_WITH_COUNTS = [

@@ -1,9 +1,13 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
 import { BlockData } from '@woocommerce/e2e-types';
-import { customerFile, guestFile } from '@woocommerce/e2e-utils';
+import {
+	expect,
+	test as base,
+	customerFile,
+	guestFile,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies

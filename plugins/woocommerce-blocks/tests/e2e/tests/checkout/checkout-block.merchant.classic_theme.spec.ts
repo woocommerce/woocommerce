@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { CLASSIC_THEME_SLUG } from '@woocommerce/e2e-utils';
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect, CLASSIC_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 test.describe( 'Merchant → Checkout', () => {
 	test.beforeEach( async ( { requestUtils } ) => {

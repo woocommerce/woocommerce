@@ -1,8 +1,11 @@
 /**
  * External dependencies
  */
-import { CLASSIC_THEME_SLUG } from '@woocommerce/e2e-utils';
-import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
+import {
+	expect,
+	test as base,
+	CLASSIC_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies

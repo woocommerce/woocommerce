@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect, ConsoleMessage } from '@playwright/test';
 import {
 	STORAGE_STATE_PATH,
 	DB_EXPORT_FILE,
@@ -20,8 +20,6 @@ import {
 	ShippingUtils,
 	StoreApiUtils,
 } from '@woocommerce/e2e-utils';
-
-import type { ConsoleMessage } from '@playwright/test';
 
 /**
  * Set of console logging types observed to protect against unexpected yet

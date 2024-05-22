@@ -7,7 +7,7 @@ import {
 	TemplateCompiler,
 	BASE_URL,
 	cli,
-} from '@woocommerce/e2e-playwright-utils';
+} from '@woocommerce/e2e-utils';
 
 const blockData = {
 	slug: 'woocommerce/price-filter',
@@ -294,6 +294,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 	test( 'should show all products', async ( { page, templateCompiler } ) => {
 		await templateCompiler.compile();
+
 		await page.goto( '/shop' );
 		const products = page
 			.locator( '.wp-block-woocommerce-product-template' )
@@ -308,6 +309,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		templateCompiler,
 	} ) => {
 		await templateCompiler.compile();
+
 		await page.goto( '/shop' );
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',

@@ -11,3 +11,5 @@ export * from './request-utils';
 export * from './shipping';
 export * from './storeApi';
 export * from './wpCli';
+
+export * from './test';

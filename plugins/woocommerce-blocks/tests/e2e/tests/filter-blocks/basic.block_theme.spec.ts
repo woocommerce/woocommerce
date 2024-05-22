@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 const filterBlocks = [
 	{

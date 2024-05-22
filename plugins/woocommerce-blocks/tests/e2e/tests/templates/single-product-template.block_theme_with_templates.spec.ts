@@ -1,19 +1,17 @@
 /**
  * External dependencies
  */
-import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-
-/**
- * Internal dependencies
- */
-import type { TemplateType } from '../../utils/types';
+import {
+	test,
+	expect,
+	BLOCK_THEME_WITH_TEMPLATES_SLUG,
+} from '@woocommerce/e2e-utils';
 
 const testData = {
 	permalink: '/product/belt',
 	templateName: 'Single Product Belt',
 	templatePath: 'single-product-belt',
-	templateType: 'wp_template' as TemplateType,
+	templateType: 'wp_template',
 };
 
 const userText = 'Hello World in the Belt template';

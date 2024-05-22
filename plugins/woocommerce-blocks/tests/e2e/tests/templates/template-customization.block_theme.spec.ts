@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import {
+	test,
+	expect,
 	BLOCK_THEME_SLUG,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
 } from '@woocommerce/e2e-utils';

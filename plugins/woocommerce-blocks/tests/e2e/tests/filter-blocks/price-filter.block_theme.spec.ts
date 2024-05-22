@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-utils';
 
 const test = base.extend( {
 	templateCompiler: async ( { requestUtils }, use ) => {

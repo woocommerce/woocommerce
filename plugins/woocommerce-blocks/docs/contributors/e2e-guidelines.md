@@ -52,7 +52,6 @@ In order to make the codebase cleaner, you should import the function from the p
 
 -   "@woocommerce/e2e-utils": Contains generic utils for interactive with the page.
 -   "@woocommerce/e2e-types": Contains generic types.
--   "@woocommerce/e2e-playwright-utils": Contains utils for playwright for example custom hooks.
 
 By using these packages, you can make your code more modular and easier to maintain.
 
@@ -65,4 +64,3 @@ By using these packages, you can make your code more modular and easier to maint
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/e2e-guidelines.md)
 
 <!-- /FEEDBACK -->
-
