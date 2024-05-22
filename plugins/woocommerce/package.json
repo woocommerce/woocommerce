@@ -178,7 +178,7 @@
 							"wpVersion": "latest-2"
 						}
 					}
-				}, 
+				},
 				{
 					"name": "PHP WP: nightly",
 					"command": "test:php:env",
