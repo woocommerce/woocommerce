@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -29,6 +30,8 @@ class WC_Helper_Admin {
 	public static function load() {
 		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_marketplace_settings' ) );
 		add_filter( 'rest_api_init', array( __CLASS__, 'register_rest_routes' ) );
+
+		add_action( 'current_screen', array( __CLASS__, 'check_subscriptions' ) );
 	}
 
 	/**
@@ -144,6 +147,17 @@ class WC_Helper_Admin {
 		}
 
 		wp_send_json( $featured );
+	}
+
+	public static function check_subscriptions( $screen ) {
+		if ( in_array( $screen->id, [ 'woocommerce_page_wc-admin' ] ) ) {
+			add_action( 'admin_notices', array( __CLASS__, 'inactive_subscription_notice' ) );
+		}
+	}
+
+	public static function inactive_subscription_notice() {
+		WCAdminAssets::register_style( 'woo-inactive-subscription', 'style', array( 'wp-components' ) );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-inactive-subscription', true );
 	}
 }
 
