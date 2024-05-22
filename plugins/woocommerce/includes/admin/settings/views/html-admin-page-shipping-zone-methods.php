@@ -90,7 +90,7 @@ do_action( 'woocommerce_shipping_zone_before_methods_table', $zone );
 		<tr>
 			<th scope="row"></th>
 			<td>
-				<button type="submit" class="button button-primary wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
+				<button type="submit" class="wc-shipping-zone-add-method components-button is-primary" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
 			</td>
 		</tr>
 	</tbody>
@@ -102,7 +102,7 @@ do_action( 'woocommerce_shipping_zone_after_methods_table', $zone );
 ?>
 
 <p class="submit">
-	<button type="submit" name="submit" id="submit" class="button button-primary button-large wc-shipping-zone-method-save" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" disabled><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
+	<button type="submit" name="submit" id="submit" class="button-primary button-large wc-shipping-zone-method-save components-button is-primary" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" disabled><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
 </p>
 
 <script type="text/html" id="tmpl-wc-shipping-zone-method-row-blank">
