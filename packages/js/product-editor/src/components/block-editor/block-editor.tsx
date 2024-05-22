@@ -206,12 +206,7 @@ export function BlockEditor( {
 		{ id: productId !== -1 ? productId : 0 }
 	);
 
-	const isEditorLoading =
-		! settings ||
-		! layoutTemplate ||
-		// variations don't have a product template
-		( postType !== 'product_variation' && ! productTemplate ) ||
-		productId === -1;
+	const isEditorLoading = ! settings || ! layoutTemplate || productId === -1;
 
 	useLayoutEffect( () => {
 		if ( isEditorLoading ) {

@@ -15,8 +15,7 @@ export const useProductTemplate = ( productTemplateId: string | undefined ) => {
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
 
-	const productTemplateIdToFind =
-		productTemplateId || 'standard-product-template';
+	const productTemplateIdToFind = productTemplateId;
 
 	const matchingProductTemplate = productTemplates.find(
 		( productTemplate ) => productTemplate.id === productTemplateIdToFind
