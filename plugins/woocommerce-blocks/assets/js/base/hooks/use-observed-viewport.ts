@@ -44,7 +44,10 @@ export function useObservedViewport(): [
 			entries.forEach( ( entry ) => {
 				if ( entry.target === element ) {
 					const { height, width } = entry.contentRect;
-					setObservedElement( { height, width } );
+					setObservedElement( {
+						height: height + element.offsetTop,
+						width,
+					} );
 				}
 			} );
 		} );

@@ -24,9 +24,9 @@
 .is-large {
 	.wc-block-checkout__sidebar {
 		align-self: flex-start;
+		top: $gap-large;
 		&.is-sticky {
 			position: sticky;
-			top: $gap-largest;
 		}
 	}
 }
