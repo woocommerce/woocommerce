@@ -70,8 +70,14 @@ const config = {
 	},
 	projects: [
 		{
-			name: 'Chrome',
+			name: 'default',
 			use: { ...devices[ 'Desktop Chrome' ] },
+		},
+		{
+			name: 'Gutenberg',
+			use: { ...devices[ 'Desktop Chrome' ] },
+			testIgnore:
+				/.*smoke-tests\/*|.*js-file-monitor\/*|.*admin-tasks\/*|.*activate-and-setup\/*|.*admin-analytics\/*|.*admin-marketing\/*/,
 		},
 	],
 };
