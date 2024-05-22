@@ -124,6 +124,8 @@ test.describe( 'Assembler - Loading Page', () => {
 
 		const assembler = await pageObject.getAssembler();
 		await assembler.getByRole( 'button', { name: 'Save' } ).click();
+		// Abort any additional unnecessary requests
+		await page.evaluate( () => window.stop() );
 		await pageObject.setupSite( baseURL );
 
 		const requestToSetupStore = createRequestsToSetupStoreDictionary();

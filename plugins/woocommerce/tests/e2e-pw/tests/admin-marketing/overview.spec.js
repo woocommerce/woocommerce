@@ -58,7 +58,7 @@ test.describe( 'Marketing page', () => {
 			page.getByText(
 				'Reach new customers and increase sales without leaving WooCommerce'
 			)
-		).not.toBeVisible();
+		).toBeHidden();
 
 		// Refresh the page to make sure the state is saved.
 		await page.reload();
@@ -68,14 +68,18 @@ test.describe( 'Marketing page', () => {
 			page.getByText(
 				'Reach new customers and increase sales without leaving WooCommerce'
 			)
-		).not.toBeVisible();
+		).toBeHidden();
 	} );
 
 	test( 'Learning section can be expanded', async ( { page } ) => {
+		// Go to the Dashboard page (this adds time for posts to be created)
+		await page.goto( 'wp-admin/index.php' );
+
 		// Go to the Marketing page.
 		await page.goto( 'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing' );
 
 		// Expand the learning section
+		await page.getByLabel( 'Expand' ).waitFor();
 		await page.getByLabel( 'Expand' ).click( { timeout: 2000 } );
 
 		// The learning section should be expanded.
@@ -89,6 +93,6 @@ test.describe( 'Marketing page', () => {
 		await page.getByLabel( 'Collapse' ).nth( 2 ).click( { timeout: 2000 } );
 
 		// The learning section should be collapsed.
-		await expect( page.getByText( 'Page 1 of 4' ) ).not.toBeVisible();
+		await expect( page.getByText( 'Page 1 of 4' ) ).toBeHidden();
 	} );
 } );
