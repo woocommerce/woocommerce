@@ -179,18 +179,13 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 					additionalGateways.map( ( g ) => g.id )
 				);
 			}
-			if ( offlineGateways.length ) {
-				shownGateways = shownGateways.concat(
-					offlineGateways.map( ( g ) => g.id )
-				);
-			}
 			if ( shownGateways.length ) {
 				recordEvent( 'tasklist_payments_options', {
 					options: shownGateways,
 				} );
 			}
 		}
-	}, [ additionalGateways, currentGateway, offlineGateways, wcPayGateway ] );
+	}, [ additionalGateways, currentGateway, wcPayGateway ] );
 
 	const trackSeeMore = () => {
 		recordEvent( 'tasklist_payment_see_more', {} );
