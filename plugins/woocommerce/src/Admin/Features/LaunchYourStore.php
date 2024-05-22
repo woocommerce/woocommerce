@@ -78,7 +78,6 @@ class LaunchYourStore {
 		if ( is_array( $event_properties ) ) {
 			$coming_soon = 'no';
 			if ( 'yes' === get_option( 'woocommerce_coming_soon', 'no' ) ) {
-				$coming_soon = 'yes';
 				if ( 'yes' === get_option( 'woocommerce_store_pages_only', 'no' ) ) {
 					$coming_soon = 'store';
 				} else {
