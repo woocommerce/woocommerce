@@ -487,12 +487,12 @@ class CheckoutFields {
 	public function get_core_fields_keys() {
 		return [
 			'email',
+			'country',
 			'first_name',
 			'last_name',
 			'company',
 			'address_1',
 			'address_2',
-			'country',
 			'city',
 			'state',
 			'postcode',
