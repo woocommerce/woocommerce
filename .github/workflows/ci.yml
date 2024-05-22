@@ -345,7 +345,7 @@ jobs:
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
-                  slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
+                  slack_channel: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
                   playwright_report_path: ./out/test-results-*.json
                   playwright_output_dir: ./out/results-data
 
@@ -413,4 +413,4 @@ jobs:
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
-                  slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
+                  slack_channel: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
