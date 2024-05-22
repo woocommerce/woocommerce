@@ -244,7 +244,7 @@
 						"daily-e2e"
 					],
 					"testEnv": {
-						"start": "env:test && PLUGIN_REPOSITORY='WordPress/gutenberg' PLUGIN_NAME=Gutenberg PLUGIN_SLUG=gutenberg ./tests/e2e-pw/bin/install-plugin.sh"
+						"start": "env:test && PLUGIN_REPOSITORY='WordPress/gutenberg' PLUGIN_NAME=Gutenberg PLUGIN_SLUG=gutenberg plugins/woocommerce/tests/e2e-pw/bin/install-plugin.sh"
 					}
 				},
 				{
