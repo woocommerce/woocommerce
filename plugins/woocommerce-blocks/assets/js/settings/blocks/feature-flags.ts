@@ -13,7 +13,7 @@ import { WC_BLOCKS_PHASE, WcBlocksConfig } from './constants';
  *
  * @return {boolean} True if this experimental blocks are enabled.
  */
-export const isExperimentalBuild = (): boolean => {
+export const isExperimentalBlocksEnabled = (): boolean => {
 	const { experimentalBlocksEnabled } = getSetting( 'wcBlocksConfig', {
 		experimentalBlocksEnabled: false,
 	} ) as WcBlocksConfig;
