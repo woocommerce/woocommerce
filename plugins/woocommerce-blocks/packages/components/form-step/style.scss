@@ -10,10 +10,15 @@
 	padding: 0;
 
 	// The below CSS targets form steps, but only when the global option to show form step numbers is off (hence the :not)
+	// It will hide the number and the vertical line that runs down alongside the form step.
 	&:not(.wc-block-checkout__main--with-step-numbers &) {
 		padding: 0;
 
 		.wc-block-components-checkout-step__title::before {
+			display: none;
+		}
+
+		.wc-block-components-checkout-step__container::after {
 			display: none;
 		}
 	}
