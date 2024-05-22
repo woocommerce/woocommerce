@@ -80,10 +80,12 @@ class LaunchYourStore {
 
 		$current_screen         = get_current_screen();
 		$is_setting_page        = $current_screen && 'woocommerce_page_wc-settings' === $current_screen->id;
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$is_woopayments_connect = isset( $_GET['path'] ) &&
 								isset( $_GET['page'] ) &&
 								( '/payments/connect' === sanitize_text_field( wp_unslash( $_GET['path'] ) ) || '/payments/onboarding' === sanitize_text_field( wp_unslash( $_GET['path'] ) ) ) &&
 								'wc-admin' === $_GET['page'];
+		// phpcs:enable
 
 		if ( $is_setting_page || $is_woopayments_connect ) {
 			// Regnerate the share key if it's not set.
