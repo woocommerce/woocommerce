@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Check each pacakge's chosen shipping rate against each valid rate for that package
