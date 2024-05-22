@@ -3069,10 +3069,6 @@ ul.wc_coupon_list_block {
 
 		.column-order_number {
 			width: 20ch;
-
-			.order-date-and-status {
-				display: none;
-			}
 		}
 
 		.column-order_total {
@@ -3430,7 +3426,7 @@ ul.wc_coupon_list_block {
 
 				a.order-view {
 					display: inline-block;
-					width: calc(95% - 48px - 10ch - 20ch);
+					width: calc(100% - 48px - 10ch - 20ch);
 					overflow: hidden;
 					text-overflow: ellipsis;
 					white-space: nowrap;
@@ -3444,7 +3440,7 @@ ul.wc_coupon_list_block {
 			}
 
 			td.column-order_status {
-				top: 1em;
+				top: -1em;
 				right: 48px;
 			}
 
@@ -3453,7 +3449,6 @@ ul.wc_coupon_list_block {
 				padding: 0 !important;
 				display: block !important;
 				float: right;
-				clear: none !important;
 
 				&::before {
 					display: none !important;
