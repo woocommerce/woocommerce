@@ -17,7 +17,6 @@ use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
-use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -610,7 +609,7 @@ class WC_Tracker {
 		// Sort keys by length and then by characters within the same length keys.
 		usort(
 			$keys,
-			function ( $a, $b ) {
+			function( $a, $b ) {
 				if ( strlen( $a ) === strlen( $b ) ) {
 					return strcmp( $a, $b );
 				}
@@ -712,7 +711,7 @@ class WC_Tracker {
 			// Convert into an associative array with a combination of currency and gateway as key.
 			array_reduce(
 				$orders_and_gateway_details,
-				function ( $result, $item ) {
+				function( $result, $item ) {
 					$item->gateway = preg_replace( '/\s+/', ' ', $item->gateway );
 
 					// Introduce currency as a prefix for the key.
@@ -801,7 +800,7 @@ class WC_Tracker {
 			// Convert into an associative array with the origin as key.
 			array_reduce(
 				$orders_origin,
-				function ( $result, $item ) {
+				function( $result, $item ) {
 					$key = $item->origin;
 
 					$result[ $key ] = $item;
@@ -926,7 +925,7 @@ class WC_Tracker {
 		$all_features     = FeaturesUtil::get_features( true, true );
 		$enabled_features = array_filter(
 			$all_features,
-			function ( $feature ) {
+			function( $feature ) {
 				return $feature['is_enabled'];
 			}
 		);
