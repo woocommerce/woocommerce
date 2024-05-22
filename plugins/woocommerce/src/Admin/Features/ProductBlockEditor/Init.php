@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\TemplateMatching;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
@@ -72,6 +73,7 @@ class Init {
 			add_filter( 'register_block_type_args', array( $this, 'register_metadata_attribute' ) );
 			add_filter( 'woocommerce_get_block_types', array( $this, 'get_block_types' ), 999, 1 );
 
+			add_filter( 'woocommerce_rest_get_product', array( $this, 'possibly_add_template_id' ) );
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
 
@@ -80,6 +82,23 @@ class Init {
 
 			$this->register_product_templates();
 		}
+	}
+
+
+	/**
+	 * Adds the product template ID to the product if it doesn't exist.
+	 *
+	 * @param WC_Product $product The product.
+	 */
+	public function possibly_add_template_id( $product ) {
+		if ( ! $product->meta_exists( '_product_template_id' ) ) {
+			$product_template_id = TemplateMatching::determine_product_template( $product, $this->product_templates );
+			if ( $product_template_id ) {
+				$product->add_meta_data( '_product_template_id', $product_template_id, true );
+				$product->save_meta_data();
+			}
+		}
+		return $product;
 	}
 
 	/**
