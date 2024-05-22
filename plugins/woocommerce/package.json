@@ -231,7 +231,7 @@
 				{
 					"name": "Core e2e tests - Gutenberg",
 					"testType": "e2e",
-					"command": "test:e2e-pw",
+					"command": "test:e2e-pw --project=Gutenberg",
 					"shardingArguments": [
 						"--shard=1/5",
 						"--shard=2/5",

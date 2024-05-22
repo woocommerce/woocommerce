@@ -73,6 +73,11 @@ const config = {
 			name: 'Chrome',
 			use: { ...devices[ 'Desktop Chrome' ] },
 		},
+		{
+			name: 'Gutenberg',
+			testIgnore:
+				/.*smoke-tests\/*|.*js-file-monitor\/*|.*admin-tasks\/*|.*activate-and-setup\/*|.*admin-analytics\/*|.*admin-marketing\/*/,
+		},
 	],
 };
 
