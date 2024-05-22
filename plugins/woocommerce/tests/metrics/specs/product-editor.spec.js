@@ -143,6 +143,15 @@ test.describe( 'Product editor performance', () => {
 				.first()
 				.waitFor();
 
+			// FTUX tour on first run through
+			try {
+				await page
+					.getByLabel( 'Close Tour' )
+					.click( { timeout: 3000 } );
+			} catch ( e ) {
+				console.log( 'Tour was not visible, skipping.' );
+			}
+
 			const input = page.getByPlaceholder( 'e.g. 12 oz Coffee Mug' );
 
 			// The first character typed triggers a longer time (isTyping change).
