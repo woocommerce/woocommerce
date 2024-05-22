@@ -9,6 +9,7 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -1698,12 +1699,11 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param array $restrictions Array of allowed email addresses.
 	 *
 	 * @return bool
-	 * @deprecated 9.0.0 In favor of WC_Discounts->is_coupon_emails_allowed.
+	 * @deprecated 9.0.0 In favor of static method DiscountsUtil::is_coupon_emails_allowed.
 	 */
 	public function is_coupon_emails_allowed( $check_emails, $restrictions ) {
-		$discounts = new WC_Discounts( $this );
 
-		return $discounts->is_coupon_emails_allowed( $check_emails, $restrictions );
+		return DiscountsUtil::is_coupon_emails_allowed( $check_emails, $restrictions );
 	}
 
 
