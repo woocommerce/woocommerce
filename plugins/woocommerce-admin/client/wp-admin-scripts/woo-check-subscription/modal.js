@@ -25,7 +25,7 @@ export class CheckSubscriptionModal extends Component {
 
 		return (
 			<Modal
-				title={ __( 'Missing active subscription', 'woocommerce' ) }
+				title={ __( 'Missing subscription', 'woocommerce' ) }
 				onRequestClose={ () => this.setState( { isModalOpen: false } ) }
 				className="woocommerce-navigation-opt-out-modal"
 			>
@@ -33,7 +33,7 @@ export class CheckSubscriptionModal extends Component {
 					{
 						sprintf(
 							__(
-								"We couldn't find active subscription for %s on your store",
+								"We couldn't find active subscription for %s on your store.",
 								'woocommerce'
 							),
 							window.wooCheckSubscriptionData.productName
@@ -48,7 +48,7 @@ export class CheckSubscriptionModal extends Component {
 							this.setState( { isModalOpen: false } )
 						}
 					>
-						{ __( 'Do it later', 'woocommerce' ) }
+						{ __( 'Remind me later', 'woocommerce' ) }
 					</Button>
 
 					<Button
@@ -59,7 +59,7 @@ export class CheckSubscriptionModal extends Component {
 							this.setState( { isModalOpen: false } )
 						}
 					>
-						{ __( 'Resubscribe', 'woocommerce' ) }
+						{ __( 'Manage subscriptions', 'woocommerce' ) }
 					</Button>
 				</div>
 			</Modal>
