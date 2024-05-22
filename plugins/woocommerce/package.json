@@ -114,7 +114,11 @@
 					],
 					"testEnv": {
 						"start": "env:test"
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "PHP 8.0",
@@ -135,7 +139,11 @@
 						"config": {
 							"phpVersion": "8.0"
 						}
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "PHP WP: latest - 1",
@@ -156,7 +164,11 @@
 						"config": {
 							"wpVersion": "latest-1"
 						}
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "PHP WP: latest - 2",
@@ -177,7 +189,11 @@
 						"config": {
 							"wpVersion": "latest-2"
 						}
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "PHP WP: nightly",
@@ -199,7 +215,11 @@
 						"config": {
 							"wpVersion": "nightly"
 						}
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "Core e2e tests",
@@ -226,7 +246,11 @@
 					],
 					"testEnv": {
 						"start": "env:test"
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "Core e2e tests - Gutenberg",
@@ -244,7 +268,7 @@
 						"daily-e2e"
 					],
 					"testEnv": {
-						"start": "env:test && PLUGIN_REPOSITORY='WordPress/gutenberg' PLUGIN_NAME=Gutenberg PLUGIN_SLUG=gutenberg plugins/woocommerce/tests/e2e-pw/bin/install-plugin.sh"
+						"start": "env:test && cd plugins/woocommerce && PLUGIN_REPOSITORY='WordPress/gutenberg' PLUGIN_NAME=Gutenberg PLUGIN_SLUG=gutenberg ./tests/e2e-pw/bin/install-plugin.sh"
 					}
 				},
 				{
@@ -297,7 +321,11 @@
 					],
 					"testEnv": {
 						"start": "env:test"
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "Core API tests - HPOS disabled",
@@ -342,7 +370,11 @@
 					],
 					"testEnv": {
 						"start": "env:perf"
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "Metrics",
@@ -358,6 +390,10 @@
 						"templates/**/*.php",
 						"templates/**/*.html",
 						"tests/metrics/**"
+					],
+					"events": [
+						"pull_request",
+						"push"
 					]
 				}
 			]
