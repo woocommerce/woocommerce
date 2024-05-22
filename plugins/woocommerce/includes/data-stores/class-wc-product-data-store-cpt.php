@@ -100,10 +100,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Method to obtain DB lock on SKU to make sure we only
 	 * create product with unique SKU for concurrent requests.
-	 * 
+	 *
 	 * We are doing so by inserting a row in the wc_product_meta_lookup table
 	 * upfront with the SKU of the product we are trying to insert.
-	 * 
+	 *
 	 * If the SKU is already present in the table, it means that another
 	 * request is already processing the same SKU and we should not proceed
 	 * with the insert.
@@ -113,7 +113,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	private function obtain_lock_on_sku_for_concurrent_requests( $product ) {
 		global $wpdb;
-		$query = "INSERT INTO $wpdb->wc_product_meta_lookup (product_id, sku)
+		$query  = "INSERT INTO $wpdb->wc_product_meta_lookup (product_id, sku)
 		SELECT {$product->get_id()},{$product->get_sku()} FROM $wpdb->wc_product_meta_lookup
 		WHERE NOT EXISTS (SELECT * FROM $wpdb->wc_product_meta_lookup WHERE sku = '{$product->get_sku()}') limit 1;";
 		$result = $wpdb->query( $query );
@@ -163,7 +163,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
 
-			if ( !$this->obtain_lock_on_sku_for_concurrent_requests( $product ) ) {
+			if ( ! $this->obtain_lock_on_sku_for_concurrent_requests( $product ) ) {
 				$product->delete();
 
 				throw new Exception( __( 'The SKU you are trying to insert is already under processing', 'woocommerce' ) );
