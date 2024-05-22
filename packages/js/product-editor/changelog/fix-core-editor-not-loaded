@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Prevent destructuring of core/editor store while it's still loading
+
+

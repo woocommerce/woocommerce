@@ -196,7 +196,7 @@ export function BlockEditor( {
 		{ id: productId !== -1 ? productId : 0 }
 	);
 
-	const { updateEditorSettings } = useDispatch( 'core/editor' );
+	const coreEditor = useDispatch( 'core/editor' );
 
 	const isEditorLoading =
 		! settings ||
@@ -217,7 +217,7 @@ export function BlockEditor( {
 
 		onChange( blockInstances, {} );
 
-		updateEditorSettings( {
+		coreEditor.updateEditorSettings( {
 			...settings,
 			productTemplate,
 		} as Partial< ProductEditorSettings > );
