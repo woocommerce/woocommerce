@@ -31,6 +31,12 @@
 			position: relative;
 		}
 	}
+
+	.is-large {
+		.wc-block-checkout__sidebar {
+			top: 0;
+		}
+	}
 }
 
 body.wc-lock-selected-block--move {

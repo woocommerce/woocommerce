@@ -9,7 +9,7 @@ import classNames from 'classnames';
  */
 import { ForwardRefProps } from './types';
 
-const Sidebar = forwardRef< HTMLInputElement, ForwardRefProps >(
+const Sidebar = forwardRef< HTMLDivElement, ForwardRefProps >(
 	( { children, className = '' }, ref ): JSX.Element => {
 		return (
 			<div
