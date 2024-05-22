@@ -1107,15 +1107,16 @@ test.describe( 'Product Collection', () => {
 		];
 
 		genericArchiveTemplates.forEach( ( { name, path } ) => {
-			test( `${ name } template`, async ( { page, pageObject } ) => {
+			test( `${ name } template`, async ( {
+				editor,
+				page,
+				pageObject,
+			} ) => {
 				await pageObject.replaceProductsWithProductCollectionInTemplate(
 					path
 				);
 
-				const editorFrame = page.frameLocator(
-					'iframe[name="editor-canvas"]'
-				);
-				const previewButtonLocator = editorFrame.locator(
+				const previewButtonLocator = editor.canvas.locator(
 					'button[data-test-id="product-collection-preview-button"]'
 				);
 
@@ -1127,7 +1128,7 @@ test.describe( 'Product Collection', () => {
 				await expect( previewButtonLocator ).toBeHidden();
 
 				// Preview button should be visible when any of inner block is selected
-				await editorFrame
+				await editor.canvas
 					.getByLabel( 'Block: Product Template' )
 					.getByLabel( 'Block: Product Image' )
 					.first()

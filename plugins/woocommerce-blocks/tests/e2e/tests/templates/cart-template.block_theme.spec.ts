@@ -10,7 +10,6 @@ const templateType = 'wp_template';
 test.describe( 'Test the cart template', () => {
 	test( 'Template can be opened in the site editor', async ( {
 		admin,
-		page,
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
@@ -19,10 +18,7 @@ test.describe( 'Test the cart template', () => {
 		} );
 		await editor.enterEditMode();
 		await expect(
-			page
-				.frameLocator( 'iframe[title="Editor canvas"i]' )
-				.locator( 'h1:has-text("Cart")' )
-				.first()
+			editor.canvas.getByLabel( 'Block: Title' )
 		).toBeVisible();
 	} );
 
@@ -54,10 +50,7 @@ test.describe( 'Test the cart template', () => {
 		await admin.page.goto( permalink );
 		await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
 		await expect(
-			admin.page
-				.frameLocator( 'iframe[title="Editor canvas"i]' )
-				.locator( 'h1:has-text("Cart")' )
-				.first()
+			admin.editor.canvas.getByLabel( 'Block: Title' )
 		).toBeVisible();
 	} );
 } );

@@ -77,8 +77,7 @@ class ProductCollectionPage {
 	private page: Page;
 	private admin: Admin;
 	private editor: Editor;
-	private editor: Editor;
-	BLOCK_NAME = 'Product Collection (Beta)';
+	BLOCK_NAME = 'Product Collection';
 	productTemplate!: Locator;
 	products!: Locator;
 	productImages!: Locator;
@@ -95,11 +94,9 @@ class ProductCollectionPage {
 		page: Page;
 		admin: Admin;
 		editor: Editor;
-		editor: Editor;
 	} ) {
 		this.page = page;
 		this.admin = admin;
-		this.editor = editor;
 		this.editor = editor;
 	}
 
@@ -540,7 +537,7 @@ class ProductCollectionPage {
 			( await productTemplate.getAttribute( 'data-block' ) ) ?? '';
 
 		await this.editor.selectBlocks( productTemplate );
-		await this.editor.insertBlock( block, undefined, productTemplateId );
+		await this.editor.insertBlock( block, { clientId: productTemplateId } );
 	}
 
 	async insertProductCollectionInSingleProductBlock() {
@@ -557,8 +554,7 @@ class ProductCollectionPage {
 		await this.editor.selectBlocks( siblingBlock );
 		await this.editor.insertBlock(
 			{ name: this.BLOCK_SLUG },
-			undefined,
-			parentClientId
+			{ clientId: parentClientId }
 		);
 	}
 

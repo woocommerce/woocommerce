@@ -568,7 +568,7 @@ test.describe( 'Billing Address Form', () => {
 				shippingForm.getByLabel( 'Address', { exact: true } )
 			).toHaveValue( '123 Easy Street' );
 			await expect(
-				shippingForm.getByLabel( 'Apartment, suite, etc. (' )
+				shippingForm.getByLabel( 'Apartment, suite, etc. (optional)' )
 			).toHaveValue( 'Testville' );
 			await expect(
 				shippingForm.getByLabel( 'United States (US), Country/' )
@@ -600,8 +600,10 @@ test.describe( 'Billing Address Form', () => {
 				billingForm.getByLabel( 'Address', { exact: true } )
 			).toHaveValue( '' );
 			await expect(
-				billingForm.getByLabel( 'Apartment, suite, etc. (' )
-			).toHaveValue( '' );
+				billingForm.getByRole( 'button', {
+					name: '+ Add apartment, suite, etc.',
+				} )
+			).toBeVisible();
 			await expect(
 				billingForm.getByLabel( 'United States (US), Country/' )
 			).toHaveValue( 'United States (US)' );

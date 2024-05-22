@@ -21,16 +21,16 @@ export interface ComboboxControlOption {
 }
 
 export interface ComboboxProps {
-	autoComplete?: string;
+	autoComplete?: string | undefined;
 	className?: string;
 	errorId: string | null;
 	errorMessage?: string | undefined;
 	id: string;
 	instanceId?: string;
-	label: string;
+	label?: string | undefined;
 	onChange: ( filterValue: string ) => void;
 	options: ComboboxControlOption[];
-	required?: boolean;
+	required?: boolean | undefined;
 	value: string;
 }
 

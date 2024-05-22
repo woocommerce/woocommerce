@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix warnings from using fse theme json filter
