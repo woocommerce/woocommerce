@@ -969,7 +969,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 		filter: brightness(50%);
 	}
 	.woocommerce-add-variation-price-container {
-		width: 15%;
+		width: auto;
 		display: flex;
 		justify-content: flex-end;
 		> button {
@@ -994,7 +994,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 			margin-top: 20px;
 			> button {
 				margin-left: 16px;
-				width: 88px;
+				width: auto;
 				display: unset;
 			}
 		}
