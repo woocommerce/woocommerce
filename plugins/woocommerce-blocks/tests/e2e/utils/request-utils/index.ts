@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { RequestUtils as BaseRequestUtils } from '@wordpress/e2e-test-utils-playwright';
+import { RequestUtils as CoreRequestUtils } from '@wordpress/e2e-test-utils-playwright';
 
 /**
  * Internal dependencies
@@ -16,12 +16,12 @@ import {
 	TemplateCompiler,
 } from './templates';
 
-export class RequestUtils extends BaseRequestUtils {
+export class RequestUtils extends CoreRequestUtils {
 	// The `setup` override is necessary only until
 	// https://github.com/WordPress/gutenberg/pull/59362 is merged.
-	static async setup( ...args: Parameters< typeof BaseRequestUtils.setup > ) {
+	static async setup( ...args: Parameters< typeof CoreRequestUtils.setup > ) {
 		const { request, user, storageState, storageStatePath, baseURL } =
-			await BaseRequestUtils.setup( ...args );
+			await CoreRequestUtils.setup( ...args );
 
 		// We need those checks to satisfy TypeScript.
 		if ( ! storageState ) {
