@@ -676,7 +676,7 @@
           "post_title": "Product editor extensibility guidelines",
           "menu_title": "Extensibility guidelines",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor-extensibility-guidelines.md",
-          "hash": "4e42c13decac01baccb57fa4f7542c3f14347ad60a53272a328bbc290e2a2625",
+          "hash": "8b6102ecab0ceda36afe6d7b2b12fd9d1e62c893ed7409d79cc15da8fc1e76c8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor-extensibility-guidelines.md",
           "id": "a837eb947d31fcff3c6e1f775926ba5eb13cd790"
         },
@@ -1123,7 +1123,7 @@
           "post_title": "Product Editor Guidelines - Groups",
           "menu_title": "Groups",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-product-editor/product-editor-form-groups.md",
-          "hash": "798c7cf96dd1a88be7a7763dae751dafa81acf0f0fba65a868d5ebe875ed75ea",
+          "hash": "70a01fcd0096461538f9071ea19c8c335f186c922b48e8c88a30fc874ce1cd81",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-product-editor/product-editor-form-groups.md",
           "id": "03000dc9341d0d55a113c506e6e0bc87c98e3e1e",
           "links": {
@@ -1266,5 +1266,5 @@
       "categories": []
     }
   ],
-  "hash": "556bb0eab0e99ed385dbc32b96008add0b64f01888d4aae6f7051345aae045cc"
+  "hash": "a0932041c53c24ecf0a04c1163d796fbcd204a8e940fa8664fadea0c4bdea153"
 }

@@ -15,9 +15,10 @@ import { TRACKS_SOURCE } from '../../constants';
 import { useCustomFields } from '../../hooks/use-custom-fields';
 import { CreateModal } from './create-modal';
 import { EditModal } from './edit-modal';
-import { EmptyState } from './empty-state';
+import { EmptyState } from '../empty-state';
 import type { Metadata } from '../../types';
 import type { CustomFieldsProps } from './types';
+import { getEmptyStateSequentialNames } from '../../utils';
 
 export function CustomFields( {
 	className,
@@ -106,7 +107,12 @@ export function CustomFields( {
 			) }
 
 			{ customFields.length === 0 ? (
-				<EmptyState />
+				<EmptyState
+					names={ getEmptyStateSequentialNames(
+						__( 'Custom field', 'woocommerce' ),
+						3
+					) }
+				/>
 			) : (
 				<table
 					{ ...props }
