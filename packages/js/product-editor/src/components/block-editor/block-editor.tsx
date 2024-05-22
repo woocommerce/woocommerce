@@ -193,10 +193,7 @@ export function BlockEditor( {
 		[ product?.meta_data ]
 	);
 
-	const { productTemplate } = useProductTemplate(
-		productTemplateId,
-		product
-	);
+	const { productTemplate } = useProductTemplate( productTemplateId );
 
 	const { layoutTemplate } = useLayoutTemplate(
 		getLayoutTemplateId( productTemplate, postType )
