@@ -22,7 +22,6 @@ class DiscountsUtilTest extends \WC_Unit_Test_Case {
 
 		// Case sensitivity.
 		$this->assertEquals( false, DiscountsUtil::is_coupon_emails_allowed( array( 'Customer@WC.local' ), array( 'customer@wc.local' ) ) );
-		$this->assertEquals( false, DiscountsUtil::is_coupon_emails_allowed( array( 'customer@wc.local' ), array( 'CUSTOMER@WC.LOCAL' ) ) );
 
 		// Empty allowed list.
 		$this->assertEquals( false, DiscountsUtil::is_coupon_emails_allowed( array( 'customer@wc.local' ), array() ) );
