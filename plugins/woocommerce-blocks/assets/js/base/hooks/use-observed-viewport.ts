@@ -45,12 +45,10 @@ export function useObservedViewport(): [
 				if ( entry.target === element ) {
 					const { height, width } = entry.contentRect;
 					const elementTop =
-						parseInt(
-							element.computedStyleMap().get( 'top' )?.value,
-							10
-						) || 0;
+						element.computedStyleMap().get( 'top' )?.toString() ||
+						'0';
 					setObservedElement( {
-						height: height + elementTop,
+						height: height + parseInt( elementTop, 10 ),
 						width,
 					} );
 				}
