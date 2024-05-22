@@ -4,7 +4,7 @@
 import { test as base, expect } from '@woocommerce/e2e-utils';
 
 const test = base.extend( {
-	postWithFilters: async ( { requestUtils }, use ) => {
+	postCompiler: async ( { requestUtils }, use ) => {
 		const post = await requestUtils.createPostFromFile(
 			'filters-with-all-products'
 		);
@@ -16,9 +16,9 @@ const test = base.extend( {
 test.describe( 'Filter by Attributes Block - with All products Block', () => {
 	test( 'should show correct attrs count (color=blue|query_type_color=or)', async ( {
 		page,
-		postWithFilters,
+		postCompiler,
 	} ) => {
-		const post = await postWithFilters.compile( {} );
+		const post = await postCompiler.compile( {} );
 
 		await page.goto(
 			`${ post.link }?filter_color=blue&query_type_color=or`
@@ -38,9 +38,9 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 
 	test( 'should show correct attrs count (color=blue,gray|query_type_color=or)', async ( {
 		page,
-		postWithFilters,
+		postCompiler,
 	} ) => {
-		const post = await postWithFilters.compile( {} );
+		const post = await postCompiler.compile( {} );
 
 		await page.goto(
 			`${ post.link }?filter_color=blue,gray&query_type_color=or`
@@ -60,9 +60,9 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 
 	test( 'should show correct attrs count (color=blue|query_type_color=or|min_price=15|max_price=40)', async ( {
 		page,
-		postWithFilters,
+		postCompiler,
 	} ) => {
-		const post = await postWithFilters.compile( {} );
+		const post = await postCompiler.compile( {} );
 
 		await page.goto(
 			`${ post.link }?filter_color=blue&query_type_color=or&min_price=15&max_price=40`
