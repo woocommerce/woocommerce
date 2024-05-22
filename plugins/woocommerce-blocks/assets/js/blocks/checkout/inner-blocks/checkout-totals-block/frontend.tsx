@@ -12,7 +12,8 @@ const FrontendBlock = ( {
 	children: JSX.Element;
 	className?: string;
 } ): JSX.Element => {
-	const [ observedRef, observedElement, viewWindow ] = useObservedViewport();
+	const [ observedRef, observedElement, viewWindow ] =
+		useObservedViewport< HTMLDivElement >();
 	const isSticky = observedElement.height < viewWindow.height;
 	return (
 		<Sidebar

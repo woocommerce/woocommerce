@@ -18,8 +18,8 @@ import { useState, useRef, useEffect } from '@wordpress/element';
  * };
  * ```
  */
-export function useObservedViewport(): [
-	React.Ref< HTMLDivElement >,
+export function useObservedViewport< T extends HTMLElement >(): [
+	React.Ref< T >,
 	{ height: number; width: number },
 	{ height: number; width: number }
 ] {
@@ -33,7 +33,7 @@ export function useObservedViewport(): [
 		width: 0,
 	} );
 
-	const observedRef = useRef< HTMLDivElement >( null );
+	const observedRef = useRef< T >( null );
 
 	useEffect( () => {
 		if ( ! observedRef.current ) {
