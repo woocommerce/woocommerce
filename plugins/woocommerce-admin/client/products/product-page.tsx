@@ -93,7 +93,7 @@ export default function ProductPage() {
 
 		return () => {
 			document.body.classList.remove( 'is-product-editor' );
-			unregisterPlugin( 'wc-admin-more-menu' );
+			unregisterPlugin( 'wc-admin-product-editor' );
 			unregisterBlocks();
 		};
 	}, [ productIdSearchParam ] );
