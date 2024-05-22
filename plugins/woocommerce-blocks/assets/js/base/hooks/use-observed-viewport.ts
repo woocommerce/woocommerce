@@ -44,8 +44,13 @@ export function useObservedViewport(): [
 			entries.forEach( ( entry ) => {
 				if ( entry.target === element ) {
 					const { height, width } = entry.contentRect;
+					const elementTop =
+						parseInt(
+							element.computedStyleMap().get( 'top' )?.value,
+							10
+						) || 0;
 					setObservedElement( {
-						height: height + element.offsetTop,
+						height: height + elementTop,
 						width,
 					} );
 				}
