@@ -28,7 +28,6 @@ test.describe( `${ blockData.slug } Block`, () => {
 	test( 'block can be inserted in the Site Editor', async ( {
 		admin,
 		requestUtils,
-		editorUtils,
 		editor,
 	} ) => {
 		const template = await requestUtils.createTemplate( 'wp_template', {
@@ -49,7 +48,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 			name: blockData.slug,
 		} );
 
-		const block = await editorUtils.getBlockByName( blockData.slug );
+		const block = await editor.getBlockByName( blockData.slug );
 
 		await expect( block ).toHaveText( 'Breadcrumbs / Navigation / Path' );
 	} );

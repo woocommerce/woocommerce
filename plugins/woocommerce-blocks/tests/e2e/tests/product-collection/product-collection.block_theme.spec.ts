@@ -10,12 +10,11 @@ import { test as base, expect } from '@woocommerce/e2e-utils';
 import ProductCollectionPage, { SELECTORS } from './product-collection.page';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
-	pageObject: async ( { page, admin, editor, editorUtils }, use ) => {
+	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new ProductCollectionPage( {
 			page,
 			admin,
 			editor,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},
@@ -930,19 +929,31 @@ test.describe( 'Product Collection', () => {
 		};
 
 		test( 'as product in specific Single Product template', async ( {
+			admin,
 			page,
 			pageObject,
-			editorUtils,
+			editor,
 		} ) => {
-			const productName = 'Cap';
-			const productSlug = 'cap';
+			await admin.visitSiteEditor( { path: '/wp_template' } );
 
-			await editorUtils.openSpecificProductTemplate(
-				productName,
-				productSlug
-			);
+			await page
+				.getByRole( 'button', { name: 'Add New Template' } )
+				.click();
+			await page
+				.getByRole( 'button', { name: 'Single Item: Product' } )
+				.click();
+			await page
+				.getByRole( 'option', {
+					name: `Cap http://localhost:8889/product/cap/`,
+				} )
+				.click();
+			await page
+				.getByRole( 'button', {
+					name: 'Skip',
+				} )
+				.click();
 
-			await editorUtils.insertBlockUsingGlobalInserter(
+			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
 			);
 
@@ -961,7 +972,7 @@ test.describe( 'Product Collection', () => {
 		} );
 		test( 'as category in Products by Category template', async ( {
 			admin,
-			editorUtils,
+			editor,
 			pageObject,
 			page,
 		} ) => {
@@ -969,8 +980,8 @@ test.describe( 'Product Collection', () => {
 				postId: `woocommerce/woocommerce//taxonomy-product_cat`,
 				postType: 'wp_template',
 			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.insertBlockUsingGlobalInserter(
+			await editor.enterEditMode();
+			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
 			);
 
@@ -990,7 +1001,7 @@ test.describe( 'Product Collection', () => {
 
 		test( 'as tag in Products by Tag template', async ( {
 			admin,
-			editorUtils,
+			editor,
 			pageObject,
 			page,
 		} ) => {
@@ -998,8 +1009,8 @@ test.describe( 'Product Collection', () => {
 				postId: `woocommerce/woocommerce//taxonomy-product_tag`,
 				postType: 'wp_template',
 			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.insertBlockUsingGlobalInserter(
+			await editor.enterEditMode();
+			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
 			);
 
@@ -1019,12 +1030,12 @@ test.describe( 'Product Collection', () => {
 
 		test( 'as site in post', async ( {
 			admin,
-			editorUtils,
+			editor,
 			pageObject,
 			page,
 		} ) => {
 			await admin.createNewPost();
-			await editorUtils.insertBlockUsingGlobalInserter(
+			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
 			);
 

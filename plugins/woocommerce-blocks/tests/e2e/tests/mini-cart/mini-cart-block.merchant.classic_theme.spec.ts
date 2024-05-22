@@ -24,15 +24,18 @@ test.describe( 'Merchant → Mini Cart', () => {
 	} );
 
 	test.describe( 'in widget editor', () => {
-		test( 'can be inserted in a widget area', async ( { editorUtils } ) => {
-			await editorUtils.openWidgetEditor();
-			await editorUtils.openGlobalBlockInserter();
+		test( 'can be inserted in a widget area', async ( {
+			admin,
+			editor,
+		} ) => {
+			await admin.visitWidgetEditor();
+			await editor.openGlobalBlockInserter();
 
-			await editorUtils.page
+			await editor.page
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( blockData.slug );
 
-			const miniCartButton = editorUtils.page.getByRole( 'option', {
+			const miniCartButton = editor.page.getByRole( 'option', {
 				name: blockData.name,
 				exact: true,
 			} );
@@ -42,18 +45,18 @@ test.describe( 'Merchant → Mini Cart', () => {
 			await miniCartButton.click();
 
 			await expect(
-				await editorUtils.getBlockByName( blockData.slug )
+				await editor.getBlockByName( blockData.slug )
 			).toBeVisible();
 		} );
-		test( 'can only be inserted once', async ( { editorUtils } ) => {
-			await editorUtils.openWidgetEditor();
-			await editorUtils.openGlobalBlockInserter();
+		test( 'can only be inserted once', async ( { admin, editor } ) => {
+			await admin.visitWidgetEditor();
+			await editor.openGlobalBlockInserter();
 
-			await editorUtils.page
+			await editor.page
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( blockData.slug );
 
-			const miniCartButton = editorUtils.page.getByRole( 'option', {
+			const miniCartButton = editor.page.getByRole( 'option', {
 				name: blockData.name,
 				exact: true,
 			} );

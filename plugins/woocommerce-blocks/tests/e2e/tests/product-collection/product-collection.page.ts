@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { Locator, Page } from '@playwright/test';
-import { EditorUtils } from '@woocommerce/e2e-utils';
-import { expect, Editor, Admin } from '@wordpress/e2e-test-utils-playwright';
+import { Editor, Admin, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -78,7 +77,7 @@ class ProductCollectionPage {
 	private page: Page;
 	private admin: Admin;
 	private editor: Editor;
-	private editorUtils: EditorUtils;
+	private editor: Editor;
 	BLOCK_NAME = 'Product Collection (Beta)';
 	productTemplate!: Locator;
 	products!: Locator;
@@ -92,17 +91,16 @@ class ProductCollectionPage {
 		page,
 		admin,
 		editor,
-		editorUtils,
 	}: {
 		page: Page;
 		admin: Admin;
 		editor: Editor;
-		editorUtils: EditorUtils;
+		editor: Editor;
 	} ) {
 		this.page = page;
 		this.admin = admin;
 		this.editor = editor;
-		this.editorUtils = editorUtils;
+		this.editor = editor;
 	}
 
 	async chooseCollectionInPost( collection?: Collections ) {
@@ -174,13 +172,13 @@ class ProductCollectionPage {
 			postType: 'wp_template',
 		} );
 
-		await this.editorUtils.enterEditMode();
+		await this.editor.enterEditMode();
 
 		await expect(
 			this.editor.canvas.locator( `[data-type="core/query"]` )
 		).toBeVisible();
 
-		await this.editorUtils.replaceBlockByBlockName(
+		await this.editor.replaceBlockByBlockName(
 			'core/query',
 			this.BLOCK_SLUG
 		);
@@ -211,7 +209,7 @@ class ProductCollectionPage {
 			postId: template,
 			postType: 'wp_template',
 		} );
-		await this.editorUtils.enterEditMode();
+		await this.editor.enterEditMode();
 		await this.editor.canvas.locator( 'body' ).click();
 		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
@@ -535,33 +533,29 @@ class ProductCollectionPage {
 		name: string;
 		attributes: object;
 	} ) {
-		const productTemplate = await this.editorUtils.getBlockByName(
+		const productTemplate = await this.editor.getBlockByName(
 			'woocommerce/product-template'
 		);
 		const productTemplateId =
 			( await productTemplate.getAttribute( 'data-block' ) ) ?? '';
 
 		await this.editor.selectBlocks( productTemplate );
-		await this.editorUtils.insertBlock(
-			block,
-			undefined,
-			productTemplateId
-		);
+		await this.editor.insertBlock( block, undefined, productTemplateId );
 	}
 
 	async insertProductCollectionInSingleProductBlock() {
 		await this.insertSingleProductBlock();
 
-		const siblingBlock = await this.editorUtils.getBlockByName(
+		const siblingBlock = await this.editor.getBlockByName(
 			'woocommerce/product-price'
 		);
 		const clientId =
 			( await siblingBlock.getAttribute( 'data-block' ) ) ?? '';
 		const parentClientId =
-			( await this.editorUtils.getBlockRootClientId( clientId ) ) ?? '';
+			( await this.editor.getBlockRootClientId( clientId ) ) ?? '';
 
 		await this.editor.selectBlocks( siblingBlock );
-		await this.editorUtils.insertBlock(
+		await this.editor.insertBlock(
 			{ name: this.BLOCK_SLUG },
 			undefined,
 			parentClientId
@@ -590,7 +584,7 @@ class ProductCollectionPage {
 	 */
 	private async insertSingleProductBlock() {
 		await this.editor.insertBlock( { name: 'woocommerce/single-product' } );
-		const singleProductBlock = await this.editorUtils.getBlockByName(
+		const singleProductBlock = await this.editor.getBlockByName(
 			'woocommerce/single-product'
 		);
 		await singleProductBlock

@@ -24,24 +24,22 @@ test.describe( 'Merchant → Cart', () => {
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
 	test.describe( 'in page editor', () => {
-		test.beforeEach( async ( { editorUtils, admin } ) => {
+		test.beforeEach( async ( { editor, admin } ) => {
 			await admin.visitSiteEditor( {
 				postId: 'woocommerce/woocommerce//page-cart',
 				postType: 'wp_template',
 			} );
-			await editorUtils.enterEditMode();
+			await editor.enterEditMode();
 		} );
 
 		test( 'renders without crashing and can only be inserted once', async ( {
 			page,
-			editorUtils,
+			editor,
 		} ) => {
-			const blockPresence = await editorUtils.getBlockByName(
-				blockData.slug
-			);
+			const blockPresence = await editor.getBlockByName( blockData.slug );
 			expect( blockPresence ).toBeTruthy();
 
-			await editorUtils.openGlobalBlockInserter();
+			await editor.openGlobalBlockInserter();
 			await page.getByPlaceholder( 'Search' ).fill( blockData.slug );
 			const cartBlockButton = page.getByRole( 'option', {
 				name: blockData.name,
@@ -56,7 +54,6 @@ test.describe( 'Merchant → Cart', () => {
 		test( 'inner blocks can be added/removed by filters', async ( {
 			page,
 			editor,
-			editorUtils,
 		} ) => {
 			// Begin by removing the block.
 			await editor.selectBlocks( blockSelectorInEditor );
@@ -70,7 +67,7 @@ test.describe( 'Merchant → Cart', () => {
 			await removeButton.click();
 			// Expect block to have been removed.
 			await expect(
-				await editorUtils.getBlockByName( blockData.slug )
+				await editor.getBlockByName( blockData.slug )
 			).toHaveCount( 0 );
 
 			// Register a checkout filter to allow `core/table` block in the Checkout block's inner blocks, add
@@ -90,7 +87,7 @@ test.describe( 'Merchant → Cart', () => {
 
 			await editor.insertBlock( { name: 'woocommerce/cart' } );
 			await expect(
-				await editorUtils.getBlockByName( blockData.slug )
+				await editor.getBlockByName( blockData.slug )
 			).not.toHaveCount( 0 );
 
 			// Select the cart-order-summary-block block and try to insert a block. Check the Table block is available.
@@ -145,7 +142,6 @@ test.describe( 'Merchant → Cart', () => {
 		test( 'shows empty cart when changing the view', async ( {
 			page,
 			editor,
-			editorUtils,
 		} ) => {
 			await editor.selectBlocks( blockSelectorInEditor );
 			await editor.page
@@ -159,10 +155,10 @@ test.describe( 'Merchant → Cart', () => {
 			await emptyCartButton.focus();
 			await emptyCartButton.dispatchEvent( 'click' );
 
-			const filledCartBlock = await editorUtils.getBlockByName(
+			const filledCartBlock = await editor.getBlockByName(
 				'woocommerce/filled-cart-block'
 			);
-			const emptyCartBlock = await editorUtils.getBlockByName(
+			const emptyCartBlock = await editor.getBlockByName(
 				'woocommerce/empty-cart-block'
 			);
 			await expect( filledCartBlock ).toBeHidden();

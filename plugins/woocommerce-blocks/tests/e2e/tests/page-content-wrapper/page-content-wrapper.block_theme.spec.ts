@@ -40,7 +40,7 @@ for ( const template of templates ) {
 		test( `the content of the ${ template.title } page is correctly rendered in the ${ template.title } template`, async ( {
 			page,
 			admin,
-			editorUtils,
+			editor,
 			frontendUtils,
 			requestUtils,
 		} ) => {
@@ -57,12 +57,17 @@ for ( const template of templates ) {
 				page.locator( template.blockClassName )
 			).toBeVisible();
 
-			await editorUtils.editor.insertBlock( {
+			await editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
 
-			await editorUtils.updatePost();
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+
+			await page
+				.getByRole( 'button', { name: 'Dismiss this notice' } )
+				.filter( { hasText: 'updated' } )
+				.waitFor();
 
 			// Verify edits are in the template when viewed from the frontend.
 			await template.visitPage( { frontendUtils } );

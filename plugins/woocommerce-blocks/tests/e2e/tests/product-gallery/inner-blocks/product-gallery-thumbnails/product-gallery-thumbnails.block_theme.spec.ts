@@ -36,12 +36,11 @@ const changeNumberOfThumbnailsInputValue = async (
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
-	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
+	pageObject: async ( { page, editor, frontendUtils }, use ) => {
 		const pageObject = new ProductGalleryPage( {
 			page,
 			editor,
 			frontendUtils,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},
@@ -64,7 +63,6 @@ test.describe( `${ blockData.name }`, () => {
 		page,
 		editor,
 		pageObject,
-		editorUtils,
 		frontendUtils,
 	} ) => {
 		await editor.insertBlock( {
@@ -82,7 +80,7 @@ test.describe( `${ blockData.name }`, () => {
 		// - The Thumbnails block has a lower index than the Large Image block.
 
 		const groupBlock = (
-			await editorUtils.getBlockByTypeWithParent(
+			await editor.getBlockByTypeWithParent(
 				'core/group',
 				'woocommerce/product-gallery'
 			)
@@ -94,7 +92,7 @@ test.describe( `${ blockData.name }`, () => {
 		expect( groupBlockClassAttribute ).toContain( 'is-layout-flex' );
 		expect( groupBlockClassAttribute ).toContain( 'is-nowrap' );
 
-		const isThumbnailsBlockEarlier = await editorUtils.isBlockEarlierThan(
+		const isThumbnailsBlockEarlier = await editor.isBlockEarlierThan(
 			groupBlock,
 			'woocommerce/product-gallery-thumbnails',
 			'core/group'
@@ -158,11 +156,10 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'Position thumbnails on the left of the large image', async ( {
 			page,
 			editor,
-			editorUtils,
 			frontendUtils,
 		} ) => {
 			// Currently we are adding the block under the legacy Product Image Gallery block, but in the future we have to add replace the product gallery block with this block.
-			const parentBlock = await editorUtils.getBlockByName(
+			const parentBlock = await editor.getBlockByName(
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
@@ -170,17 +167,14 @@ test.describe( `${ blockData.name }`, () => {
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
 				// eslint-disable-next-line playwright/no-conditional-in-test
-				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
+				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
-			await editorUtils.insertBlock(
+			await editor.insertBlock(
 				{ name: 'woocommerce/product-gallery' },
-				undefined,
-				parentClientId
+				{ clientId: parentClientId }
 			);
-			await (
-				await editorUtils.getBlockByName( blockData.name )
-			 ).click();
+			await ( await editor.getBlockByName( blockData.name ) ).click();
 
 			await editor.openDocumentSettingsSidebar();
 			await page
@@ -190,7 +184,7 @@ test.describe( `${ blockData.name }`, () => {
 				.click();
 
 			const groupBlock = (
-				await editorUtils.getBlockByTypeWithParent(
+				await editor.getBlockByTypeWithParent(
 					'core/group',
 					'woocommerce/product-gallery'
 				)
@@ -202,12 +196,11 @@ test.describe( `${ blockData.name }`, () => {
 			expect( groupBlockClassAttribute ).toContain( 'is-layout-flex' );
 			expect( groupBlockClassAttribute ).toContain( 'is-nowrap' );
 
-			const isThumbnailsBlockEarlier =
-				await editorUtils.isBlockEarlierThan(
-					groupBlock,
-					'woocommerce/product-gallery-thumbnails',
-					'core/group'
-				);
+			const isThumbnailsBlockEarlier = await editor.isBlockEarlierThan(
+				groupBlock,
+				'woocommerce/product-gallery-thumbnails',
+				'core/group'
+			);
 
 			expect( isThumbnailsBlockEarlier ).toBe( true );
 
@@ -244,11 +237,10 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'Position thumbnails on the bottom of the large image', async ( {
 			page,
 			editor,
-			editorUtils,
 			frontendUtils,
 		} ) => {
 			// Currently we are adding the block under the legacy Product Image Gallery block, but in the future we have to add replace the product gallery block with this block.
-			const parentBlock = await editorUtils.getBlockByName(
+			const parentBlock = await editor.getBlockByName(
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
@@ -256,17 +248,14 @@ test.describe( `${ blockData.name }`, () => {
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
 				// eslint-disable-next-line playwright/no-conditional-in-test
-				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
+				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
-			await editorUtils.insertBlock(
+			await editor.insertBlock(
 				{ name: 'woocommerce/product-gallery' },
-				undefined,
-				parentClientId
+				{ clientId: parentClientId }
 			);
-			await (
-				await editorUtils.getBlockByName( blockData.name )
-			 ).click();
+			await ( await editor.getBlockByName( blockData.name ) ).click();
 
 			await editor.openDocumentSettingsSidebar();
 			await page
@@ -276,7 +265,7 @@ test.describe( `${ blockData.name }`, () => {
 				.click();
 
 			const groupBlock = (
-				await editorUtils.getBlockByTypeWithParent(
+				await editor.getBlockByTypeWithParent(
 					'core/group',
 					'woocommerce/product-gallery'
 				)
@@ -288,12 +277,11 @@ test.describe( `${ blockData.name }`, () => {
 			expect( groupBlockClassAttribute ).toContain( 'is-layout-flex' );
 			expect( groupBlockClassAttribute ).toContain( 'is-vertical' );
 
-			const isThumbnailsBlockEarlier =
-				await editorUtils.isBlockEarlierThan(
-					groupBlock,
-					'woocommerce/product-gallery-thumbnails',
-					'core/group'
-				);
+			const isThumbnailsBlockEarlier = await editor.isBlockEarlierThan(
+				groupBlock,
+				'woocommerce/product-gallery-thumbnails',
+				'core/group'
+			);
 
 			expect( isThumbnailsBlockEarlier ).toBe( false );
 
@@ -331,11 +319,10 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'Position thumbnails on the right of the large image', async ( {
 			page,
 			editor,
-			editorUtils,
 			frontendUtils,
 		} ) => {
 			// Currently we are adding the block under the legacy Product Image Gallery block, but in the future we have to add replace the product gallery block with this block.
-			const parentBlock = await editorUtils.getBlockByName(
+			const parentBlock = await editor.getBlockByName(
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
@@ -343,17 +330,14 @@ test.describe( `${ blockData.name }`, () => {
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
 				// eslint-disable-next-line playwright/no-conditional-in-test
-				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
+				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
-			await editorUtils.insertBlock(
+			await editor.insertBlock(
 				{ name: 'woocommerce/product-gallery' },
-				undefined,
-				parentClientId
+				{ clientId: parentClientId }
 			);
-			await (
-				await editorUtils.getBlockByName( blockData.name )
-			 ).click();
+			await ( await editor.getBlockByName( blockData.name ) ).click();
 
 			await editor.openDocumentSettingsSidebar();
 			await page
@@ -363,7 +347,7 @@ test.describe( `${ blockData.name }`, () => {
 				.click();
 
 			const groupBlock = (
-				await editorUtils.getBlockByTypeWithParent(
+				await editor.getBlockByTypeWithParent(
 					'core/group',
 					'woocommerce/product-gallery'
 				)
@@ -375,12 +359,11 @@ test.describe( `${ blockData.name }`, () => {
 			expect( groupBlockClassAttribute ).toContain( 'is-layout-flex' );
 			expect( groupBlockClassAttribute ).toContain( 'is-nowrap' );
 
-			const isThumbnailsBlockEarlier =
-				await editorUtils.isBlockEarlierThan(
-					groupBlock,
-					'woocommerce/product-gallery-thumbnails',
-					'core/group'
-				);
+			const isThumbnailsBlockEarlier = await editor.isBlockEarlierThan(
+				groupBlock,
+				'woocommerce/product-gallery-thumbnails',
+				'core/group'
+			);
 
 			expect( isThumbnailsBlockEarlier ).toBe( false );
 

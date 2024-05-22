@@ -16,10 +16,10 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 	} );
 
 	test( 'block can be inserted and it is rendered on the frontend', async ( {
-		editorUtils,
+		editor,
 		page,
 	} ) => {
-		await editorUtils.publishAndVisitPost();
+		await editor.publishAndVisitPost();
 
 		await expect(
 			page.locator( '.wc-block-grid__product.wc-block-layout' )

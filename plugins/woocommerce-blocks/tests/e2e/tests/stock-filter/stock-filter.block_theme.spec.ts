@@ -52,10 +52,9 @@ test.describe( `${ blockData.name } Block`, () => {
 
 	test( 'should allow changing the display style', async ( {
 		page,
-		editorUtils,
 		editor,
 	} ) => {
-		const stockFilter = await editorUtils.getBlockByName( blockData.slug );
+		const stockFilter = await editor.getBlockByName( blockData.slug );
 		await editor.selectBlocks( stockFilter );
 
 		await expect(
@@ -89,10 +88,9 @@ test.describe( `${ blockData.name } Block`, () => {
 
 	test( 'should allow toggling the visibility of the filter button', async ( {
 		page,
-		editorUtils,
 		editor,
 	} ) => {
-		const priceFilterControls = await editorUtils.getBlockByName(
+		const priceFilterControls = await editor.getBlockByName(
 			blockData.slug
 		);
 		await editor.selectBlocks( priceFilterControls );
@@ -114,7 +112,7 @@ test.describe( `${ blockData.name } Block`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
-	test.beforeEach( async ( { admin, page, editor, editorUtils } ) => {
+	test.beforeEach( async ( { admin, page, editor } ) => {
 		await cli(
 			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
@@ -124,7 +122,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			postType: 'wp_template',
 		} );
 
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -213,7 +211,6 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		page,
 		admin,
 		editor,
-		editorUtils,
 		templateCompiler,
 	} ) => {
 		const template = await templateCompiler.compile();
@@ -222,9 +219,9 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 			postId: template.id,
 			postType: template.type,
 		} );
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 
-		const stockFilterControls = await editorUtils.getBlockByName(
+		const stockFilterControls = await editor.getBlockByName(
 			blockData.slug
 		);
 		await expect( stockFilterControls ).toBeVisible();

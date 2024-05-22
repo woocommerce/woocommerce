@@ -11,13 +11,13 @@ test.describe( 'Test the cart template', () => {
 	test( 'Template can be opened in the site editor', async ( {
 		admin,
 		page,
-		editorUtils,
+		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
 		} );
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 		await expect(
 			page
 				.frameLocator( 'iframe[title="Editor canvas"i]' )
@@ -30,13 +30,12 @@ test.describe( 'Test the cart template', () => {
 		admin,
 		editor,
 		page,
-		editorUtils,
 	} ) => {
 		await admin.visitSiteEditor( { path: '/page' } );
 		await editor.page
 			.getByRole( 'button', { name: 'Cart', exact: true } )
 			.click();
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 
 		await expect(
 			editor.canvas.locator( 'h1:has-text("Cart")' ).first()
@@ -66,14 +65,13 @@ test.describe( 'Test the cart template', () => {
 test.describe( 'Test editing the cart template', () => {
 	test( 'Merchant can transform shortcode block into blocks', async ( {
 		admin,
-		editorUtils,
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
 		} );
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 		await editor.setContent(
 			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"cart"} /-->'
 		);

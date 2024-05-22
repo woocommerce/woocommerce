@@ -37,15 +37,15 @@ const test = base.extend< { pageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
-	test.beforeEach( async ( { admin, editorUtils, localPickupUtils } ) => {
+	test.beforeEach( async ( { admin, editor, localPickupUtils } ) => {
 		await localPickupUtils.disableLocalPickup();
 
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//order-confirmation',
 			postType: 'wp_template',
 		} );
-		await editorUtils.enterEditMode();
-		await editorUtils.transformIntoBlocks();
+		await editor.enterEditMode();
+		await editor.transformIntoBlocks();
 	} );
 
 	test( 'Place order', async ( {

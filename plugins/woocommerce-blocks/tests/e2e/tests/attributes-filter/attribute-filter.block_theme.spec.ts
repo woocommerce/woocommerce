@@ -19,7 +19,7 @@ const test = base.extend( {
 } );
 
 test.describe( `${ blockData.name } Block`, () => {
-	test.beforeEach( async ( { admin, editor, editorUtils } ) => {
+	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.createNewPost();
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -28,9 +28,7 @@ test.describe( `${ blockData.name } Block`, () => {
 				heading: 'Filter By Attribute',
 			},
 		} );
-		const attributeFilter = await editorUtils.getBlockByName(
-			blockData.slug
-		);
+		const attributeFilter = await editor.getBlockByName( blockData.slug );
 
 		await attributeFilter.getByText( 'Size' ).click();
 		await attributeFilter.getByText( 'Done' ).click();
@@ -50,12 +48,9 @@ test.describe( `${ blockData.name } Block`, () => {
 
 	test( 'should allow changing the display style', async ( {
 		page,
-		editorUtils,
 		editor,
 	} ) => {
-		const attributeFilter = await editorUtils.getBlockByName(
-			blockData.slug
-		);
+		const attributeFilter = await editor.getBlockByName( blockData.slug );
 		await editor.selectBlocks( attributeFilter );
 
 		await expect(
@@ -79,12 +74,9 @@ test.describe( `${ blockData.name } Block`, () => {
 
 	test( 'should allow toggling the visibility of the filter button', async ( {
 		page,
-		editorUtils,
 		editor,
 	} ) => {
-		const attributeFilter = await editorUtils.getBlockByName(
-			blockData.slug
-		);
+		const attributeFilter = await editor.getBlockByName( blockData.slug );
 		await editor.selectBlocks( attributeFilter );
 
 		await expect(
@@ -104,7 +96,7 @@ test.describe( `${ blockData.name } Block`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
-	test.beforeEach( async ( { admin, page, editor, editorUtils } ) => {
+	test.beforeEach( async ( { admin, page, editor } ) => {
 		await cli(
 			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
@@ -114,7 +106,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			postType: 'wp_template',
 		} );
 
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
 			attributes: {
@@ -122,9 +114,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 				heading: 'Filter By Attribute',
 			},
 		} );
-		const attributeFilter = await editorUtils.getBlockByName(
-			blockData.slug
-		);
+		const attributeFilter = await editor.getBlockByName( blockData.slug );
 
 		await attributeFilter.getByText( 'Size' ).click();
 		await attributeFilter.getByText( 'Done' ).click();
@@ -215,7 +205,6 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		page,
 		admin,
 		editor,
-		editorUtils,
 		templateCompiler,
 	} ) => {
 		const template = await templateCompiler.compile();
@@ -225,8 +214,8 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 			postType: template.type,
 		} );
 
-		await editorUtils.enterEditMode();
-		const attributeFilterControl = await editorUtils.getBlockByName(
+		await editor.enterEditMode();
+		const attributeFilterControl = await editor.getBlockByName(
 			blockData.slug
 		);
 		await expect( attributeFilterControl ).toBeVisible();

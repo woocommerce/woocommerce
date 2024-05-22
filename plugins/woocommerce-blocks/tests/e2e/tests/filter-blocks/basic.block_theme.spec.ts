@@ -38,10 +38,10 @@ test.describe( 'Filter blocks registration', () => {
 
 	test( 'Variations can be inserted through the inserter.', async ( {
 		page,
-		editorUtils,
+		editor,
 	} ) => {
 		for ( const block of filterBlocks ) {
-			await editorUtils.insertBlockUsingGlobalInserter( block.title );
+			await editor.insertBlockUsingGlobalInserter( block.title );
 
 			await expect(
 				page.getByLabel( `Block: ${ block.title }` )
@@ -50,11 +50,11 @@ test.describe( 'Filter blocks registration', () => {
 	} );
 
 	test( 'Each filter block comes with a default title', async ( {
-		editorUtils,
+		editor,
 		page,
 	} ) => {
 		for ( const block of filterBlocks ) {
-			await editorUtils.insertBlockUsingGlobalInserter( block.title );
+			await editor.insertBlockUsingGlobalInserter( block.title );
 
 			await expect(
 				page

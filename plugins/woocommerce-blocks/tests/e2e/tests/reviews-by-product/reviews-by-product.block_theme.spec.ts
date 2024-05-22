@@ -28,7 +28,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 
 	test( 'block can be inserted and it successfully renders a review in the editor and the frontend', async ( {
 		page,
-		editorUtils,
+		editor,
 	} ) => {
 		const productCheckbox = page.getByLabel( 'Hoodie, has 2 reviews' );
 		await productCheckbox.check();
@@ -41,7 +41,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 			page.getByText( hoodieReviews[ 0 ].review )
 		).toBeVisible();
 
-		await editorUtils.publishAndVisitPost();
+		await editor.publishAndVisitPost();
 
 		await expect(
 			page.getByText( hoodieReviews[ 0 ].review )
@@ -51,9 +51,9 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 	test( 'sorts by most recent by default and can sort by highest rating', async ( {
 		page,
 		frontendUtils,
-		editorUtils,
+		editor,
 	} ) => {
-		await editorUtils.publishAndVisitPost();
+		await editor.publishAndVisitPost();
 		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
 
 		const reviews = block.locator(
@@ -71,9 +71,9 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 	test( 'can sort by lowest rating', async ( {
 		page,
 		frontendUtils,
-		editorUtils,
+		editor,
 	} ) => {
-		await editorUtils.publishAndVisitPost();
+		await editor.publishAndVisitPost();
 		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
 
 		const reviews = block.locator(

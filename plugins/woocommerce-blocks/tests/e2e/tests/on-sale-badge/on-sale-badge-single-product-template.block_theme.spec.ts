@@ -4,7 +4,7 @@
 import {
 	test as base,
 	expect,
-	EditorUtils,
+	Editor,
 	FrontendUtils,
 } from '@woocommerce/e2e-utils';
 
@@ -36,12 +36,11 @@ const blockData = {
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
-	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
+	pageObject: async ( { page, editor, frontendUtils }, use ) => {
 		const pageObject = new ProductGalleryPage( {
 			page,
 			editor,
 			frontendUtils,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},
@@ -49,14 +48,14 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 
 const getBoundingClientRect = async ( {
 	frontendUtils,
-	editorUtils,
+	editor,
 	isFrontend,
 }: {
 	frontendUtils: FrontendUtils;
-	editorUtils: EditorUtils;
+	editor: Editor;
 	isFrontend: boolean;
 } ) => {
-	const page = isFrontend ? frontendUtils.page : editorUtils.editor.canvas;
+	const page = isFrontend ? frontendUtils.page : editor.canvas;
 	return {
 		productSaleBadge: await page
 			.locator(
@@ -76,24 +75,21 @@ const getBoundingClientRect = async ( {
 };
 test.describe( `${ blockData.name }`, () => {
 	test.describe( `On the Single Product Template`, () => {
-		test.beforeEach( async ( { admin, editorUtils, editor } ) => {
+		test.beforeEach( async ( { admin, editor } ) => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//${ blockData.slug }`,
 				postType: 'wp_template',
 			} );
-			await editorUtils.enterEditMode();
+			await editor.enterEditMode();
 			await editor.setContent( '' );
 		} );
 
-		test( 'should be rendered on the editor side', async ( {
-			editorUtils,
-			editor,
-		} ) => {
+		test( 'should be rendered on the editor side', async ( { editor } ) => {
 			await editor.insertBlock( {
 				name: 'woocommerce/product-gallery',
 			} );
 
-			const block = await editorUtils.getBlockByName( blockData.name );
+			const block = await editor.getBlockByName( blockData.name );
 
 			await expect( block ).toBeVisible();
 		} );
@@ -144,7 +140,6 @@ test.describe( `${ blockData.name }`, () => {
 
 		test( 'should be aligned on the left', async ( {
 			frontendUtils,
-			editorUtils,
 			editor,
 			page,
 			pageObject,
@@ -156,15 +151,15 @@ test.describe( `${ blockData.name }`, () => {
 
 			await pageObject.toggleFullScreenOnClickSetting( false );
 
-			const block = await editorUtils.getBlockByName( blockData.name );
+			const block = await editor.getBlockByName( blockData.name );
 
 			await block.click();
 
-			await editorUtils.setAlignOption( 'Align Left' );
+			await editor.setAlignOption( 'Align Left' );
 
 			const editorBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,
-				editorUtils,
+				editor,
 				isFrontend: false,
 			} );
 
@@ -178,7 +173,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			const clientBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,
-				editorUtils,
+				editor,
 				isFrontend: true,
 			} );
 
@@ -189,7 +184,6 @@ test.describe( `${ blockData.name }`, () => {
 
 		test( 'should be aligned on the center', async ( {
 			frontendUtils,
-			editorUtils,
 			editor,
 			page,
 			pageObject,
@@ -201,15 +195,15 @@ test.describe( `${ blockData.name }`, () => {
 
 			await pageObject.toggleFullScreenOnClickSetting( false );
 
-			const block = await editorUtils.getBlockByName( blockData.name );
+			const block = await editor.getBlockByName( blockData.name );
 
 			await block.click();
 
-			await editorUtils.setAlignOption( 'Align Center' );
+			await editor.setAlignOption( 'Align Center' );
 
 			const editorBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,
-				editorUtils,
+				editor,
 				isFrontend: false,
 			} );
 
@@ -225,7 +219,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			const clientBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,
-				editorUtils,
+				editor,
 				isFrontend: true,
 			} );
 
@@ -238,7 +232,6 @@ test.describe( `${ blockData.name }`, () => {
 
 		test( 'should be aligned on the right by default', async ( {
 			frontendUtils,
-			editorUtils,
 			editor,
 			page,
 			pageObject,
@@ -251,7 +244,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			const editorBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,
-				editorUtils,
+				editor,
 				isFrontend: false,
 			} );
 
@@ -268,7 +261,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			const clientBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,
-				editorUtils,
+				editor,
 				isFrontend: true,
 			} );
 

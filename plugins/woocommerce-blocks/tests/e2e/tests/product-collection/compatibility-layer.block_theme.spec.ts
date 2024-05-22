@@ -76,12 +76,11 @@ const multipleOccurrenceScenarios: Scenario[] = [
 ];
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
-	pageObject: async ( { page, admin, editor, editorUtils }, use ) => {
+	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new ProductCollectionPage( {
 			page,
 			admin,
 			editor,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},

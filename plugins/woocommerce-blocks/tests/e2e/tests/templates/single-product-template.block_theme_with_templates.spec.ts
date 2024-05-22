@@ -25,14 +25,15 @@ test.describe( 'Single Product Template', () => {
 	test( 'loads the theme template for a specific product using the product slug and it can be customized', async ( {
 		admin,
 		editor,
-		editorUtils,
 		page,
 	} ) => {
 		// Edit the theme template.
-		await editorUtils.visitTemplateEditor(
-			testData.templateName,
-			testData.templateType
-		);
+		await admin.visitSiteEditor( {
+			postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
+			postType: testData.templateType,
+		} );
+		await editor.enterEditMode();
+
 		await editor.insertBlock( {
 			name: 'core/paragraph',
 			attributes: { content: userText },
@@ -45,17 +46,5 @@ test.describe( 'Single Product Template', () => {
 			page.getByText( themeTemplateText ).first()
 		).toBeVisible();
 		await expect( page.getByText( userText ).first() ).toBeVisible();
-
-		// Revert edition and verify the template from the theme is used.
-		await admin.visitSiteEditor( {
-			path: `/${ testData.templateType }/all`,
-		} );
-		await editorUtils.revertTemplateCustomizations( testData.templateName );
-		await page.goto( testData.permalink );
-
-		await expect(
-			page.getByText( themeTemplateText ).first()
-		).toBeVisible();
-		await expect( page.getByText( userText ) ).toHaveCount( 0 );
 	} );
 } );

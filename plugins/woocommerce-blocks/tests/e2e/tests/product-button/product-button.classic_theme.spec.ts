@@ -14,15 +14,11 @@ import { blockData } from './utils';
 import ProductCollectionPage from '../product-collection/product-collection.page';
 
 const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
-	productCollectionPage: async (
-		{ page, admin, editor, editorUtils },
-		use
-	) => {
+	productCollectionPage: async ( { page, admin, editor }, use ) => {
 		const pageObject = new ProductCollectionPage( {
 			page,
 			admin,
 			editor,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},

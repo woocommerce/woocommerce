@@ -10,7 +10,6 @@ import {
 	WPCLIUtils,
 	Admin,
 	Editor,
-	EditorUtils,
 	FrontendUtils,
 	LocalPickupUtils,
 	MiniCartUtils,
@@ -109,7 +108,6 @@ const test = base.extend<
 		admin: Admin;
 		editor: Editor;
 		pageUtils: PageUtils;
-		editorUtils: EditorUtils;
 		frontendUtils: FrontendUtils;
 		storeApiUtils: StoreApiUtils;
 		performanceUtils: PerformanceUtils;
@@ -146,9 +144,6 @@ const test = base.extend<
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
 	},
-	editorUtils: async ( { editor, page, admin }, use ) => {
-		await use( new EditorUtils( editor, page, admin ) );
-	},
 	frontendUtils: async ( { page, requestUtils }, use ) => {
 		await use( new FrontendUtils( page, requestUtils ) );
 	},
@@ -173,7 +168,7 @@ const test = base.extend<
 	requestUtils: [
 		async ( {}, use, workerInfo ) => {
 			const requestUtils = await RequestUtils.setup( {
-				baseURL: workerInfo.project.use.baseURL,
+				baseURL: workerInfo.project.use.baseURL as string,
 				storageStatePath: STORAGE_STATE_PATH,
 			} );
 

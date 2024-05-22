@@ -6,15 +6,15 @@ import { test, expect } from '@woocommerce/e2e-utils';
 test.describe( 'Test the order confirmation template', () => {
 	test( 'Template can be opened in the site editor', async ( {
 		page,
-		editorUtils,
+		editor,
 		admin,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//order-confirmation',
 			postType: 'wp_template',
 		} );
-		await editorUtils.enterEditMode();
-		await editorUtils.transformIntoBlocks();
+		await editor.enterEditMode();
+		await editor.transformIntoBlocks();
 		await expect(
 			page
 				.frameLocator( 'iframe[title="Editor canvas"i]' )

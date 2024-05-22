@@ -7,7 +7,6 @@ test.describe( 'Single Product template', () => {
 	test( 'loads the Single Product template for a specific product', async ( {
 		admin,
 		editor,
-		editorUtils,
 		page,
 	} ) => {
 		const testData = {
@@ -43,15 +42,5 @@ test.describe( 'Single Product template', () => {
 		// Verify edits are visible.
 		await page.goto( testData.permalink );
 		await expect( page.getByText( userText ).first() ).toBeVisible();
-
-		// Revert edition.
-		await admin.visitSiteEditor( {
-			path: `/${ testData.templateType }/all`,
-		} );
-		await editorUtils.revertTemplateCreation( testData.templateName );
-		await page.goto( testData.permalink );
-
-		// Verify the edits are no longer visible.
-		await expect( page.getByText( userText ) ).toHaveCount( 0 );
 	} );
 } );

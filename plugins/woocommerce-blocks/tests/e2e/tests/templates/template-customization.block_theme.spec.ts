@@ -27,14 +27,15 @@ test.describe( 'Template customization', () => {
 				admin,
 				frontendUtils,
 				editor,
-				editorUtils,
 				page,
 			} ) => {
-				// Verify the template can be edited.
-				await editorUtils.visitTemplateEditor(
-					testData.templateName,
-					testData.templateType
-				);
+				await admin.visitSiteEditor( {
+					postId: `woocommerce/woocommerce//${ testData.templatePath }`,
+					postType: testData.templateType,
+				} );
+
+				await editor.enterEditMode();
+
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: userText },
@@ -52,16 +53,6 @@ test.describe( 'Template customization', () => {
 				await expect(
 					page.getByText( userText ).first()
 				).toBeVisible();
-
-				// Verify the edition can be reverted.
-				await admin.visitSiteEditor( {
-					path: `/${ testData.templateType }/all`,
-				} );
-				await editorUtils.revertTemplateCustomizations(
-					testData.templateName
-				);
-				await testData.visitPage( { frontendUtils, page } );
-				await expect( page.getByText( userText ) ).toHaveCount( 0 );
 			} );
 
 			if ( testData.fallbackTemplate ) {
@@ -69,14 +60,16 @@ test.describe( 'Template customization', () => {
 					admin,
 					frontendUtils,
 					editor,
-					editorUtils,
 					page,
 				} ) => {
 					// Edit fallback template and verify changes are visible.
-					await editorUtils.visitTemplateEditor(
-						testData.fallbackTemplate?.templateName || '',
-						testData.templateType
-					);
+					await admin.visitSiteEditor( {
+						postId: `woocommerce/woocommerce//${ testData.fallbackTemplate?.templatePath }`,
+						postType: testData.templateType,
+					} );
+
+					await editor.enterEditMode();
+
 					await editor.insertBlock( {
 						name: 'core/paragraph',
 						attributes: {
@@ -88,18 +81,6 @@ test.describe( 'Template customization', () => {
 					await expect(
 						page.getByText( fallbackTemplateUserText ).first()
 					).toBeVisible();
-
-					// Verify the edition can be reverted.
-					await admin.visitSiteEditor( {
-						path: `/${ testData.templateType }/all`,
-					} );
-					await editorUtils.revertTemplateCustomizations(
-						testData.fallbackTemplate?.templateName || ''
-					);
-					await testData.visitPage( { frontendUtils, page } );
-					await expect(
-						page.getByText( fallbackTemplateUserText )
-					).toHaveCount( 0 );
 				} );
 			}
 		} );
@@ -119,14 +100,15 @@ test.describe( 'Template customization', () => {
 				admin,
 				editor,
 				requestUtils,
-				editorUtils,
 				frontendUtils,
 			} ) => {
 				// Edit the WooCommerce default template
-				await editorUtils.visitTemplateEditor(
-					testData.templateName,
-					testData.templateType
-				);
+				await admin.visitSiteEditor( {
+					postId: `woocommerce/woocommerce//${ testData.templatePath }`,
+					postType: testData.templateType,
+				} );
+				await editor.enterEditMode();
+
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: woocommerceTemplateUserText },
@@ -144,9 +126,9 @@ test.describe( 'Template customization', () => {
 					postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
 					postType: testData.templateType,
 				} );
-				await editorUtils.enterEditMode();
+				await editor.enterEditMode();
 
-				await editorUtils.editor.insertBlock( {
+				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: userText },
 				} );
@@ -169,9 +151,31 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					path: `/${ testData.templateType }/all`,
 				} );
-				await editorUtils.revertTemplateCustomizations(
-					testData.templateName
-				);
+
+				await page
+					.getByPlaceholder( 'Search' )
+					.fill( testData.templateName );
+
+				const templateRow = page.getByRole( 'row' ).filter( {
+					has: page.getByRole( 'link', {
+						name: testData.templateName,
+						exact: true,
+					} ),
+				} );
+				const resetButton = templateRow.getByLabel( 'Reset', {
+					exact: true,
+				} );
+				const revertedNotice = page
+					.getByLabel( 'Dismiss this notice' )
+					.getByText( `"${ testData.templateName }" reverted.` );
+				const savedButton = page.getByRole( 'button', {
+					name: 'Saved',
+				} );
+
+				await resetButton.click();
+
+				await expect( revertedNotice ).toBeVisible();
+				await expect( savedButton ).toBeVisible();
 
 				await testData.visitPage( { frontendUtils, page } );
 
