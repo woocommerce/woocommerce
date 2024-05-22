@@ -195,11 +195,6 @@ class WC_Tracker {
 		// Cart & checkout tech (blocks or shortcodes).
 		$data['cart_checkout'] = self::get_cart_checkout_info();
 
-		// Product Collection tracking on FSE themes.
-		if ( wc_current_theme_is_fse_theme() ) {
-			$data['product_collection_block'] = self::get_product_collection_info();
-		}
-
 		// Mini Cart block, which only exists since wp 5.9.
 		if ( version_compare( get_bloginfo( 'version' ), '5.9', '>=' ) ) {
 			$data['mini_cart_block'] = self::get_mini_cart_info();
@@ -1143,68 +1138,6 @@ class WC_Tracker {
 			'pickup_location'                           => $pickup_location_data,
 			'additional_fields'                         => $additional_fields_data,
 		);
-	}
-
-	/**
-	 * Get info about the Product Collection Block.
-	 *
-	 * @return array
-	 */
-	public static function get_product_collection_info() {
-
-		/**
-		 * Follows the 'template_id' => 'location_context' pattern.
-		 */
-		$home_template_id = get_stylesheet() . '//home';
-		$woo_prefix       = 'woocommerce/woocommerce';
-		$templates        = array(
-			$home_template_id                            => 'home',
-			$woo_prefix . '//single-product'             => 'product',
-			$woo_prefix . '//archive-product'            => 'product-catalog',
-			$woo_prefix . '//page-cart'                  => 'cart',
-			$woo_prefix . '//mini-cart'                  => 'cart',
-			$woo_prefix . '//page-checkout'              => 'checkout',
-			$woo_prefix . '//taxonomy-product_attribute' => 'product-archive',
-			$woo_prefix . '//taxonomy-product_cat'       => 'product-archive',
-			$woo_prefix . '//taxonomy-product_tag'       => 'product-archive',
-			$woo_prefix . '//taxonomy-product_brand'     => 'product-archive',
-			$woo_prefix . '//order-confirmation'         => 'order',
-		);
-
-		$instances = array();
-		foreach ( $templates as $template_id => $template_name ) {
-
-			// Group collection names by template_name.
-			if ( ! isset( $instances[ $template_name ] ) || ! is_array( $instances[ $template_name ] ) ) {
-				$instances[ $template_name ] = array(
-					'collections' => array(),
-				);
-			}
-
-			$template_type = $woo_prefix . '//mini-cart' === $template_id ? 'wp_template_part' : 'wp_template';
-			$template      = get_block_template( $template_id, $template_type );
-			if ( ! $template instanceof \WP_Block_Template ) {
-				continue;
-			}
-
-			if ( empty( $template->content ) ) {
-				continue;
-			}
-
-			if ( ! has_block( 'woocommerce/product-collection', $template->content ) ) {
-				continue;
-			}
-
-			$blocks     = parse_blocks( $template->content );
-			$track_data = ProductCollectionUtils::parse_blocks_track_data( $blocks );
-			foreach ( $track_data as $data ) {
-				if ( isset( $data['collection'] ) ) {
-					$instances[ $template_name ]['collections'][] = $data['collection'];
-				}
-			}
-		}
-
-		return $instances;
 	}
 
 	/**
