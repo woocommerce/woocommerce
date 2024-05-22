@@ -268,12 +268,6 @@ jobs:
                     - plugin: 'WooCommerce Shipping & Tax'
                       repo: 'automattic/woocommerce-services'
                       slug: woocommerce-services
-                    - plugin: 'Gutenberg'
-                      repo: 'WordPress/gutenberg'
-                      slug: gutenberg
-                    - plugin: 'Gutenberg - Nightly'
-                      repo: 'bph/gutenberg'
-                      slug: gutenberg
         steps:
             - uses: actions/checkout@v3
 
@@ -410,10 +404,6 @@ jobs:
                       slug: woocommerce-paypal-payments
                     - plugin: 'WooCommerce Shipping & Tax'
                       slug: woocommerce-services
-                    - plugin: 'Gutenberg'
-                      slug: gutenberg
-                    - plugin: 'Gutenberg - Nightly'
-                      slug: gutenberg-nightly
         steps:
             - name: Download test report artifact
               uses: actions/download-artifact@v3

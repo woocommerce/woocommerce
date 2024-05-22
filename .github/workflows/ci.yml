@@ -5,6 +5,14 @@ on:
         branches:
             - 'trunk'
             - 'release/*'
+    workflow_call:
+      inputs: 
+        trigger:
+          description: 'Type of run to trigger. E.g. daily-e2e, release-checks, etc.'
+          required: true
+          default: 'default'
+          type: string
+          
 concurrency:
     group: '${{ github.workflow }}-${{ github.ref }}'
     cancel-in-progress: true
@@ -43,6 +51,11 @@ jobs:
                       }
 
                       let githubEvent = ${{ toJson( github.event_name ) }};
+                      let trigger = ${{ toJson( inputs.trigger ) }};
+                    
+                      if ( trigger ) {
+                        githubEvent = trigger;
+                      }
 
                       const child_process = require( 'node:child_process' );
                       child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );

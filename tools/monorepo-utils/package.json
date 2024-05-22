@@ -83,6 +83,10 @@
 						"jest.config.js",
 						"tsconfig.json",
 						"src/**/*.ts"
+					],
+					"events": [
+						"pull_request",
+						"push"
 					]
 				}
 			]
