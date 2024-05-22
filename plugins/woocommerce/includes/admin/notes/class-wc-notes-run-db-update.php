@@ -113,8 +113,9 @@ class WC_Notes_Run_Db_Update {
 			add_query_arg(
 				array(
 					'do_update_woocommerce' => 'true',
+					'return_url'            => wc_get_current_admin_url() ? wc_get_current_admin_url() : admin_url( 'admin.php?page=wc-settings' ),
 				),
-				wc_get_current_admin_url() ? wc_get_current_admin_url() : admin_url( 'admin.php?page=wc-settings' )
+				admin_url()
 			);
 
 		$note_actions = array(
