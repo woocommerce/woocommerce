@@ -1487,6 +1487,42 @@ class WC_Helper {
 	 *
 	 * @return array
 	 */
+	public static function get_checked_products() {
+		$cache_key = '_woocommerce_helper_checked_products';
+		$data      = get_transient( $cache_key );
+		if ( false !== $data ) {
+			return $data;
+		}
+
+		// TODO: pass list of installed product IDs?
+		$request = WC_Helper_API::get(
+			'checked-products',
+			array(
+				'authenticated' => false,
+			)
+		);
+
+		// Retry in 15 minutes for non-200 response.
+		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
+			set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+			return array();
+		}
+
+		$data = json_decode( wp_remote_retrieve_body( $request ), true );
+		if ( empty( $data ) || ! is_array( $data ) ) {
+			$data = array();
+		}
+
+		set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+		return $data;
+	}
+
+
+	/**
+	 * Get the connected user's subscriptions.
+	 *
+	 * @return array
+	 */
 	public static function get_subscriptions() {
 		$cache_key = '_woocommerce_helper_subscriptions';
 		$data      = get_transient( $cache_key );

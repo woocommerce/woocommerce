@@ -21,6 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * an account on WooCommerce.com.
  */
 class WC_Helper_Admin {
+	private static $checked_products = array();
+
+	private static $checked_screen_param = array();
 
 	/**
 	 * Loads the class, runs on init
@@ -150,14 +153,64 @@ class WC_Helper_Admin {
 	}
 
 	public static function check_subscriptions( $screen ) {
-		if ( in_array( $screen->id, [ 'woocommerce_page_wc-admin' ] ) ) {
-			add_action( 'admin_notices', array( __CLASS__, 'inactive_subscription_notice' ) );
+		self::$checked_products = WC_Helper::get_checked_products();
+		if ( empty( self::$checked_products ) ) {
+			return;
 		}
+
+		self::$checked_screen_param = self::get_checked_screen_param( $screen );
+		if ( empty( self::$checked_screen_param ) ) {
+			return;
+		}
+
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_check_subscription_modal_scripts' ) );
 	}
 
-	public static function inactive_subscription_notice() {
-		WCAdminAssets::register_style( 'woo-inactive-subscription', 'style', array( 'wp-components' ) );
-		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-inactive-subscription', true );
+	public static function enqueue_check_subscription_modal_scripts() {
+		WCAdminAssets::register_style( 'woo-check-subscription', 'style', array( 'wp-components' ) );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-check-subscription', true );
+
+		wp_localize_script(
+			'wc-admin-woo-check-subscription',
+			'wooCheckSubscriptionData',
+			array(
+				'url' => 'https://woocommerce.com/my-account/my-subscriptions/',
+				'productName' => self::$checked_screen_param['name'],
+			)
+		);
+	}
+
+	private static function get_checked_screen_param( $screen ) {
+		foreach ( self::$checked_products as $product_id => $param ) {
+			if ( empty( $param['screens'][ $screen->id ] ) ) {
+				continue;
+			}
+
+			// Check query strings.
+			if ( ! self::query_string_matches( $screen, $param ) ) {
+				continue;
+			}
+
+			if ( ! WC_Helper::has_product_subscription( absint( $product_id ) ) ) {
+				return $param;
+			}
+		}
+
+		return array();
+	}
+
+	private static function query_string_matches( $screen, $param ) {
+		if ( empty( $param['screens'][ $screen->id ]['qs'] ) ) {
+			return true;
+		}
+
+		$qs = $param['screens'][ $screen->id ]['qs'];
+		foreach ( $qs as $key => $val ) {
+			if ( empty( $_GET[ $key ] ) || $_GET[ $key ] !== $val ) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
 
