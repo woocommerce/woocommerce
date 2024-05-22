@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { Button, Modal } from '@wordpress/components';
 
-export class NavigationOptOutContainer extends Component {
+export class CheckSubscriptionModal extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
@@ -19,21 +19,26 @@ export class NavigationOptOutContainer extends Component {
 			return null;
 		}
 
-		if ( ! window.surveyData || ! window.surveyData.url ) {
+		if ( ! window.wooCheckSubscriptionData ) {
 			return null;
 		}
 
 		return (
 			<Modal
-				title={ __( 'Help us improve', 'woocommerce' ) }
+				title={ __( 'Missing active subscription', 'woocommerce' ) }
 				onRequestClose={ () => this.setState( { isModalOpen: false } ) }
 				className="woocommerce-navigation-opt-out-modal"
 			>
 				<p>
-					{ __(
-						"Take this 2-minute survey to share why you're opting out of the new navigation",
-						'woocommerce'
-					) }
+					{
+						sprintf(
+							__(
+								"We couldn't find active subscription for %s on your store",
+								'woocommerce'
+							),
+							window.wooCheckSubscriptionData.productName
+						)
+					}
 				</p>
 
 				<div className="woocommerce-navigation-opt-out-modal__actions">
@@ -43,18 +48,18 @@ export class NavigationOptOutContainer extends Component {
 							this.setState( { isModalOpen: false } )
 						}
 					>
-						{ __( 'No thanks', 'woocommerce' ) }
+						{ __( 'Do it later', 'woocommerce' ) }
 					</Button>
 
 					<Button
 						isPrimary
 						target="_blank"
-						href={ window.surveyData.url }
+						href={ window.wooCheckSubscriptionData.url }
 						onClick={ () =>
 							this.setState( { isModalOpen: false } )
 						}
 					>
-						{ __( 'Share feedback', 'woocommerce' ) }
+						{ __( 'Resubscribe', 'woocommerce' ) }
 					</Button>
 				</div>
 			</Modal>
