@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useBlockProps } from '@wordpress/block-editor';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlockStylingEnabled } from '@woocommerce/block-settings';
 import classNames from 'classnames';
 
 /**
@@ -15,7 +15,7 @@ import metadata from './block.json';
 const v1 = {
 	supports: {
 		...metadata.supports,
-		...( isFeaturePluginBuild() && {
+		...( isExperimentalBlockStylingEnabled() && {
 			__experimentalBorder: {
 				radius: false,
 				color: true,

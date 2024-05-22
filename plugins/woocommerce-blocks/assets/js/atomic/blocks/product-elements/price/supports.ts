@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlockStylingEnabled } from '@woocommerce/block-settings';
 import { __experimentalGetSpacingClassesAndStyles } from '@wordpress/block-editor';
 
 /**
@@ -11,7 +11,7 @@ import sharedConfig from '../shared/config';
 
 export const supports = {
 	...sharedConfig.supports,
-	...( isFeaturePluginBuild() && {
+	...( isExperimentalBlockStylingEnabled() && {
 		color: {
 			text: true,
 			background: true,

@@ -10,7 +10,7 @@ import {
 	AlignmentToolbar,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlockStylingEnabled } from '@woocommerce/block-settings';
 import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 
 /**
@@ -42,7 +42,7 @@ const TitleEdit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 						setAttributes( { headingLevel: newLevel } )
 					}
 				/>
-				{ isFeaturePluginBuild() && (
+				{ isExperimentalBlockStylingEnabled() && (
 					<AlignmentToolbar
 						value={ align }
 						onChange={ ( newAlign ) => {
@@ -84,7 +84,7 @@ const TitleEdit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 	);
 };
 
-const Title = isFeaturePluginBuild()
+const Title = isExperimentalBlockStylingEnabled()
 	? compose( [
 			withProductSelector( {
 				icon: BLOCK_ICON,

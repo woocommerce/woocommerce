@@ -4,7 +4,7 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import type { BlockConfiguration } from '@wordpress/blocks';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlockStylingEnabled } from '@woocommerce/block-settings';
 import { __experimentalGetSpacingClassesAndStyles } from '@wordpress/block-editor';
 
 /**
@@ -31,7 +31,7 @@ const blockConfig: BlockConfiguration = {
 	save: Save,
 	supports: {
 		...sharedConfig.supports,
-		...( isFeaturePluginBuild() && {
+		...( isExperimentalBlockStylingEnabled() && {
 			typography: {
 				fontSize: true,
 				lineHeight: true,

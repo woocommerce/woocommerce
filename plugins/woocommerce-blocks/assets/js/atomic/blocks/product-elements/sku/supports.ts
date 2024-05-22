@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlockStylingEnabled } from '@woocommerce/block-settings';
 import {
 	// @ts-expect-error We check if this exists before using it.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -22,7 +22,7 @@ export const supports = {
 	typography: {
 		fontSize: true,
 		lineHeight: true,
-		...( isFeaturePluginBuild() && {
+		...( isExperimentalBlockStylingEnabled() && {
 			__experimentalFontWeight: true,
 			__experimentalFontFamily: true,
 			__experimentalFontStyle: true,

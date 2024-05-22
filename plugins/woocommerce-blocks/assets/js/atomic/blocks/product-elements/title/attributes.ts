@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { BlockAttributes } from '@wordpress/blocks';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlockStylingEnabled } from '@woocommerce/block-settings';
 
 let blockAttributes: BlockAttributes = {
 	headingLevel: {
@@ -22,7 +22,7 @@ let blockAttributes: BlockAttributes = {
 	},
 };
 
-if ( isFeaturePluginBuild() ) {
+if ( isExperimentalBlockStylingEnabled() ) {
 	blockAttributes = {
 		...blockAttributes,
 		align: {
