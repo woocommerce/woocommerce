@@ -84,18 +84,16 @@
 	}
 
 	.wc-block-components-checkbox__mark {
-		background: $input-border-gray;
-		fill: #fff;
-		border-radius: $universal-border-radius;
+		fill: $input-text-active;
 		position: absolute;
+		margin-left: em(3px);
+		margin-top: em(1px);
 		width: em(18px);
 		height: em(18px);
-		padding: em(1px) em(3px) em(5px);
 		pointer-events: none;
 
 		.has-dark-controls & {
-			background: #fff;
-			fill: $input-text-active;
+			fill: #fff;
 		}
 	}
 
