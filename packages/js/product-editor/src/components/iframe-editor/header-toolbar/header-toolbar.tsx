@@ -134,36 +134,39 @@ export function HeaderToolbar( {
 					// @ts-expect-error variant prop exists
 					variant="unstyled"
 				>
-					<ToolbarItem
-						ref={ inserterButton }
-						as={ Button }
-						className="woocommerce-iframe-editor__header-inserter-toggle"
-						variant="primary"
-						isPressed={ isInserterOpened }
-						onMouseDown={ (
-							event: MouseEvent< HTMLButtonElement >
-						) => {
-							event.preventDefault();
-						} }
-						onClick={ toggleInserter }
-						disabled={ ! isInserterEnabled }
-						icon={ plus }
-						label={
-							! isInserterOpened
-								? __( 'Add', 'woocommerce' )
-								: __( 'Close', 'woocommerce' )
-						}
-						showTooltip
-					/>
-					{ isLargeViewport && (
+					<div className="woocommerce-iframe-editor-document-tools__left">
 						<ToolbarItem
-							as={ ToolSelector }
-							disabled={ isTextModeEnabled }
+							ref={ inserterButton }
+							as={ Button }
+							className="woocommerce-iframe-editor__header-inserter-toggle"
+							variant="primary"
+							isPressed={ isInserterOpened }
+							onMouseDown={ (
+								event: MouseEvent< HTMLButtonElement >
+							) => {
+								event.preventDefault();
+							} }
+							onClick={ toggleInserter }
+							disabled={ ! isInserterEnabled }
+							icon={ plus }
+							label={
+								! isInserterOpened
+									? __( 'Add', 'woocommerce' )
+									: __( 'Close', 'woocommerce' )
+							}
+							showTooltip
 						/>
-					) }
-					<ToolbarItem as={ EditorHistoryUndo } />
-					<ToolbarItem as={ EditorHistoryRedo } />
-					<ToolbarItem as={ DocumentOverview } />
+						{ isLargeViewport && (
+							<ToolbarItem
+								as={ ToolSelector }
+								disabled={ isTextModeEnabled }
+								size="compact"
+							/>
+						) }
+						<ToolbarItem as={ EditorHistoryUndo } size="compact" />
+						<ToolbarItem as={ EditorHistoryRedo } size="compact" />
+						<ToolbarItem as={ DocumentOverview } size="compact" />
+					</div>
 				</NavigableToolbar>
 				{ hasFixedToolbar && isLargeViewport && renderBlockToolbar && (
 					<>
