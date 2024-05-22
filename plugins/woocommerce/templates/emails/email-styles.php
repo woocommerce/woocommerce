@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 8.6.0
+ * @version 9.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -241,6 +241,14 @@ img {
 	vertical-align: middle;
 	margin-<?php echo is_rtl() ? 'left' : 'right'; ?>: 10px;
 	max-width: 100%;
+}
+
+/*
+ * Temporary measure until e-mail clients more properly support the correct styles.
+ * See https://github.com/woocommerce/woocommerce/pull/47738.
+ */
+.screen-reader-text {
+	display: none;
 }
 
 /**
