@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { cli } from '../../utils';
 
 const filterBlocks = [
 	{
@@ -33,6 +34,10 @@ const filterBlocks = [
 
 test.describe( 'Filter blocks registration', () => {
 	test.beforeEach( async ( { admin } ) => {
+		await cli(
+			'npm run wp-env run tests-cli -- wp option update woocommerce_feature_experimental_blocks_enabled yes'
+		);
+
 		await admin.createNewPost();
 	} );
 

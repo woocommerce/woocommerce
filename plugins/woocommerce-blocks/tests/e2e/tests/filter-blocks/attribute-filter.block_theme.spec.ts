@@ -8,6 +8,7 @@ import path from 'path';
  * Internal dependencies
  */
 import { PRODUCT_CATALOG_LINK, PRODUCT_CATALOG_TEMPLATE_ID } from './constants';
+import { cli } from '../../utils';
 
 const TEMPLATE_PATH = path.join( __dirname, './attribute-filter.handlebars' );
 
@@ -24,6 +25,9 @@ const COLOR_ATTRIBUTES_WITH_COUNTS = [
 test.describe( 'Product Filter: Attribute Block', () => {
 	test.describe( 'With default display style', () => {
 		test.beforeEach( async ( { requestUtils } ) => {
+			await cli(
+				'npm run wp-env run tests-cli -- wp option update woocommerce_feature_experimental_blocks_enabled yes'
+			);
 			await requestUtils.updateTemplateContents(
 				PRODUCT_CATALOG_TEMPLATE_ID,
 				TEMPLATE_PATH,
