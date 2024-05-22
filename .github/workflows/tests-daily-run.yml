@@ -1,6 +1,9 @@
 name: 'Daily tests run'
-on: [pull_request]
-
+on:
+  schedule:
+    - cron: '25 3 * * *'
+  workflow_dispatch: 
+    
 jobs:
   run-tests:
     name: 'Run tests'
