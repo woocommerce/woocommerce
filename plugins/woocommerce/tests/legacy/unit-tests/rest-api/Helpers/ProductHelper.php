@@ -23,6 +23,11 @@ use WC_Cache_Helper;
 class ProductHelper {
 
 	/**
+	 * Counter to insert unique SKU for concurrent tests.
+	 */
+	private static $sku_counter = 0;
+
+	/**
 	 * Delete a product.
 	 *
 	 * @param int $product_id ID to delete.
@@ -48,7 +53,7 @@ class ProductHelper {
 				'name'          => 'Dummy Product',
 				'regular_price' => 10,
 				'price'         => 10,
-				'sku'           => 'DUMMY SKU',
+				'sku'           => "DUMMY SKU" . self::$sku_counter,
 				'manage_stock'  => false,
 				'tax_status'    => 'taxable',
 				'downloadable'  => false,
@@ -57,6 +62,8 @@ class ProductHelper {
 				'weight'        => '1.1',
 			)
 		);
+
+		self::$sku_counter++;
 
 		if ( $save ) {
 			$product->save();
