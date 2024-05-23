@@ -73,7 +73,7 @@ class TemplateMatchingTest extends WC_Unit_Test_Case {
 							),
 						),
 					),
-					'match_fn'           => function( $product ) {
+					'match_fn'           => function ( $product ) {
 						return $product->get_regular_price() === '15';
 					},
 				)
@@ -96,7 +96,6 @@ class TemplateMatchingTest extends WC_Unit_Test_Case {
 			$this->product_templates
 		);
 		$this->assertEquals( 'standard-product-template', $product_template_id );
-
 	}
 
 	/**
@@ -123,7 +122,6 @@ class TemplateMatchingTest extends WC_Unit_Test_Case {
 			$this->product_templates
 		);
 		$this->assertEquals( 'meta-product-template', $product_template_id );
-
 	}
 
 	/**
