@@ -49,49 +49,6 @@ export function getContentFromFreeform(
 	return false;
 }
 
-/**
- * By default the blocks variable always contains one paragraph
- * block with empty content, that causes the description to never
- * be empty. This function removes the default block to keep
- * the description empty.
- *
- * @param blocks The block list
- * @return Empty array if there is only one paragraph block with empty content
- * in the list. The same block list otherwise.
- */
-function clearDescriptionIfEmpty( blocks?: BlockInstance[] | null ) {
-	if ( ! blocks?.length ) {
-		return [];
-	}
-
-	if ( blocks.length === 1 ) {
-		const block = blocks[ 0 ];
-		const isParagraph = block.name === 'core/paragraph';
-
-		if ( isParagraph ) {
-			// dropCap is set to false by default; we don't care what it is set to
-			// when determining if a paragraph block is empty
-			const { content, dropCap, backgroundColor, ...attributes } =
-				block.attributes;
-			const isContentEmpty = ! content || ! content.trim();
-			// When the background is cleared, the backgroundColor is set to undefined,
-			// so we need to check if it is actually set to a value
-			const isBackgroundColorSet = !! backgroundColor;
-			const isAttributesSet = Object.keys( attributes ).length > 0;
-
-			if (
-				isContentEmpty &&
-				! isBackgroundColorSet &&
-				! isAttributesSet
-			) {
-				return [];
-			}
-		}
-	}
-
-	return blocks;
-}
-
 export function DescriptionBlockEdit( {
 	attributes,
 }: DescriptionBlockEditComponent ) {
@@ -150,7 +107,7 @@ export function DescriptionBlockEdit( {
 			return;
 		}
 
-		const html = serialize( clearDescriptionIfEmpty( modalEditorBlocks ) );
+		const html = serialize( modalEditorBlocks );
 		setDescription( html );
 	}, [ modalEditorBlocks, setDescription, hasChanged ] );
 
