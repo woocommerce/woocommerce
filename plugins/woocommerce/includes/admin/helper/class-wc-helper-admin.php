@@ -159,6 +159,11 @@ class WC_Helper_Admin {
 	}
 
 	public static function check_subscriptions( $screen ) {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return;
+		}
+
 		self::$checked_products = WC_Helper::get_checked_products();
 		if ( empty( self::$checked_products ) ) {
 			return;
@@ -166,6 +171,21 @@ class WC_Helper_Admin {
 
 		self::$checked_screen_param = self::get_checked_screen_param( $screen );
 		if ( empty( self::$checked_screen_param ) ) {
+			return;
+		}
+
+		$product_id     = self::$checked_screen_param['id'];
+		$count_meta     = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX, $product_id );
+		$dismiss_count  = absint( get_user_meta( $user_id, $count_meta, true ) );
+		$max_dismissals = self::$checked_screen_param['max_dismissals'];
+		if ( $dismiss_count >= $max_dismissals ) {
+			return;
+		}
+
+		$timestamp_meta   = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX, $product_id );
+		$last_dismissed   = absint( get_user_meta( $user_id, $timestamp_meta, true) );
+		$show_again_after = self::$checked_screen_param['show_again_after']; // in seconds
+		if ( $last_dismissed > 0 && ( time() - $last_dismissed ) < $show_again_after ) {
 			return;
 		}
 
@@ -191,7 +211,7 @@ class WC_Helper_Admin {
 
 	private static function get_checked_screen_param( $screen ) {
 		foreach ( self::$checked_products as $product_id => $param ) {
-			if ( empty( $param['screens'][ $screen->id ] ) ) {
+			if ( ! isset( $param['screens'][ $screen->id ] ) ) {
 				continue;
 			}
 
@@ -203,7 +223,6 @@ class WC_Helper_Admin {
 			$product_id = absint( $product_id );
 			if ( ! WC_Helper::has_product_subscription( $product_id ) ) {
 				$param['id'] = $product_id;
-
 				return $param;
 			}
 		}
