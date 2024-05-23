@@ -3,10 +3,6 @@
  */
 import { expect, test } from '@woocommerce/e2e-utils';
 
-/**
- * Internal dependencies
- */
-
 const blockData = {
 	slug: 'woocommerce/breadcrumbs',
 	name: 'Store Breadcrumbs',
