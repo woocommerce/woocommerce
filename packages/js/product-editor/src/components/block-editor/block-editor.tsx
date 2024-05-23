@@ -223,6 +223,26 @@ export function BlockEditor( {
 		'<div data-block-name="woocommerce/product-radio-field" data-title="Charge sales tax on" data-property="stock_status"></div>' +
 		'<div data-block-name="woocommerce/product-summary-field" data-property="description"></div>' +
 		'</div>' +
+		'</div>' +
+		'<div data-block-name="woocommerce/product-tab" data-id="pricing" data-title="Pricing">' +
+		'<div data-block-name="woocommerce/product-section" data-id="basic-details" data-title="Basic Details" data-description="">' +
+		'<div data-block-name="woocommerce/product-name-field"></div>' +
+		'<div data-block-name="woocommerce/product-regular-price-field" data-label="Regular price"></div>' +
+		'<div data-block-name="woocommerce/product-sale-price-field" data-label="Sale price"></div>' +
+		'<div data-block-name="woocommerce/product-schedule-sale-fields" data-label="Sale price"></div>' +
+		'<div data-block-name="woocommerce/product-radio-field" data-title="Charge sales tax on" data-property="stock_status"></div>' +
+		'<div data-block-name="woocommerce/product-summary-field" data-property="description"></div>' +
+		'</div>' +
+		'</div>' +
+		'<div data-block-name="woocommerce/product-tab" data-id="third" data-title="Third">' +
+		'<div data-block-name="woocommerce/product-section" data-id="basic-details" data-title="Basic Details" data-description="">' +
+		'<div data-block-name="woocommerce/product-name-field"></div>' +
+		'<div data-block-name="woocommerce/product-regular-price-field" data-label="Regular price"></div>' +
+		'<div data-block-name="woocommerce/product-sale-price-field" data-label="Sale price"></div>' +
+		'<div data-block-name="woocommerce/product-schedule-sale-fields" data-label="Sale price"></div>' +
+		'<div data-block-name="woocommerce/product-radio-field" data-title="Charge sales tax on" data-property="stock_status"></div>' +
+		'<div data-block-name="woocommerce/product-summary-field" data-property="description"></div>' +
+		'</div>' +
 		'</div>';
 
 	const ProductForm = useCallback( () => {

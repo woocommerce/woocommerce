@@ -47,14 +47,16 @@ export function TabBlockEdit( {
 			<TabButton id={ id } selected={ isSelected } order={ order }>
 				{ title }
 			</TabButton>
-			<div
-				id={ `woocommerce-product-tab__${ id }-content` }
-				aria-labelledby={ `woocommerce-product-tab__${ id }` }
-				role="tabpanel"
-				className={ classes }
-			>
-				{ children }
-			</div>
+			{ isSelected && (
+				<div
+					id={ `woocommerce-product-tab__${ id }-content` }
+					aria-labelledby={ `woocommerce-product-tab__${ id }` }
+					role="tabpanel"
+					className={ classes }
+				>
+					{ children }
+				</div>
+			) }
 		</div>
 	);
 }
