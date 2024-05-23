@@ -24,13 +24,9 @@ const TotalsWrapper = ( {
 }: TotalsWrapperProps ): JSX.Element | null => {
 	return Children.count( children ) ? (
 		<div
-			className={ clsx(
-				className,
-				'wc-block-components-totals-wrapper',
-				{
-					'slot-wrapper': slotWrapper,
-				}
-			) }
+			className={ clsx( className, 'wc-block-components-totals-wrapper', {
+				'slot-wrapper': slotWrapper,
+			} ) }
 		>
 			{ children }
 		</div>

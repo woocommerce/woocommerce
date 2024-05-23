@@ -30,10 +30,7 @@ type StockStatusCount = {
 
 const Edit = ( props: BlockEditProps< BlockProps > ) => {
 	const blockProps = useBlockProps( {
-		className: clsx(
-			'wc-block-stock-filter',
-			props.attributes.className
-		),
+		className: clsx( 'wc-block-stock-filter', props.attributes.className ),
 	} );
 
 	const { showCounts, displayStyle } = props.attributes;

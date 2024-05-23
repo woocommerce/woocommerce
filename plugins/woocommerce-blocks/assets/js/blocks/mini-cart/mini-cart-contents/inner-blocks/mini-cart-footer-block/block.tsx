@@ -55,9 +55,7 @@ const Block = ( {
 	const hasButtons = hasChildren( children );
 
 	return (
-		<div
-			className={ clsx( className, 'wc-block-mini-cart__footer' ) }
-		>
+		<div className={ clsx( className, 'wc-block-mini-cart__footer' ) }>
 			<TotalsItem
 				className="wc-block-mini-cart__footer-subtotal"
 				currency={ getCurrencyFromPriceResponse( cartTotals ) }

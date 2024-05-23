@@ -47,13 +47,10 @@ const LocalPickupSelector = ( {
 			role="radio"
 			removeTextWrap
 			onClick={ onClick }
-			className={ clsx(
-				'wc-block-checkout__shipping-method-option',
-				{
-					'wc-block-checkout__shipping-method-option--selected':
-						checked === 'pickup',
-				}
-			) }
+			className={ clsx( 'wc-block-checkout__shipping-method-option', {
+				'wc-block-checkout__shipping-method-option--selected':
+					checked === 'pickup',
+			} ) }
 		>
 			{ showIcon === true && (
 				<Icon
@@ -135,13 +132,10 @@ const ShippingSelector = ( {
 			role="radio"
 			onClick={ onClick }
 			removeTextWrap
-			className={ clsx(
-				'wc-block-checkout__shipping-method-option',
-				{
-					'wc-block-checkout__shipping-method-option--selected':
-						checked === 'shipping',
-				}
-			) }
+			className={ clsx( 'wc-block-checkout__shipping-method-option', {
+				'wc-block-checkout__shipping-method-option--selected':
+					checked === 'shipping',
+			} ) }
 		>
 			{ showIcon === true && (
 				<Icon

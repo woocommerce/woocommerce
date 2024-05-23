@@ -62,10 +62,7 @@ const QuantitySelector = ( {
 	itemName = '',
 	disabled,
 }: QuantitySelectorProps ): JSX.Element => {
-	const classes = clsx(
-		'wc-block-components-quantity-selector',
-		className
-	);
+	const classes = clsx( 'wc-block-components-quantity-selector', className );
 
 	const inputRef = useRef< HTMLInputElement | null >( null );
 	const decreaseButtonRef = useRef< HTMLButtonElement | null >( null );

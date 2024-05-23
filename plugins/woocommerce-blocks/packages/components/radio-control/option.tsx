@@ -25,15 +25,11 @@ const Option = ( {
 	return (
 		// eslint-disable-next-line jsx-a11y/label-has-associated-control
 		<label
-			className={ clsx(
-				'wc-block-components-radio-control__option',
-				{
-					'wc-block-components-radio-control__option-checked':
-						checked,
-					'wc-block-components-radio-control__option--checked-option-highlighted':
-						checked && highlightChecked,
-				}
-			) }
+			className={ clsx( 'wc-block-components-radio-control__option', {
+				'wc-block-components-radio-control__option-checked': checked,
+				'wc-block-components-radio-control__option--checked-option-highlighted':
+					checked && highlightChecked,
+			} ) }
 			htmlFor={ `${ name }-${ value }` }
 		>
 			<input

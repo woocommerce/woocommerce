@@ -37,10 +37,7 @@ const FrontendBlock = ( {
 		<FormStep
 			id="contact-fields"
 			disabled={ checkoutIsProcessing }
-			className={ clsx(
-				'wc-block-checkout__contact-fields',
-				className
-			) }
+			className={ clsx( 'wc-block-checkout__contact-fields', className ) }
 			title={ title }
 			description={ description }
 			showStepNumber={ showFormStepNumbers }

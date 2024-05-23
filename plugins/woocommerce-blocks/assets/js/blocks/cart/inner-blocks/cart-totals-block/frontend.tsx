@@ -17,9 +17,7 @@ const FrontendBlock = ( {
 	className?: string;
 } ): JSX.Element => {
 	return (
-		<Sidebar
-			className={ clsx( 'wc-block-cart__sidebar', className ) }
-		>
+		<Sidebar className={ clsx( 'wc-block-cart__sidebar', className ) }>
 			{ children }
 		</Sidebar>
 	);

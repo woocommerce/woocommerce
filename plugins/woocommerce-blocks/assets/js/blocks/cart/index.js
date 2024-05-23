@@ -70,10 +70,7 @@ const settings = {
 			save: ( { attributes } ) => {
 				return (
 					<div
-						className={ clsx(
-							'is-loading',
-							attributes.className
-						) }
+						className={ clsx( 'is-loading', attributes.className ) }
 					>
 						<InnerBlocks.Content />
 					</div>

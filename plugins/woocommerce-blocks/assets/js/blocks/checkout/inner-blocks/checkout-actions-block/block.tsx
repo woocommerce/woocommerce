@@ -59,9 +59,7 @@ const Block = ( {
 	}
 
 	return (
-		<div
-			className={ clsx( 'wc-block-checkout__actions', className ) }
-		>
+		<div className={ clsx( 'wc-block-checkout__actions', className ) }>
 			<StoreNoticesContainer
 				context={ noticeContexts.CHECKOUT_ACTIONS }
 			/>

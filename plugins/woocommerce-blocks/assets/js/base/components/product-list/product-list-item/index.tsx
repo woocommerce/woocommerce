@@ -19,13 +19,9 @@ const ProductListItem = ( {
 	const { layoutConfig } = attributes;
 	const { parentClassName, parentName } = useInnerBlockLayoutContext();
 	const isLoading = Object.keys( product ).length === 0;
-	const classes = clsx(
-		`${ parentClassName }__product`,
-		'wc-block-layout',
-		{
-			'is-loading': isLoading,
-		}
-	);
+	const classes = clsx( `${ parentClassName }__product`, 'wc-block-layout', {
+		'is-loading': isLoading,
+	} );
 
 	return (
 		<li className={ classes } aria-hidden={ isLoading }>

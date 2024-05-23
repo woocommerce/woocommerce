@@ -60,10 +60,7 @@ const settings = {
 			save( { attributes }: { attributes: { className: string } } ) {
 				return (
 					<div
-						className={ clsx(
-							'is-loading',
-							attributes.className
-						) }
+						className={ clsx( 'is-loading', attributes.className ) }
 					/>
 				);
 			},
@@ -164,10 +161,7 @@ const settings = {
 			save( { attributes }: { attributes: { className: string } } ) {
 				return (
 					<div
-						className={ clsx(
-							'is-loading',
-							attributes.className
-						) }
+						className={ clsx( 'is-loading', attributes.className ) }
 					/>
 				);
 			},

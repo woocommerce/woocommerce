@@ -38,10 +38,7 @@ export const CountryInput = ( {
 
 	return (
 		<div
-			className={ clsx(
-				className,
-				'wc-block-components-country-input'
-			) }
+			className={ clsx( className, 'wc-block-components-country-input' ) }
 		>
 			<Combobox
 				id={ id }

@@ -58,13 +58,9 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 
 		return (
 			<div
-				className={ clsx(
-					'wc-block-components-text-input',
-					className,
-					{
-						'is-active': isActive || value,
-					}
-				) }
+				className={ clsx( 'wc-block-components-text-input', className, {
+					'is-active': isActive || value,
+				} ) }
 			>
 				<input
 					type={ type }

@@ -16,10 +16,7 @@ export const CallToAction = ( {
 	linkText,
 	permalink,
 }: CallToActionProps ) => {
-	const buttonClasses = clsx(
-		'wp-block-button__link',
-		'is-style-fill'
-	);
+	const buttonClasses = clsx( 'wp-block-button__link', 'is-style-fill' );
 	const buttonStyle = {
 		backgroundColor: 'vivid-green-cyan',
 		borderRadius: '5px',

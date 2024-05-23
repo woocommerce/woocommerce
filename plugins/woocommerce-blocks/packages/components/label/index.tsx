@@ -34,10 +34,7 @@ const Label = ( {
 		Wrapper = wrapperElement || 'span';
 		wrapperProps = {
 			...wrapperProps,
-			className: clsx(
-				wrapperProps.className,
-				'screen-reader-text'
-			),
+			className: clsx( wrapperProps.className, 'screen-reader-text' ),
 		};
 
 		return <Wrapper { ...wrapperProps }>{ screenReaderLabel }</Wrapper>;

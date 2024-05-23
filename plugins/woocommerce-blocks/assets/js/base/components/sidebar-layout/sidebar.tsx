@@ -14,10 +14,7 @@ const Sidebar = forwardRef< HTMLDivElement, ForwardRefProps >(
 		return (
 			<div
 				ref={ ref }
-				className={ clsx(
-					'wc-block-components-sidebar',
-					className
-				) }
+				className={ clsx( 'wc-block-components-sidebar', className ) }
 			>
 				{ children }
 			</div>

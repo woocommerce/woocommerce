@@ -12,9 +12,7 @@ const save = ( { attributes } ) => {
 		return null;
 	}
 
-	return (
-		<div className={ clsx( 'is-loading', attributes.className ) } />
-	);
+	return <div className={ clsx( 'is-loading', attributes.className ) } />;
 };
 
 export default save;

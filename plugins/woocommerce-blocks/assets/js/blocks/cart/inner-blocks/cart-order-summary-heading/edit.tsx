@@ -24,10 +24,7 @@ export const Edit = ( {
 	return (
 		<div { ...blockProps }>
 			<span
-				className={ clsx(
-					className,
-					'wc-block-cart__totals-title'
-				) }
+				className={ clsx( className, 'wc-block-cart__totals-title' ) }
 			>
 				<PlainText
 					className={ '' }

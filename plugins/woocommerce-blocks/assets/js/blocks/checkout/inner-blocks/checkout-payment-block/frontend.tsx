@@ -43,10 +43,7 @@ const FrontendBlock = ( {
 		<FormStep
 			id="payment-method"
 			disabled={ checkoutIsProcessing }
-			className={ clsx(
-				'wc-block-checkout__payment-method',
-				className
-			) }
+			className={ clsx( 'wc-block-checkout__payment-method', className ) }
 			title={ title }
 			description={ description }
 			showStepNumber={ showFormStepNumbers }

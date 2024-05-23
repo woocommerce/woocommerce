@@ -17,12 +17,7 @@ const Block = ( { className }: { className: string } ): JSX.Element | null => {
 	}
 
 	return (
-		<div
-			className={ clsx(
-				'wc-block-cart__payment-options',
-				className
-			) }
-		>
+		<div className={ clsx( 'wc-block-cart__payment-options', className ) }>
 			<CartExpressPayment />
 		</div>
 	);

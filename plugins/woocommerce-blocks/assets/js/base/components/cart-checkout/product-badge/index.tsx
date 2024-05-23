@@ -19,10 +19,7 @@ const ProductBadge = ( {
 }: ProductBadgeProps ): JSX.Element => {
 	return (
 		<div
-			className={ clsx(
-				'wc-block-components-product-badge',
-				className
-			) }
+			className={ clsx( 'wc-block-components-product-badge', className ) }
 		>
 			{ children }
 		</div>

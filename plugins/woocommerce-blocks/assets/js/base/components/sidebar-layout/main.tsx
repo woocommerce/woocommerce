@@ -14,10 +14,7 @@ const Main = forwardRef< HTMLInputElement, ForwardRefProps >(
 		return (
 			<div
 				ref={ ref }
-				className={ clsx(
-					'wc-block-components-main',
-					className
-				) }
+				className={ clsx( 'wc-block-components-main', className ) }
 			>
 				{ children }
 			</div>

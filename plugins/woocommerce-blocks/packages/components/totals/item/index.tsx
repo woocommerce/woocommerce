@@ -50,12 +50,7 @@ const TotalsItem = ( {
 	description,
 }: TotalsItemProps ): ReactElement => {
 	return (
-		<div
-			className={ clsx(
-				'wc-block-components-totals-item',
-				className
-			) }
-		>
+		<div className={ clsx( 'wc-block-components-totals-item', className ) }>
 			<span className="wc-block-components-totals-item__label">
 				{ label }
 			</span>

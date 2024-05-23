@@ -30,10 +30,7 @@ const Block = ( { className }: { className?: string } ): JSX.Element => {
 		<FormStep
 			id="order-notes"
 			showStepNumber={ false }
-			className={ clsx(
-				'wc-block-checkout__order-notes',
-				className
-			) }
+			className={ clsx( 'wc-block-checkout__order-notes', className ) }
 			disabled={ checkoutIsProcessing }
 		>
 			<CheckoutOrderNotes

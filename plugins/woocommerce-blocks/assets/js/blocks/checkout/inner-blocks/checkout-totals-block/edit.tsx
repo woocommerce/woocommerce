@@ -26,10 +26,7 @@ export const Edit = ( {
 	};
 } ): JSX.Element => {
 	const blockProps = useBlockProps( {
-		className: clsx(
-			'wc-block-checkout__sidebar',
-			attributes?.className
-		),
+		className: clsx( 'wc-block-checkout__sidebar', attributes?.className ),
 	} );
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CHECKOUT_TOTALS );
 

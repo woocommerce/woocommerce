@@ -11,9 +11,7 @@ const Block = ( {
 	content: string;
 } ): JSX.Element => {
 	return (
-		<span
-			className={ clsx( className, 'wc-block-cart__totals-title' ) }
-		>
+		<span className={ clsx( className, 'wc-block-cart__totals-title' ) }>
 			{ content }
 		</span>
 	);
