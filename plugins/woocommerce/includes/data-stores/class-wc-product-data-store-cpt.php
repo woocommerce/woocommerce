@@ -109,7 +109,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * with the insert.
 	 *
 	 * @param WC_Product $product Product object.
-	 * @return bool True if lock is obtained, false otherwise.
+	 * @return bool True if lock is obtained (unique SKU), false otherwise.
 	 */
 	private function obtain_lock_on_sku_for_concurrent_requests( $product ) {
 		global $wpdb;
@@ -174,11 +174,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
+			$sku = $product->get_sku();
 
-			if ( ! $this->obtain_lock_on_sku_for_concurrent_requests( $product ) ) {
+			/**
+			 * If SKU is already under processing aka Duplicate SKU
+			 * because of concurrent requests, then we should not proceed
+			 * Delete the product and throw an exception.
+			 */
+			if ( ! empty( $sku ) && ! $this->obtain_lock_on_sku_for_concurrent_requests( $product ) ) {
 				$product->delete();
 
-				throw new Exception( __( 'The SKU you are trying to insert is already under processing', 'woocommerce' ) );
+				throw new Exception( sprintf( __( 'The SKU (%1$s) you are trying to insert with Product Id (%2$s) is already under processing', 'woocommerce' ), $sku, $id ) );
 			}
 
 			$this->update_post_meta( $product, true );
