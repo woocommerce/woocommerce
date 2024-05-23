@@ -119,7 +119,7 @@ export const addProductCollectionToQueryPaginationParentOrAncestor = () => {
 				if ( blockSettings?.parent ) {
 					return {
 						...blockSettings,
-						ancestor: [ ...blockSettings.parent, blockJson.name ],
+						parent: [ ...blockSettings.parent, blockJson.name ],
 					};
 				}
 
