@@ -87,12 +87,9 @@ export default function ProductPage() {
 			},
 		} );
 
-		const unregisterBlocks = initBlocks();
-
 		return () => {
 			document.body.classList.remove( 'is-product-editor' );
 			unregisterPlugin( 'wc-admin-more-menu' );
-			unregisterBlocks();
 		};
 	}, [ productId ] );
 
