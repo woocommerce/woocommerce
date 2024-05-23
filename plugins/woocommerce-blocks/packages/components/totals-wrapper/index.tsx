@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Children } from '@wordpress/element';
 import type { ReactNode } from 'react';
 
@@ -24,7 +24,7 @@ const TotalsWrapper = ( {
 }: TotalsWrapperProps ): JSX.Element | null => {
 	return Children.count( children ) ? (
 		<div
-			className={ classnames(
+			className={ clsx(
 				className,
 				'wc-block-components-totals-wrapper',
 				{

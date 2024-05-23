@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { PanelBody, ToggleControl } from '@wordpress/components';
 import { Icon, store, shipping } from '@wordpress/icons';
@@ -53,7 +53,7 @@ const LocalPickupSelector = ( {
 } ) => {
 	return (
 		<Button
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__shipping-method-option',
 				{
 					'wc-block-checkout__shipping-method-option--selected':
@@ -116,7 +116,7 @@ const ShippingSelector = ( {
 
 	return (
 		<Button
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__shipping-method-option',
 				{
 					'wc-block-checkout__shipping-method-option--selected':
@@ -214,7 +214,7 @@ export const Edit = ( {
 		<FormStepBlock
 			attributes={ attributes }
 			setAttributes={ setAttributes }
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__shipping-method',
 				className
 			) }

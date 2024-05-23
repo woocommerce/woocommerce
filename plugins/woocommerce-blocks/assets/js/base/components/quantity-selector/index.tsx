@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { useCallback, useLayoutEffect, useRef } from '@wordpress/element';
 import { DOWN, UP } from '@wordpress/keycodes';
 import { useDebouncedCallback } from 'use-debounce';
@@ -62,7 +62,7 @@ const QuantitySelector = ( {
 	itemName = '',
 	disabled,
 }: QuantitySelectorProps ): JSX.Element => {
-	const classes = classNames(
+	const classes = clsx(
 		'wc-block-components-quantity-selector',
 		className
 	);

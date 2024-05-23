@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
@@ -65,7 +65,7 @@ export const Block = ( props: Props ): JSX.Element => {
 		return (
 			<TagName
 				headingLevel={ headingLevel }
-				className={ classnames(
+				className={ clsx(
 					className,
 					styleProps.className,
 					'wc-block-components-product-title',
@@ -84,7 +84,7 @@ export const Block = ( props: Props ): JSX.Element => {
 	return (
 		<TagName
 			headingLevel={ headingLevel }
-			className={ classnames(
+			className={ clsx(
 				className,
 				styleProps.className,
 				'wc-block-components-product-title',

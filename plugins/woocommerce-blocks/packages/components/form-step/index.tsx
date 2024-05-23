@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -60,7 +60,7 @@ const FormStep = ( {
 
 	return (
 		<Element
-			className={ classnames(
+			className={ clsx(
 				className,
 				'wc-block-components-checkout-step',
 				{

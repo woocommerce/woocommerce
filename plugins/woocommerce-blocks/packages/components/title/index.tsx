@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import type { ReactNode } from 'react';
 
 /**
@@ -18,7 +18,7 @@ const Title = ( {
 	headingLevel,
 	...props
 }: TitleProps ): JSX.Element => {
-	const buttonClassName = classNames(
+	const buttonClassName = clsx(
 		'wc-block-components-title',
 		className
 	);

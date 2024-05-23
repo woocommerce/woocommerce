@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import { FormStep } from '@woocommerce/blocks-components';
 import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
@@ -58,7 +58,7 @@ const FrontendBlock = ( {
 		<FormStep
 			id="billing-fields"
 			disabled={ checkoutIsProcessing }
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__billing-fields',
 				className
 			) }

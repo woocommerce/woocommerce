@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
 import Rating from '@woocommerce/base-components/product-rating';
@@ -162,7 +162,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 				<Disabled>
 					{ displayNoProductRatingsNotice && <NoRatings /> }
 					<div
-						className={ classnames(
+						className={ clsx(
 							`style-${ blockAttributes.displayStyle }`,
 							{
 								'is-loading': isLoading,

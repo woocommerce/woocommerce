@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 const Block = ( {
 	className,
@@ -12,7 +12,7 @@ const Block = ( {
 } ): JSX.Element => {
 	return (
 		<span
-			className={ classnames( className, 'wc-block-cart__totals-title' ) }
+			className={ clsx( className, 'wc-block-cart__totals-title' ) }
 		>
 			{ content }
 		</span>

@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useShippingData } from '@woocommerce/base-context/hooks';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Icon, store, shipping } from '@wordpress/icons';
 import { useEffect } from '@wordpress/element';
 import { CART_STORE_KEY, VALIDATION_STORE_KEY } from '@woocommerce/block-data';
@@ -47,7 +47,7 @@ const LocalPickupSelector = ( {
 			role="radio"
 			removeTextWrap
 			onClick={ onClick }
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__shipping-method-option',
 				{
 					'wc-block-checkout__shipping-method-option--selected':
@@ -135,7 +135,7 @@ const ShippingSelector = ( {
 			role="radio"
 			onClick={ onClick }
 			removeTextWrap
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__shipping-method-option',
 				{
 					'wc-block-checkout__shipping-method-option--selected':

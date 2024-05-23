@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -21,7 +21,7 @@ export const AddressWrapper = ( {
 	addressCard: () => JSX.Element;
 	addressForm: () => JSX.Element;
 } ): JSX.Element | null => {
-	const wrapperClasses = classnames(
+	const wrapperClasses = clsx(
 		'wc-block-components-address-address-wrapper',
 		{
 			'is-editing': isEditing,

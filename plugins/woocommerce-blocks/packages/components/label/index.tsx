@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Fragment } from '@wordpress/element';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import type { ReactElement, HTMLProps } from 'react';
 
 export interface LabelProps extends HTMLProps< HTMLElement > {
@@ -34,7 +34,7 @@ const Label = ( {
 		Wrapper = wrapperElement || 'span';
 		wrapperProps = {
 			...wrapperProps,
-			className: classNames(
+			className: clsx(
 				wrapperProps.className,
 				'screen-reader-text'
 			),

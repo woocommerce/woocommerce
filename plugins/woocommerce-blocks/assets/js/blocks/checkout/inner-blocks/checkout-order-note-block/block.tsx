@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { FormStep } from '@woocommerce/blocks-components';
 import { useShippingData } from '@woocommerce/base-context/hooks';
@@ -30,7 +30,7 @@ const Block = ( { className }: { className?: string } ): JSX.Element => {
 		<FormStep
 			id="order-notes"
 			showStepNumber={ false }
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__order-notes',
 				className
 			) }

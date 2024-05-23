@@ -3,7 +3,7 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import fastDeepEqual from 'fast-deep-equal/es6';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import Pagination from '@woocommerce/base-components/pagination';
 import { useEffect } from '@wordpress/element';
 import { usePrevious } from '@woocommerce/base-hooks';
@@ -196,7 +196,7 @@ const ProductList = ( {
 		const { columns, rows, alignButtons, align } = attributes;
 		const alignClass = typeof align !== 'undefined' ? 'align' + align : '';
 
-		return classnames(
+		return clsx(
 			parentClassName,
 			alignClass,
 			'has-' + columns + '-columns',
@@ -227,7 +227,7 @@ const ProductList = ( {
 		Number.isFinite( maxPrice );
 
 	return (
-		<div className={ getClassnames() }>
+		<div className={ getclsx() }>
 			{ contentVisibility?.orderBy && hasProducts && (
 				<ProductSortSelect
 					onChange={ onSortChange }
@@ -248,7 +248,7 @@ const ProductList = ( {
 			{ ! hasProducts && ! hasFilters && <NoProducts /> }
 			{ hasProducts && (
 				<ul
-					className={ classnames( `${ parentClassName }__products`, {
+					className={ clsx( `${ parentClassName }__products`, {
 						'is-loading-products': productsLoading,
 					} ) }
 				>

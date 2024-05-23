@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import {
@@ -43,7 +43,7 @@ const FrontendBlock = ( {
 		<FormStep
 			id="payment-method"
 			disabled={ checkoutIsProcessing }
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__payment-method',
 				className
 			) }

@@ -3,7 +3,7 @@
  */
 import { _n, sprintf } from '@wordpress/i18n';
 import { SearchListItem } from '@woocommerce/editor-components/search-list-control';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -22,7 +22,7 @@ export const ProductTagItem = ( {
 
 	return (
 		<SearchListItem
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-product-tags__item',
 				'has-count',
 				{

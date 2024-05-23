@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { RichText, InnerBlocks } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 
@@ -16,7 +16,7 @@ export const CallToAction = ( {
 	linkText,
 	permalink,
 }: CallToActionProps ) => {
-	const buttonClasses = classnames(
+	const buttonClasses = clsx(
 		'wp-block-button__link',
 		'is-style-fill'
 	);

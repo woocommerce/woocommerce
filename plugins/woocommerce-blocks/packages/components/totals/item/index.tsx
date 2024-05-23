@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { isValidElement } from '@wordpress/element';
 import type { ReactElement, ReactNode } from 'react';
 import type { Currency } from '@woocommerce/types';
@@ -51,7 +51,7 @@ const TotalsItem = ( {
 }: TotalsItemProps ): ReactElement => {
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'wc-block-components-totals-item',
 				className
 			) }

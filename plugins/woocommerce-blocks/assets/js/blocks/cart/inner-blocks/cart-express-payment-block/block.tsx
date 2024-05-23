@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useStoreCart } from '@woocommerce/base-context/hooks';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -18,7 +18,7 @@ const Block = ( { className }: { className: string } ): JSX.Element | null => {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'wc-block-cart__payment-options',
 				className
 			) }

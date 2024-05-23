@@ -28,7 +28,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { sprintf, _n } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -284,7 +284,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 				/>
 			</button>
 			<Drawer
-				className={ classnames(
+				className={ clsx(
 					'wc-block-mini-cart__drawer',
 					'is-mobile',
 					{

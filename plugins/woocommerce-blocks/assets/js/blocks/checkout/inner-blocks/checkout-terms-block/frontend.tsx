@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useState, useEffect } from '@wordpress/element';
 import { CheckboxControl } from '@woocommerce/blocks-components';
 import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
@@ -72,7 +72,7 @@ const FrontendBlock = ( {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__terms',
 				{
 					'wc-block-checkout__terms--disabled': isDisabled,

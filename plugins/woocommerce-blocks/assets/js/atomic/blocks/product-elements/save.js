@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 const save = ( { attributes } ) => {
 	if (
@@ -13,7 +13,7 @@ const save = ( { attributes } ) => {
 	}
 
 	return (
-		<div className={ classnames( 'is-loading', attributes.className ) } />
+		<div className={ clsx( 'is-loading', attributes.className ) } />
 	);
 };
 

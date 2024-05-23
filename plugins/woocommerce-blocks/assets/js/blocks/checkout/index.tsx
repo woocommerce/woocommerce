@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { fields } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 import { registerBlockType, createBlock } from '@wordpress/blocks';
@@ -60,7 +60,7 @@ const settings = {
 			save( { attributes }: { attributes: { className: string } } ) {
 				return (
 					<div
-						className={ classnames(
+						className={ clsx(
 							'is-loading',
 							attributes.className
 						) }
@@ -164,7 +164,7 @@ const settings = {
 			save( { attributes }: { attributes: { className: string } } ) {
 				return (
 					<div
-						className={ classnames(
+						className={ clsx(
 							'is-loading',
 							attributes.className
 						) }

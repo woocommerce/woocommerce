@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
 import { withInstanceId } from '@wordpress/compose';
 
@@ -19,7 +19,7 @@ const ProductListItem = ( {
 	const { layoutConfig } = attributes;
 	const { parentClassName, parentName } = useInnerBlockLayoutContext();
 	const isLoading = Object.keys( product ).length === 0;
-	const classes = classnames(
+	const classes = clsx(
 		`${ parentClassName }__product`,
 		'wc-block-layout',
 		{
