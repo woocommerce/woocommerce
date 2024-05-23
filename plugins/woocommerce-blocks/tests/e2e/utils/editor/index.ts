@@ -24,22 +24,31 @@ export class Editor extends CoreEditor {
 		return true;
 	}
 
-	/**
-	 * Checks if the editor is inside an iframe.
-	 */
-	private async isEditorInsideIframe() {
-		try {
-			return ( await this.canvas.locator( '*' ).count() ) > 0;
-		} catch ( e ) {
-			return false;
-		}
-	}
-
 	async getBlockByName( name: string ) {
-		if ( await this.isEditorInsideIframe() ) {
-			return this.canvas.locator( `[data-type="${ name }"]` );
+		const blockSelector = `[data-type="${ name }"]`;
+		const framedLocator = this.canvas.locator( blockSelector );
+		const legacyLocator = this.page.locator( blockSelector );
+
+		const result = await Promise.any( [
+			framedLocator
+				.waitFor()
+				.then( () => 'framed' )
+				.catch( () => null ),
+			legacyLocator
+				.waitFor()
+				.then( () => 'legacy' )
+				.catch( () => null ),
+		] );
+
+		if ( result === null ) {
+			throw new Error( `Timed out waiting for block "${ name }"` );
 		}
-		return this.page.locator( `[data-type="${ name }"]` );
+
+		if ( result === 'framed' ) {
+			return framedLocator;
+		}
+
+		return legacyLocator;
 	}
 
 	async getBlockByTypeWithParent( name: string, parentName: string ) {
