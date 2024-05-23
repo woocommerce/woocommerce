@@ -71,15 +71,6 @@ class Package {
 		return self::get_package()->feature();
 	}
 
-	/**
-	 * Checks if we're executing the code in a feature plugin or experimental build mode.
-	 *
-	 * @return boolean
-	 */
-	public static function is_feature_plugin_build() {
-		return self::get_package()->is_feature_plugin_build();
-	}
-
 
 	/**
 	 * Loads the dependency injection container for woocommerce blocks.
