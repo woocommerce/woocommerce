@@ -136,7 +136,7 @@ jobs:
                   BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_DAILY_E2E_TOKEN }}
                   BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.set_buildkite_message.outputs.BUILDKITE_MESSAGE }}
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
+              run: pnpm test:e2e-pw --shard ${{ matrix.shard.name }}
 
             - name: Upload reports to GitHub Actions Artifacts
               if: always()
@@ -301,6 +301,7 @@ jobs:
               with:
                   playwright-config: ignore-plugin-tests.playwright.config.js
                   report-name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
+                  tests: '--project=default'
               env:
                   E2E_MAX_FAILURES: 90
 
