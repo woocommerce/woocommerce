@@ -616,6 +616,16 @@ class WC_Email extends WC_Settings_API {
 
 					$dom_document = $css_inliner->getDomDocument();
 
+					// Remove `.screen-reader-text` elements until there's better support in e-mail clients for the
+					// necessary styles. See https://github.com/woocommerce/woocommerce/pull/47738.
+					foreach ( ( new \DOMXPath( $dom_document ) )->query( "//*[contains(concat(' ', @class, ' '), ' screen-reader-text ')]" ) as $element ) {
+						// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+						if ( null !== $element->parentNode ) {
+							$element->parentNode->removeChild( $element );
+						}
+						// phpcs:enable
+					}
+
 					HtmlPruner::fromDomDocument( $dom_document )->removeElementsWithDisplayNone();
 					$content = CssToAttributeConverter::fromDomDocument( $dom_document )
 						->convertCssToVisualAttributes()
