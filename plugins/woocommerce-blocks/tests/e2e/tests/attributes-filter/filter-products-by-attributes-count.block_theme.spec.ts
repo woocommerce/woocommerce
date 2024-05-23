@@ -1,9 +1,11 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import { test as base, expect, PostCompiler } from '@woocommerce/e2e-utils';
 
-const test = base.extend( {
+const test = base.extend< {
+	postCompiler: PostCompiler;
+} >( {
 	postCompiler: async ( { requestUtils }, use ) => {
 		const post = await requestUtils.createPostFromFile(
 			'filters-with-all-products'

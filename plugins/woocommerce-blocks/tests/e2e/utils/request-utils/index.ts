@@ -6,13 +6,11 @@ import { RequestUtils as CoreRequestUtils } from '@wordpress/e2e-test-utils-play
 /**
  * Internal dependencies
  */
-import { createPostFromFile } from './posts';
+import { createPostFromFile, PostCompiler } from './posts';
 import {
 	getTemplates,
 	revertTemplate,
 	createTemplateFromFile,
-	WPTemplate,
-	WPTemplateType,
 	TemplateCompiler,
 } from './templates';
 
@@ -56,4 +54,4 @@ export class RequestUtils extends CoreRequestUtils {
 		createTemplateFromFile.bind( this );
 }
 
-export { WPTemplate, WPTemplateType, TemplateCompiler };
+export { TemplateCompiler, PostCompiler };

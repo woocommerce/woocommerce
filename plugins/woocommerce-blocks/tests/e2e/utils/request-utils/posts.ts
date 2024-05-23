@@ -11,6 +11,10 @@ import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-u
  */
 import type { RequestUtils } from './index';
 
+export interface PostCompiler {
+	compile: ( data?: unknown ) => Promise< Post >;
+}
+
 /**
  * Creates a post from a Handlebars template file located in the
  * tests/e2e/content-templates directory.
@@ -40,8 +44,8 @@ export async function createPostFromFile( this: RequestUtils, name: string ) {
 
 	const compiledTemplate = Handlebars.compile( fileContent );
 
-	return {
-		compile: async ( data: unknown ): Promise< Post > => {
+	return <PostCompiler>{
+		compile: async ( data: unknown ) => {
 			const content = compiledTemplate( data );
 
 			// We're calling the posts endpoint directly until we can use the
