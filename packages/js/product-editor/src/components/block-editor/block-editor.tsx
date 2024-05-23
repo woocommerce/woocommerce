@@ -222,6 +222,9 @@ export function BlockEditor( {
 		'<div data-block-name="woocommerce/product-schedule-sale-fields" data-label="Sale price"></div>' +
 		'<div data-block-name="woocommerce/product-radio-field" data-title="Charge sales tax on" data-property="stock_status"></div>' +
 		'<div data-block-name="woocommerce/product-summary-field" data-property="description"></div>' +
+		'<div data-block-name="woocommerce/product-description-field" data-property="description"></div>' +
+		'<div data-block-name="woocommerce/product-images-field" data-property="description"></div>' +
+		'<div data-block-name="woocommerce/product-downloads-field" data-property="description"></div>' +
 		'</div>' +
 		'</div>' +
 		'<div data-block-name="woocommerce/product-tab" data-id="pricing" data-title="Pricing">' +

@@ -16,6 +16,9 @@ import { Edit as SalePriceBlockEdit } from '../blocks/product-fields/sale-price/
 import { Edit as ScheduleSaleBlockEdit } from '../blocks/product-fields/schedule-sale/edit';
 import { Edit as RadioBlockEdit } from '../blocks/generic/radio/edit';
 import { SummaryBlockEdit } from '../blocks/product-fields/summary/edit';
+import { DescriptionBlockEdit } from '../blocks/product-fields/description/edit';
+import { ImageBlockEdit } from '../blocks/product-fields/images/edit';
+import { DownloadBlockEdit } from '../blocks/product-fields/downloads/edit';
 
 type ComponentMap = {
 	[ key: string ]: unknown;
@@ -30,6 +33,9 @@ const componentMap: ComponentMap = {
 	'woocommerce/product-schedule-sale-fields': ScheduleSaleBlockEdit,
 	'woocommerce/product-radio-field': RadioBlockEdit,
 	'woocommerce/product-summary-field': SummaryBlockEdit,
+	'woocommerce/product-description-field': DescriptionBlockEdit,
+	'woocommerce/product-images-field': ImageBlockEdit,
+	'woocommerce/product-downloads-field': DownloadBlockEdit,
 };
 
 function getComponentName( blockName: string | null ) {
