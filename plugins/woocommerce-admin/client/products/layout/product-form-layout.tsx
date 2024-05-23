@@ -7,7 +7,7 @@ import { TabPanel, Tooltip } from '@wordpress/components';
 import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
 import { __experimentalWooProductTabItem as WooProductTabItem } from '@woocommerce/product-editor';
 import { PartialProduct } from '@woocommerce/data';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -99,7 +99,7 @@ export const ProductFormLayout: React.FC< ProductFormLayoutProps > = ( {
 							} }
 						>
 							{ ( tab ) => {
-								const classes = classnames(
+								const classes = clsx(
 									'woocommerce-product-form-tab',
 									'woocommerce-product-form-tab__' + tab.name
 								);

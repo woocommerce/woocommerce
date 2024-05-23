@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, arrowLeft, arrowRight } from '@wordpress/icons';
 import { Link } from '@woocommerce/components';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -36,7 +36,7 @@ export default function PostsNavigation( {
 	return (
 		<nav
 			{ ...props }
-			className={ classNames( className, 'posts-navigation' ) }
+			className={ clsx( className, 'posts-navigation' ) }
 		>
 			{ prevHref ? (
 				<Link

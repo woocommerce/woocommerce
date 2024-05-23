@@ -24,7 +24,7 @@ import {
 import { getNewPath } from '@woocommerce/navigation';
 import { useContext, useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import truncate from 'lodash/truncate';
 import { CurrencyContext } from '@woocommerce/currency';
 
@@ -171,7 +171,7 @@ export const Variations: React.FC = () => {
 							} ) }
 						</div>
 						<div
-							className={ classnames(
+							className={ clsx(
 								'woocommerce-product-variations__price',
 								{
 									'woocommerce-product-variations__price--fade':
@@ -182,7 +182,7 @@ export const Variations: React.FC = () => {
 							{ formatAmount( variation.price ) }
 						</div>
 						<div
-							className={ classnames(
+							className={ clsx(
 								'woocommerce-product-variations__quantity',
 								{
 									'woocommerce-product-variations__quantity--fade':
@@ -191,7 +191,7 @@ export const Variations: React.FC = () => {
 							) }
 						>
 							<span
-								className={ classnames(
+								className={ clsx(
 									'woocommerce-product-variations__status-dot',
 									getProductStockStatusClass( variation )
 								) }

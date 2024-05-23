@@ -11,7 +11,7 @@ import {
 	spawnChild,
 } from 'xstate5';
 import React from 'react';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { getQuery, navigateTo } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME, TaskListType, TaskType } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
@@ -338,7 +338,7 @@ export const SidebarContainer = ( {
 } ) => {
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'launch-your-store-layout__sidebar',
 				className
 			) }

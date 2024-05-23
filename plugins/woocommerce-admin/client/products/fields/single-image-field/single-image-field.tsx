@@ -9,7 +9,7 @@ import {
 } from '@woocommerce/components';
 import { MediaItem } from '@wordpress/media-utils';
 import uniqueId from 'lodash/uniqueId';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -35,7 +35,7 @@ export function SingleImageField( {
 	return (
 		<div
 			{ ...props }
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-single-image-field',
 				className
 			) }

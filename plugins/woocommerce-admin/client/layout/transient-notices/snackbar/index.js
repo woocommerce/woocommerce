@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { noop } from 'lodash';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { speak } from '@wordpress/a11y';
 import {
 	RawHTML,
@@ -89,7 +89,7 @@ function Snackbar(
 		return () => clearTimeout( timeoutHandle );
 	}, [ explicitDismiss, onDismiss, onRemove ] );
 
-	const classes = classnames( className, 'components-snackbar', {
+	const classes = clsx( className, 'components-snackbar', {
 		'components-snackbar-explicit-dismiss': !! explicitDismiss,
 	} );
 	if ( actions && actions.length > 1 ) {
@@ -101,7 +101,7 @@ function Snackbar(
 		actions = [ actions[ 0 ] ];
 	}
 
-	const snackbarContentClassnames = classnames(
+	const snackbarContentClassnames = clsx(
 		'components-snackbar__content',
 		{
 			'components-snackbar__content-with-icon': !! icon,

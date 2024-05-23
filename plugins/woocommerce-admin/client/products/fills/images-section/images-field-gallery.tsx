@@ -14,7 +14,7 @@ import { useState } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
 import { Icon, trash } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -57,7 +57,7 @@ export const ImagesGalleryField = () => {
 
 	return (
 		<div
-			className={ classnames( 'woocommerce-product-form__images', {
+			className={ clsx( 'woocommerce-product-form__images', {
 				'has-images': images.length > 0,
 			} ) }
 		>

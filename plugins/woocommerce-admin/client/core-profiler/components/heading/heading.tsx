@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -17,7 +17,7 @@ type Props = {
 export const Heading = ( { className, title, subTitle }: Props ) => {
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-profiler-heading',
 				className
 			) }

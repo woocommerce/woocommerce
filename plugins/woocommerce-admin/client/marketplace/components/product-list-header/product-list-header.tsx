@@ -3,7 +3,7 @@
  */
 import { Link } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -22,7 +22,7 @@ export default function ProductListHeader(
 	const { title, groupURL } = props;
 	const isLoading = title === '';
 
-	const classNames = classnames(
+	const classNames = clsx(
 		'woocommerce-marketplace__product-list-header',
 		{
 			'is-loading': isLoading,

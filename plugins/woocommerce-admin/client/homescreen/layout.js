@@ -10,7 +10,7 @@ import {
 } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import {
 	useUserPreferences,
@@ -141,13 +141,13 @@ export const Layout = ( {
 		<>
 			{ isDashboardShown && (
 				<WooHomescreenHeaderBanner
-					className={ classnames( 'woocommerce-homescreen', {
+					className={ clsx( 'woocommerce-homescreen', {
 						'woocommerce-homescreen-column': ! twoColumns,
 					} ) }
 				/>
 			) }
 			<div
-				className={ classnames( 'woocommerce-homescreen', {
+				className={ clsx( 'woocommerce-homescreen', {
 					'two-columns': twoColumns,
 				} ) }
 			>

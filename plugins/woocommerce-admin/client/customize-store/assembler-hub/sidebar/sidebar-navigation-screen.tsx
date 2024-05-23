@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useContext, useState } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
@@ -66,7 +66,7 @@ export const SidebarNavigationScreen = ( {
 	return (
 		<>
 			<VStack
-				className={ classnames(
+				className={ clsx(
 					'edit-site-sidebar-navigation-screen__main',
 					{
 						'has-footer': !! footer,

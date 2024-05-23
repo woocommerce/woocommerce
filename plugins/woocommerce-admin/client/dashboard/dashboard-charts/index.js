@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Fragment, useState } from '@wordpress/element';
 import LineGraphIcon from 'gridicons/dist/line-graph';
 import StatsAltIcon from 'gridicons/dist/stats-alt';
@@ -210,7 +210,7 @@ const DashboardCharts = ( props ) => {
 					role="menubar"
 				>
 					<Button
-						className={ classNames(
+						className={ clsx(
 							'woocommerce-chart__type-button',
 							{
 								'woocommerce-chart__type-button-selected':
@@ -227,7 +227,7 @@ const DashboardCharts = ( props ) => {
 						<LineGraphIcon />
 					</Button>
 					<Button
-						className={ classNames(
+						className={ clsx(
 							'woocommerce-chart__type-button',
 							{
 								'woocommerce-chart__type-button-selected':

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
 
 /**
@@ -26,7 +26,7 @@ export default function CategoryLink( props: Category ): JSX.Element {
 
 	const isLoading = props.label === '';
 
-	const classes = classNames(
+	const classes = clsx(
 		'woocommerce-marketplace__category-item-button',
 		{
 			'woocommerce-marketplace__category-item-button--selected':

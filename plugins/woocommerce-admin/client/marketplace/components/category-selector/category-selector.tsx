@@ -4,7 +4,7 @@
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useQuery } from '@woocommerce/navigation';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -149,7 +149,7 @@ export default function CategorySelector(
 							type={ props.type }
 							label={ __( 'More', 'woocommerce' ) }
 							categories={ dropdownItems }
-							buttonClassName={ classNames(
+							buttonClassName={ clsx(
 								'woocommerce-marketplace__category-item-button',
 								{
 									'woocommerce-marketplace__category-item-button--selected':

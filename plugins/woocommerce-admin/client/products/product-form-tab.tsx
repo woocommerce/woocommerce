@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 export const ProductFormTab: React.FC< {
 	disabled?: boolean;
@@ -9,7 +9,7 @@ export const ProductFormTab: React.FC< {
 	title: string;
 	children: JSX.Element | JSX.Element[] | string;
 } > = ( { name, children } ) => {
-	const classes = classnames(
+	const classes = clsx(
 		'woocommerce-product-form-tab',
 		'woocommerce-product-form-tab__' + name
 	);

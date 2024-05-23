@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { cloneElement, Component } from '@wordpress/element';
 import NoticeOutline from 'gridicons/dist/notice-outline';
 import moment from 'moment';
@@ -36,7 +36,7 @@ class ActivityCard extends Component {
 			title,
 			unread,
 		} = this.props;
-		const cardClassName = classnames(
+		const cardClassName = clsx(
 			'woocommerce-activity-card',
 			className
 		);

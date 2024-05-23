@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import GridiconCheckmarkCircle from 'gridicons/dist/checkmark-circle';
 import GridiconSync from 'gridicons/dist/sync';
 import GridiconNotice from 'gridicons/dist/notice';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -24,7 +24,7 @@ export const SyncStatus: React.FC< SyncStatusPropsType > = ( { status } ) => {
 	if ( status === 'failed' ) {
 		return (
 			<div
-				className={ classnames( className, `${ className }__failed` ) }
+				className={ clsx( className, `${ className }__failed` ) }
 			>
 				<GridiconNotice size={ iconSize } />
 				{ __( 'Sync failed', 'woocommerce' ) }
@@ -35,7 +35,7 @@ export const SyncStatus: React.FC< SyncStatusPropsType > = ( { status } ) => {
 	if ( status === 'syncing' ) {
 		return (
 			<div
-				className={ classnames( className, `${ className }__syncing` ) }
+				className={ clsx( className, `${ className }__syncing` ) }
 			>
 				<GridiconSync size={ iconSize } />
 				{ __( 'Syncing', 'woocommerce' ) }
@@ -44,7 +44,7 @@ export const SyncStatus: React.FC< SyncStatusPropsType > = ( { status } ) => {
 	}
 
 	return (
-		<div className={ classnames( className, `${ className }__synced` ) }>
+		<div className={ clsx( className, `${ className }__synced` ) }>
 			<GridiconCheckmarkCircle size={ iconSize } />
 			{ __( 'Synced', 'woocommerce' ) }
 		</div>

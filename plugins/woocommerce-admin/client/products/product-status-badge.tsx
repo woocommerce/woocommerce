@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Pill } from '@woocommerce/components';
 import { PRODUCTS_STORE_NAME, WCDataSelector } from '@woocommerce/data';
 import { useParams } from 'react-router-dom';
@@ -31,7 +31,7 @@ export const ProductStatusBadge: React.FC = () => {
 
 	return (
 		<Pill
-			className={ classnames(
+			className={ clsx(
 				'woocommerce-product-status',
 				`is-${ status }`
 			) }

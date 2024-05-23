@@ -9,7 +9,7 @@ import {
 } from '@wordpress/element';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { addQueryArgs } from '@wordpress/url';
 import { useSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
@@ -119,15 +119,15 @@ export default function Products( props: ProductsProps ) {
 	const baseContainerClass = 'woocommerce-marketplace__search-';
 	const baseProductListTitleClass = 'product-list-title--';
 
-	const containerClassName = classnames(
+	const containerClassName = clsx(
 		baseContainerClass + labelForClassName
 	);
-	const productListTitleClassName = classnames(
+	const productListTitleClassName = clsx(
 		'woocommerce-marketplace__product-list-title',
 		baseContainerClass + baseProductListTitleClass + labelForClassName,
 		{ 'is-loading': isLoading }
 	);
-	const viewAllButonClassName = classnames(
+	const viewAllButonClassName = clsx(
 		'woocommerce-marketplace__view-all-button',
 		baseContainerClass + 'button-' + labelForClassName
 	);
@@ -150,7 +150,7 @@ export default function Products( props: ProductsProps ) {
 		return <NoResults type={ type } showHeading={ false } />;
 	}
 
-	const productListClass = classnames(
+	const productListClass = clsx(
 		showAllButton
 			? 'woocommerce-marketplace__product-list-content--collapsed'
 			: ''
