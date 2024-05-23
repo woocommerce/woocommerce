@@ -55,11 +55,8 @@ export function getContentFromFreeform(
  * be empty. This function removes the default block to keep
  * the description empty.
  *
- * todo: this is not optimal. We cannot rely on the content attribute to
- * determine whether the description is empty or not
- *
  * @param blocks The block list
- * @return Empty array if there is only one block with empty content
+ * @return Empty array if there is only one paragraph block with empty content
  * in the list. The same block list otherwise.
  */
 function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
@@ -147,6 +144,8 @@ export function DescriptionBlockEdit( {
 		if ( ! hasChanged ) {
 			return;
 		}
+
+		console.log( 'modalEditorBlocks', modalEditorBlocks );
 
 		if ( ! modalEditorBlocks?.length ) {
 			setDescription( '' );
