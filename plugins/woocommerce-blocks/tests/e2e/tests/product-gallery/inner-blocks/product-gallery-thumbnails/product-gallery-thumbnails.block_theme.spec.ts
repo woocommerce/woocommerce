@@ -78,13 +78,10 @@ test.describe( `${ blockData.name }`, () => {
 		// Test the default (left) position of thumbnails by cross-checking:
 		// - The Gallery block has the classes "is-layout-flex" and "is-nowrap".
 		// - The Thumbnails block has a lower index than the Large Image block.
-
-		await expect(
-			await editor.getBlockByName( 'woocommerce/product-gallery' )
-		).toBeVisible();
-		const groupBlock = (
-			await editor.getBlockByName( 'core/group' )
-		 ).first();
+		const groupBlock = editor.canvas
+			.locator( '[data-type="woocommerce/product-gallery"]' )
+			.locator( '[data-type="core/group"]' )
+			.first();
 
 		const groupBlockClassAttribute = await groupBlock.getAttribute(
 			'class'
@@ -183,13 +180,10 @@ test.describe( `${ blockData.name }`, () => {
 				)
 				.click();
 
-			await expect(
-				await editor.getBlockByName( 'woocommerce/product-gallery' )
-			).toBeVisible();
-
-			const groupBlock = (
-				await editor.getBlockByName( 'core/group' )
-			 ).first();
+			const groupBlock = editor.canvas
+				.locator( '[data-type="woocommerce/product-gallery"]' )
+				.locator( '[data-type="core/group"]' )
+				.first();
 
 			const groupBlockClassAttribute = await groupBlock.getAttribute(
 				'class'
@@ -265,13 +259,10 @@ test.describe( `${ blockData.name }`, () => {
 				)
 				.click();
 
-			await expect(
-				await editor.getBlockByName( 'woocommerce/product-gallery' )
-			).toBeVisible();
-
-			const groupBlock = (
-				await editor.getBlockByName( 'core/group' )
-			 ).first();
+			const groupBlock = editor.canvas
+				.locator( '[data-type="woocommerce/product-gallery"]' )
+				.locator( '[data-type="core/group"]' )
+				.first();
 
 			const groupBlockClassAttribute = await groupBlock.getAttribute(
 				'class'
@@ -348,13 +339,10 @@ test.describe( `${ blockData.name }`, () => {
 				)
 				.click();
 
-			await expect(
-				await editor.getBlockByName( 'woocommerce/product-gallery' )
-			).toBeVisible();
-
-			const groupBlock = (
-				await editor.getBlockByName( 'core/group' )
-			 ).first();
+			const groupBlock = editor.canvas
+				.locator( '[data-type="woocommerce/product-gallery"]' )
+				.locator( '[data-type="core/group"]' )
+				.first();
 
 			const groupBlockClassAttribute = await groupBlock.getAttribute(
 				'class'
