@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import { useWooBlockProps } from '@woocommerce/block-templates';
 
 /**
  * Internal dependencies
@@ -16,7 +15,6 @@ export function Edit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< RadioBlockAttributes > ) {
-	const blockProps = useWooBlockProps( attributes );
 	const { description, options, property, title, disabled } = attributes;
 	const [ value, setValue ] = useProductEntityProp< string >( property, {
 		postType,
@@ -24,7 +22,7 @@ export function Edit( {
 	} );
 
 	return (
-		<div { ...blockProps }>
+		<div>
 			<RadioField
 				title={ title }
 				description={ description }

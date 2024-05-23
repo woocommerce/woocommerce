@@ -12,7 +12,6 @@ import {
 } from '@wordpress/element';
 import { closeSmall } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
-import { useWooBlockProps } from '@woocommerce/block-templates';
 import { ListItem, MediaUploader, Sortable } from '@woocommerce/components';
 import { Product, ProductDownload } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -51,7 +50,6 @@ export function DownloadBlockEdit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< UploadsBlockAttributes > ) {
-	const blockProps = useWooBlockProps( attributes );
 	const [ downloads, setDownloads ] = useEntityProp< Product[ 'downloads' ] >(
 		'postType',
 		postType,
@@ -215,7 +213,7 @@ export function DownloadBlockEdit( {
 	}
 
 	return (
-		<div { ...blockProps }>
+		<div>
 			<SectionActions>
 				{ Boolean( downloads.length ) && (
 					<Button

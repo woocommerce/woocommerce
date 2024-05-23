@@ -9,8 +9,6 @@ import {
 } from '@wordpress/element';
 import { BlockInstance, parse, serialize } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
-import classNames from 'classnames';
-import { useWooBlockProps } from '@woocommerce/block-templates';
 import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import {
@@ -138,11 +136,6 @@ export function DescriptionBlockEdit( {
 		setDescription( html );
 	}, [ modalEditorBlocks, setDescription, hasChanged ] );
 
-	const blockProps = useWooBlockProps( attributes, {
-		className: classNames( { 'has-blocks': !! description.length } ),
-		tabIndex: 0,
-	} );
-
 	const innerBlockProps = useInnerBlocksProps(
 		{},
 		{
@@ -152,7 +145,7 @@ export function DescriptionBlockEdit( {
 	);
 
 	return (
-		<div { ...blockProps }>
+		<div>
 			{ !! descriptionBlocks?.length ? (
 				<>
 					<BlockControls>

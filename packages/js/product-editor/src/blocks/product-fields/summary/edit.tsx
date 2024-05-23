@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	createElement,
 	createInterpolateElement,
@@ -35,9 +34,6 @@ export function SummaryBlockEdit( {
 	context,
 }: ProductEditorBlockEditProps< SummaryAttributes > ) {
 	const { align, direction, label, helpText } = attributes;
-	const blockProps = useWooBlockProps( attributes, {
-		style: { direction },
-	} );
 	const contentId = useInstanceId(
 		SummaryBlockEdit,
 		'wp-block-woocommerce-product-summary-field__content'
@@ -50,11 +46,6 @@ export function SummaryBlockEdit( {
 	const [ summaryBlocks, setSummaryBlocks ] = useState< BlockInstance[] >(
 		parse( summary )
 	);
-
-	// This is a workaround to hide the toolbar when the block is blurred.
-	// This is a temporary solution until using Gutenberg 18 with the
-	// fix from https://github.com/WordPress/gutenberg/pull/59800
-	const { handleBlur: hideToolbar } = useClearSelectedBlockOnBlur();
 
 	function handleAlignmentChange( value: SummaryAttributes[ 'align' ] ) {
 		setAttributes( { align: value } );
@@ -113,7 +104,7 @@ export function SummaryBlockEdit( {
 						: helpText
 				}
 			>
-				<div { ...blockProps }>
+				<div>
 					<RichTextEditor
 						label={ __( 'Summary', 'woocommerce' ) }
 						blocks={ summaryBlocks }

@@ -3,7 +3,6 @@
  */
 import classNames from 'classnames';
 import { createElement } from '@wordpress/element';
-import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
@@ -21,22 +20,12 @@ export function SectionBlockEdit( {
 	// @ts-ignore
 	children,
 }: ProductEditorBlockEditProps< SectionBlockAttributes > ) {
-	const { description, title, blockGap } = attributes;
+	const { description, title } = attributes;
 
-	const blockProps = useWooBlockProps( attributes );
-	const innerBlockProps = useInnerBlocksProps(
-		{
-			className: classNames(
-				'wp-block-woocommerce-product-section-header__content',
-				`wp-block-woocommerce-product-section-header__content--block-gap-${ blockGap }`
-			),
-		},
-		{ templateLock: 'all' }
-	);
 	const SectionTagName = title ? 'fieldset' : 'div';
 
 	return (
-		<SectionTagName { ...blockProps }>
+		<SectionTagName>
 			{ title && (
 				<SectionHeader
 					description={ description }

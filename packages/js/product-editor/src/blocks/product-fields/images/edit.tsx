@@ -5,11 +5,9 @@ import { DragEvent } from 'react';
 import { __ } from '@wordpress/i18n';
 import { BlockAttributes } from '@wordpress/blocks';
 import { DropZone } from '@wordpress/components';
-import classnames from 'classnames';
 import { createElement, useState } from '@wordpress/element';
 import { Icon, trash } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
-import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	MediaUploader,
 	ImageGallery,
@@ -54,14 +52,6 @@ export function ImageBlockEdit( {
 	const [ draggedImageId, setDraggedImageId ] = useState< number | null >(
 		null
 	);
-
-	const blockProps = useWooBlockProps( attributes, {
-		className: classnames( {
-			'has-images': Array.isArray( propertyValue )
-				? propertyValue.length > 0
-				: Boolean( propertyValue ),
-		} ),
-	} );
 
 	function orderImages( newOrder: JSX.Element[] ) {
 		if ( Array.isArray( propertyValue ) ) {
@@ -191,7 +181,7 @@ export function ImageBlockEdit( {
 		( ! Array.isArray( propertyValue ) || propertyValue.length > 0 );
 
 	return (
-		<div { ...blockProps }>
+		<div>
 			<div className="woocommerce-product-form__image-drop-zone">
 				{ isRemovingZoneVisible ? (
 					<div className="woocommerce-product-form__remove-image-drop-zone">

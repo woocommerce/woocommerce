@@ -1,11 +1,9 @@
 /**
  * External dependencies
  */
-import { InnerBlocks } from '@wordpress/block-editor';
 import classnames from 'classnames';
 import { createElement } from '@wordpress/element';
 import type { BlockAttributes } from '@wordpress/blocks';
-import { useWooBlockProps } from '@woocommerce/block-templates';
 
 /**
  * Internal dependencies
@@ -26,7 +24,6 @@ export function TabBlockEdit( {
 	// @ts-ignore
 	children,
 }: ProductEditorBlockEditProps< TabBlockAttributes > ) {
-	const blockProps = useWooBlockProps( attributes );
 	const {
 		id,
 		title,
@@ -43,7 +40,7 @@ export function TabBlockEdit( {
 	} );
 
 	return (
-		<div { ...blockProps }>
+		<div>
 			<TabButton id={ id } selected={ isSelected } order={ order }>
 				{ title }
 			</TabButton>

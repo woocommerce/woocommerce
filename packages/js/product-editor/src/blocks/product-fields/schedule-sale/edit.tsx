@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { useWooBlockProps } from '@woocommerce/block-templates';
 import { DateTimePickerControl } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -24,11 +23,9 @@ import { useValidation } from '../../../contexts/validation-context';
 import { ProductEditorBlockEditProps } from '../../../types';
 
 export function Edit( {
-	attributes,
 	clientId,
 	context,
 }: ProductEditorBlockEditProps< ScheduleSalePricingBlockAttributes > ) {
-	const blockProps = useWooBlockProps( attributes );
 	const { hasEdit } = useProductEdits();
 
 	const dateTimeFormat = getSettings().formats.datetime;
@@ -138,7 +135,7 @@ export function Edit( {
 	);
 
 	return (
-		<div { ...blockProps }>
+		<div>
 			<ToggleControl
 				label={ __( 'Schedule sale', 'woocommerce' ) }
 				checked={ showScheduleSale }

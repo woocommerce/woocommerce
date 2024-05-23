@@ -2,7 +2,6 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
@@ -28,7 +27,6 @@ export function Edit( {
 	clientId,
 	context,
 }: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
-	const blockProps = useWooBlockProps( attributes );
 	const { label, help, tooltip, disabled } = attributes;
 	const [ regularPrice ] = useEntityProp< string >(
 		'postType',
@@ -80,7 +78,7 @@ export function Edit( {
 	);
 
 	return (
-		<div { ...blockProps }>
+		<div>
 			<BaseControl
 				id={ salePriceId }
 				help={

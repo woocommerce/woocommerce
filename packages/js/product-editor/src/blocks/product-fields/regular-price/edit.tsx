@@ -29,7 +29,6 @@ export function Edit( {
 	clientId,
 	context,
 }: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
-	const blockProps = useWooBlockProps( attributes );
 	const { label, help, isRequired, tooltip, disabled } = attributes;
 	const [ regularPrice, setRegularPrice ] = useEntityProp< string >(
 		'postType',
@@ -96,7 +95,7 @@ export function Edit( {
 	}, [] );
 
 	return (
-		<div { ...blockProps }>
+		<div>
 			<BaseControl
 				id={ regularPriceId }
 				help={
