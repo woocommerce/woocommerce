@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: updated the test ignore pattern for Gutenberg tests project
