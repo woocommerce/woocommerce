@@ -61,11 +61,11 @@ test.describe( 'Product editor performance', () => {
 
 	test.afterAll( async ( {}, testInfo ) => {
 		const medians = {};
-		Object.keys( results ).map( ( metric ) => {
+		Object.keys( results ).forEach( ( metric ) => {
 			medians[ metric ] = median( results[ metric ] );
 		} );
 		await testInfo.attach( 'results', {
-			body: JSON.stringify( medians, null, 2 ),
+			body: JSON.stringify( { 'product-editor': medians }, null, 2 ),
 			contentType: 'application/json',
 		} );
 	} );

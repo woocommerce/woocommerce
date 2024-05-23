@@ -57,11 +57,11 @@ test.describe( 'Editor Performance', () => {
 
 	test.afterAll( async ( {}, testInfo ) => {
 		const medians = {};
-		Object.keys( results ).map( ( metric ) => {
+		Object.keys( results ).forEach( ( metric ) => {
 			medians[ metric ] = median( results[ metric ] );
 		} );
 		await testInfo.attach( 'results', {
-			body: JSON.stringify( medians, null, 2 ),
+			body: JSON.stringify( { editor: medians }, null, 2 ),
 			contentType: 'application/json',
 		} );
 	} );
