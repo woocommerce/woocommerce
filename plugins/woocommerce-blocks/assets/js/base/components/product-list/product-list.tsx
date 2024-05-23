@@ -227,7 +227,7 @@ const ProductList = ( {
 		Number.isFinite( maxPrice );
 
 	return (
-		<div className={ getclsx() }>
+		<div className={ getClassnames() }>
 			{ contentVisibility?.orderBy && hasProducts && (
 				<ProductSortSelect
 					onChange={ onSortChange }
