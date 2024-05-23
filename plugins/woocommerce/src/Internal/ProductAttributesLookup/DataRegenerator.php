@@ -545,9 +545,9 @@ class DataRegenerator {
 		// If the lookup table has data, or if it's empty because there are no products yet, we're good.
 		// Otherwise (lookup table is empty but products exist) we need to initiate a regeneration if one isn't already in progress.
 		if ( $this->data_store->lookup_table_has_data() || ! $this->get_last_existing_product_id() ) {
-            $must_enable = get_option( 'woocommerce_attribute_lookup_enabled' ) !== 'no';
-            $this->delete_all_attributes_lookup_data( false );
-            update_option( 'woocommerce_attribute_lookup_enabled', $must_enable ? 'yes' : 'no' );
+			$must_enable = get_option( 'woocommerce_attribute_lookup_enabled' ) !== 'no';
+			$this->delete_all_attributes_lookup_data( false );
+			update_option( 'woocommerce_attribute_lookup_enabled', $must_enable ? 'yes' : 'no' );
 		} else {
 			$this->initiate_regeneration();
 		}

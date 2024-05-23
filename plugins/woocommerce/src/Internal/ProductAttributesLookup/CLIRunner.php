@@ -374,7 +374,10 @@ class CLIRunner {
 
 		$was_enabled = 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' );
 
-		$processed_count = get_option( 'woocommerce_attribute_lookup_processed_count', 0 );
+		// TODO: adjust for non-CPT datastores (this is only used for the progress bar, though).
+		$products_count = wp_count_posts( 'product' );
+		$products_count = intval( $products_count->publish ) + intval( $products_count->pending ) + intval( $products_count->draft );
+
 		if ( ! $this->lookup_data_store->regeneration_is_in_progress() || array_key_exists( 'from-scratch', $assoc_args ) ) {
 			$info = $this->get_lookup_table_info();
 			if ( $info['total_rows'] > 0 && ! array_key_exists( 'force', $assoc_args ) ) {
@@ -389,26 +392,28 @@ class CLIRunner {
 				WP_CLI::log( 'No products exist in the database, the table is left empty.' );
 				return;
 			}
+			$processed_count = 0;
 		} else {
 			$last_product_id = get_option( 'woocommerce_attribute_lookup_last_product_id_to_process' );
 			if ( false === $last_product_id ) {
 				WP_CLI::error( 'Regeneration seems to be already in progress, but the woocommerce_attribute_lookup_last_product_id_to_process option isn\'t there. Try %9wp cli palt cleanup_regeneration_progress%n first." );' );
 				return 1;
 			}
+			$processed_count = get_option( 'woocommerce_attribute_lookup_processed_count', 0 );
 			$this->log( "Resuming regeneration, %C{$processed_count}%n products have been processed already" );
 			$this->lookup_data_store->set_regeneration_in_progress_flag();
 		}
 
 		$this->data_regenerator->cancel_regeneration_scheduled_action();
 
-		$progress               = WP_CLI\Utils\make_progress_bar( '', $last_product_id - $processed_count );
-		$last_product_processed = 0;
+		$progress = WP_CLI\Utils\make_progress_bar( '', $products_count );
 		$this->log( "Regenerating %W{$table_name}%n..." );
+		if ( $processed_count > 0 ) {
+			$progress->tick( $processed_count );
+		}
+
 		while ( $this->data_regenerator->do_regeneration_step( $batch_size ) ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$last_product_in_table = $wpdb->get_var( 'select max(product_or_parent_id) from ' . $table_name ) ?? 0;
-			$progress->tick( $last_product_in_table - $last_product_processed );
-			$last_product_processed = $last_product_in_table;
+			$progress->tick( $batch_size );
 		}
 
 		$this->data_regenerator->finalize_regeneration( $was_enabled );
