@@ -153,6 +153,8 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 			}
 		}
 
+		// This callback is required. Without it the mini cart contents block will render every time the drawer is opened.
+		// Removing this callback will cause memory use to grow every time it is opened.
 		return () => {
 			if ( contentsNode instanceof Element && isOpen ) {
 				const container = contentsNode.querySelector(
