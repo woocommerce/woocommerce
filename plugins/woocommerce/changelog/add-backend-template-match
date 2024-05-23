@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Determine _product_template_id from the products and variations REST endpoint
