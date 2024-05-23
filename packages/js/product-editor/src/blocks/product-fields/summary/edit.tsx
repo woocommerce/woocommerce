@@ -3,17 +3,21 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { createElement, createInterpolateElement } from '@wordpress/element';
+import {
+	createElement,
+	createInterpolateElement,
+	useState,
+} from '@wordpress/element';
+import { __experimentalRichTextEditor as RichTextEditor } from '@woocommerce/components';
 import { BaseControl } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useInstanceId } from '@wordpress/compose';
-import classNames from 'classnames';
+import { BlockInstance, serialize, parse } from '@wordpress/blocks';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	AlignmentControl,
 	BlockControls,
-	RichText,
 } from '@wordpress/block-editor';
 
 /**
@@ -30,11 +34,10 @@ export function SummaryBlockEdit( {
 	setAttributes,
 	context,
 }: ProductEditorBlockEditProps< SummaryAttributes > ) {
-	const { align, allowedFormats, direction, label, helpText } = attributes;
+	const { align, direction, label, helpText } = attributes;
 	const blockProps = useWooBlockProps( attributes, {
 		style: { direction },
 	} );
-
 	const contentId = useInstanceId(
 		SummaryBlockEdit,
 		'wp-block-woocommerce-product-summary-field__content'
@@ -43,6 +46,9 @@ export function SummaryBlockEdit( {
 		'postType',
 		context.postType || 'product',
 		attributes.property
+	);
+	const [ summaryBlocks, setSummaryBlocks ] = useState< BlockInstance[] >(
+		parse( summary )
 	);
 
 	// This is a workaround to hide the toolbar when the block is blurred.
@@ -108,19 +114,20 @@ export function SummaryBlockEdit( {
 				}
 			>
 				<div { ...blockProps }>
-					<RichText
-						id={ contentId.toString() }
-						identifier="content"
-						tagName="p"
-						value={ summary }
-						onChange={ setSummary }
-						data-empty={ Boolean( summary ) }
-						className={ classNames( 'components-summary-control', {
-							[ `has-text-align-${ align }` ]: align,
-						} ) }
-						dir={ direction }
-						allowedFormats={ allowedFormats }
-						onBlur={ hideToolbar }
+					<RichTextEditor
+						label={ __( 'Summary', 'woocommerce' ) }
+						blocks={ summaryBlocks }
+						onChange={ ( blocks ) => {
+							setSummaryBlocks( blocks );
+							if ( ! summaryBlocks.length ) {
+								return;
+							}
+							setSummary( serialize( blocks ) );
+						} }
+						placeholder={ __(
+							'Describe this product. What makes it unique? What are its most important features?',
+							'woocommerce'
+						) }
 					/>
 				</div>
 			</BaseControl>

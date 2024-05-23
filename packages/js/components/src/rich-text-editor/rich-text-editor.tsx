@@ -18,6 +18,7 @@ import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
  * Internal dependencies
  */
 import { EditorWritingFlow } from './editor-writing-flow';
+import { registerBlocks } from './utils/register-blocks';
 
 type RichTextEditorProps = {
 	blocks: BlockInstance[];
@@ -26,6 +27,8 @@ type RichTextEditorProps = {
 	entryId?: string;
 	placeholder?: string;
 };
+
+registerBlocks();
 
 export const RichTextEditor: React.VFC< RichTextEditorProps > = ( {
 	blocks,
