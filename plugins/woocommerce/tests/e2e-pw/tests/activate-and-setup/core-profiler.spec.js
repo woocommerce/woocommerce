@@ -16,7 +16,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			).toBeVisible();
 			await page
 				.getByRole( 'checkbox', { name: 'I agree to share my data' } )
-				.check();
+				.uncheck();
 			await page
 				.getByRole( 'button', { name: 'Set up my store' } )
 				.click();
@@ -158,7 +158,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			).toBeVisible();
 			await page
 				.getByRole( 'checkbox', { name: 'I agree to share my data' } )
-				.check();
+				.uncheck();
 			await page
 				.getByRole( 'button', { name: 'Set up my store' } )
 				.click();
