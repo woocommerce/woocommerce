@@ -4,7 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const { site } = require('../utils');
 const qit = require('/qitHelpers');
-const { ENABLE_HPOS } = qit.getEnv();
+const {default: wcApi} = require("@woocommerce/woocommerce-rest-api");
+const { DISABLE_HPOS } = qit.getEnv();
 
 async function setup() {
 	// Copy the files from "./test-data/images" to "/var/www/html/wp-content/uploads/woo-entrypoint" using node, and create the dir first.
@@ -204,20 +205,23 @@ test('Entrypoint @entrypoint', async ({page}, testInfo) => {
 		process.exit( 1 );
 	}
 
-	// While we're here, let's set HPOS according to the passed in ENABLE_HPOS env variable
-	// (if a value for ENABLE_HPOS was set)
+	// While we're here, let's set HPOS according to the passed in DISABLE_HPOS env variable
+	// (if a value for DISABLE_HPOS was set)
 	// This was always being set to 'yes' after login in wp-env so this step ensures the
 	// correct value is set before we begin our tests
-	if ( ENABLE_HPOS ) {
-		const hposSettingRetries = 5;
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: qit.getEnv('CONSUMER_KEY'),
-			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
-			version: 'wc/v3',
-		} );
+	console.log( `DISABLE_HPOS: ${ DISABLE_HPOS }` );
 
-		const value = ENABLE_HPOS === '0' ? 'no' : 'yes';
+	const api = new wcApi( {
+		url: baseURL,
+		consumerKey: process.env.CONSUMER_KEY,
+		consumerSecret: process.env.CONSUMER_SECRET,
+		version: 'wc/v3',
+	} );
+
+	if ( DISABLE_HPOS ) {
+		const hposSettingRetries = 5;
+
+		const value = DISABLE_HPOS === '1' ? 'no' : 'yes';
 
 		for ( let i = 0; i < hposSettingRetries; i++ ) {
 			try {
@@ -249,11 +253,21 @@ test('Entrypoint @entrypoint', async ({page}, testInfo) => {
 
 		if ( ! hposConfigured ) {
 			console.error(
-				'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct ENABLE_HPOS value was used and the test site has been setup correctly.'
+				'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct DISABLE_HPOS value was used and the test site has been setup correctly.'
 			);
 			process.exit( 1 );
 		}
 	}
+
+	const response = await api.get(
+		'settings/advanced/woocommerce_custom_orders_table_enabled'
+	);
+
+	const dataValue = response.data.value;
+	const enabledOption = response.data.options[ dataValue ];
+	console.log(
+		`HPOS configuration (woocommerce_custom_orders_table_enabled): ${ dataValue } - ${ enabledOption }`
+	);
 
 	await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
 

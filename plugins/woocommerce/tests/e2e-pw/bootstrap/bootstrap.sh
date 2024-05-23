@@ -36,3 +36,5 @@ if [ $ENABLE_TRACKING == 1 ]; then
 	wp --path=/var/www/html option update woocommerce_allow_tracking 'yes'
 fi
 
+echo -e 'Disabling coming soon option \n'
+wp --path=/var/www/html option update woocommerce_coming_soon 'no'
