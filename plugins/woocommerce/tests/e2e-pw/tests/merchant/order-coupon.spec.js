@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
@@ -10,13 +11,13 @@ const couponAmount = '5';
 const discountedPrice = ( productPrice - couponAmount ).toString();
 
 test.describe( 'WooCommerce Orders > Apply Coupon', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		// create a simple product
@@ -63,8 +64,8 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		// cleans up product, coupon and order after run
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api.delete( `products/${ productId }`, { force: true } );

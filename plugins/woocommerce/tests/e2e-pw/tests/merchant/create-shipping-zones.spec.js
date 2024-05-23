@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
@@ -8,14 +9,14 @@ const shippingZoneNameFreeShip = 'BC with Free shipping';
 const shippingZoneNameLocalPickup = 'Mayne Island with Local pickup';
 
 test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		// Set selling location to all countries.
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api.put( 'settings/general/woocommerce_allowed_countries', {
@@ -26,8 +27,8 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api.get( 'shipping/zones' ).then( ( response ) => {
@@ -409,8 +410,8 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		// need to add a product to the store so that we can order it and check shipping options
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api
@@ -488,8 +489,8 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api.delete( `products/${ productId }`, { force: true } );

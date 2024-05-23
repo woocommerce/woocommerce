@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 baseTest.describe( 'Coupon management', () => {
@@ -32,7 +33,7 @@ baseTest.describe( 'Coupon management', () => {
 	};
 
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
+		storageState: qit.getEnv('ADMINSTATE'),
 		coupon: async ( { api }, use ) => {
 			const coupon = {};
 			await use( coupon );

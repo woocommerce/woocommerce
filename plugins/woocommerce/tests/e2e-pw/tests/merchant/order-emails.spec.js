@@ -1,10 +1,11 @@
+const qit = require('/qitHelpers');
 /* eslint-disable no-console */
 const { test, expect } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'Merchant > Order Action emails received', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	const customerBilling = {
 		email: 'john.doe.merchant.test@example.com',
@@ -16,8 +17,8 @@ test.describe( 'Merchant > Order Action emails received', () => {
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api
@@ -56,8 +57,8 @@ test.describe( 'Merchant > Order Action emails received', () => {
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 
@@ -71,8 +72,8 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		// Need to create a new order for this test because we clear logs before each run.
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api
@@ -118,8 +119,8 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		const emailContentJson = '#wp-mail-logging-modal-format-json';
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api
@@ -173,8 +174,8 @@ test.describe( 'Merchant > Order Action emails received', () => {
 	test( 'can receive cancelled order email', async ( { page, baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api

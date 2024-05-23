@@ -1,7 +1,8 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 
 test.describe( 'Merchant can add shipping classes', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.afterEach( async ( { page } ) => {
 		// no api endpoints for shipping classes, so use the UI to cleanup

@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const { logIn } = require( '../../utils/login' );
 
@@ -20,7 +21,7 @@ const users = [
 ];
 
 const test = baseTest.extend( {
-	storageState: process.env.ADMINSTATE,
+	storageState: qit.getEnv('ADMINSTATE'),
 	user: async ( { api }, use ) => {
 		const user = {};
 		await use( user );

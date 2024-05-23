@@ -1,16 +1,17 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'Bulk edit orders', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	let orderId1, orderId2, orderId3, orderId4, orderId5;
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api
@@ -53,8 +54,8 @@ test.describe( 'Bulk edit orders', () => {
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api.delete( `orders/${ orderId1 }`, { force: true } );

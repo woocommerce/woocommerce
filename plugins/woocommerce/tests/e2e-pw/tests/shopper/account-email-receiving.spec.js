@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 
 const email = `test-${ Math.random() }@example.com`;
@@ -6,7 +7,7 @@ const emailContent = '#wp-mail-logging-modal-content-body-content';
 const emailContentJson = '#wp-mail-logging-modal-format-json';
 
 test.describe( 'Shopper Account Email Receiving', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeEach( async ( { page } ) => {
 		await page.goto(
@@ -147,7 +148,7 @@ test.describe( 'Shopper Account Email Receiving', () => {
 } );
 
 test.describe( 'Shopper Password Reset Email Receiving', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeEach( async ( { page } ) => {
 		await page.goto(

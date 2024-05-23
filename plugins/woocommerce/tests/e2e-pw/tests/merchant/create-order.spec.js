@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
@@ -47,13 +48,13 @@ let simpleProductId,
 	orderId;
 
 test.describe( 'WooCommerce Orders > Add new order', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		// enable taxes on the account
@@ -199,8 +200,8 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 	test.afterEach( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		// clean up order after each test
@@ -212,8 +213,8 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		// cleans up all products after run

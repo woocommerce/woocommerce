@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 async function addImageFromLibrary( page, imageName, actionButtonName ) {

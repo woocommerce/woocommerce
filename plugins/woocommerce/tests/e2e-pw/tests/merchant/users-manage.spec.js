@@ -1,7 +1,8 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 const test = baseTest.extend( {
-	storageState: process.env.ADMINSTATE,
+	storageState: qit.getEnv('ADMINSTATE'),
 	customer: async ( { api, wpApi }, use ) => {
 		const now = Date.now();
 		let user = {
