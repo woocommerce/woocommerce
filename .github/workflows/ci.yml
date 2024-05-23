@@ -329,7 +329,7 @@ jobs:
                       -f commit_sha=$GITHUB_SHA \
                       -f s3_root=public \
                       --repo woocommerce/woocommerce-test-reports
-                  else
+                  elif [ "$GITHUB_EVENT_NAME" == push ]; then
                     gh workflow run publish-test-reports-trunk-merge.yml \
                       -f run_id=$RUN_ID \
                       -f artifact=e2e-test-report \
@@ -337,6 +337,8 @@ jobs:
                       -f commit_sha=$GITHUB_SHA \
                       -f test_type="e2e" \
                       --repo woocommerce/woocommerce-test-reports
+                  else
+                    echo "No report will be created for '$GITHUB_EVENT_NAME' event"
                   fi
 
             - name: 'Send Slack notification'
@@ -397,7 +399,7 @@ jobs:
                       -f commit_sha=$GITHUB_SHA \
                       -f s3_root=public \
                       --repo woocommerce/woocommerce-test-reports
-                  else
+                  elif [ "$GITHUB_EVENT_NAME" == push ]; then
                     gh workflow run publish-test-reports-trunk-merge.yml \
                       -f run_id=$RUN_ID \
                       -f artifact=api-test-report \
@@ -405,6 +407,8 @@ jobs:
                       -f commit_sha=$GITHUB_SHA \
                       -f test_type="api" \
                       --repo woocommerce/woocommerce-test-reports
+                  else
+                    echo "No report will be created for '$GITHUB_EVENT_NAME' event"
                   fi
 
             - name: 'Send Slack notification'
