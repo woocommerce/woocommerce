@@ -889,7 +889,7 @@ test.describe( 'Product Collection', () => {
 			await pageObject.chooseCollectionInPost( 'productCatalog' );
 			const paginations = page.getByLabel( 'Block: Pagination' );
 
-			expect( paginations ).toHaveCount( 1 );
+			await expect( paginations ).toHaveCount( 1 );
 
 			const siblingBlock = await editorUtils.getBlockByName(
 				'woocommerce/product-template'
@@ -897,7 +897,7 @@ test.describe( 'Product Collection', () => {
 			await editor.selectBlocks( siblingBlock );
 			await editorUtils.insertBlockUsingGlobalInserter( 'Pagination' );
 
-			expect( paginations ).toHaveCount( 2 );
+			await expect( paginations ).toHaveCount( 2 );
 		} );
 	} );
 
