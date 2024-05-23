@@ -600,4 +600,37 @@ test.describe( `${ blockData.name }`, () => {
 			width === height + 1 || width === height - 1 || width === height
 		).toBeTruthy();
 	} );
+
+	test( 'should persistently display the block when navigating back to the template without a page reload', async ( {
+		editor,
+		pageObject,
+		page,
+	} ) => {
+		await pageObject.addProductGalleryBlock( { cleanContent: true } );
+		await editor.saveSiteEditorEntities();
+
+		await page.getByLabel( 'Open Navigation' ).click();
+		const navigationSidebar = page.getByLabel( 'Navigation' );
+		const navigationBackButton = navigationSidebar.getByLabel( 'Back' );
+		await expect( navigationBackButton ).toBeVisible();
+		await navigationSidebar.getByLabel( 'Back' ).click();
+		await page.getByRole( 'button', { name: 'Index' } ).click();
+
+		const editorFrame = page.frameLocator( 'iframe[name="editor-canvas"]' );
+		const headerTitle = editorFrame.getByRole( 'document', {
+			name: 'Block: Site Title',
+		} );
+		await expect( headerTitle ).toBeVisible();
+
+		await navigationSidebar.getByLabel( 'Back' ).click();
+		await page
+			.getByRole( 'button', { name: 'Custom Single Product' } )
+			.click();
+
+		const productGalleryBlock = editorFrame.getByLabel(
+			'Block: Product Gallery (Beta)'
+		);
+
+		await expect( productGalleryBlock ).toBeVisible();
+	} );
 } );
