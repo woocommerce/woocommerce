@@ -68,6 +68,7 @@ const config = {
 		actionTimeout: 20 * 1000,
 		navigationTimeout: 20 * 1000,
 	},
+	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
 	projects: [
 		{
 			name: 'default',
