@@ -116,6 +116,8 @@ export const addProductCollectionToQueryPaginationParentOrAncestor = () => {
 					};
 				}
 
+				// Below condition is to support WP >=6.4 where Pagination specifies the parent.
+				// Can be removed when minimum WP version is set to 6.5 and higher.
 				if ( blockSettings?.parent ) {
 					return {
 						...blockSettings,
