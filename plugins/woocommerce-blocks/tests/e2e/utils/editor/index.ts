@@ -5,25 +5,6 @@ import { Editor as CoreEditor } from '@wordpress/e2e-test-utils-playwright';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
 export class Editor extends CoreEditor {
-	/**
-	 * Check to see if there are any errors in the editor.
-	 */
-	async ensureNoErrorsOnBlockPage() {
-		const errorMessages = [
-			/This block contains unexpected or invalid content/gi,
-			/Your site doesn’t include support for/gi,
-			/There was an error whilst rendering/gi,
-			/This block has encountered an error and cannot be previewed/gi,
-		];
-
-		for ( const error of errorMessages ) {
-			if ( ( await this.canvas.getByText( error ).count() ) > 0 ) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 	async getBlockByName( name: string ) {
 		const blockSelector = `[data-type="${ name }"]`;
 		const canvasLocator = this.page.locator(

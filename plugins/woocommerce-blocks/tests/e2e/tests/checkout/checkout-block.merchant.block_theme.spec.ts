@@ -63,7 +63,20 @@ test.describe( 'Merchant → Checkout', () => {
 			name: blockData.name,
 			exact: true,
 		} );
-		expect( await editor.ensureNoErrorsOnBlockPage() ).toBe( true );
+
+		const errorMessages = [
+			/This block contains unexpected or invalid content/gi,
+			/Your site doesn’t include support for/gi,
+			/There was an error whilst rendering/gi,
+			/This block has encountered an error and cannot be previewed/gi,
+		];
+
+		for ( const errorMessage of errorMessages ) {
+			await expect(
+				editor.canvas.getByText( errorMessage )
+			).toBeHidden();
+		}
+
 		await expect(
 			editor.canvas.locator( blockSelectorInEditor )
 		).toBeVisible();
