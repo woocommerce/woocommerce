@@ -14,7 +14,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	/**
 	 * Counter to insert unique SKU
 	 */
-	private static $sku_counter = 0;
+	private $sku_counter = 0;
 	/**
 	 * Runs before all the tests in the class.
 	 */
