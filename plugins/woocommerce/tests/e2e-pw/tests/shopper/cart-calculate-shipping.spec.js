@@ -1,4 +1,5 @@
 const qit = require('/qitHelpers');
+const { addAProductToCart } = require( '../../utils/cart' );
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
