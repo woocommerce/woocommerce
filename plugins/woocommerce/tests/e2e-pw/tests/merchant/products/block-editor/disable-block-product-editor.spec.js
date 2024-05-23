@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test } = require( '@playwright/test' );
 const {
 	clickAddNewMenuItem,
@@ -10,7 +11,7 @@ const { toggleBlockProductTour } = require( '../../../../utils/tours' );
 
 let isNewProductEditorEnabled = false;
 
-const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
+const isTrackingSupposedToBeEnabled = !! qit.getEnv('ENABLE_TRACKING');
 
 async function dismissFeedbackModalIfShown( page ) {
 	try {
@@ -21,7 +22,7 @@ async function dismissFeedbackModalIfShown( page ) {
 }
 
 test.describe.serial( 'Disable block product editor', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { request } ) => {
 		await toggleBlockProductTour( request, false );

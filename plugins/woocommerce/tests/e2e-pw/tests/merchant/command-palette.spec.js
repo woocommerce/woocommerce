@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const { disableWelcomeModal } = require( '../../utils/editor' );
 
@@ -24,7 +25,7 @@ const clickOnCommandPaletteOption = async ( { page, optionName } ) => {
 };
 
 const test = baseTest.extend( {
-	storageState: process.env.ADMINSTATE,
+	storageState: qit.getEnv('ADMINSTATE'),
 	product: async ( { api }, use ) => {
 		let product = {
 			id: 0,

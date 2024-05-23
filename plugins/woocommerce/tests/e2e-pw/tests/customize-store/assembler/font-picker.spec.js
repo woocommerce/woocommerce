@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
@@ -41,12 +42,12 @@ const slugFontMap = {
 };
 
 test.describe( 'Assembler -> Font Picker', () => {
-	test.skip(
-		process.env.WP_ENV_CORE && process.env.WP_ENV_CORE.includes( '6.4' ),
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
+		qit.getEnv('WP_ENV_CORE') && qit.getEnv('WP_ENV_CORE').includes( '6.4' ),
 		'Skipping, font picker not available in WP 6.4'
 	);
 
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		try {
@@ -159,6 +160,47 @@ test.describe( 'Assembler -> Font Picker', () => {
 		await expect( fontPicker ).toHaveClass( /is-active/ );
 	} );
 
+	test( 'Picking a font should activate the save button', async ( {
+		pageObject,
+	} ) => {
+		const assembler = await pageObject.getAssembler();
+		const fontPicker = assembler.locator(
+			'.woocommerce-customize-store_global-styles-variations_item:not(.is-active)'
+		);
+
+		await fontPicker.click();
+
+		const saveButton = assembler.getByText( 'Save' );
+
+		await expect( saveButton ).toBeEnabled();
+	} );
+
+	test( 'The Done button should be visible after clicking save', async ( {
+		pageObject,
+		page,
+	} ) => {
+		const assembler = await pageObject.getAssembler();
+		const fontPicker = assembler.locator(
+			'.woocommerce-customize-store_global-styles-variations_item:not(.is-active)'
+		);
+
+		await fontPicker.click();
+
+		const saveButton = assembler.getByText( 'Save' );
+
+		const waitResponse = page.waitForResponse(
+			( response ) =>
+				response.url().includes( 'wp-json/wp/v2/global-styles' ) &&
+				response.status() === 200
+		);
+
+		await saveButton.click();
+
+		await waitResponse;
+
+		await expect( assembler.getByText( 'Done' ) ).toBeEnabled();
+	} );
+
 	test( 'Selected font palette should be applied on the frontend', async ( {
 		pageObject,
 		page,
@@ -179,8 +221,6 @@ test.describe( 'Assembler -> Font Picker', () => {
 		 )
 			.split( '+' )
 			.map( ( e ) => e.trim() );
-
-		await assembler.locator( '[aria-label="Back"]' ).click();
 
 		const saveButton = assembler.getByText( 'Save' );
 

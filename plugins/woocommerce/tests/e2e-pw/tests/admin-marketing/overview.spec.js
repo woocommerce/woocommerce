@@ -1,7 +1,8 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 
 test.describe( 'Marketing page', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test( 'A user can view the Marketing > Overview page without it crashing', async ( {
 		page,

@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 const { variableProducts: utils, api } = require( '../../../../utils' );
 const { showVariableProductTour } = utils;
@@ -7,7 +8,7 @@ const variableProductName = 'Variable Product with Three Variations';
 let productId;
 
 test.describe( 'Add variable product', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { browser } ) => {
 		await showVariableProductTour( browser, true );

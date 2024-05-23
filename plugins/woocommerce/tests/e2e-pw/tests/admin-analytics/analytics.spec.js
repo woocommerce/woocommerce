@@ -1,7 +1,8 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 
 test.describe( 'Analytics pages', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	for ( const aPages of [
 		'Overview',

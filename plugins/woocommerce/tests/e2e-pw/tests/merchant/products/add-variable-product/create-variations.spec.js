@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 const { variableProducts: utils } = require( '../../../../utils' );
 const {
@@ -14,7 +15,7 @@ let expectedGeneratedVariations,
 	variationsToManuallyCreate;
 
 test.describe( 'Add variations', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { browser } ) => {
 		productId_generateVariations = await createVariableProduct(

@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 const { variableProducts: utils } = require( '../../../../utils' );
 const {
@@ -28,7 +29,7 @@ let productId_indivEdit,
 	variationIds_indivEdit;
 
 test.describe( 'Update variations', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { browser } ) => {
 		await test.step( 'Create variable product for individual edit test', async () => {

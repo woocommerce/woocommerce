@@ -1,7 +1,8 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 
 test.describe( 'Store owner can complete the core profiler', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.skip( 'Can complete the core profiler skipping extension install', async ( {
 		page,
@@ -323,7 +324,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 } );
 
 test.describe( 'Store owner can skip the core profiler', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test( 'Can click skip guided setup', async ( { page } ) => {
 		await page.goto(

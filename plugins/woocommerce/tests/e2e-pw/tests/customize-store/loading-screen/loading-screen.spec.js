@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( '../assembler/assembler.page' );
 const { setOption } = require( '../../../utils/options' );
@@ -22,7 +23,7 @@ const steps = [
 ];
 
 test.describe( 'Assembler - Loading Page', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		try {

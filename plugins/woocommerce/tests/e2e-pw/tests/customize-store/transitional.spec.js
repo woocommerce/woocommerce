@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: base, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
 const { activateTheme, DEFAULT_THEME } = require( '../../utils/themes' );
@@ -16,7 +17,7 @@ const test = base.extend( {
 } );
 
 test.describe( 'Store owner can view the Transitional page', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		// In some environments the tour blocks clicking other elements.
