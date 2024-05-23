@@ -148,4 +148,24 @@ class Users {
 		$site_specific_key = $meta_key . '_' . rtrim( $wpdb->get_blog_prefix(), '_' );
 		return update_user_meta( $user_id, $site_specific_key, $meta_value, true );
 	}
+
+	/**
+	 * Site-specific means of deleting user meta.
+	 *
+	 * This is a multisite-aware wrapper around WordPress's own `delete_user_meta()` function, and works by prefixing
+	 * the supplied meta key with a blog-specific meta key.
+	 *
+	 * @param int    $user_id    User ID.
+	 * @param string $meta_key   Metadata name.
+	 * @param mixed  $meta_value Optional. Metadata value. If provided, rows will only be removed that match the value.
+	 *                           Must be serializable if non-scalar. Default empty.
+	 *
+	 * @return bool True on success, false on failure.
+	 * /
+	 */
+	public static function delete_site_user_meta(  $user_id, $meta_key, $meta_value = '' ) {
+		global $wpdb;
+		$site_specific_key = $meta_key . '_' . rtrim( $wpdb->get_blog_prefix(), '_' );
+		return delete_user_meta( $user_id, $site_specific_key, $meta_value );
+	}
 }
