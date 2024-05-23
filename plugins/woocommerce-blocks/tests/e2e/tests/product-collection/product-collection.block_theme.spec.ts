@@ -875,6 +875,28 @@ test.describe( 'Product Collection', () => {
 				featuredProductsPrices
 			);
 		} );
+
+		test( 'With multiple Pagination blocks', async ( {
+			page,
+			admin,
+			editor,
+			pageObject,
+		} ) => {
+			await admin.createNewPost();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost( 'productCatalog' );
+			const paginations = page.getByLabel( 'Block: Pagination' );
+
+			await expect( paginations ).toHaveCount( 1 );
+
+			const siblingBlock = await editor.getBlockByName(
+				'woocommerce/product-template'
+			);
+			await editor.selectBlocks( siblingBlock );
+			await editor.insertBlockUsingGlobalInserter( 'Pagination' );
+
+			await expect( paginations ).toHaveCount( 2 );
+		} );
 	} );
 
 	test.describe( 'Location is recognised', () => {
