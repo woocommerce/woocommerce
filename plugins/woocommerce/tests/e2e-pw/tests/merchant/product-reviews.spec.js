@@ -1,8 +1,9 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
+		storageState: qit.getEnv('ADMINSTATE'),
 		reviews: async ( { api }, use ) => {
 			const timestamp = Date.now().toString();
 			const products = [];

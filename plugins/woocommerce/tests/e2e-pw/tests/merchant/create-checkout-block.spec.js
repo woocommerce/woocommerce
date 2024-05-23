@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
@@ -15,7 +16,7 @@ let productId, shippingZoneId;
 
 baseTest.describe( 'Transform Classic Checkout To Checkout Block', () => {
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
+		storageState: qit.getEnv('ADMINSTATE'),
 		testPageTitlePrefix: 'Transformed checkout',
 	} );
 

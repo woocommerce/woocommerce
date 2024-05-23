@@ -1,8 +1,9 @@
+const qit = require('/qitHelpers');
 const { test, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
 
 test.describe( 'Launch Your Store front end - logged in', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.afterAll( async ( { baseURL } ) => {
 		try {

@@ -1,8 +1,10 @@
+const qit = require('/qitHelpers');
+
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 baseTest.describe( 'Products > Related products', () => {
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
+		storageState: qit.getEnv('ADMINSTATE'),
 		products: async ( { api }, use ) => {
 			const keys = [ 'main', 'linked1', 'linked2' ];
 			const products = {};

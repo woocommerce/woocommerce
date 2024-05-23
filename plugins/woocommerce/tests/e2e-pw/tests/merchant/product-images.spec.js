@@ -14,7 +14,7 @@ async function addImageFromLibrary( page, imageName, actionButtonName ) {
 
 baseTest.describe( 'Products > Product Images', () => {
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
+		storageState: qit.getEnv('ADMINSTATE'),
 		product: async ( { api }, use ) => {
 			let product = {
 				id: 0,

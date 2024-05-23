@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
@@ -9,7 +10,7 @@ const {
 
 baseTest.describe( 'Transform Classic Cart To Cart Block', () => {
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
+		storageState: qit.getEnv('ADMINSTATE'),
 		testPageTitlePrefix: 'Transformed cart',
 	} );
 

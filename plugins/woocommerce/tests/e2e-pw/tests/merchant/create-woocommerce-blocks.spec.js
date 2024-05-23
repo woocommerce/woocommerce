@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
@@ -91,7 +92,7 @@ let productId, shippingZoneId, productTagId, attributeId, productCategoryId;
 
 baseTest.describe( 'Add WooCommerce Blocks Into Page', () => {
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
+		storageState: qit.getEnv('ADMINSTATE'),
 		testPageTitlePrefix: 'Woocommerce Blocks',
 	} );
 

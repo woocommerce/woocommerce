@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 const customerData = {
@@ -60,7 +61,7 @@ const customerData = {
 
 baseTest.describe( 'Merchant > Customer List', () => {
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
+		storageState: qit.getEnv('ADMINSTATE'),
 		customers: async ( { api }, use ) => {
 			const customers = [];
 

@@ -1,8 +1,9 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 baseTest.describe( 'Products > Delete Product', () => {
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
+		storageState: qit.getEnv('ADMINSTATE'),
 		product: async ( { api }, use ) => {
 			let product = {
 				id: 0,

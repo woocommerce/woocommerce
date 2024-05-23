@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: baseTest } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
@@ -8,7 +9,7 @@ const {
 
 baseTest.describe( 'Can create a new page', () => {
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
+		storageState: qit.getEnv('ADMINSTATE'),
 	} );
 
 	// eslint-disable-next-line playwright/expect-expect
