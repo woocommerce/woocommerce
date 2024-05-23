@@ -96,10 +96,10 @@ export function getDefaultValueOfInheritQueryFromTemplate() {
 }
 
 /**
- * Add Product Collection block to the parent array of the Core Pagination block.
+ * Add Product Collection block to the parent or ancestor array of the Core Pagination block.
  * This enhancement allows the Core Pagination block to be available for the Product Collection block.
  */
-export const addProductCollectionBlockToParentOfPaginationBlock = () => {
+export const addProductCollectionToQueryPaginationParentOrAncestor = () => {
 	if ( isWpVersion( '6.1', '>=' ) ) {
 		addFilter(
 			'blocks.registerBlockType',
