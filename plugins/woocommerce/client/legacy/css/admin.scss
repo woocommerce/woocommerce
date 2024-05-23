@@ -969,7 +969,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 		filter: brightness(50%);
 	}
 	.woocommerce-add-variation-price-container {
-		width: 15%;
+		width: auto;
 		display: flex;
 		justify-content: flex-end;
 		> button {
@@ -994,7 +994,7 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 			margin-top: 20px;
 			> button {
 				margin-left: 16px;
-				width: 88px;
+				width: auto;
 				display: unset;
 			}
 		}
@@ -2966,9 +2966,9 @@ ul.wc_coupon_list_block {
 		display: none;
 	}
 
-	select.search-filter {
-		margin-right: 4px;
-		margin-bottom: 3px;
+	select#order-search-filter {
+		margin: 0 4px 0 0;
+		float: left;
 	}
 
 	.tablenav {
@@ -3366,6 +3366,10 @@ ul.wc_coupon_list_block {
 }
 
 @media screen and (max-width: 782px) {
+	.woocommerce_page_wc-orders #order-search-filter {
+		display: none;
+	}
+
 	.wc-order-preview footer {
 		.wc-action-button-group .wc-action-button-group__items {
 			display: flex;
@@ -5133,6 +5137,10 @@ img.help_tip {
 
 			p.description {
 				margin-bottom: 8px;
+
+				&.is-error, span.is-error {
+					color: $red;
+				}
 			}
 
 			&:first-child {

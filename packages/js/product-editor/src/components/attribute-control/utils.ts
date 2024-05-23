@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ProductProductAttribute } from '@woocommerce/data';
+import type { ProductProductAttribute } from '@woocommerce/data';
 
 /**
  * Returns the attribute key. The key will be the `id` or the `name` when the id is 0.
@@ -47,24 +47,4 @@ export function reorderSortableProductAttributePositions(
 			};
 		}
 	);
-}
-
-/**
- * Helper function to return the product attribute object. If attribute is a string it will create an object.
- *
- * @param { Object | string } attribute product attribute as string or object.
- */
-export function getProductAttributeObject(
-	attribute:
-		| string
-		| Omit< ProductProductAttribute, 'position' | 'visible' | 'variation' >
-): Omit< ProductProductAttribute, 'position' | 'visible' | 'variation' > {
-	return typeof attribute === 'string'
-		? {
-				id: 0,
-				name: attribute,
-				slug: attribute,
-				options: [],
-		  }
-		: attribute;
 }

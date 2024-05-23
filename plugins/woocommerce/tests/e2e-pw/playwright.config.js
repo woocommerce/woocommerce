@@ -31,6 +31,7 @@ const reporter = [
 
 if ( process.env.CI ) {
 	reporter.push( [ 'github' ] );
+	reporter.push( [ 'buildkite-test-collector/playwright/reporter' ] );
 } else {
 	reporter.push( [
 		'html',
@@ -69,8 +70,14 @@ const config = {
 	},
 	projects: [
 		{
-			name: 'Chrome',
+			name: 'default',
 			use: { ...devices[ 'Desktop Chrome' ] },
+		},
+		{
+			name: 'Gutenberg',
+			use: { ...devices[ 'Desktop Chrome' ] },
+			testIgnore:
+				/.*smoke-tests\/*|.*js-file-monitor\/*|.*admin-tasks\/*|.*activate-and-setup\/*|.*admin-analytics\/*|.*admin-marketing\/*/,
 		},
 	],
 };

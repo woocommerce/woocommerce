@@ -27,7 +27,7 @@ export const indexLocationsById = (
 
 export const defaultSettings = {
 	enabled: false,
-	title: __( 'Local Pickup', 'woocommerce' ),
+	title: __( 'Pickup', 'woocommerce' ),
 	tax_status: 'taxable',
 	cost: '',
 };

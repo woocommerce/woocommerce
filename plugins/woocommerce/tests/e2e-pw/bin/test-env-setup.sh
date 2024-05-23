@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
-
 echo -e 'Activate default theme \n'
 wp-env run tests-cli wp theme activate twentytwentythree
 
@@ -33,10 +31,15 @@ wp-env run tests-cli wp option update blogname 'WooCommerce Core E2E Test Suite'
 echo -e 'Preparing Test Files \n'
 wp-env run tests-cli sudo cp /var/www/html/wp-content/plugins/woocommerce/tests/legacy/unit-tests/importer/sample.csv /var/www/sample.csv
 
+ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
+
 if [ $ENABLE_TRACKING == 1 ]; then
 	echo -e 'Enable tracking\n'
 	wp-env run tests-cli wp option update woocommerce_allow_tracking 'yes'
 fi
+
+echo -e 'Disabling coming soon option\n'
+wp-env run tests-cli wp option update woocommerce_coming_soon 'no'
 
 echo -e 'Upload test images \n'
 wp-env run tests-cli wp media import './test-data/images/image-01.png' './test-data/images/image-02.png' './test-data/images/image-03.png'

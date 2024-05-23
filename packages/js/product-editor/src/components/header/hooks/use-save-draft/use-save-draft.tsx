@@ -17,6 +17,7 @@ import { useShortcut } from '@wordpress/keyboard-shortcuts';
 import { useValidations } from '../../../../contexts/validation-context';
 import { WPError } from '../../../../utils/get-product-error-message';
 import { SaveDraftButtonProps } from '../../save-draft-button';
+import { recordProductEvent } from '../../../../utils/record-product-event';
 
 export function useSaveDraft( {
 	productStatus,
@@ -38,7 +39,8 @@ export function useSaveDraft( {
 
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
 			const isSaving = isSavingEntityRecord< boolean >(
@@ -67,8 +69,16 @@ export function useSaveDraft( {
 		( productStatus !== 'publish' && ! hasEdits ) ||
 		isValidating;
 
-	// @ts-expect-error There are no types for this.
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
+
+	const productStatusMap: {
+		[ key in Product[ 'status' ] ]?: string;
+	} = {
+		publish: 'product_switch_draft',
+		draft: 'product_save_draft',
+	};
 
 	async function saveDraft() {
 		try {
@@ -85,6 +95,11 @@ export function useSaveDraft( {
 					throwOnError: true,
 				}
 			);
+
+			const eventName = productStatusMap[ productStatus ];
+			if ( eventName ) {
+				recordProductEvent( eventName, publishedProduct );
+			}
 
 			if ( onSaveSuccess ) {
 				onSaveSuccess( publishedProduct );

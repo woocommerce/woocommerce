@@ -71,7 +71,7 @@ function extractDefaultShippingClassFromProduct(
 
 export function Edit( {
 	attributes,
-	context,
+	context: { postType, isInSelectedTab },
 }: ProductEditorBlockEditProps< ShippingClassBlockAttributes > ) {
 	const [ showShippingClassModal, setShowShippingClassModal ] =
 		useState( false );
@@ -86,17 +86,17 @@ export function Edit( {
 
 	const [ categories ] = useEntityProp< PartialProduct[ 'categories' ] >(
 		'postType',
-		context.postType,
+		postType,
 		'categories'
 	);
 	const [ shippingClass, setShippingClass ] = useEntityProp< string >(
 		'postType',
-		context.postType,
+		postType,
 		'shipping_class'
 	);
 	const [ virtual ] = useEntityProp< boolean >(
 		'postType',
-		context.postType,
+		postType,
 		'virtual'
 	);
 
@@ -122,15 +122,22 @@ export function Edit( {
 		throw error;
 	}
 
-	const { shippingClasses } = useSelect( ( select ) => {
-		const { getProductShippingClasses } = select(
-			EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
-		);
-		return {
-			shippingClasses:
-				getProductShippingClasses< ProductShippingClass[] >() ?? [],
-		};
-	}, [] );
+	const { shippingClasses } = useSelect(
+		( select ) => {
+			const { getProductShippingClasses } = select(
+				EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
+			);
+			return {
+				shippingClasses:
+					( isInSelectedTab &&
+						getProductShippingClasses<
+							ProductShippingClass[]
+						>() ) ||
+					[],
+			};
+		},
+		[ isInSelectedTab ]
+	);
 
 	const shippingClassControlId = useInstanceId(
 		BaseControl,

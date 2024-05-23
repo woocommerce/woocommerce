@@ -126,6 +126,17 @@ export class EditorUtils {
 		);
 	}
 
+	async removeBlockByClientId( clientId: string ) {
+		await this.page.evaluate(
+			( { clientId: _clientId } ) => {
+				window.wp.data
+					.dispatch( 'core/block-editor' )
+					.removeBlocks( _clientId );
+			},
+			{ clientId }
+		);
+	}
+
 	async closeModalByName( name: string ) {
 		const isModalOpen = await this.page.getByLabel( name ).isVisible();
 
@@ -200,7 +211,7 @@ export class EditorUtils {
 	async openGlobalBlockInserter() {
 		if ( ! ( await this.isGlobalInserterOpen() ) ) {
 			await this.toggleGlobalBlockInserter();
-			await this.page.waitForSelector( '.block-editor-inserter__menu' );
+			await this.page.locator( '.block-editor-inserter__menu' ).waitFor();
 		}
 	}
 
@@ -212,7 +223,14 @@ export class EditorUtils {
 			} )
 			.dispatchEvent( 'click' );
 
-		await this.page.locator( '.edit-site-layout__sidebar' ).waitFor( {
+		const sidebar = this.page.locator( '.edit-site-layout__sidebar' );
+		const canvasLoader = this.page.locator( '.edit-site-canvas-loader' );
+
+		await sidebar.waitFor( {
+			state: 'hidden',
+		} );
+
+		await canvasLoader.waitFor( {
 			state: 'hidden',
 		} );
 	}
@@ -259,17 +277,6 @@ export class EditorUtils {
 		}
 
 		return firstBlockIndex < secondBlockIndex;
-	}
-
-	async waitForSiteEditorFinishLoading() {
-		await this.page
-			.frameLocator( 'iframe[title="Editor canvas"i]' )
-			.locator( 'body > *' )
-			.first()
-			.waitFor();
-		await this.page
-			.locator( '.edit-site-canvas-loader' )
-			.waitFor( { state: 'hidden' } );
 	}
 
 	async setLayoutOption(
@@ -341,8 +348,7 @@ export class EditorUtils {
 
 	async transformIntoBlocks() {
 		// Select the block, so the button is visible.
-		const block = this.page
-			.frameLocator( 'iframe[name="editor-canvas"]' )
+		const block = this.editor.canvas
 			.locator( `[data-type="woocommerce/legacy-template"]` )
 			.first();
 
@@ -399,9 +405,6 @@ export class EditorUtils {
 			await this.admin.visitSiteEditor( {
 				path: `/${ templateType }/all`,
 			} );
-			await this.page.goto(
-				`/wp-admin/site-editor.php?path=/${ templateType }/all`
-			);
 			const templateLink = this.page.getByRole( 'link', {
 				name: templateName,
 				exact: true,
@@ -419,7 +422,6 @@ export class EditorUtils {
 		}
 
 		await this.enterEditMode();
-		await this.waitForSiteEditorFinishLoading();
 
 		// Verify we are editing the correct template and it has the correct title.
 		const templateTypeName =

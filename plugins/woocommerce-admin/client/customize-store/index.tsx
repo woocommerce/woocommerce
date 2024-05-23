@@ -19,6 +19,7 @@ import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { PluginArea } from '@wordpress/plugins';
+import { accessTaskReferralStorage } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
@@ -144,10 +145,23 @@ const CYSSpinner = () => (
 	</div>
 );
 
+const redirectToReferrer = () => {
+	const { getWithExpiry: getCYSTaskReferral, remove: removeCYSTaskReferral } =
+		accessTaskReferralStorage( { taskId: 'customize-store' } );
+
+	const taskReferral = getCYSTaskReferral();
+
+	if ( taskReferral ) {
+		removeCYSTaskReferral();
+		window.location.href = taskReferral.returnUrl;
+	}
+};
+
 export const machineActions = {
 	updateQueryStep,
 	redirectToWooHome,
 	redirectToThemes,
+	redirectToReferrer,
 	goBack,
 };
 
@@ -323,7 +337,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					target: 'designWithAi',
 				},
 				DESIGN_WITHOUT_AI: {
-					actions: [ 'recordTracksDesignWithAIClicked' ],
+					actions: [ 'recordTracksDesignWithoutAIClicked' ],
 					target: 'designWithoutAi',
 				},
 				SELECTED_NEW_THEME: {
@@ -475,6 +489,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 							target: '#customizeStore.intro',
 						},
 						{
+							cond: 'hasTaskReferral',
+							target: 'skipTransitional',
+						},
+						{
 							// Otherwise, proceed to the next step.
 							cond: 'customizeTaskIsCompleted',
 							target: 'preTransitional',
@@ -495,6 +513,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 							actions: [ 'assignHasCompleteSurvey' ],
 						},
 					},
+				},
+				skipTransitional: {
+					entry: [ 'redirectToReferrer' ],
 				},
 				transitional: {
 					entry: [
@@ -575,6 +596,13 @@ export const CustomizeStoreController = ( {
 				},
 				customizeTaskIsNotCompleted: ( _ctx ) => {
 					return ! _ctx.intro.customizeStoreTaskCompleted;
+				},
+				hasTaskReferral: () => {
+					const { getWithExpiry: getCYSTaskReferral } =
+						accessTaskReferralStorage( {
+							taskId: 'customize-store',
+						} );
+					return getCYSTaskReferral() !== null;
 				},
 			},
 		} );

@@ -20,6 +20,11 @@ export { default as Woo } from './images/payment-methods/woo';
 export { default as WCPayLogo } from './images/wcpay-logo';
 export { WooPaymentGatewaySetup } from './components/WooPaymentGatewaySetup';
 export { WooPaymentGatewayConfigure } from './components/WooPaymentGatewayConfigure';
+export {
+	TaskReferralRecord,
+	accessTaskReferralStorage,
+	createStorageUtils,
+} from './components/WooOnboardingTaskReferral';
 export { WooOnboardingTaskListItem } from './components/WooOnboardingTaskListItem';
 export { WooOnboardingTaskListHeader } from './components/WooOnboardingTaskListHeader';
 export { WooOnboardingTask } from './components/WooOnboardingTask';

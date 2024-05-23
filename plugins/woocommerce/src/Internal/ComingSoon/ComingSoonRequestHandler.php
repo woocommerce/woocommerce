@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\Internal\ComingSoon;
 use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
- * Handles the parse_request hook to determine whether the current page needs
+ * Handles the template_include hook to determine whether the current page needs
  * to be replaced with a comiing soon screen.
  */
 class ComingSoonRequestHandler {
@@ -26,35 +26,9 @@ class ComingSoonRequestHandler {
 	final public function init( ComingSoonHelper $coming_soon_helper ) {
 		$this->coming_soon_helper = $coming_soon_helper;
 		add_filter( 'template_include', array( $this, 'handle_template_include' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'deregister_unnecessary_styles' ), 100 );
+		add_filter( 'wp_theme_json_data_theme', array( $this, 'experimental_filter_theme_json_theme' ) );
 	}
 
-	/**
-	 * Deregisters unnecessary styles for the coming soon page.
-	 *
-	 * @return void
-	 */
-	public function deregister_unnecessary_styles() {
-		global $wp;
-
-		if ( ! $this->should_show_coming_soon( $wp ) ) {
-			return;
-		}
-
-		if ( $this->coming_soon_helper->is_site_coming_soon() ) {
-			global $wp_styles;
-
-			foreach ( $wp_styles->registered as $handle => $registered_style ) {
-				// Deregister all styles except for block styles.
-				if (
-					strpos( $handle, 'wp-block' ) !== 0 &&
-					strpos( $handle, 'core-block' ) !== 0
-				) {
-					wp_deregister_style( $handle );
-				}
-			}
-		}
-	}
 
 	/**
 	 * Replaces the page template with a 'coming soon' when the site is in coming soon mode.
@@ -74,12 +48,8 @@ class ComingSoonRequestHandler {
 		// A coming soon page needs to be displayed. Don't cache this response.
 		nocache_headers();
 
-		// Optimize search engine by returning 503 status code and set retry-after header to 12 hours.
-		status_header( 503 );
-		header( 'Retry-After: ' . 12 * HOUR_IN_SECONDS );
-
 		add_theme_support( 'block-templates' );
-		wp_dequeue_style( 'global-styles' );
+
 		$coming_soon_template = get_query_template( 'coming-soon' );
 
 		if ( ! wc_current_theme_is_fse_theme() && $this->coming_soon_helper->is_store_coming_soon() ) {
@@ -132,15 +102,90 @@ class ComingSoonRequestHandler {
 			return false;
 		}
 
-		// Exclude users with a private link.
-		if ( isset( $_GET['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_GET['woo-share'] ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			// Persist the share link with a cookie for 90 days.
-			setcookie( 'woo-share', sanitize_text_field( wp_unslash( $_GET['woo-share'] ) ), time() + 60 * 60 * 24 * 90, '/' ); //phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			return false;
-		}
-		if ( isset( $_COOKIE['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_COOKIE['woo-share'] ) {
-			return false;
+		// Check if the private link option is enabled.
+		if ( get_option( 'woocommerce_private_link' ) === 'yes' ) {
+			// Exclude users with a private link.
+			if ( isset( $_GET['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_GET['woo-share'] ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				// Persist the share link with a cookie for 90 days.
+				setcookie( 'woo-share', sanitize_text_field( wp_unslash( $_GET['woo-share'] ) ), time() + 60 * 60 * 24 * 90, '/' ); //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				return false;
+			}
+			if ( isset( $_COOKIE['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_COOKIE['woo-share'] ) {
+				return false;
+			}
 		}
 		return true;
+	}
+
+	/**
+	 * Filters the theme.json data to add the Inter and Cardo fonts when they don't exist.
+	 *
+	 * @param WP_Theme_JSON $theme_json The theme json object.
+	 */
+	public function experimental_filter_theme_json_theme( $theme_json ) {
+		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
+			return $theme_json;
+		}
+
+		$theme_data = $theme_json->get_data();
+		$font_data  = $theme_data['settings']['typography']['fontFamilies']['theme'] ?? array();
+
+		$fonts_to_add = array(
+			array(
+				'fontFamily' => '"Inter", sans-serif',
+				'name'       => 'Inter',
+				'slug'       => 'inter',
+				'fontFace'   => array(
+					array(
+						'fontFamily'  => 'Inter',
+						'fontStretch' => 'normal',
+						'fontStyle'   => 'normal',
+						'fontWeight'  => '300 900',
+						'src'         => array( WC()->plugin_url() . '/assets/fonts/Inter-VariableFont_slnt,wght.woff2' ),
+					),
+				),
+			),
+			array(
+				'fontFamily' => 'Cardo',
+				'name'       => 'Cardo',
+				'slug'       => 'cardo',
+				'fontFace'   => array(
+					array(
+						'fontFamily' => 'Cardo',
+						'fontStyle'  => 'normal',
+						'fontWeight' => '400',
+						'src'        => array( WC()->plugin_url() . '/assets/fonts/cardo_normal_400.woff2' ),
+					),
+				),
+			),
+		);
+
+		// Loops through all existing fonts and append when the font's name is not found.
+		foreach ( $fonts_to_add as $font_to_add ) {
+			$found = false;
+			foreach ( $font_data as $font ) {
+				if ( $font['name'] === $font_to_add['name'] ) {
+					$found = true;
+					break;
+				}
+			}
+
+			if ( ! $found ) {
+				$font_data[] = $font_to_add;
+			}
+		}
+
+		$new_data = array(
+			'version'  => 1,
+			'settings' => array(
+				'typography' => array(
+					'fontFamilies' => array(
+						'theme' => $font_data,
+					),
+				),
+			),
+		);
+		$theme_json->update_with( $new_data );
+		return $theme_json;
 	}
 }

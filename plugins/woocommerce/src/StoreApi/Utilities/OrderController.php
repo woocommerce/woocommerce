@@ -556,14 +556,20 @@ class OrderController {
 			throw $exception;
 		}
 
-		$valid_methods = array_keys( WC()->shipping()->get_shipping_methods() );
+		$packages = WC()->shipping()->get_packages();
+		foreach ( $packages as $package_id => $package ) {
+			$chosen_rate_for_package    = wc_get_chosen_shipping_method_for_package( $package_id, $package );
+			$valid_rate_ids_for_package = array_map(
+				function ( $rate ) {
+					return $rate->id;
+				},
+				$package['rates']
+			);
 
-		foreach ( $chosen_shipping_methods as $chosen_shipping_method ) {
 			if (
-				false === $chosen_shipping_method ||
-				! is_string( $chosen_shipping_method ) ||
-				! ArrayUtils::string_contains_array( $chosen_shipping_method, $valid_methods )
-			) {
+				false === $chosen_rate_for_package ||
+				! is_string( $chosen_rate_for_package ) ||
+				! ArrayUtils::string_contains_array( $chosen_rate_for_package, $valid_rate_ids_for_package ) ) {
 				throw $exception;
 			}
 		}

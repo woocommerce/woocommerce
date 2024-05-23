@@ -104,6 +104,17 @@ class CheckoutFields {
 				'autocapitalize' => 'none',
 				'index'          => 0,
 			],
+			'country'    => [
+				'label'         => __( 'Country/Region', 'woocommerce' ),
+				'optionalLabel' => __(
+					'Country/Region (optional)',
+					'woocommerce'
+				),
+				'required'      => true,
+				'hidden'        => false,
+				'autocomplete'  => 'country',
+				'index'         => 1,
+			],
 			'first_name' => [
 				'label'          => __( 'First name', 'woocommerce' ),
 				'optionalLabel'  => __(
@@ -163,17 +174,6 @@ class CheckoutFields {
 				'autocomplete'   => 'address-line2',
 				'autocapitalize' => 'sentences',
 				'index'          => 50,
-			],
-			'country'    => [
-				'label'         => __( 'Country/Region', 'woocommerce' ),
-				'optionalLabel' => __(
-					'Country/Region (optional)',
-					'woocommerce'
-				),
-				'required'      => true,
-				'hidden'        => false,
-				'autocomplete'  => 'country',
-				'index'         => 50,
 			],
 			'city'       => [
 				'label'          => __( 'City', 'woocommerce' ),
@@ -1279,6 +1279,15 @@ class CheckoutFields {
 	 * @return array An array of fields definitions as well as their values formatted for display.
 	 */
 	public function get_order_additional_fields_with_values( WC_Order $order, string $location, string $group = 'other', string $context = 'edit' ) {
+
+		// Because the Additional Checkout Fields API only applies to orders created with Store API, we should not
+		// return any values unless it was created using Store API. This is mainly to prevent "empty" checkbox values
+		// from being shown on the order confirmation page for orders placed using the shortcode. It's rare that this
+		// will happen but not impossible.
+		if ( 'store-api' !== $order->get_created_via() ) {
+			return [];
+		}
+
 		if ( 'additional' === $location ) {
 			wc_deprecated_argument( 'location', '8.9.0', 'The "additional" location is deprecated. Use "order" instead.' );
 			$location = 'order';

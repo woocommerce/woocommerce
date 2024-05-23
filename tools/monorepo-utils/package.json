@@ -67,7 +67,7 @@
 	},
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.1.0"
 	},
 	"config": {
 		"ci": {
@@ -83,6 +83,10 @@
 						"jest.config.js",
 						"tsconfig.json",
 						"src/**/*.ts"
+					],
+					"events": [
+						"pull_request",
+						"push"
 					]
 				}
 			]

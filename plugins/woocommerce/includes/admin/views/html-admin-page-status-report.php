@@ -6,12 +6,13 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 defined( 'ABSPATH' ) || exit;
 
 global $wpdb;
 
-$report             = wc()->api->get_endpoint_data( '/wc/v3/system_status' );
+$report             = wc_get_container()->get( RestApiUtil::class )->get_endpoint_data( '/wc/v3/system_status' );
 $environment        = $report['environment'];
 $database           = $report['database'];
 $post_type_counts   = isset( $report['post_type_counts'] ) ? $report['post_type_counts'] : array();
@@ -28,6 +29,20 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 
 $active_plugins_count   = is_countable( $active_plugins ) ? count( $active_plugins ) : 0;
 $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_plugins ) : 0;
+
+// Include necessary WordPress file to use get_plugin_data().
+if ( ! function_exists( 'get_plugin_data' ) ) {
+	require_once ABSPATH . 'wp-admin/includes/plugin.php';
+}
+// Define the path to the main WooCommerce plugin file using the correct constant.
+$plugin_path = WP_PLUGIN_DIR . '/woocommerce/woocommerce.php';
+// Initialize the WooCommerce version variable.
+$wc_version = '';
+// Check if the plugin file exists before trying to access it.
+if ( file_exists( $plugin_path ) ) {
+	$plugin_data = get_plugin_data( $plugin_path );
+	$wc_version  = $plugin_data['Version'] ?? ''; // Use null coalescing operator to handle undefined index.
+}
 
 ?>
 <div class="updated woocommerce-message inline">
@@ -48,6 +63,9 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 			</button>
 			<button id="copy-for-support" class="button" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>">
 				<?php esc_html_e( 'Copy for support', 'woocommerce' ); ?>
+			</button>
+			<button id="copy-for-github" class="button" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>">
+				<?php esc_html_e( 'Copy for GitHub', 'woocommerce' ); ?>
 			</button>
 		</p>
 		<p class="copy-error hidden">
@@ -75,19 +93,20 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 		<tr>
 			<td data-export-label="WC Version"><?php esc_html_e( 'WooCommerce version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of WooCommerce installed on your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td><?php echo esc_html( $environment['version'] ); ?></td>
+			<td><?php echo esc_html( ! empty( $wc_version ) ? $wc_version : $environment['version'] ); ?></td>
+
 		</tr>
 		<tr>
-			<td data-export-label="REST API Version"><?php esc_html_e( 'WooCommerce REST API package', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce REST API package running on your site.', 'woocommerce' ) ); ?></td>
+			<td data-export-label="Legacy REST API Package Version"><?php esc_html_e( 'WooCommerce Legacy REST API package', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce Legacy REST API plugin running on this site.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
-				$version = wc()->api->get_rest_api_package_version();
-
-				if ( ! is_null( $version ) ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code></mark> ';
+				if ( is_null( wc()->api ) ) {
+					echo '<mark class="info-icon"><span class="dashicons dashicons-info"></span> ' . esc_html__( 'The Legacy REST API plugin is not installed on this site.', 'woocommerce' ) . '</mark>';
 				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the REST API package.', 'woocommerce' ) . '</mark>';
+					$plugin_path = wc_get_container()->get( \Automattic\WooCommerce\Utilities\PluginUtil::class )->get_wp_plugin_id( 'woocommerce-legacy-rest-api' );
+					$version     = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin_path )['Version'] ?? '';
+					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code></mark> ';
 				}
 				?>
 			</td>
@@ -402,7 +421,12 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 			</td>
 		</tr>
 		<?php
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		/**
+		 * Filters the environment rows to show in the WooCommerce status report.
+		 */
 		$rows = apply_filters( 'woocommerce_system_status_environment_rows', array() );
+		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceVersionComment
 		foreach ( $rows as $row ) {
 			if ( ! empty( $row['success'] ) ) {
 				$css_class = 'yes';
@@ -842,14 +866,12 @@ if ( 0 < $mu_plugins_count ) :
 				/* Translators: %s: docs link. */
 				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . wp_kses_post( sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://wordpress.org/support/article/content-visibility/' ) ) . '</mark>';
 				$found_error = true;
-			} else {
+			} elseif ( $_page['shortcode_required'] || $_page['block_required'] ) {
 				// Shortcode and block check.
-				if ( $_page['shortcode_required'] || $_page['block_required'] ) {
-					if ( ! $_page['shortcode_present'] && ! $_page['block_present'] ) {
-						/* Translators: %1$s: shortcode text, %2$s: block slug. */
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . ( $_page['block_required'] ? sprintf( esc_html__( 'Page does not contain the %1$s shortcode or the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) : sprintf( esc_html__( 'Page does not contain the %s shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
-						$found_error = true;
-					}
+				if ( ! $_page['shortcode_present'] && ! $_page['block_present'] ) {
+					/* Translators: %1$s: shortcode text, %2$s: block slug. */
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . ( $_page['block_required'] ? sprintf( esc_html__( 'Page does not contain the %1$s shortcode or the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) : sprintf( esc_html__( 'Page does not contain the %s shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
+					$found_error = true;
 				}
 			}
 
@@ -1016,7 +1038,14 @@ if ( 0 < $mu_plugins_count ) :
 	</tbody>
 </table>
 
-<?php do_action( 'woocommerce_system_status_report' ); ?>
+<?php
+	// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+	/**
+	 * Action fired when the WooCommerce system status report is rendered.
+	 */
+	do_action( 'woocommerce_system_status_report' );
+	// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+?>
 
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>

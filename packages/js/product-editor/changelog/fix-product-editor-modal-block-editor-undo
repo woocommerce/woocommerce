@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes undo/redo in the modal block editor (description field).

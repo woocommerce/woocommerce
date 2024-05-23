@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+HPOS - Made the query for retrieving meta keys more performant
