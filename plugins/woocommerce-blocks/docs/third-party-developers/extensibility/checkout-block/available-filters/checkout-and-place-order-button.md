@@ -191,24 +191,82 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Description <!-- omit in toc -->
 
-The `placeOrderButtonLabel` filter allows change the label of the "Place order · <price/>" button.
+The `placeOrderButtonLabel` filter allows change the label of the "Place order · &lt;price/>" button.
 
 ### Parameters <!-- omit in toc -->
 
--   _defaultValue_ (type: `string`, default: `Place order · <price/>`) - The label of the "Place order · <price/>" button.
+-   _defaultValue_ (type: `string`, default: `Place order · <price/>`) - The label of the "Place order · &lt;price/>" button.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 
 ### Returns <!-- omit in toc -->
 
--   `string` - The label of the "Place order · <price/>" button.
+-   `string` - The label of the "Place order · &lt;price/>" button, where the &lt;price/> placeholder is optional.
 
-### Code example <!-- omit in toc -->
+### Code example 1 <!-- omit in toc -->
 
 ```ts
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyPlaceOrderButtonLabel = ( defaultValue, extensions ) => {
 	return '😎 Pay now 😎';
+};
+
+registerCheckoutFilters( 'example-extension', {
+	placeOrderButtonLabel: modifyPlaceOrderButtonLabel,
+} );
+```
+
+### Screenshots <!-- omit in toc -->
+
+<table>
+<tr>
+<td valign="top">Before:
+<br><br>
+<img width="358" alt="Before applying the Place Order Button Label filter" src="https://github.com/woocommerce/woocommerce/assets/64858136/873e4b73-f016-4875-b705-f1f67f9f8c15">
+</td>
+<td valign="top">After:
+<br><br>
+<img width="358" alt="After applying the Place Order Button Label filter" src="https://github.com/woocommerce/woocommerce/assets/64858136/077904bb-557d-4a7f-bf6f-1de3c4f6221b">
+</td>
+</tr>
+</table>
+
+### Code example 2 <!-- omit in toc -->
+
+```ts
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+
+const modifyPlaceOrderButtonLabel = ( defaultValue, extensions ) => {
+	return 'Order now - <price/>';
+};
+
+registerCheckoutFilters( 'example-extension', {
+	placeOrderButtonLabel: modifyPlaceOrderButtonLabel,
+} );
+```
+
+### Screenshots <!-- omit in toc -->
+
+<table>
+<tr>
+<td valign="top">Before:
+<br><br>
+<img width="358" alt="Before applying the Place Order Button Label filter" src="https://github.com/woocommerce/woocommerce/assets/64858136/873e4b73-f016-4875-b705-f1f67f9f8c15">
+</td>
+<td valign="top">After:
+<br><br>
+<img width="358" alt="After applying the Place Order Button Label filter" src="https://github.com/woocommerce/woocommerce/assets/64858136/87ef6ec0-ef0d-4d87-add4-6f927deec001">
+</td>
+</tr>
+</table>
+
+### Code example 3 <!-- omit in toc -->
+
+```ts
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+
+const modifyPlaceOrderButtonLabel = ( defaultValue, extensions ) => {
+	return 'Place order';
 };
 
 registerCheckoutFilters( 'example-extension', {
@@ -224,11 +282,11 @@ registerCheckoutFilters( 'example-extension', {
 <tr>
 <td valign="top">Before:
 <br><br>
-<img width="358" alt="Before applying the Place Order Button Label filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/aa6d9b65-4d56-45f7-8162-a6bbfe171250">
+<img width="358" alt="Before applying the Place Order Button Label filter" src="https://github.com/woocommerce/woocommerce/assets/64858136/873e4b73-f016-4875-b705-f1f67f9f8c15">
 </td>
 <td valign="top">After:
 <br><br>
-<img width="358" alt="After applying the Place Order Button Label filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a5cc2572-16e7-4781-a5ab-5d6cdced2ff6">
+<img width="358" alt="After applying the Place Order Button Label filter" src="https://github.com/woocommerce/woocommerce/assets/64858136/84a6c708-7856-44db-a79c-b3c514ddd79e">
 </td>
 </tr>
 </table>
