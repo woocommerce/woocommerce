@@ -1,10 +1,11 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 const { customer } = require( '../../test-data/data' );
 
 const pages = [ 'Orders', 'Downloads', 'Addresses', 'Account details' ];
 
 test.describe( 'My account page', () => {
-	test.use( { storageState: process.env.CUSTOMERSTATE } );
+	test.use( { storageState: qit.getEnv('CUSTOMERSTATE') } );
 
 	test( 'allows customer to login and navigate', async ( { page } ) => {
 		await page.goto( 'my-account/' );
