@@ -92,6 +92,10 @@ export const TotalsShipping = ( {
 			totalShippingValue
 		);
 
+	const totalsItemLabel = showCalculator
+		? __( 'Shipping', 'woocommerce' )
+		: __( 'Delivery', 'woocommerce' );
+
 	return (
 		<div
 			className={ classnames(
@@ -100,7 +104,7 @@ export const TotalsShipping = ( {
 			) }
 		>
 			<TotalsItem
-				label={ __( 'Shipping', 'woocommerce' ) }
+				label={ totalsItemLabel }
 				value={
 					! shippingMethodsMissing && cartHasCalculatedShipping
 						? // if address is not complete, display the link to add an address.
@@ -159,6 +163,7 @@ export const TotalsShipping = ( {
 						shippingRates={ shippingRates }
 						isLoadingRates={ isLoadingRates }
 						isAddressComplete={ addressComplete }
+						shippingAddress={ shippingAddress }
 					/>
 				) }
 		</div>

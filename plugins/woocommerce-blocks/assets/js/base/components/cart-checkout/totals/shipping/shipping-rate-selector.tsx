@@ -1,9 +1,13 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import type { CartResponseShippingRate } from '@woocommerce/types';
+import { __, sprintf } from '@wordpress/i18n';
+import type {
+	CartResponseShippingRate,
+	CartResponseShippingAddress,
+} from '@woocommerce/types';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
+import { formatShippingAddress } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -15,6 +19,7 @@ export interface ShippingRateSelectorProps {
 	shippingRates: CartResponseShippingRate[];
 	isLoadingRates: boolean;
 	isAddressComplete: boolean;
+	shippingAddress: CartResponseShippingAddress;
 }
 
 export const ShippingRateSelector = ( {
@@ -22,10 +27,21 @@ export const ShippingRateSelector = ( {
 	shippingRates,
 	isLoadingRates,
 	isAddressComplete,
+	shippingAddress,
 }: ShippingRateSelectorProps ): JSX.Element => {
 	const legend = hasRates
 		? __( 'Shipping options', 'woocommerce' )
 		: __( 'Choose a shipping option', 'woocommerce' );
+
+	const formattedLocation = formatShippingAddress( shippingAddress );
+	const noResultsMessage = sprintf(
+		/* translators: %s is referring to the formatted shipping address */
+		__(
+			'No delivery options available for %s. Please verify the address is correct or try a different address.',
+			'woocommerce'
+		),
+		formattedLocation
+	);
 	return (
 		<fieldset className="wc-block-components-totals-shipping__fieldset">
 			<legend className="screen-reader-text">{ legend }</legend>
@@ -39,10 +55,7 @@ export const ShippingRateSelector = ( {
 								className="wc-block-components-shipping-rates-control__no-results-notice"
 								status="warning"
 							>
-								{ __(
-									'There are no shipping options available. Please check your shipping address.',
-									'woocommerce'
-								) }
+								{ noResultsMessage }
 							</NoticeBanner>
 						) }
 					</>
