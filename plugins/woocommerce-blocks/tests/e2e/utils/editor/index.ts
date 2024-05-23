@@ -26,29 +26,19 @@ export class Editor extends CoreEditor {
 
 	async getBlockByName( name: string ) {
 		const blockSelector = `[data-type="${ name }"]`;
-		const framedLocator = this.canvas.locator( blockSelector );
-		const legacyLocator = this.page.locator( blockSelector );
+		const canvasLocator = this.page.locator(
+			'.wp-block-post-content, iframe[name=editor-canvas]'
+		);
 
-		const result = await Promise.any( [
-			framedLocator
-				.waitFor()
-				.then( () => 'framed' )
-				.catch( () => null ),
-			legacyLocator
-				.waitFor()
-				.then( () => 'legacy' )
-				.catch( () => null ),
-		] );
+		const isFramed = await canvasLocator.evaluate(
+			( node ) => node.tagName === 'IFRAME'
+		);
 
-		if ( result === null ) {
-			throw new Error( `Timed out waiting for block "${ name }"` );
+		if ( isFramed ) {
+			return this.canvas.locator( blockSelector );
 		}
 
-		if ( result === 'framed' ) {
-			return framedLocator;
-		}
-
-		return legacyLocator;
+		return this.page.locator( blockSelector );
 	}
 
 	async getBlockByTypeWithParent( name: string, parentName: string ) {
