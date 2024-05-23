@@ -77,12 +77,13 @@ jobs:
         outputs:
             has-flaky-test-report: ${{ !!steps.merge-flaky-tests-reports.outputs.artifact-id }}
         steps:
-            - name: Merge Artifacts
+            - name: Merge failures artifacts
               uses: actions/upload-artifact/merge@v4
               # Don't fail the job if there aren't any artifacts to merge.
               continue-on-error: true
               with:
                   name: failures-artifacts
+                  pattern: failures-artifacts*
                   delete-merged: true
 
             - name: Merge flaky tests reports
