@@ -27,7 +27,7 @@ class DeleteDraftOrders extends TestCase {
 	protected function setUp(): void {
 		global $wpdb;
 
-		$this->draft_orders_instance = new DraftOrders( new Package( 'test', './', new FeatureGating( 2 ) ) );
+		$this->draft_orders_instance = new DraftOrders( new Package( 'test', './', new FeatureGating() ) );
 
 		$order = new WC_Order();
 		$order->set_status( DraftOrders::STATUS );
