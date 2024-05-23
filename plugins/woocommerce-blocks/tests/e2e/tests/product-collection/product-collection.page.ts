@@ -3,6 +3,7 @@
  */
 import { Locator, Page } from '@playwright/test';
 import { Editor, Admin, expect } from '@woocommerce/e2e-utils';
+import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
 /**
  * Internal dependencies
@@ -160,6 +161,33 @@ class ProductCollectionPage {
 		await this.refreshLocators( 'frontend' );
 	}
 
+	async replaceBlockByBlockName( name: string, nameToInsert: string ) {
+		await this.page.evaluate(
+			( { name: _name, nameToInsert: _nameToInsert } ) => {
+				const blocks = window.wp.data
+					.select( 'core/block-editor' )
+					.getBlocks();
+				const firstMatchingBlock = blocks
+					.flatMap(
+						( {
+							innerBlocks,
+						}: {
+							innerBlocks: BlockRepresentation[];
+						} ) => innerBlocks
+					)
+					.find(
+						( block: BlockRepresentation ) => block.name === _name
+					);
+				const { clientId } = firstMatchingBlock;
+				const block = window.wp.blocks.createBlock( _nameToInsert );
+				window.wp.data
+					.dispatch( 'core/block-editor' )
+					.replaceBlock( clientId, block );
+			},
+			{ name, nameToInsert }
+		);
+	}
+
 	async replaceProductsWithProductCollectionInTemplate(
 		template: string,
 		collection?: Collections
@@ -175,10 +203,7 @@ class ProductCollectionPage {
 			this.editor.canvas.locator( `[data-type="core/query"]` )
 		).toBeVisible();
 
-		await this.editor.replaceBlockByBlockName(
-			'core/query',
-			this.BLOCK_SLUG
-		);
+		await this.replaceBlockByBlockName( 'core/query', this.BLOCK_SLUG );
 		await this.chooseCollectionInTemplate( collection );
 		await this.refreshLocators( 'editor' );
 		await this.editor.saveSiteEditorEntities();

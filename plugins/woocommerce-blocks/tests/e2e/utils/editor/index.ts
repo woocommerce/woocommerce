@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Editor as CoreEditor } from '@wordpress/e2e-test-utils-playwright';
-import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
 export class Editor extends CoreEditor {
 	async getBlockByName( name: string ) {
@@ -20,33 +19,6 @@ export class Editor extends CoreEditor {
 		}
 
 		return this.page.locator( blockSelector );
-	}
-
-	async replaceBlockByBlockName( name: string, nameToInsert: string ) {
-		await this.page.evaluate(
-			( { name: _name, nameToInsert: _nameToInsert } ) => {
-				const blocks = window.wp.data
-					.select( 'core/block-editor' )
-					.getBlocks();
-				const firstMatchingBlock = blocks
-					.flatMap(
-						( {
-							innerBlocks,
-						}: {
-							innerBlocks: BlockRepresentation[];
-						} ) => innerBlocks
-					)
-					.find(
-						( block: BlockRepresentation ) => block.name === _name
-					);
-				const { clientId } = firstMatchingBlock;
-				const block = window.wp.blocks.createBlock( _nameToInsert );
-				window.wp.data
-					.dispatch( 'core/block-editor' )
-					.replaceBlock( clientId, block );
-			},
-			{ name, nameToInsert }
-		);
 	}
 
 	async getBlockRootClientId( clientId: string ) {
