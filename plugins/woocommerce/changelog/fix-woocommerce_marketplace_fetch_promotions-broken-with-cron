@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Switch marketplace promotions from Action Scheduler to transient.
