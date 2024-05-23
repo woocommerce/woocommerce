@@ -58,6 +58,16 @@ class UsersTest extends WC_Unit_Test_Case {
 			'Network-wide user meta remains isolated from site-specific user meta (unless a prefix collision occurs.'
 		);
 
+		$this->assertFalse(
+			Users::delete_site_user_meta( $customer, 'test_data', 'bad' ),
+			'Deletion of site-specific user meta follows the same rules as delete_user_meta when a previous value is provided.'
+		);
+
+		$this->assertTrue(
+			Users::delete_site_user_meta( $customer, 'test_data', 'baz' ),
+			'Deletion of site-specific user meta follows the same rules as delete_user_meta when a previous value is provided.'
+		);
+
 		wp_delete_site( $subsite );
 		restore_current_blog();
 	}
