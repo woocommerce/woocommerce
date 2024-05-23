@@ -3,9 +3,6 @@ on:
   schedule:
     - cron: '25 3 * * *'
   workflow_dispatch:
-  push:
-    branches:
-      - 'ci/fix-reporting-step-for-daily-e2e-runs'
 
 jobs:
   run-tests:
