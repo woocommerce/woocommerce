@@ -91,6 +91,9 @@ class Init {
 	 * @param WC_Product $product The product.
 	 */
 	public function possibly_add_template_id( $product ) {
+		if ( ! $product ) {
+			return $product;
+		}
 		if ( ! $product->meta_exists( '_product_template_id' ) ) {
 			$product_template_id = TemplateMatching::determine_product_template( $product, $this->product_templates );
 			if ( $product_template_id ) {
