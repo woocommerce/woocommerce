@@ -22,15 +22,6 @@ export class Editor extends CoreEditor {
 		return this.page.locator( blockSelector );
 	}
 
-	async getBlockByTypeWithParent( name: string, parentName: string ) {
-		const parentBlock = await this.getBlockByName( parentName );
-		if ( ! parentBlock ) {
-			throw new Error( `Parent block "${ parentName }" not found.` );
-		}
-		const block = parentBlock.locator( `[data-type="${ name }"]` );
-		return block;
-	}
-
 	async replaceBlockByBlockName( name: string, nameToInsert: string ) {
 		await this.page.evaluate(
 			( { name: _name, nameToInsert: _nameToInsert } ) => {

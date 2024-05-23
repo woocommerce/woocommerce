@@ -79,11 +79,11 @@ test.describe( `${ blockData.name }`, () => {
 		// - The Gallery block has the classes "is-layout-flex" and "is-nowrap".
 		// - The Thumbnails block has a lower index than the Large Image block.
 
+		await expect(
+			await editor.getBlockByName( 'woocommerce/product-gallery' )
+		).toBeVisible();
 		const groupBlock = (
-			await editor.getBlockByTypeWithParent(
-				'core/group',
-				'woocommerce/product-gallery'
-			)
+			await editor.getBlockByName( 'core/group' )
 		 ).first();
 
 		const groupBlockClassAttribute = await groupBlock.getAttribute(
@@ -183,11 +183,12 @@ test.describe( `${ blockData.name }`, () => {
 				)
 				.click();
 
+			await expect(
+				await editor.getBlockByName( 'woocommerce/product-gallery' )
+			).toBeVisible();
+
 			const groupBlock = (
-				await editor.getBlockByTypeWithParent(
-					'core/group',
-					'woocommerce/product-gallery'
-				)
+				await editor.getBlockByName( 'core/group' )
 			 ).first();
 
 			const groupBlockClassAttribute = await groupBlock.getAttribute(
@@ -264,11 +265,12 @@ test.describe( `${ blockData.name }`, () => {
 				)
 				.click();
 
+			await expect(
+				await editor.getBlockByName( 'woocommerce/product-gallery' )
+			).toBeVisible();
+
 			const groupBlock = (
-				await editor.getBlockByTypeWithParent(
-					'core/group',
-					'woocommerce/product-gallery'
-				)
+				await editor.getBlockByName( 'core/group' )
 			 ).first();
 
 			const groupBlockClassAttribute = await groupBlock.getAttribute(
@@ -346,11 +348,12 @@ test.describe( `${ blockData.name }`, () => {
 				)
 				.click();
 
+			await expect(
+				await editor.getBlockByName( 'woocommerce/product-gallery' )
+			).toBeVisible();
+
 			const groupBlock = (
-				await editor.getBlockByTypeWithParent(
-					'core/group',
-					'woocommerce/product-gallery'
-				)
+				await editor.getBlockByName( 'core/group' )
 			 ).first();
 
 			const groupBlockClassAttribute = await groupBlock.getAttribute(
