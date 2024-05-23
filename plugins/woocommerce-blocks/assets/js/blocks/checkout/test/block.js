@@ -42,6 +42,18 @@ jest.mock( '@wordpress/compose', () => ( {
 	useResizeObserver: jest.fn().mockReturnValue( [ null, { width: 0 } ] ),
 } ) );
 
+global.ResizeObserver = jest.fn().mockImplementation( () => ( {
+	observe: jest.fn(),
+	unobserve: jest.fn(),
+	disconnect: jest.fn(),
+} ) );
+
+global.IntersectionObserver = jest.fn().mockImplementation( () => ( {
+	observe: jest.fn(),
+	unobserve: jest.fn(),
+	disconnect: jest.fn(),
+} ) );
+
 jest.mock( '@wordpress/element', () => {
 	return {
 		...jest.requireActual( '@wordpress/element' ),
