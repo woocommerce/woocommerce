@@ -1,4 +1,4 @@
-const defaultConfig = require( '../playwright.config' );
+const defaultConfig = require( '/qit/tests/e2e/qit-playwright.config' );
 const testURL    = new URL( defaultConfig.use.baseURL );
 
 /**

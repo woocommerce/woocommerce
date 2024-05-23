@@ -1,6 +1,7 @@
 const axios = require( 'axios' ).default;
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { ADMINSTATE, GITHUB_TOKEN, UPDATE_WC } = process.env;
+const qit = require('/qitHelpers');
+const { ADMINSTATE, GITHUB_TOKEN, UPDATE_WC } = qit.getEnv();
 const { downloadZip, deleteZip } = require( '../../utils/plugin-utils' );
 const { test, expect } = require( '@playwright/test' );
 
@@ -168,8 +169,8 @@ test.describe.serial( 'WooCommerce update', () => {
 			await test.step( 'Verify that WooCommerce was updated to the expected version', async () => {
 				const api = new wcApi( {
 					url: baseURL,
-					consumerKey: process.env.CONSUMER_KEY,
-					consumerSecret: process.env.CONSUMER_SECRET,
+					consumerKey: qit.getEnv('CONSUMER_KEY'),
+					consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 					version: 'wc/v3',
 				} );
 

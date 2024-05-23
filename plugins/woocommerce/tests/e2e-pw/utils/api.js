@@ -1,15 +1,16 @@
+const qit = require('/qitHelpers');
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { async } = require( 'regenerator-runtime' );
-const config = require( '../playwright.config' );
+const config = require( '/qit/tests/e2e/qit-playwright.config' );
 
 let api;
 
 // Ensure that global-setup.js runs before creating api client
-if ( process.env.CONSUMER_KEY && process.env.CONSUMER_SECRET ) {
+if ( qit.getEnv('CONSUMER_KEY') && qit.getEnv('CONSUMER_SECRET') ) {
 	api = new wcApi( {
 		url: config.use.baseURL,
-		consumerKey: process.env.CONSUMER_KEY,
-		consumerSecret: process.env.CONSUMER_SECRET,
+		consumerKey: qit.getEnv('CONSUMER_KEY'),
+		consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 		version: 'wc/v3',
 	} );
 }
