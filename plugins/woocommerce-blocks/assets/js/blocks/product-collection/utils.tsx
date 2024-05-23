@@ -105,17 +105,25 @@ export const addProductCollectionBlockToParentOfPaginationBlock = () => {
 			'blocks.registerBlockType',
 			'woocommerce/add-product-collection-block-to-parent-array-of-pagination-block',
 			( blockSettings: Block, blockName: string ) => {
-				if (
-					blockName !== coreQueryPaginationBlockName ||
-					! blockSettings?.parent
-				) {
+				if ( blockName !== coreQueryPaginationBlockName ) {
 					return blockSettings;
 				}
 
-				return {
-					...blockSettings,
-					parent: [ ...blockSettings.parent, blockJson.name ],
-				};
+				if ( blockSettings?.ancestor ) {
+					return {
+						...blockSettings,
+						ancestor: [ ...blockSettings.ancestor, blockJson.name ],
+					};
+				}
+
+				if ( blockSettings?.parent ) {
+					return {
+						...blockSettings,
+						ancestor: [ ...blockSettings.parent, blockJson.name ],
+					};
+				}
+
+				return blockSettings;
 			}
 		);
 	}
