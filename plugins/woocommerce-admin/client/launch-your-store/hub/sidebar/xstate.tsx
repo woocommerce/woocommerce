@@ -16,6 +16,7 @@ import { getQuery, navigateTo } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME, TaskListType, TaskType } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -69,6 +70,15 @@ const launchStoreAction = async () => {
 		return results;
 	}
 	throw new Error( JSON.stringify( results ) );
+};
+
+const getTestOrderCount = async () => {
+	const result = ( await apiFetch( {
+		path: '/wc-admin/launch-your-store/woopayments/test-orders/count',
+		method: 'GET',
+	} ) ) as { count: number };
+
+	return result.count;
 };
 
 const recordStoreLaunchAttempt = ( {
@@ -176,6 +186,7 @@ export const sidebarMachine = setup( {
 	actors: {
 		sidebarQueryParamListener,
 		getTasklist: fromPromise( getLysTasklist ),
+		getTestOrderCount: fromPromise( getTestOrderCount ),
 		updateLaunchStoreOptions: fromPromise( launchStoreAction ),
 		fetchCongratsData,
 	},
@@ -222,15 +233,26 @@ export const sidebarMachine = setup( {
 							id: 'prefetch-congrats-data ',
 						} ),
 					],
-					invoke: {
-						src: 'getTasklist',
-						onDone: {
-							actions: assign( {
-								tasklist: ( { event } ) => event.output,
-							} ),
-							target: 'launchYourStoreHub',
+					invoke: [
+						{
+							src: 'getTestOrderCount',
+							onDone: {
+								actions: assign( {
+									testOrderCount: ( { event } ) =>
+										event.output,
+								} ),
+							},
 						},
-					},
+						{
+							src: 'getTasklist',
+							onDone: {
+								actions: assign( {
+									tasklist: ( { event } ) => event.output,
+								} ),
+								target: 'launchYourStoreHub',
+							},
+						},
+					],
 				},
 				launchYourStoreHub: {
 					id: 'launchYourStoreHub',
