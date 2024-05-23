@@ -15,7 +15,21 @@ missingSubscriptionModalRoot.setAttribute(
 	'missing-subscription-modal-root'
 );
 
+const {
+	manageSubscriptionsUrl,
+	productId,
+	productName,
+	actionName,
+	dismissNonce,
+} = window.wooCheckSubscriptionData;
+
 render(
-	<CheckSubscriptionModal />,
+	<CheckSubscriptionModal
+		manageSubscriptionsUrl={ manageSubscriptionsUrl }
+		productId={ productId }
+		productName={ productName }
+		actionName={ actionName }
+		dismissNonce={ dismissNonce }
+	/>,
 	document.body.appendChild( missingSubscriptionModalRoot )
 );

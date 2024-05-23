@@ -21,6 +21,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * an account on WooCommerce.com.
  */
 class WC_Helper_Admin {
+	const CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_count';
+
+	const CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_timestamp';
+
 	private static $checked_products = array();
 
 	private static $checked_screen_param = array();
@@ -35,6 +39,8 @@ class WC_Helper_Admin {
 		add_filter( 'rest_api_init', array( __CLASS__, 'register_rest_routes' ) );
 
 		add_action( 'current_screen', array( __CLASS__, 'check_subscriptions' ) );
+
+		add_action( 'wp_ajax_woocommerce_helper_check_subscription_dismissed', array( __CLASS__, 'check_subscription_dismissed' ) );
 	}
 
 	/**
@@ -174,8 +180,11 @@ class WC_Helper_Admin {
 			'wc-admin-woo-check-subscription',
 			'wooCheckSubscriptionData',
 			array(
-				'url' => 'https://woocommerce.com/my-account/my-subscriptions/',
-				'productName' => self::$checked_screen_param['name'],
+				'manageSubscriptionsUrl' => 'https://woocommerce.com/my-account/my-subscriptions/',
+				'actionName'             => 'woocommerce_helper_check_subscription_dismissed',
+				'productId'              => self::$checked_screen_param['id'],
+				'productName'            => self::$checked_screen_param['name'],
+				'dismissNonce'           => wp_create_nonce( 'check_subscription_dismissed' ),
 			)
 		);
 	}
@@ -191,7 +200,10 @@ class WC_Helper_Admin {
 				continue;
 			}
 
-			if ( ! WC_Helper::has_product_subscription( absint( $product_id ) ) ) {
+			$product_id = absint( $product_id );
+			if ( ! WC_Helper::has_product_subscription( $product_id ) ) {
+				$param['id'] = $product_id;
+
 				return $param;
 			}
 		}
@@ -211,6 +223,31 @@ class WC_Helper_Admin {
 			}
 		}
 		return true;
+	}
+
+	public static function check_subscription_dismissed() {
+		if ( ! check_ajax_referer( 'check_subscription_dismissed' ) ) {
+			wp_die();
+		}
+
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			wp_die();
+		}
+
+		$product_id = absint( $_GET['product_id'] );
+		if ( ! $product_id ) {
+			wp_die();
+		}
+
+		$count_meta = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX, $product_id );
+		$dismiss_count = (int) get_user_meta( $user_id, $count_meta, true );
+		update_user_meta( $user_id, $count_meta, $dismiss_count + 1 );
+
+		$timestamp_meta = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX, $product_id );
+		update_user_meta( $user_id, $timestamp_meta, time() );
+
+		wp_die();
 	}
 }
 
