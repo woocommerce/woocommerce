@@ -59,7 +59,11 @@ export function getContentFromFreeform(
  * @return Empty array if there is only one paragraph block with empty content
  * in the list. The same block list otherwise.
  */
-function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
+function clearDescriptionIfEmpty( blocks?: BlockInstance[] | null ) {
+	if ( ! blocks?.length ) {
+		return [];
+	}
+
 	if ( blocks.length === 1 ) {
 		const block = blocks[ 0 ];
 		const isParagraph = block.name === 'core/paragraph';
@@ -84,6 +88,7 @@ function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
 			}
 		}
 	}
+
 	return blocks;
 }
 
@@ -143,12 +148,6 @@ export function DescriptionBlockEdit( {
 	useEffect( () => {
 		if ( ! hasChanged ) {
 			return;
-		}
-
-		console.log( 'modalEditorBlocks', modalEditorBlocks );
-
-		if ( ! modalEditorBlocks?.length ) {
-			setDescription( '' );
 		}
 
 		const html = serialize( clearDescriptionIfEmpty( modalEditorBlocks ) );
