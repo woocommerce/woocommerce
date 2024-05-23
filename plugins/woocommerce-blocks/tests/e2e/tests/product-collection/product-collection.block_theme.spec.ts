@@ -10,15 +10,11 @@ import type { Request } from '@playwright/test';
 import ProductCollectionPage, { SELECTORS } from './product-collection.page';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
-	pageObject: async (
-		{ page, admin, editor, templateApiUtils, editorUtils },
-		use
-	) => {
+	pageObject: async ( { page, admin, editor, editorUtils }, use ) => {
 		const pageObject = new ProductCollectionPage( {
 			page,
 			admin,
 			editor,
-			templateApiUtils,
 			editorUtils,
 		} );
 		await use( pageObject );
