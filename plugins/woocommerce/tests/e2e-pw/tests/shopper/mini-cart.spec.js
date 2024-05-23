@@ -17,7 +17,7 @@ const totalInclusiveTax = +singleProductSalePrice + 5 + 2.5;
 
 let productId, countryTaxId, stateTaxId, shippingZoneId;
 
-test.describe.skip( 'Mini Cart block page', () => {
+test.describe( 'Mini Cart block page', () => {
 	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -177,9 +177,11 @@ test.describe.skip( 'Mini Cart block page', () => {
 		// customize font size and weight
 		await page.getByLabel( 'Large', { exact: true } ).click();
 		await page.getByRole( 'button', { name: 'Font weight' } ).click();
-		await page
-			.getByRole( 'option', { name: 'Black', exact: true } )
-			.click();
+		// choose Light via kb press due to encountered issue with normal click
+		await page.keyboard.press( 'ArrowDown' );
+		await page.keyboard.press( 'ArrowDown' );
+		await page.keyboard.press( 'ArrowDown' );
+		await page.keyboard.press( 'Enter' );
 
 		// publish created mini cart page
 		await page
@@ -216,7 +218,7 @@ test.describe.skip( 'Mini Cart block page', () => {
 		);
 		await expect( page.locator( miniCartBlock ) ).toHaveAttribute(
 			'data-style',
-			'{"typography":{"fontWeight":"900"}}'
+			'{"typography":{"fontWeight":"300"}}'
 		);
 		await page.locator( miniCartButton ).click();
 		await expect(
@@ -281,9 +283,8 @@ test.describe.skip( 'Mini Cart block page', () => {
 		await page.goto( miniCartPageSlug );
 		await page.locator( miniCartButton ).click();
 		await page.getByRole( 'link', { name: 'Go to checkout' } ).click();
-		await expect(
-			page.getByRole( 'heading', { name: 'Checkout', exact: true } )
-		).toBeVisible();
+		await expect( page.url() ).toContain( '/checkout' );
+		await expect( page.getByText( 'Place order' ) ).toBeVisible();
 		await expect( page.locator( miniCartButton ) ).toBeHidden();
 
 		// shopping cart is very sensitive to cookies, so be explicit
