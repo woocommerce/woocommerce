@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Update the Place Order button label documentation to reflect the change in the default place order button label from "Place order" to "Place order · <price/>"
