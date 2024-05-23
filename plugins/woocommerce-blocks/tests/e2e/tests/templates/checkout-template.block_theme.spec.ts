@@ -10,7 +10,7 @@ const templateType = 'wp_template';
 test.describe( 'Test the checkout template', () => {
 	test( 'Template can be opened in the site editor', async ( {
 		admin,
-		page,
+		editor,
 		editorUtils,
 	} ) => {
 		await admin.visitSiteEditor( {
@@ -19,10 +19,9 @@ test.describe( 'Test the checkout template', () => {
 		} );
 		await editorUtils.enterEditMode();
 		await expect(
-			page
-				.frameLocator( 'iframe[title="Editor canvas"i]' )
-				.locator( 'h1:has-text("Checkout")' )
-				.first()
+			editor.canvas.getByRole( 'button', {
+				name: 'Place Order · <price/>',
+			} )
 		).toBeVisible();
 	} );
 
@@ -43,7 +42,9 @@ test.describe( 'Test the checkout template', () => {
 		await editorUtils.enterEditMode();
 
 		await expect(
-			editor.canvas.locator( 'h1:has-text("Checkout")' ).first()
+			editor.canvas.getByRole( 'button', {
+				name: 'Place Order · <price/>',
+			} )
 		).toBeVisible();
 
 		await editor.openDocumentSettingsSidebar();
@@ -51,23 +52,25 @@ test.describe( 'Test the checkout template', () => {
 		await page.getByRole( 'menuitem', { name: 'Edit template' } ).click();
 
 		await expect(
-			editor.canvas.locator( 'h1:has-text("Checkout")' ).first()
+			editor.canvas.getByRole( 'button', {
+				name: 'Place Order · <price/>',
+			} )
 		).toBeVisible();
 	} );
 
 	test( 'Admin bar edit site link opens site editor', async ( {
 		admin,
 		frontendUtils,
+		editor,
 	} ) => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart();
 		await admin.page.goto( permalink );
 		await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
 		await expect(
-			admin.page
-				.frameLocator( 'iframe[title="Editor canvas"i]' )
-				.locator( 'h1:has-text("Checkout")' )
-				.first()
+			editor.canvas.getByRole( 'button', {
+				name: 'Place Order · <price/>',
+			} )
 		).toBeVisible();
 	} );
 } );

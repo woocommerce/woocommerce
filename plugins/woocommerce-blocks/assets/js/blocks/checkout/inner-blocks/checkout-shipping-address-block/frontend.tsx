@@ -17,13 +17,11 @@ import { useCheckoutBlockContext } from '../../context';
 const FrontendBlock = ( {
 	title,
 	description,
-	showStepNumber,
 	children,
 	className,
 }: {
 	title: string;
 	description: string;
-	showStepNumber: boolean;
 	children: JSX.Element;
 	className?: string;
 } ) => {
@@ -32,11 +30,13 @@ const FrontendBlock = ( {
 	);
 	const { showShippingFields } = useCheckoutAddress();
 	const {
-		requireCompanyField,
-		requirePhoneField,
-		showApartmentField,
 		showCompanyField,
+		requireCompanyField,
+		showApartmentField,
+		requireApartmentField,
 		showPhoneField,
+		requirePhoneField,
+		showFormStepNumbers,
 	} = useCheckoutBlockContext();
 
 	if ( ! showShippingFields ) {
@@ -53,14 +53,15 @@ const FrontendBlock = ( {
 			) }
 			title={ title }
 			description={ description }
-			showStepNumber={ showStepNumber }
+			showStepNumber={ showFormStepNumbers }
 		>
 			<Block
-				requireCompanyField={ requireCompanyField }
-				requirePhoneField={ requirePhoneField }
-				showApartmentField={ showApartmentField }
 				showCompanyField={ showCompanyField }
+				requireCompanyField={ requireCompanyField }
+				showApartmentField={ showApartmentField }
+				requireApartmentField={ requireApartmentField }
 				showPhoneField={ showPhoneField }
+				requirePhoneField={ requirePhoneField }
 			/>
 			{ children }
 		</FormStep>

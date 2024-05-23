@@ -26,7 +26,7 @@ class ComingSoonRequestHandler {
 	final public function init( ComingSoonHelper $coming_soon_helper ) {
 		$this->coming_soon_helper = $coming_soon_helper;
 		add_filter( 'template_include', array( $this, 'handle_template_include' ) );
-		add_filter( 'wp_theme_json_data_theme', array( $this, 'filter_theme_json_theme' ) );
+		add_filter( 'wp_theme_json_data_theme', array( $this, 'experimental_filter_theme_json_theme' ) );
 	}
 
 
@@ -102,14 +102,17 @@ class ComingSoonRequestHandler {
 			return false;
 		}
 
-		// Exclude users with a private link.
-		if ( isset( $_GET['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_GET['woo-share'] ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			// Persist the share link with a cookie for 90 days.
-			setcookie( 'woo-share', sanitize_text_field( wp_unslash( $_GET['woo-share'] ) ), time() + 60 * 60 * 24 * 90, '/' ); //phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			return false;
-		}
-		if ( isset( $_COOKIE['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_COOKIE['woo-share'] ) {
-			return false;
+		// Check if the private link option is enabled.
+		if ( get_option( 'woocommerce_private_link' ) === 'yes' ) {
+			// Exclude users with a private link.
+			if ( isset( $_GET['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_GET['woo-share'] ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				// Persist the share link with a cookie for 90 days.
+				setcookie( 'woo-share', sanitize_text_field( wp_unslash( $_GET['woo-share'] ) ), time() + 60 * 60 * 24 * 90, '/' ); //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				return false;
+			}
+			if ( isset( $_COOKIE['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_COOKIE['woo-share'] ) {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -119,13 +122,13 @@ class ComingSoonRequestHandler {
 	 *
 	 * @param WP_Theme_JSON $theme_json The theme json object.
 	 */
-	public function filter_theme_json_theme( $theme_json ) {
+	public function experimental_filter_theme_json_theme( $theme_json ) {
 		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
 			return $theme_json;
 		}
 
 		$theme_data = $theme_json->get_data();
-		$font_data  = $theme_data['settings']['typography']['fontFamilies']['theme'];
+		$font_data  = $theme_data['settings']['typography']['fontFamilies']['theme'] ?? array();
 
 		$fonts_to_add = array(
 			array(
