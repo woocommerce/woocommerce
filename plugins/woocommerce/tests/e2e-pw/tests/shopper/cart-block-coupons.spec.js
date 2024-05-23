@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
@@ -36,7 +37,7 @@ let productId, orderId, limitedCouponId;
 
 baseTest.describe( 'Cart Block Applying Coupons', () => {
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
+		storageState: qit.getEnv('ADMINSTATE'),
 		testPageTitlePrefix: 'Cart Block',
 		page: async ( { context, page, testPage }, use ) => {
 			await goToPageEditor( { page } );

@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const {
 	goToPageEditor,
 	fillPageTitle,
@@ -36,7 +37,7 @@ let guestOrderId1,
 
 baseTest.describe( 'Checkout Block page', () => {
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
+		storageState: qit.getEnv( 'ADMINSTATE' ),
 		testPageTitlePrefix: 'Checkout Block',
 		page: async ( { context, page, testPage }, use ) => {
 			await goToPageEditor( { page } );
@@ -53,8 +54,8 @@ baseTest.describe( 'Checkout Block page', () => {
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv( 'CONSUMER_KEY' ),
+			consumerSecret: qit.getEnv( 'CONSUMER_SECRET' ),
 			version: 'wc/v3',
 		} );
 		// ensure store address is US
@@ -192,8 +193,8 @@ baseTest.describe( 'Checkout Block page', () => {
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv( 'CONSUMER_KEY' ),
+			consumerSecret: qit.getEnv( 'CONSUMER_SECRET' ),
 			version: 'wc/v3',
 		} );
 		await api.delete( `products/${ productId }`, {

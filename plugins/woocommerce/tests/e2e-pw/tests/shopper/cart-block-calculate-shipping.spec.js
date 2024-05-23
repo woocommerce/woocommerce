@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
@@ -20,7 +21,7 @@ const shippingCountryPT = 'PT';
 
 baseTest.describe( 'Cart Block Calculate Shipping', () => {
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
+		storageState: qit.getEnv('ADMINSTATE'),
 		testPageTitlePrefix: 'Cart Block',
 		cartBlockPage: async ( { page, testPage }, use ) => {
 			await goToPageEditor( { page } );
