@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { customer } = require( '../../test-data/data' );
@@ -26,8 +27,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api.put( 'settings/general/woocommerce_calc_taxes', {
@@ -38,8 +39,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api.put( 'settings/tax/woocommerce_tax_display_cart', {
@@ -63,8 +64,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api
@@ -101,8 +102,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		test.afterAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api.delete( `products/${ productId }`, {
@@ -119,8 +120,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		} ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api.put( 'settings/tax/woocommerce_tax_display_cart', {
@@ -193,8 +194,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		} ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api.put( 'settings/tax/woocommerce_tax_display_cart', {
@@ -288,8 +289,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		} ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api.put( 'settings/tax/woocommerce_tax_display_cart', {
@@ -319,8 +320,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api
@@ -409,8 +410,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		} ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api.put( 'settings/tax/woocommerce_tax_display_cart', {
@@ -463,8 +464,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		} ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api.put( 'settings/tax/woocommerce_tax_display_cart', {
@@ -519,8 +520,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api.put( 'settings/general/woocommerce_calc_taxes', {
@@ -606,8 +607,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		test.afterAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api.delete( `products/${ productId }`, {
@@ -634,8 +635,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		} ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api.put( 'settings/tax/woocommerce_tax_total_display', {
@@ -726,8 +727,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		} ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api.put( 'settings/tax/woocommerce_tax_total_display', {
@@ -817,8 +818,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api.put( 'settings/general/woocommerce_calc_taxes', {
@@ -889,8 +890,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		test.afterAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api.delete( `products/${ productId }`, {
