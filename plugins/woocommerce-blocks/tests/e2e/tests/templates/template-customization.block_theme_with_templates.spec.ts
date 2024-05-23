@@ -72,7 +72,7 @@ test.describe( 'Template customization', () => {
 					// Edit default template and verify changes are not visible,
 					// as the theme template has priority.
 					await admin.visitSiteEditor( {
-						postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.fallbackTemplate?.templateName }`,
+						postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.fallbackTemplate?.templatePath }`,
 						postType: testData.templateType,
 					} );
 					await editor.enterEditMode();
