@@ -207,47 +207,6 @@ export class Editor extends CoreEditor {
 		await this.page.getByText( option ).click();
 	}
 
-	async closeWelcomeGuideModal() {
-		await this.page.waitForFunction( () => {
-			return (
-				window.wp &&
-				window.wp.data &&
-				window.wp.data.dispatch( 'core/preferences' )
-			);
-		} );
-
-		// Disable the welcome guide for the site editor.
-		await this.page.evaluate( () => {
-			return Promise.all( [
-				window.wp.data
-					.dispatch( 'core/preferences' )
-					.set( 'core/edit-site', 'welcomeGuide', false ),
-				window.wp.data
-					.dispatch( 'core/preferences' )
-					.set( 'core/edit-site', 'welcomeGuideStyles', false ),
-				window.wp.data
-					.dispatch( 'core/preferences' )
-					.set( 'core/edit-site', 'welcomeGuidePage', false ),
-				window.wp.data
-					.dispatch( 'core/preferences' )
-					.set( 'core/edit-site', 'welcomeGuideTemplate', false ),
-				window.wp.data
-					.dispatch( 'core/preferences' )
-					.set( 'core/edit-post', 'welcomeGuide', false ),
-				window.wp.data
-					.dispatch( 'core/preferences' )
-					.set( 'core/edit-post', 'welcomeGuideStyles', false ),
-				window.wp.data
-					.dispatch( 'core/preferences' )
-					.set( 'core/edit-post', 'welcomeGuidePage', false ),
-
-				window.wp.data
-					.dispatch( 'core/preferences' )
-					.set( 'core/edit-post', 'welcomeGuideTemplate', false ),
-			] );
-		} );
-	}
-
 	async transformIntoBlocks() {
 		// Select the block, so the button is visible.
 		const block = this.canvas
