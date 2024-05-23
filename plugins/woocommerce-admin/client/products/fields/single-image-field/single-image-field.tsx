@@ -35,10 +35,7 @@ export function SingleImageField( {
 	return (
 		<div
 			{ ...props }
-			className={ clsx(
-				'woocommerce-single-image-field',
-				className
-			) }
+			className={ clsx( 'woocommerce-single-image-field', className ) }
 		>
 			<label
 				htmlFor={ fieldId }

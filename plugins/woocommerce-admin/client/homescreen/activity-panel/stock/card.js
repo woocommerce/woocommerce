@@ -252,12 +252,9 @@ export class ProductStockCard extends Component {
 				</div>
 			</div>
 		);
-		const activityCardClasses = clsx(
-			'woocommerce-stock-activity-card',
-			{
-				'is-dimmed': ! editing && ! isLowStock,
-			}
-		);
+		const activityCardClasses = clsx( 'woocommerce-stock-activity-card', {
+			'is-dimmed': ! editing && ! isLowStock,
+		} );
 
 		const activityCard = (
 			<ActivityCard

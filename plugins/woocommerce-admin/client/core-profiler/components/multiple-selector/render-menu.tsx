@@ -51,12 +51,9 @@ export const renderMenu =
 							} }
 						>
 							<CheckboxControl
-								className={ clsx(
-									'core-profiler__checkbox',
-									{
-										'is-selected': isSelected,
-									}
-								) }
+								className={ clsx( 'core-profiler__checkbox', {
+									'is-selected': isSelected,
+								} ) }
 								onChange={ () => {} }
 								checked={ isSelected }
 								label={ item.label }

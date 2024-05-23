@@ -24,12 +24,7 @@ export const WooHomescreenWCPayFeature = ( {
 		return null;
 	}
 	return (
-		<div
-			className={ clsx(
-				'woocommerce-homescreen__header',
-				className
-			) }
-		>
+		<div className={ clsx( 'woocommerce-homescreen__header', className ) }>
 			<WooHomescreenWCPayFeatureItem.Slot />
 		</div>
 	);

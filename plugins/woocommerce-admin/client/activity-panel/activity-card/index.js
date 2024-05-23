@@ -36,10 +36,7 @@ class ActivityCard extends Component {
 			title,
 			unread,
 		} = this.props;
-		const cardClassName = clsx(
-			'woocommerce-activity-card',
-			className
-		);
+		const cardClassName = clsx( 'woocommerce-activity-card', className );
 		const actionsList = Array.isArray( actions ) ? actions : [ actions ];
 		const dateString = isDateString( date )
 			? moment.utc( date ).fromNow()

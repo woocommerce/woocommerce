@@ -23,9 +23,7 @@ const className = 'woocommerce-marketing-sync-status';
 export const SyncStatus: React.FC< SyncStatusPropsType > = ( { status } ) => {
 	if ( status === 'failed' ) {
 		return (
-			<div
-				className={ clsx( className, `${ className }__failed` ) }
-			>
+			<div className={ clsx( className, `${ className }__failed` ) }>
 				<GridiconNotice size={ iconSize } />
 				{ __( 'Sync failed', 'woocommerce' ) }
 			</div>
@@ -34,9 +32,7 @@ export const SyncStatus: React.FC< SyncStatusPropsType > = ( { status } ) => {
 
 	if ( status === 'syncing' ) {
 		return (
-			<div
-				className={ clsx( className, `${ className }__syncing` ) }
-			>
+			<div className={ clsx( className, `${ className }__syncing` ) }>
 				<GridiconSync size={ iconSize } />
 				{ __( 'Syncing', 'woocommerce' ) }
 			</div>

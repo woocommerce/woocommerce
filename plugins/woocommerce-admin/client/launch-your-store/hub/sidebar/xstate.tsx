@@ -338,10 +338,7 @@ export const SidebarContainer = ( {
 } ) => {
 	return (
 		<div
-			className={ clsx(
-				'launch-your-store-layout__sidebar',
-				className
-			) }
+			className={ clsx( 'launch-your-store-layout__sidebar', className ) }
 		>
 			{ children }
 		</div>

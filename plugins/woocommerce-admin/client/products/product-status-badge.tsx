@@ -31,10 +31,7 @@ export const ProductStatusBadge: React.FC = () => {
 
 	return (
 		<Pill
-			className={ clsx(
-				'woocommerce-product-status',
-				`is-${ status }`
-			) }
+			className={ clsx( 'woocommerce-product-status', `is-${ status }` ) }
 		>
 			{ PRODUCT_STATUS_LABELS[ status ] }
 		</Pill>

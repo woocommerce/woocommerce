@@ -119,9 +119,7 @@ export default function Products( props: ProductsProps ) {
 	const baseContainerClass = 'woocommerce-marketplace__search-';
 	const baseProductListTitleClass = 'product-list-title--';
 
-	const containerClassName = clsx(
-		baseContainerClass + labelForClassName
-	);
+	const containerClassName = clsx( baseContainerClass + labelForClassName );
 	const productListTitleClassName = clsx(
 		'woocommerce-marketplace__product-list-title',
 		baseContainerClass + baseProductListTitleClass + labelForClassName,

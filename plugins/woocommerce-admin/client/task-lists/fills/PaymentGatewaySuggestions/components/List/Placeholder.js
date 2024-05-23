@@ -18,10 +18,7 @@ import { Text } from '@woocommerce/experimental';
 import './List.scss';
 
 const PlaceholderItem = () => {
-	const classes = clsx(
-		'woocommerce-task-payment',
-		'woocommerce-task-card'
-	);
+	const classes = clsx( 'woocommerce-task-payment', 'woocommerce-task-card' );
 
 	return (
 		<Fragment>

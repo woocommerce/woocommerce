@@ -35,10 +35,7 @@ export const Choice = ( {
 	return (
 		<div
 			role="radio"
-			className={ clsx(
-				'woocommerce-cys-choice-container',
-				className
-			) }
+			className={ clsx( 'woocommerce-cys-choice-container', className ) }
 			onClick={ changeHandler }
 			onKeyDown={ ( e ) => {
 				if ( e.key === 'Enter' ) {

@@ -101,12 +101,9 @@ function Snackbar(
 		actions = [ actions[ 0 ] ];
 	}
 
-	const snackbarContentClassnames = clsx(
-		'components-snackbar__content',
-		{
-			'components-snackbar__content-with-icon': !! icon,
-		}
-	);
+	const snackbarContentClassnames = clsx( 'components-snackbar__content', {
+		'components-snackbar__content-with-icon': !! icon,
+	} );
 
 	if ( __unstableHTML === true ) {
 		children = <RawHTML>{ children }</RawHTML>;

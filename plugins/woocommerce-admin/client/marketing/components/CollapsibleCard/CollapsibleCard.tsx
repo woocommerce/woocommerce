@@ -42,12 +42,7 @@ const CollapsibleCard: React.FC< CollapsibleCardProps > = ( {
 	};
 
 	return (
-		<Card
-			className={ clsx(
-				'woocommerce-collapsible-card',
-				className
-			) }
-		>
+		<Card className={ clsx( 'woocommerce-collapsible-card', className ) }>
 			<CardHeader onClick={ handleClick }>
 				<CardHeaderTitle>{ header }</CardHeaderTitle>
 				<Button

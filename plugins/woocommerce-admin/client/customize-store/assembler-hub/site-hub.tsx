@@ -60,10 +60,7 @@ export const SiteHub = forwardRef(
 			<motion.div
 				ref={ ref }
 				{ ...restProps }
-				className={ clsx(
-					'edit-site-site-hub',
-					restProps.className
-				) }
+				className={ clsx( 'edit-site-site-hub', restProps.className ) }
 				initial={ false }
 				transition={ {
 					type: 'tween',

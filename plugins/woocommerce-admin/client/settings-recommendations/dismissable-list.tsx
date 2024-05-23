@@ -75,10 +75,7 @@ export const DismissableList: React.FC< {
 	return (
 		<Card
 			size="medium"
-			className={ clsx(
-				'woocommerce-dismissable-list',
-				className
-			) }
+			className={ clsx( 'woocommerce-dismissable-list', className ) }
 		>
 			<OptionNameContext.Provider value={ dismissOptionName }>
 				{ children }

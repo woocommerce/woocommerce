@@ -16,10 +16,7 @@ const Card = ( props ) => {
 
 	return (
 		<WPCard
-			className={ clsx(
-				className,
-				'woocommerce-admin-marketing-card'
-			) }
+			className={ clsx( className, 'woocommerce-admin-marketing-card' ) }
 		>
 			<CardHeader>
 				<div>

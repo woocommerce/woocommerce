@@ -34,10 +34,7 @@ export default function PostsNavigation( {
 	};
 
 	return (
-		<nav
-			{ ...props }
-			className={ clsx( className, 'posts-navigation' ) }
-		>
+		<nav { ...props } className={ clsx( className, 'posts-navigation' ) }>
 			{ prevHref ? (
 				<Link
 					{ ...prevNavigationProps }

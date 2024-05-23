@@ -210,14 +210,10 @@ const DashboardCharts = ( props ) => {
 					role="menubar"
 				>
 					<Button
-						className={ clsx(
-							'woocommerce-chart__type-button',
-							{
-								'woocommerce-chart__type-button-selected':
-									! query.chartType ||
-									query.chartType === 'line',
-							}
-						) }
+						className={ clsx( 'woocommerce-chart__type-button', {
+							'woocommerce-chart__type-button-selected':
+								! query.chartType || query.chartType === 'line',
+						} ) }
 						title={ __( 'Line chart', 'woocommerce' ) }
 						aria-checked={ query.chartType === 'line' }
 						role="menuitemradio"
@@ -227,13 +223,10 @@ const DashboardCharts = ( props ) => {
 						<LineGraphIcon />
 					</Button>
 					<Button
-						className={ clsx(
-							'woocommerce-chart__type-button',
-							{
-								'woocommerce-chart__type-button-selected':
-									query.chartType === 'bar',
-							}
-						) }
+						className={ clsx( 'woocommerce-chart__type-button', {
+							'woocommerce-chart__type-button-selected':
+								query.chartType === 'bar',
+						} ) }
 						title={ __( 'Bar chart', 'woocommerce' ) }
 						aria-checked={ query.chartType === 'bar' }
 						role="menuitemradio"

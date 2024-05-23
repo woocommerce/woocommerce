@@ -22,12 +22,9 @@ export default function ProductListHeader(
 	const { title, groupURL } = props;
 	const isLoading = title === '';
 
-	const classNames = clsx(
-		'woocommerce-marketplace__product-list-header',
-		{
-			'is-loading': isLoading,
-		}
-	);
+	const classNames = clsx( 'woocommerce-marketplace__product-list-header', {
+		'is-loading': isLoading,
+	} );
 
 	return (
 		<div className={ classNames } aria-hidden={ isLoading }>

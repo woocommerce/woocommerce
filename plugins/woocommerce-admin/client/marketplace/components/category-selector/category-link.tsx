@@ -26,14 +26,11 @@ export default function CategoryLink( props: Category ): JSX.Element {
 
 	const isLoading = props.label === '';
 
-	const classes = clsx(
-		'woocommerce-marketplace__category-item-button',
-		{
-			'woocommerce-marketplace__category-item-button--selected':
-				props.selected,
-			'is-loading': isLoading,
-		}
-	);
+	const classes = clsx( 'woocommerce-marketplace__category-item-button', {
+		'woocommerce-marketplace__category-item-button--selected':
+			props.selected,
+		'is-loading': isLoading,
+	} );
 
 	return (
 		<button
