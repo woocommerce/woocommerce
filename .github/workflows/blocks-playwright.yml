@@ -100,6 +100,9 @@ jobs:
         needs: [merge-artifacts]
         if: ${{ !cancelled() && needs.merge-artifacts.outputs.has-flaky-test-report == 'true' }}
         runs-on: ubuntu-latest
+        permissions:
+            contents: read # Needed to checkout the code
+            issues: write # Required to create and manage issues
         steps:
             # We are using @wordpress/report-flaky-tests package
             # to create GitHub issues for flaky tests from Gutenberg repo.
