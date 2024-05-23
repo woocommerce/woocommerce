@@ -48,7 +48,11 @@ test.describe( 'Merchant → Mini Cart', () => {
 				await editor.getBlockByName( blockData.slug )
 			).toBeVisible();
 		} );
-		test( 'can only be inserted once', async ( { admin, editor } ) => {
+		test( 'can only be inserted once', async ( {
+			page,
+			admin,
+			editor,
+		} ) => {
 			await admin.visitWidgetEditor();
 			await editor.openGlobalBlockInserter();
 
@@ -56,7 +60,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( blockData.slug );
 
-			const miniCartButton = editor.page.getByRole( 'option', {
+			const miniCartButton = page.getByRole( 'option', {
 				name: blockData.name,
 				exact: true,
 			} );

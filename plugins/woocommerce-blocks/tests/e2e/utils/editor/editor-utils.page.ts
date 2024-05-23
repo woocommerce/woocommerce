@@ -6,9 +6,9 @@ import { Editor as CoreEditor } from '@wordpress/e2e-test-utils-playwright';
 export class Editor extends CoreEditor {
 	async getBlockByName( name: string ) {
 		const blockSelector = `[data-type="${ name }"]`;
-		const canvasLocator = this.page.locator(
-			'.wp-block-post-content, iframe[name=editor-canvas]'
-		);
+		const canvasLocator = this.page
+			.locator( '.editor-styles-wrapper, iframe[name=editor-canvas]' )
+			.first();
 
 		const isFramed = await canvasLocator.evaluate(
 			( node ) => node.tagName === 'IFRAME'
