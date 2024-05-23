@@ -344,7 +344,10 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			 ).click();
 
-			await editor.setLayoutOption( 'Align Top' );
+			await page
+				.locator( "button[aria-label='Change vertical alignment']" )
+				.click();
+			await page.getByText( 'Align Top' ).click();
 
 			const block = await pageObject.getNextPreviousButtonsBlock( {
 				page: 'editor',
@@ -396,7 +399,10 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			 ).click();
 
-			await editor.setLayoutOption( 'Align Middle' );
+			await page
+				.locator( "button[aria-label='Change vertical alignment']" )
+				.click();
+			await page.getByText( 'Align Middle' ).click();
 
 			const block = await pageObject.getNextPreviousButtonsBlock( {
 				page: 'editor',

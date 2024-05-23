@@ -137,32 +137,6 @@ export class Editor extends CoreEditor {
 		return firstBlockIndex < secondBlockIndex;
 	}
 
-	async setLayoutOption(
-		option:
-			| 'Align Top'
-			| 'Align Bottom'
-			| 'Align Middle'
-			| 'Stretch to Fill'
-	) {
-		const button = this.page.locator(
-			"button[aria-label='Change vertical alignment']"
-		);
-
-		await button.click();
-
-		await this.page.getByText( option ).click();
-	}
-
-	async setAlignOption(
-		option: 'Align Left' | 'Align Center' | 'Align Right' | 'None'
-	) {
-		const button = this.page.locator( "button[aria-label='Align']" );
-
-		await button.click();
-
-		await this.page.getByText( option ).click();
-	}
-
 	async transformIntoBlocks() {
 		// Select the block, so the button is visible.
 		const block = this.canvas

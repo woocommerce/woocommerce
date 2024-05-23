@@ -172,7 +172,8 @@ test.describe( `${ blockData.name }`, () => {
 
 			await block.click();
 
-			await editor.setAlignOption( 'Align Left' );
+			await page.locator( "button[aria-label='Align']" ).click();
+			await page.getByText( 'Align Left' ).click();
 
 			await expect
 				.poll( async () => {
@@ -216,7 +217,8 @@ test.describe( `${ blockData.name }`, () => {
 
 			await block.click();
 
-			await editor.setAlignOption( 'Align Center' );
+			await page.locator( "button[aria-label='Align']" ).click();
+			await page.getByText( 'Align Center' ).click();
 
 			await expect
 				.poll( async () => {
