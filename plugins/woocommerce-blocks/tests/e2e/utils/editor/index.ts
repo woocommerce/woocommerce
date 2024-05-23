@@ -58,33 +58,17 @@ export class Editor extends CoreEditor {
 	}
 
 	/**
-	 * Toggles the global inserter.
-	 */
-	async toggleGlobalBlockInserter() {
-		await this.page
-			.getByRole( 'button', { name: 'Toggle block inserter' } )
-			.click();
-	}
-
-	/**
-	 * Checks if the global inserter is open.
-	 *
-	 * @return {Promise<boolean>} Whether the inserter is open or not.
-	 */
-	async isGlobalInserterOpen() {
-		const button = this.page.getByRole( 'button', {
-			name: 'Toggle block inserter',
-		} );
-
-		return ( await button.getAttribute( 'aria-pressed' ) ) === 'true';
-	}
-
-	/**
 	 * Opens the global inserter.
 	 */
 	async openGlobalBlockInserter() {
-		if ( ! ( await this.isGlobalInserterOpen() ) ) {
-			await this.toggleGlobalBlockInserter();
+		const toggleButton = this.page.getByRole( 'button', {
+			name: 'Toggle block inserter',
+		} );
+		const isOpen =
+			( await toggleButton.getAttribute( 'aria-pressed' ) ) === 'true';
+
+		if ( ! isOpen ) {
+			await toggleButton.click();
 			await this.page.locator( '.block-editor-inserter__menu' ).waitFor();
 		}
 	}
