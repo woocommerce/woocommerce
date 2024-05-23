@@ -10,15 +10,11 @@ import type { Request } from '@playwright/test';
 import ProductCollectionPage, { SELECTORS } from './product-collection.page';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
-	pageObject: async (
-		{ page, admin, editor, templateApiUtils, editorUtils },
-		use
-	) => {
+	pageObject: async ( { page, admin, editor, editorUtils }, use ) => {
 		const pageObject = new ProductCollectionPage( {
 			page,
 			admin,
 			editor,
-			templateApiUtils,
 			editorUtils,
 		} );
 		await use( pageObject );
@@ -879,6 +875,29 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.productPrices ).toHaveText(
 				featuredProductsPrices
 			);
+		} );
+
+		test( 'With multiple Pagination blocks', async ( {
+			page,
+			admin,
+			editor,
+			editorUtils,
+			pageObject,
+		} ) => {
+			await admin.createNewPost();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost( 'productCatalog' );
+			const paginations = page.getByLabel( 'Block: Pagination' );
+
+			await expect( paginations ).toHaveCount( 1 );
+
+			const siblingBlock = await editorUtils.getBlockByName(
+				'woocommerce/product-template'
+			);
+			await editor.selectBlocks( siblingBlock );
+			await editorUtils.insertBlockUsingGlobalInserter( 'Pagination' );
+
+			await expect( paginations ).toHaveCount( 2 );
 		} );
 	} );
 
