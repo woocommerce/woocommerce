@@ -7,11 +7,11 @@ const {
 	publishPage,
 } = require( '../../utils/editor' );
 
-baseTest.describe( 'Can create a new page', () => {
-	const test = baseTest.extend( {
-		storageState: qit.getEnv('ADMINSTATE'),
-	} );
+const test = baseTest.extend( {
+	storageState: qit.getEnv('ADMINSTATE'),
+} );
 
+test.describe( 'Can create a new page', () => {
 	// eslint-disable-next-line playwright/expect-expect
 	test( 'can create new page', async ( { page, testPage } ) => {
 		await goToPageEditor( { page } );

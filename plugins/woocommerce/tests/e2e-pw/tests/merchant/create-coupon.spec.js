@@ -1,7 +1,16 @@
 const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
-baseTest.describe( 'Coupon management', () => {
+const test = baseTest.extend( {
+	storageState: qit.getEnv('ADMINSTATE'),
+	coupon: async ( { api }, use ) => {
+		const coupon = {};
+		await use( coupon );
+		await api.delete( `coupons/${ coupon.id }`, { force: true } );
+	},
+} );
+
+test.describe( 'Coupon management', () => {
 	const couponData = {
 		fixedCart: {
 			code: `fixedCart-${ Date.now() }`,
@@ -31,15 +40,6 @@ baseTest.describe( 'Coupon management', () => {
 			freeShipping: true,
 		},
 	};
-
-	const test = baseTest.extend( {
-		storageState: qit.getEnv('ADMINSTATE'),
-		coupon: async ( { api }, use ) => {
-			const coupon = {};
-			await use( coupon );
-			await api.delete( `coupons/${ coupon.id }`, { force: true } );
-		},
-	} );
 
 	for ( const couponType of Object.keys( couponData ) ) {
 		test( `can create new ${ couponType } coupon`, async ( {

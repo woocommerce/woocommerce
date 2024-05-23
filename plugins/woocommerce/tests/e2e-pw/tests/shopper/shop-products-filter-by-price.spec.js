@@ -16,12 +16,12 @@ const simpleProductName = 'AAA Filter Products';
 
 let product1Id, product2Id, product3Id;
 
-baseTest.describe( 'Filter items in the shop by product price', () => {
-	const test = baseTest.extend( {
-		storageState: qit.getEnv('ADMINSTATE'),
-		testPageTitlePrefix: 'Products filter',
-	} );
+const test = baseTest.extend( {
+	storageState: qit.getEnv('ADMINSTATE'),
+	testPageTitlePrefix: 'Products filter',
+} );
 
+test.describe( 'Filter items in the shop by product price', () => {
 	test.beforeAll( async ( { api } ) => {
 		// add products
 		await api

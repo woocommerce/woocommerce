@@ -8,12 +8,12 @@ const {
 	publishPage,
 } = require( '../../utils/editor' );
 
-baseTest.describe( 'Transform Classic Cart To Cart Block', () => {
-	const test = baseTest.extend( {
-		storageState: qit.getEnv('ADMINSTATE'),
-		testPageTitlePrefix: 'Transformed cart',
-	} );
+const test = baseTest.extend( {
+	storageState: qit.getEnv('ADMINSTATE'),
+	testPageTitlePrefix: 'Transformed cart',
+} );
 
+test.describe( 'Transform Classic Cart To Cart Block', () => {
 	test( 'can transform classic cart to cart block', async ( {
 		page,
 		testPage,

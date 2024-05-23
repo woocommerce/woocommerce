@@ -90,12 +90,12 @@ const blocks = [
 
 let productId, shippingZoneId, productTagId, attributeId, productCategoryId;
 
-baseTest.describe( 'Add WooCommerce Blocks Into Page', () => {
-	const test = baseTest.extend( {
-		storageState: qit.getEnv('ADMINSTATE'),
-		testPageTitlePrefix: 'Woocommerce Blocks',
-	} );
+const test = baseTest.extend( {
+	storageState: qit.getEnv('ADMINSTATE'),
+	testPageTitlePrefix: 'Woocommerce Blocks',
+} );
 
+test.describe( 'Add WooCommerce Blocks Into Page', () => {
 	test.beforeAll( async ( { api } ) => {
 		// add product attribute
 		await api

@@ -35,22 +35,22 @@ let guestOrderId1,
 	productId,
 	shippingZoneId;
 
-baseTest.describe( 'Checkout Block page', () => {
-	const test = baseTest.extend( {
-		storageState: qit.getEnv( 'ADMINSTATE' ),
-		testPageTitlePrefix: 'Checkout Block',
-		page: async ( { context, page, testPage }, use ) => {
-			await goToPageEditor( { page } );
-			await fillPageTitle( page, testPage.title );
-			await insertBlockByShortcut( page, '/checkout' );
-			await publishPage( page, testPage.title );
+const test = baseTest.extend( {
+	storageState: qit.getEnv( 'ADMINSTATE' ),
+	testPageTitlePrefix: 'Checkout Block',
+	page: async ( { context, page, testPage }, use ) => {
+		await goToPageEditor( { page } );
+		await fillPageTitle( page, testPage.title );
+		await insertBlockByShortcut( page, '/checkout' );
+		await publishPage( page, testPage.title );
 
-			await context.clearCookies();
+		await context.clearCookies();
 
-			await use( page );
-		},
-	} );
+		await use( page );
+	},
+} );
 
+test.describe( 'Checkout Block page', () => {
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,

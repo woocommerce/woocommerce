@@ -19,20 +19,20 @@ const shippingCountryNL = 'NL';
 const shippingZoneNamePT = 'Portugal Flat Local';
 const shippingCountryPT = 'PT';
 
-baseTest.describe( 'Cart Block Calculate Shipping', () => {
-	const test = baseTest.extend( {
-		storageState: qit.getEnv('ADMINSTATE'),
-		testPageTitlePrefix: 'Cart Block',
-		cartBlockPage: async ( { page, testPage }, use ) => {
-			await goToPageEditor( { page } );
-			await fillPageTitle( page, testPage.title );
-			await insertBlockByShortcut( page, '/cart' );
-			await publishPage( page, testPage.title );
+const test = baseTest.extend( {
+	storageState: qit.getEnv('ADMINSTATE'),
+	testPageTitlePrefix: 'Cart Block',
+	cartBlockPage: async ( { page, testPage }, use ) => {
+		await goToPageEditor( { page } );
+		await fillPageTitle( page, testPage.title );
+		await insertBlockByShortcut( page, '/cart' );
+		await publishPage( page, testPage.title );
 
-			await use( testPage );
-		},
-	} );
+		await use( testPage );
+	},
+} );
 
+test.describe( 'Cart Block Calculate Shipping', () => {
 	let product1Id, product2Id, shippingZoneNLId, shippingZonePTId;
 
 	test.beforeAll( async ( { api } ) => {

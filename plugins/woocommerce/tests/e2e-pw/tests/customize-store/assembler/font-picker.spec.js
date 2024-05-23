@@ -43,7 +43,7 @@ const slugFontMap = {
 
 test.describe( 'Assembler -> Font Picker', () => {
 	test.skip(
-		qit.getEnv('WP_ENV_CORE') && qit.getEnv('WP_ENV_CORE').includes( '6.4' ),
+		typeof qit.getEnv('WP_ENV_CORE') !== 'string' || qit.getEnv('WP_ENV_CORE').includes('6.4'),
 		'Skipping, font picker not available in WP 6.4'
 	);
 
