@@ -38,8 +38,6 @@ jobs:
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
-              env:
-                  ENABLE_HPOS: 1
               run: pnpm --filter=@woocommerce/plugin-woocommerce env:test
 
             - name: Run API tests
@@ -270,12 +268,6 @@ jobs:
                     - plugin: 'WooCommerce Shipping & Tax'
                       repo: 'automattic/woocommerce-services'
                       slug: woocommerce-services
-                    - plugin: 'Gutenberg'
-                      repo: 'WordPress/gutenberg'
-                      slug: gutenberg
-                    - plugin: 'Gutenberg - Nightly'
-                      repo: 'bph/gutenberg'
-                      slug: gutenberg
         steps:
             - uses: actions/checkout@v3
 
@@ -412,10 +404,6 @@ jobs:
                       slug: woocommerce-paypal-payments
                     - plugin: 'WooCommerce Shipping & Tax'
                       slug: woocommerce-services
-                    - plugin: 'Gutenberg'
-                      slug: gutenberg
-                    - plugin: 'Gutenberg - Nightly'
-                      slug: gutenberg-nightly
         steps:
             - name: Download test report artifact
               uses: actions/download-artifact@v3
@@ -476,7 +464,7 @@ jobs:
               id: send-slack-message
               uses: slackapi/slack-github-action@v1.23.0
               with:
-                  channel-id: ${{ secrets.DAILY_TEST_SLACK_CHANNEL }}
+                  channel-id: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
                   payload: ${{ steps.construct-slack-payload.outputs.payload }}
               env:
                   SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}

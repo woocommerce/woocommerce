@@ -57,6 +57,11 @@ type AttributeForm = {
 	attributes: Array< EnhancedProductAttribute | null >;
 };
 
+/*
+ * Sort criteria for the attributes.
+ */
+const attributeSortCriteria = { order_by: 'name' };
+
 export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
 	description = '',
@@ -193,8 +198,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		name: defaultSearch,
 	} as EnhancedProductAttribute;
 
-	const attributeSortCriteria = { order_by: 'name' };
-
 	const { attributes, isLoadingAttributes } = useSelect(
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
@@ -211,7 +214,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 				),
 				attributes: getAttributes( attributeSortCriteria ),
 			};
-		}
+		},
+		[]
 	);
 
 	const { createErrorNotice } = useDispatch( 'core/notices' );
@@ -269,7 +273,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					function addNewAttribute(
 						newAttributeName: string,
 						index: number
-					) {
+					): void {
 						if ( ! createNewAttributesAsGlobal ) {
 							return setValue( `attributes[${ index }]`, {
 								id: 0,
@@ -378,6 +382,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								}
 							} }
 							className="woocommerce-new-attribute-modal"
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore
+							size="medium"
 						>
 							{ notice && (
 								<Notice isDismissible={ false }>

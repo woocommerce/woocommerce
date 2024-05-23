@@ -34,6 +34,10 @@
 			"type": "boolean",
 			"default": true
 		},
+		"requireApartmentField": {
+			"type": "boolean",
+			"default": false
+		},
 		"showPhoneField": {
 			"type": "boolean",
 			"default": true
@@ -45,6 +49,10 @@
 		"align": {
 			"type": "string",
 			"default": "wide"
+		},
+		"showFormStepNumbers": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"textdomain": "woocommerce",

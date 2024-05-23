@@ -262,7 +262,11 @@
 						"tsconfig.json",
 						"client/**/*.{js,jsx,ts,tsx,scss,json}"
 					],
-					"cascade": "test:js"
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}
