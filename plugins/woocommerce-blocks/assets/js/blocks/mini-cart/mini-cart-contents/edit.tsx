@@ -8,7 +8,7 @@ import {
 	InspectorControls,
 } from '@wordpress/block-editor';
 import { EditorProvider } from '@woocommerce/base-context';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlockStylingEnabled } from '@woocommerce/block-settings';
 import type { TemplateArray } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
 import type { FocusEvent, ReactElement } from 'react';
@@ -115,7 +115,7 @@ const Edit = ( {
 
 	return (
 		<>
-			{ isFeaturePluginBuild() && (
+			{ isExperimentalBlockStylingEnabled() && (
 				<InspectorControls key="inspector">
 					<PanelBody
 						title={ __( 'Dimensions', 'woocommerce' ) }

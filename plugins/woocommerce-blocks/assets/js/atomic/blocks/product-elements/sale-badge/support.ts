@@ -2,13 +2,13 @@
 /**
  * External dependencies
  */
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlockStylingEnabled } from '@woocommerce/block-settings';
 import { __experimentalGetSpacingClassesAndStyles } from '@wordpress/block-editor';
 
 export const supports = {
 	html: false,
 	align: true,
-	...( isFeaturePluginBuild() && {
+	...( isExperimentalBlockStylingEnabled() && {
 		color: {
 			gradients: true,
 			background: true,
@@ -42,7 +42,7 @@ export const supports = {
 		__experimentalSelector: '.wc-block-components-product-sale-badge',
 	} ),
 	...( typeof __experimentalGetSpacingClassesAndStyles === 'function' &&
-		! isFeaturePluginBuild() && {
+		! isExperimentalBlockStylingEnabled() && {
 			spacing: {
 				margin: true,
 			},

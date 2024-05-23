@@ -3,7 +3,7 @@
  */
 import { Icon, button } from '@wordpress/icons';
 import { registerBlockType } from '@wordpress/blocks';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlockStylingEnabled } from '@woocommerce/block-settings';
 import { __experimentalGetSpacingClassesAndStyles } from '@wordpress/block-editor';
 /**
  * Internal dependencies
@@ -14,7 +14,7 @@ import metadata from './block.json';
 
 const featurePluginSupport = {
 	...metadata.supports,
-	...( isFeaturePluginBuild() && {
+	...( isExperimentalBlockStylingEnabled() && {
 		color: {
 			text: true,
 			background: true,
@@ -49,7 +49,7 @@ const featurePluginSupport = {
 			'.wp-block-button.wc-block-components-product-button .wc-block-components-product-button__button',
 	} ),
 	...( typeof __experimentalGetSpacingClassesAndStyles === 'function' &&
-		! isFeaturePluginBuild() && {
+		! isExperimentalBlockStylingEnabled() && {
 			spacing: {
 				margin: true,
 			},
