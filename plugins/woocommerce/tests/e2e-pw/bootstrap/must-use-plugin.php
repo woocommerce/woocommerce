@@ -180,9 +180,17 @@ function test_helper_apis() {
 					$option_name  = sanitize_text_field( $request['option_name'] );
 					$option_value = sanitize_text_field( $request['option_value'] );
 
-					update_option( $option_name, $option_value );
+					$existing_value = get_option( $option_name );
 
-					return new WP_REST_Response( 'Option updated', 200 );
+					if ( $existing_value === $option_value ) {
+						return new WP_REST_Response( 'Option ' . $option_name . ' already set to: ' . $option_value, 200 );
+					}
+
+					if ( update_option( $option_name, $option_value ) ) {
+						return new WP_REST_Response( 'Update option SUCCESS: ' . $option_name . ' => ' . $option_value, 200 );
+					}
+
+					return new WP_REST_Response( 'Update option FAILED: ' . $option_name . ' => ' . $option_value, 400 );
 				},
 				'permission_callback' => $is_allowed,
 			)
@@ -198,9 +206,6 @@ function test_helper_apis() {
 	 */
 	add_filter( 'woocommerce_admin_get_feature_config', function ( $features ) {
 		$stored_features = get_option( 'e2e_feature_flags', array() );
-
-		// We always enable this for tests at the moment.
-		$features['product-variation-management'] = true;
 
 		return array_merge( $features, $stored_features );
 	} );
