@@ -1,33 +1,20 @@
 /**
  * External dependencies
  */
-import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
 import {
 	createElement,
 	useMemo,
 	useLayoutEffect,
+	useCallback,
 	useEffect,
 	useState,
 } from '@wordpress/element';
 import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
-import { PluginArea } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { Product } from '@woocommerce/data';
-import {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	BlockContextProvider,
-	BlockEditorKeyboardShortcuts,
-	BlockEditorProvider,
-	BlockList,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	BlockTools,
-	ObserveTyping,
-} from '@wordpress/block-editor';
 // It doesn't seem to notice the External dependency block whn @ts-ignore is added.
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
@@ -44,13 +31,12 @@ import {
  */
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
 import { useProductTemplate } from '../../hooks/use-product-template';
-import { PostTypeContext } from '../../contexts/post-type-context';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { ModalEditor } from '../modal-editor';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { ProductTemplate } from '../../types';
-import { LoadingState } from './loading-state';
+import { getRenderedBlockView } from '../../utils/get-rendered-block-view';
 
 function getLayoutTemplateId(
 	productTemplate: ProductTemplate | undefined,
@@ -189,13 +175,6 @@ export function BlockEditor( {
 		getLayoutTemplateId( productTemplate, postType )
 	);
 
-	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
-		'postType',
-		postType,
-		// useEntityBlockEditor will not try to fetch the product if productId is falsy.
-		{ id: productId !== -1 ? productId : 0 }
-	);
-
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	const isEditorLoading =
@@ -209,13 +188,6 @@ export function BlockEditor( {
 		if ( isEditorLoading ) {
 			return;
 		}
-
-		const blockInstances = synchronizeBlocksWithTemplate(
-			[],
-			layoutTemplate.blockTemplates
-		);
-
-		onChange( blockInstances, {} );
 
 		updateEditorSettings( {
 			...settings,
@@ -241,6 +213,28 @@ export function BlockEditor( {
 
 	const { closeModalEditor } = useDispatch( productEditorUiStore );
 
+	const content =
+		'<div data-block-name="woocommerce/product-tab" data-id="general" data-title="General">' +
+		'<div data-block-name="woocommerce/product-section" data-id="basic-details" data-title="Basic Details" data-description="">' +
+		'<div data-block-name="woocommerce/product-name-field"></div>' +
+		'<div data-block-name="woocommerce/product-regular-price-field" data-label="Regular price"></div>' +
+		'<div data-block-name="woocommerce/product-sale-price-field" data-label="Sale price"></div>' +
+		'<div data-block-name="woocommerce/product-schedule-sale-fields" data-label="Sale price"></div>' +
+		'<div data-block-name="woocommerce/product-radio-field" data-title="Charge sales tax on" data-property="stock_status"></div>' +
+		'<div data-block-name="woocommerce/product-summary-field" data-property="description"></div>' +
+		'</div>' +
+		'</div>';
+
+	const ProductForm = useCallback( () => {
+		const container = document.createElement( 'div' );
+		container.innerHTML = content;
+		return (
+			<div className="woocommerce-product-block-editor__product-form">
+				{ getRenderedBlockView( container, context ) }
+			</div>
+		);
+	}, [ content, context ] );
+
 	if ( isModalEditorOpen ) {
 		return (
 			<ModalEditor
@@ -252,33 +246,7 @@ export function BlockEditor( {
 
 	return (
 		<div className="woocommerce-product-block-editor">
-			<BlockContextProvider value={ context }>
-				<BlockEditorProvider
-					value={ blocks }
-					onInput={ onInput }
-					onChange={ onChange }
-					settings={ settings }
-					useSubRegistry={ false }
-				>
-					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-					{ /* @ts-ignore No types for this exist yet. */ }
-					<BlockEditorKeyboardShortcuts.Register />
-					<BlockTools>
-						<ObserveTyping>
-							{ isEditorLoading ? (
-								<LoadingState />
-							) : (
-								<BlockList className="woocommerce-product-block-editor__block-list" />
-							) }
-						</ObserveTyping>
-					</BlockTools>
-					{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }
-					<PostTypeContext.Provider value={ context.postType! }>
-						{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-						<PluginArea scope="woocommerce-product-block-editor" />
-					</PostTypeContext.Provider>
-				</BlockEditorProvider>
-			</BlockContextProvider>
+			<ProductForm />
 		</div>
 	);
 }

@@ -23,6 +23,8 @@ export function TabBlockEdit( {
 	setAttributes,
 	attributes,
 	context,
+	// @ts-ignore
+	children,
 }: ProductEditorBlockEditProps< TabBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const {
@@ -51,9 +53,7 @@ export function TabBlockEdit( {
 				role="tabpanel"
 				className={ classes }
 			>
-				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-				{ /* @ts-ignore Content only template locking does exist for this property. */ }
-				<InnerBlocks templateLock="contentOnly" />
+				{ children }
 			</div>
 		</div>
 	);

@@ -18,6 +18,8 @@ import { SectionHeader } from '../../../components/section-header';
 
 export function SectionBlockEdit( {
 	attributes,
+	// @ts-ignore
+	children,
 }: ProductEditorBlockEditProps< SectionBlockAttributes > ) {
 	const { description, title, blockGap } = attributes;
 
@@ -42,8 +44,7 @@ export function SectionBlockEdit( {
 					title={ title }
 				/>
 			) }
-
-			<div { ...innerBlockProps } />
+			{ children }
 		</SectionTagName>
 	);
 }
