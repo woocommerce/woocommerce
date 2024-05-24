@@ -42,7 +42,6 @@ test.describe( 'Edit order', () => {
 	} );
 
 	test( 'can view single order', async ( { page } ) => {
-		// eslint-disable-next-line no-conditional-in-test
 		if ( process.env.DISABLE_HPOS === 1 ) {
 			await page.goto( '/wp-admin/admin.php?page=wc-orders&action=new' );
 		} else {
@@ -266,8 +265,8 @@ test.describe( 'Edit order', () => {
 					},
 					type: 'POST',
 					// eslint-disable-next-line no-shadow
-					success( response ) {
-						resolve( response );
+					success( resp ) {
+						resolve( resp );
 					},
 				} );
 			} );
