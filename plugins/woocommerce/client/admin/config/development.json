@@ -4,6 +4,7 @@
 		"analytics": true,
 		"product-block-editor": true,
 		"experimental-blocks": true,
+		"experimental-block-styling": true,
 		"coupons": true,
 		"core-profiler": true,
 		"customize-store": true,
