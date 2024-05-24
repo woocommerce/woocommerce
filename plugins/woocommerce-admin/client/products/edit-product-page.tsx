@@ -18,7 +18,6 @@ import { useParams } from 'react-router-dom';
 /**
  * Internal dependencies
  */
-import { ProductVariationForm } from './product-variation-form';
 import './add-edit-product-page.scss';
 
 const EditProductPage: React.FC = () => {
@@ -119,12 +118,6 @@ const EditProductPage: React.FC = () => {
 					<Spinner />
 				</div>
 			) : null }
-			{ productVariation && product && (
-				<ProductVariationForm
-					product={ product }
-					productVariation={ productVariation }
-				/>
-			) }
 		</div>
 	);
 };
