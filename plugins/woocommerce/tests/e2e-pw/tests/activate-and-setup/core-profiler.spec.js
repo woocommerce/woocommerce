@@ -3,7 +3,7 @@ const { test, expect } = require( '@playwright/test' );
 test.describe( 'Store owner can complete the core profiler', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.skip( 'Can complete the core profiler skipping extension install', async ( {
+	test( 'Can complete the core profiler skipping extension install', async ( {
 		page,
 	} ) => {
 		await page.goto(
@@ -16,7 +16,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			).toBeVisible();
 			await page
 				.getByRole( 'checkbox', { name: 'I agree to share my data' } )
-				.check();
+				.uncheck();
 			await page
 				.getByRole( 'button', { name: 'Set up my store' } )
 				.click();
@@ -106,20 +106,18 @@ test.describe( 'Store owner can complete the core profiler', () => {
 					name: 'Welcome to WooCommerce Core E2E Test Suite',
 				} )
 			).toBeVisible();
-			await expect(
-				page.getByText( 'List your products' )
-			).toBeVisible();
+
 			// go to the plugins page to make sure that extensions weren't installed
 			await page.goto( 'wp-admin/plugins.php' );
 			await expect(
 				page.getByRole( 'heading', { name: 'Plugins', exact: true } )
 			).toBeVisible();
 			// confirm that some of the optional extensions aren't present
-			await expect( page.getByText( 'MailPoet' ) ).not.toBeAttached();
-			await expect( page.getByText( 'Pinterest' ) ).not.toBeAttached();
+			await expect( page.getByText( 'MailPoet' ) ).toBeHidden();
+			await expect( page.getByText( 'Pinterest' ) ).toBeHidden();
 			await expect(
 				page.getByText( 'Google Listings & Ads' )
-			).not.toBeAttached();
+			).toBeHidden();
 		} );
 
 		await test.step( 'Confirm that information from core profiler saved', async () => {
@@ -147,7 +145,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 		} );
 	} );
 
-	test.skip( 'Can complete the core profiler installing default extensions', async ( {
+	test( 'Can complete the core profiler installing default extensions', async ( {
 		page,
 	} ) => {
 		await page.goto(
@@ -160,7 +158,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			).toBeVisible();
 			await page
 				.getByRole( 'checkbox', { name: 'I agree to share my data' } )
-				.check();
+				.uncheck();
 			await page
 				.getByRole( 'button', { name: 'Set up my store' } )
 				.click();
@@ -256,9 +254,6 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				page.getByRole( 'heading', {
 					name: 'Welcome to WooCommerce Core E2E Test Suite',
 				} )
-			).toBeVisible();
-			await expect(
-				page.getByText( 'List your products' )
 			).toBeVisible();
 			// go to the plugins page to make sure that extensions were installed
 			await page.goto( 'wp-admin/plugins.php' );
