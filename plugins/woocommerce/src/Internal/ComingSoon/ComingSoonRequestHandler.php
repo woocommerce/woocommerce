@@ -102,6 +102,12 @@ class ComingSoonRequestHandler {
 			return false;
 		}
 
+		// Check if there is an exclusion.
+		print_r('paul');
+		if ( apply_filters( 'woocommerce_coming_soon_exclude', false ) ) {
+			return false;
+		}
+
 		// Check if the private link option is enabled.
 		if ( get_option( 'woocommerce_private_link' ) === 'yes' ) {
 			// Exclude users with a private link.
