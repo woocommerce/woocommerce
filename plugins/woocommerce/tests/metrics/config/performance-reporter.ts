@@ -4,22 +4,23 @@
 import path from 'path';
 import { writeFileSync } from 'fs';
 import type {
-	Reporter as PlaywrightReporter,
-	FullResult as PlaywrightFullResult,
-	TestCase as PlaywrightTestCase,
-	TestResult as PlaywrightTestResult,
+	Reporter,
+	FullResult,
+	TestCase,
+	TestResult,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 } from '@playwright/test/reporter';
 
 export type WPPerformanceResults = Record< string, number >;
 
-class PerformanceReporter implements PlaywrightReporter {
+class PerformanceReporter implements Reporter {
 	private results: Record< string, WPPerformanceResults >;
 
 	constructor() {
 		this.results = {};
 	}
 
-	onTestEnd( test: PlaywrightTestCase, result: PlaywrightTestResult ): void {
+	onTestEnd( test: TestCase, result: TestResult ): void {
 		for ( const attachment of result.attachments ) {
 			if ( attachment.name !== 'results' ) {
 				continue;
@@ -50,7 +51,7 @@ class PerformanceReporter implements PlaywrightReporter {
 		}
 	}
 
-	onEnd( result: PlaywrightFullResult ) {
+	onEnd( result: FullResult ): void {
 		if ( result.status !== 'passed' ) {
 			return;
 		}
