@@ -1823,7 +1823,7 @@ class WC_Helper {
 			}
 
 			// No more sites available in this subscription.
-			if ( $_sub['maxed'] ) {
+			if ( isset( $_sub['maxed'] ) && $_sub['maxed'] ) {
 				continue;
 			}
 
