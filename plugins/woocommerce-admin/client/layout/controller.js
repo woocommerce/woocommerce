@@ -30,11 +30,6 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { isFeatureEnabled } from '~/utils/features';
 import { NoMatch } from './NoMatch';
 
-const EditProductPage = lazy( () =>
-	import(
-		/* webpackChunkName: "edit-product-page" */ '../products/edit-product-page'
-	)
-);
 const ProductVariationPage = lazy( () =>
 	import(
 		/* webpackChunkName: "edit-product-page" */ '../products/product-variation-page'
@@ -240,22 +235,6 @@ export const getPages = () => {
 			navArgs: {
 				id: 'woocommerce-edit-product',
 			},
-		} );
-	} else if (
-		window.wcAdminFeatures[ 'new-product-management-experience' ]
-	) {
-		pages.push( {
-			container: EditProductPage,
-			path: '/product/:productId',
-			breadcrumbs: [
-				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
-				__( 'Edit Product', 'woocommerce' ),
-			],
-			navArgs: {
-				id: 'woocommerce-edit-product',
-			},
-			wpOpenMenu: 'menu-posts-product',
-			capability: 'manage_woocommerce',
 		} );
 	}
 
