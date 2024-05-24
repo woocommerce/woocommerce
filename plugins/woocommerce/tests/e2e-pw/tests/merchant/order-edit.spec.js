@@ -42,6 +42,7 @@ test.describe( 'Edit order', () => {
 	} );
 
 	test( 'can view single order', async ( { page } ) => {
+		// eslint-disable-next-line no-conditional-in-test
 		if ( process.env.DISABLE_HPOS === 1 ) {
 			await page.goto( '/wp-admin/admin.php?page=wc-orders&action=new' );
 		} else {
@@ -250,14 +251,14 @@ test.describe( 'Edit order', () => {
 		);
 
 		// Simulate the ajax `woocommerce_get_customer_details` call normally done inside meta-boxes-order.js.
-		const response = await page.evaluate( async ( customerId ) => {
+		const response = await page.evaluate( async ( custId ) => {
 			const simulateCustomerDetailsCall = new Promise( ( resolve ) => {
 				// eslint-disable-next-line no-undef
 				jQuery.ajax( {
 					// eslint-disable-next-line no-undef
 					url: woocommerce_admin_meta_boxes.ajax_url,
 					data: {
-						user_id: customerId,
+						user_id: custId,
 						action: 'woocommerce_get_customer_details',
 						security:
 							// eslint-disable-next-line no-undef

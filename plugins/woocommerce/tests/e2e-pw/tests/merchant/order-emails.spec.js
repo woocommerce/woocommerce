@@ -185,7 +185,6 @@ test.describe( 'Merchant > Order Action emails received', () => {
 					status: 'cancelled',
 				} );
 			} );
-		// eslint-disable-next-line no-wait-for-timeout
 		await page.waitForTimeout( 1000 );
 		// search to narrow it down to just the messages we want
 		await page.goto(
