@@ -281,6 +281,36 @@ jobs:
                   
                   node .github/workflows/scripts/evaluate-jobs-conclusions.js
 
+
+    alert-on-failure:
+        name: 'Send a Slack message'
+        runs-on: 'ubuntu-20.04'
+        needs:
+            [
+                'project-jobs',
+                'project-lint-jobs',
+                'project-default-test-jobs',
+                'project-e2e-test-jobs',
+                'project-api-test-jobs',
+                'project-performance-test-jobs'
+            ]
+        if: ${{ always() && github.event_name != 'pull_request' }}
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+              
+            - name: 'Send message for failed jobs'
+              env:
+                SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+                SLACK_CHANNEL: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
+              run: |
+                  pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "Build jobs matrix"
+                  pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "Linting"
+                  pnpm utils slack-test-report -c "${{ needs.project-default-test-jobs.result }}" -r "Tests"
+                  pnpm utils slack-test-report -c "${{ needs.project-e2e-test-jobs.result }}" -r "e2e tests"
+                  pnpm utils slack-test-report -c "${{ needs.project-api-test-jobs.result }}" -r "Api tests"
+                  pnpm utils slack-test-report -c "${{ needs.project-performance-test-jobs.result }}" -r "Performance tests"
+
     e2e-test-reports:
         name: 'Report e2e tests results'
         needs: [project-e2e-test-jobs]
@@ -340,16 +370,7 @@ jobs:
                   else
                     echo "No report will be created for '$GITHUB_EVENT_NAME' event"
                   fi
-
-            - name: 'Send Slack notification'
-              if: ${{ always() && github.event_name != 'pull_request' }}
-              uses: automattic/action-test-results-to-slack@v0.3.0
-              with:
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
-                  slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
-                  slack_channel: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
-                  playwright_report_path: ./out/test-results-*.json
-                  playwright_output_dir: ./out/results-data
+                
 
     api-test-reports:
         name: 'Report API tests results'
@@ -410,11 +431,3 @@ jobs:
                   else
                     echo "No report will be created for '$GITHUB_EVENT_NAME' event"
                   fi
-
-            - name: 'Send Slack notification'
-              if: github.event_name != 'pull_request'
-              uses: automattic/action-test-results-to-slack@v0.3.0
-              with:
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
-                  slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
-                  slack_channel: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
