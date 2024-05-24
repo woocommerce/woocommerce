@@ -1246,21 +1246,32 @@ class WC_Install {
 			// The plugin was automatically installed in a different installation process - can happen in multisite.
 			$install_ok = true;
 		} else {
-			$install_result = wc_get_container()->get( PluginInstaller::class )->install_plugin(
-				'https://downloads.wordpress.org/plugin/woocommerce-legacy-rest-api.latest-stable.zip',
-				array(
-					'info_link' => 'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/',
-				)
-			);
+			try {
+				$install_result = wc_get_container()->get( PluginInstaller::class )->install_plugin(
+					'https://downloads.wordpress.org/plugin/woocommerce-legacy-rest-api.latest-stable.zip',
+					array(
+						'info_link' => 'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/',
+					)
+				);
 
-			if ( $install_result['already_installing'] ?? null ) {
-				// The plugin is in the process of being installed already (can happen in multisite),
-				// but we still need to activate it for ourselves once it's installed.
-				as_schedule_single_action( time() + 10, 'woocommerce_activate_legacy_rest_api_plugin' );
-				return;
+				if ( $install_result['already_installing'] ?? null ) {
+					// The plugin is in the process of being installed already (can happen in multisite),
+					// but we still need to activate it for ourselves once it's installed.
+					as_schedule_single_action( time() + 10, 'woocommerce_activate_legacy_rest_api_plugin' );
+					return;
+				}
+
+				$install_ok = $install_result['install_ok'];
+			} catch ( \Exception $ex ) {
+				wc_get_logger()->error(
+					'The autoinstall of the WooCommerce Legacy REST API plugin failed: ' . $ex->getMessage(),
+					array(
+						'source'    => 'plugin_auto_installs',
+						'exception' => $ex,
+					)
+				);
+				$install_ok = false;
 			}
-
-			$install_ok = $install_result['install_ok'];
 		}
 
 		$plugin_page_url              = 'https://wordpress.org/plugins/woocommerce-legacy-rest-api/';
