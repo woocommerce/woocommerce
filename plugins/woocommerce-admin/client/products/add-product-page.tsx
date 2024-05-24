@@ -13,7 +13,6 @@ import {
 /**
  * Internal dependencies
  */
-import { ProductForm } from './product-form';
 import { ProductTourContainer } from './tour';
 import './add-edit-product-page.scss';
 
@@ -37,7 +36,6 @@ const AddProductPage: React.FC = () => {
 				</div>
 			) : (
 				<>
-					<ProductForm />
 					<ProductTourContainer />
 				</>
 			) }

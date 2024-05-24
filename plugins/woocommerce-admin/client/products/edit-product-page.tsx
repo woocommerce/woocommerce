@@ -18,7 +18,6 @@ import { useParams } from 'react-router-dom';
 /**
  * Internal dependencies
  */
-import { ProductForm } from './product-form';
 import { ProductVariationForm } from './product-variation-form';
 import './add-edit-product-page.scss';
 
@@ -126,11 +125,6 @@ const EditProductPage: React.FC = () => {
 					productVariation={ productVariation }
 				/>
 			) }
-			{ ! isProductVariation &&
-				product &&
-				( product.status !== 'trash' || wasDeletedUsingAction ) && (
-					<ProductForm formRef={ formRef } product={ product } />
-				) }
 		</div>
 	);
 };

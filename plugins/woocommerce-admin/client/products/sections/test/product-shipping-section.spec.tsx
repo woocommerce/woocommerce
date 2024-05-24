@@ -11,7 +11,6 @@ import { Form } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { validate } from '../../product-validation';
 import { ADD_NEW_SHIPPING_CLASS_OPTION_VALUE } from '~/products/constants';
 //import { ProductShippingSection } from '../product-shipping-section';
 
@@ -107,7 +106,7 @@ describe.skip( 'ProductShippingSection', () => {
 	describe( 'when creating a product', () => {
 		beforeEach( () => {
 			render(
-				<Form initialValues={ {} } validate={ validate }>
+				<Form initialValues={ {} } validate={ undefined }>
 					<ProductShippingSection />
 				</Form>
 			);
@@ -170,7 +169,7 @@ describe.skip( 'ProductShippingSection', () => {
 
 		beforeEach( () => {
 			render(
-				<Form initialValues={ product } validate={ validate }>
+				<Form initialValues={ product } validate={ undefined }>
 					<ProductShippingSection product={ product } />
 				</Form>
 			);
