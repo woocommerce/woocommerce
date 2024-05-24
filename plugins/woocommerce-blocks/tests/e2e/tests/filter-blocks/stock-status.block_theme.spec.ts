@@ -14,7 +14,10 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 
 test.describe( 'Product Filter: Stock Status Block', () => {
 	test.describe( 'With default display style', () => {
-		test.beforeEach( async ( { templateCompiler } ) => {
+		test.beforeEach( async ( { requestUtils, templateCompiler } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
 			await templateCompiler.compile();
 		} );
 
@@ -105,7 +108,10 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 	} );
 
 	test.describe( 'With dropdown display style', () => {
-		test.beforeEach( async ( { templateCompiler } ) => {
+		test.beforeEach( async ( { requestUtils, templateCompiler } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
 			await templateCompiler.compile( {
 				attributes: {
 					displayStyle: 'dropdown',

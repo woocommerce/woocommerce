@@ -1,12 +1,17 @@
 /**
  * External dependencies
  */
-import { createElement, useEffect, useState } from '@wordpress/element';
-import { ReactElement } from 'react';
+import {
+	createElement,
+	useEffect,
+	useState,
+	Fragment,
+} from '@wordpress/element';
+import { ReactElement, useMemo } from 'react';
 import { NavigableMenu, Slot } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { useSelect } from '@wordpress/data';
+import { select } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -17,7 +22,6 @@ import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { getTabTracksData } from './utils/get-tab-tracks-data';
-import { sortFillsByOrder } from '../../utils';
 import { TABS_SLOT_NAME } from './constants';
 
 type TabsProps = {
@@ -28,6 +32,38 @@ export type TabsFillProps = {
 	onClick: ( tabId: string ) => void;
 };
 
+function TabFills( {
+	fills,
+	onDefaultSelection,
+}: {
+	fills: readonly ( readonly ReactElement[] )[];
+	onDefaultSelection( tabId: string ): void;
+} ) {
+	const sortedFills = useMemo(
+		function sortFillsByOrder() {
+			return [ ...fills ].sort(
+				( [ { props: a } ], [ { props: b } ] ) => a.order - b.order
+			);
+		},
+		[ fills ]
+	);
+
+	useEffect( () => {
+		for ( let i = 0; i < sortedFills.length; i++ ) {
+			const [ { props } ] = fills[ i ];
+			if ( ! props.disabled ) {
+				const tabId = props.children?.key;
+				if ( tabId ) {
+					onDefaultSelection( tabId );
+				}
+				return;
+			}
+		}
+	}, [ sortedFills ] );
+
+	return <>{ sortedFills }</>;
+}
+
 export function Tabs( { onChange = () => {} }: TabsProps ) {
 	const [ selected, setSelected ] = useState< string | null >( null );
 	const query = getQuery() as Record< string, string >;
@@ -36,46 +72,34 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 		'product',
 		'id'
 	);
-	const product: Product = useSelect( ( select ) =>
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		select( 'core' ).getEditedEntityRecord(
-			'postType',
-			'product',
-			productId
-		)
-	);
-
-	useEffect( () => {
-		onChange( selected );
-	}, [ selected ] );
 
 	useEffect( () => {
 		if ( query.tab ) {
 			setSelected( query.tab );
+			onChange( query.tab );
 		}
 	}, [ query.tab ] );
-
-	function maybeSetSelected( fills: readonly ( readonly ReactElement[] )[] ) {
-		if ( selected ) {
-			return;
-		}
-
-		for ( let i = 0; i < fills.length; i++ ) {
-			if ( fills[ i ][ 0 ].props.disabled ) {
-				continue;
-			}
-			const tabId = fills[ i ][ 0 ].props?.children?.key || null;
-			setSelected( tabId );
-			return;
-		}
-	}
 
 	function selectTabOnNavigate(
 		_childIndex: number,
 		child: HTMLButtonElement
 	) {
 		child.click();
+	}
+
+	function renderFills( fills: readonly ( readonly ReactElement[] )[] ) {
+		return (
+			<TabFills
+				fills={ fills }
+				onDefaultSelection={ ( tabId ) => {
+					if ( selected ) {
+						return;
+					}
+					setSelected( tabId );
+					onChange( tabId );
+				} }
+			/>
+		);
 	}
 
 	return (
@@ -92,6 +116,17 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 							navigateTo( {
 								url: getNewPath( { tab: tabId } ),
 							} );
+
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore
+							const { getEditedEntityRecord } = select( 'core' );
+
+							const product: Product = getEditedEntityRecord(
+								'postType',
+								'product',
+								productId
+							);
+
 							recordEvent(
 								'product_tab_click',
 								getTabTracksData( tabId, product )
@@ -101,14 +136,7 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 				}
 				name={ TABS_SLOT_NAME }
 			>
-				{ ( fills ) => {
-					if ( ! sortFillsByOrder ) {
-						return null;
-					}
-
-					maybeSetSelected( fills );
-					return sortFillsByOrder( fills );
-				} }
+				{ renderFills }
 			</Slot>
 		</NavigableMenu>
 	);

@@ -14,6 +14,12 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 
 test.describe( 'Product Filter: Active Filters Block', () => {
 	test.describe( 'frontend', () => {
+		test.beforeEach( async ( { requestUtils } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
+		} );
+
 		test( 'Without any filters selected, only a wrapper block is rendered', async ( {
 			page,
 			templateCompiler,

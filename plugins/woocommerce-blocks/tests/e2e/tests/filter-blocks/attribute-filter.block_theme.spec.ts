@@ -135,7 +135,10 @@ test.describe( 'Product Filter: Attribute Block', () => {
 	} );
 
 	test.describe( 'With show counts enabled', () => {
-		test.beforeEach( async ( { templateCompiler } ) => {
+		test.beforeEach( async ( { requestUtils, templateCompiler } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
 			await templateCompiler.compile( {
 				attributes: {
 					attributeId: 1,
@@ -164,7 +167,10 @@ test.describe( 'Product Filter: Attribute Block', () => {
 	} );
 
 	test.describe( "With display style 'dropdown'", () => {
-		test.beforeEach( async ( { templateCompiler } ) => {
+		test.beforeEach( async ( { requestUtils, templateCompiler } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
 			await templateCompiler.compile( {
 				attributes: {
 					attributeId: 1,
