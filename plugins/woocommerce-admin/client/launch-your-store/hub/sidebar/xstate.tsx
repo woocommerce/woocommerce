@@ -64,7 +64,7 @@ const sidebarQueryParamListener = fromCallback( ( { sendBack } ) => {
 
 const launchStoreAction = async () => {
 	const results = await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-		woocommerce_coming_soon: 'no',
+		woocommerce_coming_soon: 'yes',
 	} );
 	if ( results.success ) {
 		return results;
@@ -79,6 +79,22 @@ const getTestOrderCount = async () => {
 	} ) ) as { count: number };
 
 	return result.count;
+};
+
+const deleteTestOrders = async ( {
+	input,
+}: {
+	input: {
+		removeTestOrders: boolean;
+	};
+} ) => {
+	if ( ! input.removeTestOrders ) {
+		return Promise.resolve();
+	}
+	return await apiFetch( {
+		path: '/wc-admin/launch-your-store/woopayments/test-orders',
+		method: 'DELETE',
+	} );
 };
 
 const recordStoreLaunchAttempt = ( {
@@ -188,6 +204,7 @@ export const sidebarMachine = setup( {
 		getTasklist: fromPromise( getLysTasklist ),
 		getTestOrderCount: fromPromise( getTestOrderCount ),
 		updateLaunchStoreOptions: fromPromise( launchStoreAction ),
+		deleteTestOrders: fromPromise( deleteTestOrders ),
 		fetchCongratsData,
 	},
 } ).createMachine( {
@@ -277,38 +294,47 @@ export const sidebarMachine = setup( {
 						assign( { launchStoreError: undefined } ), // clear the errors if any from previously
 						'recordStoreLaunchAttempt',
 					],
-					invoke: {
-						src: 'updateLaunchStoreOptions',
-						onDone: {
-							target: '#storeLaunchSuccessful',
-							actions: [
-								{
-									type: 'recordStoreLaunchResults',
-									params: { success: true },
-								},
-							],
-						},
-						onError: {
-							actions: [
-								assign( {
-									launchStoreError: ( { event } ) => {
-										return {
-											message: JSON.stringify(
-												event.error
-											), // for some reason event.error is an empty object, worth investigating if we decide to use the error message somewhere
-										};
+					invoke: [
+						{
+							src: 'updateLaunchStoreOptions',
+							onDone: {
+								target: '#storeLaunchSuccessful',
+								actions: [
+									{
+										type: 'recordStoreLaunchResults',
+										params: { success: true },
 									},
-								} ),
-								{
-									type: 'recordStoreLaunchResults',
-									params: {
-										success: false,
+								],
+							},
+							onError: {
+								actions: [
+									assign( {
+										launchStoreError: ( { event } ) => {
+											return {
+												message: JSON.stringify(
+													event.error
+												), // for some reason event.error is an empty object, worth investigating if we decide to use the error message somewhere
+											};
+										},
+									} ),
+									{
+										type: 'recordStoreLaunchResults',
+										params: {
+											success: false,
+										},
 									},
-								},
-							],
-							target: '#launchYourStoreHub',
+								],
+								target: '#launchYourStoreHub',
+							},
 						},
-					},
+						{
+							src: 'deleteTestOrders',
+							input: ( { event } ) => ( {
+								// @ts-expect-error - how do I type this?
+								removeTestOrders: event.removeTestOrders,
+							} ),
+						},
+					],
 				},
 			},
 		},
