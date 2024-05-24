@@ -23,7 +23,7 @@ final class StoreApi {
 		add_action(
 			'rest_api_init',
 			function () {
-				if ( ! wc_rest_should_load_namespace( 'wc/store' ) ) {
+				if ( ! wc_rest_should_load_namespace( 'wc/store' ) && ! wc_rest_should_load_namespace( 'wc/private' ) ) {
 					return;
 				}
 				self::container()->get( Legacy::class )->init();
