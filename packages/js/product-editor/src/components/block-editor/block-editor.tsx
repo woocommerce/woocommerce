@@ -184,6 +184,8 @@ export function BlockEditor( {
 		{ enabled: productId !== -1 }
 	);
 
+	const isProductLoaded = product && Object.keys( product ).length > 0;
+
 	const productTemplateId = useMemo(
 		() =>
 			product?.meta_data?.find(
@@ -196,7 +198,9 @@ export function BlockEditor( {
 	const { productTemplate } = useProductTemplate( productTemplateId );
 
 	const { layoutTemplate } = useLayoutTemplate(
-		getLayoutTemplateId( productTemplate, postType )
+		isProductLoaded
+			? getLayoutTemplateId( productTemplate, postType )
+			: undefined
 	);
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
@@ -206,7 +210,7 @@ export function BlockEditor( {
 		{ id: productId !== -1 ? productId : 0 }
 	);
 
-	const isEditorLoading = ! settings || ! layoutTemplate || productId === -1;
+	const isEditorLoading = ! ( settings && layoutTemplate && isProductLoaded );
 
 	useLayoutEffect( () => {
 		if ( isEditorLoading ) {
