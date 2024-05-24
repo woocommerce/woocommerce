@@ -11,7 +11,6 @@ import { Ref } from 'react';
  */
 import { ProductFormLayout } from './layout/product-form-layout';
 import { validate } from './product-validation';
-import { ProductFormFooter } from './layout/product-form-footer';
 
 export const ProductForm: React.FC< {
 	product?: PartialProduct;
@@ -35,7 +34,6 @@ export const ProductForm: React.FC< {
 				validate={ validate }
 			>
 				<ProductFormLayout id="general" product={ product } />
-				<ProductFormFooter product={ product } />
 				{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 				<PluginArea scope="woocommerce-product-editor" />
 			</Form>
