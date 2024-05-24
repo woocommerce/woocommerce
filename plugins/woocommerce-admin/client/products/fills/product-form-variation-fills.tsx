@@ -26,7 +26,6 @@ import {
 	VARIANT_INVENTORY_SECTION_ADVANCED_ID,
 	PLUGIN_ID,
 } from './constants';
-import { ShippingSectionFills } from './shipping-section';
 import { PricingSectionFills } from './pricing-section';
 import { InventorySectionFills } from './inventory-section';
 
@@ -93,11 +92,6 @@ registerPlugin( 'wc-admin-product-editor-form-variation-fills', {
 	render: () => (
 		<>
 			<Tabs />
-			<ShippingSectionFills
-				tabId={ VARIANT_TAB_SHIPPING_ID }
-				basicSectionId={ VARIANT_SHIPPING_SECTION_BASIC_ID }
-				dimensionsSectionId={ VARIANT_SHIPPING_SECTION_DIMENSIONS_ID }
-			/>
 			<PricingSectionFills
 				tabId={ VARIANT_TAB_PRICING_ID }
 				basicSectionId={ VARIANT_PRICING_SECTION_BASIC_ID }
