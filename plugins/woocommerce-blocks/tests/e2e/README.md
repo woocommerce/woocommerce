@@ -1,6 +1,6 @@
 # WooCommerce Blocks End-to-End Tests
 
-This living document serves to prescribe instructions and best practices for writing end-to-end (E2E) tests with Playwright in the WooCommerce Blocks project.
+This living document serves as a guide for writing end-to-end (E2E) tests with Playwright in the WooCommerce Blocks project.
 
 ## Preparing the environment
 
@@ -22,11 +22,11 @@ pnpm env:start
 > [!TIP]
 > If you want to start/stop the environment without running the whole setup, use the native `wp-env` commands directly, e.g. `npx wp-env start` and `npx wp-env stop`.
 
-The environment should now be ready under http://localhost:8889. Skip to the next section if you want to start running the tests!
+The environment should now be ready under http://localhost:8889.
 
 ### Resetting the environment
 
-From time to time you'll need to reset the environment, e.g. when testing products have been updated. To do that, run the following command and go make yourself some coffee:
+Occasionally, you'll need to reset the environment, e.g., when testing products have been updated. To do that, run the following command and go make yourself some coffee:
 
 ```shell
 pnpm env:restart
@@ -37,7 +37,7 @@ pnpm env:restart
 > [!NOTE]
 > If you're using VSCode, we recommend using the [Playwright Test](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright) extension to run and debug the tests.
 
-The following is a basic set of commands that will give you a quick start to running and debugging the tests. For full documentation on this topic see the official Playwright guide on [Running and Debugging Tests](https://playwright.dev/docs/running-tests). 
+Here is a basic set of commands to quickly start running and debugging the tests. For full documentation, see the official Playwright guide on [Running and Debugging Tests](https://playwright.dev/docs/running-tests). 
 
 ```shell
 # Run all available tests.
@@ -66,17 +66,17 @@ pnpm run test:e2e -g "should display a discount label" --ui
 ```
 
 > [!TIP]
-> When a test fails, it leaves a trace info at the bottom. You can quickly jump into debugging mode by using the generated trace view command into your terminal, for example:
+> When a test fails, it leaves a trace info at the bottom. You can quickly jump into debugging mode by running the generated trace view command, for example:
 >
 > ![](./docs/e2e-open-trace-cmd.png)
 
 ### Debugging tests in CI
 
-If a test fails in CI, a failure artifact is zipped and uploaded to the Summary page of the current job:
+When a test fails in CI, a failure artifact is zipped and uploaded to the Summary page of the current job:
 
 ![](./docs/e2e-download-failure-artifacts.png)
 
-Once you download and extract that zip, you'll see the dedicated folder(s) for the failed test artifacts. In CI we retry running a failed test 2 times before considering it a failure, so there can be up to 3 folders per failed test. Each of those folders should contain a Playwright trace zip file and a screenshot from the failure moment. On a first retry, we also record the entire test, so the first retry folder should contain a video recording as well. To view a trace, you can head to https://trace.playwright.dev and just drag and drop the zip file there or run it from the command line:
+Once you download and extract that zip, you'll see dedicated folders for the failed test artifacts. In CI, we retry running a failed test twice before considering it a failure, so there can be up to three folders per failed test. Each of those folders should contain a Playwright trace zip file and a screenshot from the failure moment. On the first retry, we also record the entire test, so the first retry folder should contain a video recording as well. To view a trace, head to https://trace.playwright.dev and drag and drop the zip file there, or run it from the command line:
 
 ```shell
 npx playwright show-trace <path-to-the-trace>
@@ -84,10 +84,10 @@ npx playwright show-trace <path-to-the-trace>
 
 ## Writing Tests
 
-We're using the [`@wordpress/e2e-test-utils-playwright`](https://github.com/WordPress/gutenberg/tree/HEAD/packages/e2e-test-utils-playwright) package as our framework base, so we generally aim to follow Gutenberg E2E's [best practices](https://github.com/WordPress/gutenberg/blob/trunk/docs/contributors/code/e2e/README.md#best-practices) which helps reduce the framework entry threshold and necessary maintenance. Our framework, however, is specific in a couple of aspects, which you can learn all about in this section.
+We're using the [`@wordpress/e2e-test-utils-playwright`](https://github.com/WordPress/gutenberg/tree/HEAD/packages/e2e-test-utils-playwright) package as our framework base, so we generally follow Gutenberg E2E's [best practices](https://github.com/WordPress/gutenberg/blob/trunk/docs/contributors/code/e2e/README.md#best-practices) to reduce the framework entry threshold and necessary maintenance. However, our framework has specific aspects, which you can learn about in this section.
 
 > [!TIP]
-> Using the right selectors can be a daunting task. You can let Playwright pick the right selector for you. All you need to do is open the page you're testing against via `npx playwright open localhost:8889/path-to-the-page`. From there, you can use Playwright Inspector to generate the recommended locators for you, for example:
+> Using the right selectors can be a daunting task, so let Playwright pick the right selector for you. Open the page you're testing against via `npx playwright open localhost:8889/path-to-the-page`. From there, you can use Playwright Inspector to generate the recommended locators:
 >
 > ![](./docs/e2e-playwright-inspector.png)
 >
@@ -95,11 +95,11 @@ We're using the [`@wordpress/e2e-test-utils-playwright`](https://github.com/Word
 
 ### Setup and teardown
 
-We isolate our tests from each other by resetting the database to its initial state **for every test**. Since every test starts with a clean slate, and there's no need to manually reset the environment, we only allow the `beforeEach` hook as there's no point in using `beforeAll`, `afterAll` or `afterEach`. This approach might seem like a limitation at first, but ultimately it makes tests more stable and easier to write. This convention is enforced by an ESLint rule, so you don't really need to worry about anything.
+We isolate our tests from each other by resetting the database to its initial state **for every test**. Since every test starts with a clean slate, and there's no need to manually reset the environment, we only allow the beforeEach hook as there's no point in using beforeAll, afterAll, or afterEach. This approach might seem like a limitation at first, but ultimately it makes tests more stable and easier to write. This convention is enforced by an ESLint rule, so you don't need to worry about it.
 
 ### Plugins
 
-To use a custom plugin with your tests, first you'll need to create the plugin PHP file and save it to the [test plugins folder](./plugins/). Here's a handy snippet that should help you getting started:
+To use a custom plugin with your tests, first create the plugin PHP file and save it to the [test plugins folder](./plugins/). Here's a handy snippet to help you get started:
 
 ```php
 // plugins/my-fancy-plugin.php
@@ -114,7 +114,7 @@ To use a custom plugin with your tests, first you'll need to create the plugin P
  */
 
 function my_fancy_plugin() {
-    echo 'Howdy!';
+  echo 'Howdy!';
 }
 
 add_action('wp_footer', 'my_fancy_plugin');
@@ -129,13 +129,13 @@ Once the plugin is saved, it will be automatically picked up by `wp-env` - no ne
 import { test, expect } from '@woocommerce/e2e-utils';
 
 test( 'My fancy plugin', async ( { page, requestUtils } ) => {
-	await requestUtils.activatePlugin(
-		'woocommerce-blocks-test-my-fancy-plugin'
-	);
+  await requestUtils.activatePlugin(
+    'woocommerce-blocks-test-my-fancy-plugin'
+  );
 
-	await page.goto( '/shop' );
+  await page.goto( '/shop' );
 
-	await expect( page.getByText( 'Howdy!' ) ).toBeVisible();
+  await expect( page.getByText( 'Howdy!' ) ).toBeVisible();
 } );
 ```
 
@@ -148,16 +148,16 @@ Currently, the default theme is Twenty Twenty Four. Activating other themes is d
 
 ```ts
 test.beforeEach( async ( { page, requestUtils } ) => {
-	await requestUtils.activateTheme(	'storefront' );
+  await requestUtils.activateTheme( 'storefront' );
 } );
 ```
 
-> [!IMPORTANT]  
-> Unless it's a one-off thing, remember to use the `beforeEach` hook to activate your theme. Each test starts with a clean database, which means the theme will be re-set to the default one as well.
+> [!NOTE]  
+> Unless it's a one-off thing, remember to use the `beforeEach` hook to activate your theme. Each test starts with a clean database, which means the theme will be reset to the default one as well.
 
 #### Adding a new theme
 
-If you've created a custom theme and want to use it in your tests, all you need to do is save it in the [test themes folder](./themes/). Check out the themes that are already there for an inspiration. The activation part was already explained above, so you're good to go!
+If you've created a custom theme and want to use it in your tests, save it in the [test themes folder](./themes/). Check out the themes that are already there for inspiration. The activation part was explained above, so you're good to go!
 
 ### Utilities
 
@@ -165,7 +165,7 @@ We have a handful of [custom utilities](./utils/) built on top of core's [`@word
 
 #### Creating new utilities
 
-Most of the time, it's better to do a little repetition instead of going straight to creating a utility, as over-abstracting can make the code too vague, complicated, or confusing. However, if the piece is complex and repeated enough, we recommend abstracting it into a [POM (Page Object Model)](https://playwright.dev/docs/pom), for example:
+Most of the time, it's better to do a little repetition instead of creating a utility, as over-abstracting can make the code too vague, complicated, or confusing. However, if the piece is complex and repeated enough, we recommend abstracting it into a [POM (Page Object Model)](https://playwright.dev/docs/pom), for example:
 
 ```ts
 import { test as base, expect, Editor } from '@woocommerce/e2e-utils';
@@ -187,9 +187,9 @@ class CartUtils {
 }
 
 const test = base.extend< { cartUtils: CartUtils } >( {
-	cartUtils: async ( { editor }, use ) => {
-		await use( new CartUtils( { editor } ) );
-	},
+  cartUtils: async ( { editor }, use ) => {
+    await use( new CartUtils( { editor } ) );
+  },
 } );
 
 test( 'Add products', async( { admin, cartUtils } ) => {
@@ -206,7 +206,7 @@ test( 'Add products', async( { admin, cartUtils } ) => {
 
 #### Extending Core utilities
 
-If you've come up with a utility that you think should be a part of the Core utilities (`Admin`, `Editor`, `RequestUtils`, etc.) go ahead and make a PR in Gutenberg - it's best to move as much as possible upstream. If you think that the utility still fits under, e.g., `Editor` but is Woo-specific, you'll need to write an extension, for example:
+If you've come up with a utility that you think should be a part of the Core utilities (`Admin`, `Editor`, `RequestUtils`, etc.), go ahead and make a PR in Gutenberg - it's best to move as much as possible upstream. If you think that the utility still fits under, e.g., `Editor` but is Woo-specific, you'll need to write an extension, for example:
 
 ```ts
 // utils/editor/index.ts
@@ -224,9 +224,9 @@ export class Editor extends CoreEditor {
 
 ### Content Templates
 
-We have created `RequestUtils.createPostFromFile()` and `RequestUtils.createTemplateFromFile()` utilities that enable creating complex content testing scenarios with Handlebars templates. The template files are kept in the [content-templates folder](./content-templates/), so you can head there for some inspiration.
+We have created `RequestUtils.createPostFromFile()` and `RequestUtils.createTemplateFromFile()` utilities that enable creating complex content testing scenarios with Handlebars templates. The template files are kept in the [content-templates](./content-templates/) folder, so you can head there for some inspiration.
 
-The Handlebars template filenames must be prefixed with the template type, e.g. `post_with-filters.handlebars`. As for the templates' templates (I know it's confusing), you'll also need to provide the template type, e.g. `template_archive-product_with-filters.handlebars`. 
+The Handlebars template filenames must be prefixed with the template type, e.g., `post_with-filters.handlebars`. As for the templates' templates (I know it's confusing), you'll also need to provide the template type, e.g., `template_archive-product_with-filters.handlebars`. 
 
 When you have the template ready, we recommend creating a fixture that will be used to compile and create your template with given data, for example:
 
@@ -236,16 +236,16 @@ When you have the template ready, we recommend creating a fixture that will be u
 import { test as base, expect, TemplateCompiler } from '@woocommerce/e2e-utils';
 
 const test = base.extend< { templateCompiler: TemplateCompiler } >( {
-	templateCompiler: async ( { requestUtils }, use ) => {
-		const compiler = await requestUtils.createTemplateFromFile(
-			'archive-product_with-filters'
-		);
-		await use( compiler );
-	},
+  templateCompiler: async ( { requestUtils }, use ) => {
+    const compiler = await requestUtils.createTemplateFromFile(
+      'archive-product_with-filters'
+    );
+    await use( compiler );
+  },
 } );
 
 test( 'Renders correct filters', async ( { page, templateCompiler } ) => {
-	await templateCompiler.compile( {
+  await templateCompiler.compile( {
     price: {
       from: '$10',
       to: '$99',
