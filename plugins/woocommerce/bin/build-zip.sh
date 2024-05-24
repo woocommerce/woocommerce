@@ -5,6 +5,11 @@ PROJECT_PATH=$(pwd)
 BUILD_PATH="${PROJECT_PATH}/build"
 DEST_PATH="$BUILD_PATH/$PLUGIN_SLUG"
 
+# Check if BUNDLE_EXPERIMENTAL_BLOCKS is set, if not, exclude experimental blocks
+if [ -z "${BUNDLE_EXPERIMENTAL_BLOCKS}" ]; then
+  export BUNDLE_EXPERIMENTAL_BLOCKS=0
+fi
+
 echo "Generating build directory..."
 rm -rf "$BUILD_PATH"
 mkdir -p "$DEST_PATH"
