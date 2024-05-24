@@ -14,6 +14,8 @@ class WC_Helper_Product {
 
 	/**
 	 * Counter to insert unique SKU for concurrent tests.
+	 * 
+	 * @var int $sku_counter
 	 */
 	private static $sku_counter = 0;
 
@@ -44,7 +46,7 @@ class WC_Helper_Product {
 				'name'          => 'Dummy Product',
 				'regular_price' => 10,
 				'price'         => 10,
-				'sku'           => "DUMMY SKU" . self::$sku_counter,
+				'sku'           => 'DUMMY SKU' . self::$sku_counter,
 				'manage_stock'  => false,
 				'tax_status'    => 'taxable',
 				'downloadable'  => false,
