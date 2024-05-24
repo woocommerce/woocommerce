@@ -8,28 +8,18 @@
 	"env": {
 		"tests": {
 			"mappings": {
+				"wp-cli.yml": "./wp-cli.yml",
 				"wp-content/mu-plugins": "./node_modules/@wordpress/e2e-tests/mu-plugins",
 				"wp-content/plugins/gutenberg-test-plugins": "./node_modules/@wordpress/e2e-tests/plugins",
 				"wp-content/plugins/woocommerce-blocks-test-plugins": "./tests/e2e/plugins",
-				"wp-cli.yml": "./wp-cli.yml",
 				"wp-content/plugins/woocommerce/blocks-bin": "./bin",
-				"wp-content/plugins/woocommerce/blocks-bin/playwright": "./tests/e2e/bin"
+				"wp-content/plugins/woocommerce/blocks-bin/playwright": "./tests/e2e/bin",
+				"wp-content/themes/woocommerce-blocks-test-themes": "./tests/e2e/themes",
+				"wp-content/themes/woocommerce-blocks-test-themes/storefront": "https://downloads.wordpress.org/theme/storefront.latest-stable.zip",
+				"wp-content/themes/woocommerce-blocks-test-themes/twentytwentyfour": "https://downloads.wordpress.org/theme/twentytwentyfour.latest-stable.zip"
 			}
 		}
 	},
-	"themes": [
-		"https://downloads.wordpress.org/theme/storefront.latest-stable.zip",
-		"https://downloads.wordpress.org/theme/twentytwentyone.latest-stable.zip",
-		"https://downloads.wordpress.org/theme/twentytwentyfour.latest-stable.zip",
-		"./tests/e2e/themes/emptytheme",
-		"./tests/e2e/themes/storefront-child__block-notices-filter",
-		"./tests/e2e/themes/storefront-child__block-notices-template",
-		"./tests/e2e/themes/storefront-child__classic-notices-template",
-		"./tests/e2e/themes/theme-with-woo-templates",
-		"./tests/e2e/themes/twentytwentyfour-child__block-notices-filter",
-		"./tests/e2e/themes/twentytwentyfour-child__block-notices-template",
-		"./tests/e2e/themes/twentytwentyfour-child__classic-notices-template"
-	],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
 		"SCRIPT_DEBUG": false,
