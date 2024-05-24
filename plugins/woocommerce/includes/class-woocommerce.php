@@ -216,14 +216,6 @@ final class WooCommerce {
 		 * @since 3.6.0
 		 */
 		do_action( 'woocommerce_loaded' );
-
-		// add_filter( 'woocommerce_coming_soon_exclude', function() {
-		// 	print_r( 'hello world' );
-		// 	if ( is_page( 'privacy-policy' ) ) {
-		// 		return true;
-		// 	}
-		// 	return false;
-		// }, 10 );
 	}
 
 	/**
