@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * External dependencies
  */
 import path from 'path';
 import { writeFileSync } from 'fs';
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import type {
 	Reporter,
 	FullResult,
