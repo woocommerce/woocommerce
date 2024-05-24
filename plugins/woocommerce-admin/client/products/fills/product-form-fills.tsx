@@ -20,7 +20,6 @@ import { PricingSectionFills } from './pricing-section';
 import { InventorySectionFills } from './inventory-section';
 import { AttributesSectionFills } from './attributes-section';
 import { ImagesSectionFills } from './images-section';
-import { ProductVariationsSection } from '../sections/product-variations-section';
 import {
 	TAB_GENERAL_ID,
 	TAB_SHIPPING_ID,
@@ -103,16 +102,6 @@ const Tabs = () => {
 					tab={ TAB_SHIPPING_ID }
 					fillProps={ { product } }
 				/>
-			</WooProductTabItem>
-			<WooProductTabItem
-				id={ TAB_OPTIONS_ID }
-				templates={ [ { name: TAB_GENERAL_ID, order: 9 } ] }
-				pluginId={ PLUGIN_ID }
-				tabProps={ tabPropData.options }
-			>
-				<>
-					<ProductVariationsSection />
-				</>
 			</WooProductTabItem>
 		</>
 	);
