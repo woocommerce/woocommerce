@@ -19,7 +19,6 @@ import { useParams } from 'react-router-dom';
  * Internal dependencies
  */
 import { ProductForm } from './product-form';
-import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductVariationForm } from './product-variation-form';
 import './add-edit-product-page.scss';
 
@@ -121,19 +120,6 @@ const EditProductPage: React.FC = () => {
 					<Spinner />
 				</div>
 			) : null }
-			{ product &&
-				product.status === 'trash' &&
-				! isPendingAction &&
-				! wasDeletedUsingAction && (
-					<ProductFormLayout id="error">
-						<div className="woocommerce-edit-product__error">
-							{ __(
-								'You cannot edit this item because it is in the Trash. Please restore it and try again.',
-								'woocommerce'
-							) }
-						</div>
-					</ProductFormLayout>
-				) }
 			{ productVariation && product && (
 				<ProductVariationForm
 					product={ product }

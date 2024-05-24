@@ -11,7 +11,6 @@ import { PartialProduct, ProductVariation } from '@woocommerce/data';
  * Internal dependencies
  */
 import PostsNavigation from './shared/posts-navigation';
-import { ProductFormLayout } from './layout/product-form-layout';
 import useProductVariationNavigation from './hooks/use-product-variation-navigation';
 
 import './product-variation-form.scss';
@@ -45,12 +44,6 @@ export const ProductVariationForm: React.FC< {
 				errors={ {} }
 				ref={ formRef }
 			>
-				<ProductFormLayout
-					key={ productVariation.id }
-					id="variation"
-					product={ productVariation as PartialProduct }
-				/>
-
 				<div className="product-variation-form__navigation">
 					<PostsNavigation
 						{ ...navigationProps }

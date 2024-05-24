@@ -9,7 +9,6 @@ import { Ref } from 'react';
 /**
  * Internal dependencies
  */
-import { ProductFormLayout } from './layout/product-form-layout';
 import { validate } from './product-validation';
 
 export const ProductForm: React.FC< {
@@ -33,7 +32,6 @@ export const ProductForm: React.FC< {
 				errors={ {} }
 				validate={ validate }
 			>
-				<ProductFormLayout id="general" product={ product } />
 				{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 				<PluginArea scope="woocommerce-product-editor" />
 			</Form>
