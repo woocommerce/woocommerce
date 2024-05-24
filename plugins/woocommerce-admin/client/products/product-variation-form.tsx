@@ -13,7 +13,6 @@ import { PartialProduct, ProductVariation } from '@woocommerce/data';
 import PostsNavigation from './shared/posts-navigation';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductFormFooter } from './layout/product-form-footer';
-import { ProductVariationFormHeader } from './layout/product-variation-form-header';
 import useProductVariationNavigation from './hooks/use-product-variation-navigation';
 
 import './product-variation-form.scss';
@@ -47,7 +46,6 @@ export const ProductVariationForm: React.FC< {
 				errors={ {} }
 				ref={ formRef }
 			>
-				<ProductVariationFormHeader />
 				<ProductFormLayout
 					key={ productVariation.id }
 					id="variation"
