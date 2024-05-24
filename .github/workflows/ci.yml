@@ -312,7 +312,10 @@ jobs:
                   pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "Build jobs matrix"
                   pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "Linting"
                   pnpm utils slack-test-report -c "${{ needs.project-default-test-jobs.result }}" -r "Tests"
-                  pnpm utils slack-test-report -c "${{ needs.project-e2e-test-jobs.result }}" -r "e2e tests"
+                
+                  REPORT_NAME=${{ inputs.trigger != '' && inputs.trigger || 'e2e tests' }}
+                  pnpm utils slack-test-report -c "${{ needs.project-e2e-test-jobs.result }}" -r "$REPORT_NAME"
+                
                   pnpm utils slack-test-report -c "${{ needs.project-api-test-jobs.result }}" -r "Api tests"
                   pnpm utils slack-test-report -c "${{ needs.project-performance-test-jobs.result }}" -r "Performance tests"
 
