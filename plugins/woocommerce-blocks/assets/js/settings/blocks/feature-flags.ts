@@ -6,7 +6,7 @@ import { getSetting } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import { WC_BLOCKS_PHASE, WcBlocksConfig } from './constants';
+import { WcBlocksConfig } from './constants';
 
 /**
  * Checks if experimental blocks are enabled.
@@ -26,5 +26,10 @@ export const isExperimentalBlocksEnabled = (): boolean => {
  *
  * @return {boolean} True if experimental block styling features are enabled.
  */
-export const isExperimentalBlockStylingEnabled = (): boolean =>
-	WC_BLOCKS_PHASE > 1;
+export const isExperimentalBlockStylingEnabled = (): boolean => {
+	const { experimentalBlockStylingEnabled } = getSetting( 'wcBlocksConfig', {
+		isExperimentalBlockStylingEnabled: false,
+	} ) as WcBlocksConfig;
+
+	return experimentalBlockStylingEnabled;
+};
