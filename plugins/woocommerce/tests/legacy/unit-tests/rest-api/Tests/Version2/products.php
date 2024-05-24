@@ -171,7 +171,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products/' . $product->get_id() ) );
 		$data     = $response->get_data();
 
-		$this->assertMatchesRegularExpression( '/^DUMMY SKU\d+$/', $data['sku']  );
+		$this->assertMatchesRegularExpression( '/^DUMMY SKU\d+$/', $data['sku'] );
 		$this->assertEquals( 10, $data['regular_price'] );
 		$this->assertEmpty( $data['sale_price'] );
 

@@ -14,7 +14,7 @@ class WC_Helper_Product {
 
 	/**
 	 * Counter to insert unique SKU for concurrent tests.
-	 * 
+	 *
 	 * @var int $sku_counter
 	 */
 	private static $sku_counter = 0;
@@ -54,8 +54,8 @@ class WC_Helper_Product {
 				'stock_status'  => 'instock',
 				'weight'        => '1.1',
 			);
-		
-		self::$sku_counter++;
+
+		++self::$sku_counter;
 
 		$product->set_props( array_merge( $default_props, $props ) );
 
