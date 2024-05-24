@@ -103,7 +103,6 @@ class ComingSoonRequestHandler {
 		}
 
 		// Check if there is an exclusion.
-		print_r('paul');
 		if ( apply_filters( 'woocommerce_coming_soon_exclude', false ) ) {
 			return false;
 		}
