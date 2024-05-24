@@ -6,7 +6,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * AbstractBlock class.
@@ -439,7 +439,7 @@ abstract class AbstractBlock {
 				'wcBlocksConfig',
 				[
 					'buildPhase'                => Package::feature()->get_flag(),
-					'experimentalBlocksEnabled' => FeaturesUtil::feature_is_enabled( 'experimental_blocks' ),
+					'experimentalBlocksEnabled' => Features::is_enabled( 'experimental-blocks' ),
 					'pluginUrl'                 => plugins_url( '/', dirname( __DIR__, 2 ) ),
 					'productCount'              => array_sum( (array) wp_count_posts( 'product' ) ),
 					'restApiRoutes'             => [
