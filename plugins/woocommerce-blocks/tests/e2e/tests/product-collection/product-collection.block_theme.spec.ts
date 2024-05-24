@@ -10,15 +10,11 @@ import type { Request } from '@playwright/test';
 import ProductCollectionPage, { SELECTORS } from './product-collection.page';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
-	pageObject: async (
-		{ page, admin, editor, templateApiUtils, editorUtils },
-		use
-	) => {
+	pageObject: async ( { page, admin, editor, editorUtils }, use ) => {
 		const pageObject = new ProductCollectionPage( {
 			page,
 			admin,
 			editor,
-			templateApiUtils,
 			editorUtils,
 		} );
 		await use( pageObject );
@@ -880,6 +876,29 @@ test.describe( 'Product Collection', () => {
 				featuredProductsPrices
 			);
 		} );
+
+		test( 'With multiple Pagination blocks', async ( {
+			page,
+			admin,
+			editor,
+			editorUtils,
+			pageObject,
+		} ) => {
+			await admin.createNewPost();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost( 'productCatalog' );
+			const paginations = page.getByLabel( 'Block: Pagination' );
+
+			await expect( paginations ).toHaveCount( 1 );
+
+			const siblingBlock = await editorUtils.getBlockByName(
+				'woocommerce/product-template'
+			);
+			await editor.selectBlocks( siblingBlock );
+			await editorUtils.insertBlockUsingGlobalInserter( 'Pagination' );
+
+			await expect( paginations ).toHaveCount( 2 );
+		} );
 	} );
 
 	test.describe( 'Location is recognised', () => {
@@ -1080,6 +1099,54 @@ test.describe( 'Product Collection', () => {
 			expect( collectionName ).toBe(
 				'woocommerce/product-collection/on-sale'
 			);
+		} );
+	} );
+
+	test.describe( 'Preview mode in generic archive templates', () => {
+		const genericArchiveTemplates = [
+			{
+				name: 'Products by Tag',
+				path: 'woocommerce/woocommerce//taxonomy-product_tag',
+			},
+			{
+				name: 'Products by Category',
+				path: 'woocommerce/woocommerce//taxonomy-product_cat',
+			},
+			{
+				name: 'Products by Attribute',
+				path: 'woocommerce/woocommerce//taxonomy-product_attribute',
+			},
+		];
+
+		genericArchiveTemplates.forEach( ( { name, path } ) => {
+			test( `${ name } template`, async ( {
+				editor,
+				page,
+				pageObject,
+			} ) => {
+				await pageObject.replaceProductsWithProductCollectionInTemplate(
+					path
+				);
+
+				const previewButtonLocator = editor.canvas.locator(
+					'button[data-test-id="product-collection-preview-button"]'
+				);
+
+				// The preview button should be visible
+				await expect( previewButtonLocator ).toBeVisible();
+
+				// The preview button should be hidden when the block is not selected
+				await page.click( 'body' );
+				await expect( previewButtonLocator ).toBeHidden();
+
+				// Preview button should be visible when any of inner block is selected
+				await editor.canvas
+					.getByLabel( 'Block: Product Template' )
+					.getByLabel( 'Block: Product Image' )
+					.first()
+					.click();
+				await expect( previewButtonLocator ).toBeVisible();
+			} );
 		} );
 	} );
 } );

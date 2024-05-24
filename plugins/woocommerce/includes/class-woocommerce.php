@@ -22,6 +22,8 @@ use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -47,6 +49,8 @@ use Automattic\WooCommerce\Admin\Features\Features;
  * @property WC_Payment_Gateways $payment_gateways
  */
 final class WooCommerce {
+
+	use AccessiblePrivateMethods;
 
 	/**
 	 * WooCommerce version.
@@ -88,6 +92,8 @@ final class WooCommerce {
 
 	/**
 	 * API instance
+	 *
+	 * @deprecated 9.0.0 The Legacy REST API has been removed from WooCommerce core. This property will be null unless the WooCommerce Legacy REST API plugin is installed.
 	 *
 	 * @var WC_API
 	 */
@@ -266,6 +272,7 @@ final class WooCommerce {
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
+		self::add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 
@@ -597,6 +604,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/queue/class-wc-action-queue.php';
 		include_once WC_ABSPATH . 'includes/queue/class-wc-queue.php';
 		include_once WC_ABSPATH . 'includes/admin/marketplace-suggestions/class-wc-marketplace-updater.php';
+		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-marketplace-promotions.php';
 		include_once WC_ABSPATH . 'includes/blocks/class-wc-blocks-utils.php';
 
 		/**
@@ -630,8 +638,6 @@ final class WooCommerce {
 		/**
 		 * REST API.
 		 */
-		include_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-api.php';
-		include_once WC_ABSPATH . 'includes/class-wc-api.php';
 		include_once WC_ABSPATH . 'includes/class-wc-rest-authentication.php';
 		include_once WC_ABSPATH . 'includes/class-wc-rest-exception.php';
 		include_once WC_ABSPATH . 'includes/class-wc-auth.php';
@@ -664,10 +670,6 @@ final class WooCommerce {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin.php';
 		}
 
-		if ( $this->is_request( 'admin' ) || $this->is_request( 'cron' ) ) {
-			include_once WC_ABSPATH . 'includes/admin/class-wc-admin-marketplace-promotions.php';
-		}
-
 		// We load frontend includes in the post editor, because they may be invoked via pre-loading of blocks.
 		$in_post_editor = doing_action( 'load-post.php' ) || doing_action( 'load-post-new.php' );
 
@@ -681,8 +683,8 @@ final class WooCommerce {
 
 		$this->theme_support_includes();
 		$this->query = new WC_Query();
-		$this->api   = new WC_API();
-		$this->api->init();
+
+		LegacyRestApiStub::setup();
 	}
 
 	/**
@@ -1185,6 +1187,25 @@ final class WooCommerce {
 	 */
 	public function get_global( string $global_name ) {
 		return wc_get_container()->get( LegacyProxy::class )->get_global( $global_name );
+	}
+
+	/**
+	 * Register WC settings from WP-API to the REST API.
+	 *
+	 * This method used to be part of the now removed Legacy REST API.
+	 *
+	 * @since 9.0.0
+	 */
+	private function register_wp_admin_settings() {
+		$pages = WC_Admin_Settings::get_settings_pages();
+		foreach ( $pages as $page ) {
+			new WC_Register_WP_Admin_Settings( $page, 'page' );
+		}
+
+		$emails = WC_Emails::instance();
+		foreach ( $emails->get_emails() as $email ) {
+			new WC_Register_WP_Admin_Settings( $email, 'email' );
+		}
 	}
 
 	/**

@@ -5,6 +5,14 @@ on:
         branches:
             - 'trunk'
             - 'release/*'
+    workflow_call:
+      inputs: 
+        trigger:
+          description: 'Type of run to trigger. E.g. daily-e2e, release-checks, etc.'
+          required: true
+          default: 'default'
+          type: string
+          
 concurrency:
     group: '${{ github.workflow }}-${{ github.ref }}'
     cancel-in-progress: true
@@ -43,15 +51,20 @@ jobs:
                       }
 
                       let githubEvent = ${{ toJson( github.event_name ) }};
+                      let trigger = ${{ toJson( inputs.trigger ) }};
+                    
+                      if ( trigger ) {
+                        githubEvent = trigger;
+                      }
 
                       const child_process = require( 'node:child_process' );
                       child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
 
     project-lint-jobs:
-        name: 'Lint - ${{ matrix.projectName }}'
+        name: "Lint - ${{ matrix.projectName }} ${{ matrix.optional && ' (optional)' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
-        if: ${{ needs.project-jobs.outputs.lint-jobs != '[]' }}
+        if: ${{ needs.project-jobs.outputs.lint-jobs != '[]' && github.event_name == 'pull_request' }}
         strategy:
             fail-fast: false
             matrix:
@@ -71,7 +84,7 @@ jobs:
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
     project-default-test-jobs:
-        name: 'Test - ${{ matrix.projectName }} - ${{ matrix.name }}'
+        name: "Test - ${{ matrix.projectName }} - ${{ matrix.name }} ${{ matrix.optional && ' (optional)' || '' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.default-test-jobs != '[]' }}
@@ -97,10 +110,11 @@ jobs:
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
     project-e2e-test-jobs:
-        name: 'E2E - ${{ matrix.name }}'
+        name: "E2E - ${{ matrix.name }} ${{ matrix.optional && ' (optional)' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.e2e-test-jobs != '[]' }}
+        env: ${{ matrix.testEnv.envVars }}
         strategy:
             fail-fast: false
             matrix:
@@ -116,12 +130,31 @@ jobs:
                   install: '${{ matrix.projectName }}...'
                   build: '${{ matrix.projectName }}'
 
+            - name: Get commit message
+              id: get_commit_message
+              env:
+                  HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                  PR_TITLE: ${{ github.event.pull_request.title }}
+              run: |
+                  if [[ "${{ github.event_name }}" == "push" ]]; then
+                    COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+                  elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+                    COMMIT_MESSAGE="$PR_TITLE"
+                  else
+                    COMMIT_MESSAGE="${{ github.event_name }}"
+                  fi
+                  echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
+              shell: bash
+
             - name: 'Prepare Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
 
             - name: 'Run tests'
+              env:
+                  BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
+                  BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
             - name: 'Upload artifacts'
@@ -134,10 +167,11 @@ jobs:
                   compression-level: 9
 
     project-api-test-jobs:
-        name: 'API - ${{ matrix.name }}'
+        name: "API - ${{ matrix.name }} ${{ matrix.optional && ' (optional)' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.api-test-jobs != '[]' }}
+        env: ${{ matrix.testEnv.envVars }}
         strategy:
             fail-fast: false
             matrix:
@@ -171,7 +205,7 @@ jobs:
                   compression-level: 9
 
     project-performance-test-jobs:
-        name: 'Performance - ${{ matrix.name }}'
+        name: "Performance - ${{ matrix.name }} ${{ matrix.optional && ' (optional)' || ''}}"
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.performance-test-jobs != '[]' }}
@@ -225,37 +259,27 @@ jobs:
                 'project-default-test-jobs',
                 'project-e2e-test-jobs',
                 'project-api-test-jobs',
+                'project-performance-test-jobs'
             ]
-        if: ${{ always() }}
+        if: ${{ always() && github.event_name == 'pull_request' }}
         steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+              
             - name: 'Evaluation'
+              env:
+                REPOSITORY: ${{ github.repository }}
+                RUN_ID: ${{ github.run_id }}
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
+                  # Check if project-jobs was successful. Fail for any other status, including skipped. 
                   result="${{ needs.project-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "An error occurred generating the CI jobs."
+                  if [[ $result != "success" ]]; then
+                    echo "Generating CI jobs was not successful."
                     exit 1
                   fi
-                  result="${{ needs.project-lint-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "One or more lint jobs have failed."
-                    exit 1
-                  fi
-                  result="${{ needs.project-default-test-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "One or more test jobs have failed."
-                    exit 1
-                  fi
-                  result="${{ needs.project-e2e-test-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "One or more e2e test jobs have failed."
-                    exit 1
-                  fi
-                  result="${{ needs.project-api-test-jobs.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "One or more api test jobs have failed."
-                    exit 1
-                  fi
-                  echo "All jobs have completed successfully."
+                  
+                  node .github/workflows/scripts/evaluate-jobs-conclusions.js
 
     e2e-test-reports:
         name: 'Report e2e tests results'
@@ -305,7 +329,7 @@ jobs:
                       -f commit_sha=$GITHUB_SHA \
                       -f s3_root=public \
                       --repo woocommerce/woocommerce-test-reports
-                  else
+                  elif [ "$GITHUB_EVENT_NAME" == push ]; then
                     gh workflow run publish-test-reports-trunk-merge.yml \
                       -f run_id=$RUN_ID \
                       -f artifact=e2e-test-report \
@@ -313,15 +337,17 @@ jobs:
                       -f commit_sha=$GITHUB_SHA \
                       -f test_type="e2e" \
                       --repo woocommerce/woocommerce-test-reports
+                  else
+                    echo "No report will be created for '$GITHUB_EVENT_NAME' event"
                   fi
 
             - name: 'Send Slack notification'
-              if: github.event_name != 'pull_request'
+              if: ${{ always() && github.event_name != 'pull_request' }}
               uses: automattic/action-test-results-to-slack@v0.3.0
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
-                  slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
+                  slack_channel: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
                   playwright_report_path: ./out/test-results-*.json
                   playwright_output_dir: ./out/results-data
 
@@ -373,7 +399,7 @@ jobs:
                       -f commit_sha=$GITHUB_SHA \
                       -f s3_root=public \
                       --repo woocommerce/woocommerce-test-reports
-                  else
+                  elif [ "$GITHUB_EVENT_NAME" == push ]; then
                     gh workflow run publish-test-reports-trunk-merge.yml \
                       -f run_id=$RUN_ID \
                       -f artifact=api-test-report \
@@ -381,6 +407,8 @@ jobs:
                       -f commit_sha=$GITHUB_SHA \
                       -f test_type="api" \
                       --repo woocommerce/woocommerce-test-reports
+                  else
+                    echo "No report will be created for '$GITHUB_EVENT_NAME' event"
                   fi
 
             - name: 'Send Slack notification'
@@ -389,4 +417,4 @@ jobs:
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
-                  slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
+                  slack_channel: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
