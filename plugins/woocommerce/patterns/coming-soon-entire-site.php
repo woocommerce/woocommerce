@@ -47,7 +47,7 @@ if ( 'twentytwentyfour' === $current_theme ) {
 
 <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 <div class="wp-block-group"><!-- wp:heading {"textAlign":"center","level":1,"align":"wide","className":"woocommerce-coming-soon-banner","fontFamily":"<?php echo esc_html( $cardo_font_family ); ?>"} -->
-<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner has-<?php echo esc_html( $cardo_font_family ); ?>-font-family">Pardon our dust! We're working on something amazing — check back soon!</h1>
+<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner has-<?php echo esc_html( $cardo_font_family ); ?>-font-family"><?php echo esc_html__( "Pardon our dust! We're working on something amazing — check back soon!", 'woocommerce' ); ?></h1>
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 
