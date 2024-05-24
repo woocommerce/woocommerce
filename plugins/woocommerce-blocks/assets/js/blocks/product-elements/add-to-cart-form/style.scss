@@ -41,7 +41,7 @@
 	// Grouped Product
 	table.woocommerce-grouped-product-list.group_table > tbody {
 		td
-		.wc-block-components-quantity-selector.wc-block-components-quantity-selector--input {
+			.wc-block-components-quantity-selector.wc-block-components-quantity-selector--input {
 			height: 40px;
 		}
 
@@ -63,7 +63,7 @@
 	// Grouped Product
 	table.woocommerce-grouped-product-list.group_table > tbody {
 		td
-		.wc-block-components-quantity-selector.wc-block-components-quantity-selector--stepper {
+			.wc-block-components-quantity-selector.wc-block-components-quantity-selector--stepper {
 			height: 40px;
 			width: 120px;
 
@@ -80,7 +80,8 @@
 	}
 
 	// Product Variation
-	.woocommerce-variation-add-to-cart.variations_button.woocommerce-variation-add-to-cart-enabled {
+	.woocommerce-variation-add-to-cart.variations_button.woocommerce-variation-add-to-cart-enabled,
+	.woocommerce-variation-add-to-cart.variations_button.woocommerce-variation-add-to-cart-disabled {
 		display: flex;
 
 		.wc-block-components-quantity-selector {
