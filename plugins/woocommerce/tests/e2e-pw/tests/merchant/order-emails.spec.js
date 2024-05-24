@@ -41,10 +41,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			await page.locator( '#bulk-action-selector-top' ).isVisible()
 		) {
 			// In WP 6.3, label intercepts check action. Need to force.
-			await page
-				.getByLabel( 'Select All' )
-				.first()
-				.check( { force: true } );
+			await page.getByLabel( 'Select All' ).first().check();
 
 			await page
 				.locator( '#bulk-action-selector-top' )
@@ -188,6 +185,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 					status: 'cancelled',
 				} );
 			} );
+		// eslint-disable-next-line no-wait-for-timeout
 		await page.waitForTimeout( 1000 );
 		// search to narrow it down to just the messages we want
 		await page.goto(
@@ -211,7 +209,6 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			.locator( 'li#actions > select' )
 			.selectOption( 'send_order_details_admin' );
 		await page.locator( 'button.wc-reload' ).click();
-		await page.waitForLoadState( 'networkidle' );
 
 		// search to narrow it down to just the messages we want
 		await page.goto(
@@ -240,7 +237,6 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			.locator( 'li#actions > select' )
 			.selectOption( 'send_order_details' );
 		await page.locator( 'button.wc-reload' ).click();
-		await page.waitForLoadState( 'networkidle' );
 
 		// confirm the message was delivered in the logs
 		await page.goto(

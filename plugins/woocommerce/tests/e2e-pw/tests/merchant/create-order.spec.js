@@ -422,8 +422,6 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
 			'Add new order'
 		);
-
-		await page.waitForLoadState( 'networkidle' );
 		// get order ID from the page
 		const orderText = await page
 			.locator( 'h2.woocommerce-order-data__heading' )

@@ -117,7 +117,6 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		await page.goto(
 			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
 		);
-		await page.waitForLoadState( 'networkidle' );
 
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
 		await page.getByRole( 'row', { name: /Refund #\d+/ } ).hover();

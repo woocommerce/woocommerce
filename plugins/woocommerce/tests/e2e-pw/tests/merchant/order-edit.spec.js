@@ -42,14 +42,16 @@ test.describe( 'Edit order', () => {
 	} );
 
 	test( 'can view single order', async ( { page } ) => {
-		// go to orders page
-		await page.goto( '/wp-admin/admin.php?page=wc-orders&action=new' );
+		if ( process.env.DISABLE_HPOS === 1 ) {
+			await page.goto( '/wp-admin/admin.php?page=wc-orders&action=new' );
+		} else {
+			await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
+		}
 
 		// confirm we're on the orders page
 		await expect( page.locator( 'h1.components-text' ) ).toContainText(
 			'Orders'
 		);
-
 		// open order we created
 		await page.goto(
 			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
@@ -209,7 +211,7 @@ test.describe( 'Edit order', () => {
 	} );
 
 	test( 'can load billing details', async ( { page, baseURL } ) => {
-		let customerId = 0;
+		let customerId;
 
 		const api = new wcApi( {
 			url: baseURL,
@@ -250,15 +252,19 @@ test.describe( 'Edit order', () => {
 		// Simulate the ajax `woocommerce_get_customer_details` call normally done inside meta-boxes-order.js.
 		const response = await page.evaluate( async ( customerId ) => {
 			const simulateCustomerDetailsCall = new Promise( ( resolve ) => {
+				// eslint-disable-next-line no-undef
 				jQuery.ajax( {
+					// eslint-disable-next-line no-undef
 					url: woocommerce_admin_meta_boxes.ajax_url,
 					data: {
 						user_id: customerId,
 						action: 'woocommerce_get_customer_details',
 						security:
+							// eslint-disable-next-line no-undef
 							woocommerce_admin_meta_boxes.get_customer_details_nonce,
 					},
 					type: 'POST',
+					// eslint-disable-next-line no-shadow
 					success( response ) {
 						resolve( response );
 					},
@@ -552,7 +558,6 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		// click revoke access
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
 		await page.locator( 'button.revoke_access' ).click();
-		await page.waitForLoadState( 'networkidle' );
 
 		// verify permissions gone
 		await expect(
