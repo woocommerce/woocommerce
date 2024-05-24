@@ -80,7 +80,7 @@ test.describe( 'Add to Cart behavior', () => {
 		await api.put(
 			'settings/general/woocommerce_default_customer_address',
 			{
-				value: '',
+				value: 'base',
 			}
 		);
 		await api.put(
