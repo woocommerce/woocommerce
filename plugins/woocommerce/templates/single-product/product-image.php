@@ -26,12 +26,11 @@ global $product;
 
 $columns           = apply_filters( 'woocommerce_product_thumbnails_columns', 4 );
 $post_thumbnail_id = $product->get_image_id();
-$has_images        = $post_thumbnail_id || ( $product->is_type( 'variable' ) && ! empty( $product->get_available_variations( 'image' ) ) );
 $wrapper_classes   = apply_filters(
 	'woocommerce_single_product_image_gallery_classes',
 	array(
 		'woocommerce-product-gallery',
-		'woocommerce-product-gallery--' . ( $has_images ? 'with-images' : 'without-images' ),
+		'woocommerce-product-gallery--' . ( $post_thumbnail_id ? 'with-images' : 'without-images' ),
 		'woocommerce-product-gallery--columns-' . absint( $columns ),
 		'images',
 	)
@@ -43,7 +42,9 @@ $wrapper_classes   = apply_filters(
 		if ( $post_thumbnail_id ) {
 			$html = wc_get_gallery_image_html( $post_thumbnail_id, true );
 		} else {
-			$wrapper_classname = $has_images ? 'woocommerce-product-gallery__image woocommerce-product-gallery__image--placeholder' : 'woocommerce-product-gallery__image--placeholder';
+			$wrapper_classname = $product->is_type( 'variable' ) && ! empty( $product->get_available_variations( 'image' ) ) ?
+				'woocommerce-product-gallery__image woocommerce-product-gallery__image--placeholder' :
+				'woocommerce-product-gallery__image--placeholder';
 			$html              = sprintf( '<div class="%s">', esc_attr( $wrapper_classname ) );
 			$html             .= sprintf( '<img src="%s" alt="%s" class="wp-post-image" />', esc_url( wc_placeholder_img_src( 'woocommerce_single' ) ), esc_html__( 'Awaiting product image', 'woocommerce' ) );
 			$html             .= '</div>';
