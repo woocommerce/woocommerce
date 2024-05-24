@@ -16,7 +16,6 @@ import { useMemo } from '@wordpress/element';
  */
 import { PricingSectionFills } from './pricing-section';
 import { InventorySectionFills } from './inventory-section';
-import { AttributesSectionFills } from './attributes-section';
 import {
 	TAB_GENERAL_ID,
 	TAB_SHIPPING_ID,
@@ -110,7 +109,6 @@ registerPlugin( 'wc-admin-product-editor-form-fills', {
 	render: () => (
 		<>
 			<Tabs />
-			<AttributesSectionFills />
 			<PricingSectionFills
 				tabId={ TAB_PRICING_ID }
 				basicSectionId={ PRICING_SECTION_BASIC_ID }
