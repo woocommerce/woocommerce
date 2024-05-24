@@ -26,7 +26,6 @@ import {
 	VARIANT_INVENTORY_SECTION_ADVANCED_ID,
 	PLUGIN_ID,
 } from './constants';
-import { PricingSectionFills } from './pricing-section';
 import { InventorySectionFills } from './inventory-section';
 
 const tabPropData = {
@@ -92,14 +91,6 @@ registerPlugin( 'wc-admin-product-editor-form-variation-fills', {
 	render: () => (
 		<>
 			<Tabs />
-			<PricingSectionFills
-				tabId={ VARIANT_TAB_PRICING_ID }
-				basicSectionId={ VARIANT_PRICING_SECTION_BASIC_ID }
-				taxesSectionId={ VARIANT_PRICING_SECTION_TAXES_ID }
-				taxesAdvancedSectionId={
-					VARIANT_PRICING_SECTION_TAXES_ADVANCED_ID
-				}
-			/>
 			<InventorySectionFills
 				tabId={ VARIANT_TAB_INVENTORY_ID }
 				basicSectionId={ VARIANT_INVENTORY_SECTION_ID }

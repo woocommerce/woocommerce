@@ -14,7 +14,6 @@ import { useMemo } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { PricingSectionFills } from './pricing-section';
 import { InventorySectionFills } from './inventory-section';
 import {
 	TAB_GENERAL_ID,
@@ -109,12 +108,6 @@ registerPlugin( 'wc-admin-product-editor-form-fills', {
 	render: () => (
 		<>
 			<Tabs />
-			<PricingSectionFills
-				tabId={ TAB_PRICING_ID }
-				basicSectionId={ PRICING_SECTION_BASIC_ID }
-				taxesSectionId={ PRICING_SECTION_TAXES_ID }
-				taxesAdvancedSectionId={ PRICING_SECTION_TAXES_ADVANCED_ID }
-			/>
 			<InventorySectionFills
 				tabId={ TAB_INVENTORY_ID }
 				basicSectionId={ INVENTORY_SECTION_ID }
