@@ -1,36 +1,15 @@
 /**
  * External dependencies
  */
-import { registerBlockSingleProductTemplate } from '@woocommerce/atomic-utils';
-import { Icon, button } from '@wordpress/icons';
+import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import metadata from './block.json';
-import edit from './edit';
+import { AddToCartFormBlockSettings } from './settings';
 import './style.scss';
 import './editor.scss';
 
-const blockSettings = {
-	edit,
-	icon: {
-		src: (
-			<Icon
-				icon={ button }
-				className="wc-block-editor-components-block-icon"
-			/>
-		),
-	},
-	ancestor: [ 'woocommerce/single-product' ],
-	save() {
-		return null;
-	},
-};
-
-registerBlockSingleProductTemplate( {
-	blockName: metadata.name,
-	blockMetadata: metadata,
-	blockSettings,
-	isAvailableOnPostEditor: true,
-} );
+// @ts-expect-error: `metadata` currently does not have a type definition in WordPress core.
+registerBlockType( metadata.name, AddToCartFormBlockSettings );

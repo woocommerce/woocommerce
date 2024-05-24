@@ -7,7 +7,9 @@ import { ProductGalleryBlockSettings } from '@woocommerce/blocks/product-gallery
 /**
  * Internal dependencies
  */
+import { AddToCartFormBlockSettings } from '../../../atomic/blocks/product-elements/add-to-cart-form/settings';
 import productGalleryBlockMetadata from '../../../blocks/product-gallery/block.json';
+import addToCartFormBlockMetadata from '../../../atomic/blocks/product-elements/add-to-cart-form/block.json';
 
 export interface BlocksWithRestriction {
 	[ key: string ]: {
@@ -27,7 +29,13 @@ export interface BlocksWithRestriction {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error: `metadata` currently does not have a type definition in WordPress core
 export const BLOCKS_WITH_RESTRICTION: BlocksWithRestriction = {
-	[ productGalleryBlockMetadata.name ]: {
+	'woocommerce/add-to-cart-form': {
+		blockMetadata: addToCartFormBlockMetadata,
+		blockSettings: AddToCartFormBlockSettings,
+		availableInPostOrPageEditor: true,
+		isVariationBlock: false,
+	},
+	'woocommerce/product-gallery': {
 		blockMetadata: productGalleryBlockMetadata,
 		blockSettings: ProductGalleryBlockSettings,
 		allowedTemplates: {

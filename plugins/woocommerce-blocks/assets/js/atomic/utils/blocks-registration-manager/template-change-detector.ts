@@ -3,7 +3,12 @@
  */
 import { subscribe } from '@wordpress/data';
 import { getPath, getQueryArg } from '@wordpress/url';
-import { isNumber } from '@woocommerce/types';
+
+enum ContentType {
+	POST_OR_PAGE = 'post-or-page',
+	TEMPLATE = 'template',
+	NONE = 'none',
+}
 
 interface TemplateChangeDetectorSubject {
 	add( observer: TemplateChangeDetectorObserver ): void;
@@ -29,15 +34,69 @@ export interface TemplateChangeDetectorObserver {
 export class TemplateChangeDetector implements TemplateChangeDetectorSubject {
 	private previousTemplateId: string | undefined;
 	private currentTemplateId: string | undefined;
-	private isPostOrPage: boolean;
+	private previousContentType: ContentType | undefined;
+	private currentContentType: ContentType | undefined;
+	private previousPageLocation = '';
+	private currentPageLocation = '';
 
 	private observers: TemplateChangeDetectorObserver[] = [];
 
 	constructor() {
-		this.isPostOrPage = false;
 		subscribe( () => {
-			this.checkIfTemplateHasChangedAndNotifySubscribers();
+			this.previousPageLocation = this.currentPageLocation;
+			this.currentPageLocation = window.location.href;
+			this.previousContentType = this.currentContentType;
+			this.currentContentType = this.detectContentType();
+			const isPageLocationUpdated = this.checkIfPageLocationHasChanged();
+
+			if ( isPageLocationUpdated ) {
+				this.notify();
+			}
 		}, 'core/edit-site' );
+	}
+
+	private detectContentType(): ContentType {
+		const path = getPath( window.location.href );
+
+		if ( ! path ) {
+			return ContentType.NONE;
+		}
+
+		if ( path.includes( 'site-editor.php' ) ) {
+			return ContentType.TEMPLATE;
+		}
+
+		if (
+			path.includes( 'post.php' ) ||
+			path.includes( 'post-new.php' ) ||
+			path.includes( 'page-new.php' )
+		) {
+			return ContentType.POST_OR_PAGE;
+		}
+
+		return ContentType.NONE;
+	}
+
+	private checkIfPageLocationHasChanged(): boolean {
+		if ( this.currentContentType !== this.previousContentType ) {
+			return true;
+		}
+
+		if ( this.currentContentType === ContentType.POST_OR_PAGE ) {
+			return (
+				this.getPostOrPageIdFromUrl( this.currentPageLocation ) !==
+				this.getPostOrPageIdFromUrl( this.previousPageLocation )
+			);
+		}
+
+		if ( this.currentContentType === ContentType.TEMPLATE ) {
+			return (
+				this.getCurrentTemplateIdFromUrl( this.currentPageLocation ) !==
+				this.getCurrentTemplateIdFromUrl( this.previousPageLocation )
+			);
+		}
+
+		return false;
 	}
 
 	public add( observer: TemplateChangeDetectorObserver ): void {
@@ -61,27 +120,6 @@ export class TemplateChangeDetector implements TemplateChangeDetectorSubject {
 		return this.currentTemplateId;
 	}
 
-	public getIsPostOrPage() {
-		return this.isPostOrPage;
-	}
-
-	/**
-	 * Parses the template ID.
-	 *
-	 * This method takes a template or a post ID and returns it parsed in the expected format.
-	 *
-	 * @param {string | number | undefined} templateId - The template ID to parse.
-	 * @return {string | undefined} The parsed template ID.
-	 */
-	private parseTemplateId(
-		templateId: string | number | undefined
-	): string | undefined {
-		if ( isNumber( templateId ) ) {
-			return String( templateId );
-		}
-		return templateId?.split( '//' )[ 1 ];
-	}
-
 	private getCurrentTemplateIdFromUrl( url: string ): string | undefined {
 		const path = getPath( url );
 		const isTemplatePage = path
@@ -96,28 +134,15 @@ export class TemplateChangeDetector implements TemplateChangeDetectorSubject {
 		return templateId as string;
 	}
 
-	/**
-	 * Checks if the current template or page has changed and notifies subscribers.
-	 *
-	 * If the current template ID has changed and is not undefined (which means that it is not a page, post or template), it notifies all subscribers.
-	 */
-	public checkIfTemplateHasChangedAndNotifySubscribers(): void {
-		this.previousTemplateId = this.currentTemplateId;
+	private getPostOrPageIdFromUrl( url: string ): string | undefined {
+		const path = getPath( url );
+		const isPostOrPage = path ? path.includes( 'post.php' ) : false;
+		let postId;
 
-		const templateId = this.getCurrentTemplateIdFromUrl(
-			window.location.href
-		);
-
-		this.currentTemplateId = this.parseTemplateId( templateId );
-
-		const hasChangedTemplate =
-			this.previousTemplateId !== this.currentTemplateId;
-		const hasTemplateId = Boolean( this.currentTemplateId );
-
-		if ( ! hasChangedTemplate || ! hasTemplateId ) {
-			return;
+		if ( isPostOrPage ) {
+			postId = getQueryArg( url, 'post' );
 		}
 
-		this.notify();
+		return postId as string;
 	}
 }
