@@ -8,10 +8,11 @@ import {
 	useLayoutEffect,
 	useEffect,
 	useState,
+	lazy,
+	Suspense,
 } from '@wordpress/element';
-import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
+import { dispatch, select, useSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
-import { PluginArea } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
@@ -46,11 +47,22 @@ import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved
 import { useProductTemplate } from '../../hooks/use-product-template';
 import { PostTypeContext } from '../../contexts/post-type-context';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
-import { ModalEditor } from '../modal-editor';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { ProductTemplate } from '../../types';
 import { LoadingState } from './loading-state';
+
+const PluginArea = lazy( () =>
+	import( '@wordpress/plugins' ).then( ( module ) => ( {
+		default: module.PluginArea,
+	} ) )
+);
+
+const ModalEditor = lazy( () =>
+	import( '../modal-editor' ).then( ( module ) => ( {
+		default: module.ModalEditor,
+	} ) )
+);
 
 function getLayoutTemplateId(
 	productTemplate: ProductTemplate | undefined,
@@ -76,11 +88,6 @@ export function BlockEditor( {
 }: BlockEditorProps ) {
 	useConfirmUnsavedProductChanges( postType );
 
-	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
-		const { canUser } = select( 'core' );
-		return canUser( 'create', 'media', '' ) !== false;
-	}, [] );
-
 	/**
 	 * Fire wp-pin-menu event once to trigger the pinning of the menu.
 	 * That can be necessary since wpwrap's height wasn't being recalculated after the skeleton
@@ -94,10 +101,9 @@ export function BlockEditor( {
 		return () => window.removeEventListener( 'scroll', wpPinMenuEvent );
 	}, [] );
 
-	// @ts-expect-error Type definitions are missing
-	const { registerShortcut } = useDispatch( keyboardShortcutsStore );
-
 	useEffect( () => {
+		// @ts-expect-error Type definitions are missing
+		const { registerShortcut } = dispatch( keyboardShortcutsStore );
 		if ( registerShortcut ) {
 			registerShortcut( {
 				name: 'core/editor/save',
@@ -109,7 +115,7 @@ export function BlockEditor( {
 				},
 			} );
 		}
-	}, [ registerShortcut ] );
+	}, [] );
 
 	const [ settingsGlobal, setSettingsGlobal ] = useState<
 		Partial< ProductEditorSettings > | undefined
@@ -140,6 +146,9 @@ export function BlockEditor( {
 			return undefined;
 		}
 
+		const canUserCreateMedia =
+			select( 'core' ).canUser( 'create', 'media', '' ) !== false;
+
 		const mediaSettings = canUserCreateMedia
 			? {
 					mediaUpload( {
@@ -165,7 +174,7 @@ export function BlockEditor( {
 			...mediaSettings,
 			templateLock: 'all',
 		};
-	}, [ settingsGlobal, canUserCreateMedia ] );
+	}, [ settingsGlobal ] );
 
 	const { editedRecord: product } = useEntityRecord< Product >(
 		'postType',
@@ -175,10 +184,14 @@ export function BlockEditor( {
 		{ enabled: productId !== -1 }
 	);
 
-	const productTemplateId = product?.meta_data?.find(
-		( metaEntry: { key: string } ) =>
-			metaEntry.key === '_product_template_id'
-	)?.value;
+	const productTemplateId = useMemo(
+		() =>
+			product?.meta_data?.find(
+				( metaEntry: { key: string } ) =>
+					metaEntry.key === '_product_template_id'
+			)?.value,
+		[ product?.meta_data ]
+	);
 
 	const { productTemplate } = useProductTemplate(
 		productTemplateId,
@@ -195,8 +208,6 @@ export function BlockEditor( {
 		// useEntityBlockEditor will not try to fetch the product if productId is falsy.
 		{ id: productId !== -1 ? productId : 0 }
 	);
-
-	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	const isEditorLoading =
 		! settings ||
@@ -217,7 +228,7 @@ export function BlockEditor( {
 
 		onChange( blockInstances, {} );
 
-		updateEditorSettings( {
+		dispatch( 'core/editor' ).updateEditorSettings( {
 			...settings,
 			productTemplate,
 		} as Partial< ProductEditorSettings > );
@@ -232,21 +243,31 @@ export function BlockEditor( {
 		// the blocks by calling onChange.
 		//
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ layoutTemplate, settings, productTemplate, productId ] );
+	}, [ isEditorLoading, productId ] );
 
 	// Check if the Modal editor is open from the store.
-	const isModalEditorOpen = useSelect( ( select ) => {
-		return select( productEditorUiStore ).isModalEditorOpen();
+	const isModalEditorOpen = useSelect( ( selectCore ) => {
+		return selectCore( productEditorUiStore ).isModalEditorOpen();
 	}, [] );
 
-	const { closeModalEditor } = useDispatch( productEditorUiStore );
+	if ( isEditorLoading ) {
+		return (
+			<div className="woocommerce-product-block-editor">
+				<LoadingState />
+			</div>
+		);
+	}
 
 	if ( isModalEditorOpen ) {
 		return (
-			<ModalEditor
-				onClose={ closeModalEditor }
-				title={ __( 'Edit description', 'woocommerce' ) }
-			/>
+			<Suspense fallback={ null }>
+				<ModalEditor
+					onClose={
+						dispatch( productEditorUiStore ).closeModalEditor
+					}
+					title={ __( 'Edit description', 'woocommerce' ) }
+				/>
+			</Suspense>
 		);
 	}
 
@@ -265,17 +286,15 @@ export function BlockEditor( {
 					<BlockEditorKeyboardShortcuts.Register />
 					<BlockTools>
 						<ObserveTyping>
-							{ isEditorLoading ? (
-								<LoadingState />
-							) : (
-								<BlockList className="woocommerce-product-block-editor__block-list" />
-							) }
+							<BlockList className="woocommerce-product-block-editor__block-list" />
 						</ObserveTyping>
 					</BlockTools>
 					{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }
 					<PostTypeContext.Provider value={ context.postType! }>
-						{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-						<PluginArea scope="woocommerce-product-block-editor" />
+						<Suspense fallback={ null }>
+							{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+							<PluginArea scope="woocommerce-product-block-editor" />
+						</Suspense>
 					</PostTypeContext.Provider>
 				</BlockEditorProvider>
 			</BlockContextProvider>
