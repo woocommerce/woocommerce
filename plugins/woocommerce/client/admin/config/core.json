@@ -16,7 +16,6 @@
 		"minified-js": false,
 		"mobile-app-banner": true,
 		"navigation": true,
-		"new-product-management-experience": false,
 		"onboarding": true,
 		"onboarding-tasks": true,
 		"pattern-toolkit-full-composability": false,
