@@ -438,24 +438,24 @@ abstract class AbstractBlock {
 			$this->asset_data_registry->add(
 				'wcBlocksConfig',
 				[
-					'buildPhase'                => Package::feature()->get_flag(),
 					// Note that while we don't have a consolidated way of doing feature-flagging
 					// we are borrowing from the WC Admin Features implementation. Also note we cannot
 					// use the wcAdminFeatures global because it's not always enqueued in the context of blocks.
-					'experimentalBlocksEnabled' => Features::is_enabled( 'experimental-blocks' ),
-					'pluginUrl'                 => plugins_url( '/', dirname( __DIR__, 2 ) ),
-					'productCount'              => array_sum( (array) wp_count_posts( 'product' ) ),
-					'restApiRoutes'             => [
+					'experimentalBlocksEnabled'       => Features::is_enabled( 'experimental-blocks' ),
+					'experimentalBlockStylingEnabled' => Features::is_enabled( 'experimental-block-styling' ),
+					'pluginUrl'                       => plugins_url( '/', dirname( __DIR__, 2 ) ),
+					'productCount'                    => array_sum( (array) wp_count_posts( 'product' ) ),
+					'restApiRoutes'                   => [
 						'/wc/store/v1' => array_keys( $this->get_routes_from_namespace( 'wc/store/v1' ) ),
 					],
-					'defaultAvatar'             => get_avatar_url( 0, [ 'force_default' => true ] ),
+					'defaultAvatar'                   => get_avatar_url( 0, [ 'force_default' => true ] ),
 
 					/*
 					 * translators: If your word count is based on single characters (e.g. East Asian characters),
 					 * enter 'characters_excluding_spaces' or 'characters_including_spaces'. Otherwise, enter 'words'.
 					 * Do not translate into your own language.
 					 */
-					'wordCountType'             => _x( 'words', 'Word count type. Do not translate!', 'woocommerce' ),
+					'wordCountType'                   => _x( 'words', 'Word count type. Do not translate!', 'woocommerce' ),
 				]
 			);
 		}
