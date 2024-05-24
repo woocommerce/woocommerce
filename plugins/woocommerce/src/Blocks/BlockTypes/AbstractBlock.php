@@ -439,6 +439,9 @@ abstract class AbstractBlock {
 				'wcBlocksConfig',
 				[
 					'buildPhase'                => Package::feature()->get_flag(),
+					// Note that while we don't have a consolidated way of doing feature-flagging
+					// we are borrowing from the WC Admin Features implementation. Also note we cannot
+					// use the wcAdminFeatures global because it's not always enqueued in the context of blocks.
 					'experimentalBlocksEnabled' => Features::is_enabled( 'experimental-blocks' ),
 					'pluginUrl'                 => plugins_url( '/', dirname( __DIR__, 2 ) ),
 					'productCount'              => array_sum( (array) wp_count_posts( 'product' ) ),
