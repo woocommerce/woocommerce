@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
@@ -34,28 +35,28 @@ const customerBilling = {
 
 let productId, orderId, limitedCouponId;
 
-baseTest.describe( 'Cart Block Applying Coupons', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		testPageTitlePrefix: 'Cart Block',
-		page: async ( { context, page, testPage }, use ) => {
-			await goToPageEditor( { page } );
-			await fillPageTitle( page, testPage.title );
-			await insertBlockByShortcut( page, '/cart' );
-			await publishPage( page, testPage.title );
+const test = baseTest.extend( {
+	storageState: qit.getEnv('ADMINSTATE'),
+	testPageTitlePrefix: 'Cart Block',
+	page: async ( { context, page, testPage }, use ) => {
+		await goToPageEditor( { page } );
+		await fillPageTitle( page, testPage.title );
+		await insertBlockByShortcut( page, '/cart' );
+		await publishPage( page, testPage.title );
 
-			await context.clearCookies();
+		await context.clearCookies();
 
-			await addAProductToCart( page, productId );
-			await page.goto( testPage.slug );
-			await expect(
-				page.getByRole( 'heading', { name: testPage.title } )
-			).toBeVisible();
+		await addAProductToCart( page, productId );
+		await page.goto( testPage.slug );
+		await expect(
+			page.getByRole( 'heading', { name: testPage.title } )
+		).toBeVisible();
 
-			await use( page );
-		},
-	} );
+		await use( page );
+	},
+} );
 
+test.describe( 'Cart Block Applying Coupons', () => {
 	const couponBatchId = [];
 
 	test.beforeAll( async ( { api } ) => {

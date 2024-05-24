@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
@@ -112,13 +113,13 @@ for ( const currentPage of wcPages ) {
 		email: `customer${ randomNum }@woocommercecoree2etestsuite.com`,
 	};
 	test.describe( `WooCommerce Page Load > Load ${ currentPage.name } sub pages`, () => {
-		test.use( { storageState: process.env.ADMINSTATE } );
+		test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 		test.beforeAll( async ( { baseURL } ) => {
 			const response = await new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc-admin',
 			} ).post( 'onboarding/profile', {
 				skipped: true,
@@ -134,8 +135,8 @@ for ( const currentPage of wcPages ) {
 			);
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			// create a simple product
@@ -170,8 +171,8 @@ for ( const currentPage of wcPages ) {
 		test.afterAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api.delete( `products/${ productId }`, {

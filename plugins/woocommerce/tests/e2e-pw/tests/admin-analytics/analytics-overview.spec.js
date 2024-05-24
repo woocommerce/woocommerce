@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect, Page, Locator } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 
@@ -112,7 +113,7 @@ const resetSections = async () => {
 };
 
 test.describe( 'Analytics pages', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { browser } ) => {
 		page = await browser.newPage();

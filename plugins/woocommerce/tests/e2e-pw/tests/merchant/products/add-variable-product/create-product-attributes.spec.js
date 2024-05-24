@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 const { variableProducts: utils } = require( '../../../../utils' );
 const {
@@ -26,7 +27,7 @@ const step_goToAttributesTab = async ( page ) => {
 test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'Add product attributes', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { browser } ) => {
 		productId = await createVariableProduct();

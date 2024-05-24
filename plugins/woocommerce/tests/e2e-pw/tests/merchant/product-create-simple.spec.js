@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 const productData = {
@@ -36,7 +37,7 @@ const productData = {
 };
 
 const test = baseTest.extend( {
-	storageState: process.env.ADMINSTATE,
+	storageState: qit.getEnv('ADMINSTATE'),
 	product: async ( { api }, use ) => {
 		const product = {};
 		await use( product );

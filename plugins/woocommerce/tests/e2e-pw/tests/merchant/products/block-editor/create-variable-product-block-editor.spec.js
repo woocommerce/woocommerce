@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 /* eslint-disable playwright/no-conditional-in-test */
 const { test } = require( '../../../../fixtures/block-editor-fixtures' );
 const { expect } = require( '@playwright/test' );
@@ -19,7 +20,7 @@ const {
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product&tab=variations';
 
-const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
+const isTrackingSupposedToBeEnabled = !! qit.getEnv('ENABLE_TRACKING');
 
 const productData = {
 	name: `Variable product Name ${ new Date().getTime().toString() }`,

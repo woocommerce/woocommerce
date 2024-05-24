@@ -1,7 +1,8 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 
 test.describe( 'Coupons page', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test( 'A user can view the coupons overview without it crashing', async ( {
 		page,

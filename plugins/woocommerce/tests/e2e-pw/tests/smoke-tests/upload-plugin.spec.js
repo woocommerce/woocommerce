@@ -1,10 +1,12 @@
+const qit = require('/qitHelpers');
+
 const {
 	ADMINSTATE,
 	GITHUB_TOKEN,
 	PLUGIN_NAME,
 	PLUGIN_REPOSITORY,
 	PLUGIN_SLUG,
-} = process.env;
+} = qit.getEnv();
 const { test, expect } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const {

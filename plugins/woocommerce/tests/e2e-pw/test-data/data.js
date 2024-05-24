@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const {
 	ADMIN_USER,
 	ADMIN_PASSWORD,
@@ -8,7 +9,7 @@ const {
 	CUSTOMER_FIRST_NAME,
 	CUSTOMER_LAST_NAME,
 	USE_WP_ENV,
-} = process.env;
+} = qit.getEnv();
 
 const admin = {
 	username: ADMIN_USER ?? 'admin',

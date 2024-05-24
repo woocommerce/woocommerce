@@ -1,7 +1,8 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 
 test.describe( 'Customer-role users are blocked from accessing the WP Dashboard.', () => {
-	test.use( { storageState: process.env.CUSTOMERSTATE } );
+	test.use( { storageState: qit.getEnv('CUSTOMERSTATE') } );
 
 	const dashboardScreens = {
 		'WP Admin home': 'wp-admin',

@@ -1,7 +1,8 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 const test = baseTest.extend( {
-	storageState: process.env.CUSTOMERSTATE,
+	storageState: qit.getEnv('CUSTOMERSTATE'),
 } );
 
 test( 'logged-in customer can comment on a post', async ( { page } ) => {

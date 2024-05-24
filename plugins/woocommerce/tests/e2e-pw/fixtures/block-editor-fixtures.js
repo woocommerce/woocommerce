@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test } = require( './fixtures' );
 
 exports.test = test.extend( {
@@ -25,5 +26,5 @@ exports.test = test.extend( {
 			}
 		);
 	},
-	storageState: process.env.ADMINSTATE,
+	storageState: qit.getEnv('ADMINSTATE'),
 } );

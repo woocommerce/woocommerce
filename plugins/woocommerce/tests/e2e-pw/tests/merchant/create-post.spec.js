@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const {
@@ -9,7 +10,7 @@ const {
 const postTitle = `Post-${ new Date().getTime().toString() }`;
 
 test.describe( 'Can create a new post', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.afterAll( async ( { baseURL } ) => {
 		const base64auth = Buffer.from(

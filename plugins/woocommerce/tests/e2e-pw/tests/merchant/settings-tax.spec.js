@@ -1,8 +1,9 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'WooCommerce Tax Settings > enable', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test( 'can enable tax calculation', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=general' );
@@ -30,13 +31,13 @@ test.describe( 'WooCommerce Tax Settings > enable', () => {
 } );
 
 test.describe.serial( 'WooCommerce Tax Settings', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeEach( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api.put( 'settings/general/woocommerce_calc_taxes', {
@@ -46,8 +47,8 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 	test.afterEach( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv('CONSUMER_KEY'),
+			consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 			version: 'wc/v3',
 		} );
 		await api.put( 'settings/general/woocommerce_calc_taxes', {

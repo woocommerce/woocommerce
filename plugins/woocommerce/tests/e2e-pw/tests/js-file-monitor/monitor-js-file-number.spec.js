@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 
 // add any non-authenticated pages here (that don't require a login)
@@ -71,7 +72,7 @@ test.describe( 'Keeps track of the number of JS files included on key shopper pa
 } );
 
 test.describe( 'Keeps track of the number of JS files on key admin pages', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 	for ( const row of merchantPages ) {
 		const url = row.url;
 		const name = row.name;

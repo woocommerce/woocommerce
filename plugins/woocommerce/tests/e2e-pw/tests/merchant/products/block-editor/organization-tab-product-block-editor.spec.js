@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test } = require( '../../../../fixtures/block-editor-fixtures' );
 const { expect } = require( '@playwright/test' );
 
@@ -6,7 +7,7 @@ const { clickOnTab } = require( '../../../../utils/simple-products' );
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
 
-const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
+const isTrackingSupposedToBeEnabled = !! qit.getEnv('ENABLE_TRACKING');
 
 const productData = {
 	name: `Simple product Name ${ new Date().getTime().toString() }`,

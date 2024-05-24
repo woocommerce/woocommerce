@@ -1,7 +1,8 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 
 test.describe( 'Store owner can finish initial store setup', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 	test( 'can enable tax rates and calculations', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings' );
 		// Check the enable taxes checkbox

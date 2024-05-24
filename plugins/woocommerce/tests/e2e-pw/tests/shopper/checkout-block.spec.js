@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const {
 	goToPageEditor,
 	fillPageTitle,
@@ -34,27 +35,27 @@ let guestOrderId1,
 	productId,
 	shippingZoneId;
 
-baseTest.describe( 'Checkout Block page', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		testPageTitlePrefix: 'Checkout Block',
-		page: async ( { context, page, testPage }, use ) => {
-			await goToPageEditor( { page } );
-			await fillPageTitle( page, testPage.title );
-			await insertBlockByShortcut( page, '/checkout' );
-			await publishPage( page, testPage.title );
+const test = baseTest.extend( {
+	storageState: qit.getEnv( 'ADMINSTATE' ),
+	testPageTitlePrefix: 'Checkout Block',
+	page: async ( { context, page, testPage }, use ) => {
+		await goToPageEditor( { page } );
+		await fillPageTitle( page, testPage.title );
+		await insertBlockByShortcut( page, '/checkout' );
+		await publishPage( page, testPage.title );
 
-			await context.clearCookies();
+		await context.clearCookies();
 
-			await use( page );
-		},
-	} );
+		await use( page );
+	},
+} );
 
+test.describe( 'Checkout Block page', () => {
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv( 'CONSUMER_KEY' ),
+			consumerSecret: qit.getEnv( 'CONSUMER_SECRET' ),
 			version: 'wc/v3',
 		} );
 		// ensure store address is US
@@ -192,8 +193,8 @@ baseTest.describe( 'Checkout Block page', () => {
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
+			consumerKey: qit.getEnv( 'CONSUMER_KEY' ),
+			consumerSecret: qit.getEnv( 'CONSUMER_SECRET' ),
 			version: 'wc/v3',
 		} );
 		await api.delete( `products/${ productId }`, {

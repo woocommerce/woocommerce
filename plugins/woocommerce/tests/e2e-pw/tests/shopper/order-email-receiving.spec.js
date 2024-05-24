@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 const { customer, storeDetails } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
@@ -21,7 +22,7 @@ const methodInfo = {
 const storeName = 'WooCommerce Core E2E Test Suite';
 
 test.describe( 'Shopper Order Email Receiving', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async () => {
 		productId = await api.create.product( product );

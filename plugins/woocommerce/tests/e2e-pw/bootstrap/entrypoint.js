@@ -1,26 +1,50 @@
-const { chromium, expect } = require( '@playwright/test' );
-const { admin, customer } = require( './test-data/data' );
-const fs = require( 'fs' );
-const { site } = require( './utils' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { DISABLE_HPOS } = process.env;
+const { test, chromium, expect } = require('@playwright/test');
+const { admin, customer } = require('../test-data/data');
+const fs = require('fs');
+const path = require('path');
+const { site } = require('../utils');
+const qit = require('/qitHelpers');
+const {default: wcApi} = require("@woocommerce/woocommerce-rest-api");
+const { DISABLE_HPOS } = qit.getEnv();
+
+async function setup() {
+	// Copy the files from "./test-data/images" to "/var/www/html/wp-content/uploads/woo-entrypoint" using node, and create the dir first.
+	const source = path.resolve(__dirname, './../test-data/images');
+	const dest = '/var/www/html/wp-content/uploads/woo-entrypoint';
+	fs.mkdirSync(dest, { recursive: true });
+	fs.readdirSync(source).forEach(file => {
+		fs.copyFileSync(path.join(source, file), path.join(dest, file));
+	});
+
+	await qit.wp('theme activate twentytwentythree');
+	await qit.wp("media import '/var/www/html/wp-content/uploads/woo-entrypoint/image-01.png' '/var/www/html/wp-content/uploads/woo-entrypoint/image-02.png' '/var/www/html/wp-content/uploads/woo-entrypoint/image-03.png'");
+
+	console.log('Setup completed.');
+}
 
 /**
  * @param {import('@playwright/test').FullConfig} config
  */
-module.exports = async ( config ) => {
-	const { stateDir, baseURL, userAgent } = config.projects[ 0 ].use;
+test('Entrypoint @entrypoint', async ({page}, testInfo) => {
+	await setup();
+
+	const wcApi = require('@woocommerce/woocommerce-rest-api').default;
+
+	const { stateDir, baseURL, userAgent } = testInfo.project.use;
 
 	console.log( `State Dir: ${ stateDir }` );
 	console.log( `Base URL: ${ baseURL }` );
 
 	// used throughout tests for authentication
-	process.env.ADMINSTATE = `${ stateDir }adminState.json`;
-	process.env.CUSTOMERSTATE = `${ stateDir }customerState.json`;
+	qit.setEnv('ADMINSTATE', `${ stateDir }/adminState.json`);
+	qit.setEnv('CUSTOMERSTATE', `${ stateDir }/customerState.json`);
+
+	console.log( 'Admin state file path: ' + qit.getEnv('ADMINSTATE') );
+	console.log( 'Customer state file path: ' + qit.getEnv('CUSTOMERSTATE') );
 
 	// Clear out the previous save states
 	try {
-		fs.unlinkSync( process.env.ADMINSTATE );
+		fs.unlinkSync( qit.getEnv('ADMINSTATE') );
 		console.log( 'Admin state file deleted successfully.' );
 	} catch ( err ) {
 		if ( err.code === 'ENOENT' ) {
@@ -30,7 +54,7 @@ module.exports = async ( config ) => {
 		}
 	}
 	try {
-		fs.unlinkSync( process.env.CUSTOMERSTATE );
+		fs.unlinkSync( qit.getEnv('CUSTOMERSTATE') );
 		console.log( 'Customer state file deleted successfully.' );
 	} catch ( err ) {
 		if ( err.code === 'ENOENT' ) {
@@ -64,10 +88,10 @@ module.exports = async ( config ) => {
 			await adminPage.goto( `/wp-admin` );
 			await adminPage
 				.locator( 'input[name="log"]' )
-				.fill( admin.username );
+				.fill( 'admin' );
 			await adminPage
 				.locator( 'input[name="pwd"]' )
-				.fill( admin.password );
+				.fill( 'password' );
 			await adminPage.locator( 'text=Log In' ).click();
 			// eslint-disable-next-line playwright/no-networkidle
 			await adminPage.waitForLoadState( 'networkidle' );
@@ -79,7 +103,7 @@ module.exports = async ( config ) => {
 			);
 			await adminPage
 				.context()
-				.storageState( { path: process.env.ADMINSTATE } );
+				.storageState( { path: qit.getEnv('ADMINSTATE') } );
 			console.log( 'Logged-in as admin successfully.' );
 			adminLoggedIn = true;
 			break;
@@ -114,12 +138,8 @@ module.exports = async ( config ) => {
 				.locator( '#key_permissions' )
 				.selectOption( 'read_write' );
 			await adminPage.locator( 'text=Generate API key' ).click();
-			process.env.CONSUMER_KEY = await adminPage
-				.locator( '#key_consumer_key' )
-				.inputValue();
-			process.env.CONSUMER_SECRET = await adminPage
-				.locator( '#key_consumer_secret' )
-				.inputValue();
+			qit.setEnv('CONSUMER_KEY', await adminPage.locator( '#key_consumer_key' ).inputValue());
+			qit.setEnv('CONSUMER_SECRET', await adminPage.locator( '#key_consumer_secret' ).inputValue());
 			console.log( 'Added consumer token successfully.' );
 			customerKeyConfigured = true;
 			break;
@@ -146,10 +166,10 @@ module.exports = async ( config ) => {
 			await customerPage.goto( `/wp-admin` );
 			await customerPage
 				.locator( 'input[name="log"]' )
-				.fill( customer.username );
+				.fill( 'customer' );
 			await customerPage
 				.locator( 'input[name="pwd"]' )
-				.fill( customer.password );
+				.fill( 'password' );
 			await customerPage.locator( 'text=Log In' ).click();
 
 			await customerPage.goto( `/my-account` );
@@ -166,7 +186,7 @@ module.exports = async ( config ) => {
 
 			await customerPage
 				.context()
-				.storageState( { path: process.env.CUSTOMERSTATE } );
+				.storageState( { path: qit.getEnv('CUSTOMERSTATE') } );
 			console.log( 'Logged-in as customer successfully.' );
 			customerLoggedIn = true;
 			break;
@@ -193,8 +213,8 @@ module.exports = async ( config ) => {
 
 	const api = new wcApi( {
 		url: baseURL,
-		consumerKey: process.env.CONSUMER_KEY,
-		consumerSecret: process.env.CONSUMER_SECRET,
+		consumerKey: qit.getEnv('CONSUMER_KEY'),
+		consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 		version: 'wc/v3',
 	} );
 
@@ -242,6 +262,7 @@ module.exports = async ( config ) => {
 	const response = await api.get(
 		'settings/advanced/woocommerce_custom_orders_table_enabled'
 	);
+
 	const dataValue = response.data.value;
 	const enabledOption = response.data.options[ dataValue ];
 	console.log(
@@ -253,11 +274,4 @@ module.exports = async ( config ) => {
 	await adminContext.close();
 	await customerContext.close();
 	await browser.close();
-
-	if ( process.env.RESET_SITE === 'true' ) {
-		await site.reset(
-			process.env.CONSUMER_KEY,
-			process.env.CONSUMER_SECRET
-		);
-	}
-};
+});

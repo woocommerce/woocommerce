@@ -1,6 +1,34 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
-baseTest.describe( 'Restricted coupon management', () => {
+const test = baseTest.extend( {
+	storageState: qit.getEnv('ADMINSTATE'),
+	coupon: async ( { api }, use ) => {
+		const coupon = {};
+		await use( coupon );
+		await api.delete( `coupons/${ coupon.id }`, { force: true } );
+	},
+
+	product: async ( { api }, use ) => {
+		let product = {};
+
+		await api
+			.post( 'products', {
+				name: 'Product',
+				regular_price: '100',
+			} )
+			.then( ( response ) => {
+				product = response.data;
+			} );
+
+		await use( product );
+
+		// Product cleanup
+		await api.delete( `products/${ product.id }`, { force: true } );
+	},
+} );
+
+test.describe( 'Restricted coupon management', () => {
 	const couponData = {
 		minimumSpend: {
 			code: `minSpend-${ new Date().getTime().toString() }`,
@@ -71,33 +99,6 @@ baseTest.describe( 'Restricted coupon management', () => {
 			usageLimitPerUser: '2',
 		},
 	};
-
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		coupon: async ( { api }, use ) => {
-			const coupon = {};
-			await use( coupon );
-			await api.delete( `coupons/${ coupon.id }`, { force: true } );
-		},
-
-		product: async ( { api }, use ) => {
-			let product = {};
-
-			await api
-				.post( 'products', {
-					name: 'Product',
-					regular_price: '100',
-				} )
-				.then( ( response ) => {
-					product = response.data;
-				} );
-
-			await use( product );
-
-			// Product cleanup
-			await api.delete( `products/${ product.id }`, { force: true } );
-		},
-	} );
 
 	for ( const couponType of Object.keys( couponData ) ) {
 		test( `can create new ${ couponType } coupon`, async ( {

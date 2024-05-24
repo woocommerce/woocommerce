@@ -1,33 +1,35 @@
+const qit = require('/qitHelpers');
+
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
-baseTest.describe( 'Products > Related products', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		products: async ( { api }, use ) => {
-			const keys = [ 'main', 'linked1', 'linked2' ];
-			const products = {};
+const test = baseTest.extend( {
+	storageState: qit.getEnv('ADMINSTATE'),
+	products: async ( { api }, use ) => {
+		const keys = [ 'main', 'linked1', 'linked2' ];
+		const products = {};
 
-			for ( const key of Object.values( keys ) ) {
-				await api
-					.post( 'products', {
-						name: `${ key } ${ Date.now() }`,
-						type: 'simple',
-						regular_price: '12.99',
-					} )
-					.then( ( response ) => {
-						products[ key ] = response.data;
-					} );
-			}
+		for ( const key of Object.values( keys ) ) {
+			await api
+				.post( 'products', {
+					name: `${ key } ${ Date.now() }`,
+					type: 'simple',
+					regular_price: '12.99',
+				} )
+				.then( ( response ) => {
+					products[ key ] = response.data;
+				} );
+		}
 
-			await use( products );
+		await use( products );
 
-			// Cleanup
-			for ( const product of Object.values( products ) ) {
-				await api.delete( `products/${ product.id }`, { force: true } );
-			}
-		},
-	} );
+		// Cleanup
+		for ( const product of Object.values( products ) ) {
+			await api.delete( `products/${ product.id }`, { force: true } );
+		}
+	},
+} );
 
+test.describe( 'Products > Related products', () => {
 	async function navigate( page, productId ) {
 		await test.step( 'Navigate to product edit page', async () => {
 			await page.goto(

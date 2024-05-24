@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( '../assembler.page' );
 const { LogoPickerPage } = require( './logo-picker.page' );
@@ -24,7 +25,7 @@ const test = base.extend( {
 } );
 
 test.describe( 'Assembler -> Logo Picker', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		try {

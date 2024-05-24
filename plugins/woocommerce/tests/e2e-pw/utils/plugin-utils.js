@@ -4,6 +4,7 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const { promisify } = require( 'util' );
 const execAsync = promisify( require( 'child_process' ).exec );
+const qit = require('/qitHelpers');
 
 /**
  * Encode basic auth username and password to be used in HTTP Authorization header.
@@ -236,25 +237,12 @@ export const getLatestReleaseZipUrl = async ( {
  * @param {string} pluginPath
  */
 export const installPluginThruWpCli = async ( pluginPath ) => {
-	const runWpCliCommand = async ( command ) => {
-		const { stdout, stderr } = await execAsync(
-			`pnpm exec wp-env run tests-cli -- ${ command }`
-		);
-
-		console.log( stdout );
-		console.error( stderr );
-	};
-
 	const wpEnvPluginPath = pluginPath.replace(
 		/.*\/plugins\/woocommerce/,
 		'wp-content/plugins/woocommerce'
 	);
 
-	await runWpCliCommand( `ls  ${ wpEnvPluginPath }` );
-
-	await runWpCliCommand(
-		`wp plugin install --activate --force ${ wpEnvPluginPath }`
-	);
-
-	await runWpCliCommand( `wp plugin list` );
+	await qit.wp( `plugin list  ${ wpEnvPluginPath }` );
+	await qit.wp( `plugin install --activate --force  ${ wpEnvPluginPath }` );
+	await qit.wp( `plugin list  ${ wpEnvPluginPath }` );
 };

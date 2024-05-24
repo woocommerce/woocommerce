@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
@@ -27,12 +28,12 @@ const wooPatterns = [
 	},
 ];
 
-baseTest.describe( 'Add WooCommerce Patterns Into Page', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		testPageTitlePrefix: 'Woocommerce Patterns',
-	} );
+const test = baseTest.extend( {
+	storageState: qit.getEnv('ADMINSTATE'),
+	testPageTitlePrefix: 'Woocommerce Patterns',
+} );
 
+test.describe( 'Add WooCommerce Patterns Into Page', () => {
 	test( 'can insert WooCommerce patterns into page', async ( {
 		page,
 		testPage,

@@ -1,0 +1,6 @@
+[
+  "axios",
+  "@woocommerce/woocommerce-rest-api",
+  "regenerator-runtime",
+  "uuid"
+]

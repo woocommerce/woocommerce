@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
@@ -11,7 +12,7 @@ const test = base.extend( {
 } );
 
 test.describe( 'Assembler -> Homepage', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		try {

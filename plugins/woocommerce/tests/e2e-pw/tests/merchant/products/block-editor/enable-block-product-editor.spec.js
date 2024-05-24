@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const { test, expect } = require( '@playwright/test' );
 const {
 	clickAddNewMenuItem,
@@ -13,7 +14,7 @@ const NEW_EDITOR_ADD_PRODUCT_URL =
 
 let isNewProductEditorEnabled = false;
 
-const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
+const isTrackingSupposedToBeEnabled = !! qit.getEnv('ENABLE_TRACKING');
 
 async function disableNewEditorIfEnabled( browser ) {
 	const context = await browser.newContext();
@@ -28,7 +29,7 @@ test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'Enable block product editor', () => {
 	test.describe( 'Enabled', () => {
-		test.use( { storageState: process.env.ADMINSTATE } );
+		test.use( { storageState: qit.getEnv('ADMINSTATE') } );
 
 		test.beforeEach( async ( { browser } ) => {
 			await disableNewEditorIfEnabled( browser );
