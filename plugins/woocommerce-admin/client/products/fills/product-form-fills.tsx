@@ -18,7 +18,6 @@ import { ShippingSectionFills } from './shipping-section';
 import { PricingSectionFills } from './pricing-section';
 import { InventorySectionFills } from './inventory-section';
 import { AttributesSectionFills } from './attributes-section';
-import { ImagesSectionFills } from './images-section';
 import {
 	TAB_GENERAL_ID,
 	TAB_SHIPPING_ID,
@@ -112,7 +111,6 @@ registerPlugin( 'wc-admin-product-editor-form-fills', {
 	render: () => (
 		<>
 			<Tabs />
-			<ImagesSectionFills />
 			<AttributesSectionFills />
 			<ShippingSectionFills
 				tabId={ TAB_SHIPPING_ID }
