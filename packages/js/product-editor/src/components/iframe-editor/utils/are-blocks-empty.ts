@@ -6,10 +6,10 @@ import { BlockInstance } from '@wordpress/blocks';
 /**
  * By default the blocks returned by the editor contains one paragraph
  * block with empty content. This function checks to see if the blocks
- * consists of a single paragraph block with empty content.
+ * consists of a single paragraph block with empty content or no blocks.
  *
  * @param blocks The block list
- * @return true if the blocks consists of a single paragraph block with empty content; false otherwise
+ * @return true if the blocks consists of a single paragraph block with empty content or no blocks; false otherwise
  */
 export function areBlocksEmpty( blocks?: BlockInstance[] | null ) {
 	if ( ! blocks?.length ) {
