@@ -8,15 +8,15 @@ import path from 'path';
  * Internal dependencies
  */
 import { PRODUCT_CATALOG_LINK, PRODUCT_CATALOG_TEMPLATE_ID } from './constants';
-import { enableFeatureFlag } from '../../utils/wcadmin-feature-flag';
 
 const TEMPLATE_PATH = path.join( __dirname, './active-filters.handlebars' );
 
 test.describe( 'Product Filter: Active Filters Block', () => {
 	test.describe( 'frontend', () => {
 		test.beforeEach( async ( { requestUtils } ) => {
-			await enableFeatureFlag( 'experimental-blocks' );
-
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
 			await requestUtils.updateTemplateContents(
 				PRODUCT_CATALOG_TEMPLATE_ID,
 				TEMPLATE_PATH,

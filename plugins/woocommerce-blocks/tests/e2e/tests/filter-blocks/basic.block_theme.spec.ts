@@ -3,11 +3,6 @@
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
-/**
- * Internal dependencies
- */
-import { enableFeatureFlag } from '../../utils/wcadmin-feature-flag';
-
 const filterBlocks = [
 	{
 		name: 'woocommerce/product-filter-price',
@@ -38,8 +33,9 @@ const filterBlocks = [
 
 test.describe( 'Filter blocks registration', () => {
 	test.beforeEach( async ( { admin } ) => {
-		await enableFeatureFlag( 'experimental-blocks' );
-
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-enable-experimental-features'
+		);
 		await admin.createNewPost();
 	} );
 

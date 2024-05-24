@@ -7,7 +7,6 @@ import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
  * Internal dependencies
  */
 import { ProductFiltersPage } from './product-filters.page';
-import { enableFeatureFlag } from '../../utils/wcadmin-feature-flag';
 
 const blockData = {
 	name: 'woocommerce/product-filters',
@@ -23,7 +22,13 @@ const blockData = {
 };
 
 const test = base.extend< { pageObject: ProductFiltersPage } >( {
-	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
+	pageObject: async (
+		{ page, editor, frontendUtils, editorUtils, requestUtils },
+		use
+	) => {
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-enable-experimental-features'
+		);
 		const pageObject = new ProductFiltersPage( {
 			page,
 			editor,
@@ -36,7 +41,6 @@ const test = base.extend< { pageObject: ProductFiltersPage } >( {
 
 test.describe( `${ blockData.name }`, () => {
 	test.beforeEach( async ( { admin, editorUtils } ) => {
-		await enableFeatureFlag( 'experimental-blocks' );
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',

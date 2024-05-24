@@ -8,14 +8,12 @@ import path from 'path';
  * Internal dependencies
  */
 import { PRODUCT_CATALOG_LINK, PRODUCT_CATALOG_TEMPLATE_ID } from './constants';
-import { enableFeatureFlag } from '../../utils/wcadmin-feature-flag';
 
 const TEMPLATE_PATH = path.join( __dirname, './price-filter.handlebars' );
 
 test.describe( 'Product Filter: Price Filter Block', () => {
 	test.describe( 'frontend', () => {
 		test.beforeEach( async ( { requestUtils } ) => {
-			await enableFeatureFlag( 'experimental-blocks' );
 			await requestUtils.updateTemplateContents(
 				PRODUCT_CATALOG_TEMPLATE_ID,
 				TEMPLATE_PATH,
