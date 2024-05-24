@@ -29,9 +29,11 @@ store( 'woocommerce/add-to-cart-form', {
 		removeQuantity: ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 			const inputElement = getInputElement( event );
 
-			if ( inputElement && inputElement.value >= '1' ) {
+			if ( inputElement?.value ) {
 				const parsedValue = parseInt( inputElement.value, 10 );
-				inputElement.value = ( parsedValue - 1 ).toString();
+				if ( parsedValue > 1 ) {
+					inputElement.value = ( parsedValue - 1 ).toString();
+				}
 			}
 		},
 	},
