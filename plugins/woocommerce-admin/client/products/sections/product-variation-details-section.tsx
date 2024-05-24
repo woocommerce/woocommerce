@@ -3,61 +3,28 @@
  */
 import { __ } from '@wordpress/i18n';
 import { BlockInstance, serialize, rawHandler } from '@wordpress/blocks';
-import {
-	CheckboxControl,
-	Card,
-	CardBody,
-	BaseControl,
-} from '@wordpress/components';
+import { CheckboxControl, Card, CardBody } from '@wordpress/components';
 import { getCheckboxTracks } from '@woocommerce/product-editor';
-import { MediaItem } from '@wordpress/media-utils';
 import {
 	useFormContext,
 	__experimentalRichTextEditor as RichTextEditor,
 	__experimentalTooltip as Tooltip,
 } from '@woocommerce/components';
-import { ProductVariation, ProductVariationImage } from '@woocommerce/data';
+import { ProductVariation } from '@woocommerce/data';
 import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { ProductSectionLayout } from '../layout/product-section-layout';
-import { SingleImageField } from '../fields/single-image-field';
-
-function parseVariationImage(
-	media?: MediaItem
-): ProductVariationImage | undefined {
-	if ( ! media ) return undefined;
-	return {
-		id: media.id,
-		src: media.url,
-		alt: media.alt,
-		name: media.title,
-	} as ProductVariationImage;
-}
-
-function formatVariationImage(
-	image?: ProductVariationImage
-): MediaItem | undefined {
-	if ( ! image ) return undefined;
-	return {
-		id: image.id,
-		url: image.src,
-		alt: image.alt,
-		title: image.name,
-	} as MediaItem;
-}
 
 export const ProductVariationDetailsSection: React.FC = () => {
-	const { getCheckboxControlProps, getInputProps, values, setValue } =
+	const { getCheckboxControlProps, values, setValue } =
 		useFormContext< ProductVariation >();
 
 	const [ descriptionBlocks, setDescriptionBlocks ] = useState<
 		BlockInstance[]
 	>( rawHandler( { HTML: values.description } ) );
-
-	const imageFieldProps = getInputProps( 'image' );
 
 	return (
 		<ProductSectionLayout
@@ -110,21 +77,6 @@ export const ProductVariationDetailsSection: React.FC = () => {
 							'woocommerce'
 						) }
 					/>
-
-					<BaseControl id="product-variation-image">
-						<SingleImageField
-							label={ __( 'Image', 'woocommerce' ) }
-							value={ formatVariationImage(
-								imageFieldProps.value as ProductVariationImage
-							) }
-							onChange={ ( media ) =>
-								setValue(
-									'image',
-									parseVariationImage( media )
-								)
-							}
-						/>
-					</BaseControl>
 				</CardBody>
 			</Card>
 		</ProductSectionLayout>
