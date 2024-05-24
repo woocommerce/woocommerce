@@ -14,7 +14,6 @@ import { useMemo } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { DetailsSectionFills } from './details-section';
 import { ShippingSectionFills } from './shipping-section';
 import { PricingSectionFills } from './pricing-section';
 import { InventorySectionFills } from './inventory-section';
@@ -113,7 +112,6 @@ registerPlugin( 'wc-admin-product-editor-form-fills', {
 	render: () => (
 		<>
 			<Tabs />
-			<DetailsSectionFills />
 			<ImagesSectionFills />
 			<AttributesSectionFills />
 			<ShippingSectionFills
