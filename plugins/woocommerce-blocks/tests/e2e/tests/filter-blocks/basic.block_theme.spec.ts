@@ -6,7 +6,7 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 /**
  * Internal dependencies
  */
-import { cli } from '../../utils';
+import { enableFeatureFlag } from '../../utils/wcadmin-feature-flag';
 
 const filterBlocks = [
 	{
@@ -38,9 +38,7 @@ const filterBlocks = [
 
 test.describe( 'Filter blocks registration', () => {
 	test.beforeEach( async ( { admin } ) => {
-		await cli(
-			'npm run wp-env run tests-cli -- wp option update woocommerce_feature_experimental_blocks_enabled yes'
-		);
+		await enableFeatureFlag( 'experimental-blocks' );
 
 		await admin.createNewPost();
 	} );
