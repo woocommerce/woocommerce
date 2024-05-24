@@ -2,10 +2,15 @@
  * External dependencies
  */
 import { Suspense, lazy } from '@wordpress/element';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { parse, stringify } from 'qs';
 import { find, isEqual, last, omit } from 'lodash';
-import { applyFilters } from '@wordpress/hooks';
+import {
+	applyFilters,
+	addAction,
+	removeAction,
+	didFilter,
+} from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import {
 	getNewPath,
@@ -429,6 +434,32 @@ export const getPages = () => {
 
 	return filteredPages;
 };
+
+export function usePages() {
+	const [ pages, setPages ] = useState( getPages );
+
+	/*
+	 * Handler for new pages being added after the initial filter has been run,
+	 * so that if any routing pages are added later, they can still be rendered
+	 * instead of falling back to the `NoMatch` page.
+	 */
+	useEffect( () => {
+		const handleHookAdded = ( hookName ) => {
+			if ( hookName === PAGES_FILTER && didFilter( PAGES_FILTER ) > 0 ) {
+				setPages( getPages() );
+			}
+		};
+
+		const namespace = `woocommerce/woocommerce/watch_${ PAGES_FILTER }`;
+		addAction( 'hookAdded', namespace, handleHookAdded );
+
+		return () => {
+			removeAction( 'hookAdded', namespace );
+		};
+	}, [] );
+
+	return pages;
+}
 
 function usePrevious( value ) {
 	const ref = useRef();
