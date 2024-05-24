@@ -26,7 +26,6 @@ import {
 	VARIANT_INVENTORY_SECTION_ADVANCED_ID,
 	PLUGIN_ID,
 } from './constants';
-import { InventorySectionFills } from './inventory-section';
 
 const tabPropData = {
 	general: {
@@ -91,11 +90,6 @@ registerPlugin( 'wc-admin-product-editor-form-variation-fills', {
 	render: () => (
 		<>
 			<Tabs />
-			<InventorySectionFills
-				tabId={ VARIANT_TAB_INVENTORY_ID }
-				basicSectionId={ VARIANT_INVENTORY_SECTION_ID }
-				advancedSectionId={ VARIANT_INVENTORY_SECTION_ADVANCED_ID }
-			/>
 		</>
 	),
 } );
