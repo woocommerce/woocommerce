@@ -53,6 +53,7 @@ import {
 	KeyboardShortcuts,
 	RegisterKeyboardShortcuts,
 } from './keyboard-shortcuts';
+import { areBlocksEmpty } from './utils/are-blocks-empty';
 
 type IframeEditorProps = {
 	initialBlocks?: BlockInstance[];
@@ -191,7 +192,11 @@ export function IframeEditor( {
 
 					<HeaderToolbar
 						onSave={ () => {
-							setBlocks( temporalBlocks );
+							setBlocks(
+								areBlocksEmpty( temporalBlocks )
+									? []
+									: temporalBlocks
+							);
 							setModalEditorContentHasChanged( true );
 							onChange( temporalBlocks );
 							onClose?.();
