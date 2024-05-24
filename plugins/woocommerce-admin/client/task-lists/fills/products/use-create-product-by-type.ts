@@ -21,8 +21,6 @@ const EXPERIMENT_NAME =
 export const useCreateProductByType = () => {
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
 	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
-	const isNewExperienceEnabled =
-		window.wcAdminFeatures[ 'new-product-management-experience' ];
 
 	const getProductEditPageLink = async (
 		type: ProductTypeKey,
@@ -70,13 +68,6 @@ export const useCreateProductByType = () => {
 			type === 'grouped' ||
 			type === 'external'
 		) {
-			if ( isNewExperienceEnabled ) {
-				const url = await getProductEditPageLink( type, false );
-				if ( url ) {
-					navigateTo( { url } );
-				}
-				return;
-			}
 			const assignment = await loadExperimentAssignment(
 				EXPERIMENT_NAME
 			);
