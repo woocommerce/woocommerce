@@ -1,224 +1,259 @@
-# WooCommerce Blocks Playwright End to End Tests
+# WooCommerce Blocks End-to-End Tests
 
-This is the documentation for the new E2E testing setup based on Playwright and wp-env. Over time, these playwright E2E tests should replace the current [Puppeteer E2E tests](../e2e-jest/).
+This living document serves to prescribe instructions and best practices for writing end-to-end (E2E) tests with Playwright in the WooCommerce Blocks project.
 
-## Table of contents <!-- omit in toc -->
+## Preparing the environment
 
--   [Pre-requisites](#pre-requisites)
--   [Introduction](#introduction)
-    -   [Running tests for the first time](#running-tests-for-the-first-time)
-    -   [To run the test again, re-create the environment to start with a fresh state](#to-run-the-test-again-re-create-the-environment-to-start-with-a-fresh-state)
-    -   [Other ways of running tests](#other-ways-of-running-tests)
-    -   [Troubleshooting](#troubleshooting)
+Please refer to [the Getting Started section of the main `README.md`](../../../../README.md#getting-started) for a general-purpose guide on getting started. The rest of this document will assume that you've installed all of the prequisites and setup described there.
 
-## Pre-requisites
-
--   Node.js ([Installation instructions](https://nodejs.org/en/download/))
--   NVM ([Installation instructions](https://github.com/nvm-sh/nvm))
--   Docker and Docker Compose ([Installation instructions](https://docs.docker.com/engine/install/))
-
-Note, that if you are on Mac and you install docker through other methods such as homebrew, for example, your steps to set it up might be different. The commands listed in steps below may also vary.
-
-If you are using Windows, we recommend using [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/) for running E2E tests. Follow the [WSL Setup Instructions](../tests/e2e-jest/WSL_SETUP_INSTRUCTIONS.md) first before proceeding with the steps below.
-
-## Introduction
-
-End-to-end tests are powered by Playwright. The test site is spun up using `wp-env` (recommended), but we will continue to support `e2e-environment` in the meantime.
-
-### Running tests for the first time
-
-In the root directory, run:
+Run the following command from the repository root to build the WooCommerce plugin:
 
 ```sh
-nvm use
+pnpm --filter='@woocommerce/plugin-woocommerce' watch:build
 ```
 
-```sh
-pnpm install
-```
+Next, run the following command from the [`woocommerce-blocks` plugin folder](../../../woocommerce-blocks/) to start a `wp-env` instance and install all the testing products, languages, etc.:
 
-Now change directory to `plugins/woocommerce-blocks/`:
-
-```sh
+```shell
 cd plugins/woocommerce-blocks/
+pnpm env:start
 ```
 
-Ensure necessary browsers are installed:
+> [!TIP]
+> If you want to start/stop the environment without running the whole setup, use the native `wp-env` commands directly, e.g. `npx wp-env start` and `npx wp-env stop`.
 
-```sh
-npx playwright install
+The environment should now be ready under http://localhost:8889. Skip to the next section if you want to start running the tests!
+
+### Resetting the environment
+
+From time to time you'll need to reset the environment, e.g. when testing products have been updated. To do that, run the following command and go make yourself some coffee:
+
+```shell
+pnpm env:restart
 ```
 
-```sh
-pnpm run env:start
+## Running and debugging tests
+
+> [!NOTE]
+> If you're using VSCode, we recommend using the [Playwright Test](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright) extension to run and debug the tests.
+
+The following is a basic set of commands that will give you a quick start to running and debugging the tests. For full documentation on this topic see the official Playwright guide on [Running and Debugging Tests](https://playwright.dev/docs/running-tests). 
+
+```shell
+# Run all available tests.
+pnpm test:e2e
+
+# Run in headed mode.
+pnpm test:e2e --headed
+
+# Run/Debug in UI mode.
+pnpm test:e2e --ui
+
+# Run a single test file.
+pnpm run test:e2e cart-block.spec.ts
+
+# Run a set of files from a different directories.
+pnpm run test:e2e tests/cart/ tests/products/
+
+# Run files that have `cart` or `checkout` in the file name.
+pnpm run test:e2e cart checkout
+
+# Run a single test via its line number.
+pnpm run test:e2e cart-block.spec.ts:38
+
+# Run/Debug a test with a specific title.
+pnpm run test:e2e -g "should display a discount label" --ui
 ```
 
-```sh
-pnpm run test:e2e
+> [!TIP]
+> When a test fails, it leaves a trace info at the bottom. You can quickly jump into debugging mode by using the generated trace view command into your terminal, for example:
+>
+> ![](./docs/e2e-open-trace-cmd.png)
+
+### Debugging tests in CI
+
+If a test fails in CI, a failure artifact is zipped and uploaded to the Summary page of the current job:
+
+![](./docs/e2e-download-failure-artifacts.png)
+
+Once you download and extract that zip, you'll see the dedicated folder(s) for the failed test artifacts. In CI we retry running a failed test 2 times before considering it a failure, so there can be up to 3 folders per failed test. Each of those folders should contain a Playwright trace zip file and a screenshot from the failure moment. On a first retry, we also record the entire test, so the first retry folder should contain a video recording as well. To view a trace, you can head to https://trace.playwright.dev and just drag and drop the zip file there or run it from the command line:
+
+```shell
+npx playwright show-trace <path-to-the-trace>
 ```
 
-ℹ️ If you have any problems running the tests, check out the [Troubleshooting](#troubleshooting) section for help.
+## Writing Tests
 
-### To run the test again, re-create the environment to start with a fresh state
+We're using the [`@wordpress/e2e-test-utils-playwright`](https://github.com/WordPress/gutenberg/tree/HEAD/packages/e2e-test-utils-playwright) package as our framework base, so we generally aim to follow Gutenberg E2E's [best practices](https://github.com/WordPress/gutenberg/blob/trunk/docs/contributors/code/e2e/README.md#best-practices) which helps reduce the framework entry threshold and necessary maintenance. Our framework, however, is specific in a couple of aspects, which you can learn all about in this section.
 
-```sh
-pnpm run env:restart
+> [!TIP]
+> Using the right selectors can be a daunting task. You can let Playwright pick the right selector for you. All you need to do is open the page you're testing against via `npx playwright open localhost:8889/path-to-the-page`. From there, you can use Playwright Inspector to generate the recommended locators for you, for example:
+>
+> ![](./docs/e2e-playwright-inspector.png)
+>
+> Read more about generating tests with Playwright in https://playwright.dev/docs/codegen-intro.
+
+### Setup and teardown
+
+We isolate our tests from each other by resetting the database to its initial state **for every test**. Since every test starts with a clean slate, and there's no need to manually reset the environment, we only allow the `beforeEach` hook as there's no point in using `beforeAll`, `afterAll` or `afterEach`. This approach might seem like a limitation at first, but ultimately it makes tests more stable and easier to write. This convention is enforced by an ESLint rule, so you don't really need to worry about anything.
+
+### Plugins
+
+To use a custom plugin with your tests, first you'll need to create the plugin PHP file and save it to the [test plugins folder](./plugins/). Here's a handy snippet that should help you getting started:
+
+```php
+// plugins/my-fancy-plugin.php
+
+<?php
+/**
+ * Plugin Name: WooCommerce Blocks Test My Fancy Plugin
+ * Plugin URI: https://github.com/woocommerce/woocommerce
+ * Author: WooCommerce
+ *
+ * @package woocommerce-blocks-test-my-fancy-plugin
+ */
+
+function my_fancy_plugin() {
+    echo 'Howdy!';
+}
+
+add_action('wp_footer', 'my_fancy_plugin');
 ```
 
-```sh
-pnpm run test:e2e
-```
 
-### Adding posts for testing block content
-
-During test setup posts are automatically created from all the html files contained in `./bin/posts`. All posts are given a title like `File Name Block` which generates a url like `file-name-block`.
-
-e.g. `my-test.html` will generate a post with the title `My Test Block` and permalink `my-test-block`. You'll be able to navigate to that page in your test like:
+Once the plugin is saved, it will be automatically picked up by `wp-env` - no need to restart the environment. To activate your plugin, use the `RequestUtils.activatePlugin()` API, for example:
 
 ```ts
-await page.goto( '/my-test-block/' );
-```
+// tests/my-fancy-plugin.spec.ts
 
-Please also note that the posts are generated during initial environment setup, so if you add or edit a post file you'll need to restart the environment to see the changes.
+import { test, expect } from '@woocommerce/e2e-utils';
 
-### Tests with side effects
+test( 'My fancy plugin', async ( { page, requestUtils } ) => {
+	await requestUtils.activatePlugin(
+		'woocommerce-blocks-test-my-fancy-plugin'
+	);
 
-We call tests that affect other tests (ones that modify the site settings, using custom plugins) are tests with side effects and we [split](https://github.com/woocommerce/woocommerce-blocks/pull/10508) those tests to a separate test suite:
+	await page.goto( '/shop' );
 
-```sh
-pnpm run test:e2e:side-effects
-```
-
-_Note: All command parameters of `test:e2e` can be used for
-`test:e2e:side-effects`._
-
-### Tests with a classic theme and a block theme with custom templates
-
-By default, e2e tests run in a non-customized block theme. However, we also have some e2e tests which run specifically in a classic theme and in a block theme with custom templates. They can be run like this:
-
-```sh
-pnpm run test:e2e:classic-theme
-```
-
-```sh
-pnpm run test:e2e:block-theme-with-templates
-```
-
-\_Note: All command parameters of `test:e2e` can be used for these commands too.
-
-### Other ways of running tests
-
-Headless mode:
-
-```sh
-pnpm run test:e2e
-```
-
-Interactive UI mode:
-
-```sh
-pnpm run test:e2e --ui
-```
-
-Headed mode:
-
-```sh
-pnpm run test:e2e --headed
-```
-
-Debug mode:
-
-```sh
-pnpm run test:e2e --debug
-```
-
-Running a single test:
-
-```sh
-pnpm run test:e2e ./tests/e2e/tests/example.spec.ts
-```
-
-To see all options, run the following command:
-
-```sh
-npx playwright test --help
-```
-
-### Generating dynamic posts to test block variations
-
-Testing a single block can be daunting considering all the different attribute combinations that could be
-considered valid for a single block. The basic templating system available in this test suite allows for
-the generation of dynamic posts that can be used to test block variations.
-
-Templates use the Handlebars templating system and you can put them anywhere. It's simplest to co-locate them
-with the test. You can easily pass custom attributes to a block in your template using the wp-block helper
-we've defined.
-
-It looks like this in the template:
-
-```handlebars
-{{#> wp-block name="woocommerce/featured-category" attributes=attributes /}}
-    You can nest content here if you want to test the block with some content.
-{{/wp-block}}
-```
-
-In your tests you can use `createPostFromFile` to create a post containing your template. If you use it
-more than once in your test you can extend the test suite and provide the posts as fixtures, like in the example
-below
-
-```js
-import { test as base } from '@playwright/test';
-
-const test = base.extend< {
-	dropdownBlockPost: Post;
-	defaultBlockPost: Post;
-} >( {
-	defaultBlockPost: async ( { requestUtils }, use ) => {
-		const testingPost = await requestUtils.createPostFromFile(
-			requestUtils,
-			{ title: 'Product Filter Stock Status Block' },
-			TEMPLATE_PATH,
-			{}
-		);
-
-		await use( testingPost );
-		await requestUtils.deletePost( post.id );
-	},
-
-	dropdownBlockPost: async ( { requestUtils }, use ) => {
-		const testingPost = await requestUtils.createPostFromFile(
-			requestUtils,
-			{ title: 'Product Filter Stock Status Block' },
-			TEMPLATE_PATH,
-			{
-				attributes: {
-					displayStyle: 'dropdown',
-				},
-			}
-		);
-
-		await use( testingPost );
-		await requestUtils.deletePost( post.id );
-	},
+	await expect( page.getByText( 'Howdy!' ) ).toBeVisible();
 } );
 ```
 
-In your test you can navigate to the page. You won't need to clean it up, because
-the fixture will take care of that for you.
+> [!IMPORTANT]  
+> A plugin's slug is created automatically **from the plugin's name**, not from the `@package` statement as you might think. So, if your plugin is named `WooCommerce Blocks Test Bazzinga`, you'll need to activate it by `woocommerce-blocks-test-bazzinga`.
 
-```js
-test( 'Test the block', async ( { page, defaultBlockPost } ) => {
-	await page.goto( defaultBlockPost.link );
-	// do your tests here
+### Themes
+
+Currently, the default theme is Twenty Twenty Four. Activating other themes is done by the `RequestUtils.activateTheme()` API, for example:
+
+```ts
+test.beforeEach( async ( { page, requestUtils } ) => {
+	await requestUtils.activateTheme(	'storefront' );
 } );
 ```
 
-### Troubleshooting
+> [!IMPORTANT]  
+> Unless it's a one-off thing, remember to use the `beforeEach` hook to activate your theme. Each test starts with a clean database, which means the theme will be re-set to the default one as well.
 
-If you run into problems the first time you try to run the tests, please run the following command before starting the test suite:
+#### Adding a new theme
 
-```sh
-pnpm wp-env:config
+If you've created a custom theme and want to use it in your tests, all you need to do is save it in the [test themes folder](./themes/). Check out the themes that are already there for an inspiration. The activation part was already explained above, so you're good to go!
+
+### Utilities
+
+We have a handful of [custom utilities](./utils/) built on top of core's [`@wordpress/e2e-test-utils-playwright`](https://github.com/WordPress/gutenberg/tree/HEAD/packages/e2e-test-utils-playwright), so make sure to familiarize yourself with them.
+
+#### Creating new utilities
+
+Most of the time, it's better to do a little repetition instead of going straight to creating a utility, as over-abstracting can make the code too vague, complicated, or confusing. However, if the piece is complex and repeated enough, we recommend abstracting it into a [POM (Page Object Model)](https://playwright.dev/docs/pom), for example:
+
+```ts
+import { test as base, expect, Editor } from '@woocommerce/e2e-utils';
+
+class CartUtils {
+  editor: Editor
+
+  constructor( { editor }: { editor: Editor } ) {
+    this.editor = editor;
+  }
+
+  async addClothes( list ) {
+    // Add clothes from the list.
+  }
+
+  async addBooks( list ) {
+    // Add books from the list.
+  }
+}
+
+const test = base.extend< { cartUtils: CartUtils } >( {
+	cartUtils: async ( { editor }, use ) => {
+		await use( new CartUtils( { editor } ) );
+	},
+} );
+
+test( 'Add products', async( { admin, cartUtils } ) => {
+  await admin.createNewPost();
+  await cartUtils.addClotes( [ 'Shirt', 'Cap', 'Pants' ] );
+  await cartUtils.addBooks( [ 'Cooking with Woo' ] )
+
+  await page.goto( '/cart' );
+
+  await expect( this.page.getByLabel( 'Shirt' ) ).toBeVisible();
+  // etc.
+} );
 ```
 
-This helps set up your environment correctly and can prevent some of the usual issues from happening.
+#### Extending Core utilities
+
+If you've come up with a utility that you think should be a part of the Core utilities (`Admin`, `Editor`, `RequestUtils`, etc.) go ahead and make a PR in Gutenberg - it's best to move as much as possible upstream. If you think that the utility still fits under, e.g., `Editor` but is Woo-specific, you'll need to write an extension, for example:
+
+```ts
+// utils/editor/index.ts
+
+import { Editor as CoreEditor } from '@wordpress/e2e-test-utils-playwright';
+
+export class Editor extends CoreEditor {
+  async insertAllWooBlocks() {
+    for ( const wooBlock of [ 'all', 'woo', 'blocks' ] ) {
+      await this.insertBlock( wooBlock );
+    }
+  }
+}
+```
+
+### Content Templates
+
+We have created `RequestUtils.createPostFromFile()` and `RequestUtils.createTemplateFromFile()` utilities that enable creating complex content testing scenarios with Handlebars templates. The template files are kept in the [content-templates folder](./content-templates/), so you can head there for some inspiration.
+
+The Handlebars template filenames must be prefixed with the template type, e.g. `post_with-filters.handlebars`. As for the templates' templates (I know it's confusing), you'll also need to provide the template type, e.g. `template_archive-product_with-filters.handlebars`. 
+
+When you have the template ready, we recommend creating a fixture that will be used to compile and create your template with given data, for example:
+
+```ts
+// tests/product-collection.spec.ts
+
+import { test as base, expect, TemplateCompiler } from '@woocommerce/e2e-utils';
+
+const test = base.extend< { templateCompiler: TemplateCompiler } >( {
+	templateCompiler: async ( { requestUtils }, use ) => {
+		const compiler = await requestUtils.createTemplateFromFile(
+			'archive-product_with-filters'
+		);
+		await use( compiler );
+	},
+} );
+
+test( 'Renders correct filters', async ( { page, templateCompiler } ) => {
+	await templateCompiler.compile( {
+    price: {
+      from: '$10',
+      to: '$99',
+    },
+  } );
+
+  await page.goto( '/shop' );
+
+  await expect( page.getByLabel( 'Products' ) ).toHaveCount( 4 );
+} );
+```
