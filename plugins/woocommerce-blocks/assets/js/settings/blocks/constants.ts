@@ -9,13 +9,14 @@ export type WordCountType =
 	| 'characters_excluding_spaces'
 	| 'characters_including_spaces';
 
-interface WcBlocksConfig {
+export interface WcBlocksConfig {
 	buildPhase: number;
 	pluginUrl: string;
 	productCount: number;
 	defaultAvatar: string;
 	restApiRoutes: Record< string, string[] >;
 	wordCountType: WordCountType;
+	experimentalBlocksEnabled: boolean;
 }
 
 export const blocksConfig = getSetting( 'wcBlocksConfig', {

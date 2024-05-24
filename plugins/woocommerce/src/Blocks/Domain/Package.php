@@ -125,15 +125,6 @@ class Package {
 	}
 
 	/**
-	 * Checks if we're executing the code in an experimental build mode.
-	 *
-	 * @return boolean
-	 */
-	public function is_experimental_build() {
-		return $this->feature()->is_experimental_build();
-	}
-
-	/**
 	 * Checks if we're executing the code in an feature plugin or experimental build mode.
 	 *
 	 * @return boolean

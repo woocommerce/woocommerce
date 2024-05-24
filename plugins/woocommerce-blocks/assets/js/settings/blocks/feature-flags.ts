@@ -1,48 +1,25 @@
 /**
  * External dependencies
  */
-import { registerBlockType } from '@wordpress/blocks';
-import type { Block, BlockConfiguration } from '@wordpress/blocks';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import { WC_BLOCKS_PHASE } from './constants';
+import { WC_BLOCKS_PHASE, WcBlocksConfig } from './constants';
 
 /**
- * Registers a new experimental block provided a unique name and an object defining its
- * behavior. Once registered, the block is made available as an option to any
- * editor interface where blocks are implemented.
- */
-export const registerExperimentalBlockType = (
-	blockNameOrMetadata: string | BlockConfiguration,
-	settings: Record< string, unknown >
-): Block | undefined => {
-	if ( WC_BLOCKS_PHASE > 2 ) {
-		return registerBlockType( blockNameOrMetadata, settings );
-	}
-};
-
-/**
- * Registers a new feature plugin block provided a unique name and an object
- * defining its behavior. Once registered, the block is made available as an
- * option to any editor interface where blocks are implemented.
- */
-export const registerFeaturePluginBlockType = (
-	blockNameOrMetadata: string | BlockConfiguration,
-	settings: Record< string, unknown >
-): Block | undefined => {
-	if ( WC_BLOCKS_PHASE > 1 ) {
-		return registerBlockType( blockNameOrMetadata, settings );
-	}
-};
-
-/**
- * Checks if we're executing the code in an experimental build mode.
+ * Checks if experimental blocks are enabled.
  *
- * @return {boolean} True if this is an experimental build, false otherwise.
+ * @return {boolean} True if this experimental blocks are enabled.
  */
-export const isExperimentalBuild = (): boolean => WC_BLOCKS_PHASE > 2;
+export const isExperimentalBlocksEnabled = (): boolean => {
+	const { experimentalBlocksEnabled } = getSetting( 'wcBlocksConfig', {
+		experimentalBlocksEnabled: false,
+	} ) as WcBlocksConfig;
+
+	return experimentalBlocksEnabled;
+};
 
 /**
  * Checks if we're executing the code in an feature plugin or experimental build mode.

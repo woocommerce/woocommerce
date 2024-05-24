@@ -14,7 +14,7 @@ import {
 	more,
 	starEmpty,
 } from '@wordpress/icons';
-import { isExperimentalBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 import { __ } from '@wordpress/i18n';
 import { toggle } from '@woocommerce/icons';
 
@@ -27,7 +27,7 @@ import save from './save';
 import { BLOCK_NAME_MAP } from './constants';
 import { BlockAttributes } from './types';
 
-if ( isExperimentalBuild() ) {
+if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
 		icon: {
 			src: (

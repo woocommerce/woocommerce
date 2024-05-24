@@ -14,6 +14,9 @@ const TEMPLATE_PATH = path.join( __dirname, './price-filter.handlebars' );
 test.describe( 'Product Filter: Price Filter Block', () => {
 	test.describe( 'frontend', () => {
 		test.beforeEach( async ( { requestUtils } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
 			await requestUtils.updateTemplateContents(
 				PRODUCT_CATALOG_TEMPLATE_ID,
 				TEMPLATE_PATH,
