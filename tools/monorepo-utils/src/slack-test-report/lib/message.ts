@@ -93,7 +93,6 @@ export async function createMessage( options: Options ) {
 		prNumber,
 		prTitle,
 		runId,
-		isFailure,
 		commitMessage,
 		reportName,
 		runAttempt,
@@ -161,10 +160,8 @@ export async function createMessage( options: Options ) {
 
 	contextElements.push( lastRunBlock );
 
-	const statusIcon = `${ isFailure ? ':x:' : ':white_check_mark:' }`;
-	const statusText = `${ isFailure ? 'failed' : 'passed' }`;
-	const reportText = reportName ? `_*${ reportName }*_ tests` : 'Tests';
-	const text = `${ statusIcon }	${ reportText } ${ statusText } ${ target }`;
+	const reportText = reportName ? `_*${ reportName }*_ failed` : 'Failure';
+	const text = `:x:	${ reportText } ${ target }`;
 
 	const mainMsgBlocks = [
 		{
