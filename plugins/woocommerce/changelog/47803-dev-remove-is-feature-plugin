@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove isFeaturePlugin from Blocks and add feature flag `isExperimentalBlockStylingEnabled` via WC Admin feature flag system
