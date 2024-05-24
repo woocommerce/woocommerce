@@ -6,6 +6,7 @@ import {
 	__experimentalInitBlocks as initBlocks,
 	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
 	productApiFetchMiddleware,
+	productEditorHeaderApiFetchMiddleware,
 	TRACKS_SOURCE,
 	__experimentalVariationSwitcherFooter as VariationSwitcherFooter,
 	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
@@ -15,6 +16,8 @@ import { useEffect } from '@wordpress/element';
 import { WooFooterItem } from '@woocommerce/admin-layout';
 import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
 import { useParams } from 'react-router-dom';
+import { Spinner } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -24,6 +27,7 @@ import { useProductVariationEntityRecord } from './hooks/use-product-variation-e
 import { DeleteVariationMenuItem } from './fills/more-menu-items';
 import './product-page.scss';
 
+productEditorHeaderApiFetchMiddleware();
 productApiFetchMiddleware();
 
 export default function ProductPage() {
@@ -76,9 +80,19 @@ export default function ProductPage() {
 		[ productId ]
 	);
 
+	if ( ! variation ) {
+		return (
+			<div className="woocommerce-layout__loading">
+				<Spinner
+					aria-label={ __( 'Creating the product', 'woocommerce' ) }
+				/>
+			</div>
+		);
+	}
+
 	return (
 		<>
-			<Editor product={ variation } productType="product_variation" />
+			<Editor productId={ variation.id } postType="product_variation" />
 			<WooFooterItem order={ 0 }>
 				<>
 					<VariationSwitcherFooter

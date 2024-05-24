@@ -25,6 +25,13 @@ Property in which the value is stored.
 
 Help text that appears below the field.
 
+### tooltip
+
+- **Type:** `String`
+- **Required:** `No`
+
+If provided, shows a tooltip next to the label with additional information.
+
 ### multiple
 
 -   **Type:** `Boolean`

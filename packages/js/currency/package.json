@@ -10,8 +10,8 @@
 		"currency"
 	],
 	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.12.1"
+		"node": "^20.11.1",
+		"pnpm": "^9.1.0"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/currency/README.md",
 	"repository": {
@@ -73,7 +73,7 @@
 		"eslint": "^8.55.0",
 		"jest": "~27.5.1",
 		"jest-cli": "~27.5.1",
-		"rimraf": "^3.0.2",
+		"rimraf": "5.0.5",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
 		"wireit": "0.14.3"
@@ -95,7 +95,11 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js"
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}

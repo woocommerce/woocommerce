@@ -4,7 +4,7 @@ menu_title: Troubleshooting Endpoints
 tags: how-to
 ---
 
-This document outlines common troubleshooting steps for [WooCommerce Endpoints](.woocommerce-endpoints.md). 
+This document outlines common troubleshooting steps for [WooCommerce Endpoints](./woocommerce-endpoints.md). 
 
 For more information, learn how to [Customize Endpoints](./customizing-endpoint-urls.md).
 

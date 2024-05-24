@@ -51,7 +51,7 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests retrieve the test variation when consent is false
+	 * Tests retrieve the default control variation when consent is false
 	 */
 	public function test_get_variation_return_control_when_no_consent() {
 		$exp = new Experimental_Abtest( 'anon', 'platform', false );
@@ -62,7 +62,7 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests retrieve the test variation when consent is false
+	 * Tests retrieve the treatment variation when consent is true and experiment name is valid
 	 */
 	public function test_get_variation() {
 		delete_transient( 'abtest_variation_control' );
@@ -102,15 +102,6 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 			is_wp_error( $exp->request_assignment( 'test_experiment_name' ) ),
 			true
 		);
-	}
-
-	/**
-	 * Test get_variation with valid experiment name.
-	 */
-	public function test_fetch_variation_with_valid_name() {
-		$exp       = new Experimental_Abtest( 'anon', 'platform', true );
-		$variation = $exp->get_variation( 'valid_experiment_name_2' );
-		$this->assertNotInstanceOf( 'WP_Error', $variation );
 	}
 
 	/**

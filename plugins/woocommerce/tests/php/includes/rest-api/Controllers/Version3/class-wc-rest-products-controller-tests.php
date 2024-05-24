@@ -507,4 +507,33 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'new-sku', $duplicated_product->get_sku() );
 		$this->assertEquals( 'test', $duplicated_product->get_meta( 'test', true ) );
 	}
+	/**
+	 * Test the duplicate product endpoint with to update product's name and stock management.
+	 */
+	public function test_duplicate_product_with_extra_args_name_stock_management() {
+		$product    = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Blueberry Cake',
+				'sku'  => 'blueberry-cake-1',
+			)
+		);
+		$product_id = $product->get_id();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product_id . '/duplicate' );
+		$request->set_param( 'name', 'new-name' );
+		$request->set_param( 'manage_stock', true );
+		$request->set_param( 'stock_quantity', 10 );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+		$this->assertArrayHasKey( 'id', $response_data );
+		$this->assertNotEquals( $product_id, $response_data['id'] );
+
+		$duplicated_product = wc_get_product( $response_data['id'] );
+		$this->assertEquals( 'new-name (Copy)', $duplicated_product->get_name() );
+		$this->assertTrue( $duplicated_product->get_manage_stock() );
+		$this->assertEquals( 10, $duplicated_product->get_stock_quantity() );
+	}
 }

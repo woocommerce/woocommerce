@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-[Product Block Editor]: disable TextArea RichText instance according to `disabled` attribute value

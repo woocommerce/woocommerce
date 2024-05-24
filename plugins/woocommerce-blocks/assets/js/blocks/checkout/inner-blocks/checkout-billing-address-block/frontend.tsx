@@ -22,25 +22,25 @@ import {
 const FrontendBlock = ( {
 	title,
 	description,
-	showStepNumber,
 	children,
 	className,
 }: {
 	title: string;
 	description: string;
-	showStepNumber: boolean;
 	children: JSX.Element;
 	className?: string;
 } ): JSX.Element | null => {
+	const { showFormStepNumbers } = useCheckoutBlockContext();
 	const checkoutIsProcessing = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).isProcessing()
 	);
 	const {
-		requireCompanyField,
-		requirePhoneField,
-		showApartmentField,
 		showCompanyField,
+		requireCompanyField,
+		showApartmentField,
+		requireApartmentField,
 		showPhoneField,
+		requirePhoneField,
 	} = useCheckoutBlockContext();
 	const { showBillingFields, forcedBillingAddress, useBillingAsShipping } =
 		useCheckoutAddress();
@@ -64,12 +64,13 @@ const FrontendBlock = ( {
 			) }
 			title={ title }
 			description={ description }
-			showStepNumber={ showStepNumber }
+			showStepNumber={ showFormStepNumbers }
 		>
 			<Block
+				showCompanyField={ showCompanyField }
 				requireCompanyField={ requireCompanyField }
 				showApartmentField={ showApartmentField }
-				showCompanyField={ showCompanyField }
+				requireApartmentField={ requireApartmentField }
 				showPhoneField={ showPhoneField }
 				requirePhoneField={ requirePhoneField }
 			/>

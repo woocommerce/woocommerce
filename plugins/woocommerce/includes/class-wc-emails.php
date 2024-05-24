@@ -610,8 +610,8 @@ class WC_Emails {
 
 		$checkout_fields = Package::container()->get( CheckoutFields::class );
 		$fields          = array_merge(
-			$checkout_fields->get_order_additional_fields_with_values( $order, 'contact', 'additional', 'view' ),
-			$checkout_fields->get_order_additional_fields_with_values( $order, 'additional', 'additional', 'view' ),
+			$checkout_fields->get_order_additional_fields_with_values( $order, 'contact', 'other', 'view' ),
+			$checkout_fields->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' ),
 		);
 
 		if ( ! $fields ) {

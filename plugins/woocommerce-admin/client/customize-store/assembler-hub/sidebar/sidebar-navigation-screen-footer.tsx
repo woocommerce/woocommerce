@@ -12,7 +12,6 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
-import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 // @ts-expect-error No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
@@ -33,6 +32,7 @@ import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
 import { footerTemplateId } from '~/customize-store/data/homepageTemplates';
 import { useSelect } from '@wordpress/data';
+import { trackEvent } from '~/customize-store/tracking';
 
 const SUPPORTED_FOOTER_PATTERNS = [
 	'woocommerce-blocks/footer-with-3-menus',
@@ -147,7 +147,7 @@ export const SidebarNavigationScreenFooter = () => {
 				EditorLink: (
 					<Link
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_assembler_hub_editor_link_click',
 								{
 									source: 'footer',

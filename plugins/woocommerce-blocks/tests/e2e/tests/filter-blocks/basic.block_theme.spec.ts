@@ -31,8 +31,11 @@ const filterBlocks = [
 	},
 ];
 
-test.describe( 'Filter blocks registration', async () => {
-	test.beforeEach( async ( { admin } ) => {
+test.describe( 'Filter blocks registration', () => {
+	test.beforeEach( async ( { admin, requestUtils } ) => {
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-enable-experimental-features'
+		);
 		await admin.createNewPost();
 	} );
 

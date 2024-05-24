@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const productName = 'Cart product test';
+const productName = `Cart product test ${ Date.now() }`;
 const productPrice = '13.99';
 const twoProductPrice = +productPrice * 2;
 const fourProductPrice = +productPrice * 4;
@@ -72,8 +72,13 @@ test.describe( 'Cart page', () => {
 
 	async function goToShopPageAndAddProductToCart( page, prodName ) {
 		await page.goto( '/shop/?orderby=date' );
-		await page.getByLabel( `Add to cart: “${ prodName }”` ).click();
-		await page.waitForLoadState( 'networkidle' );
+		const responsePromise = page.waitForResponse(
+			'**/wp-json/wc/store/v1/batch?**'
+		);
+		await page
+			.getByLabel( `Add to cart: “${ prodName }”`, { exact: true } )
+			.click();
+		await responsePromise;
 	}
 
 	test( 'should display no item in the cart', async ( { page } ) => {
@@ -204,17 +209,22 @@ test.describe( 'Cart page', () => {
 		await expect( page.locator( '.cross-sells' ) ).toContainText(
 			'You may be interested in…'
 		);
+
 		await page
 			.getByLabel( `Add to cart: “${ productName } cross-sell 1”` )
 			.click();
+		await expect(
+			page.getByLabel( `Remove ${ productName } cross-sell 1 from cart` )
+		).toBeVisible();
 		await page
 			.getByLabel( `Add to cart: “${ productName } cross-sell 2”` )
 			.click();
-		await page.waitForLoadState( 'networkidle' );
+		await expect(
+			page.getByLabel( `Remove ${ productName } cross-sell 2 from cart` )
+		).toBeVisible();
 
 		// reload page and confirm added products
-		await page.reload();
-		await page.waitForLoadState( 'networkidle' );
+		await page.reload( { waitUntil: 'domcontentloaded' } );
 		await expect( page.locator( '.cross-sells' ) ).toBeHidden();
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
 			`$${ fourProductPrice }`

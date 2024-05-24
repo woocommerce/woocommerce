@@ -49,8 +49,6 @@ Please take a moment to review the [project readme](https://github.com/woocommer
 - Please create a change file for your changes by running `pnpm --filter=<project> changelog add`. For example, a change file for the WooCommerce Core project would be added by running `pnpm --filter=@woocommerce/plugin-woocommerce changelog add`. 
 - Please avoid modifying the changelog directly or updating the .pot files. These will be updated by the WooCommerce team. 
 
-If you are contributing code to our (Javascript-driven) Gutenberg blocks, please note that they are developed in their [own repository](https://github.com/woocommerce/woocommerce-gutenberg-products-block) and have their [own issue tracker](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues).
-
 ## Feature Requests 🚀
 
 The best place to submit feature requests is over on our [dedicated feature request page](https://woocommerce.com/feature-requests/woocommerce/). You can easily search and vote for existing requests, or create new requests if necessary.

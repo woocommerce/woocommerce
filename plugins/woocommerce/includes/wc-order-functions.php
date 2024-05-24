@@ -287,8 +287,6 @@ function wc_get_order_type( $type ) {
  * post types are types of orders, and having them treated as such.
  *
  * $args are passed to register_post_type, but there are a few specific to this function:
- *      - exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main.
- *      orders screen.
  *      - add_order_meta_boxes (bool) Whether or not the order type gets shop_order meta boxes.
  *      - exclude_from_order_count (bool) Whether or not this order type is excluded from counts.
  *      - exclude_from_order_views (bool) Whether or not this order type is visible by customers when.
@@ -320,7 +318,6 @@ function wc_register_order_type( $type, $args = array() ) {
 
 	// Register for WC usage.
 	$order_type_args = array(
-		'exclude_from_orders_screen'       => false,
 		'add_order_meta_boxes'             => true,
 		'exclude_from_order_count'         => false,
 		'exclude_from_order_views'         => false,
@@ -936,15 +933,28 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		return;
 	}
 
-	$has_recorded = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
+	$has_recorded     = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
+	$invalid_statuses = array( 'cancelled', 'failed', 'trash' );
 
-	if ( $order->has_status( 'cancelled' ) && $has_recorded ) {
+	/**
+	 * Allow invalid order status filtering for updating coupon usage.
+	 *
+	 * @since 9.0.0
+	 *
+	 * @param array $invalid_statuses Array of statuses to consider invalid.
+	 */
+	$invalid_statuses = apply_filters(
+		'woocommerce_update_coupon_usage_invalid_statuses',
+		$invalid_statuses
+	);
+
+	if ( $order->has_status( $invalid_statuses ) && $has_recorded ) {
 		$action = 'reduce';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
-	} elseif ( ! $order->has_status( 'cancelled' ) && ! $has_recorded ) {
+	} elseif ( ! $order->has_status( $invalid_statuses ) && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
-	} elseif ( $order->has_status( 'cancelled' ) ) {
+	} elseif ( $order->has_status( $invalid_statuses ) ) {
 		$order->get_data_store()->release_held_coupons( $order, true );
 		return;
 	} else {
@@ -981,6 +991,8 @@ add_action( 'woocommerce_order_status_completed', 'wc_update_coupon_usage_counts
 add_action( 'woocommerce_order_status_processing', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_on-hold', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_cancelled', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_order_status_failed', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_trash_order', 'wc_update_coupon_usage_counts' );
 
 /**
  * Cancel all unpaid orders after held duration to prevent stock lock for those products.

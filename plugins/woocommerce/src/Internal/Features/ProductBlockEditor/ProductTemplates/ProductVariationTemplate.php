@@ -64,7 +64,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	/**
 	 * Adds the group blocks to the template.
 	 */
-	private function add_group_blocks() {
+	protected function add_group_blocks() {
 		$this->add_group(
 			array(
 				'id'         => $this::GROUP_IDS['GENERAL'],
@@ -106,7 +106,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	/**
 	 * Adds the general group blocks to the template.
 	 */
-	private function add_general_group_blocks() {
+	protected function add_general_group_blocks() {
 		$general_group = $this->get_group_by_id( $this::GROUP_IDS['GENERAL'] );
 		$general_group->add_block(
 			array(
@@ -193,7 +193,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	/**
 	 * Adds the pricing group blocks to the template.
 	 */
-	private function add_pricing_group_blocks() {
+	protected function add_pricing_group_blocks() {
 		$is_calc_taxes_enabled = wc_tax_enabled();
 
 		$pricing_group = $this->get_group_by_id( $this::GROUP_IDS['PRICING'] );
@@ -315,7 +315,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	/**
 	 * Adds the inventory group blocks to the template.
 	 */
-	private function add_inventory_group_blocks() {
+	protected function add_inventory_group_blocks() {
 		$inventory_group = $this->get_group_by_id( $this::GROUP_IDS['INVENTORY'] );
 		$inventory_group->add_block(
 			array(
@@ -425,7 +425,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	/**
 	 * Adds the shipping group blocks to the template.
 	 */
-	private function add_shipping_group_blocks() {
+	protected function add_shipping_group_blocks() {
 		$shipping_group = $this->get_group_by_id( $this::GROUP_IDS['SHIPPING'] );
 		$shipping_group->add_block(
 			array(
@@ -441,27 +441,25 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 			)
 		);
 		// Virtual section.
-		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
-			$shipping_group->add_section(
-				array(
-					'id'    => 'product-variation-virtual-section',
-					'order' => 20,
-				)
-			)->add_block(
-				array(
-					'id'         => 'product-variation-virtual',
-					'blockName'  => 'woocommerce/product-toggle-field',
-					'order'      => 10,
-					'attributes' => array(
-						'property'       => 'virtual',
-						'checkedValue'   => false,
-						'uncheckedValue' => true,
-						'label'          => __( 'This variation requires shipping or pickup', 'woocommerce' ),
-						'uncheckedHelp'  => __( 'This variation will not trigger your customer\'s shipping calculator in cart or at checkout. This product also won\'t require your customers to enter their shipping details at checkout. <a href="https://woocommerce.com/document/managing-products/#adding-a-virtual-product" target="_blank" rel="noreferrer">Read more about virtual products</a>.', 'woocommerce' ),
-					),
-				)
-			);
-		}
+		$shipping_group->add_section(
+			array(
+				'id'    => 'product-variation-virtual-section',
+				'order' => 20,
+			)
+		)->add_block(
+			array(
+				'id'         => 'product-variation-virtual',
+				'blockName'  => 'woocommerce/product-toggle-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property'       => 'virtual',
+					'checkedValue'   => false,
+					'uncheckedValue' => true,
+					'label'          => __( 'This variation requires shipping or pickup', 'woocommerce' ),
+					'uncheckedHelp'  => __( 'This variation will not trigger your customer\'s shipping calculator in cart or at checkout. This product also won\'t require your customers to enter their shipping details at checkout. <a href="https://woocommerce.com/document/managing-products/#adding-a-virtual-product" target="_blank" rel="noreferrer">Read more about virtual products</a>.', 'woocommerce' ),
+				),
+			)
+		);
 		// Product Shipping Section.
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
 			array(
@@ -471,7 +469,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'title'       => __( 'Fees & dimensions', 'woocommerce' ),
 					'description' => sprintf(
 					/* translators: %1$s: How to get started? link opening tag. %2$s: How to get started? link closing tag.*/
-						__( 'Set up shipping costs and enter dimensions used for accurate rate calculations. %1$sHow to get started?%2$s.', 'woocommerce' ),
+						__( 'Set up shipping costs and enter dimensions used for accurate rate calculations. %1$sHow to get started?%2$s', 'woocommerce' ),
 						'<a href="https://woocommerce.com/posts/how-to-calculate-shipping-costs-for-your-woocommerce-store/" target="_blank" rel="noreferrer">',
 						'</a>'
 					),

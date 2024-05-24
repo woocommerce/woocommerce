@@ -33,8 +33,20 @@ class WC_Helper_Updater {
 	 * Add the hook for modifying default WPCore update notices on the plugins management page.
 	 */
 	public static function add_hook_for_modifying_update_notices() {
-		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
+		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() || ! WC_Helper::is_site_connected() ) {
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_update_plugins_messages' ), 11 );
+		}
+		if ( WC_Helper::is_site_connected() ) {
+			add_action( 'load-plugins.php', array( __CLASS__, 'setup_message_for_expired_and_expiring_subscriptions' ), 11 );
+		}
+	}
+
+	/**
+	 * Add the hook for modifying default WPCore update notices on the plugins management page.
+	 */
+	public static function setup_message_for_expired_and_expiring_subscriptions() {
+		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
+			add_action( 'in_plugin_update_message-' . $plugin['_filename'], array( __CLASS__, 'display_notice_for_expired_and_expiring_subscriptions' ), 10, 2 );
 		}
 	}
 
@@ -155,10 +167,45 @@ class WC_Helper_Updater {
 	 * @return void.
 	 */
 	public static function setup_update_plugins_messages() {
+		$is_site_connected = WC_Helper::is_site_connected();
 		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
 			$filename = $plugin['_filename'];
-			add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_install_marketplace_plugin_message' ), 10, 2 );
+			if ( $is_site_connected ) {
+				add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_install_marketplace_plugin_message' ), 10, 2 );
+			} else {
+				add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_connect_woocom_plugin_message' ) );
+			}
 		}
+	}
+
+	/**
+	 * Runs on in_plugin_update_message-{file-name}, show a message to connect to woocommerce.com for unconnected stores
+	 *
+	 * @return void.
+	 */
+	public static function add_connect_woocom_plugin_message() {
+		$connect_page_url = add_query_arg(
+			array(
+				'page' => 'wc-admin',
+				'tab'  => 'my-subscriptions',
+				'path' => rawurlencode( '/extensions' ),
+			),
+			admin_url( 'admin.php' )
+		);
+
+		printf(
+			wp_kses(
+			/* translators: 1: Woo Update Manager plugin install URL */
+				__( ' <a href="%1$s" class="woocommerce-connect-your-store">Connect your store</a> to woocommerce.com to update.', 'woocommerce' ),
+				array(
+					'a' => array(
+						'href'  => array(),
+						'class' => array(),
+					),
+				)
+			),
+			esc_url( $connect_page_url ),
+		);
 	}
 
 	/**
@@ -193,6 +240,67 @@ class WC_Helper_Updater {
 
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
 			echo esc_html_e( ' Activate WooCommerce.com Update Manager to update.', 'woocommerce' );
+		}
+	}
+
+	/**
+	 * Runs on in_plugin_update_message-{file-name}, show a message if plugins subscription expired or expiring soon.
+	 *
+	 * @param object $plugin_data An array of plugin metadata.
+	 * @param object $response  An object of metadata about the available plugin update.
+	 *
+	 * @return void.
+	 */
+	public static function display_notice_for_expired_and_expiring_subscriptions( $plugin_data, $response ) {
+
+		// Extract product ID from the response.
+		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
+
+		// Get the subscription details based on product ID.
+		$subscription = current(
+			wp_list_filter(
+				WC_Helper::get_subscriptions(),
+				array( 'product_id' => $product_id )
+			)
+		);
+
+		// Check if subscription is empty.
+		if ( empty( $subscription ) ) {
+			return;
+		}
+
+		// Prepare the expiry notice based on subscription status.
+		$expiry_notice = '';
+		if ( ! empty( $subscription['expired'] ) && ! $subscription['lifetime'] ) {
+			/* translators: 1: Product regular price */
+			$product_price = ! empty( $subscription['product_regular_price'] ) ? sprintf( __( 'for %s ', 'woocommerce' ), esc_html( $subscription['product_regular_price'] ) ) : '';
+
+			$expiry_notice = sprintf(
+			/* translators: 1: URL to My Subscriptions page 2: Product price */
+				__( ' Your subscription expired, <a href="%1$s" class="woocommerce-renew-subscription">renew %2$s</a>to update.', 'woocommerce' ),
+				esc_url( 'https://woocommerce.com/my-account/my-subscriptions/' ),
+				$product_price
+			);
+		} elseif ( ! empty( $subscription['expiring'] ) && ! $subscription['autorenew'] ) {
+			$expiry_notice = sprintf(
+			/* translators: 1: Expiry date 1: URL to My Subscriptions page */
+				__( ' Your subscription expires on %1$s, <a href="%2$s" class="woocommerce-enable-autorenew">enable auto-renew</a> to continue receiving updates.', 'woocommerce' ),
+				date_i18n( 'F jS', $subscription['expires'] ),
+				esc_url( 'https://woocommerce.com/my-account/my-subscriptions/' )
+			);
+		}
+
+		// Display the expiry notice.
+		if ( ! empty( $expiry_notice ) ) {
+			echo wp_kses(
+				$expiry_notice,
+				array(
+					'a' => array(
+						'href'  => array(),
+						'class' => array(),
+					),
+				)
+			);
 		}
 	}
 
@@ -404,6 +512,9 @@ class WC_Helper_Updater {
 	 * @return array Update data for each requested product.
 	 */
 	private static function _update_check( $payload ) {
+		if ( empty( $payload ) ) {
+			return array();
+		}
 		ksort( $payload );
 		$hash = md5( wp_json_encode( $payload ) );
 
@@ -422,13 +533,22 @@ class WC_Helper_Updater {
 			'errors'   => array(),
 		);
 
-		$request = WC_Helper_API::post(
-			'update-check',
-			array(
-				'body'          => wp_json_encode( array( 'products' => $payload ) ),
-				'authenticated' => true,
-			)
-		);
+		if ( WC_Helper::is_site_connected() ) {
+			$request = WC_Helper_API::post(
+				'update-check',
+				array(
+					'body'          => wp_json_encode( array( 'products' => $payload ) ),
+					'authenticated' => true,
+				)
+			);
+		} else {
+			$request = WC_Helper_API::post(
+				'update-check-public',
+				array(
+					'body' => wp_json_encode( array( 'products' => $payload ) ),
+				)
+			);
+		}
 
 		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
 			$data['errors'][] = 'http-error';
@@ -503,7 +623,7 @@ class WC_Helper_Updater {
 	 */
 	public static function get_updates_count_based_on_site_status() {
 		if ( ! WC_Helper::is_site_connected() ) {
-			return 1;
+			return 0;
 		}
 
 		$count = self::get_updates_count() ?? 0;
@@ -512,6 +632,45 @@ class WC_Helper_Updater {
 		}
 
 		return $count;
+	}
+
+	/**
+	 * Get the type of woo connect notice to be shown in the WC Settings and Marketplace pages.
+	 * - If a store is connected to woocommerce.com or has no installed woo plugins, return 'none'.
+	 * - If a store has installed woo plugins but no updates, return 'short'.
+	 * - If a store has an installed woo plugin with update, return 'long'.
+	 *
+	 * @return string The notice type, 'none', 'short', or 'long'.
+	 */
+	public static function get_woo_connect_notice_type() {
+		if ( WC_Helper::is_site_connected() ) {
+			return 'none';
+		}
+
+		$woo_plugins = WC_Helper::get_local_woo_plugins();
+
+		if ( empty( $woo_plugins ) ) {
+			return 'none';
+		}
+
+		$update_data = self::get_update_data();
+
+		if ( empty( $update_data ) ) {
+			return 'short';
+		}
+
+		// Scan local plugins.
+		foreach ( $woo_plugins as $plugin ) {
+			if ( empty( $update_data[ $plugin['_product_id'] ] ) ) {
+				continue;
+			}
+
+			if ( version_compare( $plugin['Version'], $update_data[ $plugin['_product_id'] ]['version'], '<' ) ) {
+				return 'long';
+			}
+		}
+
+		return 'short';
 	}
 
 	/**

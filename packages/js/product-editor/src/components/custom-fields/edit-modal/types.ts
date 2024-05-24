@@ -13,6 +13,7 @@ export type EditModalProps = Omit<
 	'title' | 'onRequestClose' | 'children'
 > & {
 	initialValue: Metadata< string >;
+	values: Metadata< string >[];
 	onUpdate( value: Metadata< string > ): void;
 	onCancel(): void;
 };

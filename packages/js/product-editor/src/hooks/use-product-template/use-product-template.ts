@@ -67,9 +67,7 @@ export const useProductTemplate = (
 	const productType = product?.type;
 
 	const productTemplateIdToFind =
-		productType === 'variable'
-			? 'standard-product-template'
-			: productTemplateId;
+		productTemplateId || 'standard-product-template';
 
 	const productTypeToFind =
 		productType === 'variable' ? 'simple' : productType;

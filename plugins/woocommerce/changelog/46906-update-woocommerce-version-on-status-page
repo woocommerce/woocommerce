@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update the WooCommerce Status page to use the full plugin version to show dev, Beta and RC versions as opposed to only the milestone number

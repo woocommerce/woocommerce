@@ -2,6 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const { customer, storeDetails } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
 const { getOrderIdFromUrl } = require( '../../utils/order' );
+const { addAProductToCart } = require( '../../utils/cart' );
 
 let productId, orderId, zoneId;
 
@@ -68,8 +69,7 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		// ensure that the store's address is in the US
 		await api.update.storeDetails( storeDetails.us.store );
 
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
+		await addAProductToCart( page, productId );
 
 		await page.goto( '/checkout/' );
 

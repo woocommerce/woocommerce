@@ -6,6 +6,7 @@
 -   [Internal developers](#internal-developers)
 -   [Third-party developers](#third-party-developers)
 -   [Designers](#designers)
+-   [Block References](#block-references)
 -   [Developer Resources](#developer-resources)
     -   [Tools](#tools)
     -   [Articles](#articles)
@@ -119,6 +120,10 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
     -   [Class names update in 2.8.0](designers/theming/class-names-update-280.md)
     -   [Product grid blocks style update in 2.7.0](designers/theming/product-grid-270.md)
 
+## Block References
+
+- [Block References](block-references/block-references.md)
+
 ## Developer Resources
 
 ### Tools
@@ -136,7 +141,7 @@ The following posts from [developer.woo.com](https://developer.woocommerce.com/c
 
 ### Tutorials
 
-The following tutorials from [developer.woo.com](https://developer.woocommerce.com/category/tutorials/) help you with extending the WooCommerce Blocks plugin.
+The following tutorials from [developer.woo.com](https://developer.woocommerce.com/) help you with extending the WooCommerce Blocks plugin.
 
 -   [📺 Tutorial: Extending the WooCommerce Checkout Block](https://developer.woocommerce.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/)
 -   [Hiding Shipping and Payment Options in the Cart and Checkout Blocks](https://developer.woocommerce.com/2022/05/20/hiding-shipping-and-payment-options-in-the-cart-and-checkout-blocks/)

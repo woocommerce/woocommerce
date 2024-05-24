@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { sort } from 'fast-sort';
-import { __, sprintf, _n } from '@wordpress/i18n';
+import { __, sprintf, _n, _x } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import {
 	InspectorControls,
@@ -201,11 +201,19 @@ const Edit = ( {
 					>
 						<ToggleGroupControlOption
 							value="multiple"
-							label={ __( 'Multiple', 'woocommerce' ) }
+							label={ _x(
+								'Multiple',
+								'Number of filters',
+								'woocommerce'
+							) }
 						/>
 						<ToggleGroupControlOption
 							value="single"
-							label={ __( 'Single', 'woocommerce' ) }
+							label={ _x(
+								'Single',
+								'Number of filters',
+								'woocommerce'
+							) }
 						/>
 					</ToggleGroupControl>
 					{ selectType === 'multiple' && (

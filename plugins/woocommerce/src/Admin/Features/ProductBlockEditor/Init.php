@@ -49,26 +49,17 @@ class Init {
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( Features::is_enabled( 'product-variation-management' ) ) {
-			array_push( $this->supported_product_types, 'variable' );
-		}
-
-		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
-			array_push( $this->supported_product_types, 'external' );
-		}
-
-		if ( Features::is_enabled( 'product-grouped' ) ) {
-			array_push( $this->supported_product_types, 'grouped' );
-		}
+		array_push( $this->supported_product_types, 'variable' );
+		array_push( $this->supported_product_types, 'external' );
+		array_push( $this->supported_product_types, 'grouped' );
 
 		$this->redirection_controller = new RedirectionController();
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
-				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
-				add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
-				add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
-			}
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+			add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
+			add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
+
 			add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 			add_filter( 'woocommerce_register_post_type_product_variation', array( $this, 'enable_rest_api_for_product_variation' ) );
@@ -79,6 +70,7 @@ class Init {
 			add_action( 'rest_api_init', array( $this, 'register_user_metas' ) );
 
 			add_filter( 'register_block_type_args', array( $this, 'register_metadata_attribute' ) );
+			add_filter( 'woocommerce_get_block_types', array( $this, 'get_block_types' ), 999, 1 );
 
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
@@ -115,6 +107,9 @@ class Init {
 		);
 		wp_tinymce_inline_scripts();
 		wp_enqueue_media();
+		wp_register_style( 'wc-global-presets', false ); // phpcs:ignore
+		wp_add_inline_style( 'wc-global-presets', wp_get_global_stylesheet( array( 'presets' ) ) );
+		wp_enqueue_style( 'wc-global-presets' );
 	}
 
 	/**
@@ -445,5 +440,20 @@ class Init {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Filters woocommerce block types.
+	 *
+	 * @param string[] $block_types Array of woocommerce block types.
+	 * @return array
+	 */
+	public function get_block_types( $block_types ) {
+		if ( PageController::is_admin_page() ) {
+			// Ignore all woocommerce blocks.
+			return array();
+		}
+
+		return $block_types;
 	}
 }

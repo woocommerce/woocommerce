@@ -1,8 +1,66 @@
+// Resizable frame styles
+.edit-site-resizable-frame__inner.is-resizing::before {
+	content: "";
+	inset: 0;
+	position: absolute;
+	z-index: 1;
+}
+
+.edit-site-resizable-frame__inner-content {
+	inset: 0;
+	position: absolute;
+	z-index: 0;
+	height: 100%;
+	width: 100%;
+}
+
+.edit-site-resizable-frame__handle {
+	align-items: center;
+	border: 0;
+	border-radius: 4px;
+	background: var(--wp-admin-theme-color);
+	cursor: ew-resize;
+	display: flex;
+	height: 64px;
+	justify-content: flex-end;
+	padding: 0;
+	position: absolute;
+	top: calc(50% - 32px);
+	width: 4px;
+	z-index: 100;
+}
+
+.edit-site-resizable-frame__handle::before {
+	content: "";
+	height: 100%;
+	left: 100%;
+	position: absolute;
+	width: 32px;
+}
+
+.edit-site-resizable-frame__handle::after {
+	content: "";
+	height: 100%;
+	position: absolute;
+	right: 100%;
+	width: 32px;
+}
+
+.edit-site-resizable-frame__handle:focus-visible {
+	outline: 2px solid #0000;
+}
+
+.edit-site-resizable-frame__handle.is-resizing,
+.edit-site-resizable-frame__handle:focus,
+.edit-site-resizable-frame__handle:hover {
+	background-color: var(--wp-admin-theme-color);
+}
+
 .launch-store-site-preview-page__container {
 	height: 100vh;
 	width: 100%;
-	padding: 16px 16px 16px 0;
 	position: relative;
+	z-index: 3;
 
 	.launch-store-site__preview-site-iframe {
 		display: block;
@@ -23,7 +81,19 @@
 		z-index: 1;
 		background-color: #fff;
 		opacity: 0.9;
-		height: calc(100% - 32px);
-		width: calc(100% - 16px);
+		height: 100%;
+		width: 100%;
+	}
+
+	.launch-store-preview-layout__canvas {
+		align-items: center;
+		bottom: 0;
+		display: flex;
+		justify-content: center;
+		position: absolute;
+		top: 0;
+		left: -32px; // Make room for the handle on the left side for maximum width
+		width: calc(100% + 32px);
+		padding: 16px 16px 16px 32px;
 	}
 }

@@ -118,7 +118,7 @@ const getSkeleton = () => {
 					</li>
 					<li className="woocommerce-order-overview__email email">
 						{ __( 'Email', 'woocommerce' ) }:{ ' ' }
-						<strong>shopper@woo.com</strong>
+						<strong>shopper@woocommerce.com</strong>
 					</li>
 					<li className="woocommerce-order-overview__total total">
 						{ __( 'Total', 'woocommerce' ) }:{ ' ' }

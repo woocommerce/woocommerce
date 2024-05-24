@@ -262,8 +262,8 @@ class CheckoutSchema extends AbstractSchema {
 	 */
 	protected function get_additional_fields_response( \WC_Order $order ) {
 		$fields = wp_parse_args(
-			$this->additional_fields_controller->get_all_fields_from_object( $order, 'additional' ),
-			$this->additional_fields_controller->get_all_fields_from_object( wc()->customer, 'additional' )
+			$this->additional_fields_controller->get_all_fields_from_object( $order, 'other' ),
+			$this->additional_fields_controller->get_all_fields_from_object( wc()->customer, 'other' )
 		);
 
 		$additional_field_schema = $this->get_additional_fields_schema();
@@ -291,7 +291,7 @@ class CheckoutSchema extends AbstractSchema {
 	protected function get_additional_fields_schema() {
 		return $this->generate_additional_fields_schema(
 			$this->additional_fields_controller->get_fields_for_location( 'contact' ),
-			$this->additional_fields_controller->get_fields_for_location( 'additional' )
+			$this->additional_fields_controller->get_fields_for_location( 'order' )
 		);
 	}
 
@@ -420,11 +420,11 @@ class CheckoutSchema extends AbstractSchema {
 		}
 
 		// Validate groups of properties per registered location.
-		$locations = array( 'contact', 'additional' );
+		$locations = array( 'contact', 'order' );
 
 		foreach ( $locations as $location ) {
 			$location_fields = $this->additional_fields_controller->filter_fields_for_location( $fields, $location );
-			$result          = $this->additional_fields_controller->validate_fields_for_location( $location_fields, $location, 'additional' );
+			$result          = $this->additional_fields_controller->validate_fields_for_location( $location_fields, $location, 'other' );
 
 			if ( is_wp_error( $result ) && $result->has_errors() ) {
 				$errors->merge_from( $result );

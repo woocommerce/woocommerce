@@ -3,7 +3,6 @@
  */
 import { assign, spawn } from 'xstate';
 import { getQuery, updateQueryString } from '@woocommerce/navigation';
-import { recordEvent } from '@woocommerce/tracks';
 import { dispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
@@ -25,6 +24,7 @@ import {
 	lookAndFeelCompleteEvent,
 	toneOfVoiceCompleteEvent,
 } from './pages';
+import { trackEvent } from '../tracking';
 
 const assignStartLoadingTime = assign<
 	designWithAiStateMachineContext,
@@ -218,7 +218,7 @@ const assignAPICallLoaderError = assign<
 	designWithAiStateMachineEvents
 >( {
 	apiCallLoader: () => {
-		recordEvent( 'customize_your_store_ai_wizard_error' );
+		trackEvent( 'customize_your_store_ai_wizard_error' );
 
 		return {
 			hasErrors: true,
@@ -261,7 +261,7 @@ const recordTracksStepViewed = (
 	{ action }: { action: unknown }
 ) => {
 	const { step } = action as { step: string };
-	recordEvent( 'customize_your_store_ai_wizard_step_view', {
+	trackEvent( 'customize_your_store_ai_wizard_step_view', {
 		step,
 	} );
 };
@@ -271,7 +271,7 @@ const recordTracksStepClosed = (
 	event: aiWizardClosedBeforeCompletionEvent
 ) => {
 	const { step } = event.payload;
-	recordEvent( `customize_your_store_ai_wizard_step_close`, {
+	trackEvent( `customize_your_store_ai_wizard_step_close`, {
 		step: step.replaceAll( '-', '_' ),
 	} );
 };
@@ -282,7 +282,7 @@ const recordTracksStepCompleted = (
 	{ action }: { action: unknown }
 ) => {
 	const { step } = action as { step: string };
-	recordEvent( 'customize_your_store_ai_wizard_step_complete', {
+	trackEvent( 'customize_your_store_ai_wizard_step_complete', {
 		step,
 	} );
 };

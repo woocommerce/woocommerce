@@ -3,7 +3,7 @@
 	"apiVersion": 2,
 	"name": "woocommerce/product-collection",
 	"version": "1.0.0",
-	"title": "Product Collection (Beta)",
+	"title": "Product Collection",
 	"description": "Display a collection of products from your store.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce", "Products (Beta)" ],
@@ -38,6 +38,9 @@
 		"forcePageReload": {
 			"type": "boolean",
 			"default": false
+		},
+		"__privatePreviewState": {
+			"type": "object"
 		}
 	},
 	"providesContext": {
@@ -45,7 +48,8 @@
 		"query": "query",
 		"displayLayout": "displayLayout",
 		"queryContextIncludes": "queryContextIncludes",
-		"collection": "collection"
+		"collection": "collection",
+		"__privateProductCollectionPreviewState": "__privatePreviewState"
 	},
 	"usesContext": [ "templateSlug" ],
 	"supports": {

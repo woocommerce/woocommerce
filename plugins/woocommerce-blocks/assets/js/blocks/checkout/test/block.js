@@ -42,6 +42,18 @@ jest.mock( '@wordpress/compose', () => ( {
 	useResizeObserver: jest.fn().mockReturnValue( [ null, { width: 0 } ] ),
 } ) );
 
+global.ResizeObserver = jest.fn().mockImplementation( () => ( {
+	observe: jest.fn(),
+	unobserve: jest.fn(),
+	disconnect: jest.fn(),
+} ) );
+
+global.IntersectionObserver = jest.fn().mockImplementation( () => ( {
+	observe: jest.fn(),
+	unobserve: jest.fn(),
+	disconnect: jest.fn(),
+} ) );
+
 jest.mock( '@wordpress/element', () => {
 	return {
 		...jest.requireActual( '@wordpress/element' ),
@@ -50,6 +62,27 @@ jest.mock( '@wordpress/element', () => {
 		},
 	};
 } );
+
+jest.mock( '../context', () => {
+	return {
+		...jest.requireActual( '../context' ),
+		useCheckoutBlockContext: jest.fn().mockReturnValue( {
+			showFormStepNumbers: false,
+			cartPageId: 0,
+			requireCompanyField: false,
+			requirePhoneField: false,
+			showApartmentField: false,
+			showCompanyField: false,
+			showOrderNotes: false,
+			showPhoneField: false,
+			showPolicyLinks: false,
+			showRateAfterTaxName: false,
+			showReturnToCart: false,
+		} ),
+	};
+} );
+
+import { useCheckoutBlockContext } from '../context';
 
 const CheckoutBlock = () => {
 	return (
@@ -83,7 +116,7 @@ const CheckoutBlock = () => {
 	);
 };
 
-describe( 'Testing cart', () => {
+describe( 'Testing Checkout', () => {
 	beforeEach( () => {
 		act( () => {
 			fetchMock.mockResponse( ( req ) => {
@@ -104,6 +137,10 @@ describe( 'Testing cart', () => {
 
 	it( 'Renders checkout if there are items in the cart', async () => {
 		render( <CheckoutBlock /> );
+
+		// TODO: Fix a recent deprecation of showSpinner prop of Button called in this component.
+		expect( console ).toHaveWarned();
+
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 
 		expect( screen.getByText( /Place Order/i ) ).toBeInTheDocument();
@@ -251,5 +288,43 @@ describe( 'Testing cart', () => {
 			allSettings.checkoutAllowsSignup = undefined;
 			dispatch( CHECKOUT_STORE_KEY ).__internalSetCustomerId( 1 );
 		} );
+	} );
+
+	it( 'Ensures correct classes are applied to FormStep when step numbers are shown/hidden', async () => {
+		const mockReturnValue = {
+			showFormStepNumbers: false,
+			cartPageId: 0,
+			requireCompanyField: false,
+			requirePhoneField: false,
+			showApartmentField: false,
+			showCompanyField: false,
+			showOrderNotes: false,
+			showPhoneField: false,
+			showPolicyLinks: false,
+			showRateAfterTaxName: false,
+			showReturnToCart: false,
+		};
+		useCheckoutBlockContext.mockReturnValue( mockReturnValue );
+		// Render the CheckoutBlock
+		const { container, rerender } = render( <CheckoutBlock /> );
+
+		let formStepsWithNumber = container.querySelectorAll(
+			'.wc-block-components-checkout-step--with-step-number'
+		);
+
+		expect( formStepsWithNumber ).toHaveLength( 0 );
+
+		useCheckoutBlockContext.mockReturnValue( {
+			...mockReturnValue,
+			showFormStepNumbers: true,
+		} );
+
+		rerender( <CheckoutBlock /> );
+
+		formStepsWithNumber = container.querySelectorAll(
+			'.wc-block-components-checkout-step--with-step-number'
+		);
+
+		expect( formStepsWithNumber.length ).not.toBe( 0 );
 	} );
 } );

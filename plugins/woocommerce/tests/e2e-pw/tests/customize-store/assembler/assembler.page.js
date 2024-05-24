@@ -16,7 +16,7 @@ export class AssemblerPage {
 			'.cys-fullscreen-iframe[style="opacity: 1;"]'
 		);
 
-		await frame.getByRole( 'button', { name: 'Done' } ).waitFor();
+		await frame.getByRole( 'button', { name: 'Save' } ).waitFor();
 	}
 
 	/**

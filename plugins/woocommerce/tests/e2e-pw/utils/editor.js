@@ -1,3 +1,5 @@
+const { expect } = require( '@playwright/test' );
+
 const closeWelcomeModal = async ( { page } ) => {
 	// Close welcome popup if prompted
 	try {
@@ -24,16 +26,73 @@ const disableWelcomeModal = async ( { page } ) => {
 	}
 };
 
+const getCanvas = async ( page ) => {
+	return page.frame( 'editor-canvas' ) || page;
+};
+
 const goToPageEditor = async ( { page } ) => {
 	await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
 	await disableWelcomeModal( { page } );
 };
 
 const goToPostEditor = async ( { page } ) => {
 	await page.goto( 'wp-admin/post-new.php' );
-
 	await disableWelcomeModal( { page } );
+};
+
+const fillPageTitle = async ( page, title ) => {
+	await ( await getCanvas( page ) )
+		.getByRole( 'textbox', { name: 'Add title' } )
+		.fill( title );
+};
+
+const insertBlock = async ( page, blockName ) => {
+	const canvas = await getCanvas( page );
+	// Click the title to activate the block inserter.
+	await canvas.getByRole( 'textbox', { name: 'Add title' } ).click();
+	await canvas.getByLabel( 'Add block' ).click();
+	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
+	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
+};
+
+const insertBlockByShortcut = async ( page, blockShortcut ) => {
+	const canvas = await getCanvas( page );
+	await canvas.getByRole( 'button', { name: 'Add default block' } ).click();
+	await canvas
+		.getByRole( 'document', {
+			name: 'Empty block; start writing or type forward slash to choose a block',
+		} )
+		.fill( blockShortcut );
+	await page.keyboard.press( 'Enter' );
+};
+
+const transformIntoBlocks = async ( page ) => {
+	const canvas = await getCanvas( page );
+
+	await expect(
+		canvas.locator(
+			'.wp-block-woocommerce-classic-shortcode__placeholder-copy'
+		)
+	).toBeVisible();
+	await canvas
+		.getByRole( 'button' )
+		.filter( { hasText: 'Transform into blocks' } )
+		.click();
+
+	await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
+		'Classic shortcode transformed to blocks.'
+	);
+};
+
+const publishPage = async ( page, pageTitle ) => {
+	await page.getByRole( 'button', { name: 'Publish', exact: true } ).click();
+	await page
+		.getByRole( 'region', { name: 'Editor publish' } )
+		.getByRole( 'button', { name: 'Publish', exact: true } )
+		.click();
+	await expect(
+		page.getByText( `${ pageTitle } is now live.` )
+	).toBeVisible();
 };
 
 module.exports = {
@@ -41,4 +100,10 @@ module.exports = {
 	goToPageEditor,
 	goToPostEditor,
 	disableWelcomeModal,
+	getCanvas,
+	fillPageTitle,
+	insertBlock,
+	insertBlockByShortcut,
+	transformIntoBlocks,
+	publishPage,
 };

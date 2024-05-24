@@ -267,7 +267,7 @@ class Checkout extends AbstractBlock {
 		if ( ( ! empty( $post->post_type ) && ! empty( $post->post_name ) && 'page-checkout' !== $post->post_name && 'wp_template' === $post->post_type ) || false === has_block( 'woocommerce/checkout', $post ) ) {
 			return;
 		}
-		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
+		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings( 'edit' );
 
 		if ( ! isset( $pickup_location_settings['title'] ) ) {
 			return;
@@ -570,6 +570,7 @@ class Checkout extends AbstractBlock {
 			'CheckoutOrderSummaryShippingBlock',
 			'CheckoutOrderSummarySubtotalBlock',
 			'CheckoutOrderSummaryTaxesBlock',
+			'CheckoutOrderSummaryTotalsBlock',
 			'CheckoutPaymentBlock',
 			'CheckoutShippingAddressBlock',
 			'CheckoutShippingMethodsBlock',

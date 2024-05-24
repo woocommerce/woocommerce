@@ -27,7 +27,7 @@ Payment gateways should be created as additional plugins that hook into WooComme
 add_action( 'plugins_loaded', 'init_your_gateway_class' );
 ```
 
-It is also important that your gateway class extends the WooCommerce base gateway class, so you have access to important methods and the [settings API](https://woocommerce.com/document/settings-api/ "https://woocommerce.com/document/settings-api/"):
+It is also important that your gateway class extends the WooCommerce base gateway class, so you have access to important methods and the [settings API](https://developer.woocommerce.com/docs/settings-api/):
 
 ```php
 function init_your_gateway_class() {
@@ -87,7 +87,7 @@ add_action( 'woocommerce_update_options_payment_gateways\_' . $this->id, array( 
 
 #### init_form_fields()
 
-Use this method to set `$this->form_fields` - these are options you'll show in admin on your gateway settings page and make use of the [WC Settings API](https://woocommerce.com/document/settings-api/ "https://woocommerce.com/document/settings-api/").
+Use this method to set `$this->form_fields` - these are options you'll show in admin on your gateway settings page and make use of the [WC Settings API](https://developer.woocommerce.com/docs/settings-api/).
 
 A basic set of settings for your gateway would consist of _enabled_, _title_ and _description_:
 

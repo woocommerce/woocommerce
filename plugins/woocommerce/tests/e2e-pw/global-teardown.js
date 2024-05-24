@@ -1,4 +1,4 @@
-const { chromium } = require( '@playwright/test' );
+const { chromium, expect } = require( '@playwright/test' );
 const { admin } = require( './test-data/data' );
 
 module.exports = async ( config ) => {
@@ -95,8 +95,5 @@ module.exports = async ( config ) => {
 		}
 	}
 
-	if ( ! consumerTokenCleared ) {
-		console.error( 'Could not clear consumer token.' );
-		process.exit( 1 );
-	}
+	await expect( consumerTokenCleared ).toBe( true );
 };
