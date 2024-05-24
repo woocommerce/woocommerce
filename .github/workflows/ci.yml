@@ -294,7 +294,7 @@ jobs:
                 'project-api-test-jobs',
                 'project-performance-test-jobs'
             ]
-        if: ${{ always() && github.event_name != 'pull_request' }}
+        if: ${{ always() && github.event_name == 'pull_request' }}
         steps:
             - uses: 'actions/checkout@v4'
               name: 'Checkout'
