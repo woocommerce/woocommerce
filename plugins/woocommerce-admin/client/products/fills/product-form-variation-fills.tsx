@@ -12,7 +12,6 @@ import { PartialProduct } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { ProductVariationDetailsSection } from '../sections/product-variation-details-section';
 import {
 	VARIANT_TAB_GENERAL_ID,
 	VARIANT_TAB_SHIPPING_ID,
@@ -56,14 +55,6 @@ const tabPropData = {
 
 const Tabs = () => (
 	<>
-		<WooProductTabItem
-			id={ VARIANT_TAB_GENERAL_ID }
-			templates={ [ { name: 'tab/variation', order: 1 } ] }
-			pluginId={ PLUGIN_ID }
-			tabProps={ tabPropData.general }
-		>
-			<ProductVariationDetailsSection />
-		</WooProductTabItem>
 		<WooProductTabItem
 			id={ VARIANT_TAB_PRICING_ID }
 			templates={ [ { name: 'tab/variation', order: 3 } ] }
