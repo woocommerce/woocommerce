@@ -485,9 +485,9 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	// Clear customer's order related caches.
 	if ( is_a( $order, 'WC_Order' ) ) {
 		$order_id = $order->get_id();
-		Users::delete_site_user_meta( $order->get_customer_id(), '_money_spent' );
-		Users::delete_site_user_meta( $order->get_customer_id(), '_order_count' );
-		Users::delete_site_user_meta( $order->get_customer_id(), '_last_order' );
+		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_money_spent' );
+		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_order_count' );
+		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_last_order' );
 	} else {
 		$order_id = 0;
 	}
