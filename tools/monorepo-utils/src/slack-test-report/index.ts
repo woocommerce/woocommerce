@@ -80,7 +80,7 @@ const program = new Command( 'slack-test-report' )
 			const response = await postMessage( client, {
 				text: `${ text }`,
 				blocks: mainMsgBlocks,
-				channel: getEnvVar( 'SLACK_CHANNEL' ),
+				channel: getEnvVar( 'SLACK_CHANNEL', true ),
 				username,
 			} );
 			const mainMessageTS = response.ts;
@@ -93,7 +93,7 @@ const program = new Command( 'slack-test-report' )
 				await postMessage( client, {
 					text,
 					blocks: detailsMsgBlocksChunks,
-					channel: getEnvVar( 'SLACK_CHANNEL' ),
+					channel: getEnvVar( 'SLACK_CHANNEL', true ),
 					username,
 					thread_ts: mainMessageTS,
 				} );
