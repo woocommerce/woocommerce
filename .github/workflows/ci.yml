@@ -299,6 +299,11 @@ jobs:
             - uses: 'actions/checkout@v4'
               name: 'Checkout'
               
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              name: 'Setup Monorepo'
+              with:
+                php-version: false
+              
             - name: 'Send message for failed jobs'
               env:
                 SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
