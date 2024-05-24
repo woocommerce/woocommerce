@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlockStylingEnabled } from '@woocommerce/block-settings';
 
 export const supports = {
-	...( isFeaturePluginBuild() && {
+	...( isExperimentalBlockStylingEnabled() && {
 		color: {
 			background: false,
 		},

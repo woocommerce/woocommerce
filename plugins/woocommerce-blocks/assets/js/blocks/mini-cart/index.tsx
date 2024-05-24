@@ -4,7 +4,7 @@
 import { miniCartAlt } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 import { registerBlockType } from '@wordpress/blocks';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlockStylingEnabled } from '@woocommerce/block-settings';
 import { addFilter } from '@wordpress/hooks';
 /**
  * Internal dependencies
@@ -15,7 +15,7 @@ import './style.scss';
 
 const featurePluginSupport = {
 	...metadata.supports,
-	...( isFeaturePluginBuild() && {
+	...( isExperimentalBlockStylingEnabled() && {
 		typography: {
 			...metadata.supports.typography,
 			__experimentalFontFamily: true,

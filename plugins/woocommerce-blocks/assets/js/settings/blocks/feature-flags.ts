@@ -22,8 +22,9 @@ export const isExperimentalBlocksEnabled = (): boolean => {
 };
 
 /**
- * Checks if we're executing the code in an feature plugin or experimental build mode.
+ * Check if experimental block styling features are enabled.
  *
- * @return {boolean} True if this is an experimental or feature plugin build, false otherwise.
+ * @return {boolean} True if experimental block styling features are enabled.
  */
-export const isFeaturePluginBuild = (): boolean => WC_BLOCKS_PHASE > 1;
+export const isExperimentalBlockStylingEnabled = (): boolean =>
+	WC_BLOCKS_PHASE > 1;

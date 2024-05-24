@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlockStylingEnabled } from '@woocommerce/block-settings';
 import { Icon } from '@wordpress/icons';
 
 /**
@@ -15,7 +15,7 @@ import './style.scss';
 
 const featurePluginSupport = {
 	...metadata.supports,
-	...( isFeaturePluginBuild() && {
+	...( isExperimentalBlockStylingEnabled() && {
 		typography: {
 			...metadata.supports.typography,
 			__experimentalFontFamily: true,
