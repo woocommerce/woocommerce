@@ -51,7 +51,6 @@ test.describe( 'Store owner can view the Intro page', () => {
 		page,
 		context,
 	} ) => {
-		expect(1).toBe(2); // force failure to test notifications
 		await page.goto( CUSTOMIZE_STORE_URL );
 		await expect( page.locator( 'text=Design your own' ) ).toBeVisible();
 		await context.setOffline( true );

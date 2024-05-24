@@ -294,7 +294,7 @@ jobs:
                 'project-api-test-jobs',
                 'project-performance-test-jobs'
             ]
-        if: ${{ always() }}
+        if: ${{ always() && github.event_name != 'pull_request'  }}
         steps:
             - uses: 'actions/checkout@v4'
               name: 'Checkout'
@@ -307,7 +307,7 @@ jobs:
             - name: 'Send messages for failed jobs'
               env:
                 SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
-                SLACK_CHANNEL: ${{ secrets.TEST_TEST_REPORTS_SLACK_CHANNEL }}
+                SLACK_CHANNEL: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
                 HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
                 INPUT_TRIGGER: ${{ inputs.trigger }}
               run: |
