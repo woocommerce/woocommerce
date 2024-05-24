@@ -57,12 +57,11 @@
 			max-height: 50px;
 
 			&[aria-expanded="true"],
-			&:focus,
-			&:focus-visible {
+			&:focus {
 				background-color: #fff;
 				color: $input-text-active;
 				outline: 0;
-				border: 2px solid $input-border-gray;
+				box-shadow: 0 0 0 2px $input-border-gray;
 				border-bottom: 0;
 			}
 
@@ -79,8 +78,7 @@
 				&:focus {
 					background-color: $input-background-dark;
 					color: $input-text-dark;
-					border: 2px solid $input-border-gray;
-					border-bottom: 0;
+					box-shadow: 0 0 0 2px $input-border-gray;
 				}
 			}
 		}
@@ -90,11 +88,13 @@
 			background-color: $select-dropdown-light;
 			border: 2px solid $input-border-gray;
 			border-top: 0;
-			border-bottom: 1;
+			border-bottom-width: 2px;
 			margin: 3em 0 0 0;
 			padding: 0;
 			max-height: 300px;
-			min-width: 100%;
+			min-width: calc(100% + 4px);
+			left: -2px;
+			top: -1px;
 			overflow: auto;
 			color: $input-text-active;
 			border-bottom-left-radius: $universal-border-radius;
