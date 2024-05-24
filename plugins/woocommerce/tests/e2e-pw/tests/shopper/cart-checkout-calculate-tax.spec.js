@@ -386,8 +386,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		test.afterAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
 				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
+				consumerKey: qit.getEnv('CONSUMER_KEY'),
+				consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 				version: 'wc/v3',
 			} );
 			await api.delete( `products/${ productId }`, {

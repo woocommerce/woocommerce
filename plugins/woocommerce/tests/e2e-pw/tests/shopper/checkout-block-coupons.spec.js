@@ -1,3 +1,4 @@
+const qit = require('/qitHelpers');
 const {
 	goToPageEditor,
 	fillPageTitle,
@@ -36,7 +37,7 @@ const customerBilling = {
 let productId, orderId, limitedCouponId;
 
 const test = baseTest.extend( {
-	storageState: process.env.ADMINSTATE,
+	storageState: qit.getEnv('ADMINSTATE'),
 	testPageTitlePrefix: 'Checkout Block',
 	page: async ( { context, page, testPage }, use ) => {
 		await goToPageEditor( { page } );

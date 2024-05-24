@@ -16,7 +16,7 @@ async function setup() {
 		fs.copyFileSync(path.join(source, file), path.join(dest, file));
 	});
 
-	await qit.wp('theme activate twentynineteen');
+	await qit.wp('theme activate twentytwentythree');
 	await qit.wp("media import '/var/www/html/wp-content/uploads/woo-entrypoint/image-01.png' '/var/www/html/wp-content/uploads/woo-entrypoint/image-02.png' '/var/www/html/wp-content/uploads/woo-entrypoint/image-03.png'");
 
 	console.log('Setup completed.');
@@ -213,8 +213,8 @@ test('Entrypoint @entrypoint', async ({page}, testInfo) => {
 
 	const api = new wcApi( {
 		url: baseURL,
-		consumerKey: process.env.CONSUMER_KEY,
-		consumerSecret: process.env.CONSUMER_SECRET,
+		consumerKey: qit.getEnv('CONSUMER_KEY'),
+		consumerSecret: qit.getEnv('CONSUMER_SECRET'),
 		version: 'wc/v3',
 	} );
 
