@@ -29,13 +29,13 @@ class TemplateMatching {
 					if ( 'meta_data' === $key ) {
 						foreach ( $value as $meta_value ) {
 							if ( $product->get_meta( $meta_value['key'] ) !== $meta_value['value'] ) {
-								continue 3;
+								continue 3; // continue $product_templates loop.
 							}
 						}
 					} else {
 						$method_name = 'get_' . $key;
 						if ( $product->$method_name() !== $value ) {
-							continue 2;
+							continue 2; // continue $product_templates loop.
 						}
 					}
 					++$matches;
