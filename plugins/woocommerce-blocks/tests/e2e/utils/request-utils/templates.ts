@@ -10,8 +10,12 @@ import Handlebars from 'handlebars';
  */
 import type { RequestUtils } from './index';
 
+// We need to re-define the Template and TemplateType interfaces under a
+// different names because of the conflicts caused by the core E2E
+// utils already defining, but not exporting them.
+// @todo: Remove this when the core E2E utils export these interfaces and we can
+// use them directly.
 export type WPTemplateType = 'wp_template' | 'wp_template_part';
-
 export interface WPTemplate {
 	wp_id: number;
 	id: string;
