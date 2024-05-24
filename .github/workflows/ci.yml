@@ -283,7 +283,7 @@ jobs:
 
 
     alert-on-failure:
-        name: 'Send a Slack message'
+        name: 'Report results on Slack'
         runs-on: 'ubuntu-20.04'
         needs:
             [
@@ -304,10 +304,10 @@ jobs:
               with:
                 php-version: false
               
-            - name: 'Send message for failed jobs'
+            - name: 'Send messages for failed jobs'
               env:
                 SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
-                SLACK_CHANNEL: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
+                SLACK_CHANNEL: ${{ secrets.TEST_TEST_REPORTS_SLACK_CHANNEL }}
               run: |
                   pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "Build jobs matrix"
                   pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "Linting"

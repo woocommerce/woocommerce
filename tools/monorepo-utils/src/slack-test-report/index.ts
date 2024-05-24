@@ -52,7 +52,7 @@ const program = new Command( 'slack-test-report' )
 		if ( isFailure ) {
 			const { username } = options;
 			const client = new WebClient( getEnvVar( 'SLACK_TOKEN', true ) );
-			const { text, mainMsgBlocks, detailsMsgBlocksChunks } =
+			const {text, mainMsgBlocks, detailsMsgBlocksChunks } =
 				await createMessage( {
 					isFailure,
 					reportName: options.reportName,
