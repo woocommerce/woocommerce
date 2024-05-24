@@ -13,7 +13,6 @@ import {
 /**
  * Internal dependencies
  */
-import { ProductTourContainer } from './tour';
 import './add-edit-product-page.scss';
 
 const AddProductPage: React.FC = () => {
@@ -35,9 +34,7 @@ const AddProductPage: React.FC = () => {
 					<Spinner />
 				</div>
 			) : (
-				<>
-					<ProductTourContainer />
-				</>
+				<></>
 			) }
 		</div>
 	);
