@@ -3,13 +3,14 @@
  */
 import path from 'path';
 import { writeFileSync } from 'fs';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type {
 	Reporter,
 	FullResult,
 	TestCase,
 	TestResult,
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 } from '@playwright/test/reporter';
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 export type WPPerformanceResults = Record< string, number >;
 
