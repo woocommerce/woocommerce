@@ -34,7 +34,6 @@ declare global {
 			'minified-js': boolean;
 			'mobile-app-banner': boolean;
 			navigation: boolean;
-			'new-product-management-experience': boolean;
 			onboarding: boolean;
 			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
@@ -56,13 +55,16 @@ declare global {
 		};
 		wp: {
 			updates?: {
-				ajax: ( action, data: {
-					slug?: string;
-					plugin?: string;
-					theme?: string;
-					success?: function;
-					error?: function;
-				} ) => JQuery.Promise;
+				ajax: (
+					action,
+					data: {
+						slug?: string;
+						plugin?: string;
+						theme?: string;
+						success?: function;
+						error?: function;
+					}
+				) => JQuery.Promise;
 			};
 			autosave?: {
 				server: {

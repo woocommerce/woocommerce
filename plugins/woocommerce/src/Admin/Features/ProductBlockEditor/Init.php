@@ -56,11 +56,10 @@ class Init {
 		$this->redirection_controller = new RedirectionController();
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
-				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
-				add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
-				add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
-			}
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+			add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
+			add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
+
 			add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 			add_filter( 'woocommerce_register_post_type_product_variation', array( $this, 'enable_rest_api_for_product_variation' ) );
