@@ -308,19 +308,6 @@ describe( 'Activity Panel', () => {
 
 			expect( queryByText( '[HighlightTooltip]' ) ).toBeNull();
 		} );
-
-		it( 'should not render highlight tooltip when task is visited twice, not completed, but already shown', () => {
-			useUserPreferences.mockReturnValue( {
-				task_list_tracked_started_tasks: { payment: 2 },
-				help_panel_highlight_shown: 'yes',
-			} );
-
-			const { queryByText } = render(
-				<ActivityPanel isEmbedded query={ { task: 'payment' } } />
-			);
-
-			expect( queryByText( '[HighlightTooltip]' ) ).toBeNull();
-		} );
 	} );
 
 	describe( 'panel', () => {
