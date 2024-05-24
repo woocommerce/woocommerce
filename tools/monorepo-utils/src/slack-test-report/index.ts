@@ -57,19 +57,22 @@ const program = new Command( 'slack-test-report' )
 					isFailure,
 					reportName: options.reportName,
 					username: options.username,
-					sha: getEnvVar( 'GITHUB_SHA' ),
+					sha: getEnvVar( 'GITHUB_SHA', true ),
 					commitMessage: options.commitMessage,
 					prTitle: options.prTitle,
 					prNumber: options.prNumber,
-					actor: getEnvVar( 'GITHUB_ACTOR' ),
-					triggeringActor: getEnvVar( 'GITHUB_TRIGGERING_ACTOR' ),
-					eventName: getEnvVar( 'GITHUB_EVENT_NAME' ),
-					runId: getEnvVar( 'GITHUB_RUN_ID' ),
-					runAttempt: getEnvVar( 'GITHUB_RUN_ATTEMPT' ),
-					serverUrl: getEnvVar( 'GITHUB_SERVER_URL' ),
-					repository: getEnvVar( 'GITHUB_REPOSITORY' ),
-					refType: getEnvVar( 'GITHUB_REF_TYPE' ),
-					refName: getEnvVar( 'GITHUB_REF_NAME' ),
+					actor: getEnvVar( 'GITHUB_ACTOR', true ),
+					triggeringActor: getEnvVar(
+						'GITHUB_TRIGGERING_ACTOR',
+						true
+					),
+					eventName: getEnvVar( 'GITHUB_EVENT_NAME', true ),
+					runId: getEnvVar( 'GITHUB_RUN_ID', true ),
+					runAttempt: getEnvVar( 'GITHUB_RUN_ATTEMPT', true ),
+					serverUrl: getEnvVar( 'GITHUB_SERVER_URL', true ),
+					repository: getEnvVar( 'GITHUB_REPOSITORY', true ),
+					refType: getEnvVar( 'GITHUB_REF_TYPE', true ),
+					refName: getEnvVar( 'GITHUB_REF_NAME', true ),
 				} );
 
 			Logger.notice( 'Sending new message' );
