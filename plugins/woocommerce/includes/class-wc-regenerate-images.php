@@ -273,7 +273,7 @@ class WC_Regenerate_Images {
 		}
 
 		// The result of the earlier wp_get_attachment_metadata call is filterable, so we may not have height or
-		// width data at this point. 
+		// width data at this point.
 		if ( ! isset( $imagedata['height'] ) || ! isset( $imagedata['width'] ) ) {
 			return array();
 		}
