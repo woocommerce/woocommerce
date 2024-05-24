@@ -23,7 +23,10 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 
 test.describe( 'Product Filter: Attribute Block', () => {
 	test.describe( 'With default display style', () => {
-		test.beforeEach( async ( { templateCompiler } ) => {
+		test.beforeEach( async ( { requestUtils, templateCompiler } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
 			await templateCompiler.compile( {
 				attributes: {
 					attributeId: 1,

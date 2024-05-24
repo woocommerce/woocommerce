@@ -14,9 +14,9 @@
 				"wp-content/plugins/woocommerce-blocks-test-plugins": "./tests/e2e/plugins",
 				"wp-content/plugins/woocommerce/blocks-bin": "./bin",
 				"wp-content/plugins/woocommerce/blocks-bin/playwright": "./tests/e2e/bin",
-				"wp-content/themes/woocommerce-blocks-test-themes": "./tests/e2e/themes",
-				"wp-content/themes/woocommerce-blocks-test-themes/storefront": "https://downloads.wordpress.org/theme/storefront.latest-stable.zip",
-				"wp-content/themes/woocommerce-blocks-test-themes/twentytwentyfour": "https://downloads.wordpress.org/theme/twentytwentyfour.latest-stable.zip"
+				"wp-content/themes": "./tests/e2e/themes",
+				"wp-content/themes/storefront": "https://downloads.wordpress.org/theme/storefront.latest-stable.zip",
+				"wp-content/themes/twentytwentyfour": "https://downloads.wordpress.org/theme/twentytwentyfour.latest-stable.zip"
 			}
 		}
 	},
