@@ -67,8 +67,6 @@ const Combobox = ( {
 	} );
 
 	const [ isFocused, setIsFocused ] = useState( false );
-	const handleFocus = () => setIsFocused( true );
-	const handleBlur = () => setIsFocused( false );
 
 	useEffect( () => {
 		if ( ! required || value ) {
@@ -103,13 +101,14 @@ const Combobox = ( {
 				'has-error': error?.message && ! error?.hidden,
 			} ) }
 			ref={ controlRef }
-			onFocus={ handleFocus }
-			onBlur={ handleBlur }
+			onFocus={ () => setIsFocused( true ) }
+			onBlur={ () => setIsFocused( false ) }
 		>
 			<ComboboxControl
 				className={ 'wc-block-components-combobox-control' }
 				label={ label }
 				onChange={ onChange }
+				onSelect={ () => setIsFocused( false ) }
 				onFilterValueChange={ ( filterValue: string ) => {
 					if ( filterValue.length ) {
 						// If we have a value and the combobox is not focussed, this could be from browser autofill.
