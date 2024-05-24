@@ -368,7 +368,11 @@
 						"tests/js/**/*.{js,ts,tsx,scss,json}",
 						"tests/utils/**/.{js,ts,tsx,scss,json}"
 					],
-					"cascade": "test:js"
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}

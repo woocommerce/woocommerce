@@ -68,10 +68,17 @@ const config = {
 		actionTimeout: 20 * 1000,
 		navigationTimeout: 20 * 1000,
 	},
+	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
 	projects: [
 		{
-			name: 'Chrome',
+			name: 'default',
 			use: { ...devices[ 'Desktop Chrome' ] },
+		},
+		{
+			name: 'Gutenberg',
+			use: { ...devices[ 'Desktop Chrome' ] },
+			testIgnore:
+				/.*smoke-tests\/*|.*js-file-monitor\/*|.*admin-tasks\/*|.*activate-and-setup\/*|.*admin-analytics\/*|.*admin-marketing\/*|.*basic\/*|.*account-\/*|.*settings-\/*|.*users-\/*|.*order\/*|.*page-loads\/*/,
 		},
 	],
 };

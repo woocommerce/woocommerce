@@ -73,7 +73,7 @@ export const Layout = ( {
 	const shouldShowWCPayFeature = taskListComplete || isTaskListHidden;
 	const hasTwoColumnContent =
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
-	const isDashboardShown = ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
+	const isDashboardShown = Object.keys( query ).length > 0 && ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
 	const activeSetupTaskList = useActiveSetupTasklist();
 
 	const twoColumns =

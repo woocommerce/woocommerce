@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed a fatal error when programmatically using the WC_Discounts::class in a context where no cart exists.

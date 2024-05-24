@@ -12,6 +12,7 @@ export interface Attributes extends Record< string, boolean | number > {
 	requireApartmentField: boolean;
 	showPhoneField: boolean;
 	requirePhoneField: boolean;
+	showFormStepNumbers: boolean;
 	// Deprecated.
 	showOrderNotes: boolean;
 	showPolicyLinks: boolean;
