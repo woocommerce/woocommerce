@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/**
+ * External dependencies
+ */
 import path from 'path';
 import { writeFileSync } from 'fs';
 import type {
@@ -6,6 +10,7 @@ import type {
 	TestCase,
 	TestResult,
 } from '@playwright/test/reporter';
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 export type WPPerformanceResults = Record< string, number >;
 
@@ -47,7 +52,7 @@ class PerformanceReporter implements Reporter {
 		}
 	}
 
-	onEnd( result: FullResult ) {
+	onEnd( result: FullResult ): void {
 		if ( result.status !== 'passed' ) {
 			return;
 		}
