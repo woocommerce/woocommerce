@@ -48,11 +48,12 @@ const program = new Command( 'slack-test-report' )
 		}
 
 		const isFailure = options.conclusion === 'failure';
+		const channel = getEnvVar( 'SLACK_CHANNEL', true );
 
 		if ( isFailure ) {
 			const { username } = options;
 			const client = new WebClient( getEnvVar( 'SLACK_TOKEN', true ) );
-			const {text, mainMsgBlocks, detailsMsgBlocksChunks } =
+			const { text, mainMsgBlocks, detailsMsgBlocksChunks } =
 				await createMessage( {
 					isFailure,
 					reportName: options.reportName,
@@ -80,26 +81,26 @@ const program = new Command( 'slack-test-report' )
 			const response = await postMessage( client, {
 				text: `${ text }`,
 				blocks: mainMsgBlocks,
-				channel: getEnvVar( 'SLACK_CHANNEL', true ),
+				channel,
 				username,
 			} );
 			const mainMessageTS = response.ts;
 
-			if ( detailsMsgBlocksChunks.length === 0 ) {
-				Logger.notice(
-					'Sending new reply to main message with failure details'
-				);
+			if ( detailsMsgBlocksChunks.length > 0 ) {
+				Logger.notice( 'Replying with failure details' );
 				// Send replies to the main message with the current failure result
 				await postMessage( client, {
 					text,
 					blocks: detailsMsgBlocksChunks,
-					channel: getEnvVar( 'SLACK_CHANNEL', true ),
+					channel,
 					username,
 					thread_ts: mainMessageTS,
 				} );
 			}
 		} else {
-			Logger.notice( 'Test run passed. No message will be sent.' );
+			Logger.notice(
+				`No message will be sent for '${ options.conclusion }'`
+			);
 		}
 	} );
 
