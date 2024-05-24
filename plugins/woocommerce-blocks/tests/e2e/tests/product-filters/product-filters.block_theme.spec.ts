@@ -22,13 +22,7 @@ const blockData = {
 };
 
 const test = base.extend< { pageObject: ProductFiltersPage } >( {
-	pageObject: async (
-		{ page, editor, frontendUtils, editorUtils, requestUtils },
-		use
-	) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-enable-experimental-features'
-		);
+	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
 		const pageObject = new ProductFiltersPage( {
 			page,
 			editor,
@@ -40,7 +34,10 @@ const test = base.extend< { pageObject: ProductFiltersPage } >( {
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editorUtils } ) => {
+	test.beforeEach( async ( { admin, editorUtils, requestUtils } ) => {
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-enable-experimental-features'
+		);
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
