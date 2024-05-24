@@ -1704,7 +1704,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function is_coupon_emails_allowed( $check_emails, $restrictions ) {
 		wc_doing_it_wrong(
 			'WC_Cart::is_coupon_emails_allowed',
-			'This method has been deprecated and will be removed soon. Use Automattic\WooCommerce\Utilities\DiscountsUtil::is_coupon_emails_allowed instead.',
+			__( 'This method has been deprecated and will be removed soon. Use Automattic\WooCommerce\Utilities\DiscountsUtil::is_coupon_emails_allowed instead.', 'woocommerce' ),
 			'9.0.0'
 		);
 
