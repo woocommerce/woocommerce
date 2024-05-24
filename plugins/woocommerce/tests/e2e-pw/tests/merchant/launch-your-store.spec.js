@@ -1,25 +1,19 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
+const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'Launch Your Store - logged in', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeEach( async ( { page } ) => {
-		// Dismiss the core profiler
-		await page.goto( '/wp-admin/admin.php?page=wc-admin' );
-		// if the core profiler is already complete, skip this
-		try {
-			await page
-				.getByRole( 'button', { name: 'Skip guided setup' } )
-				.click( { timeout: 5000 } );
-			await page.getByLabel( 'Select country/region' ).click();
-			await page.getByRole( 'option', { name: 'Afghanistan' } ).click();
-			await page
-				.getByRole( 'button', { name: 'Go to my store' } )
-				.click();
-		} catch ( error ) {
-			console.log( 'Core profiler completed already.' );
-		}
+	test.beforeEach( async ( { page, baseURL } ) => {
+		await new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc-admin',
+		} ).post( 'onboarding/profile', {
+			skipped: true,
+		} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
