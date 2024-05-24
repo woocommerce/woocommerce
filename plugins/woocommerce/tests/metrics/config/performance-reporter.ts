@@ -1,22 +1,25 @@
+/**
+ * External dependencies
+ */
 import path from 'path';
 import { writeFileSync } from 'fs';
 import type {
-	Reporter,
-	FullResult,
-	TestCase,
-	TestResult,
+	Reporter as PlaywrightReporter,
+	FullResult as PlaywrightFullResult,
+	TestCase as PlaywrightTestCase,
+	TestResult as PlaywrightTestResult,
 } from '@playwright/test/reporter';
 
 export type WPPerformanceResults = Record< string, number >;
 
-class PerformanceReporter implements Reporter {
+class PerformanceReporter implements PlaywrightReporter {
 	private results: Record< string, WPPerformanceResults >;
 
 	constructor() {
 		this.results = {};
 	}
 
-	onTestEnd( test: TestCase, result: TestResult ): void {
+	onTestEnd( test: PlaywrightTestCase, result: PlaywrightTestResult ): void {
 		for ( const attachment of result.attachments ) {
 			if ( attachment.name !== 'results' ) {
 				continue;
@@ -47,7 +50,7 @@ class PerformanceReporter implements Reporter {
 		}
 	}
 
-	onEnd( result: FullResult ) {
+	onEnd( result: PlaywrightFullResult ) {
 		if ( result.status !== 'passed' ) {
 			return;
 		}
