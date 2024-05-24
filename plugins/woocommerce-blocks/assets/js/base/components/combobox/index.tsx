@@ -107,7 +107,10 @@ const Combobox = ( {
 			<ComboboxControl
 				className={ 'wc-block-components-combobox-control' }
 				label={ label }
-				onChange={ onChange }
+				onChange={ ( selectedValue: string ) => {
+					onChange( selectedValue );
+					setIsFocused( false );
+				} }
 				onSelect={ () => setIsFocused( false ) }
 				onFilterValueChange={ ( filterValue: string ) => {
 					if ( filterValue.length ) {
