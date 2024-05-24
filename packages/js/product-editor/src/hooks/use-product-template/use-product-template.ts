@@ -15,10 +15,8 @@ export const useProductTemplate = ( productTemplateId: string | undefined ) => {
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
 
-	const productTemplateIdToFind = productTemplateId;
-
 	const matchingProductTemplate = productTemplates.find(
-		( productTemplate ) => productTemplate.id === productTemplateIdToFind
+		( productTemplate ) => productTemplate.id === productTemplateId
 	);
 
 	// When we switch to getting the product template from the API,
