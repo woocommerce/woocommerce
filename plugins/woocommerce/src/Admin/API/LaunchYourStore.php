@@ -89,6 +89,18 @@ class LaunchYourStore {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/woopayments/test-orders',
+			array(
+				array(
+					'methods'             => 'DELETE',
+					'callback'            => array( $this, 'delete_woopay_test_orders' ),
+					'permission_callback' => array( $this, 'must_be_shop_manager_or_admin' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -144,28 +156,47 @@ class LaunchYourStore {
 	 * @return \WP_REST_Response
 	 */
 	public function get_woopay_test_orders_count() {
-		global $wpdb;
+		$return = function( $count ) {
+			return new \WP_REST_Response( array( 'count' => $count ) );
+		};
 
-		$hpos_enabled          = get_option( 'woocommerce_custom_orders_table_enabled', 'no' ) === 'yes';
-		$orders_table          = $hpos_enabled ? $wpdb->prefix . 'wc_orders' : $wpdb->posts;
-		$orders_meta_table     = $hpos_enabled ? $wpdb->prefix . 'wc_orders_meta' : $wpdb->postmeta;
-		$orders_table_key      = $hpos_enabled ? 'orders.id' : 'orders.ID';
-		$orders_meta_table_key = $hpos_enabled ? 'meta.order_id' : 'meta.post_id';
+		if ( ! defined( 'WCPAY_PLUGIN_FILE' ) ) {
+			return $return( 0 );
+		}
 
-		$sql = "
-			select count(*) as test_orders from
-			{$orders_table} as orders left join {$orders_meta_table} as meta
-			on {$orders_table_key} = {$orders_meta_table_key}
-			where
-				meta.`meta_key` = '_wcpay_mode'
-				and
-			    meta.`meta_value` = 'test'
-		";
+		$orders = wc_get_orders( array(
+			'meta_key' => '_wcpay_mode',
+			'meta_value' => 'test',
+			'return' => 'ids'
+		) );
 
-		// phpcs:ignore -- ignoring placeholder warning. Those values are not from user input.
-		$results = $wpdb->get_results( $sql );
+		return $return( count( $orders ) );
+	}
 
-		return new \WP_REST_Response( array( 'count' => (int) $results[0]->test_orders ) );
+	/**
+	 * Delete WooPayments test orders.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function delete_woopay_test_orders() {
+		$return = function( $status = 204 ) {
+			return new \WP_REST_Response( null, $status );
+		};
+
+		if ( ! defined( 'WCPAY_PLUGIN_FILE' ) ) {
+			return $return();
+		}
+
+		$orders = wc_get_orders( array(
+			'meta_key' => '_wcpay_mode',
+			'meta_value' => 'test',
+		) );
+
+		foreach ( $orders as $order ) {
+			$order->delete();
+		}
+
+		return $return();
 	}
 
 	/**
