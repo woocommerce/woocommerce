@@ -69,17 +69,4 @@ class FeatureGating {
 	public function is_production_environment() {
 		return self::PRODUCTION_ENVIRONMENT === $this->environment;
 	}
-
-	/**
-	 * Check if the block templates controller refactor should be used to display blocks.
-	 *
-	 * @return boolean
-	 */
-	public function is_block_templates_controller_refactor_enabled() {
-		if ( file_exists( __DIR__ . '/../../../../blocks.ini' ) ) {
-			$conf = parse_ini_file( __DIR__ . '/../../../../blocks.ini' );
-			return $this->is_development_environment() && isset( $conf['use_block_templates_controller_refactor'] ) && true === (bool) $conf['use_block_templates_controller_refactor'];
-		}
-		return false;
-	}
 }
