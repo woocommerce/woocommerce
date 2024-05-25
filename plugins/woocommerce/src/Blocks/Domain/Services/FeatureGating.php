@@ -25,7 +25,6 @@ class FeatureGating {
 	 */
 	public function __construct( $environment = 'unset' ) {
 		$this->environment = $environment;
-		$this->load_flag();
 		$this->load_environment();
 	}
 
