@@ -160,10 +160,6 @@ class LaunchYourStore {
 			return new \WP_REST_Response( array( 'count' => $count ) );
 		};
 
-		if ( ! defined( 'WCPAY_PLUGIN_FILE' ) ) {
-			return $return( 0 );
-		}
-
 		$orders = wc_get_orders( array(
 			'meta_key' => '_wcpay_mode',
 			'meta_value' => 'test',
@@ -182,10 +178,6 @@ class LaunchYourStore {
 		$return = function( $status = 204 ) {
 			return new \WP_REST_Response( null, $status );
 		};
-
-		if ( ! defined( 'WCPAY_PLUGIN_FILE' ) ) {
-			return $return();
-		}
 
 		$orders = wc_get_orders( array(
 			'meta_key' => '_wcpay_mode',
