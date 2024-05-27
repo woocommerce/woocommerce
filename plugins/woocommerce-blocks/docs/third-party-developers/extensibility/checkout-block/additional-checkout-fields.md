@@ -236,7 +236,7 @@ There are plans to expand this list, but for now these are the types available.
 
 To register additional checkout fields you must use the `woocommerce_register_additional_checkout_field` function.
 
-It is recommended to run this function after the `woocommerce_blocks_loaded` action.
+It is recommended to run this function after the `woocommerce_init` action.
 
 The registration function takes an array of options describing your field. Some field types take additional options.
 
@@ -312,7 +312,7 @@ Select fields can also be marked as required. If they are not (i.e. they are opt
 		'label' => 'Our New York Store'
 	]
 ]
-````
+```
 
 #### Options for `checkbox` fields
 
@@ -347,7 +347,7 @@ This example demonstrates rendering a text field in the address section:
 
 ```php
 add_action(
-	'woocommerce_blocks_loaded',
+	'woocommerce_init',
 	function() {
 		woocommerce_register_additional_checkout_field(
 			array(
@@ -377,7 +377,7 @@ This results in the following address form (the billing form will be the same):
 The rendered markup looks like this:
 
 ```html
-<input type="text" id="shipping-namespace/gov-id" autocapitalize="off"
+<input type="text" id="shipping-namespace-gov-id" autocapitalize="off"
        autocomplete="government-id" aria-label="custom aria label"
        aria-describedby="some-element" required="" aria-invalid="true"
        title="Title to show on hover" pattern="[A-Z0-9]{5}"
@@ -390,7 +390,7 @@ This example demonstrates rendering a checkbox field in the contact information 
 
 ```php
 add_action(
-	'woocommerce_blocks_loaded',
+	'woocommerce_init',
 	function() {
 		woocommerce_register_additional_checkout_field(
 			array(
@@ -402,7 +402,7 @@ add_action(
 		);
 	}
 );
-````
+```
 
 This results in the following contact information section:
 
@@ -416,7 +416,7 @@ This example demonstrates rendering a select field in the order information sect
 
 ```php
 add_action(
-	'woocommerce_blocks_loaded',
+	'woocommerce_init',
 	function() {
 		woocommerce_register_additional_checkout_field(
 			array(
@@ -690,7 +690,7 @@ This example is just a combined version of the examples shared above.
 
 ```php
 add_action(
-	'woocommerce_blocks_loaded',
+	'woocommerce_init',
 	function() {
 		woocommerce_register_additional_checkout_field(
 			array(

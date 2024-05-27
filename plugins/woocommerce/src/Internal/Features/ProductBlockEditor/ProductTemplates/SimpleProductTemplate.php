@@ -227,7 +227,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'             => 10,
 				'attributes'        => array(
 					'name'  => 'regular_price',
-					'label' => __( 'List price', 'woocommerce' ),
+					'label' => __( 'Regular price', 'woocommerce' ),
 					'help'  => $is_calc_taxes_enabled ? null : sprintf(
 					/* translators: %1$s: store settings link opening tag. %2$s: store settings link closing tag.*/
 						__( 'Per your %1$sstore settings%2$s, taxes are not enabled.', 'woocommerce' ),

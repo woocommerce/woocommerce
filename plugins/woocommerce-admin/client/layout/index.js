@@ -20,7 +20,12 @@ import {
 	CustomerEffortScoreModalContainer,
 	triggerExitPageCesSurvey,
 } from '@woocommerce/customer-effort-score';
-import { getHistory, getQuery } from '@woocommerce/navigation';
+import {
+	getHistory,
+	getQuery,
+	getNewPath,
+	navigateTo,
+} from '@woocommerce/navigation';
 import {
 	PLUGINS_STORE_NAME,
 	useUser,
@@ -39,7 +44,7 @@ import {
  * Internal dependencies
  */
 import './style.scss';
-import { Controller, getPages } from './controller';
+import { Controller, usePages } from './controller';
 import { Header } from '../header';
 import { Footer } from './footer';
 import Notices from './notices';
@@ -192,6 +197,19 @@ function _Layout( {
 		}
 	}, [ showHeader ] );
 
+	const isDashboardShown =
+		query.page && query.page === 'wc-admin' && ! query.path && ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
+	useEffect( () => {
+		// Catch-all to redirect to LYS hub when it was previously opened.
+		const isLYSWaiting =
+			window.sessionStorage.getItem( 'lysWaiting' ) === 'yes';
+		if ( isDashboardShown && isLYSWaiting ) {
+			navigateTo( {
+				url: getNewPath( {}, '/launch-your-store' ),
+			} );
+		}
+	}, [ isDashboardShown ] );
+
 	return (
 		<LayoutContextProvider
 			value={ getLayoutContextValue( [
@@ -313,6 +331,7 @@ const Layout = compose(
 
 const _PageLayout = () => {
 	const { currentUserCan } = useUser();
+	const pages = usePages();
 
 	// get the basename, usually 'wp-admin/' but can be something else if the site installation changed it
 	const path = document.location.pathname;
@@ -321,7 +340,7 @@ const _PageLayout = () => {
 	return (
 		<HistoryRouter history={ getHistory() }>
 			<Routes basename={ basename }>
-				{ getPages()
+				{ pages
 					.filter(
 						( page ) =>
 							! page.capability ||

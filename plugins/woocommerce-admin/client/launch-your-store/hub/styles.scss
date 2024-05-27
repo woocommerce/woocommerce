@@ -72,6 +72,10 @@
 
 					.edit-site-site-icon__image {
 						border-radius: 2px;
+						width: 100%;
+						height: auto;
+						object-fit: cover;
+						background: rgba(0, 0, 0, 0);
 					}
 
 					.edit-site-site-hub__view-mode-toggle-container {

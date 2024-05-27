@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Price: Narrow down the ancestors of the block so it's available in inserter only in places where block makes sense
