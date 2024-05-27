@@ -34,7 +34,10 @@ const test = base.extend< { pageObject: ProductFiltersPage } >( {
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editorUtils } ) => {
+	test.beforeEach( async ( { admin, editorUtils, requestUtils } ) => {
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-enable-experimental-features'
+		);
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
