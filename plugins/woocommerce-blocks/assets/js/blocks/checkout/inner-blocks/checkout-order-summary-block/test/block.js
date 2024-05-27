@@ -489,7 +489,7 @@ describe( 'Checkout Order Summary', () => {
 			await findByText(
 				container,
 				textContentMatcherAcrossSiblings(
-					'Shipping $40.00 Free shipping'
+					'Delivery $40.00 Free shipping'
 				)
 			)
 		).toBeInTheDocument();
