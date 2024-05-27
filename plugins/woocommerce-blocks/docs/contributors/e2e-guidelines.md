@@ -22,7 +22,7 @@ pnpm env:start
 > [!TIP]
 > If you want to start/stop the environment without running the whole setup, use the native `wp-env` commands directly, e.g. `npx wp-env start` and `npx wp-env stop`.
 
-The testing environment should now be ready under http://localhost:8889.
+The testing environment should now be ready under [localhost:8889](http://localhost:8889).
 
 ### Resetting the environment
 
@@ -68,15 +68,15 @@ pnpm run test:e2e -g "should display a discount label" --ui
 > [!TIP]
 > When a test fails, it leaves a trace info at the bottom. You can quickly jump into debugging mode by running the generated trace view command, for example:
 >
-> ![](../.media/images/e2e-open-trace-cmd.png)
+> ![Playwright failed test report](../.media/images/e2e-open-trace-cmd.png)
 
 ### Debugging tests in CI
 
 When a test fails in CI, a failure artifact is zipped and uploaded to the Summary page of the current job:
 
-![](../.media/images/e2e-download-failure-artifacts.png)
+![Summary page of the Blocks end-to-end tests job](../.media/images/e2e-download-failure-artifacts.png)
 
-Once you download and extract that zip, you'll see dedicated folders for the failed test artifacts. In CI, we retry running a failed test twice before considering it a failure, so there can be up to three folders per failed test. Each of those folders should contain a Playwright trace zip file and a screenshot from the failure moment. On the first retry, we also record the entire test, so the first retry folder should contain a video recording as well. To view a trace, head to https://trace.playwright.dev and drag and drop the zip file there, or run it from the command line:
+Once you download and extract that zip, you'll see dedicated folders for the failed test artifacts. In CI, we retry running a failed test twice before considering it a failure, so there can be up to three folders per failed test. Each of those folders should contain a Playwright trace zip file and a screenshot from the failure moment. On the first retry, we also record the entire test, so the first retry folder should contain a video recording as well. To view a trace, head to the [Playwright Trace Viewer](https://trace.playwright.dev) page and drag and drop the trace zip file there, or run it from the command line:
 
 ```shell
 npx playwright show-trace <path-to-the-trace>
@@ -89,9 +89,9 @@ We're using the [`@wordpress/e2e-test-utils-playwright`](https://github.com/Word
 > [!TIP]
 > Using the right selectors can be a daunting task, so let Playwright pick the right selector for you. Open the page you're testing against via `npx playwright open localhost:8889/path-to-the-page`. From there, you can use Playwright Inspector to generate the recommended locators:
 >
-> ![](../.media/images/e2e-playwright-inspector.png)
+> ![Playwright Inspector example usage](../.media/images/e2e-playwright-inspector.png)
 >
-> Read more about generating tests with Playwright in https://playwright.dev/docs/codegen-intro.
+> Read more about generating tests with Playwright in the [Generating Tests](https://playwright.dev/docs/codegen-intro) guide.
 
 ### Setup and teardown
 
