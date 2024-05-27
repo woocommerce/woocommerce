@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix some issues in performance tests #47735
