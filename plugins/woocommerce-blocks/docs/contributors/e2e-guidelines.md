@@ -95,7 +95,7 @@ We're using the [`@wordpress/e2e-test-utils-playwright`](https://github.com/Word
 
 ### Setup and teardown
 
-We isolate our tests from each other by resetting the database to its initial state **for every test**. Since every test starts with a clean slate, and there's no need to manually reset the environment, we only allow the beforeEach hook as there's no point in using beforeAll, afterAll, or afterEach. This approach might seem like a limitation at first, but ultimately it makes tests more stable and easier to write. This convention is enforced by an ESLint rule, so you don't need to worry about it.
+We isolate our tests from each other by resetting the database to its initial state **for every test**. Since every test starts with a clean slate, and there's no need to manually reset the environment, we only allow the `beforeEach` hook as there's no point in using `beforeAll`, `afterAll`, or `afterEach`. This approach might seem like a limitation at first, but ultimately it makes tests more stable and easier to write. This convention is enforced by an ESLint rule, so you don't need to worry about it.
 
 ### Plugins
 
