@@ -236,8 +236,10 @@ When you have the template ready, we recommend creating a [test fixture](https:/
 
 import { test as base, expect, TemplateCompiler } from '@woocommerce/e2e-utils';
 
-const test = base.extend< { templateCompiler: TemplateCompiler } >( {
-  templateCompiler: async ( { requestUtils }, use ) => {
+const test = base.extend< {
+  filteredProductsTemplate: TemplateCompiler
+} >( {
+  filteredProductsTemplate: async ( { requestUtils }, use ) => {
     const compiler = await requestUtils.createTemplateFromFile(
       'archive-product_with-filters'
     );
@@ -247,9 +249,9 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 
 test( 'Renders correct products for $10-$99 price range', async ( {
   page,
-  templateCompiler,
+  filteredProductsTemplate,
 } ) => {
-  await templateCompiler.compile( {
+  await filteredProductsTemplate.compile( {
     price: {
       from: '$10',
       to: '$99',
@@ -266,9 +268,9 @@ test( 'Renders correct products for $10-$99 price range', async ( {
 
 test( 'Renders correct products for $100-$999 price range', async ( {
   page,
-  templateCompiler,
+  filteredProductsTemplate,
 } ) => {
-  await templateCompiler.compile( {
+  await filteredProductsTemplate.compile( {
     price: {
       from: '$100',
       to: '$990',
