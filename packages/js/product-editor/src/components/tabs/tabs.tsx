@@ -84,7 +84,7 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 		_childIndex: number,
 		child: HTMLButtonElement
 	) {
-		child.click();
+		child.focus();
 	}
 
 	function renderFills( fills: readonly ( readonly ReactElement[] )[] ) {
