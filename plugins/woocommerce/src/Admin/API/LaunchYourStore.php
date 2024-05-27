@@ -156,15 +156,17 @@ class LaunchYourStore {
 	 * @return \WP_REST_Response
 	 */
 	public function get_woopay_test_orders_count() {
-		$return = function( $count ) {
+		$return = function ( $count ) {
 			return new \WP_REST_Response( array( 'count' => $count ) );
 		};
 
-		$orders = wc_get_orders( array(
-			'meta_key' => '_wcpay_mode',
-			'meta_value' => 'test',
-			'return' => 'ids'
-		) );
+		$orders = wc_get_orders(
+			array(
+				'meta_key'   => '_wcpay_mode',
+				'meta_value' => 'test',
+				'return'     => 'ids',
+			)
+		);
 
 		return $return( count( $orders ) );
 	}
@@ -175,14 +177,16 @@ class LaunchYourStore {
 	 * @return \WP_REST_Response
 	 */
 	public function delete_woopay_test_orders() {
-		$return = function( $status = 204 ) {
+		$return = function ( $status = 204 ) {
 			return new \WP_REST_Response( null, $status );
 		};
 
-		$orders = wc_get_orders( array(
-			'meta_key' => '_wcpay_mode',
-			'meta_value' => 'test',
-		) );
+		$orders = wc_get_orders(
+			array(
+				'meta_key'   => '_wcpay_mode',
+				'meta_value' => 'test',
+			)
+		);
 
 		foreach ( $orders as $order ) {
 			$order->delete();
