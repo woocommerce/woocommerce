@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test } from '@woocommerce/e2e-playwright-utils';
+import { expect, test } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'woocommerce/customer-account',
@@ -47,14 +47,13 @@ test.describe( `${ blockData.name } Block`, () => {
 		editor,
 		page,
 		frontendUtils,
-		editorUtils,
 	} ) => {
-		await admin.createNewPost( { legacyCanvas: true } );
+		await admin.createNewPost();
 		await editor.insertBlock( { name: blockData.name } );
 
 		await selectTextOnlyOption( { page } );
 
-		await editorUtils.publishAndVisitPost();
+		await editor.publishAndVisitPost();
 
 		// We have specified the parent block name as 'main' to ensure that the
 		// block is found within the main content area of the page and not the hooked block in the header.
@@ -76,14 +75,13 @@ test.describe( `${ blockData.name } Block`, () => {
 		editor,
 		page,
 		frontendUtils,
-		editorUtils,
 	} ) => {
-		await admin.createNewPost( { legacyCanvas: true } );
+		await admin.createNewPost();
 		await editor.insertBlock( { name: blockData.name } );
 
 		await selectIconOnlyOption( { page } );
 
-		await editorUtils.publishAndVisitPost();
+		await editor.publishAndVisitPost();
 
 		// We have specified the parent block name as 'main' to ensure that the
 		// block is found within the main content area of the page and not the hooked block in the header.
@@ -105,14 +103,13 @@ test.describe( `${ blockData.name } Block`, () => {
 		editor,
 		page,
 		frontendUtils,
-		editorUtils,
 	} ) => {
-		await admin.createNewPost( { legacyCanvas: true } );
+		await admin.createNewPost();
 		await editor.insertBlock( { name: blockData.name } );
 
 		await selectIconAndTextOption( { page } );
 
-		await editorUtils.publishAndVisitPost();
+		await editor.publishAndVisitPost();
 
 		// We have specified the parent block name as 'main' to ensure that the
 		// block is found within the main content area of the page and not the hooked block in the header.

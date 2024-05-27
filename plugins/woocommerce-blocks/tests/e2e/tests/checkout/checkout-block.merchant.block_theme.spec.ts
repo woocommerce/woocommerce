@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockData } from '@woocommerce/e2e-types';
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect, BlockData } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -42,32 +41,42 @@ test.describe( 'Merchant → Checkout', () => {
 	// `as string` is safe here because we know the variable is a string, it is defined above.
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test.beforeEach( async ( { editorUtils, admin, editor } ) => {
+	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
 		} );
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
 	} );
 
 	test( 'renders without crashing and can only be inserted once', async ( {
 		page,
-		editorUtils,
 		editor,
 	} ) => {
-		const blockPresence = await editorUtils.getBlockByName(
-			blockData.slug
-		);
+		const blockPresence = await editor.getBlockByName( blockData.slug );
 		expect( blockPresence ).toBeTruthy();
 
-		await editorUtils.openGlobalBlockInserter();
+		await editor.openGlobalBlockInserter();
 		await page.getByPlaceholder( 'Search' ).fill( blockData.slug );
 		const checkoutBlockButton = page.getByRole( 'option', {
 			name: blockData.name,
 			exact: true,
 		} );
-		expect( await editorUtils.ensureNoErrorsOnBlockPage() ).toBe( true );
+
+		const errorMessages = [
+			/This block contains unexpected or invalid content/gi,
+			/Your site doesn’t include support for/gi,
+			/There was an error whilst rendering/gi,
+			/This block has encountered an error and cannot be previewed/gi,
+		];
+
+		for ( const errorMessage of errorMessages ) {
+			await expect(
+				editor.canvas.getByText( errorMessage )
+			).toBeHidden();
+		}
+
 		await expect(
 			editor.canvas.locator( blockSelectorInEditor )
 		).toBeVisible();
@@ -140,7 +149,6 @@ test.describe( 'Merchant → Checkout', () => {
 	test( 'Merchant can see T&S and Privacy Policy links with checkbox', async ( {
 		frontendUtils,
 		checkoutPageObject,
-		editorUtils,
 		admin,
 		editor,
 	} ) => {
@@ -148,7 +156,7 @@ test.describe( 'Merchant → Checkout', () => {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
 		} );
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
 		await editor.selectBlocks(
 			blockSelectorInEditor +
@@ -191,7 +199,7 @@ test.describe( 'Merchant → Checkout', () => {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
 		} );
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
 		await editor.selectBlocks(
 			blockSelectorInEditor +
@@ -208,7 +216,6 @@ test.describe( 'Merchant → Checkout', () => {
 	test( 'inner blocks can be added/removed by filters', async ( {
 		page,
 		editor,
-		editorUtils,
 	} ) => {
 		// Begin by removing the block.
 		await editor.selectBlocks( blockSelectorInEditor );
@@ -222,7 +229,7 @@ test.describe( 'Merchant → Checkout', () => {
 		await removeButton.click();
 		// Expect block to have been removed.
 		await expect(
-			await editorUtils.getBlockByName( blockData.slug )
+			await editor.getBlockByName( blockData.slug )
 		).toHaveCount( 0 );
 
 		// Register a checkout filter to allow `core/table` block in the Checkout block's inner blocks, add
@@ -241,7 +248,7 @@ test.describe( 'Merchant → Checkout', () => {
 
 		await editor.insertBlock( { name: 'woocommerce/checkout' } );
 		await expect(
-			await editorUtils.getBlockByName( blockData.slug )
+			await editor.getBlockByName( blockData.slug )
 		).not.toHaveCount( 0 );
 
 		// Select the checkout-fields-block block and try to insert a block. Check the Table block is available.
@@ -293,14 +300,11 @@ test.describe( 'Merchant → Checkout', () => {
 			await editor.selectBlocks( blockSelectorInEditor );
 		} );
 
-		test( 'can enable dark mode inputs', async ( {
-			editorUtils,
-			page,
-		} ) => {
+		test( 'can enable dark mode inputs', async ( { editor, page } ) => {
 			const toggleLabel = page.getByLabel( 'Dark mode inputs' );
 			await toggleLabel.check();
 
-			const shippingAddressBlock = await editorUtils.getBlockByName(
+			const shippingAddressBlock = await editor.getBlockByName(
 				'woocommerce/checkout'
 			);
 
@@ -320,14 +324,13 @@ test.describe( 'Merchant → Checkout', () => {
 
 			test( 'Company input visibility and optional and required can be toggled', async ( {
 				editor,
-				editorUtils,
 			} ) => {
 				await editor.selectBlocks(
 					blockSelectorInEditor +
 						'  [data-type="woocommerce/checkout-shipping-address-block"]'
 				);
 
-				const shippingAddressBlock = await editorUtils.getBlockByName(
+				const shippingAddressBlock = await editor.getBlockByName(
 					'woocommerce/checkout-shipping-address-block'
 				);
 
@@ -385,7 +388,7 @@ test.describe( 'Merchant → Checkout', () => {
 						'  [data-type="woocommerce/checkout-billing-address-block"]'
 				);
 
-				const billingAddressBlock = await editorUtils.getBlockByName(
+				const billingAddressBlock = await editor.getBlockByName(
 					'woocommerce/checkout-billing-address-block'
 				);
 
@@ -438,14 +441,13 @@ test.describe( 'Merchant → Checkout', () => {
 
 			test( 'Apartment input visibility and optional and required can be toggled', async ( {
 				editor,
-				editorUtils,
 			} ) => {
 				await editor.selectBlocks(
 					blockSelectorInEditor +
 						'  [data-type="woocommerce/checkout-shipping-address-block"]'
 				);
 
-				const shippingAddressBlock = await editorUtils.getBlockByName(
+				const shippingAddressBlock = await editor.getBlockByName(
 					'woocommerce/checkout-shipping-address-block'
 				);
 
@@ -508,7 +510,7 @@ test.describe( 'Merchant → Checkout', () => {
 						'  [data-type="woocommerce/checkout-billing-address-block"]'
 				);
 
-				const billingAddressBlock = await editorUtils.getBlockByName(
+				const billingAddressBlock = await editor.getBlockByName(
 					'woocommerce/checkout-billing-address-block'
 				);
 
@@ -573,14 +575,13 @@ test.describe( 'Merchant → Checkout', () => {
 
 			test( 'Phone input visibility and optional and required can be toggled', async ( {
 				editor,
-				editorUtils,
 			} ) => {
 				await editor.selectBlocks(
 					blockSelectorInEditor +
 						'  [data-type="woocommerce/checkout-shipping-address-block"]'
 				);
 
-				const shippingAddressBlock = await editorUtils.getBlockByName(
+				const shippingAddressBlock = await editor.getBlockByName(
 					'woocommerce/checkout-shipping-address-block'
 				);
 
@@ -632,7 +633,7 @@ test.describe( 'Merchant → Checkout', () => {
 						'  [data-type="woocommerce/checkout-billing-address-block"]'
 				);
 
-				const billingAddressBlock = await editorUtils.getBlockByName(
+				const billingAddressBlock = await editor.getBlockByName(
 					'woocommerce/checkout-billing-address-block'
 				);
 
@@ -688,7 +689,6 @@ test.describe( 'Merchant → Checkout', () => {
 
 		test( 'Return to cart link is visible and can be toggled', async ( {
 			editor,
-			editorUtils,
 		} ) => {
 			await editor.selectBlocks(
 				`${ blockSelectorInEditor } .wp-block-woocommerce-checkout-actions-block`
@@ -700,7 +700,7 @@ test.describe( 'Merchant → Checkout', () => {
 				{ exact: true }
 			);
 			await returnToCartLinkToggle.check();
-			const shippingAddressBlock = await editorUtils.getBlockByName(
+			const shippingAddressBlock = await editor.getBlockByName(
 				'woocommerce/checkout-actions-block'
 			);
 
