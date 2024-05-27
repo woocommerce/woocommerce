@@ -445,7 +445,6 @@ abstract class AbstractBlock {
 				'restApiRoutes'             => [
 					'/wc/store/v1' => array_keys( $this->get_routes_from_namespace( 'wc/store/v1' ) ),
 				],
-				'defaultAvatar'             => get_avatar_url( 0, [ 'force_default' => true ] ),
 
 				/*
 				 * translators: If your word count is based on single characters (e.g. East Asian characters),
@@ -458,7 +457,8 @@ abstract class AbstractBlock {
 				$wc_blocks_config = array_merge(
 					$wc_blocks_config,
 					[
-						'productCount' => array_sum( (array) wp_count_posts( 'product' ) ),
+						'productCount'  => array_sum( (array) wp_count_posts( 'product' ) ),
+						'defaultAvatar' => get_avatar_url( 0, [ 'force_default' => true ] ),
 					]
 				);
 			}
