@@ -149,7 +149,7 @@ class ProductCollectionUtils {
 			} elseif ( ProductCatalogTemplate::SLUG === $name ) {
 				$context = 'product-catalog';
 			} elseif ( OrderConfirmationTemplate::SLUG === $name ) {
-				$context = 'order';
+				$context = 'order-confirmation';
 			}
 		}
 
