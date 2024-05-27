@@ -57,8 +57,8 @@ class Init {
 	 * Init REST API.
 	 */
 	public function rest_api_init() {
-		$controllers              = array();
-		$analytics_controllers    = array();
+		$controllers           = array();
+		$analytics_controllers = array();
 
 		if ( Features::is_enabled( 'launch-your-store' ) ) {
 			$controllers[] = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';

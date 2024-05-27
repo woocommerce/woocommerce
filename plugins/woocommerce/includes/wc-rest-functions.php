@@ -405,7 +405,7 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 		'wc-admin',
 		'wc-analytics',
 		'wc/store',
-		'wc/private'
+		'wc/private',
 	);
 
 	// We can consider allowing filtering this list in the future.
