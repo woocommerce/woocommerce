@@ -441,9 +441,6 @@ abstract class AbstractBlock {
 				// use the wcAdminFeatures global because it's not always enqueued in the context of blocks.
 				'experimentalBlocksEnabled' => Features::is_enabled( 'experimental-blocks' ),
 				'pluginUrl'                 => plugins_url( '/', dirname( __DIR__, 2 ) ),
-				'restApiRoutes'             => [
-					'/wc/store/v1' => array_keys( $this->get_routes_from_namespace( 'wc/store/v1' ) ),
-				],
 
 				/*
 				 * translators: If your word count is based on single characters (e.g. East Asian characters),
