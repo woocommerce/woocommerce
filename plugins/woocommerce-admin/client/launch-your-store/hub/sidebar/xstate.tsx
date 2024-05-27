@@ -90,7 +90,7 @@ const deleteTestOrders = async ( {
 	};
 } ) => {
 	if ( ! input.removeTestOrders ) {
-		return Promise.resolve();
+		return null;
 	}
 	return await apiFetch( {
 		path: '/wc-admin/launch-your-store/woopayments/test-orders',
@@ -333,12 +333,10 @@ export const sidebarMachine = setup( {
 							input: ( { event } ) => {
 								return {
 									removeTestOrders: (
-										event as DoneActorEvent<
-											ReturnType<
-												typeof deleteTestOrders
-											>
-										>
-									 ).removeTestOrders, // @ts-expect-error -- I can't really tell the type of the return value of deleteTestOrders by reading the PR changeset. With this typecast the TS error goes away once deleteTestOrders is typed properly
+										event as {
+											removeTestOrders: boolean;
+										}
+									 ).removeTestOrders,
 								};
 							},
 						},
