@@ -49,7 +49,9 @@ const tabs = [
 	},
 ];
 
-let productId_editVariations, productId_deleteVariations;
+let productId_editVariations,
+	productId_deleteVariations,
+	productId_singleVariation;
 
 test.describe( 'Variations tab', () => {
 	test.describe( 'Create variable product', () => {
@@ -58,6 +60,9 @@ test.describe( 'Variations tab', () => {
 				productAttributes
 			);
 			productId_deleteVariations = await createVariableProduct(
+				productAttributes
+			);
+			productId_singleVariation = await createVariableProduct(
 				productAttributes
 			);
 			await showVariableProductTour( browser, false );
@@ -71,6 +76,7 @@ test.describe( 'Variations tab', () => {
 			'The block product editor is not being tested'
 		);
 
+		// Issue found so skipping this test until fixed #47858
 		test.skip( 'can create a variation option and publish the product', async ( {
 			page,
 		} ) => {
@@ -150,7 +156,7 @@ test.describe( 'Variations tab', () => {
 					)
 				).toBeVisible();
 
-				await page.on( 'dialog', ( dialog ) => dialog.accept( '50' ) );
+				page.on( 'dialog', ( dialog ) => dialog.accept( '50' ) );
 
 				await page
 					.getByRole( 'button', { name: 'Set prices' } )
@@ -199,9 +205,7 @@ test.describe( 'Variations tab', () => {
 			await clickOnTab( 'Variations', page );
 
 			await page
-				.getByRole( 'button', {
-					name: 'Generate from options',
-				} )
+				.getByRole( 'button', { name: 'Generate from options' } )
 				.click();
 
 			const getVariationsResponsePromise = page.waitForResponse(
@@ -268,7 +272,7 @@ test.describe( 'Variations tab', () => {
 			).toBeVisible();
 		} );
 
-		test.skip( 'can delete a variation', async ( { page } ) => {
+		test( 'can delete a variation', async ( { page } ) => {
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }`
 			);
@@ -287,9 +291,6 @@ test.describe( 'Variations tab', () => {
 			await getVariationsResponsePromise;
 
 			await page
-				.locator(
-					'.woocommerce-variations-table-error-or-empty-state__actions'
-				)
 				.getByRole( 'button', { name: 'Generate from options' } )
 				.click();
 
@@ -352,12 +353,16 @@ test.describe( 'Variations tab', () => {
 			}
 		} );
 
-		test.skip( 'can see single variation warning and click the CTA', async ( {
+		test( 'can see single variation warning and click the CTA', async ( {
 			page,
 		} ) => {
 			await page.goto(
-				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }&tab=variations`
+				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_singleVariation }&tab=variations`
 			);
+
+			await page
+				.getByRole( 'button', { name: 'Generate from options' } )
+				.click();
 
 			await expect(
 				page.getByText(
