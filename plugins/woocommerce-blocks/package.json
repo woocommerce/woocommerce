@@ -40,7 +40,7 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "https://github.com:woocommerce/woocommerce.git"
+		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
 	"license": "GPL-3.0+",
 	"scripts": {
@@ -86,13 +86,9 @@
 		"test:js": "wp-scripts test-unit-js --config tests/js/jest.config.json",
 		"test:debug": "ndb .",
 		"test:e2e": "sh ./bin/check-env.sh && pnpm playwright test --config=tests/e2e/playwright.config.ts",
-		"test:e2e:report": "sh ./bin/check-env.sh && npx playwright test --config=tests/e2e/playwright.config.ts --reporter=html",
-		"test:e2e:side-effects": "pnpm run test:e2e --config=tests/e2e/playwright.side-effects.config.ts",
-		"test:e2e:side-effects:report": "pnpm run test:e2e:report --config=tests/e2e/playwright.side-effects.config.ts --reporter=html",
-		"test:e2e:classic-theme": "pnpm run test:e2e --config=tests/e2e/playwright.classic-theme.config.ts",
-		"test:e2e:classic-theme:report": "pnpm run test:e2e:report --config=tests/e2e/playwright.classic-theme.config.ts",
-		"test:e2e:block-theme-with-templates": "pnpm run test:e2e --config=tests/e2e/playwright.block-theme-with-templates.config.ts",
-		"test:e2e:block-theme-with-templates:report": "pnpm run test:e2e:report --config=tests/e2e/playwright.block-theme-with-templates.config.ts",
+		"test:e2e:block-theme": "pnpm run test:e2e block_theme",
+		"test:e2e:classic-theme": "pnpm run test:e2e classic_theme",
+		"test:e2e:block-theme-with-templates": "pnpm run test:e2e block_theme_with_templates",
 		"test:e2e:jest": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js",
 		"test:e2e:jest:dev": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config-dev.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js",
 		"test:e2e:jest:dev-watch": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config-dev.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js --watch",
@@ -141,10 +137,9 @@
 		"@storybook/react": "7.5.2",
 		"@storybook/react-webpack5": "^7.6.4",
 		"@testing-library/dom": "9.3.3",
-		"@testing-library/jest-dom": "5.16.5",
-		"@testing-library/react": "12.1.5",
-		"@testing-library/react-hooks": "7.0.2",
-		"@testing-library/user-event": "13.5.0",
+		"@testing-library/jest-dom": "6.4.5",
+		"@testing-library/react": "15.0.7",
+		"@testing-library/user-event": "14.5.2",
 		"@types/classnames": "2.3.0",
 		"@types/dinero.js": "1.9.0",
 		"@types/dompurify": "2.3.4",
@@ -256,7 +251,7 @@
 		"puppeteer": "17.1.3",
 		"react-docgen": "5.4.3",
 		"react-docgen-typescript-plugin": "^1.0.5",
-		"react-test-renderer": "17.0.2",
+		"react-test-renderer": "18.3.1",
 		"redux": "4.2.1",
 		"request-promise": "4.2.6",
 		"rimraf": "5.0.5",
@@ -277,7 +272,7 @@
 	},
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.1.0"
 	},
 	"dependencies": {
 		"@ariakit/react": "^0.4.4",
@@ -320,11 +315,12 @@
 		"trim-html": "0.1.9",
 		"use-debounce": "9.0.4",
 		"usehooks-ts": "^2.9.1",
-		"wordpress-components": "npm:@wordpress/components@14.2.0"
+		"wordpress-components": "npm:@wordpress/components@14.2.0",
+		"wordpress-components-slotfill": "npm:@wordpress/components@wp-6.5"
 	},
 	"peerDependencies": {
-		"react": "^17.0.0",
-		"react-dom": "^17.0.0"
+		"react": "^18.3.0",
+		"react-dom": "^18.3.0"
 	},
 	"optionalDependencies": {
 		"ndb": "1.1.5"
@@ -364,14 +360,19 @@
 					"name": "JavaScript",
 					"command": "test:js",
 					"changes": [
-						"jest.config.js",
 						"webpack.config.js",
 						"babel.config.js",
 						"tsconfig.json",
 						"assets/**/*.{js,ts,tsx,scss}",
-						"packages/**/*.{js,ts,tsx,scss}"
+						"packages/**/*.{js,ts,tsx,scss}",
+						"tests/js/**/*.{js,ts,tsx,scss,json}",
+						"tests/utils/**/.{js,ts,tsx,scss,json}"
 					],
-					"cascade": "test:js"
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}

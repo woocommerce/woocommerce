@@ -30,10 +30,12 @@ import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-u
  * Internal dependencies
  */
 import {
-	PostPayload,
+	type PostPayload,
 	createPostFromTemplate,
+	updateTemplateContents,
 	deletePost,
 } from '../utils/create-dynamic-content';
+import type { ExtendedTemplate } from '../types/e2e-test-utils-playwright';
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -142,6 +144,11 @@ const test = base.extend<
 				data: unknown
 			) => Promise< Post >;
 			deletePost: ( id: number ) => Promise< void >;
+			updateTemplateContents: (
+				templateId: string,
+				templatePath: string,
+				data: unknown
+			) => Promise< ExtendedTemplate >;
 		};
 	}
 >( {
@@ -161,12 +168,9 @@ const test = base.extend<
 			window.localStorage.clear();
 		} );
 
-		const cliOutput = await cli(
+		await cli(
 			`npm run wp-env run tests-cli wp db import ${ DB_EXPORT_FILE }`
 		);
-		if ( ! cliOutput.stdout.includes( 'Success: Imported ' ) ) {
-			throw new Error( `Failed to import ${ DB_EXPORT_FILE }` );
-		}
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
@@ -219,9 +223,22 @@ const test = base.extend<
 			const utilDeletePost = ( id: number ) =>
 				deletePost( requestUtils, id );
 
+			const utilUpdateTemplateContents = (
+				templateId: string,
+				templatePath: string,
+				data: unknown
+			) =>
+				updateTemplateContents(
+					requestUtils,
+					templateId,
+					templatePath,
+					data
+				);
+
 			await use( {
 				...requestUtils,
 				createPostFromTemplate: utilCreatePostFromTemplate,
+				updateTemplateContents: utilUpdateTemplateContents,
 				deletePost: utilDeletePost,
 			} );
 		},

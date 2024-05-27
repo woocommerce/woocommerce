@@ -38,8 +38,6 @@ jobs:
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
-              env:
-                  ENABLE_HPOS: 1
               run: pnpm --filter=@woocommerce/plugin-woocommerce env:test
 
             - name: Run API tests
@@ -119,6 +117,13 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
 
+            - name: Set Buildkite message
+              id: set_buildkite_message
+              run: |
+                  BUILDKITE_MESSAGE=`echo "Daily E2E run for $(date '+%Y-%m-%d')"`
+                  echo "BUILDKITE_MESSAGE=$BUILDKITE_MESSAGE" >> "$GITHUB_OUTPUT"
+              shell: bash
+
             - name: Run E2E tests
               timeout-minutes: 90
               id: run_playwright_e2e_tests
@@ -128,8 +133,10 @@ jobs:
                   FORCE_COLOR: 1
                   ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
                   ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+                  BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_DAILY_E2E_TOKEN }}
+                  BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.set_buildkite_message.outputs.BUILDKITE_MESSAGE }}
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
+              run: pnpm test:e2e-pw --shard ${{ matrix.shard.name }}
 
             - name: Upload reports to GitHub Actions Artifacts
               if: always()
@@ -261,12 +268,6 @@ jobs:
                     - plugin: 'WooCommerce Shipping & Tax'
                       repo: 'automattic/woocommerce-services'
                       slug: woocommerce-services
-                    - plugin: 'Gutenberg'
-                      repo: 'WordPress/gutenberg'
-                      slug: gutenberg
-                    - plugin: 'Gutenberg - Nightly'
-                      repo: 'bph/gutenberg'
-                      slug: gutenberg
         steps:
             - uses: actions/checkout@v3
 
@@ -280,7 +281,7 @@ jobs:
               uses: ./.github/actions/tests/setup-local-test-environment
               with:
                   test-type: e2e
-                  
+
             - name: Setup plugin for the main e2e suite
               working-directory: ./plugins/woocommerce
               run: ./tests/e2e-pw/bin/install-plugin.sh
@@ -292,7 +293,7 @@ jobs:
               with:
                   report-name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
                   tests: upload-plugin.spec.js
-                  
+
             - name: Run the rest of E2E tests
               id: run-e2e-composite-action
               timeout-minutes: 90
@@ -300,6 +301,7 @@ jobs:
               with:
                   playwright-config: ignore-plugin-tests.playwright.config.js
                   report-name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
+                  tests: '--project=default'
               env:
                   E2E_MAX_FAILURES: 90
 
@@ -403,10 +405,6 @@ jobs:
                       slug: woocommerce-paypal-payments
                     - plugin: 'WooCommerce Shipping & Tax'
                       slug: woocommerce-services
-                    - plugin: 'Gutenberg'
-                      slug: gutenberg
-                    - plugin: 'Gutenberg - Nightly'
-                      slug: gutenberg-nightly
         steps:
             - name: Download test report artifact
               uses: actions/download-artifact@v3
@@ -467,7 +465,7 @@ jobs:
               id: send-slack-message
               uses: slackapi/slack-github-action@v1.23.0
               with:
-                  channel-id: ${{ secrets.DAILY_TEST_SLACK_CHANNEL }}
+                  channel-id: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
                   payload: ${{ steps.construct-slack-payload.outputs.payload }}
               env:
                   SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}

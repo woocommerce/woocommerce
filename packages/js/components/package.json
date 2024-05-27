@@ -6,7 +6,7 @@
 	"license": "GPL-3.0-or-later",
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.1.0"
 	},
 	"keywords": [
 		"wordpress",
@@ -63,7 +63,7 @@
 	"dependencies": {
 		"@automattic/calypso-color-schemes": "^2.1.1",
 		"@automattic/interpolate-components": "^1.2.1",
-		"@automattic/tour-kit": "^1.1.1",
+		"@automattic/tour-kit": "^1.1.3",
 		"@types/wordpress__block-editor": "7.0.0",
 		"@types/wordpress__block-library": "2.6.1",
 		"@types/wordpress__blocks": "11.0.7",
@@ -199,7 +199,11 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js"
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}

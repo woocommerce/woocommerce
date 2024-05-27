@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
@@ -297,13 +297,15 @@ final class BlockTypesController {
 			MiniCartContents::get_mini_cart_block_types()
 		);
 
-		if ( Package::feature()->is_experimental_build() ) {
+		if ( Features::is_enabled( 'experimental-blocks' ) ) {
 			$block_types[] = 'ProductFilter';
+			$block_types[] = 'ProductFilters';
 			$block_types[] = 'ProductFilterStockStatus';
 			$block_types[] = 'ProductFilterPrice';
 			$block_types[] = 'ProductFilterAttribute';
 			$block_types[] = 'ProductFilterRating';
 			$block_types[] = 'ProductFilterActive';
+			$block_types[] = 'ProductFilterClearButton';
 		}
 
 		/**

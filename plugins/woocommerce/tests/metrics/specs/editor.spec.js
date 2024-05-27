@@ -1,4 +1,4 @@
-/* eslint-disable playwright/no-conditional-in-test, playwright/expect-expect */
+/* eslint-disable @woocommerce/dependency-group, jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */
 
 /**
  * WordPress dependencies
@@ -16,18 +16,6 @@ const BROWSER_IDLE_WAIT = 1000;
 
 const results = {};
 
-async function editPost( admin, page, postId ) {
-	const query = new URLSearchParams();
-	query.set( 'post', String( postId ) );
-	query.set( 'action', 'edit' );
-
-	await admin.visitAdminPage( 'post.php', query.toString() );
-	await setPreferences( page, 'core/edit-post', {
-		welcomeGuide: false,
-		fullscreenMode: false,
-	} );
-}
-
 async function setPreferences( page, context, preferences ) {
 	await page.waitForFunction( () => window?.wp?.data );
 
@@ -43,6 +31,18 @@ async function setPreferences( page, context, preferences ) {
 		},
 		{ context, preferences }
 	);
+}
+
+async function editPost( admin, page, postId ) {
+	const query = new URLSearchParams();
+	query.set( 'post', String( postId ) );
+	query.set( 'action', 'edit' );
+
+	await admin.visitAdminPage( 'post.php', query.toString() );
+	await setPreferences( page, 'core/edit-post', {
+		welcomeGuide: false,
+		fullscreenMode: false,
+	} );
 }
 
 test.describe( 'Editor Performance', () => {
@@ -125,12 +125,7 @@ test.describe( 'Editor Performance', () => {
 			console.log( draftId );
 		} );
 
-		test( 'Run the test', async ( {
-			admin,
-			page,
-			perfUtils,
-			metrics,
-		} ) => {
+		test( 'Run the test', async ( { admin, page, perfUtils, metrics } ) => {
 			await editPost( admin, page, draftId );
 			await perfUtils.disableAutosave();
 			const canvas = await perfUtils.getCanvas();
@@ -175,4 +170,4 @@ test.describe( 'Editor Performance', () => {
 	} );
 } );
 
-/* eslint-enable playwright/no-conditional-in-test, playwright/expect-expect */
+/* eslint-enable @woocommerce/dependency-group, jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */
