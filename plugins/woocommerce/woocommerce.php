@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 
 add_filter( 'plugin_configuration_data_woocommerce', static function() {
 	return array(
-		'url' => admin_url( 'admin.php?page=wc-admin&path=%2Fsetup-wizard' ),
+		'url' => admin_url( 'admin.php?page=wc-admin' ),
 	);
 } );
 
