@@ -230,7 +230,10 @@ class ProductCollectionUtils {
 		}
 
 		if ( ! empty( $query_attrs['woocommerceStockStatus'] ) ) {
-			$filters['stock-status'] = 1;
+			$default_diff = array_diff( array( 'instock', 'outofstock', 'onbackorder' ), $query_attrs['woocommerceStockStatus'] );
+			if ( ! empty( $default_diff ) ) {
+				$filters['stock-status'] = 1;
+			}
 		}
 
 		if ( ! empty( $query_attrs['woocommerceAttributes'] ) ) {
