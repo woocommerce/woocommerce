@@ -91,4 +91,24 @@ test.describe( 'Shopper → Shipping', () => {
 			)
 		).toBeHidden();
 	} );
+
+	test( 'Guest user cannot see shipping calculator on cart page when disabled', async ( {
+		requestUtils,
+		browser,
+		shippingUtils,
+	} ) => {
+		const guestContext = await browser.newContext();
+		const userPage = await guestContext.newPage();
+		await shippingUtils.disableShippingCalculator();
+		const userFrontendUtils = new FrontendUtils( userPage, requestUtils );
+
+		await userFrontendUtils.goToShop();
+		await userFrontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await userFrontendUtils.goToCart();
+		await expect( userPage.getByText( 'Delivery' ) ).toBeVisible();
+
+		await expect(
+			userPage.getByText( 'Calculated during checkout' )
+		).toBeVisible();
+	} );
 } );
