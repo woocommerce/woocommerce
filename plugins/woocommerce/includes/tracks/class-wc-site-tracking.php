@@ -233,5 +233,26 @@ class WC_Site_Tracking {
 		}
 	}
 
+	/**
+	 * Sets a cookie for tracking purposes, but only if tracking is enabled/allowed.
+	 *
+	 * @internal
+	 * @since 9.1.0
+	 *
+	 * @param string $cookie_key   The key of the cookie.
+	 * @param string $cookie_value The value of the cookie.
+	 * @param int    $expire       Expiry of the cookie.
+	 * @param bool   $secure       Whether the cookie should be served only over https.
+	 * @param bool   $http_only    Whether the cookie is only accessible over HTTP.
+	 *
+	 * @return bool If setting the cookie was attempted (will be false if tracking is not allowed).)
+	 */
+	public static function set_tracking_cookie( string $cookie_key, string $cookie_value, int $expire = 0, bool $secure = false, bool $http_only = false ): bool {
+		if ( self::is_tracking_enabled() ) {
+			wc_setcookie( $cookie_key, $cookie_value, $expire, $secure, $http_only);
+			return true;
+		}
 
+		return false;
+	}
 }

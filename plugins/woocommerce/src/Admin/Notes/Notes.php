@@ -423,7 +423,7 @@ class Notes {
 		unset( $_COOKIE['tk_ai'] );
 		wc_admin_record_tracks_event( $event_name, $params );
 		if ( isset( $anon_id ) ) {
-			setcookie( 'tk_ai', $anon_id );
+			WC_Site_Tracking::set_tracking_cookie( 'tk_ai', $anon_id );
 		}
 	}
 
