@@ -1,12 +1,12 @@
 /**
  * Util helper made for filling shipping details in the block-based checkout
  *
- * @param page
- * @param firstName
- * @param lastName
- * @param address
- * @param city
- * @param zip
+ * @param {Object} page
+ * @param {string} firstName
+ * @param {string} lastName
+ * @param {string} address
+ * @param {string} city
+ * @param {string} zip
  */
 export async function fillShippingCheckoutBlocks(
 	page,
@@ -41,12 +41,12 @@ export async function fillShippingCheckoutBlocks(
 /**
  * Util helper made for filling billing details in the block-based checkout
  *
- * @param page
- * @param firstName
- * @param lastName
- * @param address
- * @param city
- * @param zip
+ * @param {Object} page
+ * @param {string} firstName
+ * @param {string} lastName
+ * @param {string} address
+ * @param {string} city
+ * @param {string} zip
  */
 export async function fillBillingCheckoutBlocks(
 	page,
