@@ -89,7 +89,7 @@ export const createReducer = (
 					};
 
 				case TYPES.CREATE_ITEM_SUCCESS: {
-					const { options } = payload;
+					const { options = {} } = payload;
 
 					const { objItems, ids } = organizeItemsById(
 						[ payload.item ],
