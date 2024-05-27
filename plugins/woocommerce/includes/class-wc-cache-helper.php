@@ -169,8 +169,7 @@ class WC_Cache_Helper {
 					$redirect_url = add_query_arg( $wp->query_string, '', $redirect_url );
 				}
 
-				$redirect_url = add_query_arg( 'v', $location_hash, remove_query_arg( 'v', $redirect_url ) );
-
+				$redirect_url = add_query_arg( 'v', $location_hash, remove_query_arg( array( 'v', 'add-to-cart' ), $redirect_url ) );
 				wp_safe_redirect( esc_url_raw( $redirect_url ), 307 );
 				exit;
 			}

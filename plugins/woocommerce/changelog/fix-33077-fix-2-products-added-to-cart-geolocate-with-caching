@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix two products being added to cart when Geolocate (with page caching support) was enabled and AJAX add to cart buttons disabled
