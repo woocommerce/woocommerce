@@ -84,15 +84,6 @@ class FeatureGating {
 	}
 
 	/**
-	 * Checks if we're executing the code in an experimental build mode.
-	 *
-	 * @return boolean
-	 */
-	public function is_experimental_build() {
-		return $this->flag >= self::EXPERIMENTAL_FLAG;
-	}
-
-	/**
 	 * Checks if we're executing the code in an feature plugin or experimental build mode.
 	 *
 	 * @return boolean
@@ -177,5 +168,4 @@ class FeatureGating {
 		}
 		return false;
 	}
-
 }

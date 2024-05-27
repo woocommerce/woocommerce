@@ -14,6 +14,9 @@ const TEMPLATE_PATH = path.join( __dirname, './stock-status.handlebars' );
 test.describe( 'Product Filter: Stock Status Block', () => {
 	test.describe( 'With default display style', () => {
 		test.beforeEach( async ( { requestUtils } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
 			await requestUtils.updateTemplateContents(
 				PRODUCT_CATALOG_TEMPLATE_ID,
 				TEMPLATE_PATH,
@@ -113,6 +116,9 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 	test.describe( 'With dropdown display style', () => {
 		test.beforeEach( async ( { requestUtils } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
 			await requestUtils.updateTemplateContents(
 				PRODUCT_CATALOG_TEMPLATE_ID,
 				TEMPLATE_PATH,
