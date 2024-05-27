@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Adds a defensive check to reduce error log noise when regenerating images.
