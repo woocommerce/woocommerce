@@ -133,7 +133,7 @@ class ProductCollectionUtils {
 
 			$name = $post->post_name;
 			if ( false !== strpos( $name, SingleProductTemplate::SLUG ) ) {
-				$context = 'product';
+				$context = 'single-product';
 			} elseif ( ProductAttributeTemplate::SLUG === $name ) {
 				$context = 'product-archive';
 			} elseif ( false !== strpos( $name, 'taxonomy-' ) ) { // Including the '-' in the check to avoid false positives.
@@ -147,7 +147,7 @@ class ProductCollectionUtils {
 			} elseif ( CheckoutTemplate::SLUG === $name ) {
 				$context = 'checkout';
 			} elseif ( ProductCatalogTemplate::SLUG === $name ) {
-				$context = 'catalog';
+				$context = 'product-catalog';
 			} elseif ( OrderConfirmationTemplate::SLUG === $name ) {
 				$context = 'order';
 			}
@@ -179,7 +179,7 @@ class ProductCollectionUtils {
 			if ( 'woocommerce/product-collection' === $block['blockName'] ) {
 
 				$instances[] = array(
-					'collection'        => $block['attrs']['collection'] ?? 'catalog',
+					'collection'        => $block['attrs']['collection'] ?? 'product-catalog',
 					'in-single-product' => $in_single ? '1' : '0',
 					'filters'           => self::get_query_filters_track_data( $block ),
 				);
