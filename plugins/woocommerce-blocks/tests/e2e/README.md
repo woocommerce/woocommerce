@@ -1,6 +1,6 @@
 # WooCommerce Blocks End-to-End Tests
 
-This document provides an overview of the WooCommerce Blocks end-to-end testing process. For detailed instructions and comprehensive guidelines, please refer to the [contributor guidelines document](https://github.com/woocommerce/woocommerce/blob/refactor/core-e2e-utils-implementation/plugins/woocommerce-blocks/docs/contributors/e2e-guidelines.md).
+This document provides an overview of the WooCommerce Blocks end-to-end testing process. For detailed instructions and comprehensive guidelines, please refer to the [contributor guidelines document](../../docs/contributors/e2e-guidelines.md).
 
 ## Quick Start
 

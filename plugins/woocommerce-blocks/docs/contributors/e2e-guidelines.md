@@ -12,7 +12,7 @@ Run the following command from the repository root to build the WooCommerce plug
 pnpm --filter='@woocommerce/plugin-woocommerce' watch:build
 ```
 
-Next, run the following command from the [`woocommerce-blocks` plugin folder](https://github.com/woocommerce/woocommerce/tree/HEAD/plugins/woocommerce-blocks) to start a `wp-env` instance and install all the testing products, languages, etc.:
+Next, run the following command from the [`woocommerce-blocks` plugin folder](../../../woocommerce-blocks/) to start a `wp-env` instance and install all the testing products, languages, etc.:
 
 ```shell
 cd plugins/woocommerce-blocks/
@@ -99,7 +99,7 @@ We isolate our tests from each other by resetting the database to its initial st
 
 ### Plugins
 
-To use a custom plugin with your tests, first create the plugin PHP file and save it to the [test plugins folder](https://github.com/woocommerce/woocommerce/tree/HEAD/plugins/woocommerce-blocks/tests/e2e/plugins/). Here's a handy snippet to help you get started:
+To use a custom plugin with your tests, first create the plugin PHP file and save it to the [test plugins folder](../../tests/e2e/plugins/). Here's a handy snippet to help you get started:
 
 ```php
 // plugins/my-fancy-plugin.php
@@ -157,11 +157,11 @@ test.beforeEach( async ( { page, requestUtils } ) => {
 
 #### Adding a new theme
 
-If you've created a custom theme and want to use it in your tests, save it in the [test themes folder](https://github.com/woocommerce/woocommerce/tree/HEAD/plugins/woocommerce-blocks/tests/e2e/themes/). Check out the themes that are already there for inspiration. The activation part was explained above, so you're good to go!
+If you've created a custom theme and want to use it in your tests, save it in the [test themes folder](../../tests/e2e/themes/). Check out the themes that are already there for inspiration. The activation part was explained above, so you're good to go!
 
 ### Utilities
 
-We have a handful of [custom utilities](https://github.com/woocommerce/woocommerce/tree/HEAD/plugins/woocommerce-blocks/tests/e2e/utils/) built on top of core's [`@wordpress/e2e-test-utils-playwright`](https://github.com/WordPress/gutenberg/tree/HEAD/packages/e2e-test-utils-playwright), so make sure to familiarize yourself with them.
+We have a handful of [custom utilities](../../tests/e2e/utils/) built on top of core's [`@wordpress/e2e-test-utils-playwright`](https://github.com/WordPress/gutenberg/tree/HEAD/packages/e2e-test-utils-playwright), so make sure to familiarize yourself with them.
 
 #### Creating new utilities
 
@@ -224,7 +224,7 @@ export class Editor extends CoreEditor {
 
 ### Content Templates
 
-We have created `RequestUtils.createPostFromFile()` and `RequestUtils.createTemplateFromFile()` utilities that enable creating complex content testing scenarios with Handlebars templates. The template files are kept in the [content-templates](https://github.com/woocommerce/woocommerce/tree/HEAD/plugins/woocommerce-blocks/tests/e2e/content-templates/) folder, so you can head there for some inspiration.
+We have created `RequestUtils.createPostFromFile()` and `RequestUtils.createTemplateFromFile()` utilities that enable creating complex content testing scenarios with Handlebars templates. The template files are kept in the [content-templates](../../tests/e2e/content-templates/) folder, so you can head there for some inspiration.
 
 > [!IMPORTANT]
 > The Handlebars template filenames must be prefixed with the entity type. For posts, an example filename would be `post_with-filters.handlebars`, and for templates `template_archive-product_with-filters.handlebars`. Notice that the latter contains the slug of the template (`archive-product`) before the name (`with-filters`), separated with an underscore - it's necessary for the template to be properly loaded and created.
