@@ -14,9 +14,6 @@ const singleProductPrice = '555.00';
 // default cart and checkout blocks, mini-cart, product collection
 const blocks = [
 	{
-		name: 'Product Price',
-	},
-	{
 		name: 'Product Search',
 	},
 	{
