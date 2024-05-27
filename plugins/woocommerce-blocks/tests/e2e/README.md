@@ -226,7 +226,8 @@ export class Editor extends CoreEditor {
 
 We have created `RequestUtils.createPostFromFile()` and `RequestUtils.createTemplateFromFile()` utilities that enable creating complex content testing scenarios with Handlebars templates. The template files are kept in the [content-templates](./content-templates/) folder, so you can head there for some inspiration.
 
-The Handlebars template filenames must be prefixed with the template type, e.g., `post_with-filters.handlebars`. As for the templates' templates (I know it's confusing), you'll also need to provide the template type, e.g., `template_archive-product_with-filters.handlebars`. 
+> [!IMPORTANT]
+> The Handlebars template filenames must be prefixed with the entity type. For posts, an example filename would be `post_with-filters.handlebars`, and for templates `template_archive-product_with-filters.handlebars`. Notice that the latter contains the slug of the template (`archive-product`) before the name (`with-filters`), separated with an underscore - it's necessary for the template to be properly loaded and created.
 
 When you have the template ready, we recommend creating a fixture that will be used to compile and create your template with given data, for example:
 
@@ -244,7 +245,10 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
   },
 } );
 
-test( 'Renders correct filters', async ( { page, templateCompiler } ) => {
+test( 'Renders correct products for $10-$99 price range', async ( {
+  page,
+  templateCompiler,
+} ) => {
   await templateCompiler.compile( {
     price: {
       from: '$10',
@@ -254,6 +258,28 @@ test( 'Renders correct filters', async ( { page, templateCompiler } ) => {
 
   await page.goto( '/shop' );
 
-  await expect( page.getByLabel( 'Products' ) ).toHaveCount( 4 );
+  await expect( page.getByLabel( 'Products' ) ).toHaveText( [
+    'Socks',
+    'T-Shirt',
+  ] );
+} );
+
+test( 'Renders correct products for $100-$999 price range', async ( {
+  page,
+  templateCompiler,
+} ) => {
+  await templateCompiler.compile( {
+    price: {
+      from: '$100',
+      to: '$990',
+    },
+  } );
+
+  await page.goto( '/shop' );
+
+  await expect( page.getByLabel( 'Products' ) ).toHaveText( [
+    'Rolex',
+    'Lambo',
+  ] );
 } );
 ```
