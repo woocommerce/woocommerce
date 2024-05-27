@@ -34,14 +34,17 @@ export const ShippingRateSelector = ( {
 		: __( 'Choose a shipping option', 'woocommerce' );
 
 	const formattedLocation = formatShippingAddress( shippingAddress );
-	const noResultsMessage = sprintf(
-		/* translators: %s is referring to the formatted shipping address */
-		__(
-			'No delivery options available for %s. Please verify the address is correct or try a different address.',
-			'woocommerce'
-		),
-		formattedLocation
+	const noResultsMessage = (
+		<>
+			{ __( 'No delivery options available for ', 'woocommerce' ) }
+			<strong>{ formattedLocation }</strong>
+			{ __(
+				'. Please verify the address is correct or try a different address.',
+				'woocommerce'
+			) }
+		</>
 	);
+
 	return (
 		<fieldset className="wc-block-components-totals-shipping__fieldset">
 			<legend className="screen-reader-text">{ legend }</legend>
