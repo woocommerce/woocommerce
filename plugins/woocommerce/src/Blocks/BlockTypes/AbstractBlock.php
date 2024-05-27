@@ -436,26 +436,26 @@ abstract class AbstractBlock {
 
 		if ( ! $this->asset_data_registry->exists( 'wcBlocksConfig' ) ) {
 			$wc_blocks_config = [
-				// Note that while we don't have a consolidated way of doing feature-flagging
-				// we are borrowing from the WC Admin Features implementation. Also note we cannot
-				// use the wcAdminFeatures global because it's not always enqueued in the context of blocks.
-				'experimentalBlocksEnabled' => Features::is_enabled( 'experimental-blocks' ),
-				'pluginUrl'                 => plugins_url( '/', dirname( __DIR__, 2 ) ),
+				'pluginUrl'     => plugins_url( '/', dirname( __DIR__, 2 ) ),
 
 				/*
 				 * translators: If your word count is based on single characters (e.g. East Asian characters),
 				 * enter 'characters_excluding_spaces' or 'characters_including_spaces'. Otherwise, enter 'words'.
 				 * Do not translate into your own language.
 				 */
-				'wordCountType'             => _x( 'words', 'Word count type. Do not translate!', 'woocommerce' ),
+				'wordCountType' => _x( 'words', 'Word count type. Do not translate!', 'woocommerce' ),
 			];
 			if ( is_admin() && ! WC()->is_rest_api_request() ) {
 				$wc_blocks_config = array_merge(
 					$wc_blocks_config,
 					[
-						'buildPhase'    => Package::feature()->get_flag(),
-						'productCount'  => array_sum( (array) wp_count_posts( 'product' ) ),
-						'defaultAvatar' => get_avatar_url( 0, [ 'force_default' => true ] ),
+						'buildPhase'                => Package::feature()->get_flag(),
+						// Note that while we don't have a consolidated way of doing feature-flagging
+						// we are borrowing from the WC Admin Features implementation. Also note we cannot
+						// use the wcAdminFeatures global because it's not always enqueued in the context of blocks.
+						'experimentalBlocksEnabled' => Features::is_enabled( 'experimental-blocks' ),
+						'productCount'              => array_sum( (array) wp_count_posts( 'product' ) ),
+						'defaultAvatar'             => get_avatar_url( 0, [ 'force_default' => true ] ),
 					]
 				);
 			}
