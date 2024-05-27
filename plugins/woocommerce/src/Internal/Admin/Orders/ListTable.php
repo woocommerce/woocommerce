@@ -236,7 +236,7 @@ class ListTable extends WP_List_Table {
 		if ( ! empty( $this->order_query_args['s'] ) ) {
 			$search_label  = '<span class="subtitle">';
 			$search_label .= sprintf(
-				/* translators: %s: Search query. */
+			/* translators: %s: Search query. */
 				__( 'Search results for: %s', 'woocommerce' ),
 				'<strong>' . esc_html( $this->order_query_args['s'] ) . '</strong>'
 			);
@@ -275,15 +275,15 @@ class ListTable extends WP_List_Table {
 	 */
 	public function render_blank_state(): void {
 		?>
-			<div class="woocommerce-BlankState">
+		<div class="woocommerce-BlankState">
 
-				<h2 class="woocommerce-BlankState-message">
-					<?php esc_html_e( 'When you receive a new order, it will appear here.', 'woocommerce' ); ?>
-				</h2>
+			<h2 class="woocommerce-BlankState-message">
+				<?php esc_html_e( 'When you receive a new order, it will appear here.', 'woocommerce' ); ?>
+			</h2>
 
-				<div class="woocommerce-BlankState-buttons">
-					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
-				</div>
+			<div class="woocommerce-BlankState-buttons">
+				<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
+			</div>
 
 			<?php
 			/**
@@ -294,7 +294,7 @@ class ListTable extends WP_List_Table {
 			do_action( 'wc_marketplace_suggestions_orders_empty_state' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			?>
 
-			</div>
+		</div>
 		<?php
 	}
 
@@ -611,8 +611,8 @@ class ListTable extends WP_List_Table {
 
 			$this->status_count_cache =
 				$res
-				? array_combine( array_column( $res, 'status' ), array_map( 'absint', array_column( $res, 'cnt' ) ) )
-				: array();
+					? array_combine( array_column( $res, 'status' ), array_map( 'absint', array_column( $res, 'cnt' ) ) )
+					: array();
 		}
 
 		$status = (array) $status;
@@ -646,7 +646,7 @@ class ListTable extends WP_List_Table {
 		 *
 		 * @param null           $should_render_blank_state `null` will use the built-in counts. Sending a boolean will short-circuit that path.
 		 * @param object         ListTable The current instance of the class.
-		*/
+		 */
 		$should_render_blank_state = apply_filters(
 			'woocommerce_' . $this->order_type . '_list_table_should_render_blank_state',
 			null,
@@ -793,7 +793,7 @@ class ListTable extends WP_List_Table {
 		foreach ( $order_dates as $date ) {
 			$month           = zeroise( $date->month, 2 );
 			$month_year_text = sprintf(
-				/* translators: 1: Month name, 2: 4-digit year. */
+			/* translators: 1: Month name, 2: 4-digit year. */
 				esc_html_x( '%1$s %2$d', 'order dates dropdown', 'woocommerce' ),
 				$wp_locale->get_month( $month ),
 				$date->year
@@ -825,7 +825,7 @@ class ListTable extends WP_List_Table {
 			$user    = get_user_by( 'id', $user_id );
 
 			$user_string = sprintf(
-				/* translators: 1: user display name 2: user ID 3: user email */
+			/* translators: 1: user display name 2: user ID 3: user email */
 				esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
 				$user->display_name,
 				absint( $user->ID ),
@@ -1031,30 +1031,43 @@ class ListTable extends WP_List_Table {
 	 */
 	public function render_order_status_column( WC_Order $order ): void {
 		$tooltip = '';
-		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-		$comment_count = get_comment_count( $order->get_id() );
-		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-		$approved_comments_count = absint( $comment_count['approved'] );
 
-		if ( $approved_comments_count ) {
-			$latest_notes = wc_get_order_notes(
-				array(
-					'order_id' => $order->get_id(),
-					'limit'    => 1,
-					'orderby'  => 'date_created_gmt',
-				)
-			);
+		/**
+		 * Provides an opportunity to toggle showing tooltips
+		 * when hovering over an order status badge in the dashboard.
+		 *
+		 * @param bool $use_tooltip 'true' will enable the tooltips over status badges.
+		 *
+		 * @since 6.7.0
+		 */
+		$use_tooltip = apply_filters( 'woocommerce_enable_order_status_tooltips_on_hover', true);
 
-			$latest_note = current( $latest_notes );
+		if ( $use_tooltip ){
+			remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+			$comment_count = get_comment_count( $order->get_id() );
+			add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+			$approved_comments_count = absint( $comment_count['approved'] );
 
-			if ( isset( $latest_note->content ) && 1 === $approved_comments_count ) {
-				$tooltip = wc_sanitize_tooltip( $latest_note->content );
-			} elseif ( isset( $latest_note->content ) ) {
-				/* translators: %d: notes count */
-				$tooltip = wc_sanitize_tooltip( $latest_note->content . '<br/><small style="display:block">' . sprintf( _n( 'Plus %d other note', 'Plus %d other notes', ( $approved_comments_count - 1 ), 'woocommerce' ), $approved_comments_count - 1 ) . '</small>' );
-			} else {
-				/* translators: %d: notes count */
-				$tooltip = wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $approved_comments_count, 'woocommerce' ), $approved_comments_count ) );
+			if ( $approved_comments_count ) {
+				$latest_notes = wc_get_order_notes(
+					array(
+						'order_id' => $order->get_id(),
+						'limit'    => 1,
+						'orderby'  => 'date_created_gmt',
+					)
+				);
+
+				$latest_note = current( $latest_notes );
+
+				if ( isset( $latest_note->content ) && 1 === $approved_comments_count ) {
+					$tooltip = wc_sanitize_tooltip( $latest_note->content );
+				} elseif ( isset( $latest_note->content ) ) {
+					/* translators: %d: notes count */
+					$tooltip = wc_sanitize_tooltip( $latest_note->content . '<br/><small style="display:block">' . sprintf( _n( 'Plus %d other note', 'Plus %d other notes', ( $approved_comments_count - 1 ), 'woocommerce' ), $approved_comments_count - 1 ) . '</small>' );
+				} else {
+					/* translators: %d: notes count */
+					$tooltip = wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $approved_comments_count, 'woocommerce' ), $approved_comments_count ) );
+				}
 			}
 		}
 
@@ -1501,8 +1514,8 @@ class ListTable extends WP_List_Table {
 	public function get_order_preview_template(): string {
 		$order_edit_url_placeholder =
 			wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled()
-			? esc_url( admin_url( 'admin.php?page=wc-orders&action=edit' ) ) . '&id={{ data.data.id }}'
-			: esc_url( admin_url( 'post.php?action=edit' ) ) . '&post={{ data.data.id }}';
+				? esc_url( admin_url( 'admin.php?page=wc-orders&action=edit' ) ) . '&id={{ data.data.id }}'
+				: esc_url( admin_url( 'post.php?action=edit' ) ) . '&post={{ data.data.id }}';
 
 		ob_start();
 		?>
@@ -1527,46 +1540,46 @@ class ListTable extends WP_List_Table {
 									{{{ data.formatted_billing_address }}}
 
 									<# if ( data.data.billing.email ) { #>
-										<strong><?php esc_html_e( 'Email', 'woocommerce' ); ?></strong>
-										<a href="mailto:{{ data.data.billing.email }}">{{ data.data.billing.email }}</a>
+									<strong><?php esc_html_e( 'Email', 'woocommerce' ); ?></strong>
+									<a href="mailto:{{ data.data.billing.email }}">{{ data.data.billing.email }}</a>
 									<# } #>
 
 									<# if ( data.data.billing.phone ) { #>
-										<strong><?php esc_html_e( 'Phone', 'woocommerce' ); ?></strong>
-										<a href="tel:{{ data.data.billing.phone }}">{{ data.data.billing.phone }}</a>
+									<strong><?php esc_html_e( 'Phone', 'woocommerce' ); ?></strong>
+									<a href="tel:{{ data.data.billing.phone }}">{{ data.data.billing.phone }}</a>
 									<# } #>
 
 									<# if ( data.payment_via ) { #>
-										<strong><?php esc_html_e( 'Payment via', 'woocommerce' ); ?></strong>
-										{{{ data.payment_via }}}
+									<strong><?php esc_html_e( 'Payment via', 'woocommerce' ); ?></strong>
+									{{{ data.payment_via }}}
 									<# } #>
 								</div>
 								<# if ( data.needs_shipping ) { #>
-									<div class="wc-order-preview-address">
-										<h2><?php esc_html_e( 'Shipping details', 'woocommerce' ); ?></h2>
-										<# if ( data.ship_to_billing ) { #>
-											{{{ data.formatted_billing_address }}}
-										<# } else { #>
-											<a href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
-										<# } #>
+								<div class="wc-order-preview-address">
+									<h2><?php esc_html_e( 'Shipping details', 'woocommerce' ); ?></h2>
+									<# if ( data.ship_to_billing ) { #>
+									{{{ data.formatted_billing_address }}}
+									<# } else { #>
+									<a href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
+									<# } #>
 
-										<# if ( data.data.shipping.phone ) { #>
-											<strong><?php esc_html_e( 'Phone', 'woocommerce' ); ?></strong>
-											<a href="tel:{{ data.data.shipping.phone }}">{{ data.data.shipping.phone }}</a>
-										<# } #>
+									<# if ( data.data.shipping.phone ) { #>
+									<strong><?php esc_html_e( 'Phone', 'woocommerce' ); ?></strong>
+									<a href="tel:{{ data.data.shipping.phone }}">{{ data.data.shipping.phone }}</a>
+									<# } #>
 
-										<# if ( data.shipping_via ) { #>
-											<strong><?php esc_html_e( 'Shipping method', 'woocommerce' ); ?></strong>
-											{{ data.shipping_via }}
-										<# } #>
-									</div>
+									<# if ( data.shipping_via ) { #>
+									<strong><?php esc_html_e( 'Shipping method', 'woocommerce' ); ?></strong>
+									{{ data.shipping_via }}
+									<# } #>
+								</div>
 								<# } #>
 
 								<# if ( data.data.customer_note ) { #>
-									<div class="wc-order-preview-note">
-										<strong><?php esc_html_e( 'Note', 'woocommerce' ); ?></strong>
-										{{ data.data.customer_note }}
-									</div>
+								<div class="wc-order-preview-note">
+									<strong><?php esc_html_e( 'Note', 'woocommerce' ); ?></strong>
+									{{ data.data.customer_note }}
+								</div>
 								<# } #>
 							</div>
 
