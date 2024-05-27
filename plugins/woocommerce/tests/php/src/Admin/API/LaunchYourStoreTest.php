@@ -7,21 +7,22 @@ use Automattic\WooCommerce\Admin\Marketing\MarketingCampaign;
 use Automattic\WooCommerce\Admin\Marketing\MarketingCampaignType;
 use Automattic\WooCommerce\Admin\Marketing\MarketingChannelInterface;
 use Automattic\WooCommerce\Admin\Marketing\MarketingChannels as MarketingChannelsService;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 
 /**
- * PaymentGatewaySuggestionsTest API controller test.
+ * LaunchYourStoreTest API controller test.
  *
- * @class PaymentGatewaySuggestionsTest.
+ * @class LaunchYourStoreTest.
  */
-class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
+class LaunchYourStoreTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Endpoint.
 	 *
 	 * @var string
 	 */
-	const ENDPOINT = '/wc-admin/payment-gateway-suggestions';
+	const ENDPOINT = '/wc-admin/launch-your-store';
 
 	/**
 	 * Set up.
@@ -36,65 +37,39 @@ class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->user );
-
 	}
 
-	/**
-	 * Test it clears cache when the base country gets updated.
-	 *
-	 * @return void
-	 */
-	public function test_it_clears_cache_when_the_base_country_gets_updated() {
-		// Clear any exisiting cache first.
-		Init::delete_specs_transient();
+	protected function get_order_count() {
+		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/woopayments/test-orders/count' );
+		return $this->server->dispatch( $request )->get_data()['count'];
+	}
 
-		$existing_base_country = wc_get_base_location();
-		// update the base country to the U.S for testing purposes.
-		update_option( 'woocommerce_default_country', 'US:CA' );
+	protected function add_test_order() {
+		$order = OrderHelper::create_order( $this->user );
+		$order->update_meta_data( '_wcpay_mode', 'test' );
+		$order->save();
+	}
 
-		$response_mock_ref = function( $preempt, $parsed_args, $url ) {
-			if ( str_contains( $url, 'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0/suggestions.json' ) ) {
-				return array(
-					'success' => true,
-					'body'    => wp_json_encode(
-						array(
-							array(
-								'id' => wc_get_base_location()['country'],
-							),
-						)
-					),
-				);
-			}
+	public function test_it_returns_test_order_count() {
+		$count = $this->get_order_count();
+		$this->assertEquals( 0, $count );
 
-			return $preempt;
-		};
+		$this->add_test_order();
 
-		// Make a new request -- this should populate the cache with the base country.
-		add_filter( 'pre_http_request', $response_mock_ref, 10, 3 );
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT );
-		$response = rest_get_server()->dispatch( $request )->get_data();
+		$count = $this->get_order_count();
+		$this->assertEquals( 1, $count );
+	}
 
-		// Confirm the current data returns id = US.
-		$this->assertEquals( 'US', $response[0]->id );
+	public function test_delete_endpoint_returns_204() {
+		$request = new WP_REST_Request( 'DELETE', self::ENDPOINT . '/woopayments/test-orders' );
+		$status  = $this->server->dispatch( $request )->get_status();
+		$this->assertEquals( 204, $status );
+	}
 
-		// Remove filter just in case and a new request still returns the cached data.
-		remove_filter( 'pre_http_request', $response_mock_ref );
-		$response = rest_get_server()->dispatch( $request )->get_data();
-		$this->assertEquals( 'US', $response[0]->id );
-
-		add_filter( 'pre_http_request', $response_mock_ref, 10, 3 );
-
-		// Update the base country to CA.
-		update_option( 'woocommerce_default_country', 'CA:ON' );
-
-		// Make a new request -- this should populate the cache with the updated country.
-		$response = rest_get_server()->dispatch( $request )->get_data();
-		$this->assertEquals( 'CA', $response[0]->id );
-
-		// Clean up.
-		remove_filter( 'pre_http_request', $response_mock_ref );
-
-		// restore the base country.
-		update_option( 'woocommerce_default_country', $existing_base_country['country'] . ':' . $existing_base_country['state'] );
+	public function test_delete_endpoint_deletes_test_order() {
+		$this->add_test_order();
+		$request = new WP_REST_Request( 'DELETE', self::ENDPOINT . '/woopayments/test-orders' );
+		$this->server->dispatch( $request );
+		$this->assertEquals( 0, $this->get_order_count() );
 	}
 }
