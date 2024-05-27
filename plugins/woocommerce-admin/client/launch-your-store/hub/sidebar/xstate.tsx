@@ -9,6 +9,7 @@ import {
 	fromPromise,
 	assign,
 	spawnChild,
+	DoneActorEvent,
 } from 'xstate5';
 import React from 'react';
 import classnames from 'classnames';
@@ -329,10 +330,17 @@ export const sidebarMachine = setup( {
 						},
 						{
 							src: 'deleteTestOrders',
-							input: ( { event } ) => ( {
-								// @ts-expect-error - how do I type this?
-								removeTestOrders: event.removeTestOrders,
-							} ),
+							input: ( { event } ) => {
+								return {
+									removeTestOrders: (
+										event as DoneActorEvent<
+											ReturnType<
+												typeof deleteTestOrders
+											>
+										>
+									 ).removeTestOrders, // @ts-expect-error -- I can't really tell the type of the return value of deleteTestOrders by reading the PR changeset. With this typecast the TS error goes away once deleteTestOrders is typed properly
+								};
+							},
 						},
 					],
 				},
