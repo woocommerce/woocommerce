@@ -3,7 +3,7 @@ module.exports = {
 		type: 'problem',
 		docs: {
 			description:
-				'advise using @woocommerce/e2e-playwright-utils for importing test or expect functions',
+				'advise using @woocommerce/e2e-utils for importing test or expect functions',
 			category: 'Possible Errors',
 			recommended: true,
 		},
@@ -11,7 +11,7 @@ module.exports = {
 		schema: [],
 		messages: {
 			unexpected:
-				"Prefer importing { test, expect } from '@woocommerce/e2e-playwright-utils'.",
+				"Prefer importing { test, expect } from '@woocommerce/e2e-utils'.",
 		},
 	},
 	create( context ) {
@@ -34,12 +34,12 @@ module.exports = {
 						context.report( {
 							node,
 							message:
-								'Import test or expect from @woocommerce/e2e-playwright-utils instead of @playwright/test for additional utilities.',
+								'Import test or expect from @woocommerce/e2e-utils instead of @playwright/test for additional utilities.',
 							fix( fixer ) {
 								return [
 									fixer.replaceText(
 										node.source,
-										"'@woocommerce/e2e-playwright-utils'"
+										"'@woocommerce/e2e-utils'"
 									),
 								];
 							},

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { expect } from '@woocommerce/e2e-playwright-utils';
+import { expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies

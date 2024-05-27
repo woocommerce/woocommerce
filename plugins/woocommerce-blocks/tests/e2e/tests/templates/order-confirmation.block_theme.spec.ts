@@ -1,20 +1,19 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 test.describe( 'Test the order confirmation template', () => {
 	test( 'Template can be opened in the site editor', async ( {
 		editor,
-		editorUtils,
 		admin,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//order-confirmation',
 			postType: 'wp_template',
 		} );
-		await editorUtils.enterEditMode();
-		await editorUtils.transformIntoBlocks();
+		await editor.enterEditMode();
+		await editor.transformIntoBlocks();
 		await expect(
 			editor.canvas.getByText(
 				'Thank you. Your order has been received.'

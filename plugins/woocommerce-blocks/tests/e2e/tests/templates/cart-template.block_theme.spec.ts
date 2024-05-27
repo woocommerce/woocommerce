@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 const permalink = '/cart';
 const templatePath = 'woocommerce/woocommerce//page-cart';
@@ -11,13 +11,12 @@ test.describe( 'Test the cart template', () => {
 	test( 'Template can be opened in the site editor', async ( {
 		admin,
 		editor,
-		editorUtils,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
 		} );
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 		await expect(
 			editor.canvas.getByLabel( 'Block: Title' )
 		).toBeVisible();
@@ -27,13 +26,12 @@ test.describe( 'Test the cart template', () => {
 		admin,
 		editor,
 		page,
-		editorUtils,
 	} ) => {
 		await admin.visitSiteEditor( { path: '/page' } );
 		await editor.page
 			.getByRole( 'button', { name: 'Cart', exact: true } )
 			.click();
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 
 		await expect(
 			editor.canvas.locator( 'h1:has-text("Cart")' ).first()
@@ -60,14 +58,13 @@ test.describe( 'Test the cart template', () => {
 test.describe( 'Test editing the cart template', () => {
 	test( 'Merchant can transform shortcode block into blocks', async ( {
 		admin,
-		editorUtils,
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
 		} );
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 		await editor.setContent(
 			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"cart"} /-->'
 		);

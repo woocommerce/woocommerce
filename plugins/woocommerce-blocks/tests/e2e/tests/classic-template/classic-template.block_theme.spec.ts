@@ -1,9 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockData } from '@woocommerce/e2e-types';
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { cli } from '@woocommerce/e2e-utils';
+import { test, expect, cli, BlockData } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies

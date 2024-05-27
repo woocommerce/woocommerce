@@ -1,9 +1,13 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
-import { BlockData } from '@woocommerce/e2e-types';
-import { customerFile, guestFile } from '@woocommerce/e2e-utils';
+import {
+	expect,
+	test as base,
+	customerFile,
+	guestFile,
+	BlockData,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -243,12 +247,12 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 	// `as string` is safe here because we know the variable is a string, it is defined above.
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test.beforeEach( async ( { editor, admin, editorUtils, page } ) => {
+	test.beforeEach( async ( { admin, editor, page } ) => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
 		} );
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 
 		await editor.selectBlocks(
 			blockSelectorInEditor +
@@ -268,7 +272,7 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 				'div.wc-block-components-address-form__company'
 			)
 		).toBeVisible();
-		await editorUtils.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities();
 	} );
 
 	test( 'User can add postcodes for different countries', async ( {
@@ -498,12 +502,7 @@ test.describe( 'Shopper → Checkout Form Errors (guest user)', () => {
 test.describe( 'Billing Address Form', () => {
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test( 'Enable company field', async ( {
-		page,
-		editor,
-		admin,
-		editorUtils,
-	} ) => {
+	test( 'Enable company field', async ( { page, admin, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
@@ -526,7 +525,7 @@ test.describe( 'Billing Address Form', () => {
 		const companyInput = editor.canvas.getByLabel( 'Company (optional)' );
 		await expect( companyInput ).toBeVisible();
 
-		await editorUtils.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities();
 	} );
 
 	test.describe( 'Guest user', () => {

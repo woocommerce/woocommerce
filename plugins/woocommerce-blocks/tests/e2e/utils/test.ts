@@ -2,40 +2,23 @@
 /**
  * External dependencies
  */
-import { test as base, expect, request as baseRequest } from '@playwright/test';
-import type { ConsoleMessage } from '@playwright/test';
+import { test as base, expect, ConsoleMessage } from '@playwright/test';
 import {
-	Admin,
-	Editor,
-	PageUtils,
-	RequestUtils,
-} from '@wordpress/e2e-test-utils-playwright';
-import {
-	TemplateApiUtils,
 	STORAGE_STATE_PATH,
 	DB_EXPORT_FILE,
-	EditorUtils,
+	cli,
+	WPCLIUtils,
+	Admin,
+	Editor,
 	FrontendUtils,
-	StoreApiUtils,
-	PerformanceUtils,
-	ShippingUtils,
 	LocalPickupUtils,
 	MiniCartUtils,
-	WPCLIUtils,
-	cli,
+	PageUtils,
+	PerformanceUtils,
+	RequestUtils,
+	ShippingUtils,
+	StoreApiUtils,
 } from '@woocommerce/e2e-utils';
-import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
-
-/**
- * Internal dependencies
- */
-import {
-	type PostPayload,
-	createPostFromTemplate,
-	updateTemplateContents,
-	deletePost,
-} from '../utils/create-dynamic-content';
-import type { ExtendedTemplate } from '../types/e2e-test-utils-playwright';
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -125,8 +108,6 @@ const test = base.extend<
 		admin: Admin;
 		editor: Editor;
 		pageUtils: PageUtils;
-		templateApiUtils: TemplateApiUtils;
-		editorUtils: EditorUtils;
 		frontendUtils: FrontendUtils;
 		storeApiUtils: StoreApiUtils;
 		performanceUtils: PerformanceUtils;
@@ -137,19 +118,7 @@ const test = base.extend<
 		wpCliUtils: WPCLIUtils;
 	},
 	{
-		requestUtils: RequestUtils & {
-			createPostFromTemplate: (
-				post: PostPayload,
-				templatePath: string,
-				data: unknown
-			) => Promise< Post >;
-			deletePost: ( id: number ) => Promise< void >;
-			updateTemplateContents: (
-				templateId: string,
-				templatePath: string,
-				data: unknown
-			) => Promise< ExtendedTemplate >;
-		};
+		requestUtils: RequestUtils;
 	}
 >( {
 	admin: async ( { page, pageUtils, editor }, use ) => {
@@ -175,11 +144,6 @@ const test = base.extend<
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
 	},
-	templateApiUtils: async ( {}, use ) =>
-		await use( new TemplateApiUtils( baseRequest ) ),
-	editorUtils: async ( { editor, page, admin }, use ) => {
-		await use( new EditorUtils( editor, page, admin ) );
-	},
 	frontendUtils: async ( { page, requestUtils }, use ) => {
 		await use( new FrontendUtils( page, requestUtils ) );
 	},
@@ -204,43 +168,11 @@ const test = base.extend<
 	requestUtils: [
 		async ( {}, use, workerInfo ) => {
 			const requestUtils = await RequestUtils.setup( {
-				baseURL: workerInfo.project.use.baseURL,
+				baseURL: workerInfo.project.use.baseURL as string,
 				storageStatePath: STORAGE_STATE_PATH,
 			} );
 
-			const utilCreatePostFromTemplate = (
-				post: Partial< PostPayload >,
-				templatePath: string,
-				data: unknown
-			) =>
-				createPostFromTemplate(
-					requestUtils,
-					post,
-					templatePath,
-					data
-				);
-
-			const utilDeletePost = ( id: number ) =>
-				deletePost( requestUtils, id );
-
-			const utilUpdateTemplateContents = (
-				templateId: string,
-				templatePath: string,
-				data: unknown
-			) =>
-				updateTemplateContents(
-					requestUtils,
-					templateId,
-					templatePath,
-					data
-				);
-
-			await use( {
-				...requestUtils,
-				createPostFromTemplate: utilCreatePostFromTemplate,
-				updateTemplateContents: utilUpdateTemplateContents,
-				deletePost: utilDeletePost,
-			} );
+			await use( requestUtils );
 		},
 		{ scope: 'worker', auto: true },
 	],

@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockData } from '@woocommerce/e2e-types';
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect, BlockData } from '@woocommerce/e2e-utils';
 
 const blockData: BlockData = {
 	name: 'Related Products',
@@ -28,13 +27,12 @@ test.describe( `${ blockData.name } Block`, () => {
 	test( "can't be added in the Post Editor - Product Catalog Template", async ( {
 		admin,
 		editor,
-		editorUtils,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//archive-product`,
 			postType: 'wp_template',
 		} );
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 
 		await editor.setContent( '' );
 
@@ -45,25 +43,24 @@ test.describe( `${ blockData.name } Block`, () => {
 		}
 
 		await expect(
-			await editorUtils.getBlockByName( blockData.slug )
+			await editor.getBlockByName( blockData.slug )
 		).toBeHidden();
 	} );
 
 	test( 'can be added in the Post Editor - Single Product Template', async ( {
 		admin,
 		editor,
-		editorUtils,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//single-product`,
 			postType: 'wp_template',
 		} );
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 		await editor.setContent( '' );
 		await editor.insertBlock( { name: blockData.slug } );
 
 		await expect(
-			await editorUtils.getBlockByName( blockData.slug )
+			await editor.getBlockByName( blockData.slug )
 		).toBeVisible();
 	} );
 } );

@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { cli } from '@woocommerce/e2e-utils';
+import { test, expect, cli } from '@woocommerce/e2e-utils';
 
 test.describe( 'Legacy templates', () => {
 	test( 'woocommerce//* slug is supported', async ( {

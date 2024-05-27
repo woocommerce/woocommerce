@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test } from '@woocommerce/e2e-playwright-utils';
-import { cli } from '@woocommerce/e2e-utils';
+import { expect, test, cli } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies

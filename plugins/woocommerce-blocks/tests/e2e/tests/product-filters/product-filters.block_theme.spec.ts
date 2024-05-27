@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -22,19 +22,18 @@ const blockData = {
 };
 
 const test = base.extend< { pageObject: ProductFiltersPage } >( {
-	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
+	pageObject: async ( { page, editor, frontendUtils }, use ) => {
 		const pageObject = new ProductFiltersPage( {
 			page,
 			editor,
 			frontendUtils,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editorUtils, requestUtils } ) => {
+	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
 		await requestUtils.activatePlugin(
 			'woocommerce-blocks-test-enable-experimental-features'
 		);
@@ -42,7 +41,7 @@ test.describe( `${ blockData.name }`, () => {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
 		} );
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 	} );
 
 	test( 'should be visible and contain correct inner blocks', async ( {
