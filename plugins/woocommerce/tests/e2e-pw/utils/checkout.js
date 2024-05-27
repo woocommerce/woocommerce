@@ -1,5 +1,5 @@
 /**
- * Util helper made for filling shipping details in the blockbased checkout
+ * Util helper made for filling shipping details in the block-based checkout
  *
  * @param page
  * @param firstName
@@ -39,7 +39,7 @@ export async function fillShippingCheckoutBlocks(
 }
 
 /**
- * Util helper made for filling billing details in the blockbased checkout
+ * Util helper made for filling billing details in the block-based checkout
  *
  * @param page
  * @param firstName
