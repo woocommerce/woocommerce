@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
 import {
+	expect,
+	test as base,
 	cli,
 	CLASSIC_THEME_SLUG,
 	CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG,
