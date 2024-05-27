@@ -773,11 +773,13 @@ class PluginsHelper {
 			return array();
 		}
 
-		$subscriptions          = WC_Helper::get_subscriptions();
+		$subscriptions          = WC_Helper::get_subscription_list_data();
 		$expiring_subscriptions = array_filter(
 			$subscriptions,
 			function ( $sub ) {
-				return $sub['expiring'] && ! $sub['autorenew'];
+				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
+				       && $sub['expiring']
+				       && ! $sub['autorenew'];
 			},
 		);
 
@@ -823,11 +825,13 @@ class PluginsHelper {
 			return array();
 		}
 
-		$subscriptions         = WC_Helper::get_subscriptions();
+		$subscriptions         = WC_Helper::get_subscription_list_data();
 		$expired_subscriptions = array_filter(
 			$subscriptions,
 			function ( $sub ) {
-				return $sub['expired'] && ! $sub['lifetime'];
+				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
+				       && $sub['expired' ]
+				       && ! $sub['lifetime'];
 			},
 		);
 
