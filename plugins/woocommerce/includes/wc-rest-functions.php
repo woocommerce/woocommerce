@@ -394,5 +394,33 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 	$rest_route = trailingslashit( ltrim( $rest_route, '/' ) );
 	$ns         = trailingslashit( $ns );
 
+	/**
+	 * Known namespaces that we know are safe to not load if the request is not for them. Namespaces not in this namespace should always be loaded, because we don't know if they won't be making another internal REST request to an unloaded namespace.
+	 */
+	$known_namespaces = array(
+		'wc/v1',
+		'wc/v2',
+		'wc/v3',
+		'wc-telemetry',
+		'wc-admin',
+		'wc-analytics',
+		'wc/store',
+		'wc/private'
+	);
+
+	// We can consider allowing filtering this list in the future.
+
+	$known_namespace_request = false;
+	foreach ( $known_namespaces as $known_namespace ) {
+		if ( str_starts_with( $rest_route, $known_namespace ) ) {
+			$known_namespace_request = true;
+			break;
+		}
+	}
+
+	if ( ! $known_namespace_request ) {
+		return true;
+	}
+
 	return str_starts_with( $rest_route, $ns );
 }
