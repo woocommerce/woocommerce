@@ -552,7 +552,7 @@ class WC_Products_Tracking {
 	 *
 	 * @return bool True if importing, false otherwise.
 	 */
-    private function is_importing() {
+	private function is_importing() {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		// Check if the current request is a product import.
 		if ( isset( $_POST['action'] ) && 'woocommerce_do_ajax_product_import' === $_POST['action'] ) {
