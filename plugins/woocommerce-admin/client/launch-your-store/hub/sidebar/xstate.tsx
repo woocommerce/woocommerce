@@ -9,7 +9,6 @@ import {
 	fromPromise,
 	assign,
 	spawnChild,
-	DoneActorEvent,
 } from 'xstate5';
 import React from 'react';
 import classnames from 'classnames';

@@ -162,7 +162,9 @@ class LaunchYourStore {
 
 		$orders = wc_get_orders(
 			array(
+				// phpcs:ignore
 				'meta_key'   => '_wcpay_mode',
+				// phpcs:ignore
 				'meta_value' => 'test',
 				'return'     => 'ids',
 			)
@@ -183,7 +185,9 @@ class LaunchYourStore {
 
 		$orders = wc_get_orders(
 			array(
+				// phpcs:ignore
 				'meta_key'   => '_wcpay_mode',
+				// phpcs:ignore
 				'meta_value' => 'test',
 			)
 		);
