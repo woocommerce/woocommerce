@@ -548,16 +548,17 @@ class WC_Products_Tracking {
 	}
 
 	/**
-     * Check if the current process is importing products.
-     *
-     * @return bool True if importing, false otherwise.
-     */
+	 * Check if the current process is importing products.
+	 *
+	 * @return bool True if importing, false otherwise.
+	 */
     private function is_importing() {
-        // Check if the current request is a product import.
-        if ( isset( $_POST['action'] ) && 'woocommerce_do_ajax_product_import' === $_POST['action'] ) {
-            return true;
-        }
-        return false;
-    }
-
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		// Check if the current request is a product import.
+		if ( isset( $_POST['action'] ) && 'woocommerce_do_ajax_product_import' === $_POST['action'] ) {
+			return true;
+		}
+		return false;
+		// phpcs:enable
+	}
 }
