@@ -436,7 +436,6 @@ abstract class AbstractBlock {
 
 		if ( ! $this->asset_data_registry->exists( 'wcBlocksConfig' ) ) {
 			$wc_blocks_config = [
-				'buildPhase'                => Package::feature()->get_flag(),
 				// Note that while we don't have a consolidated way of doing feature-flagging
 				// we are borrowing from the WC Admin Features implementation. Also note we cannot
 				// use the wcAdminFeatures global because it's not always enqueued in the context of blocks.
@@ -457,6 +456,7 @@ abstract class AbstractBlock {
 				$wc_blocks_config = array_merge(
 					$wc_blocks_config,
 					[
+						'buildPhase'    => Package::feature()->get_flag(),
 						'productCount'  => array_sum( (array) wp_count_posts( 'product' ) ),
 						'defaultAvatar' => get_avatar_url( 0, [ 'force_default' => true ] ),
 					]
