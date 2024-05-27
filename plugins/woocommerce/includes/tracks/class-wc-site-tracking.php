@@ -245,7 +245,7 @@ class WC_Site_Tracking {
 	 * @param bool   $secure       Whether the cookie should be served only over https.
 	 * @param bool   $http_only    Whether the cookie is only accessible over HTTP.
 	 *
-	 * @return bool If setting the cookie was attempted (will be false if tracking is not allowed).)
+	 * @return bool If setting the cookie was attempted (will be false if tracking is not allowed).
 	 */
 	public static function set_tracking_cookie( string $cookie_key, string $cookie_value, int $expire = 0, bool $secure = false, bool $http_only = false ): bool {
 		if ( self::is_tracking_enabled() ) {
