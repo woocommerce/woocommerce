@@ -48,7 +48,7 @@ const ExpressPaymentMethods = ( {
 	buttonAttributes.height = buttonHeight;
 	buttonAttributes.minWidth = '118px';
 	buttonAttributes.darkMode = hasDarkControls;
-	buttonAttributes.label = buttonLabel;
+	buttonAttributes.label = buttonLabel || 'default';
 
 	const { activePaymentMethod, paymentMethodData } = useSelect(
 		( select ) => {
