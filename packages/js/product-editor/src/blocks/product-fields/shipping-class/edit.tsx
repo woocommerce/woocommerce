@@ -51,6 +51,11 @@ function mapShippingClassToSelectOption(
 	} ) );
 }
 
+/*
+ * Query to fetch shipping classes.
+ */
+const shippingClassRequestQuery = {};
+
 function extractDefaultShippingClassFromProduct(
 	categories?: PartialProduct[ 'categories' ],
 	shippingClasses?: ProductShippingClass[]
@@ -130,9 +135,9 @@ export function Edit( {
 			return {
 				shippingClasses:
 					( isInSelectedTab &&
-						getProductShippingClasses<
-							ProductShippingClass[]
-						>() ) ||
+						getProductShippingClasses< ProductShippingClass[] >(
+							shippingClassRequestQuery
+						) ) ||
 					[],
 			};
 		},
@@ -214,7 +219,9 @@ export function Edit( {
 					onAdd={ ( shippingClassValues ) =>
 						createProductShippingClass<
 							Promise< ProductShippingClass >
-						>( shippingClassValues )
+						>( shippingClassValues, {
+							optimisticQueryUpdate: shippingClassRequestQuery,
+						} )
 							.then( ( value ) => {
 								recordEvent(
 									'product_new_shipping_class_modal_add_button_click'
