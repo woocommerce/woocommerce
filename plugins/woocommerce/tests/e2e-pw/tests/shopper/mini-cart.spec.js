@@ -1,7 +1,8 @@
-const { test, expect } = require( '@playwright/test' );
+const { test, expect, request } = require( '@playwright/test' );
 const { disableWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { random } = require( '../../utils/helpers' );
+const { setFeatureFlag } = require( '../../utils/features' );
 
 const miniCartPageTitle = `Mini Cart ${ random() }`;
 const miniCartPageSlug = miniCartPageTitle.replace( / /gi, '-' ).toLowerCase();
@@ -26,6 +27,13 @@ test.describe( 'Mini Cart block page', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
+
+		await setFeatureFlag(
+			request,
+			baseURL,
+			'experimental-block-styling',
+			true
+		);
 		// add product
 		await api
 			.post( 'products', {
