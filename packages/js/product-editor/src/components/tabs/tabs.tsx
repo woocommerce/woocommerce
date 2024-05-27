@@ -7,7 +7,7 @@ import {
 	useState,
 	Fragment,
 } from '@wordpress/element';
-import { ReactElement, useMemo } from 'react';
+import { KeyboardEvent, ReactElement, useMemo } from 'react';
 import { NavigableMenu, Slot } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -87,6 +87,30 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 		child.focus();
 	}
 
+	function handleKeyDown( event: KeyboardEvent< HTMLDivElement > ) {
+		const tabs =
+			event.currentTarget.querySelectorAll< HTMLButtonElement >(
+				'[role="tab"]'
+			);
+
+		switch ( event.key ) {
+			case 'Home':
+				event.preventDefault();
+				event.stopPropagation();
+
+				const [ firstTab ] = tabs;
+				firstTab?.focus();
+				break;
+			case 'End':
+				event.preventDefault();
+				event.stopPropagation();
+
+				const [ lastTab ] = [ ...tabs ].reverse();
+				lastTab?.focus();
+				break;
+		}
+	}
+
 	function renderFills( fills: readonly ( readonly ReactElement[] )[] ) {
 		return (
 			<TabFills
@@ -106,6 +130,7 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 		<NavigableMenu
 			role="tablist"
 			onNavigate={ selectTabOnNavigate }
+			onKeyDown={ handleKeyDown }
 			className="woocommerce-product-tabs"
 			orientation="horizontal"
 		>
