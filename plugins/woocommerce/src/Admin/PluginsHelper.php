@@ -737,7 +737,10 @@ class PluginsHelper {
 		);
 
 		$message_key  = $has_multiple_subs_for_product ? 'multiple_manage' : 'single_manage';
-		$renew_string = $subscription['product_price'] ? __('Renew for %4$s', 'woocommerce' ) : __('Renew', 'woocommerce' );
+		$renew_string = __('Renew', 'woocommerce' );
+		if ( isset( $subscription['product_price'] ) ) {
+			$renew_string = sprintf( __('Renew for %1$s', 'woocommerce' ), $subscription['product_price'] );
+		}
 		$expiry_date  = date_i18n( 'F jS', $subscription['expires'] );
 
 		// Construct message based on template for multiple_manage or single_manage, parameter used:
