@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Clean up eslint comments after rules update in Blocks E2E tests.

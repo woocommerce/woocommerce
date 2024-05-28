@@ -183,10 +183,8 @@ test.describe( `${ blockData.name }`, () => {
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
@@ -255,10 +253,8 @@ test.describe( `${ blockData.name }`, () => {
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
@@ -327,10 +323,8 @@ test.describe( `${ blockData.name }`, () => {
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
@@ -382,10 +376,8 @@ test.describe( `${ blockData.name }`, () => {
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
@@ -434,10 +426,8 @@ test.describe( `${ blockData.name }`, () => {
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
