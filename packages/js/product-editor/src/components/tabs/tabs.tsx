@@ -105,7 +105,7 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 				event.preventDefault();
 				event.stopPropagation();
 
-				const [ lastTab ] = [ ...tabs ].reverse();
+				const lastTab = tabs[ tabs.length - 1 ];
 				lastTab?.focus();
 				break;
 		}
