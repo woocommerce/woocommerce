@@ -738,8 +738,8 @@ class PluginsHelper {
 
 		$message_key  = $has_multiple_subs_for_product ? 'multiple_manage' : 'single_manage';
 		$renew_string = __('Renew', 'woocommerce' );
-		if ( isset( $subscription['product_price'] ) ) {
-			$renew_string = sprintf( __('Renew for %1$s', 'woocommerce' ), $subscription['product_price'] );
+		if ( isset( $subscription['product_regular_price'] ) ) {
+			$renew_string = sprintf( __('Renew for %1$s', 'woocommerce' ), $subscription['product_regular_price'] );
 		}
 		$expiry_date  = date_i18n( 'F jS', $subscription['expires'] );
 
