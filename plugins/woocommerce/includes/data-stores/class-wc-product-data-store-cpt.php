@@ -106,7 +106,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * If the SKU is already present in the table, it means that another
 	 * request is already processing the same SKU and we should not proceed
-	 * with the insert.
+	 * with the insert..
 	 *
 	 * @param WC_Product $product Product object.
 	 * @return bool True if lock is obtained (unique SKU), false otherwise.
