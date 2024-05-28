@@ -37,6 +37,7 @@ jobs:
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   pattern: '{packages/js/**/build/**/*.js,packages/js/**/build/**/*.css,plugins/woocommerce/client/legacy/js/**/*.min.js,plugins/woocommerce/client/legacy/css/**/*.css,plugins/woocommerce-admin/build/**/*.min.js,plugins/woocommerce-admin/build/**/*.css,plugins/woocommerce-blocks/build/**/*.js}'
-                  exclude: '{packages/js/dependency-extraction-webpack-plugin/,packages/js/*e2e*/,packages/js/*create*/,**/*.map,**/node_modules/**'
+                  exclude: '{packages/js/dependency-extraction-webpack-plugin/,packages/js/*e2e*/,packages/js/*create*/,**/*.map,**/node_modules/**}'
                   clean-script: '--if-present distclean'
                   minimum-change-threshold: 100
+                  omit-unchanged: true
