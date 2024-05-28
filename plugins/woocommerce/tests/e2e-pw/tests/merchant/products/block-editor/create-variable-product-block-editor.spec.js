@@ -225,7 +225,7 @@ test.describe( 'Variations tab', () => {
 
 			await page
 				.locator( '.woocommerce-product-tabs' )
-				.getByRole( 'button', { name: 'Pricing' } )
+				.getByRole( 'tab', { name: 'Pricing' } )
 				.click();
 
 			await page
@@ -234,7 +234,7 @@ test.describe( 'Variations tab', () => {
 
 			await page
 				.locator( '.woocommerce-product-tabs' )
-				.getByRole( 'button', { name: 'Inventory' } )
+				.getByRole( 'tab', { name: 'Inventory' } )
 				.click();
 
 			await page
