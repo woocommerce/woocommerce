@@ -59,9 +59,9 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_patterns should be empty when fetching patterns return an error.
+	 * Test get_patterns should be empty when the cache is empty.
 	 */
-	public function test_get_patterns_should_return_an_error_when_the_cache_is_empty() {
+	public function test_get_patterns_should_return_an_empty_array_when_the_cache_is_empty() {
 		delete_transient( PTKPatternsStore::TRANSIENT_NAME );
 
 		$this->ptk_client
@@ -70,7 +70,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 
 		$patterns = $this->pattern_store->get_patterns();
 
-		$this->assertErrorResponse( $patterns, 'Failed to get the cached PTK patterns.' );
+		$this->assertEmpty( $patterns );
 	}
 
 	/**

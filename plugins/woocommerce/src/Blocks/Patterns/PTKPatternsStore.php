@@ -1,5 +1,4 @@
 <?php
-
 namespace Automattic\WooCommerce\Blocks\Patterns;
 
 use Automattic\WooCommerce\Admin\Features\Features;
@@ -103,7 +102,7 @@ class PTKPatternsStore {
 	/**
 	 * Get the patterns from the Patterns Toolkit cache.
 	 *
-	 * @return array|WP_Error
+	 * @return array
 	 */
 	public function get_patterns() {
 		$patterns = get_transient( self::TRANSIENT_NAME );
@@ -111,10 +110,7 @@ class PTKPatternsStore {
 		// Only if the transient is not set, we schedule fetching the patterns from the PTK.
 		if ( false === $patterns ) {
 			$this->schedule_fetch_patterns();
-			return new WP_Error(
-				'patterns_store_error',
-				__( 'Failed to get the cached PTK patterns.', 'woocommerce' )
-			);
+			return array();
 		}
 
 		return $patterns;
