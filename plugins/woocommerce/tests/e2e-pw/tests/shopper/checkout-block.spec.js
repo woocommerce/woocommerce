@@ -288,6 +288,9 @@ baseTest.describe( 'Checkout Block page', () => {
 			)
 		).toContainText( `$${ singleProductSalePrice }` );
 		await expect(
+			page.locator( '.wc-block-components-product-metadata__description' )
+		).toContainText( simpleProductDesc );
+		await expect(
 			page.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
 			)
@@ -332,7 +335,7 @@ baseTest.describe( 'Checkout Block page', () => {
 			page.getByLabel( 'Address', { exact: true } )
 		).toBeEditable();
 		await expect(
-			page.getByLabel( 'Apartment, suite, etc. (optional)' )
+			page.getByText( '+ Add apartment, suite, etc.' )
 		).toBeEnabled();
 		await expect(
 			page.getByLabel( 'United States (US), Country/Region' )

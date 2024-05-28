@@ -255,6 +255,9 @@ class WC_Install {
 		'8.9.1' => array(
 			'wc_update_891_create_plugin_autoinstall_history_option',
 		),
+		'9.0.0' => array(
+			'wc_update_900_add_launch_your_store_tour_option',
+		),
 	);
 
 	/**
@@ -420,6 +423,10 @@ class WC_Install {
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			self::update();
 			WC_Admin_Notices::add_notice( 'update', true );
+		}
+		if ( ! empty( $_GET['return_url'] ) ) { // WPCS: input var ok.
+			$return_url = esc_url_raw( wp_unslash( $_GET['return_url'] ) );
+			wp_safe_redirect( $return_url ); // WPCS: input var ok.
 		}
 	}
 

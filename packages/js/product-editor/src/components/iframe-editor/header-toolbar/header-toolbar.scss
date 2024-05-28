@@ -1,4 +1,4 @@
-.woocommerce-iframe-editor__header-toolbar {
+.woocommerce-iframe-editor__header {
 	height: 60px;
 	border: 0;
 	border-bottom: 1px solid $gray-400;
@@ -6,9 +6,8 @@
 	align-items: center;
 	justify-content: space-between;
 
-	.woocommerce-iframe-editor__header-toolbar-inserter-toggle.components-button.has-icon {
+	.woocommerce-iframe-editor__header-inserter-toggle.components-button.has-icon {
 		height: 32px;
-		margin-right: 8px;
 		min-width: 32px;
 		padding: 0;
 		width: 32px;
@@ -33,8 +32,36 @@
 		display: flex;
 
 		.woocommerce-iframe-editor-document-tools {
-			padding-right: $gap-smaller;
-			margin-right: $gap-smaller;
+			&__left {
+				align-items: center;
+				display: inline-flex;
+				gap: 8px;
+				margin-right: 8px;
+
+				// Copying how Gutenberg handles styling the toolbar buttons in the editor
+				// see: https://github.com/mattsherman/gutenberg/blob/d538f429f018aba34814b360c5adf37eb6013427/packages/editor/src/components/document-tools/style.scss#L39
+				// The Toolbar component adds different styles to buttons, so we reset them
+				// here to the original button styles
+				& > .components-button.has-icon,
+				& > .components-dropdown > .components-button.has-icon {
+					height: 32px;
+					min-width: 32px;
+					padding: $gap-smallest;
+
+					&.is-pressed {
+						background: $gray-900;
+					}
+
+					&:focus:not(:disabled) {
+						box-shadow: 0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color), inset 0 0 0 $border-width $white;
+						outline: $border-width solid transparent;
+					}
+
+					&::before {
+						display: none;
+					}
+				}
+			}
 		}
 
 		.selected-block-tools-wrapper {

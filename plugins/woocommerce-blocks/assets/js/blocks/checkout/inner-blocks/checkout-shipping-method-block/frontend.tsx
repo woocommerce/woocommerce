@@ -8,6 +8,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
+import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
 
 /**
  * Internal dependencies
@@ -18,7 +19,6 @@ import attributes from './attributes';
 const FrontendBlock = ( {
 	title,
 	description,
-	showStepNumber,
 	children,
 	className,
 	showPrice,
@@ -28,7 +28,6 @@ const FrontendBlock = ( {
 }: {
 	title: string;
 	description: string;
-	showStepNumber: boolean;
 	children: JSX.Element;
 	className?: string;
 	showPrice: boolean;
@@ -36,6 +35,7 @@ const FrontendBlock = ( {
 	shippingText: string;
 	localPickupText: string;
 } ) => {
+	const { showFormStepNumbers } = useCheckoutBlockContext();
 	const { checkoutIsProcessing, prefersCollection } = useSelect(
 		( select ) => {
 			const checkoutStore = select( CHECKOUT_STORE_KEY );
@@ -81,7 +81,7 @@ const FrontendBlock = ( {
 			) }
 			title={ title }
 			description={ description }
-			showStepNumber={ showStepNumber }
+			showStepNumber={ showFormStepNumbers }
 		>
 			<Block
 				checked={ prefersCollection ? 'pickup' : 'shipping' }

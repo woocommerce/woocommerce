@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockData } from '@woocommerce/e2e-types';
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect, BlockData } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -14,6 +13,7 @@ import {
 
 const blockData: BlockData = {
 	name: 'core/query',
+	slug: '',
 	mainClass: '.wc-block-price-filter',
 	selectors: {
 		frontend: {},
@@ -58,7 +58,6 @@ const templates = {
 test.describe( `${ blockData.name } Block `, () => {
 	test( 'when Inherit Query from template is enabled all the settings that customize the query should be hidden', async ( {
 		admin,
-		editorUtils,
 		editor,
 		page,
 	} ) => {
@@ -69,7 +68,7 @@ test.describe( `${ blockData.name } Block `, () => {
 
 		await editor.canvas.locator( 'body' ).click();
 
-		const block = await editorUtils.getBlockByName( blockData.name );
+		const block = await editor.getBlockByName( blockData.name );
 		await editor.selectBlocks( block );
 
 		await editor.openDocumentSettingsSidebar();
@@ -86,7 +85,6 @@ test.describe( `${ blockData.name } Block `, () => {
 	} );
 	test( 'when Inherit Query from template is disabled all the settings that customize the query should be visble', async ( {
 		admin,
-		editorUtils,
 		editor,
 		page,
 	} ) => {
@@ -97,7 +95,7 @@ test.describe( `${ blockData.name } Block `, () => {
 
 		await editor.canvas.locator( 'body' ).click();
 
-		const block = await editorUtils.getBlockByName( blockData.name );
+		const block = await editor.getBlockByName( blockData.name );
 		await editor.selectBlocks( block );
 
 		await editor.openDocumentSettingsSidebar();
@@ -127,7 +125,6 @@ for ( const {
 			admin,
 			editor,
 			page,
-			editorUtils,
 		} ) => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//${ slug }`,
@@ -135,17 +132,16 @@ for ( const {
 			} );
 
 			await editor.canvas.locator( 'body' ).click();
-			const block = await editorUtils.getBlockByName( blockData.name );
+			const block = await editor.getBlockByName( blockData.name );
 			// eslint-disable-next-line playwright/no-conditional-in-test
 			const clientId = ( await block.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
 				// eslint-disable-next-line playwright/no-conditional-in-test
-				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
+				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 			await editor.selectBlocks( block );
-			await editorUtils.insertBlock(
+			await editor.insertBlock(
 				{ name: legacyBlockName },
-				undefined,
-				parentClientId
+				{ clientId: parentClientId }
 			);
 
 			await editor.saveSiteEditorEntities();
