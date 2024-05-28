@@ -133,10 +133,8 @@ for ( const {
 
 			await editor.canvas.locator( 'body' ).click();
 			const block = await editor.getBlockByName( blockData.name );
-			// eslint-disable-next-line playwright/no-conditional-in-test
 			const clientId = ( await block.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 			await editor.selectBlocks( block );
 			await editor.insertBlock(
