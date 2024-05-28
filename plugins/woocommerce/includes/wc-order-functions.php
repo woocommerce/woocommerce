@@ -1189,7 +1189,7 @@ function wc_delete_order_note( $note_id ) {
 		/**
 		 * Action hook fired after an order note is deleted.
 		 *
-		 * @param int      $note_id	Order note ID.
+		 * @param int      $note_id Order note ID.
 		 * @param stdClass $note    Object with the deleted order note details.
 		 *
 		 * @since 9.1.0
