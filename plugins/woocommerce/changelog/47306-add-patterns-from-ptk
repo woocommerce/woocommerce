@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+[CYS] Refactor the pattern registration and add patterns from the PTK API.
