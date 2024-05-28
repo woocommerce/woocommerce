@@ -320,7 +320,24 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
 		 */
-		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $refund, $request, $creating );
+		$refund = apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $refund, $request, $creating );
+
+		// If the filtered result is not a WC_Data instance and is not a WP_Error then something went wrong, but we
+		// still need to honor the declared return type.
+		if ( ! is_a( $refund, WC_Data::class ) && ! is_wp_error( $refund ) ) {
+			return new WP_Error(
+				'woocommerce-rest-api-cannot-write-refund',
+				sprintf(
+					/* translators: 1: REST API request route 2: filter hook name. */
+					__( 'Unable to prepare the refund for the database during REST API request "%1$s". There may be a problem with one or more functions hooked into "%2$s".', 'woocommerce' ),
+					$request->get_route(),
+					"woocommerce_rest_pre_insert_{$this->post_type}_object"
+				),
+				$refund
+			);
+		}
+
+		return $refund;
 	}
 
 	/**
