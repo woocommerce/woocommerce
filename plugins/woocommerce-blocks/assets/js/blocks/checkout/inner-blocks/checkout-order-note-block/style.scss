@@ -1,5 +1,5 @@
 .wc-block-checkout__add-note {
-	margin: 2.5rem 0;
+	margin: 0 0 $gap-largest 0;
 	line-height: 1;
 }
 
@@ -21,7 +21,7 @@
 .is-medium {
 	.wc-block-checkout__add-note {
 		border-bottom: 1px solid $universal-border-light;
-		padding-bottom: 2.5rem;
+		padding-bottom: $gap-largest
 	}
 }
 
@@ -40,8 +40,8 @@
 .wc-block-components-form
 .wc-block-checkout__order-notes.wc-block-components-checkout-step {
 	padding-left: 0;
-	padding-bottom: 2.5rem;
-	margin-bottom: 2.5rem;
+	padding-bottom: $gap-largest;
+	margin-bottom: $gap-largest;
 	border-bottom: 1px solid $universal-border-light;
 
 	// When the order notes are the last item in the checkout (before the place order button) the margin should be removed.
@@ -57,7 +57,7 @@
 
 		// Restore margin removed above when the order notes are the last item in the checkout on smaller screens.
 		&:nth-last-child(2) {
-			margin-bottom: 2.5rem;
+			margin-bottom: $gap-largest;
 		}
 	}
 }
