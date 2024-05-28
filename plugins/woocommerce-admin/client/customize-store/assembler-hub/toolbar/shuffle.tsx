@@ -91,6 +91,7 @@ export default function Shuffle( { clientId }: { clientId: string } ) {
 			);
 		} );
 	}, [ categories, patterns ] );
+
 	if ( sameCategoryPatternsWithSingleWrapper.length === 0 ) {
 		return null;
 	}
