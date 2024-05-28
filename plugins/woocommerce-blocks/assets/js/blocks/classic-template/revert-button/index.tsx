@@ -137,7 +137,7 @@ const templateSlugs = [
 const REVERT_BUTTON_PLUGIN_NAME = 'woocommerce-blocks-revert-button-templates';
 
 let currentTemplateId: string | undefined;
-subscribe( () => {
+export const revertButtonRegistration = () => {
 	const previousTemplateId = currentTemplateId;
 	const store = select( 'core/edit-site' );
 
@@ -173,4 +173,4 @@ subscribe( () => {
 	}
 
 	unregisterPlugin( REVERT_BUTTON_PLUGIN_NAME );
-}, 'core/edit-site' );
+};

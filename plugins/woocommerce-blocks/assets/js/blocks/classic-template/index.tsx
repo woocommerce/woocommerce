@@ -36,7 +36,7 @@ import { isNumber } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import './revert-button';
+import { revertButtonRegistration } from './revert-button';
 import './editor.scss';
 import './style.scss';
 import { BLOCK_SLUG, TEMPLATES, TYPES } from './constants';
@@ -470,3 +470,5 @@ subscribe( () => {
 		} );
 	}
 }, 'core/blocks-editor' );
+
+subscribe( revertButtonRegistration, 'core/edit-site' );
