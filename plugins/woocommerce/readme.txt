@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Product Collection: fix the incompatibility of Query Pagination block with Product Collection [#47749](https://github.com/woocommerce/woocommerce/pull/47749)
 * Fix - Add missing line item data to the REST API refunds schema in versions 2 and 3 [#47254](https://github.com/woocommerce/woocommerce/pull/47254)
 * Fix - Allow category and tag taxonomy filters on the Product Collection block to see more than the first 10. [#47155](https://github.com/woocommerce/woocommerce/pull/47155)
 * Fix - A number of e2e fixes for flaky tests [#47562](https://github.com/woocommerce/woocommerce/pull/47562)
