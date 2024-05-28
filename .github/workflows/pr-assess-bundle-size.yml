@@ -22,6 +22,8 @@ jobs:
     build:
         name: Check Asset Sizes
         runs-on: ubuntu-latest
+        permissions:
+            issues: write
 
         steps:
             - uses: actions/checkout@v4
