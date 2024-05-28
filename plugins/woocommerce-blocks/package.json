@@ -33,7 +33,7 @@
 		"./assets/js/blocks/product-query/inspector-controls.tsx",
 		"./assets/js/blocks/product-gallery/**.tsx",
 		"./assets/js/blocks/product-gallery/inner-blocks/**/index.tsx",
-		"./assets/js/templates/revert-button/index.tsx",
+		"./assets/js/blocks/classic-template/revert-button/index.tsx",
 		"./assets/js/settings/blocks/index.ts",
 		"./assets/js/atomic/utils/blocks-registration-manager/index.ts",
 		"./packages/**/*.{tsx,ts,js}"

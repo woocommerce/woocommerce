@@ -36,6 +36,7 @@ import { isNumber } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
+import './revert-button';
 import './editor.scss';
 import './style.scss';
 import { BLOCK_SLUG, TEMPLATES, TYPES } from './constants';

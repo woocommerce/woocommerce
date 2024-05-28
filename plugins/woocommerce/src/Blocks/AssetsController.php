@@ -33,7 +33,6 @@ final class AssetsController {
 	 */
 	protected function init() {
 		add_action( 'init', array( $this, 'register_assets' ) );
-		add_action( 'enqueue_block_editor_assets', array( $this, 'register_and_enqueue_site_editor_assets' ) );
 		add_filter( 'wp_resource_hints', array( $this, 'add_resource_hints' ), 10, 2 );
 		add_action( 'body_class', array( $this, 'add_theme_body_class' ), 1 );
 		add_action( 'admin_body_class', array( $this, 'add_theme_body_class' ), 1 );
@@ -82,20 +81,6 @@ final class AssetsController {
 			",
 			'before'
 		);
-	}
-
-	/**
-	 * Register and enqueue assets for exclusive usage within the Site Editor.
-	 */
-	public function register_and_enqueue_site_editor_assets() {
-		$this->api->register_script( 'wc-blocks-classic-template-revert-button', 'assets/client/blocks/wc-blocks-classic-template-revert-button.js' );
-		$this->api->register_style( 'wc-blocks-classic-template-revert-button-style', 'assets/client/blocks/wc-blocks-classic-template-revert-button-style.css' );
-
-		$current_screen = get_current_screen();
-		if ( $current_screen instanceof \WP_Screen && 'site-editor' === $current_screen->base ) {
-			wp_enqueue_script( 'wc-blocks-classic-template-revert-button' );
-			wp_enqueue_style( 'wc-blocks-classic-template-revert-button-style' );
-		}
 	}
 
 	/**
