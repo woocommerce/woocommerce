@@ -1063,6 +1063,7 @@ function wc_get_order_note( $data ) {
 			'content'       => $data->comment_content,
 			'customer_note' => (bool) get_comment_meta( $data->comment_ID, 'is_customer_note', true ),
 			'added_by'      => __( 'WooCommerce', 'woocommerce' ) === $data->comment_author ? 'system' : $data->comment_author,
+			'order_id'      => absint( $data->comment_post_ID ),
 		),
 		$data
 	);
