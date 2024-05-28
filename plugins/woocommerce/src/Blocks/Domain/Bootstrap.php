@@ -9,6 +9,8 @@ use Automattic\WooCommerce\Blocks\BlockPatterns;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
+use Automattic\WooCommerce\Blocks\Patterns\AIPatterns;
+use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
 use Automattic\WooCommerce\Blocks\Domain\Services\Notices;
@@ -145,6 +147,7 @@ class Bootstrap {
 		if ( ! $is_store_api_request ) {
 			// Template related functionality. These won't be loaded for store API requests, but may be loaded for
 			// regular rest requests to maintain compatibility with the store editor.
+			$this->container->get( AIPatterns::class );
 			$this->container->get( BlockPatterns::class );
 			$this->container->get( BlockTypesController::class );
 			$this->container->get( BlockTemplatesRegistry::class )->init();
@@ -376,7 +379,16 @@ class Bootstrap {
 		$this->container->register(
 			BlockPatterns::class,
 			function () {
-				return new BlockPatterns( $this->package );
+				return new BlockPatterns(
+					$this->package,
+					new PatternRegistry()
+				);
+			}
+		);
+		$this->container->register(
+			AIPatterns::class,
+			function () {
+				return new AIPatterns();
 			}
 		);
 		$this->container->register(
