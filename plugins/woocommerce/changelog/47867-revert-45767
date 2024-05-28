@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Partially revert #45767, ensuring the product description remains visible within the order summary section on the Checkout block.
-
