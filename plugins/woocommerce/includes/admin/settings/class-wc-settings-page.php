@@ -85,6 +85,22 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		}
 
 		/**
+		 * Get page settings data.
+		 *
+		 * @param array $pages The settings array where we'll add data.
+		 *
+		 * @return mixed
+		 */
+		public function get_settings_page_data( $pages ) {
+			$pages[ $this->id ] = array(
+				'label'   => $this->label,
+				'default' => method_exists( $this, 'get_settings_for_default_section' ) ? $this->get_settings_for_default_section() : null
+			);
+
+			return $pages;
+		}
+
+		/**
 		 * Get settings array for the default section.
 		 *
 		 * External settings classes (registered via 'woocommerce_get_settings_pages' filter)
