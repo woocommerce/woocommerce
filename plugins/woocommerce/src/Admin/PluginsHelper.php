@@ -737,17 +737,22 @@ class PluginsHelper {
 			)
 		);
 
-		$message_key = sprintf( '%s_manage', $has_multiple_subs_for_product ? 'multiple' : 'single' );
-		$price       = $subscription['product_price'] ?? '';
-		$expiry_date = date_i18n( 'F jS', $subscription['expires'] );
+		$message_key  = $has_multiple_subs_for_product ? 'multiple_manage' : 'single_manage';
+		$renew_string = $subscription['product_price'] ? __('Renew for %4$s', 'woocommerce' ) : __('Renew', 'woocommerce' );
+		$expiry_date  = date_i18n( 'F jS', $subscription['expires'] );
 
+		// Construct message based on template for multiple_manage or single_manage, parameter used:
+		// 1. Product name
+		// 2. Expiry date
+		// 3. URL to My Subscriptions page
+		// 4. Renew string
 		if ( isset( $messages[ $message_key ] ) ) {
 			return sprintf(
 				$messages[ $message_key ],
 				esc_attr( $subscription['product_name'] ),
 				esc_attr( $expiry_date ),
 				esc_url( self::WOO_SUBSCRIPTION_PAGE_URL ),
-				esc_attr( $price ),
+				esc_attr( $renew_string ),
 			);
 		}
 
@@ -847,10 +852,10 @@ class PluginsHelper {
 			$expired_subscriptions,
 			$total_expired_subscriptions,
 			array(
-				/* translators: 1) product name 2) URL to My Subscriptions page 3) Product price */
-				'single_manage'           => __( 'Your subscription for <strong>%1$s</strong> expired. <a href="%3$s" >Renew for %4$s</a> to continue receiving updates and streamlined support', 'woocommerce' ),
-				/* translators: 1) product name 2) URL to My Subscriptions page 3) Product price */
-				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">Renew for %4$s.</a> to continue receiving updates and streamlined support', 'woocommerce' ),
+				/* translators: 1) product name 3) URL to My Subscriptions page 4) Renew product price string */
+				'single_manage'           => __( 'Your subscription for <strong>%1$s</strong> expired. <a href="%3$s">%4$s</a> to continue receiving updates and streamlined support', 'woocommerce' ),
+				/* translators: 1) product name 3) URL to My Subscriptions page 4) Renew product price string */
+				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">%4$s.</a> to continue receiving updates and streamlined support', 'woocommerce' ),
 				/* translators: 1) total expired subscriptions 2) URL to My Subscriptions page */
 				'different_subscriptions' => __( 'You have <strong>%1$s Woo extension subscriptions</strong> that expired. <a href="%2$s">Renew</a> to continue receiving updates and streamlined support', 'woocommerce' ),
 			),
