@@ -57,7 +57,7 @@ class Settings {
 		$setting_pages = \WC_Admin_Settings::get_settings_pages();
 		$pages         = array();
 		foreach ( $setting_pages as $setting_page ) {
-			$pages = $setting_page->add_settings_page( $pages );
+			$pages = $setting_page->get_settings_page_data( $pages );
 		}
 
 		$settings['settingsPages'] = $pages;
