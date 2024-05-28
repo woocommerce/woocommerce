@@ -97,6 +97,26 @@ export const organizeItemsById = (
 };
 
 /**
+ * Filters the input data object, returning a new object that contains only the keys
+ * specified in the keys array.
+ *
+ * @param {Record<string, unknown>} data - The original data object to filter.
+ * @param {IdType[]}                keys - An array of keys that should be included in the returned object.
+ * @return {Record<string, unknown>} A new object containing only the specified keys.
+ */
+export function filterDataByKeys(
+	data: Record< string, unknown >,
+	keys: IdType[]
+): Record< string, unknown > {
+	return keys.reduce( ( acc: Record< string, unknown >, key ) => {
+		if ( data[ key ] ) {
+			acc[ key ] = data[ key ];
+		}
+		return acc;
+	}, {} );
+}
+
+/**
  * Parse an ID query into a ID string.
  *
  * @param query Id Query

@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { BlockData } from '@woocommerce/e2e-types';
+import { test, expect, BlockData } from '@woocommerce/e2e-utils';
 
 const blockData: BlockData = {
 	name: 'Mini-Cart',
@@ -19,16 +18,12 @@ const blockData: BlockData = {
 
 test.describe( 'Merchant → Mini Cart', () => {
 	test.describe( 'in FSE editor', () => {
-		test( 'can be inserted in FSE area', async ( {
-			editorUtils,
-			editor,
-			admin,
-		} ) => {
+		test( 'can be inserted in FSE area', async ( { editor, admin } ) => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//single-product`,
 				postType: 'wp_template',
 			} );
-			await editorUtils.enterEditMode();
+			await editor.enterEditMode();
 
 			await editor.setContent( '' );
 
@@ -38,19 +33,19 @@ test.describe( 'Merchant → Mini Cart', () => {
 			).toBeVisible();
 		} );
 
-		test( 'can only be inserted once', async ( { editorUtils, admin } ) => {
+		test( 'can only be inserted once', async ( { editor, admin } ) => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//single-product`,
 				postType: 'wp_template',
 			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.openGlobalBlockInserter();
+			await editor.enterEditMode();
+			await editor.openGlobalBlockInserter();
 
-			await editorUtils.page
+			await editor.page
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( blockData.slug );
 
-			const miniCartButton = editorUtils.page.getByRole( 'option', {
+			const miniCartButton = editor.page.getByRole( 'option', {
 				name: blockData.name,
 			} );
 

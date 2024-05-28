@@ -25,7 +25,7 @@ class Installer {
 
 	/**
 	 * Modifies default page content replacing it with classic shortcode block.
-	 * We check for shortcode as default because after WooCommerce 8.3, block based checkout is used by default.
+	 * We check for shortcode as default because after WooCommerce 8.3, block-based checkout is used by default.
 	 * This only runs on Tools > Create Pages as the filter is not applied on WooCommerce plugin activation.
 	 *
 	 * @param array $pages Default pages.
