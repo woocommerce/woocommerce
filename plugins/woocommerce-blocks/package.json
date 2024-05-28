@@ -40,7 +40,7 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "https://github.com:woocommerce/woocommerce.git"
+		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
 	"license": "GPL-3.0+",
 	"scripts": {
@@ -360,14 +360,19 @@
 					"name": "JavaScript",
 					"command": "test:js",
 					"changes": [
-						"jest.config.js",
 						"webpack.config.js",
 						"babel.config.js",
 						"tsconfig.json",
 						"assets/**/*.{js,ts,tsx,scss}",
-						"packages/**/*.{js,ts,tsx,scss}"
+						"packages/**/*.{js,ts,tsx,scss}",
+						"tests/js/**/*.{js,ts,tsx,scss,json}",
+						"tests/utils/**/.{js,ts,tsx,scss,json}"
 					],
-					"cascade": "test:js"
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}

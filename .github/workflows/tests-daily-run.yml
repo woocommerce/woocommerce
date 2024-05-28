@@ -1,0 +1,13 @@
+name: 'Daily tests run'
+on:
+  schedule:
+    - cron: '25 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  run-tests:
+    name: 'Run tests'
+    uses: ./.github/workflows/ci.yml
+    with:
+      trigger: 'daily-e2e'
+    secrets: inherit

@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+When the total shipping cost is 0 the order summary in the Cart and Checkout blocks shows "FREE" instead of 0.00
