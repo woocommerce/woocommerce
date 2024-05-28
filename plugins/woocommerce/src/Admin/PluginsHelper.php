@@ -64,7 +64,6 @@ class PluginsHelper {
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_expired_subscriptions_notice' ), 10 );
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_expiring_subscriptions_notice' ), 11 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice_in_plugins' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_subscription_notice' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_notices_in_plugins' ) );
 	}
@@ -646,20 +645,6 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Enqueue scripts for connect notice in plugin list page.
-	 *
-	 * @return void
-	 */
-	public static function maybe_enqueue_scripts_for_connect_notice_in_plugins() {
-		if ( 'plugins' !== get_current_screen()->id ) {
-			return;
-		}
-
-		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-plugin-update-connect-notice' );
-		wp_enqueue_script( 'woo-plugin-update-connect-notice' );
-	}
-
-	/**
 	 * Show notice about to expired subscription on WC settings page.
 	 *
 	 * @return void
@@ -704,6 +689,20 @@ class PluginsHelper {
 	    		<p class="widefat">' . wp_kses_post( $notice['description'] ) . '</p>
 	    	</div>';
 		}
+	}
+
+	/**
+	 * Enqueue scripts for woo subscription notice.
+	 *
+	 * @return void
+	 */
+	public static function maybe_enqueue_scripts_for_subscription_notice() {
+		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
+			return;
+		}
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-subscriptions-notice' );
+		wp_enqueue_script( 'woo-subscriptions-notice' );
 	}
 
 	/**
@@ -866,20 +865,6 @@ class PluginsHelper {
 			'button_text' => __( 'Renew', 'woocommerce' ),
 			'button_link' => self::WOO_SUBSCRIPTION_PAGE_URL,
 		);
-	}
-
-	/**
-	 * Enqueue scripts for woo subscription notice.
-	 *
-	 * @return void
-	 */
-	public static function maybe_enqueue_scripts_for_subscription_notice() {
-		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
-			return;
-		}
-
-		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-subscriptions-notice' );
-		wp_enqueue_script( 'woo-subscriptions-notice' );
 	}
 
 	/**
