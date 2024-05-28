@@ -288,6 +288,9 @@ baseTest.describe( 'Checkout Block page', () => {
 			)
 		).toContainText( `$${ singleProductSalePrice }` );
 		await expect(
+			page.locator( '.wc-block-components-product-metadata__description' )
+		).toContainText( simpleProductDesc );
+		await expect(
 			page.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
 			)
