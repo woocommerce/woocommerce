@@ -147,7 +147,10 @@ const ProductCollectionContent = ( {
 		return null;
 	}
 
-	// Let's not render anything until default attributes are set.
+	/**
+	 * If default attributes are not set, we don't wanna render anything.
+	 * Default attributes are set in the useEffect above.
+	 */
 	isInitialAttributesSet.current =
 		isInitialAttributesSet.current ||
 		fastDeepEqual( attributes, defaultAttributesValue );
