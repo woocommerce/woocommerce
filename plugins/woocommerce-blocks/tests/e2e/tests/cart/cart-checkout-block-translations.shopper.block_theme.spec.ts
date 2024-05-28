@@ -116,7 +116,12 @@ test.describe( 'Shopper → Translations', () => {
 		).toBeVisible();
 
 		await expect( page.getByText( 'Subtotaal' ) ).toBeVisible();
-		await expect( page.getByText( 'Verzending' ) ).toBeVisible();
+
+		/**
+		 * @todo Uncomment and update when WooCommerce 9.1.0 is released and a translation for the new string is available.
+		 * @see https://github.com/woocommerce/woocommerce/issues/47882
+		 */
+		//await expect( page.getByText( 'Verzending' ) ).toBeVisible();
 
 		await expect(
 			page.getByText( 'Totaal', { exact: true } )
