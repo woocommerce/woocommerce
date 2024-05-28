@@ -141,15 +141,6 @@ class PTKPatternsStore {
 	}
 
 	/**
-	 * Reset the cached patterns to fetch them again from the PTK.
-	 *
-	 * @return void
-	 */
-	public function reset_cached_patterns() {
-		delete_transient( self::TRANSIENT_NAME );
-	}
-
-	/**
 	 * Re-fetch the patterns when the WooCommerce plugin is updated.
 	 *
 	 * @param WP_Upgrader $upgrader_object WP_Upgrader instance.
