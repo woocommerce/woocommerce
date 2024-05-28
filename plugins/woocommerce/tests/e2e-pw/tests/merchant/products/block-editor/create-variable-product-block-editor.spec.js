@@ -294,6 +294,15 @@ test.describe( 'Variations tab', () => {
 				.getByRole( 'button', { name: 'Generate from options' } )
 				.click();
 
+			await getVariationsResponsePromise;
+
+			// Get rid of the intro popup if present
+			if ( await page.getByText( 'Got it' ).isVisible() ) {
+				await page.getByText( 'Got it' ).click();
+			} else {
+				console.log( 'Intro popup was not present, skipping action' );
+			}
+
 			await page.getByLabel( 'Actions', { exact: true } ).first().click();
 
 			await page.getByLabel( 'Delete variation' ).click();
