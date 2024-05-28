@@ -36,8 +36,8 @@ jobs:
             - uses: preactjs/compressed-size-action@f780fd104362cfce9e118f9198df2ee37d12946c
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
-                  pattern: '{packages/js/**/build/**/*.js,packages/js/**/build/**/*.css,plugins/woocommerce/client/legacy/js/**/*.min.js,plugins/woocommerce/client/legacy/css/**/*.css,plugins/woocommerce-admin/build/**/*.min.js,plugins/woocommerce-admin/build/**/*.css,plugins/woocommerce-blocks/build/**/*.js}'
-                  exclude: '{packages/js/dependency-extraction-webpack-plugin/,packages/js/*e2e*/,packages/js/*create*/,**/*.map,**/node_modules/**}'
+                  pattern: './{packages,plugins/woocommerce-admin,plugins/woocommerce-blocks}/**/{build,build-style}/**/*.{js,css}'
+                  exclude: '{packages/js/{*e2e*,*tests,internal*,*plugin},**/*.map,**/node_modules/**}'
                   clean-script: '--if-present distclean'
                   minimum-change-threshold: 100
                   omit-unchanged: true
