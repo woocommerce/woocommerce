@@ -4,7 +4,11 @@
 
 import { useSelect } from '@wordpress/data';
 import { BlockInstance } from '@wordpress/blocks';
-import { ToolbarGroup, Toolbar as WPToolbar } from '@wordpress/components';
+import {
+	ToolbarButton,
+	ToolbarGroup,
+	Toolbar as WPToolbar,
+} from '@wordpress/components';
 import { useMemo } from '@wordpress/element';
 import {
 	BlockMover,
@@ -17,6 +21,7 @@ import {
  * Internal dependencies
  */
 import './style.scss';
+import Shuffle from './shuffle';
 
 export const Toolbar = () => {
 	const {
@@ -85,6 +90,15 @@ export const Toolbar = () => {
 									isNextBlockTemplatePart
 								}
 							/>
+						</ToolbarGroup>
+						<ToolbarGroup>
+							<ToolbarButton>
+								{ currentBlock && (
+									<Shuffle
+										clientId={ currentBlock?.clientId }
+									/>
+								) }
+							</ToolbarButton>
 						</ToolbarGroup>
 					</>
 				</WPToolbar>
