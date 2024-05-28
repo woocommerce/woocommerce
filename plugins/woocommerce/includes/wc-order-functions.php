@@ -1184,18 +1184,20 @@ function wc_create_order_note( $order_id, $note, $is_customer_note = false, $add
  * @return bool         True on success, false on failure.
  */
 function wc_delete_order_note( $note_id ) {
-	$delete = wp_delete_comment( $note_id, true );
-
-	if ( $delete ) {
+	$note = wc_get_order_note( $note_id );
+	if ( $note && wp_delete_comment( $note_id, true ) ) {
 		/**
 		 * Action hook fired after an order note is deleted.
 		 *
 		 * @param int      $note_id	Order note ID.
+		 * @param stdClass $note    Object with the deleted order note details.
 		 *
-		 * @since 7.7.0
+		 * @since 9.1.0
 		 */
-		do_action( 'woocommerce_order_note_deleted', $note_id);
+		do_action( 'woocommerce_order_note_deleted', $note_id, $note );
+
+		return true;
 	}
 
-	return $delete;
+	return false;
 }
