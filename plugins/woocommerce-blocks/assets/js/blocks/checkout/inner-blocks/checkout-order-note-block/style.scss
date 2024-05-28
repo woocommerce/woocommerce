@@ -1,22 +1,15 @@
 .wc-block-checkout__add-note {
 	margin: 0 0 $gap-largest 0;
 	line-height: 1;
-}
+	padding: 0;
 
-.is-mobile,
-.is-small,
-.is-medium {
-	.wc-block-checkout__add-note {
-		padding: 0;
+	.wc-block-components-checkbox {
+		line-height: 1;
 		margin-top: 0;
-
-		.wc-block-components-checkbox {
-			line-height: 1;
-			margin-top: 0;
-			margin-bottom: -3px;
-		}
+		margin-bottom: -3px;
 	}
 }
+
 
 .is-medium {
 	.wc-block-checkout__add-note {
