@@ -1,16 +1,14 @@
 /**
  * External dependencies
  */
-import { test, expect, cli } from '@woocommerce/e2e-utils';
+import { test, expect, wpCLI } from '@woocommerce/e2e-utils';
 
 test.describe( 'Shop page', () => {
 	test( 'template selector is not visible in the Page editor', async ( {
 		admin,
 		page,
 	} ) => {
-		const cliOutput = await cli(
-			`npm run wp-env run tests-cli -- wp option get woocommerce_shop_page_id`
-		);
+		const cliOutput = await wpCLI( 'option get woocommerce_shop_page_id' );
 		const shopPageId = cliOutput.stdout.match( /\d+/ )?.pop();
 		if ( ! shopPageId ) {
 			throw new Error( 'Shop page ID not found' );
