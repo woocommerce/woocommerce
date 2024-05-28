@@ -125,7 +125,7 @@ class WC_Products_Tracking {
 		}
 
 		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
-		$source     = apply_filters( 'woocommerce_product_source', self::is_importing() ? 'bulk-import' : self::TRACKS_SOURCE );
+		$source     = apply_filters( 'woocommerce_product_source', self::is_importing() ? 'import' : self::TRACKS_SOURCE );
 		$properties = array(
 			'product_id' => $product_id,
 			'source'     => $source,
@@ -341,7 +341,7 @@ class WC_Products_Tracking {
 			'product_type_options' => $product_type_options_string,
 			'purchase_note'        => $product->get_purchase_note() ? 'yes' : 'no',
 			'sale_price'           => $product->get_sale_price() ? 'yes' : 'no',
-			'source'               => apply_filters( 'woocommerce_product_source', self::is_importing() ? 'bulk-import' : self::TRACKS_SOURCE ),
+			'source'               => apply_filters( 'woocommerce_product_source', self::is_importing() ? 'import' : self::TRACKS_SOURCE ),
 			'short_description'    => $product->get_short_description() ? 'yes' : 'no',
 			'tags'                 => count( $product->get_tag_ids() ),
 			'upsells'              => ! empty( $product->get_upsell_ids() ) ? 'yes' : 'no',
