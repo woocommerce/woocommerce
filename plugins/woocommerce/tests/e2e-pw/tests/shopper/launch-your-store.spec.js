@@ -38,7 +38,7 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 
 		await expect(
 			page.getByText(
-				'Pardon our dust! We’re working on something amazing — check back soon!'
+				"Pardon our dust! We're working on something amazing — check back soon!"
 			)
 		).toBeVisible();
 	} );

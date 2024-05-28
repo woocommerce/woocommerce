@@ -3,19 +3,16 @@
  */
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
-import {
-	PlainText,
-	InspectorControls,
-	useBlockProps,
-} from '@wordpress/block-editor';
-import { PanelBody, ToggleControl } from '@wordpress/components';
+import { PlainText, useBlockProps } from '@wordpress/block-editor';
+import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
 
 /**
  * Internal dependencies
  */
 import FormStepHeading from './form-step-heading';
+
 export interface FormStepBlockProps {
-	attributes: { title: string; description: string; showStepNumber: boolean };
+	attributes: { title: string; description: string };
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 	className?: string;
 	children?: React.ReactNode;
@@ -31,28 +28,17 @@ export const FormStepBlock = ( {
 	className = '',
 	children,
 }: FormStepBlockProps ): JSX.Element => {
-	const { title = '', description = '', showStepNumber = true } = attributes;
+	const { showFormStepNumbers } = useCheckoutBlockContext();
+
+	const { title = '', description = '' } = attributes;
 	const blockProps = useBlockProps( {
 		className: classnames( 'wc-block-components-checkout-step', className, {
 			'wc-block-components-checkout-step--with-step-number':
-				showStepNumber,
+				showFormStepNumbers,
 		} ),
 	} );
 	return (
 		<div { ...blockProps }>
-			<InspectorControls>
-				<PanelBody title={ __( 'Form Step Options', 'woocommerce' ) }>
-					<ToggleControl
-						label={ __( 'Show step number', 'woocommerce' ) }
-						checked={ showStepNumber }
-						onChange={ () =>
-							setAttributes( {
-								showStepNumber: ! showStepNumber,
-							} )
-						}
-					/>
-				</PanelBody>
-			</InspectorControls>
 			<FormStepHeading>
 				<PlainText
 					className={ '' }

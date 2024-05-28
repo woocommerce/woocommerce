@@ -96,26 +96,36 @@ export function getDefaultValueOfInheritQueryFromTemplate() {
 }
 
 /**
- * Add Product Collection block to the parent array of the Core Pagination block.
+ * Add Product Collection block to the parent or ancestor array of the Core Pagination block.
  * This enhancement allows the Core Pagination block to be available for the Product Collection block.
  */
-export const addProductCollectionBlockToParentOfPaginationBlock = () => {
+export const addProductCollectionToQueryPaginationParentOrAncestor = () => {
 	if ( isWpVersion( '6.1', '>=' ) ) {
 		addFilter(
 			'blocks.registerBlockType',
 			'woocommerce/add-product-collection-block-to-parent-array-of-pagination-block',
 			( blockSettings: Block, blockName: string ) => {
-				if (
-					blockName !== coreQueryPaginationBlockName ||
-					! blockSettings?.parent
-				) {
+				if ( blockName !== coreQueryPaginationBlockName ) {
 					return blockSettings;
 				}
 
-				return {
-					...blockSettings,
-					parent: [ ...blockSettings.parent, blockJson.name ],
-				};
+				if ( blockSettings?.ancestor ) {
+					return {
+						...blockSettings,
+						ancestor: [ ...blockSettings.ancestor, blockJson.name ],
+					};
+				}
+
+				// Below condition is to support WP >=6.4 where Pagination specifies the parent.
+				// Can be removed when minimum WP version is set to 6.5 and higher.
+				if ( blockSettings?.parent ) {
+					return {
+						...blockSettings,
+						parent: [ ...blockSettings.parent, blockJson.name ],
+					};
+				}
+
+				return blockSettings;
 			}
 		);
 	}

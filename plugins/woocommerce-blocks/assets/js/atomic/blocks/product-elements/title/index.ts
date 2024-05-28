@@ -22,6 +22,9 @@ import { Save } from './save';
 
 const blockConfig: BlockConfiguration = {
 	...sharedConfig,
+	// Product Title is not expected to be available in Product Collection
+	// nor Products (Beta). They use core/post-title variation.
+	ancestor: [ 'woocommerce/all-products', 'woocommerce/single-product' ],
 	apiVersion: 2,
 	title,
 	description,

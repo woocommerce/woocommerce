@@ -36,7 +36,7 @@ export function createItemSuccess(
 	key: IdType,
 	item: Item,
 	query: Partial< ItemQuery >,
-	options: CrudActionOptions
+	options?: CrudActionOptions
 ) {
 	return {
 		type: TYPES.CREATE_ITEM_SUCCESS as const,
