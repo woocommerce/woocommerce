@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect, cli } from '@woocommerce/e2e-utils';
+import { test, expect, wpCLI } from '@woocommerce/e2e-utils';
 
 test.describe( 'Legacy templates', () => {
 	test( 'woocommerce//* slug is supported', async ( {
@@ -43,12 +43,11 @@ test.describe( 'Legacy templates', () => {
 		} );
 
 		await test.step( 'Update created term to legacy format in the DB', async () => {
-			await cli(
-				`npm run wp-env run tests-cli -- \
-					wp term update wp_theme woocommerce-woocommerce \
-						--by="slug" \
-						--name="woocommerce" \
-						--slug="woocommerce"`
+			await wpCLI(
+				`term update wp_theme woocommerce-woocommerce \
+					--by="slug" \
+					--name="woocommerce" \
+					--slug="woocommerce"`
 			);
 		} );
 

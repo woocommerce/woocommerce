@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test, cli } from '@woocommerce/e2e-utils';
+import { expect, test, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -10,9 +10,7 @@ import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
 
 test.describe( 'Shopper → Translations', () => {
 	test.beforeEach( async () => {
-		await cli(
-			`npm run wp-env run tests-cli -- wp site switch-language nl_NL`
-		);
+		await wpCLI( 'site switch-language nl_NL' );
 	} );
 
 	test( 'User can see translation in empty Mini-Cart', async ( {
@@ -57,12 +55,8 @@ test.describe( 'Shopper → Translations', () => {
 
 test.describe( 'Shopper → Tax', () => {
 	test.beforeEach( async () => {
-		await cli(
-			`npm run wp-env run tests-cli -- wp option set woocommerce_prices_include_tax no`
-		);
-		await cli(
-			`npm run wp-env run tests-cli -- wp option set woocommerce_tax_display_cart incl`
-		);
+		await wpCLI( 'option set woocommerce_prices_include_tax no' );
+		await wpCLI( 'option set woocommerce_tax_display_cart incl' );
 	} );
 
 	test( 'User can see tax label and price including tax', async ( {
@@ -88,12 +82,8 @@ test.describe( 'Shopper → Tax', () => {
 			page.getByTestId( 'mini-cart' ).getByLabel( '1 item in cart' )
 		).toContainText( '(incl. tax)' );
 
-		await cli(
-			`npm run wp-env run tests-cli -- wp option set woocommerce_prices_include_tax yes`
-		);
-		await cli(
-			`npm run wp-env run tests-cli -- wp option set woocommerce_tax_display_cart excl`
-		);
+		await wpCLI( 'option set woocommerce_prices_include_tax yes' );
+		await wpCLI( 'option set woocommerce_tax_display_cart excl' );
 		await page.reload();
 
 		await expect(

@@ -6,8 +6,7 @@ import { test as base, expect, ConsoleMessage } from '@playwright/test';
 import {
 	STORAGE_STATE_PATH,
 	DB_EXPORT_FILE,
-	cli,
-	WPCLIUtils,
+	wpCLI,
 	Admin,
 	Editor,
 	FrontendUtils,
@@ -115,7 +114,6 @@ const test = base.extend<
 		shippingUtils: ShippingUtils;
 		localPickupUtils: LocalPickupUtils;
 		miniCartUtils: MiniCartUtils;
-		wpCliUtils: WPCLIUtils;
 	},
 	{
 		requestUtils: RequestUtils;
@@ -137,9 +135,7 @@ const test = base.extend<
 			window.localStorage.clear();
 		} );
 
-		await cli(
-			`npm run wp-env run tests-cli wp db import ${ DB_EXPORT_FILE }`
-		);
+		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
@@ -161,9 +157,6 @@ const test = base.extend<
 	},
 	miniCartUtils: async ( { page, frontendUtils }, use ) => {
 		await use( new MiniCartUtils( page, frontendUtils ) );
-	},
-	wpCliUtils: async ( {}, use ) => {
-		await use( new WPCLIUtils() );
 	},
 	requestUtils: [
 		async ( {}, use, workerInfo ) => {

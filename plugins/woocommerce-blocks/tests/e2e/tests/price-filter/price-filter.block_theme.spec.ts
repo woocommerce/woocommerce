@@ -6,7 +6,7 @@ import {
 	expect,
 	TemplateCompiler,
 	BASE_URL,
-	cli,
+	wpCLI,
 } from '@woocommerce/e2e-utils';
 
 const blockData = {
@@ -226,8 +226,8 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 } );
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 	test.beforeEach( async ( { admin, page, editor } ) => {
-		await cli(
-			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
+		await wpCLI(
+			'option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
 
 		await admin.visitSiteEditor( {

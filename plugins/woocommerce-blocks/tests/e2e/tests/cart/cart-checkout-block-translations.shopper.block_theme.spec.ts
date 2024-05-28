@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test as base, cli } from '@woocommerce/e2e-utils';
+import { expect, test as base, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -19,9 +19,7 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 
 test.describe( 'Shopper → Translations', () => {
 	test.beforeEach( async () => {
-		await cli(
-			`npm run wp-env run tests-cli -- wp site switch-language nl_NL`
-		);
+		await wpCLI( 'site switch-language nl_NL' );
 	} );
 
 	test( 'User can view translated Cart block', async ( {
