@@ -294,14 +294,16 @@ test.describe( 'Variations tab', () => {
 				.getByRole( 'button', { name: 'Generate from options' } )
 				.click();
 
-			await getVariationsResponsePromise;
-
-			// Get rid of the intro popup if present
-			if ( await page.getByText( 'Got it' ).isVisible() ) {
-				await page.getByText( 'Got it' ).click();
-			} else {
-				console.log( 'Intro popup was not present, skipping action' );
+			// Tour sometimes present
+			try {
+				await page
+					.getByRole( 'button', { name: 'Got it', exact: true } )
+					.click( { timeout: 5000 } );
+			} catch ( e ) {
+				console.log( 'Tour was not visible, skipping.' );
 			}
+
+			await getVariationsResponsePromise;
 
 			await page.getByLabel( 'Actions', { exact: true } ).first().click();
 
