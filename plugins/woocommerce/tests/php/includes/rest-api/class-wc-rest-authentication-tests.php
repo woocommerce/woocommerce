@@ -22,6 +22,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$authenticated_user          = new ReflectionProperty( $wc_rest_authentication, 'user' );
 		$original_authenticated_user = $authenticated_user->getValue( $wc_rest_authentication );
 		$update_last_access->setAccessible( true );
+		$authenticated_user->setAccessible( true );
 		$authenticated_user->setValue(
 			$wc_rest_authentication,
 			(object) array(
@@ -55,8 +56,9 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 
 		// Clean-up.
 		$wp->request = $original_request;
-		$update_last_access->setAccessible( false );
 		$authenticated_user->setValue( $wc_rest_authentication, $original_authenticated_user );
+		$authenticated_user->setAccessible( false );
+		$update_last_access->setAccessible( false );
 		add_filter( 'woocommerce_disable_rest_api_access_log', $last_access_spy );
 	}
 }
