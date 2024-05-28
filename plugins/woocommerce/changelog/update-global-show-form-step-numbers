@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Changed the Form Step blocks in the Checkout block so that the step nunbers cannot be turned off individually. This is now a global setting on the Checkout Fields block that will affect all child blocks. The FormStep component in the checkout pacakge remains unchanged.

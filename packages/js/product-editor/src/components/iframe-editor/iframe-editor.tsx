@@ -53,6 +53,7 @@ import {
 	KeyboardShortcuts,
 	RegisterKeyboardShortcuts,
 } from './keyboard-shortcuts';
+import { areBlocksEmpty } from './utils/are-blocks-empty';
 
 type IframeEditorProps = {
 	initialBlocks?: BlockInstance[];
@@ -84,7 +85,7 @@ export function IframeEditor( {
 		useDispatch( productEditorUiStore );
 
 	const {
-		appendEdit: tempAppendEdit,
+		appendEdit: appendToEditorHistory,
 		hasRedo,
 		hasUndo,
 		redo,
@@ -98,7 +99,7 @@ export function IframeEditor( {
 	 * @todo: probably we can get rid of the initialBlocks prop.
 	 */
 	useEffect( () => {
-		tempAppendEdit( blocks );
+		appendToEditorHistory( blocks );
 		setTemporalBlocks( blocks );
 	}, [] ); // eslint-disable-line
 
@@ -137,6 +138,22 @@ export function IframeEditor( {
 		updateSettings( productBlockEditorSettings );
 	}, [] );
 
+	const handleBlockEditorProviderOnChange = (
+		updatedBlocks: BlockInstance[]
+	) => {
+		appendToEditorHistory( updatedBlocks );
+		setTemporalBlocks( updatedBlocks );
+		onChange( updatedBlocks );
+	};
+
+	const handleBlockEditorProviderOnInput = (
+		updatedBlocks: BlockInstance[]
+	) => {
+		appendToEditorHistory( updatedBlocks );
+		setTemporalBlocks( updatedBlocks );
+		onInput( updatedBlocks );
+	};
+
 	const settings = __settings || parentEditorSettings;
 
 	const inlineFixedBlockToolbar =
@@ -164,16 +181,8 @@ export function IframeEditor( {
 						templateLock: false,
 					} }
 					value={ temporalBlocks }
-					onChange={ ( updatedBlocks: BlockInstance[] ) => {
-						tempAppendEdit( updatedBlocks );
-						setTemporalBlocks( updatedBlocks );
-						onChange( updatedBlocks );
-					} }
-					onInput={ ( updatedBlocks: BlockInstance[] ) => {
-						tempAppendEdit( updatedBlocks );
-						setTemporalBlocks( updatedBlocks );
-						onInput( updatedBlocks );
-					} }
+					onChange={ handleBlockEditorProviderOnChange }
+					onInput={ handleBlockEditorProviderOnInput }
 					useSubRegistry={ true }
 				>
 					<RegisterStores />
@@ -183,7 +192,11 @@ export function IframeEditor( {
 
 					<HeaderToolbar
 						onSave={ () => {
-							setBlocks( temporalBlocks );
+							setBlocks(
+								areBlocksEmpty( temporalBlocks )
+									? []
+									: temporalBlocks
+							);
 							setModalEditorContentHasChanged( true );
 							onChange( temporalBlocks );
 							onClose?.();

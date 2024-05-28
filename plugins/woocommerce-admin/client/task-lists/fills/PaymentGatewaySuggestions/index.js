@@ -71,16 +71,6 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		[ installedPaymentGateways, paymentGatewaySuggestions ]
 	);
 
-	useEffect( () => {
-		if ( paymentGateways.size ) {
-			recordEvent( 'tasklist_payments_options', {
-				options: Array.from( paymentGateways.values() ).map(
-					( gateway ) => gateway.id
-				),
-			} );
-		}
-	}, [ paymentGateways ] );
-
 	const enablePaymentGateway = ( id ) => {
 		if ( ! id ) {
 			return;
@@ -176,6 +166,26 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			isWCPayOrOtherCategoryDoneSetup,
 		]
 	);
+
+	useEffect( () => {
+		let shownGateways = [];
+
+		if ( ! currentGateway ) {
+			if ( wcPayGateway.length ) {
+				shownGateways.push( wcPayGateway[ 0 ].id );
+			}
+			if ( additionalGateways.length ) {
+				shownGateways = shownGateways.concat(
+					additionalGateways.map( ( g ) => g.id )
+				);
+			}
+			if ( shownGateways.length ) {
+				recordEvent( 'tasklist_payments_options', {
+					options: shownGateways,
+				} );
+			}
+		}
+	}, [ additionalGateways, currentGateway, wcPayGateway ] );
 
 	const trackSeeMore = () => {
 		recordEvent( 'tasklist_payment_see_more', {} );

@@ -6,6 +6,7 @@
  * @since   3.2.0
  */
 
+use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -989,7 +990,7 @@ class WC_Discounts {
 			)
 		);
 
-		if ( ! WC()->cart->is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
+		if ( ! DiscountsUtil::is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
 			throw new Exception( $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ), WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 

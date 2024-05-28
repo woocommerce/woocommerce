@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add custom fonts via wp_theme_json_data_theme filter for coming soon pages

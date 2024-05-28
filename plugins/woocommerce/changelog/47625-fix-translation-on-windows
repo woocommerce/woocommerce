@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Correctly load up Cart/Checkout translations on Windows machines.

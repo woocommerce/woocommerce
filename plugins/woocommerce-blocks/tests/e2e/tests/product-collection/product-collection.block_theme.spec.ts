@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import type { Request } from '@playwright/test';
+import { Request } from '@playwright/test';
+import { test as base, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -10,16 +10,11 @@ import type { Request } from '@playwright/test';
 import ProductCollectionPage, { SELECTORS } from './product-collection.page';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
-	pageObject: async (
-		{ page, admin, editor, templateApiUtils, editorUtils },
-		use
-	) => {
+	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new ProductCollectionPage( {
 			page,
 			admin,
 			editor,
-			templateApiUtils,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},
@@ -880,6 +875,28 @@ test.describe( 'Product Collection', () => {
 				featuredProductsPrices
 			);
 		} );
+
+		test( 'With multiple Pagination blocks', async ( {
+			page,
+			admin,
+			editor,
+			pageObject,
+		} ) => {
+			await admin.createNewPost();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost( 'productCatalog' );
+			const paginations = page.getByLabel( 'Block: Pagination' );
+
+			await expect( paginations ).toHaveCount( 1 );
+
+			const siblingBlock = await editor.getBlockByName(
+				'woocommerce/product-template'
+			);
+			await editor.selectBlocks( siblingBlock );
+			await editor.insertBlockUsingGlobalInserter( 'Pagination' );
+
+			await expect( paginations ).toHaveCount( 2 );
+		} );
 	} );
 
 	test.describe( 'Location is recognised', () => {
@@ -934,19 +951,31 @@ test.describe( 'Product Collection', () => {
 		};
 
 		test( 'as product in specific Single Product template', async ( {
+			admin,
 			page,
 			pageObject,
-			editorUtils,
+			editor,
 		} ) => {
-			const productName = 'Cap';
-			const productSlug = 'cap';
+			await admin.visitSiteEditor( { path: '/wp_template' } );
 
-			await editorUtils.openSpecificProductTemplate(
-				productName,
-				productSlug
-			);
+			await page
+				.getByRole( 'button', { name: 'Add New Template' } )
+				.click();
+			await page
+				.getByRole( 'button', { name: 'Single Item: Product' } )
+				.click();
+			await page
+				.getByRole( 'option', {
+					name: `Cap http://localhost:8889/product/cap/`,
+				} )
+				.click();
+			await page
+				.getByRole( 'button', {
+					name: 'Skip',
+				} )
+				.click();
 
-			await editorUtils.insertBlockUsingGlobalInserter(
+			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
 			);
 
@@ -965,7 +994,7 @@ test.describe( 'Product Collection', () => {
 		} );
 		test( 'as category in Products by Category template', async ( {
 			admin,
-			editorUtils,
+			editor,
 			pageObject,
 			page,
 		} ) => {
@@ -973,8 +1002,8 @@ test.describe( 'Product Collection', () => {
 				postId: `woocommerce/woocommerce//taxonomy-product_cat`,
 				postType: 'wp_template',
 			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.insertBlockUsingGlobalInserter(
+			await editor.enterEditMode();
+			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
 			);
 
@@ -994,7 +1023,7 @@ test.describe( 'Product Collection', () => {
 
 		test( 'as tag in Products by Tag template', async ( {
 			admin,
-			editorUtils,
+			editor,
 			pageObject,
 			page,
 		} ) => {
@@ -1002,8 +1031,8 @@ test.describe( 'Product Collection', () => {
 				postId: `woocommerce/woocommerce//taxonomy-product_tag`,
 				postType: 'wp_template',
 			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.insertBlockUsingGlobalInserter(
+			await editor.enterEditMode();
+			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
 			);
 
@@ -1023,12 +1052,12 @@ test.describe( 'Product Collection', () => {
 
 		test( 'as site in post', async ( {
 			admin,
-			editorUtils,
+			editor,
 			pageObject,
 			page,
 		} ) => {
 			await admin.createNewPost();
-			await editorUtils.insertBlockUsingGlobalInserter(
+			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
 			);
 
@@ -1100,15 +1129,16 @@ test.describe( 'Product Collection', () => {
 		];
 
 		genericArchiveTemplates.forEach( ( { name, path } ) => {
-			test( `${ name } template`, async ( { page, pageObject } ) => {
+			test( `${ name } template`, async ( {
+				editor,
+				page,
+				pageObject,
+			} ) => {
 				await pageObject.replaceProductsWithProductCollectionInTemplate(
 					path
 				);
 
-				const editorFrame = page.frameLocator(
-					'iframe[name="editor-canvas"]'
-				);
-				const previewButtonLocator = editorFrame.locator(
+				const previewButtonLocator = editor.canvas.locator(
 					'button[data-test-id="product-collection-preview-button"]'
 				);
 
@@ -1120,7 +1150,7 @@ test.describe( 'Product Collection', () => {
 				await expect( previewButtonLocator ).toBeHidden();
 
 				// Preview button should be visible when any of inner block is selected
-				await editorFrame
+				await editor.canvas
 					.getByLabel( 'Block: Product Template' )
 					.getByLabel( 'Block: Product Image' )
 					.first()

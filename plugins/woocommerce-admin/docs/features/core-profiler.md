@@ -41,7 +41,7 @@ This stores the name of the store, which is used in the store header and in the 
         selling_online_answer: "yes_im_selling_online" | "no_im_selling_offline" | "im_selling_both_online_and_offline" | undefined
         selling_platforms: ("amazon" | "adobe_commerce" | "big_cartel" | "big_commerce" | "ebay" | "ecwid" | "etsy" | "facebook_marketplace" | "google_shopping" | "pinterest" | "shopify" | "square" | "squarespace" | "wix" | "wordpress")[] | undefined
         is_store_country_set: true | false
-        industry: "clothing_and_accessories" | "health_and_beauty" | "food_and_drink" | "home_furniture_and_garden" | "education_and_learning" | "electronics_and_computers" | "other"
+        industry: "clothing_and_accessories" | "health_and_beauty" | "food_and_drink" | "home_furniture_and_garden" | "education_and_learning" | "electronics_and_computers" | "arts_and_crafts" | "sports_and_recreation" | "other"
     }
     ```
 

@@ -100,11 +100,6 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
 		);
 
-		$product_form_controllers = array();
-		if ( Features::is_enabled( 'new-product-management-experience' ) ) {
-			$product_form_controllers[] = 'Automattic\WooCommerce\Admin\API\ProductForm';
-		}
-
 		if ( Features::is_enabled( 'launch-your-store' ) ) {
 			$controllers[] = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
 		}
@@ -138,7 +133,7 @@ class Init {
 
 			// The performance indicators controller must be registered last, after other /stats endpoints have been registered.
 			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
-			$controllers             = array_merge( $controllers, $analytics_controllers, $product_form_controllers );
+			$controllers             = array_merge( $controllers, $analytics_controllers );
 		}
 
 		/**
