@@ -67,8 +67,8 @@ async function globalSetup() {
 	let databaseImported = false;
 
 	try {
-		console.log( '├ Attempting database import…' );
 		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
+		console.log( '├ Database snapshot imported, running basic setup…' );
 		databaseImported = true;
 	} catch ( error ) {
 		if (
@@ -78,6 +78,8 @@ async function globalSetup() {
 			// Throw if the error is not related to the import file missing.
 			throw error;
 		}
+
+		console.log( '├ Database snapshot not found, running full setup…' );
 	}
 
 	const requestContext = await request.newContext( {
@@ -103,7 +105,7 @@ async function globalSetup() {
 		await prepareAttributes();
 	}
 
-	console.log( '├ Exporting database…' );
+	console.log( '├ Exporting database snapshot…' );
 	await wpCLI( `db export ${ DB_EXPORT_FILE }` );
 
 	await requestContext.dispose();
