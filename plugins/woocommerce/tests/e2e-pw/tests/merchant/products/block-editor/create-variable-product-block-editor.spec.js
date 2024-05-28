@@ -253,7 +253,7 @@ test.describe( 'Variations tab', () => {
 				.click();
 			const element = page.locator( 'div.components-snackbar__content' );
 			await expect( await element.innerText() ).toMatch(
-				/Product updated/
+				/Product updated./
 			);
 
 			await page
@@ -294,13 +294,9 @@ test.describe( 'Variations tab', () => {
 				.getByRole( 'button', { name: 'Generate from options' } )
 				.click();
 
-			await page
-				.locator( '.woocommerce-product-variations__table-body > div' )
-				.first()
-				.locator( 'button[aria-label="Actions"]' )
-				.click();
+			await page.getByLabel( 'Actions', { exact: true } ).first().click();
 
-			await page.locator( 'text=Delete' ).click( { timeout: 3000 } );
+			await page.getByLabel( 'Delete variation' ).click();
 
 			const element = page.locator( 'div.components-snackbar__content' );
 			await expect( await element.innerText() ).toMatch(
