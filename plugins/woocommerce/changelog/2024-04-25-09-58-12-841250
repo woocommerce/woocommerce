@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed shipping flat price change to free shipping when shipping cost represented using decimal separators and thousands separators.
