@@ -27,7 +27,6 @@ class Features {
 	 */
 	protected static $optional_features = array(
 		'navigation'                 => array( 'default' => 'no' ),
-		// 'settings'                   => array( 'default' => 'no' ),
 		'analytics'                  => array( 'default' => 'yes' ),
 		'remote-inbox-notifications' => array( 'default' => 'yes' ),
 	);
