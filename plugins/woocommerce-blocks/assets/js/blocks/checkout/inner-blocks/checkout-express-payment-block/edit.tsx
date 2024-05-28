@@ -20,7 +20,6 @@ export const Edit = ( {
 	attributes: {
 		className?: string;
 		buttonHeight: string;
-		buttonLabel: string;
 		lock: {
 			move: boolean;
 			remove: boolean;
@@ -61,22 +60,9 @@ export const Edit = ( {
 							setAttributes( { buttonHeight: newValue } )
 						}
 					/>
-					<RadioControl
-						label="Button label"
-						selected={ attributes.buttonLabel }
-						options={ [
-							{ label: 'Only icon', value: 'none' },
-							{ label: 'Buy', value: 'buy' },
-							{ label: 'Donate', value: 'donate' },
-							{ label: 'Book', value: 'book' },
-						] }
-						onChange={ ( newValue ) =>
-							setAttributes( { buttonLabel: newValue } )
-						}
-					/>
 				</PanelBody>
 			</InspectorControls>
-			<Block />
+			<Block buttonHeight={ attributes.buttonHeight } />
 		</div>
 	);
 };

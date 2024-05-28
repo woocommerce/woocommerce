@@ -27,10 +27,8 @@ import { STORE_KEY as PAYMENT_STORE_KEY } from '../../../data/payment/constants'
 
 const ExpressPaymentMethods = ( {
 	buttonHeight: buttonHeight,
-	buttonLabel,
 }: {
 	buttonHeight: string;
-	buttonLabel: string;
 } ) => {
 	const { isEditor } = useEditorContext();
 
@@ -48,7 +46,6 @@ const ExpressPaymentMethods = ( {
 	buttonAttributes.height = buttonHeight;
 	buttonAttributes.minWidth = '118px';
 	buttonAttributes.darkMode = hasDarkControls;
-	buttonAttributes.label = buttonLabel || 'default';
 
 	const { activePaymentMethod, paymentMethodData } = useSelect(
 		( select ) => {

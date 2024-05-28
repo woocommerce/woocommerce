@@ -17,10 +17,6 @@
 			"type": "string",
 			"default": "48px"
 		},
-		"buttonLabel": {
-			"type": "string",
-			"default": "buy"
-		},
 		"className": {
 			"type": "string",
 			"default": ""

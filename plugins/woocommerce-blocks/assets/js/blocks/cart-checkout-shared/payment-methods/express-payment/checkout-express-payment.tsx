@@ -17,10 +17,8 @@ import './style.scss';
 
 const CheckoutExpressPayment = ( {
 	buttonHeight,
-	buttonLabel,
 }: {
 	buttonHeight: string;
-	buttonLabel: string;
 } ) => {
 	const {
 		isCalculating,
@@ -102,10 +100,7 @@ const CheckoutExpressPayment = ( {
 						<StoreNoticesContainer
 							context={ noticeContexts.EXPRESS_PAYMENTS }
 						/>
-						<ExpressPaymentMethods
-							buttonHeight={ buttonHeight }
-							buttonLabel={ buttonLabel }
-						/>
+						<ExpressPaymentMethods buttonHeight={ buttonHeight } />
 					</div>
 				</div>
 			</LoadingMask>
