@@ -37,7 +37,7 @@ jobs:
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   pattern: './{packages,plugins/woocommerce-admin,plugins/woocommerce-blocks}/**/{build,build-style}/**/*.{js,css}'
-                  exclude: '{packages/js/{*e2e*,*tests,internal*,*plugin},**/*.map,**/node_modules/**}'
+                  exclude: '{**/*e2e*/**,**/*tests/**,**/internal*/**,**/*.map,**/node_modules/**,**/chunks/**}'
                   clean-script: '--if-present distclean'
                   minimum-change-threshold: 100
                   omit-unchanged: true
