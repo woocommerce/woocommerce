@@ -368,7 +368,7 @@ async function runPerformanceTests( branches, options ) {
 			const resultsRounds = resultFiles
 				.filter( ( file ) =>
 					file.includes(
-						`${ testSuite }_${ sanitizedBranchName }_round-`
+						`/${ testSuite }_${ sanitizedBranchName }_round-`
 					)
 				)
 				.map( ( file ) => {

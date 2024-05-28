@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: CYS: mutate the original instance of the block array.
-
