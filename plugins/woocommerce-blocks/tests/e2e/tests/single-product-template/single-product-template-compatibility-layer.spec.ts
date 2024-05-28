@@ -90,7 +90,6 @@ test.describe( 'Compatibility Layer with Product Collection block', () => {
 		);
 	} );
 
-	// eslint-disable-next-line playwright/valid-describe-callback
 	test.describe( 'Product Archive with Product Collection block', () => {
 		for ( const scenario of singleOccurranceScenarios ) {
 			test( `${ scenario.title } is attached to the page`, async ( {

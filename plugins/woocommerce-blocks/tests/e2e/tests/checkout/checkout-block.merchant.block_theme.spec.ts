@@ -11,8 +11,12 @@ import { REGULAR_PRICED_PRODUCT_NAME } from './constants';
 
 declare global {
 	interface Window {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		wcSettings: { storePages: any };
+		wcSettings: {
+			storePages: {
+				terms: { permalink: string };
+				privacy: { permalink: string };
+			};
+		};
 	}
 }
 const blockData: BlockData = {
@@ -99,6 +103,7 @@ test.describe( 'Merchant → Checkout', () => {
 		} );
 
 		test( 'Merchant can see T&S and Privacy Policy links without checkbox', async ( {
+			page,
 			frontendUtils,
 			checkoutPageObject,
 		} ) => {
@@ -120,15 +125,16 @@ test.describe( 'Merchant → Checkout', () => {
 				.getByText( 'Privacy Policy' )
 				.first();
 
-			const { termsPageUrl, privacyPageUrl } =
-				await frontendUtils.page.evaluate( () => {
+			const { termsPageUrl, privacyPageUrl } = await page.evaluate(
+				() => {
+					const { terms, privacy } = window.wcSettings.storePages;
+
 					return {
-						termsPageUrl:
-							window.wcSettings.storePages.terms.permalink,
-						privacyPageUrl:
-							window.wcSettings.storePages.privacy.permalink,
+						termsPageUrl: terms.permalink,
+						privacyPageUrl: privacy.permalink,
 					};
-				} );
+				}
+			);
 			await expect( termsAndConditions ).toHaveAttribute(
 				'href',
 				termsPageUrl
