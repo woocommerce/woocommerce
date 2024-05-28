@@ -4,6 +4,7 @@
 	.is-mobile &,
 	.is-small & {
 		padding-top: $gap-larger;
+		margin-bottom: $gap-larger;
 	}
 
 	textarea {
