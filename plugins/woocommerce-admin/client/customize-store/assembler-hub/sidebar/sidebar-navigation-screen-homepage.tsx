@@ -20,6 +20,7 @@ import { store as coreStore } from '@wordpress/core-data';
 import {
 	privateApis as blockEditorPrivateApis,
 	__experimentalBlockPatternsList as BlockPatternList,
+	store as blockEditorStore,
 	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/block-editor';
 // @ts-expect-error Missing type in core-data.
@@ -37,7 +38,7 @@ import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 import { trackEvent } from '~/customize-store/tracking';
 import {
@@ -69,19 +70,31 @@ export const SidebarNavigationScreenHomepage = () => {
 		'wp_template',
 		currentTemplate.id
 	);
+
+	// @ts-expect-error No types for this exist yet.
+	const { selectBlock } = useDispatch( blockEditorStore );
+
 	const onClickPattern = useCallback(
 		( pattern, selectedBlocks ) => {
 			if ( pattern === selectedPattern ) {
 				return;
 			}
 			setSelectedPattern( pattern );
+			selectBlock( pattern.blocks[ 0 ].clientId );
 			onChange(
 				[ blocks[ 0 ], ...selectedBlocks, blocks[ blocks.length - 1 ] ],
 				{ selection: {} }
 			);
 			scroll();
 		},
-		[ selectedPattern, setSelectedPattern, onChange, blocks, scroll ]
+		[
+			selectedPattern,
+			setSelectedPattern,
+			selectBlock,
+			onChange,
+			blocks,
+			scroll,
+		]
 	);
 
 	const isEditorLoading = useIsSiteEditorLoading();
