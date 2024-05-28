@@ -229,7 +229,9 @@ final class WooCommerce {
 			'connection',
 			array(
 				'slug' => 'woocommerce',
-				'name' => __( 'WooCommerce', 'woocommerce' ),
+				// Cannot use __() here because it would cause translations to be loaded too early.
+				// See https://github.com/woocommerce/woocommerce/pull/47113.
+				'name' => 'WooCommerce',
 			)
 		);
 	}
@@ -244,7 +246,7 @@ final class WooCommerce {
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
-		add_action( 'init', array( $this, 'init_jetpack_connection_config' ), 1 );
+		add_action( 'plugins_loaded', array( $this, 'init_jetpack_connection_config' ), 1 );
 		add_action( 'admin_notices', array( $this, 'build_dependencies_notice' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
