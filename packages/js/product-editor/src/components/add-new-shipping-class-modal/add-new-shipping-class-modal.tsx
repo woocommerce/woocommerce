@@ -23,9 +23,6 @@ export type ShippingClassFormProps = {
 	onCancel: () => void;
 };
 
-// Store a refreshed value of the shipping class name.
-let shippingName = '';
-
 function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 	const { errors, getInputProps, isValidForm } =
 		useFormContext< ProductShippingClass >();
@@ -47,31 +44,44 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 	const [ automaticSlug, setAutomaticSlug ] = useState( true );
 
 	// Get the shipping class name value.
-	const shippingNameValue = getInputProps( 'name' ).value;
+	const shippingNameInputValue = getInputProps( 'name' ).value;
+
+	const [ prevNameValue, setPrevNameValue ] = useState(
+		shippingNameInputValue
+	);
+
+	/**
+	 * Pull the slug suggestion from the server,
+	 * and update the slug input field.
+	 */
+	async function pullAndupdateSlugInputField() {
+		// Avoid making the request if the name has not changed.
+		if ( prevNameValue === shippingNameInputValue ) {
+			return;
+		}
+
+		setPrevNameValue( shippingNameInputValue );
+
+		const url = `/wc/v3/products/shipping_classes/slug-suggestion`;
+		const slug: string = await apiFetch( {
+			path: addQueryArgs( url, { name: shippingNameInputValue } ),
+			method: 'GET',
+		} );
+
+		getInputProps( 'slug' ).onChange( slug );
+	}
 
 	/**
 	 * Get a slug suggestion based on the shipping class name.
 	 * This function is called when the name field is blurred.
 	 */
-	const getSlugSuggestion = async () => {
+	function getSlugSuggestion() {
 		if ( ! automaticSlug ) {
 			return;
 		}
 
-		if ( shippingName === shippingNameValue ) {
-			return;
-		}
-
-		shippingName = String( shippingNameValue );
-
-		const url = `/wc/v3/products/shipping_classes/slug-suggestion`;
-		const slug: string = await apiFetch( {
-			path: addQueryArgs( url, { name: shippingName } ),
-			method: 'GET',
-		} );
-
-		getInputProps( 'slug' ).onChange( slug );
-	};
+		pullAndupdateSlugInputField();
+	}
 
 	return (
 		<div className="woocommerce-add-new-shipping-class-modal__wrapper">
@@ -99,12 +109,17 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 				checked={ automaticSlug }
 				onChange={ setAutomaticSlug }
 				onBlur={ getSlugSuggestion }
+				onClick={ pullAndupdateSlugInputField }
 			/>
 
 			<TextControl
 				{ ...getInputProps( 'slug' ) }
 				label={ __( 'Custom slug', 'woocommerce' ) }
 				disabled={ automaticSlug }
+				onChange={ ( value ) => {
+					setPrevNameValue( '' ); // clean the previous name value.
+					getInputProps( 'slug' ).onChange( value );
+				} }
 			/>
 
 			<TextControl
