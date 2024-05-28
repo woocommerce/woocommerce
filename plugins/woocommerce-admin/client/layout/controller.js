@@ -350,7 +350,7 @@ export const getPages = () => {
 							  }`,
 						__( 'Settings', 'woocommerce' ),
 					],
-					page,
+					page.label,
 				];
 			},
 			wpOpenMenu: 'toplevel_page_woocommerce',
