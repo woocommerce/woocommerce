@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Add missing line item data to the REST API refunds schema in versions 2 and 3

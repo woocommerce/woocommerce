@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Remove BuildKite reporter from e2e tests

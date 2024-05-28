@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent empty checkboxes added by Additional Checkout Fields API showing in the order confirmation when the order was placed using the shortcode checkout experience.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Blocks E2E: Wait for Site Editor canvas loader in the `enterEditMore()` utility.
