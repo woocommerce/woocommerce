@@ -3,7 +3,7 @@
  */
 import { Notice } from '@wordpress/notices';
 import { Page } from '@playwright/test';
-import { Admin, cli } from '@woocommerce/e2e-utils';
+import { Admin, wpCLI } from '@woocommerce/e2e-utils';
 
 type Location = {
 	name: string;
@@ -88,9 +88,7 @@ export class LocalPickupUtils {
 	}
 
 	async deleteLocations() {
-		await cli(
-			`npm run wp-env run tests-cli -- wp option update pickup_location_pickup_locations ''`
-		);
+		await wpCLI( "option update pickup_location_pickup_locations ''" );
 	}
 
 	async deletePickupLocation() {
