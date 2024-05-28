@@ -1,15 +1,15 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { BASE_URL, cli } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	TemplateCompiler,
+	BASE_URL,
+	cli,
+} from '@woocommerce/e2e-utils';
 
-/**
- * Internal dependencies
- */
-import ProductCollectionPage from '../product-collection/product-collection.page';
-
-export const blockData = {
+const blockData = {
 	slug: 'woocommerce/price-filter',
 	name: 'Filter by Price',
 	mainClass: '.wc-block-price-filter',
@@ -22,21 +22,12 @@ export const blockData = {
 	placeholderUrl: `${ BASE_URL }/wp-content/plugins/woocommerce/assets/images/placeholder.png`,
 };
 
-const test = base.extend< {
-	productCollectionPageObject: ProductCollectionPage;
-} >( {
-	productCollectionPageObject: async (
-		{ page, admin, editor, templateApiUtils, editorUtils },
-		use
-	) => {
-		const pageObject = new ProductCollectionPage( {
-			page,
-			admin,
-			editor,
-			templateApiUtils,
-			editorUtils,
-		} );
-		await use( pageObject );
+const test = base.extend< { templateCompiler: TemplateCompiler } >( {
+	templateCompiler: async ( { requestUtils }, use ) => {
+		const compiler = await requestUtils.createTemplateFromFile(
+			'archive-product_filters-with-product-collection'
+		);
+		await use( compiler );
 	},
 } );
 
@@ -66,10 +57,9 @@ test.describe( `${ blockData.name } Block - editor side`, () => {
 
 	test( 'should allow changing the display style', async ( {
 		page,
-		editorUtils,
 		editor,
 	} ) => {
-		const priceFilterControls = await editorUtils.getBlockByName(
+		const priceFilterControls = await editor.getBlockByName(
 			'woocommerce/price-filter'
 		);
 		await editor.selectBlocks( priceFilterControls );
@@ -106,10 +96,9 @@ test.describe( `${ blockData.name } Block - editor side`, () => {
 
 	test( 'should allow toggling the visibility of the filter button', async ( {
 		page,
-		editorUtils,
 		editor,
 	} ) => {
-		const priceFilterControls = await editorUtils.getBlockByName(
+		const priceFilterControls = await editor.getBlockByName(
 			blockData.slug
 		);
 		await editor.selectBlocks( priceFilterControls );
@@ -132,7 +121,7 @@ test.describe( `${ blockData.name } Block - editor side`, () => {
 
 test.describe( `${ blockData.name } Block - with All products Block`, () => {
 	test.beforeEach( async ( { admin, page, editor } ) => {
-		await admin.createNewPost( { legacyCanvas: true } );
+		await admin.createNewPost();
 		await editor.insertBlock( { name: 'woocommerce/all-products' } );
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -236,7 +225,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 	} );
 } );
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
-	test.beforeEach( async ( { admin, page, editor, editorUtils } ) => {
+	test.beforeEach( async ( { admin, page, editor } ) => {
 		await cli(
 			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
@@ -246,7 +235,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			postType: 'wp_template',
 		} );
 
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -256,7 +245,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			},
 		} );
 		await editor.saveSiteEditorEntities();
-		await page.goto( `/shop` );
+		await page.goto( '/shop' );
 	} );
 
 	test( 'should show all products', async ( { frontendUtils } ) => {
@@ -299,42 +288,25 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test.beforeEach(
-		async ( {
-			admin,
-			editorUtils,
-			productCollectionPageObject,
-			editor,
-		} ) => {
-			await admin.createNewPost();
-			await productCollectionPageObject.insertProductCollection();
-			await productCollectionPageObject.chooseCollectionInPost(
-				'productCatalog'
-			);
+	test( 'should show all products', async ( { page, templateCompiler } ) => {
+		await templateCompiler.compile();
 
-			await editor.insertBlock( {
-				name: 'woocommerce/filter-wrapper',
-				attributes: {
-					filterType: 'price-filter',
-					heading: 'Filter By Price',
-				},
-			} );
-			await editorUtils.publishAndVisitPost();
-		}
-	);
-
-	test( 'should show all products', async ( { page } ) => {
+		await page.goto( '/shop' );
 		const products = page
 			.locator( '.wp-block-woocommerce-product-template' )
 			.getByRole( 'listitem' );
 
-		await expect( products ).toHaveCount( 9 );
+		await expect( products ).toHaveCount( 16 );
 	} );
 
 	test( 'should show only products that match the filter', async ( {
 		page,
 		frontendUtils,
+		templateCompiler,
 	} ) => {
+		await templateCompiler.compile();
+
+		await page.goto( '/shop' );
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
 		} );
@@ -353,34 +325,31 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await expect( products ).toHaveCount( 1 );
 	} );
 
-	test( 'should refresh the page only if the user click on button', async ( {
+	test( 'should refresh the page only if the user clicks on button', async ( {
 		page,
 		admin,
 		editor,
-		editorUtils,
-		productCollectionPageObject,
+		templateCompiler,
 	} ) => {
-		await admin.createNewPost();
-		await productCollectionPageObject.insertProductCollection();
-		await productCollectionPageObject.chooseCollectionInPost(
-			'productCatalog'
-		);
+		const template = await templateCompiler.compile();
 
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'price-filter',
-				heading: 'Filter By Price',
-			},
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: template.type,
 		} );
 
-		const priceFilterControls = await editorUtils.getBlockByName(
+		await editor.enterEditMode();
+
+		const priceFilterControls = await editor.getBlockByName(
 			blockData.slug
 		);
+		await expect( priceFilterControls ).toBeVisible();
 		await editor.selectBlocks( priceFilterControls );
 		await editor.openDocumentSettingsSidebar();
 		await page.getByText( "Show 'Apply filters' button" ).click();
-		await editorUtils.publishAndVisitPost();
+
+		await editor.saveSiteEditorEntities();
+		await page.goto( '/shop' );
 
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',

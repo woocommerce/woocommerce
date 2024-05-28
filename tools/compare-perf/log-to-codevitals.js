@@ -10,6 +10,10 @@ const resultsFiles = [
 		file: 'editor.performance-results.json',
 		metricsPrefix: 'editor-',
 	},
+	{
+		file: 'product-editor.performance-results.json',
+		metricsPrefix: 'product-editor-',
+	},
 ];
 
 const performanceResults = resultsFiles.map( ( { file } ) =>

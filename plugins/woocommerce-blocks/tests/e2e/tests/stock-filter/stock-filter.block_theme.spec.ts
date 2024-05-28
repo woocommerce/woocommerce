@@ -1,13 +1,12 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { cli } from '@woocommerce/e2e-utils';
-
-/**
- * Internal dependencies
- */
-import ProductCollectionPage from '../product-collection/product-collection.page';
+import {
+	test as base,
+	expect,
+	TemplateCompiler,
+	cli,
+} from '@woocommerce/e2e-utils';
 
 export const blockData = {
 	name: 'Filter by Stock',
@@ -15,21 +14,12 @@ export const blockData = {
 	urlSearchParamWhenFilterIsApplied: 'filter_stock_status=outofstock',
 };
 
-const test = base.extend< {
-	productCollectionPageObject: ProductCollectionPage;
-} >( {
-	productCollectionPageObject: async (
-		{ page, admin, editor, templateApiUtils, editorUtils },
-		use
-	) => {
-		const pageObject = new ProductCollectionPage( {
-			page,
-			admin,
-			editor,
-			templateApiUtils,
-			editorUtils,
-		} );
-		await use( pageObject );
+const test = base.extend< { templateCompiler: TemplateCompiler } >( {
+	templateCompiler: async ( { requestUtils }, use ) => {
+		const compiler = await requestUtils.createTemplateFromFile(
+			'archive-product_filters-with-product-collection'
+		);
+		await use( compiler );
 	},
 } );
 
@@ -60,10 +50,9 @@ test.describe( `${ blockData.name } Block`, () => {
 
 	test( 'should allow changing the display style', async ( {
 		page,
-		editorUtils,
 		editor,
 	} ) => {
-		const stockFilter = await editorUtils.getBlockByName( blockData.slug );
+		const stockFilter = await editor.getBlockByName( blockData.slug );
 		await editor.selectBlocks( stockFilter );
 
 		await expect(
@@ -97,10 +86,9 @@ test.describe( `${ blockData.name } Block`, () => {
 
 	test( 'should allow toggling the visibility of the filter button', async ( {
 		page,
-		editorUtils,
 		editor,
 	} ) => {
-		const priceFilterControls = await editorUtils.getBlockByName(
+		const priceFilterControls = await editor.getBlockByName(
 			blockData.slug
 		);
 		await editor.selectBlocks( priceFilterControls );
@@ -130,14 +118,9 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
-			canvas: 'edit',
 		} );
 
-		await editor.canvas
-			.locator(
-				'.wp-block-woocommerce-classic-template__placeholder-image'
-			)
-			.waitFor();
+		await editor.enterEditMode();
 
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -147,7 +130,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			},
 		} );
 		await editor.saveSiteEditorEntities();
-		await page.goto( `/shop` );
+		await page.goto( '/shop' );
 	} );
 
 	test( 'should show all products', async ( { frontendUtils } ) => {
@@ -191,40 +174,24 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test.beforeEach(
-		async ( {
-			admin,
-			editorUtils,
-			productCollectionPageObject,
-			editor,
-		} ) => {
-			await admin.createNewPost();
-			await productCollectionPageObject.insertProductCollection();
-			await productCollectionPageObject.chooseCollectionInPost(
-				'productCatalog'
-			);
-			await editor.insertBlock( {
-				name: 'woocommerce/filter-wrapper',
-				attributes: {
-					filterType: 'stock-filter',
-					heading: 'Filter By Stock',
-				},
-			} );
-			await editorUtils.publishAndVisitPost();
-		}
-	);
+	test( 'should show all products', async ( { page, templateCompiler } ) => {
+		await templateCompiler.compile();
 
-	test( 'should show all products', async ( { page } ) => {
+		await page.goto( '/shop' );
 		const products = page
 			.locator( '.wp-block-woocommerce-product-template' )
 			.getByRole( 'listitem' );
 
-		await expect( products ).toHaveCount( 9 );
+		await expect( products ).toHaveCount( 16 );
 	} );
 
 	test( 'should show only products that match the filter', async ( {
 		page,
+		templateCompiler,
 	} ) => {
+		await templateCompiler.compile();
+
+		await page.goto( '/shop' );
 		await page.getByText( 'Out of Stock' ).click();
 
 		await expect( page ).toHaveURL(
@@ -238,32 +205,29 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await expect( products ).toHaveCount( 1 );
 	} );
 
-	test( 'should refresh the page only if the user click on button', async ( {
+	test( 'should refresh the page only if the user clicks on button', async ( {
 		page,
 		admin,
 		editor,
-		editorUtils,
-		productCollectionPageObject,
+		templateCompiler,
 	} ) => {
-		await admin.createNewPost();
-		await productCollectionPageObject.insertProductCollection();
-		await productCollectionPageObject.chooseCollectionInPost(
-			'productCatalog'
-		);
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'stock-filter',
-				heading: 'Filter By Price',
-			},
+		const template = await templateCompiler.compile();
+
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: template.type,
 		} );
-		const stockFilterControls = await editorUtils.getBlockByName(
+		await editor.enterEditMode();
+
+		const stockFilterControls = await editor.getBlockByName(
 			blockData.slug
 		);
+		await expect( stockFilterControls ).toBeVisible();
 		await editor.selectBlocks( stockFilterControls );
 		await editor.openDocumentSettingsSidebar();
 		await page.getByText( "Show 'Apply filters' button" ).click();
-		await editorUtils.publishAndVisitPost();
+		await editor.saveSiteEditorEntities();
+		await page.goto( '/shop' );
 
 		await page.getByText( 'Out of Stock' ).click();
 		await page.getByRole( 'button', { name: 'Apply' } ).click();

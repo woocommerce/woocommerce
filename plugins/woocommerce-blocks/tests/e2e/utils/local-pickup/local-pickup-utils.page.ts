@@ -1,10 +1,9 @@
 /**
  * External dependencies
  */
-import { Page } from '@playwright/test';
-import { Admin } from '@wordpress/e2e-test-utils-playwright';
-import { cli } from '@woocommerce/e2e-utils';
 import { Notice } from '@wordpress/notices';
+import { Page } from '@playwright/test';
+import { Admin, cli } from '@woocommerce/e2e-utils';
 
 type Location = {
 	name: string;

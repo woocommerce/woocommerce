@@ -1,13 +1,12 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { cli } from '@woocommerce/e2e-utils';
-
-/**
- * Internal dependencies
- */
-import ProductCollectionPage from '../product-collection/product-collection.page';
+import {
+	test as base,
+	expect,
+	cli,
+	TemplateCompiler,
+} from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'Filter by Attribute',
@@ -15,26 +14,17 @@ const blockData = {
 	urlSearchParamWhenFilterIsApplied: 'filter_size=small&query_type_size=or',
 };
 
-const test = base.extend< {
-	productCollectionPageObject: ProductCollectionPage;
-} >( {
-	productCollectionPageObject: async (
-		{ page, admin, editor, templateApiUtils, editorUtils },
-		use
-	) => {
-		const pageObject = new ProductCollectionPage( {
-			page,
-			admin,
-			editor,
-			templateApiUtils,
-			editorUtils,
-		} );
-		await use( pageObject );
+const test = base.extend< { templateCompiler: TemplateCompiler } >( {
+	templateCompiler: async ( { requestUtils }, use ) => {
+		const compiler = await requestUtils.createTemplateFromFile(
+			'archive-product_filters-with-product-collection'
+		);
+		await use( compiler );
 	},
 } );
 
 test.describe( `${ blockData.name } Block`, () => {
-	test.beforeEach( async ( { admin, editor, editorUtils } ) => {
+	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.createNewPost();
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -43,9 +33,7 @@ test.describe( `${ blockData.name } Block`, () => {
 				heading: 'Filter By Attribute',
 			},
 		} );
-		const attributeFilter = await editorUtils.getBlockByName(
-			blockData.slug
-		);
+		const attributeFilter = await editor.getBlockByName( blockData.slug );
 
 		await attributeFilter.getByText( 'Size' ).click();
 		await attributeFilter.getByText( 'Done' ).click();
@@ -65,12 +53,9 @@ test.describe( `${ blockData.name } Block`, () => {
 
 	test( 'should allow changing the display style', async ( {
 		page,
-		editorUtils,
 		editor,
 	} ) => {
-		const attributeFilter = await editorUtils.getBlockByName(
-			blockData.slug
-		);
+		const attributeFilter = await editor.getBlockByName( blockData.slug );
 		await editor.selectBlocks( attributeFilter );
 
 		await expect(
@@ -94,12 +79,9 @@ test.describe( `${ blockData.name } Block`, () => {
 
 	test( 'should allow toggling the visibility of the filter button', async ( {
 		page,
-		editorUtils,
 		editor,
 	} ) => {
-		const attributeFilter = await editorUtils.getBlockByName(
-			blockData.slug
-		);
+		const attributeFilter = await editor.getBlockByName( blockData.slug );
 		await editor.selectBlocks( attributeFilter );
 
 		await expect(
@@ -119,7 +101,7 @@ test.describe( `${ blockData.name } Block`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
-	test.beforeEach( async ( { admin, page, editor, editorUtils } ) => {
+	test.beforeEach( async ( { admin, page, editor } ) => {
 		await cli(
 			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
@@ -129,7 +111,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			postType: 'wp_template',
 		} );
 
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
 			attributes: {
@@ -137,15 +119,13 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 				heading: 'Filter By Attribute',
 			},
 		} );
-		const attributeFilter = await editorUtils.getBlockByName(
-			blockData.slug
-		);
+		const attributeFilter = await editor.getBlockByName( blockData.slug );
 
 		await attributeFilter.getByText( 'Size' ).click();
 		await attributeFilter.getByText( 'Done' ).click();
 
 		await editor.saveSiteEditorEntities();
-		await page.goto( `/shop` );
+		await page.goto( '/shop' );
 	} );
 
 	test( 'should show all products', async ( { frontendUtils, page } ) => {
@@ -195,48 +175,24 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test.beforeEach(
-		async ( {
-			admin,
-			editorUtils,
-			productCollectionPageObject,
-			editor,
-		} ) => {
-			await admin.createNewPost();
-			await productCollectionPageObject.insertProductCollection();
-			await productCollectionPageObject.chooseCollectionInPost(
-				'productCatalog'
-			);
-			await editor.insertBlock( {
-				name: 'woocommerce/filter-wrapper',
-				attributes: {
-					filterType: 'attribute-filter',
-					heading: 'Filter By Attribute',
-				},
-			} );
+	test( 'should show all products', async ( { page, templateCompiler } ) => {
+		await templateCompiler.compile();
 
-			const attributeFilter = await editorUtils.getBlockByName(
-				blockData.slug
-			);
-
-			await attributeFilter.getByText( 'Size' ).click();
-			await attributeFilter.getByText( 'Done' ).click();
-
-			await editorUtils.publishAndVisitPost();
-		}
-	);
-
-	test( 'should show all products', async ( { page } ) => {
+		await page.goto( '/shop' );
 		const products = page
 			.locator( '.wp-block-woocommerce-product-template' )
 			.getByRole( 'listitem' );
 
-		await expect( products ).toHaveCount( 9 );
+		await expect( products ).toHaveCount( 16 );
 	} );
 
 	test( 'should show only products that match the filter', async ( {
 		page,
+		templateCompiler,
 	} ) => {
+		await templateCompiler.compile();
+
+		await page.goto( '/shop' );
 		await page.getByRole( 'checkbox', { name: 'Small' } ).click();
 
 		await expect( page ).toHaveURL(
@@ -254,31 +210,27 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		page,
 		admin,
 		editor,
-		editorUtils,
-		productCollectionPageObject,
+		templateCompiler,
 	} ) => {
-		await admin.createNewPost();
-		await productCollectionPageObject.insertProductCollection();
-		await productCollectionPageObject.chooseCollectionInPost(
-			'productCatalog'
-		);
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'attribute-filter',
-				heading: 'Filter By Attribute',
-			},
+		const template = await templateCompiler.compile();
+
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: template.type,
 		} );
-		const attributeFilterControl = await editorUtils.getBlockByName(
+
+		await editor.enterEditMode();
+		const attributeFilterControl = await editor.getBlockByName(
 			blockData.slug
 		);
-		await attributeFilterControl.getByText( 'Size' ).click();
-		await attributeFilterControl.getByText( 'Done' ).click();
-
+		await expect( attributeFilterControl ).toBeVisible();
 		await editor.selectBlocks( attributeFilterControl );
 		await editor.openDocumentSettingsSidebar();
+
 		await page.getByText( "Show 'Apply filters' button" ).click();
-		await editorUtils.publishAndVisitPost();
+
+		await editor.saveSiteEditorEntities();
+		await page.goto( '/shop' );
 
 		await page.getByRole( 'checkbox', { name: 'Small' } ).click();
 		await page.getByRole( 'button', { name: 'Apply' } ).click();

@@ -1,13 +1,12 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { cli } from '@woocommerce/e2e-utils';
-
-/**
- * Internal dependencies
- */
-import ProductCollectionPage from '../product-collection/product-collection.page';
+import {
+	test as base,
+	expect,
+	cli,
+	TemplateCompiler,
+} from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'Filter by Rating',
@@ -15,21 +14,12 @@ const blockData = {
 	urlSearchParamWhenFilterIsApplied: 'rating_filter=1',
 };
 
-const test = base.extend< {
-	productCollectionPageObject: ProductCollectionPage;
-} >( {
-	productCollectionPageObject: async (
-		{ page, admin, editor, templateApiUtils, editorUtils },
-		use
-	) => {
-		const pageObject = new ProductCollectionPage( {
-			page,
-			admin,
-			editor,
-			templateApiUtils,
-			editorUtils,
-		} );
-		await use( pageObject );
+const test = base.extend< { templateCompiler: TemplateCompiler } >( {
+	templateCompiler: async ( { requestUtils }, use ) => {
+		const compiler = await requestUtils.createTemplateFromFile(
+			'archive-product_filters-with-product-collection'
+		);
+		await use( compiler );
 	},
 } );
 
@@ -59,10 +49,9 @@ test.describe( `${ blockData.name } Block`, () => {
 
 	test( 'should allow changing the display style', async ( {
 		page,
-		editorUtils,
 		editor,
 	} ) => {
-		const stockFilter = await editorUtils.getBlockByName( blockData.slug );
+		const stockFilter = await editor.getBlockByName( blockData.slug );
 		await editor.selectBlocks( stockFilter );
 
 		await expect(
@@ -86,10 +75,9 @@ test.describe( `${ blockData.name } Block`, () => {
 
 	test( 'should allow toggling the visibility of the filter button', async ( {
 		page,
-		editorUtils,
 		editor,
 	} ) => {
-		const priceFilterControls = await editorUtils.getBlockByName(
+		const priceFilterControls = await editor.getBlockByName(
 			blockData.slug
 		);
 		await editor.selectBlocks( priceFilterControls );
@@ -111,7 +99,7 @@ test.describe( `${ blockData.name } Block`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
-	test.beforeEach( async ( { admin, page, editor, editorUtils } ) => {
+	test.beforeEach( async ( { admin, page, editor } ) => {
 		await cli(
 			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
@@ -121,7 +109,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			postType: 'wp_template',
 		} );
 
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -130,8 +118,11 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 				heading: 'Filter By Rating',
 			},
 		} );
+
+		await page.keyboard.press( 'Escape' );
 		await editor.saveSiteEditorEntities();
-		await page.goto( `/shop` );
+
+		await page.goto( '/shop' );
 	} );
 
 	test( 'should show all products', async ( { frontendUtils, page } ) => {
@@ -175,40 +166,24 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test.beforeEach(
-		async ( {
-			admin,
-			editorUtils,
-			productCollectionPageObject,
-			editor,
-		} ) => {
-			await admin.createNewPost();
-			await productCollectionPageObject.insertProductCollection();
-			await productCollectionPageObject.chooseCollectionInPost(
-				'productCatalog'
-			);
-			await editor.insertBlock( {
-				name: 'woocommerce/filter-wrapper',
-				attributes: {
-					filterType: 'rating-filter',
-					heading: 'Filter By Rating',
-				},
-			} );
-			await editorUtils.publishAndVisitPost();
-		}
-	);
+	test( 'should show all products', async ( { page, templateCompiler } ) => {
+		await templateCompiler.compile();
 
-	test( 'should show all products', async ( { page } ) => {
+		await page.goto( '/shop' );
 		const products = page
 			.locator( '.wp-block-woocommerce-product-template' )
 			.getByRole( 'listitem' );
 
-		await expect( products ).toHaveCount( 9 );
+		await expect( products ).toHaveCount( 16 );
 	} );
 
 	test( 'should show only products that match the filter', async ( {
 		page,
+		templateCompiler,
 	} ) => {
+		await templateCompiler.compile();
+
+		await page.goto( '/shop' );
 		await page
 			.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
 			.click();
@@ -224,33 +199,31 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await expect( products ).toHaveCount( 1 );
 	} );
 
-	test( 'should refresh the page only if the user click on button', async ( {
+	test( 'should refresh the page only if the user clicks on button', async ( {
 		page,
 		admin,
 		editor,
-		editorUtils,
-		productCollectionPageObject,
+		templateCompiler,
 	} ) => {
-		await admin.createNewPost();
-		await productCollectionPageObject.insertProductCollection();
-		await productCollectionPageObject.chooseCollectionInPost(
-			'productCatalog'
-		);
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'rating-filter',
-				heading: 'Filter By Rating',
-			},
+		const template = await templateCompiler.compile();
+
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: template.type,
 		} );
 
-		const ratingFilterControls = await editorUtils.getBlockByName(
+		await editor.enterEditMode();
+
+		const ratingFilterControls = await editor.getBlockByName(
 			'woocommerce/rating-filter'
 		);
+		await expect( ratingFilterControls ).toBeVisible();
 		await editor.selectBlocks( ratingFilterControls );
 		await editor.openDocumentSettingsSidebar();
 		await page.getByText( "Show 'Apply filters' button" ).click();
-		await editorUtils.publishAndVisitPost();
+
+		await editor.saveSiteEditorEntities();
+		await page.goto( '/shop' );
 
 		await page
 			.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
