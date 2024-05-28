@@ -17,12 +17,13 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$original_request = $wp->request;
 
 		// Prepare the WC_Rest_Authentication instance for testing.
-		$wc_rest_authentication      = WC_REST_Authentication::instance();
-		$update_last_access          = new ReflectionMethod( $wc_rest_authentication, 'update_last_access' );
-		$authenticated_user          = new ReflectionProperty( $wc_rest_authentication, 'user' );
-		$original_authenticated_user = $authenticated_user->getValue( $wc_rest_authentication );
+		$wc_rest_authentication  = WC_REST_Authentication::instance();
+		$update_last_access      = new ReflectionMethod( $wc_rest_authentication, 'update_last_access' );
+		$authenticated_user      = new ReflectionProperty( $wc_rest_authentication, 'user' );
+
 		$update_last_access->setAccessible( true );
 		$authenticated_user->setAccessible( true );
+		$original_authenticated_user = $authenticated_user->getValue( $wc_rest_authentication );
 		$authenticated_user->setValue(
 			$wc_rest_authentication,
 			(object) array(
