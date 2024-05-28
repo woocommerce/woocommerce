@@ -438,7 +438,6 @@ abstract class AbstractBlock {
 			$this->asset_data_registry->add(
 				'wcBlocksConfig',
 				[
-					'buildPhase'                => Package::feature()->get_flag(),
 					// Note that while we don't have a consolidated way of doing feature-flagging
 					// we are borrowing from the WC Admin Features implementation. Also note we cannot
 					// use the wcAdminFeatures global because it's not always enqueued in the context of blocks.
