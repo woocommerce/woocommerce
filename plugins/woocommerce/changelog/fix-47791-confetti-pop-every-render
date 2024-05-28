@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Added useRef to ensure confetti animation is only run once
