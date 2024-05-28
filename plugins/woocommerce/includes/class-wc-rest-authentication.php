@@ -601,7 +601,7 @@ class WC_REST_Authentication {
 		global $wp;
 		global $wpdb;
 
-		// Lots of (programmatically) created REST API requests may be processed within the same process.
+		// Lots of (programmatically) created REST API requests may be handled within the same process.
 		// In most cases, however, we do not want to record the last access time for each of these.
 		$do_not_record = true;
 
