@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-In blocks migrate `@wordpress/components` Button to Ariakit, replace  `__experimentalRadio/RadioGroup` with Ariakit Button.

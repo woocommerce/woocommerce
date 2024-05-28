@@ -17,6 +17,7 @@ import {
  * Internal dependencies
  */
 import './style.scss';
+import Shuffle from './shuffle';
 
 export const Toolbar = () => {
 	const {
@@ -86,6 +87,9 @@ export const Toolbar = () => {
 								}
 							/>
 						</ToolbarGroup>
+						{ currentBlock && (
+							<Shuffle clientId={ currentBlock?.clientId } />
+						) }
 					</>
 				</WPToolbar>
 			</div>
