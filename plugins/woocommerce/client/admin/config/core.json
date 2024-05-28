@@ -25,7 +25,6 @@
 		"remote-free-extensions": true,
 		"payment-gateway-suggestions": true,
 		"settings": true,
-		"settings-refresh": false,
 		"shipping-label-banner": true,
 		"subscriptions": true,
 		"store-alerts": true,

@@ -3,14 +3,14 @@
  * WooCommerce Settings.
  */
 
-namespace Automattic\WooCommerce\Internal\Admin;
+ namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\PageController;
 
 /**
  * Contains backend logic for the Settings feature.
  */
-class SettingsNavigationFeature {
+class Settings {
 	/**
 	 * Option name used to toggle this feature.
 	 */
