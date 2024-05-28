@@ -3,7 +3,6 @@
 namespace Automattic\WooCommerce\Blocks\Patterns;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use WP_Error;
 use WP_Upgrader;
 
 /**
@@ -152,7 +151,6 @@ class PTKPatternsStore {
 
 	/**
 	 * Re-fetch the patterns when the WooCommerce plugin is updated.
-	 * Delete the transient when the WooCommerce plugin is updated to fetch the patterns again.
 	 *
 	 * @param WP_Upgrader $upgrader_object WP_Upgrader instance.
 	 * @param array       $options Array of bulk item update data.

@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\Patterns;
 
 use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
-use PharIo\Version\VersionConstraint;
 use WP_Error;
 
 /**
