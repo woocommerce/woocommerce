@@ -250,26 +250,44 @@ export const sidebarMachine = setup( {
 							id: 'prefetch-congrats-data ',
 						} ),
 					],
-					invoke: [
+					invoke: {
+						src: 'getTasklist',
+						onDone: {
+							actions: assign( {
+								tasklist: ( { event } ) => event.output,
+							} ),
+							target: 'maybeCountTestOrders',
+						},
+					},
+				},
+				maybeCountTestOrders: {
+					always: [
 						{
-							src: 'getTestOrderCount',
-							onDone: {
-								actions: assign( {
-									testOrderCount: ( { event } ) =>
-										event.output,
-								} ),
+							guard: () => {
+								return window?.wcSettings?.admin?.plugins?.activePlugins.includes(
+									'woocommerce-payments'
+								);
 							},
+							target: 'countTestOrders',
 						},
 						{
-							src: 'getTasklist',
-							onDone: {
-								actions: assign( {
-									tasklist: ( { event } ) => event.output,
-								} ),
-								target: 'launchYourStoreHub',
-							},
+							target: 'launchYourStoreHub',
 						},
 					],
+				},
+				countTestOrders: {
+					invoke: {
+						src: 'getTestOrderCount',
+						onDone: {
+							actions: assign( {
+								testOrderCount: ( { event } ) => event.output,
+							} ),
+							target: 'launchYourStoreHub',
+						},
+						onError: {
+							target: 'launchYourStoreHub',
+						},
+					},
 				},
 				launchYourStoreHub: {
 					id: 'launchYourStoreHub',
