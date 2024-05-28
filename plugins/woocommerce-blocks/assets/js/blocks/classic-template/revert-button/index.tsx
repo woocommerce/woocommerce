@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { PluginTemplateSettingPanel } from '@wordpress/edit-site';
-import { subscribe, select, useSelect, useDispatch } from '@wordpress/data';
+import { select, useSelect, useDispatch } from '@wordpress/data';
 import { BlockInstance, createBlock } from '@wordpress/blocks';
 import { Button, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
