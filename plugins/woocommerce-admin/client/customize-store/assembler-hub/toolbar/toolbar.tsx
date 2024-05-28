@@ -4,11 +4,7 @@
 
 import { useSelect } from '@wordpress/data';
 import { BlockInstance } from '@wordpress/blocks';
-import {
-	ToolbarButton,
-	ToolbarGroup,
-	Toolbar as WPToolbar,
-} from '@wordpress/components';
+import { ToolbarGroup, Toolbar as WPToolbar } from '@wordpress/components';
 import { useMemo } from '@wordpress/element';
 import {
 	BlockMover,
@@ -91,15 +87,9 @@ export const Toolbar = () => {
 								}
 							/>
 						</ToolbarGroup>
-						<ToolbarGroup>
-							<ToolbarButton>
-								{ currentBlock && (
-									<Shuffle
-										clientId={ currentBlock?.clientId }
-									/>
-								) }
-							</ToolbarButton>
-						</ToolbarGroup>
+						{ currentBlock && (
+							<Shuffle clientId={ currentBlock?.clientId } />
+						) }
 					</>
 				</WPToolbar>
 			</div>

@@ -13,6 +13,7 @@ import {
 	__unstableIframe as Iframe,
 	privateApis as blockEditorPrivateApis,
 	BlockList,
+	store as blockEditorStore,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
@@ -29,6 +30,8 @@ import { FontFamily } from '../types/font';
 import { FontFamiliesLoaderDotCom } from './sidebar/global-styles/font-pairing-variations/font-families-loader-dot-com';
 import { CustomizeStoreContext } from '.';
 import { isAIFlow } from '../guards';
+import { selectBlockOnHover } from './utils/select-block-on-hover';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -86,6 +89,13 @@ function ScaledBlockPreview( {
 	if ( ! viewportWidth ) {
 		viewportWidth = containerWidth;
 	}
+
+	// @ts-expect-error No types for this exist yet.
+	const { selectBlock, setBlockEditingMode } =
+		useDispatch( blockEditorStore );
+
+	// @ts-expect-error No types for this exist yet.
+	const { getBlockParents } = useSelect( blockEditorStore );
 
 	// Avoid scrollbars for pattern previews.
 	const editorStyles = useMemo( () => {
@@ -207,6 +217,28 @@ function ScaledBlockPreview( {
 		// Stop mousemove event listener to disable block tool insertion feature.
 		bodyElement.addEventListener( 'mousemove', onMouseMove, true );
 
+		if ( window.wcAdminFeatures[ 'pattern-toolkit-full-composability' ] ) {
+			bodyElement.addEventListener( 'click', ( event ) => {
+				selectBlockOnHover( event, {
+					selectBlockByClientId: selectBlock,
+					getBlockParents,
+					setBlockEditingMode,
+				} );
+			} );
+
+			bodyElement.addEventListener(
+				'mouseover',
+				( event ) => {
+					selectBlockOnHover( event, {
+						selectBlockByClientId: selectBlock,
+						getBlockParents,
+						setBlockEditingMode: () => void 0,
+					} );
+				},
+				true
+			);
+		}
+
 		const observer = new window.MutationObserver( onChange );
 		observer.observe( bodyElement, {
 			attributes: true,
@@ -253,7 +285,7 @@ function ScaledBlockPreview( {
 					// @ts-ignore disabled prop exists
 					scrolling={ isScrollable ? 'yes' : 'no' }
 					tabIndex={ -1 }
-					readonly={ ! isNavigable }
+					readonly={ false }
 					style={
 						autoScale
 							? {
@@ -297,8 +329,8 @@ function ScaledBlockPreview( {
 					<style>
 						{ `
 						.block-editor-block-list__block::before,
-						.is-selected::after,
-						.is-hovered::after,
+						.has-child-selected > .is-selected::after,
+						.is-hovered:not(.is-selected.is-hovered)::after,
 						.block-list-appender {
 							display: none !important;
 						}

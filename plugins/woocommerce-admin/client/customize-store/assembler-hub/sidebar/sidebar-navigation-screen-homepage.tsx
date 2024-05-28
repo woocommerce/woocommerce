@@ -159,6 +159,10 @@ export const SidebarNavigationScreenHomepage = () => {
 								select( blockEditorStore )
 							).__experimentalGetParsedPattern( pattern.name );
 
+							if ( ! parsedPattern ) {
+								return acc;
+							}
+
 							return [ ...acc, ...parsedPattern.blocks ];
 						},
 						[]
