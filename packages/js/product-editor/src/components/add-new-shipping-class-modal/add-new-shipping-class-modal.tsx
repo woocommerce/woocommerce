@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { Button, Modal, TextControl } from '@wordpress/components';
+import {
+	Button,
+	CheckboxControl,
+	Modal,
+	TextControl,
+} from '@wordpress/components';
 import {
 	useState,
 	createElement,
@@ -10,11 +15,16 @@ import {
 import { __ } from '@wordpress/i18n';
 import { Form, FormErrors, useFormContext } from '@woocommerce/components';
 import { ProductShippingClass } from '@woocommerce/data';
+import { addQueryArgs } from '@wordpress/url';
+import apiFetch from '@wordpress/api-fetch';
 
 export type ShippingClassFormProps = {
 	onAdd: () => Promise< ProductShippingClass >;
 	onCancel: () => void;
 };
+
+// Store a refreshed value of the shipping class name.
+let shippingName = '';
 
 function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 	const { errors, getInputProps, isValidForm } =
@@ -33,6 +43,36 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 			} );
 	}
 
+	// State to control the automatic slug generation.
+	const [ automaticSlug, setAutomaticSlug ] = useState( true );
+
+	// Get the shipping class name value.
+	const shippingNameValue = getInputProps( 'name' ).value;
+
+	/**
+	 * Get a slug suggestion based on the shipping class name.
+	 * This function is called when the name field is blurred.
+	 */
+	const getSlugSuggestion = async () => {
+		if ( ! automaticSlug ) {
+			return;
+		}
+
+		if ( shippingName === shippingNameValue ) {
+			return;
+		}
+
+		shippingName = String( shippingNameValue );
+
+		const url = `/wc/v3/products/shipping_classes/slug-suggestion`;
+		const slug: string = await apiFetch( {
+			path: addQueryArgs( url, { name: shippingName } ),
+			method: 'GET',
+		} );
+
+		getInputProps( 'slug' ).onChange( slug );
+	};
+
 	return (
 		<div className="woocommerce-add-new-shipping-class-modal__wrapper">
 			<TextControl
@@ -48,11 +88,25 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 						),
 					}
 				) }
+				onBlur={ getSlugSuggestion }
 			/>
+
+			<CheckboxControl
+				label={ __(
+					'Generate slug automatically based on the name',
+					'woocommerce'
+				) }
+				checked={ automaticSlug }
+				onChange={ setAutomaticSlug }
+				onBlur={ getSlugSuggestion }
+			/>
+
 			<TextControl
 				{ ...getInputProps( 'slug' ) }
-				label={ __( 'Slug', 'woocommerce' ) }
+				label={ __( 'Custom slug', 'woocommerce' ) }
+				disabled={ automaticSlug }
 			/>
+
 			<TextControl
 				{ ...getInputProps( 'description' ) }
 				label={ __( 'Description', 'woocommerce' ) }
