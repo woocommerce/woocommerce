@@ -2,11 +2,6 @@
 
 namespace Automattic\WooCommerce\Tests\Admin\API;
 
-use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init;
-use Automattic\WooCommerce\Admin\Marketing\MarketingCampaign;
-use Automattic\WooCommerce\Admin\Marketing\MarketingCampaignType;
-use Automattic\WooCommerce\Admin\Marketing\MarketingChannelInterface;
-use Automattic\WooCommerce\Admin\Marketing\MarketingChannels as MarketingChannelsService;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
