@@ -28,10 +28,25 @@ test.describe( 'Marketing page', () => {
 
 		// Sections present
 		await expect(
-			page.getByText( 'ChannelsStart by adding a' )
+			page.getByText(
+				'Reach new customers and increase sales without leaving WooCommerce'
+			)
 		).toBeVisible();
+		await expect( page.getByText( 'Channels' ) ).toBeVisible();
 		await expect(
 			page.getByText( 'Discover more marketing tools' )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'tab', { name: 'Email' } )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'tab', { name: 'Automations' } )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'tab', { name: 'Conversion' } )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'tab', { name: 'CRM', exact: true } )
 		).toBeVisible();
 		await expect(
 			page.getByText( 'Learn about marketing a store' )
