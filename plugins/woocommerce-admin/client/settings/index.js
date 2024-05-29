@@ -20,7 +20,8 @@ const Settings = ( { params } ) => {
 		<>
 			<Tabs data={ settingsData } page={ params.page }>
 				<p>
-					now editing <span>{ params.page }</span>
+					now editing{ ' ' }
+					<span>{ settingsData[ params.page ].label }</span>
 				</p>
 			</Tabs>
 		</>
