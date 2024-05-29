@@ -41,15 +41,11 @@ test.describe( `${ blockData.name } Block`, () => {
 			.locator( '[data-product_id]' )
 			.getAttribute( 'data-product_id' );
 
-		const productName = await page
-			.locator( `li.post-${ productId } h3` )
-			.textContent();
+		const productNameLocator = page.locator( `li.post-${ productId } h3` );
+		await expect( productNameLocator ).not.toBeEmpty();
 
-		// We want to fail the test if the product name is not found.
-		// eslint-disable-next-line playwright/no-conditional-in-test
-		if ( ! productName ) {
-			return test.fail( ! productName, 'Product name was not found' );
-		}
+		const productName =
+			( await productNameLocator.textContent() ) as string;
 
 		await block.locator( 'loading' ).waitFor( {
 			state: 'detached',
@@ -82,15 +78,11 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		const productId = await button.getAttribute( 'data-product_id' );
 
-		const productName = await page
-			.locator( `li.post-${ productId } h3` )
-			.textContent();
+		const productNameLocator = page.locator( `li.post-${ productId } h3` );
+		await expect( productNameLocator ).not.toBeEmpty();
 
-		// We want to fail the test if the product name is not found.
-		// eslint-disable-next-line playwright/no-conditional-in-test
-		if ( ! productName ) {
-			return test.fail( ! productName, 'Product name was not found' );
-		}
+		const productName =
+			( await productNameLocator.textContent() ) as string;
 
 		await block.click();
 
