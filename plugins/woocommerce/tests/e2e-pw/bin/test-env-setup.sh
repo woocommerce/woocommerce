@@ -2,17 +2,29 @@
 
 wp-env run tests-cli wp package install wp-cli/profile-command:@stable
 
-# Stage default.
+echo -e 'Stage default \n'
 wp-env run tests-cli wp profile stage --spotlight
 
-# Stage without plugins.
+echo -e 'Stage without plugins \n'
 wp-env run tests-cli wp profile stage --spotlight --skip-plugins
 
-# Hooks default.
-wp-env run tests-cli wp profile hooks --spotlight
+echo -e 'Stage default (all) \n'
+wp-env run tests-cli wp profile stage --spotlight --all
 
-# Hooks without plugins.
-wp-env run tests-cli wp profile hooks --spotlight --skip-plugins
+echo -e 'Stage without plugins (all) \n'
+wp-env run tests-cli wp profile stage --spotlight --skip-plugins --all
+
+echo -e 'Hooks default \n'
+wp-env run tests-cli wp profile hook --spotlight
+
+echo -e 'Hooks without plugins \n'
+wp-env run tests-cli wp profile hook --spotlight --skip-plugins
+
+echo -e 'Hooks default (all) \n'
+wp-env run tests-cli wp profile hook --spotlight --all
+
+echo -e 'Hooks without plugins (all) \n'
+wp-env run tests-cli wp profile hook --spotlight --skip-plugins --all
 
 echo -e 'Activate default theme \n'
 wp-env run tests-cli wp theme activate twentytwentythree
