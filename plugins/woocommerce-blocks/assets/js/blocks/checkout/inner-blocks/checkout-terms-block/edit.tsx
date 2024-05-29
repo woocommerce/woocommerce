@@ -24,10 +24,10 @@ import './editor.scss';
 import { termsConsentDefaultText, termsCheckboxDefaultText } from './constants';
 
 export const Edit = ( {
-	attributes: { checkbox, text },
+	attributes: { checkbox, text, separatorVisible },
 	setAttributes,
 }: {
-	attributes: { text: string; checkbox: boolean };
+	attributes: { text: string; checkbox: boolean; separatorVisible: boolean };
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
 	const blockProps = useBlockProps();

@@ -20,9 +20,11 @@ const FrontendBlock = ( {
 	checkbox,
 	instanceId,
 	className,
+	separatorVisible,
 }: {
 	text: string;
 	checkbox: boolean;
+	separatorVisible: string | boolean;
 	instanceId: string;
 	className?: string;
 } ): JSX.Element => {
