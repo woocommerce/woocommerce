@@ -177,7 +177,7 @@ export const getChangelogDetails = ( body: string ) => {
 		significance: getChangelogSignificance( body ),
 		type: getChangelogType( body ),
 		message: getChangelogMessage( body ),
-		comment: '',
+		comment: getChangelogComment( body ),
 	};
 };
 
