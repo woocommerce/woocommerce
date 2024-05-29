@@ -24,3 +24,18 @@
 		}
 	}
 }
+
+.woocommerce-settings-layout {
+	width: 100%;
+	display: flex;
+	gap: 10px;
+	padding: 50px 16px 16px 16px;
+}
+
+.woocommerce-settings-section-nav {
+	width: 300px;
+}
+
+.woocommerce-settings-content {
+	flex: 1;
+}
