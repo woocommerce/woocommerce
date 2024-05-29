@@ -39,7 +39,9 @@ const TotalsItemValue = ( {
 			currency={ currency || {} }
 			value={ value as number }
 		/>
-	) : null;
+	) : (
+		<>&#8208;</>
+	);
 };
 
 const TotalsItem = ( {

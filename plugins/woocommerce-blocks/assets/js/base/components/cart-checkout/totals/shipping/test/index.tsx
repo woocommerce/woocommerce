@@ -368,7 +368,7 @@ describe( 'TotalsShipping', () => {
 			screen.queryByText( 'Change address' )
 		).not.toBeInTheDocument();
 		expect(
-			screen.getByText( 'Add an address for shipping options' )
+			screen.getByText( 'Enter address to check delivery options' )
 		).toBeInTheDocument();
 	} );
 	it( 'does not show the calculator button when default rates are available and no address has been entered', () => {
@@ -416,7 +416,7 @@ describe( 'TotalsShipping', () => {
 			screen.queryByText( 'Change address' )
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByText( 'Add an address for shipping options' )
+			screen.queryByText( 'Enter address to check delivery options' )
 		).not.toBeInTheDocument();
 	} );
 	it( 'does show the calculator button when default rates are available and has formatted address', () => {
@@ -463,7 +463,7 @@ describe( 'TotalsShipping', () => {
 		);
 		expect( screen.queryByText( 'Change address' ) ).toBeInTheDocument();
 		expect(
-			screen.queryByText( 'Add an address for shipping options' )
+			screen.queryByText( 'Enter address to check delivery options' )
 		).not.toBeInTheDocument();
 	} );
 } );

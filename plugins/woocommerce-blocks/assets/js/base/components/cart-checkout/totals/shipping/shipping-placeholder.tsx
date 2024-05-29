@@ -33,7 +33,10 @@ export const ShippingPlaceholder = ( {
 
 	return (
 		<CalculatorButton
-			label={ __( 'Add an address for shipping options', 'woocommerce' ) }
+			label={ __(
+				'Enter address to check delivery options',
+				'woocommerce'
+			) }
 			isShippingCalculatorOpen={ isShippingCalculatorOpen }
 			setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
 		/>
