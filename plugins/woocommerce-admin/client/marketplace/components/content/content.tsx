@@ -25,8 +25,8 @@ import InstallNewProductModal from '../install-flow/install-new-product-modal';
 import Promotions from '../promotions/promotions';
 import ConnectNotice from '~/marketplace/components/connect-notice/connect-notice';
 import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
-import SubscriptionsExpiredNotice from '../my-subscriptions/subscriptions-expired-notice';
-import SubscriptionsExpiringNotice from '../my-subscriptions/subscriptions-expiring-notice';
+import SubscriptionsExpiredExpiringNotice
+	from '~/marketplace/components/my-subscriptions/subscriptions-expired-expiring-notice';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
@@ -192,10 +192,10 @@ export default function Content(): JSX.Element {
 				selectedTab !== 'my-subscriptions' && <ConnectNotice /> }
 			{ selectedTab !== 'business-services' && <PluginInstallNotice /> }
 			{ selectedTab !== 'business-services' && (
-				<SubscriptionsExpiredNotice />
+				<SubscriptionsExpiredExpiringNotice type="expired" />
 			) }
 			{ selectedTab !== 'business-services' && (
-				<SubscriptionsExpiringNotice />
+				<SubscriptionsExpiredExpiringNotice type="expiring" />
 			) }
 
 			{ renderContent() }
