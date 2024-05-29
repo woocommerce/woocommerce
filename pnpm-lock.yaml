@@ -3961,9 +3961,6 @@ importers:
       html-react-parser:
         specifier: 3.0.4
         version: 3.0.4(react@18.3.1)
-      immutable:
-        specifier: ^4.3.6
-        version: 4.3.6
       postcode-validator:
         specifier: 3.8.15
         version: 3.8.15
@@ -16576,9 +16573,6 @@ packages:
 
   immutable@4.3.4:
     resolution: {integrity: sha512-fsXeu4J4i6WNWSikpI88v/PcVflZz+6kMhUfIwc5SY+poQRPnaf5V7qds6SUyUN3cVxEzuCab7QIoLOQ+DQ1wA==}
-
-  immutable@4.3.6:
-    resolution: {integrity: sha512-Ju0+lEMyzMVZarkTn/gqRpdqd5dOPaz1mCZ0SH3JV6iFw81PldE/PEB1hWVEA288HPt4WXW8O7AWxB10M+03QQ==}
 
   import-cwd@2.1.0:
     resolution: {integrity: sha512-Ew5AZzJQFqrOV5BTW3EIoHAnoie1LojZLXKcCQ/yTRyVZosBhK1x1ViYjHGf5pAFOq8ZyChZp6m/fSN7pJyZtg==}
@@ -49434,8 +49428,6 @@ snapshots:
   image-ssim@0.2.0: {}
 
   immutable@4.3.4: {}
-
-  immutable@4.3.6: {}
 
   import-cwd@2.1.0:
     dependencies:
