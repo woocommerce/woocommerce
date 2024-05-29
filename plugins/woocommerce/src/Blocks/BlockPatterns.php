@@ -143,11 +143,7 @@ class BlockPatterns {
 		$patterns = $this->ptk_patterns_store->get_patterns();
 		if ( empty( $patterns ) ) {
 			wc_get_logger()->warning(
-				sprintf(
-				// translators: %s is a generated error message.
-					__( 'Empty patterns received from the PTK Pattern Store: "%s"', 'woocommerce' ),
-					$patterns->get_error_message()
-				),
+				__( 'Empty patterns received from the PTK Pattern Store', 'woocommerce' ),
 			);
 			return;
 		}
