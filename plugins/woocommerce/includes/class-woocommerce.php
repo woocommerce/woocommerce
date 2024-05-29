@@ -240,7 +240,9 @@ final class WooCommerce {
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
 		add_action( 'init', array( $this, 'load_rest_api' ) );
-		add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
+		if ( $this->is_request( 'admin' ) || ( $this->is_rest_api_request() && ! $this->is_store_api_request() ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
+		}
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
@@ -393,6 +395,19 @@ final class WooCommerce {
 		 * @since 3.6.0
 		 */
 		return apply_filters( 'woocommerce_is_rest_api_request', $is_rest_api_request );
+	}
+
+	/**
+	 * Returns true if the request is a store REST API request.
+	 *
+	 * @return bool
+	 */
+	public function is_store_api_request() {
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		return false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' );
 	}
 
 	/**
@@ -558,15 +573,6 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
 
 		/**
-		 * Tracks.
-		 */
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
-
-		/**
 		 * WCCOM Site.
 		 */
 		include_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php';
@@ -578,14 +584,24 @@ final class WooCommerce {
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once WC_ABSPATH . 'includes/class-wc-cli.php';
+
+			$this->tracks_includes();
 		}
 
 		if ( $this->is_request( 'admin' ) ) {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin.php';
+
+			// Include tracking classes for use in admin.
+			$this->tracks_includes();
 		}
 
 		if ( $this->is_request( 'frontend' ) ) {
 			$this->frontend_includes();
+		}
+
+		if ( $this->is_rest_api_request() && ! $this->is_store_api_request() ) {
+			// Include tracks classes for use in REST API.
+			$this->tracks_includes();
 		}
 
 		if ( $this->is_request( 'cron' ) && 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
@@ -665,6 +681,17 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-customer.php';
 		include_once WC_ABSPATH . 'includes/class-wc-embed.php';
 		include_once WC_ABSPATH . 'includes/class-wc-session-handler.php';
+	}
+
+	/**
+	 * Include Tracks classes.
+	 */
+	public function tracks_includes() {
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
 	}
 
 	/**
