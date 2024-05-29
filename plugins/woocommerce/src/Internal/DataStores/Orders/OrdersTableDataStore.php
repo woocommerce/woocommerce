@@ -2621,7 +2621,7 @@ FROM $order_meta_table
 		$order->apply_changes();
 		$this->clear_caches( $order );
 
-		// For backwards compatibility, moving an auto-draft order to a valid status triggers the 'woocommerce_new_order' hook.
+		// For backwards compatibility, moving a draft order to a valid status triggers the 'woocommerce_new_order' hook.
 		if ( ! empty( $changes['status'] ) && in_array( $previous_status, array( 'new', 'auto-draft', 'draft', 'checkout-draft' ), true ) ) {
 			do_action( 'woocommerce_new_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			return;
