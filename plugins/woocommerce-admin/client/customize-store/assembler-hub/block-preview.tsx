@@ -19,6 +19,7 @@ import {
 } from './auto-block-preview';
 import { ChangeHandler } from './hooks/use-editor-blocks';
 import { Toolbar } from './toolbar/toolbar';
+import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
 
 export const BlockPreview = ( {
 	blocks,
@@ -43,9 +44,7 @@ export const BlockPreview = ( {
 				onChange={ onChange }
 				useSubRegistry={ useSubRegistry }
 			>
-				{ window.wcAdminFeatures[
-					'pattern-toolkit-full-composability'
-				] && <Toolbar /> }
+				{ isFullComposabilityFeatureAndAPIAvailable() && <Toolbar /> }
 				<AutoHeightBlockPreview settings={ settings } { ...props } />
 			</BlockEditorProvider>
 		</>
