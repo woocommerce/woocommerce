@@ -10,6 +10,12 @@ import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-
  */
 import { BLOCK_THEME_SLUG } from '../../utils/constants';
 
+export const BLOCK_LABELS = {
+	productTemplate: 'Block: Product Template',
+	pagination: 'Block: Pagination',
+	productImage: 'Block: Product Image',
+};
+
 export const SELECTORS = {
 	productTemplate: '.wc-block-product-template',
 	product: '.wc-block-product-template .wc-block-product',
