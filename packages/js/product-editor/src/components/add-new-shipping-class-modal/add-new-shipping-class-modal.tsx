@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	Button,
-	CheckboxControl,
-	Modal,
-	TextControl,
-} from '@wordpress/components';
+import { BaseControl, Button, Modal, TextControl } from '@wordpress/components';
 import {
 	useState,
 	createElement,
@@ -41,10 +36,10 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 	}
 
 	// State to control the automatic slug generation.
-	const [ automaticSlug, setAutomaticSlug ] = useState( true );
+	const [ isRequestingSlug, setIsRequestingSlug ] = useState( false );
 
 	// Get the shipping class name value.
-	const shippingNameInputValue = getInputProps( 'name' ).value;
+	const shippingNameInputValue = String( getInputProps( 'name' ).value );
 
 	const [ prevNameValue, setPrevNameValue ] = useState(
 		shippingNameInputValue
@@ -55,6 +50,8 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 	 * and update the slug input field.
 	 */
 	async function pullAndupdateSlugInputField() {
+		setIsRequestingSlug( true );
+
 		// Avoid making the request if the name has not changed.
 		if ( prevNameValue === shippingNameInputValue ) {
 			return;
@@ -68,15 +65,22 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 			method: 'GET',
 		} );
 
+		setIsRequestingSlug( false );
+
 		getInputProps( 'slug' ).onChange( slug );
 	}
+
+	const isGenerateButtonDisabled =
+		isRequestingSlug ||
+		! shippingNameInputValue?.length ||
+		prevNameValue === shippingNameInputValue;
 
 	/**
 	 * Get a slug suggestion based on the shipping class name.
 	 * This function is called when the name field is blurred.
 	 */
 	function getSlugSuggestion() {
-		if ( ! automaticSlug ) {
+		if ( ! isRequestingSlug ) {
 			return;
 		}
 
@@ -101,26 +105,33 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 				onBlur={ getSlugSuggestion }
 			/>
 
-			<CheckboxControl
-				label={ __(
-					'Generate slug automatically based on the name',
-					'woocommerce'
-				) }
-				checked={ automaticSlug }
-				onChange={ setAutomaticSlug }
-				onBlur={ getSlugSuggestion }
-				onClick={ pullAndupdateSlugInputField }
-			/>
+			<div className="woocommerce-add-new-shipping-class-modal__slug-section">
+				<TextControl
+					{ ...getInputProps( 'slug' ) }
+					className="woocommerce-add-new-shipping-class-modal__slug-input"
+					label={ __( 'Custom', 'woocommerce' ) }
+					onChange={ ( value ) => {
+						setPrevNameValue( '' ); // clean the previous name value.
+						getInputProps( 'slug' ).onChange( value );
+					} }
+					disabled={ isRequestingSlug }
+				/>
 
-			<TextControl
-				{ ...getInputProps( 'slug' ) }
-				label={ __( 'Custom slug', 'woocommerce' ) }
-				disabled={ automaticSlug }
-				onChange={ ( value ) => {
-					setPrevNameValue( '' ); // clean the previous name value.
-					getInputProps( 'slug' ).onChange( value );
-				} }
-			/>
+				<BaseControl
+					id="automatic-slug"
+					label={ __( 'Automatic', 'woocommerce' ) }
+					className="woocommerce-add-new-shipping-class-modal__slug-button"
+				>
+					<Button
+						disabled={ isGenerateButtonDisabled }
+						variant="secondary"
+						onClick={ pullAndupdateSlugInputField }
+						isBusy={ isRequestingSlug }
+					>
+						{ __( 'Generate', 'woocommerce' ) }
+					</Button>
+				</BaseControl>
+			</div>
 
 			<TextControl
 				{ ...getInputProps( 'description' ) }
@@ -133,6 +144,7 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 					)
 				}
 			/>
+
 			<div className="woocommerce-add-new-shipping-class-modal__buttons">
 				<Button isSecondary onClick={ onCancel }>
 					{ __( 'Cancel', 'woocommerce' ) }
