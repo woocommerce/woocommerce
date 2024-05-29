@@ -58,8 +58,8 @@ class Notice extends \WC_REST_Data_Controller {
 	 */
 	public function dissmiss_notice( $request ) {
 		if ( ! isset( $request['dismiss_notice_nonce'] )
-		     || ! wp_verify_nonce( $request['dismiss_notice_nonce'], 'dismiss_notice' )) {
-			return new WP_Error( 'unauthorized', 'Invalid nonce.', [ 'status' => 401 ] );
+			|| ! wp_verify_nonce( $request['dismiss_notice_nonce'], 'dismiss_notice' ) ) {
+			return new WP_Error( 'unauthorized', 'Invalid nonce.', array( 'status' => 401 ) );
 		}
 		$notice_id = isset( $request['notice_id'] ) ? sanitize_text_field( wp_unslash( $request['notice_id'] ) ) : '';
 		$dismissed = false;

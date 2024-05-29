@@ -786,8 +786,8 @@ class PluginsHelper {
 			$subscriptions,
 			function ( $sub ) {
 				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
-				       && $sub['expiring']
-				       && ! $sub['autorenew'];
+						&& $sub['expiring']
+						&& ! $sub['autorenew'];
 			},
 		);
 
@@ -838,8 +838,8 @@ class PluginsHelper {
 			$subscriptions,
 			function ( $sub ) {
 				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
-				       && $sub['expired' ]
-				       && ! $sub['lifetime'];
+						&& $sub['expired']
+						&& ! $sub['lifetime'];
 			},
 		);
 
@@ -874,7 +874,7 @@ class PluginsHelper {
 	/**
 	 * Determine whether a specific notice should be shown to the current user.
 	 *
-	 * @param $dismiss_notice_meta string User meta that includes the timestamp when a store notice was dismissed.
+	 * @param string $dismiss_notice_meta User meta that includes the timestamp when a store notice was dismissed.
 	 * @return bool True if the notice should be shown, false otherwise.
 	 */
 	public static function should_show_notice( $dismiss_notice_meta ) {
