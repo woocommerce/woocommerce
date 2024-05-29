@@ -615,6 +615,20 @@ function wc_get_product_types() {
  * @return bool
  */
 function wc_product_has_unique_sku( $product_id, $sku ) {
+	/**
+	 * Gives plugins an opportunity to verify SKU uniqueness themselves.
+	 *
+	 * @since 9.0.0
+	 *
+	 * @param bool|null $has_unique_sku Set to a boolean value to short-circuit the default SKU check.
+	 * @param int $product_id The ID of the current product.
+	 * @param string $sku The SKU to check for uniqueness.
+	 */
+	$has_unique_sku = apply_filters( 'wc_product_pre_has_unique_sku', null, $product_id, $sku );
+	if ( ! is_null( $has_unique_sku ) ) {
+		return boolval( $has_unique_sku );
+	}
+
 	$data_store = WC_Data_Store::load( 'product' );
 	$sku_found  = $data_store->is_existing_sku( $product_id, $sku );
 
@@ -1562,13 +1576,17 @@ function wc_update_product_lookup_tables_column( $column ) {
 						{$wpdb->wc_product_meta_lookup} lookup_table
 						LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
 						LEFT JOIN {$wpdb->postmeta} meta2 ON lookup_table.product_id = meta2.post_id AND meta2.meta_key = '_sale_price'
+	  					LEFT JOIN {$wpdb->postmeta} meta3 ON lookup_table.product_id = meta3.post_id AND meta3.meta_key = '_regular_price'
 					SET
 						lookup_table.`{$column}` = IF (
 							CAST( meta1.meta_value AS DECIMAL ) >= 0
 							AND CAST( meta2.meta_value AS CHAR ) != ''
 							AND CAST( meta1.meta_value AS DECIMAL( 10, %d ) ) = CAST( meta2.meta_value AS DECIMAL( 10, %d ) )
+							AND CAST( meta3.meta_value AS DECIMAL( 10, %d ) ) > CAST( meta2.meta_value AS DECIMAL( 10, %d ) )
 						, 1, 0 )
 					",
+					$decimals,
+					$decimals,
 					$decimals,
 					$decimals
 				)
@@ -1661,9 +1679,10 @@ add_action( 'wc_update_product_lookup_tables_rating_count_batch', 'wc_update_pro
  * @since 8.5.0
  * @param int        $attachment_id Media attachment ID.
  * @param WC_Product $product Optional product object.
+ * @param bool       $save_product If true, the changes in the product will be saved before the method returns.
  * @return void
  */
-function wc_product_attach_featured_image( $attachment_id, $product = null ) {
+function wc_product_attach_featured_image( $attachment_id, $product = null, $save_product = true ) {
 	$attachment_post = get_post( $attachment_id );
 	if ( ! $attachment_post ) {
 		return;
@@ -1685,7 +1704,9 @@ function wc_product_attach_featured_image( $attachment_id, $product = null ) {
 	}
 
 	$product->set_image_id( $attachment_id );
-	$product->save();
+	if ( $save_product ) {
+		$product->save();
+	}
 	if ( 0 === $attachment_post->post_parent ) {
 		wp_update_post(
 			array(

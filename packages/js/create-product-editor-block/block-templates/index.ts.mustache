@@ -1,27 +1,23 @@
 /**
  * External dependencies
  */
-import { BlockConfiguration, registerBlockType } from '@wordpress/blocks';
+import { registerProductEditorBlockType } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
  */
 import './editor.scss'; // see https://www.npmjs.com/package/@wordpress/scripts#using-css
-
-/**
- * Internal dependencies
- */
+import blockConfiguration from './block.json';
 import { Edit } from './edit';
-import metadata from './block.json';
 
-/**
- * Every block starts by registering a new block type definition.
- *
- * @see https://developer.wordpress.org/block-editor/developers/block-api/#registering-a-block
- */
-registerBlockType( metadata as BlockConfiguration, {
-	/**
-	 * @see ./edit.js
-	 */
+const { name, ...metadata } = blockConfiguration;
+
+const settings = {
 	edit: Edit,
+};
+
+registerProductEditorBlockType( {
+	name,
+	metadata: metadata as never,
+	settings: settings as never,
 } );

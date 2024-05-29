@@ -24,6 +24,7 @@ import {
 } from '@woocommerce/base-utils';
 import { ExperimentalOrderLocalPickupPackages } from '@woocommerce/blocks-checkout';
 import { LocalPickupSelect } from '@woocommerce/base-components/cart-checkout/local-pickup-select';
+import ReadMore from '@woocommerce/base-components/read-more';
 
 /**
  * Internal dependencies
@@ -118,8 +119,7 @@ const renderPickupLocation = (
 			? decodeEntities( location )
 			: decodeEntities( option.name ),
 		secondaryLabel,
-		description: decodeEntities( details ),
-		secondaryDescription: address ? (
+		description: address ? (
 			<>
 				<Icon
 					icon={ mapMarker }
@@ -128,6 +128,10 @@ const renderPickupLocation = (
 				{ decodeEntities( address ) }
 			</>
 		) : undefined,
+
+		secondaryDescription: (
+			<ReadMore maxLines={ 2 }>{ decodeEntities( details ) }</ReadMore>
+		),
 	};
 };
 

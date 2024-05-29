@@ -11,6 +11,10 @@
 		"title": {
 			"type": "string",
 			"__experimentalRole": "content"
+		},
+		"disabled": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {
@@ -22,5 +26,5 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
-	"usesContext": [ "postType" ]
+	"usesContext": [ "postType", "isInSelectedTab" ]
 }

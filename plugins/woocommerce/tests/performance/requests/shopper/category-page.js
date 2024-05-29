@@ -44,10 +44,21 @@ export function categoryPage() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
+			'title is: "Accessories – WooCommerce Core E2E Test Suite"': (
+				response
+			) =>
+				response.html().find( 'head title' ).text() ===
+				'Accessories – WooCommerce Core E2E Test Suite',
 			"body contains: Category's title": ( response ) =>
 				response.body.includes(
 					`<h1 class="woocommerce-products-header__title page-title">${ product_category }</h1>`
 				),
+			'footer contains: Built with WooCommerce': ( response ) =>
+				response
+					.html()
+					.find( 'body footer' )
+					.text()
+					.includes( 'Built with WooCommerce' ),
 		} );
 	} );
 

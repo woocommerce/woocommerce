@@ -16,13 +16,11 @@ import { createNoticesFromResponse } from '../../../lib/notices';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 const EXPERIMENT_NAME =
-	'woocommerce_product_creation_experience_linked_products_202402_v1';
+	'woocommerce_product_creation_experience_pricing_to_general_202406';
 
 export const useCreateProductByType = () => {
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
 	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
-	const isNewExperienceEnabled =
-		window.wcAdminFeatures[ 'new-product-management-experience' ];
 
 	const getProductEditPageLink = async (
 		type: ProductTypeKey,
@@ -50,7 +48,7 @@ export const useCreateProductByType = () => {
 			if ( data && data.id ) {
 				return classicEditor
 					? getAdminLink(
-							`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true`
+							`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true&tutorial_type=${ type }`
 					  )
 					: getNewPath( {}, '/product/' + data.id, {} );
 			}
@@ -70,13 +68,6 @@ export const useCreateProductByType = () => {
 			type === 'grouped' ||
 			type === 'external'
 		) {
-			if ( isNewExperienceEnabled ) {
-				const url = await getProductEditPageLink( type, false );
-				if ( url ) {
-					navigateTo( { url } );
-				}
-				return;
-			}
 			const assignment = await loadExperimentAssignment(
 				EXPERIMENT_NAME
 			);

@@ -8,7 +8,10 @@ import {
 	FormattedMonetaryAmount,
 	TotalsItem,
 } from '@woocommerce/blocks-components';
-import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
+import {
+	applyCheckoutFilter,
+	productPriceValidation,
+} from '@woocommerce/blocks-checkout';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { getSetting } from '@woocommerce/settings';
 import {
@@ -64,6 +67,7 @@ const TotalsFooterItem = ( {
 	// We need to pluck out receiveCart.
 	// eslint-disable-next-line no-unused-vars
 	const { receiveCart, ...cart } = useStoreCart();
+
 	const label = applyCheckoutFilter( {
 		filterName: 'totalLabel',
 		defaultValue: __( 'Total', 'woocommerce' ),
@@ -71,7 +75,28 @@ const TotalsFooterItem = ( {
 		arg: { cart },
 	} );
 
+	const totalValue = applyCheckoutFilter( {
+		filterName: 'totalValue',
+		defaultValue: '<price/>',
+		extensions: cart.extensions,
+		arg: { cart },
+		validation: productPriceValidation,
+	} );
+
+	const priceComponent = (
+		<FormattedMonetaryAmount
+			className="wc-block-components-totals-footer-item-tax-value"
+			currency={ currency }
+			value={ parseInt( totalPrice, 10 ) }
+		/>
+	);
+
+	const value = createInterpolateElement( totalValue, {
+		price: priceComponent,
+	} );
+
 	const parsedTaxValue = parseInt( totalTax, 10 );
+
 	const description =
 		taxLines && taxLines.length > 0
 			? sprintf(
@@ -96,7 +121,7 @@ const TotalsFooterItem = ( {
 			) }
 			currency={ currency }
 			label={ label }
-			value={ parseInt( totalPrice, 10 ) }
+			value={ value }
 			description={
 				SHOW_TAXES &&
 				parsedTaxValue !== 0 && (

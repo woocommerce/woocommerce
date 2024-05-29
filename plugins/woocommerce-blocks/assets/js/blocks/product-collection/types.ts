@@ -4,8 +4,12 @@
 import type { BlockEditProps } from '@wordpress/blocks';
 import { type AttributeMetadata } from '@woocommerce/types';
 
+/**
+ * Internal dependencies
+ */
+import { WooCommerceBlockLocation } from '../product-template/utils';
+
 export interface ProductCollectionAttributes {
-	id: string;
 	query: ProductCollectionQuery;
 	queryId: number;
 	queryContext: [
@@ -19,6 +23,13 @@ export interface ProductCollectionAttributes {
 	convertedFromProducts: boolean;
 	collection?: string;
 	hideControls: FilterName[];
+	/**
+	 * Contain the list of attributes that should be included in the queryContext
+	 */
+	queryContextIncludes: string[];
+	forcePageReload: boolean;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	__privatePreviewState?: PreviewState;
 }
 
 export enum LayoutOptions {
@@ -77,16 +88,23 @@ export interface ProductCollectionQuery {
 	 * ),
 	 * ```
 	 */
-	woocommerceStockStatus?: string[];
-	woocommerceAttributes?: AttributeMetadata[];
-	isProductCollectionBlock?: boolean;
-	woocommerceHandPickedProducts?: string[];
-	priceRange?: undefined | PriceRange;
+	woocommerceStockStatus: string[];
+	woocommerceAttributes: AttributeMetadata[];
+	isProductCollectionBlock: boolean;
+	woocommerceHandPickedProducts: string[];
+	priceRange: undefined | PriceRange;
 }
 
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
 		openCollectionSelectionModal: () => void;
+		preview: {
+			initialPreviewState?: PreviewState;
+			setPreviewState?: SetPreviewState;
+		};
+		context: {
+			templateSlug: string;
+		};
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';
@@ -96,12 +114,17 @@ export type TProductCollectionOrderBy =
 	| 'popularity'
 	| 'rating';
 
+export type ProductCollectionSetAttributes = (
+	attrs: Partial< ProductCollectionAttributes >
+) => void;
+
 export type DisplayLayoutControlProps = {
 	displayLayout: ProductCollectionDisplayLayout;
-	setAttributes: ( attrs: Partial< ProductCollectionAttributes > ) => void;
+	setAttributes: ProductCollectionSetAttributes;
 };
 export type QueryControlProps = {
 	query: ProductCollectionQuery;
+	trackInteraction: ( filter: CoreFilterNames | string ) => void;
 	setQueryAttribute: ( attrs: Partial< ProductCollectionQuery > ) => void;
 };
 
@@ -126,7 +149,19 @@ export enum CoreFilterNames {
 	ORDER = 'order',
 	STOCK_STATUS = 'stock-status',
 	TAXONOMY = 'taxonomy',
+	PRICE_RANGE = 'price-range',
 }
 
 export type CollectionName = CoreCollectionNames | string;
 export type FilterName = CoreFilterNames | string;
+
+export interface PreviewState {
+	isPreview: boolean;
+	previewMessage: string;
+}
+
+export type SetPreviewState = ( args: {
+	setState: ( previewState: PreviewState ) => void;
+	location: WooCommerceBlockLocation;
+	attributes: ProductCollectionAttributes;
+} ) => void | ( () => void );

@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Expose metadata as object from useProductMetadata hook

@@ -166,7 +166,7 @@
 		width: 450px;
 
 		@media only screen and (min-width: 1400px) {
-			width: 700px;
+			width: 710px;
 		}
 
 		button.is-link {
@@ -278,27 +278,36 @@
 			}
 		}
 
-		.theme-card__active {
-			border-radius: 100px;
-			background: rgba(56, 88, 233, 0.2);
-			padding: 5px 10px;
-			justify-content: flex-end;
-			align-items: center;
-			gap: 10px;
-			color: #1d35b4;
-			font-size: 12px;
-			font-style: normal;
-			font-weight: 500;
-			line-height: 20px; /* 166.667% */
-			margin-right: 10px;
-		}
-
 		.theme-card__free {
 			color: #1e1e1e;
 			font-size: 14px;
 			font-style: normal;
 			font-weight: 400;
 			line-height: 16px; /* 114.286% */
+		}
+
+		.theme-card__active {
+			background-color: rgba(var(--wp-admin-theme-color--rgb), 0.12);
+			color: var(--wp-admin-theme-color, #fff);
+		}
+
+		.theme-card__paid {
+			background: #f0f0f1;
+			color: #2c3338;
+		}
+
+		.theme-card__active,
+		.theme-card__paid {
+			border-radius: 4px;
+			padding: 4px 8px;
+			justify-content: flex-end;
+			align-items: center;
+			gap: 10px;
+			font-size: 12px;
+			font-style: normal;
+			font-weight: 400;
+			line-height: 20px; /* 166.667% */
+			margin-right: 10px;
 		}
 	}
 }

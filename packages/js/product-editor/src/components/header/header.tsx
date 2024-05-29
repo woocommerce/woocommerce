@@ -2,14 +2,24 @@
  * External dependencies
  */
 import { WooHeaderItem, useAdminSidebarWidth } from '@woocommerce/admin-layout';
-import { useEntityProp } from '@wordpress/core-data';
+import { useEntityId, useEntityRecord } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
-import { createElement, useEffect } from '@wordpress/element';
+import {
+	createElement,
+	useContext,
+	useEffect,
+	Fragment,
+	lazy,
+	Suspense,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
-import { chevronLeft, group, Icon } from '@wordpress/icons';
+import { box, chevronLeft, group, Icon } from '@wordpress/icons';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
+import classNames from 'classnames';
+import { Tag } from '@woocommerce/components';
+import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -18,18 +28,22 @@ import { PinnedItems } from '@wordpress/interface';
 /**
  * Internal dependencies
  */
+import { EditorLoadingContext } from '../../contexts/editor-loading-context';
 import { getHeaderTitle } from '../../utils';
 import { MoreMenu } from './more-menu';
 import { PreviewButton } from './preview-button';
 import { SaveDraftButton } from './save-draft-button';
-import { PublishButton } from './publish-button';
+import { LoadingState } from './loading-state';
 import { Tabs } from '../tabs';
 import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
+import { useShowPrepublishChecks } from '../../hooks/use-show-prepublish-checks';
+import { HeaderProps, Image } from './types';
 
-export type HeaderProps = {
-	onTabSelect: ( tabId: string | null ) => void;
-	productType?: string;
-};
+const PublishButton = lazy( () =>
+	import( './publish-button' ).then( ( module ) => ( {
+		default: module.PublishButton,
+	} ) )
+);
 
 const RETURN_TO_MAIN_PRODUCT = __(
 	'Return to the main product',
@@ -40,25 +54,34 @@ export function Header( {
 	onTabSelect,
 	productType = 'product',
 }: HeaderProps ) {
-	const [ productId ] = useEntityProp< number >(
+	const isEditorLoading = useContext( EditorLoadingContext );
+
+	const productId = useEntityId( 'postType', productType );
+
+	const { editedRecord: product } = useEntityRecord< Product >(
 		'postType',
 		productType,
-		'id'
+		productId,
+		{ enabled: productId !== -1 }
 	);
 
-	const lastPersistedProduct = useSelect(
+	const lastPersistedProduct = useSelect< Product | null >(
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
-			return getEntityRecord( 'postType', productType, productId );
+			return productId !== -1
+				? getEntityRecord( 'postType', productType, productId )
+				: null;
 		},
-		[ productId ]
+		[ productType, productId ]
 	);
 
-	const [ editedProductName ] = useEntityProp< string >(
-		'postType',
-		productType,
-		'name'
-	);
+	const editedProductName = product?.name;
+	const catalogVisibility = product?.catalog_visibility;
+	const productStatus = product?.status;
+
+	const { showPrepublishChecks } = useShowPrepublishChecks();
 
 	const sidebarWidth = useAdminSidebarWidth();
 
@@ -74,11 +97,63 @@ export function Header( {
 			} );
 	}, [ sidebarWidth ] );
 
-	if ( ! productId ) {
-		return null;
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	const isVariation = lastPersistedProduct?.parent_id > 0;
+
+	const selectedImage = isVariation ? product?.image : product?.images;
+
+	if ( isEditorLoading ) {
+		return <LoadingState />;
 	}
 
-	const isVariation = lastPersistedProduct?.parent_id > 0;
+	const isHeaderImageVisible =
+		( ! isVariation &&
+			Array.isArray( selectedImage ) &&
+			selectedImage.length > 0 ) ||
+		( isVariation && selectedImage );
+
+	function getImagePropertyValue(
+		image: Image | Image[],
+		prop: 'alt' | 'src'
+	): string {
+		if ( Array.isArray( image ) ) {
+			return image[ 0 ][ prop ] || '';
+		}
+		return image[ prop ] || '';
+	}
+
+	function getVisibilityTags() {
+		const tags = [];
+		if ( productStatus === 'draft' ) {
+			tags.push(
+				<Tag
+					key={ 'draft-tag' }
+					label={ __( 'Draft', 'woocommerce' ) }
+				/>
+			);
+		}
+		if ( productStatus === 'future' ) {
+			tags.push(
+				<Tag
+					key={ 'scheduled-tag' }
+					label={ __( 'Scheduled', 'woocommerce' ) }
+				/>
+			);
+		}
+		if (
+			( productStatus !== 'future' && catalogVisibility === 'hidden' ) ||
+			( isVariation && productStatus === 'private' )
+		) {
+			tags.push(
+				<Tag
+					key={ 'hidden-tag' }
+					label={ __( 'Hidden', 'woocommerce' ) }
+				/>
+			);
+		}
+		return tags;
+	}
 
 	return (
 		<div
@@ -122,42 +197,77 @@ export function Header( {
 					<div />
 				) }
 
-				<h1 className="woocommerce-product-header__title">
-					{ isVariation ? (
-						<div className="woocommerce-product-header__variable-product-title">
-							<Icon icon={ group } />
-							<span className="woocommerce-product-header__variable-product-name">
-								{ lastPersistedProduct?.name }
-							</span>
-							<span className="woocommerce-product-header__variable-product-id">
-								# { lastPersistedProduct?.id }
-							</span>
-						</div>
-					) : (
-						getHeaderTitle(
-							editedProductName,
-							lastPersistedProduct?.name
-						)
+				<div
+					className={ classNames(
+						'woocommerce-product-header-title-bar',
+						{
+							'is-variation': isVariation,
+						}
 					) }
-				</h1>
+				>
+					<div className="woocommerce-product-header-title-bar__image">
+						{ isHeaderImageVisible ? (
+							<img
+								alt={ getImagePropertyValue(
+									selectedImage,
+									'alt'
+								) }
+								src={ getImagePropertyValue(
+									selectedImage,
+									'src'
+								) }
+								className="woocommerce-product-header-title-bar__product-image"
+							/>
+						) : (
+							<Icon icon={ isVariation ? group : box } />
+						) }
+					</div>
+					<h1 className="woocommerce-product-header__title">
+						{ isVariation ? (
+							<>
+								{ lastPersistedProduct?.name }
+								<span className="woocommerce-product-header__variable-product-id">
+									# { lastPersistedProduct?.id }
+								</span>
+							</>
+						) : (
+							getHeaderTitle(
+								editedProductName,
+								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								// @ts-ignore - Arg is not typed correctly.
+								lastPersistedProduct?.name
+							)
+						) }
+						<div className="woocommerce-product-header__visibility-tags">
+							{ getVisibilityTags() }
+						</div>
+					</h1>
+				</div>
 
 				<div className="woocommerce-product-header__actions">
 					{ ! isVariation && (
 						<SaveDraftButton
 							productType={ productType }
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore - Prop is not typed correctly.
 							productStatus={ lastPersistedProduct?.status }
 						/>
 					) }
 
 					<PreviewButton
 						productType={ productType }
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore - Prop is not typed correctly.
 						productStatus={ lastPersistedProduct?.status }
 					/>
 
-					<PublishButton
-						productType={ productType }
-						productStatus={ lastPersistedProduct?.status }
-					/>
+					<Suspense fallback={ null }>
+						<PublishButton
+							productType={ productType }
+							isPrePublishPanelVisible={ showPrepublishChecks }
+							isMenuButton
+						/>
+					</Suspense>
 
 					<WooHeaderItem.Slot name="product" />
 					<PinnedItems.Slot scope={ HEADER_PINNED_ITEMS_SCOPE } />

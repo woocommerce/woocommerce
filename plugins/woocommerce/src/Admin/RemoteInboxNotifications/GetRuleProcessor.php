@@ -7,63 +7,25 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
+
 /**
  * Class encapsulating getting the processor for a given rule type.
+ *
+ * @deprecated 8.8.0
  */
-class GetRuleProcessor {
+class GetRuleProcessor extends DeprecatedClassFacade {
 	/**
-	 * Get the processor for the specified rule type.
+	 * The name of the non-deprecated class that this facade covers.
 	 *
-	 * @param string $rule_type The rule type.
-	 *
-	 * @return RuleProcessorInterface The matching processor for the specified rule type, or a FailRuleProcessor if no matching processor is found.
+	 * @var string
 	 */
-	public static function get_processor( $rule_type ) {
-		switch ( $rule_type ) {
-			case 'plugins_activated':
-				return new PluginsActivatedRuleProcessor();
-			case 'publish_after_time':
-				return new PublishAfterTimeRuleProcessor();
-			case 'publish_before_time':
-				return new PublishBeforeTimeRuleProcessor();
-			case 'not':
-				return new NotRuleProcessor();
-			case 'or':
-				return new OrRuleProcessor();
-			case 'fail':
-				return new FailRuleProcessor();
-			case 'pass':
-				return new PassRuleProcessor();
-			case 'plugin_version':
-				return new PluginVersionRuleProcessor();
-			case 'stored_state':
-				return new StoredStateRuleProcessor();
-			case 'order_count':
-				return new OrderCountRuleProcessor();
-			case 'wcadmin_active_for':
-				return new WCAdminActiveForRuleProcessor();
-			case 'product_count':
-				return new ProductCountRuleProcessor();
-			case 'onboarding_profile':
-				return new OnboardingProfileRuleProcessor();
-			case 'is_ecommerce':
-				return new IsEcommerceRuleProcessor();
-			case 'is_woo_express':
-				return new IsWooExpressRuleProcessor();
-			case 'base_location_country':
-				return new BaseLocationCountryRuleProcessor();
-			case 'base_location_state':
-				return new BaseLocationStateRuleProcessor();
-			case 'note_status':
-				return new NoteStatusRuleProcessor();
-			case 'option':
-				return new OptionRuleProcessor();
-			case 'wca_updated':
-				return new WooCommerceAdminUpdatedRuleProcessor();
-			case 'total_payments_value':
-				return new TotalPaymentsVolumeProcessor();
-		}
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\GetRuleProcessor';
 
-		return new FailRuleProcessor();
-	}
+	/**
+	 * The version that this class was deprecated in.
+	 *
+	 * @var string
+	 */
+	protected static $deprecated_in_version = '8.8.0';
 }

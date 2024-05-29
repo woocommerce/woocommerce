@@ -34,16 +34,18 @@ interface TaxonomyBlockAttributes extends BlockAttributes {
 	createTitle: string;
 	dialogNameHelpText?: string;
 	parentTaxonomyText?: string;
+	placeholder?: string;
 }
 
 export function Edit( {
 	attributes,
-	context: { postType },
+	context: { postType, isInSelectedTab },
 }: ProductEditorBlockEditProps< TaxonomyBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 	const { hierarchical }: TaxonomyMetadata = useSelect(
 		( select ) =>
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			select( 'core' ).getTaxonomy( attributes.slug ) || {
 				hierarchical: false,
 			}
@@ -56,6 +58,7 @@ export function Edit( {
 		dialogNameHelpText,
 		parentTaxonomyText,
 		disabled,
+		placeholder,
 	} = attributes;
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );
@@ -75,8 +78,10 @@ export function Edit( {
 	);
 
 	useEffect( () => {
-		searchDelayed( '' );
-	}, [] );
+		if ( isInSelectedTab ) {
+			searchDelayed( '' );
+		}
+	}, [ isInSelectedTab ] );
 
 	const [ selectedEntries, setSelectedEntries ] = useProductEntityProp<
 		Taxonomy[]
@@ -114,6 +119,7 @@ export function Edit( {
 					multiple
 					createValue={ searchValue }
 					onInputChange={ searchDelayed }
+					placeholder={ placeholder }
 					shouldNotRecursivelySelect
 					shouldShowCreateButton={ ( typedValue ) =>
 						! typedValue ||

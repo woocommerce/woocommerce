@@ -14,7 +14,7 @@ import {
 	more,
 	starEmpty,
 } from '@wordpress/icons';
-import { isExperimentalBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 import { __ } from '@wordpress/i18n';
 import { toggle } from '@woocommerce/icons';
 
@@ -27,7 +27,7 @@ import save from './save';
 import { BLOCK_NAME_MAP } from './constants';
 import { BlockAttributes } from './types';
 
-if ( isExperimentalBuild() ) {
+if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
 		icon: {
 			src: (
@@ -42,7 +42,10 @@ if ( isExperimentalBuild() ) {
 		variations: [
 			{
 				name: 'product-filter-active',
-				title: __( 'Product Filter: Active Filters', 'woocommerce' ),
+				title: __(
+					'Product Filter: Active Filters (Beta)',
+					'woocommerce'
+				),
 				description: __(
 					'Display the currently active filters.',
 					'woocommerce'
@@ -63,7 +66,7 @@ if ( isExperimentalBuild() ) {
 			},
 			{
 				name: 'product-filter-price',
-				title: __( 'Product Filter: Price', 'woocommerce' ),
+				title: __( 'Product Filter: Price (Beta)', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by choosing a price range.',
 					'woocommerce'
@@ -83,7 +86,10 @@ if ( isExperimentalBuild() ) {
 			},
 			{
 				name: 'product-filter-stock-status',
-				title: __( 'Product Filter: Stock Status', 'woocommerce' ),
+				title: __(
+					'Product Filter: Stock Status (Beta)',
+					'woocommerce'
+				),
 				description: __(
 					'Enable customers to filter the product collection by stock status.',
 					'woocommerce'
@@ -103,7 +109,7 @@ if ( isExperimentalBuild() ) {
 			},
 			{
 				name: 'product-filter-attribute',
-				title: __( 'Product Filter: Attribute', 'woocommerce' ),
+				title: __( 'Product Filter: Attribute (Beta)', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by selecting one or more attributes, such as color.',
 					'woocommerce'
@@ -123,7 +129,7 @@ if ( isExperimentalBuild() ) {
 			},
 			{
 				name: 'product-filter-rating',
-				title: __( 'Product Filter: Rating', 'woocommerce' ),
+				title: __( 'Product Filter: Rating (Beta)', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by rating.',
 					'woocommerce'

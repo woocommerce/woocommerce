@@ -73,10 +73,72 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	private static function delete_all_log_files(): void {
-		$files = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$upload_dir    = wp_upload_dir( null, false );
+		$log_directory = $upload_dir['basedir'] . '/wc-logs/';
+
+		$files = glob( $log_directory . '*.log' );
 		foreach ( $files as $file ) {
 			unlink( $file );
 		}
+	}
+
+	/**
+	 * @testdox Check that the get_log_directory method returns the correct directory path.
+	 */
+	public function test_get_log_directory_path(): void {
+		Constants::set_constant( 'WC_LOG_DIR_CUSTOM', true );
+		Constants::set_constant( 'WC_LOG_DIR', '/a/test/path/constant' );
+		$actual = Settings::get_log_directory();
+		$this->assertEquals( '/a/test/path/constant/', $actual );
+		Constants::clear_constants();
+
+		$callback = fn() => '/a/test/path/filter';
+		add_filter( 'woocommerce_log_directory', $callback );
+
+		$actual = Settings::get_log_directory();
+		$this->assertEquals( '/a/test/path/filter/', $actual );
+
+		remove_filter( 'woocommerce_log_directory', $callback );
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wp_upload_dir' => fn() => array( 'basedir' => '/a/test/path' ),
+			)
+		);
+		$actual = Settings::get_log_directory();
+		$this->assertEquals( '/a/test/path/wc-logs/', $actual );
+		$this->reset_legacy_proxy_mocks();
+	}
+
+	/**
+	 * @testdox Check that the get_log_directory method creates the directory if it doesn't exist yet.
+	 */
+	public function test_get_log_directory_creation() {
+		$upload_dir = wp_upload_dir();
+		$path       = $upload_dir['basedir'] . '/wc-logs-test/';
+
+		$callback = fn() => $path;
+		add_filter( 'woocommerce_log_directory', $callback );
+
+		$actual_path = Settings::get_log_directory();
+		$this->assertEquals( $path, $actual_path );
+		$this->assertTrue( wp_is_writable( $actual_path ) );
+
+		remove_filter( 'woocommerce_log_directory', $callback );
+
+		// The GLOB_BRACE flag is not available in some environments.
+		$files = array_merge(
+			glob( $path . '*' ),
+			glob( $path . '.[!.,!..]*' )
+		);
+		$this->assertCount( 2, $files );
+		$this->assertContains( $path . '.htaccess', $files );
+		$this->assertContains( $path . 'index.html', $files );
+
+		foreach ( $files as $file ) {
+			unlink( $file );
+		}
+		rmdir( $path );
 	}
 
 	/**

@@ -28,7 +28,7 @@ export type ProductDownload = {
 	file: string;
 };
 
-export type ProductAttribute = {
+export type ProductProductAttribute = {
 	id: number;
 	name: string;
 	slug: string;
@@ -72,7 +72,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
 	'status' | 'categories'
 > & {
-	attributes: ProductAttribute[];
+	attributes: ProductProductAttribute[];
 	average_rating: string;
 	backordered: boolean;
 	backorders: 'no' | 'notify' | 'yes';

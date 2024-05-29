@@ -1,50 +1,39 @@
-name: Run Blocks Playwright Tests
+name: Blocks Playwright Tests
+
 on:
     pull_request:
         paths:
+            - '.github/workflows/blocks-playwright.yml' # This file
             - 'plugins/woocommerce-blocks/**'
             - 'plugins/woocommerce/src/Blocks/**'
             - 'plugins/woocommerce/templates/**'
             - 'plugins/woocommerce/patterns/**'
+    # Allow manually triggering the workflow.
+    workflow_dispatch:
+
+concurrency:
+    group: '${{ github.workflow }}-${{ github.ref }}'
+    cancel-in-progress: true
 
 env:
     FORCE_COLOR: 1
 
 jobs:
-    PlaywrightE2ETests:
-        name: Playwright E2E tests - ${{ matrix.config.name }}
+    blocks-playwright-tests:
+        name: Shard ${{ matrix.shardIndex }} of ${{ matrix.shardTotal }}
         timeout-minutes: 60
         runs-on: ubuntu-latest
         defaults:
             run:
                 working-directory: plugins/woocommerce-blocks
         strategy:
+            fail-fast: false
             matrix:
-                config:
-                    [
-                        {
-                            name: Normal,
-                            file: playwright.config.ts,
-                            resultPath: test-results,
-                        },
-                        {
-                            name: Classic,
-                            file: playwright.classic-theme.config.ts,
-                            resultPath: test-results-classic-theme,
-                        },
-                        {
-                            name: SideEffects,
-                            file: playwright.side-effects.config.ts,
-                            resultPath: test-results-side-effects,
-                        },
-                        {
-                            name: BlockThemeWithTemplates,
-                            file: playwright.block-theme-with-templates.config.ts,
-                            resultPath: test-results-block-theme-with-templates,
-                        },
-                    ]
+                shardIndex: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                shardTotal: [10]
+
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -52,20 +41,36 @@ jobs:
                   install: '@woocommerce/plugin-woocommerce...'
                   build: '@woocommerce/plugin-woocommerce'
 
-            - name: Install Playwright
-              run: pnpm --filter='@woocommerce/block-library' exec playwright install --with-deps
+            - name: Install Playwright dependencies
+              run: pnpm exec playwright install chromium --with-deps
 
-            - name: Start wp-env
-              run: pnpm --filter='@woocommerce/block-library' env:start
+            - name: Setup testing environment and start the server
+              run: pnpm env:start
 
             - name: Run Playwright tests
-              working-directory: plugins/woocommerce-blocks
-              run: pnpm playwright test --config=tests/e2e/${{ matrix.config.file }}
+              run: pnpm test:e2e --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
 
-            - uses: actions/upload-artifact@v3
-              if: ${{ failure() }}
-
+            - name: Archive debug artifacts (screenshots, traces)
+              uses: actions/upload-artifact@v4
+              if: ${{ !cancelled() }}
               with:
-                  name: playwright-report-${{ matrix.config.name }}
-                  path: plugins/woocommerce-blocks/tests/e2e/artifacts/${{ matrix.config.resultPath }}
-                  if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+                  name: failures-artifacts-shard-${{ matrix.shardIndex }}
+                  path: plugins/woocommerce-blocks/tests/e2e/artifacts/test-results
+                  if-no-files-found: ignore
+
+    merge-artifacts:
+        # Merges all artifacts from all shards into a single zip and
+        # deletes the parts. In case of a rerun, artifacts from the
+        # previous run will be retained by merging them with the new ones. 
+        name: Merge Artifacts
+        if: ${{ !cancelled() }}
+        needs: [blocks-playwright-tests]
+        runs-on: ubuntu-latest
+        steps:
+            - name: Merge Artifacts
+              uses: actions/upload-artifact/merge@v4
+              # Don't fail the job if there aren't any artifacts to merge.
+              continue-on-error: true
+              with:
+                  name: failures-artifacts
+                  delete-merged: true

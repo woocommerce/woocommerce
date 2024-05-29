@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Logging\Settings;
 
 /**
  * Class WC_Tests_Logger
@@ -39,7 +40,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	private static function delete_all_log_files(): void {
-		$files = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$files = glob( Settings::get_log_directory() . '*.log' );
 		foreach ( $files as $file ) {
 			unlink( $file );
 		}
@@ -81,7 +82,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_clear() {
-		$path = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . 'unit-tests.log';
+		$path = Settings::get_log_directory() . 'unit-tests.log';
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 		file_put_contents( $path, 'Test file content.' );
 		$this->assertFileExists( $path );
@@ -184,7 +185,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 */
 	public function test_woocommerce_register_log_handlers_filter() {
 		add_filter( 'woocommerce_register_log_handlers', array( $this, 'return_assertion_handlers' ) );
-		$log = new WC_Logger( null, 'debug' );
+		$log = new WC_Logger();
 		$log->debug( 'debug' );
 		$log->info( 'info' );
 		$log->notice( 'notice' );
@@ -252,8 +253,9 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 			->setMethods( array( 'handle' ) )
 			->getMock();
 		$handler->expects( $this->never() )->method( 'handle' );
-		new WC_Logger( array( $handler ) );
-		$this->setExpectedIncorrectUsage( 'WC_Logger::__construct' );
+		$logger = new WC_Logger( array( $handler ) );
+		$logger->debug( 'debug' );
+		$this->setExpectedIncorrectUsage( 'WC_Logger::get_handlers' );
 	}
 
 	/**
@@ -267,11 +269,15 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @return WC_Log_Handler[] array of mocked handlers.
 	 */
 	public function return_assertion_handlers() {
-		$handler = $this
-			->getMockBuilder( 'WC_Log_Handler_Interface' )
-			->setMethods( array( 'handle' ) )
-			->getMock();
-		$handler->expects( $this->exactly( 8 ) )->method( 'handle' );
+		static $handler;
+
+		if ( ! $handler instanceof WC_Log_Handler_Interface ) {
+			$handler = $this
+				->getMockBuilder( 'WC_Log_Handler_Interface' )
+				->setMethods( array( 'handle' ) )
+				->getMock();
+			$handler->expects( $this->exactly( 8 ) )->method( 'handle' );
+		}
 
 		return array( $handler );
 	}

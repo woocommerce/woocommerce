@@ -2,9 +2,15 @@
  * External dependencies
  */
 import { Sender } from 'xstate';
-import { recordEvent } from '@woocommerce/tracks';
 import apiFetch from '@wordpress/api-fetch';
-import { resolveSelect } from '@wordpress/data';
+import { resolveSelect, dispatch } from '@wordpress/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+// @ts-expect-error -- No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
+// @ts-expect-error -- No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -19,8 +25,14 @@ import {
 	installFontFace,
 	installFontFamily,
 	getFontFamiliesAndFontFaceToInstall,
-	FontCollectionsResponse,
 } from './fonts';
+import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
+import {
+	FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
+	FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING,
+} from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
+import { DesignWithoutAIStateMachineContext, Theme } from './types';
+import { trackEvent } from '../tracking';
 
 const assembleSite = async () => {
 	await updateTemplate( {
@@ -39,11 +51,91 @@ const browserPopstateHandler =
 		};
 	};
 
-const installAndActivateTheme = async () => {
+const getActiveThemeWithRetries = async (): Promise< Theme[] | null > => {
+	let retries = 3;
+
+	while ( retries > 0 ) {
+		const activeThemes = ( await resolveSelect( 'core' ).getEntityRecords(
+			'root',
+			'theme',
+			{ status: 'active' },
+			true
+		) ) as Theme[];
+		if ( activeThemes ) {
+			return activeThemes;
+		}
+
+		retries--;
+	}
+
+	return null;
+};
+
+const getCurrentGlobalStylesId = async (): Promise< number | null > => {
+	const activeThemes = await getActiveThemeWithRetries();
+	if ( ! activeThemes ) {
+		return null;
+	}
+
+	const currentThemeLinks = activeThemes[ 0 ]?._links;
+	const url = currentThemeLinks?.[ 'wp:user-global-styles' ]?.[ 0 ]?.href;
+	const globalStylesObject = ( await apiFetch( { url } ) ) as { id: number };
+
+	return globalStylesObject.id;
+};
+
+const updateGlobalStylesWithDefaultValues = async (
+	context: DesignWithoutAIStateMachineContext
+) => {
+	// We are using the first color palette and font pairing that are displayed on the color/font picker on the sidebar.
+	const colorPalette = COLOR_PALETTES[ 0 ];
+
+	const allowTracking =
+		( await resolveSelect( OPTIONS_STORE_NAME ).getOption(
+			'woocommerce_allow_tracking'
+		) ) === 'yes';
+
+	const fontPairing =
+		context.isFontLibraryAvailable && allowTracking
+			? FONT_PAIRINGS_WHEN_AI_IS_OFFLINE[ 0 ]
+			: FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING[ 0 ];
+
+	const globalStylesId = await getCurrentGlobalStylesId();
+	if ( ! globalStylesId ) {
+		return;
+	}
+
+	// @ts-expect-error No types for this exist yet.
+	const { saveEntityRecord } = dispatch( coreStore );
+
+	await saveEntityRecord(
+		'root',
+		'globalStyles',
+		{
+			id: globalStylesId,
+			styles: mergeBaseAndUserConfigs(
+				colorPalette?.styles || {},
+				fontPairing?.styles || {}
+			),
+			settings: mergeBaseAndUserConfigs(
+				colorPalette?.settings || {},
+				fontPairing?.settings || {}
+			),
+		},
+		{
+			throwOnError: true,
+		}
+	);
+};
+
+const installAndActivateTheme = async (
+	context: DesignWithoutAIStateMachineContext
+) => {
 	try {
 		await setTheme( THEME_SLUG );
+		await updateGlobalStylesWithDefaultValues( context );
 	} catch ( error ) {
-		recordEvent(
+		trackEvent(
 			'customize_your_store__no_ai_install_and_activate_theme_error',
 			{
 				theme: THEME_SLUG,
@@ -55,6 +147,11 @@ const installAndActivateTheme = async () => {
 };
 
 const installFontFamilies = async () => {
+	const isTrackingEnabled = window.wcTracks?.isEnabled || false;
+	if ( ! isTrackingEnabled ) {
+		return;
+	}
+
 	try {
 		const installedFontFamily = ( await resolveSelect(
 			'core'
@@ -80,13 +177,8 @@ const installFontFamilies = async () => {
 			} )
 		);
 
-		const fontCollections = await apiFetch< FontCollectionsResponse >( {
-			path: '/wp/v2/font-collections?_fields=slug,name,description,id',
-			method: 'GET',
-		} );
-
 		const fontCollection = await apiFetch< FontCollectionResponse >( {
-			path: `/wp/v2/font-collections/${ fontCollections[ 0 ].slug }`,
+			path: `/wp/v2/font-collections/google-fonts`,
 			method: 'GET',
 		} );
 
@@ -143,10 +235,23 @@ const createProducts = async () => {
 	}
 };
 
+export const enableTracking = async () => {
+	try {
+		await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+			woocommerce_allow_tracking: 'yes',
+		} );
+		window.wcTracks.isEnabled = true;
+	} catch ( error ) {
+		throw error;
+	}
+};
+
 export const services = {
 	assembleSite,
 	browserPopstateHandler,
 	installAndActivateTheme,
 	createProducts,
 	installFontFamilies,
+	updateGlobalStylesWithDefaultValues,
+	enableTracking,
 };

@@ -24,12 +24,20 @@
 		"required": {
 			"type": "string"
 		},
+		"tooltip": {
+			"type": "string"
+		},
 		"disabled": {
 			"type": "boolean"
 		},
 		"align": {
 			"type": "string",
 			"enum": [ "left", "center", "right", "justify" ]
+		},
+		"mode": {
+			"type": "string",
+			"enum": [ "plain-text", "rich-text" ],
+			"default": "rich-text"
 		},
 		"allowedFormats": {
 			"type": "array",

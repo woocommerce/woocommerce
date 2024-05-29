@@ -130,7 +130,7 @@ const AttributeFilterBlock = ( {
 			resourceName: 'products/attributes/terms',
 			resourceValues: [ attributeObject?.id || 0 ],
 			shouldSelect: blockAttributes.attributeId > 0,
-			query: { orderby: 'menu_order' },
+			query: { orderby: attributeObject?.orderby || 'menu_order' },
 		} );
 
 	const { results: filteredCounts, isLoading: filteredCountsLoading } =
@@ -139,9 +139,7 @@ const AttributeFilterBlock = ( {
 				taxonomy: attributeObject?.taxonomy || '',
 				queryType: blockAttributes.queryType,
 			},
-			queryState: {
-				...queryState,
-			},
+			queryState,
 			isEditor,
 		} );
 

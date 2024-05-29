@@ -117,10 +117,14 @@
 		padding: $gap-small 0;
 		text-align: center;
 		border: none;
+		display: flex;
+		justify-content: center;
 
 		.woocommerce-search-list__not-found-icon,
 		.woocommerce-search-list__not-found-text {
-			display: inline-block;
+			display: flex;
+			align-content: center;
+			flex-wrap: wrap;
 		}
 
 		.woocommerce-search-list__not-found-icon {
@@ -236,7 +240,7 @@
 
 		@for $i from 1 to 5 {
 			&.depth-#{$i} {
-				padding-left: $gap * ( $i + 1 );
+				padding-left: $gap * ($i + 1);
 			}
 
 			&.depth-#{$i} .woocommerce-search-list__item-label::before {

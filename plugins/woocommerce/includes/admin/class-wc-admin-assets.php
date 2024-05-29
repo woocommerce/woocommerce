@@ -231,7 +231,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'gateway_toggle' => current_user_can( 'manage_woocommerce' ) ? wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ) : null,
 					),
 					'urls'                              => array(
-						'add_product'     => Features::is_enabled( 'new-product-management-experience' ) || \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
+						'add_product'     => \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
@@ -554,6 +554,22 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				);
 				wp_enqueue_script( 'marketplace-suggestions' );
 			}
+
+			// Marketplace promotions.
+			if ( in_array( $screen_id, array( 'woocommerce_page_wc-admin' ), true ) ) {
+
+				$promotions = WC_Admin_Marketplace_Promotions::get_active_promotions();
+
+				if ( false === $promotions ) {
+					return;
+				}
+
+				wp_add_inline_script(
+					'wc-admin-app',
+					'window.wcMarketplace = ' . wp_json_encode( array( 'promotions' => $promotions ) ),
+					'before'
+				);
+			}
 		}
 
 		/**
@@ -570,7 +586,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				'wc-admin-' . $script_name,
 				WCAdminAssets::get_url( $script_path_name . '/' . $script_name, 'js' ),
 				$script_assets['dependencies'],
-				WCAdminAssets::get_file_version( 'js' ),
+				WCAdminAssets::get_file_version( 'js', $script_assets['version'] ),
 				true
 			);
 		}

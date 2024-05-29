@@ -4,10 +4,8 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
-import { recordEvent } from '@woocommerce/tracks';
 import {
 	Button,
 	Modal,
@@ -15,8 +13,7 @@ import {
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
 } from '@wordpress/components';
-// @ts-ignore No types for this exist yet.
-import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
+
 /**
  * Internal dependencies
  */
@@ -27,6 +24,10 @@ import './style.scss';
 import { navigateOrParent } from '../utils';
 import { WooCYSSecondaryButtonSlot } from './secondary-button-slot';
 import { SurveyForm } from './survey-form';
+import lessonPlan from '../assets/icons/lesson-plan.js';
+import { Icon, brush, tag } from '@wordpress/icons';
+import { trackEvent } from '../tracking';
+import { isEntrepreneurFlow } from '~/customize-store/design-with-ai/entrepreneur-flow';
 
 export * as actions from './actions';
 export * as services from './services';
@@ -34,7 +35,6 @@ export * as services from './services';
 export type events = { type: 'GO_BACK_TO_HOME' } | { type: 'COMPLETE_SURVEY' };
 
 export const Transitional = ( {
-	editor,
 	sendEvent,
 	hasCompleteSurvey,
 	isWooExpress,
@@ -42,7 +42,6 @@ export const Transitional = ( {
 	setSurveyOpen,
 	aiOnline,
 }: {
-	editor: React.ReactNode;
 	sendEvent: ( event: events ) => void;
 	hasCompleteSurvey: boolean;
 	isWooExpress: boolean;
@@ -51,12 +50,11 @@ export const Transitional = ( {
 	aiOnline: boolean;
 } ) => {
 	const homeUrl: string = getSetting( 'homeUrl', '' );
-	const isEditorLoading = useIsSiteEditorLoading();
 	const closeSurvey = () => {
 		setSurveyOpen( false );
 	};
 
-	const showSurveyButton = ! hasCompleteSurvey;
+	const showSurveyButton = ! hasCompleteSurvey && ! isEntrepreneurFlow();
 	const showAISurvey = isWooExpress && aiOnline;
 
 	return (
@@ -88,32 +86,30 @@ export const Transitional = ( {
 				isTransparent={ false }
 				className="edit-site-layout__hub"
 			/>
-
 			<div className="woocommerce-customize-store__transitional-content">
 				<h1 className="woocommerce-customize-store__transitional-heading">
 					{ __( 'Your store looks great!', 'woocommerce' ) }
 				</h1>
 				<h2 className="woocommerce-customize-store__transitional-subheading">
-					{ isWooExpress
+					{ isEntrepreneurFlow()
 						? __(
-								"You're one step closer to launching your online business — we can't wait to see it come to life.",
+								"Congratuations! You've successfully designed your store. Now you can go back to the Home screen to complete your store setup and start selling.",
 								'woocommerce'
 						  )
 						: __(
-								'Your store is a reflection of your unique style and personality, and we are thrilled to see it come to life.',
+								"Congratulations! You've successfully designed your store. Take a look at your hard work before continuing to set up your store.",
 								'woocommerce'
 						  ) }
 				</h2>
 
-				<div className="woocommerce-customize-store__transitional-main-actions">
-					<WooCYSSecondaryButtonSlot />
-
+				<WooCYSSecondaryButtonSlot />
+				<div className="woocommerce-customize-store__transitional-buttons">
 					{ showSurveyButton && (
 						<Button
-							className="woocommerce-customize-store__transitional-preview-button"
+							className="woocommerce-customize-store__transitional-preview-buttonwoocommerce-customize-store__transitional-preview-button"
 							variant="secondary"
 							onClick={ () => {
-								recordEvent(
+								trackEvent(
 									isWooExpress
 										? 'customize_your_store_transitional_survey_click'
 										: 'customize_your_store_on_core_transitional_survey_click'
@@ -127,73 +123,25 @@ export const Transitional = ( {
 
 					<Button
 						className="woocommerce-customize-store__transitional-preview-button"
-						variant="primary"
+						variant={
+							isEntrepreneurFlow() ? 'secondary' : 'primary'
+						}
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_transitional_preview_store_click'
 							);
 							window.open( homeUrl, '_blank' );
 						} }
 					>
-						{ __( 'Preview store', 'woocommerce' ) }
+						{ __( 'View store', 'woocommerce' ) }
 					</Button>
-				</div>
 
-				<div
-					className={ classNames(
-						'woocommerce-customize-store__transitional-site-preview-container',
-						{
-							'is-loading': isEditorLoading,
-						}
-					) }
-				>
-					{ editor }
-				</div>
-				<div className="woocommerce-customize-store__transitional-actions">
-					<div className="woocommerce-customize-store__transitional-action">
-						<h3>
-							{ __( 'Fine-tune your design', 'woocommerce' ) }
-						</h3>
-						<p>
-							{ __(
-								'Head to the Editor to change your images and text, add more pages, and make any further customizations.',
-								'woocommerce'
-							) }
-						</p>
+					{ isEntrepreneurFlow() && (
 						<Button
-							variant="tertiary"
+							variant="primary"
 							onClick={ () => {
-								recordEvent(
-									'customize_your_store_transitional_editor_click'
-								);
-								navigateOrParent(
-									window,
-									`${ ADMIN_URL }site-editor.php`
-								);
-							} }
-						>
-							{ __( 'Go to the Editor', 'woocommerce' ) }
-						</Button>
-					</div>
-
-					<div className="woocommerce-customize-store__transitional-action">
-						<h3>
-							{ __(
-								'Continue setting up your store',
-								'woocommerce'
-							) }
-						</h3>
-						<p>
-							{ __(
-								'Go back to the Home screen to complete your store setup and start selling',
-								'woocommerce'
-							) }
-						</p>
-						<Button
-							variant="tertiary"
-							onClick={ () => {
-								recordEvent(
-									'customize_your_store_transitional_home_click'
+								trackEvent(
+									'customize_your_store_entrepreneur_home_click'
 								);
 								sendEvent( {
 									type: 'GO_BACK_TO_HOME',
@@ -202,8 +150,132 @@ export const Transitional = ( {
 						>
 							{ __( 'Back to Home', 'woocommerce' ) }
 						</Button>
-					</div>
+					) }
 				</div>
+				{ ! isEntrepreneurFlow() && (
+					<>
+						<h2 className="woocommerce-customize-store__transitional-main-actions-title">
+							{ __( "What's next?", 'woocommerce' ) }
+						</h2>
+						<div className="woocommerce-customize-store__transitional-main-actions">
+							<div className="woocommerce-customize-store__transitional-action">
+								<Icon
+									className={
+										'woocommerce-customize-store__transitional-action__icon'
+									}
+									icon={ tag }
+								/>
+								<div className="woocommerce-customize-store__transitional-action__content">
+									<h3>
+										{ __(
+											'Add your products',
+											'woocommerce'
+										) }
+									</h3>
+									<p>
+										{ __(
+											'Start stocking your virtual shelves by adding or importing your products, or edit the sample products.',
+											'woocommerce'
+										) }
+									</p>
+									<Button
+										variant="link"
+										onClick={ () => {
+											trackEvent(
+												'customize_your_store_transitional_product_list_click'
+											);
+											navigateOrParent(
+												window,
+												`${ ADMIN_URL }edit.php?post_type=product`
+											);
+										} }
+									>
+										{ __(
+											'Go to Products',
+											'woocommerce'
+										) }
+									</Button>
+								</div>
+							</div>
+
+							<div className="woocommerce-customize-store__transitional-action">
+								<Icon
+									className={
+										'woocommerce-customize-store__transitional-action__icon'
+									}
+									icon={ brush }
+								/>
+								<div className="woocommerce-customize-store__transitional-action__content">
+									<h3>
+										{ __(
+											'Fine-tune your design',
+											'woocommerce'
+										) }
+									</h3>
+									<p>
+										{ __(
+											'Head to the Editor to change your images and text, add more pages, and make any further customizations.',
+											'woocommerce'
+										) }
+									</p>
+									<Button
+										variant="link"
+										onClick={ () => {
+											trackEvent(
+												'customize_your_store_transitional_editor_click'
+											);
+											navigateOrParent(
+												window,
+												`${ ADMIN_URL }site-editor.php`
+											);
+										} }
+									>
+										{ __(
+											'Go to the Editor',
+											'woocommerce'
+										) }
+									</Button>
+								</div>
+							</div>
+
+							<div className="woocommerce-customize-store__transitional-action">
+								<Icon
+									className={
+										'woocommerce-customize-store__transitional-action__icon'
+									}
+									icon={ lessonPlan }
+								/>
+								<div className="woocommerce-customize-store__transitional-action__content">
+									<h3>
+										{ __(
+											'Continue setting up your store',
+											'woocommerce'
+										) }
+									</h3>
+									<p>
+										{ __(
+											'Go back to the Home screen to complete your store setup and start selling',
+											'woocommerce'
+										) }
+									</p>
+									<Button
+										variant="link"
+										onClick={ () => {
+											trackEvent(
+												'customize_your_store_transitional_home_click'
+											);
+											sendEvent( {
+												type: 'GO_BACK_TO_HOME',
+											} );
+										} }
+									>
+										{ __( 'Back to Home', 'woocommerce' ) }
+									</Button>
+								</div>
+							</div>
+						</div>
+					</>
+				) }
 			</div>
 		</div>
 	);

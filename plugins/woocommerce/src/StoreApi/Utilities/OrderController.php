@@ -1,10 +1,11 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
-use \Exception;
+use Exception;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Utilities\DiscountsUtil;
 
 /**
  * OrderController class.
@@ -79,7 +80,7 @@ class OrderController {
 		 */
 		add_filter(
 			'woocommerce_order_get_tax_location',
-			function( $location ) {
+			function ( $location ) {
 
 				if ( ! is_null( wc()->customer ) ) {
 
@@ -148,14 +149,11 @@ class OrderController {
 					'shipping_phone'      => $order->get_shipping_phone(),
 				)
 			);
-			$order_fields = $this->additional_fields_controller->get_all_fields_from_order( $order );
 
-			$customer_fields = $this->additional_fields_controller->filter_fields_for_customer( $order_fields );
-			foreach ( $customer_fields as $key => $value ) {
-				$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer );
-			}
+			$this->additional_fields_controller->sync_customer_additional_fields_with_order( $order, $customer );
+
 			$customer->save();
-		};
+		}
 	}
 
 	/**
@@ -168,7 +166,7 @@ class OrderController {
 	 */
 	public function validate_order_before_payment( \WC_Order $order ) {
 		$needs_shipping          = wc()->cart->needs_shipping();
-		$chosen_shipping_methods = wc()->session->get( 'chosen_shipping_methods' );
+		$chosen_shipping_methods = wc()->session->get( 'chosen_shipping_methods', [] );
 
 		$this->validate_coupons( $order );
 		$this->validate_email( $order );
@@ -202,7 +200,7 @@ class OrderController {
 			try {
 				array_walk(
 					$validators,
-					function( $validator, $index, $params ) {
+					function ( $validator, $index, $params ) {
 						call_user_func_array( array( $this, $validator ), $params );
 					},
 					array( $coupon, $order )
@@ -339,6 +337,7 @@ class OrderController {
 
 		$errors_by_code = array();
 		$error_codes    = $errors->get_error_codes();
+
 		foreach ( $error_codes as $code ) {
 			$errors_by_code[ $code ] = $errors->get_error_messages( $code );
 		}
@@ -383,20 +382,15 @@ class OrderController {
 		$address        = $order->get_address( $address_type );
 		$current_locale = isset( $all_locales[ $address['country'] ] ) ? $all_locales[ $address['country'] ] : array();
 
-		$additional_fields = $this->additional_fields_controller->get_all_fields_from_order( $order );
+		$additional_fields = $this->additional_fields_controller->get_all_fields_from_object( $order, $address_type );
 
-		foreach ( $additional_fields as $field_id => $field_value ) {
-			$prefix = '/' . $address_type . '/';
-			if ( strpos( $field_id, $prefix ) === 0 ) {
-				$address[ str_replace( $prefix, '', $field_id ) ] = $field_value;
-			}
-		}
+		$address = array_merge( $address, $additional_fields );
 
 		$fields              = $this->additional_fields_controller->get_additional_fields();
 		$address_fields_keys = $this->additional_fields_controller->get_address_fields_keys();
 		$address_fields      = array_filter(
 			$fields,
-			function( $key ) use ( $address_fields_keys ) {
+			function ( $key ) use ( $address_fields_keys ) {
 				return in_array( $key, $address_fields_keys, true );
 			},
 			ARRAY_FILTER_USE_KEY
@@ -417,6 +411,16 @@ class OrderController {
 				$errors->add( $address_type, sprintf( __( '%s is required', 'woocommerce' ), $address_field['label'] ), $address_field_key );
 			}
 		}
+
+		// Validate additional fields.
+		$result = $this->additional_fields_controller->validate_fields_for_location( $address, 'address', $address_type );
+
+		if ( $result->has_errors() ) {
+			// Add errors to main error object but ensure they maintain the billing/shipping error code.
+			foreach ( $result->get_error_codes() as $code ) {
+				$errors->add( $address_type, $result->get_error_message( $code ), $code );
+			}
+		}
 	}
 
 	/**
@@ -429,7 +433,7 @@ class OrderController {
 	protected function validate_coupon_email_restriction( \WC_Coupon $coupon, \WC_Order $order ) {
 		$restrictions = $coupon->get_email_restrictions();
 
-		if ( ! empty( $restrictions ) && $order->get_billing_email() && ! wc()->cart->is_coupon_emails_allowed( array( $order->get_billing_email() ), $restrictions ) ) {
+		if ( ! empty( $restrictions ) && $order->get_billing_email() && ! DiscountsUtil::is_coupon_emails_allowed( array( $order->get_billing_email() ), $restrictions ) ) {
 			throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ) );
 		}
 	}
@@ -538,18 +542,36 @@ class OrderController {
 	 * @param array   $chosen_shipping_methods Array of shipping methods.
 	 */
 	public function validate_selected_shipping_methods( $needs_shipping, $chosen_shipping_methods = array() ) {
-		if ( ! $needs_shipping || ! is_array( $chosen_shipping_methods ) ) {
+		if ( ! $needs_shipping ) {
 			return;
 		}
 
-		foreach ( $chosen_shipping_methods as $chosen_shipping_method ) {
-			if ( false === $chosen_shipping_method ) {
-				throw new RouteException(
-					'woocommerce_rest_invalid_shipping_option',
-					__( 'Sorry, this order requires a shipping option.', 'woocommerce' ),
-					400,
-					array()
-				);
+		$exception = new RouteException(
+			'woocommerce_rest_invalid_shipping_option',
+			__( 'Sorry, this order requires a shipping option.', 'woocommerce' ),
+			400,
+			array()
+		);
+
+		if ( ! is_array( $chosen_shipping_methods ) || empty( $chosen_shipping_methods ) ) {
+			throw $exception;
+		}
+
+		$packages = WC()->shipping()->get_packages();
+		foreach ( $packages as $package_id => $package ) {
+			$chosen_rate_for_package    = wc_get_chosen_shipping_method_for_package( $package_id, $package );
+			$valid_rate_ids_for_package = array_map(
+				function ( $rate ) {
+					return $rate->id;
+				},
+				$package['rates']
+			);
+
+			if (
+				false === $chosen_rate_for_package ||
+				! is_string( $chosen_rate_for_package ) ||
+				! ArrayUtils::string_contains_array( $chosen_rate_for_package, $valid_rate_ids_for_package ) ) {
+				throw $exception;
 			}
 		}
 	}
@@ -736,9 +758,6 @@ class OrderController {
 				'shipping_phone'      => wc()->customer->get_shipping_phone(),
 			)
 		);
-		$customer_fields = $this->additional_fields_controller->get_all_fields_from_customer( wc()->customer );
-		foreach ( $customer_fields as $key => $value ) {
-			$this->additional_fields_controller->persist_field_for_order( $key, $value, $order, false );
-		}
+		$this->additional_fields_controller->sync_order_additional_fields_with_customer( $order, wc()->customer );
 	}
 }

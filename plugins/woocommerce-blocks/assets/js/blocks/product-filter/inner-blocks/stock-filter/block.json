@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/product-filter-stock-status",
 	"version": "1.0.0",
-	"title": "Product Filter: Stock Status",
+	"title": "Product Filter: Stock Status (Beta)",
 	"description": "Enable customers to filter the product collection by stock status.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce", "filter", "stock" ],

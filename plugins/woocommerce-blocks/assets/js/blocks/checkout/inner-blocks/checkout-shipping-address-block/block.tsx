@@ -15,8 +15,11 @@ import {
 } from '@woocommerce/blocks-components';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { BillingAddress, FormFieldsConfig } from '@woocommerce/settings';
+import { getSetting } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { CART_STORE_KEY } from '@woocommerce/block-data';
+import { emptyAddressFields } from '@woocommerce/base-utils';
+import type { CartResponseBillingAddress } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -25,24 +28,28 @@ import CustomerAddress from './customer-address';
 
 const Block = ( {
 	showCompanyField = false,
-	showApartmentField = false,
-	showPhoneField = false,
 	requireCompanyField = false,
+	showApartmentField = false,
+	requireApartmentField = false,
+	showPhoneField = false,
 	requirePhoneField = false,
 }: {
 	showCompanyField: boolean;
-	showApartmentField: boolean;
-	showPhoneField: boolean;
 	requireCompanyField: boolean;
+	showApartmentField: boolean;
+	requireApartmentField: boolean;
+	showPhoneField: boolean;
 	requirePhoneField: boolean;
 } ): JSX.Element => {
 	const {
 		setBillingAddress,
 		shippingAddress,
+		billingAddress,
 		useShippingAsBilling,
 		setUseShippingAsBilling,
 	} = useCheckoutAddress();
 	const { isEditor } = useEditorContext();
+	const isGuest = getSetting( 'currentUserId' ) === 0;
 
 	// Syncs the billing address with the shipping address.
 	const syncBillingWithShipping = () => {
@@ -61,6 +68,18 @@ const Block = ( {
 		setBillingAddress( syncValues );
 	};
 
+	const clearBillingAddress = ( address: BillingAddress ) => {
+		// If the address is empty or the user is not a guest,
+		// we don't need to clear the address.
+		if ( ! address || ! isGuest ) {
+			return;
+		}
+		const emptyAddress = emptyAddressFields(
+			address as CartResponseBillingAddress
+		);
+		setBillingAddress( emptyAddress );
+	};
+
 	// Run this on first render to ensure addresses sync if needed (this is not re-ran when toggling the checkbox).
 	useEffectOnce( () => {
 		if ( useShippingAsBilling ) {
@@ -77,6 +96,7 @@ const Block = ( {
 			},
 			address_2: {
 				hidden: ! showApartmentField,
+				required: requireApartmentField,
 			},
 			phone: {
 				hidden: ! showPhoneField,
@@ -87,6 +107,7 @@ const Block = ( {
 		showCompanyField,
 		requireCompanyField,
 		showApartmentField,
+		requireApartmentField,
 		showPhoneField,
 		requirePhoneField,
 	] ) as FormFieldsConfig;
@@ -129,6 +150,8 @@ const Block = ( {
 					setUseShippingAsBilling( checked );
 					if ( checked ) {
 						syncBillingWithShipping();
+					} else {
+						clearBillingAddress( billingAddress );
 					}
 				} }
 			/>

@@ -4,12 +4,53 @@ This page includes all documentation regarding WooCommerce Blocks and themes.
 
 ## General concepts
 
+### Global styles
+
+WooCommerce blocks rely on [global styles](https://developer.wordpress.org/themes/global-settings-and-styles/styles/) for their styling. Global styles can be defined by themes via `theme.json` or by users via Appearance > Editor > Styles and offer several advantages over plain CSS:
+
+* Better performance, as only the required CSS is printed into the page, reducing the bundle size to render a page.
+* Can be easily customized by users via the UI.
+* Gracefully handle conflicts between plugins and themes.
+* Are not affected by markup or class name updates into individual blocks or components.
+* Don't depend on a specific nesting order of blocks: users can freely move blocks around without styles breaking.
+
+#### Example
+
+For example, let's imagine you are building a theme and would like to customize the Product Price block styles, you can do so by adding these properties in your `theme.json`:
+
+```JSON
+"styles": {
+	"blocks": {
+		"woocommerce/product-price": {
+			"color": {
+				"background": "#00cc00",
+				"text": "#fff"
+			},
+			"typography": {
+				"fontStyle": "italic",
+				"fontWeight": "700"
+			}
+		}
+		...
+	}
+	...
+}
+```
+
+Before                                                                                                                                                                                                      | After
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+<img src="https://github.com/woocommerce/woocommerce/assets/3616980/fbc11b83-f47b-4b25-bdeb-df798b251cce" width="210" alt="Product Collection block showing the Product Price block with default styles" /> | <img src="https://github.com/woocommerce/woocommerce/assets/3616980/c9730445-b9df-4e96-8204-a10896ac2c5a" width="210" alt="Product Collection block showing the Product Price styled with background and text colors and italic and bold typography" /> <!-- markdownlint-disable-line no-inline-html -->
+
+You can find more [documentation on global styles](https://developer.wordpress.org/themes/global-settings-and-styles/styles/) in developer.wordpress.org. You can also find the [list of WooCommerce blocks and their names in the docs](../../block-references/block-references.md).
+
 ### Block and component class names
+
+**Important: we strongly discourage writing CSS code based on existing block class names and prioritize using global styles when possible. We especially discourage writing CSS selectors that rely on a specific block being a descendant of another one, as users can move blocks around freely, so they are prone to breaking. Similar to WordPress itself, we consider the HTML structure within components, blocks, and block templates to be “private”, and subject to further change in the future, so using CSS to target the internals of a block or a block template is _not recommended or supported_.**
 
 WooCommerce Blocks follows BEM for class names, as [stated in our coding guidelines](../../contributors/coding-guidelines.md). All classes start with one of these two prefixes:
 
--   `.wc-block-`: class names specific to a single block.
--   `.wc-block-components-`: class names specific to a component. The component might be reused by different blocks.
+* `.wc-block-`: class names specific to a single block.
+* `.wc-block-components-`: class names specific to a component. The component might be reused by different blocks.
 
 The combination of block class names and component class names allows themes to style each component either globally or only in specific blocks. As an example, you could style all prices to be italics with:
 
@@ -37,12 +78,12 @@ Some of our components have responsive classes depending on the container width.
 
 Those classes are:
 
-| Container width | Class name  |
-| --------------- | ----------- |
-| >700px          | `is-large`  |
-| 521px-700px     | `is-medium` |
-| 401px-520px     | `is-small`  |
-| <=400px         | `is-mobile` |
+Container width | Class name
+----------------|------------
+\>700px         | `is-large`
+521px-700px     | `is-medium`
+401px-520px     | `is-small`
+<=400px         | `is-mobile`
 
 As an example, if we wanted to do the Checkout font size 10% larger when the container has a width of 521px or wider, we could do so with this code:
 
@@ -69,22 +110,22 @@ WooCommerce Blocks avoids using legacy unprefixed classes as much as possible. H
 
 ## Blocks
 
--   [Filter blocks](filter-blocks.md)
--   [Cart and Checkout](cart-and-checkout.md)
+* [Filter blocks](filter-blocks.md)
+* [Cart and Checkout](cart-and-checkout.md)
 
 ## Other docs
 
--   [Product grid blocks style update in 2.7.0](product-grid-270.md)
--   [Class names update in 2.8.0](class-names-update-280.md)
--   [Class names update in 3.3.0](class-names-update-330.md)
--   [Class names update in 3.4.0](class-names-update-340.md)
--   [Class names update in 4.6.0](class-names-update-460.md)
+* [Product grid blocks style update in 2.7.0](product-grid-270.md)
+* [Class names update in 2.8.0](class-names-update-280.md)
+* [Class names update in 3.3.0](class-names-update-330.md)
+* [Class names update in 3.4.0](class-names-update-340.md)
+* [Class names update in 4.6.0](class-names-update-460.md)
 
 <!-- FEEDBACK -->
 
 ---
 
-[We're hiring!](https://woo.com/careers/) Come work with us!
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/designers/theming/README.md)
 

@@ -31,6 +31,7 @@ import { GoBackWarningModal } from '../go-back-warning-modal';
  */
 import { CustomizeStoreContext } from '../';
 import { isAIFlow } from '~/customize-store/guards';
+import { isEntrepreneurFlow } from '~/customize-store/design-with-ai/entrepreneur-flow';
 const { useLocation } = unlock( routerPrivateApis );
 
 export const SidebarNavigationScreen = ( {
@@ -54,7 +55,7 @@ export const SidebarNavigationScreen = ( {
 	backPath?: string;
 	onNavigateBackClick?: () => void;
 } ) => {
-	const { sendEvent, context } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext );
 	const [ openWarningModal, setOpenWarningModal ] =
 		useState< boolean >( false );
 	const location = useLocation();
@@ -98,7 +99,7 @@ export const SidebarNavigationScreen = ( {
 							showTooltip={ false }
 						/>
 					) }
-					{ isRoot && (
+					{ isRoot && ! isEntrepreneurFlow() && (
 						<SidebarButton
 							onClick={ () => {
 								setOpenWarningModal( true );
@@ -110,6 +111,9 @@ export const SidebarNavigationScreen = ( {
 					) }
 					<Heading
 						className="edit-site-sidebar-navigation-screen__title"
+						style={
+							isEntrepreneurFlow() ? { padding: '0 16px' } : {}
+						}
 						color={ '#e0e0e0' /* $gray-200 */ }
 						level={ 1 }
 						size={ 20 }
@@ -148,10 +152,10 @@ export const SidebarNavigationScreen = ( {
 				<GoBackWarningModal
 					setOpenWarningModal={ setOpenWarningModal }
 					onExitClicked={ () => {
-						sendEvent(
+						window.parent.__wcCustomizeStore.sendEventToIntroMachine(
 							flowType && isAIFlow( flowType )
-								? 'GO_BACK_TO_DESIGN_WITH_AI'
-								: 'GO_BACK_TO_DESIGN_WITHOUT_AI'
+								? { type: 'GO_BACK_TO_DESIGN_WITH_AI' }
+								: { type: 'GO_BACK_TO_DESIGN_WITHOUT_AI' }
 						);
 					} }
 				/>

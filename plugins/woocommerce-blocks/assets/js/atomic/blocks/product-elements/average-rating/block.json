@@ -3,12 +3,12 @@
 	"version": "1.0.0",
 	"title": "Product Average Rating (Beta)",
 	"description": "Display the average rating of a product",
+	"category": "woocommerce-product-elements",
 	"attributes": {
 		"textAlign": {
 			"type": "string"
 		}
 	},
-	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"ancestor": [ "woocommerce/single-product" ],
 	"textdomain": "woocommerce",

@@ -110,7 +110,7 @@ export default {
 export type ReviewBlockAttributes = BlockAttributes & {
 	editMode: boolean;
 	imageType: string;
-	orderby: string;
+	orderby: 'most-recent' | 'highest-rating' | 'lowest-rating';
 	reviewsOnLoadMore: number;
 	reviewsOnPageLoad: number;
 	showLoadMore: boolean;

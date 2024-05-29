@@ -4,6 +4,7 @@
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -17,7 +18,12 @@ import type { FilterType } from './types';
 const Edit = ( {
 	attributes,
 	clientId,
-}: BlockEditProps< { heading: string; filterType: FilterType } > ) => {
+}: BlockEditProps< {
+	heading: string;
+	filterType: FilterType;
+	isPreview: boolean;
+	attributeId: number | undefined;
+} > ) => {
 	const blockProps = useBlockProps();
 
 	const isNested = useSelect( ( select ) => {
@@ -40,16 +46,62 @@ const Edit = ( {
 					'core/query',
 				] ) }
 				template={ [
-					[
-						'core/heading',
-						{ level: 3, content: attributes.heading || '' },
-					],
+					/**
+					 * We want to hide the clear filter button for active filters block
+					 * as it has its own "clear all" button.
+					 */
+					attributes.filterType === 'active-filters'
+						? [
+								'core/heading',
+								{ level: 3, content: attributes.heading || '' },
+						  ]
+						: [
+								'core/group',
+								{
+									layout: {
+										type: 'flex',
+										flexWrap: 'nowrap',
+									},
+									metadata: {
+										name: __( 'Header', 'woocommerce' ),
+									},
+									style: {
+										spacing: {
+											blockGap: '0',
+										},
+									},
+								},
+								[
+									[
+										'core/heading',
+										{
+											level: 3,
+											content: attributes.heading || '',
+										},
+									],
+									[
+										'woocommerce/product-filter-clear-button',
+										{
+											lock: {
+												remove: true,
+												move: false,
+											},
+										},
+									],
+								],
+						  ],
 					[
 						BLOCK_NAME_MAP[ attributes.filterType ],
 						{
 							lock: {
 								remove: true,
 							},
+							isPreview: attributes.isPreview,
+							attributeId:
+								attributes.filterType === 'attribute-filter' &&
+								attributes.attributeId
+									? attributes.attributeId
+									: undefined,
 						},
 					],
 				] }

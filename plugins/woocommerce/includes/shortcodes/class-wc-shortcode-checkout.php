@@ -10,6 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\Users;
+
 /**
  * Shortcode checkout class.
  */
@@ -382,75 +384,15 @@ class WC_Shortcode_Checkout {
 	 * @return bool
 	 */
 	private static function guest_should_verify_email( WC_Order $order, string $context ): bool {
-		$order_email       = $order->get_billing_email();
-		$order_customer_id = $order->get_customer_id();
+		// If we cannot match the order with the current user, ask that they verify their email address.
+		$nonce_is_valid = wp_verify_nonce( filter_input( INPUT_POST, 'check_submission' ), 'wc_verify_email' );
+		$supplied_email = null;
+		$order_id       = $order->get_id();
 
-		// If we do not have a billing email for the order (could happen in the order is created manually, or if the
-		// requirement for this has been removed from the checkout flow), email verification does not make sense.
-		if ( empty( $order_email ) ) {
-			return false;
+		if ( $nonce_is_valid ) {
+			$supplied_email = sanitize_email( wp_unslash( filter_input( INPUT_POST, 'email' ) ) );
 		}
 
-		// No verification step is needed if the user is logged in and is already associated with the order.
-		if ( $order_customer_id && get_current_user_id() === $order_customer_id ) {
-			return false;
-		}
-
-		/**
-		 * Controls the grace period within which we do not require any sort of email verification step before rendering
-		 * the 'order received' or 'order pay' pages.
-		 *
-		 * To eliminate the grace period, set to zero (or to a negative value). Note that this filter is not invoked
-		 * at all if email verification is deemed to be unnecessary (in other words, it cannot be used to force
-		 * verification in *all* cases).
-		 *
-		 * @since 8.0.0
-		 *
-		 * @param int      $grace_period Time in seconds after an order is placed before email verification may be required.
-		 * @param WC_Order $order        The order for which this grace period is being assessed.
-		 * @param string   $context      Indicates the context in which we might verify the email address. Typically 'order-pay' or 'order-received'.
-		 */
-		$verification_grace_period = (int) apply_filters( 'woocommerce_order_email_verification_grace_period', 10 * MINUTE_IN_SECONDS, $order, $context );
-		$date_created              = $order->get_date_created();
-
-		// We do not need to verify the email address if we are within the grace period immediately following order creation.
-		if (
-			is_a( $date_created, WC_DateTime::class )
-			&& time() - $date_created->getTimestamp() <= $verification_grace_period
-		) {
-			return false;
-		}
-
-		$session       = wc()->session;
-		$session_email = '';
-
-		if ( is_a( $session, WC_Session::class ) ) {
-			$customer      = $session->get( 'customer' );
-			$session_email = is_array( $customer ) && isset( $customer['email'] ) ? $customer['email'] : '';
-		}
-
-		// Email verification is required if the user cannot be identified, or if they supplied an email address but the nonce check failed.
-		$can_view_orders      = current_user_can( 'read_private_shop_orders' );
-		$session_email_match  = $session_email === $order->get_billing_email();
-		$supplied_email_match = sanitize_email( wp_unslash( filter_input( INPUT_POST, 'email' ) ) ) === $order->get_billing_email()
-			&& wp_verify_nonce( filter_input( INPUT_POST, 'check_submission' ), 'wc_verify_email' );
-
-		$email_verification_required = ! $session_email_match && ! $supplied_email_match && ! $can_view_orders;
-
-		/**
-		 * Provides an opportunity to override the (potential) requirement for shoppers to verify their email address
-		 * before we show information such as the order summary, or order payment page.
-		 *
-		 * Note that this hook is not always triggered, therefore it is (for example) unsuitable as a way of forcing
-		 * email verification across all order confirmation/order payment scenarios. Instead, the filter primarily
-		 * exists as a way to *remove* the email verification step.
-		 *
-		 * @since 7.9.0
-		 *
-		 * @param bool     $email_verification_required If email verification is required.
-		 * @param WC_Order $order                       The relevant order.
-		 * @param string   $context                     The context under which we are performing this check.
-		 */
-		return (bool) apply_filters( 'woocommerce_order_email_verification_required', $email_verification_required, $order, $context );
+		return Users::should_user_verify_order_email( $order_id, $supplied_email, $context );
 	}
 }

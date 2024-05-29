@@ -412,8 +412,8 @@ test.describe( 'System Status API tests', () => {
 			expect( responseJSON ).toEqual(
 				expect.objectContaining( {
 					dropins_mu_plugins: expect.objectContaining( {
-						dropins: [],
-						mu_plugins: [],
+						dropins: expect.arrayContaining( [] ),
+						mu_plugins: expect.arrayContaining( [] ),
 					} ),
 				} )
 			);

@@ -129,7 +129,7 @@ export const isSellingElsewhere = ( selectedOption ) =>
 	].includes( selectedOption );
 
 const getWccomMigrationUrl = ( selectedOption ) => {
-	return `https://woo.com/migrate/?utm_source=nux&utm_medium=product&utm_campaign=migrate&utm_content=${ selectedOption }`;
+	return `https://woocommerce.com/migrate/?utm_source=nux&utm_medium=product&utm_campaign=migrate&utm_content=${ selectedOption }`;
 };
 
 export const isSellingOtherPlatformInPerson = ( selectedOption ) =>

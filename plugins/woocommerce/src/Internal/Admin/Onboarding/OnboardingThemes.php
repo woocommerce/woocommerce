@@ -69,9 +69,9 @@ class OnboardingThemes {
 	}
 
 	/**
-	 * Sort themes returned from Woo.com
+	 * Sort themes returned from WooCommerce.com
 	 *
-	 * @param  array $themes Array of themes from Woo.com.
+	 * @param  array $themes Array of themes from WooCommerce.com.
 	 * @return array
 	 */
 	public static function sort_woocommerce_themes( $themes ) {

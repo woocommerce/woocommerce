@@ -168,7 +168,6 @@ module.exports = {
 			'@wordpress/url',
 			'@woocommerce/blocks-test-utils',
 			'@woocommerce/e2e-utils',
-			'@woocommerce/e2e-mocks',
 			'babel-jest',
 			'dotenv',
 			'jest-environment-puppeteer',

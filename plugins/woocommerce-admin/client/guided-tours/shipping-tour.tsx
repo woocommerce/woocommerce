@@ -13,6 +13,10 @@ import {
 } from '@wordpress/element';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+/**
+ * Internal dependencies
+ */
+import { getCountryCode } from '~/dashboard/utils';
 
 const REVIEWED_DEFAULTS_OPTION =
 	'woocommerce_admin_reviewed_default_shipping_zones';
@@ -37,6 +41,7 @@ const useShowShippingTour = () => {
 	const {
 		hasCreatedDefaultShippingZones,
 		hasReviewedDefaultShippingOptions,
+		businessCountry,
 		isLoading,
 	} = useSelect( ( select ) => {
 		const { hasFinishedResolution, getOption } =
@@ -49,11 +54,17 @@ const useShowShippingTour = () => {
 				] ) &&
 				! hasFinishedResolution( 'getOption', [
 					REVIEWED_DEFAULTS_OPTION,
+				] ) &&
+				! hasFinishedResolution( 'getOption', [
+					'woocommerce_default_country',
 				] ),
 			hasCreatedDefaultShippingZones:
 				getOption( CREATED_DEFAULTS_OPTION ) === 'yes',
 			hasReviewedDefaultShippingOptions:
 				getOption( REVIEWED_DEFAULTS_OPTION ) === 'yes',
+			businessCountry: getCountryCode(
+				getOption( 'woocommerce_default_country' ) as string
+			),
 		};
 	} );
 
@@ -64,6 +75,7 @@ const useShowShippingTour = () => {
 			! isLoading &&
 			hasCreatedDefaultShippingZones &&
 			! hasReviewedDefaultShippingOptions,
+		isUspsDhlEligible: businessCountry === 'US',
 	};
 };
 
@@ -203,7 +215,7 @@ export const ShippingTour: React.FC< {
 	showShippingRecommendationsStep: boolean;
 } > = ( { showShippingRecommendationsStep } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-	const { show: showTour } = useShowShippingTour();
+	const { show: showTour, isUspsDhlEligible } = useShowShippingTour();
 	const [ step, setStepNumber ] = useState( 0 );
 	const { createNotice } = useDispatch( 'core/notices' );
 
@@ -220,20 +232,21 @@ export const ShippingTour: React.FC< {
 					mutation: true,
 					resize: true,
 				},
+				autoScroll: true,
 			},
 			callbacks: {
-				onNextStep: ( currentStepIndex ) => {
-					setStepNumber( currentStepIndex + 1 );
+				onNextStep: ( newStepIndex ) => {
+					setStepNumber( newStepIndex );
 					recordEvent( 'walkthrough_settings_shipping_next_click', {
 						step_name:
-							tourConfig.steps[ currentStepIndex ].meta.name,
+							tourConfig.steps[ newStepIndex - 1 ].meta.name,
 					} );
 				},
-				onPreviousStep: ( currentStepIndex ) => {
-					setStepNumber( currentStepIndex - 1 );
+				onPreviousStep: ( newStepIndex ) => {
+					setStepNumber( newStepIndex );
 					recordEvent( 'walkthrough_settings_shipping_back_click', {
 						step_name:
-							tourConfig.steps[ currentStepIndex ].meta.name,
+							tourConfig.steps[ newStepIndex + 1 ].meta.name,
 					} );
 				},
 			},
@@ -326,7 +339,7 @@ export const ShippingTour: React.FC< {
 
 	const isWcsSectionPresent = document.querySelector( WCS_LINK_SELECTOR );
 
-	if ( isWcsSectionPresent ) {
+	if ( isWcsSectionPresent && isUspsDhlEligible ) {
 		tourConfig.steps.push( {
 			referenceElements: {
 				desktop: WCS_LINK_SELECTOR,

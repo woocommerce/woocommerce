@@ -354,6 +354,18 @@
 		}
 	},
 	{
+		"name": "Product Gallery",
+		"slug": "woocommerce-blocks/product-query-product-gallery",
+		"content": {
+			"titles": [
+				{
+					"default": "Bestsellers",
+					"ai_prompt": "An impact phrase that advertises the featured products with at least 10 characters"
+				}
+			]
+		}
+	},
+	{
 		"name": "Featured Products 2 Columns",
 		"slug": "woocommerce-blocks/featured-products-2-cols",
 		"content": {

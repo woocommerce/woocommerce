@@ -5,9 +5,9 @@
 .wc-block-components-form .wc-block-components-checkout-step {
 	position: relative;
 	border: none;
-	padding: 0 0 0 $gap-larger;
 	background: none;
 	margin: 0;
+	padding: 0;
 
 	.is-mobile &,
 	.is-small & {
@@ -33,16 +33,18 @@
 }
 .wc-block-components-checkout-step--with-step-number .wc-block-components-checkout-step__content > :last-child {
 	margin-bottom: 0;
-	padding-bottom: $gap;
 }
-
+.wc-block-checkout__contact-fields .wc-block-components-checkout-step__heading {
+	margin-top: em($gap-smaller);
+}
 .wc-block-components-checkout-step__heading {
-	margin: em($gap-small) 0 em($gap);
+	margin: $gap-larger 0 $gap-smaller;
 	position: relative;
 
 	.wc-block-components-express-payment-continue-rule + .wc-block-components-checkout-step & {
 		margin-top: 0;
 	}
+
 }
 
 .wc-block-components-checkout-step:first-child .wc-block-components-checkout-step__heading {
@@ -62,58 +64,67 @@
 	}
 }
 
-.wc-block-components-checkout-step__description {
-	@include font-size(small);
-	line-height: 1.25;
-	margin-bottom: $gap;
+.wc-block-checkout__payment-method .wc-block-components-checkout-step__content {
+	padding-top: $gap-smaller;
 }
 
-.wc-block-components-checkout-step--with-step-number {
-	.wc-block-components-checkout-step__title::before {
-		@include reset-box();
-		background: transparent;
-		counter-increment: checkout-step;
-		content: "\00a0" counter(checkout-step) ".";
-		content: "\00a0" counter(checkout-step) "." / "";
-		position: absolute;
-		left: -$gap-large;
-		top: 0;
-		text-align: center;
-		transform: translateX(-50%);
-		white-space: nowrap;
+.wc-block-components-checkout-step__description {
+	@include font-size(small);
+	line-height: 1.2;
+	margin: 0 0 $gap;
+}
+
+.wc-block-checkout__form--with-step-numbers {
+	.wc-block-components-checkout-step--with-step-number {
+		padding: 0 0 0 $gap-larger;
+
+		.wc-block-components-checkout-step__title::before {
+			@include reset-box();
+			background: transparent;
+			counter-increment: checkout-step;
+			content: "\00a0" counter(checkout-step) ".";
+			content: "\00a0" counter(checkout-step) "." / "";
+			position: absolute;
+			left: -$gap-large;
+			top: 0;
+			text-align: center;
+			transform: translateX(-50%);
+			white-space: nowrap;
+
+			.is-mobile &,
+			.is-small & {
+				position: static;
+				transform: none;
+				left: auto;
+				top: auto;
+				content: counter(checkout-step) ".\00a0";
+				content: counter(checkout-step) ".\00a0" / "";
+			}
+		}
+
+		.wc-block-components-checkout-step__container::after {
+			content: "";
+			height: 100%;
+			border-left: 1px solid $universal-border-light;
+			position: absolute;
+			left: -$gap-large;
+			top: 0;
+		}
 
 		.is-mobile &,
 		.is-small & {
-			position: static;
-			transform: none;
-			left: auto;
-			top: auto;
-			content: counter(checkout-step) ".\00a0";
-			content: counter(checkout-step) ".\00a0" / "";
-		}
-	}
+			.wc-block-components-checkout-step__title::before {
+				position: static;
+				transform: none;
+				left: auto;
+				top: auto;
+				content: counter(checkout-step) ".\00a0";
+				content: counter(checkout-step) ".\00a0" / "";
+			}
 
-	.wc-block-components-checkout-step__container::after {
-		content: "";
-		height: 100%;
-		border-left: 1px solid $universal-border-light;
-		position: absolute;
-		left: -$gap-large;
-		top: 0;
-	}
-
-	.is-mobile &,
-	.is-small & {
-		.wc-block-components-checkout-step__title::before {
-			position: static;
-			transform: none;
-			left: auto;
-			top: auto;
-			content: counter(checkout-step) ".\00a0";
-			content: counter(checkout-step) ".\00a0" / "";
-		}
-		.wc-block-components-checkout-step__container::after {
-			content: unset;
+			.wc-block-components-checkout-step__container::after {
+				content: unset;
+			}
 		}
 	}
 }

@@ -78,7 +78,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 
 		$block_hooks = array_filter(
 			$this->hook_data,
-			function( $hook ) use ( $block_name ) {
+			function ( $hook ) use ( $block_name ) {
 				return in_array( $block_name, $hook['block_names'], true );
 			}
 		);
@@ -98,9 +98,9 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 		}
 
 		$supported_blocks = array_merge(
-			[],
+			array(),
 			...array_map(
-				function( $hook ) {
+				function ( $hook ) {
 					return $hook['block_names'];
 				},
 				array_values( $this->hook_data )
@@ -312,7 +312,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 				continue;
 			}
 			foreach ( $data['hooked'] as $callback => $priority ) {
-				if ( ! in_array( $callback, $data['permanently_removed_actions'] ?? [], true ) ) {
+				if ( ! in_array( $callback, $data['permanently_removed_actions'] ?? array(), true ) ) {
 					add_action( $hook, $callback, $priority );
 				}
 			}

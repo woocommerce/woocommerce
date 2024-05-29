@@ -4,11 +4,13 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
 /**
  * Products Task
  */
 class Products extends Task {
+	const PRODUCT_COUNT_TRANSIENT_NAME = 'woocommerce_product_task_product_count_transient';
 
 	/**
 	 * Constructor
@@ -20,6 +22,11 @@ class Products extends Task {
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_manual_return_notice_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_import_return_notice_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_load_sample_return_notice_script' ) );
+
+		add_action( 'woocommerce_update_product', array( $this, 'delete_product_count_cache' ) );
+		add_action( 'woocommerce_new_product', array( $this, 'delete_product_count_cache' ) );
+		add_action( 'wp_trash_post', array( $this, 'delete_product_count_cache' ) );
+		add_action( 'untrashed_post', array( $this, 'delete_product_count_cache' ) );
 	}
 
 	/**
@@ -37,13 +44,13 @@ class Products extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
-			if ( $this->is_complete() ) {
-				return __( 'You added products', 'woocommerce' );
-			}
-			return __( 'Add products', 'woocommerce' );
+		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
+
+		if ( isset( $onboarding_profile['business_choice'] ) && 'im_already_selling' === $onboarding_profile['business_choice'] ) {
+			return __( 'Import your products', 'woocommerce' );
 		}
-		return __( 'Add my products', 'woocommerce' );
+
+		return __( 'Add your products', 'woocommerce' );
 	}
 
 	/**
@@ -77,7 +84,7 @@ class Products extends Task {
 	}
 
 	/**
-	 * Addtional data.
+	 * Additional data.
 	 *
 	 * @return array
 	 */
@@ -156,12 +163,56 @@ class Products extends Task {
 	}
 
 	/**
-	 * Check if the store has any published products.
+	 * Delete the product count transient used in has_products() method to refresh the cache.
+	 *
+	 * @return void
+	 */
+	public static function delete_product_count_cache() {
+		delete_transient( self::PRODUCT_COUNT_TRANSIENT_NAME );
+	}
+
+	/**
+	 * Check if the store has any user created published products.
 	 *
 	 * @return bool
 	 */
 	public static function has_products() {
-		$counts = wp_count_posts('product');
-		return isset( $counts->publish ) && $counts->publish > 0;
+		$product_counts = get_transient( self::PRODUCT_COUNT_TRANSIENT_NAME );
+		if ( false !== $product_counts && is_numeric( $product_counts ) ) {
+			return (int) $product_counts > 0;
+		}
+
+		$product_counts = self::count_user_products();
+		set_transient( self::PRODUCT_COUNT_TRANSIENT_NAME, $product_counts );
+		return $product_counts > 0;
+	}
+
+	/**
+	 * Count the number of user created products.
+	 * Generated products have the _headstart_post meta key.
+	 *
+	 * @return int The number of user created products.
+	 */
+	private static function count_user_products() {
+		$args = array(
+			'post_type'   => 'product',
+			'post_status' => 'publish',
+			'fields'      => 'ids',
+			'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				'relation' => 'OR',
+				array(
+					'key'     => '_headstart_post',
+					'compare' => 'NOT EXISTS',
+				),
+				array(
+					'key'     => '_edit_last',
+					'compare' => 'EXISTS',
+				),
+			),
+		);
+
+		$products_query = new \WP_Query( $args );
+
+		return $products_query->found_posts;
 	}
 }

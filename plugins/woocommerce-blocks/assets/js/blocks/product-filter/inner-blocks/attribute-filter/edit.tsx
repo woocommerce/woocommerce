@@ -35,6 +35,7 @@ import { getAttributeFromId } from './utils';
 import { Inspector } from './components/inspector-controls';
 import { AttributeCheckboxList } from './components/attribute-checkbox-list';
 import { AttributeDropdown } from './components/attribute-dropdown';
+import { attributeOptionsPreview } from './constants';
 import './style.scss';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
@@ -115,6 +116,7 @@ const Edit = ( props: EditProps ) => {
 	const [ isEditing, setIsEditing ] = useState(
 		! attributeId && ! isPreview
 	);
+
 	const [ attributeOptions, setAttributeOptions ] = useState<
 		AttributeTerm[]
 	>( [] );
@@ -176,6 +178,23 @@ const Edit = ( props: EditProps ) => {
 	const toggleEditing = useCallback( () => {
 		setIsEditing( ! isEditing );
 	}, [ isEditing ] );
+
+	if ( isPreview ) {
+		return (
+			<Wrapper
+				onClickToolbarEdit={ toggleEditing }
+				isEditing={ isEditing }
+				blockProps={ blockProps }
+			>
+				<Disabled>
+					<AttributeCheckboxList
+						showCounts={ showCounts }
+						attributeTerms={ attributeOptionsPreview }
+					/>
+				</Disabled>
+			</Wrapper>
+		);
+	}
 
 	// Block rendering starts.
 	if ( Object.keys( ATTRIBUTES ).length === 0 )

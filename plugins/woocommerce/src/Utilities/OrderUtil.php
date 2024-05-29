@@ -8,7 +8,6 @@ namespace Automattic\WooCommerce\Utilities;
 use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
 use WC_Order;
 use WP_Post;
@@ -185,4 +184,48 @@ final class OrderUtil {
 	public static function get_table_for_order_meta() {
 		return wc_get_container()->get( COTMigrationUtil::class )->get_table_for_order_meta();
 	}
+
+	/**
+	 * Counts number of orders of a given type.
+	 *
+	 * @since 8.7.0
+	 *
+	 * @param string $order_type Order type.
+	 * @return array<string,int> Array of order counts indexed by order type.
+	 */
+	public static function get_count_for_type( $order_type ) {
+		global $wpdb;
+
+		$cache_key        = \WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'order-count-' . $order_type;
+		$count_per_status = wp_cache_get( $cache_key, 'counts' );
+
+		if ( false === $count_per_status ) {
+			if ( self::custom_orders_table_usage_is_enabled() ) {
+				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+				$results = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT `status`, COUNT(*) AS `count` FROM ' . self::get_table_for_orders() . ' WHERE `type` = %s GROUP BY `status`',
+						$order_type
+					),
+					ARRAY_A
+				);
+				// phpcs:enable
+
+				$count_per_status = array_map( 'absint', array_column( $results, 'count', 'status' ) );
+			} else {
+				$count_per_status = (array) wp_count_posts( $order_type );
+			}
+
+			// Make sure all order statuses are included just in case.
+			$count_per_status = array_merge(
+				array_fill_keys( array_keys( wc_get_order_statuses() ), 0 ),
+				$count_per_status
+			);
+
+			wp_cache_set( $cache_key, $count_per_status, 'counts' );
+		}
+
+		return $count_per_status;
+	}
+
 }

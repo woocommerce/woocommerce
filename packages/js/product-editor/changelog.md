@@ -2,10 +2,161 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.5.0) - 2024-04-12 
+
+-   Patch - Always use productTemplateId when available and use editedRecord in useEntityRecord hooks [#46395]
+-   Patch - BlockEditor loads global settings itself instead of having them passed in. Handles case where global is set after initial render. [#45490]
+-   Minor - Change Tracks event name for Quick variations menu action #45889 [#45889]
+-   Minor - Close prepublish panel before creating new product #45397 [#45397]
+-   Minor - Enable publish button when product status is draft #45812 [#45812]
+-   Minor - Fix double scroll bar in pre-publish panel #45671 [#45671]
+-   Minor - Fix publish dropdown visibility in new product after hiding pre-publish modal #45682 [#45682]
+-   Minor - Fix section title styles in the pre-publish panel on WP 6.5 #45689 [#45689]
+-   Patch - Fix word break inside columns in product editor [#45687]
+-   Patch - Header tag Hidden now is aligned with the Visibility: Hidden from the pre publish modal [#45679]
+-   Patch - Product Editor: "Upload files" quick update menu for variations does not crash variations list. [#45748]
+-   Patch - Product Editor: Fix accessibility of woocommerce/product-text-area-field label. [#45968]
+-   Patch - Product Editor: Fixes issue where saves would fail when certain extensions were installed. [#45958]
+-   Patch - Product Editor: Prevent description full editor usage if a version of Gutenberg plugin is installed that causes crashes. [#45650]
+-   Patch - Product Editor: Show correct Publish/Schedule button label. [#45848]
+-   Patch - Product Editor: Workaround a Gutenberg bug that resulted in a crash when clicking in the margin of the editor when the summary or description fields were focused, by reverting the changes that were made in #44166. [#45608]
+-   Patch - Redirect to the edit product page after changing the product type and publishing it [#46092]
+-   Patch - Remove editable outline for blocks in the product editor. [#45366]
+-   Minor - Remove Subsection actions and fix use of SectionActions for both section and subsection. [#44816]
+-   Minor - Remove the "Always show pre-publish checks" from pre-publish panel #45672 [#45672]
+-   Patch - Replace the Draft tag with a Scheduled tag in the product header [#45685]
+-   Minor - Set product status after publishing #45436 [#45436]
+-   Patch - [Product Block Editor]: do not include current product in the suggested products list [#44815]
+-   Minor - Add Always show pre-publish checks checkbox #44595 [#44595]
+-   Minor - Add an image to multiple variations using Quick updates #45774 [#45774]
+-   Minor - Add Custom Fields for New Product Editor [#45484]
+-   Minor - Add menu item to publish button to schedule product updates [#44783]
+-   Minor - Add menu item to publish button with 'Move to trash' [#44940]
+-   Minor - Add message after publishing a product to pre-publish panel #44864 [#44864]
+-   Minor - Allow using woocommerce icons for product details section description and add gift icon [#45348]
+-   Minor - Apply filter to get meta_data to generate variations [#45953]
+-   Minor - Create woocommerce/product-custom-fields-toggle-field block [#45291]
+-   Minor - Create woocommerce/product-custom-fields block [#45360]
+-   Minor - Create woocommerce/product-select-field block [#45531]
+-   Minor - Disable the fields that are not required in variable products because they are set in each variation [#45838]
+-   Minor - Edit Custom Fields for New Product Editor [#45396]
+-   Minor - Product Editor: Add loading state functionality to Schedule Product modal [#45645]
+-   Minor - Product Editor: Add support for tooltip attribute for woocommerce/product-select-field block [#46447]
+-   Minor - Remove Custom Fields for New Product Editor [#45493]
+-   Minor - Use isSelectableByUser product template attribute to show/hide product templates in the list [#46394]
+-   Patch - [Product Block Editor]: disable TextArea RichText instance according to `disabled` attribute value [#46089]
+-   Patch - [Product Block Editor]: document woocommerce/product-text-area-field field block [#45513]
+-   Patch - [Product Block Editor]: introduce `woocommerce/entity-product` binding source handler [#45616]
+-   Minor - Match template based on different attributes besides product types [#45454]
+-   Patch - Product Block Editor: expose __experimentalSectionActions component [#46515]
+-   Minor - Set product editor blocks multiple support to true. [#45283]
+-   Patch - Update Woo.com references to WooCommerce.com. [#46259]
+-   Patch - [Product Block Editor]: update Name field block name [#45657]
+-   Minor - Add menu item to Publish button with copy to draft #46294 [#46294]
+-   Minor - Change hidden tag behavior #45766 [#45766]
+-   Minor - Exports handlePrompt from @woocommerce/product-editor for use by extensions expanding the variation quick update menu. Also introduces handleConfirm and exposes it also [#44226]
+-   Patch - Improve webpack cache-busting version parameter by using file contents hash [#44838]
+-   Minor - Modify product header #44711 [#44711]
+-   Minor - Update Attributes tooltip copy #45485 [#45485]
+-   Minor - Update copy of inventory management fields #45801 [#45801]
+-   Minor - [Linked products] - Change number of 'choose products for me' to 4 #46094 [#46094]
+
+## [1.4.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.4.0) - 2024-02-20 
+
+-   Patch - Add empty state when filtering variations by attribute terms and the response is empty [#44505]
+-   Patch - Fix toggle visibility on bach update variations [#44508]
+-   Patch - Product Editor loading state now shows until form is displayed. No more blank flash of white. [#43840]
+-   Minor - Fix pre-publish modal styles #44562 [#44562]
+-   Minor - Add the collapsible Schedule section [#44563]
+-   Minor - Add visibility section to pre-publish panel #44434 [#44434]
+-   Minor - Export Notice component in package [#44812]
+-   Minor - Refactor section and subsection blocks #44502 [#44502]
+-   Minor - [Product editor block]: Change visibility label when a password is set #44623 [#44624]
+-   Minor - [Product editor block]: Modify pre-publish sidebar title after scheduling a product #44651 [#44652]
+-   Minor - [Product editor block]: Rename the Add button to Publish #44461 [#44461]
+
+## [1.3.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.3.0) - 2024-02-09 
+
+-   Patch - Corrected build configuration for packages that weren't outputting minified code.
+-   Patch - Export __experimentalVariationQUickUpdateMenuItem, __experimentalPluginHeaderItemModal, __experimentalPluginHeaderItemPopover
+-   Patch - Fix performance issue when modifying product metadata
+-   Patch - Fix product editor UI misbehaving in custom adminmenu widths (e.g. Calypso)
+-   Patch - Fix typo that broke the CI pipeline and the build process.
+-   Patch - Hide the product type selector dropdown when click outside
+-   Patch - [Product Block Editor]: fix e2e test that happens in the text-area block
+-   Patch - [Product Block Editor]: fix the top area for the dashboard
+-   Patch - [Product Block Editor]: add CashRegister image component
+-   Patch - [Product Block Editor]: Add Linked Product sections
+-   Patch - [Product Block Editor]: add loading for the `Choose products for me` button
+-   Patch - [Product Block Editor]: add plain and rich text mode to the Textarea field block
+-   Patch - [Product Block Editor]: add Upsell advice
+-   Patch - [Product Block Editor]: always show "loading" state when choosing suggested products
+-   Patch - [Product Block Editor]: exclude the current product from the suggested ones to use in the Linked Product tab
+-   Patch - [Product Block Editor]: implement `Choose products for me` button
+-   Patch - [Product Block Editor]: Introduce AdviceCard component
+-   Patch - [Product Block Editor]: Introduce ButtonWithDropdownMenuProps component
+-   Patch - [Product Block Editor]: introduce note attribute to Label component
+-   Patch - [Product Block Editor]: introduce ShoppingBags component
+-   Patch - [Product Block Editor]: introduce TextArea field block
+-   Patch - [Product Block Editor]: introduce `<SectionActions />` slot
+-   Patch - [Product Block Editor]: render empty state for the Cross-sells section
+-   Patch - [Product Block Editor]: use Label component to render Textarea field block label
+-   Patch - [Product Block Editor]: use text-area block to handle the variation description field
+-   Patch - bump php version in packages/js/*/composer.json
+-   Patch - [Product Block Editor]: dismiss AdviceCard by clicking close button
+-   Patch - [Product Block Editor]: fallback with random products when there isn't related products in the Linked Products tab
+-   Patch - [Product Block Editor]: improve getting suggested products from linked product section
+-   Patch - [Product Block Editor]: redefine the app dashboard size
+-   Patch - [Product Block Editor]: tweak section actions of some blocks #43555
+-   Patch - [Product Block Editor]: update advice card instances
+-   Patch - [Product Block Editor]: add className prop to ButtonWithDropdownMenu component
+-   Patch - [Product Block Editor]: improve and tweak AdviceCard component
+-   Patch - [Product Block Editor]: show three products by default in the Linked Products tab
+-   Patch - [Product Block Editor]: tweak styles and layout of AdviceCard component
+-   Minor - Fix header toolbar in iframe modal editor to have block toolbar render correctly with latest Gutenberg and WP version.
+-   Minor - Fix issue when generating variations for the first time in the new editor.
+-   Minor - Revert "Show feedback bar only once (#41787)" #43178
+-   Minor - Variation quick actions update properly when variation inherits sku of parent; slot fills always deal with arrays
+-   Minor - Add a featured product button
+-   Minor - Add empty state to the linked product list block
+-   Minor - Add HOC to hide inventory collapsible block when nothing is inside it
+-   Minor - Add prepublish panel #44331
+-   Minor - Add slotFills for header items #43687
+-   Minor - Add step buttons for Number block and component
+-   Minor - Add tooltip attribute to Pricing field #43144
+-   Minor - Allow providing recently updated data for the validate function in the useValidation hook
+-   Minor - Always fallback to the standard product template in case the given product type is variable
+-   Minor - Create attribute control custom empty state
+-   Minor - Create linked product list block
+-   Minor - Create variation empty state when no variable attributes are asigned to the product
+-   Minor - Expose metadata as object from useProductMetadata hook
+-   Minor - Fix margin top for none first child nested sections
+-   Minor - Introduce a product type selection within the new experience
+-   Minor - Load/save the product template from/to the product meta data
+-   Minor - Product Editor: Subsection block #43725
+-   Minor - Set the product template id also for unsupported product templates
+-   Minor - track Linked Products feature events
+-   Minor - Unlink downloads and downloadable product props so they can be managed separately
+-   Minor - Add isLoading to useProductMetadata hook
+-   Minor - Load layout templates via the REST API. Note that layout template modifications must now be hooked up in an action that is called when REST API endpoints are handled, such as `rest_api_init`.
+-   Minor - Use different delays for initial click and hold when incrementing number on NumberControl
+-   Minor - Use woocommerce's Tooltip component for Label and checkbox instead of wordpress Tooltip
+-   Minor - Add slotFill for variation menus #43441
+-   Minor - Modify feedback modal actions #43005
+
 ## [1.2.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.2.0) - 2023-12-20 
 
 -   Patch - Fix menu not being pinned correctly with certain screen widths [#42791]
 -   Patch - [Product Block Editor]: fix Input control issue in Manage download limit form [#41796]
+-   Patch - [Product Block Editor]: add story for Label component [#42953]
+-   Patch - [Product Block Editor]: introduce UI state [#41859]
+-   Patch - [Product Block Editor]: expose Label component [#42959]
+-   Patch - [Product Block Editor]: move modal editor out of the description block edit component [#41878]
+-   Patch - [Product Block Editor]: propagate content from description inner blocks to Modal editor [#42768]
+-   Patch - [Product Block Editor]: replace custom preview component by BlockPreview core [#42019]
+-   Patch - [Product Block Editor]: replace description button by editable block [#41862]
+-   Patch - [Product Block Editor]: minor Summary block enhancements [#41839]
+-   Patch - [Product Block editor]: rename component edit function [#41741]
 -   Minor - Add ordering support to the product list [#41709]
 -   Minor - Add product list block [#41653]
 -   Minor - Add step prop to NumberControl [#42928]
@@ -15,21 +166,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Move action button ( reorder and add products ) inline with the section header [#42929]
 -   Minor - Support HTML in checkbox-control tooltip and Label tooltip [#42926]
 -   Minor - Use DisplayState as a direct wrapper of the woocommerce/conditional block [#42909]
--   Patch - [Product Block Editor]: add story for Label component [#42953]
--   Patch - [Product Block Editor]: introduce UI state [#41859]
 -   Minor - Expose Taxonomy and TaxonomyMetadata types [#42962]
 -   Minor - Remove deprecated use of position for Dropdown component, using popoverProps.placement instead. [#41845]
 -   Minor - Update products list field to add re-order option. [#42766]
--   Patch - [Product Block Editor]: expose Label component [#42959]
--   Patch - [Product Block Editor]: move modal editor out of the description block edit component [#41878]
--   Patch - [Product Block Editor]: propagate content from description inner blocks to Modal editor [#42768]
--   Patch - [Product Block Editor]: replace custom preview component by BlockPreview core [#42019]
--   Patch - [Product Block Editor]: replace description button by editable block [#41862]
 -   Minor - Add empty state when no attributes #41679 [#41679]
 -   Minor - Add max-width to tooltip #41797 [#41797]
 -   Minor - Show feedback bar only once #41787 [#41787]
--   Patch - [Product Block Editor]: minor Summary block enhancements [#41839]
--   Patch - [Product Block editor]: rename component edit function [#41741]
 
 ## [1.1.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.1.0) - 2023-11-28 
 

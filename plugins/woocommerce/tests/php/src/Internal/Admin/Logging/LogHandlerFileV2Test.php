@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
+use Automattic\WooCommerce\Internal\Admin\Logging\{ LogHandlerFileV2, Settings };
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
 use WC_Unit_Test_Case;
 
@@ -56,7 +56,7 @@ class LogHandlerFileV2Test extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	private static function delete_all_log_files(): void {
-		$files = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$files = glob( Settings::get_log_directory() . '*.log' );
 		foreach ( $files as $file ) {
 			unlink( $file );
 		}
@@ -110,7 +110,7 @@ class LogHandlerFileV2Test extends WC_Unit_Test_Case {
 			$input['context']
 		);
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$paths = glob( Settings::get_log_directory() . '*.log' );
 		$this->assertCount( 1, $paths );
 
 		$parsed = File::parse_path( reset( $paths ) );
@@ -138,7 +138,7 @@ MESSAGE;
 			array()
 		);
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$paths = glob( Settings::get_log_directory() . '*.log' );
 		$this->assertCount( 1, $paths );
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
@@ -239,7 +239,7 @@ MESSAGE;
 			$input,
 		);
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$paths = glob( Settings::get_log_directory() . '*.log' );
 		$this->assertCount( 1, $paths );
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
@@ -258,16 +258,16 @@ MESSAGE;
 		$this->sut->handle( strtotime( '-4 days' ), 'debug', 'duck', array( 'source' => 'duck' ) );
 		$this->sut->handle( time(), 'debug', 'goose', array( 'source' => 'goose' ) );
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$paths = glob( Settings::get_log_directory() . '*.log' );
 		$this->assertCount( 4, $paths );
 
 		$result = $this->sut->clear( 'duck' );
 		$this->assertEquals( 3, $result );
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$paths = glob( Settings::get_log_directory() . '*.log' );
 		$this->assertCount( 2, $paths ); // New log gets created when old logs are deleted!
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . 'wc_logger*.log' );
+		$paths = glob( Settings::get_log_directory() . 'wc_logger*.log' );
 		$this->assertCount( 1, $paths );
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
@@ -290,16 +290,16 @@ MESSAGE;
 		$this->sut->handle( $current_time, 'debug', 'new!', array( 'source' => 'source5' ) );
 		$this->sut->handle( $current_time, 'debug', 'new!', array( 'source' => 'source6' ) );
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$paths = glob( Settings::get_log_directory() . '*.log' );
 		$this->assertCount( 6, $paths );
 
 		$result = $this->sut->delete_logs_before_timestamp( strtotime( '-3 days' ) );
 		$this->assertEquals( 4, $result );
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$paths = glob( Settings::get_log_directory() . '*.log' );
 		$this->assertCount( 3, $paths ); // New log gets created when old logs are deleted!
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . 'wc_logger*.log' );
+		$paths = glob( Settings::get_log_directory() . 'wc_logger*.log' );
 		$this->assertCount( 1, $paths );
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents

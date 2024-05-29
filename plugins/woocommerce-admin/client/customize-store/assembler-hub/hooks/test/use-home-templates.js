@@ -13,19 +13,17 @@ import { usePatterns } from '../use-patterns';
 jest.mock( '../use-patterns' );
 jest.mock( '~/customize-store/data/homepageTemplates', () => ( {
 	HOMEPAGE_TEMPLATES: {
-		template1: { blocks: [ 'header', 'content1', 'content2', 'footer' ] },
-		template2: { blocks: [ 'header', 'content3', 'footer' ] },
+		template1: { blocks: [ 'content1', 'content2' ] },
+		template2: { blocks: [ 'content3' ] },
 	},
 } ) );
 
 const mockUsePatterns = usePatterns;
 
 const mockPatternsByName = {
-	header: { name: 'header', content: '<div>Header</div>' },
 	content1: { name: 'content1', content: '<div>Content1</div>' },
 	content2: { name: 'content2', content: '<div>Content2</div>' },
 	content3: { name: 'content3', content: '<div>Content3</div>' },
-	footer: { name: 'footer', content: '<div>Footer</div>' },
 };
 
 describe( 'useHomeTemplates', () => {

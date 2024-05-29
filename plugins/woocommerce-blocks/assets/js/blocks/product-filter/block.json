@@ -17,6 +17,19 @@
 		},
 		"heading": {
 			"type": "string"
+		},
+		"isPreview": {
+			"type": "boolean",
+			"default": false
+		},
+		"attributeId": {
+			"type": "number",
+			"default": 0
+		}
+	},
+	"example": {
+		"attributes": {
+			"isPreview": true
 		}
 	},
 	"apiVersion": 2,

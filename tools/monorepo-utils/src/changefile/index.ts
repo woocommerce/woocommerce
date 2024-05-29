@@ -145,7 +145,7 @@ const program = new Command( 'changefile' )
 					const changelogFilePath = nodePath.join(
 						tmpRepoPath,
 						projectPath,
-						composerFile.extra?.changelogger[ 'changes-dir' ] ??
+						composerFile.extra?.changelogger?.[ 'changes-dir' ] ??
 							'changelog',
 						fileName
 					);

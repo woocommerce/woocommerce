@@ -353,12 +353,20 @@ class WC_Form_Handler {
 				$customer->save();
 			}
 
-			wc_add_notice( __( 'Account details changed successfully.', 'woocommerce' ) );
-
+			/**
+			 * Hook: woocommerce_save_account_details.
+			 *
+			 * @since 3.6.0
+			 * @param int $user_id User ID being saved.
+			 */
 			do_action( 'woocommerce_save_account_details', $user->ID );
 
-			wp_safe_redirect( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) );
-			exit;
+			// Notices are checked here so that if something created a notice during the save hooks above, the redirect will not happen.
+			if ( 0 === wc_notice_count( 'error' ) ) {
+				wc_add_notice( __( 'Account details changed successfully.', 'woocommerce' ) );
+				wp_safe_redirect( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) );
+				exit;
+			}
 		}
 	}
 
@@ -901,7 +909,7 @@ class WC_Form_Handler {
 		$quantity     = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) );  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$variations   = array();
 
-		$product      = wc_get_product( $product_id );
+		$product = wc_get_product( $product_id );
 
 		foreach ( $_REQUEST as $key => $value ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( 'attribute_' !== substr( $key, 0, 10 ) ) {

@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
 
 /**
  * Evaluates the spec and returns the evaluated suggestion.
@@ -29,5 +29,32 @@ class EvaluateSuggestion {
 		}
 
 		return $suggestion;
+	}
+
+	/**
+	 * Evaluates the specs and returns the visible suggestions.
+	 *
+	 * @param array $specs payment suggestion spec array.
+	 * @return array The visible suggestions and errors.
+	 */
+	public static function evaluate_specs( $specs ) {
+		$suggestions = array();
+		$errors      = array();
+
+		foreach ( $specs as $spec ) {
+			try {
+				$suggestion = self::evaluate( $spec );
+				if ( ! property_exists( $suggestion, 'is_visible' ) || $suggestion->is_visible ) {
+					$suggestions[] = $suggestion;
+				}
+			} catch ( \Throwable $e ) {
+				$errors[] = $e;
+			}
+		}
+
+		return array(
+			'suggestions' => $suggestions,
+			'errors'      => $errors,
+		);
 	}
 }

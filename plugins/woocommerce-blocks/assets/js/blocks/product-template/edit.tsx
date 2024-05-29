@@ -22,6 +22,15 @@ import { ProductDataContextProvider } from '@woocommerce/shared-context';
 import { withProduct } from '@woocommerce/block-hocs';
 import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 
+/**
+ * Internal dependencies
+ */
+import { useGetLocation, useProductCollectionQueryContext } from './utils';
+import './editor.scss';
+import { getDefaultStockStatuses } from '../product-collection/constants';
+
+const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
+
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
 		{ className: 'wc-block-product' },
@@ -117,36 +126,43 @@ const ProductContent = withProduct(
 	}
 );
 
-const ProductTemplateEdit = ( {
-	clientId,
-	context: {
-		query: {
-			perPage,
-			offset = 0,
-			order,
-			orderBy,
-			search,
-			exclude,
-			inherit,
-			taxQuery,
-			pages,
-			...restQueryArgs
+const ProductTemplateEdit = (
+	props: BlockEditProps< {
+		clientId: string;
+	} > & {
+		context: ProductCollectionAttributes;
+		__unstableLayoutClassNames: string;
+	}
+) => {
+	const {
+		clientId,
+		context: {
+			query: {
+				perPage,
+				offset = 0,
+				order,
+				orderBy,
+				search,
+				exclude,
+				inherit,
+				taxQuery,
+				pages,
+				...restQueryArgs
+			},
+			queryContext = [ { page: 1 } ],
+			templateSlug,
+			displayLayout: { type: layoutType, columns, shrinkColumns } = {
+				type: 'flex',
+				columns: 3,
+				shrinkColumns: false,
+			},
+			queryContextIncludes = [],
+			__privateProductCollectionPreviewState,
 		},
-		queryContext = [ { page: 1 } ],
-		templateSlug,
-		displayLayout: { type: layoutType, columns, shrinkColumns } = {
-			type: 'flex',
-			columns: 3,
-			shrinkColumns: false,
-		},
-	},
-	__unstableLayoutClassNames,
-}: BlockEditProps< {
-	clientId: string;
-} > & {
-	context: ProductCollectionAttributes;
-	__unstableLayoutClassNames: string;
-} ) => {
+		__unstableLayoutClassNames,
+	} = props;
+	const location = useGetLocation( props.context, props.clientId );
+
 	const [ { page } ] = queryContext;
 	const [ activeBlockContextId, setActiveBlockContextId ] =
 		useState< string >();
@@ -156,6 +172,19 @@ const ProductTemplateEdit = ( {
 		12,
 		isNumber
 	);
+
+	// Add default query context attributes to queryContextIncludes
+	const queryContextIncludesWithDefaults = [
+		...new Set(
+			queryContextIncludes.concat( DEFAULT_QUERY_CONTEXT_ATTRIBUTES )
+		),
+	];
+
+	const productCollectionQueryContext = useProductCollectionQueryContext( {
+		clientId,
+		queryContextIncludes: queryContextIncludesWithDefaults,
+	} );
+
 	const { products, blocks } = useSelect(
 		( select ) => {
 			const { getEntityRecords, getTaxonomies } = select( coreStore );
@@ -220,6 +249,17 @@ const ProductTemplateEdit = ( {
 				products: getEntityRecords( 'postType', postType, {
 					...query,
 					...restQueryArgs,
+					location,
+					productCollectionQueryContext,
+					previewState: __privateProductCollectionPreviewState,
+					/**
+					 * Use value of "Out of stock visibility" setting to determine
+					 * which stock statuses to include if inherit query
+					 * from template is true.
+					 */
+					...( inherit && {
+						woocommerceStockStatus: getDefaultStockStatuses(),
+					} ),
 				} ),
 				blocks: getBlocks( clientId ),
 			};
@@ -238,6 +278,10 @@ const ProductTemplateEdit = ( {
 			templateSlug,
 			taxQuery,
 			restQueryArgs,
+			location,
+			productCollectionQueryContext,
+			loopShopPerPage,
+			__privateProductCollectionPreviewState,
 		]
 	);
 	const blockContexts = useMemo(

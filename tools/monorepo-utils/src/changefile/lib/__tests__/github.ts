@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import {
+	shouldAutomateChangelog,
 	getChangelogSignificance,
 	getChangelogType,
 	getChangelogDetails,
@@ -15,6 +16,50 @@ jest.mock( '../../../core/logger', () => {
 			error: jest.fn(),
 		},
 	};
+} );
+
+describe( 'shouldAutomateChangelog', () => {
+	it( 'should return true when checked', () => {
+		const body =
+			'### Changelog entry\r\n' +
+			'\r\n' +
+			'<!-- You can optionally choose to enter a changelog entry by checking the box and supplying data. -->\r\n' +
+			'\r\n' +
+			'- [x] Automatically create a changelog entry from the details below.\r\n' +
+			'\r\n';
+		const shouldAutomate = shouldAutomateChangelog( body );
+		expect( shouldAutomate ).toBe( true );
+	} );
+
+	it( 'should return true when checked with upper-case', () => {
+		const body =
+			'### Changelog entry\r\n' +
+			'\r\n' +
+			'<!-- You can optionally choose to enter a changelog entry by checking the box and supplying data. -->\r\n' +
+			'\r\n' +
+			'- [X] Automatically create a changelog entry from the details below.\r\n' +
+			'\r\n';
+		const shouldAutomate = shouldAutomateChangelog( body );
+		expect( shouldAutomate ).toBe( true );
+	} );
+
+	it( 'should return false when unchecked', () => {
+		const body =
+			'### Changelog entry\r\n' +
+			'\r\n' +
+			'<!-- You can optionally choose to enter a changelog entry by checking the box and supplying data. -->\r\n' +
+			'\r\n' +
+			'- [ ] Automatically create a changelog entry from the details below.\r\n' +
+			'\r\n';
+		const shouldAutomate = shouldAutomateChangelog( body );
+		expect( shouldAutomate ).toBe( false );
+	} );
+
+	it( 'should return false when missing from body', () => {
+		const body = '';
+		const shouldAutomate = shouldAutomateChangelog( body );
+		expect( shouldAutomate ).toBe( false );
+	} );
 } );
 
 describe( 'getChangelogSignificance', () => {
@@ -57,13 +102,52 @@ describe( 'getChangelogSignificance', () => {
 		expect( significance ).toBe( 'patch' );
 	} );
 
-	it( 'should error when no significance selected', () => {
+	it( 'should return the selected significance when upper-case', () => {
 		const body =
 			'### Changelog entry\r\n' +
 			'\r\n' +
 			'<!-- You can optionally choose to enter a changelog entry by checking the box and supplying data. -->\r\n' +
 			'\r\n' +
 			'- [x] Automatically create a changelog entry from the details below.\r\n' +
+			'\r\n' +
+			'<details>\r\n' +
+			'\r\n' +
+			'#### Significance\r\n' +
+			'<!-- Choose only one -->\r\n' +
+			'- [ ] Patch\r\n' +
+			'- [X] Minor\r\n' +
+			'- [ ] Major\r\n' +
+			'\r\n' +
+			'#### Type\r\n' +
+			'<!-- Choose only one -->\r\n' +
+			'- [x] Fix - Fixes an existing bug\r\n' +
+			'- [ ] Add - Adds functionality\r\n' +
+			'- [ ] Update - Update existing functionality\r\n' +
+			'- [ ] Dev - Development related task\r\n' +
+			'- [ ] Tweak - A minor adjustment to the codebase\r\n' +
+			'- [ ] Performance - Address performance issues\r\n' +
+			'- [ ] Enhancement\r\n' +
+			'\r\n' +
+			'#### Message ' +
+			'<!-- Add a changelog message here -->\r\n' +
+			'This is a very useful fix.\r\n' +
+			'\r\n' +
+			'#### Comment ' +
+			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
+			'\r\n' +
+			'</details>';
+
+		const significance = getChangelogSignificance( body );
+		expect( significance ).toBe( 'minor' );
+	} );
+
+	it( 'should error when no significance selected', () => {
+		const body =
+			'### Changelog entry\r\n' +
+			'\r\n' +
+			'<!-- You can optionally choose to enter a changelog entry by checking the box and supplying data. -->\r\n' +
+			'\r\n' +
+			'- [X] Automatically create a changelog entry from the details below.\r\n' +
 			'\r\n' +
 			'<details>\r\n' +
 			'\r\n' +
@@ -180,6 +264,45 @@ describe( 'getChangelogType', () => {
 
 		const type = getChangelogType( body );
 		expect( type ).toBe( 'fix' );
+	} );
+
+	it( 'should return the selected changelog type when upper-case', () => {
+		const body =
+			'### Changelog entry\r\n' +
+			'\r\n' +
+			'<!-- You can optionally choose to enter a changelog entry by checking the box and supplying data. -->\r\n' +
+			'\r\n' +
+			'- [x] Automatically create a changelog entry from the details below.\r\n' +
+			'\r\n' +
+			'<details>\r\n' +
+			'\r\n' +
+			'#### Significance\r\n' +
+			'<!-- Choose only one -->\r\n' +
+			'- [x] Patch\r\n' +
+			'- [ ] Minor\r\n' +
+			'- [ ] Major\r\n' +
+			'\r\n' +
+			'#### Type\r\n' +
+			'<!-- Choose only one -->\r\n' +
+			'- [ ] Fix - Fixes an existing bug\r\n' +
+			'- [ ] Add - Adds functionality\r\n' +
+			'- [ ] Update - Update existing functionality\r\n' +
+			'- [X] Dev - Development related task\r\n' +
+			'- [ ] Tweak - A minor adjustment to the codebase\r\n' +
+			'- [ ] Performance - Address performance issues\r\n' +
+			'- [ ] Enhancement\r\n' +
+			'\r\n' +
+			'#### Message ' +
+			'<!-- Add a changelog message here -->\r\n' +
+			'This is a very useful fix.\r\n' +
+			'\r\n' +
+			'#### Comment ' +
+			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
+			'\r\n' +
+			'</details>';
+
+		const type = getChangelogType( body );
+		expect( type ).toBe( 'dev' );
 	} );
 
 	it( 'should error when no type selected', () => {

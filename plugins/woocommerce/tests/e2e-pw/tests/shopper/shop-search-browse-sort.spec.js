@@ -92,19 +92,17 @@ test.describe( 'Search, browse by categories and sort items in the shop', () => 
 		} );
 	} );
 
+	// default theme doesn't have a search box, but can simulate a search by visiting the search URL
 	test( 'should let user search the store', async ( { page } ) => {
-		await page.goto( 'shop/' );
+		await page.goto( `shop/?s=${ simpleProductName }%201` );
 
-		await page
-			.locator( '#wp-block-search__input-1' )
-			.fill( simpleProductName + ' 1' );
-		await page.locator( 'button.wp-block-search__button' ).click();
-
-		await expect( page.locator( 'h1.page-title' ) ).toContainText(
+		await expect(
+			page.getByRole( 'heading', {
+				name: `${ simpleProductName } 1`,
+			} )
+		).toBeVisible();
+		await expect( page.getByLabel( 'Breadcrumb' ) ).toContainText(
 			`${ simpleProductName } 1`
-		);
-		await expect( page.locator( 'h2.entry-title' ) ).toContainText(
-			simpleProductName + ' 1'
 		);
 	} );
 
@@ -115,20 +113,21 @@ test.describe( 'Search, browse by categories and sort items in the shop', () => 
 		await page.goto( 'shop/' );
 		await page.locator( `text=${ simpleProductName } 2` ).click();
 		await page
-			.locator( 'span.posted_in > a', { hasText: categoryB } )
+			.getByLabel( 'Breadcrumb' )
+			.getByRole( 'link', { name: categoryB } )
 			.click();
 
 		// verify the Audio category page
-		await expect( page.locator( 'h1.page-title' ) ).toContainText(
-			categoryB
-		);
 		await expect(
-			page.locator( 'h2.woocommerce-loop-product__title' )
-		).toContainText( simpleProductName + ' 2' );
+			page.getByRole( 'heading', { name: categoryB } )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'heading', { name: simpleProductName + ' 2' } )
+		).toBeVisible();
 		await page.locator( `text=${ simpleProductName } 2` ).click();
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			simpleProductName + ' 2'
-		);
+		await expect(
+			page.getByRole( 'heading', { name: simpleProductName + ' 2' } )
+		).toBeVisible();
 	} );
 
 	test( 'should let user sort the products in the shop', async ( {
