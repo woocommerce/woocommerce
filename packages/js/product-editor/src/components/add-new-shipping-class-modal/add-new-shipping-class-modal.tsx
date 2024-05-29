@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { BaseControl, Button, Modal, TextControl } from '@wordpress/components';
 import {
 	useState,
 	createElement,
@@ -12,6 +11,17 @@ import { Form, FormErrors, useFormContext } from '@woocommerce/components';
 import { ProductShippingClass } from '@woocommerce/data';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
+import {
+	Button,
+	Modal,
+	TextControl,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore We need this to import the block modules for registration.
+	__experimentalInputControl as InputControl,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore We need this to import the block modules for registration.
+	__experimentalInputControlPrefixWrapper as InputControlPrefixWrapper,
+} from '@wordpress/components';
 
 export type ShippingClassFormProps = {
 	onAdd: () => Promise< ProductShippingClass >;
@@ -105,37 +115,32 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 				onBlur={ getSlugSuggestion }
 			/>
 
-			<div className="woocommerce-add-new-shipping-class-modal__slug-section">
-				<TextControl
-					{ ...getInputProps( 'slug' ) }
-					className="woocommerce-add-new-shipping-class-modal__slug-input"
-					label={ __( 'Slug', 'woocommerce' ) }
-					onChange={ ( value ) => {
-						setPrevNameValue( '' ); // clean the previous name value.
-						getInputProps( 'slug' ).onChange( value );
-					} }
-					disabled={ isRequestingSlug }
-					help={ __(
-						'Set a custom slug or generate it by clicking the button.',
-						'woocommerce'
-					) }
-				/>
-
-				<BaseControl
-					id="automatic-slug"
-					label={ __( 'Automatic', 'woocommerce' ) }
-					className="woocommerce-add-new-shipping-class-modal__slug-button"
-				>
-					<Button
-						disabled={ isGenerateButtonDisabled }
-						variant="secondary"
-						onClick={ pullAndupdateSlugInputField }
-						isBusy={ isRequestingSlug }
-					>
-						{ __( 'Generate', 'woocommerce' ) }
-					</Button>
-				</BaseControl>
-			</div>
+			<InputControl
+				{ ...getInputProps( 'slug' ) }
+				label={ __( 'Slug', 'woocommerce' ) }
+				onChange={ ( value: string ) => {
+					setPrevNameValue( '' ); // clean the previous name value.
+					getInputProps( 'slug' ).onChange( value );
+				} }
+				disabled={ isRequestingSlug }
+				help={ __(
+					'Set a custom slug or generate it by clicking the button.',
+					'woocommerce'
+				) }
+				prefix={
+					<InputControlPrefixWrapper>
+						<Button
+							disabled={ isGenerateButtonDisabled }
+							variant="secondary"
+							onClick={ pullAndupdateSlugInputField }
+							isBusy={ isRequestingSlug }
+							isSmall
+						>
+							{ __( 'Generate', 'woocommerce' ) }
+						</Button>
+					</InputControlPrefixWrapper>
+				}
+			/>
 
 			<TextControl
 				{ ...getInputProps( 'description' ) }
