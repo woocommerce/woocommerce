@@ -6,7 +6,7 @@ import {
 	__experimentalItem as Item,
 } from '@wordpress/components';
 
-export const Subnav = ( { data } ) => {
+export const SectionNav = ( { data } ) => {
 	const { sections } = data;
 	const sectionKeys = Object.keys( sections );
 
