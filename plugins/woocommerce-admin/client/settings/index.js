@@ -7,7 +7,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { Tabs } from './tabs';
-import { Subnav } from './subnav';
+import { SectionNav } from './section-nav';
 import './style.scss';
 
 const Settings = ( { params } ) => {
@@ -20,7 +20,9 @@ const Settings = ( { params } ) => {
 	return (
 		<>
 			<Tabs data={ settingsData } page={ params.page }>
-				<Subnav data={ settingsData[ params.page ] } />
+				<div className="woocommerce-settings-section-nav">
+					<SectionNav data={ settingsData[ params.page ] } />
+				</div>
 			</Tabs>
 		</>
 	);
