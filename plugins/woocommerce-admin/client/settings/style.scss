@@ -62,6 +62,10 @@
 	justify-content: space-between;
 	margin: 16px 0px;
 
+	&:first-of-type {
+		margin: 0;
+	}
+
 	h4 {
 		margin: 0;
 		width: 200px;

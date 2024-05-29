@@ -14,7 +14,10 @@ export const Content = ( { data } ) => {
 				switch ( setting.type ) {
 					case 'title':
 						return (
-							<div className="woocommerce-settings-element">
+							<div
+								key={ setting.id }
+								className="woocommerce-settings-element"
+							>
 								<h3>{ setting.title }</h3>
 							</div>
 						);
