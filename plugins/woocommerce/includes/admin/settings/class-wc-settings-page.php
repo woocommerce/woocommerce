@@ -92,9 +92,17 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * @return mixed
 		 */
 		public function get_settings_page_data( $pages ) {
+			$sections = $this->get_sections();
+			$sections_data = array();
+			foreach ( $sections as $section_id => $section_label ) {
+				$sections_data[ $section_id ] = array(
+					'label'   => html_entity_decode( $section_label ),
+					'settings' => $this->get_settings_for_section( $section_id ),
+				);
+			}
 			$pages[ $this->id ] = array(
 				'label'   => html_entity_decode( $this->label ),
-				'default' => method_exists( $this, 'get_settings_for_default_section' ) ? $this->get_settings_for_default_section() : null
+				'sections' => $sections_data,
 			);
 
 			return $pages;

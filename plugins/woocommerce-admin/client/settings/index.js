@@ -7,6 +7,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { Tabs } from './tabs';
+import { Subnav } from './subnav';
 import './style.scss';
 
 const Settings = ( { params } ) => {
@@ -19,10 +20,7 @@ const Settings = ( { params } ) => {
 	return (
 		<>
 			<Tabs data={ settingsData } page={ params.page }>
-				<p>
-					now editing{ ' ' }
-					<span>{ settingsData[ params.page ].label }</span>
-				</p>
+				<Subnav data={ settingsData[ params.page ] } />
 			</Tabs>
 		</>
 	);
