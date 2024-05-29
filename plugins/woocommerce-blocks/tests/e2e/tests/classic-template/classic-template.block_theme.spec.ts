@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect, cli, BlockData } from '@woocommerce/e2e-utils';
+import { test, expect, wpCLI, BlockData } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -48,8 +48,8 @@ const templates = [
 
 test.describe( `${ blockData.name } Block `, () => {
 	test.beforeEach( async () => {
-		await cli(
-			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
+		await wpCLI(
+			'option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
 	} );
 
