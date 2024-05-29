@@ -5,7 +5,7 @@ import type { ShippingAddress } from '@woocommerce/settings';
 import { useCustomerData } from '@woocommerce/base-context/hooks';
 import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY, processErrorResponse } from '@woocommerce/block-data';
-import { StoreNoticesContainer } from '@woocommerce/blocks-components';
+import { StoreNoticesContainer, Panel } from '@woocommerce/blocks-components';
 import { removeNoticesWithContext } from '@woocommerce/base-utils';
 
 /**
@@ -18,6 +18,11 @@ interface ShippingCalculatorProps {
 	onUpdate?: ( newAddress: ShippingAddress ) => void;
 	onCancel?: () => void;
 	addressFields?: Partial< keyof ShippingAddress >[];
+	isShippingCalculatorOpen: boolean;
+	setIsShippingCalculatorOpen: React.Dispatch<
+		React.SetStateAction< boolean >
+	>;
+	label: string | JSX.Element;
 }
 
 const ShippingCalculator = ( {
@@ -28,35 +33,46 @@ const ShippingCalculator = ( {
 		/* Do nothing */
 	},
 	addressFields = [ 'country', 'state', 'city', 'postcode' ],
+	isShippingCalculatorOpen,
+	setIsShippingCalculatorOpen,
+	label,
 }: ShippingCalculatorProps ): JSX.Element => {
 	const { shippingAddress } = useCustomerData();
 	const noticeContext = 'wc/cart/shipping-calculator';
 	return (
-		<div className="wc-block-components-shipping-calculator">
-			<StoreNoticesContainer context={ noticeContext } />
-			<ShippingCalculatorAddress
-				address={ shippingAddress }
-				addressFields={ addressFields }
-				onCancel={ onCancel }
-				onUpdate={ ( newAddress ) => {
-					// Updates the address and waits for the result.
-					dispatch( CART_STORE_KEY )
-						.updateCustomerData(
-							{
-								shipping_address: newAddress,
-							},
-							false
-						)
-						.then( () => {
-							removeNoticesWithContext( noticeContext );
-							onUpdate( newAddress );
-						} )
-						.catch( ( response ) => {
-							processErrorResponse( response, noticeContext );
-						} );
-				} }
-			/>
-		</div>
+		<Panel
+			className="wc-block-components-totals-shipping-panel"
+			initialOpen={ isShippingCalculatorOpen }
+			hasBorder={ false }
+			title={ label }
+			state={ [ isShippingCalculatorOpen, setIsShippingCalculatorOpen ] }
+		>
+			<div className="wc-block-components-shipping-calculator">
+				<StoreNoticesContainer context={ noticeContext } />
+				<ShippingCalculatorAddress
+					address={ shippingAddress }
+					addressFields={ addressFields }
+					onCancel={ onCancel }
+					onUpdate={ ( newAddress ) => {
+						// Updates the address and waits for the result.
+						dispatch( CART_STORE_KEY )
+							.updateCustomerData(
+								{
+									shipping_address: newAddress,
+								},
+								false
+							)
+							.then( () => {
+								removeNoticesWithContext( noticeContext );
+								onUpdate( newAddress );
+							} )
+							.catch( ( response ) => {
+								processErrorResponse( response, noticeContext );
+							} );
+					} }
+				/>
+			</div>
+		</Panel>
 	);
 };
 

@@ -18,7 +18,6 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import ShippingCalculator from '../../shipping-calculator';
 import {
 	hasShippingRate,
 	getTotalShippingValue,
@@ -142,16 +141,6 @@ export const TotalsShipping = ( {
 				}
 				currency={ currency }
 			/>
-			{ showShippingCalculatorForm && (
-				<ShippingCalculator
-					onUpdate={ () => {
-						setIsShippingCalculatorOpen( false );
-					} }
-					onCancel={ () => {
-						setIsShippingCalculatorOpen( false );
-					} }
-				/>
-			) }
 			{ showRateSelector &&
 				cartHasCalculatedShipping &&
 				! showShippingCalculatorForm && (

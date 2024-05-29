@@ -11,7 +11,11 @@ import {
 import PickupLocation from '@woocommerce/base-components/cart-checkout/pickup-location';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
-import { Panel } from '@woocommerce/blocks-components';
+
+/**
+ * Internal dependencies
+ */
+import ShippingCalculator from '../../shipping-calculator';
 
 export interface ShippingAddressProps {
 	isShippingCalculatorOpen: boolean;
@@ -62,18 +66,26 @@ export const ShippingAddress = ( {
 			<strong>{ formattedLocation }</strong>
 		</>
 	);
-	if ( prefersCollection ) return <PickupLocation />;
+	if ( prefersCollection )
+		return (
+			<PickupLocation
+				isShippingCalculatorOpen={ isShippingCalculatorOpen }
+				setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
+			/>
+		);
 
 	return (
-		<Panel
-			className="wc-block-components-totals-shipping-panel"
-			initialOpen={ isShippingCalculatorOpen }
-			hasBorder={ false }
-			title={ deliveryLabel }
-			state={ [ isShippingCalculatorOpen, setIsShippingCalculatorOpen ] }
-		>
-			<></>
-		</Panel>
+		<ShippingCalculator
+			isShippingCalculatorOpen={ isShippingCalculatorOpen }
+			setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
+			label={ deliveryLabel }
+			onUpdate={ () => {
+				setIsShippingCalculatorOpen( false );
+			} }
+			onCancel={ () => {
+				setIsShippingCalculatorOpen( false );
+			} }
+		/>
 	);
 };
 

@@ -42,6 +42,9 @@
 		.wc-block-components-sidebar {
 			padding: 0;
 			width: 100%;
+			.wc-block-components-totals-shipping-panel .wc-block-components-panel__button {
+				font-weight: normal;
+			}
 		}
 	}
 }
@@ -56,9 +59,20 @@
 		}
 		.wc-block-components-totals-shipping-panel {
 			padding: 0;
+
+			.wc-block-components-shipping-calculator {
+				padding-left: 0;
+				padding-right: 0;
+				font-size: 1.143em;
+			}
 		}
 		.wc-block-components-totals-shipping-panel .wc-block-components-panel__button {
 			padding-right: $gap-huge;
+			font-weight: normal;
+			@include font-size(regular);
+			strong {
+				text-transform: none;
+			}
 		}
 		.wc-block-components-panel {
 			.wc-block-components-totals-item {

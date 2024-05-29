@@ -49,6 +49,13 @@
 			opacity: 0.8;
 		}
 	}
+
+	// Apply flex-grow when there is no pickup or shipping option available.
+	.wc-block-components-totals-item__value:not(:has(> strong)) {
+		flex-grow: 1;
+		width: 100%;
+	}
+
 }
 
 // Extra classes for specificity.
