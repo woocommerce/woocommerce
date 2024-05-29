@@ -3,8 +3,16 @@
 
 	.is-mobile &,
 	.is-small & {
-		padding-top: $gap-larger;
 		margin-bottom: $gap-larger;
+
+		&.wc-block-checkout__terms--with-separator {
+			padding-top: $gap-larger;
+		}
+	}
+
+	&.wc-block-checkout__terms--with-separator {
+		padding-top: $gap-largest;
+		border-top: 1px solid $universal-border-light;
 	}
 
 	textarea {
