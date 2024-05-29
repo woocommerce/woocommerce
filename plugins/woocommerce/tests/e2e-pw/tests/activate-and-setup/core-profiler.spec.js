@@ -228,33 +228,76 @@ test.describe( 'Store owner can complete the core profiler', () => {
 					name: 'Get paid with WooPayments',
 				} )
 			).not.toBeAttached();
+
 			// select and install the rest of the extentions
-			await page.locator( '#inspector-checkbox-control-2' ).uncheck();
-			await page.locator( '#inspector-checkbox-control-3' ).check();
-			await page.locator( '#inspector-checkbox-control-4' ).uncheck();
-			await page.locator( '#inspector-checkbox-control-5' ).check();
+			try {
+				await page
+					.getByText(
+						'Boost content creation with Jetpack AI AssistantSave time on content creation'
+					)
+					.getByRole( 'checkbox' )
+					.uncheck( { timeout: 2000 } );
+			} catch ( e ) {
+				console.log( 'Checkbox not present for Jetpack AI Assistant' );
+			}
+			try {
+				await page
+					.getByText(
+						'Showcase your products with PinterestGet your products in front of a highly'
+					)
+					.getByRole( 'checkbox' )
+					.check( { timeout: 2000 } );
+			} catch ( e ) {
+				console.log( 'Checkbox not present for Pinterest' );
+			}
+			try {
+				await page
+					.getByText(
+						'Reach your customers with MailPoetSend purchase follow-up emails, newsletters,'
+					)
+					.getByRole( 'checkbox' )
+					.uncheck( { timeout: 2000 } );
+			} catch ( e ) {
+				console.log( 'Checkbox not present for MailPoet' );
+			}
+			try {
+				await page
+					.getByText(
+						'Drive sales with Google Listings & AdsReach millions of active shoppers across'
+					)
+					.getByRole( 'checkbox' )
+					.check( { timeout: 2000 } );
+			} catch ( e ) {
+				console.log( 'Checkbox not present for Google Listings & Ads' );
+			}
 			await page.getByRole( 'button', { name: 'Continue' } ).click();
 		} );
 
 		await test.step( 'Confirm that core profiler was completed and a couple of default extensions installed', async () => {
 			page.on( 'dialog', ( dialog ) => dialog.accept() );
 			// intermediate page shown
-			await expect(
-				page.getByRole( 'heading', {
-					name: "Woo! Let's get your features ready",
-				} )
-			).toBeVisible( { timeout: 30000 } );
-			await expect(
-				page.getByRole( 'heading', {
-					name: "Extending your store's capabilities",
-				} )
-			).toBeVisible( { timeout: 30000 } );
+			// the next two are soft assertions because depending on the extensions selected, they may or may not appear
+			// and we want the test to complete in order for cleanup to happen
+			await expect
+				.soft(
+					page.getByRole( 'heading', {
+						name: "Woo! Let's get your features ready",
+					} )
+				)
+				.toBeVisible( { timeout: 30000 } );
+			await expect
+				.soft(
+					page.getByRole( 'heading', {
+						name: "Extending your store's capabilities",
+					} )
+				)
+				.toBeVisible( { timeout: 30000 } );
 			// dashboard shown
 			await expect(
 				page.getByRole( 'heading', {
 					name: 'Welcome to WooCommerce Core E2E Test Suite',
 				} )
-			).toBeVisible();
+			).toBeVisible( { timeout: 30000 } );
 			// go to the plugins page to make sure that extensions were installed
 			await page.goto( 'wp-admin/plugins.php' );
 			await expect(
@@ -267,6 +310,8 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			await expect(
 				page.getByText( 'Google Listings and Ads', { exact: true } )
 			).toBeVisible();
+			await expect( page.getByText( 'MailPoet' ) ).toBeHidden();
+			await expect( page.getByText( 'Jetpack' ) ).toBeHidden();
 		} );
 
 		await test.step( 'Confirm that information from core profiler saved', async () => {

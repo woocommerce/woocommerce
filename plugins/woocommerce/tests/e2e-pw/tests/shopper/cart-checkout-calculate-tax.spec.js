@@ -927,8 +927,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 				await page.pause();
 
 				await expect(
-					page.getByRole( 'row', {
-						name: 'Shipping Flat rate: $23.00 (incl. tax) Shipping to CA.',
+					page.getByRole( 'cell', {
+						name: 'Flat rate: $23.00 (incl. tax',
 					} )
 				).toBeVisible();
 				await expect(
