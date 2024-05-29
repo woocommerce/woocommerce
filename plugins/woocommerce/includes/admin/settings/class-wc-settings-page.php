@@ -99,7 +99,9 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 				$section_settings_data = array();
 
 				foreach( $section_settings as $section_setting ) {
-					$section_setting['value'] = get_option( $section_setting['id'], $section_setting['default'] );
+					if ( isset( $section_setting['id'] ) ) {
+						$section_setting['value'] = isset( $section_setting['default'] ) ? get_option( $section_setting['id'], $section_setting['default'] ) : get_option( $section_setting['id'] );
+					}
 					$section_settings_data[] = $section_setting;
 				}
 				$sections_data[ $section_id ] = array(

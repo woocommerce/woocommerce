@@ -54,7 +54,15 @@ class Settings {
 			return $settings;
 		}
 
-		// TODO: change so its only being added on Settings page, otherwise bail.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$page = sanitize_text_field( wp_unslash( $_GET['page'] ) );
+		$path = sanitize_text_field( wp_unslash( $_GET['path'] ) );
+
+		// Only add data when we are on the settings page.
+		if ( 'wc-admin' !== $page && 0 !== strpos( $path, '/settings' ) ) {
+			return $settings;
+		}
+		// phpcs:enable
 
 		$setting_pages = \WC_Admin_Settings::get_settings_pages();
 		$pages         = array();
