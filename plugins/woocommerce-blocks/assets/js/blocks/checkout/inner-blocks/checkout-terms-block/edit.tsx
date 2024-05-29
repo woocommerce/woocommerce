@@ -126,6 +126,18 @@ export const Edit = ( {
 							} )
 						}
 					/>
+					<ToggleControl
+						label={ __(
+							'Show separator above block',
+							'woocommerce'
+						) }
+						checked={ separatorVisible }
+						onChange={ () =>
+							setAttributes( {
+								separatorVisible: ! separatorVisible,
+							} )
+						}
+					/>
 				</PanelBody>
 			</InspectorControls>
 			<div className="wc-block-checkout__terms">
