@@ -28,7 +28,7 @@
 .woocommerce-settings-layout {
 	width: 100%;
 	display: flex;
-	gap: 10px;
+	gap: 30px;
 	padding: 50px 16px 16px 16px;
 }
 
@@ -38,4 +38,21 @@
 
 .woocommerce-settings-content {
 	flex: 1;
+}
+
+.woocommerce-settings-section-nav {
+	.components-item {
+		&.active-section {
+			.components-button {
+				background-color: lightgray;
+			}
+		}
+	}
+
+	.components-button {
+		width: 100%;
+		border: none !important;
+		box-shadow: none !important;
+		padding: 20px 12px;
+	}
 }

@@ -4,12 +4,15 @@
 import {
 	__experimentalItemGroup as ItemGroup,
 	__experimentalItem as Item,
+	Button,
 } from '@wordpress/components';
+import { getNewPath, navigateTo, getQuery } from '@woocommerce/navigation';
+import classnames from 'classnames';
 
-export const SectionNav = ( { data, section } ) => {
+export const SectionNav = ( { data } ) => {
 	const { sections } = data;
 	const sectionKeys = Object.keys( sections );
-	console.log( section );
+	const { section } = getQuery();
 
 	if ( sectionKeys.length === 1 ) {
 		return null;
@@ -17,9 +20,25 @@ export const SectionNav = ( { data, section } ) => {
 
 	return (
 		<>
-			<ItemGroup>
+			<ItemGroup className="woocommerce-settings-section-nav">
 				{ sectionKeys.map( ( key ) => (
-					<Item>{ sections[ key ].label }</Item>
+					<Item
+						key={ key }
+						className={ classnames( {
+							'active-section': section === key,
+						} ) }
+					>
+						<Button
+							variant="tertiary"
+							onClick={ () => {
+								navigateTo( {
+									url: getNewPath( { section: key } ),
+								} );
+							} }
+						>
+							{ sections[ key ].label }
+						</Button>
+					</Item>
 				) ) }
 			</ItemGroup>
 		</>
