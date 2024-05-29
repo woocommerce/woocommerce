@@ -478,11 +478,11 @@ final class WooCommerce {
 	 * @return bool
 	 */
 	public function is_store_api_request() {
-		if ( WC()->is_rest_api_request() ) {
-			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			return false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' );
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
 		}
-		return false;
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		return false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' );
 	}
 
 	/**
