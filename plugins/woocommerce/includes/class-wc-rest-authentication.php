@@ -597,6 +597,16 @@ class WC_REST_Authentication {
 		return true;
 	}
 
+	/**
+	 * Updates the `last_access` field for the API key associated with the current request.
+	 *
+	 * This method tries to disambiguate 'primary' API requests from any programmatic REST
+	 * API requests made internally.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return void
+	 */
 	private function update_last_access( $request ) {
 		global $wp;
 		global $wpdb;
