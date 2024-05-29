@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Prevent tracking files from being enqueued on the front end.
