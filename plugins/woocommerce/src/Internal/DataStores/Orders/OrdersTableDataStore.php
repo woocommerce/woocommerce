@@ -2524,7 +2524,7 @@ FROM $order_meta_table
 		$this->persist_save( $order );
 
 		// Do not fire 'woocommerce_new_order' for draft statuses for backwards compatibility.
-		if ( in_array( $order->get_status( 'edit' ), array( 'auto-draft', 'checkout-draft' ), true ) ) {
+		if ( in_array( $order->get_status( 'edit' ), array( 'auto-draft', 'draft', 'checkout-draft' ), true ) ) {
 			return;
 		}
 
