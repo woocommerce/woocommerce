@@ -1598,10 +1598,11 @@ class WC_Helper {
 			);
 		}
 
+		// Fetch updates so we can refine subscriptions with information about updates.
+		$updates = WC_Helper_Updater::get_update_data();
+
 		foreach ( $subscriptions as &$subscription ) {
 			$subscription['active'] = in_array( $site_id, $subscription['connections'], true );
-
-			$updates = WC_Helper_Updater::get_update_data();
 
 			$subscription['local'] = self::get_subscription_local_data( $subscription );
 
@@ -1612,6 +1613,11 @@ class WC_Helper {
 
 			if ( ! empty( $updates[ $subscription['product_id'] ] ) ) {
 				$subscription['version'] = $updates[ $subscription['product_id'] ]['version'];
+			}
+
+			// If the update endpoint returns a URL, we prefer it over the default PluginURI.
+			if ( ! empty( $updates[ $subscription['product_id'] ]['url'] ) ) {
+				$subscription['product_url'] = $updates[ $subscription['product_id'] ]['url'];
 			}
 		}
 
