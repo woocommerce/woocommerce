@@ -109,7 +109,7 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 				<TextControl
 					{ ...getInputProps( 'slug' ) }
 					className="woocommerce-add-new-shipping-class-modal__slug-input"
-					label={ __( 'Custom', 'woocommerce' ) }
+					label={ __( 'Slug', 'woocommerce' ) }
 					onChange={ ( value ) => {
 						setPrevNameValue( '' ); // clean the previous name value.
 						getInputProps( 'slug' ).onChange( value );
