@@ -159,7 +159,7 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button
-					isPrimary
+					variant="primary"
 					isBusy={ isLoading }
 					disabled={ ! isValidForm || isLoading }
 					onClick={ handleAdd }
