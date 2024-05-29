@@ -106,7 +106,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * If the SKU is already present in the table, it means that another
 	 * request is already processing the same SKU and we should not proceed
-	 * with the insert..
+	 * with the insert.
 	 *
 	 * @param WC_Product $product Product object.
 	 * @return bool True if lock is obtained (unique SKU), false otherwise.
@@ -182,7 +182,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			 * Delete the product and throw an exception.
 			 */
 			if ( ! empty( $sku ) && ! $this->obtain_lock_on_sku_for_concurrent_requests( $product ) ) {
-				$product->delete();
+				$product->delete( true );
 				// translators: 1: SKU, 2: Product Id.
 				throw new Exception( esc_html( sprintf( __( 'The SKU (%1$s) you are trying to insert with Product Id (%2$s) is already under processing', 'woocommerce' ), $sku, $id ) ) );
 			}
