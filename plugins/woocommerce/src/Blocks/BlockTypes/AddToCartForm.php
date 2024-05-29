@@ -92,19 +92,16 @@ class AddToCartForm extends AbstractBlock {
 	 * @return string The Add to Cart form HTML with classes added.
 	 */
 	private function add_classes_to_add_to_cart_form_input( $product, $attributes ) {
-		$is_stepper_style        = 'stepper' === $attributes['quantitySelectorStyle'];
-		$quantity_selector_class = $is_stepper_style ? 'wc-block-components-quantity-selector--stepper' : 'wc-block-components-quantity-selector--input';
+		$is_stepper_style = 'stepper' === $attributes['quantitySelectorStyle'];
 
 		$html = new \WP_HTML_Tag_Processor( $product );
 
-		// Add classes to the quantity selector.
-		while ( $html->next_tag( array( 'class_name' => 'quantity' ) ) ) {
-			$html->add_class( 'wc-block-components-quantity-selector' );
-			$html->add_class( $quantity_selector_class );
-		}
-
-		// If stepper style, add class to the quantity input.
 		if ( $is_stepper_style ) {
+			// Add classes to the form.
+			while ( $html->next_tag( array( 'class_name' => 'quantity' ) ) ) {
+				$html->add_class( 'wc-block-components-quantity-selector' );
+			}
+
 			$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
 			while ( $html->next_tag( array( 'class_name' => 'input-text' ) ) ) {
 				$html->add_class( 'wc-block-components-quantity-selector__input' );
@@ -158,7 +155,9 @@ class AddToCartForm extends AbstractBlock {
 			return '';
 		}
 
-		$product = 'stepper' === $attributes['quantitySelectorStyle'] ? $this->add_steppers( $product ) : $product;
+		$is_stepper_style = 'stepper' === $attributes['quantitySelectorStyle'];
+
+		$product = $is_stepper_style ? $this->add_steppers( $product ) : $product;
 
 		$parsed_attributes                     = $this->parse_attributes( $attributes );
 		$is_descendent_of_single_product_block = $parsed_attributes['isDescendentOfSingleProductBlock'];
@@ -171,11 +170,12 @@ class AddToCartForm extends AbstractBlock {
 		$product_classname  = $is_descendent_of_single_product_block ? 'product' : '';
 
 		$form = sprintf(
-			'<div class="wp-block-add-to-cart-form wp-block-woocommerce-add-to-cart-form wc-block-add-to-cart-form %1$s %2$s %3$s" %4$s style="%5$s">%6$s</div>',
+			'<div class="wp-block-add-to-cart-form wp-block-woocommerce-add-to-cart-form wc-block-add-to-cart-form %1$s %2$s %3$s %4$s" %5$s style="%6$s">%7$s</div>',
 			esc_attr( $classes_and_styles['classes'] ),
 			esc_attr( $classname ),
 			esc_attr( $product_classname ),
-			'stepper' === $attributes['quantitySelectorStyle'] ? 'data-wc-interactive=\'' . wp_json_encode(
+			$is_stepper_style ? 'wc-block-add-to-cart-form--stepper' : 'wc-block-add-to-cart-form--input',
+			$is_stepper_style ? 'data-wc-interactive=\'' . wp_json_encode(
 				array(
 					'namespace' => 'woocommerce/add-to-cart-form',
 				),

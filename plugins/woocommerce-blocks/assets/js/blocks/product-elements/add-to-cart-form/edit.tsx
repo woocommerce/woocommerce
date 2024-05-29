@@ -23,8 +23,14 @@ export interface Attributes {
 
 const Edit = ( props: BlockEditProps< Attributes > ) => {
 	const { setAttributes } = props;
+
+	const quantitySelectorStyleClass =
+		props.attributes.quantitySelectorStyle === QuantitySelectorStyle.Input
+			? 'wc-block-add-to-cart-form--input'
+			: 'wc-block-add-to-cart-form--stepper';
+
 	const blockProps = useBlockProps( {
-		className: 'wc-block-add-to-cart-form',
+		className: `wc-block-add-to-cart-form ${ quantitySelectorStyleClass }`,
 	} );
 	const { isDescendentOfSingleProductBlock } =
 		useIsDescendentOfSingleProductBlock( {
@@ -54,7 +60,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 							{ props.attributes.quantitySelectorStyle ===
 								QuantitySelectorStyle.Input && (
 								<>
-									<div className="quantity wc-block-components-quantity-selector wc-block-components-quantity-selector--input">
+									<div className="quantity">
 										<input
 											type={ 'number' }
 											value={ '1' }
@@ -72,7 +78,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 							{ props.attributes.quantitySelectorStyle ===
 								QuantitySelectorStyle.Stepper && (
 								<>
-									<div className="quantity wc-block-components-quantity-selector wc-block-components-quantity-selector--stepper">
+									<div className="quantity wc-block-components-quantity-selector">
 										<button className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">
 											-
 										</button>
