@@ -118,7 +118,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$query = $wpdb->prepare(
 			"INSERT INTO $wpdb->wc_product_meta_lookup (product_id, sku)
-			SELECT %d, %s FROM DUAL
+			SELECT %d, %s FROM $wpdb->options
 			WHERE NOT EXISTS (
 				SELECT * FROM $wpdb->wc_product_meta_lookup WHERE sku = %s LIMIT 1
 			) LIMIT 1 FOR UPDATE;",
