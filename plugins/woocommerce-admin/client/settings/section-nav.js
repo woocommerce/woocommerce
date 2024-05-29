@@ -9,10 +9,9 @@ import {
 import { getNewPath, navigateTo, getQuery } from '@woocommerce/navigation';
 import classnames from 'classnames';
 
-export const SectionNav = ( { data } ) => {
+export const SectionNav = ( { data, section } ) => {
 	const { sections } = data;
 	const sectionKeys = Object.keys( sections );
-	const { section } = getQuery();
 
 	if ( sectionKeys.length === 1 ) {
 		return null;
