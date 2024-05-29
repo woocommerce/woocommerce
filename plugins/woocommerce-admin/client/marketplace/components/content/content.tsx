@@ -25,8 +25,7 @@ import InstallNewProductModal from '../install-flow/install-new-product-modal';
 import Promotions from '../promotions/promotions';
 import ConnectNotice from '~/marketplace/components/connect-notice/connect-notice';
 import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
-import SubscriptionsExpiredExpiringNotice
-	from '~/marketplace/components/my-subscriptions/subscriptions-expired-expiring-notice';
+import SubscriptionsExpiredExpiringNotice from '~/marketplace/components/my-subscriptions/subscriptions-expired-expiring-notice';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );

@@ -662,7 +662,7 @@ class PluginsHelper {
 		$notice = self::get_expired_subscription_notice();
 
 		if ( isset( $notice['description'] ) ) {
-			echo '<div id="woo-subscription-expired-notice" class="woo-subscription-expired-notice woo-subscription-notices notice notice-error is-dismissible" data-dismissnonce="' . wp_create_nonce( 'dismiss_notice' ) . '">
+			echo '<div id="woo-subscription-expired-notice" class="woo-subscription-expired-notice woo-subscription-notices notice notice-error is-dismissible" data-dismissnonce="' . esc_attr( wp_create_nonce( 'dismiss_notice' ) ) . '">
 	    		<p class="widefat">' . wp_kses_post( $notice['description'] ) . '</p>
 	    	</div>';
 		}
@@ -685,7 +685,7 @@ class PluginsHelper {
 		$notice = self::get_expiring_subscription_notice();
 
 		if ( isset( $notice['description'] ) ) {
-			echo '<div id="woo-subscription-expiring-notice" class="woo-subscription-expiring-notice woo-subscription-notices notice notice-error is-dismissible" data-dismissnonce="' . wp_create_nonce( 'dismiss_notice' ) . '">
+			echo '<div id="woo-subscription-expiring-notice" class="woo-subscription-expiring-notice woo-subscription-notices notice notice-error is-dismissible" data-dismissnonce="' . esc_attr( wp_create_nonce( 'dismiss_notice' ) ) . '">
 	    		<p class="widefat">' . wp_kses_post( $notice['description'] ) . '</p>
 	    	</div>';
 		}
@@ -737,17 +737,18 @@ class PluginsHelper {
 		);
 
 		$message_key  = $has_multiple_subs_for_product ? 'multiple_manage' : 'single_manage';
-		$renew_string = __('Renew', 'woocommerce' );
+		$renew_string = __( 'Renew', 'woocommerce' );
 		if ( isset( $subscription['product_regular_price'] ) ) {
-			$renew_string = sprintf( __('Renew for %1$s', 'woocommerce' ), $subscription['product_regular_price'] );
+			/* translators: 1: Product price */
+			$renew_string = sprintf( __( 'Renew for %1$s', 'woocommerce' ), $subscription['product_regular_price'] );
 		}
-		$expiry_date  = date_i18n( 'F jS', $subscription['expires'] );
+		$expiry_date = date_i18n( 'F jS', $subscription['expires'] );
 
 		// Construct message based on template for multiple_manage or single_manage, parameter used:
 		// 1. Product name
 		// 2. Expiry date
 		// 3. URL to My Subscriptions page
-		// 4. Renew string
+		// 4. Renew string.
 		if ( isset( $messages[ $message_key ] ) ) {
 			return sprintf(
 				$messages[ $message_key ],
