@@ -62,7 +62,7 @@ export const ShippingAddress = ( {
 	const formattedLocation = formatShippingAddress( shippingAddress );
 	const deliveryLabel = (
 		<>
-			{ __( 'Delivery to ', 'woocommerce' ) }
+			{ __( 'Delivers to ', 'woocommerce' ) }
 			<strong>{ formattedLocation }</strong>
 		</>
 	);
