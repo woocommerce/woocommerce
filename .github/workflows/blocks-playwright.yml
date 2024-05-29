@@ -103,8 +103,7 @@ jobs:
     create-github-issues-for-flaky-tests:
         name: Create GitHub issues for flaky tests
         needs: [merge-artifacts]
-        # Run only if the workflow is triggered by a push to trunk branch i.e. PR merge.
-        if: ${{ github.ref == 'refs/heads/trunk' && !cancelled() && needs.merge-artifacts.outputs.has-flaky-test-report == 'true' }}
+        if: ${{ !cancelled() && needs.merge-artifacts.outputs.has-flaky-test-report == 'true' }}
         runs-on: ubuntu-latest
         permissions:
             contents: read
