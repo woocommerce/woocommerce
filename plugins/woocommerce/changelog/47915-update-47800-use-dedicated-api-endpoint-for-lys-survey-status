@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Replace the use of options endpoint with the LYS API endpoint to query woocommerce_admin_launch_your_store_survey_completed option.
