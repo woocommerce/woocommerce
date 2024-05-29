@@ -2587,7 +2587,6 @@ FROM $order_meta_table
 	 */
 	public function update( &$order ) {
 		$previous_status = ArrayUtil::get_value_or_default( $order->get_data(), 'status' );
-		$changes         = $order->get_changes();
 
 		// Before updating, ensure date paid is set if missing.
 		if (
