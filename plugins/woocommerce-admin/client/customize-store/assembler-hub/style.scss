@@ -480,6 +480,24 @@ body.woocommerce-assembler {
 		}
 	}
 
+	.woocommerce-customize-store_sidebar-patterns-upgrade-notice {
+		color: #1e1e1e;
+		padding: 0 0 40px;
+
+		h4 {
+			text-transform: uppercase;
+			margin-bottom: 4px;
+		}
+		p {
+			margin: 0;
+		}
+
+		a,
+		button {
+			text-decoration: none;
+		}
+	}
+
 	.woocommerce-customize-store_sidebar-typography-upgrade-notice {
 		margin-top: 48px;
 		color: #1e1e1e;

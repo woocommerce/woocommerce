@@ -10,9 +10,10 @@ import {
 	useMemo,
 	useEffect,
 	useContext,
+	useState,
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
-import { Spinner } from '@wordpress/components';
+import { Spinner, Button, Modal, CheckboxControl } from '@wordpress/components';
 // @ts-expect-error Missing type.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-expect-error No types for this exist yet.
@@ -25,6 +26,7 @@ import {
 } from '@wordpress/block-editor';
 // @ts-expect-error Missing type in core-data.
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
+import interpolateComponents from '@automattic/interpolate-components';
 
 /**
  * Internal dependencies
@@ -47,6 +49,7 @@ import {
 } from '../utils/hero-pattern';
 import { isEqual } from 'lodash';
 import { COLOR_PALETTES } from './global-styles/color-palette-variations/constants';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
@@ -223,6 +226,39 @@ export const SidebarNavigationScreenHomepage = () => {
 				'woocommerce'
 		  );
 
+	const trackingAllowed = useSelect( ( select ) =>
+		select( OPTIONS_STORE_NAME ).getOption( 'woocommerce_allow_tracking' )
+	);
+	let notice;
+
+	const isTrackingDisallowed = trackingAllowed === 'no' || ! trackingAllowed;
+	if ( isTrackingDisallowed ) {
+		notice = __(
+			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
+			'woocommerce'
+		);
+	}
+
+	const [ isModalOpen, setIsModalOpen ] = useState( false );
+
+	const openModal = () => setIsModalOpen( true );
+	const closeModal = () => setIsModalOpen( false );
+
+	const [ OptInDataSharing, setIsOptInDataSharing ] =
+		useState< boolean >( true );
+
+	const optIn = () => {
+		trackEvent(
+			'customize_your_store_assembler_hub_opt_in_usage_tracking'
+		);
+	};
+
+	const skipOptIn = () => {
+		trackEvent(
+			'customize_your_store_assembler_hub_skip_opt_in_usage_tracking'
+		);
+	};
+
 	return (
 		<SidebarNavigationScreen
 			title={ title }
@@ -268,6 +304,82 @@ export const SidebarNavigationScreenHomepage = () => {
 								isDraggable={ false }
 								showTitlesAsTooltip={ false }
 							/>
+						) }
+						{ notice && (
+							<div className="woocommerce-customize-store_sidebar-patterns-upgrade-notice">
+								<h4>
+									{ __(
+										'Want more patterns?',
+										'woocommerce'
+									) }
+								</h4>
+								<p>
+									{ createInterpolateElement( notice, {
+										OptInModal: (
+											<Button
+												onClick={ () => {
+													openModal();
+												} }
+												variant="link"
+											/>
+										),
+									} ) }
+								</p>
+								{ isModalOpen && (
+									<Modal
+										className={
+											'woocommerce-customize-store__opt-in-usage-tracking-modal'
+										}
+										title={ __(
+											'Opt in to usage tracking',
+											'woocommerce'
+										) }
+										onRequestClose={ closeModal }
+										shouldCloseOnClickOutside={ false }
+									>
+										<CheckboxControl
+											className="core-profiler__checkbox"
+											label={ interpolateComponents( {
+												mixedString: __(
+													'I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
+													'woocommerce'
+												),
+												components: {
+													link: (
+														<Link
+															href="https://woocommerce.com/usage-tracking?utm_medium=product"
+															target="_blank"
+															type="external"
+														/>
+													),
+												},
+											} ) }
+											checked={ OptInDataSharing }
+											onChange={ setIsOptInDataSharing }
+										/>
+										<div className="woocommerce-customize-store__design-change-warning-modal-footer">
+											<Button
+												onClick={ () => {
+													skipOptIn();
+													closeModal();
+												} }
+												variant="link"
+											>
+												{ __( 'Cancel', 'woocommerce' ) }
+											</Button>
+											<Button
+												onClick={ () => {
+													optIn();
+												} }
+												variant="primary"
+												disabled={ ! OptInDataSharing }
+											>
+												{ __( 'Opt in', 'woocommerce' ) }
+											</Button>
+										</div>
+									</Modal>
+								) }
+							</div>
 						) }
 					</div>
 				</div>
