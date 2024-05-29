@@ -6,9 +6,10 @@ import {
 	__experimentalItem as Item,
 } from '@wordpress/components';
 
-export const SectionNav = ( { data } ) => {
+export const SectionNav = ( { data, section } ) => {
 	const { sections } = data;
 	const sectionKeys = Object.keys( sections );
+	console.log( section );
 
 	if ( sectionKeys.length === 1 ) {
 		return null;
