@@ -55,7 +55,6 @@ const useQueryId = (
 	// on the same page, updating one will cause the other to be re-inserted.
 	// If we change the ID on init it will trigger a loop as each competes
 	// to set a new queryId and update the sync pattern.
-	// const blockParents = getBlockParentsByBlockName( clientId, 'core/block' );
 	const blockParents = useMemo( () => {
 		return getBlockParentsByBlockName( clientId, 'core/block' );
 	}, [ getBlockParentsByBlockName, clientId ] );
