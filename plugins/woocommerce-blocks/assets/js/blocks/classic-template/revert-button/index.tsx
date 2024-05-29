@@ -11,6 +11,14 @@ import { useEntityRecord } from '@wordpress/core-data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { isSiteEditorPage } from '@woocommerce/utils';
 
+/**
+ * Internal dependencies
+ */
+import type {
+	TemplateChangeDetectorObserver,
+	TemplateChangeDetector,
+} from '../../../atomic/utils/blocks-registration-manager/template-change-detector';
+
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	registerPlugin,
@@ -136,41 +144,44 @@ const templateSlugs = [
 
 const REVERT_BUTTON_PLUGIN_NAME = 'woocommerce-blocks-revert-button-templates';
 
-let currentTemplateId: string | undefined;
-export const revertButtonRegistration = () => {
-	const previousTemplateId = currentTemplateId;
-	const store = select( 'core/edit-site' );
+export class RevertButtonRegistration
+	implements TemplateChangeDetectorObserver
+{
+	run( templateChangeDetector: TemplateChangeDetector ) {
+		const store = select( 'core/edit-site' );
 
-	if ( ! isSiteEditorPage( store ) ) {
-		return;
-	}
-
-	currentTemplateId = store?.getEditedPostId();
-
-	if ( previousTemplateId === currentTemplateId ) {
-		return;
-	}
-
-	const isWooTemplate = templateSlugs.some( ( slug ) =>
-		currentTemplateId?.includes( slug )
-	);
-
-	const hasSupportForPluginTemplateSettingPanel =
-		PluginTemplateSettingPanel !== undefined;
-
-	if ( isWooTemplate && hasSupportForPluginTemplateSettingPanel ) {
-		if ( getPlugin( REVERT_BUTTON_PLUGIN_NAME ) ) {
+		if ( ! isSiteEditorPage( store ) ) {
 			return;
 		}
 
-		return registerPlugin( REVERT_BUTTON_PLUGIN_NAME, {
-			render: RevertClassicTemplateButton,
-		} );
-	}
+		const currentTemplateId = templateChangeDetector.getCurrentTemplateId();
+		const previousTemplateId =
+			templateChangeDetector.getPreviousTemplateId();
+		if ( previousTemplateId === currentTemplateId ) {
+			return;
+		}
 
-	if ( getPlugin( REVERT_BUTTON_PLUGIN_NAME ) === undefined ) {
-		return;
-	}
+		const isWooTemplate = templateSlugs.some( ( slug ) =>
+			currentTemplateId?.includes( slug )
+		);
 
-	unregisterPlugin( REVERT_BUTTON_PLUGIN_NAME );
-};
+		const hasSupportForPluginTemplateSettingPanel =
+			PluginTemplateSettingPanel !== undefined;
+
+		if ( isWooTemplate && hasSupportForPluginTemplateSettingPanel ) {
+			if ( getPlugin( REVERT_BUTTON_PLUGIN_NAME ) ) {
+				return;
+			}
+
+			return registerPlugin( REVERT_BUTTON_PLUGIN_NAME, {
+				render: RevertClassicTemplateButton,
+			} );
+		}
+
+		if ( getPlugin( REVERT_BUTTON_PLUGIN_NAME ) === undefined ) {
+			return;
+		}
+
+		unregisterPlugin( REVERT_BUTTON_PLUGIN_NAME );
+	}
+}
