@@ -52,11 +52,11 @@ export const Edit = ( {
 						label="Button size"
 						selected={ attributes.buttonHeight }
 						options={ [
-							{ label: 'Small (40px)', value: '40px' },
-							{ label: 'Medium (48px)', value: '48px' },
-							{ label: 'Large (56px)', value: '56px' },
+							{ label: 'Small (40px)', value: '40' },
+							{ label: 'Medium (48px)', value: '48' },
+							{ label: 'Large (56px)', value: '56' },
 						] }
-						onChange={ ( newValue ) =>
+						onChange={ ( newValue: string ) =>
 							setAttributes( { buttonHeight: newValue } )
 						}
 					/>

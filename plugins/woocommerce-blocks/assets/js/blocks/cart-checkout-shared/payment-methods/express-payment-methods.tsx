@@ -44,7 +44,6 @@ const ExpressPaymentMethods = ( {
 	} = useMemo( () => getSetting( 'expressPaymentStyles' ), [] );
 	// any attritutes defined on client
 	buttonAttributes.height = buttonHeight;
-	buttonAttributes.minWidth = '118px';
 	buttonAttributes.darkMode = hasDarkControls;
 
 	const { activePaymentMethod, paymentMethodData } = useSelect(

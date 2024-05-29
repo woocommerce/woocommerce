@@ -15,7 +15,7 @@
 	"attributes": {
 		"buttonHeight": {
 			"type": "string",
-			"default": "48px"
+			"default": "48"
 		},
 		"className": {
 			"type": "string",
