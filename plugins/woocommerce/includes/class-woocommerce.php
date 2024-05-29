@@ -254,7 +254,7 @@ final class WooCommerce {
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
 		add_action( 'init', array( $this, 'load_rest_api' ) );
-		if ( $this->is_request( 'admin' ) || ( $this->is_rest_api_request() && ! $this->is_store_api_request() ) ) {
+		if ( $this->is_request( 'admin' ) || ( $this->is_rest_api_request() && ! $this->is_store_api_request() ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 			add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
 		}
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
@@ -658,6 +658,8 @@ final class WooCommerce {
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once WC_ABSPATH . 'includes/class-wc-cli.php';
+
+			$this->tracks_includes();
 		}
 
 		if ( $this->is_request( 'admin' ) ) {
