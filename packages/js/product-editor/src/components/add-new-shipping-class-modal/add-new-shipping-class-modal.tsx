@@ -6,6 +6,7 @@ import {
 	createElement,
 	createInterpolateElement,
 	useRef,
+	useEffect,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Form, FormErrors, useFormContext } from '@woocommerce/components';
@@ -56,8 +57,14 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 		shippingNameInputValue
 	);
 
-	// Get the reference of the description field
+	// Get the reference of the name and description field
+	const nameRef = useRef< HTMLInputElement | null >( null );
 	const descriptionRef = useRef< HTMLInputElement | null >( null );
+
+	// Focus in the name field when the component is mounted.
+	useEffect( () => {
+		nameRef.current?.focus();
+	}, [] );
 
 	/**
 	 * Pull the slug suggestion from the server,
@@ -122,6 +129,7 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 					}
 				) }
 				onBlur={ getSlugSuggestion }
+				ref={ nameRef }
 			/>
 
 			<InputControl
