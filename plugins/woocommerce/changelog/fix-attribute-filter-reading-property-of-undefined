@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Filter by Attribute: fix potential reading from undefined error
