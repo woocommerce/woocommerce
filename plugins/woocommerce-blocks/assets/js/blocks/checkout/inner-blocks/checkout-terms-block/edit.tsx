@@ -25,10 +25,10 @@ import './editor.scss';
 import { termsConsentDefaultText, termsCheckboxDefaultText } from './constants';
 
 export const Edit = ( {
-	attributes: { checkbox, text, separatorVisible },
+	attributes: { checkbox, text, showSeparator },
 	setAttributes,
 }: {
-	attributes: { text: string; checkbox: boolean; separatorVisible: boolean };
+	attributes: { text: string; checkbox: boolean; showSeparator: boolean };
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
 	const blockProps = useBlockProps();
@@ -128,14 +128,11 @@ export const Edit = ( {
 						}
 					/>
 					<ToggleControl
-						label={ __(
-							'Show separator above block',
-							'woocommerce'
-						) }
-						checked={ separatorVisible }
+						label={ __( 'Show separator', 'woocommerce' ) }
+						checked={ showSeparator }
 						onChange={ () =>
 							setAttributes( {
-								separatorVisible: ! separatorVisible,
+								showSeparator: ! showSeparator,
 							} )
 						}
 					/>
@@ -143,8 +140,7 @@ export const Edit = ( {
 			</InspectorControls>
 			<div
 				className={ classnames( 'wc-block-checkout__terms', {
-					'wc-block-checkout__terms--with-separator':
-						separatorVisible,
+					'wc-block-checkout__terms--with-separator': showSeparator,
 				} ) }
 			>
 				{ checkbox ? (
