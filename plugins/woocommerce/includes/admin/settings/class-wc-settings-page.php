@@ -95,9 +95,16 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$sections = $this->get_sections();
 			$sections_data = array();
 			foreach ( $sections as $section_id => $section_label ) {
+				$section_settings = $this->get_settings_for_section( $section_id );
+				$section_settings_data = array();
+
+				foreach( $section_settings as $section_setting ) {
+					$section_setting['value'] = get_option( $section_setting['id'], $section_setting['default'] );
+					$section_settings_data[] = $section_setting;
+				}
 				$sections_data[ $section_id ] = array(
 					'label'   => html_entity_decode( $section_label ),
-					'settings' => $this->get_settings_for_section( $section_id ),
+					'settings' => $section_settings_data,
 				);
 			}
 			$pages[ $this->id ] = array(

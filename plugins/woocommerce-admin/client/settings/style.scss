@@ -56,3 +56,18 @@
 		padding: 20px 12px;
 	}
 }
+
+.woocommerce-settings-element {
+	display: flex;
+	justify-content: space-between;
+	margin: 16px 0px;
+
+	h4 {
+		margin: 0;
+		width: 200px;
+	}
+
+	.components-base-control {
+		flex: 1;
+	}
+}
