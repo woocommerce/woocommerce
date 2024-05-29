@@ -1,17 +1,19 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import { Tabs } from './tabs';
 import { SectionNav } from './section-nav';
+import { Content } from './content';
 import './style.scss';
 
 const Settings = ( { params } ) => {
 	const settingsData = window.wcSettings?.admin?.settingsPages;
+	const { section } = getQuery();
 
 	if ( ! settingsData ) {
 		return <div>Error getting data</div>;
@@ -22,10 +24,17 @@ const Settings = ( { params } ) => {
 			<Tabs data={ settingsData } page={ params.page }>
 				<div className="woocommerce-settings-layout">
 					<div className="woocommerce-settings-section-nav">
-						<SectionNav data={ settingsData[ params.page ] } />
+						<SectionNav
+							data={ settingsData[ params.page ] }
+							section={ section }
+						/>
 					</div>
 					<div className="woocommerce-settings-content">
-						<p>Content here</p>
+						<Content
+							data={
+								settingsData[ params.page ].sections[ section ]
+							}
+						/>
 					</div>
 				</div>
 			</Tabs>

@@ -54,6 +54,8 @@ class Settings {
 			return $settings;
 		}
 
+		// TODO: change so its only being added on Settings page, otherwise bail.
+
 		$setting_pages = \WC_Admin_Settings::get_settings_pages();
 		$pages         = array();
 		foreach ( $setting_pages as $setting_page ) {
