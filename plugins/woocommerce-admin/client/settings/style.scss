@@ -13,10 +13,11 @@
 .woocommerce-settings-tabs {
 	.components-tab-panel__tabs {
 		border-bottom: 1px solid lightgray;
-		padding: 16px 16px 0 16px;
+		padding: 14px 14px 0 14px;
 	}
 	.components-tab-panel__tabs-item {
 		font-weight: 400;
+		border: 2px solid transparent;
 
 		&.active-tab {
 			border-bottom: 2px solid blue;
