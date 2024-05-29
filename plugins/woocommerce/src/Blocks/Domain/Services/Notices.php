@@ -119,7 +119,7 @@ class Notices {
 	}
 
 	/**
-	 * Replaces all notices with the new block based notices.
+	 * Replaces all notices with the new block-based notices.
 	 *
 	 * @return void
 	 */

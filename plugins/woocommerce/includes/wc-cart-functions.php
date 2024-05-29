@@ -460,7 +460,7 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	 * If the customer has selected local pickup, keep it selected if it's still in the package. We don't want to auto
 	 * toggle between shipping and pickup even if available shipping methods are changed.
 	 *
-	 * This is important for block based checkout where there is an explicit toggle between shipping and pickup.
+	 * This is important for block-based checkout where there is an explicit toggle between shipping and pickup.
 	 */
 	$local_pickup_method_ids = LocalPickupUtils::get_local_pickup_method_ids();
 	$is_local_pickup_chosen  = in_array( $chosen_method_id, $local_pickup_method_ids, true );

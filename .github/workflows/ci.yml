@@ -281,6 +281,45 @@ jobs:
                   
                   node .github/workflows/scripts/evaluate-jobs-conclusions.js
 
+
+    alert-on-failure:
+        name: 'Report results on Slack'
+        runs-on: 'ubuntu-20.04'
+        needs:
+            [
+                'project-jobs',
+                'project-lint-jobs',
+                'project-default-test-jobs',
+                'project-e2e-test-jobs',
+                'project-api-test-jobs',
+                'project-performance-test-jobs'
+            ]
+        if: ${{ always() && github.event_name != 'pull_request'  }}
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+              
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              name: 'Setup Monorepo'
+              with:
+                php-version: false
+              
+            - name: 'Send messages for failed jobs'
+              env:
+                SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+                SLACK_CHANNEL: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
+                HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                INPUT_TRIGGER: ${{ inputs.trigger }}
+              run: |
+                  COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+                
+                  pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$INPUT_TRIGGER Build jobs matrix" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$INPUT_TRIGGER Linting" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-default-test-jobs.result }}" -r "$INPUT_TRIGGER Tests" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-e2e-test-jobs.result }}" -r "$INPUT_TRIGGER e2e tests" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-api-test-jobs.result }}" -r "$INPUT_TRIGGER Api tests" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-performance-test-jobs.result }}" -r "$INPUT_TRIGGER Performance tests" -m "$COMMIT_MESSAGE"
+
     e2e-test-reports:
         name: 'Report e2e tests results'
         needs: [project-e2e-test-jobs]
@@ -340,16 +379,7 @@ jobs:
                   else
                     echo "No report will be created for '$GITHUB_EVENT_NAME' event"
                   fi
-
-            - name: 'Send Slack notification'
-              if: ${{ always() && github.event_name != 'pull_request' }}
-              uses: automattic/action-test-results-to-slack@v0.3.0
-              with:
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
-                  slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
-                  slack_channel: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
-                  playwright_report_path: ./out/test-results-*.json
-                  playwright_output_dir: ./out/results-data
+                
 
     api-test-reports:
         name: 'Report API tests results'
@@ -410,11 +440,3 @@ jobs:
                   else
                     echo "No report will be created for '$GITHUB_EVENT_NAME' event"
                   fi
-
-            - name: 'Send Slack notification'
-              if: github.event_name != 'pull_request'
-              uses: automattic/action-test-results-to-slack@v0.3.0
-              with:
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
-                  slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
-                  slack_channel: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
