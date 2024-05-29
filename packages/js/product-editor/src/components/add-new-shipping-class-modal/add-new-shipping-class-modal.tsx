@@ -115,6 +115,10 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 						getInputProps( 'slug' ).onChange( value );
 					} }
 					disabled={ isRequestingSlug }
+					help={ __(
+						'Set a custom slug or generate it by clicking the button.',
+						'woocommerce'
+					) }
 				/>
 
 				<BaseControl
