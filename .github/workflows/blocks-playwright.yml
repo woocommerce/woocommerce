@@ -10,24 +10,15 @@ on:
             - 'plugins/woocommerce/patterns/**'
     # Allow manually triggering the workflow.
     workflow_dispatch:
+    # Run workflow when a PR is merged to trunk branch
+    # To create github issues for flaky tests.
+    push:
+        branches:
+            - trunk
 
 concurrency:
     group: '${{ github.workflow }}-${{ github.ref }}'
     cancel-in-progress: true
-
-permissions:
-    actions: write
-    checks: write
-    contents: write
-    deployments: write
-    discussions: write
-    issues: write
-    packages: write
-    pages: write
-    pull-requests: write
-    repository-projects: write
-    security-events: write
-    statuses: write
 
 env:
     FORCE_COLOR: 1
@@ -112,34 +103,31 @@ jobs:
     create-github-issues-for-flaky-tests:
         name: Create GitHub issues for flaky tests
         needs: [merge-artifacts]
-        if: ${{ !cancelled() && needs.merge-artifacts.outputs.has-flaky-test-report == 'true' }}
+        # Run only if the workflow is triggered by a push to trunk branch i.e. PR merge.
+        if: ${{ github.ref == 'refs/heads/trunk' && !cancelled() && needs.merge-artifacts.outputs.has-flaky-test-report == 'true' }}
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            issues: write
         steps:
-            # We are using @wordpress/report-flaky-tests package
-            # to create GitHub issues for flaky tests from Gutenberg repo.
+            # We are using @wordpress/report-flaky-tests package from Gutenberg repo
+            # to create GitHub issues for flaky tests.
             - uses: actions/checkout@v4
               with:
                   repository: WordPress/gutenberg
                   ref: trunk
 
-            - name: Use desired version of NodeJS
-              uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
-              with:
-                  node-version-file: '.nvmrc'
-                  cache: npm
-
-            - name: Npm install and build
-              # TODO: We don't have to build the entire project, just the action itself.
-              run: |
-                  npm ci
-                  npm run build:packages
-
             - uses: actions/download-artifact@v4
-              # Don't fail the job if there isn't any flaky tests report.
-              continue-on-error: true
               with:
                   name: flaky-tests-report
                   path: flaky-tests
+
+            - name: Setup Node.js and install dependencies
+              uses: ./.github/setup-node
+
+            - name: Npm build
+              # TODO: We don't have to build the entire project, just the action itself.
+              run: npm run build:packages
 
             - name: Report flaky tests
               uses: ./packages/report-flaky-tests
