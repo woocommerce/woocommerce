@@ -3,7 +3,7 @@
  */
 import { test, expect } from '@woocommerce/e2e-utils';
 
-test.describe( 'woocommerce/product-gallery-thumbnails', () => {
+test.describe( 'Product Gallery Thumbnails block', () => {
 	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
 		const template = await requestUtils.createTemplate( 'wp_template', {
 			slug: 'single-product',
@@ -18,13 +18,14 @@ test.describe( 'woocommerce/product-gallery-thumbnails', () => {
 		} );
 
 		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
+
+		await editor.insertBlock( {
+			name: 'woocommerce/product-gallery',
+		} );
 	} );
 
-	test( 'Default render', async ( { page, editor } ) => {
-		await test.step( 'editor', async () => {
-			await editor.insertBlock( {
-				name: 'woocommerce/product-gallery',
-			} );
+	test( 'renders as expected', async ( { page, editor } ) => {
+		await test.step( 'in editor', async () => {
 			const productGalleryBlock = editor.canvas.locator(
 				'[data-type="woocommerce/product-gallery"]'
 			);
@@ -37,14 +38,16 @@ test.describe( 'woocommerce/product-gallery-thumbnails', () => {
 
 			await expect(
 				productGalleryBlock.locator(
-					'[data-type="woocommerce/product-gallery-thumbnails"]:left-of([data-type="woocommerce/product-gallery-large-image"])'
+					`[data-type="woocommerce/product-gallery-thumbnails"]:left-of(
+						[data-type="woocommerce/product-gallery-large-image"]
+					)`
 				)
 			).toBeVisible();
 
 			await editor.saveSiteEditorEntities();
 		} );
 
-		await test.step( 'frontend', async () => {
+		await test.step( 'in frontend', async () => {
 			await page.goto( '/product/v-neck-t-shirt/' );
 			const productGalleryBlock = page.locator(
 				'[data-block-name="woocommerce/product-gallery"]'
@@ -58,19 +61,17 @@ test.describe( 'woocommerce/product-gallery-thumbnails', () => {
 
 			await expect(
 				productGalleryBlock.locator(
-					'[data-block-name="woocommerce/product-gallery-thumbnails"]:left-of([data-block-name="woocommerce/product-gallery-large-image"])'
+					`[data-block-name="woocommerce/product-gallery-thumbnails"]:left-of(
+						[data-block-name="woocommerce/product-gallery-large-image"]
+					)`
 				)
 			).toBeVisible();
 		} );
 	} );
 
-	test.describe( 'Settings', () => {
-		test( 'Hide thumbnails', async ( { page, editor } ) => {
-			await test.step( 'editor', async () => {
-				await editor.insertBlock( {
-					name: 'woocommerce/product-gallery',
-				} );
-
+	test.describe( 'settings', () => {
+		test( 'hides thumbnails', async ( { page, editor } ) => {
+			await test.step( 'in editor', async () => {
 				const productGalleryBlock = editor.canvas.locator(
 					'[data-type="woocommerce/product-gallery"]'
 				);
@@ -92,7 +93,7 @@ test.describe( 'woocommerce/product-gallery-thumbnails', () => {
 				await editor.saveSiteEditorEntities();
 			} );
 
-			await test.step( 'frontend', async () => {
+			await test.step( 'in frontend', async () => {
 				await page.goto( '/product/v-neck-t-shirt/' );
 
 				const productGalleryBlock = page.locator(
@@ -114,7 +115,7 @@ test.describe( 'woocommerce/product-gallery-thumbnails', () => {
 		} );
 
 		for ( const position of [ 'left', 'bottom', 'right' ] ) {
-			test( `Position thumbnails to the ${ position }`, async ( {
+			test( `positions thumbnails to the ${ position }`, async ( {
 				page,
 				editor,
 			} ) => {
@@ -124,11 +125,7 @@ test.describe( 'woocommerce/product-gallery-thumbnails', () => {
 					right: 'right-of',
 				}[ position ];
 
-				await test.step( 'editor', async () => {
-					await editor.insertBlock( {
-						name: 'woocommerce/product-gallery',
-					} );
-
+				await test.step( 'in editor', async () => {
 					const productGalleryBlock = editor.canvas.locator(
 						'[data-type="woocommerce/product-gallery"]'
 					);
@@ -142,14 +139,16 @@ test.describe( 'woocommerce/product-gallery-thumbnails', () => {
 
 					await expect(
 						productGalleryBlock.locator(
-							`[data-type="woocommerce/product-gallery-thumbnails"]:${ layoutClass }([data-type="woocommerce/product-gallery-large-image"])`
+							`[data-type="woocommerce/product-gallery-thumbnails"]:${ layoutClass }(
+								[data-type="woocommerce/product-gallery-large-image"]
+							)`
 						)
 					).toBeVisible();
 
 					await editor.saveSiteEditorEntities();
 				} );
 
-				await test.step( 'frontend', async () => {
+				await test.step( 'in frontend', async () => {
 					await page.goto( '/product/v-neck-t-shirt/' );
 					const productGalleryBlock = page.locator(
 						'[data-block-name="woocommerce/product-gallery"]'
@@ -163,21 +162,19 @@ test.describe( 'woocommerce/product-gallery-thumbnails', () => {
 
 					await expect(
 						productGalleryBlock.locator(
-							`[data-block-name="woocommerce/product-gallery-thumbnails"]:${ layoutClass }([data-block-name="woocommerce/product-gallery-large-image"])`
+							`[data-block-name="woocommerce/product-gallery-thumbnails"]:${ layoutClass }(
+								[data-block-name="woocommerce/product-gallery-large-image"]
+							)`
 						)
 					).toBeVisible();
 				} );
 			} );
 		}
 
-		test( 'Number of thumbnails rounds to integer', async ( {
+		test( 'rounds the number of thumbnails to integer', async ( {
 			page,
 			editor,
 		} ) => {
-			await editor.insertBlock( {
-				name: 'woocommerce/product-gallery',
-			} );
-
 			const productGalleryBlock = editor.canvas.locator(
 				'[data-type="woocommerce/product-gallery"]'
 			);
