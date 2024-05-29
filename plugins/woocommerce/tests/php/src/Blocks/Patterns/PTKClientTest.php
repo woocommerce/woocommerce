@@ -154,7 +154,7 @@ class PTKClientTest extends \WP_UnitTestCase {
 	 * @param string         $expected_error_message The expected error message.
 	 * @return void
 	 */
-	public function assertErrorResponse( $response, $expected_error_message ) {
+	private function assertErrorResponse( $response, $expected_error_message ) {
 		$this->assertInstanceOf( WP_Error::class, $response );
 
 		$error_code = $response->get_error_code();

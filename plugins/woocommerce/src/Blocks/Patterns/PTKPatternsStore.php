@@ -32,42 +32,85 @@ class PTKPatternsStore {
 		$this->ptk_client = $ptk_client;
 
 		if ( Features::is_enabled( 'pattern-toolkit-full-composability' ) ) {
-			add_action( 'deactivated_plugin', array( $this, 'reset_cached_patterns' ), 10, 2 );
-			add_action( 'upgrader_process_complete', array( $this, 'woocommerce_plugin_update' ), 10, 2 );
-			add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'reset_cached_patterns' ), 10, 2 );
+			// We want to flush the cached patterns when:
+			// - The WooCommerce plugin is deactivated.
+			// - The `woocommerce_allow_tracking` option is disabled.
+			//
+			// We also want to re-fetch the patterns and update the cache when:
+			// - The `woocommerce_allow_tracking` option changes to enabled.
+			// - The WooCommerce plugin is activated (if `woocommerce_allow_tracking` is enabled).
+			// - The WooCommerce plugin is updated.
+
+			add_action( 'woocommerce_activated_plugin', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
+			add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
+			add_action( 'deactivated_plugin', array( $this, 'flush_cached_patterns' ), 10, 2 );
+			add_action( 'upgrader_process_complete', array( $this, 'fetch_patterns_on_plugin_update' ), 10, 2 );
+
+			// This is the scheduled action that takes care of flushing and re-fetching the patterns from the PTK API.
+			add_action( 'fetch_patterns', array( $this, 'fetch_patterns' ) );
 		}
 	}
 
 	/**
-	 * Register block patterns from the Patterns Toolkit.
+	 * Resets the cached patterns when the `woocommerce_allow_tracking` option is disabled.
+	 * Resets and fetch the patterns from the PTK when it is enabled (if the scheduler
+	 * is initialized, it's done asynchronously via a scheduled action).
 	 *
 	 * @return void
+	 */
+	public function flush_or_fetch_patterns() {
+		if ( $this->allowed_tracking_is_enabled() ) {
+			$this->schedule_fetch_patterns();
+			return;
+		}
+
+		$this->flush_cached_patterns();
+	}
+
+	/**
+	 * Schedule an async action to fetch the PTK patterns when the scheduler is initialized.
+	 *
+	 * @return void
+	 */
+	private function schedule_fetch_patterns() {
+		if ( did_action( 'action_scheduler_init' ) ) {
+			$this->schedule_action_if_not_pending( 'fetch_patterns' );
+		} else {
+			add_action(
+				'action_scheduler_init',
+				function () {
+					$this->schedule_action_if_not_pending( 'fetch_patterns' );
+				}
+			);
+		}
+	}
+
+	/**
+	 * Schedule an action if it's not already pending.
+	 *
+	 * @param string $action The action name to schedule.
+	 * @return void
+	 */
+	private function schedule_action_if_not_pending( $action ) {
+		if ( as_has_scheduled_action( $action ) ) {
+			return;
+		}
+
+		as_schedule_single_action( time(), $action );
+	}
+
+	/**
+	 * Get the patterns from the Patterns Toolkit cache.
+	 *
+	 * @return array
 	 */
 	public function get_patterns() {
 		$patterns = get_transient( self::TRANSIENT_NAME );
 
-		// Only if the transient is not set, we fetch the patterns from the PTK.
+		// Only if the transient is not set, we schedule fetching the patterns from the PTK.
 		if ( false === $patterns ) {
-			$patterns = $this->ptk_client->fetch_patterns(
-				array(
-					'categories' => array( 'intro', 'about', 'services', 'testimonials' ),
-				)
-			);
-
-			if ( is_wp_error( $patterns ) ) {
-				wc_get_logger()->warning(
-					sprintf(
-					// translators: %s is a generated error message.
-						__( 'Failed to get the patterns from the PTK: "%s"', 'woocommerce' ),
-						$patterns->get_error_message()
-					),
-				);
-				return;
-			}
-
-			$patterns = $this->filter_patterns( $patterns, self::EXCLUDED_PATTERNS );
-
-			set_transient( self::TRANSIENT_NAME, $patterns );
+			$this->schedule_fetch_patterns();
+			return array();
 		}
 
 		return $patterns;
@@ -98,29 +141,68 @@ class PTKPatternsStore {
 	}
 
 	/**
-	 * Reset the cached patterns to fetch them again from the PTK.
-	 *
-	 * @return void
-	 */
-	public function reset_cached_patterns() {
-		delete_transient( self::TRANSIENT_NAME );
-	}
-
-	/**
-	 * Delete the transient when the WooCommerce plugin is updated to fetch the patterns again.
+	 * Re-fetch the patterns when the WooCommerce plugin is updated.
 	 *
 	 * @param WP_Upgrader $upgrader_object WP_Upgrader instance.
 	 * @param array       $options Array of bulk item update data.
 	 *
 	 * @return void
 	 */
-	private function woocommerce_plugin_update( $upgrader_object, $options ) {
+	public function fetch_patterns_on_plugin_update( $upgrader_object, $options ) {
 		if ( 'update' === $options['action'] && 'plugin' === $options['type'] && isset( $options['plugins'] ) ) {
 			foreach ( $options['plugins'] as $plugin ) {
-				if ( plugin_basename( __FILE__ ) === $plugin ) {
-					$this->reset_cached_patterns();
+				if ( str_contains( $plugin, 'woocommerce.php' ) ) {
+					$this->schedule_fetch_patterns();
 				}
 			}
 		}
+	}
+
+	/**
+	 * Reset the cached patterns to fetch them again from the PTK.
+	 *
+	 * @return void
+	 */
+	public function flush_cached_patterns() {
+		delete_transient( self::TRANSIENT_NAME );
+	}
+
+	/**
+	 * Reset the cached patterns and fetch them again from the PTK API.
+	 *
+	 * @return void
+	 */
+	public function fetch_patterns() {
+		$this->flush_cached_patterns();
+
+		$patterns = $this->ptk_client->fetch_patterns(
+			array(
+				'categories' => array( 'intro', 'about', 'services', 'testimonials' ),
+			)
+		);
+
+		if ( is_wp_error( $patterns ) ) {
+			wc_get_logger()->warning(
+				sprintf(
+				// translators: %s is a generated error message.
+					__( 'Failed to get the patterns from the PTK: "%s"', 'woocommerce' ),
+					$patterns->get_error_message()
+				),
+			);
+			return;
+		}
+
+		$patterns = $this->filter_patterns( $patterns, self::EXCLUDED_PATTERNS );
+
+		set_transient( self::TRANSIENT_NAME, $patterns );
+	}
+
+	/**
+	 * Check if the user allowed tracking.
+	 *
+	 * @return bool
+	 */
+	private function allowed_tracking_is_enabled(): bool {
+		return 'yes' === get_option( 'woocommerce_allow_tracking' );
 	}
 }

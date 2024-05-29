@@ -10,8 +10,8 @@ use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use WP_Error;
 
 /**
- * Registers patterns under the `./patterns/` directory and updates their content.
- * Each pattern is defined as a PHP file and defines its metadata using plugin-style headers.
+ * Registers patterns under the `./patterns/` directory and from the PTK API and updates their content.
+ * Each pattern from core is defined as a PHP file and defines its metadata using plugin-style headers.
  * The minimum required definition is:
  *
  *     /**
@@ -55,15 +55,29 @@ class BlockPatterns {
 	 * @var array|WP_Error
 	 */
 	private $dictionary;
+
+	/**
+	 * PTKPatternsStore instance.
+	 *
+	 * @var PTKPatternsStore $ptk_patterns_store
+	 */
+	private PTKPatternsStore $ptk_patterns_store;
+
 	/**
 	 * Constructor for class
 	 *
-	 * @param Package         $package An instance of Package.
-	 * @param PatternRegistry $pattern_registry An instance of PatternRegistry.
+	 * @param Package          $package An instance of Package.
+	 * @param PatternRegistry  $pattern_registry An instance of PatternRegistry.
+	 * @param PTKPatternsStore $ptk_patterns_store An instance of PTKPatternsStore.
 	 */
-	public function __construct( Package $package, PatternRegistry $pattern_registry ) {
-		$this->pattern_registry = $pattern_registry;
-		$this->patterns_path    = $package->get_path( 'patterns' );
+	public function __construct(
+		Package $package,
+		PatternRegistry $pattern_registry,
+		PTKPatternsStore $ptk_patterns_store
+	) {
+		$this->patterns_path      = $package->get_path( 'patterns' );
+		$this->pattern_registry   = $pattern_registry;
+		$this->ptk_patterns_store = $ptk_patterns_store;
 
 		$this->dictionary = PatternsHelper::get_patterns_dictionary();
 
@@ -124,9 +138,15 @@ class BlockPatterns {
 			return;
 		}
 
-		$ptk_patterns_loader = new PTKPatternsStore( new PTKClient() );
+		$this->ptk_patterns_store = new PTKPatternsStore( new PTKClient() );
 
-		$patterns = $ptk_patterns_loader->get_patterns();
+		$patterns = $this->ptk_patterns_store->get_patterns();
+		if ( empty( $patterns ) ) {
+			wc_get_logger()->warning(
+				__( 'Empty patterns received from the PTK Pattern Store', 'woocommerce' ),
+			);
+			return;
+		}
 
 		foreach ( $patterns as $pattern ) {
 			$pattern['slug']    = $pattern['name'];

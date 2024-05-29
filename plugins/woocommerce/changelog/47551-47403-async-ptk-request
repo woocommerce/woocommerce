@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+[CYS] Ensure fetch PTK patterns requests are always done async to improve performance.
