@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-E2E tests: don't exit if the consumer token was not cleared in teardown

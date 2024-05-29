@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fixing a flaky core profiler e2e test
