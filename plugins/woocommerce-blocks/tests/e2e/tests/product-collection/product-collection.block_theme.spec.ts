@@ -7,7 +7,10 @@ import { test as base, expect } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import ProductCollectionPage, { SELECTORS } from './product-collection.page';
+import ProductCollectionPage, {
+	BLOCK_LABELS,
+	SELECTORS,
+} from './product-collection.page';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
@@ -885,7 +888,7 @@ test.describe( 'Product Collection', () => {
 			await admin.createNewPost();
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInPost( 'productCatalog' );
-			const paginations = page.getByLabel( 'Block: Pagination' );
+			const paginations = page.getByLabel( BLOCK_LABELS.pagination );
 
 			await expect( paginations ).toHaveCount( 1 );
 
@@ -1151,12 +1154,47 @@ test.describe( 'Product Collection', () => {
 
 				// Preview button should be visible when any of inner block is selected
 				await editor.canvas
-					.getByLabel( 'Block: Product Template' )
-					.getByLabel( 'Block: Product Image' )
+					.getByLabel( BLOCK_LABELS.productTemplate )
+					.getByLabel( BLOCK_LABELS.productImage )
 					.first()
 					.click();
 				await expect( previewButtonLocator ).toBeVisible();
 			} );
+		} );
+	} );
+
+	test.describe( 'Product Collection should be visible after Refresh', () => {
+		test( 'In a Product Archive (Product Catalog)', async ( {
+			page,
+			editor,
+			pageObject,
+		} ) => {
+			await pageObject.replaceProductsWithProductCollectionInTemplate(
+				'woocommerce/woocommerce//archive-product'
+			);
+			await expect(
+				editor.canvas.getByLabel( BLOCK_LABELS.productTemplate )
+			).toBeVisible();
+
+			// Refresh the template and verify the block is still visible
+			await page.reload();
+			await expect(
+				editor.canvas.getByLabel( BLOCK_LABELS.productTemplate )
+			).toBeVisible();
+		} );
+
+		test( 'In a Post', async ( { page, pageObject, editor } ) => {
+			await pageObject.createNewPostAndInsertBlock();
+			await expect(
+				page.getByLabel( BLOCK_LABELS.productTemplate )
+			).toBeVisible();
+
+			// Refresh the post and verify the block is still visible
+			await editor.saveDraft();
+			await page.reload();
+			await expect(
+				page.getByLabel( BLOCK_LABELS.productTemplate )
+			).toBeVisible();
 		} );
 	} );
 } );
