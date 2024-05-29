@@ -57,7 +57,7 @@ export const shouldAutomateChangelog = ( body: string ) => {
  */
 export const shouldAutomateNoChangelog = ( body: string ) => {
 	const regex =
-		/\[x\] This Pull Request does not require a changelog entry/gm;
+		/\[(?:x|X)\] This Pull Request does not require a changelog entry/gm;
 	return regex.test( body );
 };
 
