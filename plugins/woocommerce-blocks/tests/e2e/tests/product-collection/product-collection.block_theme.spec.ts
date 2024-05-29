@@ -1172,29 +1172,27 @@ test.describe( 'Product Collection', () => {
 			await pageObject.replaceProductsWithProductCollectionInTemplate(
 				'woocommerce/woocommerce//archive-product'
 			);
-			await expect(
-				editor.canvas.getByLabel( BLOCK_LABELS.productTemplate )
-			).toBeVisible();
+			const productTemplate = editor.canvas.getByLabel(
+				BLOCK_LABELS.productTemplate
+			);
+			await expect( productTemplate ).toBeVisible();
 
 			// Refresh the template and verify the block is still visible
 			await page.reload();
-			await expect(
-				editor.canvas.getByLabel( BLOCK_LABELS.productTemplate )
-			).toBeVisible();
+			await expect( productTemplate ).toBeVisible();
 		} );
 
 		test( 'In a Post', async ( { page, pageObject, editor } ) => {
 			await pageObject.createNewPostAndInsertBlock();
-			await expect(
-				page.getByLabel( BLOCK_LABELS.productTemplate )
-			).toBeVisible();
+			const productTemplate = page.getByLabel(
+				BLOCK_LABELS.productTemplate
+			);
+			await expect( productTemplate ).toBeVisible();
 
 			// Refresh the post and verify the block is still visible
 			await editor.saveDraft();
 			await page.reload();
-			await expect(
-				page.getByLabel( BLOCK_LABELS.productTemplate )
-			).toBeVisible();
+			await expect( productTemplate ).toBeVisible();
 		} );
 	} );
 } );
