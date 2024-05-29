@@ -16,6 +16,7 @@ import {
 } from '@wordpress/components';
 import { PRIVACY_URL, TERMS_URL } from '@woocommerce/block-settings';
 import { ADMIN_URL } from '@woocommerce/settings';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -140,7 +141,12 @@ export const Edit = ( {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<div className="wc-block-checkout__terms">
+			<div
+				className={ classnames( 'wc-block-checkout__terms', {
+					'wc-block-checkout__terms--with-separator':
+						separatorVisible,
+				} ) }
+			>
 				{ checkbox ? (
 					<>
 						<CheckboxControl
