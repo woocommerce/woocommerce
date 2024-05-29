@@ -2,10 +2,12 @@
  * External dependencies
  */
 import { TabPanel } from '@wordpress/components';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
-export const Tabs = ( { data, page } ) => {
+export const Tabs = ( { data, page, children } ) => {
 	const onSelect = ( tabName ) => {
-		console.log( 'Selecting tab', tabName );
+		const url = getNewPath( {}, `/settings/${ tabName }` );
+		navigateTo( { url } );
 	};
 
 	return (
@@ -20,7 +22,7 @@ export const Tabs = ( { data, page } ) => {
 					title: data[ key ].label,
 				} ) ) }
 			>
-				{ ( tab ) => <p>{ tab.title }</p> }
+				{ () => <div>{ children }</div> }
 			</TabPanel>
 		</>
 	);

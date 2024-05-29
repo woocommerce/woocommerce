@@ -18,7 +18,11 @@ const Settings = ( { params } ) => {
 
 	return (
 		<>
-			<Tabs data={ settingsData } page={ params.page } />
+			<Tabs data={ settingsData } page={ params.page }>
+				<p>
+					now editing <span>{ params.page }</span>
+				</p>
+			</Tabs>
 		</>
 	);
 };
