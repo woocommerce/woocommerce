@@ -11,17 +11,13 @@ import {
 import PickupLocation from '@woocommerce/base-components/cart-checkout/pickup-location';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
-
-/**
- * Internal dependencies
- */
-import ShippingLocation from '../../shipping-location';
-import { CalculatorButton, CalculatorButtonProps } from './calculator-button';
+import { Panel } from '@woocommerce/blocks-components';
 
 export interface ShippingAddressProps {
-	showCalculator: boolean;
 	isShippingCalculatorOpen: boolean;
-	setIsShippingCalculatorOpen: CalculatorButtonProps[ 'setIsShippingCalculatorOpen' ];
+	setIsShippingCalculatorOpen: React.Dispatch<
+		React.SetStateAction< boolean >
+	>;
 	shippingAddress: ShippingAddressType;
 }
 
@@ -30,7 +26,6 @@ export type ActiveShippingZones = {
 }[];
 
 export const ShippingAddress = ( {
-	showCalculator,
 	isShippingCalculatorOpen,
 	setIsShippingCalculatorOpen,
 	shippingAddress,
@@ -60,25 +55,25 @@ export const ShippingAddress = ( {
 	if ( ! hasFormattedAddress && ! isEditor && ! hasMultipleAndDefaultZone ) {
 		return null;
 	}
-	const label = hasFormattedAddress
-		? __( 'Change address', 'woocommerce' )
-		: __( 'Calculate shipping for your location', 'woocommerce' );
 	const formattedLocation = formatShippingAddress( shippingAddress );
-	return (
+	const deliveryLabel = (
 		<>
-			{ prefersCollection ? (
-				<PickupLocation />
-			) : (
-				<ShippingLocation formattedLocation={ formattedLocation } />
-			) }
-			{ showCalculator && (
-				<CalculatorButton
-					label={ label }
-					isShippingCalculatorOpen={ isShippingCalculatorOpen }
-					setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
-				/>
-			) }
+			{ __( 'Delivery to ', 'woocommerce' ) }
+			<strong>{ formattedLocation }</strong>
 		</>
+	);
+	if ( prefersCollection ) return <PickupLocation />;
+
+	return (
+		<Panel
+			className="wc-block-components-totals-shipping-panel"
+			initialOpen={ isShippingCalculatorOpen }
+			hasBorder={ false }
+			title={ deliveryLabel }
+			state={ [ isShippingCalculatorOpen, setIsShippingCalculatorOpen ] }
+		>
+			<></>
+		</Panel>
 	);
 };
 

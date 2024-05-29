@@ -129,7 +129,6 @@ export const TotalsShipping = ( {
 							{ showCalculator && (
 								<ShippingAddress
 									shippingAddress={ shippingAddress }
-									showCalculator={ showCalculator }
 									isShippingCalculatorOpen={
 										isShippingCalculatorOpen
 									}

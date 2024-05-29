@@ -54,6 +54,12 @@
 			padding-left: $gap;
 			padding-right: $gap;
 		}
+		.wc-block-components-totals-shipping-panel {
+			padding: 0;
+		}
+		.wc-block-components-totals-shipping-panel .wc-block-components-panel__button {
+			padding-right: $gap-huge;
+		}
 		.wc-block-components-panel {
 			.wc-block-components-totals-item {
 				padding: 0;
