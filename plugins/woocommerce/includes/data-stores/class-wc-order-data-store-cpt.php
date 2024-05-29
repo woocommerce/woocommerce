@@ -100,6 +100,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$order->set_order_key( wc_generate_order_key() );
 		}
 		parent::create( $order );
+
+		// Do not fire 'woocommerce_new_order' for draft statuses.
+		if ( in_array( $order->get_status( 'edit' ), array( 'auto-draft', 'draft', 'checkout-draft' ), true ) ) {
+			return;
+		}
+
 		do_action( 'woocommerce_new_order', $order->get_id(), $order );
 	}
 
