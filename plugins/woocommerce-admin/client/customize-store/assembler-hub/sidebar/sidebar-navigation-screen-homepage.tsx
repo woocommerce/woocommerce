@@ -50,6 +50,7 @@ import {
 import { isEqual } from 'lodash';
 import { COLOR_PALETTES } from './global-styles/color-palette-variations/constants';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
@@ -226,12 +227,17 @@ export const SidebarNavigationScreenHomepage = () => {
 				'woocommerce'
 		  );
 
+	const isNetworkOffline = useNetworkStatus();
+
 	const trackingAllowed = useSelect( ( select ) =>
 		select( OPTIONS_STORE_NAME ).getOption( 'woocommerce_allow_tracking' )
 	);
 	let notice;
 
 	const isTrackingDisallowed = trackingAllowed === 'no' || ! trackingAllowed;
+	if ( isNetworkOffline ) {
+		notice = __( "Looks like we can't detect your network. Please double-check your internet connection and refresh the page.", 'woocommerce' );
+	}
 	if ( isTrackingDisallowed ) {
 		notice = __(
 			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
