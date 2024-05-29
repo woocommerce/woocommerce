@@ -93,7 +93,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 */
 		public function get_settings_page_data( $pages ) {
 			$pages[ $this->id ] = array(
-				'label'   => $this->label,
+				'label'   => html_entity_decode( $this->label ),
 				'default' => method_exists( $this, 'get_settings_for_default_section' ) ? $this->get_settings_for_default_section() : null
 			);
 
