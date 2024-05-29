@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fixed "woocommerce_new_order" triggering on order creation/update for both CPT and HPOS orders, regarding draft statuses
+Prevent "woocommerce_new_order" from being triggered on orders with "checkout-draft" status
