@@ -187,12 +187,8 @@ class WC_Site_Tracking {
 	 * Init tracking.
 	 */
 	public static function init() {
-		$is_rest = WC()->is_rest_api_request();
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$is_store_api_request = $is_rest && ! empty( $_SERVER['REQUEST_URI'] ) && ( false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) );
-		
-		// Only run tracking on admin or if it is admin API request.
-		if ( ! is_admin() && ! $is_rest && ! $is_store_api_request ) {
+		// Only run tracking on admin and none store REST API requests .
+		if ( ! is_admin() && ( ! WC()->is_rest_api_request() || WC()->is_store_api_request() ) ) {
 			return;
 		}
 		

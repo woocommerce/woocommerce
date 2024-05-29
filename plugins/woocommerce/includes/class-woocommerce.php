@@ -471,6 +471,19 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Returns true if the request is a store REST API request.
+	 *
+	 * @return bool
+	 */
+	public function is_store_api_request() {
+		if ( WC()->is_rest_api_request() ) {
+			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			return false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' );
+		}
+		return false;
+	}
+
+	/**
 	 * Load REST API.
 	 */
 	public function load_rest_api() {
@@ -664,7 +677,7 @@ final class WooCommerce {
 			$this->frontend_includes();
 		}
 
-		if ( $this->is_rest_api_request() ) {
+		if ( $this->is_rest_api_request() && ! $this->is_store_api_request() ) {
 			// Include tracks classes for use in REST API.
 			$this->tracks_includes();
 		}
