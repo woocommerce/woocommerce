@@ -3,6 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -14,11 +15,31 @@ export interface SubscriptionsExpiredExpiringNoticeProps {
 	type: string;
 }
 
+export interface TrackEvents {
+	shown: string;
+	clicked: string;
+	dismissed: string;
+}
+
 export default function SubscriptionsExpiredExpiringNotice(
 	props: SubscriptionsExpiredExpiringNoticeProps
 ): JSX.Element | null {
 	const { type } = props;
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	const eventKeys: Record< string, TrackEvents > = {
+		'woo-subscription-expired-notice': {
+			shown: 'woo_subscription_expired_notice_in_marketplace_shown',
+			clicked: 'woo_subscription_expired_notice_in_marketplace_clicked',
+			dismissed:
+				'woo_subscription_expired_notice_in_marketplace_dismissed',
+		},
+		'woo-subscription-expiring-notice': {
+			shown: 'woo_subscription_expiring_notice_in_marketplace_shown',
+			clicked: 'woo_subscription_expiring_notice_in_marketplace_clicked',
+			dismissed:
+				'woo_subscription_expiring_notice_in_marketplace_dismissed',
+		},
+	};
 
 	let notice = null;
 	let notice_id = '';
@@ -39,6 +60,7 @@ export default function SubscriptionsExpiredExpiringNotice(
 	}
 
 	const handleClose = () => {
+		recordEvent( eventKeys[ notice_id ].dismissed );
 		const data = { notice_id, dismiss_notice_nonce };
 		apiFetch( {
 			path: `/wc-admin/notice/dismiss`,
@@ -47,6 +69,14 @@ export default function SubscriptionsExpiredExpiringNotice(
 		} );
 	};
 
+	function handleClick() {
+		recordEvent( eventKeys[ notice_id ].clicked );
+	}
+
+	function handleLoad() {
+		recordEvent( eventKeys[ notice_id ].shown );
+	}
+
 	return (
 		<Notice
 			id={ notice_id }
@@ -54,8 +84,13 @@ export default function SubscriptionsExpiredExpiringNotice(
 			isDismissible={ true }
 			variant="error"
 			onClose={ handleClose }
+			onLoad={ handleLoad }
 		>
-			<Button href={ notice.button_link } variant="secondary">
+			<Button
+				href={ notice.button_link }
+				variant="secondary"
+				onClick={ handleClick }
+			>
 				{ notice.button_text }
 			</Button>
 		</Notice>
