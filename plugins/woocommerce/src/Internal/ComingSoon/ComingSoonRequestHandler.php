@@ -102,6 +102,17 @@ class ComingSoonRequestHandler {
 			return false;
 		}
 
+		/**
+		 * Check if there is an exclusion.
+		 *
+		 * @since 9.1.0
+		 *
+		 * @param bool $is_excluded If the request should be excluded from Coming soon mode. Defaults to false.
+		 */
+		if ( apply_filters( 'woocommerce_coming_soon_exclude', false ) ) {
+			return false;
+		}
+
 		// Check if the private link option is enabled.
 		if ( get_option( 'woocommerce_private_link' ) === 'yes' ) {
 			// Exclude users with a private link.
