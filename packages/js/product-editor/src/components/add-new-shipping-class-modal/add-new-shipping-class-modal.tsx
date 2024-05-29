@@ -5,6 +5,7 @@ import {
 	useState,
 	createElement,
 	createInterpolateElement,
+	useRef,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Form, FormErrors, useFormContext } from '@woocommerce/components';
@@ -55,6 +56,9 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 		shippingNameInputValue
 	);
 
+	// Get the reference of the description field
+	const descriptionRef = useRef< HTMLInputElement | null >( null );
+
 	/**
 	 * Pull the slug suggestion from the server,
 	 * and update the slug input field.
@@ -66,6 +70,11 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 		if ( prevNameValue === shippingNameInputValue ) {
 			return;
 		}
+
+		setIsRequestingSlug( true );
+
+		// Being optimistic, focus on the description field.
+		descriptionRef.current?.focus();
 
 		setPrevNameValue( shippingNameInputValue );
 
@@ -152,6 +161,7 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 						'woocommerce'
 					)
 				}
+				ref={ descriptionRef }
 			/>
 
 			<div className="woocommerce-add-new-shipping-class-modal__buttons">
