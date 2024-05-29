@@ -23,8 +23,12 @@ window.jQuery( document ).ready( function () {
 			);
 
 			const notice_id = 'woo-subscription-expired-notice';
+			const dismiss_notice_nonce = window
+				.jQuery( expiredNoticeSelector )
+				.data( 'dismissnonce' );
 			const data = {
 				notice_id,
+				dismiss_notice_nonce,
 			};
 
 			window.wp.apiFetch( {
@@ -47,8 +51,12 @@ window.jQuery( document ).ready( function () {
 			);
 
 			const notice_id = 'woo-subscription-expiring-notice';
+			const dismiss_notice_nonce = window
+				.jQuery( expiredNoticeSelector )
+				.data( 'dismissnonce' );
 			const data = {
 				notice_id,
+				dismiss_notice_nonce,
 			};
 
 			window.wp.apiFetch( {

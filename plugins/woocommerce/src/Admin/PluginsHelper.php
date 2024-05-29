@@ -662,7 +662,7 @@ class PluginsHelper {
 		$notice = self::get_expired_subscription_notice();
 
 		if ( isset( $notice['description'] ) ) {
-			echo '<div id="woo-subscription-expired-notice" class="woo-subscription-expired-notice woo-subscription-notices notice notice-error is-dismissible">
+			echo '<div id="woo-subscription-expired-notice" class="woo-subscription-expired-notice woo-subscription-notices notice notice-error is-dismissible" data-dismissnonce="' . wp_create_nonce( 'dismiss_notice' ) . '">
 	    		<p class="widefat">' . wp_kses_post( $notice['description'] ) . '</p>
 	    	</div>';
 		}
@@ -685,7 +685,7 @@ class PluginsHelper {
 		$notice = self::get_expiring_subscription_notice();
 
 		if ( isset( $notice['description'] ) ) {
-			echo '<div id="woo-subscription-expiring-notice" class="woo-subscription-expiring-notice woo-subscription-notices notice notice-error is-dismissible">
+			echo '<div id="woo-subscription-expiring-notice" class="woo-subscription-expiring-notice woo-subscription-notices notice notice-error is-dismissible" data-dismissnonce="' . wp_create_nonce( 'dismiss_notice' ) . '">
 	    		<p class="widefat">' . wp_kses_post( $notice['description'] ) . '</p>
 	    	</div>';
 		}

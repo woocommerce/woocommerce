@@ -67,6 +67,7 @@ class WC_Helper_Admin {
 			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
 			'wooUpdateCount'             => WC_Helper_Updater::get_updates_count_based_on_site_status(),
 			'woocomConnectNoticeType'    => $woo_connect_notice_type,
+			'dismissNoticeNonce'         => wp_create_nonce( 'dismiss_notice' ),
 		);
 
 		if ( WC_Helper::is_site_connected() ) {
