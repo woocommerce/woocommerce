@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 import { Locator } from '@playwright/test';
+import { test as base, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -26,12 +26,11 @@ const blockData = {
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
-	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
+	pageObject: async ( { page, editor, frontendUtils }, use ) => {
 		const pageObject = new ProductGalleryPage( {
 			page,
 			editor,
 			frontendUtils,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},
@@ -520,9 +519,9 @@ test.describe( `${ blockData.name }`, () => {
 	test.describe( 'block availability', () => {
 		test( 'should be available on the Single Product Template', async ( {
 			page,
-			editorUtils,
+			editor,
 		} ) => {
-			await editorUtils.openGlobalBlockInserter();
+			await editor.openGlobalBlockInserter();
 			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
 			const productGalleryBlockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
@@ -533,15 +532,15 @@ test.describe( `${ blockData.name }`, () => {
 
 		test( 'should be available on the Product Gallery template part', async ( {
 			admin,
-			editorUtils,
+			editor,
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//product-gallery`,
 				postType: 'wp_template_part',
 			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.openGlobalBlockInserter();
+			await editor.enterEditMode();
+			await editor.openGlobalBlockInserter();
 			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
 			const productGalleryBlockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
@@ -553,10 +552,10 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'should be hidden on the post editor', async ( {
 			admin,
 			page,
-			editorUtils,
+			editor,
 		} ) => {
 			await admin.createNewPost();
-			await editorUtils.openGlobalBlockInserter();
+			await editor.openGlobalBlockInserter();
 			const productGalleryBlockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
 				.getByRole( 'option', { name: blockData.title } );
@@ -599,5 +598,38 @@ test.describe( `${ blockData.name }`, () => {
 		expect(
 			width === height + 1 || width === height - 1 || width === height
 		).toBeTruthy();
+	} );
+
+	test( 'should persistently display the block when navigating back to the template without a page reload', async ( {
+		editor,
+		pageObject,
+		page,
+	} ) => {
+		await pageObject.addProductGalleryBlock( { cleanContent: true } );
+		await editor.saveSiteEditorEntities();
+
+		await page.getByLabel( 'Open Navigation' ).click();
+		const navigationSidebar = page.getByLabel( 'Navigation' );
+		const navigationBackButton = navigationSidebar.getByLabel( 'Back' );
+		await expect( navigationBackButton ).toBeVisible();
+		await navigationSidebar.getByLabel( 'Back' ).click();
+		await page.getByRole( 'button', { name: 'Index' } ).click();
+
+		const editorFrame = page.frameLocator( 'iframe[name="editor-canvas"]' );
+		const headerTitle = editorFrame.getByRole( 'document', {
+			name: 'Block: Site Title',
+		} );
+		await expect( headerTitle ).toBeVisible();
+
+		await navigationSidebar.getByLabel( 'Back' ).click();
+		await page
+			.getByRole( 'button', { name: 'Custom Single Product' } )
+			.click();
+
+		const productGalleryBlock = editorFrame.getByLabel(
+			'Block: Product Gallery (Beta)'
+		);
+
+		await expect( productGalleryBlock ).toBeVisible();
 	} );
 } );

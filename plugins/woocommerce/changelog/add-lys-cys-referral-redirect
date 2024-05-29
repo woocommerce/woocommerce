@@ -1,5 +1,0 @@
-Significance: minor
-Type: add
-
-Comment: Added feature to redirect back to LYS from CYS if the referrer is LYS. 
-

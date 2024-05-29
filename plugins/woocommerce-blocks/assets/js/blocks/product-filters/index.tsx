@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { isExperimentalBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -10,6 +10,6 @@ import { isExperimentalBuild } from '@woocommerce/block-settings';
 import metadata from './block.json';
 import { ProductFiltersBlockSettings } from './settings';
 
-if ( isExperimentalBuild() ) {
+if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, ProductFiltersBlockSettings );
 }

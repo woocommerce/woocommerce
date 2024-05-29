@@ -26,6 +26,8 @@ export function PostPublishSection( { postType }: PostPublishSectionProps ) {
 
 	const productURL = getProductURL( isScheduled );
 
+	if ( ! productURL ) return null;
+
 	const CopyButton = ( { text, onCopy, children }: CopyButtonProps ) => {
 		const ref = useCopyToClipboard(
 			text,
