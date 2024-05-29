@@ -2731,3 +2731,45 @@ function wc_update_891_create_plugin_autoinstall_history_option() {
 function wc_update_910_add_launch_your_store_tour_option() {
 	add_option( 'woocommerce_show_lys_tour', 'yes' );
 }
+
+/**
+ * Remove user meta associated with the keys '_last_order', '_order_count' and '_money_spent'.
+ *
+ * New keys are now used for these, to improve compatibility with multisite networks.
+ *
+ * @return void
+ */
+function wc_update_910_remove_obsolete_user_meta() {
+	global $wpdb;
+
+	$deletions = $wpdb->query( "
+		DELETE FROM $wpdb->usermeta
+		WHERE meta_key IN (
+			'_last_order',
+			'_order_count',
+			'_money_spent'
+		)
+	" );
+
+	$logger = wc_get_logger();
+
+	if ( null === $logger ) {
+		return;
+	}
+
+	if ( false === $deletions ) {
+		$logger->notice( __( 'During the update to 9.1.0, WooCommerce attempted to remove user meta with the keys "_last_order", "_order_count" and "_money_spent" but was unable to do so.', 'woocommerce' ) );
+	} else {
+		$logger->notice(
+			sprintf(
+				_n(
+					'During the update to 9.1.0, WooCommerce removed %d user meta row associated with the meta keys "_last_order", "_order_count" or "_money_spent".',
+					'During the update to 9.1.0, WooCommerce removed %d user meta rows associated with the meta keys "_last_order", "_order_count" or "_money_spent".',
+					$deletions,
+					'woocommerce'
+				),
+				number_format_i18n( $deletions )
+			)
+		);
+	}
+}
