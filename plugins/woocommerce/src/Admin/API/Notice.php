@@ -54,9 +54,13 @@ class Notice extends \WC_REST_Data_Controller {
 	 * Save notice dismiss information in user meta.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function dissmiss_notice( $request ) {
+		if ( ! isset( $request['dismiss_notice_nonce'] )
+		     || ! wp_verify_nonce( $request['dismiss_notice_nonce'], 'dismiss_notice' )) {
+			return new WP_Error( 'unauthorized', 'Invalid nonce.', [ 'status' => 401 ] );
+		}
 		$notice_id = isset( $request['notice_id'] ) ? sanitize_text_field( wp_unslash( $request['notice_id'] ) ) : '';
 		$dismissed = false;
 		switch ( $notice_id ) {
@@ -83,8 +87,6 @@ class Notice extends \WC_REST_Data_Controller {
 	 * @return bool
 	 */
 	public function get_permission(): bool {
-		return current_user_can( 'manage_woocommerce' )
-		       && isset( $request['dismiss_notice_nonce'] )
-		       && wp_verify_nonce( $request['dismiss_notice_nonce'], 'dismiss_notice' );
+		return current_user_can( 'manage_woocommerce' );
 	}
 }
