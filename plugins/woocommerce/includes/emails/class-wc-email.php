@@ -602,9 +602,15 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function style_inline( $content ) {
 		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ), true ) ) {
+			$css  = '';
+			$css .= $this->get_must_use_css_styles();
+			$css .= "\n";
+
 			ob_start();
 			wc_get_template( 'emails/email-styles.php' );
-			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean(), $this );
+			$css .= ob_get_clean();
+
+			$css = apply_filters( 'woocommerce_email_styles', $css, $this );
 
 			$css_inliner_class = CssInliner::class;
 
@@ -630,6 +636,29 @@ class WC_Email extends WC_Settings_API {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Returns CSS styles that should be included with all HTML e-mails, regardless of theme specific customizations.
+	 *
+	 * @since 9.1.0
+	 *
+	 * @return string
+	 */
+	protected function get_must_use_css_styles(): string {
+		$css = <<<'EOF'
+
+		/*
+		* Temporary measure until e-mail clients more properly support the correct styles.
+		* See https://github.com/woocommerce/woocommerce/pull/47738.
+		*/
+		.screen-reader-text {
+			display: none;
+		}
+
+		EOF;
+
+		return $css;
 	}
 
 	/**
