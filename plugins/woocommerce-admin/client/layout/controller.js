@@ -69,7 +69,7 @@ const CoreProfiler = lazy( () =>
 );
 
 const SettingsGroup = lazy( () =>
-	import( /* webpackChunkName: "profile-wizard" */ '../settings' )
+	import( /* webpackChunkName: "settings" */ '../settings' )
 );
 const WCPaymentsWelcomePage = lazy( () =>
 	import(
@@ -340,18 +340,7 @@ export const getPages = () => {
 				if ( ! page ) {
 					return [];
 				}
-				return [
-					...initialBreadcrumbs,
-					[
-						settingsPages.general
-							? '/settings/general'
-							: `/settings/${
-									Object.keys( settingsPages )[ 0 ]
-							  }`,
-						__( 'Settings', 'woocommerce' ),
-					],
-					page.label,
-				];
+				return [ ...initialBreadcrumbs, page.label ];
 			},
 			wpOpenMenu: 'toplevel_page_woocommerce',
 			capability: 'manage_woocommerce',

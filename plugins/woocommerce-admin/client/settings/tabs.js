@@ -11,7 +11,7 @@ export const Tabs = ( { data, page } ) => {
 	return (
 		<>
 			<TabPanel
-				className="my-tab-panel"
+				className="woocommerce-settings-tabs"
 				activeClass="active-tab"
 				onSelect={ onSelect }
 				initialTabName={ page }

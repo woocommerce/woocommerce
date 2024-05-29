@@ -1,0 +1,25 @@
+.woocommerce-admin-page__settings_page {
+	.woocommerce-layout__primary {
+		margin: 0;
+	}
+	.woocommerce-layout .woocommerce-layout__main {
+		padding-right: 0;
+	}
+	#wpbody-content {
+		background-color: white;
+	}
+}
+
+.woocommerce-settings-tabs {
+	.components-tab-panel__tabs {
+		border-bottom: 1px solid lightgray;
+		padding: 16px 16px 0 16px;
+	}
+	.components-tab-panel__tabs-item {
+		font-weight: 400;
+
+		&.active-tab {
+			border-bottom: 2px solid blue;
+		}
+	}
+}

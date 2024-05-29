@@ -7,6 +7,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { Tabs } from './tabs';
+import './style.scss';
 
 const Settings = ( { params } ) => {
 	const settingsData = window.wcSettings?.admin?.settingsPages;
