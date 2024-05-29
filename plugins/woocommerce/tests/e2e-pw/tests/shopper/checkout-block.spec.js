@@ -1,22 +1,21 @@
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { admin, customer } = require( '../../test-data/data' );
-const { setFilterValue, clearFilters } = require( '../../utils/filters' );
-const {
-	addProductsToCart: pdpAddProductsToCart,
-} = require( '../../utils/pdp' );
-const { addAProductToCart } = require( '../../utils/cart' );
-const {
-	fillShippingCheckoutBlocks,
-	fillBillingCheckoutBlocks,
-} = require( '../../utils/checkout' );
-const { getOrderIdFromUrl } = require( '../../utils/order' );
 const {
 	goToPageEditor,
 	fillPageTitle,
 	insertBlockByShortcut,
 	publishPage,
 } = require( '../../utils/editor' );
+const { addAProductToCart } = require( '../../utils/cart' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+
+const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { admin, customer } = require( '../../test-data/data' );
+const { setFilterValue, clearFilters } = require( '../../utils/filters' );
+
+const {
+	fillShippingCheckoutBlocks,
+	fillBillingCheckoutBlocks,
+} = require( '../../utils/checkout' );
+const { getOrderIdFromUrl } = require( '../../utils/order' );
 
 const guestEmail = 'checkout-guest@example.com';
 const newAccountEmail = 'marge-test-account@example.com';
@@ -28,11 +27,6 @@ const singleProductSalePrice = '75.00';
 const twoProductPrice = ( singleProductSalePrice * 2 ).toString();
 const threeProductPrice = ( singleProductSalePrice * 3 ).toString();
 
-const checkoutBlockPageTitle = `Checkout Block ${ Date.now() }`;
-const checkoutBlockPageSlug = checkoutBlockPageTitle
-	.replace( / /gi, '-' )
-	.toLowerCase();
-
 let guestOrderId1,
 	guestOrderId2,
 	customerOrderId,
@@ -40,8 +34,21 @@ let guestOrderId1,
 	productId,
 	shippingZoneId;
 
-test.describe( 'Checkout Block page', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+baseTest.describe( 'Checkout Block page', () => {
+	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
+		testPageTitlePrefix: 'Checkout Block',
+		page: async ( { context, page, testPage }, use ) => {
+			await goToPageEditor( { page } );
+			await fillPageTitle( page, testPage.title );
+			await insertBlockByShortcut( page, '/checkout' );
+			await publishPage( page, testPage.title );
+
+			await context.clearCookies();
+
+			await use( page );
+		},
+	} );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -155,6 +162,31 @@ test.describe( 'Checkout Block page', () => {
 
 			await api.delete( `customers/${ customerId }`, { force: true } );
 		}
+		// make sure our customer user has a pre-defined billing/shipping address
+		await api.put( `customers/2`, {
+			shipping: {
+				first_name: 'Maggie',
+				last_name: 'Simpson',
+				company: '',
+				address_1: '123 Evergreen Terrace',
+				address_2: '',
+				city: 'Springfield',
+				state: 'OR',
+				postcode: '97403',
+				country: 'US',
+			},
+			billing: {
+				first_name: 'Maggie',
+				last_name: 'Simpson',
+				company: '',
+				address_1: '123 Evergreen Terrace',
+				address_2: '',
+				city: 'Springfield',
+				state: 'OR',
+				postcode: '97403',
+				country: 'US',
+			},
+		} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -215,20 +247,14 @@ test.describe( 'Checkout Block page', () => {
 		} );
 	} );
 
-	test( 'can see empty checkout block page', async ( { page } ) => {
-		// create a new page with checkout block
-		await goToPageEditor( { page } );
-		await fillPageTitle( page, checkoutBlockPageTitle );
-		await insertBlockByShortcut( page, '/checkout' );
-		await publishPage( page, checkoutBlockPageTitle );
-
+	test( 'can see empty checkout block page', async ( { page, testPage } ) => {
 		// go to the page to test empty cart block
-		await page.goto( checkoutBlockPageSlug );
+		await page.goto( testPage.slug );
 		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Your cart is currently empty!' )
+			page.getByText( 'Cannot create order from empty cart.' )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'link', { name: 'Browse store' } )
@@ -241,16 +267,15 @@ test.describe( 'Checkout Block page', () => {
 
 	test( 'allows customer to choose available payment methods', async ( {
 		page,
-		context,
+		testPage,
 	} ) => {
-		await context.clearCookies();
-
 		// this time we're going to add two products to the cart
-		await pdpAddProductsToCart( page, simpleProductName, '2' );
+		await addAProductToCart( page, productId );
+		await addAProductToCart( page, productId );
+		await page.goto( testPage.slug );
 
-		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
 		// check the order summary
@@ -262,6 +287,9 @@ test.describe( 'Checkout Block page', () => {
 				'.wc-block-components-order-summary-item__individual-price'
 			)
 		).toContainText( `$${ singleProductSalePrice }` );
+		await expect(
+			page.locator( '.wc-block-components-product-metadata__description' )
+		).toContainText( simpleProductDesc );
 		await expect(
 			page.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
@@ -277,16 +305,16 @@ test.describe( 'Checkout Block page', () => {
 
 	test( 'allows customer to fill shipping details', async ( {
 		page,
-		context,
+		testPage,
 	} ) => {
-		await context.clearCookies();
-
 		// this time we're going to add three products to the cart
-		await pdpAddProductsToCart( page, simpleProductName, '3' );
+		await addAProductToCart( page, productId );
+		await addAProductToCart( page, productId );
+		await addAProductToCart( page, productId );
+		await page.goto( testPage.slug );
 
-		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
 		// check the order summary
@@ -307,7 +335,7 @@ test.describe( 'Checkout Block page', () => {
 			page.getByLabel( 'Address', { exact: true } )
 		).toBeEditable();
 		await expect(
-			page.getByLabel( 'Apartment, suite, etc. (optional)' )
+			page.getByText( '+ Add apartment, suite, etc.' )
 		).toBeEnabled();
 		await expect(
 			page.getByLabel( 'United States (US), Country/Region' )
@@ -320,14 +348,13 @@ test.describe( 'Checkout Block page', () => {
 
 	test( 'allows customer to fill different shipping and billing details', async ( {
 		page,
-		context,
+		testPage,
 	} ) => {
-		await context.clearCookies();
-
 		await addAProductToCart( page, productId );
-		await page.goto( checkoutBlockPageSlug );
+		await page.goto( testPage.slug );
+
 		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
 		// For flakiness, sometimes the email address is not filled
@@ -363,9 +390,9 @@ test.describe( 'Checkout Block page', () => {
 		guestOrderId2 = getOrderIdFromUrl( page );
 
 		await addAProductToCart( page, productId );
-		await page.goto( checkoutBlockPageSlug );
+		await page.goto( testPage.slug );
 		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
 		// verify shipping details
@@ -400,45 +427,43 @@ test.describe( 'Checkout Block page', () => {
 		).toHaveValue( '97403' );
 
 		// verify billing details
-		// ISSUE REPORTED #42967, please uncomment below once fixed
-		// await page.getByLabel( 'Edit address', { exact: true } ).last().click();
-		// await expect(
-		// 	page
-		// 		.getByRole( 'group', { name: 'Billing address' } )
-		// 		.getByLabel( 'First name' )
-		// ).toHaveValue( 'Mister' );
-		// await expect(
-		// 	page
-		// 		.getByRole( 'group', { name: 'Billing address' } )
-		// 		.getByLabel( 'Last name' )
-		// ).toHaveValue( 'Burns' );
-		// await expect(
-		// 	page
-		// 		.getByRole( 'group', { name: 'Billing address' } )
-		// 		.getByLabel( 'Address', { exact: true } )
-		// ).toHaveValue( '156th Street' );
-		// await expect(
-		// 	page
-		// 		.getByRole( 'group', { name: 'Billing address' } )
-		// 		.getByLabel( 'City' )
-		// ).toHaveValue( 'Springfield' );
-		// await expect(
-		// 	page
-		// 		.getByRole( 'group', { name: 'Billing address' } )
-		// 		.getByLabel( 'ZIP Code' )
-		// ).toHaveValue( '98500' );
+		await page.getByLabel( 'Edit address', { exact: true } ).last().click();
+		await expect(
+			page
+				.getByRole( 'group', { name: 'Billing address' } )
+				.getByLabel( 'First name' )
+		).toHaveValue( 'Mister' );
+		await expect(
+			page
+				.getByRole( 'group', { name: 'Billing address' } )
+				.getByLabel( 'Last name' )
+		).toHaveValue( 'Burns' );
+		await expect(
+			page
+				.getByRole( 'group', { name: 'Billing address' } )
+				.getByLabel( 'Address', { exact: true } )
+		).toHaveValue( '156th Street' );
+		await expect(
+			page
+				.getByRole( 'group', { name: 'Billing address' } )
+				.getByLabel( 'City' )
+		).toHaveValue( 'Springfield' );
+		await expect(
+			page
+				.getByRole( 'group', { name: 'Billing address' } )
+				.getByLabel( 'ZIP Code' )
+		).toHaveValue( '98500' );
 	} );
 
 	test( 'allows customer to fill shipping details and toggle different billing', async ( {
 		page,
-		context,
+		testPage,
 	} ) => {
-		await context.clearCookies();
-
 		await addAProductToCart( page, productId );
-		await page.goto( checkoutBlockPageSlug );
+		await page.goto( testPage.slug );
+
 		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
 		// For flakiness, sometimes the email address is not filled
@@ -464,14 +489,13 @@ test.describe( 'Checkout Block page', () => {
 
 	test( 'can choose different shipping types in the checkout', async ( {
 		page,
-		context,
+		testPage,
 	} ) => {
-		await context.clearCookies();
-
 		await addAProductToCart( page, productId );
-		await page.goto( checkoutBlockPageSlug );
+		await page.goto( testPage.slug );
+
 		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
 		// For flakiness, sometimes the email address is not filled
@@ -547,15 +571,15 @@ test.describe( 'Checkout Block page', () => {
 
 	test( 'allows guest customer to place an order', async ( {
 		page,
-		context,
+		testPage,
 	} ) => {
-		await context.clearCookies();
+		// adding 2 products to the cart
+		await addAProductToCart( page, productId );
+		await addAProductToCart( page, productId );
+		await page.goto( testPage.slug );
 
-		await pdpAddProductsToCart( page, simpleProductName, '2' );
-
-		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
 		// For flakiness, sometimes the email address is not filled
@@ -669,15 +693,14 @@ test.describe( 'Checkout Block page', () => {
 
 	test( 'allows existing customer to place an order', async ( {
 		page,
-		context,
+		testPage,
 	} ) => {
-		await context.clearCookies();
+		await addAProductToCart( page, productId );
+		await addAProductToCart( page, productId );
+		await page.goto( testPage.slug );
 
-		await pdpAddProductsToCart( page, simpleProductName, '2' );
-
-		await page.goto( checkoutBlockPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
 		// click to log in and make sure you are on the same page after logging in
@@ -690,27 +713,13 @@ test.describe( 'Checkout Block page', () => {
 			.fill( customer.password );
 		await page.locator( 'text=Log in' ).click();
 		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
-		// if edit address is present click it, otherwise fill shipping details
-		if (
-			await page
-				.getByLabel( 'Edit address', { exact: true } )
-				.first()
-				.isVisible()
-		) {
-			await page
-				.getByLabel( 'Edit address', { exact: true } )
-				.first()
-				.click();
-		} else {
-			console.log(
-				'No saved shipping address found, filling it instead.'
-			);
-			// fill shipping address
-			await fillShippingCheckoutBlocks( page );
-		}
+		await page
+			.getByLabel( 'Edit address', { exact: true } )
+			.first()
+			.click();
 
 		// check COD payment method
 		await page.getByLabel( 'Cash on delivery' ).check();
@@ -773,14 +782,13 @@ test.describe( 'Checkout Block page', () => {
 
 	test( 'can create an account during checkout', async ( {
 		page,
-		context,
+		testPage,
 	} ) => {
-		await context.clearCookies();
-
 		await addAProductToCart( page, productId );
-		await page.goto( checkoutBlockPageSlug );
+		await page.goto( testPage.slug );
+
 		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
 		// check create account during checkout

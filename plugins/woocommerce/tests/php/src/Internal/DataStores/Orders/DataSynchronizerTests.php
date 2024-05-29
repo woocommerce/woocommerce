@@ -664,7 +664,7 @@ class DataSynchronizerTests extends HposTestCase {
 		);
 		$sync_setting = array_values( $sync_setting )[0];
 		$this->assertEquals( $sync_setting['value'], 'no' );
-		$this->assertTrue( str_contains( $sync_setting['desc_tip'], "There's 1 order pending sync" ) );
+		$this->assertTrue( str_contains( $sync_setting['desc_tip'], $auth_table_change_allowed_with_sync_pending ? "There's 1 order pending sync" : "There's currently 1 order out of sync" ) );
 		$this->assertTrue(
 			str_contains(
 				$sync_setting['desc_tip'],

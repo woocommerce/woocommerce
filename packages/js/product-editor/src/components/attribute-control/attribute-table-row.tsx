@@ -36,9 +36,9 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	disabledAttributeMessage,
 	isLoadingAttributes,
 	attributes,
+	onNewAttributeAdd,
 	onAttributeSelect,
 
-	termLabel = undefined,
 	termPlaceholder,
 	onTermsSelect,
 
@@ -199,6 +199,15 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		onTermsSelect( [ ...selectedTerms, ...newItems ], index, attribute );
 	}
 
+	/*
+	 * Check if there are available suggestions
+	 * to show the values column,
+	 * comparing the suggestions length with the selected values length.
+	 */
+	const hasAvailableSuggestions =
+		suggestions?.length &&
+		suggestions.length > ( selectedValues?.length || 0 );
+
 	return (
 		<tr
 			key={ index }
@@ -211,6 +220,9 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					current={ attribute }
 					items={ filteredAttributes }
 					isLoading={ isLoadingAttributes }
+					onAddNew={ ( newValue ) =>
+						onNewAttributeAdd?.( newValue, index )
+					}
 					onChange={ ( nextAttribute ) => {
 						if ( nextAttribute.id === attributeId ) {
 							return;
@@ -223,9 +235,12 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 				/>
 			</td>
 
-			<td className="woocommerce-new-attribute-modal__table-attribute-value-column">
+			<td
+				className={ `woocommerce-new-attribute-modal__table-attribute-value-column${
+					hasAvailableSuggestions ? ' has-values' : ''
+				}` }
+			>
 				<FormTokenField
-					label={ termLabel }
 					placeholder={ termPlaceholder }
 					disabled={ ! attribute }
 					suggestions={ suggestions }

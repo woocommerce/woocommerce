@@ -2,10 +2,15 @@
  * External dependencies
  */
 import { Suspense, lazy } from '@wordpress/element';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { parse, stringify } from 'qs';
 import { find, isEqual, last, omit } from 'lodash';
-import { applyFilters } from '@wordpress/hooks';
+import {
+	applyFilters,
+	addAction,
+	removeAction,
+	didFilter,
+} from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import {
 	getNewPath,
@@ -25,16 +30,6 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { isFeatureEnabled } from '~/utils/features';
 import { NoMatch } from './NoMatch';
 
-const AddProductPage = lazy( () =>
-	import(
-		/* webpackChunkName: "edit-product-page" */ '../products/add-product-page'
-	)
-);
-const EditProductPage = lazy( () =>
-	import(
-		/* webpackChunkName: "edit-product-page" */ '../products/edit-product-page'
-	)
-);
 const ProductVariationPage = lazy( () =>
 	import(
 		/* webpackChunkName: "edit-product-page" */ '../products/product-variation-page'
@@ -241,36 +236,6 @@ export const getPages = () => {
 				id: 'woocommerce-edit-product',
 			},
 		} );
-	} else if (
-		window.wcAdminFeatures[ 'new-product-management-experience' ]
-	) {
-		pages.push( {
-			container: AddProductPage,
-			path: '/add-product',
-			breadcrumbs: [
-				[ '/add-product', __( 'Product', 'woocommerce' ) ],
-				__( 'Add New Product', 'woocommerce' ),
-			],
-			navArgs: {
-				id: 'woocommerce-add-product',
-			},
-			wpOpenMenu: 'menu-posts-product',
-			capability: 'manage_woocommerce',
-		} );
-
-		pages.push( {
-			container: EditProductPage,
-			path: '/product/:productId',
-			breadcrumbs: [
-				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
-				__( 'Edit Product', 'woocommerce' ),
-			],
-			navArgs: {
-				id: 'woocommerce-edit-product',
-			},
-			wpOpenMenu: 'menu-posts-product',
-			capability: 'manage_woocommerce',
-		} );
 	}
 
 	pages.push( {
@@ -429,6 +394,32 @@ export const getPages = () => {
 
 	return filteredPages;
 };
+
+export function usePages() {
+	const [ pages, setPages ] = useState( getPages );
+
+	/*
+	 * Handler for new pages being added after the initial filter has been run,
+	 * so that if any routing pages are added later, they can still be rendered
+	 * instead of falling back to the `NoMatch` page.
+	 */
+	useEffect( () => {
+		const handleHookAdded = ( hookName ) => {
+			if ( hookName === PAGES_FILTER && didFilter( PAGES_FILTER ) > 0 ) {
+				setPages( getPages() );
+			}
+		};
+
+		const namespace = `woocommerce/woocommerce/watch_${ PAGES_FILTER }`;
+		addAction( 'hookAdded', namespace, handleHookAdded );
+
+		return () => {
+			removeAction( 'hookAdded', namespace );
+		};
+	}, [] );
+
+	return pages;
+}
 
 function usePrevious( value ) {
 	const ref = useRef();

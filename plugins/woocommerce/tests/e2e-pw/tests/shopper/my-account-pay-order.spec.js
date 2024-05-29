@@ -90,7 +90,7 @@ test.describe( 'Customer can pay for their order through My Account', () => {
 		await page.locator( 'a.pay' ).click();
 
 		await expect(
-			page.getByRole( 'heading', { name: 'Checkout' } )
+			page.getByRole( 'button', { name: 'Pay for order' } )
 		).toBeVisible();
 		await page.locator( '#place_order' ).click();
 

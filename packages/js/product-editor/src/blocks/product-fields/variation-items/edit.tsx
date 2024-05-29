@@ -28,7 +28,7 @@ import { VariableProductTour } from './variable-product-tour';
 import { TRACKS_SOURCE } from '../../../constants';
 import { handlePrompt } from '../../../utils/handle-prompt';
 import { ProductEditorBlockEditProps } from '../../../types';
-import { EmptyState } from './empty-state';
+import { EmptyState } from '../../../components/empty-state';
 
 export function Edit( {
 	attributes,
@@ -183,7 +183,15 @@ export function Edit( {
 			: '';
 
 	if ( ! hasVariationOptions ) {
-		return <EmptyState />;
+		return (
+			<EmptyState
+				names={ [
+					__( 'Variation', 'woocommerce' ),
+					__( 'Colors', 'woocommerce' ),
+					__( 'Sizes', 'woocommerce' ),
+				] }
+			/>
+		);
 	}
 
 	return (

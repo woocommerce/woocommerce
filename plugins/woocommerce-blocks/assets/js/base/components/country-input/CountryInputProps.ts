@@ -14,7 +14,7 @@ export interface CountryInputProps extends Omit< ComboboxProps, 'options' > {
 	 *
 	 * This value gets assigned to both the wrapper `Combobox` and the wrapped input element.
 	 */
-	autoComplete?: string;
+	autoComplete?: string | undefined;
 }
 
 export interface CountryInputWithCountriesProps extends CountryInputProps {

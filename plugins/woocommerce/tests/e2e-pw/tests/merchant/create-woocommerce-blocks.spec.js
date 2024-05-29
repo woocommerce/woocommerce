@@ -11,11 +11,8 @@ const simpleProductName = 'Simplest Product';
 const singleProductPrice = '555.00';
 
 // all WooCommerce blocks except:
-// default cart and checkout blocks, mini-cart, product collection (beta)
+// default cart and checkout blocks, mini-cart, product collection
 const blocks = [
-	{
-		name: 'Product Price',
-	},
 	{
 		name: 'Product Search',
 	},
