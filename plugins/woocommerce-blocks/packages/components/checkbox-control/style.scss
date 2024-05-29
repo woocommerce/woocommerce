@@ -22,6 +22,7 @@
 		border: 1px solid $universal-border-medium;
 		border-radius: $universal-border-radius;
 		box-sizing: border-box;
+		color: currentColor;
 		height: em(24px);
 		width: em(24px);
 		margin: 0;
@@ -33,8 +34,12 @@
 		vertical-align: middle;
 		background-color: #fff;
 
+		&:checked {
+			border: 1px solid currentColor;
+		}
+
 		&:focus {
-			outline: 2px solid $universal-border-strong;
+			outline: 2px solid currentColor;
 			outline-offset: 2px;
 		}
 
@@ -84,7 +89,7 @@
 	}
 
 	.wc-block-components-checkbox__mark {
-		fill: $input-text-active;
+		fill: currentColor;
 		position: absolute;
 		margin-left: em(3px);
 		margin-top: em(1px);

@@ -9,6 +9,7 @@
 	position: relative;
 
 	svg {
+		fill: currentColor;
 		position: absolute;
 		right: 15px;
 		top: 15px;
@@ -43,7 +44,7 @@
 			border: 1px solid $universal-border-light;
 			background: #fff;
 			box-shadow: none;
-			color: $input-text-active;
+			color: currentColor;
 			font-family: inherit;
 			font-weight: normal;
 			letter-spacing: inherit;
@@ -59,9 +60,8 @@
 			&[aria-expanded="true"],
 			&:focus {
 				background-color: #fff;
-				color: $input-text-active;
 				outline: 0;
-				box-shadow: 0 0 0 2px $input-border-gray;
+				box-shadow: 0 0 0 2px currentColor;
 				border-bottom: 0;
 			}
 
@@ -86,7 +86,7 @@
 			position: absolute;
 			z-index: 10;
 			background-color: $select-dropdown-light;
-			border: 2px solid $input-border-gray;
+			border: 2px solid currentColor;
 			border-top: 0;
 			border-bottom-width: 2px;
 			margin: 3em 0 0 0;
@@ -96,7 +96,7 @@
 			left: -2px;
 			top: -1px;
 			overflow: auto;
-			color: $input-text-active;
+			color: currentColor;
 			border-bottom-left-radius: $universal-border-radius;
 			border-bottom-right-radius: $universal-border-radius;
 			box-sizing: border-box;
@@ -108,7 +108,7 @@
 
 			.components-form-token-field__suggestion {
 				@include font-size(regular);
-				color: $gray-700;
+				color: currentColor;
 				cursor: default;
 				list-style: none;
 				margin: 0;
@@ -147,7 +147,7 @@
 			top: 0;
 			transform-origin: top left;
 			transition: all 200ms ease;
-			color: $universal-body-low-emphasis;
+			color: currentColor;
 			z-index: 1;
 			margin: 0;
 			overflow: hidden;

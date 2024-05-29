@@ -5,7 +5,6 @@
 	white-space: nowrap;
 
 	label {
-		@include reset-color();
 		@include reset-typography();
 		@include font-size(regular);
 		position: absolute;
@@ -14,7 +13,7 @@
 		left: em($gap-smaller + 1px);
 		top: 0;
 		transform-origin: top left;
-		color: $universal-body-low-emphasis;
+		color: currentColor;
 		transition: all 200ms ease;
 		margin: 0;
 		overflow: hidden;
@@ -57,13 +56,12 @@
 		min-height: 0;
 		max-height: 50px;
 		background-color: #fff;
-		color: $input-text-active;
+		color: currentColor;
 
 		&:focus {
 			background-color: #fff;
-			color: $input-text-active;
 			outline: 0;
-			box-shadow: 0 0 0 2px $input-border-gray;
+			box-shadow: 0 0 0 2px currentColor;
 		}
 
 		.has-dark-controls & {

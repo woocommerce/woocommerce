@@ -19,9 +19,9 @@
 
 	&:focus {
 		background-color: #fff;
-		color: $input-text-active;
+		color: currentColor;
 		outline: 0;
-		box-shadow: 0 0 0 2px $input-border-gray;
+		box-shadow: 0 0 0 2px currentColor;
 	}
 }
 
