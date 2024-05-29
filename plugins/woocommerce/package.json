@@ -26,7 +26,7 @@
 		"env:down": "pnpm wp-env stop",
 		"env:performance-init": "./tests/performance/bin/init-sample-products.sh",
 		"env:restart": "pnpm wp-env destroy && pnpm wp-env start --update",
-		"env:start": "pnpm wp-env start",
+		"env:start": "pnpm wp-env start --debug",
 		"env:stop": "pnpm wp-env stop",
 		"env:test": "pnpm env:dev && pnpm playwright install chromium",
 		"env:perf:install-k6": "curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1",
