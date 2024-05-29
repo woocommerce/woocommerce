@@ -108,6 +108,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * request is already processing the same SKU and we should not proceed
 	 * with the insert.
 	 *
+	 * using $wpdb->options as it always has some data
+	 *
 	 * @param WC_Product $product Product object.
 	 * @return bool True if lock is obtained (unique SKU), false otherwise.
 	 */
