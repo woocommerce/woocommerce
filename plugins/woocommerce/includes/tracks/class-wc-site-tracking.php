@@ -187,10 +187,15 @@ class WC_Site_Tracking {
 	 * Init tracking.
 	 */
 	public static function init() {
-		// Only run on admin or if it is a rest api request.
-		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
+		$is_rest = WC()->is_rest_api_request();
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$is_store_api_request = $is_rest && ! empty( $_SERVER['REQUEST_URI'] ) && ( false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) );
+		
+		// Only run tracking on admin or if it is admin API request.
+		if ( ! is_admin() && ! $is_rest && ! $is_store_api_request ) {
 			return;
 		}
+		
 		// Define window.wcTracks.recordEvent in case it is enabled client-side.
 		self::register_scripts();
 		add_filter( 'admin_footer', array( __CLASS__, 'add_tracking_function' ), 24 );
