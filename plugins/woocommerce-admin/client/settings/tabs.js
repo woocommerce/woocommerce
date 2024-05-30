@@ -6,7 +6,7 @@ import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 export const Tabs = ( { data, page, children } ) => {
 	const onSelect = ( tabName ) => {
-		const url = getNewPath( {}, `/settings/${ tabName }` );
+		const url = getNewPath( {}, `/settings/${ tabName }`, {} );
 		navigateTo( { url } );
 	};
 
