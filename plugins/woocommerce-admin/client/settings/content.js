@@ -10,12 +10,13 @@ export const Content = ( { data } ) => {
 
 	return (
 		<div>
-			{ settings.map( ( setting ) => {
+			{ settings.map( ( setting, idx ) => {
+				const key = setting.id || setting.title || idx;
 				switch ( setting.type ) {
 					case 'title':
 						return (
 							<div
-								key={ setting.id }
+								key={ key }
 								className="woocommerce-settings-element"
 							>
 								<h3>{ setting.title }</h3>
@@ -23,10 +24,7 @@ export const Content = ( { data } ) => {
 						);
 					case 'checkbox':
 						return (
-							<SettingsCheckbox
-								setting={ setting }
-								key={ setting.id }
-							/>
+							<SettingsCheckbox setting={ setting } key={ key } />
 						);
 					default:
 						return null;
