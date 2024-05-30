@@ -381,7 +381,7 @@ jobs:
 
             - name: 'Add annotation to workflow run linking to PR'
               run: |
-                  echo "::notice::📃 The e2e report for this run is available at https://woocommerce.github.io/woocommerce-test-reports/pr/${{ github.event.pull_request.number }}/e2e"
+                  echo "::notice::🔗🔗 The e2e report for this run is available at https://woocommerce.github.io/woocommerce-test-reports/pr/${{ github.event.pull_request.number }}/e2e"
 
     api-test-reports:
         name: 'Report API tests results'
