@@ -168,7 +168,7 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 			/>
 
 			<div className="woocommerce-add-new-shipping-class-modal__buttons">
-				<Button isSecondary onClick={ onCancel }>
+				<Button variant="secondary" onClick={ onCancel }>
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button
