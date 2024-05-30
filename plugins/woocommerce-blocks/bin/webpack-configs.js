@@ -331,17 +331,6 @@ const getFrontConfig = ( options = {} ) => {
 			// @see https://github.com/Automattic/jetpack/pull/20926
 			chunkFilename: `[name]-frontend${ fileSuffix }.js?ver=[contenthash]`,
 			filename: ( pathData ) => {
-				// blocksCheckout and blocksComponents were moved from core bundle,
-				// retain their filenames to avoid breaking translations.
-				if (
-					pathData.chunk.name === 'blocksCheckout' ||
-					pathData.chunk.name === 'blocksComponents'
-				) {
-					return `${ paramCase(
-						pathData.chunk.name
-					) }${ fileSuffix }.js`;
-				}
-
 				return `[name]-frontend${ fileSuffix }.js`;
 			},
 			uniqueName: 'webpackWcBlocksFrontendJsonp',
@@ -1089,7 +1078,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 						enforce: true,
 					},
 					base: {
-						test: /assets[\\/]js[\\/]base[\\/]/,
+						test: /(?:assets[\\/]js[\\/]base|packages[\\/]components|assets[\\/]js[\\/]blocks[\\/]checkout)/,
 						name: 'wc-cart-checkout-fe-base-and-blocks',
 						chunks: 'all',
 						enforce: true,
