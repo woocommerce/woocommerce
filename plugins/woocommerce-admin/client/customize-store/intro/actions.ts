@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { assign, DoneInvokeEvent } from 'xstate';
+import { TaskReferralRecord } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
@@ -49,8 +50,26 @@ export const assignActiveTheme = assign<
 	},
 } );
 
+export const assignTaskReferral = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	intro: ( context, event ) => {
+		const taskReferral = (
+			event as DoneInvokeEvent< {
+				taskReferral: TaskReferralRecord | null;
+			} >
+		 ).data.taskReferral;
+		return { ...context.intro, taskReferral };
+	},
+} );
+
 export const recordTracksDesignWithAIClicked = () => {
 	trackEvent( 'customize_your_store_intro_design_with_ai_click' );
+};
+
+export const recordTracksDesignWithoutAIClicked = () => {
+	trackEvent( 'customize_your_store_intro_design_without_ai_click' );
 };
 
 export const recordTracksThemeSelected = (

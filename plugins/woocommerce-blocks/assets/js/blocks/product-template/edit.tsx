@@ -27,6 +27,7 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
  */
 import { useGetLocation, useProductCollectionQueryContext } from './utils';
 import './editor.scss';
+import { getDefaultStockStatuses } from '../product-collection/constants';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
 
@@ -156,6 +157,7 @@ const ProductTemplateEdit = (
 				shrinkColumns: false,
 			},
 			queryContextIncludes = [],
+			__privateProductCollectionPreviewState,
 		},
 		__unstableLayoutClassNames,
 	} = props;
@@ -249,6 +251,15 @@ const ProductTemplateEdit = (
 					...restQueryArgs,
 					location,
 					productCollectionQueryContext,
+					previewState: __privateProductCollectionPreviewState,
+					/**
+					 * Use value of "Out of stock visibility" setting to determine
+					 * which stock statuses to include if inherit query
+					 * from template is true.
+					 */
+					...( inherit && {
+						woocommerceStockStatus: getDefaultStockStatuses(),
+					} ),
 				} ),
 				blocks: getBlocks( clientId ),
 			};
@@ -270,6 +281,7 @@ const ProductTemplateEdit = (
 			location,
 			productCollectionQueryContext,
 			loopShopPerPage,
+			__privateProductCollectionPreviewState,
 		]
 	);
 	const blockContexts = useMemo(

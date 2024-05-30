@@ -6,13 +6,24 @@ import { addFilter } from '@wordpress/hooks';
 import { select } from '@wordpress/data';
 import { isWpVersion } from '@woocommerce/settings';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
+import { useLayoutEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { ProductCollectionAttributes, ProductCollectionQuery } from './types';
+import {
+	PreviewState,
+	ProductCollectionAttributes,
+	ProductCollectionQuery,
+	SetPreviewState,
+} from './types';
 import { coreQueryPaginationBlockName } from './constants';
 import blockJson from './block.json';
+import {
+	LocationType,
+	WooCommerceBlockLocation,
+} from '../product-template/utils';
 
 /**
  * Sets the new query arguments of a Product Query block
@@ -85,27 +96,113 @@ export function getDefaultValueOfInheritQueryFromTemplate() {
 }
 
 /**
- * Add Product Collection block to the parent array of the Core Pagination block.
+ * Add Product Collection block to the parent or ancestor array of the Core Pagination block.
  * This enhancement allows the Core Pagination block to be available for the Product Collection block.
  */
-export const addProductCollectionBlockToParentOfPaginationBlock = () => {
+export const addProductCollectionToQueryPaginationParentOrAncestor = () => {
 	if ( isWpVersion( '6.1', '>=' ) ) {
 		addFilter(
 			'blocks.registerBlockType',
 			'woocommerce/add-product-collection-block-to-parent-array-of-pagination-block',
 			( blockSettings: Block, blockName: string ) => {
-				if (
-					blockName !== coreQueryPaginationBlockName ||
-					! blockSettings?.parent
-				) {
+				if ( blockName !== coreQueryPaginationBlockName ) {
 					return blockSettings;
 				}
 
-				return {
-					...blockSettings,
-					parent: [ ...blockSettings.parent, blockJson.name ],
-				};
+				if ( blockSettings?.ancestor ) {
+					return {
+						...blockSettings,
+						ancestor: [ ...blockSettings.ancestor, blockJson.name ],
+					};
+				}
+
+				// Below condition is to support WP >=6.4 where Pagination specifies the parent.
+				// Can be removed when minimum WP version is set to 6.5 and higher.
+				if ( blockSettings?.parent ) {
+					return {
+						...blockSettings,
+						parent: [ ...blockSettings.parent, blockJson.name ],
+					};
+				}
+
+				return blockSettings;
 			}
 		);
 	}
+};
+
+export const useSetPreviewState = ( {
+	setPreviewState,
+	location,
+	attributes,
+	setAttributes,
+}: {
+	setPreviewState?: SetPreviewState | undefined;
+	location: WooCommerceBlockLocation;
+	attributes: ProductCollectionAttributes;
+	setAttributes: (
+		attributes: Partial< ProductCollectionAttributes >
+	) => void;
+} ) => {
+	const setState = ( newPreviewState: PreviewState ) => {
+		setAttributes( {
+			__privatePreviewState: {
+				...attributes.__privatePreviewState,
+				...newPreviewState,
+			},
+		} );
+	};
+
+	// Running setPreviewState function provided by Collection, if it exists.
+	useLayoutEffect( () => {
+		if ( ! setPreviewState ) {
+			return;
+		}
+
+		const cleanup = setPreviewState?.( {
+			setState,
+			location,
+			attributes,
+		} );
+
+		if ( cleanup ) {
+			return cleanup;
+		}
+
+		// It should re-run only when setPreviewState changes to avoid performance issues.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ setPreviewState ] );
+
+	/**
+	 * For all Product Collection blocks that inherit query from the template,
+	 * we want to show a preview message in the editor if the block is in
+	 * generic archive template i.e.
+	 * - Products by category
+	 * - Products by tag
+	 * - Products by attribute
+	 */
+	useLayoutEffect( () => {
+		if ( ! setPreviewState ) {
+			const isGenericArchiveTemplate =
+				location.type === LocationType.Archive &&
+				location.sourceData?.termId === null;
+			if ( isGenericArchiveTemplate ) {
+				setAttributes( {
+					__privatePreviewState: {
+						isPreview: !! attributes?.query?.inherit,
+						previewMessage: __(
+							'Actual products will vary depending on the page being viewed.',
+							'woocommerce'
+						),
+					},
+				} );
+			}
+		}
+	}, [
+		attributes?.query?.inherit,
+		location.sourceData?.termId,
+		location.type,
+		setAttributes,
+		setPreviewState,
+	] );
 };

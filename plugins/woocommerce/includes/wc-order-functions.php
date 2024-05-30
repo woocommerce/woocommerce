@@ -933,15 +933,28 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		return;
 	}
 
-	$has_recorded = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
+	$has_recorded     = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
+	$invalid_statuses = array( 'cancelled', 'failed', 'trash' );
 
-	if ( $order->has_status( 'cancelled' ) && $has_recorded ) {
+	/**
+	 * Allow invalid order status filtering for updating coupon usage.
+	 *
+	 * @since 9.0.0
+	 *
+	 * @param array $invalid_statuses Array of statuses to consider invalid.
+	 */
+	$invalid_statuses = apply_filters(
+		'woocommerce_update_coupon_usage_invalid_statuses',
+		$invalid_statuses
+	);
+
+	if ( $order->has_status( $invalid_statuses ) && $has_recorded ) {
 		$action = 'reduce';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
-	} elseif ( ! $order->has_status( 'cancelled' ) && ! $has_recorded ) {
+	} elseif ( ! $order->has_status( $invalid_statuses ) && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
-	} elseif ( $order->has_status( 'cancelled' ) ) {
+	} elseif ( $order->has_status( $invalid_statuses ) ) {
 		$order->get_data_store()->release_held_coupons( $order, true );
 		return;
 	} else {
@@ -978,6 +991,8 @@ add_action( 'woocommerce_order_status_completed', 'wc_update_coupon_usage_counts
 add_action( 'woocommerce_order_status_processing', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_on-hold', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_cancelled', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_order_status_failed', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_trash_order', 'wc_update_coupon_usage_counts' );
 
 /**
  * Cancel all unpaid orders after held duration to prevent stock lock for those products.
@@ -1048,6 +1063,7 @@ function wc_get_order_note( $data ) {
 			'content'       => $data->comment_content,
 			'customer_note' => (bool) get_comment_meta( $data->comment_ID, 'is_customer_note', true ),
 			'added_by'      => __( 'WooCommerce', 'woocommerce' ) === $data->comment_author ? 'system' : $data->comment_author,
+			'order_id'      => absint( $data->comment_post_ID ),
 		),
 		$data
 	);
@@ -1168,5 +1184,20 @@ function wc_create_order_note( $order_id, $note, $is_customer_note = false, $add
  * @return bool         True on success, false on failure.
  */
 function wc_delete_order_note( $note_id ) {
-	return wp_delete_comment( $note_id, true );
+	$note = wc_get_order_note( $note_id );
+	if ( $note && wp_delete_comment( $note_id, true ) ) {
+		/**
+		 * Action hook fired after an order note is deleted.
+		 *
+		 * @param int      $note_id Order note ID.
+		 * @param stdClass $note    Object with the deleted order note details.
+		 *
+		 * @since 9.1.0
+		 */
+		do_action( 'woocommerce_order_note_deleted', $note_id, $note );
+
+		return true;
+	}
+
+	return false;
 }

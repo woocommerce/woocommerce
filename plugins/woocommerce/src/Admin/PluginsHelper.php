@@ -46,6 +46,7 @@ class PluginsHelper {
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_connect_notice_in_plugin_list' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_missing_payment_method_notice' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_notices_in_plugins' ) );
 	}
 
 	/**
@@ -577,7 +578,7 @@ class PluginsHelper {
 
 		$notice_string .= sprintf(
 			/* translators: %s: Connect page URL */
-			__( '<a href="%s">Connect your store</a> to WooCommerce.com to get updates and streamlined support for your subscriptions.', 'woocommerce' ),
+			__( '<a id="woo-connect-notice-url" href="%s">Connect your store</a> to WooCommerce.com to get updates and streamlined support for your subscriptions.', 'woocommerce' ),
 			esc_url( $connect_page_url )
 		);
 
@@ -587,7 +588,7 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Enqueue scripts for connect notice.
+	 * Enqueue scripts for connect notice in WooCommerce settings page.
 	 *
 	 * @return void
 	 */
@@ -606,8 +607,25 @@ class PluginsHelper {
 		wp_enqueue_script( 'woo-connect-notice' );
 	}
 
-	public static function maybe_show_missing_payment_method_notice(){
+	/**
+	 * Enqueue scripts for notices in plugin list page.
+	 *
+	 * @return void
+	 */
+	public static function maybe_enqueue_scripts_for_notices_in_plugins() {
+		if ( 'plugins' !== get_current_screen()->id ) {
+			return;
+		}
 
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-plugin-update-connect-notice' );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-enable-autorenew' );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-renew-subscription' );
+		wp_enqueue_script( 'woo-plugin-update-connect-notice' );
+		wp_enqueue_script( 'woo-enable-autorenew' );
+		wp_enqueue_script( 'woo-renew-subscription' );
+	}
+
+	public static function maybe_show_missing_payment_method_notice(){
 		if ( ! WC_Helper::is_site_connected() ) {
 			return;
 		}
@@ -620,8 +638,8 @@ class PluginsHelper {
 
 		if ( !empty( $message ) ) {
 			echo '<div id="woo-subscription-missing-payment-method" class="woo-subscription-missing-payment-method woo-subscription-notices notice notice-error is-dismissible">
-	    		<p class="widefat">' . wp_kses_post( $message ) . '</p>
-	    	</div>';
+				<p class="widefat">' . wp_kses_post( $message ) . '</p>
+			</div>';
 		}
 	}
 

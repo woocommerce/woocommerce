@@ -15,9 +15,7 @@ export const CalculatorButton = ( {
 	setIsShippingCalculatorOpen,
 }: CalculatorButtonProps ): JSX.Element => {
 	return (
-		<a
-			role="button"
-			href="#wc-block-components-shipping-calculator-address__link"
+		<button
 			className="wc-block-components-totals-shipping__change-address__link"
 			id="wc-block-components-totals-shipping__change-address__link"
 			onClick={ ( e ) => {
@@ -28,7 +26,7 @@ export const CalculatorButton = ( {
 			aria-expanded={ isShippingCalculatorOpen }
 		>
 			{ label }
-		</a>
+		</button>
 	);
 };
 

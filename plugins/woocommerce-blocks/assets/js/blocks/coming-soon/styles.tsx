@@ -1,17 +1,5 @@
 export const generateStyles = ( color = '#bea0f2' ) => {
-	return `@font-face {
-        font-family: 'Inter';
-        src: url( <?php echo esc_url( WC()->plugin_url() . '/assets/fonts/Inter-VariableFont_slnt,wght.woff2' ); ?>) format('woff2');
-        font-weight: 300 900;
-        font-style: normal;
-    }
-
-    @font-face {
-        font-family: 'Cardo';
-        src: url( <?php echo esc_url( WC()->plugin_url() . '/assets/fonts/cardo_normal_400.woff2' ); ?>) format('woff2');
-        font-weight: 400;
-        font-style: normal;
-    }
+	return `
     /* Reset */
     h1, p, a {
         margin: 0;
@@ -30,6 +18,7 @@ export const generateStyles = ( color = '#bea0f2' ) => {
         margin: 0;
         background-color: ${ color };
         font-family: 'Inter', sans-serif;
+        min-width: 320px;
         --wp--preset--color--contrast: #111111;
         --wp--style--global--wide-size: 1280px;
     }
@@ -92,6 +81,11 @@ export const generateStyles = ( color = '#bea0f2' ) => {
         flex-direction: column;
         justify-content: space-between;
     }
+	@media (max-width: 660px) {
+		.woocommerce-coming-soon-banner-container {
+			padding-inline: 0;
+		}
+	}
     .woocommerce-coming-soon-banner-container > .wp-block-group__inner-container {
         height: 100%;
         display: flex;
@@ -129,7 +123,7 @@ export const generateStyles = ( color = '#bea0f2' ) => {
         height: 40px;
     }
     .woocommerce-coming-soon-banner {
-        font-size: 48px;
+        font-size: clamp(27px, 1.74rem + ((1vw - 3px) * 2), 48px);
         font-weight: 400;
         line-height: 58px;
         font-family: 'Cardo', serif;
@@ -139,5 +133,6 @@ export const generateStyles = ( color = '#bea0f2' ) => {
         max-width: 820px;
         color: var(--wp--preset--color--contrast);
         margin: 0 auto;
+        text-wrap: balance;
     }`;
 };

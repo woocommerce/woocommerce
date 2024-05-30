@@ -92,6 +92,9 @@ const blocks = {
 	'product-filter': {
 		isExperimental: true,
 	},
+	'product-filters': {
+		isExperimental: true,
+	},
 	'product-filter-stock-status': {
 		isExperimental: true,
 		customDir: 'product-filter/inner-blocks/stock-filter',
@@ -110,6 +113,10 @@ const blocks = {
 	},
 	'product-filter-active': {
 		customDir: 'product-filter/inner-blocks/active-filters',
+		isExperimental: true,
+	},
+	'product-filter-clear-button': {
+		customDir: 'product-filter/inner-blocks/clear-button',
 		isExperimental: true,
 	},
 	'order-confirmation-summary': {

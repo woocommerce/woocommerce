@@ -118,12 +118,12 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$validation_util   = new ValidationUtils();
 		$sanitization_util = new SanitizationUtils();
 		$address           = (array) $address;
-		$field_schema      = $this->get_properties();
+		$schema            = $this->get_properties();
 		// omit all keys from address that are not in the schema. This should account for email.
-		$address = array_intersect_key( $address, $field_schema );
+		$address = array_intersect_key( $address, $schema );
 		$address = array_reduce(
 			array_keys( $address ),
-			function( $carry, $key ) use ( $address, $validation_util, $field_schema ) {
+			function ( $carry, $key ) use ( $address, $validation_util, $schema ) {
 				switch ( $key ) {
 					case 'country':
 						$carry[ $key ] = wc_strtoupper( sanitize_text_field( wp_unslash( $address[ $key ] ) ) );
@@ -135,7 +135,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
 						break;
 					default:
-						$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $field_schema[ $key ], $key );
+						$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $schema[ $key ], $key );
 						break;
 				}
 				if ( $this->additional_fields_controller->is_field( $key ) ) {
@@ -164,6 +164,8 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$address         = (array) $address;
 		$validation_util = new ValidationUtils();
 		$schema          = $this->get_properties();
+		// omit all keys from address that are not in the schema. This should account for email.
+		$address = array_intersect_key( $address, $schema );
 
 		// The flow is Validate -> Sanitize -> Re-Validate
 		// First validation step is to ensure fields match their schema, then we sanitize to put them in the
@@ -238,16 +240,14 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 				continue;
 			}
 
-			$properties = $this->get_properties();
-
 			// Only run specific validation on properties that are defined in the schema and present in the address.
 			// This is for partial address pushes when only part of a customer address is sent.
 			// Full schema address validation still happens later, so empty, required values are disallowed.
-			if ( empty( $properties[ $key ] ) || empty( $address[ $key ] ) ) {
+			if ( empty( $schema[ $key ] ) || empty( $address[ $key ] ) ) {
 				continue;
 			}
 
-			$result = rest_validate_value_from_schema( $address[ $key ], $properties[ $key ], $key );
+			$result = rest_validate_value_from_schema( $address[ $key ], $schema[ $key ], $key );
 
 			// Check if a field is in the list of additional fields then validate the value against the custom validation rules defined for it.
 			// Skip additional validation if the schema validation failed.
@@ -281,7 +281,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 
 		$address_fields = array_filter(
 			$fields,
-			function( $key ) use ( $additional_fields_keys ) {
+			function ( $key ) use ( $additional_fields_keys ) {
 				return in_array( $key, $additional_fields_keys, true );
 			},
 			ARRAY_FILTER_USE_KEY
@@ -298,7 +298,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 
 			if ( 'select' === $field['type'] ) {
 				$field_schema['enum'] = array_map(
-					function( $option ) {
+					function ( $option ) {
 						return $option['value'];
 					},
 					$field['options']

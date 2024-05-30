@@ -31,6 +31,8 @@ class CustomOrdersTableController {
 
 	private const SYNC_QUERY_ARG = 'wc_hpos_sync_now';
 
+	private const STOP_SYNC_QUERY_ARG = 'wc_hpos_stop_sync';
+
 	/**
 	 * The name of the option for enabling the usage of the custom orders tables
 	 */
@@ -145,6 +147,7 @@ class CustomOrdersTableController {
 		self::add_action( 'woocommerce_sections_advanced', array( $this, 'sync_now' ) );
 		self::add_filter( 'removable_query_args', array( $this, 'register_removable_query_arg' ) );
 		self::add_action( 'woocommerce_register_feature_definitions', array( $this, 'add_feature_definition' ) );
+		self::add_filter( 'get_edit_post_link', array( $this, 'maybe_rewrite_order_edit_link' ), 10, 2 );
 	}
 
 	/**
@@ -418,17 +421,30 @@ class CustomOrdersTableController {
 			return;
 		}
 
-		if ( ! filter_input( INPUT_GET, self::SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
+		if ( filter_input( INPUT_GET, self::SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
+			$action = 'sync-now';
+		} elseif ( filter_input( INPUT_GET, self::STOP_SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
+			$action = 'stop-sync';
+		} else {
 			return;
 		}
 
-		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'hpos-sync-now' ) ) {
-			WC_Admin_Settings::add_error( esc_html__( 'Unable to start synchronization. The link you followed may have expired.', 'woocommerce' ) );
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), "hpos-{$action}" ) ) {
+			WC_Admin_Settings::add_error(
+				'sync-now' === $action ?
+					esc_html__( 'Unable to start synchronization. The link you followed may have expired.', 'woocommerce' )
+					: esc_html__( 'Unable to stop synchronization. The link you followed may have expired.', 'woocommerce' )
+			);
 			return;
 		}
 
 		$this->data_cleanup->toggle_flag( false );
-		$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
+
+		if ( 'sync-now' === $action ) {
+			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
+		} else {
+			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );
+		}
 	}
 
 	/**
@@ -440,6 +456,7 @@ class CustomOrdersTableController {
 	 */
 	private function register_removable_query_arg( $query_args ) {
 		$query_args[] = self::SYNC_QUERY_ARG;
+		$query_args[] = self::STOP_SYNC_QUERY_ARG;
 
 		return $query_args;
 	}
@@ -528,7 +545,7 @@ class CustomOrdersTableController {
 
 		$get_disabled = function () {
 			$plugin_compatibility = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
-			$sync_complete        = 0 === $this->get_orders_pending_sync_count();
+			$sync_complete        = 0 === $this->data_synchronizer->get_current_orders_pending_sync_count();
 			$disabled             = array();
 			// Changing something here? might also want to look at `enable|disable` functions in CLIRunner.
 			$incompatible_plugins = array_merge( $plugin_compatibility['uncertain'], $plugin_compatibility['incompatible'] );
@@ -574,7 +591,7 @@ class CustomOrdersTableController {
 		};
 
 		$get_sync_message = function () {
-			$orders_pending_sync_count = $this->get_orders_pending_sync_count();
+			$orders_pending_sync_count = $this->data_synchronizer->get_current_orders_pending_sync_count( true );
 			$sync_in_progress          = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
 			$sync_enabled              = $this->data_synchronizer->data_sync_is_enabled();
 			$sync_is_pending           = $orders_pending_sync_count > 0;
@@ -585,15 +602,14 @@ class CustomOrdersTableController {
 			if ( $is_dangerous ) {
 				$sync_message[] = wp_kses_data(
 					sprintf(
-					// translators: %d: number of pending orders.
-						_n(
-							"There's %d order pending sync. <b>Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!</b>",
-							'There are %d orders pending sync. <b>Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!</b>',
-							$orders_pending_sync_count,
-							'woocommerce'
-						),
-						$orders_pending_sync_count,
+						// translators: %s: number of pending orders.
+						_n( "There's %s order pending sync.", 'There are %s orders pending sync.', $orders_pending_sync_count, 'woocommerce' ),
+						number_format_i18n( $orders_pending_sync_count ),
 					)
+					. ' '
+					. '<strong>'
+					. __( 'Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!', 'woocommerce' )
+					. '</strong>'
 				);
 			}
 
@@ -603,10 +619,28 @@ class CustomOrdersTableController {
 
 			if ( $sync_in_progress && $sync_is_pending ) {
 				$sync_message[] = sprintf(
-					// translators: %d: number of pending orders.
-					__( 'Currently syncing orders... %d pending', 'woocommerce' ),
-					$orders_pending_sync_count
+					// translators: %s: number of pending orders.
+					__( 'Currently syncing orders... %s pending', 'woocommerce' ),
+					number_format_i18n( $orders_pending_sync_count )
 				);
+
+				if ( ! $sync_enabled ) {
+					$stop_sync_url = wp_nonce_url(
+						add_query_arg(
+							array(
+								self::STOP_SYNC_QUERY_ARG => true,
+							),
+							wc_get_container()->get( FeaturesController::class )->get_features_page_url()
+						),
+						'hpos-stop-sync'
+					);
+
+					$sync_message[] = sprintf(
+						'<a href="%1$s" class="button button-link">%2$s</a>',
+						esc_url( $stop_sync_url ),
+						__( 'Stop sync', 'woocommerce' )
+					);
+				}
 			} elseif ( $sync_is_pending ) {
 				$sync_now_url = wp_nonce_url(
 					add_query_arg(
@@ -621,14 +655,14 @@ class CustomOrdersTableController {
 				if ( ! $is_dangerous ) {
 					$sync_message[] = wp_kses_data(
 						sprintf(
-						// translators: %d: number of pending orders.
+							// translators: %s: number of pending orders.
 							_n(
-								"There's %d order pending sync. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.",
-								'There are %d orders pending sync. You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>.',
+								"You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>. There's currently %s order out of sync.",
+								'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>. There are currently %s orders out of sync. ',
 								$orders_pending_sync_count,
 								'woocommerce'
 							),
-							$orders_pending_sync_count
+							number_format_i18n( $orders_pending_sync_count )
 						)
 					);
 				}
@@ -636,16 +670,7 @@ class CustomOrdersTableController {
 				$sync_message[] = sprintf(
 					'<a href="%1$s" class="button button-link">%2$s</a>',
 					esc_url( $sync_now_url ),
-					sprintf(
-						// translators: %d: number of pending orders.
-						_n(
-							'Sync %s pending order',
-							'Sync %s pending orders',
-							$orders_pending_sync_count,
-							'woocommerce'
-						),
-						number_format_i18n( $orders_pending_sync_count )
-					)
+					__( 'Sync orders now', 'woocommerce' )
 				);
 			}
 
@@ -653,7 +678,7 @@ class CustomOrdersTableController {
 		};
 
 		$get_description_is_error = function () {
-			$sync_is_pending = $this->get_orders_pending_sync_count() > 0;
+			$sync_is_pending = $this->data_synchronizer->get_current_orders_pending_sync_count( true ) > 0;
 
 			return $sync_is_pending && $this->changing_data_source_with_sync_pending_is_allowed();
 		};
@@ -691,11 +716,20 @@ class CustomOrdersTableController {
 	}
 
 	/**
-	 * Returns the count of orders pending synchronization.
+	 * Rewrites post edit links for HPOS placeholder posts so that they go to the HPOS order itself.
+	 * Hooked onto `get_edit_post_link`.
 	 *
-	 * @return int
+	 * @since 9.0.0
+	 *
+	 * @param string $link    The edit link.
+	 * @param int    $post_id Post ID.
+	 * @return string
 	 */
-	private function get_orders_pending_sync_count(): int {
-		return $this->data_synchronizer->get_sync_status()['current_pending_count'];
+	private function maybe_rewrite_order_edit_link( $link, $post_id ) {
+		if ( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE === get_post_type( $post_id ) ) {
+			$link = OrderUtil::get_order_admin_edit_url( $post_id );
+		}
+
+		return $link;
 	}
 }

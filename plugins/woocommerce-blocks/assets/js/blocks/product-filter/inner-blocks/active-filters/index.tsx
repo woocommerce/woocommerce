@@ -4,7 +4,7 @@
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon } from '@wordpress/icons';
 import { toggle } from '@woocommerce/icons';
-import { isExperimentalBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -13,7 +13,7 @@ import metadata from './block.json';
 import Edit from './edit';
 import './style.scss';
 
-if ( isExperimentalBuild() ) {
+if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
 		icon: {
 			src: (
