@@ -1217,5 +1217,22 @@ test.describe( 'Product Collection', () => {
 			await page.reload();
 			await expect( productTemplate ).toHaveCount( 2 );
 		} );
+
+		test( 'On Sale collection should be visible after Refresh in a Post', async ( {
+			page,
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock( 'onSale' );
+			const productTemplate = page.getByLabel(
+				BLOCK_LABELS.productTemplate
+			);
+			await expect( productTemplate ).toBeVisible();
+
+			// Refresh the post and verify "On Sale" collection is still visible
+			await editor.saveDraft();
+			await page.reload();
+			await expect( productTemplate ).toBeVisible();
+		} );
 	} );
 } );
