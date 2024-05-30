@@ -22,9 +22,7 @@ const blocks = {
 	},
 	'attribute-filter': {},
 	breadcrumbs: {},
-	cart: {},
 	'catalog-sorting': {},
-	checkout: {},
 	'coming-soon': {},
 	'customer-account': {},
 	'featured-category': {
@@ -160,20 +158,29 @@ const blocks = {
 	},
 };
 
+// Intentional separation of cart and checkout entry points to allow for better code splitting.
+const cartAndCheckoutBlocks = {
+	cart: {},
+	checkout: {},
+};
+
 // Returns the entries for each block given a relative path (ie: `index.js`,
 // `**/*.scss`...).
 // It also filters out elements with undefined props and experimental blocks.
-const getBlockEntries = ( relativePath ) => {
-	const experimental =
-		! parseInt( process.env.WOOCOMMERCE_BLOCKS_PHASE, 10 ) < 3;
+const getBlockEntries = ( relativePath, blockEntries = blocks ) => {
+	const bundleExperimentalBlocks = !! parseInt(
+		process.env.BUNDLE_EXPERIMENTAL_BLOCKS,
+		10
+	);
 
 	return Object.fromEntries(
-		Object.entries( blocks )
-			.filter(
-				( [ , config ] ) =>
-					! config.isExperimental ||
-					config.isExperimental === experimental
-			)
+		Object.entries( blockEntries )
+			.filter( ( [ , config ] ) => {
+				if ( config.isExperimental ) {
+					return bundleExperimentalBlocks;
+				}
+				return true;
+			} )
 			.map( ( [ blockCode, config ] ) => {
 				const filePaths = glob.sync(
 					`./assets/js/blocks/${ config.customDir || blockCode }/` +
@@ -243,10 +250,6 @@ const entries = {
 	frontend: {
 		reviews: './assets/js/blocks/reviews/frontend.ts',
 		...getBlockEntries( 'frontend.{t,j}s{,x}' ),
-
-		blocksCheckout: './packages/checkout/index.js',
-		blocksComponents: './packages/components/index.ts',
-
 		'mini-cart-component':
 			'./assets/js/blocks/mini-cart/component-frontend.tsx',
 		'product-button-interactivity':
@@ -271,6 +274,12 @@ const entries = {
 	editor: {
 		'wc-blocks-classic-template-revert-button':
 			'./assets/js/templates/revert-button/index.tsx',
+	},
+
+	cartAndCheckoutFrontend: {
+		...getBlockEntries( 'frontend.{t,j}s{,x}', cartAndCheckoutBlocks ),
+		blocksCheckout: './packages/checkout/index.js',
+		blocksComponents: './packages/components/index.ts',
 	},
 };
 

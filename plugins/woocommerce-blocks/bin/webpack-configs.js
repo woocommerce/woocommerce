@@ -987,6 +987,140 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 	};
 };
 
+const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
+	let { fileSuffix } = options;
+	const { alias, resolvePlugins = [] } = options;
+	fileSuffix = fileSuffix ? `-${ fileSuffix }` : '';
+
+	const resolve = alias
+		? {
+				alias,
+				plugins: resolvePlugins,
+		  }
+		: {
+				plugins: resolvePlugins,
+		  };
+	return {
+		entry: getEntryConfig( 'frontend', options.exclude || [] ),
+		output: {
+			devtoolNamespace: 'wc',
+			path: path.resolve( __dirname, '../build/' ),
+			// This is a cache busting mechanism which ensures that the script is loaded via the browser with a ?ver=hash
+			// string. The hash is based on the built file contents.
+			// @see https://github.com/webpack/webpack/issues/2329
+			// Using the ?ver string is needed here so the filename does not change between builds. The WordPress
+			// i18n system relies on the hash of the filename, so changing that frequently would result in broken
+			// translations which we must avoid.
+			// @see https://github.com/Automattic/jetpack/pull/20926
+			chunkFilename: `[name]-frontend${ fileSuffix }.js?ver=[contenthash]`,
+			filename: ( pathData ) => {
+				// blocksCheckout and blocksComponents were moved from core bundle,
+				// retain their filenames to avoid breaking translations.
+				if (
+					pathData.chunk.name === 'blocksCheckout' ||
+					pathData.chunk.name === 'blocksComponents'
+				) {
+					return `${ paramCase(
+						pathData.chunk.name
+					) }${ fileSuffix }.js`;
+				}
+
+				return `[name]-cart-checkout-frontend${ fileSuffix }.js`;
+			},
+			uniqueName: 'webpackWcBlocksCartCheckoutFrontendJsonp',
+			library: [ 'wc', '[name]' ],
+		},
+		module: {
+			rules: [
+				{
+					test: /\.(j|t)sx?$/,
+					exclude: /node_modules/,
+					use: {
+						loader: 'babel-loader',
+						options: {
+							presets: [
+								[
+									'@wordpress/babel-preset-default',
+									{
+										modules: false,
+										targets: {
+											browsers: [
+												'extends @wordpress/browserslist-config',
+											],
+										},
+									},
+								],
+							],
+							plugins: [
+								isProduction
+									? require.resolve(
+											'babel-plugin-transform-react-remove-prop-types'
+									  )
+									: false,
+								'@babel/plugin-proposal-optional-chaining',
+								'@babel/plugin-proposal-class-properties',
+							].filter( Boolean ),
+							cacheDirectory: true,
+						},
+					},
+				},
+				{
+					test: /\.s[c|a]ss$/,
+					use: {
+						loader: 'ignore-loader',
+					},
+				},
+			],
+		},
+		optimization: {
+			concatenateModules:
+				isProduction && ! process.env.WP_BUNDLE_ANALYZER,
+			splitChunks: {
+				minSize: 200000,
+				automaticNameDelimiter: '--',
+				cacheGroups: {
+					commons: {
+						test: /[\\/]node_modules[\\/]/,
+						name: 'wc-cart-checkout-fe-vendors',
+						chunks: 'all',
+						enforce: true,
+					},
+					...getCacheGroups(),
+				},
+			},
+			minimizer: [
+				new TerserPlugin( {
+					parallel: true,
+					terserOptions: {
+						output: {
+							comments: /translators:/i,
+						},
+						compress: {
+							passes: 2,
+						},
+						mangle: {
+							reserved: [ '__', '_n', '_nx', '_x' ],
+						},
+					},
+					extractComments: false,
+				} ),
+			],
+		},
+		plugins: [
+			...getSharedPlugins( {
+				bundleAnalyzerReportTitle: 'Cart & Checkout Frontend',
+			} ),
+			new ProgressBarPlugin(
+				getProgressBarPluginConfig( 'Cart & Checkout Frontend' )
+			),
+		],
+		resolve: {
+			...resolve,
+			extensions: [ '.js', '.ts', '.tsx' ],
+		},
+	};
+};
+
 module.exports = {
 	getCoreConfig,
 	getFrontConfig,
