@@ -712,6 +712,7 @@ class PluginsHelper {
 	 * @param array $subs_to_show filtered subscriptions as condition.
 	 * @param int   $total total subscription count.
 	 * @param array $messages message.
+	 * @param string $type type of notice, whether it is for expiring or expired subscription.
 	 * @return array notice data to return. Contains type, parsed_message and product_id.
 	 */
 	public static function get_subscriptions_notice_data( array $all_subs, array $subs_to_show, int $total, array $messages, string $type ) {
@@ -748,7 +749,7 @@ class PluginsHelper {
 			/* translators: 1: Product price */
 			$renew_string = sprintf( __( 'Renew for %1$s', 'woocommerce' ), $subscription['product_regular_price'] );
 		}
-		$expiry_date = date_i18n( 'F jS', $subscription['expires'] );
+		$expiry_date   = date_i18n( 'F jS', $subscription['expires'] );
 		$hyperlink_url = add_query_arg(
 			array(
 				'product_id' => $product_id,
