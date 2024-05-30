@@ -708,10 +708,10 @@ class PluginsHelper {
 	/**
 	 * Construct the subscritpion notice data based on user subscriptions data.
 	 *
-	 * @param array $all_subs all subscription data.
-	 * @param array $subs_to_show filtered subscriptions as condition.
-	 * @param int   $total total subscription count.
-	 * @param array $messages message.
+	 * @param array  $all_subs all subscription data.
+	 * @param array  $subs_to_show filtered subscriptions as condition.
+	 * @param int    $total total subscription count.
+	 * @param array  $messages message.
 	 * @param string $type type of notice, whether it is for expiring or expired subscription.
 	 * @return array notice data to return. Contains type, parsed_message and product_id.
 	 */
