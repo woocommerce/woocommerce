@@ -255,8 +255,6 @@ const entries = {
 	frontend: {
 		reviews: './assets/js/blocks/reviews/frontend.ts',
 		...getBlockEntries( 'frontend.{t,j}s{,x}' ),
-		'mini-cart-component':
-			'./assets/js/blocks/mini-cart/component-frontend.tsx',
 		'product-button-interactivity':
 			'./assets/js/atomic/blocks/product-elements/button/frontend.tsx',
 	},
@@ -285,6 +283,8 @@ const entries = {
 		...getBlockEntries( 'frontend.{t,j}s{,x}', cartAndCheckoutBlocks ),
 		blocksCheckout: './packages/checkout/index.js',
 		blocksComponents: './packages/components/index.ts',
+		'mini-cart-component':
+			'./assets/js/blocks/mini-cart/component-frontend.tsx',
 	},
 };
 
