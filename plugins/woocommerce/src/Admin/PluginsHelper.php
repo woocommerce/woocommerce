@@ -706,21 +706,27 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Prepared a message based on user subscriptions data.
+	 * Construct the subscritpion notice data based on user subscriptions data.
 	 *
 	 * @param array $all_subs all subscription data.
 	 * @param array $subs_to_show filtered subscriptions as condition.
 	 * @param int   $total total subscription count.
 	 * @param array $messages message.
-	 * @return string message to return.
+	 * @return array notice data to return. Contains type, parsed_message and product_id.
 	 */
-	public static function get_subscriptions_message( array $all_subs, array $subs_to_show, int $total, array $messages ) {
+	public static function get_subscriptions_notice_data( array $all_subs, array $subs_to_show, int $total, array $messages, string $type ) {
 		if ( 1 < $total ) {
-			return sprintf(
+			$parsed_message = sprintf(
 				$messages['different_subscriptions'],
 				esc_attr( $total ),
 				esc_url( self::WOO_SUBSCRIPTION_PAGE_URL ),
 				esc_attr( $total ),
+			);
+
+			return array(
+				'type'           => 'different_subscriptions',
+				'parsed_message' => $parsed_message,
+				'product_id'     => '',
 			);
 		}
 
@@ -743,23 +749,40 @@ class PluginsHelper {
 			$renew_string = sprintf( __( 'Renew for %1$s', 'woocommerce' ), $subscription['product_regular_price'] );
 		}
 		$expiry_date = date_i18n( 'F jS', $subscription['expires'] );
+		$hyperlink_url = add_query_arg(
+			array(
+				'product_id' => $product_id,
+				'type'       => $type,
+			),
+			self::WOO_SUBSCRIPTION_PAGE_URL
+		);
 
 		// Construct message based on template for multiple_manage or single_manage, parameter used:
 		// 1. Product name
 		// 2. Expiry date
-		// 3. URL to My Subscriptions page
+		// 3. URL to My Subscriptions page with extra params
 		// 4. Renew string.
 		if ( isset( $messages[ $message_key ] ) ) {
-			return sprintf(
+			$parsed_message = sprintf(
 				$messages[ $message_key ],
 				esc_attr( $subscription['product_name'] ),
 				esc_attr( $expiry_date ),
-				esc_url( self::WOO_SUBSCRIPTION_PAGE_URL ),
+				esc_url( $hyperlink_url ),
 				esc_attr( $renew_string ),
+			);
+
+			return array(
+				'type'           => $message_key,
+				'parsed_message' => $parsed_message,
+				'product_id'     => $product_id,
 			);
 		}
 
-		return '';
+		return array(
+			'type'           => 'invalid',
+			'parsed_message' => '',
+			'product_id'     => '',
+		);
 	}
 
 	/**
@@ -797,7 +820,7 @@ class PluginsHelper {
 
 		$total_expiring_subscriptions = count( $expiring_subscriptions );
 
-		$message = self::get_subscriptions_message(
+		$notice_data = self::get_subscriptions_notice_data(
 			$subscriptions,
 			$expiring_subscriptions,
 			$total_expiring_subscriptions,
@@ -808,13 +831,25 @@ class PluginsHelper {
 				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> expires on %2$s. <a href="%3$s">Enable auto-renewal</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
 				/* translators: 1) total expiring subscriptions 2) URL to My Subscriptions page */
 				'different_subscriptions' => __( 'You have <strong>%1$s Woo extension subscriptions</strong> expiring soon. <a href="%2$s">Enable auto-renewal</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
-			)
+			),
+			'expiring',
 		);
 
+		$button_link = self::WOO_SUBSCRIPTION_PAGE_URL;
+		if ( in_array( $notice_data['type'], array( 'single_manage', 'multiple_manage' ), true ) ) {
+			$button_link = add_query_arg(
+				array(
+					'product_id' => $notice_data['product_id'],
+					'type'       => 'expiring',
+				),
+				self::WOO_SUBSCRIPTION_PAGE_URL
+			);
+		}
+
 		return array(
-			'description' => $allowed_link ? $message : preg_replace( '#<a.*?>(.*?)</a>#i', '\1', $message ),
+			'description' => $allowed_link ? $notice_data['parsed_message'] : preg_replace( '#<a.*?>(.*?)</a>#i', '\1', $notice_data['parsed_message'] ),
 			'button_text' => __( 'Enable auto-renewal', 'woocommerce' ),
-			'button_link' => self::WOO_SUBSCRIPTION_PAGE_URL,
+			'button_link' => $button_link,
 		);
 	}
 
@@ -850,7 +885,7 @@ class PluginsHelper {
 		$total_expired_subscriptions         = count( $expired_subscriptions );
 		self::$can_show_expiring_subs_notice = false;
 
-		$message = self::get_subscriptions_message(
+		$notice_data = self::get_subscriptions_notice_data(
 			$subscriptions,
 			$expired_subscriptions,
 			$total_expired_subscriptions,
@@ -862,12 +897,24 @@ class PluginsHelper {
 				/* translators: 1) total expired subscriptions 2) URL to My Subscriptions page */
 				'different_subscriptions' => __( 'You have <strong>%1$s Woo extension subscriptions</strong> that expired. <a href="%2$s">Renew</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
 			),
+			'expired',
 		);
 
+		$button_link = self::WOO_SUBSCRIPTION_PAGE_URL;
+		if ( in_array( $notice_data['type'], array( 'single_manage', 'multiple_manage' ), true ) ) {
+			$button_link = add_query_arg(
+				array(
+					'product_id' => $notice_data['product_id'],
+					'type'       => 'expiring',
+				),
+				self::WOO_SUBSCRIPTION_PAGE_URL
+			);
+		}
+
 		return array(
-			'description' => $allowed_link ? $message : preg_replace( '#<a.*?>(.*?)</a>#i', '\1', $message ),
+			'description' => $allowed_link ? $notice_data['parsed_message'] : preg_replace( '#<a.*?>(.*?)</a>#i', '\1', $notice_data['parsed_message'] ),
 			'button_text' => __( 'Renew', 'woocommerce' ),
-			'button_link' => self::WOO_SUBSCRIPTION_PAGE_URL,
+			'button_link' => $button_link,
 		);
 	}
 
