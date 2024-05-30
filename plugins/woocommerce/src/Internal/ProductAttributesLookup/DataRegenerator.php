@@ -119,8 +119,17 @@ class DataRegenerator {
 		$this->data_store->unset_regeneration_aborted_flag();
 
 		if ( $truncate_table && $this->data_store->check_lookup_table_exists() ) {
-			$wpdb->query( "TRUNCATE TABLE {$this->lookup_table_name}" ); // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$this->truncate_lookup_table();
 		}
+	}
+
+	/**
+	 * Delete all the data from the lookup table.
+	 */
+	public function truncate_lookup_table() {
+		global $wpdb;
+
+		$wpdb->query( "TRUNCATE TABLE {$this->lookup_table_name}" ); // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -179,7 +188,7 @@ class DataRegenerator {
 			return;
 		}
 
-		$result = $this->do_regeneration_step();
+		$result = $this->do_regeneration_step( null, $this->data_store->optimized_data_access_is_enabled() );
 		if ( $result ) {
 			$this->enqueue_regeneration_step_run();
 		} else {
@@ -205,16 +214,17 @@ class DataRegenerator {
 	 * the appropriate entries for them in the lookup table.
 	 *
 	 * @param int|null $step_size How many products to process, by default PRODUCTS_PER_GENERATION_STEP will be used.
+	 * @param bool     $use_optimized_db_access Use direct database access for data retrieval if possible.
 	 * @return bool True if more steps need to be run, false otherwise.
 	 */
-	public function do_regeneration_step( ?int $step_size = self::PRODUCTS_PER_GENERATION_STEP ) {
+	public function do_regeneration_step( ?int $step_size = null, bool $use_optimized_db_access = false ) {
 		/**
 		 * Filter to alter the count of products that will be processed in each step of the product attributes lookup table regeneration process.
 		 *
 		 * @since 6.3
 		 * @param int $count Default processing step size.
 		 */
-		$products_per_generation_step = apply_filters( 'woocommerce_attribute_lookup_regeneration_step_size', $step_size );
+		$products_per_generation_step = apply_filters( 'woocommerce_attribute_lookup_regeneration_step_size', $step_size ?? self::PRODUCTS_PER_GENERATION_STEP );
 
 		$products_already_processed = get_option( 'woocommerce_attribute_lookup_processed_count', 0 );
 
@@ -235,7 +245,7 @@ class DataRegenerator {
 		}
 
 		foreach ( $product_ids as $id ) {
-			$this->data_store->create_data_for_product( $id );
+			$this->data_store->create_data_for_product( $id, $use_optimized_db_access );
 		}
 
 		$products_already_processed += count( $product_ids );
@@ -347,7 +357,7 @@ class DataRegenerator {
 		if ( isset( $_REQUEST['regenerate_product_attribute_lookup_data_product_id'] ) ) {
 			$product_id = (int) $_REQUEST['regenerate_product_attribute_lookup_data_product_id'];
 			$this->check_can_do_lookup_table_regeneration( $product_id );
-			$this->data_store->create_data_for_product( $product_id );
+			$this->data_store->create_data_for_product( $product_id, $this->data_store->optimized_data_access_is_enabled() );
 		} else {
 			$this->initiate_regeneration();
 		}
