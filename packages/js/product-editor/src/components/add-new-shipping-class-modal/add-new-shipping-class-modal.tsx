@@ -59,7 +59,7 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 	 * Pull the slug suggestion from the server,
 	 * and update the slug input field.
 	 */
-	async function pullAndupdateSlugInputField() {
+	async function pullAndUpdateSlugInputField() {
 		setIsRequestingSlug( true );
 
 		// Avoid making the request if the name has not changed.
@@ -94,7 +94,7 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 			return;
 		}
 
-		pullAndupdateSlugInputField();
+		pullAndUpdateSlugInputField();
 	}
 
 	return (
@@ -132,7 +132,7 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 						<Button
 							disabled={ isGenerateButtonDisabled }
 							variant="secondary"
-							onClick={ pullAndupdateSlugInputField }
+							onClick={ pullAndUpdateSlugInputField }
 							isBusy={ isRequestingSlug }
 							isSmall
 						>
