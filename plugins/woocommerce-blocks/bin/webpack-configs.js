@@ -1001,7 +1001,10 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 				plugins: resolvePlugins,
 		  };
 	return {
-		entry: getEntryConfig( 'frontend', options.exclude || [] ),
+		entry: getEntryConfig(
+			'cartAndCheckoutFrontend',
+			options.exclude || []
+		),
 		output: {
 			devtoolNamespace: 'wc',
 			path: path.resolve( __dirname, '../build/' ),
@@ -1082,6 +1085,12 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 					commons: {
 						test: /[\\/]node_modules[\\/]/,
 						name: 'wc-cart-checkout-fe-vendors',
+						chunks: 'all',
+						enforce: true,
+					},
+					base: {
+						test: /assets[\\/]js[\\/]base[\\/]/,
+						name: 'wc-cart-checkout-fe-base-and-blocks',
 						chunks: 'all',
 						enforce: true,
 					},
