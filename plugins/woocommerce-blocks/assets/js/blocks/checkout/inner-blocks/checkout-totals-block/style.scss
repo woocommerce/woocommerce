@@ -21,12 +21,37 @@
 	}
 }
 
-.is-large {
+.wc-block-checkout__sidebar {
+	align-self: flex-start;
+	top: $gap-large;
+	&.can-sticky {
+		position: sticky;
+	}
+}
+
+.wc-block-components-order-summary__sticky-container {
+	margin-bottom: $gap-large;
 	.wc-block-checkout__sidebar {
-		align-self: flex-start;
-		top: $gap-large;
-		&.is-sticky {
-			position: sticky;
+		margin-bottom: 0;
+	}
+}
+
+.is-small, .is-mobile {
+	.wc-block-components-order-summary {
+		> div:first-of-type {
+			padding-left: 12px;
+			padding-right: 12px;
+			> .wc-block-components-panel__button {
+				padding-top: $gap;
+				padding-bottom: $gap;
+				&[aria-expanded=true] {
+					margin-bottom: 0;
+				}
+			}
+		}
+		.wc-block-components-sidebar {
+			margin-bottom: 0;
+			margin-top: 0;
 		}
 	}
 }

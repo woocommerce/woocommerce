@@ -19,16 +19,33 @@ interface OrderSummaryProps {
 const OrderSummary = ( {
 	cartItems = [],
 }: OrderSummaryProps ): null | JSX.Element => {
-	const { isLarge, hasContainerWidth } = useContainerWidthContext();
+	const { isMobile, isSmall, hasContainerWidth } = useContainerWidthContext();
 
 	if ( ! hasContainerWidth ) {
 		return null;
 	}
 
+	const panelContent = (
+		<div className="wc-block-components-order-summary__content">
+			{ cartItems.map( ( cartItem ) => {
+				return (
+					<OrderSummaryItem
+						key={ cartItem.key }
+						cartItem={ cartItem }
+					/>
+				);
+			} ) }
+		</div>
+	);
+
+	if ( isMobile || isSmall ) {
+		return panelContent;
+	}
+
 	return (
 		<Panel
 			className="wc-block-components-order-summary"
-			initialOpen={ isLarge }
+			initialOpen={ true }
 			hasBorder={ false }
 			title={
 				<span className="wc-block-components-order-summary__button-text">
@@ -36,16 +53,7 @@ const OrderSummary = ( {
 				</span>
 			}
 		>
-			<div className="wc-block-components-order-summary__content">
-				{ cartItems.map( ( cartItem ) => {
-					return (
-						<OrderSummaryItem
-							key={ cartItem.key }
-							cartItem={ cartItem }
-						/>
-					);
-				} ) }
-			</div>
+			{ panelContent }
 		</Panel>
 	);
 };

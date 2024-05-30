@@ -11,9 +11,18 @@
 		margin-bottom: 0;
 	}
 
+	.wc-block-components-order-summary__header {
+		display: flex;
+		justify-content: space-between;
+	}
+
 	.wc-block-components-order-summary__content {
 		display: table;
 		width: 100%;
+	}
+
+	.wc-block-components-order-summary__value {
+		font-weight: bold
 	}
 
 	.wc-block-components-order-summary-item {
@@ -118,6 +127,19 @@
 		.wc-block-components-totals-wrapper {
 			padding-left: $gap-small;
 			padding-right: $gap-small;
+		}
+	}
+}
+
+.wc-block-components-order-summary__sticky-container {
+	&.can-sticky {
+		position: sticky !important;
+		top: 0;
+		//z-index: 1;
+		//transform: translateY(0%);
+		transition: all 0.3s ease;
+		&.is-scrolling-down {
+			//transform: translateY(-100%);
 		}
 	}
 }

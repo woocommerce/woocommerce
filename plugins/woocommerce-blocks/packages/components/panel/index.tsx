@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { useState, forwardRef } from '@wordpress/element';
 import classNames from 'classnames';
 import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 import type { ReactNode, ReactElement } from 'react';
@@ -19,17 +19,22 @@ export interface PanelProps {
 	title: ReactNode;
 	titleTag?: keyof JSX.IntrinsicElements;
 	state?: [ boolean, React.Dispatch< React.SetStateAction< boolean > > ];
+	style?: React.CSSProperties;
 }
 
-const Panel = ( {
-	children,
-	className,
-	initialOpen = false,
-	hasBorder = false,
-	title,
-	titleTag: TitleTag = 'div',
-	state,
-}: PanelProps ): ReactElement => {
+const Panel = (
+	{
+		children,
+		className,
+		initialOpen = false,
+		hasBorder = false,
+		title,
+		titleTag: TitleTag = 'div',
+		state,
+		style,
+	}: PanelProps,
+	ref: React.Ref< HTMLDivElement >
+): ReactElement => {
 	let [ isOpen, setIsOpen ] = useState< boolean >( initialOpen );
 	// If state is managed externally, we override the internal state.
 	if ( Array.isArray( state ) && state.length === 2 ) {
@@ -41,6 +46,8 @@ const Panel = ( {
 			className={ classNames( className, 'wc-block-components-panel', {
 				'has-border': hasBorder,
 			} ) }
+			ref={ ref }
+			style={ style }
 		>
 			<TitleTag>
 				<button
@@ -65,4 +72,4 @@ const Panel = ( {
 	);
 };
 
-export default Panel;
+export default forwardRef( Panel );
