@@ -387,6 +387,10 @@
 				"BABEL_ENV": {
 					"external": true,
 					"default": "default"
+				},
+				"BUNDLE_EXPERIMENTAL_BLOCKS": {
+					"external": true,
+					"default": "1"
 				}
 			},
 			"files": [
