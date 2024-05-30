@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Prevent compatible extensions, such as WooCommerce Stripe Gateway and WooPayments to be listed as incompatible.
