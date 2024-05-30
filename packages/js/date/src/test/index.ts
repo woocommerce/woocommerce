@@ -990,6 +990,19 @@ describe( 'getPreviousDate', () => {
 		);
 		expect( previousDate.format( isoDateFormat ) ).toBe( '2017-08-21' );
 	} );
+	it( 'should default to previous_year when compare is undefined', () => {
+		const date = '2020-03-01 00:00:00';
+		const primaryStart = '2020-02-28';
+		const secondaryStart = '2020-02-28';
+		const previousDate = getPreviousDate(
+			date,
+			primaryStart,
+			secondaryStart,
+			undefined,
+			'day'
+		);
+		expect( previousDate.format( isoDateFormat ) ).toBe( '2019-03-01' );
+	} );
 } );
 
 describe( 'getChartTypeForQuery', () => {
