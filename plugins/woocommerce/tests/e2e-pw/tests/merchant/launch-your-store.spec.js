@@ -313,6 +313,6 @@ test.describe( 'Launch Your Store - logged in', () => {
 
 		await expect(
 			page.getByText( 'Customize "Coming soon" page' )
-		).toBeHidden();
+		).not.toBeVisible();
 	} );
 } );
