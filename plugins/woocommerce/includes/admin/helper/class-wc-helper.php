@@ -2268,7 +2268,6 @@ class WC_Helper {
 	 * @return array An array containing notice data.
 	 */
 	public static function get_notices() {
-
 		$cache_key = '_woocommerce_helper_notices';
 		$cached_data = get_transient( $cache_key );
 
