@@ -603,7 +603,7 @@ class WC_REST_Authentication {
 	 * This method tries to disambiguate 'primary' API requests from any programmatic REST
 	 * API requests made internally.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request The request currently being processed.
 	 *
 	 * @return void
 	 */
