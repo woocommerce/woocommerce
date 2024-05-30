@@ -212,7 +212,12 @@ const entries = {
 			'./assets/js/atomic/blocks/product-elements/product-details/index.tsx',
 		'add-to-cart-form':
 			'./assets/js/atomic/blocks/product-elements/add-to-cart-form/index.tsx',
-		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}' ),
+
+		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}', {
+			...blocks,
+			cart: {},
+			checkout: {},
+		} ),
 
 		// Interactivity component styling
 		'wc-interactivity-checkbox-list':

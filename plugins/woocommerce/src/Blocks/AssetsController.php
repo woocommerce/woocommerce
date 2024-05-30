@@ -65,9 +65,9 @@ final class AssetsController {
 		$this->api->register_script( 'wc-blocks-vendors-frontend', $this->api->get_block_asset_build_path( 'wc-blocks-vendors-frontend' ), array(), false );
 
 		// Cart and checkout frontend scripts.
-		$cart_checkout_common_deps = array( 'wc-cart-checkout-fe-vendors', 'wc-cart-checkout-fe-base-and-blocks' );
-		$this->api->register_script( 'wc-cart-checkout-fe-vendors', $this->api->get_block_asset_build_path( 'wc-cart-checkout-fe-vendors' ), array(), false );
-		$this->api->register_script( 'wc-cart-checkout-fe-base-and-blocks', $this->api->get_block_asset_build_path( 'wc-cart-checkout-fe-base-and-blocks' ), array(), false );
+		$cart_checkout_common_deps = array( 'cart-checkout-vendors-frontend', 'cart-checkout-base-frontend' );
+		$this->api->register_script( 'cart-checkout-vendors-frontend', $this->api->get_block_asset_build_path( 'cart-checkout-vendors-frontend' ), array(), false );
+		$this->api->register_script( 'cart-checkout-base-frontend', $this->api->get_block_asset_build_path( 'cart-checkout-base-frontend' ), array(), false );
 		$this->api->register_script( 'wc-blocks-checkout', 'assets/client/blocks/blocks-checkout.js', $cart_checkout_common_deps );
 		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js', $cart_checkout_common_deps );
 

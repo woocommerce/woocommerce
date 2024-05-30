@@ -1017,7 +1017,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 					) }${ fileSuffix }.js`;
 				}
 
-				return `[name]-cart-checkout-frontend${ fileSuffix }.js`;
+				return `[name]-frontend${ fileSuffix }.js`;
 			},
 			uniqueName: 'webpackWcBlocksCartCheckoutFrontendJsonp',
 			library: [ 'wc', '[name]' ],
@@ -1073,13 +1073,13 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 				cacheGroups: {
 					commons: {
 						test: /[\\/]node_modules[\\/]/,
-						name: 'wc-cart-checkout-fe-vendors',
+						name: 'cart-checkout-vendors',
 						chunks: 'all',
 						enforce: true,
 					},
 					base: {
 						test: /(?:assets[\\/]js[\\/]base|packages[\\/]components|assets[\\/]js[\\/]blocks[\\/]checkout)/,
-						name: 'wc-cart-checkout-fe-base-and-blocks',
+						name: 'cart-checkout-base',
 						chunks: 'all',
 						enforce: true,
 					},
