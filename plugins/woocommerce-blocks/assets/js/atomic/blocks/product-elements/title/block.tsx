@@ -6,7 +6,6 @@ import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
 } from '@woocommerce/shared-context';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import ProductName from '@woocommerce/base-components/product-name';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
@@ -73,10 +72,10 @@ export const Block = ( props: Props ): JSX.Element => {
 						[ `${ parentClassName }__product-title` ]:
 							parentClassName,
 						[ `wc-block-components-product-title--align-${ align }` ]:
-							align && isFeaturePluginBuild(),
+							align,
 					}
 				) }
-				style={ isFeaturePluginBuild() ? styleProps.style : {} }
+				style={ styleProps.style }
 			/>
 		);
 	}
@@ -91,10 +90,10 @@ export const Block = ( props: Props ): JSX.Element => {
 				{
 					[ `${ parentClassName }__product-title` ]: parentClassName,
 					[ `wc-block-components-product-title--align-${ align }` ]:
-						align && isFeaturePluginBuild(),
+						align,
 				}
 			) }
-			style={ isFeaturePluginBuild() ? styleProps.style : {} }
+			style={ styleProps.style }
 		>
 			<ProductName
 				disabled={ ! showProductLink }
