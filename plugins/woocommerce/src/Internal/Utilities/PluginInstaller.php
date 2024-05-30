@@ -114,8 +114,8 @@ class PluginInstaller implements RegisterHooksInterface {
 		$installed_by = $metadata['installed_by'] ?? 'WooCommerce';
 		if ( 0 === strcasecmp( 'WooCommerce', $installed_by ) ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
-			$calling_file = debug_backtrace()[1]['file'] ?? null; // [1], not [0], because the immediate caller is the install_plugin method.
-			if ( ! StringUtil::starts_with( $calling_file, WC_ABSPATH . 'includes/' ) && ! StringUtil::starts_with( $calling_file, WC_ABSPATH . 'src/' ) ) {
+			$calling_file = StringUtil::normalize_local_path_slashes( debug_backtrace()[1]['file'] ?? '' ); // [1], not [0], because the immediate caller is the install_plugin method.
+			if ( ! StringUtil::starts_with( $calling_file, StringUtil::normalize_local_path_slashes( WC_ABSPATH . 'includes/' ) ) && ! StringUtil::starts_with( $calling_file, StringUtil::normalize_local_path_slashes( WC_ABSPATH . 'src/' ) ) ) {
 				throw new \InvalidArgumentException( "If the value of 'installed_by' is 'WooCommerce', the caller of the method must be a WooCommerce core class or function." );
 			}
 		}

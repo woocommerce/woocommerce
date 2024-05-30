@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make the plugin autoinstall process more robust
