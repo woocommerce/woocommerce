@@ -32,7 +32,7 @@ class DataRegenerator {
 
 	use AccessiblePrivateMethods;
 
-	public const PRODUCTS_PER_GENERATION_STEP = 10;
+	public const PRODUCTS_PER_GENERATION_STEP = 100;
 
 	/**
 	 * The data store to use.
