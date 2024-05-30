@@ -706,6 +706,15 @@
           "id": "56a8ef0ef0afec9c884f655e7fdd23d9666c9d00"
         },
         {
+          "post_title": "Support and documentation for WooCommerce extensions",
+          "menu_title": "Support and documentation",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/support-and-documentation.md",
+          "hash": "48ec15e8c50c2fceea0bce267a52dcd7c740a9f1614773b10b6bab4a2e605a8c",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/support-and-documentation.md",
+          "id": "c7ab700f5ab812a79b646a865caf429864becdb8"
+        },
+        {
           "post_title": "Understanding the risks of removing URL bases in WooCommerce",
           "menu_title": "Risks of removing URL bases",
           "tags": "reference",
@@ -713,6 +722,18 @@
           "hash": "414970e7d53ddcafb186f2f3a253eed0d01800df2182f8bd2a4310c53079a795",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/removing-product-product-category-or-shop-from-the-url.md",
           "id": "827bfa56d40c2155542147ea5afe7cc756e18c5d"
+        },
+        {
+          "post_title": "Privacy Standards for WooCommerce Extensions",
+          "menu_title": "Privacy Standards",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/privacy-standards.md",
+          "hash": "44496b3d6244ea09c86b9d13fbefe9b77478311df25def6ae5e4e567a0e2bd6f",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/privacy-standards.md",
+          "id": "840cf3001ed520ed206a42b147a2e3afa4ed82ae",
+          "links": {
+            "./gdpr-compliance.md": "af392a92b41b69b543c5ec77a07af770f6bb1587"
+          }
         },
         {
           "post_title": "How to optimize performance for WooCommerce stores",
@@ -734,6 +755,15 @@
           "links": {
             "./css-sass-naming-conventions.md": "a34404f72868f2780ccf07da9b998204b8213d32"
           }
+        },
+        {
+          "post_title": "Maintaining and updating WooCommerce extensions",
+          "menu_title": "Maintainability and updates",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/maintainability.md",
+          "hash": "6c1afab52dfab6998b87c4fac3acaba05ef516c4ff483b1ad46be13bc1b299c1",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/maintainability.md",
+          "id": "828687b931d51c041ff4b4e0dc9a3a5b832b7ead"
         },
         {
           "post_title": "WooCommerce grammar, punctuation and capitalization guide",
@@ -770,11 +800,20 @@
           "id": "e561b46694dba223c38b87613ce4907e4e14333a"
         },
         {
+          "post_title": "Compatibility and interoperability for WooCommerce extensions",
+          "menu_title": "Compatibility best practices",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/compatibility.md",
+          "hash": "c8e09923cffd4a3951dfc2db43823f9d469439775019104f687aa2c95caff142",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/compatibility.md",
+          "id": "e3353f3e7a61bfd0f839d74c5baee2847b4b75d0"
+        },
+        {
           "post_title": "WooCommerce coding standards",
           "menu_title": "Coding standards",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/coding-standards.md",
-          "hash": "f23b9ab30de8af1356e92999d492ddb5bfb1303e88e64c4e58a26fbc9b93e6d4",
+          "hash": "7c5b8a0b555f81606fd6d2c85f62a00feaff369569666ba88d029fd384202f2f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/coding-standards.md",
           "id": "b09a572b8a452b6cd795e0985daa85f06e5889fb"
         }
@@ -1266,5 +1305,5 @@
       "categories": []
     }
   ],
-  "hash": "fe317e6e18998dd7e1936581791d6e949ff59137cd42d5004464093efbca1a88"
+  "hash": "4b21f13102730165225dfb14ca0e448f66be236867a000e807d4b5327ec02aa5"
 }
