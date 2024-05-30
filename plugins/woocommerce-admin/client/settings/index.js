@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { getQuery } from '@woocommerce/navigation';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -9,11 +10,25 @@ import { getQuery } from '@woocommerce/navigation';
 import { Tabs } from './tabs';
 import { SectionNav } from './section-nav';
 import { Content } from './content';
+import { possiblyRenderSettingsSlots } from './settings-slots';
+import { registerTaxSettingsConflictErrorFill } from './conflict-error-slotfill';
+import { registerPaymentsSettingsBannerFill } from '../payments/payments-settings-banner-slotfill';
+import { registerSiteVisibilitySlotFill } from '../launch-your-store';
 import './style.scss';
 
 const Settings = ( { params } ) => {
 	const settingsData = window.wcSettings?.admin?.settingsPages;
 	const { section } = getQuery();
+
+	useEffect( () => {
+		possiblyRenderSettingsSlots();
+	}, [ params ] );
+
+	useEffect( () => {
+		registerTaxSettingsConflictErrorFill();
+		registerPaymentsSettingsBannerFill();
+		registerSiteVisibilitySlotFill();
+	}, [] );
 
 	if ( ! settingsData ) {
 		return <div>Error getting data</div>;

@@ -26,6 +26,14 @@ export const Content = ( { data } ) => {
 						return (
 							<SettingsCheckbox setting={ setting } key={ key } />
 						);
+					case 'slotfill_placeholder':
+						return (
+							<div
+								key={ key }
+								id={ setting.id }
+								className={ setting.class }
+							></div>
+						);
 					default:
 						return null;
 				}
