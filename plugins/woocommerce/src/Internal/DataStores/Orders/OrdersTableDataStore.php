@@ -2586,8 +2586,6 @@ FROM $order_meta_table
 	 * @param \WC_Order $order Order object.
 	 */
 	public function update( &$order ) {
-		$previous_status = ArrayUtil::get_value_or_default( $order->get_data(), 'status' );
-
 		// Before updating, ensure date paid is set if missing.
 		if (
 			! $order->get_date_paid( 'edit' )
@@ -2620,6 +2618,8 @@ FROM $order_meta_table
 
 		$order->apply_changes();
 		$this->clear_caches( $order );
+
+		$previous_status = ArrayUtil::get_value_or_default( $order->get_data(), 'status' );
 
 		// For backwards compatibility, moving a draft order to a valid status triggers the 'woocommerce_new_order' hook.
 		if ( ! empty( $changes['status'] ) && in_array( $previous_status, array( 'new', 'auto-draft', 'draft', 'checkout-draft' ), true ) ) {
