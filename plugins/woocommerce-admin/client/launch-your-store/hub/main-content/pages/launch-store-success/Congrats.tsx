@@ -82,8 +82,9 @@ export const Congrats = ( {
 			? emojis[ emojiValue as keyof typeof emojis ]
 			: 'none';
 		recordEvent( 'launch_your_store_congrats_survey_complete', {
-			emoji: emoji_value,
-			feedback: feedbackText,
+			action: 'store_setup',
+			score: emoji_value,
+			comments: feedbackText,
 		} );
 
 		setIsShowThanks( true );
