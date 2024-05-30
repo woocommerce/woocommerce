@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update the React version in the pnpm-lock file
