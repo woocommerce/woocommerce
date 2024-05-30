@@ -280,7 +280,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 	}
 
 	if ( $complete ) {
-		Users::update_site_user_meta( $customer_id, 'paying_customer', 1 );
+		update_user_meta( $customer_id, 'paying_customer', 1 );
 		Users::update_site_user_meta( $customer_id, 'wc_order_count', '' );
 		Users::update_site_user_meta( $customer_id, 'wc_money_spent', '' );
 		Users::delete_site_user_meta( $customer_id, 'wc_last_order' );
