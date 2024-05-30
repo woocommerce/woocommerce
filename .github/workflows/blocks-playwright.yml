@@ -11,10 +11,16 @@ on:
     # Allow manually triggering the workflow.
     workflow_dispatch:
     # Run workflow when a PR is merged to trunk branch
-    # To create github issues for flaky tests.
+    # to create github issues for flaky tests.
     push:
         branches:
             - trunk
+        paths:
+            - '.github/workflows/blocks-playwright.yml' # This file
+            - 'plugins/woocommerce-blocks/**'
+            - 'plugins/woocommerce/src/Blocks/**'
+            - 'plugins/woocommerce/templates/**'
+            - 'plugins/woocommerce/patterns/**'
 
 concurrency:
     group: '${{ github.workflow }}-${{ github.ref }}'
