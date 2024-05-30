@@ -186,14 +186,14 @@ class LaunchYourStore {
 			// translators: no need to translate it. It's a link.
 			__(
 				"
-			This page is in \"Coming soon\" mode and is only visible to you and those who have permission. To make it public to everyone,&nbsp;<a href='%s'>change visibility settings</a>
+			This page is in \"Coming soon\" mode and is only visible to you and those who have permission. To make it public to everyone,&nbsp;<a href='%s'>Change visibility settings</a>
 		",
 				'woocommerce'
 			),
 			$link
 		);
 		// phpcs:ignore
-		echo "<div id='coming-soon-footer-banner'>$text<a class='coming-soon-footer-banner-dismiss' data-rest-url='$rest_url' data-rest-nonce='$rest_nonce'></a></div>";
+		echo "<div id='coming-soon-footer-banner'><div class='coming-soon-footer-banner__content'>$text</div><a class='coming-soon-footer-banner-dismiss' data-rest-url='$rest_url' data-rest-nonce='$rest_nonce'></a></div>";
 	}
 
 	/**
