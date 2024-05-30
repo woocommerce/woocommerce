@@ -19,8 +19,9 @@ export type ValidationContextProps< T > = {
 	validateAll( newData?: Partial< T > ): Promise< ValidationErrors >;
 };
 
-export type ValidationProviderProps< T > = {
-	initialValue?: T;
+export type ValidationProviderProps = {
+	postType: string;
+	productId: number;
 };
 
 export type ValidationError = string | undefined;

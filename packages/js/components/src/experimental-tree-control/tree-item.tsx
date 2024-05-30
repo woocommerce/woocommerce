@@ -58,6 +58,9 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 							}
 							checked={ selection.checkedStatus === 'checked' }
 							onChange={ selection.onSelectChild }
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore __nextHasNoMarginBottom is a valid prop
+							__nextHasNoMarginBottom={ true }
 						/>
 					) : (
 						<input
