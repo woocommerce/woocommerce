@@ -1164,7 +1164,7 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Product Collection should be visible after Refresh', () => {
-		test( 'In a Product Archive (Product Catalog)', async ( {
+		test( 'Product Collection should be visible after Refresh in a Template', async ( {
 			page,
 			editor,
 			pageObject,
@@ -1182,7 +1182,11 @@ test.describe( 'Product Collection', () => {
 			await expect( productTemplate ).toBeVisible();
 		} );
 
-		test( 'In a Post', async ( { page, pageObject, editor } ) => {
+		test( 'Product Collection should be visible after Refresh in a Post', async ( {
+			page,
+			pageObject,
+			editor,
+		} ) => {
 			await pageObject.createNewPostAndInsertBlock();
 			const productTemplate = page.getByLabel(
 				BLOCK_LABELS.productTemplate
@@ -1190,9 +1194,28 @@ test.describe( 'Product Collection', () => {
 			await expect( productTemplate ).toBeVisible();
 
 			// Refresh the post and verify the block is still visible
-			await editor.saveDraft();
+			await editor.publishPost();
 			await page.reload();
 			await expect( productTemplate ).toBeVisible();
+		} );
+
+		test( 'On Sale collection should be visible after Refresh', async ( {
+			page,
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.goToProductCatalogAndInsertCollection( 'onSale' );
+
+			const productTemplate = editor.canvas.getByLabel(
+				BLOCK_LABELS.productTemplate
+			);
+
+			await expect( productTemplate ).toHaveCount( 2 );
+
+			// Refresh the template and verify "On Sale" collection is still visible
+			await editor.saveSiteEditorEntities();
+			await page.reload();
+			await expect( productTemplate ).toHaveCount( 2 );
 		} );
 	} );
 } );
