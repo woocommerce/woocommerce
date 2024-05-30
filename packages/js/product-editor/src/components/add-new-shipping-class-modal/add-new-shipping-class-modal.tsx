@@ -57,9 +57,8 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 		shippingNameInputValue
 	);
 
-	// Get the reference of the name and description field
+	// Get the reference of the name field
 	const nameRef = useRef< HTMLInputElement | null >( null );
-	const descriptionRef = useRef< HTMLInputElement | null >( null );
 
 	// Focus in the name field when the component is mounted.
 	useEffect( () => {
@@ -79,9 +78,6 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 		}
 
 		setIsRequestingSlug( true );
-
-		// Being optimistic, focus on the description field.
-		descriptionRef.current?.focus();
 
 		setPrevNameValue( shippingNameInputValue );
 
@@ -169,7 +165,6 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 						'woocommerce'
 					)
 				}
-				ref={ descriptionRef }
 			/>
 
 			<div className="woocommerce-add-new-shipping-class-modal__buttons">
