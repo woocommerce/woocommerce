@@ -16,6 +16,7 @@ import { getQuery, navigateTo } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME, TaskListType, TaskType } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -69,6 +70,31 @@ const launchStoreAction = async () => {
 		return results;
 	}
 	throw new Error( JSON.stringify( results ) );
+};
+
+const getTestOrderCount = async () => {
+	const result = ( await apiFetch( {
+		path: '/wc-admin/launch-your-store/woopayments/test-orders/count',
+		method: 'GET',
+	} ) ) as { count: number };
+
+	return result.count;
+};
+
+const deleteTestOrders = async ( {
+	input,
+}: {
+	input: {
+		removeTestOrders: boolean;
+	};
+} ) => {
+	if ( ! input.removeTestOrders ) {
+		return null;
+	}
+	return await apiFetch( {
+		path: '/wc-admin/launch-your-store/woopayments/test-orders',
+		method: 'DELETE',
+	} );
 };
 
 const recordStoreLaunchAttempt = ( {
@@ -172,11 +198,18 @@ export const sidebarMachine = setup( {
 			const { sidebar } = getQuery() as { sidebar?: string };
 			return !! sidebar && sidebar === sidebarLocation;
 		},
+		hasWooPayments: () => {
+			return window?.wcSettings?.admin?.plugins?.activePlugins.includes(
+				'woocommerce-payments'
+			);
+		},
 	},
 	actors: {
 		sidebarQueryParamListener,
 		getTasklist: fromPromise( getLysTasklist ),
+		getTestOrderCount: fromPromise( getTestOrderCount ),
 		updateLaunchStoreOptions: fromPromise( launchStoreAction ),
+		deleteTestOrders: fromPromise( deleteTestOrders ),
 		fetchCongratsData,
 	},
 } ).createMachine( {
@@ -228,6 +261,31 @@ export const sidebarMachine = setup( {
 							actions: assign( {
 								tasklist: ( { event } ) => event.output,
 							} ),
+							target: 'maybeCountTestOrders',
+						},
+					},
+				},
+				maybeCountTestOrders: {
+					always: [
+						{
+							guard: 'hasWooPayments',
+							target: 'countTestOrders',
+						},
+						{
+							target: 'launchYourStoreHub',
+						},
+					],
+				},
+				countTestOrders: {
+					invoke: {
+						src: 'getTestOrderCount',
+						onDone: {
+							actions: assign( {
+								testOrderCount: ( { event } ) => event.output,
+							} ),
+							target: 'launchYourStoreHub',
+						},
+						onError: {
 							target: 'launchYourStoreHub',
 						},
 					},
@@ -255,38 +313,52 @@ export const sidebarMachine = setup( {
 						assign( { launchStoreError: undefined } ), // clear the errors if any from previously
 						'recordStoreLaunchAttempt',
 					],
-					invoke: {
-						src: 'updateLaunchStoreOptions',
-						onDone: {
-							target: '#storeLaunchSuccessful',
-							actions: [
-								{
-									type: 'recordStoreLaunchResults',
-									params: { success: true },
-								},
-							],
-						},
-						onError: {
-							actions: [
-								assign( {
-									launchStoreError: ( { event } ) => {
-										return {
-											message: JSON.stringify(
-												event.error
-											), // for some reason event.error is an empty object, worth investigating if we decide to use the error message somewhere
-										};
+					invoke: [
+						{
+							src: 'updateLaunchStoreOptions',
+							onDone: {
+								target: '#storeLaunchSuccessful',
+								actions: [
+									{
+										type: 'recordStoreLaunchResults',
+										params: { success: true },
 									},
-								} ),
-								{
-									type: 'recordStoreLaunchResults',
-									params: {
-										success: false,
+								],
+							},
+							onError: {
+								actions: [
+									assign( {
+										launchStoreError: ( { event } ) => {
+											return {
+												message: JSON.stringify(
+													event.error
+												), // for some reason event.error is an empty object, worth investigating if we decide to use the error message somewhere
+											};
+										},
+									} ),
+									{
+										type: 'recordStoreLaunchResults',
+										params: {
+											success: false,
+										},
 									},
-								},
-							],
-							target: '#launchYourStoreHub',
+								],
+								target: '#launchYourStoreHub',
+							},
 						},
-					},
+						{
+							src: 'deleteTestOrders',
+							input: ( { event } ) => {
+								return {
+									removeTestOrders: (
+										event as {
+											removeTestOrders: boolean;
+										}
+									 ).removeTestOrders,
+								};
+							},
+						},
+					],
 				},
 			},
 		},
