@@ -198,6 +198,11 @@ export const sidebarMachine = setup( {
 			const { sidebar } = getQuery() as { sidebar?: string };
 			return !! sidebar && sidebar === sidebarLocation;
 		},
+		hasWooPayments: () => {
+			return window?.wcSettings?.admin?.plugins?.activePlugins.includes(
+				'woocommerce-payments'
+			);
+		},
 	},
 	actors: {
 		sidebarQueryParamListener,
@@ -263,11 +268,7 @@ export const sidebarMachine = setup( {
 				maybeCountTestOrders: {
 					always: [
 						{
-							guard: () => {
-								return window?.wcSettings?.admin?.plugins?.activePlugins.includes(
-									'woocommerce-payments'
-								);
-							},
+							guard: 'hasWooPayments',
 							target: 'countTestOrders',
 						},
 						{
