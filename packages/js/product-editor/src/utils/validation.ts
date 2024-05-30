@@ -4,8 +4,9 @@
 import { __ } from '@wordpress/i18n';
 import { Product as ProductType } from '@woocommerce/data';
 import { z } from 'zod'
+import { zodToJsonSchema } from "zod-to-json-schema";
 
-const Product = z.object( {
+const ProductSchema = z.object( {
     name: z.string(),
     regular_price: z.coerce.number().nonnegative(),
     sale_price: z.coerce.number().nonnegative(),
@@ -18,5 +19,8 @@ const Product = z.object( {
 );
 
 export function validateProduct( product : ProductType ) {
-    return Product.safeParse( product );
+    return ProductSchema.safeParse( product );
 }
+
+const jsonSchema = zodToJsonSchema( ProductSchema, 'ProductSchema' );
+console.log(jsonSchema);

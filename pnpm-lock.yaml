@@ -2677,6 +2677,9 @@ importers:
       zod:
         specifier: ^3.22.4
         version: 3.22.4
+      zod-to-json-schema:
+        specifier: ^3.23.0
+        version: 3.23.0(zod@3.22.4)
     devDependencies:
       '@babel/core':
         specifier: ^7.23.5
@@ -24802,6 +24805,11 @@ packages:
 
   zenhub-api@0.2.0:
     resolution: {integrity: sha512-++csiIAGRwF2PhifpIL5Os7zuNWLScFbfjtwp7x+u4xI6UfkCJWS3yDWrjh/kgexNPB5Pwcu30kpnlsuN1V1sw==}
+
+  zod-to-json-schema@3.23.0:
+    resolution: {integrity: sha512-az0uJ243PxsRIa2x1WmNE/pnuA05gUq/JB8Lwe1EDCCL/Fz9MgjYQ0fPlyc2Tcv6aF2ZA7WM5TWaRZVEFaAIag==}
+    peerDependencies:
+      zod: ^3.23.3
 
   zod@3.22.4:
     resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
@@ -62394,6 +62402,10 @@ snapshots:
       request-promise-native: 1.0.9(request@2.88.2)
     transitivePeerDependencies:
       - supports-color
+
+  zod-to-json-schema@3.23.0(zod@3.22.4):
+    dependencies:
+      zod: 3.22.4
 
   zod@3.22.4: {}
 
