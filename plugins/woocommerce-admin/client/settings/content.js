@@ -8,6 +8,10 @@ export const Content = ( { data } ) => {
 
 	console.log( settings );
 
+	if ( ! settings ) {
+		return null;
+	}
+
 	return (
 		<div>
 			{ settings.map( ( setting, idx ) => {
