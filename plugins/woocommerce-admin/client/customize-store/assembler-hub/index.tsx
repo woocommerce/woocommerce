@@ -30,12 +30,14 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
 // @ts-ignore No types for this exist yet.
 import { store as preferencesStore } from '@wordpress/preferences';
-// @ts-ignore No types for this exist yet.
-import { store as editorStore } from '@wordpress/editor';
+import {
+	store as editorStore,
+	privateApis as editorPrivateApis,
+	// @ts-ignore No types for this exist yet.
+} from '@wordpress/editor';
 // @ts-ignore No types for this exist yet.
 import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 // @ts-ignore No types for this exist yet.
-import { GlobalStylesProvider } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
 import { MediaUpload } from '@wordpress/media-utils';
 import { addFilter } from '@wordpress/hooks';
 
@@ -52,6 +54,7 @@ import { getNewPath } from '@woocommerce/navigation';
 import useBodyClass from '../hooks/use-body-class';
 
 const { RouterProvider } = unlock( routerPrivateApis );
+const { GlobalStylesProvider } = unlock( editorPrivateApis );
 
 addFilter(
 	'editor.MediaUpload',

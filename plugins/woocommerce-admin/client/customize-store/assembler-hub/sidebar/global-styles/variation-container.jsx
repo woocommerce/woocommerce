@@ -10,11 +10,12 @@ import {
 	privateApis as blockEditorPrivateApis,
 	BlockEditorProvider,
 } from '@wordpress/block-editor';
-import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { isEqual, noop } from 'lodash';
+import { privateApis as editorPrivateApis } from '@wordpress/editor';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
+const { mergeBaseAndUserConfigs } = unlock( editorPrivateApis );
 
 // Removes the typography settings from the styles when the user is changing
 // to a new typography variation. Otherwise, some of the user's old

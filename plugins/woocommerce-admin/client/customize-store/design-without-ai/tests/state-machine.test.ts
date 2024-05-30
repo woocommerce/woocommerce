@@ -26,10 +26,14 @@ const createMockMachine = ( {
 };
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
-jest.mock(
-	'@wordpress/edit-site/build-module/components/global-styles/global-styles-provider',
-	() => jest.fn()
-);
+jest.mock( '@wordpress/edit-site/build-module/lock-unlock', () => {
+	const unlock = jest.fn( () => ( {
+		mergeBaseAndUserConfigs: jest.fn(),
+	} ) );
+	return {
+		unlock,
+	};
+} );
 
 describe( 'Design Without AI state machine', () => {
 	beforeEach( () => {

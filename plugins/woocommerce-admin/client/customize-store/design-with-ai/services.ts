@@ -11,7 +11,10 @@ import { dispatch, resolveSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
-import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
+import { privateApis as editorPrivateApis } from '@wordpress/editor';
+// @ts-ignore No types for this exist yet.
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
+
 /**
  * Internal dependencies
  */
@@ -25,6 +28,8 @@ import { THEME_SLUG } from '../data/constants';
 import { trackEvent } from '../tracking';
 
 const { escalate } = actions;
+
+const { mergeBaseAndUserConfigs } = unlock( editorPrivateApis );
 
 const browserPopstateHandler =
 	() => ( sendBack: Sender< { type: 'EXTERNAL_URL_UPDATE' } > ) => {
