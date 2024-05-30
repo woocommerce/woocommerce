@@ -62,6 +62,7 @@ export type customizeStoreStateMachineEvents =
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'INSTALL_FONTS' }
+	| { type: 'INSTALL_PATTERNS' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
 	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean };
 
@@ -240,6 +241,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		INSTALL_FONTS: {
 			target: 'designWithoutAi.installFonts',
 		},
+		INSTALL_PATTERNS: {
+			target: 'designWithoutAi.installPatterns',
+		},
 	},
 	states: {
 		setFlags: {
@@ -376,6 +380,18 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						{
 							type: 'updateQueryStep',
 							step: 'design/install-fonts',
+						},
+					],
+					meta: {
+						component: DesignWithoutAi,
+					},
+				},
+				// This state is used to install patterns and then redirect to the assembler hub.
+				installPatterns: {
+					entry: [
+						{
+							type: 'updateQueryStep',
+							step: 'design/install-patterns',
 						},
 					],
 					meta: {

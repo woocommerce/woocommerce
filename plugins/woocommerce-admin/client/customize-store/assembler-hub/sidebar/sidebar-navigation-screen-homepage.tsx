@@ -51,6 +51,7 @@ import { isEqual } from 'lodash';
 import { COLOR_PALETTES } from './global-styles/color-palette-variations/constants';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
+import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
@@ -211,7 +212,7 @@ export const SidebarNavigationScreenHomepage = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, homePatterns, isLoading, isEditorLoading ] );
 
-	const { context } = useContext( CustomizeStoreContext );
+	const { context, sendEvent } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 
 	const title = aiOnline
@@ -376,6 +377,15 @@ export const SidebarNavigationScreenHomepage = () => {
 											<Button
 												onClick={ () => {
 													optIn();
+													if ( isIframe( window ) ) {
+														sendMessageToParent( {
+															type: 'INSTALL_PATTERNS',
+														} );
+													} else {
+														sendEvent(
+															'INSTALL_PATTERNS'
+														);
+													}
 												} }
 												variant="primary"
 												disabled={ ! OptInDataSharing }
