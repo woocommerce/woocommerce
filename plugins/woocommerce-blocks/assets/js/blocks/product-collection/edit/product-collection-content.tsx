@@ -112,6 +112,7 @@ const ProductCollectionContent = ( {
 	useEffect(
 		() => {
 			setAttributes( defaultAttributesValue );
+			isInitialAttributesSet.current = true;
 		},
 		// This hook is only needed on initialization and sets default attributes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
