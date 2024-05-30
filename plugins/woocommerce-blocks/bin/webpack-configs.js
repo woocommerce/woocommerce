@@ -1130,4 +1130,5 @@ module.exports = {
 	getSiteEditorConfig,
 	getStylingConfig,
 	getInteractivityAPIConfig,
+	getCartAndCheckoutFrontendConfig,
 };
