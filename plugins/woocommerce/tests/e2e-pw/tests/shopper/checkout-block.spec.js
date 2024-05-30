@@ -1,3 +1,4 @@
+/* eslint-disable playwright/no-networkidle */
 const {
 	goToPageEditor,
 	fillPageTitle,
@@ -353,6 +354,9 @@ baseTest.describe( 'Checkout Block page', () => {
 		await addAProductToCart( page, productId );
 		await page.goto( testPage.slug );
 
+		// This wait is required to make the page fully stable before testing
+		await page.waitForLoadState( 'networkidle' );
+
 		await expect(
 			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
@@ -462,6 +466,8 @@ baseTest.describe( 'Checkout Block page', () => {
 		await addAProductToCart( page, productId );
 		await page.goto( testPage.slug );
 
+		await page.waitForLoadState( 'networkidle' );
+
 		await expect(
 			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
@@ -494,6 +500,8 @@ baseTest.describe( 'Checkout Block page', () => {
 		await addAProductToCart( page, productId );
 		await page.goto( testPage.slug );
 
+		await page.waitForLoadState( 'networkidle' );
+
 		await expect(
 			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
@@ -509,11 +517,9 @@ baseTest.describe( 'Checkout Block page', () => {
 		await fillShippingCheckoutBlocks( page );
 
 		await page
-			.locator( '.wc-block-components-loading-mask' )
+			.locator( '.wc-block-components-totals-shipping__via' )
+			.getByText( 'Free shipping' )
 			.waitFor( { state: 'visible' } );
-		await page
-			.locator( '.wc-block-components-loading-mask' )
-			.waitFor( { state: 'hidden' } );
 
 		// check if you see all three shipping options
 		await expect( page.getByLabel( 'Free shipping' ) ).toBeVisible();
@@ -521,17 +527,12 @@ baseTest.describe( 'Checkout Block page', () => {
 		await expect( page.getByLabel( 'Flat rate' ) ).toBeVisible();
 
 		// check free shipping option
-		await page.getByLabel( 'Free shipping' ).check();
-		await page
-			.locator( '.wc-block-components-loading-mask' )
-			.waitFor( { state: 'visible' } );
-		await page
-			.locator( '.wc-block-components-loading-mask' )
-			.waitFor( { state: 'hidden' } );
+		await page.getByLabel( 'Free shipping' ).click();
 		await expect( page.getByLabel( 'Free shipping' ) ).toBeChecked();
-		await expect(
-			page.locator( '.wc-block-components-totals-shipping__via' )
-		).toHaveText( 'Free shipping' );
+		await page
+			.locator( '.wc-block-components-totals-shipping__via' )
+			.getByText( 'Free shipping' )
+			.waitFor( { state: 'visible' } );
 		await expect(
 			page.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
@@ -539,14 +540,15 @@ baseTest.describe( 'Checkout Block page', () => {
 		).toContainText( singleProductSalePrice );
 
 		// check local pickup option
-		await page.getByLabel( 'Local pickup' ).check();
 		await page
 			.locator( '.wc-block-components-loading-mask' )
 			.waitFor( { state: 'hidden' } );
+		await page.getByLabel( 'Local pickup' ).click();
 		await expect( page.getByLabel( 'Local pickup' ) ).toBeChecked();
-		await expect(
-			page.locator( '.wc-block-components-totals-shipping__via' )
-		).toHaveText( 'Local pickup' );
+		await page
+			.locator( '.wc-block-components-totals-shipping__via' )
+			.getByText( 'Local pickup' )
+			.waitFor( { state: 'visible' } );
 		await expect(
 			page.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
@@ -554,14 +556,15 @@ baseTest.describe( 'Checkout Block page', () => {
 		).toContainText( singleProductSalePrice );
 
 		// check flat rate option
-		await page.getByLabel( 'Flat rate' ).check();
 		await page
 			.locator( '.wc-block-components-loading-mask' )
 			.waitFor( { state: 'hidden' } );
+		await page.getByLabel( 'Flat rate' ).click();
 		await expect( page.getByLabel( 'Flat rate' ) ).toBeChecked();
-		await expect(
-			page.locator( '.wc-block-components-totals-shipping__via' )
-		).toHaveText( 'Flat rate' );
+		await page
+			.locator( '.wc-block-components-totals-shipping__via' )
+			.getByText( 'Flat rate' )
+			.waitFor( { state: 'visible' } );
 		await expect(
 			page.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
@@ -577,6 +580,8 @@ baseTest.describe( 'Checkout Block page', () => {
 		await addAProductToCart( page, productId );
 		await addAProductToCart( page, productId );
 		await page.goto( testPage.slug );
+
+		await page.waitForLoadState( 'networkidle' );
 
 		await expect(
 			page.getByRole( 'heading', { name: testPage.title } )
@@ -699,6 +704,8 @@ baseTest.describe( 'Checkout Block page', () => {
 		await addAProductToCart( page, productId );
 		await page.goto( testPage.slug );
 
+		await page.waitForLoadState( 'networkidle' );
+
 		await expect(
 			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
@@ -786,6 +793,8 @@ baseTest.describe( 'Checkout Block page', () => {
 	} ) => {
 		await addAProductToCart( page, productId );
 		await page.goto( testPage.slug );
+
+		await page.waitForLoadState( 'networkidle' );
 
 		await expect(
 			page.getByRole( 'heading', { name: testPage.title } )

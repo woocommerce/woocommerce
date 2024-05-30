@@ -16,6 +16,10 @@ export async function fillShippingCheckoutBlocks(
 	city = 'Springfield',
 	zip = '97403'
 ) {
+	await page.getByLabel( 'Country/Region' ).click();
+	await page
+		.getByRole( 'option', { name: 'United States (US)', exact: true } )
+		.click();
 	await page
 		.getByRole( 'group', { name: 'Shipping address' } )
 		.getByLabel( 'First name' )
@@ -32,6 +36,10 @@ export async function fillShippingCheckoutBlocks(
 		.getByRole( 'group', { name: 'Shipping address' } )
 		.getByLabel( 'City' )
 		.fill( city );
+	await page.getByLabel( 'State', { exact: true } ).click();
+	await page
+		.getByRole( 'option', { name: 'California', exact: true } )
+		.click();
 	await page
 		.getByRole( 'group', { name: 'Shipping address' } )
 		.getByLabel( 'ZIP Code' )
