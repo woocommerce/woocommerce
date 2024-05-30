@@ -600,7 +600,7 @@ export const getPreviousDate = (
 	date: string,
 	date1: string,
 	date2: string,
-	compare: string,
+	compare = 'previous_year',
 	interval: moment.unitOfTime.Diff | moment.DurationInputArg2
 ) => {
 	const dateMoment = moment( date );
