@@ -610,6 +610,14 @@ class WC_Email extends WC_Settings_API {
 			wc_get_template( 'emails/email-styles.php' );
 			$css .= ob_get_clean();
 
+			/**
+			 * Provides an opportunity to filter the CSS styles included in e-mails.
+			 *
+			 * @since 2.3.0
+			 *
+			 * @param string    $css   CSS code.
+			 * @param \WC_Email $email E-mail instance.
+			 */
 			$css = apply_filters( 'woocommerce_email_styles', $css, $this );
 
 			$css_inliner_class = CssInliner::class;
