@@ -32,7 +32,9 @@ const Settings = ( { params } ) => {
 					<div className="woocommerce-settings-content">
 						<Content
 							data={
-								settingsData[ params.page ].sections[ section ]
+								settingsData[ params.page ].sections[
+									section || ''
+								]
 							}
 						/>
 					</div>
