@@ -9,7 +9,11 @@ import {
 	FormattedMonetaryAmount,
 } from '@woocommerce/blocks-components';
 import { useContainerWidthContext } from '@woocommerce/base-context';
-import { useObservedViewport, useStickyState } from '@woocommerce/base-hooks';
+import {
+	useObservedViewport,
+	useStickyState,
+	useScrollDirection,
+} from '@woocommerce/base-hooks';
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
@@ -44,6 +48,7 @@ const FrontendBlock = ( {
 	const [ observedRef, observedElement, viewWindow ] =
 		useObservedViewport< HTMLDivElement >();
 	const [ stickyRef, isSticky ] = useStickyState< HTMLDivElement >();
+	const [ scrollDirection ] = useScrollDirection();
 	const ref = useMergeRefs( [ stickyRef, observedRef ] );
 	const canBeSticky = observedElement.height < viewWindow.height;
 	const { isSmall, isMobile } = useContainerWidthContext();
@@ -64,7 +69,8 @@ const FrontendBlock = ( {
 						'wc-block-components-order-summary__sticky-container',
 						{
 							'can-sticky': true,
-							//'is-scrolling-down': scrollDirection === 'down',
+							'is-scrolling-down':
+								scrollDirection === 'down' && isSticky,
 						}
 					) }
 					ref={ ref }

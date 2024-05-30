@@ -135,11 +135,11 @@
 	&.can-sticky {
 		position: sticky !important;
 		top: 0;
-		//z-index: 1;
-		//transform: translateY(0%);
+		z-index: 1;
+		transform: translateY(0%);
 		transition: all 0.3s ease;
 		&.is-scrolling-down {
-			//transform: translateY(-100%);
+			transform: translateY(-100%);
 		}
 	}
 }

@@ -44,7 +44,7 @@ export function useStickyState< T extends HTMLElement >(): [
 			const intersectionObserver = new IntersectionObserver(
 				( entries ) => {
 					entries.forEach( ( entry ) => {
-						setIsSticky( entry.isIntersecting );
+						setIsSticky( entry.intersectionRatio < 1 );
 					} );
 				},
 				{

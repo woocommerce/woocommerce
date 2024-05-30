@@ -10,3 +10,4 @@ export * from './use-spoken-message';
 export * from './use-style-props';
 export * from './use-observed-viewport';
 export * from './use-sticky-state';
+export * from './use-scroll-direction';

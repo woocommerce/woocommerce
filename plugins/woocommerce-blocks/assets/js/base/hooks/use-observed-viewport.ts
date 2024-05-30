@@ -68,14 +68,17 @@ export function useObservedViewport< T extends HTMLElement >(): [
 				entries.forEach( ( entry ) => {
 					if ( entry.target === node ) {
 						const { height, width } = entry.contentRect;
-						const elementTop =
-							parseInt(
-								node
-									.computedStyleMap()
-									.get( 'top' )
-									?.toString() || '0', // This is needed because `top` can be a number, auto, or undefined.
-								10
-							) || 0;
+						let elementTop = 0;
+						if ( node.computedStyleMap() ) {
+							elementTop =
+								parseInt(
+									node
+										.computedStyleMap()
+										.get( 'top' )
+										?.toString() || '0', // This is needed because `top` can be a number, auto, or undefined.
+									10
+								) || 0;
+						}
 						setObservedElement( {
 							height: height + elementTop,
 							width,
