@@ -36,7 +36,7 @@ import { isNumber } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import { RevertButtonRegistration } from './revert-button';
+import { revertButtonRegistration } from './revert-button';
 import './editor.scss';
 import './style.scss';
 import { BLOCK_SLUG, TEMPLATES, TYPES } from './constants';
@@ -52,7 +52,6 @@ import {
 import * as blockifiedSingleProduct from './single-product';
 import * as blockifiedProductSearchResults from './product-search-results';
 import * as blockifiedOrderConfirmation from './order-confirmation';
-import { TemplateChangeDetector } from '../../atomic/utils/blocks-registration-manager/template-change-detector';
 
 import type { BlockifiedTemplateConfig } from './types';
 
@@ -472,6 +471,4 @@ subscribe( () => {
 	}
 }, 'core/blocks-editor' );
 
-const templateChangeDetector = new TemplateChangeDetector();
-const revertButtonRegistration = new RevertButtonRegistration();
-templateChangeDetector.add( revertButtonRegistration );
+subscribe( revertButtonRegistration, 'core/edit-site' );
