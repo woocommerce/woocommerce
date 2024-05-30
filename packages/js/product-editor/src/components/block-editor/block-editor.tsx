@@ -51,6 +51,7 @@ import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { ProductTemplate } from '../../types';
 import { LoadingState } from './loading-state';
+import { validateProduct } from '../../utils/validation';
 
 const PluginArea = lazy( () =>
 	import( '@wordpress/plugins' ).then( ( module ) => ( {
@@ -197,6 +198,11 @@ export function BlockEditor( {
 		productTemplateId,
 		product
 	);
+
+	console.log(product);
+	const validationResult = validateProduct( product );
+	console.log(validationResult);
+
 
 	const { layoutTemplate } = useLayoutTemplate(
 		getLayoutTemplateId( productTemplate, postType )
