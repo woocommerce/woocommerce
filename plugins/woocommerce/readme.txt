@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Make the plugin autoinstall process more robust [#47798](https://github.com/woocommerce/woocommerce/pull/47798)
 * Fix - Added useRef to ensure confetti animation is only run once [#47838](https://github.com/woocommerce/woocommerce/pull/47838)
 * Fix - Fixed a fatal error when programmatically using the WC_Discounts::class in a context where no cart exists. [#47589](https://github.com/woocommerce/woocommerce/pull/47589)
 * Fix - Fixed shipping flat price change to free shipping when shipping cost represented using decimal separators and thousands separators. [#46857](https://github.com/woocommerce/woocommerce/pull/46857)
