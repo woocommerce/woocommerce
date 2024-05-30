@@ -207,6 +207,7 @@ class FeaturesController {
 					'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 					'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
 					'is_experimental' => false,
+					'is_legacy'       => true,
 					'disable_ui'      => true,
 				),
 				'marketplace'          => array(
