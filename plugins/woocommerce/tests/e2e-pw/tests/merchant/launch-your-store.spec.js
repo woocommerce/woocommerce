@@ -55,7 +55,7 @@ test.describe( 'Launch Your Store - logged in', () => {
 
 		await expect(
 			page.getByText(
-				/This page is in "Coming soon" mode and is only visible to you and those who have permission. To make it public to everyone, change visibility settings/i
+				'This page is in "Coming soon" mode and is only visible to you and those who have permission. To make it public to everyone, Change visibility settings'
 			)
 		).toBeVisible();
 	} );
@@ -86,7 +86,7 @@ test.describe( 'Launch Your Store - logged in', () => {
 
 		await expect(
 			page.getByText(
-				/This page is in "Coming soon" mode and is only visible to you and those who have permission. To make it public to everyone, change visibility settings/i
+				'This page is in "Coming soon" mode and is only visible to you and those who have permission. To make it public to everyone, Change visibility settings'
 			)
 		).toBeVisible();
 	} );
