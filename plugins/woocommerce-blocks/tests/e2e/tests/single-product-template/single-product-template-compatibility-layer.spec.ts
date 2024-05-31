@@ -14,7 +14,7 @@ type Scenario = {
 	amount: number;
 };
 
-const singleOccurranceScenarios: Scenario[] = [
+const singleOccurrenceScenarios: Scenario[] = [
 	{
 		title: 'Before Main Content',
 		dataTestId: 'woocommerce_before_main_content',
