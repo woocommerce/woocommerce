@@ -49,7 +49,7 @@ class BatchProcessingController {
 	/**
 	 * Maximum number of failures per processor before it gets dequeued.
 	 */
-	const FAILING_PROCESS_MAX_ATTEMPTS_DEFAULT = 3;
+	const FAILING_PROCESS_MAX_ATTEMPTS_DEFAULT = 5;
 
 	/**
 	 * Instance of WC_Logger class.
