@@ -8,7 +8,7 @@ import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 export type TaskListItemProps = {
 	task: TaskType;
@@ -63,7 +63,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 
 	const DefaultTaskItem = useCallback(
 		( props: { onClick?: () => void; isClickable?: boolean } ) => {
-			const className = classnames(
+			const className = clsx(
 				'woocommerce-task-list__item index-' + taskIndex,
 				{
 					complete: isComplete,

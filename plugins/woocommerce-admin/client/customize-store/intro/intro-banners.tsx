@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import interpolateComponents from '@automattic/interpolate-components';
@@ -45,7 +45,7 @@ export const BaseIntroBanner = ( {
 } ) => {
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-customize-store-banner',
 				bannerClass
 			) }
