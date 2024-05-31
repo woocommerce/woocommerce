@@ -168,19 +168,16 @@ const cartAndCheckoutBlocks = {
 // `**/*.scss`...).
 // It also filters out elements with undefined props and experimental blocks.
 const getBlockEntries = ( relativePath, blockEntries = blocks ) => {
-	const bundleExperimentalBlocks = !! parseInt(
-		process.env.BUNDLE_EXPERIMENTAL_BLOCKS,
-		10
-	);
+	const experimental =
+		! parseInt( process.env.WOOCOMMERCE_BLOCKS_PHASE, 10 ) < 3;
 
 	return Object.fromEntries(
-		Object.entries( blockEntries )
-			.filter( ( [ , config ] ) => {
-				if ( config.isExperimental ) {
-					return bundleExperimentalBlocks;
-				}
-				return true;
-			} )
+		Object.entries( blocks )
+			.filter(
+				( [ , config ] ) =>
+					! config.isExperimental ||
+					config.isExperimental === experimental
+			)
 			.map( ( [ blockCode, config ] ) => {
 				const filePaths = glob.sync(
 					`./assets/js/blocks/${ config.customDir || blockCode }/` +
