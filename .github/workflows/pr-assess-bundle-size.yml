@@ -14,7 +14,6 @@ on:
             - '**/webpack.config.js'
             - '.github/workflows/pr-assess-bundle-size.yml'
         paths-ignore:
-            - '**/*internal*/**'
             - 'packages/js/*e2e*/**'
             - 'packages/js/*plugin*/**'
             - 'packages/js/*internal*/**'
