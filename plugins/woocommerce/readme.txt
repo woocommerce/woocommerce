@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, che
 Requires at least: 6.2
 Tested up to: 6.3
 Requires PHP: 7.3
-Stable tag: 8.1.1
+Stable tag: 8.9.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -163,11 +163,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 8.1.1 2023-09-18 =
+= 8.1.2 2024-06-03 =
 
 **WooCommerce**
 
-* Fix - Do not send user meta data back in `woocommerce_get_customer_details` response. [#40221](https://github.com/woocommerce/woocommerce/pull/40221)
-* Fix - Fix possible metadata duplication when HPOS is enabled. [#40148](https://github.com/woocommerce/woocommerce/pull/40148)
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
