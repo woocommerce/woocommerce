@@ -269,6 +269,8 @@ class BatchProcessingController {
 	/**
 	 * Removes the option where we store state for a given processor.
 	 *
+	 * @since 9.1.0
+	 *
 	 * @param string $processor_class_name Fully qualified class name of the processor.
 	 */
 	private function clear_processor_state( string $processor_class_name ): void {
