@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Make the plugin autoinstall process more robust [#47798](https://github.com/woocommerce/woocommerce/pull/47798)
 * Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
 * Fix - Fix: Product Collection block does not display properly when editing template/post [#47871](https://github.com/woocommerce/woocommerce/pull/47871)
 * Fix - Added useRef to ensure confetti animation is only run once [#47838](https://github.com/woocommerce/woocommerce/pull/47838)
