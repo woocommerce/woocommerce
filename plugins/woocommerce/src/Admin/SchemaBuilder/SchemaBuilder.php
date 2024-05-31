@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Admin\SchemaBuilder;
 
 use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaString;
 use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaObject;
+use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaNumber;
 
 /**
  * Schema Builder.
@@ -15,6 +16,13 @@ class SchemaBuilder {
      */
     public static function string() {
         return new SchemaString();
+    }
+
+    /**
+     * Number type.
+     */
+    public static function number() {
+        return new SchemaNumber();
     }
 
     /**
