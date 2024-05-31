@@ -328,7 +328,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 
 						const selectedTerms = isGlobalAttribute
 							? newSelectedStringTerms
-							: terms.filter( ( term ) => {
+							: terms?.filter( ( term ) => {
 									return newSelectedStringTerms.includes(
 										term.name
 									);
