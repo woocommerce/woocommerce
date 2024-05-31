@@ -68,7 +68,6 @@ class PluginsHelper {
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_connect_notice_in_plugin_list' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_expired_subscriptions_notice' ), 10 );
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_expiring_subscriptions_notice' ), 11 );
-		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_missing_payment_method_notice' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_subscription_notice' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_notices_in_plugins' ) );
@@ -697,24 +696,6 @@ class PluginsHelper {
 		}
 	}
 
-	public static function maybe_show_missing_payment_method_notice(){
-		if ( ! WC_Helper::is_site_connected() ) {
-			return;
-		}
-
-		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
-			return;
-		}
-
-		$message = self::get_missing_payment_method_notice();
-
-		if ( !empty( $message ) ) {
-			echo '<div id="woo-subscription-missing-payment-method" class="woo-subscription-missing-payment-method woo-subscription-notices notice notice-error is-dismissible">
-				<p class="widefat">' . wp_kses_post( $message ) . '</p>
-			</div>';
-		}
-	}
-
 	/**
 	 * Enqueue scripts for woo subscription notice.
 	 *
@@ -845,6 +826,35 @@ class PluginsHelper {
 
 		$total_expiring_subscriptions = count( $expiring_subscriptions );
 
+		// When payment method is missing on WooCommerce.com.
+		$helper_notices = WC_Helper::get_notices();
+		if ( ! empty( $helper_notices['missing_payment_method_notice'] ) ) {
+			$description = $allowed_link
+				? sprintf(
+					/* translators: %s: WooCommerce.com URL to add payment method */
+					_n(
+						'Your WooCommerce extension subscription is missing a payment method for renewal. <a href="%s">Add a payment method</a> to ensure you continue receiving updates and streamlined support.',
+						'Your WooCommerce extension subscriptions are missing a payment method for renewal. <a href="%s">Add a payment method</a> to ensure you continue receiving updates and streamlined support.',
+						$total_expiring_subscriptions,
+						'woocommerce'
+					),
+					'https://woocommerce.com/my-account/add-payment-method/'
+				)
+				: _n(
+					'Your WooCommerce extension subscription is missing a payment method for renewal. Add a payment method to ensure you continue receiving updates and streamlined support.',
+					'Your WooCommerce extension subscriptions are missing a payment method for renewal. Add a payment method to ensure you continue receiving updates and streamlined support.',
+					$total_expiring_subscriptions,
+					'woocommerce'
+				);
+
+			return array(
+				'description' => $description,
+				'button_text' => __( 'Add payment method', 'woocommerce' ),
+				'button_link' => 'https://woocommerce.com/my-account/add-payment-method/',
+			);
+		}
+
+		// Payment method is available but there are expiring subscriptions.
 		$notice_data = self::get_subscriptions_notice_data(
 			$subscriptions,
 			$expiring_subscriptions,
@@ -941,30 +951,6 @@ class PluginsHelper {
 			'button_text' => __( 'Renew', 'woocommerce' ),
 			'button_link' => $button_link,
 		);
-	}
-
-	/**
-	 * Retrieves the missing payment method notice.
-	 *
-	 * @return string The missing payment method notice message.
-	 */
-	public static function get_missing_payment_method_notice() {
-		if ( ! self::should_show_notice( self::DISMISS_MISSING_PAYMENT_MATHOD_NOTICE ) ) {
-			return '';
-		}
-
-		$notices = WC_Helper::get_notices();
-		$message = '';
-		if ( ! empty( $notices['missing_payment_method_notice'] ) ) {
-
-			$message = sprintf(
-			/* translators: %s: Add card page URL */
-				__( 'Your WooCommerce extension subscriptions are missing a payment method for renewal. <a href="%s">Add a payment method</a> to ensure you continue receiving updates and streamlined support.', 'woocommerce' ),
-				esc_url( 'https://woocommerce.com/my-account/add-payment-method/' )
-			);
-		}
-
-		return $message;
 	}
 
 	/**
