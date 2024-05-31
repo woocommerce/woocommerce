@@ -20,6 +20,8 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 
 	/**
 	 * Option name for this feature.
+	 *
+	 * @deprecated 9.1.0
 	 */
 	public const OPTION_NAME = 'woocommerce_hpos_legacy_data_cleanup_in_progress';
 
@@ -193,16 +195,15 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 * Sets the flag that indicates that the cleanup process should be initiated.
 	 *
 	 * @param boolean $enabled TRUE if the process should be initiated, FALSE if it should be canceled.
+	 * @return boolean Whether the legacy data cleanup was initiated or not.
 	 */
-	public function toggle_flag( bool $enabled ) {
-		if ( $enabled ) {
-			if ( ! $this->can_run() ) {
-				throw new \Exception( 'Can not start HPOS cleanup process.' );
-			}
-
+	public function toggle_flag( bool $enabled ): bool {
+		if ( $enabled && $this->can_run() ) {
 			$this->batch_processing->enqueue_processor( self::class );
+			return true;
 		} else {
 			$this->batch_processing->remove_processor( self::class );
+			return $enabled ? false : true;
 		}
 	}
 
