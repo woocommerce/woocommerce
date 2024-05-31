@@ -57,17 +57,6 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	private $error_logger;
 
 	/**
-	 * Class constructor.
-	 */
-	public function __construct() {
-		self::add_filter( 'pre_update_option_' . self::OPTION_NAME, array( $this, 'pre_update_option' ), 999, 2 );
-		self::add_action( 'add_option_' . self::OPTION_NAME, array( $this, 'process_added_option' ), 999, 2 );
-		self::add_action( 'update_option_' . self::OPTION_NAME, array( $this, 'process_updated_option' ), 999, 2 );
-		self::add_action( 'delete_option_' . self::OPTION_NAME, array( $this, 'process_deleted_option' ), 999 );
-		self::add_action( 'shutdown', array( $this, 'maybe_reset_state' ) );
-	}
-
-	/**
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @param BatchProcessingController $batch_processing  The batch processing controller to use.
@@ -106,7 +95,7 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 * @return int Number of pending records.
 	 */
 	public function get_total_pending_count(): int {
-		return $this->should_run() ? $this->legacy_handler->count_orders_for_cleanup() : 0;
+		return $this->can_run() ? $this->legacy_handler->count_orders_for_cleanup() : 0;
 	}
 
 	/**
@@ -116,7 +105,7 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 * @return array Batch of records.
 	 */
 	public function get_next_batch_to_process( int $size ): array {
-		return $this->should_run()
+		return $this->can_run()
 			? array_map( 'absint', $this->legacy_handler->get_orders_for_cleanup( array(), $size ) )
 			: array();
 	}
@@ -128,7 +117,7 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 */
 	public function process_batch( array $batch ): void {
 		// This is a destructive operation, so check if we need to bail out just in case.
-		if ( ! $this->should_run() ) {
+		if ( ! $this->can_run() ) {
 			$this->toggle_flag( false );
 			return;
 		}
@@ -182,10 +171,13 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	/**
 	 * Checks whether the cleanup process should run. That is, it must be activated and {@see can_run()} must return TRUE.
 	 *
+	 * @deprecated 9.1.0
+	 *
 	 * @return boolean TRUE if the cleanup process should be run, FALSE otherwise.
 	 */
 	public function should_run() {
-		return $this->can_run() && $this->is_flag_set();
+		wc_deprecated_function( __METHOD__, '9.1.0', __CLASS__ . '::can_run()' );
+		return $this->can_run();
 	}
 
 	/**
@@ -194,7 +186,7 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 * @return boolean TRUE if the user has initiated the cleanup process, FALSE otherwise.
 	 */
 	public function is_flag_set() {
-		return 'yes' === get_option( self::OPTION_NAME, 'no' );
+		return $this->batch_processing->is_enqueued( self::class );
 	}
 
 	/**
@@ -204,9 +196,13 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	 */
 	public function toggle_flag( bool $enabled ) {
 		if ( $enabled ) {
-			update_option( self::OPTION_NAME, wc_bool_to_string( $enabled ) );
+			if ( ! $this->can_run() ) {
+				throw new \Exception( 'Can not start HPOS cleanup process.' );
+			}
+
+			$this->batch_processing->enqueue_processor( self::class );
 		} else {
-			delete_option( self::OPTION_NAME );
+			$this->batch_processing->remove_processor( self::class );
 		}
 	}
 
@@ -259,68 +255,12 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	}
 
 	/**
-	 * Hooked onto 'add_option' to enqueue the batch processor (if needed).
-	 *
-	 * @param string $option Name of the option to add.
-	 * @param mixed  $value  Value of the option.
-	 */
-	private function process_added_option( string $option, $value ) {
-		$this->process_updated_option( false, $value );
-	}
-
-	/**
-	 * Hooked onto 'delete_option' to remove the batch processor.
-	 */
-	private function process_deleted_option() {
-		$this->process_updated_option( false, false );
-	}
-
-	/**
-	 * Hooked onto 'update_option' to enqueue the batch processor as needed.
-	 *
-	 * @param mixed $old_value Previous option value.
-	 * @param mixed $new_value New option value.
-	 */
-	private function process_updated_option( $old_value, $new_value ) {
-		$enable = wc_string_to_bool( $new_value );
-
-		if ( $enable ) {
-			$this->batch_processing->enqueue_processor( self::class );
-		} else {
-			$this->batch_processing->remove_processor( self::class );
-		}
-	}
-
-	/**
-	 * Hooked onto 'pre_update_option' to prevent enabling of the cleanup process when conditions aren't met.
-	 *
-	 * @param mixed $new_value New option value.
-	 * @param mixed $old_value Previous option value.
-	 */
-	private function pre_update_option( $new_value, $old_value ) {
-		return $this->can_run() ? $new_value : 'no';
-	}
-
-	/**
 	 * Checks whether there are any orders in need of cleanup and cleanup can run.
 	 *
 	 * @return bool TRUE if there are orders in need of cleanup, FALSE otherwise.
 	 */
 	private function orders_pending() {
 		return ! empty( $this->get_next_batch_to_process( 1 ) );
-	}
-
-	/**
-	 * Hooked onto 'shutdown' to clean up or set things straight in case of failures (timeouts, etc).
-	 */
-	private function maybe_reset_state() {
-		$is_enqueued = $this->batch_processing->is_enqueued( self::class );
-		$is_flag_set = $this->is_flag_set();
-
-		if ( $is_enqueued xor $is_flag_set ) {
-			$this->toggle_flag( false );
-			$this->batch_processing->remove_processor( self::class );
-		}
 	}
 
 }
