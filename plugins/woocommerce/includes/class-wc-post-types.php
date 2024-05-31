@@ -406,7 +406,7 @@ class WC_Post_Types {
 					),
 					'description'         => __( 'This is where you can set up product forms for various product types in your dashboard.', 'woocommerce' ),
 					'public'              => true,
-					'menu_icon'           => 'dashicons-archive',
+					'menu_icon'           => 'dashicons-forms',
 					'capability_type'     => 'product',
 					'map_meta_cap'        => true,
 					'publicly_queryable'  => true,
