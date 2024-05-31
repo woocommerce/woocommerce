@@ -2268,7 +2268,7 @@ class WC_Helper {
 	 * @return array An array containing notice data.
 	 */
 	public static function get_notices() {
-		$cache_key = '_woocommerce_helper_notices';
+		$cache_key   = '_woocommerce_helper_notices';
 		$cached_data = get_transient( $cache_key );
 
 		if ( false !== $cached_data ) {
@@ -2277,15 +2277,14 @@ class WC_Helper {
 
 		// Fetch notice data for connected store.
 		$request = WC_Helper_API::get(
-			'notices'
-			,
-			[
+			'notices',
+			array(
 				'authenticated' => true,
-			]
+			)
 		);
 
 		if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
-			set_transient( $cache_key, [], 15 * MINUTE_IN_SECONDS );
+			set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 			return array();
 		}
 
