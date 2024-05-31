@@ -458,7 +458,38 @@ class BatchProcessingController {
 	 * @return boolean TRUE if processor is consistently failing. FALSE otherwise.
 	 */
 	private function is_consistently_failing( BatchProcessorInterface $batch_processor ): bool {
-		return absint( $this->get_process_details( $batch_processor )['recent_failures'] ?? 0 ) >= self::FAILING_PROCESS_MAX_ATTEMPTS;
+		$process_details = $this->get_process_details( $batch_processor );
+		$max_attempts    = absint(
+			/**
+			 * Controls the failure threshold for batch processors. That is, the number of times we'll attempt to
+			 * process a batch that has resulted in a failure. Once above this threshold, the processor won't be
+			 * re-scheduled and will be removed from the queue.
+			 *
+			 * @since 9.1.0
+			 *
+			 * @param int $failure_threshold Maximum number of times for the processor to try processing a given batch.
+			 * @param BatchProcessorInterface $batch_processor The processor instance.
+			 * @param array $process_details Array with batch processor state.
+			 */
+			apply_filters(
+				'wc_batch_processing_attempts_threshold',
+				self::FAILING_PROCESS_MAX_ATTEMPTS,
+				$batch_processor,
+				$process_details
+			)
+		);
+
+		/**
+		 * Controls the failure threshold for recurring actions.
+		 *
+		 * Before rescheduling a recurring action, we look at its status. If it failed, we then check if all of the most
+		 * recent actions (upto the threshold set by this filter) sharing the same hook have also failed: if they have,
+		 * that is considered consistent failure and a new instance of the action will not be scheduled.
+		 *
+		 * @param int $failure_threshold Number of actions of the same hook to examine for failure. Defaults to 5.
+		 */
+
+		return absint( $process_details['recent_failures'] ?? 0 ) >= $max_attempts;
 	}
 
 	/**
