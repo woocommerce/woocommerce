@@ -1,5 +1,4 @@
 <?php
-
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
@@ -16,8 +15,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\MiniCartContents;
  * @since 5.0.0
  * @internal
  */
-final class BlockTypesController
-{
+final class BlockTypesController {
 
 	/**
 	 * Instance of the asset API.
@@ -39,8 +37,7 @@ final class BlockTypesController
 	 * @param AssetApi          $asset_api Instance of the asset API.
 	 * @param AssetDataRegistry $asset_data_registry Instance of the asset data registry.
 	 */
-	public function __construct(AssetApi $asset_api, AssetDataRegistry $asset_data_registry)
-	{
+	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry ) {
 		$this->asset_api           = $asset_api;
 		$this->asset_data_registry = $asset_data_registry;
 		$this->init();
@@ -49,23 +46,22 @@ final class BlockTypesController
 	/**
 	 * Initialize class features.
 	 */
-	protected function init()
-	{
-		add_action('init', array($this, 'register_blocks'));
-		add_filter('render_block', array($this, 'add_data_attributes'), 10, 2);
-		add_action('woocommerce_login_form_end', array($this, 'redirect_to_field'));
-		add_filter('widget_types_to_hide_from_legacy_widget_block', array($this, 'hide_legacy_widgets_with_block_equivalent'));
-		add_action('woocommerce_delete_product_transients', array($this, 'delete_product_transients'));
+	protected function init() {
+		add_action( 'init', array( $this, 'register_blocks' ) );
+		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
+		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
+		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
+		add_action( 'woocommerce_delete_product_transients', array( $this, 'delete_product_transients' ) );
 		add_filter(
 			'woocommerce_is_checkout',
-			function ($ret) {
-				return $ret || $this->has_block_variation('woocommerce/classic-shortcode', 'shortcode', 'checkout');
+			function ( $ret ) {
+				return $ret || $this->has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'checkout' );
 			}
 		);
 		add_filter(
 			'woocommerce_is_cart',
-			function ($ret) {
-				return $ret || $this->has_block_variation('woocommerce/classic-shortcode', 'shortcode', 'cart');
+			function ( $ret ) {
+				return $ret || $this->has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'cart' );
 			}
 		);
 	}
@@ -78,19 +74,18 @@ final class BlockTypesController
 	 * @param string $value The value to check for.
 	 * @return boolean
 	 */
-	private function has_block_variation($block_id, $attribute, $value)
-	{
+	private function has_block_variation( $block_id, $attribute, $value ) {
 		$post = get_post();
 
-		if (!$post) {
+		if ( ! $post ) {
 			return false;
 		}
 
-		if (has_block($block_id, $post->ID)) {
-			$blocks = (array) parse_blocks($post->post_content);
+		if ( has_block( $block_id, $post->ID ) ) {
+			$blocks = (array) parse_blocks( $post->post_content );
 
-			foreach ($blocks as $block) {
-				if (isset($block['attrs'][$attribute]) && $value === $block['attrs'][$attribute]) {
+			foreach ( $blocks as $block ) {
+				if ( isset( $block['attrs'][ $attribute ] ) && $value === $block['attrs'][ $attribute ] ) {
 					return true;
 				}
 			}
@@ -102,14 +97,13 @@ final class BlockTypesController
 	/**
 	 * Register blocks, hooking up assets and render functions as needed.
 	 */
-	public function register_blocks()
-	{
+	public function register_blocks() {
 		$block_types = $this->get_block_types();
 
-		foreach ($block_types as $block_type) {
+		foreach ( $block_types as $block_type ) {
 			$block_type_class = __NAMESPACE__ . '\\BlockTypes\\' . $block_type;
 
-			new $block_type_class($this->asset_api, $this->asset_data_registry, new IntegrationRegistry());
+			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
 	}
 
@@ -120,10 +114,9 @@ final class BlockTypesController
 	 * @param array  $block Parsed block data.
 	 * @return string
 	 */
-	public function add_data_attributes($content, $block)
-	{
+	public function add_data_attributes( $content, $block ) {
 		$block_name      = $block['blockName'];
-		$block_namespace = strtok($block_name ?? '', '/');
+		$block_namespace = strtok( $block_name ?? '', '/' );
 
 		/**
 		 * Filters the list of allowed block namespaces.
@@ -134,7 +127,7 @@ final class BlockTypesController
 		 *
 		 * @param array $allowed_namespaces List of namespaces.
 		 */
-		$allowed_namespaces = array_merge(array('woocommerce', 'woocommerce-checkout'), (array) apply_filters('__experimental_woocommerce_blocks_add_data_attributes_to_namespace', array()));
+		$allowed_namespaces = array_merge( array( 'woocommerce', 'woocommerce-checkout' ), (array) apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_namespace', array() ) );
 
 		/**
 		 * Filters the list of allowed Block Names
@@ -145,44 +138,43 @@ final class BlockTypesController
 		 *
 		 * @param array $allowed_namespaces List of namespaces.
 		 */
-		$allowed_blocks = (array) apply_filters('__experimental_woocommerce_blocks_add_data_attributes_to_block', array());
+		$allowed_blocks = (array) apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_block', array() );
 
-		if (!in_array($block_namespace, $allowed_namespaces, true) && !in_array($block_name, $allowed_blocks, true)) {
+		if ( ! in_array( $block_namespace, $allowed_namespaces, true ) && ! in_array( $block_name, $allowed_blocks, true ) ) {
 			return $content;
 		}
 
 		$attributes              = (array) $block['attrs'];
-		$exclude_attributes      = array('className', 'align');
+		$exclude_attributes      = array( 'className', 'align' );
 		$escaped_data_attributes = array(
-			'data-block-name="' . esc_attr($block['blockName']) . '"',
+			'data-block-name="' . esc_attr( $block['blockName'] ) . '"',
 		);
 
-		foreach ($attributes as $key => $value) {
-			if (in_array($key, $exclude_attributes, true)) {
+		foreach ( $attributes as $key => $value ) {
+			if ( in_array( $key, $exclude_attributes, true ) ) {
 				continue;
 			}
-			if (is_bool($value)) {
+			if ( is_bool( $value ) ) {
 				$value = $value ? 'true' : 'false';
 			}
-			if (!is_scalar($value)) {
-				$value = wp_json_encode($value);
+			if ( ! is_scalar( $value ) ) {
+				$value = wp_json_encode( $value );
 			}
-			$escaped_data_attributes[] = 'data-' . esc_attr(strtolower(preg_replace('/(?<!\ )[A-Z]/', '-$0', $key))) . '="' . esc_attr($value) . '"';
+			$escaped_data_attributes[] = 'data-' . esc_attr( strtolower( preg_replace( '/(?<!\ )[A-Z]/', '-$0', $key ) ) ) . '="' . esc_attr( $value ) . '"';
 		}
 
-		return preg_replace('/^<div /', '<div ' . implode(' ', $escaped_data_attributes) . ' ', trim($content));
+		return preg_replace( '/^<div /', '<div ' . implode( ' ', $escaped_data_attributes ) . ' ', trim( $content ) );
 	}
 
 	/**
 	 * Adds a redirect field to the login form so blocks can redirect users after login.
 	 */
-	public function redirect_to_field()
-	{
+	public function redirect_to_field() {
 		// phpcs:ignore WordPress.Security.NonceVerification
-		if (empty($_GET['redirect_to'])) {
+		if ( empty( $_GET['redirect_to'] ) ) {
 			return;
 		}
-		echo '<input type="hidden" name="redirect" value="' . esc_attr(esc_url_raw(wp_unslash($_GET['redirect_to']))) . '" />'; // phpcs:ignore WordPress.Security.NonceVerification
+		echo '<input type="hidden" name="redirect" value="' . esc_attr( esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) ) . '" />'; // phpcs:ignore WordPress.Security.NonceVerification
 	}
 
 	/**
@@ -192,8 +184,7 @@ final class BlockTypesController
 	 * @param array $widget_types An array of widgets hidden in core.
 	 * @return array $widget_types An array inluding the WooCommerce widgets to hide.
 	 */
-	public function hide_legacy_widgets_with_block_equivalent($widget_types)
-	{
+	public function hide_legacy_widgets_with_block_equivalent( $widget_types ) {
 		array_push(
 			$widget_types,
 			'woocommerce_product_search',
@@ -212,9 +203,8 @@ final class BlockTypesController
 	/**
 	 * Delete product transients when a product is deleted.
 	 */
-	public function delete_product_transients()
-	{
-		delete_transient('wc_blocks_has_downloadable_product');
+	public function delete_product_transients() {
+		delete_transient( 'wc_blocks_has_downloadable_product' );
 	}
 
 	/**
@@ -222,8 +212,7 @@ final class BlockTypesController
 	 *
 	 * @return array
 	 */
-	protected function get_block_types()
-	{
+	protected function get_block_types() {
 		global $pagenow;
 
 		$block_types = array(
@@ -310,7 +299,7 @@ final class BlockTypesController
 
 		// Update plugins/woocommerce-blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
 		// when modifying this list.
-		if (Features::is_enabled('experimental-blocks')) {
+		if ( Features::is_enabled( 'experimental-blocks' ) ) {
 			$block_types[] = 'ProductFilter';
 			$block_types[] = 'ProductFilters';
 			$block_types[] = 'ProductFilterStockStatus';
@@ -324,7 +313,7 @@ final class BlockTypesController
 		/**
 		 * This disables specific blocks in Widget Areas by not registering them.
 		 */
-		if (in_array($pagenow, array('widgets.php', 'themes.php', 'customize.php'), true) && (empty($_GET['page']) || 'gutenberg-edit-site' !== $_GET['page'])) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( in_array( $pagenow, array( 'widgets.php', 'themes.php', 'customize.php' ), true ) && ( empty( $_GET['page'] ) || 'gutenberg-edit-site' !== $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$block_types = array_diff(
 				$block_types,
 				array(
@@ -338,7 +327,7 @@ final class BlockTypesController
 		/**
 		 * This disables specific blocks in Post and Page editor by not registering them.
 		 */
-		if (in_array($pagenow, array('post.php', 'post-new.php'), true)) {
+		if ( in_array( $pagenow, array( 'post.php', 'post-new.php' ), true ) ) {
 			$block_types = array_diff(
 				$block_types,
 				array(
@@ -371,6 +360,6 @@ final class BlockTypesController
 		 *
 		 * @param array $block_types List of block types.
 		 */
-		return apply_filters('woocommerce_get_block_types', $block_types);
+		return apply_filters( 'woocommerce_get_block_types', $block_types );
 	}
 }
