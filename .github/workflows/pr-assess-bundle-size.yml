@@ -19,6 +19,7 @@ on:
             - '!packages/js/*create*/**'
             - '!**/*.spec.*'
             - '!**/tests/**'
+            - '!tools/**'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
