@@ -71,8 +71,9 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 } ) => {
 	const attributeId = attribute ? attribute.id : undefined;
 
-	const { createProductAttributeTerm, invalidateResolutionForStoreSelector } =
-		useDispatch( EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME );
+	const { createProductAttributeTerm } = useDispatch(
+		EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+	);
 
 	const { terms } = useSelect(
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
