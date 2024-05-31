@@ -12,6 +12,13 @@ abstract class AbstractSchemaType {
     protected $format = null;
 
     /**
+     * Required.
+     *
+     * @var bool
+     */
+    protected $required = false;
+
+    /**
      * Description.
      *
      * @var string|null
@@ -37,6 +44,16 @@ abstract class AbstractSchemaType {
     }
 
     /**
+     * Set the property as required.
+     *
+     * @return SchemaTypeInterface
+     */
+    public function required() {
+        $this->required = true;
+        return $this;
+    }
+
+    /**
      * Get the JSON.
      */
     public function get_json() {
@@ -53,6 +70,13 @@ abstract class AbstractSchemaType {
         }
 
         return $json;
+    }
+
+    /**
+     * Check if the property is required.
+     */
+    public function is_required() {
+        return $this->required;
     }
 
 }
