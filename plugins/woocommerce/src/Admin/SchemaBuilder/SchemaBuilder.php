@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Admin\SchemaBuilder;
 use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaString;
 use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaObject;
 use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaNumber;
+use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaArray;
 
 /**
  * Schema Builder.
@@ -26,10 +27,17 @@ class SchemaBuilder {
     }
 
     /**
-     * String type.
+     * Object type.
      */
     public static function object( $properties ) {
         return new SchemaObject( $properties );
+    }
+
+    /**
+     * Array type.
+     */
+    public static function array( $properties ) {
+        return new SchemaArray( $properties );
     }
 
 }
