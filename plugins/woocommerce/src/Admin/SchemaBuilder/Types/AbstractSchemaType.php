@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Admin\SchemaBuilder\Types;
 
+use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaReference;
+
 abstract class AbstractSchemaType {
 
     /**
@@ -77,6 +79,17 @@ abstract class AbstractSchemaType {
      */
     public function is_required() {
         return $this->required;
+    }
+
+    /**
+     * Parse an input value.
+     */
+    public function parse_value( $input ) {
+        if ( is_a( $input, SchemaReference::class ) ) {
+            return $input->get_json();
+        }
+
+        return $input;
     }
 
 }

@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaObject;
 use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaNumber;
 use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaArray;
 use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaBoolean;
+use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaReference;
 
 /**
  * Schema Builder.
@@ -15,6 +16,8 @@ class SchemaBuilder {
 
     /**
      * String type.
+     *
+     * @return SchemaString
      */
     public static function string() {
         return new SchemaString();
@@ -22,6 +25,8 @@ class SchemaBuilder {
 
     /**
      * Number type.
+     *
+     * @return SchemaNumber
      */
     public static function number() {
         return new SchemaNumber();
@@ -29,6 +34,9 @@ class SchemaBuilder {
 
     /**
      * Object type.
+     *
+     * @param array $properties Properties.
+     * @return SchemaObject
      */
     public static function object( $properties ) {
         return new SchemaObject( $properties );
@@ -36,16 +44,31 @@ class SchemaBuilder {
 
     /**
      * Array type.
+     *
+     * @param array $items Items.
+     * @return SchemaArray
      */
-    public static function array( $properties ) {
-        return new SchemaArray( $properties );
+    public static function array( $items ) {
+        return new SchemaArray( $items );
     }
 
     /**
      * Boolean type.
+     *
+     * @return SchemaBoolean
      */
     public static function boolean() {
         return new SchemaBoolean();
+    }
+
+    /**
+     * Reference type.
+     *
+     * @param string $pointer Pointer.
+     * @return SchemaReference
+     */
+    public static function reference( $pointer ) {
+        return new SchemaReference( $pointer );
     }
 
 }

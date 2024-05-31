@@ -44,7 +44,7 @@ class SchemaString extends AbstractSchemaType {
      * @return SchemaString
      */
     public function min_length( $min_length ) {
-        $this->min_length = $min_length;
+        $this->min_length = $this->parse_value( $min_length );
         return $this;
     }
 
@@ -55,7 +55,7 @@ class SchemaString extends AbstractSchemaType {
      * @return SchemaString
      */
     public function max_length( $max_length ) {
-        $this->max_length = $max_length;
+        $this->max_length = $this->parse_value( $max_length );
         return $this;
     }
 

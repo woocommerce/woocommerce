@@ -57,7 +57,7 @@ class SchemaNumber extends AbstractSchemaType {
      * @return SchemaString
      */
     public function minimum( $minimum ) {
-        $this->minimum = $minimum;
+        $this->minimum = $this->parse_value( $minimum );
         return $this;
     }
 
@@ -68,7 +68,7 @@ class SchemaNumber extends AbstractSchemaType {
      * @return SchemaString
      */
     public function maximum( $maximum ) {
-        $this->maximum = $maximum;
+        $this->maximum = $this->parse_value( $maximum );
         return $this;
     }
 
@@ -79,7 +79,7 @@ class SchemaNumber extends AbstractSchemaType {
      * @return SchemaString
      */
     public function exclusiveMinimum( $exclusive_minimum ) {
-        $this->exclusive_minimum = $exclusive_minimum;
+        $this->exclusive_minimum = $this->parse_value( $exclusive_minimum );
         return $this;
     }
 
@@ -90,7 +90,7 @@ class SchemaNumber extends AbstractSchemaType {
      * @return SchemaString
      */
     public function exclusiveMaximum( $exclusive_maximum ) {
-        $this->exclusive_maximum = $exclusive_maximum;
+        $this->exclusive_maximum = $this->parse_value( $exclusive_maximum );
         return $this;
     }
 
@@ -101,7 +101,7 @@ class SchemaNumber extends AbstractSchemaType {
      * @return SchemaString
      */
     public function multipleOf( $multiple_of ) {
-        $this->multiple_of = $multiple_of;
+        $this->multiple_of = $this->parse_value( $multiple_of );
         return $this;
     }
 
