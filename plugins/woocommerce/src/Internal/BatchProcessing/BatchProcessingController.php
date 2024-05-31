@@ -82,7 +82,7 @@ class BatchProcessingController {
 
 		add_action(
 			'shutdown',
-			function() {
+			function () {
 				$this->remove_or_retry_failed_processors();
 			}
 		);
@@ -491,8 +491,6 @@ class BatchProcessingController {
 			} else {
 				$this->schedule_batch_processing( $processor, true );
 			}
-
 		}
 	}
-
 }
