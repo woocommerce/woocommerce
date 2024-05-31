@@ -24,7 +24,7 @@ export const Content = ( { data } ) => {
 		formElements.forEach( ( input ) => {
 			const value =
 				// Only looking at checkboxes for now.
-				input.type === input.checked ? 'yes' : 'no';
+				input.checked ? 'yes' : 'no';
 			data[ input.id || input.name ] = value;
 		} );
 
@@ -40,7 +40,22 @@ export const Content = ( { data } ) => {
 
 	const handleSubmit = ( event ) => {
 		event.preventDefault();
-		console.log( 'Form submitted:', formData );
+		console.log( 'Submitting form', formData );
+
+		const form = new FormData();
+		Object.keys( formData ).forEach( ( key ) => {
+			form.append( key, formData[ key ] );
+		} );
+
+		try {
+			fetch( '/wp-admin/admin.php?page=wc-settings&tab=products', {
+				method: 'POST',
+				ContentType: 'text/html',
+				body: form,
+			} );
+		} catch ( error ) {
+			console.error( 'Error saving settings', error );
+		}
 	};
 
 	// Run once to gather inputs on initial render
