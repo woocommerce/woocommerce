@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Product Summary: Increase the length of the description from 55 to 100 words (max supported by core/post-excerpt)
