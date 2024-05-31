@@ -7,7 +7,7 @@
  */
 // @ts-ignore No types for this exist yet.
 import { BlockEditorProvider } from '@wordpress/block-editor';
-import { memo, useRef } from '@wordpress/element';
+import { memo } from '@wordpress/element';
 import { BlockInstance } from '@wordpress/blocks';
 
 /**

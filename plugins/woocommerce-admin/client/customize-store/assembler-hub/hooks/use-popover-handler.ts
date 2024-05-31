@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { useDebounce } from '@wordpress/compose';
 import { useState } from 'react';
 
 export enum PopoverStatus {
@@ -77,11 +76,6 @@ export const usePopoverHandler = () => {
 
 		setPopoverStatus( PopoverStatus.HIDDEN );
 	};
-
-	const debounceUpdatePopoverPosition = useDebounce(
-		updatePopoverPosition,
-		5
-	);
 
 	return [ popoverStatus, virtualElement, updatePopoverPosition ] as const;
 };
