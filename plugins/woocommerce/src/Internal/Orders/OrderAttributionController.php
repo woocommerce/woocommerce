@@ -15,7 +15,6 @@ use WC_Customer;
 use WC_Log_Levels;
 use WC_Logger_Interface;
 use WC_Order;
-use WC_Tracks;
 
 /**
  * Class OrderAttributionController
@@ -415,7 +414,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 			'customer_order_count' => $customer_info['order_count'] + 1,
 			'customer_registered'  => $order->get_customer_id() ? 'yes' : 'no',
 		);
-		$this->proxy->call_static( WC_Tracks::class, 'record_event', 'order_attribution', $tracks_data );
+		if ( function_exists( 'wc_admin_record_tracks_event' ) ) {
+			wc_admin_record_tracks_event( 'order_attribution', $tracks_data );
+		}
 	}
 
 	/**
