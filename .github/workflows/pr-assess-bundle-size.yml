@@ -12,6 +12,17 @@ on:
             - '**.prettier*'
             - '**.tsconfig*'
             - '**/webpack.config.js'
+            - '!.github/**'
+            - '!packages/js/*e2e*/**'
+            - '!packages/js/*plugin*/**'
+            - '!packages/js/*internal*/**'
+            - '!packages/js/*create*/**'
+            - '!**/*.spec.*'
+            - '!**/tests/**'
+            - '!tools/**'
+            - '!changelog/**'
+            - '!docs/**'
+            - '!bin/**'
             - '.github/workflows/pr-assess-bundle-size.yml'
 
 concurrency:
