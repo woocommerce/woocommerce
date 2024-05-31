@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Admin\SchemaBuilder\Types;
 
 use Automattic\WooCommerce\Admin\SchemaBuilder\Exceptions\IncompatibleSchemaFormatException;
+use Automattic\WooCommerce\Admin\SchemaBuilder\Exceptions\IncompatibleSchemaPatternException;
 
 class SchemaString extends AbstractSchemaType {
 
@@ -19,6 +20,13 @@ class SchemaString extends AbstractSchemaType {
      * @var int
      */
     private $max_length = null;
+
+    /**
+     * Pattern.
+     *
+     * @var int
+     */
+    private $pattern = null;
 
     /**
      * Schema type.
@@ -52,6 +60,21 @@ class SchemaString extends AbstractSchemaType {
     }
 
     /**
+     * Set the pattern.
+     *
+     * @param string
+     * @return SchemaString
+     */
+    public function pattern( $pattern ) {
+        if ( $this->pattern !== null ) {
+            throw new IncompatibleSchemaPatternException();
+        }
+
+        $this->pattern = $pattern;
+        return $this;
+    }
+
+    /**
      * Get the JSON.
      *
      * @return array
@@ -65,6 +88,10 @@ class SchemaString extends AbstractSchemaType {
 
         if ( $this->max_length !== null  ) {
             $json['maxLength'] = $this->max_length;
+        }
+
+        if ( $this->pattern !== null  ) {
+            $json['pattern'] = $this->pattern;
         }
 
         return $json;
@@ -82,6 +109,15 @@ class SchemaString extends AbstractSchemaType {
 
         $this->format = 'email';
         return $this;
+    }
+
+    /**
+     * Set the currency format.
+     *
+     * @return SchemaString
+     */
+    public function currency() {
+        return $this->pattern( '^(0|([1-9]+[0-9]*))(\.[0-9]*)?$' );
     }
 
 }
