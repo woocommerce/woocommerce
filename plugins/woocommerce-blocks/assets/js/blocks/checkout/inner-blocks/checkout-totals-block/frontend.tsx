@@ -49,15 +49,15 @@ const FrontendBlock = ( {
 		useObservedViewport< HTMLDivElement >();
 	const [ stickyRef, isSticky ] = useStickyState< HTMLDivElement >();
 	const [ scrollDirection ] = useScrollDirection();
-	const ref = useMergeRefs( [ stickyRef, observedRef ] );
+	//const ref = useMergeRefs( [ stickyRef, observedRef ] );
 	const canBeSticky = observedElement.height < viewWindow.height;
-	const { isSmall, isMobile } = useContainerWidthContext();
+	const { isSmall, isMobile, isMedium } = useContainerWidthContext();
 	// Get the body background color to use as the sticky container background color.
 	const backgroundColor = useMemo(
 		() => getComputedStyle( document.body ).backgroundColor,
 		[]
 	);
-	if ( isSmall || isMobile ) {
+	if ( isSmall || isMobile || isMedium ) {
 		return (
 			<>
 				<StoreNoticesContainer
@@ -68,12 +68,12 @@ const FrontendBlock = ( {
 						'wc-block-components-order-summary',
 						'wc-block-components-order-summary__sticky-container',
 						{
-							'can-sticky': true,
-							'is-scrolling-down':
-								scrollDirection === 'down' && isSticky,
+							'can-sticky': canBeSticky,
+							'is-sticky': isSticky,
+							'is-scrolling-down': scrollDirection === 'down',
 						}
 					) }
-					ref={ ref }
+					ref={ observedRef }
 					initialOpen={ false }
 					hasBorder={ true }
 					title={ <SummaryHeader /> }
@@ -93,6 +93,7 @@ const FrontendBlock = ( {
 						{ children }
 					</Sidebar>
 				</Panel>
+				<span ref={ stickyRef } />
 			</>
 		);
 	}

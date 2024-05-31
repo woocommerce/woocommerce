@@ -119,27 +119,3 @@
 		padding-top: $gap-smaller;
 	}
 }
-
-.is-medium,
-.is-small,
-.is-mobile {
-	.wp-block-woocommerce-checkout-order-summary-block {
-		.wc-block-components-totals-wrapper {
-			padding-left: $gap-small;
-			padding-right: $gap-small;
-		}
-	}
-}
-
-.wc-block-components-order-summary__sticky-container {
-	&.can-sticky {
-		position: sticky !important;
-		top: 0;
-		z-index: 1;
-		transform: translateY(0%);
-		transition: all 0.3s ease;
-		&.is-scrolling-down {
-			transform: translateY(-100%);
-		}
-	}
-}
