@@ -163,8 +163,8 @@ ${ blockjson.description || '' }
 -	**Category:** ${ blockjson.category || '' }
 -   **Ancestor:** ${ blockjson.ancestor || '' }
 -   **Parent:** ${ blockjson.parent || '' }
--	**Supports:** ${ supportsList || supportsList.sort().join( ', ' ) }
--	**Attributes:** ${ attributes || attributes.sort().join( ', ' ) }
+-	**Supports:** ${ supportsList && supportsList.sort().join( ', ' ) }
+-	**Attributes:** ${ attributes && attributes.sort().join( ', ' ) }
 `;
 }
 
