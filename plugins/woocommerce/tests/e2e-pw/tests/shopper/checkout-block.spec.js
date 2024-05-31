@@ -1,4 +1,3 @@
-/* eslint-disable playwright/no-networkidle */
 const {
 	goToPageEditor,
 	fillPageTitle,
