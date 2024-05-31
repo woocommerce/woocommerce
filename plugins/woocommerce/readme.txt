@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, che
 Requires at least: 6.3
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 8.4.0
+Stable tag: 8.9.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -171,11 +171,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 8.4.1 2024-01-25 =
+= 8.4.1 2024-06-03 =
 
 **WooCommerce**
 
-* Fix - Add defensive checks for strpos in ComparisonOperation. [#44058](https://github.com/woocommerce/woocommerce/pull/44058)
-* Fix - Add rudimentary try catch for all remote endpoint spec evaluators. [#44070](https://github.com/woocommerce/woocommerce/pull/44070)
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
