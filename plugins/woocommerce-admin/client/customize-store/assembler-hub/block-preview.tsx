@@ -7,7 +7,7 @@
  */
 // @ts-ignore No types for this exist yet.
 import { BlockEditorProvider } from '@wordpress/block-editor';
-import { memo } from '@wordpress/element';
+import { memo, useRef } from '@wordpress/element';
 import { BlockInstance } from '@wordpress/blocks';
 
 /**
@@ -26,12 +26,14 @@ export const BlockPreview = ( {
 	settings,
 	useSubRegistry = true,
 	onChange,
+	isPatternPreview,
 	...props
 }: {
 	blocks: BlockInstance | BlockInstance[];
 	settings: Record< string, unknown >;
 	onChange?: ChangeHandler | undefined;
 	useSubRegistry?: boolean;
+	isPatternPreview: boolean;
 } & Omit< ScaledBlockPreviewProps, 'containerWidth' > ) => {
 	const renderedBlocks = Array.isArray( blocks ) ? blocks : [ blocks ];
 
@@ -44,8 +46,13 @@ export const BlockPreview = ( {
 				onChange={ onChange }
 				useSubRegistry={ useSubRegistry }
 			>
-				{ isFullComposabilityFeatureAndAPIAvailable() && <Toolbar /> }
-				<AutoHeightBlockPreview settings={ settings } { ...props } />
+				{ isFullComposabilityFeatureAndAPIAvailable() &&
+					! isPatternPreview && <Toolbar /> }
+				<AutoHeightBlockPreview
+					isPatternPreview={ isPatternPreview }
+					settings={ settings }
+					{ ...props }
+				/>
 			</BlockEditorProvider>
 		</>
 	);
