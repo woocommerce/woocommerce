@@ -13,6 +13,7 @@ import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	type ProductAttributeTerm,
 } from '@woocommerce/data';
+import type { MouseEventHandler } from 'react';
 
 /**
  * Internal dependencies
@@ -28,6 +29,19 @@ interface FormTokenFieldProps extends CoreFormTokenField.Props {
 }
 const FormTokenField =
 	CoreFormTokenField as React.ComponentType< FormTokenFieldProps >;
+
+/*
+ * Type copied form core FormTokenField component.
+ * Todo: move to a shared location.
+ */
+export interface TokenItem {
+	value: string;
+	status?: 'error' | 'success' | 'validating';
+	title?: string;
+	isBorderless?: boolean;
+	onMouseEnter?: MouseEventHandler< HTMLSpanElement >;
+	onMouseLeave?: MouseEventHandler< HTMLSpanElement >;
+}
 
 export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	index,
@@ -123,10 +137,12 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	 * Combine the temporary terms with the selected values,
 	 * removing duplicates.
 	 */
-	const selectedValues = [
+	const selectedValues: TokenItem[] = [
 		...( allSelectedValues || [] ),
 		...temporaryTerms,
-	].filter( ( value, i, self ) => self.indexOf( value ) === i );
+	]
+		.filter( ( value, i, self ) => self.indexOf( value ) === i )
+		.map( ( value ) => ( { value } ) );
 
 	// Flag to track if the terms are initially populated.
 	const [ initiallyPopulated, setInitiallyPopulated ] = useState( false );
@@ -278,7 +294,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 
 						/*
 						 * Extract new terms (string[]) from the selected terms,
-						 * by extracting the terms that are not in the suggestions.
+						 * picking the terms that are not in the suggestions.
 						 * If the new terms are not in the suggestions, they are new ones.
 						 */
 						const newStringTerms = newSelectedTerms.filter(
