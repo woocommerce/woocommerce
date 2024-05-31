@@ -326,7 +326,16 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 
 		// If the filtered result is not a WC_Data instance and is not a WP_Error then something went wrong, but we
 		// still need to honor the declared return type.
-		return Types::ensure_is_type_or_wp_error( $refund, WC_Data::class );
+		return Types::ensure_instance_of(
+			$refund,
+			WC_Data::class,
+			function () {
+				return new WP_Error(
+					'woocommerce_rest_cannot_verify_refund_created',
+					__( 'An unexpected error occurred while generating the refund.', 'woocommerce' )
+				);
+			}
+		);
 	}
 
 	/**
