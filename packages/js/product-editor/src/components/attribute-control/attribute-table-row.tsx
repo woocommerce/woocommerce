@@ -43,6 +43,13 @@ export interface TokenItem {
 	onMouseLeave?: MouseEventHandler< HTMLSpanElement >;
 }
 
+const stringToTokenItem = ( v: string | TokenItem ): TokenItem => ( {
+	value: typeof v === 'string' ? v : v.value,
+} );
+
+const tokenItemToString = ( item: string | TokenItem ): string =>
+	typeof item === 'string' ? item : item.value;
+
 export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	index,
 	attribute,
@@ -91,8 +98,8 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	 * Local terms to handle not global attributes.
 	 * Set initially with the attribute options.
 	 */
-	const [ localTerms, setLocalTerms ] = useState< string[] | undefined >(
-		attribute?.options
+	const [ localTerms, setLocalTerms ] = useState< TokenItem[] >(
+		attribute?.options?.map( stringToTokenItem ) || []
 	);
 
 	/**
@@ -100,7 +107,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	 * the new terms on the fly,
 	 * before they are created by hitting the API.
 	 */
-	const [ temporaryTerms, setTemporaryTerms ] = useState< string[] >( [] );
+	const [ temporaryTerms, setTemporaryTerms ] = useState< TokenItem[] >( [] );
 
 	// By convention, it's a global attribute if the attribute ID is 0.
 	const isGlobalAttribute = attribute?.id === 0;
@@ -111,17 +118,19 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	 * if it's not a global attribute
 	 * set the suggestions with the terms names.
 	 */
-	const allTerms = isGlobalAttribute
-		? localTerms
-		: terms?.map( ( term: ProductAttributeTerm ) => term.name );
+	const allTerms =
+		( isGlobalAttribute
+			? localTerms.map( tokenItemToString )
+			: terms?.map( ( term: ProductAttributeTerm ) => term.name ) ) || [];
 
 	/*
 	 * Combine the temporary terms with the attribute options or terms,
 	 * removing duplicates.
 	 */
-	const suggestions = [ ...( allTerms || [] ), ...temporaryTerms ].filter(
-		( value, i, self ) => self.indexOf( value ) === i
-	);
+	const suggestions = [
+		...( allTerms || [] ),
+		...temporaryTerms.map( tokenItemToString ),
+	].filter( ( value, i, self ) => self.indexOf( value ) === i );
 
 	/*
 	 * Build selected options object from the attribute,
@@ -130,8 +139,10 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	 * Otherwise, maps the terms to their names.
 	 */
 	const allSelectedValues = isGlobalAttribute
-		? attribute.options
-		: attribute?.terms?.map( ( option ) => option.name );
+		? attribute.options?.map( stringToTokenItem )
+		: attribute?.terms?.map( ( option ) =>
+				stringToTokenItem( option.name )
+		  ) || [];
 
 	/*
 	 * Combine the temporary terms with the selected values,
@@ -140,9 +151,8 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	const selectedValues: TokenItem[] = [
 		...( allSelectedValues || [] ),
 		...temporaryTerms,
-	]
-		.filter( ( value, i, self ) => self.indexOf( value ) === i )
-		.map( ( value ) => ( { value } ) );
+	];
+	//.filter( ( value, i, self ) => self.indexOf( value ) === i ); @ojo
 
 	// Flag to track if the terms are initially populated.
 	const [ initiallyPopulated, setInitiallyPopulated ] = useState( false );
@@ -205,7 +215,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	} );
 
 	async function addNewTerms(
-		termNames: string[],
+		newTerms: TokenItem[],
 		selectedTerms: ProductAttributeTerm[]
 	) {
 		if ( ! attribute ) {
@@ -217,25 +227,31 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		 * It will show the tokens in the token field
 		 * optimistically, before the terms are created.
 		 */
-		setTemporaryTerms( ( prevTerms = [] ) => [
-			...prevTerms,
-			...termNames,
-		] );
+		setTemporaryTerms( ( prevTerms ) => [ ...prevTerms, ...newTerms ] );
 
 		// Create the new terms.
-		const promises = termNames.map( async ( termName ) => {
-			const newTerm = ( await createProductAttributeTerm( {
-				name: termName,
-				slug: cleanForSlug( termName ),
-				attribute_id: attributeId,
-			} ) ) as ProductAttributeTerm;
+		const promises = newTerms.map( async ( term ) => {
+			const newTerm = ( await createProductAttributeTerm(
+				{
+					name: term.value,
+					slug: cleanForSlug( term.value ),
+					attribute_id: attributeId,
+				},
+				{
+					optimisticQueryUpdate: {
+						search: '',
+						attribute_id: attributeId,
+					},
+					optimisticUrlParameters: [ attributeId ],
+				}
+			) ) as ProductAttributeTerm;
 
 			return newTerm;
 		} );
 
 		const newItems = await Promise.all( promises );
 
-		// clean up temporary terms
+		// Clean up temporary terms
 		setTemporaryTerms( [] );
 
 		onTermsSelect( [ ...selectedTerms, ...newItems ], index, attribute );
@@ -287,37 +303,46 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					disabled={ ! attribute }
 					suggestions={ suggestions }
 					value={ selectedValues }
-					onChange={ ( newSelectedTerms: string[] ) => {
+					onChange={ (
+						newSelectedTerms: ( TokenItem | string )[]
+					) => {
 						if ( ! attribute ) {
 							return;
 						}
 
 						/*
-						 * Extract new terms (string[]) from the selected terms,
-						 * picking the terms that are not in the suggestions.
-						 * If the new terms are not in the suggestions, they are new ones.
+						 * Create a new strings array with the new selected terms,
+						 * used to pass to the Form component.
 						 */
-						const newStringTerms = newSelectedTerms.filter(
-							( term ) => ! suggestions?.includes( term )
-						);
+
+						const newSelectedStringTerms =
+							newSelectedTerms.map( tokenItemToString );
 
 						/*
-						 * Selected terms are the selected ones when it is a global attribute,
-						 * otherwise, the selected terms are the terms that are in ProductAttributeTerm[].
+						 * Create an array with the new terms to add,
+						 * filtering the new selected terms that are not in the
+						 * suggestions array.
 						 */
-						const selectedTerms = isGlobalAttribute
-							? newSelectedTerms
-							: terms.filter( ( term ) =>
-									newSelectedTerms.includes( term.name )
-							  );
+						const newItems = newSelectedStringTerms
+							.filter( ( t ) => ! suggestions.includes( t ) )
+							.map( stringToTokenItem );
 
+						const selectedTerms = isGlobalAttribute
+							? newSelectedStringTerms
+							: terms.filter( ( term ) => {
+									return newSelectedStringTerms.includes(
+										term.name
+									);
+							  } );
+
+						// Call the callback to update the Form terms.
 						onTermsSelect( selectedTerms, index, attribute );
 
 						// If it is a global attribute, set the local terms.
 						if ( isGlobalAttribute ) {
-							return setLocalTerms( ( prevTerms = [] ) => [
+							return setLocalTerms( ( prevTerms ) => [
 								...prevTerms,
-								...newStringTerms,
+								...newItems,
 							] );
 						}
 
@@ -325,9 +350,9 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 						 * Create new terms, in case there are any,
 						 * when it is not a global attribute.
 						 */
-						if ( newStringTerms.length ) {
+						if ( newItems.length ) {
 							addNewTerms(
-								newStringTerms,
+								newItems,
 								selectedTerms as ProductAttributeTerm[]
 							);
 						}
