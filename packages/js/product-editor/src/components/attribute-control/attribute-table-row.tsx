@@ -152,7 +152,6 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		...( allSelectedValues || [] ),
 		...temporaryTerms,
 	];
-	//.filter( ( value, i, self ) => self.indexOf( value ) === i ); @ojo
 
 	// Flag to track if the terms are initially populated.
 	const [ initiallyPopulated, setInitiallyPopulated ] = useState( false );
@@ -352,7 +351,10 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 						 */
 						if ( newItems.length ) {
 							addNewTerms(
-								newItems,
+								newItems.map( ( item ) => ( {
+									...item,
+									status: 'validating',
+								} ) ),
 								selectedTerms as ProductAttributeTerm[]
 							);
 						}
