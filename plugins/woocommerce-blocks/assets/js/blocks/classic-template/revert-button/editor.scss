@@ -1,8 +1,4 @@
-.wc-block-editor-revert-button-container {
-	display: flex;
-	flex-direction: column;
-	gap: $gap;
-	span {
-		color: $gray-700;
-	}
+.wc-block-editor-revert-button-text {
+	color: $gray-700;
+	padding-top: $gap;
 }
