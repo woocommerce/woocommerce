@@ -2,26 +2,20 @@
  * Util helper made for filling shipping details in the block-based checkout
  *
  * @param {Object} page
- * @param {string} country
  * @param {string} firstName
  * @param {string} lastName
  * @param {string} address
  * @param {string} city
- * @param {string} state
  * @param {string} zip
  */
 export async function fillShippingCheckoutBlocks(
 	page,
-	country = 'United States (US)',
 	firstName = 'Homer',
 	lastName = 'Simpson',
 	address = '123 Evergreen Terrace',
 	city = 'Springfield',
-	state = 'California',
 	zip = '97403'
 ) {
-	await page.getByLabel( 'Country/Region' ).click();
-	await page.getByRole( 'option', { name: country, exact: true } ).click();
 	await page
 		.getByRole( 'group', { name: 'Shipping address' } )
 		.getByLabel( 'First name' )
@@ -38,8 +32,6 @@ export async function fillShippingCheckoutBlocks(
 		.getByRole( 'group', { name: 'Shipping address' } )
 		.getByLabel( 'City' )
 		.fill( city );
-	await page.getByLabel( 'State', { exact: true } ).click();
-	await page.getByRole( 'option', { name: state, exact: true } ).click();
 	await page
 		.getByRole( 'group', { name: 'Shipping address' } )
 		.getByLabel( 'ZIP Code' )
