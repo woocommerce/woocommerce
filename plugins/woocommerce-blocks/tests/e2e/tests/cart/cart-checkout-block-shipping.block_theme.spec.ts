@@ -58,9 +58,13 @@ test.describe( 'Shopper → Shipping', () => {
 		await userFrontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await userFrontendUtils.goToCart();
 
-		await expect(
-			userPage.getByLabel( 'Enter address to check delivery options' )
-		).toBeVisible();
+		// Locate the button using a different selector method
+		const button = userPage.locator( 'button', {
+			hasText: 'Enter address to check delivery options',
+		} );
+
+		// Ensure the button is visible
+		await expect( button ).toBeVisible();
 	} );
 
 	test( 'Guest user does not see shipping rates until full address is entered', async ( {
