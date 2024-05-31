@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 
 interface SingleProductTab {
@@ -18,7 +18,7 @@ const ProductTabTitle = ( {
 }: Pick< SingleProductTab, 'id' | 'title' | 'active' > ) => {
 	return (
 		<li
-			className={ classnames( `${ id }_tab`, {
+			className={ clsx( `${ id }_tab`, {
 				active,
 			} ) }
 			id={ `tab-title-${ id }` }

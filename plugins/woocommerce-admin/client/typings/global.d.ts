@@ -13,6 +13,10 @@ declare global {
 				currentUserData: {
 					first_name: string;
 				};
+				plugins: {
+					activePlugins: string[];
+					installedPlugins: string[];
+				},
 				wcpayWelcomePageIncentive: {
 					id: string;
 					description: string;
