@@ -54,11 +54,6 @@ class PluginsHelper {
 	const DISMISS_EXPIRING_SUBS_NOTICE = 'woo_subscription_expiring_notice_dismiss';
 
 	/**
-	 * Meta key for dismissing missing payment method notice.
-	 */
-	const DISMISS_MISSING_PAYMENT_MATHOD_NOTICE = 'woo_missing_payment_method_notice_dismiss';
-
-	/**
 	 * Initialize hooks.
 	 */
 	public static function init() {
