@@ -28,7 +28,7 @@ const test = baseTest.extend( {
 			await page.goto(
 				`wp-admin/post.php?post=${ product.id }&action=edit`
 			);
-			await page.getByRole( 'button', { name: 'Inventory' } ).click();
+			await page.getByRole( 'tab', { name: 'Inventory' } ).click();
 		} );
 
 		await use( page );
@@ -132,7 +132,7 @@ test( 'can track stock quantity', async ( { page, product } ) => {
 
 	await test.step( 'return to product editor', async () => {
 		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
-		await page.getByRole( 'button', { name: 'Inventory' } ).click();
+		await page.getByRole( 'tab', { name: 'Inventory' } ).click();
 	} );
 
 	await test.step( 'update available quantity', async () => {
@@ -185,7 +185,7 @@ test( 'can limit purchases', async ( { page, product } ) => {
 
 	await test.step( 'return to product editor', async () => {
 		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
-		await page.getByRole( 'button', { name: 'Inventory' } ).click();
+		await page.getByRole( 'tab', { name: 'Inventory' } ).click();
 	} );
 
 	await test.step( 'enable limit purchases', async () => {

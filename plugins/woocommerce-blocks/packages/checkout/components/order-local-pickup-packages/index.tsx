@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	Cart,
 	CartShippingPackageShippingRate,
@@ -38,7 +38,7 @@ const Slot = ( {
 }: ExperimentalOrderLocalPickupPackagesProps ) => {
 	return (
 		<OrderLocalPickupPackagesSlot
-			className={ classnames(
+			className={ clsx(
 				'wc-block-components-local-pickup-rates-control'
 			) }
 			fillProps={ {

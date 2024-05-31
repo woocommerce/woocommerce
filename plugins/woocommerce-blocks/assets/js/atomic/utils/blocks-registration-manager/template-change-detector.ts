@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { subscribe, select } from '@wordpress/data';
+import { subscribe } from '@wordpress/data';
+import { getPath, getQueryArg } from '@wordpress/url';
 import { isNumber } from '@woocommerce/types';
 
 interface TemplateChangeDetectorSubject {
@@ -81,6 +82,20 @@ export class TemplateChangeDetector implements TemplateChangeDetectorSubject {
 		return templateId?.split( '//' )[ 1 ];
 	}
 
+	private getCurrentTemplateIdFromUrl( url: string ): string | undefined {
+		const path = getPath( url );
+		const isTemplatePage = path
+			? path.includes( 'site-editor.php' )
+			: false;
+		let templateId;
+
+		if ( isTemplatePage ) {
+			templateId = getQueryArg( url, 'postId' );
+		}
+
+		return templateId as string;
+	}
+
 	/**
 	 * Checks if the current template or page has changed and notifies subscribers.
 	 *
@@ -89,18 +104,11 @@ export class TemplateChangeDetector implements TemplateChangeDetectorSubject {
 	public checkIfTemplateHasChangedAndNotifySubscribers(): void {
 		this.previousTemplateId = this.currentTemplateId;
 
-		const postOrPageId = select( 'core/editor' )?.getCurrentPostId<
-			string | number | undefined
-		>();
+		const templateId = this.getCurrentTemplateIdFromUrl(
+			window.location.href
+		);
 
-		this.isPostOrPage = Boolean( postOrPageId );
-
-		const editedPostId =
-			postOrPageId ||
-			select( 'core/edit-site' )?.getEditedPostId<
-				string | number | undefined
-			>();
-		this.currentTemplateId = this.parseTemplateId( editedPostId );
+		this.currentTemplateId = this.parseTemplateId( templateId );
 
 		const hasChangedTemplate =
 			this.previousTemplateId !== this.currentTemplateId;

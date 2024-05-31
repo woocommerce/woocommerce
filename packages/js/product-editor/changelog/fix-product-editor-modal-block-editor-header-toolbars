@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Updated modal block editor header implementation to get rid of deprecation warnings.

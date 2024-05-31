@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { Button, Modal, TextControl } from '@wordpress/components';
 import {
 	useState,
 	createElement,
@@ -10,6 +9,19 @@ import {
 import { __ } from '@wordpress/i18n';
 import { Form, FormErrors, useFormContext } from '@woocommerce/components';
 import { ProductShippingClass } from '@woocommerce/data';
+import { addQueryArgs } from '@wordpress/url';
+import apiFetch from '@wordpress/api-fetch';
+import {
+	Button,
+	Modal,
+	TextControl,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore We need this to import the block modules for registration.
+	__experimentalInputControl as InputControl,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore We need this to import the block modules for registration.
+	__experimentalInputControlPrefixWrapper as InputControlPrefixWrapper,
+} from '@wordpress/components';
 
 export type ShippingClassFormProps = {
 	onAdd: () => Promise< ProductShippingClass >;
@@ -33,6 +45,58 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 			} );
 	}
 
+	// State to control the automatic slug generation.
+	const [ isRequestingSlug, setIsRequestingSlug ] = useState( false );
+
+	// Get the shipping class name value.
+	const shippingNameInputValue = String( getInputProps( 'name' ).value );
+
+	const [ prevNameValue, setPrevNameValue ] = useState(
+		shippingNameInputValue
+	);
+
+	/**
+	 * Pull the slug suggestion from the server,
+	 * and update the slug input field.
+	 */
+	async function pullAndUpdateSlugInputField() {
+		setIsRequestingSlug( true );
+
+		// Avoid making the request if the name has not changed.
+		if ( prevNameValue === shippingNameInputValue ) {
+			return;
+		}
+
+		setPrevNameValue( shippingNameInputValue );
+
+		const url = `/wc/v3/products/shipping_classes/slug-suggestion`;
+		const slug: string = await apiFetch( {
+			path: addQueryArgs( url, { name: shippingNameInputValue } ),
+			method: 'GET',
+		} );
+
+		setIsRequestingSlug( false );
+
+		getInputProps( 'slug' ).onChange( slug );
+	}
+
+	const isGenerateButtonDisabled =
+		isRequestingSlug ||
+		! shippingNameInputValue?.length ||
+		prevNameValue === shippingNameInputValue;
+
+	/**
+	 * Get a slug suggestion based on the shipping class name.
+	 * This function is called when the name field is blurred.
+	 */
+	function getSlugSuggestion() {
+		if ( ! isRequestingSlug ) {
+			return;
+		}
+
+		pullAndUpdateSlugInputField();
+	}
+
 	return (
 		<div className="woocommerce-add-new-shipping-class-modal__wrapper">
 			<TextControl
@@ -48,11 +112,36 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 						),
 					}
 				) }
+				onBlur={ getSlugSuggestion }
 			/>
-			<TextControl
+
+			<InputControl
 				{ ...getInputProps( 'slug' ) }
 				label={ __( 'Slug', 'woocommerce' ) }
+				onChange={ ( value: string ) => {
+					setPrevNameValue( '' ); // clean the previous name value.
+					getInputProps( 'slug' ).onChange( value );
+				} }
+				disabled={ isRequestingSlug }
+				help={ __(
+					'Set a custom slug or generate it by clicking the button.',
+					'woocommerce'
+				) }
+				prefix={
+					<InputControlPrefixWrapper>
+						<Button
+							disabled={ isGenerateButtonDisabled }
+							variant="secondary"
+							onClick={ pullAndUpdateSlugInputField }
+							isBusy={ isRequestingSlug }
+							isSmall
+						>
+							{ __( 'Generate', 'woocommerce' ) }
+						</Button>
+					</InputControlPrefixWrapper>
+				}
 			/>
+
 			<TextControl
 				{ ...getInputProps( 'description' ) }
 				label={ __( 'Description', 'woocommerce' ) }
@@ -64,12 +153,13 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 					)
 				}
 			/>
+
 			<div className="woocommerce-add-new-shipping-class-modal__buttons">
 				<Button isSecondary onClick={ onCancel }>
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button
-					isPrimary
+					variant="primary"
 					isBusy={ isLoading }
 					disabled={ ! isValidForm || isLoading }
 					onClick={ handleAdd }
