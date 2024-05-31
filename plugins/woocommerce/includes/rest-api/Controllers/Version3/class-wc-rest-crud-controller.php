@@ -175,7 +175,17 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			try {
 				$object->save();
 			} catch ( Exception $e ) {
-				return new WP_Error( "woocommerce_rest_{$this->post_type}_not_created", $e->getMessage(), array( 'status' => 400 ) );
+				$error = "woocommerce_rest_{$this->post_type}_not_created";
+
+				wc_get_logger()->error(
+					$e->getMessage(),
+					array(
+						'source' => 'woocommerce-rest-api',
+						'error'  => $error,
+						'code'   => 400,
+					)
+				);
+				return new WP_Error( $error, $e->getMessage(), array( 'status' => 400 ) );
 			}
 
 			return $this->get_object( $object->get_id() );
