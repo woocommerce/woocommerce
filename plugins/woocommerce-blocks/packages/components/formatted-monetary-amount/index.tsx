@@ -6,7 +6,7 @@ import type {
 	NumberFormatValues,
 	NumberFormatProps,
 } from 'react-number-format';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import type { ReactElement } from 'react';
 import type { Currency } from '@woocommerce/types';
 
@@ -89,7 +89,7 @@ const FormattedMonetaryAmount = ( {
 		return null;
 	}
 
-	const classes = classNames(
+	const classes = clsx(
 		'wc-block-formatted-money-amount',
 		'wc-block-components-formatted-money-amount',
 		className

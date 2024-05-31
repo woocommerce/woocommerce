@@ -15,7 +15,7 @@ import {
 } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { useCopyToClipboard } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting } from '@woocommerce/settings';
@@ -148,7 +148,7 @@ const SiteVisibility = () => {
 						  ) }
 				</p>
 				<div
-					className={ classNames(
+					className={ clsx(
 						'site-visibility-settings-slotfill-section-content',
 						{
 							'is-hidden': comingSoon !== 'yes',

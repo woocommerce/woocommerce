@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import { FormStep } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
@@ -47,10 +47,7 @@ const FrontendBlock = ( {
 		<FormStep
 			id="pickup-options"
 			disabled={ checkoutIsProcessing }
-			className={ classnames(
-				'wc-block-checkout__pickup-options',
-				className
-			) }
+			className={ clsx( 'wc-block-checkout__pickup-options', className ) }
 			title={ title }
 			description={ description }
 			showStepNumber={ showFormStepNumbers }

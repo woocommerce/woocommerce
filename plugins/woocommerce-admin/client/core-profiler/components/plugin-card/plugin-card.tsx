@@ -4,7 +4,7 @@
 import { ReactNode } from 'react';
 import { CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -43,7 +43,7 @@ export const PluginCard = ( {
 				) }
 				{ icon }
 				<div
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-profiler-plugins-plugin-card-text-header',
 						{
 							installed,
@@ -58,7 +58,7 @@ export const PluginCard = ( {
 			</div>
 
 			<div
-				className={ classnames(
+				className={ clsx(
 					'woocommerce-profiler-plugins-plugin-card-text',
 					{ 'smaller-margin-left': installed }
 				) }

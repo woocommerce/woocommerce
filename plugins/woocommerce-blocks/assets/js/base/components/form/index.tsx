@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import type { FormEvent } from 'react';
 
 interface FormProps {
@@ -22,7 +22,7 @@ const Form = ( {
 
 	return (
 		<form
-			className={ classnames( 'wc-block-components-form', className ) }
+			className={ clsx( 'wc-block-components-form', className ) }
 			onSubmit={ formOnSubmit }
 		>
 			{ children }

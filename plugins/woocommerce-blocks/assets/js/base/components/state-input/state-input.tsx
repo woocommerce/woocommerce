@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useCallback, useMemo, useEffect, useRef } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
 
 /**
@@ -92,7 +92,7 @@ const StateInput = ( {
 	if ( options.length > 0 ) {
 		return (
 			<Combobox
-				className={ classnames(
+				className={ clsx(
 					className,
 					'wc-block-components-state-input'
 				) }
