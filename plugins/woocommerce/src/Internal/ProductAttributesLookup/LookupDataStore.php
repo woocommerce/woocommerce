@@ -73,7 +73,7 @@ class LookupDataStore {
 	public function can_use_optimized_db_access() {
 		try {
 			return is_a( \WC_Data_Store::load( 'product' )->get_current_class_name(), 'WC_Product_Data_Store_CPT', true );
-		} catch ( \Exception ) {
+		} catch ( \Exception $ex ) {
 			return false;
 		}
 	}
