@@ -90,7 +90,7 @@ test.describe( 'Compatibility Layer in Single Product template', () => {
 		);
 	} );
 
-	for ( const scenario of singleOccurranceScenarios ) {
+	for ( const scenario of singleOccurrenceScenarios ) {
 		test( `${ scenario.title } is attached to the page`, async ( {
 			page,
 		} ) => {
