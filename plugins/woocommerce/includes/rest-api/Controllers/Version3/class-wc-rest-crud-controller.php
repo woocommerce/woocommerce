@@ -167,7 +167,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			}
 
 			/**
-			 * Setting a magic property to indicate that this is a REST request.
+			 * Setting a dynamic property to indicate that this is a REST request.
 			 * We are doing this to ensure that unique SKU validation
 			 * is only triggered for REST requests where we are handling the exception.
 			 */
