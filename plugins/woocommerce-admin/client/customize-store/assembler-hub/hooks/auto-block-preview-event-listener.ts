@@ -6,7 +6,7 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { isFullComposabilityFeatureAndAPIAvailable } from './is-full-composability-enabled';
+import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
 
 const setStyle = ( documentElement: HTMLElement ) => {
 	const element = documentElement.ownerDocument.documentElement;
@@ -20,6 +20,9 @@ const setStyle = ( documentElement: HTMLElement ) => {
 	documentElement.style.width = '100%';
 };
 
+/**
+ * Sets the height of the iframe to the height of the root container
+ */
 const setContentHeightPatternPreview = (
 	documentElement: HTMLElement,
 	autoScale: boolean,
@@ -73,6 +76,9 @@ const findAndSetLogoBlock = (
 	setLogoBlockIds( logoBlockIds );
 };
 
+/**
+ * Adds inert attribute to all inner blocks to prevent them from being focused or clicked.
+ */
 const addInertToAllInnerBlocks = ( documentElement: HTMLElement ) => {
 	const body = documentElement.ownerDocument.body;
 	const observerChildList = new window.MutationObserver( () => {
@@ -188,7 +194,11 @@ type useAutoBlockPreviewEventListenersCallbacks = {
 	setContentHeight: ( contentHeight: number | null ) => void;
 };
 
-export const useAutoBlockPreviewEventListener = (
+/**
+ * Adds event listeners and observers to the auto block preview iframe.
+ *
+ */
+export const useAddAutoBlockPreviewEventListenersAndObservers = (
 	{
 		documentElement,
 		autoScale,
@@ -211,6 +221,7 @@ export const useAutoBlockPreviewEventListener = (
 			return;
 		}
 
+		// Set the height of the iframe to the height of the root container only when the block preview is used to preview a pattern.
 		if ( isPatternPreview ) {
 			const heightObserver = setContentHeightPatternPreview(
 				documentElement,

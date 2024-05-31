@@ -75,6 +75,7 @@ export const usePopoverHandler = () => {
 		}
 
 		setPopoverStatus( PopoverStatus.HIDDEN );
+		clickedClientId = null;
 	};
 
 	return [ popoverStatus, virtualElement, updatePopoverPosition ] as const;

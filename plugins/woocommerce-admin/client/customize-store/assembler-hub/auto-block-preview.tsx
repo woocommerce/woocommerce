@@ -33,7 +33,7 @@ import { selectBlockOnHover } from './utils/select-block-on-hover';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { PopoverStatus, usePopoverHandler } from './hooks/use-popover-handler';
 import { noop } from 'lodash';
-import { useAutoBlockPreviewEventListener } from './utils/auto-block-preview-event-listener';
+import { useAddAutoBlockPreviewEventListenersAndObservers } from './hooks/auto-block-preview-event-listener';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -128,7 +128,7 @@ function ScaledBlockPreview( {
 
 	const [ iframeRef, setIframeRef ] = useState< HTMLElement | null >( null );
 
-	useAutoBlockPreviewEventListener(
+	useAddAutoBlockPreviewEventListenersAndObservers(
 		{
 			documentElement: iframeRef,
 			autoScale,
