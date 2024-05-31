@@ -47,6 +47,11 @@ class BatchProcessingController {
 	const ACTION_GROUP                    = 'wc_batch_processes';
 
 	/**
+	 * Maximum number of failures per processor before it gets dequeued.
+	 */
+	const FAILING_PROCESS_MAX_ATTEMPTS = 3;
+
+	/**
 	 * Instance of WC_Logger class.
 	 *
 	 * @var \WC_Logger_Interface
@@ -73,6 +78,13 @@ class BatchProcessingController {
 			},
 			10,
 			2
+		);
+
+		add_action(
+			'shutdown',
+			function() {
+				$this->remove_or_retry_failed_processors();
+			}
 		);
 
 		$this->logger = wc_get_logger();
@@ -156,9 +168,13 @@ class BatchProcessingController {
 		$still_pending   = count( $batch_processor->get_next_batch_to_process( 1 ) ) > 0;
 		if ( ( $error instanceof \Exception ) ) {
 			// The batch processing failed and no items were processed:
-			// reschedule the processing with a delay, and also throw the error
-			// so Action Scheduler will ignore the rescheduling if this happens repeatedly.
-			$this->schedule_batch_processing( $processor_class_name, true );
+			// reschedule the processing with a delay, unless this is a repeatead failure.
+			if ( $this->is_consistently_failing( $batch_processor ) ) {
+				$this->logger->error( "Batch processor {$batch_processor->get_name()} appears to be consistently failing. Execution won't be automatically re-attempted." );
+			} else {
+				$this->schedule_batch_processing( $processor_class_name, true );
+			}
+
 			throw $error;
 		}
 		if ( $still_pending ) {
@@ -209,6 +225,7 @@ class BatchProcessingController {
 				'total_time_spent'   => 0,
 				'current_batch_size' => $batch_processor->get_default_batch_size(),
 				'last_error'         => null,
+				'recent_failures'    => 0,
 			)
 		);
 	}
@@ -216,12 +233,12 @@ class BatchProcessingController {
 	/**
 	 * Get the name of the option where we will be saving state for a given processor.
 	 *
-	 * @param BatchProcessorInterface $batch_processor Batch processor instance.
+	 * @param BatchProcessorInterface|string $batch_processor Batch processor instance or class name.
 	 *
 	 * @return string Option name.
 	 */
-	private function get_processor_state_option_name( BatchProcessorInterface $batch_processor ): string {
-		$class_name = get_class( $batch_processor );
+	private function get_processor_state_option_name( $batch_processor ): string {
+		$class_name = is_a( $batch_processor, BatchProcessorInterface::class ) ? get_class( $batch_processor ) : $batch_processor;
 		$class_md5  = md5( $class_name );
 		// truncate the class name so we know that it will fit in the option name column along with md5 hash and prefix.
 		$class_name = substr( $class_name, 0, 140 );
@@ -239,7 +256,23 @@ class BatchProcessingController {
 		$current_status                      = $this->get_process_details( $batch_processor );
 		$current_status['total_time_spent'] += $time_taken;
 		$current_status['last_error']        = null !== $last_error ? $last_error->getMessage() : null;
+
+		if ( null !== $last_error ) {
+			$current_status['recent_failures'] = ( $current_status['recent_failures'] ?? 0 ) + 1;
+		} else {
+			$current_status['recent_failures'] = 0;
+		}
+
 		update_option( $this->get_processor_state_option_name( $batch_processor ), $current_status, false );
+	}
+
+	/**
+	 * Removes the option where we store state for a given processor.
+	 *
+	 * @param string $processor_class_name Fully qualified class name of the processor.
+	 */
+	private function clear_processor_state( string $processor_class_name ): void {
+		delete_option( $this->get_processor_state_option_name( $processor_class_name ) );
 	}
 
 	/**
@@ -315,6 +348,7 @@ class BatchProcessingController {
 	private function dequeue_processor( string $processor_class_name ): void {
 		$pending_processes = $this->get_enqueued_processors();
 		if ( in_array( $processor_class_name, $pending_processes, true ) ) {
+			$this->clear_processor_state( $processor_class_name );
 			$pending_processes = array_diff( $pending_processes, array( $processor_class_name ) );
 			$this->set_enqueued_processors( $pending_processes );
 		}
@@ -358,6 +392,7 @@ class BatchProcessingController {
 		} else {
 			update_option( self::ENQUEUED_PROCESSORS_OPTION_NAME, $enqueued_processors, false );
 			as_unschedule_all_actions( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
+			$this->clear_processor_state( $processor_class_name );
 		}
 
 		return true;
@@ -369,6 +404,11 @@ class BatchProcessingController {
 	public function force_clear_all_processes(): void {
 		as_unschedule_all_actions( self::PROCESS_SINGLE_BATCH_ACTION_NAME );
 		as_unschedule_all_actions( self::WATCHDOG_ACTION_NAME );
+
+		foreach ( $this->get_enqueued_processors() as $processor ) {
+			$this->clear_processor_state( $processor );
+		}
+
 		update_option( self::ENQUEUED_PROCESSORS_OPTION_NAME, array(), false );
 	}
 
@@ -408,4 +448,51 @@ class BatchProcessingController {
 
 		$this->logger->error( $error_message, array( 'exception' => $error ) );
 	}
+
+	/**
+	 * Determines whether a given processor is consistently failing based on how many recent consecutive failures it has had.
+	 *
+	 * @since 9.1.0
+	 *
+	 * @param BatchProcessorInterface $batch_processor The processor that we want to check.
+	 * @return boolean TRUE if processor is consistently failing. FALSE otherwise.
+	 */
+	private function is_consistently_failing( BatchProcessorInterface $batch_processor ): bool {
+		return absint( $this->get_process_details( $batch_processor )['recent_failures'] ?? 0 ) >= self::FAILING_PROCESS_MAX_ATTEMPTS;
+	}
+
+	/**
+	 * Hooked onto 'shutdown'. This cleanup routine checks enqueued processors and whether they are scheduled or not to
+	 * either re-eschedule them or remove them from the queue.
+	 * This prevents stale states where Action Scheduler won't schedule any more attempts but we still report the
+	 * processor as enqueued.
+	 *
+	 * @return void
+	 */
+	private function remove_or_retry_failed_processors(): void {
+		if ( as_has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
+			return;
+		}
+
+		$enqueued_processors    = $this->get_enqueued_processors();
+		$unscheduled_processors = array_diff( $enqueued_processors, array_filter( $enqueued_processors, array( $this, 'is_scheduled' ) ) );
+
+		foreach ( $unscheduled_processors as $processor ) {
+			try {
+				$instance = $this->get_processor_instance( $processor );
+			} catch ( \Exception $e ) {
+				continue;
+			}
+
+			$this->update_processor_state( $instance, 0, new \Exception( 'Processor is enqueued but not scheduled. Background job was probably killed or marked as failed.' ) );
+
+			if ( $this->is_consistently_failing( $instance ) ) {
+				$this->remove_processor( $processor );
+			} else {
+				$this->schedule_batch_processing( $processor, true );
+			}
+
+		}
+	}
+
 }
