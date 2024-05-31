@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import {
 	SearchListControl,
@@ -70,7 +70,7 @@ const ProductAttributeTermControl = ( {
 			return (
 				<ExpandableSearchListItem
 					{ ...args }
-					className={ classNames( classes ) }
+					className={ clsx( classes ) }
 					item={ item }
 					isLoading={ isLoadingAttributes }
 					disabled={ item.count === 0 }
@@ -101,7 +101,7 @@ const ProductAttributeTermControl = ( {
 			<SearchListItem
 				{ ...args }
 				name={ `terms-${ instanceId }` }
-				className={ classNames( ...classes, 'has-count' ) }
+				className={ clsx( ...classes, 'has-count' ) }
 				countLabel={ sprintf(
 					/* translators: %d is the count of products. */
 					_n( '%d product', '%d products', count, 'woocommerce' ),
