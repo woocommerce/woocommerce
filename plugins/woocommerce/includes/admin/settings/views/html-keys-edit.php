@@ -104,6 +104,19 @@ defined( 'ABSPATH' ) || exit;
 					</td>
 				</tr>
 			<?php endif ?>
+			<tr>
+				<th scope="row" class="titledesc">
+					<?php esc_html_e( 'Best practices', 'woocommerce' ); ?>
+				</th>
+				<td class="forminp">
+					<ul class="advice">
+						<li><?php esc_html_e( 'API keys open up access to potentially sensitive information. Only share them with organizations you trust.', 'woocommerce' ); ?></li>
+						<li><?php esc_html_e( 'Stick to one key per client: this makes it easier to revoke access in the future for a single client, without causing disruption for others.', 'woocommerce' ); ?></li>
+						<li><?php esc_html_e( 'Add a meaningful description, including a note of the person, company or app you are sharing the key with.', 'woocommerce' ); ?></li>
+						<li><?php esc_html_e( 'Write-only keys do not prevent clients from seeing information about the entities they are updating.', 'woocommerce' ); ?></li>
+					</ul>
+				</td>
+			</tr>
 		</tbody>
 	</table>
 
