@@ -806,7 +806,7 @@ class LookupDataStore {
 			"delete from {$wpdb->prefix}wc_product_attributes_lookup where product_or_parent_id=%d",
 			$product_id
 		);
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$wpdb->query( $sql );
 
 		// * Obtain list of product variations, together with stock statuses; also get the product type.
@@ -840,7 +840,7 @@ class LookupDataStore {
 			$product_id
 		);
 
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$product_ids_with_stock_status = $wpdb->get_results( $sql, ARRAY_A );
 
 		$main_product_row = array_filter( $product_ids_with_stock_status, fn( $item ) => 'variation' !== $item['product_type'] );
@@ -868,14 +868,14 @@ class LookupDataStore {
 			'_product_attributes'
 		);
 
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$temp = $wpdb->get_var( $sql );
 
 		if ( is_null( $temp ) ) {
 			return;
 		}
 
-        // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
 		$temp = unserialize( $temp );
 		if ( false === $temp ) {
 			wc_get_logger()->error( "Lookup data creation failed for product $product_id: the product attributes metadata row is not properly serialized", array( 'source' => 'palt-updates' ) );
@@ -910,7 +910,7 @@ class LookupDataStore {
 			'pa_%'
 		);
 
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$terms_used_per_attribute = $wpdb->get_results( $sql, ARRAY_A );
 		foreach ( $terms_used_per_attribute as &$term ) {
 			$term['attribute'] = strtolower( rawurlencode( $term['attribute'] ) );
@@ -943,7 +943,7 @@ class LookupDataStore {
 				$product_id,
 				'attribute_pa_%'
 			);
-            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$variations_defined = $wpdb->get_results( $sql, ARRAY_A );
 			$variations_defined = ArrayUtil::group_by_column( $variations_defined, 'variation_id' );
 		}
@@ -1024,7 +1024,7 @@ class LookupDataStore {
 
 			$sql .= implode( '),(', $values_strings ) . ')';
 
-            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$wpdb->query( $sql );
 		}
 	}
