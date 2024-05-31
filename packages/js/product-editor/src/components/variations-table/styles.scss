@@ -5,6 +5,7 @@
 @import "./variations-filter/styles.scss";
 @import "./table-row-skeleton/styles.scss";
 @import "./add-image-menu-item/style.scss";
+@import "./variations-table-row/image-actions-menu/style.scss";
 
 .woocommerce-product-variations {
 	display: flex;
@@ -190,17 +191,24 @@
 		border-radius: 2px;
 		border: 1px dashed $gray-400;
 		margin-right: $gap-small;
-		width: 32px;
+		width: $grid-unit-40;
+		height: $grid-unit-40;
 		padding: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		.components-spinner {
+			margin: 0;
+		}
 	}
 	&__image-button {
 		margin-right: $gap-small;
-		width: 32px;
-		max-height: 32px;
+		width: $grid-unit-40;
+		height: $grid-unit-40;
 		padding: 0;
 	}
 	&__image {
-		width: 32px;
-		max-height: 32px;
+		width: 100%;
 	}
 }

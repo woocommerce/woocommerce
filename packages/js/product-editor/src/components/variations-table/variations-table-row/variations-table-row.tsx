@@ -16,7 +16,6 @@ import {
 import { plus, info, Icon } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { MediaUpload } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
@@ -30,7 +29,7 @@ import {
 } from '../../../utils';
 import { SingleUpdateMenu } from '../variation-actions-menus';
 import { VariationsTableRowProps } from './types';
-import { mapUploadImageToImage } from '../../../utils/map-upload-image-to-image';
+import { ImageActionsMenu } from '../image-actions-menu';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
 
@@ -142,46 +141,44 @@ export function VariationsTableRow( {
 				className="woocommerce-product-variations__attributes-cell"
 				role="cell"
 			>
-				<MediaUpload
-					value={ variation.id }
-					onSelect={ ( image ) =>
-						handleChange(
-							[
-								{
-									id: variation.id,
-									image:
-										mapUploadImageToImage( image ) ||
-										undefined,
-								},
-							],
-							false
+				<ImageActionsMenu
+					selection={ [ variation ] }
+					onChange={ handleChange }
+					onDelete={ handleDelete }
+					renderToggle={ ( { onToggle, isBusy } ) =>
+						isBusy ? (
+							<div className="woocommerce-product-variations__add-image-button">
+								<Spinner
+									aria-label={ __(
+										'Loading image',
+										'woocommerce'
+									) }
+								/>
+							</div>
+						) : (
+							<Button
+								className={ classNames(
+									variation.image
+										? 'woocommerce-product-variations__image-button'
+										: 'woocommerce-product-variations__add-image-button'
+								) }
+								icon={ variation.image ? undefined : plus }
+								iconSize={ variation.image ? undefined : 16 }
+								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								// @ts-ignore this exists in the props but is not typed
+								size="compact"
+								onClick={ onToggle }
+							>
+								{ variation.image && (
+									<img
+										className="woocommerce-product-variations__image"
+										src={ variation.image.src }
+										alt={ variation.image.alt }
+									/>
+								) }
+							</Button>
 						)
 					}
-					allowedTypes={ [ 'image' ] }
-					multiple={ false }
-					render={ ( { open } ) => (
-						<Button
-							className={ classNames(
-								variation.image
-									? 'woocommerce-product-variations__image-button'
-									: 'woocommerce-product-variations__add-image-button'
-							) }
-							icon={ variation.image ? undefined : plus }
-							iconSize={ variation.image ? undefined : 16 }
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore this exists in the props but is not typed
-							size="compact"
-							onClick={ open }
-						>
-							{ variation.image && (
-								<img
-									className="woocommerce-product-variations__image"
-									src={ variation.image.src }
-									alt={ variation.image.alt }
-								/>
-							) }
-						</Button>
-					) }
 				/>
 
 				<div className="woocommerce-product-variations__attributes">
