@@ -68,16 +68,13 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		admin,
 		editor,
-		editorUtils,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//single-product`,
 			postType: 'wp_template',
 		} );
-		await editorUtils.enterEditMode();
-		const relatedProducts = await editorUtils.getBlockByName(
-			blockData.slug
-		);
+		await editor.enterEditMode();
+		const relatedProducts = await editor.getBlockByName( blockData.slug );
 		await editor.selectBlocks( relatedProducts );
 		await editor.openDocumentSettingsSidebar();
 
@@ -108,7 +105,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			name: querySlug,
 			attributes: { namespace: productsBetaSlug },
 		} );
-		const productsBeta = await editorUtils.getBlockByName( querySlug );
+		const productsBeta = await editor.getBlockByName( querySlug );
 		await editor.selectBlocks( productsBeta );
 		await expect( upgradeNotice ).toBeVisible();
 		await expect( advancedFilters ).toBeVisible();
