@@ -202,14 +202,6 @@ Layout.propTypes = {
 	 */
 	shouldShowWelcomeFromCalypsoModal: PropTypes.bool,
 	/**
-	 * Timestamp of WooCommerce Admin installation.
-	 */
-	installTimestamp: PropTypes.string,
-	/**
-	 * Resolution of WooCommerce Admin installation timetsamp.
-	 */
-	installTimestampHasResolved: PropTypes.bool,
-	/**
 	 * Dispatch an action to update an option
 	 */
 	updateOptions: PropTypes.func.isRequired,
