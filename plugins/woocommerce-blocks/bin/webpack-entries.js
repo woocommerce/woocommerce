@@ -13,7 +13,9 @@ const glob = require( 'glob' );
 // property.
 const blocks = {
 	'active-filters': {},
-	'add-to-cart-form': {},
+	'add-to-cart-form': {
+		customDir: 'product-elements/add-to-cart-form',
+	},
 	'all-products': {
 		customDir: 'products/all-products',
 	},
