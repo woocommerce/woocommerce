@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { FormTokenField as WPFormTokenField } from 'wordpress-components';
+import WPFormTokenField from 'wordpress-components/build-module/form-token-field';
 import clsx from 'clsx';
 
 /**

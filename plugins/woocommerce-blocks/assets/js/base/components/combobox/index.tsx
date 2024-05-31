@@ -4,7 +4,7 @@
 import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { useEffect, useId, useRef } from '@wordpress/element';
-import { ComboboxControl } from 'wordpress-components';
+import ComboboxControl from 'wordpress-components/build-module/combobox-control';
 import { ValidationInputError } from '@woocommerce/blocks-components';
 import { isObject } from '@woocommerce/types';
 import { useDispatch, useSelect } from '@wordpress/data';

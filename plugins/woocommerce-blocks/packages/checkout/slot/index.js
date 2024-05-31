@@ -10,7 +10,7 @@ import {
 	createSlotFill as baseCreateSlotFill,
 	useSlot,
 	useSlotFills,
-} from 'wordpress-components-slotfill/build-module/slot-fill';
+} from 'wordpress-components/build-module/slot-fill';
 
 /**
  * Internal dependencies
