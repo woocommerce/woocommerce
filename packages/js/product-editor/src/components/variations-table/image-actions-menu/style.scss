@@ -1,0 +1,10 @@
+.woocommerce-image-actions-menu {
+	&__menu-content {
+		// To be rendered below the MediaLibrary modal.
+		z-index: 100000;
+
+		.components-menu-item__item {
+			min-width: 172px;
+		}
+	}
+}
