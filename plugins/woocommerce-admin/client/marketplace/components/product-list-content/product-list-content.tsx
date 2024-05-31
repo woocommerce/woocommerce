@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Fragment, useEffect, useState } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
@@ -28,7 +28,7 @@ export default function ProductListContent( props: {
 } ): JSX.Element {
 	const wccomHelperSettings = getAdminSetting( 'wccomHelper', {} );
 
-	const classes = classnames(
+	const classes = clsx(
 		'woocommerce-marketplace__product-list-content',
 		props.className
 	);
