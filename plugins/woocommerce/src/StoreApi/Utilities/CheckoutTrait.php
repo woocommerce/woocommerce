@@ -88,11 +88,11 @@ trait CheckoutTrait {
 			$additional_data = [];
 			if ( $e->getPrevious() ) {
 				$additional_data = [
-					'previous' => get_class( $e->getPrevious() )
+					'previous' => get_class( $e->getPrevious() ),
 				];
 			}
 
-			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ), 400, $additional_data );
+			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ), 400, array_map( 'esc_attr', $additional_data ) );
 		}
 	}
 
