@@ -49,7 +49,7 @@ class BatchProcessingController {
 	/**
 	 * Maximum number of failures per processor before it gets dequeued.
 	 */
-	const FAILING_PROCESS_MAX_ATTEMPTS = 3;
+	const FAILING_PROCESS_MAX_ATTEMPTS_DEFAULT = 3;
 
 	/**
 	 * Instance of WC_Logger class.
@@ -473,7 +473,7 @@ class BatchProcessingController {
 			 */
 			apply_filters(
 				'wc_batch_processing_attempts_threshold',
-				self::FAILING_PROCESS_MAX_ATTEMPTS,
+				self::FAILING_PROCESS_MAX_ATTEMPTS_DEFAULT,
 				$batch_processor,
 				$process_details
 			)
