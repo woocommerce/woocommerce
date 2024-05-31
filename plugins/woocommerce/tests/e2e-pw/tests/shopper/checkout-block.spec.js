@@ -354,14 +354,16 @@ baseTest.describe( 'Checkout Block page', () => {
 		await addAProductToCart( page, productId );
 		await page.goto( testPage.slug );
 
-		// This wait is required to make the page fully stable before testing
-		await page.waitForLoadState( 'networkidle' );
-
 		await expect(
 			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
-		// For flakiness, sometimes the email address is not filled
+		// to avoid flakiness, sometimes the email address is not filled
+		await page
+			.locator(
+				'.wc-block-components-order-summary-item__individual-prices'
+			)
+			.waitFor( { state: 'visible' } );
 		await page.getByLabel( 'Email address' ).click();
 		await page.getByLabel( 'Email address' ).fill( guestEmail );
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
@@ -466,13 +468,16 @@ baseTest.describe( 'Checkout Block page', () => {
 		await addAProductToCart( page, productId );
 		await page.goto( testPage.slug );
 
-		await page.waitForLoadState( 'networkidle' );
-
 		await expect(
 			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
-		// For flakiness, sometimes the email address is not filled
+		// to avoid flakiness, sometimes the email address is not filled
+		await page
+			.locator(
+				'.wc-block-components-order-summary-item__individual-prices'
+			)
+			.waitFor( { state: 'visible' } );
 		await page.getByLabel( 'Email address' ).click();
 		await page.getByLabel( 'Email address' ).fill( customer.email );
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
@@ -500,13 +505,16 @@ baseTest.describe( 'Checkout Block page', () => {
 		await addAProductToCart( page, productId );
 		await page.goto( testPage.slug );
 
-		await page.waitForLoadState( 'networkidle' );
-
 		await expect(
 			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
-		// For flakiness, sometimes the email address is not filled
+		// to avoid flakiness, sometimes the email address is not filled
+		await page
+			.locator(
+				'.wc-block-components-order-summary-item__individual-prices'
+			)
+			.waitFor( { state: 'visible' } );
 		await page.getByLabel( 'Email address' ).click();
 		await page.getByLabel( 'Email address' ).fill( customer.email );
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
@@ -581,13 +589,16 @@ baseTest.describe( 'Checkout Block page', () => {
 		await addAProductToCart( page, productId );
 		await page.goto( testPage.slug );
 
-		await page.waitForLoadState( 'networkidle' );
-
 		await expect(
 			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
-		// For flakiness, sometimes the email address is not filled
+		// to avoid flakiness, sometimes the email address is not filled
+		await page
+			.locator(
+				'.wc-block-components-order-summary-item__individual-prices'
+			)
+			.waitFor( { state: 'visible' } );
 		await page.getByLabel( 'Email address' ).click();
 		await page.getByLabel( 'Email address' ).fill( guestEmail );
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
@@ -704,11 +715,16 @@ baseTest.describe( 'Checkout Block page', () => {
 		await addAProductToCart( page, productId );
 		await page.goto( testPage.slug );
 
-		await page.waitForLoadState( 'networkidle' );
-
 		await expect(
 			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
+
+		// wait for product price to show up in the summary
+		await page
+			.locator(
+				'.wc-block-components-order-summary-item__individual-prices'
+			)
+			.waitFor( { state: 'visible' } );
 
 		// click to log in and make sure you are on the same page after logging in
 		await page.locator( 'text=Log in.' ).click();
@@ -794,11 +810,16 @@ baseTest.describe( 'Checkout Block page', () => {
 		await addAProductToCart( page, productId );
 		await page.goto( testPage.slug );
 
-		await page.waitForLoadState( 'networkidle' );
-
 		await expect(
 			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
+
+		// wait for product price to show up in the summary
+		await page
+			.locator(
+				'.wc-block-components-order-summary-item__individual-prices'
+			)
+			.waitFor( { state: 'visible' } );
 
 		// check create account during checkout
 		await expect( page.getByLabel( 'Create an account?' ) ).toBeVisible();
