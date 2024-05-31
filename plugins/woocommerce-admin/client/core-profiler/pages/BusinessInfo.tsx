@@ -20,7 +20,7 @@ import {
 import { findCountryOption, getCountry } from '@woocommerce/onboarding';
 import { decodeEntities } from '@wordpress/html-entities';
 import { z } from 'zod';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -395,7 +395,7 @@ export const BusinessInfo = ( {
 					{
 						<>
 							<TextControl
-								className={ classNames(
+								className={ clsx(
 									'woocommerce-profiler-business-info-email-adddress',
 									{ 'is-error': isEmailInvalid }
 								) }

@@ -2,13 +2,13 @@
  * External dependencies
  */
 import { SVG } from '@wordpress/primitives';
-import classnames from 'classnames';
+import clsx from 'clsx';
 const Component = ( { className, height, width, ...props } ) => {
 	return (
 		<SVG
 			xmlns="http://www.w3.org/2000/svg"
 			viewBox="0 0 245 145"
-			className={ classnames( 'woo-icon', className ) }
+			className={ clsx( 'woo-icon', className ) }
 			width={ width }
 			height={ height }
 			{ ...props }

@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	useReducedMotion,
 	useResizeObserver,
@@ -156,7 +156,7 @@ export const Layout = () => {
 						type={ templateType }
 						id={ templateId }
 					>
-						<div className={ classnames( 'edit-site-layout' ) }>
+						<div className={ clsx( 'edit-site-layout' ) }>
 							<motion.div
 								className="edit-site-layout__header-container"
 								animate={ 'view' }
@@ -204,7 +204,7 @@ export const Layout = () => {
 											<motion.div
 												initial={ false }
 												layout="position"
-												className={ classnames(
+												className={ clsx(
 													'edit-site-layout__canvas'
 												) }
 											>

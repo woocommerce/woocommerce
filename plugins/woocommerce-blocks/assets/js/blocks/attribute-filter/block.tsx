@@ -33,7 +33,7 @@ import {
 } from '@woocommerce/utils';
 import FormTokenField from '@woocommerce/base-components/form-token-field';
 import FilterTitlePlaceholder from '@woocommerce/base-components/filter-placeholder';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -531,7 +531,7 @@ const AttributeFilterBlock = ( {
 		<>
 			{ ! isEditor && blockAttributes.heading && filterHeading }
 			<div
-				className={ classnames(
+				className={ clsx(
 					'wc-block-attribute-filter',
 					`style-${ blockAttributes.displayStyle }`
 				) }
@@ -540,7 +540,7 @@ const AttributeFilterBlock = ( {
 					<>
 						<FormTokenField
 							key={ remountKey }
-							className={ classnames( {
+							className={ clsx( {
 								'single-selection': ! multiple,
 								'is-loading': isLoading,
 							} ) }

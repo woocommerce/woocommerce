@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import { FormStep } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
@@ -37,10 +37,7 @@ const FrontendBlock = ( {
 		<FormStep
 			id="contact-fields"
 			disabled={ checkoutIsProcessing }
-			className={ classnames(
-				'wc-block-checkout__contact-fields',
-				className
-			) }
+			className={ clsx( 'wc-block-checkout__contact-fields', className ) }
 			title={ title }
 			description={ description }
 			showStepNumber={ showFormStepNumbers }

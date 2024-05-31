@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { SelectControl } from '@woocommerce/components';
 import { Icon, chevronDown } from '@wordpress/icons';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -236,7 +236,7 @@ export const UserProfile = ( {
 				}
 			/>
 			<div
-				className={ classnames(
+				className={ clsx(
 					'woocommerce-profiler-page__content woocommerce-profiler-user-profile__content',
 					{
 						'is-platform-selector-open': isPlatformDropdownOpen,

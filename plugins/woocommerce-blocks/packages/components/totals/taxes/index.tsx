@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
 import type { CartTotalsTaxLineItem, Currency } from '@woocommerce/types';
@@ -54,7 +54,7 @@ const TotalsTaxes = ( {
 					return (
 						<TotalsItem
 							key={ `tax-line-${ i }` }
-							className={ classnames(
+							className={ clsx(
 								'wc-block-components-totals-taxes',
 								className
 							) }
@@ -72,7 +72,7 @@ const TotalsTaxes = ( {
 	) : (
 		<>
 			<TotalsItem
-				className={ classnames(
+				className={ clsx(
 					'wc-block-components-totals-taxes',
 					className
 				) }

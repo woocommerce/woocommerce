@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { Main } from '@woocommerce/base-components/sidebar-layout';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
@@ -31,10 +31,7 @@ export const Edit = ( {
 	};
 } ): JSX.Element => {
 	const blockProps = useBlockProps( {
-		className: classnames(
-			'wc-block-checkout__main',
-			attributes?.className
-		),
+		className: clsx( 'wc-block-checkout__main', attributes?.className ),
 	} );
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CHECKOUT_FIELDS );
 
@@ -67,7 +64,7 @@ export const Edit = ( {
 		<Main { ...blockProps }>
 			<Controls />
 			<form
-				className={ classnames(
+				className={ clsx(
 					'wc-block-components-form wc-block-checkout__form',
 					{
 						'wc-block-checkout__form--with-step-numbers':

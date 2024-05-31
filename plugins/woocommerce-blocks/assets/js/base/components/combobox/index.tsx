@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { useEffect, useId, useRef } from '@wordpress/element';
 import { ComboboxControl } from 'wordpress-components';
@@ -93,7 +93,7 @@ const Combobox = ( {
 	return (
 		<div
 			id={ controlId }
-			className={ classnames( 'wc-block-components-combobox', className, {
+			className={ clsx( 'wc-block-components-combobox', className, {
 				'is-active': value,
 				'has-error': error?.message && ! error?.hidden,
 			} ) }

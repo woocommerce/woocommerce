@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { forwardRef, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import type { InputHTMLAttributes } from 'react';
@@ -58,13 +58,9 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 
 		return (
 			<div
-				className={ classnames(
-					'wc-block-components-text-input',
-					className,
-					{
-						'is-active': isActive || value,
-					}
-				) }
+				className={ clsx( 'wc-block-components-text-input', className, {
+					'is-active': isActive || value,
+				} ) }
 			>
 				<input
 					type={ type }

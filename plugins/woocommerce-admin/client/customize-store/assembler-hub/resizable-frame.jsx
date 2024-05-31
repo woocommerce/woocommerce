@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useState, useRef } from '@wordpress/element';
 import {
 	ResizableBox,
@@ -202,7 +202,7 @@ function ResizableFrame( {
 			key="handle"
 			role="separator"
 			aria-orientation="vertical"
-			className={ classnames( 'edit-site-resizable-frame__handle', {
+			className={ clsx( 'edit-site-resizable-frame__handle', {
 				'is-resizing': isResizing,
 			} ) }
 			variants={ resizeHandleVariants }
@@ -302,7 +302,7 @@ function ResizableFrame( {
 			onResizeStart={ handleResizeStart }
 			onResize={ handleResize }
 			onResizeStop={ handleResizeStop }
-			className={ classnames( 'edit-site-resizable-frame__inner', {
+			className={ clsx( 'edit-site-resizable-frame__inner', {
 				'is-resizing': isResizing,
 			} ) }
 		>

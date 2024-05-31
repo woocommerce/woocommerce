@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useRef } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
@@ -101,7 +101,7 @@ export const Edit = ( {
 						) }
 					</Noninteractive>
 					<EditableButton
-						className={ classnames(
+						className={ clsx(
 							'wc-block-cart__submit-button',
 							'wc-block-components-checkout-place-order-button',
 							{

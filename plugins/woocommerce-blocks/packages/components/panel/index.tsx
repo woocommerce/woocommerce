@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 import type { ReactNode, ReactElement } from 'react';
 
@@ -38,7 +38,7 @@ const Panel = ( {
 
 	return (
 		<div
-			className={ classNames( className, 'wc-block-components-panel', {
+			className={ clsx( className, 'wc-block-components-panel', {
 				'has-border': hasBorder,
 			} ) }
 		>

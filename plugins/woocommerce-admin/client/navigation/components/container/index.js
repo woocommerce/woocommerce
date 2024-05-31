@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Navigation } from '@woocommerce/experimental';
 import { NAVIGATION_STORE_NAME, useUser } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -77,7 +77,7 @@ const Container = () => {
 
 	const isRoot = activeLevel === 'woocommerce';
 
-	const classes = classnames( 'woocommerce-navigation', {
+	const classes = clsx( 'woocommerce-navigation', {
 		'is-root': isRoot,
 	} );
 

@@ -3,7 +3,7 @@
  */
 import { compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
@@ -62,7 +62,7 @@ const KnowledgeBase = ( {
 			( page - 1 ) * 2,
 			( page - 1 ) * 2 + 2
 		);
-		const pageClass = classNames(
+		const pageClass = clsx(
 			'woocommerce-marketing-knowledgebase-card__page',
 			{
 				'page-with-single-post': currentPosts.length === 1,
@@ -194,7 +194,7 @@ const KnowledgeBase = ( {
 		<Card
 			title={ title }
 			description={ description }
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-marketing-knowledgebase-card',
 				categoryClass
 			) }

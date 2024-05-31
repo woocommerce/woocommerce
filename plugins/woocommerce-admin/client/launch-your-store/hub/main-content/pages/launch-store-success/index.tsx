@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Spinner } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 
@@ -32,7 +32,7 @@ export const LaunchYourStoreSuccess = ( props: MainContentComponentProps ) => {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'launch-store-success-page__container',
 				props.className
 			) }

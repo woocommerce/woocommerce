@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { Icon, close } from '@wordpress/icons';
 
@@ -53,7 +53,7 @@ const NoticeBanner = ( {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				className,
 				'wc-block-components-notice-banner',
 				'is-' + status,

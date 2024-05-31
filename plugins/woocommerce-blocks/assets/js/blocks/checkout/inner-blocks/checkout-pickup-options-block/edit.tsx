@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useBlockProps } from '@wordpress/block-editor';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import { useSelect } from '@wordpress/data';
@@ -47,7 +47,7 @@ export const Edit = ( {
 		<FormStepBlock
 			attributes={ attributes }
 			setAttributes={ setAttributes }
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__shipping-method',
 				className
 			) }
