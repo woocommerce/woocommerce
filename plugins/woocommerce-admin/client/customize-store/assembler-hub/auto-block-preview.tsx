@@ -93,8 +93,10 @@ function ScaledBlockPreview( {
 		viewportWidth = containerWidth;
 	}
 
+	const [ iframeRef, setIframeRef ] = useState< HTMLElement | null >( null );
+
 	const [ popoverStatus, virtualElement, updatePopoverPosition ] =
-		usePopoverHandler();
+		usePopoverHandler( iframeRef );
 
 	// @ts-expect-error No types for this exist yet.
 	const { selectBlock, setBlockEditingMode } =
@@ -125,8 +127,6 @@ function ScaledBlockPreview( {
 
 	// Initialize on render instead of module top level, to avoid circular dependency issues.
 	MemoizedBlockList = MemoizedBlockList || pure( BlockList );
-
-	const [ iframeRef, setIframeRef ] = useState< HTMLElement | null >( null );
 
 	useAddAutoBlockPreviewEventListenersAndObservers(
 		{

@@ -50,6 +50,8 @@ export const usePopoverHandler = () => {
 		clickedBlockClientId: string | null;
 		hoveredBlockClientId: string | null;
 	} ) => {
+		const iframe = window.document.querySelector( 'iframe' ) as HTMLElement;
+
 		clickedClientId =
 			clickedBlockClientId === null
 				? clickedClientId
@@ -63,10 +65,15 @@ export const usePopoverHandler = () => {
 			if ( popoverStatus === PopoverStatus.HIDDEN ) {
 				setPopoverStatus( PopoverStatus.VISIBLE );
 			}
+
+			const iframeRect = iframe.getBoundingClientRect();
+
 			const newElement = {
 				getBoundingClientRect: generateGetBoundingClientRect(
-					event.clientX + ( mainBodyWidth - iframeWidth ),
-					event.clientY + 40
+					event.clientX +
+						( mainBodyWidth - iframeWidth - iframeRect.left ) +
+						200,
+					event.clientY + iframeRect.top + 40
 				),
 			} as VirtualElement;
 

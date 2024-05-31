@@ -242,7 +242,10 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 
 		setStyle( documentElement );
 
-		if ( isFullComposabilityFeatureAndAPIAvailable() ) {
+		if (
+			isFullComposabilityFeatureAndAPIAvailable() &&
+			! isPatternPreview
+		) {
 			updateSelectedBlock( documentElement, {
 				selectBlock,
 				selectBlockOnHover,
