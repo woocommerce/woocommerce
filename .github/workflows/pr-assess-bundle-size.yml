@@ -13,13 +13,12 @@ on:
             - '**.tsconfig*'
             - '**/webpack.config.js'
             - '.github/workflows/pr-assess-bundle-size.yml'
-        paths-ignore:
-            - 'packages/js/*e2e*/**'
-            - 'packages/js/*plugin*/**'
-            - 'packages/js/*internal*/**'
-            - 'packages/js/*create*/**'
-            - '**/*.spec.*'
-            - '**/tests/**'
+            - '!packages/js/*e2e*/**'
+            - '!packages/js/*plugin*/**'
+            - '!packages/js/*internal*/**'
+            - '!packages/js/*create*/**'
+            - '!**/*.spec.*'
+            - '!**/tests/**'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
