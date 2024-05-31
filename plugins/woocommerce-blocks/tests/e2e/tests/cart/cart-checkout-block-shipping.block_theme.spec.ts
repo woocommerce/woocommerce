@@ -58,12 +58,10 @@ test.describe( 'Shopper → Shipping', () => {
 		await userFrontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await userFrontendUtils.goToCart();
 
-		// Locate the button using a different selector method
 		const button = userPage.locator( 'button', {
 			hasText: 'Enter address to check delivery options',
 		} );
 
-		// Ensure the button is visible
 		await expect( button ).toBeVisible();
 	} );
 
