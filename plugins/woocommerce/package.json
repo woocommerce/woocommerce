@@ -240,9 +240,6 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
 						"tests/e2e-pw/**"
 					],
 					"testEnv": {
@@ -293,7 +290,6 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/php/**/*.php",
 						"tests/e2e-pw/**"
 					],
 					"testEnv": {
@@ -315,10 +311,8 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
-						"tests/api-core-tests/**"
+						"tests/api-core-tests/**",
+						"tests/e2e-pw/bin/**"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -340,8 +334,8 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/api-core-tests/**"
+						"tests/api-core-tests/**",
+						"tests/e2e-pw/bin/**"
 					],
 					"events": [
 						"push"
@@ -365,8 +359,6 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
 						"tests/performance/**"
 					],
 					"testEnv": {
