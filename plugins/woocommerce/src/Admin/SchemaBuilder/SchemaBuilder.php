@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaString;
 use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaObject;
 use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaNumber;
 use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaArray;
+use Automattic\WooCommerce\Admin\SchemaBuilder\Types\SchemaBoolean;
 
 /**
  * Schema Builder.
@@ -38,6 +39,13 @@ class SchemaBuilder {
      */
     public static function array( $properties ) {
         return new SchemaArray( $properties );
+    }
+
+    /**
+     * Boolean type.
+     */
+    public static function boolean() {
+        return new SchemaBoolean();
     }
 
 }
