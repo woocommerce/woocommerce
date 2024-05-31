@@ -111,6 +111,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 * @testdox `initiate_regeneration` initializes the transient options, and enqueues the first step for time()+1.
 	 */
 	public function test_initiate_regeneration_initializes_temporary_options_and_enqueues_regeneration_step() {
+		// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wc_get_products' => function ( $args ) {
@@ -121,6 +122,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 				},
 			)
 		);
+		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
 		$this->sut->initiate_regeneration();
 
@@ -149,6 +151,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 * @param mixed $get_products_result Result from wc_get_products.
 	 */
 	public function test_initiate_regeneration_does_not_enqueues_regeneration_step_when_no_products( $get_products_result ) {
+		// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wc_get_products' => function ( $args ) use ( $get_products_result ) {
@@ -156,6 +159,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 				},
 			)
 		);
+		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
 		$this->sut->initiate_regeneration();
 
@@ -223,6 +227,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 		$filtered_size = DataRegenerator::PRODUCTS_PER_GENERATION_STEP / 2;
 
+		// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		if ( $set_filter ) {
 			\add_filter(
 				'woocommerce_attribute_lookup_regeneration_step_size',
@@ -231,6 +236,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 				}
 			);
 		}
+		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
