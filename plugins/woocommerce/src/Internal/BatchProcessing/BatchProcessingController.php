@@ -498,7 +498,7 @@ class BatchProcessingController {
 	 * This prevents stale states where Action Scheduler won't schedule any more attempts but we still report the
 	 * processor as enqueued.
 	 *
-	 * @return void
+	 * @since 9.1.0
 	 */
 	private function remove_or_retry_failed_processors(): void {
 		if ( as_has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
