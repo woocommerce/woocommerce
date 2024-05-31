@@ -108,6 +108,10 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product2->set_props( $default_props );
 		$product3->set_props( $default_props );
 
+		$product1->is_rest_request = true;
+		$product2->is_rest_request = true;
+		$product3->is_rest_request = true;
+
 		$product1->save();
 		$product2->save();
 		$product3->save();

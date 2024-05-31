@@ -166,7 +166,17 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 				return $object;
 			}
 
-			$object->save();
+			/**
+			 * Setting a migic property to indicate that this is a REST request.
+			 * We are doing this to ensure that unique SKU validation
+			 * is only triggered for REST requests where we are handling the exception.
+			 */
+			$object->is_rest_request = true;
+			try {
+				$object->save();
+			} catch ( Exception $e ) {
+				return new WP_Error( "woocommerce_rest_{$this->post_type}_not_created", $e->getMessage(), array( 'status' => 400 ) );
+			}
 
 			return $this->get_object( $object->get_id() );
 		} catch ( WC_Data_Exception $e ) {
@@ -188,11 +198,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
-		try {
-			$object = $this->save_object( $request, true );
-		} catch ( Exception $e ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_not_created", $e->getMessage(), array( 'status' => 400 ) );
-		}
+		$object = $this->save_object( $request, true );
 
 		if ( is_wp_error( $object ) ) {
 			return $object;

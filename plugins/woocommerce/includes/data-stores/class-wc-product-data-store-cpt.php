@@ -123,7 +123,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			SELECT %d, %s FROM $wpdb->options
 			WHERE NOT EXISTS (
 				SELECT * FROM $wpdb->wc_product_meta_lookup WHERE sku = %s LIMIT 1
-			) LIMIT 1 FOR UPDATE;",
+			) LIMIT 1;",
 			$product_id,
 			$sku,
 			$sku
@@ -183,7 +183,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			 * because of concurrent requests, then we should not proceed
 			 * Delete the product and throw an exception.
 			 */
-			if ( ! empty( $sku ) && ! $this->obtain_lock_on_sku_for_concurrent_requests( $product ) ) {
+			if ( ! empty( $sku ) && ! $this->obtain_lock_on_sku_for_concurrent_requests( $product ) && $product->is_rest_request ) {
 				$product->delete( true );
 				// translators: 1: SKU, 2: Product Id.
 				throw new Exception( esc_html( sprintf( __( 'The SKU (%1$s) you are trying to insert with Product Id (%2$s) is already under processing', 'woocommerce' ), $sku, $id ) ) );
