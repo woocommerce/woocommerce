@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Tweak the paths that should trigger e2e tests.
