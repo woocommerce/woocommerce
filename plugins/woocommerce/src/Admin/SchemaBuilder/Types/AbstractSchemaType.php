@@ -5,11 +5,18 @@ namespace Automattic\WooCommerce\Admin\SchemaBuilder\Types;
 abstract class AbstractSchemaType {
 
     /**
+     * Format.
+     *
+     * @var string|null
+     */
+    protected $format = null;
+
+    /**
      * Description.
      *
      * @var string|null
      */
-    private $description = null;
+    protected $description = null;
 
     /**
      * Schema type.
@@ -33,10 +40,19 @@ abstract class AbstractSchemaType {
      * Get the JSON.
      */
     public function get_json() {
-        return array(
+        $json = array(
             'type'        => $this->get_type(),
-            'description' => $this->description,
         );
+
+        if ( $this->description ) {
+            $json['description'] = $this->description;
+        }
+
+        if ( $this->format ) {
+            $json['format'] = $this->format;
+        }
+
+        return $json;
     }
 
 }
