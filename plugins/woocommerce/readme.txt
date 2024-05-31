@@ -230,6 +230,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Use the default ordering of states in the Checkout block [#46656](https://github.com/woocommerce/woocommerce/pull/46656)
 * Fix - [CYS]: Fix event name when starting the no-AI flow. [#47181](https://github.com/woocommerce/woocommerce/pull/47181)
 * Fix - [CYS] Fix bug making the AI flow fail on the same prompt. [#46872](https://github.com/woocommerce/woocommerce/pull/46872)
+* Add - Show notice for expiring subscriptions [#47004](https://github.com/woocommerce/woocommerce/pull/47004)
 * Add - Add custom fonts via wp_theme_json_data_theme filter for coming soon pages [#47417](https://github.com/woocommerce/woocommerce/pull/47417)
 * Add - Added phone number field to Shipping Address form under My Account [#47062](https://github.com/woocommerce/woocommerce/pull/47062)
 * Add - Added the `wc_product_pre_has_unique_sku` filter hook to allow SKU uniqueness to be determined externally [#46763](https://github.com/woocommerce/woocommerce/pull/46763)
