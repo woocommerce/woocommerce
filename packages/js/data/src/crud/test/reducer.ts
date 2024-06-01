@@ -1,13 +1,13 @@
 /**
  * Internal dependencies
  */
-import { Actions } from '../actions';
-import { createReducer, ResourceState } from '../reducer';
+import { createReducer, type ResourceState } from '../reducer';
 import { CRUD_ACTIONS } from '../crud-actions';
 import { getResourceName, getTotalCountResourceName } from '../../utils';
 import { getRequestIdentifier } from '../utils';
-import { Item, ItemQuery } from '../types';
 import TYPES from '../action-types';
+import type { Item, ItemQuery } from '../types';
+import type { Actions } from '../actions';
 
 const defaultState: ResourceState = {
 	items: {},
