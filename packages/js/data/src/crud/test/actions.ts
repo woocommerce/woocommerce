@@ -8,7 +8,7 @@ const selectors = createDispatchActions( {
 	namespace: '/products',
 } );
 
-describe( 'crud selectors', () => {
+describe( 'crud actions', () => {
 	it( 'should return methods for the default actions', () => {
 		expect( Object.keys( selectors ).length ).toEqual( 3 );
 		expect( selectors ).toHaveProperty( 'createProduct' );
