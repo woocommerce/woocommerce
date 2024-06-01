@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: check if the array key 'class' exists before printing it.
+
+
