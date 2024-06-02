@@ -329,8 +329,8 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 		return Types::ensure_instance_of(
 			$refund,
 			WC_Data::class,
-			function () {
-				return new WP_Error(
+			function ( $thing ) {
+				return is_wp_error( $thing ) ?? new WP_Error(
 					'woocommerce_rest_cannot_verify_refund_created',
 					__( 'An unexpected error occurred while generating the refund.', 'woocommerce' )
 				);
