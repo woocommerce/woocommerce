@@ -45,6 +45,12 @@ export type CrudCreateItemActionOptions = {
 	optimisticQueryUpdate?: ItemQuery;
 	optimisticUrlParameters?: IdType[];
 	optimisticPropagation?: boolean;
+
+	/*
+	 * This is a temporary ID that is used to identify the item in the store
+	 * before the actual ID is known. This is used for optimistic updates.
+	 */
+	tempId?: IdType;
 };
 
 export type CrudActionOptions = {
