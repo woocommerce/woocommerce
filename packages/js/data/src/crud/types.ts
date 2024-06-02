@@ -41,6 +41,12 @@ type WithRequiredProperty< Type, Key extends keyof Type > = Type & {
 	[ Property in Key ]-?: Type[ Property ];
 };
 
+export type CrudCreateItemActionOptions = {
+	optimisticQueryUpdate?: ItemQuery;
+	optimisticUrlParameters?: IdType[];
+	optimisticPropagation?: boolean;
+};
+
 export type CrudActionOptions = {
 	optimisticQueryUpdate?: ItemQuery;
 	optimisticUrlParameters?: IdType[];
@@ -49,7 +55,7 @@ export type CrudActionOptions = {
 export type CreateAction< ResourceName extends string, ItemType > = {
 	[ Property in `create${ Capitalize< ResourceName > }` ]: (
 		query: Partial< ItemType >,
-		options?: CrudActionOptions
+		options?: CrudCreateItemActionOptions
 	) => Generator< unknown, ItemType >;
 };
 
