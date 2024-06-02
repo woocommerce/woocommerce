@@ -4,7 +4,7 @@
 import { createReducer, type ResourceState } from '../reducer';
 import { CRUD_ACTIONS } from '../crud-actions';
 import { getResourceName, getTotalCountResourceName } from '../../utils';
-import { getRequestIdentifier } from '../utils';
+import { generateTemporaryId, getRequestIdentifier } from '../utils';
 import TYPES from '../action-types';
 import type { Item, ItemQuery } from '../types';
 import type { Actions } from '../actions';
@@ -311,6 +311,120 @@ describe( 'crud reducer', () => {
 		expect( state.data[ 2 ].title ).toEqual( initialState.data[ 2 ].title );
 		expect( state.data[ 2 ].name ).toEqual( item.name );
 		expect( state.requesting[ requestId ] ).toEqual( false );
+	} );
+
+	describe( 'should handle CREATE_ITEM_REQUEST', () => {
+		it( 'with empty previous state', () => {
+			const query = {
+				name: 'Zuri',
+				kind: 'dog',
+				age: 3,
+			};
+
+			const state = reducer( defaultState, {
+				type: TYPES.CREATE_ITEM_REQUEST,
+				query,
+				options: {},
+			} );
+
+			const resourceName = getRequestIdentifier(
+				CRUD_ACTIONS.CREATE_ITEM,
+				query
+			);
+
+			expect( state.requesting[ resourceName ] ).toEqual( true );
+		} );
+
+		it( 'with empty previous state, and optimistic propagation', () => {
+			const query_zuri = {
+				name: 'Zuri',
+				kind: 'dog',
+				age: 3,
+			};
+			const tempId_zuri = generateTemporaryId();
+
+			const query_shishi = {
+				name: 'Shishi',
+				kind: 'cat',
+				age: 8,
+			};
+			const tempId_shishi = generateTemporaryId();
+
+			const options = {
+				optimisticQueryUpdate: { order_by: 'name' },
+			};
+
+			const state_0 = reducer( defaultState, {
+				type: TYPES.CREATE_ITEM_REQUEST,
+				query: query_zuri,
+				options: {
+					...options,
+					optimisticPropagation: true,
+					tempId: tempId_zuri,
+				},
+			} );
+
+			const state_last = reducer( state_0, {
+				type: TYPES.CREATE_ITEM_REQUEST,
+				query: query_shishi,
+				options: {
+					...options,
+					optimisticPropagation: true,
+					tempId: tempId_shishi,
+				},
+			} );
+
+			const creatingQueryId_zuri = getRequestIdentifier(
+				CRUD_ACTIONS.CREATE_ITEM,
+				query_zuri
+			);
+
+			const creatingQueryId_shishi = getRequestIdentifier(
+				CRUD_ACTIONS.CREATE_ITEM,
+				query_shishi
+			);
+
+			// Check it's performing the first request to create the item
+			expect( state_last.requesting[ creatingQueryId_zuri ] ).toEqual(
+				true
+			);
+
+			// Chec it's not performing the second request to create the item
+			expect( state_last.requesting[ creatingQueryId_shishi ] ).toEqual(
+				true
+			);
+
+			// Check the temporary items are in the data
+			expect( state_last.data[ tempId_zuri ] ).toEqual( {
+				id: tempId_zuri,
+				name: 'Zuri',
+				kind: 'dog',
+				age: 3,
+			} );
+
+			expect( state_last.data[ tempId_shishi ] ).toEqual( {
+				id: tempId_shishi,
+				name: 'Shishi',
+				kind: 'cat',
+				age: 8,
+			} );
+
+			// Check the temporary item is in the items list
+			const gettingQueryId = getRequestIdentifier(
+				CRUD_ACTIONS.GET_ITEMS,
+				options.optimisticQueryUpdate
+			);
+
+			expect( state_last.items[ gettingQueryId ].data ).toContain(
+				tempId_zuri
+			);
+
+			expect( state_last.items[ gettingQueryId ].data ).toContain(
+				tempId_shishi
+			);
+
+			expect( state_last.items[ gettingQueryId ].data ).toHaveLength( 2 );
+		} );
 	} );
 
 	describe( 'should handle CREATE_ITEM_SUCCESS', () => {

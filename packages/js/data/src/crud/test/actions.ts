@@ -117,19 +117,21 @@ describe( 'crud actions', () => {
 			} );
 
 			// Step through the generator request action
-			const { value: requestAction } = generator.next();
+			const { value: requestAction } = generator.next() as any;
 
-			expect( requestAction ).toEqual( {
-				type: TYPES.CREATE_ITEM_REQUEST,
-				query: {
-					name: 'Zuri',
-					kind: 'dog',
-					age: 3,
-				},
-				options: {
-					optimisticPropagation: true,
-				},
+			expect( requestAction.type ).toEqual( TYPES.CREATE_ITEM_REQUEST );
+			expect( requestAction.query ).toEqual( {
+				name: 'Zuri',
+				kind: 'dog',
+				age: 3,
 			} );
+
+			expect( requestAction.options.optimisticPropagation ).toEqual(
+				true
+			);
+
+			// Test the options.tmpId has a temporary id shape, starting with 'temp-'
+			expect( requestAction.options.tempId ).toMatch( /^temp-/ );
 		} );
 	} );
 } );
