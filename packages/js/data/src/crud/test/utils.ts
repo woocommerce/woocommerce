@@ -15,6 +15,7 @@ import {
 	maybeReplaceIdQuery,
 	isValidIdQuery,
 	parseId,
+	generateTemporaryId,
 } from '../utils';
 import type { Item } from '../types';
 
@@ -332,6 +333,19 @@ describe( 'utils', () => {
 			} );
 
 			expect( ids ).toEqual( [ '200/10/1', '200/10/2' ] );
+		} );
+	} );
+
+	describe.only( 'generateTemporaryId', () => {
+		it( 'should generate a temporary ID with the correct format', () => {
+			const tempId = generateTemporaryId();
+			expect( tempId ).toMatch( /^temp-[a-z0-9]{10}$/ );
+		} );
+
+		it( 'should generate unique IDs on subsequent calls', () => {
+			const tempId1 = generateTemporaryId();
+			const tempId2 = generateTemporaryId();
+			expect( tempId1 ).not.toEqual( tempId2 );
 		} );
 	} );
 } );
