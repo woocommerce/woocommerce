@@ -6,7 +6,13 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import { cleanQuery, getUrlParameters, getRestPath, parseId } from './utils';
+import {
+	cleanQuery,
+	getUrlParameters,
+	getRestPath,
+	parseId,
+	generateTemporaryId,
+} from './utils';
 import CRUD_ACTIONS from './crud-actions';
 import TYPES from './action-types';
 import type {
@@ -39,11 +45,23 @@ export function createItemRequest(
 	query: Partial< ItemQuery >,
 	options?: CrudCreateItemActionOptions
 ) {
-	return {
+	const action = {
 		type: TYPES.CREATE_ITEM_REQUEST as const,
 		query,
 		options,
 	};
+
+	if ( options?.optimisticPropagation ) {
+		return {
+			...action,
+			options: {
+				...options,
+				tempId: generateTemporaryId(),
+			},
+		};
+	}
+
+	return action;
 }
 
 export function createItemSuccess(
