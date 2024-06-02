@@ -9,7 +9,16 @@ import { apiFetch } from '@wordpress/data-controls';
 import { cleanQuery, getUrlParameters, getRestPath, parseId } from './utils';
 import CRUD_ACTIONS from './crud-actions';
 import TYPES from './action-types';
-import { IdType, IdQuery, Item, ItemQuery, CrudActionOptions } from './types';
+import type {
+	IdType,
+	IdQuery,
+	Item,
+	ItemQuery,
+	CrudActionOptions,
+	CreateAction,
+	DeleteAction,
+	UpdateAction,
+} from './types';
 
 type ResolverOptions = {
 	resourceName: string;
@@ -174,7 +183,7 @@ export function updateItemSuccess(
 	};
 }
 
-export const createDispatchActions = ( {
+export const createDispatchActions = < ResourceName extends string >( {
 	namespace,
 	resourceName,
 }: ResolverOptions ) => {
@@ -254,11 +263,15 @@ export const createDispatchActions = ( {
 		}
 	};
 
-	return {
+	const actions = {
 		[ `create${ resourceName }` ]: createItem,
 		[ `delete${ resourceName }` ]: deleteItem,
 		[ `update${ resourceName }` ]: updateItem,
-	};
+	} as CreateAction< ResourceName, Item > &
+		DeleteAction< ResourceName, Item > &
+		UpdateAction< ResourceName, Item >;
+
+	return actions;
 };
 
 export type Actions = ReturnType<
