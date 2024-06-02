@@ -46,6 +46,26 @@ export type CrudActionOptions = {
 	optimisticUrlParameters?: IdType[];
 };
 
+export type CreateAction< ResourceName extends string, ItemType > = {
+	[ Property in `create${ Capitalize< ResourceName > }` ]: (
+		query: Partial< ItemType >,
+		options?: CrudActionOptions
+	) => Generator< unknown, ItemType >;
+};
+
+export type DeleteAction< ResourceName extends string, ItemType > = {
+	[ Property in `delete${ Capitalize< ResourceName > }` ]: (
+		idQuery: IdQuery,
+		force?: boolean
+	) => Generator< unknown, ItemType >;
+};
+
+export type UpdateAction< ResourceName extends string, ItemType > = {
+	[ Property in `update${ Capitalize< ResourceName > }` ]: (
+		query: Partial< ItemType >
+	) => Generator< unknown, ItemType >;
+};
+
 export type CrudActions<
 	ResourceName,
 	ItemType,
