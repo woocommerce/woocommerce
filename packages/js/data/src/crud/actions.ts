@@ -18,6 +18,7 @@ import type {
 	CreateAction,
 	DeleteAction,
 	UpdateAction,
+	CrudCreateItemActionOptions,
 } from './types';
 
 type ResolverOptions = {
@@ -34,10 +35,14 @@ export function createItemError( query: Partial< ItemQuery >, error: unknown ) {
 	};
 }
 
-export function createItemRequest( query: Partial< ItemQuery > ) {
+export function createItemRequest(
+	query: Partial< ItemQuery >,
+	options?: CrudCreateItemActionOptions
+) {
 	return {
 		type: TYPES.CREATE_ITEM_REQUEST as const,
 		query,
+		options,
 	};
 }
 
@@ -191,7 +196,7 @@ export const createDispatchActions = < ResourceName extends string >( {
 		query: Partial< ItemQuery >,
 		options: CrudActionOptions
 	) {
-		yield createItemRequest( query );
+		yield createItemRequest( query, options );
 		const urlParameters = getUrlParameters( namespace, query );
 
 		try {
