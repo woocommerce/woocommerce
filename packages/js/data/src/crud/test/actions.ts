@@ -49,7 +49,7 @@ describe( 'crud actions', () => {
 			const dispatch = jest.fn();
 
 			// Call the createMyThing action
-			const generator = createMyThing( query, {} );
+			const generator = createMyThing( query );
 
 			// Step through the generator request action
 			const { value: requestAction } = generator.next();
@@ -84,7 +84,6 @@ describe( 'crud actions', () => {
 				key: 1,
 				item: expectedItem,
 				query,
-				options: {},
 			} );
 
 			// Dispatch the actions
@@ -102,7 +101,34 @@ describe( 'crud actions', () => {
 				key: 1,
 				item: expectedItem,
 				query,
-				options: {},
+			} );
+		} );
+
+		it( 'with optimistc propagation', async () => {
+			const query = {
+				name: 'Zuri',
+				kind: 'dog',
+				age: 3,
+			};
+
+			// Call the createMyThing action
+			const generator = createMyThing( query, {
+				optimisticPropagation: true,
+			} );
+
+			// Step through the generator request action
+			const { value: requestAction } = generator.next();
+
+			expect( requestAction ).toEqual( {
+				type: TYPES.CREATE_ITEM_REQUEST,
+				query: {
+					name: 'Zuri',
+					kind: 'dog',
+					age: 3,
+				},
+				options: {
+					optimisticPropagation: true,
+				},
 			} );
 		} );
 	} );
