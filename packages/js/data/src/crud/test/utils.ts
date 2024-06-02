@@ -336,7 +336,7 @@ describe( 'utils', () => {
 		} );
 	} );
 
-	describe.only( 'generateTemporaryId', () => {
+	describe( 'generateTemporaryId', () => {
 		it( 'should generate a temporary ID with the correct format', () => {
 			const tempId = generateTemporaryId();
 			expect( tempId ).toMatch( /^temp-[a-z0-9]{10}$/ );
