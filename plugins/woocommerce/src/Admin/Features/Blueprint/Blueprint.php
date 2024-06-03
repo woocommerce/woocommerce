@@ -15,10 +15,11 @@ class Blueprint {
 
 		$schema = json_decode( file_get_contents( $this->schemaPath ) );
 		foreach ( $schema->steps as $stepSchema ) {
-			$stepProcessor = __NAMESPACE__ . '\\StepProcessors\\' . ucfirst( $stepSchema->step ) . 'Processor';
+			$stepProcessor = __NAMESPACE__ . '\\StepProcessors\\' . ucfirst( $stepSchema->step );
 			if ( class_exists( $stepProcessor ) ) {
 				/**
 				 * @var $stepProcessor StepProcessor
+				 * @todo Use container.
 				 */
 				$stepProcessor = new $stepProcessor();
 				$stepProcessor->process($stepSchema);

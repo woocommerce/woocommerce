@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessors;
 use Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessor;
 use WC_Tax;
 
-class ConfigureTaxProcessor implements StepProcessor {
+class ConfigureTax implements StepProcessor {
 	public function process($schema) {
 		foreach($schema->rates as $rate) {
 			$tax_rate = array_intersect_key(

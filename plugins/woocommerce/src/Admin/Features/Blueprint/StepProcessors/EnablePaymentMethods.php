@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessors;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessor;
 
-class EnablePaymentMethodsProcessor implements StepProcessor {
+class EnablePaymentMethods implements StepProcessor {
 	public function process($schema) {
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 		foreach ($schema->gateway_ids as $gateway_id) {

@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessors;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessor;
 
-class ImportProductsProcessor implements StepProcessor {
+class ImportProducts implements StepProcessor {
 	// Do we really need it? If so, make it reusuable.
 	private function cleanup() {
 		global $wpdb;
