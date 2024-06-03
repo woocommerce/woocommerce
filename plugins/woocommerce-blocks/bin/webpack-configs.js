@@ -1078,8 +1078,8 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 						enforce: true,
 					},
 					base: {
-						// A refined match across blocks and settings that are shared between cart and checkout that produces the smallest possible bundle.
-						test: /(assets[\\/](js[\\/](icons|base|data|utils|blocks|settings[\\/](cart-checkout-shared|[^\\/]*?(?!.*-blocks)[^\\/]*))|packages[\\/]components))/,
+						// A refined include blocks and settings that are shared between cart and checkout that produces the smallest possible bundle.
+						test: /assets[\\/]js[\\/](settings|previews|base|data|utils|blocks[\\/]cart-checkout-shared|icons)|packages[\\/](checkout|components)|atomic[\\/]utils/,
 						name: 'cart-checkout-base',
 						chunks: 'all',
 						enforce: true,
