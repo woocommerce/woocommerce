@@ -61,8 +61,7 @@ jobs:
                       let githubEvent = ${{ toJson( github.event_name ) }};
                     
                       if (! ['pull_request', 'push'].includes( githubEvent )) {
-                        import { setOutput } from '@actions/core';
-                        setOutput( 'build-plugin', true );
+                        core.setOutput( 'build-plugin', true );
                       }
                     
                       let trigger = ${{ toJson( inputs.trigger ) }};

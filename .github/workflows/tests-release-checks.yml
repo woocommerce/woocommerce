@@ -4,7 +4,7 @@ on:
     tags:
       - '*'
   workflow_dispatch:
-  pull_request: 
+  pull_request:
     branches:
       - 'e2e/migrate-release-checks-to-ci'
 
