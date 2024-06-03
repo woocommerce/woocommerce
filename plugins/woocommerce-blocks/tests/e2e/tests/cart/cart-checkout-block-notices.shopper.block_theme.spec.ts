@@ -1,14 +1,16 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
 import {
-	cli,
+	expect,
+	test as base,
+	wpCLI,
 	BLOCK_THEME_SLUG,
 	BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG,
 	BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG,
 	BLOCK_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG,
 } from '@woocommerce/e2e-utils';
+
 /**
  * Internal dependencies
  */
@@ -25,12 +27,14 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Notice Templates', () => {
-	test.beforeEach( async ( { wpCliUtils, frontendUtils } ) => {
-		const cartShortcodeID = await wpCliUtils.getPostIDByTitle(
-			'Cart Shortcode'
+	test.beforeEach( async ( { frontendUtils } ) => {
+		const cliOutput = await wpCLI(
+			'post list --title="Cart Shortcode" --post_type=page --field=ID'
 		);
-		await cli(
-			`npm run wp-env run tests-cli -- wp option update woocommerce_cart_page_id ${ cartShortcodeID }`
+		const cartShortcodeID = cliOutput.stdout.match( /\d+/g )?.pop();
+
+		await wpCLI(
+			`option update woocommerce_cart_page_id ${ cartShortcodeID }`
 		);
 
 		await frontendUtils.goToShop();

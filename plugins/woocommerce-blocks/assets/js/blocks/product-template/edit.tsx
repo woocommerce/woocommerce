@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { memo, useMemo, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
@@ -27,6 +27,7 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
  */
 import { useGetLocation, useProductCollectionQueryContext } from './utils';
 import './editor.scss';
+import { getDefaultStockStatuses } from '../product-collection/constants';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
 
@@ -251,6 +252,14 @@ const ProductTemplateEdit = (
 					location,
 					productCollectionQueryContext,
 					previewState: __privateProductCollectionPreviewState,
+					/**
+					 * Use value of "Out of stock visibility" setting to determine
+					 * which stock statuses to include if inherit query
+					 * from template is true.
+					 */
+					...( inherit && {
+						woocommerceStockStatus: getDefaultStockStatuses(),
+					} ),
 				} ),
 				blocks: getBlocks( clientId ),
 			};
@@ -294,7 +303,7 @@ const ProductTemplateEdit = (
 	}
 
 	const blockProps = useBlockProps( {
-		className: classnames(
+		className: clsx(
 			__unstableLayoutClassNames,
 			'wc-block-product-template',
 			customClassName

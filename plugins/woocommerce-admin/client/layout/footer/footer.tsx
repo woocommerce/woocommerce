@@ -3,7 +3,7 @@
  */
 import { WC_FOOTER_SLOT_NAME, WooFooterItem } from '@woocommerce/admin-layout';
 import { useSlot } from '@woocommerce/experimental';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -21,7 +21,7 @@ export const Footer: React.FC = () => {
 	}
 	return (
 		<div
-			className={ classNames( 'woocommerce-layout__footer', {
+			className={ clsx( 'woocommerce-layout__footer', {
 				'at-bottom': atBottom,
 			} ) }
 		>

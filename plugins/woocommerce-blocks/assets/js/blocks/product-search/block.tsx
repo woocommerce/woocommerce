@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { HOME_URL } from '@woocommerce/settings';
 
 /**
@@ -37,7 +37,7 @@ interface ProductSearchBlockProps {
 const ProductSearchBlock = ( {
 	attributes: { label, placeholder, formId, className, hasLabel, align },
 }: ProductSearchBlockProps ) => {
-	const classes = classnames(
+	const classes = clsx(
 		'wc-block-product-search',
 		align ? 'align' + align : '',
 		className

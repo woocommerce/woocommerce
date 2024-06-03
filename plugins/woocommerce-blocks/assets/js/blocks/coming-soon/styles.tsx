@@ -1,17 +1,5 @@
 export const generateStyles = ( color = '#bea0f2' ) => {
-	return `@font-face {
-        font-family: 'Inter';
-        src: url( <?php echo esc_url( WC()->plugin_url() . '/assets/fonts/Inter-VariableFont_slnt,wght.woff2' ); ?>) format('woff2');
-        font-weight: 300 900;
-        font-style: normal;
-    }
-
-    @font-face {
-        font-family: 'Cardo';
-        src: url( <?php echo esc_url( WC()->plugin_url() . '/assets/fonts/cardo_normal_400.woff2' ); ?>) format('woff2');
-        font-weight: 400;
-        font-style: normal;
-    }
+	return `
     /* Reset */
     h1, p, a {
         margin: 0;

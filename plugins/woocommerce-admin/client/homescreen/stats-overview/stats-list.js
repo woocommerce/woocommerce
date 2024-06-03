@@ -4,7 +4,7 @@
 import { useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { withSelect } from '@wordpress/data';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	SummaryNumber,
 	SummaryNumberPlaceholder,
@@ -40,7 +40,7 @@ export const StatsList = ( {
 
 	return (
 		<ul
-			className={ classnames( 'woocommerce-stats-overview__stats', {
+			className={ clsx( 'woocommerce-stats-overview__stats', {
 				'is-even': stats.length % 2 === 0,
 			} ) }
 		>

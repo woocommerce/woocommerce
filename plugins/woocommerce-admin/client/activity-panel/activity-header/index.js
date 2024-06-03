@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { Text } from '@woocommerce/experimental';
@@ -15,7 +15,7 @@ import './style.scss';
 class ActivityHeader extends Component {
 	render() {
 		const { className, menu, subtitle, title, unreadMessages } = this.props;
-		const cardClassName = classnames(
+		const cardClassName = clsx(
 			{
 				'woocommerce-layout__inbox-panel-header': subtitle,
 				'woocommerce-layout__activity-panel-header': ! subtitle,

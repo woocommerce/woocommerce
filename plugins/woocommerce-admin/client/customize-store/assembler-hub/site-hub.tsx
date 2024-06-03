@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useSelect } from '@wordpress/data';
 import {
 	// @ts-ignore No types for this exist yet.
@@ -23,6 +23,8 @@ import { forwardRef } from '@wordpress/element';
 import SiteIcon from '@wordpress/edit-site/build-module/components/site-icon';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
+import WordPressLogo from '~/lib/wordpress-logo';
+
 /**
  * Internal dependencies
  */
@@ -58,10 +60,7 @@ export const SiteHub = forwardRef(
 			<motion.div
 				ref={ ref }
 				{ ...restProps }
-				className={ classnames(
-					'edit-site-site-hub',
-					restProps.className
-				) }
+				className={ clsx( 'edit-site-site-hub', restProps.className ) }
 				initial={ false }
 				transition={ {
 					type: 'tween',
@@ -80,7 +79,7 @@ export const SiteHub = forwardRef(
 						spacing="0"
 					>
 						<div
-							className={ classnames(
+							className={ clsx(
 								'edit-site-site-hub__view-mode-toggle-container',
 								{
 									'has-transparent-background': isTransparent,
@@ -95,7 +94,14 @@ export const SiteHub = forwardRef(
 								) }
 								type="wp-admin"
 							>
-								<SiteIcon className="edit-site-layout__view-mode-toggle-icon" />
+								{ isEntrepreneurFlow() ? (
+									<WordPressLogo
+										size={ 24 }
+										className="woocommerce-cys-wordpress-header-logo"
+									/>
+								) : (
+									<SiteIcon className="edit-site-layout__view-mode-toggle-icon" />
+								) }
 							</Link>
 						</div>
 
@@ -109,7 +115,7 @@ export const SiteHub = forwardRef(
 									exit={ {
 										opacity: 0,
 									} }
-									className={ classnames(
+									className={ clsx(
 										'edit-site-site-hub__site-title',
 										{ 'is-transparent': isTransparent }
 									) }
