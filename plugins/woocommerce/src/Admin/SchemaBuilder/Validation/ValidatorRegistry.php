@@ -1,33 +1,33 @@
 <?php
 /**
- * WooCommerce Validation Registration
+ * WooCommerce Validator Registration
  */
 
 namespace Automattic\WooCommerce\Admin\SchemaBuilder\Validation;
 
 /**
- * Validation registry.
+ * Validator registry.
  */
-class ValidationRegistry {
+class ValidatorRegistry {
 
 	/**
 	 * Singleton instance.
 	 *
-	 * @var BlockRegistry
+	 * @var ValidatorRegistry
 	 */
 	private static $instance = null;
 
 	/**
-	 * Registered validation callbacks.
+	 * Registered validator callbacks.
 	 *
 	 * @var array
 	 */
-	private $validation_callbacks = array();
+	private $validator_callbacks = array();
 
 	/**
 	 * Get the singleton instance.
 	 */
-	public static function get_instance(): ValidationRegistry {
+	public static function get_instance(): ValidatorRegistry {
 		if ( ! self::$instance ) {
 			self::$instance = new self();
 		}
@@ -36,29 +36,29 @@ class ValidationRegistry {
 	}
 
 	/**
-	 * Register a validation callback.
+	 * Register a validator callback.
 	 *
-	 * @param string         $name Validation name.
+	 * @param string         $name Validator name.
 	 * @param callable|array $callback Callback function.
 	 */
 	public function register( $name, $callback ) {
 		if ( ! is_callable( $callback ) ) {
 			throw new InvalidCallbackException();
 		}
-		$this->validation_callbacks[ $name ] = $callback;
+		$this->validator_callbacks[ $name ] = $callback;
 	}
 
 	/**
-	 * Get a validation callback.
+	 * Get a validator callback.
 	 *
-	 * @param string $name Validation name.
+	 * @param string $name Validator name.
 	 * @return callable|array
 	 */
 	public function get( $name ) {
-		if ( ! isset( $this->validation_callbacks[ $name ] ) ) {
-			throw new ValidationNotFoundException();
+		if ( ! isset( $this->validator_callbacks[ $name ] ) ) {
+			throw new ValidatorNotFoundException();
 		}
-		return $this->validation_callbacks[ $name ];
+		return $this->validator_callbacks[ $name ];
 	}
 
 }
