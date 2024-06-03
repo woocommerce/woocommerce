@@ -9,6 +9,7 @@
 import { BlockEditorProvider } from '@wordpress/block-editor';
 import { memo } from '@wordpress/element';
 import { BlockInstance } from '@wordpress/blocks';
+
 /**
  * Internal dependencies
  */
@@ -17,6 +18,8 @@ import {
 	ScaledBlockPreviewProps,
 } from './auto-block-preview';
 import { ChangeHandler } from './hooks/use-editor-blocks';
+import { Toolbar } from './toolbar/toolbar';
+import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
 
 export const BlockPreview = ( {
 	blocks,
@@ -33,15 +36,18 @@ export const BlockPreview = ( {
 	const renderedBlocks = Array.isArray( blocks ) ? blocks : [ blocks ];
 
 	return (
-		<BlockEditorProvider
-			value={ renderedBlocks }
-			settings={ settings }
-			// We need to set onChange for logo to work, but we don't want to trigger the onChange callback when highlighting blocks in the preview. It would persist the highlighted block and cause the opacity to be applied to block permanently.
-			onChange={ onChange }
-			useSubRegistry={ useSubRegistry }
-		>
-			<AutoHeightBlockPreview settings={ settings } { ...props } />
-		</BlockEditorProvider>
+		<>
+			<BlockEditorProvider
+				value={ renderedBlocks }
+				settings={ settings }
+				// We need to set onChange for logo to work, but we don't want to trigger the onChange callback when highlighting blocks in the preview. It would persist the highlighted block and cause the opacity to be applied to block permanently.
+				onChange={ onChange }
+				useSubRegistry={ useSubRegistry }
+			>
+				{ isFullComposabilityFeatureAndAPIAvailable() && <Toolbar /> }
+				<AutoHeightBlockPreview settings={ settings } { ...props } />
+			</BlockEditorProvider>
+		</>
 	);
 };
 

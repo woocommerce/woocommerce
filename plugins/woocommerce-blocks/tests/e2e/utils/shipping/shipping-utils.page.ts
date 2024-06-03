@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { Admin } from '@wordpress/e2e-test-utils-playwright';
+import { Admin } from '@woocommerce/e2e-utils';
 
 export class ShippingUtils {
 	private page: Page;
