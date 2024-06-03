@@ -2,32 +2,44 @@
  * External dependencies
  */
 
-import { useSelect } from '@wordpress/data';
 import { BlockInstance } from '@wordpress/blocks';
 import { ToolbarGroup, Toolbar as WPToolbar } from '@wordpress/components';
-import { useMemo } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { useEffect, useMemo, useState } from '@wordpress/element';
+
 import {
 	BlockMover,
 	BlockPopover,
 	store as blockEditorStore,
-	// @ts-expect-error No types for this exist yet.
+	// @ts-expect-error missing type
 } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
-import './style.scss';
 import Shuffle from './shuffle';
+import './style.scss';
+
+const isHomepageUrl = ( url: string ) => {
+	const path = new URLSearchParams( url ).get( 'path' );
+
+	return path === '/customize-store/assembler-hub/homepage';
+};
 
 export const Toolbar = () => {
+	const [ isHomepageSidebarOpen, setIsHomepageSidebarOpen ] =
+		useState( false );
+
 	const {
 		currentBlock,
 		nextBlock,
 		previousBlock,
+		allBlocks,
 	}: {
 		currentBlock: BlockInstance | undefined;
 		nextBlock: BlockInstance | undefined;
 		previousBlock: BlockInstance | undefined;
+		allBlocks: BlockInstance[];
 	} = useSelect( ( select ) => {
 		const selectedBlockId =
 			// @ts-expect-error missing type
@@ -54,10 +66,50 @@ export const Toolbar = () => {
 			// @ts-expect-error missing type
 		).getBlocksByClientId( [ previousBlockClientId ] );
 
+		const blocks = select(
+			blockEditorStore
+			// @ts-expect-error missing type
+		).getBlocks();
+
 		return {
 			currentBlock: current,
 			nextBlock: next,
 			previousBlock: previous,
+			allBlocks: blocks,
+		};
+	}, [] );
+
+	const firstBlock = useMemo( () => {
+		return allBlocks.find(
+			( block: BlockInstance ) => block.name !== 'core/template-part'
+		);
+	}, [ allBlocks ] );
+
+	useEffect( () => {
+		const initialUrl = window.parent.location.href;
+
+		setIsHomepageSidebarOpen( isHomepageUrl( initialUrl ) );
+
+		const navigateHandler = ( event: {
+			destination: {
+				url: string;
+			};
+		} ) => {
+			setIsHomepageSidebarOpen( isHomepageUrl( event.destination.url ) );
+		};
+
+		// @ts-expect-error missing type
+		window.parent.navigation.addEventListener(
+			'navigate',
+			navigateHandler
+		);
+
+		return () => {
+			// @ts-expect-error missing type
+			window.parent.navigation.removeEventListener(
+				'navigate',
+				navigateHandler
+			);
 		};
 	}, [] );
 
@@ -71,14 +123,21 @@ export const Toolbar = () => {
 			};
 		}, [ nextBlock?.name, previousBlock?.name ] );
 
+	const selectedBlockClientId =
+		currentBlock?.clientId ?? firstBlock?.clientId;
+
+	if ( ! isHomepageSidebarOpen || ! selectedBlockClientId ) {
+		return null;
+	}
+
 	return (
-		<BlockPopover clientId={ currentBlock?.clientId }>
+		<BlockPopover clientId={ selectedBlockClientId }>
 			<div className="woocommerce-customize-store-block-toolbar">
 				<WPToolbar label="Options">
 					<>
 						<ToolbarGroup>
 							<BlockMover
-								clientIds={ [ currentBlock?.clientId ] }
+								clientIds={ [ selectedBlockClientId ] }
 								isBlockMoverUpButtonDisabled={
 									isPreviousBlockTemplatePart
 								}
@@ -87,9 +146,7 @@ export const Toolbar = () => {
 								}
 							/>
 						</ToolbarGroup>
-						{ currentBlock && (
-							<Shuffle clientId={ currentBlock?.clientId } />
-						) }
+						<Shuffle clientId={ selectedBlockClientId } />
 					</>
 				</WPToolbar>
 			</div>
