@@ -226,6 +226,7 @@ const entries = {
 		wcBlocksSharedHocs: './assets/js/shared/hocs/index.js',
 		priceFormat: './packages/prices/index.js',
 		wcTypes: './assets/js/types/index.ts',
+		wcBaseUtils: './assets/js/base-utils/index.ts',
 
 		// interactivity components, exported as separate entries for now
 		'wc-interactivity-dropdown':
