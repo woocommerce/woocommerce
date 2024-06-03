@@ -48,7 +48,11 @@ describe( 'ShippingAddress', () => {
 				shippingAddress={ testShippingAddress }
 			/>
 		);
-		expect( screen.getByText( /Shipping to 94107/ ) ).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'button', {
+				name: /No delivery options available for 94107, San Francisco, CA/,
+			} )
+		).toBeInTheDocument();
 		expect(
 			screen.queryByText( /Collection from/ )
 		).not.toBeInTheDocument();
@@ -83,9 +87,9 @@ describe( 'ShippingAddress', () => {
 			/>
 		);
 		expect(
-			screen.getByText(
-				/Collection from 123 Easy Street, New York, 12345/
-			)
+			screen.getByRole( 'button', {
+				name: /Collection from 123 Easy Street, New York, 12345/,
+			} )
 		).toBeInTheDocument();
 	} );
 } );

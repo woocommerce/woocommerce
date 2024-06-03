@@ -49,9 +49,9 @@ describe( 'PickupLocation', () => {
 
 		render( <PickupLocation /> );
 		expect(
-			screen.getByText(
-				/Collection from 123 Easy Street, New York, 12345/
-			)
+			screen.getByRole( 'button', {
+				name: /Collection from 123 Easy Street, New York, 12345/,
+			} )
 		).toBeInTheDocument();
 	} );
 	it( 'renders no address if one is not set in the methods metadata', async () => {
