@@ -13,6 +13,6 @@ jobs:
     uses: ./.github/workflows/ci.yml
     with:
       trigger: 'release-checks'
-      tag: ${{ env.GITHUB_REF_NAME }}
+      tag: ${{ GITHUB_REF_NAME }}
       artifact-name: 'woocommerce.zip'
     secrets: inherit
