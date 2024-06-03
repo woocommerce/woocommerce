@@ -321,10 +321,13 @@ const registerClassicTemplateBlock = ( {
 		category: 'woocommerce',
 		apiVersion: 2,
 		keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
-		description: __(
-			'Renders classic WooCommerce PHP templates.',
-			'woocommerce'
-		),
+		description:
+			template && TEMPLATES[ template ]
+				? TEMPLATES[ template ].description
+				: __(
+						'Renders classic WooCommerce PHP templates.',
+						'woocommerce'
+				  ),
 		supports: {
 			align: [ 'wide', 'full' ],
 			html: false,

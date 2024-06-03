@@ -31,6 +31,8 @@ export type Subscription = {
 	subscription_installed: boolean;
 	subscription_available: boolean;
 	is_installable: boolean;
+	is_shared: boolean;
+	owner_email: boolean;
 };
 
 export interface SubscriptionLocal {
@@ -55,4 +57,5 @@ export interface SubscriptionShare {
 export enum StatusLevel {
 	Warning = 'warning',
 	Error = 'error',
+	Info = 'info',
 }

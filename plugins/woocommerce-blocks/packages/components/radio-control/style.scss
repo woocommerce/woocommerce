@@ -118,7 +118,8 @@
 	width: 100%;
 }
 
-.wc-block-components-radio-control__option .wc-block-components-radio-control__option-layout {
+.wc-block-components-radio-control__option
+.wc-block-components-radio-control__option-layout {
 	&::after {
 		display: none;
 	}
@@ -160,6 +161,7 @@
 		background: #fff;
 		border: 1px solid $universal-border-medium;
 		border-radius: 50%;
+		color: currentColor;
 		display: inline-block;
 		height: em(24px); // =1.5rem
 		min-height: 24px;
@@ -173,16 +175,16 @@
 		margin: inherit;
 		cursor: pointer;
 		&:checked {
-			border: 1px solid $universal-border-strong;
+			border: 1px solid currentColor;
 		}
 
 		&:focus {
-			outline: 1px solid $universal-border-strong;
+			outline: 2px solid currentColor;
 			outline-offset: 2px;
 		}
 
 		&:checked::before {
-			background: #000;
+			background: currentColor;
 			border-radius: 50%;
 			content: "";
 			display: block;
@@ -215,7 +217,8 @@
 }
 
 .theme-twentytwentyone {
-	.wc-block-components-radio-control .wc-block-components-radio-control__input {
+	.wc-block-components-radio-control
+	.wc-block-components-radio-control__input {
 		&:checked {
 			border-width: 2px;
 

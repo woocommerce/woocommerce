@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import PropTypes from 'prop-types';
 
 const ActivityPanelToggleBubble = ( {
@@ -9,12 +9,9 @@ const ActivityPanelToggleBubble = ( {
 	width = 24,
 	hasUnread = false,
 } ) => {
-	const classes = classnames(
-		'woocommerce-layout__activity-panel-toggle-bubble',
-		{
-			'has-unread': hasUnread,
-		}
-	);
+	const classes = clsx( 'woocommerce-layout__activity-panel-toggle-bubble', {
+		'has-unread': hasUnread,
+	} );
 
 	/* eslint-disable max-len */
 	return (

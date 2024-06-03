@@ -32,6 +32,28 @@ if ( ! function_exists( 'get_plugins' ) ) {
 class PluginsHelper {
 
 	/**
+	 * Indicates whether the expiration notice for subscriptions can be displayed.
+	 *
+	 * @var bool
+	 */
+	public static $can_show_expiring_subs_notice = true;
+
+	/**
+	 * The URL for the WooCommerce subscription page.
+	 */
+	const WOO_SUBSCRIPTION_PAGE_URL = 'https://woocommerce.com/my-account/my-subscriptions/';
+
+	/**
+	 * Meta key for dismissing expired subscription notices.
+	 */
+	const DISMISS_EXPIRED_SUBS_NOTICE = 'woo_subscription_expired_notice_dismiss';
+
+	/**
+	 * Meta key for dismissing expiring subscription notices
+	 */
+	const DISMISS_EXPIRING_SUBS_NOTICE = 'woo_subscription_expiring_notice_dismiss';
+
+	/**
 	 * Initialize hooks.
 	 */
 	public static function init() {
@@ -39,8 +61,11 @@ class PluginsHelper {
 		add_action( 'woocommerce_plugins_install_and_activate_async_callback', array( __CLASS__, 'install_and_activate_plugins_async_callback' ), 10, 2 );
 		add_action( 'woocommerce_plugins_activate_callback', array( __CLASS__, 'activate_plugins' ), 10, 2 );
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_connect_notice_in_plugin_list' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_expired_subscriptions_notice' ), 10 );
+		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_expiring_subscriptions_notice' ), 11 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice_in_plugins' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_subscription_notice' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_notices_in_plugins' ) );
 	}
 
 	/**
@@ -602,16 +627,321 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Enqueue scripts for connect notice in plugin list page.
+	 * Enqueue scripts for notices in plugin list page.
 	 *
 	 * @return void
 	 */
-	public static function maybe_enqueue_scripts_for_connect_notice_in_plugins() {
+	public static function maybe_enqueue_scripts_for_notices_in_plugins() {
 		if ( 'plugins' !== get_current_screen()->id ) {
 			return;
 		}
 
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-plugin-update-connect-notice' );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-enable-autorenew' );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-renew-subscription' );
 		wp_enqueue_script( 'woo-plugin-update-connect-notice' );
+		wp_enqueue_script( 'woo-enable-autorenew' );
+		wp_enqueue_script( 'woo-renew-subscription' );
+	}
+
+	/**
+	 * Show notice about to expired subscription on WC settings page.
+	 *
+	 * @return void
+	 */
+	public static function maybe_show_expired_subscriptions_notice() {
+
+		if ( ! WC_Helper::is_site_connected() ) {
+			return;
+		}
+
+		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
+			return;
+		}
+
+		$notice = self::get_expired_subscription_notice();
+
+		if ( isset( $notice['description'] ) ) {
+			echo '<div id="woo-subscription-expired-notice" class="woo-subscription-expired-notice woo-subscription-notices notice notice-error is-dismissible" data-dismissnonce="' . esc_attr( wp_create_nonce( 'dismiss_notice' ) ) . '">
+	    		<p class="widefat">' . wp_kses_post( $notice['description'] ) . '</p>
+	    	</div>';
+		}
+	}
+
+	/**
+	 * Show notice about to expiring subscription on WC settings page.
+	 *
+	 * @return void
+	 */
+	public static function maybe_show_expiring_subscriptions_notice() {
+		if ( ! WC_Helper::is_site_connected() ) {
+			return;
+		}
+
+		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
+			return;
+		}
+
+		$notice = self::get_expiring_subscription_notice();
+
+		if ( isset( $notice['description'] ) ) {
+			echo '<div id="woo-subscription-expiring-notice" class="woo-subscription-expiring-notice woo-subscription-notices notice notice-error is-dismissible" data-dismissnonce="' . esc_attr( wp_create_nonce( 'dismiss_notice' ) ) . '">
+	    		<p class="widefat">' . wp_kses_post( $notice['description'] ) . '</p>
+	    	</div>';
+		}
+	}
+
+	/**
+	 * Enqueue scripts for woo subscription notice.
+	 *
+	 * @return void
+	 */
+	public static function maybe_enqueue_scripts_for_subscription_notice() {
+		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
+			return;
+		}
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-subscriptions-notice' );
+		wp_enqueue_script( 'woo-subscriptions-notice' );
+	}
+
+	/**
+	 * Construct the subscritpion notice data based on user subscriptions data.
+	 *
+	 * @param array  $all_subs all subscription data.
+	 * @param array  $subs_to_show filtered subscriptions as condition.
+	 * @param int    $total total subscription count.
+	 * @param array  $messages message.
+	 * @param string $type type of notice, whether it is for expiring or expired subscription.
+	 * @return array notice data to return. Contains type, parsed_message and product_id.
+	 */
+	public static function get_subscriptions_notice_data( array $all_subs, array $subs_to_show, int $total, array $messages, string $type ) {
+		if ( 1 < $total ) {
+			$parsed_message = sprintf(
+				$messages['different_subscriptions'],
+				esc_attr( $total ),
+				esc_url( self::WOO_SUBSCRIPTION_PAGE_URL ),
+				esc_attr( $total ),
+			);
+
+			return array(
+				'type'           => 'different_subscriptions',
+				'parsed_message' => $parsed_message,
+				'product_id'     => '',
+			);
+		}
+
+		$subscription = reset( $subs_to_show );
+		$product_id   = $subscription['product_id'];
+		// check if $all_subs has multiple subs for this product.
+		$has_multiple_subs_for_product = 1 < count(
+			array_filter(
+				$all_subs,
+				function ( $sub ) use ( $product_id ) {
+					return $product_id === $sub['product_id'];
+				}
+			)
+		);
+
+		$message_key  = $has_multiple_subs_for_product ? 'multiple_manage' : 'single_manage';
+		$renew_string = __( 'Renew', 'woocommerce' );
+		if ( isset( $subscription['product_regular_price'] ) ) {
+			/* translators: 1: Product price */
+			$renew_string = sprintf( __( 'Renew for %1$s', 'woocommerce' ), $subscription['product_regular_price'] );
+		}
+		$expiry_date   = date_i18n( 'F jS', $subscription['expires'] );
+		$hyperlink_url = add_query_arg(
+			array(
+				'product_id' => $product_id,
+				'type'       => $type,
+			),
+			self::WOO_SUBSCRIPTION_PAGE_URL
+		);
+
+		// Construct message based on template for multiple_manage or single_manage, parameter used:
+		// 1. Product name
+		// 2. Expiry date
+		// 3. URL to My Subscriptions page with extra params
+		// 4. Renew string.
+		if ( isset( $messages[ $message_key ] ) ) {
+			$parsed_message = sprintf(
+				$messages[ $message_key ],
+				esc_attr( $subscription['product_name'] ),
+				esc_attr( $expiry_date ),
+				esc_url( $hyperlink_url ),
+				esc_attr( $renew_string ),
+			);
+
+			return array(
+				'type'           => $message_key,
+				'parsed_message' => $parsed_message,
+				'product_id'     => $product_id,
+			);
+		}
+
+		return array(
+			'type'           => 'invalid',
+			'parsed_message' => '',
+			'product_id'     => '',
+		);
+	}
+
+	/**
+	 * Get formatted notice information for expiring subscription.
+	 *
+	 * @param boolean $allowed_link whether the notice description should include a link.
+	 * @return array notice information.
+	 */
+	public static function get_expiring_subscription_notice( $allowed_link = true ) {
+		if ( ! WC_Helper::is_site_connected() ) {
+			return array();
+		}
+
+		if ( ! self::$can_show_expiring_subs_notice ) {
+			return array();
+		}
+
+		if ( ! self::should_show_notice( self::DISMISS_EXPIRING_SUBS_NOTICE ) ) {
+			return array();
+		}
+
+		$subscriptions          = WC_Helper::get_subscription_list_data();
+		$expiring_subscriptions = array_filter(
+			$subscriptions,
+			function ( $sub ) {
+				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
+						&& $sub['expiring']
+						&& ! $sub['autorenew'];
+			},
+		);
+
+		if ( ! $expiring_subscriptions ) {
+			return array();
+		}
+
+		$total_expiring_subscriptions = count( $expiring_subscriptions );
+
+		$notice_data = self::get_subscriptions_notice_data(
+			$subscriptions,
+			$expiring_subscriptions,
+			$total_expiring_subscriptions,
+			array(
+				/* translators: 1) product name 2) expiry date 3) URL to My Subscriptions page */
+				'single_manage'           => __( 'Your subscription for <strong>%1$s</strong> expires on %2$s. <a href="%3$s">Enable auto-renewal</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+				/* translators: 1) product name 2) expiry date 3) URL to My Subscriptions page */
+				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> expires on %2$s. <a href="%3$s">Enable auto-renewal</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+				/* translators: 1) total expiring subscriptions 2) URL to My Subscriptions page */
+				'different_subscriptions' => __( 'You have <strong>%1$s Woo extension subscriptions</strong> expiring soon. <a href="%2$s">Enable auto-renewal</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+			),
+			'expiring',
+		);
+
+		$button_link = self::WOO_SUBSCRIPTION_PAGE_URL;
+		if ( in_array( $notice_data['type'], array( 'single_manage', 'multiple_manage' ), true ) ) {
+			$button_link = add_query_arg(
+				array(
+					'product_id' => $notice_data['product_id'],
+					'type'       => 'expiring',
+				),
+				self::WOO_SUBSCRIPTION_PAGE_URL
+			);
+		}
+
+		return array(
+			'description' => $allowed_link ? $notice_data['parsed_message'] : preg_replace( '#<a.*?>(.*?)</a>#i', '\1', $notice_data['parsed_message'] ),
+			'button_text' => __( 'Enable auto-renewal', 'woocommerce' ),
+			'button_link' => $button_link,
+		);
+	}
+
+	/**
+	 * Get formatted notice information for expired subscription.
+	 *
+	 * @param boolean $allowed_link whether the notice description should include a link.
+	 * @return array notice information.
+	 */
+	public static function get_expired_subscription_notice( $allowed_link = true ) {
+		if ( ! WC_Helper::is_site_connected() ) {
+			return array();
+		}
+
+		if ( ! self::should_show_notice( self::DISMISS_EXPIRED_SUBS_NOTICE ) ) {
+			return array();
+		}
+
+		$subscriptions         = WC_Helper::get_subscription_list_data();
+		$expired_subscriptions = array_filter(
+			$subscriptions,
+			function ( $sub ) {
+				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
+						&& $sub['expired']
+						&& ! $sub['lifetime'];
+			},
+		);
+
+		if ( ! $expired_subscriptions ) {
+			return array();
+		}
+
+		$total_expired_subscriptions         = count( $expired_subscriptions );
+		self::$can_show_expiring_subs_notice = false;
+
+		$notice_data = self::get_subscriptions_notice_data(
+			$subscriptions,
+			$expired_subscriptions,
+			$total_expired_subscriptions,
+			array(
+				/* translators: 1) product name 3) URL to My Subscriptions page 4) Renew product price string */
+				'single_manage'           => __( 'Your subscription for <strong>%1$s</strong> expired. <a href="%3$s">%4$s</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+				/* translators: 1) product name 3) URL to My Subscriptions page 4) Renew product price string */
+				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">%4$s.</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+				/* translators: 1) total expired subscriptions 2) URL to My Subscriptions page */
+				'different_subscriptions' => __( 'You have <strong>%1$s Woo extension subscriptions</strong> that expired. <a href="%2$s">Renew</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+			),
+			'expired',
+		);
+
+		$button_link = self::WOO_SUBSCRIPTION_PAGE_URL;
+		if ( in_array( $notice_data['type'], array( 'single_manage', 'multiple_manage' ), true ) ) {
+			$button_link = add_query_arg(
+				array(
+					'product_id' => $notice_data['product_id'],
+					'type'       => 'expiring',
+				),
+				self::WOO_SUBSCRIPTION_PAGE_URL
+			);
+		}
+
+		return array(
+			'description' => $allowed_link ? $notice_data['parsed_message'] : preg_replace( '#<a.*?>(.*?)</a>#i', '\1', $notice_data['parsed_message'] ),
+			'button_text' => __( 'Renew', 'woocommerce' ),
+			'button_link' => $button_link,
+		);
+	}
+
+	/**
+	 * Determine whether a specific notice should be shown to the current user.
+	 *
+	 * @param string $dismiss_notice_meta User meta that includes the timestamp when a store notice was dismissed.
+	 * @return bool True if the notice should be shown, false otherwise.
+	 */
+	public static function should_show_notice( $dismiss_notice_meta ) {
+		// Get the current user ID.
+		$user_id = get_current_user_id();
+
+		// Get the timestamp when the notice was dismissed.
+		$dismissed_timestamp = get_user_meta( $user_id, $dismiss_notice_meta, true );
+
+		// If the notice was dismissed within the last month, do not show it.
+		if ( ! empty( $dismissed_timestamp ) && ( time() - $dismissed_timestamp ) < 30 * DAY_IN_SECONDS ) {
+			return false;
+		}
+
+		// If the notice was dismissed more than a month ago, delete the meta value and show the notice.
+		if ( ! empty( $dismissed_timestamp ) ) {
+			delete_user_meta( $user_id, $dismiss_notice_meta );
+		}
+
+		return true;
 	}
 }

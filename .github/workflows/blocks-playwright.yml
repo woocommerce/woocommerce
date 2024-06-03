@@ -11,6 +11,10 @@ on:
     # Allow manually triggering the workflow.
     workflow_dispatch:
 
+concurrency:
+    group: '${{ github.workflow }}-${{ github.ref }}'
+    cancel-in-progress: true
+
 env:
     FORCE_COLOR: 1
 
