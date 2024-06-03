@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
 import type { CartFeeItem, Currency } from '@woocommerce/types';
@@ -48,7 +48,7 @@ const TotalsFees = ( {
 				return (
 					<TotalsItem
 						key={ id || `${ index }-${ name }` }
-						className={ classnames(
+						className={ clsx(
 							'wc-block-components-totals-fees',
 							'wc-block-components-totals-fees__' + key,
 							className

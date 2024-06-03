@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { decodeEntities } from '@wordpress/html-entities';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import type { AnchorHTMLAttributes, HTMLAttributes } from 'react';
 
 /**
@@ -48,7 +48,7 @@ export const ProductName = ( {
 	onClick,
 	...props
 }: ProductNameProps ): JSX.Element => {
-	const classes = classnames( 'wc-block-components-product-name', className );
+	const classes = clsx( 'wc-block-components-product-name', className );
 	if ( disabled ) {
 		// Cast the props as type HTMLSpanElement.
 		const disabledProps = props as HTMLAttributes< HTMLSpanElement >;

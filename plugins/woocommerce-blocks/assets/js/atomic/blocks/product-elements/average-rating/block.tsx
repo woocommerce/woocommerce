@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useProductDataContext } from '@woocommerce/shared-context';
 import { useStyleProps } from '@woocommerce/base-hooks';
 import { __ } from '@wordpress/i18n';
@@ -17,7 +17,7 @@ export const Block = ( props: ProductAverageRatingProps ): JSX.Element => {
 	const styleProps = useStyleProps( props );
 	const { product } = useProductDataContext();
 
-	const className = classnames(
+	const className = clsx(
 		styleProps.className,
 		'wc-block-components-product-average-rating',
 		{

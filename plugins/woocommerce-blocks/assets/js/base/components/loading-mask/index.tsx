@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Spinner } from '@woocommerce/blocks-components';
 
 /**
@@ -27,13 +27,13 @@ const LoadingMask = ( {
 }: LoadingMaskProps ): JSX.Element => {
 	return (
 		<div
-			className={ classNames( className, {
+			className={ clsx( className, {
 				'wc-block-components-loading-mask': isLoading,
 			} ) }
 		>
 			{ isLoading && showSpinner && <Spinner /> }
 			<div
-				className={ classNames( {
+				className={ clsx( {
 					'wc-block-components-loading-mask__children': isLoading,
 				} ) }
 				aria-hidden={ isLoading }
