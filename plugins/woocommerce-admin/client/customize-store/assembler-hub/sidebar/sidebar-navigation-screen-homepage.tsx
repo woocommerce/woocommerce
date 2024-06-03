@@ -229,17 +229,24 @@ export const SidebarNavigationScreenHomepage = () => {
 		  );
 
 	const isNetworkOffline = useNetworkStatus();
-
+	const isPTKPatternsAPIAvailable = context.isPTKPatternsAPIAvailable;
 	const trackingAllowed = useSelect( ( select ) =>
 		select( OPTIONS_STORE_NAME ).getOption( 'woocommerce_allow_tracking' )
 	);
-	let notice;
-
 	const isTrackingDisallowed = trackingAllowed === 'no' || ! trackingAllowed;
+
+	let notice;
 	if ( isNetworkOffline ) {
-		notice = __( "Looks like we can't detect your network. Please double-check your internet connection and refresh the page.", 'woocommerce' );
-	}
-	if ( isTrackingDisallowed ) {
+		notice = __(
+			"Looks like we can't detect your network. Please double-check your internet connection and refresh the page.",
+			'woocommerce'
+		);
+	} else if ( ! isPTKPatternsAPIAvailable ) {
+		notice = __(
+			"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns.",
+			'woocommerce'
+		);
+	} else if ( isTrackingDisallowed ) {
 		notice = __(
 			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
 			'woocommerce'
