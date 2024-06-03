@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Blocks E2E: Remove confusing utilities in favor of native locator functionality.
