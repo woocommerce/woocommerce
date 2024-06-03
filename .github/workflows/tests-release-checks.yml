@@ -13,4 +13,5 @@ jobs:
     with:
       trigger: 'release-checks'
       tag: 'nightly'
+      artifact-name: 'woocommerce-trunk-nightly.zip'
     secrets: inherit
