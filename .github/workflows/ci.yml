@@ -12,6 +12,10 @@ on:
           required: true
           default: 'default'
           type: string
+        tag:
+          description: 'The tag that marks the release point to be tested. E.g. v1.0.0'
+          required: false
+          type: string
           
 concurrency:
     group: '${{ github.workflow }}-${{ github.ref }}'
@@ -34,6 +38,7 @@ jobs:
             e2e-test-jobs: ${{ steps.project-jobs.outputs.e2e-test-jobs }}
             api-test-jobs: ${{ steps.project-jobs.outputs.api-test-jobs }}
             performance-test-jobs: ${{ steps.project-jobs.outputs.performance-test-jobs }}
+            build-plugin: ${{ steps.project-jobs.outputs.build-plugin }}
         steps:
             - uses: 'actions/checkout@v4'
               name: 'Checkout'
@@ -54,6 +59,12 @@ jobs:
                       }
 
                       let githubEvent = ${{ toJson( github.event_name ) }};
+                    
+                      if (! ['pull_request', 'push'].includes( githubEvent )) {
+                        import { setOutput } from '@actions/core';
+                        setOutput( 'build-plugin', true );
+                      }
+                    
                       let trigger = ${{ toJson( inputs.trigger ) }};
                     
                       if ( trigger ) {
@@ -62,6 +73,8 @@ jobs:
 
                       const child_process = require( 'node:child_process' );
                       child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
+                    
+                    
 
     project-lint-jobs:
         name: "Lint - ${{ matrix.projectName }} ${{ matrix.optional && ' (optional)' || ''}}"
