@@ -9,9 +9,10 @@ on:
 jobs:
   run-tests:
     name: 'Run tests'
+    if: ${{ env.GITHUB_REF_TYPE == 'tag' && env.GITHUB_REF_NAME != 'nightly' }}
     uses: ./.github/workflows/ci.yml
     with:
       trigger: 'release-checks'
-      tag: 'nightly'
-      artifact-name: 'woocommerce-trunk-nightly.zip'
+      tag: ${{ env.GITHUB_REF_NAME }}
+      artifact-name: 'woocommerce.zip'
     secrets: inherit
