@@ -25,20 +25,18 @@ export const Content = ( { data } ) => {
 
 		const data = {};
 		formElements.forEach( ( input ) => {
-			const value =
-				// Only looking at checkboxes for now.
-				input.checked ? 'yes' : 'no';
+			let value;
+			if ( input.type === 'checkbox' || input.type === 'radio' ) {
+				value = input.checked ? 'yes' : 'no';
+			} else {
+				value = input.value;
+			}
 			data[ input.id || input.name ] = value;
 		} );
 
 		setFormData( data );
-	};
 
-	const handleFormChange = ( { id, value } ) => {
-		setFormData( {
-			...formData,
-			[ id ]: value,
-		} );
+		return data;
 	};
 
 	const handleSubmit = async ( event ) => {
@@ -49,7 +47,7 @@ export const Content = ( { data } ) => {
 			const response = await fetch( '/wp-json/wc-admin/options', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify( formData ),
+				body: JSON.stringify( gatherFormInputs() ),
 			} );
 
 			setIsBusy( false );
@@ -96,11 +94,7 @@ export const Content = ( { data } ) => {
 						);
 					case 'checkbox':
 						return (
-							<SettingsCheckbox
-								setting={ setting }
-								key={ key }
-								handleFormChange={ handleFormChange }
-							/>
+							<SettingsCheckbox setting={ setting } key={ key } />
 						);
 					case 'slotfill_placeholder':
 						return (
@@ -123,11 +117,7 @@ export const Content = ( { data } ) => {
 					case 'url':
 					case 'tel':
 						return (
-							<SettingsInput
-								setting={ setting }
-								key={ key }
-								handleFormChange={ handleFormChange }
-							/>
+							<SettingsInput setting={ setting } key={ key } />
 						);
 					default:
 						return null;
