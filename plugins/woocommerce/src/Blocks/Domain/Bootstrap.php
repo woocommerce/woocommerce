@@ -380,9 +380,15 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
+			PTKClient::class,
+			function () {
+				return new PTKClient();
+			}
+		);
+		$this->container->register(
 			PTKPatternsStore::class,
 			function () {
-				return new PTKPatternsStore( new PTKClient() );
+				return new PTKPatternsStore( $this->container->get( PTKClient::class ) );
 			}
 		);
 		$this->container->register(

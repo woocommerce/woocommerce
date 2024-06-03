@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
@@ -54,6 +55,13 @@ class Patterns extends AbstractRoute {
 	public function get_args() {
 		return [
 			[
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'get_response' ],
+				'permission_callback' => function () {
+					return is_user_logged_in();
+				},
+			],
+			[
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => function () {
@@ -62,6 +70,34 @@ class Patterns extends AbstractRoute {
 			],
 			'schema' => [ $this->schema, 'get_public_item_schema' ],
 		];
+	}
+
+	/**
+	 * Fetch a single pattern from the PTK to ensure the API is available.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_Error|\WP_HTTP_Response|WP_REST_Response
+	 * @throws RouteException If the patterns cannot be fetched.
+	 */
+	protected function get_route_response( WP_REST_Request $request ) {
+		$ptk_client = Package::container()->get( PTKClient::class );
+
+		$response = $ptk_client->fetch_patterns(
+			array(
+				'per_page' => 1,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			throw new RouteException( $response->get_error_message(), $response->get_error_code() );
+		}
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+			)
+		);
 	}
 
 	/**
