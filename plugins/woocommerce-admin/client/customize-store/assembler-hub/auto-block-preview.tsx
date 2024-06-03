@@ -100,8 +100,6 @@ function ScaledBlockPreview( {
 		setPopoverStatus,
 	] = usePopoverHandler();
 
-	console.log( 'popoverStatus', popoverStatus );
-
 	// @ts-expect-error No types for this exist yet.
 	const { selectBlock, setBlockEditingMode } =
 		useDispatch( blockEditorStore );
