@@ -2391,6 +2391,7 @@ body:not(.search-results) .twentysixteen .entry-summary {
 	border-top: 1px solid #dcdcdc;
 	padding: 16px;
 	box-sizing: border-box;
+	z-index: 100;
 
 	.coming-soon-footer-banner__content {
 		text-align: center;
