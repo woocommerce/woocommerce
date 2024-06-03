@@ -166,7 +166,7 @@ function ScaledBlockPreview( {
 					>
 						<span>
 							{ __(
-								'You can edit your content later in the editor',
+								'You can edit your content later in the Editor',
 								'woocommerce'
 							) }
 						</span>
