@@ -271,6 +271,64 @@
 					}
 				},
 				{
+					"name": "Core e2e tests - Gutenberg nightly",
+					"testType": "e2e",
+					"command": "test:e2e:with-env gutenberg-nightly",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"events": [
+						"daily-e2e"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - Woocommerce Payments",
+					"testType": "e2e",
+					"command": "test:e2e:with-env woocommerce-payments",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-e2e"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - Woocommerce Paypal Payments",
+					"testType": "e2e",
+					"command": "test:e2e:with-env woocommerce-paypal-payments",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-e2e"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - WooCommerce Shipping & Tax",
+					"testType": "e2e",
+					"command": "test:e2e:with-env woocommerce-services",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-e2e"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
 					"name": "Core e2e tests - HPOS disabled",
 					"testType": "e2e",
 					"command": "test:e2e:with-env default",
