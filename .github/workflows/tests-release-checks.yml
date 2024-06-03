@@ -9,7 +9,7 @@ on:
 jobs:
   run-tests:
     name: 'Run tests'
-    if: ${{ env.GITHUB_REF_TYPE == 'tag' && env.GITHUB_REF_NAME != 'nightly' }}
+    if: ${{ GITHUB_REF_TYPE == 'tag' && GITHUB_REF_NAME != 'nightly' }}
     uses: ./.github/workflows/ci.yml
     with:
       trigger: 'release-checks'
