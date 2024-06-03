@@ -71,4 +71,28 @@ class SchemaBuilder {
         return new SchemaReference( $pointer );
     }
 
+    /**
+     * Merges two schemas together, keeping duplicate properties while
+     * overwriting the first values within a property with those in the second schema.
+     *
+     * @param string $pointer Pointer.
+     * @return SchemaReference
+     */
+    public static function merge( $first, $second ) {
+        $second_properties = $second['properties'] ?? array();
+        unset( $second['properties'] );
+
+        $merged               = array_replace_recursive( $first, $second );
+        $merged['properties'] = $merged['properties'] ?? array();
+
+        foreach( $second_properties as $key => $property ) {
+            $merged['properties'][ $key ] = array_replace_recursive(
+                $merged['properties'][ $key ] ?? array(),
+                $property
+            );
+        }
+
+        return $merged;
+    }
+
 }
