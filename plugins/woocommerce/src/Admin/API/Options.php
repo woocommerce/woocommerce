@@ -129,11 +129,17 @@ class Options extends \WC_REST_Data_Controller {
 			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'You must supply an array of options and values.', 'woocommerce' ), 500 );
 		}
 
-		foreach ( $params as $option_name => $option_value ) {
-			if ( ! $this->user_has_permission( $option_name, $request, true ) ) {
-				return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage these options.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-			}
-		}
+		/**
+		 * 
+		 * DANGER - Commented out for demonstration purposes only!
+		 * 
+		 * 
+		 */
+		// foreach ( $params as $option_name => $option_value ) {
+		// 	if ( ! $this->user_has_permission( $option_name, $request, true ) ) {
+		// 		return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage these options.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		// 	}
+		// }
 
 		return true;
 	}

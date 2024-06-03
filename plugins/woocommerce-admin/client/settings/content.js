@@ -4,12 +4,12 @@
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useState, useRef, useEffect } from '@wordpress/element';
+import { apiFetch } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
  */
 import { SettingsCheckbox } from './components';
-import { set } from 'lodash';
 
 export const Content = ( { data } ) => {
 	const { settings } = data;
@@ -42,16 +42,11 @@ export const Content = ( { data } ) => {
 		event.preventDefault();
 		console.log( 'Submitting form', formData );
 
-		const form = new FormData();
-		Object.keys( formData ).forEach( ( key ) => {
-			form.append( key, formData[ key ] );
-		} );
-
 		try {
-			fetch( '/wp-admin/admin.php?page=wc-settings&tab=products', {
+			fetch( '/wp-json/wc-admin/options', {
 				method: 'POST',
-				ContentType: 'text/html',
-				body: form,
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify( formData ),
 			} );
 		} catch ( error ) {
 			console.error( 'Error saving settings', error );
