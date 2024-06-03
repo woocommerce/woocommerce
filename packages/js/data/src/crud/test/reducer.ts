@@ -424,6 +424,15 @@ describe( 'crud reducer', () => {
 			);
 
 			expect( state_last.items[ gettingQueryId ].data ).toHaveLength( 2 );
+
+			// todo: Continue how the reducer should handle CREATE_ITEM_SUCCESS
+			// const state_1 = reducer( state_last, {
+			// 	type: TYPES.CREATE_ITEM_SUCCESS
+			// 	key: item.id,
+			// 	item,
+			// 	query,
+			// 	options: {},
+			// } );
 		} );
 	} );
 
