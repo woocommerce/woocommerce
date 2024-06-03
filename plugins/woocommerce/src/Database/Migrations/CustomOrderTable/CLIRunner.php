@@ -1263,5 +1263,4 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			WP_CLI::success( __( 'Compatibility mode disabled.', 'woocommerce' ) );
 		}
 	}
-
 }
