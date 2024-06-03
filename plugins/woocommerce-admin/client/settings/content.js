@@ -4,7 +4,7 @@
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useState, useRef, useEffect } from '@wordpress/element';
-import { apiFetch } from '@wordpress/data-controls';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -14,7 +14,9 @@ import { SettingsCheckbox } from './components';
 export const Content = ( { data } ) => {
 	const { settings } = data;
 	const [ formData, setFormData ] = useState( {} );
+	const [ isBusy, setIsBusy ] = useState( false );
 	const formRef = useRef( null );
+	const { createNotice } = useDispatch( 'core/notices' );
 
 	const gatherFormInputs = () => {
 		const formElements = formRef.current.querySelectorAll(
@@ -38,17 +40,33 @@ export const Content = ( { data } ) => {
 		} );
 	};
 
-	const handleSubmit = ( event ) => {
+	const handleSubmit = async ( event ) => {
 		event.preventDefault();
 		console.log( 'Submitting form', formData );
 
 		try {
-			fetch( '/wp-json/wc-admin/options', {
+			setIsBusy( true );
+			const response = await fetch( '/wp-json/wc-admin/options', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify( formData ),
 			} );
+
+			setIsBusy( false );
+
+			if ( response.status === 200 ) {
+				createNotice(
+					'success',
+					__( 'Options saved successfully', 'woocommerce' )
+				);
+			} else {
+				throw new Error();
+			}
 		} catch ( error ) {
+			createNotice(
+				'fail',
+				__( 'Error saving settings', 'woocommerce' )
+			);
 			console.error( 'Error saving settings', error );
 		}
 	};
@@ -96,7 +114,7 @@ export const Content = ( { data } ) => {
 						return null;
 				}
 			} ) }
-			<Button variant="primary" type="submit">
+			<Button variant="primary" type="submit" isBusy={ isBusy }>
 				{ __( 'Save changes', 'woocommerce' ) }
 			</Button>
 		</form>
