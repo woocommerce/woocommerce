@@ -210,6 +210,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		flowType: FlowType.noAI,
 		isFontLibraryAvailable: null,
+		isPTKPatternsAPIAvailable: null,
 		activeThemeHasMods: undefined,
 	} as customizeStoreStateMachineContext,
 	invoke: {
@@ -559,6 +560,7 @@ declare global {
 	interface Window {
 		__wcCustomizeStore: {
 			isFontLibraryAvailable: boolean | null;
+			isPTKPatternsAPIAvailable: boolean | null;
 			activeThemeHasMods: boolean | undefined;
 			sendEventToIntroMachine: (
 				typeEvent: customizeStoreStateMachineEvents

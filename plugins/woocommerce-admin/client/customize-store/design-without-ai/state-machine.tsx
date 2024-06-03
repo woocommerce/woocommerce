@@ -114,6 +114,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 				hasErrors: false,
 			},
 			isFontLibraryAvailable: false,
+			isPTKPatternsAPIAvailable: false,
 		},
 		initial: 'navigate',
 		states: {
