@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import type { ChangeEvent } from 'react';
-import { FormFileUpload, MenuItem } from '@wordpress/components';
+import { MenuItem } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { media } from '@wordpress/icons';
-import { MediaUpload, uploadMedia } from '@wordpress/media-utils';
+import { MediaUpload } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
