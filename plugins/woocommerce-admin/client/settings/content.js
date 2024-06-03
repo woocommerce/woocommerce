@@ -9,7 +9,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { SettingsCheckbox } from './components';
+import { SettingsCheckbox, SettingsInput } from './components';
 
 export const Content = ( { data } ) => {
 	const { settings } = data;
@@ -109,6 +109,25 @@ export const Content = ( { data } ) => {
 								id={ setting.id }
 								className={ setting.class }
 							></div>
+						);
+					case 'text':
+					case 'password':
+					case 'datetime':
+					case 'datetime-local':
+					case 'date':
+					case 'month':
+					case 'time':
+					case 'week':
+					case 'number':
+					case 'email':
+					case 'url':
+					case 'tel':
+						return (
+							<SettingsInput
+								setting={ setting }
+								key={ key }
+								handleFormChange={ handleFormChange }
+							/>
 						);
 					default:
 						return null;
