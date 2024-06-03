@@ -34,6 +34,8 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { PopoverStatus, usePopoverHandler } from './hooks/use-popover-handler';
 import { noop } from 'lodash';
 import { useAddAutoBlockPreviewEventListenersAndObservers } from './hooks/auto-block-preview-event-listener';
+import { IsResizingContext } from './resizable-frame';
+import { __ } from '@wordpress/i18n';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -95,8 +97,12 @@ function ScaledBlockPreview( {
 
 	const [ iframeRef, setIframeRef ] = useState< HTMLElement | null >( null );
 
-	const [ popoverStatus, virtualElement, updatePopoverPosition ] =
-		usePopoverHandler( iframeRef );
+	const [
+		popoverStatus,
+		virtualElement,
+		updatePopoverPosition,
+		setPopoverStatus,
+	] = usePopoverHandler();
 
 	// @ts-expect-error No types for this exist yet.
 	const { selectBlock, setBlockEditingMode } =
@@ -128,6 +134,8 @@ function ScaledBlockPreview( {
 	// Initialize on render instead of module top level, to avoid circular dependency issues.
 	MemoizedBlockList = MemoizedBlockList || pure( BlockList );
 
+	const isResizing = useContext( IsResizingContext );
+
 	useAddAutoBlockPreviewEventListenersAndObservers(
 		{
 			documentElement: iframeRef,
@@ -143,6 +151,7 @@ function ScaledBlockPreview( {
 			updatePopoverPosition,
 			setLogoBlockIds,
 			setContentHeight,
+			setPopoverStatus,
 		}
 	);
 
@@ -150,7 +159,8 @@ function ScaledBlockPreview( {
 		<>
 			{ ! isPatternPreview &&
 				virtualElement &&
-				popoverStatus === PopoverStatus.VISIBLE && (
+				popoverStatus === PopoverStatus.VISIBLE &&
+				! isResizing && (
 					<Popover
 						// @ts-ignore No types for this exist yet.
 						anchor={ virtualElement }
@@ -158,7 +168,12 @@ function ScaledBlockPreview( {
 						variant="unstyled"
 						className="components-tooltip woocommerce-customize-store_popover-tooltip"
 					>
-						You can edit your content later in the editor
+						<span>
+							{ __(
+								'You can edit your content later in the editor',
+								'woocommerce'
+							) }
+						</span>
 					</Popover>
 				) }
 			<DisabledProvider value={ true }>

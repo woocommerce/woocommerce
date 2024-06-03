@@ -7,6 +7,7 @@ import { useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
+import { PopoverStatus } from './use-popover-handler';
 
 const setStyle = ( documentElement: HTMLElement ) => {
 	const element = documentElement.ownerDocument.documentElement;
@@ -122,7 +123,8 @@ const updateSelectedBlock = (
 	>
 ) => {
 	const body = documentElement.ownerDocument.body;
-	body.addEventListener( 'click', ( event ) => {
+
+	const onClickListener = ( event: MouseEvent ) => {
 		const clickedBlockClientId = selectBlockOnHover( event, {
 			selectBlockByClientId: selectBlock,
 			getBlockParents,
@@ -136,29 +138,58 @@ const updateSelectedBlock = (
 			hoveredBlockClientId: null,
 			clickedBlockClientId: clickedBlockClientId as string,
 		} );
-	} );
+	};
 
-	body.addEventListener(
-		'mousemove',
-		( event ) => {
-			const selectedBlockClientId = selectBlockOnHover( event, {
-				selectBlockByClientId: selectBlock,
-				getBlockParents,
-				setBlockEditingMode: () => void 0,
+	const onMouseMoveListener = ( event: MouseEvent ) => {
+		const selectedBlockClientId = selectBlockOnHover( event, {
+			selectBlockByClientId: selectBlock,
+			getBlockParents,
+			setBlockEditingMode: () => void 0,
+		} );
+
+		if ( selectedBlockClientId ) {
+			updatePopoverPosition( {
+				mainBodyWidth: window.document.body.clientWidth,
+				iframeWidth: body.clientWidth,
+				event,
+				hoveredBlockClientId: selectedBlockClientId,
+				clickedBlockClientId: null,
 			} );
+		}
+	};
 
-			if ( selectedBlockClientId ) {
-				updatePopoverPosition( {
-					mainBodyWidth: window.document.body.clientWidth,
-					iframeWidth: body.clientWidth,
-					event,
-					hoveredBlockClientId: selectedBlockClientId,
-					clickedBlockClientId: null,
-				} );
-			}
-		},
-		true
-	);
+	body.addEventListener( 'click', onClickListener );
+	body.addEventListener( 'mousemove', onMouseMoveListener );
+
+	return () => {
+		body.removeEventListener( 'click', onClickListener );
+		body.removeEventListener( 'mousemove', onMouseMoveListener );
+	};
+};
+
+export const hidePopoverWhenMouseLeaveIframe = (
+	iframeRef: HTMLElement,
+	setPopoverStatus: ( popoverStatus: PopoverStatus ) => void
+) => {
+	const handleMouseEnter = () => {
+		setPopoverStatus( PopoverStatus.VISIBLE );
+	};
+
+	const handleMouseLeave = () => {
+		setPopoverStatus( PopoverStatus.HIDDEN );
+	};
+
+	if ( iframeRef ) {
+		iframeRef.addEventListener( 'mouseenter', handleMouseEnter );
+		iframeRef.addEventListener( 'mouseleave', handleMouseLeave );
+	}
+
+	return () => {
+		if ( iframeRef ) {
+			iframeRef.removeEventListener( 'mouseenter', handleMouseEnter );
+			iframeRef.removeEventListener( 'mouseleave', handleMouseLeave );
+		}
+	};
 };
 
 type useAutoBlockPreviewEventListenersValues = {
@@ -192,6 +223,7 @@ type useAutoBlockPreviewEventListenersCallbacks = {
 	} ) => void;
 	setLogoBlockIds: ( logoBlockIds: string[] ) => void;
 	setContentHeight: ( contentHeight: number | null ) => void;
+	setPopoverStatus: ( popoverStatus: PopoverStatus ) => void;
 };
 
 /**
@@ -212,10 +244,12 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 		updatePopoverPosition,
 		setLogoBlockIds,
 		setContentHeight,
+		setPopoverStatus,
 	}: useAutoBlockPreviewEventListenersCallbacks
 ) => {
 	useEffect( () => {
 		const observers: Array< MutationObserver > = [];
+		const unsubscribeCallbacks: Array< () => void > = [];
 
 		if ( ! documentElement ) {
 			return;
@@ -246,20 +280,31 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 			isFullComposabilityFeatureAndAPIAvailable() &&
 			! isPatternPreview
 		) {
-			updateSelectedBlock( documentElement, {
-				selectBlock,
-				selectBlockOnHover,
-				getBlockParents,
-				setBlockEditingMode,
-				updatePopoverPosition,
-			} );
+			const removeEventListenerHidePopover =
+				hidePopoverWhenMouseLeaveIframe(
+					documentElement,
+					setPopoverStatus
+				);
+			const removeEventListenersSelectedBlock = updateSelectedBlock(
+				documentElement,
+				{
+					selectBlock,
+					selectBlockOnHover,
+					getBlockParents,
+					setBlockEditingMode,
+					updatePopoverPosition,
+				}
+			);
 			const inertObserver = addInertToAllInnerBlocks( documentElement );
 			observers.push( inertObserver );
+			unsubscribeCallbacks.push( removeEventListenersSelectedBlock );
+			unsubscribeCallbacks.push( removeEventListenerHidePopover );
 		} else {
 		}
 
 		return () => {
 			observers.forEach( ( observer ) => observer.disconnect() );
+			unsubscribeCallbacks.forEach( ( callback ) => callback() );
 		};
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps

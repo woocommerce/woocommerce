@@ -50,7 +50,9 @@ export const usePopoverHandler = () => {
 		clickedBlockClientId: string | null;
 		hoveredBlockClientId: string | null;
 	} ) => {
-		const iframe = window.document.querySelector( 'iframe' ) as HTMLElement;
+		const iframe = window.document.querySelector(
+			'iframe[name="editor-canvas"]'
+		) as HTMLElement;
 
 		clickedClientId =
 			clickedBlockClientId === null
@@ -85,5 +87,10 @@ export const usePopoverHandler = () => {
 		clickedClientId = null;
 	};
 
-	return [ popoverStatus, virtualElement, updatePopoverPosition ] as const;
+	return [
+		popoverStatus,
+		virtualElement,
+		updatePopoverPosition,
+		setPopoverStatus,
+	] as const;
 };
