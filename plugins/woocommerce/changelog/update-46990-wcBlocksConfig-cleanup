@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Reduce the amount of queries needed to define WC Blocks settings
