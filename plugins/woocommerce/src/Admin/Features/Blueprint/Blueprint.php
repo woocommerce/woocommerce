@@ -8,10 +8,19 @@ class Blueprint {
 		$this->schemaPath = $schemaPath;
 	}
 
+	/**
+	 * @return StepProcessorResult[]
+	 */
 	public function process() {
 		if ( ! $this->validate() ) {
-			// push a notification and display it when user gets redirected to Home
+			// @todo Implement JSON Schema validation here.
+			return false;
 		}
+
+		/**
+		 * @var StepProcessorResult[]
+		 */
+		$results = array();
 
 		$schema = json_decode( file_get_contents( $this->schemaPath ) );
 		foreach ( $schema->steps as $stepSchema ) {
@@ -22,9 +31,11 @@ class Blueprint {
 				 * @todo Use container.
 				 */
 				$stepProcessor = new $stepProcessor();
-				$stepProcessor->process($stepSchema);
+				$results[] = $stepProcessor->process($stepSchema);
 			}
 		}
+
+		return $results;
 	}
 
 	private function validate() {

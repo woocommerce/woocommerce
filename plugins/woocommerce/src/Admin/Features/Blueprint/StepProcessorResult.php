@@ -2,30 +2,113 @@
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint;
 
+use InvalidArgumentException;
+
+/**
+ * A class returned by StepProcessor classes containing result of the process and messages.
+ */
 class StepProcessorResult {
-	private $errors = array();
-	private $success = false;
-	public function __construct( $success ) {
+	const MESSAGE_TYPES = array( 'error', 'info' );
+
+	/**
+	 * Messages
+	 *
+	 * @var array $messages
+	 */
+	private array $messages = array();
+
+	/**
+	 * Indicate whether the process was success or not
+	 *
+	 * @var bool $success
+	 */
+	private bool $success;
+
+	/**
+	 * Construct.
+	 *
+	 * @param bool $success Indicate whether the process was success or not.
+	 */
+	public function __construct( bool $success ) {
 		$this->success = $success;
 	}
 
-	public static function success() {
+	/**
+	 * Create a new instance with $success = true.
+	 *
+	 * @return StepProcessorResult
+	 */
+	public static function success(): self {
 		return ( new self( true ) );
 	}
 
-	public function add_error( $message ) {
-		$this->errors[] = $this->translate( $message );
+
+	/**
+	 * Add a new message.
+	 *
+	 * @param string $message message.
+	 * @param string $type one of error, info.
+	 *
+	 * @throws InvalidArgumentException When incorrect type is given.
+	 * @return void
+	 */
+	public function add_message( string $message, string $type = 'error' ) {
+		if ( ! in_array( $type, self::MESSAGE_TYPES, true ) ) {
+			// phpcs:ignore
+			throw new InvalidArgumentException( "{$type} is not allowed. Type must be one of " . implode( ',', self::MESSAGE_TYPES ) );
+		}
+
+		$this->messages[] = compact( 'message', 'type' );
 	}
 
-	public function translate( $message ) {
-		return __( $message, 'woocommerce' );
+	/**
+	 * Add a new error message.
+	 *
+	 * @param string $message message.
+	 *
+	 * @return void
+	 */
+	public function add_error( string $message ) {
+		$this->add_message( $message );
 	}
 
-	public function get_errors() {
-	    return $this->errors;
+	/**
+	 * Add a new info message.
+	 *
+	 * @param string $message message.
+	 *
+	 * @return void
+	 */
+	public function add_info( string $message ) {
+		$this->add_message( $message, 'info' );
 	}
 
-	public function is_success() {
-	    return $this->success === true;
+	/**
+	 * Filter messages.
+	 *
+	 * @param string $type one of all, error, and info.
+	 *
+	 * @return array
+	 */
+	public function get_messages( string $type = 'all' ): array {
+		if ( 'all' === $type ) {
+			return $this->messages;
+		}
+
+		return array_filter(
+			$this->messages,
+			function ( $message ) use ( $type ) {
+				return $type === $message['type'];
+			}
+		);
+	}
+
+	/**
+	 * Check to see if the result was success.
+	 *
+	 * @return bool
+	 */
+	public function is_success(): bool {
+		return true === $this->success && 0 === count( $this->get_messages( 'error' ) );
 	}
 }

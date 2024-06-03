@@ -3,12 +3,9 @@
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessors\Settings;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessor;
-use Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessorResult;
-use RecursiveArrayIterator;
-use RecursiveIteratorIterator;
 
-class ConfigureSettingsGeneral implements StepProcessor {
-	private $options_map = [
+class ConfigureSettingsGeneral extends MapFieldsToOptions implements StepProcessor {
+	protected array $options_map = [
 		// store address
 		'address_line_1' => 'woocommerce_store_address',
 		'address_line_2' => 'woocommerce_store_address_2',
@@ -31,19 +28,5 @@ class ConfigureSettingsGeneral implements StepProcessor {
 		"thousand_separator" => 'woocommerce_price_thousand_sep',
 		"decimal_separator" => 'woocommerce_price_decimal_sep',
 		"number_of_decimals" => 'woocommerce_price_num_decimals',
-
 	];
-
-	public function process( $schema ): StepProcessorResult {
-		// flatten fields
-		$fields = iterator_to_array( new RecursiveIteratorIterator( new RecursiveArrayIterator( $schema ) ), true );
-		foreach ($fields as $field_name => $field) {
-			$option_key = $this->options_map[$field_name] ?? null;
-			if ($option_key !== null) {
-				update_option($option_key, $field);
-			}
-		}
-
-		return StepProcessorResult::success();
-	}
 }

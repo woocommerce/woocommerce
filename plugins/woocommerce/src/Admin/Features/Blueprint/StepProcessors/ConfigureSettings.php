@@ -9,6 +9,9 @@ use WC_Tax;
 class ConfigureSettings implements StepProcessor {
 	public function process($schema): StepProcessorResult {
 		foreach ($schema->tabs as $tabName => $tab) {
+			if ($tabName !== 'products') {
+				continue;
+			}
 			$stepProcessor = __NAMESPACE__ . '\\Settings\\ConfigureSettings' . ucfirst( $tabName );
 			if ( class_exists( $stepProcessor ) ) {
 
