@@ -32,6 +32,5 @@ test.describe( 'Store owner can finish initial store setup', () => {
 		await expect(
 			page.locator( '#woocommerce_permalink_structure' )
 		).toHaveValue( '/product/' );
-		await expect( true ).toBe( true );
 	} );
 } );
