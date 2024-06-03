@@ -385,6 +385,16 @@ const getFrontConfig = ( options = {} ) => {
 				minSize: 200000,
 				automaticNameDelimiter: '--',
 				cacheGroups: {
+					vendor: {
+						test: /[\\/]node_modules[\\/]/,
+						name: 'wc-blocks-vendors',
+						chunks: ( chunk ) => {
+							return (
+								chunk.name !== 'product-button-interactivity'
+							);
+						},
+						enforce: true,
+					},
 					...getCacheGroups(),
 				},
 			},
@@ -1068,7 +1078,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 						enforce: true,
 					},
 					base: {
-						test: /(?:assets[\\/]js[\\/]base|packages[\\/]components|assets[\\/]js[\\/]blocks[\\/]checkout)/,
+						test: /(?:assets[\\/]js[\\/]base|packages[\\/]components|assets[\\/]js[\\/]blocks[\\/]checkout(?![\\/]inner-blocks)|assets[\\/]js[\\/]blocks[\\/]cart-checkout-shared)/,
 						name: 'cart-checkout-base',
 						chunks: 'all',
 						enforce: true,
