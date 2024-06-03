@@ -22,6 +22,7 @@ export const Content = ( { data } ) => {
 		const formElements = formRef.current.querySelectorAll(
 			'input' // For now. There will be more.
 		);
+
 		const data = {};
 		formElements.forEach( ( input ) => {
 			const value =
@@ -42,7 +43,6 @@ export const Content = ( { data } ) => {
 
 	const handleSubmit = async ( event ) => {
 		event.preventDefault();
-		console.log( 'Submitting form', formData );
 
 		try {
 			setIsBusy( true );
@@ -57,7 +57,7 @@ export const Content = ( { data } ) => {
 			if ( response.status === 200 ) {
 				createNotice(
 					'success',
-					__( 'Options saved successfully', 'woocommerce' )
+					__( 'Settings saved successfully', 'woocommerce' )
 				);
 			} else {
 				throw new Error();
