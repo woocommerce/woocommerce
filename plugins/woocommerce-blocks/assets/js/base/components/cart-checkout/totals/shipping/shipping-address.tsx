@@ -23,6 +23,7 @@ export interface ShippingAddressProps {
 		React.SetStateAction< boolean >
 	>;
 	shippingAddress: ShippingAddressType;
+	hasRates: boolean;
 }
 
 export type ActiveShippingZones = {
@@ -33,6 +34,7 @@ export const ShippingAddress = ( {
 	isShippingCalculatorOpen,
 	setIsShippingCalculatorOpen,
 	shippingAddress,
+	hasRates,
 }: ShippingAddressProps ): JSX.Element | null => {
 	const { isEditor } = useEditorContext();
 	const prefersCollection = useSelect( ( select ) =>
@@ -60,12 +62,23 @@ export const ShippingAddress = ( {
 		return null;
 	}
 	const formattedLocation = formatShippingAddress( shippingAddress );
-	const deliveryLabel = (
-		<>
-			{ __( 'Delivers to ', 'woocommerce' ) }
-			<strong>{ formattedLocation }</strong>
-		</>
-	);
+	let deliveryLabel;
+	if ( hasRates ) {
+		deliveryLabel = (
+			<>
+				{ __( 'Delivers to ', 'woocommerce' ) }
+				<strong>{ formattedLocation }</strong>
+			</>
+		);
+	} else {
+		deliveryLabel = (
+			<>
+				{ __( 'No delivery options available for ', 'woocommerce' ) }
+				<strong>{ formattedLocation }</strong>
+			</>
+		);
+	}
+
 	if ( prefersCollection )
 		return (
 			<PickupLocation

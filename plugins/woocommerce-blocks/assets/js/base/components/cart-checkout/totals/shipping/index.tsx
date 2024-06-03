@@ -134,6 +134,7 @@ export const TotalsShipping = ( {
 									setIsShippingCalculatorOpen={
 										setIsShippingCalculatorOpen
 									}
+									hasRates={ hasRates }
 								/>
 							) }
 						</>
@@ -150,6 +151,7 @@ export const TotalsShipping = ( {
 						isLoadingRates={ isLoadingRates }
 						isAddressComplete={ addressComplete }
 						shippingAddress={ shippingAddress }
+						showCalculator={ showCalculator }
 					/>
 				) }
 		</div>
