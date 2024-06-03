@@ -247,7 +247,11 @@ const entries = {
 		'wc-blocks': './assets/js/index.js',
 
 		// Blocks
-		...getBlockEntries( 'index.{t,j}s{,x}' ),
+		...getBlockEntries( 'index.{t,j}s{,x}', {
+			...blocks,
+			cart: {},
+			checkout: {},
+		} ),
 	},
 	frontend: {
 		reviews: './assets/js/blocks/reviews/frontend.ts',
@@ -275,7 +279,6 @@ const entries = {
 		'wc-blocks-classic-template-revert-button':
 			'./assets/js/templates/revert-button/index.tsx',
 	},
-
 	cartAndCheckoutFrontend: {
 		...getBlockEntries( 'frontend.{t,j}s{,x}', cartAndCheckoutBlocks ),
 		blocksCheckout: './packages/checkout/index.js',
