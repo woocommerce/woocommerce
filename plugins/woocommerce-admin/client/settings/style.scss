@@ -74,4 +74,8 @@
 	.components-base-control {
 		flex: 1;
 	}
+
+	.components-input-control__container {
+		max-width: 420px;
+	}
 }
