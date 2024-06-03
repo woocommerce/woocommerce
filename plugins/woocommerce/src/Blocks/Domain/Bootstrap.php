@@ -113,7 +113,7 @@ class Bootstrap {
 
 		add_action(
 			'admin_init',
-			function() {
+			function () {
 				// Delete this notification because the blocks are included in WC Core now. This will handle any sites
 				// with lingering notices.
 				InboxNotifications::delete_surface_cart_checkout_blocks_notification();
@@ -184,7 +184,7 @@ class Bootstrap {
 		}
 		add_action(
 			'admin_notices',
-			function() {
+			function () {
 				echo '<div class="error"><p>';
 				printf(
 					/* translators: %1$s is the node install command, %2$s is the install command, %3$s is the build command, %4$s is the watch command. */
@@ -224,19 +224,19 @@ class Bootstrap {
 		);
 		$this->container->register(
 			AssetDataRegistry::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				return new AssetDataRegistry( $container->get( AssetApi::class ) );
 			}
 		);
 		$this->container->register(
 			AssetsController::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				return new AssetsController( $container->get( AssetApi::class ) );
 			}
 		);
 		$this->container->register(
 			PaymentMethodRegistry::class,
-			function() {
+			function () {
 				return new PaymentMethodRegistry();
 			}
 		);
@@ -287,51 +287,51 @@ class Bootstrap {
 		);
 		$this->container->register(
 			DraftOrders::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				return new DraftOrders( $container->get( Package::class ) );
 			}
 		);
 		$this->container->register(
 			CreateAccount::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				return new CreateAccount( $container->get( Package::class ) );
 			}
 		);
 		$this->container->register(
 			GoogleAnalytics::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				$asset_api = $container->get( AssetApi::class );
 				return new GoogleAnalytics( $asset_api );
 			}
 		);
 		$this->container->register(
 			Notices::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				return new Notices( $container->get( Package::class ) );
 			}
 		);
 		$this->container->register(
 			Hydration::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				return new Hydration( $container->get( AssetDataRegistry::class ) );
 			}
 		);
 		$this->container->register(
 			CheckoutFields::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				return new CheckoutFields( $container->get( AssetDataRegistry::class ) );
 			}
 		);
 		$this->container->register(
 			CheckoutFieldsAdmin::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				$checkout_fields_controller = $container->get( CheckoutFields::class );
 				return new CheckoutFieldsAdmin( $checkout_fields_controller );
 			}
 		);
 		$this->container->register(
 			CheckoutFieldsFrontend::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				$checkout_fields_controller = $container->get( CheckoutFields::class );
 				return new CheckoutFieldsFrontend( $checkout_fields_controller );
 			}
@@ -353,28 +353,28 @@ class Bootstrap {
 		// Maintains backwards compatibility with previous Store API namespace.
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\StoreApi\Formatters',
-			function( Container $container ) {
+			function ( Container $container ) {
 				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\Formatters', '6.4.0', 'Automattic\WooCommerce\StoreApi\Formatters', '6.5.0' );
 				return $container->get( StoreApi::class )->container()->get( \Automattic\WooCommerce\StoreApi\Formatters::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi',
-			function( Container $container ) {
+			function ( Container $container ) {
 				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi', '6.4.0', 'Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema', '6.5.0' );
 				return $container->get( StoreApi::class )->container()->get( \Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\StoreApi\SchemaController',
-			function( Container $container ) {
+			function ( Container $container ) {
 				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\SchemaController', '6.4.0', 'Automattic\WooCommerce\StoreApi\SchemaController', '6.5.0' );
 				return $container->get( StoreApi::class )->container()->get( SchemaController::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\StoreApi\RoutesController',
-			function( Container $container ) {
+			function ( Container $container ) {
 				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\RoutesController', '6.4.0', 'Automattic\WooCommerce\StoreApi\RoutesController', '6.5.0' );
 				return $container->get( StoreApi::class )->container()->get( RoutesController::class );
 			}
@@ -411,13 +411,13 @@ class Bootstrap {
 		);
 		$this->container->register(
 			TasksController::class,
-			function() {
+			function () {
 				return new TasksController();
 			}
 		);
 		$this->container->register(
 			QueryFilters::class,
-			function() {
+			function () {
 				return new QueryFilters();
 			}
 		);
@@ -492,28 +492,28 @@ class Bootstrap {
 	protected function register_payment_methods() {
 		$this->container->register(
 			Cheque::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				$asset_api = $container->get( AssetApi::class );
 				return new Cheque( $asset_api );
 			}
 		);
 		$this->container->register(
 			PayPal::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				$asset_api = $container->get( AssetApi::class );
 				return new PayPal( $asset_api );
 			}
 		);
 		$this->container->register(
 			BankTransfer::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				$asset_api = $container->get( AssetApi::class );
 				return new BankTransfer( $asset_api );
 			}
 		);
 		$this->container->register(
 			CashOnDelivery::class,
-			function( Container $container ) {
+			function ( Container $container ) {
 				$asset_api = $container->get( AssetApi::class );
 				return new CashOnDelivery( $asset_api );
 			}
