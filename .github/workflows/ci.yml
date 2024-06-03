@@ -140,11 +140,19 @@ jobs:
               name: 'Checkout'
 
             - uses: './.github/actions/setup-woocommerce-monorepo'
-              name: 'Setup Monorepo'
-              id: 'setup-monorepo'
+              name: 'Install Monorepo'
+              id: 'install-monorepo'
               with:
                   install: '${{ matrix.projectName }}...'
-                  build: ${{ needs.project-jobs.outputs.release-artifact != '' && matrix.projectName || 'false' }}
+                  build: 'false'
+                  
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              if: ${{ needs.project-jobs.outputs.release-artifact != '' }}
+              name: 'Build project'
+              id: 'build-project'
+              with:
+                install: 'false'
+                build: ${{ matrix.projectName }}
 
             - name: Get commit message
               id: get_commit_message
@@ -161,6 +169,13 @@ jobs:
                   fi
                   echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
               shell: bash
+              
+            - uses: actions/github-script@v7
+              name: 'Update wp-env config'
+              if: ${{ needs.project-jobs.outputs.release-artifact != '' }}
+              with:
+                script: |
+                  console.log(${{ toJson( needs.project-jobs.outputs.release-artifact ) }})
 
             - name: 'Start Test Environment'
               id: 'prepare-test-environment'
