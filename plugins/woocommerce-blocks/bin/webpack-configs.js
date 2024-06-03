@@ -385,16 +385,6 @@ const getFrontConfig = ( options = {} ) => {
 				minSize: 200000,
 				automaticNameDelimiter: '--',
 				cacheGroups: {
-					commons: {
-						test: /[\\/]node_modules[\\/]/,
-						name: 'wc-blocks-vendors',
-						chunks: ( chunk ) => {
-							return (
-								chunk.name !== 'product-button-interactivity'
-							);
-						},
-						enforce: true,
-					},
 					...getCacheGroups(),
 				},
 			},

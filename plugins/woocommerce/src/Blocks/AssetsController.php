@@ -62,8 +62,6 @@ final class AssetsController {
 		// The price package is shared externally so has no blocks prefix.
 		$this->api->register_script( 'wc-price-format', 'assets/client/blocks/price-format.js', array(), false );
 
-		$this->api->register_script( 'wc-blocks-vendors-frontend', $this->api->get_block_asset_build_path( 'wc-blocks-vendors-frontend' ), array(), false );
-
 		// Cart and checkout frontend scripts.
 		$cart_checkout_common_deps = array( 'cart-checkout-vendors-frontend', 'cart-checkout-base-frontend' );
 		$this->api->register_script( 'cart-checkout-vendors-frontend', $this->api->get_block_asset_build_path( 'cart-checkout-vendors-frontend' ), array(), false );
