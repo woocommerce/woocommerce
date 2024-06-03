@@ -73,12 +73,7 @@ const config = {
 		navigationTimeout: 20 * 1000,
 	},
 	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
-	projects: [
-		{
-			name: 'default',
-			use: { ...devices[ 'Desktop Chrome' ] },
-		},
-	],
+	projects: [],
 };
 
 module.exports = config;

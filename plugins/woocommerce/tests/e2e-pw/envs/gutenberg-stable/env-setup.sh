@@ -2,4 +2,9 @@
 
 set -eo pipefail
 
-PLUGIN_REPOSITORY='WordPress/gutenberg' PLUGIN_NAME=Gutenberg PLUGIN_SLUG=gutenberg ../../bin/install-plugin.sh
+SCRIPT_PATH=$(
+  cd "$(dirname "${BASH_SOURCE[0]}")" || return
+  pwd -P
+)
+
+PLUGIN_REPOSITORY='WordPress/gutenberg' PLUGIN_NAME=Gutenberg PLUGIN_SLUG=gutenberg "$SCRIPT_PATH"/../../bin/install-plugin.sh
