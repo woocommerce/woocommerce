@@ -127,11 +127,7 @@ const initializeAssembleHub = () => {
 		welcomeGuideTemplate: false,
 		showListViewByDefault: false,
 		showBlockBreadcrumbs: true,
-		isDistractionFree: true,
 	} );
-
-	// @ts-expect-error No types for this exist yet.
-	dispatch( preferencesStore ).set( 'core', 'distractionFree', true );
 
 	// @ts-ignore No types for this exist yet.
 	dispatch( editSiteStore ).updateSettings( settings );
