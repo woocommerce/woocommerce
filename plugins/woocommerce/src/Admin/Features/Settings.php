@@ -71,6 +71,7 @@ class Settings {
 		}
 
 		$settings['settingsPages'] = $pages;
+		$settings['settingsNonce'] = wp_create_nonce( 'woocommerce-settings' );
 
 		return $settings;
 	}
