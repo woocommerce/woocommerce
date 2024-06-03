@@ -12,6 +12,7 @@ import { MediaItem } from '@wordpress/media-utils';
 import { MediaLibraryMenuItem } from '../../menu-items/media-library-menu-item';
 import { UploadFilesMenuItem } from '../../menu-items/upload-files-menu-item';
 import { mapUploadImageToImage } from '../../../utils/map-upload-image-to-image';
+import { VariationQuickUpdateMenuItem } from '../variation-actions-menus';
 import type { ImageActionsMenuProps } from './types';
 
 export function ImageActionsMenu( {
@@ -91,6 +92,14 @@ export function ImageActionsMenu( {
 							) }
 						/>
 					</MenuGroup>
+
+					<VariationQuickUpdateMenuItem.Slot
+						group={ 'image-actions-menu' }
+						onChange={ onChange }
+						onClose={ onClose }
+						selection={ selection }
+						supportsMultipleSelection={ false }
+					/>
 				</div>
 			) }
 		/>
