@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+WooCommerce: collect taxonomies before to record the `product_add_publish` event
