@@ -171,22 +171,16 @@ export const hidePopoverWhenMouseLeaveIframe = (
 	iframeRef: HTMLElement,
 	setPopoverStatus: ( popoverStatus: PopoverStatus ) => void
 ) => {
-	const handleMouseEnter = () => {
-		setPopoverStatus( PopoverStatus.VISIBLE );
-	};
-
 	const handleMouseLeave = () => {
 		setPopoverStatus( PopoverStatus.HIDDEN );
 	};
 
 	if ( iframeRef ) {
-		iframeRef.addEventListener( 'mouseenter', handleMouseEnter );
 		iframeRef.addEventListener( 'mouseleave', handleMouseLeave );
 	}
 
 	return () => {
 		if ( iframeRef ) {
-			iframeRef.removeEventListener( 'mouseenter', handleMouseEnter );
 			iframeRef.removeEventListener( 'mouseleave', handleMouseLeave );
 		}
 	};
