@@ -95,7 +95,12 @@ class Init {
 			return $product;
 		}
 		if ( ! $product->meta_exists( '_product_template_id' ) ) {
-			$product_template_id = TemplateMatching::determine_product_template( $product, $this->product_templates );
+			/**
+			 * Allows to determine a product template id based on the product data.
+			 *
+			 * @since 9.1.0
+			 */
+			$product_template_id = apply_filters( 'woocommerce_product_editor_determine_product_template', '', $product );
 			if ( $product_template_id ) {
 				$product->add_meta_data( '_product_template_id', $product_template_id, true );
 				$product->save_meta_data();

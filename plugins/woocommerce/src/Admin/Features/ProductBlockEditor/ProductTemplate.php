@@ -69,13 +69,6 @@ class ProductTemplate {
 	private $is_selectable_by_user = true;
 
 	/**
-	 * Function that can be used to match a product to the template.
-	 *
-	 * @var function
-	 */
-	private $match_fn;
-
-	/**
 	 * ProductTemplate constructor
 	 *
 	 * @param array $data The data.
@@ -103,10 +96,6 @@ class ProductTemplate {
 
 		if ( isset( $data['is_selectable_by_user'] ) ) {
 			$this->is_selectable_by_user = $data['is_selectable_by_user'];
-		}
-
-		if ( isset( $data['match_fn'] ) ) {
-			$this->match_fn = $data['match_fn'];
 		}
 	}
 
@@ -180,15 +169,6 @@ class ProductTemplate {
 	 */
 	public function get_icon() {
 		return $this->icon;
-	}
-
-	/**
-	 * Get the match function.
-	 *
-	 * @return function The match function.
-	 */
-	public function get_match_fn() {
-		return $this->match_fn;
 	}
 
 	/**
