@@ -35,6 +35,20 @@ abstract class AbstractSchemaType {
     protected $readonly = false;
 
     /**
+     * Validation callback.
+     *
+     * @var string
+     */
+    protected $callback = null;
+
+    /**
+     * Validation callback args.
+     *
+     * @var array
+     */
+    protected $callback_args = array();
+
+    /**
      * Context.
      *
      * @var array
@@ -111,6 +125,13 @@ abstract class AbstractSchemaType {
             $json['readonly'] = true;
         }
 
+        if ( $this->callback ) {
+            $json['$filters'] = array(
+                '$func' => $this->callback,
+                '$vars' => $this->callback_args,
+            );
+        }
+
         return $json;
     }
 
@@ -119,6 +140,18 @@ abstract class AbstractSchemaType {
      */
     public function is_required() {
         return $this->required;
+    }
+
+    /**
+     * Add a validation callback.
+     *
+     * @param string $callback Callback.
+     * @param array  $args Callback arguments.
+     */
+    public function validate( $callback, $args = array() ) {
+        $this->callback      = $callback;
+        $this->callback_args = $args;
+        return $this;
     }
 
     /**
