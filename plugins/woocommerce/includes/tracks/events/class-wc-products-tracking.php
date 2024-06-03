@@ -16,6 +16,16 @@ require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
  * This class adds actions to track usage of WooCommerce Products.
  */
 class WC_Products_Tracking {
+	/**
+	 * Collect terms data for tracking.
+	 */
+	private $tracking_data = [
+        'attributes'                => [],
+        'category_ids'              => [],
+        'tag_ids'                   => [],
+		'post_id'                   => null,
+		'tracked_product_published' => false,
+    ];
 
 	/**
 	 * Tracks source.
@@ -29,7 +39,9 @@ class WC_Products_Tracking {
 		add_action( 'load-edit.php', array( $this, 'track_products_view' ), 10 );
 		add_action( 'load-edit-tags.php', array( $this, 'track_categories_and_tags_view' ), 10, 2 );
 		add_action( 'edit_post', array( $this, 'track_product_updated' ), 10, 2 );
-		add_action( 'wp_after_insert_post', array( $this, 'track_product_published' ), 10, 4 );
+		add_action( 'set_object_terms', array( $this, 'collect_tracking_data' ), 10, 6 );
+		add_action( 'wp_after_insert_post', array( $this, 'prepare_track_product_published' ), 10, 4 );
+		add_action( 'shutdown', array( $this, 'track_product_published' ) );
 		add_action( 'created_product_cat', array( $this, 'track_product_category_created' ) );
 		add_action( 'edited_product_cat', array( $this, 'track_product_category_updated' ) );
 		add_action( 'add_meta_boxes_product', array( $this, 'track_product_updated_client_side' ), 10 );
@@ -300,6 +312,35 @@ class WC_Products_Tracking {
 		);
 	}
 
+    
+	/**
+	 * Collect terms data for tracking.
+	 * This is required because the `set_object_terms` action is called multiple times,
+	 * and we need to collect the terms data before the product is published.
+	 *
+	 * @param int    $object_id  Object ID.
+	 * @param array  $terms      Array of term IDs.
+	 * @param array  $tt_ids     Array of term taxonomy IDs.
+	 * @param string $taxonomy   Taxonomy slug.
+	 * @param bool   $append     Whether to append terms to the object.
+	 * @param array  $old_tt_ids Old array of term taxonomy IDs.
+	 */
+	public function collect_tracking_data( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
+		switch ( $taxonomy ) {
+			case 'product_attribute':
+				$this->tracking_data[ 'attributes' ] = $terms;
+				break;
+
+			case 'product_cat':
+				$this->tracking_data[ 'category_ids' ] = $terms;
+				break;
+
+			case 'product_tag':
+				$this->tracking_data[ 'tag_ids' ] = $terms;
+				break;
+		}
+	}
+
 	/**
 	 * Send a Tracks event when a product is published.
 	 *
@@ -309,7 +350,7 @@ class WC_Products_Tracking {
 	 * @param null|WP_Post $post_before Null for new posts, the WP_Post object prior
 	 *                                  to the update for updated posts.
 	 */
-	public function track_product_published( $post_id, $post, $update, $post_before ) {
+	public function prepare_track_product_published( $post_id, $post, $update, $post_before ) {
 		if (
 			'product' !== $post->post_type ||
 			'publish' !== $post->post_status ||
@@ -318,14 +359,50 @@ class WC_Products_Tracking {
 			return;
 		}
 
+		// Collect the post ID to track the product when it's published.
+		$this->tracking_data['post_id'] = $post_id;
+	}
+
+	/**
+	 * Send a Tracks event when a product is published.
+	 *
+	 * @param int          $post_id     Post ID.
+	 * @param WP_Post      $post        Post object.
+	 * @param bool         $update      Whether this is an existing post being updated.
+	 * @param null|WP_Post $post_before Null for new posts, the WP_Post object prior
+	 *                                  to the update for updated posts.
+	 */
+	public function track_product_published() {
+		// Check if we have a product to track.
+		if ( ! isset( $this->tracking_data['post_id'] ) ) {
+			return;
+		}
+
+		// If we've already tracked this product, don't track it again.
+		if ( $this->tracking_data['tracked_product_published'] ) {
+			return;
+		}
+
+		$post_id = $this->tracking_data['post_id'];
+		$this->tracking_data['post_id'] = null;
+
 		$product = wc_get_product( $post_id );
 
 		$product_type_options        = self::get_product_type_options( $post_id );
 		$product_type_options_string = self::get_product_type_options_string( $product_type_options );
 
+		/*
+		 * Merge the attributes, category IDs, and tag IDs collected during the
+		 * product creation process with the current product's attributes, category IDs,
+		 * and tag IDs.
+		 */
+		$attributes   = array_unique( array_merge( array_keys( $product->get_attributes() ), $this->tracking_data['attributes'] ) );
+		$category_ids = array_unique( array_merge( $product->get_category_ids(), $this->tracking_data['category_ids'] ) );
+		$tag_ids	  = array_unique( array_merge( $product->get_tag_ids(), $this->tracking_data['tag_ids'] ) );
+
 		$properties = array(
-			'attributes'           => count( $product->get_attributes() ),
-			'categories'           => count( $product->get_category_ids() ),
+			'attributes'           => count( $attributes ),
+			'categories'           => count( $category_ids ),
 			'cross_sells'          => ! empty( $product->get_cross_sell_ids() ) ? 'yes' : 'no',
 			'description'          => $product->get_description() ? 'yes' : 'no',
 			'dimensions'           => wc_format_dimensions( $product->get_dimensions( false ) ) !== 'N/A' ? 'yes' : 'no',
@@ -343,12 +420,15 @@ class WC_Products_Tracking {
 			'sale_price'           => $product->get_sale_price() ? 'yes' : 'no',
 			'source'               => apply_filters( 'woocommerce_product_source', self::is_importing() ? 'import' : self::TRACKS_SOURCE ),
 			'short_description'    => $product->get_short_description() ? 'yes' : 'no',
-			'tags'                 => count( $product->get_tag_ids() ),
+			'tags'                 => count( $tag_ids ),
 			'upsells'              => ! empty( $product->get_upsell_ids() ) ? 'yes' : 'no',
 			'weight'               => $product->get_weight() ? 'yes' : 'no',
 		);
 
 		WC_Tracks::record_event( 'product_add_publish', $properties );
+
+		// Ensure we don't track this product again.
+		$this->tracking_data['tracked_product_published'] = true;
 	}
 
 	/**
