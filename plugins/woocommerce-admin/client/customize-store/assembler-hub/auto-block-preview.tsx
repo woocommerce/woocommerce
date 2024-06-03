@@ -64,10 +64,6 @@ export type ScaledBlockPreviewProps = {
 	isPatternPreview: boolean;
 };
 
-export type VirtualElement = Pick< Element, 'getBoundingClientRect' > & {
-	ownerDocument?: Document;
-};
-
 function ScaledBlockPreview( {
 	viewportWidth,
 	containerWidth,

@@ -124,7 +124,7 @@ const updateSelectedBlock = (
 ) => {
 	const body = documentElement.ownerDocument.body;
 
-	const onClickListener = ( event: MouseEvent ) => {
+	const handleOnClick = ( event: MouseEvent ) => {
 		const clickedBlockClientId = selectBlockOnHover( event, {
 			selectBlockByClientId: selectBlock,
 			getBlockParents,
@@ -140,7 +140,7 @@ const updateSelectedBlock = (
 		} );
 	};
 
-	const onMouseMoveListener = ( event: MouseEvent ) => {
+	const handleMouseMove = ( event: MouseEvent ) => {
 		const selectedBlockClientId = selectBlockOnHover( event, {
 			selectBlockByClientId: selectBlock,
 			getBlockParents,
@@ -158,12 +158,12 @@ const updateSelectedBlock = (
 		}
 	};
 
-	body.addEventListener( 'click', onClickListener );
-	body.addEventListener( 'mousemove', onMouseMoveListener );
+	body.addEventListener( 'click', handleOnClick );
+	body.addEventListener( 'mousemove', handleMouseMove );
 
 	return () => {
-		body.removeEventListener( 'click', onClickListener );
-		body.removeEventListener( 'mousemove', onMouseMoveListener );
+		body.removeEventListener( 'click', handleOnClick );
+		body.removeEventListener( 'mousemove', handleMouseMove );
 	};
 };
 
