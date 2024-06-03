@@ -167,8 +167,7 @@ jobs:
                   echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
               shell: bash
               
-            - uses: actions/github-script@v7
-              name: 'Update wp-env config'
+            - name: 'Update wp-env config'
               if: ${{ inputs.tag != '' }}
               env:
                   RELEASE_TAG: ${{ inputs.tag }}
