@@ -117,9 +117,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			// confirm that some of the optional extensions aren't present
 			await expect( page.getByText( 'MailPoet' ) ).not.toBeAttached();
 			await expect( page.getByText( 'Pinterest' ) ).not.toBeAttached();
-			await expect(
-				page.getByText( 'Google for WooCommerce' )
-			).not.toBeAttached();
+			await expect( page.getByText( 'Google for WooCommerce' ) ).not.toBeAttached();
 		} );
 
 		await test.step( 'Confirm that information from core profiler saved', async () => {
