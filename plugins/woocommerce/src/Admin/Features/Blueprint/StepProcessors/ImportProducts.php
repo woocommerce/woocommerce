@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessors;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessor;
+use Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessorResult;
 
 class ImportProducts implements StepProcessor {
 	// Do we really need it? If so, make it reusuable.
@@ -44,7 +45,7 @@ class ImportProducts implements StepProcessor {
 				AND tt.taxonomy IN ( '" . implode( "','", array_map( 'esc_sql', get_object_taxonomies( 'product' ) ) ) . "' )
 			" );
 	}
-	public function process( $schema ) {
+	public function process( $schema ): StepProcessorResult {
 		include_once WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php';
 		include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
 
@@ -74,7 +75,6 @@ class ImportProducts implements StepProcessor {
 			$this->cleanup();
 		}
 		// @todo check for errors.
-
-		return true;
+		return StepProcessorResult::success();
 	}
 }

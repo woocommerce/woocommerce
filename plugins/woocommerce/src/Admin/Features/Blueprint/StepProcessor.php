@@ -3,5 +3,5 @@
 namespace Automattic\WooCommerce\Admin\Features\Blueprint;
 
 interface StepProcessor {
-	public function process($schema);
+	public function process($schema): StepProcessorResult;
 }

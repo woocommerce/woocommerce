@@ -3,10 +3,11 @@
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessors;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessor;
+use Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessorResult;
 use WC_Tax;
 
 class ConfigureTax implements StepProcessor {
-	public function process($schema) {
+	public function process($schema): StepProcessorResult {
 		foreach($schema->rates as $rate) {
 			$tax_rate = array_intersect_key(
 				(array) $rate,
@@ -35,5 +36,7 @@ class ConfigureTax implements StepProcessor {
 				WC_Tax::_update_tax_rate_cities( $tax_rate_id, array_map( 'wc_clean', array_map( 'wp_unslash', $cities ) ) );
 			}
 		}
+
+		return StepProcessorResult::success();
 	}
 }

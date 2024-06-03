@@ -3,9 +3,10 @@
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessors;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessor;
+use Automattic\WooCommerce\Admin\Features\Blueprint\StepProcessorResult;
 
 class EnablePaymentMethods implements StepProcessor {
-	public function process($schema) {
+	public function process($schema): StepProcessorResult {
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 		foreach ($schema->gateway_ids as $gateway_id) {
 			if (!isset($payment_gateways[$gateway_id])) {
@@ -18,6 +19,6 @@ class EnablePaymentMethods implements StepProcessor {
 			do_action( 'woocommerce_update_options' );
 		}
 
-		return true;
+		return StepProcessorResult::success();
 	}
 }
