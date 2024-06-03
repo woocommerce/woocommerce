@@ -256,13 +256,13 @@ class Bootstrap {
 		);
 		$this->container->register(
 			BlockTemplatesRegistry::class,
-			function ( Container $container ) {
+			function () {
 				return new BlockTemplatesRegistry();
 			}
 		);
 		$this->container->register(
 			BlockTemplatesController::class,
-			function ( Container $container ) {
+			function () {
 				return new BlockTemplatesController();
 			}
 		);
