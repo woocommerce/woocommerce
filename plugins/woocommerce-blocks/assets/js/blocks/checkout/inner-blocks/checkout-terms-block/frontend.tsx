@@ -20,9 +20,11 @@ const FrontendBlock = ( {
 	checkbox,
 	instanceId,
 	className,
+	showSeparator,
 }: {
 	text: string;
 	checkbox: boolean;
+	showSeparator: string | boolean;
 	instanceId: string;
 	className?: string;
 } ): JSX.Element => {
@@ -76,6 +78,8 @@ const FrontendBlock = ( {
 				'wc-block-checkout__terms',
 				{
 					'wc-block-checkout__terms--disabled': isDisabled,
+					'wc-block-checkout__terms--with-separator':
+						showSeparator !== 'false' && showSeparator !== false,
 				},
 				className
 			) }
