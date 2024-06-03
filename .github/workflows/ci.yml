@@ -38,7 +38,6 @@ jobs:
             e2e-test-jobs: ${{ steps.project-jobs.outputs.e2e-test-jobs }}
             api-test-jobs: ${{ steps.project-jobs.outputs.api-test-jobs }}
             performance-test-jobs: ${{ steps.project-jobs.outputs.performance-test-jobs }}
-            release-artifact: ${{ steps.project-jobs.outputs.release-artifact }}
         steps:
             - uses: 'actions/checkout@v4'
               name: 'Checkout'
@@ -59,12 +58,6 @@ jobs:
                       }
 
                       let githubEvent = ${{ toJson( github.event_name ) }};
-                    
-                      if (! ['pull_request', 'push'].includes( githubEvent )) {
-                        const tag = ${{ toJson( inputs.tag ) }};
-                        core.setOutput( 'release-artifact', tag );
-                      }
-                    
                       let trigger = ${{ toJson( inputs.trigger ) }};
                     
                       if ( trigger ) {
@@ -147,7 +140,7 @@ jobs:
                   build: 'false'
                   
             - uses: './.github/actions/setup-woocommerce-monorepo'
-              if: ${{ needs.project-jobs.outputs.release-artifact != '' }}
+              if: ${{ inputs.tag == '' }}
               name: 'Build project'
               id: 'build-project'
               with:
@@ -172,10 +165,10 @@ jobs:
               
             - uses: actions/github-script@v7
               name: 'Update wp-env config'
-              if: ${{ needs.project-jobs.outputs.release-artifact != '' }}
+              if: ${{ inputs.tag != '' }}
               with:
                 script: |
-                  console.log(${{ toJson( needs.project-jobs.outputs.release-artifact ) }})
+                  console.log(${{ toJson( inputs.tag ) }})
 
             - name: 'Start Test Environment'
               id: 'prepare-test-environment'
