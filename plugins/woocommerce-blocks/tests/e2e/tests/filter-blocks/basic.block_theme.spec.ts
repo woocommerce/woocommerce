@@ -6,27 +6,27 @@ import { test, expect } from '@woocommerce/e2e-utils';
 const filterBlocks = [
 	{
 		name: 'woocommerce/product-filter-price',
-		title: 'Product Filter: Price (Beta)',
+		title: 'Product Filter: Price (Experimental)',
 		heading: 'Filter by Price',
 	},
 	{
 		name: 'woocommerce/product-filter-stock-status',
-		title: 'Product Filter: Stock Status (Beta)',
+		title: 'Product Filter: Stock Status (Experimental)',
 		heading: 'Filter by Stock Status',
 	},
 	{
 		name: 'woocommerce/product-filter-rating',
-		title: 'Product Filter: Rating (Beta)',
+		title: 'Product Filter: Rating (Experimental)',
 		heading: 'Filter by Rating',
 	},
 	{
 		name: 'woocommerce/product-filter-attribute',
-		title: 'Product Filter: Attribute (Beta)',
+		title: 'Product Filter: Attribute (Experimental)',
 		heading: 'Filter by Attribute',
 	},
 	{
 		name: 'woocommerce/product-filter-active',
-		title: 'Product Filter: Active Filters (Beta)',
+		title: 'Product Filter: Active Filters (Experimental)',
 		heading: 'Active Filters',
 	},
 ];
