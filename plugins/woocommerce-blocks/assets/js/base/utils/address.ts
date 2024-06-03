@@ -193,12 +193,20 @@ export const isAddressComplete = (
 		{},
 		address.country
 	);
-
 	return addressForm.every(
 		( { key = '', hidden = false, required = false } ) => {
 			if ( hidden || ! required ) {
 				return true;
 			}
+
+			if (
+				key === 'first_name' ||
+				key === 'last_name' ||
+				key === 'address_1'
+			) {
+				return true;
+			}
+
 			return isValidAddressKey( key, address ) && address[ key ] !== '';
 		}
 	);
