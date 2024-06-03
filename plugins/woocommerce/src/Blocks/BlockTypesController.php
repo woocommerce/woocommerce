@@ -125,7 +125,7 @@ final class BlockTypesController {
 			array(
 				'slug'  => 'woocommerce-product-elements',
 				'title' => __( 'WooCommerce Product Elements', 'woocommerce' ),
-			)
+			),
 		);
 
 		return array_merge( $categories, $woocommerce_block_categories );
