@@ -248,7 +248,8 @@
 					},
 					"events": [
 						"pull_request",
-						"push"
+						"push",
+						"release-checks"
 					]
 				},
 				{
@@ -264,7 +265,7 @@
 					],
 					"changes": [],
 					"events": [
-						"daily-e2e"
+						"daily-e2e", "release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -283,7 +284,7 @@
 					],
 					"changes": [],
 					"events": [
-						"daily-e2e"
+						"daily-e2e", "release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -296,7 +297,7 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-e2e"
+						"daily-e2e", "release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -309,7 +310,7 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-e2e"
+						"daily-e2e", "release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -322,7 +323,7 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-e2e"
+						"daily-e2e", "release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -340,7 +341,7 @@
 						"--shard=5/5"
 					],
 					"events": [
-						"push"
+						"push", "release-checks"
 					],
 					"changes": [
 						"client/admin/config/*.json",
@@ -357,6 +358,50 @@
 							"disableHpos": true
 						}
 					}
+				},
+				{
+					"name": "Core e2e tests - PHP 8.1",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"phpVersion": "8.1"
+						}
+					},
+					"events": [
+						"release-checks"
+					]
+				},
+				{
+					"name": "Core e2e tests - WP latest-1",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "latest-1"
+						}
+					},
+					"events": [
+						"release-checks"
+					]
 				},
 				{
 					"name": "Core API tests",
