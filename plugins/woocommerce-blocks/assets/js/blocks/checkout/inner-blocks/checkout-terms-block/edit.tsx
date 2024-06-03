@@ -16,7 +16,7 @@ import {
 } from '@wordpress/components';
 import { PRIVACY_URL, TERMS_URL } from '@woocommerce/block-settings';
 import { ADMIN_URL } from '@woocommerce/settings';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -139,7 +139,7 @@ export const Edit = ( {
 				</PanelBody>
 			</InspectorControls>
 			<div
-				className={ classnames( 'wc-block-checkout__terms', {
+				className={ clsx( 'wc-block-checkout__terms', {
 					'wc-block-checkout__terms--with-separator': showSeparator,
 				} ) }
 			>
