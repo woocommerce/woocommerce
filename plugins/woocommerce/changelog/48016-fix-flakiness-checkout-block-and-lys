@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: fixing flakiness in checkout block and launch your store tests
