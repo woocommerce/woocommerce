@@ -380,6 +380,7 @@ jobs:
                   fi
 
             - name: 'Add annotation to workflow run linking to PR'
+              if: ${{ github.event_name == 'pull_request' }}
               run: |
                   echo "::notice::🔗🔗 The e2e report for this run is available at https://woocommerce.github.io/woocommerce-test-reports/pr/${{ github.event.pull_request.number }}/e2e"
 
