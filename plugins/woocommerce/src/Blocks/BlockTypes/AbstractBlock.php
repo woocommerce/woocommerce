@@ -151,11 +151,14 @@ abstract class AbstractBlock {
 			$data     = $this->asset_api->get_script_data( $this->get_block_type_script( 'path' ) );
 			$has_i18n = in_array( 'wp-i18n', $data['dependencies'], true );
 
+			$has_blocks_vendors = ! strpos( $this->get_block_type_script( 'handle' ), 'checkout' ) && ! strpos( $this->get_block_type_script( 'handle' ), 'cart' );
+			$vendors            = $has_blocks_vendors ? [ 'wc-blocks-vendors-frontend' ] : [];
 			$this->asset_api->register_script(
 				$this->get_block_type_script( 'handle' ),
 				$this->get_block_type_script( 'path' ),
 				array_merge(
 					$this->get_block_type_script( 'dependencies' ),
+					$vendors,
 					$this->integration_registry->get_all_registered_script_handles()
 				),
 				$has_i18n
