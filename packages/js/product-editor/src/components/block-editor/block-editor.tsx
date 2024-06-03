@@ -184,8 +184,6 @@ export function BlockEditor( {
 		{ enabled: productId !== -1 }
 	);
 
-	const isProductLoaded = product && Object.keys( product ).length > 0;
-
 	const productTemplateId = useMemo(
 		() =>
 			product?.meta_data?.find(
@@ -195,12 +193,13 @@ export function BlockEditor( {
 		[ product?.meta_data ]
 	);
 
-	const { productTemplate } = useProductTemplate( productTemplateId );
+	const { productTemplate } = useProductTemplate(
+		productTemplateId,
+		product
+	);
 
 	const { layoutTemplate } = useLayoutTemplate(
-		isProductLoaded
-			? getLayoutTemplateId( productTemplate, postType )
-			: undefined
+		getLayoutTemplateId( productTemplate, postType )
 	);
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
@@ -210,7 +209,12 @@ export function BlockEditor( {
 		{ id: productId !== -1 ? productId : 0 }
 	);
 
-	const isEditorLoading = ! ( settings && layoutTemplate && isProductLoaded );
+	const isEditorLoading =
+		! settings ||
+		! layoutTemplate ||
+		// variations don't have a product template
+		( postType !== 'product_variation' && ! productTemplate ) ||
+		productId === -1;
 
 	useLayoutEffect( () => {
 		if ( isEditorLoading ) {

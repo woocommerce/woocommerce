@@ -87,17 +87,64 @@ describe( 'useProductTemplate', () => {
 
 	it( 'should return the product template if it exists', () => {
 		const { result } = renderHook( () =>
-			useProductTemplate( 'template-3' )
+			useProductTemplate( 'template-3', { type: 'simple' } )
 		);
 
 		expect( result.current.productTemplate?.id ).toEqual( 'template-3' );
 	} );
 
+	it( 'should return the first product template with a matching type in the productData if no matching product template by id', () => {
+		const { result } = renderHook( () =>
+			useProductTemplate( 'invalid-template-id', { type: 'grouped' } )
+		);
+
+		expect( result.current.productTemplate?.id ).toEqual( 'template-2' );
+	} );
+
+	it( 'should return the first product template with a matching type in the productData if no product template id is set', () => {
+		const { result } = renderHook( () =>
+			useProductTemplate( undefined, { type: 'grouped' } )
+		);
+
+		expect( result.current.productTemplate?.id ).toEqual( 'template-2' );
+	} );
+
 	it( 'should return undefined if no matching product template by id or type', () => {
 		const { result } = renderHook( () =>
-			useProductTemplate( 'invalid-template-id' )
+			useProductTemplate( 'invalid-template-id', { type: 'external' } )
 		);
 
 		expect( result.current.productTemplate ).toBeUndefined();
+	} );
+
+	it( 'should use the standard product template if no templateId is provided', () => {
+		const { result } = renderHook( () =>
+			useProductTemplate( undefined, { type: 'simple' } )
+		);
+
+		expect( result.current.productTemplate?.id ).toEqual(
+			'standard-product-template'
+		);
+	} );
+
+	it( 'should use the product type to match if the product template id matches a template with a different product type', () => {
+		const { result } = renderHook( () =>
+			useProductTemplate( 'template-2', { type: 'simple' } )
+		);
+
+		expect( result.current.productTemplate?.id ).toEqual( 'template-1' );
+	} );
+
+	it( 'should select the product template with the most matching fields if there are multiple matching templates', () => {
+		const { result } = renderHook( () =>
+			useProductTemplate( 'invalid-template-id', {
+				type: 'simple',
+				meta_data: [ { key: '_gift_card', value: 'yes' } ],
+			} )
+		);
+
+		expect( result.current.productTemplate?.id ).toEqual(
+			'gift-card-product-template'
+		);
 	} );
 } );
