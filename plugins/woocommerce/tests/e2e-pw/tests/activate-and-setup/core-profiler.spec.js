@@ -115,7 +115,9 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			// confirm that some of the optional extensions aren't present
 			await expect( page.getByText( 'MailPoet' ) ).toBeHidden();
 			await expect( page.getByText( 'Pinterest' ) ).toBeHidden();
-			await expect( page.getByText( 'Google for WooCommerce' ) ).toBeHidden();
+			await expect(
+				page.getByText( 'Google for WooCommerce', { exact: true } )
+			).toBeHidden();
 		} );
 
 		await test.step( 'Confirm that information from core profiler saved', async () => {
