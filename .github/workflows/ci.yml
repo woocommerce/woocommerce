@@ -38,7 +38,7 @@ jobs:
             e2e-test-jobs: ${{ steps.project-jobs.outputs.e2e-test-jobs }}
             api-test-jobs: ${{ steps.project-jobs.outputs.api-test-jobs }}
             performance-test-jobs: ${{ steps.project-jobs.outputs.performance-test-jobs }}
-            build-plugin: ${{ steps.project-jobs.outputs.build-plugin }}
+            release-artifact: ${{ steps.project-jobs.outputs.release-artifact }}
         steps:
             - uses: 'actions/checkout@v4'
               name: 'Checkout'
@@ -61,7 +61,8 @@ jobs:
                       let githubEvent = ${{ toJson( github.event_name ) }};
                     
                       if (! ['pull_request', 'push'].includes( githubEvent )) {
-                        core.setOutput( 'build-plugin', true );
+                        const tag = ${{ toJson( inputs.tag ) }};
+                        core.setOutput( 'release-artifact', tag );
                       }
                     
                       let trigger = ${{ toJson( inputs.trigger ) }};
@@ -143,7 +144,7 @@ jobs:
               id: 'setup-monorepo'
               with:
                   install: '${{ matrix.projectName }}...'
-                  build: ${{ needs.project-jobs.outputs.build-plugin == 'true' && matrix.projectName || 'false' }}
+                  build: ${{ needs.project-jobs.outputs.release-artifact != '' && matrix.projectName || 'false' }}
 
             - name: Get commit message
               id: get_commit_message
