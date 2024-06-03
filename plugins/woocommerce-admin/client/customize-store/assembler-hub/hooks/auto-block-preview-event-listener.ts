@@ -299,7 +299,6 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 			observers.push( inertObserver );
 			unsubscribeCallbacks.push( removeEventListenersSelectedBlock );
 			unsubscribeCallbacks.push( removeEventListenerHidePopover );
-		} else {
 		}
 
 		return () => {
