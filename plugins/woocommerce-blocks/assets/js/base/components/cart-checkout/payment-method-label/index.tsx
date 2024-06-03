@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { checkPayment } from '@woocommerce/icons';
 import {
 	Icon,
@@ -59,7 +59,7 @@ export const PaymentMethodLabel = ( {
 			objectHasProp( namedIcons, iconToCheck ),
 		[ hasIcon ]
 	);
-	const className = classnames( 'wc-block-components-payment-method-label', {
+	const className = clsx( 'wc-block-components-payment-method-label', {
 		'wc-block-components-payment-method-label--with-icon': hasIcon,
 	} );
 

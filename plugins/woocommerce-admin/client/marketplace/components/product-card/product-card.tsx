@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Card } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { ExtraProperties, queueRecordEvent } from '@woocommerce/tracks';
 import { useQuery } from '@woocommerce/navigation';
 
@@ -125,7 +125,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		return product.url;
 	};
 
-	const classNames = classnames(
+	const classNames = clsx(
 		'woocommerce-marketplace__product-card',
 		`woocommerce-marketplace__product-card--${ type }`,
 		{
