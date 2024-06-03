@@ -12,5 +12,5 @@ jobs:
     uses: ./.github/workflows/ci.yml
     with:
       trigger: 'release-checks'
-      tag: ${{ github.ref }}
+      tag: 'nightly'
     secrets: inherit
