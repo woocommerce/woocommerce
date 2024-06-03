@@ -44,18 +44,27 @@ class SchemaObject extends AbstractSchemaType {
     public function get_json() {
         $properties = array();
         $required   = array();
+
         foreach( $this->properties as $property_name => $property ) {
-            $properties[] = $property->get_json();
+            $properties[ $property_name ] = $property->get_json();
             if ( $property->is_required() ) {
                 $required[] = $property_name;
             }
         }
-        $json               = parent::get_json();
-        $json['title']      = $this->title;
+
+        $json  = parent::get_json();
+        unset( $json['context'] );
+
         $json['properties'] = $properties;
+
+        if ( $this->title ) {
+            $json['title']      = $this->title;
+        }
+
         if ( count( $required ) ) {
             $json['required'] = $required;
         }
+
         return $json;
     }
 

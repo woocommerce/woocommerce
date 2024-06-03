@@ -28,6 +28,20 @@ abstract class AbstractSchemaType {
     protected $description = null;
 
     /**
+     * Read only.
+     *
+     * @var bool
+     */
+    protected $readonly = false;
+
+    /**
+     * Context.
+     *
+     * @var array
+     */
+    protected $context = array( 'view', 'edit' );
+
+    /**
      * Schema type.
      *
      * @return string
@@ -56,6 +70,24 @@ abstract class AbstractSchemaType {
     }
 
     /**
+     * Set the property as required.
+     *
+     * @return SchemaTypeInterface
+     */
+    public function readonly() {
+        $this->readonly = true;
+        return $this;
+    }
+
+    /**
+     * Context
+     */
+    public function context( $context ) {
+        $this->context = $context;
+        return $this;
+    }
+
+    /**
      * Get the JSON.
      */
     public function get_json() {
@@ -69,6 +101,14 @@ abstract class AbstractSchemaType {
 
         if ( $this->format ) {
             $json['format'] = $this->format;
+        }
+
+        if ( $this->context ) {
+            $json['context'] = $this->context;
+        }
+
+        if ( $this->readonly ) {
+            $json['readonly'] = true;
         }
 
         return $json;
