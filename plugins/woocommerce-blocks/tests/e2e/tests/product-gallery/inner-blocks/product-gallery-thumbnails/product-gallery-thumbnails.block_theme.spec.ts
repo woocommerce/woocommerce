@@ -1,418 +1,204 @@
 /**
  * External dependencies
  */
-import { Locator, Page } from '@playwright/test';
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
-/**
- * Internal dependencies
- */
-import { ProductGalleryPage } from '../../product-gallery.page';
-
-const blockData = {
-	name: 'woocommerce/product-gallery-thumbnails',
-	mainClass: '.wp-block-woocommerce-product-gallery-thumbnails',
-	selectors: {
-		frontend: {},
-		editor: {
-			thumbnails: '.wp-block-woocommerce-product-gallery-thumbnails',
-			noThumbnailsOption: 'button[data-value=off]',
-			leftPositionThumbnailsOption: 'button[data-value=left]',
-			bottomPositionThumbnailsOption: 'button[data-value=bottom]',
-			rightPositionThumbnailsOption: 'button[data-value=right]',
-		},
-	},
-	slug: 'single-product',
-	productPage: '/product/v-neck-t-shirt/',
-};
-
-const changeNumberOfThumbnailsInputValue = async (
-	page: Page,
-	numberOfThumbnailInput: Locator,
-	value: string
-) => {
-	await numberOfThumbnailInput.fill( value );
-	await page.keyboard.press( 'Enter' );
-};
-
-const test = base.extend< { pageObject: ProductGalleryPage } >( {
-	pageObject: async ( { page, editor, frontendUtils }, use ) => {
-		const pageObject = new ProductGalleryPage( {
-			page,
-			editor,
-			frontendUtils,
+test.describe( 'Product Gallery Thumbnails block', () => {
+	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
+		const template = await requestUtils.createTemplate( 'wp_template', {
+			slug: 'single-product',
+			title: 'Custom Single Product',
+			content: 'placeholder',
 		} );
-		await use( pageObject );
-	},
-} );
-test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editor } ) => {
+
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//${ blockData.slug }`,
+			postId: template.id,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
 
-		await editor.canvas
-			.locator( '[data-testid="product-image"]' )
-			.first()
-			.waitFor();
-	} );
+		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
 
-	test( 'Renders Product Gallery Thumbnails block on the editor and frontend side', async ( {
-		page,
-		editor,
-		pageObject,
-		frontendUtils,
-	} ) => {
 		await editor.insertBlock( {
 			name: 'woocommerce/product-gallery',
 		} );
-
-		const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
-			page: 'editor',
-		} );
-
-		await expect( thumbnailsBlock ).toBeVisible();
-
-		// Test the default (left) position of thumbnails by cross-checking:
-		// - The Gallery block has the classes "is-layout-flex" and "is-nowrap".
-		// - The Thumbnails block has a lower index than the Large Image block.
-		const groupBlock = editor.canvas
-			.locator( '[data-type="woocommerce/product-gallery"]' )
-			.locator( '[data-type="core/group"]' )
-			.first();
-
-		const groupBlockClassAttribute = await groupBlock.getAttribute(
-			'class'
-		);
-		expect( groupBlockClassAttribute ).toContain( 'is-layout-flex' );
-		expect( groupBlockClassAttribute ).toContain( 'is-nowrap' );
-
-		const isThumbnailsBlockEarlier = await editor.isBlockEarlierThan(
-			groupBlock,
-			'woocommerce/product-gallery-thumbnails',
-			'core/group'
-		);
-
-		expect( isThumbnailsBlockEarlier ).toBe( true );
-
-		await editor.saveSiteEditorEntities();
-
-		await page.goto( blockData.productPage );
-
-		const groupBlockFrontend = (
-			await frontendUtils.getBlockByClassWithParent(
-				'wp-block-group',
-				'woocommerce/product-gallery'
-			)
-		 ).first();
-
-		const groupBlockFrontendClassAttribute =
-			await groupBlockFrontend.getAttribute( 'class' );
-		expect( groupBlockFrontendClassAttribute ).toContain(
-			'is-layout-flex'
-		);
-		expect( groupBlockFrontendClassAttribute ).toContain( 'is-nowrap' );
-
-		const isThumbnailsFrontendBlockEarlier =
-			await frontendUtils.isBlockEarlierThanGroupBlock(
-				groupBlockFrontend,
-				'woocommerce/product-gallery-thumbnails'
-			);
-
-		expect( isThumbnailsFrontendBlockEarlier ).toBe( true );
 	} );
 
-	test.describe( `${ blockData.name } Settings`, () => {
-		test( 'Hide correctly the thumbnails', async ( { page, editor } ) => {
-			await editor.insertBlock( {
-				name: 'woocommerce/product-gallery',
-			} );
-
-			await editor.canvas
-				.locator( `[data-type="${ blockData.name }"]` )
-				.click();
-
-			await editor.openDocumentSettingsSidebar();
-
-			await page
-				.locator( blockData.selectors.editor.noThumbnailsOption )
-				.click();
-
-			await expect(
-				page.locator( blockData.selectors.editor.thumbnails )
-			).toBeHidden();
-
-			await editor.saveSiteEditorEntities();
-		} );
-
-		// We can test the left position of thumbnails by cross-checking:
-		// - The Gallery block has the classes "is-layout-flex" and "is-nowrap".
-		// - The Thumbnails block has a lower index than the Large Image block.
-		test( 'Position thumbnails on the left of the large image', async ( {
-			page,
-			editor,
-			frontendUtils,
-		} ) => {
-			// Currently we are adding the block under the legacy Product Image Gallery block, but in the future we have to add replace the product gallery block with this block.
-			const parentBlock = await editor.getBlockByName(
-				'woocommerce/product-image-gallery'
-			);
-			const clientId =
-				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
-			const parentClientId =
-				( await editor.getBlockRootClientId( clientId ) ) ?? '';
-
-			await editor.selectBlocks( parentBlock );
-			await editor.insertBlock(
-				{ name: 'woocommerce/product-gallery' },
-				{ clientId: parentClientId }
-			);
-			await ( await editor.getBlockByName( blockData.name ) ).click();
-
-			await editor.openDocumentSettingsSidebar();
-			await page
-				.locator(
-					blockData.selectors.editor.leftPositionThumbnailsOption
-				)
-				.click();
-
-			const groupBlock = editor.canvas
-				.locator( '[data-type="woocommerce/product-gallery"]' )
-				.locator( '[data-type="core/group"]' )
-				.first();
-
-			const groupBlockClassAttribute = await groupBlock.getAttribute(
-				'class'
-			);
-			expect( groupBlockClassAttribute ).toContain( 'is-layout-flex' );
-			expect( groupBlockClassAttribute ).toContain( 'is-nowrap' );
-
-			const isThumbnailsBlockEarlier = await editor.isBlockEarlierThan(
-				groupBlock,
-				'woocommerce/product-gallery-thumbnails',
-				'core/group'
-			);
-
-			expect( isThumbnailsBlockEarlier ).toBe( true );
-
-			await editor.saveSiteEditorEntities();
-
-			await page.goto( blockData.productPage );
-
-			const groupBlockFrontend = (
-				await frontendUtils.getBlockByClassWithParent(
-					'wp-block-group',
-					'woocommerce/product-gallery'
-				)
-			 ).first();
-
-			const groupBlockFrontendClassAttribute =
-				await groupBlockFrontend.getAttribute( 'class' );
-			expect( groupBlockFrontendClassAttribute ).toContain(
-				'is-layout-flex'
-			);
-			expect( groupBlockFrontendClassAttribute ).toContain( 'is-nowrap' );
-
-			const isThumbnailsFrontendBlockEarlier =
-				await frontendUtils.isBlockEarlierThanGroupBlock(
-					groupBlockFrontend,
-					'woocommerce/product-gallery-thumbnails'
-				);
-
-			expect( isThumbnailsFrontendBlockEarlier ).toBe( true );
-		} );
-
-		// We can test the bottom position of thumbnails by cross-checking:
-		// - The Gallery block has the classes "is-layout-flex" and "is-vertical".
-		// - The Thumbnails block has a higher index than the Large Image block.
-		test( 'Position thumbnails on the bottom of the large image', async ( {
-			page,
-			editor,
-			frontendUtils,
-		} ) => {
-			// Currently we are adding the block under the legacy Product Image Gallery block, but in the future we have to add replace the product gallery block with this block.
-			const parentBlock = await editor.getBlockByName(
-				'woocommerce/product-image-gallery'
-			);
-			const clientId =
-				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
-			const parentClientId =
-				( await editor.getBlockRootClientId( clientId ) ) ?? '';
-
-			await editor.selectBlocks( parentBlock );
-			await editor.insertBlock(
-				{ name: 'woocommerce/product-gallery' },
-				{ clientId: parentClientId }
-			);
-			await ( await editor.getBlockByName( blockData.name ) ).click();
-
-			await editor.openDocumentSettingsSidebar();
-			await page
-				.locator(
-					blockData.selectors.editor.bottomPositionThumbnailsOption
-				)
-				.click();
-
-			const groupBlock = editor.canvas
-				.locator( '[data-type="woocommerce/product-gallery"]' )
-				.locator( '[data-type="core/group"]' )
-				.first();
-
-			const groupBlockClassAttribute = await groupBlock.getAttribute(
-				'class'
-			);
-			expect( groupBlockClassAttribute ).toContain( 'is-layout-flex' );
-			expect( groupBlockClassAttribute ).toContain( 'is-vertical' );
-
-			const isThumbnailsBlockEarlier = await editor.isBlockEarlierThan(
-				groupBlock,
-				'woocommerce/product-gallery-thumbnails',
-				'core/group'
-			);
-
-			expect( isThumbnailsBlockEarlier ).toBe( false );
-
-			await editor.saveSiteEditorEntities();
-			await page.goto( blockData.productPage );
-
-			const groupBlockFrontend = (
-				await frontendUtils.getBlockByClassWithParent(
-					'wp-block-group',
-					'woocommerce/product-gallery'
-				)
-			 ).first();
-
-			const groupBlockFrontendClassAttribute =
-				await groupBlockFrontend.getAttribute( 'class' );
-			expect( groupBlockFrontendClassAttribute ).toContain(
-				'is-layout-flex'
-			);
-			expect( groupBlockFrontendClassAttribute ).toContain(
-				'is-vertical'
-			);
-
-			const isThumbnailsFrontendBlockEarlier =
-				await frontendUtils.isBlockEarlierThanGroupBlock(
-					groupBlockFrontend,
-					'woocommerce/product-gallery-thumbnails'
-				);
-
-			expect( isThumbnailsFrontendBlockEarlier ).toBe( false );
-		} );
-
-		// We can test the right position of thumbnails by cross-checking:
-		// - The Gallery block has the classes "is-layout-flex" and "is-nowrap".
-		// - The Thumbnails block has a higher index than the Large Image block.
-		test( 'Position thumbnails on the right of the large image', async ( {
-			page,
-			editor,
-			frontendUtils,
-		} ) => {
-			// Currently we are adding the block under the legacy Product Image Gallery block, but in the future we have to add replace the product gallery block with this block.
-			const parentBlock = await editor.getBlockByName(
-				'woocommerce/product-image-gallery'
-			);
-			const clientId =
-				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
-			const parentClientId =
-				( await editor.getBlockRootClientId( clientId ) ) ?? '';
-
-			await editor.selectBlocks( parentBlock );
-			await editor.insertBlock(
-				{ name: 'woocommerce/product-gallery' },
-				{ clientId: parentClientId }
-			);
-			await ( await editor.getBlockByName( blockData.name ) ).click();
-
-			await editor.openDocumentSettingsSidebar();
-			await page
-				.locator(
-					blockData.selectors.editor.rightPositionThumbnailsOption
-				)
-				.click();
-
-			const groupBlock = editor.canvas
-				.locator( '[data-type="woocommerce/product-gallery"]' )
-				.locator( '[data-type="core/group"]' )
-				.first();
-
-			const groupBlockClassAttribute = await groupBlock.getAttribute(
-				'class'
-			);
-			expect( groupBlockClassAttribute ).toContain( 'is-layout-flex' );
-			expect( groupBlockClassAttribute ).toContain( 'is-nowrap' );
-
-			const isThumbnailsBlockEarlier = await editor.isBlockEarlierThan(
-				groupBlock,
-				'woocommerce/product-gallery-thumbnails',
-				'core/group'
-			);
-
-			expect( isThumbnailsBlockEarlier ).toBe( false );
-
-			await editor.saveSiteEditorEntities();
-			await page.goto( blockData.productPage );
-
-			const groupBlockFrontend = (
-				await frontendUtils.getBlockByClassWithParent(
-					'wp-block-group',
-					'woocommerce/product-gallery'
-				)
-			 ).first();
-
-			const groupBlockFrontendClassAttribute =
-				await groupBlockFrontend.getAttribute( 'class' );
-			expect( groupBlockFrontendClassAttribute ).toContain(
-				'is-layout-flex'
-			);
-			expect( groupBlockFrontendClassAttribute ).toContain( 'is-nowrap' );
-
-			const isThumbnailsFrontendBlockEarlier =
-				await frontendUtils.isBlockEarlierThanGroupBlock(
-					groupBlockFrontend,
-					'woocommerce/product-gallery-thumbnails'
-				);
-
-			expect( isThumbnailsFrontendBlockEarlier ).toBe( false );
-		} );
-
-		test( 'Ensure entered Number of Thumbnails rounds to integer', async ( {
-			page,
-			editor,
-		} ) => {
-			await editor.insertBlock( {
-				name: 'woocommerce/product-gallery',
-			} );
-
-			await editor.selectBlocks(
+	test( 'renders as expected', async ( { page, editor } ) => {
+		await test.step( 'in editor', async () => {
+			const productGalleryBlock = editor.canvas.locator(
 				'[data-type="woocommerce/product-gallery"]'
 			);
 
-			await editor.openDocumentSettingsSidebar();
+			await expect(
+				productGalleryBlock.locator(
+					'[data-type="woocommerce/product-gallery-thumbnails"]'
+				)
+			).toBeVisible();
 
-			const numberOfThumbnailInput = page.getByRole( 'spinbutton', {
-				name: 'Number of Thumbnails',
-			} );
+			await expect(
+				productGalleryBlock.locator(
+					`[data-type="woocommerce/product-gallery-thumbnails"]:left-of(
+						[data-type="woocommerce/product-gallery-large-image"]
+					)`
+				)
+			).toBeVisible();
 
-			await changeNumberOfThumbnailsInputValue(
-				page,
-				numberOfThumbnailInput,
-				'4.2'
+			await editor.saveSiteEditorEntities();
+		} );
+
+		await test.step( 'in frontend', async () => {
+			await page.goto( '/product/v-neck-t-shirt/' );
+			const productGalleryBlock = page.locator(
+				'[data-block-name="woocommerce/product-gallery"]'
 			);
 
-			const numberOfThumbnailsOnScreen = editor.canvas.locator(
+			await expect(
+				productGalleryBlock.locator(
+					'[data-block-name="woocommerce/product-gallery-thumbnails"]'
+				)
+			).toBeVisible();
+
+			await expect(
+				productGalleryBlock.locator(
+					`[data-block-name="woocommerce/product-gallery-thumbnails"]:left-of(
+						[data-block-name="woocommerce/product-gallery-large-image"]
+					)`
+				)
+			).toBeVisible();
+		} );
+	} );
+
+	test.describe( 'settings', () => {
+		test( 'hides thumbnails', async ( { page, editor } ) => {
+			await test.step( 'in editor', async () => {
+				const productGalleryBlock = editor.canvas.locator(
+					'[data-type="woocommerce/product-gallery"]'
+				);
+				const thumbailsBlock = productGalleryBlock.locator(
+					'[data-type="woocommerce/product-gallery-thumbnails"]'
+				);
+				await expect( thumbailsBlock ).toBeVisible();
+
+				await editor.selectBlocks( thumbailsBlock );
+
+				await editor.openDocumentSettingsSidebar();
+				await page
+					.getByLabel( 'Editor settings' )
+					.locator( 'button[data-value="off"]' )
+					.click();
+
+				await expect( thumbailsBlock ).toBeHidden();
+
+				await editor.saveSiteEditorEntities();
+			} );
+
+			await test.step( 'in frontend', async () => {
+				await page.goto( '/product/v-neck-t-shirt/' );
+
+				const productGalleryBlock = page.locator(
+					'[data-block-name="woocommerce/product-gallery"]'
+				);
+
+				await expect(
+					productGalleryBlock.locator(
+						'[data-block-name="woocommerce/product-gallery-large-image"]:visible'
+					)
+				).toBeVisible();
+
+				await expect(
+					productGalleryBlock.locator(
+						'[data-block-name="woocommerce/product-gallery-thumbnails"]'
+					)
+				).toBeHidden();
+			} );
+		} );
+
+		for ( const position of [ 'left', 'bottom', 'right' ] ) {
+			test( `positions thumbnails to the ${ position }`, async ( {
+				page,
+				editor,
+			} ) => {
+				const layoutClass = {
+					left: 'left-of',
+					bottom: 'below',
+					right: 'right-of',
+				}[ position ];
+
+				await test.step( 'in editor', async () => {
+					const productGalleryBlock = editor.canvas.locator(
+						'[data-type="woocommerce/product-gallery"]'
+					);
+
+					await editor.selectBlocks( productGalleryBlock );
+					await editor.openDocumentSettingsSidebar();
+					await page
+						.getByLabel( 'Editor settings' )
+						.locator( `button[data-value="${ position }"]` )
+						.click();
+
+					await expect(
+						productGalleryBlock.locator(
+							`[data-type="woocommerce/product-gallery-thumbnails"]:${ layoutClass }(
+								[data-type="woocommerce/product-gallery-large-image"]
+							)`
+						)
+					).toBeVisible();
+
+					await editor.saveSiteEditorEntities();
+				} );
+
+				await test.step( 'in frontend', async () => {
+					await page.goto( '/product/v-neck-t-shirt/' );
+					const productGalleryBlock = page.locator(
+						'[data-block-name="woocommerce/product-gallery"]'
+					);
+
+					await expect(
+						productGalleryBlock.locator(
+							'[data-block-name="woocommerce/product-gallery-thumbnails"]'
+						)
+					).toBeVisible();
+
+					await expect(
+						productGalleryBlock.locator(
+							`[data-block-name="woocommerce/product-gallery-thumbnails"]:${ layoutClass }(
+								[data-block-name="woocommerce/product-gallery-large-image"]
+							)`
+						)
+					).toBeVisible();
+				} );
+			} );
+		}
+
+		test( 'rounds the number of thumbnails to integer', async ( {
+			page,
+			editor,
+		} ) => {
+			const productGalleryBlock = editor.canvas.locator(
+				'[data-type="woocommerce/product-gallery"]'
+			);
+
+			await editor.selectBlocks( productGalleryBlock );
+
+			await editor.openDocumentSettingsSidebar();
+			const numberOfThumbnailInput = page
+				.getByLabel( 'Editor settings' )
+				.getByRole( 'spinbutton', {
+					name: 'Number of Thumbnails',
+				} );
+
+			await numberOfThumbnailInput.fill( '4.2' );
+			await page.keyboard.press( 'Enter' );
+
+			const numberOfThumbnailsOnScreen = productGalleryBlock.locator(
 				'.wc-block-product-gallery-thumbnails__thumbnail'
 			);
 
 			await expect( numberOfThumbnailsOnScreen ).toHaveCount( 4 );
 
-			await changeNumberOfThumbnailsInputValue(
-				page,
-				numberOfThumbnailInput,
-				'4.7'
-			);
+			await numberOfThumbnailInput.fill( '4.7' );
+			await page.keyboard.press( 'Enter' );
 
 			await expect( numberOfThumbnailsOnScreen ).toHaveCount( 5 );
 		} );
