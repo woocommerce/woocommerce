@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import type { ReactNode } from 'react';
 
 /**
@@ -19,10 +19,7 @@ const ProductBadge = ( {
 }: ProductBadgeProps ): JSX.Element => {
 	return (
 		<div
-			className={ classNames(
-				'wc-block-components-product-badge',
-				className
-			) }
+			className={ clsx( 'wc-block-components-product-badge', className ) }
 		>
 			{ children }
 		</div>

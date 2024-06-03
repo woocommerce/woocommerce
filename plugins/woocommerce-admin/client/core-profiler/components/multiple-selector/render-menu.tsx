@@ -8,7 +8,7 @@ import {
 	__experimentalSelectControlMenuItem as MenuItem,
 } from '@woocommerce/components';
 import { ChildrenProps } from '@woocommerce/components/build-types/experimental-select-control/types';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 type Props = {
 	selectedOptions: Array< { label: string; value: string } >;
@@ -51,12 +51,9 @@ export const renderMenu =
 							} }
 						>
 							<CheckboxControl
-								className={ classNames(
-									'core-profiler__checkbox',
-									{
-										'is-selected': isSelected,
-									}
-								) }
+								className={ clsx( 'core-profiler__checkbox', {
+									'is-selected': isSelected,
+								} ) }
 								onChange={ () => {} }
 								checked={ isSelected }
 								label={ item.label }
