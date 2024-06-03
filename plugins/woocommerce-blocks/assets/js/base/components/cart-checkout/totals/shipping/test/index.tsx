@@ -19,23 +19,23 @@ jest.mock( '@wordpress/data', () => ( {
 } ) );
 
 // Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
-wpData.useSelect.mockImplementation(
-	jest.fn().mockImplementation( ( passedMapSelect ) => {
-		const mockedSelect = jest.fn().mockImplementation( ( storeName ) => {
-			if ( storeName === 'wc/store/checkout' ) {
-				return {
-					prefersCollection() {
-						return false;
-					},
-				};
-			}
-			return jest.requireActual( '@wordpress/data' ).select( storeName );
-		} );
-		passedMapSelect( mockedSelect, {
-			dispatch: jest.requireActual( '@wordpress/data' ).dispatch,
-		} );
-	} )
-);
+wpData.useSelect.mockImplementation( ( selector: any ) => {
+	const mockSelect = ( storeName: string ) => {
+		if ( storeName === 'wc/store/checkout' ) {
+			return {
+				getCustomerData: () => ( {
+					firstName: 'John',
+					lastName: 'Doe',
+					email: 'john.doe@example.com',
+				} ),
+				isInitialized: true,
+				prefersCollection: () => false,
+			};
+		}
+		return jest.requireActual( '@wordpress/data' ).select( storeName );
+	};
+	return selector( mockSelect );
+} );
 
 const shippingAddress = {
 	first_name: 'John',
@@ -292,7 +292,8 @@ describe( 'TotalsShipping', () => {
 		expect( screen.queryByText( 'Free' ) ).not.toBeInTheDocument();
 		expect( screen.getByText( '56.78' ) ).toBeInTheDocument();
 	} );
-	it( 'should show correct calculator button label if address is complete', () => {
+
+	it( 'should show correct shipping calculator panel text if address is complete', () => {
 		render(
 			<SlotFillProvider>
 				<TotalsShipping
@@ -317,13 +318,13 @@ describe( 'TotalsShipping', () => {
 			</SlotFillProvider>
 		);
 		expect(
-			screen.getByText(
-				'Shipping to W1T 4JG, London, United Kingdom (UK)'
-			)
+			screen.getByRole( 'button', {
+				name: /Delivers to W1T 4JG, London, United Kingdom \(UK\)/i,
+			} )
 		).toBeInTheDocument();
-		expect( screen.getByText( 'Change address' ) ).toBeInTheDocument();
 	} );
-	it( 'should show correct calculator button label if address is incomplete', () => {
+
+	it( 'does show calculator panel if address is incomplete', () => {
 		baseContextHooks.useStoreCart.mockReturnValue( {
 			cartItems: mockPreviewCart.items,
 			cartTotals: [ mockPreviewCart.totals ],
@@ -364,9 +365,6 @@ describe( 'TotalsShipping', () => {
 				/>
 			</SlotFillProvider>
 		);
-		expect(
-			screen.queryByText( 'Change address' )
-		).not.toBeInTheDocument();
 		expect(
 			screen.getByText( 'Enter address to check delivery options' )
 		).toBeInTheDocument();
@@ -413,13 +411,10 @@ describe( 'TotalsShipping', () => {
 			</SlotFillProvider>
 		);
 		expect(
-			screen.queryByText( 'Change address' )
-		).not.toBeInTheDocument();
-		expect(
 			screen.queryByText( 'Enter address to check delivery options' )
 		).not.toBeInTheDocument();
 	} );
-	it( 'does show the calculator button when default rates are available and has formatted address', () => {
+	it( 'does show the calculator panel with address when default rates are available and has formatted address', () => {
 		baseContextHooks.useStoreCart.mockReturnValue( {
 			cartItems: mockPreviewCart.items,
 			cartTotals: [ mockPreviewCart.totals ],
@@ -461,9 +456,10 @@ describe( 'TotalsShipping', () => {
 				/>
 			</SlotFillProvider>
 		);
-		expect( screen.queryByText( 'Change address' ) ).toBeInTheDocument();
 		expect(
-			screen.queryByText( 'Enter address to check delivery options' )
-		).not.toBeInTheDocument();
+			screen.getByRole( 'button', {
+				name: /Delivers to California/,
+			} )
+		).toBeInTheDocument();
 	} );
 } );
