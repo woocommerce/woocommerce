@@ -13,6 +13,7 @@ import { SettingsCheckbox, SettingsInput } from './components';
 
 export const Content = ( { data } ) => {
 	const { settings } = data;
+	console.log( settings );
 	const [ formData, setFormData ] = useState( {} );
 	const [ isBusy, setIsBusy ] = useState( false );
 	const formRef = useRef( null );
@@ -118,6 +119,20 @@ export const Content = ( { data } ) => {
 					case 'tel':
 						return (
 							<SettingsInput setting={ setting } key={ key } />
+						);
+					case 'custom':
+						return (
+							<div
+								key={ key }
+								className="woocommerce-settings-element"
+								id={ setting.id }
+							>
+								<div
+									dangerouslySetInnerHTML={ {
+										__html: setting.content,
+									} }
+								/>
+							</div>
 						);
 					default:
 						return null;
