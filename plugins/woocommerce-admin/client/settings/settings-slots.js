@@ -10,8 +10,6 @@ export const SETTINGS_SLOT_FILL_CONSTANT =
 
 const { Slot } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
-const roots = {};
-
 export const possiblyRenderSettingsSlots = () => {
 	const slots = [
 		{
@@ -43,13 +41,8 @@ export const possiblyRenderSettingsSlots = () => {
 		);
 
 		if ( createRoot ) {
-			if ( roots[ slot.id ] ) {
-				roots[ slot.id ].render( slotFill );
-			} else {
-				const root = createRoot( slotDomElement );
-				root.render( slotFill );
-				roots[ slot.id ] = root;
-			}
+			const root = createRoot( slotDomElement );
+			root.render( slotFill );
 		} else {
 			render(
 				<>

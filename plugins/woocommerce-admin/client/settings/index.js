@@ -18,11 +18,12 @@ import './style.scss';
 
 const Settings = ( { params } ) => {
 	const settingsData = window.wcSettings?.admin?.settingsPages;
+	const { section } = getQuery();
 
 	// Be sure to render Settings slots when the params change.
 	useEffect( () => {
 		possiblyRenderSettingsSlots();
-	}, [ params ] );
+	}, [ params.page, section ] );
 
 	// Register the slot fills for the settings page just once.
 	useEffect( () => {
@@ -35,7 +36,6 @@ const Settings = ( { params } ) => {
 		return <div>Error getting data</div>;
 	}
 
-	const { section } = getQuery();
 	const sections = settingsData[ params.page ]?.sections;
 	const contentData =
 		Array.isArray( sections ) && sections.length === 0
