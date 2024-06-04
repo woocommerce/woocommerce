@@ -170,17 +170,8 @@ class BatchProcessingController {
 			// The batch processing failed and no items were processed:
 			// reschedule the processing with a delay, unless this is a repeatead failure.
 			if ( $this->is_consistently_failing( $batch_processor ) ) {
-				$process_details = $this->get_process_details( $batch_processor );
-
-				$this->logger->error(
-					"Batch processor {$batch_processor->get_name()} appears to be failing consistently: {$process_details['recent_failures']} unsuccessful attempt(s). No further attempts will be made.",
-					array(
-						'source'        => 'batch-processing',
-						'failures'      => $process_details['recent_failures'],
-						'first_failure' => $process_details['batch_first_failure'],
-						'last_failure'  => $process_details['batch_last_failure'],
-					)
-				);
+				$this->log_consistent_failure( $batch_processor, $this->get_process_details( $batch_processor ) );
+				$this->remove_processor( $processor_class_name );
 			} else {
 				$this->schedule_batch_processing( $processor_class_name, true );
 			}
@@ -277,7 +268,7 @@ class BatchProcessingController {
 				$current_status['batch_first_failure'] = $current_status['batch_last_failure'];
 			}
 		} else {
-			$current_status['recent_failures'] = 0;
+			$current_status['recent_failures']     = 0;
 			$current_status['batch_first_failure'] = null;
 			$current_status['batch_last_failure']  = null;
 		}
@@ -302,7 +293,7 @@ class BatchProcessingController {
 	 * @param string $processor_class_name Fully qualified class name of the processor.
 	 * @param bool   $with_delay   Whether to schedule the action for immediate execution or for later.
 	 */
-	private function schedule_batch_processing( string $processor_class_name, bool $with_delay = false ) : void {
+	private function schedule_batch_processing( string $processor_class_name, bool $with_delay = false ): void {
 		$time = $with_delay ? time() + MINUTE_IN_SECONDS : time();
 		as_schedule_single_action( $time, self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
 	}
@@ -327,7 +318,7 @@ class BatchProcessingController {
 	 * @return BatchProcessorInterface Instance of batch processor for the given class.
 	 * @throws \Exception If it's not possible to get an instance of the class.
 	 */
-	private function get_processor_instance( string $processor_class_name ) : BatchProcessorInterface {
+	private function get_processor_instance( string $processor_class_name ): BatchProcessorInterface {
 
 		$container = wc_get_container();
 		$processor = $container->has( $processor_class_name ) ? $container->get( $processor_class_name ) : null;
@@ -357,7 +348,7 @@ class BatchProcessingController {
 	 *
 	 * @return array List (of string) of the class names of the enqueued processors.
 	 */
-	public function get_enqueued_processors() : array {
+	public function get_enqueued_processors(): array {
 		return get_option( self::ENQUEUED_PROCESSORS_OPTION_NAME, array() );
 	}
 
@@ -391,7 +382,7 @@ class BatchProcessingController {
 	 *
 	 * @return bool True if the processor is enqueued.
 	 */
-	public function is_enqueued( string $processor_class_name ) : bool {
+	public function is_enqueued( string $processor_class_name ): bool {
 		return in_array( $processor_class_name, $this->get_enqueued_processors(), true );
 	}
 
@@ -440,7 +431,7 @@ class BatchProcessingController {
 	 * @param BatchProcessorInterface $batch_processor Batch processor instance.
 	 * @param array                   $batch Batch that was being processed.
 	 */
-	protected function log_error( \Exception $error, BatchProcessorInterface $batch_processor, array $batch ) : void {
+	protected function log_error( \Exception $error, BatchProcessorInterface $batch_processor, array $batch ): void {
 		$error_message = "Error processing batch for {$batch_processor->get_name()}: {$error->getMessage()}";
 		$error_context = array(
 			'exception' => $error,
@@ -515,7 +506,27 @@ class BatchProcessingController {
 		 * @param int $failure_threshold Number of actions of the same hook to examine for failure. Defaults to 5.
 		 */
 
-		return absint( $process_details['recent_failures'] ?? 0 ) >= $max_attempts;
+		return absint( $process_details['recent_failures'] ?? 0 ) >= max( $max_attempts, 1 );
+	}
+
+	/**
+	 * Creates log entry with details about a batch processor that is consistently failing.
+	 *
+	 * @since 9.1.0
+	 *
+	 * @param BatchProcessorInterface $batch_processor The batch processor instance.
+	 * @param array                   $process_details Failing process details.
+	 */
+	private function log_consistent_failure( BatchProcessorInterface $batch_processor, array $process_details ): void {
+		$this->logger->error(
+			"Batch processor {$batch_processor->get_name()} appears to be failing consistently: {$process_details['recent_failures']} unsuccessful attempt(s). No further attempts will be made.",
+			array(
+				'source'        => 'batch-processing',
+				'failures'      => $process_details['recent_failures'],
+				'first_failure' => $process_details['batch_first_failure'],
+				'last_failure'  => $process_details['batch_last_failure'],
+			)
+		);
 	}
 
 	/**
@@ -541,9 +552,12 @@ class BatchProcessingController {
 				continue;
 			}
 
-			$this->update_processor_state( $instance, 0, new \Exception( 'Processor is enqueued but not scheduled. Background job was probably killed or marked as failed.' ) );
+			$exception = new \Exception( 'Processor is enqueued but not scheduled. Background job was probably killed or marked as failed. Reattempting execution.' );
+			$this->update_processor_state( $instance, 0, $exception );
+			$this->log_error( $exception, $instance, array() );
 
 			if ( $this->is_consistently_failing( $instance ) ) {
+				$this->log_consistent_failure( $instance, $this->get_process_details( $instance ) );
 				$this->remove_processor( $processor );
 			} else {
 				$this->schedule_batch_processing( $processor, true );
