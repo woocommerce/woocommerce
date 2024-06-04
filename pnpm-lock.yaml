@@ -3345,8 +3345,8 @@ importers:
         specifier: 4.37.1
         version: 4.37.1
       xstate5:
-        specifier: npm:xstate@^5.13.0
-        version: xstate@5.13.0
+        specifier: npm:xstate@^5.13.1
+        version: xstate@5.13.1
       zod:
         specifier: ^3.22.4
         version: 3.22.4
@@ -3391,7 +3391,7 @@ importers:
         specifier: ^0.5.11
         version: 0.5.11(@types/webpack@4.41.38)(react-refresh@0.14.0)(type-fest@2.19.0)(webpack-dev-server@4.15.1(debug@4.3.4)(webpack-cli@4.10.0)(webpack@5.89.0))(webpack-hot-middleware@2.25.4)(webpack@5.89.0(webpack-cli@4.10.0))
       '@statelyai/inspect':
-        specifier: ^0.3.0
+        specifier: ^0.3.1
         version: 0.3.1(ws@8.15.0)(xstate@4.37.1)
       '@testing-library/dom':
         specifier: 8.11.3
@@ -24645,8 +24645,8 @@ packages:
   xstate@4.37.1:
     resolution: {integrity: sha512-MuB7s01nV5vG2CzaBg2msXLGz7JuS+x/NBkQuZAwgEYCnWA8iQMiRz2VGxD3pcFjZAOih3fOgDD3kDaFInEx+g==}
 
-  xstate@5.13.0:
-    resolution: {integrity: sha512-Z0om784N5u8sAzUvQJBa32jiTCIGGF/2ZsmKkerQEqeeUktAeOMK20FIHFUMywC4GcAkNksSvaeX7lwoRNXPEQ==}
+  xstate@5.13.1:
+    resolution: {integrity: sha512-saBUxsTb29Vq8bjq1TjLdGCYs2pneGMzQ7pqQyXh1nqZaSnKHkCkxf3EV+EDYbLnQioxK9HNMYPQrz4whj3RJQ==}
 
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
@@ -29269,7 +29269,9 @@ snapshots:
       source-map: 0.6.1
       string-length: 2.0.0
     transitivePeerDependencies:
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@jest/reporters@25.5.1':
     dependencies:
@@ -41076,14 +41078,14 @@ snapshots:
       minimist: 1.2.8
       npm-package-json-lint: 5.4.2
       postcss: 8.4.32
-      postcss-loader: 6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
+      postcss-loader: 6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4))
       prettier: wp-prettier@2.2.1-beta-1
       puppeteer-core: 10.4.0
       read-pkg-up: 1.0.1
       resolve-bin: 0.4.3
       sass: 1.69.5
-      sass-loader: 12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
-      source-map-loader: 3.0.2(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
+      sass-loader: 12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4))
+      source-map-loader: 3.0.2(webpack@5.89.0(uglify-js@3.17.4))
       stylelint: 13.13.1
       terser-webpack-plugin: 5.3.6(uglify-js@3.17.4)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
       url-loader: 4.1.1(file-loader@6.2.0(webpack@5.89.0(uglify-js@3.17.4)))(webpack@5.89.0(uglify-js@3.17.4))
@@ -41155,14 +41157,14 @@ snapshots:
       minimist: 1.2.8
       npm-package-json-lint: 5.4.2
       postcss: 8.4.32
-      postcss-loader: 6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
+      postcss-loader: 6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4))
       prettier: wp-prettier@2.2.1-beta-1
       puppeteer-core: 10.4.0
       read-pkg-up: 1.0.1
       resolve-bin: 0.4.3
       sass: 1.69.5
-      sass-loader: 12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
-      source-map-loader: 3.0.2(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
+      sass-loader: 12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4))
+      source-map-loader: 3.0.2(webpack@5.89.0(uglify-js@3.17.4))
       stylelint: 13.13.1
       terser-webpack-plugin: 5.3.6(uglify-js@3.17.4)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
       url-loader: 4.1.1(file-loader@6.2.0(webpack@5.91.0(uglify-js@3.17.4)))(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
@@ -50672,7 +50674,9 @@ snapshots:
       pretty-format: 24.9.0
       throat: 4.1.0
     transitivePeerDependencies:
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   jest-jasmine2@25.5.4:
     dependencies:
@@ -54955,7 +54959,7 @@ snapshots:
       semver: 7.5.4
       webpack: 5.91.0(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
 
-  postcss-loader@6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0)):
+  postcss-loader@6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4)):
     dependencies:
       cosmiconfig: 7.1.0
       klona: 2.0.6
@@ -57692,7 +57696,7 @@ snapshots:
     optionalDependencies:
       sass: 1.69.5
 
-  sass-loader@12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0)):
+  sass-loader@12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4)):
     dependencies:
       klona: 2.0.6
       neo-async: 2.6.2
@@ -58145,7 +58149,7 @@ snapshots:
       async: 2.6.4
       loader-utils: 1.4.2
 
-  source-map-loader@3.0.2(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0)):
+  source-map-loader@3.0.2(webpack@5.89.0(uglify-js@3.17.4)):
     dependencies:
       abab: 2.0.6
       iconv-lite: 0.6.3
@@ -61753,7 +61757,7 @@ snapshots:
 
   xstate@4.37.1: {}
 
-  xstate@5.13.0: {}
+  xstate@5.13.1: {}
 
   xtend@4.0.2: {}
 
