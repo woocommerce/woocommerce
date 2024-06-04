@@ -22,6 +22,10 @@
 		"text": {
 			"type": "string",
 			"required": false
+		},
+		"showSeparator": {
+			"type": "boolean",
+			"default": true
 		}
 	},
 	"parent": [ "woocommerce/checkout-fields-block" ],

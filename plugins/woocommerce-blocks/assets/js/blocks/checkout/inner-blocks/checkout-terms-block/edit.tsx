@@ -16,6 +16,7 @@ import {
 } from '@wordpress/components';
 import { PRIVACY_URL, TERMS_URL } from '@woocommerce/block-settings';
 import { ADMIN_URL } from '@woocommerce/settings';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -24,10 +25,10 @@ import './editor.scss';
 import { termsConsentDefaultText, termsCheckboxDefaultText } from './constants';
 
 export const Edit = ( {
-	attributes: { checkbox, text },
+	attributes: { checkbox, text, showSeparator },
 	setAttributes,
 }: {
-	attributes: { text: string; checkbox: boolean };
+	attributes: { text: string; checkbox: boolean; showSeparator: boolean };
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
 	const blockProps = useBlockProps();
@@ -126,9 +127,22 @@ export const Edit = ( {
 							} )
 						}
 					/>
+					<ToggleControl
+						label={ __( 'Show separator', 'woocommerce' ) }
+						checked={ showSeparator }
+						onChange={ () =>
+							setAttributes( {
+								showSeparator: ! showSeparator,
+							} )
+						}
+					/>
 				</PanelBody>
 			</InspectorControls>
-			<div className="wc-block-checkout__terms">
+			<div
+				className={ clsx( 'wc-block-checkout__terms', {
+					'wc-block-checkout__terms--with-separator': showSeparator,
+				} ) }
+			>
 				{ checkbox ? (
 					<>
 						<CheckboxControl
