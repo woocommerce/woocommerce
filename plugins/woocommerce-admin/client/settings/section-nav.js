@@ -12,10 +12,7 @@ import classnames from 'classnames';
 export const SectionNav = ( { data, section } ) => {
 	const { sections } = data;
 	const sectionKeys = Object.keys( sections );
-
-	if ( sectionKeys.length === 1 ) {
-		return null;
-	}
+	const selectedSection = section || sectionKeys[ 0 ];
 
 	return (
 		<>
@@ -24,7 +21,7 @@ export const SectionNav = ( { data, section } ) => {
 					<Item
 						key={ key }
 						className={ classnames( {
-							'active-section': section === key,
+							'active-section': selectedSection === key,
 						} ) }
 					>
 						<Button
