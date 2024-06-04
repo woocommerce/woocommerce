@@ -278,7 +278,7 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 
 		if ( logoBlockIds.length === 0 ) {
 			const logoObserver = findAndSetLogoBlock(
-				{ autoScale, documentElement, logoBlockIds },
+				{ autoScale, documentElement },
 				{
 					setLogoBlockIds,
 				}
