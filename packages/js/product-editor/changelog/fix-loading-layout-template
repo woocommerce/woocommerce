@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid loading layout template before product is loaded

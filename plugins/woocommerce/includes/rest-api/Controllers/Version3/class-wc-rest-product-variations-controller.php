@@ -486,23 +486,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	}
 
 	/**
-	 * Get object.
-	 *
-	 * @since  3.0.0
-	 * @param  int $id Object ID.
-	 * @return WC_Data
-	 */
-	protected function get_object( $id ) {
-		/**
-		 * Filter the product object that is fetched in the context of the REST API.
-		 *
-		 * @param WC_Product $product The product.
-		 * @since 9.0.0
-		 */
-		return apply_filters( 'woocommerce_rest_get_product', wc_get_product( $id ) );
-	}
-
-	/**
 	 * Get the Variation's schema, conforming to JSON Schema.
 	 *
 	 * @return array

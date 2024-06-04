@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Determine _product_template_id from the products and variations REST endpoint
+Determine _product_template_id from 'woocommerce_product_editor_determine_product_template' filter
