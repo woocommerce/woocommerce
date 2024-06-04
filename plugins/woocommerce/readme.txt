@@ -165,11 +165,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 8.9.2 2024-06-03 =
+= 8.9.2 2024-06-04 =
 
 **WooCommerce**
 
-
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
 /trunk/changelog.txt).
