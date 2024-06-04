@@ -170,10 +170,15 @@ class BatchProcessingController {
 			// The batch processing failed and no items were processed:
 			// reschedule the processing with a delay, unless this is a repeatead failure.
 			if ( $this->is_consistently_failing( $batch_processor ) ) {
+				$process_details = $this->get_process_details( $batch_processor );
+
 				$this->logger->error(
-					"Batch processor {$batch_processor->get_name()} appears to be consistently failing. Execution won't be automatically re-attempted.",
+					"Batch processor {$batch_processor->get_name()} appears to be failing consistently: {$process_details['recent_failures']} unsuccessful attempt(s). No further attempts will be made.",
 					array(
-						'source' => 'batch-processing',
+						'source'        => 'batch-processing',
+						'failures'      => $process_details['recent_failures'],
+						'first_failure' => $process_details['batch_first_failure'],
+						'last_failure'  => $process_details['batch_last_failure'],
 					)
 				);
 			} else {
@@ -227,10 +232,12 @@ class BatchProcessingController {
 		return get_option(
 			$this->get_processor_state_option_name( $batch_processor ),
 			array(
-				'total_time_spent'   => 0,
-				'current_batch_size' => $batch_processor->get_default_batch_size(),
-				'last_error'         => null,
-				'recent_failures'    => 0,
+				'total_time_spent'    => 0,
+				'current_batch_size'  => $batch_processor->get_default_batch_size(),
+				'last_error'          => null,
+				'recent_failures'     => 0,
+				'batch_first_failure' => null,
+				'batch_last_failure'  => null,
 			)
 		);
 	}
@@ -263,9 +270,16 @@ class BatchProcessingController {
 		$current_status['last_error']        = null !== $last_error ? $last_error->getMessage() : null;
 
 		if ( null !== $last_error ) {
-			$current_status['recent_failures'] = ( $current_status['recent_failures'] ?? 0 ) + 1;
+			$current_status['recent_failures']    = ( $current_status['recent_failures'] ?? 0 ) + 1;
+			$current_status['batch_last_failure'] = current_time( 'mysql' );
+
+			if ( is_null( $current_status['batch_first_failure'] ) ) {
+				$current_status['batch_first_failure'] = $current_status['batch_last_failure'];
+			}
 		} else {
 			$current_status['recent_failures'] = 0;
+			$current_status['batch_first_failure'] = null;
+			$current_status['batch_last_failure']  = null;
 		}
 
 		update_option( $this->get_processor_state_option_name( $batch_processor ), $current_status, false );
@@ -427,18 +441,22 @@ class BatchProcessingController {
 	 * @param array                   $batch Batch that was being processed.
 	 */
 	protected function log_error( \Exception $error, BatchProcessorInterface $batch_processor, array $batch ) : void {
-		$batch_detail_string = '';
+		$error_message = "Error processing batch for {$batch_processor->get_name()}: {$error->getMessage()}";
+		$error_context = array(
+			'exception' => $error,
+			'source'    => 'batch-processing',
+		);
+
 		// Log only first and last, as the entire batch may be too big.
 		if ( count( $batch ) > 0 ) {
-			$batch_detail_string = "\n" . wp_json_encode(
+			$error_context = array_merge(
+				$error_context,
 				array(
 					'batch_start' => $batch[0],
 					'batch_end'   => end( $batch ),
-				),
-				JSON_PRETTY_PRINT
+				)
 			);
 		}
-		$error_message = "Error processing batch for {$batch_processor->get_name()}: {$error->getMessage()}" . $batch_detail_string;
 
 		/**
 		 * Filters the error message for a batch processing.
@@ -447,13 +465,14 @@ class BatchProcessingController {
 		 * @param \Exception $error The exception that was thrown by the processor.
 		 * @param BatchProcessorInterface $batch_processor The processor that threw the exception.
 		 * @param array $batch The batch that was being processed.
+		 * @param array $error_context Context to be passed to the logging function.
 		 * @return string The actual error message that will be logged.
 		 *
 		 * @since 6.8.0
 		 */
-		$error_message = apply_filters( 'wc_batch_processing_log_message', $error_message, $error, $batch_processor, $batch );
+		$error_message = apply_filters( 'wc_batch_processing_log_message', $error_message, $error, $batch_processor, $batch, $error_context );
 
-		$this->logger->error( $error_message, array( 'exception' => $error, 'source' => 'batch-processing' ) );
+		$this->logger->error( $error_message, $error_context );
 	}
 
 	/**
