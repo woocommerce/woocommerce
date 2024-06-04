@@ -8,16 +8,16 @@ import { isWpVersion } from '@woocommerce/settings';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
 import { useLayoutEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-
-/**
- * Internal dependencies
- */
-import {
+import type {
 	PreviewState,
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
 	SetPreviewState,
-} from './types';
+} from '@woocommerce/blocks-checkout';
+
+/**
+ * Internal dependencies
+ */
 import { coreQueryPaginationBlockName } from './constants';
 import blockJson from './block.json';
 import {

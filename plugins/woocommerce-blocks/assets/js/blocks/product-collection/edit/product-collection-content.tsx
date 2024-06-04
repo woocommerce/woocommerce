@@ -12,15 +12,15 @@ import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
 import fastDeepEqual from 'fast-deep-equal/es6';
-
-/**
- * Internal dependencies
- */
 import type {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
 	ProductCollectionEditComponentProps,
-} from '../types';
+} from '@woocommerce/blocks-checkout';
+
+/**
+ * Internal dependencies
+ */
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import {
 	getDefaultValueOfInheritQueryFromTemplate,

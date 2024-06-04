@@ -4,15 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { ToolbarGroup } from '@wordpress/components';
 import { list, grid } from '@wordpress/icons';
-
-/**
- * Internal dependencies
- */
-import {
+import type {
 	DisplayLayoutControlProps,
 	ProductCollectionDisplayLayout,
 	LayoutOptions,
-} from '../../types';
+} from '@woocommerce/blocks-checkout';
 
 const DisplayLayoutToolbar = ( props: DisplayLayoutControlProps ) => {
 	const { type, columns, shrinkColumns } = props.displayLayout;

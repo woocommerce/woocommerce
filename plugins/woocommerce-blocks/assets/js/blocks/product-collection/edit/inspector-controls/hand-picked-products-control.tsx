@@ -6,6 +6,10 @@ import { ProductResponseItem } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import type {
+	QueryControlProps,
+	CoreFilterNames,
+} from '@woocommerce/blocks-checkout';
 import {
 	FormTokenField,
 	// @ts-expect-error Using experimental features
@@ -16,7 +20,6 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps, CoreFilterNames } from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
 /**

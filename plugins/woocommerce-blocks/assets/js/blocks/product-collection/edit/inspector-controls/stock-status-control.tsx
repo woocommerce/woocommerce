@@ -3,6 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import fastDeepEqual from 'fast-deep-equal/es6';
+import type {
+	CoreFilterNames,
+	QueryControlProps,
+} from '@woocommerce/blocks-checkout';
 import {
 	FormTokenField,
 	// @ts-expect-error Using experimental features
@@ -13,7 +17,6 @@ import {
 /**
  * Internal dependencies
  */
-import { CoreFilterNames, QueryControlProps } from '../../types';
 import {
 	STOCK_STATUS_OPTIONS,
 	DEFAULT_FILTERS,

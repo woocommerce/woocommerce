@@ -4,6 +4,10 @@
 import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, starEmpty } from '@wordpress/icons';
+import type {
+	CoreCollectionNames,
+	CoreFilterNames,
+} from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -12,7 +16,6 @@ import {
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 } from '../constants';
-import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.TOP_RATED,

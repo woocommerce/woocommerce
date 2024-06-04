@@ -5,6 +5,10 @@ import { __ } from '@wordpress/i18n';
 import ProductAttributeTermControl from '@woocommerce/editor-components/product-attribute-term-control';
 import { SearchListItem } from '@woocommerce/editor-components/search-list-control/types';
 import { ADMIN_URL } from '@woocommerce/settings';
+import type {
+	CoreFilterNames,
+	QueryControlProps,
+} from '@woocommerce/blocks-checkout';
 import {
 	ExternalLink,
 	// @ts-expect-error Using experimental features
@@ -15,7 +19,6 @@ import {
 /**
  * Internal dependencies
  */
-import { CoreFilterNames, QueryControlProps } from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
 const EDIT_ATTRIBUTES_URL = `${ ADMIN_URL }edit.php?post_type=product&page=product_attributes`;

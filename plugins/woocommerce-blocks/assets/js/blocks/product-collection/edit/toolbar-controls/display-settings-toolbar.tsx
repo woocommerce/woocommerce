@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { settings } from '@wordpress/icons';
+import type { ProductCollectionQuery } from '@woocommerce/blocks-checkout';
 import {
 	ToolbarGroup,
 	Dropdown,
@@ -12,11 +13,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalNumberControl as NumberControl,
 } from '@wordpress/components';
-
-/**
- * Internal dependencies
- */
-import { ProductCollectionQuery } from '../../types';
 
 interface DisplaySettingsToolbarProps {
 	query: ProductCollectionQuery;

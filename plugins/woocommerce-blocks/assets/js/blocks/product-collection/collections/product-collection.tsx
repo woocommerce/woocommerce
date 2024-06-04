@@ -4,12 +4,12 @@
 import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, loop } from '@wordpress/icons';
+import type { CoreCollectionNames } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
  */
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
-import { CoreCollectionNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.PRODUCT_CATALOG,

@@ -4,12 +4,12 @@
 import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import { ToggleControl } from '@wordpress/components';
+import type { ProductCollectionSetAttributes } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
  */
 import { useHasUnsupportedBlocks } from './utils';
-import type { ProductCollectionSetAttributes } from '../../types';
 
 type ForcePageReloadControlProps = {
 	clientId: string;

@@ -2,6 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import type {
+	CoreFilterNames,
+	QueryControlProps,
+} from '@woocommerce/blocks-checkout';
 import {
 	ToggleControl,
 	// @ts-expect-error Using experimental features
@@ -12,7 +16,6 @@ import {
 /**
  * Internal dependencies
  */
-import { CoreFilterNames, QueryControlProps } from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
 const OnSaleControl = ( props: QueryControlProps ) => {

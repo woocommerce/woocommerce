@@ -6,6 +6,11 @@ import { isSiteEditorPage } from '@woocommerce/utils';
 import { usePrevious } from '@woocommerce/base-hooks';
 import { select } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
+import type {
+	CoreFilterNames,
+	ProductCollectionQuery,
+	QueryControlProps,
+} from '@woocommerce/blocks-checkout';
 import {
 	ToggleControl,
 	// @ts-expect-error Using experimental features
@@ -16,11 +21,6 @@ import {
 /**
  * Internal dependencies
  */
-import {
-	CoreFilterNames,
-	ProductCollectionQuery,
-	QueryControlProps,
-} from '../../types';
 import { DEFAULT_QUERY } from '../../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../../utils';
 

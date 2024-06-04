@@ -4,17 +4,16 @@
 import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
+import type {
+	CoreFilterNames,
+	QueryControlProps,
+} from '@woocommerce/blocks-checkout';
 import {
 	TextControl,
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
-
-/**
- * Internal dependencies
- */
-import { CoreFilterNames, QueryControlProps } from '../../types';
 
 const KeywordControl = ( props: QueryControlProps ) => {
 	const { query, trackInteraction, setQueryAttribute } = props;

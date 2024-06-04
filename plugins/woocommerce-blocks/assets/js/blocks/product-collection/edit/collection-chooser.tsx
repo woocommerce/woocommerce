@@ -3,6 +3,10 @@
  */
 import { useSelect } from '@wordpress/data';
 import { Button } from '@wordpress/components';
+import type {
+	CollectionName,
+	CoreCollectionNames,
+} from '@woocommerce/blocks-checkout';
 import {
 	BlockInstance,
 	createBlock,
@@ -15,7 +19,6 @@ import {
 /**
  * Internal dependencies
  */
-import { type CollectionName, CoreCollectionNames } from '../types';
 import blockJson from '../block.json';
 import { getCollectionByName } from '../collections';
 import { getDefaultProductCollection } from '../constants';

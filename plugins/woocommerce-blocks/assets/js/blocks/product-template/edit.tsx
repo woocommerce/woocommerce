@@ -15,7 +15,7 @@ import {
 } from '@wordpress/block-editor';
 import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-import { ProductCollectionAttributes } from '@woocommerce/blocks/product-collection/types';
+import type { ProductCollectionAttributes } from '@woocommerce/blocks-checkout';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isNumber, ProductResponseItem } from '@woocommerce/types';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';

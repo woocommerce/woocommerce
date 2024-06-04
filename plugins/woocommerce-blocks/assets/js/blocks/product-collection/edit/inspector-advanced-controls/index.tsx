@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { InspectorAdvancedControls } from '@wordpress/block-editor';
+import type { ProductCollectionEditComponentProps } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
  */
 import ForcePageReloadControl from './force-page-reload-control';
-import type { ProductCollectionEditComponentProps } from '../../types';
 
 export default function ProductCollectionAdvancedInspectorControls(
 	props: Omit< ProductCollectionEditComponentProps, 'preview' >

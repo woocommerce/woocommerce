@@ -2,6 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import type {
+	TProductCollectionOrder,
+	TProductCollectionOrderBy,
+	QueryControlProps,
+	CoreFilterNames,
+} from '@woocommerce/blocks-checkout';
 import {
 	SelectControl,
 	// @ts-expect-error Using experimental features
@@ -12,12 +18,6 @@ import {
 /**
  * Internal dependencies
  */
-import {
-	TProductCollectionOrder,
-	TProductCollectionOrderBy,
-	QueryControlProps,
-	CoreFilterNames,
-} from '../../types';
 import { getDefaultQuery } from '../../constants';
 
 const orderOptions = [

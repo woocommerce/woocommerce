@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { select } from '@wordpress/data';
+import type { CollectionName } from '@woocommerce/blocks-checkout';
+import { registerProductCollection } from '@woocommerce/blocks-checkout';
 import {
 	// @ts-expect-error Type definition is missing
 	store as blocksStore,
@@ -12,7 +14,6 @@ import {
 /**
  * Internal dependencies
  */
-import { CollectionName } from '../types';
 import blockJson from '../block.json';
 import productCollection from './product-collection';
 import newArrivals from './new-arrivals';
@@ -20,7 +21,6 @@ import topRated from './top-rated';
 import bestSellers from './best-sellers';
 import onSale from './on-sale';
 import featured from './featured';
-import registerProductCollection from './register-product-collection';
 
 const collections: BlockVariation[] = [
 	productCollection,

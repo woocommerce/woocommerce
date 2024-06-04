@@ -3,6 +3,14 @@
  */
 import { getSetting } from '@woocommerce/settings';
 import { objectOmit } from '@woocommerce/utils';
+import type {
+	ProductCollectionAttributes,
+	TProductCollectionOrder,
+	TProductCollectionOrderBy,
+	ProductCollectionQuery,
+	ProductCollectionDisplayLayout,
+	LayoutOptions,
+} from '@woocommerce/blocks-checkout';
 import {
 	type InnerBlockTemplate,
 	createBlock,
@@ -13,14 +21,6 @@ import {
 /**
  * Internal dependencies
  */
-import {
-	ProductCollectionAttributes,
-	TProductCollectionOrder,
-	TProductCollectionOrderBy,
-	ProductCollectionQuery,
-	ProductCollectionDisplayLayout,
-	LayoutOptions,
-} from './types';
 import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 import { VARIATION_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
 import { getDefaultValueOfInheritQueryFromTemplate } from './utils';

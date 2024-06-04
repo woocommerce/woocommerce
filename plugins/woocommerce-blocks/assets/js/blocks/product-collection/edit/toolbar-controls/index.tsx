@@ -3,6 +3,7 @@
  */
 import { useMemo } from '@wordpress/element';
 import { BlockControls } from '@wordpress/block-editor';
+import type { ProductCollectionEditComponentProps } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -11,7 +12,6 @@ import { setQueryAttribute } from '../../utils';
 import DisplaySettingsToolbar from './display-settings-toolbar';
 import DisplayLayoutToolbar from './display-layout-toolbar';
 import CollectionChooserToolbar from './collection-chooser-toolbar';
-import type { ProductCollectionEditComponentProps } from '../../types';
 
 export default function ToolbarControls(
 	props: Omit< ProductCollectionEditComponentProps, 'preview' >

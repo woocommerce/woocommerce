@@ -16,6 +16,12 @@ import {
 	UPGRADE_NOTICE_DISPLAY_COUNT_THRESHOLD,
 } from '@woocommerce/blocks/migration-products-to-product-collection';
 import { recordEvent } from '@woocommerce/tracks';
+import type {
+	ProductCollectionEditComponentProps,
+	ProductCollectionAttributes,
+	CoreFilterNames,
+	FilterName,
+} from '@woocommerce/blocks-checkout';
 import {
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -27,12 +33,6 @@ import {
  */
 import metadata from '../../block.json';
 import { useTracksLocation } from '../../tracks-utils';
-import {
-	ProductCollectionEditComponentProps,
-	ProductCollectionAttributes,
-	CoreFilterNames,
-	FilterName,
-} from '../../types';
 import { setQueryAttribute } from '../../utils';
 import { getDefaultSettings } from '../../constants';
 import UpgradeNotice from './upgrade-notice';

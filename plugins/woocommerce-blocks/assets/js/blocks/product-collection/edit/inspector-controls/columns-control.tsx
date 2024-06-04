@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import type { DisplayLayoutControlProps } from '@woocommerce/blocks-checkout';
 import {
 	RangeControl,
 	ToggleControl,
@@ -13,7 +14,6 @@ import {
 /**
  * Internal dependencies
  */
-import { DisplayLayoutControlProps } from '../../types';
 import { getDefaultDisplayLayout } from '../../constants';
 
 const columnsLabel = __( 'Columns', 'woocommerce' );

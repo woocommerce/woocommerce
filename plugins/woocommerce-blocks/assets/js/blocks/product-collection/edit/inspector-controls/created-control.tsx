@@ -2,6 +2,11 @@
  * External dependencies
  */
 import { __, _x } from '@wordpress/i18n';
+import type {
+	CoreFilterNames,
+	ETimeFrameOperator,
+	QueryControlProps,
+} from '@woocommerce/blocks-checkout';
 import {
 	Flex,
 	FlexItem,
@@ -22,11 +27,6 @@ import {
 /**
  * Internal dependencies
  */
-import {
-	CoreFilterNames,
-	ETimeFrameOperator,
-	QueryControlProps,
-} from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
 const CreatedControl = ( props: QueryControlProps ) => {

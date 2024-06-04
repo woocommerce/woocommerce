@@ -10,12 +10,11 @@ import type { BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import blockJson from '../block.json';
 import {
 	SetPreviewState,
 	PreviewState,
 	ProductCollectionAttributes,
-} from '../types';
+} from './types';
 
 export interface ProductCollectionConfig extends BlockVariation {
 	preview?: {
@@ -24,12 +23,14 @@ export interface ProductCollectionConfig extends BlockVariation {
 	};
 }
 
+const BLOCK_NAME = 'woocommerce/product-collection';
+
 /**
  * Register a new collection for the Product Collection block.
  *
  * @param {ProductCollectionConfig} blockVariationArgs The configuration of new collection.
  */
-const registerProductCollection = ( {
+export const registerProductCollection = ( {
 	preview: { setPreviewState, initialPreviewState } = {},
 	...blockVariationArgs
 }: ProductCollectionConfig ) => {
@@ -64,9 +65,7 @@ const registerProductCollection = ( {
 		);
 	}
 
-	registerBlockVariation( blockJson.name, {
+	registerBlockVariation( BLOCK_NAME, {
 		...blockVariationArgs,
 	} );
 };
-
-export default registerProductCollection;
