@@ -6,7 +6,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
 
 /**
- * BlockTypesController class.
+ * BlockTemplatesController class.
  *
  * @internal
  */
