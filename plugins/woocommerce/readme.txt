@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Add missing URL to discover more link in LYS tour [#48109](https://github.com/woocommerce/woocommerce/pull/48109)
 * Fix - Fix: "On Sale" collection isn't displaying on Editor side  </details>  <details> [#47994](https://github.com/woocommerce/woocommerce/pull/47994)
 * Fix - Make the plugin autoinstall process more robust [#47798](https://github.com/woocommerce/woocommerce/pull/47798)
 * Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
