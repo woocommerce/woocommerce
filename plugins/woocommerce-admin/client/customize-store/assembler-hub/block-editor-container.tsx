@@ -4,9 +4,8 @@
  * External dependencies
  */
 import {
-	store as blockEditorStore,
 	privateApis as blockEditorPrivateApis,
-	// @ts-expect-error No types for this exist yet.
+	store as blockEditorStore,
 } from '@wordpress/block-editor';
 // @ts-expect-error No types for this exist yet.
 import { store as coreStore, useEntityRecords } from '@wordpress/core-data';
@@ -14,8 +13,8 @@ import { useDispatch, useSelect } from '@wordpress/data';
 // @ts-expect-error No types for this exist yet.
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 // @ts-expect-error No types for this exist yet.
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { useQuery } from '@woocommerce/navigation';
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-expect-error No types for this exist yet.
 import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/block-editor/use-site-editor-settings';
 import {
@@ -25,19 +24,20 @@ import {
 	useMemo,
 } from '@wordpress/element';
 // @ts-expect-error No types for this exist yet.
+import { BlockInstance, createBlock } from '@wordpress/blocks';
 import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 
 /**
  * Internal dependencies
  */
+import { isEqual } from 'lodash';
 import { CustomizeStoreContext } from './';
 import { BlockEditor } from './block-editor';
 import { HighlightedBlockContext } from './context/highlighted-block-context';
+import { useAddNoBlocksPlaceholder } from './hooks/block-placeholder/use-add-no-blocks-placeholder';
 import { useEditorBlocks } from './hooks/use-editor-blocks';
 import { useScrollOpacity } from './hooks/use-scroll-opacity';
-import { isEqual } from 'lodash';
 import { COLOR_PALETTES } from './sidebar/global-styles/color-palette-variations/constants';
-import { BlockInstance } from '@wordpress/blocks';
 import {
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
 	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
@@ -212,6 +212,16 @@ export const BlockEditorContainer = () => {
 			}
 		);
 	}, [ blocks, updateBlockAttributes, user.settings.color ] );
+
+	// @ts-expect-error No types for this exist yet.
+	const { insertBlock, removeBlock } = useDispatch( blockEditorStore );
+
+	useAddNoBlocksPlaceholder( {
+		blocks,
+		createBlock,
+		insertBlock,
+		removeBlock,
+	} );
 
 	useEffect( () => {
 		const { blockIdToHighlight, restOfBlockIds } = clientIds.reduce(

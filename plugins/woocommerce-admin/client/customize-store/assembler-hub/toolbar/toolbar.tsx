@@ -18,6 +18,7 @@ import {
  */
 import './style.scss';
 import Shuffle from './shuffle';
+import Delete from './delete';
 
 export const Toolbar = () => {
 	const {
@@ -89,6 +90,9 @@ export const Toolbar = () => {
 						</ToolbarGroup>
 						{ currentBlock && (
 							<Shuffle clientId={ currentBlock?.clientId } />
+						) }
+						{ currentBlock && (
+							<Delete clientId={ currentBlock?.clientId } />
 						) }
 					</>
 				</WPToolbar>

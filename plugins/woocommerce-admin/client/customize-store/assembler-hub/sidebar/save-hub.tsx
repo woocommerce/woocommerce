@@ -11,7 +11,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,
@@ -36,6 +36,8 @@ import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/compon
  */
 import { CustomizeStoreContext } from '../';
 import { trackEvent } from '~/customize-store/tracking';
+import { useIsNoBlocksPlaceholderPresent } from '../hooks/block-placeholder/use-add-no-blocks-placeholder';
+import { useEditorBlocks } from '../hooks/use-editor-blocks';
 
 const PUBLISH_ON_SAVE_ENTITIES = [
 	{
@@ -49,6 +51,25 @@ export const SaveHub = () => {
 	const urlParams = useQuery();
 	const { sendEvent } = useContext( CustomizeStoreContext );
 	const [ isResolving, setIsResolving ] = useState< boolean >( false );
+
+	const currentTemplate:
+		| {
+				id: string;
+		  }
+		| undefined = useSelect(
+		( select ) =>
+			// @ts-expect-error No types for this exist yet.
+			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+		[]
+	);
+
+	const [ blocks ] = useEditorBlocks(
+		'wp_template',
+		currentTemplate?.id ?? ''
+	);
+
+	const isNoBlocksPlaceholderPresent =
+		useIsNoBlocksPlaceholderPresent( blocks );
 
 	const isEditorLoading = useIsSiteEditorLoading();
 	// @ts-ignore No types for this exist yet.
@@ -160,7 +181,11 @@ export const SaveHub = () => {
 					variant="primary"
 					onClick={ onDone }
 					className="edit-site-save-hub__button"
-					disabled={ isResolving || isEditorLoading }
+					disabled={
+						isResolving ||
+						isEditorLoading ||
+						isNoBlocksPlaceholderPresent
+					}
 					aria-disabled={ isResolving }
 					// @ts-ignore No types for this exist yet.
 					__next40pxDefaultSize
