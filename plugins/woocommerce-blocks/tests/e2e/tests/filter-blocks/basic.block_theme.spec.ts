@@ -38,10 +38,10 @@ test.describe( 'Filter blocks registration', () => {
 
 	test( 'Variations cannot be inserted through the inserter.', async ( {
 		page,
-		editorUtils,
+		editor,
 	} ) => {
 		for ( const block of filterBlocks ) {
-			await editorUtils.openGlobalBlockInserter();
+			await editor.openGlobalBlockInserter();
 			await page.getByPlaceholder( 'Search' ).fill( block.title );
 			const filterBlock = page.getByRole( 'option', {
 				name: block.title,
