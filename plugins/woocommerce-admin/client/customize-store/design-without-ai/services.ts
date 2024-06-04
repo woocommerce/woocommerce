@@ -131,10 +131,6 @@ const updateGlobalStylesWithDefaultValues = async (
 const installAndActivateTheme = async (
 	context: DesignWithoutAIStateMachineContext
 ) => {
-	if ( context.isBlockTheme ) {
-		return;
-	}
-
 	try {
 		await setTheme( THEME_SLUG );
 		await updateGlobalStylesWithDefaultValues( context );
