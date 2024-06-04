@@ -10,7 +10,7 @@ use WC_Tax;
 class ConfigureSettings implements StepProcessor {
 	public function process($schema): StepProcessorResult {
 		foreach ($schema->tabs as $tabName => $tab) {
-			if ($tabName !== 'site_visibility') {
+			if ($tabName !== 'integration') {
 				continue;
 			}
 			$stepProcessor = __NAMESPACE__ . '\\Settings\\ConfigureSettings' .  Util::snake_to_camel($tabName);
