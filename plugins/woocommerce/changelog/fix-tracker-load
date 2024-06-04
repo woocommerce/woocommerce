@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: No functional change, moved a hook loading under defensive check to prevent accidental misuse in future.
+
+
