@@ -64,18 +64,11 @@ export const useProductTemplate = (
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
 
-	const productType = product?.type;
-
 	const productTemplateIdToFind =
 		productTemplateId || 'standard-product-template';
 
-	const productTypeToFind =
-		productType === 'variable' ? 'simple' : productType;
-
 	let matchingProductTemplate = productTemplates.find(
-		( productTemplate ) =>
-			productTemplate.id === productTemplateIdToFind &&
-			productTemplate.productData.type === productTypeToFind
+		( productTemplate ) => productTemplate.id === productTemplateIdToFind
 	);
 
 	if ( ! matchingProductTemplate && product ) {
