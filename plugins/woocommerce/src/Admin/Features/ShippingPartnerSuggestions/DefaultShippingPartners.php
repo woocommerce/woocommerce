@@ -285,6 +285,15 @@ class DefaultShippingPartners {
 				'learn_more_link'   => 'https://woocommerce.com/products/shipping/',
 				'is_visible'        => array(
 					self::get_rules_for_countries( array( 'US' ) ),
+					array(
+						'type' => 'not',
+						'operand' => array(
+							array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'woocommerce-shipping' ),
+							),
+						),
+					),
 				),
 				'available_layouts' => array( 'column' ),
 			),
