@@ -7,16 +7,14 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import {
-	CoreProfilerStateMachineContext,
-} from '..';
+import { CoreProfilerStateMachineContext } from '..';
 import {
 	UserProfileEvent,
 	BusinessInfoEvent,
 	PluginsLearnMoreLinkClickedEvent,
 	PluginsInstallationCompletedWithErrorsEvent,
 	PluginsInstallationCompletedEvent,
-	PluginsInstallationRequestedEvent
+	PluginsInstallationRequestedEvent,
 } from '../events';
 import { POSSIBLY_DEFAULT_STORE_NAMES } from '../pages/BusinessInfo';
 import {
