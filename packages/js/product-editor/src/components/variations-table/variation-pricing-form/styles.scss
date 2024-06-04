@@ -1,0 +1,20 @@
+.woocommerce-variation-pricing-form {
+	display: flex;
+	flex-direction: column;
+	min-width: 345px;
+
+	&__controls,
+	&__actions {
+		display: flex;
+		gap: $grid-unit-20;
+		padding: $grid-unit-20;
+	}
+
+	&__controls {
+		justify-content: stretch;
+	}
+
+	&__actions {
+		justify-content: flex-end;
+	}
+}
