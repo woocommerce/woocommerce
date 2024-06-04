@@ -42,10 +42,10 @@ describe( 'ShippingAddress', () => {
 	it( 'renders ShippingLocation if user does not prefer collection', () => {
 		render(
 			<ShippingAddress
-				showCalculator={ false }
 				isShippingCalculatorOpen={ false }
 				setIsShippingCalculatorOpen={ jest.fn() }
 				shippingAddress={ testShippingAddress }
+				hasRates={ false }
 			/>
 		);
 		expect(
@@ -80,10 +80,10 @@ describe( 'ShippingAddress', () => {
 
 		render(
 			<ShippingAddress
-				showCalculator={ false }
 				isShippingCalculatorOpen={ false }
 				setIsShippingCalculatorOpen={ jest.fn() }
 				shippingAddress={ testShippingAddress }
+				hasRates={ true }
 			/>
 		);
 		expect(
