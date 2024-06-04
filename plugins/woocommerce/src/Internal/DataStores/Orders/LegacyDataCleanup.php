@@ -171,18 +171,6 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	}
 
 	/**
-	 * Checks whether the cleanup process should run. That is, it must be activated and {@see can_run()} must return TRUE.
-	 *
-	 * @deprecated 9.1.0
-	 *
-	 * @return boolean TRUE if the cleanup process should be run, FALSE otherwise.
-	 */
-	public function should_run() {
-		wc_deprecated_function( __METHOD__, '9.1.0', __CLASS__ . '::can_run()' );
-		return $this->can_run();
-	}
-
-	/**
 	 * Whether the user has initiated the cleanup process.
 	 *
 	 * @return boolean TRUE if the user has initiated the cleanup process, FALSE otherwise.
