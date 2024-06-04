@@ -170,7 +170,12 @@ class BatchProcessingController {
 			// The batch processing failed and no items were processed:
 			// reschedule the processing with a delay, unless this is a repeatead failure.
 			if ( $this->is_consistently_failing( $batch_processor ) ) {
-				$this->logger->error( "Batch processor {$batch_processor->get_name()} appears to be consistently failing. Execution won't be automatically re-attempted." );
+				$this->logger->error(
+					"Batch processor {$batch_processor->get_name()} appears to be consistently failing. Execution won't be automatically re-attempted.",
+					array(
+						'source' => 'batch-processing',
+					)
+				);
 			} else {
 				$this->schedule_batch_processing( $processor_class_name, true );
 			}
@@ -448,7 +453,7 @@ class BatchProcessingController {
 		 */
 		$error_message = apply_filters( 'wc_batch_processing_log_message', $error_message, $error, $batch_processor, $batch );
 
-		$this->logger->error( $error_message, array( 'exception' => $error ) );
+		$this->logger->error( $error_message, array( 'exception' => $error, 'source' => 'batch-processing' ) );
 	}
 
 	/**
