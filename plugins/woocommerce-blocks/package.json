@@ -308,7 +308,7 @@
 		"postcode-validator": "3.8.15",
 		"preact": "^10.19.3",
 		"prop-types": "^15.8.1",
-		"react-number-format": "4.9.3",
+		"react-number-format": "5.4.0",
 		"react-transition-group": "^4.4.5",
 		"request": "2.88.2",
 		"trim-html": "0.1.9",

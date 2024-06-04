@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import NumberFormat from 'react-number-format';
+import { NumericFormat } from 'react-number-format';
 import type {
 	NumberFormatValues,
 	NumberFormatProps,
@@ -113,7 +113,7 @@ const FormattedMonetaryAmount = ( {
 		: () => void 0;
 
 	return (
-		<NumberFormat
+		<NumericFormat
 			className={ classes }
 			displayType={ displayType }
 			{ ...numberFormatProps }
