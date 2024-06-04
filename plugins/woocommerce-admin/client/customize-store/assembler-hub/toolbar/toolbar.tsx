@@ -1,3 +1,4 @@
+/* eslint-disable @woocommerce/dependency-group */
 /**
  * External dependencies
  */
@@ -17,12 +18,11 @@ import {
 /**
  * Internal dependencies
  */
+import { useQuery } from '@woocommerce/navigation';
 import Shuffle from './shuffle';
 import './style.scss';
 
-const isHomepageUrl = ( url: string ) => {
-	const path = new URLSearchParams( url ).get( 'path' );
-
+const isHomepageUrl = ( path: string ) => {
 	return path === '/customize-store/assembler-hub/homepage';
 };
 
@@ -85,34 +85,13 @@ export const Toolbar = () => {
 		);
 	}, [ allBlocks ] );
 
+	const query = useQuery();
+
 	useEffect( () => {
-		const initialUrl = window.parent.location.href;
+		const path = query.path;
 
-		setIsHomepageSidebarOpen( isHomepageUrl( initialUrl ) );
-
-		const navigateHandler = ( event: {
-			destination: {
-				url: string;
-			};
-		} ) => {
-			setIsHomepageSidebarOpen( isHomepageUrl( event.destination.url ) );
-		};
-
-		// @ts-expect-error missing type
-		window.parent.navigation.addEventListener(
-			'navigate',
-			navigateHandler
-		);
-
-		return () => {
-			// @ts-expect-error missing type
-			window.parent.navigation.removeEventListener(
-				'navigate',
-				navigateHandler
-			);
-		};
-	}, [] );
-
+		setIsHomepageSidebarOpen( isHomepageUrl( path ) );
+	}, [ query ] );
 	const { isPreviousBlockTemplatePart, isNextBlockTemplatePart } =
 		useMemo( () => {
 			return {
