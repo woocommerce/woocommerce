@@ -287,7 +287,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			array(
 				'name'           => 'Highline',
 				/* translators: %d: price */
-				'price'          => sprintf( __( '%d/year', 'woocommerce' ), 79 ),
+				'price'          => sprintf( __( '$%d/year', 'woocommerce' ), 79 ),
 				'is_free'        => false,
 				'color_palettes' => array(
 					array(
@@ -319,7 +319,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			array(
 				'name'           => 'Luminate',
 				/* translators: %d: price */
-				'price'          => sprintf( __( '%d/year', 'woocommerce' ), 79 ),
+				'price'          => sprintf( __( '$%d/year', 'woocommerce' ), 79 ),
 				'is_free'        => false,
 				'color_palettes' => array(
 					array(
@@ -351,7 +351,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			array(
 				'name'           => 'Nokul',
 				/* translators: %d: price */
-				'price'          => sprintf( __( '%d/year', 'woocommerce' ), 79 ),
+				'price'          => sprintf( __( '$%d/year', 'woocommerce' ), 79 ),
 				'is_free'        => false,
 				'color_palettes' => array(
 					array(
