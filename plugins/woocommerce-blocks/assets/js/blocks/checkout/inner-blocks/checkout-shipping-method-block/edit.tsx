@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { PanelBody, ToggleControl } from '@wordpress/components';
 import { Icon, store, shipping } from '@wordpress/icons';
@@ -53,13 +53,10 @@ const LocalPickupSelector = ( {
 } ) => {
 	return (
 		<Button
-			className={ classnames(
-				'wc-block-checkout__shipping-method-option',
-				{
-					'wc-block-checkout__shipping-method-option--selected':
-						checked === 'pickup',
-				}
-			) }
+			className={ clsx( 'wc-block-checkout__shipping-method-option', {
+				'wc-block-checkout__shipping-method-option--selected':
+					checked === 'pickup',
+			} ) }
 			onClick={ onClick }
 			removeTextWrap
 		>
@@ -116,13 +113,10 @@ const ShippingSelector = ( {
 
 	return (
 		<Button
-			className={ classnames(
-				'wc-block-checkout__shipping-method-option',
-				{
-					'wc-block-checkout__shipping-method-option--selected':
-						checked === 'shipping',
-				}
-			) }
+			className={ clsx( 'wc-block-checkout__shipping-method-option', {
+				'wc-block-checkout__shipping-method-option--selected':
+					checked === 'shipping',
+			} ) }
 			onClick={ onClick }
 			removeTextWrap
 		>
@@ -214,7 +208,7 @@ export const Edit = ( {
 		<FormStepBlock
 			attributes={ attributes }
 			setAttributes={ setAttributes }
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__shipping-method',
 				className
 			) }

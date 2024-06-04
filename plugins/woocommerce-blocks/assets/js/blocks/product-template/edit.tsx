@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { memo, useMemo, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
@@ -303,7 +303,7 @@ const ProductTemplateEdit = (
 	}
 
 	const blockProps = useBlockProps( {
-		className: classnames(
+		className: clsx(
 			__unstableLayoutClassNames,
 			'wc-block-product-template',
 			customClassName

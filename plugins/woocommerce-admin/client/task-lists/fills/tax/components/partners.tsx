@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button, Card, CardBody, CardHeader } from '@wordpress/components';
 import { Children } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -18,7 +18,7 @@ export const Partners: React.FC< TaxChildProps > = ( {
 	onManual,
 	onDisable,
 } ) => {
-	const classes = classnames(
+	const classes = clsx(
 		'woocommerce-task-card',
 		'woocommerce-tax-partners',
 		`woocommerce-tax-partners__partners-count-${ Children.count(

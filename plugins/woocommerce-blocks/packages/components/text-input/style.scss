@@ -5,7 +5,6 @@
 	white-space: nowrap;
 
 	label {
-		@include reset-color();
 		@include reset-typography();
 		@include font-size(regular);
 		position: absolute;
@@ -14,7 +13,7 @@
 		left: em($gap-smaller + 1px);
 		top: 0;
 		transform-origin: top left;
-		color: $universal-body-low-emphasis;
+		color: currentColor;
 		transition: all 200ms ease;
 		margin: 0;
 		overflow: hidden;
@@ -49,19 +48,20 @@
 		line-height: em($gap);
 		width: 100%;
 		border-radius: $universal-border-radius;
-		border: 1px solid $universal-border-strong;
+		border: 1px solid $universal-border-light;
+
 		font-family: inherit;
 		margin: 0;
 		box-sizing: border-box;
 		min-height: 0;
+		max-height: 50px;
 		background-color: #fff;
-		color: $input-text-active;
+		color: currentColor;
 
 		&:focus {
 			background-color: #fff;
-			color: $input-text-active;
 			outline: 0;
-			box-shadow: 0 0 0 1px $input-border-gray;
+			box-shadow: 0 0 0 2px currentColor;
 		}
 
 		.has-dark-controls & {
@@ -72,7 +72,7 @@
 			&:focus {
 				background-color: $input-background-dark;
 				color: $input-text-dark;
-				box-shadow: 0 0 0 1px $input-border-dark;
+				box-shadow: 0 0 0 2px $input-border-dark;
 			}
 		}
 	}
@@ -88,7 +88,7 @@
 
 	&.is-active label,
 	input:-webkit-autofill + label {
-		transform: translateY(em($gap-smaller)) scale(0.875);
+		transform: translateY(25%) scale(0.75);
 	}
 
 	&.has-error input {

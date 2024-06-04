@@ -49,12 +49,12 @@ export const Congrats = ( {
 	const [ isShowSurvey, setIsShowSurvey ] = useState< boolean >(
 		! hasCompleteSurvey
 	);
-	const [ emojiValue, setEmojiValue ] = useState< number | null >( null );
+	const [ score, setScore ] = useState< number | null >( null );
 	const [ feedbackText, setFeedbackText ] = useState< string >( '' );
 	const [ isShowThanks, setIsShowThanks ] = useState< boolean >( false );
 	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
 
-	const shouldShowComment = isInteger( emojiValue );
+	const shouldShowComment = isInteger( score );
 
 	const copyClipboardRef = useCopyToClipboard< HTMLAnchorElement >(
 		homeUrl,
@@ -71,19 +71,10 @@ export const Congrats = ( {
 	);
 
 	const sendData = () => {
-		const emojis = {
-			1: 'very_difficult',
-			2: 'difficult',
-			3: 'neutral',
-			4: 'good',
-			5: 'very_good',
-		} as const;
-		const emoji_value = emojiValue
-			? emojis[ emojiValue as keyof typeof emojis ]
-			: 'none';
 		recordEvent( 'launch_your_store_congrats_survey_complete', {
-			emoji: emoji_value,
-			feedback: feedbackText,
+			action: 'lys_experience',
+			score,
+			comments: feedbackText,
 		} );
 
 		setIsShowThanks( true );
@@ -205,10 +196,8 @@ export const Congrats = ( {
 												'How was the experience of launching your store?',
 												'woocommerce'
 											) }
-											onSelect={ ( score ) =>
-												setEmojiValue( score )
-											}
-											selectedValue={ emojiValue }
+											onSelect={ setScore }
+											selectedValue={ score }
 										/>
 									</div>
 									{ shouldShowComment && (
@@ -266,7 +255,7 @@ export const Congrats = ( {
 											className=""
 											variant="tertiary"
 											onClick={ () => {
-												setEmojiValue( null );
+												setScore( null );
 											} }
 										>
 											{ __( 'Cancel', 'woocommerce' ) }
