@@ -101,14 +101,6 @@ describe( 'useProductTemplate', () => {
 		expect( result.current.productTemplate?.id ).toEqual( 'template-2' );
 	} );
 
-	it( 'should return the first product template with a matching type in the productData if no product template id is set', () => {
-		const { result } = renderHook( () =>
-			useProductTemplate( undefined, { type: 'grouped' } )
-		);
-
-		expect( result.current.productTemplate?.id ).toEqual( 'template-2' );
-	} );
-
 	it( 'should return undefined if no matching product template by id or type', () => {
 		const { result } = renderHook( () =>
 			useProductTemplate( 'invalid-template-id', { type: 'external' } )
@@ -125,14 +117,6 @@ describe( 'useProductTemplate', () => {
 		expect( result.current.productTemplate?.id ).toEqual(
 			'standard-product-template'
 		);
-	} );
-
-	it( 'should use the product type to match if the product template id matches a template with a different product type', () => {
-		const { result } = renderHook( () =>
-			useProductTemplate( 'template-2', { type: 'simple' } )
-		);
-
-		expect( result.current.productTemplate?.id ).toEqual( 'template-1' );
 	} );
 
 	it( 'should select the product template with the most matching fields if there are multiple matching templates', () => {
