@@ -5,9 +5,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
-use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\TemplateMatching;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
@@ -98,11 +96,12 @@ class Init {
 		}
 		if ( ! $product->meta_exists( '_product_template_id' ) ) {
 			/**
-			 * Allows to determine a product template id based on the product data.
+			 * Experimental: Allows to determine a product template id based on the product data.
 			 *
+			 * @ignore
 			 * @since 9.1.0
 			 */
-			$product_template_id = apply_filters( 'woocommerce_product_editor_determine_product_template', '', $product );
+			$product_template_id = apply_filters( 'experimental_woocommerce_product_editor_determine_product_template', '', $product );
 			if ( $product_template_id ) {
 				$response->data['meta_data'][] = new WC_Meta_Data(
 					array(
