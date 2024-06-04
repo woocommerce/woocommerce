@@ -1051,13 +1051,19 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			}
 
 			$active_plugins_data = array();
+			$transient_lifetime = HOUR_IN_SECONDS;
 
 			foreach ( $active_plugins as $plugin ) {
+				if ( !is_readable( WP_PLUGIN_DIR . '/' . $plugin ) ) {
+					$transient_lifetime = 60;
+					continue;
+				}
+
 				$data                  = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
 				$active_plugins_data[] = $this->format_plugin_data( $plugin, $data );
 			}
 
-			set_transient( 'wc_system_status_active_plugins', $active_plugins_data, HOUR_IN_SECONDS );
+			set_transient( 'wc_system_status_active_plugins', $active_plugins_data, $transient_lifetime );
 		}
 
 		return $active_plugins_data;
