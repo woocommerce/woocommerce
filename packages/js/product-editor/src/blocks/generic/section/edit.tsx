@@ -36,6 +36,8 @@ export function SectionBlockEdit( {
 	const blockProps = useWooBlockProps( attributes );
 	const { hasInnerBlocks } = useSelect(
 		( select ) => {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore No types for this exist yet, natively.
 			const { getBlock } = select( blockEditorStore );
 			const block = getBlock( clientId );
 			return {
