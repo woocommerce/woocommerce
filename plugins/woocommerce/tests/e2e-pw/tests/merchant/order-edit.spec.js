@@ -43,9 +43,9 @@ test.describe( 'Edit order', () => {
 
 	test( 'can view single order', async ( { page } ) => {
 		if ( process.env.DISABLE_HPOS === 1 ) {
-			await page.goto( '/wp-admin/admin.php?page=wc-orders&action=new' );
-		} else {
 			await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
+		} else {
+			await page.goto( '/wp-admin/admin.php?page=wc-orders&action=new' );
 		}
 
 		// confirm we're on the orders page
