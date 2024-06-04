@@ -194,25 +194,16 @@ class ProductCollectionPage {
 		);
 	}
 
-	async replaceProductsWithProductCollectionInTemplate(
-		template: string,
-		collection?: Collections
+	// Going to Product Catalog by default
+	async goToEditorTemplate(
+		template = 'woocommerce/woocommerce//archive-product'
 	) {
-		await this.admin.visitSiteEditor( {
+		await await this.admin.visitSiteEditor( {
 			postId: template,
 			postType: 'wp_template',
 		} );
-
 		await this.editor.enterEditMode();
-
-		await expect(
-			this.editor.canvas.locator( `[data-type="core/query"]` )
-		).toBeVisible();
-
-		await this.replaceBlockByBlockName( 'core/query', this.BLOCK_SLUG );
-		await this.chooseCollectionInTemplate( collection );
 		await this.refreshLocators( 'editor' );
-		await this.editor.saveSiteEditorEntities();
 	}
 
 	async goToProductCatalogFrontend() {

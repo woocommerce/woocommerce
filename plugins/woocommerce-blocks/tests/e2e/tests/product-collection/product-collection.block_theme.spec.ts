@@ -118,9 +118,7 @@ test.describe( 'Product Collection', () => {
 			editor,
 			pageObject,
 		} ) => {
-			await pageObject.replaceProductsWithProductCollectionInTemplate(
-				'woocommerce/woocommerce//archive-product'
-			);
+			await pageObject.goToEditorTemplate();
 
 			await expect(
 				editor.canvas.locator( '[data-testid="product-image"]:visible' )
@@ -1137,9 +1135,7 @@ test.describe( 'Product Collection', () => {
 				page,
 				pageObject,
 			} ) => {
-				await pageObject.replaceProductsWithProductCollectionInTemplate(
-					path
-				);
+				await pageObject.goToEditorTemplate( path );
 
 				const previewButtonLocator = editor.canvas.locator(
 					'button[data-test-id="product-collection-preview-button"]'
@@ -1169,9 +1165,7 @@ test.describe( 'Product Collection', () => {
 			editor,
 			pageObject,
 		} ) => {
-			await pageObject.replaceProductsWithProductCollectionInTemplate(
-				'woocommerce/woocommerce//archive-product'
-			);
+			await pageObject.goToEditorTemplate();
 			const productTemplate = editor.canvas.getByLabel(
 				BLOCK_LABELS.productTemplate
 			);
