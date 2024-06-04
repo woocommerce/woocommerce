@@ -19,7 +19,7 @@ jest.mock( '@wordpress/data', () => ( {
 } ) );
 
 // Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
-wpData.useSelect.mockImplementation( ( selector: any ) => {
+wpData.useSelect.mockImplementation( ( selector ) => {
 	const mockSelect = ( storeName: string ) => {
 		if ( storeName === 'wc/store/checkout' ) {
 			return {
