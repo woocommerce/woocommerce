@@ -347,7 +347,6 @@ class WC_Post_Types {
 						'items_list'            => __( 'Products list', 'woocommerce' ),
 						'item_link'             => __( 'Product Link', 'woocommerce' ),
 						'item_link_description' => __( 'A link to a product.', 'woocommerce' ),
-						'template_name'         => _x( 'Single Product', 'Template name', 'woocommerce' ),
 					),
 					'description'         => __( 'This is where you can browse products in this store.', 'woocommerce' ),
 					'public'              => true,
