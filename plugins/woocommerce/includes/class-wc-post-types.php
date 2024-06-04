@@ -376,6 +376,12 @@ class WC_Post_Types {
 		if ( Features::is_enabled( 'product-editor-template-system' ) ) {
 			register_post_type(
 				'product_form',
+				/**
+				 * Allow developers to customize the product form post type registration arguments.
+				 *
+				 * @since 9.1.0
+				 * @param array $args The default post type registration arguments.
+				 */
 				apply_filters(
 					'woocommerce_register_post_type_product_form',
 					array(
