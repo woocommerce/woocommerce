@@ -23,7 +23,7 @@ class StoreConnect extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Manage your WooCommerce.com Marketplace subscriptions', 'woocommerce' );
+		return __( 'Manage your WooCommerce Marketplace subscriptions', 'woocommerce' );
 	}
 
 	/**
