@@ -56,16 +56,16 @@ export const ShippingRateSelector = ( {
 					<>
 						{
 							// If the address is not complete and shipping calculator is disabled. Display warning notice.
-						 }
-						{ isAddressComplete && ! showCalculator && (
-							<NoticeBanner
-								isDismissible={ false }
-								className="wc-block-components-shipping-rates-control__no-results-notice"
-								status="warning"
-							>
-								{ noResultsMessage }
-							</NoticeBanner>
-						) }
+							isAddressComplete && ! showCalculator && (
+								<NoticeBanner
+									isDismissible={ false }
+									className="wc-block-components-shipping-rates-control__no-results-notice"
+									status="warning"
+								>
+									{ noResultsMessage }
+								</NoticeBanner>
+							)
+						}
 					</>
 				}
 				shippingRates={ shippingRates }
