@@ -322,5 +322,62 @@ class WC_Admin_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 'extended_tasklist_test_event', $task->record_tracks_event( 'test_event' ) );
 	}
+
+	/**
+	 * Test completion track when task is completed but not yet tracked.
+	 */
+	public function test_record_tracks_event_completion_success() {
+		$mock = $this->getMockBuilder( TestTask::class )
+			->onlyMethods( array( 'record_tracks_event', 'has_previously_completed' ) )
+			->disableOriginalConstructor()
+			->getMock();
+
+		$mock->method( 'has_previously_completed' )
+			->willReturn( false );
+		$mock->is_complete = true;
+
+		$mock->expects( $this->once() )
+			->method('record_tracks_event');
+
+		$mock->possibly_track_completion();
+	}
+
+	/**
+	 * Test completion track when task is not completed.
+	 */
+	public function test_record_tracks_event_completion_not_complete() {
+		$mock = $this->getMockBuilder( TestTask::class )
+			->onlyMethods( array( 'record_tracks_event', 'has_previously_completed' ) )
+			->disableOriginalConstructor()
+			->getMock();
+
+		$mock->method( 'has_previously_completed' )
+			->willReturn( false );
+		$mock->is_complete = false;
+
+		$mock->expects( $this->never() )
+			->method('record_tracks_event');
+
+		$mock->possibly_track_completion();
+	}
+
+	/**
+	 * Test completion track when task is completed but already tracked.
+	 */
+	public function test_record_tracks_event_completion_already_tracked() {
+		$mock = $this->getMockBuilder( TestTask::class )
+			->onlyMethods( array( 'record_tracks_event', 'has_previously_completed' ) )
+			->disableOriginalConstructor()
+			->getMock();
+
+		$mock->method( 'has_previously_completed' )
+			->willReturn( true );
+		$mock->is_complete = false;
+
+		$mock->expects( $this->never() )
+			->method('record_tracks_event');
+
+		$mock->possibly_track_completion();
+	}
 }
 
