@@ -76,6 +76,8 @@ class CLIRunner {
 		WP_CLI::add_command( 'wc hpos status', array( $this, 'status' ) );
 		WP_CLI::add_command( 'wc hpos diff', array( $this, 'diff' ) );
 		WP_CLI::add_command( 'wc hpos backfill', array( $this, 'backfill' ) );
+		WP_CLI::add_command( 'wc hpos compatibility-mode enable', array( $this, 'enable_compat_mode' ) );
+		WP_CLI::add_command( 'wc hpos compatibility-mode disable', array( $this, 'disable_compat_mode' ) );
 
 		WP_CLI::add_command( 'wc cot migrate', array( $this, 'migrate' ) ); // Fully deprecated. No longer works.
 	}
@@ -803,12 +805,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		}
 
 		if ( $assoc_args['with-sync'] && $table_exists ) {
-			if ( $data_synchronizer->data_sync_is_enabled() ) {
-				WP_CLI::warning( __( 'Sync is already enabled.', 'woocommerce' ) );
-			} else {
-				$feature_controller->change_feature_enable( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, true );
-				WP_CLI::success( __( 'Sync enabled.', 'woocommerce' ) );
-			}
+			$this->toggle_compat_mode( true );
 		}
 
 		if ( ! $enable_hpos ) {
@@ -889,15 +886,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		}
 
 		if ( $assoc_args['with-sync'] ) {
-			if ( ! $data_synchronizer->data_sync_is_enabled() ) {
-				return WP_CLI::warning( __( 'Sync is already disabled.', 'woocommerce' ) );
-			}
-			$feature_controller->change_feature_enable( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, false );
-			if ( $data_synchronizer->data_sync_is_enabled() ) {
-				return WP_CLI::warning( __( 'Sync could not be disabled.', 'woocommerce' ) );
-			} else {
-				WP_CLI::success( __( 'Sync disabled.', 'woocommerce' ) );
-			}
+			$this->toggle_compat_mode( false );
 		}
 	}
 
@@ -1222,5 +1211,56 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				$to
 			)
 		);
+	}
+
+	/**
+	 * Enables compatibility mode, which keeps the HPOS and posts datastore in sync.
+	 *
+	 * @since 9.1.0
+	 */
+	public function enable_compat_mode(): void {
+		$this->toggle_compat_mode( true );
+	}
+
+	/**
+	 * Disables compatibility mode, which keeps the HPOS and posts datastore in sync.
+	 *
+	 * @since 9.1.0
+	 */
+	public function disable_compat_mode(): void {
+		$this->toggle_compat_mode( false );
+	}
+
+	/**
+	 * Toggles compatibility mode on or off.
+	 *
+	 * @since 9.1.0
+	 *
+	 * @param bool $enabled TRUE to enable compatibility mode, FALSE to disable.
+	 */
+	private function toggle_compat_mode( bool $enabled ): void {
+		if ( ! $this->synchronizer->check_orders_table_exists() ) {
+			WP_CLI::error( __( 'HPOS tables do not exist.', 'woocommerce' ) );
+		}
+
+		$currently_enabled = $this->synchronizer->data_sync_is_enabled();
+
+		if ( $currently_enabled === $enabled ) {
+			if ( $enabled ) {
+				WP_CLI::warning( __( 'Compatibility mode is already enabled.', 'woocommerce' ) );
+			} else {
+				WP_CLI::warning( __( 'Compatibility mode is already disabled.', 'woocommerce' ) );
+			}
+
+			return;
+		}
+
+		update_option( $this->synchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, wc_bool_to_string( $enabled ) );
+
+		if ( $enabled ) {
+			WP_CLI::success( __( 'Compatibility mode enabled.', 'woocommerce' ) );
+		} else {
+			WP_CLI::success( __( 'Compatibility mode disabled.', 'woocommerce' ) );
+		}
 	}
 }
