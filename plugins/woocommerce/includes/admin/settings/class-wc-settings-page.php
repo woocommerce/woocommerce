@@ -32,6 +32,42 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		protected $label = '';
 
 		/**
+		 * Setting page label.
+		 *
+		 * @var string
+		 */
+		protected $types = array(
+			'title',
+			'info',
+			'sectionend',
+			'text',
+			'password',
+			'datetime',
+			'datetime-local',
+			'date',
+			'month',
+			'time',
+			'week',
+			'number',
+			'email',
+			'url',
+			'tel',
+			'color',
+			'textarea',
+			'select',
+			'multiselect',
+			'radio',
+			'checkbox',
+			'image_width',
+			'single_select_page',
+			'single_select_page_with_search',
+			'single_select_country',
+			'multi_select_countries',
+			'relative_date_selector',
+			'slotfill_placeholder',
+		);
+
+		/**
 		 * Constructor.
 		 */
 		public function __construct() {
@@ -94,14 +130,26 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		public function get_settings_page_data( $pages ) {
 			$sections = $this->get_sections();
 			$sections_data = array();
+
 			foreach ( $sections as $section_id => $section_label ) {
 				$section_settings = $this->get_settings_for_section( $section_id );
 				$section_settings_data = array();
 
 				foreach( $section_settings as $section_setting ) {
 					if ( isset( $section_setting['id'] ) ) {
-						$section_setting['value'] = isset( $section_setting['default'] ) ? get_option( $section_setting['id'], $section_setting['default'] ) : get_option( $section_setting['id'] );
+							$section_setting['value'] = isset( $section_setting['default'] ) ? get_option( $section_setting['id'], $section_setting['default'] ) : get_option( $section_setting['id'] );
 					}
+						
+					if ( ! in_array( $section_setting['type'], $this->types ) ) {
+						ob_start();
+						do_action( 'woocommerce_admin_field_' . $section_setting['type'], $section_setting);
+						$html = ob_get_contents();
+						$section_setting['content'] = trim( $html );
+						$section_setting['id'] = $section_setting['type'];
+						$section_setting['type'] = 'custom';
+						ob_end_clean();
+					}
+
 					$section_settings_data[] = $section_setting;
 				}
 				$sections_data[ $section_id ] = array(
