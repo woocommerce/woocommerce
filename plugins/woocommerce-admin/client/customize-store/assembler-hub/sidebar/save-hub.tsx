@@ -36,8 +36,8 @@ import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/compon
  */
 import { CustomizeStoreContext } from '../';
 import { trackEvent } from '~/customize-store/tracking';
-import { useIsNoBlocksPlaceholderPresent } from '../hooks/block-placeholder/use-add-no-blocks-placeholder';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
+import { useIsNoBlocksPlaceholderPresent } from '../hooks/block-placeholder/use-is-no-blocks-placeholder-present';
 
 const PUBLISH_ON_SAVE_ENTITIES = [
 	{
