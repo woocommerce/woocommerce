@@ -29,40 +29,37 @@ export const possiblyRenderSettingsSlots = () => {
 	slots.forEach( ( slot ) => {
 		const slotDomElement = document.getElementById( slot.id );
 
-		if ( slotDomElement ) {
-			if ( createRoot ) {
-				if ( roots[ slot.id ] ) {
-					roots[ slot.id ].render(
-						<>
-							<SlotFillProvider>
-								<Slot />
-								<PluginArea scope={ slot.scope } />
-							</SlotFillProvider>
-						</>
-					);
-				} else {
-					const root = createRoot( slotDomElement );
-					root.render(
-						<>
-							<SlotFillProvider>
-								<Slot />
-								<PluginArea scope={ slot.scope } />
-							</SlotFillProvider>
-						</>
-					);
-					roots[ slot.id ] = root;
-				}
+		if ( ! slotDomElement ) {
+			return;
+		}
+
+		const slotFill = (
+			<>
+				<SlotFillProvider>
+					<Slot />
+					<PluginArea scope={ slot.scope } />
+				</SlotFillProvider>
+			</>
+		);
+
+		if ( createRoot ) {
+			if ( roots[ slot.id ] ) {
+				roots[ slot.id ].render( slotFill );
 			} else {
-				render(
-					<>
-						<SlotFillProvider>
-							<Slot />
-							<PluginArea scope={ slot.scope } />
-						</SlotFillProvider>
-					</>,
-					slotDomElement
-				);
+				const root = createRoot( slotDomElement );
+				root.render( slotFill );
+				roots[ slot.id ] = root;
 			}
+		} else {
+			render(
+				<>
+					<SlotFillProvider>
+						<Slot />
+						<PluginArea scope={ slot.scope } />
+					</SlotFillProvider>
+				</>,
+				slotDomElement
+			);
 		}
 	} );
 };
