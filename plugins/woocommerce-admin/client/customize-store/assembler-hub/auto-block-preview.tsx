@@ -77,7 +77,7 @@ function ScaledBlockPreview( {
 	const [ contentHeight, setContentHeight ] = useState< number | null >(
 		null
 	);
-	const { setLogoBlockIds } = useContext( LogoBlockContext );
+	const { setLogoBlockIds, logoBlockIds } = useContext( LogoBlockContext );
 	const [ fontFamilies ] = useGlobalSetting(
 		'typography.fontFamilies.theme'
 	) as [ FontFamily[] ];
@@ -138,6 +138,7 @@ function ScaledBlockPreview( {
 			autoScale,
 			isPatternPreview,
 			contentHeight,
+			logoBlockIds,
 		},
 		{
 			selectBlockOnHover,

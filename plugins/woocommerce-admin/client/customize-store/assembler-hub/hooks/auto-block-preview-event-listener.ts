@@ -59,22 +59,32 @@ const findAndSetLogoBlock = (
 	}: Pick< useAutoBlockPreviewEventListenersValues, 'autoScale' > & {
 		documentElement: HTMLElement;
 	},
-
 	{
 		setLogoBlockIds,
 	}: Pick< useAutoBlockPreviewEventListenersCallbacks, 'setLogoBlockIds' >
 ) => {
-	// Get the current logo block client ID from DOM and set it in the logo block context. This is used for the logo settings. See: ./sidebar/sidebar-navigation-screen-logo.tsx
-	// Ideally, we should be able to get the logo block client ID from the block editor store but it is not available.
-	// We should update this code once the there is a selector in the block editor store that can be used to get the logo block client ID.
-	const siteLogos = documentElement.querySelectorAll( '.wp-block-site-logo' );
+	const observer = new window.MutationObserver( () => {
+		// Get the current logo block client ID from DOM and set it in the logo block context. This is used for the logo settings. See: ./sidebar/sidebar-navigation-screen-logo.tsx
+		// Ideally, we should be able to get the logo block client ID from the block editor store but it is not available.
+		// We should update this code once the there is a selector in the block editor store that can be used to get the logo block client ID.
+		const siteLogos = documentElement.querySelectorAll(
+			'.wp-block-site-logo'
+		);
 
-	const logoBlockIds = Array.from( siteLogos )
-		.map( ( siteLogo ) => {
-			return siteLogo.getAttribute( 'data-block' );
-		} )
-		.filter( Boolean ) as string[];
-	setLogoBlockIds( logoBlockIds );
+		const logoBlockIds = Array.from( siteLogos )
+			.map( ( siteLogo ) => {
+				return siteLogo.getAttribute( 'data-block' );
+			} )
+			.filter( Boolean ) as string[];
+		setLogoBlockIds( logoBlockIds );
+	} );
+
+	observer.observe( documentElement, {
+		subtree: true,
+		childList: true,
+	} );
+
+	return observer;
 };
 
 /**
@@ -191,6 +201,7 @@ type useAutoBlockPreviewEventListenersValues = {
 	autoScale: boolean;
 	isPatternPreview: boolean;
 	contentHeight: number | null;
+	logoBlockIds: string[];
 };
 
 type useAutoBlockPreviewEventListenersCallbacks = {
@@ -229,6 +240,7 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 		documentElement,
 		autoScale,
 		isPatternPreview,
+		logoBlockIds,
 	}: useAutoBlockPreviewEventListenersValues,
 	{
 		selectBlockOnHover,
@@ -258,17 +270,22 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 					setContentHeight,
 				}
 			);
-			findAndSetLogoBlock(
-				{ autoScale, documentElement },
-				{
-					setLogoBlockIds,
-				}
-			);
 
 			observers.push( heightObserver );
 		}
 
 		setStyle( documentElement );
+
+		if ( logoBlockIds.length === 0 ) {
+			const logoObserver = findAndSetLogoBlock(
+				{ autoScale, documentElement, logoBlockIds },
+				{
+					setLogoBlockIds,
+				}
+			);
+
+			observers.push( logoObserver );
+		}
 
 		if (
 			isFullComposabilityFeatureAndAPIAvailable() &&
@@ -301,5 +318,5 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 		};
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ documentElement ] );
+	}, [ documentElement, logoBlockIds ] );
 };
