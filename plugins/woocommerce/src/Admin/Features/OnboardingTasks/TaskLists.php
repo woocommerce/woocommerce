@@ -166,6 +166,7 @@ class TaskLists {
 				),
 				'tasks'   => array(
 					'StoreConnect',
+					'BrowseMarketplace',
 					'AdditionalPayments',
 					'GetMobileApp',
 				),
