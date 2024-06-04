@@ -198,8 +198,12 @@ export function BlockEditor( {
 		product
 	);
 
+	const isProductLoaded = product && Object.keys( product ).length > 0;
+
 	const { layoutTemplate } = useLayoutTemplate(
-		getLayoutTemplateId( productTemplate, postType )
+		isProductLoaded
+			? getLayoutTemplateId( productTemplate, postType )
+			: undefined
 	);
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
