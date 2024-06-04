@@ -334,7 +334,7 @@ class WC_Admin_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 					new TaskList( array( 'id' => 'extended' ) ),
 					array(
 						'id' => 'wc-unit-test-task',
-					)
+					),
 				)
 			)
 			->getMock();
@@ -344,7 +344,7 @@ class WC_Admin_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		$mock->is_complete = true;
 
 		$mock->expects( $this->once() )
-			->method('record_tracks_event');
+			->method( 'record_tracks_event' );
 
 		$mock->get_json();
 	}
@@ -363,7 +363,7 @@ class WC_Admin_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		$mock->is_complete = false;
 
 		$mock->expects( $this->never() )
-			->method('record_tracks_event');
+			->method( 'record_tracks_event' );
 
 		$mock->possibly_track_completion();
 	}
@@ -382,9 +382,8 @@ class WC_Admin_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		$mock->is_complete = false;
 
 		$mock->expects( $this->never() )
-			->method('record_tracks_event');
+			->method( 'record_tracks_event' );
 
 		$mock->possibly_track_completion();
 	}
 }
-
