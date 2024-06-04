@@ -1,12 +1,6 @@
 /**
  * External dependencies
  */
-import {
-	createBlock,
-	createBlocksFromInnerBlocksTemplate,
-	type BlockInstance,
-	type InnerBlockTemplate,
-} from '@wordpress/blocks';
 import { isWpVersion } from '@woocommerce/settings';
 import { __, sprintf } from '@wordpress/i18n';
 import {
@@ -14,6 +8,13 @@ import {
 	DEFAULT_ATTRIBUTES as productCollectionDefaultAttributes,
 	DEFAULT_QUERY as productCollectionDefaultQuery,
 } from '@woocommerce/blocks/product-collection/constants';
+import {
+	createBlock,
+	// @ts-expect-error Type definitions for this function are missing in Guteberg
+	createBlocksFromInnerBlocksTemplate,
+	type BlockInstance,
+	type InnerBlockTemplate,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies

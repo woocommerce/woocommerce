@@ -3,13 +3,14 @@
  */
 import { useRef, useEffect } from '@wordpress/element';
 import { useRegistry, dispatch } from '@wordpress/data';
+import { useEditorContext } from '@woocommerce/base-context';
 import {
 	createBlock,
 	getBlockType,
+	// @ts-expect-error Type definitions for this function are missing in Guteberg
 	createBlocksFromInnerBlocksTemplate,
 	TemplateArray,
 } from '@wordpress/blocks';
-import { useEditorContext } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
