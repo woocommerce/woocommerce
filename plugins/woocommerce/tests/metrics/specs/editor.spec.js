@@ -1,4 +1,4 @@
-/* eslint-disable playwright/no-conditional-in-test, playwright/expect-expect */
+/* eslint-disable @woocommerce/dependency-group, jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */
 
 /**
  * WordPress dependencies
@@ -9,24 +9,12 @@ import { test, Metrics } from '@wordpress/e2e-test-utils-playwright';
  * Internal dependencies
  */
 import { PerfUtils } from '../fixtures';
-import { median } from '../utils';
+import { getTotalBlockingTime, median } from '../utils';
 
 // See https://github.com/WordPress/gutenberg/issues/51383#issuecomment-1613460429
 const BROWSER_IDLE_WAIT = 1000;
 
 const results = {};
-
-async function editPost( admin, page, postId ) {
-	const query = new URLSearchParams();
-	query.set( 'post', String( postId ) );
-	query.set( 'action', 'edit' );
-
-	await admin.visitAdminPage( 'post.php', query.toString() );
-	await setPreferences( page, 'core/edit-post', {
-		welcomeGuide: false,
-		fullscreenMode: false,
-	} );
-}
 
 async function setPreferences( page, context, preferences ) {
 	await page.waitForFunction( () => window?.wp?.data );
@@ -45,6 +33,18 @@ async function setPreferences( page, context, preferences ) {
 	);
 }
 
+async function editPost( admin, page, postId ) {
+	const query = new URLSearchParams();
+	query.set( 'post', String( postId ) );
+	query.set( 'action', 'edit' );
+
+	await admin.visitAdminPage( 'post.php', query.toString() );
+	await setPreferences( page, 'core/edit-post', {
+		welcomeGuide: false,
+		fullscreenMode: false,
+	} );
+}
+
 test.describe( 'Editor Performance', () => {
 	test.use( {
 		perfUtils: async ( { page }, use ) => {
@@ -57,11 +57,11 @@ test.describe( 'Editor Performance', () => {
 
 	test.afterAll( async ( {}, testInfo ) => {
 		const medians = {};
-		Object.keys( results ).map( ( metric ) => {
+		Object.keys( results ).forEach( ( metric ) => {
 			medians[ metric ] = median( results[ metric ] );
 		} );
 		await testInfo.attach( 'results', {
-			body: JSON.stringify( medians, null, 2 ),
+			body: JSON.stringify( { editor: medians }, null, 2 ),
 			contentType: 'application/json',
 		} );
 	} );
@@ -95,8 +95,32 @@ test.describe( 'Editor Performance', () => {
 				// Get the durations.
 				const loadingDurations = await metrics.getLoadingDurations();
 
+				// Measure CLS
+				const cumulativeLayoutShift =
+					await metrics.getCumulativeLayoutShift();
+
+				// Measure LCP
+				const largestContentfulPaint =
+					await metrics.getLargestContentfulPaint();
+
+				// Measure TBT
+				const totalBlockingTime = await getTotalBlockingTime(
+					page,
+					BROWSER_IDLE_WAIT
+				);
+
 				// Save the results.
 				if ( i > throwaway ) {
+					results.totalBlockingTime = results.tbt || [];
+					results.totalBlockingTime.push( totalBlockingTime );
+					results.cumulativeLayoutShift =
+						results.cumulativeLayoutShift || [];
+					results.cumulativeLayoutShift.push( cumulativeLayoutShift );
+					results.largestContentfulPaint =
+						results.largestContentfulPaint || [];
+					results.largestContentfulPaint.push(
+						largestContentfulPaint
+					);
 					Object.entries( loadingDurations ).forEach(
 						( [ metric, duration ] ) => {
 							const metricKey =
@@ -125,12 +149,7 @@ test.describe( 'Editor Performance', () => {
 			console.log( draftId );
 		} );
 
-		test( 'Run the test', async ( {
-			admin,
-			page,
-			perfUtils,
-			metrics,
-		} ) => {
+		test( 'Run the test', async ( { admin, page, perfUtils, metrics } ) => {
 			await editPost( admin, page, draftId );
 			await perfUtils.disableAutosave();
 			const canvas = await perfUtils.getCanvas();
@@ -175,4 +194,4 @@ test.describe( 'Editor Performance', () => {
 	} );
 } );
 
-/* eslint-enable playwright/no-conditional-in-test, playwright/expect-expect */
+/* eslint-enable @woocommerce/dependency-group, jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */

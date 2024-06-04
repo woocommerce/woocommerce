@@ -13,10 +13,16 @@ import {
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
+// @ts-expect-error Missing type.
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-expect-error No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
-// @ts-expect-error Missing type in core-data.
-import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
+import {
+	privateApis as blockEditorPrivateApis,
+	__experimentalBlockPatternsList as BlockPatternList,
+	store as blockEditorStore,
+	// @ts-expect-error No types for this exist yet.
+} from '@wordpress/block-editor';
 // @ts-expect-error Missing type in core-data.
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 
@@ -32,8 +38,17 @@ import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { useSelect } from '@wordpress/data';
+import { select, useDispatch, useSelect } from '@wordpress/data';
+
 import { trackEvent } from '~/customize-store/tracking';
+import {
+	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
+	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
+} from '../utils/hero-pattern';
+import { isEqual } from 'lodash';
+import { COLOR_PALETTES } from './global-styles/color-palette-variations/constants';
+
+const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
 export const SidebarNavigationScreenHomepage = () => {
 	const { scroll } = useEditorScroll( {
@@ -45,9 +60,9 @@ export const SidebarNavigationScreenHomepage = () => {
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
 	const currentTemplate = useSelect(
-		( select ) =>
+		( sel ) =>
 			// @ts-expect-error No types for this exist yet.
-			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+			sel( coreStore ).__experimentalGetTemplateForLink( '/' ),
 		[]
 	);
 
@@ -55,34 +70,101 @@ export const SidebarNavigationScreenHomepage = () => {
 		'wp_template',
 		currentTemplate.id
 	);
+
+	// @ts-expect-error No types for this exist yet.
+	const { selectBlock } = useDispatch( blockEditorStore );
+
 	const onClickPattern = useCallback(
 		( pattern, selectedBlocks ) => {
 			if ( pattern === selectedPattern ) {
 				return;
 			}
 			setSelectedPattern( pattern );
+			selectBlock( pattern.blocks[ 0 ].clientId );
 			onChange(
 				[ blocks[ 0 ], ...selectedBlocks, blocks[ blocks.length - 1 ] ],
 				{ selection: {} }
 			);
 			scroll();
 		},
-		[ selectedPattern, setSelectedPattern, onChange, blocks, scroll ]
+		[
+			selectedPattern,
+			setSelectedPattern,
+			selectBlock,
+			onChange,
+			blocks,
+			scroll,
+		]
 	);
 
 	const isEditorLoading = useIsSiteEditorLoading();
 
+	// @ts-expect-error No types for this exist yet.
+	const { user } = useContext( GlobalStylesContext );
+
+	const isActiveNewNeutralVariation = useMemo(
+		() =>
+			isEqual( COLOR_PALETTES[ 0 ].settings.color, user.settings.color ),
+		[ user ]
+	);
+
 	const homePatterns = useMemo( () => {
 		return Object.entries( homeTemplates ).map(
 			( [ templateName, patterns ] ) => {
+				if ( templateName === 'template1' ) {
+					return {
+						name: templateName,
+						title: templateName,
+						blocks: patterns.reduce(
+							( acc: BlockInstance[], pattern ) => {
+								const parsedPattern = unlock(
+									select( blockEditorStore )
+								).__experimentalGetParsedPattern(
+									pattern.name
+								);
+
+								if ( ! parsedPattern ) {
+									return acc;
+								}
+
+								if ( ! isActiveNewNeutralVariation ) {
+									return [ ...acc, ...parsedPattern.blocks ];
+								}
+								const updatedBlocks =
+									findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+										parsedPattern.blocks,
+										( buttonBlock: BlockInstance ) => {
+											buttonBlock.attributes.style =
+												PRODUCT_HERO_PATTERN_BUTTON_STYLE;
+										}
+									);
+
+								return [ ...acc, ...updatedBlocks ];
+							},
+							[]
+						),
+						blockTypes: [ '' ],
+						categories: [ '' ],
+						content: '',
+						source: '',
+					};
+				}
+
 				return {
 					name: templateName,
 					title: templateName,
 					blocks: patterns.reduce(
-						( acc: BlockInstance[], pattern ) => [
-							...acc,
-							...pattern.blocks,
-						],
+						( acc: BlockInstance[], pattern ) => {
+							const parsedPattern = unlock(
+								select( blockEditorStore )
+							).__experimentalGetParsedPattern( pattern.name );
+
+							if ( ! parsedPattern ) {
+								return acc;
+							}
+
+							return [ ...acc, ...parsedPattern.blocks ];
+						},
 						[]
 					),
 					blockTypes: [ '' ],
@@ -92,7 +174,7 @@ export const SidebarNavigationScreenHomepage = () => {
 				};
 			}
 		);
-	}, [ homeTemplates ] );
+	}, [ homeTemplates, isActiveNewNeutralVariation ] );
 
 	useEffect( () => {
 		if (

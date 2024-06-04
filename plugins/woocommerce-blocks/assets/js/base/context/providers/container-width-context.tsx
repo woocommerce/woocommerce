@@ -3,7 +3,7 @@
  */
 import { createContext, useContext } from '@wordpress/element';
 import { useContainerQueries } from '@woocommerce/base-hooks';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 export type ContainerWidthContextProps = {
 	hasContainerWidth: boolean;
@@ -54,7 +54,7 @@ export const ContainerWidthContextProvider = ( {
 
 	return (
 		<ContainerWidthContext.Provider value={ contextValue }>
-			<div className={ classNames( className, containerClassName ) }>
+			<div className={ clsx( className, containerClassName ) }>
 				{ resizeListener }
 				{ children }
 			</div>

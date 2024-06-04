@@ -13,7 +13,9 @@ const glob = require( 'glob' );
 // property.
 const blocks = {
 	'active-filters': {},
-	'add-to-cart-form': {},
+	'add-to-cart-form': {
+		customDir: 'product-elements/add-to-cart-form',
+	},
 	'all-products': {
 		customDir: 'products/all-products',
 	},
@@ -92,6 +94,9 @@ const blocks = {
 	'product-filter': {
 		isExperimental: true,
 	},
+	'product-filters': {
+		isExperimental: true,
+	},
 	'product-filter-stock-status': {
 		isExperimental: true,
 		customDir: 'product-filter/inner-blocks/stock-filter',
@@ -110,6 +115,10 @@ const blocks = {
 	},
 	'product-filter-active': {
 		customDir: 'product-filter/inner-blocks/active-filters',
+		isExperimental: true,
+	},
+	'product-filter-clear-button': {
+		customDir: 'product-filter/inner-blocks/clear-button',
 		isExperimental: true,
 	},
 	'order-confirmation-summary': {
@@ -196,8 +205,6 @@ const entries = {
 			'./assets/js/atomic/blocks/product-elements/product-reviews/index.tsx',
 		'product-details':
 			'./assets/js/atomic/blocks/product-elements/product-details/index.tsx',
-		'add-to-cart-form':
-			'./assets/js/atomic/blocks/product-elements/add-to-cart-form/index.tsx',
 		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}' ),
 
 		// Interactivity component styling

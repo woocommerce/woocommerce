@@ -6,7 +6,7 @@
 	"license": "GPL-3.0-or-later",
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.1.0"
 	},
 	"keywords": [
 		"wordpress",
@@ -91,7 +91,11 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js"
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}

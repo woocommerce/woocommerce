@@ -3,38 +3,46 @@
 ## Table of Contents  <!-- omit in toc -->
 
 - [Available field locations](#available-field-locations)
-    - [Contact information](#contact-information)
-    - [Address](#address)
-    - [Order information](#order-information)
+   	- [Contact information](#contact-information)
+   	- [Address](#address)
+   	- [Order information](#order-information)
+- [Accessing values](#accessing-values)
+   	- [Helper methods](#helper-methods)
+      		- [Guest customers](#guest-customers)
+      		- [Logged-in customers](#logged-in-customers)
+      		- [Accessing all fields](#accessing-all-fields)
+   	- [Accessing values directly](#accessing-values-directly)
+      		- [Checkboxes values](#checkboxes-values)
 - [Supported field types](#supported-field-types)
 - [Using the API](#using-the-api)
-    - [Options](#options)
-        - [General options](#general-options)
-        - [Options for `text` fields](#options-for-text-fields)
-        - [Options for `select` fields](#options-for-select-fields)
-        - [Options for `checkbox` fields](#options-for-checkbox-fields)
-    - [Attributes](#attributes)
+   	- [Options](#options)
+      		- [General options](#general-options)
+      		- [Options for `text` fields](#options-for-text-fields)
+      		- [Options for `select` fields](#options-for-select-fields)
+         			- [Example of `options` value](#example-of-options-value)
+      		- [Options for `checkbox` fields](#options-for-checkbox-fields)
+   	- [Attributes](#attributes)
 - [Usage examples](#usage-examples)
-    - [Rendering a text field](#rendering-a-text-field)
-    - [Rendering a checkbox field](#rendering-a-checkbox-field)
-    - [Rendering a select field](#rendering-a-select-field)
-    - [The select input before being focused](#the-select-input-before-being-focused)
-    - [The select input when focused](#the-select-input-when-focused)
+   	- [Rendering a text field](#rendering-a-text-field)
+   	- [Rendering a checkbox field](#rendering-a-checkbox-field)
+   	- [Rendering a select field](#rendering-a-select-field)
+   	- [The select input before being focused](#the-select-input-before-being-focused)
+   	- [The select input when focused](#the-select-input-when-focused)
 - [Validation and sanitization](#validation-and-sanitization)
-    - [Sanitization](#sanitization)
-        - [Using the `woocommerce_sanitize_additional_field` filter](#using-the-woocommerce_sanitize_additional_field-filter)
-            - [Example of sanitization](#example-of-sanitization)
-    - [Validation](#validation)
-        - [Single field validation](#single-field-validation)
-            - [Using the `woocommerce_validate_additional_field` action](#using-the-woocommerce_validate_additional_field-action)
-                - [The `WP_Error` object](#the-wp_error-object)
-                - [Example of single-field validation](#example-of-single-field-validation)
-        - [Multiple field validation](#multiple-field-validation)
-            - [Using the `woocommerce_blocks_validate_location_{location}_fields` action](#using-the-woocommerce_blocks_validate_location_location_fields-action)
-            - [Example of location validation](#example-of-location-validation)
+   	- [Sanitization](#sanitization)
+      		- [Using the `woocommerce_sanitize_additional_field` filter](#using-the-woocommerce_sanitize_additional_field-filter)
+         			- [Example of sanitization](#example-of-sanitization)
+   	- [Validation](#validation)
+      		- [Single field validation](#single-field-validation)
+         			- [Using the `woocommerce_validate_additional_field` action](#using-the-woocommerce_validate_additional_field-action)
+            				- [The `WP_Error` object](#the-wp_error-object)
+            				- [Example of single-field validation](#example-of-single-field-validation)
+      		- [Multiple field validation](#multiple-field-validation)
+         			- [Using the `woocommerce_blocks_validate_location_{location}_fields` action](#using-the-woocommerce_blocks_validate_location_location_fields-action)
+         			- [Example of location validation](#example-of-location-validation)
 - [Backward compatibility](#backward-compatibility)
-    - [React to to saving fields](#react-to-to-saving-fields)
-    - [React to reading fields](#react-to-reading-fields)
+   	- [React to to saving fields](#react-to-to-saving-fields)
+   	- [React to reading fields](#react-to-reading-fields)
 - [A full example](#a-full-example)
 
 A common use-case for developers and merchants is to add a new field to the Checkout form to collect additional data about a customer or their order.
@@ -228,7 +236,7 @@ There are plans to expand this list, but for now these are the types available.
 
 To register additional checkout fields you must use the `woocommerce_register_additional_checkout_field` function.
 
-It is recommended to run this function after the `woocommerce_blocks_loaded` action.
+It is recommended to run this function after the `woocommerce_init` action.
 
 The registration function takes an array of options describing your field. Some field types take additional options.
 
@@ -249,7 +257,7 @@ These options apply to all field types (except in a few circumstances which are 
 | `sanitize_callback` | A function called to sanitize the customer provided value when posted.                                                              | No        | See example below                            | By default the field's value is returned unchanged.                                                                                                                                                                                                                          |
 | `validate_callback` | A function called to validate the customer provided value when posted. This runs _after_ sanitization.                              | No        | See example below                            | The default validation function will add an error to the response if the field is required and does not have a value. [See the default validation function.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFields.php#L270-L281) |
 
-##### &ast; Example of `sanitize_callback`. This function will remove spaces from the value
+##### Example of `sanitize_callback`. This function will remove spaces from the value <!-- omit from toc -->
 
 ```php
 'sanitize_callback' => function( $field_value ) {
@@ -257,7 +265,7 @@ These options apply to all field types (except in a few circumstances which are 
 },
 ```
 
-##### &ast; Example of `validate_callback`. This function will check if the value is an email
+##### Example of `validate_callback`. This function will check if the value is an email <!-- omit from toc -->
 
 ```php
 'validate_callback' => function( $field_value ) {
@@ -283,10 +291,10 @@ Select fields can also be marked as required. If they are not (i.e. they are opt
 
 | Option name | Description | Required? | Example        | Default value |
 |-----|-----|-----|----------------|--------------|
-| `options` | An array of options to show in the select input. Each options must be an array containing a `label` and `value` property. Each entry must have a unique `value`. Any duplicate options will be removed. The `value` is what gets submitted to the server during checkout and the `label` is simply a user-friendly representation of this value. It is not transmitted to the server in any way. | Yes | &ast;see below | No default - this must be provided. |
+| `options` | An array of options to show in the select input. Each options must be an array containing a `label` and `value` property. Each entry must have a unique `value`. Any duplicate options will be removed. The `value` is what gets submitted to the server during checkout and the `label` is simply a user-friendly representation of this value. It is not transmitted to the server in any way. | Yes | see below | No default - this must be provided. |
 | `required` | If this is `true` then the shopper _must_ provide a value for this field during the checkout process. | No | `true` | `false` |
 
-##### &ast;Example of `options` value
+##### Example of `options` value
 
 ```php
 [
@@ -304,7 +312,7 @@ Select fields can also be marked as required. If they are not (i.e. they are opt
 		'label' => 'Our New York Store'
 	]
 ]
-````
+```
 
 #### Options for `checkbox` fields
 
@@ -339,7 +347,7 @@ This example demonstrates rendering a text field in the address section:
 
 ```php
 add_action(
-	'woocommerce_blocks_loaded',
+	'woocommerce_init',
 	function() {
 		woocommerce_register_additional_checkout_field(
 			array(
@@ -369,7 +377,7 @@ This results in the following address form (the billing form will be the same):
 The rendered markup looks like this:
 
 ```html
-<input type="text" id="shipping-namespace/gov-id" autocapitalize="off"
+<input type="text" id="shipping-namespace-gov-id" autocapitalize="off"
        autocomplete="government-id" aria-label="custom aria label"
        aria-describedby="some-element" required="" aria-invalid="true"
        title="Title to show on hover" pattern="[A-Z0-9]{5}"
@@ -382,7 +390,7 @@ This example demonstrates rendering a checkbox field in the contact information 
 
 ```php
 add_action(
-	'woocommerce_blocks_loaded',
+	'woocommerce_init',
 	function() {
 		woocommerce_register_additional_checkout_field(
 			array(
@@ -394,7 +402,7 @@ add_action(
 		);
 	}
 );
-````
+```
 
 This results in the following contact information section:
 
@@ -408,7 +416,7 @@ This example demonstrates rendering a select field in the order information sect
 
 ```php
 add_action(
-	'woocommerce_blocks_loaded',
+	'woocommerce_init',
 	function() {
 		woocommerce_register_additional_checkout_field(
 			array(
@@ -682,7 +690,7 @@ This example is just a combined version of the examples shared above.
 
 ```php
 add_action(
-	'woocommerce_blocks_loaded',
+	'woocommerce_init',
 	function() {
 		woocommerce_register_additional_checkout_field(
 			array(

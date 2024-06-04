@@ -8,7 +8,8 @@
 	"textdomain": "woocommerce",
 	"supports": {
 		"html": false,
-		"reusable": false
+		"reusable": false,
+		"inserter": false
 	},
 	"usesContext": [ "query", "queryId" ],
 	"attributes": {
@@ -21,6 +22,10 @@
 		"isPreview": {
 			"type": "boolean",
 			"default": false
+		},
+		"attributeId": {
+			"type": "number",
+			"default": 0
 		}
 	},
 	"example": {

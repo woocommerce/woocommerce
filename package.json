@@ -5,7 +5,7 @@
 	"homepage": "https://woocommerce.com/",
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.1.0"
 	},
 	"private": true,
 	"repository": {
@@ -23,6 +23,7 @@
 		"lint": "pnpm -r lint",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
 		"clean": "rimraf -g '**/node_modules' '**/.wireit' && pnpm store prune && pnpm i",
+		"distclean": "git clean --force -d -X",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "pnpm git:update-hooks",
 		"git:update-hooks": "if test -d .git; then rm -rf .git/hooks && mkdir -p .git/hooks && husky install; else husky install; fi",
@@ -72,8 +73,8 @@
 	"pnpm": {
 		"overrides": {
 			"@types/react": "^17.0.71",
-			"react": "^17.0.2",
-			"react-resize-aware": "3.1.1"
+			"react-resize-aware": "3.1.1",
+			"@automattic/tour-kit>@wordpress/element": "4.4.1"
 		}
 	}
 }

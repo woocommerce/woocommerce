@@ -7,6 +7,7 @@ import { Button } from '@wordpress/components';
 import {
 	createElement,
 	createInterpolateElement,
+	useEffect,
 	useMemo,
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -37,7 +38,7 @@ import { ProductTShirt } from './images';
 
 export function Edit( {
 	attributes: blockAttributes,
-	context,
+	context: { postType, isInSelectedTab },
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( blockAttributes );
 	const { generateProductVariations } = useProductVariationsHelper();
@@ -57,19 +58,26 @@ export function Edit( {
 			'default_attributes'
 		);
 
-	const { postType } = context;
 	const productId = useEntityId( 'postType', postType );
 
-	const { attributes, handleChange } = useProductAttributes( {
-		allAttributes: entityAttributes,
-		isVariationAttributes: true,
-		productId: useEntityId( 'postType', 'product' ),
-		onChange( values, defaultAttributes ) {
-			setEntityAttributes( values );
-			setEntityDefaultAttributes( defaultAttributes );
-			generateProductVariations( values, defaultAttributes );
-		},
-	} );
+	const { attributes, fetchAttributes, handleChange } = useProductAttributes(
+		{
+			allAttributes: entityAttributes,
+			isVariationAttributes: true,
+			productId,
+			onChange( values, defaultAttributes ) {
+				setEntityAttributes( values );
+				setEntityDefaultAttributes( defaultAttributes );
+				generateProductVariations( values, defaultAttributes );
+			},
+		}
+	);
+
+	useEffect( () => {
+		if ( isInSelectedTab ) {
+			fetchAttributes();
+		}
+	}, [ isInSelectedTab, entityAttributes ] );
 
 	const localAttributeNames = attributes
 		.filter( ( attr ) => attr.id === 0 )
@@ -139,22 +147,6 @@ export function Edit( {
 				<div className="wp-block-woocommerce-product-variations-options-field__empty-state-actions">
 					<Button variant="primary" onClick={ () => addAttribute() }>
 						{ __( 'Add options', 'woocommerce' ) }
-					</Button>
-					<Button
-						variant="secondary"
-						onClick={ () =>
-							addAttribute( __( 'Size', 'woocommerce' ) )
-						}
-					>
-						{ __( 'Add sizes', 'woocommerce' ) }
-					</Button>
-					<Button
-						variant="secondary"
-						onClick={ () =>
-							addAttribute( __( 'Color', 'woocommerce' ) )
-						}
-					>
-						{ __( 'Add colors', 'woocommerce' ) }
 					</Button>
 				</div>
 			</div>

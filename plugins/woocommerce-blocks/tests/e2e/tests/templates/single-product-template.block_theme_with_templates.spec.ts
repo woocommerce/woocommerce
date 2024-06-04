@@ -1,35 +1,39 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-
-/**
- * Internal dependencies
- */
-import type { TemplateType } from '../../utils/types';
+import {
+	test,
+	expect,
+	BLOCK_THEME_WITH_TEMPLATES_SLUG,
+} from '@woocommerce/e2e-utils';
 
 const testData = {
 	permalink: '/product/belt',
 	templateName: 'Single Product Belt',
 	templatePath: 'single-product-belt',
-	templateType: 'wp_template' as TemplateType,
+	templateType: 'wp_template',
 };
 
 const userText = 'Hello World in the Belt template';
 const themeTemplateText = 'Single Product Belt template loaded from theme';
 
 test.describe( 'Single Product Template', () => {
+	test.beforeEach( async ( { requestUtils } ) => {
+		await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
+	} );
+
 	test( 'loads the theme template for a specific product using the product slug and it can be customized', async ( {
 		admin,
 		editor,
-		editorUtils,
 		page,
 	} ) => {
 		// Edit the theme template.
-		await editorUtils.visitTemplateEditor(
-			testData.templateName,
-			testData.templateType
-		);
+		await admin.visitSiteEditor( {
+			postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
+			postType: testData.templateType,
+		} );
+		await editor.enterEditMode();
+
 		await editor.insertBlock( {
 			name: 'core/paragraph',
 			attributes: { content: userText },
@@ -42,17 +46,5 @@ test.describe( 'Single Product Template', () => {
 			page.getByText( themeTemplateText ).first()
 		).toBeVisible();
 		await expect( page.getByText( userText ).first() ).toBeVisible();
-
-		// Revert edition and verify the template from the theme is used.
-		await admin.visitSiteEditor( {
-			path: `/${ testData.templateType }/all`,
-		} );
-		await editorUtils.revertTemplateCustomizations( testData.templateName );
-		await page.goto( testData.permalink );
-
-		await expect(
-			page.getByText( themeTemplateText ).first()
-		).toBeVisible();
-		await expect( page.getByText( userText ) ).toHaveCount( 0 );
 	} );
 } );

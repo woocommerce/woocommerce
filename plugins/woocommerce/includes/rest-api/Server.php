@@ -162,6 +162,7 @@ class Server {
 			'product-tags'             => 'WC_REST_Product_Tags_Controller',
 			'products'                 => 'WC_REST_Products_Controller',
 			'product-variations'       => 'WC_REST_Product_Variations_Controller',
+			'refunds'                  => 'WC_REST_Refunds_Controller',
 			'reports-sales'            => 'WC_REST_Report_Sales_Controller',
 			'reports-top-sellers'      => 'WC_REST_Report_Top_Sellers_Controller',
 			'reports-orders-totals'    => 'WC_REST_Report_Orders_Totals_Controller',

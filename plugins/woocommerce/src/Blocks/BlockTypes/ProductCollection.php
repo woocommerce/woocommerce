@@ -84,7 +84,6 @@ class ProductCollection extends AbstractBlock {
 
 		// Disable client-side-navigation if incompatible blocks are detected.
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
-
 	}
 
 	/**
@@ -370,6 +369,14 @@ class ProductCollection extends AbstractBlock {
 			return $args;
 		}
 
+		// Is this a preview mode request?
+		// If yes, short-circuit the query and return the preview query args.
+		$product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
+		$is_preview                       = $product_collection_query_context['previewState']['isPreview'] ?? false;
+		if ( 'true' === $is_preview ) {
+			return $this->get_preview_query_args( $args, $request );
+		}
+
 		$orderby             = $request->get_param( 'orderBy' );
 		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
 		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
@@ -445,7 +452,9 @@ class ProductCollection extends AbstractBlock {
 		// phpcs:ignore WordPress.DB.SlowDBQuery
 		$block_context_query['tax_query'] = ! empty( $query['tax_query'] ) ? $query['tax_query'] : array();
 
-		return $this->get_final_frontend_query( $block_context_query, $page );
+		$is_exclude_applied_filters = ! ( $block->context['query']['inherit'] ?? false );
+
+		return $this->get_final_frontend_query( $block_context_query, $page, $is_exclude_applied_filters );
 	}
 
 
@@ -529,6 +538,29 @@ class ProductCollection extends AbstractBlock {
 		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
 
 		return $result;
+	}
+
+	/**
+	 * Get query args for preview mode. These query args will be used with WP_Query to fetch the products.
+	 *
+	 * @param array           $args    Query args.
+	 * @param WP_REST_Request $request Request.
+	 */
+	private function get_preview_query_args( $args, $request ) {
+		$collection_query = array();
+
+		/**
+		 * In future, Here we will modify the preview query based on the collection name. For example:
+		 *
+		 * $product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
+		 * $collection_name                  = $product_collection_query_context['collection'] ?? '';
+		 * if ( 'woocommerce/product-collection/on-sale' === $collection_name ) {
+		 *      $collection_query = $this->get_on_sale_products_query( true );
+		 * }.
+		 */
+
+		$args = $this->merge_queries( $args, $collection_query );
+		return $args;
 	}
 
 	/**

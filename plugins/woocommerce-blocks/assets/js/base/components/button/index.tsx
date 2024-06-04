@@ -3,7 +3,7 @@
  */
 import { Button as AriakitButton } from '@ariakit/react';
 import { forwardRef } from '@wordpress/element';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import type { ForwardedRef } from 'react';
 import type { ButtonProps as AriakitButtonProps } from '@ariakit/react';
 import deprecated from '@wordpress/deprecated';
@@ -73,7 +73,7 @@ const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 			...rest
 		} = props;
 
-		const buttonClassName = classNames(
+		const buttonClassName = clsx(
 			'wc-block-components-button',
 			'wp-element-button',
 			className,

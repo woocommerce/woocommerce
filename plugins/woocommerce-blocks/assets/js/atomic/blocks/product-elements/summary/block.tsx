@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import Summary from '@woocommerce/base-components/summary';
 import { blocksConfig } from '@woocommerce/block-settings';
 
@@ -30,7 +30,7 @@ const Block = ( props: Props ): JSX.Element | null => {
 	if ( ! product ) {
 		return (
 			<div
-				className={ classnames(
+				className={ clsx(
 					className,
 					`wc-block-components-product-summary`,
 					{
@@ -52,7 +52,7 @@ const Block = ( props: Props ): JSX.Element | null => {
 
 	return (
 		<Summary
-			className={ classnames(
+			className={ clsx(
 				className,
 				styleProps.className,
 				`wc-block-components-product-summary`,

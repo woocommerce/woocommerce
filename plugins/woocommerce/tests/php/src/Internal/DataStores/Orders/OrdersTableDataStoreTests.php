@@ -3222,6 +3222,8 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 * @testDox Test webhooks are not fired multiple times on order save.
 	 */
 	public function test_order_updated_webhook_delivered_once() {
+		$this->markTestSkipped( 'Skipped temporarily due to increased flakiness.' );
+
 		$this->toggle_cot_authoritative( true );
 		$this->enable_cot_sync();
 

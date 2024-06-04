@@ -219,7 +219,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 			// Set status.
 			if ( ! empty( $request['status'] ) ) {
-				$object->set_status( $request['status'] );
+				$manual_update = isset( $request['manual_update'] ) ? $request['manual_update'] : false;
+				$object->set_status( $request['status'], '', $manual_update );
 			}
 
 			$object->save();
@@ -281,6 +282,13 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		$schema = parent::get_item_schema();
 
 		$schema['properties']['coupon_lines']['items']['properties']['discount']['readonly'] = true;
+
+		$schema['properties']['manual_update'] = array(
+			'default'     => false,
+			'description' => __( 'Set the action as manual so that the order note registers as "added by user".', 'woocommerce' ),
+			'type'        => 'boolean',
+			'context'     => array( 'edit' ),
+		);
 
 		return $schema;
 	}

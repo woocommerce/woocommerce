@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "9.0.0",
+	"version": "9.1.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -29,7 +29,6 @@
 		"env:start": "pnpm wp-env start",
 		"env:stop": "pnpm wp-env stop",
 		"env:test": "pnpm env:dev && pnpm playwright install chromium",
-		"env:test:no-hpos": "DISABLE_HPOS=1 pnpm env:test",
 		"env:perf:install-k6": "curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1",
 		"env:perf": "pnpm env:dev && pnpm env:performance-init && pnpm env:perf:install-k6",
 		"preinstall": "npx only-allow pnpm",
@@ -53,7 +52,9 @@
 		"test": "pnpm test:unit",
 		"test:api": "API_TEST_REPORT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
 		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
-		"test:e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js",
+		"test:e2e-pw": "pnpm playwright test --config=tests/e2e-pw/envs/default/playwright.config.js",
+		"test:e2e": "pnpm test:e2e:with-env default",
+		"test:e2e:with-env": "bash ./tests/e2e-pw/run-tests-with-env.sh",
 		"test:perf": "./k6 run ./tests/performance/tests/gh-action-pr-requests.js",
 		"test:env:start": "pnpm env:test",
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
@@ -115,7 +116,11 @@
 					],
 					"testEnv": {
 						"start": "env:test"
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "PHP 8.0",
@@ -136,7 +141,11 @@
 						"config": {
 							"phpVersion": "8.0"
 						}
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "PHP WP: latest - 1",
@@ -157,7 +166,11 @@
 						"config": {
 							"wpVersion": "latest-1"
 						}
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "PHP WP: latest - 2",
@@ -178,12 +191,42 @@
 						"config": {
 							"wpVersion": "latest-2"
 						}
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "PHP WP: nightly",
+					"command": "test:php:env",
+					"optional": true,
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
+						"tests/unit-tests/**/*.php"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "nightly"
+						}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "Core e2e tests",
 					"testType": "e2e",
-					"command": "test:e2e-pw",
+					"command": "test:e2e:with-env default",
 					"shardingArguments": [
 						"--shard=1/5",
 						"--shard=2/5",
@@ -198,10 +241,88 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
 						"tests/e2e-pw/**"
+					],
+					"testEnv": {
+						"start": "env:test"
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "Core e2e tests - Gutenberg stable",
+					"testType": "e2e",
+					"command": "test:e2e:with-env gutenberg-stable",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"events": [
+						"daily-e2e"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - Gutenberg nightly",
+					"testType": "e2e",
+					"command": "test:e2e:with-env gutenberg-nightly",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"events": [
+						"daily-e2e"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - Woocommerce Payments",
+					"testType": "e2e",
+					"command": "test:e2e:with-env woocommerce-payments",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-e2e"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - Woocommerce Paypal Payments",
+					"testType": "e2e",
+					"command": "test:e2e:with-env woocommerce-paypal-payments",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-e2e"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - WooCommerce Shipping & Tax",
+					"testType": "e2e",
+					"command": "test:e2e:with-env woocommerce-services",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-e2e"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -210,7 +331,7 @@
 				{
 					"name": "Core e2e tests - HPOS disabled",
 					"testType": "e2e",
-					"command": "test:e2e-pw",
+					"command": "test:e2e:with-env default",
 					"shardingArguments": [
 						"--shard=1/5",
 						"--shard=2/5",
@@ -228,17 +349,20 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/php/**/*.php",
 						"tests/e2e-pw/**"
 					],
 					"testEnv": {
-						"start": "env:test:no-hpos"
+						"start": "env:test",
+						"config": {
+							"disableHpos": true
+						}
 					}
 				},
 				{
 					"name": "Core API tests",
 					"testType": "api",
 					"command": "test:api-pw",
+					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.lock",
@@ -246,19 +370,22 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
-						"tests/api-core-tests/**"
+						"tests/api-core-tests/**",
+						"tests/e2e-pw/bin/**"
 					],
 					"testEnv": {
 						"start": "env:test"
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "Core API tests - HPOS disabled",
 					"testType": "api",
 					"command": "test:api-pw",
+					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.lock",
@@ -266,20 +393,24 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/api-core-tests/**"
+						"tests/api-core-tests/**",
+						"tests/e2e-pw/bin/**"
 					],
 					"events": [
 						"push"
 					],
 					"testEnv": {
-						"start": "env:test:no-hpos"
+						"start": "env:test",
+						"config": {
+							"disableHpos": true
+						}
 					}
 				},
 				{
 					"name": "Core Performance tests (K6)",
 					"testType": "performance",
 					"command": "test:perf",
+					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.lock",
@@ -287,18 +418,21 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
 						"tests/performance/**"
 					],
 					"testEnv": {
 						"start": "env:perf"
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "Metrics",
 					"testType": "performance",
 					"command": "test:metrics:ci",
+					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.lock",
@@ -308,6 +442,10 @@
 						"templates/**/*.php",
 						"templates/**/*.html",
 						"tests/metrics/**"
+					],
+					"events": [
+						"pull_request",
+						"push"
 					]
 				}
 			]
@@ -364,7 +502,7 @@
 	},
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.1.0"
 	},
 	"browserslist": [
 		"> 0.1%",
@@ -375,7 +513,8 @@
 		"@woocommerce/admin-library": "workspace:*",
 		"@woocommerce/block-library": "workspace:*",
 		"@woocommerce/classic-assets": "workspace:*",
-		"@wordpress/browserslist-config": "wp-6.0"
+		"@wordpress/browserslist-config": "wp-6.0",
+		"buildkite-test-collector": "^1.7.1"
 	},
 	"nodemonConfig": {
 		"delay": 2500,
