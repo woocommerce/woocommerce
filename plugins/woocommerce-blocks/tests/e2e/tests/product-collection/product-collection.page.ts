@@ -242,13 +242,6 @@ class ProductCollectionPage {
 		);
 	}
 
-	async goToProductCatalogAndInsertCollection( collection?: Collections ) {
-		await this.goToTemplateAndInsertCollection(
-			'woocommerce/woocommerce//archive-product',
-			collection
-		);
-	}
-
 	async searchProducts( phrase: string ) {
 		await this.page
 			.getByLabel( SELECTORS.productSearchLabel )

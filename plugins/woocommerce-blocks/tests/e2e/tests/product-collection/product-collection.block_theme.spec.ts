@@ -458,7 +458,7 @@ test.describe( 'Product Collection', () => {
 				pageObject,
 				editor,
 			} ) => {
-				await pageObject.goToProductCatalogAndInsertCollection();
+				await pageObject.goToEditorTemplate();
 				await editor.openDocumentSettingsSidebar();
 
 				const sidebarSettings =
@@ -514,7 +514,7 @@ test.describe( 'Product Collection', () => {
 			} ) => {
 				// First Product Catalog
 				// Option should be visible & ENABLED by default
-				await pageObject.goToProductCatalogAndInsertCollection();
+				await pageObject.goToEditorTemplate();
 				await editor.openDocumentSettingsSidebar();
 
 				const sidebarSettings =
@@ -785,12 +785,8 @@ test.describe( 'Product Collection', () => {
 
 		test( 'Product Catalog Collection can be added in product archive and syncs query with template', async ( {
 			pageObject,
-			editor,
 		} ) => {
-			await pageObject.goToProductCatalogAndInsertCollection(
-				'productCatalog'
-			);
-			await editor.openDocumentSettingsSidebar();
+			await pageObject.goToEditorTemplate();
 
 			const sidebarSettings = await pageObject.locateSidebarSettings();
 			const input = sidebarSettings.locator(
@@ -1198,7 +1194,9 @@ test.describe( 'Product Collection', () => {
 			pageObject,
 			editor,
 		} ) => {
-			await pageObject.goToProductCatalogAndInsertCollection( 'onSale' );
+			await pageObject.goToEditorTemplate();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInTemplate( 'onSale' );
 
 			const productTemplate = editor.canvas.getByLabel(
 				BLOCK_LABELS.productTemplate
