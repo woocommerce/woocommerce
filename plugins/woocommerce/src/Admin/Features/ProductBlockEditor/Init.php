@@ -13,7 +13,7 @@ use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
 use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
 use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
-
+use WC_Meta_Data;
 use WP_Block_Editor_Context;
 
 /**
@@ -73,7 +73,8 @@ class Init {
 			add_filter( 'register_block_type_args', array( $this, 'register_metadata_attribute' ) );
 			add_filter( 'woocommerce_get_block_types', array( $this, 'get_block_types' ), 999, 1 );
 
-			add_filter( 'woocommerce_rest_get_product', array( $this, 'possibly_add_template_id' ) );
+			add_filter( 'woocommerce_rest_prepare_product_object', array( $this, 'possibly_add_template_id' ), 10, 2 );
+
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
 
@@ -88,11 +89,12 @@ class Init {
 	/**
 	 * Adds the product template ID to the product if it doesn't exist.
 	 *
-	 * @param WC_Product $product The product.
+	 * @param WP_REST_Response $response The response object.
+	 * @param WC_Product       $product The product.
 	 */
-	public function possibly_add_template_id( $product ) {
+	public function possibly_add_template_id( $response, $product ) {
 		if ( ! $product ) {
-			return $product;
+			return $response;
 		}
 		if ( ! $product->meta_exists( '_product_template_id' ) ) {
 			/**
@@ -102,11 +104,15 @@ class Init {
 			 */
 			$product_template_id = apply_filters( 'woocommerce_product_editor_determine_product_template', '', $product );
 			if ( $product_template_id ) {
-				$product->add_meta_data( '_product_template_id', $product_template_id, true );
-				$product->save_meta_data();
+				$response->data['meta_data'][] = new WC_Meta_Data(
+					array(
+						'key'   => '_product_template_id',
+						'value' => $product_template_id,
+					)
+				);
 			}
 		}
-		return $product;
+		return $response;
 	}
 
 	/**
