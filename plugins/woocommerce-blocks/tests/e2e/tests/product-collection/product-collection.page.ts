@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Locator, Page } from '@playwright/test';
-import { Editor, Admin, expect } from '@woocommerce/e2e-utils';
+import { Editor, Admin } from '@woocommerce/e2e-utils';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
 /**
@@ -198,7 +198,7 @@ class ProductCollectionPage {
 	async goToEditorTemplate(
 		template = 'woocommerce/woocommerce//archive-product'
 	) {
-		await await this.admin.visitSiteEditor( {
+		await this.admin.visitSiteEditor( {
 			postId: template,
 			postType: 'wp_template',
 		} );
