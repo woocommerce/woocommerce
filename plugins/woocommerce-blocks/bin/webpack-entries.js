@@ -212,8 +212,7 @@ const entries = {
 
 		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}', {
 			...blocks,
-			cart: {},
-			checkout: {},
+			...cartAndCheckoutBlocks,
 		} ),
 
 		// Interactivity component styling
@@ -249,8 +248,7 @@ const entries = {
 		// Blocks
 		...getBlockEntries( 'index.{t,j}s{,x}', {
 			...blocks,
-			cart: {},
-			checkout: {},
+			...cartAndCheckoutBlocks,
 		} ),
 	},
 	frontend: {
