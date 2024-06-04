@@ -3,7 +3,7 @@
  */
 import { select } from '@wordpress/data';
 import {
-	registerProductCollection,
+	__experimentalRegisterProductCollection,
 	CollectionName,
 } from '@woocommerce/blocks-registry';
 import {
@@ -42,7 +42,7 @@ export const registerCollections = () => {
 			return blockAttrs.collection === variationAttributes.collection;
 		};
 
-		registerProductCollection( {
+		__experimentalRegisterProductCollection( {
 			isActive,
 			...collection,
 		} );

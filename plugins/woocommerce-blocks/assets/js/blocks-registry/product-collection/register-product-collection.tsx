@@ -30,7 +30,7 @@ const BLOCK_NAME = 'woocommerce/product-collection';
  *
  * @param {ProductCollectionConfig} blockVariationArgs The configuration of new collection.
  */
-export const registerProductCollection = ( {
+export const __experimentalRegisterProductCollection = ( {
 	preview: { setPreviewState, initialPreviewState } = {},
 	...blockVariationArgs
 }: ProductCollectionConfig ) => {
