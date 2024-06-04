@@ -324,7 +324,7 @@ describe( 'TotalsShipping', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'does show calculator panel if address is incomplete', () => {
+	it( 'should show calculator panel if address is incomplete', () => {
 		baseContextHooks.useStoreCart.mockReturnValue( {
 			cartItems: mockPreviewCart.items,
 			cartTotals: [ mockPreviewCart.totals ],
@@ -414,7 +414,7 @@ describe( 'TotalsShipping', () => {
 			screen.queryByText( 'Enter address to check delivery options' )
 		).not.toBeInTheDocument();
 	} );
-	it( 'does show the calculator panel with address when default rates are available and has formatted address', () => {
+	it( 'should show the calculator panel with address when default rates are available and has formatted address', () => {
 		baseContextHooks.useStoreCart.mockReturnValue( {
 			cartItems: mockPreviewCart.items,
 			cartTotals: [ mockPreviewCart.totals ],
