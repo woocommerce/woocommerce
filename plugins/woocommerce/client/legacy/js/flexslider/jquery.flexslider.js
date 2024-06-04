@@ -289,8 +289,7 @@
 
           slider.controlNavScaffold.on(eventType, 'a, img', function(event) {
             event.preventDefault();
-
-            if (watchedEvent === "" || watchedEvent === event.type) {
+            if (watchedEvent === "" || eventType.includes( watchedEvent ) ) {
               var $this = $(this),
                   target = slider.controlNav.index($this);
 
