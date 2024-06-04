@@ -230,8 +230,8 @@ export const SidebarNavigationScreenHomepage = () => {
 
 	const isNetworkOffline = useNetworkStatus();
 	const isPTKPatternsAPIAvailable = context.isPTKPatternsAPIAvailable;
-	const trackingAllowed = useSelect( ( select ) =>
-		select( OPTIONS_STORE_NAME ).getOption( 'woocommerce_allow_tracking' )
+	const trackingAllowed = useSelect( ( sel ) =>
+		sel( OPTIONS_STORE_NAME ).getOption( 'woocommerce_allow_tracking' )
 	);
 	const isTrackingDisallowed = trackingAllowed === 'no' || ! trackingAllowed;
 
@@ -379,7 +379,10 @@ export const SidebarNavigationScreenHomepage = () => {
 												} }
 												variant="link"
 											>
-												{ __( 'Cancel', 'woocommerce' ) }
+												{ __(
+													'Cancel',
+													'woocommerce'
+												) }
 											</Button>
 											<Button
 												onClick={ () => {
@@ -397,7 +400,10 @@ export const SidebarNavigationScreenHomepage = () => {
 												variant="primary"
 												disabled={ ! OptInDataSharing }
 											>
-												{ __( 'Opt in', 'woocommerce' ) }
+												{ __(
+													'Opt in',
+													'woocommerce'
+												) }
 											</Button>
 										</div>
 									</Modal>

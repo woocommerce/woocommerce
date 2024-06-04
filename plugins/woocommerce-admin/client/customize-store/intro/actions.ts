@@ -153,12 +153,11 @@ export const assignIsPTKPatternsAPIAvailable = assign<
 	customizeStoreStateMachineEvents
 >( {
 	isPTKPatternsAPIAvailable: ( context, event: unknown ) => {
-		console.log({event});
 		return (
 			event as {
 				payload: boolean;
 			}
-		).payload;
+		 ).payload;
 	},
 } );
 

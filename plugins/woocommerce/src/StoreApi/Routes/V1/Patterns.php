@@ -90,7 +90,10 @@ class Patterns extends AbstractRoute {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			throw new RouteException( $response->get_error_message(), $response->get_error_code() );
+			throw new RouteException(
+				wp_kses( $response->get_error_message(), array() ),
+				wp_kses( $response->get_error_code(), array() )
+			);
 		}
 
 		return rest_ensure_response(
