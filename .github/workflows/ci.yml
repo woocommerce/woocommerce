@@ -16,6 +16,9 @@ on:
 concurrency:
     group: '${{ github.workflow }}-${{ github.ref }}'
     cancel-in-progress: true
+    
+env: 
+  FORCE_COLOR: 1
 
 jobs:
     project-jobs:
@@ -101,7 +104,7 @@ jobs:
               with:
                   install: '${{ matrix.projectName }}...'
                   build: '${{ matrix.projectName }}'
-            - name: 'Prepare Test Environment'
+            - name: 'Start Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
               env: ${{ matrix.testEnv.envVars }}
@@ -146,7 +149,7 @@ jobs:
                   echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
               shell: bash
 
-            - name: 'Prepare Test Environment'
+            - name: 'Start Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
@@ -187,7 +190,7 @@ jobs:
                   install: '${{ matrix.projectName }}...'
                   build: '${{ matrix.projectName }}'
 
-            - name: 'Prepare Test Environment'
+            - name: 'Start Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
@@ -227,7 +230,7 @@ jobs:
                   install: '${{ matrix.projectName }}...'
                   build: '${{ matrix.projectName }}'
 
-            - name: 'Prepare Test Environment'
+            - name: 'Start Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
