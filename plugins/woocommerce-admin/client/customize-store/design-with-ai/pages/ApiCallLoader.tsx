@@ -4,7 +4,7 @@
 import { Loader } from '@woocommerce/onboarding';
 import { __ } from '@wordpress/i18n';
 import { useEffect, useRef, useState } from '@wordpress/element';
-import { getNewPath } from '@woocommerce/navigation';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -156,7 +156,12 @@ export const ApiCallLoader = () => {
 };
 
 const AssemblerHub = () => {
-	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
+	const persistedQuery = getPersistedQuery();
+	const assemblerUrl = getNewPath(
+		persistedQuery,
+		'/customize-store/assembler-hub',
+		{}
+	);
 	const iframe = useRef< HTMLIFrameElement | null >( null );
 	const [ isVisible, setIsVisible ] = useState( false );
 
@@ -169,7 +174,7 @@ const AssemblerHub = () => {
 			'popstate',
 			() => {
 				const apiLoaderUrl = getNewPath(
-					{},
+					persistedQuery,
 					'/customize-store/design-with-ai/api-call-loader',
 					{}
 				);
@@ -190,7 +195,7 @@ const AssemblerHub = () => {
 			},
 			false
 		);
-	}, [ assemblerUrl, iframe ] );
+	}, [ assemblerUrl, iframe, persistedQuery ] );
 
 	return (
 		<iframe

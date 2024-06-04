@@ -1,28 +1,24 @@
 /**
  * External dependencies
  */
-import {
-	getSetting,
-	STORE_PAGES,
-	LocaleSpecificFormField,
-} from '@woocommerce/settings';
+import { getSetting, STORE_PAGES } from '@woocommerce/settings';
+import { CountryData } from '@woocommerce/types';
 
 export type WordCountType =
 	| 'words'
 	| 'characters_excluding_spaces'
 	| 'characters_including_spaces';
 
-interface WcBlocksConfig {
-	buildPhase: number;
+export interface WcBlocksConfig {
 	pluginUrl: string;
 	productCount: number;
 	defaultAvatar: string;
 	restApiRoutes: Record< string, string[] >;
 	wordCountType: WordCountType;
+	experimentalBlocksEnabled: boolean;
 }
 
 export const blocksConfig = getSetting( 'wcBlocksConfig', {
-	buildPhase: 1,
 	pluginUrl: '',
 	productCount: 0,
 	defaultAvatar: '',
@@ -33,7 +29,6 @@ export const blocksConfig = getSetting( 'wcBlocksConfig', {
 export const WC_BLOCKS_IMAGE_URL = blocksConfig.pluginUrl + 'assets/images/';
 export const WC_BLOCKS_BUILD_URL =
 	blocksConfig.pluginUrl + 'assets/client/blocks/';
-export const WC_BLOCKS_PHASE = blocksConfig.buildPhase;
 export const SHOP_URL = STORE_PAGES.shop?.permalink;
 export const CHECKOUT_PAGE_ID = STORE_PAGES.checkout?.id;
 export const CHECKOUT_URL = STORE_PAGES.checkout?.permalink;
@@ -51,17 +46,10 @@ export const LOCAL_PICKUP_ENABLED = getSetting< boolean >(
 	false
 );
 
-type CountryData = {
-	allowBilling: boolean;
-	allowShipping: boolean;
-	states: Record< string, string >;
-	locale: Record< string, LocaleSpecificFormField >;
-};
-
 type FieldsLocations = {
 	address: string[];
 	contact: string[];
-	additional: string[];
+	order: string[];
 };
 
 // Contains country names.
@@ -133,7 +121,7 @@ const defaultFieldsLocations: FieldsLocations = {
 		'phone',
 	],
 	contact: [ 'email' ],
-	additional: [],
+	order: [],
 };
 
 export const ADDRESS_FORM_KEYS = getSetting< FieldsLocations >(
@@ -146,10 +134,10 @@ export const CONTACT_FORM_KEYS = getSetting< FieldsLocations >(
 	defaultFieldsLocations
 ).contact;
 
-export const ADDITIONAL_FORM_KEYS = getSetting< FieldsLocations >(
+export const ORDER_FORM_KEYS = getSetting< FieldsLocations >(
 	'addressFieldsLocations',
 	defaultFieldsLocations
-).additional;
+).order;
 
 export interface CheckoutField {
 	label: string;
@@ -157,8 +145,8 @@ export interface CheckoutField {
 	options: { label: string; value: string }[];
 }
 
-export const ADDITIONAL_FORM_FIELDS = getSetting< CheckoutField[] >(
-	'additionalFields',
+export const ORDER_FORM_FIELDS = getSetting< CheckoutField[] >(
+	'additionalOrderFields',
 	{}
 );
 export const CONTACT_FORM_FIELDS = getSetting< CheckoutField[] >(

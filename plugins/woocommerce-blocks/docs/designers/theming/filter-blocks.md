@@ -1,5 +1,7 @@
 # Filter blocks
 
+**Important: we strongly discourage writing CSS code based on existing block class names, prioritize using global styles when possible. We specially discourage writing CSS selectors that rely on a specific block being a descendant of another one, as users can move blocks around freely, so they are prone to breaking. Similar to WordPress itself, we consider the HTML structure within components, blocks, and block templates to be “private”, and subject to further change in the future, so using CSS to target the internals of a block or a block template is _not recommended or supported_.**
+
 ## Price slider accent color
 
 The Filter by Price block includes a price slider which uses an accent color to show the selected range.
@@ -32,7 +34,7 @@ Notice the code snippet above uses a CSS custom property, so the default color m
 
 ---
 
-[We're hiring!](https://woo.com/careers/) Come work with us!
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/designers/theming/filter-blocks.md)
 

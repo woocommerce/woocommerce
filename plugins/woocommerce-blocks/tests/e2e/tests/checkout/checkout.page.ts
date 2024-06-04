@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { expect } from '@woocommerce/e2e-playwright-utils';
+import { expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -47,7 +47,7 @@ export class CheckoutPage {
 			.getByText( shippingName )
 			.isVisible();
 		const priceIsVisible = await shippingLine
-			.getByText( shippingPrice )
+			.getByText( shippingPrice, { exact: true } )
 			.isVisible();
 		return nameIsVisible && priceIsVisible;
 	}
@@ -60,10 +60,10 @@ export class CheckoutPage {
 				billing?: Record< string, string >;
 			};
 			contact?: Record< string, string >;
-			additional?: Record< string, string >;
+			order?: Record< string, string >;
 		} = {
 			address: { shipping: {}, billing: {} },
-			additional: {},
+			order: {},
 			contact: {},
 		}
 	) {
@@ -100,11 +100,11 @@ export class CheckoutPage {
 		}
 
 		if (
-			typeof additionalFields.additional !== 'undefined' &&
-			Object.keys( additionalFields.additional ).length > 0
+			typeof additionalFields.order !== 'undefined' &&
+			Object.keys( additionalFields.order ).length > 0
 		) {
 			await this.fillAdditionalInformationSection(
-				additionalFields.additional
+				additionalFields.order
 			);
 		}
 
@@ -160,6 +160,7 @@ export class CheckoutPage {
 	 */
 	async waitForCheckoutToFinishUpdating() {
 		await this.page.evaluate( 'document.activeElement.blur()' );
+
 		await this.page.waitForFunction( () => {
 			return (
 				! window.wp.data
@@ -182,8 +183,20 @@ export class CheckoutPage {
 	 *                        when testing for errors on the checkout page.
 	 */
 	async placeOrder( waitForRedirect = true ) {
+		await this.page
+			.waitForRequest(
+				( request ) => {
+					return request.url().includes( 'batch' );
+				},
+				{ timeout: 3000 }
+			)
+			.catch( () => {
+				// Do nothing. This is just in case there's a debounced request
+				// still to be made, e.g. from checking "Can a truck fit down
+				// your road?" field.
+			} );
 		await this.waitForCheckoutToFinishUpdating();
-		await this.page.getByText( 'Place Order', { exact: true } ).click();
+		await this.page.getByText( 'Place Order' ).click();
 		if ( waitForRedirect ) {
 			await this.page.waitForURL( /order-received/ );
 		}
@@ -314,6 +327,10 @@ export class CheckoutPage {
 		const country = billingForm.getByLabel( 'Country/Region' );
 		const address1 = billingForm.getByLabel( 'Address', { exact: true } );
 		const address2 = billingForm.getByLabel( 'Apartment, suite, etc.' );
+		const address2Link = billingForm.getByText(
+			'+ Add apartment, suite, etc.'
+		);
+
 		const city = billingForm.getByLabel( 'City' );
 		const phone = billingForm.getByLabel( 'Phone' );
 
@@ -322,7 +339,15 @@ export class CheckoutPage {
 		await lastName.fill( customerBillingDetails.lastname );
 		await country.fill( customerBillingDetails.country );
 		await address1.fill( customerBillingDetails.addressfirstline );
-		await address2.fill( customerBillingDetails.addresssecondline );
+
+		if ( customerBillingDetails.addresssecondline ) {
+			if ( await address2Link.isVisible() ) {
+				await address2Link.click();
+			}
+
+			await address2.fill( customerBillingDetails.addresssecondline );
+		}
+
 		await city.fill( customerBillingDetails.city );
 		await phone.fill( customerBillingDetails.phone );
 
@@ -353,9 +378,6 @@ export class CheckoutPage {
 			const field = billingForm.getByLabel( label, { exact: true } );
 			await field.fill( value );
 		}
-
-		// Blur active field to trigger customer address update.
-		await this.page.keyboard.press( 'Escape' );
 	}
 
 	async fillShippingDetails(
@@ -377,6 +399,9 @@ export class CheckoutPage {
 		const country = shippingForm.getByLabel( 'Country/Region' );
 		const address1 = shippingForm.getByLabel( 'Address', { exact: true } );
 		const address2 = shippingForm.getByLabel( 'Apartment, suite, etc.' );
+		const address2Link = shippingForm.getByText(
+			'+ Add apartment, suite, etc.'
+		);
 		const city = shippingForm.getByLabel( 'City' );
 		const phone = shippingForm.getByLabel( 'Phone' );
 
@@ -384,7 +409,15 @@ export class CheckoutPage {
 		await lastName.fill( customerShippingDetails.lastname );
 		await country.fill( customerShippingDetails.country );
 		await address1.fill( customerShippingDetails.addressfirstline );
-		await address2.fill( customerShippingDetails.addresssecondline );
+
+		if ( customerShippingDetails.addresssecondline ) {
+			if ( await address2Link.isVisible() ) {
+				await address2Link.click();
+			}
+
+			await address2.fill( customerShippingDetails.addresssecondline );
+		}
+
 		await city.fill( customerShippingDetails.city );
 		await phone.fill( customerShippingDetails.phone );
 
@@ -494,7 +527,13 @@ export class CheckoutPage {
 				currentPage.getByText( SIMPLE_PHYSICAL_PRODUCT_NAME )
 			).toBeVisible();
 			await expect(
-				currentPage.getByText( SIMPLE_VIRTUAL_PRODUCT_NAME )
+				currentPage
+					.locator(
+						'table.wc-block-order-confirmation-totals__table '
+					)
+					.getByRole( 'link', {
+						name: SIMPLE_VIRTUAL_PRODUCT_NAME,
+					} )
 			).toBeVisible();
 			await expect(
 				currentPage

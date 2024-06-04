@@ -45,8 +45,19 @@ export function myAccount() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
+			'title is: "My account – WooCommerce Core E2E Test Suite"': (
+				response
+			) =>
+				response.html().find( 'head title' ).text() ===
+				'My account – WooCommerce Core E2E Test Suite',
 			"body contains: 'My account' title": ( response ) =>
 				response.body.includes( '>My account</h1>' ),
+			'footer contains: Built with WooCommerce': ( response ) =>
+				response
+					.html()
+					.find( 'body footer' )
+					.text()
+					.includes( 'Built with WooCommerce' ),
 		} );
 
 		// Correlate nonce value for use in subsequent requests.

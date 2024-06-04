@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { Icon, close } from '@wordpress/icons';
 
@@ -53,7 +53,7 @@ const NoticeBanner = ( {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				className,
 				'wc-block-components-notice-banner',
 				'is-' + status,
@@ -74,11 +74,12 @@ const NoticeBanner = ( {
 			{ !! isDismissible && (
 				<Button
 					className="wc-block-components-notice-banner__dismiss"
-					icon={ close }
-					label={ __( 'Dismiss this notice', 'woocommerce' ) }
+					aria-label={ __( 'Dismiss this notice', 'woocommerce' ) }
 					onClick={ dismiss }
-					showTooltip={ false }
-				/>
+					removeTextWrap
+				>
+					<Icon icon={ close } />
+				</Button>
 			) }
 		</div>
 	);

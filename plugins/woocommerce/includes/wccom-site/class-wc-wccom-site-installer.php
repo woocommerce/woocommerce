@@ -1,6 +1,6 @@
 <?php
 /**
- * Woo.com Product Installation.
+ * WooCommerce.com Product Installation.
  *
  * @package WooCommerce\WCCom
  * @since   3.7.0
@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WC_WCCOM_Site_Installer Class
  *
- * Contains functionalities to install products via Woo.com helper connection.
+ * Contains functionalities to install products via WooCommerce.com helper connection.
  */
 class WC_WCCOM_Site_Installer {
 

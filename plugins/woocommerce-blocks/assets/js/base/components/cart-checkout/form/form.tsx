@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { isPostcode } from '@woocommerce/blocks-checkout';
 import {
 	ValidatedTextInput,
 	type ValidatedTextInputHandle,
@@ -19,7 +18,7 @@ import { useEffect, useMemo, useRef } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { useShallowEqual } from '@woocommerce/base-hooks';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	AddressFormValues,
 	ContactFormValues,
@@ -35,6 +34,8 @@ import prepareFormFields from './prepare-form-fields';
 import validateShippingCountry from './validate-shipping-country';
 import customValidationHandler from './custom-validation-handler';
 import Combobox from '../../combobox';
+import AddressLineFields from './address-line-fields';
+import { createFieldProps, getFieldData } from './utils';
 
 /**
  * Checkout form.
@@ -114,18 +115,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 					return null;
 				}
 
-				const fieldProps = {
-					id: `${ id }-${ field.key }`,
-					errorId: `${ addressType }_${ field.key }`,
-					label: field.required ? field.label : field.optionalLabel,
-					// These may come from core locale settings or the attributes option on custom fields.
-					autoCapitalize: field.autocapitalize,
-					autoComplete: field.autocomplete,
-					errorMessage: field.errorMessage,
-					required: field.required,
-					className: `wc-block-components-address-form__${ field.key }`,
-					...field.attributes,
-				};
+				const fieldProps = createFieldProps( field, id, addressType );
 
 				if ( field.key === 'email' ) {
 					fieldProps.id = 'email';
@@ -135,8 +125,6 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 				if ( field.type === 'checkbox' ) {
 					return (
 						<CheckboxControl
-							className={ `wc-block-components-address-form__${ field.key }` }
-							label={ field.label }
 							key={ field.key }
 							checked={ Boolean( values[ field.key ] ) }
 							onChange={ ( checked: boolean ) => {
@@ -148,6 +136,41 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 							{ ...fieldProps }
 						/>
 					);
+				}
+
+				// If the current field is 'address_1', we handle both 'address_1' and 'address_2' fields together.
+				if ( field.key === 'address_1' ) {
+					const address1 = getFieldData(
+						'address_1',
+						addressFormFields.fields,
+						values
+					);
+					const address2 = getFieldData(
+						'address_2',
+						addressFormFields.fields,
+						values
+					);
+
+					return (
+						<AddressLineFields
+							address1={ address1 }
+							address2={ address2 }
+							addressType={ addressType }
+							formId={ id }
+							key={ field.key }
+							onChange={ ( key, value ) => {
+								onChange( {
+									...values,
+									[ key ]: value,
+								} );
+							} }
+						/>
+					);
+				}
+
+				// If the current field is 'address_2', we skip it because it's already handled above.
+				if ( field.key === 'address_2' ) {
+					return null;
 				}
 
 				if (
@@ -164,22 +187,12 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 							{ ...fieldProps }
 							value={ values.country }
 							onChange={ ( newCountry ) => {
-								const newValues = {
+								onChange( {
 									...values,
 									country: newCountry,
 									state: '',
-								};
-								// Country will impact postcode too. Do we need to clear it?
-								if (
-									values.postcode &&
-									! isPostcode( {
-										postcode: values.postcode,
-										country: newCountry,
-									} )
-								) {
-									newValues.postcode = '';
-								}
-								onChange( newValues );
+									postcode: '',
+								} );
 							} }
 						/>
 					);
@@ -218,9 +231,12 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 						<Combobox
 							key={ field.key }
 							{ ...fieldProps }
-							className={ classnames(
+							className={ clsx(
 								'wc-block-components-select-input',
-								`wc-block-components-select-input-${ field.key }`
+								`wc-block-components-select-input-${ field.key }`.replaceAll(
+									'/',
+									'-'
+								)
 							) }
 							value={ values[ field.key ] }
 							onChange={ ( newValue: string ) => {

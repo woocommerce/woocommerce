@@ -136,10 +136,13 @@ export function DownloadsMenuItem( {
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<MenuItem
 					onClick={ () => {
-						recordEvent( 'product_variations_menu_shipping_click', {
-							source: TRACKS_SOURCE,
-							variation_id: ids,
-						} );
+						recordEvent(
+							'product_variations_menu_downloads_click',
+							{
+								source: TRACKS_SOURCE,
+								variation_id: ids,
+							}
+						);
 						onToggle();
 					} }
 					aria-expanded={ isOpen }

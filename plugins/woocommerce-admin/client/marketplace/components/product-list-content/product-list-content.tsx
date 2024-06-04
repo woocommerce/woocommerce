@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Fragment, useEffect, useState } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
@@ -28,7 +28,7 @@ export default function ProductListContent( props: {
 } ): JSX.Element {
 	const wccomHelperSettings = getAdminSetting( 'wccomHelper', {} );
 
-	const classes = classnames(
+	const classes = clsx(
 		'woocommerce-marketplace__product-list-content',
 		props.className
 	);
@@ -72,6 +72,7 @@ export default function ProductListContent( props: {
 								title: product.title,
 								image: product.image,
 								type: product.type,
+								freemium_type: product.freemium_type,
 								icon: product.icon,
 								label: product.label,
 								primary_color: product.primary_color,
@@ -101,6 +102,9 @@ export default function ProductListContent( props: {
 								reviewsCount: product.reviewsCount,
 								description: product.description,
 								isInstallable: product.isInstallable,
+								color: product.color,
+								featuredImage: product.featuredImage,
+								productCategory: product.productCategory,
 							} }
 							tracksData={ {
 								position: index + 1,

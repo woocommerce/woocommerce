@@ -248,7 +248,7 @@ class WC_AJAX {
 		$coupon_code   = ArrayUtil::get_value_or_default( $_POST, 'coupon_code' );
 		$billing_email = ArrayUtil::get_value_or_default( $_POST, 'billing_email' );
 
-		if ( is_email( $billing_email ) ) {
+		if ( is_string( $billing_email ) && is_email( $billing_email ) ) {
 			wc()->customer->set_billing_email( $billing_email );
 		}
 

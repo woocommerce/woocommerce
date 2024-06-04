@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Icon } from '@wordpress/icons';
 import {
 	customerAccountStyle,
@@ -110,7 +110,7 @@ export const BlockSettings = ( {
 								<Icon
 									icon={ customerAccountStyle }
 									size={ 16 }
-									className={ classNames(
+									className={ clsx(
 										'wc-block-editor-customer-account__icon-option',
 										{
 											active:
@@ -126,7 +126,7 @@ export const BlockSettings = ( {
 								<Icon
 									icon={ customerAccountStyleAlt }
 									size={ 20 }
-									className={ classNames(
+									className={ clsx(
 										'wc-block-editor-customer-account__icon-option',
 										{
 											active: iconStyle === IconStyle.ALT,

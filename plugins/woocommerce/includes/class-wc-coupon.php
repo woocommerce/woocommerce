@@ -82,6 +82,18 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	protected $cache_group = 'coupons';
 
 	/**
+	 * Error message.
+	 *
+	 * This property should not be considered public API, and should not be accessed directly.
+	 * It is being added to supress PHP > 8.0 warnings against dynamic property creation, and all access
+	 * should be through the getter and setter methods, namely `get_error_message()` and `set_error_message()`.
+	 * In the future, the access modifier may be changed back to protected.
+	 *
+	 * @var string
+	 */
+	public $error_message;
+
+	/**
 	 * Sorting.
 	 *
 	 * Used by `get_coupons_from_cart` to sort coupons.
@@ -865,6 +877,17 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
+	 * Sets the error_message string.
+	 *
+	 * @param string $message Message string.
+	 *
+	 * @return void
+	 */
+	public function set_error_message( string $message ) {
+		$this->error_message = $message;
+	}
+
+	/**
 	 * Check if a coupon is valid for the cart.
 	 *
 	 * @deprecated 3.2.0 In favor of WC_Discounts->is_coupon_valid.
@@ -899,7 +922,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return bool
 	 */
 	public function is_valid_for_product( $product, $values = array() ) {
-		if ( ! $this->is_type( wc_get_product_coupon_types() ) ) {
+		if ( ! $this->is_type( wc_get_product_coupon_types() ) || ! is_a( $product, WC_Product::class ) ) {
 			return apply_filters( 'woocommerce_coupon_is_valid_for_product', false, $product, $this, $values );
 		}
 

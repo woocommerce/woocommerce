@@ -45,8 +45,6 @@ test.describe( 'General tab', () => {
 				.last()
 				.fill( productData.summary );
 
-			await clickOnTab( 'Pricing', page );
-
 			const regularPrice = page
 				.locator( 'input[name="regular_price"]' )
 				.first();
@@ -114,17 +112,9 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			await page
-				.locator( '.woocommerce-product-publish-panel__header' )
-				.getByRole( 'button', {
-					name: 'Publish',
-				} )
-				.click();
-
-			const element = page.locator( 'div.components-snackbar__content' );
-			const textContent = await element.innerText();
-
-			await expect( textContent ).toMatch( /Product published/ );
+			await expect(
+				page.getByLabel( 'Dismiss this notice' )
+			).toContainText( 'Product published' );
 
 			const title = page.locator( '.woocommerce-product-header__title' );
 

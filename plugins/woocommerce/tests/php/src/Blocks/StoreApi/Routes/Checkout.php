@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Checkout as CheckoutRoute;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 
+use Automattic\WooCommerce\Tests\Blocks\StoreApi\MockSessionHandler;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 
 /**
@@ -65,7 +66,13 @@ class Checkout extends MockeryTestCase {
 		register_rest_route( $route->get_namespace(), $route->get_path(), $route->get_args(), true );
 
 		$fixtures = new FixtureData();
-		$fixtures->shipping_add_flat_rate();
+
+		// Add a flat rate to the default zone.
+		$flat_rate    = WC()->shipping()->get_shipping_methods()['flat_rate'];
+		$default_zone = \WC_Shipping_Zones::get_zone( 0 );
+		$default_zone->add_shipping_method( $flat_rate->id );
+		$default_zone->save();
+
 		$fixtures->payments_enable_bacs();
 		$this->products = array(
 			$fixtures->get_simple_product(
@@ -95,6 +102,13 @@ class Checkout extends MockeryTestCase {
 	 */
 	protected function tearDown(): void {
 		parent::tearDown();
+		$default_zone     = \WC_Shipping_Zones::get_zone( 0 );
+		$shipping_methods = $default_zone->get_shipping_methods();
+		foreach ( $shipping_methods as $method ) {
+			$default_zone->delete_shipping_method( $method->instance_id );
+		}
+		$default_zone->save();
+
 		global $wp_rest_server;
 		$wp_rest_server = null;
 	}
@@ -310,6 +324,12 @@ class Checkout extends MockeryTestCase {
 	 * Check that accounts are created on request.
 	 */
 	public function test_checkout_create_account() {
+		// We need to replace the WC_Session with a mock because this test relies on cookies being set which
+		// is not easy with PHPUnit. This is a simpler approach.
+		$old_session  = WC()->session;
+		WC()->session = new MockSessionHandler();
+		WC()->session->init();
+
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
@@ -356,17 +376,26 @@ class Checkout extends MockeryTestCase {
 		$status   = $response->get_status();
 		$data     = $response->get_data();
 
-		$this->assertEquals( $status, 200 );
+		$this->assertEquals( $status, 200, print_r( $data, true ) );
 		$this->assertTrue( $data['customer_id'] > 0 );
 
 		$customer = get_user_by( 'id', $data['customer_id'] );
 		$this->assertEquals( $customer->user_email, 'testaccount@test.com' );
+
+		// Return WC_Session to original state.
+		WC()->session = $old_session;
 	}
 
 	/**
 	 * Test account creation options.
 	 */
 	public function test_checkout_do_not_create_account() {
+		// We need to replace the WC_Session with a mock because this test relies on cookies being set which
+		// is not easy with PHPUnit. This is a simpler approach.
+		$old_session  = WC()->session;
+		WC()->session = new MockSessionHandler();
+		WC()->session->init();
+
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
@@ -415,12 +444,21 @@ class Checkout extends MockeryTestCase {
 
 		$this->assertEquals( $status, 200 );
 		$this->assertEquals( $data['customer_id'], 0 );
+
+		// Return WC_Session to original state.
+		WC()->session = $old_session;
 	}
 
 	/**
 	 * Test account creation options.
 	 */
 	public function test_checkout_force_create_account() {
+		// We need to replace the WC_Session with a mock because this test relies on cookies being set which
+		// is not easy with PHPUnit. This is a simpler approach.
+		$old_session  = WC()->session;
+		WC()->session = new MockSessionHandler();
+		WC()->session->init();
+
 		update_option( 'woocommerce_enable_guest_checkout', 'no' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
@@ -471,6 +509,9 @@ class Checkout extends MockeryTestCase {
 
 		$customer = get_user_by( 'id', $data['customer_id'] );
 		$this->assertEquals( $customer->user_email, 'testaccount@test.com' );
+
+		// Return WC_Session to original state.
+		WC()->session = $old_session;
 	}
 
 	/**
@@ -517,5 +558,57 @@ class Checkout extends MockeryTestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 400, $status, print_r( $data, true ) );
+	}
+
+	/**
+	 * Test checkout without valid shipping methods.
+	 */
+	public function test_checkout_invalid_shipping_method() {
+		global $wpdb;
+		$shipping_methods = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
+		foreach ( $shipping_methods as $shipping_method ) {
+			$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => '0' ), array( 'instance_id' => absint( $shipping_method->instance_id ) ) );
+		}
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$status   = $response->get_status();
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $status, print_r( $data, true ) );
+		$this->assertEquals( 'woocommerce_rest_invalid_shipping_option', $data['code'], print_r( $data, true ) );
+		$this->assertEquals( 'Sorry, this order requires a shipping option.', $data['message'], print_r( $data, true ) );
 	}
 }

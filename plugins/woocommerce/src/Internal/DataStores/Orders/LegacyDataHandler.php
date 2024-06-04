@@ -91,6 +91,8 @@ class LegacyDataHandler {
 	private function build_sql_query_for_cleanup( array $order_ids = array(), string $result = 'ids', int $limit = 0 ): string {
 		global $wpdb;
 
+		$hpos_orders_table = $this->data_store->get_orders_table_name();
+
 		$sql_where = '';
 
 		if ( $order_ids ) {
@@ -123,7 +125,7 @@ class LegacyDataHandler {
 		$sql_where .= '(';
 		$sql_where .= "{$wpdb->posts}.post_type IN ('" . implode( "', '", esc_sql( wc_get_order_types( 'cot-migration' ) ) ) . "')";
 		$sql_where .= $wpdb->prepare(
-			" OR (post_type = %s AND EXISTS(SELECT 1 FROM {$wpdb->postmeta} WHERE post_id = {$wpdb->posts}.ID))",
+			" OR (post_type = %s AND ( {$hpos_orders_table}.id IS NULL OR EXISTS(SELECT 1 FROM {$wpdb->postmeta} WHERE post_id = {$wpdb->posts}.ID)) )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$this->data_synchronizer::PLACEHOLDER_ORDER_POST_TYPE
 		);
 		$sql_where .= ')';
@@ -135,11 +137,12 @@ class LegacyDataHandler {
 			$sql_fields = 'COUNT(*)';
 			$sql_limit  = '';
 		} else {
-			$sql_fields = 'ID';
+			$sql_fields = "{$wpdb->posts}.ID";
 			$sql_limit  = $limit > 0 ? $wpdb->prepare( 'LIMIT %d', $limit ) : '';
 		}
 
-		return "SELECT {$sql_fields} FROM {$wpdb->posts} WHERE {$sql_where} {$sql_limit}";
+		$sql = "SELECT {$sql_fields} FROM {$wpdb->posts} LEFT JOIN {$hpos_orders_table} ON {$wpdb->posts}.ID = {$hpos_orders_table}.id WHERE {$sql_where} {$sql_limit}";
+		return $sql;
 	}
 
 	/**
@@ -153,36 +156,46 @@ class LegacyDataHandler {
 	public function cleanup_post_data( int $order_id, bool $skip_checks = false ): void {
 		global $wpdb;
 
-		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
+		$post_type = get_post_type( $order_id );
+		if ( ! in_array( $post_type, array_merge( wc_get_order_types( 'cot-migration' ), array( $this->data_synchronizer::PLACEHOLDER_ORDER_POST_TYPE ) ), true ) ) {
 			// translators: %d is an order ID.
-			throw new \Exception( esc_html( sprintf( __( '%d is not a valid order ID.', 'woocommerce' ), $order_id ) ) );
+			throw new \Exception( esc_html( sprintf( __( '%d is not of a valid order type.', 'woocommerce' ), $order_id ) ) );
 		}
 
-		if ( ! $skip_checks && ! $this->is_order_newer_than_post( $order ) ) {
-			throw new \Exception( esc_html( sprintf( __( 'Data in posts table appears to be more recent than in HPOS tables.', 'woocommerce' ) ) ) );
+		$order_exists = $this->data_store->order_exists( $order_id );
+		if ( $order_exists ) {
+			$order = wc_get_order( $order_id );
+			if ( ! $order ) {
+				// translators: %d is an order ID.
+				throw new \Exception( esc_html( sprintf( __( '%d is not a valid order ID.', 'woocommerce' ), $order_id ) ) );
+			}
+
+			if ( ! $skip_checks && ! $this->is_order_newer_than_post( $order ) ) {
+				// translators: %1 is an order ID.
+				throw new \Exception( esc_html( sprintf( __( 'Data in posts table appears to be more recent than in HPOS tables. Compare order data with `wp wc hpos diff %1$d` and use `wp wc hpos backfill %1$d --from=posts --to=hpos` to fix.', 'woocommerce' ), $order_id ) ) );
+			}
 		}
 
-		// Delete all metadata.
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->postmeta} WHERE post_id = %d",
-				$order->get_id()
-			)
-		);
+		$wpdb->delete( $wpdb->postmeta, array( 'post_id' => $order_id ), array( '%d' ) ); // Delete all metadata.
 
-		// wp_update_post() changes the post modified date, so we do this manually.
-		// Also, we suspect using wp_update_post() could lead to integrations mistakenly updating the entity.
-		$wpdb->query(
-			$wpdb->prepare(
-				"UPDATE {$wpdb->posts} SET post_type = %s, post_status = %s WHERE ID = %d",
-				$this->data_synchronizer::PLACEHOLDER_ORDER_POST_TYPE,
-				'draft',
-				$order->get_id()
-			)
-		);
+		if ( $order_exists ) {
+			// wp_update_post() changes the post modified date, so we do this manually.
+			// Also, we suspect using wp_update_post() could lead to integrations mistakenly updating the entity.
+			$wpdb->update(
+				$wpdb->posts,
+				array(
+					'post_type'   => $this->data_synchronizer::PLACEHOLDER_ORDER_POST_TYPE,
+					'post_status' => 'draft',
+				),
+				array( 'ID' => $order_id ),
+				array( '%s', '%s' ),
+				array( '%d' )
+			);
+		} else {
+			$wpdb->delete( $wpdb->posts, array( 'ID' => $order_id ), array( '%d' ) );
+		}
 
-		clean_post_cache( $order->get_id() );
+		clean_post_cache( $order_id );
 	}
 
 	/**

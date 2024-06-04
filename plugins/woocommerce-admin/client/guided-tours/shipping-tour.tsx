@@ -232,20 +232,21 @@ export const ShippingTour: React.FC< {
 					mutation: true,
 					resize: true,
 				},
+				autoScroll: true,
 			},
 			callbacks: {
-				onNextStep: ( currentStepIndex ) => {
-					setStepNumber( currentStepIndex + 1 );
+				onNextStep: ( newStepIndex ) => {
+					setStepNumber( newStepIndex );
 					recordEvent( 'walkthrough_settings_shipping_next_click', {
 						step_name:
-							tourConfig.steps[ currentStepIndex ].meta.name,
+							tourConfig.steps[ newStepIndex - 1 ].meta.name,
 					} );
 				},
-				onPreviousStep: ( currentStepIndex ) => {
-					setStepNumber( currentStepIndex - 1 );
+				onPreviousStep: ( newStepIndex ) => {
+					setStepNumber( newStepIndex );
 					recordEvent( 'walkthrough_settings_shipping_back_click', {
 						step_name:
-							tourConfig.steps[ currentStepIndex ].meta.name,
+							tourConfig.steps[ newStepIndex + 1 ].meta.name,
 					} );
 				},
 			},

@@ -5,8 +5,8 @@
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
 	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.12.1"
+		"node": "^20.11.1",
+		"pnpm": "^9.1.0"
 	},
 	"keywords": [
 		"wordpress",
@@ -77,7 +77,7 @@
 		"jest-cli": "~27.5.1",
 		"postcss": "^8.4.32",
 		"postcss-loader": "^4.3.0",
-		"rimraf": "^3.0.2",
+		"rimraf": "5.0.5",
 		"sass-loader": "^10.5.0",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
@@ -131,7 +131,11 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js"
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}

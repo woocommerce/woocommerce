@@ -24,7 +24,7 @@ If manual entry of API keys is required, design the setup process to be as simpl
 
 ## Configuration & Settings
 
-Follow the Woo User Experience guidelines for [Settings](docs/user-experience/settings.md) and [Navigation](docs/user-experience/navigation.md).
+Follow the Woo User Experience guidelines for [Settings](../ux-guidelines-extensions/settings.md) and [Navigation](../ux-guidelines-extensions/navigation.md).
 
 Include sensible default settings to minimize the configuration effort for the user.
 
@@ -32,10 +32,10 @@ After the merchant has completed all the actions that are required for your plug
 
 If you're offering multiple payment methods within the plugin, present the choices clearly to the merchant and provide an indication of which payment methods are enabled.
 
-![Payment methods](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Payment-methods.png)
+![Payment methods](https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2024/01/Payment-methods.png)
 
 If a payment method is not available for any reason, provide clear and informative error messages that help users diagnose and resolve issues.
 
 Your plugin needs to inform the merchant that it's ready to process payments. Until then, display an inline warning notice in the plugin settings as a reminder to the merchant. Do not implement a top level banner for the warning notice.
 
-![Inline notice](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Inline-Notice.png)
+![Inline notice](https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2024/01/Inline-Notice.png)

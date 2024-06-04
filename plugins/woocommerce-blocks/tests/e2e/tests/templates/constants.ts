@@ -9,7 +9,6 @@ import type { FrontendUtils } from '@woocommerce/e2e-utils';
  */
 import { SIMPLE_VIRTUAL_PRODUCT_NAME } from '../checkout/constants';
 import { CheckoutPage } from '../checkout/checkout.page';
-import type { TemplateType } from '../../utils/types';
 
 type TemplateCustomizationTest = {
 	visitPage: ( props: {
@@ -18,7 +17,7 @@ type TemplateCustomizationTest = {
 	} ) => Promise< void | Response | null >;
 	templateName: string;
 	templatePath: string;
-	templateType: TemplateType;
+	templateType: string;
 	fallbackTemplate?: {
 		templateName: string;
 		templatePath: string;
@@ -87,7 +86,6 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 	},
 	{
 		visitPage: async ( { frontendUtils } ) => {
-			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart();
 			const block = await frontendUtils.getBlockByName(
@@ -110,7 +108,6 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 	},
 	{
 		visitPage: async ( { frontendUtils } ) => {
-			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart();
 			await frontendUtils.goToCheckout();
@@ -122,7 +119,6 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 	},
 	{
 		visitPage: async ( { frontendUtils } ) => {
-			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart();
 			await frontendUtils.goToCheckout();

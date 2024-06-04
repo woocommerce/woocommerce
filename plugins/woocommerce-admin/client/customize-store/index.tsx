@@ -11,12 +11,15 @@ import {
 	getNewPath,
 	getQuery,
 	updateQueryString,
+	getHistory,
+	getPersistedQuery,
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { PluginArea } from '@wordpress/plugins';
+import { accessTaskReferralStorage } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
@@ -80,8 +83,24 @@ const updateQueryStep = (
 };
 
 const redirectToWooHome = () => {
-	const url = getNewPath( {}, '/', {} );
+	const url = getNewPath( getPersistedQuery(), '/', {} );
 	navigateOrParent( window, url );
+};
+
+const goBack = () => {
+	const history = getHistory();
+	if (
+		history.__experimentalLocationStack.length >= 2 &&
+		! history.__experimentalLocationStack[
+			history.__experimentalLocationStack.length - 2
+		].search.includes( 'customize-store' )
+	) {
+		// If the previous location is not a customize-store step, go back in history.
+		history.back();
+		return;
+	}
+
+	redirectToWooHome();
 };
 
 const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
@@ -126,10 +145,24 @@ const CYSSpinner = () => (
 	</div>
 );
 
+const redirectToReferrer = () => {
+	const { getWithExpiry: getCYSTaskReferral, remove: removeCYSTaskReferral } =
+		accessTaskReferralStorage( { taskId: 'customize-store' } );
+
+	const taskReferral = getCYSTaskReferral();
+
+	if ( taskReferral ) {
+		removeCYSTaskReferral();
+		window.location.href = taskReferral.returnUrl;
+	}
+};
+
 export const machineActions = {
 	updateQueryStep,
 	redirectToWooHome,
 	redirectToThemes,
+	redirectToReferrer,
+	goBack,
 };
 
 export const customizeStoreStateMachineActions = {
@@ -262,41 +295,8 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		intro: {
 			id: 'intro',
-			initial: 'flowType',
+			initial: 'fetchIntroData',
 			states: {
-				flowType: {
-					always: [
-						{
-							target: 'fetchIntroData',
-							cond: 'isNotWooExpress',
-							actions: 'assignNoAI',
-						},
-						{
-							target: 'checkAiStatus',
-							cond: 'isWooExpress',
-						},
-					],
-				},
-				checkAiStatus: {
-					initial: 'pending',
-					states: {
-						pending: {
-							invoke: {
-								src: 'fetchAiStatus',
-								onDone: {
-									actions: 'assignAiStatus',
-									target: 'success',
-								},
-								onError: {
-									actions: 'assignAiOffline',
-									target: 'success',
-								},
-							},
-						},
-						success: { type: 'final' },
-					},
-					onDone: 'fetchIntroData',
-				},
 				fetchIntroData: {
 					initial: 'pending',
 					states: {
@@ -330,14 +330,14 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 			on: {
 				CLICKED_ON_BREADCRUMB: {
-					actions: 'redirectToWooHome',
+					actions: 'goBack',
 				},
 				DESIGN_WITH_AI: {
 					actions: [ 'recordTracksDesignWithAIClicked' ],
 					target: 'designWithAi',
 				},
 				DESIGN_WITHOUT_AI: {
-					actions: [ 'recordTracksDesignWithAIClicked' ],
+					actions: [ 'recordTracksDesignWithoutAIClicked' ],
 					target: 'designWithoutAi',
 				},
 				SELECTED_NEW_THEME: {
@@ -432,31 +432,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						{
 							// Otherwise, proceed to the next step.
 							cond: 'activeThemeHasMods',
-							target: 'preCheckAiStatus',
-						},
-					],
-				},
-				preCheckAiStatus: {
-					always: [
-						{
-							cond: 'isWooExpress',
-							target: 'checkAiStatus',
-						},
-						{ cond: 'isNotWooExpress', target: 'assemblerHub' },
-					],
-				},
-				checkAiStatus: {
-					invoke: {
-						src: 'fetchAiStatus',
-						onDone: {
-							actions: 'assignAiStatus',
 							target: 'assemblerHub',
 						},
-						onError: {
-							actions: 'assignAiOffline',
-							target: 'assemblerHub',
-						},
-					},
+					],
 				},
 				assemblerHub: {
 					entry: [
@@ -489,8 +467,38 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		transitionalScreen: {
-			initial: 'preTransitional',
+			initial: 'fetchCustomizeStoreCompleted',
 			states: {
+				fetchCustomizeStoreCompleted: {
+					invoke: {
+						src: 'fetchCustomizeStoreCompleted',
+						onDone: {
+							actions: 'assignCustomizeStoreCompleted',
+							target: 'checkCustomizeStoreCompleted',
+						},
+					},
+				},
+				checkCustomizeStoreCompleted: {
+					always: [
+						{
+							// Redirect to the "intro step" if the active theme has no modifications.
+							cond: 'customizeTaskIsNotCompleted',
+							actions: [
+								{ type: 'updateQueryStep', step: 'intro' },
+							],
+							target: '#customizeStore.intro',
+						},
+						{
+							cond: 'hasTaskReferral',
+							target: 'skipTransitional',
+						},
+						{
+							// Otherwise, proceed to the next step.
+							cond: 'customizeTaskIsCompleted',
+							target: 'preTransitional',
+						},
+					],
+				},
 				preTransitional: {
 					meta: {
 						component: CYSSpinner,
@@ -498,35 +506,16 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					invoke: {
 						src: 'fetchSurveyCompletedOption',
 						onError: {
-							target: 'preCheckAiStatus', // leave it as initialised default on error
+							target: 'transitional', // leave it as initialised default on error
 						},
 						onDone: {
-							target: 'preCheckAiStatus',
+							target: 'transitional',
 							actions: [ 'assignHasCompleteSurvey' ],
 						},
 					},
 				},
-				preCheckAiStatus: {
-					always: [
-						{
-							cond: 'isWooExpress',
-							target: 'checkAiStatus',
-						},
-						{ cond: 'isNotWooExpress', target: 'transitional' },
-					],
-				},
-				checkAiStatus: {
-					invoke: {
-						src: 'fetchAiStatus',
-						onDone: {
-							actions: 'assignAiStatus',
-							target: 'transitional',
-						},
-						onError: {
-							actions: 'assignAiOffline',
-							target: 'transitional',
-						},
-					},
+				skipTransitional: {
+					entry: [ 'redirectToReferrer' ],
 				},
 				transitional: {
 					entry: [
@@ -596,13 +585,24 @@ export const CustomizeStoreController = ( {
 				isAiOffline: ( _ctx ) => {
 					return _ctx.flowType === FlowType.AIOffline;
 				},
-				isWooExpress: () => isWooExpress(),
-				isNotWooExpress: () => ! isWooExpress(),
 				activeThemeHasMods: ( _ctx ) => {
 					return !! _ctx.activeThemeHasMods;
 				},
 				activeThemeHasNoMods: ( _ctx ) => {
 					return ! _ctx.activeThemeHasMods;
+				},
+				customizeTaskIsCompleted: ( _ctx ) => {
+					return _ctx.intro.customizeStoreTaskCompleted;
+				},
+				customizeTaskIsNotCompleted: ( _ctx ) => {
+					return ! _ctx.intro.customizeStoreTaskCompleted;
+				},
+				hasTaskReferral: () => {
+					const { getWithExpiry: getCYSTaskReferral } =
+						accessTaskReferralStorage( {
+							taskId: 'customize-store',
+						} );
+					return getCYSTaskReferral() !== null;
 				},
 			},
 		} );

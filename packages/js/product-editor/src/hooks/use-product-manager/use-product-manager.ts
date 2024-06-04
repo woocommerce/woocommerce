@@ -4,13 +4,14 @@
 import { useEntityProp } from '@wordpress/core-data';
 import { dispatch, useSelect, select as wpSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
-import type { Product, ProductStatus } from '@woocommerce/data';
+import { Product, ProductStatus, PRODUCTS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { useValidations } from '../../contexts/validation-context';
 import type { WPError } from '../../utils/get-product-error-message';
+import { AUTO_DRAFT_NAME } from '../../utils/constants';
 
 function errorHandler( error: WPError, productStatus: ProductStatus ) {
 	if ( error.code ) {
@@ -45,6 +46,11 @@ function errorHandler( error: WPError, productStatus: ProductStatus ) {
 
 export function useProductManager< T = Product >( postType: string ) {
 	const [ id ] = useEntityProp< number >( 'postType', postType, 'id' );
+	const [ name, , prevName ] = useEntityProp< string >(
+		'postType',
+		postType,
+		'name'
+	);
 	const [ status ] = useEntityProp< ProductStatus >(
 		'postType',
 		postType,
@@ -55,7 +61,8 @@ export function useProductManager< T = Product >( postType: string ) {
 	const { isValidating, validate } = useValidations< T >();
 	const { isDirty } = useSelect(
 		( select ) => ( {
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			isDirty: select( 'core' ).hasEditsForEntityRecord(
 				'postType',
 				postType,
@@ -72,10 +79,16 @@ export function useProductManager< T = Product >( postType: string ) {
 			await validate( extraProps );
 			const { saveEntityRecord } = dispatch( 'core' );
 
-			const { blocks, content, selection, ...editedProduct } = wpSelect(
-				'core'
-				// @ts-expect-error There are no types for this.
-			).getEditedEntityRecord( 'postType', postType, id );
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			const { blocks, content, selection, ...editedProduct } =
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
+				wpSelect( 'core' ).getEntityRecordEdits(
+					'postType',
+					postType,
+					id
+				);
 
 			const savedProduct = await saveEntityRecord(
 				'postType',
@@ -83,14 +96,37 @@ export function useProductManager< T = Product >( postType: string ) {
 				{
 					...editedProduct,
 					...extraProps,
+					id,
 				},
-				// @ts-expect-error There are no types for this.
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				{
 					throwOnError: true,
 				}
 			);
 
 			return savedProduct as T;
+		} catch ( error ) {
+			throw errorHandler( error as WPError, status );
+		} finally {
+			setIsSaving( false );
+		}
+	}
+
+	async function copyToDraft() {
+		try {
+			// When "Copy to a new draft" is used on an unsaved product with a filled-out name,
+			// the name is retained in the copied product.
+			const data =
+				AUTO_DRAFT_NAME === prevName && name !== prevName
+					? { name }
+					: {};
+			setIsSaving( true );
+			const duplicatedProduct = await dispatch(
+				PRODUCTS_STORE_NAME
+			).duplicateProduct( id, data );
+
+			return duplicatedProduct as T;
 		} catch ( error ) {
 			throw errorHandler( error as WPError, status );
 		} finally {
@@ -117,7 +153,8 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			await validate();
 
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			const { deleteEntityRecord, saveEditedEntityRecord } =
 				dispatch( 'core' );
 
@@ -152,5 +189,6 @@ export function useProductManager< T = Product >( postType: string ) {
 		save,
 		publish,
 		trash,
+		copyToDraft,
 	};
 }

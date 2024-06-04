@@ -30,7 +30,7 @@ export const renderNoProductsPlaceholder = ( blockTitle, blockIcon ) => (
 		<Button
 			className="wc-block-products__read_more_button"
 			variant="tertiary"
-			href="https://woo.com/document/managing-products/"
+			href="https://woocommerce.com/document/managing-products/"
 			target="_blank"
 		>
 			{ __( 'Learn more', 'woocommerce' ) }

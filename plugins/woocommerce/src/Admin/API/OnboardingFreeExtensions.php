@@ -82,7 +82,7 @@ class OnboardingFreeExtensions extends WC_REST_Data_Controller {
 		/**
 		* Allows removing Jetpack suggestions from WooCommerce Admin when false.
 		 *
-		 * In this instance it is removed from the list of extensions suggested in the Onboarding Profiler. This list is first retrieved from the Woo.com API, then if a plugin with the 'jetpack' slug is found, it is removed.
+		 * In this instance it is removed from the list of extensions suggested in the Onboarding Profiler. This list is first retrieved from the WooCommerce.com API, then if a plugin with the 'jetpack' slug is found, it is removed.
 		 *
 		 * @since 7.8
 		*/

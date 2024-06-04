@@ -221,7 +221,6 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	public function get_store_page_test_data() {
 			return array(
 				array( get_permalink( wc_get_page_id( 'cart' ) ), true ), // Test case 1: URL matches cart page.
-				array( get_permalink( wc_get_page_id( 'myaccount' ) ) . '/orders/', true ), // Test case 2: URL matches my account > orders page.
 				array( 'https://example.com/product-category/sample-category/', true ), // Test case 3: URL matches product category page.
 				array( 'https://example.com/product-tag/sample-tag/', true ), // Test case 4: URL matches product tag page.
 				array( 'https://example.com/shop/uncategorized/test/', true ), // Test case 5: URL matches product page.

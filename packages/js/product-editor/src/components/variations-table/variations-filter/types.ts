@@ -1,10 +1,13 @@
 /**
  * External dependencies
  */
-import { ProductAttribute, ProductAttributeTerm } from '@woocommerce/data';
+import {
+	ProductProductAttribute,
+	ProductAttributeTerm,
+} from '@woocommerce/data';
 
 export type VariationsFilterProps = {
 	initialValues: ProductAttributeTerm[ 'slug' ][];
-	attribute: ProductAttribute;
+	attribute: ProductProductAttribute;
 	onFilter( values: ProductAttributeTerm[ 'slug' ][] ): void;
 };

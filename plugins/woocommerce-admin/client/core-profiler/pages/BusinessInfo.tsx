@@ -20,7 +20,7 @@ import {
 import { findCountryOption, getCountry } from '@woocommerce/onboarding';
 import { decodeEntities } from '@wordpress/html-entities';
 import { z } from 'zod';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -44,24 +44,32 @@ export const industryChoices = [
 		key: 'clothing_and_accessories' as const,
 	},
 	{
-		label: __( 'Health and beauty', 'woocommerce' ),
-		key: 'health_and_beauty' as const,
-	},
-	{
 		label: __( 'Food and drink', 'woocommerce' ),
 		key: 'food_and_drink' as const,
 	},
 	{
-		label: __( 'Home, furniture and garden', 'woocommerce' ),
-		key: 'home_furniture_and_garden' as const,
+		label: __( 'Electronics and computers', 'woocommerce' ),
+		key: 'electronics_and_computers' as const,
+	},
+	{
+		label: __( 'Health and beauty', 'woocommerce' ),
+		key: 'health_and_beauty' as const,
 	},
 	{
 		label: __( 'Education and learning', 'woocommerce' ),
 		key: 'education_and_learning' as const,
 	},
 	{
-		label: __( 'Electronics and computers', 'woocommerce' ),
-		key: 'electronics_and_computers' as const,
+		label: __( 'Home, furniture and garden', 'woocommerce' ),
+		key: 'home_furniture_and_garden' as const,
+	},
+	{
+		label: __( 'Arts and crafts', 'woocommerce' ),
+		key: 'arts_and_crafts' as const,
+	},
+	{
+		label: __( 'Sports and recreation', 'woocommerce' ),
+		key: 'sports_and_recreation' as const,
 	},
 	{
 		label: __( 'Other', 'woocommerce' ),
@@ -387,7 +395,7 @@ export const BusinessInfo = ( {
 					{
 						<>
 							<TextControl
-								className={ classNames(
+								className={ clsx(
 									'woocommerce-profiler-business-info-email-adddress',
 									{ 'is-error': isEmailInvalid }
 								) }

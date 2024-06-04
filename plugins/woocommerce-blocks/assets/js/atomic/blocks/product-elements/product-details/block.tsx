@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
-import { useBlockProps } from '@wordpress/block-editor';
 
 interface SingleProductTab {
 	id: string;
@@ -19,7 +18,7 @@ const ProductTabTitle = ( {
 }: Pick< SingleProductTab, 'id' | 'title' | 'active' > ) => {
 	return (
 		<li
-			className={ classnames( `${ id }_tab`, {
+			className={ clsx( `${ id }_tab`, {
 				active,
 			} ) }
 			id={ `tab-title-${ id }` }
@@ -48,7 +47,6 @@ const ProductTabContent = ( {
 };
 
 export const SingleProductDetails = () => {
-	const blockProps = useBlockProps();
 	const productTabs = [
 		{
 			id: 'description',
@@ -79,12 +77,12 @@ export const SingleProductDetails = () => {
 	) );
 
 	return (
-		<div { ...blockProps }>
+		<>
 			<ul className="wc-tabs tabs" role="tablist">
 				{ tabsTitle }
 			</ul>
 			{ tabsContent }
-		</div>
+		</>
 	);
 };
 

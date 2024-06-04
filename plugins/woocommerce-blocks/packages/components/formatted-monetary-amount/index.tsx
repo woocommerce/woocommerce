@@ -6,7 +6,7 @@ import type {
 	NumberFormatValues,
 	NumberFormatProps,
 } from 'react-number-format';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import type { ReactElement } from 'react';
 import type { Currency } from '@woocommerce/types';
 
@@ -34,8 +34,18 @@ export interface FormattedMonetaryAmountProps
 const currencyToNumberFormat = (
 	currency: FormattedMonetaryAmountProps[ 'currency' ]
 ) => {
+	const hasSimiliarSeparators =
+		currency?.thousandSeparator === currency?.decimalSeparator;
+	if ( hasSimiliarSeparators ) {
+		// eslint-disable-next-line no-console
+		console.warn(
+			'Thousand separator and decimal separator are the same. This may cause formatting issues.'
+		);
+	}
 	return {
-		thousandSeparator: currency?.thousandSeparator,
+		thousandSeparator: hasSimiliarSeparators
+			? ''
+			: currency?.thousandSeparator,
 		decimalSeparator: currency?.decimalSeparator,
 		fixedDecimalScale: true,
 		prefix: currency?.prefix,
@@ -79,7 +89,7 @@ const FormattedMonetaryAmount = ( {
 		return null;
 	}
 
-	const classes = classNames(
+	const classes = clsx(
 		'wc-block-formatted-money-amount',
 		'wc-block-components-formatted-money-amount',
 		className

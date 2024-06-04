@@ -248,6 +248,16 @@ class WC_Install {
 		'8.7.0' => array(
 			'wc_update_870_prevent_listing_of_transient_files_directory',
 		),
+		'8.9.0' => array(
+			'wc_update_890_update_connect_to_woocommerce_note',
+			'wc_update_890_update_paypal_standard_load_eligibility',
+		),
+		'8.9.1' => array(
+			'wc_update_891_create_plugin_autoinstall_history_option',
+		),
+		'9.0.0' => array(
+			'wc_update_900_add_launch_your_store_tour_option',
+		),
 	);
 
 	/**
@@ -414,6 +424,10 @@ class WC_Install {
 			self::update();
 			WC_Admin_Notices::add_notice( 'update', true );
 		}
+		if ( ! empty( $_GET['return_url'] ) ) { // WPCS: input var ok.
+			$return_url = esc_url_raw( wp_unslash( $_GET['return_url'] ) );
+			wp_safe_redirect( $return_url ); // WPCS: input var ok.
+		}
 	}
 
 	/**
@@ -433,31 +447,11 @@ class WC_Install {
 		set_transient( 'wc_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 		wc_maybe_define_constant( 'WC_INSTALLING', true );
 
-		if ( self::is_new_install() && ! get_option( self::NEWLY_INSTALLED_OPTION, false ) ) {
-			update_option( self::NEWLY_INSTALLED_OPTION, 'yes' );
+		try {
+			self::install_core();
+		} finally {
+			delete_transient( 'wc_installing' );
 		}
-
-		WC()->wpdb_table_fix();
-		self::remove_admin_notices();
-		self::create_tables();
-		self::verify_base_tables();
-		self::create_options();
-		self::migrate_options();
-		self::create_roles();
-		self::setup_environment();
-		self::create_terms();
-		self::create_cron_jobs();
-		self::delete_obsolete_notes();
-		self::create_files();
-		self::maybe_create_pages();
-		self::maybe_set_activation_transients();
-		self::set_paypal_standard_load_eligibility();
-		self::update_wc_version();
-		self::maybe_update_db_version();
-		self::maybe_set_store_id();
-		self::maybe_install_legacy_api_plugin();
-
-		delete_transient( 'wc_installing' );
 
 		// Use add_option() here to avoid overwriting this value with each
 		// plugin version update. We base plugin age off of this value.
@@ -486,6 +480,36 @@ class WC_Install {
 		 * @since 6.5.0
 		 */
 		do_action( 'woocommerce_admin_installed' );
+	}
+
+	/**
+	 * Core function that performs the WooCommerce install.
+	 */
+	private static function install_core() {
+		if ( self::is_new_install() && ! get_option( self::NEWLY_INSTALLED_OPTION, false ) ) {
+			update_option( self::NEWLY_INSTALLED_OPTION, 'yes' );
+		}
+
+		WC()->wpdb_table_fix();
+		self::remove_admin_notices();
+		self::create_tables();
+		self::verify_base_tables();
+		self::create_options();
+		self::migrate_options();
+		self::create_roles();
+		self::setup_environment();
+		self::create_terms();
+		self::create_cron_jobs();
+		self::delete_obsolete_notes();
+		self::create_files();
+		self::maybe_create_pages();
+		self::maybe_set_activation_transients();
+		self::set_paypal_standard_load_eligibility();
+		self::update_wc_version();
+		self::maybe_update_db_version();
+		self::maybe_set_store_id();
+		self::maybe_install_legacy_api_plugin();
+		self::maybe_activate_legacy_api_enabled_option();
 	}
 
 	/**
@@ -568,7 +592,6 @@ class WC_Install {
 		WC_Post_types::register_taxonomies();
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
-		WC_API::add_endpoint();
 		WC_Auth::add_endpoint();
 		TransientFilesEngine::add_endpoint();
 	}
@@ -1183,16 +1206,30 @@ class WC_Install {
 			return;
 		}
 
+		// Did we previously install this plugin?
+		// We check both the woocommerce_history_of_autoinstalled_plugins options (introduced in 9.0)
+		// and the woocommerce_autoinstalled_plugins option (info should still exist here if the plugin has been uninstalled but not manually reinstalled).
+		$legacy_api_plugin          = 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php';
+		$autoinstalled_plugins      = (array) get_site_option( 'woocommerce_history_of_autoinstalled_plugins', array() );
+		$previously_installed_by_us = isset( $autoinstalled_plugins[ $legacy_api_plugin ] );
+		if ( ! $previously_installed_by_us ) {
+			$autoinstalled_plugins      = (array) get_site_option( 'woocommerce_autoinstalled_plugins', array() );
+			$previously_installed_by_us = isset( $autoinstalled_plugins[ $legacy_api_plugin ] );
+		}
+
 		/**
 		 * Filter to skip the automatic installation of the WooCommerce Legacy REST API plugin
 		 * from the WordPress.org plugins directory.
+		 *
+		 * By default, this is true (skip installation) if we have a record of previously installing the legacy plugin,
+		 * and false (do not skip) if we have no record of previously installing the plugin.
 		 *
 		 * @since 8.8.0
 		 *
 		 * @param bool $skip_auto_install False, defaulting to "don't skip the plugin automatic installation".
 		 * @returns bool True to skip the plugin automatic installation, false to install the plugin if necessary.
 		 */
-		if ( apply_filters( 'woocommerce_skip_legacy_rest_api_plugin_auto_install', false ) ) {
+		if ( apply_filters( 'woocommerce_skip_legacy_rest_api_plugin_auto_install', $previously_installed_by_us ) ) {
 			return;
 		}
 
@@ -1201,50 +1238,59 @@ class WC_Install {
 			return;
 		}
 
-		$plugin_name = 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php';
-
 		wp_clean_plugins_cache();
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
-		if ( isset( get_plugins()[ $plugin_name ] ) ) {
-			if ( ! ( get_site_option( 'woocommerce_autoinstalled_plugins', array() )[ $plugin_name ] ?? null ) ) {
+		if ( isset( get_plugins()[ $legacy_api_plugin ] ) ) {
+			if ( ! $previously_installed_by_us ) {
 				// The plugin was installed manually so let's not interfere.
 				return;
 			}
 
-			if ( in_array( $plugin_name, wp_get_active_and_valid_plugins(), true ) ) {
+			if ( in_array( $legacy_api_plugin, wp_get_active_and_valid_plugins(), true ) ) {
 				return;
 			}
 
 			// The plugin was automatically installed in a different installation process - can happen in multisite.
 			$install_ok = true;
 		} else {
-			$install_result = wc_get_container()->get( PluginInstaller::class )->install_plugin(
-				'https://downloads.wordpress.org/plugin/woocommerce-legacy-rest-api.latest-stable.zip',
-				array(
-					'info_link' => 'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/',
-				)
-			);
+			try {
+				$install_result = wc_get_container()->get( PluginInstaller::class )->install_plugin(
+					'https://downloads.wordpress.org/plugin/woocommerce-legacy-rest-api.latest-stable.zip',
+					array(
+						'info_link' => 'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/',
+					)
+				);
 
-			if ( $install_result['already_installing'] ?? null ) {
-				// The plugin is in the process of being installed already (can happen in multisite),
-				// but we still need to activate it for ourselves once it's installed.
-				as_schedule_single_action( time() + 10, 'woocommerce_activate_legacy_rest_api_plugin' );
-				return;
+				if ( $install_result['already_installing'] ?? null ) {
+					// The plugin is in the process of being installed already (can happen in multisite),
+					// but we still need to activate it for ourselves once it's installed.
+					as_schedule_single_action( time() + 10, 'woocommerce_activate_legacy_rest_api_plugin' );
+					return;
+				}
+
+				$install_ok = $install_result['install_ok'];
+			} catch ( \Exception $ex ) {
+				wc_get_logger()->error(
+					'The autoinstall of the WooCommerce Legacy REST API plugin failed: ' . $ex->getMessage(),
+					array(
+						'source'    => 'plugin_auto_installs',
+						'exception' => $ex,
+					)
+				);
+				$install_ok = false;
 			}
-
-			$install_ok = $install_result['install_ok'];
 		}
 
 		$plugin_page_url              = 'https://wordpress.org/plugins/woocommerce-legacy-rest-api/';
-		$blog_post_url                = 'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/';
+		$blog_post_url                = 'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/';
 		$site_legacy_api_settings_url = get_admin_url( null, '/admin.php?page=wc-settings&tab=advanced&section=legacy_api' );
 		$site_webhooks_settings_url   = get_admin_url( null, '/admin.php?page=wc-settings&tab=advanced&section=webhooks' );
 		$site_logs_url                = get_admin_url( null, '/admin.php?page=wc-status&tab=logs' );
 
 		if ( $install_ok ) {
-			$activation_result = activate_plugin( $plugin_name );
+			$activation_result = activate_plugin( $legacy_api_plugin );
 			if ( $activation_result instanceof \WP_Error ) {
 				$message = sprintf(
 				/* translators: 1 = URL of Legacy REST API plugin page, 2 = URL of Legacy API settings in current site, 3 = URL of webhooks settings in current site, 4 = URL of logs page in current site, 5 = URL of plugins page in current site, 6 = URL of blog post about the Legacy REST API removal */
@@ -1295,6 +1341,17 @@ class WC_Install {
 		}
 
 		\WC_Admin_Notices::store_notices();
+	}
+
+	/**
+	 * If in a previous version of WooCommerce the Legacy REST API plugin was installed manually but the core Legacy REST API was kept disabled,
+	 * now the Legacy API is still disabled and can't be manually enabled from settings UI (the plugin, which is now in control, won't allow that),
+	 * which is weird and confusing. So we detect this case and explicitly enable it.
+	 */
+	private static function maybe_activate_legacy_api_enabled_option() {
+		if ( ! self::is_new_install() && is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) && 'yes' !== get_option( 'woocommerce_api_enabled' ) ) {
+			update_option( 'woocommerce_api_enabled', 'yes' );
+		}
 	}
 
 	/**
@@ -1595,7 +1652,8 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `stock_status` (`stock_status`),
   KEY `stock_quantity` (`stock_quantity`),
   KEY `onsale` (`onsale`),
-  KEY min_max_price (`min_price`, `max_price`)
+  KEY min_max_price (`min_price`, `max_price`),
+  KEY sku (sku(50))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   tax_rate_class_id bigint(20) unsigned NOT NULL auto_increment,
@@ -2123,14 +2181,14 @@ $hpos_table_schema;
 		 *
 		 * @since 2.7.0
 		 */
-		$docs_url = apply_filters( 'woocommerce_docs_url', 'https://woo.com/documentation/plugins/woocommerce/' );
+		$docs_url = apply_filters( 'woocommerce_docs_url', 'https://woocommerce.com/documentation/plugins/woocommerce/' );
 
 		/**
 		 * The WooCommerce API documentation URL.
 		 *
 		 * @since 2.2.0
 		 */
-		$api_docs_url = apply_filters( 'woocommerce_apidocs_url', 'https://woo.com/wc-apidocs/' );
+		$api_docs_url = apply_filters( 'woocommerce_apidocs_url', 'https://woocommerce.com/wc-apidocs/' );
 
 		/**
 		 * The community WooCommerce support URL.
@@ -2142,9 +2200,9 @@ $hpos_table_schema;
 		/**
 		 * The premium support URL.
 		 *
-		 * @since
+		 * @since 6.7.0
 		 */
-		$support_url = apply_filters( 'woocommerce_support_url', 'https://woo.com/my-account/create-a-ticket/' );
+		$support_url = apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/create-a-ticket/' );
 
 		$row_meta = array(
 			'docs'    => '<a href="' . esc_url( $docs_url ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',

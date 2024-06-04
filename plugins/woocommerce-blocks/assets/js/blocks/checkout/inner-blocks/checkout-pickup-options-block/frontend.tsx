@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import { FormStep } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
+import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
+
 /**
  * Internal dependencies
  */
@@ -16,7 +18,6 @@ import attributes from './attributes';
 const FrontendBlock = ( {
 	title,
 	description,
-	showStepNumber,
 	children,
 	className,
 }: {
@@ -36,6 +37,8 @@ const FrontendBlock = ( {
 		}
 	);
 
+	const { showFormStepNumbers } = useCheckoutBlockContext();
+
 	if ( ! prefersCollection || ! LOCAL_PICKUP_ENABLED ) {
 		return null;
 	}
@@ -44,13 +47,10 @@ const FrontendBlock = ( {
 		<FormStep
 			id="pickup-options"
 			disabled={ checkoutIsProcessing }
-			className={ classnames(
-				'wc-block-checkout__pickup-options',
-				className
-			) }
+			className={ clsx( 'wc-block-checkout__pickup-options', className ) }
 			title={ title }
 			description={ description }
-			showStepNumber={ showStepNumber }
+			showStepNumber={ showFormStepNumbers }
 		>
 			<Block />
 			{ children }

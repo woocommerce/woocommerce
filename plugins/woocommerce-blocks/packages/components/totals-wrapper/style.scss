@@ -21,9 +21,7 @@
 		padding: 0;
 
 		> * > * {
-			border-bottom: 1px solid $universal-border-light;
 			padding: $gap 0;
-
 
 			// Removes the border for the slot inserted
 			&::after {

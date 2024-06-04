@@ -9,7 +9,10 @@ const clickOnCommandPaletteOption = async ( { page, optionName } ) => {
 	// Press `Ctrl` + `K` to open the command palette.
 	await page.keyboard.press( cmdKeyCombo );
 
-	await page.getByPlaceholder( 'Search for commands' ).fill( optionName );
+	await page
+		.getByLabel( 'Command palette' )
+		.locator( 'input' )
+		.fill( optionName );
 
 	// Click on the relevant option.
 	const option = page.getByRole( 'option', {

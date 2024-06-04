@@ -22,7 +22,7 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_general_settings',
-			function( $settings ) use ( &$actual_settings_via_filter ) {
+			function ( $settings ) use ( &$actual_settings_via_filter ) {
 				$actual_settings_via_filter = $settings;
 				return $settings;
 			},
@@ -48,29 +48,28 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 		$settings_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
-			'woocommerce_store_address'                    => 'text',
-			'woocommerce_store_address_2'                  => 'text',
-			'woocommerce_store_city'                       => 'text',
-			'woocommerce_default_country'                  => 'single_select_country',
-			'woocommerce_store_postcode'                   => 'text',
-			'store_address'                                => array( 'title', 'sectionend' ),
-			'woocommerce_allowed_countries'                => 'select',
-			'woocommerce_all_except_countries'             => 'multi_select_countries',
-			'woocommerce_specific_allowed_countries'       => 'multi_select_countries',
-			'woocommerce_ship_to_countries'                => 'select',
-			'woocommerce_specific_ship_to_countries'       => 'multi_select_countries',
-			'woocommerce_default_customer_address'         => 'select',
-			'woocommerce_calc_taxes'                       => 'checkbox',
-			'woocommerce_enable_coupons'                   => 'checkbox',
-			'woocommerce_calc_discounts_sequentially'      => 'checkbox',
-			'general_options'                              => array( 'title', 'sectionend' ),
-			'woocommerce_currency'                         => 'select',
-			'woocommerce_currency_pos'                     => 'select',
-			'woocommerce_price_thousand_sep'               => 'text',
-			'woocommerce_price_decimal_sep'                => 'text',
-			'woocommerce_price_num_decimals'               => 'number',
-			'pricing_options'                              => array( 'title', 'sectionend' ),
-			'wc_settings_general_site_visibility_slotfill' => 'slotfill_placeholder',
+			'woocommerce_store_address'               => 'text',
+			'woocommerce_store_address_2'             => 'text',
+			'woocommerce_store_city'                  => 'text',
+			'woocommerce_default_country'             => 'single_select_country',
+			'woocommerce_store_postcode'              => 'text',
+			'store_address'                           => array( 'title', 'sectionend' ),
+			'woocommerce_allowed_countries'           => 'select',
+			'woocommerce_all_except_countries'        => 'multi_select_countries',
+			'woocommerce_specific_allowed_countries'  => 'multi_select_countries',
+			'woocommerce_ship_to_countries'           => 'select',
+			'woocommerce_specific_ship_to_countries'  => 'multi_select_countries',
+			'woocommerce_default_customer_address'    => 'select',
+			'woocommerce_calc_taxes'                  => 'checkbox',
+			'woocommerce_enable_coupons'              => 'checkbox',
+			'woocommerce_calc_discounts_sequentially' => 'checkbox',
+			'general_options'                         => array( 'title', 'sectionend' ),
+			'woocommerce_currency'                    => 'select',
+			'woocommerce_currency_pos'                => 'select',
+			'woocommerce_price_thousand_sep'          => 'text',
+			'woocommerce_price_decimal_sep'           => 'text',
+			'woocommerce_price_num_decimals'          => 'number',
+			'pricing_options'                         => array( 'title', 'sectionend' ),
 		);
 
 		$this->assertEquals( $expected, $settings_ids_and_types );
@@ -82,13 +81,13 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_settings__currencies() {
 		FunctionsMockerHack::add_function_mocks(
 			array(
-				'get_woocommerce_currencies'      => function() {
+				'get_woocommerce_currencies'      => function () {
 					return array(
 						'c1' => 'Currency 1',
 						'c2' => 'Currency 2',
 					);
 				},
-				'get_woocommerce_currency_symbol' => function( $currency = '' ) {
+				'get_woocommerce_currency_symbol' => function ( $currency = '' ) {
 					return "symbol for $currency";
 				},
 			)

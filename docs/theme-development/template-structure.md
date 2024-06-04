@@ -9,9 +9,9 @@ visit [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/cour
 to learn about block theme development, and explore
 the [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/) tool when you're ready to create a
 new theme.  
-We are unable to provide support for customizations under our [Support Policy](http://woo.com/support-policy/). If you
+We are unable to provide support for customizations under our [Support Policy](http://woocommerce.com/support-policy/). If you
 need to further customize a snippet, or extend its functionality, we highly
-recommend [Codeable](https://codeable.io/?ref=z4Hnp), or a [Certified WooExpert](https://woo.com/experts/).
+recommend [Codeable](https://codeable.io/?ref=z4Hnp), or a [Certified WooExpert](https://woocommerce.com/experts/).
 
 ---
 
@@ -22,7 +22,7 @@ recommend [Codeable](https://codeable.io/?ref=z4Hnp), or a [Certified WooExpert]
 WooCommerce template files contain the **markup** and **template structure** for **frontend and HTML emails** of your
 store.
 
-[![Documentation for Template structure & Overriding templates via a theme](https://embed-ssl.wistia.com/deliveries/a2f57c5896505b39952aa8411a474066.jpg?image_play_button_size=2x&amp;image_crop_resized=960x540&amp;image_play_button=1&amp;image_play_button_color=694397e0)](https://woo.com/document/template-structure/?wvideo=8mvl4bro0g)
+[![Documentation for Template structure & Overriding templates via a theme](https://embed-ssl.wistia.com/deliveries/a2f57c5896505b39952aa8411a474066.jpg?image_play_button_size=2x&amp;image_crop_resized=960x540&amp;image_play_button=1&amp;image_play_button_color=694397e0)](https://woocommerce.com/document/template-structure/?wvideo=8mvl4bro0g)
 
 When you open these files, you will notice they all contain **hooks** that allow you to add/move content without needing
 to edit template files themselves. This method protects against upgrade issues, as the template files can be left
@@ -115,7 +115,7 @@ Example: To override the admin order notification, copy: `wp-content/plugins/woo
 
 The copied file will now override the WooCommerce default template file.
 
-**Warning:** Do not edit these files within the core plugin itself as they are overwritten during the upgrade process and any customizations will be lost. For more detailed information, see [Fixing Outdated WooCommerce Templates](https://woo.com/document/fix-outdated-templates-woocommerce/).
+**Warning:** Do not edit these files within the core plugin itself as they are overwritten during the upgrade process and any customizations will be lost. For more detailed information, see [Fixing Outdated WooCommerce Templates](https://woocommerce.com/document/fix-outdated-templates-woocommerce/).
 
 ## For Custom Templates
 
@@ -126,4 +126,4 @@ If your theme has a `woocommerce.php` file, you will be unable to override the `
 ---
 
 Need support with editing your Woo store? WooExpert agencies are here to help. They are trusted agencies with a proven track record of building highly customized, scalable online stores.
-[Hire an Expert](https://woo.com/customizations/).
+[Hire an Expert](https://woocommerce.com/customizations/).

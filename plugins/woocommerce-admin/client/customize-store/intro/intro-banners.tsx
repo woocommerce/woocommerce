@@ -2,10 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
-import { recordEvent } from '@woocommerce/tracks';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
@@ -19,6 +18,7 @@ import { IntroSiteIframe } from './intro-site-iframe';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
 import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
+import { trackEvent } from '../tracking';
 
 export const BaseIntroBanner = ( {
 	bannerTitle,
@@ -45,7 +45,7 @@ export const BaseIntroBanner = ( {
 } ) => {
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-customize-store-banner',
 				bannerClass
 			) }
@@ -229,6 +229,8 @@ export const NoAIBanner = ( {
 	}
 
 	const currentTheme = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		return select( 'core' ).getCurrentTheme() as Theme;
 	}, [] );
 
@@ -272,7 +274,7 @@ export const ExistingAiThemeBanner = ( {
 		<Button
 			className=""
 			onClick={ () => {
-				recordEvent(
+				trackEvent(
 					'customize_your_store_intro_create_a_new_one_click'
 				);
 				setOpenDesignChangeWarningModal( true );
@@ -294,7 +296,7 @@ export const ExistingAiThemeBanner = ( {
 			bannerClass="existing-ai-theme-banner"
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
-				recordEvent( 'customize_your_store_intro_customize_click' );
+				trackEvent( 'customize_your_store_intro_customize_click' );
 				navigateOrParent(
 					window,
 					getNewPath(
@@ -330,7 +332,7 @@ export const ExistingNoAiThemeBanner = () => {
 			bannerClass="existing-no-ai-theme-banner"
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
-				recordEvent( 'customize_your_store_intro_customize_click' );
+				trackEvent( 'customize_your_store_intro_customize_click' );
 				navigateOrParent(
 					window,
 					getNewPath(

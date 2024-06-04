@@ -73,7 +73,7 @@ export function Edit( {
 			if ( listPrice ) {
 				if ( listPrice < 0 ) {
 					return __(
-						'List price must be greater than or equals to zero.',
+						'Regular price must be greater than or equals to zero.',
 						'woocommerce'
 					);
 				}
@@ -82,7 +82,7 @@ export function Edit( {
 					listPrice <= Number.parseFloat( salePrice )
 				) {
 					return __(
-						'List price must be greater than the sale price.',
+						'Regular price must be greater than the sale price.',
 						'woocommerce'
 					);
 				}

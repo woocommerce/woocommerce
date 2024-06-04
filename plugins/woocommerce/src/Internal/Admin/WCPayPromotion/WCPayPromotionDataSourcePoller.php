@@ -1,7 +1,8 @@
 <?php
+
 namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
 
-use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
+use Automattic\WooCommerce\Admin\DataSourcePoller;
 
 /**
  * Specs data source poller class for WooCommerce Payment Promotion.

@@ -1,29 +1,24 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 const permalink = '/cart';
 const templatePath = 'woocommerce/woocommerce//page-cart';
 const templateType = 'wp_template';
 
-test.describe( 'Test the cart template', async () => {
+test.describe( 'Test the cart template', () => {
 	test( 'Template can be opened in the site editor', async ( {
 		admin,
-		page,
-		editorUtils,
+		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
 		} );
-		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
+		await editor.enterEditMode();
 		await expect(
-			page
-				.frameLocator( 'iframe[title="Editor canvas"i]' )
-				.locator( 'h1:has-text("Cart")' )
-				.first()
+			editor.canvas.getByLabel( 'Block: Title' )
 		).toBeVisible();
 	} );
 
@@ -31,14 +26,12 @@ test.describe( 'Test the cart template', async () => {
 		admin,
 		editor,
 		page,
-		editorUtils,
 	} ) => {
-		await admin.visitAdminPage( 'site-editor.php', 'path=%2Fpage' );
+		await admin.visitSiteEditor( { path: '/page' } );
 		await editor.page
 			.getByRole( 'button', { name: 'Cart', exact: true } )
 			.click();
-		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
+		await editor.enterEditMode();
 
 		await expect(
 			editor.canvas.locator( 'h1:has-text("Cart")' ).first()
@@ -54,40 +47,30 @@ test.describe( 'Test the cart template', async () => {
 	} );
 
 	test( 'Admin bar edit site link opens site editor', async ( { admin } ) => {
-		await admin.page.goto( permalink, { waitUntil: 'load' } );
+		await admin.page.goto( permalink );
 		await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
 		await expect(
-			admin.page
-				.frameLocator( 'iframe[title="Editor canvas"i]' )
-				.locator( 'h1:has-text("Cart")' )
-				.first()
+			admin.editor.canvas.getByLabel( 'Block: Title' )
 		).toBeVisible();
 	} );
 } );
 
-test.describe( 'Test editing the cart template', async () => {
-	test.afterAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
-	} );
-
+test.describe( 'Test editing the cart template', () => {
 	test( 'Merchant can transform shortcode block into blocks', async ( {
 		admin,
-		editorUtils,
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
 		} );
-		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
+		await editor.enterEditMode();
 		await editor.setContent(
 			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"cart"} /-->'
 		);
-		await editor.canvas.waitForSelector(
-			'.wp-block-woocommerce-classic-shortcode'
-		);
+		await editor.canvas
+			.locator( '.wp-block-woocommerce-classic-shortcode' )
+			.waitFor();
 		await editor.canvas
 			.getByRole( 'button', { name: 'Transform into blocks' } )
 			.click();

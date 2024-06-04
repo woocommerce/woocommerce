@@ -1,11 +1,12 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
-const { activateTheme } = require( '../../utils/themes' );
+const { activateTheme, DEFAULT_THEME } = require( '../../utils/themes' );
 const { AssemblerPage } = require( './assembler/assembler.page' );
 
 const CUSTOMIZE_STORE_URL =
 	'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store';
 const TRANSITIONAL_URL = `${ CUSTOMIZE_STORE_URL }%2Ftransitional`;
+const INTRO_URL = `${ CUSTOMIZE_STORE_URL }%2Fintro`;
 
 const test = base.extend( {
 	pageObject: async ( { page }, use ) => {
@@ -39,13 +40,13 @@ test.describe( 'Store owner can view the Transitional page', () => {
 				'no'
 			);
 		} catch ( error ) {
-			console.log( 'Store completed option not updated', error );
+			console.log( 'Store completed option not updated' );
 		}
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		// Reset theme back to twentynineteen
-		await activateTheme( 'twentynineteen' );
+		// Reset theme back to default.
+		await activateTheme( DEFAULT_THEME );
 
 		// Reset tour to visible.
 		await setOption(
@@ -56,7 +57,19 @@ test.describe( 'Store owner can view the Transitional page', () => {
 		);
 	} );
 
-	test( 'Clicking on "Done" in the assembler should go to the transitional page', async ( {
+	test( 'Accessing the transitional page when the CYS flow is not completed should redirect to the Intro page', async ( {
+		page,
+		baseURL,
+	} ) => {
+		await page.goto( TRANSITIONAL_URL );
+
+		const locator = page.locator( 'h1:visible' );
+		await expect( locator ).not.toHaveText( 'Your store looks great!' );
+
+		await expect( page.url() ).toBe( `${ baseURL }${ INTRO_URL }` );
+	} );
+
+	test( 'Clicking on "Save" in the assembler should go to the transitional page', async ( {
 		pageObject,
 		baseURL,
 	} ) => {
@@ -64,7 +77,7 @@ test.describe( 'Store owner can view the Transitional page', () => {
 		await pageObject.waitForLoadingScreenFinish();
 
 		const assembler = await pageObject.getAssembler();
-		await assembler.getByRole( 'button', { name: 'Done' } ).click();
+		await assembler.getByRole( 'button', { name: 'Save' } ).click();
 
 		await expect(
 			assembler.locator( 'text=Your store looks great!' )

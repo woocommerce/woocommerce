@@ -64,7 +64,7 @@ class ProductTag extends AbstractProductGrid {
 
 		$tag_count = wp_count_terms( 'product_tag' );
 
-		$this->asset_data_registry->add( 'hasTags', $tag_count > 0, true );
-		$this->asset_data_registry->add( 'limitTags', $tag_count > 100, true );
+		$this->asset_data_registry->add( 'hasTags', $tag_count > 0 );
+		$this->asset_data_registry->add( 'limitTags', $tag_count > 100 );
 	}
 }
