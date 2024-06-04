@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix a filters block e2e test that was mistakenly merged incorrectly.  </details>  <details>
