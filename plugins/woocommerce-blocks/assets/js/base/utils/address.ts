@@ -199,6 +199,7 @@ export const isAddressComplete = (
 				return true;
 			}
 
+			// Ignore these keys as they are not present in shipping calculator.
 			if (
 				key === 'first_name' ||
 				key === 'last_name' ||
