@@ -147,7 +147,9 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 		await page.getByLabel( 'Postal code' ).fill( '1011AA' );
 		await page.getByLabel( 'City' ).fill( 'Amsterdam' );
 		await page
-			.getByRole( 'button', { name: 'Check delivery options' } )
+			.locator(
+				'.wc-block-components-shipping-calculator-address__button'
+			)
 			.click();
 
 		// Verify shipping costs
@@ -182,7 +184,9 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 		await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 		await page.getByLabel( 'City' ).fill( 'Lisbon' );
 		await page
-			.getByRole( 'button', { name: 'Check delivery options' } )
+			.locator(
+				'.wc-block-components-shipping-calculator-address__button'
+			)
 			.click();
 
 		// Verify shipping costs
@@ -224,7 +228,9 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 		await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 		await page.getByLabel( 'City' ).fill( 'Lisbon' );
 		await page
-			.getByRole( 'button', { name: 'Check delivery options' } )
+			.locator(
+				'.wc-block-components-shipping-calculator-address__button'
+			)
 			.click();
 
 		// Increase product quantity and verify the updated price
@@ -261,7 +267,9 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 		await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 		await page.getByLabel( 'City' ).fill( 'Lisbon' );
 		await page
-			.getByRole( 'button', { name: 'Check delivery options' } )
+			.locator(
+				'.wc-block-components-shipping-calculator-address__button'
+			)
 			.click();
 
 		// Verify shipping costs
