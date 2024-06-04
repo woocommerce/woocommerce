@@ -27,7 +27,6 @@ import {
 	BlockList,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
-	BlockTools,
 	ObserveTyping,
 } from '@wordpress/block-editor';
 // It doesn't seem to notice the External dependency block whn @ts-ignore is added.
@@ -40,6 +39,46 @@ import {
 	// @ts-ignore store should be included.
 	useEntityRecord,
 } from '@wordpress/core-data';
+
+type ProductFormProps = {
+	id: number;
+	date: string;
+	date_gmt: string;
+	guid: {
+		rendered: string;
+		raw: string;
+	};
+	modified: string;
+	modified_gmt: string;
+	password: string;
+	slug: string;
+	status: 'publish' | 'future' | 'draft' | 'pending' | 'private';
+	type: 'product_form';
+	link: string;
+	title: {
+		raw: string;
+		rendered: string;
+	};
+	content: {
+		raw: string;
+		rendered: string;
+		protected: false;
+		block_version: number;
+	};
+	excerpt: {
+		raw: string;
+		rendered: string;
+		protected: boolean;
+	};
+	featured_media: number;
+	comment_status: 'open' | 'closed';
+	ping_status: 'closed' | 'open';
+	template: '';
+	meta: [];
+	permalink_template: string;
+	generated_slug: string;
+	class_list: string[];
+};
 
 /**
  * Internal dependencies
@@ -218,7 +257,7 @@ export function BlockEditor( {
 		return sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
 			per_page: -1,
 		} );
-	}, [] );
+	}, [] ) as ProductFormProps[];
 
 	useEffect( () => {
 		if ( selectedProductFormId || ! productForms ) {
@@ -241,14 +280,16 @@ export function BlockEditor( {
 		}
 
 		const productForm = productForms.find(
-			( form ) => form.id === selectedProductFormId
+			( form: ProductFormProps ) => form.id === selectedProductFormId
 		);
 
 		if ( ! productForm ) {
 			return;
 		}
 
-		onChange( parse( productForm.content.raw ), {} );
+		const productFormTemplate = parse( productForm.content.raw );
+
+		onChange( productFormTemplate, {} );
 
 		dispatch( 'core/editor' ).updateEditorSettings( {
 			...settings,
@@ -265,7 +306,6 @@ export function BlockEditor( {
 		// the blocks by calling onChange.
 		//
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-
 	}, [ selectedProductFormId, productId, productForms, isEditorLoading ] );
 
 	// Check if the Modal editor is open from the store.
@@ -294,14 +334,16 @@ export function BlockEditor( {
 		);
 	}
 
+	const formValues = productForms?.map( ( form ) => ( {
+		label: form.title.raw,
+		value: String( form.id ),
+	} ) );
+
 	return (
 		<div className="woocommerce-product-block-editor">
 			<SelectControl
 				label={ __( 'Choose product type', 'woocommerce' ) }
-				options={ productForms?.map( ( form ) => ( {
-					label: form.title.raw,
-					value: form.id,
-				} ) ) }
+				options={ formValues }
 				onChange={ ( value: string ) =>
 					setSelectedProductFormId( parseInt( value, 10 ) )
 				}
