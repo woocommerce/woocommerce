@@ -19,7 +19,7 @@ use Automattic\WooCommerce\Admin\PageController;
 class WooSubscriptionsNotes {
 	const LAST_REFRESH_OPTION_KEY = 'woocommerce_admin-wc-helper-last-refresh';
 	const NOTE_NAME               = 'wc-admin-wc-helper-connection';
-	const CONNECTION_NOTE_NAME    = 'wc-admin-wc-helper-connection'; // deprecated
+	const CONNECTION_NOTE_NAME    = 'wc-admin-wc-helper-connection'; // deprecated.
 	const SUBSCRIPTION_NOTE_NAME  = 'wc-admin-wc-helper-subscription';
 	const NOTIFY_WHEN_DAYS_LEFT   = 60;
 
