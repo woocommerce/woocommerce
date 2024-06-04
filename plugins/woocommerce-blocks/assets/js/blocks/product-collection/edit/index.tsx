@@ -4,7 +4,7 @@
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import type { ProductCollectionEditComponentProps } from '@woocommerce/blocks-checkout';
+import { ProductCollectionEditComponentProps } from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies

@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import type {
+import {
 	TProductCollectionOrder,
 	TProductCollectionOrderBy,
 	QueryControlProps,
 	CoreFilterNames,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-registry';
 import {
 	SelectControl,
 	// @ts-expect-error Using experimental features

@@ -4,11 +4,11 @@
 import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, calendar } from '@wordpress/icons';
-import type {
-	CoreCollectionNames,
+import {
 	CoreFilterNames,
 	ETimeFrameOperator,
-} from '@woocommerce/blocks-checkout';
+	CoreCollectionNames,
+} from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies

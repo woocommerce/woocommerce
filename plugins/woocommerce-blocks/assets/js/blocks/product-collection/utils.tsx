@@ -8,22 +8,20 @@ import { isWpVersion } from '@woocommerce/settings';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
 import { useLayoutEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import type {
+import {
 	PreviewState,
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
 	SetPreviewState,
-} from '@woocommerce/blocks-checkout';
+	LocationType,
+	WooCommerceBlockLocation,
+} from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
  */
 import { coreQueryPaginationBlockName } from './constants';
 import blockJson from './block.json';
-import {
-	LocationType,
-	WooCommerceBlockLocation,
-} from '../product-template/utils';
 
 /**
  * Sets the new query arguments of a Product Query block

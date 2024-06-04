@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { settings } from '@wordpress/icons';
-import type { ProductCollectionQuery } from '@woocommerce/blocks-checkout';
+import { ProductCollectionQuery } from '@woocommerce/blocks-registry';
 import {
 	ToolbarGroup,
 	Dropdown,

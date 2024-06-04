@@ -6,7 +6,7 @@ import { useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { Modal, Button } from '@wordpress/components';
 import { store as blockEditorStore } from '@wordpress/block-editor';
-import type { ProductCollectionAttributes } from '@woocommerce/blocks-checkout';
+import { ProductCollectionAttributes } from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies

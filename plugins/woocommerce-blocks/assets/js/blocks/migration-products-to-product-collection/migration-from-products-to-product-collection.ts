@@ -4,10 +4,10 @@
 import { createBlock, BlockInstance } from '@wordpress/blocks';
 import { select, dispatch, subscribe } from '@wordpress/data';
 import { isWpVersion } from '@woocommerce/settings';
-import type {
+import {
 	LayoutOptions,
 	ProductCollectionDisplayLayout,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies

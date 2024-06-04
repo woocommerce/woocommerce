@@ -2,8 +2,10 @@
  * External dependencies
  */
 import { select } from '@wordpress/data';
-import type { CollectionName } from '@woocommerce/blocks-checkout';
-import { registerProductCollection } from '@woocommerce/blocks-checkout';
+import {
+	registerProductCollection,
+	CollectionName,
+} from '@woocommerce/blocks-registry';
 import {
 	// @ts-expect-error Type definition is missing
 	store as blocksStore,

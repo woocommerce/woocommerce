@@ -9,10 +9,10 @@ import {
 import { Placeholder } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
-import type {
+import {
 	CollectionName,
 	ProductCollectionEditComponentProps,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies

@@ -5,14 +5,8 @@ import { resolveSelect, useSelect } from '@wordpress/data';
 import { useState, useEffect, useMemo } from '@wordpress/element';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
+import { LocationType } from '@woocommerce/blocks-registry';
 
-export const enum LocationType {
-	Product = 'product',
-	Archive = 'archive',
-	Cart = 'cart',
-	Order = 'order',
-	Site = 'site',
-}
 type Context< T > = T & {
 	templateSlug?: string;
 	postId?: number;

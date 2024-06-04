@@ -3,10 +3,10 @@
  */
 import { useSelect } from '@wordpress/data';
 import { Button } from '@wordpress/components';
-import type {
+import {
 	CollectionName,
 	CoreCollectionNames,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-registry';
 import {
 	BlockInstance,
 	createBlock,

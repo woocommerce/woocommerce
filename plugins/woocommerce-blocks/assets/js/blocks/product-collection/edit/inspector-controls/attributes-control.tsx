@@ -5,10 +5,10 @@ import { __ } from '@wordpress/i18n';
 import ProductAttributeTermControl from '@woocommerce/editor-components/product-attribute-term-control';
 import { SearchListItem } from '@woocommerce/editor-components/search-list-control/types';
 import { ADMIN_URL } from '@woocommerce/settings';
-import type {
+import {
 	CoreFilterNames,
 	QueryControlProps,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-registry';
 import {
 	ExternalLink,
 	// @ts-expect-error Using experimental features

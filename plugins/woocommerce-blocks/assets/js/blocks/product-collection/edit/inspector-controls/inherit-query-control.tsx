@@ -6,11 +6,11 @@ import { isSiteEditorPage } from '@woocommerce/utils';
 import { usePrevious } from '@woocommerce/base-hooks';
 import { select } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
-import type {
+import {
 	CoreFilterNames,
 	ProductCollectionQuery,
 	QueryControlProps,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-registry';
 import {
 	ToggleControl,
 	// @ts-expect-error Using experimental features

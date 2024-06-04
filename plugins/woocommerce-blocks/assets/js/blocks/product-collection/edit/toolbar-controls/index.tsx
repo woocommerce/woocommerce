@@ -3,7 +3,7 @@
  */
 import { useMemo } from '@wordpress/element';
 import { BlockControls } from '@wordpress/block-editor';
-import type { ProductCollectionEditComponentProps } from '@woocommerce/blocks-checkout';
+import { ProductCollectionEditComponentProps } from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies

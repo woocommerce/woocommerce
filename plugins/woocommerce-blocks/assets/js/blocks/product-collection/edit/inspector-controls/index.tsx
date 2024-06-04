@@ -16,12 +16,12 @@ import {
 	UPGRADE_NOTICE_DISPLAY_COUNT_THRESHOLD,
 } from '@woocommerce/blocks/migration-products-to-product-collection';
 import { recordEvent } from '@woocommerce/tracks';
-import type {
+import {
 	ProductCollectionEditComponentProps,
 	ProductCollectionAttributes,
 	CoreFilterNames,
 	FilterName,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-registry';
 import {
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis

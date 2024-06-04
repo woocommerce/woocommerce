@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import type { DisplayLayoutControlProps } from '@woocommerce/blocks-checkout';
+import { DisplayLayoutControlProps } from '@woocommerce/blocks-registry';
 import {
 	RangeControl,
 	ToggleControl,

@@ -4,7 +4,7 @@
 import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, loop } from '@wordpress/icons';
-import type { CoreCollectionNames } from '@woocommerce/blocks-checkout';
+import { CoreCollectionNames } from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies

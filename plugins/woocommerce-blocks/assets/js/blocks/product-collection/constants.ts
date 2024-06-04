@@ -3,14 +3,14 @@
  */
 import { getSetting } from '@woocommerce/settings';
 import { objectOmit } from '@woocommerce/utils';
-import type {
+import {
 	ProductCollectionAttributes,
 	TProductCollectionOrder,
 	TProductCollectionOrderBy,
 	ProductCollectionQuery,
 	ProductCollectionDisplayLayout,
 	LayoutOptions,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-registry';
 import {
 	type InnerBlockTemplate,
 	createBlock,

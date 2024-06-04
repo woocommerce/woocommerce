@@ -5,8 +5,6 @@ import type { LazyExoticComponent } from '@wordpress/element';
 import type { BlockConfiguration } from '@wordpress/blocks';
 import type { RegisteredBlockComponent } from '@woocommerce/types';
 
-export * from './types/product-collection';
-
 export enum innerBlockAreas {
 	CHECKOUT = 'woocommerce/checkout',
 	CHECKOUT_FIELDS = 'woocommerce/checkout-fields-block',

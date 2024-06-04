@@ -5,10 +5,10 @@ import { Taxonomy } from '@wordpress/core-data/src/entity-types';
 import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
-import type {
+import {
 	QueryControlProps,
 	CoreFilterNames,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-registry';
 import {
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis

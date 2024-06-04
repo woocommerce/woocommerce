@@ -4,10 +4,10 @@
 import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, starEmpty } from '@wordpress/icons';
-import type {
+import {
 	CoreCollectionNames,
 	CoreFilterNames,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies

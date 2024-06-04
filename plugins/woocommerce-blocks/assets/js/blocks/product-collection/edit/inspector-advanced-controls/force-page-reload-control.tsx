@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import { ToggleControl } from '@wordpress/components';
-import type { ProductCollectionSetAttributes } from '@woocommerce/blocks-checkout';
+import { ProductCollectionSetAttributes } from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies

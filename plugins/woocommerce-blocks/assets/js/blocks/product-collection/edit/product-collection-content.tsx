@@ -12,11 +12,11 @@ import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
 import fastDeepEqual from 'fast-deep-equal/es6';
-import type {
+import {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
 	ProductCollectionEditComponentProps,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies

@@ -4,10 +4,10 @@
 import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
-import type {
+import {
 	CoreFilterNames,
 	QueryControlProps,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-registry';
 import {
 	TextControl,
 	// @ts-expect-error Using experimental features

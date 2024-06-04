@@ -2,11 +2,11 @@
  * External dependencies
  */
 import { __, _x } from '@wordpress/i18n';
-import type {
+import {
 	CoreFilterNames,
 	ETimeFrameOperator,
 	QueryControlProps,
-} from '@woocommerce/blocks-checkout';
+} from '@woocommerce/blocks-registry';
 import {
 	Flex,
 	FlexItem,
