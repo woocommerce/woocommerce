@@ -474,7 +474,7 @@ class BatchProcessingController {
 			 * @param array $process_details Array with batch processor state.
 			 */
 			apply_filters(
-				'wc_batch_processing_attempts_threshold',
+				'wc_batch_processing_max_attempts',
 				self::FAILING_PROCESS_MAX_ATTEMPTS_DEFAULT,
 				$batch_processor,
 				$process_details
