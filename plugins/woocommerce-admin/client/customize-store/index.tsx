@@ -448,7 +448,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					invoke: [
 						{
 							src: 'markTaskComplete',
-							// eslint-disable-next-line xstate/no-ondone-outside-compound-state
 							onDone: {
 								target: '#customizeStore.transitionalScreen',
 							},

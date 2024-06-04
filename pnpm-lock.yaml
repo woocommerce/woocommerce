@@ -3627,9 +3627,6 @@ importers:
       eslint-plugin-react:
         specifier: ^7.33.2
         version: 7.33.2(eslint@8.55.0)
-      eslint-plugin-xstate:
-        specifier: 3.2.1
-        version: 3.2.1(eslint@8.55.0)
       expose-loader:
         specifier: ^3.1.0
         version: 3.1.0(webpack@5.89.0(webpack-cli@4.10.0))
@@ -14854,12 +14851,6 @@ packages:
     peerDependencies:
       eslint: '>=5'
 
-  eslint-plugin-xstate@3.2.1:
-    resolution: {integrity: sha512-/C51ZtQ51JOO4VJC+/LBRy6mDP2RifypoZvnzx+VSMcDesdOYJDUuclgbR4uk1LSFG/O/ZqmuTxAb80GEj+63Q==}
-    engines: {node: '>=16.0.0'}
-    peerDependencies:
-      eslint: ^8.40.0
-
   eslint-plugin-you-dont-need-lodash-underscore@6.12.0:
     resolution: {integrity: sha512-WF4mNp+k2532iswT6iUd1BX6qjd3AV4cFy/09VC82GY9SsRtvkxhUIx7JNGSe0/bLyd57oTr4inPFiIaENXhGw==}
     engines: {node: '>=4.0'}
@@ -18405,9 +18396,6 @@ packages:
   lodash.assign@4.2.0:
     resolution: {integrity: sha512-hFuH8TY+Yji7Eja3mGiuAxBqLagejScbG8GbG0j6o9vzn0YL14My+ktnqtZgFTosKymC9/44wP6s7xyuLfnClw==}
 
-  lodash.camelcase@4.3.0:
-    resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
-
   lodash.debounce@4.0.8:
     resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
 
@@ -18477,9 +18465,6 @@ packages:
   lodash.shuffle@4.2.0:
     resolution: {integrity: sha512-V/rTAABKLFjoecTZjKSv+A1ZomG8hZg8hlgeG6wwQVD9AGv+10zqqSf6mFq2tVA703Zd5R0YhSuSlXA+E/Ei+Q==}
 
-  lodash.snakecase@4.1.1:
-    resolution: {integrity: sha512-QZ1d4xoBHYUeuouhEq3lk3Uq7ldgyFXGBhg04+oRLnIz8o9T65Eh+8YdroUwn846zchkA9yDsDl5CVVaV2nqYw==}
-
   lodash.sortby@4.7.0:
     resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}
 
@@ -18497,9 +18482,6 @@ packages:
 
   lodash.uniq@4.5.0:
     resolution: {integrity: sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==}
-
-  lodash.upperfirst@4.3.1:
-    resolution: {integrity: sha512-sReKOYJIJf74dhJONhU4e0/shzi1trVbSWDOhKYE5XV2O+H7Sb2Dihwuc7xWxVl+DgFPyTqIN3zMfT9cq5iWDg==}
 
   lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
@@ -21873,6 +21855,7 @@ packages:
 
   rimraf@2.6.3:
     resolution: {integrity: sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rimraf@2.7.1:
@@ -21970,30 +21953,6 @@ packages:
 
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
-
-  sanctuary-def@0.22.0:
-    resolution: {integrity: sha512-lywS27TfuPHzelMh6M1YWBcB//Lom4Gko/tGjKYbDPkPet1B5KplsSdjY+5sF4mwp6+PDUodsk/Y3Uskrc/ebw==}
-
-  sanctuary-either@2.1.0:
-    resolution: {integrity: sha512-AsQCma2yGAVS7Dlxme/09NZWQfcXBNylVmkuvarp8uOe9otSwClOgQyyePN2OxO4hTf3Au1Ck4ggm+97Je06kA==}
-
-  sanctuary-maybe@2.1.0:
-    resolution: {integrity: sha512-xCmvaEkYaIz5klWUrsgvgORKTL3bVYxATp7HyGBY0ZCu9tHJtSYDTpwnqMkRknHFIU986Kr2M/dJdiFvuc6UCQ==}
-
-  sanctuary-pair@2.1.0:
-    resolution: {integrity: sha512-yY1JzzIJ/Ex7rjN8NmQLB7yv6GVzNeaMvxoYSW8w1ReLQI0n2sGOVCnAVipZuCv7wmfd+BavSXp59rklJeYytw==}
-
-  sanctuary-show@2.0.0:
-    resolution: {integrity: sha512-REj4ZiioUXnDLj6EpJ9HcYDIEGaEexmB9Fg5o6InZR9f0x5PfnnC21QeU9SZ9E7G8zXSZPNjy8VRUK4safbesw==}
-
-  sanctuary-type-classes@12.1.0:
-    resolution: {integrity: sha512-oWP071Q88dEgJwxHLZp8tc7DoS+mWmYhYOuhP85zznPpIxV1ZjJfyRvcR59YCazyFxyFeBif7bJx1giLhDZW0Q==}
-
-  sanctuary-type-identifiers@3.0.0:
-    resolution: {integrity: sha512-YFXYcG0Ura1dSPd/1xLYtE2XAWUEsBHhMTZvYBOvwT8MeFQwdUOCMm2DC+r94z6H93FVq0qxDac8/D7QpJj6Mg==}
-
-  sanctuary@3.1.0:
-    resolution: {integrity: sha512-yTpWmslb5Q2jXcHYeIfCzJksIpe3pngBaFBDpjdPXONWyVSB3hBVDZZ8EmitohaMZqjLB+JREeEL0YOVtdxILA==}
 
   sane@4.1.0:
     resolution: {integrity: sha512-hhbzAgTIX8O7SHfp2c8/kREfEn4qO/9q8C9beyY6+tvZ87EpoZ3i1RIEvp27YBswnNbY9mWd6paKVmKbAgLfZA==}
@@ -46443,14 +46402,6 @@ snapshots:
     dependencies:
       eslint: 8.55.0
 
-  eslint-plugin-xstate@3.2.1(eslint@8.55.0):
-    dependencies:
-      eslint: 8.55.0
-      lodash.camelcase: 4.3.0
-      lodash.snakecase: 4.1.1
-      lodash.upperfirst: 4.3.1
-      sanctuary: 3.1.0
-
   eslint-plugin-you-dont-need-lodash-underscore@6.12.0:
     dependencies:
       kebab-case: 1.0.2
@@ -52358,8 +52309,6 @@ snapshots:
 
   lodash.assign@4.2.0: {}
 
-  lodash.camelcase@4.3.0: {}
-
   lodash.debounce@4.0.8: {}
 
   lodash.differencewith@4.5.0: {}
@@ -52419,8 +52368,6 @@ snapshots:
 
   lodash.shuffle@4.2.0: {}
 
-  lodash.snakecase@4.1.1: {}
-
   lodash.sortby@4.7.0: {}
 
   lodash.template@4.5.0:
@@ -52437,8 +52384,6 @@ snapshots:
   lodash.truncate@4.4.2: {}
 
   lodash.uniq@4.5.0: {}
-
-  lodash.upperfirst@4.3.1: {}
 
   lodash@4.17.21: {}
 
@@ -57523,46 +57468,6 @@ snapshots:
   safe-stable-stringify@2.4.3: {}
 
   safer-buffer@2.1.2: {}
-
-  sanctuary-def@0.22.0:
-    dependencies:
-      sanctuary-either: 2.1.0
-      sanctuary-show: 2.0.0
-      sanctuary-type-classes: 12.1.0
-      sanctuary-type-identifiers: 3.0.0
-
-  sanctuary-either@2.1.0:
-    dependencies:
-      sanctuary-show: 2.0.0
-      sanctuary-type-classes: 12.1.0
-
-  sanctuary-maybe@2.1.0:
-    dependencies:
-      sanctuary-show: 2.0.0
-      sanctuary-type-classes: 12.1.0
-
-  sanctuary-pair@2.1.0:
-    dependencies:
-      sanctuary-show: 2.0.0
-      sanctuary-type-classes: 12.1.0
-
-  sanctuary-show@2.0.0: {}
-
-  sanctuary-type-classes@12.1.0:
-    dependencies:
-      sanctuary-type-identifiers: 3.0.0
-
-  sanctuary-type-identifiers@3.0.0: {}
-
-  sanctuary@3.1.0:
-    dependencies:
-      sanctuary-def: 0.22.0
-      sanctuary-either: 2.1.0
-      sanctuary-maybe: 2.1.0
-      sanctuary-pair: 2.1.0
-      sanctuary-show: 2.0.0
-      sanctuary-type-classes: 12.1.0
-      sanctuary-type-identifiers: 3.0.0
 
   sane@4.1.0:
     dependencies:

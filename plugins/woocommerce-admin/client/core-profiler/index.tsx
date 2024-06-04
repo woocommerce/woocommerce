@@ -1,5 +1,3 @@
-/* eslint-disable xstate/system-id */
-/* eslint-disable xstate/no-inline-implementation */
 /**
  * External dependencies
  */
@@ -1446,7 +1444,6 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							enqueue( 'preFetchJetpackAuthUrl' );
 						}
 						enqueue(
-							// eslint-disable-next-line xstate/no-imperative-action -- this seems like a false positive as it works. Track issue: https://github.com/rlaffers/eslint-plugin-xstate/issues/29
 							assign( {
 								loader: {
 									progress: 10,

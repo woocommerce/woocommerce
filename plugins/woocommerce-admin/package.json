@@ -195,7 +195,6 @@
 		"eslint-import-resolver-webpack": "^0.13.8",
 		"eslint-plugin-import": "^2.29.0",
 		"eslint-plugin-react": "^7.33.2",
-		"eslint-plugin-xstate": "3.2.1",
 		"expose-loader": "^3.1.0",
 		"fork-ts-checker-webpack-plugin": "^8.0.0",
 		"fs-extra": "11.1.1",
