@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: We fix the WCPay incentives promo notes logic to avoid needless friction in the merchant UX.
+
+
