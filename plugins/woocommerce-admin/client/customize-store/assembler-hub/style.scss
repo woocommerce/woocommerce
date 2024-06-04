@@ -833,3 +833,10 @@ body.woocommerce-assembler {
 .components-resizable-box__handle.components-resizable-box__side-handle.components-resizable-box__handle-left {
 	display: none;
 }
+
+.woocommerce-customize-store_popover-tooltip {
+	.components-popover__content {
+		width: fit-content;
+		user-select: none;
+	}
+}

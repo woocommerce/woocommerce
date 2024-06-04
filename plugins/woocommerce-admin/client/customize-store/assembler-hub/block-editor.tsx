@@ -18,7 +18,6 @@ export const BlockEditor = memo(
 		settings,
 		additionalStyles,
 		isScrollable,
-		onClickNavigationItem,
 		onChange,
 	}: {
 		renderedBlocks: BlockInstance[];
@@ -27,7 +26,6 @@ export const BlockEditor = memo(
 		};
 		additionalStyles: string;
 		isScrollable: boolean;
-		onClickNavigationItem: ( event: MouseEvent ) => void;
 		onChange: ChangeHandler;
 	} ) => {
 		return (
@@ -38,14 +36,13 @@ export const BlockEditor = memo(
 						onChange={ onChange }
 						settings={ settings }
 						additionalStyles={ additionalStyles }
-						isNavigable={ false }
 						isScrollable={ isScrollable }
-						onClickNavigationItem={ onClickNavigationItem }
 						// Don't use sub registry so that we can get the logo block from the main registry on the logo sidebar navigation screen component.
 						useSubRegistry={ false }
 						autoScale={ false }
 						setLogoBlockContext={ true }
 						CustomIframeComponent={ Iframe }
+						isPatternPreview={ false }
 					/>
 				</div>
 			</div>
