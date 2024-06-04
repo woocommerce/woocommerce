@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+WooCommerce: introduce `product-editor-template-system` feature flag
