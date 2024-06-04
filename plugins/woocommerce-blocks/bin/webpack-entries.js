@@ -166,19 +166,8 @@ const blocks = {
 // `**/*.scss`...).
 // It also filters out elements with undefined props and experimental blocks.
 const getBlockEntries = ( relativePath ) => {
-	const bundleExperimentalBlocks = !! parseInt(
-		process.env.BUNDLE_EXPERIMENTAL_BLOCKS,
-		10
-	);
-
 	return Object.fromEntries(
 		Object.entries( blocks )
-			.filter( ( [ , config ] ) => {
-				if ( config.isExperimental ) {
-					return bundleExperimentalBlocks;
-				}
-				return true;
-			} )
 			.map( ( [ blockCode, config ] ) => {
 				const filePaths = glob.sync(
 					`./assets/js/blocks/${ config.customDir || blockCode }/` +

@@ -44,8 +44,6 @@ jobs:
               id: prepare
               env:
                   CURRENT_VERSION: ${{ steps.version.outputs.version }}
-                  # Build with experimental blocks.
-                  BUNDLE_EXPERIMENTAL_BLOCKS: 1
               run: |
 
                   # Current version must compare greater than any previously used current version for this PR.

@@ -386,10 +386,6 @@
 				"BABEL_ENV": {
 					"external": true,
 					"default": "default"
-				},
-				"BUNDLE_EXPERIMENTAL_BLOCKS": {
-					"external": true,
-					"default": "1"
 				}
 			},
 			"files": [
@@ -411,13 +407,7 @@
 		},
 		"watch:build:project:bundle": {
 			"command": "webpack --watch",
-			"service": true,
-			"env": {
-				"BUNDLE_EXPERIMENTAL_BLOCKS": {
-					"external": true,
-					"default": "1"
-				}
-			}
+			"service": true
 		},
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
