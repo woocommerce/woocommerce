@@ -2685,8 +2685,6 @@ function wc_update_890_update_connect_to_woocommerce_note() {
 		return;
 	}
 	Notes::delete_notes_with_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
-	$new_note = WooSubscriptionsNotes::get_note();
-	$new_note->save();
 }
 
 /**
