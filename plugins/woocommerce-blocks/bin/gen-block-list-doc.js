@@ -137,6 +137,7 @@ function readBlockJSON( filename ) {
 	const blockjson = require( filename );
 	let supportsList = [];
 	let attributes = [];
+	let suffix = '';
 
 	if ( typeof blockjson.name === 'undefined' ) {
 		return ``;
@@ -148,6 +149,10 @@ function readBlockJSON( filename ) {
 		if ( supportsAugmented ) {
 			supportsList = processObjWithInnerKeys( supportsAugmented );
 		}
+
+		if ( blockjson.supports.inserter === false ) {
+			suffix = ' _(Unavailable in inserter)_';
+		}
 	}
 
 	if ( typeof blockjson.attributes !== 'undefined' ) {
@@ -155,7 +160,7 @@ function readBlockJSON( filename ) {
 	}
 
 	return `
-## ${ blockjson.title } - ${ blockjson.name }
+## ${ blockjson.title } - ${ blockjson.name }${ suffix }
 
 ${ blockjson.description || '' }
 

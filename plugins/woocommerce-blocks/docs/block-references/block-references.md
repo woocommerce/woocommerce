@@ -114,7 +114,7 @@ Display related products.
 -	**Supports:** align, ~~reusable~~
 -	**Attributes:** 
 
-## Active Filters Controls - woocommerce/active-filters
+## Active Filters Controls - woocommerce/active-filters _(Unavailable in inserter)_
 
 Display the currently active filters.
 
@@ -125,7 +125,7 @@ Display the currently active filters.
 -	**Supports:** color (text, ~~background~~), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~
 -	**Attributes:** displayStyle, headingLevel
 
-## Filter by Attribute Controls - woocommerce/attribute-filter
+## Filter by Attribute Controls - woocommerce/attribute-filter _(Unavailable in inserter)_
 
 Enable customers to filter the product grid by selecting one or more attributes, such as color.
 
@@ -169,7 +169,7 @@ Shows the Cross-Sells block.
 -	**Supports:** inserter, ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** 
 
-## Cart Cross-Sells Products - woocommerce/cart-cross-sells-products-block
+## Cart Cross-Sells Products - woocommerce/cart-cross-sells-products-block _(Unavailable in inserter)_
 
 Shows the Cross-Sells products.
 
@@ -180,7 +180,7 @@ Shows the Cross-Sells products.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** columns, lock
 
-## Express Checkout - woocommerce/cart-express-payment-block
+## Express Checkout - woocommerce/cart-express-payment-block _(Unavailable in inserter)_
 
 Allow customers to breeze through with quick payment options.
 
@@ -191,7 +191,7 @@ Allow customers to breeze through with quick payment options.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Cart Items - woocommerce/cart-items-block
+## Cart Items - woocommerce/cart-items-block _(Unavailable in inserter)_
 
 Column containing cart items.
 
@@ -202,7 +202,7 @@ Column containing cart items.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Cart Line Items - woocommerce/cart-line-items-block
+## Cart Line Items - woocommerce/cart-line-items-block _(Unavailable in inserter)_
 
 Block containing current line items in Cart.
 
@@ -213,7 +213,7 @@ Block containing current line items in Cart.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Order Summary - woocommerce/cart-order-summary-block
+## Order Summary - woocommerce/cart-order-summary-block _(Unavailable in inserter)_
 
 Show customers a summary of their order.
 
@@ -312,7 +312,7 @@ Shows the subtotal, fees, discounts, shipping and taxes.
 -	**Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** className, lock
 
-## Cart Totals - woocommerce/cart-totals-block
+## Cart Totals - woocommerce/cart-totals-block _(Unavailable in inserter)_
 
 Column containing the cart totals.
 
@@ -323,7 +323,7 @@ Column containing the cart totals.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** checkbox, lock, text
 
-## Empty Cart - woocommerce/empty-cart-block
+## Empty Cart - woocommerce/empty-cart-block _(Unavailable in inserter)_
 
 Contains blocks that are displayed when the cart is empty.
 
@@ -334,7 +334,7 @@ Contains blocks that are displayed when the cart is empty.
 -	**Supports:** align (wide), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Filled Cart - woocommerce/filled-cart-block
+## Filled Cart - woocommerce/filled-cart-block _(Unavailable in inserter)_
 
 Contains blocks that are displayed when the cart contains products.
 
@@ -345,7 +345,7 @@ Contains blocks that are displayed when the cart contains products.
 -	**Supports:** align (wide), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Proceed to Checkout - woocommerce/proceed-to-checkout-block
+## Proceed to Checkout - woocommerce/proceed-to-checkout-block _(Unavailable in inserter)_
 
 Allow customers proceed to Checkout.
 
@@ -378,7 +378,7 @@ Display a checkout form so your customers can submit orders.
 -	**Supports:** align (wide), ~~html~~, ~~multiple~~
 -	**Attributes:** align, isPreview, requireApartmentField, requireCompanyField, requirePhoneField, showApartmentField, showCompanyField, showFormStepNumbers, showPhoneField
 
-## Actions - woocommerce/checkout-actions-block
+## Actions - woocommerce/checkout-actions-block _(Unavailable in inserter)_
 
 Allow customers to place their order.
 
@@ -400,7 +400,7 @@ Render additional fields in the 'Additional information' location.
 -	**Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** className, lock
 
-## Billing Address - woocommerce/checkout-billing-address-block
+## Billing Address - woocommerce/checkout-billing-address-block _(Unavailable in inserter)_
 
 Collect your customer's billing address.
 
@@ -411,7 +411,7 @@ Collect your customer's billing address.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Contact Information - woocommerce/checkout-contact-information-block
+## Contact Information - woocommerce/checkout-contact-information-block _(Unavailable in inserter)_
 
 Collect your customer's contact information.
 
@@ -422,7 +422,7 @@ Collect your customer's contact information.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Express Checkout - woocommerce/checkout-express-payment-block
+## Express Checkout - woocommerce/checkout-express-payment-block _(Unavailable in inserter)_
 
 Allow customers to breeze through with quick payment options.
 
@@ -433,7 +433,7 @@ Allow customers to breeze through with quick payment options.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** className, lock
 
-## Checkout Fields - woocommerce/checkout-fields-block
+## Checkout Fields - woocommerce/checkout-fields-block _(Unavailable in inserter)_
 
 Column containing checkout address fields.
 
@@ -455,7 +455,7 @@ Allow customers to add a note to their order.
 -	**Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** className, lock
 
-## Order Summary - woocommerce/checkout-order-summary-block
+## Order Summary - woocommerce/checkout-order-summary-block _(Unavailable in inserter)_
 
 Show customers a summary of their order.
 
@@ -554,7 +554,7 @@ Shows the subtotal, fees, discounts, shipping and taxes.
 -	**Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** className, lock
 
-## Payment Options - woocommerce/checkout-payment-block
+## Payment Options - woocommerce/checkout-payment-block _(Unavailable in inserter)_
 
 Payment options for your store.
 
@@ -565,7 +565,7 @@ Payment options for your store.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Pickup Method - woocommerce/checkout-pickup-options-block
+## Pickup Method - woocommerce/checkout-pickup-options-block _(Unavailable in inserter)_
 
 Shows local pickup locations.
 
@@ -576,7 +576,7 @@ Shows local pickup locations.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Shipping Address - woocommerce/checkout-shipping-address-block
+## Shipping Address - woocommerce/checkout-shipping-address-block _(Unavailable in inserter)_
 
 Collect your customer's shipping address.
 
@@ -587,7 +587,7 @@ Collect your customer's shipping address.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Delivery - woocommerce/checkout-shipping-method-block
+## Delivery - woocommerce/checkout-shipping-method-block _(Unavailable in inserter)_
 
 Select between shipping or local pickup.
 
@@ -598,7 +598,7 @@ Select between shipping or local pickup.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Shipping Options - woocommerce/checkout-shipping-methods-block
+## Shipping Options - woocommerce/checkout-shipping-methods-block _(Unavailable in inserter)_
 
 Display shipping options and rates for your store.
 
@@ -618,9 +618,9 @@ Ensure that customers agree to your Terms & Conditions and Privacy Policy.
 -   **Ancestor:** 
 -   **Parent:** woocommerce/checkout-fields-block
 -	**Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
--	**Attributes:** checkbox, className, text
+-	**Attributes:** checkbox, className, showSeparator, text
 
-## Checkout Totals - woocommerce/checkout-totals-block
+## Checkout Totals - woocommerce/checkout-totals-block _(Unavailable in inserter)_
 
 Column containing the checkout totals.
 
@@ -719,7 +719,7 @@ Display a button for shoppers to quickly view their cart.
 -	**Supports:** typography (fontSize), ~~html~~, ~~multiple~~
 -	**Attributes:** addToCartBehaviour, cartAndCheckoutRenderStyle, hasHiddenPrice, iconColor, iconColorValue, isPreview, miniCartIcon, priceColor, priceColorValue, productCountColor, productCountColorValue
 
-## Empty Mini-Cart view - woocommerce/empty-mini-cart-contents-block
+## Empty Mini-Cart view - woocommerce/empty-mini-cart-contents-block _(Unavailable in inserter)_
 
 Blocks that are displayed when the Mini-Cart is empty.
 
@@ -730,7 +730,7 @@ Blocks that are displayed when the Mini-Cart is empty.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Filled Mini-Cart view - woocommerce/filled-mini-cart-contents-block
+## Filled Mini-Cart view - woocommerce/filled-mini-cart-contents-block _(Unavailable in inserter)_
 
 Contains blocks that display the content of the Mini-Cart.
 
@@ -763,7 +763,7 @@ Block that displays the checkout button when the Mini-Cart has products.
 -	**Supports:** color (background, text), inserter, ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Mini-Cart Footer - woocommerce/mini-cart-footer-block
+## Mini-Cart Footer - woocommerce/mini-cart-footer-block _(Unavailable in inserter)_
 
 Block that displays the footer of the Mini-Cart block.
 
@@ -774,7 +774,7 @@ Block that displays the footer of the Mini-Cart block.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Mini-Cart Items - woocommerce/mini-cart-items-block
+## Mini-Cart Items - woocommerce/mini-cart-items-block _(Unavailable in inserter)_
 
 Contains the products table and other custom blocks of filled mini-cart.
 
@@ -785,7 +785,7 @@ Contains the products table and other custom blocks of filled mini-cart.
 -	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Mini-Cart Products Table - woocommerce/mini-cart-products-table-block
+## Mini-Cart Products Table - woocommerce/mini-cart-products-table-block _(Unavailable in inserter)_
 
 Block that displays the products table of the Mini-Cart block.
 
@@ -807,7 +807,7 @@ Block that displays the shopping button when the Mini-Cart is empty.
 -	**Supports:** color (background, text), inserter, ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Mini-Cart Title - woocommerce/mini-cart-title-block
+## Mini-Cart Title - woocommerce/mini-cart-title-block _(Unavailable in inserter)_
 
 Block that displays the title of the Mini-Cart block.
 
@@ -818,7 +818,7 @@ Block that displays the title of the Mini-Cart block.
 -	**Supports:** color (text, ~~background~~), typography (fontSize), ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** lock
 
-## Mini-Cart Title Items Counter - woocommerce/mini-cart-title-items-counter-block
+## Mini-Cart Title Items Counter - woocommerce/mini-cart-title-items-counter-block _(Unavailable in inserter)_
 
 Block that displays the items counter part of the Mini-Cart Title block.
 
@@ -829,7 +829,7 @@ Block that displays the items counter part of the Mini-Cart Title block.
 -	**Supports:** color (background, text), spacing (padding), typography (fontSize), ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** 
 
-## Mini-Cart Title Label - woocommerce/mini-cart-title-label-block
+## Mini-Cart Title Label - woocommerce/mini-cart-title-label-block _(Unavailable in inserter)_
 
 Block that displays the 'Your cart' part of the Mini-Cart Title block.
 
@@ -873,7 +873,7 @@ Displays additional information provided by third-party extensions for the curre
 -	**Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
 -	**Attributes:** align, className
 
-## Billing Address - woocommerce/order-confirmation-billing-address
+## Billing Address - woocommerce/order-confirmation-billing-address _(Unavailable in inserter)_
 
 Display the order confirmation billing address.
 
@@ -917,7 +917,7 @@ Display the downloadable products section.
 -	**Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
 -	**Attributes:** heading
 
-## Shipping Address - woocommerce/order-confirmation-shipping-address
+## Shipping Address - woocommerce/order-confirmation-shipping-address _(Unavailable in inserter)_
 
 Display the order confirmation shipping address.
 
@@ -983,7 +983,7 @@ Display the order details section.
 -	**Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
 -	**Attributes:** heading
 
-## WooCommerce Page - woocommerce/page-content-wrapper
+## WooCommerce Page - woocommerce/page-content-wrapper _(Unavailable in inserter)_
 
 Displays WooCommerce page content.
 
@@ -994,7 +994,7 @@ Displays WooCommerce page content.
 -	**Supports:** ~~html~~, ~~inserter~~, ~~multiple~~
 -	**Attributes:** page
 
-## Filter by Price Controls - woocommerce/price-filter
+## Filter by Price Controls - woocommerce/price-filter _(Unavailable in inserter)_
 
 Enable customers to filter the product grid by choosing a price range.
 
@@ -1071,7 +1071,7 @@ Display a button so the customer can add a product to their cart. Options will a
 -	**Supports:** interactivity
 -	**Attributes:** isDescendentOfSingleProductBlock, quantitySelectorStyle
 
-## Product Filter (Experimental) - woocommerce/product-filter
+## Product Filter (Experimental) - woocommerce/product-filter _(Unavailable in inserter)_
 
 A block that adds product filters to the product collection.
 
@@ -1079,10 +1079,10 @@ A block that adds product filters to the product collection.
 -	**Category:** woocommerce
 -   **Ancestor:** 
 -   **Parent:** 
--	**Supports:** ~~html~~, ~~reusable~~
+-	**Supports:** ~~html~~, ~~inserter~~, ~~reusable~~
 -	**Attributes:** attributeId, filterType, heading, isPreview
 
-## Product Filter: Active Filters (Experimental) - woocommerce/product-filter-active
+## Product Filter: Active Filters (Experimental) - woocommerce/product-filter-active _(Unavailable in inserter)_
 
 Display the currently active filters.
 
@@ -1093,7 +1093,7 @@ Display the currently active filters.
 -	**Supports:** color (text, ~~background~~), interactivity, ~~inserter~~
 -	**Attributes:** displayStyle
 
-## Product Filter: Attribute (Experimental) - woocommerce/product-filter-attribute
+## Product Filter: Attribute (Experimental) - woocommerce/product-filter-attribute _(Unavailable in inserter)_
 
 Enable customers to filter the product grid by selecting one or more attributes, such as color.
 
@@ -1104,7 +1104,7 @@ Enable customers to filter the product grid by selecting one or more attributes,
 -	**Supports:** color (text, ~~background~~), interactivity, ~~inserter~~
 -	**Attributes:** attributeId, displayStyle, isPreview, queryType, selectType, showCounts
 
-## Clear (Experimental) - woocommerce/product-filter-clear-button
+## Clear (Experimental) - woocommerce/product-filter-clear-button _(Unavailable in inserter)_
 
 Allows shoppers to reset this filter.
 
@@ -1115,7 +1115,7 @@ Allows shoppers to reset this filter.
 -	**Supports:** interactivity, ~~inserter~~
 -	**Attributes:** 
 
-## Product Filter: Price (Experimental) - woocommerce/product-filter-price
+## Product Filter: Price (Experimental) - woocommerce/product-filter-price _(Unavailable in inserter)_
 
 Enable customers to filter the product collection by choosing a price range.
 
@@ -1126,7 +1126,7 @@ Enable customers to filter the product collection by choosing a price range.
 -	**Supports:** interactivity, ~~inserter~~
 -	**Attributes:** inlineInput, showInputFields
 
-## Product Filter: Rating (Experimental) - woocommerce/product-filter-rating
+## Product Filter: Rating (Experimental) - woocommerce/product-filter-rating _(Unavailable in inserter)_
 
 Enable customers to filter the product collection by rating.
 
@@ -1137,7 +1137,7 @@ Enable customers to filter the product collection by rating.
 -	**Supports:** color (text, ~~background~~), interactivity, ~~inserter~~
 -	**Attributes:** className, displayStyle, isPreview, selectType, showCounts
 
-## Product Filter: Stock Status (Experimental) - woocommerce/product-filter-stock-status
+## Product Filter: Stock Status (Experimental) - woocommerce/product-filter-stock-status _(Unavailable in inserter)_
 
 Enable customers to filter the product collection by stock status.
 
@@ -1247,7 +1247,7 @@ Display a grid of products with selected tags.
 -	**Supports:** align (full, wide), ~~html~~
 -	**Attributes:** alignButtons, columns, contentVisibility, isPreview, orderby, rows, stockStatus, tagOperator, tags
 
-## Product Template - woocommerce/product-template
+## Product Template - woocommerce/product-template _(Unavailable in inserter)_
 
 Contains the block elements used to render a product.
 
@@ -1291,7 +1291,7 @@ Display a grid of products with selected attributes.
 -	**Supports:** align (full, wide), ~~html~~
 -	**Attributes:** alignButtons, attrOperator, attributes, columns, contentVisibility, isPreview, orderby, rows, stockStatus
 
-## Filter by Rating Controls - woocommerce/rating-filter
+## Filter by Rating Controls - woocommerce/rating-filter _(Unavailable in inserter)_
 
 Enable customers to filter the product grid by rating.
 
@@ -1313,7 +1313,7 @@ Display a single product.
 -	**Supports:** align (full, wide)
 -	**Attributes:** isPreview, productId
 
-## Filter by Stock Controls - woocommerce/stock-filter
+## Filter by Stock Controls - woocommerce/stock-filter _(Unavailable in inserter)_
 
 Enable customers to filter the product grid by stock status.
 
