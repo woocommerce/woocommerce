@@ -496,16 +496,6 @@ class BatchProcessingController {
 			)
 		);
 
-		/**
-		 * Controls the failure threshold for recurring actions.
-		 *
-		 * Before rescheduling a recurring action, we look at its status. If it failed, we then check if all of the most
-		 * recent actions (upto the threshold set by this filter) sharing the same hook have also failed: if they have,
-		 * that is considered consistent failure and a new instance of the action will not be scheduled.
-		 *
-		 * @param int $failure_threshold Number of actions of the same hook to examine for failure. Defaults to 5.
-		 */
-
 		return absint( $process_details['recent_failures'] ?? 0 ) >= max( $max_attempts, 1 );
 	}
 
