@@ -434,13 +434,16 @@ class ProductCollectionPage {
 		await this.refreshLocators( 'editor' );
 	}
 
-	async clickDisplaySettings() {
-		// Select the block, so that toolbar is visible.
+	async focusProductCollection() {
 		const block = this.page
 			.locator( `[data-type="${ this.BLOCK_SLUG }"]` )
 			.first();
 		await this.editor.selectBlocks( block );
+	}
 
+	async clickDisplaySettings() {
+		// Select the block, so that toolbar is visible.
+		await this.focusProductCollection();
 		// Open the display settings.
 		await this.page
 			.getByRole( 'button', { name: 'Display settings' } )

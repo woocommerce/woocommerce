@@ -459,6 +459,7 @@ test.describe( 'Product Collection', () => {
 				editor,
 			} ) => {
 				await pageObject.goToEditorTemplate();
+				await pageObject.focusProductCollection();
 				await editor.openDocumentSettingsSidebar();
 
 				const sidebarSettings =
@@ -515,6 +516,7 @@ test.describe( 'Product Collection', () => {
 				// First Product Catalog
 				// Option should be visible & ENABLED by default
 				await pageObject.goToEditorTemplate();
+				await pageObject.focusProductCollection();
 				await editor.openDocumentSettingsSidebar();
 
 				const sidebarSettings =
@@ -787,6 +789,8 @@ test.describe( 'Product Collection', () => {
 			pageObject,
 		} ) => {
 			await pageObject.goToEditorTemplate();
+			await pageObject.focusProductCollection();
+			await pageObject.clickDisplaySettings();
 
 			const sidebarSettings = await pageObject.locateSidebarSettings();
 			const input = sidebarSettings.locator(
@@ -1132,6 +1136,7 @@ test.describe( 'Product Collection', () => {
 				pageObject,
 			} ) => {
 				await pageObject.goToEditorTemplate( path );
+				await pageObject.focusProductCollection();
 
 				const previewButtonLocator = editor.canvas.locator(
 					'button[data-test-id="product-collection-preview-button"]'
