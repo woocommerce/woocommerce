@@ -36,6 +36,10 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 
 		await page.goto( baseURL );
 
+		await page
+			.locator( '.woocommerce-coming-soon-banner' )
+			.waitFor( { state: 'visible' } );
+
 		await expect(
 			page.getByText(
 				"Pardon our dust! We're working on something amazing — check back soon!"

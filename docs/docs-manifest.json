@@ -97,7 +97,7 @@
           "post_title": "Customizing checkout fields using actions and filters",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/customising-checkout-fields.md",
-          "hash": "3b0ce072c92206279fc6d49f3aa4cb0e4fbc2da71a2a5f0ffada81c030c397df",
+          "hash": "8bbfe162402e484ae89427e1aedaed4faa57555b64b5a77ca800f701524314cb",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/customising-checkout-fields.md",
           "id": "83097d3b7414557fc80dcf9f8f1a708bbdcdd884"
         },
@@ -666,9 +666,35 @@
           "menu_title": "Payment Gateway API",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/payments/payment-gateway-api.md",
-          "hash": "812b0beff6b99ca3ac54a896be7daf3c2baca79cc0ba6caa6010c5563c97bd8f",
+          "hash": "f199d04a262bac32d1e22eb3f8410d5c30f10fa86cbb303d4149363a44dc3562",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/payments/payment-gateway-api.md",
           "id": "b337203996650b567f91c70306e1010d6f1ae552"
+        }
+      ],
+      "categories": []
+    },
+    {
+      "content": "\nThis section is dedicated to providing you with guides and best practices to optimize the performance of WooCommerce stores and extensions. Whether you're a store developer looking to enhance your site's speed and efficiency or an extension developer aiming to ensure your products contribute positively to store performance, you'll find valuable resources here to assist you.\n",
+      "category_slug": "performance",
+      "category_title": "Performance",
+      "posts": [
+        {
+          "post_title": "How to optimize performance for WooCommerce stores",
+          "menu_title": "Optimize store performance",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/performance/performance-optimization.md",
+          "hash": "25588fe2fab942f8db82a47d98594a3b0b6f35748185719b5c3b453876a9714b",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/performance/performance-optimization.md",
+          "id": "7294890af7805de703ce7b3d4b55d3c56ff39186"
+        },
+        {
+          "post_title": "WooCommerce performance best practices",
+          "menu_title": "Performance best practices",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/performance/performance-best-practices.md",
+          "hash": "5af1f4e4085e85a1693390f40e238cbd6a4a0b7d5d304afdda935c34fed97c64",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/performance/performance-best-practices.md",
+          "id": "35bda1cd7068d6179a9e46cca8d7dc2694d0df96"
         }
       ],
       "categories": []
@@ -1323,5 +1349,5 @@
       "categories": []
     }
   ],
-  "hash": "4a7c8981de659b226972039904b0c41aa9451f7501ffd52f0c216084cdf093b6"
+  "hash": "1579358bdc138f095c65a591f1e4e8ad32529375fff451d3f06e1deeeb035956"
 }

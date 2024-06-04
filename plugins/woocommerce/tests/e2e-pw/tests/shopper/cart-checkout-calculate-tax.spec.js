@@ -960,7 +960,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 					.getByRole( 'textbox', { name: 'ZIP Code *' } )
 					.type( customer.billing.us.zip );
 				await page
-					.getByRole( 'textbox', { name: 'Phone *' } )
+					.getByLabel( 'Phone *' )
 					.fill( customer.billing.us.phone );
 				await page
 					.getByLabel( 'Email address *' )

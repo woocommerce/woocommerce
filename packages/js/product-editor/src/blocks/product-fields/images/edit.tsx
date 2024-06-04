@@ -270,7 +270,7 @@ export function ImageBlockEdit( {
 					) ) }
 				</ImageGallery>
 			) : (
-				<PlaceHolder />
+				<PlaceHolder multiple={ multiple } />
 			) }
 		</div>
 	);

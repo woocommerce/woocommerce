@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Button } from '@wordpress/components';
 /**
  * Internal dependencies
@@ -33,7 +33,7 @@ export const Navigation = ( {
 }: NavigationProps ) => {
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'woocommerce-profiler-navigation-container',
 				classNames
 			) }
@@ -58,7 +58,7 @@ export const Navigation = ( {
 					{ typeof onSkip === 'function' && (
 						<Button
 							onClick={ onSkip }
-							className={ classnames(
+							className={ clsx(
 								'woocommerce-profiler-navigation-skip-link',
 								classNames.mobile ? 'mobile' : ''
 							) }

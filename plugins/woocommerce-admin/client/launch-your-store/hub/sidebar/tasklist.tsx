@@ -7,7 +7,7 @@ import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import { resolveSelect } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
-import classnames from 'classnames';
+import clsx from 'clsx';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 
@@ -118,7 +118,7 @@ export const CompletedTaskItem: React.FC< {
 	classNames?: string;
 } > = ( { task, classNames } ) => (
 	<SidebarNavigationItem
-		className={ classnames( task.id, 'is-complete', classNames ) }
+		className={ clsx( task.id, 'is-complete', classNames ) }
 		icon={ taskCompleteIcon }
 		disabled={ true }
 	>
@@ -132,7 +132,7 @@ export const IncompleteTaskItem: React.FC< {
 	onClick: () => void;
 } > = ( { task, classNames, onClick } ) => (
 	<SidebarNavigationItem
-		className={ classnames( task.id, classNames ) }
+		className={ clsx( task.id, classNames ) }
 		icon={ taskIcons[ task.id ] }
 		withChevron
 		onClick={ onClick }
