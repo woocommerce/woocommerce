@@ -144,6 +144,19 @@ const fetchIsFontLibraryAvailable = async () => {
 	}
 };
 
+const fetchIsPTKPatternsAPIAvailable = async () => {
+	try {
+		await apiFetch( {
+			path: '/wc/private/patterns',
+			method: 'GET',
+		} );
+
+		return true;
+	} catch ( err ) {
+		return false;
+	}
+};
+
 export const setFlags = async () => {
 	if ( ! isIframe( window ) ) {
 		// To improve the readability of the code, we want to use a dictionary
@@ -158,6 +171,14 @@ export const setFlags = async () => {
 				window.__wcCustomizeStore = {
 					...window.__wcCustomizeStore,
 					isFontLibraryAvailable,
+				};
+			} )(),
+			PTK_PATTERNS_API_AVAILABLE: ( async () => {
+				const isPTKPatternsAPIAvailable =
+					await fetchIsPTKPatternsAPIAvailable();
+				window.__wcCustomizeStore = {
+					...window.__wcCustomizeStore,
+					isPTKPatternsAPIAvailable,
 				};
 			} )(),
 		};
