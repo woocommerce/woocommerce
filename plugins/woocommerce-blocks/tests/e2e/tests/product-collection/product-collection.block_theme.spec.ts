@@ -1140,11 +1140,7 @@ test.describe( 'Product Collection', () => {
 		];
 
 		genericArchiveTemplates.forEach( ( { name, path } ) => {
-			test( `${ name } template`, async ( {
-				page,
-				editor,
-				pageObject,
-			} ) => {
+			test( `${ name } template`, async ( { editor, pageObject } ) => {
 				await pageObject.goToEditorTemplate( path );
 				await pageObject.focusProductCollection();
 
