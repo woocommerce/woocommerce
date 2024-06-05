@@ -59,7 +59,7 @@ function findBetterMatchTemplate( matchingTemplates: ProductTemplate[] ) {
 
 export const useProductTemplate = (
 	productTemplateId: string | undefined,
-	product: Partial< Product > | undefined | null
+	product: Partial< Product > | null
 ) => {
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];

@@ -176,7 +176,7 @@ export function BlockEditor( {
 		};
 	}, [ settingsGlobal ] );
 
-	const { editedRecord: product } = useEntityRecord< Product >(
+	const { editedRecord: product, hasResolved } = useEntityRecord< Product >(
 		'postType',
 		postType,
 		productId,
@@ -195,15 +195,11 @@ export function BlockEditor( {
 
 	const { productTemplate } = useProductTemplate(
 		productTemplateId,
-		product
+		hasResolved ? product : null
 	);
 
-	const isProductLoaded = product && Object.keys( product ).length > 0;
-
 	const { layoutTemplate } = useLayoutTemplate(
-		isProductLoaded
-			? getLayoutTemplateId( productTemplate, postType )
-			: undefined
+		hasResolved ? getLayoutTemplateId( productTemplate, postType ) : null
 	);
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
