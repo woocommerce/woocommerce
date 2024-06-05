@@ -65,8 +65,8 @@
 
     var namespace = slider.vars.namespace,
         touch = (( "ontouchstart" in window ) || window.DocumentTouch && document instanceof DocumentTouch) && slider.vars.touch,
-        // deprecating this idea, as devices are being released with both of these events
-        eventType = "click touchend keyup",
+        // we add a custom event so we can differentiate manually triggering events when needed.
+        eventType = "click touchend keyup flexslider-click",
         watchedEvent = "",
         watchedEventClearTimer,
         easing = easings[slider.vars.easing] || "ease",
@@ -301,7 +301,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -326,7 +326,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -379,7 +379,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -433,7 +433,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
