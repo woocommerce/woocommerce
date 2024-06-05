@@ -20,7 +20,7 @@ export const ThemeCard = ( {
 	link_url = '',
 	is_active = false,
 	is_free,
-	price = 'Free',
+	price,
 	onClick,
 }: TypeThemeCard & {
 	onClick: () => void;
