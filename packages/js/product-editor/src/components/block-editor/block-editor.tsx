@@ -40,6 +40,8 @@ import {
 	useEntityRecord,
 } from '@wordpress/core-data';
 
+const isProductEditorTemplateSystemEnabled =
+	window.wcAdminFeatures[ 'product-editor-template-system' ];
 /**
  * Internal dependencies
  */
@@ -49,8 +51,8 @@ import { PostTypeContext } from '../../contexts/post-type-context';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
-import { ProductTemplate } from '../../types';
 import { LoadingState } from './loading-state';
+import type { ProductFormTemplateProps, ProductTemplate } from '../../types';
 
 const PluginArea = lazy( () =>
 	import( '@wordpress/plugins' ).then( ( module ) => ( {
@@ -86,6 +88,8 @@ export function BlockEditor( {
 	productId,
 	setIsEditorLoading,
 }: BlockEditorProps ) {
+	const [ , setSelectedProductFormId ] = useState< number | null >( null );
+
 	useConfirmUnsavedProductChanges( postType );
 
 	/**
@@ -208,6 +212,25 @@ export function BlockEditor( {
 		// useEntityBlockEditor will not try to fetch the product if productId is falsy.
 		{ id: productId !== -1 ? productId : 0 }
 	);
+
+	// Pull the product templates from the store.
+	const productForms = useSelect( ( sel ) => {
+		if ( ! isProductEditorTemplateSystemEnabled ) {
+			return [];
+		}
+
+		return sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
+			per_page: -1,
+		} );
+	}, [] ) as ProductFormTemplateProps[];
+
+	// Set the defailt product form template id.
+	useEffect( () => {
+		if ( ! productForms.length ) {
+			return;
+		}
+		setSelectedProductFormId( productForms[ 0 ].id );
+	}, [ productForms ] );
 
 	const isEditorLoading =
 		! settings ||
