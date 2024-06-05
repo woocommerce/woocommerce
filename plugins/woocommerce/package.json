@@ -291,8 +291,7 @@
 					"changes": [],
 					"events": [
 						"nightly-checks",
-						"release-checks",
-						"nightly-checks"
+						"release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
