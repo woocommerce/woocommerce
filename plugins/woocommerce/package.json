@@ -265,7 +265,8 @@
 					],
 					"changes": [],
 					"events": [
-						"daily-e2e", "release-checks"
+						"daily-e2e",
+						"release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -284,7 +285,9 @@
 					],
 					"changes": [],
 					"events": [
-						"daily-e2e", "release-checks", "nightly-checks"
+						"daily-e2e", 
+						"release-checks", 
+						"nightly-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -297,7 +300,8 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-e2e", "release-checks"
+						"daily-e2e", 
+						"release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -310,7 +314,8 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-e2e", "release-checks"
+						"daily-e2e", 
+						"release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -323,7 +328,8 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-e2e", "release-checks"
+						"daily-e2e",
+						"release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -341,7 +347,8 @@
 						"--shard=5/5"
 					],
 					"events": [
-						"push", "release-checks"
+						"push", 
+						"release-checks"
 					],
 					"changes": [
 						"client/admin/config/*.json",
