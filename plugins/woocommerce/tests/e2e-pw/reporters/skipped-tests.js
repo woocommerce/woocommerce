@@ -20,7 +20,7 @@ class SkippedReporter {
 		if ( this.skippedTests.length > 0 ) {
 			// Output a GitHub Actions annotation
 			console.log(
-				`::warning title=Skipped Tests::${ skippedTestsMessage }`
+				`::error title=Skipped Tests::${ skippedTestsMessage }`
 			);
 		}
 	}
