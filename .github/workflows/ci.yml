@@ -5,6 +5,8 @@ on:
         branches:
             - 'trunk'
             - 'release/*'
+        tags:
+          - '*'
     workflow_call:
         inputs:
             trigger:
@@ -54,6 +56,18 @@ jobs:
                       }
 
                       let githubEvent = ${{ toJson( github.event_name ) }};
+                    
+                      const refType = ${{ toJson( github.ref_type ) }};
+                      const refName = ${{ toJson( github.ref_name ) }};
+                    
+                      if ( refType === 'tag' && refName !== 'nightly' ) {
+                        githubEvent = 'release-checks';
+                      }
+                    
+                      if ( refType === 'tag' && refName === 'nightly' ) {
+                        githubEvent = 'nightly-checks';
+                      }
+                    
                       let trigger = ${{ toJson( inputs.trigger ) }};
 
                       if ( trigger ) {
@@ -127,11 +141,19 @@ jobs:
               name: 'Checkout'
 
             - uses: './.github/actions/setup-woocommerce-monorepo'
-              name: 'Setup Monorepo'
-              id: 'setup-monorepo'
+              name: 'Install Monorepo'
+              id: 'install-monorepo'
               with:
                   install: '${{ matrix.projectName }}...'
-                  build: '${{ matrix.projectName }}'
+                  build: 'false'
+                  
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              if: ${{ github.ref_type != 'tag' }}
+              name: 'Build project'
+              id: 'build-project'
+              with:
+                install: 'false'
+                build: ${{ matrix.projectName }}
 
             - name: Get commit message
               id: get_commit_message
@@ -148,6 +170,14 @@ jobs:
                   fi
                   echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
               shell: bash
+              
+            - name: 'Update wp-env config'
+              if: ${{ github.ref_type == 'tag' }}
+              env:
+                  RELEASE_TAG: ${{ github.ref_name }}
+                  ARTIFACT_NAME: ${{ github.ref_name == 'nightly' && 'woocommerce-trunk-nightly.zip' || 'woocommerce.zip' }}
+              working-directory: ${{ matrix.projectPath }}
+              run: node ./tests/e2e-pw/bin/override-wp-env-plugins.js
 
             - name: 'Start Test Environment'
               id: 'prepare-test-environment'
