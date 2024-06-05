@@ -67,12 +67,6 @@ jobs:
                       if ( refType === 'tag' && refName === 'nightly' ) {
                         githubEvent = 'nightly-checks';
                       }
-                    
-                      let trigger = ${{ toJson( inputs.trigger ) }};
-
-                      if ( trigger ) {
-                        githubEvent = trigger;
-                      }
 
                       const child_process = require( 'node:child_process' );
                       child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
