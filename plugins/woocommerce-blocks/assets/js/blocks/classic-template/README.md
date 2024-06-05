@@ -18,7 +18,7 @@ The Classic Template block is a placeholder block for specific WooCommerce block
 - `Product Search Results (Classic)`,
 - `Product Grid (Classic)`.
 
-![Classic Template Block Single Product](./assets/doc-image-single-product-classic-block.png)
+![Classic Template block in the Single Product template](https://github.com/woocommerce/woocommerce/assets/3616980/c996d4e8-8839-4542-b6a3-9f01627c482d)
 
 When the Classic Template block is clicked, a button appears to 'Transform into blocks'. Clicking it updates the template so it's composed of more granular blocks. That's what we commonly refer to as the 'blockified template'. The blockified template has several advantages over using the Classic Template block, like allowing users to hide some blocks from the template, changing their order or making more granular modifications.
 
