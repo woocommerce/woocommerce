@@ -124,7 +124,7 @@ class Users {
 	 */
 	public static function get_site_user_meta( int $user_id, string $key = '', bool $single = false ) {
 		global $wpdb;
-		$site_specific_key = $key . '_' . rtrim( $wpdb->get_blog_prefix(), '_' );
+		$site_specific_key = $key . '_' . rtrim( $wpdb->get_blog_prefix( get_current_blog_id() ), '_' );
 		return get_user_meta( $user_id, $site_specific_key, true );
 	}
 
