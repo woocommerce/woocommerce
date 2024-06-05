@@ -59,7 +59,7 @@ The majority of our feature flagging is blocks, this is a list of them:
 - Product Filter: Rating (Experimental)
     - [PHP flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce/src/Blocks/BlockTypesController.php#L306)
     - [Webpack flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/bin/webpack-entries.js#L114)
-    - JS flag - lack
+    - [JS flag](https://github.com/woocommerce/woocommerce/blob/bad0b61a83c5e86703a985deaab67cbb3a88a06d/plugins/woocommerce-blocks/assets/js/blocks/product-filter/inner-blocks/rating-filter/index.tsx#L14)
 - Product Filter: Stock Status (Experimental)
     - [PHP flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce/src/Blocks/BlockTypesController.php#L303)
     - [Webpack flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/bin/webpack-entries.js#L101)
