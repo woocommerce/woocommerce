@@ -1190,6 +1190,11 @@ describe( 'Job Processing', () => {
 					},
 					optional: false,
 					testType: 'e2e',
+					report: {
+						resultsBlobName: '',
+						resultsPath: '',
+						allureResultsPath: '',
+					},
 				},
 				{
 					type: JobType.Test,
@@ -1249,6 +1254,11 @@ describe( 'Job Processing', () => {
 						},
 						optional: false,
 						testType: 'e2e',
+						report: {
+							resultsBlobName: '',
+							resultsPath: '',
+							allureResultsPath: '',
+						},
 					},
 					{
 						type: JobType.Test,

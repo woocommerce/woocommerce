@@ -298,6 +298,26 @@ interface TestEnvConfig {
 }
 
 /**
+ * The configuration of a report.
+ */
+interface ReportConfig {
+	/**
+	 * The name of the artifact to be uploaded.
+	 */
+	resultsBlobName: string;
+
+	/**
+	 * The path to the results that will be uploaded under the resultsBlobName name.
+	 */
+	resultsPath: string;
+
+	/**
+	 * The path to the allure results inside the resultsPath.
+	 */
+	allureResultsPath: string;
+}
+
+/**
  * The configuration of a test job.
  */
 export interface TestJobConfig extends BaseJobConfig {
@@ -330,6 +350,11 @@ export interface TestJobConfig extends BaseJobConfig {
 	 * The key(s) to use when identifying what jobs should be triggered by a cascade.
 	 */
 	cascadeKeys?: string[];
+
+	/**
+	 * The configuration for the report if one is needed.
+	 */
+	report?: ReportConfig;
 }
 
 /**
@@ -407,6 +432,45 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		config.testEnv = {
 			start: raw.testEnv.start,
 			config: parseTestEnvConfigVars( raw.testEnv.config ),
+		};
+	}
+
+	if ( raw.report ) {
+		if ( typeof raw.report !== 'object' ) {
+			throw new ConfigError( 'The "report" option must be an object.' );
+		}
+
+		if (
+			! raw.report.resultsBlobName ||
+			typeof raw.report.resultsBlobName !== 'string'
+		) {
+			throw new ConfigError(
+				'A string "resultsBlobName" option is required for report.'
+			);
+		}
+
+		if (
+			! raw.report.resultsPath ||
+			typeof raw.report.resultsPath !== 'string'
+		) {
+			throw new ConfigError(
+				'A string "resultsPath" option is required for report.'
+			);
+		}
+
+		if (
+			raw.report.allureResultsPath &&
+			typeof raw.report.allureResultsPath !== 'string'
+		) {
+			throw new ConfigError(
+				'A string "allureResultsPath" option is required for report.'
+			);
+		}
+
+		config.report = {
+			resultsBlobName: raw.report.resultsBlobName,
+			resultsPath: raw.report.resultsPath,
+			allureResultsPath: raw.report.allureResultsPath,
 		};
 	}
 

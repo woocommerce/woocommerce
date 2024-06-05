@@ -250,7 +250,12 @@
 						"pull_request",
 						"push",
 						"release-checks"
-					]
+					],
+					"report": {
+						"resultsBlobName": "all-blob-e2e-reports",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allureResultsPath": "allure-results"
+					}
 				},
 				{
 					"name": "Core e2e tests - Gutenberg stable",
@@ -431,7 +436,12 @@
 					"events": [
 						"pull_request",
 						"push"
-					]
+					],
+					"report": {
+						"resultsBlobName": "all-blob-api-reports",
+						"resultsPath": "tests/api-core-tests/test-results",
+						"allureResultsPath": "allure-results"
+					}
 				},
 				{
 					"name": "Core API tests - HPOS disabled",

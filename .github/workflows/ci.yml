@@ -161,8 +161,8 @@ jobs:
               if: ${{ always() }}
               uses: actions/upload-artifact@v4
               with:
-                name: all-blob-${{ matrix.testType }}-reports-${{ strategy.job-index }}
-                path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results
+                name: '${{ matrix.resultsBlobName }}-${{ strategy.job-index }}'
+                path: '${{ matrix.projectPath }}/${{ matrix.resultsPath }}'
                 retention-days: 1
                 compression-level: 9
 

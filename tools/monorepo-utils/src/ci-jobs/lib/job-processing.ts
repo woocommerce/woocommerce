@@ -31,6 +31,15 @@ interface TestJobEnv {
 }
 
 /**
+ * A testing job report.
+ */
+interface TestJobReport {
+	resultsBlobName: string;
+	resultsPath: string;
+	allureResultsPath: string;
+}
+
+/**
  * A testing job.
  */
 interface TestJob {
@@ -42,6 +51,7 @@ interface TestJob {
 	shardNumber: number;
 	optional: boolean;
 	testType: string;
+	report: TestJobReport;
 }
 
 /**
@@ -230,6 +240,7 @@ async function createTestJob(
 			shouldCreate: false,
 			envVars: {},
 		},
+		report: config.report,
 		shardNumber,
 		optional: config.optional,
 		testType: config.testType,
