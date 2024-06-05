@@ -84,9 +84,8 @@ const program = new Command( 'ci-jobs' )
 			Logger.notice( `Test Jobs` );
 			for ( const job of jobs.test ) {
 				const optional = job.optional ? ' (optional)' : '';
-				Logger.notice(
-					`-  ${ job.projectName } - [${ job.testType }] ${ job.name }${ optional }`
-				);
+				job.name = `${ job.name } - ${ job.projectName } [${ job.testType }]${ optional }`;
+				Logger.notice( `-  ${ job.name }` );
 			}
 		} else {
 			Logger.notice( `No test jobs to run.` );
