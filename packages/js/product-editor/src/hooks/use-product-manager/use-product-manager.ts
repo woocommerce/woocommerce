@@ -13,7 +13,7 @@ import { useValidations } from '../../contexts/validation-context';
 import type { WPError } from '../../utils/get-product-error-message';
 import { AUTO_DRAFT_NAME } from '../../utils/constants';
 
-function errorHandler( error: WPError, productStatus: ProductStatus ) {
+export function errorHandler( error: WPError, productStatus: ProductStatus ) {
 	if ( error.code ) {
 		return error;
 	}
@@ -107,6 +107,7 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			return savedProduct as T;
 		} catch ( error ) {
+			console.log( '----> save', error );
 			throw errorHandler( error as WPError, status );
 		} finally {
 			setIsSaving( false );

@@ -16,6 +16,7 @@ import { useValidations } from '../../../../contexts/validation-context';
 import { WPError } from '../../../../utils/get-product-error-message';
 import { useProductURL } from '../../../../hooks/use-product-url';
 import { PreviewButtonProps } from '../../preview-button';
+import { errorHandler } from '../../../../hooks/use-product-manager';
 
 export function usePreview( {
 	productStatus,
@@ -127,13 +128,9 @@ export function usePreview( {
 			}
 		} catch ( error ) {
 			if ( onSaveError ) {
-				let wpError = error as WPError;
-				if ( ! wpError.code ) {
-					wpError = {
-						code: 'product_preview_error',
-					} as WPError;
-				}
-				onSaveError( wpError );
+				onSaveError(
+					errorHandler( error as WPError, productStatus ) as WPError
+				);
 			}
 		}
 	}
