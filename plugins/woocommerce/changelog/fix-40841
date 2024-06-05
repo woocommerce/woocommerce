@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Add DISTINCT keyword for smaller response and performance.
