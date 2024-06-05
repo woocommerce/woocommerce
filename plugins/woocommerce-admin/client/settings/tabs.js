@@ -17,6 +17,7 @@ export const Tabs = ( { data, page, children } ) => {
 				activeClass="active-tab"
 				onSelect={ onSelect }
 				initialTabName={ page }
+				orientation="vertical"
 				tabs={ Object.keys( data ).map( ( key ) => ( {
 					name: key,
 					title: data[ key ].label,

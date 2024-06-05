@@ -14,7 +14,6 @@ import { SettingsCheckbox, SettingsInput } from './components';
 export const Content = ( { data } ) => {
 	const { settings } = data;
 	console.log( settings );
-	const [ formData, setFormData ] = useState( {} );
 	const [ isBusy, setIsBusy ] = useState( false );
 	const formRef = useRef( null );
 	const { createNotice } = useDispatch( 'core/notices' );
@@ -34,8 +33,6 @@ export const Content = ( { data } ) => {
 			}
 			data[ input.id || input.name ] = value;
 		} );
-
-		setFormData( data );
 
 		return data;
 	};

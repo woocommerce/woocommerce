@@ -14,9 +14,11 @@ import { possiblyRenderSettingsSlots } from './settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from '../payments/payments-settings-banner-slotfill';
 import { registerSiteVisibilitySlotFill } from '../launch-your-store';
+import { useFullScreen } from '~/utils';
 import './style.scss';
 
 const Settings = ( { params } ) => {
+	useFullScreen( [ 'woocommerce-settings' ] );
 	const settingsData = window.wcSettings?.admin?.settingsPages;
 	const { section } = getQuery();
 
@@ -37,6 +39,7 @@ const Settings = ( { params } ) => {
 	}
 
 	const sections = settingsData[ params.page ]?.sections;
+	const title = settingsData[ params.page ]?.label;
 	const contentData =
 		Array.isArray( sections ) && sections.length === 0
 			? {}
@@ -44,19 +47,24 @@ const Settings = ( { params } ) => {
 
 	return (
 		<>
-			<Tabs data={ settingsData } page={ params.page }>
-				<div className="woocommerce-settings-layout">
-					<div className="woocommerce-settings-section-nav">
-						<SectionNav
-							data={ settingsData[ params.page ] }
-							section={ section }
-						/>
-					</div>
-					<div className="woocommerce-settings-content">
-						<Content data={ contentData } />
-					</div>
+			<div className="woocommerce-settings-layout">
+				<div className="woocommerce-settings-layout-navigation">
+					<Tabs data={ settingsData } page={ params.page } />
 				</div>
-			</Tabs>
+				<div className="woocommerce-settings-layout-content">
+					<div className="woocommerce-settings-layout-title">
+						<h1>{ title }</h1>
+					</div>
+					<SectionNav
+						data={ settingsData[ params.page ] }
+						section={ section }
+					>
+						<div className="woocommerce-settings-layout-main">
+							<Content data={ contentData } />
+						</div>
+					</SectionNav>
+				</div>
+			</div>
 		</>
 	);
 };
