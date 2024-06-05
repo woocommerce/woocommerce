@@ -1133,7 +1133,11 @@ test.describe( 'Product Collection', () => {
 		];
 
 		genericArchiveTemplates.forEach( ( { name, path } ) => {
-			test( `${ name } template`, async ( { editor, pageObject } ) => {
+			test( `${ name } template`, async ( {
+				page,
+				editor,
+				pageObject,
+			} ) => {
 				await pageObject.goToEditorTemplate( path );
 				await pageObject.focusProductCollection();
 
@@ -1145,7 +1149,7 @@ test.describe( 'Product Collection', () => {
 				await expect( previewButtonLocator ).toBeVisible();
 
 				// The preview button should be hidden when the block is not selected
-				await editor.canvas.locator( 'body' ).click();
+				await page.click( 'body' );
 				await expect( previewButtonLocator ).toBeHidden();
 
 				// Preview button should be visible when any of inner block is selected
