@@ -85,7 +85,9 @@ const transformIntoBlocks = async ( page ) => {
 };
 
 const publishPage = async ( page, pageTitle ) => {
-	await page.getByRole( 'button', { name: 'Publish', exact: true } ).click();
+	await page
+		.getByRole( 'button', { name: 'Publish', exact: true } )
+		.dispatchEvent( 'click' );
 	await page
 		.getByRole( 'region', { name: 'Editor publish' } )
 		.getByRole( 'button', { name: 'Publish', exact: true } )
