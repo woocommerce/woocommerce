@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 8.9.2 2024-06-03 =
+
+**WooCommerce**
+
+
+
 = 8.9.1 2024-05-21 =
 
 **WooCommerce**
