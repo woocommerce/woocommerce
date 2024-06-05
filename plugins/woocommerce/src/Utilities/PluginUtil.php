@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Utilities;
 
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\PluginInstaller;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -189,13 +190,12 @@ class PluginUtil {
 	 * the Legacy REST API and HPOS are active.
 	 *
 	 * @param string $feature_id Feature id.
-	 * @param array  $plugin_feature_info Array of plugin feature info. See FeaturesControllers->get_compatible_plugins_for_feature() for details.
+	 * @param array  $plugin_feature_info Array of plugin feature info, as provided by FeaturesController->get_compatible_plugins_for_feature().
 	 *
 	 * @return string Warning string.
 	 */
 	public function generate_incompatible_plugin_feature_warning( string $feature_id, array $plugin_feature_info ): string {
-		$feature_warning    = '';
-		$incompatibles      = array_merge( $plugin_feature_info['incompatible'], $plugin_feature_info['uncertain'] );
+		$incompatibles      = $this->get_plugins_considered_incompatible($plugin_feature_info);
 		$incompatibles      = array_filter( $incompatibles, 'is_plugin_active' );
 		$incompatibles      = array_values( array_diff( $incompatibles, $this->get_plugins_excluded_from_compatibility_ui() ) );
 		$incompatible_count = count( $incompatibles );
@@ -279,6 +279,20 @@ class PluginUtil {
 		return str_replace( "\n", '<br>', implode( "\n", $feature_warnings ) );
 	}
 
+    /**
+     * Filter a plugin  compatibility info for a feature, returning the names of the plugins that are considered incompatible.
+     * Uncertain plugins will be included or not depending on the value of the FeaturesController::PLUGINS_INCOMPATIBLE_BY_DEFAULT_OPTION setting.
+     *
+     * @param array $compatibility_info Array of plugin feature info, as provided by FeaturesController->get_compatible_plugins_for_feature().
+     * @return array List of plugin file names.
+     */
+    public function get_plugins_considered_incompatible(array $compatibility_info): array {
+        return
+            $this->plugins_are_incompatible_with_features_by_default() ?
+                array_merge( $compatibility_info['incompatible'], $compatibility_info['uncertain'] ) :
+                $compatibility_info['incompatible'];
+    }
+
 	/**
 	 * Get the names of the plugins that are excluded from the feature compatibility UI.
 	 * These plugins won't be considered as incompatible with any existing feature for the purposes
@@ -289,4 +303,14 @@ class PluginUtil {
 	public function get_plugins_excluded_from_compatibility_ui() {
 		return $this->plugins_excluded_from_compatibility_ui;
 	}
+
+    /**
+     * Gets a value indicating if uncertain plugins are considered as incompatible with a given feature or not.
+     * "Uncertain" plugins are those that don't explicitly declare themselves as compatible nor incompatible with the feature.
+     *
+     * @return bool True if uncertain plugins are considered as incompatible with each feature.
+     */
+    public function plugins_are_incompatible_with_features_by_default() {
+        return 'yes' === get_option(FeaturesController::PLUGINS_INCOMPATIBLE_BY_DEFAULT_OPTION);
+    }
 }

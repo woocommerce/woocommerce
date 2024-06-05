@@ -26,6 +26,8 @@ class FeaturesController {
 
 	public const FEATURE_ENABLED_CHANGED_ACTION = 'woocommerce_feature_enabled_changed';
 
+	public const PLUGINS_INCOMPATIBLE_BY_DEFAULT_OPTION = 'woocommerce_plugins_are_incompatible_with_features_by_default';
+
 	/**
 	 * The existing feature definitions.
 	 *
@@ -476,7 +478,7 @@ class FeaturesController {
 	 *
 	 * @param string $feature_id Feature id.
 	 * @param bool   $active_only True to return only active plugins.
-	 * @return array An array having a 'compatible' and an 'incompatible' key, each holding an array of plugin names.
+	 * @return array An array having a 'compatible', an 'incompatible' and an 'uncertain' key, each holding an array of plugin names.
 	 */
 	public function get_compatible_plugins_for_feature( string $feature_id, bool $active_only = false ): array {
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
@@ -661,6 +663,23 @@ class FeaturesController {
 		}
 
 		$feature_settings = array(
+			array(
+				'title' => __( 'General', 'woocommerce' ),
+				'type'  => 'title',
+				'desc'  => __( 'Settings in this section apply to all the existing WooCommerce features.', 'woocommerce' ),
+				'id'    => 'features_general_settings',
+			),
+			array(
+				'title'   => __( 'Incompatible by default', 'woocommerce' ),
+				'type'    => 'checkbox',
+				'desc'    => __( 'Plugins that don\'t declare compatibility nor incompatibility with a given feature will be considered incompatible with the feature.', 'woocommerce' ),
+				'id'      => self::PLUGINS_INCOMPATIBLE_BY_DEFAULT_OPTION,
+				'default' => 'no',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'features_general_settings',
+			),
 			array(
 				'title' => __( 'Features', 'woocommerce' ),
 				'type'  => 'title',
@@ -884,7 +903,7 @@ class FeaturesController {
 	 *
 	 * @param array $plugin_list The original list of plugins.
 	 */
-	private function filter_plugins_list( $plugin_list ): array {
+	public function filter_plugins_list( $plugin_list ): array {
 		if ( ! $this->verify_did_woocommerce_init() ) {
 			return $plugin_list;
 		}
@@ -910,7 +929,7 @@ class FeaturesController {
 	 *
 	 * @return array List of plugins incompatible with the given feature.
 	 */
-	private function get_incompatible_plugins( $feature_id, $plugin_list ) {
+	public function get_incompatible_plugins( $feature_id, $plugin_list ) {
 		$incompatibles = array();
 
 		$plugin_list = array_diff_key( $plugin_list, array_flip( $this->plugins_excluded_from_compatibility_ui ) );
@@ -921,11 +940,11 @@ class FeaturesController {
 				continue;
 			}
 
-			$compatibility     = $this->get_compatible_features_for_plugin( $plugin_name );
-			$incompatible_with = array_filter(
-				array_merge( $compatibility['incompatible'], $compatibility['uncertain'] ),
+			$compatibility_info = $this->get_compatible_features_for_plugin( $plugin_name );
+			$incompatible_with  = array_filter(
+				$this->plugin_util->get_plugins_considered_incompatible( $compatibility_info ),
 				function ( $feature_id ) {
-					return ! $this->is_legacy_feature( $feature_id );
+					return $this->feature_is_enabled( $feature_id ) && ! $this->is_legacy_feature( $feature_id );
 				}
 			);
 
@@ -965,9 +984,9 @@ class FeaturesController {
 		$relevant_plugins     = array_diff( $this->plugin_util->get_woocommerce_aware_plugins( true ), $this->plugins_excluded_from_compatibility_ui );
 
 		foreach ( $relevant_plugins as $plugin ) {
-			$compatibility     = $this->get_compatible_features_for_plugin( $plugin, true );
-			$incompatible_with = array_filter(
-				array_merge( $compatibility['incompatible'], $compatibility['uncertain'] ),
+			$compatibility_info = $this->get_compatible_features_for_plugin( $plugin, true );
+			$incompatible_with  = array_filter(
+				$this->plugin_util->get_plugins_considered_incompatible( $compatibility_info ),
 				function ( $feature_id ) {
 					return ! $this->is_legacy_feature( $feature_id );
 				}

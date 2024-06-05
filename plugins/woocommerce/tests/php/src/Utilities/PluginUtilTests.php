@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Utilities;
 
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
@@ -123,23 +124,23 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 		$this->reset_legacy_proxy_mocks();
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_plugins' => function() {
+				'get_plugins' => function () {
 					return array(
 						'woocommerce/woocommerce.php' => array( 'WC tested up to' => '1.0' ),
-						'jetpack/jetpack.php' => array( 'foo' => 'bar' ),
+						'jetpack/jetpack.php'         => array( 'foo' => 'bar' ),
 						'classic-editor/classic-editor.php' => array( 'foo' => 'bar' ),
 					);
 				},
 			)
 		);
 
-		// Unix style
+		// Unix style.
 		$this->assertEquals( 'woocommerce/woocommerce.php', $this->sut->get_wp_plugin_id( 'woocommerce/woocommerce.php' ) );
 		$this->assertEquals( 'woocommerce/woocommerce.php', $this->sut->get_wp_plugin_id( '6.9.2/woocommerce.php' ) );
 		$this->assertEquals( 'woocommerce/woocommerce.php', $this->sut->get_wp_plugin_id( '/srv/htdocs/woocommerce/latest/woocommerce.php' ) );
 		$this->assertEquals( 'woocommerce/woocommerce.php', $this->sut->get_wp_plugin_id( '../../../../wordpress/plugins/woocommerce/latest/woocommerce.php' ) );
 
-		// Windows style
+		// Windows style.
 		$this->assertEquals( 'woocommerce/woocommerce.php', $this->sut->get_wp_plugin_id( 'woocommerce\\woocommerce.php' ) );
 		$this->assertEquals( 'woocommerce/woocommerce.php', $this->sut->get_wp_plugin_id( '6.9.2\\woocommerce.php' ) );
 		$this->assertEquals( 'woocommerce/woocommerce.php', $this->sut->get_wp_plugin_id( 'D:\\WordPress\\plugins\\woocommerce\\6.9.2\\woocommerce.php' ) );
@@ -155,7 +156,7 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 	private function mock_plugin_functions() {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_plugins'      => function() {
+				'get_plugins'      => function () {
 					return array(
 						'woo_aware_1'     => array( 'WC tested up to' => '1.0' ),
 						'woo_aware_2'     => array( 'WC tested up to' => '2.0' ),
@@ -164,10 +165,10 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 						'not_woo_aware_2' => array( 'foo' => 'bar' ),
 					);
 				},
-				'is_plugin_active' => function( $plugin_name ) {
+				'is_plugin_active' => function ( $plugin_name ) {
 					return 'woo_aware_3' !== $plugin_name;
 				},
-				'get_plugin_data'  => function( $plugin_name ) {
+				'get_plugin_data'  => function ( $plugin_name ) {
 					return StringUtil::ends_with( $plugin_name, 'woo_aware_1' ) ?
 						array(
 							'WC tested up to' => '1.0',
@@ -177,5 +178,51 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 				},
 			)
 		);
+	}
+
+	/**
+	 * @testdox Test the `get_incompatible_plugins_for_feature` method.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $incompatible_by_default True if the setting for considering uncertain plugins as incompatible is set.
+	 */
+	public function test_get_incompatible_plugins_for_feature( bool $incompatible_by_default ) {
+		update_option( FeaturesController::PLUGINS_INCOMPATIBLE_BY_DEFAULT_OPTION, $incompatible_by_default ? 'yes' : 'no' );
+
+		$plugin_compatibility_info = array(
+			'compatible'   => array(
+				'compatible_1.php',
+				'compatible_2.php',
+			),
+			'incompatible' => array(
+				'incompatible_1.php',
+				'incompatible_2.php',
+			),
+			'uncertain'    => array(
+				'uncertain_1.php',
+				'uncertain_2.php',
+			),
+		);
+
+		$expected =
+			$incompatible_by_default ?
+			array(
+				'incompatible_1.php',
+				'incompatible_2.php',
+				'uncertain_1.php',
+				'uncertain_2.php',
+			) : array(
+				'incompatible_1.php',
+				'incompatible_2.php',
+			);
+
+		$actual = $this->sut->get_plugins_considered_incompatible( $plugin_compatibility_info );
+		delete_option( FeaturesController::PLUGINS_INCOMPATIBLE_BY_DEFAULT_OPTION, $incompatible_by_default ? 'yes' : 'no' );
+
+		sort( $actual );
+		sort( $expected );
+		$this->assertEquals( $expected, $actual );
 	}
 }
