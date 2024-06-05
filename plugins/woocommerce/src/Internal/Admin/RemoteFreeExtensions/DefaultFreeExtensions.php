@@ -918,12 +918,24 @@ class DefaultFreeExtensions {
 			),
 		);
 
-		// Copy shipping for the core-profiler and remove is_visible conditions, except for the country restriction.
-		$_plugins['woocommerce-services:shipping']['is_visible'] = array( // TODO ?
+		/*
+		 * Copy shipping for the core-profiler and remove is_visible conditions, except for the country restriction
+		 * and the requirement for WooCommerce Shipping to not be active.
+		 */
+		$_plugins['woocommerce-services:shipping']['is_visible'] = array(
 			array(
 				'type'      => 'base_location_country',
 				'value'     => 'US',
 				'operation' => '=',
+			),
+			array(
+				'type'    => 'not',
+				'operand' => array(
+					array(
+						'type'    => 'plugins_activated',
+						'plugins' => array( 'woocommerce-shipping' ),
+					),
+				),
 			),
 		);
 
@@ -938,7 +950,10 @@ class DefaultFreeExtensions {
 						return array_filter(
 							$rule['operand'],
 							function ( $operand ) {
-								return 'plugins_activated' !== $operand['type'];
+								// Ignore "plugin_activated" rules except for WooCommerce Shipping and WooCommerce Tax.
+								return 'plugins_activated' !== $operand['type'] ||
+								       in_array( 'woocommerce-shipping', $operand['plugins'] ) ||
+								       in_array( 'woocommerce-tax', $operand['plugins'] );
 							}
 						);
 					},
