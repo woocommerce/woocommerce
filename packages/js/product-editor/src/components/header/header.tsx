@@ -253,6 +253,7 @@ export function Header( {
 					{ ! isVariation && (
 						<SaveDraftButton
 							productType={ productType }
+							visibleTab={ visibleTab }
 							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 							// @ts-ignore - Prop is not typed correctly.
 							productStatus={ lastPersistedProduct?.status }

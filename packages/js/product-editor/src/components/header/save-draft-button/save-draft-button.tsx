@@ -11,7 +11,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getProductErrorMessage } from '../../../utils/get-product-error-message';
+import { getProductErrorMessageAndProps } from '../../../utils/get-product-error-message';
 import { recordProductEvent } from '../../../utils/record-product-event';
 import { useSaveDraft } from '../hooks/use-save-draft';
 import { SaveDraftButtonProps } from './types';
@@ -20,6 +20,7 @@ import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
 export function SaveDraftButton( {
 	productStatus,
 	productType = 'product',
+	visibleTab = 'general',
 	...props
 }: SaveDraftButtonProps ) {
 	const { createSuccessNotice, createErrorNotice } =
@@ -46,8 +47,11 @@ export function SaveDraftButton( {
 			}
 		},
 		onSaveError( error ) {
-			const message = getProductErrorMessage( error );
-			createErrorNotice( message );
+			const { message, errorProps } = getProductErrorMessageAndProps(
+				error,
+				visibleTab
+			);
+			createErrorNotice( message, errorProps );
 		},
 	} );
 

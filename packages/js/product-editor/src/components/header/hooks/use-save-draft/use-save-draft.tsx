@@ -18,6 +18,7 @@ import { useValidations } from '../../../../contexts/validation-context';
 import { WPError } from '../../../../utils/get-product-error-message';
 import { SaveDraftButtonProps } from '../../save-draft-button';
 import { recordProductEvent } from '../../../../utils/record-product-event';
+import { errorHandler } from '../../../../hooks/use-product-manager';
 
 export function useSaveDraft( {
 	productStatus,
@@ -106,7 +107,9 @@ export function useSaveDraft( {
 			}
 		} catch ( error ) {
 			if ( onSaveError ) {
-				onSaveError( error as WPError );
+				onSaveError(
+					errorHandler( error as WPError, productStatus ) as WPError
+				);
 			}
 		}
 	}
