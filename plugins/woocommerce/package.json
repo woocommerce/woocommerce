@@ -285,8 +285,8 @@
 					],
 					"changes": [],
 					"events": [
-						"daily-e2e", 
-						"release-checks", 
+						"daily-e2e",
+						"release-checks",
 						"nightly-checks"
 					],
 					"testEnv": {
@@ -300,7 +300,7 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-e2e", 
+						"daily-e2e",
 						"release-checks"
 					],
 					"testEnv": {
@@ -314,7 +314,7 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-e2e", 
+						"daily-e2e",
 						"release-checks"
 					],
 					"testEnv": {
@@ -347,7 +347,7 @@
 						"--shard=5/5"
 					],
 					"events": [
-						"push", 
+						"push",
 						"release-checks"
 					],
 					"changes": [
