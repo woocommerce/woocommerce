@@ -255,7 +255,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		$core_themes = array(
 			array(
 				'name'           => 'Twenty Twenty-Four',
-				'price'          => __( 'free', 'woocommerce' ),
+				'price'          => __( 'Free', 'woocommerce' ),
 				'is_free'        => true,
 				'color_palettes' => array(
 					array(
@@ -387,7 +387,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		$default_themes = array(
 			array(
 				'name'           => 'Tsubaki',
-				'price'          => __( 'free', 'woocommerce' ),
+				'price'          => __( 'Free', 'woocommerce' ),
 				'is_free'        => true,
 				'color_palettes' => array(),
 				'total_palettes' => 0,
@@ -397,7 +397,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			),
 			array(
 				'name'           => 'Tazza',
-				'price'          => __( 'free', 'woocommerce' ),
+				'price'          => __( 'Free', 'woocommerce' ),
 				'is_free'        => true,
 				'color_palettes' => array(),
 				'total_palettes' => 0,
@@ -407,7 +407,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			),
 			array(
 				'name'           => 'Amulet',
-				'price'          => __( 'free', 'woocommerce' ),
+				'price'          => __( 'Free', 'woocommerce' ),
 				'is_free'        => true,
 				'color_palettes' => array(
 					array(
@@ -438,7 +438,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			),
 			array(
 				'name'           => 'Zaino',
-				'price'          => __( 'free', 'woocommerce' ),
+				'price'          => __( 'Free', 'woocommerce' ),
 				'is_free'        => true,
 				'color_palettes' => array(
 					array(
