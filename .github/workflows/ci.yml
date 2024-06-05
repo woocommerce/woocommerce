@@ -335,16 +335,16 @@ jobs:
                   SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   SLACK_CHANNEL: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
                   HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-                  INPUT_TRIGGER: ${{ inputs.trigger }}
+                  RUN_TYPE: ${{ github.ref_type == 'tag' && (github.ref_name == 'nightly' && 'nightly-checks' || 'release-checks') || '' }}
               run: |
                   COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
 
-                  pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$INPUT_TRIGGER Build jobs matrix" -m "$COMMIT_MESSAGE"
-                  pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$INPUT_TRIGGER Linting" -m "$COMMIT_MESSAGE"
-                  pnpm utils slack-test-report -c "${{ needs.project-default-test-jobs.result }}" -r "$INPUT_TRIGGER Tests" -m "$COMMIT_MESSAGE"
-                  pnpm utils slack-test-report -c "${{ needs.project-e2e-test-jobs.result }}" -r "$INPUT_TRIGGER e2e tests" -m "$COMMIT_MESSAGE"
-                  pnpm utils slack-test-report -c "${{ needs.project-api-test-jobs.result }}" -r "$INPUT_TRIGGER Api tests" -m "$COMMIT_MESSAGE"
-                  pnpm utils slack-test-report -c "${{ needs.project-performance-test-jobs.result }}" -r "$INPUT_TRIGGER Performance tests" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$RUN_TYPE Build jobs matrix" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$RUN_TYPE Linting" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-default-test-jobs.result }}" -r "$RUN_TYPE Tests" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-e2e-test-jobs.result }}" -r "$RUN_TYPE e2e tests" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-api-test-jobs.result }}" -r "$RUN_TYPE Api tests" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-performance-test-jobs.result }}" -r "$RUN_TYPE Performance tests" -m "$COMMIT_MESSAGE"
 
     e2e-test-reports:
         name: 'Report e2e tests results'
