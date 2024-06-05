@@ -341,6 +341,23 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return WC_Order|false
 	 */
 	public function get_last_order( &$customer ) {
+		// Try to fetch the last order placed by this customer.
+		$last_order_id       = Users::get_site_user_meta( $customer->get_id(), 'wc_last_order', true );
+		$last_customer_order = false;
+
+		if ( ! empty( $last_order_id ) ) {
+			$last_customer_order = wc_get_order( $last_order_id );
+		}
+
+		// "Unset" the last order ID if the order is associated with another customer. Unsetting is done by making it an
+		// empty string, for compatibility with the declared types of the following filter hook.
+		if (
+			$last_customer_order instanceof WC_Order
+			&& intval( $last_customer_order->get_customer_id() ) !== intval( $customer->get_id() )
+		) {
+			$last_order_id = '';
+		}
+
 		/**
 		 * Filters the id of the last order from a given customer.
 		 *
@@ -353,7 +370,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		 */
 		$last_order_id = apply_filters(
 			'woocommerce_customer_get_last_order',
-			Users::get_site_user_meta( $customer->get_id(), 'wc_last_order', true ),
+			$last_order_id,
 			$customer
 		);
 		//phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
