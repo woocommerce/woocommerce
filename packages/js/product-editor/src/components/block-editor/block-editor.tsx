@@ -65,7 +65,7 @@ const ModalEditor = lazy( () =>
 );
 
 function getLayoutTemplateId(
-	productTemplate: ProductTemplate | undefined,
+	productTemplate: ProductTemplate | undefined | null,
 	postType: string
 ) {
 	if ( productTemplate?.layoutTemplateId ) {
