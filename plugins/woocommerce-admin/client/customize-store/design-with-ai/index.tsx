@@ -53,6 +53,7 @@ export const DesignWithAiController = ( {
 	}
 
 	const currentTheme = useSelect( ( select ) => {
+		// @ts-ignore
 		return select( 'core' ).getCurrentTheme() as Theme;
 	}, [] );
 

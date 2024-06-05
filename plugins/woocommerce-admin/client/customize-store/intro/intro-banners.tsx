@@ -328,6 +328,7 @@ export const ExistingNoAiThemeBanner = () => {
 	}
 
 	const currentTheme = useSelect( ( select ) => {
+		// @ts-ignore
 		return select( 'core' ).getCurrentTheme() as Theme;
 	}, [] );
 

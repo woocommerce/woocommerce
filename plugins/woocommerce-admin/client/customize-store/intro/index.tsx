@@ -141,20 +141,12 @@ const ThemeCards = ( {
 };
 
 const CustomizedThemeBanners = ( {
+	isBlockTheme,
 	sendEvent,
 }: {
+	isBlockTheme: boolean | undefined;
 	sendEvent: Sender< customizeStoreStateMachineEvents >;
 } ) => {
-	interface Theme {
-		is_block_theme?: boolean;
-	}
-
-	const currentTheme = useSelect( ( select ) => {
-		return select( 'core' ).getCurrentTheme() as Theme;
-	}, [] );
-
-	const isBlockTheme = currentTheme?.is_block_theme;
-
 	return (
 		<>
 			<p className="select-theme-text">
@@ -246,6 +238,7 @@ const CustomizedThemeBanners = ( {
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
 		intro: {
+			activeTheme,
 			themeData,
 			customizeStoreTaskCompleted,
 			currentThemeIsAiGenerated,
@@ -267,6 +260,18 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'default';
 
+	const isDefaultTheme = activeTheme === 'twentytwentyfour';
+	interface Theme {
+		is_block_theme?: boolean;
+	}
+
+	const currentTheme = useSelect( ( select ) => {
+		// @ts-ignore
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
+
+	const isBlockTheme = currentTheme?.is_block_theme;
+
 	switch ( true ) {
 		case isNetworkOffline:
 			bannerStatus = 'network-offline';
@@ -276,6 +281,9 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 		case context.flowType === FlowType.noAI &&
 			! customizeStoreTaskCompleted:
+			bannerStatus = FlowType.noAI;
+			break;
+		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted && isBlockTheme && !isDefaultTheme:
 			bannerStatus = FlowType.noAI;
 			break;
 		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
@@ -394,13 +402,13 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 						sendEvent={ sendEvent }
 					/>
 
-					{ ! customizeStoreTaskCompleted ? (
+					{ customizeStoreTaskCompleted && (isDefaultTheme || !isBlockTheme) ? (
+						<CustomizedThemeBanners isBlockTheme={ isBlockTheme } sendEvent={ sendEvent } />
+					) : (
 						<ThemeCards
 							sendEvent={ sendEvent }
 							themeData={ themeData }
 						/>
-					) : (
-						<CustomizedThemeBanners sendEvent={ sendEvent } />
 					) }
 				</div>
 			</div>
