@@ -30,7 +30,15 @@
 		}
 	}
 
-	.components-input-control__suffix {
-		margin-right: 0;
+	.components-base-control .components-input-control__container {
+		.components-input-control {
+			&__input {
+				font-size: $grid-unit-20;
+				min-height: $grid-unit-60;
+			}
+			&__suffix {
+				margin-right: 0;
+			}
+		}
 	}
 }
