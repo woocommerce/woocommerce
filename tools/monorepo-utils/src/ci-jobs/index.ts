@@ -77,7 +77,7 @@ const program = new Command( 'ci-jobs' )
 			} )
 			.filter( Boolean );
 
-		const reports = new Set( resultsBlobNames );
+		const reports = [ ...new Set( resultsBlobNames ) ];
 
 		if ( isGithubCI() ) {
 			setOutput( 'lint-jobs', JSON.stringify( jobs.lint ) );
@@ -107,11 +107,9 @@ const program = new Command( 'ci-jobs' )
 			Logger.notice( `No test jobs to run.` );
 		}
 
-		if ( reports.size > 0 ) {
+		if ( reports.length > 0 ) {
 			Logger.notice( `Report Jobs` );
-			for ( const job of reports ) {
-				Logger.notice( JSON.stringify( job ) );
-			}
+			Logger.notice( `${ reports }` );
 		} else {
 			Logger.notice( `No report jobs to run.` );
 		}
