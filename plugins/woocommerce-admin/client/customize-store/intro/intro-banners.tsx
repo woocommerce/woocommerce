@@ -225,6 +225,7 @@ export const NoAIBanner = ( {
 } ) => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	interface Theme {
+		is_block_theme?: boolean;
 		stylesheet?: string;
 	}
 
@@ -322,9 +323,21 @@ export const ExistingAiThemeBanner = ( {
 export const ExistingNoAiThemeBanner = () => {
 	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
 
+	interface Theme {
+		is_block_theme?: boolean;
+	}
+
+	const currentTheme = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
+
+	const isBlockTheme = currentTheme?.is_block_theme;
+
 	return (
 		<BaseIntroBanner
-			bannerTitle={ __( 'Edit your custom theme', 'woocommerce' ) }
+			bannerTitle={ __( 'Customize your theme', 'woocommerce' ) }
 			bannerText={ __(
 				'Continue to customize your store using the store designer. Change your color palette, fonts, page layouts, and more.',
 				'woocommerce'
@@ -332,15 +345,24 @@ export const ExistingNoAiThemeBanner = () => {
 			bannerClass="existing-no-ai-theme-banner"
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
-				trackEvent( 'customize_your_store_intro_customize_click' );
-				navigateOrParent(
-					window,
-					getNewPath(
-						{ customizing: true },
-						'/customize-store/assembler-hub',
-						{}
-					)
-				);
+				trackEvent( 'customize_your_store_intro_customize_click', {
+					theme_type: isBlockTheme ? 'block' : 'classic',
+				} );
+				if ( isBlockTheme ) {
+					navigateOrParent(
+						window,
+						getNewPath(
+							{ customizing: true },
+							'/customize-store/assembler-hub',
+							{}
+						)
+					);
+				} else {
+					navigateOrParent(
+						window,
+						'customize.php?return=/wp-admin/themes.php'
+					);
+				}
 			} }
 			bannerButtonText={ __( 'Customize your theme', 'woocommerce' ) }
 			showAIDisclaimer={ false }

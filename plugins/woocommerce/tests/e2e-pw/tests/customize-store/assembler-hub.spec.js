@@ -1,6 +1,6 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler/assembler.page' );
-const { activateTheme, DEFAULT_THEME } = require( '../../utils/themes' );
+const { activateTheme } = require( '../../utils/themes' );
 const { setOption } = require( '../../utils/options' );
 
 const ASSEMBLER_HUB_URL =
@@ -27,7 +27,7 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 				'woocommerce_customize_store_onboarding_tour_hidden',
 				'yes'
 			);
-			await activateTheme( 'twentytwentythree' );
+			await activateTheme( 'twentytwentyfour' );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
@@ -47,9 +47,6 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		// Reset theme back to default.
-		await activateTheme( DEFAULT_THEME );
-
 		// Reset tour to visible.
 		await setOption(
 			request,
@@ -68,16 +65,15 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 		await expect( locator ).not.toHaveText( 'Customize your store' );
 	} );
 
-	test( 'Can view the Assembler Hub page when the theme is already customized', async ( {
+	test( 'Can access the Assembler Hub page when the theme is already customized', async ( {
 		page,
 		assemblerPageObject,
 	} ) => {
 		await page.goto( CUSTOMIZE_STORE_URL );
 		await page.click( 'text=Start designing' );
-		await page
-			.getByRole( 'button', { name: 'Design a new theme' } )
-			.click();
 		await assemblerPageObject.waitForLoadingScreenFinish();
+
+		await page.goto( ASSEMBLER_HUB_URL );
 		const assembler = await assemblerPageObject.getAssembler();
 		await expect(
 			assembler.locator( "text=Let's get creative" )
@@ -86,11 +82,16 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 
 	test( 'Visiting change header should show a list of block patterns to choose from', async ( {
 		page,
+		assemblerPageObject,
 	} ) => {
-		await page.goto( ASSEMBLER_HUB_URL );
-		await page.click( 'text=Choose your header' );
+		await page.goto( CUSTOMIZE_STORE_URL );
+		await page.click( 'text=Start designing' );
+		await assemblerPageObject.waitForLoadingScreenFinish();
 
-		const locator = page.locator(
+		const assembler = await assemblerPageObject.getAssembler();
+		await assembler.locator( 'text=Choose your header' ).click();
+
+		const locator = assembler.locator(
 			'.block-editor-block-patterns-list__list-item'
 		);
 
