@@ -266,6 +266,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	}
 
 	const currentTheme = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		return select( 'core' ).getCurrentTheme() as Theme;
 	}, [] );
@@ -283,7 +284,10 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			! customizeStoreTaskCompleted:
 			bannerStatus = FlowType.noAI;
 			break;
-		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted && isBlockTheme && !isDefaultTheme:
+		case context.flowType === FlowType.noAI &&
+			customizeStoreTaskCompleted &&
+			isBlockTheme &&
+			! isDefaultTheme:
 			bannerStatus = FlowType.noAI;
 			break;
 		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
@@ -402,8 +406,12 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 						sendEvent={ sendEvent }
 					/>
 
-					{ customizeStoreTaskCompleted && (isDefaultTheme || !isBlockTheme) ? (
-						<CustomizedThemeBanners isBlockTheme={ isBlockTheme } sendEvent={ sendEvent } />
+					{ customizeStoreTaskCompleted &&
+					( isDefaultTheme || ! isBlockTheme ) ? (
+						<CustomizedThemeBanners
+							isBlockTheme={ isBlockTheme }
+							sendEvent={ sendEvent }
+						/>
 					) : (
 						<ThemeCards
 							sendEvent={ sendEvent }
