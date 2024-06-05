@@ -1155,8 +1155,12 @@ test.describe( 'Product Collection', () => {
 				// The preview button should be visible
 				await expect( previewButtonLocator ).toBeVisible();
 
-				// The preview button should be hidden when the block is not selected
-				await page.click( 'body' );
+				// The preview button should be hidden when the block is not selected.
+				// Changing focus.
+				const otherBlockSelector = editor.canvas.getByLabel(
+					'Block: Archive Title'
+				);
+				await editor.selectBlocks( otherBlockSelector );
 				await expect( previewButtonLocator ).toBeHidden();
 
 				// Preview button should be visible when any of inner block is selected
