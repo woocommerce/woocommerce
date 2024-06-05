@@ -331,8 +331,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 1 );
-			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -342,6 +342,7 @@ describe( 'Job Processing', () => {
 					shouldCreate: false,
 					envVars: {},
 				},
+				testType,
 			} );
 		} );
 
@@ -378,8 +379,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 1 );
-			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -389,6 +390,7 @@ describe( 'Job Processing', () => {
 					shouldCreate: false,
 					envVars: {},
 				},
+				testType,
 			} );
 		} );
 
@@ -421,7 +423,7 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
 		it( 'should not trigger test job for single node with no changes', async () => {
@@ -450,7 +452,7 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
 		it( 'should trigger test job for project graph', async () => {
@@ -520,8 +522,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 2 );
-			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+			expect( jobs.test ).toHaveLength( 2 );
+			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -531,8 +533,9 @@ describe( 'Job Processing', () => {
 					shouldCreate: false,
 					envVars: {},
 				},
+				testType,
 			} );
-			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-b',
 				projectPath: 'test-b',
 				name: 'Default B',
@@ -542,6 +545,7 @@ describe( 'Job Processing', () => {
 					shouldCreate: false,
 					envVars: {},
 				},
+				testType,
 			} );
 		} );
 
@@ -574,8 +578,8 @@ describe( 'Job Processing', () => {
 				);
 
 				expect( jobs.lint ).toHaveLength( 0 );
-				expect( jobs[ `${ testType }Test` ] ).toHaveLength( 1 );
-				expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+				expect( jobs.test ).toHaveLength( 1 );
+				expect( jobs.test ).toContainEqual( {
 					projectName: 'test',
 					projectPath: 'test',
 					name: 'Default',
@@ -585,6 +589,7 @@ describe( 'Job Processing', () => {
 						shouldCreate: false,
 						envVars: {},
 					},
+					testType,
 				} );
 			}
 		);
@@ -638,8 +643,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 2 );
-			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+			expect( jobs.test ).toHaveLength( 2 );
+			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -649,8 +654,9 @@ describe( 'Job Processing', () => {
 					shouldCreate: false,
 					envVars: {},
 				},
+				testType,
 			} );
-			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-a',
 				projectPath: 'test-a',
 				name: 'Default A',
@@ -660,6 +666,7 @@ describe( 'Job Processing', () => {
 					shouldCreate: false,
 					envVars: {},
 				},
+				testType,
 			} );
 		} );
 
@@ -731,8 +738,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 2 );
-			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+			expect( jobs.test ).toHaveLength( 2 );
+			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -742,8 +749,9 @@ describe( 'Job Processing', () => {
 					shouldCreate: false,
 					envVars: {},
 				},
+				testType: 'unit',
 			} );
-			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-a',
 				projectPath: 'test-a',
 				name: 'Default A',
@@ -753,6 +761,7 @@ describe( 'Job Processing', () => {
 					shouldCreate: false,
 					envVars: {},
 				},
+				testType: 'unit',
 			} );
 		} );
 
@@ -799,8 +808,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 1 );
-			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -813,6 +822,7 @@ describe( 'Job Processing', () => {
 						WP_ENV_CORE: 'https://wordpress.org/latest.zip',
 					},
 				},
+				testType: 'unit',
 			} );
 		} );
 
@@ -853,8 +863,8 @@ describe( 'Job Processing', () => {
 				projectPath: 'test',
 				command: 'test-lint',
 			} );
-			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 1 );
-			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -864,6 +874,7 @@ describe( 'Job Processing', () => {
 					shouldCreate: false,
 					envVars: {},
 				},
+				testType: 'unit',
 			} );
 		} );
 
@@ -898,8 +909,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 2 );
-			expect( jobs[ `${ testType }Test` ] ).toEqual(
+			expect( jobs.test ).toHaveLength( 2 );
+			expect( jobs.test ).toEqual(
 				expect.arrayContaining( [
 					{
 						projectName: 'test',
@@ -911,6 +922,7 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
+						testType: 'unit',
 					},
 					{
 						projectName: 'test',
@@ -922,6 +934,7 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
+						testType: 'unit',
 					},
 				] )
 			);
@@ -958,8 +971,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 2 );
-			expect( jobs[ `${ testType }Test` ] ).toEqual(
+			expect( jobs.test ).toHaveLength( 2 );
+			expect( jobs.test ).toEqual(
 				expect.arrayContaining( [
 					{
 						projectName: 'test',
@@ -971,6 +984,7 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
+						testType: 'unit',
 					},
 					{
 						projectName: 'test',
@@ -982,6 +996,7 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
+						testType: 'unit',
 					},
 				] )
 			);
@@ -1018,8 +1033,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 2 );
-			expect( jobs[ `${ testType }Test` ] ).toEqual(
+			expect( jobs.test ).toHaveLength( 2 );
+			expect( jobs.test ).toEqual(
 				expect.arrayContaining( [
 					{
 						projectName: 'test',
@@ -1031,6 +1046,7 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
+						testType: 'unit',
 					},
 					{
 						projectName: 'test',
@@ -1042,6 +1058,7 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
+						testType: 'unit',
 					},
 				] )
 			);
@@ -1121,6 +1138,7 @@ describe( 'Job Processing', () => {
 				projectPath: 'test',
 				command: 'test-lint test-base-ref',
 				optional: false,
+				report: undefined,
 			} );
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
@@ -1159,8 +1177,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 1 );
-			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -1171,6 +1189,8 @@ describe( 'Job Processing', () => {
 					envVars: {},
 				},
 				optional: true,
+				report: undefined,
+				testType: 'unit',
 			} );
 		} );
 	} );
@@ -1191,8 +1211,8 @@ describe( 'Job Processing', () => {
 					optional: false,
 					testType: 'e2e',
 					report: {
-						resultsBlobName: '',
-						resultsPath: '',
+						resultsBlobName: 'blob-name',
+						resultsPath: 'results-path',
 						allure: false,
 					},
 				},
@@ -1204,6 +1224,11 @@ describe( 'Job Processing', () => {
 					events: [],
 					changes: [ /test.js$/ ],
 					command: 'test-cmd',
+					report: {
+						resultsBlobName: 'blob-name',
+						resultsPath: 'results-path',
+						allure: false,
+					},
 				}
 			);
 
@@ -1217,9 +1242,15 @@ describe( 'Job Processing', () => {
 						command: 'test-cmd --shard-arg-1',
 						shardNumber: 1,
 						optional: false,
+						testType: 'e2e',
 						testEnv: {
 							shouldCreate: false,
 							envVars: {},
+						},
+						report: {
+							resultsBlobName: 'blob-name',
+							resultsPath: 'results-path',
+							allure: false,
 						},
 					},
 					{
@@ -1229,9 +1260,15 @@ describe( 'Job Processing', () => {
 						command: 'test-cmd --shard-arg-2',
 						shardNumber: 2,
 						optional: false,
+						testType: 'e2e',
 						testEnv: {
 							shouldCreate: false,
 							envVars: {},
+						},
+						report: {
+							resultsBlobName: 'blob-name',
+							resultsPath: 'results-path',
+							allure: false,
 						},
 					},
 				] )
@@ -1255,8 +1292,8 @@ describe( 'Job Processing', () => {
 						optional: false,
 						testType: 'e2e',
 						report: {
-							resultsBlobName: '',
-							resultsPath: '',
+							resultsBlobName: 'blob-name',
+							resultsPath: 'results-path',
 							allure: false,
 						},
 					},
@@ -1268,6 +1305,11 @@ describe( 'Job Processing', () => {
 						events: [],
 						changes: [ /test.js$/ ],
 						command: 'test-cmd',
+						report: {
+							resultsBlobName: 'blob-name',
+							resultsPath: 'results-path',
+							allure: false,
+						},
 					}
 				);
 
@@ -1279,9 +1321,15 @@ describe( 'Job Processing', () => {
 					command: 'test-cmd',
 					shardNumber: 0,
 					optional: false,
+					testType: 'e2e',
 					testEnv: {
 						shouldCreate: false,
 						envVars: {},
+					},
+					report: {
+						resultsBlobName: 'blob-name',
+						resultsPath: 'results-path',
+						allure: false,
 					},
 				} );
 			}

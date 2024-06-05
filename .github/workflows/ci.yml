@@ -243,8 +243,8 @@ jobs:
                   pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$RUN_TYPE Tests" -m "$COMMIT_MESSAGE"
 
     test-reports:
-        name: 'Publish reports - ${{ matrix }}'
-        needs: [project-test-jobs]
+        name: 'Publish reports - ${{ matrix.report }}'
+        needs: ['project-test-jobs']
         if: ${{ needs.project-jobs.outputs.report-jobs != '[]' }}
         strategy:
           fail-fast: false
