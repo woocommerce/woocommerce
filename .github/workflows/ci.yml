@@ -245,11 +245,11 @@ jobs:
     test-reports:
         name: 'Publish reports - ${{ matrix }}'
         needs: [project-test-jobs]
-        if: ${{ ! cancelled() }}
+        if: ${{ needs.project-jobs.outputs.report-jobs != '[]' }}
         strategy:
           fail-fast: false
           matrix:
-            include: ${{ fromJSON( needs.project-jobs.outputs.report-jobs ) }}
+            report: ${{ fromJSON( needs.project-jobs.outputs.report-jobs ) }}
         runs-on: ubuntu-latest
 
         steps:
@@ -264,7 +264,7 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   path: ./out
-                  pattern: ${{ matrix }}-*
+                  pattern: ${{ matrix.report }}-*
                   run-id: project-test-jobs
                   merge-multiple: true
 
@@ -275,7 +275,7 @@ jobs:
             - name: 'Archive reports'
               uses: actions/upload-artifact@v4
               with:
-                  name: ${{ matrix }}
+                  name: ${{ matrix.report }}
                   path: ./out
                   if-no-files-found: ignore
                   retention-days: 5
@@ -285,7 +285,7 @@ jobs:
                   GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   PR_NUMBER: ${{ github.event.pull_request.number }}
                   RUN_ID: ${{ github.run_id }}
-              if: ${{ startsWith(matrix, 'e2e') }} # temporary until we adapt the woocommerce-test-reports side to not care about the test type
+              if: ${{ contains(matrix.report, 'e2e') }} # temporary until we adapt the woocommerce-test-reports side to not care about the test type
               run: |
                   if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
                     gh workflow run publish-test-reports-pr.yml \
