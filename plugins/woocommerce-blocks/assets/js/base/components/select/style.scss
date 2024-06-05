@@ -41,19 +41,12 @@
 	}
 
 	.wc-blocks-components-select__label {
-		font-family: inherit;
-		font-size: inherit;
-		font-style: inherit;
-		font-weight: inherit;
-		letter-spacing: inherit;
-		line-height: inherit;
-		text-decoration: inherit;
-		text-transform: inherit;
-		font-size: 1em;
+		@include reset-typography();
+		@include font-size(regular);
 		position: absolute;
-		transform: translateY(1em);
-		line-height: 1.25;
-		left: 0.5em;
+		transform: translateY(em($gap));
+		line-height: 1.25; // =20px when font-size is 16px.
+		left: em($gap-smaller);
 		top: 0;
 		transform-origin: top left;
 		transition: all 200ms ease;
@@ -62,10 +55,17 @@
 		margin: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		max-width: calc(100% - 32px);
+		max-width: calc(100% - #{2 * $gap});
 		white-space: nowrap;
 
-		transform: translateY(25%) scale(0.75);
+		.has-dark-controls & {
+			color: $input-placeholder-dark;
+		}
+		@media screen and (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+
+		transform: translateY(15%) scale(0.75);
 	}
 
 	.wc-blocks-components-select__expand {
