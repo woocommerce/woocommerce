@@ -1,0 +1,78 @@
+.wc-blocks-components-select {
+	width: 100%;
+
+	.wc-blocks-components-select__container {
+		border-radius: $universal-border-radius;
+		box-sizing: border-box;
+		border: 1px solid $universal-border-light;
+		background: #fff;
+		width: 100%;
+		border-radius: $universal-border-radius;
+		max-height: 50px;
+		position: relative;
+
+		.has-dark-controls & {
+			background-color: $input-background-dark;
+			border-color: $input-border-dark;
+			color: $input-text-dark;
+
+			&:focus {
+				background-color: $input-background-dark;
+				color: $input-text-dark;
+				box-shadow: 0 0 0 2px $input-border-gray;
+			}
+		}
+	}
+
+	.wc-blocks-components-select__select {
+		@include reset-typography();
+		@include font-size(regular);
+		border-radius: $universal-border-radius;
+		width: 100%;
+		appearance: none;
+		border: none;
+		background: none;
+		padding: em($gap + $gap-smallest) em($gap-smaller) 0;
+
+		&:focus {
+			outline: 0;
+			box-shadow: 0 0 0 2px currentColor;
+		}
+	}
+
+	.wc-blocks-components-select__label {
+		font-family: inherit;
+		font-size: inherit;
+		font-style: inherit;
+		font-weight: inherit;
+		letter-spacing: inherit;
+		line-height: inherit;
+		text-decoration: inherit;
+		text-transform: inherit;
+		font-size: 1em;
+		position: absolute;
+		transform: translateY(1em);
+		line-height: 1.25;
+		left: 0.5em;
+		top: 0;
+		transform-origin: top left;
+		transition: all 200ms ease;
+		color: currentColor;
+		z-index: 1;
+		margin: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: calc(100% - 32px);
+		white-space: nowrap;
+
+		transform: translateY(25%) scale(0.75);
+	}
+
+	.wc-blocks-components-select__expand {
+		position: absolute;
+		transform: translate(0%, -50%);
+		top: 50%;
+		right: $gap-small;
+		pointer-events: none;
+	}
+}
