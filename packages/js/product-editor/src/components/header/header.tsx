@@ -8,6 +8,7 @@ import {
 	createElement,
 	useContext,
 	useEffect,
+	useState,
 	Fragment,
 	lazy,
 	Suspense,
@@ -75,6 +76,10 @@ export function Header( {
 				: null;
 		},
 		[ productType, productId ]
+	);
+
+	const [ visibleTab, setVisibleTab ] = useState< string | null >(
+		'general'
 	);
 
 	const editedProductName = product?.name;
@@ -266,6 +271,7 @@ export function Header( {
 							productType={ productType }
 							isPrePublishPanelVisible={ showPrepublishChecks }
 							isMenuButton
+							visibleTab={ visibleTab }
 						/>
 					</Suspense>
 
@@ -274,7 +280,12 @@ export function Header( {
 					<MoreMenu />
 				</div>
 			</div>
-			<Tabs onChange={ onTabSelect } />
+			<Tabs
+				onChange={ ( tab ) => {
+					setVisibleTab( tab );
+					onTabSelect( tab );
+				} }
+			/>
 		</div>
 	);
 }
