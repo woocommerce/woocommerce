@@ -145,8 +145,8 @@ class Users {
 	 */
 	public static function update_site_user_meta( int $user_id, string $meta_key, $meta_value, $prev_value = '' ) {
 		global $wpdb;
-		$site_specific_key = $meta_key . '_' . rtrim( $wpdb->get_blog_prefix(), '_' );
-		return update_user_meta( $user_id, $site_specific_key, $meta_value, true );
+		$site_specific_key = $meta_key . '_' . rtrim( $wpdb->get_blog_prefix( get_current_blog_id() ), '_' );
+		return update_user_meta( $user_id, $site_specific_key, $meta_value, $prev_value );
 	}
 
 	/**
