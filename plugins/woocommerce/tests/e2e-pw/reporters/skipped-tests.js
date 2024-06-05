@@ -1,17 +1,13 @@
-const {
-	Reporter,
-	TestCase,
-	TestResult,
-} = require( '@playwright/test/reporter' );
+require( '@playwright/test/reporter' );
 
 class SkippedReporter {
 	constructor() {
 		this.skippedTests = [];
 	}
 
-	onTestEnd( TestCase, TestResult ) {
-		if ( TestResult.status === 'skipped' ) {
-			this.skippedTests.push( TestCase.title );
+	onTestEnd( testCase, testResult ) {
+		if ( testResult.status === 'skipped' ) {
+			this.skippedTests.push( testCase.title );
 		}
 	}
 
