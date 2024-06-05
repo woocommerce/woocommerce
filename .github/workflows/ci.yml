@@ -33,6 +33,7 @@ jobs:
         outputs:
             lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
             test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
+            report-jobs: ${{ steps.project-jobs.outputs.report-jobs }}
         steps:
             - uses: 'actions/checkout@v4'
               name: 'Checkout'
@@ -158,7 +159,7 @@ jobs:
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
               
             - name: 'Upload artifacts'
-              if: ${{ always() }}
+              if: ${{ always() && matrix.resultsPath && matrix.resultsBlobName }}
               uses: actions/upload-artifact@v4
               with:
                 name: '${{ matrix.resultsBlobName }}-${{ strategy.job-index }}'
@@ -242,9 +243,13 @@ jobs:
                   pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$RUN_TYPE Tests" -m "$COMMIT_MESSAGE"
 
     test-reports:
-        name: 'Report tests results'
+        name: 'Publish reports - ${{ matrix }}'
         needs: [project-test-jobs]
-        if: ${{ ! cancelled() && needs.project-e2e-test-jobs.result != 'skipped' }}
+        if: ${{ ! cancelled() }}
+        strategy:
+          fail-fast: false
+          matrix:
+            include: ${{ fromJSON( needs.project-jobs.outputs.report-jobs ) }}
         runs-on: ubuntu-latest
 
         steps:
@@ -259,8 +264,8 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   path: ./out
-                  pattern: all-blob-e2e-reports-*
-                  run-id: project-e2e-test-jobs
+                  pattern: ${{ matrix }}-*
+                  run-id: project-test-jobs
                   merge-multiple: true
 
             - name: 'Generate Allure report'
@@ -270,7 +275,7 @@ jobs:
             - name: 'Archive reports'
               uses: actions/upload-artifact@v4
               with:
-                  name: e2e-test-report
+                  name: ${{ matrix }}
                   path: ./out
                   if-no-files-found: ignore
                   retention-days: 5

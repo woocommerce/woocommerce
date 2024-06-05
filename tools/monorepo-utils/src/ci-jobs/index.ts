@@ -68,9 +68,21 @@ const program = new Command( 'ci-jobs' )
 			Logger.notice( `-  ${ job.name }` );
 		}
 
+		const resultsBlobNames = jobs.test
+			.map( ( job ) => {
+				if ( job.report && job.report.allureResultsPath ) {
+					return job.report.resultsBlobName;
+				}
+				return undefined;
+			} )
+			.filter( Boolean );
+
+		const reports = new Set( resultsBlobNames );
+
 		if ( isGithubCI() ) {
 			setOutput( 'lint-jobs', JSON.stringify( jobs.lint ) );
 			setOutput( 'test-jobs', JSON.stringify( jobs.test ) );
+			setOutput( 'report-jobs', JSON.stringify( reports ) );
 			return;
 		}
 
@@ -93,6 +105,15 @@ const program = new Command( 'ci-jobs' )
 			}
 		} else {
 			Logger.notice( `No test jobs to run.` );
+		}
+
+		if ( reports.size > 0 ) {
+			Logger.notice( `Report Jobs` );
+			for ( const job of reports ) {
+				Logger.notice( JSON.stringify( job ) );
+			}
+		} else {
+			Logger.notice( `No report jobs to run.` );
 		}
 	} );
 

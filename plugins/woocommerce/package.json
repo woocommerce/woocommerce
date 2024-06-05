@@ -252,7 +252,7 @@
 						"release-checks"
 					],
 					"report": {
-						"resultsBlobName": "all-blob-e2e-reports",
+						"resultsBlobName": "core-e2e-report",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allureResultsPath": "allure-results"
 					}
@@ -369,6 +369,10 @@
 						"config": {
 							"disableHpos": true
 						}
+					},
+					"report": {
+						"resultsBlobName": "all-blob-e2e-reports-non-hpos",
+						"resultsPath": "tests/e2e-pw/test-results"
 					}
 				},
 				{
@@ -438,7 +442,7 @@
 						"push"
 					],
 					"report": {
-						"resultsBlobName": "all-blob-api-reports",
+						"resultsBlobName": "core-api-report",
 						"resultsPath": "tests/api-core-tests/test-results",
 						"allureResultsPath": "allure-results"
 					}
