@@ -50,14 +50,12 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
 		"build:check-assets": "rimraf build/* && cross-env ASSET_CHECK=true BABEL_ENV=default NODE_ENV=production webpack",
-		"build:deploy": "rimraf vendor/* && cross-env WOOCOMMERCE_BLOCKS_PHASE=2 composer install --no-dev && cross-env WOOCOMMERCE_BLOCKS_PHASE=2 pnpm run build --loglevel error",
 		"prebuild:docs": "rimraf docs/extensibility/actions.md & rimraf docs/extensibility/filters.md",
 		"build:docs": "./vendor/bin/wp-hooks-generator --input=src --output=bin/hook-docs/data && node ./bin/hook-docs && pnpm build:docs:block-references",
 		"build:docs:block-references": "node ./bin/gen-block-list-doc.js",
 		"postbuild:docs": "./bin/add-doc-footer.sh",
 		"changelog:zenhub": "node ./bin/changelog --changelogSrcType='ZENHUB_RELEASE'",
 		"change-versions": "source ./bin/change-versions.sh",
-		"deploy": "pnpm run build:deploy && sh ./bin/github-deploy.sh",
 		"dev": "rimraf build/* && cross-env BABEL_ENV=default webpack",
 		"labels:dry": "github-label-sync --labels ./.github/label-sync-config.json --allow-added-labels --dry-run woocommerce/woocommerce-gutenberg-products-block",
 		"labels:sync": "github-label-sync --labels ./.github/label-sync-config.json --allow-added-labels woocommerce/woocommerce-gutenberg-products-block",
@@ -388,9 +386,6 @@
 				"BABEL_ENV": {
 					"external": true,
 					"default": "default"
-				},
-				"WOOCOMMERCE_BLOCKS_PHASE": {
-					"external": true
 				}
 			},
 			"files": [
