@@ -17,7 +17,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useProductManager } from '../../../../hooks/use-product-manager';
 import { useProductScheduled } from '../../../../hooks/use-product-scheduled';
 import { recordProductEvent } from '../../../../utils/record-product-event';
-import { getProductErrorMessage } from '../../../../utils/get-product-error-message';
+import { getProductErrorMessageAndProps } from '../../../../utils/get-product-error-message';
 import { ButtonWithDropdownMenu } from '../../../button-with-dropdown-menu';
 import { SchedulePublishModal } from '../../../schedule-publish-modal';
 import { showSuccessNotice } from '../utils';
@@ -26,6 +26,7 @@ import { TRACKS_SOURCE } from '../../../../constants';
 
 export function PublishButtonMenu( {
 	postType,
+	visibleTab = 'general',
 	...props
 }: PublishButtonMenuProps ) {
 	const { isScheduling, isScheduled, schedule, date, formattedDate } =
@@ -50,8 +51,11 @@ export function PublishButtonMenu( {
 				showSuccessNotice( scheduledProduct );
 			} )
 			.catch( ( error ) => {
-				const message = getProductErrorMessage( error );
-				createErrorNotice( message );
+				const { message, errorProps } = getProductErrorMessageAndProps(
+					error,
+					visibleTab
+				);
+				createErrorNotice( message, errorProps );
 			} )
 			.finally( () => {
 				setShowScheduleModal( undefined );
@@ -134,9 +138,15 @@ export function PublishButtonMenu( {
 										navigateTo( { url } );
 									} )
 									.catch( ( error ) => {
-										const message =
-											getProductErrorMessage( error );
-										createErrorNotice( message );
+										const { message, errorProps } =
+											getProductErrorMessageAndProps(
+												error,
+												visibleTab
+											);
+										createErrorNotice(
+											message,
+											errorProps
+										);
 									} );
 								onClose();
 							} }
@@ -166,9 +176,15 @@ export function PublishButtonMenu( {
 										} );
 									} )
 									.catch( ( error ) => {
-										const message =
-											getProductErrorMessage( error );
-										createErrorNotice( message );
+										const { message, errorProps } =
+											getProductErrorMessageAndProps(
+												error,
+												visibleTab
+											);
+										createErrorNotice(
+											message,
+											errorProps
+										);
 									} );
 								onClose();
 							} }

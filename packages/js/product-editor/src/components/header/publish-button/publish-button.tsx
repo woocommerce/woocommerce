@@ -75,7 +75,11 @@ export function PublishButton( {
 			menuProps: Dropdown.RenderProps
 		): React.ReactElement {
 			return (
-				<PublishButtonMenu { ...menuProps } postType={ productType } />
+				<PublishButtonMenu
+					{ ...menuProps }
+					postType={ productType }
+					visibleTab={ visibleTab }
+				/>
 			);
 		}
 
@@ -107,6 +111,7 @@ export function PublishButton( {
 					controls={ undefined }
 					onClick={ handlePrePublishButtonClick }
 					renderMenu={ renderPublishButtonMenu }
+					visibleTab={ visibleTab }
 				/>
 			);
 		}
@@ -117,6 +122,7 @@ export function PublishButton( {
 				postType={ productType }
 				controls={ undefined }
 				renderMenu={ renderPublishButtonMenu }
+				visibleTab={ visibleTab }
 			/>
 		);
 	}
