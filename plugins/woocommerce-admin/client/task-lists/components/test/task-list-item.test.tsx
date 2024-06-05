@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, render } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SlotFillProvider } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
@@ -41,6 +41,7 @@ const mockDispatch = {
 	snoozeTask: jest.fn(),
 	undoDismissTask: jest.fn(),
 	undoSnoozeTask: jest.fn(),
+	visitedTask: jest.fn(),
 };
 ( useDispatch as jest.Mock ).mockReturnValue( mockDispatch );
 
@@ -52,7 +53,10 @@ jest.mock( '@woocommerce/data', () => {
 	const originalModule = jest.requireActual( '@woocommerce/data' );
 	return {
 		...originalModule,
-		useUserPreferences: jest.fn(),
+		useUserPreferences: jest.fn().mockReturnValue( {
+			task_list_tracked_started_tasks: 0,
+			updateUserPreferences: jest.fn(),
+		} ),
 	};
 } );
 jest.mock( '@woocommerce/experimental', () => {
@@ -62,21 +66,31 @@ jest.mock( '@woocommerce/experimental', () => {
 		useSlot: jest.fn(),
 		TaskItem: jest
 			.fn()
-			.mockImplementation( ( { title, onSnooze, onDismiss } ) => (
-				<div>
-					<span>{ title }</span>
-					{ onSnooze && (
-						<button onClick={ onSnooze } name="Snooze">
-							Snooze
-						</button>
-					) }
-					{ onDismiss && (
-						<button onClick={ onDismiss } name="Dismiss">
-							Dismiss
-						</button>
-					) }
-				</div>
-			) ),
+			.mockImplementation(
+				( { title, onSnooze, onDismiss, onClick } ) => (
+					<div>
+						<button onClick={ onClick }>{ title }</button>
+						{ onSnooze && (
+							<button onClick={ onSnooze } name="Snooze">
+								Snooze
+							</button>
+						) }
+						{ onDismiss && (
+							<button onClick={ onDismiss } name="Dismiss">
+								Dismiss
+							</button>
+						) }
+					</div>
+				)
+			),
+	};
+} );
+jest.mock( '@woocommerce/navigation', () => {
+	return {
+		getPersistedQuery: jest.fn().mockReturnValue( {} ),
+		navigateTo: jest.fn(),
+		getNewPath: jest.fn(),
+		addHistoryListener: jest.fn(),
 	};
 } );
 
@@ -172,6 +186,25 @@ describe( 'TaskListItem', () => {
 		expect( mockDispatch.createNotice.mock.calls[ 0 ][ 1 ] ).toEqual(
 			'Task dismissed'
 		);
+	} );
+
+	it( 'should call trackClick and trigger recordEvent', () => {
+		render(
+			<TaskListItem
+				task={ { ...task } }
+				isExpandable={ false }
+				isExpanded={ false }
+				setExpandedTask={ () => {} }
+			/>
+		);
+		act( () => {
+			userEvent.click( screen.getByText( task.title ) );
+		} );
+
+		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_click', {
+			context: 'home',
+			task_name: task.id,
+		} );
 	} );
 
 	it( 'should not call dismissTask when isDismissable is set to false', () => {
