@@ -88,6 +88,7 @@ trait CheckoutTrait {
 		} catch ( \Exception $e ) {
 			$additional_data = [];
 
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			/**
 			 * Allows to check if WP_DEBUG mode is enabled before returning previous Exception.
 			 *
