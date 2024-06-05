@@ -159,7 +159,7 @@ jobs:
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
               
             - name: 'Upload artifacts'
-              if: ${{ always() && matrix.resultsPath && matrix.resultsBlobName }}
+              if: ${{ always() && matrix.resultsPath != '' }}
               uses: actions/upload-artifact@v4
               with:
                 name: '${{ matrix.resultsBlobName }}-${{ strategy.job-index }}'
