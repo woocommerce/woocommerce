@@ -140,15 +140,6 @@ const ProductCollectionContent = ( {
 	);
 
 	/**
-	 * If inherit is not a boolean, then we haven't set default attributes yet.
-	 * We don't wanna render anything until default attributes are set.
-	 * Default attributes are set in the useEffect above.
-	 */
-	if ( typeof attributes?.query?.inherit !== 'boolean' ) {
-		return null;
-	}
-
-	/**
 	 * If default attributes are not set, we don't wanna render anything.
 	 * Default attributes are set in the useEffect above.
 	 */

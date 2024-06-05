@@ -5,7 +5,7 @@ import { BlockVariation, registerBlockVariation } from '@wordpress/blocks';
 import { addFilter } from '@wordpress/hooks';
 import { EditorBlock } from '@woocommerce/types';
 import type { ElementType } from '@wordpress/element';
-import type { BlockEditProps } from '@wordpress/blocks';
+import type { BlockEditProps, BlockAttributes } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -15,6 +15,7 @@ import {
 	PreviewState,
 	ProductCollectionAttributes,
 } from './types';
+import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from './constants';
 
 export interface ProductCollectionConfig extends BlockVariation {
 	preview?: {
@@ -65,7 +66,26 @@ export const __experimentalRegisterProductCollection = ( {
 		);
 	}
 
+	const isActive = (
+		blockAttrs: BlockAttributes,
+		variationAttributes: BlockAttributes
+	) => {
+		return blockAttrs.collection === variationAttributes.collection;
+	};
+
 	registerBlockVariation( BLOCK_NAME, {
 		...blockVariationArgs,
+		attributes: {
+			...DEFAULT_ATTRIBUTES,
+			...blockVariationArgs.attributes,
+			query: {
+				...DEFAULT_ATTRIBUTES.query,
+				...blockVariationArgs.attributes?.query,
+			},
+			collection: blockVariationArgs.name,
+			inherit: blockVariationArgs.attributes?.inherit || false,
+		},
+		innerBlocks: blockVariationArgs.innerBlocks || INNER_BLOCKS_TEMPLATE,
+		isActive: blockVariationArgs.isActive || isActive,
 	} );
 };

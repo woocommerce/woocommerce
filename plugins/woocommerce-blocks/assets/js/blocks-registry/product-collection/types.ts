@@ -12,7 +12,7 @@ export const enum LocationType {
 	Site = 'site',
 }
 
-type WooCommerceBlockLocation = {
+export type WooCommerceBlockLocation = {
 	type: LocationType;
 	sourceData: Record< string, unknown >;
 };
