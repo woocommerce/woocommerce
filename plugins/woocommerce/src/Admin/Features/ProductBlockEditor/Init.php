@@ -101,7 +101,7 @@ class Init {
 			 * @ignore
 			 * @since 9.1.0
 			 */
-			$product_template_id = apply_filters( 'experimental_woocommerce_product_editor_determine_product_template', '', $product );
+			$product_template_id = apply_filters( 'experimental_woocommerce_product_editor_product_template_for_product', '', $product );
 			if ( $product_template_id ) {
 				$response->data['meta_data'][] = new WC_Meta_Data(
 					array(
