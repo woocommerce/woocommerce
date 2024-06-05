@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+CI: Replace daily-e2e teste runs with nightly-checks
