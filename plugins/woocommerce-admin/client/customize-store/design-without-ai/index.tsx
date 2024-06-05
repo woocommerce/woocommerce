@@ -54,6 +54,8 @@ export const DesignWithNoAiController = ( {
 				...designWithNoAiStateMachineDefinition.context,
 				isFontLibraryAvailable:
 					parentContext?.isFontLibraryAvailable ?? false,
+				isPTKPatternsAPIAvailable:
+					parentContext?.isPTKPatternsAPIAvailable ?? false,
 				isBlockTheme,
 			},
 		}
