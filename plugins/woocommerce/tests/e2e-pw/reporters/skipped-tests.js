@@ -9,16 +9,14 @@ class SkippedReporter {
 		this.skippedTests = [];
 	}
 
-	onTestEnd( testCase, testResult ) {
-		if ( testResult.status === 'skipped' ) {
-			this.skippedTests.push( testCase.title );
+	onTestEnd( TestCase, TestResult ) {
+		if ( TestResult.status === 'skipped' ) {
+			this.skippedTests.push( TestCase.title );
 		}
 	}
 
 	onEnd() {
 		const skippedTestsMessage = this.skippedTests.join( ', ' );
-		console.log( 'Skipped tests', this.skippedTests );
-
 		if ( this.skippedTests.length > 0 ) {
 			// Output a GitHub Actions annotation
 			console.log(
