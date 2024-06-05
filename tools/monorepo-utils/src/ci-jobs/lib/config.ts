@@ -312,9 +312,9 @@ interface ReportConfig {
 	resultsPath: string;
 
 	/**
-	 * The path to the allure results inside the resultsPath.
+	 * Whether Allure results exists and an Allure report should be generated and possibly published.
 	 */
-	allureResultsPath: string;
+	allure: boolean;
 }
 
 /**
@@ -458,19 +458,16 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 			);
 		}
 
-		if (
-			raw.report.allureResultsPath &&
-			typeof raw.report.allureResultsPath !== 'string'
-		) {
+		if ( raw.report.allure && typeof raw.report.allure !== 'boolean' ) {
 			throw new ConfigError(
-				'A string "allureResultsPath" option is required for report.'
+				'A boolean "allure" option is required for report.'
 			);
 		}
 
 		config.report = {
 			resultsBlobName: raw.report.resultsBlobName,
 			resultsPath: raw.report.resultsPath,
-			allureResultsPath: raw.report.allureResultsPath,
+			allure: raw.report.allure,
 		};
 	}
 

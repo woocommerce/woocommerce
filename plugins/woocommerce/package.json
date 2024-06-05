@@ -254,7 +254,7 @@
 					"report": {
 						"resultsBlobName": "core-e2e-report",
 						"resultsPath": "tests/e2e-pw/test-results",
-						"allureResultsPath": "allure-results"
+						"allure": true
 					}
 				},
 				{
@@ -444,7 +444,7 @@
 					"report": {
 						"resultsBlobName": "core-api-report",
 						"resultsPath": "tests/api-core-tests/test-results",
-						"allureResultsPath": "allure-results"
+						"allure": true
 					}
 				},
 				{

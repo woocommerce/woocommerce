@@ -1193,7 +1193,7 @@ describe( 'Job Processing', () => {
 					report: {
 						resultsBlobName: '',
 						resultsPath: '',
-						allureResultsPath: '',
+						allure: false,
 					},
 				},
 				{
@@ -1257,7 +1257,7 @@ describe( 'Job Processing', () => {
 						report: {
 							resultsBlobName: '',
 							resultsPath: '',
-							allureResultsPath: '',
+							allure: false,
 						},
 					},
 					{

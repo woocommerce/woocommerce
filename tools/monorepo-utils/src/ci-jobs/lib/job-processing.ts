@@ -36,7 +36,7 @@ interface TestJobEnv {
 interface TestJobReport {
 	resultsBlobName: string;
 	resultsPath: string;
-	allureResultsPath: string;
+	allure: boolean;
 }
 
 /**

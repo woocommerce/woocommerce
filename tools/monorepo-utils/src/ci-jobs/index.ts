@@ -70,7 +70,7 @@ const program = new Command( 'ci-jobs' )
 
 		const resultsBlobNames = jobs.test
 			.map( ( job ) => {
-				if ( job.report && job.report.allureResultsPath ) {
+				if ( job.report && job.report.allure ) {
 					return job.report.resultsBlobName;
 				}
 				return undefined;
