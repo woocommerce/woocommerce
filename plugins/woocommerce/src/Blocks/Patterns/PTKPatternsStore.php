@@ -173,6 +173,10 @@ class PTKPatternsStore {
 	 * @return void
 	 */
 	public function fetch_patterns() {
+		if ( ! $this->allowed_tracking_is_enabled() ) {
+			return;
+		}
+
 		$this->flush_cached_patterns();
 
 		$patterns = $this->ptk_client->fetch_patterns(
