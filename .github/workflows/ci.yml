@@ -244,7 +244,7 @@ jobs:
 
     test-reports:
         name: 'Publish reports - ${{ matrix.report }}'
-        needs: ['project-test-jobs']
+        needs: 'project-test-jobs'
         if: ${{ always() && needs.project-jobs.outputs.report-jobs != '[]' }}
         strategy:
           fail-fast: false
