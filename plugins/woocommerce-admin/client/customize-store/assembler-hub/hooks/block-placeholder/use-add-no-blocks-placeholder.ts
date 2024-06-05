@@ -3,10 +3,12 @@
  */
 import { BlockInstance } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
 import NoBlocks from '../../../assets/images/no-blocks.png';
+import { DISABLE_CLICK_CLASS } from '../auto-block-preview-event-listener';
 
 /**
  * The scope of this variable is limited to the block-placeholder folder.
@@ -41,6 +43,7 @@ export const useAddNoBlocksPlaceholder = ( {
 					customOverlayColor: '#F6F7F7',
 					minHeight: 800,
 					__noBlocksPlaceholder: true,
+					className: DISABLE_CLICK_CLASS,
 				},
 				[
 					createBlock( 'core/image', {
@@ -55,8 +58,10 @@ export const useAddNoBlocksPlaceholder = ( {
 								text: '#000000',
 							},
 						},
-						content:
+						content: __(
 							'Unlock your creativity and populate your homepage by adding as many patterns as you like.',
+							'woocommerce'
+						),
 					} ),
 				]
 			);
