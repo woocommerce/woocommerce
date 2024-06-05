@@ -435,10 +435,18 @@ class ProductCollectionPage {
 	}
 
 	async focusProductCollection() {
-		const block = this.page
-			.locator( `[data-type="${ this.BLOCK_SLUG }"]` )
+		const editorSelector = this.editor.canvas
+			.getByLabel( 'Block: Product Collection', { exact: true } )
 			.first();
-		await this.editor.selectBlocks( block );
+
+		const postSelector = this.page
+			.getByLabel( 'Block: Product Collection', { exact: true } )
+			.first();
+
+		await Promise.any( [
+			this.editor.selectBlocks( editorSelector ),
+			this.editor.selectBlocks( postSelector ),
+		] );
 	}
 
 	async clickDisplaySettings() {
