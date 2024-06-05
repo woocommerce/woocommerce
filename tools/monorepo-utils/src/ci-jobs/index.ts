@@ -62,6 +62,13 @@ const program = new Command( 'ci-jobs' )
 		} );
 		Logger.endTask( true );
 
+		// Rename the test jobs to include the project name and test type.
+		for ( const job of jobs.test ) {
+			const optional = job.optional ? ' (optional)' : '';
+			job.name = `${ job.name } - ${ job.projectName } [${ job.testType }]${ optional }`;
+			Logger.notice( `-  ${ job.name }` );
+		}
+
 		if ( isGithubCI() ) {
 			setOutput( 'lint-jobs', JSON.stringify( jobs.lint ) );
 			setOutput( 'test-jobs', JSON.stringify( jobs.test ) );
@@ -83,8 +90,6 @@ const program = new Command( 'ci-jobs' )
 		if ( jobs.test.length > 0 ) {
 			Logger.notice( `Test Jobs` );
 			for ( const job of jobs.test ) {
-				const optional = job.optional ? ' (optional)' : '';
-				job.name = `${ job.name } - ${ job.projectName } [${ job.testType }]${ optional }`;
 				Logger.notice( `-  ${ job.name }` );
 			}
 		} else {
