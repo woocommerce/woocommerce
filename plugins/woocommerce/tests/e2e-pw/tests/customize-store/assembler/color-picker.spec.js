@@ -289,7 +289,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 	) ) {
 		test( `Color palette ${ colorPaletteName } should be applied`, async ( {
 			assemblerPageObject,
-			page
+			page,
 		} ) => {
 			const assembler = await assemblerPageObject.getAssembler();
 			const editor = await assemblerPageObject.getEditor();
