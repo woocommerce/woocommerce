@@ -64,6 +64,11 @@ export const useProductTemplate = (
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
 
+	// we shouldn't default to the standard-product-template for variations
+	if ( ! productTemplateId && product?.type === 'variation' ) {
+		return { productTemplate: null, isResolving: false };
+	}
+
 	const productTemplateIdToFind =
 		productTemplateId || 'standard-product-template';
 
