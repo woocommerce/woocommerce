@@ -258,7 +258,7 @@ export const SidebarNavigationScreenHomepage = () => {
 	const openModal = () => setIsModalOpen( true );
 	const closeModal = () => setIsModalOpen( false );
 
-	const [ OptInDataSharing, setIsOptInDataSharing ] =
+	const [ optInDataSharing, setIsOptInDataSharing ] =
 		useState< boolean >( true );
 
 	const optIn = () => {
@@ -368,7 +368,7 @@ export const SidebarNavigationScreenHomepage = () => {
 													),
 												},
 											} ) }
-											checked={ OptInDataSharing }
+											checked={ optInDataSharing }
 											onChange={ setIsOptInDataSharing }
 										/>
 										<div className="woocommerce-customize-store__design-change-warning-modal-footer">
@@ -398,7 +398,7 @@ export const SidebarNavigationScreenHomepage = () => {
 													}
 												} }
 												variant="primary"
-												disabled={ ! OptInDataSharing }
+												disabled={ ! optInDataSharing }
 											>
 												{ __(
 													'Opt in',
