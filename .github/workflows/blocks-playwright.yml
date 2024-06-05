@@ -140,5 +140,5 @@ jobs:
               uses: ./packages/report-flaky-tests
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
-                  label: 'metric: flaky e2e test'
+                  label: 'team: Kirigami & Origami'
                   artifact-path: flaky-tests
