@@ -159,11 +159,11 @@ jobs:
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
               
             - name: 'Upload artifacts'
-              if: ${{ always() && matrix.resultsPath != '' }}
+              if: ${{ always() && matrix.report.resultsPath != '' }}
               uses: actions/upload-artifact@v4
               with:
-                name: '${{ matrix.resultsBlobName }}-${{ strategy.job-index }}'
-                path: '${{ matrix.projectPath }}/${{ matrix.resultsPath }}'
+                name: '${{ matrix.report.resultsBlobName }}-${{ strategy.job-index }}'
+                path: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
                 retention-days: 1
                 compression-level: 9
 
