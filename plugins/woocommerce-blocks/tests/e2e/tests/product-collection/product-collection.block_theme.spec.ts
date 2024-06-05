@@ -786,24 +786,18 @@ test.describe( 'Product Collection', () => {
 		} );
 
 		test( 'Product Catalog Collection can be added in product archive and syncs query with template', async ( {
-			requestUtils,
 			pageObject,
 			editor,
 			admin,
 		} ) => {
-			const template = await requestUtils.createTemplate( 'wp_template', {
-				slug: 'product-catalog',
-				title: 'Custom Product Catalog',
-				content: '',
-			} );
-
 			await admin.visitSiteEditor( {
-				postId: template.id,
+				postId: 'woocommerce/woocommerce//archive-product',
 				postType: 'wp_template',
-				canvas: 'edit',
 			} );
 
 			await editor.enterEditMode();
+			await editor.setContent( '' );
+
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInTemplate();
 			await editor.openDocumentSettingsSidebar();
