@@ -1,10 +1,10 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
-use Automattic\Jetpack\Constants;
 
 /**
  * CheckoutTrait
@@ -88,6 +88,11 @@ trait CheckoutTrait {
 		} catch ( \Exception $e ) {
 			$additional_data = [];
 
+			/**
+			 * Allows to check if WP_DEBUG mode is enabled before returning previous Exception.
+			 *
+			 * @param bool The WP_DEBUG mode.
+			 */
 			if ( apply_filters( 'woocommerce_return_previous_exceptions', Constants::is_true( 'WP_DEBUG' ) ) && $e->getPrevious() ) {
 				$additional_data = [
 					'previous' => get_class( $e->getPrevious() ),
