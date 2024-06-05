@@ -363,8 +363,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		 *
 		 * @since 4.9.1
 		 *
-		 * @param string @last_order_id The last order id as retrieved from the database.
-		 * @param WC_Customer The customer whose last order id is being retrieved.
+		 * @param string      $last_order_id The last order id as retrieved from the database.
+		 * @param WC_Customer $customer      The customer whose last order id is being retrieved.
 		 *
 		 * @return string The actual last order id to use.
 		 */
