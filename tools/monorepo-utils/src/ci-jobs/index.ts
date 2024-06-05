@@ -12,7 +12,6 @@ import { buildProjectGraph } from './lib/project-graph';
 import { getFileChanges } from './lib/file-changes';
 import { createJobsForChanges } from './lib/job-processing';
 import { isGithubCI } from '../core/environment';
-import { testTypes } from './lib/config';
 
 const program = new Command( 'ci-jobs' )
 	.description(
