@@ -341,12 +341,14 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return WC_Order|false
 	 */
 	public function get_last_order( &$customer ) {
-		//phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		/**
 		 * Filters the id of the last order from a given customer.
 		 *
+		 * @since 4.9.1
+		 *
 		 * @param string @last_order_id The last order id as retrieved from the database.
 		 * @param WC_Customer The customer whose last order id is being retrieved.
+		 *
 		 * @return string The actual last order id to use.
 		 */
 		$last_order_id = apply_filters(
