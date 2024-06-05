@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
+import { parse, synchronizeBlocksWithTemplate } from '@wordpress/blocks';
 import {
 	createElement,
 	useMemo,
@@ -40,8 +40,6 @@ import {
 	useEntityRecord,
 } from '@wordpress/core-data';
 
-const isProductEditorTemplateSystemEnabled =
-	window.wcAdminFeatures[ 'product-editor-template-system' ];
 /**
  * Internal dependencies
  */
@@ -88,7 +86,12 @@ export function BlockEditor( {
 	productId,
 	setIsEditorLoading,
 }: BlockEditorProps ) {
-	const [ , setSelectedProductFormId ] = useState< number | null >( null );
+	const isProductEditorTemplateSystemEnabled =
+		!! window.wcAdminFeatures?.[ 'product-editor-template-system' ];
+
+	const [ selectedProductFormId, setSelectedProductFormId ] = useState<
+		number | null
+	>( null );
 
 	useConfirmUnsavedProductChanges( postType );
 
@@ -215,20 +218,19 @@ export function BlockEditor( {
 
 	// Pull the product templates from the store.
 	const productForms = useSelect( ( sel ) => {
-		if ( ! isProductEditorTemplateSystemEnabled ) {
-			return [];
-		}
-
-		return sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
-			per_page: -1,
-		} );
+		return (
+			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
+				per_page: -1,
+			} ) || []
+		);
 	}, [] ) as ProductFormTemplateProps[];
 
-	// Set the defailt product form template id.
+	// Set the defailt product form template ID.
 	useEffect( () => {
 		if ( ! productForms.length ) {
 			return;
 		}
+
 		setSelectedProductFormId( productForms[ 0 ].id );
 	}, [ productForms ] );
 
@@ -244,12 +246,28 @@ export function BlockEditor( {
 			return;
 		}
 
+		// PFT: pick and parse the product form template, if it exists.
+		const productFormPost = productForms.find(
+			( form ) => form.id === selectedProductFormId
+		);
+
+		let productFormTemplate;
+		if ( productFormPost && isProductEditorTemplateSystemEnabled ) {
+			productFormTemplate = parse( productFormPost.content.raw );
+		}
+
 		const blockInstances = synchronizeBlocksWithTemplate(
 			[],
 			layoutTemplate.blockTemplates
 		);
 
-		onChange( blockInstances, {} );
+		/*
+		 * If the product form template is not available, use the block instances.
+		 * ToDo: Remove this fallback once the product form template is stable/available.
+		 */
+		const editorTemplate = productFormTemplate ?? blockInstances;
+
+		onChange( editorTemplate, {} );
 
 		dispatch( 'core/editor' ).updateEditorSettings( {
 			...settings,
@@ -266,7 +284,7 @@ export function BlockEditor( {
 		// the blocks by calling onChange.
 		//
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ isEditorLoading, productId ] );
+	}, [ isEditorLoading, productId, productForms ] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( selectCore ) => {
