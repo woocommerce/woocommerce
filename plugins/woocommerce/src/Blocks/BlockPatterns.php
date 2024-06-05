@@ -138,8 +138,6 @@ class BlockPatterns {
 			return;
 		}
 
-		$this->ptk_patterns_store = new PTKPatternsStore( new PTKClient() );
-
 		$patterns = $this->ptk_patterns_store->get_patterns();
 		if ( empty( $patterns ) ) {
 			wc_get_logger()->warning(

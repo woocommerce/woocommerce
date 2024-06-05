@@ -146,6 +146,28 @@ const installAndActivateTheme = async (
 	}
 };
 
+const installPatterns = async () => {
+	const isTrackingEnabled = window.wcTracks?.isEnabled || false;
+	if ( ! isTrackingEnabled ) {
+		return;
+	}
+
+	try {
+		const { success } = await apiFetch< {
+			success: boolean;
+		} >( {
+			path: '/wc/private/patterns',
+			method: 'POST',
+		} );
+
+		if ( ! success ) {
+			throw new Error( 'Fetching patterns failed' );
+		}
+	} catch ( error ) {
+		throw error;
+	}
+};
+
 const installFontFamilies = async () => {
 	const isTrackingEnabled = window.wcTracks?.isEnabled || false;
 	if ( ! isTrackingEnabled ) {
@@ -252,6 +274,7 @@ export const services = {
 	installAndActivateTheme,
 	createProducts,
 	installFontFamilies,
+	installPatterns,
 	updateGlobalStylesWithDefaultValues,
 	enableTracking,
 };
