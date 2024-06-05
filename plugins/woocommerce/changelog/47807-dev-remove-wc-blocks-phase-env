@@ -1,4 +1,4 @@
 Significance: minor
 Type: dev
 
-Remove WOOCOMMERCE_BLOCKS_PHASE completely from the monorepo.
+Remove WOOCOMMERCE_BLOCKS_PHASE completely from the monorepo, introduce BUNDLE_EXPERIMENTAL_BLOCKS just for the purpose of building/bundling experimental blocks
