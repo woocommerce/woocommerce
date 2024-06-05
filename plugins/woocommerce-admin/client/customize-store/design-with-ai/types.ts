@@ -40,6 +40,7 @@ export type designWithAiStateMachineContext = {
 	// we can retrieve them in preBusinessInfoDescription and then assign them here
 	spawnSaveDescriptionToOptionRef?: ReturnType< typeof spawn >;
 	aiOnline: boolean;
+	isBlockTheme: boolean;
 };
 export type designWithAiStateMachineEvents =
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
