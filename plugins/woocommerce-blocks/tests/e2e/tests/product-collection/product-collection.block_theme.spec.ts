@@ -786,11 +786,23 @@ test.describe( 'Product Collection', () => {
 		} );
 
 		test( 'Product Catalog Collection can be added in product archive and syncs query with template', async ( {
+			requestUtils,
 			pageObject,
 			editor,
+			admin,
 		} ) => {
-			await pageObject.goToEditorTemplate();
-			await editor.setContent( '' );
+			const template = await requestUtils.createTemplate( 'wp_template', {
+				slug: 'product-catalog',
+				title: 'Custom Product Catalog',
+				content: '',
+			} );
+
+			await admin.visitSiteEditor( {
+				postId: template.id,
+				postType: 'wp_template',
+				canvas: 'edit',
+			} );
+
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInTemplate();
 			await editor.openDocumentSettingsSidebar();
@@ -1249,24 +1261,28 @@ test.describe( 'Product Collection', () => {
 			slug: 'taxonomy-product_cat',
 			frontendPage: '/product-category/music/',
 			legacyBlockName: 'woocommerce/legacy-template',
+			expectedProductsCount: 2,
 		},
 		'taxonomy-product_tag': {
 			templateTitle: 'Product Tag',
 			slug: 'taxonomy-product_tag',
 			frontendPage: '/product-tag/recommended/',
 			legacyBlockName: 'woocommerce/legacy-template',
+			expectedProductsCount: 2,
 		},
 		'archive-product': {
 			templateTitle: 'Product Catalog',
 			slug: 'archive-product',
 			frontendPage: '/shop/',
 			legacyBlockName: 'woocommerce/legacy-template',
+			expectedProductsCount: 16,
 		},
 		'product-search-results': {
 			templateTitle: 'Product Search Results',
 			slug: 'product-search-results',
 			frontendPage: '/?s=shirt&post_type=product',
 			legacyBlockName: 'woocommerce/legacy-template',
+			expectedProductsCount: 3,
 		},
 	};
 
@@ -1275,6 +1291,7 @@ test.describe( 'Product Collection', () => {
 		slug,
 		frontendPage,
 		legacyBlockName,
+		expectedProductsCount,
 	} of Object.values( templates ) ) {
 		test.describe( `${ templateTitle } template`, () => {
 			test( 'Product Collection block matches with classic template block', async ( {
@@ -1286,6 +1303,9 @@ test.describe( 'Product Collection', () => {
 				const getProductNamesFromClassicTemplate = async () => {
 					const products = page.locator(
 						'.woocommerce-loop-product__title'
+					);
+					await expect( products ).toHaveCount(
+						expectedProductsCount
 					);
 					return products.allTextContents();
 				};
