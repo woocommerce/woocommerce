@@ -4,7 +4,6 @@
 import {
 	CommandVarOptions,
 	JobType,
-	testTypes,
 	LintJobConfig,
 	TestJobConfig,
 } from './config';
@@ -42,6 +41,7 @@ interface TestJob {
 	testEnv: TestJobEnv;
 	shardNumber: number;
 	optional: boolean;
+	testType: string;
 }
 
 /**
@@ -232,6 +232,7 @@ async function createTestJob(
 		},
 		shardNumber,
 		optional: config.optional,
+		testType: config.testType,
 	};
 
 	// We want to make sure that we're including the configuration for
@@ -268,10 +269,6 @@ async function createJobsForProject(
 		test: [],
 	};
 
-	testTypes.forEach( ( type ) => {
-		newJobs[ `${ type }Test` ] = [];
-	} );
-
 	// In order to simplify the way that cascades work we're going to recurse depth-first and check our dependencies
 	// for jobs before ourselves. This lets any cascade keys created in dependencies cascade to dependents.
 	const newCascadeKeys = [];
@@ -304,12 +301,7 @@ async function createJobsForProject(
 		}
 
 		newJobs.lint.push( ...dependencyJobs.lint );
-
-		testTypes.forEach( ( type ) => {
-			newJobs[ `${ type }Test` ].push(
-				...dependencyJobs[ `${ type }Test` ]
-			);
-		} );
+		newJobs.test.push( ...dependencyJobs.test );
 
 		// Track any new cascade keys added by the dependency.
 		// Since we're filtering out duplicates after the
@@ -402,9 +394,7 @@ async function createJobsForProject(
 
 				jobConfig.jobCreated = true;
 
-				newJobs[ `${ jobConfig.testType }Test` ].push(
-					...getShardedJobs( created, jobConfig )
-				);
+				newJobs.test.push( ...getShardedJobs( created, jobConfig ) );
 
 				// We need to track any cascade keys that this job is associated with so that
 				// dependent projects can trigger jobs with matching keys. We are expecting

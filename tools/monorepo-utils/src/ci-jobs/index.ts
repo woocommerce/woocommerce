@@ -64,13 +64,7 @@ const program = new Command( 'ci-jobs' )
 
 		if ( isGithubCI() ) {
 			setOutput( 'lint-jobs', JSON.stringify( jobs.lint ) );
-
-			testTypes.forEach( ( type ) => {
-				setOutput(
-					`${ type }-test-jobs`,
-					JSON.stringify( jobs[ `${ type }Test` ] )
-				);
-			} );
+			setOutput( 'test-jobs', JSON.stringify( jobs.test ) );
 			return;
 		}
 
@@ -86,19 +80,17 @@ const program = new Command( 'ci-jobs' )
 			Logger.notice( 'No lint jobs to run.' );
 		}
 
-		testTypes.forEach( ( type ) => {
-			if ( jobs[ `${ type }Test` ].length > 0 ) {
-				Logger.notice( `${ type } test Jobs` );
-				for ( const job of jobs[ `${ type }Test` ] ) {
-					const optional = job.optional ? ' (optional)' : '';
-					Logger.notice(
-						`-  ${ job.projectName } - ${ job.name }${ optional }`
-					);
-				}
-			} else {
-				Logger.notice( `No ${ type } test jobs to run.` );
+		if ( jobs.test.length > 0 ) {
+			Logger.notice( `Test Jobs` );
+			for ( const job of jobs.test ) {
+				const optional = job.optional ? ' (optional)' : '';
+				Logger.notice(
+					`-  ${ job.projectName } - [${ job.testType }] ${ job.name }${ optional }`
+				);
 			}
-		} );
+		} else {
+			Logger.notice( `No test jobs to run.` );
+		}
 	} );
 
 export default program;
