@@ -7,7 +7,7 @@
  */
 // @ts-ignore No types for this exist yet.
 import { BlockEditorProvider } from '@wordpress/block-editor';
-import { memo } from '@wordpress/element';
+import { memo, useContext } from '@wordpress/element';
 import { BlockInstance } from '@wordpress/blocks';
 
 /**
@@ -20,20 +20,25 @@ import {
 import { ChangeHandler } from './hooks/use-editor-blocks';
 import { Toolbar } from './toolbar/toolbar';
 import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
+import { IsResizingContext } from './resizable-frame';
 
 export const BlockPreview = ( {
 	blocks,
 	settings,
 	useSubRegistry = true,
 	onChange,
+	isPatternPreview,
 	...props
 }: {
 	blocks: BlockInstance | BlockInstance[];
 	settings: Record< string, unknown >;
 	onChange?: ChangeHandler | undefined;
 	useSubRegistry?: boolean;
+	isPatternPreview: boolean;
 } & Omit< ScaledBlockPreviewProps, 'containerWidth' > ) => {
 	const renderedBlocks = Array.isArray( blocks ) ? blocks : [ blocks ];
+
+	const isResizing = useContext( IsResizingContext );
 
 	return (
 		<>
@@ -44,8 +49,14 @@ export const BlockPreview = ( {
 				onChange={ onChange }
 				useSubRegistry={ useSubRegistry }
 			>
-				{ isFullComposabilityFeatureAndAPIAvailable() && <Toolbar /> }
-				<AutoHeightBlockPreview settings={ settings } { ...props } />
+				{ isFullComposabilityFeatureAndAPIAvailable() &&
+					! isPatternPreview &&
+					! isResizing && <Toolbar /> }
+				<AutoHeightBlockPreview
+					isPatternPreview={ isPatternPreview }
+					settings={ settings }
+					{ ...props }
+				/>
 			</BlockEditorProvider>
 		</>
 	);

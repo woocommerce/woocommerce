@@ -1,4 +1,4 @@
-const BLOCK_SELECTOR = '.block-editor-block-list__block';
+const BLOCK_SELECTOR = "[data-is-parent-block='true'], header, footer";
 
 const getBlockClientId = ( node: HTMLElement ) => {
 	while ( node && node.nodeType !== node.ELEMENT_NODE ) {
@@ -23,8 +23,6 @@ export const selectBlockOnHover = (
 	event: MouseEvent,
 	{
 		selectBlockByClientId,
-		getBlockParents,
-		setBlockEditingMode,
 	}: {
 		selectBlockByClientId: (
 			clientId: string,
@@ -42,14 +40,7 @@ export const selectBlockOnHover = (
 		return;
 	}
 
-	const blockParents = getBlockParents( blockClientId );
+	selectBlockByClientId( blockClientId, null );
 
-	if ( ! blockParents || blockParents.length === 0 ) {
-		selectBlockByClientId( blockClientId, null );
-	} else {
-		if ( setBlockEditingMode ) {
-			setBlockEditingMode( blockClientId, 'disabled' );
-		}
-		selectBlockByClientId( blockParents[ 0 ], null );
-	}
+	return blockClientId;
 };
