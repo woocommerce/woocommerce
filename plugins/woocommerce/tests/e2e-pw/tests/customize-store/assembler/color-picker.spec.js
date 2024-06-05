@@ -287,7 +287,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 	for ( const [ colorPaletteName, colors ] of Object.entries(
 		colorPalette
 	) ) {
-		test.only( `Color palette ${ colorPaletteName } should be applied`, async ( {
+		test( `Color palette ${ colorPaletteName } should be applied`, async ( {
 			assemblerPageObject,
 			page
 		} ) => {
