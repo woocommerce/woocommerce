@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
+use Automattic\Jetpack\Constants;
 
 /**
  * CheckoutTrait
@@ -86,7 +87,8 @@ trait CheckoutTrait {
 			}
 		} catch ( \Exception $e ) {
 			$additional_data = [];
-			if ( $e->getPrevious() ) {
+
+			if ( apply_filters( 'woocommerce_return_previous_exceptions', Constants::is_true( 'WP_DEBUG' ) ) && $e->getPrevious() ) {
 				$additional_data = [
 					'previous' => get_class( $e->getPrevious() ),
 				];
