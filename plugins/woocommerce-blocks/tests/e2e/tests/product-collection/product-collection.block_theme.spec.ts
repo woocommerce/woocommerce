@@ -803,6 +803,7 @@ test.describe( 'Product Collection', () => {
 				canvas: 'edit',
 			} );
 
+			await editor.enterEditMode();
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInTemplate();
 			await editor.openDocumentSettingsSidebar();
