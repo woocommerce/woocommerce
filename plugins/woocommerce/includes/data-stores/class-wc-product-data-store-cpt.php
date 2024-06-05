@@ -278,7 +278,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$product->apply_changes();
 
-		do_action( 'woocommerce_update_product', $product->get_id(), $product );
+		do_action( 'woocommerce_update_product', $product->get_id(), $product, $changes );
 	}
 
 	/**
