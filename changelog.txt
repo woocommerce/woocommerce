@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 8.9.2 2024-06-04 =
+
+**WooCommerce**
+
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
+
+
 = 8.9.1 2024-05-21 =
 
 **WooCommerce**
