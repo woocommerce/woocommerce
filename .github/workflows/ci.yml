@@ -7,13 +7,6 @@ on:
             - 'release/*'
         tags:
           - '*'
-    workflow_call:
-        inputs:
-            trigger:
-                description: 'Type of run to trigger. E.g. daily-e2e, release-checks, etc.'
-                required: true
-                default: 'default'
-                type: string
 
 concurrency:
     group: '${{ github.workflow }}-${{ github.ref }}'
