@@ -787,10 +787,13 @@ test.describe( 'Product Collection', () => {
 
 		test( 'Product Catalog Collection can be added in product archive and syncs query with template', async ( {
 			pageObject,
+			editor,
 		} ) => {
 			await pageObject.goToEditorTemplate();
-			await pageObject.focusProductCollection();
-			await pageObject.clickDisplaySettings();
+			await editor.setContent( '' );
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInTemplate();
+			await editor.openDocumentSettingsSidebar();
 
 			const sidebarSettings = await pageObject.locateSidebarSettings();
 			const input = sidebarSettings.locator(
@@ -1130,11 +1133,7 @@ test.describe( 'Product Collection', () => {
 		];
 
 		genericArchiveTemplates.forEach( ( { name, path } ) => {
-			test( `${ name } template`, async ( {
-				editor,
-				page,
-				pageObject,
-			} ) => {
+			test( `${ name } template`, async ( { editor, pageObject } ) => {
 				await pageObject.goToEditorTemplate( path );
 				await pageObject.focusProductCollection();
 
@@ -1146,7 +1145,7 @@ test.describe( 'Product Collection', () => {
 				await expect( previewButtonLocator ).toBeVisible();
 
 				// The preview button should be hidden when the block is not selected
-				await page.click( 'body' );
+				await editor.canvas.locator( 'body' ).click();
 				await expect( previewButtonLocator ).toBeHidden();
 
 				// Preview button should be visible when any of inner block is selected
@@ -1232,4 +1231,79 @@ test.describe( 'Product Collection', () => {
 			await expect( productTemplate ).toBeVisible();
 		} );
 	} );
+
+	const templates = {
+		// This test is disabled because archives are disabled for attributes by default. This can be uncommented when this is toggled on.
+		//'taxonomy-product_attribute': {
+		//	templateTitle: 'Product Attribute',
+		//	slug: 'taxonomy-product_attribute',
+		//	frontendPage: '/product-attribute/color/',
+		//	legacyBlockName: 'woocommerce/legacy-template',
+		//},
+		'taxonomy-product_cat': {
+			templateTitle: 'Product Category',
+			slug: 'taxonomy-product_cat',
+			frontendPage: '/product-category/music/',
+			legacyBlockName: 'woocommerce/legacy-template',
+		},
+		'taxonomy-product_tag': {
+			templateTitle: 'Product Tag',
+			slug: 'taxonomy-product_tag',
+			frontendPage: '/product-tag/recommended/',
+			legacyBlockName: 'woocommerce/legacy-template',
+		},
+		'archive-product': {
+			templateTitle: 'Product Catalog',
+			slug: 'archive-product',
+			frontendPage: '/shop/',
+			legacyBlockName: 'woocommerce/legacy-template',
+		},
+		'product-search-results': {
+			templateTitle: 'Product Search Results',
+			slug: 'product-search-results',
+			frontendPage: '/?s=shirt&post_type=product',
+			legacyBlockName: 'woocommerce/legacy-template',
+		},
+	};
+
+	for ( const {
+		templateTitle,
+		slug,
+		frontendPage,
+		legacyBlockName,
+	} of Object.values( templates ) ) {
+		test.describe( `${ templateTitle } template`, () => {
+			test( 'Product Collection block matches with classic template block', async ( {
+				pageObject,
+				admin,
+				editor,
+				page,
+			} ) => {
+				const getProductNamesFromClassicTemplate = async () => {
+					const products = page.locator(
+						'.woocommerce-loop-product__title'
+					);
+					return products.allTextContents();
+				};
+
+				await admin.visitSiteEditor( {
+					postId: `woocommerce/woocommerce//${ slug }`,
+					postType: 'wp_template',
+				} );
+				await editor.enterEditMode();
+				await editor.insertBlock( { name: legacyBlockName } );
+				await editor.canvas.locator( 'body' ).click();
+				await editor.saveSiteEditorEntities();
+				await page.goto( frontendPage );
+				await pageObject.refreshLocators( 'frontend' );
+
+				const classicProducts =
+					await getProductNamesFromClassicTemplate();
+				const productCollectionProducts =
+					await pageObject.getProductNames();
+
+				expect( classicProducts ).toEqual( productCollectionProducts );
+			} );
+		} );
+	}
 } );

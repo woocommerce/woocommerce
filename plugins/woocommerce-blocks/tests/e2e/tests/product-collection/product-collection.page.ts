@@ -601,6 +601,11 @@ class ProductCollectionPage {
 		return this.page.getByRole( 'heading' );
 	}
 
+	async getProductNames() {
+		const products = this.page.locator( '.wp-block-post-title' );
+		return products.allTextContents();
+	}
+
 	/**
 	 * Private methods to be used by the class.
 	 */
