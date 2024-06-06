@@ -33,47 +33,6 @@ export const fetchThemeCards = async () => {
 	return themes;
 };
 
-export const fetchActiveThemeHasMods = async () => {
-	const currentTemplatePromise =
-		// @ts-expect-error No types for this exist yet.
-		resolveSelect( coreStore ).__experimentalGetTemplateForLink( '/' );
-
-	const styleRevsPromise =
-		// @ts-expect-error No types for this exist yet.
-		resolveSelect( coreStore ).getCurrentThemeGlobalStylesRevisions();
-
-	// @ts-expect-error No types for this exist yet.
-	const hasModifiedPagesPromise = resolveSelect( coreStore ).getEntityRecords(
-		'postType',
-		'page',
-		{
-			per_page: 100,
-			_fields: [ 'id', '_links.version-history' ],
-			orderby: 'menu_order',
-			order: 'asc',
-		}
-	);
-
-	const [ currentTemplate, styleRevs, rawPages ] = await Promise.all( [
-		currentTemplatePromise,
-		styleRevsPromise,
-		hasModifiedPagesPromise,
-	] );
-
-	const hasModifiedPages = rawPages?.some(
-		( page: { _links: { [ key: string ]: string[] } } ) => {
-			return page._links?.[ 'version-history' ]?.length > 1;
-		}
-	);
-
-	const activeThemeHasMods =
-		!! currentTemplate?.modified ||
-		styleRevs?.length > 0 ||
-		hasModifiedPages;
-
-	return { activeThemeHasMods };
-};
-
 export const fetchCustomizeStoreCompleted = async () => {
 	const task = await resolveSelect( ONBOARDING_STORE_NAME ).getTask(
 		'customize-store'
@@ -144,6 +103,19 @@ const fetchIsFontLibraryAvailable = async () => {
 	}
 };
 
+const fetchIsPTKPatternsAPIAvailable = async () => {
+	try {
+		await apiFetch( {
+			path: '/wc/private/patterns',
+			method: 'GET',
+		} );
+
+		return true;
+	} catch ( err ) {
+		return false;
+	}
+};
+
 export const setFlags = async () => {
 	if ( ! isIframe( window ) ) {
 		// To improve the readability of the code, we want to use a dictionary
@@ -158,6 +130,14 @@ export const setFlags = async () => {
 				window.__wcCustomizeStore = {
 					...window.__wcCustomizeStore,
 					isFontLibraryAvailable,
+				};
+			} )(),
+			PTK_PATTERNS_API_AVAILABLE: ( async () => {
+				const isPTKPatternsAPIAvailable =
+					await fetchIsPTKPatternsAPIAvailable();
+				window.__wcCustomizeStore = {
+					...window.__wcCustomizeStore,
+					isPTKPatternsAPIAvailable,
 				};
 			} )(),
 		};

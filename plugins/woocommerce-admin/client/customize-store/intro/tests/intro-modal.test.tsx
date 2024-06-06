@@ -44,6 +44,7 @@ describe( 'Intro Modals', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: true,
 				} }
 				currentState={ 'intro' }
@@ -100,6 +101,7 @@ describe( 'Intro Modals', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
@@ -154,6 +156,7 @@ describe( 'Intro Modals', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }

@@ -9,7 +9,7 @@ import {
 	useImperativeHandle,
 	useRef,
 } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { isObject } from '@woocommerce/types';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
@@ -225,7 +225,7 @@ const ValidatedTextInput = forwardRef<
 
 		return (
 			<TextInput
-				className={ classnames( className, {
+				className={ clsx( className, {
 					'has-error': hasError,
 				} ) }
 				aria-invalid={ hasError === true }

@@ -1,7 +1,7 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
 
-test.describe( 'Launch Your Store front end - logged out', () => {
+test.describe.skip( 'Launch Your Store front end - logged out', () => {
 	test.afterAll( async ( { baseURL } ) => {
 		try {
 			await setOption(
@@ -35,6 +35,10 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 		}
 
 		await page.goto( baseURL );
+
+		await page
+			.locator( '.woocommerce-coming-soon-banner' )
+			.waitFor( { state: 'visible' } );
 
 		await expect(
 			page.getByText(

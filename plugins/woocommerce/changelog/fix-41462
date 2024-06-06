@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Honor empty "additional content" setting in e-mails.

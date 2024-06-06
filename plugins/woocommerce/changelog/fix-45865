@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Allow HPOS CLI cleanup tool to remove metadata for deleted orders.

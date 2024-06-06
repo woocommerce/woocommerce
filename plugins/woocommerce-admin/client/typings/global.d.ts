@@ -13,6 +13,10 @@ declare global {
 				currentUserData: {
 					first_name: string;
 				};
+				plugins: {
+					activePlugins: string[];
+					installedPlugins: string[];
+				},
 				wcpayWelcomePageIncentive: {
 					id: string;
 					description: string;
@@ -29,6 +33,7 @@ declare global {
 			'activity-panels': boolean;
 			analytics: boolean;
 			coupons: boolean;
+			'customer-effort-score-tracks': boolean;
 			homescreen: boolean;
 			marketing: boolean;
 			'minified-js': boolean;
@@ -37,6 +42,7 @@ declare global {
 			onboarding: boolean;
 			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
+			'pattern-toolkit-full-composability': boolean;
 			'product-pre-publish-modal': boolean;
 			'product-custom-fields': boolean;
 			'remote-inbox-notifications': boolean;
