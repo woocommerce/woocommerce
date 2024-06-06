@@ -10,6 +10,18 @@
 		padding: $grid-unit-20;
 	}
 
+	&__controls {
+		&:first-child {
+			padding-top: $grid-unit-20;
+		}
+
+		padding-top: 0;
+
+		.components-base-control.components-toggle-control {
+			margin: 0;
+		}
+	}
+
 	&__actions {
 		justify-content: flex-end;
 	}
