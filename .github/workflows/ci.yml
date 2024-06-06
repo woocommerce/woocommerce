@@ -91,12 +91,14 @@ jobs:
               name: 'Checkout'
               with:
                   fetch-depth: 0
+                  
             - uses: './.github/actions/setup-woocommerce-monorepo'
               name: 'Setup Monorepo'
               id: 'setup-monorepo'
               with:
                   install: '${{ matrix.projectName }}...'
-                  build: '${{ matrix.projectName }}'
+                  build: false
+                  
             - name: 'Lint'
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
