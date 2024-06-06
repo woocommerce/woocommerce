@@ -13,21 +13,24 @@ class ProductFormsController {
 	/**
 	 * Set up the product forms controller.
 	 */
-	public function init() {
-
+	public function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingFinal, WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag -- Not an injection.
 		// Migrate form templates after WooCommerce plugin update.
 		add_action( 'upgrader_process_complete', array( $this, 'migrate_form_templates' ), 10, 2 );
 	}
 
 	/**
 	 * Migrate form templates.
+	 *
+	 * @param \WP_Upgrader $upgrader The WP_Upgrader instance.
+	 * @param array        $hook_extra Extra arguments passed to hooked filters.
+	 * @return void
 	 */
 	public function migrate_form_templates( \WP_Upgrader $upgrader, array $hook_extra ) {
 		// Check if the action is an `update` or `install` action for a plugin.
 		if (
-			$hook_extra['action'] !== 'install' &&
-			$hook_extra['action'] !== 'update' ||
-			$hook_extra['type'] !== 'plugin'
+			'install' !== $hook_extra['action'] &&
+			'update' !== $hook_extra['action'] ||
+			'plugin' !== $hook_extra['type']
 		) {
 			return;
 		}
@@ -35,7 +38,7 @@ class ProductFormsController {
 		$updated_plugins = $hook_extra['plugins'];
 
 		// Check if WooCommerce plugin was updated.
-		if ( ! in_array( 'woocommerce/woocommerce.php', $updated_plugins ) ) {
+		if ( ! in_array( 'woocommerce/woocommerce.php', $updated_plugins, true ) ) {
 			return;
 		}
 
@@ -48,13 +51,12 @@ class ProductFormsController {
 		$templates = apply_filters(
 			'woocommerce_product_form_templates',
 			array(
-				'simple'
+				'simple',
 			)
 		);
 
 		foreach ( $templates as $slug ) {
 			$file_path = BlockTemplateUtils::get_block_template_path( $slug );
-			error_log( $file_path );
 
 			if ( ! $file_path ) {
 				continue;
@@ -67,7 +69,7 @@ class ProductFormsController {
 					'name'           => $slug,
 					'post_type'      => 'product_form',
 					'post_status'    => 'any',
-					'posts_per_page' => 1
+					'posts_per_page' => 1,
 				)
 			);
 

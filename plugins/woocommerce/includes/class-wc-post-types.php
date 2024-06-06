@@ -385,7 +385,8 @@ class WC_Post_Types {
 				apply_filters(
 					'woocommerce_register_post_type_product_form',
 					array(
-						'labels'             => array(
+						'labels'
+						=> array(
 							'name'                  => __( 'Product Forms', 'woocommerce' ),
 							'singular_name'         => __( 'Product Form', 'woocommerce' ),
 							'all_items'             => __( 'All Product Form', 'woocommerce' ),
@@ -413,22 +414,22 @@ class WC_Post_Types {
 							'item_link'             => __( 'Product form Link', 'woocommerce' ),
 							'item_link_description' => __( 'A link to a product form.', 'woocommerce' ),
 						),
-						'description'        => __( 'This is where you can set up product forms for various product types in your dashboard.', 'woocommerce' ),
-						'public'             => true,
-						'menu_icon'          => 'dashicons-forms',
-						'capability_type'    => 'product',
-						'map_meta_cap'       => true,
-						'publicly_queryable' => true,
-						'hierarchical'       => false, // Hierarchical causes memory issues - WP loads all records!
-						'rewrite'            => $permalinks['product_rewrite_slug'] ? array(
+						'description'         => __( 'This is where you can set up product forms for various product types in your dashboard.', 'woocommerce' ),
+						'public'              => true,
+						'menu_icon'           => 'dashicons-forms',
+						'capability_type'     => 'product',
+						'map_meta_cap'        => true,
+						'publicly_queryable'  => true,
+						'hierarchical'        => false, // Hierarchical causes memory issues - WP loads all records!
+						'rewrite'             => $permalinks['product_rewrite_slug'] ? array(
 							'slug'       => $permalinks['product_rewrite_slug'],
 							'with_front' => false,
 							'feeds'      => true,
 						) : false,
-						'query_var'          => true,
-						'supports'           => $supports,
-						'has_archive'        => $has_archive,
-						'show_in_rest'       => true,
+						'query_var'           => true,
+						'supports'            => $supports,
+						'has_archive'         => $has_archive,
+						'show_in_rest'        => true,
 						'show_ui'             => true,
 						'show_in_menu'        => true,
 						'exclude_from_search' => true,
