@@ -34,6 +34,8 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$product->set_name( 'My Product' );
 		$product->save();
 
+		$this->assertEquals( 'publish', $product->get_status() );
+
 		$read_product = new WC_Product( $product->get_id() );
 
 		$this->assertEquals( '42', $read_product->get_regular_price() );
