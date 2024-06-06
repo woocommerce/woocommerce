@@ -7,12 +7,14 @@ class SkippedReporter {
 
 	onTestEnd( testCase, testResult ) {
 		if ( testResult.status === 'skipped' ) {
-			this.skippedTests.push( testCase.title );
+			this.skippedTests.push(
+				`- ${ testCase.title } in ${ testCase.file } on line ${ testCase.line }`
+			);
 		}
 	}
 
 	onEnd() {
-		const skippedTestsMessage = this.skippedTests.join( ', ' );
+		const skippedTestsMessage = this.skippedTests.join( '%0A' );
 		if ( this.skippedTests.length > 0 ) {
 			// Output a GitHub Actions annotation
 			console.log(
