@@ -11,13 +11,13 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import classNames from 'classnames';
 import {
 	Button,
 	ToggleControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
-import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -69,7 +69,7 @@ export function VariationStockStatusForm( {
 	);
 
 	function validateStockQuantity() {
-		let error: string | undefined = undefined;
+		let error: string | undefined;
 
 		if (
 			value.manage_stock &&
@@ -109,6 +109,7 @@ export function VariationStockStatusForm( {
 			),
 			{
 				Link: (
+					// eslint-disable-next-line jsx-a11y/anchor-has-content
 					<a
 						href={ getAdminLink(
 							'admin.php?page=wc-settings&tab=products&section=inventory'
