@@ -190,11 +190,11 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 									case 'action':
 										$setup_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
 										if ( wc_string_to_bool( $gateway->enabled ) ) {
-											$cta_text = 'Manage';
-											$cta_label = 'Manage the "%s" payment method';
+											/* Translators: %s Payment gateway name. */
+											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Manage the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Manage', 'woocommerce' ) . '</a>';
 										} else {
-											$cta_text = 'Finish set up';
-											$cta_label = 'Set up the "%s" payment method';
+											/* Translators: %s Payment gateway name. */
+											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish set up', 'woocommerce' ) . '</a>';
 										}
 
 										// Override the behaviour for WooPayments plugin.
@@ -205,17 +205,15 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 										) {
 											if ( ! WooCommercePayments::is_connected() || WooCommercePayments::is_account_partially_onboarded() ) {
 												// The CTA text and label is "Finish set up" if the account is not connected or not completely onboarded.
-												$cta_text = 'Finish set up';
-												$cta_label = 'Set up the "%s" payment method';
 												$setup_url = WC_Payments_Account::get_connect_url(); // Plugin will handle the redirection to the connect page or directly to the provider (e.g. Stripe).
+												/* Translators: %s Payment gateway name. */
+												echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish set up', 'woocommerce' ) . '</a>';
 											} else {
-												// If the account is fully onboarded, the CTA text and label is "Manage" despite the gateway is enabled or not.
-												$cta_text = 'Manage';
-												$cta_label = 'Manage the "%s" payment method';
+												// If the account is fully onboarded, the CTA text and label is "Manage" regardless gateway is enabled or not.
+												/* Translators: %s Payment gateway name. */
+												echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Manage the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Manage', 'woocommerce' ) . '</a>';
 											}
 										}
-										/* Translators: %s Payment gateway name. */
-										echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( $cta_label, 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( $cta_text, 'woocommerce' ) . '</a>';
 										break;
 									case 'status':
 										echo '<a class="wc-payment-gateway-method-toggle-enabled" href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '">';
