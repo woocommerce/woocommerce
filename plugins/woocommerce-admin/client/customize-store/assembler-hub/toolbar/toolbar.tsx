@@ -1,33 +1,47 @@
+/* eslint-disable @woocommerce/dependency-group */
 /**
  * External dependencies
  */
 
-import { useSelect } from '@wordpress/data';
 import { BlockInstance } from '@wordpress/blocks';
 import { ToolbarGroup, Toolbar as WPToolbar } from '@wordpress/components';
-import { useMemo } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { useEffect, useMemo, useState } from '@wordpress/element';
+
 import {
 	BlockMover,
 	BlockPopover,
 	store as blockEditorStore,
-	// @ts-expect-error No types for this exist yet.
+	// @ts-expect-error missing type
 } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
-import './style.scss';
+import { useQuery } from '@woocommerce/navigation';
 import Shuffle from './shuffle';
+import Delete from './delete';
+import './style.scss';
+import { useIsNoBlocksPlaceholderPresent } from '../hooks/block-placeholder/use-is-no-blocks-placeholder-present';
+
+const isHomepageUrl = ( path: string ) => {
+	return path === '/customize-store/assembler-hub/homepage';
+};
 
 export const Toolbar = () => {
+	const [ isHomepageSidebarOpen, setIsHomepageSidebarOpen ] =
+		useState( false );
+
 	const {
 		currentBlock,
 		nextBlock,
 		previousBlock,
+		allBlocks,
 	}: {
 		currentBlock: BlockInstance | undefined;
 		nextBlock: BlockInstance | undefined;
 		previousBlock: BlockInstance | undefined;
+		allBlocks: BlockInstance[];
 	} = useSelect( ( select ) => {
 		const selectedBlockId =
 			// @ts-expect-error missing type
@@ -54,13 +68,32 @@ export const Toolbar = () => {
 			// @ts-expect-error missing type
 		).getBlocksByClientId( [ previousBlockClientId ] );
 
+		const blocks = select(
+			blockEditorStore
+			// @ts-expect-error missing type
+		).getBlocks();
+
 		return {
 			currentBlock: current,
 			nextBlock: next,
 			previousBlock: previous,
+			allBlocks: blocks,
 		};
 	}, [] );
 
+	const firstBlock = useMemo( () => {
+		return allBlocks.find(
+			( block: BlockInstance ) => block.name !== 'core/template-part'
+		);
+	}, [ allBlocks ] );
+
+	const query = useQuery();
+
+	useEffect( () => {
+		const path = query.path;
+
+		setIsHomepageSidebarOpen( isHomepageUrl( path ) );
+	}, [ query ] );
 	const { isPreviousBlockTemplatePart, isNextBlockTemplatePart } =
 		useMemo( () => {
 			return {
@@ -71,14 +104,37 @@ export const Toolbar = () => {
 			};
 		}, [ nextBlock?.name, previousBlock?.name ] );
 
+	const selectedBlockClientId =
+		currentBlock?.clientId ?? firstBlock?.clientId;
+
+	const isNoBlocksPlaceholderPresent =
+		useIsNoBlocksPlaceholderPresent( allBlocks );
+
+	const isHeaderOrFooter = useMemo( () => {
+		const selectedBlock = allBlocks.find( ( { clientId } ) => {
+			return clientId === selectedBlockClientId;
+		} );
+
+		return selectedBlock?.name === 'core/template-part';
+	}, [ allBlocks, selectedBlockClientId ] );
+
+	if (
+		! isHomepageSidebarOpen ||
+		! selectedBlockClientId ||
+		isNoBlocksPlaceholderPresent ||
+		isHeaderOrFooter
+	) {
+		return null;
+	}
+
 	return (
-		<BlockPopover clientId={ currentBlock?.clientId }>
+		<BlockPopover clientId={ selectedBlockClientId }>
 			<div className="woocommerce-customize-store-block-toolbar">
 				<WPToolbar label="Options">
 					<>
 						<ToolbarGroup>
 							<BlockMover
-								clientIds={ [ currentBlock?.clientId ] }
+								clientIds={ [ selectedBlockClientId ] }
 								isBlockMoverUpButtonDisabled={
 									isPreviousBlockTemplatePart
 								}
@@ -87,9 +143,8 @@ export const Toolbar = () => {
 								}
 							/>
 						</ToolbarGroup>
-						{ currentBlock && (
-							<Shuffle clientId={ currentBlock?.clientId } />
-						) }
+						<Shuffle clientId={ selectedBlockClientId } />
+						<Delete clientId={ selectedBlockClientId } />
 					</>
 				</WPToolbar>
 			</div>
