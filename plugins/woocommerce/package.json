@@ -544,7 +544,11 @@
 						"pull_request",
 						"push",
 						"release-checks"
-					]
+					],
+					"report": {
+						"resultsBlobName": "blocks-e2e-report",
+						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results"
+					}
 				}
 			]
 		}
