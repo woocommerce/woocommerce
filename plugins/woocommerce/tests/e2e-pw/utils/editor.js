@@ -62,7 +62,7 @@ const insertBlockByShortcut = async ( page, blockName ) => {
 		.getByRole( 'document', {
 			name: 'Empty block; start writing or type forward slash to choose a block',
 		} )
-		.fill( `/${ blockName }` );
+		.pressSequentially( `/${ blockName }` );
 	await expect(
 		page.getByRole( 'option', { name: blockName, exact: true } )
 	).toBeVisible();
