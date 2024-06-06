@@ -55,15 +55,19 @@ const insertBlock = async ( page, blockName ) => {
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
 };
 
-const insertBlockByShortcut = async ( page, blockShortcut ) => {
+const insertBlockByShortcut = async ( page, blockName ) => {
 	const canvas = await getCanvas( page );
 	await canvas.getByRole( 'button', { name: 'Add default block' } ).click();
 	await canvas
 		.getByRole( 'document', {
 			name: 'Empty block; start writing or type forward slash to choose a block',
 		} )
-		.fill( blockShortcut );
-	await page.keyboard.press( 'Enter' );
+		.fill( `/${ blockName }` );
+	await expect(
+		page.getByRole( 'button', { name: blockName, exact: true } )
+	).toBeVisible();
+	await page.getByRole( 'button', { name: blockName, exact: true } ).click();
+	await expect( page.getByLabel( `Block: ${ blockName }` ) ).toBeVisible();
 };
 
 const transformIntoBlocks = async ( page ) => {
