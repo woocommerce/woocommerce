@@ -429,7 +429,10 @@ class WC_Post_Types {
 						'supports'           => $supports,
 						'has_archive'        => $has_archive,
 						'show_in_rest'       => true,
-						'show_ui'            => false,
+						'show_ui'             => true,
+						'show_in_menu'        => true,
+						'exclude_from_search' => true,
+						'show_in_nav_menus'   => false,
 					)
 				)
 			);
