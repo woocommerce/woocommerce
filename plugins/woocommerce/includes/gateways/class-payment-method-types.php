@@ -3,7 +3,7 @@
  * Class Payment_Method_Types
  *
  * This class contains constants for payment method types.
- * If payment method type is missing, add it.
+ * If a payment method type is missing, add it.
  */
 class Payment_Method_Types {
 
@@ -17,24 +17,21 @@ class Payment_Method_Types {
     const CREDIT_CARD = 'credit_card';
     const BANCONTACT = 'bancontact';
     const IDEAL = 'ideal';
-    
+
+    private static $express_checkout_methods = [
+        self::APPLE_PAY,
+        self::GOOGLE_PAY
+    ];
+
     public static function is_valid_type( $type ) {
         return in_array( $type, self::get_types(), true );
     }
 
-    private static  function get_types() {
-        return [
-            self::PAYPAL,
-            self::AUTHORIZE_NET,
-            self::APPLE_PAY,
-            self::GOOGLE_PAY,
-            self::AFFIRM,
-            self::AFTERPAY,
-            self::KLARNA,
-            self::CREDIT_CARD,
-            self::BANCONTACT,
-            self::IDEAL
-        ];
+    public static function is_express_checkout( $type ) {
+        return in_array($type, self::$express_checkout_methods);
     }
 
+    private static function get_types() {
+        return array_keys(self::$express_checkout_methods);
+    }
 }
