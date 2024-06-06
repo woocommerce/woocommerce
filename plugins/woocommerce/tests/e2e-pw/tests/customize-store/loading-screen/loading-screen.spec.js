@@ -124,6 +124,7 @@ test.describe( 'Assembler - Loading Page', () => {
 
 		const assembler = await pageObject.getAssembler();
 		await assembler.getByRole( 'button', { name: 'Save' } ).click();
+		await assembler.getByText( 'Your store looks great!' ).waitFor();
 		// Abort any additional unnecessary requests
 		await page.evaluate( () => window.stop() );
 		await pageObject.setupSite( baseURL );
