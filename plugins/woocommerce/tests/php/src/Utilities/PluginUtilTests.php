@@ -181,15 +181,15 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test the `get_incompatible_plugins_for_feature` method.
+	 * @testdox Test the `get_compatible_plugins_for_feature` method.
 	 *
 	 * @testWith [true]
 	 *           [false]
 	 *
-	 * @param bool $incompatible_by_default True if the setting for considering uncertain plugins as incompatible is set.
+	 * @param bool $compatible_by_default True if the setting for considering uncertain plugins as incompatible is set.
 	 */
-	public function test_get_incompatible_plugins_for_feature( bool $incompatible_by_default ) {
-		update_option( FeaturesController::PLUGINS_INCOMPATIBLE_BY_DEFAULT_OPTION, $incompatible_by_default ? 'yes' : 'no' );
+	public function test_get_incompatible_plugins_for_feature( bool $compatible_by_default ) {
+		update_option( FeaturesController::PLUGINS_COMPATIBLE_BY_DEFAULT_OPTION, $compatible_by_default ? 'yes' : 'no' );
 
 		$plugin_compatibility_info = array(
 			'compatible'   => array(
@@ -207,19 +207,19 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 		);
 
 		$expected =
-			$incompatible_by_default ?
+			$compatible_by_default ?
 			array(
+				'incompatible_1.php',
+				'incompatible_2.php',
+			) : array(
 				'incompatible_1.php',
 				'incompatible_2.php',
 				'uncertain_1.php',
 				'uncertain_2.php',
-			) : array(
-				'incompatible_1.php',
-				'incompatible_2.php',
 			);
 
 		$actual = $this->sut->get_plugins_considered_incompatible( $plugin_compatibility_info );
-		delete_option( FeaturesController::PLUGINS_INCOMPATIBLE_BY_DEFAULT_OPTION, $incompatible_by_default ? 'yes' : 'no' );
+		delete_option( FeaturesController::PLUGINS_COMPATIBLE_BY_DEFAULT_OPTION );
 
 		sort( $actual );
 		sort( $expected );

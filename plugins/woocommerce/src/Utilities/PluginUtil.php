@@ -287,9 +287,9 @@ class PluginUtil {
 	 * @return array List of plugin file names.
 	 */
 	public function get_plugins_considered_incompatible( array $compatibility_info ): array {
-		return $this->plugins_are_incompatible_with_features_by_default() ?
-				array_merge( $compatibility_info['incompatible'], $compatibility_info['uncertain'] ) :
-				$compatibility_info['incompatible'];
+		return $this->plugins_are_compatible_with_features_by_default() ?
+				$compatibility_info['incompatible'] :
+				array_merge( $compatibility_info['incompatible'], $compatibility_info['uncertain'] );
 	}
 
 	/**
@@ -304,12 +304,12 @@ class PluginUtil {
 	}
 
 	/**
-	 * Gets a value indicating if uncertain plugins are considered as incompatible with a given feature or not.
+	 * Gets a value indicating if uncertain plugins are considered as compatible with a given feature or not.
 	 * "Uncertain" plugins are those that don't explicitly declare themselves as compatible nor incompatible with the feature.
 	 *
-	 * @return bool True if uncertain plugins are considered as incompatible with each feature.
+	 * @return bool True if uncertain plugins are considered as compatible with each feature.
 	 */
-	public function plugins_are_incompatible_with_features_by_default() {
-		return 'yes' === get_option( FeaturesController::PLUGINS_INCOMPATIBLE_BY_DEFAULT_OPTION );
+	public function plugins_are_compatible_with_features_by_default() {
+		return 'yes' === get_option( FeaturesController::PLUGINS_COMPATIBLE_BY_DEFAULT_OPTION );
 	}
 }

@@ -26,7 +26,7 @@ class FeaturesController {
 
 	public const FEATURE_ENABLED_CHANGED_ACTION = 'woocommerce_feature_enabled_changed';
 
-	public const PLUGINS_INCOMPATIBLE_BY_DEFAULT_OPTION = 'woocommerce_plugins_are_incompatible_with_features_by_default';
+	public const PLUGINS_COMPATIBLE_BY_DEFAULT_OPTION = 'woocommerce_plugins_are_compatible_with_features_by_default';
 
 	/**
 	 * The existing feature definitions.
@@ -670,11 +670,10 @@ class FeaturesController {
 				'id'    => 'features_general_settings',
 			),
 			array(
-				'title'   => __( 'Incompatible by default', 'woocommerce' ),
+				'title'   => __( 'Compatible by default', 'woocommerce' ),
 				'type'    => 'checkbox',
-				'desc'    => __( 'Plugins that don\'t declare compatibility nor incompatibility with a given feature will be considered incompatible with the feature.', 'woocommerce' ),
-				'id'      => self::PLUGINS_INCOMPATIBLE_BY_DEFAULT_OPTION,
-				'default' => 'no',
+				'desc'    => __( 'Plugins that don\'t declare compatibility nor incompatibility with a given feature will be considered compatible with the feature.', 'woocommerce' ),
+				'id'      => self::PLUGINS_COMPATIBLE_BY_DEFAULT_OPTION,
 			),
 			array(
 				'type' => 'sectionend',
