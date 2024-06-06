@@ -7,7 +7,7 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
-defined( 'ABSPATH' ) || exit;
+defined( 'ABSPATH') || exit;
 
 /**
  * Coupons controller.
