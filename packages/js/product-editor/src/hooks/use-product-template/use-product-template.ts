@@ -64,16 +64,23 @@ export const useProductTemplate = (
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
 
+	const productType = product?.type;
+
 	// we shouldn't default to the standard-product-template for variations
-	if ( ! productTemplateId && product?.type === 'variation' ) {
+	if ( ! productTemplateId && productType === 'variation' ) {
 		return { productTemplate: null, isResolving: false };
 	}
 
 	const productTemplateIdToFind =
 		productTemplateId || 'standard-product-template';
 
+	const productTypeToFind =
+		productType === 'variable' ? 'simple' : productType;
+
 	let matchingProductTemplate = productTemplates.find(
-		( productTemplate ) => productTemplate.id === productTemplateIdToFind
+		( productTemplate ) =>
+			productTemplate.id === productTemplateIdToFind &&
+			productTemplate.productData.type === productTypeToFind
 	);
 
 	if ( ! matchingProductTemplate && product ) {

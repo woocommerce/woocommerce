@@ -101,6 +101,14 @@ describe( 'useProductTemplate', () => {
 		expect( result.current.productTemplate?.id ).toEqual( 'template-2' );
 	} );
 
+	it( 'should return the first product template with a matching type in the productData if no product template id is set', () => {
+		const { result } = renderHook( () =>
+			useProductTemplate( undefined, { type: 'grouped' } )
+		);
+
+		expect( result.current.productTemplate?.id ).toEqual( 'template-2' );
+	} );
+
 	it( 'should return undefined if no matching product template by id or type', () => {
 		const { result } = renderHook( () =>
 			useProductTemplate( 'invalid-template-id', { type: 'external' } )
