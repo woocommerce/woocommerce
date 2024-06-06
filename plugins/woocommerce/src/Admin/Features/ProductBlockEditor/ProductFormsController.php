@@ -23,8 +23,12 @@ class ProductFormsController {
 	 * Migrate form templates.
 	 */
 	public function migrate_form_templates( \WP_Upgrader $upgrader, array $hook_extra ) {
-		// Check if the action is an update and the type is a plugin.
-		if ( $hook_extra['action'] !== 'update' || $hook_extra['type'] !== 'plugin') {
+		// Check if the action is an `update` or `install` action for a plugin.
+		if (
+			$hook_extra['action'] !== 'install' &&
+			$hook_extra['action'] !== 'update' ||
+			$hook_extra['type'] !== 'plugin'
+		) {
 			return;
 		}
 
