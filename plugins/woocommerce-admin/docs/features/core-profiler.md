@@ -77,7 +77,7 @@ Refer to [Shop currency documentation](https://woocommerce.com/document/shop-cur
 
 These options are set by the API call `coreProfilerCompleted()` on exit of the Core Profiler, and they set the store to private mode until the store is launched. 
 
-If the site previous had non-WooCommerce-store related pages, only the store pages will be set to private.
+If the site previously had non-WooCommerce-store related pages, only the store pages will be set to private.
 
 - `woocommerce_coming_soon`: 'yes'
 - `woocommerce_store_pages_only`: 'yes' | 'no'

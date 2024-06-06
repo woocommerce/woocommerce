@@ -35,7 +35,7 @@ export type UserProfileEvent =
 			type: 'USER_PROFILE_COMPLETED';
 			payload: {
 				userProfile: CoreProfilerStateMachineContext[ 'userProfile' ];
-			}; // TODO: fill in the types for this when developing this page
+			};
 	  }
 	| {
 			type: 'USER_PROFILE_SKIPPED';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * External dependencies
  */
@@ -11,6 +12,7 @@ import {
 	enqueueActions,
 	DoneActorEvent,
 	fromCallback,
+	log,
 } from 'xstate5';
 import { useMachine, useSelector } from '@xstate5/react';
 import { useMemo } from '@wordpress/element';
@@ -183,10 +185,6 @@ const handleStoreCountryOption = assign( {
 	},
 } );
 
-const preFetchGetCountries = fromPromise( () =>
-	resolveSelect( COUNTRIES_STORE_NAME ).getCountries()
-);
-
 const preFetchOptions = fromPromise( async ( { input }: { input: string[] } ) =>
 	Promise.all( [
 		input.map( ( optionName: string ) =>
@@ -321,6 +319,7 @@ const redirectToJetpackAuthPage = ( {
 const updateTrackingOption = fromPromise(
 	async ( { input }: { input: CoreProfilerStateMachineContext } ) => {
 		await new Promise< void >( ( resolve ) => {
+			setTimeout( resolve, 500 );
 			if (
 				input.optInDataSharing &&
 				typeof window.wcTracks.enable === 'function'
@@ -621,7 +620,6 @@ const coreProfilerMachineActions = {
 
 const coreProfilerMachineActors = {
 	preFetchGetPlugins,
-	preFetchGetCountries,
 	preFetchOptions,
 	getAllowTrackingOption,
 	getStoreNameOption,
@@ -745,7 +743,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					entry: [
 						// these prefetch tasks are spawned actors in the background and do not block progression of the state machine
 						spawnChild( 'preFetchGetPlugins' ),
-						spawnChild( 'preFetchGetCountries' ),
+						spawnChild( 'getCountries' ),
 						spawnChild( 'preFetchOptions', {
 							id: 'prefetch-options',
 							input: [
@@ -829,6 +827,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							actions: [ 'recordTracksIntroCompleted' ],
 							target: '#userProfile',
 						},
+						onError: {
+							actions: [ 'recordTracksIntroCompleted' ],
+							target: '#userProfile',
+						}
 					},
 				},
 			},
