@@ -2698,12 +2698,13 @@ ul.wc_coupon_list_block {
 			color: #ccc;
 			display: inline-block;
 			cursor: pointer;
-			padding: 0 0 0.5em;
-			margin: 0 0 0 12px;
+			padding: 0;
+			margin: 0 0 0.5em 12px;
 			vertical-align: middle;
 			text-decoration: none;
 			line-height: 16px;
 			width: 16px;
+			height: 16px;
 			overflow: hidden;
 
 			&::before {
@@ -2744,11 +2745,14 @@ ul.wc_coupon_list_block {
 	}
 
 	tbody tr .wc-order-edit-line-item-actions {
-		visibility: hidden;
+		opacity: 0;
 	}
 
-	tbody tr:hover .wc-order-edit-line-item-actions {
-		visibility: visible;
+	tbody tr:focus-within,
+	tbody tr:hover {
+		.wc-order-edit-line-item-actions {
+			opacity: 1;
+		}
 	}
 
 	.wc-order-totals .wc-order-edit-line-item-actions {
