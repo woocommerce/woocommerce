@@ -216,4 +216,10 @@
 		background-size: contain;
 		background-repeat: no-repeat;
 	}
+
+	&__stock-status-actions-menu {
+		.components-popover__content {
+			padding: 0;
+		}
+	}
 }
