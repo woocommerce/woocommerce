@@ -17,6 +17,7 @@ import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { Product } from '@woocommerce/data';
+import { SelectControl } from '@wordpress/components';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -252,7 +253,7 @@ export function BlockEditor( {
 		);
 
 		let productFormTemplate;
-		if ( productFormPost && isProductEditorTemplateSystemEnabled ) {
+		if ( isProductEditorTemplateSystemEnabled && productFormPost ) {
 			productFormTemplate = parse( productFormPost.content.raw );
 		}
 
@@ -284,7 +285,7 @@ export function BlockEditor( {
 		// the blocks by calling onChange.
 		//
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ isEditorLoading, productId, productForms ] );
+	}, [ isEditorLoading, productId, productForms, selectedProductFormId ] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( selectCore ) => {
@@ -312,8 +313,34 @@ export function BlockEditor( {
 		);
 	}
 
+	const formTemplateSelectValues = productForms?.map( ( form ) => ( {
+		label: form.title.raw,
+		value: String( form.id ),
+	} ) );
+
 	return (
 		<div className="woocommerce-product-block-editor">
+			{ isProductEditorTemplateSystemEnabled && (
+				<div style={ { margin: '32px', width: '250px' } }>
+					<SelectControl
+						label={ __(
+							'Choose form template type',
+							'woocommerce'
+						) }
+						options={ formTemplateSelectValues }
+						onChange={ ( value: string ) =>
+							setSelectedProductFormId( parseInt( value, 10 ) )
+						}
+						disabled={ ! productForms }
+						className="woocommerce-product-block-editor__product-type-selector"
+						help={ __(
+							'This is a temporary setting.',
+							'woocommerce'
+						) }
+					/>
+				</div>
+			) }
+
 			<BlockContextProvider value={ context }>
 				<BlockEditorProvider
 					value={ blocks }
