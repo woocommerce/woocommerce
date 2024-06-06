@@ -524,7 +524,7 @@
 						"patterns/**"
 					],
 					"testEnv": {
-						"start": "env:test:blocks"
+						"start": "env:start:blocks"
 					},
 					"events": [
 						"pull_request",
