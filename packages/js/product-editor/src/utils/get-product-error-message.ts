@@ -19,25 +19,6 @@ export type WPError = {
 	};
 };
 
-export function getProductErrorMessage( error: WPError ) {
-	switch ( error.code ) {
-		case 'variable_product_no_variation_prices':
-			return error.message;
-		case 'product_form_field_error':
-			return error.message;
-		case 'product_invalid_sku':
-			return __( 'Invalid or duplicated SKU.', 'woocommerce' );
-		case 'product_create_error':
-			return __( 'Failed to create product.', 'woocommerce' );
-		case 'product_publish_error':
-			return __( 'Failed to publish product.', 'woocommerce' );
-		case 'product_preview_error':
-			return __( 'Failed to preview product.', 'woocommerce' );
-		default:
-			return __( 'Failed to save product.', 'woocommerce' );
-	}
-}
-
 export function getProductErrorMessageAndProps(
 	error: WPError,
 	visibleTab: string | null
