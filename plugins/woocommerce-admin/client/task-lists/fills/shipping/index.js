@@ -599,9 +599,6 @@ export class Shipping extends Component {
 							) }
 						</>
 					),
-					visible: ! this.activePlugins.includes(
-						'woocommerce-shipping'
-					),
 				},
 				store_location: {
 					label: __( 'Set your store location', 'woocommerce' ),
