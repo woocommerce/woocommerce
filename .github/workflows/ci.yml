@@ -65,6 +65,11 @@ jobs:
                       if ( refType === 'tag' && refName === 'nightly' ) {
                         githubEvent = 'nightly-checks';
                       }
+                    
+                      let trigger = ${{ toJson( inputs.trigger ) }};
+                      if ( trigger ) {
+                        githubEvent = trigger;
+                      }
 
                       const child_process = require( 'node:child_process' );
                       child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
@@ -234,13 +239,20 @@ jobs:
                   SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   SLACK_CHANNEL: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
                   HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                  INPUT_TRIGGER: ${{ inputs.trigger }}
                   RUN_TYPE: ${{ github.ref_type == 'tag' && (github.ref_name == 'nightly' && 'nightly-checks' || 'release-checks') || '' }}
               run: |
                   COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+                
+                  if [[ -n "${INPUT_TRIGGER}" ]]; then
+                      CHECKS_TYPE="${INPUT_TRIGGER}"
+                  else
+                      CHECKS_TYPE="${RUN_TYPE}"
+                  fi
 
-                  pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$RUN_TYPE Build jobs matrix" -m "$COMMIT_MESSAGE"
-                  pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$RUN_TYPE Linting" -m "$COMMIT_MESSAGE"
-                  pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$RUN_TYPE Tests" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$CHECKS_TYPE Build jobs matrix" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$CHECKS_TYPE Linting" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE Tests" -m "$COMMIT_MESSAGE"
 
     test-reports:
         name: 'Publish reports - ${{ matrix.report }}'
