@@ -14,7 +14,7 @@ export function useAdminSidebarWidth() {
 			setWidth( entries[ 0 ].contentRect.width );
 		} );
 		const adminMenu = document.getElementById( 'adminmenu' );
-		if ( adminMenu ) {
+		if ( adminMenu) {
 			resizeObserver.observe( adminMenu );
 		}
 		return () => {
