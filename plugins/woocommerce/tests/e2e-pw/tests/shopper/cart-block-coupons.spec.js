@@ -41,7 +41,7 @@ baseTest.describe( 'Cart Block Applying Coupons', () => {
 		page: async ( { context, page, testPage }, use ) => {
 			await goToPageEditor( { page } );
 			await fillPageTitle( page, testPage.title );
-			await insertBlockByShortcut( page, '/cart' );
+			await insertBlockByShortcut( page, 'Cart' );
 			await publishPage( page, testPage.title );
 
 			await context.clearCookies();
