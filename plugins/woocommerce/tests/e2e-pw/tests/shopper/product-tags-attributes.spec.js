@@ -274,7 +274,7 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 			.getByRole( 'document', {
 				name: 'Empty block; start writing or type forward slash to choose a block',
 			} )
-			.fill( '/product collection' );
+			.pressSequentially( '/product collection' );
 		await page.keyboard.press( 'Enter' );
 
 		// Product Collection requires choosing some collection.
