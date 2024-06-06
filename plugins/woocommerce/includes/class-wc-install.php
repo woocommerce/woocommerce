@@ -423,10 +423,11 @@ class WC_Install {
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			self::update();
 			WC_Admin_Notices::add_notice( 'update', true );
-		}
-		if ( ! empty( $_GET['return_url'] ) ) { // WPCS: input var ok.
-			$return_url = esc_url_raw( wp_unslash( $_GET['return_url'] ) );
-			wp_safe_redirect( $return_url ); // WPCS: input var ok.
+
+			if ( ! empty( $_GET['return_url'] ) ) { // WPCS: input var ok.
+				$return_url = esc_url_raw( wp_unslash( $_GET['return_url'] ) );
+				wp_safe_redirect( $return_url ); // WPCS: input var ok.
+			}
 		}
 	}
 
