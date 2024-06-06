@@ -29,13 +29,11 @@
 			<!-- wp:query-pagination-next /-->
 		<!-- /wp:query-pagination -->
 
-		<!-- wp:woocommerce/product-collection-no-results -->
-			<!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center","flexWrap":"wrap"}} -->
-			<div class="wp-block-group"><!-- wp:paragraph {"fontSize":"medium"} -->
-				<p class="has-medium-font-size"><strong>No products were found matching your selection.</strong></p>
-				<!-- /wp:paragraph --></div>
-				<!-- wp:search {"showLabel":false,"placeholder":"Search products…","buttonText":"Search","query":{"post_type":"product"}} /-->
-			<!-- /wp:group -->
+		<!-- wp:woocommerce/product-collection-no-results {"align":"wide"} -->
+			<!-- wp:paragraph -->
+				<p>No products were found matching your selection.</p>
+			<!-- /wp:paragraph -->
+			<!-- wp:search {"showLabel":false,"placeholder":"Search products…","buttonText":"Search","query":{"post_type":"product"}} /-->
 		<!-- /wp:woocommerce/product-collection-no-results --></div>
 	<!-- /wp:woocommerce/product-collection -->
 </main>
