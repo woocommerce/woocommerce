@@ -395,6 +395,12 @@ test( 'can remove product attributes', async ( {
 		);
 		await page.getByRole( 'tab', { name: 'Organization' } ).click();
 		await getAttributesResponsePromise;
+		await page
+			.getByLabel( 'Block: Product attributes' )
+			.waitFor( { state: 'visible' } );
+		await page
+			.getByLabel( 'Block: Product attributes' )
+			.scrollIntoViewIfNeeded();
 	} );
 
 	const attributeItemLocator = page.getByRole( 'listitem' ).filter( {
@@ -403,7 +409,9 @@ test( 'can remove product attributes', async ( {
 	page.on( 'dialog', ( dialog ) => dialog.accept() );
 
 	await test.step( "remove product's attribute", async () => {
-		await attributeItemLocator.getByLabel( 'Remove' ).click();
+		await attributeItemLocator
+			.getByLabel( 'Remove' )
+			.click( { delay: 1000 } );
 	} );
 
 	await test.step( 'verify the change in product editor', async () => {
