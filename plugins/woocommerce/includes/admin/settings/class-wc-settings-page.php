@@ -152,6 +152,23 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 
 					$section_settings_data[] = $section_setting;
 				}
+
+				if ( count( $section_settings ) === 0 ) {
+					global $current_section;
+					$saved_current_section = $current_section;
+					$current_section = $section_id;
+					ob_start();
+					do_action( 'woocommerce_settings_' . $this->id );
+					$html = ob_get_contents();
+					$section_settings_data[] = array(
+						'type' => 'custom',
+						'content' => trim( $html ),
+					);
+					ob_end_clean();
+
+					$current_section = $saved_current_section;
+				}
+
 				$sections_data[ $section_id ] = array(
 					'label'   => html_entity_decode( $section_label ),
 					'settings' => $section_settings_data,

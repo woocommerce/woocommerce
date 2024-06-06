@@ -25,6 +25,11 @@
 .woocommerce-settings-layout-navigation {
 	min-width: 300px;
 	color: white;
+
+	.components-button {
+		font-size: 16px;
+		color: white;
+	}
 }
 
 .woocommerce-settings-layout-content {
@@ -79,11 +84,12 @@
 
 	h4 {
 		margin: 0;
-		width: 200px;
+		min-width: 200px;
 	}
 
 	.components-base-control {
 		flex: 1;
+		overflow: auto;
 	}
 
 	.components-input-control__container {

@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
-import { getQuery } from '@woocommerce/navigation';
+import { getQuery, getNewPath } from '@woocommerce/navigation';
+import { Button } from '@wordpress/components';
+import { Icon, chevronLeft } from '@wordpress/icons';
 import { useEffect } from '@wordpress/element';
 
 /**
@@ -49,6 +51,10 @@ const Settings = ( { params } ) => {
 		<>
 			<div className="woocommerce-settings-layout">
 				<div className="woocommerce-settings-layout-navigation">
+					<Button href={ getNewPath( {}, '/', {} ) }>
+						<Icon icon={ chevronLeft } />
+						Settings
+					</Button>
 					<Tabs data={ settingsData } page={ params.page } />
 				</div>
 				<div className="woocommerce-settings-layout-content">
