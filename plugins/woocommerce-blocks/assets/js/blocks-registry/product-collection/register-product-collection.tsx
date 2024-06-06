@@ -87,5 +87,6 @@ export const __experimentalRegisterProductCollection = ( {
 		},
 		innerBlocks: blockVariationArgs.innerBlocks || INNER_BLOCKS_TEMPLATE,
 		isActive: blockVariationArgs.isActive || isActive,
+		isDefault: false,
 	} );
 };
