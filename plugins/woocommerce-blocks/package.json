@@ -370,6 +370,22 @@
 						"pull_request",
 						"push"
 					]
+				},
+				{
+					"name": "Blocks e2e - trigger for Blocks e2e tests in @woocommerce/plugin-woocommerce",
+					"command": "echo 'Dummy command. It should trigger Blocks e2e tests in @woocommerce/plugin-woocommerce'",
+					"changes": [
+						"webpack.config.js",
+						"babel.config.js",
+						"tsconfig.json",
+						"assets/**/*.{js,ts,tsx,scss}",
+						"packages/**/*.{js,ts,tsx,scss}",
+						"tests/e2e/**/*.{js,ts,tsx,scss,json}",
+						"tests/utils/**/.{js,ts,tsx,scss,json}"
+					],
+					"events": [
+						"pull_request"
+					]
 				}
 			]
 		}
