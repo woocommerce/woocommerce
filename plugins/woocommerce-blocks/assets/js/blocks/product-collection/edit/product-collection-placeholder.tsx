@@ -9,16 +9,16 @@ import {
 import { Placeholder } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
-import {
-	CollectionName,
-	ProductCollectionEditComponentProps,
-} from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
  */
 import CollectionChooser, { applyCollection } from './collection-chooser';
 import { useTracksLocation } from '../tracks-utils';
+import type {
+	CollectionName,
+	ProductCollectionEditComponentProps,
+} from '../types';
 import Icon from '../icon';
 
 const ProductCollectionPlaceholder = (

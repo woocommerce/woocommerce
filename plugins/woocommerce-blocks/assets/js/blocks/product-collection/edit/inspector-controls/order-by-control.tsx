@@ -3,12 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	TProductCollectionOrder,
-	TProductCollectionOrderBy,
-	QueryControlProps,
-	CoreFilterNames,
-} from '@woocommerce/blocks-registry';
-import {
 	SelectControl,
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -18,6 +12,12 @@ import {
 /**
  * Internal dependencies
  */
+import {
+	TProductCollectionOrder,
+	TProductCollectionOrderBy,
+	QueryControlProps,
+	CoreFilterNames,
+} from '../../types';
 import { getDefaultQuery } from '../../constants';
 
 const orderOptions = [

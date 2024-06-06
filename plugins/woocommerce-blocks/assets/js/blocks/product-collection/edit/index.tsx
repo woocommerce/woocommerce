@@ -4,11 +4,11 @@
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { ProductCollectionEditComponentProps } from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
  */
+import type { ProductCollectionEditComponentProps } from '../types';
 import ProductCollectionPlaceholder from './product-collection-placeholder';
 import ProductCollectionContent from './product-collection-content';
 import CollectionSelectionModal from './collection-selection-modal';

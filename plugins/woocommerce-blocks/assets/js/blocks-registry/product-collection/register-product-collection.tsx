@@ -14,8 +14,12 @@ import {
 	SetPreviewState,
 	PreviewState,
 	ProductCollectionAttributes,
-} from './types';
-import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from './constants';
+} from '../../blocks/product-collection/types';
+import {
+	DEFAULT_ATTRIBUTES,
+	INNER_BLOCKS_TEMPLATE,
+	PRODUCT_COLLECTION_BLOCK_NAME as BLOCK_NAME,
+} from '../../blocks/product-collection/constants';
 
 export interface ProductCollectionConfig extends BlockVariation {
 	preview?: {
@@ -23,8 +27,6 @@ export interface ProductCollectionConfig extends BlockVariation {
 		initialPreviewState?: PreviewState;
 	};
 }
-
-const BLOCK_NAME = 'woocommerce/product-collection';
 
 /**
  * Register a new collection for the Product Collection block.

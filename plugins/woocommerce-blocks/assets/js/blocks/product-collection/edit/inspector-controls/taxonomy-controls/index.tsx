@@ -6,10 +6,6 @@ import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import {
-	QueryControlProps,
-	CoreFilterNames,
-} from '@woocommerce/blocks-registry';
-import {
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
@@ -19,6 +15,7 @@ import {
  * Internal dependencies
  */
 import TaxonomyItem from './taxonomy-item';
+import { QueryControlProps, CoreFilterNames } from '../../../types';
 
 /**
  * Hook that returns the taxonomies associated with product post type.

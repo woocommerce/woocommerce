@@ -3,10 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	CoreFilterNames,
-	QueryControlProps,
-} from '@woocommerce/blocks-registry';
-import {
 	ToggleControl,
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -16,6 +12,7 @@ import {
 /**
  * Internal dependencies
  */
+import { CoreFilterNames, QueryControlProps } from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
 const OnSaleControl = ( props: QueryControlProps ) => {

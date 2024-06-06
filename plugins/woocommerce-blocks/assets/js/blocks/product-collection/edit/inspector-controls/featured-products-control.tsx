@@ -3,10 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	CoreFilterNames,
-	QueryControlProps,
-} from '@woocommerce/blocks-registry';
-import {
 	BaseControl,
 	ToggleControl,
 	// @ts-expect-error Using experimental features
@@ -17,6 +13,7 @@ import {
 /**
  * Internal dependencies
  */
+import { CoreFilterNames, QueryControlProps } from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
 const FeaturedProductsControl = ( props: QueryControlProps ) => {

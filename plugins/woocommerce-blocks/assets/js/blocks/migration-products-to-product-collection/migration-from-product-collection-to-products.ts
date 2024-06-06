@@ -3,10 +3,6 @@
  */
 import { createBlock, BlockInstance } from '@wordpress/blocks';
 import { select, dispatch } from '@wordpress/data';
-import {
-	LayoutOptions,
-	ProductCollectionDisplayLayout,
-} from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
@@ -24,6 +20,10 @@ import type {
 	PostTemplateLayout,
 	PostTemplateLayoutTypes,
 } from './types';
+import {
+	LayoutOptions,
+	ProductCollectionDisplayLayout,
+} from '../product-collection/types';
 
 const VARIATION_NAME = 'woocommerce/product-query';
 

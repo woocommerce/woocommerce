@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { select } from '@wordpress/data';
-import {
-	__experimentalRegisterProductCollection,
-	CollectionName,
-} from '@woocommerce/blocks-registry';
+import { __experimentalRegisterProductCollection } from '@woocommerce/blocks-registry';
 import {
 	// @ts-expect-error Type definition is missing
 	store as blocksStore,
@@ -16,6 +13,7 @@ import {
 /**
  * Internal dependencies
  */
+import { CollectionName } from '../types';
 import blockJson from '../block.json';
 import productCollection from './product-collection';
 import newArrivals from './new-arrivals';

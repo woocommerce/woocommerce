@@ -6,10 +6,6 @@ import ProductAttributeTermControl from '@woocommerce/editor-components/product-
 import { SearchListItem } from '@woocommerce/editor-components/search-list-control/types';
 import { ADMIN_URL } from '@woocommerce/settings';
 import {
-	CoreFilterNames,
-	QueryControlProps,
-} from '@woocommerce/blocks-registry';
-import {
 	ExternalLink,
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -19,6 +15,7 @@ import {
 /**
  * Internal dependencies
  */
+import { CoreFilterNames, QueryControlProps } from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
 const EDIT_ATTRIBUTES_URL = `${ ADMIN_URL }edit.php?post_type=product&page=product_attributes`;

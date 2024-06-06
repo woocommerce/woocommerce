@@ -17,12 +17,6 @@ import {
 } from '@woocommerce/blocks/migration-products-to-product-collection';
 import { recordEvent } from '@woocommerce/tracks';
 import {
-	ProductCollectionEditComponentProps,
-	ProductCollectionAttributes,
-	CoreFilterNames,
-	FilterName,
-} from '@woocommerce/blocks-registry';
-import {
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
@@ -33,6 +27,12 @@ import {
  */
 import metadata from '../../block.json';
 import { useTracksLocation } from '../../tracks-utils';
+import {
+	ProductCollectionEditComponentProps,
+	ProductCollectionAttributes,
+	CoreFilterNames,
+	FilterName,
+} from '../../types';
 import { setQueryAttribute } from '../../utils';
 import { getDefaultSettings } from '../../constants';
 import UpgradeNotice from './upgrade-notice';

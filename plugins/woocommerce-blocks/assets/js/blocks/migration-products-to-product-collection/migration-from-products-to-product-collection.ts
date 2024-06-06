@@ -4,10 +4,6 @@
 import { createBlock, BlockInstance } from '@wordpress/blocks';
 import { select, dispatch, subscribe } from '@wordpress/data';
 import { isWpVersion } from '@woocommerce/settings';
-import {
-	LayoutOptions,
-	ProductCollectionDisplayLayout,
-} from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
@@ -30,6 +26,10 @@ import type {
 	PostTemplateLayoutTypes,
 } from './types';
 import { DEFAULT_ATTRIBUTES } from '../product-collection/constants';
+import {
+	LayoutOptions,
+	ProductCollectionDisplayLayout,
+} from '../product-collection/types';
 
 const mapAttributes = ( attributes: Record< string, unknown > ) => {
 	const { query, namespace, ...restAttributes } = attributes;

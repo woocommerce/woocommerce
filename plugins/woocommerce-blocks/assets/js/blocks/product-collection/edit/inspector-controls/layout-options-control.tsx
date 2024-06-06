@@ -3,10 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	DisplayLayoutControlProps,
-	LayoutOptions,
-} from '@woocommerce/blocks-registry';
-import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore - Ignoring because `__experimentalToggleGroupControl` is not yet in the type definitions.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -19,6 +15,11 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
+
+/**
+ * Internal dependencies
+ */
+import { DisplayLayoutControlProps, LayoutOptions } from '../../types';
 
 const getHelpText = ( layoutOptions: LayoutOptions ) => {
 	switch ( layoutOptions ) {

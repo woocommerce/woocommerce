@@ -4,10 +4,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	CoreFilterNames,
-	QueryControlProps,
-} from '@woocommerce/blocks-registry';
-import {
 	BaseControl,
 	// @ts-expect-error Using experimental features
 	__experimentalHStack as HStack,
@@ -18,6 +14,7 @@ import {
 /**
  * Internal dependencies
  */
+import { CoreFilterNames, QueryControlProps } from '../../../types';
 import { DEFAULT_FILTERS } from '../../../constants';
 import PriceTextField from './PriceTextField';
 

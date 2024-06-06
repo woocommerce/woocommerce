@@ -7,11 +7,6 @@ import { usePrevious } from '@woocommerce/base-hooks';
 import { select } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
 import {
-	CoreFilterNames,
-	ProductCollectionQuery,
-	QueryControlProps,
-} from '@woocommerce/blocks-registry';
-import {
 	ToggleControl,
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -21,6 +16,11 @@ import {
 /**
  * Internal dependencies
  */
+import {
+	CoreFilterNames,
+	ProductCollectionQuery,
+	QueryControlProps,
+} from '../../types';
 import { DEFAULT_QUERY } from '../../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../../utils';
 

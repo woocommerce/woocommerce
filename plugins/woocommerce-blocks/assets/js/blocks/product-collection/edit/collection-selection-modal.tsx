@@ -6,12 +6,12 @@ import { useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { Modal, Button } from '@wordpress/components';
 import { store as blockEditorStore } from '@wordpress/block-editor';
-import { ProductCollectionAttributes } from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
  */
 import CollectionChooser, { applyCollection } from './collection-chooser';
+import type { ProductCollectionAttributes } from '../types';
 
 const PatternSelectionModal = ( props: {
 	clientId: string;

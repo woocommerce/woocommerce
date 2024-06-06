@@ -4,11 +4,6 @@
 import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, calendar } from '@wordpress/icons';
-import {
-	CoreFilterNames,
-	ETimeFrameOperator,
-	CoreCollectionNames,
-} from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
@@ -17,6 +12,11 @@ import {
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 } from '../constants';
+import {
+	CoreCollectionNames,
+	CoreFilterNames,
+	ETimeFrameOperator,
+} from '../types';
 
 const collection = {
 	name: CoreCollectionNames.NEW_ARRIVALS,

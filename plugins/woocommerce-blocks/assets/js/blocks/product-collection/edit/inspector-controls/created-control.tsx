@@ -3,11 +3,6 @@
  */
 import { __, _x } from '@wordpress/i18n';
 import {
-	CoreFilterNames,
-	ETimeFrameOperator,
-	QueryControlProps,
-} from '@woocommerce/blocks-registry';
-import {
 	Flex,
 	FlexItem,
 	RadioControl,
@@ -27,6 +22,11 @@ import {
 /**
  * Internal dependencies
  */
+import {
+	CoreFilterNames,
+	ETimeFrameOperator,
+	QueryControlProps,
+} from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
 const CreatedControl = ( props: QueryControlProps ) => {

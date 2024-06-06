@@ -4,10 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import fastDeepEqual from 'fast-deep-equal/es6';
 import {
-	CoreFilterNames,
-	QueryControlProps,
-} from '@woocommerce/blocks-registry';
-import {
 	FormTokenField,
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -17,6 +13,7 @@ import {
 /**
  * Internal dependencies
  */
+import { CoreFilterNames, QueryControlProps } from '../../types';
 import {
 	STOCK_STATUS_OPTIONS,
 	DEFAULT_FILTERS,

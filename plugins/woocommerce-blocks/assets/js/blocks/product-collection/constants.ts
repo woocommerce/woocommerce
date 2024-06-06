@@ -4,14 +4,6 @@
 import { getSetting } from '@woocommerce/settings';
 import { objectOmit } from '@woocommerce/utils';
 import {
-	ProductCollectionAttributes,
-	TProductCollectionOrder,
-	TProductCollectionOrderBy,
-	ProductCollectionQuery,
-	ProductCollectionDisplayLayout,
-	LayoutOptions,
-} from '@woocommerce/blocks-registry';
-import {
 	type InnerBlockTemplate,
 	createBlock,
 	// @ts-expect-error Missing types in Gutenberg
@@ -21,10 +13,20 @@ import {
 /**
  * Internal dependencies
  */
+import {
+	ProductCollectionAttributes,
+	TProductCollectionOrder,
+	TProductCollectionOrderBy,
+	ProductCollectionQuery,
+	ProductCollectionDisplayLayout,
+	LayoutOptions,
+} from './types';
 import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 import { VARIATION_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
 import { getDefaultValueOfInheritQueryFromTemplate } from './utils';
 import blockJson from './block.json';
+
+export const PRODUCT_COLLECTION_BLOCK_NAME = blockJson.name;
 
 export const STOCK_STATUS_OPTIONS = getSetting< Record< string, string > >(
 	'stockStatusOptions',

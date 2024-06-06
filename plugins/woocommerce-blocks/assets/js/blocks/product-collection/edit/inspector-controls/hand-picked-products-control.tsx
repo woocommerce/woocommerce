@@ -7,10 +7,6 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
-	QueryControlProps,
-	CoreFilterNames,
-} from '@woocommerce/blocks-registry';
-import {
 	FormTokenField,
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -20,6 +16,7 @@ import {
 /**
  * Internal dependencies
  */
+import { QueryControlProps, CoreFilterNames } from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
 /**

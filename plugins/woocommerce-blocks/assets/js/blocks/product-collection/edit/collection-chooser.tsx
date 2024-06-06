@@ -4,10 +4,6 @@
 import { useSelect } from '@wordpress/data';
 import { Button } from '@wordpress/components';
 import {
-	CollectionName,
-	CoreCollectionNames,
-} from '@woocommerce/blocks-registry';
-import {
 	BlockInstance,
 	createBlock,
 	// @ts-expect-error Type definitions for this function are missing in Guteberg
@@ -19,6 +15,7 @@ import {
 /**
  * Internal dependencies
  */
+import { type CollectionName, CoreCollectionNames } from '../types';
 import blockJson from '../block.json';
 import { getCollectionByName } from '../collections';
 import { getDefaultProductCollection } from '../constants';
