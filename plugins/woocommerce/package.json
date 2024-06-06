@@ -250,7 +250,12 @@
 						"pull_request",
 						"push",
 						"release-checks"
-					]
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
 				},
 				{
 					"name": "Core e2e tests - Gutenberg stable",
@@ -266,6 +271,7 @@
 					"changes": [],
 					"events": [
 						"daily-e2e",
+						"nightly-checks",
 						"release-checks"
 					],
 					"testEnv": {
@@ -286,8 +292,7 @@
 					"changes": [],
 					"events": [
 						"daily-e2e",
-						"release-checks",
-						"nightly-checks"
+						"release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -364,6 +369,10 @@
 						"config": {
 							"disableHpos": true
 						}
+					},
+					"report": {
+						"resultsBlobName": "all-blob-e2e-reports-non-hpos",
+						"resultsPath": "tests/e2e-pw/test-results"
 					}
 				},
 				{
@@ -431,7 +440,12 @@
 					"events": [
 						"pull_request",
 						"push"
-					]
+					],
+					"report": {
+						"resultsBlobName": "core-api-report",
+						"resultsPath": "tests/api-core-tests/test-results",
+						"allure": true
+					}
 				},
 				{
 					"name": "Core API tests - HPOS disabled",
