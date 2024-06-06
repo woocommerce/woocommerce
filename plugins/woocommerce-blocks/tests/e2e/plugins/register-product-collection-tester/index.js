@@ -4,7 +4,6 @@ const { __experimentalRegisterProductCollection } = wc.wcBlocksRegistry;
 __experimentalRegisterProductCollection( {
 	name: 'woocommerce/product-collection/my-custom-collection',
 	title: 'My Custom Collection',
-	icon: 'games',
 	description: 'This is a custom collection.',
 	keywords: [ 'custom collection', 'product collection' ],
 } );
@@ -13,7 +12,6 @@ __experimentalRegisterProductCollection( {
 __experimentalRegisterProductCollection( {
 	name: 'woocommerce/product-collection/my-custom-collection-with-preview',
 	title: 'My Custom Collection with Preview',
-	icon: 'games',
 	description: 'This is a custom collection with preview.',
 	keywords: [ 'custom collection', 'product collection' ],
 	preview: {
@@ -29,7 +27,6 @@ __experimentalRegisterProductCollection( {
 __experimentalRegisterProductCollection( {
 	name: 'woocommerce/product-collection/my-custom-collection-with-advanced-preview',
 	title: 'My Custom Collection with Advanced Preview',
-	icon: 'games',
 	description: 'This is a custom collection with advanced preview.',
 	keywords: [ 'custom collection', 'product collection' ],
 	preview: {
@@ -47,7 +44,7 @@ __experimentalRegisterProductCollection( {
 					isPreview: false,
 					previewMessage: '',
 				} );
-			}, 5000 );
+			}, 2000 );
 
 			return () => clearTimeout( timeoutID );
 		},

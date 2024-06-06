@@ -67,7 +67,10 @@ type Collections =
 	| 'bestSellers'
 	| 'onSale'
 	| 'featured'
-	| 'productCatalog';
+	| 'productCatalog'
+	| 'myCustomCollection'
+	| 'myCustomCollectionWithPreview'
+	| 'myCustomCollectionWithAdvancedPreview';
 
 const collectionToButtonNameMap = {
 	newArrivals: 'New Arrivals Recommend your newest products.',
@@ -77,6 +80,11 @@ const collectionToButtonNameMap = {
 	featured: 'Featured Showcase your featured products.',
 	productCatalog:
 		'Product Catalog Display all products in your catalog. Results can (change to) match the current template, page, or search term.',
+	myCustomCollection: 'My Custom Collection This is a custom collection.',
+	myCustomCollectionWithPreview:
+		'My Custom Collection with Preview This is a custom collection with preview.',
+	myCustomCollectionWithAdvancedPreview:
+		'My Custom Collection with Advanced Preview This is a custom collection with advanced preview.',
 };
 
 class ProductCollectionPage {
