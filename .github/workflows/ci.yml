@@ -163,12 +163,17 @@ jobs:
                 CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
               
+            - name: 'Resolve artifacts path'
+              env:
+                ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
+              run: echo "artifacts_path=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
+              
             - name: 'Upload artifacts'
               if: ${{ always() && matrix.report.resultsPath != '' }}
               uses: actions/upload-artifact@v4
               with:
                 name: '${{ matrix.report.resultsBlobName }}-${{ strategy.job-index }}'
-                path: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
+                path: ${{ env.ARTIFACTS_PATH }}
                 retention-days: 1
                 compression-level: 9
 
