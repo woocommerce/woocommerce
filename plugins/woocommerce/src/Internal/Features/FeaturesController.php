@@ -670,10 +670,10 @@ class FeaturesController {
 				'id'    => 'features_general_settings',
 			),
 			array(
-				'title'   => __( 'Compatible by default', 'woocommerce' ),
-				'type'    => 'checkbox',
-				'desc'    => __( 'Plugins that don\'t declare compatibility nor incompatibility with a given feature will be considered compatible with the feature.', 'woocommerce' ),
-				'id'      => self::PLUGINS_COMPATIBLE_BY_DEFAULT_OPTION,
+				'title' => __( 'Compatible by default', 'woocommerce' ),
+				'type'  => 'checkbox',
+				'desc'  => __( 'Plugins that don\'t declare compatibility nor incompatibility with a given feature will be considered compatible with the feature.', 'woocommerce' ),
+				'id'    => self::PLUGINS_COMPATIBLE_BY_DEFAULT_OPTION,
 			),
 			array(
 				'type' => 'sectionend',
