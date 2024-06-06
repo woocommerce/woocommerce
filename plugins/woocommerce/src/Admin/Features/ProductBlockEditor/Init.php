@@ -46,6 +46,13 @@ class Init {
 	private $redirection_controller;
 
 	/**
+	 * Product form controller.
+	 *
+	 * @var ProductFormsController
+	 */ 
+	private $product_form_controller;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -376,6 +383,12 @@ class Init {
 		);
 
 		$this->redirection_controller->set_product_templates( $this->product_templates );
+
+		// PFT: Initialize the product form controller.
+		if ( Features::is_enabled( 'product-editor-template-system' ) ) {
+			$this->product_form_controller = new ProductFormsController;
+			$this->product_form_controller->init();
+		}
 	}
 
 	/**
