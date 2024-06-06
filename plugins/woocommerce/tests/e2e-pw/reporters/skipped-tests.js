@@ -8,18 +8,19 @@ class SkippedReporter {
 	onTestEnd( testCase, testResult ) {
 		if ( testResult.status === 'skipped' ) {
 			this.skippedTests.push(
-				`- ${ testCase.title } in ${ testCase.location }`
+				`- ${ testCase.title } in ${ testCase.location.file }:${ testCase.location.line }`
 			);
 		}
 	}
 
 	onEnd() {
-		const skippedTestsMessage = this.skippedTests.join( '\n' );
 		if ( this.skippedTests.length > 0 ) {
-			// Output a GitHub Actions annotation
 			console.log(
-				`::error title=Skipped Tests::${ skippedTestsMessage }`
+				`::error title=Skipped Tests::The following tests were skipped:`
 			);
+			this.skippedTests.forEach( ( test ) => {
+				console.log( `::error title=Skipped Test::${ test }` );
+			} );
 		}
 	}
 }
