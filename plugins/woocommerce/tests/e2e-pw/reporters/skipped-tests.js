@@ -1,4 +1,4 @@
-const { Reporter } = require( '@playwright/test/reporter' );
+require( '@playwright/test/reporter' );
 
 class SkippedReporter {
 	constructor() {
