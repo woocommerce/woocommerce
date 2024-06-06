@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Ensures that the root element exists before attempting to render the CustomerEffortScoreTracksContainer component.
+</details>  <details>  <summary>Changelog Entry Comment</summary>  Ensures that the root element exists before attempting to render the CustomerEffortScoreTracksContainer component.
