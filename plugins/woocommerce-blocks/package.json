@@ -377,13 +377,7 @@
 					"testType": "e2e",
 					"command": "test:e2e:dummy",
 					"changes": [
-						"webpack.config.js",
-						"babel.config.js",
-						"tsconfig.json",
-						"assets/**/*.{js,ts,tsx,scss}",
-						"packages/**/*.{js,ts,tsx,scss}",
-						"tests/e2e/**/*.{js,ts,tsx,scss,json}",
-						"tests/utils/**/.{js,ts,tsx,scss,json}"
+						"tests/e2e/**"
 					],
 					"events": [
 						"pull_request"
