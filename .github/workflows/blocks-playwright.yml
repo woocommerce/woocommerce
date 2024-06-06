@@ -10,6 +10,17 @@ on:
             - 'plugins/woocommerce/patterns/**'
     # Allow manually triggering the workflow.
     workflow_dispatch:
+    # Run workflow when a PR is merged to trunk branch
+    # to create github issues for flaky tests.
+    push:
+        branches:
+            - trunk
+        paths:
+            - '.github/workflows/blocks-playwright.yml' # This file
+            - 'plugins/woocommerce-blocks/**'
+            - 'plugins/woocommerce/src/Blocks/**'
+            - 'plugins/woocommerce/templates/**'
+            - 'plugins/woocommerce/patterns/**'
 
 concurrency:
     group: '${{ github.workflow }}-${{ github.ref }}'
@@ -58,19 +69,76 @@ jobs:
                   path: plugins/woocommerce-blocks/tests/e2e/artifacts/test-results
                   if-no-files-found: ignore
 
+            - name: Archive flaky test reports
+              uses: actions/upload-artifact@v4
+              if: ${{ !cancelled() }}
+              with:
+                  name: flaky-tests-report-shard-${{ matrix.shardIndex }}
+                  path: plugins/woocommerce-blocks/flaky-tests
+                  if-no-files-found: ignore
+
     merge-artifacts:
         # Merges all artifacts from all shards into a single zip and
         # deletes the parts. In case of a rerun, artifacts from the
-        # previous run will be retained by merging them with the new ones. 
+        # previous run will be retained by merging them with the new ones.
         name: Merge Artifacts
         if: ${{ !cancelled() }}
         needs: [blocks-playwright-tests]
         runs-on: ubuntu-latest
+        outputs:
+            has-flaky-test-report: ${{ !!steps.merge-flaky-tests-reports.outputs.artifact-id }}
         steps:
-            - name: Merge Artifacts
+            - name: Merge failures artifacts
               uses: actions/upload-artifact/merge@v4
               # Don't fail the job if there aren't any artifacts to merge.
               continue-on-error: true
               with:
                   name: failures-artifacts
+                  pattern: failures-artifacts*
                   delete-merged: true
+
+            - name: Merge flaky tests reports
+              id: merge-flaky-tests-reports
+              uses: actions/upload-artifact/merge@v4
+              continue-on-error: true
+              with:
+                  name: flaky-tests-report
+                  pattern: flaky-tests-report*
+                  delete-merged: true
+
+    create-github-issues-for-flaky-tests:
+        name: Create GitHub issues for flaky tests
+        needs: [merge-artifacts]
+        if: ${{ !cancelled() && needs.merge-artifacts.outputs.has-flaky-test-report == 'true' }}
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            issues: write
+        steps:
+            # We are using @wordpress/report-flaky-tests package from Gutenberg repo
+            # to create GitHub issues for flaky tests.
+            - uses: actions/checkout@v4
+              with:
+                  repository: WordPress/gutenberg
+                  # We are using commit hash to checkout the exact version of the script.
+                  # This is to avoid any breaking changes.
+                  ref: dbf201449e9736f672b61e422787d47659db327a
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: flaky-tests-report
+                  path: flaky-tests
+
+            - name: Setup Node.js and install dependencies
+              uses: ./.github/setup-node
+
+            - name: Npm build
+              # TODO: We don't have to build the entire project, just the action itself.
+              run: npm run build:packages
+
+            - name: Report flaky tests
+              uses: ./packages/report-flaky-tests
+              with:
+                  repo-token: '${{ secrets.GITHUB_TOKEN }}'
+                  label: 'team: Kirigami & Origami'
+                  artifact-path: flaky-tests
