@@ -277,6 +277,13 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 			.fill( '/product collection' );
 		await page.keyboard.press( 'Enter' );
 
+		// Product Collection requires choosing some collection.
+		await page
+			.getByRole( 'button', {
+				name: 'Product Catalog Display all products in your catalog. Results can (change to) match the current template, page, or search term.',
+			} )
+			.click();
+
 		await page
 			.getByRole( 'button', { name: 'Publish', exact: true } )
 			.click();
