@@ -44,8 +44,8 @@ const extendInnerBlocksWithNoResultsContent = (
 	innerBlocks: InnerBlockTemplate[],
 	inheritedAttributes: InheritedAttributes
 ) => {
-	// InnerBlockTemplate is an array block representation so name,
-	// or attributes are access with array indexes.
+	// InnerBlockTemplate is an array block representation so properties
+	// like name or attributes need to be accessed with array indexes.
 	const nameArrayIndex = 0;
 	const attributesArrayIndex = 1;
 
