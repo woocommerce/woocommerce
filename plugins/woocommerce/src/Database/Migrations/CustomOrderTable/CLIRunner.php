@@ -78,7 +78,7 @@ class CLIRunner {
 		WP_CLI::add_command( 'wc hpos status', array( $this, 'status' ) );
 		WP_CLI::add_command( 'wc hpos diff', array( $this, 'diff' ) );
 		WP_CLI::add_command( 'wc hpos backfill', array( $this, 'backfill' ) );
-		WP_CLI::add_command( 'wc hpos compatibility', array( $this, 'compatibility_info' ) );
+		WP_CLI::add_command( 'wc hpos compatibility-info', array( $this, 'compatibility_info' ) );
 		WP_CLI::add_command( 'wc hpos compatibility-mode enable', array( $this, 'enable_compat_mode' ) );
 		WP_CLI::add_command( 'wc hpos compatibility-mode disable', array( $this, 'disable_compat_mode' ) );
 
