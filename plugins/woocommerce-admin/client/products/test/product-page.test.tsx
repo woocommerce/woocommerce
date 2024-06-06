@@ -63,14 +63,14 @@ describe( 'ProductVariationPage', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 	} );
-	it( 'should trigger product_add_view on render without product_id defined', () => {
+	it( 'should trigger product_add_view track event on render without product_id defined', () => {
 		( useParams as jest.Mock ).mockReturnValue( { productId: null } );
 		render( <ProductVariationPage /> );
 		expect( recordEvent ).toBeCalledWith( 'product_add_view', {
 			source: TRACKS_SOURCE,
 		} );
 	} );
-	it( 'should trigger product_edit_view on render with product_id defined', () => {
+	it( 'should trigger product_edit_view track event on render with product_id defined', () => {
 		( useParams as jest.Mock ).mockReturnValue( { productId: 1 } );
 		render( <ProductVariationPage /> );
 		expect( recordEvent ).toBeCalledWith( 'product_edit_view', {
