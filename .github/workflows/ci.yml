@@ -5,8 +5,8 @@ on:
         branches:
             - 'trunk'
             - 'release/*'
-        tags:
-          - '*'
+    release:
+      types: [ published, edited ]
     workflow_call:
         inputs:
             trigger:
