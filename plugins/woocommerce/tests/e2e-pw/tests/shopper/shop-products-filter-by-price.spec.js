@@ -66,7 +66,7 @@ baseTest.describe( 'Filter items in the shop by product price', () => {
 
 		await goToPageEditor( { page } );
 		await fillPageTitle( page, testPage.title );
-		await insertBlockByShortcut( page, '/filter' );
+		await insertBlockByShortcut( page, 'Filter by Price' );
 		await insertBlock( page, 'All Products' );
 		await publishPage( page, testPage.title );
 
