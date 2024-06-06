@@ -166,7 +166,7 @@ jobs:
             - name: 'Resolve artifacts path'
               env:
                 ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
-              run: echo "artifacts_path=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
+              run: echo "ARTIFACTS_PATH=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
               
             - name: 'Upload artifacts'
               if: ${{ always() && matrix.report.resultsPath != '' }}
