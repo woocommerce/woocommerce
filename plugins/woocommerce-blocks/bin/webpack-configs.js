@@ -28,6 +28,7 @@ const {
 	getProgressBarPluginConfig,
 	getCacheGroups,
 } = require( './webpack-helpers' );
+const AddStableChunksToAssets = require( './add-stable-chunks-to-assets' );
 
 const isProduction = NODE_ENV === 'production';
 
@@ -1112,6 +1113,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 			new ProgressBarPlugin(
 				getProgressBarPluginConfig( 'Cart & Checkout Frontend' )
 			),
+			new AddStableChunksToAssets(),
 		],
 		resolve: {
 			...resolve,
