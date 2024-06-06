@@ -5,17 +5,22 @@ on:
         branches:
             - 'trunk'
             - 'release/*'
+        tags:
+          - '*'
     workflow_call:
-      inputs: 
-        trigger:
-          description: 'Type of run to trigger. E.g. daily-e2e, release-checks, etc.'
-          required: true
-          default: 'default'
-          type: string
-          
+        inputs:
+            trigger:
+                description: 'Type of run to trigger. E.g. daily-e2e, release-checks, etc.'
+                required: true
+                default: 'default'
+                type: string
+
 concurrency:
     group: '${{ github.workflow }}-${{ github.ref }}'
     cancel-in-progress: true
+    
+env: 
+  FORCE_COLOR: 1
 
 jobs:
     project-jobs:
@@ -51,8 +56,20 @@ jobs:
                       }
 
                       let githubEvent = ${{ toJson( github.event_name ) }};
-                      let trigger = ${{ toJson( inputs.trigger ) }};
                     
+                      const refType = ${{ toJson( github.ref_type ) }};
+                      const refName = ${{ toJson( github.ref_name ) }};
+                    
+                      if ( refType === 'tag' && refName !== 'nightly' ) {
+                        githubEvent = 'release-checks';
+                      }
+                    
+                      if ( refType === 'tag' && refName === 'nightly' ) {
+                        githubEvent = 'nightly-checks';
+                      }
+                    
+                      let trigger = ${{ toJson( inputs.trigger ) }};
+
                       if ( trigger ) {
                         githubEvent = trigger;
                       }
@@ -101,7 +118,7 @@ jobs:
               with:
                   install: '${{ matrix.projectName }}...'
                   build: '${{ matrix.projectName }}'
-            - name: 'Prepare Test Environment'
+            - name: 'Start Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
               env: ${{ matrix.testEnv.envVars }}
@@ -124,11 +141,19 @@ jobs:
               name: 'Checkout'
 
             - uses: './.github/actions/setup-woocommerce-monorepo'
-              name: 'Setup Monorepo'
-              id: 'setup-monorepo'
+              name: 'Install Monorepo'
+              id: 'install-monorepo'
               with:
                   install: '${{ matrix.projectName }}...'
-                  build: '${{ matrix.projectName }}'
+                  build: 'false'
+                  
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              if: ${{ github.ref_type != 'tag' }}
+              name: 'Build project'
+              id: 'build-project'
+              with:
+                install: 'false'
+                build: ${{ matrix.projectName }}
 
             - name: Get commit message
               id: get_commit_message
@@ -145,8 +170,16 @@ jobs:
                   fi
                   echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
               shell: bash
+              
+            - name: 'Update wp-env config'
+              if: ${{ github.ref_type == 'tag' }}
+              env:
+                  RELEASE_TAG: ${{ github.ref_name }}
+                  ARTIFACT_NAME: ${{ github.ref_name == 'nightly' && 'woocommerce-trunk-nightly.zip' || 'woocommerce.zip' }}
+              working-directory: ${{ matrix.projectPath }}
+              run: node ./tests/e2e-pw/bin/override-wp-env-plugins.js
 
-            - name: 'Prepare Test Environment'
+            - name: 'Start Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
@@ -187,7 +220,7 @@ jobs:
                   install: '${{ matrix.projectName }}...'
                   build: '${{ matrix.projectName }}'
 
-            - name: 'Prepare Test Environment'
+            - name: 'Start Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
@@ -227,7 +260,7 @@ jobs:
                   install: '${{ matrix.projectName }}...'
                   build: '${{ matrix.projectName }}'
 
-            - name: 'Prepare Test Environment'
+            - name: 'Start Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
@@ -259,18 +292,18 @@ jobs:
                 'project-default-test-jobs',
                 'project-e2e-test-jobs',
                 'project-api-test-jobs',
-                'project-performance-test-jobs'
+                'project-performance-test-jobs',
             ]
         if: ${{ always() && github.event_name == 'pull_request' }}
         steps:
             - uses: 'actions/checkout@v4'
               name: 'Checkout'
-              
+
             - name: 'Evaluation'
               env:
-                REPOSITORY: ${{ github.repository }}
-                RUN_ID: ${{ github.run_id }}
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  REPOSITORY: ${{ github.repository }}
+                  RUN_ID: ${{ github.run_id }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   # Check if project-jobs was successful. Fail for any other status, including skipped. 
                   result="${{ needs.project-jobs.result }}"
@@ -278,9 +311,8 @@ jobs:
                     echo "Generating CI jobs was not successful."
                     exit 1
                   fi
-                  
-                  node .github/workflows/scripts/evaluate-jobs-conclusions.js
 
+                  node .github/workflows/scripts/evaluate-jobs-conclusions.js
 
     alert-on-failure:
         name: 'Report results on Slack'
@@ -292,27 +324,27 @@ jobs:
                 'project-default-test-jobs',
                 'project-e2e-test-jobs',
                 'project-api-test-jobs',
-                'project-performance-test-jobs'
+                'project-performance-test-jobs',
             ]
         if: ${{ always() && github.event_name != 'pull_request'  }}
         steps:
             - uses: 'actions/checkout@v4'
               name: 'Checkout'
-              
+
             - uses: './.github/actions/setup-woocommerce-monorepo'
               name: 'Setup Monorepo'
               with:
-                php-version: false
-              
+                  php-version: false
+
             - name: 'Send messages for failed jobs'
               env:
-                SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
-                SLACK_CHANNEL: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
-                HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-                INPUT_TRIGGER: ${{ inputs.trigger }}
+                  SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+                  SLACK_CHANNEL: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
+                  HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                  INPUT_TRIGGER: ${{ inputs.trigger }}
               run: |
                   COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
-                
+
                   pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$INPUT_TRIGGER Build jobs matrix" -m "$COMMIT_MESSAGE"
                   pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$INPUT_TRIGGER Linting" -m "$COMMIT_MESSAGE"
                   pnpm utils slack-test-report -c "${{ needs.project-default-test-jobs.result }}" -r "$INPUT_TRIGGER Tests" -m "$COMMIT_MESSAGE"
@@ -379,7 +411,11 @@ jobs:
                   else
                     echo "No report will be created for '$GITHUB_EVENT_NAME' event"
                   fi
-                
+
+            - name: 'Add annotation to workflow run linking to PR'
+              if: ${{ github.event_name == 'pull_request' }}
+              run: |
+                  echo "::notice::🔗🔗 The e2e report for this run is available at https://woocommerce.github.io/woocommerce-test-reports/pr/${{ github.event.pull_request.number }}/e2e"
 
     api-test-reports:
         name: 'Report API tests results'
