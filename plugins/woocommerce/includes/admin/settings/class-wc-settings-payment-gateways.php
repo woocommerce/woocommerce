@@ -188,22 +188,23 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 										echo wp_kses_post( $gateway->get_method_description() );
 										break;
 									case 'action':
+										$setup_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
 										if ( wc_string_to_bool( $gateway->enabled ) ) {
-											/* Translators: %s Payment gateway name. */
-											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Manage the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '">' . esc_html__( 'Manage', 'woocommerce' ) . '</a>';
+											$cta_text = 'Manage';
+											$cta_label = 'Manage the "%s" payment method';
 										} else {
+											$cta_text = 'Finish set up';
+											$cta_label = 'Set up the "%s" payment method';
 											if (
 												// Keep old brand name for backwards compatibility.
 												( 'WooCommerce Payments' === $method_title || 'WooPayments' === $method_title ) &&
 												class_exists( 'WC_Payments_Account' )
 											) {
 												$setup_url = WC_Payments_Account::get_connect_url();
-											} else {
-												$setup_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
 											}
-											/* Translators: %s Payment gateway name. */
-											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish set up', 'woocommerce' ) . '</a>';
 										}
+										/* Translators: %s Payment gateway name. */
+										echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( $cta_label, 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( $cta_text, 'woocommerce' ) . '</a>';
 										break;
 									case 'status':
 										echo '<a class="wc-payment-gateway-method-toggle-enabled" href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) ) ) . '">';
