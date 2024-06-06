@@ -5,7 +5,7 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { useState, useRef } from '@wordpress/element';
+import { useState, useRef, createContext } from '@wordpress/element';
 import {
 	ResizableBox,
 	Tooltip,
@@ -65,6 +65,8 @@ function calculateNewHeight( width, initialAspectRatio ) {
 
 	return width / intermediateAspectRatio;
 }
+
+export const IsResizingContext = createContext( false );
 
 function ResizableFrame( {
 	isFullWidth,
@@ -314,7 +316,9 @@ function ResizableFrame( {
 				transition={ frameTransition }
 				style={ innerContentStyle }
 			>
-				{ children }
+				<IsResizingContext.Provider value={ isResizing }>
+					{ children }
+				</IsResizingContext.Provider>
 			</motion.div>
 		</ResizableBox>
 	);
