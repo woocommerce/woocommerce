@@ -11,77 +11,31 @@ const simpleProductName = 'Simplest Product';
 const singleProductPrice = '555.00';
 
 // all WooCommerce blocks except:
-// default cart and checkout blocks, mini-cart, product collection
+// default cart and checkout blocks, mini-cart
 const blocks = [
-	{
-		name: 'Product Search',
-	},
-	{
-		name: 'Reviews by Product',
-	},
-	{
-		name: 'Single Product',
-	},
-	{
-		name: 'All Products',
-	},
-	{
-		name: 'All Reviews',
-	},
-	{
-		name: 'Active Filters',
-	},
-	{
-		name: 'Filter by Price',
-	},
-	{
-		name: 'Filter by Stock',
-	},
-	{
-		name: 'Filter by Attribute',
-	},
-	{
-		name: 'Filter by Rating',
-	},
-	{
-		name: 'Hand-picked Products',
-	},
-	{
-		name: 'Products by Category',
-	},
-	{
-		name: 'Newest Products',
-	},
-	{
-		name: 'Products by Tag',
-	},
-	{
-		name: 'Top Rated Products',
-	},
-	{
-		name: 'Customer account',
-	},
-	{
-		name: 'Featured Category',
-	},
-	{
-		name: 'Featured Product',
-	},
-	{
-		name: 'Store Notices',
-	},
-	{
-		name: 'Best Selling Products',
-	},
-	{
-		name: 'Product Categories List',
-	},
-	{
-		name: 'On Sale Products',
-	},
-	{
-		name: 'Reviews by Category',
-	},
+	'All Products',
+	'All Reviews',
+	'Active Filters',
+	'Best Selling Products',
+	'Customer account',
+	'Featured Category',
+	'Featured Product',
+	'Filter by Price',
+	'Filter by Stock',
+	'Filter by Attribute',
+	'Filter by Rating',
+	'Hand-picked Products',
+	'Newest Products',
+	'On Sale Products',
+	'Product Categories List',
+	'Product Search',
+	'Products by Category',
+	'Products by Tag',
+	'Reviews by Category',
+	'Reviews by Product',
+	'Single Product',
+	'Store Notices',
+	'Top Rated Products',
 ];
 
 let productId, shippingZoneId, productTagId, attributeId, productCategoryId;
@@ -189,13 +143,13 @@ baseTest.describe( 'Add WooCommerce Blocks Into Page', () => {
 		await fillPageTitle( page, testPage.title );
 
 		for ( let i = 0; i < blocks.length; i++ ) {
-			await test.step( `Insert ${ blocks[ i ].name } block`, async () => {
-				await insertBlock( page, blocks[ i ].name );
+			await test.step( `Insert ${ blocks[ i ] } block`, async () => {
+				await insertBlock( page, blocks[ i ] );
 
 				const canvas = await getCanvas( page );
 
 				// eslint-disable-next-line playwright/no-conditional-in-test
-				if ( blocks[ i ].name === 'Reviews by Product' ) {
+				if ( blocks[ i ] === 'Reviews by Product' ) {
 					await canvas.getByLabel( simpleProductName ).check();
 					await canvas
 						.getByRole( 'button', { name: 'Done', exact: true } )
@@ -206,7 +160,7 @@ baseTest.describe( 'Add WooCommerce Blocks Into Page', () => {
 				await expect(
 					canvas
 						.getByRole( 'document', {
-							name: `Block: ${ blocks[ i ].name }`,
+							name: `Block: ${ blocks[ i ] }`,
 							exact: true,
 						} )
 						.first()
@@ -224,7 +178,7 @@ baseTest.describe( 'Add WooCommerce Blocks Into Page', () => {
 			await expect(
 				canvas
 					.getByRole( 'document', {
-						name: `Block: ${ blocks[ i ].name }`,
+						name: `Block: ${ blocks[ i ] }`,
 						exact: true,
 					} )
 					.first()
