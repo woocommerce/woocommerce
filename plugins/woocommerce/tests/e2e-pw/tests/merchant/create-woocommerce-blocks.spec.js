@@ -17,7 +17,6 @@ const blocks = [
 	'All Reviews',
 	'Active Filters',
 	'Best Selling Products',
-	'Coming soon',
 	'Customer account',
 	'Featured Category',
 	'Featured Product',
