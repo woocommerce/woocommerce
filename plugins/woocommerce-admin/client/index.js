@@ -100,6 +100,9 @@ if ( appRoot ) {
 // Set up customer effort score survey.
 ( function () {
 	const root = appRoot || embeddedRoot;
+	if ( ! root ) {
+		return;
+	}
 	render(
 		<CustomerEffortScoreTracksContainer />,
 		root.insertBefore( document.createElement( 'div' ), null )
