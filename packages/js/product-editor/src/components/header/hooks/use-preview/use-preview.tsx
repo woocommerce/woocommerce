@@ -13,7 +13,7 @@ import { MouseEvent } from 'react';
  * Internal dependencies
  */
 import { useValidations } from '../../../../contexts/validation-context';
-import { WPError } from '../../../../utils/get-product-error-message';
+import { WPError } from '../../../../utils/get-product-error-message-and-props';
 import { useProductURL } from '../../../../hooks/use-product-url';
 import { PreviewButtonProps } from '../../preview-button';
 import { errorHandler } from '../../../../hooks/use-product-manager';

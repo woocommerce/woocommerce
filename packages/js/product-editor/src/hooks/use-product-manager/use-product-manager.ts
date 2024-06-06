@@ -10,7 +10,7 @@ import { Product, ProductStatus, PRODUCTS_STORE_NAME } from '@woocommerce/data';
  * Internal dependencies
  */
 import { useValidations } from '../../contexts/validation-context';
-import type { WPError } from '../../utils/get-product-error-message';
+import type { WPError } from '../../utils/get-product-error-message-and-props';
 import { AUTO_DRAFT_NAME } from '../../utils/constants';
 
 export function errorHandler( error: WPError, productStatus: ProductStatus ) {

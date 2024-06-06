@@ -17,7 +17,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useProductManager } from '../../../../hooks/use-product-manager';
 import { useProductScheduled } from '../../../../hooks/use-product-scheduled';
 import { recordProductEvent } from '../../../../utils/record-product-event';
-import { getProductErrorMessageAndProps } from '../../../../utils/get-product-error-message';
+import { getProductErrorMessageAndProps } from '../../../../utils/get-product-error-message-and-props';
 import { ButtonWithDropdownMenu } from '../../../button-with-dropdown-menu';
 import { SchedulePublishModal } from '../../../schedule-publish-modal';
 import { showSuccessNotice } from '../utils';

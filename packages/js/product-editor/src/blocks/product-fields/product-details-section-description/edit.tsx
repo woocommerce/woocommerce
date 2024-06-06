@@ -36,7 +36,7 @@ import { TRACKS_SOURCE } from '../../../constants';
 import {
 	WPError,
 	getProductErrorMessageAndProps,
-} from '../../../utils/get-product-error-message';
+} from '../../../utils/get-product-error-message-and-props';
 import type {
 	ProductEditorBlockEditProps,
 	ProductFormPostProps,

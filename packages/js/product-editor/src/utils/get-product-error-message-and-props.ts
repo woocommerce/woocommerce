@@ -50,25 +50,21 @@ export function getProductErrorMessageAndProps(
 			break;
 		case 'product_create_error':
 			response.message = __( 'Failed to create product.', 'woocommerce' );
-			response.errorProps.explicitDismiss = false;
 			break;
 		case 'product_publish_error':
 			response.message = __(
 				'Failed to publish product.',
 				'woocommerce'
 			);
-			response.errorProps.explicitDismiss = false;
 			break;
 		case 'product_preview_error':
 			response.message = __(
 				'Failed to preview product.',
 				'woocommerce'
 			);
-			response.errorProps.explicitDismiss = false;
 			break;
 		default:
 			response.message = __( 'Failed to save product.', 'woocommerce' );
-			response.errorProps.explicitDismiss = false;
 			break;
 	}
 	return response;

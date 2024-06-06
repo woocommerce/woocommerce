@@ -11,7 +11,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getProductErrorMessageAndProps } from '../../../utils/get-product-error-message';
+import { getProductErrorMessageAndProps } from '../../../utils/get-product-error-message-and-props';
 import { usePreview } from '../hooks/use-preview';
 import { PreviewButtonProps } from './types';
 import { TRACKS_SOURCE } from '../../../constants';
