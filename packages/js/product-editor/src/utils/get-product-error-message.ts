@@ -44,7 +44,6 @@ export function getProductErrorMessageAndProps(
 ): {
 	message: string;
 	errorProps: { explicitDismiss: boolean };
-	isDismissible?: boolean;
 } {
 	const response = {
 		message: '',
