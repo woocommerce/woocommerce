@@ -20,7 +20,9 @@ import {
  */
 import { useQuery } from '@woocommerce/navigation';
 import Shuffle from './shuffle';
+import Delete from './delete';
 import './style.scss';
+import { useIsNoBlocksPlaceholderPresent } from '../hooks/block-placeholder/use-is-no-blocks-placeholder-present';
 
 const isHomepageUrl = ( path: string ) => {
 	return path === '/customize-store/assembler-hub/homepage';
@@ -105,7 +107,23 @@ export const Toolbar = () => {
 	const selectedBlockClientId =
 		currentBlock?.clientId ?? firstBlock?.clientId;
 
-	if ( ! isHomepageSidebarOpen || ! selectedBlockClientId ) {
+	const isNoBlocksPlaceholderPresent =
+		useIsNoBlocksPlaceholderPresent( allBlocks );
+
+	const isHeaderOrFooter = useMemo( () => {
+		const selectedBlock = allBlocks.find( ( { clientId } ) => {
+			return clientId === selectedBlockClientId;
+		} );
+
+		return selectedBlock?.name === 'core/template-part';
+	}, [ allBlocks, selectedBlockClientId ] );
+
+	if (
+		! isHomepageSidebarOpen ||
+		! selectedBlockClientId ||
+		isNoBlocksPlaceholderPresent ||
+		isHeaderOrFooter
+	) {
 		return null;
 	}
 
@@ -126,6 +144,7 @@ export const Toolbar = () => {
 							/>
 						</ToolbarGroup>
 						<Shuffle clientId={ selectedBlockClientId } />
+						<Delete clientId={ selectedBlockClientId } />
 					</>
 				</WPToolbar>
 			</div>
