@@ -6,6 +6,7 @@
  * Categories: WooCommerce
  */
 ?>
+
 <!-- wp:paragraph {"fontSize":"medium"} -->
 <p class="has-medium-font-size"><strong><?php echo esc_html_x( 'No results found', 'Message explaining that there are no products found', 'woocommerce' ); ?></strong></p>
 <!-- /wp:paragraph -->
