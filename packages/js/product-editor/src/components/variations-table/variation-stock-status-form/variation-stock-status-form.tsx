@@ -4,7 +4,6 @@
 import type { FormEvent } from 'react';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
-import { Button, ToggleControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import {
 	createElement,
@@ -12,12 +11,19 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import {
+	Button,
+	ToggleControl,
+	// @ts-expect-error `__experimentalInputControl` does exist.
+	__experimentalInputControl as InputControl,
+} from '@wordpress/components';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
-import type { VariationStockStatusFormProps } from './types';
 import { RadioField } from '../../radio-field';
+import type { VariationStockStatusFormProps } from './types';
 
 const MANAGE_STOCK_OPTION = 'woocommerce_manage_stock';
 const STOCK_STATUS_OPTIONS = [
@@ -42,8 +48,11 @@ export function VariationStockStatusForm( {
 }: VariationStockStatusFormProps ) {
 	const [ value, setValue ] = useState( {
 		manage_stock: Boolean( initialValue?.manage_stock ),
-		stock_status: initialValue?.stock_status,
+		stock_status: initialValue?.stock_status ?? '',
+		stock_quantity: initialValue?.stock_quantity ?? 1,
 	} );
+
+	const [ errors, setErrors ] = useState< Partial< typeof value > >( {} );
 
 	const { canManageStock, isLoadingManageStockOption } = useSelect(
 		( select ) => {
@@ -59,10 +68,31 @@ export function VariationStockStatusForm( {
 		[]
 	);
 
+	function validateStockQuantity() {
+		let error: string | undefined = undefined;
+
+		if (
+			value.manage_stock &&
+			value.stock_quantity &&
+			Number.parseInt( value.stock_quantity, 10 ) < 0
+		) {
+			error = __(
+				'Stock quantity must be a positive number.',
+				'woocommerce'
+			);
+		}
+
+		setErrors( { stock_quantity: error } );
+
+		return ! error;
+	}
+
 	function handleSubmit( event: FormEvent< HTMLFormElement > ) {
 		event.preventDefault();
 
-		onSubmit?.( value );
+		if ( validateStockQuantity() ) {
+			onSubmit?.( value );
+		}
 	}
 
 	function handleTrackInventoryToggleChange( isChecked: boolean ) {
@@ -96,11 +126,16 @@ export function VariationStockStatusForm( {
 		setValue( ( current ) => ( { ...current, stock_status: selected } ) );
 	}
 
+	function handleStockQuantityInputControlChange( stock_quantity: string ) {
+		setValue( ( current ) => ( { ...current, stock_quantity } ) );
+	}
+
 	return (
 		<form
 			onSubmit={ handleSubmit }
 			className="woocommerce-variation-stock-status-form"
 			aria-label={ __( 'Variation stock status form', 'woocommerce' ) }
+			noValidate
 		>
 			<div className="woocommerce-variation-stock-status-form__controls">
 				<ToggleControl
@@ -112,16 +147,29 @@ export function VariationStockStatusForm( {
 				/>
 			</div>
 
-			{ ! value.manage_stock && (
-				<div className="woocommerce-variation-stock-status-form__controls">
+			<div className="woocommerce-variation-stock-status-form__controls">
+				{ value.manage_stock ? (
+					<InputControl
+						type="number"
+						min={ 0 }
+						label={ __( 'Available stock', 'woocommerce' ) }
+						help={ errors.stock_quantity }
+						value={ value.stock_quantity }
+						onChange={ handleStockQuantityInputControlChange }
+						onBlur={ validateStockQuantity }
+						className={ classNames( {
+							'has-error': errors.stock_quantity,
+						} ) }
+					/>
+				) : (
 					<RadioField
 						title={ __( 'Stock status', 'woocommerce' ) }
 						selected={ value.stock_status }
 						options={ STOCK_STATUS_OPTIONS }
 						onChange={ handleStockStatusRadioFieldChange }
 					/>
-				</div>
-			) }
+				) }
+			</div>
 
 			<div className="woocommerce-variation-stock-status-form__actions">
 				<Button variant="tertiary" onClick={ onCancel }>
