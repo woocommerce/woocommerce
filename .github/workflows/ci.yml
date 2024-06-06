@@ -224,7 +224,7 @@ jobs:
                 'project-lint-jobs',
                 'project-test-jobs',
             ]
-        if: ${{ always() && github.event_name == 'pull_request'  }}
+        if: ${{ always() && github.event_name != 'pull_request'  }}
         steps:
             - uses: 'actions/checkout@v4'
               name: 'Checkout'
