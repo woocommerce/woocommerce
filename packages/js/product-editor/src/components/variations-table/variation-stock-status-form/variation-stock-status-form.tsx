@@ -2,14 +2,23 @@
  * External dependencies
  */
 import type { FormEvent } from 'react';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { getAdminLink } from '@woocommerce/settings';
 import { Button, ToggleControl } from '@wordpress/components';
-import { createElement, useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import {
+	createElement,
+	createInterpolateElement,
+	useState,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import type { VariationStockStatusFormProps } from './types';
+
+const MANAGE_STOCK_OPTION = 'woocommerce_manage_stock';
 
 export function VariationStockStatusForm( {
 	initialValue,
@@ -19,6 +28,20 @@ export function VariationStockStatusForm( {
 	const [ value, setValue ] = useState( {
 		manage_stock: Boolean( initialValue?.manage_stock ),
 	} );
+
+	const { canManageStock, isLoadingManageStockOption } = useSelect(
+		( select ) => {
+			const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
+
+			return {
+				canManageStock: getOption( MANAGE_STOCK_OPTION ) === 'yes',
+				isLoadingManageStockOption: isResolving( 'getOption', [
+					MANAGE_STOCK_OPTION,
+				] ),
+			};
+		},
+		[]
+	);
 
 	function handleSubmit( event: FormEvent< HTMLFormElement > ) {
 		event.preventDefault();
@@ -30,6 +53,29 @@ export function VariationStockStatusForm( {
 		setValue( ( current ) => ( { ...current, manage_stock: isChecked } ) );
 	}
 
+	function renderTrackInventoryToggleHelp() {
+		if ( isLoadingManageStockOption || canManageStock ) return undefined;
+		return createInterpolateElement(
+			/* translators: <Link>: Learn more link opening tag. </Link>: Learn more link closing tag.*/
+			__(
+				'Per your <Link>store settings</Link>, inventory management is <strong>disabled</strong>.',
+				'woocommerce'
+			),
+			{
+				Link: (
+					<a
+						href={ getAdminLink(
+							'admin.php?page=wc-settings&tab=products&section=inventory'
+						) }
+						target="_blank"
+						rel="noreferrer"
+					/>
+				),
+				strong: <strong />,
+			}
+		);
+	}
+
 	return (
 		<form
 			onSubmit={ handleSubmit }
@@ -39,8 +85,10 @@ export function VariationStockStatusForm( {
 			<div className="woocommerce-variation-stock-status-form__controls">
 				<ToggleControl
 					label={ __( 'Track inventory', 'woocommerce' ) }
+					disabled={ isLoadingManageStockOption || ! canManageStock }
 					checked={ value.manage_stock }
 					onChange={ handleTrackInventoryToggleChange }
+					help={ renderTrackInventoryToggleHelp() }
 				/>
 			</div>
 

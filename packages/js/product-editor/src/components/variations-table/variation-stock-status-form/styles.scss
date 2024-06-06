@@ -5,18 +5,12 @@
 
 	&__controls,
 	&__actions {
+		display: flex;
 		gap: $grid-unit-20;
 		padding: $grid-unit-20;
 	}
 
-	&__controls {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		justify-content: stretch;
-	}
-
 	&__actions {
-		display: flex;
 		justify-content: flex-end;
 	}
 }
