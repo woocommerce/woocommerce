@@ -15,9 +15,6 @@ class SkippedReporter {
 
 	onEnd() {
 		if ( this.skippedTests.length > 0 ) {
-			console.log(
-				`::error title=Skipped Tests::The following tests were skipped:`
-			);
 			this.skippedTests.forEach( ( test ) => {
 				console.log( `::error title=Skipped Test::${ test }` );
 			} );
