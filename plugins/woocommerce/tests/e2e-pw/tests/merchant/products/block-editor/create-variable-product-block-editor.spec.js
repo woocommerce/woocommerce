@@ -229,7 +229,7 @@ test.describe( 'Variations tab', () => {
 
 			await page
 				.locator( '.woocommerce-product-tabs' )
-				.getByRole( 'tab', { name: 'Pricing' } )
+				.getByRole( 'tab', { name: 'General' } )
 				.click();
 
 			await page
