@@ -64,10 +64,12 @@ const insertBlockByShortcut = async ( page, blockName ) => {
 		} )
 		.fill( `/${ blockName }` );
 	await expect(
-		page.getByRole( 'button', { name: blockName, exact: true } )
+		page.getByRole( 'option', { name: blockName, exact: true } )
 	).toBeVisible();
-	await page.getByRole( 'button', { name: blockName, exact: true } ).click();
-	await expect( page.getByLabel( `Block: ${ blockName }` ) ).toBeVisible();
+	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
+	await expect(
+		page.getByLabel( `Block: ${ blockName }` ).first()
+	).toBeVisible();
 };
 
 const transformIntoBlocks = async ( page ) => {
