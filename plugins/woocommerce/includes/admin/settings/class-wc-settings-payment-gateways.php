@@ -189,14 +189,6 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 										break;
 									case 'action':
 										$setup_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
-										if ( wc_string_to_bool( $gateway->enabled ) ) {
-											/* Translators: %s Payment gateway name. */
-											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Manage the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Manage', 'woocommerce' ) . '</a>';
-										} else {
-											/* Translators: %s Payment gateway name. */
-											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish set up', 'woocommerce' ) . '</a>';
-										}
-
 										// Override the behaviour for WooPayments plugin.
 										if (
 											// Keep old brand name for backwards compatibility.
@@ -212,6 +204,14 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 												// If the account is fully onboarded, the CTA text and label is "Manage" regardless gateway is enabled or not.
 												/* Translators: %s Payment gateway name. */
 												echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Manage the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Manage', 'woocommerce' ) . '</a>';
+											}
+										} else {
+											if ( wc_string_to_bool( $gateway->enabled ) ) {
+												/* Translators: %s Payment gateway name. */
+												echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Manage the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Manage', 'woocommerce' ) . '</a>';
+											} else {
+												/* Translators: %s Payment gateway name. */
+												echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish set up', 'woocommerce' ) . '</a>';
 											}
 										}
 										break;
