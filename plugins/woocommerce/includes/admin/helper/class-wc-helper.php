@@ -2261,6 +2261,42 @@ class WC_Helper {
 
 		return $woo_com_base_url . 'auto-install-init/';
 	}
+
+	/**
+	 * Retrieve notice for connected store.
+	 *
+	 * @return array An array containing notice data.
+	 */
+	public static function get_notices() {
+		$cache_key   = '_woocommerce_helper_notices';
+		$cached_data = get_transient( $cache_key );
+
+		if ( false !== $cached_data ) {
+			return $cached_data;
+		}
+
+		// Fetch notice data for connected store.
+		$request = WC_Helper_API::get(
+			'notices',
+			array(
+				'authenticated' => true,
+			)
+		);
+
+		if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
+			set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+			return array();
+		}
+
+		$data = json_decode( wp_remote_retrieve_body( $request ), true );
+
+		if ( empty( $data ) || ! is_array( $data ) ) {
+			$data = array();
+		}
+
+		set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+		return $data;
+	}
 }
 
 WC_Helper::load();
