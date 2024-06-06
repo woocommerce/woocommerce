@@ -17,8 +17,23 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { VariationStockStatusFormProps } from './types';
+import { RadioField } from '../../radio-field';
 
 const MANAGE_STOCK_OPTION = 'woocommerce_manage_stock';
+const STOCK_STATUS_OPTIONS = [
+	{
+		label: __( 'In stock', 'woocommerce' ),
+		value: 'instock',
+	},
+	{
+		label: __( 'Out of stock', 'woocommerce' ),
+		value: 'outofstock',
+	},
+	{
+		label: __( 'On backorder', 'woocommerce' ),
+		value: 'onbackorder',
+	},
+];
 
 export function VariationStockStatusForm( {
 	initialValue,
@@ -27,6 +42,7 @@ export function VariationStockStatusForm( {
 }: VariationStockStatusFormProps ) {
 	const [ value, setValue ] = useState( {
 		manage_stock: Boolean( initialValue?.manage_stock ),
+		stock_status: initialValue?.stock_status,
 	} );
 
 	const { canManageStock, isLoadingManageStockOption } = useSelect(
@@ -76,6 +92,10 @@ export function VariationStockStatusForm( {
 		);
 	}
 
+	function handleStockStatusRadioFieldChange( selected: string ) {
+		setValue( ( current ) => ( { ...current, stock_status: selected } ) );
+	}
+
 	return (
 		<form
 			onSubmit={ handleSubmit }
@@ -91,6 +111,17 @@ export function VariationStockStatusForm( {
 					help={ renderTrackInventoryToggleHelp() }
 				/>
 			</div>
+
+			{ ! value.manage_stock && (
+				<div className="woocommerce-variation-stock-status-form__controls">
+					<RadioField
+						title={ __( 'Stock status', 'woocommerce' ) }
+						selected={ value.stock_status }
+						options={ STOCK_STATUS_OPTIONS }
+						onChange={ handleStockStatusRadioFieldChange }
+					/>
+				</div>
+			) }
 
 			<div className="woocommerce-variation-stock-status-form__actions">
 				<Button variant="tertiary" onClick={ onCancel }>

@@ -5,6 +5,8 @@ import { ProductVariation } from '@woocommerce/data';
 
 export type VariationStockStatusFormProps = {
 	initialValue?: Partial< ProductVariation >;
-	onSubmit?( value: Pick< ProductVariation, 'manage_stock' > ): void;
+	onSubmit?(
+		value: Pick< ProductVariation, 'manage_stock' | 'stock_status' >
+	): void;
 	onCancel?(): void;
 };
