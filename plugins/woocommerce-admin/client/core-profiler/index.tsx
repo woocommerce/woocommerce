@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * External dependencies
  */
@@ -12,7 +11,6 @@ import {
 	enqueueActions,
 	DoneActorEvent,
 	fromCallback,
-	log,
 } from 'xstate5';
 import { useMachine, useSelector } from '@xstate5/react';
 import { useMemo } from '@wordpress/element';
@@ -830,7 +828,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onError: {
 							actions: [ 'recordTracksIntroCompleted' ],
 							target: '#userProfile',
-						}
+						},
 					},
 				},
 			},
