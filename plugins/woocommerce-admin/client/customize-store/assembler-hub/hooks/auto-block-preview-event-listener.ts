@@ -87,8 +87,11 @@ const findAndSetLogoBlock = (
 	return observer;
 };
 
+export const DISABLE_CLICK_CLASS = 'disable-click';
+
 /**
- * Adds inert attribute to all inner blocks to prevent them from being focused or clicked.
+ * Adds an 'inert' attribute to all inner blocks and blocks with the class "disable-click" within the provided document element.
+ * The 'inert' attribute makes the blocks uninteractive, preventing them from receiving focus or being clicked.
  */
 const addInertToAllInnerBlocks = ( documentElement: HTMLElement ) => {
 	const body = documentElement.ownerDocument.body;
@@ -102,7 +105,7 @@ const addInertToAllInnerBlocks = ( documentElement: HTMLElement ) => {
 		}
 
 		for ( const disableClick of documentElement.querySelectorAll(
-			"[data-is-parent-block='true'] *, header *, footer *"
+			`[data-is-parent-block='true'] *, header *, footer *, .${ DISABLE_CLICK_CLASS }`
 		) ) {
 			disableClick.setAttribute( 'inert', 'true' );
 		}
