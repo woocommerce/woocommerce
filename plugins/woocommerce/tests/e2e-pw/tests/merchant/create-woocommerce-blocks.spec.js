@@ -10,8 +10,9 @@ const {
 const simpleProductName = 'Simplest Product';
 const singleProductPrice = '555.00';
 
-// all WooCommerce blocks except:
-// default cart and checkout blocks, mini-cart
+// All WooCommerce blocks except:
+// - default cart and checkout blocks, mini-cart
+// - Product Gallery (Beta) - it's not intended to be used in posts
 const blocks = [
 	'All Products',
 	'All Reviews',
@@ -29,7 +30,6 @@ const blocks = [
 	'On Sale Products',
 	'Product Categories List',
 	'Product Collection',
-	'Product Gallery (Beta)',
 	'Product Search',
 	'Products by Attribute',
 	'Products by Category',
