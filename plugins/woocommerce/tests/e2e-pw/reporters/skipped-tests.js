@@ -1,4 +1,4 @@
-require( '@playwright/test/reporter' );
+const { Reporter } = require( '@playwright/test/reporter' );
 
 class SkippedReporter {
 	constructor() {
@@ -15,9 +15,11 @@ class SkippedReporter {
 
 	onEnd() {
 		if ( this.skippedTests.length > 0 ) {
-			this.skippedTests.forEach( ( test ) => {
-				console.log( `::error title=Skipped Test::${ test }` );
-			} );
+			const skippedTestsMessage = this.skippedTests.join( '%0A' );
+			// Output a GitHub Actions annotation with line breaks
+			console.log(
+				`::error title=Skipped Tests::${ skippedTestsMessage }`
+			);
 		}
 	}
 }
