@@ -153,8 +153,18 @@ baseTest.describe( 'Add WooCommerce Blocks Into Page', () => {
 
 				// eslint-disable-next-line playwright/no-conditional-in-test
 				if ( blocks[ i ] === 'Reviews by Product' ) {
-					await canvas.getByLabel( simpleProductName ).check();
 					await canvas
+						.getByRole( 'document', {
+							name: `Block: ${ blocks[ i ] }`,
+							exact: true,
+						} )
+						.getByLabel( simpleProductName )
+						.check();
+					await canvas
+						.getByRole( 'document', {
+							name: `Block: ${ blocks[ i ] }`,
+							exact: true,
+						} )
 						.getByRole( 'button', { name: 'Done', exact: true } )
 						.click();
 				}
