@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, no-undef */
 const { __experimentalRegisterProductCollection } = wc.wcBlocksRegistry;
 
 // Example 1: Register a new collection.
