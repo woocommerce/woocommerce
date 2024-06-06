@@ -1227,7 +1227,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	}
 
 	/**
-	 * Show the list of WooCommerce-aware plugins known to be compatible, incompatible or without compatibility declaration for HPOS.
+	 * Show the list of WooCommerce-aware plugins known to be compatible, incompatible or without compatibility declaration for HPOS. Note that inactive plugins will always be listed in the "uncertain" list.
 	 *
 	 * [--include-inactive]
 	 * : Include inactive plugins in the list.
@@ -1243,8 +1243,8 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	public function compatibility_info( array $args = array(), array $assoc_args = array() ) {
 		$container          = wc_get_container();
 		$feature_controller = $container->get( FeaturesController::class );
-		$plugin_info        = $feature_controller->get_compatible_plugins_for_feature( 'custom_order_tables', ! ( (bool) $assoc_args['include-inactive'] ) );
-		$display_filenames  = (bool) $assoc_args['display-filenames'];
+		$plugin_info        = $feature_controller->get_compatible_plugins_for_feature( 'custom_order_tables', ! ( (bool) ( $assoc_args['include-inactive'] ?? null ) ) );
+		$display_filenames  = (bool) ( $assoc_args['display-filenames'] ?? null );
 
 		$compatibles       = $this->get_printable_plugin_names( $plugin_info['compatible'], $display_filenames );
 		$compatibles_count = count( $compatibles );
