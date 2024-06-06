@@ -1,0 +1,22 @@
+.woocommerce-variation-stock-status-form {
+	display: flex;
+	flex-direction: column;
+	min-width: 345px;
+
+	&__controls,
+	&__actions {
+		gap: $grid-unit-20;
+		padding: $grid-unit-20;
+	}
+
+	&__controls {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		justify-content: stretch;
+	}
+
+	&__actions {
+		display: flex;
+		justify-content: flex-end;
+	}
+}
