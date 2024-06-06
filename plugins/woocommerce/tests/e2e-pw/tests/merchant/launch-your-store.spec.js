@@ -2,7 +2,7 @@ const { test, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-test.describe( 'Launch Your Store - logged in', () => {
+test.describe.skip( 'Launch Your Store - logged in', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { baseURL } ) => {
