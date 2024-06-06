@@ -29,6 +29,7 @@ class WC_Products_Tracking {
 		add_action( 'load-edit.php', array( $this, 'track_products_view' ), 10 );
 		add_action( 'load-edit-tags.php', array( $this, 'track_categories_and_tags_view' ), 10, 2 );
 		add_action( 'edit_post', array( $this, 'track_product_updated' ), 10, 2 );
+		add_action( 'woocommerce_new_product', array( $this, 'track_product_published' ), 10, 3 );
 		add_action( 'woocommerce_update_product', array( $this, 'track_product_published' ), 10, 3 );
 		add_action( 'created_product_cat', array( $this, 'track_product_category_created' ) );
 		add_action( 'edited_product_cat', array( $this, 'track_product_category_updated' ) );
