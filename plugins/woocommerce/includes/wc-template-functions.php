@@ -4004,7 +4004,12 @@ function wc_get_pay_buttons() {
  */
 function wc_update_product_archive_title( $post_type_name, $post_type ) {
 	if ( is_shop() && 'product' === $post_type ) {
-		return get_the_title( wc_get_page_id('shop') );
+		$shop_page_title = get_the_title( wc_get_page_id( 'shop' ) );
+		if ( $shop_page_title ) {
+			return $shop_page_title;
+		}
+		 
+		return __( 'Shop', 'woocommerce' );
 	}
 
 	return $post_type_name;
