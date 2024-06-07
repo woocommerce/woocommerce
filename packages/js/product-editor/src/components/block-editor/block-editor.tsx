@@ -242,50 +242,70 @@ export function BlockEditor( {
 		( postType !== 'product_variation' && ! productTemplate ) ||
 		productId === -1;
 
-	useLayoutEffect( () => {
-		if ( isEditorLoading ) {
-			return;
-		}
+	const productFormTemplate = useMemo(
+		function pickAndParseTheProductFormTemplate() {
+			if (
+				! isProductEditorTemplateSystemEnabled ||
+				! selectedProductFormId
+			) {
+				return undefined;
+			}
 
-		// PFT: pick and parse the product form template, if it exists.
-		const productFormPost = productForms.find(
-			( form ) => form.id === selectedProductFormId
-		);
+			const productFormPost = productForms.find(
+				( form ) => form.id === selectedProductFormId
+			);
 
-		let productFormTemplate;
-		if ( isProductEditorTemplateSystemEnabled && productFormPost ) {
-			productFormTemplate = parse( productFormPost.content.raw );
-		}
+			if ( productFormPost ) {
+				return parse( productFormPost.content.raw );
+			}
 
-		const blockInstances = synchronizeBlocksWithTemplate(
-			[],
-			layoutTemplate.blockTemplates
-		);
+			return undefined;
+		},
+		[
+			isProductEditorTemplateSystemEnabled,
+			productForms,
+			selectedProductFormId,
+		]
+	);
 
-		/*
-		 * If the product form template is not available, use the block instances.
-		 * ToDo: Remove this fallback once the product form template is stable/available.
-		 */
-		const editorTemplate = productFormTemplate ?? blockInstances;
+	useLayoutEffect(
+		function setupEditor() {
+			if (
+				! layoutTemplate?.blockTemplates ||
+				! settings ||
+				! productTemplate
+			) {
+				return;
+			}
 
-		onChange( editorTemplate, {} );
+			const blockInstances = synchronizeBlocksWithTemplate(
+				[],
+				layoutTemplate.blockTemplates
+			);
 
-		dispatch( 'core/editor' ).updateEditorSettings( {
-			...settings,
-			productTemplate,
-		} as Partial< ProductEditorSettings > );
+			/*
+			 * If the product form template is not available, use the block instances.
+			 * ToDo: Remove this fallback once the product form template is stable/available.
+			 */
+			const editorTemplate = productFormTemplate ?? blockInstances;
 
+			onChange( editorTemplate, {} );
+
+			dispatch( 'core/editor' ).updateEditorSettings( {
+				...settings,
+				productTemplate,
+			} as Partial< ProductEditorSettings > );
+
+			// We don't need to include onChange in the dependencies, since we get new
+			// instances of it on every render, which would cause an infinite loop.
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+		},
+		[ layoutTemplate, settings, productTemplate, productFormTemplate ]
+	);
+
+	useEffect( () => {
 		setIsEditorLoading( isEditorLoading );
-
-		// We don't need to include onChange or updateEditorSettings in the dependencies,
-		// since we get new instances of them on every render, which would cause an infinite loop.
-		//
-		// We include productId in the dependencies to make sure that the effect is run when the
-		// product is changed, since we need to synchronize the blocks with the template and update
-		// the blocks by calling onChange.
-		//
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ isEditorLoading, productId, productForms, selectedProductFormId ] );
+	}, [ isEditorLoading ] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( selectCore ) => {
