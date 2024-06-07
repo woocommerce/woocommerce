@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <!-- wp:woocommerce/product-section {"title":"<?php esc_attr_e( 'Basic details', 'woocommerce' ); ?>"} -->
 <div data-block-name="woocommerce/product-section" class="wp-block-woocommerce-product-section" data-title="<?php esc_attr_e( 'Basic details', 'woocommerce' ); ?>">
 	<div>
-		<!-- wp:woocommerce/product-regular-price-field -->
+		<!-- wp:woocommerce/product-regular-price-field{ "label":"<?php esc_attr_e( 'Regular price', 'woocommerce' ); ?>"} -->
 		<div data-block-name="woocommerce/product-regular-price-field" class="wp-block-woocommerce-product-regular-price-field"></div>
 		<!-- /wp:woocommerce/product-regular-price-field -->
 
