@@ -240,7 +240,8 @@ export function BlockEditor( {
 		! layoutTemplate ||
 		// variations don't have a product template
 		( postType !== 'product_variation' && ! productTemplate ) ||
-		productId === -1;
+		productId === -1 ||
+		! hasResolved;
 
 	const productFormTemplate = useMemo(
 		function pickAndParseTheProductFormTemplate() {
