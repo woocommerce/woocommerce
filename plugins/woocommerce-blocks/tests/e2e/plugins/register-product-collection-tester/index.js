@@ -7,6 +7,11 @@ __experimentalRegisterProductCollection( {
 	title: 'My Custom Collection',
 	description: 'This is a custom collection.',
 	keywords: [ 'custom collection', 'product collection' ],
+	attributes: {
+		query: {
+			perPage: 5,
+		},
+	},
 } );
 
 // Example 2: Register a new collection with a preview.
@@ -45,7 +50,7 @@ __experimentalRegisterProductCollection( {
 					isPreview: false,
 					previewMessage: '',
 				} );
-			}, 2000 );
+			}, 1000 );
 
 			return () => clearTimeout( timeoutID );
 		},

@@ -59,9 +59,10 @@ export const SELECTORS = {
 		min: 'MIN',
 		max: 'MAX',
 	},
+	previewButtonTestID: 'product-collection-preview-button',
 };
 
-type Collections =
+export type Collections =
 	| 'newArrivals'
 	| 'topRated'
 	| 'bestSellers'

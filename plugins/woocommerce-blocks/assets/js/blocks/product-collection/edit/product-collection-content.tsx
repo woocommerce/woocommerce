@@ -162,7 +162,7 @@ const ProductCollectionContent = ( {
 							attributes.__privatePreviewState?.previewMessage
 						}
 						className="wc-block-product-collection__preview-button"
-						data-test-id="product-collection-preview-button"
+						data-testid="product-collection-preview-button"
 					>
 						Preview
 					</Button>
