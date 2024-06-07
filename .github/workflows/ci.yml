@@ -349,6 +349,14 @@ jobs:
             contents: read
             issues: write
         steps:
+            - uses: actions/download-artifact@v4
+              with:
+                pattern: flaky-tests*
+                path: flaky-tests
+                merge-multiple: true
+                
+            - run: ls -lh flaky-tests
+                
             # We are using @wordpress/report-flaky-tests package from Gutenberg repo
             # to create GitHub issues for flaky tests.
             - uses: actions/checkout@v4
@@ -358,18 +366,12 @@ jobs:
                   # This is to avoid any breaking changes.
                   ref: dbf201449e9736f672b61e422787d47659db327a
 
-            - uses: actions/download-artifact@v4
-              with:
-                  pattern: flaky-tests*
-                  path: flaky-tests
-                  merge-multiple: true
-
             - name: 'Setup Node.js and install dependencies'
               uses: ./.github/setup-node
 
-            - name: 'Npm build'
-              # TODO: We don't have to build the entire project, just the action itself.
-              run: npm run build:packages
+#            - name: 'Npm build'
+#              # TODO: We don't have to build the entire project, just the action itself.
+#              run: npm run build:packages
 
             - name: 'Report flaky tests'
               uses: ./packages/report-flaky-tests
