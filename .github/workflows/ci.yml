@@ -373,9 +373,14 @@ jobs:
               if: ${{ !!steps.download-artifact.outputs.download-path }}
               uses: ./.github/setup-node
 
-            - name: 'Build packages'
+#            - name: 'Build packages'
+#              if: ${{ !!steps.download-artifact.outputs.download-path }}
+#              run: npm run build:packages
+
+            - name: 'Update action main script'
               if: ${{ !!steps.download-artifact.outputs.download-path }}
-              run: npm run build:packages
+              run: |
+                sed -i 's|main: '\''build/index.js'\''|main: '\''src/index.ts'\''|g' ./packages/report-flaky-tests/action.yml
 
             - name: 'Report flaky tests'
               if: ${{ !!steps.download-artifact.outputs.download-path }}
