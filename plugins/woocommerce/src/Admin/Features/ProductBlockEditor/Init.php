@@ -408,6 +408,12 @@ class Init {
 		);
 
 		$this->redirection_controller->set_product_templates( $this->product_templates );
+
+		// PFT: Initialize the product form controller.
+		if ( Features::is_enabled( 'product-editor-template-system' ) ) {
+			$product_form_controller = new ProductFormsController();
+			$product_form_controller->init();
+		}
 	}
 
 	/**

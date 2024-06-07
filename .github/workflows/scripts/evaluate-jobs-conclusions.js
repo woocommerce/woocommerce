@@ -1,15 +1,17 @@
 /* eslint-disable no-console */
 const { REPOSITORY, RUN_ID, GITHUB_TOKEN, TEST_MODE } = process.env;
 const IGNORED_JOBS = [
-	'Evaluate Project Job Statuses',
-	'Report e2e tests results',
-	'Report API tests results',
+	/Evaluate Project Job Statuses/,
+	/Report results on Slack/,
+	/Publish reports/,
 ];
 
 const isJobRequired = ( job ) => {
 	return (
 		! job.name.endsWith( '(optional)' ) &&
-		! IGNORED_JOBS.includes( job.name )
+		! IGNORED_JOBS.some( ( ignoredJobRegex ) =>
+			ignoredJobRegex.test( job.name )
+		)
 	);
 };
 
