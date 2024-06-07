@@ -14,17 +14,17 @@ const singleProductPrice = '555.00';
 // - default cart and checkout blocks, mini-cart
 // - Product Gallery (Beta) - it's not intended to be used in posts
 const blocks = [
+	'Active Filters',
 	'All Products',
 	'All Reviews',
-	'Active Filters',
 	'Best Selling Products',
 	'Customer account',
 	'Featured Category',
 	'Featured Product',
-	'Filter by Price',
-	'Filter by Stock',
 	'Filter by Attribute',
+	'Filter by Price',
 	'Filter by Rating',
+	'Filter by Stock',
 	'Hand-picked Products',
 	'Newest Products',
 	'On Sale Products',
