@@ -1387,6 +1387,10 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 				),
 			);
 
+			if ( is_a( $product, 'WC_Product_Simple' ) ) {
+				$defaults['attributes']['data-success_message'] = $product->add_to_cart_success_message();
+			}
+
 			$args = apply_filters( 'woocommerce_loop_add_to_cart_args', wp_parse_args( $args, $defaults ), $product );
 
 			if ( ! empty( $args['attributes']['aria-describedby'] ) ) {
