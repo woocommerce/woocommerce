@@ -255,8 +255,8 @@ class WC_Install {
 		'8.9.1' => array(
 			'wc_update_891_create_plugin_autoinstall_history_option',
 		),
-		'9.0.0' => array(
-			'wc_update_900_add_launch_your_store_tour_option',
+		'9.1.0' => array(
+			'wc_update_910_add_launch_your_store_tour_option',
 		),
 	);
 
