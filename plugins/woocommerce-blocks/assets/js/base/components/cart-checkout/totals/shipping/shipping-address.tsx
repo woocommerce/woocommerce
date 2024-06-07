@@ -11,6 +11,7 @@ import {
 import PickupLocation from '@woocommerce/base-components/cart-checkout/pickup-location';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
+import { createInterpolateElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -64,18 +65,21 @@ export const ShippingAddress = ( {
 	const formattedLocation = formatShippingAddress( shippingAddress );
 	let deliveryLabel;
 	if ( hasRates ) {
-		deliveryLabel = (
-			<>
-				{ __( 'Delivers to ', 'woocommerce' ) }
-				<strong>{ formattedLocation }</strong>
-			</>
+		deliveryLabel = createInterpolateElement(
+			__( 'Delivers to <FormattedLocation />', 'woocommerce' ),
+			{
+				FormattedLocation: <strong>{ formattedLocation }</strong>,
+			}
 		);
 	} else {
-		deliveryLabel = (
-			<>
-				{ __( 'No delivery options available for ', 'woocommerce' ) }
-				<strong>{ formattedLocation }</strong>
-			</>
+		deliveryLabel = createInterpolateElement(
+			__(
+				'No delivery options available for <FormattedLocation />',
+				'woocommerce'
+			),
+			{
+				FormattedLocation: <strong>{ formattedLocation }</strong>,
+			}
 		);
 	}
 

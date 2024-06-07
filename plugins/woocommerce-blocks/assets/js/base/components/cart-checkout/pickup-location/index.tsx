@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { isObject, objectHasProp } from '@woocommerce/types';
 import { isPackageRateCollectable } from '@woocommerce/base-utils';
+import { createInterpolateElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -68,11 +69,11 @@ const PickupLocation = ( {
 	if ( typeof pickupAddress === 'undefined' ) {
 		return null;
 	}
-	const pickupLabel = (
-		<>
-			{ __( 'Collection from ', 'woocommerce' ) }
-			<strong>{ pickupAddress }</strong>
-		</>
+	const pickupLabel = createInterpolateElement(
+		__( 'Collection from <PickupAddress />', 'woocommerce' ),
+		{
+			PickupAddress: <strong>{ pickupAddress }</strong>,
+		}
 	);
 
 	// Show the pickup method's name if we don't have an address to show.

@@ -54,7 +54,6 @@ const ShippingCalculator = ( {
 					addressFields={ addressFields }
 					onCancel={ onCancel }
 					onUpdate={ ( newAddress ) => {
-						// Updates the address and waits for the result.
 						dispatch( CART_STORE_KEY )
 							.updateCustomerData(
 								{
