@@ -14,18 +14,17 @@ class ProductFormsController {
 	 * Set up the product forms controller.
 	 */
 	public function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingFinal, WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag -- Not an injection.
-		// Migrate form templates after WooCommerce plugin update.
-		add_action( 'upgrader_process_complete', array( $this, 'migrate_form_templates' ), 10, 2 );
+		add_action( 'upgrader_process_complete', array( $this, 'migrate_templates_when_plugin_updated' ), 10, 2 );
 	}
 
 	/**
-	 * Migrate form templates.
+	 * Migrate form templates after WooCommerce plugin update.
 	 *
 	 * @param \WP_Upgrader $upgrader The WP_Upgrader instance.
 	 * @param array        $hook_extra Extra arguments passed to hooked filters.
 	 * @return void
 	 */
-	public function migrate_form_templates( \WP_Upgrader $upgrader, array $hook_extra ) {
+	public function migrate_templates_when_plugin_updated( \WP_Upgrader $upgrader, array $hook_extra ) {
 		// Check if the action is an `update` or `install` action for a plugin.
 		if (
 			'install' !== $hook_extra['action'] &&
@@ -42,6 +41,15 @@ class ProductFormsController {
 			return;
 		}
 
+		$this->insert_post_form_posts();
+	}
+
+	/**
+	 * Insert post form posts for each form template file.
+	 *
+	 * @return void
+	 */
+	public function insert_post_form_posts() {
 		/**
 		 * Allow extend the list of templates that should be auto-generated.
 		 *
@@ -78,7 +86,6 @@ class ProductFormsController {
 				continue;
 			}
 
-			// Insert the post.
 			$post = wp_insert_post(
 				array(
 					'post_title'   => $file_data['title'],
@@ -86,7 +93,7 @@ class ProductFormsController {
 					'post_status'  => 'publish',
 					'post_type'    => 'product_form',
 					'post_content' => BlockTemplateUtils::get_template_content( $file_path ),
-					'post_excerpt' => __( 'Template auto-generated for the Product Form Template system', 'woocommerce' ),
+					'post_excerpt' => __( 'Template auto-generated for the (PFT) Product Form Template system', 'woocommerce' ),
 				)
 			);
 		}
