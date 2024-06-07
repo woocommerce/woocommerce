@@ -346,6 +346,9 @@ jobs:
         if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         needs: ['project-test-jobs']
         runs-on: ubuntu-latest
+        permissions:
+          contents: read
+          issues: write
 
         steps:
             - uses: actions/checkout@v4
