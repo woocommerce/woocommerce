@@ -66,7 +66,7 @@ const ModalEditor = lazy( () =>
 );
 
 function getLayoutTemplateId(
-	productTemplate: ProductTemplate | undefined,
+	productTemplate: ProductTemplate | undefined | null,
 	postType: string
 ) {
 	if ( productTemplate?.layoutTemplateId ) {
@@ -184,7 +184,7 @@ export function BlockEditor( {
 		};
 	}, [ settingsGlobal ] );
 
-	const { editedRecord: product } = useEntityRecord< Product >(
+	const { editedRecord: product, hasResolved } = useEntityRecord< Product >(
 		'postType',
 		postType,
 		productId,
@@ -203,11 +203,11 @@ export function BlockEditor( {
 
 	const { productTemplate } = useProductTemplate(
 		productTemplateId,
-		product
+		hasResolved ? product : null
 	);
 
 	const { layoutTemplate } = useLayoutTemplate(
-		getLayoutTemplateId( productTemplate, postType )
+		hasResolved ? getLayoutTemplateId( productTemplate, postType ) : null
 	);
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
