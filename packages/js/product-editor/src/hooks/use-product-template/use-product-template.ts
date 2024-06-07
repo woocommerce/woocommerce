@@ -87,7 +87,13 @@ export const useProductTemplate = (
 		);
 
 		// If there are multiple matching templates, we should use the one with the most matching fields.
-		matchingProductTemplate = findBetterMatchTemplate( matchingTemplates );
+		// If there is no matching template, we should default to the standard product template.
+		matchingProductTemplate =
+			findBetterMatchTemplate( matchingTemplates ) ||
+			productTemplates.find(
+				( productTemplate ) =>
+					productTemplate.id === 'standard-product-template'
+			);
 	}
 
 	// When we switch to getting the product template from the API,
