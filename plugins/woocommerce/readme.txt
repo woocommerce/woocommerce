@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Revert "Remove customer-effort-score-tracks" feature flag #48235 [#48235](https://github.com/woocommerce/woocommerce/pull/48235)
 * Fix - Fix db update notice redirection bug where it redirects without checking for db update action.  </details>  <details>  <summary>Changelog Entry Comment</summary> [#48163](https://github.com/woocommerce/woocommerce/pull/48163)
 * Fix - Add missing URL to discover more link in LYS tour [#48109](https://github.com/woocommerce/woocommerce/pull/48109)
 * Fix - Fix: "On Sale" collection isn't displaying on Editor side  </details>  <details> [#47994](https://github.com/woocommerce/woocommerce/pull/47994)
