@@ -16,9 +16,9 @@ jQuery( function( $ ) {
 		$( document.body )
 			.on( 'click', '.add_to_cart_button:not(.wc-interactive)', { addToCartHandler: this }, this.onAddToCart )
 			.on( 'click', '.remove_from_cart_button', { addToCartHandler: this }, this.onRemoveFromCart )
-			.on( 'added_to_cart', this.updateButton )
-			.on( 'ajax_request_not_sent.adding_to_cart', this.updateButton )
-			.on( 'added_to_cart removed_from_cart', { addToCartHandler: this }, this.updateFragments );
+			.on( 'added_to_cart', { addToCartHandler: this }, this.onAddedToCart )
+			.on( 'removed_from_cart', { addToCartHandler: this }, this.onRemovedFromCart )
+			.on( 'ajax_request_not_sent.adding_to_cart', this.updateButton );
 	};
 
 	/**
@@ -64,6 +64,12 @@ jQuery( function( $ ) {
 			if ( ! $thisbutton.attr( 'data-product_id' ) ) {
 				return true;
 			}
+
+			// Clean existing text in mini cart live region and update aria-relevant attribute
+			// so screen readers can identify the next update if it's the same as the previous one.
+			$( '.widget_shopping_cart_live_region' )
+				.text( '' )
+				.attr( 'aria-relevant', 'additions text' );
 
 			e.preventDefault();
 
@@ -126,6 +132,10 @@ jQuery( function( $ ) {
 	AddToCartHandler.prototype.onRemoveFromCart = function( e ) {
 		var $thisbutton = $( this ),
 			$row        = $thisbutton.closest( '.woocommerce-mini-cart-item' );
+
+		$( '.widget_shopping_cart_live_region' )
+			.text( '' )
+			.attr( 'aria-relevant', 'additions text' );
 
 		e.preventDefault();
 
@@ -205,6 +215,42 @@ jQuery( function( $ ) {
 
 			$( document.body ).trigger( 'wc_fragments_loaded' );
 		}
+	};
+
+	/**
+	 * Update cart live region message after add/remove cart events.
+	 */
+	AddToCartHandler.prototype.alertCartUpdated = function( e, fragments, cart_hash, $button ) {
+		var message = $button.data( 'success_message' );
+
+		if ( !message ) {
+			return;
+		}
+
+		var $liveRegion = $( '.widget_shopping_cart_live_region' );
+
+		if ( !$liveRegion.length ) {
+			$liveRegion = $( '<div class="widget_shopping_cart_live_region screen-reader-text" role="status"></div>' ).appendTo( 'body' );
+		}
+
+		$liveRegion.text( message ).attr( 'aria-relevant', 'all' );
+	};
+
+	/**
+	 * Callbacks after added to cart event.
+	 */
+	AddToCartHandler.prototype.onAddedToCart = function( e, fragments, cart_hash, $button ) {
+		e.data.addToCartHandler.updateButton( e, fragments, cart_hash, $button );
+		e.data.addToCartHandler.updateFragments( e, fragments );
+		e.data.addToCartHandler.alertCartUpdated( e, fragments, cart_hash, $button );
+	};
+
+	/**
+	 * Callbacks after removed from cart event.
+	 */
+	AddToCartHandler.prototype.onRemovedFromCart = function( e, fragments, cart_hash, $button ) {
+		e.data.addToCartHandler.updateFragments( e, fragments );
+		e.data.addToCartHandler.alertCartUpdated( e, fragments, cart_hash, $button );
 	};
 
 	/**
