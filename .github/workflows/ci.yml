@@ -352,9 +352,8 @@ jobs:
               id: download-artifact
               continue-on-error: true
               with:
-                pattern: flaky-tests*
+                name: flaky-tests-9
                 path: flaky-tests
-                merge-multiple: true
                 
             - run: |
                 ls -lh
@@ -373,14 +372,9 @@ jobs:
               if: ${{ !!steps.download-artifact.outputs.download-path }}
               uses: ./.github/setup-node
 
-#            - name: 'Build packages'
-#              if: ${{ !!steps.download-artifact.outputs.download-path }}
-#              run: npm run build:packages
-
-            - name: 'Update action main script'
+            - name: 'Build packages'
               if: ${{ !!steps.download-artifact.outputs.download-path }}
-              run: |
-                sed -i 's|main: '\''build/index.js'\''|main: '\''src/index.ts'\''|g' ./packages/report-flaky-tests/action.yml
+              run: npm run build:packages
 
             - name: 'Report flaky tests'
               if: ${{ !!steps.download-artifact.outputs.download-path }}
