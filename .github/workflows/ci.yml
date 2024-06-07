@@ -362,6 +362,8 @@ jobs:
             - uses: actions/checkout@v4
               with:
                   repository: WordPress/gutenberg
+                  # Only checkout the packages we need
+                  sparse-checkout: packages/report-flaky-tests
                   # We are using commit hash to checkout the exact version of the script.
                   # This is to avoid any breaking changes.
                   ref: dbf201449e9736f672b61e422787d47659db327a
@@ -369,9 +371,9 @@ jobs:
             - name: 'Setup Node.js and install dependencies'
               uses: ./.github/setup-node
 
-#            - name: 'Npm build'
-#              # TODO: We don't have to build the entire project, just the action itself.
-#              run: npm run build:packages
+            - name: 'Build the action project'
+              working-directory: ./packages/report-flaky-tests
+              run: npm install
 
             - name: 'Report flaky tests'
               uses: ./packages/report-flaky-tests
