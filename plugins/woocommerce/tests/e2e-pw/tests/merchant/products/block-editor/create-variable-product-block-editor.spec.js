@@ -76,8 +76,7 @@ test.describe( 'Variations tab', () => {
 			'The block product editor is not being tested'
 		);
 
-		// Issue found so skipping this test until fixed #47858
-		test.skip( 'can create a variation option and publish the product', async ( {
+		test( 'can create a variation option and publish the product', async ( {
 			page,
 		} ) => {
 			await test.step( 'Load new product editor, disable tour', async () => {
@@ -107,7 +106,7 @@ test.describe( 'Variations tab', () => {
 				await page
 					.locator( '.woocommerce-attribute-field' )
 					.getByRole( 'button', {
-						name: 'Add sizes',
+						name: 'Add options',
 					} )
 					.click();
 			} );
@@ -119,26 +118,28 @@ test.describe( 'Variations tab', () => {
 
 				await page.waitForLoadState( 'domcontentloaded' );
 
+				await page
+					.locator(
+						'input[aria-describedby^="components-form-token-suggestions-howto-combobox-control"]'
+					)
+					.fill( attributesData.name );
+
 				await page.locator( 'text=Create "Size"' ).click();
 
-				const attributeColumn = page.getByPlaceholder(
-					'Search or create attribute'
-				);
-
-				await expect( attributeColumn ).toHaveValue( 'Size' );
-
 				for ( const option of attributesData.options ) {
-					await page
-						.locator(
-							'.woocommerce-new-attribute-modal__table-attribute-value-column .woocommerce-experimental-select-control__input'
-						)
-						.fill( option );
+					const container = page.locator(
+						'td.woocommerce-new-attribute-modal__table-attribute-value-column'
+					);
 
-					await page.locator( `text=Create "${ option }"` ).click();
+					const inputLocator = container.locator(
+						'input[id^="components-form-token-input-"]'
+					);
 
-					await expect(
-						page.locator( '.woocommerce-attribute-term-field' )
-					).toContainText( option );
+					await inputLocator.fill( option );
+					await page.waitForTimeout( 100 ); // needs some time to be able to press Enter.
+					await expect( inputLocator ).toHaveValue( option );
+					await inputLocator.press( 'Enter' );
+					await expect( container ).toContainText( option );
 				}
 
 				await page
@@ -293,15 +294,6 @@ test.describe( 'Variations tab', () => {
 			await page
 				.getByRole( 'button', { name: 'Generate from options' } )
 				.click();
-
-			// Tour sometimes present
-			try {
-				await page
-					.getByRole( 'button', { name: 'Got it', exact: true } )
-					.click( { timeout: 5000 } );
-			} catch ( e ) {
-				console.log( 'Tour was not visible, skipping.' );
-			}
 
 			await getVariationsResponsePromise;
 
