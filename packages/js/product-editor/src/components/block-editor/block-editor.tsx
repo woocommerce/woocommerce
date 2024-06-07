@@ -270,11 +270,7 @@ export function BlockEditor( {
 
 	useLayoutEffect(
 		function setupEditor() {
-			if (
-				! layoutTemplate?.blockTemplates ||
-				! settings ||
-				! productTemplate
-			) {
+			if ( isEditorLoading ) {
 				return;
 			}
 
@@ -300,7 +296,13 @@ export function BlockEditor( {
 			// instances of it on every render, which would cause an infinite loop.
 			// eslint-disable-next-line react-hooks/exhaustive-deps
 		},
-		[ layoutTemplate, settings, productTemplate, productFormTemplate ]
+		[
+			isEditorLoading,
+			layoutTemplate,
+			settings,
+			productTemplate,
+			productFormTemplate,
+		]
 	);
 
 	useEffect( () => {
