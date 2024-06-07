@@ -358,7 +358,9 @@ jobs:
                 path: flaky-tests
                 merge-multiple: true
                 
-            - run: ls -lh flaky-tests
+            - run: |
+                ls -lh
+                ls -lh flaky-tests
                 
             - uses: actions/checkout@v4
               if: ${{ !!steps.download-artifact.outputs.download-path }}
@@ -380,4 +382,4 @@ jobs:
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   label: 'metric: flaky e2e test'
-                  artifact-path: ./flaky-tests
+                  artifact-path: flaky-tests

@@ -512,8 +512,11 @@
 				{
 					"name": "Blocks e2e tests",
 					"testType": "e2e",
-					"command": "test:e2e:blocks flaky-test.spec.ts",
-					"shardingArguments": [],
+					"command": "test:e2e:blocks flaky-test",
+					"shardingArguments": [
+						"--shard=1/2",
+						"--shard=2/2"
+					],
 					"changes": [
 						"src/Blocks/**",
 						"templates/**",
