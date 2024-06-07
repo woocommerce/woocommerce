@@ -34,10 +34,19 @@ class ProductFormsController {
 			return;
 		}
 
-		$updated_plugins = $hook_extra['plugins'];
+		/*
+		 * Check whether $hook_extra['plugins'] contains the WooCommerce plugin.
+		 * It seems that $hook_extra may be `null` in some cases.
+		 * @see https://github.com/woocommerce/woocommerce/pull/48221#pullrequestreview-2102772713
+		 */
+		if ( ! isset( $hook_extra['plugins'] ) || ! is_array( $hook_extra['plugins'] ) ) {
+			return;
+		}
 
 		// Check if WooCommerce plugin was updated.
-		if ( ! in_array( 'woocommerce/woocommerce.php', $updated_plugins, true ) ) {
+		if (
+			! in_array( 'woocommerce/woocommerce.php', $hook_extra['plugins'], true )
+		) {
 			return;
 		}
 
