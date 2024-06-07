@@ -8,6 +8,7 @@ import type {
 } from '@woocommerce/types';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import { formatShippingAddress } from '@woocommerce/base-utils';
+import { createInterpolateElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -34,15 +35,14 @@ export const ShippingRateSelector = ( {
 		: __( 'Choose a shipping option', 'woocommerce' );
 
 	const formattedLocation = formatShippingAddress( shippingAddress );
-	const noResultsMessage = (
-		<>
-			{ __( 'No delivery options available for ', 'woocommerce' ) }
-			<strong>{ formattedLocation }</strong>
-			{ __(
-				'. Please verify the address is correct or try a different address.',
-				'woocommerce'
-			) }
-		</>
+	const noResultsMessage = createInterpolateElement(
+		__(
+			'No delivery options available for <formattedLocation />. Please verify the address is correct or try a different address.',
+			'woocommerce'
+		),
+		{
+			formattedLocation: <strong>{ formattedLocation }</strong>,
+		}
 	);
 
 	return (
