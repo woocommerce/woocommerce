@@ -1,4 +1,5 @@
-Significance: patch
-Type: tweak
+Significance: major
+Type: update
 
-Move the archive product update logic from BlockTemplatesController to wc-template-functions.php since it applies to block and classic themes.
+The archive product title will now be updated to the title of the current shop
+page. If the page does not exist, it will fall back to "Shop.
