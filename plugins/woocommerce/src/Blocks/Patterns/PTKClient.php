@@ -32,6 +32,10 @@ class PTKClient {
 			$ptk_url = add_query_arg( 'categories', implode( ',', $options['categories'] ), $ptk_url );
 		}
 
+		if ( isset( $options['per_page'] ) ) {
+			$ptk_url = add_query_arg( 'per_page', $options['per_page'], $ptk_url );
+		}
+
 		$patterns = wp_safe_remote_get( $ptk_url );
 		if ( is_wp_error( $patterns ) || 200 !== wp_remote_retrieve_response_code( $patterns ) ) {
 			return new WP_Error(
