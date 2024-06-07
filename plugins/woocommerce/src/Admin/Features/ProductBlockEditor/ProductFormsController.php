@@ -60,15 +60,16 @@ class ProductFormsController {
 			return;
 		}
 
-		$this->migrate_product_form_posts();
+		$this->migrate_product_form_posts( $action );
 	}
 
 	/**
 	 * Insert post form posts for each form template file.
 	 *
+	 * @param string $action - The action to perform. `insert` | `update`.
 	 * @return void
 	 */
-	public function migrate_product_form_posts() {
+	public function migrate_product_form_posts( $action ) {
 		/**
 		 * Allow extend the list of templates that should be auto-generated.
 		 *
@@ -99,6 +100,25 @@ class ProductFormsController {
 			);
 
 			/*
+			 * Update the the CPT post if it already exists,
+			 * and the action is `update`.
+			 */
+			if ( 'update' === $action ) {
+				$post = $posts[0] ?? null;
+
+				if ( ! empty( $post ) ) {
+					wp_update_post(
+						array(
+							'ID'           => $post->ID,
+							'post_title'   => $file_data['title'],
+							'post_content' => BlockTemplateUtils::get_template_content( $file_path ),
+							'post_excerpt' => __( 'Template updated by the (PFT) Product Form Template system', 'woocommerce' ),
+						)
+					);
+				}
+			}
+
+			/*
 			 * Skip the post creation if the post already exists.
 			 */
 			if ( ! empty( $posts ) ) {
@@ -112,7 +132,7 @@ class ProductFormsController {
 					'post_status'  => 'publish',
 					'post_type'    => 'product_form',
 					'post_content' => BlockTemplateUtils::get_template_content( $file_path ),
-					'post_excerpt' => __( 'Template auto-generated for the (PFT) Product Form Template system', 'woocommerce' ),
+					'post_excerpt' => __( 'Template created by the (PFT) Product Form Template system', 'woocommerce' ),
 				)
 			);
 		}
