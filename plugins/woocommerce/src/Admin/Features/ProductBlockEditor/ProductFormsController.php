@@ -75,7 +75,8 @@ class ProductFormsController {
 		 * @param array $templates List of templates to auto-generate.
 		 */
 		$templates = apply_filters(
-			'woocommerce_product_form_templates', $this->product_form_templates
+			'woocommerce_product_form_templates',
+			$this->product_form_templates
 		);
 
 		foreach ( $templates as $slug ) {
