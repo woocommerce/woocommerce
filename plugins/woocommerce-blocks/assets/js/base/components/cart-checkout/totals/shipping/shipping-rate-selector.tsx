@@ -37,11 +37,11 @@ export const ShippingRateSelector = ( {
 	const formattedLocation = formatShippingAddress( shippingAddress );
 	const noResultsMessage = createInterpolateElement(
 		__(
-			'No delivery options available for <formattedLocation />. Please verify the address is correct or try a different address.',
+			'No delivery options available for <FormattedLocation />. Please verify the address is correct or try a different address.',
 			'woocommerce'
 		),
 		{
-			formattedLocation: <strong>{ formattedLocation }</strong>,
+			FormattedLocation: <strong>{ formattedLocation }</strong>,
 		}
 	);
 
