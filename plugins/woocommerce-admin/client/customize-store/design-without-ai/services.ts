@@ -147,6 +147,10 @@ const installAndActivateTheme = async (
 };
 
 export const installPatterns = async () => {
+	if ( ! window.wcAdminFeatures[ 'pattern-toolkit-full-composability' ] ) {
+		return;
+	}
+
 	const isTrackingEnabled = window.wcTracks?.isEnabled || false;
 	if ( ! isTrackingEnabled ) {
 		return;
