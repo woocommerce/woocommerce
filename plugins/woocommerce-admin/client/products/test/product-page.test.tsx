@@ -12,7 +12,6 @@ import { useParams } from 'react-router-dom';
 import ProductPage from '../product-page';
 import ProductVariationPage from '../product-variation-page';
 
-
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
