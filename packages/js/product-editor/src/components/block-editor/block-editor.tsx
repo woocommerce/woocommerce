@@ -226,7 +226,7 @@ export function BlockEditor( {
 		);
 	}, [] ) as ProductFormTemplateProps[];
 
-	// Set the defailt product form template ID.
+	// Set the default product form template ID.
 	useEffect( () => {
 		if ( ! productForms.length ) {
 			return;
