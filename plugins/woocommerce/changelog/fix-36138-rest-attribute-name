@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Ensure attribute slugs with multibyte characters are handled property when outputting attributes in the REST API products endpoint
