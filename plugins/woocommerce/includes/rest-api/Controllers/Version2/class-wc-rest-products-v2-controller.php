@@ -462,8 +462,12 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	protected function get_attribute_taxonomy_name( $slug, $product ) {
 		// Format slug so it matches attributes of the product.
 		$slug       = wc_attribute_taxonomy_slug( $slug );
-		$attributes = $product->get_attributes();
-		$attribute  = false;
+		$attributes = array_combine(
+			array_map( 'wc_sanitize_taxonomy_name', array_keys( $product->get_attributes() ) ),
+			array_values( $product->get_attributes() )
+		);
+
+		$attribute = false;
 
 		// pa_ attributes.
 		if ( isset( $attributes[ wc_attribute_taxonomy_name( $slug ) ] ) ) {
