@@ -22,41 +22,42 @@ export const batchFetch = ( optionName: string ) => {
 	};
 };
 
+const delay = ( timeout: number ) =>
+	new Promise( ( resolve ) => setTimeout( resolve, timeout ) );
+
 export const controls = {
 	...dataControls,
-	BATCH_FETCH( { optionName }: Action ) {
+	async BATCH_FETCH( { optionName }: Action ) {
 		optionNames.push( optionName );
 
-		return new Promise( ( resolve ) => {
-			setTimeout( function () {
-				if (
-					fetches.hasOwnProperty( optionName ) &&
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore TODO - this type bug needs to be fixed.
-					fetches[ optionName ]
-				) {
-					return fetches[ optionName ].then( ( result ) => {
-						resolve( result );
-					} );
-				}
+		// Wait for 1ms to allow batching of option names
+		await delay( 1 );
 
-				// Get unique option names.
-				const names = [ ...new Set( optionNames ) ].join( ',' );
-				// Send request for a group of options.
-				const url = WC_ADMIN_NAMESPACE + '/options?options=' + names;
-				const fetch = apiFetch( { path: url } );
-				fetch.then( ( result ) => resolve( result ) );
-				optionNames.forEach( ( option ) => {
-					fetches[ option ] = fetch;
-					fetches[ option ].then( () => {
-						// Delete the fetch after to allow wp data to handle cache invalidation.
-						delete fetches[ option ];
-					} );
-				} );
+		// If the option name is already being fetched, return the promise
+		if ( fetches.hasOwnProperty( optionName ) ) {
+			return await fetches[ optionName ];
+		}
 
-				// Clear option names after we've sent the request for a group of options.
-				optionNames = [];
-			}, 1 );
+		// Get unique option names
+		const uniqueOptionNames = [ ...new Set( optionNames ) ];
+		const names = uniqueOptionNames.join( ',' );
+
+		// Send request for a group of options
+		const fetch = apiFetch( {
+			path: `${ WC_ADMIN_NAMESPACE }/options?options=${ names }`,
 		} );
+
+		uniqueOptionNames.forEach( ( option ) => {
+			fetches[ option ] = fetch;
+			fetch.finally( () => {
+				// Delete the fetch after completion to allow wp data to handle cache invalidation
+				delete fetches[ option ];
+			} );
+		} );
+
+		// Clear option names after we've sent the request for a group of options
+		optionNames = [];
+
+		return await fetch;
 	},
 };
