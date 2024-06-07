@@ -365,7 +365,7 @@ jobs:
                 
             - name: 'Check if there are flaky tests reports'
               run: |
-                downloadPath= ${{ steps.download-artifact.outputs.download-path }}
+                downloadPath=${{ steps.download-artifact.outputs.download-path }}
                 HAS_FLAKY_TESTS=$(if [ -z "$(ls -A $downloadPath)" ]; then echo 'false'; else echo 'true'; fi)
                 echo "HAS_FLAKY_TESTS=$HAS_FLAKY_TESTS" >> $GITHUB_ENV
                 
