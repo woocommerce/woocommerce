@@ -4,6 +4,7 @@ const IGNORED_JOBS = [
 	/Evaluate Project Job Statuses/,
 	/Report results on Slack/,
 	/Publish reports/,
+	/Create issues for flaky tests/,
 ];
 
 const isJobRequired = ( job ) => {
