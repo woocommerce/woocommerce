@@ -17,6 +17,11 @@ export type WPError = {
 	data: {
 		[ key: string ]: unknown;
 	};
+	productType?: string;
+};
+
+type ErrorProps = {
+	explicitDismiss: boolean;
 };
 
 export function getProductErrorMessageAndProps(
@@ -24,25 +29,31 @@ export function getProductErrorMessageAndProps(
 	visibleTab: string | null
 ): {
 	message: string;
-	errorProps: { explicitDismiss: boolean };
+	errorProps: ErrorProps;
 } {
 	const response = {
 		message: '',
-		errorProps: {
-			explicitDismiss: false,
-		},
+		errorProps: {} as ErrorProps,
 	};
 	switch ( error.code ) {
 		case 'variable_product_no_variation_prices':
 			response.message = error.message;
 			if ( visibleTab !== 'variations' ) {
-				response.errorProps.explicitDismiss = true;
+				response.errorProps = { explicitDismiss: true };
 			}
 			break;
 		case 'product_form_field_error':
 			response.message = error.message;
-			if ( visibleTab !== 'general' ) {
-				response.errorProps.explicitDismiss = true;
+			if (
+				error.productType === 'product_variation' &&
+				visibleTab !== 'pricing'
+			) {
+				response.errorProps = { explicitDismiss: true };
+			} else if (
+				visibleTab !== 'general' &&
+				error.productType !== 'product_variation'
+			) {
+				response.errorProps = { explicitDismiss: true };
 			}
 			break;
 		case 'product_invalid_sku':
@@ -51,7 +62,7 @@ export function getProductErrorMessageAndProps(
 				'woocommerce'
 			);
 			if ( visibleTab !== 'inventory' ) {
-				response.errorProps.explicitDismiss = true;
+				response.errorProps = { explicitDismiss: true };
 			}
 			break;
 		case 'product_create_error':

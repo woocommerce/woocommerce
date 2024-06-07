@@ -13,7 +13,11 @@ import { useValidations } from '../../contexts/validation-context';
 import type { WPError } from '../../utils/get-product-error-message-and-props';
 import { AUTO_DRAFT_NAME } from '../../utils/constants';
 
-export function errorHandler( error: WPError, productStatus: ProductStatus ) {
+export function errorHandler(
+	error: WPError,
+	productStatus: ProductStatus,
+	productType: string
+) {
 	if ( error.code ) {
 		return error;
 	}
@@ -33,6 +37,7 @@ export function errorHandler( error: WPError, productStatus: ProductStatus ) {
 		return {
 			code: 'product_form_field_error',
 			message: errorMessage,
+			productType,
 		};
 	}
 
@@ -41,6 +46,7 @@ export function errorHandler( error: WPError, productStatus: ProductStatus ) {
 			productStatus === 'publish' || productStatus === 'future'
 				? 'product_publish_error'
 				: 'product_create_error',
+		productType,
 	};
 }
 
@@ -107,7 +113,7 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			return savedProduct as T;
 		} catch ( error ) {
-			throw errorHandler( error as WPError, status );
+			throw errorHandler( error as WPError, status, postType );
 		} finally {
 			setIsSaving( false );
 		}
@@ -128,7 +134,7 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			return duplicatedProduct as T;
 		} catch ( error ) {
-			throw errorHandler( error as WPError, status );
+			throw errorHandler( error as WPError, status, postType );
 		} finally {
 			setIsSaving( false );
 		}
@@ -174,7 +180,7 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			return deletedProduct as T;
 		} catch ( error ) {
-			throw errorHandler( error as WPError, status );
+			throw errorHandler( error as WPError, status, postType );
 		} finally {
 			setTrashing( false );
 		}
