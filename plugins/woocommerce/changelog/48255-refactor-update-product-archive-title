@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Move the archive product update logic from BlockTemplatesController to wc-template-functions.php since it applies to block and classic themes.
