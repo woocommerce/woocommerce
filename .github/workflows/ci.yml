@@ -370,7 +370,7 @@ jobs:
                 mkdir -p $downloadPath
                 echo "FLAKY_REPORTS=$(ls -A -m $downloadPath)" >> $GITHUB_ENV
                 
-            - name: 'Setup Node.js and install dependencies'
+            - name: 'Setup'
               if: ${{ !!env.FLAKY_REPORTS }}
               uses: ./.github/setup-node
 
