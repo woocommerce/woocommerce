@@ -117,14 +117,12 @@ describe( 'useProductTemplate', () => {
 		expect( result.current.productTemplate ).toBeUndefined();
 	} );
 
-	it( 'should use the standard product template if no templateId is provided', () => {
+	it( 'should match to a template with the same type if no template id is provided', () => {
 		const { result } = renderHook( () =>
 			useProductTemplate( undefined, { type: 'simple' } )
 		);
 
-		expect( result.current.productTemplate?.id ).toEqual(
-			'standard-product-template'
-		);
+		expect( result.current.productTemplate?.id ).toEqual( 'template-1' );
 	} );
 
 	it( 'should select the product template with the most matching fields if there are multiple matching templates', () => {

@@ -71,17 +71,13 @@ export const useProductTemplate = (
 		return { productTemplate: null, isResolving: false };
 	}
 
-	const productTemplateIdToFind =
-		productTemplateId || 'standard-product-template';
+	let matchingProductTemplate: ProductTemplate | undefined;
 
-	const productTypeToFind =
-		productType === 'variable' ? 'simple' : productType;
-
-	let matchingProductTemplate = productTemplates.find(
-		( productTemplate ) =>
-			productTemplate.id === productTemplateIdToFind &&
-			productTemplate.productData.type === productTypeToFind
-	);
+	if ( productTemplateId ) {
+		matchingProductTemplate = productTemplates.find(
+			( productTemplate ) => productTemplate.id === productTemplateId
+		);
+	}
 
 	if ( ! matchingProductTemplate && product ) {
 		// Look for matching templates based on product data described on each template.
