@@ -25,7 +25,7 @@ import './style.scss';
 import { useIsNoBlocksPlaceholderPresent } from '../hooks/block-placeholder/use-is-no-blocks-placeholder-present';
 
 const isHomepageUrl = ( path: string ) => {
-	return path === '/customize-store/assembler-hub/homepage';
+	return path.includes( '/customize-store/assembler-hub/homepage' );
 };
 
 export const Toolbar = () => {
@@ -91,7 +91,9 @@ export const Toolbar = () => {
 
 	useEffect( () => {
 		const path = query.path;
-
+		if ( ! path ) {
+			return;
+		}
 		setIsHomepageSidebarOpen( isHomepageUrl( path ) );
 	}, [ query ] );
 	const { isPreviousBlockTemplatePart, isNextBlockTemplatePart } =

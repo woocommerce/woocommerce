@@ -4,7 +4,14 @@
 /**
  * External dependencies
  */
-import { memo, useRef, useEffect } from '@wordpress/element';
+import {
+	memo,
+	useRef,
+	useEffect,
+	useMemo,
+	useLayoutEffect,
+	useState,
+} from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalNavigatorProvider as NavigatorProvider,
@@ -35,6 +42,9 @@ import {
 } from '@woocommerce/navigation';
 // In some cases, the assembler is loaded in an iframe, so we have to re-apply the filter.
 import '~/customize-store/design-with-ai/entrepreneur-flow';
+import { isPatternToolkitFullComposabilityFeatureFlagEnabled } from '../utils/is-full-composability-enabled';
+import { SidebarNavigationScreenHomepagePTK } from './sidebar-navigation-screen-homepage-ptk';
+import { home } from '@wordpress/icons';
 
 function isSubset(
 	subset: {
@@ -106,33 +116,72 @@ function useSyncPathWithURL() {
 
 function SidebarScreens() {
 	useSyncPathWithURL();
+
+	const path = useQuery().path;
+
+	const ref = useRef( '/customize-store/assembler-hub/homepage' );
+
+	const [ homepagePath, setHomepagePath ] = useState(
+		'/customize-store/assembler-hub/homepage'
+	);
+
+	useLayoutEffect( () => {
+		if ( ! path ) {
+			return;
+		}
+
+		if ( path === '/customize-store/assembler-hub/homepage' ) {
+			return;
+		}
+
+		if ( path.startsWith( '/customize-store/assembler-hub/homepage/' ) ) {
+			ref.current = path;
+			return;
+		}
+
+		ref.current = '/customize-store/assembler-hub/homepage';
+	}, [ path ] );
+
+	console.log( 'homepagePath', path );
+
 	return (
 		<>
-			<NavigatorScreen path="/customize-store/assembler-hub">
-				<SidebarNavigationScreenMain />
-			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/assembler-hub/color-palette">
-				<SidebarNavigationScreenColorPalette />
-			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/assembler-hub/typography">
-				<SidebarNavigationScreenTypography />
-			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/assembler-hub/header">
-				<SidebarNavigationScreenHeader />
-			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/assembler-hub/homepage">
-				<SidebarNavigationScreenHomepage />
-			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/assembler-hub/footer">
-				<SidebarNavigationScreenFooter />
-			</NavigatorScreen>
-			{ /* TODO: Implement pages sidebar in Phrase 2 */ }
-			{ /* <NavigatorScreen path="/customize-store/assembler-hub/pages">
+			<div className="disable-animation">
+				<NavigatorScreen path="/customize-store/assembler-hub">
+					<SidebarNavigationScreenMain />
+				</NavigatorScreen>
+				<NavigatorScreen path="/customize-store/assembler-hub/color-palette">
+					<SidebarNavigationScreenColorPalette />
+				</NavigatorScreen>
+				<NavigatorScreen path="/customize-store/assembler-hub/typography">
+					<SidebarNavigationScreenTypography />
+				</NavigatorScreen>
+				<NavigatorScreen path="/customize-store/assembler-hub/header">
+					<SidebarNavigationScreenHeader />
+				</NavigatorScreen>
+				{ isPatternToolkitFullComposabilityFeatureFlagEnabled() && (
+					<NavigatorScreen path={ ref.current }>
+						<SidebarNavigationScreenHomepagePTK />
+					</NavigatorScreen>
+				) }
+				{ ! isPatternToolkitFullComposabilityFeatureFlagEnabled() && (
+					<NavigatorScreen
+						path={ '/customize-store/assembler-hub/homepage' }
+					>
+						<SidebarNavigationScreenHomepage />
+					</NavigatorScreen>
+				) }
+				<NavigatorScreen path="/customize-store/assembler-hub/footer">
+					<SidebarNavigationScreenFooter />
+				</NavigatorScreen>
+				{ /* TODO: Implement pages sidebar in Phrase 2 */ }
+				{ /* <NavigatorScreen path="/customize-store/assembler-hub/pages">
 				<SidebarNavigationScreenPages />
 			</NavigatorScreen> */ }
-			<NavigatorScreen path="/customize-store/assembler-hub/logo">
-				<SidebarNavigationScreenLogo />
-			</NavigatorScreen>
+				<NavigatorScreen path="/customize-store/assembler-hub/logo">
+					<SidebarNavigationScreenLogo />
+				</NavigatorScreen>
+			</div>
 		</>
 	);
 }

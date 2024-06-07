@@ -137,6 +137,8 @@ export const FontPairing = () => {
 		trackingAllowed,
 	] );
 
+	console.log( 'fontPairings', fontPairings );
+
 	if ( isLoading ) {
 		return (
 			<div className="woocommerce-customize-store_font-pairing-spinner-container">
