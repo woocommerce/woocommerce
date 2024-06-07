@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { select } from '@wordpress/data';
-import { __experimentalRegisterProductCollection } from '@woocommerce/blocks-registry';
+import { __experimentalRegisterProductCollection as registerProductCollection } from '@woocommerce/blocks-registry';
 import {
 	// @ts-expect-error Type definition is missing
 	store as blocksStore,
@@ -40,7 +40,7 @@ export const registerCollections = () => {
 			return blockAttrs.collection === variationAttributes.collection;
 		};
 
-		__experimentalRegisterProductCollection( {
+		registerProductCollection( {
 			isActive,
 			...collection,
 		} );

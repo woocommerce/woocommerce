@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Enqueue the JavaScript file.
-function rpc_register_product_collections_script()
+function register_product_collections_script()
 {
 	wp_enqueue_script(
 		'rpc_register_product_collections',
@@ -27,4 +27,4 @@ function rpc_register_product_collections_script()
 	);
 }
 
-add_action('enqueue_block_editor_assets', 'rpc_register_product_collections_script');
+add_action('enqueue_block_editor_assets', 'register_product_collections_script');

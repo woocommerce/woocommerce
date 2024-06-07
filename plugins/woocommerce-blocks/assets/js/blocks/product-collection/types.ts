@@ -4,18 +4,10 @@
 import type { BlockEditProps } from '@wordpress/blocks';
 import { type AttributeMetadata } from '@woocommerce/types';
 
-export const enum LocationType {
-	Product = 'product',
-	Archive = 'archive',
-	Cart = 'cart',
-	Order = 'order',
-	Site = 'site',
-}
-
-export type WooCommerceBlockLocation = {
-	type: LocationType;
-	sourceData: Record< string, unknown >;
-};
+/**
+ * Internal dependencies
+ */
+import { WooCommerceBlockLocation } from '../product-template/utils';
 
 export interface ProductCollectionAttributes {
 	query: ProductCollectionQuery;

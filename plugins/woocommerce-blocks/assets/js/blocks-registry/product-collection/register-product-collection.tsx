@@ -31,6 +31,8 @@ export interface ProductCollectionConfig extends BlockVariation {
 /**
  * Register a new collection for the Product Collection block.
  *
+ * 🚨🚨🚨 WARNING: This is an experimental API and is subject to change without notice.
+ *
  * @param {ProductCollectionConfig} blockVariationArgs The configuration of new collection.
  */
 export const __experimentalRegisterProductCollection = ( {
@@ -88,7 +90,7 @@ export const __experimentalRegisterProductCollection = ( {
 			inherit: blockVariationArgs.attributes?.inherit || false,
 		},
 		innerBlocks: blockVariationArgs.innerBlocks || INNER_BLOCKS_TEMPLATE,
-		isActive: blockVariationArgs.isActive || isActive,
+		isActive,
 		isDefault: false,
 	} );
 };

@@ -9,7 +9,6 @@ import { test as base, expect } from '@woocommerce/e2e-utils';
  */
 import ProductCollectionPage, {
 	BLOCK_LABELS,
-	Collections,
 	SELECTORS,
 } from './product-collection.page';
 
@@ -1243,19 +1242,20 @@ test.describe( 'Product Collection', () => {
  * for 3PDs to register new product collections.
  */
 test.describe( 'Testing registerProductCollection', () => {
-	const MY_COLLECTIONS_LABELS = {
-		myCustomCollection: 'Block: My Custom Collection',
-		myCustomCollectionWithPreview:
-			'Block: My Custom Collection with Preview',
-		myCustomCollectionWithAdvancedPreview:
-			'Block: My Custom Collection with Advanced Preview',
+	const MY_REGISTERED_COLLECTIONS = {
+		myCustomCollection: {
+			name: 'My Custom Collection',
+			label: 'Block: My Custom Collection',
+		},
+		myCustomCollectionWithPreview: {
+			name: 'My Custom Collection with Preview',
+			label: 'Block: My Custom Collection with Preview',
+		},
+		myCustomCollectionWithAdvancedPreview: {
+			name: 'My Custom Collection with Advanced Preview',
+			label: 'Block: My Custom Collection with Advanced Preview',
+		},
 	};
-
-	const COLLECTION_NAMES = [
-		'My Custom Collection',
-		'My Custom Collection with Preview',
-		'My Custom Collection with Advanced Preview',
-	];
 
 	// Activate plugin which registers custom product collections
 	test.beforeEach( async ( { requestUtils } ) => {
@@ -1279,13 +1279,20 @@ test.describe( 'Testing registerProductCollection', () => {
 
 		// Check if all registered collections are available in the collection chooser
 		expect(
-			collectionChooserButtonsTexts.includes( COLLECTION_NAMES[ 0 ] )
+			collectionChooserButtonsTexts.includes(
+				MY_REGISTERED_COLLECTIONS.myCustomCollection.name
+			)
 		).toBeTruthy();
 		expect(
-			collectionChooserButtonsTexts.includes( COLLECTION_NAMES[ 1 ] )
+			collectionChooserButtonsTexts.includes(
+				MY_REGISTERED_COLLECTIONS.myCustomCollectionWithPreview.name
+			)
 		).toBeTruthy();
 		expect(
-			collectionChooserButtonsTexts.includes( COLLECTION_NAMES[ 2 ] )
+			collectionChooserButtonsTexts.includes(
+				MY_REGISTERED_COLLECTIONS.myCustomCollectionWithAdvancedPreview
+					.name
+			)
 		).toBeTruthy();
 	} );
 
@@ -1313,7 +1320,7 @@ test.describe( 'Testing registerProductCollection', () => {
 			);
 
 			const block = editor.canvas.getByLabel(
-				MY_COLLECTIONS_LABELS.myCustomCollection
+				MY_REGISTERED_COLLECTIONS.myCustomCollection.label
 			);
 
 			const products = block
@@ -1362,10 +1369,10 @@ test.describe( 'Testing registerProductCollection', () => {
 			);
 
 			const block = editor.canvas.getByLabel(
-				MY_COLLECTIONS_LABELS.myCustomCollectionWithPreview
+				MY_REGISTERED_COLLECTIONS.myCustomCollectionWithPreview.label
 			);
 
-			// Check if all products are visible
+			// Check if products are visible
 			const products = block
 				.getByLabel( BLOCK_LABELS.productImage )
 				.locator( 'visible=true' );
@@ -1379,7 +1386,6 @@ test.describe( 'Testing registerProductCollection', () => {
 		} );
 	} );
 
-	// My Custom Collection with Advanced Preview
 	test.describe( 'My Custom Collection with Advanced Preview', () => {
 		test( 'Clicking "My Custom Collection with Advanced Preview" should insert block and show 9 products', async ( {
 			pageObject,
@@ -1395,7 +1401,7 @@ test.describe( 'Testing registerProductCollection', () => {
 			await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
 		} );
 
-		test( 'Clicking "My Custom Collection with Advanced Preview" should show preview for 5 seconds', async ( {
+		test( 'Clicking "My Custom Collection with Advanced Preview" should show preview for 1 second', async ( {
 			pageObject,
 			editor,
 			page,
@@ -1427,14 +1433,10 @@ test.describe( 'Testing registerProductCollection', () => {
 				'myCustomCollectionWithAdvancedPreview'
 			);
 
-			// Check if all products are visible
 			const block = editor.canvas.getByLabel(
-				MY_COLLECTIONS_LABELS.myCustomCollectionWithAdvancedPreview
+				MY_REGISTERED_COLLECTIONS.myCustomCollectionWithAdvancedPreview
+					.label
 			);
-			const products = block
-				.getByLabel( BLOCK_LABELS.productImage )
-				.locator( 'visible=true' );
-			await expect( products ).toHaveCount( 9 );
 
 			// Check if the preview button is visible
 			const previewButtonLocator = block.getByTestId(
@@ -1442,11 +1444,17 @@ test.describe( 'Testing registerProductCollection', () => {
 			);
 			await expect( previewButtonLocator ).toBeVisible();
 
+			// Check if products are visible
+			const products = block
+				.getByLabel( BLOCK_LABELS.productImage )
+				.locator( 'visible=true' );
+			await expect( products ).toHaveCount( 9 );
+
 			// Disabling eslint rule because we need to wait for the preview to disappear
 			// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
 			await page.waitForTimeout( 1000 );
 
-			// The preview button should be hidden after 5 seconds
+			// The preview button should be hidden after 1 second
 			await expect( previewButtonLocator ).toBeHidden();
 		} );
 	} );

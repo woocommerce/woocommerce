@@ -17,11 +17,13 @@ import {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
 	SetPreviewState,
-	LocationType,
 } from './types';
 import { coreQueryPaginationBlockName } from './constants';
 import blockJson from './block.json';
-import { WooCommerceBlockLocation } from '../product-template/utils';
+import {
+	LocationType,
+	WooCommerceBlockLocation,
+} from '../product-template/utils';
 
 /**
  * Sets the new query arguments of a Product Query block
