@@ -108,7 +108,7 @@ test.skip( 'can create and add attributes', async ( { page, product } ) => {
 
 	await test.step( 'go to product editor, Organization tab', async () => {
 		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
-		await page.getByRole( 'button', { name: 'Organization' } ).click();
+		await page.getByRole( 'tab', { name: 'Organization' } ).click();
 	} );
 
 	await test.step( 'add new attributes', async () => {
@@ -215,7 +215,7 @@ test.skip( 'can add existing attributes', async ( {
 				response.url().includes( '/terms?attribute_id=' ) &&
 				response.status() === 200
 		);
-		await page.getByRole( 'button', { name: 'Organization' } ).click();
+		await page.getByRole( 'tab', { name: 'Organization' } ).click();
 		await getAttributesResponsePromise;
 	} );
 
@@ -297,7 +297,7 @@ test.skip( 'can update product attributes', async ( {
 		await page.goto(
 			`wp-admin/post.php?post=${ productWithAttributes.id }&action=edit`
 		);
-		await page.getByRole( 'button', { name: 'Organization' } ).click();
+		await page.getByRole( 'tab', { name: 'Organization' } ).click();
 
 		// Sometimes the attribute's terms take a while to load, and we need to reload and retry.
 		// See https://github.com/woocommerce/woocommerce/issues/44925
@@ -393,8 +393,14 @@ test( 'can remove product attributes', async ( {
 				response.url().includes( '/terms?attribute_id=' ) &&
 				response.status() === 200
 		);
-		await page.getByRole( 'button', { name: 'Organization' } ).click();
+		await page.getByRole( 'tab', { name: 'Organization' } ).click();
 		await getAttributesResponsePromise;
+		await page
+			.getByLabel( 'Block: Product attributes' )
+			.waitFor( { state: 'visible' } );
+		await page
+			.getByLabel( 'Block: Product attributes' )
+			.scrollIntoViewIfNeeded();
 	} );
 
 	const attributeItemLocator = page.getByRole( 'listitem' ).filter( {
@@ -403,7 +409,9 @@ test( 'can remove product attributes', async ( {
 	page.on( 'dialog', ( dialog ) => dialog.accept() );
 
 	await test.step( "remove product's attribute", async () => {
-		await attributeItemLocator.getByLabel( 'Remove' ).click();
+		await attributeItemLocator
+			.getByLabel( 'Remove' )
+			.click( { delay: 1000 } );
 	} );
 
 	await test.step( 'verify the change in product editor', async () => {

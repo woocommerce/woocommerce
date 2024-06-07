@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -66,7 +67,13 @@ class WC_Helper_Admin {
 			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
 			'wooUpdateCount'             => WC_Helper_Updater::get_updates_count_based_on_site_status(),
 			'woocomConnectNoticeType'    => $woo_connect_notice_type,
+			'dismissNoticeNonce'         => wp_create_nonce( 'dismiss_notice' ),
 		);
+
+		if ( WC_Helper::is_site_connected() ) {
+			$settings['wccomHelper']['subscription_expired_notice']  = PluginsHelper::get_expired_subscription_notice( false );
+			$settings['wccomHelper']['subscription_expiring_notice'] = PluginsHelper::get_expiring_subscription_notice( false );
+		}
 
 		return $settings;
 	}

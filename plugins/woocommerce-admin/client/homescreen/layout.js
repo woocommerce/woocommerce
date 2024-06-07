@@ -10,7 +10,7 @@ import {
 } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import {
 	useUserPreferences,
@@ -73,7 +73,7 @@ export const Layout = ( {
 	const shouldShowWCPayFeature = taskListComplete || isTaskListHidden;
 	const hasTwoColumnContent =
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
-	const isDashboardShown = ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
+	const isDashboardShown = Object.keys( query ).length > 0 && ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
 	const activeSetupTaskList = useActiveSetupTasklist();
 
 	const twoColumns =
@@ -141,13 +141,13 @@ export const Layout = ( {
 		<>
 			{ isDashboardShown && (
 				<WooHomescreenHeaderBanner
-					className={ classnames( 'woocommerce-homescreen', {
+					className={ clsx( 'woocommerce-homescreen', {
 						'woocommerce-homescreen-column': ! twoColumns,
 					} ) }
 				/>
 			) }
 			<div
-				className={ classnames( 'woocommerce-homescreen', {
+				className={ clsx( 'woocommerce-homescreen', {
 					'two-columns': twoColumns,
 				} ) }
 			>
@@ -201,14 +201,6 @@ Layout.propTypes = {
 	 * If the welcome from Calypso modal should display.
 	 */
 	shouldShowWelcomeFromCalypsoModal: PropTypes.bool,
-	/**
-	 * Timestamp of WooCommerce Admin installation.
-	 */
-	installTimestamp: PropTypes.string,
-	/**
-	 * Resolution of WooCommerce Admin installation timetsamp.
-	 */
-	installTimestampHasResolved: PropTypes.bool,
 	/**
 	 * Dispatch an action to update an option
 	 */

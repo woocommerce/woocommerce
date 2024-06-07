@@ -102,14 +102,28 @@ class ComingSoonRequestHandler {
 			return false;
 		}
 
-		// Exclude users with a private link.
-		if ( isset( $_GET['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_GET['woo-share'] ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			// Persist the share link with a cookie for 90 days.
-			setcookie( 'woo-share', sanitize_text_field( wp_unslash( $_GET['woo-share'] ) ), time() + 60 * 60 * 24 * 90, '/' ); //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		/**
+		 * Check if there is an exclusion.
+		 *
+		 * @since 9.1.0
+		 *
+		 * @param bool $is_excluded If the request should be excluded from Coming soon mode. Defaults to false.
+		 */
+		if ( apply_filters( 'woocommerce_coming_soon_exclude', false ) ) {
 			return false;
 		}
-		if ( isset( $_COOKIE['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_COOKIE['woo-share'] ) {
-			return false;
+
+		// Check if the private link option is enabled.
+		if ( get_option( 'woocommerce_private_link' ) === 'yes' ) {
+			// Exclude users with a private link.
+			if ( isset( $_GET['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_GET['woo-share'] ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				// Persist the share link with a cookie for 90 days.
+				setcookie( 'woo-share', sanitize_text_field( wp_unslash( $_GET['woo-share'] ) ), time() + 60 * 60 * 24 * 90, '/' ); //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				return false;
+			}
+			if ( isset( $_COOKIE['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_COOKIE['woo-share'] ) {
+				return false;
+			}
 		}
 		return true;
 	}

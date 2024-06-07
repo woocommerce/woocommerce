@@ -5,7 +5,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { useDebounce } from 'use-debounce';
 import type { ForwardedRef, KeyboardEvent, RefObject } from 'react';
 import { __ } from '@wordpress/i18n';
@@ -133,17 +133,14 @@ const UnforwardedDrawer = (
 		// eslint-disable-next-line jsx-a11y/no-static-element-interactions
 		<div
 			ref={ overlayRef }
-			className={ classNames(
-				'wc-block-components-drawer__screen-overlay',
-				{
-					'wc-block-components-drawer__screen-overlay--is-hidden':
-						! isOpen,
-					'wc-block-components-drawer__screen-overlay--with-slide-in':
-						slideIn,
-					'wc-block-components-drawer__screen-overlay--with-slide-out':
-						slideOut,
-				}
-			) }
+			className={ clsx( 'wc-block-components-drawer__screen-overlay', {
+				'wc-block-components-drawer__screen-overlay--is-hidden':
+					! isOpen,
+				'wc-block-components-drawer__screen-overlay--with-slide-in':
+					slideIn,
+				'wc-block-components-drawer__screen-overlay--with-slide-out':
+					slideOut,
+			} ) }
 			onKeyDown={ handleEscapeKeyDown }
 			onClick={ ( e ) => {
 				// If click was done directly in the overlay element and not one
@@ -154,10 +151,7 @@ const UnforwardedDrawer = (
 			} }
 		>
 			<div
-				className={ classNames(
-					className,
-					'wc-block-components-drawer'
-				) }
+				className={ clsx( className, 'wc-block-components-drawer' ) }
 				ref={ drawerRef }
 				role="dialog"
 				tabIndex={ -1 }

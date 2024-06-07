@@ -55,15 +55,21 @@ const insertBlock = async ( page, blockName ) => {
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
 };
 
-const insertBlockByShortcut = async ( page, blockShortcut ) => {
+const insertBlockByShortcut = async ( page, blockName ) => {
 	const canvas = await getCanvas( page );
 	await canvas.getByRole( 'button', { name: 'Add default block' } ).click();
 	await canvas
 		.getByRole( 'document', {
 			name: 'Empty block; start writing or type forward slash to choose a block',
 		} )
-		.fill( blockShortcut );
-	await page.keyboard.press( 'Enter' );
+		.pressSequentially( `/${ blockName }` );
+	await expect(
+		page.getByRole( 'option', { name: blockName, exact: true } )
+	).toBeVisible();
+	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
+	await expect(
+		page.getByLabel( `Block: ${ blockName }` ).first()
+	).toBeVisible();
 };
 
 const transformIntoBlocks = async ( page ) => {
@@ -85,7 +91,9 @@ const transformIntoBlocks = async ( page ) => {
 };
 
 const publishPage = async ( page, pageTitle ) => {
-	await page.getByRole( 'button', { name: 'Publish', exact: true } ).click();
+	await page
+		.getByRole( 'button', { name: 'Publish', exact: true } )
+		.dispatchEvent( 'click' );
 	await page
 		.getByRole( 'region', { name: 'Editor publish' } )
 		.getByRole( 'button', { name: 'Publish', exact: true } )

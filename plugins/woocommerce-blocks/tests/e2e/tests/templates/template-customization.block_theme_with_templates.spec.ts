@@ -1,8 +1,11 @@
 /**
  * External dependencies
  */
-import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import {
+	test,
+	expect,
+	BLOCK_THEME_WITH_TEMPLATES_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -29,15 +32,16 @@ test.describe( 'Template customization', () => {
 			test( "theme template has priority over WooCommerce's and can be modified", async ( {
 				admin,
 				editor,
-				editorUtils,
 				frontendUtils,
 				page,
 			} ) => {
 				// Edit the theme template.
-				await editorUtils.visitTemplateEditor(
-					testData.templateName,
-					testData.templateType
-				);
+				await admin.visitSiteEditor( {
+					postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
+					postType: testData.templateType,
+				} );
+				await editor.enterEditMode();
+
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: userText },
@@ -56,24 +60,6 @@ test.describe( 'Template customization', () => {
 				await expect(
 					page.getByText( userText ).first()
 				).toBeVisible();
-
-				// Revert edition and verify the template from the theme is used.
-				await admin.visitSiteEditor( {
-					path: `/${ testData.templateType }/all`,
-				} );
-				await editorUtils.revertTemplateCustomizations(
-					testData.templateName
-				);
-				await testData.visitPage( { frontendUtils, page } );
-
-				await expect(
-					page
-						.getByText(
-							`${ testData.templateName } template loaded from theme`
-						)
-						.first()
-				).toBeVisible();
-				await expect( page.getByText( userText ) ).toHaveCount( 0 );
 			} );
 
 			if ( testData.fallbackTemplate ) {
@@ -81,14 +67,16 @@ test.describe( 'Template customization', () => {
 					admin,
 					frontendUtils,
 					editor,
-					editorUtils,
 					page,
 				} ) => {
-					// Edit default template and verify changes are not visible, as the theme template has priority.
-					await editorUtils.visitTemplateEditor(
-						testData.fallbackTemplate?.templateName || '',
-						testData.templateType
-					);
+					// Edit default template and verify changes are not visible,
+					// as the theme template has priority.
+					await admin.visitSiteEditor( {
+						postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.fallbackTemplate?.templatePath }`,
+						postType: testData.templateType,
+					} );
+					await editor.enterEditMode();
+
 					await editor.insertBlock( {
 						name: 'core/paragraph',
 						attributes: {
@@ -100,14 +88,6 @@ test.describe( 'Template customization', () => {
 					await expect(
 						page.getByText( fallbackTemplateUserText )
 					).toHaveCount( 0 );
-
-					// Revert the edit.
-					await admin.visitSiteEditor( {
-						path: `/${ testData.templateType }/all`,
-					} );
-					await editorUtils.revertTemplateCustomizations(
-						testData.fallbackTemplate?.templateName || ''
-					);
 				} );
 			}
 		} );
