@@ -59,7 +59,7 @@ class ProductFormsController {
 			return;
 		}
 
-		$this->insert_post_form_posts();
+		$this->migrate_product_form_posts();
 	}
 
 	/**
@@ -67,7 +67,7 @@ class ProductFormsController {
 	 *
 	 * @return void
 	 */
-	public function insert_post_form_posts() {
+	public function migrate_product_form_posts() {
 		/**
 		 * Allow extend the list of templates that should be auto-generated.
 		 *
