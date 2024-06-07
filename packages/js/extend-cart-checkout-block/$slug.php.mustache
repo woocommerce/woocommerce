@@ -54,7 +54,7 @@ function register_{{slugPascalCase}}_block_category( $categories ) {
 add_action( 'block_categories_all', 'register_{{slugPascalCase}}_block_category', 10, 2 );
 
 
-add_action( 'woocommerce_loaded', '{{slug}}_register_custom_checkout_fields' );
+add_action( 'woocommerce_loaded', '{{slugPascalCase}}_register_custom_checkout_fields' );
 
 /**
  * Registers custom checkout fields for the WooCommerce checkout form.
@@ -62,7 +62,7 @@ add_action( 'woocommerce_loaded', '{{slug}}_register_custom_checkout_fields' );
  * @return void
  * @throws Exception If there is an error during the registration of the checkout fields.
  */
-function {{slug}}_register_custom_checkout_fields() {
+function {{slugPascalCase}}_register_custom_checkout_fields() {
 
 	if ( ! function_exists( 'woocommerce_register_additional_checkout_field' ) ) {
 		return;
