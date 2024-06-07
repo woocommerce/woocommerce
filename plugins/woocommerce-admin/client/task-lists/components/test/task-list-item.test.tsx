@@ -188,7 +188,7 @@ describe( 'TaskListItem', () => {
 		);
 	} );
 
-	it( 'should call trackClick and trigger recordEvent', () => {
+	it( 'should trigger tasklist_click event when clicking tasklist item', () => {
 		render(
 			<TaskListItem
 				task={ { ...task } }
