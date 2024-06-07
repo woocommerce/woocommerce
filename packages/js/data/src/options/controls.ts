@@ -30,34 +30,39 @@ export const controls = {
 	async BATCH_FETCH( { optionName }: Action ) {
 		optionNames.push( optionName );
 
-		// Wait for 1ms to allow batching of option names
-		await delay( 1 );
+		try {
+			// Wait for 1ms to allow batching of option names
+			await delay( 1 );
 
-		// If the option name is already being fetched, return the promise
-		if ( fetches.hasOwnProperty( optionName ) ) {
-			return await fetches[ optionName ];
-		}
+			// If the option name is already being fetched, return the promise
+			if ( fetches.hasOwnProperty( optionName ) ) {
+				return await fetches[ optionName ];
+			}
 
-		// Get unique option names
-		const uniqueOptionNames = [ ...new Set( optionNames ) ];
-		const names = uniqueOptionNames.join( ',' );
+			// Get unique option names
+			const uniqueOptionNames = [ ...new Set( optionNames ) ];
+			const names = uniqueOptionNames.join( ',' );
 
-		// Send request for a group of options
-		const fetch = apiFetch( {
-			path: `${ WC_ADMIN_NAMESPACE }/options?options=${ names }`,
-		} );
-
-		uniqueOptionNames.forEach( ( option ) => {
-			fetches[ option ] = fetch;
-			fetch.finally( () => {
-				// Delete the fetch after completion to allow wp data to handle cache invalidation
-				delete fetches[ option ];
+			// Send request for a group of options
+			const fetch = apiFetch( {
+				path: `${ WC_ADMIN_NAMESPACE }/options?options=${ names }`,
 			} );
-		} );
 
-		// Clear option names after we've sent the request for a group of options
-		optionNames = [];
+			uniqueOptionNames.forEach( ( option ) => {
+				fetches[ option ] = fetch;
+				fetch.finally( () => {
+					// Delete the fetch after completion to allow wp data to handle cache invalidation
+					delete fetches[ option ];
+				} );
+			} );
 
-		return await fetch;
+			// Clear option names after we've sent the request for a group of options
+			optionNames = [];
+
+			return await fetch;
+		} catch ( error ) {
+			// Catch promise rejections to prevent unhandled promise rejection warnings and throw the error to resolver to handle
+			throw error;
+		}
 	},
 };
