@@ -361,12 +361,6 @@ jobs:
                 path: flaky-tests
                 merge-multiple: true
                 
-            - run: |
-                ls -lh
-                ls -lh flaky-tests
-                pwd 
-                ls /home/runner/work/woocommerce/woocommerce/flaky-tests
-
             - name: 'Setup Node.js and install dependencies'
               if: ${{ !!steps.download-artifact.outputs.download-path }}
               uses: ./.github/setup-node
