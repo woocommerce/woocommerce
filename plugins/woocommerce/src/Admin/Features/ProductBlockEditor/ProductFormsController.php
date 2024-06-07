@@ -11,6 +11,15 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 class ProductFormsController {
 
 	/**
+	 * Product form templates.
+	 *
+	 * @var array
+	 */
+	private $product_form_templates = array(
+		'simple',
+	);
+
+	/**
 	 * Set up the product forms controller.
 	 */
 	public function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingFinal, WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag -- Not an injection.
@@ -66,10 +75,7 @@ class ProductFormsController {
 		 * @param array $templates List of templates to auto-generate.
 		 */
 		$templates = apply_filters(
-			'woocommerce_product_form_templates',
-			array(
-				'simple',
-			)
+			'woocommerce_product_form_templates', $this->product_form_templates
 		);
 
 		foreach ( $templates as $slug ) {
