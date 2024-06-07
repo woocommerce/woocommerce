@@ -447,12 +447,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @return int The ID of an order, or 0 if the order could not be found
 	 */
 	public function get_order_id_by_order_key( $order_key ) {
-  		global $wpdb;
-		if ( empty( $order_key ) ) {
-        	return 0;
-    	}
+  	    global $wpdb;
+	    if ( empty( $order_key ) ) {
+            return 0;
+        }
 
-		return $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_key' AND meta_value = %s", $order_key ) );
+        return $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_key' AND meta_value = %s", $order_key ) );
 	}
 
 	/**
