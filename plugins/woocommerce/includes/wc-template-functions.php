@@ -3995,7 +3995,8 @@ function wc_get_pay_buttons() {
 }
 
 /**
- * Update the product archive title to the title of the shop page.
+ * Update the product archive title to the title of the shop page. Fallback to
+ * 'Shop' if the shop page doesn't exist.
  *
  * @param string $post_type_name Post type 'name' label.
  * @param string $post_type      Post type.
