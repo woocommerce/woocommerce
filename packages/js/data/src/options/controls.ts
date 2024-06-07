@@ -35,7 +35,7 @@ export const controls = {
 
 		// If the option name is already being fetched, return the promise
 		if ( fetches.hasOwnProperty( optionName ) ) {
-			return await fetches[ optionName ].catch( ( error ) => {} );
+			return await fetches[ optionName ];
 		}
 
 		// Get unique option names
