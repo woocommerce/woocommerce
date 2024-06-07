@@ -34,15 +34,6 @@ class ProductFormsController {
 	 * @return void
 	 */
 	public function migrate_templates_when_plugin_updated( \WP_Upgrader $upgrader, array $hook_extra ) {
-		// Check if the action is an `update` or `install` action for a plugin.
-		if (
-			'install' !== $hook_extra['action'] &&
-			'update' !== $hook_extra['action'] ||
-			'plugin' !== $hook_extra['type']
-		) {
-			return;
-		}
-
 		/*
 		 * Check whether $hook_extra['plugins'] contains the WooCommerce plugin.
 		 * It seems that $hook_extra may be `null` in some cases.
@@ -55,6 +46,16 @@ class ProductFormsController {
 		// Check if WooCommerce plugin was updated.
 		if (
 			! in_array( 'woocommerce/woocommerce.php', $hook_extra['plugins'], true )
+		) {
+			return;
+		}
+
+		// Check if the action is an `update` or `install` action for a plugin.
+		$action = isset( $hook_extra['action'] ) ? $hook_extra['action'] : '';
+
+		if (
+			'install' !== $action && 'update' !== $action ||
+			'plugin' !== $hook_extra['type']
 		) {
 			return;
 		}
@@ -97,7 +98,9 @@ class ProductFormsController {
 				)
 			);
 
-			// If the post already exists, skip.
+			/*
+			 * Skip the post creation if the post already exists.
+			 */
 			if ( ! empty( $posts ) ) {
 				continue;
 			}
