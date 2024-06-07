@@ -78,6 +78,10 @@ WooCommerce is developed and supported by Automattic, the creators of WordPress.
 
 WooCommerce is translated into multiple languages, including Danish, Ukrainian, and Persian. Help localize WooCommerce even further by adding your locale – visit [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/woocommerce/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing).
 
+= Connection to WooCommerce.com =
+
+You can connect your store to [WooCommerce.com](https://woocommerce.com/) to manage your subscriptions on WooCommerce Marketplace and receive product updates without leaving WordPress admin. Connection also enables installation of purchased products right from WooCommerce.com and streamlines access to technical support. 
+
 == Frequently Asked Questions ==
 
 = Where can I find WooCommerce documentation and user guides? =
