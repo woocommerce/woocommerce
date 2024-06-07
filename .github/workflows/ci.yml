@@ -351,6 +351,8 @@ jobs:
             issues: write
         steps:
             - uses: actions/download-artifact@v4
+              id: download-artifact
+              continue-on-error: true
               with:
                 pattern: flaky-tests*
                 path: flaky-tests
@@ -358,24 +360,22 @@ jobs:
                 
             - run: ls -lh flaky-tests
                 
-            # We are using @wordpress/report-flaky-tests package from Gutenberg repo
-            # to create GitHub issues for flaky tests.
             - uses: actions/checkout@v4
+              if: ${{ !!steps.download-artifact.outputs.download-path }}
               with:
                   repository: WordPress/gutenberg
-                  # Only checkout the packages we need
-#                  sparse-checkout: packages/report-flaky-tests
-                  # We are using commit hash to checkout the exact version of the script.
-                  # This is to avoid any breaking changes.
                   ref: dbf201449e9736f672b61e422787d47659db327a
 
             - name: 'Setup Node.js and install dependencies'
+              if: ${{ !!steps.download-artifact.outputs.download-path }}
               uses: ./.github/setup-node
 
-#            - name: 'Build packages'
-#              run: npm run build:packages
+            - name: 'Build packages'
+              if: ${{ !!steps.download-artifact.outputs.download-path }}
+              run: npm run build:packages
 
             - name: 'Report flaky tests'
+              if: ${{ !!steps.download-artifact.outputs.download-path }}
               uses: ./packages/report-flaky-tests
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
