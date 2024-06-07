@@ -25,7 +25,8 @@ import clsx from 'clsx';
 /**
  * Internal dependencies
  */
-import { CoreProfilerStateMachineContext, BusinessInfoEvent } from '../index';
+import { CoreProfilerStateMachineContext } from '../index';
+import { BusinessInfoEvent } from '../events';
 import { CountryStateOption } from '../services/country';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
