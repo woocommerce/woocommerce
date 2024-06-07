@@ -342,8 +342,8 @@ jobs:
 
 
     report-flaky-tests:
-        name: 'Create GitHub issues for flaky tests'
-        if: ${{ !cancelled() }}
+        name: 'Create issues for flaky tests'
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         needs: ['project-test-jobs']
         runs-on: ubuntu-latest
         permissions:
@@ -380,4 +380,4 @@ jobs:
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   label: 'metric: flaky e2e test'
-                  artifact-path: flaky-tests
+                  artifact-path: ./flaky-tests
