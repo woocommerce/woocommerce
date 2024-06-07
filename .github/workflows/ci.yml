@@ -348,25 +348,24 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            - uses: actions/checkout@v4
+              with:
+                  repository: WordPress/gutenberg
+                  ref: dbf201449e9736f672b61e422787d47659db327a
+                  
             - uses: actions/download-artifact@v4
               id: download-artifact
               continue-on-error: true
               with:
-                name: flaky-tests-9
+                pattern: flaky-tests*
                 path: flaky-tests
+                merge-multiple: true
                 
             - run: |
                 ls -lh
                 ls -lh flaky-tests
                 pwd 
                 ls /home/runner/work/woocommerce/woocommerce/flaky-tests
-                
-                
-            - uses: actions/checkout@v4
-              if: ${{ !!steps.download-artifact.outputs.download-path }}
-              with:
-                  repository: WordPress/gutenberg
-                  ref: dbf201449e9736f672b61e422787d47659db327a
 
             - name: 'Setup Node.js and install dependencies'
               if: ${{ !!steps.download-artifact.outputs.download-path }}
@@ -382,4 +381,3 @@ jobs:
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   label: 'metric: flaky e2e test'
-                  artifact-path: ${{ steps.download-artifact.outputs.download-path }}
