@@ -361,6 +361,9 @@ jobs:
             - run: |
                 ls -lh
                 ls -lh flaky-tests
+                pwd 
+                echo "ARTIFACT_PATH=$(realpath flaky-tests)" >> $GITHUB_ENV
+                
                 
             - uses: actions/checkout@v4
               if: ${{ !!steps.download-artifact.outputs.download-path }}
@@ -382,4 +385,4 @@ jobs:
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   label: 'metric: flaky e2e test'
-                  artifact-path: flaky-tests
+                  artifact-path: ${{ env.ARTIFACT_PATH }}
