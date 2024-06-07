@@ -54,6 +54,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 							esc_attr( $product_id ),
 							esc_attr( $cart_item_key ),
 							esc_attr( $_product->get_sku() ),
+							/* translators: %s is the product name */
 							esc_attr( sprintf( __( '&ldquo;%s&rdquo; has been removed from your cart', 'woocommerce' ), wp_strip_all_tags( $product_name ) ) )
 						),
 						$cart_item_key
