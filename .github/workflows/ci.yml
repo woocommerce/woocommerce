@@ -368,7 +368,6 @@ jobs:
                 downloadPath='${{ steps.download-artifact.outputs.download-path }}'
                 # make dir so that next step doesn't fail if it doesn't exist 
                 mkdir -p $downloadPath
-                # check if there are any flaky tests reports
                 echo "FLAKY_REPORTS=$(ls -A -m $downloadPath)" >> $GITHUB_ENV
                 
             - name: 'Setup Node.js and install dependencies'
