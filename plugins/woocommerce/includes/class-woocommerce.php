@@ -30,6 +30,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{ LoggingUtil, TimeUtil };
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Polyfills\WordPressPolyfillService;
 
 /**
  * Main WooCommerce Class.
@@ -286,6 +287,7 @@ final class WooCommerce {
 		$container->get( TimeUtil::class );
 		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
+		$container->get( WordPressPolyfillService::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
