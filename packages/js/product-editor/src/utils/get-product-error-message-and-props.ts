@@ -35,18 +35,24 @@ export function getProductErrorMessageAndProps(
 	switch ( error.code ) {
 		case 'variable_product_no_variation_prices':
 			response.message = error.message;
-			response.errorProps.explicitDismiss = visibleTab !== 'variations';
+			if ( visibleTab !== 'variations' ) {
+				response.errorProps.explicitDismiss = true;
+			}
 			break;
 		case 'product_form_field_error':
 			response.message = error.message;
-			response.errorProps.explicitDismiss = visibleTab !== 'general';
+			if ( visibleTab !== 'general' ) {
+				response.errorProps.explicitDismiss = true;
+			}
 			break;
 		case 'product_invalid_sku':
 			response.message = __(
 				'Invalid or duplicated SKU.',
 				'woocommerce'
 			);
-			response.errorProps.explicitDismiss = visibleTab !== 'inventory';
+			if ( visibleTab !== 'inventory' ) {
+				response.errorProps.explicitDismiss = true;
+			}
 			break;
 		case 'product_create_error':
 			response.message = __( 'Failed to create product.', 'woocommerce' );
