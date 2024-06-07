@@ -352,8 +352,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		// "Unset" the last order ID if the order is associated with another customer. Unsetting is done by making it an
 		// empty string, for compatibility with the declared types of the following filter hook.
 		if (
-			$last_customer_order instanceof WC_Order
-			&& intval( $last_customer_order->get_customer_id() ) !== intval( $customer->get_id() )
+			! $last_customer_order instanceof WC_Order
+			|| intval( $last_customer_order->get_customer_id() ) !== intval( $customer->get_id() )
 		) {
 			$last_order_id = '';
 		}
