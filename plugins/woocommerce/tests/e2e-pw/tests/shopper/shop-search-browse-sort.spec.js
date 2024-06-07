@@ -139,7 +139,7 @@ test.describe( 'Search, browse by categories and sort items in the shop', () => 
 		await page.getByLabel( 'Shop order' ).selectOption( 'price-desc' );
 
 		await expect(
-			page.getByText( 'Add to cart View cart' ).nth( 4 )
+			page.getByText( 'Add to cart View cart' ).nth( 2 )
 		).toBeVisible();
 
 		// Check that the priciest appears before the cheapest in the list
@@ -161,7 +161,7 @@ test.describe( 'Search, browse by categories and sort items in the shop', () => 
 		await page.getByLabel( 'Shop order' ).selectOption( 'price' );
 
 		await expect(
-			page.getByText( 'Add to cart View cart' ).nth( 4 )
+			page.getByText( 'Add to cart View cart' ).nth( 2 )
 		).toBeVisible();
 
 		// Check that the cheapest appears before the priciest in the list
