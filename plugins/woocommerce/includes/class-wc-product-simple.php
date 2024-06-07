@@ -74,4 +74,20 @@ class WC_Product_Simple extends WC_Product {
 
 		return apply_filters( 'woocommerce_product_add_to_cart_description', sprintf( $text, $this->get_name() ), $this );
 	}
+
+	/**
+	 * Get the add to cart button success message - used to update the mini cart live region.
+	 *
+	 * @return string
+	 */
+	public function add_to_cart_success_message() {
+		/* translators: %s: Product title */
+		$text = $this->is_purchasable() && $this->is_in_stock() ? __( '&ldquo;%s&rdquo; has been added to your cart', 'woocommerce' ) : '';
+
+		if ( ! empty( $text ) ) {
+			$text = sprintf( $text, $this->get_name() );
+		}
+
+		return apply_filters( 'woocommerce_product_add_to_cart_success_message', $text, $this );
+	}
 }
