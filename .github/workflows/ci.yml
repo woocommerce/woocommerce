@@ -358,22 +358,27 @@ jobs:
                   
             - uses: actions/download-artifact@v4
               id: download-artifact
-              continue-on-error: true
               with:
                 pattern: flaky-tests*
                 path: flaky-tests
                 merge-multiple: true
                 
+            - name: 'Check if there are flaky tests reports'
+              run: |
+                downloadPath= ${{ steps.download-artifact.outputs.download-path }}
+                HAS_FLAKY_TESTS=$(if [ -z "$(ls -A $downloadPath)" ]; then echo 'false'; else echo 'true'; fi)
+                echo "HAS_FLAKY_TESTS=$HAS_FLAKY_TESTS" >> $GITHUB_ENV
+                
             - name: 'Setup Node.js and install dependencies'
-              if: ${{ !!steps.download-artifact.outputs.download-path }}
+              if: ${{ env.HAS_FLAKY_TESTS }}
               uses: ./.github/setup-node
 
             - name: 'Build packages'
-              if: ${{ !!steps.download-artifact.outputs.download-path }}
+              if: ${{ env.HAS_FLAKY_TESTS }}
               run: npm run build:packages
 
             - name: 'Report flaky tests'
-              if: ${{ !!steps.download-artifact.outputs.download-path }}
+              if: ${{ env.HAS_FLAKY_TESTS }}
               uses: ./packages/report-flaky-tests
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
