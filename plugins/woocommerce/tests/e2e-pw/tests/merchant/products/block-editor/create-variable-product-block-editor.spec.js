@@ -234,7 +234,11 @@ test.describe( 'Variations tab', () => {
 
 			await page
 				.getByLabel( 'Regular price', { exact: true } )
-				.fill( '100' );
+				.waitFor( { state: 'visible' } );
+
+			await page
+				.getByLabel( 'Regular price', { exact: true } )
+				.pressSequentially( '100' );
 
 			await page
 				.locator( '.woocommerce-product-tabs' )
