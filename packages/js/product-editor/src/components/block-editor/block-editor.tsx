@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
+import { parse, synchronizeBlocksWithTemplate } from '@wordpress/blocks';
 import {
 	createElement,
 	useMemo,
@@ -17,6 +17,7 @@ import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { Product } from '@woocommerce/data';
+import { SelectControl } from '@wordpress/components';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -49,8 +50,8 @@ import { PostTypeContext } from '../../contexts/post-type-context';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
-import { ProductTemplate } from '../../types';
 import { LoadingState } from './loading-state';
+import type { ProductFormTemplateProps, ProductTemplate } from '../../types';
 
 const PluginArea = lazy( () =>
 	import( '@wordpress/plugins' ).then( ( module ) => ( {
@@ -86,6 +87,13 @@ export function BlockEditor( {
 	productId,
 	setIsEditorLoading,
 }: BlockEditorProps ) {
+	const isProductEditorTemplateSystemEnabled =
+		!! window.wcAdminFeatures?.[ 'product-editor-template-system' ];
+
+	const [ selectedProductFormId, setSelectedProductFormId ] = useState<
+		number | null
+	>( null );
+
 	useConfirmUnsavedProductChanges( postType );
 
 	/**
@@ -209,6 +217,24 @@ export function BlockEditor( {
 		{ id: productId !== -1 ? productId : 0 }
 	);
 
+	// Pull the product templates from the store.
+	const productForms = useSelect( ( sel ) => {
+		return (
+			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
+				per_page: -1,
+			} ) || []
+		);
+	}, [] ) as ProductFormTemplateProps[];
+
+	// Set the default product form template ID.
+	useEffect( () => {
+		if ( ! productForms.length ) {
+			return;
+		}
+
+		setSelectedProductFormId( productForms[ 0 ].id );
+	}, [ productForms ] );
+
 	const isEditorLoading =
 		! settings ||
 		! layoutTemplate ||
@@ -221,12 +247,28 @@ export function BlockEditor( {
 			return;
 		}
 
+		// PFT: pick and parse the product form template, if it exists.
+		const productFormPost = productForms.find(
+			( form ) => form.id === selectedProductFormId
+		);
+
+		let productFormTemplate;
+		if ( isProductEditorTemplateSystemEnabled && productFormPost ) {
+			productFormTemplate = parse( productFormPost.content.raw );
+		}
+
 		const blockInstances = synchronizeBlocksWithTemplate(
 			[],
 			layoutTemplate.blockTemplates
 		);
 
-		onChange( blockInstances, {} );
+		/*
+		 * If the product form template is not available, use the block instances.
+		 * ToDo: Remove this fallback once the product form template is stable/available.
+		 */
+		const editorTemplate = productFormTemplate ?? blockInstances;
+
+		onChange( editorTemplate, {} );
 
 		dispatch( 'core/editor' ).updateEditorSettings( {
 			...settings,
@@ -243,7 +285,7 @@ export function BlockEditor( {
 		// the blocks by calling onChange.
 		//
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ isEditorLoading, productId ] );
+	}, [ isEditorLoading, productId, productForms, selectedProductFormId ] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( selectCore ) => {
@@ -271,8 +313,34 @@ export function BlockEditor( {
 		);
 	}
 
+	const formTemplateSelectValues = productForms?.map( ( form ) => ( {
+		label: form.title.raw,
+		value: String( form.id ),
+	} ) );
+
 	return (
 		<div className="woocommerce-product-block-editor">
+			{ isProductEditorTemplateSystemEnabled && (
+				<div style={ { margin: '32px', width: '250px' } }>
+					<SelectControl
+						label={ __(
+							'Choose form template type',
+							'woocommerce'
+						) }
+						options={ formTemplateSelectValues }
+						onChange={ ( value: string ) =>
+							setSelectedProductFormId( parseInt( value, 10 ) )
+						}
+						disabled={ ! productForms }
+						className="woocommerce-product-block-editor__product-type-selector"
+						help={ __(
+							'This is a temporary setting.',
+							'woocommerce'
+						) }
+					/>
+				</div>
+			) }
+
 			<BlockContextProvider value={ context }>
 				<BlockEditorProvider
 					value={ blocks }
