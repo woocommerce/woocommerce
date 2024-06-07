@@ -30,8 +30,8 @@ WooCommerce comes with several [block templates](https://github.com/woocommerce/
 Block themes can customize those templates in the following ways:
 
 - It's possible to override the templates by creating a file with the same file name under the `/templates` folder. For example, if a block theme contains a `wp-content/themes/yourtheme/templates/single-product.html` template, it will take priority over the WooCommerce default Single Product template.
-- Products by Category, Products by Tag and Products by Attribute templates fall back to the Product Catalog template. That means, if a theme provides an `archive-product.html` template but doesn't provide a `taxonomy-product_cat.html` template, the Products by Category template will use the `archive-product.html` template.
-- It's possible to create templates for specific products or taxonomies. For example, if the theme provides a template with file name of `single-product-cap.html`, that template will be used when rendering the product with slug `cap`. Similarly, themes can provide specific taxonomy templates: `taxonomy-product_cat-clothing.html` would be used in the product category with slug `clothing`.
+- Products by Category, Products by Tag and Products by Attribute templates fall back to the Product Catalog template. In other words, if a theme provides an `archive-product.html` template but doesn't provide a `taxonomy-product_cat.html` template, the Products by Category template will use the `archive-product.html` template. Same for the Products by Tag and Products by Attribute templates.
+- It's possible to create templates for specific products and taxonomies. For example, if the theme provides a template with file name of `single-product-cap.html`, that template will be used when rendering the product with slug `cap`. Similarly, themes can provide specific taxonomy templates: `taxonomy-product_cat-clothing.html` would be used in the product category with slug `clothing`.
 - Always keep in mind users can make modifications to the templates provided by the theme via the Site Editor.
 
 ### Block template parts
