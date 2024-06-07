@@ -2,12 +2,14 @@
  * External dependencies
  */
 import { sendParent } from 'xstate';
+import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import { DesignWithoutAIStateMachineContext } from './types';
 import { DesignWithoutAIStateMachineEvents } from './state-machine';
+import { navigateOrParent } from '../utils';
 
 const redirectToAssemblerHub = async () => {
 	// This is a workaround to update the "activeThemeHasMods" in the parent's machine
@@ -29,7 +31,25 @@ const redirectToIntroWithError = sendParent<
 	type: 'NO_AI_FLOW_ERROR',
 } );
 
+const redirectToAssemblerHubSection = (
+	_context: unknown,
+	_evt: unknown,
+	{ action }: { action: unknown }
+) => {
+	const { section } = action as { section: string };
+
+	navigateOrParent(
+		window,
+		getNewPath(
+			{ customizing: true },
+			`/customize-store/assembler-hub/${ section }`,
+			{}
+		)
+	);
+};
+
 export const actions = {
 	redirectToAssemblerHub,
 	redirectToIntroWithError,
+	redirectToAssemblerHubSection,
 };
