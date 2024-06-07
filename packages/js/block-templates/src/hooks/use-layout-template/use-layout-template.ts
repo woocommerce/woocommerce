@@ -15,7 +15,7 @@ import { useEntityRecord } from '@wordpress/core-data';
 // eslint-disable-next-line @woocommerce/dependency-group
 import { dispatch, select } from '@wordpress/data';
 
-export const useLayoutTemplate = ( layoutTemplateId: string | undefined ) => {
+export const useLayoutTemplate = ( layoutTemplateId: string | null ) => {
 	const [ isEntityRegistered, setIsEntityRegistered ] = useState( false );
 
 	useEffect( () => {

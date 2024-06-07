@@ -59,24 +59,25 @@ function findBetterMatchTemplate( matchingTemplates: ProductTemplate[] ) {
 
 export const useProductTemplate = (
 	productTemplateId: string | undefined,
-	product: Partial< Product > | undefined | null
+	product: Partial< Product > | null
 ) => {
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
 
 	const productType = product?.type;
 
-	const productTemplateIdToFind =
-		productTemplateId || 'standard-product-template';
+	// we shouldn't default to the standard-product-template for variations
+	if ( ! productTemplateId && productType === 'variation' ) {
+		return { productTemplate: null, isResolving: false };
+	}
 
-	const productTypeToFind =
-		productType === 'variable' ? 'simple' : productType;
+	let matchingProductTemplate: ProductTemplate | undefined;
 
-	let matchingProductTemplate = productTemplates.find(
-		( productTemplate ) =>
-			productTemplate.id === productTemplateIdToFind &&
-			productTemplate.productData.type === productTypeToFind
-	);
+	if ( productTemplateId ) {
+		matchingProductTemplate = productTemplates.find(
+			( productTemplate ) => productTemplate.id === productTemplateId
+		);
+	}
 
 	if ( ! matchingProductTemplate && product ) {
 		// Look for matching templates based on product data described on each template.
@@ -86,7 +87,13 @@ export const useProductTemplate = (
 		);
 
 		// If there are multiple matching templates, we should use the one with the most matching fields.
-		matchingProductTemplate = findBetterMatchTemplate( matchingTemplates );
+		// If there is no matching template, we should default to the standard product template.
+		matchingProductTemplate =
+			findBetterMatchTemplate( matchingTemplates ) ||
+			productTemplates.find(
+				( productTemplate ) =>
+					productTemplate.id === 'standard-product-template'
+			);
 	}
 
 	// When we switch to getting the product template from the API,

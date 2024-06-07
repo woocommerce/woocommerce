@@ -414,6 +414,9 @@ class WC_Meta_Box_Product_Data {
 			WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );
 		}
 
+		// Remove _product_template_id for products that were created with the new product editor.
+		$product->delete_meta_data( '_product_template_id' );
+
 		/**
 		 * Set props before save.
 		 *

@@ -109,17 +109,9 @@ describe( 'useProductTemplate', () => {
 		expect( result.current.productTemplate?.id ).toEqual( 'template-2' );
 	} );
 
-	it( 'should return undefined if no matching product template by id or type', () => {
+	it( 'should return standard-product-template if no matching product template by id or type', () => {
 		const { result } = renderHook( () =>
 			useProductTemplate( 'invalid-template-id', { type: 'external' } )
-		);
-
-		expect( result.current.productTemplate ).toBeUndefined();
-	} );
-
-	it( 'should use the standard product template if no templateId is provided', () => {
-		const { result } = renderHook( () =>
-			useProductTemplate( undefined, { type: 'simple' } )
 		);
 
 		expect( result.current.productTemplate?.id ).toEqual(
@@ -127,9 +119,9 @@ describe( 'useProductTemplate', () => {
 		);
 	} );
 
-	it( 'should use the product type to match if the product template id matches a template with a different product type', () => {
+	it( 'should match to a template with the same type if no template id is provided', () => {
 		const { result } = renderHook( () =>
-			useProductTemplate( 'template-2', { type: 'simple' } )
+			useProductTemplate( undefined, { type: 'simple' } )
 		);
 
 		expect( result.current.productTemplate?.id ).toEqual( 'template-1' );
