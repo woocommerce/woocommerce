@@ -164,6 +164,8 @@ jobs:
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
               
             - name: 'Resolve artifacts path'
+              # Blocks e2e use a relative path which is not supported by actions/upload-artifact@v4
+              # https://github.com/actions/upload-artifact/issues/176
               env:
                 ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
               run: echo "ARTIFACTS_PATH=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
@@ -174,8 +176,13 @@ jobs:
               with:
                 name: '${{ matrix.report.resultsBlobName }}-${{ strategy.job-index }}'
                 path: ${{ env.ARTIFACTS_PATH }}
-                retention-days: 1
-                compression-level: 9
+                
+            - name: 'Upload flaky test reports'
+              uses: actions/upload-artifact@v4
+              with:
+                name: flaky-tests-${{ strategy.job-index }}
+                path: ${{ env.ARTIFACTS_PATH }}/flaky-tests
+                if-no-files-found: ignore
 
             - name: 'Archive metrics results'
               if: ${{ success() && startsWith(matrix.name, 'Metrics') }} # this seems too fragile, we should update the reporting path and use the generic upload step above
@@ -260,7 +267,7 @@ jobs:
                   pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE Tests" -m "$COMMIT_MESSAGE"
 
     test-reports:
-        name: 'Publish reports - ${{ matrix.report }}'
+        name: 'Publish reports - ${{ matrix.report }} (optional)'
         needs:
           [
             'project-jobs',
@@ -332,3 +339,42 @@ jobs:
               if: ${{ github.event_name == 'pull_request' }}
               run: |
                   echo "::notice::🔗🔗 The e2e report for this run is available at https://woocommerce.github.io/woocommerce-test-reports/pr/${{ github.event.pull_request.number }}/e2e"
+
+
+    report-flaky-tests:
+        name: 'Create GitHub issues for flaky tests (optional)'
+        needs: ['project-test-jobs']
+        if: ${{ !cancelled() && needs.merge-artifacts.outputs.has-flaky-test-report == 'true' }}
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            issues: write
+        steps:
+            # We are using @wordpress/report-flaky-tests package from Gutenberg repo
+            # to create GitHub issues for flaky tests.
+            - uses: actions/checkout@v4
+              with:
+                  repository: WordPress/gutenberg
+                  # We are using commit hash to checkout the exact version of the script.
+                  # This is to avoid any breaking changes.
+                  ref: dbf201449e9736f672b61e422787d47659db327a
+
+            - uses: actions/download-artifact@v4
+              with:
+                  pattern: flaky-tests*
+                  path: flaky-tests
+                  merge-multiple: true
+
+            - name: 'Setup Node.js and install dependencies'
+              uses: ./.github/setup-node
+
+            - name: 'Npm build'
+              # TODO: We don't have to build the entire project, just the action itself.
+              run: npm run build:packages
+
+            - name: 'Report flaky tests'
+              uses: ./packages/report-flaky-tests
+              with:
+                  repo-token: '${{ secrets.GITHUB_TOKEN }}'
+                  label: 'metric: flaky e2e test'
+                  artifact-path: flaky-tests
