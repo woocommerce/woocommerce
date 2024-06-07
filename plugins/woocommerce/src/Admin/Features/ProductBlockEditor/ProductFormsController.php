@@ -24,6 +24,24 @@ class ProductFormsController {
 	 */
 	public function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingFinal, WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag -- Not an injection.
 		add_action( 'upgrader_process_complete', array( $this, 'migrate_templates_when_plugin_updated' ), 10, 2 );
+
+		/*
+		 * Regenerate and update the product form template post
+		 * when the site changes the setting language.
+		 */
+		add_action( 'update_option_WPLANG', array( $this, 'update_templates_when_ln_change' ), 10, 3 );
+	}
+
+	/**
+	 * Update product form templates when the site language changes.
+	 *
+	 * @param string $old_value The old value of the option.
+	 * @param string $value The new value of the option.
+	 * @param string $option The option name.
+	 * @return void
+	 */
+	public function update_templates_when_ln_change( $old_value, $value, $option ) {
+		$this->migrate_product_form_posts( 'update' );
 	}
 
 	/**
