@@ -22,7 +22,7 @@ const blockConfig: BlockConfiguration = {
 	...sharedConfig,
 	// Product Summary is not expected to be available in Product Collection
 	// nor Products (Beta). They use core/post-summary variation.
-	ancestor: [ 'woocommerce/all-products', 'woocommerce/single-product' ],
+	ancestor: [ 'woocommerce/all-products' ],
 	apiVersion: 2,
 	title,
 	description,
