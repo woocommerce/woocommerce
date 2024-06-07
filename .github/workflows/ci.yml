@@ -372,15 +372,15 @@ jobs:
                 echo "FLAKY_REPORTS=$(ls -A -m $downloadPath)" >> $GITHUB_ENV
                 
             - name: 'Setup Node.js and install dependencies'
-              if: ${{ env.HAS_FLAKY_TESTS }}
+              if: ${{ !!env.FLAKY_REPORTS }}
               uses: ./.github/setup-node
 
             - name: 'Build packages'
-              if: ${{ env.HAS_FLAKY_TESTS }}
+              if: ${{ !!env.FLAKY_REPORTS }}
               run: npm run build:packages
 
             - name: 'Report flaky tests'
-              if: ${{ env.HAS_FLAKY_TESTS }}
+              if: ${{ !!env.FLAKY_REPORTS }}
               uses: ./packages/report-flaky-tests
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
