@@ -308,7 +308,7 @@ class WC_Products_Tracking {
 	 * @param WC_Product $product     Product object.
 	 * @param array      $changes     Product changes.
 	 */
-	public function track_product_published( $product_id, $product, $changes ) {
+	public function track_product_published( $product_id, $product, $changes = null ) {
 		if (
 			! isset( $product ) ||
 			'product' !== $product->post_type ||
