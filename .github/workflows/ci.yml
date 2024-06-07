@@ -365,9 +365,11 @@ jobs:
                 
             - name: 'Check if there are flaky tests reports'
               run: |
-                downloadPath=${{ steps.download-artifact.outputs.download-path }}
-                HAS_FLAKY_TESTS=$(if [ -z "$(ls -A $downloadPath)" ]; then echo 'false'; else echo 'true'; fi)
-                echo "HAS_FLAKY_TESTS=$HAS_FLAKY_TESTS" >> $GITHUB_ENV
+                downloadPath='${{ steps.download-artifact.outputs.download-path }}'
+                # make dir so that next step doesn't fail if it doesn't exist 
+                mkdir -p $downloadPath
+                # check if there are any flaky tests reports
+                echo "FLAKY_REPORTS=$(ls -A $downloadPath)" >> $GITHUB_ENV
                 
             - name: 'Setup Node.js and install dependencies'
               if: ${{ env.HAS_FLAKY_TESTS }}
