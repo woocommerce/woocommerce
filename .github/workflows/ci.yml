@@ -362,7 +362,7 @@ jobs:
                 ls -lh
                 ls -lh flaky-tests
                 pwd 
-                echo "ARTIFACT_PATH=$(realpath flaky-tests)" >> $GITHUB_ENV
+                ls /home/runner/work/woocommerce/woocommerce/flaky-tests
                 
                 
             - uses: actions/checkout@v4
@@ -385,4 +385,4 @@ jobs:
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   label: 'metric: flaky e2e test'
-                  artifact-path: ${{ env.ARTIFACT_PATH }}
+                  artifact-path: ${{ steps.download-artifact.outputs.download-path }}
