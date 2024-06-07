@@ -264,6 +264,25 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 									},
 								},
 							},
+							installPatterns: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'installPatterns',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												target: 'success',
+											},
+										},
+									},
+									success: {
+										type: 'final',
+									},
+								},
+							},
 						},
 						onDone: {
 							target: 'assembleSite',

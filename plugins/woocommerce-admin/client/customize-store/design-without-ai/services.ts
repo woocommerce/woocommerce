@@ -146,7 +146,7 @@ const installAndActivateTheme = async (
 	}
 };
 
-const installPatterns = async () => {
+export const installPatterns = async () => {
 	const isTrackingEnabled = window.wcTracks?.isEnabled || false;
 	if ( ! isTrackingEnabled ) {
 		return;
