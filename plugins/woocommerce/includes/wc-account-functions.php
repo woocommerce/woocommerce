@@ -309,11 +309,9 @@ function wc_get_account_orders_actions( $order ) {
  * Get account formatted address.
  *
  * @since  3.2.0
- * @param  string $address_type Address type.
- *                              Accepts: 'billing' or 'shipping'.
- *                              Default to 'billing'.
+ * @param  string $address_type Type of address; 'billing' or 'shipping'.
  * @param  int    $customer_id  Customer ID.
- *                              Default to 0.
+ *                              Defaults to 0.
  * @return string
  */
 function wc_get_account_formatted_address( $address_type = 'billing', $customer_id = 0 ) {
@@ -395,7 +393,7 @@ function wc_get_account_saved_payment_methods_list_item_cc( $item, $payment_toke
 
 	$card_type               = $payment_token->get_card_type();
 	$item['method']['last4'] = $payment_token->get_last4();
-	$item['method']['brand'] = ( ! empty( $card_type ) ? ucfirst( $card_type ) : esc_html__( 'Credit card', 'woocommerce' ) );
+	$item['method']['brand'] = ( ! empty( $card_type ) ? ucwords( str_replace( '_', ' ', $card_type ) ) : esc_html__( 'Credit card', 'woocommerce' ) );
 	$item['expires']         = $payment_token->get_expiry_month() . '/' . substr( $payment_token->get_expiry_year(), -2 );
 
 	return $item;

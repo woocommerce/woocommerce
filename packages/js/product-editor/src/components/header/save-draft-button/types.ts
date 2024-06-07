@@ -9,4 +9,5 @@ export type SaveDraftButtonProps = Omit<
 	'aria-disabled' | 'variant' | 'children'
 > & {
 	productStatus: Product[ 'status' ];
+	productType?: string;
 };

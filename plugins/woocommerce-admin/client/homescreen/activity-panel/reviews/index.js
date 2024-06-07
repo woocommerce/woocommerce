@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Component, Fragment } from '@wordpress/element';
 import { Button, Tooltip } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
@@ -150,8 +150,9 @@ class ReviewsPanel extends Component {
 
 		const title = interpolateComponents( {
 			mixedString: sprintf(
+				/* translators: product reviewer as author, and product name  */
 				__(
-					'{{authorLink}}%s{{/authorLink}}{{verifiedCustomerIcon/}} reviewed {{productLink}}%s{{/productLink}}',
+					'{{authorLink}}%1$s{{/authorLink}}{{verifiedCustomerIcon/}} reviewed {{productLink}}%2$s{{/productLink}}',
 					'woocommerce'
 				),
 				review.reviewer,
@@ -200,7 +201,7 @@ class ReviewsPanel extends Component {
 
 		const productImage =
 			get( product, [ 'images', 0 ] ) || get( product, [ 'image' ] );
-		const productImageClasses = classnames(
+		const productImageClasses = clsx(
 			'woocommerce-review-activity-card__image-overlay__product',
 			{
 				'is-placeholder': ! productImage || ! productImage.src,

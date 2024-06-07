@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add after_add_block and after_remove block hooks to the block template API.

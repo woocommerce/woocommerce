@@ -10,14 +10,8 @@ import {
 	CardHeader,
 	CardFooter,
 	Button,
-	IsolatedEventContainer,
 } from '@wordpress/components';
-import {
-	useState,
-	useEffect,
-	createPortal,
-	useLayoutEffect,
-} from '@wordpress/element';
+import { useState, useEffect, createPortal } from '@wordpress/element';
 import { close } from '@wordpress/icons';
 import { noop } from 'lodash';
 
@@ -37,12 +31,32 @@ function HighlightTooltip( {
 	delay,
 	onShow = noop,
 	useAnchor = false,
+	shouldCloseOnClickOutside = true,
 } ) {
 	const [ showHighlight, setShowHighlight ] = useState(
 		delay > 0 ? null : show
 	);
 	const [ node, setNode ] = useState( null );
-	const [ anchorRect, setAnchorRect ] = useState( null );
+	const showTooltip = ( container ) => {
+		if ( container ) {
+			container.classList.add( SHOW_CLASS );
+		}
+		setShowHighlight( true );
+		onShow();
+	};
+
+	const triggerShowTooltip = ( container ) => {
+		let timeoutId = null;
+		if ( delay > 0 ) {
+			timeoutId = setTimeout( () => {
+				timeoutId = null;
+				showTooltip( container );
+			}, delay );
+		} else if ( ! showHighlight ) {
+			showTooltip( container );
+		}
+		return timeoutId;
+	};
 
 	useEffect( () => {
 		const element = document.getElementById( id );
@@ -93,43 +107,6 @@ function HighlightTooltip( {
 		}
 	}, [ show ] );
 
-	useLayoutEffect( () => {
-		window.addEventListener( 'resize', updateSize );
-		return () => window.removeEventListener( 'resize', updateSize );
-	}, [] );
-
-	function updateSize() {
-		if ( useAnchor ) {
-			const element = document.getElementById( id );
-			setAnchorRect( element.getBoundingClientRect() );
-		}
-	}
-
-	const triggerShowTooltip = ( container ) => {
-		let timeoutId = null;
-		if ( delay > 0 ) {
-			timeoutId = setTimeout( () => {
-				timeoutId = null;
-				showTooltip( container );
-			}, delay );
-		} else if ( ! showHighlight ) {
-			showTooltip( container );
-		}
-		return timeoutId;
-	};
-
-	const showTooltip = ( container ) => {
-		const element = document.getElementById( id );
-		if ( element && useAnchor ) {
-			setAnchorRect( element.getBoundingClientRect() );
-		}
-		if ( container ) {
-			container.classList.add( SHOW_CLASS );
-		}
-		setShowHighlight( true );
-		onShow();
-	};
-
 	const triggerClose = () => {
 		setShowHighlight( false );
 		if ( onClose ) {
@@ -145,11 +122,22 @@ function HighlightTooltip( {
 		<div className="highlight-tooltip__portal">
 			{ showHighlight ? (
 				<>
-					<IsolatedEventContainer className="highlight-tooltip__overlay" />
+					{
+						/* eslint-disable jsx-a11y/no-static-element-interactions */
+						<div
+							className="highlight-tooltip__overlay"
+							onMouseDown={ ( event ) =>
+								shouldCloseOnClickOutside
+									? setShowHighlight( false )
+									: event.stopPropagation()
+							}
+						/>
+						/* eslint-enable jsx-a11y/no-static-element-interactions */
+					}
 					<Popover
 						className="highlight-tooltip__popover"
 						noArrow={ false }
-						anchorRect={ anchorRect }
+						anchor={ document.getElementById( id ) }
 						focusOnMount="container"
 					>
 						<Card size="medium">

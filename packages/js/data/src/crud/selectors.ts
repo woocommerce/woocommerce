@@ -80,9 +80,11 @@ export const getItems = createSelector(
 			return null;
 		}
 
-		if ( query && query._fields ) {
+		if ( query && typeof query._fields !== 'undefined' ) {
+			const fields = query._fields;
+
 			return ids.map( ( id: IdType ) => {
-				return query._fields.reduce(
+				return fields.reduce(
 					( item: Partial< Item >, field: string ) => {
 						return {
 							...item,

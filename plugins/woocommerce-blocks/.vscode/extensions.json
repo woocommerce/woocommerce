@@ -1,0 +1,16 @@
+{
+	"recommendations": [
+		"dbaeumer.vscode-eslint",
+		"esbenp.prettier-vscode",
+		"wordpresstoolbox.wordpress-toolbox",
+		"claudiosanches.woocommerce",
+		"andys8.jest-snippets",
+		"eamodio.gitlens",
+		"bmewburn.vscode-intelephense-client",
+		"neilbrayfield.php-docblocker",
+		"valeryanm.vscode-phpsab",
+		"editorconfig.editorconfig",
+		"stylelint.vscode-stylelint",
+		"DavidAnson.vscode-markdownlint"
+	]
+}

@@ -20,7 +20,6 @@ import {
 	Discover,
 	UnionPay,
 	JCB,
-	Sofort,
 } from './Icons';
 
 export const PaymentMethodsIcons: React.VFC< {
@@ -38,7 +37,6 @@ export const PaymentMethodsIcons: React.VFC< {
 		<Discover />
 		<UnionPay />
 		<JCB />
-		<Sofort />
 		<Text variant="caption" as="p" size="12" lineHeight="16px">
 			{ __( '& more.', 'woocommerce' ) }
 		</Text>

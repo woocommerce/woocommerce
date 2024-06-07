@@ -10,13 +10,16 @@ import { getQuery } from '@woocommerce/navigation';
 import {
 	designWithAiStateMachineContext,
 	designWithAiStateMachineEvents,
-	ColorPalette,
+	FontPairing,
+	ColorPaletteResponse,
+	HomepageTemplate,
 } from './types';
 import {
 	BusinessInfoDescription,
 	LookAndFeel,
 	ToneOfVoice,
 	ApiCallLoader,
+	AssembleHubLoader,
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
@@ -33,6 +36,10 @@ export const hasStepInUrl = (
 		pathFragments[ 3 ] === // [0] '', [1] 'customize-store', [2] cys step slug [3] design-with-ai step slug
 		( cond as { step: string | undefined } ).step
 	);
+};
+
+export const isAiOnline = ( _ctx: designWithAiStateMachineContext ) => {
+	return _ctx.aiOnline;
 };
 
 export const designWithAiStateMachineDefinition = createMachine(
@@ -59,6 +66,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 			},
 		},
 		context: {
+			startLoadingTime: null,
 			businessInfoDescription: {
 				descriptionText: '',
 			},
@@ -69,8 +77,19 @@ export const designWithAiStateMachineDefinition = createMachine(
 				choice: '',
 			},
 			aiSuggestions: {
-				defaultColorPalette: {} as ColorPalette,
+				// Default color palette, font pairing are used as fallbacks when the AI endpoint fails.
+				defaultColorPalette: {
+					default: 'Ancient Bronze',
+				} as ColorPaletteResponse,
+				fontPairing: 'Rubik + Inter' as FontPairing[ 'pair_name' ],
+				homepageTemplate:
+					'template1' as HomepageTemplate[ 'homepage_template' ],
 			},
+			apiCallLoader: {
+				hasErrors: false,
+			},
+			aiOnline: true,
+			isBlockTheme: false,
 		},
 		initial: 'navigate',
 		states: {
@@ -131,34 +150,21 @@ export const designWithAiStateMachineDefinition = createMachine(
 						],
 						on: {
 							BUSINESS_INFO_DESCRIPTION_COMPLETE: {
-								actions: [ 'assignBusinessInfoDescription' ],
+								actions: [
+									'assignBusinessInfoDescription',
+									'spawnSaveDescriptionToOption',
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'business_info_description',
+									},
+								],
 								target: 'postBusinessInfoDescription',
 							},
 						},
 					},
 					postBusinessInfoDescription: {
-						invoke: {
-							src: 'getLookAndTone',
-							onError: {
-								actions: [
-									{
-										type: 'recordTracksStepCompleted',
-										step: 'business_info_description',
-									},
-									'logAIAPIRequestError',
-								],
-								target: '#lookAndFeel',
-							},
-							onDone: {
-								actions: [
-									{
-										type: 'recordTracksStepCompleted',
-										step: 'business_info_description',
-									},
-									'assignLookAndTone',
-								],
-								target: '#lookAndFeel',
-							},
+						always: {
+							target: '#lookAndFeel',
 						},
 					},
 				},
@@ -267,34 +273,196 @@ export const designWithAiStateMachineDefinition = createMachine(
 								type: 'updateQueryStep',
 								step: 'api-call-loader',
 							},
+							'assignStartLoadingTime',
 						],
 						type: 'parallel',
 						states: {
 							chooseColorPairing: {
-								invoke: {
-									src: 'queryAiEndpoint',
-									data: ( context ) => {
-										return {
-											...defaultColorPalette,
-											prompt: defaultColorPalette.prompt(
-												context.businessInfoDescription
-													.descriptionText,
-												context.lookAndFeel.choice,
-												context.toneOfVoice.choice
-											),
-										};
-									},
-									onDone: {
-										actions: [
-											'assignDefaultColorPalette',
+								initial: 'executeOrSkip',
+								states: {
+									executeOrSkip: {
+										always: [
+											{
+												target: 'pending',
+												cond: 'isAiOnline',
+											},
+											{
+												target: 'success',
+											},
 										],
+									},
+									pending: {
+										invoke: {
+											src: 'queryAiEndpoint',
+											data: ( context ) => {
+												return {
+													...defaultColorPalette,
+													prompt: defaultColorPalette.prompt(
+														context
+															.businessInfoDescription
+															.descriptionText,
+														context.lookAndFeel
+															.choice,
+														context.toneOfVoice
+															.choice
+													),
+												};
+											},
+											onDone: {
+												actions: [
+													'assignDefaultColorPalette',
+												],
+												target: 'success',
+											},
+											// If there's an error we don't want to block the user from proceeding.
+											onError: {
+												target: 'success',
+											},
+										},
+									},
+									success: { type: 'final' },
+								},
+							},
+							chooseFontPairing: {
+								initial: 'pending',
+								states: {
+									pending: {
+										entry: [ 'assignFontPairing' ],
+										always: {
+											target: 'success',
+										},
+									},
+									success: { type: 'final' },
+								},
+							},
+							updateStorePatterns: {
+								initial: 'executeOrSkip',
+								states: {
+									executeOrSkip: {
+										always: [
+											{
+												target: 'pending',
+												cond: 'isAiOnline',
+											},
+											{
+												target: 'resetPatternsAndProducts',
+											},
+										],
+									},
+									pending: {
+										invoke: {
+											src: 'updateStorePatterns',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
+											},
+										},
+									},
+									resetPatternsAndProducts: {
+										invoke: {
+											src: 'resetPatternsAndProducts',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
+											},
+										},
+									},
+									success: { type: 'final' },
+								},
+							},
+							installAndActivateTheme: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'installAndActivateTheme',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
+											},
+										},
+									},
+									success: { type: 'final' },
+								},
+							},
+						},
+						onDone: 'postApiCallLoader',
+					},
+					postApiCallLoader: {
+						type: 'parallel',
+						states: {
+							assembleSite: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'assembleSite',
+											onDone: {
+												target: 'done',
+											},
+											onError: {
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
+											},
+										},
+									},
+									done: {
+										type: 'final',
+									},
+								},
+							},
+							saveAiResponse: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'saveAiResponseToOption',
+											onDone: {
+												target: 'done',
+											},
+											onError: {
+												target: 'failed',
+											},
+										},
+									},
+									done: {
+										type: 'final',
+									},
+									failed: {
+										type: 'final',
 									},
 								},
 							},
 						},
+						onDone: {
+							target: '#designWithAi.showAssembleHub',
+						},
 					},
-					postApiCallLoader: {},
 				},
+			},
+			showAssembleHub: {
+				meta: {
+					component: AssembleHubLoader,
+				},
+				entry: [ 'redirectToAssemblerHub' ],
+				type: 'final',
 			},
 		},
 	},
@@ -303,6 +471,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 		services,
 		guards: {
 			hasStepInUrl,
+			isAiOnline,
 		},
 	}
 );

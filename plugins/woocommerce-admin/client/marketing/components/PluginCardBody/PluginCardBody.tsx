@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -36,7 +36,7 @@ export const PluginCardBody: React.FC< PluginCardBodyProps > = ( {
 } ) => {
 	return (
 		<CardBody
-			className={ classnames(
+			className={ clsx(
 				'woocommerce_marketing_plugin_card_body',
 				className
 			) }

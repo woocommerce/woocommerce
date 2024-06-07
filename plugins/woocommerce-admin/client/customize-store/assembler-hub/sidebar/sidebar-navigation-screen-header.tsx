@@ -12,10 +12,10 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
-import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
-// @ts-ignore No types for this exist yet.
-import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
+import { useSelect } from '@wordpress/data';
+// @ts-expect-error No types for this exist yet.
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -23,33 +23,63 @@ import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { usePatternsByCategory } from '../hooks/use-patterns';
+import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
+import { findPatternByBlock } from './utils';
+import BlockPatternList from '../block-pattern-list';
+import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
+import { FlowType } from '~/customize-store/types';
+import { headerTemplateId } from '~/customize-store/data/homepageTemplates';
+import { trackEvent } from '~/customize-store/tracking';
 
 const SUPPORTED_HEADER_PATTERNS = [
+	'woocommerce-blocks/header-centered-menu',
 	'woocommerce-blocks/header-essential',
 	'woocommerce-blocks/header-minimal',
 	'woocommerce-blocks/header-large',
-	'woocommerce-blocks/header-centered-menu-with-search',
 ];
 
 export const SidebarNavigationScreenHeader = () => {
-	useEditorScroll( {
+	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'top',
 	} );
 
 	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
-	const [ blocks, , onChange ] = useEditorBlocks();
-	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
-		HighlightedBlockContext
+
+	const currentTemplate = useSelect(
+		( select ) =>
+			// @ts-expect-error No types for this exist yet.
+			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+		[]
 	);
 
-	useEffect( () => {
-		setHighlightedBlockIndex( 0 );
-	}, [ setHighlightedBlockIndex ] );
+	const [ mainTemplateBlocks ] = useEditorBlocks(
+		'wp_template',
+		currentTemplate.id
+	);
 
+	const [ blocks, , onChange ] = useEditorBlocks(
+		'wp_template_part',
+		headerTemplateId
+	);
+
+	const headerTemplatePartBlock = mainTemplateBlocks.find(
+		( block ) => block.attributes.slug === 'header'
+	);
+
+	const { setHighlightedBlockClientId, resetHighlightedBlockClientId } =
+		useContext( HighlightedBlockContext );
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
+
+	useEffect( () => {
+		setHighlightedBlockClientId(
+			headerTemplatePartBlock?.clientId ?? null
+		);
+	}, [ headerTemplatePartBlock?.clientId, setHighlightedBlockClientId ] );
 	const headerPatterns = useMemo(
 		() =>
 			patterns
@@ -64,19 +94,41 @@ export const SidebarNavigationScreenHeader = () => {
 		[ patterns ]
 	);
 
+	useEffect( () => {
+		if ( selectedPattern || ! blocks.length || ! headerPatterns.length ) {
+			return;
+		}
+
+		const currentSelectedPattern = findPatternByBlock(
+			headerPatterns,
+			blocks[ 0 ]
+		);
+		setSelectedPattern( currentSelectedPattern );
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
+	}, [ blocks, headerPatterns ] );
 	const onClickHeaderPattern = useCallback(
-		( _pattern, selectedBlocks ) => {
+		( pattern, selectedBlocks ) => {
+			setSelectedPattern( pattern );
 			onChange( [ selectedBlocks[ 0 ], ...blocks.slice( 1 ) ], {
 				selection: {},
 			} );
+			scroll();
 		},
-		[ blocks, onChange ]
+		[ blocks, onChange, setSelectedPattern, scroll ]
 	);
+
+	const { context } = useContext( CustomizeStoreContext );
+	const aiOnline = context.flowType === FlowType.AIOnline;
+
+	const title = aiOnline
+		? __( 'Change your header', 'woocommerce' )
+		: __( 'Choose your header', 'woocommerce' );
 
 	return (
 		<SidebarNavigationScreen
-			title={ __( 'Change your header', 'woocommerce' ) }
-			onNavigateBackClick={ resetHighlightedBlockIndex }
+			title={ title }
+			onNavigateBackClick={ resetHighlightedBlockClientId }
 			description={ createInterpolateElement(
 				__(
 					"Select a new header from the options below. Your header includes your site's navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
@@ -86,7 +138,7 @@ export const SidebarNavigationScreenHeader = () => {
 					EditorLink: (
 						<Link
 							onClick={ () => {
-								recordEvent(
+								trackEvent(
 									'customize_your_store_assembler_hub_editor_link_click',
 									{
 										source: 'header',
@@ -105,7 +157,7 @@ export const SidebarNavigationScreenHeader = () => {
 			) }
 			content={
 				<>
-					<div className="edit-site-sidebar-navigation-screen-patterns__group-header">
+					<div className="woocommerce-customize-store__sidebar-header-content">
 						{ isLoading && (
 							<span className="components-placeholder__preview">
 								<Spinner />
@@ -119,8 +171,8 @@ export const SidebarNavigationScreenHeader = () => {
 								onClickPattern={ onClickHeaderPattern }
 								label={ 'Headers' }
 								orientation="vertical"
-								category={ 'header' }
 								isDraggable={ false }
+								onHover={ () => {} }
 								showTitlesAsTooltip={ true }
 							/>
 						) }

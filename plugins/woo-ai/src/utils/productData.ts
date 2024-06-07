@@ -190,3 +190,19 @@ export const isProductVirtual = () =>
 
 export const isProductDownloadable = () =>
 	( document.querySelector( '#_downloadable' ) as HTMLInputElement )?.checked;
+
+export const getProductImageCount = () => {
+	const gallery = document.querySelectorAll(
+		'.product_images li.image'
+	).length;
+
+	const featured = document.querySelectorAll(
+		'#set-post-thumbnail img'
+	).length;
+
+	return {
+		gallery,
+		featured,
+		total: gallery + featured,
+	};
+};

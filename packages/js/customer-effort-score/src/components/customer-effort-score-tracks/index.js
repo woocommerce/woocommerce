@@ -91,15 +91,14 @@ function _CustomerEffortScoreTracks( {
 			ces_location: 'inside',
 			...trackProps,
 		} );
-	};
-
-	const addActionToShownOption = () => {
-		updateOptions( {
-			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
-				action,
-				...( cesShownForActions || [] ),
-			],
-		} );
+		if ( ! cesShownForActions || ! cesShownForActions.includes( action ) ) {
+			updateOptions( {
+				[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
+					action,
+					...( cesShownForActions || [] ),
+				],
+			} );
+		}
 	};
 
 	const onNoticeDismissed = () => {
@@ -109,8 +108,6 @@ function _CustomerEffortScoreTracks( {
 			ces_location: 'inside',
 			...trackProps,
 		} );
-
-		addActionToShownOption();
 	};
 
 	const onModalDismissed = () => {
@@ -131,8 +128,6 @@ function _CustomerEffortScoreTracks( {
 			ces_location: 'inside',
 			...trackProps,
 		} );
-
-		addActionToShownOption();
 	};
 
 	const recordScore = ( score, secondScore, comments ) => {

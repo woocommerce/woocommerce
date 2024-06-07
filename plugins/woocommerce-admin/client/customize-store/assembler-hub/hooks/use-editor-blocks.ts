@@ -5,39 +5,27 @@
  */
 // @ts-ignore No types for this exist yet.
 import { useEntityBlockEditor } from '@wordpress/core-data';
-// @ts-ignore No types for this exist yet.
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-// @ts-ignore No types for this exist yet.
-import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
-import { useSelect } from '@wordpress/data';
 import { BlockInstance } from '@wordpress/blocks';
 
-type ChangeHandler = (
+export type ChangeHandler = (
 	blocks: BlockInstance[],
 	options: Record< string, unknown >
 ) => void;
 
 // Note, must be used within BlockEditorProvider. This allows shared access of blocks currently
 // being edited in the BlockEditor.
-export const useEditorBlocks = (): [
-	BlockInstance[],
-	ChangeHandler,
-	ChangeHandler
-] => {
-	const { templateType } = useSelect( ( select ) => {
-		const { getEditedPostType } = unlock( select( editSiteStore ) );
-
-		return {
-			templateType: getEditedPostType(),
-		};
-	}, [] );
-
+export const useEditorBlocks = (
+	templateType: 'wp_template' | 'wp_template_part',
+	templateId: string
+): [ BlockInstance[], ChangeHandler, ChangeHandler ] => {
 	// @ts-ignore Types are not up to date.
 	const [ blocks, onInput, onChange ]: [
-		BlockInstance[],
+		BlockInstance[] | undefined,
 		ChangeHandler,
 		ChangeHandler
-	] = useEntityBlockEditor( 'postType', templateType );
+	] = useEntityBlockEditor( 'postType', templateType, {
+		id: templateId,
+	} );
 
-	return [ blocks, onInput, onChange ];
+	return [ blocks ?? [], onInput, onChange ];
 };

@@ -100,6 +100,7 @@ export const Tree = forwardRef( function ForwardedTree(
 					<Icon icon={ plus } size={ 20 } />
 					{ props.createValue
 						? sprintf(
+								/* translators: %s: create value */
 								__( 'Create "%s"', 'woocommerce' ),
 								props.createValue
 						  )

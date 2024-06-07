@@ -1,4 +1,8 @@
-# How to design a simple extension
+---
+post_title: How to design a simple extension
+menu_title: Design a simple extension
+tags: how-to
+---
 
 ## Introduction
 
@@ -6,18 +10,18 @@ Building a WooCommerce extension that provides a first-class experience for merc
 
 ## The main plugin file
 
-Your extension’s main PHP file is a bootstrapping file. It contains important metadata about your extension that WordPress and WooCommerce use for a number of ecosystem integration processes, and it serves as the primary entry point for your extension’s functionality. While there is not a particular rule enforced around naming this file, using a hyphenated version of the plugin name is a common best practice. (i.e. my-extension.php)
+Your extension's main PHP file is a bootstrapping file. It contains important metadata about your extension that WordPress and WooCommerce use for a number of ecosystem integration processes, and it serves as the primary entry point for your extension's functionality. While there is not a particular rule enforced around naming this file, using a hyphenated version of the plugin name is a common best practice. (i.e. my-extension.php)
 
 ## Declaring extension metadata
 
-Your extension’s main plugin file should have a header comment that includes a number of important pieces of metadata about your extension. WordPress has a list of header requirements to which all plugins must adhere, but there are additional considerations for WooCommerce extensions:
+Your extension's main plugin file should have a header comment that includes a number of important pieces of metadata about your extension. WordPress has a list of header requirements to which all plugins must adhere, but there are additional considerations for WooCommerce extensions:
 
 - The `Author` and `Developer` fields are required and should be set to  
   either your name or your company name.
 
 - The `Developer URI` field should be your official webpage URL.
 
-- The `Plugin URI` field should contain the URL of the extension’s product page in the WooCommerce Marketplace or the extension’s official landing page on your website.
+- The `Plugin URI` field should contain the URL of the extension's product page in the WooCommerce Marketplace or the extension's official landing page on your website.
 
 - For extensions listed in the WooCommerce Marketplace, to help facilitate the update process, add a `Woo` field and an appropriate value. WooCommerce Marketplace vendors can find this snippet by logging in to the Vendors Dashboard and navigating to `Extensions > All Extensions`. Then, select the product and click Edit product page. This snippet will be in the upper-right-hand corner of the screen.
 
@@ -26,7 +30,7 @@ Below is an example of what the header content might look like for an extension 
 ```php
 /**
  * Plugin Name: My Great WooCommerce Extension
- * Plugin URI: http://woocommerce.com/products/woocommerce-extension/
+ * Plugin URI: https://woocommerce.com/products/woocommerce-extension/
  * Description: Your extension's description text.
  * Version: 1.0.0
  * Author: Your Name
@@ -45,7 +49,7 @@ Below is an example of what the header content might look like for an extension 
 
 ## Preventing data leaks
 
-As a best practice, your extension’s PHP files should contain a conditional statement at the top that checks for WordPress’ ABSPATH constant. If this constant is not defined, the script should exit.
+As a best practice, your extension's PHP files should contain a conditional statement at the top that checks for WordPress' ABSPATH constant. If this constant is not defined, the script should exit.
 
 `defined( 'ABSPATH' ) || exit;`
 
@@ -53,13 +57,13 @@ This check prevents your PHP files from being executed via direct browser access
 
 ## Managing extension lifecycle
 
-Because your main PHP file is the primary point of coupling between your extension and WordPress, you should use it as a hub for managing your extension’s lifecycle. At a very basic level, this means handling:
+Because your main PHP file is the primary point of coupling between your extension and WordPress, you should use it as a hub for managing your extension's lifecycle. At a very basic level, this means handling:
 
 - Activation
 - Execution
 - Deactivation
 
-Starting with these three broad lifecycle areas, you can begin to break your extension’s functionality down further to help maintain a good separation of concerns.
+Starting with these three broad lifecycle areas, you can begin to break your extension's functionality down further to help maintain a good separation of concerns.
 
 ## Handling activation and deactivation
 
@@ -81,15 +85,15 @@ register_deactivation_hook( __FILE__, 'my_extension_deactivate' );
 
 ## Maintaining a separation of concerns
 
-There are numerous ways to organize the code in your extension. You can find a good overview of best practices in the WordPress Plugin Developer Handbook. Regardless of the approach you use for organizing your code, the nature of WordPress’ shared application space makes it imperative that you build with an eye toward interoperability. There are a few common principles that will help you optimize your extension and ensure it is a good neighbor to others:
+There are numerous ways to organize the code in your extension. You can find a good overview of best practices in the WordPress Plugin Developer Handbook. Regardless of the approach you use for organizing your code, the nature of WordPress' shared application space makes it imperative that you build with an eye toward interoperability. There are a few common principles that will help you optimize your extension and ensure it is a good neighbor to others:
 
 - Use namespacing and prefixing to avoid conflicts with other extensions.
-- Use classes to encapsulate your extension’s functionality.
+- Use classes to encapsulate your extension's functionality.
 - Check for existing declarations, assignments, and implementations.
 
 ## The core extension class
 
-As mentioned above, encapsulating different parts of your extension’s functionality using classes is an important measure that not only helps with interoperability, but which also makes your code easier to maintain and debug. Your extension may have many different classes, each shouldering some piece of functionality. At a minimum, your extension should define a central class which can handle the setup, initialization and management of a single instance of itself.
+As mentioned above, encapsulating different parts of your extension's functionality using classes is an important measure that not only helps with interoperability, but which also makes your code easier to maintain and debug. Your extension may have many different classes, each shouldering some piece of functionality. At a minimum, your extension should define a central class which can handle the setup, initialization and management of a single instance of itself.
 
 ## Implementing a singleton pattern
 
@@ -144,7 +148,7 @@ if ( ! class_exists( 'My_Extension' ) ) :
 endif;
 ```
 
-Notice that the example class above is designed to be instantiated by calling the static class method `instance()`, which will either return an existing instance of the class or create one and return it. In order to fully protect against unwanted instantiation, it’s also necessary to override the built-in magic methods `__clone()` and `__wakeup()`. You can implement your own error logging here or use something like `_doing_it_wrong()` which handles error logging for you. You can also use WooCommerce’s wrapper function `wc_doing_it_wrong()` here. Just be sure your code checks that the function exists first.
+Notice that the example class above is designed to be instantiated by calling the static class method `instance()`, which will either return an existing instance of the class or create one and return it. In order to fully protect against unwanted instantiation, it's also necessary to override the built-in magic methods `__clone()` and `__wakeup()`. You can implement your own error logging here or use something like `_doing_it_wrong()` which handles error logging for you. You can also use WooCommerce's wrapper function `wc_doing_it_wrong()` here. Just be sure your code checks that the function exists first.
 
 ## Constructor
 
@@ -167,7 +171,7 @@ protected function __construct() {
 
 ## Loading dependencies
 
-The includes() function above is where you’ll load other class dependencies, typically via an include or require constructs. A common way of managing and loading external dependencies is to use Composer’s autoload feature, but you can also load specific files individually. You can read more about how to autoload external dependencies in the Composer documentation. A basic example of a setup method that uses both Composer and internal inclusion is below.
+The includes() function above is where you'll load other class dependencies, typically via an include or require constructs. A common way of managing and loading external dependencies is to use Composer's autoload feature, but you can also load specific files individually. You can read more about how to autoload external dependencies in the Composer documentation. A basic example of a setup method that uses both Composer and internal inclusion is below.
 
 ```php
 public function includes() {
@@ -183,9 +187,9 @@ public function includes() {
 
 ## Initialization
 
-The `init()` function above is where you should handle any setup for the classes you loaded in the includes() method. This step is where you’ll often perform any initial registration with relevant actions or filters. It’s also where you can register and enqueue your extension’s JavaScripts and stylesheets.
+The `init()` function above is where you should handle any setup for the classes you loaded in the includes() method. This step is where you'll often perform any initial registration with relevant actions or filters. It's also where you can register and enqueue your extension's JavaScripts and stylesheets.
 
-Here’s an example of what your initialization method might look like:
+Here's an example of what your initialization method might look like:
 
 ```php
 private function init() {
@@ -203,13 +207,13 @@ private function init() {
 }
 ```
 
-There are many different ways that your core class’ initialization method might look, depending on the way that you choose to architect your extension. The important concept here is that this function serves as a central point for handling any initial registration and setup that your extension requires in order to respond to web requests going forward.
+There are many different ways that your core class' initialization method might look, depending on the way that you choose to architect your extension. The important concept here is that this function serves as a central point for handling any initial registration and setup that your extension requires in order to respond to web requests going forward.
 
 ## Delaying initialization
 
-The WordPress activation hook we set up above with register_activation_hook() may seem like a great place to instantiate our extension’s main class, and in some cases it will work. By virtue of being a plugin for a plugin, however, WooCommerce extensions typically require WooCommerce to be loaded in order to function properly, so it’s often best to delay instantiation and initialization until after WordPress has loaded other plugins.
+The WordPress activation hook we set up above with register_activation_hook() may seem like a great place to instantiate our extension's main class, and in some cases it will work. By virtue of being a plugin for a plugin, however, WooCommerce extensions typically require WooCommerce to be loaded in order to function properly, so it's often best to delay instantiation and initialization until after WordPress has loaded other plugins.
 
-To do that, instead of hooking your instantiation to your extension’s activation hook, use the plugins_loaded action in WordPress to instantiate your extension’s core class and add its singleton to the $GLOBALS array.
+To do that, instead of hooking your instantiation to your extension's activation hook, use the plugins_loaded action in WordPress to instantiate your extension's core class and add its singleton to the $GLOBALS array.
 
 ```php
 function my_extension_initialize() {
@@ -229,7 +233,7 @@ In the example above, WordPress will wait until after all plugins have been load
 
 ## Handling execution
 
-Once your extension is active and initialized, the possibilities are wide open. This is where the proverbial magic happens in an extension, and it’s largely up to you to define. While implementing specific functionality is outside the scope of this guide, there are some best practices to keep in mind as you think about how to build out your extension’s functionality.
+Once your extension is active and initialized, the possibilities are wide open. This is where the proverbial magic happens in an extension, and it's largely up to you to define. While implementing specific functionality is outside the scope of this guide, there are some best practices to keep in mind as you think about how to build out your extension's functionality.
 
 - Keep an event-driven mindset. Merchants and shoppers who use your extension will be interacting with WooCommerce using web requests, so it can be helpful to anchor your extension to some of the critical flows that users follow in WooCommerce.
 
@@ -249,9 +253,9 @@ The WordPress deactivation hook we set up earlier in our main PHP file with regi
 
 ## Uninstallation
 
-While it’s certainly possible to completely reverse everything your extension has created when a merchant deactivates it, it’s not advisable nor practical in most cases. Instead, it’s best to reserve that behavior for uninstallation.
+While it's certainly possible to completely reverse everything your extension has created when a merchant deactivates it, it's not advisable nor practical in most cases. Instead, it's best to reserve that behavior for uninstallation.
 
-For handling uninstallation, it’s best to follow the guidelines in the WordPress Plugin Handbook.
+For handling uninstallation, it's best to follow the guidelines in the WordPress Plugin Handbook.
 
 ## Putting it all together
 
@@ -260,7 +264,7 @@ Below is an example of what a main plugin file might look like for a very simple
 ```php
 /**
  * Plugin Name: My Great WooCommerce Extension
- * Plugin URI: http://woocommerce.com/products/woocommerce-extension/
+ * Plugin URI: https://woocommerce.com/products/woocommerce-extension/
  * Description: Your extension's description text.
  * Version: 1.0.0
  * Author: Your Name

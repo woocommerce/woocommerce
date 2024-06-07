@@ -3,9 +3,10 @@
 		"activity-panels": true,
 		"analytics": true,
 		"product-block-editor": true,
+		"experimental-blocks": false,
 		"coupons": true,
 		"core-profiler": true,
-		"customize-store": false,
+		"customize-store": true,
 		"customer-effort-score-tracks": true,
 		"import-products-task": true,
 		"experimental-fashion-sample-products": true,
@@ -16,10 +17,11 @@
 		"minified-js": false,
 		"mobile-app-banner": true,
 		"navigation": true,
-		"new-product-management-experience": false,
 		"onboarding": true,
 		"onboarding-tasks": true,
-		"product-variation-management": true,
+		"pattern-toolkit-full-composability": false,
+		"product-pre-publish-modal": false,
+		"product-custom-fields": true,
 		"remote-inbox-notifications": true,
 		"remote-free-extensions": true,
 		"payment-gateway-suggestions": true,
@@ -31,6 +33,8 @@
 		"woo-mobile-welcome": true,
 		"wc-pay-promotion": true,
 		"wc-pay-welcome-page": true,
-		"async-product-editor-category-field": false
+		"async-product-editor-category-field": false,
+		"launch-your-store": true,
+		"product-editor-template-system": false
 	}
 }

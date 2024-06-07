@@ -1,5 +1,6 @@
 {
-	"name": "woocommerce-beta-tester",
+	"private": true,
+	"name": "@woocommerce/plugin-woocommerce-beta-tester",
 	"description": "Setting up the local beta tester scripts.",
 	"license": "GPL-2.0",
 	"repository": {
@@ -7,28 +8,33 @@
 		"url": "git://github.com/woocommerce/woocommerce-beta-tester.git"
 	},
 	"title": "WooCommerce Beta Tester",
-	"version": "2.2.2",
+	"version": "2.3.1",
 	"homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
 	"devDependencies": {
-		"@types/react": "^17.0.2",
-		"@types/react-dom": "^17.0.2",
-		"@types/wordpress__components": "^19.10.3",
+		"@types/react": "^17.0.71",
+		"@types/react-dom": "^17.0.25",
+		"@types/wordpress__components": "^19.10.5",
+		"@types/wordpress__plugins": "3.0.0",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/env": "^8.2.0",
+		"@wordpress/env": "^9.0.7",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^19.2.4",
-		"eslint": "^8.32.0",
+		"eslint": "^8.55.0",
 		"prettier": "npm:wp-prettier@^2.8.5",
-		"ts-loader": "^9.4.1",
-		"typescript": "^5.1.6",
-		"uglify-js": "^3.5.3"
+		"ts-loader": "^9.5.1",
+		"typescript": "^5.3.3",
+		"uglify-js": "^3.17.4",
+		"wireit": "0.14.3"
 	},
 	"dependencies": {
-		"@emotion/react": "^11.10.4",
-		"@types/prop-types": "^15.7.4",
+		"@emotion/react": "^11.11.1",
+		"@types/prop-types": "^15.7.11",
+		"@woocommerce/admin-layout": "workspace:*",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/data": "workspace:*",
+		"@woocommerce/expression-evaluation": "workspace:*",
+		"@woocommerce/product-editor": "workspace:*",
 		"@wordpress/api-fetch": "wp-6.0",
 		"@wordpress/components": "wp-6.0",
 		"@wordpress/compose": "wp-6.0",
@@ -36,11 +42,14 @@
 		"@wordpress/data-controls": "wp-6.0",
 		"@wordpress/element": "wp-6.0",
 		"@wordpress/hooks": "wp-6.0",
+		"@wordpress/i18n": "wp-6.0",
+		"@wordpress/icons": "wp-6.0",
+		"@wordpress/plugins": "wp-6.0",
 		"prop-types": "^15.8.1"
 	},
 	"peerDependencies": {
-		"@types/react": "^17.0.2",
-		"@types/react-dom": "^17.0.2",
+		"@types/react": "^17.0.71",
+		"@types/react-dom": "^17.0.25",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
 	},
@@ -50,38 +59,37 @@
 			"js": "assets/js/*.js"
 		}
 	},
-  "config": {
-    "build_step": "pnpm run build:zip"
-  },
+	"config": {
+		"build_step": "pnpm run build:zip"
+	},
 	"scripts": {
-		"postinstall": "composer install",
-		"changelog": "composer exec -- changelogger",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"turbo:build": "pnpm run build:admin && pnpm run uglify",
+		"build": "pnpm build:admin && pnpm uglify",
 		"build:admin": "wp-scripts build",
+		"build:dev": "pnpm lint:js && pnpm build",
 		"build:zip": "./bin/build-zip.sh",
-		"build:dev": "pnpm run lint:js && pnpm run build",
-		"uglify": "rm -f $npm_package_assets_js_min && for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done",
+		"changelog": "composer install && composer exec -- changelogger",
 		"check-engines": "wp-scripts check-engines",
 		"check-licenses": "wp-scripts check-licenses",
 		"format:js": "wp-scripts format-js",
+		"postinstall": "composer install",
 		"lint:css": "wp-scripts lint-style",
 		"lint:css:fix": "wp-scripts lint-style --fix",
-		"lint:php": "composer run-script phpcs",
-		"lint:php:fix": "composer run-script phpcbf",
 		"lint:js": "wp-scripts lint-js",
 		"lint:js:fix": "wp-scripts lint-js --fix",
 		"lint:md:docs": "wp-scripts lint-md-docs",
 		"lint:md:js": "wp-scripts lint-md-js",
+		"lint:php": "composer run-script phpcs",
+		"lint:php:fix": "composer run-script phpcbf",
 		"lint:pkg-json": "wp-scripts lint-pkg-json",
 		"packages-update": "wp-scripts packages-update",
 		"start": "wp-scripts start",
 		"test:e2e": "wp-scripts test-e2e",
-		"test:unit": "wp-scripts test-unit-js"
+		"test:unit": "wp-scripts test-unit-js",
+		"uglify": "rm -f $npm_package_assets_js_min && for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done"
 	},
 	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"node": "^20.11.1",
+		"pnpm": "^9.1.0"
 	},
 	"lint-staged": {
 		"*.php": [

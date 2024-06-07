@@ -9,7 +9,7 @@ import './appearance';
 import './tax';
 import './woocommerce-payments';
 import './deprecated-tasks';
-import './customize-store-tasklist-item';
+import './launch-your-store';
 
 const possiblyImportProductTask = async () => {
 	if ( isImportProduct() ) {

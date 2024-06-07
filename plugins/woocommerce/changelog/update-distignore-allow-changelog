@@ -1,5 +1,0 @@
-Significance: patch
-Type: dev
-Comment: This PR updates the .distignore such that the changelog.txt file is included in builds, and does not itself need a changelog entry.
-
-

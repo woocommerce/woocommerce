@@ -4,14 +4,14 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	useReducedMotion,
 	useResizeObserver,
 	useViewportMatch,
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useContext, useEffect } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
@@ -45,22 +45,60 @@ import { LogoBlockContext } from './logo-block-context';
 import ResizableFrame from './resizable-frame';
 import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
+import { Transitional } from '../transitional';
+import { CustomizeStoreContext } from './';
+import { AiOfflineModal } from '~/customize-store/assembler-hub/onboarding-tour/ai-offline-modal';
+import { useQuery } from '@woocommerce/navigation';
+import { FlowType } from '../types';
+import { isOfflineAIFlow } from '../guards';
+import { isWooExpress } from '~/utils/is-woo-express';
+import { trackEvent } from '../tracking';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
 const ANIMATION_DURATION = 0.5;
 
 export const Layout = () => {
-	const [ logoBlock, setLogoBlock ] = useState< {
-		clientId: string | null;
-		isLoading: boolean;
-	} >( {
-		clientId: null,
-		isLoading: true,
-	} );
+	const [ logoBlockIds, setLogoBlockIds ] = useState< Array< string > >( [] );
+
+	const { sendEvent, currentState, context } = useContext(
+		CustomizeStoreContext
+	);
+
+	const { customizing } = useQuery();
+
+	const [ showAiOfflineModal, setShowAiOfflineModal ] = useState(
+		isOfflineAIFlow( context.flowType ) && customizing !== 'true'
+	);
+
+	useEffect( () => {
+		setShowAiOfflineModal(
+			isOfflineAIFlow( context.flowType ) && customizing !== 'true'
+		);
+	}, [ context.flowType, customizing ] );
+
 	// This ensures the edited entity id and type are initialized properly.
 	useInitEditedEntityFromURL();
-	const { shouldTourBeShown, ...onboardingTourProps } = useOnboardingTour();
+	const {
+		shouldTourBeShown,
+		isResizeHandleVisible,
+		setShowWelcomeTour,
+		onClose,
+		...onboardingTourProps
+	} = useOnboardingTour();
+
+	const takeTour = () => {
+		// Click on "Take a tour" button
+		trackEvent( 'customize_your_store_assembler_hub_tour_start' );
+		setShowWelcomeTour( false );
+		setShowAiOfflineModal( false );
+	};
+
+	const skipTour = () => {
+		trackEvent( 'customize_your_store_assembler_hub_tour_skip' );
+		onClose();
+		setShowAiOfflineModal( false );
+	};
 
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const disableMotion = useReducedMotion();
@@ -74,11 +112,41 @@ export const Layout = () => {
 	const { record: template } = useEditedEntityRecord();
 	const { id: templateId, type: templateType } = template;
 
+	const [ isSurveyOpen, setSurveyOpen ] = useState( false );
+	const editor = <Editor isLoading={ isEditorLoading } />;
+
+	if (
+		typeof currentState === 'object' &&
+		currentState.transitionalScreen === 'transitional'
+	) {
+		return (
+			<EntityProvider kind="root" type="site">
+				<EntityProvider
+					kind="postType"
+					type={ templateType }
+					id={ templateId }
+				>
+					<Transitional
+						sendEvent={ sendEvent }
+						isWooExpress={ isWooExpress() }
+						isSurveyOpen={ isSurveyOpen }
+						setSurveyOpen={ setSurveyOpen }
+						hasCompleteSurvey={
+							!! context?.transitionalScreen?.hasCompleteSurvey
+						}
+						aiOnline={ context?.flowType === FlowType.AIOnline }
+					/>
+				</EntityProvider>
+			</EntityProvider>
+		);
+	}
+
 	return (
+		// This causes the editor to re-render when the logo block ids change. Maybe we can find a better way to do this.
 		<LogoBlockContext.Provider
 			value={ {
-				logoBlock,
-				setLogoBlock,
+				logoBlockIds,
+				setLogoBlockIds,
 			} }
 		>
 			<HighlightedBlockContextProvider>
@@ -88,7 +156,7 @@ export const Layout = () => {
 						type={ templateType }
 						id={ templateId }
 					>
-						<div className={ classnames( 'edit-site-layout' ) }>
+						<div className={ clsx( 'edit-site-layout' ) }>
 							<motion.div
 								className="edit-site-layout__header-container"
 								animate={ 'view' }
@@ -130,44 +198,24 @@ export const Layout = () => {
 								</NavigableRegion>
 
 								{ ! isMobileViewport && (
-									<div
-										className={ classnames(
-											'edit-site-layout__canvas-container'
-										) }
-									>
+									<div className="edit-site-layout__canvas-container">
 										{ canvasResizer }
 										{ !! canvasSize.width && (
 											<motion.div
-												whileHover={ {
-													scale: 1.005,
-													transition: {
-														duration: disableMotion
-															? 0
-															: 0.5,
-														ease: 'easeOut',
-													},
-												} }
 												initial={ false }
 												layout="position"
-												className={ classnames(
+												className={ clsx(
 													'edit-site-layout__canvas'
 												) }
-												transition={ {
-													type: 'tween',
-													duration: disableMotion
-														? 0
-														: ANIMATION_DURATION,
-													ease: 'easeOut',
-												} }
 											>
 												<ErrorBoundary>
 													<ResizableFrame
 														isReady={
 															! isEditorLoading
 														}
-														duringGuideTour={
-															shouldTourBeShown &&
-															! onboardingTourProps.showWelcomeTour
+														isHandleVisibleByDefault={
+															! onboardingTourProps.showWelcomeTour &&
+															isResizeHandleVisible
 														}
 														isFullWidth={ false }
 														defaultSize={ {
@@ -188,11 +236,7 @@ export const Layout = () => {
 																backgroundColor,
 														} }
 													>
-														<Editor
-															isLoading={
-																isEditorLoading
-															}
-														/>
+														{ editor }
 													</ResizableFrame>
 												</ErrorBoundary>
 											</motion.div>
@@ -201,8 +245,25 @@ export const Layout = () => {
 								) }
 							</div>
 						</div>
-						{ shouldTourBeShown && (
-							<OnboardingTour { ...onboardingTourProps } />
+						{ ! isEditorLoading &&
+							shouldTourBeShown &&
+							( FlowType.AIOnline === context.flowType ||
+								FlowType.noAI === context.flowType ) && (
+								<OnboardingTour
+									skipTour={ skipTour }
+									takeTour={ takeTour }
+									onClose={ onClose }
+									flowType={ context.flowType }
+									{ ...onboardingTourProps }
+								/>
+							) }
+
+						{ ! isEditorLoading && showAiOfflineModal && (
+							<AiOfflineModal
+								shouldTourBeShown={ shouldTourBeShown }
+								skipTour={ skipTour }
+								takeTour={ takeTour }
+							/>
 						) }
 					</EntityProvider>
 				</EntityProvider>

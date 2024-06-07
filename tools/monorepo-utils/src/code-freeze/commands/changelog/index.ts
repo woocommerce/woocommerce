@@ -29,6 +29,11 @@ export const changelogCommand = new Command( 'changelog' )
 		'Path to existing repo. Use this option to avoid cloning a fresh repo for development purposes. Note that using this option assumes dependencies are already installed.'
 	)
 	.option(
+		'-c --commit-direct-to-base',
+		'Commit directly to the base branch. Do not create a PR just push directly to base branch',
+		false
+	)
+	.option(
 		'-o, --override <override>',
 		"Time Override: The time to use in checking whether the action should run (default: 'now').",
 		'now'
@@ -39,10 +44,15 @@ export const changelogCommand = new Command( 'changelog' )
 		Logger.startTask(
 			`Making a temporary clone of '${ owner }/${ name }'`
 		);
+
+		const cloneOptions = {
+			owner: owner ? owner : 'woocommerce',
+			name: name ? name : 'woocommerce',
+		};
 		// Use a supplied path, otherwise do a full clone of the repo, including history so that changelogs can be created with links to PRs.
 		const tmpRepoPath = devRepoPath
 			? devRepoPath
-			: await cloneAuthenticatedRepo( options, false );
+			: await cloneAuthenticatedRepo( cloneOptions, false );
 
 		Logger.endTask();
 

@@ -42,6 +42,22 @@ describe( 'generateManifest', () => {
 		);
 	} );
 
+	it( 'should exclude files and folders matching patterns in .manifestignore', async () => {
+		// generate the manifest from fixture directory
+		const manifest = await generateManifestFromDirectory(
+			rootDir,
+			dir,
+			'example-docs',
+			'https://example.com',
+			'https://example.com/edit'
+		);
+
+		const topLevelCategories = manifest.categories;
+
+		expect( topLevelCategories ).toHaveLength( 2 );
+		expect( topLevelCategories[ 0 ].posts ).toHaveLength( 1 );
+	} );
+
 	it( 'should generate a manifest with categories that contain all markdown files in a location as individual posts', async () => {
 		// generate the manifest from fixture directory
 		const manifest = await generateManifestFromDirectory(

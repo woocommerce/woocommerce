@@ -5,29 +5,37 @@
 /**
  * External dependencies
  */
-import { useResizeObserver, pure, useRefEffect } from '@wordpress/compose';
-import { useContext } from '@wordpress/element';
-import { Disabled } from '@wordpress/components';
+import { useResizeObserver, pure } from '@wordpress/compose';
+import { useContext, useMemo, useState } from '@wordpress/element';
+import { Disabled, Popover } from '@wordpress/components';
 import {
 	__unstableEditorStyles as EditorStyles,
 	__unstableIframe as Iframe,
 	privateApis as blockEditorPrivateApis,
 	BlockList,
+	store as blockEditorStore,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-import { noop } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import { LogoBlockContext } from './logo-block-context';
-import {
-	FontFamiliesLoader,
-	FontFamily,
-} from './sidebar/global-styles/font-pairing-variations/font-families-loader';
 import { SYSTEM_FONT_SLUG } from './sidebar/global-styles/font-pairing-variations/constants';
+import { PreloadFonts } from './preload-fonts';
+import { FontFamily } from '../types/font';
+import { FontFamiliesLoaderDotCom } from './sidebar/global-styles/font-pairing-variations/font-families-loader-dot-com';
+import { CustomizeStoreContext } from '.';
+import { isAIFlow } from '../guards';
+import { selectBlockOnHover } from './utils/select-block-on-hover';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { PopoverStatus, usePopoverHandler } from './hooks/use-popover-handler';
+import { noop } from 'lodash';
+import { useAddAutoBlockPreviewEventListenersAndObservers } from './hooks/auto-block-preview-event-listener';
+import { IsResizingContext } from './resizable-frame';
+import { __ } from '@wordpress/i18n';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -36,6 +44,7 @@ const { Provider: DisabledProvider } = Disabled.Context;
 let MemoizedBlockList: typeof BlockList | undefined;
 
 const { useGlobalSetting } = unlock( blockEditorPrivateApis );
+const MAX_HEIGHT = 2000;
 
 export type ScaledBlockPreviewProps = {
 	viewportWidth?: number;
@@ -46,7 +55,13 @@ export type ScaledBlockPreviewProps = {
 		[ key: string ]: unknown;
 	};
 	additionalStyles: string;
-	onClickNavigationItem: ( event: MouseEvent ) => void;
+	isScrollable?: boolean;
+	autoScale?: boolean;
+	setLogoBlockContext?: boolean;
+	CustomIframeComponent?: React.ComponentType<
+		Parameters< typeof Iframe >[ 0 ]
+	>;
+	isPatternPreview: boolean;
 };
 
 function ScaledBlockPreview( {
@@ -54,169 +69,168 @@ function ScaledBlockPreview( {
 	containerWidth,
 	settings,
 	additionalStyles,
-	onClickNavigationItem,
+	isScrollable = true,
+	autoScale = true,
+	isPatternPreview,
+	CustomIframeComponent = Iframe,
 }: ScaledBlockPreviewProps ) {
-	const { setLogoBlock } = useContext( LogoBlockContext );
+	const [ contentHeight, setContentHeight ] = useState< number | null >(
+		null
+	);
+	const { setLogoBlockIds, logoBlockIds } = useContext( LogoBlockContext );
 	const [ fontFamilies ] = useGlobalSetting(
 		'typography.fontFamilies.theme'
 	) as [ FontFamily[] ];
-
 	const externalFontFamilies = fontFamilies.filter(
 		( { slug } ) => slug !== SYSTEM_FONT_SLUG
 	);
+
+	const { context } = useContext( CustomizeStoreContext );
 
 	if ( ! viewportWidth ) {
 		viewportWidth = containerWidth;
 	}
 
+	const [ iframeRef, setIframeRef ] = useState< HTMLElement | null >( null );
+
+	const [
+		popoverStatus,
+		virtualElement,
+		updatePopoverPosition,
+		setPopoverStatus,
+	] = usePopoverHandler();
+
+	// @ts-expect-error No types for this exist yet.
+	const { selectBlock, setBlockEditingMode } =
+		useDispatch( blockEditorStore );
+
+	// @ts-expect-error No types for this exist yet.
+	const { getBlockParents } = useSelect( blockEditorStore );
+
+	// Avoid scrollbars for pattern previews.
+	const editorStyles = useMemo( () => {
+		if ( ! isScrollable && settings.styles ) {
+			return [
+				...settings.styles,
+				{
+					css: 'body{height:auto;overflow:hidden;border:none;padding:0;}',
+					__unstableType: 'presets',
+				},
+			];
+		}
+
+		return settings.styles;
+	}, [ settings.styles, isScrollable ] );
+
+	const scale = containerWidth / viewportWidth;
+	const aspectRatio = contentHeight
+		? containerWidth / ( contentHeight * scale )
+		: 0;
+
 	// Initialize on render instead of module top level, to avoid circular dependency issues.
 	MemoizedBlockList = MemoizedBlockList || pure( BlockList );
 
+	const isResizing = useContext( IsResizingContext );
+
+	useAddAutoBlockPreviewEventListenersAndObservers(
+		{
+			documentElement: iframeRef,
+			autoScale,
+			isPatternPreview,
+			contentHeight,
+			logoBlockIds,
+		},
+		{
+			selectBlockOnHover,
+			selectBlock,
+			getBlockParents,
+			setBlockEditingMode,
+			updatePopoverPosition,
+			setLogoBlockIds,
+			setContentHeight,
+			setPopoverStatus,
+		}
+	);
+
 	return (
-		<DisabledProvider value={ true }>
-			<Iframe
-				aria-hidden
-				tabIndex={ -1 }
-				contentRef={ useRefEffect( ( bodyElement: HTMLBodyElement ) => {
-					const {
-						ownerDocument: { documentElement },
-					} = bodyElement;
-
-					documentElement.classList.add(
-						'block-editor-block-preview__content-iframe'
-					);
-					documentElement.style.position = 'absolute';
-					documentElement.style.width = '100%';
-
-					// Necessary for contentResizeListener to work.
-					bodyElement.style.boxSizing = 'border-box';
-					bodyElement.style.position = 'absolute';
-					bodyElement.style.width = '100%';
-
-					let navigationContainers: NodeListOf< HTMLDivElement >;
-					let siteTitles: NodeListOf< HTMLAnchorElement >;
-					const onClickNavigation = ( event: MouseEvent ) => {
-						event.preventDefault();
-						onClickNavigationItem( event );
-					};
-
-					const onMouseMove = ( event: MouseEvent ) => {
-						event.stopImmediatePropagation();
-					};
-
-					const possiblyRemoveAllListeners = () => {
-						bodyElement.removeEventListener(
-							'mousemove',
-							onMouseMove,
-							false
-						);
-						if ( navigationContainers ) {
-							navigationContainers.forEach( ( element ) => {
-								element.removeEventListener(
-									'click',
-									onClickNavigation
-								);
-							} );
+		<>
+			{ ! isPatternPreview &&
+				virtualElement &&
+				popoverStatus === PopoverStatus.VISIBLE &&
+				! isResizing && (
+					<Popover
+						// @ts-ignore No types for this exist yet.
+						anchor={ virtualElement }
+						as="div"
+						variant="unstyled"
+						className="components-tooltip woocommerce-customize-store_popover-tooltip"
+					>
+						<span>
+							{ __(
+								'You can edit your content later in the Editor',
+								'woocommerce'
+							) }
+						</span>
+					</Popover>
+				) }
+			<DisabledProvider value={ true }>
+				<div
+					className="block-editor-block-preview__content"
+					style={
+						autoScale
+							? {
+									transform: `scale(${ scale })`,
+									// Using width + aspect-ratio instead of height here triggers browsers' native
+									// handling of scrollbar's visibility. It prevents the flickering issue seen
+									// in https://github.com/WordPress/gutenberg/issues/52027.
+									// See https://github.com/WordPress/gutenberg/pull/52921 for more info.
+									aspectRatio,
+									maxHeight:
+										contentHeight !== null &&
+										contentHeight > MAX_HEIGHT
+											? MAX_HEIGHT * scale
+											: undefined,
+							  }
+							: {}
+					}
+				>
+					<CustomIframeComponent
+						aria-hidden
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore disabled prop exists
+						scrolling={ isScrollable ? 'yes' : 'no' }
+						tabIndex={ -1 }
+						readonly={ false }
+						style={
+							autoScale
+								? {
+										position: 'absolute',
+										width: viewportWidth,
+										pointerEvents: 'none',
+										height: contentHeight,
+										// This is a catch-all max-height for patterns.
+										// See: https://github.com/WordPress/gutenberg/pull/38175.
+										maxHeight: MAX_HEIGHT,
+								  }
+								: {}
 						}
+						contentRef={ ( bodyElement: HTMLElement ) => {
+							if ( ! bodyElement || iframeRef !== null ) {
+								return;
+							}
 
-						if ( siteTitles ) {
-							siteTitles.forEach( ( element ) => {
-								element.removeEventListener(
-									'click',
-									onClickNavigation
-								);
-							} );
-						}
-					};
+							const documentElement =
+								bodyElement.ownerDocument.documentElement;
 
-					const onChange = () => {
-						// Remove contenteditable and inert attributes from editable elements so that users can click on navigation links.
-						bodyElement
-							.querySelectorAll(
-								'.block-editor-rich-text__editable[contenteditable="true"]'
-							)
-							.forEach( ( element ) => {
-								element.removeAttribute( 'contenteditable' );
-							} );
-
-						bodyElement
-							.querySelectorAll( '*[inert="true"]' )
-							.forEach( ( element ) => {
-								element.removeAttribute( 'inert' );
-							} );
-
-						possiblyRemoveAllListeners();
-						navigationContainers = bodyElement.querySelectorAll(
-							'.wp-block-navigation__container'
-						);
-						navigationContainers.forEach( ( element ) => {
-							element.addEventListener(
-								'click',
-								onClickNavigation,
-								true
-							);
-						} );
-
-						siteTitles = bodyElement.querySelectorAll(
-							'.wp-block-site-title a'
-						);
-						siteTitles.forEach( ( element ) => {
-							element.addEventListener(
-								'click',
-								onClickNavigation,
-								true
-							);
-						} );
-
-						// Get the current logo block client ID from DOM and set it in the logo block context. This is used for the logo settings. See: ./sidebar/sidebar-navigation-screen-logo.tsx
-						// Ideally, we should be able to get the logo block client ID from the block editor store but it is not available.
-						// We should update this code once the there is a selector in the block editor store that can be used to get the logo block client ID.
-						const siteLogo = bodyElement.querySelector(
-							'.wp-block-site-logo'
-						);
-
-						const blockClientId = siteLogo
-							? siteLogo.getAttribute( 'data-block' )
-							: null;
-
-						setLogoBlock( {
-							clientId: blockClientId,
-							isLoading: false,
-						} );
-					};
-
-					// Stop mousemove event listener to disable block tool insertion feature.
-					bodyElement.addEventListener(
-						'mousemove',
-						onMouseMove,
-						true
-					);
-
-					const observer = new window.MutationObserver( onChange );
-
-					observer.observe( bodyElement, {
-						attributes: true,
-						characterData: false,
-						subtree: true,
-						childList: true,
-					} );
-
-					return () => {
-						observer.disconnect();
-						possiblyRemoveAllListeners();
-						setLogoBlock( {
-							clientId: null,
-							isLoading: true,
-						} );
-					};
-				}, [] ) }
-			>
-				<EditorStyles styles={ settings.styles } />
-				<style>
-					{ `
+							setIframeRef( documentElement );
+						} }
+					>
+						<EditorStyles styles={ editorStyles } />
+						<style>
+							{ `
 						.block-editor-block-list__block::before,
-						.is-selected::after,
-						.is-hovered::after,
+						.has-child-selected > .is-selected::after,
+						.is-hovered:not(.is-selected.is-hovered)::after,
 						.block-list-appender {
 							display: none !important;
 						}
@@ -241,17 +255,19 @@ function ScaledBlockPreview( {
 
 						${ additionalStyles }
 					` }
-				</style>
-				<MemoizedBlockList renderAppender={ false } />
-				{ /* Only load font families when there are two font families (font-paring selection). Otherwise, it is not needed. */ }
-				{ externalFontFamilies.length === 2 && (
-					<FontFamiliesLoader
-						fontFamilies={ externalFontFamilies }
-						onLoad={ noop }
-					/>
-				) }
-			</Iframe>
-		</DisabledProvider>
+						</style>
+						<MemoizedBlockList renderAppender={ false } />
+						<PreloadFonts />
+						{ isAIFlow( context.flowType ) && (
+							<FontFamiliesLoaderDotCom
+								fontFamilies={ externalFontFamilies }
+								onLoad={ noop }
+							/>
+						) }
+					</CustomIframeComponent>
+				</div>
+			</DisabledProvider>
+		</>
 	);
 }
 

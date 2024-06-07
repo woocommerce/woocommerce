@@ -7,15 +7,15 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
+import { CoreProfilerStateMachineContext } from '..';
 import {
-	CoreProfilerStateMachineContext,
 	UserProfileEvent,
 	BusinessInfoEvent,
-	PluginsLearnMoreLinkClicked,
+	PluginsLearnMoreLinkClickedEvent,
 	PluginsInstallationCompletedWithErrorsEvent,
 	PluginsInstallationCompletedEvent,
 	PluginsInstallationRequestedEvent,
-} from '..';
+} from '../events';
 import { POSSIBLY_DEFAULT_STORE_NAMES } from '../pages/BusinessInfo';
 import {
 	InstalledPlugin,
@@ -23,25 +23,15 @@ import {
 } from '../services/installAndActivatePlugins';
 import { getPluginTrackKey, getTimeFrame } from '~/utils';
 
-const recordTracksStepViewed = (
-	_context: unknown,
-	_event: unknown,
-	{ action }: { action: unknown }
-) => {
-	const { step } = action as { step: string };
+const recordTracksStepViewed = ( _: unknown, params: { step: string } ) => {
 	recordEvent( 'coreprofiler_step_view', {
-		step,
+		step: params.step,
 		wc_version: getSetting( 'wcVersion' ),
 	} );
 };
 
-const recordTracksStepSkipped = (
-	_context: unknown,
-	_event: unknown,
-	{ action }: { action: unknown }
-) => {
-	const { step } = action as { step: string };
-	recordEvent( `coreprofiler_${ step }_skip` );
+const recordTracksStepSkipped = ( _: unknown, params: { step: string } ) => {
+	recordEvent( `coreprofiler_${ params.step }_skip` );
 };
 
 const recordTracksIntroCompleted = () => {
@@ -51,10 +41,11 @@ const recordTracksIntroCompleted = () => {
 	} );
 };
 
-const recordTracksUserProfileCompleted = (
-	_context: CoreProfilerStateMachineContext,
-	event: Extract< UserProfileEvent, { type: 'USER_PROFILE_COMPLETED' } >
-) => {
+const recordTracksUserProfileCompleted = ( {
+	event,
+}: {
+	event: Extract< UserProfileEvent, { type: 'USER_PROFILE_COMPLETED' } >;
+} ) => {
 	recordEvent( 'coreprofiler_step_complete', {
 		step: 'user_profile',
 		wc_version: getSetting( 'wcVersion' ),
@@ -76,10 +67,42 @@ const recordTracksSkipBusinessLocationCompleted = () => {
 	} );
 };
 
-const recordTracksBusinessInfoCompleted = (
-	_context: CoreProfilerStateMachineContext,
-	event: Extract< BusinessInfoEvent, { type: 'BUSINESS_INFO_COMPLETED' } >
-) => {
+const recordTracksIsEmailChanged = ( {
+	context,
+	event,
+}: {
+	context: CoreProfilerStateMachineContext;
+	event: BusinessInfoEvent;
+} ) => {
+	let emailSource, isEmailChanged;
+	if ( context.onboardingProfile.store_email ) {
+		emailSource = 'onboarding_profile_store_email'; // from previous entry
+		isEmailChanged =
+			event.payload.storeEmailAddress !==
+			context.onboardingProfile.store_email;
+	} else if ( context.currentUserEmail ) {
+		emailSource = 'current_user_email'; // from currentUser
+		isEmailChanged =
+			event.payload.storeEmailAddress !== context.currentUserEmail;
+	} else {
+		emailSource = 'was_empty';
+		isEmailChanged = event.payload.storeEmailAddress?.length > 0;
+	}
+
+	recordEvent( 'coreprofiler_email_marketing', {
+		opt_in: event.payload.isOptInMarketing,
+		email_field_prefilled_source: emailSource,
+		email_field_modified: isEmailChanged,
+	} );
+};
+
+const recordTracksBusinessInfoCompleted = ( {
+	context,
+	event,
+}: {
+	context: CoreProfilerStateMachineContext;
+	event: Extract< BusinessInfoEvent, { type: 'BUSINESS_INFO_COMPLETED' } >;
+} ) => {
 	recordEvent( 'coreprofiler_step_complete', {
 		step: 'business_info',
 		wc_version: getSetting( 'wcVersion' ),
@@ -92,19 +115,20 @@ const recordTracksBusinessInfoCompleted = (
 			) === -1,
 		industry: event.payload.industry,
 		store_location_previously_set:
-			_context.onboardingProfile.is_store_country_set || false,
-		geolocation_success: _context.geolocatedLocation !== undefined,
+			context.onboardingProfile.is_store_country_set || false,
+		geolocation_success: context.geolocatedLocation !== undefined,
 		geolocation_overruled: event.payload.geolocationOverruled,
 	} );
 };
 
-const recordTracksPluginsInstallationRequest = (
-	_context: CoreProfilerStateMachineContext,
+const recordTracksPluginsInstallationRequest = ( {
+	event,
+}: {
 	event: Extract<
 		PluginsInstallationRequestedEvent,
 		{ type: 'PLUGINS_INSTALLATION_REQUESTED' }
-	>
-) => {
+	>;
+} ) => {
 	recordEvent( 'coreprofiler_store_extensions_continue', {
 		shown: event.payload.pluginsShown || [],
 		selected: event.payload.pluginsSelected || [],
@@ -113,35 +137,45 @@ const recordTracksPluginsInstallationRequest = (
 };
 
 const recordTracksPluginsLearnMoreLinkClicked = (
-	_context: unknown,
-	_event: PluginsLearnMoreLinkClicked,
-	{ action }: { action: unknown }
+	{ event }: { event: PluginsLearnMoreLinkClickedEvent },
+	params: { step: string }
 ) => {
-	const { step } = action as { step: string };
-	recordEvent( `coreprofiler_${ step }_learn_more_link_clicked`, {
-		plugin: _event.payload.plugin,
-		link: _event.payload.learnMoreLink,
+	recordEvent( `coreprofiler_${ params.step }_learn_more_link_clicked`, {
+		plugin: event.payload.plugin,
+		link: event.payload.learnMoreLink,
 	} );
 };
 
-const recordFailedPluginInstallations = (
-	_context: unknown,
-	_event: PluginsInstallationCompletedWithErrorsEvent
-) => {
+const recordFailedPluginInstallations = ( {
+	event,
+}: {
+	event: PluginsInstallationCompletedWithErrorsEvent;
+} ) => {
+	const failedExtensions = event.payload.errors.map(
+		( error: PluginInstallError ) => getPluginTrackKey( error.plugin )
+	);
+
 	recordEvent( 'coreprofiler_store_extensions_installed_and_activated', {
 		success: false,
-		failed_extensions: _event.payload.errors.map(
-			( error: PluginInstallError ) => getPluginTrackKey( error.plugin )
-		),
+		failed_extensions: failedExtensions,
+	} );
+
+	event.payload.errors.forEach( ( error: PluginInstallError ) => {
+		recordEvent( 'coreprofiler_store_extension_installed_and_activated', {
+			success: false,
+			extension: getPluginTrackKey( error.plugin ),
+			error_message: error.error,
+		} );
 	} );
 };
 
-const recordSuccessfulPluginInstallation = (
-	_context: unknown,
-	_event: PluginsInstallationCompletedEvent
-) => {
+const recordSuccessfulPluginInstallation = ( {
+	event,
+}: {
+	event: PluginsInstallationCompletedEvent;
+} ) => {
 	const installationCompletedResult =
-		_event.payload.installationCompletedResult;
+		event.payload.installationCompletedResult;
 
 	const trackData: {
 		success: boolean;
@@ -158,9 +192,15 @@ const recordSuccessfulPluginInstallation = (
 	};
 
 	for ( const installedPlugin of installationCompletedResult.installedPlugins ) {
-		trackData[
-			'install_time_' + getPluginTrackKey( installedPlugin.plugin )
-		] = getTimeFrame( installedPlugin.installTime );
+		const pluginKey = getPluginTrackKey( installedPlugin.plugin );
+		const installTime = getTimeFrame( installedPlugin.installTime );
+		trackData[ 'install_time_' + pluginKey ] = installTime;
+
+		recordEvent( 'coreprofiler_store_extension_installed_and_activated', {
+			success: true,
+			extension: pluginKey,
+			install_time: installTime,
+		} );
 	}
 
 	recordEvent(
@@ -180,4 +220,5 @@ export default {
 	recordFailedPluginInstallations,
 	recordSuccessfulPluginInstallation,
 	recordTracksPluginsInstallationRequest,
+	recordTracksIsEmailChanged,
 };

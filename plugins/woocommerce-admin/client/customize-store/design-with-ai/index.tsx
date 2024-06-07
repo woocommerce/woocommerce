@@ -3,12 +3,18 @@
  */
 import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useState } from '@wordpress/element';
+import { getNewPath } from '@woocommerce/navigation';
+import { useSelect } from '@wordpress/data';
 import { AnyInterpreter, Sender } from 'xstate';
 
 /**
  * Internal dependencies
  */
-import { CustomizeStoreComponent } from '../types';
+import {
+	CustomizeStoreComponent,
+	FlowType,
+	customizeStoreStateMachineContext,
+} from '../types';
 import { designWithAiStateMachineDefinition } from './state-machine';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
@@ -18,8 +24,11 @@ import {
 	ToneOfVoice,
 } from './pages';
 import { customizeStoreStateMachineEvents } from '..';
-
 import './style.scss';
+import { isAIFlow } from '../guards';
+import { navigateOrParent } from '../utils';
+import { useXStateInspect } from '~/xstate';
+import './entrepreneur-flow';
 
 export type events = { type: 'THEME_SUGGESTED' };
 export type DesignWithAiComponent =
@@ -33,15 +42,38 @@ export type DesignWithAiComponentMeta = {
 
 export const DesignWithAiController = ( {
 	parentMachine,
+	parentContext,
 }: {
 	parentMachine?: AnyInterpreter;
 	sendEventToParent?: Sender< customizeStoreStateMachineEvents >;
+	parentContext?: customizeStoreStateMachineContext;
 } ) => {
+	interface Theme {
+		is_block_theme?: boolean;
+	}
+
+	const currentTheme = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
+
+	const isBlockTheme = currentTheme?.is_block_theme;
+
+	// Assign aiOnline value from the parent context if it exists. Otherwise, ai is online by default.
+	designWithAiStateMachineDefinition.context.aiOnline =
+		parentContext?.flowType === FlowType.AIOnline;
+
+	const { versionEnabled } = useXStateInspect();
 	const [ state, send, service ] = useMachine(
 		designWithAiStateMachineDefinition,
 		{
-			devTools: process.env.NODE_ENV === 'development',
+			devTools: versionEnabled === 'V4',
 			parent: parentMachine,
+			context: {
+				...designWithAiStateMachineDefinition.context,
+				isBlockTheme,
+			},
 		}
 	);
 
@@ -68,7 +100,7 @@ export const DesignWithAiController = ( {
 	return (
 		<>
 			<div
-				className={ `woocommerce-design-with-ai-__container woocommerce-design-with-ai-wizard__step-${ currentNodeCssLabel }` }
+				className={ `woocommerce-design-with-ai__container woocommerce-design-with-ai-wizard__step-${ currentNodeCssLabel }` }
 			>
 				{ CurrentComponent ? (
 					<CurrentComponent
@@ -84,10 +116,22 @@ export const DesignWithAiController = ( {
 };
 
 //loader should send event 'THEME_SUGGESTED' when it's done
-export const DesignWithAi: CustomizeStoreComponent = ( { parentMachine } ) => {
+export const DesignWithAi: CustomizeStoreComponent = ( {
+	parentMachine,
+	context,
+} ) => {
+	const assemblerUrl = getNewPath( {}, '/customize-store', {} );
+
+	if ( ! isAIFlow( context.flowType ) ) {
+		navigateOrParent( window, assemblerUrl );
+		return null;
+	}
 	return (
 		<>
-			<DesignWithAiController parentMachine={ parentMachine } />
+			<DesignWithAiController
+				parentMachine={ parentMachine }
+				parentContext={ context }
+			/>
 		</>
 	);
 };

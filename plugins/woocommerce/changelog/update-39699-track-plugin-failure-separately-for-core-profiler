@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Records plugin API requests and installation errors to coreprofiler_install_plugin_error separately for the core profiler.

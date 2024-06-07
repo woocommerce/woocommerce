@@ -5,6 +5,7 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -12,7 +13,11 @@ import { useState } from '@wordpress/element';
 import { Look, designWithAiStateMachineContext } from '../types';
 import { Choice } from '../components/choice/choice';
 import { CloseButton } from '../components/close-button/close-button';
+import { SkipButton } from '../components/skip-button/skip-button';
 import { aiWizardClosedBeforeCompletionEvent } from '../events';
+import { isEntrepreneurFlow } from '../entrepreneur-flow';
+import { trackEvent } from '~/customize-store/tracking';
+import WordPressLogo from '~/lib/wordpress-logo';
 
 export type lookAndFeelCompleteEvent = {
 	type: 'LOOK_AND_FEEL_COMPLETE';
@@ -33,7 +38,7 @@ export const LookAndFeel = ( {
 			title: __( 'Contemporary', 'woocommerce' ),
 			key: 'Contemporary' as const,
 			subtitle: __(
-				'Clean lines, neutral colors, sleek and modern look',
+				'Clean lines, neutral colors, sleek and modern look.',
 				'woocommerce'
 			),
 		},
@@ -41,7 +46,7 @@ export const LookAndFeel = ( {
 			title: __( 'Classic', 'woocommerce' ),
 			key: 'Classic' as const,
 			subtitle: __(
-				'Elegant and timeless look with nostalgic touch.',
+				'Elegant and timeless with a nostalgic touch.',
 				'woocommerce'
 			),
 		},
@@ -49,7 +54,7 @@ export const LookAndFeel = ( {
 			title: __( 'Bold', 'woocommerce' ),
 			key: 'Bold' as const,
 			subtitle: __(
-				'Vibrant look with eye-catching colors and visuals.',
+				'Vibrant with eye-catching colors and visuals.',
 				'woocommerce'
 			),
 		},
@@ -59,21 +64,47 @@ export const LookAndFeel = ( {
 			? choices[ 0 ].key
 			: context.lookAndFeel.choice
 	);
+
 	return (
 		<div>
-			<ProgressBar
-				percent={ 60 }
-				color={ 'var(--wp-admin-theme-color)' }
-				bgcolor={ 'transparent' }
-			/>
-			<CloseButton
-				onClick={ () => {
-					sendEvent( {
-						type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
-						payload: { step: 'look-and-feel' },
-					} );
-				} }
-			/>
+			{ ! isEntrepreneurFlow() && (
+				<ProgressBar
+					percent={ 60 }
+					color={ 'var(--wp-admin-theme-color)' }
+					bgcolor={ 'transparent' }
+				/>
+			) }
+			{ isEntrepreneurFlow() && (
+				<WordPressLogo
+					size={ 24 }
+					className="woocommerce-cys-wordpress-header-logo"
+				/>
+			) }
+			{ ! isEntrepreneurFlow() && (
+				<CloseButton
+					onClick={ () => {
+						sendEvent( {
+							type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
+							payload: { step: 'look-and-feel' },
+						} );
+					} }
+				/>
+			) }
+			{ isEntrepreneurFlow() && (
+				<SkipButton
+					onClick={ () => {
+						trackEvent(
+							'customize_your_store_entrepreneur_skip_click',
+							{
+								step: 'look-and-feel',
+							}
+						);
+						window.location.href = getAdminLink(
+							'admin.php?page=wc-admin&ref=entrepreneur-signup'
+						);
+					} }
+				/>
+			) }
 			<div className="woocommerce-cys-design-with-ai-look-and-feel woocommerce-cys-layout">
 				<div className="woocommerce-cys-page">
 					<h1>
@@ -103,6 +134,21 @@ export const LookAndFeel = ( {
 					<Button
 						variant="primary"
 						onClick={ () => {
+							if (
+								context.lookAndFeel.aiRecommended &&
+								context.lookAndFeel.aiRecommended !== look
+							) {
+								trackEvent(
+									'customize_your_store_ai_wizard_changed_ai_option',
+									{
+										step: 'look-and-feel',
+										ai_recommended:
+											context.lookAndFeel.aiRecommended,
+										user_choice: look,
+									}
+								);
+							}
+
 							sendEvent( {
 								type: 'LOOK_AND_FEEL_COMPLETE',
 								payload: look,

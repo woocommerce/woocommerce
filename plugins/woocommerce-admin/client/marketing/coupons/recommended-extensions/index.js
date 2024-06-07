@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { compose } from '@wordpress/compose';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { withDispatch, withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 
@@ -36,14 +36,14 @@ const RecommendedExtensions = ( {
 		<Card
 			title={ title }
 			description={ description }
-			className={ classnames(
+			className={ clsx(
 				'woocommerce-marketing-recommended-extensions-card',
 				categoryClass
 			) }
 		>
 			{ isLoading ? (
 				<div
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-marketing-recommended-extensions-card__items',
 						`woocommerce-marketing-recommended-extensions-card__items--count-${ placholdersCount }`
 					) }
@@ -54,7 +54,7 @@ const RecommendedExtensions = ( {
 				</div>
 			) : (
 				<div
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-marketing-recommended-extensions-card__items',
 						`woocommerce-marketing-recommended-extensions-card__items--count-${ extensions.length }`
 					) }

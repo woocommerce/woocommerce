@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Track coreprofiler_store_extensions_installed_and_activated when async installation is complete

@@ -14,6 +14,7 @@ import { TRACKS_SOURCE } from '../../../constants';
 import { handlePrompt } from '../../../utils/handle-prompt';
 import { VariationActionsMenuItemProps } from '../types';
 import { SetListPriceMenuItem } from '../set-list-price-menu-item';
+import { VariationQuickUpdateMenuItem } from '../variation-actions-menus';
 
 function isPercentage( value: string ) {
 	return value.endsWith( '%' );
@@ -58,14 +59,16 @@ export function PricingMenuItem( {
 	selection,
 	onChange,
 	onClose,
+	supportsMultipleSelection = false,
 }: VariationActionsMenuItemProps ) {
-	const ids = Array.isArray( selection )
-		? selection.map( ( { id } ) => id )
-		: selection.id;
+	const ids = selection.map( ( { id } ) => id );
 
 	return (
 		<Dropdown
-			position="middle right"
+			// @ts-expect-error missing prop in types.
+			popoverProps={ {
+				placement: 'right-start',
+			} }
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<MenuItem
 					onClick={ () => {
@@ -84,7 +87,7 @@ export function PricingMenuItem( {
 			) }
 			renderContent={ () => (
 				<div className="components-dropdown-menu__menu">
-					<MenuGroup label={ __( 'List price', 'woocommerce' ) }>
+					<MenuGroup label={ __( 'Regular price', 'woocommerce' ) }>
 						<SetListPriceMenuItem
 							selection={ selection }
 							onChange={ onChange }
@@ -114,37 +117,24 @@ export function PricingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map(
-													( {
-														id,
-														regular_price,
-													} ) => ( {
-														id,
-														regular_price:
-															addFixedOrPercentage(
-																regular_price,
-																value
-															)?.toFixed( 2 ),
-													} )
-												)
-											);
-										} else {
-											onChange( {
-												regular_price:
-													addFixedOrPercentage(
-														selection.regular_price,
-														value
-													)?.toFixed( 2 ),
-											} );
-										}
+										onChange(
+											selection.map(
+												( { id, regular_price } ) => ( {
+													id,
+													regular_price:
+														addFixedOrPercentage(
+															regular_price,
+															value
+														)?.toFixed( 2 ),
+												} )
+											)
+										);
 									},
 								} );
 								onClose();
 							} }
 						>
-							{ __( 'Increase list price', 'woocommerce' ) }
+							{ __( 'Increase regular price', 'woocommerce' ) }
 						</MenuItem>
 						<MenuItem
 							onClick={ () => {
@@ -170,39 +160,25 @@ export function PricingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map(
-													( {
-														id,
-														regular_price,
-													} ) => ( {
-														id,
-														regular_price:
-															addFixedOrPercentage(
-																regular_price,
-																value,
-																-1
-															)?.toFixed( 2 ),
-													} )
-												)
-											);
-										} else {
-											onChange( {
-												regular_price:
-													addFixedOrPercentage(
-														selection.regular_price,
-														value,
-														-1
-													)?.toFixed( 2 ),
-											} );
-										}
+										onChange(
+											selection.map(
+												( { id, regular_price } ) => ( {
+													id,
+													regular_price:
+														addFixedOrPercentage(
+															regular_price,
+															value,
+															-1
+														)?.toFixed( 2 ),
+												} )
+											)
+										);
 									},
 								} );
 								onClose();
 							} }
 						>
-							{ __( 'Decrease list price', 'woocommerce' ) }
+							{ __( 'Decrease regular price', 'woocommerce' ) }
 						</MenuItem>
 					</MenuGroup>
 					<MenuGroup label={ __( 'Sale price', 'woocommerce' ) }>
@@ -226,18 +202,12 @@ export function PricingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map( ( { id } ) => ( {
-													id,
-													sale_price: value,
-												} ) )
-											);
-										} else {
-											onChange( {
+										onChange(
+											selection.map( ( { id } ) => ( {
+												id,
 												sale_price: value,
-											} );
-										}
+											} ) )
+										);
 									},
 								} );
 								onClose();
@@ -269,31 +239,18 @@ export function PricingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map(
-													( {
-														id,
-														sale_price,
-													} ) => ( {
-														id,
-														sale_price:
-															addFixedOrPercentage(
-																sale_price,
-																value
-															)?.toFixed( 2 ),
-													} )
-												)
-											);
-										} else {
-											onChange( {
-												sale_price:
-													addFixedOrPercentage(
-														selection.sale_price,
-														value
-													)?.toFixed( 2 ),
-											} );
-										}
+										onChange(
+											selection.map(
+												( { id, sale_price } ) => ( {
+													id,
+													sale_price:
+														addFixedOrPercentage(
+															sale_price,
+															value
+														)?.toFixed( 2 ),
+												} )
+											)
+										);
 									},
 								} );
 								onClose();
@@ -325,33 +282,19 @@ export function PricingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map(
-													( {
-														id,
-														sale_price,
-													} ) => ( {
-														id,
-														sale_price:
-															addFixedOrPercentage(
-																sale_price,
-																value,
-																-1
-															)?.toFixed( 2 ),
-													} )
-												)
-											);
-										} else {
-											onChange( {
-												sale_price:
-													addFixedOrPercentage(
-														selection.sale_price,
-														value,
-														-1
-													)?.toFixed( 2 ),
-											} );
-										}
+										onChange(
+											selection.map(
+												( { id, sale_price } ) => ( {
+													id,
+													sale_price:
+														addFixedOrPercentage(
+															sale_price,
+															value,
+															-1
+														)?.toFixed( 2 ),
+												} )
+											)
+										);
 									},
 								} );
 								onClose();
@@ -383,19 +326,12 @@ export function PricingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map( ( { id } ) => ( {
-													id,
-													date_on_sale_from_gmt:
-														value,
-												} ) )
-											);
-										} else {
-											onChange( {
+										onChange(
+											selection.map( ( { id } ) => ( {
+												id,
 												date_on_sale_from_gmt: value,
-											} );
-										}
+											} ) )
+										);
 									},
 								} );
 								handlePrompt( {
@@ -412,18 +348,12 @@ export function PricingMenuItem( {
 												variation_id: ids,
 											}
 										);
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map( ( { id } ) => ( {
-													id,
-													date_on_sale_to_gmt: value,
-												} ) )
-											);
-										} else {
-											onChange( {
+										onChange(
+											selection.map( ( { id } ) => ( {
+												id,
 												date_on_sale_to_gmt: value,
-											} );
-										}
+											} ) )
+										);
 									},
 								} );
 								onClose();
@@ -432,6 +362,13 @@ export function PricingMenuItem( {
 							{ __( 'Schedule sale', 'woocommerce' ) }
 						</MenuItem>
 					</MenuGroup>
+					<VariationQuickUpdateMenuItem.Slot
+						group={ 'pricing' }
+						onChange={ onChange }
+						onClose={ onClose }
+						selection={ selection }
+						supportsMultipleSelection={ supportsMultipleSelection }
+					/>
 				</div>
 			) }
 		/>

@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add support for slug auto generation to the create attribute endpoint

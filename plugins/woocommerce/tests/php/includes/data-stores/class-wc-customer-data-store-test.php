@@ -14,6 +14,9 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
@@ -25,6 +28,8 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * Destroys system under test.
 	 */
 	public function tearDown(): void {
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+
 		// Add back removed filter.
 		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );

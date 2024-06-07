@@ -3,15 +3,25 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Icon, search } from '@wordpress/icons';
-import { useEffect, useState } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
 import './search.scss';
+import { MARKETPLACE_PATH } from '../constants';
+import { MarketplaceContext } from '../../contexts/marketplace-context';
 
-const searchPlaceholder = __( 'Search for extensions', 'woocommerce' );
+const searchPlaceholder = __(
+	'Search for extensions, themes, and business services',
+	'woocommerce'
+);
+
+const searchPlaceholderNoBusinessServices = __(
+	'Search for extensions and themes',
+	'woocommerce'
+);
 
 /**
  * Search component.
@@ -20,21 +30,40 @@ const searchPlaceholder = __( 'Search for extensions', 'woocommerce' );
  */
 function Search(): JSX.Element {
 	const [ searchTerm, setSearchTerm ] = useState( '' );
+	const { hasBusinessServices } = useContext( MarketplaceContext );
 
 	const query = useQuery();
+
+	const placeholder = hasBusinessServices
+		? searchPlaceholder
+		: searchPlaceholderNoBusinessServices;
 
 	useEffect( () => {
 		if ( query.term ) {
 			setSearchTerm( query.term );
+		} else {
+			setSearchTerm( '' );
 		}
 	}, [ query.term ] );
+
+	useEffect( () => {
+		if ( query.tab !== 'search' ) {
+			setSearchTerm( '' );
+		}
+	}, [ query.tab ] );
 
 	const runSearch = () => {
 		const term = searchTerm.trim();
 
-		// When the search term changes, we reset the category on purpose.
+		const newQuery: { term?: string; tab?: string } = {};
+		if ( term !== '' ) {
+			newQuery.term = term;
+			newQuery.tab = 'search';
+		}
+
+		// When the search term changes, we reset the query string on purpose.
 		navigateTo( {
-			url: getNewPath( { term, category: null, tab: 'extensions' } ),
+			url: getNewPath( newQuery, MARKETPLACE_PATH, {} ),
 		} );
 
 		return [];
@@ -62,7 +91,7 @@ function Search(): JSX.Element {
 				className="screen-reader-text"
 				htmlFor="woocommerce-marketplace-search-query"
 			>
-				{ searchPlaceholder }
+				{ placeholder }
 			</label>
 			<input
 				id="woocommerce-marketplace-search-query"
@@ -70,7 +99,7 @@ function Search(): JSX.Element {
 				className="woocommerce-marketplace__search-input"
 				type="search"
 				name="woocommerce-marketplace-search-query"
-				placeholder={ searchPlaceholder }
+				placeholder={ placeholder }
 				onChange={ handleInputChange }
 				onKeyUp={ handleKeyUp }
 			/>

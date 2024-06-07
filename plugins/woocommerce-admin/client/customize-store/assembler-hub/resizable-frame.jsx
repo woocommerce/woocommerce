@@ -4,8 +4,8 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
-import { useState, useRef } from '@wordpress/element';
+import clsx from 'clsx';
+import { useState, useRef, createContext } from '@wordpress/element';
 import {
 	ResizableBox,
 	Tooltip,
@@ -66,6 +66,8 @@ function calculateNewHeight( width, initialAspectRatio ) {
 	return width / intermediateAspectRatio;
 }
 
+export const IsResizingContext = createContext( false );
+
 function ResizableFrame( {
 	isFullWidth,
 	isOversized,
@@ -75,7 +77,7 @@ function ResizableFrame( {
 	/** The default (unresized) width/height of the frame, based on the space availalbe in the viewport. */
 	defaultSize,
 	innerContentStyle,
-	duringGuideTour = false,
+	isHandleVisibleByDefault = false,
 } ) {
 	const [ frameSize, setFrameSize ] = useState( INITIAL_FRAME_SIZE );
 	// The width of the resizable frame when a new resize gesture starts.
@@ -180,20 +182,19 @@ function ResizableFrame( {
 			left: 0,
 		},
 		visible: {
-			opacity: 1,
+			opacity: 0.6,
 			left: -10,
 		},
 		active: {
 			opacity: 1,
 			left: -10,
-			scaleY: 1.3,
 		},
 	};
 	const currentResizeHandleVariant = ( () => {
-		if ( isResizing ) {
+		if ( isResizing || isHandleVisibleByDefault ) {
 			return 'active';
 		}
-		return shouldShowHandle || duringGuideTour ? 'visible' : 'hidden';
+		return shouldShowHandle ? 'visible' : 'hidden';
 	} )();
 
 	const resizeHandler = (
@@ -203,7 +204,7 @@ function ResizableFrame( {
 			key="handle"
 			role="separator"
 			aria-orientation="vertical"
-			className={ classnames( 'edit-site-resizable-frame__handle', {
+			className={ clsx( 'edit-site-resizable-frame__handle', {
 				'is-resizing': isResizing,
 			} ) }
 			variants={ resizeHandleVariants }
@@ -221,10 +222,10 @@ function ResizableFrame( {
 			whileFocus="active"
 			whileHover="active"
 			children={
-				duringGuideTour &&
+				isHandleVisibleByDefault &&
 				! hasHandlerDragged && (
 					<Popover
-						className="components-tooltip"
+						className="woocommerce-assembler-hub__resizable-frame__drag-handler"
 						position="middle right"
 					>
 						{ __( 'Drag to resize', 'woocommerce' ) }
@@ -244,6 +245,13 @@ function ResizableFrame( {
 			onAnimationComplete={ ( definition ) => {
 				if ( definition === 'fullWidth' )
 					setFrameSize( { width: '100%', height: '100%' } );
+			} }
+			whileHover={ {
+				scale: 1.005,
+				transition: {
+					duration: 0.5,
+					ease: 'easeOut',
+				},
 			} }
 			transition={ frameTransition }
 			size={ frameSize }
@@ -265,7 +273,7 @@ function ResizableFrame( {
 				right: HANDLE_STYLES_OVERRIDE,
 			} }
 			minWidth={ FRAME_MIN_WIDTH }
-			maxWidth={ isFullWidth ? '100%' : '150%' }
+			maxWidth={ '100%' }
 			maxHeight={ '100%' }
 			onFocus={ () => setShouldShowHandle( true ) }
 			onBlur={ () => setShouldShowHandle( false ) }
@@ -274,7 +282,7 @@ function ResizableFrame( {
 			handleComponent={ {
 				left: (
 					<>
-						{ duringGuideTour ? (
+						{ isHandleVisibleByDefault ? (
 							<div>{ resizeHandler }</div>
 						) : (
 							<Tooltip
@@ -296,7 +304,7 @@ function ResizableFrame( {
 			onResizeStart={ handleResizeStart }
 			onResize={ handleResize }
 			onResizeStop={ handleResizeStop }
-			className={ classnames( 'edit-site-resizable-frame__inner', {
+			className={ clsx( 'edit-site-resizable-frame__inner', {
 				'is-resizing': isResizing,
 			} ) }
 		>
@@ -308,7 +316,9 @@ function ResizableFrame( {
 				transition={ frameTransition }
 				style={ innerContentStyle }
 			>
-				{ children }
+				<IsResizingContext.Provider value={ isResizing }>
+					{ children }
+				</IsResizingContext.Provider>
 			</motion.div>
 		</ResizableBox>
 	);

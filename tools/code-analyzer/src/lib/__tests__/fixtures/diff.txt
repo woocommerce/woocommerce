@@ -965,7 +965,7 @@ index 99b4cbaff3..b8304993ff 100644
 @@ -20,7 +20,8 @@
  		"git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && husky install",
  		"storybook": "./tools/storybook/import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true start-storybook -c ./tools/storybook/.storybook -p 6007 --ci",
- 		"storybook-rtl": "USE_RTL_STYLE=true pnpm run storybook",
+ 		"storybook-rtl": "USE_RTL_STYLE=true pnpm storybook",
 -		"create-extension": "node ./tools/create-extension/index.js"
 +		"create-extension": "node ./tools/create-extension/index.js",
 +		"cherry-pick": "node ./tools/cherry-pick/bin/run"
@@ -1148,7 +1148,7 @@ index 8ac33e230f..924001b401 100644
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix",
- 		"prepack": "pnpm run clean && pnpm run build"
+ 		"prepack": "pnpm clean && pnpm build"
  	},
 diff --git a/packages/js/admin-e2e-tests/src/fixtures/reset.ts b/packages/js/admin-e2e-tests/src/fixtures/reset.ts
 index c7cc5d07c2..594bba9447 100644
@@ -2552,9 +2552,9 @@ index 198eaf1da4..d085d34e04 100644
  		"changelog": "composer exec -- changelogger",
  		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
  		"compile": "tsc -b",
--		"build": "pnpm run clean && npm run compile",
-+		"build": "node ./node_modules/require-turbo && pnpm run clean && npm run compile",
- 		"prepack": "pnpm run build",
+-		"build": "pnpm clean && npm run compile",
++		"build": "node ./node_modules/require-turbo && pnpm clean && npm run compile",
+ 		"prepack": "pnpm build",
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix",
@@ -2776,19 +2776,19 @@ index ea6075e85a..2fd271b525 100644
 -		"postinstall": "composer install",
 +		"prepare": "composer install",
  		"changelog": "composer exec -- changelogger",
--		"build": "pnpm run build:js && pnpm run build:css",
-+		"build": "node ./node_modules/require-turbo && pnpm run build:js && pnpm run build:css",
+-		"build": "pnpm build:js && pnpm build:css",
++		"build": "node ./node_modules/require-turbo && pnpm build:js && pnpm build:css",
  		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
  		"build:css": "webpack",
  		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 -		"lint": "eslint src --ext=js,ts,tsx",
 +		"lint": "node ./node_modules/require-turbo && eslint src --ext=js,ts,tsx",
  		"lint:fix": "eslint src --ext=js,ts,tsx --fix",
- 		"prepack": "pnpm run clean && pnpm run build",
+ 		"prepack": "pnpm clean && pnpm build",
  		"start": "concurrently \"tsc --build ./tsconfig.json --watch\" \"webpack --watch\"",
 -		"test": "jest --config ./jest.config.json",
 +		"test": "node ./node_modules/require-turbo && jest --config ./jest.config.json",
- 		"test:update-snapshots": "pnpm run test -- --updateSnapshot",
+ 		"test:update-snapshots": "pnpm test -- --updateSnapshot",
  		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
  	},
 diff --git a/packages/js/components/src/advanced-filters/number-filter.js b/packages/js/components/src/advanced-filters/number-filter.js
@@ -5658,7 +5658,7 @@ index 95495e5704..0be79e99d1 100644
 -		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 +		"build": "node ./node_modules/require-turbo && tsc --build ./tsconfig.json ./tsconfig-cjs.json",
  		"start": "tsc --build --watch",
- 		"prepack": "pnpm run clean && pnpm run build",
+ 		"prepack": "pnpm clean && pnpm build",
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix",
@@ -5828,7 +5828,7 @@ index fa7a005989..d345c7c650 100644
 -		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 +		"build": "node ./node_modules/require-turbo && tsc --build ./tsconfig.json ./tsconfig-cjs.json",
  		"start": "tsc --build --watch",
- 		"prepack": "pnpm run clean && pnpm run build",
+ 		"prepack": "pnpm clean && pnpm build",
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix",
@@ -6019,12 +6019,12 @@ index 6fca5bcfad..fa98da90ca 100644
 +		"prepare": "composer install",
  		"changelog": "composer exec -- changelogger",
  		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
--		"build": "pnpm run build:js && pnpm run build:css",
-+		"build": "node ./node_modules/require-turbo && pnpm run build:js && pnpm run build:css",
+-		"build": "pnpm build:js && pnpm build:css",
++		"build": "node ./node_modules/require-turbo && pnpm build:js && pnpm build:css",
  		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
  		"build:css": "webpack",
  		"start": "concurrently \"tsc --build --watch\" \"webpack --watch\"",
- 		"prepack": "pnpm run clean && pnpm run build",
+ 		"prepack": "pnpm clean && pnpm build",
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix",
@@ -6258,7 +6258,7 @@ index f48317de96..a54c8d20dc 100644
 -		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 +		"build": "node ./node_modules/require-turbo && tsc --build ./tsconfig.json ./tsconfig-cjs.json",
  		"start": "tsc --build --watch",
- 		"prepack": "pnpm run clean && pnpm run build",
+ 		"prepack": "pnpm clean && pnpm build",
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix",
@@ -9984,7 +9984,7 @@ index 95332d773e..04cae8d409 100644
 -		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 +		"build": "node ./node_modules/require-turbo && tsc --build ./tsconfig.json ./tsconfig-cjs.json",
  		"start": "tsc --build --watch",
- 		"prepack": "pnpm run clean && pnpm run build",
+ 		"prepack": "pnpm clean && pnpm build",
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix",
@@ -13641,12 +13641,12 @@ index 9473aafe90..65fa856783 100644
 +		"prepare": "composer install",
  		"changelog": "composer exec -- changelogger",
  		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
--		"build": "pnpm run build:js && pnpm run build:css",
-+		"build": "node ./node_modules/require-turbo && pnpm run build:js && pnpm run build:css",
+-		"build": "pnpm build:js && pnpm build:css",
++		"build": "node ./node_modules/require-turbo && pnpm build:js && pnpm build:css",
  		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
  		"build:css": "webpack",
  		"start": "concurrently \"tsc --build --watch\" \"webpack --watch\"",
- 		"prepack": "pnpm run clean && pnpm run build",
+ 		"prepack": "pnpm clean && pnpm build",
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix",
@@ -13882,7 +13882,7 @@ index f6b8445735..9ffa693eb9 100644
 -		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 +		"build": "node ./node_modules/require-turbo && tsc --build ./tsconfig.json ./tsconfig-cjs.json",
  		"start": "tsc --build --watch",
- 		"prepack": "pnpm run clean && pnpm run build",
+ 		"prepack": "pnpm clean && pnpm build",
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix",
@@ -14231,7 +14231,7 @@ index 7a0c3d89a4..2de6535838 100644
 +		"build": "node ./node_modules/require-turbo && tsc --build ./tsconfig.json ./tsconfig-cjs.json",
  		"ts:check": "tsc --noEmit --project ./tsconfig.json",
  		"clean": "pnpm exec rimraf *.tsbuildinfo build build-*",
- 		"prepack": "pnpm run clean && pnpm run build",
+ 		"prepack": "pnpm clean && pnpm build",
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix"
@@ -14443,7 +14443,7 @@ index c03f52779c..c613d8b175 100644
 -		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 +		"build": "node ./node_modules/require-turbo && tsc --build ./tsconfig.json ./tsconfig-cjs.json",
  		"start": "tsc --build --watch",
- 		"prepack": "pnpm run clean && pnpm run build",
+ 		"prepack": "pnpm clean && pnpm build",
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix",
@@ -14510,7 +14510,7 @@ index e019f5a245..c12e93bb11 100644
 -		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 +		"build": "node ./node_modules/require-turbo && tsc --build ./tsconfig.json ./tsconfig-cjs.json",
  		"start": "tsc --build --watch",
- 		"prepack": "pnpm run clean && pnpm run build",
+ 		"prepack": "pnpm clean && pnpm build",
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix"
@@ -14743,7 +14743,7 @@ index 08ff35b9c8..875c2b3697 100644
 -		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 +		"build": "node ./node_modules/require-turbo && tsc --build ./tsconfig.json ./tsconfig-cjs.json",
  		"start": "tsc --build --watch",
- 		"prepack": "pnpm run clean && pnpm run build",
+ 		"prepack": "pnpm clean && pnpm build",
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix",
@@ -14928,12 +14928,12 @@ index 787aa626ec..7bd577f1c0 100644
 +		"prepare": "composer install",
  		"changelog": "composer exec -- changelogger",
  		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
--		"build": "pnpm run build:js && pnpm run build:css",
-+		"build": "node ./node_modules/require-turbo && pnpm run build:js && pnpm run build:css",
+-		"build": "pnpm build:js && pnpm build:css",
++		"build": "node ./node_modules/require-turbo && pnpm build:js && pnpm build:css",
  		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
  		"build:css": "webpack",
  		"start": "concurrently \"tsc --build --watch\" \"webpack --watch\"",
- 		"prepack": "pnpm run clean && pnpm run build",
+ 		"prepack": "pnpm clean && pnpm build",
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix"
@@ -16269,7 +16269,7 @@ index a3a3230e93..12094a3bc3 100644
 -		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 +		"build": "node ./node_modules/require-turbo && tsc --build ./tsconfig.json ./tsconfig-cjs.json",
  		"start": "tsc --build --watch",
- 		"prepack": "pnpm run clean && pnpm run build",
+ 		"prepack": "pnpm clean && pnpm build",
 -		"lint": "eslint src",
 +		"lint": "node ./node_modules/require-turbo && eslint src",
  		"lint:fix": "eslint src --fix"
@@ -23305,47 +23305,47 @@ index fcc67ba38a..5d959e3d34 100644
  	},
  	"scripts": {
  		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
--		"build": "pnpm run install-if-deps-outdated && pnpm run clean && WC_ADMIN_PHASE=core pnpm run build:packages && WC_ADMIN_PHASE=core pnpm run build:feature-config && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
-+		"build": "node ./node_modules/require-turbo && pnpm run install-if-deps-outdated && pnpm run clean && WC_ADMIN_PHASE=core pnpm run build:packages && WC_ADMIN_PHASE=core pnpm run build:feature-config && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
+-		"build": "pnpm install-if-deps-outdated && pnpm clean && WC_ADMIN_PHASE=core pnpm build:packages && WC_ADMIN_PHASE=core pnpm build:feature-config && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
++		"build": "node ./node_modules/require-turbo && pnpm install-if-deps-outdated && pnpm clean && WC_ADMIN_PHASE=core pnpm build:packages && WC_ADMIN_PHASE=core pnpm build:feature-config && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
  		"build:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 -		"build:packages": "cross-env NODE_ENV=production pnpm run:packages -- build",
 +		"build:packages": "cross-env NODE_ENV=production pnpm -w exec turbo run build --filter='./packages/js/*'",
  		"clean": "rimraf ../woocommerce/assets/client/admin/* && pnpm run:packages -- clean --parallel",
- 		"client:watch": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development webpack --watch",
+ 		"client:watch": "cross-env WC_ADMIN_PHASE=development pnpm build:feature-config && cross-env WC_ADMIN_PHASE=development webpack --watch",
  		"create-hook-reference": "node ./bin/hook-reference/index.js",
 @@ -22,14 +22,14 @@
  		"preinstall": "npx only-allow pnpm",
  		"install-if-deps-outdated": "node bin/install-if-deps-outdated.js",
  		"install-if-no-packages": "node bin/install-if-no-packages.js",
--		"lint": "pnpm run lint:js && pnpm run lint:css",
-+		"lint": "node ./node_modules/require-turbo && pnpm run lint:js && pnpm run lint:css",
+-		"lint": "pnpm lint:js && pnpm lint:css",
++		"lint": "node ./node_modules/require-turbo && pnpm lint:js && pnpm lint:css",
  		"lint:fix": "pnpm lint:js-fix && pnpm lint:css-fix",
  		"lint:css": "stylelint '**/*.scss'",
  		"lint:css-fix": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
 -		"lint:js": "wp-scripts lint-js ./client --ext=js,ts,tsx",
 +		"lint:js": "eslint ./client --ext=js,ts,tsx",
- 		"lint:js-fix": "pnpm run lint:js -- --fix --ext=js,ts,tsx",
+ 		"lint:js-fix": "pnpm lint:js -- --fix --ext=js,ts,tsx",
 -		"lint:js-packages": "wp-scripts lint-js ../../packages/js --ext=js,ts,tsx",
 -		"lint:js-pre-commit": "wp-scripts lint-js --ext=js,ts,tsx",
 +		"lint:js-packages": "eslint ../../packages/js --ext=js,ts,tsx",
 +		"lint:js-pre-commit": "eslint --ext=js,ts,tsx",
- 		"prepack": "pnpm install && pnpm run lint && pnpm run test && cross-env WC_ADMIN_PHASE=core pnpm run build",
+ 		"prepack": "pnpm install && pnpm lint && pnpm test && cross-env WC_ADMIN_PHASE=core pnpm build",
  		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
  		"packages:watch": "cross-env WC_ADMIN_PHASE=development pnpm run:packages -- start --parallel",
 @@ -42,12 +42,12 @@
- 		"start": "pnpm run install-if-deps-outdated && cross-env WC_ADMIN_PHASE=development pnpm run build:packages && cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && concurrently \"cross-env WC_ADMIN_PHASE=development webpack --watch\" \"cross-env WC_ADMIN_PHASE=development pnpm run:packages -- start --parallel\"",
+ 		"start": "pnpm install-if-deps-outdated && cross-env WC_ADMIN_PHASE=development pnpm build:packages && cross-env WC_ADMIN_PHASE=development pnpm build:feature-config && concurrently \"cross-env WC_ADMIN_PHASE=development webpack --watch\" \"cross-env WC_ADMIN_PHASE=development pnpm run:packages -- start --parallel\"",
  		"start:package": "pnpm run:packages -- start --parallel",
- 		"pretest": "pnpm run -s install-if-no-packages",
--		"test": "pnpm run test:client",
-+		"test": "node ./node_modules/require-turbo && pnpm run test:client",
- 		"test-staged": "pnpm run test:client -- --bail --findRelatedTests",
+ 		"pretest": "pnpm -s install-if-no-packages",
+-		"test": "pnpm test:client",
++		"test": "node ./node_modules/require-turbo && pnpm test:client",
+ 		"test-staged": "pnpm test:client -- --bail --findRelatedTests",
  		"test:client": "jest --config client/jest.config.js",
  		"test:debug": "node --inspect-brk ./node_modules/.bin/jest --config client/jest.config.js --watch --runInBand --no-cache",
  		"test:help": "wp-scripts test-unit-js --help",
--		"test:packages": "pnpm run --filter ../../packages/js/ --filter !api-core-tests test",
+-		"test:packages": "pnpm --filter ../../packages/js/ --filter !api-core-tests test",
 +		"test:packages": "pnpm -w exec turbo run test --filter='./packages/js/*'",
- 		"test:update-snapshots": "pnpm run test:client -- --updateSnapshot && pnpm run --filter @woocommerce/components test:update-snapshots",
- 		"test:watch": "pnpm run test:client -- --watch",
+ 		"test:update-snapshots": "pnpm test:client -- --updateSnapshot && pnpm --filter @woocommerce/components test:update-snapshots",
+ 		"test:watch": "pnpm test:client -- --watch",
  		"ts:check": "tsc --build ./tsconfig.json --pretty",
 @@ -204,6 +204,7 @@
  		"raw-loader": "^4.0.2",
@@ -23436,7 +23436,7 @@ index d3523fce96..b580ff8c87 100755
  echo "Installing PHP and JS dependencies..."
  pnpm install
  echo "Running JS Build..."
--pnpm run build
+-pnpm build
 +pnpm -w exec turbo run build --filter=woocommerce-beta-tester || exit "$?"
  
  echo "Syncing files..."
@@ -23881,7 +23881,7 @@ index 227f668ec7..4570ee348a 100644
 +	"version": "2.1.0",
  	"homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
 -	"config": {
--		"build_step": "pnpm run build:zip"
+-		"build_step": "pnpm build:zip"
 -	},
  	"devDependencies": {
  		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
@@ -23897,18 +23897,18 @@ index 227f668ec7..4570ee348a 100644
  	"scripts": {
  		"postinstall": "composer install",
  		"changelog": "composer exec -- changelogger",
--		"build": "pnpm run build:admin && pnpm run uglify",
-+		"build": "node ./node_modules/require-turbo && pnpm run build:admin && pnpm run uglify",
+-		"build": "pnpm build:admin && pnpm uglify",
++		"build": "node ./node_modules/require-turbo && pnpm build:admin && pnpm uglify",
  		"build:admin": "wp-scripts build",
  		"build:zip": "./bin/build-zip.sh",
- 		"build:dev": "pnpm run lint:js && pnpm run build",
+ 		"build:dev": "pnpm lint:js && pnpm build",
 @@ -66,12 +64,13 @@
  	},
  	"woorelease": {
  		"svn_reauth": "true",
 -		"wp_org_slug": "woocommerce-beta-tester"
 +		"wp_org_slug": "woocommerce-beta-tester",
-+		"build_step": "pnpm run build:zip"
++		"build_step": "pnpm build:zip"
  	},
  	"lint-staged": {
  		"*.php": [
@@ -24155,7 +24155,7 @@ index 8cac777258..3bcac057a0 100644
 +```
  
  ## Documentation
- * [WooCommerce Documentation](https://docs.woocommerce.com/)
+ * [WooCommerce Documentation](https://woocommerce.com/)
 diff --git a/plugins/woocommerce/bin/composer/mozart/composer.lock b/plugins/woocommerce/bin/composer/mozart/composer.lock
 index 6c82f02706..d05f3d8113 100644
 --- a/plugins/woocommerce/bin/composer/mozart/composer.lock
@@ -27364,10 +27364,10 @@ index 9260fad5df..3ef0c998da 100644
 +		).toContainText( '35.99' );
  	} );
  } );
-diff --git a/plugins/woocommerce/e2e/tests/merchant/create-simple-product.spec.js b/plugins/woocommerce/e2e/tests/merchant/create-simple-product.spec.js
+diff --git a/plugins/woocommerce/e2e/tests/merchant/product-create-simple.spec.js b/plugins/woocommerce/e2e/tests/merchant/product-create-simple.spec.js
 index 607de7df93..58fde16c6d 100644
---- a/plugins/woocommerce/e2e/tests/merchant/create-simple-product.spec.js
-+++ b/plugins/woocommerce/e2e/tests/merchant/create-simple-product.spec.js
+--- a/plugins/woocommerce/e2e/tests/merchant/product-create-simple.spec.js
++++ b/plugins/woocommerce/e2e/tests/merchant/product-create-simple.spec.js
 @@ -20,10 +20,13 @@ test.describe( 'Add New Simple Product Page', () => {
  		// and the flat rate shipping method to that zone
  		await api
@@ -32494,7 +32494,7 @@ index 0000000000..ee57fbfa48
 +	 *
 +	 * ## EXAMPLES
 +	 *
-+	 *     # Install the latest version from woocommerce.com and activate
++	 *     # Install the latest version from WooCommerce.com and activate
 +	 *     $ wp wc com extension install automatewoo --activate
 +	 *     Downloading install package from http://s3.amazonaws.com/bucketname/automatewoo.zip?AWSAccessKeyId=123&Expires=456&Signature=abcdef......
 +	 *     Using cached file '/home/vagrant/.wp-cli/cache/plugin/automatewoo.zip'...
@@ -33961,8 +33961,8 @@ index ce20f1478b..b77d6042ab 100644
  		"preinstall": "npx only-allow pnpm",
  		"postinstall": "composer install",
  		"changelog": "composer exec -- changelogger",
--		"build": "WC_ADMIN_PHASE=core pnpm run build:feature-config",
-+		"build": "node ./node_modules/require-turbo && WC_ADMIN_PHASE=core pnpm run build:feature-config",
+-		"build": "WC_ADMIN_PHASE=core pnpm build:feature-config",
++		"build": "node ./node_modules/require-turbo && WC_ADMIN_PHASE=core pnpm build:feature-config",
  		"build:feature-config": "php bin/generate-feature-config.php",
  		"build:zip": "./bin/build-zip.sh",
 -		"lint": "pnpm lint:js && pnpm lint:php",
@@ -36694,7 +36694,7 @@ index cc475239cf..e5e0a75056 100644
 - * Version: 6.7.0
 + * Version: 6.8.2
   * Author: Automattic
-  * Author URI: https://woocommerce.com
+  * Author URI: https://woocommerce.com/
   * Text Domain: woocommerce
 diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
 index 90c59db874..e8c302e806 100644

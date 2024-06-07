@@ -176,7 +176,10 @@ jQuery( function ( $ ) {
 	function change_product_type_tip( content ) {
 		$( '#tiptip_holder' ).removeAttr( 'style' );
 		$( '#tiptip_arrow' ).removeAttr( 'style' );
-		$( '.woocommerce-product-type-tip' ).tipTip( {
+		$( '.woocommerce-product-type-tip' )
+		.attr( 'tabindex', '0' )
+		.attr( 'aria-label', $( '<div />' ).html( content ).text() ) // Remove HTML tags.
+		.tipTip( {
 			attribute: 'data-tip',
 			content: content,
 			fadeIn: 50,
@@ -522,15 +525,6 @@ jQuery( function ( $ ) {
 		$attributeListItem.find( 'h3' ).trigger( 'click' );
 	}
 
-	function toggle_selection_of_attribute_list_item_terms( $attributeListItem ) {
-
-		var $attributeListItemSelectAllButton = $attributeListItem.find( 'button.select_all_attributes' );
-
-		if ( $attributeListItemSelectAllButton.length ) {
-			$attributeListItemSelectAllButton.trigger( 'click' );
-		}
-	}
-
 	function add_placeholder_to_attribute_values_field( $attributeListItem ) {
 
 		var $used_for_variations_checkbox = $attributeListItem.find( 'input.woocommerce_attribute_used_for_variations' );
@@ -574,9 +568,6 @@ jQuery( function ( $ ) {
 			update_attribute_row_indexes();
 
 			toggle_expansion_of_attribute_list_item( $attributeListItem );
-
-			// Automatically pre-select all terms when a global Attribute is chosen.
-			toggle_selection_of_attribute_list_item_terms( $attributeListItem );
 
 			// Conditionally change the placeholder of product-level Attributes depending on the value of the "Use for variations" checkbox.
 			if ( 'undefined' === typeof globalAttributeId ) {

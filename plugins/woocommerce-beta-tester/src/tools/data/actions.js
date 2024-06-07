@@ -210,3 +210,55 @@ export function* runDisableEmail() {
 		yield setIsEmailDisabled( response );
 	} );
 }
+
+export function* resetCustomizeYourStore() {
+	yield runCommand( 'Reset Customize Your Store', function* () {
+		const optionsToDelete = [
+			'woocommerce_customize_store_onboarding_tour_hidden',
+			'woocommerce_admin_customize_store_completed',
+			'woocommerce_admin_customize_store_completed_theme_id',
+		];
+		yield apiFetch( {
+			method: 'DELETE',
+			path: `${ API_NAMESPACE }/options/${ optionsToDelete.join( ',' ) }`,
+		} );
+
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/reset-cys',
+			method: 'POST',
+		} );
+
+		yield apiFetch( {
+			path: '/wc/private/ai/patterns',
+			method: 'DELETE',
+		} );
+	} );
+}
+
+export function setLoggingLevels( loggingLevels ) {
+	return {
+		type: TYPES.SET_LOGGING_LEVELS,
+		loggingLevels,
+	};
+}
+
+export function setBlockTemplateLoggingThreshold(
+	blockTemplateLoggingThreshold
+) {
+	return {
+		type: TYPES.SET_BLOCK_TEMPLATE_LOGGING_THRESHOLD,
+		blockTemplateLoggingThreshold,
+	};
+}
+
+export function* updateBlockTemplateLoggingThreshold( params ) {
+	yield runCommand( 'Update block template logging threshold', function* () {
+		yield apiFetch( {
+			path:
+				API_NAMESPACE +
+				'/tools/update-block-template-logging-threshold/v1',
+			method: 'POST',
+			data: params,
+		} );
+	} );
+}

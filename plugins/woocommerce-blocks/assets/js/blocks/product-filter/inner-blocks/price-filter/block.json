@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "woocommerce/product-filter-price",
+	"version": "1.0.0",
+	"title": "Product Filter: Price (Beta)",
+	"description": "Enable customers to filter the product collection by choosing a price range.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 2,
+	"ancestor": [ "woocommerce/product-filter" ],
+	"supports": {
+		"interactivity": true,
+		"inserter": false
+	},
+	"usesContext": [ "query", "queryId" ],
+	"attributes": {
+		"showInputFields": {
+			"type": "boolean",
+			"default": true
+		},
+		"inlineInput": {
+			"type": "boolean",
+			"default": false
+		}
+	}
+}

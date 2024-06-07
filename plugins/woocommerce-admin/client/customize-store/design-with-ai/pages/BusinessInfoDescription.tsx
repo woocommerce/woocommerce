@@ -5,13 +5,18 @@ import { useState } from '@wordpress/element';
 import { TextareaControl, Button, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import { designWithAiStateMachineContext } from '../types';
 import { CloseButton } from '../components/close-button/close-button';
+import { SkipButton } from '../components/skip-button/skip-button';
 import { aiWizardClosedBeforeCompletionEvent } from '../events';
+import { isEntrepreneurFlow } from '../entrepreneur-flow';
+import WordPressLogo from '~/lib/wordpress-logo';
+import { trackEvent } from '~/customize-store/tracking';
 
 export type businessInfoDescriptionCompleteEvent = {
 	type: 'BUSINESS_INFO_DESCRIPTION_COMPLETE';
@@ -35,19 +40,44 @@ export const BusinessInfoDescription = ( {
 
 	return (
 		<div>
-			<ProgressBar
-				percent={ 20 }
-				color={ 'var(--wp-admin-theme-color)' }
-				bgcolor={ 'transparent' }
-			/>
-			<CloseButton
-				onClick={ () => {
-					sendEvent( {
-						type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
-						payload: { step: 'business-info-description' },
-					} );
-				} }
-			/>
+			{ ! isEntrepreneurFlow() && (
+				<ProgressBar
+					percent={ 20 }
+					color={ 'var(--wp-admin-theme-color)' }
+					bgcolor={ 'transparent' }
+				/>
+			) }
+			{ isEntrepreneurFlow() && (
+				<WordPressLogo
+					size={ 24 }
+					className="woocommerce-cys-wordpress-header-logo"
+				/>
+			) }
+			{ ! isEntrepreneurFlow() && (
+				<CloseButton
+					onClick={ () => {
+						sendEvent( {
+							type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
+							payload: { step: 'business-info-description' },
+						} );
+					} }
+				/>
+			) }
+			{ isEntrepreneurFlow() && (
+				<SkipButton
+					onClick={ () => {
+						trackEvent(
+							'customize_your_store_entrepreneur_skip_click',
+							{
+								step: 'business-info-description',
+							}
+						);
+						window.location.href = getAdminLink(
+							'admin.php?page=wc-admin&ref=entrepreneur-signup'
+						);
+					} }
+				/>
+			) }
 			<div className="woocommerce-cys-design-with-ai woocommerce-cys-layout">
 				<div className="woocommerce-cys-page">
 					<h1>
@@ -61,10 +91,6 @@ export const BusinessInfoDescription = ( {
 							setBusinessInfoDescription( businessInfo );
 						} }
 						value={ businessInfoDescription }
-						placeholder={ __(
-							'E.g., At Cool Cat Shades, we sell sunglasses specially designed for our stylish feline friends. Designed and developed with a cat’s comfort in mind, our range of sunglasses are fashionable accessories our furry friends can wear all day. We currently offer 50 different styles and variations of shades, with plans to add more in the near future.',
-							'woocommerce'
-						) }
 					/>
 					<div className="woocommerce-cys-design-with-ai-guide">
 						<p>

@@ -12,7 +12,7 @@
 			"dependencies": [
 				"pnpm"
 			],
-			"pinVersion": "^8.6.7",
+			"pinVersion": "^9.1.0",
 			"packages": [
 				"**"
 			]
@@ -24,16 +24,43 @@
 			"dependencyTypes": [
 				"engines"
 			],
-			"pinVersion": "^16.14.1",
+			"pinVersion": "^20.11.1",
 			"packages": [
 				"**"
 			]
 		},
 		{
 			"dependencies": [
+				"@actions/*",
+				"@automattic/*",
+				"@babel/*",
+				"@bartekbp/*",
+				"@octokit/*",
+				"@storybook/*",
+				"@testing-library/*",
+				"@types/*",
+				"@typescript-eslint/*",
+				"@woocommerce/*",
+				"@wordpress/*",
+				"babel*",
+				"eslint*",
+				"glob*",
+				"jest*",
+				"postcss*",
+				"react*",
+				"typescript",
+				"webpack*"
+			],
+			"packages": [
+				"@woocommerce/block-library"
+			],
+			"isIgnored": true
+		},
+		{
+			"dependencies": [
 				"@typescript-eslint/**"
 			],
-			"pinVersion": "^5.54.0",
+			"pinVersion": "^5.62.0",
 			"packages": [
 				"**"
 			]
@@ -42,10 +69,16 @@
 			"dependencies": [
 				"@types/react"
 			],
-			"dependencyTypes": [
-				"devDependencies"
+			"pinVersion": "^17.0.71",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"dependencies": [
+				"@types/react-dom"
 			],
-			"pinVersion": "^17.0.2",
+			"pinVersion": "^17.0.25",
 			"packages": [
 				"**"
 			]
@@ -76,19 +109,34 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^5.1.6"
+			"pinVersion": "^5.3.3"
 		},
 		{
 			"dependencies": [
 				"eslint"
 			],
-			"dependencyTypes": [
-				"devDependencies"
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^8.55.0"
+		},
+		{
+			"dependencies": [
+				"github-label-sync"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^8.32.0"
+			"pinVersion": "^2.3.1"
+		},
+		{
+			"dependencies": [
+				"@playwright/test"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^1.40.1"
 		},
 		{
 			"dependencies": [
@@ -118,8 +166,9 @@
 				"@wordpress/edit-site"
 			],
 			"packages": [
+				"@woocommerce/block-templates",
 				"@woocommerce/product-editor",
-				"woocommerce/client/admin",
+				"@woocommerce/admin-library",
 				"@woocommerce/components"
 			],
 			"isIgnored": true
@@ -158,7 +207,16 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^8.2.0"
+			"pinVersion": "^9.0.7"
+		},
+		{
+			"dependencies": [
+				"@wordpress/e2e-test-utils-playwright"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "wp-6.4"
 		},
 		{
 			"dependencies": [
@@ -176,14 +234,29 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^19.10.3"
+			"pinVersion": "^19.10.5"
+		},
+		{
+			"dependencies": [
+				"classnames"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^2.3.2"
+		},
+		{
+			"dependencies": [
+				"glob"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^10.3.10"
 		},
 		{
 			"dependencies": [
 				"postcss-loader"
-			],
-			"dependencyTypes": [
-				"devDependencies"
 			],
 			"packages": [
 				"**"
@@ -197,7 +270,52 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^8.4.7"
+			"pinVersion": "^8.4.32"
+		},
+		{
+			"dependencies": [
+				"rimraf"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "5.0.5"
+		},
+		{
+			"dependencies": [
+				"sass-loader"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^10.5.0"
+		},
+		{
+			"dependencies": [
+				"simple-git"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^3.21.0"
+		},
+		{
+			"dependencies": [
+				"stylelint"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^14.16.1"
+		},
+		{
+			"dependencies": [
+				"uuid"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^9.0.1"
 		},
 		{
 			"dependencies": [
@@ -206,7 +324,38 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^16.18.18"
+			"pinVersion": "^16.18.68"
+		},
+		{
+			"dependencies": [
+				"jest",
+				"jest-cli",
+				"jest-environment-jsdom",
+				"jest-environment-node",
+				"babel-jest"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "~27.5.1"
+		},
+		{
+			"dependencies": [
+				"ts-jest"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "~29.1.1"
+		},
+		{
+			"dependencies": [
+				"wireit"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "0.14.3"
 		},
 		{
 			"label": "Only manage versions for these dependencies",

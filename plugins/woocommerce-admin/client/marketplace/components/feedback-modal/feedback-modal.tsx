@@ -82,36 +82,6 @@ export default function FeedbackModal(): JSX.Element {
 	};
 	const { createNotice } = useDispatch( 'core/notices' );
 
-	function maybeShowSnackbar() {
-		// Don't show if we're still loading content
-		if ( isLoading ) {
-			return;
-		}
-
-		// Don't show if the user has already given feedback or otherwise suppressed
-		if ( isDismissedForever() ) {
-			return;
-		}
-
-		// Don't show if we've already shown today or user has declined today
-		const today = new Date().toDateString();
-		if (
-			today ===
-			localStorage.getItem( LOCALSTORAGE_KEY_LAST_REQUESTED_DATE )
-		) {
-			return;
-		}
-
-		const timer = setTimeout( showSnackbar, SNACKBAR_TIMEOUT );
-
-		// Without this, navigating between screens will create a series of snackbars
-		dismissToday();
-
-		return () => {
-			clearTimeout( timer );
-		};
-	}
-
 	function showSnackbar() {
 		createNotice(
 			'success',
@@ -165,6 +135,36 @@ export default function FeedbackModal(): JSX.Element {
 				],
 			}
 		);
+	}
+
+	function maybeShowSnackbar() {
+		// Don't show if we're still loading content
+		if ( isLoading ) {
+			return;
+		}
+
+		// Don't show if the user has already given feedback or otherwise suppressed
+		if ( isDismissedForever() ) {
+			return;
+		}
+
+		// Don't show if we've already shown today or user has declined today
+		const today = new Date().toDateString();
+		if (
+			today ===
+			localStorage.getItem( LOCALSTORAGE_KEY_LAST_REQUESTED_DATE )
+		) {
+			return;
+		}
+
+		const timer = setTimeout( showSnackbar, SNACKBAR_TIMEOUT );
+
+		// Without this, navigating between screens will create a series of snackbars
+		dismissToday();
+
+		return () => {
+			clearTimeout( timer );
+		};
 	}
 
 	useEffect( maybeShowSnackbar, [ isLoading ] );

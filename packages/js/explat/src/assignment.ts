@@ -5,6 +5,9 @@ import { stringify } from 'qs';
 import { applyFilters } from '@wordpress/hooks';
 import apiFetch from '@wordpress/api-fetch';
 
+export const canTrack =
+	window.wcTracks?.isEnabled || window?._wca?.push !== undefined;
+
 const EXPLAT_VERSION = '0.1.0';
 
 type QueryParams = {
@@ -83,7 +86,7 @@ export const fetchExperimentAssignment = async ( {
 	experimentName: string;
 	anonId: string | null;
 } ): Promise< unknown > => {
-	if ( ! window.wcTracks?.isEnabled ) {
+	if ( ! canTrack ) {
 		throw new Error(
 			`Tracking is disabled, can't fetch experimentAssignment`
 		);
@@ -111,7 +114,7 @@ export const fetchExperimentAssignmentWithAuth = async ( {
 	experimentName: string;
 	anonId: string | null;
 } ): Promise< unknown > => {
-	if ( ! window.wcTracks?.isEnabled ) {
+	if ( ! canTrack ) {
 		throw new Error(
 			`Tracking is disabled, can't fetch experimentAssignment`
 		);

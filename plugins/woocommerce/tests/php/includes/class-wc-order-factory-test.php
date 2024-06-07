@@ -1,12 +1,15 @@
 <?php
 
 use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
 /**
  * WC_Order_Factory_Test Class.
  */
 class WC_Order_Factory_Test extends WC_Unit_Test_Case {
+
+	use \Automattic\WooCommerce\RestApi\UnitTests\SerializingCacheTrait;
 
 	/**
 	 * Store COT state at the start of the test so we can restore it later.
@@ -24,6 +27,7 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->cot_state = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
 		OrderHelper::toggle_cot_feature_and_usage( false );
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 	}
 
 	/**
@@ -35,6 +39,7 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 		parent::tearDown();
 		wp_cache_flush();
 		OrderHelper::toggle_cot_feature_and_usage( $this->cot_state );
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 	}
 
 	/**
@@ -94,6 +99,35 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( $order1->get_id(), $orders[0]->get_id() );
 		$this->assertEquals( $order2->get_id(), $orders[1]->get_id() );
 		OrderHelper::toggle_cot_feature_and_usage( false );
+	}
+
+	/**
+	 * @testDox Test that an WC_Order_Factory::get_order() does not return an order that did not properly load, $id = 0.
+	 */
+	public function test_get_order_doesnt_return_invalid_cached_order() {
+		global $wpdb;
+
+		OrderHelper::toggle_cot_feature_and_usage( true );
+		$this->setup_serializing_cache();
+
+		$order = OrderHelper::create_order();
+
+		// Retrieve the order to prime the cache.
+		$retrieved_order = WC_Order_Factory::get_order( $order->get_id() );
+		$this->assertEquals( $order->get_id(), $retrieved_order->get_id() );
+
+		// Delete the order from the DB to mimic situations like SQL replication lag where the cache has propagated,
+		// but SQL data hasn't yet caught up.
+		$wpdb->delete( OrdersTableDataStore::get_orders_table_name(), array( 'ID' => $retrieved_order->get_id() ) );
+		foreach ( OrdersTableDataStore::get_all_table_names_with_id() as $table_id => $table ) {
+			if ( 'orders' !== $table_id ) {
+				$wpdb->delete( $table, array( 'order_id' => $retrieved_order->get_id() ) );
+			}
+		}
+
+		// Retrieving the order again should either return false because the order was not able to fully load.
+		$retrieved_order = WC_Order_Factory::get_order( $order->get_id() );
+		$this->assertFalse( $retrieved_order );
 	}
 
 }

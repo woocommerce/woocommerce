@@ -5,8 +5,8 @@
 	"description": "A simple interface for interacting with a WooCommerce installation.",
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/api/README.md",
 	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"node": "^20.11.1",
+		"pnpm": "^9.1.0"
 	},
 	"repository": {
 		"type": "git",
@@ -20,27 +20,33 @@
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"files": [
-		"/dist/",
+		"dist/",
 		"!*.ts.map",
 		"!*.tsbuildinfo",
-		"!/dist/**/__tests__/",
-		"!/dist/**/__mocks__/",
-		"!/dist/**/__snapshops__/",
-		"!/dist/**/__test_data__/"
+		"!dist/**/__tests__/",
+		"!dist/**/__mocks__/",
+		"!dist/**/__snapshops__/",
+		"!dist/**/__test_data__/"
 	],
 	"sideEffects": false,
 	"scripts": {
-		"turbo:build": "pnpm run clean && npm run compile",
-		"turbo:test": "jest",
-		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-		"prepare": "composer install",
-		"changelog": "composer exec -- changelogger",
-		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
-		"compile": "tsc --project tsconfig.json",
-		"prepack": "pnpm run build",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint --output-file eslint_report.json --format json src",
-		"lint:fix": "eslint src --fix"
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
+		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project:typescript": "wireit",
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint src",
+		"prepack": "pnpm build",
+		"test:js": "jest --config ./jest.config.js --passWithNoTests",
+		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
+		"watch:build:project": "pnpm build:project --watch"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
 	},
 	"dependencies": {
 		"axios": "^0.24.0",
@@ -49,23 +55,70 @@
 	},
 	"devDependencies": {
 		"@types/create-hmac": "1.1.0",
-		"@types/jest": "^27.4.1",
-		"@types/node": "^16.18.18",
-		"@typescript-eslint/eslint-plugin": "^5.54.0",
-		"@typescript-eslint/parser": "^5.54.0",
+		"@types/jest": "^27.5.2",
+		"@types/node": "^16.18.68",
+		"@typescript-eslint/eslint-plugin": "^5.62.0",
+		"@typescript-eslint/parser": "^5.62.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"axios-mock-adapter": "^1.20.0",
-		"eslint": "^8.32.0",
-		"jest": "^27",
-		"ts-jest": "^27",
-		"typescript": "^5.1.6"
+		"axios-mock-adapter": "^1.22.0",
+		"eslint": "^8.55.0",
+		"jest": "~27.5.1",
+		"ts-jest": "~29.1.1",
+		"typescript": "^5.3.3",
+		"wireit": "0.14.3"
 	},
 	"publishConfig": {
 		"access": "public"
 	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.js",
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}",
+						"typings/**/*.ts"
+					],
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
+		}
+	},
+	"wireit": {
+		"build:project:typescript": {
+			"command": "tsc --project tsconfig.json",
+			"clean": "if-file-deleted",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"dist"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"package.json"
+			]
+		}
 	}
 }

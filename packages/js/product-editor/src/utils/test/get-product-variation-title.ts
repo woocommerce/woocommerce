@@ -15,11 +15,13 @@ describe( 'getProductVariationTitle', () => {
 					id: 0,
 					name: 'Color',
 					option: 'Red',
+					slug: 'red',
 				},
 				{
 					id: 0,
 					name: 'Size',
 					option: 'Medium',
+					slug: 'medium',
 				},
 			],
 		} );
@@ -34,6 +36,7 @@ describe( 'getProductVariationTitle', () => {
 					id: 0,
 					name: 'Color',
 					option: 'Blue',
+					slug: 'blue',
 				},
 			],
 		} );
@@ -58,11 +61,13 @@ describe( 'getTruncatedProductVariationTitle', () => {
 					id: 0,
 					name: 'Color',
 					option: 'Red',
+					slug: 'red',
 				},
 				{
 					id: 0,
 					name: 'Size',
 					option: 'Medium',
+					slug: 'medium',
 				},
 			],
 		} );
@@ -77,11 +82,13 @@ describe( 'getTruncatedProductVariationTitle', () => {
 					id: 0,
 					name: 'Color',
 					option: 'Reddish',
+					slug: 'reddish',
 				},
 				{
 					id: 0,
 					name: 'Size',
 					option: 'MediumLargeSmallishTypeOfSize',
+					slug: 'mediumlargesmallishtypeofsize',
 				},
 			],
 		} );

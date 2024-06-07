@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Example uses registerProductEditorBlockType to register block so that functionality such as hideConditions and disableConditions work with block.

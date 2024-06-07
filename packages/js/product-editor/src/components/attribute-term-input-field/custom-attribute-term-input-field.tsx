@@ -150,18 +150,7 @@ export const CustomAttributeTermInputField: React.FC<
 													item
 												) }
 												label={
-													<span
-														style={ {
-															fontWeight:
-																value.includes(
-																	item
-																)
-																	? 'bold'
-																	: 'normal',
-														} }
-													>
-														{ item }
-													</span>
+													<span> { item } </span>
 												}
 											/>
 										) }

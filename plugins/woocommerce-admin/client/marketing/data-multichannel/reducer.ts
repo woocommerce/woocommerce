@@ -21,9 +21,10 @@ const initialState = {
 		error: undefined,
 	},
 	campaigns: {
-		perPage: undefined,
-		pages: undefined,
-		total: undefined,
+		pages: {},
+		meta: {
+			total: undefined,
+		},
 	},
 	campaignTypes: {
 		data: undefined,
@@ -66,13 +67,15 @@ export const reducer: Reducer< State, Action > = (
 			};
 
 		case TYPES.RECEIVE_CAMPAIGNS:
+			const { meta } = action;
+			const key = `${ meta.page }-${ meta.perPage }`;
+
 			return {
 				...state,
 				campaigns: {
-					perPage: action.meta.perPage,
 					pages: {
 						...state.campaigns.pages,
-						[ action.meta.page ]: action.error
+						[ key ]: action.error
 							? {
 									error: action.payload,
 							  }
@@ -80,7 +83,9 @@ export const reducer: Reducer< State, Action > = (
 									data: action.payload,
 							  },
 					},
-					total: action.meta.total,
+					meta: {
+						total: meta.total,
+					},
 				},
 			};
 

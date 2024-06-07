@@ -3,9 +3,8 @@
  */
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Spinner } from '@wordpress/components';
 import { useQuery } from '@woocommerce/navigation';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -15,10 +14,21 @@ import CategoryDropdown from './category-dropdown';
 import { Category, CategoryAPIItem } from './types';
 import { fetchCategories } from '../../utils/functions';
 import './category-selector.scss';
+import { ProductType } from '../product-list/types';
 
-const ALL_CATEGORIES_SLUG = '_all';
+const ALL_CATEGORIES_SLUGS = {
+	[ ProductType.extension ]: '_all',
+	[ ProductType.theme ]: 'themes',
+	[ ProductType.businessService ]: 'business-services',
+};
 
-export default function CategorySelector(): JSX.Element {
+interface CategorySelectorProps {
+	type: ProductType;
+}
+
+export default function CategorySelector(
+	props: CategorySelectorProps
+): JSX.Element {
 	const [ visibleItems, setVisibleItems ] = useState< Category[] >( [] );
 	const [ dropdownItems, setDropdownItems ] = useState< Category[] >( [] );
 	const [ selected, setSelected ] = useState< Category >();
@@ -28,7 +38,7 @@ export default function CategorySelector(): JSX.Element {
 
 	useEffect( () => {
 		// If no category is selected, show All as selected
-		let categoryToSearch = ALL_CATEGORIES_SLUG;
+		let categoryToSearch = ALL_CATEGORIES_SLUGS[ props.type ];
 
 		if ( query.category ) {
 			categoryToSearch = query.category;
@@ -43,12 +53,12 @@ export default function CategorySelector(): JSX.Element {
 		if ( selectedCategory ) {
 			setSelected( selectedCategory );
 		}
-	}, [ query, visibleItems, dropdownItems ] );
+	}, [ query.category, props.type, visibleItems, dropdownItems ] );
 
 	useEffect( () => {
 		setIsLoading( true );
 
-		fetchCategories()
+		fetchCategories( props.type )
 			.then( ( categoriesFromAPI: CategoryAPIItem[] ) => {
 				const categories: Category[] = categoriesFromAPI
 					.map( ( categoryAPIItem: CategoryAPIItem ): Category => {
@@ -76,7 +86,7 @@ export default function CategorySelector(): JSX.Element {
 			.finally( () => {
 				setIsLoading( false );
 			} );
-	}, [] );
+	}, [ props.type ] );
 
 	function mobileCategoryDropdownLabel() {
 		const allCategoriesText = __( 'All Categories', 'woocommerce' );
@@ -104,10 +114,18 @@ export default function CategorySelector(): JSX.Element {
 
 	if ( isLoading ) {
 		return (
-			<div className="woocommerce-marketplace__category-selector-loading">
-				<p>{ __( 'Loading categories…', 'woocommerce' ) }</p>
-				<Spinner />
-			</div>
+			<>
+				<ul className="woocommerce-marketplace__category-selector">
+					{ [ ...Array( 5 ) ].map( ( el, i ) => (
+						<li
+							key={ i }
+							className="woocommerce-marketplace__category-item"
+						>
+							<CategoryLink slug="" label="" selected={ false } />
+						</li>
+					) ) }
+				</ul>
+			</>
 		);
 	}
 
@@ -128,9 +146,10 @@ export default function CategorySelector(): JSX.Element {
 				<li className="woocommerce-marketplace__category-item">
 					{ dropdownItems.length > 0 && (
 						<CategoryDropdown
+							type={ props.type }
 							label={ __( 'More', 'woocommerce' ) }
 							categories={ dropdownItems }
-							buttonClassName={ classNames(
+							buttonClassName={ clsx(
 								'woocommerce-marketplace__category-item-button',
 								{
 									'woocommerce-marketplace__category-item-button--selected':
@@ -147,6 +166,7 @@ export default function CategorySelector(): JSX.Element {
 
 			<div className="woocommerce-marketplace__category-selector--full-width">
 				<CategoryDropdown
+					type={ props.type }
 					label={ mobileCategoryDropdownLabel() }
 					categories={ visibleItems.concat( dropdownItems ) }
 					buttonClassName="woocommerce-marketplace__category-dropdown-button"

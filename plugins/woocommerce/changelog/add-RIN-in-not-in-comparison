@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Update Remote Inbox Notifications to add in and !in comparison operators for comparing values against arrays

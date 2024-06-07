@@ -8,7 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,6 +28,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		public function __construct() {
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
+			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		}
 
 		/**
@@ -146,7 +147,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_register_script( 'wc-backbone-modal', WC()->plugin_url() . '/assets/js/admin/backbone-modal' . $suffix . '.js', array( 'underscore', 'backbone', 'wp-util' ), $version );
 			wp_register_script( 'wc-shipping-zones', WC()->plugin_url() . '/assets/js/admin/wc-shipping-zones' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'jquery-ui-sortable', 'wc-enhanced-select', 'wc-backbone-modal' ), $version );
 			wp_register_script( 'wc-shipping-zone-methods', WC()->plugin_url() . '/assets/js/admin/wc-shipping-zone-methods' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'jquery-ui-sortable', 'wc-backbone-modal' ), $version );
-			wp_register_script( 'wc-shipping-classes', WC()->plugin_url() . '/assets/js/admin/wc-shipping-classes' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone' ), $version );
+			wp_register_script( 'wc-shipping-classes', WC()->plugin_url() . '/assets/js/admin/wc-shipping-classes' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'wc-backbone-modal' ), $version, array( 'in_footer' => false ) );
 			wp_register_script( 'wc-clipboard', WC()->plugin_url() . '/assets/js/admin/wc-clipboard' . $suffix . '.js', array( 'jquery' ), $version );
 			wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2.full' . $suffix . '.js', array( 'jquery' ), '4.0.3' );
 			wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.6' );
@@ -230,7 +231,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'gateway_toggle' => current_user_can( 'manage_woocommerce' ) ? wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ) : null,
 					),
 					'urls'                              => array(
-						'add_product'     => Features::is_enabled( 'new-product-management-experience' ) || \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
+						'add_product'     => \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
@@ -554,11 +555,107 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'marketplace-suggestions' );
 			}
 
-			// Temporarily hide empty addons submenu item
-			if ( FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
-				wp_enqueue_script( 'wc-admin-menu', WC()->plugin_url() . '/assets/js/admin/wc-admin-menu' . $suffix . '.js', null, $version );
+			// Marketplace promotions.
+			if ( in_array( $screen_id, array( 'woocommerce_page_wc-admin' ), true ) ) {
+
+				$promotions = WC_Admin_Marketplace_Promotions::get_active_promotions();
+
+				if ( false === $promotions ) {
+					return;
+				}
+
+				wp_add_inline_script(
+					'wc-admin-app',
+					'window.wcMarketplace = ' . wp_json_encode( array( 'promotions' => $promotions ) ),
+					'before'
+				);
+			}
+		}
+
+		/**
+		 * Enqueue a script in the block editor.
+		 * Similar to `WCAdminAssets::register_script()` but without enqueuing unnecessary dependencies.
+		 *
+		 * @return void
+		 */
+		private function enqueue_block_editor_script( $script_path_name, $script_name ) {
+			$script_assets_filename = WCAdminAssets::get_script_asset_filename( $script_path_name, $script_name );
+			$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER .  $script_path_name . '/' . $script_assets_filename;
+
+			wp_enqueue_script(
+				'wc-admin-' . $script_name,
+				WCAdminAssets::get_url( $script_path_name . '/' . $script_name, 'js' ),
+				$script_assets['dependencies'],
+				WCAdminAssets::get_file_version( 'js', $script_assets['version'] ),
+				true
+			);
+		}
+
+		/**
+		 * Enqueue block editor assets.
+		 *
+		 * @return void
+		 */
+		public function enqueue_block_editor_assets() {
+			$settings_tabs = apply_filters('woocommerce_settings_tabs_array', []);
+
+			if ( is_array( $settings_tabs ) && count( $settings_tabs ) > 0  ) {
+				$formatted_settings_tabs = array();
+				foreach ($settings_tabs as $key => $label) {
+					if (
+						is_string( $key ) && $key !== "" &&
+						is_string( $label ) && $label !== ""
+					) {
+						$formatted_settings_tabs[] = array(
+							'key'   => $key,
+							'label' => wp_strip_all_tags( $label ),
+						);
+					}
+				}
+
+				self::enqueue_block_editor_script( 'wp-admin-scripts', 'command-palette' );
+				wp_localize_script(
+					'wc-admin-command-palette',
+					'wcCommandPaletteSettings',
+					array(
+						'settingsTabs'    => $formatted_settings_tabs,
+					)
+				);
 			}
 
+			$admin_features_disabled = apply_filters( 'woocommerce_admin_disabled', false );
+			if ( ! $admin_features_disabled ) {
+				$analytics_reports = Analytics::get_report_pages();
+				if ( is_array( $analytics_reports ) && count( $analytics_reports ) > 0 ) {
+					$formatted_analytics_reports = array_map( function( $report ) {
+						if ( ! is_array( $report ) ) {
+							return null;
+						}
+						$title = array_key_exists( 'title', $report ) ? $report['title'] : '';
+						$path = array_key_exists( 'path', $report ) ? $report['path'] : '';
+						if (
+							is_string( $title ) && $title !== "" &&
+							is_string( $path ) && $path !== ""
+						) {
+							return array(
+								'title' => wp_strip_all_tags( $title ),
+								'path' => $path,
+							);
+						}
+						return null;
+					}, $analytics_reports );
+					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
+
+					self::enqueue_block_editor_script( 'wp-admin-scripts', 'command-palette-analytics' );
+					wp_localize_script(
+						'wc-admin-command-palette-analytics',
+						'wcCommandPaletteAnalytics',
+						array(
+							'reports'    => $formatted_analytics_reports,
+						)
+					);
+				}
+			}
 		}
 
 		/**

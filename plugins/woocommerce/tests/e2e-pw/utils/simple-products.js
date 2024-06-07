@@ -8,9 +8,9 @@ const SETTINGS_URL =
  *
  * Navigates to the block product editor and verifies it's enabled.
  *
- * @param {Page} page
+ * @param {import('@playwright/test').Page} page
  *
- * @returns {Promise<boolean>} Boolean value based on the visibility of the element.
+ * @return {Promise<boolean>} Boolean value based on the visibility of the element.
  */
 async function isBlockProductEditorEnabled( page ) {
 	await page.goto( SETTINGS_URL );
@@ -23,7 +23,7 @@ async function isBlockProductEditorEnabled( page ) {
  * This function is typically used for enabling/disabling the block product editor in settings page.
  *
  * @param {string} action The action that will be performed.
- * @param {Page} page
+ * @param {import('@playwright/test').Page}   page
  */
 async function toggleBlockProductEditor( action = 'enable', page ) {
 	await page.goto( SETTINGS_URL );
@@ -47,7 +47,7 @@ async function toggleBlockProductEditor( action = 'enable', page ) {
 /**
  * This function simulates the clicking of the "Add New" link under the "product" section in the menu.
  *
- * @param {Page} page
+ * @param {import('@playwright/test').Page} page
  */
 async function clickAddNewMenuItem( page ) {
 	await page
@@ -59,18 +59,18 @@ async function clickAddNewMenuItem( page ) {
 /**
  * This function checks if the old product editor is visible.
  *
- * @param {Page} page
+ * @param {import('@playwright/test').Page} page
  */
 async function expectOldProductEditor( page ) {
 	await expect(
-		page.locator( '#woocommerce-product-data h2' )
-	).toContainText( 'Product data' );
+		page.getByRole( 'heading', { name: 'Product data' } )
+	).toBeVisible();
 }
 
 /**
  * This function checks if the block product editor is visible.
  *
- * @param {Page} page
+ * @param {import('@playwright/test').Page} page
  */
 async function expectBlockProductEditor( page ) {
 	await expect(
@@ -81,14 +81,13 @@ async function expectBlockProductEditor( page ) {
 /**
  * Click on a block editor tab.
  *
- * @param {Page} page
- * @param {string} tabName
+ * @param {string}													tabName
+ * @param {import('@playwright/test').Page} page
  */
 async function clickOnTab( tabName, page ) {
 	await page
-		// .locator( '.woocommerce-product-tab__general-content' )
 		.locator( '.woocommerce-product-tabs' )
-		.getByRole( 'button', { name: tabName } )
+		.getByRole( 'tab', { name: tabName } )
 		.click();
 }
 

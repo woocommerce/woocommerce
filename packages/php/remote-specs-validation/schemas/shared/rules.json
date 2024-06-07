@@ -1,0 +1,24 @@
+{
+	"anyOf": [
+		{"$ref": "./rules/or.json"},
+		{"$ref": "./rules/not.json"},
+		{"$ref": "./rules/fail.json"},
+		{"$ref": "./rules/publish_after_time.json"},
+		{"$ref": "./rules/publish_before_time.json"},
+		{"$ref": "./rules/base_location_country.json"},
+		{"$ref": "./rules/base_location_state.json"},
+		{"$ref": "./rules/plugins_activated.json"},
+		{"$ref": "./rules/plugin_version.json"},
+		{"$ref": "./rules/stored_state.json"},
+		{"$ref": "./rules/product_count.json"},
+		{"$ref": "./rules/order_count.json"},
+		{"$ref": "./rules/wcadmin_active_for.json"},
+		{"$ref": "./rules/onboarding_profile.json"},
+		{"$ref": "./rules/is_woo_express.json"},
+		{"$ref": "./rules/note_status.json"},
+		{"$ref": "./rules/total_payments_value.json"},
+		{"$ref": "./rules/option.json"},
+		{"$ref": "./rules/is_ecommerce.json"},
+		{"$ref": "./rules/pass.json"}
+	]
+}

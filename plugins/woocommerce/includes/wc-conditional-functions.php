@@ -102,7 +102,7 @@ if ( ! function_exists( 'is_cart' ) ) {
 if ( ! function_exists( 'is_checkout' ) ) {
 
 	/**
-	 * Is_checkout - Returns true when viewing the checkout page.
+	 * Is_checkout - Returns true when viewing the checkout page, or when processing AJAX requests for updating or processing the checkout.
 	 *
 	 * @return bool
 	 */

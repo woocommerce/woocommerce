@@ -1,10 +1,12 @@
 packages:
     - 'packages/js/*'
+    - 'packages/php/*'
     - 'plugins/*'
     - 'plugins/woocommerce/client/legacy'
+    - 'plugins/woocommerce-blocks/bin/eslint-plugin-woocommerce'
     - 'tools/monorepo-merge'
     - 'tools/code-analyzer'
-    - 'tools/create-extension'
+    - 'tools/compare-perf'
     - 'tools/package-release'
     - 'tools/cherry-pick'
     - 'tools/release-posts'

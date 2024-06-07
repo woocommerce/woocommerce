@@ -230,21 +230,26 @@ class OrdersTableQuery {
 		 * @param OrdersTableQuery   $query The OrdersTableQuery instance.
 		 * @param string             $sql The OrdersTableQuery instance.
 		 */
-		list( $this->orders, $this->found_orders, $this->max_num_pages ) = apply_filters( 'woocommerce_hpos_pre_query', null, $this, $this->sql );
-		// If the filter set the orders, make sure the others values are set as well and skip running the query.
-		if ( is_array( $this->orders ) ) {
-			if ( ! is_int( $this->found_orders ) || $this->found_orders < 1 ) {
-				$this->found_orders = count( $this->orders );
-			}
-			if ( ! is_int( $this->max_num_pages ) || $this->max_num_pages < 1 ) {
-				if ( ! $this->arg_isset( 'limit' ) || ! is_int( $this->args['limit'] ) || $this->args['limit'] < 1 ) {
-					$this->args['limit'] = 10;
-				}
-				$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
-			}
-			return true;
+		$pre_query = apply_filters( 'woocommerce_hpos_pre_query', null, $this, $this->sql );
+		if ( ! $pre_query || ! isset( $pre_query[0] ) || ! is_array( $pre_query[0] ) ) {
+			return false;
 		}
-		return false;
+
+		// If the filter set the orders, make sure the others values are set as well and skip running the query.
+		list( $this->orders, $this->found_orders, $this->max_num_pages ) = $pre_query;
+
+		if ( ! is_int( $this->found_orders ) || $this->found_orders < 1 ) {
+			$this->found_orders = count( $this->orders );
+		}
+
+		if ( ! is_int( $this->max_num_pages ) || $this->max_num_pages < 1 ) {
+			if ( ! $this->arg_isset( 'limit' ) || ! is_int( $this->args['limit'] ) || $this->args['limit'] < 1 ) {
+				$this->args['limit'] = 10;
+			}
+			$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
+		}
+
+		return true;
 	}
 
 	/**
@@ -341,6 +346,7 @@ class OrdersTableQuery {
 			'day'   => '',
 		);
 
+		$precision = null;
 		if ( is_numeric( $date ) ) {
 			$date      = new \WC_DateTime( "@{$date}", new \DateTimeZone( 'UTC' ) );
 			$precision = 'second';
@@ -914,6 +920,23 @@ class OrdersTableQuery {
 		}
 		$orders_table    = $this->tables['orders'];
 		$this->count_sql = "SELECT COUNT(DISTINCT $fields) FROM  $orders_table $join WHERE $where";
+
+		if ( ! $this->suppress_filters ) {
+			/**
+			 * Filters the count SQL query.
+			 *
+			 * @since 8.6.0
+			 *
+			 * @param string           $sql   The count SQL query.
+			 * @param OrdersTableQuery $query The OrdersTableQuery instance (passed by reference).
+			 * @param array            $args  Query args.
+			 * @param string           $fields Prepared fields for SELECT clause.
+			 * @param string           $join Prepared JOIN clause.
+			 * @param string           $where Prepared WHERE clause.
+			 * @param string           $groupby Prepared GROUP BY clause.
+			 */
+			$this->count_sql = apply_filters_ref_array( 'woocommerce_orders_table_query_count_sql', array( $this->count_sql, &$this, $this->args, $fields, $join, $where, $groupby ) );
+		}
 	}
 
 	/**
@@ -1126,7 +1149,7 @@ class OrdersTableQuery {
 		$values = is_array( $values ) ? $values : array( $values );
 		$ids    = array();
 		$emails = array();
-
+		$pieces = array();
 		foreach ( $values as $value ) {
 			if ( is_array( $value ) ) {
 				$sql      = $this->generate_customer_query( $value, 'AND' );

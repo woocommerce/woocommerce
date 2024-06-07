@@ -4,8 +4,8 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
-import { useContext } from '@wordpress/element';
+import clsx from 'clsx';
+import { useContext, useState } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,
@@ -24,11 +24,14 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import SidebarButton from '@wordpress/edit-site/build-module/components/sidebar-button';
+import { GoBackWarningModal } from '../go-back-warning-modal';
 
 /**
  * Internal dependencies
  */
 import { CustomizeStoreContext } from '../';
+import { isAIFlow } from '~/customize-store/guards';
+import { isEntrepreneurFlow } from '~/customize-store/design-with-ai/entrepreneur-flow';
 const { useLocation } = unlock( routerPrivateApis );
 
 export const SidebarNavigationScreen = ( {
@@ -52,20 +55,20 @@ export const SidebarNavigationScreen = ( {
 	backPath?: string;
 	onNavigateBackClick?: () => void;
 } ) => {
-	const { sendEvent } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext );
+	const [ openWarningModal, setOpenWarningModal ] =
+		useState< boolean >( false );
 	const location = useLocation();
 	const navigator = useNavigator();
 	const icon = isRTL() ? chevronRight : chevronLeft;
+	const flowType = context?.flowType;
 
 	return (
 		<>
 			<VStack
-				className={ classnames(
-					'edit-site-sidebar-navigation-screen__main',
-					{
-						'has-footer': !! footer,
-					}
-				) }
+				className={ clsx( 'edit-site-sidebar-navigation-screen__main', {
+					'has-footer': !! footer,
+				} ) }
 				spacing={ 0 }
 				justify="flex-start"
 			>
@@ -93,11 +96,10 @@ export const SidebarNavigationScreen = ( {
 							showTooltip={ false }
 						/>
 					) }
-					{ isRoot && (
+					{ isRoot && ! isEntrepreneurFlow() && (
 						<SidebarButton
 							onClick={ () => {
-								onNavigateBackClick?.();
-								sendEvent( 'GO_BACK_TO_DESIGN_WITH_AI' );
+								setOpenWarningModal( true );
 							} }
 							icon={ icon }
 							label={ __( 'Back', 'woocommerce' ) }
@@ -106,6 +108,9 @@ export const SidebarNavigationScreen = ( {
 					) }
 					<Heading
 						className="edit-site-sidebar-navigation-screen__title"
+						style={
+							isEntrepreneurFlow() ? { padding: '0 16px' } : {}
+						}
 						color={ '#e0e0e0' /* $gray-200 */ }
 						level={ 1 }
 						size={ 20 }
@@ -139,6 +144,18 @@ export const SidebarNavigationScreen = ( {
 				<footer className="edit-site-sidebar-navigation-screen__footer">
 					{ footer }
 				</footer>
+			) }
+			{ openWarningModal && (
+				<GoBackWarningModal
+					setOpenWarningModal={ setOpenWarningModal }
+					onExitClicked={ () => {
+						window.parent.__wcCustomizeStore.sendEventToIntroMachine(
+							flowType && isAIFlow( flowType )
+								? { type: 'GO_BACK_TO_DESIGN_WITH_AI' }
+								: { type: 'GO_BACK_TO_DESIGN_WITHOUT_AI' }
+						);
+					} }
+				/>
 			) }
 		</>
 	);

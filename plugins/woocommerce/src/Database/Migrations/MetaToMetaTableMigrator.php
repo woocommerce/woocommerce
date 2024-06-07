@@ -231,7 +231,7 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 		$meta_query = $this->build_meta_table_query( $entity_ids );
 
 		$meta_data_rows = $this->db_get_results( $meta_query );
-		if ( empty( $meta_data_rows ) ) {
+		if ( ! is_array( $meta_data_rows ) || empty( $meta_data_rows ) ) {
 			return array();
 		}
 
@@ -384,7 +384,7 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 		$entity_id_column              = $this->schema_config['source']['entity']['id_column'];
 		$entity_meta_id_mapping_column = $this->schema_config['source']['entity']['source_id_column'];
 
-		if ( $this->schema_config['source']['excluded_keys'] ) {
+		if ( isset( $this->schema_config['source']['excluded_keys'] ) && is_array( $this->schema_config['source']['excluded_keys'] ) ) {
 			$key_placeholder = implode( ',', array_fill( 0, count( $this->schema_config['source']['excluded_keys'] ), '%s' ) );
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $source_meta_key_column is escaped for backticks, $key_placeholder is hardcoded.
 			$exclude_clause = $wpdb->prepare( "source.$source_meta_key_column NOT IN ( $key_placeholder )", $this->schema_config['source']['excluded_keys'] );

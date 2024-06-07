@@ -64,18 +64,23 @@ const SummaryNumber = ( {
 
 	let screenReaderLabel =
 		delta > 0
-			? sprintf(
+			? // eslint-disable-next-line @wordpress/valid-sprintf -- false positive from %%
+			  sprintf(
+					/* translators: percentage change upwards */
 					__( 'Up %f%% from %s', 'woocommerce' ),
 					delta,
 					prevLabel
 			  )
-			: sprintf(
+			: // eslint-disable-next-line @wordpress/valid-sprintf -- false positive from %%
+			  sprintf(
+					/* translators: percentage change downwards */
 					__( 'Down %f%% from %s', 'woocommerce' ),
 					Math.abs( delta ),
 					prevLabel
 			  );
 	if ( ! delta ) {
 		screenReaderLabel = sprintf(
+			/* translators: previous value */
 			__( 'No change from %s', 'woocommerce' ),
 			prevLabel
 		);
@@ -150,7 +155,9 @@ const SummaryNumber = ( {
 						>
 							<Text variant="caption" size="12" lineHeight="16px">
 								{ ! isNil( delta )
-									? sprintf(
+									? // eslint-disable-next-line @wordpress/valid-sprintf -- false positive from %%
+									  sprintf(
+											/* translators: percentage change */
 											__( '%f%%', 'woocommerce' ),
 											delta
 									  )

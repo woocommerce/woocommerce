@@ -10,6 +10,8 @@ const BundleAnalyzerPlugin =
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
+const NormalModuleReplacementPlugin =
+	require( 'webpack' ).NormalModuleReplacementPlugin;
 
 /**
  * Internal dependencies
@@ -40,6 +42,7 @@ const wcAdminPackages = [
 	'data',
 	'tracks',
 	'onboarding',
+	'block-templates',
 	'product-editor',
 ];
 // wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
@@ -67,6 +70,14 @@ const wpAdminScripts = [
 	'product-import-tracking',
 	'variable-product-tour',
 	'product-category-metabox',
+	'shipping-settings-region-picker',
+	'command-palette',
+	'command-palette-analytics',
+	'woo-connect-notice',
+	'woo-plugin-update-connect-notice',
+	'woo-enable-autorenew',
+	'woo-renew-subscription',
+	'woo-subscriptions-notice',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
@@ -95,8 +106,8 @@ const webpackConfig = {
 				? `wp-admin-scripts/[name]${ outputSuffix }.js`
 				: `[name]/index${ outputSuffix }.js`;
 		},
-		chunkFilename: `chunks/[name]${ outputSuffix }.js`,
-		path: path.join( __dirname, '/../woocommerce/assets/client/admin' ),
+		chunkFilename: `chunks/[name]${ outputSuffix }.js?ver=[contenthash]`,
+		path: path.join( __dirname, '/build' ),
 		library: {
 			// Expose the exports of entry points so we can consume the libraries in window.wc.[modulename] with WooCommerceDependencyExtractionWebpackPlugin.
 			name: [ 'wc', '[modulename]' ],
@@ -167,6 +178,14 @@ const webpackConfig = {
 		},
 	},
 	plugins: [
+		// Workaround for Gutenberg private API consent string differences between WP 6.3 and 6.4+
+		// The modified version checks for the WP version and replaces the consent string with the correct one.
+		// This can be removed once we drop support for WP 6.3 in the "Customize Your Store" task.
+		// See this PR for details: https://github.com/woocommerce/woocommerce/pull/40884
+		new NormalModuleReplacementPlugin(
+			/@wordpress\/edit-site\/build-module\/lock-unlock\.js/,
+			path.resolve( __dirname, 'bin/modified-editsite-lock-unlock.js' )
+		),
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
 		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
@@ -186,7 +205,8 @@ const webpackConfig = {
 		// The package build process doesn't handle extracting CSS from JS files, so we copy them separately.
 		new CopyWebpackPlugin( {
 			patterns: wcAdminPackages.map( ( packageName ) => ( {
-				from: `../../packages/js/${ packageName }/build-style/*.css`,
+				// Copy css and style.asset.php files.
+				from: `../../packages/js/${ packageName }/build-style/*.{css,php}`,
 				to: `./${ packageName }/[name][ext]`,
 				noErrorOnMissing: true,
 				// Overwrites files already in compilation.assets to ensure we use the assets from the build-style.

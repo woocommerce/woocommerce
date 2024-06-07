@@ -4,7 +4,7 @@
 
 Welcome to the WooCommerce Monorepo on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core WooCommerce plugin as well as WooCommerce extensions. You can browse the source, look at open issues, contribute code, and keep tracking of ongoing development.
 
-We recommend all developers to follow the [WooCommerce development blog](https://woocommerce.wordpress.com/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
+We recommend all developers to follow the [WooCommerce development blog](https://developer.woocommerce.com/blog/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
 
 ## Getting Started
 
@@ -25,10 +25,10 @@ nvm use
 # Install the PHP and Composer dependencies for all of the plugins, packages, and tools
 pnpm install
 # Build all of the plugins, packages, and tools in the monorepo
-pnpm run build
+pnpm build
 ```
 
-At this point you are now ready to begin developing and testing. All of the build outputs are cached running `pnpm run build` again will only build the plugins, packages, and tools that have changed since the last time you ran the command.
+At this point you are now ready to begin developing and testing. All of the build outputs are cached running `pnpm build` again will only build the plugins, packages, and tools that have changed since the last time you ran the command.
 
 Check out [our development guide](DEVELOPMENT.md) if you would like a more comprehensive look at working in our repository.
 
@@ -47,7 +47,7 @@ To disclose a security issue to our team, [please submit a report via HackerOne 
 
 This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core WooCommerce issues only. Support can take place through the appropriate channels:
 
--   If you have a problem, you may want to start with the [self help guide](https://docs.woocommerce.com/document/woocommerce-self-service-guide/).
+-   If you have a problem, you may want to start with the [self help guide](https://woocommerce.com/document/woocommerce-self-service-guide/).
 -   The [WooCommerce.com premium support portal](https://woocommerce.com/contact-us/) for customers who have purchased themes or extensions.
 -   [Our community forum on wp.org](https://wordpress.org/support/plugin/woocommerce) which is available for all WooCommerce users.
 -   [The Official WooCommerce Facebook Group](https://www.facebook.com/groups/advanced.woocommerce).
@@ -61,4 +61,4 @@ For peer to peer support, real-time announcements, and office hours, please [joi
 
 ## Contributing to WooCommerce
 
-If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) for more information on how you can do this.
+As an open source project, we rely on community contributions to continue to improve WooCommerce. To contribute, please follow the pre-requisites above and visit our [Contributing to Woo](https://developer.woo.com/docs/category/contributing/) doc for more links and contribution guidelines.

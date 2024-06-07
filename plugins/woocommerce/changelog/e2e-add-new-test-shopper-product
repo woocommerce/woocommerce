@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Add new E2E test covering shopper product page and make Product-related tests granular (separated test files)

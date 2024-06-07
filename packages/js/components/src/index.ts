@@ -84,7 +84,7 @@ export { DynamicForm } from './dynamic-form';
 export { default as TourKit } from './tour-kit';
 export * as TourKitTypes from './tour-kit/types';
 export { CollapsibleContent } from './collapsible-content';
-export { createOrderedChildren, sortFillsByOrder } from './utils';
+export { createOrderedChildren, sortFillsByOrder, escapeHTML } from './utils';
 export { WooProductFieldItem as __experimentalWooProductFieldItem } from './woo-product-field-item';
 export { WooProductSectionItem as __experimentalWooProductSectionItem } from './woo-product-section-item';
 export { WooProductTabItem as __experimentalWooProductTabItem } from './woo-product-tab-item';
@@ -104,6 +104,7 @@ export {
 	SelectTreeMenuSlot as __experimentalSelectTreeMenuSlot,
 } from './experimental-select-tree-control';
 export { default as TreeSelectControl } from './tree-select-control';
+export { default as PhoneNumberInput } from './phone-number-input';
 
 // Exports below can be removed once the @woocommerce/product-editor package is released.
 export {
@@ -112,3 +113,4 @@ export {
 } from './product-section-layout';
 export { DisplayState } from './display-state';
 export { ProgressBar } from './progress-bar';
+export { ConfettiAnimation } from './confetti-animation';

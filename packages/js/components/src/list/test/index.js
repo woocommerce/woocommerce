@@ -113,7 +113,7 @@ describe( 'List', () => {
 					title: 'WooCommerce.com',
 					href: 'https://woocommerce.com',
 					linkType: 'external',
-					listItemTag: 'woocommerce.com-site',
+					listItemTag: 'woo.com-site',
 				},
 				{
 					title: 'WordPress.org',
@@ -134,7 +134,7 @@ describe( 'List', () => {
 			expect(
 				screen.getByRole( 'menuitem', { name: 'WooCommerce.com' } )
 					.dataset.listItemTag
-			).toBe( 'woocommerce.com-site' );
+			).toBe( 'woo.com-site' );
 			expect(
 				screen.getByRole( 'menuitem', { name: 'WordPress.org' } )
 					.dataset.listItemTag

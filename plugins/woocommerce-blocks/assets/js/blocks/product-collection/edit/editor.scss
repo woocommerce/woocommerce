@@ -1,0 +1,118 @@
+$max-columns: 3;
+$min-button-width: 250px;
+$gap-count: calc(#{$max-columns} - 1);
+$total-gap-width: calc(#{$gap-count} * #{$gap-small});
+$max-button-width: calc((100% - #{$total-gap-width}) / #{$max-columns});
+
+.wc-block-editor-product-collection-inspector-toolspanel__filters {
+	.wc-block-editor-product-collection-inspector__taxonomy-control:not(:last-child) {
+		margin-bottom: $grid-unit-30;
+	}
+}
+
+.wc-block-editor-product-collection__display-settings {
+	.components-popover__content {
+		min-width: 230px;
+	}
+}
+
+// Need to override high-specificity styles
+.wc-blocks-product-collection__placeholder.is-medium {
+	.components-placeholder__fieldset {
+		display: block;
+	}
+
+	.components-button.wc-blocks-product-collection__collection-button {
+		margin: 0;
+	}
+}
+
+.wc-blocks-product-collection__placeholder,
+.wc-blocks-product-collection__modal {
+	.wc-blocks-product-collection__selection-subtitle {
+		margin-bottom: $gap-large;
+	}
+
+	.wc-blocks-product-collection__collections-section {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(max(#{$min-button-width}, #{$max-button-width}), 1fr));
+		grid-auto-rows: 1fr;
+		grid-gap: $gap-small;
+		margin: $gap-large auto;
+		max-width: 1000px;
+		width: 100%;
+	}
+
+	.wc-blocks-product-collection__collection-button {
+		color: var(--wp-admin-theme-color);
+		display: flex;
+		align-items: flex-start;
+		height: auto;
+		border-radius: $universal-border-radius;
+		box-sizing: border-box;
+		padding: $gap-smallest $gap-small;
+		margin: 0;
+
+		&.is-primary {
+			box-shadow: 0 0 0 2px var(--wp-admin-theme-color, #3858e9);
+			color: var(--wp-admin-theme-color-darker-20);
+			background-color: var(--wc-content-bg, #fff);
+
+			&:hover {
+				background-color: var(--wc-content-bg, #fff);
+				color: var(--wp-admin-theme-color-darker-20);
+			}
+		}
+
+		.wc-blocks-product-collection__collection-button-icon {
+			margin: 1em 0;
+		}
+
+		.wc-blocks-product-collection__collection-button-text {
+			padding: 0 $gap-small;
+			text-align: left;
+			white-space: break-spaces;
+		}
+
+		.wc-blocks-product-collection__collection-button-title {
+			@include font-size(large);
+			line-height: 1;
+		}
+
+		.wc-blocks-product-collection__collection-button-description {
+			white-space: wrap;
+		}
+	}
+
+	.wc-blocks-product-collection__footer {
+		text-align: end;
+		margin: $gap-small 0;
+	}
+}
+
+// Price Range Filter
+.wc-block-product-price-range-control {
+	input {
+		text-align: end;
+	}
+}
+
+.editor-styles-wrapper .wp-block-woocommerce-product-collection .wp-block-post-title {
+	a:where(:not(.wp-element-button)) {
+		pointer-events: none;
+	}
+}
+
+// Preview mode
+.wc-block-product-collection__preview-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	transform: translateY(-100%);
+	font-family: var(--wp--preset--font-family--system-sans-serif);
+
+	&.is-primary:focus:not(:disabled) {
+		outline: none;
+		box-shadow: none;
+	}
+}

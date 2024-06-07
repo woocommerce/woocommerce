@@ -7,53 +7,25 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
+
 /**
  * Compare two operands using the specified operation.
+ *
+ * @deprecated 8.8.0
  */
-class ComparisonOperation {
+class ComparisonOperation extends DeprecatedClassFacade {
 	/**
-	 * Compare two operands using the specified operation.
+	 * The name of the non-deprecated class that this facade covers.
 	 *
-	 * @param object $left_operand  The left hand operand.
-	 * @param object $right_operand The right hand operand.
-	 * @param string $operation     The operation used to compare the operands.
+	 * @var string
 	 */
-	public static function compare( $left_operand, $right_operand, $operation ) {
-		switch ( $operation ) {
-			case '=':
-				return $left_operand === $right_operand;
-			case '<':
-				return $left_operand < $right_operand;
-			case '<=':
-				return $left_operand <= $right_operand;
-			case '>':
-				return $left_operand > $right_operand;
-			case '>=':
-				return $left_operand >= $right_operand;
-			case '!=':
-				return $left_operand !== $right_operand;
-			case 'contains':
-				if ( is_array( $left_operand ) && is_string( $right_operand ) ) {
-					return in_array( $right_operand, $left_operand, true );
-				}
-				return strpos( $right_operand, $left_operand ) !== false;
-			case '!contains':
-				if ( is_array( $left_operand ) && is_string( $right_operand ) ) {
-					return ! in_array( $right_operand, $left_operand, true );
-				}
-				return strpos( $right_operand, $left_operand ) === false;
-			case 'in':
-				if ( is_array( $right_operand ) && is_string( $left_operand ) ) {
-					return in_array( $left_operand, $right_operand, true );
-				}
-				return strpos( $left_operand, $right_operand ) !== false;
-			case '!in':
-				if ( is_array( $right_operand ) && is_string( $left_operand ) ) {
-					return ! in_array( $left_operand, $right_operand, true );
-				}
-				return strpos( $left_operand, $right_operand ) === false;
-		}
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\ComparisonOperation';
 
-		return false;
-	}
+	/**
+	 * The version that this class was deprecated in.
+	 *
+	 * @var string
+	 */
+	protected static $deprecated_in_version = '8.8.0';
 }

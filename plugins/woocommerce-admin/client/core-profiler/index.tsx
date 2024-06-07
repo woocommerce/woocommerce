@@ -1,20 +1,19 @@
-/* eslint-disable xstate/no-inline-implementation */
 /**
  * External dependencies
  */
 import {
 	createMachine,
-	ActionMeta,
 	assign,
-	DoneInvokeEvent,
-	actions,
-	spawn,
-	AnyEventObject,
-	BaseActionObject,
-	Sender,
-} from 'xstate';
-import { useMachine, useSelector } from '@xstate/react';
-import { useEffect, useMemo, useState } from '@wordpress/element';
+	fromPromise,
+	spawnChild,
+	raise,
+	assertEvent,
+	enqueueActions,
+	DoneActorEvent,
+	fromCallback,
+} from 'xstate5';
+import { useMachine, useSelector } from '@xstate5/react';
+import { useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
 import {
 	updateQueryString,
@@ -31,6 +30,8 @@ import {
 	GeolocationResponse,
 	PLUGINS_STORE_NAME,
 	SETTINGS_STORE_NAME,
+	USER_STORE_NAME,
+	WCUser,
 } from '@woocommerce/data';
 import { initializeExPlat } from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
@@ -60,7 +61,6 @@ import { Plugins } from './pages/Plugins';
 import { getPluginSlug, useFullScreen } from '~/utils';
 import './style.scss';
 import {
-	InstallationCompletedResult,
 	InstalledPlugin,
 	PluginInstallError,
 	pluginInstallerMachine,
@@ -70,67 +70,22 @@ import recordTracksActions from './actions/tracks';
 import { ComponentMeta } from './types';
 import { getCountryCode } from '~/dashboard/utils';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { useXStateInspect } from '~/xstate';
+import { useComponentFromXStateService } from '~/utils/xstate/useComponentFromService';
+import {
+	CoreProfilerEvents,
+	BusinessLocationEvent,
+	UserProfileEvent,
+	BusinessInfoEvent,
+	IntroOptInEvent,
+	PluginsInstallationRequestedEvent,
+} from './events';
 
-export type InitializationCompleteEvent = {
-	type: 'INITIALIZATION_COMPLETE';
-	payload: { optInDataSharing: boolean };
-};
-
-export type IntroOptInEvent =
-	| { type: 'INTRO_COMPLETED'; payload: { optInDataSharing: boolean } } // can be true or false depending on whether the user opted in or not
-	| { type: 'INTRO_SKIPPED'; payload: { optInDataSharing: false } }; // always false for now
-
-export type UserProfileEvent =
-	| {
-			type: 'USER_PROFILE_COMPLETED';
-			payload: {
-				userProfile: CoreProfilerStateMachineContext[ 'userProfile' ];
-			}; // TODO: fill in the types for this when developing this page
-	  }
-	| {
-			type: 'USER_PROFILE_SKIPPED';
-			payload: { userProfile: { skipped: true } };
-	  };
-
-export type BusinessInfoEvent = {
-	type: 'BUSINESS_INFO_COMPLETED';
-	payload: {
-		storeName?: string;
-		industry?: IndustryChoice;
-		storeLocation: CountryStateOption[ 'key' ];
-		geolocationOverruled: boolean;
-	};
-};
-
-export type BusinessLocationEvent = {
-	type: 'BUSINESS_LOCATION_COMPLETED';
-	payload: {
-		storeLocation: CountryStateOption[ 'key' ];
-	};
-};
-
-export type PluginsInstallationRequestedEvent = {
-	type: 'PLUGINS_INSTALLATION_REQUESTED';
-	payload: {
-		pluginsShown: string[];
-		pluginsSelected: string[];
-		pluginsUnselected: string[];
-	};
-};
-
-export type PluginsLearnMoreLinkClicked = {
-	type: 'PLUGINS_LEARN_MORE_LINK_CLICKED';
-	payload: {
-		plugin: string;
-		learnMoreLink: string;
-	};
-};
-
-export type CoreProfilerPageComponent = ( props: {
+export type CoreProfilerPageComponent = {
 	navigationProgress: number | undefined;
-	sendEvent: Sender< AnyEventObject >;
+	sendEvent: ( event: CoreProfilerEvents ) => void;
 	context: CoreProfilerStateMachineContext;
-} ) => React.ReactElement | null;
+};
 
 export type OnboardingProfile = {
 	business_choice: BusinessChoice;
@@ -139,31 +94,8 @@ export type OnboardingProfile = {
 	selling_platforms: SellingPlatform[] | null;
 	skip?: boolean;
 	is_store_country_set: boolean | null;
-};
-
-export type PluginsPageSkippedEvent = {
-	type: 'PLUGINS_PAGE_SKIPPED';
-};
-
-export type PluginInstalledAndActivatedEvent = {
-	type: 'PLUGIN_INSTALLED_AND_ACTIVATED';
-	payload: {
-		pluginsCount: number;
-		installedPluginIndex: number;
-	};
-};
-export type PluginsInstallationCompletedEvent = {
-	type: 'PLUGINS_INSTALLATION_COMPLETED';
-	payload: {
-		installationCompletedResult: InstallationCompletedResult;
-	};
-};
-
-export type PluginsInstallationCompletedWithErrorsEvent = {
-	type: 'PLUGINS_INSTALLATION_COMPLETED_WITH_ERRORS';
-	payload: {
-		errors: PluginInstallError[];
-	};
+	store_email?: string;
+	is_agree_marketing?: boolean;
 };
 
 export type CoreProfilerStateMachineContext = {
@@ -192,105 +124,96 @@ export type CoreProfilerStateMachineContext = {
 	};
 	onboardingProfile: OnboardingProfile;
 	jetpackAuthUrl?: string;
-	persistBusinessInfoRef?: ReturnType< typeof spawn >;
-	spawnUpdateOnboardingProfileOptionRef?: ReturnType< typeof spawn >;
-	spawnGeolocationRef?: ReturnType< typeof spawn >;
+	currentUserEmail: string | undefined;
 };
 
-const getAllowTrackingOption = async () =>
+const getAllowTrackingOption = fromPromise( async () =>
 	resolveSelect( OPTIONS_STORE_NAME ).getOption(
 		'woocommerce_allow_tracking'
-	);
+	)
+);
 
 const handleTrackingOption = assign( {
-	optInDataSharing: (
-		_context,
-		event: DoneInvokeEvent< 'no' | 'yes' | undefined >
-	) => event.data !== 'no',
+	optInDataSharing: ( {
+		event,
+	}: {
+		event: DoneActorEvent< 'no' | 'yes' | undefined >;
+	} ) => event.output !== 'no',
 } );
 
-const getStoreNameOption = async () =>
-	resolveSelect( OPTIONS_STORE_NAME ).getOption( 'blogname' );
+const getStoreNameOption = fromPromise( async () =>
+	resolveSelect( OPTIONS_STORE_NAME ).getOption( 'blogname' )
+);
 
 const handleStoreNameOption = assign( {
-	businessInfo: (
-		context: CoreProfilerStateMachineContext,
-		event: DoneInvokeEvent< string | undefined >
-	) => {
+	businessInfo: ( {
+		context,
+		event,
+	}: {
+		context: CoreProfilerStateMachineContext;
+		event: DoneActorEvent< string | undefined >;
+	} ) => {
 		return {
 			...context.businessInfo,
-			storeName: POSSIBLY_DEFAULT_STORE_NAMES.includes( event.data ) // if its empty or the default, show empty to the user
+			storeName: POSSIBLY_DEFAULT_STORE_NAMES.includes( event.output ) // if its empty or the default, show empty to the user
 				? undefined
-				: event.data,
+				: event.output,
 		};
 	},
 } );
 
-const getStoreCountryOption = async () =>
+const getStoreCountryOption = fromPromise( async () =>
 	resolveSelect( OPTIONS_STORE_NAME ).getOption(
 		'woocommerce_default_country'
-	);
+	)
+);
 
 const handleStoreCountryOption = assign( {
-	businessInfo: (
-		context: CoreProfilerStateMachineContext,
-		event: DoneInvokeEvent< string | undefined >
-	) => {
+	businessInfo: ( {
+		context,
+		event,
+	}: {
+		context: CoreProfilerStateMachineContext;
+		event: DoneActorEvent< string | undefined >;
+	} ) => {
 		return {
 			...context.businessInfo,
-			location: event.data,
+			location: event.output,
 		};
 	},
 } );
 
-/**
- * Prefetch it so that @wp/data caches it and there won't be a loading delay when its used
- */
-const preFetchGetCountries = assign( {
-	spawnGetCountriesRef: () =>
-		spawn(
-			() => resolveSelect( COUNTRIES_STORE_NAME ).getCountries(),
-			'core-profiler-prefetch-countries'
+const preFetchOptions = fromPromise( async ( { input }: { input: string[] } ) =>
+	Promise.all( [
+		input.map( ( optionName: string ) =>
+			resolveSelect( OPTIONS_STORE_NAME ).getOption( optionName )
 		),
-} );
+	] )
+);
 
-const preFetchOptions = assign( {
-	spawnPrefetchOptionsRef: ( _context, _event, { action } ) => {
-		spawn(
-			() =>
-				Promise.all( [
-					// @ts-expect-error -- not sure its possible to type this yet, maybe in xstate v5
-					action.options.map( ( optionName: string ) =>
-						resolveSelect( OPTIONS_STORE_NAME ).getOption(
-							optionName
-						)
-					),
-				] ),
-			'core-profiler-prefetch-options'
-		);
-	},
-} );
-
-const getCountries = async () =>
-	resolveSelect( COUNTRIES_STORE_NAME ).getCountries();
+const getCountries = fromPromise( async () =>
+	resolveSelect( COUNTRIES_STORE_NAME ).getCountries()
+);
 
 const handleCountries = assign( {
-	countries: ( _context, event: DoneInvokeEvent< Country[] > ) => {
-		return getCountryStateOptions( event.data );
+	countries: ( { event }: { event: DoneActorEvent< Country[] > } ) => {
+		return getCountryStateOptions( event.output );
 	},
 } );
 
-const getOnboardingProfileOption = async () =>
+const getOnboardingProfileOption = fromPromise( async () =>
 	resolveSelect( OPTIONS_STORE_NAME ).getOption(
 		'woocommerce_onboarding_profile'
-	);
+	)
+);
 
 const handleOnboardingProfileOption = assign( {
-	userProfile: (
-		_context,
-		event: DoneInvokeEvent< OnboardingProfile | undefined >
-	) => {
-		if ( ! event.data ) {
+	userProfile: ( {
+		event,
+	}: {
+		event: DoneActorEvent< OnboardingProfile | undefined >;
+	} ) => {
+		if ( ! event.output ) {
 			return {};
 		}
 
@@ -299,7 +222,7 @@ const handleOnboardingProfileOption = assign( {
 			selling_online_answer: sellingOnlineAnswer,
 			selling_platforms: sellingPlatforms,
 			...rest
-		} = event.data;
+		} = event.output;
 		return {
 			...rest,
 			businessChoice,
@@ -309,48 +232,76 @@ const handleOnboardingProfileOption = assign( {
 	},
 } );
 
-const assignOnboardingProfile = assign( {
-	onboardingProfile: (
-		_context,
-		event: DoneInvokeEvent< OnboardingProfile | undefined >
-	) => event.data,
+const getCurrentUserEmail = fromPromise( async () => {
+	const currentUser: WCUser< 'email' > = await resolveSelect(
+		USER_STORE_NAME
+	).getCurrentUser();
+	return currentUser?.email;
 } );
 
-const getGeolocation = async ( context: CoreProfilerStateMachineContext ) => {
-	if ( context.optInDataSharing ) {
-		return resolveSelect( COUNTRIES_STORE_NAME ).geolocate();
-	}
-	return undefined;
-};
-
-const preFetchGeolocation = assign( {
-	spawnGeolocationRef: ( context: CoreProfilerStateMachineContext ) =>
-		spawn(
-			() => getGeolocation( context ),
-			'core-profiler-prefetch-geolocation'
-		),
-} );
-
-const handleGeolocation = assign( {
-	geolocatedLocation: (
-		_context,
-		event: DoneInvokeEvent< GeolocationResponse >
-	) => {
-		return event.data;
+const assignCurrentUserEmail = assign( {
+	currentUserEmail: ( {
+		event,
+	}: {
+		event: DoneActorEvent< string | undefined >;
+	} ) => {
+		if (
+			event.output &&
+			event.output.length > 0 &&
+			event.output !== 'wordpress@example.com' // wordpress default prefilled email address
+		) {
+			return event.output;
+		}
+		return undefined;
 	},
 } );
 
-const redirectToWooHome = () => {
-	window.location.href = getNewPath( {}, '/', {} );
-};
+const assignOnboardingProfile = assign( {
+	onboardingProfile: ( {
+		event,
+	}: {
+		event: DoneActorEvent< OnboardingProfile | undefined >;
+	} ) => event.output,
+} );
 
-const redirectToJetpackAuthPage = (
-	_context: CoreProfilerStateMachineContext,
-	event: { data: { url: string } }
-) => {
-	const url = new URL( event.data.url );
+const getGeolocation = fromPromise(
+	async ( { input }: { input: CoreProfilerStateMachineContext } ) => {
+		if ( input.optInDataSharing ) {
+			return resolveSelect( COUNTRIES_STORE_NAME ).geolocate();
+		}
+		return undefined;
+	}
+);
+
+const handleGeolocation = assign( {
+	geolocatedLocation: ( {
+		event,
+	}: {
+		event: DoneActorEvent< GeolocationResponse >;
+	} ) => {
+		return event.output;
+	},
+} );
+
+const redirectToWooHome = raise( { type: 'REDIRECT_TO_WOO_HOME' } );
+
+const exitToWooHome = fromPromise( async () => {
+	if ( window.wcAdminFeatures[ 'launch-your-store' ] ) {
+		await dispatch( ONBOARDING_STORE_NAME ).coreProfilerCompleted();
+	}
+	window.location.href = getNewPath( {}, '/', {} );
+} );
+
+const redirectToJetpackAuthPage = ( {
+	context,
+	event,
+}: {
+	context: CoreProfilerStateMachineContext;
+	event: { output: { url: string } };
+} ) => {
+	const url = new URL( event.output.url );
 	url.searchParams.set( 'installed_ext_success', '1' );
-	const selectedPlugin = _context.pluginsSelected.find(
+	const selectedPlugin = context.pluginsSelected.find(
 		( plugin ) => plugin === 'jetpack' || plugin === 'jetpack-boost'
 	);
 
@@ -363,58 +314,48 @@ const redirectToJetpackAuthPage = (
 	window.location.href = url.toString();
 };
 
-const updateTrackingOption = async (
-	context: CoreProfilerStateMachineContext
-) => {
-	await new Promise< void >( ( resolve ) => {
-		if (
-			context.optInDataSharing &&
-			typeof window.wcTracks.enable === 'function'
-		) {
-			window.wcTracks.enable( () => {
-				initializeExPlat();
-				resolve(); // resolve the promise only after explat is enabled by the callback
-			} );
-		} else {
-			if ( ! context.optInDataSharing ) {
-				window.wcTracks.isEnabled = false;
+const updateTrackingOption = fromPromise(
+	async ( { input }: { input: CoreProfilerStateMachineContext } ) => {
+		await new Promise< void >( ( resolve ) => {
+			setTimeout( resolve, 500 );
+			if (
+				input.optInDataSharing &&
+				typeof window.wcTracks.enable === 'function'
+			) {
+				window.wcTracks.enable( () => {
+					initializeExPlat();
+					resolve(); // resolve the promise only after explat is enabled by the callback
+				} );
+			} else {
+				if ( ! input.optInDataSharing ) {
+					window.wcTracks.isEnabled = false;
+				}
+				resolve();
 			}
-			resolve();
-		}
-	} );
+		} );
 
-	const trackingValue = context.optInDataSharing ? 'yes' : 'no';
-	dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-		woocommerce_allow_tracking: trackingValue,
-	} );
-};
+		const trackingValue = input.optInDataSharing ? 'yes' : 'no';
+		dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+			woocommerce_allow_tracking: trackingValue,
+		} );
+	}
+);
 
-// TODO: move the data references over to the context.onboardingProfile object which stores the entire woocommerce_onboarding_profile contents
-const updateOnboardingProfileOption = (
-	context: CoreProfilerStateMachineContext
-) => {
-	const { businessChoice, sellingOnlineAnswer, sellingPlatforms } =
-		context.userProfile;
+const updateOnboardingProfileOption = fromPromise(
+	async ( { input }: { input: CoreProfilerStateMachineContext } ) => {
+		const { businessChoice, sellingOnlineAnswer, sellingPlatforms } =
+			input.userProfile;
 
-	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-		woocommerce_onboarding_profile: {
-			...context.onboardingProfile,
-			business_choice: businessChoice,
-			selling_online_answer: sellingOnlineAnswer,
-			selling_platforms: sellingPlatforms,
-		},
-	} );
-};
-
-const spawnUpdateOnboardingProfileOption = assign( {
-	spawnUpdateOnboardingProfileOptionRef: (
-		context: CoreProfilerStateMachineContext
-	) =>
-		spawn(
-			() => updateOnboardingProfileOption( context ),
-			'update-onboarding-profile'
-		),
-} );
+		return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+			woocommerce_onboarding_profile: {
+				...input.onboardingProfile,
+				business_choice: businessChoice,
+				selling_online_answer: sellingOnlineAnswer,
+				selling_platforms: sellingPlatforms,
+			},
+		} );
+	}
+);
 
 const updateBusinessLocation = ( countryAndState: string ) => {
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
@@ -466,10 +407,13 @@ const updateStoreCurrency = async ( countryAndState: string ) => {
 };
 
 const assignStoreLocation = assign( {
-	businessInfo: (
-		context: CoreProfilerStateMachineContext,
-		event: BusinessLocationEvent
-	) => {
+	businessInfo: ( {
+		event,
+		context,
+	}: {
+		context: CoreProfilerStateMachineContext;
+		event: BusinessLocationEvent;
+	} ) => {
 		return {
 			...context.businessInfo,
 			location: event.payload.storeLocation,
@@ -478,41 +422,38 @@ const assignStoreLocation = assign( {
 } );
 
 const assignUserProfile = assign( {
-	userProfile: ( context, event: UserProfileEvent ) =>
-		event.payload.userProfile, // sets context.userProfile to the payload of the event
+	userProfile: ( { event }: { event: UserProfileEvent } ) =>
+		event.payload.userProfile,
 } );
 
-const updateBusinessInfo = async (
-	_context: CoreProfilerStateMachineContext,
-	event: AnyEventObject
-) => {
-	const refreshedOnboardingProfile = ( await resolveSelect(
-		OPTIONS_STORE_NAME
-	).getOption( 'woocommerce_onboarding_profile' ) ) as OnboardingProfile;
+const updateBusinessInfo = fromPromise(
+	async ( {
+		input,
+	}: {
+		input: { payload: BusinessInfoEvent[ 'payload' ] };
+	} ) => {
+		const refreshedOnboardingProfile = ( await resolveSelect(
+			OPTIONS_STORE_NAME
+		).getOption( 'woocommerce_onboarding_profile' ) ) as OnboardingProfile;
 
-	await updateStoreCurrency( event.payload.storeLocation );
+		await updateStoreCurrency( input.payload.storeLocation );
 
-	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-		blogname: event.payload.storeName,
-		woocommerce_default_country: event.payload.storeLocation,
-		woocommerce_onboarding_profile: {
-			...refreshedOnboardingProfile,
-			is_store_country_set: true,
-			industry: [ event.payload.industry ],
-		},
-	} );
-};
-
-const persistBusinessInfo = assign( {
-	persistBusinessInfoRef: (
-		context: CoreProfilerStateMachineContext,
-		event: BusinessInfoEvent
-	) =>
-		spawn(
-			() => updateBusinessInfo( context, event ),
-			'core-profiler-update-business-info'
-		),
-} );
+		return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+			blogname: input.payload.storeName,
+			woocommerce_default_country: input.payload.storeLocation,
+			woocommerce_onboarding_profile: {
+				...refreshedOnboardingProfile,
+				is_store_country_set: true,
+				industry: [ input.payload.industry ],
+				is_agree_marketing: input.payload.isOptInMarketing,
+				store_email:
+					input.payload.storeEmailAddress.length > 0
+						? input.payload.storeEmailAddress
+						: null,
+			},
+		} );
+	}
+);
 
 const promiseDelay = ( milliseconds: number ) => {
 	return new Promise( ( resolve ) => {
@@ -520,46 +461,37 @@ const promiseDelay = ( milliseconds: number ) => {
 	} );
 };
 
-/**
- * Assigns the optInDataSharing value from the event payload to the context
- */
 const assignOptInDataSharing = assign( {
-	optInDataSharing: ( _context, event: IntroOptInEvent ) =>
+	optInDataSharing: ( { event }: { event: IntroOptInEvent } ) =>
 		event.payload.optInDataSharing,
 } );
 
 const preFetchIsJetpackConnected = assign( {
-	isJetpackConnectedRef: () =>
+	isJetpackConnectedRef: ( { spawn } ) =>
 		spawn(
-			() => resolveSelect( PLUGINS_STORE_NAME ).isJetpackConnected(),
-			'core-profiler-prefetch-is-jetpack-connected'
+			fromPromise( async () =>
+				resolveSelect( PLUGINS_STORE_NAME ).isJetpackConnected()
+			)
 		),
 } );
 
 const preFetchJetpackAuthUrl = assign( {
-	jetpackAuthUrlRef: () =>
+	jetpackAuthUrlRef: ( { spawn } ) =>
 		spawn(
-			() =>
+			fromPromise( async () =>
 				resolveSelect( ONBOARDING_STORE_NAME ).getJetpackAuthUrl( {
 					redirectUrl: getAdminLink( 'admin.php?page=wc-admin' ),
 					from: 'woocommerce-core-profiler',
-				} ),
-			'core-profiler-prefetch-jetpack-auth-url'
+				} )
+			)
 		),
 } );
 
-/**
- * Prefetch it so that @wp/data caches it and there won't be a loading delay when its used
- */
-const preFetchGetPlugins = assign( {
-	extensionsRef: () =>
-		spawn(
-			() => resolveSelect( ONBOARDING_STORE_NAME ).getFreeExtensions(),
-			'core-profiler-prefetch-extensions'
-		),
-} );
+const preFetchGetPlugins = fromPromise( async () =>
+	resolveSelect( ONBOARDING_STORE_NAME ).getFreeExtensions()
+);
 
-const getPlugins = async () => {
+const getPlugins = fromPromise( async () => {
 	dispatch( ONBOARDING_STORE_NAME ).invalidateResolution(
 		'getFreeExtensions'
 	);
@@ -571,59 +503,93 @@ const getPlugins = async () => {
 			( bundle ) => bundle.key === 'obw/core-profiler'
 		)?.plugins || []
 	);
-};
+} );
 
-/** Special callback that is used to trigger a navigation event if the user uses the browser's back or foward buttons */
-const browserPopstateHandler = () => ( sendBack: Sender< AnyEventObject > ) => {
+/** Special callback that is used to trigger a navigation event if the user uses the browser's back or forward buttons */
+const browserPopstateHandler = fromCallback( ( { sendBack } ) => {
 	const popstateHandler = () => {
-		sendBack( 'EXTERNAL_URL_UPDATE' );
+		sendBack( { type: 'EXTERNAL_URL_UPDATE' } );
 	};
 	window.addEventListener( 'popstate', popstateHandler );
 	return () => {
 		window.removeEventListener( 'popstate', popstateHandler );
 	};
-};
-
-const handlePlugins = assign< CoreProfilerStateMachineContext >( {
-	pluginsAvailable: ( _context, event ) =>
-		( event as DoneInvokeEvent< Extension[] > ).data,
 } );
 
-export type CoreProfilerMachineAssign = (
-	ctx: CoreProfilerStateMachineContext,
-	evt: AnyEventObject,
-	{
-		action: { step },
-	}: ActionMeta<
-		CoreProfilerStateMachineContext,
-		AnyEventObject,
-		BaseActionObject
-	>
-) => void;
+const handlePlugins = assign( {
+	pluginsAvailable: ( {
+		event,
+	}: {
+		event: DoneActorEvent< Extension[] >;
+	} ) => {
+		return event.output;
+	},
+} );
 
-const updateQueryStep: CoreProfilerMachineAssign = (
-	_context,
-	_evt,
-	{ action }
-) => {
+const updateQueryStep = ( _: unknown, params: { step: string } ) => {
 	const { step } = getQuery() as { step: string };
 	// only update the query string if it has changed
-	if ( action.step !== step ) {
-		updateQueryString( { step: action.step } );
+	if ( params.step !== step ) {
+		updateQueryString( { step: params.step } );
 	}
 };
 
 const assignPluginsSelected = assign( {
-	pluginsSelected: ( _context, event: PluginsInstallationRequestedEvent ) => {
+	pluginsSelected: ( {
+		event,
+	}: {
+		event: PluginsInstallationRequestedEvent;
+	} ) => {
 		return event.payload.pluginsSelected.map( getPluginSlug );
 	},
 } );
 
+const updateLoaderProgressWithPluginInstall = assign( {
+	loader: ( { event } ) => {
+		assertEvent( event, 'PLUGIN_INSTALLED_AND_ACTIVATED' );
+		const progress = event.payload.progressPercentage;
+
+		let stageIndex = 0;
+
+		if ( progress > 60 ) {
+			stageIndex = 2;
+		} else if ( progress > 30 ) {
+			stageIndex = 1;
+		}
+
+		return {
+			useStages: 'plugins',
+			progress,
+			stageIndex,
+		};
+	},
+} );
+
+const skipFlowUpdateBusinessLocation = fromPromise(
+	async ( {
+		input: context,
+	}: {
+		input: CoreProfilerStateMachineContext;
+	} ) => {
+		const skipped = dispatch( ONBOARDING_STORE_NAME ).updateProfileItems( {
+			skipped: true,
+		} );
+		const businessLocation = updateBusinessLocation(
+			context.businessInfo.location as string
+		);
+		const currencyUpdate = updateStoreCurrency(
+			context.businessInfo.location as string
+		);
+
+		return Promise.all( [ skipped, businessLocation, currencyUpdate ] );
+	}
+);
+
+export const getJetpackIsConnected = fromPromise( async () => {
+	return resolveSelect( PLUGINS_STORE_NAME ).isJetpackConnected();
+} );
+
 export const preFetchActions = {
-	preFetchGetPlugins,
-	preFetchGetCountries,
-	preFetchGeolocation,
-	preFetchOptions,
 	preFetchIsJetpackConnected,
 	preFetchJetpackAuthUrl,
 };
@@ -644,34 +610,49 @@ const coreProfilerMachineActions = {
 	handleCountries,
 	handleOnboardingProfileOption,
 	assignOnboardingProfile,
-	persistBusinessInfo,
-	spawnUpdateOnboardingProfileOption,
+	assignCurrentUserEmail,
 	redirectToWooHome,
 	redirectToJetpackAuthPage,
+	updateLoaderProgressWithPluginInstall,
 };
 
-const coreProfilerMachineServices = {
+const coreProfilerMachineActors = {
+	preFetchGetPlugins,
+	preFetchOptions,
 	getAllowTrackingOption,
 	getStoreNameOption,
 	getStoreCountryOption,
 	getCountries,
 	getGeolocation,
 	getOnboardingProfileOption,
+	getCurrentUserEmail,
 	getPlugins,
+	getJetpackIsConnected,
 	browserPopstateHandler,
 	updateBusinessInfo,
 	updateTrackingOption,
+	updateOnboardingProfileOption,
+	skipFlowUpdateBusinessLocation,
+	pluginInstallerMachine,
+	exitToWooHome,
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
 	initial: 'navigate',
-	predictableActionArguments: true, // recommended setting: https://xstate.js.org/docs/guides/actions.html
+	types: {} as {
+		context: CoreProfilerStateMachineContext;
+		events: CoreProfilerEvents;
+	},
 	invoke: {
+		id: 'browserPopstateHandler',
 		src: 'browserPopstateHandler',
 	},
 	on: {
 		EXTERNAL_URL_UPDATE: {
-			target: 'navigate',
+			target: '#navigate',
+		},
+		REDIRECT_TO_WOO_HOME: {
+			target: '#redirectingToWooHome',
 		},
 	},
 	context: {
@@ -693,9 +674,11 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		loader: {},
 		onboardingProfile: {} as OnboardingProfile,
 		jetpackAuthUrl: undefined,
+		currentUserEmail: undefined,
 	} as CoreProfilerStateMachineContext,
 	states: {
 		navigate: {
+			id: 'navigate',
 			always: [
 				/**
 				 * The 'navigate' state forwards the progress to whichever step is
@@ -712,26 +695,38 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				 */
 				{
 					target: '#introOptIn',
-					cond: {
+					guard: {
 						type: 'hasStepInUrl',
-						step: 'intro-opt-in',
+						params: { step: 'intro-opt-in' },
 					},
 				},
 				{
 					target: '#userProfile',
-					cond: { type: 'hasStepInUrl', step: 'user-profile' },
+					guard: {
+						type: 'hasStepInUrl',
+						params: { step: 'user-profile' },
+					},
 				},
 				{
 					target: '#businessInfo',
-					cond: { type: 'hasStepInUrl', step: 'business-info' },
+					guard: {
+						type: 'hasStepInUrl',
+						params: { step: 'business-info' },
+					},
 				},
 				{
 					target: '#plugins',
-					cond: { type: 'hasStepInUrl', step: 'plugins' },
+					guard: {
+						type: 'hasStepInUrl',
+						params: { step: 'plugins' },
+					},
 				},
 				{
 					target: '#skipGuidedSetup',
-					cond: { type: 'hasStepInUrl', step: 'skip-guided-setup' },
+					guard: {
+						type: 'hasStepInUrl',
+						params: { step: 'skip-guided-setup' },
+					},
 				},
 				{
 					target: 'introOptIn',
@@ -745,16 +740,16 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				preIntroOptIn: {
 					entry: [
 						// these prefetch tasks are spawned actors in the background and do not block progression of the state machine
-						'preFetchGetPlugins',
-						'preFetchGetCountries',
-						{
-							type: 'preFetchOptions',
-							options: [
+						spawnChild( 'preFetchGetPlugins' ),
+						spawnChild( 'getCountries' ),
+						spawnChild( 'preFetchOptions', {
+							id: 'prefetch-options',
+							input: [
 								'blogname',
 								'woocommerce_onboarding_profile',
 								'woocommerce_default_country',
 							],
-						},
+						} ),
 					],
 					type: 'parallel',
 					states: {
@@ -765,6 +760,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							states: {
 								fetching: {
 									invoke: {
+										systemId: 'getAllowTrackingOption',
 										src: 'getAllowTrackingOption',
 										onDone: [
 											{
@@ -803,7 +799,16 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							target: '#skipGuidedSetup',
 							actions: [
 								'assignOptInDataSharing',
-								'updateTrackingOption',
+								spawnChild( 'updateTrackingOption ', {
+									input: ( {
+										event,
+									}: {
+										event: CoreProfilerEvents;
+									} ) => {
+										assertEvent( event, 'INTRO_SKIPPED' );
+										return event.payload;
+									},
+								} ),
 							],
 						},
 					},
@@ -815,7 +820,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				postIntroOptIn: {
 					invoke: {
 						src: 'updateTrackingOption',
+						input: ( { context } ) => context,
 						onDone: {
+							actions: [ 'recordTracksIntroCompleted' ],
+							target: '#userProfile',
+						},
+						onError: {
 							actions: [ 'recordTracksIntroCompleted' ],
 							target: '#userProfile',
 						},
@@ -852,41 +862,49 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					entry: [
 						{
 							type: 'recordTracksStepViewed',
-							step: 'user_profile',
+							params: { step: 'user_profile' },
 						},
-						{ type: 'updateQueryStep', step: 'user-profile' },
-						'preFetchGeolocation',
+						{
+							type: 'updateQueryStep',
+							params: { step: 'user-profile' },
+						},
+						spawnChild( 'getGeolocation', {
+							input: ( {
+								context,
+							}: {
+								context: CoreProfilerStateMachineContext;
+							} ) => context,
+						} ),
 					],
 					on: {
 						USER_PROFILE_COMPLETED: {
 							target: 'postUserProfile',
-							actions: [ 'assignUserProfile' ],
+							actions: [
+								'assignUserProfile',
+								{ type: 'recordTracksUserProfileCompleted' },
+							],
 						},
 						USER_PROFILE_SKIPPED: {
 							target: 'postUserProfile',
-							actions: [ 'assignUserProfile' ],
-						},
-					},
-					exit: actions.choose( [
-						{
-							cond: ( _context, event ) =>
-								event.type === 'USER_PROFILE_COMPLETED',
-							actions: 'recordTracksUserProfileCompleted',
-						},
-						{
-							cond: ( _context, event ) =>
-								event.type === 'USER_PROFILE_SKIPPED',
 							actions: [
+								'assignUserProfile',
 								{
 									type: 'recordTracksStepSkipped',
-									step: 'user_profile',
+									params: { step: 'user_profile' },
 								},
 							],
 						},
-					] ),
+					},
 				},
 				postUserProfile: {
-					entry: [ 'spawnUpdateOnboardingProfileOption' ],
+					entry: spawnChild( 'updateOnboardingProfileOption', {
+						id: 'updateOnboardingProfileOption',
+						input: ( {
+							context,
+						}: {
+							context: CoreProfilerStateMachineContext;
+						} ) => context,
+					} ),
 					always: {
 						target: '#businessInfo',
 					},
@@ -896,7 +914,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		businessInfo: {
 			id: 'businessInfo',
 			initial: 'preBusinessInfo',
-			entry: [ { type: 'updateQueryStep', step: 'business-info' } ],
+			entry: [
+				{ type: 'updateQueryStep', params: { step: 'business-info' } },
+			],
 			states: {
 				preBusinessInfo: {
 					type: 'parallel',
@@ -922,6 +942,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								},
 								fetching: {
 									invoke: {
+										input: ( { context } ) => context,
 										src: 'getGeolocation',
 										onDone: {
 											target: 'done',
@@ -1014,10 +1035,33 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							states: {
 								fetching: {
 									invoke: {
+										systemId: 'getCountries',
 										src: 'getCountries',
 										onDone: {
 											target: 'done',
 											actions: 'handleCountries',
+										},
+									},
+								},
+								done: {
+									type: 'final',
+								},
+							},
+						},
+						currentUserEmail: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										src: 'getCurrentUserEmail',
+										onDone: {
+											target: 'done',
+											actions: [
+												'assignCurrentUserEmail',
+											],
+										},
+										onError: {
+											target: 'done',
 										},
 									},
 								},
@@ -1040,19 +1084,23 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					entry: [
 						{
 							type: 'recordTracksStepViewed',
-							step: 'business_info',
+							params: { step: 'business_info' },
 						},
 					],
 					on: {
 						BUSINESS_INFO_COMPLETED: {
 							target: 'postBusinessInfo',
-							actions: [ 'recordTracksBusinessInfoCompleted' ],
+							actions: [
+								'recordTracksBusinessInfoCompleted',
+								'recordTracksIsEmailChanged',
+							],
 						},
 					},
 				},
 				postBusinessInfo: {
 					invoke: {
 						src: 'updateBusinessInfo',
+						input: ( { event } ) => event,
 						onDone: {
 							target: '#plugins',
 						},
@@ -1066,7 +1114,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		skipGuidedSetup: {
 			id: 'skipGuidedSetup',
 			initial: 'preSkipFlowBusinessLocation',
-			entry: [ { type: 'updateQueryStep', step: 'skip-guided-setup' } ],
+			entry: [
+				{
+					type: 'updateQueryStep',
+					params: { step: 'skip-guided-setup' },
+				},
+			],
 			states: {
 				preSkipFlowBusinessLocation: {
 					invoke: {
@@ -1095,7 +1148,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					entry: [
 						{
 							type: 'recordTracksStepViewed',
-							step: 'skip_business_location',
+							params: { step: 'skip_business_location' },
 						},
 					],
 					meta: {
@@ -1114,34 +1167,15 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								},
 							} ),
 							invoke: {
-								src: ( context ) => {
-									const skipped = dispatch(
-										ONBOARDING_STORE_NAME
-									).updateProfileItems( {
-										skipped: true,
-									} );
-									const businessLocation =
-										updateBusinessLocation(
-											context.businessInfo
-												.location as string
-										);
-									const currencyUpdate = updateStoreCurrency(
-										context.businessInfo.location as string
-									);
-
-									return Promise.all( [
-										skipped,
-										businessLocation,
-										currencyUpdate,
-									] );
-								},
+								input: ( { context } ) => context,
+								src: 'skipFlowUpdateBusinessLocation',
 								onDone: {
 									target: 'progress20',
 								},
 							},
 						},
 						// Although we don't need to wait 3 seconds for the following states
-						// We will dispaly 20% and 80% progress for 1.5 seconds each
+						// We will display 20% and 80% progress for 1.5 seconds each
 						// for the sake of user experience.
 						progress20: {
 							entry: assign( {
@@ -1150,11 +1184,8 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 									useStages: 'skippedGuidedSetup',
 								},
 							} ),
-							invoke: {
-								src: () => {
-									return promiseDelay( 1500 );
-								},
-								onDone: {
+							after: {
+								1500: {
 									target: 'progress80',
 								},
 							},
@@ -1167,11 +1198,8 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 									stageIndex: 1,
 								},
 							} ),
-							invoke: {
-								src: () => {
-									return promiseDelay( 1500 );
-								},
-								onDone: {
+							after: {
+								1500: {
 									actions: [ 'redirectToWooHome' ],
 								},
 							},
@@ -1193,27 +1221,29 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: [
 							{
 								target: 'pluginsSkipped',
-								cond: ( _context, event ) => {
+								guard: ( {
+									event,
+								}: {
+									event: DoneActorEvent< Extension[] >;
+								} ) => {
 									// Skip the plugins page
 									// When there is 0 plugin returned from the server
 									// Or all the plugins are activated already.
-									return event.data?.every(
-										( plugin: Extension ) =>
-											plugin.is_activated
+									return (
+										event.output.length === 0 ||
+										event.output.every(
+											( plugin: Extension ) =>
+												plugin.is_activated
+										)
 									);
 								},
 							},
 							{ target: 'plugins', actions: 'handlePlugins' },
 						],
+						onError: {
+							target: 'pluginsSkipped',
+						},
 					},
-					// add exit action to filter the extensions using a custom function here and assign it to context.extensionsAvailable
-					exit: assign( {
-						pluginsAvailable: ( context ) => {
-							return context.pluginsAvailable.filter(
-								() => true
-							);
-						}, // TODO : define an extensible filter function here
-					} ),
 					meta: {
 						progress: 70,
 					},
@@ -1225,7 +1255,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					} ),
 					invoke: {
-						src: () => {
+						src: fromPromise( () => {
 							dispatch(
 								ONBOARDING_STORE_NAME
 							).updateProfileItems( {
@@ -1233,11 +1263,11 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								completed: true,
 							} );
 							return promiseDelay( 3000 );
-						},
+						} ),
 						onDone: [
 							{
 								target: 'isJetpackConnected',
-								cond: 'hasJetpackSelected',
+								guard: 'hasJetpackSelected',
 							},
 							{ actions: [ 'redirectToWooHome' ] },
 						],
@@ -1248,15 +1278,21 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				},
 				plugins: {
 					entry: [
-						{ type: 'recordTracksStepViewed', step: 'plugins' },
-						{ type: 'updateQueryStep', step: 'plugins' },
+						{
+							type: 'recordTracksStepViewed',
+							params: { step: 'plugins' },
+						},
+						{
+							type: 'updateQueryStep',
+							params: { step: 'plugins' },
+						},
 					],
 					on: {
 						PLUGINS_PAGE_SKIPPED: {
 							actions: [
 								{
 									type: 'recordTracksStepSkipped',
-									step: 'plugins',
+									params: { step: 'plugins' },
 								},
 							],
 							target: 'pluginsSkipped',
@@ -1265,7 +1301,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							actions: [
 								{
 									type: 'recordTracksPluginsLearnMoreLinkClicked',
-									step: 'plugins',
+									params: { step: 'plugins' },
 								},
 							],
 						},
@@ -1284,7 +1320,14 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				},
 				postPluginInstallation: {
 					invoke: {
-						src: async ( _context, event ) => {
+						input: ( { event } ) => {
+							assertEvent(
+								event,
+								'PLUGINS_INSTALLATION_COMPLETED'
+							);
+							return event;
+						},
+						src: fromPromise( async ( { input: event } ) => {
 							return await dispatch(
 								ONBOARDING_STORE_NAME
 							).updateProfileItems( {
@@ -1295,11 +1338,11 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 									),
 								completed: true,
 							} );
-						},
+						} ),
 						onDone: [
 							{
 								target: 'isJetpackConnected',
-								cond: 'hasJetpackSelected',
+								guard: 'hasJetpackSelected',
 							},
 							{ actions: 'redirectToWooHome' },
 						],
@@ -1311,16 +1354,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				},
 				isJetpackConnected: {
 					invoke: {
-						src: async () => {
-							return await resolveSelect(
-								PLUGINS_STORE_NAME
-							).isJetpackConnected();
-						},
+						src: 'getJetpackIsConnected',
 						onDone: [
 							{
 								target: 'sendToJetpackAuthPage',
-								cond: ( _context, event ) => {
-									return ! event.data;
+								guard: ( { event } ) => {
+									return ! event.output.data;
 								},
 							},
 							{ actions: 'redirectToWooHome' },
@@ -1333,28 +1372,37 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				},
 				sendToJetpackAuthPage: {
 					invoke: {
-						src: async () =>
-							await resolveSelect(
+						src: fromPromise( async () => {
+							if (
+								window.wcAdminFeatures[ 'launch-your-store' ]
+							) {
+								await dispatch(
+									ONBOARDING_STORE_NAME
+								).coreProfilerCompleted();
+							}
+							return await resolveSelect(
 								ONBOARDING_STORE_NAME
 							).getJetpackAuthUrl( {
 								redirectUrl: getAdminLink(
 									'admin.php?page=wc-admin'
 								),
 								from: 'woocommerce-core-profiler',
-							} ),
+							} );
+						} ),
 						onDone: {
-							actions: actions.choose( [
-								{
-									cond: ( _context, event ) =>
-										event.data.success === true,
-									actions: 'redirectToJetpackAuthPage',
-								},
-								{
-									cond: ( _context, event ) =>
-										event.data.success === false,
-									actions: 'redirectToWooHome',
-								},
-							] ),
+							actions: enqueueActions( ( { enqueue, check } ) => {
+								if (
+									check(
+										( { event } ) => event.output.success
+									)
+								) {
+									enqueue( {
+										type: 'redirectToJetpackAuthPage',
+									} );
+								} else {
+									enqueue( { type: 'redirectToWooHome' } );
+								}
+							} ),
 						},
 					},
 					meta: {
@@ -1366,43 +1414,15 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					on: {
 						PLUGIN_INSTALLED_AND_ACTIVATED: {
 							actions: [
-								assign( {
-									loader: (
-										_context,
-										event: PluginInstalledAndActivatedEvent
-									) => {
-										const progress = Math.round(
-											( event.payload
-												.installedPluginIndex /
-												event.payload.pluginsCount ) *
-												100
-										);
-
-										let stageIndex = 0;
-
-										if ( progress > 60 ) {
-											stageIndex = 2;
-										} else if ( progress > 30 ) {
-											stageIndex = 1;
-										}
-
-										return {
-											useStages: 'plugins',
-											progress,
-											stageIndex,
-										};
-									},
-								} ),
+								'updateLoaderProgressWithPluginInstall',
 							],
 						},
 						PLUGINS_INSTALLATION_COMPLETED_WITH_ERRORS: {
 							target: 'prePlugins',
 							actions: [
 								assign( {
-									pluginsInstallationErrors: (
-										_context,
-										event
-									) => event.payload.errors,
+									pluginsInstallationErrors: ( { event } ) =>
+										event.payload.errors,
 								} ),
 								{
 									type: 'recordFailedPluginInstallations',
@@ -1418,34 +1438,23 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							],
 						},
 					},
-					entry: actions.choose( [
-						{
-							cond: 'hasJetpackSelected',
-							actions: [
-								assign( {
-									loader: {
-										progress: 10,
-										useStages: 'plugins',
-									},
-								} ),
-								'preFetchIsJetpackConnected',
-								'preFetchJetpackAuthUrl',
-							],
-						},
-						{
-							actions: [
-								assign( {
-									loader: {
-										progress: 10,
-										useStages: 'plugins',
-									},
-								} ),
-							],
-						},
-					] ),
+					entry: enqueueActions( ( { enqueue, check } ) => {
+						if ( check( { type: 'hasJetpackSelected' } ) ) {
+							enqueue( 'preFetchIsJetpackConnected' );
+							enqueue( 'preFetchJetpackAuthUrl' );
+						}
+						enqueue(
+							assign( {
+								loader: {
+									progress: 10,
+									useStages: 'plugins',
+								},
+							} )
+						);
+					} ),
 					invoke: {
-						src: pluginInstallerMachine,
-						data: ( context ) => {
+						src: 'pluginInstallerMachine',
+						input: ( { context } ) => {
 							return {
 								selectedPlugins: context.pluginsSelected,
 								pluginsAvailable: context.pluginsAvailable,
@@ -1459,6 +1468,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		settingUpStore: {},
+		redirectingToWooHome: {
+			id: 'redirectingToWooHome',
+			invoke: {
+				src: 'exitToWooHome',
+			},
+		},
 	},
 } );
 
@@ -1467,36 +1482,40 @@ export const CoreProfilerController = ( {
 	servicesOverrides,
 }: {
 	actionOverrides: Partial< typeof coreProfilerMachineActions >;
-	servicesOverrides: Partial< typeof coreProfilerMachineServices >;
+	servicesOverrides: Partial< typeof coreProfilerMachineActors >;
 } ) => {
 	const augmentedStateMachine = useMemo( () => {
 		// When adding extensibility, this is the place to manipulate the state machine definition.
-		return coreProfilerStateMachineDefinition.withConfig( {
+		return coreProfilerStateMachineDefinition.provide( {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore -- there seems to be a flaky error here - it fails sometimes and then not on recompile, will need to investigate further.
 			actions: {
 				...coreProfilerMachineActions,
 				...actionOverrides,
 			},
-			services: {
-				...coreProfilerMachineServices,
+			actors: {
+				...coreProfilerMachineActors,
 				...servicesOverrides,
 			},
 			guards: {
-				hasStepInUrl: ( _ctx, _evt, { cond }: { cond: unknown } ) => {
-					const { step = undefined } = getQuery() as { step: string };
+				hasStepInUrl: ( _, params ) => {
+					const { step } = getQuery() as { step: string };
 					return (
-						step === ( cond as { step: string | undefined } ).step
+						!! step && step === ( params as { step: string } ).step
 					);
 				},
-				hasJetpackSelected: ( context ) => {
+				hasJetpackSelected: ( { context } ) => {
 					return (
 						context.pluginsSelected.find(
-							( plugin ) => plugin === 'jetpack'
+							( plugin ) =>
+								plugin === 'jetpack' ||
+								plugin === 'jetpack-boost'
 						) !== undefined ||
 						context.pluginsAvailable.find(
 							( plugin: Extension ) =>
-								plugin.key === 'jetpack' && plugin.is_activated
+								( plugin.key === 'jetpack' ||
+									plugin.key === 'jetpack-boost' ) &&
+								plugin.is_activated
 						) !== undefined
 					);
 				},
@@ -1504,24 +1523,20 @@ export const CoreProfilerController = ( {
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
 
+	const { xstateV5Inspector } = useXStateInspect( 'V5' );
+
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
-		devTools: process.env.NODE_ENV === 'development',
+		inspect: xstateV5Inspector,
 	} );
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
-		findComponentMeta< ComponentMeta >( currentState?.meta ?? undefined )
+		findComponentMeta< ComponentMeta >(
+			currentState?.getMeta() ?? undefined
+		)
 	);
 
 	const navigationProgress = currentNodeMeta?.progress;
-
-	const [ CurrentComponent, setCurrentComponent ] =
-		useState< CoreProfilerPageComponent | null >( null );
-	useEffect( () => {
-		if ( currentNodeMeta?.component ) {
-			setCurrentComponent( () => currentNodeMeta?.component );
-		}
-	}, [ CurrentComponent, currentNodeMeta?.component ] );
 
 	const currentNodeCssLabel =
 		state.value instanceof Object
@@ -1529,6 +1544,9 @@ export const CoreProfilerController = ( {
 			: state.value;
 
 	useFullScreen( [ 'woocommerce-profile-wizard__body' ] );
+
+	const [ CurrentComponent ] =
+		useComponentFromXStateService< CoreProfilerPageComponent >( service );
 
 	return (
 		<>

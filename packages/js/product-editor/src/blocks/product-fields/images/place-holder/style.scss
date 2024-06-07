@@ -1,0 +1,18 @@
+.woocommerce-image-placeholder {
+	&__wrapper {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-direction: column;
+		padding: $grid-unit-60;
+		border-radius: 2px;
+		border: 1px dashed $gray-400;
+		gap: $grid-unit-30;
+
+		p {
+			margin: 0;
+			text-align: center;
+			color: $gray-700;
+		}
+	}
+}

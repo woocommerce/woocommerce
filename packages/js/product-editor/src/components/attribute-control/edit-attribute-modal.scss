@@ -32,7 +32,7 @@
 		flex-direction: row;
 		align-items: center;
 
-		.components-checkbox-control .components-base-control__field {
+		.components-base-control, .components-base-control__field {
 			margin-bottom: 0;
 		}
 	}

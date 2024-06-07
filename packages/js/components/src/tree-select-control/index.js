@@ -234,7 +234,10 @@ const TreeSelectControl = ( {
 				 * @return {boolean} True if checked, false otherwise.
 				 */
 				get() {
-					if ( includeParent && this.value !== ROOT_VALUE ) {
+					if (
+						( includeParent && this.value !== ROOT_VALUE ) ||
+						individuallySelectParent
+					) {
 						return cache.selectedValues.includes( this.value );
 					}
 					if ( this.hasChildren ) {
@@ -257,10 +260,50 @@ const TreeSelectControl = ( {
 					}
 					return (
 						! this.checked &&
-						this.leaves.some(
+						this.children.some(
 							( opt ) => opt.checked || opt.partialChecked
 						)
 					);
+				},
+			},
+			isVisible: {
+				/**
+				 * Returns whether this option should be visible based on search.
+				 * All options are visible when not searching. Otherwise, true if this option is
+				 * a search result or it has a descendent that is being searched for.
+				 *
+				 * @return {boolean} True if option should be visible, false otherwise.
+				 */
+				get() {
+					// everything is visible when not searching.
+					if ( ! isSearching ) {
+						return true;
+					}
+
+					// Exit true if this is searched result.
+					if ( this.isSearchResult ) {
+						return true;
+					}
+
+					// If any children are search results, remain visible.
+					if ( this.hasChildren ) {
+						return this.children.some( ( opt ) => opt.isVisible );
+					}
+
+					return this.leaves.some( ( opt ) => opt.isSearchResult );
+				},
+			},
+			isSearchResult: {
+				/**
+				 * Returns whether this option is a searched result.
+				 *
+				 * @return {boolean} True if option is being searched, false otherwise.
+				 */
+				get() {
+					if ( ! isSearching ) {
+						return false;
+					}
+					return !! this.filterMatch;
 				},
 			},
 			expanded: {
@@ -272,7 +315,7 @@ const TreeSelectControl = ( {
 				 */
 				get() {
 					return (
-						isSearching ||
+						( isSearching && this.isVisible ) ||
 						this.value === ROOT_VALUE ||
 						cache.expandedValues.includes( this.value )
 					);
@@ -280,19 +323,29 @@ const TreeSelectControl = ( {
 			},
 		};
 
+		/**
+		 * Decompose accented characters into their composable parts, then remove accents.
+		 * See https://www.unicode.org/reports/tr15/ and https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/normalize.
+		 */
+		const removeAccents = ( str ) => {
+			return str.normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' );
+		};
+
 		const reduceOptions = ( acc, { children = [], ...option } ) => {
 			if ( children.length ) {
 				option.children = children.reduce( reduceOptions, [] );
+			}
 
-				if ( ! option.children.length ) {
-					return acc;
+			if ( isSearching ) {
+				const labelWithAccentsRemoved = removeAccents( option.label );
+				const filterWithAccentsRemoved = removeAccents( filter );
+				const match = labelWithAccentsRemoved
+					.toLowerCase()
+					.indexOf( filterWithAccentsRemoved );
+				if ( match > -1 ) {
+					option.label = highlightOptionLabel( option.label, match );
+					option.filterMatch = true;
 				}
-			} else if ( isSearching ) {
-				const match = option.label.toLowerCase().indexOf( filter );
-				if ( match === -1 ) {
-					return acc;
-				}
-				option.label = highlightOptionLabel( option.label, match );
 			}
 
 			Object.defineProperties( option, descriptors );
@@ -328,6 +381,11 @@ const TreeSelectControl = ( {
 
 		if ( ENTER === event.key ) {
 			setTreeVisible( true );
+
+			if ( event.target.type === 'checkbox' ) {
+				event.target.click();
+			}
+
 			event.preventDefault();
 		}
 
@@ -427,11 +485,20 @@ const TreeSelectControl = ( {
 	const handleParentChange = ( checked, option ) => {
 		let newValue;
 		const changedValues = individuallySelectParent
-			? []
+			? [ option.value ]
 			: option.leaves
 					.filter( ( opt ) => opt.checked !== checked )
 					.map( ( opt ) => opt.value );
-		if ( includeParent && option.value !== ROOT_VALUE ) {
+		/**
+		 * If includeParent is true, we need to add the parent value to the array of
+		 * changed values. However, if for some reason includeParent AND individuallySelectParent
+		 * are both set to true, we want to avoid duplicating the parent value in the array.
+		 */
+		if (
+			includeParent &&
+			! individuallySelectParent &&
+			option.value !== ROOT_VALUE
+		) {
 			changedValues.push( option.value );
 		}
 		if ( checked ) {

@@ -126,14 +126,26 @@ class Homescreen {
 		if (
 			( 'US' === $country_code && $is_jetpack_installed )
 			||
-			( ! in_array( $country_code, array( 'CA', 'AU', 'GB', 'ES', 'IT', 'DE', 'FR', 'MX', 'CO', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT', 'NL', 'AT', 'BE' ), true ) )
+			( ! in_array( $country_code, array( 'CA', 'AU', 'NZ', 'SG', 'HK', 'GB', 'ES', 'IT', 'DE', 'FR', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT', 'NL', 'AT', 'BE' ), true ) )
 			||
 			( 'US' === $country_code && false === $is_jetpack_installed && false === $is_wcs_installed )
 		) {
 			$zone = new \WC_Shipping_Zone();
 			$zone->set_zone_name( $country_name );
 			$zone->add_location( $country_code, 'country' );
-			$zone->add_shipping_method( 'free_shipping' );
+
+			// Method creation has no default title, use the REST API to add a title.
+			$instance_id = $zone->add_shipping_method( 'free_shipping' );
+			$request     = new \WP_REST_Request( 'POST', '/wc/v2/shipping/zones/' . $zone->get_id() . '/methods/' . $instance_id );
+			$request->set_body_params(
+				array(
+					'settings' => array(
+						'title' => 'Free shipping',
+					),
+				)
+			);
+			rest_do_request( $request );
+
 			update_option( 'woocommerce_admin_created_default_shipping_zones', 'yes' );
 			Shipping::delete_zone_count_transient();
 		}

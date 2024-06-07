@@ -126,7 +126,6 @@ export const SelectTreeMenu = ( {
 							) : (
 								<Tree
 									{ ...props }
-									id={ `${ props.id }-menu` }
 									ref={ ref }
 									items={ items }
 									onTreeBlur={ onClose }

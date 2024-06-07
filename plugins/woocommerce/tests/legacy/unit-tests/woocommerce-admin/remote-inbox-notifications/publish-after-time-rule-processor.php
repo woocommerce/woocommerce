@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\PublishAfterTimeRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\PublishAfterTimeRuleProcessor;
 use Automattic\WooCommerce\Admin\DateTimeProvider\DateTimeProviderInterface;
 
 /**
@@ -73,6 +73,25 @@ class WC_Admin_Tests_RemoteInboxNotifications_PublishAfterTimeRuleProcessor exte
 		$processor               = new PublishAfterTimeRuleProcessor( $mock_date_time_provider );
 
 		$result = $processor->process( $this->get_rule(), new stdClass() );
+
+		$this->assertEquals( false, $result );
+	}
+
+	/**
+	 * Tests that the rule validation fails if publish_after_time is not in a valid date time format.
+	 *
+	 * @group fast
+	 */
+	public function test_spec_fails_for_invalid_date_time_format() {
+		$processor = new PublishAfterTimeRuleProcessor();
+
+		$rules  = json_decode(
+			'{
+				"type": "publish_after_time",
+				"publish_after": "wrong-format"
+			}'
+		);
+		$result = $processor->validate( $rules );
 
 		$this->assertEquals( false, $result );
 	}

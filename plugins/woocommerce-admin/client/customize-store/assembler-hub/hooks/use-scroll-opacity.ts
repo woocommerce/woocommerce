@@ -36,10 +36,14 @@ export const useScrollOpacity = (
 				? ( targetElement as Document ).documentElement
 				: ( targetElement as Element );
 
+			const _sensitivity =
+				// Set sensitivity to a small threshold for mobile devices because they have a small viewport to ensure the effect is visible.
+				contentElement.clientWidth > 480 ? sensitivity : 0.05;
+
 			const maxScrollHeight =
 				contentElement.scrollHeight - contentElement.clientHeight;
 			const currentScrollPosition = contentElement.scrollTop;
-			const maxEffectScroll = maxScrollHeight * sensitivity;
+			const maxEffectScroll = maxScrollHeight * _sensitivity;
 
 			let calculatedOpacity;
 			if ( direction === 'bottomUp' ) {

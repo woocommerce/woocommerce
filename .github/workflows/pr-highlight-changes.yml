@@ -1,64 +1,61 @@
-name: Highlight templates changes
+name: 'Highlight Template Changes'
 on:
-    pull_request:
-        paths-ignore:
-            - '**/changelog/**'
-
-permissions: {}
-
+  pull_request:
+    paths:
+      - 'plugins/woocommerce/**'
 jobs:
-    analyze:
-        if: ${{ github.event.pull_request.user.login != 'github-actions[bot]' }}
-        name: Check pull request changes to highlight
-        runs-on: ubuntu-20.04
-        permissions:
-            contents: read
-        outputs:
-            results: ${{ steps.results.outputs.results }}
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
-            - name: Install prerequisites
-              run: |
-                  npm install -g pnpm
-                  npm -g i @wordpress/env@8.0.0
-                  pnpm install --filter code-analyzer --filter monorepo-utils
-            - name: Run analyzer
-              id: run
-              working-directory: tools/code-analyzer
-              run: |
-                  HEAD_REF=$(git rev-parse HEAD)
-                  version=$(pnpm run analyzer major-minor "$HEAD_REF" "plugins/woocommerce/woocommerce.php" | tail -n 1)
-                  pnpm run analyzer "$HEAD_REF" $version -o "github"
-            - name: Check results
-              uses: actions/github-script@v6
-              with:
-                  script: |
-                      const template = '${{ steps.run.outputs.templates }}';
+  analyze:
+    name: 'Analyze Branch Changes'
+    runs-on: 'ubuntu-20.04'
+    outputs:
+      results: ${{ steps.results.outputs.results }}
+    steps:
+      - uses: 'actions/checkout@v3'
+        name: 'Checkout'
+      - uses: './.github/actions/setup-woocommerce-monorepo'
+        name: 'Setup WooCommerce Monorepo'
+        with:
+          install: 'code-analyzer...'
+          build: 'code-analyzer'
+      - name: 'Analyze'
+        id: 'analyze'
+        working-directory: 'tools/code-analyzer'
+        env:
+          GIT_CLONE_PROTECTION_ACTIVE: false
+        run: |
+          HEAD_REF=$(git rev-parse HEAD)
+          exclude="plugins/woocommerce/tests plugins/woocommerce-admin/tests plugins/woocommerce-blocks/tests"
+          version=$(pnpm analyzer major-minor "$HEAD_REF" "plugins/woocommerce/woocommerce.php" | tail -n 1)
+          pnpm analyzer "$HEAD_REF" $version -o "github" -e $exclude
+      - uses: 'actions/github-script@v6'
+        name: 'Validate'
+        with:
+          script: |
+            const template = '${{ steps.analyze.outputs.templates }}';
 
-                      if ( template === '' ) {
-                        return;
-                      }
+            if ( template === '' ) {
+              return;
+            }
 
-                      const templateArr = template.split( '\n' );
-                      const modTemplateArr = [];
-                      let needsVersionBump = false;
+            const templateArr = template.split( '\n' );
+            const modTemplateArr = [];
+            let needsVersionBump = false;
 
-                      templateArr.forEach( ( el ) => {
-                        if ( el.match( /NOTICE/ ) ) {
-                          modTemplateArr.pop();
-                          return;
-                        }
+            templateArr.forEach( ( el ) => {
+              if ( el.match( /NOTICE/ ) ) {
+                modTemplateArr.pop();
+                return;
+              }
 
-                        if ( el.match( /WARNING/ ) ) {
-                          needsVersionBump = true;
-                        }
+              if ( el.match( /WARNING/ ) ) {
+                needsVersionBump = true;
+              }
 
-                        modTemplateArr.push( el );
-                      } );
+              modTemplateArr.push( el );
+            } );
 
-                      const templateResult = modTemplateArr.join( '\n' );
+            const templateResult = modTemplateArr.join( '\n' );
 
-                      if ( needsVersionBump ) {
-                        core.setFailed( `Templates have changed but template versions were not bumped:\n${ templateResult }` );
-                      }
+            if ( needsVersionBump ) {
+              core.setFailed( `Templates have changed but template versions were not bumped:\n${ templateResult }` );
+            }

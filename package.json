@@ -4,8 +4,8 @@
 	"description": "Monorepo for the WooCommerce ecosystem",
 	"homepage": "https://woocommerce.com/",
 	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"node": "^20.11.1",
+		"pnpm": "^9.1.0"
 	},
 	"private": true,
 	"repository": {
@@ -17,37 +17,36 @@
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
-	"bin": {
-		"utils": "./tools/monorepo-utils/bin/run"
-	},
 	"scripts": {
-		"build": "pnpm exec turbo run turbo:build",
-		"test": "pnpm exec turbo run turbo:test",
-		"clean": "pnpm store prune && git clean -fx **/node_modules && pnpm i",
+		"build": "pnpm -r --workspace-concurrency=Infinity --stream '/^build:project:.*$/'",
+		"test": "pnpm -r test",
+		"lint": "pnpm -r lint",
+		"cherry-pick": "node ./tools/cherry-pick/bin/run",
+		"clean": "rimraf -g '**/node_modules' '**/.wireit' && pnpm store prune && pnpm i",
+		"distclean": "git clean --force -d -X",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "pnpm git:update-hooks",
-		"git:update-hooks": "if test -d .git; then rm -r .git/hooks && mkdir -p .git/hooks && husky install; else husky install; fi",
-		"create-extension": "node ./tools/create-extension/index.js",
-		"cherry-pick": "node ./tools/cherry-pick/bin/run",
+		"git:update-hooks": "if test -d .git; then rm -rf .git/hooks && mkdir -p .git/hooks && husky install; else husky install; fi",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
-		"utils": "node ./tools/monorepo-utils/dist/index.js"
+		"utils": "./tools/monorepo-utils/bin/run"
 	},
 	"devDependencies": {
-		"@babel/preset-env": "^7.20.2",
-		"@babel/runtime": "^7.21.0",
-		"@types/node": "^16.18.18",
+		"@babel/preset-env": "^7.23.5",
+		"@babel/runtime": "^7.23.5",
+		"@types/node": "^16.18.68",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/monorepo-utils": "workspace:*",
 		"@wordpress/data": "wp-6.0",
 		"@wordpress/eslint-plugin": "14.7.0",
 		"@wordpress/prettier-config": "2.17.0",
 		"babel-loader": "^8.3.0",
 		"chalk": "^4.1.2",
 		"copy-webpack-plugin": "^10.2.4",
-		"core-js": "^3.29.1",
-		"css-loader": "^6.7.3",
-		"glob": "^7.2.3",
-		"husky": "^7.0.4",
-		"jest": "^27.5.1",
+		"core-js": "^3.34.0",
+		"css-loader": "^6.8.1",
+		"glob": "^10.3.10",
+		"husky": "^9.0.11",
+		"jest": "~27.5.1",
 		"lint-staged": "^12.5.0",
 		"mkdirp": "^1.0.4",
 		"moment": "^2.29.4",
@@ -56,13 +55,13 @@
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"regenerator-runtime": "^0.13.11",
 		"request": "^2.88.2",
-		"sass": "^1.59.3",
-		"sass-loader": "^10.4.1",
-		"syncpack": "^10.7.3",
-		"turbo": "^1.10.7",
-		"typescript": "^5.1.6",
+		"rimraf": "5.0.5",
+		"sass": "^1.69.5",
+		"sass-loader": "^10.5.0",
+		"syncpack": "^10.9.3",
+		"typescript": "^5.3.3",
 		"url-loader": "^1.1.2",
-		"webpack": "^5.76.2"
+		"webpack": "^5.89.0"
 	},
 	"dependencies": {
 		"@babel/core": "7.12.9",
@@ -73,8 +72,9 @@
 	},
 	"pnpm": {
 		"overrides": {
-			"@types/react": "^17.0.2",
-			"react": "^17.0.2"
+			"@types/react": "^17.0.71",
+			"react-resize-aware": "3.1.1",
+			"@automattic/tour-kit>@wordpress/element": "4.4.1"
 		}
 	}
 }

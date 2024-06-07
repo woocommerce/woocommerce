@@ -1,10 +1,14 @@
-# Theme Design and User Experience Guidelines
+---
+post_title: Theme design and user experience guidelines
+menu_title: Theme design and user experience guidelines
+tags: reference
+---
 
 This guide covers general guidelines and best practices to follow in order to ensure your theme experience aligns with ecommerce industry standards and WooCommerce for providing a great online shopping experience, maximizing sales, ensuring ease of use, seamless integration, and strong UX adoption.
 
 We recommend you review the [UI best practices for WordPress](https://developer.wordpress.org/themes/advanced-topics/ui-best-practices/) to ensure your theme is aligned with the WordPress theme requirements.
 
-Make sure your theme fits one or more industries currently available in the [WooCommerce themes store](https://woocommerce.com/product-category/themes). It’s important that the theme offers enough originality and distinctiveness in its design, while keeping it familiar, in order to be distinguished from other themes on the WooCommerce theme store. Your theme should avoid copying existing themes on the WooCommerce theme store or other WordPress theme marketplaces.
+Make sure your theme fits one or more industries currently available in the [WooCommerce themes store](https://woocommerce.com/product-category/themes). It's important that the theme offers enough originality and distinctiveness in its design, while keeping it familiar, in order to be distinguished from other themes on the WooCommerce theme store. Your theme should avoid copying existing themes on the WooCommerce theme store or other WordPress theme marketplaces.
 
 ## Design
 
@@ -68,7 +72,7 @@ Any customization supported by the theme, such as layout options, additional fea
 
 Themes should not bundle or require the installation of additional plugins/extensions (or frameworks) that provide additional options or functionality. For more information on customisation, check out the [WordPress theme customization API](https://codex.wordpress.org/Theme_Customization_API)**.**
 
-On activation, themes shouldn’t override the WordPress theme activation flow by taking the user into other pages.
+On activation, themes shouldn't override the WordPress theme activation flow by taking the user into other pages.
 
 ## Branding
 
@@ -80,6 +84,6 @@ The interface should solely focus on the experience, the usage of notices, banne
 
 Upon submission theme authors must provide a way for the theme to be showcased and tested. The sample content/demo should refrain from using custom graphics/assets that will not be present in the deliverables to avoid merchant confusion and broken expectations (examples: using logos, illustrations). When creating a theme for a specific vertical theme authors should consider using sample content that aligns with the vertical.
 
-All imagery and text should be appropriate for all ages/family-friendly. The theme author should consider using imagery that is inclusive of ages, nationalities, etc. The theme should refrain from using imagery that looks like ‘stock photography’.
+All imagery and text should be appropriate for all ages/family-friendly. The theme author should consider using imagery that is inclusive of ages, nationalities, etc. The theme should refrain from using imagery that looks like 'stock photography'.
 
 The theme must be distributed and cleared of all the necessary licenses for assets such as images, fonts, icons, etc.

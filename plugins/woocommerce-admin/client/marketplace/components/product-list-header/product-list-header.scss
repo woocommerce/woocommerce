@@ -1,4 +1,4 @@
-@import '../../stylesheets/_variables.scss';
+@import "../../stylesheets/_variables.scss";
 
 .woocommerce-marketplace {
 	&__product-list-header {
@@ -12,12 +12,20 @@
 		flex: 1 0 0;
 		font-size: 20px;
 		font-style: normal;
-		font-weight: 500;
+		font-weight: 400;
 		margin-bottom: $medium-gap;
 		margin-top: $small-gap;
+
+		&.is-loading {
+			background: $skeleton-loader-color;
+			height: 26px;
+			margin: 0;
+			width: min(100%, 12em);
+		}
 	}
 
-	&__product-list-title--extensions {
+	&__product-list-title--extensions,
+	&__product-list-title--themes {
 		margin-bottom: 0;
 	}
 
@@ -35,4 +43,3 @@
 		text-decoration: none;
 	}
 }
-

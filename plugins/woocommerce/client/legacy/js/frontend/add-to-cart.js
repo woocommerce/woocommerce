@@ -14,7 +14,7 @@ jQuery( function( $ ) {
 		this.run        = this.run.bind( this );
 
 		$( document.body )
-			.on( 'click', '.add_to_cart_button', { addToCartHandler: this }, this.onAddToCart )
+			.on( 'click', '.add_to_cart_button:not(.wc-interactive)', { addToCartHandler: this }, this.onAddToCart )
 			.on( 'click', '.remove_from_cart_button', { addToCartHandler: this }, this.onRemoveFromCart )
 			.on( 'added_to_cart', this.updateButton )
 			.on( 'ajax_request_not_sent.adding_to_cart', this.updateButton )
@@ -71,7 +71,7 @@ jQuery( function( $ ) {
 			$thisbutton.addClass( 'loading' );
 
 			// Allow 3rd parties to validate and quit early.
-			if ( false === $( document.body ).triggerHandler( 'should_send_ajax_request.adding_to_cart', [ $thisbutton ] ) ) { 
+			if ( false === $( document.body ).triggerHandler( 'should_send_ajax_request.adding_to_cart', [ $thisbutton ] ) ) {
 				$( document.body ).trigger( 'ajax_request_not_sent.adding_to_cart', [ false, false, $thisbutton ] );
 				return true;
 			}
@@ -166,7 +166,7 @@ jQuery( function( $ ) {
 
 		if ( $button ) {
 			$button.removeClass( 'loading' );
-			
+
 			if ( fragments ) {
 				$button.addClass( 'added' );
 			}

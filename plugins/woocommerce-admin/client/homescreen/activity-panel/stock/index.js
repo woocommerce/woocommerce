@@ -40,9 +40,7 @@ export class StockPanel extends Component {
 	}
 
 	async updateStock( product, quantity ) {
-		const { invalidateResolution, updateProductStock, products } =
-			this.props;
-
+		const { invalidateResolution, updateProductStock } = this.props;
 		const success = await updateProductStock( product, quantity );
 
 		if ( success ) {
@@ -51,13 +49,11 @@ export class StockPanel extends Component {
 				'products/low-in-stock',
 				productsQuery,
 			] );
-			if ( products.length < 2 ) {
-				invalidateResolution( 'getItemsTotalCount', [
-					'products/low-in-stock',
-					getLowStockCountQuery,
-					null,
-				] );
-			}
+			invalidateResolution( 'getItemsTotalCount', [
+				'products/count-low-in-stock',
+				getLowStockCountQuery,
+				null,
+			] );
 		}
 
 		return success;

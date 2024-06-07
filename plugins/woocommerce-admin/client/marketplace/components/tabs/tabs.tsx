@@ -2,9 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useEffect } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 
 /**
@@ -14,6 +14,7 @@ import './tabs.scss';
 import { DEFAULT_TAB_KEY, MARKETPLACE_PATH } from '../constants';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { MarketplaceContextType } from '../../contexts/types';
+import { getAdminSetting } from '../../../utils/admin-settings';
 
 export interface TabsProps {
 	additionalClassNames?: Array< string > | undefined;
@@ -23,54 +24,101 @@ interface Tab {
 	name: string;
 	title: string;
 	href?: string;
+	showUpdateCount: boolean;
+	updateCount: number;
 }
 
 interface Tabs {
 	[ key: string ]: Tab;
 }
 
+const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+const wooUpdateCount = wccomSettings?.wooUpdateCount ?? 0;
+
 const tabs: Tabs = {
+	search: {
+		name: 'search',
+		title: __( 'Search results', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
+	},
 	discover: {
 		name: 'discover',
 		title: __( 'Discover', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
 	},
 	extensions: {
 		name: 'extensions',
 		title: __( 'Browse', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
+	},
+	themes: {
+		name: 'themes',
+		title: __( 'Themes', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
+	},
+	'business-services': {
+		name: 'business-services',
+		title: __( 'Business services', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
 	},
 	'my-subscriptions': {
 		name: 'my-subscriptions',
-		title: __( 'My Subscriptions', 'woocommerce' ),
-		href: getNewPath(
-			{
-				page: 'wc-addons',
-				section: 'helper',
-			},
-			''
-		),
+		title: __( 'My subscriptions', 'woocommerce' ),
+		showUpdateCount: true,
+		updateCount: wooUpdateCount,
 	},
 };
 
 const setUrlTabParam = ( tabKey: string ) => {
-	if ( tabKey === DEFAULT_TAB_KEY ) {
-		navigateTo( {
-			url: getNewPath( {}, MARKETPLACE_PATH, {} ),
-		} );
-		return;
-	}
 	navigateTo( {
-		url: getNewPath( { tab: tabKey } ),
+		url: getNewPath(
+			{ tab: tabKey === DEFAULT_TAB_KEY ? undefined : tabKey },
+			MARKETPLACE_PATH,
+			{}
+		),
 	} );
 };
 
-const renderTabs = ( contextValue: MarketplaceContextType ) => {
-	const { selectedTab, setSelectedTab } = contextValue;
+const getVisibleTabs = ( selectedTab: string, hasBusinessServices = false ) => {
+	if ( selectedTab === '' ) {
+		return tabs;
+	}
+	const currentVisibleTabs = { ...tabs };
+	if ( selectedTab !== 'search' ) {
+		delete currentVisibleTabs.search;
+	}
+	if ( ! hasBusinessServices ) {
+		delete currentVisibleTabs[ 'business-services' ];
+	}
+
+	return currentVisibleTabs;
+};
+
+const renderTabs = (
+	marketplaceContextValue: MarketplaceContextType,
+	visibleTabs: Tabs
+) => {
+	const { selectedTab, setSelectedTab } = marketplaceContextValue;
+
+	const onTabClick = ( tabKey: string ) => {
+		if ( tabKey === selectedTab ) {
+			return;
+		}
+		setSelectedTab( tabKey );
+		setUrlTabParam( tabKey );
+	};
+
 	const tabContent = [];
-	for ( const tabKey in tabs ) {
+	for ( const tabKey in visibleTabs ) {
 		tabContent.push(
 			tabs[ tabKey ]?.href ? (
 				<a
-					className={ classNames(
+					className={ clsx(
 						'woocommerce-marketplace__tab-button',
 						'components-button',
 						`woocommerce-marketplace__tab-${ tabKey }`
@@ -82,20 +130,23 @@ const renderTabs = ( contextValue: MarketplaceContextType ) => {
 				</a>
 			) : (
 				<Button
-					className={ classNames(
+					className={ clsx(
 						'woocommerce-marketplace__tab-button',
 						`woocommerce-marketplace__tab-${ tabKey }`,
 						{
 							'is-active': tabKey === selectedTab,
 						}
 					) }
-					onClick={ () => {
-						setSelectedTab( tabKey );
-						setUrlTabParam( tabKey );
-					} }
+					onClick={ () => onTabClick( tabKey ) }
 					key={ tabKey }
 				>
 					{ tabs[ tabKey ]?.title }
+					{ tabs[ tabKey ]?.showUpdateCount &&
+						tabs[ tabKey ]?.updateCount > 0 && (
+							<span className="woocommerce-marketplace__update-count">
+								<span> { tabs[ tabKey ]?.updateCount } </span>
+							</span>
+						) }
 				</Button>
 			)
 		);
@@ -106,26 +157,31 @@ const renderTabs = ( contextValue: MarketplaceContextType ) => {
 const Tabs = ( props: TabsProps ): JSX.Element => {
 	const { additionalClassNames } = props;
 	const marketplaceContextValue = useContext( MarketplaceContext );
-	const { setSelectedTab } = marketplaceContextValue;
+	const { selectedTab, setSelectedTab, hasBusinessServices } =
+		marketplaceContextValue;
+	const [ visibleTabs, setVisibleTabs ] = useState( getVisibleTabs( '' ) );
 
 	const query: Record< string, string > = useQuery();
 
 	useEffect( () => {
 		if ( query?.tab && tabs[ query.tab ] ) {
 			setSelectedTab( query.tab );
-		} else {
+		} else if ( Object.keys( query ).length > 0 ) {
 			setSelectedTab( DEFAULT_TAB_KEY );
 		}
 	}, [ query, setSelectedTab ] );
 
+	useEffect( () => {
+		setVisibleTabs( getVisibleTabs( selectedTab, hasBusinessServices ) );
+	}, [ selectedTab, hasBusinessServices ] );
 	return (
 		<nav
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-marketplace__tabs',
 				additionalClassNames || []
 			) }
 		>
-			{ renderTabs( marketplaceContextValue ) }
+			{ renderTabs( marketplaceContextValue, visibleTabs ) }
 		</nav>
 	);
 };

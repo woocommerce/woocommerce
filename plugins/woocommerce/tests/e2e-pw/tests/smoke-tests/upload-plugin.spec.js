@@ -3,10 +3,10 @@ const {
 	GITHUB_TOKEN,
 	PLUGIN_NAME,
 	PLUGIN_REPOSITORY,
+	PLUGIN_SLUG,
 } = process.env;
 const { test, expect } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
-const path = require( 'path' );
 const {
 	deletePlugin,
 	deleteZip,
@@ -19,13 +19,13 @@ const deletePluginFromSite = async ( { request, baseURL } ) => {
 	await deletePlugin( {
 		request,
 		baseURL,
-		slug: pluginSlug,
+		slug: PLUGIN_SLUG,
 		username: admin.username,
 		password: admin.password,
 	} );
 };
 
-let pluginSlug, pluginPath;
+let pluginPath;
 
 test.skip( () => {
 	const shouldSkip = ! PLUGIN_REPOSITORY;
@@ -41,39 +41,29 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 	test.use( { storageState: ADMINSTATE } );
 
 	test.beforeAll( async ( { playwright, baseURL } ) => {
-		pluginSlug = path.basename( PLUGIN_REPOSITORY );
-
-		pluginPath = await test.step(
-			`Download ${ PLUGIN_NAME } plugin zip`,
-			async () => {
+		pluginPath =
+			await test.step( `Download ${ PLUGIN_NAME } plugin zip`, async () => {
 				return downloadZip( {
 					repository: PLUGIN_REPOSITORY,
 					authorizationToken: GITHUB_TOKEN,
 				} );
-			}
-		);
+			} );
 
-		await test.step(
-			"Delete plugin from test site if it's installed.",
-			async () => {
-				await deletePluginFromSite( {
-					request: playwright.request,
-					baseURL,
-				} );
-			}
-		);
+		await test.step( "Delete plugin from test site if it's installed.", async () => {
+			await deletePluginFromSite( {
+				request: playwright.request,
+				baseURL,
+			} );
+		} );
 	} );
 
 	test.afterAll( async ( { playwright, baseURL } ) => {
-		await test.step(
-			"Delete plugin from test site if it's installed.",
-			async () => {
-				await deletePluginFromSite( {
-					request: playwright.request,
-					baseURL,
-				} );
-			}
-		);
+		await test.step( "Delete plugin from test site if it's installed.", async () => {
+			await deletePluginFromSite( {
+				request: playwright.request,
+				baseURL,
+			} );
+		} );
 
 		await test.step( 'Delete the downloaded zip', async () => {
 			await deleteZip( pluginPath );
@@ -81,25 +71,19 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 	} );
 
 	test( `can upload and activate "${ PLUGIN_NAME }"`, async ( { page } ) => {
-		await test.step(
-			`Install "${ PLUGIN_NAME }" through WP CLI`,
-			async () => {
-				await installPluginThruWpCli( pluginPath );
-			}
-		);
+		await test.step( `Install "${ PLUGIN_NAME }" through WP CLI`, async () => {
+			await installPluginThruWpCli( pluginPath );
+		} );
 
 		await test.step( 'Go to the "Installed Plugins" page', async () => {
 			await page.goto( 'wp-admin/plugins.php' );
 		} );
 
-		await test.step(
-			`Expect "${ PLUGIN_NAME }" to be listed and active.`,
-			async () => {
-				await expect(
-					page.locator( `#deactivate-${ pluginSlug }` )
-				).toBeVisible();
-			}
-		);
+		await test.step( `Expect "${ PLUGIN_NAME }" to be listed and active.`, async () => {
+			await expect(
+				page.getByLabel( `Deactivate ${ PLUGIN_NAME }` )
+			).toBeVisible();
+		} );
 
 		await test.step( 'Expect the shop to load successfully.', async () => {
 			const shopHeading = page.getByRole( 'heading', {
@@ -110,19 +94,16 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 			await expect( shopHeading ).toBeVisible();
 		} );
 
-		await test.step(
-			'Expect the WooCommerce Homepage to load successfully.',
-			async () => {
-				const statsOverviewHeading = page.getByText( 'Stats overview' );
-				const skipSetupStoreLink = page.getByRole( 'button', {
-					name: 'Set up my store',
-				} );
+		await test.step( 'Expect the WooCommerce Homepage to load successfully.', async () => {
+			const statsOverviewHeading = page.getByText( 'Stats overview' );
+			const skipSetupStoreLink = page.getByRole( 'button', {
+				name: 'Set up my store',
+			} );
 
-				await page.goto( '/wp-admin/admin.php?page=wc-admin' );
-				await expect(
-					statsOverviewHeading.or( skipSetupStoreLink )
-				).toBeVisible();
-			}
-		);
+			await page.goto( '/wp-admin/admin.php?page=wc-admin' );
+			await expect(
+				statsOverviewHeading.or( skipSetupStoreLink )
+			).toBeVisible();
+		} );
 	} );
 } );

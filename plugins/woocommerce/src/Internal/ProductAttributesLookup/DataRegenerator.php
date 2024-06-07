@@ -215,7 +215,7 @@ class DataRegenerator {
 			)
 		);
 
-		if ( ! $product_ids ) {
+		if ( ! is_array( $product_ids ) || empty( $product_ids ) ) {
 			return false;
 		}
 

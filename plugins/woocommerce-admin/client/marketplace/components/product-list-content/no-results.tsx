@@ -1,117 +1,166 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import NoResultsIcon from '../../assets/images/no-results.svg';
 import { fetchDiscoverPageData, ProductGroup } from '../../utils/functions';
 import ProductLoader from '../product-loader/product-loader';
 import ProductList from '../product-list/product-list';
+import { ProductType, SearchResultType } from '../product-list/types';
+import CategorySelector from '../category-selector/category-selector';
 import './no-results.scss';
 
-export default function NoResults(): JSX.Element {
-	const [ productGroup, setProductGroup ] = useState< ProductGroup >();
-	const [ isLoadingProductGroup, setisLoadingProductGroup ] =
-		useState( false );
-	const [ noResultsTerm, setNoResultsTerm ] = useState< string >( '' );
-
+export default function NoResults( props: {
+	type: SearchResultType;
+	showHeading?: boolean;
+	heading?: string;
+} ): JSX.Element {
+	const [ productGroups, setProductGroups ] = useState< ProductGroup[] >();
+	const [ isLoading, setIsLoading ] = useState( false );
 	const query = useQuery();
+	const showCategorySelector = query.tab === 'search' && query.section;
+	const productGroupsForSearchType = {
+		[ SearchResultType.all ]: [
+			'most-popular',
+			'popular-themes',
+			'business-services',
+		],
+		[ SearchResultType.theme ]: [ 'popular-themes' ],
+		[ SearchResultType.extension ]: [ 'most-popular' ],
+		[ SearchResultType.businessService ]: [ 'business-services' ],
+	};
 
 	useEffect( () => {
-		if ( query.term ) {
-			setNoResultsTerm( query.term );
-
-			return;
-		}
-
-		if ( query.category ) {
-			/**
-			 * Trim understore from start and end of a category. Some categories have underscores at the start and end
-			 * and we don't want to show them for the no results term
-			 */
-			const categoryTerm = query.category.replace( /^_+|_+$/g, '' );
-
-			setNoResultsTerm( categoryTerm );
-		}
-	}, [ query ] );
-
-	useEffect( () => {
-		setisLoadingProductGroup( true );
+		setIsLoading( true );
 
 		fetchDiscoverPageData()
 			.then( ( products: ProductGroup[] ) => {
-				const mostPopularGroup = products.find(
-					( group ) => group.id === 'most-popular'
-				);
+				const productGroupIds =
+					productGroupsForSearchType[ props.type ];
 
-				if ( ! mostPopularGroup ) {
+				if ( ! productGroupIds ) {
 					return;
 				}
 
-				mostPopularGroup.items = mostPopularGroup.items.slice( 0, 9 );
+				const productGroupsToDisplay = products.filter( ( group ) => {
+					return productGroupIds.includes( group.id );
+				} );
 
-				setProductGroup( mostPopularGroup );
+				if ( ! productGroupsToDisplay ) {
+					return;
+				}
+
+				// Limit productGroup.items to 4 items.
+				productGroupsToDisplay.forEach( ( group ) => {
+					group.items = group.items.slice( 0, 4 );
+				} );
+
+				setProductGroups( productGroupsToDisplay );
 			} )
 			.catch( () => {
-				setProductGroup( undefined );
+				setProductGroups( undefined );
 			} )
 			.finally( () => {
-				setisLoadingProductGroup( false );
+				setIsLoading( false );
 			} );
 	}, [] );
 
-	function renderProductGroup() {
-		if ( isLoadingProductGroup ) {
-			return <ProductLoader />;
+	function productListTitle( groupId: string ) {
+		if ( groupId === 'popular-themes' ) {
+			return __( 'Our favorite themes', 'woocommerce' );
+		} else if ( groupId === 'business-services' ) {
+			return __( 'Services to help your business grow', 'woocommerce' );
 		}
 
-		if ( ! productGroup ) {
+		return __( 'Most popular extensions', 'woocommerce' );
+	}
+
+	function renderProductGroups() {
+		if ( isLoading ) {
+			return (
+				<>
+					<ProductLoader
+						type={ ProductType.extension }
+						placeholderCount={ 4 }
+					/>
+					<ProductLoader
+						type={ ProductType.theme }
+						placeholderCount={ 4 }
+					/>
+					<ProductLoader
+						type={ ProductType.businessService }
+						placeholderCount={ 4 }
+					/>
+				</>
+			);
+		}
+
+		if ( ! productGroups || productGroups.length === 0 ) {
 			return <></>;
 		}
 
 		return (
-			<ProductList
-				title={ productGroup.title }
-				products={ productGroup.items }
-				groupURL={ productGroup.url }
-			/>
+			<>
+				{ productGroups.map( ( productGroup ) => {
+					return (
+						<ProductList
+							title={ productListTitle( productGroup.id ) }
+							products={ productGroup.items }
+							groupURL={ productGroup.url }
+							productGroup={ productGroup.id }
+							type={ productGroup.itemType }
+							key={ productGroup.id }
+						/>
+					);
+				} ) }
+			</>
 		);
+	}
+
+	function categorySelector() {
+		if ( ! showCategorySelector ) {
+			return <></>;
+		}
+
+		if ( props.type === SearchResultType.all ) {
+			return <></>;
+		}
+
+		let categorySelectorType = ProductType.extension;
+
+		if ( props.type === SearchResultType.theme ) {
+			categorySelectorType = ProductType.theme;
+		}
+
+		if ( props.type === SearchResultType.businessService ) {
+			categorySelectorType = ProductType.businessService;
+		}
+
+		return <CategorySelector type={ categorySelectorType } />;
 	}
 
 	return (
 		<div className="woocommerce-marketplace__no-results">
+			{ categorySelector() }
 			<div className="woocommerce-marketplace__no-results__content">
-				<img
-					className="woocommerce-marketplace__no-results__icon"
-					src={ NoResultsIcon }
-					alt={ __( 'No results.', 'woocommerce' ) }
-				/>
-				<div className="woocommerce-marketplace__no-results__description">
-					<h3 className="woocommerce-marketplace__no-results__description--bold">
-						{ sprintf(
-							// translators: %s: search term
-							__(
-								'We didn\'t find any results for "%s"',
-								'woocommerce'
-							),
-							noResultsTerm
-						) }
-					</h3>
-					<p>
-						{ __(
-							'Try searching again using a different term, or take a look at some of our most popular extensions below.',
-							'woocommerce'
-						) }
-					</p>
-				</div>
+				<h2 className="woocommerce-marketplace__no-results__heading">
+					{ props.showHeading ? props.heading : '' }
+				</h2>
+				<p className="woocommerce-marketplace__no-results__description">
+					{ __(
+						'Try searching again using a different term, or take a look at' +
+							' our recommendations below.',
+						'woocommerce'
+					) }
+				</p>
 			</div>
-			<div className="woocommerce-marketplace__no-results__product-group">
-				{ renderProductGroup() }
+			<div className="woocommerce-marketplace__no-results__product-groups">
+				{ renderProductGroups() }
 			</div>
 		</div>
 	);

@@ -45,6 +45,13 @@ const reducer: Reducer< ResourceState, Actions > = (
 							payload.key
 						) ]: false,
 					},
+					errors: {
+						...state.errors,
+						[ getRequestIdentifier(
+							CRUD_ACTIONS.GENERATE_VARIATIONS,
+							payload.key
+						) ]: undefined,
+					},
 				};
 			case TYPES.GENERATE_VARIATIONS_ERROR:
 				return {

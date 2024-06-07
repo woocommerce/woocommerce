@@ -15,7 +15,7 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	 * Temporarily store webhook delivery counters.
 	 * @var array
 	 */
-	protected $delivery_counter = array();
+	public $delivery_counter = array();
 
 	/**
 	 * Data provider for test_wc_is_webhook_valid_topic.
@@ -276,8 +276,7 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	 * @param string $topic The webhook topic for the test.
 	 * @param string $status The status of the webhook to be tested.
 	 */
-	protected function create_webhook( $topic = 'action.woocommerce_some_action', $status = 'active' ) {
-
+	public function create_webhook( $topic = 'action.woocommerce_some_action', $status = 'active' ) {
 		$webhook = new WC_Webhook();
 		$webhook->set_props(
 			array(

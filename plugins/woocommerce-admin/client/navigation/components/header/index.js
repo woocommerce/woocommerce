@@ -8,7 +8,7 @@ import { Icon, wordpress } from '@wordpress/icons';
 import { getSetting } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { debounce } from 'lodash';
 import { addHistoryListener } from '@woocommerce/navigation';
 
@@ -20,7 +20,7 @@ import useIsScrolled from '../../../hooks/useIsScrolled';
 const Header = () => {
 	const siteTitle = getSetting( 'siteTitle', '' );
 	const homeUrl = getSetting( 'homeUrl', '' );
-	const isScrolled = useIsScrolled();
+	const { isScrolled } = useIsScrolled();
 	const [ isFolded, setIsFolded ] = useState(
 		document.body.classList.contains( false )
 	);
@@ -103,7 +103,7 @@ const Header = () => {
 		buttonIcon = null;
 	}
 
-	const className = classnames( 'woocommerce-navigation-header', {
+	const className = clsx( 'woocommerce-navigation-header', {
 		'is-scrolled': isScrolled,
 	} );
 

@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Move the switch to classic shortcode block button to separate component.

@@ -22,7 +22,7 @@ export const getPullRequestData = async (
 	const isCommunityPR = isCommunityPullRequest( prData, owner, name );
 	const headOwner = isCommunityPR ? prData.head.repo.owner.login : owner;
 	const branch = prData.head.ref;
-	const fileName = branch.replace( /\//g, '-' );
+	const fileName = `${ prNumber }-${ branch.replace( /\//g, '-' ) }`;
 	const prBody = prData.body;
 	const head = prData.head.sha;
 	const base = prData.base.sha;
@@ -38,14 +38,26 @@ export const getPullRequestData = async (
 };
 
 /**
- * Determine if a pull request description activates the changelog automation.
+ * Determine if a pull request description activates the changelog automation with a changelog entry.
  *
  * @param {string} body pull request description.
  * @return {boolean} if the pull request description activates the changelog automation.
  */
 export const shouldAutomateChangelog = ( body: string ) => {
 	const regex =
-		/\[x\] Automatically create a changelog entry from the details/gm;
+		/\[(?:x|X)\] Automatically create a changelog entry from the details/gm;
+	return regex.test( body );
+};
+
+/**
+ * Determine if a pull request description activates the changelog automation without a changelog entry.
+ *
+ * @param {string} body pull request description.
+ * @return {boolean} if the pull request description activates the changelog automation.
+ */
+export const shouldAutomateNoChangelog = ( body: string ) => {
+	const regex =
+		/\[(?:x|X)\] This Pull Request does not require a changelog entry/gm;
 	return regex.test( body );
 };
 
@@ -56,7 +68,7 @@ export const shouldAutomateChangelog = ( body: string ) => {
  * @return {void|string} changelog significance.
  */
 export const getChangelogSignificance = ( body: string ) => {
-	const regex = /\[x\] (Patch|Minor|Major)\r\n/gm;
+	const regex = /\[(?:x|X)\] (Patch|Minor|Major)\r\n/gm;
 	const matches = body.match( regex );
 
 	if ( matches === null ) {
@@ -85,7 +97,7 @@ export const getChangelogSignificance = ( body: string ) => {
  */
 export const getChangelogType = ( body: string ) => {
 	const regex =
-		/\[x\] (Fix|Add|Update|Dev|Tweak|Performance|Enhancement) -/gm;
+		/\[(?:x|X)\] (Fix|Add|Update|Dev|Tweak|Performance|Enhancement) -/gm;
 	const matches = body.match( regex );
 
 	if ( matches === null ) {
@@ -120,7 +132,12 @@ export const getChangelogMessage = ( body: string ) => {
 		Logger.error( 'No changelog message found' );
 	}
 
-	return match[ 3 ].trim();
+	let message = match[ 3 ].trim();
+
+	// Newlines break the formatting of the changelog, so we replace them with spaces.
+	message = message.replace( /\r\n|\n/g, ' ' );
+
+	return message;
 };
 
 /**
@@ -133,7 +150,12 @@ export const getChangelogComment = ( body: string ) => {
 	const commentRegex = /#### Comment ?(<!--(.*)-->)?(.*)<\/details>/gms;
 	const match = commentRegex.exec( body );
 
-	return match ? match[ 3 ].trim() : '';
+	let comment = match ? match[ 3 ].trim() : '';
+
+	// Newlines break the formatting of the changelog, so we replace them with spaces.
+	comment = comment.replace( /\r\n|\n/g, ' ' );
+
+	return comment;
 };
 
 /**
@@ -143,6 +165,14 @@ export const getChangelogComment = ( body: string ) => {
  * @return {Object}     Changelog details
  */
 export const getChangelogDetails = ( body: string ) => {
+	if ( shouldAutomateNoChangelog( body ) ) {
+		return {
+			significance: 'patch',
+			type: 'tweak',
+			message: '',
+			comment: getChangelogComment( body ),
+		};
+	}
 	return {
 		significance: getChangelogSignificance( body ),
 		type: getChangelogType( body ),

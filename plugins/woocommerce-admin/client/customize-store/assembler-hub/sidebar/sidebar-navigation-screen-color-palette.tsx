@@ -4,109 +4,118 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement } from '@wordpress/element';
+import { createInterpolateElement, useContext } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
-import { useSelect } from '@wordpress/data';
-// @ts-ignore no types exist yet.
-import { BlockEditorProvider } from '@wordpress/block-editor';
-import { noop } from 'lodash';
+import { PanelBody } from '@wordpress/components';
+// @ts-ignore No types for this exist yet.
+import { privateApis as blockEditorPrivateApis } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-// @ts-ignore No types for this exist yet.
-import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
-import { PanelBody } from '@wordpress/components';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
+import { CustomizeStoreContext } from '../';
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { ColorPalette, ColorPanel } from './global-styles';
+import { FlowType } from '~/customize-store/types';
+import { trackEvent } from '~/customize-store/tracking';
+
+const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
 const SidebarNavigationScreenColorPaletteContent = () => {
-	const { storedSettings } = useSelect( ( select ) => {
-		const { getSettings } = unlock( select( editSiteStore ) );
-
-		return {
-			storedSettings: getSettings( false ),
-		};
-	}, [] );
-
+	// @ts-ignore No types for this exist yet.
+	const { user } = useContext( GlobalStylesContext );
+	const hasCreatedOwnColors = !! (
+		user.settings.color && user.settings.color.palette.hasCreatedOwnColors
+	);
 	// Wrap in a BlockEditorProvider to ensure that the Iframe's dependencies are
 	// loaded. This is necessary because the Iframe component waits until
 	// the block editor store's `__internalIsInitialized` is true before
 	// rendering the iframe. Without this, the iframe previews will not render
 	// in mobile viewport sizes, where the editor canvas is hidden.
 	return (
-		<div className="woocommerce-customize-store_sidebar-color-content">
-			<BlockEditorProvider
-				settings={ storedSettings }
-				onChange={ noop }
-				onInput={ noop }
+		<div
+			className="woocommerce-customize-store_sidebar-color-content"
+			style={ {
+				opacity: 0,
+				animation: 'containerFadeIn 300ms ease-in-out forwards',
+			} }
+		>
+			<ColorPalette />
+			<PanelBody
+				className="woocommerce-customize-store__color-panel-container"
+				title={ __( 'or create your own', 'woocommerce' ) }
+				initialOpen={ hasCreatedOwnColors }
 			>
-				<ColorPalette />
-
-				<PanelBody
-					className="woocommerce-customize-store__color-panel-container"
-					title={ __( 'or create your own', 'woocommerce' ) }
-					initialOpen={ false }
-				>
-					<ColorPanel />
-				</PanelBody>
-			</BlockEditorProvider>
+				<ColorPanel />
+			</PanelBody>
 		</div>
 	);
 };
 
 export const SidebarNavigationScreenColorPalette = () => {
+	const {
+		context: { flowType },
+	} = useContext( CustomizeStoreContext );
+
+	const aiOnline = flowType === FlowType.AIOnline;
+
+	const title = aiOnline
+		? __( 'Change the color palette', 'woocommerce' )
+		: __( 'Choose your color palette', 'woocommerce' );
+	const description = aiOnline
+		? __(
+				'Based on the info you shared, our AI tool recommends using this color palette. Want to change it? You can select or add new colors below, or update them later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
+				'woocommerce'
+		  )
+		: __(
+				'Choose the color palette that best suits your brand. Want to change it? Create your custom color palette below, or update it later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
+				'woocommerce'
+		  );
+
 	return (
 		<SidebarNavigationScreen
-			title={ __( 'Change the color palette', 'woocommerce' ) }
-			description={ createInterpolateElement(
-				__(
-					'Based on the info you shared, our AI tool recommends using this color palette. Want to change it? You can select or add new colors below, or update them later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
-					'woocommerce'
+			title={ title }
+			description={ createInterpolateElement( description, {
+				EditorLink: (
+					<Link
+						onClick={ () => {
+							trackEvent(
+								'customize_your_store_assembler_hub_editor_link_click',
+								{
+									source: 'color-palette',
+								}
+							);
+							window.open(
+								`${ ADMIN_URL }site-editor.php`,
+								'_blank'
+							);
+							return false;
+						} }
+						href=""
+					/>
 				),
-				{
-					EditorLink: (
-						<Link
-							onClick={ () => {
-								recordEvent(
-									'customize_your_store_assembler_hub_editor_link_click',
-									{
-										source: 'color-palette',
-									}
-								);
-								window.open(
-									`${ ADMIN_URL }site-editor.php`,
-									'_blank'
-								);
-								return false;
-							} }
-							href=""
-						/>
-					),
-					StyleLink: (
-						<Link
-							onClick={ () => {
-								recordEvent(
-									'customize_your_store_assembler_hub_style_link_click',
-									{
-										source: 'color-palette',
-									}
-								);
-								window.open(
-									`${ ADMIN_URL }site-editor.php?path=%2Fwp_global_styles&canvas=edit`,
-									'_blank'
-								);
-								return false;
-							} }
-							href=""
-						/>
-					),
-				}
-			) }
+				StyleLink: (
+					<Link
+						onClick={ () => {
+							trackEvent(
+								'customize_your_store_assembler_hub_style_link_click',
+								{
+									source: 'color-palette',
+								}
+							);
+							window.open(
+								`${ ADMIN_URL }site-editor.php?path=%2Fwp_global_styles&canvas=edit`,
+								'_blank'
+							);
+							return false;
+						} }
+						href=""
+					/>
+				),
+			} ) }
 			content={ <SidebarNavigationScreenColorPaletteContent /> }
 		/>
 	);

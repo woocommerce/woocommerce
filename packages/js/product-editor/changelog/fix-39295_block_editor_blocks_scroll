@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix issue where scrollbar was not showing up on block inserter panel within IFrame block editor modal.

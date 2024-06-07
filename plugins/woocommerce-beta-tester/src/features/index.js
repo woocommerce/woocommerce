@@ -24,9 +24,6 @@ function Features() {
 	const sortedFeatureNames = Object.keys( features ).sort();
 
 	const afterToggleCallback = {
-		'new-product-management-experience': () => {
-			window.location.reload();
-		},
 		'product-block-editor': () => {
 			window.location.reload();
 		},

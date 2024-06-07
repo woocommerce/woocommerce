@@ -32,7 +32,7 @@ export const moveIndex = < T >(
  * @return boolean
  */
 export const isBefore = (
-	event: DragEvent< HTMLLIElement >,
+	event: DragEvent< HTMLDivElement >,
 	isHorizontal = false
 ) => {
 	const target = event.target as HTMLElement;
@@ -123,7 +123,7 @@ export const getPreviousIndex = ( currentIndex: number, itemCount: number ) => {
 };
 
 export const getItemName = (
-	parentNode: HTMLOListElement | null,
+	parentNode: HTMLDivElement | null,
 	index: number
 ) => {
 	const listItemNode = parentNode?.childNodes[ index ] as HTMLLIElement;

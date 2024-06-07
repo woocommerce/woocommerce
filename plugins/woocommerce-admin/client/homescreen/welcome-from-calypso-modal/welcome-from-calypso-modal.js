@@ -6,7 +6,7 @@ import { Guide } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import interpolateComponents from '@automattic/interpolate-components';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Link } from '@woocommerce/components';
 
 /**
@@ -54,7 +54,7 @@ export default function WelcomeFromCalypsoModal( { onClose } ) {
 		return null;
 	}
 
-	const guideClassNames = classNames(
+	const guideClassNames = clsx(
 		'woocommerce__welcome-modal',
 		'woocommerce__welcome-from-calypso-modal'
 	);

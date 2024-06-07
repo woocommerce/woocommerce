@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ProductAttribute } from '@woocommerce/data';
+import { ProductProductAttribute } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -11,10 +11,11 @@ import {
 	reorderSortableProductAttributePositions,
 } from '../utils';
 
-const attributeList: Record< number | string, ProductAttribute > = {
+const attributeList: Record< number | string, ProductProductAttribute > = {
 	15: {
 		id: 15,
 		name: 'Automotive',
+		slug: 'Automotive',
 		position: 0,
 		visible: true,
 		variation: false,
@@ -23,6 +24,7 @@ const attributeList: Record< number | string, ProductAttribute > = {
 	1: {
 		id: 1,
 		name: 'Color',
+		slug: 'Color',
 		position: 1,
 		visible: true,
 		variation: true,
@@ -31,6 +33,7 @@ const attributeList: Record< number | string, ProductAttribute > = {
 	Quality: {
 		id: 0,
 		name: 'Quality',
+		slug: 'Quality',
 		position: 2,
 		visible: true,
 		variation: false,
@@ -39,6 +42,7 @@ const attributeList: Record< number | string, ProductAttribute > = {
 	3: {
 		id: 3,
 		name: 'Random',
+		slug: 'Random',
 		position: 3,
 		visible: true,
 		variation: true,

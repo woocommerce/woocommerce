@@ -1,5 +1,5 @@
 .woocommerce-new-attribute-modal {
-	min-width: 50%;
+	min-width: 75%;
 	.components-notice.is-info {
 		margin-left: 0;
 		margin-right: 0;
@@ -26,7 +26,15 @@
 	&__body {
 		min-height: 200px;
 		flex: 1 1 auto;
-		overflow: auto;
+
+		.woocommerce-new-attribute-modal__table-row {
+			min-height: 80px;
+
+			.components-form-token-field__input-container .components-form-token-field__suggestions-list {
+				position: absolute;
+				z-index: 10;
+			}
+		}
 	}
 
 	&__table {
@@ -54,12 +62,57 @@
 		display: grid;
 		grid-template-columns: 40% 55% 5%;
 		border-bottom: 1px solid $gray-300;
-		align-items: center;
-	}
-	&__table-row {
+
 		padding: $gap-large 0;
 		td:not(:last-child) {
 			margin-right: $gap;
+		}
+
+		.components-form-token-field {
+			position: relative;
+		}
+
+		.components-form-token-field__help {
+			position: absolute;
+			top: 36px;
+			z-index: 0;
+			display: none;
+		}
+
+		.components-form-token-field__label {
+			display: none;
+		}
+
+		.components-form-token-field__input-container {
+			> .components-flex {
+				min-height: 34px;
+			}
+
+			&.is-disabled {
+				border-color: $gray-600;
+			}
+
+			&.is-active {
+				z-index: 10;
+			}
+
+			&:not(.is-disabled) {
+				background-color: white;
+			}
+
+			&:focus-within {
+				outline: none;
+				box-shadow: none;
+			}
+		}
+
+		.components-form-token-field__input {
+			margin: 1px 0;
+		}
+
+		.components-form-token-field__suggestion {
+			min-height: 36px;
+			padding: 10px 12px;
 		}
 
 		@include breakpoint( '<782px' ) {
@@ -83,17 +136,28 @@
 	&__table-attribute-trash-column {
 		display: flex;
 		justify-content: center;
+		align-items:flex-start;
 
 		@include breakpoint( '<782px' ) {
 			position: absolute;
 			top: 0;
 			right: 0;
 			bottom: 0;
-			align-items: center;
 		}
 
 		.components-button.has-icon {
 			padding: 8px;
 		}
+	}
+}
+
+.woocommerce-new-attribute-modal__table-attribute-value-column.has-values {
+	.components-form-token-field__suggestions-list {
+		border: 1px solid var( --wp-admin-theme-color );
+		border-top: 0;
+		width: calc(100% + 2px);
+		margin-left: -1px;
+		margin-top: -1px;
+		background-color: white;
 	}
 }

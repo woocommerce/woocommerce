@@ -5,28 +5,24 @@
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 /**
  * Handle redirecting to the old or new editor based on features and support.
  */
 class RedirectionController {
-
 	/**
-	 * Supported post types.
+	 * Registered product templates.
 	 *
 	 * @var array
 	 */
-	private $supported_post_types;
+	private $product_templates = array();
 
 	/**
 	 * Set up the hooks used for redirection.
-	 *
-	 * @param array $supported_post_types Array of supported post types.
 	 */
-	public function __construct( $supported_post_types ) {
-		$this->supported_post_types = $supported_post_types;
-
+	public function __construct() {
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			add_action( 'current_screen', array( $this, 'maybe_redirect_to_new_editor' ), 30, 0 );
 			add_action( 'current_screen', array( $this, 'redirect_non_supported_product_types' ), 30, 0 );
@@ -62,8 +58,48 @@ class RedirectionController {
 	 */
 	protected function is_product_supported( $product_id ): bool {
 		$product = $product_id ? wc_get_product( $product_id ) : null;
-		$digital_product = $product->is_downloadable() || $product->is_virtual();
-		return $product && in_array( $product->get_type(), $this->supported_post_types, true ) && ! $digital_product;
+
+		if ( is_null( $product ) ) {
+			return false;
+		}
+
+		$digital_product     = $product->is_downloadable() || $product->is_virtual();
+		$product_template_id = $product->get_meta( '_product_template_id' );
+
+		foreach ( $this->product_templates as $product_template ) {
+			if ( is_null( $product_template->get_layout_template_id() ) ) {
+				continue;
+			}
+
+			$product_data      = $product_template->get_product_data();
+			$product_data_type = $product_data['type'];
+			// Treat a variable product as a simple product since there is not a product template
+			// for variable products.
+			$product_type = $product->get_type() === 'variable' ? 'simple' : $product->get_type();
+
+			if ( isset( $product_data_type ) && $product_data_type !== $product_type ) {
+				continue;
+			}
+
+			if ( isset( $product_template_id ) && $product_template_id === $product_template->get_id() ) {
+				return true;
+			}
+
+			if ( isset( $product_data_type ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if a product is supported by the new experience.
+	 *
+	 * @param array $product_templates The registered product teamplates.
+	 */
+	public function set_product_templates( array $product_templates ): void {
+		$this->product_templates = $product_templates;
 	}
 
 	/**
@@ -124,6 +160,7 @@ class RedirectionController {
 		);
 	}
 
+
 	/**
 	 * Redirect non supported product types to legacy editor.
 	 */
@@ -136,5 +173,4 @@ class RedirectionController {
 			exit();
 		}
 	}
-
 }

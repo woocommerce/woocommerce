@@ -24,100 +24,6 @@ import {
 import { createMetaDataTransformer } from '../shared';
 
 /**
- * Creates a transformer for an order object.
- *
- * @return {ModelTransformer} The created transformer.
- */
-export function createOrderTransformer(): ModelTransformer< Order > {
-	return new ModelTransformer( [
-		new IgnorePropertyTransformation( [ 'date_created', 'date_modified' ] ),
-		new ModelTransformerTransformation(
-			'billing',
-			BillingOrderAddress,
-			createBillingAddressTransformer()
-		),
-		new ModelTransformerTransformation(
-			'shipping',
-			ShippingOrderAddress,
-			createShippingAddressTransformer()
-		),
-		new ModelTransformerTransformation(
-			'taxLines',
-			OrderTaxRate,
-			createOrderTaxRateTransformer()
-		),
-		new ModelTransformerTransformation(
-			'refunds',
-			OrderRefundLine,
-			createOrderRefundLineTransformer()
-		),
-		new ModelTransformerTransformation(
-			'couponLines',
-			OrderCouponLine,
-			createOrdeCouponLineTransformer()
-		),
-		new ModelTransformerTransformation(
-			'feeLines',
-			OrderFeeLine,
-			createOrderFeeLineTransformer()
-		),
-		new ModelTransformerTransformation(
-			'lineItems',
-			OrderLineItem,
-			createOrderLineItemTransformer()
-		),
-		new ModelTransformerTransformation(
-			'shippingLines',
-			OrderShippingLine,
-			createOrderShippingItemTransformer()
-		),
-		new ModelTransformerTransformation(
-			'metaData',
-			MetaData,
-			createMetaDataTransformer()
-		),
-
-		new PropertyTypeTransformation( {
-			status: PropertyType.String,
-			currency: PropertyType.String,
-			discountTotal: PropertyType.String,
-			discountTax: PropertyType.String,
-			shippingTotal: PropertyType.String,
-			shippingTax: PropertyType.String,
-			cartTax: PropertyType.String,
-			total: PropertyType.String,
-			totalTax: PropertyType.String,
-			pricesIncludeTax: PropertyType.Boolean,
-			customerId: PropertyType.Integer,
-			customerNote: PropertyType.String,
-			paymentMethod: PropertyType.String,
-			transactionId: PropertyType.String,
-			setPaid: PropertyType.Boolean,
-		} ),
-		new KeyChangeTransformation< Order >( {
-			discountTotal: 'discount_total',
-			discountTax: 'discount_tax',
-			shippingTotal: 'shipping_total',
-			shippingTax: 'shipping_tax',
-			cartTax: 'cart_tax',
-			totalTax: 'total_tax',
-			pricesIncludeTax: 'prices_include_tax',
-			customerId: 'customer_id',
-			customerNote: 'customer_note',
-			paymentMethod: 'payment_method',
-			transactionId: 'transaction_id',
-			setPaid: 'set_paid',
-			lineItems: 'line_items',
-			taxLines: 'tax_lines',
-			shippingLines: 'shipping_lines',
-			feeLines: 'fee_lines',
-			couponLines: 'coupon_lines',
-			metaData: 'meta_data',
-		} ),
-	] );
-}
-
-/**
  * Creates a transformer for an order address object.
  *
  * @return {ModelTransformer} The created transformer.
@@ -325,6 +231,100 @@ function createOrderShippingItemTransformer(): ModelTransformer< OrderShippingLi
 			methodTitle: 'method_title',
 			methodId: 'method_id',
 			totalTax: 'total_tax',
+		} ),
+	] );
+}
+
+/**
+ * Creates a transformer for an order object.
+ *
+ * @return {ModelTransformer} The created transformer.
+ */
+export function createOrderTransformer(): ModelTransformer< Order > {
+	return new ModelTransformer( [
+		new IgnorePropertyTransformation( [ 'date_created', 'date_modified' ] ),
+		new ModelTransformerTransformation(
+			'billing',
+			BillingOrderAddress,
+			createBillingAddressTransformer()
+		),
+		new ModelTransformerTransformation(
+			'shipping',
+			ShippingOrderAddress,
+			createShippingAddressTransformer()
+		),
+		new ModelTransformerTransformation(
+			'taxLines',
+			OrderTaxRate,
+			createOrderTaxRateTransformer()
+		),
+		new ModelTransformerTransformation(
+			'refunds',
+			OrderRefundLine,
+			createOrderRefundLineTransformer()
+		),
+		new ModelTransformerTransformation(
+			'couponLines',
+			OrderCouponLine,
+			createOrdeCouponLineTransformer()
+		),
+		new ModelTransformerTransformation(
+			'feeLines',
+			OrderFeeLine,
+			createOrderFeeLineTransformer()
+		),
+		new ModelTransformerTransformation(
+			'lineItems',
+			OrderLineItem,
+			createOrderLineItemTransformer()
+		),
+		new ModelTransformerTransformation(
+			'shippingLines',
+			OrderShippingLine,
+			createOrderShippingItemTransformer()
+		),
+		new ModelTransformerTransformation(
+			'metaData',
+			MetaData,
+			createMetaDataTransformer()
+		),
+
+		new PropertyTypeTransformation( {
+			status: PropertyType.String,
+			currency: PropertyType.String,
+			discountTotal: PropertyType.String,
+			discountTax: PropertyType.String,
+			shippingTotal: PropertyType.String,
+			shippingTax: PropertyType.String,
+			cartTax: PropertyType.String,
+			total: PropertyType.String,
+			totalTax: PropertyType.String,
+			pricesIncludeTax: PropertyType.Boolean,
+			customerId: PropertyType.Integer,
+			customerNote: PropertyType.String,
+			paymentMethod: PropertyType.String,
+			transactionId: PropertyType.String,
+			setPaid: PropertyType.Boolean,
+		} ),
+		new KeyChangeTransformation< Order >( {
+			discountTotal: 'discount_total',
+			discountTax: 'discount_tax',
+			shippingTotal: 'shipping_total',
+			shippingTax: 'shipping_tax',
+			cartTax: 'cart_tax',
+			totalTax: 'total_tax',
+			pricesIncludeTax: 'prices_include_tax',
+			customerId: 'customer_id',
+			customerNote: 'customer_note',
+			paymentMethod: 'payment_method',
+			transactionId: 'transaction_id',
+			setPaid: 'set_paid',
+			lineItems: 'line_items',
+			taxLines: 'tax_lines',
+			shippingLines: 'shipping_lines',
+			feeLines: 'fee_lines',
+			couponLines: 'coupon_lines',
+			metaData: 'meta_data',
 		} ),
 	] );
 }

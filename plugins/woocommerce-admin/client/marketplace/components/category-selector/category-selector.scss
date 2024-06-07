@@ -1,4 +1,4 @@
-@import '../../stylesheets/_variables.scss';
+@import "../../stylesheets/_variables.scss";
 
 .woocommerce-marketplace__category-selector {
 	display: flex;
@@ -31,6 +31,14 @@
 		color: $white;
 		background-color: $gray-900;
 		fill: $white;
+	}
+
+	&.is-loading {
+		animation: loading-fade 1.6s ease-in-out infinite;
+		background: $skeleton-loader-color;
+		height: 32px;
+		pointer-events: none;
+		width: 6em;
 	}
 }
 
@@ -112,15 +120,5 @@
 	&--selected {
 		color: $white;
 		background-color: $gray-900;
-	}
-}
-
-.woocommerce-marketplace__category-selector-loading {
-	display: flex;
-	margin-top: $grid-unit-20;
-
-	p {
-		margin: 0;
-		line-height: $grid-unit-30;
 	}
 }

@@ -16,7 +16,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	ProductAttributeTerm,
-	QueryProductAttribute,
+	ProductProductAttribute,
 } from '@woocommerce/data';
 
 /**
@@ -118,7 +118,7 @@ export const CreateAttributeTermModal: React.FC<
 					isValidForm,
 					setValue,
 					values,
-				}: FormContextType< QueryProductAttribute > ) => {
+				}: FormContextType< ProductProductAttribute > ) => {
 					const nameInputProps = getInputProps< string >( 'name' );
 					return (
 						<>

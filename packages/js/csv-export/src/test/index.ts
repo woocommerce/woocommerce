@@ -2,7 +2,6 @@
 /**
  * External dependencies
  */
-import moment from 'moment';
 import { saveAs } from 'browser-filesaver';
 
 /**
@@ -33,9 +32,16 @@ describe( 'generateCSVDataFromTable', () => {
 		);
 	} );
 
-	it( 'should prefix tab character when the cell value starts with one of =, +, -, and @', () => {
-		[ '=', '+', '-', '@' ].forEach( ( val ) => {
-			const expected = 'value\n"\t' + val + 'test"';
+	it( 'should prefix single quote character when the cell value starts with one of =, +, -, @, tab, and carriage return', () => {
+		[
+			'=',
+			'+',
+			'-',
+			'@',
+			String.fromCharCode( 0x09 ), // tab
+			String.fromCharCode( 0x0d ), // carriage return
+		].forEach( ( val ) => {
+			const expected = 'value\n"\'' + val + 'test"';
 			const result = generateCSVDataFromTable(
 				[
 					{
@@ -58,16 +64,16 @@ describe( 'generateCSVDataFromTable', () => {
 } );
 
 describe( 'generateCSVFileName', () => {
+	jest.useFakeTimers().setSystemTime( new Date( '2024-12-23' ) );
+
 	it( 'should generate a file name with the date when no params are provided', () => {
 		const fileName = generateCSVFileName();
-		expect( fileName ).toBe( moment().format( 'YYYY-MM-DD' ) + '.csv' );
+		expect( fileName ).toBe( '2024-12-23.csv' );
 	} );
 
 	it( 'should generate a file name with the `name` and the date', () => {
 		const fileName = generateCSVFileName( 'Revenue table' );
-		expect( fileName ).toBe(
-			'revenue-table_' + moment().format( 'YYYY-MM-DD' ) + '.csv'
-		);
+		expect( fileName ).toBe( 'revenue-table_2024-12-23.csv' );
 	} );
 
 	it( 'should generate a file name with the `name` and `params`', () => {
@@ -76,9 +82,7 @@ describe( 'generateCSVFileName', () => {
 			order: 'desc',
 		} );
 		expect( fileName ).toBe(
-			'revenue-table_' +
-				moment().format( 'YYYY-MM-DD' ) +
-				'_orderby-revenue_order-desc.csv'
+			'revenue-table_2024-12-23_orderby-revenue_order-desc.csv'
 		);
 	} );
 } );

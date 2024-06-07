@@ -5,13 +5,12 @@
  * External dependencies
  */
 import {
-	__unstableIframe as Iframe,
 	__unstableEditorStyles as EditorStyles,
 	privateApis as blockEditorPrivateApis,
 	// @ts-ignore no types exist yet.
 } from '@wordpress/block-editor';
 import { useRefEffect } from '@wordpress/compose';
-import { useMemo } from 'react';
+import { MutableRefObject, useMemo } from 'react';
 // @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 
@@ -19,6 +18,7 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
  * Internal dependencies
  */
 import './style.scss';
+import Iframe from '../../../iframe';
 
 const { useGlobalStylesOutput } = unlock( blockEditorPrivateApis );
 
@@ -28,6 +28,7 @@ interface Props {
 	inlineCss?: string;
 	containerResizeListener: JSX.Element;
 	children: JSX.Element;
+	iframeInstance?: MutableRefObject< HTMLObjectElement | null >;
 	onFocusOut?: () => void;
 }
 
@@ -38,6 +39,7 @@ export const GlobalStylesVariationIframe = ( {
 	containerResizeListener,
 	children,
 	onFocusOut,
+	iframeInstance,
 	...props
 }: Props ) => {
 	const [ styles ] = useGlobalStylesOutput();
@@ -65,12 +67,14 @@ export const GlobalStylesVariationIframe = ( {
 
 	return (
 		<Iframe
+			ref={ iframeInstance }
 			className="global-styles-variation-container__iframe"
 			style={ {
 				height,
 				visibility: width ? 'visible' : 'hidden',
 			} }
 			tabIndex={ -1 }
+			loadStyles={ false }
 			contentRef={ useRefEffect( ( bodyElement ) => {
 				// Disable moving focus to the writing flow wrapper if the focus disappears
 				// See https://github.com/WordPress/gutenberg/blob/aa8e1c52c7cb497e224a479673e584baaca97113/packages/block-editor/src/components/writing-flow/use-tab-nav.js#L136

@@ -5,6 +5,12 @@
 	}
 }
 
+.woocommerce-experimental-select-control {
+	&__input:disabled {
+		background-color: $gray-100;
+	}
+}
+
 .woocommerce-experimental-select-tree-control__dropdown {
 	display: block;
 

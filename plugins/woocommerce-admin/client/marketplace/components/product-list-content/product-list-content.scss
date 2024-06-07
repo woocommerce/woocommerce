@@ -1,4 +1,4 @@
-@import '../../stylesheets/_variables.scss';
+@import "../../stylesheets/_variables.scss";
 
 .woocommerce-marketplace {
 	&__product-list-content {
@@ -12,6 +12,25 @@
 		color: $white;
 		height: 270px;
 	}
+
+	.woocommerce-customize-store-banner {
+		grid-column: 1 / -1;
+		display: block;
+		width: 100%;
+		margin: 16px 0;
+	}
+
+	.woocommerce-customize-store-banner-content {
+		margin-top: 63px;
+	}
+
+	&__browse-wp-theme-directory {
+		margin-top: 24px;
+
+		a {
+			text-decoration: none;
+		}
+	}
 }
 
 @media screen and (min-width: $breakpoint-medium) {
@@ -20,9 +39,11 @@
 			gap: $large-gap;
 			grid-template-columns: repeat(2, 1fr);
 		}
-		// Hide third and above product cards on Discover page due to API result count
-		// These are progressively displayed at larger screen sizes.
-		&__discover .woocommerce-marketplace__product-card:nth-child(n+3) {
+
+		// Hide third and above product cards on Discover and suggestions on "no results" search results page
+		// due to item count. We display progressively more on larger screen sizes.
+		&__discover .woocommerce-marketplace__product-card:nth-child(n+3),
+		&__no-results .woocommerce-marketplace__product-card:nth-child(n+3) {
 			display: none;
 		}
 	}
@@ -34,7 +55,9 @@
 			gap: $large-gap;
 			grid-template-columns: repeat(3, 1fr);
 		}
-		&__discover .woocommerce-marketplace__product-card:nth-child(3) {
+
+		&__discover .woocommerce-marketplace__product-card:nth-child(3),
+		&__no-results .woocommerce-marketplace__product-card:nth-child(3) {
 			display: block;
 		}
 	}
@@ -45,7 +68,9 @@
 		&__product-list-content {
 			grid-template-columns: repeat(4, 1fr);
 		}
-		&__discover .woocommerce-marketplace__product-card:nth-child(4) {
+
+		&__discover .woocommerce-marketplace__product-card:nth-child(4),
+		&__no-results .woocommerce-marketplace__product-card:nth-child(4) {
 			display: block;
 		}
 	}

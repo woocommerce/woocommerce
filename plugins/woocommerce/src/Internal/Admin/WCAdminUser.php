@@ -41,8 +41,12 @@ class WCAdminUser {
 			'user',
 			'is_super_admin',
 			array(
-				'get_callback' => function() {
-					return is_super_admin();
+				'get_callback' => function( $user ) {
+					if ( ! isset( $user['id'] ) || 0 === $user['id'] ) {
+						return false;
+					}
+
+					return is_super_admin( $user['id'] );
 				},
 				'schema'       => null,
 			)

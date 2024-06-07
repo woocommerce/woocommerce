@@ -5,6 +5,8 @@
  * @package  WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Admin\Features\Features;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -63,7 +65,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				array(
 					'title'    => __( 'Cart page', 'woocommerce' ),
 					/* Translators: %s Page contents. */
-					'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) ),
+					'desc'     => __( 'Page where shoppers review their shopping cart', 'woocommerce' ),
 					'id'       => 'woocommerce_cart_page_id',
 					'type'     => 'single_select_page_with_search',
 					'default'  => '',
@@ -83,7 +85,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				array(
 					'title'    => __( 'Checkout page', 'woocommerce' ),
 					/* Translators: %s Page contents. */
-					'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) ),
+					'desc'     => __( 'Page where shoppers go to finalize their purchase', 'woocommerce' ),
 					'id'       => 'woocommerce_checkout_page_id',
 					'type'     => 'single_select_page_with_search',
 					'default'  => wc_get_page_id( 'checkout' ),
@@ -153,7 +155,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'checkboxgroup'   => 'start',
 					'show_if_checked' => 'option',
 					/* Translators: %s Docs URL. */
-					'desc_tip'        => sprintf( __( 'Force SSL (HTTPS) on the checkout pages (<a href="%s" target="_blank">an SSL Certificate is required</a>).', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/#section-3' ),
+					'desc_tip'        => sprintf( __( 'Force SSL (HTTPS) on the checkout pages (<a href="%s" target="_blank">an SSL Certificate is required</a>).', 'woocommerce' ), 'https://woocommerce.com/document/ssl-and-https/#section-3' ),
 				),
 
 				'unforce_ssl_checkout' => array(
@@ -335,7 +337,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'title' => esc_html__( 'Usage Tracking', 'woocommerce' ),
 					'type'  => 'title',
 					'id'    => 'tracking_options',
-					'desc'  => __( 'Gathering usage data allows us to make WooCommerce better — your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense.', 'woocommerce' ),
+					'desc'  => __( 'Gathering usage data allows us to tailor your store setup experience, offer more relevant content, and help make WooCommerce better for everyone.', 'woocommerce' ),
 				),
 				array(
 					'title'         => __( 'Enable tracking', 'woocommerce' ),
@@ -361,7 +363,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				array(
 					'title'         => __( 'Show Suggestions', 'woocommerce' ),
 					'desc'          => __( 'Display suggestions within WooCommerce', 'woocommerce' ),
-					'desc_tip'      => esc_html__( 'Leave this box unchecked if you do not want to see suggested extensions.', 'woocommerce' ),
+					'desc_tip'      => esc_html__( 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com. You will see a static list of extensions instead.', 'woocommerce' ),
 					'id'            => 'woocommerce_show_marketplace_suggestions',
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',
@@ -383,6 +385,21 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * @return array
 	 */
 	protected function get_settings_for_legacy_api_section() {
+		$legacy_api_setting_desc =
+			'yes' === get_option( 'woocommerce_api_enabled' ) ?
+			__( 'The legacy REST API is enabled', 'woocommerce' ) :
+			__( 'The legacy REST API is NOT enabled', 'woocommerce' );
+
+		$legacy_api_setting_tip =
+			is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ?
+			__( 'ℹ️️ The WooCommerce Legacy REST API extension is installed and active.', 'woocommerce' ) :
+			sprintf(
+				/* translators: placeholders are URLs */
+				__( '⚠️ The WooCommerce Legacy REST API has been moved to <a target=”_blank” href="%1$s">a dedicated extension</a>. <b><a target=”_blank” href="%2$s">Learn more about this change</a></b>', 'woocommerce' ),
+				'https://wordpress.org/plugins/woocommerce-legacy-rest-api/',
+				'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
+			);
+
 		$settings =
 			array(
 				array(
@@ -392,11 +409,13 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'id'    => 'legacy_api_options',
 				),
 				array(
-					'title'   => __( 'Legacy API', 'woocommerce' ),
-					'desc'    => __( 'Enable the legacy REST API', 'woocommerce' ),
-					'id'      => 'woocommerce_api_enabled',
-					'type'    => 'checkbox',
-					'default' => 'no',
+					'title'    => __( 'Legacy API', 'woocommerce' ),
+					'desc'     => $legacy_api_setting_desc,
+					'id'       => 'woocommerce_api_enabled',
+					'type'     => 'checkbox',
+					'default'  => 'no',
+					'disabled' => true,
+					'desc_tip' => $legacy_api_setting_tip,
 				),
 				array(
 					'type' => 'sectionend',

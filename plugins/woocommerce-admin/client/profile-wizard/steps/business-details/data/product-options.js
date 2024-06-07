@@ -16,12 +16,14 @@ export const getNumberRangeString = (
 ) => {
 	if ( ! max ) {
 		return sprintf(
+			/* translators: a formatted number string, for the minimum value */
 			_x( '%s+', 'store product count or revenue', 'woocommerce' ),
 			formatAmount( numberConfig, min )
 		);
 	}
 
 	return sprintf(
+		/* translators: a formatted number string, for the minimum and maximum values */
 		_x(
 			'%1$s - %2$s',
 			'store product count or revenue range',

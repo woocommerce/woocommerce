@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Do not sanitize HTML for WooCommerce Subscriptions column in Settings > Payments > Payment Methods table.

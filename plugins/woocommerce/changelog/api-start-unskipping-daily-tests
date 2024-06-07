@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fixes and enables API test suite to run on daily CI run against alternate host

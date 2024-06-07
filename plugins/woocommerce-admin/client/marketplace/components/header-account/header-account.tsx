@@ -13,6 +13,7 @@ import './header-account.scss';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import HeaderAccountModal from './header-account-modal';
 import { MARKETPLACE_HOST } from '../constants';
+import { connectUrl } from '../../utils/functions';
 
 export default function HeaderAccount(): JSX.Element {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
@@ -20,7 +21,7 @@ export default function HeaderAccount(): JSX.Element {
 
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 	const isConnected = wccomSettings?.isConnected ?? false;
-	const connectionURL = wccomSettings?.connectURL ?? '';
+	const connectionURL = connectUrl();
 	const userEmail = wccomSettings?.userEmail;
 	const avatarURL = wccomSettings?.userAvatar ?? commentAuthorAvatar;
 

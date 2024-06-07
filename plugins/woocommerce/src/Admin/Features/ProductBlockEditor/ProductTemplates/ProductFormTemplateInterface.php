@@ -14,7 +14,7 @@ interface ProductFormTemplateInterface extends BlockTemplateInterface {
 	 * Adds a new group block.
 	 *
 	 * @param array $block_config block config.
-	 * @return BlockInterface new block section.
+	 * @return GroupInterface new group block.
 	 */
 	public function add_group( array $block_config ): GroupInterface;
 
@@ -33,6 +33,14 @@ interface ProductFormTemplateInterface extends BlockTemplateInterface {
 	 * @return SectionInterface|null
 	 */
 	public function get_section_by_id( string $section_id ): ?SectionInterface;
+
+	/**
+	 * Gets subsection block by id.
+	 *
+	 * @param string $subsection_id subsection id.
+	 * @return SubsectionInterface|null
+	 */
+	public function get_subsection_by_id( string $subsection_id ): ?SubsectionInterface;
 
 	/**
 	 * Gets Block by id.

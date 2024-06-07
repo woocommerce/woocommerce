@@ -1,5 +1,4 @@
 const { test, expect } = require( '@playwright/test' );
-const { features } = require( '../../utils' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 // a representation of the menu structure for WC
@@ -27,26 +26,20 @@ const wcPages = [
 				text: 'Move backward for selected items',
 			},
 			{
-				name: 'Coupons',
-				heading: 'Coupons',
-				element: '.woocommerce-table__empty-item',
-				text: 'No data to display',
-			},
-			{
 				name: 'Reports',
-				heading: 'Orders',
+				heading: 'Reports',
 				element: '.nav-tab-wrapper > .nav-tab-active',
 				text: 'Orders',
 			},
 			{
 				name: 'Settings',
-				heading: 'General',
+				heading: 'Settings',
 				element: '#store_address-description',
 				text: 'This is where your business is located. Tax rates and shipping rates will use this address.',
 			},
 			{
 				name: 'Status',
-				heading: 'System status',
+				heading: 'Status',
 				element: '.nav-tab-active',
 				text: 'System status',
 			},
@@ -70,20 +63,20 @@ const wcPages = [
 			{
 				name: 'Categories',
 				heading: 'Product categories',
-				element: '.row-title',
-				text: 'Uncategorized',
+				element: '#submit',
+				text: 'Add new category',
 			},
 			{
 				name: 'Tags',
 				heading: 'Product tags',
-				element: '.no-items > td',
-				text: 'No tags found',
+				element: '#submit',
+				text: 'Add new tag',
 			},
 			{
 				name: 'Attributes',
 				heading: 'Attributes',
-				element: '.alternate > td',
-				text: 'No attributes currently exist.',
+				element: '#submit',
+				text: 'Add attribute',
 			},
 		],
 	},
@@ -122,27 +115,23 @@ for ( const currentPage of wcPages ) {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test.beforeAll( async ( { baseURL } ) => {
-			const coreProfilerEnabled = features.is_enabled( 'core-profiler' );
+			const response = await new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc-admin',
+			} ).post( 'onboarding/profile', {
+				skipped: true,
+			} );
 
-			if ( coreProfilerEnabled ) {
-				const response = await new wcApi( {
-					url: baseURL,
-					consumerKey: process.env.CONSUMER_KEY,
-					consumerSecret: process.env.CONSUMER_SECRET,
-					version: 'wc-admin',
-				} ).post( 'onboarding/profile', {
-					skipped: true,
-				} );
+			const httpStatus = response.status;
+			const { status, message } = response.data;
 
-				const httpStatus = response.status;
-				const { status, message } = response.data;
-
-				expect( httpStatus ).toEqual( 200 );
-				expect( status ).toEqual( 'success' );
-				expect( message ).toEqual(
-					'Onboarding profile data has been updated.'
-				);
-			}
+			test.expect( httpStatus ).toEqual( 200 );
+			test.expect( status ).toEqual( 'success' );
+			test.expect( message ).toEqual(
+				'Onboarding profile data has been updated.'
+			);
 			const api = new wcApi( {
 				url: baseURL,
 				consumerKey: process.env.CONSUMER_KEY,
@@ -156,8 +145,8 @@ for ( const currentPage of wcPages ) {
 					type: 'simple',
 					regular_price: productPrice,
 				} )
-				.then( ( response ) => {
-					productId = response.data.id;
+				.then( ( _response ) => {
+					productId = _response.data.id;
 				} );
 			// create an order
 			await api
@@ -169,13 +158,13 @@ for ( const currentPage of wcPages ) {
 						},
 					],
 				} )
-				.then( ( response ) => {
-					orderId = response.data.id;
+				.then( ( _response ) => {
+					orderId = _response.data.id;
 				} );
 			// create customer
 			await api
 				.post( 'customers', customer )
-				.then( ( response ) => ( customer.id = response.data.id ) );
+				.then( ( _response ) => ( customer.id = _response.data.id ) );
 		} );
 
 		test.afterAll( async ( { baseURL } ) => {
@@ -208,20 +197,6 @@ for ( const currentPage of wcPages ) {
 			test( `Can load ${ currentPage.subpages[ i ].name }`, async ( {
 				page,
 			} ) => {
-				// deal with cases where the 'Coupons' legacy menu had already been removed.
-				if ( currentPage.subpages[ i ].name === 'Coupons' ) {
-					const couponsMenuVisible = await page
-						.locator(
-							`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`
-						)
-						.isVisible();
-
-					test.skip(
-						! couponsMenuVisible,
-						'Skipping this test because the legacy Coupons menu was not found and may have already been removed.'
-					);
-				}
-
 				await page
 					.locator(
 						`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`,
@@ -234,7 +209,7 @@ for ( const currentPage of wcPages ) {
 				).toContainText( currentPage.subpages[ i ].heading );
 
 				await expect(
-					page.locator( currentPage.subpages[ i ].element )
+					page.locator( currentPage.subpages[ i ].element ).first()
 				).toBeVisible();
 
 				await expect(

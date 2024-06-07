@@ -1,10 +1,11 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
+import { Button, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
-import { useState } from '@wordpress/element';
+import { useState, createInterpolateElement } from '@wordpress/element';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -12,7 +13,11 @@ import { useState } from '@wordpress/element';
 import { Tone, designWithAiStateMachineContext } from '../types';
 import { Choice } from '../components/choice/choice';
 import { CloseButton } from '../components/close-button/close-button';
+import { SkipButton } from '../components/skip-button/skip-button';
 import { aiWizardClosedBeforeCompletionEvent } from '../events';
+import { isEntrepreneurFlow } from '../entrepreneur-flow';
+import { trackEvent } from '~/customize-store/tracking';
+import WordPressLogo from '../../../lib/wordpress-logo';
 
 export type toneOfVoiceCompleteEvent = {
 	type: 'TONE_OF_VOICE_COMPLETE';
@@ -59,26 +64,100 @@ export const ToneOfVoice = ( {
 			? choices[ 0 ].key
 			: context.toneOfVoice.choice
 	);
+
+	const onContinue = () => {
+		if (
+			context.toneOfVoice.aiRecommended &&
+			context.toneOfVoice.aiRecommended !== sound
+		) {
+			trackEvent( 'customize_your_store_ai_wizard_changed_ai_option', {
+				step: 'tone-of-voice',
+				ai_recommended: context.toneOfVoice.aiRecommended,
+				user_choice: sound,
+			} );
+		}
+
+		sendEvent( {
+			type: 'TONE_OF_VOICE_COMPLETE',
+			payload: sound,
+		} );
+	};
+
 	return (
 		<div>
-			<ProgressBar
-				percent={ 80 }
-				color={ 'var(--wp-admin-theme-color)' }
-				bgcolor={ 'transparent' }
-			/>
-			<CloseButton
-				onClick={ () => {
-					sendEvent( {
-						type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
-						payload: { step: 'tone-of-voice' },
-					} );
-				} }
-			/>
+			{ ! isEntrepreneurFlow() && (
+				<ProgressBar
+					percent={ 80 }
+					color={ 'var(--wp-admin-theme-color)' }
+					bgcolor={ 'transparent' }
+				/>
+			) }
+			{ isEntrepreneurFlow() && (
+				<WordPressLogo
+					size={ 24 }
+					className="woocommerce-cys-wordpress-header-logo"
+				/>
+			) }
+			{ ! isEntrepreneurFlow() && (
+				<CloseButton
+					onClick={ () => {
+						sendEvent( {
+							type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
+							payload: { step: 'tone-of-voice' },
+						} );
+					} }
+				/>
+			) }
+			{ isEntrepreneurFlow() && (
+				<SkipButton
+					onClick={ () => {
+						trackEvent(
+							'customize_your_store_entrepreneur_skip_click',
+							{
+								step: 'tone-of-voice',
+							}
+						);
+						window.location.href = getAdminLink(
+							'admin.php?page=wc-admin&ref=entrepreneur-signup'
+						);
+					} }
+				/>
+			) }
 			<div className="woocommerce-cys-design-with-ai-tone-of-voice woocommerce-cys-layout">
 				<div className="woocommerce-cys-page">
 					<h1>
-						{ __( 'How would you like to sound?', 'woocommerce' ) }
+						{ __(
+							'Which writing style do you prefer?',
+							'woocommerce'
+						) }
 					</h1>
+					{ context.apiCallLoader.hasErrors && (
+						<Notice
+							className="woocommerce-cys-design-with-ai__error-notice"
+							isDismissible={ false }
+							status="error"
+						>
+							{ createInterpolateElement(
+								__(
+									'Oops! We encountered a problem while generating your store. <retryButton/>',
+									'woocommerce'
+								),
+								{
+									retryButton: (
+										<Button
+											onClick={ onContinue }
+											variant="tertiary"
+										>
+											{ __(
+												'Please try again',
+												'woocommerce'
+											) }
+										</Button>
+									),
+								}
+							) }
+						</Notice>
+					) }
 					<div className="choices">
 						{ choices.map( ( { title, subtitle, key } ) => {
 							return (
@@ -96,16 +175,7 @@ export const ToneOfVoice = ( {
 							);
 						} ) }
 					</div>
-
-					<Button
-						variant="primary"
-						onClick={ () => {
-							sendEvent( {
-								type: 'TONE_OF_VOICE_COMPLETE',
-								payload: sound,
-							} );
-						} }
-					>
+					<Button variant="primary" onClick={ onContinue }>
 						{ __( 'Continue', 'woocommerce' ) }
 					</Button>
 				</div>

@@ -9,7 +9,7 @@ import { useSelect } from '@wordpress/data';
 import { Campaign } from '~/marketing/types';
 import { STORE_KEY } from '~/marketing/data-multichannel/constants';
 import {
-	CampaignsState,
+	CampaignsPagination,
 	Campaign as APICampaign,
 	ApiFetchError,
 } from '~/marketing/data-multichannel/types';
@@ -36,7 +36,7 @@ export const useCampaigns = ( page = 1, perPage = 5 ): UseCampaignsType => {
 	return useSelect(
 		( select ) => {
 			const { hasFinishedResolution, getCampaigns } = select( STORE_KEY );
-			const campaignsState = getCampaigns< CampaignsState >(
+			const { campaignsPage, meta } = getCampaigns< CampaignsPagination >(
 				page,
 				perPage
 			);
@@ -46,11 +46,15 @@ export const useCampaigns = ( page = 1, perPage = 5 ): UseCampaignsType => {
 					( el ) => el.slug === campaign.channel
 				);
 
+				const cost = campaign.cost ? campaign.cost.formatted : '-';
+				const sales = campaign.sales ? campaign.sales.formatted : '-';
+
 				return {
 					id: `${ campaign.channel }|${ campaign.id }`,
 					title: campaign.title,
 					description: '',
-					cost: `${ campaign.cost.currency } ${ campaign.cost.value }`,
+					cost,
+					sales,
 					manageUrl: campaign.manage_url,
 					icon: channel?.icon || '',
 					channelName: channel?.title || '',
@@ -58,25 +62,16 @@ export const useCampaigns = ( page = 1, perPage = 5 ): UseCampaignsType => {
 				};
 			};
 
-			const error =
-				campaignsState.pages && campaignsState.pages[ page ]?.error;
-
-			const data =
-				campaignsState.pages &&
-				campaignsState.pages[ page ]?.data?.map( convert );
-
 			return {
 				loading: ! hasFinishedResolution( 'getCampaigns', [
 					page,
 					perPage,
 				] ),
-				data,
-				error,
-				meta: {
-					total: campaignsState.total,
-				},
+				data: campaignsPage?.data?.map( convert ),
+				error: campaignsPage?.error,
+				meta,
 			};
 		},
-		[ page, perPage ]
+		[ page, perPage, channels ]
 	);
 };

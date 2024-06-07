@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\PaymentGatewaySuggestions
  */
 
-use Automattic\WooCommerce\Admin\DataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as PaymentGatewaySuggestions;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaySuggestionsDataSourcePoller;
@@ -59,10 +59,18 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		return array(
 			'en_US' => array(
 				array(
-					'id'         => 'mock-gateway',
+					'id'         => 'mock-gateway-1',
 					'is_visible' => (object) array(
 						'type'      => 'base_location_country',
 						'value'     => 'ZA',
+						'operation' => '=',
+					),
+				),
+				array(
+					'id'         => 'mock-gateway-2',
+					'is_visible' => (object) array(
+						'type'      => 'base_location_country',
+						'value'     => 'US',
 						'operation' => '=',
 					),
 				),
@@ -111,27 +119,15 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 	/**
 	 * Test that non-matched suggestions are not shown.
 	 */
-	public function test_non_matching_suggestions() {
+	public function test_matching_suggestions() {
 		update_option( 'woocommerce_default_country', 'US' );
 		set_transient(
 			'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
 			$this->get_mock_specs()
 		);
 		$suggestions = PaymentGatewaySuggestions::get_suggestions();
-		$this->assertCount( 0, $suggestions );
-	}
-
-	/**
-	 * Test that matched suggestions are shown.
-	 */
-	public function test_matching_suggestions() {
-		update_option( 'woocommerce_default_country', 'ZA' );
-		set_transient(
-			'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
-			$this->get_mock_specs()
-		);
-		$suggestions = PaymentGatewaySuggestions::get_suggestions();
-		$this->assertEquals( 'mock-gateway', $suggestions[0]->id );
+		$this->assertCount( 1, $suggestions );
+		$this->assertEquals( 'mock-gateway-2', $suggestions[0]->id );
 	}
 
 	/**
@@ -163,6 +159,27 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 
 		$suggestions = PaymentGatewaySuggestions::get_suggestions();
 		$this->assertEquals( 'default-gateway', $suggestions[0]->id );
+	}
+
+	/**
+	 * Test that empty suggestions are replaced with defaults.
+	 */
+	public function test_empty_suggestions() {
+		set_transient(
+			'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
+			array(
+				'en_US' => array(),
+			)
+		);
+
+		$suggestions       = PaymentGatewaySuggestions::get_suggestions();
+		$stored_transients = get_transient( 'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
+
+		$this->assertEquals( 'bacs', $suggestions[0]->id );
+		$this->assertEquals( count( $stored_transients['en_US'] ), count( DefaultPaymentGateways::get_all() ) );
+
+		$expires = (int) get_transient( '_transient_timeout_woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
+		$this->assertTrue( ( $expires - time() ) <= 3 * HOUR_IN_SECONDS );
 	}
 
 	/**

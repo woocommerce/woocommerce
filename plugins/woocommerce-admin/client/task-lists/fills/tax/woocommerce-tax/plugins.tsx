@@ -2,11 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import interpolateComponents from '@automattic/interpolate-components';
-import { Link, Plugins as PluginInstaller } from '@woocommerce/components';
+import { Plugins as PluginInstaller } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME, InstallPluginsResponse } from '@woocommerce/data';
 import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
-import { Text } from '@woocommerce/experimental';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
 
@@ -15,6 +13,7 @@ import { useEffect } from '@wordpress/element';
  */
 import { createNoticesFromResponse } from '~/lib/notices';
 import { SetupStepProps } from './setup';
+import { TermsOfService } from '~/task-lists/components/terms-of-service';
 
 const isWcConnectOptions = (
 	wcConnectOptions: unknown
@@ -57,22 +56,17 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 		nextStep();
 	}, [ isResolving ] );
 
-	const agreementText = pluginsToActivate.includes( 'woocommerce-services' )
-		? __(
-				'By installing Jetpack and WooCommerce Tax you agree to the {{link}}Terms of Service{{/link}}.',
-				'woocommerce'
-		  )
-		: __(
-				'By installing Jetpack you agree to the {{link}}Terms of Service{{/link}}.',
-				'woocommerce'
-		  );
-
 	if ( isResolving ) {
 		return null;
 	}
 
 	return (
 		<>
+			{ ! tosAccepted && (
+				<TermsOfService
+					buttonText={ __( 'Install & enable', 'woocommerce' ) }
+				/>
+			) }
 			<PluginInstaller
 				onComplete={ (
 					activatedPlugins: string[],
@@ -99,30 +93,8 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 				skipText={ __( 'Set up manually', 'woocommerce' ) }
 				onAbort={ () => onDisable() }
 				abortText={ __( "I don't charge sales tax", 'woocommerce' ) }
+				pluginSlugs={ pluginsToActivate }
 			/>
-			{ ! tosAccepted && (
-				<Text
-					variant="caption"
-					className="woocommerce-task__caption"
-					size="12"
-					lineHeight="16px"
-				>
-					{ interpolateComponents( {
-						mixedString: agreementText,
-						components: {
-							link: (
-								<Link
-									href={ 'https://wordpress.com/tos/' }
-									target="_blank"
-									type="external"
-								>
-									<></>
-								</Link>
-							),
-						},
-					} ) }
-				</Text>
-			) }
 		</>
 	);
 };

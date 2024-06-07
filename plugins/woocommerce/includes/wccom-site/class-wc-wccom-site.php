@@ -41,7 +41,6 @@ class WC_WCCOM_Site {
 	protected static function includes() {
 		require_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site-installer.php';
-		require_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site-installer-requirements-check.php';
 	}
 
 	/**
@@ -221,9 +220,10 @@ class WC_WCCOM_Site {
 
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/class-wc-rest-wccom-site-installer-error-codes.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/class-wc-rest-wccom-site-installer-error.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/abstract-wc-rest-wccom-site-controller.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-installer-controller.php';
-		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-installer-controller-v2.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-ssr-controller.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-status-controller.php';
 
 		require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-state.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-state-storage.php';
@@ -236,13 +236,10 @@ class WC_WCCOM_Site {
 		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-move-product.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-activate-product.php';
 
-		$namespaces['wccom-site/v1'] = array(
+		$namespaces['wccom-site/v2'] = array(
 			'installer' => 'WC_REST_WCCOM_Site_Installer_Controller',
 			'ssr'       => 'WC_REST_WCCOM_Site_SSR_Controller',
-		);
-
-		$namespaces['wccom-site/v2'] = array(
-			'installer' => 'WC_REST_WCCOM_Site_Installer_Controller_V2',
+			'status'    => 'WC_REST_WCCOM_Site_Status_Controller',
 		);
 
 		return $namespaces;

@@ -14,12 +14,16 @@ find "$PROJECT_PATH/assets/css/." ! -name '.gitkeep' -type f -exec rm -f {} + &&
 
 echo "Installing PHP and JS dependencies..."
 pnpm install
+
 echo "Running JS Build..."
-pnpm -w run build --filter=woocommerce || exit "$?"
+if [ -z "${NODE_ENV}" ]; then
+	export NODE_ENV=production
+fi
+pnpm --filter='@woocommerce/plugin-woocommerce' build || exit "$?"
 echo "Cleaning up PHP dependencies..."
 composer install --no-dev || exit "$?"
 echo "Run makepot..."
-pnpm -r --filter=woocommerce run makepot || exit "$?"
+pnpm --filter=@woocommerce/plugin-woocommerce makepot || exit "$?"
 echo "Syncing files..."
 rsync -rc --exclude-from="$PROJECT_PATH/.distignore" "$PROJECT_PATH/" "$DEST_PATH/" --delete --delete-excluded
 

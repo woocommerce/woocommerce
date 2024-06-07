@@ -1,6 +1,7 @@
 .woocommerce-layout__footer {
 	background: $studio-white;
 	border-top: 1px solid $gray-200;
+	box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.05);
 	box-sizing: border-box;
 	padding: 0;
 	position: fixed;
@@ -12,11 +13,11 @@
 		width: 100%;
 	}
 
-	@include breakpoint('782px-960px') {
+	@include breakpoint("782px-960px") {
 		width: calc(100% - 36px);
 	}
 
-	@include breakpoint('<782px') {
+	@include breakpoint("<782px") {
 		flex-flow: row wrap;
 		width: 100%;
 	}

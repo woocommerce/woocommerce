@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Properly convert local time date queries to UTC in the HPOS datastore.

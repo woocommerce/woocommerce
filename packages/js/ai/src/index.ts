@@ -4,6 +4,7 @@
 export {
 	useCompletion as __experimentalUseCompletion,
 	UseCompletionError,
+	useBackgroundRemoval as __experimentalUseBackgroundRemoval,
 } from './hooks';
 
 /**

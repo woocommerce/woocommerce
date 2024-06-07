@@ -735,6 +735,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	 * @return array|WP_Error  $prepared_review
 	 */
 	protected function prepare_item_for_database( $request ) {
+		$prepared_review = array();
 		if ( isset( $request['id'] ) ) {
 			$prepared_review['comment_ID'] = (int) $request['id'];
 		}

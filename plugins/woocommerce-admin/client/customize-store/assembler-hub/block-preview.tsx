@@ -7,8 +7,9 @@
  */
 // @ts-ignore No types for this exist yet.
 import { BlockEditorProvider } from '@wordpress/block-editor';
-import { memo, useContext, useMemo } from '@wordpress/element';
+import { memo, useContext } from '@wordpress/element';
 import { BlockInstance } from '@wordpress/blocks';
+
 /**
  * Internal dependencies
  */
@@ -16,61 +17,48 @@ import {
 	AutoHeightBlockPreview,
 	ScaledBlockPreviewProps,
 } from './auto-block-preview';
-import { HighlightedBlockContext } from './context/highlighted-block-context';
+import { ChangeHandler } from './hooks/use-editor-blocks';
+import { Toolbar } from './toolbar/toolbar';
+import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
+import { IsResizingContext } from './resizable-frame';
 
 export const BlockPreview = ( {
 	blocks,
 	settings,
 	useSubRegistry = true,
-	additionalStyles,
-	previewOpacity = 0.5,
+	onChange,
+	isPatternPreview,
 	...props
 }: {
 	blocks: BlockInstance | BlockInstance[];
 	settings: Record< string, unknown >;
+	onChange?: ChangeHandler | undefined;
 	useSubRegistry?: boolean;
-	previewOpacity?: number;
+	isPatternPreview: boolean;
 } & Omit< ScaledBlockPreviewProps, 'containerWidth' > ) => {
-	const { highlightedBlockIndex } = useContext( HighlightedBlockContext );
-	const renderedBlocks = useMemo( () => {
-		const _blocks = Array.isArray( blocks ) ? blocks : [ blocks ];
+	const renderedBlocks = Array.isArray( blocks ) ? blocks : [ blocks ];
 
-		return _blocks.map( ( block, i ) => {
-			if ( i === highlightedBlockIndex ) {
-				return block;
-			}
-
-			return {
-				...block,
-				attributes: {
-					...block.attributes,
-					className: block.attributes.className + ' preview-opacity',
-				},
-			};
-		} );
-	}, [ blocks, highlightedBlockIndex ] );
-
-	const opacityStyles =
-		highlightedBlockIndex === -1
-			? ''
-			: `
-		.wp-block.preview-opacity {
-			opacity: ${ previewOpacity };
-		}
-	`;
+	const isResizing = useContext( IsResizingContext );
 
 	return (
-		<BlockEditorProvider
-			value={ renderedBlocks }
-			settings={ settings }
-			useSubRegistry={ useSubRegistry }
-		>
-			<AutoHeightBlockPreview
+		<>
+			<BlockEditorProvider
+				value={ renderedBlocks }
 				settings={ settings }
-				additionalStyles={ `${ opacityStyles } ${ additionalStyles }` }
-				{ ...props }
-			/>
-		</BlockEditorProvider>
+				// We need to set onChange for logo to work, but we don't want to trigger the onChange callback when highlighting blocks in the preview. It would persist the highlighted block and cause the opacity to be applied to block permanently.
+				onChange={ onChange }
+				useSubRegistry={ useSubRegistry }
+			>
+				{ isFullComposabilityFeatureAndAPIAvailable() &&
+					! isPatternPreview &&
+					! isResizing && <Toolbar /> }
+				<AutoHeightBlockPreview
+					isPatternPreview={ isPatternPreview }
+					settings={ settings }
+					{ ...props }
+				/>
+			</BlockEditorProvider>
+		</>
 	);
 };
 
