@@ -487,7 +487,6 @@
 						"start": "env:perf"
 					},
 					"events": [
-						"pull_request",
 						"push"
 					]
 				},

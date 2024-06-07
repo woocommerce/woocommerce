@@ -343,6 +343,7 @@ jobs:
 
     report-flaky-tests:
         name: 'Create GitHub issues for flaky tests'
+        if: ${{ !cancelled() }}
         needs: ['project-test-jobs']
         runs-on: ubuntu-latest
         permissions:
