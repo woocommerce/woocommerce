@@ -1309,6 +1309,9 @@ test.describe( 'Testing registerProductCollection', () => {
 			await expect( pageObject.productTitles ).toHaveCount( 5 );
 			await expect( pageObject.productPrices ).toHaveCount( 5 );
 			await expect( pageObject.addToCartButtons ).toHaveCount( 5 );
+
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.products ).toHaveCount( 5 );
 		} );
 
 		test( 'Should display properly in Product Catalog template', async ( {
@@ -1343,6 +1346,9 @@ test.describe( 'Testing registerProductCollection', () => {
 			await expect( pageObject.productTitles ).toHaveCount( 9 );
 			await expect( pageObject.productPrices ).toHaveCount( 9 );
 			await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
+
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.products ).toHaveCount( 9 );
 		} );
 
 		test( 'Clicking "My Custom Collection with Preview" should show preview', async ( {
@@ -1399,6 +1405,9 @@ test.describe( 'Testing registerProductCollection', () => {
 			await expect( pageObject.productTitles ).toHaveCount( 9 );
 			await expect( pageObject.productPrices ).toHaveCount( 9 );
 			await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
+
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.products ).toHaveCount( 9 );
 		} );
 
 		test( 'Clicking "My Custom Collection with Advanced Preview" should show preview for 1 second', async ( {
