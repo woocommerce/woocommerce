@@ -108,7 +108,7 @@ function {{slugPascalCase}}_register_custom_checkout_fields() {
 		'woocommerce_blocks_validate_location_address_fields',
 		function ( \WP_Error $errors, $fields, $group ) {
 			if ( 'INVALID' === $fields['{{slug}}/custom-text-input'] ) {
-				$errors->add( 'invalid_text_detected', 'Please ensure your custom text input is not "invalid".' );
+				$errors->add( 'invalid_text_detected', 'Please ensure your custom text input is not "INVALID".' );
 			}
 		},
 		10,
