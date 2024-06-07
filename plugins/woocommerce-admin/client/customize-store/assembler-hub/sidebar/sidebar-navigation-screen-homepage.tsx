@@ -73,7 +73,7 @@ export const SidebarNavigationScreenHomepage = () => {
 
 	const [ blocks, , onChange ] = useEditorBlocks(
 		'wp_template',
-		currentTemplate.id
+		currentTemplate?.id ?? ''
 	);
 
 	// @ts-expect-error No types for this exist yet.

@@ -2,8 +2,7 @@
 const { REPOSITORY, RUN_ID, GITHUB_TOKEN, TEST_MODE } = process.env;
 const IGNORED_JOBS = [
 	'Evaluate Project Job Statuses',
-	'Report e2e tests results',
-	'Report API tests results',
+	'Report tests results',
 ];
 
 const isJobRequired = ( job ) => {
