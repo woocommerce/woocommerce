@@ -228,7 +228,7 @@
 				{
 					"name": "Core e2e tests",
 					"testType": "e2e",
-					"command": "test:e2e:with-env default",
+					"command": "test:e2e-pw --list",
 					"shardingArguments": [
 						"--shard=1/5",
 						"--shard=2/5",
@@ -246,7 +246,7 @@
 						"tests/e2e-pw/**"
 					],
 					"testEnv": {
-						"start": "env:test --list"
+						"start": "env:test"
 					},
 					"events": [
 						"pull_request",
@@ -512,7 +512,6 @@
 						"tests/metrics/**"
 					],
 					"events": [
-						"pull_request",
 						"push"
 					]
 				},
