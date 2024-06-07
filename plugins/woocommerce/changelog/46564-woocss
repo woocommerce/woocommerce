@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Reduced the number of FlexSlider animation engines from 2 to 1, now always using CSS3 transitions.

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 const filterBlocks = [
 	{
@@ -36,32 +36,19 @@ test.describe( 'Filter blocks registration', () => {
 		await admin.createNewPost();
 	} );
 
-	test( 'Variations can be inserted through the inserter.', async ( {
+	test( 'Variations cannot be inserted through the inserter.', async ( {
 		page,
-		editorUtils,
+		editor,
 	} ) => {
 		for ( const block of filterBlocks ) {
-			await editorUtils.insertBlockUsingGlobalInserter( block.title );
+			await editor.openGlobalBlockInserter();
+			await page.getByPlaceholder( 'Search' ).fill( block.title );
+			const filterBlock = page.getByRole( 'option', {
+				name: block.title,
+				exact: true,
+			} );
 
-			await expect(
-				page.getByLabel( `Block: ${ block.title }` )
-			).toBeVisible();
-		}
-	} );
-
-	test( 'Each filter block comes with a default title', async ( {
-		editorUtils,
-		page,
-	} ) => {
-		for ( const block of filterBlocks ) {
-			await editorUtils.insertBlockUsingGlobalInserter( block.title );
-
-			await expect(
-				page
-					.getByLabel( `Block: Product Filter` )
-					.getByLabel( 'Block: Heading' )
-					.and( page.getByText( block.heading ) )
-			).toBeVisible();
+			await expect( filterBlock ).toBeHidden();
 		}
 	} );
 } );

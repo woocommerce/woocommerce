@@ -586,7 +586,7 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 							),
 							'rate_id'            => array(
 								'description' => __( 'Tax rate ID.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
