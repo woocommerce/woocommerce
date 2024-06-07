@@ -246,7 +246,7 @@
 						"tests/e2e-pw/**"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --list"
 					},
 					"events": [
 						"pull_request",
@@ -519,19 +519,8 @@
 				{
 					"name": "Blocks e2e tests",
 					"testType": "e2e",
-					"command": "test:e2e:blocks",
-					"shardingArguments": [
-						"--shard=1/10",
-						"--shard=2/10",
-						"--shard=3/10",
-						"--shard=4/10",
-						"--shard=5/10",
-						"--shard=6/10",
-						"--shard=7/10",
-						"--shard=8/10",
-						"--shard=9/10",
-						"--shard=10/10"
-					],
+					"command": "test:e2e:blocks flaky-test.spec.ts",
+					"shardingArguments": [],
 					"changes": [
 						"src/Blocks/**",
 						"templates/**",

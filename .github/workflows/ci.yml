@@ -267,7 +267,7 @@ jobs:
                   pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE Tests" -m "$COMMIT_MESSAGE"
 
     test-reports:
-        name: 'Publish reports - ${{ matrix.report }} (optional)'
+        name: 'Publish reports - ${{ matrix.report }}'
         needs:
           [
             'project-jobs',
@@ -342,9 +342,8 @@ jobs:
 
 
     report-flaky-tests:
-        name: 'Create GitHub issues for flaky tests (optional)'
+        name: 'Create GitHub issues for flaky tests'
         needs: ['project-test-jobs']
-        if: ${{ !cancelled() && needs.merge-artifacts.outputs.has-flaky-test-report == 'true' }}
         runs-on: ubuntu-latest
         permissions:
             contents: read
