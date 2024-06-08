@@ -33,6 +33,7 @@ declare global {
 			'activity-panels': boolean;
 			analytics: boolean;
 			coupons: boolean;
+			'customer-effort-score-tracks': boolean;
 			homescreen: boolean;
 			marketing: boolean;
 			'minified-js': boolean;
