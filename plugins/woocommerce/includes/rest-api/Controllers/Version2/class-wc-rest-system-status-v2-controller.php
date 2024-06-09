@@ -1412,14 +1412,14 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			// Page checks.
 			if ( $page_id ) {
 				$page_set = true;
+				$page     = get_post( $page_id );
 
-				if ( $page = get_post( $page_id ) ) {
+				if ( $page ) {
 					$page_exists = true;
 
 					if ( 'publish' === $page->post_status ) {
 						$page_visible = true;
 					}
-
 				}
 			}
 
@@ -1439,7 +1439,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			// Block checks.
 			if ( $values['block'] && $page ) {
 				$block_required = true;
-				$block_present = has_block( $values['block'], $page->post_content );
+				$block_present  = has_block( $values['block'], $page->post_content );
 			}
 
 			// Wrap up our findings into an output array.

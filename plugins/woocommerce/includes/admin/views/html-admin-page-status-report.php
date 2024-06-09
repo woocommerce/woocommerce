@@ -875,7 +875,7 @@ if ( 0 < $mu_plugins_count ) :
 					$found_error = true;
 				}
 
-                // Warn merchants if both the shortcode and block are present, which will be a confusing shopper experience.
+				// Warn merchants if both the shortcode and block are present, which will be a confusing shopper experience.
 				if ( $_page['shortcode_present'] && $_page['block_present'] ) {
 					/* Translators: %1$s: shortcode text, %2$s: block slug. */
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'Page contains both the %1$s shortcode and the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
@@ -903,10 +903,9 @@ if ( 0 < $mu_plugins_count ) :
 					if ( ! empty( $additional_info ) ) {
 						$additional_info = '<mark class="no"> - <span class="dashicons dashicons-info"></span> ' . $additional_info . '</mark>';
 					}
-
 				}
 
-				echo '<mark class="yes">#' . absint( $_page['page_id'] ) . ' - ' . esc_html( str_replace( home_url(), '', get_permalink( $_page['page_id'] ) ) ) . '</mark>' . $additional_info;
+				echo '<mark class="yes">#' . absint( $_page['page_id'] ) . ' - ' . esc_html( str_replace( home_url(), '', get_permalink( $_page['page_id'] ) ) ) . '</mark>' . $additional_info; /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped */
 			}
 
 			echo '</td></tr>';
