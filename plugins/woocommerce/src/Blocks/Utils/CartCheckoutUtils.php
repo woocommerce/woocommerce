@@ -54,11 +54,8 @@ class CartCheckoutUtils {
 	 * @return bool true if the template has out of sync content.
 	 */
 	public static function is_overriden_by_custom_template_content( string $block ): bool {
-		$block = strtolower( trim( $block ) );
 
-		if ( ! in_array( $block, array( 'cart', 'checkout' ), true ) ) {
-			return false;
-		}
+		$block = str_replace( 'woocommerce/', '', $block );
 
 		if ( wc_current_theme_is_fse_theme() ) {
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'page-' . $block ) );

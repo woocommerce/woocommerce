@@ -890,7 +890,7 @@ if ( 0 < $mu_plugins_count ) :
 				// We only state the used type on the Checkout and the Cart page.
 				if ( in_array( $_page['block'], array( 'woocommerce/checkout', 'woocommerce/cart' ), true ) ) {
 					// We check first if, in a blocks theme, the template content does not load the page content.
-					if ( CartCheckoutUtils::is_overriden_by_custom_template_content( str_replace( 'woocommerce/', '', $_page['block'] ) ) ) {
+					if ( CartCheckoutUtils::is_overriden_by_custom_template_content( $_page['block'] ) ) {
 						$additional_info = __( "This page's content is overridden by custom template content", 'woocommerce' );
 					} elseif ( $_page['shortcode_present'] ) {
 						/* Translators: %1$s: shortcode text. */
