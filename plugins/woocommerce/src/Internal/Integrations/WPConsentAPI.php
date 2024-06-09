@@ -35,7 +35,7 @@ class WPConsentAPI {
 			function() {
 				$this->on_init();
 			},
-			20 // After OrderAttributionController
+			20 // After OrderAttributionController.
 		);
 	}
 

@@ -169,6 +169,7 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 	/**
 	 * Returns an authentication error message for a given HTTP verb.
 	 *
+	 * @param string $method HTTP method.
 	 * @return array|null Error information on success, null otherwise.
 	 */
 	protected function get_authentication_error_by_method( string $method ) {
