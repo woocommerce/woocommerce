@@ -887,8 +887,8 @@ if ( 0 < $mu_plugins_count ) :
 
 				$additional_info = '';
 
-				// We only state the used type if both are required, currently happening for the Checkout and the Cart page.
-				if ( $_page['shortcode_required'] && $_page['block_required'] ) {
+				// We only state the used type on the Checkout and the Cart page.
+				if ( in_array( $_page['block'], array( 'woocommerce/checkout', 'woocommerce/cart' ), true ) ) {
 					// We check first if, in a blocks theme, the template content does not load the page content.
 					if ( CartCheckoutUtils::is_overriden_by_custom_template_content( str_replace( 'woocommerce/', '', $_page['block'] ) ) ) {
 						$additional_info = __( "This page's content is overridden by custom template content", 'woocommerce' );
@@ -899,10 +899,11 @@ if ( 0 < $mu_plugins_count ) :
 						/* Translators: %1$s: block slug. */
 						$additional_info = sprintf( __( 'Contains the <strong>%1$s</strong> block', 'woocommerce' ), esc_html( $_page['block'] ) );
 					}
-				}
 
-				if ( ! empty( $additional_info ) ) {
-					$additional_info = ' - <mark class="no"><span class="dashicons dashicons-info"></span> ' . $additional_info . '</mark>';
+					if ( ! empty( $additional_info ) ) {
+						$additional_info = ' - <mark class="no"><span class="dashicons dashicons-info"></span> ' . $additional_info . '</mark>';
+					}
+
 				}
 
 				echo '<mark class="yes">#' . absint( $_page['page_id'] ) . ' - ' . esc_html( str_replace( home_url(), '', get_permalink( $_page['page_id'] ) ) ) . '</mark>' . $additional_info;
