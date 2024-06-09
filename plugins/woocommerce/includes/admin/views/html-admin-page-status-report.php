@@ -901,7 +901,7 @@ if ( 0 < $mu_plugins_count ) :
 					}
 
 					if ( ! empty( $additional_info ) ) {
-						$additional_info = ' - <mark class="no"><span class="dashicons dashicons-info"></span> ' . $additional_info . '</mark>';
+						$additional_info = '<mark class="no"> - <span class="dashicons dashicons-info"></span> ' . $additional_info . '</mark>';
 					}
 
 				}
