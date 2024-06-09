@@ -202,6 +202,8 @@ test.describe( 'Variations tab', () => {
 				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_editVariations }`
 			);
 
+			await disableVariableProductBlockTour( { page } );
+
 			await clickOnTab( 'Variations', page );
 
 			await page
@@ -229,12 +231,18 @@ test.describe( 'Variations tab', () => {
 
 			await page
 				.locator( '.woocommerce-product-tabs' )
-				.getByRole( 'tab', { name: 'Pricing' } )
+				.getByRole( 'tab', { name: 'General' } )
 				.click();
+
+			await page.getByLabel( 'Regular price', { exact: true } ).click();
 
 			await page
 				.getByLabel( 'Regular price', { exact: true } )
-				.fill( '100' );
+				.waitFor( { state: 'visible' } );
+
+			await page
+				.getByLabel( 'Regular price', { exact: true } )
+				.pressSequentially( '100' );
 
 			await page
 				.locator( '.woocommerce-product-tabs' )

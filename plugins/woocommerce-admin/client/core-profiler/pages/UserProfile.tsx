@@ -11,7 +11,8 @@ import clsx from 'clsx';
 /**
  * Internal dependencies
  */
-import { UserProfileEvent, CoreProfilerStateMachineContext } from '../index';
+import { CoreProfilerStateMachineContext } from '../index';
+import { UserProfileEvent } from '../events';
 import { Navigation } from '../components/navigation/navigation';
 import { Heading } from '../components/heading/heading';
 import { Choice } from '../components/choice/choice';

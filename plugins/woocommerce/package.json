@@ -52,8 +52,9 @@
 		"test": "pnpm test:unit",
 		"test:api": "API_TEST_REPORT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
 		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
-		"test:e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js --project=default",
-		"test:e2e:gutenberg": "pnpm playwright test --config=tests/e2e-pw/playwright.config.js --project=Gutenberg",
+		"test:e2e-pw": "pnpm playwright test --config=tests/e2e-pw/envs/default/playwright.config.js",
+		"test:e2e": "pnpm test:e2e:with-env default",
+		"test:e2e:with-env": "bash ./tests/e2e-pw/run-tests-with-env.sh",
 		"test:perf": "./k6 run ./tests/performance/tests/gh-action-pr-requests.js",
 		"test:env:start": "pnpm env:test",
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
@@ -225,7 +226,7 @@
 				{
 					"name": "Core e2e tests",
 					"testType": "e2e",
-					"command": "test:e2e-pw",
+					"command": "test:e2e:with-env default",
 					"shardingArguments": [
 						"--shard=1/5",
 						"--shard=2/5",
@@ -247,13 +248,19 @@
 					},
 					"events": [
 						"pull_request",
-						"push"
-					]
+						"push",
+						"release-checks"
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
 				},
 				{
-					"name": "Core e2e tests - Gutenberg",
+					"name": "Core e2e tests - Gutenberg stable",
 					"testType": "e2e",
-					"command": "test:e2e:gutenberg",
+					"command": "test:e2e:with-env gutenberg-stable",
 					"shardingArguments": [
 						"--shard=1/5",
 						"--shard=2/5",
@@ -263,16 +270,80 @@
 					],
 					"changes": [],
 					"events": [
-						"daily-e2e"
+						"daily-e2e",
+						"nightly-checks",
+						"release-checks"
 					],
 					"testEnv": {
-						"start": "env:test && cd plugins/woocommerce && PLUGIN_REPOSITORY='WordPress/gutenberg' PLUGIN_NAME=Gutenberg PLUGIN_SLUG=gutenberg ./tests/e2e-pw/bin/install-plugin.sh"
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - Gutenberg nightly",
+					"testType": "e2e",
+					"command": "test:e2e:with-env gutenberg-nightly",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"events": [
+						"daily-e2e",
+						"release-checks"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - Woocommerce Payments",
+					"testType": "e2e",
+					"command": "test:e2e:with-env woocommerce-payments",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-e2e",
+						"release-checks"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - Woocommerce Paypal Payments",
+					"testType": "e2e",
+					"command": "test:e2e:with-env woocommerce-paypal-payments",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-e2e",
+						"release-checks"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - WooCommerce Shipping & Tax",
+					"testType": "e2e",
+					"command": "test:e2e:with-env woocommerce-services",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-e2e",
+						"release-checks"
+					],
+					"testEnv": {
+						"start": "env:test"
 					}
 				},
 				{
 					"name": "Core e2e tests - HPOS disabled",
 					"testType": "e2e",
-					"command": "test:e2e-pw",
+					"command": "test:e2e:with-env default",
 					"shardingArguments": [
 						"--shard=1/5",
 						"--shard=2/5",
@@ -281,7 +352,8 @@
 						"--shard=5/5"
 					],
 					"events": [
-						"push"
+						"push",
+						"release-checks"
 					],
 					"changes": [
 						"client/admin/config/*.json",
@@ -297,7 +369,55 @@
 						"config": {
 							"disableHpos": true
 						}
+					},
+					"report": {
+						"resultsBlobName": "all-blob-e2e-reports-non-hpos",
+						"resultsPath": "tests/e2e-pw/test-results"
 					}
+				},
+				{
+					"name": "Core e2e tests - PHP 8.1",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"phpVersion": "8.1"
+						}
+					},
+					"events": [
+						"release-checks"
+					]
+				},
+				{
+					"name": "Core e2e tests - WP latest-1",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "latest-1"
+						}
+					},
+					"events": [
+						"release-checks"
+					]
 				},
 				{
 					"name": "Core API tests",
@@ -320,7 +440,12 @@
 					"events": [
 						"pull_request",
 						"push"
-					]
+					],
+					"report": {
+						"resultsBlobName": "core-api-report",
+						"resultsPath": "tests/api-core-tests/test-results",
+						"allure": true
+					}
 				},
 				{
 					"name": "Core API tests - HPOS disabled",

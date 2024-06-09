@@ -132,6 +132,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	 * Test fetch patterns should not set the patterns cache when fetching patterns fails.
 	 */
 	public function test_fetch_patterns_should_not_set_the_patterns_cache_when_fetching_patterns_fails() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$this->ptk_client
 			->expects( $this->once() )
 			->method( 'fetch_patterns' )
@@ -144,9 +145,10 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test fetch patterns should set the patterns cache after fetching patterns.
+	 * Test fetch patterns should set the patterns cache after fetching patterns if tracking is allowed.
 	 */
 	public function test_fetch_patterns_should_set_the_patterns_cache_after_fetching_patterns() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$expected_patterns = array(
 			array(
 				'title' => 'My pattern',
@@ -168,6 +170,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	 * Test fetch_patterns should filter out the excluded patterns.
 	 */
 	public function test_fetch_patterns_should_filter_out_the_excluded_patterns() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$expected_patterns = array(
 			array(
 				'title' => 'My pattern',
