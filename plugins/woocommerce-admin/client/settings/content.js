@@ -19,6 +19,10 @@ export const Content = ( { data } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 
 	const gatherFormInputs = () => {
+		if ( ! formRef.current ) {
+			return {};
+		}
+
 		const formElements = formRef.current.querySelectorAll(
 			'input' // For now. There will be more.
 		);
