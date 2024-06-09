@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -884,20 +885,27 @@ if ( 0 < $mu_plugins_count ) :
 
 			if ( ! $found_error ) {
 
-				$type_used = '';
+				$additional_info = '';
 
-                // We only state the used type if both are required, currently the Checkout and the Cart page.
+				// We only state the used type if both are required, currently happening for the Checkout and the Cart page.
 				if ( $_page['shortcode_required'] && $_page['block_required'] ) {
-					if ( $_page['shortcode_present'] ) {
+					// We check first if, in a blocks theme, the template content does not load the page content.
+					if ( CartCheckoutUtils::is_overriden_by_custom_template_content( str_replace( 'woocommerce/', '', $_page['block'] ) ) ) {
+						$additional_info = __( "This page's content is overridden by custom template content", 'woocommerce' );
+					} elseif ( $_page['shortcode_present'] ) {
 						/* Translators: %1$s: shortcode text. */
-						$type_used = sprintf( __( ' - Contains the <strong>%1$s</strong> shortcode', 'woocommerce' ), esc_html( $_page['shortcode'] ) );
+						$additional_info = sprintf( __( 'Contains the <strong>%1$s</strong> shortcode', 'woocommerce' ), esc_html( $_page['shortcode'] ) );
 					} elseif ( $_page['block_present'] ) {
 						/* Translators: %1$s: block slug. */
-						$type_used = sprintf( __( ' - Contains the <strong>%1$s</strong> block', 'woocommerce' ), esc_html( $_page['block'] ) );
+						$additional_info = sprintf( __( 'Contains the <strong>%1$s</strong> block', 'woocommerce' ), esc_html( $_page['block'] ) );
 					}
 				}
 
-				echo '<mark class="yes">#' . absint( $_page['page_id'] ) . ' - ' . esc_html( str_replace( home_url(), '', get_permalink( $_page['page_id'] ) ) ) . '</mark>' . $type_used;
+				if ( ! empty( $additional_info ) ) {
+					$additional_info = ' - <mark class="no"><span class="dashicons dashicons-info"></span> ' . $additional_info . '</mark>';
+				}
+
+				echo '<mark class="yes">#' . absint( $_page['page_id'] ) . ' - ' . esc_html( str_replace( home_url(), '', get_permalink( $_page['page_id'] ) ) ) . '</mark>' . $additional_info;
 			}
 
 			echo '</td></tr>';
