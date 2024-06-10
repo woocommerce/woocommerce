@@ -426,11 +426,18 @@ const assignUserProfile = assign( {
 		event.payload.userProfile,
 } );
 
+type BusinessInfoPayload = Extract<
+	BusinessInfoEvent,
+	{ type: 'BUSINESS_INFO_COMPLETED' }
+>[ 'payload' ];
+
 const updateBusinessInfo = fromPromise(
 	async ( {
 		input,
 	}: {
-		input: { payload: BusinessInfoEvent[ 'payload' ] };
+		input: {
+			payload: BusinessInfoPayload;
+		};
 	} ) => {
 		const refreshedOnboardingProfile = ( await resolveSelect(
 			OPTIONS_STORE_NAME
@@ -1094,6 +1101,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								'recordTracksBusinessInfoCompleted',
 								'recordTracksIsEmailChanged',
 							],
+						},
+						RETRY_PRE_BUSINESS_INFO: {
+							actions: [ () => window.location.reload() ],
+						},
+						SKIP_PRE_BUSINESS_INFO: {
+							target: '#plugins',
 						},
 					},
 				},
