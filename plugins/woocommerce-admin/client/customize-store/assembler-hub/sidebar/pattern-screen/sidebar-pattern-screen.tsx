@@ -1,11 +1,14 @@
 /**
  * External dependencies
  */
-import { useCallback, useRef, useState } from '@wordpress/element';
+import { useCallback, useMemo, useRef, useState } from '@wordpress/element';
 import { useSelect, useDispatch, select } from '@wordpress/data';
-import { BlockInstance } from '@wordpress/blocks';
+import { BlockInstance, cloneBlock } from '@wordpress/blocks';
+import { close } from '@wordpress/icons';
+import { __ } from '@wordpress/i18n';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { capitalize } from 'lodash';
-import { Spinner } from '@wordpress/components';
+import { Button, Spinner } from '@wordpress/components';
 import {
 	unlock,
 	// @ts-expect-error No types for this exist yet.
@@ -45,64 +48,33 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		[]
 	);
 
-	const [ blocks, , onChange ] = useEditorBlocks(
+	const [ blocks ] = useEditorBlocks(
 		'wp_template',
 		currentTemplate?.id ?? ''
 	);
 
 	// @ts-expect-error No types for this exist yet.
-	const { selectBlock } = useDispatch( blockEditorStore );
+	const { selectBlock, insertBlocks } = useDispatch( blockEditorStore );
 
-	const { header, footer, allBlocksExceptHeaderFooter } = blocks.reduce(
-		( acc, block ) => {
-			const blockName = block.name;
-
-			if ( blockName === 'core/template-part' ) {
-				if ( acc.header.length === 0 ) {
-					return {
-						...acc,
-						header: [ block ],
-					};
-				}
-				return {
-					...acc,
-					footer: [ block ],
-				};
-			}
-
-			return {
-				...acc,
-				allBlocksExceptHeaderFooter: [
-					...acc.allBlocksExceptHeaderFooter,
-					block,
-				],
-			};
-		},
-		{
-			header: [] as BlockInstance[],
-			footer: [] as BlockInstance[],
-			allBlocksExceptHeaderFooter: [] as BlockInstance[],
-		}
-	);
+	const insertableIndex = useMemo( () => {
+		return blocks.findLastIndex(
+			( block ) => block.name === 'core/template-part'
+		);
+	}, [ blocks ] );
 
 	const onClickPattern = useCallback(
-		( pattern, selectedBlocks ) => {
+		( pattern ) => {
 			const parsedPattern = unlock(
 				select( blockEditorStore )
 			).__experimentalGetParsedPattern( pattern.name );
 
-			selectBlock( parsedPattern.blocks[ 0 ].clientId );
-			onChange(
-				[
-					...header,
-					...allBlocksExceptHeaderFooter,
-					...selectedBlocks,
-					...footer,
-				],
-				{ selection: {} }
-			);
+			const clonedParsedPattern = parsedPattern.blocks.map( cloneBlock );
+
+			insertBlocks( clonedParsedPattern, insertableIndex );
+
+			selectBlock( clonedParsedPattern[ 0 ].clientId, null );
 		},
-		[ selectBlock, onChange, header, allBlocksExceptHeaderFooter, footer ]
+		[ insertBlocks, insertableIndex, selectBlock ]
 	);
 
 	return (
@@ -127,6 +99,20 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 						].label
 					) }
 				</h1>
+				<Button
+					onClick={ () => {
+						const homepageUrl = getNewPath(
+							{ customizing: true },
+							`/customize-store/assembler-hub/homepage`,
+							{}
+						);
+
+						navigateTo( { url: homepageUrl } );
+					} }
+					iconSize={ 22 }
+					icon={ close }
+					label={ __( 'Close', 'woocommerce' ) }
+				/>
 			</div>
 			<div className="edit-site-layout__sidebar-extra__pattern__description">
 				<span>
