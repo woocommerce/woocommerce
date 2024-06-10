@@ -87,7 +87,7 @@ Add any other context about the problem here.
 			return (
 				<div className="woocommerce-error-boundary">
 					<h1 className="woocommerce-error-boundary__heading">
-						{ __( 'Oops, Something went wrong', 'woocommerce' ) }
+						{ __( 'Oops, something went wrong', 'woocommerce' ) }
 					</h1>
 					<p className="woocommerce-error-boundary__subheading">
 						{ __(
