@@ -343,7 +343,7 @@ jobs:
 
     report-flaky-tests:
         name: 'Create issues for flaky tests'
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && ! github.event.pull_request.head.repo.fork }}
         needs: ['project-test-jobs']
         runs-on: ubuntu-latest
         permissions:
