@@ -18,7 +18,7 @@ const reporter = [
 		{
 			outputFolder:
 				ALLURE_RESULTS_DIR ??
-				`${ testsRootPath }/tests/e2e-pw/test-results/allure-results`,
+				`${ testsRootPath }/test-results/allure-results`,
 			detail: true,
 			suiteTitle: true,
 		},
@@ -65,7 +65,7 @@ const config = {
 	use: {
 		baseURL: BASE_URL ?? 'http://localhost:8086',
 		screenshot: { mode: 'only-on-failure', fullPage: true },
-		stateDir: `${ testsRootPath }/tests/e2e-pw/.state/`,
+		stateDir: `${ testsRootPath }/.state/`,
 		trace: 'retain-on-failure',
 		video: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
