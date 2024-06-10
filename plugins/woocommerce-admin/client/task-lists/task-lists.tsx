@@ -4,11 +4,10 @@
 import { __ } from '@wordpress/i18n';
 import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
-import { Fragment, useEffect } from '@wordpress/element';
+import { Fragment } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	ONBOARDING_STORE_NAME,
-	OPTIONS_STORE_NAME,
 	TaskListType,
 	TaskType,
 	WCDataSelector,
@@ -38,7 +37,6 @@ export type TaskListsProps = {
 export const TaskLists: React.FC< TaskListsProps > = ( { query } ) => {
 	const { task } = query;
 	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const { isResolving, taskLists } = useSelect(
 		( select: WCDataSelector ) => {
