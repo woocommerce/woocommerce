@@ -23,12 +23,7 @@ export const SidebarNavigationContext =
 		navigate: () => void 0,
 	} );
 
-export function SidebarContent( {
-	children,
-}: {
-	routeKey: string;
-	children: JSX.Element;
-} ) {
+export function SidebarContent( { children }: { children: JSX.Element } ) {
 	const [ navState, setNavState ] = useState< {
 		direction: SidebarNavigationAnimationDirection | null;
 	} >( {

@@ -109,7 +109,7 @@ class PTKPatternsStore {
 
 		// Only if the transient is not set, we schedule fetching the patterns from the PTK.
 		if ( false === $patterns ) {
-			// $this->schedule_fetch_patterns();
+			$this->schedule_fetch_patterns();
 			return array();
 		}
 
