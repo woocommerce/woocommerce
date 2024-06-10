@@ -23,6 +23,7 @@ import { updateTemplate } from '../data/actions';
 import { installAndActivateTheme as setTheme } from '../data/service';
 import { THEME_SLUG } from '../data/constants';
 import { trackEvent } from '../tracking';
+import { installPatterns } from '../design-without-ai/services';
 
 const { escalate } = actions;
 
@@ -464,4 +465,5 @@ export const services = {
 	saveAiResponseToOption,
 	installAndActivateTheme,
 	resetPatternsAndProducts,
+	installPatterns,
 };
