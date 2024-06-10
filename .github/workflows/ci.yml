@@ -275,20 +275,26 @@ jobs:
               env:
                   DESTINATION_PATH: ../
               run: ./.github/workflows/scripts/install-allure.sh
+              
+            - name: 'Merge artifacts'
+              uses: actions/upload-artifact/merge@v4
+              continue-on-error: true
+              with:
+                name: ${{ matrix.report }}
+                pattern: ${{ matrix.report }}-*
+                delete-merged: true
 
-            - name: 'Download blob reports from artifacts'
+            - name: 'Download merged artifacts'
               uses: actions/download-artifact@v4
               with:
                   path: ./out
-                  pattern: ${{ matrix.report }}-*
-                  run-id: project-test-jobs
-                  merge-multiple: true
+                  pattern: ${{ matrix.report }}
 
             - name: 'Generate Allure report'
               id: generate_allure_report
               run: allure generate --clean ./out/allure-results --output ./out/allure-report
 
-            - name: 'Archive reports'
+            - name: 'Re-upload artifacts with generated report'
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ matrix.report }}
@@ -325,6 +331,6 @@ jobs:
                   fi
 
             - name: 'Add annotation to workflow run linking to PR'
-              if: ${{ github.event_name == 'pull_request' }}
+              if: ${{ github.event_name == 'pull_request' && contains(matrix.report, 'e2e') }}
               run: |
                   echo "::notice::🔗🔗 The e2e report for this run is available at https://woocommerce.github.io/woocommerce-test-reports/pr/${{ github.event.pull_request.number }}/e2e"
