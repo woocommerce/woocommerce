@@ -65,6 +65,7 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 						{
 							__woocommerceNamespace:
 								PRODUCT_SUMMARY_VARIATION_NAME,
+							excerptLength: 100,
 						},
 					],
 					[ 'woocommerce/add-to-cart-form' ],
@@ -78,5 +79,9 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 export const ALLOWED_INNER_BLOCKS = [
 	'core/columns',
 	'core/column',
+	'core/post-title',
+	'core/post-excerpt',
+	'woocommerce/add-to-cart-form',
+	'woocommerce/product-meta',
 	...Object.keys( getBlockMap( metadata.name ) ),
 ];

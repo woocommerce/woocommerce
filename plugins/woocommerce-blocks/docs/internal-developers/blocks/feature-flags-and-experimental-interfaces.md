@@ -6,7 +6,7 @@
     -   [Feature plugin flag](#feature-plugin-flag)
     -   [Experimental flag](#experimental-flag)
 -   [Features behind flags](#features-behind-flags)
-    -   [Feature plugin flag](#feature-plugin-flag-1)
+    -   [Feature plugin flag](#feature-plugin-flag)
 -   [Processes and commands that use a flag](#processes-and-commands-that-use-a-flag)
 -   [Usages of `__experimental` prefix](#usages-of-__experimental-prefix)
     -   [PHP filters and actions](#php-filters-and-actions)
@@ -14,12 +14,6 @@
     -   [Slots](#slots)
     -   [Misc](#misc)
 -   [Usages of `experimental` prefix](#usages-of-experimental-prefix)
-
-We have feature gating system setup in our plugin that defines what is accessible to the public and what is not, it has three phases:
-
--   **Core flag `WOOCOMMERCE_BLOCKS_PHASE=1`:** anything that is not hidden behind a flag, falls under this category, and it contains all of the code that runs on WooCommerce Core plugin.
--   **Feature plugin flag `WOOCOMMERCE_BLOCKS_PHASE=2`**: anything that is behind this flag is code that is shipped to our [feature plugin](https://wordpress.org/plugins/woo-gutenberg-products-block/), the files of blocks behind this flag are also present in WooCommerce Core, just not active.
--   **Experimental flag `WOOCOMMERCE_BLOCKS_PHASE=3`**: This flag contains things that we're not shipping yet, so unfinished work mostly. These features are only available in developer builds of the plugin.
 
 We also use an `__experimental` prefix for any experimental interfaces. This is a signal to those reading our code that it should not be implemented in for production use. Currently this prefix is used in the following ways:
 
@@ -29,8 +23,6 @@ We also use an `__experimental` prefix for any experimental interfaces. This is 
 ## Blocks behind flags
 
 The majority of our feature flagging is blocks, this is a list of them:
-
-### Feature plugin flag
 
 ### Experimental flag
 
@@ -43,7 +35,6 @@ The majority of our feature flagging is blocks, this is a list of them:
 -   Collection Stock Filter ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/src/BlockTypesController.php#L300) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/bin/webpack-entries.js#L101) | [JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/assets/js/blocks/collection-filters/inner-blocks/stock-filter/index.tsx#L15)).
 -   Collection Price Filter ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/src/BlockTypesController.php#L301) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/bin/webpack-entries.js#L105)).
 -   Collection Attribute Filter ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/src/BlockTypesController.php#L302) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/bin/webpack-entries.js#L109)).
--   ⚛️ Add to cart ([JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/dfd2902bd8a247b5d048577db6753c5e901fc60f/assets/js/atomic/blocks/product-elements/add-to-cart/index.ts#L26-L29)).
 
 ## Features behind flags
 

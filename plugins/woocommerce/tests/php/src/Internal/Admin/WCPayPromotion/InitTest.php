@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\WCPayPromotion;
 
-use Automattic\WooCommerce\Admin\DataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 
 use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotion;
 use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\WCPayPromotionDataSourcePoller;

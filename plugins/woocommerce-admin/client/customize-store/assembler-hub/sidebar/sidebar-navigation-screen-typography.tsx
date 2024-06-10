@@ -9,10 +9,9 @@ import {
 	useContext,
 	useState,
 } from '@wordpress/element';
-import { dispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { Link } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
 import { Button, Modal, CheckboxControl } from '@wordpress/components';
 import interpolateComponents from '@automattic/interpolate-components';
 
@@ -24,8 +23,10 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { FontPairing } from './global-styles';
 import { CustomizeStoreContext } from '..';
 import { FlowType } from '~/customize-store/types';
+import { isIframe, sendMessageToParent } from '~/customize-store/utils';
+import { trackEvent } from '~/customize-store/tracking';
 export const SidebarNavigationScreenTypography = () => {
-	const { context } = useContext( CustomizeStoreContext );
+	const { context, sendEvent } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
 
@@ -67,14 +68,14 @@ export const SidebarNavigationScreenTypography = () => {
 		upgradeNotice = '';
 	}
 
-	const OptIn = () => {
-		recordEvent(
+	const optIn = () => {
+		trackEvent(
 			'customize_your_store_assembler_hub_opt_in_usage_tracking'
 		);
 	};
 
 	const skipOptIn = () => {
-		recordEvent(
+		trackEvent(
 			'customize_your_store_assembler_hub_skip_opt_in_usage_tracking'
 		);
 	};
@@ -94,7 +95,7 @@ export const SidebarNavigationScreenTypography = () => {
 				EditorLink: (
 					<Link
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_assembler_hub_editor_link_click',
 								{
 									source: 'typography',
@@ -112,7 +113,7 @@ export const SidebarNavigationScreenTypography = () => {
 				StyleLink: (
 					<Link
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_assembler_hub_style_link_click',
 								{
 									source: 'typography',
@@ -163,7 +164,7 @@ export const SidebarNavigationScreenTypography = () => {
 										'woocommerce-customize-store__opt-in-usage-tracking-modal'
 									}
 									title={ __(
-										'Opt in to usage tracking',
+										'Get more fonts',
 										'woocommerce'
 									) }
 									onRequestClose={ closeModal }
@@ -173,13 +174,13 @@ export const SidebarNavigationScreenTypography = () => {
 										className="core-profiler__checkbox"
 										label={ interpolateComponents( {
 											mixedString: __(
-												'I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
+												'I would like to get store updates, including new fonts, on an ongoing basis. In doing so, I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
 												'woocommerce'
 											),
 											components: {
 												link: (
 													<Link
-														href="https://woo.com/usage-tracking?utm_medium=product"
+														href="https://woocommerce.com/usage-tracking?utm_medium=product"
 														target="_blank"
 														type="external"
 													/>
@@ -200,19 +201,17 @@ export const SidebarNavigationScreenTypography = () => {
 											{ __( 'Cancel', 'woocommerce' ) }
 										</Button>
 										<Button
-											onClick={ async () => {
-												await dispatch(
-													OPTIONS_STORE_NAME
-												).updateOptions( {
-													woocommerce_allow_tracking:
-														OptInDataSharing
-															? 'yes'
-															: 'no',
-												} );
-
-												OptIn();
-												closeModal();
-												window.location.href = `${ ADMIN_URL }admin.php?page=wc-admin&path=%2Fcustomize-store%2Fassembler-hub`;
+											onClick={ () => {
+												optIn();
+												if ( isIframe( window ) ) {
+													sendMessageToParent( {
+														type: 'INSTALL_FONTS',
+													} );
+												} else {
+													sendEvent(
+														'INSTALL_FONTS'
+													);
+												}
 											} }
 											variant="primary"
 											disabled={ ! OptInDataSharing }

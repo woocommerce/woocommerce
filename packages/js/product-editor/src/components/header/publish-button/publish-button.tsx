@@ -25,7 +25,8 @@ import type { PublishButtonProps } from './types';
 
 export function PublishButton( {
 	productType = 'product',
-	prePublish,
+	isMenuButton,
+	isPrePublishPanelVisible = true,
 	...props
 }: PublishButtonProps ) {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
@@ -54,7 +55,7 @@ export function PublishButton( {
 
 			maybeShowFeedbackBar();
 
-			if ( prevStatus === 'auto-draft' ) {
+			if ( prevStatus === 'auto-draft' || prevStatus === 'draft' ) {
 				const url = getNewPath( {}, `/product/${ savedProduct.id }` );
 				navigateTo( { url } );
 			}
@@ -65,11 +66,7 @@ export function PublishButton( {
 		},
 	} );
 
-	if (
-		productType === 'product' &&
-		window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
-		prePublish
-	) {
+	if ( productType === 'product' && isMenuButton ) {
 		function renderPublishButtonMenu(
 			menuProps: Dropdown.RenderProps
 		): React.ReactElement {
@@ -78,7 +75,12 @@ export function PublishButton( {
 			);
 		}
 
-		if ( editedStatus !== 'publish' && editedStatus !== 'future' ) {
+		if (
+			editedStatus !== 'publish' &&
+			editedStatus !== 'future' &&
+			window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
+			isPrePublishPanelVisible
+		) {
 			function handlePrePublishButtonClick(
 				event: MouseEvent< HTMLButtonElement >
 			) {

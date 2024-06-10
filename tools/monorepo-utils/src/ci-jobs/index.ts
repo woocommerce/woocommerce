@@ -22,10 +22,23 @@ const program = new Command( 'ci-jobs' )
 		'Base ref to compare the current ref against for change detection. If not specified, all projects will be considered changed.',
 		''
 	)
+	.option(
+		'-e --event <event>',
+		'Github event for which to run the jobs. If not specified, all events will be considered.',
+		''
+	)
 	.action( async ( options ) => {
 		Logger.startTask( 'Parsing Project Graph', true );
 		const projectGraph = buildProjectGraph();
 		Logger.endTask( true );
+
+		if ( options.event === '' ) {
+			Logger.warn( 'No event was specified, considering all projects.' );
+		} else {
+			Logger.warn(
+				`Only projects configured for '${ options.event }' event will be considered.`
+			);
+		}
 
 		let fileChanges;
 		if ( options.baseRef === '' ) {
@@ -43,32 +56,62 @@ const program = new Command( 'ci-jobs' )
 		const jobs = await createJobsForChanges( projectGraph, fileChanges, {
 			commandVars: {
 				baseRef: options.baseRef,
+				event: options.event,
 			},
 		} );
 		Logger.endTask( true );
 
+		// Rename the test jobs to include the project name and test type.
+		for ( const job of jobs.test ) {
+			const optional = job.optional ? ' (optional)' : '';
+			job.name = `${ job.name } - ${ job.projectName } [${ job.testType }]${ optional }`;
+			Logger.notice( `-  ${ job.name }` );
+		}
+
+		const resultsBlobNames = jobs.test
+			.map( ( job ) => {
+				if ( job.report && job.report.allure ) {
+					return job.report.resultsBlobName;
+				}
+				return undefined;
+			} )
+			.filter( Boolean );
+
+		const reports = [ ...new Set( resultsBlobNames ) ];
+
 		if ( isGithubCI() ) {
 			setOutput( 'lint-jobs', JSON.stringify( jobs.lint ) );
 			setOutput( 'test-jobs', JSON.stringify( jobs.test ) );
+			setOutput( 'report-jobs', JSON.stringify( reports ) );
 			return;
 		}
 
 		if ( jobs.lint.length > 0 ) {
 			Logger.notice( 'Lint Jobs' );
 			for ( const job of jobs.lint ) {
-				Logger.notice( `-  ${ job.projectName } - ${ job.command }` );
+				const optional = job.optional ? '(optional)' : '';
+				Logger.notice(
+					`-  ${ job.projectName } - ${ job.command }${ optional }`
+				);
 			}
 		} else {
 			Logger.notice( 'No lint jobs to run.' );
 		}
 
 		if ( jobs.test.length > 0 ) {
-			Logger.notice( 'Test Jobs' );
+			Logger.notice( `Test Jobs` );
 			for ( const job of jobs.test ) {
-				Logger.notice( `-  ${ job.projectName } - ${ job.name }` );
+				Logger.notice( `-  ${ job.name }` );
 			}
 		} else {
-			Logger.notice( 'No test jobs to run.' );
+			Logger.notice( `No test jobs to run.` );
+		}
+
+		if ( reports.length > 0 ) {
+			Logger.notice( `Report Jobs` );
+			Logger.notice( `${ reports }` );
+		} else {
+			Logger.notice( `No report jobs to run.` );
 		}
 	} );
 

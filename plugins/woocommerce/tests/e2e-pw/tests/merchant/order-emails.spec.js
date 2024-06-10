@@ -41,10 +41,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			await page.locator( '#bulk-action-selector-top' ).isVisible()
 		) {
 			// In WP 6.3, label intercepts check action. Need to force.
-			await page
-				.getByLabel( 'Select All' )
-				.first()
-				.check( { force: true } );
+			await page.getByLabel( 'Select All' ).first().check();
 
 			await page
 				.locator( '#bulk-action-selector-top' )
@@ -85,7 +82,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			} );
 		// search to narrow it down to just the messages we want
 		await page.goto(
-			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+			`/wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
 				customerBilling.email
 			) }`
 		);
@@ -95,6 +92,20 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
 		).toContainText( `[${ storeName }]: New order #${ newOrderId }` );
+
+		// look at order email contents
+		await page.getByRole( 'button', { name: 'View log' } ).last().click();
+
+		await expect(
+			page.getByText( 'Receiver wordpress@example.com' )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Subject [WooCommerce Core E2E' )
+		).toBeVisible();
+		await page.getByRole( 'link', { name: 'json' } ).click();
+		await expect(
+			page.locator( '#wp-mail-logging-modal-content-body-content' )
+		).toContainText( 'You’ve received the following order from  :' );
 	} );
 
 	test( 'can receive completed email', async ( { page, baseURL } ) => {
@@ -136,24 +147,24 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await page.locator( emailContentJson ).click();
 
 		// Verify that the message includes an order processing confirmation
-		await expect(
-			page.locator( emailContent )
-		).toContainText( 'We have finished processing your order.' );
+		await expect( page.locator( emailContent ) ).toContainText(
+			'We have finished processing your order.'
+		);
 
 		// Verify that the email address is the correct one
-		await expect(
-			page.locator( emailContent )
-		).toContainText( customerBilling.email );
+		await expect( page.locator( emailContent ) ).toContainText(
+			customerBilling.email
+		);
 
 		// Verify that the email contains the order ID
-		await expect(
-			page.locator( emailContent )
-		).toContainText( `[Order #${ completedOrderId.toString() }]` );
+		await expect( page.locator( emailContent ) ).toContainText(
+			`[Order #${ completedOrderId.toString() }]`
+		);
 
 		// Verify that the email contains a "Thanks" note
-		await expect(
-			page.locator( emailContent )
-		).toContainText( 'Thanks for shopping with us' );
+		await expect( page.locator( emailContent ) ).toContainText(
+			'Thanks for shopping with us'
+		);
 	} );
 
 	test( 'can receive cancelled order email', async ( { page, baseURL } ) => {
@@ -190,16 +201,17 @@ test.describe( 'Merchant > Order Action emails received', () => {
 
 	test( 'can resend new order notification', async ( { page } ) => {
 		// resend the new order notification
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 		await page
 			.locator( 'li#actions > select' )
 			.selectOption( 'send_order_details_admin' );
 		await page.locator( 'button.wc-reload' ).click();
-		await page.waitForLoadState( 'networkidle' );
 
 		// search to narrow it down to just the messages we want
 		await page.goto(
-			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+			`/wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
 				customerBilling.email
 			) }`
 		);
@@ -217,12 +229,13 @@ test.describe( 'Merchant > Order Action emails received', () => {
 
 	test( 'can email invoice/order details to customer', async ( { page } ) => {
 		// send the customer order details
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 		await page
 			.locator( 'li#actions > select' )
 			.selectOption( 'send_order_details' );
 		await page.locator( 'button.wc-reload' ).click();
-		await page.waitForLoadState( 'networkidle' );
 
 		// confirm the message was delivered in the logs
 		await page.goto(
@@ -237,7 +250,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 				.getByRole( 'row' )
 				.filter( { hasText: customerBilling.email } )
 				.filter( {
-					hasText: `Invoice for order #${ orderId } on ${ storeName }`,
+					hasText: `Details for order #${ orderId } on ${ storeName }`,
 				} )
 		).toBeVisible();
 	} );

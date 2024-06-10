@@ -13,7 +13,9 @@ const glob = require( 'glob' );
 // property.
 const blocks = {
 	'active-filters': {},
-	'add-to-cart-form': {},
+	'add-to-cart-form': {
+		customDir: 'product-elements/add-to-cart-form',
+	},
 	'all-products': {
 		customDir: 'products/all-products',
 	},
@@ -25,6 +27,7 @@ const blocks = {
 	cart: {},
 	'catalog-sorting': {},
 	checkout: {},
+	'coming-soon': {},
 	'customer-account': {},
 	'featured-category': {
 		customDir: 'featured-items/featured-category',
@@ -91,6 +94,9 @@ const blocks = {
 	'product-filter': {
 		isExperimental: true,
 	},
+	'product-filters': {
+		isExperimental: true,
+	},
 	'product-filter-stock-status': {
 		isExperimental: true,
 		customDir: 'product-filter/inner-blocks/stock-filter',
@@ -109,6 +115,10 @@ const blocks = {
 	},
 	'product-filter-active': {
 		customDir: 'product-filter/inner-blocks/active-filters',
+		isExperimental: true,
+	},
+	'product-filter-clear-button': {
+		customDir: 'product-filter/inner-blocks/clear-button',
 		isExperimental: true,
 	},
 	'order-confirmation-summary': {
@@ -156,16 +166,8 @@ const blocks = {
 // `**/*.scss`...).
 // It also filters out elements with undefined props and experimental blocks.
 const getBlockEntries = ( relativePath ) => {
-	const experimental =
-		! parseInt( process.env.WOOCOMMERCE_BLOCKS_PHASE, 10 ) < 3;
-
 	return Object.fromEntries(
 		Object.entries( blocks )
-			.filter(
-				( [ , config ] ) =>
-					! config.isExperimental ||
-					config.isExperimental === experimental
-			)
 			.map( ( [ blockCode, config ] ) => {
 				const filePaths = glob.sync(
 					`./assets/js/blocks/${ config.customDir || blockCode }/` +
@@ -195,8 +197,6 @@ const entries = {
 			'./assets/js/atomic/blocks/product-elements/product-reviews/index.tsx',
 		'product-details':
 			'./assets/js/atomic/blocks/product-elements/product-details/index.tsx',
-		'add-to-cart-form':
-			'./assets/js/atomic/blocks/product-elements/add-to-cart-form/index.tsx',
 		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}' ),
 
 		// Interactivity component styling
@@ -217,8 +217,7 @@ const entries = {
 		wcBlocksSharedContext: './assets/js/shared/context/index.js',
 		wcBlocksSharedHocs: './assets/js/shared/hocs/index.js',
 		priceFormat: './packages/prices/index.js',
-		blocksCheckout: './packages/checkout/index.js',
-		blocksComponents: './packages/components/index.ts',
+		wcTypes: './assets/js/types/index.ts',
 
 		// interactivity components, exported as separate entries for now
 		'wc-interactivity-dropdown':
@@ -236,6 +235,10 @@ const entries = {
 	frontend: {
 		reviews: './assets/js/blocks/reviews/frontend.ts',
 		...getBlockEntries( 'frontend.{t,j}s{,x}' ),
+
+		blocksCheckout: './packages/checkout/index.js',
+		blocksComponents: './packages/components/index.ts',
+
 		'mini-cart-component':
 			'./assets/js/blocks/mini-cart/component-frontend.tsx',
 		'product-button-interactivity':

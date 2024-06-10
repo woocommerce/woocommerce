@@ -15,6 +15,7 @@ import {
 	HOURS_TO_DISPLAY_UPGRADE_NOTICE,
 	UPGRADE_NOTICE_DISPLAY_COUNT_THRESHOLD,
 } from '@woocommerce/blocks/migration-products-to-product-collection';
+import { recordEvent } from '@woocommerce/tracks';
 import {
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -25,13 +26,15 @@ import {
  * Internal dependencies
  */
 import metadata from '../../block.json';
+import { useTracksLocation } from '../../tracks-utils';
 import {
+	ProductCollectionEditComponentProps,
 	ProductCollectionAttributes,
 	CoreFilterNames,
 	FilterName,
 } from '../../types';
 import { setQueryAttribute } from '../../utils';
-import { DEFAULT_FILTERS, getDefaultSettings } from '../../constants';
+import { getDefaultSettings } from '../../constants';
 import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
 import InheritQueryControl from './inherit-query-control';
@@ -53,9 +56,19 @@ const prepareShouldShowFilter =
 	};
 
 const ProductCollectionInspectorControls = (
-	props: BlockEditProps< ProductCollectionAttributes >
+	props: ProductCollectionEditComponentProps
 ) => {
-	const { query, collection, hideControls } = props.attributes;
+	const { attributes, context, setAttributes } = props;
+	const { query, collection, hideControls, displayLayout } = attributes;
+
+	const tracksLocation = useTracksLocation( context.templateSlug );
+	const trackInteraction = ( filter: FilterName ) =>
+		recordEvent( 'blocks_product_collection_inspector_control_clicked', {
+			collection: attributes.collection,
+			location: tracksLocation,
+			filter,
+		} );
+
 	const inherit = query?.inherit;
 	const shouldShowFilter = prepareShouldShowFilter( hideControls );
 
@@ -73,12 +86,13 @@ const ProductCollectionInspectorControls = (
 	);
 
 	const displayControlProps = {
-		setAttributes: props.setAttributes,
-		displayLayout: props.attributes.displayLayout,
+		setAttributes,
+		displayLayout,
 	};
 
 	const queryControlProps = {
 		setQueryAttribute: setQueryAttributeBind,
+		trackInteraction,
 		query,
 	};
 
@@ -107,10 +121,9 @@ const ProductCollectionInspectorControls = (
 				<ToolsPanel
 					label={ __( 'Filters', 'woocommerce' ) }
 					resetAll={ ( resetAllFilters: ( () => void )[] ) => {
-						setQueryAttribute( props, DEFAULT_FILTERS );
-						resetAllFilters.forEach( ( resetFilter ) =>
-							resetFilter()
-						);
+						resetAllFilters.forEach( ( resetFilter ) => {
+							resetFilter();
+						} );
 					} }
 					className="wc-block-editor-product-collection-inspector-toolspanel__filters"
 				>

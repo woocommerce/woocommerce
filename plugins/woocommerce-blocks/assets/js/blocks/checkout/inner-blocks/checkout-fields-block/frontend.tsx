@@ -1,19 +1,22 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import type { ReactElement } from 'react';
+import clsx from 'clsx';
 import { Main } from '@woocommerce/base-components/sidebar-layout';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
 import { useEffect } from '@wordpress/element';
+import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
 
 const FrontendBlock = ( {
 	children,
 	className,
 }: {
-	children: JSX.Element;
+	children: ReactElement[];
 	className?: string;
 } ): JSX.Element => {
 	const { dispatchCheckoutEvent } = useStoreEvents();
+	const { showFormStepNumbers } = useCheckoutBlockContext();
 
 	// Ignore changes to dispatchCheckoutEvent callback so this is ran on first mount only.
 	useEffect( () => {
@@ -22,8 +25,16 @@ const FrontendBlock = ( {
 	}, [] );
 
 	return (
-		<Main className={ classnames( 'wc-block-checkout__main', className ) }>
-			<form className="wc-block-components-form wc-block-checkout__form">
+		<Main className={ clsx( 'wc-block-checkout__main', className ) }>
+			<form
+				className={ clsx(
+					'wc-block-components-form wc-block-checkout__form',
+					{
+						'wc-block-checkout__form--with-step-numbers':
+							showFormStepNumbers,
+					}
+				) }
+			>
 				{ children }
 			</form>
 		</Main>

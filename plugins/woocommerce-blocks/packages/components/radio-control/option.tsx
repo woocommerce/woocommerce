@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -15,6 +15,7 @@ const Option = ( {
 	onChange,
 	option,
 	disabled = false,
+	highlightChecked = false,
 }: RadioControlOptionProps ): JSX.Element => {
 	const { value, label, description, secondaryLabel, secondaryDescription } =
 		option;
@@ -24,13 +25,11 @@ const Option = ( {
 	return (
 		// eslint-disable-next-line jsx-a11y/label-has-associated-control
 		<label
-			className={ classnames(
-				'wc-block-components-radio-control__option',
-				{
-					'wc-block-components-radio-control__option-checked':
-						checked,
-				}
-			) }
+			className={ clsx( 'wc-block-components-radio-control__option', {
+				'wc-block-components-radio-control__option-checked': checked,
+				'wc-block-components-radio-control__option--checked-option-highlighted':
+					checked && highlightChecked,
+			} ) }
 			htmlFor={ `${ name }-${ value }` }
 		>
 			<input
@@ -41,7 +40,7 @@ const Option = ( {
 				value={ value }
 				onChange={ onChangeValue }
 				checked={ checked }
-				aria-describedby={ classnames( {
+				aria-describedby={ clsx( {
 					[ `${ name }-${ value }__label` ]: label,
 					[ `${ name }-${ value }__secondary-label` ]: secondaryLabel,
 					[ `${ name }-${ value }__description` ]: description,

@@ -10,9 +10,9 @@ Examples:
 - If your extension is extending a component within WooCommerce, it should live within either the Extensions navigation drawer (in Woo Express stores), or directly within that category's section.
 
 Extensions drawer (Woo Express)
-![Navigation extensions drawer](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Image-1224x572-1.png)
+![Navigation extensions drawer](https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2024/01/Image-1224x572-1.png)
 
-![Navigation category](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Image-1242x764-1.png)
+![Navigation category](https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2024/01/Image-1242x764-1.png)
 
 - If your plugin adds a settings screen to set up the plugin, settings should be under an appropriate tab on the WooCommerce > Settings screen. Only if necessary, create a top-level settings tab if your plugin has settings that don't fit under existing tabs and creating a sub-tab isn't appropriate.
 

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-E2E tests: fix global setup failing when there are more than 20 pages in site

@@ -8,71 +8,26 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
+
 /**
  * Rule processor that performs a comparison operation against the number of
  * products.
+ *
+ * @deprecated 8.8.0
  */
-class ProductCountRuleProcessor implements RuleProcessorInterface {
+class ProductCountRuleProcessor extends DeprecatedClassFacade {
+	/**
+	 * The name of the non-deprecated class that this facade covers.
+	 *
+	 * @var string
+	 */
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\ProductCountRuleProcessor';
 
 	/**
-	 * The product query.
+	 * The version that this class was deprecated in.
 	 *
-	 * @var WC_Product_Query
+	 * @var string
 	 */
-	protected $product_query;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param object $product_query The product query.
-	 */
-	public function __construct( $product_query = null ) {
-		$this->product_query = null === $product_query
-			? new \WC_Product_Query(
-				array(
-					'limit'    => 1,
-					'paginate' => true,
-					'return'   => 'ids',
-					'status'   => array( 'publish' ),
-				)
-			)
-			: $product_query;
-	}
-
-	/**
-	 * Performs a comparison operation against the number of products.
-	 *
-	 * @param object $rule         The specific rule being processed by this rule processor.
-	 * @param object $stored_state Stored state.
-	 *
-	 * @return bool The result of the operation.
-	 */
-	public function process( $rule, $stored_state ) {
-		$products = $this->product_query->get_products();
-
-		return ComparisonOperation::compare(
-			$products->total,
-			$rule->value,
-			$rule->operation
-		);
-	}
-
-	/**
-	 * Validates the rule.
-	 *
-	 * @param object $rule The rule to validate.
-	 *
-	 * @return bool Pass/fail.
-	 */
-	public function validate( $rule ) {
-		if ( ! isset( $rule->value ) ) {
-			return false;
-		}
-
-		if ( ! isset( $rule->operation ) ) {
-			return false;
-		}
-
-		return true;
-	}
+	protected static $deprecated_in_version = '8.8.0';
 }

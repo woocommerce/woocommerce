@@ -13,20 +13,25 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../../types';
+import { CoreFilterNames, QueryControlProps } from '../../types';
+import { DEFAULT_FILTERS } from '../../constants';
 
 const FeaturedProductsControl = ( props: QueryControlProps ) => {
-	const { query, setQueryAttribute } = props;
+	const { query, trackInteraction, setQueryAttribute } = props;
+
+	const deselectCallback = () => {
+		setQueryAttribute( {
+			featured: DEFAULT_FILTERS.featured,
+		} );
+		trackInteraction( CoreFilterNames.FEATURED );
+	};
 
 	return (
 		<ToolsPanelItem
 			label={ __( 'Featured', 'woocommerce' ) }
 			hasValue={ () => query.featured === true }
-			onDeselect={ () => {
-				setQueryAttribute( {
-					featured: false,
-				} );
-			} }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			<BaseControl
 				id="product-collection-featured-products-control"
@@ -39,6 +44,7 @@ const FeaturedProductsControl = ( props: QueryControlProps ) => {
 						setQueryAttribute( {
 							featured,
 						} );
+						trackInteraction( CoreFilterNames.FEATURED );
 					} }
 				/>
 			</BaseControl>

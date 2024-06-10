@@ -189,4 +189,70 @@ class LegacyDataHandlerTests extends WC_Unit_Test_Case {
 		$this->assertEquals( $order_hpos->get_meta( 'meta_key' ), $order_cpt->get_meta( 'meta_key' ) );
 	}
 
+	/**
+	 * Checks that partial backfills from/to either datastore work correctly.
+	 *
+	 * @since 8.8.0
+	 *
+	 * @return void
+	 */
+	public function test_datastore_partial_backfill() {
+		// Test order.
+		$this->enable_cot_sync();
+		$order = new \WC_Order();
+		$order->set_status( 'on-hold' );
+		$order->add_meta_data( 'my_meta', 'hpos+posts' );
+		$order->save();
+		$this->disable_cot_sync();
+
+		$order_hpos = $this->sut->get_order_from_datastore( $order->get_id(), 'hpos' );
+		$order_hpos->set_status( 'completed' );
+		$order_hpos->set_billing_first_name( 'Mr. HPOS' );
+		$order_hpos->set_billing_address_1( 'HPOS Street' );
+		$order_hpos->update_meta_data( 'my_meta', 'hpos' );
+		$order_hpos->update_meta_data( 'other_meta', 'hpos' );
+		$order_hpos->save();
+
+		// Fetch the posts version and make sure it's different.
+		$order_cpt = $this->sut->get_order_from_datastore( $order->get_id(), 'posts' );
+		$this->assertNotEquals( $order_hpos->get_billing_first_name(), $order_cpt->get_billing_first_name() );
+		$this->assertNotEquals( $order_hpos->get_status(), $order_cpt->get_status() );
+		$this->assertNotEquals( $order_hpos->get_meta( 'my_meta' ), $order_cpt->get_meta( 'my_meta' ) );
+
+		// Backfill "my_meta" to posts and confirm it has been backfilled.
+		$this->sut->backfill_order_to_datastore( $order->get_id(), 'hpos', 'posts', array( 'meta_keys' => array( 'my_meta' ) ) );
+		$order_cpt = $this->sut->get_order_from_datastore( $order->get_id(), 'posts' );
+		$this->assertNotEquals( $order_hpos->get_billing_first_name(), $order_cpt->get_billing_first_name() );
+		$this->assertNotEquals( $order_hpos->get_status(), $order_cpt->get_status() );
+		$this->assertEquals( $order_hpos->get_meta( 'my_meta' ), $order_cpt->get_meta( 'my_meta' ) );
+
+		// Backfill status and confirm it has been backfilled.
+		$this->sut->backfill_order_to_datastore( $order->get_id(), 'hpos', 'posts', array( 'props' => array( 'status' ) ) );
+		$order_cpt = $this->sut->get_order_from_datastore( $order->get_id(), 'posts' );
+		$this->assertNotEquals( $order_hpos->get_billing_first_name(), $order_cpt->get_billing_first_name() );
+		$this->assertEquals( $order_hpos->get_status(), $order_cpt->get_status() );
+
+		// Update the CPT version now.
+		$order_cpt->set_billing_first_name( 'Mr. Post' );
+		$order_cpt->set_billing_address_1( 'CPT Street' );
+		$order_cpt->save();
+
+		// Re-load the HPOS version and confirm billing first name is different.
+		$order_hpos = $this->sut->get_order_from_datastore( $order->get_id(), 'hpos' );
+		$this->assertNotEquals( $order_hpos->get_billing_first_name(), $order_cpt->get_billing_first_name() );
+
+		// Backfill name and confirm.
+		$this->sut->backfill_order_to_datastore( $order->get_id(), 'posts', 'hpos', array( 'props' => array( 'billing_first_name' ) ) );
+		$order_hpos = $this->sut->get_order_from_datastore( $order->get_id(), 'hpos' );
+		$this->assertEquals( $order_hpos->get_billing_first_name(), $order_cpt->get_billing_first_name() );
+		$this->assertEquals( $order_hpos->get_status(), $order_cpt->get_status() );
+
+		// Re-enable sync, trigger an order sync and confirm that meta/props that we didn't partially backfill already are correctly synced.
+		$this->enable_cot_sync();
+		wc_get_container()->get( DataSynchronizer::class )->process_batch( array( $order_cpt->get_id() ) );
+		$order_cpt = $this->sut->get_order_from_datastore( $order->get_id(), 'posts' );
+		$this->assertEquals( $order_cpt->get_billing_address_1(), $order_hpos->get_billing_address_1() );
+		$this->assertEquals( $order_cpt->get_meta( 'other_meta', true, 'edit' ), $order_hpos->get_meta( 'other_meta', true, 'edit' ) );
+	}
+
 }

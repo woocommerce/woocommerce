@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Refactor rating, stock filter block e2e tests to use new dynamic templates
-

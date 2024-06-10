@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import { ProductType } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import { ProductTemplate } from '../../types';
+import { Metadata, ProductTemplate } from '../../types';
 
 declare global {
 	interface Window {
@@ -16,33 +16,84 @@ declare global {
 	}
 }
 
+const matchesAllTemplateMetaFields = (
+	templateMeta: Metadata< string >[],
+	productMeta: Metadata< string >[]
+) =>
+	templateMeta.every( ( item ) =>
+		productMeta.find(
+			( productMetaEntry ) =>
+				productMetaEntry.key === item.key &&
+				productMetaEntry.value === item.value
+		)
+	);
+
+function templateDataMatchesProductData(
+	productTemplate: ProductTemplate,
+	product: Partial< Product >
+): boolean {
+	return Object.entries( productTemplate.productData ).every(
+		( [ key, value ] ) => {
+			if ( key === 'meta_data' ) {
+				return matchesAllTemplateMetaFields(
+					value,
+					product.meta_data || []
+				);
+			}
+
+			return product[ key ] === value;
+		}
+	);
+}
+
+function findBetterMatchTemplate( matchingTemplates: ProductTemplate[] ) {
+	return matchingTemplates.reduce(
+		( previous, current ) =>
+			Object.keys( current.productData ).length >
+			Object.keys( previous.productData ).length
+				? current
+				: previous,
+		matchingTemplates[ 0 ]
+	);
+}
+
 export const useProductTemplate = (
 	productTemplateId: string | undefined,
-	productType: ProductType | undefined
+	product: Partial< Product > | null
 ) => {
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
 
-	const productTemplateIdToFind =
-		productType === 'variable'
-			? 'standard-product-template'
-			: productTemplateId;
+	const productType = product?.type;
 
-	const productTypeToFind =
-		productType === 'variable' ? 'simple' : productType;
+	// we shouldn't default to the standard-product-template for variations
+	if ( ! productTemplateId && productType === 'variation' ) {
+		return { productTemplate: null, isResolving: false };
+	}
 
-	let matchingProductTemplate = productTemplates.find(
-		( productTemplate ) =>
-			productTemplate.id === productTemplateIdToFind &&
-			productTemplate.productData.type === productTypeToFind
-	);
+	let matchingProductTemplate: ProductTemplate | undefined;
 
-	if ( ! matchingProductTemplate ) {
-		// Fallback to the first template with the same product type.
+	if ( productTemplateId ) {
 		matchingProductTemplate = productTemplates.find(
-			( productTemplate ) =>
-				productTemplate.productData.type === productTypeToFind
+			( productTemplate ) => productTemplate.id === productTemplateId
 		);
+	}
+
+	if ( ! matchingProductTemplate && product ) {
+		// Look for matching templates based on product data described on each template.
+		const matchingTemplates = productTemplates.filter(
+			( productTemplate ) =>
+				templateDataMatchesProductData( productTemplate, product )
+		);
+
+		// If there are multiple matching templates, we should use the one with the most matching fields.
+		// If there is no matching template, we should default to the standard product template.
+		matchingProductTemplate =
+			findBetterMatchTemplate( matchingTemplates ) ||
+			productTemplates.find(
+				( productTemplate ) =>
+					productTemplate.id === 'standard-product-template'
+			);
 	}
 
 	// When we switch to getting the product template from the API,

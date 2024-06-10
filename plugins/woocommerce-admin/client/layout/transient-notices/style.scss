@@ -1,11 +1,11 @@
-@import '../../navigation/stylesheets/variables.scss';
+@import "../../navigation/stylesheets/variables.scss";
 
 .woocommerce-transient-notices {
 	position: absolute;
 	left: $gap;
 	bottom: 100%;
 	margin-bottom: $gap-small;
-	z-index: calc(z-index('.components-snackbar-list') + 1);
+	z-index: calc(z-index(".components-snackbar-list") + 1);
 	width: auto;
 
 	.woocommerce-profile-wizard__body & {

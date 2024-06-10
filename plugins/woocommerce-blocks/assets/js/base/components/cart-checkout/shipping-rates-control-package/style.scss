@@ -1,6 +1,9 @@
 .wc-block-components-shipping-rates-control__package {
 	margin: 0;
-	border-bottom: 1px solid $universal-border-light;
+
+	.wc-block-components-shipping-rates-control__package__description--free {
+		text-transform: uppercase;
+	}
 
 	&.wc-block-components-panel {
 		margin-bottom: 0;
@@ -14,8 +17,6 @@
 	}
 
 	&:last-child {
-		border-bottom: 0;
-
 		.wc-block-components-panel__button {
 			padding-bottom: 0;
 		}
@@ -34,9 +35,6 @@
 		padding-bottom: 0;
 	}
 
-	.wc-block-components-radio-control__label-group {
-		@include font-size(small);
-	}
 	.wc-block-components-radio-control__description-group {
 		@include font-size(smaller);
 	}
@@ -51,7 +49,7 @@
 	@include font-size(small);
 	display: block;
 	list-style: none;
-	margin: 0;
+	margin: 0 0 $gap-small 0;
 	padding: 0;
 }
 

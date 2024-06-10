@@ -32,35 +32,35 @@ describe( 'SelectTree', () => {
 	} );
 
 	it( 'should show the popover only when focused', () => {
-		const { queryByPlaceholderText, queryByText } = render(
+		const { queryByRole, queryByText } = render(
 			<SelectTree { ...DEFAULT_PROPS } />
 		);
 		expect( queryByText( 'Item 1' ) ).not.toBeInTheDocument();
-		queryByPlaceholderText( 'Type here' )?.focus();
+		queryByRole( 'textbox' )?.focus();
 		expect( queryByText( 'Item 1' ) ).toBeInTheDocument();
 	} );
 
 	it( 'should show create button when callback is true ', () => {
-		const { queryByText, queryByPlaceholderText } = render(
+		const { queryByText, queryByRole } = render(
 			<SelectTree
 				{ ...DEFAULT_PROPS }
 				shouldShowCreateButton={ () => true }
 			/>
 		);
-		queryByPlaceholderText( 'Type here' )?.focus();
+		queryByRole( 'textbox' )?.focus();
 		expect( queryByText( 'Create new' ) ).toBeInTheDocument();
 	} );
 	it( 'should not show create button when callback is false or no callback', () => {
-		const { queryByText, queryByPlaceholderText } = render(
+		const { queryByText, queryByRole } = render(
 			<SelectTree { ...DEFAULT_PROPS } />
 		);
-		queryByPlaceholderText( 'Type here' )?.focus();
+		queryByRole( 'textbox' )?.focus();
 		expect( queryByText( 'Create new' ) ).not.toBeInTheDocument();
 	} );
 	it( 'should show a root item when focused and child when expand button is clicked', () => {
-		const { queryByText, queryByLabelText, queryByPlaceholderText } =
+		const { queryByText, queryByLabelText, queryByRole } =
 			render( <SelectTree { ...DEFAULT_PROPS } /> );
-		queryByPlaceholderText( 'Type here' )?.focus();
+		queryByRole( 'textbox' )?.focus();
 		expect( queryByText( 'Item 1' ) ).toBeInTheDocument();
 
 		expect( queryByText( 'Item 2' ) ).not.toBeInTheDocument();
@@ -69,10 +69,10 @@ describe( 'SelectTree', () => {
 	} );
 
 	it( 'should show selected items', () => {
-		const { queryAllByRole, queryByPlaceholderText } = render(
+		const { queryAllByRole, queryByRole } = render(
 			<SelectTree { ...DEFAULT_PROPS } selected={ [ mockItems[ 0 ] ] } />
 		);
-		queryByPlaceholderText( 'Type here' )?.focus();
+		queryByRole( 'textbox' )?.focus();
 		expect( queryAllByRole( 'treeitem' )[ 0 ] ).toHaveAttribute(
 			'aria-selected',
 			'true'
@@ -80,19 +80,19 @@ describe( 'SelectTree', () => {
 	} );
 
 	it( 'should show Create "<createValue>" button', () => {
-		const { queryByPlaceholderText, queryByText } = render(
+		const { queryByText, queryByRole } = render(
 			<SelectTree
 				{ ...DEFAULT_PROPS }
 				createValue="new item"
 				shouldShowCreateButton={ () => true }
 			/>
 		);
-		queryByPlaceholderText( 'Type here' )?.focus();
+		queryByRole( 'textbox' )?.focus();
 		expect( queryByText( 'Create "new item"' ) ).toBeInTheDocument();
 	} );
 	it( 'should call onCreateNew when Create "<createValue>" button is clicked', () => {
 		const mockFn = jest.fn();
-		const { queryByPlaceholderText, queryByText } = render(
+		const { queryByRole, queryByText } = render(
 			<SelectTree
 				{ ...DEFAULT_PROPS }
 				createValue="new item"
@@ -100,7 +100,7 @@ describe( 'SelectTree', () => {
 				onCreateNew={ mockFn }
 			/>
 		);
-		queryByPlaceholderText( 'Type here' )?.focus();
+		queryByRole( 'textbox' )?.focus();
 		queryByText( 'Create "new item"' )?.click();
 		expect( mockFn ).toBeCalledTimes( 1 );
 	} );

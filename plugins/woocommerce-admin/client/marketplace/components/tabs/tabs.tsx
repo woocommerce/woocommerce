@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useContext, useEffect, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 
 /**
@@ -14,6 +14,7 @@ import './tabs.scss';
 import { DEFAULT_TAB_KEY, MARKETPLACE_PATH } from '../constants';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { MarketplaceContextType } from '../../contexts/types';
+import { getAdminSetting } from '../../../utils/admin-settings';
 
 export interface TabsProps {
 	additionalClassNames?: Array< string > | undefined;
@@ -23,32 +24,53 @@ interface Tab {
 	name: string;
 	title: string;
 	href?: string;
+	showUpdateCount: boolean;
+	updateCount: number;
 }
 
 interface Tabs {
 	[ key: string ]: Tab;
 }
 
+const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+const wooUpdateCount = wccomSettings?.wooUpdateCount ?? 0;
+
 const tabs: Tabs = {
 	search: {
 		name: 'search',
 		title: __( 'Search results', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
 	},
 	discover: {
 		name: 'discover',
 		title: __( 'Discover', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
 	},
 	extensions: {
 		name: 'extensions',
 		title: __( 'Browse', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
 	},
 	themes: {
 		name: 'themes',
 		title: __( 'Themes', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
+	},
+	'business-services': {
+		name: 'business-services',
+		title: __( 'Business services', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
 	},
 	'my-subscriptions': {
 		name: 'my-subscriptions',
 		title: __( 'My subscriptions', 'woocommerce' ),
+		showUpdateCount: true,
+		updateCount: wooUpdateCount,
 	},
 };
 
@@ -62,7 +84,7 @@ const setUrlTabParam = ( tabKey: string ) => {
 	} );
 };
 
-const getVisibleTabs = ( selectedTab: string ) => {
+const getVisibleTabs = ( selectedTab: string, hasBusinessServices = false ) => {
 	if ( selectedTab === '' ) {
 		return tabs;
 	}
@@ -70,9 +92,13 @@ const getVisibleTabs = ( selectedTab: string ) => {
 	if ( selectedTab !== 'search' ) {
 		delete currentVisibleTabs.search;
 	}
+	if ( ! hasBusinessServices ) {
+		delete currentVisibleTabs[ 'business-services' ];
+	}
 
 	return currentVisibleTabs;
 };
+
 const renderTabs = (
 	marketplaceContextValue: MarketplaceContextType,
 	visibleTabs: Tabs
@@ -92,7 +118,7 @@ const renderTabs = (
 		tabContent.push(
 			tabs[ tabKey ]?.href ? (
 				<a
-					className={ classNames(
+					className={ clsx(
 						'woocommerce-marketplace__tab-button',
 						'components-button',
 						`woocommerce-marketplace__tab-${ tabKey }`
@@ -104,7 +130,7 @@ const renderTabs = (
 				</a>
 			) : (
 				<Button
-					className={ classNames(
+					className={ clsx(
 						'woocommerce-marketplace__tab-button',
 						`woocommerce-marketplace__tab-${ tabKey }`,
 						{
@@ -115,6 +141,12 @@ const renderTabs = (
 					key={ tabKey }
 				>
 					{ tabs[ tabKey ]?.title }
+					{ tabs[ tabKey ]?.showUpdateCount &&
+						tabs[ tabKey ]?.updateCount > 0 && (
+							<span className="woocommerce-marketplace__update-count">
+								<span> { tabs[ tabKey ]?.updateCount } </span>
+							</span>
+						) }
 				</Button>
 			)
 		);
@@ -125,7 +157,8 @@ const renderTabs = (
 const Tabs = ( props: TabsProps ): JSX.Element => {
 	const { additionalClassNames } = props;
 	const marketplaceContextValue = useContext( MarketplaceContext );
-	const { selectedTab, setSelectedTab } = marketplaceContextValue;
+	const { selectedTab, setSelectedTab, hasBusinessServices } =
+		marketplaceContextValue;
 	const [ visibleTabs, setVisibleTabs ] = useState( getVisibleTabs( '' ) );
 
 	const query: Record< string, string > = useQuery();
@@ -139,11 +172,11 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	}, [ query, setSelectedTab ] );
 
 	useEffect( () => {
-		setVisibleTabs( getVisibleTabs( selectedTab ) );
-	}, [ selectedTab ] );
+		setVisibleTabs( getVisibleTabs( selectedTab, hasBusinessServices ) );
+	}, [ selectedTab, hasBusinessServices ] );
 	return (
 		<nav
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-marketplace__tabs',
 				additionalClassNames || []
 			) }

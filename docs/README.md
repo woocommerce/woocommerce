@@ -30,13 +30,13 @@ The WooCommerce ecosystem thrives on community contributions. Whether it's impro
 ## Support
 
 - To request a **new document, correction, or improvement**, [create an issue](https://github.com/woocommerce/woodocs/issues/new/choose).
-- For development help, start with the [WooCommerce Community Forum](https://wordpress.org/support/plugin/woocommerce/), to see if someone else has already asked the same question. You can also pose your question in the `#developers` channel of our [Community Slack](https://woo.com/community-slack/). If you're not sure where to ask your question, you can always [contact us](https://woo.com/contact-us/), and our Happiness Engineers will be glad to point you in the right direction.
-- For additional support with customizations, you might consider hiring from [WooExperts](https://woo.com/experts/) or [Codeable](https://codeable.io/).
+- For development help, start with the [WooCommerce Community Forum](https://wordpress.org/support/plugin/woocommerce/), to see if someone else has already asked the same question. You can also pose your question in the `#developers` channel of our [Community Slack](https://woocommerce.com/community-slack/). If you're not sure where to ask your question, you can always [contact us](https://woocommerce.com/contact-us/), and our Happiness Engineers will be glad to point you in the right direction.
+- For additional support with customizations, you might consider hiring from [WooExperts](https://woocommerce.com/experts/) or [Codeable](https://codeable.io/).
 
 ### Additional Resources
 
-- [WooCommerce Official Website](https://woo.com/)
-- [Woo Marketplace](https://woo.com/marketplace)
+- [WooCommerce Official Website](https://woocommerce.com/)
+- [Woo Marketplace](https://woocommerce.com/marketplace)
 - All [WooCommerce Repositories on GitHub](https://woocommerce.github.io/)
 
 ### Other documentation

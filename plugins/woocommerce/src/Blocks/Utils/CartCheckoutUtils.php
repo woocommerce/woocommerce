@@ -15,12 +15,6 @@ class CartCheckoutUtils {
 		if ( wc_current_theme_is_fse_theme() ) {
 			// Ignore the pages and check the templates.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'cart' ), 'wp_template' );
-
-			// If there is no template file, we're using default which does use the block.
-			if ( empty( $templates_from_db ) ) {
-				return true;
-			}
-
 			foreach ( $templates_from_db as $template ) {
 				if ( has_block( 'woocommerce/cart', $template->content ) ) {
 					return true;
@@ -40,12 +34,6 @@ class CartCheckoutUtils {
 		if ( wc_current_theme_is_fse_theme() ) {
 			// Ignore the pages and check the templates.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'checkout' ), 'wp_template' );
-
-			// If there is no template file, we're using default which does use the block.
-			if ( empty( $templates_from_db ) ) {
-				return true;
-			}
-
 			foreach ( $templates_from_db as $template ) {
 				if ( has_block( 'woocommerce/checkout', $template->content ) ) {
 					return true;
@@ -74,7 +62,7 @@ class CartCheckoutUtils {
 			$country_data[ $country_code ] = [
 				'allowBilling'  => isset( $billing_countries[ $country_code ] ),
 				'allowShipping' => isset( $shipping_countries[ $country_code ] ),
-				'states'        => self::deep_sort_with_accents( $country_states[ $country_code ] ?? [] ),
+				'states'        => $country_states[ $country_code ] ?? [],
 				'locale'        => $country_locales[ $country_code ] ?? [],
 			];
 		}

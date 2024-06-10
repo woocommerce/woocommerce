@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { sprintf, _n } from '@wordpress/i18n';
 import { Label } from '@woocommerce/blocks-components';
 import ProductPrice from '@woocommerce/base-components/product-price';
@@ -10,7 +10,10 @@ import {
 	getCurrencyFromPriceResponse,
 	formatPrice,
 } from '@woocommerce/price-format';
-import { applyCheckoutFilter, mustContain } from '@woocommerce/blocks-checkout';
+import {
+	applyCheckoutFilter,
+	productPriceValidation,
+} from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
 import { getSetting } from '@woocommerce/settings';
 import { useMemo } from '@wordpress/element';
@@ -24,9 +27,6 @@ import ProductBackorderBadge from '../product-backorder-badge';
 import ProductImage from '../product-image';
 import ProductLowStockBadge from '../product-low-stock-badge';
 import ProductMetadata from '../product-metadata';
-
-const productPriceValidation = ( value: string ): true | never =>
-	mustContain( value, '<price/>' );
 
 interface OrderSummaryProps {
 	cartItem: CartItem;
@@ -124,7 +124,7 @@ const OrderSummaryItem = ( { cartItem }: OrderSummaryProps ): JSX.Element => {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'wc-block-components-order-summary-item',
 				cartItemClassNameFilter
 			) }

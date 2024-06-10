@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Reduce calls to wp_count_posts( 'product' ) from OnboardingTasks

@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
+import { Notice } from '@wordpress/notices';
 import { Page } from '@playwright/test';
-import { Admin } from '@wordpress/e2e-test-utils-playwright';
-import { cli } from '@woocommerce/e2e-utils';
+import { Admin, wpCLI } from '@woocommerce/e2e-utils';
 
 type Location = {
 	name: string;
@@ -32,6 +32,17 @@ export class LocalPickupUtils {
 
 	async saveLocalPickupSettings() {
 		await this.page.getByRole( 'button', { name: 'Save changes' } ).click();
+		await this.page.waitForFunction( () => {
+			return window.wp.data
+				.select( 'core/notices' )
+				.getNotices()
+				.some(
+					( notice: Notice ) =>
+						notice.status === 'success' &&
+						notice.content ===
+							'Local Pickup settings have been saved.'
+				);
+		} );
 	}
 
 	async enableLocalPickup() {
@@ -70,10 +81,14 @@ export class LocalPickupUtils {
 		await this.saveLocalPickupSettings();
 	}
 
+	async setLocalPickupTitle( title: string ) {
+		await this.openLocalPickupSettings();
+		await this.page.getByLabel( 'Title' ).fill( title );
+		await this.saveLocalPickupSettings();
+	}
+
 	async deleteLocations() {
-		await cli(
-			`npm run wp-env run tests-cli -- wp option update pickup_location_pickup_locations ''`
-		);
+		await wpCLI( "option update pickup_location_pickup_locations ''" );
 	}
 
 	async deletePickupLocation() {

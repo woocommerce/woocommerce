@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Data: introduce optimisticQueryUpdate create item option

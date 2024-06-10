@@ -12,7 +12,41 @@ use Automattic\WooCommerce\Admin\WCAdminHelper;
  *
  * @package WooCommerce\Admin\Tests\WCAdminHelper
  */
-class WC_Admin_Tests_Admin_Helper extends WP_UnitTestCase {
+class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
+	/**
+	 * Set up before class.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
+		// Ensure pages exist.
+		WC_Install::create_pages();
+
+		// Set up permalinks.
+		update_option(
+			'woocommerce_permalinks',
+			array(
+				'product_base'           => '/shop/%product_cat%',
+				'category_base'          => 'product-category',
+				'tag_base'               => 'product-tag',
+				'attribute_base'         => 'test',
+				'use_verbose_page_rules' => true,
+			)
+		);
+	}
+
+	/**
+	 * Tear down after class.
+	 */
+	public static function tearDownAfterClass(): void {
+		// Delete pages.
+		wp_delete_post( get_option( 'woocommerce_shop_page_id' ), true );
+		wp_delete_post( get_option( 'woocommerce_cart_page_id' ), true );
+		wp_delete_post( get_option( 'woocommerce_checkout_page_id' ), true );
+		wp_delete_post( get_option( 'woocommerce_myaccount_page_id' ), true );
+		wp_delete_post( wc_privacy_policy_page_id(), true );
+		wp_delete_post( wc_terms_and_conditions_page_id(), true );
+	}
 
 	/**
 	 * Test get_wcadmin_active_for_in_seconds_with with invalid timestamp option.
@@ -175,5 +209,52 @@ class WC_Admin_Tests_Admin_Helper extends WP_UnitTestCase {
 
 		update_option( 'fresh_site', '1' );
 		$this->assertTrue( WCAdminHelper::is_site_fresh() );
+	}
+
+	/**
+	 * Get store page test data. This data is used to test is_store_page function.
+	 *
+	 * We don't use the data provider in this test because data provider are executed before setUpBeforeClass and cause other tests to fail since we need to create pages to generate the test data.
+	 *
+	 * @return array[] list of store page test data.
+	 */
+	public function get_store_page_test_data() {
+			return array(
+				array( get_permalink( wc_get_page_id( 'cart' ) ), true ), // Test case 1: URL matches cart page.
+				array( 'https://example.com/product-category/sample-category/', true ), // Test case 3: URL matches product category page.
+				array( 'https://example.com/product-tag/sample-tag/', true ), // Test case 4: URL matches product tag page.
+				array( 'https://example.com/shop/uncategorized/test/', true ), // Test case 5: URL matches product page.
+				array( '/shop/t-shirt/test/', true ), // Test case 6: URL path matches product page.
+				array( 'https://example.com/about-us/', false ), // Test case 7: URL does not match any store page.
+			);
+	}
+
+	/**
+	 *
+	 * Test is_store_page function with different URLs.
+	 *
+	 */
+	public function test_is_store_page() {
+			global $wp_rewrite;
+
+			$wp_rewrite = $this->getMockBuilder( 'WP_Rewrite' )->getMock(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+			$permalink_structure = array(
+				'category_base' => 'product-category',
+				'tag_base'      => 'product-tag',
+				'product_base'  => 'product',
+			);
+
+			$wp_rewrite->expects( $this->any() )
+				->method( 'generate_rewrite_rule' )
+				->willReturn( array( 'shop/(.+?)/?$' => 'index.php?product_cat=$matches[1]&year=$matches[2]' ) );
+
+			$test_data = $this->get_store_page_test_data();
+
+			foreach ( $test_data as $data ) {
+				list( $url, $expected_result ) = $data;
+				$result                        = WCAdminHelper::is_store_page( $url );
+				$this->assertEquals( $expected_result, $result );
+			}
 	}
 }

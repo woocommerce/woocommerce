@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
 /**
  * Products Task
@@ -43,13 +44,13 @@ class Products extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
-			if ( $this->is_complete() ) {
-				return __( 'You added products', 'woocommerce' );
-			}
-			return __( 'Add products', 'woocommerce' );
+		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
+
+		if ( isset( $onboarding_profile['business_choice'] ) && 'im_already_selling' === $onboarding_profile['business_choice'] ) {
+			return __( 'Import your products', 'woocommerce' );
 		}
-		return __( 'Add my products', 'woocommerce' );
+
+		return __( 'Add your products', 'woocommerce' );
 	}
 
 	/**

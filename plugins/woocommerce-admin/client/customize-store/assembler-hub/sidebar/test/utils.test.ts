@@ -6,7 +6,7 @@ import { BlockInstance } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { findPatternByBlock } from '../utils';
-import { PatternWithBlocks } from '../../hooks/use-patterns';
+import { PatternWithBlocks } from '~/customize-store/types/pattern';
 
 describe( 'findPatternByBlock', () => {
 	// Sample patterns and blocks for testing

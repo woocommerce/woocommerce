@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { useCallback, useLayoutEffect, useRef } from '@wordpress/element';
 import { DOWN, UP } from '@wordpress/keycodes';
 import { useDebouncedCallback } from 'use-debounce';
@@ -62,10 +62,7 @@ const QuantitySelector = ( {
 	itemName = '',
 	disabled,
 }: QuantitySelectorProps ): JSX.Element => {
-	const classes = classNames(
-		'wc-block-components-quantity-selector',
-		className
-	);
+	const classes = clsx( 'wc-block-components-quantity-selector', className );
 
 	const inputRef = useRef< HTMLInputElement | null >( null );
 	const decreaseButtonRef = useRef< HTMLButtonElement | null >( null );
@@ -93,7 +90,7 @@ const QuantitySelector = ( {
 				);
 			}
 
-			// Select the biggest between what's inserted, the the minimum value in steps.
+			// Select the biggest between what's inserted, the minimum value in steps.
 			value = Math.max( value, Math.ceil( minimum / step ) * step );
 
 			// We round off the value to our steps.

@@ -7,87 +7,25 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\Revenue\Query as RevenueQuery;
-use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
 
 /**
  * Rule processor that passes when a store's payments volume exceeds a provided amount.
+ *
+ * @deprecated 8.8.0
  */
-class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
+class TotalPaymentsVolumeProcessor extends DeprecatedClassFacade {
 	/**
-	 * Compare against the store's total payments volume.
+	 * The name of the non-deprecated class that this facade covers.
 	 *
-	 * @param object $rule         The rule being processed by this rule processor.
-	 * @param object $stored_state Stored state.
-	 *
-	 * @return bool The result of the operation.
+	 * @var string
 	 */
-	public function process( $rule, $stored_state ) {
-		$dates           = TimeInterval::get_timeframe_dates( $rule->timeframe );
-		$reports_revenue = $this->get_reports_query(
-			array(
-				'before'   => $dates['end'],
-				'after'    => $dates['start'],
-				'interval' => 'year',
-				'fields'   => array( 'total_sales' ),
-			)
-		);
-		$report_data     = $reports_revenue->get_data();
-
-		if ( ! $report_data || ! isset( $report_data->totals->total_sales ) ) {
-			return false;
-		}
-
-		$value = $report_data->totals->total_sales;
-
-		return ComparisonOperation::compare(
-			$value,
-			$rule->value,
-			$rule->operation
-		);
-	}
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\TotalPaymentsVolumeProcessor';
 
 	/**
-	 * Validates the rule.
+	 * The version that this class was deprecated in.
 	 *
-	 * @param object $rule The rule to validate.
-	 *
-	 * @return bool Pass/fail.
+	 * @var string
 	 */
-	public function validate( $rule ) {
-		$allowed_timeframes = array(
-			'last_week',
-			'last_month',
-			'last_quarter',
-			'last_6_months',
-			'last_year',
-		);
-
-		if ( ! isset( $rule->timeframe ) || ! in_array( $rule->timeframe, $allowed_timeframes, true ) ) {
-			return false;
-		}
-
-		if ( ! isset( $rule->value ) || ! is_numeric( $rule->value ) ) {
-			return false;
-		}
-
-		if ( ! isset( $rule->operation ) ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Get the report query.
-	 *
-	 * @param array $args The query args.
-	 *
-	 * @return RevenueQuery The report query.
-	 */
-	protected function get_reports_query( $args ) {
-		return new RevenueQuery(
-			$args
-		);
-	}
+	protected static $deprecated_in_version = '8.8.0';
 }

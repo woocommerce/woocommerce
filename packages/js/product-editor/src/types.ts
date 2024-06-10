@@ -11,6 +11,7 @@ export type ProductTemplate = {
 	icon: string | null;
 	order: number;
 	layoutTemplateId: string;
+	isSelectableByUser: boolean;
 	productData: Partial< Product >;
 };
 
@@ -18,6 +19,7 @@ export interface ProductEditorContext {
 	postId: number;
 	postType: string;
 	selectedTab: string | null;
+	isInSelectedTab?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,3 +49,43 @@ export interface Taxonomy {
 export interface TaxonomyMetadata {
 	hierarchical: boolean;
 }
+
+export type ProductFormTemplateProps = {
+	id: number;
+	date: string;
+	date_gmt: string;
+	guid: {
+		rendered: string;
+		raw: string;
+	};
+	modified: string;
+	modified_gmt: string;
+	password: string;
+	slug: string;
+	status: 'publish' | 'future' | 'draft' | 'pending' | 'private';
+	type: 'product_form';
+	link: string;
+	title: {
+		raw: string;
+		rendered: string;
+	};
+	content: {
+		raw: string;
+		rendered: string;
+		protected: false;
+		block_version: number;
+	};
+	excerpt: {
+		raw: string;
+		rendered: string;
+		protected: boolean;
+	};
+	featured_media: number;
+	comment_status: 'open' | 'closed';
+	ping_status: 'closed' | 'open';
+	template: '';
+	meta: [];
+	permalink_template: string;
+	generated_slug: string;
+	class_list: string[];
+};

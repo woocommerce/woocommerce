@@ -37,9 +37,6 @@ npm-debug.log
 *.swp
 *.zip
 
-# Allow theme *.zip files for testing purposes
-!plugins/woocommerce-blocks/tests/e2e/bin/themes/*.zip
-
 # Built packages
 build/
 build-module/

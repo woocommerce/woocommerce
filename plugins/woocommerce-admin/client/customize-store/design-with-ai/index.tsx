@@ -3,8 +3,9 @@
  */
 import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useState } from '@wordpress/element';
-import { AnyInterpreter, Sender } from 'xstate';
 import { getNewPath } from '@woocommerce/navigation';
+import { useSelect } from '@wordpress/data';
+import { AnyInterpreter, Sender } from 'xstate';
 
 /**
  * Internal dependencies
@@ -26,6 +27,8 @@ import { customizeStoreStateMachineEvents } from '..';
 import './style.scss';
 import { isAIFlow } from '../guards';
 import { navigateOrParent } from '../utils';
+import { useXStateInspect } from '~/xstate';
+import './entrepreneur-flow';
 
 export type events = { type: 'THEME_SUGGESTED' };
 export type DesignWithAiComponent =
@@ -45,14 +48,32 @@ export const DesignWithAiController = ( {
 	sendEventToParent?: Sender< customizeStoreStateMachineEvents >;
 	parentContext?: customizeStoreStateMachineContext;
 } ) => {
+	interface Theme {
+		is_block_theme?: boolean;
+	}
+
+	const currentTheme = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
+
+	const isBlockTheme = currentTheme?.is_block_theme;
+
 	// Assign aiOnline value from the parent context if it exists. Otherwise, ai is online by default.
 	designWithAiStateMachineDefinition.context.aiOnline =
 		parentContext?.flowType === FlowType.AIOnline;
+
+	const { versionEnabled } = useXStateInspect();
 	const [ state, send, service ] = useMachine(
 		designWithAiStateMachineDefinition,
 		{
-			devTools: process.env.NODE_ENV === 'development',
+			devTools: versionEnabled === 'V4',
 			parent: parentMachine,
+			context: {
+				...designWithAiStateMachineDefinition.context,
+				isBlockTheme,
+			},
 		}
 	);
 

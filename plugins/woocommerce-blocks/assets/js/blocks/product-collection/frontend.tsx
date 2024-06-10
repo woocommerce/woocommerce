@@ -37,6 +37,13 @@ const isValidEvent = ( event: MouseEvent ) =>
 	! event.shiftKey &&
 	! event.defaultPrevented;
 
+const forcePageReload = ( href: string ) => {
+	window.location.assign( href );
+	// It's function called in generator expecting asyncFunc return.
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	return new Promise( () => {} );
+};
+
 /**
  * Ensures the visibility of the first product in the collection.
  * Scrolls the page to the first product if it's not in the viewport.
@@ -93,6 +100,13 @@ const productCollectionStore = {
 			const wcNavigationId = (
 				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
 			 )?.dataset?.wcNavigationId;
+			const isDisabled = (
+				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
+			 )?.dataset.wcNavigationDisabled;
+
+			if ( isDisabled ) {
+				yield forcePageReload( ref.href );
+			}
 
 			if ( isValidLink( ref ) && isValidEvent( event ) ) {
 				event.preventDefault();
@@ -130,6 +144,15 @@ const productCollectionStore = {
 		 */
 		*prefetchOnHover() {
 			const { ref } = getElement();
+
+			const isDisabled = (
+				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
+			 )?.dataset.wcNavigationDisabled;
+
+			if ( isDisabled ) {
+				return;
+			}
+
 			if ( isValidLink( ref ) ) {
 				yield prefetch( ref.href );
 			}
@@ -141,8 +164,17 @@ const productCollectionStore = {
 		 * Reduces perceived load times for subsequent page navigations.
 		 */
 		*prefetch() {
-			const context = getContext< ProductCollectionStoreContext >();
 			const { ref } = getElement();
+			const isDisabled = (
+				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
+			 )?.dataset.wcNavigationDisabled;
+
+			if ( isDisabled ) {
+				return;
+			}
+
+			const context = getContext< ProductCollectionStoreContext >();
+
 			if ( context?.isPrefetchNextOrPreviousLink && isValidLink( ref ) ) {
 				yield prefetch( ref.href );
 			}

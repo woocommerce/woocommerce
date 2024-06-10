@@ -1,5 +1,5 @@
 .woocommerce-layout .woocommerce-layout__main {
-	@include breakpoint('<782px') {
+	@include breakpoint("<782px") {
 		padding-top: 0 !important;
 	}
 
@@ -241,6 +241,14 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 
 	.core-profiler__checkbox {
 		padding: 16px 32px 16px 32px;
+
+		div {
+			display: flex;
+
+			.components-checkbox-control__input-container {
+				display: block;
+			}
+		}
 	}
 
 	.woocommerce-customize-store__design-change-warning-modal-footer {
@@ -250,7 +258,13 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 		display: flex;
 		gap: 12px;
 		justify-content: flex-end;
+
+		button.is-link {
+			padding: 6px 12px;
+			text-decoration: none;
+		}
 	}
+
 }
 
 .woocommerce-onboarding-loader {
@@ -296,5 +310,16 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 	.woocommerce-onboarding-progress-bar__filler {
 		transition: width linear 2s;
 	}
+}
+
+.woocommerce-cys-wordpress-header-logo {
+	position: absolute;
+	top: 28px;
+	left: 24px;
+}
+
+.edit-site-layout__hub svg.woocommerce-cys-wordpress-header-logo {
+	width: 24px;
+	height: 24px;
 }
 

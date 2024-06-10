@@ -5,7 +5,7 @@ import { OrderSummary } from '@woocommerce/base-components/cart-checkout';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { TotalsWrapper } from '@woocommerce/blocks-components';
 
-const Block = ( { className }: { className: string } ): JSX.Element => {
+const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
 	const { cartItems } = useStoreCart();
 
 	return (

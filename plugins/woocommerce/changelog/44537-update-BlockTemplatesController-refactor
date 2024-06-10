@@ -1,3 +1,0 @@
-Significance: patch
-Type: update
-Comment: Updated the template logic used by block themes, to make it more performant and resilient.

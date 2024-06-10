@@ -25,7 +25,7 @@ import {
 } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { CurrencyContext } from '@woocommerce/currency';
 
 /**
@@ -129,7 +129,7 @@ export const isSellingElsewhere = ( selectedOption ) =>
 	].includes( selectedOption );
 
 const getWccomMigrationUrl = ( selectedOption ) => {
-	return `https://woo.com/migrate/?utm_source=nux&utm_medium=product&utm_campaign=migrate&utm_content=${ selectedOption }`;
+	return `https://woocommerce.com/migrate/?utm_source=nux&utm_medium=product&utm_campaign=migrate&utm_content=${ selectedOption }`;
 };
 
 export const isSellingOtherPlatformInPerson = ( selectedOption ) =>
@@ -423,7 +423,7 @@ class BusinessDetails extends Component {
 		const { className, ...props } = getInputProps( name );
 		return {
 			...props,
-			className: classnames(
+			className: clsx(
 				`woocommerce-profile-wizard__${ name.replace( /\_/g, '-' ) }`,
 				className
 			),

@@ -5,7 +5,7 @@
 	"title": "Taxonomy",
 	"category": "widgets",
 	"description": "A block that displays a taxonomy field, allowing searching, selection, and creation of new items",
-	"keywords": [ "taxonomy"],
+	"keywords": [ "taxonomy" ],
 	"textdomain": "default",
 	"attributes": {
 		"slug": {
@@ -31,17 +31,21 @@
 		"parentTaxonomyText": {
 			"type": "string",
 			"__experimentalRole": "content"
+		},
+		"placeholder": {
+			"type": "string",
+			"__experimentalRole": "content"
 		}
 	},
 	"supports": {
 		"align": false,
 		"html": false,
-		"multiple": false,
+		"multiple": true,
 		"reusable": false,
 		"inserter": false,
 		"lock": false,
 		"__experimentalToolbar": false
 	},
 	"editorStyle": "file:./editor.css",
-	"usesContext": [ "postType" ]
+	"usesContext": [ "postType", "isInSelectedTab" ]
 }

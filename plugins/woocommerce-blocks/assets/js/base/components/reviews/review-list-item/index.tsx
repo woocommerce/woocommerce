@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import ReadMore from '@woocommerce/base-components/read-more';
 import { ReviewBlockAttributes } from '@woocommerce/blocks/reviews/attributes';
 
@@ -167,7 +167,7 @@ const ReviewListItem = ( { attributes, review = {} }: ReviewListItemProps ) => {
 
 	return (
 		<li
-			className={ classNames(
+			className={ clsx(
 				'wc-block-review-list-item__item',
 				'wc-block-components-review-list-item__item',
 				{

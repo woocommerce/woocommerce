@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page, PlaywrightTestArgs } from '@playwright/test';
-import { BlockData } from '@woocommerce/e2e-types';
+import { BlockData } from '@woocommerce/e2e-utils';
 
 /**
  * Closes any modals in the editor if they are open.
@@ -35,6 +35,6 @@ export const editBlockPage = async (
 		.getByRole( 'link', { name: `“${ name } block” (Edit)` } )
 		.click();
 
-	await page.waitForSelector( blockSelector );
+	await page.locator( blockSelector as string ).waitFor();
 	await closeModalIfExists( page );
 };
