@@ -1,4 +1,4 @@
 Significance: patch
 Type: update
 
-PFT: support template description
+WooCommerce: store the template description in the `product_form` excerpt property.
