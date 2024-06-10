@@ -4,8 +4,8 @@
 import { getQuery, getNewPath } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
 import { Icon, chevronLeft } from '@wordpress/icons';
-import { useEffect, createContext, useState } from '@wordpress/element';
-import classNames from 'classnames';
+import { useEffect, useState } from '@wordpress/element';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -88,7 +88,7 @@ const Settings = ( { params } ) => {
 					</SectionNav>
 				</div>
 				<div
-					className={ classNames(
+					className={ classnames(
 						'woocommerce-settings-layout-sidebar',
 						{ 'is-open': sidebarVisisble }
 					) }
