@@ -255,7 +255,7 @@ jobs:
                   pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE Tests" -m "$COMMIT_MESSAGE"
 
     test-reports:
-        name: 'Publish reports - ${{ matrix.report }}'
+        name: 'Test reports - ${{ matrix.report }}'
         needs:
           [
             'project-jobs',
@@ -288,16 +288,17 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   name: ${{ matrix.report }}
+                  path: ./out
 
             - name: 'Generate Allure report'
               id: generate_allure_report
-              run: allure generate --clean ./${{ matrix.report }}/allure-results --output ./${{ matrix.report }}/allure-report
+              run: allure generate --clean ./out/${{ matrix.report }}/allure-results --output ./out/${{ matrix.report }}/allure-report
 
             - name: 'Re-upload artifacts with generated report'
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ matrix.report }}
-                  path: ./${{ matrix.report }}
+                  path: ./out/${{ matrix.report }}
                   if-no-files-found: ignore
                   retention-days: 10
                   overwrite: true
