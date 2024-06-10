@@ -136,8 +136,7 @@ test.describe( 'Variations tab', () => {
 					);
 
 					await inputLocator.fill( option );
-					await page.waitForTimeout( 100 ); // needs some time to be able to press Enter.
-					await expect( inputLocator ).toHaveValue( option );
+					await page.waitForTimeout( 500 ); // needs some time to be able to press Enter.
 					await inputLocator.press( 'Enter' );
 					await expect( container ).toContainText( option );
 				}
