@@ -25,6 +25,7 @@
 .woocommerce-settings-layout-navigation {
 	min-width: 300px;
 	color: white;
+	overflow: scroll;
 
 	.components-button {
 		font-size: 16px;
@@ -38,6 +39,23 @@
 	border-radius: 10px;
 	height: 100%;
 	overflow: scroll;
+}
+
+.woocommerce-settings-layout-sidebar {
+	flex: 1;
+	background-color: white;
+	border-radius: 10px;
+	height: 100%;
+	overflow: scroll;
+	max-width: 0;
+	padding: 0;
+	overflow: hidden;
+	transition: max-width 0.3s ease;
+
+	&.is-open {
+		max-width: 500px;
+		padding: 16px;
+	}
 }
 
 .woocommerce-settings-tabs {

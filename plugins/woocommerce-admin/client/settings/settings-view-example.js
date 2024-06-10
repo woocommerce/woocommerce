@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createSlotFill } from '@wordpress/components';
+import { createSlotFill, Button } from '@wordpress/components';
 import { registerPlugin } from '@wordpress/plugins';
 
 /**
@@ -15,13 +15,25 @@ const ExampleSettingsViewSlotFill = () => {
 	const style = { margin: '36px 0px' };
 	return (
 		<Fill>
-			{ ( { SideBar } ) => (
-				<div style={ style }>
-					<h1>Example Settings View</h1>
-					<p>This is the main content using a SlotFill</p>
-					{ <SideBar /> }
-				</div>
-			) }
+			{ ( { toggleSidebar, setSidebarContent } ) => {
+				return (
+					<div style={ style }>
+						<h1>Example Settings View</h1>
+						<p>This is the main content using a SlotFill</p>
+						<Button
+							variant="secondary"
+							onClick={ () => {
+								toggleSidebar();
+								setSidebarContent(
+									<h2>This is content created by the Fill</h2>
+								);
+							} }
+						>
+							Show Sidebar
+						</Button>
+					</div>
+				);
+			} }
 		</Fill>
 	);
 };

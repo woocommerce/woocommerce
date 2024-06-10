@@ -5,6 +5,7 @@ import { getQuery, getNewPath } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
 import { Icon, chevronLeft } from '@wordpress/icons';
 import { useEffect, createContext, useState } from '@wordpress/element';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -18,7 +19,6 @@ import { registerPaymentsSettingsBannerFill } from '../payments/payments-setting
 import { registerSiteVisibilitySlotFill } from '../launch-your-store';
 import { registerExampleSettingsView } from './settings-view-example';
 import { useFullScreen } from '~/utils';
-import { SidebarContext } from './components/side-bar';
 import './style.scss';
 
 const Settings = ( { params } ) => {
@@ -31,12 +31,16 @@ const Settings = ( { params } ) => {
 			? {}
 			: sections[ section || '' ];
 
-	const [ hasSideBar, setHasSideBar ] = useState( false );
+	const [ sidebarVisisble, setSidebarVisisble ] = useState( false );
+	const [ sidebarContent, setSidebarContent ] = useState( null );
+	const toggleSidebar = () => {
+		setSidebarVisisble( ! sidebarVisisble );
+	};
 
 	// Be sure to render Settings slots when the params change.
 	useEffect( () => {
-		possiblyRenderSettingsSlots();
-	}, [ params.page, section ] );
+		possiblyRenderSettingsSlots( toggleSidebar, setSidebarContent );
+	}, [ params.page, section, sidebarVisisble ] );
 
 	// Register the slot fills for the settings page just once.
 	useEffect( () => {
@@ -50,6 +54,8 @@ const Settings = ( { params } ) => {
 		return <div>Error getting data</div>;
 	}
 	const title = settingsData[ params.page ]?.label;
+
+	console.log( sidebarContent );
 
 	return (
 		<>
@@ -70,11 +76,17 @@ const Settings = ( { params } ) => {
 						section={ section }
 					>
 						<div className="woocommerce-settings-layout-main">
-							<SidebarContext.Provider value={ setHasSideBar }>
-								<Content data={ contentData } />
-							</SidebarContext.Provider>
+							<Content data={ contentData } />
 						</div>
 					</SectionNav>
+				</div>
+				<div
+					className={ classNames(
+						'woocommerce-settings-layout-sidebar',
+						{ 'is-open': sidebarVisisble }
+					) }
+				>
+					{ sidebarVisisble && sidebarContent }
 				</div>
 			</div>
 		</>
