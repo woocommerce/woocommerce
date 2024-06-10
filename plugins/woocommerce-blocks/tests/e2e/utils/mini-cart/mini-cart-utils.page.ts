@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { FrontendUtils } from '@woocommerce/e2e-utils';
+import { FrontendUtils, expect } from '@woocommerce/e2e-utils';
 import { Page } from '@playwright/test';
 
 export class MiniCartUtils {
@@ -14,9 +14,19 @@ export class MiniCartUtils {
 	}
 
 	async openMiniCart() {
-		const block = await this.frontendUtils.getBlockByName(
+		const miniCartButton = await this.frontendUtils.getBlockByName(
 			'woocommerce/mini-cart'
 		);
-		await block.click();
+		const miniCartContents = await this.frontendUtils.getBlockByName(
+			'woocommerce/mini-cart-contents'
+		);
+
+		// When clicking the cart button right after the page loads, the drawer
+		// script might not have been executed yet, so we need to retry the
+		// click until the drawer is visible.
+		await expect( async () => {
+			await miniCartButton.click();
+			await expect( miniCartContents ).toBeVisible();
+		} ).toPass();
 	}
 }
