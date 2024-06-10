@@ -23,6 +23,7 @@ import {
 	getTotalShippingValue,
 	areShippingMethodsMissing,
 } from './utils';
+import ShippingCalculator from '../../shipping-calculator';
 import ShippingPlaceholder from './shipping-placeholder';
 import ShippingAddress from './shipping-address';
 import ShippingRateSelector from './shipping-rate-selector';
@@ -91,6 +92,16 @@ export const TotalsShipping = ( {
 			totalShippingValue
 		);
 
+	const defaultShippingCalculatorLabel = __(
+		'Enter address to check delivery options',
+		'woocommerce'
+	);
+	const [ shippingCalculatorLabel, setShippingCalculatorLabel ] = useState(
+		defaultShippingCalculatorLabel
+	);
+	const [ shippingCalculatorAddress, setShippingCalculatorAddress ] =
+		useState( '' );
+
 	return (
 		<div
 			className={ clsx(
@@ -108,12 +119,6 @@ export const TotalsShipping = ( {
 								<ShippingPlaceholder
 									showCalculator={ showCalculator }
 									isCheckout={ isCheckout }
-									isShippingCalculatorOpen={
-										isShippingCalculatorOpen
-									}
-									setIsShippingCalculatorOpen={
-										setIsShippingCalculatorOpen
-									}
 								/>
 						  )
 				}
@@ -128,11 +133,11 @@ export const TotalsShipping = ( {
 							{ showCalculator && (
 								<ShippingAddress
 									shippingAddress={ shippingAddress }
-									isShippingCalculatorOpen={
-										isShippingCalculatorOpen
+									setShippingCalculatorLabel={
+										setShippingCalculatorLabel
 									}
-									setIsShippingCalculatorOpen={
-										setIsShippingCalculatorOpen
+									setShippingCalculatorAddress={
+										setShippingCalculatorAddress
 									}
 									hasRates={ hasRates }
 								/>
@@ -142,6 +147,20 @@ export const TotalsShipping = ( {
 				}
 				currency={ currency }
 			/>
+			{ showCalculator && (
+				<ShippingCalculator
+					onUpdate={ () => {
+						setIsShippingCalculatorOpen( false );
+					} }
+					onCancel={ () => {
+						setIsShippingCalculatorOpen( false );
+					} }
+					isShippingCalculatorOpen={ isShippingCalculatorOpen }
+					setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
+					label={ shippingCalculatorLabel }
+					shippingCalculatorAddress={ shippingCalculatorAddress }
+				/>
+			) }
 			{ showRateSelector &&
 				cartHasCalculatedShipping &&
 				! showShippingCalculatorForm && (

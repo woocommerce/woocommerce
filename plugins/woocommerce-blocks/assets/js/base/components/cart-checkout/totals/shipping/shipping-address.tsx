@@ -11,17 +11,13 @@ import {
 import PickupLocation from '@woocommerce/base-components/cart-checkout/pickup-location';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
-import { createInterpolateElement } from '@wordpress/element';
-
-/**
- * Internal dependencies
- */
-import ShippingCalculator from '../../shipping-calculator';
 
 export interface ShippingAddressProps {
-	isShippingCalculatorOpen: boolean;
-	setIsShippingCalculatorOpen: React.Dispatch<
-		React.SetStateAction< boolean >
+	setShippingCalculatorLabel: React.Dispatch<
+		React.SetStateAction< string >
+	>;
+	setShippingCalculatorAddress: React.Dispatch<
+		React.SetStateAction< string >
 	>;
 	shippingAddress: ShippingAddressType;
 	hasRates: boolean;
@@ -32,8 +28,8 @@ export type ActiveShippingZones = {
 }[];
 
 export const ShippingAddress = ( {
-	isShippingCalculatorOpen,
-	setIsShippingCalculatorOpen,
+	setShippingCalculatorLabel,
+	setShippingCalculatorAddress,
 	shippingAddress,
 	hasRates,
 }: ShippingAddressProps ): JSX.Element | null => {
@@ -62,48 +58,29 @@ export const ShippingAddress = ( {
 	if ( ! hasFormattedAddress && ! isEditor && ! hasMultipleAndDefaultZone ) {
 		return null;
 	}
-	const formattedLocation = formatShippingAddress( shippingAddress );
-	let deliveryLabel;
-	if ( hasRates ) {
-		deliveryLabel = createInterpolateElement(
-			__( 'Delivers to <FormattedLocation />', 'woocommerce' ),
-			{
-				FormattedLocation: <strong>{ formattedLocation }</strong>,
-			}
-		);
-	} else {
-		deliveryLabel = createInterpolateElement(
-			__(
-				'No delivery options available for <FormattedLocation />',
-				'woocommerce'
-			),
-			{
-				FormattedLocation: <strong>{ formattedLocation }</strong>,
-			}
-		);
-	}
-
 	if ( prefersCollection )
 		return (
 			<PickupLocation
-				isShippingCalculatorOpen={ isShippingCalculatorOpen }
-				setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
+				setShippingCalculatorLabel={ setShippingCalculatorLabel }
+				setShippingCalculatorAddress={ setShippingCalculatorAddress }
 			/>
 		);
+	const formattedAddress = formatShippingAddress( shippingAddress );
+	let deliveryLabel;
+	if ( hasRates ) {
+		deliveryLabel = __( 'Delivers to', 'woocommerce' );
+	} else {
+		deliveryLabel = __(
+			'No delivery options available for',
+			'woocommerce'
+		);
+	}
 
-	return (
-		<ShippingCalculator
-			isShippingCalculatorOpen={ isShippingCalculatorOpen }
-			setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
-			label={ deliveryLabel }
-			onUpdate={ () => {
-				setIsShippingCalculatorOpen( false );
-			} }
-			onCancel={ () => {
-				setIsShippingCalculatorOpen( false );
-			} }
-		/>
-	);
+	setShippingCalculatorLabel( deliveryLabel );
+	if ( formattedAddress ) {
+		setShippingCalculatorAddress( formattedAddress );
+	}
+	return <></>;
 };
 
 export default ShippingAddress;
