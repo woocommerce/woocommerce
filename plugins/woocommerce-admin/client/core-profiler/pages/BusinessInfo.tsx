@@ -367,7 +367,7 @@ export const BusinessInfo = ( {
 											variant="tertiary"
 										>
 											{ __(
-												'Skip this step',
+												'skip this step',
 												'woocommerce'
 											) }
 										</Button>
