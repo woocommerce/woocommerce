@@ -4,7 +4,16 @@
 import { useSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
-export const useLaunchYourStore = () => {
+type Props = {
+	/** Set to false to disable this query, defaults to true to query the data */
+	enabled?: boolean;
+};
+
+export const useLaunchYourStore = (
+	{ enabled }: Props = {
+		enabled: true,
+	}
+) => {
 	const {
 		isLoading,
 		launchYourStoreEnabled,
@@ -13,6 +22,17 @@ export const useLaunchYourStore = () => {
 		privateLink,
 		shareKey,
 	} = useSelect( ( select ) => {
+		if ( ! enabled ) {
+			return {
+				isLoading: false,
+				comingSoon: false,
+				storePagesOnly: false,
+				privateLink: false,
+				shareKey: '',
+				launchYourStoreEnabled: false,
+			};
+		}
+
 		const { hasFinishedResolution, getOption } =
 			select( OPTIONS_STORE_NAME );
 

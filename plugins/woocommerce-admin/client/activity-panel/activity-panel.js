@@ -65,6 +65,10 @@ const SetupTasksPanel = lazy( () =>
 );
 
 export const ActivityPanel = ( { isEmbedded, query } ) => {
+	const isHomescreen = () => {
+		return query.page === 'wc-admin' && ! query.path;
+	};
+
 	const [ currentTab, setCurrentTab ] = useState( '' );
 	const [ isPanelClosing, setIsPanelClosing ] = useState( false );
 	const [ isPanelOpen, setIsPanelOpen ] = useState( false );
@@ -73,7 +77,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const hasExtendedNotifications = Boolean( fills?.length );
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 	const activeSetupList = useActiveSetupTasklist();
-	const { comingSoon } = useLaunchYourStore();
+	const { comingSoon } = useLaunchYourStore( {
+		enabled: isHomescreen(),
+	} );
 
 	const closePanel = () => {
 		setIsPanelClosing( true );
@@ -230,10 +236,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		setCurrentTab( tabName );
 		setIsPanelOpen( isTabOpen );
 		setIsPanelSwitching( panelSwitching );
-	};
-
-	const isHomescreen = () => {
-		return query.page === 'wc-admin' && ! query.path;
 	};
 
 	const isProductScreen = () => {
