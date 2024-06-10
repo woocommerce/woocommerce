@@ -24,7 +24,7 @@ module.exports = async ( config ) => {
 		console.log( 'Admin state file deleted successfully.' );
 	} catch ( err ) {
 		if ( err.code === 'ENOENT' ) {
-			console.log( 'Admin state file does not exist' );
+			console.log( 'Admin state file does not exist.' );
 		} else {
 			console.log( 'Admin state file could not be deleted: ' + err );
 		}
