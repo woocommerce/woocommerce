@@ -231,7 +231,7 @@ class ProductCollectionUtils {
 
 		if ( ! empty( $query_attrs['woocommerceStockStatus'] ) ) {
 			$default_values = wc_get_product_stock_status_options();
-			$default_diff   = array_diff( array_keys($default_values), $query_attrs['woocommerceStockStatus'] );
+			$default_diff   = array_diff( array_keys( $default_values ), $query_attrs['woocommerceStockStatus'] );
 			if ( ! empty( $default_diff ) ) {
 				$filters['stock-status'] = 1;
 			}
