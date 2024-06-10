@@ -9,7 +9,6 @@ config = {
 		{
 			name: 'default',
 			use: { ...devices[ 'Desktop Chrome' ] },
-			testMatch: '**/tests/admin-*/**.spec.js',
 		},
 	],
 };
