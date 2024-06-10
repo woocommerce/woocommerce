@@ -105,8 +105,9 @@ window.addEventListener( 'load', () => {
 		if ( ! ( miniCartBlock instanceof HTMLElement ) ) {
 			return;
 		}
+		let miniCartButton: HTMLButtonElement | null = null;
 
-		const miniCartButton = miniCartBlock.querySelector(
+		miniCartButton = miniCartBlock.querySelector(
 			'.wc-block-mini-cart__button'
 		);
 		const miniCartDrawerPlaceholderOverlay = miniCartBlock.querySelector(
@@ -158,9 +159,18 @@ window.addEventListener( 'load', () => {
 			loadContents();
 		};
 
-		miniCartButton.addEventListener( 'mouseover', loadScripts );
-		miniCartButton.addEventListener( 'focus', loadScripts );
-		miniCartButton.addEventListener( 'click', openDrawer );
+		miniCartButton.addEventListener( 'click', async () => {
+			await loadScripts();
+
+			if ( ! miniCartButton?.isConnected ) {
+				miniCartButton = miniCartBlock.querySelector(
+					'.wc-block-mini-cart__button'
+				);
+			}
+
+			openDrawer();
+			miniCartButton?.click();
+		} );
 
 		const funcOnAddToCart =
 			miniCartBlock.dataset.addToCartBehaviour === 'open_drawer'

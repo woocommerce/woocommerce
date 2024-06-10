@@ -20,7 +20,7 @@ export class MiniCartUtils {
 		// The mini cart button scripts are loaded when the button is either
 		// hovered or focused. The click event alone does not trigger neither of
 		// those actions so we need to perform one explicitly.
-		await miniCartButton.hover();
+		// await miniCartButton.hover();
 		await miniCartButton.click();
 	}
 }
