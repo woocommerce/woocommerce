@@ -6,6 +6,7 @@ import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import { previewCart as mockPreviewCart } from '@woocommerce/resource-previews';
 import * as wpData from '@wordpress/data';
 import * as baseContextHooks from '@woocommerce/base-context/hooks';
+const woocommerceSettings = jest.requireMock( '@woocommerce/settings' );
 
 /**
  * Internal dependencies
@@ -17,6 +18,36 @@ jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
 } ) );
+
+// Mock the settings module to return the active shipping zones.
+jest.mock( '@woocommerce/settings', () => {
+	const originalModule = jest.requireActual( '@woocommerce/settings' );
+
+	return {
+		...originalModule,
+		getSetting: jest.fn().mockImplementation( ( setting, ...rest ) => {
+			if ( setting === 'activeShippingZones' ) {
+				return [
+					{
+						id: 7,
+						title: 'India',
+						description: 'India',
+					},
+					{
+						id: 0,
+						title: 'International',
+						description: 'Locations outside all other zones',
+					},
+				];
+			}
+			return originalModule.getSetting( setting, ...rest );
+		} ),
+	};
+} );
+
+const setGetSettingImplementation = ( implementation ) => {
+	woocommerceSettings.getSetting.mockImplementation( implementation );
+};
 
 // Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
 wpData.useSelect.mockImplementation( ( selector ) => {
@@ -331,7 +362,7 @@ describe( 'TotalsShipping', () => {
 			cartCoupons: mockPreviewCart.coupons,
 			cartFees: mockPreviewCart.fees,
 			cartNeedsShipping: mockPreviewCart.needs_shipping,
-			shippingRates: [],
+			shippingRates: mockPreviewCart.shipping_rates,
 			shippingAddress: {
 				...shippingAddress,
 				city: '',
@@ -369,7 +400,24 @@ describe( 'TotalsShipping', () => {
 			screen.getByText( 'Enter address to check delivery options' )
 		).toBeInTheDocument();
 	} );
-	it( 'does not show the calculator button when default rates are available and no address has been entered', () => {
+
+	it( 'does not show the calculator button when only default rates are available and no address has been entered', () => {
+		// Mock active shipping zones to have only one zone.
+		setGetSettingImplementation( ( setting, ...rest ) => {
+			if ( setting === 'activeShippingZones' ) {
+				return [
+					{
+						id: 0,
+						title: 'International',
+						description: 'Locations outside all other zones',
+					},
+				];
+			}
+			const originalModule = jest.requireActual(
+				'@woocommerce/settings'
+			);
+			return originalModule.getSetting( setting, ...rest );
+		} );
 		baseContextHooks.useStoreCart.mockReturnValue( {
 			cartItems: mockPreviewCart.items,
 			cartTotals: [ mockPreviewCart.totals ],
@@ -424,10 +472,10 @@ describe( 'TotalsShipping', () => {
 			shippingRates: mockPreviewCart.shipping_rates,
 			shippingAddress: {
 				...shippingAddress,
-				city: '',
-				state: 'California',
+				city: 'San Francisco',
+				state: 'CA',
 				country: 'US',
-				postcode: '',
+				postcode: '94107',
 			},
 			billingAddress: mockPreviewCart.billing_address,
 			cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
@@ -458,7 +506,7 @@ describe( 'TotalsShipping', () => {
 		);
 		expect(
 			screen.getByRole( 'button', {
-				name: /Delivers to California/,
+				name: /Delivers to 94107, San Francisco, CA/,
 			} )
 		).toBeInTheDocument();
 	} );
