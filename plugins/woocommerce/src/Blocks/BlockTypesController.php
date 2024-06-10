@@ -321,6 +321,8 @@ final class BlockTypesController {
 			MiniCartContents::get_mini_cart_block_types()
 		);
 
+		// Update plugins/woocommerce-blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
+		// when modifying this list.
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
 			$block_types[] = 'ProductFilter';
 			$block_types[] = 'ProductFilters';
