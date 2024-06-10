@@ -81,15 +81,15 @@ function getLayoutTemplateId(
 	return 'simple-product';
 }
 
+export const isProductFormTemplateEnabled = () =>
+	!! window.wcAdminFeatures?.[ 'product-editor-template-system' ];
+
 export function BlockEditor( {
 	context,
 	postType,
 	productId,
 	setIsEditorLoading,
 }: BlockEditorProps ) {
-	const isProductEditorTemplateSystemEnabled =
-		!! window.wcAdminFeatures?.[ 'product-editor-template-system' ];
-
 	const [ selectedProductFormId, setSelectedProductFormId ] = useState<
 		number | null
 	>( null );
@@ -245,10 +245,7 @@ export function BlockEditor( {
 
 	const productFormTemplate = useMemo(
 		function pickAndParseTheProductFormTemplate() {
-			if (
-				! isProductEditorTemplateSystemEnabled ||
-				! selectedProductFormId
-			) {
+			if ( ! isProductFormTemplateEnabled || ! selectedProductFormId ) {
 				return undefined;
 			}
 
@@ -339,7 +336,7 @@ export function BlockEditor( {
 
 	return (
 		<div className="woocommerce-product-block-editor">
-			{ isProductEditorTemplateSystemEnabled && (
+			{ isProductFormTemplateEnabled() && (
 				<div style={ { margin: '32px', width: '250px' } }>
 					<SelectControl
 						label={ __(
