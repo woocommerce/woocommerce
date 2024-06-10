@@ -293,6 +293,7 @@ jobs:
             - name: 'Generate Allure report'
               id: generate_allure_report
               run: |
+                ls -lh ./out
                 allure generate --clean ./out/allure-results --output ./out/allure-report
                 ls -lh ./out
 
