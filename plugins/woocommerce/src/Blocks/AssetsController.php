@@ -62,14 +62,14 @@ final class AssetsController {
 		// The price package is shared externally so has no blocks prefix.
 		$this->api->register_script( 'wc-price-format', 'assets/client/blocks/price-format.js', array(), false );
 
+		// Vendor scripts for blocks frontends (not including cart and checkout).
 		$this->api->register_script( 'wc-blocks-vendors-frontend', $this->api->get_block_asset_build_path( 'wc-blocks-vendors-frontend' ), array(), false );
 
 		// Cart and checkout frontend scripts.
-		$cart_checkout_common_deps = array( 'cart-checkout-vendors-frontend', 'cart-checkout-base-frontend' );
-		$this->api->register_script( 'cart-checkout-vendors-frontend', $this->api->get_block_asset_build_path( 'cart-checkout-vendors-frontend' ), array(), false );
-		$this->api->register_script( 'cart-checkout-base-frontend', $this->api->get_block_asset_build_path( 'cart-checkout-base-frontend' ), array(), false );
-		$this->api->register_script( 'wc-blocks-checkout', 'assets/client/blocks/blocks-checkout.js', $cart_checkout_common_deps );
-		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js', $cart_checkout_common_deps );
+		$this->api->register_script( 'cart-checkout-vendors', $this->api->get_block_asset_build_path( 'cart-checkout-vendors-frontend' ), array(), false );
+		$this->api->register_script( 'cart-checkout-base', $this->api->get_block_asset_build_path( 'cart-checkout-base-frontend' ), array(), false );
+		$this->api->register_script( 'wc-blocks-checkout', 'assets/client/blocks/blocks-checkout.js' );
+		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js' );
 
 		// Register the interactivity components here for now.
 		$this->api->register_script( 'wc-interactivity-dropdown', 'assets/client/blocks/wc-interactivity-dropdown.js', array() );

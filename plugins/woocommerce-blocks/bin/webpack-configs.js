@@ -28,7 +28,7 @@ const {
 	getProgressBarPluginConfig,
 	getCacheGroups,
 } = require( './webpack-helpers' );
-const AddStableChunksToAssets = require( './add-stable-chunks-to-assets' );
+const AddSplitChunkDependencies = require( './add-split-chunk-dependencies' );
 
 const isProduction = NODE_ENV === 'production';
 
@@ -422,6 +422,7 @@ const getFrontConfig = ( options = {} ) => {
 				bundleAnalyzerReportTitle: 'Frontend',
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Frontend' ) ),
+			new AddSplitChunkDependencies(),
 		],
 		resolve: {
 			...resolve,
@@ -1113,7 +1114,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 			new ProgressBarPlugin(
 				getProgressBarPluginConfig( 'Cart & Checkout Frontend' )
 			),
-			new AddStableChunksToAssets(),
+			new AddSplitChunkDependencies(),
 		],
 		resolve: {
 			...resolve,
