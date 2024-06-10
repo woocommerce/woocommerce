@@ -6,20 +6,16 @@ import { addFilter } from '@wordpress/hooks';
 import { EditorBlock } from '@woocommerce/types';
 import type { ElementType } from '@wordpress/element';
 import type { BlockEditProps, BlockAttributes } from '@wordpress/blocks';
-
-/**
- * Internal dependencies
- */
 import {
 	SetPreviewState,
 	PreviewState,
 	ProductCollectionAttributes,
-} from '../../blocks/product-collection/types';
+} from '@woocommerce/blocks/product-collection/types';
 import {
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_TEMPLATE,
 	PRODUCT_COLLECTION_BLOCK_NAME as BLOCK_NAME,
-} from '../../blocks/product-collection/constants';
+} from '@woocommerce/blocks/product-collection/constants';
 
 export interface ProductCollectionConfig extends BlockVariation {
 	preview?: {
