@@ -342,6 +342,7 @@ final class BlockTypesController {
 					'AllProducts',
 					'Cart',
 					'Checkout',
+					'ProductGallery',
 				)
 			);
 		}
@@ -371,6 +372,7 @@ final class BlockTypesController {
 					'OrderConfirmation\AdditionalInformation',
 					'OrderConfirmation\AdditionalFieldsWrapper',
 					'OrderConfirmation\AdditionalFields',
+					'ProductGallery',
 				)
 			);
 		}

@@ -166,7 +166,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 					},
 				},
 				onDone: {
-					target: '#designWithoutAI.showAssembleHub',
+					target: '#designWithoutAI.showAssembleHubTypography',
 				},
 			},
 			installPatterns: {
@@ -199,7 +199,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 					},
 				},
 				onDone: {
-					target: '#designWithoutAI.showAssembleHub',
+					target: '#designWithoutAI.showAssembleHubHomepage',
 				},
 			},
 			preAssembleSite: {
@@ -299,6 +299,22 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 					component: AssembleHubLoader,
 				},
 				entry: [ 'redirectToAssemblerHub' ],
+			},
+			showAssembleHubHomepage: {
+				entry: [
+					{
+						type: 'redirectToAssemblerHubSection',
+						section: 'homepage',
+					},
+				],
+			},
+			showAssembleHubTypography: {
+				entry: [
+					{
+						type: 'redirectToAssemblerHubSection',
+						section: 'typography',
+					},
+				],
 			},
 		},
 	},
