@@ -33,11 +33,6 @@ import { FlowType } from '~/customize-store/types';
 import { footerTemplateId } from '~/customize-store/data/homepageTemplates';
 import { useSelect } from '@wordpress/data';
 import { trackEvent } from '~/customize-store/tracking';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
-import {
-	SidebarNavigationAnimationDirection,
-	SidebarNavigationContext,
-} from '../components/sidebar';
 
 const SUPPORTED_FOOTER_PATTERNS = [
 	'woocommerce-blocks/footer-with-3-menus',
@@ -45,15 +40,17 @@ const SUPPORTED_FOOTER_PATTERNS = [
 	'woocommerce-blocks/footer-large',
 ];
 
-export const SidebarNavigationScreenFooter = () => {
+export const SidebarNavigationScreenFooter = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'bottom',
 	} );
 
 	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
-
-	const { navigate } = useContext( SidebarNavigationContext );
 
 	const currentTemplate = useSelect(
 		( select ) =>
@@ -151,14 +148,7 @@ export const SidebarNavigationScreenFooter = () => {
 			title={ title }
 			onNavigateBackClick={ () => {
 				resetHighlightedBlockClientId();
-				const assemblerUrl = getNewPath(
-					{ customizing: true },
-					'/customize-store/assembler-hub',
-					{}
-				);
-
-				navigateTo( { url: assemblerUrl } );
-				navigate( SidebarNavigationAnimationDirection.Back );
+				onNavigateBackClick();
 			} }
 			description={ createInterpolateElement( description, {
 				EditorLink: (

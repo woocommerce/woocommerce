@@ -27,9 +27,12 @@ import { CustomizeStoreContext } from '..';
 import { Link } from '@woocommerce/components';
 import { PATTERN_CATEGORIES } from './pattern-screen/categories';
 import { capitalize } from 'lodash';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
-export const SidebarNavigationScreenHomepagePTK = () => {
+export const SidebarNavigationScreenHomepagePTK = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const { context } = useContext( CustomizeStoreContext );
 
 	const aiOnline = context.flowType === FlowType.AIOnline;
@@ -78,14 +81,7 @@ export const SidebarNavigationScreenHomepagePTK = () => {
 								<ItemGroup key={ index }>
 									<NavigatorButton
 										path={ `/customize-store/assembler-hub/homepage/${ categoryKey }` }
-										onClick={ () => {
-											const categoryUrl = getNewPath(
-												{ customizing: true },
-												`/customize-store/assembler-hub/homepage/${ categoryKey }`,
-												{}
-											);
-											navigateTo( { url: categoryUrl } );
-										} }
+										onClick={ onNavigateBackClick }
 										as={ SidebarNavigationItem }
 										withChevron
 									>
