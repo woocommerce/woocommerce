@@ -281,7 +281,7 @@ jobs:
                 'project-lint-jobs',
                 'project-test-jobs',
             ]
-        if: ${{ always() && github.event_name != 'pull_request'  }}
+        if: ${{ always() && github.event_name != 'pull_request' && ! github.event.pull_request.head.repo.fork  }}
         steps:
             - uses: 'actions/checkout@v4'
               name: 'Checkout'
@@ -318,7 +318,7 @@ jobs:
             'project-jobs',
             'project-test-jobs',
           ]
-        if: ${{ always() && needs.project-jobs.outputs.report-jobs != '[]' }}
+        if: ${{ always() && needs.project-jobs.outputs.report-jobs != '[]' && ! github.event.pull_request.head.repo.fork }}
         strategy:
           fail-fast: false
           matrix:
