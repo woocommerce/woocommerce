@@ -1,0 +1,5 @@
+Significance: major
+Type: update
+
+The archive product title will now be updated to the title of the current shop
+page. If the page does not exist, it will fall back to "Shop".
