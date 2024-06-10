@@ -43,43 +43,11 @@ export class ErrorBoundary extends Component<
 		window.location.reload();
 	};
 
-	handleOpenIssue = () => {
-		const { error, errorInfo } = this.state;
-		const issueBody = `
-### Describe the bug
-A clear and concise description of what the bug is.
-
-**Error Details**
-\`\`\`
-Error: ${ error?.toString() }
-Stack: ${ errorInfo?.componentStack }
-\`\`\`
-
-### Expected behavior
-A clear and concise description of what you expected to happen.
-
-### Actual behavior
-
-Fatal error occurred and error page was shown.
-
-### Steps to reproduce
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
-
-### WordPress Environment
-The System Status Report is found in your WordPress admin under **WooCommerce > Status**.
-Please select “Get system report”, then “Copy for support”, and then paste it here.
-
-### Additional context
-Add any other context about the problem here.
-        `;
-		const issueUrl = `https://github.com/woocommerce/woocommerce/issues/new?body=${ encodeURIComponent(
-			issueBody
-		) }`;
-		window.open( issueUrl, '_blank' );
+	handleOpenSupport = () => {
+		window.open(
+			'https://wordpress.org/support/plugin/woocommerce/',
+			'_blank'
+		);
 	};
 
 	render() {
@@ -91,27 +59,22 @@ Add any other context about the problem here.
 					</h1>
 					<p className="woocommerce-error-boundary__subheading">
 						{ __(
-							"We're sorry for the inconvenience. Please try refreshing the page, or you can report the issue on GitHub.",
+							"We're sorry for the inconvenience. Please try reloading the page, or you can get support from the community forums.",
 							'woocommerce'
 						) }
 					</p>
 					<div className="woocommerce-error-boundary__actions">
 						<Button
 							variant="secondary"
-							onClick={ this.handleOpenIssue }
-							style={ { margin: '10px', padding: '10px 20px' } }
+							onClick={ this.handleOpenSupport }
 						>
-							{ __( 'Report Issue on Github', 'woocommerce' ) }
+							{ __( 'Get Support', 'woocommerce' ) }
 						</Button>
 						<Button
 							variant="primary"
 							onClick={ this.handleRefresh }
-							style={ { margin: '10px', padding: '10px 20px' } }
 						>
-							{ __(
-								'Refresh Page and Try Again',
-								'woocommerce'
-							) }
+							{ __( 'Reload', 'woocommerce' ) }
 						</Button>
 					</div>
 					<details className="woocommerce-error-boundary__details">

@@ -57,12 +57,8 @@ describe( 'ErrorBoundary', () => {
 			</ErrorBoundary>
 		);
 
-		expect(
-			screen.getByText( 'Refresh Page and Try Again' )
-		).toBeInTheDocument();
-		expect(
-			screen.getByText( 'Report Issue on Github' )
-		).toBeInTheDocument();
+		expect( screen.getByText( 'Reload' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Get Support' ) ).toBeInTheDocument();
 	} );
 
 	it( 'refreshes the page when Refresh Page button is clicked', () => {
@@ -78,7 +74,7 @@ describe( 'ErrorBoundary', () => {
 			</ErrorBoundary>
 		);
 
-		fireEvent.click( screen.getByText( 'Refresh Page and Try Again' ) );
+		fireEvent.click( screen.getByText( 'Reload' ) );
 
 		expect( reloadMock ).toHaveBeenCalled();
 	} );
@@ -94,7 +90,7 @@ describe( 'ErrorBoundary', () => {
 			</ErrorBoundary>
 		);
 
-		fireEvent.click( screen.getByText( 'Report Issue on Github' ) );
+		fireEvent.click( screen.getByText( 'Get Support' ) );
 
 		expect( openSpy ).toHaveBeenCalledWith(
 			expect.stringContaining(
