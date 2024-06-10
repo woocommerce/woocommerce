@@ -23,6 +23,7 @@ WooCommerce comes with several [block templates](https://github.com/woocommerce/
     - Products by Tag (`taxonomy-product_tag.html`)
     - Products by Attribute (`taxonomy-product_attribute.html`)
 - Product Search Results (`product-search-results.html`)
+- Page: Coming soon (`page-coming-soon.html`)
 - Page: Cart (`page-cart.html`)
 - Page: Checkout (`page-checkout.html`)
 - Order Confirmation (`order-confirmation.html`)
