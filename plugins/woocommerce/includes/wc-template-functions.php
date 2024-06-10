@@ -4009,7 +4009,7 @@ function wc_update_product_archive_title( $post_type_name, $post_type ) {
 		if ( $shop_page_title ) {
 			return $shop_page_title;
 		}
-		 
+
 		return __( 'Shop', 'woocommerce' );
 	}
 
