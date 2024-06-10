@@ -14,19 +14,13 @@ export class MiniCartUtils {
 	}
 
 	async openMiniCart() {
-		const miniCartButton = await this.frontendUtils.getBlockByName(
-			'woocommerce/mini-cart'
+		const miniCartButton = this.page.locator(
+			'.wc-block-mini-cart__button'
 		);
-		const miniCartContents = await this.frontendUtils.getBlockByName(
-			'woocommerce/mini-cart-contents'
-		);
-
-		// When clicking the cart button right after the page loads, the drawer
-		// script might not have been executed yet, so we need to retry the
-		// click until the drawer is visible.
-		await expect( async () => {
-			await miniCartButton.click();
-			await expect( miniCartContents ).toBeVisible();
-		} ).toPass();
+		// The mini cart button scripts are loaded when the button is either
+		// hovered or focused. The click event alone does not trigger neither of
+		// those actions so we need to perform one explicitly.
+		await miniCartButton.hover();
+		await miniCartButton.click();
 	}
 }
