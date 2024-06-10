@@ -373,8 +373,6 @@ final class WooCommerce {
 	 * Define WC Constants.
 	 */
 	private function define_constants() {
-		$upload_dir = wp_upload_dir( null, false );
-
 		$this->define( 'WC_ABSPATH', dirname( WC_PLUGIN_FILE ) . '/' );
 		$this->define( 'WC_PLUGIN_BASENAME', plugin_basename( WC_PLUGIN_FILE ) );
 		$this->define( 'WC_VERSION', $this->version );
