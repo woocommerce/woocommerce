@@ -23,8 +23,10 @@ import { SaveHub } from './save-hub';
 import '~/customize-store/design-with-ai/entrepreneur-flow';
 import { SidebarContent } from '../components/sidebar';
 import { SidebarNavigationScreenLogo } from './sidebar-navigation-screen-logo';
+import { isPatternToolkitFullComposabilityFeatureFlagEnabled } from '../utils/is-full-composability-enabled';
+import { SidebarNavigationScreenHomepagePTK } from './sidebar-navigation-screen-homepage-ptk';
 
-const getComponentByPathParams = ( params: string ) => {
+const getComponentByPathParams = ( params: string | undefined ) => {
 	if ( params === '/customize-store/assembler-hub' ) {
 		return <SidebarNavigationScreenMain />;
 	}
@@ -43,6 +45,13 @@ const getComponentByPathParams = ( params: string ) => {
 
 	if ( params === '/customize-store/assembler-hub/header' ) {
 		return <SidebarNavigationScreenHeader />;
+	}
+
+	if (
+		isPatternToolkitFullComposabilityFeatureFlagEnabled() &&
+		params?.includes( '/customize-store/assembler-hub/homepage' )
+	) {
+		return <SidebarNavigationScreenHomepagePTK />;
 	}
 
 	if ( params === '/customize-store/assembler-hub/homepage' ) {

@@ -6,8 +6,12 @@ import { useSelect, useDispatch, select } from '@wordpress/data';
 import { BlockInstance } from '@wordpress/blocks';
 import { capitalize } from 'lodash';
 import { Spinner } from '@wordpress/components';
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
+import {
+	unlock,
+	// @ts-expect-error No types for this exist yet.
+} from '@wordpress/edit-site/build-module/lock-unlock';
 
+// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	store as coreStore,
 	// @ts-expect-error No types for this exist yet.
