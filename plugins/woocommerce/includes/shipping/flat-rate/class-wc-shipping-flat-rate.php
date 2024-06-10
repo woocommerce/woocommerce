@@ -108,6 +108,9 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		// Remove whitespace from string.
 		$sum = preg_replace( '/\s+/', '', $sum );
 
+		// Removed thousand separator.
+		$sum = str_replace( wc_get_price_thousand_separator(), '', $sum );
+
 		// Remove locale from string.
 		$sum = str_replace( $decimals, '.', $sum );
 

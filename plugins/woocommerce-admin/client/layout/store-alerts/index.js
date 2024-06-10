@@ -11,7 +11,7 @@ import {
 	CardHeader,
 	SelectControl,
 } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import interpolateComponents from '@automattic/interpolate-components';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -227,7 +227,7 @@ export class StoreAlerts extends Component {
 		const numberOfAlerts = alerts.length;
 		const alert = alerts[ currentIndex ];
 		const type = alert.type;
-		const className = classnames( 'woocommerce-store-alerts', {
+		const className = clsx( 'woocommerce-store-alerts', {
 			'is-alert-error': type === 'error',
 			'is-alert-update': type === 'update',
 		} );

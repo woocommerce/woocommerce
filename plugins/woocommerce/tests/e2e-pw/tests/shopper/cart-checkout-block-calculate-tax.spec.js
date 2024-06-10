@@ -109,7 +109,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 	test( 'can create Cart Block page', async ( { page } ) => {
 		await goToPageEditor( { page } );
 		await fillPageTitle( page, cartBlockPageTitle );
-		await insertBlockByShortcut( page, '/cart' );
+		await insertBlockByShortcut( page, 'Cart' );
 		await publishPage( page, cartBlockPageTitle );
 	} );
 
@@ -117,11 +117,11 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 	test( 'can create Checkout Block page', async ( { page } ) => {
 		await goToPageEditor( { page } );
 		await fillPageTitle( page, checkoutBlockPageTitle );
-		await insertBlockByShortcut( page, '/checkout' );
+		await insertBlockByShortcut( page, 'Checkout' );
 		await publishPage( page, checkoutBlockPageTitle );
 	} );
 
-	test( 'that inclusive tax is displayed properly in blockbased Cart & Checkout pages', async ( {
+	test( 'that inclusive tax is displayed properly in block-based Cart & Checkout pages', async ( {
 		page,
 		context,
 	} ) => {
@@ -168,7 +168,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 		} );
 	} );
 
-	test( 'that exclusive tax is displayed properly in blockbased Cart & Checkout pages', async ( {
+	test( 'that exclusive tax is displayed properly in block-based Cart & Checkout pages', async ( {
 		page,
 		baseURL,
 		context,
@@ -330,7 +330,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Rounding', () => {
 		} );
 	} );
 
-	test( 'that tax rounding is present at subtotal level in blockbased Cart & Checkout pages', async ( {
+	test( 'that tax rounding is present at subtotal level in block-based Cart & Checkout pages', async ( {
 		page,
 		baseURL,
 	} ) => {
@@ -389,7 +389,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Rounding', () => {
 		} );
 	} );
 
-	test( 'that tax rounding is off at subtotal level in blockbased Cart & Checkout pages', async ( {
+	test( 'that tax rounding is off at subtotal level in block-based Cart & Checkout pages', async ( {
 		page,
 		baseURL,
 	} ) => {
@@ -714,7 +714,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Levels', () => {
 		} );
 	} );
 
-	test( 'that applying taxes in blockbased Cart & Checkout of 2 different levels (2 excluded) calculates properly', async ( {
+	test( 'that applying taxes in block-based Cart & Checkout of 2 different levels (2 excluded) calculates properly', async ( {
 		page,
 		baseURL,
 	} ) => {

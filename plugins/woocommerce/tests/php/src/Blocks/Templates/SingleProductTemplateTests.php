@@ -135,7 +135,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 
 					<!-- wp:woocommerce/product-price {"isDescendentOfSingleProductTemplate":true, "fontSize":"large"} /-->
 
-					<!-- wp:post-excerpt {"__woocommerceNamespace":"woocommerce/product-query/product-summary"} /-->
+					<!-- wp:post-excerpt {"__woocommerceNamespace":"woocommerce/product-query/product-summary", "excerptLength":100} /-->
 
 					<!-- wp:woocommerce/add-to-cart-form /-->
 
@@ -204,7 +204,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 				  <!-- wp:column -->
 				  <div class="wp-block-column">
 					 <!-- wp:post-title {"level": 1, "__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
-					 <!-- wp:post-excerpt {"__woocommerceNamespace":"woocommerce/product-query/product-summary"} /-->
+					 <!-- wp:post-excerpt {"__woocommerceNamespace":"woocommerce/product-query/product-summary", "excerptLength":100} /-->
 				  </div>
 				  <!-- /wp:column -->
 			   </div>

@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "9.0.0",
+	"version": "9.1.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -29,7 +29,6 @@
 		"env:start": "pnpm wp-env start",
 		"env:stop": "pnpm wp-env stop",
 		"env:test": "pnpm env:dev && pnpm playwright install chromium",
-		"env:test:no-hpos": "DISABLE_HPOS=1 pnpm env:test",
 		"env:perf:install-k6": "curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1",
 		"env:perf": "pnpm env:dev && pnpm env:performance-init && pnpm env:perf:install-k6",
 		"preinstall": "npx only-allow pnpm",
@@ -53,7 +52,9 @@
 		"test": "pnpm test:unit",
 		"test:api": "API_TEST_REPORT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
 		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
-		"test:e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js",
+		"test:e2e-pw": "pnpm playwright test --config=tests/e2e-pw/envs/default/playwright.config.js",
+		"test:e2e": "pnpm test:e2e:with-env default",
+		"test:e2e:with-env": "bash ./tests/e2e-pw/run-tests-with-env.sh",
 		"test:perf": "./k6 run ./tests/performance/tests/gh-action-pr-requests.js",
 		"test:env:start": "pnpm env:test",
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
@@ -115,7 +116,11 @@
 					],
 					"testEnv": {
 						"start": "env:test"
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "PHP 8.0",
@@ -136,7 +141,11 @@
 						"config": {
 							"phpVersion": "8.0"
 						}
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "PHP WP: latest - 1",
@@ -157,7 +166,11 @@
 						"config": {
 							"wpVersion": "latest-1"
 						}
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "PHP WP: latest - 2",
@@ -178,19 +191,16 @@
 						"config": {
 							"wpVersion": "latest-2"
 						}
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
-					"name": "Core e2e tests",
-					"testType": "e2e",
-					"command": "test:e2e-pw",
-					"shardingArguments": [
-						"--shard=1/5",
-						"--shard=2/5",
-						"--shard=3/5",
-						"--shard=4/5",
-						"--shard=5/5"
-					],
+					"name": "PHP WP: nightly",
+					"command": "test:php:env",
+					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.lock",
@@ -200,26 +210,29 @@
 						"templates/**/*.php",
 						"tests/php/**/*.php",
 						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
-						"tests/e2e-pw/**"
+						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
-						"start": "env:test"
-					}
+						"start": "env:test",
+						"config": {
+							"wpVersion": "nightly"
+						}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
-					"name": "Core e2e tests - HPOS disabled",
+					"name": "Core e2e tests",
 					"testType": "e2e",
-					"command": "test:e2e-pw",
+					"command": "test:e2e:with-env default",
 					"shardingArguments": [
 						"--shard=1/5",
 						"--shard=2/5",
 						"--shard=3/5",
 						"--shard=4/5",
 						"--shard=5/5"
-					],
-					"events": [
-						"push"
 					],
 					"changes": [
 						"client/admin/config/*.json",
@@ -228,12 +241,183 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/php/**/*.php",
 						"tests/e2e-pw/**"
 					],
 					"testEnv": {
-						"start": "env:test:no-hpos"
+						"start": "env:test"
+					},
+					"events": [
+						"pull_request",
+						"push",
+						"release-checks"
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
 					}
+				},
+				{
+					"name": "Core e2e tests - Gutenberg stable",
+					"testType": "e2e",
+					"command": "test:e2e:with-env gutenberg-stable",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"events": [
+						"daily-e2e",
+						"nightly-checks",
+						"release-checks"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - Gutenberg nightly",
+					"testType": "e2e",
+					"command": "test:e2e:with-env gutenberg-nightly",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"events": [
+						"daily-e2e",
+						"release-checks"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - Woocommerce Payments",
+					"testType": "e2e",
+					"command": "test:e2e:with-env woocommerce-payments",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-e2e",
+						"release-checks"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - Woocommerce Paypal Payments",
+					"testType": "e2e",
+					"command": "test:e2e:with-env woocommerce-paypal-payments",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-e2e",
+						"release-checks"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - WooCommerce Shipping & Tax",
+					"testType": "e2e",
+					"command": "test:e2e:with-env woocommerce-services",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-e2e",
+						"release-checks"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core e2e tests - HPOS disabled",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"events": [
+						"push",
+						"release-checks"
+					],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/e2e-pw/**"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"disableHpos": true
+						}
+					},
+					"report": {
+						"resultsBlobName": "all-blob-e2e-reports-non-hpos",
+						"resultsPath": "tests/e2e-pw/test-results"
+					}
+				},
+				{
+					"name": "Core e2e tests - PHP 8.1",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"phpVersion": "8.1"
+						}
+					},
+					"events": [
+						"release-checks"
+					]
+				},
+				{
+					"name": "Core e2e tests - WP latest-1",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "latest-1"
+						}
+					},
+					"events": [
+						"release-checks"
+					]
 				},
 				{
 					"name": "Core API tests",
@@ -247,13 +431,20 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
-						"tests/api-core-tests/**"
+						"tests/api-core-tests/**",
+						"tests/e2e-pw/bin/**"
 					],
 					"testEnv": {
 						"start": "env:test"
+					},
+					"events": [
+						"pull_request",
+						"push"
+					],
+					"report": {
+						"resultsBlobName": "core-api-report",
+						"resultsPath": "tests/api-core-tests/test-results",
+						"allure": true
 					}
 				},
 				{
@@ -268,14 +459,17 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/api-core-tests/**"
+						"tests/api-core-tests/**",
+						"tests/e2e-pw/bin/**"
 					],
 					"events": [
 						"push"
 					],
 					"testEnv": {
-						"start": "env:test:no-hpos"
+						"start": "env:test",
+						"config": {
+							"disableHpos": true
+						}
 					}
 				},
 				{
@@ -290,13 +484,15 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
 						"tests/performance/**"
 					],
 					"testEnv": {
 						"start": "env:perf"
-					}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "Metrics",
@@ -312,6 +508,10 @@
 						"templates/**/*.php",
 						"templates/**/*.html",
 						"tests/metrics/**"
+					],
+					"events": [
+						"pull_request",
+						"push"
 					]
 				}
 			]

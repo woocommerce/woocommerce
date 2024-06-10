@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
@@ -48,6 +48,7 @@ final class BlockTypesController {
 	 */
 	protected function init() {
 		add_action( 'init', array( $this, 'register_blocks' ) );
+		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 2 );
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
@@ -105,6 +106,29 @@ final class BlockTypesController {
 
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
+	}
+
+	/**
+	 * Register block categories
+	 *
+	 * Used in combination with the `block_categories_all` filter, to append
+	 * WooCommerce Blocks related categories to the Gutenberg editor.
+	 *
+	 * @param array $categories The array of already registered categories.
+	 */
+	public function register_block_categories( $categories ) {
+		$woocommerce_block_categories = array(
+			array(
+				'slug'  => 'woocommerce',
+				'title' => __( 'WooCommerce', 'woocommerce' ),
+			),
+			array(
+				'slug'  => 'woocommerce-product-elements',
+				'title' => __( 'WooCommerce Product Elements', 'woocommerce' ),
+			),
+		);
+
+		return array_merge( $categories, $woocommerce_block_categories );
 	}
 
 	/**
@@ -297,7 +321,7 @@ final class BlockTypesController {
 			MiniCartContents::get_mini_cart_block_types()
 		);
 
-		if ( Package::feature()->is_experimental_build() ) {
+		if ( Features::is_enabled( 'experimental-blocks' ) ) {
 			$block_types[] = 'ProductFilter';
 			$block_types[] = 'ProductFilters';
 			$block_types[] = 'ProductFilterStockStatus';
@@ -318,6 +342,7 @@ final class BlockTypesController {
 					'AllProducts',
 					'Cart',
 					'Checkout',
+					'ProductGallery',
 				)
 			);
 		}
@@ -329,7 +354,6 @@ final class BlockTypesController {
 			$block_types = array_diff(
 				$block_types,
 				array(
-					'AddToCartForm',
 					'Breadcrumbs',
 					'CatalogSorting',
 					'ClassicTemplate',
@@ -348,6 +372,7 @@ final class BlockTypesController {
 					'OrderConfirmation\AdditionalInformation',
 					'OrderConfirmation\AdditionalFieldsWrapper',
 					'OrderConfirmation\AdditionalFields',
+					'ProductGallery',
 				)
 			);
 		}

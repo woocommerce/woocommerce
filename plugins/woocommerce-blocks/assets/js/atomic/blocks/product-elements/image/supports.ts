@@ -2,7 +2,6 @@
 /**
  * External dependencies
  */
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import { __experimentalGetSpacingClassesAndStyles as getSpacingClassesAndStyles } from '@wordpress/block-editor';
 
 /**
@@ -11,21 +10,19 @@ import { __experimentalGetSpacingClassesAndStyles as getSpacingClassesAndStyles 
 
 export const supports = {
 	html: false,
-	...( isFeaturePluginBuild() && {
-		__experimentalBorder: {
-			radius: true,
-			__experimentalSkipSerialization: true,
+	__experimentalBorder: {
+		radius: true,
+		__experimentalSkipSerialization: true,
+	},
+	typography: {
+		fontSize: true,
+		__experimentalSkipSerialization: true,
+	},
+	...( typeof getSpacingClassesAndStyles === 'function' && {
+		spacing: {
+			margin: true,
+			padding: true,
 		},
-		typography: {
-			fontSize: true,
-			__experimentalSkipSerialization: true,
-		},
-		...( typeof getSpacingClassesAndStyles === 'function' && {
-			spacing: {
-				margin: true,
-				padding: true,
-			},
-		} ),
-		__experimentalSelector: '.wc-block-components-product-image',
 	} ),
+	__experimentalSelector: '.wc-block-components-product-image',
 };
