@@ -20,7 +20,6 @@ import { registerSiteVisibilitySlotFill } from '../launch-your-store';
 import { registerExampleSettingsView } from './settings-view-example';
 import { useFullScreen } from '~/utils';
 import './style.scss';
-import { use } from '@wordpress/data';
 
 const Settings = ( { params } ) => {
 	useFullScreen( [ 'woocommerce-settings' ] );
