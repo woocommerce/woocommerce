@@ -267,6 +267,10 @@ class ProductCollectionUtils {
 			$filters['featured'] = 1;
 		}
 
+		if ( ! empty( $query_attrs['priceRange'] ) ) {
+			$filters['price'] = 1;
+		}
+
 		return $filters;
 	}
 }
