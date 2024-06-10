@@ -57,7 +57,7 @@ describe( 'ErrorBoundary', () => {
 			</ErrorBoundary>
 		);
 
-		expect( screen.getByText( 'Reload' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Reload Page' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'Get Support' ) ).toBeInTheDocument();
 	} );
 
@@ -74,7 +74,7 @@ describe( 'ErrorBoundary', () => {
 			</ErrorBoundary>
 		);
 
-		fireEvent.click( screen.getByText( 'Reload' ) );
+		fireEvent.click( screen.getByText( 'Reload Page' ) );
 
 		expect( reloadMock ).toHaveBeenCalled();
 	} );

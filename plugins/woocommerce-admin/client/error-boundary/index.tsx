@@ -74,7 +74,7 @@ export class ErrorBoundary extends Component<
 							variant="primary"
 							onClick={ this.handleRefresh }
 						>
-							{ __( 'Reload', 'woocommerce' ) }
+							{ __( 'Reload Page', 'woocommerce' ) }
 						</Button>
 					</div>
 					<details className="woocommerce-error-boundary__details">
