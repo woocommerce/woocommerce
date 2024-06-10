@@ -25,11 +25,11 @@ export const useLaunchYourStore = (
 		if ( ! enabled ) {
 			return {
 				isLoading: false,
-				comingSoon: false,
-				storePagesOnly: false,
-				privateLink: false,
-				shareKey: '',
-				launchYourStoreEnabled: false,
+				comingSoon: null,
+				storePagesOnly: null,
+				privateLink: null,
+				shareKey: null,
+				launchYourStoreEnabled: null,
 			};
 		}
 
