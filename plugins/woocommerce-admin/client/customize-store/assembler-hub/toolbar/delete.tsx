@@ -15,7 +15,7 @@ export default function Delete( {
 	nextBlockClientId,
 }: {
 	clientId: string;
-	nextBlockClientId: string;
+	nextBlockClientId: string | undefined;
 } ) {
 	// @ts-expect-error missing type
 	const { removeBlock, selectBlock } = useDispatch( blockEditorStore );
