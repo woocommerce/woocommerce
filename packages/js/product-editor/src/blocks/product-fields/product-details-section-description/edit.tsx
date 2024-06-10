@@ -39,6 +39,7 @@ import {
 } from '../../../utils/get-product-error-message';
 import type {
 	ProductEditorBlockEditProps,
+	ProductFormTemplateProps,
 	ProductTemplate,
 } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
@@ -92,6 +93,15 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	const [ unsupportedProductTemplate, setUnsupportedProductTemplate ] =
 		useState< ProductTemplate >();
+
+	// Pull the product templates from the store.
+	const productForms = useSelect< ProductFormTemplateProps[] >( ( sel ) => {
+		return (
+			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
+				per_page: -1,
+			} ) || []
+		);
+	}, [] );
 
 	const { isSaving } = useSelect(
 		( select ) => {
@@ -189,6 +199,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		return <Icon icon={ icon } size={ 24 } />;
 	}
 
+	/**
+	 * Returns a function that renders a MenuItem component.
+	 *
+	 * @param {Function} onClose - Function to close the dropdown.
+	 * @return {Function} Function that renders a MenuItem component.
+	 */
 	function getMenuItem( onClose: () => void ) {
 		return function renderMenuItem( productTemplate: ProductTemplate ) {
 			const isSelected =
