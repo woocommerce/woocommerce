@@ -74,7 +74,11 @@ const getComponentByPathParams = (
 		isPatternToolkitFullComposabilityFeatureFlagEnabled() &&
 		params?.includes( '/customize-store/assembler-hub/homepage' )
 	) {
-		return <SidebarNavigationScreenHomepagePTK />;
+		return (
+			<SidebarNavigationScreenHomepagePTK
+				onNavigateBackClick={ onNavigateBackClick }
+			/>
+		);
 	}
 
 	if ( params === '/customize-store/assembler-hub/homepage' ) {

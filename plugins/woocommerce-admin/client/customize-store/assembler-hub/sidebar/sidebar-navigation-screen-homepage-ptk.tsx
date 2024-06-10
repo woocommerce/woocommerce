@@ -29,7 +29,11 @@ import { PATTERN_CATEGORIES } from './pattern-screen/categories';
 import { capitalize } from 'lodash';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
-export const SidebarNavigationScreenHomepagePTK = () => {
+export const SidebarNavigationScreenHomepagePTK = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const { context } = useContext( CustomizeStoreContext );
 
 	const aiOnline = context.flowType === FlowType.AIOnline;
@@ -50,6 +54,7 @@ export const SidebarNavigationScreenHomepagePTK = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
+			onNavigateBackClick={ onNavigateBackClick }
 			description={ createInterpolateElement( sidebarMessage, {
 				EditorLink: (
 					<Link
