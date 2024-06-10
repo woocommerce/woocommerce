@@ -3,7 +3,7 @@
 	"apiVersion": 2,
 	"name": "woocommerce/product-filters",
 	"version": "1.0.0",
-	"title": "Product Filters (Beta)",
+	"title": "Product Filters (Experimental)",
 	"description": "Let shoppers filter products displayed on the page.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
