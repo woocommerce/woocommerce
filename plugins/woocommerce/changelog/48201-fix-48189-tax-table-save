@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix tax table ajax save
+#47626 changed the classes on the legacy admin settings save button and broke saving standard tax rates
