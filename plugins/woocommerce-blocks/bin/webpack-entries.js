@@ -169,9 +169,9 @@ const cartAndCheckoutBlocks = {
 // Returns the entries for each block given a relative path (ie: `index.js`,
 // `**/*.scss`...).
 // It also filters out elements with undefined props and experimental blocks.
-const getBlockEntries = ( relativePath ) => {
+const getBlockEntries = ( relativePath, blockEntries = blocks ) => {
 	return Object.fromEntries(
-		Object.entries( blocks )
+		Object.entries( blockEntries )
 			.map( ( [ blockCode, config ] ) => {
 				const filePaths = glob.sync(
 					`./assets/js/blocks/${ config.customDir || blockCode }/` +
