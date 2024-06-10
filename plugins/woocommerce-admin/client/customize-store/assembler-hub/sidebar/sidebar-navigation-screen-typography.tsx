@@ -25,10 +25,16 @@ import { CustomizeStoreContext } from '..';
 import { FlowType } from '~/customize-store/types';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 import { trackEvent } from '~/customize-store/tracking';
+import {
+	SidebarNavigationAnimationDirection,
+	SidebarNavigationContext,
+} from '../components/sidebar';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 export const SidebarNavigationScreenTypography = () => {
 	const { context, sendEvent } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
+	const { navigate } = useContext( SidebarNavigationContext );
 
 	const title = aiOnline
 		? __( 'Change your font', 'woocommerce' )
@@ -91,6 +97,16 @@ export const SidebarNavigationScreenTypography = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
+			onNavigateBackClick={ () => {
+				const assemblerUrl = getNewPath(
+					{ customizing: true },
+					'/customize-store/assembler-hub',
+					{}
+				);
+
+				navigateTo( { url: assemblerUrl } );
+				navigate( SidebarNavigationAnimationDirection.Back );
+			} }
 			description={ createInterpolateElement( label, {
 				EditorLink: (
 					<Link

@@ -52,6 +52,11 @@ import { COLOR_PALETTES } from './global-styles/color-palette-variations/constan
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import {
+	SidebarNavigationAnimationDirection,
+	SidebarNavigationContext,
+} from '../components/sidebar';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
@@ -64,6 +69,8 @@ export const SidebarNavigationScreenHomepage = () => {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
+	const { navigate } = useContext( SidebarNavigationContext );
+
 	const currentTemplate = useSelect(
 		( sel ) =>
 			// @ts-expect-error No types for this exist yet.
@@ -73,7 +80,7 @@ export const SidebarNavigationScreenHomepage = () => {
 
 	const [ blocks, , onChange ] = useEditorBlocks(
 		'wp_template',
-		currentTemplate.id ?? ''
+		currentTemplate?.id ?? ''
 	);
 
 	// @ts-expect-error No types for this exist yet.
@@ -276,6 +283,17 @@ export const SidebarNavigationScreenHomepage = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
+			onNavigateBackClick={ () => {
+				const assemblerUrl = getNewPath(
+					{ customizing: true },
+					'/customize-store/assembler-hub',
+					{}
+				);
+
+				navigateTo( { url: assemblerUrl } );
+
+				navigate( SidebarNavigationAnimationDirection.Back );
+			} }
 			description={ createInterpolateElement( sidebarMessage, {
 				EditorLink: (
 					<Link

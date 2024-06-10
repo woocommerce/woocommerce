@@ -33,6 +33,11 @@ import { FlowType } from '~/customize-store/types';
 import { footerTemplateId } from '~/customize-store/data/homepageTemplates';
 import { useSelect } from '@wordpress/data';
 import { trackEvent } from '~/customize-store/tracking';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import {
+	SidebarNavigationAnimationDirection,
+	SidebarNavigationContext,
+} from '../components/sidebar';
 
 const SUPPORTED_FOOTER_PATTERNS = [
 	'woocommerce-blocks/footer-with-3-menus',
@@ -48,6 +53,8 @@ export const SidebarNavigationScreenFooter = () => {
 
 	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
 
+	const { navigate } = useContext( SidebarNavigationContext );
+
 	const currentTemplate = useSelect(
 		( select ) =>
 			// @ts-expect-error No types for this exist yet.
@@ -57,7 +64,7 @@ export const SidebarNavigationScreenFooter = () => {
 
 	const [ mainTemplateBlocks ] = useEditorBlocks(
 		'wp_template',
-		currentTemplate.id
+		currentTemplate?.id ?? ''
 	);
 
 	const [ blocks, , onChange ] = useEditorBlocks(
@@ -142,7 +149,17 @@ export const SidebarNavigationScreenFooter = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
-			onNavigateBackClick={ resetHighlightedBlockClientId }
+			onNavigateBackClick={ () => {
+				resetHighlightedBlockClientId();
+				const assemblerUrl = getNewPath(
+					{ customizing: true },
+					'/customize-store/assembler-hub',
+					{}
+				);
+
+				navigateTo( { url: assemblerUrl } );
+				navigate( SidebarNavigationAnimationDirection.Back );
+			} }
 			description={ createInterpolateElement( description, {
 				EditorLink: (
 					<Link
