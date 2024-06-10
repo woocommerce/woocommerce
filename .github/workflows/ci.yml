@@ -292,13 +292,16 @@ jobs:
 
             - name: 'Generate Allure report'
               id: generate_allure_report
-              run: allure generate --clean ./out/${{ matrix.report }}/allure-results --output ./out/${{ matrix.report }}/allure-report
+              run: |
+                ls -lh /out
+                allure generate --clean ./out/allure-results --output ./out/allure-report
+                ls -lh /out
 
             - name: 'Re-upload artifacts with generated report'
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ matrix.report }}
-                  path: ./out/${{ matrix.report }}
+                  path: ./out
                   if-no-files-found: ignore
                   retention-days: 10
                   overwrite: true
