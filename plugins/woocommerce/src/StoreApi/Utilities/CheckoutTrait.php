@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
@@ -85,7 +86,21 @@ trait CheckoutTrait {
 				throw new RouteException( 'woocommerce_rest_checkout_invalid_payment_result', __( 'Invalid payment result received from payment method.', 'woocommerce' ), 500 );
 			}
 		} catch ( \Exception $e ) {
-			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ), 400 );
+			$additional_data = [];
+
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			/**
+			 * Allows to check if WP_DEBUG mode is enabled before returning previous Exception.
+			 *
+			 * @param bool The WP_DEBUG mode.
+			 */
+			if ( apply_filters( 'woocommerce_return_previous_exceptions', Constants::is_true( 'WP_DEBUG' ) ) && $e->getPrevious() ) {
+				$additional_data = [
+					'previous' => get_class( $e->getPrevious() ),
+				];
+			}
+
+			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ), 400, array_map( 'esc_attr', $additional_data ) );
 		}
 	}
 

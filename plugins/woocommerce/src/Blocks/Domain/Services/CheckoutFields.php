@@ -1187,7 +1187,7 @@ class CheckoutFields {
 				 */
 				$value = apply_filters( "woocommerce_get_default_value_for_{$missing_field}", null, $group, $wc_object );
 
-			if ( $value ) {
+			if ( isset( $value ) ) {
 				$meta_data[ $missing_field ] = $value;
 			}
 		}

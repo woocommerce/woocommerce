@@ -169,17 +169,9 @@ const cartAndCheckoutBlocks = {
 // Returns the entries for each block given a relative path (ie: `index.js`,
 // `**/*.scss`...).
 // It also filters out elements with undefined props and experimental blocks.
-const getBlockEntries = ( relativePath, blockEntries = blocks ) => {
-	const experimental =
-		! parseInt( process.env.WOOCOMMERCE_BLOCKS_PHASE, 10 ) < 3;
-
+const getBlockEntries = ( relativePath ) => {
 	return Object.fromEntries(
-		Object.entries( blockEntries )
-			.filter(
-				( [ , config ] ) =>
-					! config.isExperimental ||
-					config.isExperimental === experimental
-			)
+		Object.entries( blocks )
 			.map( ( [ blockCode, config ] ) => {
 				const filePaths = glob.sync(
 					`./assets/js/blocks/${ config.customDir || blockCode }/` +
