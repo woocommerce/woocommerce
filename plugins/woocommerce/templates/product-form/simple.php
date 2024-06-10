@@ -4,7 +4,7 @@
  *
  * Title: Simple
  * Slug: simple
- * Description: This is the template description.
+ * Description: A single physical or virtual product, e.g. a t-shirt or an eBook
  * Product Types: simple, variable
  *
  * @package WooCommerce\Templates
