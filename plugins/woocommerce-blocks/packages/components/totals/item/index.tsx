@@ -40,7 +40,7 @@ const TotalsItemValue = ( {
 			value={ value as number }
 		/>
 	) : (
-		<>&#8208;</>
+		<>-</>
 	);
 };
 
