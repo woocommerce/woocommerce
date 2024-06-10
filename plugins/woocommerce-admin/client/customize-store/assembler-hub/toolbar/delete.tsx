@@ -28,7 +28,9 @@ export default function Delete( {
 					icon={ trash }
 					onClick={ () => {
 						removeBlock( clientId );
-						selectBlock( nextBlockClientId );
+						if ( nextBlockClientId ) {
+							selectBlock( nextBlockClientId );
+						}
 					} }
 				/>
 			</ToolbarButton>
