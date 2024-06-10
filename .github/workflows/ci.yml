@@ -333,14 +333,6 @@ jobs:
           name: ${{ matrix.report }}
           path: ./out
 
-      - name: 'Download blob reports from artifacts'
-        uses: actions/download-artifact@v4
-        with:
-          path: ./out
-          pattern: ${{ matrix.report }}-*
-          run-id: project-test-jobs
-          merge-multiple: true
-
       - name: 'Generate Allure report'
         id: generate_allure_report
         run: |
