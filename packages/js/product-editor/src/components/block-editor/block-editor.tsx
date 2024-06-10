@@ -329,34 +329,8 @@ export function BlockEditor( {
 		);
 	}
 
-	const formTemplateSelectValues = productForms?.map( ( form ) => ( {
-		label: form.title.raw,
-		value: String( form.id ),
-	} ) );
-
 	return (
 		<div className="woocommerce-product-block-editor">
-			{ isProductFormTemplateEnabled() && (
-				<div style={ { margin: '32px', width: '250px' } }>
-					<SelectControl
-						label={ __(
-							'Choose form template type',
-							'woocommerce'
-						) }
-						options={ formTemplateSelectValues }
-						onChange={ ( value: string ) =>
-							setSelectedProductFormId( parseInt( value, 10 ) )
-						}
-						disabled={ ! productForms }
-						className="woocommerce-product-block-editor__product-type-selector"
-						help={ __(
-							'This is a temporary setting.',
-							'woocommerce'
-						) }
-					/>
-				</div>
-			) }
-
 			<BlockContextProvider value={ context }>
 				<BlockEditorProvider
 					value={ blocks }
