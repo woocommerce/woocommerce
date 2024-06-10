@@ -37,11 +37,13 @@ export const Toolbar = () => {
 		nextBlock,
 		previousBlock,
 		allBlocks,
+		nextBlockClientId,
 	}: {
 		currentBlock: BlockInstance | undefined;
 		nextBlock: BlockInstance | undefined;
 		previousBlock: BlockInstance | undefined;
 		allBlocks: BlockInstance[];
+		nextBlockClientId: string;
 	} = useSelect( ( select ) => {
 		const selectedBlockId =
 			// @ts-expect-error missing type
@@ -78,6 +80,7 @@ export const Toolbar = () => {
 			nextBlock: next,
 			previousBlock: previous,
 			allBlocks: blocks,
+			nextBlockClientId,
 		};
 	}, [] );
 
@@ -144,7 +147,10 @@ export const Toolbar = () => {
 							/>
 						</ToolbarGroup>
 						<Shuffle clientId={ selectedBlockClientId } />
-						<Delete clientId={ selectedBlockClientId } />
+						<Delete
+							clientId={ selectedBlockClientId }
+							nextBlockClientId={ nextBlockClientId }
+						/>
 					</>
 				</WPToolbar>
 			</div>
