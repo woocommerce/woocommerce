@@ -47,11 +47,6 @@ import {
 	MAX_LOGO_WIDTH,
 	ALLOWED_MEDIA_TYPES,
 } from './constants';
-import {
-	SidebarNavigationAnimationDirection,
-	SidebarNavigationContext,
-} from '../components/sidebar';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 const useLogoEdit = ( {
 	shouldSyncIcon,
@@ -375,11 +370,14 @@ const LogoEdit = ( {
 	);
 };
 
-export const SidebarNavigationScreenLogo = () => {
+export const SidebarNavigationScreenLogo = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	// Get the current logo block client ID and attributes. These are used for the logo settings.
 	const { logoBlockIds } = useContext( LogoBlockContext );
 	const { attributes, isAttributesLoading } = useLogoAttributes();
-	const { navigate } = useContext( SidebarNavigationContext );
 
 	const { siteLogoId, canUserEdit, mediaItemData, isRequestingMediaItem } =
 		useSelect( ( select ) => {
@@ -446,16 +444,7 @@ export const SidebarNavigationScreenLogo = () => {
 				"Ensure your store is on-brand by adding your logo. For best results, upload a SVG or PNG that's a minimum of 300px wide.",
 				'woocommerce'
 			) }
-			onNavigateBackClick={ () => {
-				const assemblerUrl = getNewPath(
-					{ customizing: true },
-					'/customize-store/assembler-hub',
-					{}
-				);
-
-				navigateTo( { url: assemblerUrl } );
-				navigate( SidebarNavigationAnimationDirection.Back );
-			} }
+			onNavigateBackClick={ onNavigateBackClick }
 			content={
 				<div className="woocommerce-customize-store__sidebar-logo-content">
 					<div className="woocommerce-customize-store__sidebar-group-header woocommerce-customize-store__logo-header-container">

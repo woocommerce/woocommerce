@@ -52,15 +52,14 @@ import { COLOR_PALETTES } from './global-styles/color-palette-variations/constan
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
-import {
-	SidebarNavigationAnimationDirection,
-	SidebarNavigationContext,
-} from '../components/sidebar';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
-export const SidebarNavigationScreenHomepage = () => {
+export const SidebarNavigationScreenHomepage = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'top',
@@ -68,8 +67,6 @@ export const SidebarNavigationScreenHomepage = () => {
 	const { isLoading, homeTemplates } = useHomeTemplates();
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
-
-	const { navigate } = useContext( SidebarNavigationContext );
 
 	const currentTemplate = useSelect(
 		( sel ) =>
@@ -283,17 +280,7 @@ export const SidebarNavigationScreenHomepage = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
-			onNavigateBackClick={ () => {
-				const assemblerUrl = getNewPath(
-					{ customizing: true },
-					'/customize-store/assembler-hub',
-					{}
-				);
-
-				navigateTo( { url: assemblerUrl } );
-
-				navigate( SidebarNavigationAnimationDirection.Back );
-			} }
+			onNavigateBackClick={ onNavigateBackClick }
 			description={ createInterpolateElement( sidebarMessage, {
 				EditorLink: (
 					<Link

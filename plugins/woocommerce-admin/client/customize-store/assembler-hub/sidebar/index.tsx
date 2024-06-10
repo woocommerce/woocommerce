@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import { memo } from '@wordpress/element';
+import { memo, useCallback, useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -17,40 +17,71 @@ import { SidebarNavigationScreenMain } from './sidebar-navigation-screen-main';
 import { SidebarNavigationScreenTypography } from './sidebar-navigation-screen-typography';
 // import { SidebarNavigationScreenPages } from './sidebar-navigation-screen-pages';
 
-import { useQuery } from '@woocommerce/navigation';
+import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import { SaveHub } from './save-hub';
 // In some cases, the assembler is loaded in an iframe, so we have to re-apply the filter.
 import '~/customize-store/design-with-ai/entrepreneur-flow';
-import { SidebarContent } from '../components/sidebar';
+import {
+	SidebarContent,
+	SidebarNavigationAnimationDirection,
+	SidebarNavigationContext,
+} from '../components/sidebar';
 import { SidebarNavigationScreenLogo } from './sidebar-navigation-screen-logo';
 
-const getComponentByPathParams = ( params: string ) => {
+const getComponentByPathParams = (
+	params: string,
+	onNavigateBackClick: () => void
+) => {
 	if ( params === '/customize-store/assembler-hub' ) {
 		return <SidebarNavigationScreenMain />;
 	}
 
 	if ( params === '/customize-store/assembler-hub/color-palette' ) {
-		return <SidebarNavigationScreenColorPalette />;
+		return (
+			<SidebarNavigationScreenColorPalette
+				onNavigateBackClick={ onNavigateBackClick }
+			/>
+		);
 	}
 
 	if ( params === '/customize-store/assembler-hub/logo' ) {
-		return <SidebarNavigationScreenLogo />;
+		return (
+			<SidebarNavigationScreenLogo
+				onNavigateBackClick={ onNavigateBackClick }
+			/>
+		);
 	}
 
 	if ( params === '/customize-store/assembler-hub/typography' ) {
-		return <SidebarNavigationScreenTypography />;
+		return (
+			<SidebarNavigationScreenTypography
+				onNavigateBackClick={ onNavigateBackClick }
+			/>
+		);
 	}
 
 	if ( params === '/customize-store/assembler-hub/header' ) {
-		return <SidebarNavigationScreenHeader />;
+		return (
+			<SidebarNavigationScreenHeader
+				onNavigateBackClick={ onNavigateBackClick }
+			/>
+		);
 	}
 
 	if ( params === '/customize-store/assembler-hub/homepage' ) {
-		return <SidebarNavigationScreenHomepage />;
+		return (
+			<SidebarNavigationScreenHomepage
+				onNavigateBackClick={ onNavigateBackClick }
+			/>
+		);
 	}
 
 	if ( params === '/customize-store/assembler-hub/footer' ) {
-		return <SidebarNavigationScreenFooter />;
+		return (
+			<SidebarNavigationScreenFooter
+				onNavigateBackClick={ onNavigateBackClick }
+			/>
+		);
 	}
 
 	return <SidebarNavigationScreenMain />;
@@ -59,19 +90,27 @@ const getComponentByPathParams = ( params: string ) => {
 function SidebarScreens() {
 	const params = useQuery().path;
 
-	return (
-		<>
-			<SidebarContent>
-				{ getComponentByPathParams( params ) }
-			</SidebarContent>
-		</>
-	);
+	const { navigate } = useContext( SidebarNavigationContext );
+
+	const onNavigateBackClick = useCallback( () => {
+		const assemblerUrl = getNewPath(
+			{ customizing: true },
+			'/customize-store/assembler-hub',
+			{}
+		);
+		navigateTo( { url: assemblerUrl } );
+		navigate( SidebarNavigationAnimationDirection.Back );
+	}, [ navigate ] );
+
+	return <>{ getComponentByPathParams( params, onNavigateBackClick ) }</>;
 }
 
 function Sidebar() {
 	return (
 		<>
-			<SidebarScreens />
+			<SidebarContent>
+				<SidebarScreens />
+			</SidebarContent>
 			<SaveHub />
 		</>
 	);
