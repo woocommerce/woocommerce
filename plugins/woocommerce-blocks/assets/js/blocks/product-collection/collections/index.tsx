@@ -7,7 +7,6 @@ import {
 	// @ts-expect-error Type definition is missing
 	store as blocksStore,
 	type BlockVariation,
-	BlockAttributes,
 } from '@wordpress/blocks';
 
 /**
@@ -32,19 +31,9 @@ const collections: BlockVariation[] = [
 ];
 
 export const registerCollections = () => {
-	collections.forEach( ( collection ) => {
-		const isActive = (
-			blockAttrs: BlockAttributes,
-			variationAttributes: BlockAttributes
-		) => {
-			return blockAttrs.collection === variationAttributes.collection;
-		};
-
-		registerProductCollection( {
-			isActive,
-			...collection,
-		} );
-	} );
+	collections.forEach( ( collection ) =>
+		registerProductCollection( collection )
+	);
 };
 
 export const getCollectionByName = ( collectionName?: CollectionName ) => {
