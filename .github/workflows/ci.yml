@@ -8,12 +8,12 @@ on:
     release:
       types: [ published, edited ]
     workflow_call:
-        inputs:
-            trigger:
-                description: 'Type of run to trigger. E.g. daily-e2e, release-checks, etc.'
-                required: true
-                default: 'default'
-                type: string
+      inputs:
+        trigger:
+          description: 'Type of run to trigger. E.g. daily-e2e, release-checks, etc.'
+          required: true
+          default: 'default'
+          type: string
     workflow_dispatch:
       inputs:
         pr_simulate:
@@ -65,9 +65,9 @@ jobs:
         runs-on: 'ubuntu-20.04'
         needs: 'dispatch-handler'
         # Because forks of this repository may want to skip running this CI automatically, but still
-        # be able to run it via workflow_dispatch, if the SKIP_CI variable is truthy, and we're not
-        # running from a workflow_dispatch, we'll skip generating the project matrix and any jobs.
-        # Because dispatch-handler may be skipped, we need the always() here.
+      # be able to run it via workflow_dispatch, if the SKIP_CI variable is truthy, and we're not
+      # running from a workflow_dispatch, we'll skip generating the project matrix and any jobs.
+      # Because dispatch-handler may be skipped, we need the always() here.
         if: ${{ always() && ( github.event_name == 'workflow_dispatch' || ! vars.SKIP_CI ) }}
         outputs:
             lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
@@ -80,43 +80,43 @@ jobs:
                   fetch-depth: 0
                   # If the workflow wasn't triggered by dispatch, this will be empty and use defaults.
                   ref: ${{ needs.dispatch-handler.outputs.head }}
-                  
+            
             - uses: './.github/actions/setup-woocommerce-monorepo'
               name: 'Setup Monorepo'
               with:
                   php-version: false # We don't want to waste time installing PHP since we aren't using it in this job.
-                  
+
             - uses: actions/github-script@v7
               name: 'Build Matrix'
               id: 'project-jobs'
               with:
-                  script: |
-                      let prSim = process.env.PR_SIM;
-                      let baseRef = prSim || ${{ toJson( github.base_ref ) }};
-                      if ( baseRef ) {
-                        baseRef = `--base-ref origin/${ baseRef }`;
-                      }
+                script: |
+                  let prSim = process.env.PR_SIM;
+                  let baseRef = prSim || ${{ toJson( github.base_ref ) }};
+                  if ( baseRef ) {
+                    baseRef = `--base-ref origin/${ baseRef }`;
+                  }
 
-                      let githubEvent = ${{ toJson( github.event_name ) }};
-                    
-                      const refType = ${{ toJson( github.ref_type ) }};
-                      const refName = ${{ toJson( github.ref_name ) }};
-                    
-                      if ( refType === 'tag' && refName !== 'nightly' ) {
-                        githubEvent = 'release-checks';
-                      }
-                    
-                      if ( refType === 'tag' && refName === 'nightly' ) {
+                  let githubEvent = ${{ toJson( github.event_name ) }};
+                  
+                  const refType = ${{ toJson( github.ref_type ) }};
+                  const refName = ${{ toJson( github.ref_name ) }};
+                  
+                  if ( refType === 'tag' && refName !== 'nightly' ) {
+                    githubEvent = 'release-checks';
+                  }
+                  
+                  if ( refType === 'tag' && refName === 'nightly' ) {
                         githubEvent = 'nightly-checks';
-                      }
+                  }
                     
-                      let trigger = ${{ toJson( inputs.trigger ) }};
-                      if ( trigger ) {
-                        githubEvent = trigger;
-                      }
+                  let trigger = ${{ toJson( inputs.trigger ) }};
+                  if ( trigger ) {
+                    githubEvent = trigger;
+                  }
 
-                      const child_process = require( 'node:child_process' );
-                      child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
+                  const child_process = require( 'node:child_process' );
+                  child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
 
     project-lint-jobs:
         name: "Lint - ${{ matrix.projectName }} ${{ matrix.optional && ' (optional)' || ''}}"
@@ -167,7 +167,7 @@ jobs:
               with:
                 # If the workflow wasn't triggered by dispatch, this will be empty and use defaults.
                 ref: ${{ needs.dispatch-handler.outputs.head }}
-              
+
             - uses: './.github/actions/setup-woocommerce-monorepo'
               name: 'Install Monorepo'
               id: 'install-monorepo'
