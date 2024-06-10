@@ -7,7 +7,7 @@ import { useEditorContext } from '@woocommerce/base-context';
 import {
 	createBlock,
 	getBlockType,
-	// @ts-expect-error Type definitions for this function are missing in Guteberg
+	// @ts-expect-error Type definitions for this function are missing in Gutenberg
 	createBlocksFromInnerBlocksTemplate,
 	TemplateArray,
 } from '@wordpress/blocks';
