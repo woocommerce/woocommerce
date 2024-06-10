@@ -310,6 +310,7 @@ jobs:
                       -f e2e_artifact=$REPORT_NAME \
                       -f pr_number=$PR_NUMBER \
                       -f commit_sha=$GITHUB_SHA \
+                      -f test_type="e2e" \
                       -f s3_root=public \
                       --repo woocommerce/woocommerce-test-reports
                   elif [ "$GITHUB_EVENT_NAME" == push ]; then
