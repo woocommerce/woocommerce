@@ -309,9 +309,6 @@ const getFrontConfig = ( options = {} ) => {
 	let { fileSuffix } = options;
 	const { alias, resolvePlugins = [] } = options;
 	fileSuffix = fileSuffix ? `-${ fileSuffix }` : '';
-
-	fileSuffix = isProduction ? `${ fileSuffix }.min` : fileSuffix;
-
 	const resolve = alias
 		? {
 				alias,
@@ -984,7 +981,6 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 	let { fileSuffix } = options;
 	const { alias, resolvePlugins = [] } = options;
 	fileSuffix = fileSuffix ? `-${ fileSuffix }` : '';
-	fileSuffix = isProduction ? `${ fileSuffix }.min` : fileSuffix;
 
 	const resolve = alias
 		? {
