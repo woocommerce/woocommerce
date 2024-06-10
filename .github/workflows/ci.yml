@@ -300,7 +300,8 @@ jobs:
                   name: ${{ matrix.report }}
                   path: ./out
                   if-no-files-found: ignore
-                  retention-days: 5
+                  retention-days: 10
+                  overwrite: true
 
             - name: 'Publish report to dashboard'
               env:
