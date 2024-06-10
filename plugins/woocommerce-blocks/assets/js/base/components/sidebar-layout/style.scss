@@ -14,6 +14,12 @@
 		padding-right: math.percentage(math.div($gap-largest, 1060px)); // ~1060px is the default width of the content area in Storefront.
 		width: 65%;
 	}
+
+	.wc-block-components-totals-shipping-panel {
+		.wc-block-components-panel__button {
+			@include font-size(small);
+		}
+	}
 }
 
 .wc-block-components-sidebar {
