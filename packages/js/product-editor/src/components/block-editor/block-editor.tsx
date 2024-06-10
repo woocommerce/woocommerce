@@ -218,13 +218,13 @@ export function BlockEditor( {
 	);
 
 	// Pull the product templates from the store.
-	const productForms = useSelect( ( sel ) => {
+	const productForms = useSelect< ProductFormTemplateProps[] >( ( sel ) => {
 		return (
 			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
 				per_page: -1,
 			} ) || []
 		);
-	}, [] ) as ProductFormTemplateProps[];
+	}, [] );
 
 	// Set the default product form template ID.
 	useEffect( () => {
@@ -284,7 +284,7 @@ export function BlockEditor( {
 			 * If the product form template is not available, use the block instances.
 			 * ToDo: Remove this fallback once the product form template is stable/available.
 			 */
-			const editorTemplate = productFormTemplate ?? blockInstances;
+			const editorTemplate = blockInstances ?? productFormTemplate;
 
 			onChange( editorTemplate, {} );
 
