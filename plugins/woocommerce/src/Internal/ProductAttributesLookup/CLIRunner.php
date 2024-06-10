@@ -421,6 +421,9 @@ class CLIRunner {
 		$time = $progress->formatTime( $progress->elapsed() );
 		$progress->finish();
 		$this->log( "%GSuccess:%n Table %W{$table_name}%n regenerated in {$time}." );
+
+		$info = $this->get_lookup_table_info();
+		$this->log( "The table contains now %C{$info['total_rows']}%n rows corresponding to %G{$info['products_count']}%n products." );
 	}
 
 	// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
