@@ -33,6 +33,11 @@ import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
 import { headerTemplateId } from '~/customize-store/data/homepageTemplates';
 import { trackEvent } from '~/customize-store/tracking';
+import {
+	SidebarNavigationAnimationDirection,
+	SidebarNavigationContext,
+} from '../components/sidebar';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-centered-menu',
@@ -40,7 +45,6 @@ const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-minimal',
 	'woocommerce-blocks/header-large',
 ];
-
 export const SidebarNavigationScreenHeader = () => {
 	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
@@ -58,7 +62,7 @@ export const SidebarNavigationScreenHeader = () => {
 
 	const [ mainTemplateBlocks ] = useEditorBlocks(
 		'wp_template',
-		currentTemplate.id
+		currentTemplate?.id ?? ''
 	);
 
 	const [ blocks, , onChange ] = useEditorBlocks(
@@ -121,6 +125,8 @@ export const SidebarNavigationScreenHeader = () => {
 	const { context } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 
+	const { navigate } = useContext( SidebarNavigationContext );
+
 	const title = aiOnline
 		? __( 'Change your header', 'woocommerce' )
 		: __( 'Choose your header', 'woocommerce' );
@@ -128,7 +134,17 @@ export const SidebarNavigationScreenHeader = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
-			onNavigateBackClick={ resetHighlightedBlockClientId }
+			onNavigateBackClick={ () => {
+				resetHighlightedBlockClientId();
+				const assemblerUrl = getNewPath(
+					{ customizing: true },
+					'/customize-store/assembler-hub',
+					{}
+				);
+
+				navigateTo( { url: assemblerUrl } );
+				navigate( SidebarNavigationAnimationDirection.Back );
+			} }
 			description={ createInterpolateElement(
 				__(
 					"Select a new header from the options below. Your header includes your site's navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",

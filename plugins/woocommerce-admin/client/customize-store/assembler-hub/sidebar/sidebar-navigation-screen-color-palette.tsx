@@ -21,6 +21,11 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { ColorPalette, ColorPanel } from './global-styles';
 import { FlowType } from '~/customize-store/types';
 import { trackEvent } from '~/customize-store/tracking';
+import {
+	SidebarNavigationAnimationDirection,
+	SidebarNavigationContext,
+} from '../components/sidebar';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
@@ -60,6 +65,8 @@ export const SidebarNavigationScreenColorPalette = () => {
 		context: { flowType },
 	} = useContext( CustomizeStoreContext );
 
+	const { navigate } = useContext( SidebarNavigationContext );
+
 	const aiOnline = flowType === FlowType.AIOnline;
 
 	const title = aiOnline
@@ -78,6 +85,16 @@ export const SidebarNavigationScreenColorPalette = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
+			onNavigateBackClick={ () => {
+				const assemblerUrl = getNewPath(
+					{ customizing: true },
+					'/customize-store/assembler-hub',
+					{}
+				);
+
+				navigateTo( { url: assemblerUrl } );
+				navigate( SidebarNavigationAnimationDirection.Back );
+			} }
 			description={ createInterpolateElement( description, {
 				EditorLink: (
 					<Link
