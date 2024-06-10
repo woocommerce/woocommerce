@@ -115,7 +115,9 @@ Add any other context about the problem here.
 						</Button>
 					</div>
 					<details className="woocommerce-error-boundary__details">
-						<summary>Click for error details</summary>
+						<summary>
+							{ __( 'Click for error details', 'woocommerce' ) }
+						</summary>
 						<div className="woocommerce-error-boundary__details-content">
 							<strong className="woocommerce-error-boundary__error">
 								{ this.state.error &&
