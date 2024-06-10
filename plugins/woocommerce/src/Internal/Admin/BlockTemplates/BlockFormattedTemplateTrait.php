@@ -31,12 +31,6 @@ trait BlockFormattedTemplateTrait {
 
 		return $arr;
 	}
-	/**
-	 * TODO
-	 */
-	public function get_comment_delimited_template() {
-		return get_comment_delimited_block_content( $this->get_name(), $this->get_attributes(), '' );
-	}
 
 	/**
 	 * Get the block hide conditions formatted for inclusion in a formatted template.

@@ -711,7 +711,7 @@ class BlockTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( 'test-value', $block->get_comment_delimited_template() ); // TODO it's a wrong assumption.
+		$this->assertSame( 'test-value', $template->get_comment_delimited_template() ); // TODO it's a wrong assumption.
 
 	}
 }

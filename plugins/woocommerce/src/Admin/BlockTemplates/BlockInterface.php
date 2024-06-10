@@ -153,8 +153,4 @@ interface BlockInterface {
 	 */
 	public function get_formatted_template(): array;
 
-	/**
-	 * TODO
-	 */
-	public function get_comment_delimited_template();
 }

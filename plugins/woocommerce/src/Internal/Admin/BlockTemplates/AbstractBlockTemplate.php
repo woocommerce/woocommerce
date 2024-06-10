@@ -30,6 +30,14 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 		return '';
 	}
 
+	public function get_name(): string {
+		return '';
+	}
+
+	public function get_attributes(): array {
+		return [];
+	}
+
 	/**
 	 * Get the template area.
 	 */
@@ -144,6 +152,7 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 			'description'    => $this->get_description(),
 			'area'           => $this->get_area(),
 			'blockTemplates' => $this->get_formatted_template(),
+			'comment'        => $this->get_comment_delimited_template(),
 		);
 	}
 }

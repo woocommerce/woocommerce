@@ -216,7 +216,22 @@ trait BlockContainerTrait {
 			);
 		}
 
-		return get_comment_delimited_block_content( $this->get_name(), $this->get_attributes(), "\n<div>\n" . implode( "\n", $arr ) . "\n</div>\n" );
+		$name            = $this->get_name();
+		$attributes      = $this->get_attributes();
+		$attributes_html = implode(
+			' ',
+			array_map(
+				function( $key, $value ) {
+					return "data-$key=\"" . esc_attr( $value ) . '"';
+				},
+				array_keys( $attributes ),
+				$attributes
+			)
+		);
+
+		$children = $name && $attributes ? '<div data-block-name="' . esc_attr( $name ) . '"' . $attributes_html . ">\n" . implode( "\n", $arr ) . "\n</div>\n" : implode( "\n", $arr );
+
+		return $name !== '' && count( $attributes ) > 0 ? get_comment_delimited_block_content( $name, $attributes, $children ) : $children;
 
 	}
 
