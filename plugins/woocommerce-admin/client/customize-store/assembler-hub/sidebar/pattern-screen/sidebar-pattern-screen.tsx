@@ -72,7 +72,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 
 			insertBlocks( clonedParsedPattern, insertableIndex );
 
-			selectBlock( clonedParsedPattern[ 0 ].clientId, null );
+			selectBlock( clonedParsedPattern[ 0 ].clientId, -1 );
 		},
 		[ insertBlocks, insertableIndex, selectBlock ]
 	);
