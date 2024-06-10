@@ -39,7 +39,11 @@ const Settings = ( { params } ) => {
 
 	// Be sure to render Settings slots when the params change.
 	useEffect( () => {
-		possiblyRenderSettingsSlots( toggleSidebar, setSidebarContent );
+		possiblyRenderSettingsSlots(
+			toggleSidebar,
+			setSidebarContent,
+			sidebarVisisble
+		);
 	}, [ params.page, section, sidebarVisisble ] );
 
 	// Register the slot fills for the settings page just once.
@@ -54,8 +58,6 @@ const Settings = ( { params } ) => {
 		return <div>Error getting data</div>;
 	}
 	const title = settingsData[ params.page ]?.label;
-
-	console.log( sidebarContent );
 
 	return (
 		<>
