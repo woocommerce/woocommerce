@@ -51,7 +51,7 @@ import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { LoadingState } from './loading-state';
-import type { ProductFormTemplateProps, ProductTemplate } from '../../types';
+import type { ProductFormPostProps, ProductTemplate } from '../../types';
 
 const PluginArea = lazy( () =>
 	import( '@wordpress/plugins' ).then( ( module ) => ( {
@@ -218,7 +218,7 @@ export function BlockEditor( {
 	);
 
 	// Pull the product templates from the store.
-	const productForms = useSelect< ProductFormTemplateProps[] >( ( sel ) => {
+	const productForms = useSelect< ProductFormPostProps[] >( ( sel ) => {
 		return (
 			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
 				per_page: -1,
@@ -262,11 +262,7 @@ export function BlockEditor( {
 
 			return undefined;
 		},
-		[
-			isProductEditorTemplateSystemEnabled,
-			productForms,
-			selectedProductFormId,
-		]
+		[ productForms, selectedProductFormId ]
 	);
 
 	useLayoutEffect(
