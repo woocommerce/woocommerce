@@ -292,7 +292,9 @@ jobs:
 
             - name: 'Generate Allure report'
               id: generate_allure_report
-              run: allure generate --clean ./out/allure-results --output ./out/allure-report
+              run: |
+                allure generate --clean ./out/allure-results --output ./out/allure-report
+                ls -lh ./out
 
             - name: 'Re-upload artifacts with generated report'
               uses: actions/upload-artifact@v4
