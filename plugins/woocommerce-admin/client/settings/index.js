@@ -4,7 +4,7 @@
 import { getQuery, getNewPath } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
 import { Icon, chevronLeft } from '@wordpress/icons';
-import { useEffect } from '@wordpress/element';
+import { useEffect, createContext, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -16,13 +16,22 @@ import { possiblyRenderSettingsSlots } from './settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from '../payments/payments-settings-banner-slotfill';
 import { registerSiteVisibilitySlotFill } from '../launch-your-store';
+import { registerExampleSettingsView } from './settings-view-example';
 import { useFullScreen } from '~/utils';
+import { SidebarContext } from './components/side-bar';
 import './style.scss';
 
 const Settings = ( { params } ) => {
 	useFullScreen( [ 'woocommerce-settings' ] );
 	const settingsData = window.wcSettings?.admin?.settingsPages;
+	const sections = settingsData[ params.page ]?.sections;
 	const { section } = getQuery();
+	const contentData =
+		Array.isArray( sections ) && sections.length === 0
+			? {}
+			: sections[ section || '' ];
+
+	const [ hasSideBar, setHasSideBar ] = useState( false );
 
 	// Be sure to render Settings slots when the params change.
 	useEffect( () => {
@@ -34,18 +43,13 @@ const Settings = ( { params } ) => {
 		registerTaxSettingsConflictErrorFill();
 		registerPaymentsSettingsBannerFill();
 		registerSiteVisibilitySlotFill();
+		registerExampleSettingsView();
 	}, [] );
 
 	if ( ! settingsData ) {
 		return <div>Error getting data</div>;
 	}
-
-	const sections = settingsData[ params.page ]?.sections;
 	const title = settingsData[ params.page ]?.label;
-	const contentData =
-		Array.isArray( sections ) && sections.length === 0
-			? {}
-			: sections[ section || '' ];
 
 	return (
 		<>
@@ -66,7 +70,9 @@ const Settings = ( { params } ) => {
 						section={ section }
 					>
 						<div className="woocommerce-settings-layout-main">
-							<Content data={ contentData } />
+							<SidebarContext.Provider value={ setHasSideBar }>
+								<Content data={ contentData } />
+							</SidebarContext.Provider>
 						</div>
 					</SectionNav>
 				</div>
