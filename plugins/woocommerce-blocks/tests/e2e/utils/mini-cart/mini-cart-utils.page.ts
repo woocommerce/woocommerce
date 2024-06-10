@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { FrontendUtils, expect } from '@woocommerce/e2e-utils';
+import { FrontendUtils } from '@woocommerce/e2e-utils';
 import { Page } from '@playwright/test';
 
 export class MiniCartUtils {
