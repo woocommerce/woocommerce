@@ -288,7 +288,7 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   path: ./out
-                  pattern: ${{ matrix.report }}
+                  name: ${{ matrix.report }}
 
             - name: 'Generate Allure report'
               id: generate_allure_report
