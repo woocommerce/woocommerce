@@ -70,7 +70,7 @@ function SidebarScreens() {
 
 	return (
 		<>
-			<SidebarContent routeKey={ 'default' }>
+			<SidebarContent>
 				{ getComponentByPathParams( params ) }
 			</SidebarContent>
 		</>

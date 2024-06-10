@@ -1,14 +1,7 @@
 /**
  * External dependencies
  */
-import { focus } from '@wordpress/dom';
-import {
-	createContext,
-	useCallback,
-	useEffect,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { createContext, useCallback, useState } from '@wordpress/element';
 import clsx from 'clsx';
 
 /**
@@ -30,12 +23,7 @@ export const SidebarNavigationContext =
 		navigate: () => void 0,
 	} );
 
-export function SidebarContent( {
-	children,
-}: {
-	routeKey: string;
-	children: JSX.Element;
-} ) {
+export function SidebarContent( { children }: { children: JSX.Element } ) {
 	const [ navState, setNavState ] = useState< {
 		direction: SidebarNavigationAnimationDirection | null;
 	} >( {
@@ -48,18 +36,6 @@ export function SidebarContent( {
 		},
 		[]
 	);
-
-	const wrapperRef = useRef< HTMLElement >();
-	useEffect( () => {
-		let elementToFocus;
-		if ( navState.direction !== null && ! elementToFocus ) {
-			const [ firstTabbable ] = wrapperRef.current
-				? focus.tabbable.find( wrapperRef?.current )
-				: [];
-			elementToFocus = firstTabbable ?? wrapperRef.current;
-		}
-		( elementToFocus as HTMLElement | undefined )?.focus();
-	}, [ navState ] );
 
 	const wrapperCls = clsx( 'edit-site-sidebar__screen-wrapper', {
 		'slide-from-left': navState.direction === 'back',
