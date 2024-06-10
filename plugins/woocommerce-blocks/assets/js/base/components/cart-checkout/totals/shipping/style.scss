@@ -50,11 +50,6 @@
 		}
 	}
 
-	// Display shipping calculator panel in next line when there is no pickup or shipping option available.
-	.wc-block-components-totals-item__value:has(> .wc-block-components-totals-shipping-panel) {
-		flex-grow: 1;
-		width: 100%;
-	}
 
 }
 
