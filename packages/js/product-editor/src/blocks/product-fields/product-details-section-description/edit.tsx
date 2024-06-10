@@ -96,7 +96,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		useState< ProductTemplate >();
 
 	// Pull the product templates from the store.
-	const productFormPosts = useSelect< ProductFormPostProps[] >( ( sel ) => {
+	const productFormPosts = useSelect( ( sel ) => {
 		// Do not fetch product form posts if the feature is not enabled.
 		if ( ! isProductFormTemplateEnabled() ) {
 			return [];
@@ -107,7 +107,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 				per_page: -1,
 			} ) || []
 		);
-	}, [] );
+	}, [] ) as ProductFormPostProps[];
 
 	const { isSaving } = useSelect(
 		( select ) => {

@@ -218,13 +218,13 @@ export function BlockEditor( {
 	);
 
 	// Pull the product templates from the store.
-	const productForms = useSelect< ProductFormPostProps[] >( ( sel ) => {
+	const productForms = useSelect( ( sel ) => {
 		return (
 			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
 				per_page: -1,
 			} ) || []
 		);
-	}, [] );
+	}, [] ) as ProductFormPostProps[];
 
 	// Set the default product form template ID.
 	useEffect( () => {
