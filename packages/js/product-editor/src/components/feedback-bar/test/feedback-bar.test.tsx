@@ -26,7 +26,7 @@ describe( 'FeedbackBar', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 	} );
-	it( 'should render empty name rows when names are empty', () => {
+	it( 'should trigger product_editor_feedback_bar_turnoff_editor_click event when clicking turn off editor', () => {
 		( useFeedbackBar as jest.Mock ).mockImplementation( () => ( {
 			hideFeedbackBar: () => {},
 			shouldShowFeedbackBar: true,
