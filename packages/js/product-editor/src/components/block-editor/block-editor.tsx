@@ -52,6 +52,7 @@ import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { LoadingState } from './loading-state';
 import type { ProductFormPostProps, ProductTemplate } from '../../types';
+import isProductFormTemplateSystemEnabled from '../../utils/is-product-form-template-system-enabled';
 
 const PluginArea = lazy( () =>
 	import( '@wordpress/plugins' ).then( ( module ) => ( {
@@ -80,9 +81,6 @@ function getLayoutTemplateId(
 	// Fallback to simple product if no layout template is set.
 	return 'simple-product';
 }
-
-export const isProductFormTemplateEnabled = () =>
-	!! window.wcAdminFeatures?.[ 'product-editor-template-system' ];
 
 export function BlockEditor( {
 	context,
@@ -245,7 +243,10 @@ export function BlockEditor( {
 
 	const productFormTemplate = useMemo(
 		function pickAndParseTheProductFormTemplate() {
-			if ( ! isProductFormTemplateEnabled || ! selectedProductFormId ) {
+			if (
+				! isProductFormTemplateSystemEnabled() ||
+				! selectedProductFormId
+			) {
 				return undefined;
 			}
 

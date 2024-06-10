@@ -44,7 +44,7 @@ import type {
 } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
 import * as wooIcons from '../../../icons';
-import { isProductFormTemplateEnabled } from '../../../components/block-editor';
+import isProductFormTemplateSystemEnabled from '../../../utils/is-product-form-template-system-enabled';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
@@ -98,7 +98,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	// Pull the product templates from the store.
 	const productFormPosts = useSelect( ( sel ) => {
 		// Do not fetch product form posts if the feature is not enabled.
-		if ( ! isProductFormTemplateEnabled() ) {
+		if ( ! isProductFormTemplateSystemEnabled() ) {
 			return [];
 		}
 
@@ -366,7 +366,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 								) }
 							</MenuGroup>
 
-							{ isProductFormTemplateEnabled() && (
+							{ isProductFormTemplateSystemEnabled() && (
 								<MenuGroup>
 									{ productFormPosts.map( ( formPost ) => (
 										<MenuItem
