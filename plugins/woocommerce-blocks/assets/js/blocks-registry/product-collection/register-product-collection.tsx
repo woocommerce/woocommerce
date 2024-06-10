@@ -15,6 +15,7 @@ import {
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_TEMPLATE,
 	PRODUCT_COLLECTION_BLOCK_NAME as BLOCK_NAME,
+	DEFAULT_QUERY,
 } from '@woocommerce/blocks/product-collection/constants';
 
 export interface ProductCollectionConfig extends BlockVariation {
@@ -77,13 +78,25 @@ export const __experimentalRegisterProductCollection = ( {
 		...blockVariationArgs,
 		attributes: {
 			...DEFAULT_ATTRIBUTES,
-			...blockVariationArgs.attributes,
 			query: {
-				...DEFAULT_ATTRIBUTES.query,
+				...DEFAULT_QUERY,
 				...blockVariationArgs.attributes?.query,
+				/**
+				 * Ensure that the postType and isProductCollectionBlock are set to the default values.
+				 */
+				postType: DEFAULT_QUERY.postType,
+				isProductCollectionBlock:
+					DEFAULT_QUERY.isProductCollectionBlock,
 			},
+			displayLayout: {
+				...DEFAULT_ATTRIBUTES.displayLayout,
+				...blockVariationArgs.attributes?.displayLayout,
+			},
+			hideControls: blockVariationArgs.attributes?.hideControls,
+			queryContextIncludes:
+				blockVariationArgs.attributes?.queryContextIncludes,
 			collection: blockVariationArgs.name,
-			inherit: blockVariationArgs.attributes?.inherit || false,
+			inherit: false,
 		},
 		innerBlocks: blockVariationArgs.innerBlocks || INNER_BLOCKS_TEMPLATE,
 		isActive,

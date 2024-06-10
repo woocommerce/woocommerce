@@ -8,10 +8,7 @@ import { Icon, percent } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import {
-	DEFAULT_ATTRIBUTES,
-	INNER_BLOCKS_PRODUCT_TEMPLATE,
-} from '../constants';
+import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
 import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
@@ -27,20 +24,16 @@ const collection = {
 };
 
 const attributes = {
-	...DEFAULT_ATTRIBUTES,
 	displayLayout: {
 		type: 'flex',
 		columns: 5,
 		shrinkColumns: true,
 	},
 	query: {
-		...DEFAULT_ATTRIBUTES.query,
-		inherit: false,
 		woocommerceOnSale: true,
 		perPage: 5,
 		pages: 1,
 	},
-	collection: collection.name,
 	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.ON_SALE ],
 };
 

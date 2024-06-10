@@ -8,10 +8,7 @@ import { Icon, calendar } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import {
-	DEFAULT_ATTRIBUTES,
-	INNER_BLOCKS_PRODUCT_TEMPLATE,
-} from '../constants';
+import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
 import {
 	CoreCollectionNames,
 	CoreFilterNames,
@@ -28,15 +25,12 @@ const collection = {
 };
 
 const attributes = {
-	...DEFAULT_ATTRIBUTES,
 	displayLayout: {
 		type: 'flex',
 		columns: 5,
 		shrinkColumns: true,
 	},
 	query: {
-		...DEFAULT_ATTRIBUTES.query,
-		inherit: false,
 		orderBy: 'date',
 		order: 'desc',
 		perPage: 5,
@@ -46,7 +40,6 @@ const attributes = {
 			value: '-7 days',
 		},
 	},
-	collection: collection.name,
 	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
 };
 

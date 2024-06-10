@@ -8,10 +8,7 @@ import { Icon, chartBar } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import {
-	DEFAULT_ATTRIBUTES,
-	INNER_BLOCKS_PRODUCT_TEMPLATE,
-} from '../constants';
+import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
 import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
@@ -24,21 +21,17 @@ const collection = {
 };
 
 const attributes = {
-	...DEFAULT_ATTRIBUTES,
 	displayLayout: {
 		type: 'flex',
 		columns: 5,
 		shrinkColumns: true,
 	},
 	query: {
-		...DEFAULT_ATTRIBUTES.query,
-		inherit: false,
 		orderBy: 'popularity',
 		order: 'desc',
 		perPage: 5,
 		pages: 1,
 	},
-	collection: collection.name,
 	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
 };
 
