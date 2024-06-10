@@ -969,7 +969,7 @@ if ( 0 < $mu_plugins_count ) :
 		</tr>
 	</tbody>
 </table>
-<table class="wc_status_table widefat" cellspacing="0">
+<table class="wc_status_table widefat" id="status-table-templates" cellspacing="0">
 	<thead>
 		<tr>
 			<th colspan="3" data-export-label="Templates"><h2><?php esc_html_e( 'Templates', 'woocommerce' ); ?><?php echo wc_help_tip( esc_html__( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce' ) ); ?></h2></th>
