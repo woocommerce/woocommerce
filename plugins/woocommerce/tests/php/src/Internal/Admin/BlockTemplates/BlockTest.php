@@ -674,4 +674,44 @@ class BlockTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'test-value', $block->get_attributes()['test-attr'] );
 	}
+
+	public function test_get_comment_delimited_formatted_template() {
+		$template = new BlockTemplate();
+
+		$block = $template->add_block(
+			array(
+				'id'         => 'test-block-id',
+				'blockName'  => 'test-block-name',
+				'attributes' => array(
+					'attr-1' => 'value-1',
+					'attr-2' => 'value-2',
+				),
+			)
+		);
+
+		$block->add_hide_condition( 'foo === bar' );
+
+		$block->add_disable_condition( 'test > 100' );
+
+		$block->add_block(
+			array(
+				'id'         => 'test-block-id-2',
+				'blockName'  => 'test-block-name-2',
+				'attributes' => array(
+					'attr-3' => 'value-3',
+					'attr-4' => 'value-4',
+				),
+			)
+		);
+
+		$block->add_block(
+			array(
+				'id'        => 'test-block-id-3',
+				'blockName' => 'test-block-name-3',
+			)
+		);
+
+		$this->assertSame( 'test-value', $block->get_comment_delimited_template() ); // TODO it's a wrong assumption.
+
+	}
 }

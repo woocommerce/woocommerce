@@ -201,6 +201,26 @@ trait BlockContainerTrait {
 	}
 
 	/**
+	 * TODO
+	 */
+	public function get_comment_delimited_template() {
+
+		$arr          = [];
+		$inner_blocks = $this->get_inner_blocks_sorted_by_order();
+		if ( ! empty( $inner_blocks ) ) {
+			$arr = array_map(
+				function( BlockInterface $block ) {
+					return $block->get_comment_delimited_template();
+				},
+				$inner_blocks
+			);
+		}
+
+		return get_comment_delimited_block_content( $this->get_name(), $this->get_attributes(), "\n<div>\n" . implode( "\n", $arr ) . "\n</div>\n" );
+
+	}
+
+	/**
 	 * Do the `woocommerce_block_template_after_add_block` action.
 	 * Handle exceptions thrown by the action.
 	 *

@@ -152,4 +152,9 @@ interface BlockInterface {
 	 * @return array The block configuration as a formatted template.
 	 */
 	public function get_formatted_template(): array;
+
+	/**
+	 * TODO
+	 */
+	public function get_comment_delimited_template();
 }
