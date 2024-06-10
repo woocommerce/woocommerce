@@ -115,33 +115,6 @@
 	margin: auto auto 32px auto;
 }
 
-.woocommerce-profiler-select-control__country-error {
-	background: #fce2e4;
-	padding: $gap-small;
-	font-size: 13px;
-	font-style: normal;
-	font-weight: 400;
-	line-height: 24px;
-	color: $gray-900;
-	margin: 12px 0 16px 0;
-
-	.components-notice__content {
-		margin: 0;
-	}
-
-	.components-button {
-		padding: 0;
-		height: initial;
-		min-width: 24px;
-		min-height: 24px;
-
-		svg {
-			width: 16px;
-			fill: $gray-900;
-		}
-	}
-}
-
 
 // Intro opt-in page
 .woocommerce-profiler-intro-opt-in {
@@ -539,6 +512,33 @@
 		.woocommerce-profiler-select-control__country {
 			max-width: 404px;
 			margin: 0;
+		}
+
+		.woocommerce-profiler-select-control__country-error {
+			background: #fce2e4;
+			padding: $gap-small;
+			font-size: 13px;
+			font-style: normal;
+			font-weight: 400;
+			line-height: 24px;
+			color: $gray-900;
+			margin: 12px 0 16px 0;
+
+			.components-notice__content {
+				margin: 0;
+			}
+
+			.components-button {
+				padding: 0;
+				height: initial;
+				min-width: 24px;
+				min-height: 24px;
+
+				svg {
+					width: 16px;
+					fill: $gray-900;
+				}
+			}
 		}
 
 		.woocommerce-profiler-select-control__country-spacer {
