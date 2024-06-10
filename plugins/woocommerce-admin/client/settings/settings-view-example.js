@@ -11,6 +11,14 @@ import { SETTINGS_SLOT_FILL_CONSTANT } from './settings-slots';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
+const SidebarContent = () => {
+	return (
+		<div>
+			<h2>This is content created by the Fill</h2>
+		</div>
+	);
+};
+
 const ExampleSettingsViewSlotFill = () => {
 	const style = { margin: '36px 0px' };
 	return (
@@ -24,9 +32,7 @@ const ExampleSettingsViewSlotFill = () => {
 							variant="secondary"
 							onClick={ () => {
 								toggleSidebar();
-								setSidebarContent(
-									<h2>This is content created by the Fill</h2>
-								);
+								setSidebarContent( SidebarContent );
 							} }
 						>
 							Show Sidebar
