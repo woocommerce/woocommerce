@@ -39,11 +39,12 @@ import {
 } from '../../../utils/get-product-error-message';
 import type {
 	ProductEditorBlockEditProps,
-	ProductFormTemplateProps,
+	ProductFormPostProps,
 	ProductTemplate,
 } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
 import * as wooIcons from '../../../icons';
+import { isProductFormTemplateEnabled } from '../../../components/block-editor';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
@@ -95,7 +96,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		useState< ProductTemplate >();
 
 	// Pull the product templates from the store.
-	const productForms = useSelect< ProductFormTemplateProps[] >( ( sel ) => {
+	const productFormPosts = useSelect< ProductFormPostProps[] >( ( sel ) => {
+		// Do not fetch product form posts if the feature is not enabled.
+		if ( ! isProductFormTemplateEnabled() ) {
+			return [];
+		}
+
 		return (
 			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
 				per_page: -1,
@@ -359,6 +365,22 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 									getMenuItem( onClose )
 								) }
 							</MenuGroup>
+
+							{ isProductFormTemplateEnabled() && (
+								<MenuGroup>
+									{ productFormPosts.map( ( formPost ) => (
+										<MenuItem
+											key={ formPost.id }
+											icon={ resolveIcon( 'external' ) }
+											info={ formPost.excerpt.raw }
+											iconPosition="left"
+											onClick={ onClose } // close the dropdown for now
+										>
+											{ formPost.title.rendered }
+										</MenuItem>
+									) ) }
+								</MenuGroup>
+							) }
 
 							{ unsupportedProductTemplates.length > 0 && (
 								<MenuGroup>
