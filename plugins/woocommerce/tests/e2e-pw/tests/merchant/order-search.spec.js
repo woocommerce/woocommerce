@@ -139,7 +139,7 @@ test.describe( 'WooCommerce Orders > Search orders', () => {
 	} );
 
 	test( 'can search for order by order id', async ( { page } ) => {
-		await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
+		await page.goto( '/wp-admin/admin.php?page=wc-orders' );
 		await page
 			.locator( '[type=search][name=s]' )
 			.fill( orderId.toString() );
@@ -154,7 +154,7 @@ test.describe( 'WooCommerce Orders > Search orders', () => {
 		test( `can search for order containing "${ queries[ i ][ 0 ] }" as the ${ queries[ i ][ 1 ] }`, async ( {
 			page,
 		} ) => {
-			await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
+			await page.goto( '/wp-admin/admin.php?page=wc-orders' );
 			await page
 				.locator( '[type=search][name=s]' )
 				.fill( queries[ i ][ 0 ] );

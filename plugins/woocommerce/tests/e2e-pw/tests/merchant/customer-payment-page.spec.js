@@ -59,7 +59,9 @@ test.describe( 'WooCommerce Merchant Flow: Orders > Customer Payment Page', () =
 	test( 'should show the customer payment page link on a pending order', async ( {
 		page,
 	} ) => {
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 
 		// verify that the order is pending payment
 		await expect(
@@ -73,7 +75,9 @@ test.describe( 'WooCommerce Merchant Flow: Orders > Customer Payment Page', () =
 	} );
 
 	test( 'should load the customer payment page', async ( { page } ) => {
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 
 		// visit the page
 		await page.locator( 'label[for=order_status] > a' ).click();
@@ -94,7 +98,9 @@ test.describe( 'WooCommerce Merchant Flow: Orders > Customer Payment Page', () =
 		page,
 	} ) => {
 		// key required, so can't go directly to the customer payment page
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 		await page.locator( 'label[for=order_status] > a' ).click();
 
 		// pay for the order
