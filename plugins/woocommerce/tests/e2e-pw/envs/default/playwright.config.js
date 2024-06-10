@@ -9,6 +9,7 @@ config = {
 		{
 			name: 'default',
 			use: { ...devices[ 'Desktop Chrome' ] },
+			testMatch: '**/tests/e2e-pw/tests/admin-**/**.spec.js',
 		},
 	],
 };
