@@ -46,7 +46,7 @@ describe( 'ErrorBoundary', () => {
 		);
 
 		expect(
-			screen.getByText( 'Oops, Something went wrong' )
+			screen.getByText( 'Oops, something went wrong' )
 		).toBeInTheDocument();
 	} );
 
@@ -93,9 +93,7 @@ describe( 'ErrorBoundary', () => {
 		fireEvent.click( screen.getByText( 'Get Support' ) );
 
 		expect( openSpy ).toHaveBeenCalledWith(
-			expect.stringContaining(
-				'https://github.com/woocommerce/woocommerce/issues/new?body='
-			),
+			'https://wordpress.org/support/plugin/woocommerce/',
 			'_blank'
 		);
 
