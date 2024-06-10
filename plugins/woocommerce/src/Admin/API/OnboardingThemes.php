@@ -255,7 +255,8 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		$core_themes = array(
 			array(
 				'name'           => 'Twenty Twenty-Four',
-				'price'          => 'Free',
+				'price'          => __( 'Free', 'woocommerce' ),
+				'is_free'        => true,
 				'color_palettes' => array(
 					array(
 						'title'     => 'Black and white',
@@ -285,7 +286,9 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			),
 			array(
 				'name'           => 'Highline',
-				'price'          => '$79/year',
+				/* translators: %d: price */
+				'price'          => sprintf( __( '$%d/year', 'woocommerce' ), 79 ),
+				'is_free'        => false,
 				'color_palettes' => array(
 					array(
 						'title'     => 'Primary',
@@ -315,7 +318,9 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			),
 			array(
 				'name'           => 'Luminate',
-				'price'          => '$79/year',
+				/* translators: %d: price */
+				'price'          => sprintf( __( '$%d/year', 'woocommerce' ), 79 ),
+				'is_free'        => false,
 				'color_palettes' => array(
 					array(
 						'title'     => 'Primary',
@@ -345,7 +350,9 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			),
 			array(
 				'name'           => 'Nokul',
-				'price'          => '$79/year',
+				/* translators: %d: price */
+				'price'          => sprintf( __( '$%d/year', 'woocommerce' ), 79 ),
+				'is_free'        => false,
 				'color_palettes' => array(
 					array(
 						'title'     => 'Foreground and background',
@@ -380,7 +387,8 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		$default_themes = array(
 			array(
 				'name'           => 'Tsubaki',
-				'price'          => 'Free',
+				'price'          => __( 'Free', 'woocommerce' ),
+				'is_free'        => true,
 				'color_palettes' => array(),
 				'total_palettes' => 0,
 				'slug'           => 'tsubaki',
@@ -389,7 +397,8 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			),
 			array(
 				'name'           => 'Tazza',
-				'price'          => 'Free',
+				'price'          => __( 'Free', 'woocommerce' ),
+				'is_free'        => true,
 				'color_palettes' => array(),
 				'total_palettes' => 0,
 				'slug'           => 'tazza',
@@ -398,7 +407,8 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			),
 			array(
 				'name'           => 'Amulet',
-				'price'          => 'Free',
+				'price'          => __( 'Free', 'woocommerce' ),
+				'is_free'        => true,
 				'color_palettes' => array(
 					array(
 						'title'     => 'Default',
@@ -428,7 +438,8 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			),
 			array(
 				'name'           => 'Zaino',
-				'price'          => 'Free',
+				'price'          => __( 'Free', 'woocommerce' ),
+				'is_free'        => true,
 				'color_palettes' => array(
 					array(
 						'title'     => 'Default',
@@ -577,6 +588,10 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 							'price'          => array(
 								'type'        => 'string',
 								'description' => 'Price',
+							),
+							'is_free'        => array(
+								'type'        => 'boolean',
+								'description' => 'Whether theme is free',
 							),
 							'is_active'      => array(
 								'type'        => 'boolean',
