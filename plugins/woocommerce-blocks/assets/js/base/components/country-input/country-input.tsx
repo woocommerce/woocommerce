@@ -9,9 +9,9 @@ import clsx from 'clsx';
 /**
  * Internal dependencies
  */
-import Combobox from '../combobox';
 import './style.scss';
 import type { CountryInputWithCountriesProps } from './CountryInputProps';
+import { Select } from '../select';
 
 export const CountryInput = ( {
 	className,
@@ -40,14 +40,12 @@ export const CountryInput = ( {
 		<div
 			className={ clsx( className, 'wc-block-components-country-input' ) }
 		>
-			<Combobox
+			<Select
 				id={ id }
-				label={ label }
+				label={ label || '' }
 				onChange={ onChange }
 				options={ options }
 				value={ value }
-				errorId={ errorId }
-				errorMessage={ errorMessage }
 				required={ required }
 				autoComplete={ autoComplete }
 			/>

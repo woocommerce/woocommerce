@@ -32,7 +32,7 @@
 		appearance: none;
 		border: none;
 		background: none;
-		padding: em($gap + $gap-smallest) em($gap-smaller) 0;
+		padding: em($gap) em($gap-smaller) 0;
 
 		&:focus {
 			outline: 0;

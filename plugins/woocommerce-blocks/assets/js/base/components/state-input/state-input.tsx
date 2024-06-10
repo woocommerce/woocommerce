@@ -4,15 +4,14 @@
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useCallback, useMemo, useEffect, useRef } from '@wordpress/element';
-import clsx from 'clsx';
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies
  */
-import Combobox from '../combobox';
 import './style.scss';
 import type { StateInputWithStatesProps } from './StateInputProps';
+import { Select } from '../select';
 
 const optionMatcher = (
 	value: string,
@@ -91,20 +90,17 @@ const StateInput = ( {
 
 	if ( options.length > 0 ) {
 		return (
-			<Combobox
-				className={ clsx(
-					className,
-					'wc-block-components-state-input'
-				) }
-				id={ id }
-				label={ label }
-				onChange={ onChangeState }
+			<Select
 				options={ options }
+				label={ label || '' }
+				className={ `wc-block-components-state-input ${
+					className || ''
+				}` }
+				id={ id }
+				onChange={ onChangeState }
 				value={ value }
-				errorMessage={ __( 'Please select a state.', 'woocommerce' ) }
-				errorId={ errorId }
-				required={ required }
 				autoComplete={ autoComplete }
+				required={ required }
 			/>
 		);
 	}

@@ -33,9 +33,9 @@ import { AddressFormProps, AddressFormFields } from './types';
 import prepareFormFields from './prepare-form-fields';
 import validateShippingCountry from './validate-shipping-country';
 import customValidationHandler from './custom-validation-handler';
-import Combobox from '../../combobox';
 import AddressLineFields from './address-line-fields';
 import { createFieldProps, getFieldData } from './utils';
+import { Select } from '../../select';
 
 /**
  * Checkout form.
@@ -228,9 +228,10 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 					}
 
 					return (
-						<Combobox
+						<Select
 							key={ field.key }
 							{ ...fieldProps }
+							label={ fieldProps.label || '' }
 							className={ clsx(
 								'wc-block-components-select-input',
 								`wc-block-components-select-input-${ field.key }`.replaceAll(

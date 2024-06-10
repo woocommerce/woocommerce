@@ -9,7 +9,10 @@ import { useCallback } from '@wordpress/element';
  */
 import './style.scss';
 
-type SelectProps = React.SelectHTMLAttributes< HTMLSelectElement > & {
+type SelectProps = Omit<
+	React.SelectHTMLAttributes< HTMLSelectElement >,
+	'onChange'
+> & {
 	options: { value: string; label: string }[];
 	label: string;
 	onChange: ( newVal: string ) => void;
@@ -21,7 +24,6 @@ export const Select = ( props: SelectProps ) => {
 
 	const selectOnChange = useCallback(
 		( event: React.ChangeEvent< HTMLSelectElement > ) => {
-			console.log( 'change happen', event.target.value );
 			onChange( event.target.value );
 		},
 		[ onChange ]
