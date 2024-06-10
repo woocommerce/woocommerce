@@ -7,11 +7,13 @@ import { useState } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { TotalsItem } from '@woocommerce/blocks-components';
 import type { Currency } from '@woocommerce/types';
+import { getSetting } from '@woocommerce/settings';
 import { ShippingVia } from '@woocommerce/base-components/cart-checkout/totals/shipping/shipping-via';
 import {
 	isAddressComplete,
 	isPackageRateCollectable,
 } from '@woocommerce/base-utils';
+import { useEditorContext } from '@woocommerce/base-context';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 
@@ -40,6 +42,11 @@ export interface TotalShippingProps {
 	className?: string;
 	isCheckout?: boolean;
 }
+
+export type ActiveShippingZones = {
+	description: string;
+}[];
+
 export const TotalsShipping = ( {
 	currency,
 	values,
@@ -56,6 +63,7 @@ export const TotalsShipping = ( {
 		shippingRates,
 		isLoadingRates,
 	} = useStoreCart();
+	const { isEditor } = useEditorContext();
 	const totalShippingValue = getTotalShippingValue( values );
 	const hasRates = hasShippingRate( shippingRates ) || totalShippingValue > 0;
 	const showShippingCalculatorForm =
@@ -102,6 +110,25 @@ export const TotalsShipping = ( {
 	const [ shippingCalculatorAddress, setShippingCalculatorAddress ] =
 		useState( '' );
 
+	const activeShippingZones: ActiveShippingZones = getSetting(
+		'activeShippingZones'
+	);
+
+	const hasMultipleAndDefaultZone =
+		activeShippingZones.length > 1 &&
+		activeShippingZones.some(
+			( zone: { description: string } ) =>
+				zone.description === 'Everywhere' ||
+				zone.description === 'Locations outside all other zones'
+		);
+
+	// If there is no default customer location set in the store,
+	// and the customer hasn't provided their address,
+	// and only one default shipping method is available for all locations,
+	// then the shipping calculator will be hidden to avoid confusion.
+	if ( ! addressComplete && ! isEditor && ! hasMultipleAndDefaultZone ) {
+		showCalculator = false;
+	}
 	return (
 		<div
 			className={ clsx(
