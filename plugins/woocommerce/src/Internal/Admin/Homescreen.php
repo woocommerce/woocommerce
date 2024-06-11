@@ -63,7 +63,7 @@ class Homescreen {
 
 	/**
 	 * Set free shipping in the same country as the store default
-	 * Flag rate in all other countries when any of the following conditions are ture
+	 * Flag rate in all other countries when any of the following conditions are true
 	 *
 	 * - The store sells physical products, has JP and WCS installed and connected, and is located in the US.
 	 * - The store sells physical products, and is not located in US/Canada/Australia/UK (irrelevant if JP is installed or not).
