@@ -60,7 +60,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 * Get batch sizes.
 	 *
 	 * @internal
-	 * @retun array
+	 * @return array
 	 */
 	public static function get_batch_sizes() {
 		return array_merge(
