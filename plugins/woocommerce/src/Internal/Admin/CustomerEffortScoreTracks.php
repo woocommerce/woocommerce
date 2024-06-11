@@ -85,13 +85,13 @@ class CustomerEffortScoreTracks {
 	 * Constructor. Sets up filters to hook into WooCommerce.
 	 */
 	public function __construct() {
-		$this->enable_survey_enqueing_if_tracking_is_enabled();
+		$this->enable_survey_enqueuing_if_tracking_is_enabled();
 	}
 
 	/**
 	 * Add actions that require woocommerce_allow_tracking.
 	 */
-	private function enable_survey_enqueing_if_tracking_is_enabled() {
+	private function enable_survey_enqueuing_if_tracking_is_enabled() {
 		// Only hook up the action handlers if in wp-admin.
 		if ( ! is_admin() ) {
 			return;
