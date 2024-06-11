@@ -11,4 +11,4 @@ wp-env run tests-cli -- rm blocks_e2e.sql 2> /dev/null
 # Run the main script in the container for better performance.
 wp-env run tests-cli -- bash wp-content/plugins/woocommerce/blocks-bin/playwright/scripts/index.sh
 # Disable the LYS Coming Soon banner.
-wp-env run tests-cli wp option update woocommerce_coming_soon 'no'
+wp-env run tests-cli -- wp option update woocommerce_coming_soon 'no'

@@ -41,29 +41,9 @@ $control-size: $gap-large;
 			display: block;
 		}
 
-		.components-base-control__field {
-			margin: 0;
-		}
-
-		.components-checkbox-control__label {
-			display: none;
-		}
-
-		.components-checkbox-control__input-container {
-			display: block;
-			width: $control-size;
-			height: $control-size;
-		}
-
 		svg.components-checkbox-control__checked,
 		svg.components-checkbox-control__indeterminate,
 		.components-checkbox-control__input[type='checkbox'] {
-			position: absolute;
-			border-color: $gray-700;
-			width: $control-size;
-			height: $control-size;
-			top: 0;
-			left: 0;
 			&:focus {
 				outline: none;
 				box-shadow: none;

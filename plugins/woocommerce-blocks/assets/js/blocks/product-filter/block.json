@@ -1,14 +1,15 @@
 {
 	"name": "woocommerce/product-filter",
 	"version": "1.0.0",
-	"title": "Product Filter",
+	"title": "Product Filter (Experimental)",
 	"description": "A block that adds product filters to the product collection.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce", "Filters" ],
 	"textdomain": "woocommerce",
 	"supports": {
 		"html": false,
-		"reusable": false
+		"reusable": false,
+		"inserter": false
 	},
 	"usesContext": [ "query", "queryId" ],
 	"attributes": {

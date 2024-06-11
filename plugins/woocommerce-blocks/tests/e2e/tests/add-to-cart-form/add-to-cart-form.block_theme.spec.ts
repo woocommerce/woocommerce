@@ -1,9 +1,12 @@
 /**
  * External dependencies
  */
-import { BlockData } from '@woocommerce/e2e-types';
-import { expect, test } from '@woocommerce/e2e-playwright-utils';
-import { EditorUtils } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	Editor,
+	BlockData,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -19,45 +22,62 @@ const blockData: BlockData = {
 	},
 };
 
-const configureSingleProductBlock = async ( editorUtils: EditorUtils ) => {
-	const singleProductBlock = await editorUtils.getBlockByName(
-		'woocommerce/single-product'
-	);
+class BlockUtils {
+	editor: Editor;
 
-	await singleProductBlock.locator( 'input[type="radio"]' ).nth( 0 ).click();
+	constructor( { editor }: { editor: Editor } ) {
+		this.editor = editor;
+	}
 
-	await singleProductBlock.getByText( 'Done' ).click();
-};
+	async configureSingleProductBlock() {
+		const singleProductBlock = await this.editor.getBlockByName(
+			'woocommerce/single-product'
+		);
+
+		await singleProductBlock
+			.locator( 'input[type="radio"]' )
+			.nth( 0 )
+			.click();
+
+		await singleProductBlock.getByText( 'Done' ).click();
+	}
+}
+
+const test = base.extend< { blockUtils: BlockUtils } >( {
+	blockUtils: async ( { editor }, use ) => {
+		await use( new BlockUtils( { editor } ) );
+	},
+} );
 
 test.describe( `${ blockData.name } Block`, () => {
 	test( 'can be added in the Post Editor only as inner block of the Single Product Block', async ( {
 		admin,
 		editor,
-		editorUtils,
+		blockUtils,
 	} ) => {
 		// Add to Cart with Options in the Post Editor is only available as inner block of the Single Product Block.
 		await admin.createNewPost();
 		await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
-		await configureSingleProductBlock( editorUtils );
+		await blockUtils.configureSingleProductBlock();
 
 		await expect(
-			await editorUtils.getBlockByName( blockData.slug )
+			await editor.getBlockByName( blockData.slug )
 		).toBeVisible();
 
 		// When the block is registered as ancestor, the function doesn't throw an error, but the block is not added.
 		// So we check that only one instance of the block is present.
 		await editor.insertBlock( { name: blockData.slug } );
 		await expect(
-			await editorUtils.getBlockByName( blockData.slug )
+			await editor.getBlockByName( blockData.slug )
 		).toBeVisible();
 	} );
 
 	test( 'can be added in the Site Editor only as inner block of the Single Product Block - Product Catalog Template', async ( {
 		admin,
 		editor,
-		editorUtils,
 		requestUtils,
+		blockUtils,
 	} ) => {
 		// Add to Cart with Options in the Site Editor is only available as
 		// inner block of the Single Product Block except for the Single Product
@@ -78,24 +98,23 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
-		await configureSingleProductBlock( editorUtils );
+		await blockUtils.configureSingleProductBlock();
 
 		await expect(
-			await editorUtils.getBlockByName( blockData.slug )
+			await editor.getBlockByName( blockData.slug )
 		).toBeVisible();
 
 		// When the block is registered as ancestor, the function doesn't throw an error, but the block is not added.
 		// So we check that only one instance of the block is present.
 		await editor.insertBlock( { name: blockData.slug } );
 		await expect(
-			await editorUtils.getBlockByName( blockData.slug )
+			await editor.getBlockByName( blockData.slug )
 		).toBeVisible();
 	} );
 
 	test( 'can be added in the Post Editor - Single Product Template', async ( {
 		admin,
 		editor,
-		editorUtils,
 		requestUtils,
 	} ) => {
 		const template = await requestUtils.createTemplate( 'wp_template', {
@@ -115,7 +134,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await editor.insertBlock( { name: blockData.slug } );
 
 		await expect(
-			await editorUtils.getBlockByName( blockData.slug )
+			await editor.getBlockByName( blockData.slug )
 		).toBeVisible();
 	} );
 } );

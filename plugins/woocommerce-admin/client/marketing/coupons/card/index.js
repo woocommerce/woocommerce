@@ -3,7 +3,7 @@
  */
 import { Card as WPCard, CardBody, CardHeader } from '@wordpress/components';
 import PropTypes from 'prop-types';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Text } from '@woocommerce/experimental';
 
 /**
@@ -16,10 +16,7 @@ const Card = ( props ) => {
 
 	return (
 		<WPCard
-			className={ classnames(
-				className,
-				'woocommerce-admin-marketing-card'
-			) }
+			className={ clsx( className, 'woocommerce-admin-marketing-card' ) }
 		>
 			<CardHeader>
 				<div>

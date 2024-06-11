@@ -1,5 +1,29 @@
 == Changelog ==
 
+= 8.9.3 2024-06-10 =
+
+**WooCommerce**
+
+* Security - Prevent HTML & JS injection attacks on registration and checkout forms when the Order Attribution is enabled. [#48348](https://github.com/woocommerce/woocommerce/pull/48348)
+
+
+= 8.9.2 2024-06-04 =
+
+**WooCommerce**
+
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
+
+
+= 8.9.1 2024-05-21 =
+
+**WooCommerce**
+
+* Fix - Automated installation of the Legacy REST API plugin should only happen once. After that, it must be installed manually (if needed). [#47563](https://github.com/woocommerce/woocommerce/pull/47563)
+* Fix - Fixes a crash in the modal block editor when the Add button is clicked with Gutenberg 18.3.0 and later [#47561](https://github.com/woocommerce/woocommerce/pull/47561)
+* Fix - Fix warning when loading guest sessions from previous sessions. [#47514](https://github.com/woocommerce/woocommerce/pull/47514)
+* Fix - Prevent calling woocommerce.com on empty update-check and update-check-public payload. [#47507](https://github.com/woocommerce/woocommerce/pull/47507)
+
+
 = 8.9.0 2024-05-14 =
 
 **WooCommerce**
@@ -245,6 +269,20 @@
 * Enhancement - Various UX improvements in HPOS CLI cleanup tool. [#45322](https://github.com/woocommerce/woocommerce/pull/45322)
 
 
+= 8.8.5 2024-06-10 =
+
+**WooCommerce**
+
+* Security - Prevent HTML & JS injection attacks on registration and checkout forms when the Order Attribution is enabled. [#48348](https://github.com/woocommerce/woocommerce/pull/48348)
+
+
+= 8.8.4 2024-06-04 =
+
+**WooCommerce**
+
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
+
+
 = 8.8.3 2024-04-29 =
 
 * Update - Reverts auto-injecting specific Woo Blocks in every block theme and restores only auto-injecting in themes found in the allow list. [#46935](https://github.com/woocommerce/woocommerce/pull/46935)
@@ -453,6 +491,14 @@
 * Enhancement - Remove 'List price' and 'Sale price' fields from the General tab [#45495](https://github.com/woocommerce/woocommerce/pull/45495)
 * Enhancement - Validate coupons with email restrictions upfront and change user's feedback when a coupon is not valid for the user. [#43872](https://github.com/woocommerce/woocommerce/pull/43872)
 
+
+= 8.7.1 2024-06-04 =
+
+**WooCommerce**
+
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
+
+
 = 8.7.0 2024-03-01 =
 
 **WooCommerce**
@@ -647,6 +693,13 @@
 * Enhancement - Product Collection: enable "Sync with query" option by default only for the first Product Catalog instance, disable for 2nd and next ones [#44577](https://github.com/woocommerce/woocommerce/pull/44577)
 
 
+= 8.6.2 2024-06-04 =
+
+**WooCommerce**
+
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
+
+
 = 8.6.1 2024-02-20 =
 
 **WooCommerce**
@@ -826,6 +879,13 @@
 * Enhancement - Update WooPayments task copy [#43365](https://github.com/woocommerce/woocommerce/pull/43365)
 
 
+= 8.5.3 2024-06-04 =
+
+**WooCommerce**
+
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
+
+
 = 8.5.2 2024-01-25 =
 
 **WooCommerce**
@@ -988,6 +1048,13 @@
 * Enhancement - Update the pattern imageSizing to single. [#42767](https://github.com/woocommerce/woocommerce/pull/42767)
 
 
+= 8.4.1 2024-06-04 =
+
+**WooCommerce**
+
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
+
+
 = 8.4.0 2023-12-12 =
 
 **WooCommerce**
@@ -1134,6 +1201,13 @@
 * Enhancement - Added a new parameter $status_transition to the woocommerce_order_status_$status_transition["to"] hook. [#41051](https://github.com/woocommerce/woocommerce/pull/41051)
 * Enhancement - Adds filter `woocommerce_order_received_verify_known_shoppers` to allow known shoppers to access the order received page without being logged in. [#41347](https://github.com/woocommerce/woocommerce/pull/41347)
 * Enhancement - Check if $data['billing_email'] is set in the create_order function. [#41098](https://github.com/woocommerce/woocommerce/pull/41098)
+
+
+= 8.3.2 2024-06-04 =
+
+**WooCommerce**
+
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
 
 
 = 8.3.1 2023-11-21 =
@@ -1324,6 +1398,13 @@
 * Enhancement - Hide "Preview" icon to other users when order is locked for edits. [#40730](https://github.com/woocommerce/woocommerce/pull/40730)
 
 
+= 8.2.3 2024-06-04 =
+
+**WooCommerce**
+
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
+
+
 = 8.2.2 2023-11-08 =
 
 **WooCommerce**
@@ -1467,6 +1548,13 @@
 * Enhancement - Update Venezuelan currency: Bolívar (Bs.). [#29380](https://github.com/woocommerce/woocommerce/pull/29380)
 
 
+= 8.1.2 2024-06-04 =
+
+**WooCommerce**
+
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
+
+
 = 8.1.1 2023-09-18 =
 
 **WooCommerce**
@@ -1562,6 +1650,13 @@
 * Enhancement - Create the Organization tab [#39232](https://github.com/woocommerce/woocommerce/pull/39232)
 * Enhancement - Modify order index to also include date for faster order list query. [#39682](https://github.com/woocommerce/woocommerce/pull/39682)
 * Enhancement - Update the admin's menu remaining tasks bubble CSS class and handling [#39273](https://github.com/woocommerce/woocommerce/pull/39273)
+
+
+= 8.0.4 2024-06-04 =
+
+**WooCommerce**
+
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
 
 
 = 8.0.3 2023-08-29 =
@@ -1665,6 +1760,13 @@
 * Enhancement - Add filter `woocommerce_redirect_order_location` for consistency with posts and HPOS. [[#39193]](https://github.com/woocommerce/woocommerce/pull/39193)
 * Enhancement - New product block editor modal text enhancements [[#39055]](https://github.com/woocommerce/woocommerce/pull/39055)
 * Enhancement - Refresh UX to enable HPOS to make it user friendly. [[#38993]](https://github.com/woocommerce/woocommerce/pull/38993)
+
+
+= 7.9.1 2024-06-04 =
+
+**WooCommerce**
+
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
 
 
 = 7.9.0 2023-07-17 =
@@ -1799,6 +1901,13 @@
 * Enhancement - Fixed visibility and tax values convert to lowercase as issue facing in importing. [[#33820]](https://github.com/woocommerce/woocommerce/pull/33820)
 * Enhancement - Loader design changes for the core profiler [[#38750]](https://github.com/woocommerce/woocommerce/pull/38750)
 * Enhancement - Update product editor tour/guide copy and style. [[#38726]](https://github.com/woocommerce/woocommerce/pull/38726)
+
+
+= 7.8.3 2024-06-04 =
+
+**WooCommerce**
+
+* Fix - Prevent tracking files from being enqueued on the front end. [#47938](https://github.com/woocommerce/woocommerce/pull/47938)
 
 
 = 7.8.2 2023-07-04 =
