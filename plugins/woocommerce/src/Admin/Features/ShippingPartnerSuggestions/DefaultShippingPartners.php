@@ -294,6 +294,15 @@ class DefaultShippingPartners {
 							),
 						),
 					),
+					(object) array(
+						'type' => 'not',
+						'operand' => array(
+							(object) array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'woocommerce-tax' ),
+							),
+						),
+					),
 				),
 				'available_layouts' => array( 'column' ),
 			),

@@ -49,7 +49,10 @@ const ShippingRecommendations: React.FC = () => {
 		};
 	} );
 
-	if ( activePlugins.includes( 'woocommerce-shipping' ) ) {
+	if (
+		activePlugins.includes( 'woocommerce-shipping' ) ||
+		activePlugins.includes( 'woocommerce-tax' )
+	) {
 		return <ShippingTour showShippingRecommendationsStep={ false } />;
 	}
 

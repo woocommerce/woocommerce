@@ -423,6 +423,15 @@ class DefaultFreeExtensions {
 						),
 					),
 					array(
+						'type'    => 'not',
+						'operand' => array(
+							array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'woocommerce-tax' ),
+							),
+						),
+					),
+					array(
 						'type'     => 'or',
 						'operands' => array(
 							array(
@@ -543,6 +552,15 @@ class DefaultFreeExtensions {
 							array(
 								'type'    => 'plugins_activated',
 								'plugins' => array( 'woocommerce-services' ),
+							),
+						),
+					),
+					array(
+						'type'    => 'not',
+						'operand' => array(
+							array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'woocommerce-shipping' ),
 							),
 						),
 					),
@@ -920,7 +938,7 @@ class DefaultFreeExtensions {
 
 		/*
 		 * Copy shipping for the core-profiler and remove is_visible conditions, except for the country restriction
-		 * and the requirement for WooCommerce Shipping to not be active.
+		 * and the requirement for WooCommerce Shipping and WooCommerce Tax to not be active.
 		 */
 		$_plugins['woocommerce-services:shipping']['is_visible'] = array(
 			array(
@@ -934,6 +952,15 @@ class DefaultFreeExtensions {
 					array(
 						'type'    => 'plugins_activated',
 						'plugins' => array( 'woocommerce-shipping' ),
+					),
+				),
+			),
+			array(
+				'type'    => 'not',
+				'operand' => array(
+					array(
+						'type'    => 'plugins_activated',
+						'plugins' => array( 'woocommerce-tax' ),
 					),
 				),
 			),

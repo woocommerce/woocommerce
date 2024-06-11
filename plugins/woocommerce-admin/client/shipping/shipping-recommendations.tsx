@@ -105,7 +105,8 @@ const ShippingRecommendations: React.FC = () => {
 
 	if (
 		activePlugins.includes( 'woocommerce-services' ) ||
-		activePlugins.includes( 'woocommerce-shipping' )
+		activePlugins.includes( 'woocommerce-shipping' ) ||
+		activePlugins.includes( 'woocommerce-tax' )
 	) {
 		return null;
 	}

@@ -191,7 +191,8 @@ function getShippingItems( { activePlugins, countryCode } ) {
 	const showWCS =
 		countryCode === 'US' &&
 		! activePlugins.includes( 'woocommerce-services' ) &&
-		! activePlugins.includes( 'woocommerce-shipping' );
+		! activePlugins.includes( 'woocommerce-shipping' ) &&
+		! activePlugins.includes( 'woocommerce-tax' );
 
 	return [
 		{
@@ -241,12 +242,14 @@ function getTaxItems( props ) {
 		woocommerceTaxCountries = [],
 		taxJarActivated,
 		woocommerceTaxActivated,
+		woocommerceShippingActivated,
 	} = additionalData;
 
 	const showWCS =
 		! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
+		woocommerceTaxCountries.includes( countryCode ) &&
 		! woocommerceTaxActivated &&
-		woocommerceTaxCountries.includes( countryCode );
+		! woocommerceShippingActivated;
 
 	return [
 		{
