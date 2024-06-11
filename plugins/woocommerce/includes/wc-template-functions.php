@@ -2853,6 +2853,11 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		}
 
 		if ( $args['required'] ) {
+			// hidden inputs are the only kind of inputs that don't need an `aria-required` attribute.
+			if( $args['type'] !== 'hidden') {
+				$args['custom_attributes']['aria-required'] = 'true';
+			}
+
 			$args['class'][] = 'validate-required';
 			$required        = '&nbsp;<abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '">*</abbr>';
 		} else {
