@@ -137,12 +137,13 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 		await addAProductToCart( page, product1Id );
 		await page.goto( cartBlockPage.slug );
 
-		const shippingCalculatorButton = page.locator( 'button', {
-			hasText: 'Enter address to check delivery options',
-		} );
+		await page
+			.locator( 'button', {
+				hasText: 'Enter address to check delivery options',
+			} )
+			.click();
 
 		// Set shipping country to Netherlands
-		await shippingCalculatorButton.click();
 		await page.getByRole( 'combobox' ).first().fill( 'Netherlands' );
 		await page.getByLabel( 'Postal code' ).fill( '1011AA' );
 		await page.getByLabel( 'City' ).fill( 'Amsterdam' );
@@ -174,12 +175,13 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 		await addAProductToCart( page, product1Id );
 		await page.goto( cartBlockPage.slug );
 
-		const shippingCalculatorButton = page.locator( 'button', {
-			hasText: 'Enter address to check delivery options',
-		} );
+		await page
+			.locator( 'button', {
+				hasText: 'Enter address to check delivery options',
+			} )
+			.click();
 
 		// Set shipping country to Portugal
-		await shippingCalculatorButton.click();
 		await page.getByRole( 'combobox' ).first().fill( 'Portugal' );
 		await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 		await page.getByLabel( 'City' ).fill( 'Lisbon' );
@@ -218,12 +220,13 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 		await addAProductToCart( page, product1Id );
 		await page.goto( cartBlockPage.slug );
 
-		const shippingCalculatorButton = page.locator( 'button', {
-			hasText: 'Enter address to check delivery options',
-		} );
+		await page
+			.locator( 'button', {
+				hasText: 'Enter address to check delivery options',
+			} )
+			.click();
 
 		// Set shipping country to Portugal
-		await shippingCalculatorButton.click();
 		await page.getByRole( 'combobox' ).first().fill( 'Portugal' );
 		await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 		await page.getByLabel( 'City' ).fill( 'Lisbon' );
@@ -257,12 +260,13 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 		await addAProductToCart( page, product2Id );
 		await page.goto( cartBlockPage.slug );
 
-		const shippingCalculatorButton = page.locator( 'button', {
-			hasText: 'Enter address to check delivery options',
-		} );
+		await page
+			.locator( 'button', {
+				hasText: 'Enter address to check delivery options',
+			} )
+			.click();
 
 		// Set shipping country to Portugal
-		await shippingCalculatorButton.click();
 		await page.getByRole( 'combobox' ).first().fill( 'Portugal' );
 		await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 		await page.getByLabel( 'City' ).fill( 'Lisbon' );
