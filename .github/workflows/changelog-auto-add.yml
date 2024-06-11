@@ -24,9 +24,6 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                install: 'false'
-                build: 'false'
 
             - name: Generate Changelog File
               env:
