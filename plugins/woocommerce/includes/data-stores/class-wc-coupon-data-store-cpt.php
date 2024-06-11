@@ -159,8 +159,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * WooCommerce always stores the coupon product ids as a comma-separated string, but it seems that
 	 * some plugins mistakenly change these to an array.
 	 *
-	 * @param $coupon_id The coupon id.
-	 * @param string                  $meta_key The meta key to get.
+	 * @param int    $coupon_id The coupon id.
+	 * @param string $meta_key The meta key to get.
 	 * @return array The metadata value as an array, with empty values removed.
 	 */
 	private function get_coupon_meta_as_array( $coupon_id, string $meta_key ) {
