@@ -596,6 +596,10 @@ export const getJetpackIsConnected = fromPromise( async () => {
 	return resolveSelect( PLUGINS_STORE_NAME ).isJetpackConnected();
 } );
 
+const reloadPage = () => {
+	window.location.reload();
+};
+
 export const preFetchActions = {
 	preFetchIsJetpackConnected,
 	preFetchJetpackAuthUrl,
@@ -621,6 +625,7 @@ const coreProfilerMachineActions = {
 	redirectToWooHome,
 	redirectToJetpackAuthPage,
 	updateLoaderProgressWithPluginInstall,
+	reloadPage,
 };
 
 const coreProfilerMachineActors = {
@@ -1103,7 +1108,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							],
 						},
 						RETRY_PRE_BUSINESS_INFO: {
-							actions: [ () => window.location.reload() ],
+							actions: [ 'reloadPage' ],
 						},
 						SKIP_PRE_BUSINESS_INFO: {
 							target: '#plugins',
