@@ -6,7 +6,7 @@ import { Guide } from '@wordpress/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
-import { useEffect, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
