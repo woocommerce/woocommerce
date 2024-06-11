@@ -452,7 +452,7 @@ const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
 	const variablePostId = await page.$( '#post_ID' );
 	const variablePostIdValue = await (
 		await variablePostId.getProperty( 'value' )
-	 ).jsonValue();
+	).jsonValue();
 	return variablePostIdValue;
 };
 
