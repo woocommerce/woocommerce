@@ -1,18 +1,27 @@
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+
+	page: async ( { page, wcAdminApi }, use ) => {
+		// Disable the task list reminder bar, it can interfere with the quick actions
+		await wcAdminApi.post( 'options', {
+			woocommerce_task_list_reminder_bar_hidden: 'yes',
+		} );
+
+		// Disable the revenue report date tour
+		await wcAdminApi.post( 'options', {
+			woocommerce_revenue_report_date_tour_shown: 'yes',
+		} );
+
+		await use( page );
+	},
+} );
 
 test.describe( 'Analytics-related tests', () => {
 	let categoryIds, productIds, orderIds, setupPage;
 
-	test.use( { storageState: process.env.ADMINSTATE } );
-
-	test.beforeAll( async ( { baseURL, browser } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.beforeAll( async ( { browser, api } ) => {
 		// create a couple of product categories
 		await api
 			.post( 'products/categories/batch', {
@@ -150,15 +159,10 @@ test.describe( 'Analytics-related tests', () => {
 		setupPage = await browser.newPage();
 		await setupPage.waitForTimeout( 5000 );
 		await setupPage.goto( '?process-waiting-actions' );
+		await setupPage.close();
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.afterAll( async ( { api } ) => {
 		// delete the categories
 		await api.post( 'products/categories/batch', { delete: categoryIds } );
 		// delete the products
@@ -205,12 +209,6 @@ test.describe( 'Analytics-related tests', () => {
 		await page.goto(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
 		);
-		// FTUX tour on first run through
-		try {
-			await page.getByLabel( 'Close Tour' ).click( { timeout: 5000 } );
-		} catch ( e ) {
-			console.log( 'Tour was not visible, skipping.' );
-		}
 
 		// the revenue report can either download immediately, or get mailed.
 		try {
@@ -301,13 +299,6 @@ test.describe( 'Analytics-related tests', () => {
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
 		);
 
-		// FTUX tour on first run through
-		try {
-			await page.getByLabel( 'Close Tour' ).click( { timeout: 5000 } );
-		} catch ( e ) {
-			console.log( 'Tour was not visible, skipping.' );
-		}
-
 		// assert that current month is shown and that values are for that
 		await expect( page.getByText( 'Month to date' ).first() ).toBeVisible();
 		await expect(
@@ -391,13 +382,6 @@ test.describe( 'Analytics-related tests', () => {
 		await page.goto(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
 		);
-
-		// FTUX tour on first run through
-		try {
-			await page.getByLabel( 'Close Tour' ).click( { timeout: 5000 } );
-		} catch ( e ) {
-			console.log( 'Tour was not visible, skipping.' );
-		}
 
 		// assert that current month is shown and that values are for that
 		await expect( page.getByText( 'Month to date' ).first() ).toBeVisible();
@@ -495,13 +479,6 @@ test.describe( 'Analytics-related tests', () => {
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Forders'
 		);
 
-		// FTUX tour on first run through
-		try {
-			await page.getByLabel( 'Close Tour' ).click( { timeout: 5000 } );
-		} catch ( e ) {
-			console.log( 'Tour was not visible, skipping.' );
-		}
-
 		// no filters applied
 		await expect(
 			page.getByRole( 'menuitem', {
@@ -591,13 +568,6 @@ test.describe( 'Analytics-related tests', () => {
 		await page.goto(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fproducts'
 		);
-
-		// FTUX tour on first run through
-		try {
-			await page.getByLabel( 'Close Tour' ).click( { timeout: 5000 } );
-		} catch ( e ) {
-			console.log( 'Tour was not visible, skipping.' );
-		}
 
 		// no filters applied
 		await expect(
