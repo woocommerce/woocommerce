@@ -1358,8 +1358,8 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: [
 							{
 								target: 'sendToJetpackAuthPage',
-								guard: ( { event } ) => {
-									return ! event.output.data;
+								guard: ( { event } : { event: DoneActorEvent<typeof getJetpackIsConnected> } ) => {
+									return ! event.output;
 								},
 							},
 							{ actions: 'redirectToWooHome' },
