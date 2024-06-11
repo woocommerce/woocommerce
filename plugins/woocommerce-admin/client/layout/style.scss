@@ -124,7 +124,8 @@
 	}
 }
 
-.wp-toolbar .is-wp-toolbar-disabled {
+.wp-toolbar .is-wp-toolbar-disabled,
+.wp-toolbar:has(> .woocommerce-admin-full-screen .woocommerce-error-boundary) {
 	margin-top: -$adminbar-height;
 	@include breakpoint("<600px") {
 		margin-top: -$adminbar-height-mobile;
