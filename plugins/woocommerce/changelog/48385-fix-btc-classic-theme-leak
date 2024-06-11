@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Prevent running `add_archive_product_to_eligible_for_fallback_templates` in classic themes.
