@@ -63,7 +63,7 @@ final class AssetsController {
 		$this->api->register_script( 'wc-price-format', 'assets/client/blocks/price-format.js', array(), false );
 
 		// Vendor scripts for blocks frontends (not including cart and checkout).
-		$this->api->register_script( 'wc-blocks-vendors-frontend', $this->api->get_block_asset_build_path( 'wc-blocks-vendors-frontend' ), array(), false );
+		$this->api->register_script( 'wc-blocks-frontend-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-frontend-vendors-frontend' ), array(), false );
 
 		// Cart and checkout frontend scripts.
 		$this->api->register_script( 'cart-checkout-vendors', $this->api->get_block_asset_build_path( 'cart-checkout-vendors-frontend' ), array(), false );

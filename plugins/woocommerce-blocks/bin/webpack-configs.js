@@ -387,7 +387,8 @@ const getFrontConfig = ( options = {} ) => {
 				cacheGroups: {
 					vendor: {
 						test: /[\\/]node_modules[\\/]/,
-						name: 'wc-blocks-vendors',
+						// Note that filenames are suffixed with `frontend` so the generated file is `wc-blocks-frontend-vendors-frontend`.
+						name: 'wc-blocks-frontend-vendors',
 						chunks: ( chunk ) => {
 							return (
 								chunk.name !== 'product-button-interactivity'
