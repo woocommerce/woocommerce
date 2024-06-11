@@ -67,6 +67,7 @@ export function ImageActionsMenu( {
 					<MenuGroup>
 						<UploadFilesMenuItem
 							allowedTypes={ [ 'image' ] }
+							accept="image/*"
 							multiple={ false }
 							info={ __(
 								'1000 pixels wide or larger',
