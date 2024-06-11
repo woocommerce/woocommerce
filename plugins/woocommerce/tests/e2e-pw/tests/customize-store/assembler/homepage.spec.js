@@ -49,7 +49,23 @@ test.describe( 'Assembler -> Homepage', () => {
 		}
 	} );
 
-	test.beforeEach( async ( { baseURL, pageObject } ) => {
+	test.beforeEach( async ( { baseURL, pageObject }, testInfo ) => {
+		// This is for tests that includes tracking yes/no and API must be run before the test starts
+		if ( testInfo.title.includes( 'tracking is allowed' ) ) {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'yes'
+			);
+		} else if ( testInfo.title.includes( 'tracking is disallowed' ) ) {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'no'
+			);
+		}
 		await pageObject.setupSite( baseURL );
 		await pageObject.waitForLoadingScreenFinish();
 		const assembler = await pageObject.getAssembler();
@@ -171,17 +187,9 @@ test.describe( 'Assembler -> Homepage', () => {
 	} );
 
 	test.describe( 'Homepage tracking banner', () => {
-		test( 'Should show the "Want more patterns?" banner with the Opt-in message when tracking is not allowed', async ( {
-			baseURL,
+		test( 'Should show the "Want more patterns?" banner with the Opt-in message when tracking is disallowed', async ( {
 			pageObject,
 		} ) => {
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_allow_tracking',
-				'no'
-			);
-
 			const assembler = await pageObject.getAssembler();
 			await expect(
 				assembler.getByText( 'Want more patterns?' )
@@ -193,17 +201,10 @@ test.describe( 'Assembler -> Homepage', () => {
 			).toBeVisible();
 		} );
 
-		test( 'Should show the "Want more patterns?" banner with the offline message when the user is offline', async ( {
+		test( 'Should show the "Want more patterns?" banner with the offline message when the user is offline and tracking is disallowed', async ( {
 			context,
-			baseURL,
 			pageObject,
 		} ) => {
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_allow_tracking',
-				'no'
-			);
 			await context.setOffline( true );
 
 			const assembler = await pageObject.getAssembler();
@@ -218,16 +219,8 @@ test.describe( 'Assembler -> Homepage', () => {
 		} );
 
 		test( 'Should not show the "Want more patterns?" banner when tracking is allowed', async ( {
-			baseURL,
 			pageObject,
 		} ) => {
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_allow_tracking',
-				'yes'
-			);
-
 			const assembler = await pageObject.getAssembler();
 			await expect(
 				assembler.getByText( 'Want more patterns?' )
