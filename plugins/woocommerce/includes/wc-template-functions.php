@@ -2854,7 +2854,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 		if ( $args['required'] ) {
 			// hidden inputs are the only kind of inputs that don't need an `aria-required` attribute.
-			if( $args['type'] !== 'hidden' ) {
+			if ( 'hidden' !==  $args['type'] ) {
 				$args['custom_attributes']['aria-required'] = 'true';
 			}
 
