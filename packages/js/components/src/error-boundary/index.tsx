@@ -7,13 +7,13 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import './style.scss';
 import EmptyContent from '../empty-content';
+import { alertIcon } from './constants';
 
 export type ErrorBoundaryProps = {
 	children: ReactNode;
 	/** Custom error title to display, defaults to a generic message */
-	errorTitle?: string;
+	errorMessage?: ReactNode;
 	/** Whether to show an action button, defaults to true */
 	showActionButton?: boolean;
 	/**
@@ -63,7 +63,7 @@ export class ErrorBoundary extends Component<
 	render() {
 		const {
 			children,
-			errorTitle,
+			errorMessage,
 			showActionButton,
 			actionLabel,
 			actionCallback,
@@ -71,24 +71,27 @@ export class ErrorBoundary extends Component<
 
 		if ( this.state.hasError ) {
 			return (
-				<div className="woocommerce-experimental-error-boundary">
+				<div className="woocommerce-error-boundary">
 					<EmptyContent
-						title={
-							errorTitle ||
+						message={
+							errorMessage ||
 							__(
 								'Oops, something went wrong. Please try again',
 								'woocommerce'
 							)
 						}
-						actionLabel={
+						secondaryActionLabel={
 							actionLabel || __( 'Reload', 'woocommerce' )
 						}
-						actionURL={ null }
-						actionCallback={
+						secondaryActionURL={ null }
+						secondaryActionCallback={
 							showActionButton
 								? actionCallback || this.handleReload
 								: undefined
 						}
+						illustrationWidth={ 36 }
+						illustrationHeight={ 36 }
+						illustration={ alertIcon }
 					/>
 				</div>
 			);
