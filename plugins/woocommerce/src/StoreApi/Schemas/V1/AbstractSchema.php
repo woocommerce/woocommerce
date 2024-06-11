@@ -248,7 +248,7 @@ abstract class AbstractSchema {
 	/**
 	 * Returns extended schema for a specific endpoint.
 	 *
-	 * @param string $endpoint The endpoint identifer.
+	 * @param string $endpoint The endpoint identifier.
 	 * @param array  ...$passed_args An array of arguments to be passed to callbacks.
 	 * @return array the data that will get added.
 	 */
