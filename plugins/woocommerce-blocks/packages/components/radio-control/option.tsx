@@ -47,7 +47,21 @@ const Option = ( {
 					[ `${ name }-${ value }__secondary-description` ]:
 						secondaryDescription,
 				} ) }
-				disabled={ disabled }
+				aria-disabled={ disabled }
+				onKeyDown={ ( event ) => {
+					// Prevent option changing via keyboard when loading from server.
+					if (
+						disabled &&
+						[
+							'ArrowUp',
+							'ArrowDown',
+							'AllowLeft',
+							'ArrowRight',
+						].includes( event.key )
+					) {
+						event.preventDefault();
+					}
+				} }
 			/>
 			<OptionLayout
 				id={ `${ name }-${ value }` }
