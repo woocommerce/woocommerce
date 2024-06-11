@@ -4,14 +4,22 @@
  * External dependencies
  */
 import {
+	Button,
+	CheckboxControl,
 	// @ts-ignore No types for this exist yet.
 	__experimentalItemGroup as ItemGroup,
+	Modal,
 	// @ts-ignore No types for this exist yet.
 	__experimentalNavigatorButton as NavigatorButton,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/components';
-import { createInterpolateElement, useContext } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useContext,
+	useState,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import interpolateComponents from '@automattic/interpolate-components';
 // @ts-expect-error Missing type.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 
@@ -28,13 +36,62 @@ import { Link } from '@woocommerce/components';
 import { PATTERN_CATEGORIES } from './pattern-screen/categories';
 import { capitalize } from 'lodash';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import { useSelect } from '@wordpress/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
+import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 
 export const SidebarNavigationScreenHomepagePTK = ( {
 	onNavigateBackClick,
 }: {
 	onNavigateBackClick: () => void;
 } ) => {
-	const { context } = useContext( CustomizeStoreContext );
+	const { context, sendEvent } = useContext( CustomizeStoreContext );
+
+	const isNetworkOffline = useNetworkStatus();
+	const isPTKPatternsAPIAvailable = context.isPTKPatternsAPIAvailable;
+	const trackingAllowed = useSelect( ( sel ) =>
+		sel( OPTIONS_STORE_NAME ).getOption( 'woocommerce_allow_tracking' )
+	);
+	const isTrackingDisallowed = trackingAllowed === 'no' || ! trackingAllowed;
+
+	let notice;
+	if ( isNetworkOffline ) {
+		notice = __(
+			"Looks like we can't detect your network. Please double-check your internet connection and refresh the page.",
+			'woocommerce'
+		);
+	} else if ( ! isPTKPatternsAPIAvailable ) {
+		notice = __(
+			"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns.",
+			'woocommerce'
+		);
+	} else if ( isTrackingDisallowed ) {
+		notice = __(
+			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
+			'woocommerce'
+		);
+	}
+
+	const [ isModalOpen, setIsModalOpen ] = useState( false );
+
+	const openModal = () => setIsModalOpen( true );
+	const closeModal = () => setIsModalOpen( false );
+
+	const [ optInDataSharing, setIsOptInDataSharing ] =
+		useState< boolean >( true );
+
+	const optIn = () => {
+		trackEvent(
+			'customize_your_store_assembler_hub_opt_in_usage_tracking'
+		);
+	};
+
+	const skipOptIn = () => {
+		trackEvent(
+			'customize_your_store_assembler_hub_skip_opt_in_usage_tracking'
+		);
+	};
 
 	const aiOnline = context.flowType === FlowType.AIOnline;
 
@@ -98,6 +155,97 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 									</NavigatorButton>
 								</ItemGroup>
 							)
+						) }
+						{ notice && (
+							<div className="woocommerce-customize-store_sidebar-patterns-upgrade-notice">
+								<h4>
+									{ __(
+										'Want more patterns?',
+										'woocommerce'
+									) }
+								</h4>
+								<p>
+									{ createInterpolateElement( notice, {
+										OptInModal: (
+											<Button
+												onClick={ () => {
+													openModal();
+												} }
+												variant="link"
+											/>
+										),
+									} ) }
+								</p>
+								{ isModalOpen && (
+									<Modal
+										className={
+											'woocommerce-customize-store__opt-in-usage-tracking-modal'
+										}
+										title={ __(
+											'Opt in to usage tracking',
+											'woocommerce'
+										) }
+										onRequestClose={ closeModal }
+										shouldCloseOnClickOutside={ false }
+									>
+										<CheckboxControl
+											className="core-profiler__checkbox"
+											label={ interpolateComponents( {
+												mixedString: __(
+													'I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
+													'woocommerce'
+												),
+												components: {
+													link: (
+														<Link
+															href="https://woocommerce.com/usage-tracking?utm_medium=product"
+															target="_blank"
+															type="external"
+														/>
+													),
+												},
+											} ) }
+											checked={ optInDataSharing }
+											onChange={ setIsOptInDataSharing }
+										/>
+										<div className="woocommerce-customize-store__design-change-warning-modal-footer">
+											<Button
+												onClick={ () => {
+													skipOptIn();
+													closeModal();
+												} }
+												variant="link"
+											>
+												{ __(
+													'Cancel',
+													'woocommerce'
+												) }
+											</Button>
+											<Button
+												onClick={ () => {
+													optIn();
+													if ( isIframe( window ) ) {
+														sendMessageToParent( {
+															type: 'INSTALL_PATTERNS',
+														} );
+													} else {
+														sendEvent(
+															'INSTALL_PATTERNS'
+														);
+													}
+												} }
+												variant="primary"
+												disabled={ ! optInDataSharing }
+											>
+												{ __(
+													'Opt in',
+													'woocommerce'
+												) }
+											</Button>
+										</div>
+									</Modal>
+								) }
+							</div>
 						) }
 					</div>
 				</div>
