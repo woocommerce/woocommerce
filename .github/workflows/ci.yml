@@ -88,12 +88,14 @@ jobs:
               name: 'Checkout'
               with:
                   fetch-depth: 0
+                  
             - uses: './.github/actions/setup-woocommerce-monorepo'
               name: 'Setup Monorepo'
               id: 'setup-monorepo'
               with:
                   install: '${{ matrix.projectName }}...'
-                  build: '${{ matrix.projectName }}'
+                  build: false
+                  
             - name: 'Lint'
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
@@ -163,14 +165,26 @@ jobs:
                 CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
               
+            - name: 'Resolve artifacts path'
+              # Blocks e2e use a relative path which is not supported by actions/upload-artifact@v4
+              # https://github.com/actions/upload-artifact/issues/176
+              env:
+                ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
+              run: echo "ARTIFACTS_PATH=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
+              
             - name: 'Upload artifacts'
               if: ${{ always() && matrix.report.resultsPath != '' }}
               uses: actions/upload-artifact@v4
               with:
                 name: '${{ matrix.report.resultsBlobName }}-${{ strategy.job-index }}'
-                path: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
-                retention-days: 1
-                compression-level: 9
+                path: ${{ env.ARTIFACTS_PATH }}
+                
+            - name: 'Upload flaky test reports'
+              uses: actions/upload-artifact@v4
+              with:
+                name: flaky-tests-${{ strategy.job-index }}
+                path: ${{ env.ARTIFACTS_PATH }}/flaky-tests
+                if-no-files-found: ignore
 
             - name: 'Archive metrics results'
               if: ${{ success() && startsWith(matrix.name, 'Metrics') }} # this seems too fragile, we should update the reporting path and use the generic upload step above
@@ -338,3 +352,49 @@ jobs:
               if: ${{ github.event_name == 'pull_request' && contains(matrix.report, 'e2e') }}
               run: |
                   echo "::notice::🔗🔗 The e2e report for this run is available at https://woocommerce.github.io/woocommerce-test-reports/pr/${{ github.event.pull_request.number }}/e2e"
+
+
+    report-flaky-tests:
+        name: 'Create issues for flaky tests'
+        if: ${{ !cancelled() && ! github.event.pull_request.head.repo.fork }}
+        needs: ['project-test-jobs']
+        runs-on: ubuntu-latest
+        permissions:
+          contents: read
+          issues: write
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  repository: WordPress/gutenberg
+                  ref: dbf201449e9736f672b61e422787d47659db327a
+                  
+            - uses: actions/download-artifact@v4
+              id: download-artifact
+              with:
+                pattern: flaky-tests*
+                path: flaky-tests
+                merge-multiple: true
+                
+            - name: 'Check if there are flaky tests reports'
+              run: |
+                downloadPath='${{ steps.download-artifact.outputs.download-path }}'
+                # make dir so that next step doesn't fail if it doesn't exist 
+                mkdir -p $downloadPath
+                # any output means there are reports
+                echo "FLAKY_REPORTS=$(ls -A $downloadPath | head -1)" >> $GITHUB_ENV
+                
+            - name: 'Setup'
+              if: ${{ !!env.FLAKY_REPORTS }}
+              uses: ./.github/setup-node
+
+            - name: 'Build packages'
+              if: ${{ !!env.FLAKY_REPORTS }}
+              run: npm run build:packages
+
+            - name: 'Report flaky tests'
+              if: ${{ !!env.FLAKY_REPORTS }}
+              uses: ./packages/report-flaky-tests
+              with:
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+                  label: 'metric: flaky e2e test'

@@ -26,7 +26,7 @@ jobs:
             repository-projects: write
             id-token: write
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Get current version
               id: version
@@ -74,7 +74,7 @@ jobs:
                   echo "plugin-data=$PLUGIN_DATA" >> $GITHUB_OUTPUT
 
             - name: Create plugins artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               if: steps.prepare.outputs.plugin-data != '{}'
               with:
                   name: plugins
@@ -90,8 +90,8 @@ jobs:
                   path: unzips/woocommerce
                   retention-days: 30
 
-            - name: Inform Beta Download webhook
-              if: steps.prepare.outputs.plugin-data != '{}'
+            - name: Inform Beta Download webhook if this is an internal PR
+              if: steps.prepare.outputs.plugin-data != '{}' && ! github.event.pull_request.head.repo.fork
               env:
                   SECRET: ${{ secrets.WOOBETA_SECRET }}
                   PLUGIN_DATA: ${{ steps.prepare.outputs.plugin-data }}
