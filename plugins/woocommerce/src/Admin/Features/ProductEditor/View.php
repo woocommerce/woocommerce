@@ -13,11 +13,20 @@ class View {
      * Render the entire view.
      */
     public static function render() {
-        echo '<div data-wp-interactive="woocommerce/product-editor" data-wp-watch="actions.loadProduct">';
-        self::render_tabs();
-        self::render_header();
-        self::render_tabs_content();
-        echo '</div>';
+        ob_start();
+        ?>
+        <div data-wp-interactive="woocommerce/product-editor" data-wp-watch="actions.loadProduct">
+            <div data-wp-bind--hidden="!state.loading">
+                Loading...
+            </div>
+            <div data-wp-bind--hidden="state.loading">
+                <?php self::render_tabs(); ?>
+                <?php self::render_header(); ?>
+                <?php self::render_tabs_content(); ?>
+            </div>
+        </div>
+        <?php
+        echo ob_get_clean();
     }
 
     /**

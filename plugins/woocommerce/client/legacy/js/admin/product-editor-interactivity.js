@@ -14,6 +14,7 @@ const { state } = store( NS, {
 	state: {
 		activeTab: 'general',
 		product: null,
+		loading: true,
 	},
 	selectors: {
 		isTabActive: (a) => {
@@ -26,6 +27,7 @@ const { state } = store( NS, {
 			const product = yield wp.data.resolveSelect( 'core' ).getEntityRecord( 'postType', 'product', 1751 );
 			console.log(product);
 			state.product = product;
+			state.loading = false;
 		},
 		persistProduct() {
 			wp.data.dispatch( 'core' ).saveEditedEntityRecord(
