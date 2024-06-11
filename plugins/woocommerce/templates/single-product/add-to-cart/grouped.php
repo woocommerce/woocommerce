@@ -25,9 +25,9 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 	<table cellspacing="0" class="woocommerce-grouped-product-list group_table">
 		<tbody>
 			<?php
-			$quantites_required      = false;
-			$previous_post           = $post;
-			$grouped_product_columns = apply_filters(
+			$quantities_required      = false;
+			$previous_post            = $post;
+			$grouped_product_columns  = apply_filters(
 				'woocommerce_grouped_product_columns',
 				array(
 					'quantity',
@@ -38,12 +38,12 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 			);
 			$show_add_to_cart_button = false;
 
-			do_action( 'woocommerce_grouped_product_list_before', $grouped_product_columns, $quantites_required, $product );
+			do_action( 'woocommerce_grouped_product_list_before', $grouped_product_columns, $quantities_required, $product );
 
 			foreach ( $grouped_products as $grouped_product_child ) {
-				$post_object        = get_post( $grouped_product_child->get_id() );
-				$quantites_required = $quantites_required || ( $grouped_product_child->is_purchasable() && ! $grouped_product_child->has_options() );
-				$post               = $post_object; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$post_object         = get_post( $grouped_product_child->get_id() );
+				$quantities_required = $quantities_required || ( $grouped_product_child->is_purchasable() && ! $grouped_product_child->has_options() );
+				$post                = $post_object; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				setup_postdata( $post );
 
 				if ( $grouped_product_child->is_in_stock() ) {
@@ -106,14 +106,14 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 			$post = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			setup_postdata( $post );
 
-			do_action( 'woocommerce_grouped_product_list_after', $grouped_product_columns, $quantites_required, $product );
+			do_action( 'woocommerce_grouped_product_list_after', $grouped_product_columns, $quantities_required, $product );
 			?>
 		</tbody>
 	</table>
 
 	<input type="hidden" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" />
 
-	<?php if ( $quantites_required && $show_add_to_cart_button ) : ?>
+	<?php if ( $quantities_required && $show_add_to_cart_button ) : ?>
 
 		<?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
 
