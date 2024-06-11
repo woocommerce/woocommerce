@@ -70,7 +70,7 @@ const PickupLocation = ( {
 
 	setShippingCalculatorLabel( pickupLabel );
 	setShippingCalculatorAddress( pickupAddress );
-	return <></>;
+	return null;
 };
 
 export default PickupLocation;
