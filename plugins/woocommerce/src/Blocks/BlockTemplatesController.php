@@ -29,74 +29,72 @@ class BlockTemplatesController {
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
 		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_archive_product_to_eligible_for_fallback_templates' ), 10, 1 );
 
-		if ( wc_current_theme_is_fse_theme() ) {
-			// By default, the Template Part Block only supports template parts that are in the current theme directory.
-			// This render_callback wrapper allows us to add support for plugin-housed template parts.
-			add_filter(
-				'block_type_metadata_settings',
-				function ( $settings, $metadata ) {
-					if (
-						isset( $metadata['name'], $settings['render_callback'] ) &&
-						'core/template-part' === $metadata['name'] &&
-						in_array( $settings['render_callback'], array( 'render_block_core_template_part', 'gutenberg_render_block_core_template_part' ), true )
-					) {
-						$settings['render_callback'] = array( $this, 'render_woocommerce_template_part' );
-					}
-					return $settings;
-				},
-				10,
-				2
-			);
+		// By default, the Template Part Block only supports template parts that are in the current theme directory.
+		// This render_callback wrapper allows us to add support for plugin-housed template parts.
+		add_filter(
+			'block_type_metadata_settings',
+			function ( $settings, $metadata ) {
+				if (
+					isset( $metadata['name'], $settings['render_callback'] ) &&
+					'core/template-part' === $metadata['name'] &&
+					in_array( $settings['render_callback'], array( 'render_block_core_template_part', 'gutenberg_render_block_core_template_part' ), true )
+				) {
+					$settings['render_callback'] = array( $this, 'render_woocommerce_template_part' );
+				}
+				return $settings;
+			},
+			10,
+			2
+		);
 
-			// Prevents shortcodes in templates having their HTML content broken by wpautop.
-			// @see https://core.trac.wordpress.org/ticket/58366 for more info.
-			add_filter(
-				'block_type_metadata_settings',
-				function ( $settings, $metadata ) {
-					if (
-						isset( $metadata['name'], $settings['render_callback'] ) &&
-						'core/shortcode' === $metadata['name']
-					) {
-						$settings['original_render_callback'] = $settings['render_callback'];
-						$settings['render_callback']          = function ( $attributes, $content ) use ( $settings ) {
-							// The shortcode has already been rendered, so look for the cart/checkout HTML.
-							if ( strstr( $content, 'woocommerce-cart-form' ) || strstr( $content, 'wc-empty-cart-message' ) || strstr( $content, 'woocommerce-checkout-form' ) ) {
-								// Return early before wpautop runs again.
-								return $content;
-							}
+		// Prevents shortcodes in templates having their HTML content broken by wpautop.
+		// @see https://core.trac.wordpress.org/ticket/58366 for more info.
+		add_filter(
+			'block_type_metadata_settings',
+			function ( $settings, $metadata ) {
+				if (
+					isset( $metadata['name'], $settings['render_callback'] ) &&
+					'core/shortcode' === $metadata['name']
+				) {
+					$settings['original_render_callback'] = $settings['render_callback'];
+					$settings['render_callback']          = function ( $attributes, $content ) use ( $settings ) {
+						// The shortcode has already been rendered, so look for the cart/checkout HTML.
+						if ( strstr( $content, 'woocommerce-cart-form' ) || strstr( $content, 'wc-empty-cart-message' ) || strstr( $content, 'woocommerce-checkout-form' ) ) {
+							// Return early before wpautop runs again.
+							return $content;
+						}
 
-							$render_callback = $settings['original_render_callback'];
+						$render_callback = $settings['original_render_callback'];
 
-							return $render_callback( $attributes, $content );
-						};
-					}
-					return $settings;
-				},
-				10,
-				2
-			);
+						return $render_callback( $attributes, $content );
+					};
+				}
+				return $settings;
+			},
+			10,
+			2
+		);
 
-			/**
-			 * Prevents the pages that are assigned as cart/checkout from showing the "template" selector in the page-editor.
-			 * We want to avoid this flow and point users towards the site editor instead.
-			 */
-			add_action(
-				'current_screen',
-				function () {
-					if ( ! is_admin() ) {
-						return;
-					}
+		/**
+		 * Prevents the pages that are assigned as cart/checkout from showing the "template" selector in the page-editor.
+		 * We want to avoid this flow and point users towards the site editor instead.
+		 */
+		add_action(
+			'current_screen',
+			function () {
+				if ( ! is_admin() ) {
+					return;
+				}
 
-					$current_screen = get_current_screen();
+				$current_screen = get_current_screen();
 
-					// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					if ( $current_screen && 'page' === $current_screen->id && ! empty( $_GET['post'] ) && in_array( absint( $_GET['post'] ), array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ) ), true ) ) {
-						wp_add_inline_style( 'wc-blocks-editor-style', '.edit-post-post-template { display: none; }' );
-					}
-				},
-				10
-			);
-		}
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				if ( $current_screen && 'page' === $current_screen->id && ! empty( $_GET['post'] ) && in_array( absint( $_GET['post'] ), array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ) ), true ) ) {
+					wp_add_inline_style( 'wc-blocks-editor-style', '.edit-post-post-template { display: none; }' );
+				}
+			},
+			10
+		);
 	}
 
 	/**
