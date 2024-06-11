@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Security - Prevent HTML & JS injection attacks on registration and checkout forms when the Order Attribution is enabled. [#48348](https://github.com/woocommerce/woocommerce/pull/48348)
 * Update - Toggle LYS feature flag off for 9.0 [#48231](https://github.com/woocommerce/woocommerce/pull/48231)
 * Fix - #47626 changed the classes on the legacy admin settings save button and broke saving standard tax rates [#48201](https://github.com/woocommerce/woocommerce/pull/48201)
 * Fix - Revert "Remove customer-effort-score-tracks" feature flag #48235 [#48235](https://github.com/woocommerce/woocommerce/pull/48235)
