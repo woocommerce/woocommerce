@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 8.9.3 2024-06-10 =
+
+**WooCommerce**
+
+* Security - Prevent HTML & JS injection attacks on registration and checkout forms when the Order Attribution is enabled. [#48348](https://github.com/woocommerce/woocommerce/pull/48348)
+
 = 8.9.2 2024-06-04 =
 
 **WooCommerce**
