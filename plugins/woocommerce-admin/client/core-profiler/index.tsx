@@ -11,6 +11,7 @@ import {
 	enqueueActions,
 	DoneActorEvent,
 	fromCallback,
+	or,
 } from 'xstate5';
 import { useMachine, useSelector } from '@xstate5/react';
 import { useMemo } from '@wordpress/element';
@@ -1267,7 +1268,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: [
 							{
 								target: 'isJetpackConnected',
-								guard: 'hasJetpackSelected',
+								guard: or( [
+									'hasJetpackSelectedForInstallation',
+									'hasJetpackActivated',
+								] ),
 							},
 							{ actions: [ 'redirectToWooHome' ] },
 						],
@@ -1342,7 +1346,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: [
 							{
 								target: 'isJetpackConnected',
-								guard: 'hasJetpackSelected',
+								guard: or( [
+									'hasJetpackSelectedForInstallation',
+									'hasJetpackActivated',
+								] ),
 							},
 							{ actions: 'redirectToWooHome' },
 						],
@@ -1445,7 +1452,16 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					entry: enqueueActions( ( { enqueue, check } ) => {
-						if ( check( { type: 'hasJetpackSelected' } ) ) {
+						if (
+							check(
+								or( [
+									{
+										type: 'hasJetpackSelectedForInstallation',
+									},
+									{ type: 'hasJetpackActivated' },
+								] )
+							)
+						) {
 							enqueue( 'preFetchIsJetpackConnected' );
 							enqueue( 'preFetchJetpackAuthUrl' );
 						}
@@ -1510,13 +1526,17 @@ export const CoreProfilerController = ( {
 						!! step && step === ( params as { step: string } ).step
 					);
 				},
-				hasJetpackSelected: ( { context } ) => {
+				hasJetpackSelectedForInstallation: ( { context } ) => {
 					return (
 						context.pluginsSelected.find(
 							( plugin ) =>
 								plugin === 'jetpack' ||
 								plugin === 'jetpack-boost'
-						) !== undefined ||
+						) !== undefined
+					);
+				},
+				hasJetpackActivated: ( { context } ) => {
+					return (
 						context.pluginsAvailable.find(
 							( plugin: Extension ) =>
 								( plugin.key === 'jetpack' ||
