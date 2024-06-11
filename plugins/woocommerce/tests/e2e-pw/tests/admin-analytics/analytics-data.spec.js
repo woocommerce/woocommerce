@@ -9,6 +9,11 @@ const test = baseTest.extend( {
 			woocommerce_task_list_reminder_bar_hidden: 'yes',
 		} );
 
+		// Disable the revenue report date tour
+		await wcAdminApi.post( 'options', {
+			woocommerce_revenue_report_date_tour_shown: 'yes',
+		} );
+
 		await use( page );
 	},
 } );
@@ -204,12 +209,6 @@ test.describe( 'Analytics-related tests', () => {
 		await page.goto(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
 		);
-		// FTUX tour on first run through
-		try {
-			await page.getByLabel( 'Close Tour' ).click( { timeout: 5000 } );
-		} catch ( e ) {
-			console.log( 'Tour was not visible, skipping.' );
-		}
 
 		// the revenue report can either download immediately, or get mailed.
 		try {
@@ -300,13 +299,6 @@ test.describe( 'Analytics-related tests', () => {
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
 		);
 
-		// FTUX tour on first run through
-		try {
-			await page.getByLabel( 'Close Tour' ).click( { timeout: 5000 } );
-		} catch ( e ) {
-			console.log( 'Tour was not visible, skipping.' );
-		}
-
 		// assert that current month is shown and that values are for that
 		await expect( page.getByText( 'Month to date' ).first() ).toBeVisible();
 		await expect(
@@ -390,13 +382,6 @@ test.describe( 'Analytics-related tests', () => {
 		await page.goto(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue'
 		);
-
-		// FTUX tour on first run through
-		try {
-			await page.getByLabel( 'Close Tour' ).click( { timeout: 5000 } );
-		} catch ( e ) {
-			console.log( 'Tour was not visible, skipping.' );
-		}
 
 		// assert that current month is shown and that values are for that
 		await expect( page.getByText( 'Month to date' ).first() ).toBeVisible();
@@ -494,13 +479,6 @@ test.describe( 'Analytics-related tests', () => {
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Forders'
 		);
 
-		// FTUX tour on first run through
-		try {
-			await page.getByLabel( 'Close Tour' ).click( { timeout: 5000 } );
-		} catch ( e ) {
-			console.log( 'Tour was not visible, skipping.' );
-		}
-
 		// no filters applied
 		await expect(
 			page.getByRole( 'menuitem', {
@@ -590,13 +568,6 @@ test.describe( 'Analytics-related tests', () => {
 		await page.goto(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fproducts'
 		);
-
-		// FTUX tour on first run through
-		try {
-			await page.getByLabel( 'Close Tour' ).click( { timeout: 5000 } );
-		} catch ( e ) {
-			console.log( 'Tour was not visible, skipping.' );
-		}
 
 		// no filters applied
 		await expect(
