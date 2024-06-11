@@ -10,6 +10,16 @@ const test = base.extend( {
 	},
 } );
 
+async function prepareAssembler( pageObject, baseURL ) {
+	await pageObject.setupSite( baseURL );
+	await pageObject.waitForLoadingScreenFinish();
+	const assembler = await pageObject.getAssembler();
+	await assembler.getByText( 'Design your homepage' ).click();
+	await assembler
+		.locator( '.components-placeholder__preview' )
+		.waitFor( { state: 'hidden' } );
+}
+
 test.describe( 'Assembler -> Homepage', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -49,35 +59,12 @@ test.describe( 'Assembler -> Homepage', () => {
 		}
 	} );
 
-	test.beforeEach( async ( { baseURL, pageObject }, testInfo ) => {
-		// This is for tests that includes tracking yes/no and API must be run before the test starts
-		if ( testInfo.title.includes( 'tracking is allowed' ) ) {
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_allow_tracking',
-				'yes'
-			);
-		} else if ( testInfo.title.includes( 'tracking is disallowed' ) ) {
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_allow_tracking',
-				'no'
-			);
-		}
-		await pageObject.setupSite( baseURL );
-		await pageObject.waitForLoadingScreenFinish();
-		const assembler = await pageObject.getAssembler();
-		await assembler.getByText( 'Design your homepage' ).click();
-		await assembler
-			.locator( '.components-placeholder__preview' )
-			.waitFor( { state: 'hidden' } );
-	} );
-
 	test( 'Available homepage should be displayed', async ( {
 		pageObject,
+		baseURL,
 	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+
 		const assembler = await pageObject.getAssembler();
 
 		const homepages = assembler.locator(
@@ -89,7 +76,10 @@ test.describe( 'Assembler -> Homepage', () => {
 
 	test( 'The selected homepage should be focused when is clicked', async ( {
 		pageObject,
+		baseURL,
 	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+
 		const assembler = await pageObject.getAssembler();
 		const homepage = assembler
 			.locator( '.block-editor-block-patterns-list__item' )
@@ -101,7 +91,10 @@ test.describe( 'Assembler -> Homepage', () => {
 
 	test( 'The selected homepage should be visible on the site preview', async ( {
 		pageObject,
+		baseURL,
 	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+
 		const assembler = await pageObject.getAssembler();
 		const editor = await pageObject.getEditor();
 
@@ -143,6 +136,8 @@ test.describe( 'Assembler -> Homepage', () => {
 		baseURL,
 	}, testInfo ) => {
 		testInfo.snapshotSuffix = '';
+		await prepareAssembler( pageObject, baseURL );
+
 		const assembler = await pageObject.getAssembler();
 		const homepage = assembler
 			.locator( '.block-editor-block-patterns-list__item' )
@@ -187,9 +182,19 @@ test.describe( 'Assembler -> Homepage', () => {
 	} );
 
 	test.describe( 'Homepage tracking banner', () => {
-		test( 'Should show the "Want more patterns?" banner with the Opt-in message when tracking is disallowed', async ( {
+		test( 'Should show the "Want more patterns?" banner with the Opt-in message when tracking is not allowed', async ( {
 			pageObject,
+			baseURL,
 		} ) => {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'no'
+			);
+
+			await prepareAssembler( pageObject, baseURL );
+
 			const assembler = await pageObject.getAssembler();
 			await expect(
 				assembler.getByText( 'Want more patterns?' )
@@ -201,10 +206,20 @@ test.describe( 'Assembler -> Homepage', () => {
 			).toBeVisible();
 		} );
 
-		test( 'Should show the "Want more patterns?" banner with the offline message when the user is offline and tracking is disallowed', async ( {
+		test( 'Should show the "Want more patterns?" banner with the offline message when the user is offline and tracking is not allowed', async ( {
 			context,
 			pageObject,
+			baseURL,
 		} ) => {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'no'
+			);
+
+			await prepareAssembler( pageObject, baseURL );
+
 			await context.setOffline( true );
 
 			const assembler = await pageObject.getAssembler();
@@ -219,8 +234,18 @@ test.describe( 'Assembler -> Homepage', () => {
 		} );
 
 		test( 'Should not show the "Want more patterns?" banner when tracking is allowed', async ( {
+			baseURL,
 			pageObject,
 		} ) => {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'yes'
+			);
+
+			await prepareAssembler( pageObject, baseURL );
+
 			const assembler = await pageObject.getAssembler();
 			await expect(
 				assembler.getByText( 'Want more patterns?' )
@@ -259,14 +284,9 @@ test.describe( 'Assembler -> Homepage -> PTK API is down', () => {
 			} );
 		} );
 
-		await pageObject.setupSite( baseURL );
-		await pageObject.waitForLoadingScreenFinish();
-		const assembler = await pageObject.getAssembler();
-		await assembler.getByText( 'Design your homepage' ).click();
-		await assembler
-			.locator( '.components-placeholder__preview' )
-			.waitFor( { state: 'hidden' } );
+		await prepareAssembler( pageObject, baseURL );
 
+		const assembler = await pageObject.getAssembler();
 		await expect(
 			assembler.getByText( 'Want more patterns?' )
 		).toBeVisible();
