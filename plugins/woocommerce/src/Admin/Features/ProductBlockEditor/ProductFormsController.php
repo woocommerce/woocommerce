@@ -34,7 +34,7 @@ class ProductFormsController {
 	 * @return void
 	 */
 	public function migrate_templates_when_plugin_updated( \WP_Upgrader $upgrader, array $hook_extra ) {
-		// If it is not a plugin update, bail early.
+		// If it is not a plugin hook type, bail early.
 		$type = isset( $hook_extra['type'] ) ? $hook_extra['type'] : '';
 		if ( $type !== 'plugin' ) {
 			return;
