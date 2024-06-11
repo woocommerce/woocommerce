@@ -5,6 +5,7 @@ import { getProducts } from '@woocommerce/editor-components/utils';
 import { ProductResponseItem } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
+import { useDebounce } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import {
 	FormTokenField,
@@ -24,7 +25,7 @@ import { DEFAULT_FILTERS } from '../../constants';
  * - productsMap: Map of products by id and name.
  * - productsList: List of products retrieved.
  */
-function useProducts() {
+function useProducts( search: string ) {
 	// Creating a map for fast lookup of products by id or name.
 	const [ productsMap, setProductsMap ] = useState<
 		Map< number | string, ProductResponseItem >
@@ -36,11 +37,19 @@ function useProducts() {
 	);
 
 	useEffect( () => {
+		// Allow searching from 2+ characters.
+		if ( search.length <= 1 ) {
+			return;
+		}
+
 		getProducts( {
 			selected: [],
 			queryArgs: {
-				// Fetch all products.
-				per_page: 0,
+				search,
+				// Limit search to 100 results. If there's too many results
+				// user needs to type more characters to get closer to actual
+				// product name.
+				per_page: 100,
 			},
 		} ).then( ( results ) => {
 			const newProductsMap = new Map();
@@ -52,7 +61,7 @@ function useProducts() {
 			setProductsList( results as ProductResponseItem[] );
 			setProductsMap( newProductsMap );
 		} );
-	}, [] );
+	}, [ search ] );
 
 	return { productsMap, productsList };
 }
@@ -63,7 +72,9 @@ const HandPickedProductsControl = ( {
 	setQueryAttribute,
 }: QueryControlProps ) => {
 	const selectedProductIds = query.woocommerceHandPickedProducts;
-	const { productsMap, productsList } = useProducts();
+	const [ searchQuery, setSearchQuery ] = useState( '' );
+	const { productsMap, productsList } = useProducts( searchQuery );
+	const handleSearch = useDebounce( setSearchQuery, 300 );
 
 	const onTokenChange = useCallback(
 		( values: string[] ) => {
@@ -86,7 +97,7 @@ const HandPickedProductsControl = ( {
 			} );
 			trackInteraction( CoreFilterNames.HAND_PICKED );
 		},
-		[ setQueryAttribute, productsMap ]
+		[ setQueryAttribute, trackInteraction, productsMap ]
 	);
 
 	const suggestions = useMemo( () => {
@@ -134,10 +145,10 @@ const HandPickedProductsControl = ( {
 			resetAllFilter={ deselectCallback }
 		>
 			<FormTokenField
-				disabled={ ! productsMap.size }
 				displayTransform={ transformTokenIntoProductName }
 				label={ __( 'Hand-picked Products', 'woocommerce' ) }
 				onChange={ onTokenChange }
+				onInputChange={ handleSearch }
 				suggestions={ suggestions }
 				// @ts-expect-error Using experimental features
 				__experimentalValidateInput={ ( value: string ) =>
