@@ -46,7 +46,7 @@ export const SidebarNavigationExtraScreen = () => {
 
 	if ( patternCategory ) {
 		return (
-			<div className="edit-site-layout__sidebar-extra">
+			<div className="woocommerce-customize-store-edit-site-layout__sidebar-extra">
 				<SidebarPatternScreen category={ patternCategory } />;
 			</div>
 		);

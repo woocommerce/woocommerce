@@ -79,7 +79,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 
 	return (
 		<div
-			className="edit-site-layout__sidebar-extra__pattern"
+			className="woocommerce-customize-store-edit-site-layout__sidebar-extra__pattern"
 			onScroll={ ( event ) => {
 				const element = event.target as HTMLElement;
 				const scrollTop = element.scrollTop;
@@ -91,7 +91,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 				}
 			} }
 		>
-			<div className="edit-site-layout__sidebar-extra__pattern__header">
+			<div className="woocommerce-customize-store-edit-site-layout__sidebar-extra__pattern__header">
 				<h1>
 					{ capitalize(
 						PATTERN_CATEGORIES[
@@ -114,7 +114,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 					label={ __( 'Close', 'woocommerce' ) }
 				/>
 			</div>
-			<div className="edit-site-layout__sidebar-extra__pattern__description">
+			<div className="woocommerce-customize-store-edit-site-layout__sidebar-extra__pattern__description">
 				<span>
 					{
 						PATTERN_CATEGORIES[
