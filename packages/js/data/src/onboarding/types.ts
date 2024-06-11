@@ -32,6 +32,7 @@ export type TaskType = {
 		taxJarActivated?: boolean;
 		avalaraActivated?: boolean;
 		woocommerceTaxActivated?: boolean;
+		woocommerceShippingActivated?: boolean;
 	};
 	// Possibly added in DeprecatedTasks.mergeDeprecatedCallbackFunctions
 	isDeprecated?: boolean;
