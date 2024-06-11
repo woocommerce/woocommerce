@@ -465,7 +465,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 */
 	public function get_usage_by_user_id( &$coupon, $user_id ) {
 		global $wpdb;
-		$usage_count = $wpdb->get_var(
+		$usage_count           = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT( meta_id ) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_used_by' AND meta_value = %s;",
 				$coupon->get_id(),
@@ -486,7 +486,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 */
 	public function get_usage_by_email( &$coupon, $email ) {
 		global $wpdb;
-		$usage_count = $wpdb->get_var(
+		$usage_count           = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT( meta_id ) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_used_by' AND meta_value = %s;",
 				$coupon->get_id(),
@@ -510,7 +510,6 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		return $wpdb->get_var(
 			$this->get_tentative_usage_query_for_user( $coupon_id, $user_aliases )
 		); // WPCS: unprepared SQL ok.
-
 	}
 
 	/**
@@ -662,8 +661,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$query_for_tentative_usages = $this->get_tentative_usage_query_for_user( $coupon->get_id(), $user_aliases );
 		$db_timestamp               = $wpdb->get_var( 'SELECT UNIX_TIMESTAMP() FROM ' . $wpdb->posts . ' LIMIT 1' );
 
-		$coupon_used_by_meta_key    = '_maybe_used_by_' . ( (int) $db_timestamp + $held_time ) . '_' . wp_generate_password( 6, false );
-		$insert_statement           = $wpdb->prepare(
+		$coupon_used_by_meta_key = '_maybe_used_by_' . ( (int) $db_timestamp + $held_time ) . '_' . wp_generate_password( 6, false );
+		$insert_statement        = $wpdb->prepare(
 			"
 			INSERT INTO $wpdb->postmeta ( post_id, meta_key, meta_value )
 			SELECT %d, %s, %s FROM $wpdb->posts
