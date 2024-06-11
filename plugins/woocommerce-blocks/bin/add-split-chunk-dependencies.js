@@ -1,4 +1,4 @@
-// Dependency Exraction Webpack Plugin's asset.php array entries always refer to a single module with a single corresponding
+// Dependency Extraction Webpack Plugin's asset.php array entries always refer to a single module with a single corresponding
 // js file. When we generate a split chunk it can represent multiple modules but it becomes an essential dependency
 // for any module in the bundle. To get around this limitation, we prefix the split chunk handles to the asset.php
 // file's dependency array. You must still register the handles for them in PHP for this to work but you won't have
