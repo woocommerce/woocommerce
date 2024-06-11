@@ -170,10 +170,11 @@ export function VariationsTableRow( {
 								onClick={ onToggle }
 							>
 								{ variation.image && (
-									<img
+									<div
 										className="woocommerce-product-variations__image"
-										src={ variation.image.src }
-										alt={ variation.image.alt }
+										style={ {
+											backgroundImage: `url('${ variation.image.src }')`,
+										} }
 									/>
 								) }
 							</Button>

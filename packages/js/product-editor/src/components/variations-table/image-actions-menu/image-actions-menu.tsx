@@ -61,6 +61,7 @@ export function ImageActionsMenu( {
 			renderToggle={ ( toggleProps ) =>
 				props.renderToggle( { ...toggleProps, isBusy: isUploading } )
 			}
+			className="woocommerce-image-actions-menu"
 			contentClassName="woocommerce-image-actions-menu__menu-content"
 			renderContent={ ( { onClose } ) => (
 				<div className="components-dropdown-menu__menu">

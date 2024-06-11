@@ -1,4 +1,6 @@
 .woocommerce-image-actions-menu {
+	display: inline-flex;
+
 	&__menu-content {
 		// To be rendered below the MediaLibrary modal.
 		z-index: 100000;
