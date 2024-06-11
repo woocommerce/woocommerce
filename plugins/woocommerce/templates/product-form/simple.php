@@ -8,7 +8,7 @@
  * Product Types: simple, variable
  *
  * @package WooCommerce\Templates
- * @version 9.1.0
+ * @version 9.1.0-beta.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
