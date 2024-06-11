@@ -146,7 +146,10 @@ export const Toolbar = () => {
 							/>
 						</ToolbarGroup>
 						<Shuffle clientId={ selectedBlockClientId } />
-						<Delete clientId={ selectedBlockClientId } />
+						<Delete
+							clientId={ selectedBlockClientId }
+							nextBlockClientId={ nextBlock?.clientId }
+						/>
 					</>
 				</WPToolbar>
 			</div>

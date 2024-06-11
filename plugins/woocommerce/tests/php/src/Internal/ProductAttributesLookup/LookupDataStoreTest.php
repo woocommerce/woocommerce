@@ -30,13 +30,6 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	private $lookup_table_name;
 
 	/**
-	 * Runs after all the tests in the class.
-	 */
-	public static function tearDownAfterClass(): void {
-		parent::tearDownAfterClass();
-	}
-
-	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -144,7 +137,9 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$actual = $this->get_lookup_table_data();
 
-		$this->assertEquals( sort( $expected ), sort( $actual ) );
+		sort( $expected );
+		sort( $actual );
+		$this->assertEquals( $expected, $actual );
 	}
 
 	/**
@@ -160,7 +155,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_terms'      => function( $args ) use ( &$invokations_of_get_terms ) {
+				'get_terms'      => function ( $args ) use ( &$invokations_of_get_terms ) {
 					switch ( $args['taxonomy'] ) {
 						case 'non-variation-attribute':
 							return array(
@@ -187,7 +182,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 							throw new \Exception( "Unexpected call to 'get_terms'" );
 					}
 				},
-				'wc_get_product' => function( $id ) use ( &$products ) {
+				'wc_get_product' => function ( $id ) use ( &$products ) {
 					return $products[ $id ];
 				},
 			)
@@ -343,7 +338,10 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		);
 
 		$actual = $this->get_lookup_table_data();
-		$this->assertEquals( sort( $expected ), sort( $actual ) );
+
+		sort( $expected );
+		sort( $actual );
+		$this->assertEquals( $expected, $actual );
 	}
 
 	/**
@@ -366,17 +364,17 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_post_type'    => function( $id ) use ( $product ) {
+				'get_post_type'    => function ( $id ) use ( $product ) {
 					if ( $id === $product->get_id() || $id === $product ) {
 						return 'product';
 					} else {
 						return get_post_type( $id );
 					}
 				},
-				'time'             => function() {
+				'time'             => function () {
 					return 100;
 				},
-				'current_user_can' => function( $capability, ...$args ) {
+				'current_user_can' => function ( $capability, ...$args ) {
 					if ( 'delete_posts' === $capability ) {
 						return true;
 					} else {
@@ -420,9 +418,11 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		switch ( $deletion_mechanism ) {
 			case 'wp_trash_post':
+                // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 				do_action( 'wp_trash_post', $product );
 				break;
 			case 'delete_post':
+                // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 				do_action( 'delete_post', $product->get_id() );
 				break;
 			case 'delete_method_in_product':
@@ -460,7 +460,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_post_type'    => function( $id ) use ( $product, $variation ) {
+				'get_post_type'    => function ( $id ) use ( $product, $variation ) {
 					if ( $id === $product->get_id() || $id === $product ) {
 						return 'product';
 					} elseif ( $id === $variation->get_id() || $id === $variation ) {
@@ -469,10 +469,10 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 						return get_post_type( $id );
 					}
 				},
-				'time'             => function() {
+				'time'             => function () {
 					return 100;
 				},
-				'current_user_can' => function( $capability, ...$args ) {
+				'current_user_can' => function ( $capability, ...$args ) {
 					if ( 'delete_posts' === $capability ) {
 						return true;
 					} else {
@@ -529,7 +529,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_post_type'    => function( $id ) use ( $product, $variation ) {
+				'get_post_type'    => function ( $id ) use ( $product, $variation ) {
 					if ( $id === $product->get_id() || $id === $product ) {
 						return 'product';
 					} elseif ( $id === $variation->get_id() || $id === $variation ) {
@@ -538,10 +538,10 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 						return get_post_type( $id );
 					}
 				},
-				'time'             => function() {
+				'time'             => function () {
 					return 100;
 				},
-				'current_user_can' => function( $capability, ...$args ) {
+				'current_user_can' => function ( $capability, ...$args ) {
 					if ( 'delete_posts' === $capability ) {
 						return true;
 					} else {
@@ -580,7 +580,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'time' => function() {
+				'time' => function () {
 					return 100;
 				},
 			)
@@ -689,7 +689,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'time' => function() {
+				'time' => function () {
 					return 100;
 				},
 			)
@@ -857,7 +857,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		);
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_get_product' => function( $id ) use ( $product ) {
+				'wc_get_product' => function ( $id ) use ( $product ) {
 					if ( $id === $product->get_id() || $id === $product ) {
 						return $product;
 					} else {
@@ -936,7 +936,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_terms'      => function( $args ) {
+				'get_terms'      => function ( $args ) {
 					switch ( $args['taxonomy'] ) {
 						case 'non-variation-attribute':
 							return array(
@@ -950,7 +950,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 							throw new \Exception( "Unexpected call to 'get_terms'" );
 					}
 				},
-				'wc_get_product' => function( $id ) use ( $product, $variation ) {
+				'wc_get_product' => function ( $id ) use ( $product, $variation ) {
 					if ( $id === $product->get_id() || $id === $product ) {
 						return $product;
 					} elseif ( $id === $variation->get_id() || $id === $variation ) {
@@ -1038,7 +1038,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_terms'      => function( $args ) {
+				'get_terms'      => function ( $args ) {
 					switch ( $args['taxonomy'] ) {
 						case 'non-variation-attribute':
 							return array(
@@ -1052,7 +1052,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 							throw new \Exception( "Unexpected call to 'get_terms'" );
 					}
 				},
-				'wc_get_product' => function( $id ) use ( $product, $variation ) {
+				'wc_get_product' => function ( $id ) use ( $product, $variation ) {
 					if ( $id === $product->get_id() || $id === $product ) {
 						return $product;
 					} elseif ( $id === $variation->get_id() || $id === $variation ) {
