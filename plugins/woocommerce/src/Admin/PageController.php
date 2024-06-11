@@ -530,7 +530,7 @@ class PageController {
 	 */
 	public function remove_app_entry_page_menu_item() {
 		global $submenu;
-		// User does not have capabilites to see the submenu.
+		// User does not have capabilities to see the submenu.
 		if ( ! current_user_can( 'manage_woocommerce' ) || empty( $submenu['woocommerce'] ) ) {
 			return;
 		}
