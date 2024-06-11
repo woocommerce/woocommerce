@@ -467,7 +467,7 @@ class DataRegenerator {
 			throw new \Exception( "Can't resume the product attribute lookup data regeneration process: regeneration is already in progress" );
 		}
 		if ( ! $this->data_store->regeneration_was_aborted() ) {
-			throw new \Exception( "Can't resume the product attribute lookup data regeneration process: regeneration hasn't been aborted" );
+			throw new \Exception( "Can't resume the product attribute lookup data regeneration process: no aborted regeneration process exists" );
 		}
 
 		$this->data_store->unset_regeneration_aborted_flag();

@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { guestFile } from '@woocommerce/e2e-utils';
+import { test as base, expect, guestFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -38,15 +37,15 @@ const test = base.extend< { pageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
-	test.beforeEach( async ( { admin, editorUtils, localPickupUtils } ) => {
+	test.beforeEach( async ( { admin, editor, localPickupUtils } ) => {
 		await localPickupUtils.disableLocalPickup();
 
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//order-confirmation',
 			postType: 'wp_template',
 		} );
-		await editorUtils.enterEditMode();
-		await editorUtils.transformIntoBlocks();
+		await editor.enterEditMode();
+		await editor.transformIntoBlocks();
 	} );
 
 	test( 'Place order', async ( {
@@ -243,7 +242,7 @@ test.describe( 'Shopper → Order Confirmation → Downloadable Products', () =>
 
 		// Update last order status to completed.
 		await admin.visitAdminPage( 'edit.php', 'post_type=shop_order' );
-		await admin.page.waitForSelector( '.wp-list-table' );
+		await admin.page.locator( '.wp-list-table' ).waitFor();
 		await admin.page.click(
 			'.wp-list-table tbody tr:first-child a.order-view'
 		);

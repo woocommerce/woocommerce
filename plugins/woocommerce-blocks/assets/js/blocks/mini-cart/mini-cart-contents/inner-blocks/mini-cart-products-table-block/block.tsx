@@ -3,7 +3,7 @@
  */
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { CartLineItemsTable } from '@woocommerce/base-components/cart-checkout';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 type MiniCartProductsTableBlockProps = {
 	className: string;
@@ -15,7 +15,7 @@ const Block = ( {
 	const { cartItems, cartIsLoading } = useStoreCart();
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				className,
 				'wc-block-mini-cart__products-table'
 			) }

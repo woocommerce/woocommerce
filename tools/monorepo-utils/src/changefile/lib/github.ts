@@ -38,7 +38,7 @@ export const getPullRequestData = async (
 };
 
 /**
- * Determine if a pull request description activates the changelog automation.
+ * Determine if a pull request description activates the changelog automation with a changelog entry.
  *
  * @param {string} body pull request description.
  * @return {boolean} if the pull request description activates the changelog automation.
@@ -46,6 +46,18 @@ export const getPullRequestData = async (
 export const shouldAutomateChangelog = ( body: string ) => {
 	const regex =
 		/\[(?:x|X)\] Automatically create a changelog entry from the details/gm;
+	return regex.test( body );
+};
+
+/**
+ * Determine if a pull request description activates the changelog automation without a changelog entry.
+ *
+ * @param {string} body pull request description.
+ * @return {boolean} if the pull request description activates the changelog automation.
+ */
+export const shouldAutomateNoChangelog = ( body: string ) => {
+	const regex =
+		/\[(?:x|X)\] This Pull Request does not require a changelog entry/gm;
 	return regex.test( body );
 };
 
@@ -153,6 +165,14 @@ export const getChangelogComment = ( body: string ) => {
  * @return {Object}     Changelog details
  */
 export const getChangelogDetails = ( body: string ) => {
+	if ( shouldAutomateNoChangelog( body ) ) {
+		return {
+			significance: 'patch',
+			type: 'tweak',
+			message: '',
+			comment: getChangelogComment( body ),
+		};
+	}
 	return {
 		significance: getChangelogSignificance( body ),
 		type: getChangelogType( body ),

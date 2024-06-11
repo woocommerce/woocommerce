@@ -1472,6 +1472,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 			'content'       => $note_content,
 			'customer_note' => false,
 			'added_by'      => 'system',
+			'order_id'      => absint( $order->get_id() ),
 		);
 		$note         = (array) wc_get_order_note( $note_id );
 		unset( $note['date_created'] );

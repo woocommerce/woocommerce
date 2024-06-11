@@ -1,21 +1,23 @@
 /**
  * External dependencies
  */
-import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
+import { parse, synchronizeBlocksWithTemplate } from '@wordpress/blocks';
 import {
 	createElement,
 	useMemo,
 	useLayoutEffect,
 	useEffect,
 	useState,
+	lazy,
+	Suspense,
 } from '@wordpress/element';
-import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
+import { dispatch, select, useSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
-import { PluginArea } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { Product } from '@woocommerce/data';
+import { SelectControl } from '@wordpress/components';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -46,14 +48,25 @@ import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved
 import { useProductTemplate } from '../../hooks/use-product-template';
 import { PostTypeContext } from '../../contexts/post-type-context';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
-import { ModalEditor } from '../modal-editor';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
-import { ProductTemplate } from '../../types';
 import { LoadingState } from './loading-state';
+import type { ProductFormTemplateProps, ProductTemplate } from '../../types';
+
+const PluginArea = lazy( () =>
+	import( '@wordpress/plugins' ).then( ( module ) => ( {
+		default: module.PluginArea,
+	} ) )
+);
+
+const ModalEditor = lazy( () =>
+	import( '../modal-editor' ).then( ( module ) => ( {
+		default: module.ModalEditor,
+	} ) )
+);
 
 function getLayoutTemplateId(
-	productTemplate: ProductTemplate | undefined,
+	productTemplate: ProductTemplate | undefined | null,
 	postType: string
 ) {
 	if ( productTemplate?.layoutTemplateId ) {
@@ -74,12 +87,14 @@ export function BlockEditor( {
 	productId,
 	setIsEditorLoading,
 }: BlockEditorProps ) {
-	useConfirmUnsavedProductChanges( postType );
+	const isProductEditorTemplateSystemEnabled =
+		!! window.wcAdminFeatures?.[ 'product-editor-template-system' ];
 
-	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
-		const { canUser } = select( 'core' );
-		return canUser( 'create', 'media', '' ) !== false;
-	}, [] );
+	const [ selectedProductFormId, setSelectedProductFormId ] = useState<
+		number | null
+	>( null );
+
+	useConfirmUnsavedProductChanges( postType );
 
 	/**
 	 * Fire wp-pin-menu event once to trigger the pinning of the menu.
@@ -94,10 +109,9 @@ export function BlockEditor( {
 		return () => window.removeEventListener( 'scroll', wpPinMenuEvent );
 	}, [] );
 
-	// @ts-expect-error Type definitions are missing
-	const { registerShortcut } = useDispatch( keyboardShortcutsStore );
-
 	useEffect( () => {
+		// @ts-expect-error Type definitions are missing
+		const { registerShortcut } = dispatch( keyboardShortcutsStore );
 		if ( registerShortcut ) {
 			registerShortcut( {
 				name: 'core/editor/save',
@@ -109,7 +123,7 @@ export function BlockEditor( {
 				},
 			} );
 		}
-	}, [ registerShortcut ] );
+	}, [] );
 
 	const [ settingsGlobal, setSettingsGlobal ] = useState<
 		Partial< ProductEditorSettings > | undefined
@@ -140,6 +154,9 @@ export function BlockEditor( {
 			return undefined;
 		}
 
+		const canUserCreateMedia =
+			select( 'core' ).canUser( 'create', 'media', '' ) !== false;
+
 		const mediaSettings = canUserCreateMedia
 			? {
 					mediaUpload( {
@@ -165,9 +182,9 @@ export function BlockEditor( {
 			...mediaSettings,
 			templateLock: 'all',
 		};
-	}, [ settingsGlobal, canUserCreateMedia ] );
+	}, [ settingsGlobal ] );
 
-	const { editedRecord: product } = useEntityRecord< Product >(
+	const { editedRecord: product, hasResolved } = useEntityRecord< Product >(
 		'postType',
 		postType,
 		productId,
@@ -175,18 +192,22 @@ export function BlockEditor( {
 		{ enabled: productId !== -1 }
 	);
 
-	const productTemplateId = product?.meta_data?.find(
-		( metaEntry: { key: string } ) =>
-			metaEntry.key === '_product_template_id'
-	)?.value;
+	const productTemplateId = useMemo(
+		() =>
+			product?.meta_data?.find(
+				( metaEntry: { key: string } ) =>
+					metaEntry.key === '_product_template_id'
+			)?.value,
+		[ product?.meta_data ]
+	);
 
 	const { productTemplate } = useProductTemplate(
 		productTemplateId,
-		product
+		hasResolved ? product : null
 	);
 
 	const { layoutTemplate } = useLayoutTemplate(
-		getLayoutTemplateId( productTemplate, postType )
+		hasResolved ? getLayoutTemplateId( productTemplate, postType ) : null
 	);
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
@@ -196,62 +217,153 @@ export function BlockEditor( {
 		{ id: productId !== -1 ? productId : 0 }
 	);
 
-	const { updateEditorSettings } = useDispatch( 'core/editor' );
+	// Pull the product templates from the store.
+	const productForms = useSelect( ( sel ) => {
+		return (
+			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
+				per_page: -1,
+			} ) || []
+		);
+	}, [] ) as ProductFormTemplateProps[];
+
+	// Set the default product form template ID.
+	useEffect( () => {
+		if ( ! productForms.length ) {
+			return;
+		}
+
+		setSelectedProductFormId( productForms[ 0 ].id );
+	}, [ productForms ] );
 
 	const isEditorLoading =
 		! settings ||
 		! layoutTemplate ||
 		// variations don't have a product template
 		( postType !== 'product_variation' && ! productTemplate ) ||
-		productId === -1;
+		productId === -1 ||
+		! hasResolved;
 
-	useLayoutEffect( () => {
-		if ( isEditorLoading ) {
-			return;
-		}
+	const productFormTemplate = useMemo(
+		function pickAndParseTheProductFormTemplate() {
+			if (
+				! isProductEditorTemplateSystemEnabled ||
+				! selectedProductFormId
+			) {
+				return undefined;
+			}
 
-		const blockInstances = synchronizeBlocksWithTemplate(
-			[],
-			layoutTemplate.blockTemplates
-		);
+			const productFormPost = productForms.find(
+				( form ) => form.id === selectedProductFormId
+			);
 
-		onChange( blockInstances, {} );
+			if ( productFormPost ) {
+				return parse( productFormPost.content.raw );
+			}
 
-		updateEditorSettings( {
-			...settings,
+			return undefined;
+		},
+		[
+			isProductEditorTemplateSystemEnabled,
+			productForms,
+			selectedProductFormId,
+		]
+	);
+
+	useLayoutEffect(
+		function setupEditor() {
+			if ( isEditorLoading ) {
+				return;
+			}
+
+			const blockInstances = synchronizeBlocksWithTemplate(
+				[],
+				layoutTemplate.blockTemplates
+			);
+
+			/*
+			 * If the product form template is not available, use the block instances.
+			 * ToDo: Remove this fallback once the product form template is stable/available.
+			 */
+			const editorTemplate = productFormTemplate ?? blockInstances;
+
+			onChange( editorTemplate, {} );
+
+			dispatch( 'core/editor' ).updateEditorSettings( {
+				...settings,
+				productTemplate,
+			} as Partial< ProductEditorSettings > );
+
+			// We don't need to include onChange in the dependencies, since we get new
+			// instances of it on every render, which would cause an infinite loop.
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+		},
+		[
+			isEditorLoading,
+			layoutTemplate,
+			settings,
 			productTemplate,
-		} as Partial< ProductEditorSettings > );
+			productFormTemplate,
+		]
+	);
 
+	useEffect( () => {
 		setIsEditorLoading( isEditorLoading );
-
-		// We don't need to include onChange or updateEditorSettings in the dependencies,
-		// since we get new instances of them on every render, which would cause an infinite loop.
-		//
-		// We include productId in the dependencies to make sure that the effect is run when the
-		// product is changed, since we need to synchronize the blocks with the template and update
-		// the blocks by calling onChange.
-		//
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ layoutTemplate, settings, productTemplate, productId ] );
+	}, [ isEditorLoading ] );
 
 	// Check if the Modal editor is open from the store.
-	const isModalEditorOpen = useSelect( ( select ) => {
-		return select( productEditorUiStore ).isModalEditorOpen();
+	const isModalEditorOpen = useSelect( ( selectCore ) => {
+		return selectCore( productEditorUiStore ).isModalEditorOpen();
 	}, [] );
 
-	const { closeModalEditor } = useDispatch( productEditorUiStore );
-
-	if ( isModalEditorOpen ) {
+	if ( isEditorLoading ) {
 		return (
-			<ModalEditor
-				onClose={ closeModalEditor }
-				title={ __( 'Edit description', 'woocommerce' ) }
-			/>
+			<div className="woocommerce-product-block-editor">
+				<LoadingState />
+			</div>
 		);
 	}
 
+	if ( isModalEditorOpen ) {
+		return (
+			<Suspense fallback={ null }>
+				<ModalEditor
+					onClose={
+						dispatch( productEditorUiStore ).closeModalEditor
+					}
+					title={ __( 'Edit description', 'woocommerce' ) }
+				/>
+			</Suspense>
+		);
+	}
+
+	const formTemplateSelectValues = productForms?.map( ( form ) => ( {
+		label: form.title.raw,
+		value: String( form.id ),
+	} ) );
+
 	return (
 		<div className="woocommerce-product-block-editor">
+			{ isProductEditorTemplateSystemEnabled && (
+				<div style={ { margin: '32px', width: '250px' } }>
+					<SelectControl
+						label={ __(
+							'Choose form template type',
+							'woocommerce'
+						) }
+						options={ formTemplateSelectValues }
+						onChange={ ( value: string ) =>
+							setSelectedProductFormId( parseInt( value, 10 ) )
+						}
+						disabled={ ! productForms }
+						className="woocommerce-product-block-editor__product-type-selector"
+						help={ __(
+							'This is a temporary setting.',
+							'woocommerce'
+						) }
+					/>
+				</div>
+			) }
+
 			<BlockContextProvider value={ context }>
 				<BlockEditorProvider
 					value={ blocks }
@@ -265,17 +377,15 @@ export function BlockEditor( {
 					<BlockEditorKeyboardShortcuts.Register />
 					<BlockTools>
 						<ObserveTyping>
-							{ isEditorLoading ? (
-								<LoadingState />
-							) : (
-								<BlockList className="woocommerce-product-block-editor__block-list" />
-							) }
+							<BlockList className="woocommerce-product-block-editor__block-list" />
 						</ObserveTyping>
 					</BlockTools>
 					{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }
 					<PostTypeContext.Provider value={ context.postType! }>
-						{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-						<PluginArea scope="woocommerce-product-block-editor" />
+						<Suspense fallback={ null }>
+							{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+							<PluginArea scope="woocommerce-product-block-editor" />
+						</Suspense>
 					</PostTypeContext.Provider>
 				</BlockEditorProvider>
 			</BlockContextProvider>

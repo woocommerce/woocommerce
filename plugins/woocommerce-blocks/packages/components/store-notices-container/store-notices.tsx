@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useRef, useEffect, RawHTML } from '@wordpress/element';
 import { sanitizeHTML } from '@woocommerce/utils';
 import { useDispatch } from '@wordpress/data';
@@ -88,7 +88,7 @@ const StoreNotices = ( {
 	return (
 		<div
 			ref={ ref }
-			className={ classnames( className, 'wc-block-components-notices' ) }
+			className={ clsx( className, 'wc-block-components-notices' ) }
 		>
 			{ nonDismissibleNotices.map( ( notice ) => (
 				<StoreNotice

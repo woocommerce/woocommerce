@@ -83,7 +83,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 					cities: '*',
 					postcodes: '*',
 					rate: '25',
-					name: 'Nasty Tax',
+					name: 'Tax',
 					shipping: false,
 				} )
 				.then( ( response ) => {
@@ -167,7 +167,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 			await test.step( 'Load checkout page and confirm price display', async () => {
 				await page.goto( '/checkout/' );
 				await expect(
-					page.getByRole( 'heading', { name: 'Checkout' } )
+					page.getByRole( 'button', { name: 'Place order' } )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'row', {
@@ -234,7 +234,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 			await test.step( 'Load checkout page and confirm price display', async () => {
 				await page.goto( '/checkout/' );
 				await expect(
-					page.getByRole( 'heading', { name: 'Checkout' } )
+					page.getByRole( 'button', { name: 'Place order' } )
 				).toBeVisible();
 
 				await page
@@ -667,10 +667,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 			await test.step( 'Load checkout page and confirm taxes displayed', async () => {
 				await page.goto( '/checkout/' );
 				await expect(
-					page.getByRole( 'heading', {
-						name: 'Checkout',
-						exact: true,
-					} )
+					page.getByRole( 'button', { name: 'Place order' } )
 				).toBeVisible();
 
 				await page
@@ -762,10 +759,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 			await test.step( 'Load checkout page and confirm taxes displayed', async () => {
 				await page.goto( '/checkout/' );
 				await expect(
-					page.getByRole( 'heading', {
-						name: 'Checkout',
-						exact: true,
-					} )
+					page.getByRole( 'button', { name: 'Place order' } )
 				).toBeVisible();
 
 				await page
@@ -933,8 +927,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 				await page.pause();
 
 				await expect(
-					page.getByRole( 'row', {
-						name: 'Shipping Flat rate: $23.00 (incl. tax) Shipping to CA.',
+					page.getByRole( 'cell', {
+						name: 'Flat rate: $23.00 (incl. tax',
 					} )
 				).toBeVisible();
 				await expect(
@@ -947,7 +941,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 			await test.step( 'Load checkout page and confirm price display', async () => {
 				await page.goto( '/checkout/' );
 				await expect(
-					page.getByRole( 'heading', { name: 'Checkout' } )
+					page.getByRole( 'button', { name: 'Place order' } )
 				).toBeVisible();
 
 				await page
@@ -966,7 +960,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 					.getByRole( 'textbox', { name: 'ZIP Code *' } )
 					.type( customer.billing.us.zip );
 				await page
-					.getByRole( 'textbox', { name: 'Phone *' } )
+					.getByLabel( 'Phone *' )
 					.fill( customer.billing.us.phone );
 				await page
 					.getByLabel( 'Email address *' )

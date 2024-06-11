@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -19,24 +19,23 @@ const blockData = {
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
-	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
+	pageObject: async ( { page, editor, frontendUtils }, use ) => {
 		const pageObject = new ProductGalleryPage( {
 			page,
 			editor,
 			frontendUtils,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editorUtils, editor } ) => {
+	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
 		} );
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
 	} );
 
@@ -68,7 +67,7 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'should be enabled by default', async ( { pageObject } ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			const zoomWhileHoveringSetting =
-				await pageObject.getZoomWhileHoveringSetting();
+				pageObject.getZoomWhileHoveringSetting();
 
 			await expect( zoomWhileHoveringSetting ).toBeChecked();
 		} );
@@ -91,7 +90,7 @@ test.describe( `${ blockData.name }`, () => {
 			const imgElement = blockFrontend.locator( 'img' ).first();
 			const style = await imgElement.evaluate( ( el ) => el.style );
 
-			await expect( style.transform ).toBe( 'scale(1)' );
+			expect( style.transform ).toBe( 'scale(1)' );
 
 			await imgElement.hover();
 
@@ -99,7 +98,7 @@ test.describe( `${ blockData.name }`, () => {
 				( el ) => el.style
 			);
 
-			await expect( styleOnHover.transform ).toBe( 'scale(1.3)' );
+			expect( styleOnHover.transform ).toBe( 'scale(1.3)' );
 		} );
 
 		test( 'should not work on frontend when is disabled', async ( {
@@ -124,7 +123,7 @@ test.describe( `${ blockData.name }`, () => {
 			const imgElement = blockFrontend.locator( 'img' ).first();
 			const style = await imgElement.evaluate( ( el ) => el.style );
 
-			await expect( style.transform ).toBe( '' );
+			expect( style.transform ).toBe( '' );
 
 			await imgElement.hover();
 
@@ -132,7 +131,7 @@ test.describe( `${ blockData.name }`, () => {
 				( el ) => el.style
 			);
 
-			await expect( styleOnHover.transform ).toBe( '' );
+			expect( styleOnHover.transform ).toBe( '' );
 		} );
 	} );
 

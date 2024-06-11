@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 import { Locator } from '@playwright/test';
+import { test as base, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -26,12 +26,11 @@ const blockData = {
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
-	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
+	pageObject: async ( { page, editor, frontendUtils }, use ) => {
 		const pageObject = new ProductGalleryPage( {
 			page,
 			editor,
 			frontendUtils,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},
@@ -83,12 +82,20 @@ const getThumbnailImageIdByNth = async (
 };
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editorUtils } ) => {
-		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//${ blockData.slug }`,
-			postType: 'wp_template',
+	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
+		const template = await requestUtils.createTemplate( 'wp_template', {
+			slug: blockData.slug,
+			title: 'Custom Single Product',
+			content: 'placeholder',
 		} );
-		await editorUtils.enterEditMode();
+
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+
+		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
 	} );
 
 	test.describe( 'with thumbnails', () => {
@@ -342,7 +349,7 @@ test.describe( `${ blockData.name }`, () => {
 			const largeImageBlock = await pageObject.getMainImageBlock( {
 				page: 'frontend',
 			} );
-			largeImageBlock.click();
+			await largeImageBlock.click();
 
 			const productGalleryPopUpContent = page.locator(
 				'.wc-block-product-gallery-dialog__body'
@@ -401,7 +408,7 @@ test.describe( `${ blockData.name }`, () => {
 				secondImageThumbnailId
 			);
 
-			largeImageBlock.click();
+			await largeImageBlock.click();
 
 			const productGalleryPopUpContent = page.locator(
 				'.wc-block-product-gallery-dialog__body'
@@ -434,7 +441,7 @@ test.describe( `${ blockData.name }`, () => {
 			const closePopUpButton = productGalleryPopUpHeader.locator(
 				'.wc-block-product-gallery-dialog__close'
 			);
-			closePopUpButton.click();
+			await closePopUpButton.click();
 
 			await page.waitForFunction( () => {
 				const isPopUpOpen = document
@@ -459,8 +466,7 @@ test.describe( `${ blockData.name }`, () => {
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			await editor.openDocumentSettingsSidebar();
-			const fullScreenOption =
-				await pageObject.getFullScreenOnClickSetting();
+			const fullScreenOption = pageObject.getFullScreenOnClickSetting();
 
 			await expect( fullScreenOption ).toBeChecked();
 		} );
@@ -513,9 +519,9 @@ test.describe( `${ blockData.name }`, () => {
 	test.describe( 'block availability', () => {
 		test( 'should be available on the Single Product Template', async ( {
 			page,
-			editorUtils,
+			editor,
 		} ) => {
-			await editorUtils.openGlobalBlockInserter();
+			await editor.openGlobalBlockInserter();
 			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
 			const productGalleryBlockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
@@ -526,15 +532,15 @@ test.describe( `${ blockData.name }`, () => {
 
 		test( 'should be available on the Product Gallery template part', async ( {
 			admin,
-			editorUtils,
+			editor,
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//product-gallery`,
 				postType: 'wp_template_part',
 			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.openGlobalBlockInserter();
+			await editor.enterEditMode();
+			await editor.openGlobalBlockInserter();
 			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
 			const productGalleryBlockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
@@ -546,10 +552,10 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'should be hidden on the post editor', async ( {
 			admin,
 			page,
-			editorUtils,
+			editor,
 		} ) => {
 			await admin.createNewPost();
-			await editorUtils.openGlobalBlockInserter();
+			await editor.openGlobalBlockInserter();
 			const productGalleryBlockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
 				.getByRole( 'option', { name: blockData.title } );
@@ -592,5 +598,38 @@ test.describe( `${ blockData.name }`, () => {
 		expect(
 			width === height + 1 || width === height - 1 || width === height
 		).toBeTruthy();
+	} );
+
+	test( 'should persistently display the block when navigating back to the template without a page reload', async ( {
+		editor,
+		pageObject,
+		page,
+	} ) => {
+		await pageObject.addProductGalleryBlock( { cleanContent: true } );
+		await editor.saveSiteEditorEntities();
+
+		await page.getByLabel( 'Open Navigation' ).click();
+		const navigationSidebar = page.getByLabel( 'Navigation' );
+		const navigationBackButton = navigationSidebar.getByLabel( 'Back' );
+		await expect( navigationBackButton ).toBeVisible();
+		await navigationSidebar.getByLabel( 'Back' ).click();
+		await page.getByRole( 'button', { name: 'Index' } ).click();
+
+		const editorFrame = page.frameLocator( 'iframe[name="editor-canvas"]' );
+		const headerTitle = editorFrame.getByRole( 'document', {
+			name: 'Block: Site Title',
+		} );
+		await expect( headerTitle ).toBeVisible();
+
+		await navigationSidebar.getByLabel( 'Back' ).click();
+		await page
+			.getByRole( 'button', { name: 'Custom Single Product' } )
+			.click();
+
+		const productGalleryBlock = editorFrame.getByLabel(
+			'Block: Product Gallery (Beta)'
+		);
+
+		await expect( productGalleryBlock ).toBeVisible();
 	} );
 } );

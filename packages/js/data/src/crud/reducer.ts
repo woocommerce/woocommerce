@@ -8,10 +8,14 @@ import { Reducer } from 'redux';
  */
 import { Actions } from './actions';
 import CRUD_ACTIONS from './crud-actions';
-import { getKey, getRequestIdentifier } from './utils';
+import {
+	filterDataByKeys,
+	getRequestIdentifier,
+	organizeItemsById,
+} from './utils';
 import { getTotalCountResourceName } from '../utils';
-import { IdType, Item, ItemQuery } from './types';
 import { TYPES } from './action-types';
+import type { IdType, Item, ItemQuery } from './types';
 
 export type Data = Record< IdType, Item >;
 export type ResourceState = {
@@ -85,23 +89,41 @@ export const createReducer = (
 					};
 
 				case TYPES.CREATE_ITEM_SUCCESS: {
+					const { options = {} } = payload;
+
+					const { objItems, ids } = organizeItemsById(
+						[ payload.item ],
+						options.optimisticUrlParameters,
+						itemData
+					);
+
+					const data = {
+						...itemData,
+						...objItems,
+					};
+
 					const createItemSuccessRequestId = getRequestIdentifier(
 						CRUD_ACTIONS.CREATE_ITEM,
-						payload.key,
+						ids[ 0 ],
 						payload.query
 					);
 
-					const { options } = payload;
-					const data = {
-						...itemData,
-						[ payload.key ]: {
-							...( itemData[ payload.key ] || {} ),
-							...payload.item,
-						},
-					};
+					const getItemQueryId = getRequestIdentifier(
+						CRUD_ACTIONS.GET_ITEMS,
+						options.optimisticQueryUpdate
+					);
 
-					let items = state.items;
-					let queryItems = Object.keys( data ).map( ( key ) => +key );
+					const getItemCountQueryId = getTotalCountResourceName(
+						CRUD_ACTIONS.GET_ITEMS,
+						options?.optimisticQueryUpdate || {}
+					);
+
+					let currentItems = state.items;
+
+					const currentItemsByQueryId =
+						currentItems[ getItemQueryId ]?.data || [];
+
+					let nextItemsData = [ ...currentItemsByQueryId, ...ids ];
 
 					let itemsCount = state.itemsCount;
 
@@ -126,49 +148,52 @@ export const createReducer = (
 							const order_by = options.optimisticQueryUpdate
 								?.order_by as OrderBy;
 
-							let sortingData = Object.values( data );
-							sortingData = sortingData.sort( ( a, b ) =>
-								( a[ order_by ] as string )
-									.toLowerCase()
-									.localeCompare(
-										(
-											b[ order_by ] as string
-										 ).toLowerCase()
-									)
+							/*
+							 * Pick the data to sort by the order_by property,
+							 * from the data store,
+							 * based on the nextItemsData ids.
+							 */
+							let sourceDataToOrderBy = Object.values(
+								filterDataByKeys( data, nextItemsData )
+							) as Item[];
+
+							sourceDataToOrderBy = sourceDataToOrderBy.sort(
+								( a, b ) =>
+									String( a[ order_by ] as IdType )
+										.toLowerCase()
+										.localeCompare(
+											String(
+												b[ order_by ] as IdType
+											).toLowerCase()
+										)
 							);
 
-							queryItems = sortingData.map( ( item ) =>
-								Number( item.id )
+							// Pick the ids from the sorted data.
+							const { ids: sortedIds } = organizeItemsById(
+								sourceDataToOrderBy,
+								options.optimisticUrlParameters
 							);
+
+							// Update the items data with the sorted ids.
+							nextItemsData = sortedIds;
 						}
 
-						const getItemQuery = getRequestIdentifier(
-							CRUD_ACTIONS.GET_ITEMS,
-							options.optimisticQueryUpdate
-						);
-
-						const getItemCountQuery = getTotalCountResourceName(
-							CRUD_ACTIONS.GET_ITEMS,
-							options.optimisticQueryUpdate
-						);
-
-						items = {
-							...state.items,
-							[ getItemQuery ]: {
-								...state.items[ getItemQuery ],
-								data: queryItems,
+						currentItems = {
+							...currentItems,
+							[ getItemQueryId ]: {
+								data: nextItemsData,
 							},
 						};
 
 						itemsCount = {
 							...state.itemsCount,
-							[ getItemCountQuery ]: Object.keys( data ).length,
+							[ getItemCountQueryId ]: nextItemsData.length,
 						};
 					}
 
 					return {
 						...state,
-						items,
+						items: currentItems,
 						itemsCount,
 						data,
 						requesting: {
@@ -291,19 +316,11 @@ export const createReducer = (
 					};
 
 				case TYPES.GET_ITEMS_SUCCESS:
-					const ids: IdType[] = [];
-
-					const nextResources = payload.items.reduce<
-						Record< string, Item >
-					>( ( result, item ) => {
-						const key = getKey( item.id, payload.urlParameters );
-						ids.push( key );
-						result[ key ] = {
-							...( state.data[ key ] || {} ),
-							...item,
-						};
-						return result;
-					}, {} );
+					const { objItems, ids } = organizeItemsById(
+						payload.items,
+						payload.urlParameters,
+						itemData
+					);
 
 					const itemQuery = getRequestIdentifier(
 						CRUD_ACTIONS.GET_ITEMS,
@@ -318,7 +335,7 @@ export const createReducer = (
 						},
 						data: {
 							...state.data,
-							...nextResources,
+							...objItems,
 						},
 					};
 

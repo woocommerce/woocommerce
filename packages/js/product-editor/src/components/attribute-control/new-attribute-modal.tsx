@@ -57,6 +57,11 @@ type AttributeForm = {
 	attributes: Array< EnhancedProductAttribute | null >;
 };
 
+/*
+ * Sort criteria for the attributes.
+ */
+const attributeSortCriteria = { order_by: 'name' };
+
 export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
 	description = '',
@@ -193,8 +198,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		name: defaultSearch,
 	} as EnhancedProductAttribute;
 
-	const attributeSortCriteria = { order_by: 'name' };
-
 	const { attributes, isLoadingAttributes } = useSelect(
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
@@ -211,7 +214,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 				),
 				attributes: getAttributes( attributeSortCriteria ),
 			};
-		}
+		},
+		[]
 	);
 
 	const { createErrorNotice } = useDispatch( 'core/notices' );
@@ -252,39 +256,35 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 							source: TRACKS_SOURCE,
 						} );
 
-						const attributeExists = nextAttribute.id !== -99;
+						return setValue(
+							`attributes[${ index }]`,
+							nextAttribute
+						);
+					}
 
-						const fieldName = `attributes[${ index }]`;
-
-						/*
-						 * When the attribute exists,
-						 * set the attribute values.
-						 */
-						if ( attributeExists ) {
-							return setValue( fieldName, nextAttribute );
-						}
-
-						/*
-						 * When the attribute does not exist,
-						 * and it should not be created as a global attribute,
-						 * only set the attribute values.
-						 */
+					/**
+					 * Create a new attribute and fill the form field with it.
+					 * If the attribute is not global, create it locally.
+					 *
+					 * @param {string} newAttributeName - The name of the new attribute.
+					 * @param {number} index            - The index of the attribute in the form field.
+					 * @return {void}
+					 */
+					function addNewAttribute(
+						newAttributeName: string,
+						index: number
+					): void {
 						if ( ! createNewAttributesAsGlobal ) {
-							return setValue( fieldName, {
+							return setValue( `attributes[${ index }]`, {
 								id: 0,
-								name: nextAttribute.name,
-								slug: nextAttribute.name,
+								name: newAttributeName,
+								slug: newAttributeName,
 							} );
 						}
 
-						/*
-						 * If the attribute does not exist,
-						 * and it should be created as a global attribute,
-						 * create the new attribute and set the attribute values.
-						 */
 						createProductAttribute(
 							{
-								name: nextAttribute.name,
+								name: newAttributeName,
 								generate_slug: true,
 							},
 							{
@@ -292,7 +292,10 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 							}
 						)
 							.then( ( newAttribute ) => {
-								setValue( fieldName, newAttribute );
+								setValue(
+									`attributes[${ index }]`,
+									newAttribute
+								);
 							} )
 							.catch( ( error ) => {
 								let message = __(
@@ -379,6 +382,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								}
 							} }
 							className="woocommerce-new-attribute-modal"
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore
+							size="medium"
 						>
 							{ notice && (
 								<Notice isDismissible={ false }>
@@ -414,6 +420,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 													}
 													attributes={
 														availableAttributes
+													}
+													onNewAttributeAdd={
+														addNewAttribute
 													}
 													onAttributeSelect={
 														selectAttribute

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -238,9 +238,9 @@ test.describe( 'Shopper → Cart block', () => {
 		// Click on "Proceed to Checkout" button
 		await page.getByRole( 'link', { name: 'Proceed to Checkout' } ).click();
 
-		// Verify that you see the Checkout Block page
+		// Verify that the "Place Order" button is visible, then we're on the checkout page
 		await expect(
-			page.getByRole( 'heading', { name: 'Checkout' } )
+			page.getByRole( 'button', { name: 'Place Order' } )
 		).toBeVisible();
 	} );
 
@@ -251,9 +251,9 @@ test.describe( 'Shopper → Cart block', () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCart();
-		await page.waitForSelector(
-			'.wp-block-woocommerce-cart-cross-sells-block'
-		);
+		await page
+			.locator( '.wp-block-woocommerce-cart-cross-sells-block' )
+			.waitFor();
 		// Cap is the cross sells product that will be added to the cart
 		await page
 			.getByRole( 'button', { name: 'Add to cart: “Cap”' } )

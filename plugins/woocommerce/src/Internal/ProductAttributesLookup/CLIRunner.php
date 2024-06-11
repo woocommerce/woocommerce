@@ -440,6 +440,9 @@ class CLIRunner {
 		$time = $progress->formatTime( $progress->elapsed() );
 		$progress->finish();
 		$this->log( "%GSuccess:%n Table %W{$table_name}%n regenerated in {$time}." );
+
+		$info = $this->get_lookup_table_info();
+		$this->log( "The table contains now %C{$info['total_rows']}%n rows corresponding to %G{$info['products_count']}%n products." );
 	}
 
 	// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
@@ -454,7 +457,11 @@ class CLIRunner {
 
 		$table_name = $this->lookup_data_store->get_lookup_table_name();
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		return $wpdb->get_row( 'select count(1) as total_rows, count(distinct(product_or_parent_id)) as products_count from ' . $table_name, ARRAY_A );
+		$info = $wpdb->get_row( 'select count(1), count(distinct(product_or_parent_id)) from ' . $table_name, ARRAY_N );
+		return array(
+			'total_rows'     => absint( $info[0] ),
+			'products_count' => absint( $info[1] ),
+		);
 	}
 
 	/**

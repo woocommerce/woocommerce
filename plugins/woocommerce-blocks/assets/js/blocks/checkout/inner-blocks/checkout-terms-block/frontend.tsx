@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useState, useEffect } from '@wordpress/element';
 import { CheckboxControl } from '@woocommerce/blocks-components';
 import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
@@ -20,9 +20,11 @@ const FrontendBlock = ( {
 	checkbox,
 	instanceId,
 	className,
+	showSeparator,
 }: {
 	text: string;
 	checkbox: boolean;
+	showSeparator: string | boolean;
 	instanceId: string;
 	className?: string;
 } ): JSX.Element => {
@@ -72,10 +74,12 @@ const FrontendBlock = ( {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__terms',
 				{
 					'wc-block-checkout__terms--disabled': isDisabled,
+					'wc-block-checkout__terms--with-separator':
+						showSeparator !== 'false' && showSeparator !== false,
 				},
 				className
 			) }

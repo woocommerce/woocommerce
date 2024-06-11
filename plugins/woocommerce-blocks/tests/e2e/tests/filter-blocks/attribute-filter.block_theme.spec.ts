@@ -1,14 +1,9 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import path from 'path';
-import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
-
-const TEMPLATE_PATH = path.join( __dirname, './attribute-filter.handlebars' );
+import { TemplateCompiler, test as base, expect } from '@woocommerce/e2e-utils';
 
 const COLOR_ATTRIBUTE_VALUES = [ 'Blue', 'Gray', 'Green', 'Red', 'Yellow' ];
-
 const COLOR_ATTRIBUTES_WITH_COUNTS = [
 	'Blue (4)',
 	'Gray (2)',
@@ -17,91 +12,32 @@ const COLOR_ATTRIBUTES_WITH_COUNTS = [
 	'Yellow (1)',
 ];
 
-const test = base.extend< {
-	postWithShowCounts: Post;
-	defaultBlockPost: Post;
-	dropdownBlockPost: Post;
-} >( {
-	defaultBlockPost: async ( { requestUtils }, use ) => {
-		const testingPost = await requestUtils.createPostFromTemplate(
-			{ title: 'Product Filter: Attribute Block - Color' },
-			TEMPLATE_PATH,
-			{
-				attributes: {
-					attributeId: 1,
-				},
-			}
+const test = base.extend< { templateCompiler: TemplateCompiler } >( {
+	templateCompiler: async ( { requestUtils }, use ) => {
+		const compiler = await requestUtils.createTemplateFromFile(
+			'archive-product_attribute-filter'
 		);
-
-		await use( testingPost );
-		await requestUtils.deletePost( testingPost.id );
-	},
-
-	postWithShowCounts: async ( { requestUtils }, use ) => {
-		const testingPost = await requestUtils.createPostFromTemplate(
-			{ title: 'Product Filter: Attribute Block - Color' },
-			TEMPLATE_PATH,
-			{
-				attributes: {
-					attributeId: 1,
-					showCounts: true,
-				},
-			}
-		);
-
-		await use( testingPost );
-		await requestUtils.deletePost( testingPost.id );
-	},
-
-	dropdownBlockPost: async ( { requestUtils }, use ) => {
-		const testingPost = await requestUtils.createPostFromTemplate(
-			{ title: 'Product Filter: Attribute Block' },
-			TEMPLATE_PATH,
-			{
-				attributes: {
-					attributeId: 1,
-					displayStyle: 'dropdown',
-				},
-			}
-		);
-
-		await use( testingPost );
-		await requestUtils.deletePost( testingPost.id );
+		await use( compiler );
 	},
 } );
 
 test.describe( 'Product Filter: Attribute Block', () => {
 	test.describe( 'With default display style', () => {
-		test.describe( 'With show counts enabled', () => {
-			test( 'Renders checkboxes with associated product counts', async ( {
-				page,
-				postWithShowCounts,
-			} ) => {
-				await page.goto( postWithShowCounts.link );
-
-				const attributes = page.locator(
-					'.wc-block-components-checkbox__label'
-				);
-
-				await expect( attributes ).toHaveCount( 5 );
-
-				for (
-					let i = 0;
-					i < COLOR_ATTRIBUTES_WITH_COUNTS.length;
-					i++
-				) {
-					await expect( attributes.nth( i ) ).toHaveText(
-						COLOR_ATTRIBUTES_WITH_COUNTS[ i ]
-					);
-				}
+		test.beforeEach( async ( { requestUtils, templateCompiler } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
+			await templateCompiler.compile( {
+				attributes: {
+					attributeId: 1,
+				},
 			} );
 		} );
 
 		test( 'clear button is not shown on initial page load', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( '/shop' );
 
 			const button = page.getByRole( 'button', { name: 'Clear' } );
 
@@ -110,9 +46,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'renders a checkbox list with the available attribute filters', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( '/shop' );
 
 			const attributes = page.locator(
 				'.wc-block-components-checkbox__label'
@@ -129,9 +64,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'filters the list of products by selecting an attribute', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( '/shop' );
 
 			const grayCheckbox = page.getByText( 'Gray' );
 			await grayCheckbox.click();
@@ -146,9 +80,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'clear button appears after a filter is applied', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( '/shop' );
 
 			const grayCheckbox = page.getByText( 'Gray' );
 			await grayCheckbox.click();
@@ -163,9 +96,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'clear button hides after deselecting all filters', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( '/shop' );
 
 			const grayCheckbox = page.getByText( 'Gray' );
 			await grayCheckbox.click();
@@ -182,9 +114,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'filters are cleared after clear button is clicked', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( '/shop' );
 
 			const grayCheckbox = page.getByText( 'Gray' );
 			await grayCheckbox.click();
@@ -206,12 +137,55 @@ test.describe( 'Product Filter: Attribute Block', () => {
 		} );
 	} );
 
+	test.describe( 'With show counts enabled', () => {
+		test.beforeEach( async ( { requestUtils, templateCompiler } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
+			await templateCompiler.compile( {
+				attributes: {
+					attributeId: 1,
+					showCounts: true,
+				},
+			} );
+		} );
+
+		test( 'Renders checkboxes with associated product counts', async ( {
+			page,
+		} ) => {
+			await page.goto( '/shop' );
+
+			const attributes = page.locator(
+				'.wc-block-components-checkbox__label'
+			);
+
+			await expect( attributes ).toHaveCount( 5 );
+
+			for ( let i = 0; i < COLOR_ATTRIBUTES_WITH_COUNTS.length; i++ ) {
+				await expect( attributes.nth( i ) ).toHaveText(
+					COLOR_ATTRIBUTES_WITH_COUNTS[ i ]
+				);
+			}
+		} );
+	} );
+
 	test.describe( "With display style 'dropdown'", () => {
+		test.beforeEach( async ( { requestUtils, templateCompiler } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
+			await templateCompiler.compile( {
+				attributes: {
+					attributeId: 1,
+					displayStyle: 'dropdown',
+				},
+			} );
+		} );
+
 		test( 'clear button is not shown on initial page load', async ( {
 			page,
-			dropdownBlockPost,
 		} ) => {
-			await page.goto( dropdownBlockPost.link );
+			await page.goto( '/shop' );
 
 			const button = page.getByRole( 'button', { name: 'Clear' } );
 
@@ -220,9 +194,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'renders a dropdown list with the available attribute filters', async ( {
 			page,
-			dropdownBlockPost,
 		} ) => {
-			await page.goto( dropdownBlockPost.link );
+			await page.goto( '/shop' );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'
@@ -240,9 +213,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'Clicking a dropdown option should filter the displayed products', async ( {
 			page,
-			dropdownBlockPost,
 		} ) => {
-			await page.goto( dropdownBlockPost.link );
+			await page.goto( '/shop' );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'
@@ -264,9 +236,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'clear button appears after a filter is applied', async ( {
 			page,
-			dropdownBlockPost,
 		} ) => {
-			await page.goto( dropdownBlockPost.link );
+			await page.goto( '/shop' );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'
@@ -288,9 +259,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'clear button hides after deselecting all filters', async ( {
 			page,
-			dropdownBlockPost,
 		} ) => {
-			await page.goto( dropdownBlockPost.link );
+			await page.goto( '/shop' );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'
@@ -319,9 +289,8 @@ test.describe( 'Product Filter: Attribute Block', () => {
 
 		test( 'filters are cleared after clear button is clicked', async ( {
 			page,
-			dropdownBlockPost,
 		} ) => {
-			await page.goto( dropdownBlockPost.link );
+			await page.goto( '/shop' );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'

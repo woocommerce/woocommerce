@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+CYS - Select the next block after deleting the selected one (instead of the header).

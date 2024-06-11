@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useMemo, useContext } from '@wordpress/element';
 import { ENTER } from '@wordpress/keycodes';
 import { __, sprintf } from '@wordpress/i18n';
@@ -144,7 +144,7 @@ export const VariationContainer = ( { variation, children } ) => {
 		>
 			<GlobalStylesContext.Provider value={ context }>
 				<div
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-customize-store_global-styles-variations_item',
 						{
 							'is-active': isActive,
