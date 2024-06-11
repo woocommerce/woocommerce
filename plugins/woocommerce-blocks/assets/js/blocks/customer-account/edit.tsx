@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { Disabled } from '@wordpress/components';
 import type { BlockEditProps } from '@wordpress/blocks';
@@ -20,7 +20,7 @@ const Edit = ( {
 }: BlockEditProps< Attributes > ) => {
 	const { className } = attributes;
 	const blockProps = useBlockProps( {
-		className: classNames( 'wc-block-editor-customer-account', className ),
+		className: clsx( 'wc-block-editor-customer-account', className ),
 	} );
 
 	return (

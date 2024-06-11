@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { __, sprintf } from '@wordpress/i18n';
 import { Icon, closeSmall } from '@wordpress/icons';
 
@@ -85,7 +85,7 @@ export const RemovableChip = ( {
 		<Chip
 			{ ...props }
 			{ ...chipProps }
-			className={ classNames( className, 'is-removable' ) }
+			className={ clsx( className, 'is-removable' ) }
 			element={ removeOnAnyClick ? 'button' : props.element }
 			screenReaderText={ screenReaderText }
 			text={ text }

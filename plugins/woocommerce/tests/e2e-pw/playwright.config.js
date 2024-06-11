@@ -1,5 +1,5 @@
-const { devices } = require( '@playwright/test' );
 require( 'dotenv' ).config( { path: __dirname + '/.env' } );
+const testsRootPath = __dirname;
 
 const {
 	ALLURE_RESULTS_DIR,
@@ -18,26 +18,30 @@ const reporter = [
 		{
 			outputFolder:
 				ALLURE_RESULTS_DIR ??
-				'./tests/e2e-pw/test-results/allure-results',
+				`${ testsRootPath }/test-results/allure-results`,
 			detail: true,
 			suiteTitle: true,
 		},
 	],
 	[
 		'json',
-		{ outputFile: `./test-results/test-results-${ Date.now() }.json` },
+		{
+			outputFile: `${ testsRootPath }/test-results/test-results-${ Date.now() }.json`,
+		},
 	],
 ];
 
 if ( process.env.CI ) {
 	reporter.push( [ 'github' ] );
 	reporter.push( [ 'buildkite-test-collector/playwright/reporter' ] );
+	reporter.push( [ `${ testsRootPath }/reporters/skipped-tests.js` ] );
 } else {
 	reporter.push( [
 		'html',
 		{
 			outputFolder:
-				PLAYWRIGHT_HTML_REPORT ?? './test-results/playwright-report',
+				PLAYWRIGHT_HTML_REPORT ??
+				`${ testsRootPath }/test-results/playwright-report`,
 			open: 'on-failure',
 		},
 	] );
@@ -48,10 +52,10 @@ const config = {
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
 		: 120 * 1000,
 	expect: { timeout: 20 * 1000 },
-	outputDir: './test-results/results-data',
+	outputDir: `${ testsRootPath }/test-results/results-data`,
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
-	testDir: 'tests',
+	testDir: `${ testsRootPath }/tests`,
 	retries: CI ? 2 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
 	workers: 1,
@@ -61,19 +65,15 @@ const config = {
 	use: {
 		baseURL: BASE_URL ?? 'http://localhost:8086',
 		screenshot: { mode: 'only-on-failure', fullPage: true },
-		stateDir: 'tests/e2e-pw/.state/',
+		stateDir: `${ testsRootPath }/.state/`,
 		trace: 'retain-on-failure',
 		video: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
 		actionTimeout: 20 * 1000,
 		navigationTimeout: 20 * 1000,
 	},
-	projects: [
-		{
-			name: 'Chrome',
-			use: { ...devices[ 'Desktop Chrome' ] },
-		},
-	],
+	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
+	projects: [],
 };
 
 module.exports = config;

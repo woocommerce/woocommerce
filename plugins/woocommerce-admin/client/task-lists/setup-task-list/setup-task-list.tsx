@@ -18,7 +18,7 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List, useSlot } from '@woocommerce/experimental';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useLayoutContext } from '@woocommerce/admin-layout';
 
 /**
@@ -287,7 +287,7 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 				<ProgressHeader taskListId={ id } />
 			) : null }
 			<div
-				className={ classnames(
+				className={ clsx(
 					`woocommerce-task-dashboard__container woocommerce-task-list__${ id } setup-task-list`
 				) }
 			>

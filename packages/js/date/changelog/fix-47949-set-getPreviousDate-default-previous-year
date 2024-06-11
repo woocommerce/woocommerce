@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure getPreviousDate default behaviour is comparing previous_year

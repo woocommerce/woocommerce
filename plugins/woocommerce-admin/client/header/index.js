@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useLayoutEffect, useRef } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
 	WC_HEADER_SLOT_NAME,
@@ -52,7 +52,7 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const pageTitle = getPageTitle( sections );
 	const { isScrolled } = useIsScrolled();
 	let debounceTimer = null;
-	const className = classnames( 'woocommerce-layout__header', {
+	const className = clsx( 'woocommerce-layout__header', {
 		'is-scrolled': isScrolled,
 	} );
 
@@ -119,7 +119,9 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const isHomescreen =
 		isWCAdmin() && getScreenFromPath() === 'homescreen' && ! query.task;
 	const { isLoading, launchYourStoreEnabled, comingSoon, storePagesOnly } =
-		useLaunchYourStore();
+		useLaunchYourStore( {
+			enabled: isHomescreen,
+		} );
 	const showLaunchYourStoreStatus =
 		isHomescreen && launchYourStoreEnabled && ! isLoading;
 

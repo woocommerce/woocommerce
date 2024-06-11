@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-E2E tests: disable woocommerce_coming_soon during test environment setup

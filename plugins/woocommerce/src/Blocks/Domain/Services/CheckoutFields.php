@@ -1187,7 +1187,7 @@ class CheckoutFields {
 				 */
 				$value = apply_filters( "woocommerce_get_default_value_for_{$missing_field}", null, $group, $wc_object );
 
-			if ( $value ) {
+			if ( isset( $value ) ) {
 				$meta_data[ $missing_field ] = $value;
 			}
 		}
@@ -1279,6 +1279,15 @@ class CheckoutFields {
 	 * @return array An array of fields definitions as well as their values formatted for display.
 	 */
 	public function get_order_additional_fields_with_values( WC_Order $order, string $location, string $group = 'other', string $context = 'edit' ) {
+
+		// Because the Additional Checkout Fields API only applies to orders created with Store API, we should not
+		// return any values unless it was created using Store API. This is mainly to prevent "empty" checkbox values
+		// from being shown on the order confirmation page for orders placed using the shortcode. It's rare that this
+		// will happen but not impossible.
+		if ( 'store-api' !== $order->get_created_via() ) {
+			return [];
+		}
+
 		if ( 'additional' === $location ) {
 			wc_deprecated_argument( 'location', '8.9.0', 'The "additional" location is deprecated. Use "order" instead.' );
 			$location = 'order';

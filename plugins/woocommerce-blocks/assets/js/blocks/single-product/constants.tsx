@@ -65,6 +65,7 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 						{
 							__woocommerceNamespace:
 								PRODUCT_SUMMARY_VARIATION_NAME,
+							excerptLength: 100,
 						},
 					],
 					[ 'woocommerce/add-to-cart-form' ],

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -22,24 +22,26 @@ const blockData = {
 };
 
 const test = base.extend< { pageObject: ProductFiltersPage } >( {
-	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
+	pageObject: async ( { page, editor, frontendUtils }, use ) => {
 		const pageObject = new ProductFiltersPage( {
 			page,
 			editor,
 			frontendUtils,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editorUtils } ) => {
+	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-enable-experimental-features'
+		);
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
 		} );
-		await editorUtils.enterEditMode();
+		await editor.enterEditMode();
 	} );
 
 	test( 'should be visible and contain correct inner blocks', async ( {
@@ -49,7 +51,7 @@ test.describe( `${ blockData.name }`, () => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
 		const block = editor.canvas.getByLabel(
-			'Block: Product Filters (Beta)'
+			'Block: Product Filters (Experimental)'
 		);
 		await expect( block ).toBeVisible();
 
@@ -89,7 +91,7 @@ test.describe( `${ blockData.name }`, () => {
 			exact: true,
 		} );
 		const colorFilterBlock = block.getByLabel(
-			'Block: Product Filter: Attribute (Beta)'
+			'Block: Product Filter: Attribute (Experimental)'
 		);
 		const expectedColorFilterOptions = [
 			'Blue',
@@ -111,7 +113,7 @@ test.describe( `${ blockData.name }`, () => {
 			name: 'Rating',
 		} );
 		const ratingFilterBlock = block.getByLabel(
-			'Block: Product Filter: Rating (Beta)'
+			'Block: Product Filter: Rating (Experimental)'
 		);
 		await expect( ratingHeading ).toBeVisible();
 		await expect( ratingFilterBlock ).toBeVisible();

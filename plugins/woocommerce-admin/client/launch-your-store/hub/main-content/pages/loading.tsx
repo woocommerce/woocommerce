@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 /**
  * Internal dependencies
  */
@@ -9,7 +9,7 @@ import type { MainContentComponentProps } from '../xstate';
 export const LoadingPage = ( props: MainContentComponentProps ) => {
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'launch-store-loading-page__container',
 				props.className
 			) }

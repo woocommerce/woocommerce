@@ -78,5 +78,25 @@
 		"status": "completed",
 		"conclusion": "unknown_conclusion",
 		"name": "Job with unknown conclusion (optional)"
+	},
+	{
+		"status": "in_progress",
+		"conclusion": "",
+		"name": "Publish reports in_progress"
+	},
+	{
+		"status": "completed",
+		"conclusion": "",
+		"name": "Publish reports - failed"
+	},
+	{
+		"status": "completed",
+		"conclusion": "",
+		"name": "Another Publish reports that failed"
+	},
+	{
+		"status": "queued",
+		"conclusion": "",
+		"name": "Publish reports job queued"
 	}
 ]
