@@ -166,7 +166,7 @@ class ProductQuery {
 				$args['tax_query'] = $tax_query; // phpcs:ignore
 			}
 		} else {
-			// For product_variantions we need to convert the tax_query to a meta_query.
+			// For product_variations we need to convert the tax_query to a meta_query.
 			if ( ! empty( $args['tax_query'] ) ) {
 				$args['meta_query'] = $this->convert_tax_query_to_meta_query( array_merge( $tax_query, $args['tax_query'] ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			} else {
