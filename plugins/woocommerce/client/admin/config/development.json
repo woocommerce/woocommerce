@@ -3,6 +3,7 @@
 		"activity-panels": true,
 		"analytics": true,
 		"product-block-editor": true,
+		"product-editor": true,
 		"experimental-blocks": true,
 		"coupons": true,
 		"core-profiler": true,
