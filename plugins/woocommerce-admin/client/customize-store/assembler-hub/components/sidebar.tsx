@@ -37,10 +37,13 @@ export function SidebarContent( { children }: { children: JSX.Element } ) {
 		[]
 	);
 
-	const wrapperCls = clsx( 'edit-site-sidebar__screen-wrapper', {
-		'slide-from-left': navState.direction === 'back',
-		'slide-from-right': navState.direction === 'forward',
-	} );
+	const wrapperCls = clsx(
+		'woocommerce-customize-store-edit-site-sidebar__screen-wrapper',
+		{
+			'slide-from-left': navState.direction === 'back',
+			'slide-from-right': navState.direction === 'forward',
+		}
+	);
 
 	return (
 		<SidebarNavigationContext.Provider value={ { navigate } }>
