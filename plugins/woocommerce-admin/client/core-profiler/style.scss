@@ -261,13 +261,13 @@
 		}
 
 		.woocommerce-select-control.is-searchable
-			.woocommerce-select-control__control-input {
+		.woocommerce-select-control__control-input {
 			margin: 0;
 			padding: 0;
 		}
 
 		.woocommerce-select-control.is-searchable
-			.components-base-control__label {
+		.components-base-control__label {
 			left: 13px;
 		}
 	}
@@ -284,10 +284,10 @@
 	}
 
 	.woocommerce-experimental-select-control
-		.components-popover
-		.components-popover__content
-		ul
-		li:hover {
+	.components-popover
+	.components-popover__content
+	ul
+	li:hover {
 		background-color: #f6f7f7 !important; // Gray-0
 		color: $gray-900;
 	}
@@ -429,9 +429,9 @@
 
 		.woocommerce-profiler-question-label,
 		.woocommerce-profiler-business-info-email-adddress
-			.components-base-control__label,
+		.components-base-control__label,
 		.woocommerce-profiler-business-info-store-name
-			.components-base-control__label {
+		.components-base-control__label {
 			text-transform: uppercase;
 			color: $gray-900;
 			font-weight: 500;
@@ -441,17 +441,17 @@
 		}
 
 		.woocommerce-profiler-question-label
-			.woocommerce-profiler-question-required,
+		.woocommerce-profiler-question-required,
 		.woocommerce-profiler-business-info-email-adddress
-			.woocommerce-profiler-question-required {
+		.woocommerce-profiler-question-required {
 			color: #cc1818;
 			padding-left: 3px;
 		}
 
 		.woocommerce-profiler-business-info-email-adddress
-			.components-text-control__input,
+		.components-text-control__input,
 		.woocommerce-profiler-business-info-store-name
-			.components-text-control__input {
+		.components-text-control__input {
 			height: 40px;
 			border-color: #bbb;
 			border-radius: 2px;
@@ -474,8 +474,7 @@
 			width: 20px;
 		}
 
-		.woocommerce-profiler-select-control__country-spacer
-			+ .woocommerce-profiler-business-info-email-adddress {
+		.woocommerce-profiler-select-control__country-spacer + .woocommerce-profiler-business-info-email-adddress {
 			margin-top: 8px;
 		}
 
@@ -562,13 +561,13 @@
 		}
 
 		.woocommerce-select-control.is-searchable
-			.woocommerce-select-control__control-input {
+		.woocommerce-select-control__control-input {
 			margin: 0;
 			padding: 0;
 		}
 
 		.woocommerce-select-control.is-searchable
-			.components-base-control__label {
+		.components-base-control__label {
 			left: 13px;
 		}
 
