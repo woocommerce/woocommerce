@@ -25,7 +25,7 @@ import { DEFAULT_FILTERS } from '../../constants';
  * - productsMap: Map of products by id and name.
  * - productsList: List of products retrieved.
  */
-function useProducts( search: string ) {
+function useProducts( search: string, selected: string[] ) {
 	// Creating a map for fast lookup of products by id or name.
 	const [ productsMap, setProductsMap ] = useState<
 		Map< number | string, ProductResponseItem >
@@ -37,13 +37,8 @@ function useProducts( search: string ) {
 	);
 
 	useEffect( () => {
-		// Allow searching from 2+ characters.
-		if ( search.length <= 1 ) {
-			return;
-		}
-
 		getProducts( {
-			selected: [],
+			selected: selected.map( Number ),
 			queryArgs: {
 				search,
 				// Limit search to 100 results. If there's too many results
@@ -61,7 +56,7 @@ function useProducts( search: string ) {
 			setProductsList( results as ProductResponseItem[] );
 			setProductsMap( newProductsMap );
 		} );
-	}, [ search ] );
+	}, [ search, selected ] );
 
 	return { productsMap, productsList };
 }
@@ -73,7 +68,10 @@ const HandPickedProductsControl = ( {
 }: QueryControlProps ) => {
 	const selectedProductIds = query.woocommerceHandPickedProducts;
 	const [ searchQuery, setSearchQuery ] = useState( '' );
-	const { productsMap, productsList } = useProducts( searchQuery );
+	const { productsMap, productsList } = useProducts(
+		searchQuery,
+		selectedProductIds
+	);
 	const handleSearch = useDebounce( setSearchQuery, 300 );
 
 	const onTokenChange = useCallback(
@@ -154,11 +152,7 @@ const HandPickedProductsControl = ( {
 				__experimentalValidateInput={ ( value: string ) =>
 					productsMap.has( value )
 				}
-				value={
-					! productsMap.size
-						? [ __( 'Loading…', 'woocommerce' ) ]
-						: selectedProductIds || []
-				}
+				value={ selectedProductIds || [] }
 				__experimentalExpandOnFocus={ true }
 				__experimentalShowHowTo={ false }
 			/>
