@@ -13,12 +13,12 @@ const singleProductPrice = '999.00';
 
 let productId, shippingZoneId;
 
-baseTest.describe( 'Transform Classic Checkout To Checkout Block', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		testPageTitlePrefix: 'Transformed checkout',
-	} );
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	testPageTitlePrefix: 'Transformed checkout',
+} );
 
+test.describe( 'Transform Classic Checkout To Checkout Block', () => {
 	test.beforeAll( async ( { api } ) => {
 		// enable COD
 		await api.put( 'payment_gateways/cod', {

@@ -94,7 +94,7 @@ jobs:
               id: 'setup-monorepo'
               with:
                   install: '${{ matrix.projectName }}...'
-                  build: false
+                  build: '${{ matrix.projectName }}'
                   
             - name: 'Lint'
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'

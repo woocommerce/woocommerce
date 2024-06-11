@@ -34,22 +34,22 @@ let guestOrderId1,
 	productId,
 	shippingZoneId;
 
-baseTest.describe( 'Checkout Block page', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		testPageTitlePrefix: 'Checkout Block',
-		page: async ( { context, page, testPage }, use ) => {
-			await goToPageEditor( { page } );
-			await fillPageTitle( page, testPage.title );
-			await insertBlockByShortcut( page, 'Checkout' );
-			await publishPage( page, testPage.title );
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	testPageTitlePrefix: 'Checkout Block',
+	page: async ( { context, page, testPage }, use ) => {
+		await goToPageEditor( { page } );
+		await fillPageTitle( page, testPage.title );
+		await insertBlockByShortcut( page, 'Checkout' );
+		await publishPage( page, testPage.title );
 
-			await context.clearCookies();
+		await context.clearCookies();
 
-			await use( page );
-		},
-	} );
+		await use( page );
+	},
+} );
 
+test.describe( 'Checkout Block page', () => {
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
@@ -139,7 +139,9 @@ baseTest.describe( 'Checkout Block page', () => {
 				`Customer with email ${ newAccountEmail } exists! Deleting it before starting test...`
 			);
 
-			await api.delete( `customers/${ customerId }`, { force: true } );
+			await api.delete( `customers/${ customerId }`, {
+				force: true,
+			} );
 		}
 		// make sure our customer user has a pre-defined billing/shipping address
 		await api.put( `customers/2`, {
@@ -201,13 +203,19 @@ baseTest.describe( 'Checkout Block page', () => {
 		);
 		// delete the orders we created
 		if ( guestOrderId1 ) {
-			await api.delete( `orders/${ guestOrderId1 }`, { force: true } );
+			await api.delete( `orders/${ guestOrderId1 }`, {
+				force: true,
+			} );
 		}
 		if ( guestOrderId2 ) {
-			await api.delete( `orders/${ guestOrderId2 }`, { force: true } );
+			await api.delete( `orders/${ guestOrderId2 }`, {
+				force: true,
+			} );
 		}
 		if ( customerOrderId ) {
-			await api.delete( `orders/${ customerOrderId }`, { force: true } );
+			await api.delete( `orders/${ customerOrderId }`, {
+				force: true,
+			} );
 		}
 		if ( newAccountOrderId ) {
 			await api.delete( `orders/${ newAccountOrderId }`, {
