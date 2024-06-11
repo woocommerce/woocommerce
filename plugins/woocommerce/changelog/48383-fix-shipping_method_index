@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-fix: set correct shipping_method indexes in cart  </details>  <details>  <summary>Changelog Entry Comment</summary>
+Set the correct shipping method indexes in the cart/cart-shipping template.
