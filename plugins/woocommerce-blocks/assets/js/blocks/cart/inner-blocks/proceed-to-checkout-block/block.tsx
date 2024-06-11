@@ -103,6 +103,9 @@ const Block = ( {
 		[]
 	);
 
+	// Get the zoom level to determine if the sticky container should be displayed.
+	const zoomLevel = ( window.outerWidth / window.innerWidth ) * 100;
+
 	return (
 		<div className={ clsx( 'wc-block-cart__submit', className ) }>
 			{ positionReferenceElement }
@@ -110,8 +113,8 @@ const Block = ( {
 			<div className="wc-block-cart__submit-container">
 				{ submitContainerContents }
 			</div>
-			{ /* If the positionReferenceElement is below the viewport, display the sticky container. */ }
-			{ positionRelativeToViewport === 'below' && (
+			{ /* If the positionReferenceElement is below the viewport and if the the zoom level is <= 100%, display the sticky container. */ }
+			{ positionRelativeToViewport === 'below' && zoomLevel <= 100 && (
 				<div
 					className="wc-block-cart__submit-container wc-block-cart__submit-container--sticky"
 					style={ { backgroundColor } }
