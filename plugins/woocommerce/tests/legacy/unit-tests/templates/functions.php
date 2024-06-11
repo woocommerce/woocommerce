@@ -194,6 +194,9 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 
 	}
 
+	/**
+	 * Test: test_radio_not_required_field.
+	 */
 	public function test_radio_not_required_field() {
 		$actual_html = woocommerce_form_field(
 			'test',
@@ -213,8 +216,11 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$this->assertNotContains( 'aria-required', $actual_html );
 	}
 
+	/**
+	 * Test: test_radio_required_field.
+	 */
 	public function test_radio_required_field() {
-		$actual_html = woocommerce_form_field(
+		$actual_html   = woocommerce_form_field(
 			'test',
 			array(
 				'type'     => 'radio',
