@@ -153,6 +153,7 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 				woocommerceTaxCountries = [],
 				taxJarActivated,
 				woocommerceTaxActivated,
+				woocommerceShippingActivated,
 			} = {},
 		} = task;
 
@@ -164,6 +165,7 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 				isVisible:
 					! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
 					! woocommerceTaxActivated &&
+					! woocommerceShippingActivated &&
 					woocommerceTaxCountries.includes( countryCode ),
 			},
 		];
