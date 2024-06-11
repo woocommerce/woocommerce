@@ -165,10 +165,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 8.8.5 2024-06-11 =
+= 8.8.5 2024-06-10 =
 
 **WooCommerce**
 
-* Security - Sanitize Order Attribution input values using native DOM API
+* Security - Prevent HTML & JS injection attacks on registration and checkout forms when the Order Attribution is enabled. [#48348](https://github.com/woocommerce/woocommerce/pull/48348)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
