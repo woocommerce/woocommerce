@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Sanitize Order Attribution input values using native DOM API
