@@ -195,7 +195,8 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	public function test_radio_not_required_field() {
-		$actual_html = woocommerce_form_field( 'test',
+		$actual_html = woocommerce_form_field(
+			'test',
 			array(
 				'type'     => 'radio',
 				'id'       => 'test',
@@ -204,14 +205,17 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 					'1' => 'Option 1',
 					'2' => 'Option 2',
 				),
-				'return'   => true
-			), '1' );
+				'return'   => true,
+			),
+			'1'
+		);
 
 		$this->assertNotContains( 'aria-required', $actual_html );
 	}
 
 	public function test_radio_required_field() {
-		$actual_html   = woocommerce_form_field( 'test',
+		$actual_html = woocommerce_form_field(
+			'test',
 			array(
 				'type'     => 'radio',
 				'id'       => 'test',
@@ -220,8 +224,10 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 					'1' => 'Option 1',
 					'2' => 'Option 2',
 				),
-				'return'   => true
-			), '1' );
+				'return'   => true,
+			),
+			'1'
+		);
 		$expected_html = '<p class="form-row form-row-wide validate-required" id="test_radio_field" data-priority=""><span class="woocommerce-input-wrapper"><input type="radio" class="input-radio " value="1" name="test_radio" aria-required="true" id="test_radio_1" checked="checked"><label for="test_radio_1" class="radio ">Option 1</label><input type="radio" class="input-radio " value="2" name="test_radio" aria-required="true" id="test_radio_2"><label for="test_radio_2" class="radio ">Option 2</label></span></p>';
 
 		$this->assertEquals( $expected_html, $actual_html );
