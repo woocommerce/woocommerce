@@ -2,28 +2,7 @@ const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
-	product: async ( { api }, use ) => {
-		let product = {
-			id: 0,
-			name: `Product ${ Date.now() }`,
-			type: 'simple',
-			regular_price: '12.99',
-		};
 
-		await api.post( 'products', product ).then( ( response ) => {
-			product = response.data;
-		} );
-
-		await use( product );
-
-		// permanently delete the product if it still exists
-		const r = await api.get( `products/${ product.id }` );
-		if ( r.status !== 404 ) {
-			await api.delete( `products/${ product.id }`, {
-				force: true,
-			} );
-		}
-	},
 	page: async ( { page, wcAdminApi }, use ) => {
 		// Disable the task list reminder bar, it can interfere with the quick actions
 		await wcAdminApi.post( 'options', {
