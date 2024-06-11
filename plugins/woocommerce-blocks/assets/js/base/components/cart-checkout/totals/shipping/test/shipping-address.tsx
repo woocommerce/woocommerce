@@ -1,95 +1,115 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { useEditorContext } from '@woocommerce/base-context';
+import { formatShippingAddress } from '@woocommerce/base-utils';
+import { useSelect } from '@wordpress/data';
 import ShippingAddress from '@woocommerce/base-components/cart-checkout/totals/shipping/shipping-address';
-import { CART_STORE_KEY, CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
-import { dispatch } from '@wordpress/data';
-import { previewCart } from '@woocommerce/resource-previews';
 
-jest.mock( '@woocommerce/settings', () => {
-	const originalModule = jest.requireActual( '@woocommerce/settings' );
+jest.mock( '@woocommerce/base-utils', () => ( {
+	...jest.requireActual( '@woocommerce/base-utils' ),
+	formatShippingAddress: jest.fn(),
+} ) );
 
-	return {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore We know @woocommerce/settings is an object.
-		...originalModule,
-		getSetting: ( setting: string, ...rest: unknown[] ) => {
-			if ( setting === 'localPickupEnabled' ) {
-				return true;
-			}
-			if ( setting === 'collectableMethodIds' ) {
-				return [ 'pickup_location' ];
-			}
-			return originalModule.getSetting( setting, ...rest );
-		},
-	};
-} );
+jest.mock( '@woocommerce/base-context', () => ( {
+	...jest.requireActual( '@woocommerce/base-context' ),
+	useEditorContext: jest.fn(),
+} ) );
+
+jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
+	useSelect: jest.fn(),
+} ) );
+
 describe( 'ShippingAddress', () => {
-	const testShippingAddress = {
+	const setShippingCalculatorLabel = jest.fn();
+	const setShippingCalculatorAddress = jest.fn();
+	const shippingAddress = {
 		first_name: 'John',
 		last_name: 'Doe',
-		company: 'Automattic',
+		company: 'Company',
 		address_1: '123 Main St',
 		address_2: '',
 		city: 'San Francisco',
 		state: 'CA',
 		postcode: '94107',
 		country: 'US',
-		phone: '555-555-5555',
+		email: 'john.doe@company',
+		phone: '+1234567890',
 	};
 
-	it( 'renders ShippingLocation if user does not prefer collection', () => {
-		render(
-			<ShippingAddress
-				isShippingCalculatorOpen={ false }
-				setIsShippingCalculatorOpen={ jest.fn() }
-				shippingAddress={ testShippingAddress }
-				hasRates={ false }
-			/>
-		);
-		expect(
-			screen.getByRole( 'button', {
-				name: /No delivery options available for 94107, San Francisco, CA/,
-			} )
-		).toBeInTheDocument();
-		expect(
-			screen.queryByText( /Collection from/ )
-		).not.toBeInTheDocument();
+	beforeEach( () => {
+		jest.clearAllMocks();
 	} );
-	it( 'renders PickupLocation if shopper prefers collection', async () => {
-		dispatch( CHECKOUT_STORE_KEY ).setPrefersCollection( true );
 
-		// Deselect the default selected rate and select pickup_location:1 rate.
-		const currentlySelectedIndex =
-			previewCart.shipping_rates[ 0 ].shipping_rates.findIndex(
-				( rate ) => rate.selected
-			);
-		previewCart.shipping_rates[ 0 ].shipping_rates[
-			currentlySelectedIndex
-		].selected = false;
-		const pickupRateIndex =
-			previewCart.shipping_rates[ 0 ].shipping_rates.findIndex(
-				( rate ) => rate.method_id === 'pickup_location'
-			);
-		previewCart.shipping_rates[ 0 ].shipping_rates[
-			pickupRateIndex
-		].selected = true;
-
-		dispatch( CART_STORE_KEY ).receiveCart( previewCart );
+	it( 'should set shipping calculator label and address for a formatted address', () => {
+		( useEditorContext as jest.Mock ).mockReturnValue( {
+			isEditor: false,
+		} );
+		( useSelect as jest.Mock ).mockReturnValue( false );
+		( formatShippingAddress as jest.Mock ).mockReturnValue(
+			'123 Main St, San Francisco, CA 94107, US'
+		);
 
 		render(
 			<ShippingAddress
-				isShippingCalculatorOpen={ false }
-				setIsShippingCalculatorOpen={ jest.fn() }
-				shippingAddress={ testShippingAddress }
+				setShippingCalculatorLabel={ setShippingCalculatorLabel }
+				setShippingCalculatorAddress={ setShippingCalculatorAddress }
+				shippingAddress={ shippingAddress }
 				hasRates={ true }
 			/>
 		);
-		expect(
-			screen.getByRole( 'button', {
-				name: /Collection from 123 Easy Street, New York, 12345/,
-			} )
-		).toBeInTheDocument();
+
+		expect( setShippingCalculatorLabel ).toHaveBeenCalledWith(
+			'Delivers to'
+		);
+		expect( setShippingCalculatorAddress ).toHaveBeenCalledWith(
+			'123 Main St, San Francisco, CA 94107, US'
+		);
+	} );
+
+	it( 'should not set shipping calculator label and address when in editor and no formatted address', () => {
+		( useEditorContext as jest.Mock ).mockReturnValue( { isEditor: true } );
+		( useSelect as jest.Mock ).mockReturnValue( false );
+		( formatShippingAddress as jest.Mock ).mockReturnValue( '' );
+
+		render(
+			<ShippingAddress
+				setShippingCalculatorLabel={ setShippingCalculatorLabel }
+				setShippingCalculatorAddress={ setShippingCalculatorAddress }
+				shippingAddress={ shippingAddress }
+				hasRates={ true }
+			/>
+		);
+
+		expect( setShippingCalculatorLabel ).not.toHaveBeenCalled();
+		expect( setShippingCalculatorAddress ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should set shipping calculator label to "No delivery options available" when there are no rates', () => {
+		( useEditorContext as jest.Mock ).mockReturnValue( {
+			isEditor: false,
+		} );
+		( useSelect as jest.Mock ).mockReturnValue( false );
+		( formatShippingAddress as jest.Mock ).mockReturnValue(
+			'123 Main St, San Francisco, CA 94107, US'
+		);
+
+		render(
+			<ShippingAddress
+				setShippingCalculatorLabel={ setShippingCalculatorLabel }
+				setShippingCalculatorAddress={ setShippingCalculatorAddress }
+				shippingAddress={ shippingAddress }
+				hasRates={ false }
+			/>
+		);
+
+		expect( setShippingCalculatorLabel ).toHaveBeenCalledWith(
+			'No delivery options available for'
+		);
+		expect( setShippingCalculatorAddress ).toHaveBeenCalledWith(
+			'123 Main St, San Francisco, CA 94107, US'
+		);
 	} );
 } );
