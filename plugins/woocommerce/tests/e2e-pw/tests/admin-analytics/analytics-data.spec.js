@@ -1,18 +1,43 @@
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	product: async ( { api }, use ) => {
+		let product = {
+			id: 0,
+			name: `Product ${ Date.now() }`,
+			type: 'simple',
+			regular_price: '12.99',
+		};
+
+		await api.post( 'products', product ).then( ( response ) => {
+			product = response.data;
+		} );
+
+		await use( product );
+
+		// permanently delete the product if it still exists
+		const r = await api.get( `products/${ product.id }` );
+		if ( r.status !== 404 ) {
+			await api.delete( `products/${ product.id }`, {
+				force: true,
+			} );
+		}
+	},
+	page: async ( { page, wcAdminApi }, use ) => {
+		// Disable the task list reminder bar, it can interfere with the quick actions
+		await wcAdminApi.post( 'options', {
+			woocommerce_task_list_reminder_bar_hidden: 'yes',
+		} );
+
+		await use( page );
+	},
+} );
 
 test.describe( 'Analytics-related tests', () => {
 	let categoryIds, productIds, orderIds, setupPage;
 
-	test.use( { storageState: process.env.ADMINSTATE } );
-
-	test.beforeAll( async ( { baseURL, browser } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.beforeAll( async ( { browser, api } ) => {
 		// create a couple of product categories
 		await api
 			.post( 'products/categories/batch', {
@@ -150,15 +175,10 @@ test.describe( 'Analytics-related tests', () => {
 		setupPage = await browser.newPage();
 		await setupPage.waitForTimeout( 5000 );
 		await setupPage.goto( '?process-waiting-actions' );
+		await setupPage.close();
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.afterAll( async ( { api } ) => {
 		// delete the categories
 		await api.post( 'products/categories/batch', { delete: categoryIds } );
 		// delete the products
