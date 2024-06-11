@@ -58,7 +58,7 @@ class AddToCartForm extends AbstractBlock {
 	 * @param WP_Block $block Block instance.
 	 */
 	protected function enqueue_assets( $attributes, $content, $block ) {
-		if ( 'stepper' !== $attributes['quantitySelectorStyle'] ) {
+		if ( ! isset( $attributes['quantitySelectorStyle'] ) || 'stepper' !== $attributes['quantitySelectorStyle'] ) {
 			return;
 		}
 
@@ -155,18 +155,17 @@ class AddToCartForm extends AbstractBlock {
 			return '';
 		}
 
-		$is_stepper_style = 'stepper' === $attributes['quantitySelectorStyle'];
+		$parsed_attributes = $this->parse_attributes( $attributes );
+		$is_stepper_style  = 'stepper' === $parsed_attributes['quantitySelectorStyle'];
 
-		$product = $is_stepper_style ? $this->add_steppers( $product ) : $product;
-
-		$parsed_attributes                     = $this->parse_attributes( $attributes );
+		$product                               = $is_stepper_style ? $this->add_steppers( $product ) : $product;
 		$is_descendent_of_single_product_block = $parsed_attributes['isDescendentOfSingleProductBlock'];
 		$product                               = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
 
-		$product = $this->add_classes_to_add_to_cart_form_input( $product, $attributes );
+		$product = $this->add_classes_to_add_to_cart_form_input( $product, $parsed_attributes );
 
-		$classname          = $attributes['className'] ?? '';
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		$classname          = $parsed_attributes['className'] ?? '';
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $parsed_attributes );
 		$product_classname  = $is_descendent_of_single_product_block ? 'product' : '';
 
 		$form = sprintf(
