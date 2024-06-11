@@ -3,7 +3,7 @@
  */
 import { useCallback, useMemo, useRef, useState } from '@wordpress/element';
 import { useSelect, useDispatch, select } from '@wordpress/data';
-import { BlockInstance, cloneBlock } from '@wordpress/blocks';
+import { cloneBlock } from '@wordpress/blocks';
 import { close } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
@@ -137,7 +137,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 					orientation="vertical"
 					category={ category }
 					isDraggable={ false }
-					showTitlesAsTooltip={ false }
+					showTitlesAsTooltip={ true }
 					ref={ refElement }
 				/>
 			) }

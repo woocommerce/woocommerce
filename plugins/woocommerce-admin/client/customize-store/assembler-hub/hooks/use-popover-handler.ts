@@ -38,8 +38,6 @@ export const usePopoverHandler = () => {
 	);
 
 	const updatePopoverPosition = ( {
-		mainBodyWidth,
-		iframeWidth,
 		event,
 		clickedBlockClientId,
 		hoveredBlockClientId,
@@ -72,10 +70,8 @@ export const usePopoverHandler = () => {
 
 			const newElement = {
 				getBoundingClientRect: generateGetBoundingClientRect(
-					event.clientX +
-						( mainBodyWidth - iframeWidth - iframeRect.left ) +
-						200,
-					event.clientY + iframeRect.top + 40
+					event.clientX + iframeRect.left + window.scrollX,
+					event.clientY - iframeRect.top + 50
 				),
 			} as VirtualElement;
 
