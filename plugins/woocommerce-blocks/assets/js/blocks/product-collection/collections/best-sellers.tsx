@@ -32,7 +32,7 @@ const attributes = {
 		perPage: 5,
 		pages: 1,
 	},
-	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
+	hideControls: [ CoreFilterNames.ORDER ],
 };
 
 const heading: InnerBlockTemplate = [

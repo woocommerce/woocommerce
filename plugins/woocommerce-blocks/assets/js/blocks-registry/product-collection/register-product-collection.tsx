@@ -10,6 +10,7 @@ import {
 	SetPreviewState,
 	PreviewState,
 	ProductCollectionAttributes,
+	CoreFilterNames,
 } from '@woocommerce/blocks/product-collection/types';
 import {
 	DEFAULT_ATTRIBUTES,
@@ -74,6 +75,15 @@ export const __experimentalRegisterProductCollection = ( {
 		return blockAttrs.collection === variationAttributes.collection;
 	};
 
+	/**
+	 * As we don't allow collections to change "inherit" attribute,
+	 * We always need to hide the inherit control.
+	 */
+	const hideControls = new Set( [
+		CoreFilterNames.INHERIT,
+		...( blockVariationArgs.attributes?.hideControls || [] ),
+	] );
+
 	registerBlockVariation( BLOCK_NAME, {
 		...blockVariationArgs,
 		attributes: {
@@ -92,7 +102,7 @@ export const __experimentalRegisterProductCollection = ( {
 				...DEFAULT_ATTRIBUTES.displayLayout,
 				...blockVariationArgs.attributes?.displayLayout,
 			},
-			hideControls: blockVariationArgs.attributes?.hideControls,
+			hideControls,
 			queryContextIncludes:
 				blockVariationArgs.attributes?.queryContextIncludes,
 			collection: blockVariationArgs.name,

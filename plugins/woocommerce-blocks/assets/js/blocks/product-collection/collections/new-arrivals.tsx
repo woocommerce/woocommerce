@@ -40,7 +40,7 @@ const attributes = {
 			value: '-7 days',
 		},
 	},
-	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
+	hideControls: [ CoreFilterNames.ORDER ],
 };
 
 const heading: InnerBlockTemplate = [
