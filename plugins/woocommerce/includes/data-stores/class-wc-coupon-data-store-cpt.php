@@ -118,7 +118,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			throw new Exception( __( 'Invalid coupon.', 'woocommerce' ) );
 		}
 
-		$coupon_id = $coupon->get_id();
+		$coupon_id              = $coupon->get_id();
+		$limit_usage_to_x_items = get_post_meta( $coupon_id, 'limit_usage_to_x_items', true );
 		$coupon->set_props(
 			array(
 				'code'                        => $post_object->post_title,
@@ -131,11 +132,11 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'amount'                      => get_post_meta( $coupon_id, 'coupon_amount', true ),
 				'usage_count'                 => get_post_meta( $coupon_id, 'usage_count', true ),
 				'individual_use'              => 'yes' === get_post_meta( $coupon_id, 'individual_use', true ),
-				'product_ids'                 => array_filter( (array) explode( ',', get_post_meta( $coupon_id, 'product_ids', true ) ) ),
-				'excluded_product_ids'        => array_filter( (array) explode( ',', get_post_meta( $coupon_id, 'exclude_product_ids', true ) ) ),
+				'product_ids'                 => $this->get_coupon_meta_as_array( $coupon_id, 'product_ids' ),
+				'excluded_product_ids'        => $this->get_coupon_meta_as_array( $coupon_id, 'exclude_product_ids' ),
 				'usage_limit'                 => get_post_meta( $coupon_id, 'usage_limit', true ),
 				'usage_limit_per_user'        => get_post_meta( $coupon_id, 'usage_limit_per_user', true ),
-				'limit_usage_to_x_items'      => 0 < get_post_meta( $coupon_id, 'limit_usage_to_x_items', true ) ? get_post_meta( $coupon_id, 'limit_usage_to_x_items', true ) : null,
+				'limit_usage_to_x_items'      => $limit_usage_to_x_items > 0 ? $limit_usage_to_x_items : null,
 				'free_shipping'               => 'yes' === get_post_meta( $coupon_id, 'free_shipping', true ),
 				'product_categories'          => array_filter( (array) get_post_meta( $coupon_id, 'product_categories', true ) ),
 				'excluded_product_categories' => array_filter( (array) get_post_meta( $coupon_id, 'exclude_product_categories', true ) ),
@@ -149,6 +150,24 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$coupon->read_meta_data();
 		$coupon->set_object_read( true );
 		do_action( 'woocommerce_coupon_loaded', $coupon );
+	}
+
+	/**
+	 * Get a metadata value that is stored as either a string consisting of a comma-separated list of values
+	 * or as a serialized array.
+	 *
+	 * WooCommerce always stores the coupon product ids as a comma-separated string, but it seems that
+	 * some plugins mistakenly change these to an array.
+	 *
+	 * @param $coupon_id The coupon id.
+	 * @param string                  $meta_key The meta key to get.
+	 * @return array The metadata value as an array, with empty values removed.
+	 */
+	private function get_coupon_meta_as_array( $coupon_id, string $meta_key ) {
+		$meta_value = get_post_meta( $coupon_id, $meta_key, true );
+		return array_filter(
+			is_array( $meta_value ) ? $meta_value : explode( ',', $meta_value )
+		);
 	}
 
 	/**
