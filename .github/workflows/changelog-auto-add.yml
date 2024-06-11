@@ -7,7 +7,6 @@ on:
             prNumber:
                 description: Pull request number
                 required: true
-    pull_request: 
 
 jobs:
     add-changelog:
