@@ -1056,14 +1056,14 @@ class ListTable extends WP_List_Table {
 	 */
 	private function get_order_status_label( WC_Order $order ): string {
 		$status_names = array(
-			"Pending payment" => "The order has been received, but no payment has been made. Pending payment orders are generally awaiting customer action.",
-			"On hold" => "The order is awaiting payment confirmation. Stock is reduced, but you need to confirm payment.",
-			"Processing" => "Payment has been received (paid), and the stock has been reduced. The order is awaiting fulfillment.",
-			"Completed" => "Order fulfilled and complete.",
-			"Failed" => "The customer’s payment failed or was declined, and no payment has been successfully made.",
-			"Draft" => "Draft orders are created when customers start the checkout process while the block version of the checkout is in place.",
-			"Canceled" => "The order was canceled by an admin or the customer.",
-			"Refunded" => "Orders are automatically put in the Refunded status when an admin or shop manager has fully refunded the order’s value after payment."
+			'Pending payment' => __( 'The order has been received, but no payment has been made. Pending payment orders are generally awaiting customer action.', 'woocommerce' ),
+			'On hold'		  => __( 'The order is awaiting payment confirmation. Stock is reduced, but you need to confirm payment.', 'woocommerce' ),
+			'Processing' 	  => __( 'Payment has been received (paid), and the stock has been reduced. The order is awaiting fulfillment.', 'woocommerce' ),
+			'Completed' 	  => __( 'Order fulfilled and complete.', 'woocommerce' ),
+			'Failed' 		  => __( 'The customer’s payment failed or was declined, and no payment has been successfully made.', 'woocommerce' ),
+			'Draft' 		  => __( 'Draft orders are created when customers start the checkout process while the block version of the checkout is in place.', 'woocommerce' ),
+			'Canceled' 		  => __( 'The order was canceled by an admin or the customer.', 'woocommerce' ),
+			'Refunded' 		  => __( 'Orders are automatically put in the Refunded status when an admin or shop manager has fully refunded the order’s value after payment.', 'woocommerce' ),
 		);
 
 		/**
@@ -1071,7 +1071,7 @@ class ListTable extends WP_List_Table {
 		 *
 		 * @param array    $action Order actions.
 		 * @param WC_Order $order  Current order object.
-		 * @since 6.7.0
+		 * @since 9.1.0
 		 */
 		$status_names = apply_filters( 'woocommerce_get_order_status_labels', $status_names );
 
