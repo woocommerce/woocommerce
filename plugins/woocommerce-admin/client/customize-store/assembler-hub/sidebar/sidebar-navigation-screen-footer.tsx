@@ -57,7 +57,7 @@ export const SidebarNavigationScreenFooter = () => {
 
 	const [ mainTemplateBlocks ] = useEditorBlocks(
 		'wp_template',
-		currentTemplate.id
+		currentTemplate?.id ?? ''
 	);
 
 	const [ blocks, , onChange ] = useEditorBlocks(
