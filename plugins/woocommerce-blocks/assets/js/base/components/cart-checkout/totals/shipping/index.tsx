@@ -114,6 +114,11 @@ export const TotalsShipping = ( {
 		'activeShippingZones'
 	);
 
+	const hideShippingCostsUntilAddressEntered: boolean = getSetting(
+		'hideShippingCostsUntilAddressEntered',
+		false
+	);
+
 	const hasMultipleAndDefaultZone =
 		activeShippingZones.length > 1 &&
 		activeShippingZones.some(
@@ -125,8 +130,14 @@ export const TotalsShipping = ( {
 	// If there is no default customer location set in the store,
 	// and the customer hasn't provided their address,
 	// and only one default shipping method is available for all locations,
+	// and shipping cost is not hidden until address is entered,
 	// then the shipping calculator will be hidden to avoid confusion.
-	if ( ! addressComplete && ! isEditor && ! hasMultipleAndDefaultZone ) {
+	if (
+		! addressComplete &&
+		! isEditor &&
+		! hasMultipleAndDefaultZone &&
+		! hideShippingCostsUntilAddressEntered
+	) {
 		showCalculator = false;
 	}
 	return (

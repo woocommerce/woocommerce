@@ -248,6 +248,7 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->add( 'activeShippingZones', CartCheckoutUtils::get_shipping_zones() );
 		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
 		$this->asset_data_registry->add( 'localPickupEnabled', $pickup_location_settings['enabled'] );
+		$this->asset_data_registry->add( 'hideShippingCostsUntilAddressEntered', filter_var( get_option( 'woocommerce_shipping_cost_requires_address' ), FILTER_VALIDATE_BOOLEAN ) );
 
 		// Hydrate the following data depending on admin or frontend context.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
