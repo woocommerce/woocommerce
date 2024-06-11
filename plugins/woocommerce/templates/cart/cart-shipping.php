@@ -29,7 +29,7 @@ $calculator_text          = '';
 	<td data-title="<?php echo esc_attr( $package_name ); ?>">
 		<?php if ( ! empty( $available_methods ) && is_array( $available_methods ) ) : ?>
 			<ul id="shipping_method" class="woocommerce-shipping-methods">
-				<?php foreach ( $available_methods as $method ) : ?>
+				<?php foreach ( array_values( $available_methods ) as $index=>$method ) : ?>
 					<li>
 						<?php
 						if ( 1 < count( $available_methods ) ) {
