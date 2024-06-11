@@ -49,7 +49,7 @@ const debouncedFetch = debounce( async () => {
 	optionNames = [];
 
 	return await fetch;
-}, 1 );
+}, 100 ); // 100ms debounce time for batch fetches (to avoid multiple fetches for the same options while not affecting user experience too much. Typically, values between 50ms and 200ms should provide a good balance for most applications.
 
 export const controls = {
 	...dataControls,
