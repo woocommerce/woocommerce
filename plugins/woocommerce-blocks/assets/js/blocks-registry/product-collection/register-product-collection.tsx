@@ -79,10 +79,12 @@ export const __experimentalRegisterProductCollection = ( {
 	 * As we don't allow collections to change "inherit" attribute,
 	 * We always need to hide the inherit control.
 	 */
-	const hideControls = new Set( [
-		CoreFilterNames.INHERIT,
-		...( blockVariationArgs.attributes?.hideControls || [] ),
-	] );
+	const hideControls = [
+		...new Set( [
+			CoreFilterNames.INHERIT,
+			...( blockVariationArgs.attributes?.hideControls || [] ),
+		] ),
+	];
 
 	registerBlockVariation( BLOCK_NAME, {
 		...blockVariationArgs,

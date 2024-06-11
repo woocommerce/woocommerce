@@ -69,7 +69,7 @@ const ProductCollectionInspectorControls = (
 			filter,
 		} );
 
-	const inherit = query?.inherit;
+	const inherit = query?.inherit || false;
 	const shouldShowFilter = prepareShouldShowFilter( hideControls );
 
 	const showQueryControls = inherit === false;
