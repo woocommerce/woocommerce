@@ -153,12 +153,15 @@ class Bootstrap {
 			$this->container->get( BlockPatterns::class );
 			$this->container->get( BlockTypesController::class );
 			$this->container->get( BlockTemplatesRegistry::class )->init();
-			$this->container->get( BlockTemplatesController::class )->init();
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
 			$this->container->get( SingleProductTemplateCompatibility::class )->init();
 			$this->container->get( Notices::class )->init();
 			$this->container->get( PTKPatternsStore::class );
+
+			if ( wc_current_theme_is_fse_theme() ) {
+				$this->container->get( BlockTemplatesController::class )->init();
+			}
 		}
 
 		$this->container->get( QueryFilters::class )->init();
@@ -258,12 +261,6 @@ class Bootstrap {
 			BlockTemplatesRegistry::class,
 			function () {
 				return new BlockTemplatesRegistry();
-			}
-		);
-		$this->container->register(
-			BlockTemplatesController::class,
-			function () {
-				return new BlockTemplatesController();
 			}
 		);
 		$this->container->register(
@@ -427,6 +424,15 @@ class Bootstrap {
 				return new QueryFilters();
 			}
 		);
+
+		if ( wc_current_theme_is_fse_theme() ) {
+			$this->container->register(
+				BlockTemplatesController::class,
+				function () {
+					return new BlockTemplatesController();
+				}
+			);
+		}
 	}
 
 	/**
