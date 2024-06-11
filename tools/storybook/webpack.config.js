@@ -3,6 +3,7 @@
  */
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+const webpack = require( 'webpack' );
 
 /**
  * External dependencies
@@ -38,6 +39,11 @@ module.exports = ( storybookConfig ) => {
 		__dirname,
 		'./setting.mock.js'
 	);
+
+	storybookConfig.resolve.alias[ 'react/jsx-runtime' ] =
+		require.resolve( 'react/jsx-runtime' );
+
+	storybookConfig.resolve.alias.react = require.resolve( 'react' );
 
 	storybookConfig.resolve.modules = [
 		path.join( __dirname, '../../plugins/woocommerce-admin/client' ),
