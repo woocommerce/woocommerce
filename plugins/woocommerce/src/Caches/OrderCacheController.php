@@ -62,7 +62,7 @@ class OrderCacheController {
 	 * feature will be again enabled or not depending on how the feature is set.
 	 */
 	public function temporarily_disable_orders_cache_usage(): void {
-		if ( $this->orders_cache_usage_is_temporarly_disabled() ) {
+		if ( $this->orders_cache_usage_is_temporarily_disabled() ) {
 			return;
 		}
 
@@ -74,7 +74,7 @@ class OrderCacheController {
 	 *
 	 * @return bool True if the order cache is currently temporarily disabled.
 	 */
-	public function orders_cache_usage_is_temporarly_disabled(): bool {
+	public function orders_cache_usage_is_temporarily_disabled(): bool {
 		return null !== $this->orders_cache_usage_backup;
 	}
 
