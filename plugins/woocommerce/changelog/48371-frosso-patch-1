@@ -1,4 +1,4 @@
 Significance: patch
 Type: update
 
-</details>  <details>  <summary>Changelog Entry Comment</summary>
+feat: add `aria-required` attributes to WC form fields
