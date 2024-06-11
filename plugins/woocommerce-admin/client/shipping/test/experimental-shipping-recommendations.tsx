@@ -67,6 +67,30 @@ describe( 'ShippingRecommendations', () => {
 		).not.toBeInTheDocument();
 	} );
 
+	[
+		[ 'woocommerce-shipping' ],
+		[ 'woocommerce-tax' ],
+		[ 'woocommerce-shipping', 'woocommerce-tax' ],
+	].forEach( ( activePlugins ) => {
+		it(
+			'should not render if the following plugins are active: ' +
+				JSON.stringify( activePlugins ),
+			() => {
+				( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
+					fn( () => ( {
+						...defaultSelectReturn,
+						getActivePlugins: () => activePlugins,
+					} ) )
+				);
+				render( <ShippingRecommendations /> );
+
+				expect(
+					screen.queryByText( 'WooCommerce Shipping' )
+				).not.toBeInTheDocument();
+			} );
+		}
+	);
+
 	it( 'should not render when store location is not US', () => {
 		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
 			fn( () => ( {
