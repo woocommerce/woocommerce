@@ -3,7 +3,7 @@
  */
 import { useMachine } from '@xstate5/react';
 import React, { useEffect } from 'react';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -69,7 +69,7 @@ const LaunchStoreController = () => {
 	return (
 		<div className={ 'launch-your-store-layout__container' }>
 			<SidebarContainer
-				className={ classnames( {
+				className={ clsx( {
 					'is-sidebar-hidden': ! isSidebarVisible,
 				} ) }
 			>

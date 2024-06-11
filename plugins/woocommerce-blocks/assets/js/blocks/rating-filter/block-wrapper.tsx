@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useStyleProps } from '@woocommerce/base-hooks';
 import { isString } from '@woocommerce/types';
 
@@ -17,7 +17,7 @@ const BlockWrapper = ( props: Record< string, unknown > ) => {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				isString( props.className ) ? props.className : '',
 				styleProps.className
 			) }

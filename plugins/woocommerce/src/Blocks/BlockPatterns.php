@@ -5,7 +5,6 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
-use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use WP_Error;
 
@@ -137,8 +136,6 @@ class BlockPatterns {
 		if ( ! $allow_tracking ) {
 			return;
 		}
-
-		$this->ptk_patterns_store = new PTKPatternsStore( new PTKClient() );
 
 		$patterns = $this->ptk_patterns_store->get_patterns();
 		if ( empty( $patterns ) ) {

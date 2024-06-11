@@ -10,7 +10,7 @@ const { CI, DEFAULT_TIMEOUT_OVERRIDE } = process.env;
 const config: PlaywrightTestConfig = {
 	maxFailures: 0,
 	timeout: parseInt( DEFAULT_TIMEOUT_OVERRIDE || '', 10 ) || 100_000, // Defaults to 100s.
-	outputDir: './artifacts/test-results',
+	outputDir: `${ __dirname }/artifacts/test-results`,
 	globalSetup: fileURLToPath(
 		new URL( 'global-setup.ts', 'file:' + __filename ).href
 	),
@@ -22,7 +22,9 @@ const config: PlaywrightTestConfig = {
 	forbidOnly: !! CI,
 	// Don't report slow test "files", as we're running our tests in serial.
 	reportSlowTests: null,
-	reporter: process.env.CI ? [ [ 'github' ], [ 'list' ] ] : 'list',
+	reporter: process.env.CI
+		? [ [ 'github' ], [ 'list' ], [ './flaky-tests-reporter.ts' ] ]
+		: 'list',
 	use: {
 		baseURL: BASE_URL,
 		screenshot: 'only-on-failure',

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E test: Improve analytics data spec by disabling the task list reminder bar

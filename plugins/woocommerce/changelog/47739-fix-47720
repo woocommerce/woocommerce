@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Possible availability of unpublished coupons on sites with an object cache has been addressed through improved cache management.

@@ -100,9 +100,10 @@ const ProductCollectionContent = ( {
 		...( attributes as Partial< ProductCollectionAttributes > ),
 		queryId,
 		// If initialPreviewState is provided, set it as previewState.
-		...( !! attributes.collection && {
-			__privatePreviewState: initialPreviewState,
-		} ),
+		...( !! attributes.collection &&
+			initialPreviewState && {
+				__privatePreviewState: initialPreviewState,
+			} ),
 	};
 
 	/**
@@ -112,6 +113,7 @@ const ProductCollectionContent = ( {
 	useEffect(
 		() => {
 			setAttributes( defaultAttributesValue );
+			isInitialAttributesSet.current = true;
 		},
 		// This hook is only needed on initialization and sets default attributes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
