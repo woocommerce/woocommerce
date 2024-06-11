@@ -9,7 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Blocks\Options;
+use Automattic\WooCommerce\Blocks\Options as BlocksOptions;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 
 defined( 'ABSPATH' ) || exit;
@@ -4028,12 +4028,12 @@ add_filter( 'post_type_archive_title', 'wc_update_product_archive_title', 10, 2 
  */
 function wc_check_should_use_blockified_product_grid_templates( $old_name, $old_theme ) {
 	if ( ! wc_current_theme_is_fse_theme() ) {
-		update_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( false ) );
+		update_option( BlocksOptions::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( false ) );
 		return;
 	}
 
 	if ( ! $old_theme->is_block_theme() && wc_current_theme_is_fse_theme() ) {
-		update_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( true ) );
+		update_option( BlocksOptions::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( true ) );
 		return;
 	}
 }
