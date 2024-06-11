@@ -107,6 +107,7 @@ const ThemeCards = ( {
 						total_palettes={ theme.total_palettes }
 						link_url={ theme?.link_url }
 						is_active={ theme.is_active }
+						is_free={ theme.is_free }
 						price={ theme.price }
 						onClick={ () => {
 							if ( theme.is_active ) {
