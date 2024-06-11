@@ -95,7 +95,6 @@
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"concurrently": "^7.6.0",
 		"eslint": "^8.55.0",
-		"fork-ts-checker-webpack-plugin": "^9.0.2",
 		"jest": "~27.5.1",
 		"jest-cli": "~27.5.1",
 		"redux": "^4.2.1",
@@ -103,8 +102,6 @@
 		"ts-loader": "9.2.9",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
-		"webpack": "^5.91.0",
-		"webpack-cli": "^5.1.4",
 		"wireit": "0.14.3"
 	},
 	"peerDependencies": {
@@ -159,7 +156,7 @@
 			"service": true
 		},
 		"build:project:esm": {
-			"command": "webpack",
+			"command": "tsc --project tsconfig.json || tsc --emitDeclarationOnly || pnpm babel src --out-dir build --extensions \".ts,.tsx\"",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig.json",
