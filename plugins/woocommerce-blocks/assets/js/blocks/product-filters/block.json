@@ -15,6 +15,10 @@
 			"style": true,
 			"width": true
 		},
+		"color": {
+			"background": true,
+			"text": true
+		},
 		"multiple": false,
 		"interactivity": true,
 		"typography": {
