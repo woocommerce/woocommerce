@@ -170,7 +170,7 @@ class ProductCollectionUtils {
 	 *
 	 * @return array Parsed instances of the Product Collection block.
 	 */
-	public static function parse_blocks_track_data( $blocks, $in_single = false ) {
+	public static function parse_blocks_track_data( $blocks, $is_in_single_product = false ) {
 
 		$instances = array();
 
@@ -178,19 +178,19 @@ class ProductCollectionUtils {
 			if ( 'woocommerce/product-collection' === $block['blockName'] ) {
 				$instances[] = array(
 					'collection'        => $block['attrs']['collection'] ?? 'product-catalog',
-					'in-single-product' => $in_single ? '1' : '0',
+					'in-single-product' => $is_in_single_product ? '1' : '0',
 					'filters'           => self::get_query_filters_track_data( $block ),
 				);
 			}
 
-			$local_in_single = $in_single;
+			$local_is_in_single_product = $is_in_single_product;
 			if ( 'woocommerce/single-product' === $block['blockName'] ) {
-				$local_in_single = true;
+				$local_is_in_single_product = true;
 			}
 
 			// Recursive.
 			if ( ! empty( $block['innerBlocks'] ) ) {
-				$instances = array_merge( $instances, self::parse_blocks_track_data( $block['innerBlocks'], $local_in_single ) );
+				$instances = array_merge( $instances, self::parse_blocks_track_data( $block['innerBlocks'], $local_is_in_single_product ) );
 			}
 		}
 
