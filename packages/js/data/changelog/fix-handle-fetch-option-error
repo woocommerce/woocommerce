@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix get_option() error that was not being caught properly and rewrite the code using await and async
