@@ -145,7 +145,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 		} );
 	} );
 
-	test.only( 'Can complete the core profiler installing default extensions', async ( {
+	test( 'Can complete the core profiler installing default extensions', async ( {
 		page,
 	} ) => {
 		await page.goto(
