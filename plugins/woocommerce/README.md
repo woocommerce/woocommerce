@@ -72,7 +72,7 @@ pnpm run --filter=@woocommerce/block-library test
 Here is a collection of scripts that can help when developing the React-based admin interface.
 
 ```bash
-# Create a develoment build of the React-based admin client.
+# Create a development build of the React-based admin client.
 pnpm --filter=@woocommerce/admin-library dev 
 # Create and watch a development build of the React-based admin client.
 pnpm --filter=@woocommerce/admin-library start 
