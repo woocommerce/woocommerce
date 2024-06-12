@@ -77,7 +77,9 @@ Those hooks except `woocommerce_show_page_title` and `woocommerce_shop_loop` are
 
 > [!NOTE]
 > Using PHP template parts to customize the look-and-feel of a store with a block theme is discouraged. We recommend using [blocks](https://developer.wordpress.org/block-editor/), [global styles](https://developer.wordpress.org/themes/global-settings-and-styles/), [block hooks](https://make.wordpress.org/core/2023/10/15/introducing-block-hooks-for-dynamic-blocks/), and other block-based APIs. However, these template parts can be useful to port some customizations from the blocks into the Classic Template block.
-> It's important to point out that unlike most PHP actions and filters mentioned above, the PHP template parts are not applied in the blockified version of the templates, so you should make sure to build a version of the same changes that works with blocks.
+
+> [!CAUTION]
+> Unlike most PHP actions and filters mentioned above, the PHP template parts are not applied in the blockified version of the templates, so you should make sure to build a version of the same changes that works with blocks.
 
 The `ClassicTemplate` class renders a couple of PHP template parts. Those are [`content-single-product` template part](https://github.com/woocommerce/woocommerce/blob/f040e3acf7df9420a09d37b84358ac7d2e03b8a3/plugins/woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php#L213) in the Single Product version of the Classic Template block and the [`content-product` template part](https://github.com/woocommerce/woocommerce/blob/f040e3acf7df9420a09d37b84358ac7d2e03b8a3/plugins/woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php#L311) when rendering the Product archive templates. Themes can override those template parts as they would normally do in classic themes, with `content-single-product.php` and `content-product.php` files. However, remember that these templates parts are not used in the blockified version of the templates, so any changes to them won't be applied to the granular blocks.
 
