@@ -257,8 +257,6 @@ class WC_Install {
 		),
 		'9.1.0' => array(
 			'wc_update_910_add_launch_your_store_tour_option',
-		),
-		'9.1.0' => array(
 			'wc_update_910_remove_obsolete_user_meta',
 		),
 	);
