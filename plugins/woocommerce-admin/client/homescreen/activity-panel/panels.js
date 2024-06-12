@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { __experimentalErrorBoundary as ErrorBoundary } from '@woocommerce/components';
+
 /**
  * Internal dependencies
  */

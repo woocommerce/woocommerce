@@ -31,6 +31,5 @@ export const getReviewsError = (
 	query: ReviewsQueryParams
 ) => {
 	const stringifiedQuery = JSON.stringify( query );
-
 	return state.errors[ stringifiedQuery ];
 };

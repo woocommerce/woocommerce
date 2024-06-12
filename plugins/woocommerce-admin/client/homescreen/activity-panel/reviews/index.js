@@ -357,7 +357,6 @@ export default compose( [
 		if ( hasUnapprovedReviews ) {
 			reviews = getReviews( reviewsQuery );
 			isError = Boolean( getReviewsError( reviewsQuery ) );
-
 			isRequesting = isResolving( 'getReviews', [ reviewsQuery ] );
 		}
 

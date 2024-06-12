@@ -337,7 +337,6 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 			'Failed to load orders, raise error to trigger ErrorBoundary'
 		);
 	}
-
 	const customerList = customerItems
 		? Array.from( customerItems, ( [ , value ] ) => value )
 		: [];
