@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make coupon metadata read robust against wrongly stored product related metadata
