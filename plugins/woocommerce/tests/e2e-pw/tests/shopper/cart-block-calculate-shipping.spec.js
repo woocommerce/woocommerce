@@ -139,7 +139,7 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 
 		await page
 			.locator( 'button', {
-				hasText: 'Enter address to check delivery options',
+				hasText: 'Enter the address to check delivery options',
 			} )
 			.click();
 
@@ -177,7 +177,7 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 
 		await page
 			.locator( 'button', {
-				hasText: 'Enter address to check delivery options',
+				hasText: 'Enter the address to check delivery options',
 			} )
 			.click();
 
@@ -222,7 +222,7 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 
 		await page
 			.locator( 'button', {
-				hasText: 'Enter address to check delivery options',
+				hasText: 'Enter the address to check delivery options',
 			} )
 			.click();
 
@@ -262,7 +262,7 @@ baseTest.describe( 'Cart Block Calculate Shipping', () => {
 
 		await page
 			.locator( 'button', {
-				hasText: 'Enter address to check delivery options',
+				hasText: 'Enter the address to check delivery options',
 			} )
 			.click();
 
