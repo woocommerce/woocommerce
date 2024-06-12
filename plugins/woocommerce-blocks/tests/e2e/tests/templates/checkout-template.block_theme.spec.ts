@@ -19,7 +19,7 @@ test.describe( 'Test the checkout template', () => {
 		await editor.enterEditMode();
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place Order · <price/>',
+				name: 'Place Order',
 			} )
 		).toBeVisible();
 	} );
@@ -41,7 +41,7 @@ test.describe( 'Test the checkout template', () => {
 
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place Order · <price/>',
+				name: 'Place Order',
 			} )
 		).toBeVisible();
 
@@ -51,7 +51,7 @@ test.describe( 'Test the checkout template', () => {
 
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place Order · <price/>',
+				name: 'Place Order',
 			} )
 		).toBeVisible();
 	} );
@@ -67,7 +67,7 @@ test.describe( 'Test the checkout template', () => {
 		await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place Order · <price/>',
+				name: 'Place Order',
 			} )
 		).toBeVisible();
 	} );
