@@ -2756,7 +2756,12 @@ function wc_update_910_remove_obsolete_user_meta() {
 	}
 
 	if ( false === $deletions ) {
-		$logger->notice( __( 'During the update to 9.1.0, WooCommerce attempted to remove user meta with the keys "_last_order", "_order_count" and "_money_spent" but was unable to do so.', 'woocommerce' ) );
+		$logger->notice(
+			'During the update to 9.1.0, WooCommerce attempted to remove user meta with the keys "_last_order", "_order_count" and "_money_spent" but was unable to do so.',
+			array(
+				'source' => 'wc-updater',
+			)
+		);
 	} else {
 		$logger->notice(
 			sprintf(
