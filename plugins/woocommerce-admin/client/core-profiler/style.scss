@@ -426,7 +426,7 @@
 		}
 
 		.woocommerce-profiler-question-label,
-		.woocommerce-profiler-business-info-email-adddress
+		.woocommerce-profiler-business-info-email-address
 		.components-base-control__label,
 		.woocommerce-profiler-business-info-store-name
 		.components-base-control__label {
@@ -440,13 +440,13 @@
 
 		.woocommerce-profiler-question-label
 		.woocommerce-profiler-question-required,
-		.woocommerce-profiler-business-info-email-adddress
+		.woocommerce-profiler-business-info-email-address
 		.woocommerce-profiler-question-required {
 			color: #cc1818;
 			padding-left: 3px;
 		}
 
-		.woocommerce-profiler-business-info-email-adddress
+		.woocommerce-profiler-business-info-email-address
 		.components-text-control__input,
 		.woocommerce-profiler-business-info-store-name
 		.components-text-control__input {
@@ -461,7 +461,7 @@
 			}
 		}
 
-		.woocommerce-profiler-business-info-email-adddress.is-error {
+		.woocommerce-profiler-business-info-email-address.is-error {
 			& .components-text-control__input {
 				box-shadow: 0 0 0 1px var(--color-error);
 			}
@@ -472,11 +472,11 @@
 			width: 20px;
 		}
 
-		.woocommerce-profiler-select-control__country-spacer + .woocommerce-profiler-business-info-email-adddress {
+		.woocommerce-profiler-select-control__country-spacer + .woocommerce-profiler-business-info-email-address {
 			margin-top: 8px;
 		}
 
-		.woocommerce-profiler-business-info-email-adddress {
+		.woocommerce-profiler-business-info-email-address {
 			margin-top: 20px;
 		}
 

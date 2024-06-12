@@ -397,7 +397,7 @@ export const BusinessInfo = ( {
 						<>
 							<TextControl
 								className={ clsx(
-									'woocommerce-profiler-business-info-email-adddress',
+									'woocommerce-profiler-business-info-email-address',
 									{ 'is-error': isEmailInvalid }
 								) }
 								onChange={ ( value ) => {
