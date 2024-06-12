@@ -165,8 +165,8 @@ class ProductCollectionUtils {
 	/**
 	 * Track usage of the Product Collection block within the given blocks.
 	 *
-	 * @param array $blocks     The parsed blocks to check.
-	 * @param bool  $in_single  Whether we are in a single product container (used for keeping state in the recurring process).
+	 * @param array $blocks                The parsed blocks to check.
+	 * @param bool  $is_in_single_product  Whether we are in a single product container (used for keeping state in the recurring process).
 	 *
 	 * @return array Parsed instances of the Product Collection block.
 	 */
