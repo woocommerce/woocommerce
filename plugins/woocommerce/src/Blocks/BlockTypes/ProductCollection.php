@@ -182,7 +182,13 @@ class ProductCollection extends AbstractBlock {
 			return;
 		}
 
-		// Important: don't track revisions.
+		// Don't track autosaves and drafts.
+		$post_status = $post->post_status;
+		if ( 'publish' !== $post_status ) {
+			return;
+		}
+
+		// Important: Only track instances within specific types.
 		$post_type = $post->post_type;
 		if ( ! in_array( $post_type, array( 'post', 'page', 'wp_template', 'wp_template_part' ), true ) ) {
 			return;
