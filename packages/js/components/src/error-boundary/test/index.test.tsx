@@ -81,7 +81,21 @@ describe( 'ErrorBoundary', () => {
 		expect( reloadMock ).toHaveBeenCalled();
 	} );
 
-	it( 'hide action button when showActionButton is false', () => {
+	it( 'triggers custom action callback when provided', () => {
+		const customActionCallback = jest.fn();
+
+		render(
+			<ErrorBoundary actionCallback={ customActionCallback }>
+				<ThrowError />
+			</ErrorBoundary>
+		);
+
+		fireEvent.click( screen.getByText( 'Reload' ) );
+
+		expect( customActionCallback ).toHaveBeenCalled();
+	} );
+
+	it( 'does not display the action button when showActionButton is false', () => {
 		render(
 			<ErrorBoundary showActionButton={ false }>
 				<ThrowError />
@@ -89,5 +103,43 @@ describe( 'ErrorBoundary', () => {
 		);
 
 		expect( screen.queryByText( 'Reload' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'resets error boundary state after action is performed when resetErrorAfterAction is true', () => {
+		const { rerender } = render(
+			<ErrorBoundary>
+				<ThrowError />
+			</ErrorBoundary>
+		);
+
+		rerender(
+			<ErrorBoundary>
+				<div>Child Component</div>
+			</ErrorBoundary>
+		);
+
+		fireEvent.click( screen.getByText( 'Reload' ) );
+
+		expect( screen.getByText( 'Child Component' ) ).toBeInTheDocument();
+	} );
+
+	it( 'does not reset error boundary state after action is performed when resetErrorAfterAction is false', () => {
+		const { rerender } = render(
+			<ErrorBoundary resetErrorAfterAction={ false }>
+				<ThrowError />
+			</ErrorBoundary>
+		);
+
+		fireEvent.click( screen.getByText( 'Reload' ) );
+
+		rerender(
+			<ErrorBoundary resetErrorAfterAction={ false }>
+				<div>Child Component</div>
+			</ErrorBoundary>
+		);
+
+		expect(
+			screen.queryByText( 'Child Component' )
+		).not.toBeInTheDocument();
 	} );
 } );

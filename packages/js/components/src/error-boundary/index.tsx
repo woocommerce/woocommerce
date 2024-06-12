@@ -11,19 +11,30 @@ import EmptyContent from '../empty-content';
 import { alertIcon } from './constants';
 
 export type ErrorBoundaryProps = {
+	/**
+	 * The content to be rendered inside the ErrorBoundary component.
+	 */
 	children: ReactNode;
-	/** Custom error title to display, defaults to a generic message */
+	/**
+	 * The custom error message to be displayed. Defaults to a generic message.
+	 */
 	errorMessage?: ReactNode;
-	/** Whether to show an action button, defaults to true */
+	/**
+	 * Determines whether to show an action button. Defaults to true.
+	 */
 	showActionButton?: boolean;
 	/**
-	 * Label to be used for the action button. Defaults to 'Reload'
+	 * The label to be used for the action button. Defaults to 'Reload'.
 	 */
 	actionLabel?: string;
 	/**
-	 * Callback to be used for the action button, defaults to window.location.reload
+	 * The callback function to be executed when the action button is clicked. Defaults to window.location.reload.
 	 */
 	actionCallback?: () => void;
+	/**
+	 * Determines whether to reset the error boundary state after the action is performed. Defaults to true.
+	 */
+	resetErrorAfterAction?: boolean;
 };
 
 type ErrorBoundaryState = {
@@ -38,6 +49,7 @@ export class ErrorBoundary extends Component<
 > {
 	static defaultProps: Partial< ErrorBoundaryProps > = {
 		showActionButton: true,
+		resetErrorAfterAction: true,
 	};
 
 	constructor( props: ErrorBoundaryProps ) {
@@ -60,19 +72,30 @@ export class ErrorBoundary extends Component<
 		window.location.reload();
 	};
 
+	handleAction = () => {
+		const { actionCallback, resetErrorAfterAction } = this.props;
+
+		if ( actionCallback ) {
+			actionCallback();
+		} else {
+			this.handleReload();
+		}
+
+		if ( resetErrorAfterAction ) {
+			this.setState( { hasError: false, error: null, errorInfo: null } );
+		}
+	};
+
 	render() {
-		const {
-			children,
-			errorMessage,
-			showActionButton,
-			actionLabel,
-			actionCallback,
-		} = this.props;
+		const { children, errorMessage, showActionButton, actionLabel } =
+			this.props;
 
 		if ( this.state.hasError ) {
 			return (
 				<div className="woocommerce-error-boundary">
 					<EmptyContent
+						title=""
+						actionLabel=""
 						message={
 							errorMessage ||
 							__(
@@ -85,9 +108,7 @@ export class ErrorBoundary extends Component<
 						}
 						secondaryActionURL={ null }
 						secondaryActionCallback={
-							showActionButton
-								? actionCallback || this.handleReload
-								: undefined
+							showActionButton ? this.handleAction : undefined
 						}
 						illustrationWidth={ 36 }
 						illustrationHeight={ 36 }
