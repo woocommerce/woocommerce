@@ -130,7 +130,6 @@ class ProductCollectionUtils {
 		}
 
 		if ( in_array( $post_type, array( 'wp_template', 'wp_template_part' ), true ) ) {
-
 			$name = $post->post_name;
 			if ( false !== strpos( $name, SingleProductTemplate::SLUG ) ) {
 				$context = 'single-product';
@@ -177,7 +176,6 @@ class ProductCollectionUtils {
 
 		foreach ( $blocks as $block ) {
 			if ( 'woocommerce/product-collection' === $block['blockName'] ) {
-
 				$instances[] = array(
 					'collection'        => $block['attrs']['collection'] ?? 'product-catalog',
 					'in-single-product' => $in_single ? '1' : '0',
