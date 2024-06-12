@@ -331,8 +331,10 @@ jobs:
               run: |
                   if [[ "${{ github.event_name }}" == "pull_request" ]]; then
                     REPORT_TITLE="$PR_TITLE"
+                    REF_NAME="$GITHUB_HEAD_REF"
                   else
                     REPORT_TITLE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+                    REF_NAME="$GITHUB_REF_NAME"
                   fi
                 
                   gh workflow run report.yml \
@@ -340,7 +342,7 @@ jobs:
                     -f run_id="$GITHUB_RUN_ID" \
                     -f event="$EVENT_NAME" \
                     -f pr_number="$PR_NUMBER" \
-                    -f ref_name="$GITHUB_REF_NAME" \
+                    -f ref_name="$REF_NAME" \
                     -f commit_sha="$GITHUB_SHA" \
                     -f repository="$GITHUB_REPOSITORY" \
                     -f suite="$REPORT_NAME" \
