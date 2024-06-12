@@ -324,8 +324,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_icon() {
-
-		$icon = $this->icon ? '<img src="' . WC_HTTPS::force_https_url( $this->icon ) . '" alt="' . esc_attr( $this->get_title() ) . '" />' : '';
+		$icon = $this->icon ? '<img src="' . esc_attr( WC_HTTPS::force_https_url( $this->icon ) ) . '" alt="' . esc_attr( $this->get_title() ) . '" />' : '';
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
 	}
@@ -429,7 +428,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @since 1.5.7
 	 */
 	public function supports( $feature ) {
-		return apply_filters( 'woocommerce_payment_gateway_supports', in_array( $feature, $this->supports ), $feature, $this );
+		return apply_filters( 'woocommerce_payment_gateway_supports', in_array( $feature, $this->supports, true ), $feature, $this );
 	}
 
 	/**
