@@ -315,7 +315,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 	/**
 	 * Normalizes a block of HTML.
-	 * Line breaks, tabs and redundand whitespaces are removed.
+	 * Line breaks, tabs and redundant whitespaces are removed.
 	 *
 	 * @param string $html The block of HTML to normalize.
 	 *
