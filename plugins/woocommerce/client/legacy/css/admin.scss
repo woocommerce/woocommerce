@@ -8712,3 +8712,7 @@ table.bar_chart {
 		}
 	}
 }
+
+html:has(#status-table-templates){
+	scroll-padding-top: 80px;
+}
