@@ -118,7 +118,8 @@ if ( wc_tax_enabled() ) {
 				<li><strong><?php esc_html_e( 'Coupon(s)', 'woocommerce' ); ?></strong></li>
 				<?php
 				foreach ( $coupons as $item_id => $item ) :
-					if ( $coupon_info = $item->get_meta( 'coupon_info' ) ) {
+					$coupon_info = $item->get_meta( 'coupon_info' ) ;
+					if ( $coupon_info ) {
 						$coupon_info = json_decode( $coupon_info, true );
 						$post_id = $coupon_info[0];
 					} else {
