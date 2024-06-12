@@ -23,9 +23,9 @@ const Template: Story< ErrorBoundaryProps > = ( args ) => (
 export const Default = Template.bind( {} );
 Default.args = {};
 
-export const CustomErrorTitle = Template.bind( {} );
-CustomErrorTitle.args = {
-	errorTitle: 'Custom error title',
+export const CustomErrorMessage = Template.bind( {} );
+CustomErrorMessage.args = {
+	errorMessage: 'Custom error message',
 };
 
 export const WithoutActionButton = Template.bind( {} );
@@ -50,7 +50,7 @@ export default {
 	title: 'WooCommerce Admin/experimental/Error Boundary',
 	component: ErrorBoundary,
 	argTypes: {
-		errorTitle: {
+		errorMessage: {
 			control: 'text',
 			defaultValue: 'Oops, something went wrong. Please try again',
 		},
