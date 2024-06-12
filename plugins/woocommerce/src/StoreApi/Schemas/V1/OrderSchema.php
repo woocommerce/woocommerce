@@ -378,8 +378,10 @@ class OrderSchema extends AbstractSchema {
 			'total_shipping_tax' => $this->prepare_money_response( $order->get_shipping_tax() ),
 			'tax_lines'          => array_map(
 				function( $item ) {
+					error_log('print_r($item,true)');
+					error_log(print_r($item,true));
 					return [
-						'name'  => $item->get_name(),
+						'name'  => $item->get_label(),
 						'price' => $this->prepare_money_response( $item->get_tax_total() ),
 						'rate'  => strval( $item->get_rate_percent() ),
 					];
