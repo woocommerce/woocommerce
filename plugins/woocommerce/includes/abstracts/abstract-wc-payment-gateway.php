@@ -394,13 +394,23 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * If There are no payment fields show the description if set.
-	 * Override this in your gateway if you have some.
+	 * Default payment fields display. Override this in your gateway to customize displayed fields.
+	 *
+	 * By default this renders the payment gateway description.
+	 *
+	 * @since 1.5.7
 	 */
 	public function payment_fields() {
-		$description = $this->get_description();
-		if ( $description ) {
-			echo wpautop( wptexturize( $description ) ); // @codingStandardsIgnoreLine.
+		$description              = $this->get_description();
+		$has_extended_description = $description !== $this->description;
+
+		if ( $has_extended_description ) {
+			// Description can be overridden by extending classes so we cannot enforce escaping via kses here as it would
+			// break custom HTML. Therefore this is treated as trusted data.
+			echo wpautop( wptexturize( $description ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		} else {
+			// If the description was not modified, we can safely escape it.
+			echo wp_kses_post( wpautop( wptexturize( $description ) ) );
 		}
 
 		if ( $this->supports( 'default_credit_card_form' ) ) {
