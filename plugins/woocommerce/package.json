@@ -278,6 +278,11 @@
 					],
 					"testEnv": {
 						"start": "env:test"
+					},
+					"report": {
+						"resultsBlobName": "gutenberg-stable-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
 					}
 				},
 				{
@@ -298,6 +303,11 @@
 					],
 					"testEnv": {
 						"start": "env:test"
+					},
+					"report": {
+						"resultsBlobName": "gutenberg-nightly-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
 					}
 				},
 				{
@@ -312,6 +322,11 @@
 					],
 					"testEnv": {
 						"start": "env:test"
+					},
+					"report": {
+						"resultsBlobName": "wcpayments-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
 					}
 				},
 				{
@@ -326,6 +341,11 @@
 					],
 					"testEnv": {
 						"start": "env:test"
+					},
+					"report": {
+						"resultsBlobName": "wc-paypal-payments-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
 					}
 				},
 				{
@@ -340,6 +360,11 @@
 					],
 					"testEnv": {
 						"start": "env:test"
+					},
+					"report": {
+						"resultsBlobName": "wc-services-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
 					}
 				},
 				{
@@ -373,8 +398,9 @@
 						}
 					},
 					"report": {
-						"resultsBlobName": "all-blob-e2e-reports-non-hpos",
-						"resultsPath": "tests/e2e-pw/test-results"
+						"resultsBlobName": "core-e2e-reports-non-hpos",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
 					}
 				},
 				{
@@ -397,7 +423,12 @@
 					},
 					"events": [
 						"release-checks"
-					]
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report-php-8.1",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
 				},
 				{
 					"name": "Core e2e tests - WP latest-1",
@@ -419,7 +450,12 @@
 					},
 					"events": [
 						"release-checks"
-					]
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report-wp-latest-1",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
 				},
 				{
 					"name": "Core API tests",
@@ -472,6 +508,11 @@
 						"config": {
 							"disableHpos": true
 						}
+					},
+					"report": {
+						"resultsBlobName": "core-api-report-hpos-disabled",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
 					}
 				},
 				{
