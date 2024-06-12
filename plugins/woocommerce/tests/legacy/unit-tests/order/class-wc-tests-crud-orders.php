@@ -652,9 +652,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: calculate_taxes_is_vat_excempt
+	 * Test: calculate_taxes_is_vat_exempt
 	 */
-	public function test_calculate_taxes_is_vat_excempt() {
+	public function test_calculate_taxes_is_vat_exempt() {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$tax_rate = array(
 			'tax_rate_country'  => '',
