@@ -342,22 +342,48 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			await expect(
 				page.getByText( 'Plugin deactivated.' )
 			).toBeVisible();
-			await page.getByLabel( 'Delete Google Listings' ).click();
+			// delete plugin regularly or, if attempted, accept deleting data as well
+			try {
+				await page.getByLabel( 'Delete Google Listings' ).click();
+				await expect(
+					page.getByText(
+						'Google Listings and Ads was successfully deleted.'
+					)
+				).toBeVisible( { timeout: 5000 } );
+			} catch ( e ) {
+				await page
+					.getByText( 'Yes, delete these files and data' )
+					.click();
+				await page
+					.getByText( 'The selected plugin has been deleted.' )
+					.waitFor();
+			}
 			await expect(
-				page.getByText(
-					'Google Listings and Ads was successfully deleted.'
-				)
-			).toBeVisible();
+				page.getByLabel( 'Delete Google Listings' )
+			).toBeHidden();
 			await page.getByLabel( 'Deactivate Pinterest for' ).click();
 			await expect(
 				page.getByText( 'Plugin deactivated.' )
 			).toBeVisible();
-			await page.getByLabel( 'Delete Pinterest for' ).click();
+			// delete plugin regularly or, if attempted, accept deleting data as well
+			try {
+				await page.getByLabel( 'Delete Pinterest for' ).click();
+				await expect(
+					page.getByText(
+						'Pinterest for WooCommerce was successfully deleted.'
+					)
+				).toBeVisible( { timeout: 5000 } );
+			} catch ( e ) {
+				await page
+					.getByText( 'Yes, delete these files and data' )
+					.click();
+				await page
+					.getByText( 'The selected plugin has been deleted.' )
+					.waitFor();
+			}
 			await expect(
-				page.getByText(
-					'Pinterest for WooCommerce was successfully deleted.'
-				)
-			).toBeVisible();
+				page.getByLabel( 'Delete Pinterest for' )
+			).toBeHidden();
 		} );
 	} );
 } );
