@@ -217,13 +217,13 @@ class CLIRunner {
 			if ( ! $this->data_regenerator->has_scheduled_action_for_regeneration_step() ) {
 				$this->log( 'However, there are %9NO%n actions scheduled to run the regeneration steps (a %9wp cli palt regenerate%n command was aborted?).' );
 			}
-			$this->log( "The last product id that will be processed is %Y${max_product_id_to_process}%n." );
+			$this->log( "The last product id that will be processed is %Y{$max_product_id_to_process}%n." );
 			$this->log( "\nRun %9wp cli palt abort_regeneration%n to abort the regeneration process," );
 			$this->log( "then you'll be able to run %9wp cli palt resume_regeneration%n to resume the regeneration process," );
 		} elseif ( $this->lookup_data_store->regeneration_was_aborted() ) {
 			$max_product_id_to_process = get_option( 'woocommerce_attribute_lookup_last_product_id_to_process', '???' );
 			WP_CLI::log( '' );
-			$this->warning( "Full regeneration of the table has been %Raborted.%n\nThe last product id that will be processed is %Y${max_product_id_to_process}%n." );
+			$this->warning( "Full regeneration of the table has been %Raborted.%n\nThe last product id that will be processed is %Y{$max_product_id_to_process}%n." );
 			$this->log( "\nRun %9wp cli palt resume_regeneration%n to resume the regeneration process." );
 		}
 	}

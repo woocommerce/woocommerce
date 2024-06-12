@@ -6,11 +6,11 @@ const {
 	publishPage,
 } = require( '../../utils/editor' );
 
-baseTest.describe( 'Can create a new post', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-	} );
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+} );
 
+test.describe( 'Can create a new post', () => {
 	// eslint-disable-next-line playwright/expect-expect
 	test( 'can create new post', async ( { page, testPost } ) => {
 		await goToPostEditor( { page } );

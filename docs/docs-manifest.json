@@ -972,7 +972,7 @@
       "categories": []
     },
     {
-      "content": "\nLearn to design and integrate custom themes in WooCommerce, focusing on responsive design and ecommerce optimization.\n",
+      "content": "\nLearn to design and integrate custom themes in WooCommerce, focusing on responsive design and ecommerce optimization.\n\nThis document was created for use when developing classic themes. Check this other document for [block theme development](../../plugins/woocommerce-blocks/docs/designers/theming/README.md).\n",
       "category_slug": "theme-development",
       "category_title": "Theme Development",
       "posts": [
@@ -996,28 +996,35 @@
         {
           "post_title": "Template structure & Overriding templates via a theme",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/template-structure.md",
-          "hash": "e96f02bb6256e7f80bbe5bf5fa2b5006dd0d49cd67c8825414a64a6e34d0768a",
+          "hash": "6099b3a45f91390d9dd239f496eaf531be2b638c666858d6a066051ce915176a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/template-structure.md",
-          "id": "34bfebec9fc45e680976814928a7b8a1778af14e"
+          "id": "34bfebec9fc45e680976814928a7b8a1778af14e",
+          "links": {
+            "../../plugins/woocommerce-blocks/docs/designers/theming/README.md": "64ff2179eb307d2bcd8d9736b3249ca56b77ba0c"
+          }
         },
         {
           "post_title": "How to set up and use a child theme",
           "menu_title": "Set up and use a child theme",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/set-up-a-child-theme.md",
-          "hash": "78e003139277d0e47b71921d64fd7c3225a8ada819f0989e1c0a605ac3d2e2f7",
+          "hash": "b362d5ddd34d8b81f6a2ee2369dd2cd68e51700836a85f96d629e87d564b0844",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/set-up-a-child-theme.md",
-          "id": "00b6916595cbde7766f080260a9ea26f53f3271c"
+          "id": "00b6916595cbde7766f080260a9ea26f53f3271c",
+          "links": {
+            "../../plugins/woocommerce-blocks/docs/designers/theming/README.md": "64ff2179eb307d2bcd8d9736b3249ca56b77ba0c"
+          }
         },
         {
           "post_title": "Image sizing for theme developers",
           "menu_title": "Image sizing",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/image-sizes.md",
-          "hash": "c0c60cfd163c9fe935f1a6a8d1934eaf118668dd411212001f7f9f35a5cdcc8d",
+          "hash": "ff26ee246bb3d2f70c0fdc6dcedf50b9ef7bc55442c4378325880117f85025cd",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/image-sizes.md",
           "id": "3f5301ac3040d38bc449b440733da6a466209df3",
           "links": {
+            "../../plugins/woocommerce-blocks/docs/designers/theming/README.md": "64ff2179eb307d2bcd8d9736b3249ca56b77ba0c",
             "./thumbnail-image-regeneration.md": "733e1b16276d64f128ba0e337ca68ec3de0bf68f"
           }
         },
@@ -1043,9 +1050,12 @@
           "post_title": "Classic theme development handbook",
           "menu_title": "Classic theme development",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/classic-theme-developer-handbook.md",
-          "hash": "5b39b6db8ab9f08b8270e5803e19ee2abf6fc0fc6458780447fd8b24213d3100",
+          "hash": "1194437fbc2ec82d60c8b73a9742ec650bd90fe734758c3a2b27ed852d4d14f7",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/classic-theme-developer-handbook.md",
-          "id": "c2fde53e1dc3efbded3cfe1fb4df27136a3799a4"
+          "id": "c2fde53e1dc3efbded3cfe1fb4df27136a3799a4",
+          "links": {
+            "../../plugins/woocommerce-blocks/docs/designers/theming/README.md": "64ff2179eb307d2bcd8d9736b3249ca56b77ba0c"
+          }
         }
       ],
       "categories": []
@@ -1349,5 +1359,5 @@
       "categories": []
     }
   ],
-  "hash": "1579358bdc138f095c65a591f1e4e8ad32529375fff451d3f06e1deeeb035956"
+  "hash": "04ed3ebda992e9548c692aa676e14bda41d40d4c89d3c9aafd3edb63809e4651"
 }
