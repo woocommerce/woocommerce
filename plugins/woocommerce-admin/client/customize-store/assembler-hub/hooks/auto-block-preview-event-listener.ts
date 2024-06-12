@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useEffect } from '@wordpress/element';
-import { useQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -237,6 +236,7 @@ type useAutoBlockPreviewEventListenersValues = {
 	isPatternPreview: boolean;
 	contentHeight: number | null;
 	logoBlockIds: string[];
+	query: Record< string, string >;
 };
 
 type useAutoBlockPreviewEventListenersCallbacks = {
@@ -276,6 +276,7 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 		autoScale,
 		isPatternPreview,
 		logoBlockIds,
+		query,
 	}: useAutoBlockPreviewEventListenersValues,
 	{
 		selectBlockOnHover,
@@ -288,8 +289,6 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 		setPopoverStatus,
 	}: useAutoBlockPreviewEventListenersCallbacks
 ) => {
-	const query = useQuery();
-
 	useEffect( () => {
 		const observers: Array< MutationObserver > = [];
 		const unsubscribeCallbacks: Array< () => void > = [];
