@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { DragEvent } from 'react';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { BlockAttributes } from '@wordpress/blocks';
 import { DropZone } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
@@ -193,7 +193,14 @@ export function ImageBlockEdit( {
 	const handleMediaUploaderError: MediaUploaderErrorCallback = function (
 		error
 	) {
-		createErrorNotice( `Error uploading image:\n${ error.message }` );
+		createErrorNotice(
+			sprintf(
+				// eslint-disable-next-line @wordpress/i18n-no-collapsible-whitespace
+				/* translators: %s is the detailed error message */
+				__( 'Error uploading image:\n%s', 'woocommerce' ),
+				error.message
+			)
+		);
 	};
 
 	const isImageGalleryVisible =
