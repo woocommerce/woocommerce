@@ -220,6 +220,7 @@ class WC_Helper_Admin {
 				'remindLaterAction'      => 'woocommerce_helper_check_subscription_remind_later',
 				'productId'              => self::$checked_screen_param['id'],
 				'productName'            => self::$checked_screen_param['name'],
+				'productRegularPrice'    => self::$checked_screen_param['regular_price'],
 				'dismissNonce'           => wp_create_nonce( 'check_subscription_dismissed' ),
 				'remindLaterNonce'       => wp_create_nonce( 'check_subscription_remind_later' ),
 				'showAs'                 => self::$checked_screen_param['show_as'],

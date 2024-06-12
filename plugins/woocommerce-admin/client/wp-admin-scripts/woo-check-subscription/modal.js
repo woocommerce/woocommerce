@@ -168,7 +168,13 @@ export class CheckSubscriptionModal extends Component {
 									href={ this.props.manageSubscriptionsUrl }
 									onClick={ () => this.dismiss() }
 								>
-									{ __( 'Manage subscriptions', 'woocommerce' ) }
+									{
+										sprintf(
+											// translators: product price
+											__( 'Renew for $%s', 'woocommerce' ),
+											this.props.productRegularPrice
+										)
+									}
 								</Button>
 							</CardFooter>
 						</Card>

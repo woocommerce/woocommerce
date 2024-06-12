@@ -14,6 +14,7 @@ const {
 	manageSubscriptionsUrl,
 	productId,
 	productName,
+	productRegularPrice,
 	dismissAction,
 	dismissNonce,
 	remindLaterAction,
@@ -38,6 +39,7 @@ if ( renderStickyFooter ) {
 			manageSubscriptionsUrl={ manageSubscriptionsUrl }
 			productId={ productId }
 			productName={ productName }
+			productRegularPrice={ productRegularPrice }
 			dismissAction={ dismissAction }
 			dismissNonce={ dismissNonce }
 			colorScheme={ colorScheme }
@@ -50,6 +52,7 @@ if ( renderStickyFooter ) {
 			manageSubscriptionsUrl={ manageSubscriptionsUrl }
 			productId={ productId }
 			productName={ productName }
+			productRegularPrice={ productRegularPrice }
 			dismissAction={ dismissAction }
 			dismissNonce={ dismissNonce }
 			remindLaterAction={ remindLaterAction }
