@@ -151,14 +151,11 @@ abstract class AbstractBlock {
 			$data     = $this->asset_api->get_script_data( $this->get_block_type_script( 'path' ) );
 			$has_i18n = in_array( 'wp-i18n', $data['dependencies'], true );
 
-			$has_blocks_vendors = ! strpos( $this->get_block_type_script( 'handle' ), 'checkout' ) && ! strpos( $this->get_block_type_script( 'handle' ), 'cart' );
-			$vendors            = $has_blocks_vendors ? [ 'wc-blocks-vendors-frontend' ] : [];
 			$this->asset_api->register_script(
 				$this->get_block_type_script( 'handle' ),
 				$this->get_block_type_script( 'path' ),
 				array_merge(
 					$this->get_block_type_script( 'dependencies' ),
-					$vendors,
 					$this->integration_registry->get_all_registered_script_handles()
 				),
 				$has_i18n
@@ -438,27 +435,35 @@ abstract class AbstractBlock {
 		}
 
 		if ( ! $this->asset_data_registry->exists( 'wcBlocksConfig' ) ) {
+			$wc_blocks_config = [
+				'pluginUrl'     => plugins_url( '/', dirname( __DIR__, 2 ) ),
+				'restApiRoutes' => [
+					'/wc/store/v1' => array_keys( $this->get_routes_from_namespace( 'wc/store/v1' ) ),
+				],
+				'defaultAvatar' => get_avatar_url( 0, [ 'force_default' => true ] ),
+
+				/*
+				 * translators: If your word count is based on single characters (e.g. East Asian characters),
+				 * enter 'characters_excluding_spaces' or 'characters_including_spaces'. Otherwise, enter 'words'.
+				 * Do not translate into your own language.
+				 */
+				'wordCountType' => _x( 'words', 'Word count type. Do not translate!', 'woocommerce' ),
+			];
+			if ( is_admin() && ! WC()->is_rest_api_request() ) {
+				$wc_blocks_config = array_merge(
+					$wc_blocks_config,
+					[
+						// Note that while we don't have a consolidated way of doing feature-flagging
+						// we are borrowing from the WC Admin Features implementation. Also note we cannot
+						// use the wcAdminFeatures global because it's not always enqueued in the context of blocks.
+						'experimentalBlocksEnabled' => Features::is_enabled( 'experimental-blocks' ),
+						'productCount'              => array_sum( (array) wp_count_posts( 'product' ) ),
+					]
+				);
+			}
 			$this->asset_data_registry->add(
 				'wcBlocksConfig',
-				[
-					// Note that while we don't have a consolidated way of doing feature-flagging
-					// we are borrowing from the WC Admin Features implementation. Also note we cannot
-					// use the wcAdminFeatures global because it's not always enqueued in the context of blocks.
-					'experimentalBlocksEnabled' => Features::is_enabled( 'experimental-blocks' ),
-					'pluginUrl'                 => plugins_url( '/', dirname( __DIR__, 2 ) ),
-					'productCount'              => array_sum( (array) wp_count_posts( 'product' ) ),
-					'restApiRoutes'             => [
-						'/wc/store/v1' => array_keys( $this->get_routes_from_namespace( 'wc/store/v1' ) ),
-					],
-					'defaultAvatar'             => get_avatar_url( 0, [ 'force_default' => true ] ),
-
-					/*
-					 * translators: If your word count is based on single characters (e.g. East Asian characters),
-					 * enter 'characters_excluding_spaces' or 'characters_including_spaces'. Otherwise, enter 'words'.
-					 * Do not translate into your own language.
-					 */
-					'wordCountType'             => _x( 'words', 'Word count type. Do not translate!', 'woocommerce' ),
-				]
+				$wc_blocks_config
 			);
 		}
 	}

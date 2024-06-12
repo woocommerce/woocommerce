@@ -10,6 +10,8 @@ export type DesignWithoutAIStateMachineContext = {
 	};
 	flowType: FlowType.noAI;
 	isFontLibraryAvailable: boolean;
+	isPTKPatternsAPIAvailable: boolean;
+	isBlockTheme: boolean;
 };
 
 export interface Theme {

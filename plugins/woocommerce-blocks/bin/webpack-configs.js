@@ -28,6 +28,7 @@ const {
 	getProgressBarPluginConfig,
 	getCacheGroups,
 } = require( './webpack-helpers' );
+const AddSplitChunkDependencies = require( './add-split-chunk-dependencies' );
 
 const isProduction = NODE_ENV === 'production';
 
@@ -124,7 +125,6 @@ const getCoreConfig = ( options = {} ) => {
 				fileName: 'blocks.ini',
 				// content of the file
 				content: `
-woocommerce_blocks_phase = ${ process.env.WOOCOMMERCE_BLOCKS_PHASE || 3 }
 woocommerce_blocks_env = ${ NODE_ENV }
 `.trim(),
 			} ),
@@ -387,7 +387,8 @@ const getFrontConfig = ( options = {} ) => {
 				cacheGroups: {
 					vendor: {
 						test: /[\\/]node_modules[\\/]/,
-						name: 'wc-blocks-vendors',
+						// Note that filenames are suffixed with `frontend` so the generated file is `wc-blocks-frontend-vendors-frontend`.
+						name: 'wc-blocks-frontend-vendors',
 						chunks: ( chunk ) => {
 							return (
 								chunk.name !== 'product-button-interactivity'
@@ -421,6 +422,7 @@ const getFrontConfig = ( options = {} ) => {
 				bundleAnalyzerReportTitle: 'Frontend',
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Frontend' ) ),
+			new AddSplitChunkDependencies(),
 		],
 		resolve: {
 			...resolve,
@@ -1112,6 +1114,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 			new ProgressBarPlugin(
 				getProgressBarPluginConfig( 'Cart & Checkout Frontend' )
 			),
+			new AddSplitChunkDependencies(),
 		],
 		resolve: {
 			...resolve,

@@ -248,8 +248,14 @@
 					},
 					"events": [
 						"pull_request",
-						"push"
-					]
+						"push",
+						"release-checks"
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
 				},
 				{
 					"name": "Core e2e tests - Gutenberg stable",
@@ -264,7 +270,9 @@
 					],
 					"changes": [],
 					"events": [
-						"daily-e2e"
+						"daily-e2e",
+						"nightly-checks",
+						"release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -283,7 +291,8 @@
 					],
 					"changes": [],
 					"events": [
-						"daily-e2e"
+						"daily-e2e",
+						"release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -296,7 +305,8 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-e2e"
+						"daily-e2e",
+						"release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -309,7 +319,8 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-e2e"
+						"daily-e2e",
+						"release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -322,7 +333,8 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-e2e"
+						"daily-e2e",
+						"release-checks"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -340,7 +352,8 @@
 						"--shard=5/5"
 					],
 					"events": [
-						"push"
+						"push",
+						"release-checks"
 					],
 					"changes": [
 						"client/admin/config/*.json",
@@ -356,7 +369,55 @@
 						"config": {
 							"disableHpos": true
 						}
+					},
+					"report": {
+						"resultsBlobName": "all-blob-e2e-reports-non-hpos",
+						"resultsPath": "tests/e2e-pw/test-results"
 					}
+				},
+				{
+					"name": "Core e2e tests - PHP 8.1",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"phpVersion": "8.1"
+						}
+					},
+					"events": [
+						"release-checks"
+					]
+				},
+				{
+					"name": "Core e2e tests - WP latest-1",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"changes": [],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "latest-1"
+						}
+					},
+					"events": [
+						"release-checks"
+					]
 				},
 				{
 					"name": "Core API tests",
@@ -379,7 +440,12 @@
 					"events": [
 						"pull_request",
 						"push"
-					]
+					],
+					"report": {
+						"resultsBlobName": "core-api-report",
+						"resultsPath": "tests/api-core-tests/test-results",
+						"allure": true
+					}
 				},
 				{
 					"name": "Core API tests - HPOS disabled",

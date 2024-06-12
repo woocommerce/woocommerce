@@ -15,12 +15,6 @@
     -   [Misc](#misc)
 -   [Usages of `experimental` prefix](#usages-of-experimental-prefix)
 
-We have feature gating system setup in our plugin that defines what is accessible to the public and what is not, it has three phases:
-
--   **Core flag `WOOCOMMERCE_BLOCKS_PHASE=1`:** anything that is not hidden behind a flag, falls under this category, and it contains all of the code that runs on WooCommerce Core plugin.
--   **Feature plugin flag `WOOCOMMERCE_BLOCKS_PHASE=2`**: anything that is behind this flag is code that is shipped to our [feature plugin](https://wordpress.org/plugins/woo-gutenberg-products-block/), the files of blocks behind this flag are also present in WooCommerce Core, just not active.
--   **Experimental flag `WOOCOMMERCE_BLOCKS_PHASE=3`**: This flag contains things that we're not shipping yet, so unfinished work mostly. These features are only available in developer builds of the plugin.
-
 We also use an `__experimental` prefix for any experimental interfaces. This is a signal to those reading our code that it should not be implemented in for production use. Currently this prefix is used in the following ways:
 
 -   Prefixing references that are experimental. An example would be PHP action or filter slugs.

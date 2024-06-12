@@ -42,7 +42,7 @@ baseTest.describe( 'Checkout Block Applying Coupons', () => {
 		page: async ( { context, page, testPage }, use ) => {
 			await goToPageEditor( { page } );
 			await fillPageTitle( page, testPage.title );
-			await insertBlockByShortcut( page, '/checkout' );
+			await insertBlockByShortcut( page, 'Checkout' );
 			await publishPage( page, testPage.title );
 
 			await context.clearCookies();
