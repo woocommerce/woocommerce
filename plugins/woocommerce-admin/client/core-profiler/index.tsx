@@ -1072,7 +1072,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							},
 						},
 					},
-					// onDone is reached when child parallel states fo fetching are resolved (reached final states)
+					// onDone is reached when child parallel states of fetching are resolved (reached final states)
 					onDone: {
 						target: 'businessInfo',
 					},
