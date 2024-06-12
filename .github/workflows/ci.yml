@@ -332,8 +332,11 @@ jobs:
                   if [[ "${{ github.event_name }}" == "pull_request" ]]; then
                     REPORT_TITLE="$PR_TITLE"
                     REF_NAME="$GITHUB_HEAD_REF"
-                  else
+                  elif [[ "${{ github.event_name }}" == "push" ]]; then
                     REPORT_TITLE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+                    REF_NAME="$GITHUB_REF_NAME"
+                  else
+                    REPORT_TITLE="$EVENT_NAME"
                     REF_NAME="$GITHUB_REF_NAME"
                   fi
                 
