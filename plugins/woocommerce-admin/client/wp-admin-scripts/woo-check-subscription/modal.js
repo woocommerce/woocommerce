@@ -36,14 +36,12 @@ export class CheckSubscriptionModal extends Component {
 
 	dismiss() {
 		dismissRequest( this.props, ( response ) => {
-			console.log( response );
 			this.setState( { isModalOpen: false } )
 		} );
 	}
 
 	remindLater() {
 		remindLaterRequest( this.props, ( response ) => {
-			console.log( response );
 			this.setState( { isModalOpen: false } )
 		} );
 	}
