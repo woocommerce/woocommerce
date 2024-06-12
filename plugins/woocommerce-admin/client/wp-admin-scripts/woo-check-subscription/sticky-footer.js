@@ -10,10 +10,15 @@ import { Notice } from '@wordpress/components';
  * Internal dependencies
  */
 import sanitizeHTML from '../../lib/sanitize-html';
+import { dismissRequest } from './actions';
 
 export class CheckSubscriptionStickyFooter extends Component {
 	constructor( props ) {
 		super( props );
+	}
+
+	dismiss() {
+		dismissRequest( this.props );
 	}
 
 	render() {
@@ -26,6 +31,7 @@ export class CheckSubscriptionStickyFooter extends Component {
 			<div className={ classes }>
 				<Notice
 					status="info"
+					onRemove={ () => this.dismiss() }
 				>
 					<div
 						dangerouslySetInnerHTML={ sanitizeHTML(
