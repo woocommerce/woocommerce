@@ -950,20 +950,7 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_textarea_field( $key, $value ) {
 		$value = is_null( $value ) ? '' : $value;
-		return wp_kses(
-			trim( stripslashes( $value ) ),
-			array_merge(
-				array(
-					'iframe' => array(
-						'src'   => true,
-						'style' => true,
-						'id'    => true,
-						'class' => true,
-					),
-				),
-				wp_kses_allowed_html( 'post' )
-			)
-		);
+		return wp_kses_post( trim( stripslashes( $value ) ) );
 	}
 
 	/**
