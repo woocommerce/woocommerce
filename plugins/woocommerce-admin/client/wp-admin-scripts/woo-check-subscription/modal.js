@@ -18,15 +18,13 @@ import {
 	ResponsiveWrapper,
 } from '@wordpress/components';
 import { commentContent, reusableBlock } from '@wordpress/icons';
-import { addQueryArgs } from '@wordpress/url';
 import { Text } from '@woocommerce/experimental';
-import { getSetting } from '@woocommerce/settings';
-import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
 import extensionsSvg from './extensions.svg';
+import { dismissRequest, remindLaterRequest } from './actions';
 
 export class CheckSubscriptionModal extends Component {
 	constructor( props ) {
@@ -37,25 +35,17 @@ export class CheckSubscriptionModal extends Component {
 	}
 
 	dismiss() {
-		const url = addQueryArgs(
-			new URL(
-				'admin-ajax.php',
-				getSetting( 'adminUrl' )
-			).toString(),
-			{
-				action: this.props.actionName,
-				product_id: this.props.productId,
-				_ajax_nonce: this.props.dismissNonce,
-			},
-		);
-
-		apiFetch( {
-			url,
-			method: 'GET',
+		dismissRequest( this.props, ( response ) => {
+			console.log( response );
+			this.setState( { isModalOpen: false } )
 		} );
+	}
 
-
-		this.setState( { isModalOpen: false } )
+	remindLater() {
+		remindLaterRequest( this.props, ( response ) => {
+			console.log( response );
+			this.setState( { isModalOpen: false } )
+		} );
 	}
 
 	renderBenefits() {
@@ -169,7 +159,7 @@ export class CheckSubscriptionModal extends Component {
 							<CardFooter>
 								<Button
 									isDefault
-									onClick={ () => this.dismiss() }
+									onClick={ () => this.remindLater() }
 								>
 									{ __( 'Maybe later', 'woocommerce' ) }
 								</Button>
