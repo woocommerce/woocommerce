@@ -766,8 +766,8 @@ class LookupDataStore {
 
 				$settings[] = array(
 					'title'         => __( 'Optimized updates', 'woocommerce' ),
-					'desc'          => __( 'Use direct database access to retrieve the data needed for updates, instead of the standard WordPress and WooCommerce data store functions.', 'woocommerce' ),
-					'desc_tip'      => __( 'This setting has effect only if products are stored as custom post types.', 'woocommerce' ),
+					'desc'          => __( 'Uses much more performant queries to update the lookup table, but may not be compatible with some extensions.', 'woocommerce' ),
+					'desc_tip'      => __( 'This setting only works when product data is stored in the posts table.', 'woocommerce' ),
 					'id'            => 'woocommerce_attribute_lookup_optimized_updates',
 					'default'       => 'no',
 					'type'          => 'checkbox',
