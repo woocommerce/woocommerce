@@ -1,33 +1,33 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
-baseTest.describe( 'Products > Related products', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		products: async ( { api }, use ) => {
-			const keys = [ 'main', 'linked1', 'linked2' ];
-			const products = {};
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	products: async ( { api }, use ) => {
+		const keys = [ 'main', 'linked1', 'linked2' ];
+		const products = {};
 
-			for ( const key of Object.values( keys ) ) {
-				await api
-					.post( 'products', {
-						name: `${ key } ${ Date.now() }`,
-						type: 'simple',
-						regular_price: '12.99',
-					} )
-					.then( ( response ) => {
-						products[ key ] = response.data;
-					} );
-			}
+		for ( const key of Object.values( keys ) ) {
+			await api
+				.post( 'products', {
+					name: `${ key } ${ Date.now() }`,
+					type: 'simple',
+					regular_price: '12.99',
+				} )
+				.then( ( response ) => {
+					products[ key ] = response.data;
+				} );
+		}
 
-			await use( products );
+		await use( products );
 
-			// Cleanup
-			for ( const product of Object.values( products ) ) {
-				await api.delete( `products/${ product.id }`, { force: true } );
-			}
-		},
-	} );
+		// Cleanup
+		for ( const product of Object.values( products ) ) {
+			await api.delete( `products/${ product.id }`, { force: true } );
+		}
+	},
+} );
 
+test.describe( 'Products > Related products', () => {
 	async function navigate( page, productId ) {
 		await test.step( 'Navigate to product edit page', async () => {
 			await page.goto(
@@ -44,7 +44,10 @@ baseTest.describe( 'Products > Related products', () => {
 		await test.step( 'update the product', async () => {
 			// extra click somewhere in the page as a workaround for update button click not always working
 			await page
-				.getByRole( 'heading', { name: 'Edit product', exact: true } )
+				.getByRole( 'heading', {
+					name: 'Edit product',
+					exact: true,
+				} )
 				.click();
 			await page.getByRole( 'button', { name: 'Update' } ).click();
 			await expect( page.getByText( 'Product updated.' ) ).toBeVisible();
@@ -140,7 +143,9 @@ baseTest.describe( 'Products > Related products', () => {
 			await page.keyboard.press( 'Backspace' );
 
 			await expect(
-				page.getByRole( 'listitem', { name: products.linked1.name } )
+				page.getByRole( 'listitem', {
+					name: products.linked1.name,
+				} )
 			).toBeHidden();
 		} );
 
@@ -247,7 +252,9 @@ baseTest.describe( 'Products > Related products', () => {
 			await page.keyboard.press( 'Backspace' );
 
 			await expect(
-				page.getByRole( 'listitem', { name: products.linked1.name } )
+				page.getByRole( 'listitem', {
+					name: products.linked1.name,
+				} )
 			).toBeHidden();
 		} );
 
