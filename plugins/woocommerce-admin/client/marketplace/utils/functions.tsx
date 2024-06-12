@@ -242,7 +242,7 @@ function disconnectProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
-type WpAjaxReponse = {
+type WpAjaxResponse = {
 	success: boolean;
 	data: WpAjaxResponseData;
 };
@@ -260,7 +260,7 @@ function wpAjax(
 		theme?: string;
 		success?: boolean;
 	}
-): Promise< WpAjaxReponse > {
+): Promise< WpAjaxResponse > {
 	return new Promise( ( resolve, reject ) => {
 		if ( ! window.wp.updates ) {
 			reject( __( 'Please reload and try again', 'woocommerce' ) );
@@ -355,7 +355,7 @@ function installProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
-function updateProduct( subscription: Subscription ): Promise< WpAjaxReponse > {
+function updateProduct( subscription: Subscription ): Promise< WpAjaxResponse > {
 	return wpAjax( 'update-' + subscription.product_type, {
 		slug: subscription.local.slug,
 		[ subscription.product_type ]: subscription.local.path,
