@@ -11,6 +11,17 @@ defined( 'ABSPATH' ) || exit;
 
 $product      = $item->get_product();
 $product_link = $product ? admin_url( 'post.php?post=' . $item->get_product_id() . '&action=edit' ) : '';
+
+/**
+ * Filter the product link which appears on the order admin page.
+ *
+ * @since  7.8.0
+ * @param  string        $product_link Link to view the product.
+ * @param  int           $item_id Order item ID.
+ * @param  WC_Order_Item $item Order Item.
+ * @return string
+ */
+$product_link = apply_filters( 'woocommerce_admin_order_item_product_link_meta_box', $product_link, $product, $item_id, $item );
 $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnail', $product->get_image( 'thumbnail', array( 'title' => '' ), false ), $item_id, $item ) : '';
 $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empty( $class ) ? $class : '', $item, $order );
 ?>
