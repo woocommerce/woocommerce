@@ -4019,7 +4019,7 @@ function wc_update_product_archive_title( $post_type_name, $post_type ) {
 add_filter( 'post_type_archive_title', 'wc_update_product_archive_title', 10, 2 );
 
 /**
- * Checks the old and current themes and determines if the "wc_blocks_use_blockified_product_grid_block_as_template"
+ * Checks the old and current themes and determines if the "WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE"
  * option need to be updated accordingly.
  *
  * @param string    $old_name Old theme name.
@@ -4027,14 +4027,11 @@ add_filter( 'post_type_archive_title', 'wc_update_product_archive_title', 10, 2 
  * @return void
  */
 function wc_check_should_use_blockified_product_grid_templates( $old_name, $old_theme ) {
-	if ( ! wc_current_theme_is_fse_theme() ) {
-		update_option( BlocksOptions::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( false ) );
-		return;
-	}
+	$is_current_theme_block_theme           = wc_current_theme_is_block_theme();
+	$is_switching_from_block_to_block_theme = $old_theme->is_block_theme() && $is_current_theme_block_theme;
 
-	if ( ! $old_theme->is_block_theme() && wc_current_theme_is_fse_theme() ) {
-		update_option( BlocksOptions::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( true ) );
-		return;
+	if ( ! $is_switching_from_block_to_block_theme ) {
+		update_option( BlocksOptions::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( $is_current_theme_block_theme ) );
 	}
 }
 add_action( 'after_switch_theme', 'wc_check_should_use_blockified_product_grid_templates', 10, 2 );
