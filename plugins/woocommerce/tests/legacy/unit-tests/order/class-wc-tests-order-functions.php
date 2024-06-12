@@ -79,7 +79,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		}
 
 		// Invalid status returns 0.
-		$this->assertEquals( 0, wc_orders_count( 'unkown-status' ) );
+		$this->assertEquals( 0, wc_orders_count( 'unknown-status' ) );
 
 		// Invalid order type should return 0.
 		$this->assertEquals( 0, wc_orders_count( 'wc-pending', 'invalid-order-type' ) );
