@@ -101,7 +101,7 @@ export const TotalsShipping = ( {
 		);
 
 	const defaultShippingCalculatorLabel = __(
-		'Enter address to check delivery options',
+		'Enter the address to check delivery options',
 		'woocommerce'
 	);
 	const [ shippingCalculatorLabel, setShippingCalculatorLabel ] = useState(

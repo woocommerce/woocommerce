@@ -10,6 +10,16 @@ const test = base.extend( {
 	},
 } );
 
+async function prepareAssembler( pageObject, baseURL ) {
+	await pageObject.setupSite( baseURL );
+	await pageObject.waitForLoadingScreenFinish();
+	const assembler = await pageObject.getAssembler();
+	await assembler.getByText( 'Design your homepage' ).click();
+	await assembler
+		.locator( '.components-placeholder__preview' )
+		.waitFor( { state: 'hidden' } );
+}
+
 test.describe( 'Assembler -> Homepage', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -49,19 +59,12 @@ test.describe( 'Assembler -> Homepage', () => {
 		}
 	} );
 
-	test.beforeEach( async ( { baseURL, pageObject } ) => {
-		await pageObject.setupSite( baseURL );
-		await pageObject.waitForLoadingScreenFinish();
-		const assembler = await pageObject.getAssembler();
-		await assembler.getByText( 'Design your homepage' ).click();
-		await assembler
-			.locator( '.components-placeholder__preview' )
-			.waitFor( { state: 'hidden' } );
-	} );
-
 	test( 'Available homepage should be displayed', async ( {
 		pageObject,
+		baseURL,
 	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+
 		const assembler = await pageObject.getAssembler();
 
 		const homepages = assembler.locator(
@@ -73,7 +76,10 @@ test.describe( 'Assembler -> Homepage', () => {
 
 	test( 'The selected homepage should be focused when is clicked', async ( {
 		pageObject,
+		baseURL,
 	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+
 		const assembler = await pageObject.getAssembler();
 		const homepage = assembler
 			.locator( '.block-editor-block-patterns-list__item' )
@@ -85,7 +91,10 @@ test.describe( 'Assembler -> Homepage', () => {
 
 	test( 'The selected homepage should be visible on the site preview', async ( {
 		pageObject,
+		baseURL,
 	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+
 		const assembler = await pageObject.getAssembler();
 		const editor = await pageObject.getEditor();
 
@@ -127,6 +136,8 @@ test.describe( 'Assembler -> Homepage', () => {
 		baseURL,
 	}, testInfo ) => {
 		testInfo.snapshotSuffix = '';
+		await prepareAssembler( pageObject, baseURL );
+
 		const assembler = await pageObject.getAssembler();
 		const homepage = assembler
 			.locator( '.block-editor-block-patterns-list__item' )
@@ -172,8 +183,8 @@ test.describe( 'Assembler -> Homepage', () => {
 
 	test.describe( 'Homepage tracking banner', () => {
 		test( 'Should show the "Want more patterns?" banner with the Opt-in message when tracking is not allowed', async ( {
-			baseURL,
 			pageObject,
+			baseURL,
 		} ) => {
 			await setOption(
 				request,
@@ -181,6 +192,8 @@ test.describe( 'Assembler -> Homepage', () => {
 				'woocommerce_allow_tracking',
 				'no'
 			);
+
+			await prepareAssembler( pageObject, baseURL );
 
 			const assembler = await pageObject.getAssembler();
 			await expect(
@@ -193,10 +206,10 @@ test.describe( 'Assembler -> Homepage', () => {
 			).toBeVisible();
 		} );
 
-		test( 'Should show the "Want more patterns?" banner with the offline message when the user is offline', async ( {
+		test( 'Should show the "Want more patterns?" banner with the offline message when the user is offline and tracking is not allowed', async ( {
 			context,
-			baseURL,
 			pageObject,
+			baseURL,
 		} ) => {
 			await setOption(
 				request,
@@ -204,6 +217,9 @@ test.describe( 'Assembler -> Homepage', () => {
 				'woocommerce_allow_tracking',
 				'no'
 			);
+
+			await prepareAssembler( pageObject, baseURL );
+
 			await context.setOffline( true );
 
 			const assembler = await pageObject.getAssembler();
@@ -227,6 +243,8 @@ test.describe( 'Assembler -> Homepage', () => {
 				'woocommerce_allow_tracking',
 				'yes'
 			);
+
+			await prepareAssembler( pageObject, baseURL );
 
 			const assembler = await pageObject.getAssembler();
 			await expect(
@@ -266,14 +284,9 @@ test.describe( 'Assembler -> Homepage -> PTK API is down', () => {
 			} );
 		} );
 
-		await pageObject.setupSite( baseURL );
-		await pageObject.waitForLoadingScreenFinish();
-		const assembler = await pageObject.getAssembler();
-		await assembler.getByText( 'Design your homepage' ).click();
-		await assembler
-			.locator( '.components-placeholder__preview' )
-			.waitFor( { state: 'hidden' } );
+		await prepareAssembler( pageObject, baseURL );
 
+		const assembler = await pageObject.getAssembler();
 		await expect(
 			assembler.getByText( 'Want more patterns?' )
 		).toBeVisible();

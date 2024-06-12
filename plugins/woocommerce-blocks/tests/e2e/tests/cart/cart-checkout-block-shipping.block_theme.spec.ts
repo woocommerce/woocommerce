@@ -59,7 +59,7 @@ test.describe( 'Shopper → Shipping', () => {
 
 		await expect(
 			userPage.locator( 'button', {
-				hasText: 'Enter address to check delivery options',
+				hasText: 'Enter the address to check delivery options',
 			} )
 		).toBeVisible();
 	} );
