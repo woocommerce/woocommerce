@@ -330,9 +330,10 @@ jobs:
                   EVENT_NAME: ${{ inputs.trigger == '' && github.event_name || inputs.trigger }}
               run: |
                   if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                    REPORT_TITLE="$PR_TITLE"
+                    REPORT_TITLE=$(echo "$PR_TITLE" | tr -cd '[:alnum:] ')
                   else
                     REPORT_TITLE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+                    REPORT_TITLE=$(echo "$REPORT_TITLE" | tr -cd '[:alnum:] ')
                   fi
                 
                   gh workflow run report.yml \
