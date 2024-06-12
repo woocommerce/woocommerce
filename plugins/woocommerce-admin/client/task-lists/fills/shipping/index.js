@@ -209,7 +209,7 @@ export class Shipping extends Component {
 			return pluginToPromote.slug;
 		} );
 
-		const onShippingPluginInstalltionSkip = () => {
+		const onShippingPluginInstallationSkip = () => {
 			recordEvent( 'tasklist_shipping_label_printing', {
 				install: false,
 				plugins_to_activate: pluginsToActivate,
@@ -574,7 +574,7 @@ export class Shipping extends Component {
 											)
 										}
 										onSkip={
-											onShippingPluginInstalltionSkip
+											onShippingPluginInstallationSkip
 										}
 										pluginSlugs={ pluginsToActivate }
 										installText={ __(
@@ -586,7 +586,7 @@ export class Shipping extends Component {
 							) : (
 								<Button
 									isTertiary
-									onClick={ onShippingPluginInstalltionSkip }
+									onClick={ onShippingPluginInstallationSkip }
 									className={ clsx(
 										'woocommerce-task-shipping-recommendations_skip-button',
 										pluginsToPromote.length === 2
