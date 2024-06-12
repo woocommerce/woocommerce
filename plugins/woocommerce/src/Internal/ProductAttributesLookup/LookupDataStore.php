@@ -42,6 +42,13 @@ class LookupDataStore {
 	private bool $optimized_db_access_is_enabled;
 
 	/**
+	 * Flag indicating if the last lookup table creation operation failed.
+	 *
+	 * @var bool
+	 */
+	private bool $last_create_operation_failed;
+
+	/**
 	 * LookupDataStore constructor.
 	 */
 	public function __construct() {
@@ -99,6 +106,15 @@ class LookupDataStore {
 	 */
 	public function get_lookup_table_name() {
 		return $this->lookup_table_name;
+	}
+
+	/**
+	 * Check if the last lookup data creation operation failed.
+	 *
+	 * @return bool True if the last lookup data creation operation failed.
+	 */
+	public function get_last_create_operation_failed() {
+		return $this->last_create_operation_failed;
 	}
 
 	/**
@@ -288,8 +304,6 @@ class LookupDataStore {
 	 * @param bool           $use_optimized_db_access Use direct database access for data retrieval if possible.
 	 */
 	public function create_data_for_product( $product, $use_optimized_db_access = false ) {
-		global $wpdb;
-
 		if ( $use_optimized_db_access ) {
 			$product_id = intval( ( $product instanceof \WC_Product ) ? $product->get_id() : $product );
 			$this->create_data_for_product_cpt( $product_id );
@@ -309,6 +323,8 @@ class LookupDataStore {
 	 * @param \WC_Product $product The product to create the data for.
 	 */
 	private function create_data_for( \WC_Product $product ) {
+		$this->last_create_operation_failed = false;
+
 		try {
 			if ( $this->is_variation( $product ) ) {
 				$this->create_data_for_variation( $product );
@@ -327,6 +343,8 @@ class LookupDataStore {
 					'product_id' => $product_id,
 				)
 			);
+
+			$this->last_create_operation_failed = true;
 		}
 	}
 
@@ -779,17 +797,26 @@ class LookupDataStore {
 	 * @param int $product_id Product or variation id.
 	 */
 	private function create_data_for_product_cpt( int $product_id ) {
+		$this->last_create_operation_failed = false;
+
 		try {
 			$this->create_data_for_product_cpt_core( $product_id );
 		} catch ( \Exception $e ) {
-			WC()->call_function( 'wc_get_logger' )->error(
-				"Lookup data creation (optimized) failed for product $product_id: " . $e->getMessage(),
-				array(
-					'source'     => 'palt-updates',
-					'exception'  => $e,
-					'product_id' => $product_id,
-				)
+			$data = array(
+				'source'     => 'palt-updates',
+				'product_id' => $product_id,
 			);
+
+			if ( $e instanceof \WC_Data_Exception ) {
+				$data = array_merge( $data, $e->getErrorData() );
+			} else {
+				$data['exception'] = $e;
+			}
+
+			WC()->call_function( 'wc_get_logger' )
+				->error( "Lookup data creation (optimized) failed for product $product_id: " . $e->getMessage(), $data );
+
+			$this->last_create_operation_failed = true;
 		}
 	}
 
@@ -798,6 +825,7 @@ class LookupDataStore {
 	 *
 	 * @param int $product_id Product or variation id.
 	 * @return void
+	 * @throws \WC_Data_Exception Wrongly serialized attribute data found, or INSERT statement failed.
 	 */
 	private function create_data_for_product_cpt_core( int $product_id ) {
 		global $wpdb;
@@ -879,8 +907,7 @@ class LookupDataStore {
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
 		$temp = unserialize( $temp );
 		if ( false === $temp ) {
-			wc_get_logger()->error( "Lookup data creation failed for product $product_id: the product attributes metadata row is not properly serialized", array( 'source' => 'palt-updates' ) );
-			return;
+			throw new \WC_Data_Exception( 0, 'The product attributes metadata row is not properly serialized' );
 		}
 
 		$temp = array_filter( $temp, fn( $item, $slug ) => StringUtil::starts_with( $slug, 'pa_' ) && '' === $item['value'], ARRAY_FILTER_USE_BOTH );
@@ -1026,7 +1053,18 @@ class LookupDataStore {
 			$sql .= implode( '),(', $values_strings ) . ')';
 
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$wpdb->query( $sql );
+			$result = $wpdb->query( $sql );
+			if ( false === $result ) {
+				throw new \WC_Data_Exception(
+					0,
+					'INSERT statement failed',
+					0,
+					array(
+						'db_error' => esc_html( $wpdb->last_error ),
+						'db_query' => esc_html( $wpdb->last_query ),
+					)
+				);
+			}
 		}
 	}
 }

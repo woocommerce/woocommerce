@@ -49,6 +49,13 @@ class DataRegenerator {
 	private $lookup_table_name;
 
 	/**
+	 * Flag indicating if the last regeneration step failed.
+	 *
+	 * @var bool
+	 */
+	private $last_regeneration_step_failed;
+
+	/**
 	 * DataRegenerator constructor.
 	 */
 	public function __construct() {
@@ -69,6 +76,15 @@ class DataRegenerator {
 	 */
 	final public function init( LookupDataStore $data_store ) {
 		$this->data_store = $data_store;
+	}
+
+	/**
+	 * Check if the last regeneration step failed.
+	 *
+	 * @return bool True if the last regeneration step failed.
+	 */
+	public function get_last_regeneration_step_feiled() {
+		return $this->last_regeneration_step_failed;
 	}
 
 	/**
@@ -244,8 +260,10 @@ class DataRegenerator {
 			return false;
 		}
 
+		$this->last_regeneration_step_failed = false;
 		foreach ( $product_ids as $id ) {
 			$this->data_store->create_data_for_product( $id, $use_optimized_db_access );
+			$this->last_regeneration_step_failed |= $this->data_store->get_last_create_operation_failed();
 		}
 
 		$products_already_processed += count( $product_ids );
