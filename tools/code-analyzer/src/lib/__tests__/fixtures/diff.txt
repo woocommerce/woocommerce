@@ -24144,7 +24144,7 @@ index 8cac777258..3bcac057a0 100644
 +Here is a collection of scripts that can help when developing the React-based admin interface.
 +
 +```bash
-+# Create a development build of the React-based admin client.
++# Create a develoment build of the React-based admin client.
 +pnpm dev --filter=woocommerce/client/admin
 +# Create and watch a development build of the React-based admin client.
 +pnpm start --filter=woocommerce/client/admin
