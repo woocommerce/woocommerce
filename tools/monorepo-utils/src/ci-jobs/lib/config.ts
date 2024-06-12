@@ -24,7 +24,7 @@ export const enum JobType {
 /**
  * The type of the test job.
  */
-export const testTypes = [ 'default', 'e2e', 'api', 'performance' ] as const;
+export const testTypes = [ 'unit', 'e2e', 'api', 'performance' ] as const;
 
 /**
  * The variables that can be used in tokens on command strings
@@ -298,6 +298,26 @@ interface TestEnvConfig {
 }
 
 /**
+ * The configuration of a report.
+ */
+interface ReportConfig {
+	/**
+	 * The name of the artifact to be uploaded.
+	 */
+	resultsBlobName: string;
+
+	/**
+	 * The path to the results that will be uploaded under the resultsBlobName name.
+	 */
+	resultsPath: string;
+
+	/**
+	 * Whether Allure results exists and an Allure report should be generated and possibly published.
+	 */
+	allure: boolean;
+}
+
+/**
  * The configuration of a test job.
  */
 export interface TestJobConfig extends BaseJobConfig {
@@ -330,6 +350,11 @@ export interface TestJobConfig extends BaseJobConfig {
 	 * The key(s) to use when identifying what jobs should be triggered by a cascade.
 	 */
 	cascadeKeys?: string[];
+
+	/**
+	 * The configuration for the report if one is needed.
+	 */
+	report?: ReportConfig;
 }
 
 /**
@@ -375,7 +400,7 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		);
 	}
 
-	let testType: ( typeof testTypes )[ number ] = 'default';
+	let testType: ( typeof testTypes )[ number ] = 'unit';
 	if (
 		raw.testType &&
 		testTypes.includes( raw.testType.toString().toLowerCase() )
@@ -407,6 +432,42 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		config.testEnv = {
 			start: raw.testEnv.start,
 			config: parseTestEnvConfigVars( raw.testEnv.config ),
+		};
+	}
+
+	if ( raw.report ) {
+		if ( typeof raw.report !== 'object' ) {
+			throw new ConfigError( 'The "report" option must be an object.' );
+		}
+
+		if (
+			! raw.report.resultsBlobName ||
+			typeof raw.report.resultsBlobName !== 'string'
+		) {
+			throw new ConfigError(
+				'A string "resultsBlobName" option is required for report.'
+			);
+		}
+
+		if (
+			! raw.report.resultsPath ||
+			typeof raw.report.resultsPath !== 'string'
+		) {
+			throw new ConfigError(
+				'A string "resultsPath" option is required for report.'
+			);
+		}
+
+		if ( raw.report.allure && typeof raw.report.allure !== 'boolean' ) {
+			throw new ConfigError(
+				'A boolean "allure" option is required for report.'
+			);
+		}
+
+		config.report = {
+			resultsBlobName: raw.report.resultsBlobName,
+			resultsPath: raw.report.resultsPath,
+			allure: raw.report.allure,
 		};
 	}
 

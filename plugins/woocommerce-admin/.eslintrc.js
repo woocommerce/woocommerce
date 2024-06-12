@@ -1,9 +1,6 @@
 module.exports = {
-	extends: [
-		'plugin:@woocommerce/eslint-plugin/recommended',
-		'plugin:xstate/all',
-	],
-	plugins: [ 'xstate', 'import' ],
+	extends: [ 'plugin:@woocommerce/eslint-plugin/recommended' ],
+	plugins: [ 'import' ],
 	root: true,
 	overrides: [
 		{
