@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Added useQuery hook for usage in React functional components

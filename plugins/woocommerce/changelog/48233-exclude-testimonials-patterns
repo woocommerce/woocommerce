@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+CYS - Exclude two testimonials patterns from registering since they depend on Jetpack.
