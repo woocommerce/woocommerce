@@ -461,7 +461,7 @@ describe( 'getChangelogDetails', () => {
 			'<!-- Add a changelog message here -->\r\n' +
 			'This is a very useful fix.\r\n' +
 			'\r\n' +
-			'#### Comment <!-- a comment explaining why there is no changlog --> ' +
+			'#### Comment <!-- a comment explaining why there is no changelog --> ' +
 			'\r\n' +
 			'</details>';
 
@@ -503,7 +503,7 @@ describe( 'getChangelogDetails', () => {
 			'<!-- Add a changelog message here -->\r\n' +
 			'This is a very useful fix.\r\n' +
 			'\r\n' +
-			'#### Comment <!-- a comment explaining why there is no changlog --> ' +
+			'#### Comment <!-- a comment explaining why there is no changelog --> ' +
 			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
 			'This is a very useful comment.\r\n' +
 			'\r\n' +
@@ -545,7 +545,7 @@ describe( 'getChangelogDetails', () => {
 			'This is a very useful fix.\r\n' +
 			'I promise!\r\n' +
 			'\r\n' +
-			'#### Comment <!-- a comment explaining why there is no changlog --> ' +
+			'#### Comment <!-- a comment explaining why there is no changelog --> ' +
 			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
 			'This is a very useful comment.\r\n' +
 			"I don't promise!\r\n" +
@@ -592,7 +592,7 @@ describe( 'getChangelogDetails', () => {
 			'#### Message ' +
 			'<!-- Add a changelog message here -->\r\n' +
 			'\r\n' +
-			'#### Comment <!-- a comment explaining why there is no changlog --> ' +
+			'#### Comment <!-- a comment explaining why there is no changelog --> ' +
 			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
 			'This is a very useful comment.\r\n' +
 			'\r\n' +
@@ -634,7 +634,7 @@ describe( 'getChangelogDetails', () => {
 			'<!-- Add a changelog message here -->\r\n' +
 			'This is a very useful fix.\r\n' +
 			'\r\n' +
-			'#### Comment <!-- a comment explaining why there is no changlog --> ' +
+			'#### Comment <!-- a comment explaining why there is no changelog --> ' +
 			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\r\n` +
 			'This is a very useful comment.\r\n' +
 			'\r\n' +
