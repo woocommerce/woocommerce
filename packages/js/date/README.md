@@ -59,7 +59,7 @@ dates, for custom dates.</p>
 <dd><p>Get a DateValue object for a period prior to the current period.</p>
 </dd>
 <dt><a href="#getCurrentPeriod">getCurrentPeriod(period, compare)</a> ⇒ <code><a href="#DateValue">DateValue</a></code></dt>
-<dd><p>Get a DateValue object for a curent period. The period begins on the first day of the period,
+<dd><p>Get a DateValue object for a current period. The period begins on the first day of the period,
 and ends on the current day.</p>
 </dd>
 <dt><a href="#getAllowedIntervalsForQuery">getAllowedIntervalsForQuery(query, defaultDateRange)</a> ⇒ <code>Array</code></dt>
@@ -279,7 +279,7 @@ Get a DateValue object for a period prior to the current period.
 <a name="getCurrentPeriod"></a>
 
 ### getCurrentPeriod(period, compare) ⇒ [<code>DateValue</code>](#DateValue)
-Get a DateValue object for a curent period. The period begins on the first day of the period,
+Get a DateValue object for a current period. The period begins on the first day of the period,
 and ends on the current day.
 
 **Kind**: global function

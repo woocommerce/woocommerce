@@ -112,8 +112,8 @@ class Coupons {
 	 * Maybe add our wc-admin coupon scripts if viewing coupon pages
 	 */
 	public function maybe_add_marketing_coupon_script() {
-		$curent_screen = PageController::get_instance()->get_current_page();
-		if ( ! isset( $curent_screen['id'] ) || $curent_screen['id'] !== 'woocommerce-coupons' ) {
+		$current_screen = PageController::get_instance()->get_current_page();
+		if ( ! isset( $current_screen['id'] ) || $current_screen['id'] !== 'woocommerce-coupons' ) {
 			return;
 		}
 
