@@ -831,7 +831,7 @@ class LookupDataStore {
 		global $wpdb;
 
 		$sql = $wpdb->prepare(
-			"delete from {$wpdb->prefix}wc_product_attributes_lookup where product_or_parent_id=%d",
+			"delete from {$this->lookup_table_name} where product_or_parent_id=%d",
 			$product_id
 		);
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
