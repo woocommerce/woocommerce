@@ -789,7 +789,7 @@ class MobileDetect
         'SamsungBrowser' => 'SamsungBrowser/[VER]',
         'Iron'          => 'Iron/[VER]',
         // @note: Safari 7534.48.3 is actually Version 5.1.
-        // @note: On BlackBerry the Version is overwriten by the OS.
+        // @note: On BlackBerry the Version is overwritten by the OS.
         'Safari'        => ['Version/[VER]', 'Safari/[VER]'],
         'Skyfire'       => 'Skyfire/[VER]',
         'Tizen'         => 'Tizen/[VER]',
