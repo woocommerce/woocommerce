@@ -97,7 +97,7 @@ export class PrimaryLayout extends Component {
  * into a functional component and moving the hooks inside
  *
  * @param {Object} root0          root0 React component props
- * @param {Object} root0.children Children componeents
+ * @param {Object} root0.children Children components
  */
 const WithReactRouterProps = ( { children } ) => {
 	const location = useLocation();
