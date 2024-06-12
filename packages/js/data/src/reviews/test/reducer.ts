@@ -88,7 +88,7 @@ describe( 'reviews reducer', () => {
 	} );
 
 	it( 'should handle SET_ERROR', () => {
-		const query = { status: 'spam' as const };
+		const query = JSON.stringify( { status: 'spam' as const } );
 		const error = 'Baaam!';
 		const state = reducer( defaultState, {
 			type: TYPES.SET_ERROR,
