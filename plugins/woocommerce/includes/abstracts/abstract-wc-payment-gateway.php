@@ -357,14 +357,18 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 */
 	public function get_description() {
 		/**
-		 * Filter the gateway description.
+		 * Filters the gateway description.
+		 *
+		 * Descriptions can be overridden by extending this method or through the use of `woocommerce_gateway_description`
+		 * To avoid breaking custom HTML that may be returned we cannot enforce KSES at render time, so we run it here.
 		 *
 		 * @since 1.5.8
+		 * @since 9.0.0 wp_kses_post() is used to sanitize the description before passing it to the filter.
 		 * @param string $description Gateway description.
 		 * @param string $id Gateway ID.
 		 * @return string
 		 */
-		return apply_filters( 'woocommerce_gateway_description', $this->description, $this->id );
+		return apply_filters( 'woocommerce_gateway_description', wp_kses_post( $this->description ), $this->id );
 	}
 
 	/**
@@ -456,18 +460,11 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @since 1.5.7
 	 */
 	public function payment_fields() {
-		$description              = $this->get_description();
-		$has_extended_description = $description !== $this->description;
+		$description = $this->get_description();
 
 		if ( $description ) {
-			if ( $has_extended_description ) {
-				// Description can be overridden by extending classes so we cannot enforce escaping via kses here as it would
-				// break custom HTML. Therefore this is treated as trusted data.
-				echo wpautop( wptexturize( $description ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			} else {
-				// If the description was not modified, we can safely escape it.
-				echo wp_kses_post( wpautop( wptexturize( $description ) ) );
-			}
+			// KSES is ran within get_description, but not here since there may be custom HTML returned by extensions.
+			echo wpautop( wptexturize( $description ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 
 		if ( $this->supports( 'default_credit_card_form' ) ) {
