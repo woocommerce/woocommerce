@@ -109,7 +109,7 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 
 ## Designers and theme developers
 
-> Are you a designer or a theme developer? The following documents explain how to apply design-changes to the WooCommerce Blocks plugin.
+> The following document explains how to to create block themes that work in WooCommerce and how to customize the styles of WooCommerce blocks.
 
 -   [Theming](designers/theming/README.md)
 
