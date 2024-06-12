@@ -4234,8 +4234,8 @@ importers:
         specifier: 5.22.0
         version: 5.22.0
       '@wordpress/env':
-        specifier: 8.2.0
-        version: 8.2.0
+        specifier: ^9.7.0
+        version: 9.7.0
       '@wordpress/html-entities':
         specifier: 3.24.0
         version: 3.24.0
@@ -11202,10 +11202,6 @@ packages:
     resolution: {integrity: sha512-/d/lWBDYYgzE2yeXYvPnjMSDG1EdQs5TSLdjM/drQVJMxWayFqAPaF/pVczLHCPYfjgyJN4Zc+bneAKj6dEiLw==}
     engines: {node: '>=12'}
 
-  '@wordpress/env@8.2.0':
-    resolution: {integrity: sha512-MGf2TJD6MbBjDn/+feGAcXnh6ct9Y/aCjIZTtbMI+b+pXAPh0RzR7Q5D6KMgKUNcGeL6nNQmEUUSSPuzV2UWfQ==}
-    hasBin: true
-
   '@wordpress/env@9.7.0':
     resolution: {integrity: sha512-99VaR3VEZlBsaX30Hx3wKyAWOrtZW/FPZsK5urY4UZbP7kRSlwvIQZdxEs7S17gYOrA72tDg7O4uXsX+IRyQDQ==}
     hasBin: true
@@ -14601,10 +14597,6 @@ packages:
   dns-packet@5.6.1:
     resolution: {integrity: sha512-l4gcSouhcgIKRvyy99RNVOgxXiicE+2jZoNmaNmZ6JXiGajBOJAesk1OBlJuM5k2c+eudGdLxDqXuPCKIj6kpw==}
     engines: {node: '>=6'}
-
-  docker-compose@0.22.2:
-    resolution: {integrity: sha512-iXWb5+LiYmylIMFXvGTYsjI1F+Xyx78Jm/uj1dxwwZLbWkUdH6yOXY5Nr3RjbYX15EgbGJCq78d29CmWQQQMPg==}
-    engines: {node: '>= 6.0.0'}
 
   docker-compose@0.24.7:
     resolution: {integrity: sha512-CdHl9n0S4+bl4i6MaxDQHNjqB1FdvuDirrDTzPKmdiMpheQqCjgsny0GZ2VhvN7qHTY0833lRlKWZgrkn1i6cg==}
@@ -21626,7 +21618,7 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
-      react: 18.2.0
+      react: ^17.0.2
 
   react-number-format@4.9.3:
     resolution: {integrity: sha512-am1A1xYAbENuKJ+zpM7V+B1oRTSeOHYltqVKExznIVFweBzhLmOBmyb1DfIKjHo90E0bo1p3nzVJ2NgS5xh+sQ==}
@@ -25510,7 +25502,7 @@ snapshots:
 
   '@automattic/languages@1.0.0':
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@automattic/load-script@1.0.0':
     dependencies:
@@ -29847,7 +29839,7 @@ snapshots:
   '@eslint/eslintrc@0.4.3':
     dependencies:
       ajv: 6.12.6
-      debug: 4.3.4(supports-color@9.4.0)
+      debug: 4.3.5
       espree: 7.3.1
       globals: 13.24.0
       ignore: 4.0.6
@@ -30004,7 +29996,7 @@ snapshots:
   '@humanwhocodes/config-array@0.5.0':
     dependencies:
       '@humanwhocodes/object-schema': 1.2.1
-      debug: 4.3.4(supports-color@9.4.0)
+      debug: 4.3.5
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -30973,7 +30965,7 @@ snapshots:
       '@motionone/easing': 10.16.3
       '@motionone/types': 10.16.3
       '@motionone/utils': 10.16.3
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@motionone/dom@10.12.0':
     dependencies:
@@ -30987,13 +30979,13 @@ snapshots:
   '@motionone/easing@10.16.3':
     dependencies:
       '@motionone/utils': 10.16.3
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@motionone/generators@10.16.4':
     dependencies:
       '@motionone/types': 10.16.3
       '@motionone/utils': 10.16.3
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@motionone/types@10.16.3': {}
 
@@ -31001,7 +30993,7 @@ snapshots:
     dependencies:
       '@motionone/types': 10.16.3
       hey-listen: 1.0.8
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@mrmlnc/readdir-enhanced@2.2.1':
     dependencies:
@@ -37499,7 +37491,7 @@ snapshots:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.3.3)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.3.3)
       '@typescript-eslint/scope-manager': 4.33.0
-      debug: 4.3.4(supports-color@9.4.0)
+      debug: 4.3.5
       eslint: 7.32.0
       functional-red-black-tree: 1.0.1
       ignore: 5.3.0
@@ -37624,7 +37616,7 @@ snapshots:
       '@typescript-eslint/scope-manager': 4.33.0
       '@typescript-eslint/types': 4.33.0
       '@typescript-eslint/typescript-estree': 4.33.0(typescript@5.3.3)
-      debug: 4.3.4(supports-color@9.4.0)
+      debug: 4.3.5
       eslint: 7.32.0
     optionalDependencies:
       typescript: 5.3.3
@@ -37726,7 +37718,7 @@ snapshots:
 
   '@typescript-eslint/typescript-estree@2.34.0(typescript@5.3.3)':
     dependencies:
-      debug: 4.3.4(supports-color@9.4.0)
+      debug: 4.3.5
       eslint-visitor-keys: 1.3.0
       glob: 7.2.3
       is-glob: 4.0.3
@@ -41001,23 +40993,6 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@wordpress/env@8.2.0':
-    dependencies:
-      chalk: 4.1.2
-      copy-dir: 1.3.0
-      docker-compose: 0.22.2
-      extract-zip: 1.7.0
-      got: 11.8.6
-      inquirer: 7.3.3
-      js-yaml: 3.14.1
-      ora: 4.1.1
-      rimraf: 3.0.2
-      simple-git: 3.21.0
-      terminal-link: 2.1.1
-      yargs: 17.7.2
-    transitivePeerDependencies:
-      - supports-color
-
   '@wordpress/env@9.7.0':
     dependencies:
       chalk: 4.1.2
@@ -42812,7 +42787,7 @@ snapshots:
   '@yarnpkg/esbuild-plugin-pnp@3.0.0-rc.15(esbuild@0.18.20)':
     dependencies:
       esbuild: 0.18.20
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@yarnpkg/fslib@2.10.3':
     dependencies:
@@ -42895,7 +42870,7 @@ snapshots:
 
   agent-base@6.0.2:
     dependencies:
-      debug: 4.3.4(supports-color@9.4.0)
+      debug: 4.3.5
     transitivePeerDependencies:
       - supports-color
 
@@ -43128,7 +43103,7 @@ snapshots:
 
   aria-hidden@1.2.3:
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   aria-query@5.1.3:
     dependencies:
@@ -43296,7 +43271,7 @@ snapshots:
 
   ast-types@0.13.4:
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   ast-types@0.14.2:
     dependencies:
@@ -43308,7 +43283,7 @@ snapshots:
 
   ast-types@0.16.1:
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   astral-regex@1.0.0: {}
 
@@ -46623,8 +46598,6 @@ snapshots:
     dependencies:
       '@leichtgewicht/ip-codec': 2.0.4
 
-  docker-compose@0.22.2: {}
-
   docker-compose@0.24.7:
     dependencies:
       yaml: 2.3.4
@@ -47516,7 +47489,7 @@ snapshots:
     dependencies:
       '@es-joy/jsdoccomment': 0.10.8
       comment-parser: 1.2.4
-      debug: 4.3.4(supports-color@9.4.0)
+      debug: 4.3.5
       eslint: 7.32.0
       esquery: 1.5.0
       jsdoc-type-pratt-parser: 1.2.0
@@ -48882,7 +48855,7 @@ snapshots:
       react: 17.0.2
       react-dom: 18.3.1(react@17.0.2)
       style-value-types: 5.0.0
-      tslib: 2.6.2
+      tslib: 2.6.3
     optionalDependencies:
       '@emotion/is-prop-valid': 0.8.8
 
@@ -48895,7 +48868,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       style-value-types: 5.0.0
-      tslib: 2.6.2
+      tslib: 2.6.3
     optionalDependencies:
       '@emotion/is-prop-valid': 0.8.8
 
@@ -50095,7 +50068,7 @@ snapshots:
   https-proxy-agent@5.0.0:
     dependencies:
       agent-base: 6.0.2
-      debug: 4.3.4(supports-color@9.4.0)
+      debug: 4.3.5
     transitivePeerDependencies:
       - supports-color
 
@@ -57728,7 +57701,7 @@ snapshots:
     dependencies:
       react: 17.0.2
       react-style-singleton: 2.2.1(@types/react@17.0.71)(react@17.0.2)
-      tslib: 2.6.2
+      tslib: 2.6.3
     optionalDependencies:
       '@types/react': 17.0.71
 
@@ -57736,7 +57709,7 @@ snapshots:
     dependencies:
       react: 18.3.1
       react-style-singleton: 2.2.1(@types/react@17.0.71)(react@18.3.1)
-      tslib: 2.6.2
+      tslib: 2.6.3
     optionalDependencies:
       '@types/react': 17.0.71
 
@@ -57745,7 +57718,7 @@ snapshots:
       react: 17.0.2
       react-remove-scroll-bar: 2.3.4(@types/react@17.0.71)(react@17.0.2)
       react-style-singleton: 2.2.1(@types/react@17.0.71)(react@17.0.2)
-      tslib: 2.6.2
+      tslib: 2.6.3
       use-callback-ref: 1.3.0(@types/react@17.0.71)(react@17.0.2)
       use-sidecar: 1.1.2(@types/react@17.0.71)(react@17.0.2)
     optionalDependencies:
@@ -57756,7 +57729,7 @@ snapshots:
       react: 18.3.1
       react-remove-scroll-bar: 2.3.4(@types/react@17.0.71)(react@18.3.1)
       react-style-singleton: 2.2.1(@types/react@17.0.71)(react@18.3.1)
-      tslib: 2.6.2
+      tslib: 2.6.3
       use-callback-ref: 1.3.0(@types/react@17.0.71)(react@18.3.1)
       use-sidecar: 1.1.2(@types/react@17.0.71)(react@18.3.1)
     optionalDependencies:
@@ -57767,7 +57740,7 @@ snapshots:
       react: 17.0.2
       react-remove-scroll-bar: 2.3.4(@types/react@17.0.71)(react@17.0.2)
       react-style-singleton: 2.2.1(@types/react@17.0.71)(react@17.0.2)
-      tslib: 2.6.2
+      tslib: 2.6.3
       use-callback-ref: 1.3.0(@types/react@17.0.71)(react@17.0.2)
       use-sidecar: 1.1.2(@types/react@17.0.71)(react@17.0.2)
     optionalDependencies:
@@ -57778,7 +57751,7 @@ snapshots:
       react: 18.3.1
       react-remove-scroll-bar: 2.3.4(@types/react@17.0.71)(react@18.3.1)
       react-style-singleton: 2.2.1(@types/react@17.0.71)(react@18.3.1)
-      tslib: 2.6.2
+      tslib: 2.6.3
       use-callback-ref: 1.3.0(@types/react@17.0.71)(react@18.3.1)
       use-sidecar: 1.1.2(@types/react@17.0.71)(react@18.3.1)
     optionalDependencies:
@@ -57894,7 +57867,7 @@ snapshots:
       get-nonce: 1.0.1
       invariant: 2.2.4
       react: 17.0.2
-      tslib: 2.6.2
+      tslib: 2.6.3
     optionalDependencies:
       '@types/react': 17.0.71
 
@@ -57903,7 +57876,7 @@ snapshots:
       get-nonce: 1.0.1
       invariant: 2.2.4
       react: 18.3.1
-      tslib: 2.6.2
+      tslib: 2.6.3
     optionalDependencies:
       '@types/react': 17.0.71
 
@@ -60023,7 +59996,7 @@ snapshots:
     dependencies:
       component-emitter: 1.3.1
       cookiejar: 2.1.4
-      debug: 4.3.4(supports-color@9.4.0)
+      debug: 4.3.5
       fast-safe-stringify: 2.1.1
       form-data: 4.0.0
       formidable: 2.1.2
@@ -61202,7 +61175,7 @@ snapshots:
   update-browserslist-db@1.0.13(browserslist@4.22.2):
     dependencies:
       browserslist: 4.22.2
-      escalade: 3.1.1
+      escalade: 3.1.2
       picocolors: 1.0.0
 
   update-browserslist-db@1.0.16(browserslist@4.23.0):
@@ -61329,14 +61302,14 @@ snapshots:
   use-callback-ref@1.3.0(@types/react@17.0.71)(react@17.0.2):
     dependencies:
       react: 17.0.2
-      tslib: 2.6.2
+      tslib: 2.6.3
     optionalDependencies:
       '@types/react': 17.0.71
 
   use-callback-ref@1.3.0(@types/react@17.0.71)(react@18.3.1):
     dependencies:
       react: 18.3.1
-      tslib: 2.6.2
+      tslib: 2.6.3
     optionalDependencies:
       '@types/react': 17.0.71
 
@@ -61404,7 +61377,7 @@ snapshots:
     dependencies:
       detect-node-es: 1.1.0
       react: 17.0.2
-      tslib: 2.6.2
+      tslib: 2.6.3
     optionalDependencies:
       '@types/react': 17.0.71
 
@@ -61412,7 +61385,7 @@ snapshots:
     dependencies:
       detect-node-es: 1.1.0
       react: 18.3.1
-      tslib: 2.6.2
+      tslib: 2.6.3
     optionalDependencies:
       '@types/react': 17.0.71
 
@@ -63074,7 +63047,7 @@ snapshots:
   yargs@17.7.1:
     dependencies:
       cliui: 8.0.1
-      escalade: 3.1.1
+      escalade: 3.1.2
       get-caller-file: 2.0.5
       require-directory: 2.1.1
       string-width: 4.2.3
