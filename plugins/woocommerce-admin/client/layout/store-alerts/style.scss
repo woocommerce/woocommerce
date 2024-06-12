@@ -40,6 +40,16 @@
 		}
 	}
 
+	.woocommerce-store-alerts__close {
+		position: absolute;
+		top: 2px;
+		right: 0;
+		svg {
+			width: 14px;
+			height: 14px;
+		}
+	}
+
 	@include breakpoint( "<782px" ) {
 		margin-bottom: $gap-large;
 		padding: $gap;
