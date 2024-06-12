@@ -58,7 +58,7 @@ export type BusinessInfoEvent =
 			type: 'RETRY_PRE_BUSINESS_INFO';
 	  }
 	| {
-			type: 'SKIP_PRE_BUSINESS_INFO';
+			type: 'SKIP_BUSINESS_INFO_STEP';
 	  };
 
 export type BusinessLocationEvent = {

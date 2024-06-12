@@ -1110,8 +1110,14 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						RETRY_PRE_BUSINESS_INFO: {
 							actions: [ 'reloadPage' ],
 						},
-						SKIP_PRE_BUSINESS_INFO: {
+						SKIP_BUSINESS_INFO_STEP: {
 							target: '#plugins',
+							actions: [
+								{
+									type: 'recordTracksStepSkipped',
+									params: { step: 'business_info' },
+								},
+							],
 						},
 					},
 				},

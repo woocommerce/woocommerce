@@ -361,7 +361,7 @@ export const BusinessInfo = ( {
 										<Button
 											onClick={ () => {
 												sendEvent( {
-													type: 'SKIP_PRE_BUSINESS_INFO',
+													type: 'SKIP_BUSINESS_INFO_STEP',
 												} );
 											} }
 											variant="tertiary"
