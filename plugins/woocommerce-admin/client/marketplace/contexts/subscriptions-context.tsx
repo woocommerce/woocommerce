@@ -67,7 +67,7 @@ export function SubscriptionsContextProvider( props: {
 	useEffect( () => {
 		/**
 		 * Check if we have &install=PRODUCT_KEY in the URL. This means we have just
-		 * installed a new product and nwe need to refresh the list.
+		 * installed a new product and now need to refresh the list.
 		 */
 		const urlParams = new URLSearchParams( window.location.search );
 		const installKey = urlParams.get( 'install' );
