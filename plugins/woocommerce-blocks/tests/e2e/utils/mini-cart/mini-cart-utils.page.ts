@@ -14,9 +14,13 @@ export class MiniCartUtils {
 	}
 
 	async openMiniCart() {
-		const block = await this.frontendUtils.getBlockByName(
-			'woocommerce/mini-cart'
+		const miniCartButton = this.page.locator(
+			'.wc-block-mini-cart__button'
 		);
-		await block.click();
+		// The mini cart button scripts are loaded when the button is either
+		// hovered or focused. The click event alone does not trigger neither of
+		// those actions so we need to perform one explicitly.
+		await miniCartButton.hover();
+		await miniCartButton.click();
 	}
 }

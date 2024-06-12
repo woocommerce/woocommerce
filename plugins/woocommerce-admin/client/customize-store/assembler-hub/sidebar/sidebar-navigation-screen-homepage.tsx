@@ -55,7 +55,11 @@ import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
-export const SidebarNavigationScreenHomepage = () => {
+export const SidebarNavigationScreenHomepage = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'top',
@@ -73,7 +77,7 @@ export const SidebarNavigationScreenHomepage = () => {
 
 	const [ blocks, , onChange ] = useEditorBlocks(
 		'wp_template',
-		currentTemplate.id ?? ''
+		currentTemplate?.id ?? ''
 	);
 
 	// @ts-expect-error No types for this exist yet.
@@ -276,6 +280,7 @@ export const SidebarNavigationScreenHomepage = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
+			onNavigateBackClick={ onNavigateBackClick }
 			description={ createInterpolateElement( sidebarMessage, {
 				EditorLink: (
 					<Link
