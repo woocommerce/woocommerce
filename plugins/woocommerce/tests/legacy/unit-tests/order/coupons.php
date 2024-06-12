@@ -77,7 +77,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 			);
 			$coupon_item_2->set_props(
 				array(
-					'code'         => 'this-is-a-virtal-coupon',
+					'code'         => 'this-is-a-virtual-coupon',
 					'discount'     => 181.82,
 					'discount_tax' => 18.18,
 				)
@@ -100,7 +100,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 			);
 			$coupon_item_2->set_props(
 				array(
-					'code'         => 'this-is-a-virtal-coupon',
+					'code'         => 'this-is-a-virtual-coupon',
 					'discount'     => 200,
 					'discount_tax' => get_option( 'woocommerce_calc_taxes', 'no' ) === 'yes' ? 20 : 0,
 				)
@@ -153,7 +153,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$this->assertEquals( '799.00', $order->get_total(), $order->get_total() );
 
 		// Remove the virtual coupon. Total should be 999.
-		$order->remove_coupon( 'this-is-a-virtal-coupon' );
+		$order->remove_coupon( 'this-is-a-virtual-coupon' );
 		$this->assertEquals( '999.00', $order->get_total(), $order->get_total() );
 
 		// Remove the other coupon. Total should be 1000.
@@ -173,7 +173,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		// Do the above tests in reverse.
 		$order->remove_coupon( 'test-coupon-1' );
 		$this->assertEquals( '800.00', $order->get_total(), $order->get_total() );
-		$order->remove_coupon( 'this-is-a-virtal-coupon' );
+		$order->remove_coupon( 'this-is-a-virtual-coupon' );
 		$this->assertEquals( '1000.00', $order->get_total(), $order->get_total() );
 	}
 
@@ -216,7 +216,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$this->assertEquals( '878.90', $order->get_total(), $order->get_total() );
 
 		// Remove the virtual coupon. Total should be 999.
-		$order->remove_coupon( 'this-is-a-virtal-coupon' );
+		$order->remove_coupon( 'this-is-a-virtual-coupon' );
 		$this->assertEquals( '1098.90', $order->get_total(), $order->get_total() );
 
 		// Remove the other coupon. Total should be 1000.
@@ -236,7 +236,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		// Do the above tests in reverse.
 		$order->remove_coupon( 'test-coupon-1' );
 		$this->assertEquals( '880.00', $order->get_total(), $order->get_total() );
-		$order->remove_coupon( 'this-is-a-virtal-coupon' );
+		$order->remove_coupon( 'this-is-a-virtual-coupon' );
 		$this->assertEquals( '1100.00', $order->get_total(), $order->get_total() );
 	}
 
@@ -272,7 +272,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$this->assertEquals( '799.00', $order->get_total(), $order->get_total() );
 
 		// Remove the virtual coupon. Total should be 999.
-		$order->remove_coupon( 'this-is-a-virtal-coupon' );
+		$order->remove_coupon( 'this-is-a-virtual-coupon' );
 		$this->assertEquals( '999.00', $order->get_total(), $order->get_total() );
 
 		// Remove the other coupon. Total should be 1000.
@@ -292,7 +292,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		// Do the above tests in reverse.
 		$order->remove_coupon( 'test-coupon-1' );
 		$this->assertEquals( '800.00', $order->get_total(), $order->get_total() );
-		$order->remove_coupon( 'this-is-a-virtal-coupon' );
+		$order->remove_coupon( 'this-is-a-virtual-coupon' );
 		$this->assertEquals( '1000.00', $order->get_total(), $order->get_total() );
 	}
 
@@ -327,7 +327,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$this->assertEquals( '799.00', $order->get_total(), $order->get_total() );
 
 		// Remove the virtual coupon. Total should be 999.
-		$order->remove_coupon( 'this-is-a-virtal-coupon' );
+		$order->remove_coupon( 'this-is-a-virtual-coupon' );
 		$this->assertEquals( '999.00', $order->get_total(), $order->get_total() );
 
 		// Remove the other coupon. Total should be 1000.
@@ -347,7 +347,7 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		// Do the above tests in reverse.
 		$order->remove_coupon( 'test-coupon-1' );
 		$this->assertEquals( '800.00', $order->get_total(), $order->get_total() );
-		$order->remove_coupon( 'this-is-a-virtal-coupon' );
+		$order->remove_coupon( 'this-is-a-virtual-coupon' );
 		$this->assertEquals( '1000.00', $order->get_total(), $order->get_total() );
 	}
 
