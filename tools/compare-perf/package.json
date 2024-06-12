@@ -1,7 +1,7 @@
 {
 	"name": "compare-perf",
 	"version": "0.0.1",
-	"description": "A tool to compare performance accross tow branches in WooCommerce Monorepo.",
+	"description": "A tool to compare performance across tow branches in WooCommerce Monorepo.",
 	"author": "Automattic",
 	"homepage": "https://github.com/woocommerce/woocommerce",
 	"license": "GPLv2",
