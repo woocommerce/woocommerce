@@ -24,6 +24,7 @@ class WC_Helper_Admin {
 	const CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_count';
 
 	const CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_timestamp';
+	const CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_remind_later_timestamp';
 
 	private static $checked_products = array();
 
@@ -41,6 +42,7 @@ class WC_Helper_Admin {
 		add_action( 'current_screen', array( __CLASS__, 'check_subscriptions' ) );
 
 		add_action( 'wp_ajax_woocommerce_helper_check_subscription_dismissed', array( __CLASS__, 'check_subscription_dismissed' ) );
+		add_action( 'wp_ajax_woocommerce_helper_check_subscription_remind_later', array( __CLASS__, 'check_subscription_remind_later' ) );
 	}
 
 	/**
@@ -174,7 +176,18 @@ class WC_Helper_Admin {
 			return;
 		}
 
-		$product_id     = self::$checked_screen_param['id'];
+		$product_id = self::$checked_screen_param['id'];
+
+		// Check when the last time user clicked "remind later". If it's still
+		// in the wait period, don't show the nudge.
+		$remind_later_ts_meta    = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX, $product_id );
+		$last_remind_later       = absint( get_user_meta( $user_id, $remind_later_ts_meta, true ) );
+		$wait_after_remind_later = self::$checked_screen_param['wait_in_seconds_after_remind_later'];
+		if ( $last_remind_later > 0 && ( time() - $last_remind_later ) < $wait_after_remind_later ) {
+			return;
+		}
+
+		// Don't show the nudge after dismissed max_dismissals times.
 		$count_meta     = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX, $product_id );
 		$dismiss_count  = absint( get_user_meta( $user_id, $count_meta, true ) );
 		$max_dismissals = self::$checked_screen_param['max_dismissals'];
@@ -182,10 +195,12 @@ class WC_Helper_Admin {
 			return;
 		}
 
-		$timestamp_meta   = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX, $product_id );
-		$last_dismissed   = absint( get_user_meta( $user_id, $timestamp_meta, true) );
-		$show_again_after = self::$checked_screen_param['show_again_after']; // in seconds
-		if ( $last_dismissed > 0 && ( time() - $last_dismissed ) < $show_again_after ) {
+		// Check when the last time user dismissed the nudge. If it's still in
+		// the wait period, don't show the nudge
+		$dismiss_ts_meta    = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX, $product_id );
+		$last_dismissed     = absint( get_user_meta( $user_id, $dismiss_ts_meta, true) );
+		$wait_after_dismiss = self::$checked_screen_param['wait_in_seconds_after_dismiss'];
+		if ( $last_dismissed > 0 && ( time() - $last_dismissed ) < $wait_after_dismiss ) {
 			return;
 		}
 
@@ -201,10 +216,14 @@ class WC_Helper_Admin {
 			'wooCheckSubscriptionData',
 			array(
 				'manageSubscriptionsUrl' => 'https://woocommerce.com/my-account/my-subscriptions/',
-				'actionName'             => 'woocommerce_helper_check_subscription_dismissed',
+				'dismissAction'          => 'woocommerce_helper_check_subscription_dismissed',
+				'remindLaterAction'      => 'woocommerce_helper_check_subscription_remind_later',
 				'productId'              => self::$checked_screen_param['id'],
 				'productName'            => self::$checked_screen_param['name'],
 				'dismissNonce'           => wp_create_nonce( 'check_subscription_dismissed' ),
+				'remindLaterNonce'       => wp_create_nonce( 'check_subscription_remind_later' ),
+				'showAs'                 => self::$checked_screen_param['show_as'],
+				'colorScheme'            => self::$checked_screen_param['color_scheme'],
 			)
 		);
 	}
@@ -246,17 +265,17 @@ class WC_Helper_Admin {
 
 	public static function check_subscription_dismissed() {
 		if ( ! check_ajax_referer( 'check_subscription_dismissed' ) ) {
-			wp_die();
+			wp_die( -1 );
 		}
 
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
-			wp_die();
+			wp_die( -1 );
 		}
 
 		$product_id = absint( $_GET['product_id'] );
 		if ( ! $product_id ) {
-			wp_die();
+			wp_die( -1 );
 		}
 
 		$count_meta = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX, $product_id );
@@ -266,7 +285,28 @@ class WC_Helper_Admin {
 		$timestamp_meta = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX, $product_id );
 		update_user_meta( $user_id, $timestamp_meta, time() );
 
-		wp_die();
+		wp_die( 1 );
+	}
+
+	public static function check_subscription_remind_later() {
+		if ( ! check_ajax_referer( 'check_subscription_remind_later' ) ) {
+			wp_die( -1 );
+		}
+
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			wp_die( -1 );
+		}
+
+		$product_id = absint( $_GET['product_id'] );
+		if ( ! $product_id ) {
+			wp_die( -1 );
+		}
+
+		$timestamp_meta = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX , $product_id );
+		update_user_meta( $user_id, $timestamp_meta, time() );
+
+		wp_die( 1 );
 	}
 }
 
