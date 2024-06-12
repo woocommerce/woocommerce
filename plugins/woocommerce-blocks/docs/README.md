@@ -5,7 +5,7 @@
 -   [Contributors](#contributors)
 -   [Internal developers](#internal-developers)
 -   [Third-party developers](#third-party-developers)
--   [Designers](#designers)
+-   [Designers and theme developers](#designers-and-theme-developers)
 -   [Block References](#block-references)
 -   [Developer Resources](#developer-resources)
     -   [Tools](#tools)
