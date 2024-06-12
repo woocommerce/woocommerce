@@ -96,8 +96,7 @@ describe( 'reviews reducer', () => {
 			error,
 		} );
 
-		const stringifiedQuery = JSON.stringify( query );
-		expect( state.errors[ stringifiedQuery ] ).toBe( error );
+		expect( state.errors[ query ] ).toBe( error );
 	} );
 
 	it( 'should handle SET_REVIEW', () => {
