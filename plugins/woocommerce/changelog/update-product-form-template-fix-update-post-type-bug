@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+WooCommerce: fixes the checks when migrating the product form template

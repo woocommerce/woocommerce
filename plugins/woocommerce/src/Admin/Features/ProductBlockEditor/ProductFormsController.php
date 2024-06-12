@@ -34,32 +34,27 @@ class ProductFormsController {
 	 * @return void
 	 */
 	public function migrate_templates_when_plugin_updated( \WP_Upgrader $upgrader, array $hook_extra ) {
-		/*
-		 * Check whether $hook_extra['plugins'] contains the WooCommerce plugin.
-		 * It seems that $hook_extra may be `null` in some cases.
-		 * @see https://github.com/woocommerce/woocommerce/pull/48221#pullrequestreview-2102772713
-		 */
-		if ( ! isset( $hook_extra['plugins'] ) || ! is_array( $hook_extra['plugins'] ) ) {
+		// If it is not a plugin hook type, bail early.
+		$type = isset( $hook_extra['type'] ) ? $hook_extra['type'] : '';
+		if ( 'plugin' !== $type ) {
 			return;
 		}
 
-		// Check if WooCommerce plugin was updated.
+		// If it is not the WooCommerce plugin, bail early.
+		$plugins = isset( $hook_extra['plugins'] ) ? $hook_extra['plugins'] : array();
 		if (
-			! in_array( 'woocommerce/woocommerce.php', $hook_extra['plugins'], true )
+			! in_array( 'woocommerce/woocommerce.php', $plugins, true )
 		) {
 			return;
 		}
 
-		// Check if the action is an `update` or `install` action for a plugin.
+		// If the action is not install or update, bail early.
 		$action = isset( $hook_extra['action'] ) ? $hook_extra['action'] : '';
-
-		if (
-			'install' !== $action && 'update' !== $action ||
-			'plugin' !== $hook_extra['type']
-		) {
+		if ( 'install' !== $action && 'update' !== $action ) {
 			return;
 		}
 
+		// Trigger the migration process.
 		$this->migrate_product_form_posts( $action );
 	}
 
