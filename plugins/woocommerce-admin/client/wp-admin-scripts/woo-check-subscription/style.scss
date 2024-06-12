@@ -113,3 +113,32 @@
 		height: 32px;
 	}
 }
+
+.woocommerce-check-subscription-sticky-footer {
+	bottom: 0;
+	position: fixed;
+	width: calc(100% - 160px);
+	z-index: 1001; /* on top of #wp-content-editor-tools */
+
+	&__blue {
+		a {
+			color: #fff;
+		}
+		.components-notice {
+			background-color: #3858E9;
+			color: #fff;
+
+			&__dismiss,
+			&__dismiss:hover, {
+				color: #fff !important;
+			}
+		}
+	}
+
+	.components-notice {
+		border: none;
+		&__content {
+			text-align: center;
+		}
+	}
+}
