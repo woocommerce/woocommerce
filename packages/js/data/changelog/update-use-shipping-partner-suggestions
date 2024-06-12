@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Update shipping partner suggestions to use data from API, fix default partners data, replaced hardcoded JS components and added relevant types
