@@ -18,8 +18,8 @@ class MoneyFormatter implements FormatterInterface {
 		$options = wp_parse_args(
 			$options,
 			[
-				'decimals'      => wc_get_price_decimals(),
-				'rounding_mode' => PHP_ROUND_HALF_UP,
+				'decimals'      => $options['decimals'] ?? wc_get_price_decimals(),
+				'rounding_mode' => $options['rounding_mode'] ?? PHP_ROUND_HALF_UP,
 			]
 		);
 
