@@ -990,7 +990,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * Provides a mocked response for the oembed test. This way it is not necessary to perform
 	 * a regular request to an external server which would significantly slow down the tests.
 	 *
-	 * This function is called by WP_HTTP_TestCase::http_request_listner().
+	 * This function is called by WP_HTTP_TestCase::http_request_listener().
 	 *
 	 * @param array  $request Request arguments.
 	 * @param string $url URL of the request.
