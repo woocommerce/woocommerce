@@ -53,8 +53,6 @@ import { FlowType } from '../types';
 import { isOfflineAIFlow } from '../guards';
 import { isWooExpress } from '~/utils/is-woo-express';
 import { trackEvent } from '../tracking';
-import { View } from '@wordpress/primitives';
-import { SidebarPatternScreen } from './sidebar/pattern-screen/sidebar-pattern-screen';
 import { SidebarNavigationExtraScreen } from './sidebar/navigation-extra-screen/sidebar-navigation-extra-screen';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
