@@ -359,8 +359,6 @@ export default compose( [
 			isError = Boolean( getReviewsError( reviewsQuery ) );
 
 			isRequesting = isResolving( 'getReviews', [ reviewsQuery ] );
-			console.log( reviews );
-			console.log( isError, reviewsQuery );
 		}
 
 		return {
