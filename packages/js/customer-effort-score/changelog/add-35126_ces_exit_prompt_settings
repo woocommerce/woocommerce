@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Update CustomerEffortScore tracks to add callback for when Modal is dismissed.

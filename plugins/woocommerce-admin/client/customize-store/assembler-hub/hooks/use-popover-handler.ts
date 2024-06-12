@@ -83,10 +83,17 @@ export const usePopoverHandler = () => {
 		clickedClientId = null;
 	};
 
+	const hidePopover = () => {
+		setPopoverStatus( PopoverStatus.HIDDEN );
+		clickedClientId = null;
+		hoveredClientId = null;
+	};
+
 	return [
 		popoverStatus,
 		virtualElement,
 		updatePopoverPosition,
+		hidePopover,
 		setPopoverStatus,
 	] as const;
 };
