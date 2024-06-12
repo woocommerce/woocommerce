@@ -24,7 +24,9 @@ const request = ( { action, productId, nonce }, callback ) => {
 		method: 'GET',
 		headers,
 	} ).then( ( response ) => {
-		callback( response );
+		if ( callback ) {
+			callback( response );
+		}
 	} );
 };
 
