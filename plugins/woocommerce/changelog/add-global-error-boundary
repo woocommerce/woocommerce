@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add ErrorBoundary component for handling unexpect errors

@@ -1,104 +1,102 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
-baseTest.describe( 'Restricted coupon management', () => {
-	const couponData = {
-		minimumSpend: {
-			code: `minSpend-${ new Date().getTime().toString() }`,
-			description: 'Minimum spend coupon',
-			amount: '10',
-			minSpend: '100',
-		},
-		maximumSpend: {
-			code: `maxSpend-${ new Date().getTime().toString() }`,
-			description: 'Maximum spend coupon',
-			amount: '20',
-			maxSpend: '100',
-		},
-		individualUse: {
-			code: `individualUse-${ new Date().getTime().toString() }`,
-			description: 'Individual use coupon',
-			amount: '30',
-			individualUse: true,
-		},
-		excludeSaleItems: {
-			code: `excludeSaleItems-${ new Date().getTime().toString() }`,
-			description: 'Exclude sale items coupon',
-			amount: '40',
-			excludeSaleItems: true,
-		},
-		productCategories: {
-			code: `productCategories-${ new Date().getTime().toString() }`,
-			description: 'Product categories coupon',
-			amount: '50',
-			productCategories: [ 'Uncategorized' ],
-		},
-		excludeProductCategories: {
-			code: `excludeProductCategories-${ new Date()
-				.getTime()
-				.toString() }`,
-			description: 'Exclude product categories coupon',
-			amount: '60',
-			excludeProductCategories: [ 'Uncategorized' ],
-		},
-		products: {
-			code: `products-${ new Date().getTime().toString() }`,
-			description: 'Products coupon',
-			amount: '70',
-			products: [ 'Product' ],
-		},
-		excludeProducts: {
-			code: `excludeProducts-${ new Date().getTime().toString() }`,
-			description: 'Exclude products coupon',
-			amount: '80',
-			excludeProducts: [ 'Product' ],
-		},
-		allowedEmails: {
-			code: `allowedEmails-${ new Date().getTime().toString() }`,
-			description: 'Allowed emails coupon',
-			amount: '90',
-			allowedEmails: [ 'allowed@example.com' ],
-		},
-		usageLimitPerCoupon: {
-			code: `usageLimit-${ new Date().getTime().toString() }`,
-			description: 'Usage limit coupon',
-			amount: '100',
-			usageLimit: '1',
-		},
-		usageLimitPerUser: {
-			code: `usageLimitPerUser-${ new Date().getTime().toString() }`,
-			description: 'Usage limit per user coupon',
-			amount: '110',
-			usageLimitPerUser: '2',
-		},
-	};
+const couponData = {
+	minimumSpend: {
+		code: `minSpend-${ new Date().getTime().toString() }`,
+		description: 'Minimum spend coupon',
+		amount: '10',
+		minSpend: '100',
+	},
+	maximumSpend: {
+		code: `maxSpend-${ new Date().getTime().toString() }`,
+		description: 'Maximum spend coupon',
+		amount: '20',
+		maxSpend: '100',
+	},
+	individualUse: {
+		code: `individualUse-${ new Date().getTime().toString() }`,
+		description: 'Individual use coupon',
+		amount: '30',
+		individualUse: true,
+	},
+	excludeSaleItems: {
+		code: `excludeSaleItems-${ new Date().getTime().toString() }`,
+		description: 'Exclude sale items coupon',
+		amount: '40',
+		excludeSaleItems: true,
+	},
+	productCategories: {
+		code: `productCategories-${ new Date().getTime().toString() }`,
+		description: 'Product categories coupon',
+		amount: '50',
+		productCategories: [ 'Uncategorized' ],
+	},
+	excludeProductCategories: {
+		code: `excludeProductCategories-${ new Date().getTime().toString() }`,
+		description: 'Exclude product categories coupon',
+		amount: '60',
+		excludeProductCategories: [ 'Uncategorized' ],
+	},
+	products: {
+		code: `products-${ new Date().getTime().toString() }`,
+		description: 'Products coupon',
+		amount: '70',
+		products: [ 'Product' ],
+	},
+	excludeProducts: {
+		code: `excludeProducts-${ new Date().getTime().toString() }`,
+		description: 'Exclude products coupon',
+		amount: '80',
+		excludeProducts: [ 'Product' ],
+	},
+	allowedEmails: {
+		code: `allowedEmails-${ new Date().getTime().toString() }`,
+		description: 'Allowed emails coupon',
+		amount: '90',
+		allowedEmails: [ 'allowed@example.com' ],
+	},
+	usageLimitPerCoupon: {
+		code: `usageLimit-${ new Date().getTime().toString() }`,
+		description: 'Usage limit coupon',
+		amount: '100',
+		usageLimit: '1',
+	},
+	usageLimitPerUser: {
+		code: `usageLimitPerUser-${ new Date().getTime().toString() }`,
+		description: 'Usage limit per user coupon',
+		amount: '110',
+		usageLimitPerUser: '2',
+	},
+};
 
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		coupon: async ( { api }, use ) => {
-			const coupon = {};
-			await use( coupon );
-			await api.delete( `coupons/${ coupon.id }`, { force: true } );
-		},
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	coupon: async ( { api }, use ) => {
+		const coupon = {};
+		await use( coupon );
+		await api.delete( `coupons/${ coupon.id }`, { force: true } );
+	},
 
-		product: async ( { api }, use ) => {
-			let product = {};
+	product: async ( { api }, use ) => {
+		let product = {};
 
-			await api
-				.post( 'products', {
-					name: 'Product',
-					regular_price: '100',
-				} )
-				.then( ( response ) => {
-					product = response.data;
-				} );
+		await api
+			.post( 'products', {
+				name: 'Product',
+				regular_price: '100',
+			} )
+			.then( ( response ) => {
+				product = response.data;
+			} );
 
-			await use( product );
+		await use( product );
 
-			// Product cleanup
-			await api.delete( `products/${ product.id }`, { force: true } );
-		},
-	} );
+		// Product cleanup
+		await api.delete( `products/${ product.id }`, { force: true } );
+	},
+} );
 
+test.describe( 'Restricted coupon management', () => {
 	for ( const couponType of Object.keys( couponData ) ) {
 		test( `can create new ${ couponType } coupon`, async ( {
 			page,
@@ -379,7 +377,9 @@ baseTest.describe( 'Restricted coupon management', () => {
 						} )
 						.click();
 					await expect(
-						page.getByRole( 'listitem', { name: 'Uncategorized' } )
+						page.getByRole( 'listitem', {
+							name: 'Uncategorized',
+						} )
 					).toBeVisible();
 				} );
 			}
@@ -393,7 +393,9 @@ baseTest.describe( 'Restricted coupon management', () => {
 						} )
 						.click();
 					await expect(
-						page.getByRole( 'listitem', { name: 'Uncategorized' } )
+						page.getByRole( 'listitem', {
+							name: 'Uncategorized',
+						} )
 					).toBeVisible();
 				} );
 			}

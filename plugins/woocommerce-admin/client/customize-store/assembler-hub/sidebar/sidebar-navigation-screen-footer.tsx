@@ -40,7 +40,11 @@ const SUPPORTED_FOOTER_PATTERNS = [
 	'woocommerce-blocks/footer-large',
 ];
 
-export const SidebarNavigationScreenFooter = () => {
+export const SidebarNavigationScreenFooter = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'bottom',
@@ -142,7 +146,10 @@ export const SidebarNavigationScreenFooter = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
-			onNavigateBackClick={ resetHighlightedBlockClientId }
+			onNavigateBackClick={ () => {
+				resetHighlightedBlockClientId();
+				onNavigateBackClick();
+			} }
 			description={ createInterpolateElement( description, {
 				EditorLink: (
 					<Link

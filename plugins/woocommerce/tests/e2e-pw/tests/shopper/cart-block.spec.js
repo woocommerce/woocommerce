@@ -21,12 +21,12 @@ const singleProductWithCrossSellProducts =
 
 let product1Id, product2Id, product3Id;
 
-baseTest.describe( 'Cart Block page', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		testPageTitlePrefix: 'Cart Block',
-	} );
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	testPageTitlePrefix: 'Cart Block',
+} );
 
+test.describe( 'Cart Block page', () => {
 	test.beforeAll( async ( { api } ) => {
 		// make sure the currency is USD
 		await api.put( 'settings/general/woocommerce_currency', {

@@ -98,7 +98,7 @@ function ScaledBlockPreview( {
 		popoverStatus,
 		virtualElement,
 		updatePopoverPosition,
-		setPopoverStatus,
+		hidePopover,
 	] = usePopoverHandler();
 
 	// @ts-expect-error No types for this exist yet.
@@ -144,6 +144,7 @@ function ScaledBlockPreview( {
 			query,
 		},
 		{
+			hidePopover,
 			selectBlockOnHover,
 			selectBlock,
 			getBlockParents,
@@ -151,7 +152,6 @@ function ScaledBlockPreview( {
 			updatePopoverPosition,
 			setLogoBlockIds,
 			setContentHeight,
-			setPopoverStatus,
 		}
 	);
 

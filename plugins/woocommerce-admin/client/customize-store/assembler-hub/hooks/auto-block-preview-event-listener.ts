@@ -7,7 +7,6 @@ import { useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
-import { PopoverStatus } from './use-popover-handler';
 
 const setStyle = ( documentElement: HTMLElement ) => {
 	const element = documentElement.ownerDocument.documentElement;
@@ -213,10 +212,12 @@ const updateSelectedBlock = (
 
 export const hidePopoverWhenMouseLeaveIframe = (
 	iframeRef: HTMLElement,
-	setPopoverStatus: ( popoverStatus: PopoverStatus ) => void
+	{
+		hidePopover,
+	}: Pick< useAutoBlockPreviewEventListenersCallbacks, 'hidePopover' >
 ) => {
 	const handleMouseLeave = () => {
-		setPopoverStatus( PopoverStatus.HIDDEN );
+		hidePopover();
 	};
 
 	if ( iframeRef ) {
@@ -263,7 +264,7 @@ type useAutoBlockPreviewEventListenersCallbacks = {
 	} ) => void;
 	setLogoBlockIds: ( logoBlockIds: string[] ) => void;
 	setContentHeight: ( contentHeight: number | null ) => void;
-	setPopoverStatus: ( popoverStatus: PopoverStatus ) => void;
+	hidePopover: () => void;
 };
 
 /**
@@ -286,7 +287,7 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 		updatePopoverPosition,
 		setLogoBlockIds,
 		setContentHeight,
-		setPopoverStatus,
+		hidePopover,
 	}: useAutoBlockPreviewEventListenersCallbacks
 ) => {
 	useEffect( () => {
@@ -328,10 +329,9 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 			! isPatternPreview
 		) {
 			const removeEventListenerHidePopover =
-				hidePopoverWhenMouseLeaveIframe(
-					documentElement,
-					setPopoverStatus
-				);
+				hidePopoverWhenMouseLeaveIframe( documentElement, {
+					hidePopover,
+				} );
 			const removeEventListenersSelectedBlock = updateSelectedBlock(
 				documentElement,
 				{
