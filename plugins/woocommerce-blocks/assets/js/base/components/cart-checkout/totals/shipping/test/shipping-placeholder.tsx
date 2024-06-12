@@ -14,7 +14,7 @@ describe( 'ShippingPlaceholder', () => {
 			<ShippingPlaceholder showCalculator={ false } isCheckout={ true } />
 		);
 		expect(
-			screen.getByText( 'Enter address to calculate' )
+			screen.getByText( 'Enter the address to calculate' )
 		).toBeInTheDocument();
 		rerender(
 			<ShippingPlaceholder
