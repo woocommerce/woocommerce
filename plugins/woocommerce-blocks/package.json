@@ -92,7 +92,7 @@
 		"test:e2e:jest:dev": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config-dev.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js",
 		"test:e2e:jest:dev-watch": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config-dev.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js --watch",
 		"test:e2e:jest:update": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js --updateSnapshot",
-		"env:start": "pnpm --filter='@woocommerce/block-library' wp-env start && ./tests/e2e/bin/test-env-setup.sh",
+		"env:start": "pnpm --filter='@woocommerce/block-library' wp-env start --update && ./tests/e2e/bin/test-env-setup.sh",
 		"env:restart": "pnpm run wp-env clean all && pnpm run wp-env start && ./tests/e2e/bin/test-env-setup.sh",
 		"env:stop": "pnpm run wp-env stop",
 		"test:help": "wp-scripts test-unit-js --help",
