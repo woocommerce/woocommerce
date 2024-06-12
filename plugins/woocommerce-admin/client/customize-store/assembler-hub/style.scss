@@ -15,6 +15,11 @@
 	}
 }
 
+.edit-site-layout__header-container {
+	position: fixed;
+	z-index: 4;
+}
+
 body.woocommerce-assembler {
 	overflow: hidden;
 }
