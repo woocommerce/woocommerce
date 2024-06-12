@@ -101,7 +101,7 @@ jobs:
 
     project-test-jobs:
         name: "${{ matrix.name }}"
-        runs-on: 'ubuntu-20.04'
+        runs-on: 'ubuntu-22.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.test-jobs != '[]' }}
         env: ${{ matrix.testEnv.envVars }}
