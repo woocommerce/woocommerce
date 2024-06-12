@@ -230,7 +230,8 @@ class ProductCollectionUtils {
 		}
 
 		if ( ! empty( $query_attrs['woocommerceStockStatus'] ) ) {
-			$default_values = wc_get_product_stock_status_options();
+			$stock_statuses = wc_get_product_stock_status_options();
+			$default_values = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? array_diff_key( $stock_statuses, array( 'outofstock' => '' ) ) : $stock_statuses;
 			$default_diff   = array_diff( array_keys( $default_values ), $query_attrs['woocommerceStockStatus'] );
 			if ( ! empty( $default_diff ) ) {
 				$filters['stock-status'] = 1;
