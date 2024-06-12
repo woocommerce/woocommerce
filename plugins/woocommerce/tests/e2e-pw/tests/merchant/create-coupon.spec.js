@@ -1,45 +1,45 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
-baseTest.describe( 'Coupon management', () => {
-	const couponData = {
-		fixedCart: {
-			code: `fixedCart-${ Date.now() }`,
-			description: 'Simple fixed cart discount',
-			amount: '25',
-		},
-		fixedProduct: {
-			code: `fixedProduct-${ Date.now() }`,
-			description: 'Simple fixed product discount',
-			amount: '5',
-		},
-		percentage: {
-			code: `percentage-${ Date.now() }`,
-			description: 'Simple percentage discount',
-			amount: '10',
-		},
-		expiryDate: {
-			code: `expiryDate-${ Date.now() }`,
-			description: 'Simple expiry date discount',
-			amount: '15',
-			expiryDate: '2023-12-31',
-		},
-		freeShipping: {
-			code: `freeShipping-${ Date.now() }`,
-			description: 'Simple free shipping discount',
-			amount: '1',
-			freeShipping: true,
-		},
-	};
+const couponData = {
+	fixedCart: {
+		code: `fixedCart-${ Date.now() }`,
+		description: 'Simple fixed cart discount',
+		amount: '25',
+	},
+	fixedProduct: {
+		code: `fixedProduct-${ Date.now() }`,
+		description: 'Simple fixed product discount',
+		amount: '5',
+	},
+	percentage: {
+		code: `percentage-${ Date.now() }`,
+		description: 'Simple percentage discount',
+		amount: '10',
+	},
+	expiryDate: {
+		code: `expiryDate-${ Date.now() }`,
+		description: 'Simple expiry date discount',
+		amount: '15',
+		expiryDate: '2023-12-31',
+	},
+	freeShipping: {
+		code: `freeShipping-${ Date.now() }`,
+		description: 'Simple free shipping discount',
+		amount: '1',
+		freeShipping: true,
+	},
+};
 
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		coupon: async ( { api }, use ) => {
-			const coupon = {};
-			await use( coupon );
-			await api.delete( `coupons/${ coupon.id }`, { force: true } );
-		},
-	} );
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	coupon: async ( { api }, use ) => {
+		const coupon = {};
+		await use( coupon );
+		await api.delete( `coupons/${ coupon.id }`, { force: true } );
+	},
+} );
 
+test.describe( 'Coupon management', () => {
 	for ( const couponType of Object.keys( couponData ) ) {
 		test( `can create new ${ couponType } coupon`, async ( {
 			page,

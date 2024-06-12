@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Use products data store for getPermalinkParts selector.
