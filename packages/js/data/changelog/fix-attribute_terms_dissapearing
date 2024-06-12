@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Update ProductAttributeTerms action types and include it as part of @wordpress/data module
