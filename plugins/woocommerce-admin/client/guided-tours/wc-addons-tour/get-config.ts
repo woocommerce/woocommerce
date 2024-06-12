@@ -51,7 +51,7 @@ export const getTourConfig = ( {
 						allowedAutoPlacements: [ 'right', 'bottom', 'top' ],
 						fallbackPlacements: [ 'bottom-start', 'right' ],
 						flipVariations: false,
-						boundry: 'clippingParents',
+						boundary: 'clippingParents',
 					},
 				},
 				{
