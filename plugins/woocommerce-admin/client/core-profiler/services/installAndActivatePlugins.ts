@@ -206,7 +206,7 @@ export const pluginInstallerMachine = createMachine(
 				pluginsInstallationQueue: ( { context } ) => {
 					// Sort the plugins by install_priority so that the smaller plugins are installed first
 					// install_priority is set by plugin's size
-					// Lower install_prioirty means the plugin is smaller
+					// Lower install_priority means the plugin is smaller
 					return context.selectedPlugins.slice().sort( ( a, b ) => {
 						const aIndex = context.pluginsAvailable.find(
 							( plugin ) => plugin.key === a
