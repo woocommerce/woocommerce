@@ -107,18 +107,11 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
         -   [Slot and Fill](../packages/checkout/slot/README.md)
         -   [Utilities](../packages/checkout/utils/README.md)
 
-## Designers
+## Designers and theme developers
 
-> Are you a designer? The following documents explain how to apply design-changes to the WooCommerce Blocks plugin.
+> Are you a designer or a theme developer? The following documents explain how to apply design-changes to the WooCommerce Blocks plugin.
 
 -   [Theming](designers/theming/README.md)
-    -   [Filter blocks](designers/theming/filter-blocks.md)
-    -   [Cart and Checkout](designers/theming/cart-and-checkout.md)
-    -   [Class names update in 4.6.0](designers/theming/class-names-update-460.md)
-    -   [Class names update in 3.4.0](designers/theming/class-names-update-340.md)
-    -   [Class names update in 3.3.0](designers/theming/class-names-update-330.md)
-    -   [Class names update in 2.8.0](designers/theming/class-names-update-280.md)
-    -   [Product grid blocks style update in 2.7.0](designers/theming/product-grid-270.md)
 
 ## Block References
 
