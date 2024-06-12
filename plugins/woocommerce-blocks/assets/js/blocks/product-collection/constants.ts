@@ -6,7 +6,7 @@ import { objectOmit } from '@woocommerce/utils';
 import {
 	type InnerBlockTemplate,
 	createBlock,
-	// @ts-expect-error Missing types in Gutenberg
+	// @ts-expect-error Type definitions for this function are missing in Guteberg
 	createBlocksFromInnerBlocksTemplate,
 } from '@wordpress/blocks';
 
