@@ -2763,15 +2763,15 @@ function wc_update_910_remove_obsolete_user_meta() {
 			)
 		);
 	} else {
-		$logger->notice(
+		$logger->info(
 			sprintf(
-				_n(
-					'During the update to 9.1.0, WooCommerce removed %d user meta row associated with the meta keys "_last_order", "_order_count" or "_money_spent".',
-					'During the update to 9.1.0, WooCommerce removed %d user meta rows associated with the meta keys "_last_order", "_order_count" or "_money_spent".',
-					$deletions,
-					'woocommerce'
-				),
+				1 === $deletions
+					? 'During the update to 9.1.0, WooCommerce removed %d user meta row associated with the meta keys "_last_order", "_order_count" or "_money_spent".'
+					: 'During the update to 9.1.0, WooCommerce removed %d user meta rows associated with the meta keys "_last_order", "_order_count" or "_money_spent".',
 				number_format_i18n( $deletions )
+			),
+			array(
+				'source' => 'wc-updater',
 			)
 		);
 	}
