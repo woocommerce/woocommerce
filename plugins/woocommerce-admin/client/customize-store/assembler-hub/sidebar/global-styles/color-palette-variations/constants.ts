@@ -1593,6 +1593,15 @@ export const COLOR_PALETTES = [
 						text: 'var(--wp--preset--color--foreground)',
 					},
 				},
+				'core/cover': {
+					elements: {
+						heading: {
+							color: {
+								text: 'var(--wp--preset--color--tertiary)',
+							},
+						},
+					},
+				},
 				'core/site-title': {
 					elements: {
 						link: {
