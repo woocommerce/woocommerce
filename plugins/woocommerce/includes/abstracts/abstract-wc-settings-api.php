@@ -944,6 +944,7 @@ abstract class WC_Settings_API {
 	/**
 	 * Validate Textarea Field.
 	 *
+	 * @since 9.0.0 No longer allows storing IFRAME, which was allowed for "ShareThis" integration no longer found in core.
 	 * @param  string $key Field key.
 	 * @param  string $value Posted Value.
 	 * @return string

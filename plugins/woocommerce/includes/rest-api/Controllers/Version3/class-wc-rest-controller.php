@@ -435,6 +435,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * Validate textarea based settings.
 	 *
 	 * @since 3.0.0
+	 * @since 9.0.0 No longer allows storing IFRAME, which was allowed for "ShareThis" integration no longer found in core.
 	 * @param string $value Value.
 	 * @param array  $setting Setting.
 	 * @return string
