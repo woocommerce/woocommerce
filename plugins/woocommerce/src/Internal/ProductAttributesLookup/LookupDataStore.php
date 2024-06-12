@@ -872,6 +872,7 @@ class LookupDataStore {
 		$temp = $wpdb->get_var( $sql );
 
 		if ( is_null( $temp ) ) {
+			// The product has no attributes, thus there's no attributes lookup data to generate.
 			return;
 		}
 
