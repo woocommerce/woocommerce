@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-#47626 changed the classes on the legacy admin settings save button and broke saving standard tax rates
