@@ -45,7 +45,7 @@ export type TaxProps = {
 	task: TaskType;
 };
 
-const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
+export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 	const [ isPending, setIsPending ] = useState( false );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
