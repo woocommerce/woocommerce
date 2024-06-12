@@ -195,9 +195,9 @@ export function ImageBlockEdit( {
 	) {
 		createErrorNotice(
 			sprintf(
-				// eslint-disable-next-line @wordpress/i18n-no-collapsible-whitespace
-				/* translators: %s is the detailed error message */
-				__( 'Error uploading image:\n%s', 'woocommerce' ),
+				/* translators: %1$s is a line break, %2$s is the detailed error message */
+				__( 'Error uploading image:%1$s%2$s', 'woocommerce' ),
+				'\n',
 				error.message
 			)
 		);
