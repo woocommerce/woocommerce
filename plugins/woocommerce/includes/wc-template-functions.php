@@ -2903,10 +2903,12 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			}
 		}
 
-		$field           = '';
-		$label_id        = $args['id'];
-		$sort            = $args['priority'] ? $args['priority'] : '';
-		$field_container = '<p class="form-row %1$s" id="%2$s" data-priority="' . esc_attr( $sort ) . '">%3$s</p>';
+		$field              = '';
+		$label_id           = $args['id'];
+		$sort               = $args['priority'] ? $args['priority'] : '';
+		$field_container    = '<p class="form-row %1$s" id="%2$s" data-priority="' . esc_attr( $sort ) . '">%3$s</p>';
+		$required_field     = ! empty ( $args['required'] ) && true === $args['required'];
+		$required_attribute = $required_field ? ' required' : '';
 
 		switch ( $args['type'] ) {
 			case 'country':
