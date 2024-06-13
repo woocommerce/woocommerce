@@ -1,0 +1,103 @@
+.toplevel_page_product-editor {
+    background: #fff;
+
+    #wpbody-content {
+        padding-top: 130px;
+    }
+
+    .panel {
+        max-width: 650px;
+        margin: 0 auto;
+    }
+}
+
+.product-editor__header {
+    position: fixed;
+    top: 32px;
+    left: 160px;
+    width: calc( 100% - 160px );
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, .133);
+
+    .product-editor__header-inner {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        grid-gap: 16px;
+        align-items: center;
+        padding: 0 16px;
+        height: 60px;
+
+        button {
+            align-items: center;
+            -webkit-appearance: none;
+            background: none;
+            border: 0;
+            border-radius: 2px;
+            box-sizing: border-box;
+            color: var(--wp-components-color-foreground, #1e1e1e);
+            cursor: pointer;
+            display: inline-flex;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 400;
+            height: 36px;
+            margin: 0;
+            padding: 6px 12px;
+            text-decoration: none;
+            transition: box-shadow .1s linear;
+            background: #007cba;
+            color: var(--wp-components-color-accent-inverted, #fff);
+            outline: 1px solid #0000;
+            text-decoration: none;
+            text-shadow: none;
+            white-space: nowrap;
+        }
+    }
+
+    .product-editor__header-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .product-editor__header-title-bar {
+        display: flex;
+        align-items: center;
+        background-color: #f0f0f0;
+        justify-content: center;
+        width: 400px;
+        border-radius: 4px;
+        padding: 4px 12px;
+        gap: 12px;
+    }
+
+    .product_data_tabs {
+        display: flex;
+        justify-content: center;
+        margin-top: 0;
+        margin-bottom: 0;
+
+        li {
+            margin-left: 12px;
+            margin-right: 12px;
+            margin-bottom: 0;
+
+            a {
+                display: block;
+                color: #1e1e1e;
+                padding-top: 8px;
+                padding-bottom: 20px;
+                text-decoration: none;
+                border-bottom: 3.5px solid transparent;
+                font-size: 13px;
+            }
+
+            &.is-active a {
+                border-color: #007cba;
+            }
+        }
+    }
+
+}

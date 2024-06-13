@@ -11,7 +11,7 @@ $product_object = new WC_Product();
 ?>
 <div id="general_product_data" class="panel woocommerce_options_panel" data-wp-bind--hidden="!selectors.isTabActive" data-wp-context='{"id": "general"}' >
 
-    <div class="options_group show_if_external">
+    <div class="options_group" data-wp-bind--hidden="selectors.hasType" data-wp-context='{"types": ["external"]}'>
         <?php
         woocommerce_wp_text_input(
             array(

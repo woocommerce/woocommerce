@@ -10,6 +10,11 @@ function getPropertyNameFromInput( name ) {
 	return name;
 }
 
+function getProductId() {
+	const urlParams = new URLSearchParams( window.location.search );
+	return urlParams.get('id');
+}
+
 const { state } = store( NS, {
 	state: {
 		activeTab: 'general',
@@ -17,14 +22,18 @@ const { state } = store( NS, {
 		loading: true,
 	},
 	selectors: {
-		isTabActive: (a) => {
+		isTabActive: () => {
 			const context = getContext();
 			return context.id === state.activeTab
 		},
+		hasType: () => {
+			const context = getContext();
+			return context.types.indexOf( state.product && state.product.type );
+		}
 	},
 	actions: {
 		loadProduct: function*() {
-			const product = yield wp.data.resolveSelect( 'core' ).getEntityRecord( 'postType', 'product', 1751 );
+			const product = yield wp.data.resolveSelect( 'core' ).getEntityRecord( 'postType', 'product', getProductId() );
 			console.log(product);
 			state.product = product;
 			state.loading = false;
@@ -38,7 +47,6 @@ const { state } = store( NS, {
 		},
 		setActiveTab( e ) {
 			e.preventDefault();
-			console.log('clicked');
 			const context = getContext();
 			state.activeTab = context.id;
 		},

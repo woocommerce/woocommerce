@@ -17,7 +17,7 @@ class Init {
 	 */
 	public function __construct() {
         $this->register_page();
-        $this->register_scripts();
+        $this->register_scripts_and_styles();
     }
 
     /**
@@ -38,7 +38,7 @@ class Init {
     /**
      * Register the interactivity scripts.
      */
-    public function register_scripts() {
+    public function register_scripts_and_styles() {
         $suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
         $version      = Constants::get_constant( 'WC_VERSION' );
 
@@ -48,6 +48,13 @@ class Init {
             array( '@wordpress/interactivity' ),
             $version,
             true
+        );
+
+        wp_enqueue_style(
+            'product-editor-interactivity',
+            WC()->plugin_url() . '/assets/css/product-editor-interactivity' . $suffix . '.css',
+            array(),
+            $version,
         );
 
         add_action( 'admin_enqueue_scripts', array( wp_interactivity(), 'register_script_modules' ) );

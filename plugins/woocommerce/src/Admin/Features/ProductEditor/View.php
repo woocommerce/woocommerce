@@ -20,7 +20,6 @@ class View {
                 Loading...
             </div>
             <div data-wp-bind--hidden="state.loading">
-                <?php self::render_tabs(); ?>
                 <?php self::render_header(); ?>
                 <?php self::render_tabs_content(); ?>
             </div>
@@ -35,9 +34,21 @@ class View {
     private static function render_header() {
         ob_start();
         ?>
-        <button data-wp-on--click="actions.persistProduct">
-            Save
-        </button>
+        <div class="product-editor__header">
+            <div class="product-editor__header-inner">
+                <div></div>
+                <div class="product-editor__header-title-bar">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path fill-rule="evenodd" d="M5 5.5h14a.5.5 0 01.5.5v1.5a.5.5 0 01-.5.5H5a.5.5 0 01-.5-.5V6a.5.5 0 01.5-.5zM4 9.232A2 2 0 013 7.5V6a2 2 0 012-2h14a2 2 0 012 2v1.5a2 2 0 01-1 1.732V18a2 2 0 01-2 2H6a2 2 0 01-2-2V9.232zm1.5.268V18a.5.5 0 00.5.5h12a.5.5 0 00.5-.5V9.5h-13z" clip-rule="evenodd"></path></svg>
+                    <span class="product-editor__header-title-bar-text" data-wp-text="state.product.name"></span>
+                </div>
+                <div class="product-editor__header-actions">
+                    <button data-wp-on--click="actions.persistProduct">
+                        <?php _e( 'Update', 'woocommerce' ); ?>
+                    </button>
+                </div>
+            </div>
+            <?php self::render_tabs(); ?>
+        </div>
         <?php
         echo ob_get_clean();
     }
@@ -50,7 +61,7 @@ class View {
         ?>
         <ul class="product_data_tabs wc-tabs">
             <?php foreach ( self::get_product_data_tabs() as $key => $tab ) : ?>
-                <li class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_tab <?php echo esc_attr( isset( $tab['class'] ) ? implode( ' ', (array) $tab['class'] ) : '' ); ?>">
+                <li class="<?php echo esc_attr( $key ); ?>_options <?php echo esc_attr( $key ); ?>_tab <?php echo esc_attr( isset( $tab['class'] ) ? implode( ' ', (array) $tab['class'] ) : '' ); ?>" data-wp-class--is-active="selectors.isTabActive" data-wp-context='{"id": "<?php echo $key; ?>"}'>
                     <a href="#<?php echo esc_attr( $tab['target'] ); ?>" data-wp-on--click="actions.setActiveTab" data-wp-context='{"id": "<?php echo $key; ?>"}'><span><?php echo esc_html( $tab['label'] ); ?></span></a>
                 </li>
             <?php endforeach; ?>
