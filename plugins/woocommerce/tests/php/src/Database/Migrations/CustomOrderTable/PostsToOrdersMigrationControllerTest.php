@@ -742,7 +742,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	}
 
 	/**
-	 * @testDox When there are mutli meta values for a supposed unique meta key, the first one is picked.
+	 * @testDox When there are multi meta values for a supposed unique meta key, the first one is picked.
 	 */
 	public function test_first_value_is_picked_when_multi_value() {
 		global $wpdb;
