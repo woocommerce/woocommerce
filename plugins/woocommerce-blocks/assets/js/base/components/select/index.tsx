@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Icon, chevronDown } from '@wordpress/icons';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useId } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -29,16 +29,25 @@ export const Select = ( props: SelectProps ) => {
 		[ onChange ]
 	);
 
+	const generatedId = useId();
+
+	const inputId =
+		restOfProps.id || `wc-blocks-components-select-${ generatedId }`;
+
 	return (
 		<div className="wc-blocks-components-select">
 			<div className="wc-blocks-components-select__container">
-				<label className="wc-blocks-components-select__label">
+				<label
+					htmlFor={ inputId }
+					className="wc-blocks-components-select__label"
+				>
 					{ label }
 				</label>
 				<select
 					className={ `wc-blocks-components-select__select ${
 						className || ''
 					}` }
+					id={ inputId }
 					size={ size !== undefined ? size : 1 }
 					onChange={ selectOnChange }
 					value={ value }
