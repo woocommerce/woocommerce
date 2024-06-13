@@ -192,7 +192,7 @@ fi
 output 2 "Removing GIT directory..."
 run_command "rm -rf '$GIT_PATH'" true
 
-# SVN commit messsage
+# SVN commit message
 output 2 "Ready to commit into WordPress.org Plugin's Directory!"
 echo
 echo "-------------------------------------------"
