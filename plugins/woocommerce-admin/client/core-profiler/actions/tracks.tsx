@@ -72,7 +72,7 @@ const recordTracksIsEmailChanged = ( {
 	event,
 }: {
 	context: CoreProfilerStateMachineContext;
-	event: BusinessInfoEvent;
+	event: Extract< BusinessInfoEvent, { type: 'BUSINESS_INFO_COMPLETED' } >;
 } ) => {
 	let emailSource, isEmailChanged;
 	if ( context.onboardingProfile.store_email ) {

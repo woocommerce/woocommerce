@@ -427,11 +427,18 @@ const assignUserProfile = assign( {
 		event.payload.userProfile,
 } );
 
+type BusinessInfoPayload = Extract<
+	BusinessInfoEvent,
+	{ type: 'BUSINESS_INFO_COMPLETED' }
+>[ 'payload' ];
+
 const updateBusinessInfo = fromPromise(
 	async ( {
 		input,
 	}: {
-		input: { payload: BusinessInfoEvent[ 'payload' ] };
+		input: {
+			payload: BusinessInfoPayload;
+		};
 	} ) => {
 		const refreshedOnboardingProfile = ( await resolveSelect(
 			OPTIONS_STORE_NAME
@@ -590,6 +597,10 @@ export const getJetpackIsConnected = fromPromise( async () => {
 	return resolveSelect( PLUGINS_STORE_NAME ).isJetpackConnected();
 } );
 
+const reloadPage = () => {
+	window.location.reload();
+};
+
 export const preFetchActions = {
 	preFetchIsJetpackConnected,
 	preFetchJetpackAuthUrl,
@@ -615,6 +626,7 @@ const coreProfilerMachineActions = {
 	redirectToWooHome,
 	redirectToJetpackAuthPage,
 	updateLoaderProgressWithPluginInstall,
+	reloadPage,
 };
 
 const coreProfilerMachineActors = {
@@ -1094,6 +1106,18 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							actions: [
 								'recordTracksBusinessInfoCompleted',
 								'recordTracksIsEmailChanged',
+							],
+						},
+						RETRY_PRE_BUSINESS_INFO: {
+							actions: [ 'reloadPage' ],
+						},
+						SKIP_BUSINESS_INFO_STEP: {
+							target: '#plugins',
+							actions: [
+								{
+									type: 'recordTracksStepSkipped',
+									params: { step: 'business_info' },
+								},
 							],
 						},
 					},
