@@ -155,7 +155,7 @@ abstract class AbstractBlock {
 				$this->get_block_type_script( 'handle' ),
 				$this->get_block_type_script( 'path' ),
 				array_merge(
-					$this->get_block_type_script( 'dependencies' ),
+					$data['dependencies'],
 					$this->integration_registry->get_all_registered_script_handles()
 				),
 				$has_i18n
