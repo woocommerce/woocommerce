@@ -60,7 +60,8 @@ jQuery( function( $ ) {
 				var select2_args = $.extend({
 					placeholder: $this.attr( 'data-placeholder' ) || $this.attr( 'placeholder' ) || '',
 					label: $this.attr( 'data-label' ) || null,
-					width: '100%'
+					required: $this.attr('required') || null,
+					width: '100%',
 				}, getEnhancedSelectFormatString() );
 
 				$( this )

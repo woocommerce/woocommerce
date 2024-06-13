@@ -6537,6 +6537,11 @@ S2.define('jquery.select2',[
           var instanceOptions = $.extend(true, {}, options);
 
           var instance = new Select2($(this), instanceOptions);
+			if ( options.hasOwnProperty( 'required' ) && options.required === true ) {
+				if ( instance.$selection ) {
+					instance.$selection.attr( 'aria-required', 'true' );
+				}
+			}
         });
 
         return this;
