@@ -375,7 +375,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	}
 
 	/**
-	 * Check if block is eaither a Post template or Product Template
+	 * Check if block is either a Post template or Product Template
 	 *
 	 * @param string $block_name Block name.
 	 */
