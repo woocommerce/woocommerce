@@ -194,6 +194,7 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_admin_reviewed_store_location_settings',
 			'woocommerce_ces_product_feedback_shown',
 			'woocommerce_marketing_overview_multichannel_banner_dismissed',
+			'woocommerce_manage_stock',
 			'woocommerce_dimension_unit',
 			'woocommerce_weight_unit',
 			'woocommerce_product_editor_show_feedback_bar',
