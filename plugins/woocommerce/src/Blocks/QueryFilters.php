@@ -18,7 +18,7 @@ final class QueryFilters {
 	}
 
 	/**
-	 * Filter the posts clauses of the main query to suport global filters.
+	 * Filter the posts clauses of the main query to support global filters.
 	 *
 	 * @param array     $args     Query args.
 	 * @param \WP_Query $wp_query WP_Query object.
