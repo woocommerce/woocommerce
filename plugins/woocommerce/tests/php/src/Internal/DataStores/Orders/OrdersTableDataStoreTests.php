@@ -2699,7 +2699,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	}
 
 	/**
-	 * Helper function to simulate adding meta withing a adding meta callback.
+	 * Helper function to simulate adding meta within a adding meta callback.
 	 * @param int    $meta_id Meta ID.
 	 * @param int    $post_id Post ID.
 	 * @param string $meta_key Meta key.
