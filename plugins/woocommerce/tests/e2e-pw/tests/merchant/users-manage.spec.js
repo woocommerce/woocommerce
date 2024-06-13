@@ -62,7 +62,7 @@ async function userDeletionTest( page, username ) {
 
 	await test.step( 'confirm deletion', async () => {
 		await expect(
-			page.getByRole( 'link', { name: username, exact: true } )
+			page.getByText( `Search results for: ${ username }` )
 		).toBeVisible();
 		await page.getByRole( 'button', { name: 'Confirm Deletion' } ).click();
 	} );
