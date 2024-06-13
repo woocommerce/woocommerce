@@ -328,7 +328,7 @@ class CLIRunner {
 	 * ---
 	 *
 	 * [--order-types]
-	 * : Comma seperated list of order types that needs to be verified. For example, --order-types=shop_order,shop_order_refund
+	 * : Comma separated list of order types that needs to be verified. For example, --order-types=shop_order,shop_order_refund
 	 * ---
 	 * default: Output of function `wc_get_order_types( 'cot-migration' )`
 	 *
@@ -383,7 +383,7 @@ class CLIRunner {
 		if ( 0 === count( $order_types ) ) {
 			return WP_CLI::error(
 				sprintf(
-				/* Translators: %s is the comma seperated list of order types. */
+				/* Translators: %s is the comma separated list of order types. */
 					__( 'Passed order type does not match any registered order types. Following order types are registered: %s', 'woocommerce' ),
 					implode( ',', wc_get_order_types( 'cot-migration' ) )
 				)
