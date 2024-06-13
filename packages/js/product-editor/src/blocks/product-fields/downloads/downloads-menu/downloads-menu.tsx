@@ -47,7 +47,10 @@ export function DownloadsMenu( {
 								onUploadSuccess( files );
 								onClose();
 							} }
-							onUploadError={ onUploadError }
+							onUploadError={ ( error ) => {
+								onUploadError( error );
+								onClose();
+							} }
 						/>
 
 						<InsertUrlMenuItem
