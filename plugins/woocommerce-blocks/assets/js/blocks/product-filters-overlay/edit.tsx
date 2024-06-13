@@ -8,6 +8,11 @@ import {
 } from '@wordpress/block-editor';
 import { InnerBlockTemplate } from '@wordpress/blocks';
 
+/**
+ * Internal dependencies
+ */
+import './editor.scss';
+
 const TEMPLATE: InnerBlockTemplate[] = [ [ 'woocommerce/product-filters' ] ];
 
 export const Edit = () => {
