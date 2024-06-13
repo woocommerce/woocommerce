@@ -174,7 +174,7 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			return deletedProduct as T;
 		} catch ( error ) {
-			throw errorHandler( error as WPError, status, postType );
+			throw errorHandler( error as WPError, status );
 		} finally {
 			setTrashing( false );
 		}
