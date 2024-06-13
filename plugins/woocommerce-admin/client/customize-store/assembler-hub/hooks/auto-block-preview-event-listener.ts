@@ -88,21 +88,37 @@ const findAndSetLogoBlock = (
 
 export const DISABLE_CLICK_CLASS = 'disable-click';
 
-const addInertToTemplatePartsInHomepage = (
+const makeInert = ( element: Element ) => {
+	element.setAttribute( 'inert', 'true' );
+};
+
+const makeInteractive = ( element: Element ) => {
+	element.removeAttribute( 'inert' );
+};
+
+const addInertToAssemblerPatterns = (
 	documentElement: HTMLElement,
-	isHomepage: boolean
+	page: string
 ) => {
 	const body = documentElement.ownerDocument.body;
 
+	const interactiveBlocks: Record< string, string > = {
+		'/customize-store/assembler-hub/header': `header[data-type='core/template-part']`,
+		'/customize-store/assembler-hub/footer': `footer[data-type='core/template-part']`,
+		'/customize-store/assembler-hub/homepage': `[data-is-parent-block='true']:not([data-type='core/template-part'])`,
+	};
+
 	const addInertToTemplateParts = () => {
 		for ( const disableClick of documentElement.querySelectorAll(
-			`[data-type='core/template-part']`
+			`[data-is-parent-block='true']`
 		) ) {
-			if ( isHomepage ) {
-				disableClick.setAttribute( 'inert', 'true' );
-			} else {
-				disableClick.removeAttribute( 'inert' );
-			}
+			makeInert( disableClick );
+		}
+
+		for ( const element of documentElement.querySelectorAll(
+			interactiveBlocks[ page ]
+		) ) {
+			makeInteractive( element );
 		}
 	};
 
@@ -137,7 +153,7 @@ const addInertToAllInnerBlocks = ( documentElement: HTMLElement ) => {
 		for ( const disableClick of documentElement.querySelectorAll(
 			`[data-is-parent-block='true'] *, header *, footer *, .${ DISABLE_CLICK_CLASS }`
 		) ) {
-			disableClick.setAttribute( 'inert', 'true' );
+			makeInert( disableClick );
 		}
 	} );
 
@@ -347,12 +363,11 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 				addInertToAllInnerBlocks( documentElement );
 			observers.push( inertInnerBlockObserver );
 
-			const inertTemplatePartsObserver =
-				addInertToTemplatePartsInHomepage(
-					documentElement,
-					query?.path === '/customize-store/assembler-hub/homepage'
-				);
-			observers.push( inertTemplatePartsObserver );
+			const inertAssemblerPatternObserver = addInertToAssemblerPatterns(
+				documentElement,
+				query?.path
+			);
+			observers.push( inertAssemblerPatternObserver );
 
 			unsubscribeCallbacks.push( removeEventListenersSelectedBlock );
 			unsubscribeCallbacks.push( removeEventListenerHidePopover );
