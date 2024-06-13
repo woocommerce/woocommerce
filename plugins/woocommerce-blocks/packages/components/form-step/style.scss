@@ -30,8 +30,9 @@
 				position: absolute;
 				content: "";
 				bottom: -$gap-larger;
-				left: -100vw;
-				width: 200vw;
+				left: 50%;
+				transform: translateX(-50%);
+				width: 100vw;
 				height: 1px;
 				background: currentColor;
 				opacity: 0.11;
