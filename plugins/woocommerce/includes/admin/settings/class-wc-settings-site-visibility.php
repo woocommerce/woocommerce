@@ -60,7 +60,7 @@ class WC_Settings_Site_Visibility extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings for the default section.
+	 * Get settings for the Custom View section.
 	 *
 	 * @return array
 	 */
