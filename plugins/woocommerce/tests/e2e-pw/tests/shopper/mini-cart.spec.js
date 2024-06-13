@@ -295,7 +295,7 @@ test.describe( 'Mini Cart block page', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		// set inlcuding tax prices
+		// set including tax prices
 		await api.put( 'settings/tax/woocommerce_tax_display_cart', {
 			value: 'incl',
 		} );
