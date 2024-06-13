@@ -547,7 +547,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		}
 
 		if ( empty( $name ) ) {
-			// Default paramater name.
+			// Default parameter name.
 			$name = '_wpnonce';
 		}
 
