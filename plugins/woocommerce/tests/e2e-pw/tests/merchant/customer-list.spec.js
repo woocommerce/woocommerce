@@ -58,26 +58,26 @@ const customerData = {
 	},
 };
 
-baseTest.describe( 'Merchant > Customer List', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		customers: async ( { api }, use ) => {
-			const customers = [];
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	customers: async ( { api }, use ) => {
+		const customers = [];
 
-			for ( const customer of Object.values( customerData ) ) {
-				await api.post( 'customers', customer ).then( ( response ) => {
-					customers.push( response.data );
-				} );
-			}
-
-			await use( customers );
-
-			await api.post( `customers/batch`, {
-				delete: customers.map( ( customer ) => customer.id ),
+		for ( const customer of Object.values( customerData ) ) {
+			await api.post( 'customers', customer ).then( ( response ) => {
+				customers.push( response.data );
 			} );
-		},
-	} );
+		}
 
+		await use( customers );
+
+		await api.post( `customers/batch`, {
+			delete: customers.map( ( customer ) => customer.id ),
+		} );
+	},
+} );
+
+test.describe( 'Merchant > Customer List', () => {
 	test.beforeEach( async ( { context } ) => {
 		// prevents the column picker from saving state between tests
 		await context.route( '**/users/**', ( route ) => route.abort() );
@@ -114,9 +114,14 @@ baseTest.describe( 'Merchant > Customer List', () => {
 					.fill( customer.first_name );
 				await page
 					.getByRole( 'option', {
-						name: 'All customers with names that',
+						name: `All customers with names that include ${ customer.first_name }`,
 					} )
-					.click();
+					.waitFor( { state: 'visible' } );
+				await page
+					.getByRole( 'option', {
+						name: `All customers with names that include ${ customer.first_name }`,
+					} )
+					.click( { delay: 300 } );
 				await expect(
 					page.getByRole( 'link', { name: customer.email } )
 				).toBeVisible();
