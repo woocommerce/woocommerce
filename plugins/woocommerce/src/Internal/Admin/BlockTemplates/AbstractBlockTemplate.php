@@ -177,7 +177,6 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 			'description'    => $this->get_description(),
 			'area'           => $this->get_area(),
 			'blockTemplates' => $this->get_formatted_template(),
-			'comment'        => $this->get_comment_delimited_template(),
 		);
 	}
 }
