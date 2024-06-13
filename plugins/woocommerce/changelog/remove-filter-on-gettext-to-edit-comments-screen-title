@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Revert changing the title of the edit comments screen when editing a review.
