@@ -61,6 +61,10 @@ async function userDeletionTest( page, username ) {
 	} );
 
 	await test.step( 'confirm deletion', async () => {
+		await expect(
+			page.getByRole( 'heading', { name: 'Delete Users' } )
+		).toBeVisible();
+
 		await expect( page.getByText( `${ username }` ) ).toBeVisible();
 		await page.getByRole( 'button', { name: 'Confirm Deletion' } ).click();
 	} );
