@@ -674,8 +674,10 @@ class BlockTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'test-value', $block->get_attributes()['test-attr'] );
 	}
-
-	public function test_get_comment_delimited_formatted_template() {
+	/**
+	 * Test for get_comment_delimited_template method.
+	 */
+	public function test_get_comment_delimited_template() {
 		$template = new BlockTemplate();
 
 		$block = $template->add_block(
@@ -711,7 +713,7 @@ class BlockTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( 'test-value', $template->get_comment_delimited_template() ); // TODO it's a wrong assumption.
+		$this->assertSame( '<!-- wp:test-block-name {"attr-1":"value-1","attr-2":"value-2","_templateBlockId":"test-block-id","_templateBlockOrder":10000,"_templateBlockHideConditions":[{"expression":"foo === bar"}],"_templateBlockDisableConditions":[{"expression":"test \u003e 100"}]} --><!-- wp:test-block-name-2 {"attr-3":"value-3","attr-4":"value-4","_templateBlockId":"test-block-id-2","_templateBlockOrder":10000} /-->' . "\n" . '<!-- wp:test-block-name-3 {"_templateBlockId":"test-block-id-3","_templateBlockOrder":10000} /--><!-- /wp:test-block-name -->', $template->get_comment_delimited_template() );
 
 	}
 }
