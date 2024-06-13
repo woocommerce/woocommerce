@@ -68,7 +68,7 @@ status "Installing dependencies...";
 npm cache verify
 npm install
 
-status "Comitting updated package-lock.json...";
+status "Committing updated package-lock.json...";
 git add package-lock.json
 git commit -m 'update package-lock.json'
 git push --force-with-lease
