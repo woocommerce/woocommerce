@@ -20,7 +20,7 @@ class PaymentGatewaysController {
 	public static function init() {
 		add_filter( 'woocommerce_rest_prepare_payment_gateway', array( __CLASS__, 'extend_response' ), 10, 3 );
 		add_filter( 'admin_init', array( __CLASS__, 'possibly_do_connection_return_action' ) );
-		add_action( 'woocommerce_admin_payment_gateway_connection_return', array( __CLASS__, 'handle_successfull_connection' ) );
+		add_action( 'woocommerce_admin_payment_gateway_connection_return', array( __CLASS__, 'handle_successful_connection' ) );
 	}
 
 	/**
@@ -107,7 +107,7 @@ class PaymentGatewaysController {
 	 *
 	 * @param string $gateway_id Gateway ID.
 	 */
-	public static function handle_successfull_connection( $gateway_id ) {
+	public static function handle_successful_connection( $gateway_id ) {
 		// phpcs:disable WordPress.Security.NonceVerification
 		if ( ! isset( $_GET['success'] ) || 1 !== intval( $_GET['success'] ) ) {
 			return;
