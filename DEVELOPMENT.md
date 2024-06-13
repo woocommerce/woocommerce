@@ -4,7 +4,7 @@ This document aims to provide as much context as possible to aid in the developm
 
 ## Getting Started
 
-Please refer to [the Getting Started section of the `README.md`](README.md#getting-started) for a general-purpose guide on getting started. The rest of this document will assume that you've installed all of the prequisites and setup described there.
+Please refer to [the Getting Started section of the `README.md`](README.md#getting-started) for a general-purpose guide on getting started. The rest of this document will assume that you've installed all of the prerequisites and setup described there.
 
 ### Plugin, Package, and Tool Filtering
 

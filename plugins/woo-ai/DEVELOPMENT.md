@@ -4,7 +4,7 @@ Woo AI is a WooCommerce plugin that utilizes the power of artificial intelligenc
 
 ## Getting Started
 
-Please refer to [the Getting Started section of the WooCommerce Core `README.md`](https://github.com/woocommerce/woocommerce/blob/trunk/README.md) for a general-purpose guide on getting started. The rest of this document will assume that you've installed all of the prequisites and setup described there.
+Please refer to [the Getting Started section of the WooCommerce Core `README.md`](https://github.com/woocommerce/woocommerce/blob/trunk/README.md) for a general-purpose guide on getting started. The rest of this document will assume that you've installed all of the prerequisites and setup described there.
 
 ## Plugin Development Environments
 
