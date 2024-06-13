@@ -331,7 +331,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	}
 
 	/**
-	 * Check if block has isInherited attribute asigned
+	 * Check if block has isInherited attribute assigned
 	 *
 	 * @param array $block Parsed block data.
 	 */
