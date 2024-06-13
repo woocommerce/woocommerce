@@ -351,7 +351,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			}
 
 			// phpcs:ignore Generic.Commenting.Todo.TaskFound
-			// @todo Remove these assignements when refactoring segmenter classes to use query objects.
+			// @todo Remove these assignments when refactoring segmenter classes to use query objects.
 			$totals_query    = array(
 				'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
 				'where_time_clause' => $where_time,

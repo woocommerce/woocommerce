@@ -203,7 +203,7 @@ class DataStore extends VariationsDataStore implements DataStoreInterface {
 			);
 			/* phpcs:enable */
 
-			// @todo remove these assignements when refactoring segmenter classes to use query objects.
+			// @todo remove these assignments when refactoring segmenter classes to use query objects.
 			$totals_query          = array(
 				'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
 				'where_time_clause' => $this->total_query->get_sql_clause( 'where_time' ),
