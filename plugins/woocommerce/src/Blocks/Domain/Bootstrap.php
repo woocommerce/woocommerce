@@ -425,7 +425,7 @@ class Bootstrap {
 			}
 		);
 
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) {
 			$this->container->register(
 				BlockTemplatesController::class,
 				function () {
