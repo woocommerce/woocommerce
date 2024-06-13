@@ -108,7 +108,7 @@ function processObjWithInnerKeys( obj ) {
  */
 function augmentSupports( supports ) {
 	if ( supports && 'color' in supports ) {
-		// If backgroud or text is not specified (true or false)
+		// If background or text is not specified (true or false)
 		// then add it as true.a
 		if (
 			typeof supports.color === 'object' &&
