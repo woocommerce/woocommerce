@@ -57,7 +57,7 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 	}
 
 	/**
-	 * Retreive the option.
+	 * Retrieve the option.
 	 *
 	 * @return false|mixed|void
 	 */
