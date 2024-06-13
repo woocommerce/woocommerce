@@ -156,14 +156,14 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 			),
 		);
 		$this->ptk_client
-			->expects( $this->once() )
+			->expects( $this->exactly( 2 ) )
 			->method( 'fetch_patterns' )
 			->willReturn( $expected_patterns );
-
 		$this->pattern_store->fetch_patterns();
 
 		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
-		$this->assertEquals( $expected_patterns, $patterns );
+
+		$this->assertEquals( array_merge( $expected_patterns, $expected_patterns ), $patterns );
 	}
 
 	/**
@@ -171,7 +171,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	 */
 	public function test_fetch_patterns_should_filter_out_the_excluded_patterns() {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
-		$expected_patterns = array(
+		$api_patterns = array(
 			array(
 				'title' => 'My pattern',
 				'slug'  => 'my-pattern',
@@ -184,16 +184,21 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		);
 
 		$this->ptk_client
-			->expects( $this->once() )
+			->expects( $this->exactly( 2 ) )
 			->method( 'fetch_patterns' )
-			->willReturn( $expected_patterns );
+			->willReturn( $api_patterns );
 
 		$this->pattern_store->fetch_patterns();
 
 		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
 
-		$this->assertEquals( array( $expected_patterns[0] ), $patterns );
-		$this->assertEquals( array( $expected_patterns[0] ), get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
+		$expected_patterns = array(
+			$api_patterns[0],
+			$api_patterns[0],
+		);
+
+		$this->assertEquals( $expected_patterns, $patterns );
+		$this->assertEquals( $expected_patterns, get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
 	}
 
 	/**

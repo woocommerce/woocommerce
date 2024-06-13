@@ -124,19 +124,21 @@ class PTKPatternsStore {
 	 * @return array
 	 */
 	private function filter_patterns( array $patterns, array $pattern_ids ) {
-		return array_filter(
-			$patterns,
-			function ( $pattern ) use ( $pattern_ids ) {
-				if ( ! isset( $pattern['ID'] ) ) {
-					return true;
-				}
+		return array_values(
+			array_filter(
+				$patterns,
+				function ( $pattern ) use ( $pattern_ids ) {
+					if ( ! isset( $pattern['ID'] ) ) {
+						return true;
+					}
 
-				if ( isset( $pattern['post_type'] ) && 'wp_block' !== $pattern['post_type'] ) {
-					return false;
-				}
+					if ( isset( $pattern['post_type'] ) && 'wp_block' !== $pattern['post_type'] ) {
+						return false;
+					}
 
-				return ! in_array( (string) $pattern['ID'], $pattern_ids, true );
-			}
+					return ! in_array( (string) $pattern['ID'], $pattern_ids, true );
+				}
+			)
 		);
 	}
 
@@ -179,22 +181,40 @@ class PTKPatternsStore {
 
 		$this->flush_cached_patterns();
 
-		$patterns = $this->ptk_client->fetch_patterns(
+		$dotcom_patterns = $this->ptk_client->fetch_patterns(
 			array(
 				'categories' => array( 'intro', 'about', 'services', 'testimonials' ),
 			)
 		);
-
-		if ( is_wp_error( $patterns ) ) {
+		if ( is_wp_error( $dotcom_patterns ) ) {
 			wc_get_logger()->warning(
 				sprintf(
 				// translators: %s is a generated error message.
-					__( 'Failed to get the patterns from the PTK: "%s"', 'woocommerce' ),
-					$patterns->get_error_message()
+					__( 'Failed to get Dotcom patterns from the PTK: "%s"', 'woocommerce' ),
+					$dotcom_patterns->get_error_message()
 				),
 			);
 			return;
 		}
+
+		$woo_patterns = $this->ptk_client->fetch_patterns(
+			array(
+				'site'       => 'wooblockpatterns.wpcomstaging.com',
+				'categories' => array( '_woo_intro', '_woo_featured_selling', '_woo_about', '_woo_reviews', '_woo_social_media' ),
+			)
+		);
+		if ( is_wp_error( $woo_patterns ) ) {
+			wc_get_logger()->warning(
+				sprintf(
+				// translators: %s is a generated error message.
+					__( 'Failed to get WooCommerce patterns from the PTK: "%s"', 'woocommerce' ),
+					$woo_patterns->get_error_message()
+				),
+			);
+			return;
+		}
+
+		$patterns = array_merge( $dotcom_patterns, $woo_patterns );
 
 		$patterns = $this->filter_patterns( $patterns, self::EXCLUDED_PATTERNS );
 
