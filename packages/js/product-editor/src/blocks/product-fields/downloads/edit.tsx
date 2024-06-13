@@ -366,8 +366,6 @@ export function DownloadBlockEdit( {
 						} );
 					} }
 					onSave={ editDownloadsModalSaveHandler( selectedDownload ) }
-					onUploadSuccess={ handleFileReplace }
-					onUploadError={ handleUploadError }
 				/>
 			) }
 		</div>
