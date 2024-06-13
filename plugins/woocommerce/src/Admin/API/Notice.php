@@ -43,7 +43,7 @@ class Notice extends \WC_REST_Data_Controller {
 			array(
 				array(
 					'methods'             => 'POST',
-					'callback'            => array( $this, 'dissmiss_notice' ),
+					'callback'            => array( $this, 'dismiss_notice' ),
 					'permission_callback' => array( $this, 'get_permission' ),
 				),
 			)
@@ -56,7 +56,7 @@ class Notice extends \WC_REST_Data_Controller {
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function dissmiss_notice( $request ) {
+	public function dismiss_notice( $request ) {
 		if ( ! isset( $request['dismiss_notice_nonce'] )
 			|| ! wp_verify_nonce( $request['dismiss_notice_nonce'], 'dismiss_notice' ) ) {
 			return new WP_Error( 'unauthorized', 'Invalid nonce.', array( 'status' => 401 ) );
