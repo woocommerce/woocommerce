@@ -3770,7 +3770,7 @@ function wc_empty_cart_message() {
 	// This adds the cart-empty classname to the notice to preserve backwards compatibility (for styling purposes etc).
 	$notice = str_replace( 'class="woocommerce-info"', 'class="cart-empty woocommerce-info"', $notice );
 
-	// Return the notice within a consistent wrapper element. This is targetted by some scripts such as cart.js.
+	// Return the notice within a consistent wrapper element. This is targeted by some scripts such as cart.js.
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	echo '<div class="wc-empty-cart-message">' . $notice . '</div>';
 }
