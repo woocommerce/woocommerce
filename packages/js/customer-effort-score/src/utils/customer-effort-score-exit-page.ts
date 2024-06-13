@@ -36,23 +36,17 @@ export const getExitPageData = () => {
 	return arrayItems;
 };
 
-// Cache the value of whether tracking is allowed or not to avoid multiple calls.
-let _allowTracking: boolean | null = null;
-
 /**
  * Returns the value of whether tracking is allowed or not.
  *
  * @return boolean
  */
-const getAllowTracking = async () => {
-	if ( _allowTracking === null ) {
-		const trackingOption = await resolveSelect(
-			OPTIONS_STORE_NAME
-		).getOption( ALLOW_TRACKING_OPTION_NAME );
+const isTrackingAllowed = async () => {
+	const trackingOption = await resolveSelect( OPTIONS_STORE_NAME ).getOption(
+		ALLOW_TRACKING_OPTION_NAME
+	);
 
-		_allowTracking = trackingOption === 'yes';
-	}
-	return _allowTracking;
+	return trackingOption === 'yes';
 };
 
 /**
@@ -61,7 +55,7 @@ const getAllowTracking = async () => {
  * @param {string} pageId of page exited early.
  */
 export const addExitPage = async ( pageId: string ) => {
-	const allowTracking = await getAllowTracking();
+	const allowTracking = await isTrackingAllowed();
 
 	if ( ! ( window.localStorage && allowTracking ) ) {
 		return;
@@ -115,7 +109,7 @@ export const addCustomerEffortScoreExitPageListener = (
 	hasUnsavedChanges: () => boolean
 ) => {
 	// Pre-fetch the tracking option so that it is available before the unload event.
-	getAllowTracking();
+	isTrackingAllowed();
 
 	eventListeners[ pageId ] = () => {
 		if ( hasUnsavedChanges() ) {
