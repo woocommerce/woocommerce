@@ -6,15 +6,13 @@ import { useDispatch } from '@wordpress/data';
 import { createElement, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { MediaItem } from '@wordpress/media-utils';
+import { MediaUploaderErrorCallback } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import { MediaLibraryMenuItem } from '../../menu-items/media-library-menu-item';
-import {
-	UploadFilesMenuItem,
-	UploadFilesMenuItemErrorCallback,
-} from '../../menu-items/upload-files-menu-item';
+import { UploadFilesMenuItem } from '../../menu-items/upload-files-menu-item';
 import { mapUploadImageToImage } from '../../../utils/map-upload-image-to-image';
 import { VariationQuickUpdateMenuItem } from '../variation-actions-menus';
 import type { ImageActionsMenuProps } from './types';
@@ -46,9 +44,7 @@ export function ImageActionsMenu( {
 		};
 	}
 
-	const uploadErrorHandler: UploadFilesMenuItemErrorCallback = function (
-		error
-	) {
+	const uploadErrorHandler: MediaUploaderErrorCallback = function ( error ) {
 		createErrorNotice(
 			sprintf(
 				/* translators: %1$s is a line break, %2$s is the detailed error message */
