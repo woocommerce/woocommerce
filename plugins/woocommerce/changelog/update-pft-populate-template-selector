@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+WooCommerce: store the template description in the `product_form` excerpt property.

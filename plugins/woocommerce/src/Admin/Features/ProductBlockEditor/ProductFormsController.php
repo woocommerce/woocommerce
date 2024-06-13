@@ -109,7 +109,7 @@ class ProductFormsController {
 							'ID'           => $post->ID,
 							'post_title'   => $file_data['title'],
 							'post_content' => BlockTemplateUtils::get_template_content( $file_path ),
-							'post_excerpt' => __( 'Template updated by the (PFT) Product Form Template system', 'woocommerce' ),
+							'post_excerpt' => $file_data['description'],
 						)
 					);
 				}
@@ -129,7 +129,7 @@ class ProductFormsController {
 					'post_status'  => 'publish',
 					'post_type'    => 'product_form',
 					'post_content' => BlockTemplateUtils::get_template_content( $file_path ),
-					'post_excerpt' => __( 'Template created by the (PFT) Product Form Template system', 'woocommerce' ),
+					'post_excerpt' => $file_data['description'],
 				)
 			);
 		}
