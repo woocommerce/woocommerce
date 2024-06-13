@@ -8,7 +8,6 @@ import {
 	createElement,
 	useContext,
 	useEffect,
-	useState,
 	Fragment,
 	lazy,
 	Suspense,
@@ -54,6 +53,7 @@ const RETURN_TO_MAIN_PRODUCT = __(
 export function Header( {
 	onTabSelect,
 	productType = 'product',
+	selectedTab,
 }: HeaderProps ) {
 	const isEditorLoading = useContext( EditorLoadingContext );
 
@@ -76,10 +76,6 @@ export function Header( {
 				: null;
 		},
 		[ productType, productId ]
-	);
-
-	const [ visibleTab, setVisibleTab ] = useState< string | null >(
-		'general'
 	);
 
 	const editedProductName = product?.name;
@@ -253,7 +249,7 @@ export function Header( {
 					{ ! isVariation && (
 						<SaveDraftButton
 							productType={ productType }
-							visibleTab={ visibleTab }
+							visibleTab={ selectedTab }
 							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 							// @ts-ignore - Prop is not typed correctly.
 							productStatus={ lastPersistedProduct?.status }
@@ -262,7 +258,7 @@ export function Header( {
 
 					<PreviewButton
 						productType={ productType }
-						visibleTab={ visibleTab }
+						visibleTab={ selectedTab }
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore - Prop is not typed correctly.
 						productStatus={ lastPersistedProduct?.status }
@@ -273,7 +269,7 @@ export function Header( {
 							productType={ productType }
 							isPrePublishPanelVisible={ showPrepublishChecks }
 							isMenuButton
-							visibleTab={ visibleTab }
+							visibleTab={ selectedTab }
 						/>
 					</Suspense>
 
@@ -282,12 +278,7 @@ export function Header( {
 					<MoreMenu />
 				</div>
 			</div>
-			<Tabs
-				onChange={ ( tab ) => {
-					setVisibleTab( tab );
-					onTabSelect( tab );
-				} }
-			/>
+			<Tabs onChange={ onTabSelect } />
 		</div>
 	);
 }
