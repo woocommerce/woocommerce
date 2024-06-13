@@ -1744,7 +1744,7 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 				array(
 					'grouped_product'    => $product,
 					'grouped_products'   => $products,
-					'quantites_required' => false,
+					'quantities_required' => false,
 				)
 			);
 		}
