@@ -11,9 +11,6 @@ import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { noticeContexts } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
-import { CART_STORE_KEY } from '@woocommerce/block-data';
-import { useSelect } from '@wordpress/data';
-import { formatPrice } from '@woocommerce/price-format';
 
 /**
  * Internal dependencies
@@ -34,29 +31,13 @@ const Block = ( {
 } ): JSX.Element => {
 	const { paymentMethodButtonLabel } = useCheckoutSubmit();
 
-	const cartTotals = useSelect( ( select ) => {
-		const store = select( CART_STORE_KEY );
-		return store.getCartTotals();
-	}, [] );
-
-	const totalPrice = formatPrice( cartTotals.total_price );
-
-	let label = applyCheckoutFilter( {
+	const label = applyCheckoutFilter( {
 		filterName: 'placeOrderButtonLabel',
 		defaultValue:
 			paymentMethodButtonLabel ||
 			placeOrderButtonLabel ||
 			defaultPlaceOrderButtonLabel,
 	} );
-
-	if ( label.includes( '<price/>' ) ) {
-		if ( cartTotals.total_price === '0' ) {
-			label = label.replace( '<price/>', '' );
-			label = label.replace( /[^a-zA-Z\s]/g, '' );
-		} else {
-			label = label.replace( '<price/>', totalPrice );
-		}
-	}
 
 	return (
 		<div
