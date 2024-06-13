@@ -88,9 +88,40 @@ const findAndSetLogoBlock = (
 
 export const DISABLE_CLICK_CLASS = 'disable-click';
 
+const addInertToTemplatePartsInHomepage = (
+	documentElement: HTMLElement,
+	isHomepage: boolean
+) => {
+	const body = documentElement.ownerDocument.body;
+
+	const addInertToTemplateParts = () => {
+		for ( const disableClick of documentElement.querySelectorAll(
+			`[data-type='core/template-part']`
+		) ) {
+			if ( isHomepage ) {
+				disableClick.setAttribute( 'inert', 'true' );
+			} else {
+				disableClick.removeAttribute( 'inert' );
+			}
+		}
+	};
+
+	addInertToTemplateParts();
+
+	const observerChildList = new window.MutationObserver(
+		addInertToTemplateParts
+	);
+
+	observerChildList.observe( body, {
+		childList: true,
+	} );
+
+	return observerChildList;
+};
+
 /**
  * Adds an 'inert' attribute to all inner blocks and blocks with the class "disable-click" within the provided document element.
- * The 'inert' attribute makes the blocks uninteractive, preventing them from receiving focus or being clicked.
+ * The 'inert' attribute makes the blocks non-interactive, preventing them from receiving focus or being clicked.
  */
 const addInertToAllInnerBlocks = ( documentElement: HTMLElement ) => {
 	const body = documentElement.ownerDocument.body;
@@ -206,6 +237,7 @@ type useAutoBlockPreviewEventListenersValues = {
 	isPatternPreview: boolean;
 	contentHeight: number | null;
 	logoBlockIds: string[];
+	query: Record< string, string >;
 };
 
 type useAutoBlockPreviewEventListenersCallbacks = {
@@ -245,6 +277,7 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 		autoScale,
 		isPatternPreview,
 		logoBlockIds,
+		query,
 	}: useAutoBlockPreviewEventListenersValues,
 	{
 		selectBlockOnHover,
@@ -309,8 +342,18 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 					updatePopoverPosition,
 				}
 			);
-			const inertObserver = addInertToAllInnerBlocks( documentElement );
-			observers.push( inertObserver );
+
+			const inertInnerBlockObserver =
+				addInertToAllInnerBlocks( documentElement );
+			observers.push( inertInnerBlockObserver );
+
+			const inertTemplatePartsObserver =
+				addInertToTemplatePartsInHomepage(
+					documentElement,
+					query?.path === '/customize-store/assembler-hub/homepage'
+				);
+			observers.push( inertTemplatePartsObserver );
+
 			unsubscribeCallbacks.push( removeEventListenersSelectedBlock );
 			unsubscribeCallbacks.push( removeEventListenerHidePopover );
 		}
@@ -321,5 +364,5 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 		};
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ documentElement, logoBlockIds ] );
+	}, [ documentElement, logoBlockIds, query ] );
 };
