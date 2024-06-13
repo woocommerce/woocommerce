@@ -323,7 +323,7 @@ test.describe( 'Checkout Block page', () => {
 		await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
 	} );
 
-	test.only( 'allows customer to fill shipping details', async ( {
+	test( 'allows customer to fill shipping details', async ( {
 		page,
 		testPage,
 	} ) => {
