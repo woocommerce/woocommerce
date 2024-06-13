@@ -1597,7 +1597,7 @@ export const COLOR_PALETTES = [
 					elements: {
 						heading: {
 							color: {
-								text: 'var(--wp--preset--color--tertiary)',
+								text: '#ffffff',
 							},
 						},
 					},
