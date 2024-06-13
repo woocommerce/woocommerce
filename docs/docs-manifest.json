@@ -227,7 +227,7 @@
           "menu_title": "Common issues",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/common-issues.md",
-          "hash": "9d8f0b78a0597ab22dce58e2b3707e3a08770bc22e2b901c0c6690928b1596bf",
+          "hash": "7c6e9eff5f207685b7bb106c4b91d25c72d991895e8bceb9a93458b354704198",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/common-issues.md",
           "id": "5766fb43cf9135d5a2cceaf0d386ec14b57c9ba0"
         },
@@ -1020,7 +1020,7 @@
           "menu_title": "Image sizing",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/image-sizes.md",
-          "hash": "ff26ee246bb3d2f70c0fdc6dcedf50b9ef7bc55442c4378325880117f85025cd",
+          "hash": "9883e7931ff8bd56dcd707974fe8ec992f21148818206aec354b0368dc999239",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/image-sizes.md",
           "id": "3f5301ac3040d38bc449b440733da6a466209df3",
           "links": {
@@ -1359,5 +1359,5 @@
       "categories": []
     }
   ],
-  "hash": "04ed3ebda992e9548c692aa676e14bda41d40d4c89d3c9aafd3edb63809e4651"
+  "hash": "7998790ab69ca3a0f7d480c0dfa0b58916e9c46a04b7e80940cac69f69b50ab4"
 }
