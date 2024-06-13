@@ -2,15 +2,19 @@
  * External dependencies
  */
 import { Dropdown, MenuGroup } from '@wordpress/components';
+import { useDispatch } from '@wordpress/data';
 import { createElement, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { MediaItem } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
  */
 import { MediaLibraryMenuItem } from '../../menu-items/media-library-menu-item';
-import { UploadFilesMenuItem } from '../../menu-items/upload-files-menu-item';
+import {
+	UploadFilesMenuItem,
+	UploadFilesMenuItemErrorCallback,
+} from '../../menu-items/upload-files-menu-item';
 import { mapUploadImageToImage } from '../../../utils/map-upload-image-to-image';
 import { VariationQuickUpdateMenuItem } from '../variation-actions-menus';
 import type { ImageActionsMenuProps } from './types';
@@ -22,6 +26,8 @@ export function ImageActionsMenu( {
 	...props
 }: ImageActionsMenuProps ) {
 	const [ isUploading, setIsUploading ] = useState( false );
+
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	function uploadSuccessHandler( onClose: () => void ) {
 		return function handleUploadSuccess( files: MediaItem[] ) {
@@ -39,6 +45,19 @@ export function ImageActionsMenu( {
 			onClose();
 		};
 	}
+
+	const uploadErrorHandler: UploadFilesMenuItemErrorCallback = function (
+		error
+	) {
+		createErrorNotice(
+			sprintf(
+				/* translators: %1$s is a line break, %2$s is the detailed error message */
+				__( 'Error uploading file:%1$s%2$s', 'woocommerce' ),
+				'\n',
+				error.message
+			)
+		);
+	};
 
 	function mediaLibraryMenuItemSelectHandler( onClose: () => void ) {
 		return function handleMediaLibraryMenuItemSelect( media: never ) {
@@ -79,7 +98,8 @@ export function ImageActionsMenu( {
 								onClose();
 							} }
 							onUploadSuccess={ uploadSuccessHandler( onClose ) }
-							onUploadError={ () => {
+							onUploadError={ ( error ) => {
+								uploadErrorHandler( error );
 								setIsUploading( false );
 								onClose();
 							} }
