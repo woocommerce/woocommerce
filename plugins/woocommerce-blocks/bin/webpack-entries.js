@@ -100,6 +100,9 @@ const blocks = {
 	'product-filters': {
 		isExperimental: true,
 	},
+	'product-filters-overlay': {
+		isExperimental: true,
+	},
 	'product-filter-stock-status': {
 		isExperimental: true,
 		customDir: 'product-filter/inner-blocks/stock-filter',

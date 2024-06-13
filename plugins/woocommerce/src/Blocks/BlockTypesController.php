@@ -326,6 +326,7 @@ final class BlockTypesController {
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
 			$block_types[] = 'ProductFilter';
 			$block_types[] = 'ProductFilters';
+			$block_types[] = 'ProductFiltersOverlay';
 			$block_types[] = 'ProductFilterStockStatus';
 			$block_types[] = 'ProductFilterPrice';
 			$block_types[] = 'ProductFilterAttribute';

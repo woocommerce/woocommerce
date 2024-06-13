@@ -13,14 +13,14 @@ class ProductFiltersOverlayTemplate extends AbstractTemplatePart {
 	 *
 	 * @var string
 	 */
-	const SLUG = 'product-filters';
+	const SLUG = 'product-filters-overlay';
 
 	/**
 	 * The template part area where the template part belongs.
 	 *
 	 * @var string
 	 */
-	public $template_area = 'product-filters';
+	public $template_area = 'product-filters-overlay';
 
 	/**
 	 * Initialization method.
@@ -55,11 +55,11 @@ class ProductFiltersOverlayTemplate extends AbstractTemplatePart {
 	 */
 	public function register_product_filters_overlay_template_part_area( $default_area_definitions ) {
 		$product_filters_overlay_template_part_area = array(
-			'area'        => 'product-filters',
+			'area'        => 'product-filters-overlay',
 			'label'       => $this->get_template_title(),
 			'description' => $this->get_template_description(),
 			'icon'        => 'filter',
-			'area_tag'    => 'product-filters',
+			'area_tag'    => 'product-filters-overlay',
 		);
 		return array_merge( $default_area_definitions, array( $product_filters_overlay_template_part_area ) );
 	}
