@@ -22,7 +22,7 @@ import classnames from 'classnames';
  * @param {Function} props.onModalClose           Function to call when user closes modal by clicking X.
  * @param {Function} props.onCancel               Function to call when user presses cancel.
  * @param {Function} props.children               Children to be rendered.
- * @param {string}   props.className              Class name to addd to the modal.
+ * @param {string}   props.className              Class name to add to the modal.
  */
 function FeedbackModal( {
 	onSubmit,
