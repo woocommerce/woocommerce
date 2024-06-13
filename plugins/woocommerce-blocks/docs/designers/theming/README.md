@@ -42,7 +42,7 @@ WooCommerce also comes with two specific [block template parts](https://github.c
 - Mini-Cart (`mini-cart.html`): used inside the Mini-Cart block drawer.
 - Checkout header (`checkout-header.html`): used as the header in the Checkout template.
 
-Similarly to the templates, they can be overriden by themes by adding a file with the same file name under the `/parts` folder.
+Similarly to the templates, they can be overridden by themes by adding a file with the same file name under the `/parts` folder.
 
 ### Global styles
 

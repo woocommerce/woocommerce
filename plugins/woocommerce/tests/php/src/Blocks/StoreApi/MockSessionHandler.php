@@ -259,7 +259,7 @@ class MockSessionHandler extends WC_Session_Handler {
 
 	/**
 	 * Forget all session data without destroying it.
-	 * Overriden in this mock because the parent method sets a cookie using wc_setcookie which doesn't work with PHPUnit.
+	 * Overridden in this mock because the parent method sets a cookie using wc_setcookie which doesn't work with PHPUnit.
 	 */
 	public function forget_session() {
 		unset( $_COOKIE[ $this->_cookie ] );
