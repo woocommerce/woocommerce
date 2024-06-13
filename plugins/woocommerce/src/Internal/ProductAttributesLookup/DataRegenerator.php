@@ -83,7 +83,7 @@ class DataRegenerator {
 	 *
 	 * @return bool True if the last regeneration step failed.
 	 */
-	public function get_last_regeneration_step_feiled() {
+	public function get_last_regeneration_step_failed() {
 		return $this->last_regeneration_step_failed;
 	}
 
@@ -263,7 +263,7 @@ class DataRegenerator {
 		$this->last_regeneration_step_failed = false;
 		foreach ( $product_ids as $id ) {
 			$this->data_store->create_data_for_product( $id, $use_optimized_db_access );
-			$this->last_regeneration_step_failed |= $this->data_store->get_last_create_operation_failed();
+			$this->last_regeneration_step_failed = $this->last_regeneration_step_failed || $this->data_store->get_last_create_operation_failed();
 		}
 
 		$products_already_processed += count( $product_ids );

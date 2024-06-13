@@ -440,7 +440,7 @@ class CLIRunner {
 		$regeneration_step_failed = false;
 		while ( $this->data_regenerator->do_regeneration_step( $batch_size, $use_db_optimization ) ) {
 			$progress->tick( $batch_size );
-			$regeneration_step_failed |= $this->data_regenerator->get_last_regeneration_step_feiled();
+			$regeneration_step_failed = $regeneration_step_failed || $this->data_regenerator->get_last_regeneration_step_failed();
 		}
 
 		$this->data_regenerator->finalize_regeneration( $was_enabled );
