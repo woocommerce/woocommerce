@@ -205,11 +205,11 @@ trait BlockContainerTrait {
 	 */
 	public function get_comment_delimited_template(): string {
 
-		$arr          = [];
+		$arr          = array();
 		$inner_blocks = $this->get_inner_blocks_sorted_by_order();
 		if ( ! empty( $inner_blocks ) ) {
 			$arr = array_map(
-				function( BlockInterface $block ) {
+				function ( BlockInterface $block ) {
 					return $block->get_comment_delimited_template();
 				},
 				$inner_blocks
@@ -222,7 +222,6 @@ trait BlockContainerTrait {
 		$children = implode( "\n", $arr );
 
 		return '' !== $name ? get_comment_delimited_block_content( $name, $attributes, $children ) : $children;
-
 	}
 
 	/**

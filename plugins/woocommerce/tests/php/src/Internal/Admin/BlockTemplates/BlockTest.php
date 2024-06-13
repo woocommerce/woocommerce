@@ -714,6 +714,5 @@ class BlockTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( '<!-- wp:test-block-name {"attr-1":"value-1","attr-2":"value-2","_templateBlockId":"test-block-id","_templateBlockOrder":10000,"_templateBlockHideConditions":[{"expression":"foo === bar"}],"_templateBlockDisableConditions":[{"expression":"test \u003e 100"}]} --><!-- wp:test-block-name-2 {"attr-3":"value-3","attr-4":"value-4","_templateBlockId":"test-block-id-2","_templateBlockOrder":10000} /-->' . "\n" . '<!-- wp:test-block-name-3 {"_templateBlockId":"test-block-id-3","_templateBlockOrder":10000} /--><!-- /wp:test-block-name -->', $template->get_comment_delimited_template() );
-
 	}
 }

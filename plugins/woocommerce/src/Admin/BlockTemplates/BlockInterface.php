@@ -158,5 +158,4 @@ interface BlockInterface {
 	 * @return string The block configuration as a formatted string.
 	 */
 	public function get_comment_delimited_template(): string;
-
 }

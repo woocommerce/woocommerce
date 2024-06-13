@@ -39,7 +39,7 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 	 * Get the template attributes.
 	 */
 	public function get_attributes(): array {
-		return [];
+		return array();
 	}
 
 	/**
@@ -53,14 +53,14 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 	 * Get the template hide conditions.
 	 */
 	public function get_hide_conditions() {
-		return [];
+		return array();
 	}
 
 	/**
 	 * Get the template disable conditions.
 	 */
 	public function get_disable_conditions() {
-		return [];
+		return array();
 	}
 
 	/**
