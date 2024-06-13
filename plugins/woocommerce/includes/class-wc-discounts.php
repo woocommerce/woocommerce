@@ -973,8 +973,8 @@ class WC_Discounts {
 		$user         = wp_get_current_user();
 
 		try {
-			$customer       = new WC_Customer( $user->ID );
-			$check_emails   = array( $customer->get_billing_email(), $customer->get_email() );
+			$customer     = new WC_Customer( $user->ID );
+			$check_emails = array( $customer->get_billing_email(), $customer->get_email() );
 		} catch ( Exception $e ) {
 			$wc_logger = wc_get_logger();
 			$wc_logger->debug( $e->getMessage() );
