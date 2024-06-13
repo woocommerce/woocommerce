@@ -177,7 +177,7 @@ class ProductCollection extends AbstractBlock {
 		$is_enhanced_pagination_enabled = ! ( $this->parsed_block['attrs']['forcePageReload'] ?? false );
 
 		// Only proceed if the block is a product collection block,
-		// enhaced pagination is enabled and query IDs match.
+		// enhanced pagination is enabled and query IDs match.
 		if ( $is_product_collection_block && $is_enhanced_pagination_enabled && $query_id === $parsed_query_id ) {
 			$block_content = $this->process_pagination_links( $block_content );
 		}
