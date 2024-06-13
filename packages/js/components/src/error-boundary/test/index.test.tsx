@@ -81,6 +81,18 @@ describe( 'ErrorBoundary', () => {
 		expect( reloadMock ).toHaveBeenCalled();
 	} );
 
+	it( 'triggers on error callback when provided', () => {
+		const onError = jest.fn();
+
+		render(
+			<ErrorBoundary onError={ onError }>
+				<ThrowError />
+			</ErrorBoundary>
+		);
+
+		expect( onError ).toHaveBeenCalled();
+	} );
+
 	it( 'triggers custom action callback when provided', () => {
 		const customActionCallback = jest.fn();
 
@@ -92,7 +104,9 @@ describe( 'ErrorBoundary', () => {
 
 		fireEvent.click( screen.getByText( 'Reload' ) );
 
-		expect( customActionCallback ).toHaveBeenCalled();
+		expect( customActionCallback ).toHaveBeenCalledWith(
+			new Error( 'Test error' )
+		);
 	} );
 
 	it( 'does not display the action button when showActionButton is false', () => {

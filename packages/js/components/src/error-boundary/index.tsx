@@ -29,12 +29,22 @@ export type ErrorBoundaryProps = {
 	actionLabel?: string;
 	/**
 	 * The callback function to be executed when the action button is clicked. Defaults to window.location.reload.
+	 *
+	 * @param error - The error that was caught.
 	 */
-	actionCallback?: () => void;
+	actionCallback?: ( error: Error ) => void;
 	/**
 	 * Determines whether to reset the error boundary state after the action is performed. Defaults to true.
 	 */
 	resetErrorAfterAction?: boolean;
+
+	/**
+	 * Callback function to be executed when an error is caught.
+	 *
+	 * @param error     - The error that was caught.
+	 * @param errorInfo - The error info object.
+	 */
+	onError?: ( error: Error, errorInfo: ErrorInfo ) => void;
 };
 
 type ErrorBoundaryState = {
@@ -65,6 +75,10 @@ export class ErrorBoundary extends Component<
 
 	componentDidCatch( _error: Error, errorInfo: ErrorInfo ) {
 		this.setState( { errorInfo } );
+
+		if ( this.props.onError ) {
+			this.props.onError( _error, errorInfo );
+		}
 		// TODO: Log error to error tracking service
 	}
 
@@ -76,7 +90,7 @@ export class ErrorBoundary extends Component<
 		const { actionCallback, resetErrorAfterAction } = this.props;
 
 		if ( actionCallback ) {
-			actionCallback();
+			actionCallback( this.state.error as Error );
 		} else {
 			this.handleReload();
 		}
