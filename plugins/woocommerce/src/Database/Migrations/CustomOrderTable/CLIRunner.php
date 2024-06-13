@@ -915,7 +915,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 *    # Cleanup post data for order 314.
 	 *    $ wp wc hpos cleanup 314
 	 *
-	 *    # Cleanup postmeta for orders with IDs betweeen 10 and 100 and order 314.
+	 *    # Cleanup postmeta for orders with IDs between 10 and 100 and order 314.
 	 *    $ wp wc hpos cleanup 10-100 314
 	 *
 	 *    # Cleanup postmeta for all orders.
