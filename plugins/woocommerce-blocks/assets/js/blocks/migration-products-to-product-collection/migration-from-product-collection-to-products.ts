@@ -122,26 +122,26 @@ const transformProductTemplate: TransformBlock = (
 };
 
 const transformPostTitle: TransformBlock = ( block, innerBlocks ) => {
-	const { __woocommerceNamespace, ...restAttrributes } = block.attributes;
+	const { __woocommerceNamespace, ...restAttributes } = block.attributes;
 	return createBlock(
 		'core/post-title',
 		{
 			__woocommerceNamespace:
 				'woocommerce/product-collection/product-title',
-			...restAttrributes,
+			...restAttributes,
 		},
 		innerBlocks
 	);
 };
 
 const transformPostSummary: TransformBlock = ( block, innerBlocks ) => {
-	const { __woocommerceNamespace, ...restAttrributes } = block.attributes;
+	const { __woocommerceNamespace, ...restAttributes } = block.attributes;
 	return createBlock(
 		'core/post-excerpt',
 		{
 			__woocommerceNamespace:
 				'woocommerce/product-collection/product-summary',
-			...restAttrributes,
+			...restAttributes,
 		},
 		innerBlocks
 	);
