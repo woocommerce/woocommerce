@@ -515,7 +515,7 @@ WHERE
 		$sanitized_entity_data = array();
 		$error_records         = array();
 		$this->process_and_sanitize_entity_data( $sanitized_entity_data, $error_records, $entity_data );
-		$this->processs_and_sanitize_meta_data( $sanitized_entity_data, $error_records, $meta_data );
+		$this->process_and_sanitize_meta_data( $sanitized_entity_data, $error_records, $meta_data );
 
 		return array(
 			'data'   => $sanitized_entity_data,
@@ -554,7 +554,7 @@ WHERE
 	 * @param array $error_records Error records.
 	 * @param array $meta_data Original source data.
 	 */
-	private function processs_and_sanitize_meta_data( array &$sanitized_entity_data, array &$error_records, array $meta_data ): void {
+	private function process_and_sanitize_meta_data( array &$sanitized_entity_data, array &$error_records, array $meta_data ): void {
 		foreach ( $meta_data as $datum ) {
 			$column_schema = $this->meta_column_mapping[ $datum->meta_key ];
 			if ( isset( $sanitized_entity_data[ $datum->entity_id ][ $column_schema['destination'] ] ) ) {
