@@ -33,7 +33,7 @@ Inside each subfolder you'll find various markdown files. When imported into the
 6. [Open a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) that merges your branch with the WooCommerce monorepo's trunk branch.
     * To do this, when creating the pull request, set the `base repository` to `woocommerce/woocommerce`, the `base` to `trunk`, the `head repository` to `yourgithubusername/woocommerce` and the `compare` to the branch you created (eg: `docs/improve-extension-performance`).
     * When creating the pull request, set a descriptive title. Additionally, ensure you fill out the template provided in the description. For purely docs changes, your testing instructions should reference any major changes you think should be checked.
-7. The WooCommerce Developer Advocacy team will review your pull request and provide feedback via the comments as neccesary. Once the content is ready, we'll merge it into `trunk` and it'll appear on the Woo Developer Docs site!
+7. The WooCommerce Developer Advocacy team will review your pull request and provide feedback via the comments as necessary. Once the content is ready, we'll merge it into `trunk` and it'll appear on the Woo Developer Docs site!
 
 ## Creating New Pages
 
