@@ -224,7 +224,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			'test',
 			array(
 				'type'     => 'radio',
-				'id'       => 'test',
+				'id'       => 'test_radio',
 				'required' => true,
 				'options'  => array(
 					'1' => 'Option 1',
