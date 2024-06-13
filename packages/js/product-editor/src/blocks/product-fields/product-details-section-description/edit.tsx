@@ -18,13 +18,13 @@ import {
 import { __ } from '@wordpress/i18n';
 import * as icons from '@wordpress/icons';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { Product } from '@woocommerce/data';
+import type { ProductStatus, Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityId } from '@wordpress/core-data';
+import { useEntityId, useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -35,8 +35,8 @@ import { useValidations } from '../../../contexts/validation-context';
 import { TRACKS_SOURCE } from '../../../constants';
 import {
 	WPError,
-	getProductErrorMessage,
-} from '../../../utils/get-product-error-message';
+	getProductErrorMessageAndProps,
+} from '../../../utils/get-product-error-message-and-props';
 import type {
 	ProductEditorBlockEditProps,
 	ProductFormPostProps,
@@ -45,10 +45,12 @@ import type {
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
 import * as wooIcons from '../../../icons';
 import isProductFormTemplateSystemEnabled from '../../../utils/is-product-form-template-system-enabled';
+import { errorHandler } from '../../../hooks/use-product-manager';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
 	clientId,
+	context: { selectedTab },
 }: ProductEditorBlockEditProps< ProductDetailsSectionDescriptionBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
@@ -75,6 +77,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		);
 
 	const productId = useEntityId( 'postType', 'product' );
+
+	const [ productStatus ] = useEntityProp< ProductStatus >(
+		'postType',
+		'product',
+		'status'
+	);
 
 	const { validate } = useValidations< Product >();
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -180,8 +188,11 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 					template: productTemplate.id,
 				} );
 			} catch ( error ) {
-				const message = getProductErrorMessage( error as WPError );
-				createErrorNotice( message );
+				const { message, errorProps } = getProductErrorMessageAndProps(
+					errorHandler( error as WPError, productStatus ) as WPError,
+					selectedTab
+				);
+				createErrorNotice( message, errorProps );
 			}
 
 			onClose();
@@ -295,8 +306,11 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 			// by the product editor.
 			window.location.href = getNewPath( {}, `/product/${ productId }` );
 		} catch ( error ) {
-			const message = getProductErrorMessage( error as WPError );
-			createErrorNotice( message );
+			const { message, errorProps } = getProductErrorMessageAndProps(
+				errorHandler( error as WPError, productStatus ) as WPError,
+				selectedTab
+			);
+			createErrorNotice( message, errorProps );
 		}
 	}
 
