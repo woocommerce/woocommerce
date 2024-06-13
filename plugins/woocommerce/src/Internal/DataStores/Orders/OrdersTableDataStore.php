@@ -2638,7 +2638,7 @@ FROM $order_meta_table
 	}
 
 	/**
-	 * Proxy to udpating order meta. Here for backward compatibility reasons.
+	 * Proxy to updating order meta. Here for backward compatibility reasons.
 	 *
 	 * @param \WC_Order $order Order object.
 	 *
