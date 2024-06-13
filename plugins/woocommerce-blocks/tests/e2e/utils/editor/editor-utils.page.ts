@@ -85,7 +85,9 @@ export class Editor extends CoreEditor {
 			await transformButton.click();
 
 			// save changes
-			await this.saveSiteEditorEntities();
+			await this.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 		}
 	}
 

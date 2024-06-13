@@ -32,15 +32,16 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postId: `woocommerce/woocommerce//${ testData.templatePath }`,
 					postType: testData.templateType,
+					canvas: 'edit',
 				} );
-
-				await editor.enterEditMode();
 
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: userText },
 				} );
-				await editor.saveSiteEditorEntities();
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 				// Verify template name didn't change.
 				// See: https://github.com/woocommerce/woocommerce/issues/42221
 				await expect(
@@ -66,9 +67,8 @@ test.describe( 'Template customization', () => {
 					await admin.visitSiteEditor( {
 						postId: `woocommerce/woocommerce//${ testData.fallbackTemplate?.templatePath }`,
 						postType: testData.templateType,
+						canvas: 'edit',
 					} );
-
-					await editor.enterEditMode();
 
 					await editor.insertBlock( {
 						name: 'core/paragraph',
@@ -76,7 +76,9 @@ test.describe( 'Template customization', () => {
 							content: fallbackTemplateUserText,
 						},
 					} );
-					await editor.saveSiteEditorEntities();
+					await editor.saveSiteEditorEntities( {
+						isOnlyCurrentEntityDirty: true,
+					} );
 					await testData.visitPage( { frontendUtils, page } );
 					await expect(
 						page.getByText( fallbackTemplateUserText ).first()
@@ -106,14 +108,16 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postId: `woocommerce/woocommerce//${ testData.templatePath }`,
 					postType: testData.templateType,
+					canvas: 'edit',
 				} );
-				await editor.enterEditMode();
 
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: woocommerceTemplateUserText },
 				} );
-				await editor.saveSiteEditorEntities();
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 
 				await requestUtils.activateTheme(
 					BLOCK_THEME_WITH_TEMPLATES_SLUG
@@ -125,14 +129,16 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
 					postType: testData.templateType,
+					canvas: 'edit',
 				} );
-				await editor.enterEditMode();
 
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: userText },
 				} );
-				await editor.saveSiteEditorEntities();
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 
 				// Verify the template is the one modified by the user based on the theme.
 				await testData.visitPage( { frontendUtils, page } );

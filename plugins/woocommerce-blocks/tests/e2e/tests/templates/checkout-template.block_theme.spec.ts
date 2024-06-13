@@ -15,8 +15,8 @@ test.describe( 'Test the checkout template', () => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await expect(
 			editor.canvas.getByRole( 'button', {
 				name: 'Place Order',
@@ -29,10 +29,6 @@ test.describe( 'Test the checkout template', () => {
 		editor,
 		page,
 	} ) => {
-		await admin.visitSiteEditor( {
-			postId: templatePath,
-			postType: templateType,
-		} );
 		await admin.visitSiteEditor( { path: '/page' } );
 		await editor.page
 			.getByRole( 'button', { name: 'Checkout', exact: true } )
@@ -81,8 +77,8 @@ test.describe( 'Test editing the checkout template', () => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await editor.setContent(
 			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"checkout"} /-->'
 		);

@@ -39,7 +39,9 @@ test.describe( 'Legacy templates', () => {
 				editor.canvas.getByText( template.customText )
 			).toBeVisible();
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 		} );
 
 		await test.step( 'Update created term to legacy format in the DB', async () => {

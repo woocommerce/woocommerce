@@ -251,8 +251,8 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 
 		await editor.selectBlocks(
 			blockSelectorInEditor +
@@ -272,7 +272,9 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 				'div.wc-block-components-address-form__company'
 			)
 		).toBeVisible();
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 	} );
 
 	test( 'User can add postcodes for different countries', async ( {
@@ -525,7 +527,9 @@ test.describe( 'Billing Address Form', () => {
 		const companyInput = editor.canvas.getByLabel( 'Company (optional)' );
 		await expect( companyInput ).toBeVisible();
 
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 	} );
 
 	test.describe( 'Guest user', () => {

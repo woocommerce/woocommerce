@@ -49,8 +49,8 @@ test.describe( 'Merchant → Checkout', () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
 	} );
 
@@ -161,8 +161,8 @@ test.describe( 'Merchant → Checkout', () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
 		await editor.selectBlocks(
 			blockSelectorInEditor +
@@ -173,7 +173,9 @@ test.describe( 'Merchant → Checkout', () => {
 			exact: true,
 		} );
 		await requireTermsCheckbox.check();
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -204,8 +206,8 @@ test.describe( 'Merchant → Checkout', () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
 		await editor.selectBlocks(
 			blockSelectorInEditor +
@@ -216,7 +218,9 @@ test.describe( 'Merchant → Checkout', () => {
 			exact: true,
 		} );
 		await requireTermsCheckbox.uncheck();
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 	} );
 
 	test( 'inner blocks can be added/removed by filters', async ( {

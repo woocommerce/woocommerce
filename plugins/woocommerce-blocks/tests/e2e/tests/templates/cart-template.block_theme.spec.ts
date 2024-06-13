@@ -15,8 +15,8 @@ test.describe( 'Test the cart template', () => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await expect(
 			editor.canvas.getByLabel( 'Block: Title' )
 		).toBeVisible();
@@ -63,8 +63,8 @@ test.describe( 'Test editing the cart template', () => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await editor.setContent(
 			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"cart"} /-->'
 		);
