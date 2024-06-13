@@ -171,7 +171,9 @@ for ( const productType of Object.keys( productData ) ) {
 		if ( productData[ productType ].shipping ) {
 			await test.step( 'add shipping details', async () => {
 				await page.getByRole( 'link', { name: 'Shipping' } ).click();
-				await expect( page.getByText( 'Shipping class', { exact: true } ) ).toBeVisible();
+				await expect(
+					page.getByText( 'Shipping class', { exact: true } )
+				).toBeVisible();
 				await page
 					.getByPlaceholder( '0' )
 					.fill( productData[ productType ].shipping.weight );
