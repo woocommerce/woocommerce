@@ -17,7 +17,6 @@ export type WPError = {
 	data: {
 		[ key: string ]: unknown;
 	};
-	productType?: string;
 };
 
 type ErrorProps = {
@@ -44,15 +43,7 @@ export function getProductErrorMessageAndProps(
 			break;
 		case 'product_form_field_error':
 			response.message = error.message;
-			if (
-				error.productType === 'product_variation' &&
-				visibleTab !== 'pricing'
-			) {
-				response.errorProps = { explicitDismiss: true };
-			} else if (
-				visibleTab !== 'general' &&
-				error.productType !== 'product_variation'
-			) {
+			if ( visibleTab !== 'general' ) {
 				response.errorProps = { explicitDismiss: true };
 			}
 			break;

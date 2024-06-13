@@ -108,11 +108,7 @@ export function useSaveDraft( {
 		} catch ( error ) {
 			if ( onSaveError ) {
 				onSaveError(
-					errorHandler(
-						error as WPError,
-						productStatus,
-						productType
-					) as WPError
+					errorHandler( error as WPError, productStatus ) as WPError
 				);
 			}
 		}

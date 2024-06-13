@@ -13,11 +13,7 @@ import { useValidations } from '../../contexts/validation-context';
 import type { WPError } from '../../utils/get-product-error-message-and-props';
 import { AUTO_DRAFT_NAME } from '../../utils/constants';
 
-export function errorHandler(
-	error: WPError,
-	productStatus: ProductStatus,
-	productType: string
-) {
+export function errorHandler( error: WPError, productStatus: ProductStatus ) {
 	if ( error.code ) {
 		return error;
 	}
@@ -37,7 +33,6 @@ export function errorHandler(
 		return {
 			code: 'product_form_field_error',
 			message: errorMessage,
-			productType,
 		};
 	}
 
@@ -46,7 +41,6 @@ export function errorHandler(
 			productStatus === 'publish' || productStatus === 'future'
 				? 'product_publish_error'
 				: 'product_create_error',
-		productType,
 	};
 }
 
@@ -113,7 +107,7 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			return savedProduct as T;
 		} catch ( error ) {
-			throw errorHandler( error as WPError, status, postType );
+			throw errorHandler( error as WPError, status );
 		} finally {
 			setIsSaving( false );
 		}
@@ -134,7 +128,7 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			return duplicatedProduct as T;
 		} catch ( error ) {
-			throw errorHandler( error as WPError, status, postType );
+			throw errorHandler( error as WPError, status );
 		} finally {
 			setIsSaving( false );
 		}
