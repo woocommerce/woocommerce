@@ -1577,7 +1577,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$params = parent::get_collection_params();
 
 		$params['categories'] = array(
-			'description'       => __( 'Limit result set to specific product categorie ids.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to specific product category ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
