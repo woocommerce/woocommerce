@@ -155,30 +155,31 @@ test.describe( 'Template customization', () => {
 				// duplicate templates with the same name.
 				// See: https://github.com/woocommerce/woocommerce/issues/42220
 				await admin.visitSiteEditor( {
-					path: `/${ testData.templateType }/all`,
+					postType: testData.templateType,
 				} );
 
 				await page
 					.getByPlaceholder( 'Search' )
 					.fill( testData.templateName );
 
-				const templateRow = page.getByRole( 'row' ).filter( {
-					has: page.getByRole( 'link', {
-						name: testData.templateName,
-						exact: true,
-					} ),
-				} );
-				const resetButton = templateRow.getByLabel( 'Reset', {
-					exact: true,
-				} );
 				const revertedNotice = page
 					.getByLabel( 'Dismiss this notice' )
-					.getByText( `"${ testData.templateName }" reverted.` );
+					.getByText( `"${ testData.templateName }" reset.` );
 				const savedButton = page.getByRole( 'button', {
 					name: 'Saved',
 				} );
 
-				await resetButton.click();
+				// Wait until search has finished.
+				await page.waitForFunction( () => {
+					return (
+						document.querySelectorAll( '[aria-label="Actions"]' )
+							.length === 1
+					);
+				} );
+
+				await page.getByLabel( 'Actions' ).click();
+				await page.getByRole( 'menuitem', { name: 'Reset' } ).click();
+				await page.getByRole( 'button', { name: 'Reset' } ).click();
 
 				await expect( revertedNotice ).toBeVisible();
 				await expect( savedButton ).toBeVisible();
