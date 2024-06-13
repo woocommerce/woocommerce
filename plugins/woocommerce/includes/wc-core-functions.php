@@ -2498,7 +2498,7 @@ function wc_selected( $value, $options ) {
  * Retrieves the MySQL server version. Based on $wpdb.
  *
  * @since 3.4.1
- * @return array Vesion information.
+ * @return array Version information.
  */
 function wc_get_server_database_version() {
 	global $wpdb;
