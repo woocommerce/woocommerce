@@ -135,35 +135,6 @@ export function DownloadBlockEdit( {
 		}
 	}
 
-	function handleFileReplace( files: MediaItem | MediaItem[] ) {
-		if (
-			! Array.isArray( files ) ||
-			! files?.length ||
-			files[ 0 ]?.id === undefined
-		) {
-			return;
-		}
-
-		const uploadedFile = {
-			id: stringifyId( files[ 0 ].id ),
-			file: files[ 0 ].url,
-			name:
-				files[ 0 ].title ||
-				files[ 0 ].alt ||
-				files[ 0 ].caption ||
-				getFileName( files[ 0 ].url ),
-		};
-		const stringifyIds = downloads.map( ( download ) => {
-			if ( download.file === selectedDownload?.file ) {
-				return stringifyEntityId( uploadedFile );
-			}
-			return stringifyEntityId( download );
-		} );
-
-		setDownloads( stringifyIds );
-		setSelectedDownload( uploadedFile );
-	}
-
 	function removeDownload( download: ProductDownload ) {
 		const otherDownloads = downloads.reduce< ProductDownload[] >(
 			function removeDownloadElement(
