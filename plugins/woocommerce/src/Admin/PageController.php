@@ -220,7 +220,7 @@ class PageController {
 	 */
 	public function get_current_page() {
 		// If 'current_screen' hasn't fired yet, the current page calculation
-		// will fail which causes `false` to be returned for all subsquent calls.
+		// will fail which causes `false` to be returned for all subsequent calls.
 		if ( ! did_action( 'current_screen' ) ) {
 			_doing_it_wrong( __FUNCTION__, esc_html__( 'Current page retrieval should be called on or after the `current_screen` hook.', 'woocommerce' ), '0.16.0' );
 		}
