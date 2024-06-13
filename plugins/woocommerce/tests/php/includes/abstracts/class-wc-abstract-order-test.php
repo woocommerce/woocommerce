@@ -376,7 +376,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testDox Test that order items are not mixed when order_id is zero.
 	 */
-	public function test_order_items_shouldnot_mix_with_zero_id() {
+	public function test_order_items_should_not_mix_with_zero_id() {
 		$order1 = new WC_Order();
 		$order2 = new WC_Order();
 
