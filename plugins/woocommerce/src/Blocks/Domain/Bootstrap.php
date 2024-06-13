@@ -159,7 +159,7 @@ class Bootstrap {
 			$this->container->get( Notices::class )->init();
 			$this->container->get( PTKPatternsStore::class );
 
-			if ( wc_current_theme_is_fse_theme() ) {
+			if ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) {
 				$this->container->get( BlockTemplatesController::class )->init();
 			}
 		}
