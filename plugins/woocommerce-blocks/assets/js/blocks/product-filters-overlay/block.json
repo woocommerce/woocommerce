@@ -10,12 +10,29 @@
 	"supports": {
 		"align": true,
 		"multiple": false,
+		"inserter": false,
 		"layout": {
 			"allowCustomContentAndWideSize": true
+		},
+		"color": {},
+		"typography": {},
+		"dimensions": {},
+		"spacing": {
+			"padding": true,
+			"blockGap": true
 		}
 	},
 	"textdomain": "woocommerce",
 	"providesContext": {},
-	"attributes": {},
+	"attributes": {
+		"overlayStyle": {
+			"type": "string",
+			"default": "drawer"
+		},
+		"overlayPosition": {
+			"type": "string",
+			"default": "left"
+		}
+	},
 	"example": {}
 }
