@@ -15,7 +15,7 @@ Inside each subfolder you'll find various markdown files. When imported into the
 
 ## Getting Setup
 
-> This guide presumes that you're familar with basic Git and GitHub functionality, that you're signed into a GitHub account, and that you have Git setup locally. If you're new to GitHub, we recommend reading their [quickstart](https://docs.github.com/en/get-started/quickstart/hello-world) and [working with forks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) guides before getting started.
+> This guide presumes that you're familiar with basic Git and GitHub functionality, that you're signed into a GitHub account, and that you have Git setup locally. If you're new to GitHub, we recommend reading their [quickstart](https://docs.github.com/en/get-started/quickstart/hello-world) and [working with forks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) guides before getting started.
 
 ### Initial Setup
 
