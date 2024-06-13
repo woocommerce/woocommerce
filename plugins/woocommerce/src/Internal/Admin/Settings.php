@@ -258,7 +258,7 @@ class Settings {
 	}
 
 	/**
-	 * Removes non necesary feature properties for the client side.
+	 * Removes non necessary feature properties for the client side.
 	 *
 	 * @return array
 	 */
