@@ -262,7 +262,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		 * @since 3.1.0
 		 *
 		 * @param array                   $row         An associative array with the data of a single row in the CSV file.
-		 * @param WC_Product              $product     The product object correspnding to the current row.
+		 * @param WC_Product              $product     The product object corresponding to the current row.
 		 * @param WC_Product_CSV_Exporter $exporter    The instance of the CSV exporter.
 		 */
 		return apply_filters( 'woocommerce_product_export_row_data', $row, $product, $this );
