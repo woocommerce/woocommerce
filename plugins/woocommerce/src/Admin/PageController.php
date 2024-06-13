@@ -394,7 +394,7 @@ class PageController {
 	}
 
 	/**
-	 * Returns true if we are on a page registed with this controller.
+	 * Returns true if we are on a page registered with this controller.
 	 *
 	 * @return boolean
 	 */
