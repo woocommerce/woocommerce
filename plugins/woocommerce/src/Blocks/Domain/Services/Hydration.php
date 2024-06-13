@@ -176,7 +176,7 @@ class Hydration {
 	 * However, unlike WP core, this does not check against query params, request method etc.
 	 *
 	 * @param string $path The path to match.
-	 * @param array  $available_routes Available routes in { $regex1 => $contoller_class1, ... } format.
+	 * @param array  $available_routes Available routes in { $regex1 => $controller_class1, ... } format.
 	 *
 	 * @return string|null
 	 */
