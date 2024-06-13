@@ -199,20 +199,20 @@ class PostsToOrdersMigrationController {
 	 * Execute a database query and log any errors.
 	 *
 	 * @param string $query          The SQL query to execute.
-	 * @param bool   $supress_errors Whether to suppress errors.
+	 * @param bool   $suppress_errors Whether to suppress errors.
 	 *
 	 * @return bool True if the query succeeded, false if there were errors.
 	 */
-	private function db_query( string $query, bool $supress_errors = false ): bool {
+	private function db_query( string $query, bool $suppress_errors = false ): bool {
 		$wpdb = WC()->get_global( 'wpdb' );
 
 		try {
-			if ( $supress_errors ) {
+			if ( $suppress_errors ) {
 				$suppress = $wpdb->suppress_errors( true );
 			}
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$wpdb->query( $query );
-			if ( $supress_errors ) {
+			if ( $suppress_errors ) {
 				$wpdb->suppress_errors( $suppress );
 			}
 		} catch ( \Exception $exception ) {
