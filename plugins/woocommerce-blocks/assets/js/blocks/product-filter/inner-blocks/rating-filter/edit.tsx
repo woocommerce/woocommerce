@@ -23,7 +23,7 @@ import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
 import { previewOptions } from './preview';
 import { Attributes } from './types';
 import { getActiveFilters } from './utils';
-import { useSetWraperVisibility } from '../../../filter-wrapper/context';
+import { useSetWrapperVisibility } from '../../../filter-wrapper/context';
 import { Inspector } from './components/inspector';
 import { PreviewDropdown } from '../components/preview-dropdown';
 import './style.scss';
@@ -46,7 +46,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 
 	const isEditor = true;
 
-	const setWrapperVisibility = useSetWraperVisibility();
+	const setWrapperVisibility = useSetWrapperVisibility();
 	const [ queryState ] = useQueryStateByContext();
 
 	const { results: filteredCounts, isLoading: filteredCountsLoading } =
