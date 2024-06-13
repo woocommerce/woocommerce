@@ -155,7 +155,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_terms'      => function ( $args ) use ( &$invokations_of_get_terms ) {
+				'get_terms'      => function ( $args ) use ( &$invocations_of_get_terms ) {
 					switch ( $args['taxonomy'] ) {
 						case 'non-variation-attribute':
 							return array(
