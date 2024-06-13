@@ -274,6 +274,9 @@ export function DownloadBlockEdit( {
 					buttonText=""
 					allowedMediaTypes={ allowedTypes }
 					multipleSelect={ 'add' }
+					maxUploadFileSize={
+						window.productBlockEditorSettings?.maxUploadFileSize
+					}
 					onUpload={ handleFileUpload }
 					onFileUploadChange={ handleFileUpload }
 					onError={ handleUploadError }
