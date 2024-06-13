@@ -39,10 +39,12 @@ import {
 } from '../../../utils/get-product-error-message';
 import type {
 	ProductEditorBlockEditProps,
+	ProductFormPostProps,
 	ProductTemplate,
 } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
 import * as wooIcons from '../../../icons';
+import isProductFormTemplateSystemEnabled from '../../../utils/is-product-form-template-system-enabled';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
@@ -92,6 +94,20 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	const [ unsupportedProductTemplate, setUnsupportedProductTemplate ] =
 		useState< ProductTemplate >();
+
+	// Pull the product templates from the store.
+	const productFormPosts = useSelect( ( sel ) => {
+		// Do not fetch product form posts if the feature is not enabled.
+		if ( ! isProductFormTemplateSystemEnabled() ) {
+			return [];
+		}
+
+		return (
+			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
+				per_page: -1,
+			} ) || []
+		);
+	}, [] ) as ProductFormPostProps[];
 
 	const { isSaving } = useSelect(
 		( select ) => {
@@ -189,6 +205,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		return <Icon icon={ icon } size={ 24 } />;
 	}
 
+	/**
+	 * Returns a function that renders a MenuItem component.
+	 *
+	 * @param {Function} onClose - Function to close the dropdown.
+	 * @return {Function} Function that renders a MenuItem component.
+	 */
 	function getMenuItem( onClose: () => void ) {
 		return function renderMenuItem( productTemplate: ProductTemplate ) {
 			const isSelected =
@@ -278,7 +300,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		}
 	}
 
-	function toogleButtonClickHandler( isOpen: boolean, onToggle: () => void ) {
+	function toggleButtonClickHandler( isOpen: boolean, onToggle: () => void ) {
 		return function onClick() {
 			onToggle();
 
@@ -326,7 +348,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						<Button
 							aria-expanded={ isOpen }
 							variant="link"
-							onClick={ toogleButtonClickHandler(
+							onClick={ toggleButtonClickHandler(
 								isOpen,
 								onToggle
 							) }
@@ -343,6 +365,22 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 									getMenuItem( onClose )
 								) }
 							</MenuGroup>
+
+							{ isProductFormTemplateSystemEnabled() && (
+								<MenuGroup>
+									{ productFormPosts.map( ( formPost ) => (
+										<MenuItem
+											key={ formPost.id }
+											icon={ resolveIcon( 'external' ) }
+											info={ formPost.excerpt.raw }
+											iconPosition="left"
+											onClick={ onClose } // close the dropdown for now
+										>
+											{ formPost.title.rendered }
+										</MenuItem>
+									) ) }
+								</MenuGroup>
+							) }
 
 							{ unsupportedProductTemplates.length > 0 && (
 								<MenuGroup>
