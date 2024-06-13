@@ -350,7 +350,7 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Callback regsitered by OnboardingPlugins::install_and_activate_async.
+	 * Callback registered by OnboardingPlugins::install_and_activate_async.
 	 *
 	 * It is used to call install_plugins and activate_plugins with a custom logger.
 	 *
