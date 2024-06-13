@@ -45,26 +45,6 @@ export class Editor extends CoreEditor {
 		}
 	}
 
-	async enterEditMode() {
-		await this.page
-			.getByRole( 'button', {
-				name: 'Edit',
-				exact: true,
-			} )
-			.dispatchEvent( 'click' );
-
-		const sidebar = this.page.locator( '.edit-site-layout__sidebar' );
-		const canvasLoader = this.page.locator( '.edit-site-canvas-loader' );
-
-		await sidebar.waitFor( {
-			state: 'hidden',
-		} );
-
-		await canvasLoader.waitFor( {
-			state: 'hidden',
-		} );
-	}
-
 	async transformIntoBlocks() {
 		// Select the block, so the button is visible.
 		const block = this.canvas

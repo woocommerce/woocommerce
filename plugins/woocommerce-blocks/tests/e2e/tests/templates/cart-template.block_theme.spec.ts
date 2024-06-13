@@ -27,11 +27,14 @@ test.describe( 'Test the cart template', () => {
 		editor,
 		page,
 	} ) => {
-		await admin.visitSiteEditor( { path: '/page' } );
+		await admin.visitSiteEditor( { postType: 'page' } );
 		await editor.page
 			.getByRole( 'button', { name: 'Cart', exact: true } )
 			.click();
-		await editor.enterEditMode();
+		await page
+			.frameLocator( 'iframe[name="editor-canvas"]' )
+			.locator( 'body' )
+			.click();
 
 		await expect(
 			editor.canvas.locator( 'h1:has-text("Cart")' ).first()

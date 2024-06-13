@@ -29,11 +29,14 @@ test.describe( 'Test the checkout template', () => {
 		editor,
 		page,
 	} ) => {
-		await admin.visitSiteEditor( { path: '/page' } );
+		await admin.visitSiteEditor( { postType: 'page' } );
 		await editor.page
 			.getByRole( 'button', { name: 'Checkout', exact: true } )
 			.click();
-		await editor.enterEditMode();
+		await page
+			.frameLocator( 'iframe[name="editor-canvas"]' )
+			.locator( 'body' )
+			.click();
 
 		await expect(
 			editor.canvas.getByRole( 'button', {
@@ -61,6 +64,7 @@ test.describe( 'Test the checkout template', () => {
 		await frontendUtils.addToCart();
 		await admin.page.goto( permalink );
 		await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
+		await admin.page.getByRole( 'button', { name: 'Get started' } ).click();
 		await expect(
 			editor.canvas.getByRole( 'button', {
 				name: 'Place Order',

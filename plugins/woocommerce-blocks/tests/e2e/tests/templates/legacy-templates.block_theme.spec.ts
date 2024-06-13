@@ -67,7 +67,7 @@ test.describe( 'Legacy templates', () => {
 
 		await test.step( 'Verify the template is listed in the Site Editor UI', async () => {
 			await admin.visitSiteEditor( {
-				path: '/wp_template/all',
+				postType: 'wp_template',
 			} );
 
 			await page.getByPlaceholder( 'Search' ).fill( template.name );
