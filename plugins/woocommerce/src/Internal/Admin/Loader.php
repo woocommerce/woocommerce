@@ -111,7 +111,7 @@ class Loader {
 
 	/**
 	 * Set up a div for the header embed to render into.
-	 * The initial contents here are meant as a place loader for when the PHP page initialy loads.
+	 * The initial contents here are meant as a place loader for when the PHP page initially loads.
 	 */
 	public static function embed_page_header() {
 		if ( ! PageController::is_admin_page() && ! PageController::is_embed_page() ) {
