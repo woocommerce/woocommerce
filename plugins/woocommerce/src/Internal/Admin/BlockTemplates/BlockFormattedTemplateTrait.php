@@ -20,7 +20,7 @@ trait BlockFormattedTemplateTrait {
 		return $arr;
 	}
 	/**
-	 * Get the block attributes with block id, blkock order, hide and disable conditions.
+	 * Get the block attributes with block id, block order, hide and disable conditions.
 	 */
 	private function get_augmented_attributes() {
 		return array_merge(
