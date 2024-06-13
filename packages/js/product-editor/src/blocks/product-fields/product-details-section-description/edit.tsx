@@ -278,7 +278,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		}
 	}
 
-	function toogleButtonClickHandler( isOpen: boolean, onToggle: () => void ) {
+	function toggleButtonClickHandler( isOpen: boolean, onToggle: () => void ) {
 		return function onClick() {
 			onToggle();
 
@@ -326,7 +326,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						<Button
 							aria-expanded={ isOpen }
 							variant="link"
-							onClick={ toogleButtonClickHandler(
+							onClick={ toggleButtonClickHandler(
 								isOpen,
 								onToggle
 							) }
