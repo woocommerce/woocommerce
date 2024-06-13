@@ -56,7 +56,7 @@ These flows will continually evolve as the platform evolves with flows updated, 
 | Shopper   | Product   | Variable Product info updates depending on variation | shopper/product-variable.spec.js         |
 | Shopper   | Product   | Add Variable Product to Cart                         | shopper/product-variable.spec.js         |
 | Shopper   | Product   | Display up-sell product                              | products/product-linked-products.spec.js |
-| Shopper   | Product   | Display releated products                            | products/product-linked-products.spec.js |
+| Shopper   | Product   | Display related products                             | products/product-linked-products.spec.js |
 | Shopper   | Product   | Display reviews                                      | merchant/product-reviews.spec.js         |
 | Shopper   | Product   | Add review                                           | merchant/product-reviews.spec.js         |
 | Shopper   | Product   | View product images                                  | shopper/product-simple.spec.js           |
