@@ -16,7 +16,7 @@ test.describe( 'Single Product Page', () => {
 		'<b>This should be bolded</b> </br>' +
 		'<em>This should be italic</em> </br>' +
 		'<blockquote>This should be quoted</blockquote>' +
-		'<ul><li>Test bulletted item</li></ul>' +
+		'<ul><li>Test bulleted item</li></ul>' +
 		'<ol><li>Test numbered item</li></ol>';
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -155,7 +155,7 @@ test.describe( 'Single Product Page', () => {
 		await expect(
 			page
 				.getByRole( 'tabpanel' )
-				.filter( 'listitem', { name: 'Test bulletted item' } )
+				.filter( 'listitem', { name: 'Test bulleted item' } )
 		).toBeVisible();
 		await expect(
 			page
