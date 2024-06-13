@@ -316,6 +316,7 @@ class BlockTemplateUtils {
 		$wp_template_part_filenames = array(
 			'checkout-header.html',
 			'mini-cart.html',
+			'product-filters.html',
 		);
 
 		/*
