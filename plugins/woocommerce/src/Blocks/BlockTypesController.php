@@ -206,7 +206,7 @@ final class BlockTypesController {
 	 * and prevent them from showing as an option in the Legacy Widget block.
 	 *
 	 * @param array $widget_types An array of widgets hidden in core.
-	 * @return array $widget_types An array inluding the WooCommerce widgets to hide.
+	 * @return array $widget_types An array including the WooCommerce widgets to hide.
 	 */
 	public function hide_legacy_widgets_with_block_equivalent( $widget_types ) {
 		array_push(
