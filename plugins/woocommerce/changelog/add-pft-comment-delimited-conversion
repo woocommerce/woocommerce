@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Create 'get_comment_delimited_template' for the Template API and migrate simple product template to HTML
