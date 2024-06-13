@@ -7,6 +7,7 @@
 @import "./add-image-menu-item/style.scss";
 @import "./image-actions-menu/style.scss";
 @import "./variation-stock-status-form/styles.scss";
+@import "./variation-pricing-form/styles.scss";
 
 .woocommerce-product-variations {
 	display: flex;
@@ -217,7 +218,8 @@
 		background-repeat: no-repeat;
 	}
 
-	&__stock-status-actions-menu {
+	&__stock-status-actions-menu,
+	&__pricing-actions-menu {
 		.components-popover__content {
 			padding: 0;
 		}
