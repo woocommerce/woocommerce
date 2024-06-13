@@ -254,4 +254,4 @@ Displaying the variation in the front store works a bit differently for variable
 
 ## How to find hooks?
 
-Everyone will have their own preferred way, but for me, the quickest way is to look in the WooCommere plugin code. The code for each data section can be found in `/woocommerce/includes/admin/meta-boxes/views`. To view how the inventory section is handled check the `html-product-data-inventory.php` file, and for variations take a look at `html-variation-admin.php`.
+Everyone will have their own preferred way, but for me, the quickest way is to look in the WooCommerce plugin code. The code for each data section can be found in `/woocommerce/includes/admin/meta-boxes/views`. To view how the inventory section is handled check the `html-product-data-inventory.php` file, and for variations take a look at `html-variation-admin.php`.
