@@ -30,8 +30,10 @@ class ProductFiltersOverlay extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		return <<<HTML
-			<div>Product Filters Overlay</div>
-		HTML;
+		ob_start();
+		printf( '<div>%s</div>', esc_html__( 'Filters Overlay', 'woocommerce' ) );
+		$html = ob_get_clean();
+
+		return $html;
 	}
 }
