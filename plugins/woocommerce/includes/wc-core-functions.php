@@ -1807,7 +1807,7 @@ function wc_uasort_comparison( $a, $b ) {
 }
 
 /**
- * Sort values based on ascii, usefull for special chars in strings.
+ * Sort values based on ascii, useful for special chars in strings.
  *
  * @param string $a First value.
  * @param string $b Second value.
