@@ -97,7 +97,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	/*
 	 * Build selected options object from the attribute,
 	 * used to populate the token field.
-	 * When the attribute is global, uses straigh the attribute options.
+	 * When the attribute is global, uses straight the attribute options.
 	 * Otherwise, maps the terms to their names.
 	 */
 	const selectedValues = isGlobalAttribute
