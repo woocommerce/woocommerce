@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Button, Spinner } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
@@ -13,7 +13,12 @@ import {
 import { closeSmall } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { ListItem, MediaUploader, Sortable } from '@woocommerce/components';
+import {
+	ListItem,
+	MediaUploader,
+	MediaUploaderErrorCallback,
+	Sortable,
+} from '@woocommerce/components';
 import { Product, ProductDownload } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -164,13 +169,16 @@ export function DownloadBlockEdit( {
 		};
 	}
 
-	function handleUploadError( error: unknown ) {
+	const handleUploadError: MediaUploaderErrorCallback = function ( error ) {
 		createErrorNotice(
-			typeof error === 'string'
-				? error
-				: __( 'There was an error uploading files', 'woocommerce' )
+			sprintf(
+				/* translators: %1$s is a line break, %2$s is the detailed error message */
+				__( 'Error uploading file:%1$s%2$s', 'woocommerce' ),
+				'\n',
+				error.message
+			)
 		);
-	}
+	};
 
 	function editDownloadsModalSaveHandler( value: ProductDownload ) {
 		return function handleEditDownloadsModalSave() {
