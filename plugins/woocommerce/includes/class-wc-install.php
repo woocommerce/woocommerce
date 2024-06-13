@@ -51,7 +51,7 @@ class WC_Install {
 			'wc_update_200_db_version',
 		),
 		'2.0.9' => array(
-			'wc_update_209_brazillian_state',
+			'wc_update_209_brazilian_state',
 			'wc_update_209_db_version',
 		),
 		'2.1.0' => array(
