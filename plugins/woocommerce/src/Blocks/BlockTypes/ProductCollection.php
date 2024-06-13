@@ -266,7 +266,7 @@ class ProductCollection extends AbstractBlock {
 	/**
 	 * Check inner blocks of Product Collection block if there's one
 	 * incompatible with Interactivity API and if so, disable client-side
-	 * naviagtion.
+	 * navigation.
 	 *
 	 * @param array $parsed_block The block being rendered.
 	 * @return string Returns the parsed block, unmodified.
