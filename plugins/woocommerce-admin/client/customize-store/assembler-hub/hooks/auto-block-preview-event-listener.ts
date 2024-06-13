@@ -96,7 +96,7 @@ const makeInteractive = ( element: Element ) => {
 	element.removeAttribute( 'inert' );
 };
 
-const addInertToTemplatePartsInHomepage = (
+const addInertToAssemblerPatterns = (
 	documentElement: HTMLElement,
 	page: string
 ) => {
@@ -363,11 +363,11 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 				addInertToAllInnerBlocks( documentElement );
 			observers.push( inertInnerBlockObserver );
 
-			const inertSectionObserver = addInertToTemplatePartsInHomepage(
+			const inertAssemblerPatternObserver = addInertToAssemblerPatterns(
 				documentElement,
 				query?.path
 			);
-			observers.push( inertSectionObserver );
+			observers.push( inertAssemblerPatternObserver );
 
 			unsubscribeCallbacks.push( removeEventListenersSelectedBlock );
 			unsubscribeCallbacks.push( removeEventListenerHidePopover );
