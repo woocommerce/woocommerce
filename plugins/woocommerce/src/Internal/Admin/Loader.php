@@ -541,7 +541,7 @@ class Loader {
 	}
 
 	/**
-	 * Return an object defining the currecy options for the site's current currency
+	 * Return an object defining the currency options for the site's current currency
 	 *
 	 * @return  array  Settings for the current currency {
 	 *     Array of settings.
