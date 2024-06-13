@@ -50,7 +50,7 @@ import { errorHandler } from '../../../hooks/use-product-manager';
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
 	clientId,
-	context: { postType, selectedTab },
+	context: { selectedTab },
 }: ProductEditorBlockEditProps< ProductDetailsSectionDescriptionBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
