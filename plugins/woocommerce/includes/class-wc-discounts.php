@@ -969,8 +969,16 @@ class WC_Discounts {
 			return true;
 		}
 
+		$check_emails = array();
 		$user         = wp_get_current_user();
-		$check_emails = array( $user->get_billing_email(), $user->get_email() );
+
+		try {
+			$customer       = new WC_Customer( $user->ID );
+			$check_emails   = array( $customer->get_billing_email(), $customer->get_email() );
+		} catch ( Exception $e ) {
+			$wc_logger = wc_get_logger();
+			$wc_logger->debug( $e->getMessage() );
+		}
 
 		if ( $this->object instanceof WC_Cart ) {
 			$check_emails[] = $this->object->get_customer()->get_billing_email();
