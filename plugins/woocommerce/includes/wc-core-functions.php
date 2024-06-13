@@ -1249,7 +1249,7 @@ add_filter( 'attachment_link', 'wc_fix_product_attachment_link', 10, 2 );
  * @param string $rewrite rewrite rules.
  * @return string
  */
-function wc_ms_protect_download_rewite_rules( $rewrite ) {
+function wc_ms_protect_download_rewrite_rules( $rewrite ) {
 	if ( ! is_multisite() || 'redirect' === get_option( 'woocommerce_file_download_method' ) ) {
 		return $rewrite;
 	}
@@ -1263,7 +1263,7 @@ function wc_ms_protect_download_rewite_rules( $rewrite ) {
 
 	return $rule . $rewrite;
 }
-add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );
+add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewrite_rules' );
 
 /**
  * Formats a string in the format COUNTRY:STATE into an array.
