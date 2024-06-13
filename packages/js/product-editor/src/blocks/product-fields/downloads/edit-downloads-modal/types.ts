@@ -4,7 +4,7 @@
 import { ProductDownload } from '@woocommerce/data';
 
 export type EditDownloadsModalProps = {
-	downloableItem: ProductDownload;
+	downloadableItem: ProductDownload;
 	maxUploadFileSize?: number;
 	onCancel: () => void;
 	onRemove: () => void;

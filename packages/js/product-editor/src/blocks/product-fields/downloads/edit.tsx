@@ -353,7 +353,7 @@ export function DownloadBlockEdit( {
 			) }
 			{ selectedDownload && (
 				<EditDownloadsModal
-					downloableItem={ { ...selectedDownload } }
+					downloadableItem={ { ...selectedDownload } }
 					onCancel={ () => setSelectedDownload( null ) }
 					onRemove={ () => {
 						removeDownload( selectedDownload );
