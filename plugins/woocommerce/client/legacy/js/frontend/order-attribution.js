@@ -57,7 +57,7 @@
 	}
 
 	/**
-	 * Determin whether sourcebuster.js is available.
+	 * Determine whether sourcebuster.js is available.
 	 *
 	 * @returns {boolean} Whether sourcebuster.js is available.
 	 */
