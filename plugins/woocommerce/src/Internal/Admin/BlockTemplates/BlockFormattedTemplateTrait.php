@@ -14,22 +14,28 @@ trait BlockFormattedTemplateTrait {
 	public function get_formatted_template(): array {
 		$arr = array(
 			$this->get_name(),
-			array_merge(
-				$this->get_attributes(),
-				array(
-					'_templateBlockId'    => $this->get_id(),
-					'_templateBlockOrder' => $this->get_order(),
-				),
-				! empty( $this->get_hide_conditions() ) ? array(
-					'_templateBlockHideConditions' => $this->get_formatted_hide_conditions(),
-				) : array(),
-				! empty( $this->get_disable_conditions() ) ? array(
-					'_templateBlockDisableConditions' => $this->get_formatted_disable_conditions(),
-				) : array(),
-			),
+			$this->get_augmented_attributes(),
 		);
 
 		return $arr;
+	}
+	/**
+	 * Get the block attributes with block id, blkock order, hide and disable conditions.
+	 */
+	private function get_augmented_attributes() {
+		return array_merge(
+			$this->get_attributes(),
+			array(
+				'_templateBlockId'    => $this->get_id(),
+				'_templateBlockOrder' => $this->get_order(),
+			),
+			! empty( $this->get_hide_conditions() ) ? array(
+				'_templateBlockHideConditions' => $this->get_formatted_hide_conditions(),
+			) : array(),
+			! empty( $this->get_disable_conditions() ) ? array(
+				'_templateBlockDisableConditions' => $this->get_formatted_disable_conditions(),
+			) : array(),
+		);
 	}
 
 	/**

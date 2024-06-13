@@ -152,5 +152,11 @@ interface BlockInterface {
 	 * @return array The block configuration as a formatted template.
 	 */
 	public function get_formatted_template(): array;
+	/**
+	 * Get the block configuration as a comment delimited template
+	 *
+	 * @return string The block configuration as a formatted string.
+	 */
+	public function get_comment_delimited_template(): string;
 
 }

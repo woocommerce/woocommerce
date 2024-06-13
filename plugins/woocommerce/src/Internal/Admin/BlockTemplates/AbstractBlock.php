@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
 /**
  * Block configuration used to specify blocks in BlockTemplate.
  */
-class AbstractBlock implements BlockInterface {
+abstract class AbstractBlock implements BlockInterface {
 	use BlockFormattedTemplateTrait;
 
 	/**

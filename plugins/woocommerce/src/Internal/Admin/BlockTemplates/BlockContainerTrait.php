@@ -201,9 +201,9 @@ trait BlockContainerTrait {
 	}
 
 	/**
-	 * TODO
+	 * Get the inner blocks as a comment delimited template.
 	 */
-	public function get_comment_delimited_template() {
+	public function get_comment_delimited_template(): string {
 
 		$arr          = [];
 		$inner_blocks = $this->get_inner_blocks_sorted_by_order();
@@ -217,7 +217,7 @@ trait BlockContainerTrait {
 		}
 
 		$name       = $this->get_name();
-		$attributes = $this->get_attributes();
+		$attributes = $this->get_augmented_attributes();
 
 		$children = implode( "\n", $arr );
 
