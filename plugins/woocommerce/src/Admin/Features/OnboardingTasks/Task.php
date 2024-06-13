@@ -61,7 +61,7 @@ abstract class Task {
 	protected $task_list;
 
 	/**
-	 * Duration to milisecond mapping.
+	 * Duration to millisecond mapping.
 	 *
 	 * @var string
 	 */
