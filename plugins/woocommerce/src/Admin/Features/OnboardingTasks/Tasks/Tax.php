@@ -121,7 +121,7 @@ class Tax extends Task {
 	}
 
 	/**
-	 * Addtional data.
+	 * Additional data.
 	 *
 	 * @return array
 	 */

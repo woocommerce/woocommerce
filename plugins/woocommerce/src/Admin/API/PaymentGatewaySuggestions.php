@@ -169,9 +169,9 @@ class PaymentGatewaySuggestions extends \WC_REST_Data_Controller {
 					'readonly'    => true,
 				),
 				'transaction_processors'  => array(
-					'description'         => __( 'Array of transaction processors and their images.', 'woocommerce' ),
-					'type'                => 'object',
-					'addtionalProperties' => array(
+					'description'          => __( 'Array of transaction processors and their images.', 'woocommerce' ),
+					'type'                 => 'object',
+					'additionalProperties' => array(
 						'type'   => 'string',
 						'format' => 'uri',
 					),
