@@ -350,6 +350,25 @@ test.describe( 'Assembler -> Color Pickers', () => {
 					} )
 				);
 
+			const headersInCoverBlock = await editor
+				.locator(
+					`.wp-block-cover__inner-container h1,
+					 .wp-block-cover__inner-container h2,
+					 .wp-block-cover__inner-container h3,
+					 .wp-block-cover__inner-container h4,
+					 .wp-block-cover__inner-container h5,
+					 .wp-block-cover__inner-container h6`
+				)
+				.evaluateAll( ( elements ) =>
+					elements.map( ( element ) => {
+						const style = window.getComputedStyle( element );
+						return {
+							background: style.backgroundColor,
+							color: style.color,
+						};
+					} )
+				);
+
 			for ( const element of buttons ) {
 				await expect( element.background ).toEqual(
 					colors.button.background
@@ -366,6 +385,12 @@ test.describe( 'Assembler -> Color Pickers', () => {
 				expect( colors.header.color.includes( element.color ) ).toBe(
 					true
 				);
+			}
+
+			// Check that the headers in the cover block are white text.
+			// See: https://github.com/woocommerce/woocommerce/pull/48447
+			for ( const element of headersInCoverBlock ) {
+				expect( element.color ).toEqual( 'rgb(255, 255, 255)' );
 			}
 		} );
 	}
