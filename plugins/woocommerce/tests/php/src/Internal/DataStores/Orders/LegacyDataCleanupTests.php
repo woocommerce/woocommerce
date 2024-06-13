@@ -64,7 +64,7 @@ class LegacyDataCleanupTests extends WC_Unit_Test_Case {
 	/**
 	 * Tests that the batch processor is correctly enqueued and removed when the option is updated.
 	 */
-	public function test_batch_process_enqueing() {
+	public function test_batch_process_enqueuing() {
 		$batch_processing = wc_get_container()->get( BatchProcessingController::class );
 
 		$this->toggle_cot_authoritative( true );
