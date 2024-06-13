@@ -226,7 +226,7 @@ function wc_admin_update_280_order_status() {
 /**
  * Update the old task list options.
  */
-function wc_admin_update_290_update_apperance_task_option() {
+function wc_admin_update_290_update_appearance_task_option() {
 	$is_actioned = get_option( 'woocommerce_task_list_appearance_complete', false );
 
 	$task = TaskLists::get_task( 'appearance' );

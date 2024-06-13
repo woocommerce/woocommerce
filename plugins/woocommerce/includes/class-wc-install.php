@@ -196,7 +196,7 @@ class WC_Install {
 			'wc_admin_update_270_delete_report_downloads',
 			'wc_admin_update_271_update_task_list_options',
 			'wc_admin_update_280_order_status',
-			'wc_admin_update_290_update_apperance_task_option',
+			'wc_admin_update_290_update_appearance_task_option',
 			'wc_admin_update_290_delete_default_homepage_layout_option',
 			'wc_update_600_db_version',
 		),
