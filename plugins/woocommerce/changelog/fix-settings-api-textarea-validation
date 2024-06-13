@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix settings-api textarea validation to prevent insertion of iframes in description areas by default
