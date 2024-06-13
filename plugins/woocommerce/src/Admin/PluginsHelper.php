@@ -706,7 +706,7 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Construct the subscritpion notice data based on user subscriptions data.
+	 * Construct the subscription notice data based on user subscriptions data.
 	 *
 	 * @param array  $all_subs all subscription data.
 	 * @param array  $subs_to_show filtered subscriptions as condition.
