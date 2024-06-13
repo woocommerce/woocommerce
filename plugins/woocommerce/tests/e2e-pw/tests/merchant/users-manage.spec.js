@@ -61,9 +61,11 @@ async function userDeletionTest( page, username ) {
 	} );
 
 	await test.step( 'confirm deletion', async () => {
+		await expect( page.locator( '#the-list tr' ) ).toHaveCount( 1 );
 		await expect(
-			page.getByText( `Search results for: ${ username }` )
-		).toBeVisible();
+			page.locator( '#the-list tr td.username a' )
+		).toContainText( username );
+
 		await page.getByRole( 'button', { name: 'Confirm Deletion' } ).click();
 	} );
 
