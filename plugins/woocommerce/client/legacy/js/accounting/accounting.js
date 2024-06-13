@@ -315,7 +315,7 @@
 	 * List should be an array of numbers
 	 * Second parameter can be an object containing keys that match the params
 	 *
-	 * Returns array of accouting-formatted number strings of same length
+	 * Returns array of accounting-formatted number strings of same length
 	 *
 	 * NB: `white-space:pre` CSS rule is required on the list container to prevent
 	 * browsers from collapsing the whitespace in the output strings.
