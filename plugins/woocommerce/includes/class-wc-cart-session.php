@@ -448,7 +448,7 @@ final class WC_Cart_Session {
 			$cart = array();
 		}
 
-		$inital_cart_size = count( $cart );
+		$initial_cart_size = count( $cart );
 		$order_items      = $order->get_items();
 
 		foreach ( $order_items as $item ) {
@@ -508,7 +508,7 @@ final class WC_Cart_Session {
 
 		$num_items_in_cart           = count( $cart );
 		$num_items_in_original_order = count( $order_items );
-		$num_items_added             = $num_items_in_cart - $inital_cart_size;
+		$num_items_added             = $num_items_in_cart - $initial_cart_size;
 
 		if ( $num_items_in_original_order > $num_items_added ) {
 			wc_add_notice(
