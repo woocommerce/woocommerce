@@ -944,26 +944,14 @@ abstract class WC_Settings_API {
 	/**
 	 * Validate Textarea Field.
 	 *
+	 * @since 9.0.0 No longer allows storing IFRAME, which was allowed for "ShareThis" integration no longer found in core.
 	 * @param  string $key Field key.
 	 * @param  string $value Posted Value.
 	 * @return string
 	 */
 	public function validate_textarea_field( $key, $value ) {
 		$value = is_null( $value ) ? '' : $value;
-		return wp_kses(
-			trim( stripslashes( $value ) ),
-			array_merge(
-				array(
-					'iframe' => array(
-						'src'   => true,
-						'style' => true,
-						'id'    => true,
-						'class' => true,
-					),
-				),
-				wp_kses_allowed_html( 'post' )
-			)
-		);
+		return wp_kses_post( trim( stripslashes( $value ) ) );
 	}
 
 	/**
