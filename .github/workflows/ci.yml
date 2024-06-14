@@ -176,7 +176,7 @@ jobs:
               if: ${{ always() && matrix.report.resultsPath != '' }}
               uses: actions/upload-artifact@v4
               with:
-                name: '${{ matrix.report.resultsBlobName }}-${{ strategy.job-index }}'
+                name: '${{ matrix.report.resultsBlobName }}__${{ strategy.job-index }}'
                 path: ${{ env.ARTIFACTS_PATH }}
                 
             - name: 'Upload flaky test reports'
@@ -295,7 +295,7 @@ jobs:
               continue-on-error: true
               with:
                 name: ${{ matrix.report }}
-                pattern: ${{ matrix.report }}-*
+                pattern: ${{ matrix.report }}__*
                 delete-merged: true
 
             - name: 'Download merged artifacts'
