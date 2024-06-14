@@ -13,6 +13,7 @@ class View {
      * Render the entire view.
      */
     public static function render() {
+        self::hydrate_initial_state();
         ob_start();
         ?>
         <div data-wp-interactive="woocommerce/product-editor" data-wp-watch="actions.loadProduct">
@@ -26,6 +27,30 @@ class View {
         </div>
         <?php
         echo ob_get_clean();
+    }
+
+    /**
+     * Hydrate initial state.
+     */
+    public static function hydrate_initial_state() {
+        global $product_object;
+        global $post;
+
+        if ( isset( $_GET['id'] ) ) {
+            $product_object = wc_get_product( $_GET['id'] );
+            $post = get_post( $_GET['id'] );
+        }
+
+        $products_controller = new \WC_REST_Products_Controller();
+
+        wp_interactivity_state(
+            'woocommerce/product-editor',
+            array(
+                'activeTab' => 'general',
+                'product'   => $products_controller->prepare_object_for_response( $product_object, new \WP_REST_Request() )->get_data(),
+                'loading'   => false,
+            )
+        );
     }
 
     /**

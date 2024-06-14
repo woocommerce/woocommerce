@@ -47,7 +47,6 @@ class Init {
             WC()->plugin_url() . '/assets/js/admin/product-editor-interactivity' . $suffix . '.js',
             array( '@wordpress/interactivity' ),
             $version,
-            true
         );
 
         wp_enqueue_style(

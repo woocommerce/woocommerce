@@ -16,11 +16,7 @@ function getProductId() {
 }
 
 const { state } = store( NS, {
-	state: {
-		activeTab: 'general',
-		product: null,
-		loading: true,
-	},
+	state: {},
 	selectors: {
 		isTabActive: () => {
 			const context = getContext();
@@ -33,10 +29,12 @@ const { state } = store( NS, {
 	},
 	actions: {
 		loadProduct: function*() {
-			const product = yield wp.data.resolveSelect( 'core' ).getEntityRecord( 'postType', 'product', getProductId() );
-			console.log(product);
-			state.product = product;
-			state.loading = false;
+			if ( ! product || product.id !== getProductId() ) {
+				state.loading = true;
+				const product = yield wp.data.resolveSelect( 'core' ).getEntityRecord( 'postType', 'product', getProductId() );
+				state.product = product;
+				state.loading = false;
+			}
 		},
 		persistProduct() {
 			wp.data.dispatch( 'core' ).saveEditedEntityRecord(
