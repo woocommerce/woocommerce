@@ -30,12 +30,11 @@
 				position: absolute;
 				content: "";
 				bottom: -$gap-larger;
-				left: 50%;
 				transform: translateX(-50%);
-				width: 100vw;
+				width: 100%;
 				height: 1px;
-				background: currentColor;
-				opacity: 0.11;
+				opacity: .11;
+				box-shadow: 0 0 0 0 currentColor, 15px 1px 0 0 currentColor, 340px 1px 0 0 currentColor;
 			}
 		}
 	}
