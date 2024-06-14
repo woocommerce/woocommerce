@@ -135,7 +135,7 @@ test.describe( 'Product Reviews > Edit Product Review', () => {
 		await page.goto(
 			`wp-admin/comment.php?action=editcomment&c=${ review.id }`
 		);
-		await expect( page.getByText( 'Edit Review' ) ).toBeVisible();
+		await expect( page.getByText( 'Edit Comment' ) ).toBeVisible();
 
 		// Create new comment and edit the review with it
 		const updatedReview = `(edited ${ Date.now() })`;
