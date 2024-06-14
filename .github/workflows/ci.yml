@@ -90,6 +90,8 @@ jobs:
       - uses: actions/github-script@v7
         name: 'Build Matrix'
         id: 'project-jobs'
+        env:
+          PR_SIM: ${{ needs.dispatch-handler.outputs.base }}
         with:
           script: |
             let prSim = process.env.PR_SIM;
