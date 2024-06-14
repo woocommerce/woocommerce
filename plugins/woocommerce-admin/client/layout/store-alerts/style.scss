@@ -8,7 +8,9 @@
 	left: calc(-1 * var(--main-gap));
 
 	@include breakpoint( "<782px" ) {
-		left: calc(var(--main-gap) / -2);
+		margin: 24px auto;
+		left: calc(-1* var(--main-gap));
+		width: calc( 100% + var(--main-gap) );
 	}
 
 	&::before {
