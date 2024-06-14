@@ -118,4 +118,45 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( ratingHeading ).toBeVisible();
 		await expect( ratingFilterBlock ).toBeVisible();
 	} );
+
+	test( 'should display the correct customization settings', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Experimental)'
+		);
+		await expect( block ).toBeVisible();
+
+		await editor.openDocumentSettingsSidebar();
+
+		// Color settings
+		const colorSettings = editor.page.getByText( 'ColorTextBackground' );
+		const colorTextStylesSetting =
+			colorSettings.getByLabel( 'Color Text styles' );
+		const colorBackgroundStylesSetting = colorSettings.getByLabel(
+			'Color Background styles'
+		);
+
+		await expect( colorSettings ).toBeVisible();
+		await expect( colorTextStylesSetting ).toBeVisible();
+		await expect( colorBackgroundStylesSetting ).toBeVisible();
+
+		// Typography settings
+		const typographySettings = editor.page.getByText( 'TypographyFont' );
+		const typographySizeSetting = typographySettings.getByRole( 'group', {
+			name: 'Font size',
+		} );
+
+		await expect( typographySettings ).toBeVisible();
+		await expect( typographySizeSetting ).toBeVisible();
+
+		// Border settings
+		const borderSettings = editor.page.getByRole( 'heading', {
+			name: 'Border',
+		} );
+		await expect( borderSettings ).toBeVisible();
+	} );
 } );
