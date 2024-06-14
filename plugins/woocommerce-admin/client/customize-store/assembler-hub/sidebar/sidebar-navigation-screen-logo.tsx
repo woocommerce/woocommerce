@@ -31,6 +31,8 @@ import {
 } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
 import { store as noticesStore } from '@wordpress/notices';
+import interpolateComponents from '@automattic/interpolate-components';
+import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -531,17 +533,21 @@ export const SidebarNavigationScreenLogo = ( {
 							{ __( "DON'T HAVE A LOGO YET?", 'woocommerce' ) }
 						</strong>
 						<p>
-							{ __(
-								'Get a custom logo designed by a professional on ',
-								'woocommerce'
-							) }
-							<a
-								href="https://www.fiverr.com/logo-maker/woo?afp=&cxd_token=917527_33214203&show_join=true"
-								target="_blank"
-								rel="noreferrer"
-							>
-								{ __( 'Fiverr.', 'woocommerce' ) }
-							</a>
+							{ interpolateComponents( {
+								mixedString: __(
+									'Get a custom logo designed by a professional on {{link}}Fiverr{{/link}}.',
+									'woocommerce'
+								),
+								components: {
+									link: (
+										<Link
+											href="https://www.fiverr.com/logo-maker/woo?afp=&cxd_token=917527_33214203&show_join=true"
+											target="_blank"
+											type="external"
+										/>
+									),
+								},
+							} ) }
 						</p>
 					</div>
 				</div>
