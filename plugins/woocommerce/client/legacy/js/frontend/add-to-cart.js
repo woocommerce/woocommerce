@@ -65,11 +65,9 @@ jQuery( function( $ ) {
 				return true;
 			}
 
-			// Clean existing text in mini cart live region and update aria-relevant attribute
-			// so screen readers can identify the next update if it's the same as the previous one.
-			$( '.widget_shopping_cart_live_region' )
-				.text( '' )
-				.attr( 'aria-relevant', 'additions text' );
+			// Remove mini cart live region so screen readers can identify
+			// the next update if it's the same as the previous one.
+			$( '.widget_shopping_cart_live_region' ).remove();
 
 			e.preventDefault();
 
@@ -133,9 +131,7 @@ jQuery( function( $ ) {
 		var $thisbutton = $( this ),
 			$row        = $thisbutton.closest( '.woocommerce-mini-cart-item' );
 
-		$( '.widget_shopping_cart_live_region' )
-			.text( '' )
-			.attr( 'aria-relevant', 'additions text' );
+		$( '.widget_shopping_cart_live_region' ).remove();
 
 		e.preventDefault();
 
@@ -233,7 +229,7 @@ jQuery( function( $ ) {
 			$liveRegion = $( '<div class="widget_shopping_cart_live_region screen-reader-text" role="status"></div>' ).appendTo( 'body' );
 		}
 
-		$liveRegion.text( message ).attr( 'aria-relevant', 'all' );
+		$liveRegion.text( message );
 	};
 
 	/**
