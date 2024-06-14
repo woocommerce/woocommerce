@@ -21,7 +21,7 @@ module.exports = async ( config ) => {
 	// Clear out the previous save states
 	try {
 		fs.unlinkSync( process.env.ADMINSTATE );
-		console.log( 'Admin state file deleted successfully' );
+		console.log( 'Admin state file deleted successfully.' );
 	} catch ( err ) {
 		if ( err.code === 'ENOENT' ) {
 			console.log( 'Admin state file does not exist' );
