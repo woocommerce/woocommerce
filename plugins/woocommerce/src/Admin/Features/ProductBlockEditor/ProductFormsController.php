@@ -105,11 +105,13 @@ class ProductFormsController {
 
 				if ( ! empty( $post ) ) {
 					wp_update_post(
-						array(
-							'ID'           => $post->ID,
-							'post_title'   => $file_data['title'],
-							'post_content' => BlockTemplateUtils::get_template_content( $file_path ),
-							'post_excerpt' => $file_data['description'],
+						wp_slash(
+							array(
+								'ID'           => $post->ID,
+								'post_title'   => $file_data['title'],
+								'post_content' => BlockTemplateUtils::get_template_content( $file_path ),
+								'post_excerpt' => $file_data['description'],
+							)
 						)
 					);
 				}
@@ -123,13 +125,15 @@ class ProductFormsController {
 			}
 
 			$post = wp_insert_post(
-				array(
-					'post_title'   => $file_data['title'],
-					'post_name'    => $slug,
-					'post_status'  => 'publish',
-					'post_type'    => 'product_form',
-					'post_content' => BlockTemplateUtils::get_template_content( $file_path ),
-					'post_excerpt' => $file_data['description'],
+				wp_slash(
+					array(
+						'post_title'   => $file_data['title'],
+						'post_name'    => $slug,
+						'post_status'  => 'publish',
+						'post_type'    => 'product_form',
+						'post_content' => BlockTemplateUtils::get_template_content( $file_path ),
+						'post_excerpt' => $file_data['description'],
+					)
 				)
 			);
 		}
