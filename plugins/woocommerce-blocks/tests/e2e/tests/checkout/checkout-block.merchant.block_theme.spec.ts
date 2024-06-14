@@ -173,9 +173,7 @@ test.describe( 'Merchant → Checkout', () => {
 			exact: true,
 		} );
 		await requireTermsCheckbox.check();
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
+		await editor.saveSiteEditorEntities();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -218,9 +216,7 @@ test.describe( 'Merchant → Checkout', () => {
 			exact: true,
 		} );
 		await requireTermsCheckbox.uncheck();
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
+		await editor.saveSiteEditorEntities();
 	} );
 
 	test( 'inner blocks can be added/removed by filters', async ( {

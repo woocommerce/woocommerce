@@ -272,9 +272,7 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 				'div.wc-block-components-address-form__company'
 			)
 		).toBeVisible();
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
+		await editor.saveSiteEditorEntities();
 	} );
 
 	test( 'User can add postcodes for different countries', async ( {
@@ -527,9 +525,7 @@ test.describe( 'Billing Address Form', () => {
 		const companyInput = editor.canvas.getByLabel( 'Company (optional)' );
 		await expect( companyInput ).toBeVisible();
 
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
+		await editor.saveSiteEditorEntities();
 	} );
 
 	test.describe( 'Guest user', () => {
