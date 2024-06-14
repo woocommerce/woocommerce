@@ -53,6 +53,7 @@ const RETURN_TO_MAIN_PRODUCT = __(
 export function Header( {
 	onTabSelect,
 	productType = 'product',
+	selectedTab,
 }: HeaderProps ) {
 	const isEditorLoading = useContext( EditorLoadingContext );
 
@@ -248,6 +249,7 @@ export function Header( {
 					{ ! isVariation && (
 						<SaveDraftButton
 							productType={ productType }
+							visibleTab={ selectedTab }
 							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 							// @ts-ignore - Prop is not typed correctly.
 							productStatus={ lastPersistedProduct?.status }
@@ -256,6 +258,7 @@ export function Header( {
 
 					<PreviewButton
 						productType={ productType }
+						visibleTab={ selectedTab }
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore - Prop is not typed correctly.
 						productStatus={ lastPersistedProduct?.status }
@@ -266,6 +269,7 @@ export function Header( {
 							productType={ productType }
 							isPrePublishPanelVisible={ showPrepublishChecks }
 							isMenuButton
+							visibleTab={ selectedTab }
 						/>
 					</Suspense>
 
