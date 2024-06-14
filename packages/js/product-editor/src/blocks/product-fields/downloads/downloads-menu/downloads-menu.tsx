@@ -18,6 +18,7 @@ export function DownloadsMenu( {
 	maxUploadFileSize,
 	onUploadSuccess,
 	onUploadError,
+	onLinkError,
 }: DownloadsMenuProps ) {
 	return (
 		<Dropdown
@@ -54,11 +55,14 @@ export function DownloadsMenu( {
 						/>
 
 						<InsertUrlMenuItem
-							onUploadSuccess={ ( files ) => {
+							onLinkSuccess={ ( files ) => {
 								onUploadSuccess( files );
 								onClose();
 							} }
-							onUploadError={ onUploadError }
+							onLinkError={ ( error ) => {
+								onLinkError( error );
+								onClose();
+							} }
 						/>
 					</MenuGroup>
 				</div>

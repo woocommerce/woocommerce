@@ -38,6 +38,7 @@ import {
 import { EditDownloadsModal } from './edit-downloads-modal';
 import { UploadImage } from './upload-image';
 import { SectionActions } from '../../../components/block-slot-fill';
+import { InsertUrlLinkErrorCallback } from './insert-url-menu-item';
 
 function getFileName( url?: string ) {
 	const [ name ] = url?.split( '/' ).reverse() ?? [];
@@ -180,6 +181,18 @@ export function DownloadBlockEdit( {
 		);
 	};
 
+	const handleLinkError: InsertUrlLinkErrorCallback = function (
+		error: string
+	) {
+		createErrorNotice(
+			sprintf(
+				/* translators: %1$s is a line break, %2$s is the detailed error message */
+				__( 'Error linking file:%1$s%2$s', 'woocommerce' ),
+				'\n',
+				error
+			)
+		);
+	};
 	function editDownloadsModalSaveHandler( value: ProductDownload ) {
 		return function handleEditDownloadsModalSave() {
 			const newDownloads = downloads
@@ -209,6 +222,7 @@ export function DownloadBlockEdit( {
 					allowedTypes={ allowedTypes }
 					onUploadSuccess={ handleFileUpload }
 					onUploadError={ handleUploadError }
+					onLinkError={ handleLinkError }
 				/>
 			</SectionActions>
 
