@@ -36,6 +36,7 @@ jobs:
     outputs:
       head: ${{ steps.pr-info.outputs.head }}
       base: ${{ steps.pr-info.outputs.base }}
+
     steps:
       - uses: actions/github-script@v6
         name: 'Grab PR info.'
@@ -216,7 +217,7 @@ jobs:
         # https://github.com/actions/upload-artifact/issues/176
         env:
           ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
-          run: echo "ARTIFACTS_PATH=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
+        run: echo "ARTIFACTS_PATH=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
 
       - name: 'Upload artifacts'
         if: ${{ always() && matrix.report.resultsPath != '' }}
@@ -327,7 +328,7 @@ jobs:
       matrix:
         report: ${{ fromJSON( needs.project-jobs.outputs.report-jobs ) }}
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
 
