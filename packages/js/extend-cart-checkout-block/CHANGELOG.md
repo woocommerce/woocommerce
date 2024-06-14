@@ -2,15 +2,18 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.3.0) - 2024-06-14 
+
+-   Minor - Adds an example of using the Additional Checkout Fields API [#48280]
+-   Minor - Bump node version. [#45148]
+-   Patch - bump php version in packages/js/*/composer.json [#42020]
+-   Minor - Update pnpm monorepo-wide to 8.6.5 [#38990]
+-   Minor - Update pnpm to 8.6.7 [#39245]
+-   Patch - Update pnpm to 9.1.0 [#47385]
+
 ## [1.2.0](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.2.0) - 2023-04-26 
 
 -   Patch - This patch includes the following changes:
-    
-    -   Add `prettier:npm:wp-prettier@2.6.2`
-    -   Add `.wp-env`
-    -   Add `.nvmrc`
-    -   Correct CSS handle of newsletter subscription block
-    -   Correct metadata category of newsletter subscription block [#37914]
 -   Minor - Update pnpm to version 8. [#37914]
 
 ## [1.1.0](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.1.0) - 2022-11-21 
