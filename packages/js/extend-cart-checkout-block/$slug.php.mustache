@@ -54,7 +54,7 @@ function register_{{slugPascalCase}}_block_category( $categories ) {
 add_action( 'block_categories_all', 'register_{{slugPascalCase}}_block_category', 10, 2 );
 
 
-add_action( 'woocommerce_loaded', '{{slugPascalCase}}_register_custom_checkout_fields' );
+add_action( 'woocommerce_init', '{{slugPascalCase}}_register_custom_checkout_fields' );
 
 /**
  * Registers custom checkout fields for the WooCommerce checkout form.
