@@ -42,14 +42,12 @@ export const usePopoverHandler = () => {
 		clickedBlockClientId,
 		hoveredBlockClientId,
 	}: {
-		mainBodyWidth: number;
-		iframeWidth: number;
 		event: MouseEvent;
 		clickedBlockClientId: string | null;
 		hoveredBlockClientId: string | null;
 	} ) => {
 		const iframe = window.document.querySelector(
-			'iframe[name="editor-canvas"]'
+			'.woocommerce-customize-store-assembler > iframe[name="editor-canvas"]'
 		) as HTMLElement;
 
 		clickedClientId =
@@ -70,8 +68,8 @@ export const usePopoverHandler = () => {
 
 			const newElement = {
 				getBoundingClientRect: generateGetBoundingClientRect(
-					event.clientX + iframeRect.left + window.scrollX,
-					event.clientY - iframeRect.top + 50
+					event.clientX + iframeRect.left,
+					event.clientY + iframeRect.top + 20
 				),
 			} as VirtualElement;
 
