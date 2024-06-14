@@ -1,10 +1,11 @@
 .woocommerce-store-alerts {
 	position: relative;
-	margin: 0 0 $gap-largest 0;
-	margin-right: var(--large-gap);
+	margin: 40px auto;
 	padding: $gap-large;
 	border: 0;
 	box-shadow: 0 0 8px -2px rgba(0, 0, 0, 0.3);
+	max-width: 682px;
+	left: calc(-1 * var(--main-gap));
 
 	&::before {
 		content: "";
