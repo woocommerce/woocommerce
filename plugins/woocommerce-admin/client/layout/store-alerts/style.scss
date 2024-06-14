@@ -7,6 +7,10 @@
 	max-width: 682px;
 	left: calc(-1 * var(--main-gap));
 
+	@include breakpoint( "<782px" ) {
+		left: calc(var(--main-gap) / -2);
+	}
+
 	&::before {
 		content: "";
 		position: absolute;
