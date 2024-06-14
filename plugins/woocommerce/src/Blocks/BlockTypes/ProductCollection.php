@@ -45,6 +45,7 @@ class ProductCollection extends AbstractBlock {
 	 */
 	protected $custom_order_opts = array( 'popularity', 'rating' );
 
+	
 	/**
 	 * Initialize this block type.
 	 *
