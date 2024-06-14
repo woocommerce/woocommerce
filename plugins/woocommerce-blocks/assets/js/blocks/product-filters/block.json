@@ -9,8 +9,22 @@
 	"keywords": [ "WooCommerce" ],
 	"supports": {
 		"align": true,
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true
+		},
+		"color": {
+			"background": true,
+			"text": true
+		},
 		"multiple": false,
-		"interactivity": true
+		"interactivity": true,
+		"typography": {
+			"fontSize": true,
+			"textAlign": true
+		}
 	},
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId" ],
