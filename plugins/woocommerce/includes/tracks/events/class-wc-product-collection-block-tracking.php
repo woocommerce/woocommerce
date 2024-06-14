@@ -100,6 +100,8 @@ class WC_Product_Collection_Block_Tracking {
 	 *
 	 * @param array $blocks                The parsed blocks to check.
 	 * @param bool  $is_in_single_product  Whether we are in a single product container (used for keeping state in the recurring process).
+	 * @param bool  $is_in_template_part   Whether we are in a template part (used for keeping state in the recurring process).
+	 * @param bool  $is_in_synced_pattern  Whether we are in a synced block (used for keeping state in the recurring process).
 	 *
 	 * @return array Parsed instances of the Product Collection block.
 	 */
