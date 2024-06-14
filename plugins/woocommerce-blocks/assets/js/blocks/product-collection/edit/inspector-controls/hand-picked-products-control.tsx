@@ -7,6 +7,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
+import { blocksConfig } from '@woocommerce/block-settings';
 import {
 	FormTokenField,
 	// @ts-expect-error Using experimental features
@@ -25,7 +26,11 @@ import { DEFAULT_FILTERS } from '../../constants';
  * - productsMap: Map of products by id and name.
  * - productsList: List of products retrieved.
  */
-function useProducts( search: string, selected: string[] ) {
+function useProducts(
+	isLargeCatalog: boolean,
+	search: string,
+	selected: string[]
+) {
 	// Creating a map for fast lookup of products by id or name.
 	const [ productsMap, setProductsMap ] = useState<
 		Map< number | string, ProductResponseItem >
@@ -37,16 +42,19 @@ function useProducts( search: string, selected: string[] ) {
 	);
 
 	useEffect( () => {
-		getProducts( {
-			selected: selected.map( Number ),
-			queryArgs: {
-				search,
-				// Limit search to 40 results. If results are not satisfying
-				// user needs to type more characters to get closer to actual
-				// product name.
-				per_page: 40,
-			},
-		} ).then( ( results ) => {
+		const query = {
+			selected: isLargeCatalog ? selected.map( Number ) : [],
+			queryArgs: isLargeCatalog
+				? {
+						search,
+						// Limit search to 40 results. If results are not satisfying
+						// user needs to type more characters to get closer to actual
+						// product name.
+						per_page: 40,
+				  }
+				: {},
+		};
+		getProducts( query ).then( ( results ) => {
 			const newProductsMap = new Map();
 			( results as ProductResponseItem[] ).forEach( ( product ) => {
 				newProductsMap.set( product.id, product );
@@ -56,7 +64,7 @@ function useProducts( search: string, selected: string[] ) {
 			setProductsList( results as ProductResponseItem[] );
 			setProductsMap( newProductsMap );
 		} );
-	}, [ search, selected ] );
+	}, [ isLargeCatalog, search, selected ] );
 
 	return { productsMap, productsList };
 }
@@ -66,13 +74,15 @@ const HandPickedProductsControl = ( {
 	trackInteraction,
 	setQueryAttribute,
 }: QueryControlProps ) => {
+	const isLargeCatalog = ( blocksConfig.productCount || 0 ) > 100;
 	const selectedProductIds = query.woocommerceHandPickedProducts;
 	const [ searchQuery, setSearchQuery ] = useState( '' );
 	const { productsMap, productsList } = useProducts(
+		isLargeCatalog,
 		searchQuery,
 		selectedProductIds
 	);
-	const handleSearch = useDebounce( setSearchQuery, 300 );
+	const handleSearch = useDebounce( setSearchQuery, 250 );
 
 	const onTokenChange = useCallback(
 		( values: string[] ) => {
@@ -146,7 +156,7 @@ const HandPickedProductsControl = ( {
 				displayTransform={ transformTokenIntoProductName }
 				label={ __( 'Hand-picked Products', 'woocommerce' ) }
 				onChange={ onTokenChange }
-				onInputChange={ handleSearch }
+				onInputChange={ isLargeCatalog ? handleSearch : undefined }
 				suggestions={ suggestions }
 				// @ts-expect-error Using experimental features
 				__experimentalValidateInput={ ( value: string ) =>
