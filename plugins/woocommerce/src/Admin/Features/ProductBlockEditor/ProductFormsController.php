@@ -34,41 +34,39 @@ class ProductFormsController {
 	 * @return void
 	 */
 	public function migrate_templates_when_plugin_updated( \WP_Upgrader $upgrader, array $hook_extra ) {
-		/*
-		 * Check whether $hook_extra['plugins'] contains the WooCommerce plugin.
-		 * It seems that $hook_extra may be `null` in some cases.
-		 * @see https://github.com/woocommerce/woocommerce/pull/48221#pullrequestreview-2102772713
-		 */
-		if ( ! isset( $hook_extra['plugins'] ) || ! is_array( $hook_extra['plugins'] ) ) {
+		// If it is not a plugin hook type, bail early.
+		$type = isset( $hook_extra['type'] ) ? $hook_extra['type'] : '';
+		if ( 'plugin' !== $type ) {
 			return;
 		}
 
-		// Check if WooCommerce plugin was updated.
+		// If it is not the WooCommerce plugin, bail early.
+		$plugins = isset( $hook_extra['plugins'] ) ? $hook_extra['plugins'] : array();
 		if (
-			! in_array( 'woocommerce/woocommerce.php', $hook_extra['plugins'], true )
+			! in_array( 'woocommerce/woocommerce.php', $plugins, true )
 		) {
 			return;
 		}
 
-		// Check if the action is an `update` or `install` action for a plugin.
+		// If the action is not install or update, bail early.
 		$action = isset( $hook_extra['action'] ) ? $hook_extra['action'] : '';
-
-		if (
-			'install' !== $action && 'update' !== $action ||
-			'plugin' !== $hook_extra['type']
-		) {
+		if ( 'install' !== $action && 'update' !== $action ) {
 			return;
 		}
 
-		$this->migrate_product_form_posts();
+		// Trigger the migration process.
+		$this->migrate_product_form_posts( $action );
 	}
 
 	/**
-	 * Insert post form posts for each form template file.
+	 * Create ot update a product_form post for each product form template.
+	 * If the post already exists, it will be updated.
+	 * If the post does not exist, it will be created even if the action is `update`.
 	 *
+	 * @param string $action - The action to perform. `insert` | `update`.
 	 * @return void
 	 */
-	public function migrate_product_form_posts() {
+	public function migrate_product_form_posts( $action ) {
 		/**
 		 * Allow extend the list of templates that should be auto-generated.
 		 *
@@ -99,6 +97,25 @@ class ProductFormsController {
 			);
 
 			/*
+			 * Update the the CPT post if it already exists,
+			 * and the action is `update`.
+			 */
+			if ( 'update' === $action ) {
+				$post = $posts[0] ?? null;
+
+				if ( ! empty( $post ) ) {
+					wp_update_post(
+						array(
+							'ID'           => $post->ID,
+							'post_title'   => $file_data['title'],
+							'post_content' => BlockTemplateUtils::get_template_content( $file_path ),
+							'post_excerpt' => $file_data['description'],
+						)
+					);
+				}
+			}
+
+			/*
 			 * Skip the post creation if the post already exists.
 			 */
 			if ( ! empty( $posts ) ) {
@@ -112,7 +129,7 @@ class ProductFormsController {
 					'post_status'  => 'publish',
 					'post_type'    => 'product_form',
 					'post_content' => BlockTemplateUtils::get_template_content( $file_path ),
-					'post_excerpt' => __( 'Template auto-generated for the (PFT) Product Form Template system', 'woocommerce' ),
+					'post_excerpt' => $file_data['description'],
 				)
 			);
 		}

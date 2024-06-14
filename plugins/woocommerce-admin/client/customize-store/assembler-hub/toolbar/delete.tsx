@@ -10,9 +10,15 @@ import {
 	// @ts-expect-error missing type
 } from '@wordpress/block-editor';
 
-export default function Delete( { clientId }: { clientId: string } ) {
+export default function Delete( {
+	clientId,
+	nextBlockClientId,
+}: {
+	clientId: string;
+	nextBlockClientId: string | undefined;
+} ) {
 	// @ts-expect-error missing type
-	const { removeBlock } = useDispatch( blockEditorStore );
+	const { removeBlock, selectBlock } = useDispatch( blockEditorStore );
 
 	return (
 		<ToolbarGroup>
@@ -22,6 +28,9 @@ export default function Delete( { clientId }: { clientId: string } ) {
 					icon={ trash }
 					onClick={ () => {
 						removeBlock( clientId );
+						if ( nextBlockClientId ) {
+							selectBlock( nextBlockClientId );
+						}
 					} }
 				/>
 			</ToolbarButton>

@@ -88,12 +88,14 @@ jobs:
               name: 'Checkout'
               with:
                   fetch-depth: 0
+                  
             - uses: './.github/actions/setup-woocommerce-monorepo'
               name: 'Setup Monorepo'
               id: 'setup-monorepo'
               with:
                   install: '${{ matrix.projectName }}...'
                   build: '${{ matrix.projectName }}'
+                  
             - name: 'Lint'
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
@@ -163,14 +165,26 @@ jobs:
                 CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
               
+            - name: 'Resolve artifacts path'
+              # Blocks e2e use a relative path which is not supported by actions/upload-artifact@v4
+              # https://github.com/actions/upload-artifact/issues/176
+              env:
+                ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
+              run: echo "ARTIFACTS_PATH=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
+              
             - name: 'Upload artifacts'
               if: ${{ always() && matrix.report.resultsPath != '' }}
               uses: actions/upload-artifact@v4
               with:
                 name: '${{ matrix.report.resultsBlobName }}-${{ strategy.job-index }}'
-                path: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
-                retention-days: 1
-                compression-level: 9
+                path: ${{ env.ARTIFACTS_PATH }}
+                
+            - name: 'Upload flaky test reports'
+              uses: actions/upload-artifact@v4
+              with:
+                name: flaky-tests-${{ strategy.job-index }}
+                path: ${{ env.ARTIFACTS_PATH }}/flaky-tests
+                if-no-files-found: ignore
 
             - name: 'Archive metrics results'
               if: ${{ success() && startsWith(matrix.name, 'Metrics') }} # this seems too fragile, we should update the reporting path and use the generic upload step above
@@ -255,7 +269,7 @@ jobs:
                   pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE Tests" -m "$COMMIT_MESSAGE"
 
     test-reports:
-        name: 'Publish reports - ${{ matrix.report }}'
+        name: 'Test reports - ${{ matrix.report }}'
         needs:
           [
             'project-jobs',
@@ -275,38 +289,81 @@ jobs:
               env:
                   DESTINATION_PATH: ../
               run: ./.github/workflows/scripts/install-allure.sh
+              
+            - name: 'Merge artifacts'
+              uses: actions/upload-artifact/merge@v4
+              continue-on-error: true
+              with:
+                name: ${{ matrix.report }}
+                pattern: ${{ matrix.report }}-*
+                delete-merged: true
 
-            - name: 'Download blob reports from artifacts'
+            - name: 'Download merged artifacts'
               uses: actions/download-artifact@v4
               with:
+                  name: ${{ matrix.report }}
                   path: ./out
-                  pattern: ${{ matrix.report }}-*
-                  run-id: project-test-jobs
-                  merge-multiple: true
 
             - name: 'Generate Allure report'
               id: generate_allure_report
-              run: allure generate --clean ./out/allure-results --output ./out/allure-report
+              run: |
+                ls -lh ./out
+                allure generate --clean ./out/allure-results --output ./out/allure-report
+                ls -lh ./out
 
-            - name: 'Archive reports'
+            - name: 'Re-upload artifacts with generated report'
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ matrix.report }}
                   path: ./out
                   if-no-files-found: ignore
-                  retention-days: 5
+                  retention-days: 10
+                  overwrite: true
 
             - name: 'Publish report to dashboard'
               env:
                   GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   PR_NUMBER: ${{ github.event.pull_request.number }}
+                  REPORT_NAME: ${{ matrix.report }}
+                  HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                  PR_TITLE: ${{ github.event.pull_request.title }}
+                  EVENT_NAME: ${{ inputs.trigger == '' && github.event_name || inputs.trigger }}
+              run: |
+                  if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+                    REPORT_TITLE="$PR_TITLE"
+                    REF_NAME="$GITHUB_HEAD_REF"
+                  elif [[ "${{ github.event_name }}" == "push" ]]; then
+                    REPORT_TITLE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+                    REF_NAME="$GITHUB_REF_NAME"
+                  else
+                    REPORT_TITLE="$EVENT_NAME"
+                    REF_NAME="$GITHUB_REF_NAME"
+                  fi
+                
+                  gh workflow run report.yml \
+                    -f artifact="$REPORT_NAME" \
+                    -f run_id="$GITHUB_RUN_ID" \
+                    -f event="$EVENT_NAME" \
+                    -f pr_number="$PR_NUMBER" \
+                    -f ref_name="$REF_NAME" \
+                    -f commit_sha="$GITHUB_SHA" \
+                    -f repository="$GITHUB_REPOSITORY" \
+                    -f suite="$REPORT_NAME" \
+                    -f report_title="$REPORT_TITLE" \
+                    --repo woocommerce/woocommerce-test-reports
+                
+            - name: 'Publish report to dashboard (deprecated)'
+              env:
+                  GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
                   RUN_ID: ${{ github.run_id }}
+                  REPORT_NAME: ${{ matrix.report }}
               if: ${{ contains(matrix.report, 'e2e') }} # temporary until we adapt the woocommerce-test-reports side to not care about the test type
               run: |
                   if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
                     gh workflow run publish-test-reports-pr.yml \
                       -f run_id=$RUN_ID \
-                      -f e2e_artifact=e2e-test-report \
+                      -f e2e_artifact=$REPORT_NAME \
                       -f pr_number=$PR_NUMBER \
                       -f commit_sha=$GITHUB_SHA \
                       -f s3_root=public \
@@ -314,7 +371,7 @@ jobs:
                   elif [ "$GITHUB_EVENT_NAME" == push ]; then
                     gh workflow run publish-test-reports-trunk-merge.yml \
                       -f run_id=$RUN_ID \
-                      -f artifact=e2e-test-report \
+                      -f artifact=$REPORT_NAME \
                       -f pr_number=$PR_NUMBER \
                       -f commit_sha=$GITHUB_SHA \
                       -f test_type="e2e" \
@@ -324,6 +381,52 @@ jobs:
                   fi
 
             - name: 'Add annotation to workflow run linking to PR'
-              if: ${{ github.event_name == 'pull_request' }}
+              if: ${{ github.event_name == 'pull_request' && contains(matrix.report, 'e2e') }}
               run: |
                   echo "::notice::🔗🔗 The e2e report for this run is available at https://woocommerce.github.io/woocommerce-test-reports/pr/${{ github.event.pull_request.number }}/e2e"
+
+
+    report-flaky-tests:
+        name: 'Create issues for flaky tests'
+        if: ${{ !cancelled() && ! github.event.pull_request.head.repo.fork }}
+        needs: ['project-test-jobs']
+        runs-on: ubuntu-latest
+        permissions:
+          contents: read
+          issues: write
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  repository: WordPress/gutenberg
+                  ref: dbf201449e9736f672b61e422787d47659db327a
+                  
+            - uses: actions/download-artifact@v4
+              id: download-artifact
+              with:
+                pattern: flaky-tests*
+                path: flaky-tests
+                merge-multiple: true
+                
+            - name: 'Check if there are flaky tests reports'
+              run: |
+                downloadPath='${{ steps.download-artifact.outputs.download-path }}'
+                # make dir so that next step doesn't fail if it doesn't exist 
+                mkdir -p $downloadPath
+                # any output means there are reports
+                echo "FLAKY_REPORTS=$(ls -A $downloadPath | head -1)" >> $GITHUB_ENV
+                
+            - name: 'Setup'
+              if: ${{ !!env.FLAKY_REPORTS }}
+              uses: ./.github/setup-node
+
+            - name: 'Build packages'
+              if: ${{ !!env.FLAKY_REPORTS }}
+              run: npm run build:packages
+
+            - name: 'Report flaky tests'
+              if: ${{ !!env.FLAKY_REPORTS }}
+              uses: ./packages/report-flaky-tests
+              with:
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+                  label: 'metric: flaky e2e test'

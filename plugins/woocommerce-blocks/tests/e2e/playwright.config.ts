@@ -10,7 +10,7 @@ const { CI, DEFAULT_TIMEOUT_OVERRIDE } = process.env;
 const config: PlaywrightTestConfig = {
 	maxFailures: 0,
 	timeout: parseInt( DEFAULT_TIMEOUT_OVERRIDE || '', 10 ) || 100_000, // Defaults to 100s.
-	outputDir: './artifacts/test-results',
+	outputDir: `${ __dirname }/artifacts/test-results`,
 	globalSetup: fileURLToPath(
 		new URL( 'global-setup.ts', 'file:' + __filename ).href
 	),
