@@ -360,4 +360,95 @@ class ArrayUtilTest extends \WC_Unit_Test_Case {
 		);
 		ArrayUtil::ensure_key_is_array( $array, 'bar', true );
 	}
+
+	/**
+	 * @testdox `group_by_column` works as expected when not returning single values.
+	 */
+	public function test_group_by_column_not_returning_single_values() {
+		$data = array(
+			array(
+				'name' => 'foo',
+				'type' => 'buzzword',
+			),
+			array(
+				'name' => 'bar',
+				'type' => 'buzzword',
+			),
+			array(
+				'name' => 'Panasonic',
+				'type' => 'MSX maker',
+			),
+			array(
+				'name' => 'Sony',
+				'type' => 'MSX maker',
+			),
+		);
+
+		$expected = array(
+			'buzzword'  => array(
+				array(
+					'name' => 'foo',
+					'type' => 'buzzword',
+				),
+				array(
+					'name' => 'bar',
+					'type' => 'buzzword',
+				),
+			),
+			'MSX maker' => array(
+				array(
+					'name' => 'Panasonic',
+					'type' => 'MSX maker',
+				),
+				array(
+					'name' => 'Sony',
+					'type' => 'MSX maker',
+				),
+			),
+		);
+
+		$actual = ArrayUtil::group_by_column( $data, 'type', false );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox `group_by_column` works as expected when returning single values.
+	 */
+	public function test_group_by_column_returning_single_values() {
+		$data = array(
+			array(
+				'name' => 'foo',
+				'type' => 'buzzword',
+			),
+			array(
+				'name' => 'bar',
+				'type' => 'buzzword',
+			),
+			array(
+				'name' => 'Panasonic',
+				'type' => 'MSX maker',
+			),
+			array(
+				'name' => 'Sony',
+				'type' => 'MSX maker',
+			),
+		);
+
+		$expected = array(
+			'buzzword'  =>
+				array(
+					'name' => 'bar',
+					'type' => 'buzzword',
+				),
+			'MSX maker' =>
+				array(
+					'name' => 'Sony',
+					'type' => 'MSX maker',
+				),
+
+		);
+
+		$actual = ArrayUtil::group_by_column( $data, 'type', true );
+		$this->assertEquals( $expected, $actual );
+	}
 }
