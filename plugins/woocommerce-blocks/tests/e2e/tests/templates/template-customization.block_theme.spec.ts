@@ -162,26 +162,30 @@ test.describe( 'Template customization', () => {
 					.getByPlaceholder( 'Search' )
 					.fill( testData.templateName );
 
-				const revertedNotice = page
+				const resetNotice = page
 					.getByLabel( 'Dismiss this notice' )
-					.getByText( `"${ testData.templateName }" reset.` );
+					.getByText(
+						testData.templateType === 'wp_template'
+							? `"${ testData.templateName }" reset.`
+							: `"${ testData.templateName }" deleted.`
+					);
 				const savedButton = page.getByRole( 'button', {
 					name: 'Saved',
 				} );
 
 				// Wait until search has finished.
-				await page.waitForFunction( () => {
+				await page.waitForFunction( ( templatesLength ) => {
 					return (
 						document.querySelectorAll( '[aria-label="Actions"]' )
-							.length === 1
+							.length < templatesLength
 					);
-				} );
+				}, CUSTOMIZABLE_WC_TEMPLATES.length );
 
-				await page.getByLabel( 'Actions' ).click();
+				await page.getByLabel( 'Actions' ).first().click();
 				await page.getByRole( 'menuitem', { name: 'Reset' } ).click();
 				await page.getByRole( 'button', { name: 'Reset' } ).click();
 
-				await expect( revertedNotice ).toBeVisible();
+				await expect( resetNotice ).toBeVisible();
 				await expect( savedButton ).toBeVisible();
 
 				await testData.visitPage( { frontendUtils, page } );
