@@ -308,10 +308,6 @@ test.describe( 'Assembler -> Color Pickers', () => {
 					response.status() === 200
 			);
 
-			await saveButton.click();
-
-			await waitResponse;
-
 			const buttons = await editor
 				.locator( '.wp-block-button > .wp-block-button__link' )
 				.evaluateAll( ( elements ) =>
@@ -392,6 +388,10 @@ test.describe( 'Assembler -> Color Pickers', () => {
 			for ( const element of headersInCoverBlock ) {
 				expect( element.color ).toEqual( 'rgb(255, 255, 255)' );
 			}
+
+			await saveButton.click();
+
+			await waitResponse;
 		} );
 	}
 
