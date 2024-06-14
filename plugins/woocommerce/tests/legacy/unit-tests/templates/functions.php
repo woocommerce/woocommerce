@@ -243,7 +243,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	 * Test: test_checkbox_not_required_field.
 	 */
 	public function test_checkbox_not_required_field() {
-		$actual_html   = woocommerce_form_field(
+		$actual_html = woocommerce_form_field(
 			'test',
 			array(
 				'type'     => 'checkbox',
