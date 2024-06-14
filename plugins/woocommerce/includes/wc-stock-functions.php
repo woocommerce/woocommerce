@@ -312,11 +312,11 @@ function wc_increase_stock_levels( $order_id ) {
         /**
          * Fires when stock restored to a specific line item
          *
+         * @since 9.1.0
          * @param WC_Order_Item_Product $item Order item data.
          * @param int $new_stock  New stock.
          * @param int $old_stock Old stock.
          * @param WC_Order $order  Order data.
-         * @since 9.1.0
          */
         do_action( 'woocommerce_restore_order_item_stock', $item, $new_stock, $old_stock, $order );
 	}
