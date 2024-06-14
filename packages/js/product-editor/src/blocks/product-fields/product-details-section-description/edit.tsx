@@ -84,6 +84,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		'status'
 	);
 
+	const [ , setSelectedProductFormId ] = useEntityProp< number >(
+		'postType',
+		'product',
+		'__provisorySelectedProductFormId'
+	);
+
 	const { validate } = useValidations< Product >();
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
@@ -388,7 +394,11 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 											icon={ resolveIcon( 'external' ) }
 											info={ formPost.excerpt.raw }
 											iconPosition="left"
-											onClick={ onClose } // close the dropdown for now
+											onClick={ () =>
+												setSelectedProductFormId(
+													formPost.id
+												)
+											}
 										>
 											{ formPost.title.rendered }
 										</MenuItem>
