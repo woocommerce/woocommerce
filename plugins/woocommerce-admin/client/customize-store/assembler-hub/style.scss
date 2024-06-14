@@ -821,3 +821,10 @@ body.woocommerce-assembler {
 		user-select: none;
 	}
 }
+
+.edit-site-layout__content {
+	.edit-site-layout__sidebar {
+		display: flex;
+		max-width: 700px;
+	}
+}
