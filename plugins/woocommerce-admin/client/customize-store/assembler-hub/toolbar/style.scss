@@ -7,3 +7,10 @@
 		padding: 0;
 	}
 }
+
+.woocommerce-customize-your-store-toolbar-shuffle-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	user-select: none;
+}
