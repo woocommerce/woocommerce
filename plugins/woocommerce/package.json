@@ -501,6 +501,7 @@
 						"tests/e2e-pw/bin/**"
 					],
 					"events": [
+						"pull_request",
 						"push"
 					],
 					"testEnv": {
