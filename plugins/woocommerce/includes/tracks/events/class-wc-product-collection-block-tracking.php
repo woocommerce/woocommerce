@@ -110,6 +110,11 @@ class WC_Product_Collection_Block_Tracking {
 		$instances = array();
 
 		foreach ( $blocks as $block ) {
+
+			if ( empty( $block['blockName'] ) ) {
+				continue;
+			}
+
 			if ( 'woocommerce/product-collection' === $block['blockName'] ) {
 				$instances[] = array(
 					'collection'        => $block['attrs']['collection'] ?? 'product-catalog',
@@ -127,22 +132,27 @@ class WC_Product_Collection_Block_Tracking {
 			}
 
 			// Track instances within template part.
-			if ( 'core/template-part' === $block['blockName'] ) {
-				$template_part = get_block_template( $block['attrs']['theme'] . '//' . $block['attrs']['slug'], 'wp_template_part' );
+			// Hint: Supports up to two levels of depth.
+			if ( ! $is_in_synced_pattern && ! $is_in_template_part && 'core/template-part' === $block['blockName'] ) {
+
+				$template_part_theme = $block['attrs']['theme'] ?? '';
+				$template_part_slug  = $block['attrs']['slug'] ?? '';
+				$template_part       = get_block_template( $template_part_theme . '//' . $template_part_slug, 'wp_template_part' );
 				if ( $template_part instanceof WP_Block_Template && ! empty( $template_part->content ) ) {
-					if ( has_block( 'woocommerce/product-collection', $template_part->content ) || has_block( 'core/template-part', $template_part->content ) || has_block( 'core/block', $template_part->content ) ) {
-						$instances = array_merge( $instances, $this->parse_blocks_track_data( parse_blocks( $template_part->content ), $local_is_in_single_product, true, $is_in_synced_pattern ) );
-					}
+					// Recursive.
+					$instances = array_merge( $instances, $this->parse_blocks_track_data( parse_blocks( $template_part->content ), $local_is_in_single_product, true, $is_in_synced_pattern ) );
 				}
 			}
 
 			// Track instances within synced block.
-			if ( 'core/block' === $block['blockName'] ) {
-				$synced_pattern = get_post( $block['attrs']['ref'] );
+			// Hint: Supports up to two levels of depth.
+			if ( ! $is_in_synced_pattern && ! $is_in_template_part && 'core/block' === $block['blockName'] ) {
+
+				$block_id       = $block['attrs']['ref'] ?? 0;
+				$synced_pattern = get_post( $block_id );
 				if ( $synced_pattern instanceof WP_Post && ! empty( $synced_pattern->post_content ) ) {
-					if ( has_block( 'woocommerce/product-collection', $synced_pattern->post_content ) || has_block( 'core/template-part', $synced_pattern->post_content ) || has_block( 'core/block', $synced_pattern->post_content ) ) {
-						$instances = array_merge( $instances, $this->parse_blocks_track_data( parse_blocks( $synced_pattern->post_content ), $local_is_in_single_product, $is_in_template_part, true ) );
-					}
+					// Recursive.
+					$instances = array_merge( $instances, $this->parse_blocks_track_data( parse_blocks( $synced_pattern->post_content ), $local_is_in_single_product, $is_in_template_part, true ) );
 				}
 			}
 
@@ -184,10 +194,6 @@ class WC_Product_Collection_Block_Tracking {
 			return $context;
 		}
 
-		if ( in_array( $post_type, array( 'wp_block', 'wp_template_part' ), true ) ) {
-			$context = 'isolated';
-		}
-
 		if ( 'wp_template' === $post_type ) {
 			$name = $post->post_name;
 			if ( false !== strpos( $name, SingleProductTemplate::SLUG ) ) {
@@ -209,6 +215,10 @@ class WC_Product_Collection_Block_Tracking {
 			} elseif ( OrderConfirmationTemplate::SLUG === $name ) {
 				$context = 'order-confirmation';
 			}
+		}
+
+		if ( in_array( $post_type, array( 'wp_block', 'wp_template_part' ), true ) ) {
+			$context = 'isolated';
 		}
 
 		if ( 'page' === $post_type ) {
