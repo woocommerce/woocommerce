@@ -41,10 +41,10 @@ function useProducts( search: string, selected: string[] ) {
 			selected: selected.map( Number ),
 			queryArgs: {
 				search,
-				// Limit search to 100 results. If there's too many results
+				// Limit search to 40 results. If results are not satisfying
 				// user needs to type more characters to get closer to actual
 				// product name.
-				per_page: 100,
+				per_page: 40,
 			},
 		} ).then( ( results ) => {
 			const newProductsMap = new Map();
