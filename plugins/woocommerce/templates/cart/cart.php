@@ -121,7 +121,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 							$min_quantity = 1;
 							$max_quantity = 1;
 						} else {
-							$min_quantity = 0;
+							$min_quantity = apply_filters( 'woocommerce_quantity_input_min', 0, $_product );
 							$max_quantity = $_product->get_max_purchase_quantity();
 						}
 
