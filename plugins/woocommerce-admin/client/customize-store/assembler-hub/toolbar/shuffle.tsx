@@ -24,8 +24,6 @@ import {
 import { PatternWithBlocks } from '~/customize-store/types/pattern';
 import { PATTERN_CATEGORIES } from '../sidebar/pattern-screen/categories';
 
-import './style.scss';
-
 // This is the icon that is used in the Shuffle button. Currently we are using an outdated version of @wordpress/icons.
 // import { shuffle } from '@wordpress/icons';
 
