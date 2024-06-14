@@ -136,7 +136,11 @@ test.describe( 'Search, browse by categories and sort items in the shop', () => 
 		await page.goto( 'shop/' );
 
 		// sort by price high to low
-		await page.locator( '.orderby' ).selectOption( 'price-desc' );
+		await page.getByLabel( 'Shop order' ).selectOption( 'price-desc' );
+
+		await expect(
+			page.getByText( 'Add to cart View cart' ).nth( 2 )
+		).toBeVisible();
 
 		// Check that the priciest appears before the cheapest in the list
 		const highToLowList = await page
@@ -154,7 +158,11 @@ test.describe( 'Search, browse by categories and sort items in the shop', () => 
 		);
 
 		// sort by price low to high
-		await page.locator( '.orderby' ).selectOption( 'price' );
+		await page.getByLabel( 'Shop order' ).selectOption( 'price' );
+
+		await expect(
+			page.getByText( 'Add to cart View cart' ).nth( 2 )
+		).toBeVisible();
 
 		// Check that the cheapest appears before the priciest in the list
 		const lowToHighList = await page
