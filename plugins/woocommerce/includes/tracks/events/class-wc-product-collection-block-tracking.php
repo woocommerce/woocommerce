@@ -109,6 +109,10 @@ class WC_Product_Collection_Block_Tracking {
 
 		$instances = array();
 
+		if ( ! is_array( $blocks ) || empty( $blocks ) ) {
+			return $instances;
+		}
+
 		foreach ( $blocks as $block ) {
 
 			if ( empty( $block['blockName'] ) ) {
