@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use WP_Query;
 use WC_Tax;
-use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
 
 /**
  * ProductCollection class.
@@ -84,9 +83,6 @@ class ProductCollection extends AbstractBlock {
 
 		// Disable client-side-navigation if incompatible blocks are detected.
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
-
-		// Tracks.
-		add_action( 'save_post', array( $this, 'track_collection_instances' ), 10, 2 );
 	}
 
 	/**
@@ -162,74 +158,6 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		return $block_content;
-	}
-
-	/**
-	 * Track feature usage of the Product Collection block within the site editor.
-	 *
-	 * @param int      $post_id  The post ID.
-	 * @param \WP_Post $post     The post object.
-	 *
-	 * @return void
-	 */
-	public function track_collection_instances( $post_id, $post ) {
-
-		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST || ! wc_current_theme_is_fse_theme() ) {
-			return;
-		}
-
-		if ( ! $post instanceof \WP_Post ) {
-			return;
-		}
-
-		// Don't track autosaves and drafts.
-		$post_status = $post->post_status;
-		if ( 'publish' !== $post_status ) {
-			return;
-		}
-
-		// Important: Only track instances within specific types.
-		$post_type = $post->post_type;
-		if ( ! in_array( $post_type, array( 'post', 'page', 'wp_template', 'wp_template_part' ), true ) ) {
-			return;
-		}
-
-		if ( ! class_exists( 'WC_Tracks' ) || ! class_exists( 'WC_Site_Tracking' ) || ! \WC_Site_Tracking::is_tracking_enabled() ) {
-			return;
-		}
-
-		if ( ! has_block( $this->get_full_block_name(), $post ) ) {
-			return;
-		}
-
-		$blocks = parse_blocks( $post->post_content );
-		if ( empty( $blocks ) ) {
-			return;
-		}
-		// Count orders.
-		// Hint: Product count included in Track event. See WC_Tracks::get_blog_details().
-		$order_count = 0;
-		foreach ( wc_get_order_statuses() as $status_slug => $status_name ) {
-			$order_count += wc_orders_count( $status_slug );
-		}
-		$additional_data = array(
-			'editor_context' => ProductCollectionUtils::parse_editor_location_context( $post ),
-			'order_count'    => $order_count,
-		);
-		$instances       = ProductCollectionUtils::parse_blocks_track_data( $blocks );
-
-		foreach ( $instances as $instance ) {
-
-			$event_properties = array_merge(
-				$additional_data,
-				$instance
-			);
-
-			\WC_Tracks::record_event(
-				'product_collection_instance',
-				$event_properties
-			);
-		}
 	}
 
 	/**
