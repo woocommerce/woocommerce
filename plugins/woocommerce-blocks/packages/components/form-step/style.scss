@@ -35,6 +35,10 @@
 				width: 100%;
 				height: 1px;
 				opacity: 0.11;
+				// This box-shadow rule creates two visible shadows:
+				// - One 1 pixel directly below the element.
+				// - Another 50% of the viewport width to the right and 1 pixel down from the element.
+				// Both shadows are sharp (no blur) and use the current color of the element.
 				box-shadow: 0 1px 0 0 currentColor, 50vw 1px 0 0 currentColor;
 			}
 		}
