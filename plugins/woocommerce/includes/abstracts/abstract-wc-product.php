@@ -1384,7 +1384,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function validate_props() {
 		// Before updating, ensure stock props are all aligned. Qty, backorders and low stock amount are not needed if not stock managed.
 		if ( ! $this->get_manage_stock() ) {
-			$this->set_stock_quantity( 0 );
+			$this->set_stock_quantity( '' );
 			$this->set_backorders( 'no' );
 			$this->set_low_stock_amount( '' );
 			return;
