@@ -191,8 +191,6 @@ const updateSelectedBlock = (
 		} );
 
 		updatePopoverPosition( {
-			mainBodyWidth: window.document.body.clientWidth,
-			iframeWidth: body.clientWidth,
 			event,
 			hoveredBlockClientId: null,
 			clickedBlockClientId: clickedBlockClientId as string,
@@ -208,8 +206,6 @@ const updateSelectedBlock = (
 
 		if ( selectedBlockClientId ) {
 			updatePopoverPosition( {
-				mainBodyWidth: window.document.body.clientWidth,
-				iframeWidth: body.clientWidth,
 				event,
 				hoveredBlockClientId: selectedBlockClientId,
 				clickedBlockClientId: null,
@@ -272,8 +268,6 @@ type useAutoBlockPreviewEventListenersCallbacks = {
 	getBlockParents: ( clientId: string ) => string[];
 	setBlockEditingMode: ( clientId: string ) => void;
 	updatePopoverPosition: ( options: {
-		mainBodyWidth: number;
-		iframeWidth: number;
 		event: MouseEvent;
 		hoveredBlockClientId: string | null;
 		clickedBlockClientId: string | null;

@@ -815,6 +815,7 @@ body.woocommerce-assembler {
 }
 
 .woocommerce-customize-store_popover-tooltip {
+	pointer-events: none;
 	.components-popover__content {
 		width: fit-content;
 		user-select: none;
