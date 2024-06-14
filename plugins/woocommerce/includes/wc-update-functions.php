@@ -2671,7 +2671,7 @@ function wc_update_870_prevent_listing_of_transient_files_directory() {
 }
 
 /**
- * If it exists, remove and recreate the inbox note that asks users to connect to `Woo.com` so that the domain name is changed to the updated `WooCommerce.com`.
+ * If it exists, remove the inbox note that asks users to connect to `Woo.com`.
  */
 function wc_update_890_update_connect_to_woocommerce_note() {
 	$note = Notes::get_note_by_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
