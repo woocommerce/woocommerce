@@ -219,9 +219,16 @@ trait BlockContainerTrait {
 		$name       = $this->get_name();
 		$attributes = $this->get_augmented_attributes();
 
-		$children = implode( "\n", $arr );
+		$children = implode( '', $arr );
 
-		return '' !== $name ? get_comment_delimited_block_content( $name, $attributes, $children ) : $children;
+		$content = '';
+		if ( 'core/column' === $name ) {
+			$content = '<div class="wp-block-column" />';
+		} elseif ( 'core/columns' === $name ) {
+			$content = '<div class="wp-block-columns" />';
+		}
+
+		return '' !== $name ? get_comment_delimited_block_content( $name, $attributes, $content . $children ) : $children;
 	}
 
 	/**
