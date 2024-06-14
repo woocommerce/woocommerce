@@ -17,7 +17,12 @@ import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import moment from 'moment';
 import { Icon, chevronLeft, chevronRight, close } from '@wordpress/icons';
-import { NOTES_STORE_NAME, QUERY_DEFAULTS } from '@woocommerce/data';
+import {
+	NOTES_STORE_NAME,
+	QUERY_DEFAULTS,
+	OPTIONS_STORE_NAME,
+	ONBOARDING_STORE_NAME,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
 import { navigateTo, parseAdminUrl } from '@woocommerce/navigation';
@@ -29,6 +34,7 @@ import sanitizeHTML from '../../lib/sanitize-html';
 import StoreAlertsPlaceholder from './placeholder';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getScreenName } from '../../utils';
+import { hasTwoColumnLayout } from '../../homescreen/layout';
 
 import './style.scss';
 
@@ -221,6 +227,22 @@ export class StoreAlerts extends Component {
 			parseInt( count, 10 )
 		);
 
+		const {
+			defaultHomescreenLayout,
+			taskListComplete,
+			isTaskListHidden,
+			isLoadingTaskLists,
+		} = this.props;
+		const hasTwoColumns = hasTwoColumnLayout(
+			defaultHomescreenLayout,
+			taskListComplete,
+			isTaskListHidden
+		);
+
+		if ( isLoadingTaskLists ) {
+			return null;
+		}
+
 		if ( preloadAlertCount > 0 && this.props.isLoading ) {
 			return (
 				<StoreAlertsPlaceholder
@@ -238,6 +260,7 @@ export class StoreAlerts extends Component {
 		const className = clsx( 'woocommerce-store-alerts', {
 			'is-alert-error': type === 'error',
 			'is-alert-update': type === 'update',
+			'two-columns': hasTwoColumns,
 		} );
 
 		const onDismiss = async ( note ) => {
@@ -370,15 +393,26 @@ const ALERTS_QUERY = {
 export default compose(
 	withSelect( ( select ) => {
 		const { getNotes, isResolving } = select( NOTES_STORE_NAME );
+		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getTaskList, hasFinishedResolution: taskListFinishResolution } =
+			select( ONBOARDING_STORE_NAME );
 
 		// Filter out notes that may have been marked actioned or not delayed after the initial request
 
 		const alerts = getNotes( ALERTS_QUERY );
 		const isLoading = isResolving( 'getNotes', [ ALERTS_QUERY ] );
 
+		const defaultHomescreenLayout =
+			getOption( 'woocommerce_default_homepage_layout' ) ||
+			'single_column';
+
 		return {
 			alerts,
 			isLoading,
+			defaultHomescreenLayout,
+			taskListComplete: getTaskList( 'setup' )?.isComplete,
+			isTaskListHidden: getTaskList( 'setup' )?.isHidden,
+			isLoadingTaskLists: ! taskListFinishResolution( 'getTaskLists' ),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

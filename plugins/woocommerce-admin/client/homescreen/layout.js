@@ -50,6 +50,19 @@ const TaskLists = lazy( () =>
 	)
 );
 
+export const hasTwoColumnLayout = (
+	defaultHomescreenLayout,
+	taskListComplete,
+	isTaskListHidden
+) => {
+	const hasTwoColumnContent =
+		taskListComplete ||
+		isTaskListHidden ||
+		window.wcAdminFeatures.analytics;
+
+	return defaultHomescreenLayout === 'two_columns' && hasTwoColumnContent;
+};
+
 export const Layout = ( {
 	defaultHomescreenLayout,
 	query,
@@ -62,14 +75,14 @@ export const Layout = ( {
 	const userPrefs = useUserPreferences();
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
 	const shouldShowWCPayFeature = taskListComplete || isTaskListHidden;
-	const hasTwoColumnContent =
-		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
 	const isDashboardShown = Object.keys( query ).length > 0 && ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
 	const activeSetupTaskList = useActiveSetupTasklist();
 
-	const twoColumns =
-		( userPrefs.homepage_layout || defaultHomescreenLayout ) ===
-			'two_columns' && hasTwoColumnContent;
+	const twoColumns = hasTwoColumnLayout(
+		userPrefs.homepage_layout || defaultHomescreenLayout,
+		taskListComplete,
+		isTaskListHidden
+	);
 
 	const isWideViewport = useRef( true );
 	const maybeToggleColumns = useCallback( () => {
