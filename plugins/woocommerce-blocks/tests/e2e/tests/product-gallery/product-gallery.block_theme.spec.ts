@@ -628,24 +628,17 @@ test.describe( `${ blockData.name }`, () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
+		// Switch to the Index template.
 		await page.getByLabel( 'Open Navigation' ).click();
-		const navigationSidebar = page.getByLabel( 'Navigation' );
-		const navigationBackButton = navigationSidebar.getByLabel( 'Back' );
-		await expect( navigationBackButton ).toBeVisible();
-		await navigationSidebar.getByLabel( 'Back' ).click();
 		await page.getByRole( 'button', { name: 'Index' } ).click();
 
-		const editorFrame = page.frameLocator( 'iframe[name="editor-canvas"]' );
-		const headerTitle = editorFrame.getByRole( 'document', {
-			name: 'Block: Site Title',
-		} );
-		await expect( headerTitle ).toBeVisible();
-
-		await navigationSidebar.getByLabel( 'Back' ).click();
+		// Go back to the Custom Single Product template.
+		await page.getByLabel( 'Open Navigation' ).click();
 		await page
 			.getByRole( 'button', { name: 'Custom Single Product' } )
 			.click();
 
+		const editorFrame = page.frameLocator( 'iframe[name="editor-canvas"]' );
 		const productGalleryBlock = editorFrame.getByLabel(
 			'Block: Product Gallery (Beta)'
 		);
