@@ -103,7 +103,7 @@ class WC_Product_Collection_Block_Tracking {
 	 *
 	 * @return array Parsed instances of the Product Collection block.
 	 */
-	private function parse_blocks_track_data( $blocks, $in_single = false, $in_part = false, $in_synced = false ) {
+	private function parse_blocks_track_data( $blocks, $is_in_single_product = false, $is_in_template_part = false, $is_in_synced_pattern = false ) {
 
 		$instances = array();
 
@@ -111,24 +111,26 @@ class WC_Product_Collection_Block_Tracking {
 			if ( 'woocommerce/product-collection' === $block['blockName'] ) {
 				$instances[] = array(
 					'collection'        => $block['attrs']['collection'] ?? 'product-catalog',
-					'in-single-product' => $in_single ? 'yes' : 'no',
-					'in-template-part'  => $in_part ? 'yes' : 'no',
-					'in-synced-pattern' => $in_synced ? 'yes' : 'no',
+					'in-single-product' => $is_in_single_product ? 'yes' : 'no',
+					'in-template-part'  => $is_in_template_part ? 'yes' : 'no',
+					'in-synced-pattern' => $is_in_synced_pattern ? 'yes' : 'no',
 					'filters'           => $this->get_query_filters_usage_data( $block ),
 				);
 			}
 
 			// Track instances within single product container.
-			$local_in_single = $in_single;
+			$local_is_in_single_product = $is_in_single_product;
 			if ( 'woocommerce/single-product' === $block['blockName'] ) {
-				$local_in_single = true;
+				$local_is_in_single_product = true;
 			}
 
 			// Track instances within template part.
 			if ( 'core/template-part' === $block['blockName'] ) {
 				$template_part = get_block_template( $block['attrs']['theme'] . '//' . $block['attrs']['slug'], 'wp_template_part' );
 				if ( $template_part instanceof WP_Block_Template && ! empty( $template_part->content ) ) {
-					$instances = array_merge( $instances, $this->parse_blocks_track_data( parse_blocks( $template_part->content ), $local_in_single, true, $in_synced ) );
+					if ( has_block( 'woocommerce/product-collection', $template_part->content ) || has_block( 'core/template-part', $template_part->content ) || has_block( 'core/block', $template_part->content ) ) {
+						$instances = array_merge( $instances, $this->parse_blocks_track_data( parse_blocks( $template_part->content ), $local_is_in_single_product, true, $is_in_synced_pattern ) );
+					}
 				}
 			}
 
@@ -136,13 +138,15 @@ class WC_Product_Collection_Block_Tracking {
 			if ( 'core/block' === $block['blockName'] ) {
 				$synced_pattern = get_post( $block['attrs']['ref'] );
 				if ( $synced_pattern instanceof WP_Post && ! empty( $synced_pattern->post_content ) ) {
-					$instances = array_merge( $instances, $this->parse_blocks_track_data( parse_blocks( $synced_pattern->post_content ), $local_in_single, $in_part, true ) );
+					if ( has_block( 'woocommerce/product-collection', $synced_pattern->post_content ) || has_block( 'core/template-part', $synced_pattern->post_content ) || has_block( 'core/block', $synced_pattern->post_content ) ) {
+						$instances = array_merge( $instances, $this->parse_blocks_track_data( parse_blocks( $synced_pattern->post_content ), $local_is_in_single_product, $is_in_template_part, true ) );
+					}
 				}
 			}
 
 			// Recursive.
 			if ( ! empty( $block['innerBlocks'] ) ) {
-				$instances = array_merge( $instances, $this->parse_blocks_track_data( $block['innerBlocks'], $local_in_single, $in_part, $in_synced ) );
+				$instances = array_merge( $instances, $this->parse_blocks_track_data( $block['innerBlocks'], $local_is_in_single_product, $is_in_template_part, $is_in_synced_pattern ) );
 			}
 		}
 
@@ -179,7 +183,7 @@ class WC_Product_Collection_Block_Tracking {
 		}
 
 		if ( in_array( $post_type, array( 'wp_block', 'wp_template_part' ), true ) ) {
-			$context = 'isolated-'.$post_type;
+			$context = 'isolated';
 		}
 
 		if ( 'wp_template' === $post_type ) {
