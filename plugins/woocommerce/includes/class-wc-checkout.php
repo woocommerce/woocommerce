@@ -1138,7 +1138,7 @@ class WC_Checkout {
 			wc_set_customer_auth_cookie( $customer_id );
 
 			// As we are now logged in, checkout will need to refresh to show logged in data.
-			WC()->session->set( 'reload_checkout', true );
+			WC()->session->set( 'reload_checkout', apply_filters( 'woocommerce_checkout_reload_checkout', true ) );
 
 			// Also, recalculate cart totals to reveal any role-based discounts that were unavailable before registering.
 			WC()->cart->calculate_totals();
