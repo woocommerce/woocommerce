@@ -29,8 +29,10 @@
 			"default": {
 				"type": "flex",
 				"orientation": "vertical",
-				"justifyContent": "stretch"
+				"justifyContent": "stretch",
+				"verticalAlignment": "top"
 			},
+			"allowVerticalAlignment": true,
 			"allowInheriting": false
 		},
 		"spacing": {
