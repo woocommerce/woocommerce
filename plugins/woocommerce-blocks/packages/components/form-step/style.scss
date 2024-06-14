@@ -29,7 +29,8 @@
 			&::after {
 				position: absolute;
 				content: "";
-				bottom: -$gap-larger;
+				// Required because the box shadows are offset by 1px down so we need to move the element up by 1px.
+				bottom: calc(1px - $gap-larger);
 				transform: translateX(-50%);
 				width: 100%;
 				height: 1px;
