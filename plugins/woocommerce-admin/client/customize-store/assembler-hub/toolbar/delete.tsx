@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button, ToolbarButton, ToolbarGroup } from '@wordpress/components';
+import { ToolbarButton, ToolbarGroup } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { trash } from '@wordpress/icons';
@@ -22,18 +22,17 @@ export default function Delete( {
 
 	return (
 		<ToolbarGroup>
-			<ToolbarButton>
-				<Button
-					label={ __( 'Remove', 'woocommerce' ) }
-					icon={ trash }
-					onClick={ () => {
-						removeBlock( clientId );
-						if ( nextBlockClientId ) {
-							selectBlock( nextBlockClientId );
-						}
-					} }
-				/>
-			</ToolbarButton>
+			<ToolbarButton
+				showTooltip={ true }
+				label={ __( 'Remove', 'woocommerce' ) }
+				icon={ trash }
+				onClick={ () => {
+					removeBlock( clientId );
+					if ( nextBlockClientId ) {
+						selectBlock( nextBlockClientId );
+					}
+				} }
+			/>
 		</ToolbarGroup>
 	);
 }

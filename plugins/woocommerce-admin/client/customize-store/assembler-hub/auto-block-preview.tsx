@@ -36,6 +36,8 @@ import { noop } from 'lodash';
 import { useAddAutoBlockPreviewEventListenersAndObservers } from './hooks/auto-block-preview-event-listener';
 import { IsResizingContext } from './resizable-frame';
 import { __ } from '@wordpress/i18n';
+import { useQuery } from '@woocommerce/navigation';
+import clsx from 'clsx';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -97,7 +99,7 @@ function ScaledBlockPreview( {
 		popoverStatus,
 		virtualElement,
 		updatePopoverPosition,
-		setPopoverStatus,
+		hidePopover,
 	] = usePopoverHandler();
 
 	// @ts-expect-error No types for this exist yet.
@@ -131,6 +133,7 @@ function ScaledBlockPreview( {
 	MemoizedBlockList = MemoizedBlockList || pure( BlockList );
 
 	const isResizing = useContext( IsResizingContext );
+	const query = useQuery();
 
 	useAddAutoBlockPreviewEventListenersAndObservers(
 		{
@@ -139,8 +142,10 @@ function ScaledBlockPreview( {
 			isPatternPreview,
 			contentHeight,
 			logoBlockIds,
+			query,
 		},
 		{
+			hidePopover,
 			selectBlockOnHover,
 			selectBlock,
 			getBlockParents,
@@ -148,7 +153,6 @@ function ScaledBlockPreview( {
 			updatePopoverPosition,
 			setLogoBlockIds,
 			setContentHeight,
-			setPopoverStatus,
 		}
 	);
 
@@ -175,7 +179,10 @@ function ScaledBlockPreview( {
 				) }
 			<DisabledProvider value={ true }>
 				<div
-					className="block-editor-block-preview__content"
+					className={ clsx( 'block-editor-block-preview__content', {
+						'woocommerce-customize-store-assembler':
+							! isPatternPreview,
+					} ) }
 					style={
 						autoScale
 							? {
