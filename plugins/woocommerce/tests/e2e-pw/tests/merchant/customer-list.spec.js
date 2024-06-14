@@ -114,9 +114,14 @@ test.describe( 'Merchant > Customer List', () => {
 					.fill( customer.first_name );
 				await page
 					.getByRole( 'option', {
-						name: 'All customers with names that',
+						name: `All customers with names that include ${ customer.first_name }`,
 					} )
-					.click();
+					.waitFor( { state: 'visible' } );
+				await page
+					.getByRole( 'option', {
+						name: `All customers with names that include ${ customer.first_name }`,
+					} )
+					.click( { delay: 300 } );
 				await expect(
 					page.getByRole( 'link', { name: customer.email } )
 				).toBeVisible();

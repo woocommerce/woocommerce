@@ -143,7 +143,7 @@ module.exports = async ( config ) => {
 				await expect(
 					setupPage.locator( 'p.install-help' )
 				).toContainText(
-					'If you have a plugin in a .zip format, you may install or update it by uploading it here.'
+					'If you have a plugin in a .zip format, you may install or update it by uploading it here'
 				);
 				const [ fileChooser ] = await Promise.all( [
 					setupPage.waitForEvent( 'filechooser' ),
