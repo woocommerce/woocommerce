@@ -124,8 +124,12 @@ jobs:
   project-lint-jobs:
     name: "Lint - ${{ matrix.projectName }} ${{ matrix.optional && ' (optional)' || ''}}"
     runs-on: 'ubuntu-20.04'
-    needs: 'project-jobs'
-    if: ${{ needs.project-jobs.outputs.lint-jobs != '[]' && github.event_name == 'pull_request' }}
+    needs: [
+      'project-jobs',
+      'dispatch-handler'
+    ]
+    # Because dispatch-handler may be skipped, we need the always() here.
+    if: ${{ always() && needs.project-jobs.outputs.lint-jobs != '[]' && github.event_name == 'pull_request' }}
     strategy:
       fail-fast: false
       matrix:
@@ -136,6 +140,8 @@ jobs:
         name: 'Checkout'
         with:
           fetch-depth: 0
+          # If the workflow wasn't triggered by dispatch, this will be empty and use defaults.
+          ref: ${{ needs.dispatch-handler.outputs.head }}
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
@@ -150,8 +156,11 @@ jobs:
   project-test-jobs:
     name: "${{ matrix.name }}"
     runs-on: 'ubuntu-20.04'
-    needs: 'project-jobs'
-    if: ${{ needs.project-jobs.outputs.test-jobs != '[]' }}
+    needs: [
+      'project-jobs',
+      'dispatch-handler'
+    ]
+    if: ${{ always() && needs.project-jobs.outputs.test-jobs != '[]' }}
     env: ${{ matrix.testEnv.envVars }}
     strategy:
       fail-fast: false
@@ -161,6 +170,9 @@ jobs:
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
+        with:
+          # If the workflow wasn't triggered by dispatch, this will be empty and use defaults.
+          ref: ${{ needs.dispatch-handler.outputs.head }}
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Install Monorepo'
