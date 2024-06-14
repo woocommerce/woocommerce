@@ -46,7 +46,7 @@ class LookupDataStore {
 	 *
 	 * @var bool
 	 */
-	private bool $last_create_operation_failed;
+	private bool $last_create_operation_failed = false;
 
 	/**
 	 * LookupDataStore constructor.
@@ -830,12 +830,13 @@ class LookupDataStore {
 	private function create_data_for_product_cpt_core( int $product_id ) {
 		global $wpdb;
 
+		// phpcs:disable WordPress.DB.PreparedSQL
 		$sql = $wpdb->prepare(
 			"delete from {$this->lookup_table_name} where product_or_parent_id=%d",
 			$product_id
 		);
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$wpdb->query( $sql );
+		// phpcs:enable WordPress.DB.PreparedSQL
 
 		// * Obtain list of product variations, together with stock statuses; also get the product type.
 		// For a variation this will return just one entry, with type 'variation'.
