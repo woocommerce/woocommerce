@@ -42,6 +42,14 @@ function useProducts(
 	);
 
 	useEffect( () => {
+		// We take two strategies here because of internal logic of
+		// `getProducts` and `getProductsRequests` that skips request for
+		// `selected` products for small stores. So fetching products per user's input
+		// breaks selected items:
+		// 1. For large stores (>100 products) we fetch products as input changes AND
+		// `selected` products.
+		// 2. For small stores (<=100 products) we fetch all products just once.
+
 		const query = {
 			selected: isLargeCatalog ? selected.map( Number ) : [],
 			queryArgs: isLargeCatalog
