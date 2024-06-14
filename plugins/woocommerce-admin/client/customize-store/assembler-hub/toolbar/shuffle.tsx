@@ -7,13 +7,7 @@
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import {
-	Button,
-	Path,
-	SVG,
-	ToolbarButton,
-	ToolbarGroup,
-} from '@wordpress/components';
+import { Path, SVG, ToolbarButton, ToolbarGroup } from '@wordpress/components';
 import {
 	unlock,
 	// @ts-expect-error No types for this exist yet.
@@ -108,24 +102,22 @@ export default function Shuffle( { clientId }: { clientId: string } ) {
 
 	return (
 		<ToolbarGroup>
-			<ToolbarButton>
-				<Button
-					label={ __( 'Shuffle', 'woocommerce' ) }
-					icon={ shuffleIcon }
-					onClick={ () => {
-						const nextPattern = getNextPattern();
-						// @ts-expect-error - attributes is marked as readonly.
-						nextPattern.blocks[ 0 ].attributes = {
-							...nextPattern.blocks[ 0 ].attributes,
-							metadata: {
-								...nextPattern.blocks[ 0 ].attributes.metadata,
-								categories,
-							},
-						};
-						replaceBlocks( clientId, nextPattern.blocks );
-					} }
-				/>
-			</ToolbarButton>
+			<ToolbarButton
+				label={ __( 'Shuffle', 'woocommerce' ) }
+				icon={ shuffleIcon }
+				onClick={ () => {
+					const nextPattern = getNextPattern();
+					// @ts-expect-error - attributes is marked as readonly.
+					nextPattern.blocks[ 0 ].attributes = {
+						...nextPattern.blocks[ 0 ].attributes,
+						metadata: {
+							...nextPattern.blocks[ 0 ].attributes.metadata,
+							categories,
+						},
+					};
+					replaceBlocks( clientId, nextPattern.blocks );
+				} }
+			/>
 		</ToolbarGroup>
 	);
 }
