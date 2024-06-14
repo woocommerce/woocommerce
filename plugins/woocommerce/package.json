@@ -14,6 +14,7 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:copy-assets": "wireit",
 		"build:zip": "./bin/build-zip.sh",
+		"build:api-docs": "php ./src/Internal/Api/DesignTime/Scripts/build-api-docs.php",
 		"changelog": "composer install && composer exec -- changelogger",
 		"docker:down": "pnpm exec wc-e2e docker:down",
 		"docker:ssh": "pnpm exec wc-e2e docker:ssh",

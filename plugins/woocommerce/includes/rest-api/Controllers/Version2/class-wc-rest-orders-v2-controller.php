@@ -79,7 +79,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				),
-				'schema' => array( $this, 'get_public_item_schema' ),
+				'schema' => array( $this, 'get_list_schema' ),
 			)
 		);
 
@@ -90,7 +90,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
-						'type'        => 'integer',
+						'type'        => 'integer'
 					),
 				),
 				array(
@@ -119,7 +119,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 						),
 					),
 				),
-				'schema' => array( $this, 'get_public_item_schema' ),
+				'schema' => array( $this, 'get_single_item_schema' )
 			)
 		);
 
@@ -136,6 +136,50 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				'schema' => array( $this, 'get_public_batch_schema' ),
 			)
 		);
+	}
+
+	public function get_list_schema() {
+		$schema = $this->get_public_item_schema();
+
+		$schema['_doc'] = [
+			'category' => [
+				'id' => 'orders',
+				'name' => 'Orders',
+				'description' => 'Allows to manage orders.'
+			],
+			'endpoints' => [
+				'GET' => [
+					'name' => 'List all orders',
+					'description' => 'Get a list of orders.'
+				],
+				'POST' => [
+					'name' => 'Create order',
+					'description' => 'Create a new order.'
+				],
+			]
+		];
+
+		return $schema;
+	}
+
+	public function get_single_item_schema() {
+		$schema = $this->get_public_item_schema();
+
+		$schema['_doc'] = [
+			'category' => 'orders',
+			'endpoints' => [
+				'GET' => [
+					'name' => 'Get orders',
+					'description' => 'Get the details of an existing order.'
+				],
+				'PATCH,POST,PUT' => [
+					'name' => 'Update order',
+					'description' => 'Update an existing order.'
+				]
+			]
+		];
+
+		return $schema;
 	}
 
 	/**
