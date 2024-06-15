@@ -70,7 +70,7 @@ class StepProcessorFactory {
 		$storage = new ResourceStorage();
 		$storage->add_downloader(new OrgThemeResourceDownloader());
 		if ( $this->schema instanceof ZipSchema) {
-			$storage->add_downloader( new LocalThemeResourceDownloader($this->schema->get_unzip_path()) );
+			$storage->add_downloader( new LocalThemeResourceDownloader($this->schema->get_unzipped_path()) );
 		}
 
 		return new InstallThemes($storage);
