@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint;
 
 class ZipSchema extends Schema {
 	protected string $unzip_path;
+	protected string $unzipped_path;
 	protected bool $filesystem_initialized = false;
 	public function __construct($zip_path, $unzip_path = null) {
 		$this->unzip_path = $unzip_path ?? wp_upload_dir()['path'];
@@ -14,6 +15,7 @@ class ZipSchema extends Schema {
 
 		$unzipped_dir_name = str_replace(".zip", '', basename($zip_path));
 		$json_path = $this->unzip_path.'/'.$unzipped_dir_name.'/woo-blueprint.json';
+		$this->unzipped_path = $this->unzip_path . '/' . $unzipped_dir_name;
 
 		$schema = json_decode(file_get_contents($json_path));
 		if (!$this->validate()) {
@@ -22,7 +24,7 @@ class ZipSchema extends Schema {
 		$this->schema = $schema;
 	}
 
-	public function get_unzip_path() {
+	public function get_unzipped_path() {
 		return $this->unzip_path;
 	}
 

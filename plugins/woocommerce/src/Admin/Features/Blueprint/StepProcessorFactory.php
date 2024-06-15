@@ -60,7 +60,7 @@ class StepProcessorFactory {
 		$storage->add_downloader(new OrgPluginResourceDownloader());
 
 		if ( $this->schema instanceof ZipSchema) {
-			$storage->add_downloader( new LocalPluginResourceDownloader($this->schema->get_unzip_path()) );
+			$storage->add_downloader( new LocalPluginResourceDownloader($this->schema->get_unzipped_path()) );
 		}
 
 		return new InstallPlugins($storage);
