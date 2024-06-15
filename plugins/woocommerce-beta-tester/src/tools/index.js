@@ -16,7 +16,7 @@ function Tools( {
 	actions,
 	currentlyRunningCommands,
 	messages,
-	comandParams,
+	commandParams,
 } ) {
 	actions = actions();
 	return (
@@ -45,7 +45,7 @@ function Tools( {
 				<tbody>
 					{ commands.map(
 						( { action, command, description }, index ) => {
-							const params = comandParams[ action ] ?? false;
+							const params = commandParams[ action ] ?? false;
 							return (
 								<tr key={ index }>
 									<td className="command">{ command }</td>
@@ -83,7 +83,7 @@ export default compose(
 		return {
 			currentlyRunningCommands: getCurrentlyRunning(),
 			messages: getMessages(),
-			comandParams: getCommandParams(),
+			commandParams: getCommandParams(),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
