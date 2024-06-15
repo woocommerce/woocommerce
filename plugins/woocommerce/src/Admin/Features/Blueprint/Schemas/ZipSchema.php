@@ -25,7 +25,7 @@ class ZipSchema extends Schema {
 	}
 
 	public function get_unzipped_path() {
-		return $this->unzip_path;
+		return $this->unzipped_path;
 	}
 
 	protected function unzip($zip_path, $to) {
