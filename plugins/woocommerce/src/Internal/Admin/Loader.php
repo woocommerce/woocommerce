@@ -606,10 +606,13 @@ class Loader {
 			return;
 		}
 
+		$already_imported = get_option('wooblueprint_imported_on_activation', 'no') === 'yes';
+
 		$path = constant( 'WOO_BLUEPRINT_PATH' );
-		if ( true === constant( 'USE_WOO_BLUEPRINT' ) && file_exists( $path )) {
+		if ( true === constant( 'USE_WOO_BLUEPRINT' ) && file_exists( $path ) && !$already_imported) {
 			$blueprint = ImportSchema::crate_from_file($path);
 			$blueprint->process();
+			update_option('wooblueprint_imported_on_activation', 'yes');
 			// @todo -- process any errors
 		}
 	}
