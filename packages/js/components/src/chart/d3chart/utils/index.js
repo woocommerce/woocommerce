@@ -8,7 +8,7 @@ import { utcParse as d3UTCParse } from 'd3-time-format';
 /**
  * Allows an overriding formatter or defaults to d3Format or d3TimeFormat
  *
- * @param {string|Function} format    - either a format string for the D3 formatters or an overriding fomatting method
+ * @param {string|Function} format    - either a format string for the D3 formatters or an overriding formatting method
  * @param {Function}        formatter - default d3Format or another formatting method, which accepts the string `format`
  * @return {Function} to be used to format an input given the format and formatter
  */
