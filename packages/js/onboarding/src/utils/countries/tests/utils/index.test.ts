@@ -21,7 +21,7 @@ describe( 'findCountryOption', () => {
 		expect( findCountryOption( countryStateOptions, location ) ).toBeNull();
 	} );
 
-	it( 'should ignore accents for comparsion', () => {
+	it( 'should ignore accents for comparison', () => {
 		const location = {
 			city: 'Malaga',
 			region: 'Andalucia',
