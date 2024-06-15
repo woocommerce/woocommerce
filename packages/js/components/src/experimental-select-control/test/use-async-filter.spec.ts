@@ -78,7 +78,7 @@ describe( 'useAsyncFilter', () => {
 		expect( filter ).toHaveBeenCalledWith( inputValue );
 	} );
 
-	it( 'should trigger onFilterEnd when filtering is fullfiled', async () => {
+	it( 'should trigger onFilterEnd when filtering is fulfilled', async () => {
 		const filteredItems: string[] = [];
 
 		filter.mockResolvedValue( filteredItems );
