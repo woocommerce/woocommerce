@@ -26,7 +26,7 @@ export function* getReviews( query: ReviewsQueryParams ) {
 
 		if ( totalCountFromHeader === undefined ) {
 			throw new Error(
-				"Malformed response from server. 'x-wp-total' header is missing when retriving ./products/reviews."
+				"Malformed response from server. 'x-wp-total' header is missing when retrieving ./products/reviews."
 			);
 		}
 		const totalCount = parseInt( totalCountFromHeader, 10 );
