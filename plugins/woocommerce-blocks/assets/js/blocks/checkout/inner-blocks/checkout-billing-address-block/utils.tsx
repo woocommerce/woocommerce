@@ -8,7 +8,7 @@ import {
 	DEFAULT_FORCED_BILLING_TITLE,
 } from './constants';
 
-export const getBillingAddresssBlockTitle = (
+export const getBillingAddressBlockTitle = (
 	title: string,
 	forcedBillingAddress: boolean
 ): string => {
@@ -20,7 +20,7 @@ export const getBillingAddresssBlockTitle = (
 	return title === DEFAULT_FORCED_BILLING_TITLE ? DEFAULT_TITLE : title;
 };
 
-export const getBillingAddresssBlockDescription = (
+export const getBillingAddressBlockDescription = (
 	description: string,
 	forcedBillingAddress: boolean
 ): string => {
