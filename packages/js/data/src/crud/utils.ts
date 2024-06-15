@@ -284,7 +284,7 @@ export const getRequestIdentifier = getResourceName;
  * Get a generic action name from a resource action name if one exists.
  *
  * @param action       Action name to check.
- * @param resourceName Resurce name.
+ * @param resourceName Resource name.
  * @return Generic action name if one exists, otherwise the passed action name.
  */
 export const getGenericActionName = (
