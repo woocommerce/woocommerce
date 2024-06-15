@@ -56,7 +56,7 @@ export function UserPreferencesTabPanel( {
 		[ updateUserPreferences, userPreferences ]
 	);
 
-	// Expose updateUserPreferences globaly for debugging purposes.
+	// Expose updateUserPreferences globally for debugging purposes.
 	window.__wcbt = {
 		...window.__wcbt,
 		updateUserPreferences: update,
