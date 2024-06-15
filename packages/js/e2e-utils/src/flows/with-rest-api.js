@@ -199,7 +199,7 @@ export const withRestApi = {
 	 * @return {Promise} Promise resolving once orders have been deleted.
 	 */
 	deleteAllOrders: async () => {
-		// We need to specfically filter on order status here to make sure we catch all orders to delete.
+		// We need to specifically filter on order status here to make sure we catch all orders to delete.
 		const orderStatuses = [
 			'pending',
 			'processing',
