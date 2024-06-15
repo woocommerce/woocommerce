@@ -632,3 +632,15 @@
 		padding-top: 32px !important;
 	}
 }
+
+.woocommerce-profiler-builder-intro {
+	display: flex;
+	flex-direction: column;
+	padding: 30px;
+	gap: 20px;
+	align-items: center;
+}
+
+.woocommerce-profiler-builder-intro-file-input {
+	margin-left: 100px;
+}

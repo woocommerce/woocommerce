@@ -9,7 +9,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { Navigation } from '../components/navigation/navigation';
-import { IntroOptInEvent } from '../index';
+import { IntroOptInEvent } from '../events';
 
 export const BuilderIntro = ( {
 	sendEvent,
