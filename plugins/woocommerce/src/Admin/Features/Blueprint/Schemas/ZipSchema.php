@@ -12,9 +12,12 @@ class ZipSchema extends Schema {
 			throw new \Exception("Unable to unzip the file to {$zip_path}. Please check the directory permission.");
 		}
 
-		$schema = json_decode(file_get_contents($this->unzip_path.'/woo-blueprint.json'));
+		$unzipped_dir_name = str_replace(".zip", '', basename($zip_path));
+		$json_path = $this->unzip_path.'/'.$unzipped_dir_name.'/woo-blueprint.json';
+
+		$schema = json_decode(file_get_contents($json_path));
 		if (!$this->validate()) {
-			throw new \InvalidArgumentException($this->unzip_path.'/woo-blueprint.json is not a valid JSON.');
+			throw new \InvalidArgumentException($json_path);
 		}
 		$this->schema = $schema;
 	}

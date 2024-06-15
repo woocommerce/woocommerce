@@ -111,7 +111,11 @@ class Blueprint {
 
 			try {
 				if ( $_FILES['file']['type'] === 'application/zip' ) {
-					$blueprint = ImportSchema::crate_from_zip( $uploaded_file );
+
+					$newpath = \wp_upload_dir()['path'].'/'.$_FILES['file']['name'];
+					move_uploaded_file($uploaded_file, $newpath);
+
+					$blueprint = ImportSchema::crate_from_zip( $newpath );
 				} else {
 					$blueprint = ImportSchema::create_from_json( $uploaded_file );
 				}
