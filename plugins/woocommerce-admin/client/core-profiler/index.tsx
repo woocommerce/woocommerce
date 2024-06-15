@@ -833,6 +833,13 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								} ),
 							],
 						},
+						INTRO_BUILDER: {
+							target: '#introBuilder',
+							actions: [
+								'assignOptInDataSharing',
+								'updateTrackingOption',
+							],
+						},
 					},
 					meta: {
 						progress: 20,
