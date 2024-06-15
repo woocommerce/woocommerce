@@ -26,7 +26,7 @@ interface BlockErrorBase {
 	 */
 	button?: React.ReactNode;
 	/**
-	 * Controls wether to show the error block or fail silently
+	 * Controls whether to show the error block or fail silently
 	 */
 	showErrorBlock?: boolean;
 }
