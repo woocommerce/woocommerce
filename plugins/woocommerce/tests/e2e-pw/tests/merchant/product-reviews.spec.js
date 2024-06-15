@@ -1,53 +1,53 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
-baseTest.describe( 'Product Reviews > Edit Product Review', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		reviews: async ( { api }, use ) => {
-			const timestamp = Date.now().toString();
-			const products = [];
-			const reviews = [];
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	reviews: async ( { api }, use ) => {
+		const timestamp = Date.now().toString();
+		const products = [];
+		const reviews = [];
 
-			// Create the products
-			for ( let i = 0; i < 2; i++ ) {
-				await api
-					.post( 'products', {
-						name: `Product ${ i } ${ timestamp }`,
-						type: 'simple',
-						regular_price: '9.99',
-					} )
-					.then( ( response ) => {
-						products.push( response.data );
-					} );
-			}
+		// Create the products
+		for ( let i = 0; i < 2; i++ ) {
+			await api
+				.post( 'products', {
+					name: `Product ${ i } ${ timestamp }`,
+					type: 'simple',
+					regular_price: '9.99',
+				} )
+				.then( ( response ) => {
+					products.push( response.data );
+				} );
+		}
 
-			// Create the product reviews
-			for ( const product of products ) {
-				await api
-					.post( 'products/reviews', {
-						product_id: product.id,
-						review: `Nice product ${ product.name }, at ${ timestamp }`,
-						reviewer: 'John Doe',
-						reviewer_email: `john.doe.${ timestamp }@example.com`,
-						rating: ( Math.random() * ( 5 - 1 ) + 1 ).toFixed( 0 ),
-					} )
-					.then( ( response ) => {
-						reviews.push( response.data );
-					} );
-			}
+		// Create the product reviews
+		for ( const product of products ) {
+			await api
+				.post( 'products/reviews', {
+					product_id: product.id,
+					review: `Nice product ${ product.name }, at ${ timestamp }`,
+					reviewer: 'John Doe',
+					reviewer_email: `john.doe.${ timestamp }@example.com`,
+					rating: ( Math.random() * ( 5 - 1 ) + 1 ).toFixed( 0 ),
+				} )
+				.then( ( response ) => {
+					reviews.push( response.data );
+				} );
+		}
 
-			await use( reviews );
+		await use( reviews );
 
-			// Cleanup
-			await api.delete( `products/reviews/batch`, {
-				delete: reviews.map( ( review ) => review.id ),
-			} );
-			await api.post( `products/batch`, {
-				delete: products.map( ( product ) => product.id ),
-			} );
-		},
-	} );
+		// Cleanup
+		await api.delete( `products/reviews/batch`, {
+			delete: reviews.map( ( review ) => review.id ),
+		} );
+		await api.post( `products/batch`, {
+			delete: products.map( ( product ) => product.id ),
+		} );
+	},
+} );
 
+test.describe( 'Product Reviews > Edit Product Review', () => {
 	test( 'can view products reviews list', async ( { page, reviews } ) => {
 		await page.goto(
 			`wp-admin/edit.php?post_type=product&page=product-reviews`
@@ -135,7 +135,7 @@ baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 		await page.goto(
 			`wp-admin/comment.php?action=editcomment&c=${ review.id }`
 		);
-		await expect( page.getByText( 'Edit Review' ) ).toBeVisible();
+		await expect( page.getByText( 'Edit Comment' ) ).toBeVisible();
 
 		// Create new comment and edit the review with it
 		const updatedReview = `(edited ${ Date.now() })`;

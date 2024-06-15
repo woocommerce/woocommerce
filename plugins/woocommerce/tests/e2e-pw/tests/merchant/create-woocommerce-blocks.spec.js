@@ -43,12 +43,12 @@ const blocks = [
 
 let productId, shippingZoneId, productTagId, attributeId, productCategoryId;
 
-baseTest.describe( 'Add WooCommerce Blocks Into Page', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		testPageTitlePrefix: 'Woocommerce Blocks',
-	} );
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	testPageTitlePrefix: 'Woocommerce Blocks',
+} );
 
+test.describe( 'Add WooCommerce Blocks Into Page', () => {
 	test.beforeAll( async ( { api } ) => {
 		// add product attribute
 		await api
@@ -159,7 +159,10 @@ baseTest.describe( 'Add WooCommerce Blocks Into Page', () => {
 						.check();
 					await canvas
 						.locator( '.wc-block-reviews-by-product' )
-						.getByRole( 'button', { name: 'Done', exact: true } )
+						.getByRole( 'button', {
+							name: 'Done',
+							exact: true,
+						} )
 						.click();
 				}
 

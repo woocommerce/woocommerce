@@ -9,10 +9,16 @@ import {
 	MediaUpload,
 	uploadMedia as wpUploadMedia,
 	UploadMediaOptions,
-	UploadMediaErrorCode,
 } from '@wordpress/media-utils';
 
+/**
+ * Internal dependencies
+ */
+import { ErrorType } from './types';
+
 const DEFAULT_ALLOWED_MEDIA_TYPES = [ 'image' ];
+
+export type MediaUploaderErrorCallback = ( error: ErrorType ) => void;
 
 type MediaUploaderProps = {
 	allowedMediaTypes?: string[];
@@ -30,11 +36,7 @@ type MediaUploaderProps = {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		value: ( { id: number } & { [ k: string ]: any } ) | MediaItem[]
 	) => void;
-	onError?: ( error: {
-		code: UploadMediaErrorCode;
-		message: string;
-		file: File;
-	} ) => void;
+	onError?: MediaUploaderErrorCallback;
 	onMediaGalleryOpen?: () => void;
 	onUpload?: ( files: MediaItem | MediaItem[] ) => void;
 	onFileUploadChange?: ( files: MediaItem | MediaItem[] ) => void;

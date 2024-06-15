@@ -26,7 +26,6 @@ jest.mock( '@wordpress/data', () => {
 describe( 'IntroModal', () => {
 	test( 'should not show when modal options are resolving', () => {
 		useSelect.mockImplementation( () => ( {
-			isWelcomeModalShown: null,
 			isResolving: true,
 		} ) );
 
@@ -35,29 +34,11 @@ describe( 'IntroModal', () => {
 		expect( container ).toBeEmptyDOMElement();
 	} );
 
-	test( 'should dismiss when the welcome modal is shown', () => {
-		const updateOptions = jest.fn();
-		useSelect.mockImplementation( () => ( {
-			isWelcomeModalShown: true,
-		} ) );
-		useDispatch.mockImplementation( () => ( {
-			updateOptions,
-		} ) );
-
-		const { container } = render( <IntroModal /> );
-
-		expect( container ).toBeEmptyDOMElement();
-		expect( updateOptions ).toHaveBeenCalledWith( {
-			[ INTRO_MODAL_DISMISSED_OPTION_NAME ]: 'yes',
-		} );
-	} );
-
 	test( 'should not dismiss when the modal has already been dismissed', () => {
 		const updateOptions = jest.fn();
 		useSelect.mockImplementation( () => ( {
 			isDismissed: true,
 			isResolving: false,
-			isWelcomeModalShown: true,
 		} ) );
 		useDispatch.mockImplementation( () => ( {
 			updateOptions,
@@ -69,24 +50,11 @@ describe( 'IntroModal', () => {
 		expect( updateOptions ).not.toHaveBeenCalled();
 	} );
 
-	test( 'should show the intro modal when welcome modal is not shown', () => {
-		useSelect.mockImplementation( () => ( {
-			isResolving: false,
-			isWelcomeModalShown: false,
-		} ) );
-
-		render( <IntroModal /> );
-
-		expect(
-			screen.queryByText( 'A new navigation for WooCommerce' )
-		).not.toBeNull();
-	} );
-
 	test( 'should hide and update the dismissal option when closing the modal', () => {
 		const updateOptions = jest.fn();
 		useSelect.mockImplementation( () => ( {
 			isResolving: false,
-			isWelcomeModalShown: false,
+			isDismissed: false,
 		} ) );
 		useDispatch.mockImplementation( () => ( {
 			updateOptions,
