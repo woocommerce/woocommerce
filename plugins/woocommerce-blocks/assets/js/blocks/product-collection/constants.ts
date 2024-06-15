@@ -53,7 +53,7 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 	orderBy: 'title',
 	search: '',
 	exclude: [],
-	inherit: null,
+	inherit: false,
 	taxQuery: {},
 	isProductCollectionBlock: true,
 	featured: false,
