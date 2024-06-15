@@ -24,7 +24,7 @@ type ProductImageProps = {
 	product?: {
 		images?: Array< Image >;
 		image?: Image;
-		// ProductImage is only interested in product.images or varation.image
+		// ProductImage is only interested in product.images or variation.image
 		// but product object can have other properties that we don't control.
 		// allowing `any` here
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
