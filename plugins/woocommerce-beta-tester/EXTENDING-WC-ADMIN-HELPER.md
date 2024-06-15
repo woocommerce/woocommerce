@@ -17,7 +17,7 @@ const SuperSekret = () => (
 );
 addFilter(
 	'woocommerce_admin_test_helper_tabs',
-	'wath',
+	'what',
 	( tabs ) => [
 		...tabs,
 		{
@@ -43,7 +43,7 @@ const NewTool = () => (
 );
 addFilter(
 	'woocommerce_admin_test_helper_tab_options',
-	'wath',
+	'what',
 	( entries ) => [
 		...entries,
 		<NewTool/>
