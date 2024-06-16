@@ -1,15 +1,15 @@
 {
   "step": "configureCoreProfiler",
   "options": {
-	"blogname": "test",
-	"woocommerce_allow_tracking": "yes",
-	"woocommerce_onboarding_profile": {
-	  "is_store_country_set": true,
-	  "industry": [],
-	  "is_agree_marketing": false,
-	  "store_email": "test@gmail.com",
-	  "completed": true,
-	  "is_plugins_page_skipped": true
-	}
+    "blogname": "test",
+    "woocommerce_allow_tracking": "yes",
+    "woocommerce_onboarding_profile": {
+      "is_store_country_set": true,
+      "industry": [],
+      "is_agree_marketing": false,
+      "store_email": "test@gmail.com",
+      "completed": true,
+      "is_plugins_page_skipped": true
+    }
   }
 }

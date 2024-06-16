@@ -1,15 +1,15 @@
 {
   "step": "installPlugins",
   "plugins": [
-	{
-	  "slug": "akismet",
-	  "resource": "wordpress.org\/plugins",
-	  "activate": false
-	},
-	{
-	  "slug": "woocommerce",
-	  "resource": "wordpress.org\/plugins",
-	  "activate": true
-	}
+    {
+      "slug": "akismet",
+      "resource": "wordpress.org/plugins",
+      "activate": false
+    },
+    {
+      "slug": "woocommerce",
+      "resource": "wordpress.org/plugins",
+      "activate": true
+    }
   ]
 }

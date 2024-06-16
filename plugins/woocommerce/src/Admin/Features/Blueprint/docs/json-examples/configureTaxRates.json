@@ -1,17 +1,17 @@
 {
   "step": "configureTaxRates",
   "rates": [
-	{
-	  "tax_rate_id": "1",
-	  "tax_rate_country": "US",
-	  "tax_rate_state": "CA",
-	  "tax_rate": "9.5000",
-	  "tax_rate_name": "Test",
-	  "tax_rate_priority": "1",
-	  "tax_rate_compound": "0",
-	  "tax_rate_shipping": "1",
-	  "tax_rate_order": "0",
-	  "tax_rate_class": ""
-	}
+    {
+      "tax_rate_id": "1",
+      "tax_rate_country": "US",
+      "tax_rate_state": "CA",
+      "tax_rate": "9.5000",
+      "tax_rate_name": "Test",
+      "tax_rate_priority": "1",
+      "tax_rate_compound": "0",
+      "tax_rate_shipping": "1",
+      "tax_rate_order": "0",
+      "tax_rate_class": ""
+    }
   ]
 }

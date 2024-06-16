@@ -1,6 +1,6 @@
 {
   "step": "setOptions",
   "options": {
-	"woocommerce_allow_tracking": true
+    "woocommerce_allow_tracking": true
   }
 }

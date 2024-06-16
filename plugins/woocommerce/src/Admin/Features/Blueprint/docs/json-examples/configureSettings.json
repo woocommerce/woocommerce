@@ -1,354 +1,354 @@
 {
   "step": "configureSettings",
   "values": {
-	"pages": {
-	  "general": {
-		"label": "General",
-		"sections": {
-		  "general": {
-			"label": "General",
-			"subsections": {
-			  "store_address": {
-				"label": "Store Address"
-			  },
-			  "general_options": {
-				"label": "General options"
-			  },
-			  "pricing_options": {
-				"label": "Currency options"
-			  }
-			}
-		  }
-		}
-	  },
-	  "products": {
-		"label": "Products",
-		"sections": {
-		  "general": {
-			"label": "General",
-			"subsections": {
-			  "catalog_options": {
-				"label": "Shop pages"
-			  },
-			  "product_measurement_options": {
-				"label": "Measurements"
-			  },
-			  "product_rating_options": {
-				"label": "Reviews"
-			  }
-			}
-		  },
-		  "inventory": {
-			"label": "Inventory",
-			"subsections": {
-			  "product_inventory_options": {
-				"label": "Inventory"
-			  }
-			}
-		  },
-		  "downloadable_products": {
-			"label": "Downloadable products",
-			"subsections": {
-			  "digital_download_options": {
-				"label": "Downloadable products"
-			  }
-			}
-		  },
-		  "advanced": {
-			"label": "Advanced",
-			"subsections": {
-			  "product_attributes_lookup_table": {
-				"label": "Product attributes lookup table"
-			  },
-			  "product_image_matching_by_sku": {
-				"label": "Product image matching by SKU"
-			  }
-			}
-		  }
-		}
-	  },
-	  "tax": {
-		"label": "Tax",
-		"sections": {
-		  "tax_options": {
-			"label": "Tax options",
-			"subsections": {
-			  "tax_options": {
-				"label": "Tax options"
-			  }
-			}
-		  },
-		  "standard_rates": {
-			"label": "Standard rates",
-			"subsections": []
-		  },
-		  "reduced_rate_rates": {
-			"label": "Reduced rate rates",
-			"subsections": []
-		  },
-		  "zero_rate_rates": {
-			"label": "Zero rate rates",
-			"subsections": []
-		  }
-		}
-	  },
-	  "shipping": {
-		"label": "Shipping",
-		"sections": {
-		  "shipping_zones": {
-			"label": "Shipping zones",
-			"subsections": {
-			  "shipping_options": {
-				"label": "Shipping settings"
-			  }
-			}
-		  },
-		  "shipping_settings": {
-			"label": "Shipping settings",
-			"subsections": {
-			  "shipping_options": {
-				"label": "Shipping settings"
-			  }
-			}
-		  },
-		  "classes": {
-			"label": "Classes",
-			"subsections": []
-		  },
-		  "local_pickup": {
-			"label": "Local pickup",
-			"subsections": []
-		  }
-		}
-	  },
-	  "checkout": {
-		"label": "Payments",
-		"sections": {
-		  "payment_methods": {
-			"label": "Payment methods",
-			"subsections": []
-		  }
-		}
-	  },
-	  "account": {
-		"label": "Accounts &amp; Privacy",
-		"sections": {
-		  "general": {
-			"label": "General",
-			"subsections": {
-			  "account_registration_options": {
-				"label": ""
-			  },
-			  "privacy_policy_options": {
-				"label": "Privacy policy"
-			  },
-			  "personal_data_retention": {
-				"label": "Personal data retention"
-			  }
-			}
-		  }
-		}
-	  },
-	  "email": {
-		"label": "Emails",
-		"sections": {
-		  "email_options": {
-			"label": "Email options",
-			"subsections": {
-			  "email_notification_settings": {
-				"label": "Email notifications"
-			  },
-			  "email_options": {
-				"label": "Email sender options"
-			  },
-			  "email_template_options": {
-				"label": "Email template"
-			  },
-			  "email_merchant_notes": {
-				"label": "Store management insights"
-			  }
-			}
-		  }
-		}
-	  },
-	  "advanced": {
-		"label": "Advanced",
-		"sections": {
-		  "page_setup": {
-			"label": "Page setup",
-			"subsections": {
-			  "advanced_page_options": {
-				"label": "Page setup"
-			  },
-			  "checkout_process_options": {
-				"label": ""
-			  },
-			  "checkout_endpoint_options": {
-				"label": "Checkout endpoints"
-			  },
-			  "account_endpoint_options": {
-				"label": "Account endpoints"
-			  }
-			}
-		  },
-		  "rest_api": {
-			"label": "REST API",
-			"subsections": []
-		  },
-		  "webhooks": {
-			"label": "Webhooks",
-			"subsections": []
-		  },
-		  "legacy_api": {
-			"label": "Legacy API",
-			"subsections": {
-			  "legacy_api_options": {
-				"label": ""
-			  }
-			}
-		  },
-		  "woocommerce.com": {
-			"label": "WooCommerce.com",
-			"subsections": {
-			  "tracking_options": {
-				"label": "Usage Tracking"
-			  },
-			  "marketplace_suggestions": {
-				"label": "Marketplace suggestions"
-			  }
-			}
-		  },
-		  "blueprint": {
-			"label": "Blueprint",
-			"subsections": {
-			  "blueprint": {
-				"label": "Blueprint"
-			  }
-			}
-		  },
-		  "features": {
-			"label": "Features",
-			"subsections": {
-			  "features_options": {
-				"label": "Features"
-			  },
-			  "experimental_features_options": {
-				"label": "Experimental features"
-			  }
-			}
-		  }
-		}
-	  }
-	},
-	"options": [
-	  {
-		"id": "woocommerce_store_address",
-		"value": "Address Line 1",
-		"title": "Address line 1",
-		"location": "general.general.store_address"
-	  },
-	  {
-		"id": "woocommerce_store_address_2",
-		"value": "Address Line 2",
-		"title": "Address line 2",
-		"location": "general.general.store_address"
-	  },
-	  {
-		"id": "woocommerce_store_city",
-		"value": "Los Angeles",
-		"title": "City",
-		"location": "general.general.store_address"
-	  },
-	  {
-		"id": "woocommerce_default_country",
-		"value": "US:CA",
-		"title": "Country \/ State",
-		"location": "general.general.store_address"
-	  },
-	  {
-		"id": "woocommerce_store_postcode",
-		"value": "",
-		"title": "Postcode \/ ZIP",
-		"location": "general.general.store_address"
-	  },
-	  {
-		"id": "woocommerce_allowed_countries",
-		"value": "all",
-		"title": "Selling location(s)",
-		"location": "general.general.general_options"
-	  },
-	  {
-		"id": "woocommerce_all_except_countries",
-		"value": [],
-		"title": "Sell to all countries, except for&hellip;",
-		"location": "general.general.general_options"
-	  },
-	  {
-		"id": "woocommerce_specific_allowed_countries",
-		"value": [],
-		"title": "Sell to specific countries",
-		"location": "general.general.general_options"
-	  },
-	  {
-		"id": "woocommerce_ship_to_countries",
-		"value": "",
-		"title": "Shipping location(s)",
-		"location": "general.general.general_options"
-	  },
-	  {
-		"id": "woocommerce_specific_ship_to_countries",
-		"value": [],
-		"title": "Ship to specific countries",
-		"location": "general.general.general_options"
-	  },
-	  {
-		"id": "woocommerce_default_customer_address",
-		"value": "base",
-		"title": "Default customer location",
-		"location": "general.general.general_options"
-	  },
-	  {
-		"id": "woocommerce_calc_taxes",
-		"value": "no",
-		"title": "Enable taxes",
-		"location": "general.general.general_options"
-	  },
-	  {
-		"id": "woocommerce_enable_coupons",
-		"value": "yes",
-		"title": "Enable coupons",
-		"location": "general.general.general_options"
-	  },
-	  {
-		"id": "woocommerce_calc_discounts_sequentially",
-		"value": "no",
-		"title": "Calculate coupon discounts sequentially",
-		"location": "general.general.general_options"
-	  },
-	  {
-		"id": "woocommerce_currency",
-		"value": "NZD",
-		"title": "Currency",
-		"location": "general.general.currency_options"
-	  },
-	  {
-		"id": "woocommerce_currency_pos",
-		"value": "left",
-		"title": "Currency position",
-		"location": "general.general.currency_options"
-	  },
-	  {
-		"id": "woocommerce_price_thousand_sep",
-		"value": ",",
-		"title": "Thousand separator",
-		"location": "general.general.currency_options"
-	  },
-	  {
-		"id": "woocommerce_price_decimal_sep",
-		"value": ".",
-		"title": "Decimal separator",
-		"location": "general.general.currency_options"
-	  }
-	]
+    "pages": {
+      "general": {
+        "label": "General",
+        "sections": {
+          "general": {
+            "label": "General",
+            "subsections": {
+              "store_address": {
+                "label": "Store Address"
+              },
+              "general_options": {
+                "label": "General options"
+              },
+              "pricing_options": {
+                "label": "Currency options"
+              }
+            }
+          }
+        }
+      },
+      "products": {
+        "label": "Products",
+        "sections": {
+          "general": {
+            "label": "General",
+            "subsections": {
+              "catalog_options": {
+                "label": "Shop pages"
+              },
+              "product_measurement_options": {
+                "label": "Measurements"
+              },
+              "product_rating_options": {
+                "label": "Reviews"
+              }
+            }
+          },
+          "inventory": {
+            "label": "Inventory",
+            "subsections": {
+              "product_inventory_options": {
+                "label": "Inventory"
+              }
+            }
+          },
+          "downloadable_products": {
+            "label": "Downloadable products",
+            "subsections": {
+              "digital_download_options": {
+                "label": "Downloadable products"
+              }
+            }
+          },
+          "advanced": {
+            "label": "Advanced",
+            "subsections": {
+              "product_attributes_lookup_table": {
+                "label": "Product attributes lookup table"
+              },
+              "product_image_matching_by_sku": {
+                "label": "Product image matching by SKU"
+              }
+            }
+          }
+        }
+      },
+      "tax": {
+        "label": "Tax",
+        "sections": {
+          "tax_options": {
+            "label": "Tax options",
+            "subsections": {
+              "tax_options": {
+                "label": "Tax options"
+              }
+            }
+          },
+          "standard_rates": {
+            "label": "Standard rates",
+            "subsections": []
+          },
+          "reduced_rate_rates": {
+            "label": "Reduced rate rates",
+            "subsections": []
+          },
+          "zero_rate_rates": {
+            "label": "Zero rate rates",
+            "subsections": []
+          }
+        }
+      },
+      "shipping": {
+        "label": "Shipping",
+        "sections": {
+          "shipping_zones": {
+            "label": "Shipping zones",
+            "subsections": {
+              "shipping_options": {
+                "label": "Shipping settings"
+              }
+            }
+          },
+          "shipping_settings": {
+            "label": "Shipping settings",
+            "subsections": {
+              "shipping_options": {
+                "label": "Shipping settings"
+              }
+            }
+          },
+          "classes": {
+            "label": "Classes",
+            "subsections": []
+          },
+          "local_pickup": {
+            "label": "Local pickup",
+            "subsections": []
+          }
+        }
+      },
+      "checkout": {
+        "label": "Payments",
+        "sections": {
+          "payment_methods": {
+            "label": "Payment methods",
+            "subsections": []
+          }
+        }
+      },
+      "account": {
+        "label": "Accounts &amp; Privacy",
+        "sections": {
+          "general": {
+            "label": "General",
+            "subsections": {
+              "account_registration_options": {
+                "label": ""
+              },
+              "privacy_policy_options": {
+                "label": "Privacy policy"
+              },
+              "personal_data_retention": {
+                "label": "Personal data retention"
+              }
+            }
+          }
+        }
+      },
+      "email": {
+        "label": "Emails",
+        "sections": {
+          "email_options": {
+            "label": "Email options",
+            "subsections": {
+              "email_notification_settings": {
+                "label": "Email notifications"
+              },
+              "email_options": {
+                "label": "Email sender options"
+              },
+              "email_template_options": {
+                "label": "Email template"
+              },
+              "email_merchant_notes": {
+                "label": "Store management insights"
+              }
+            }
+          }
+        }
+      },
+      "advanced": {
+        "label": "Advanced",
+        "sections": {
+          "page_setup": {
+            "label": "Page setup",
+            "subsections": {
+              "advanced_page_options": {
+                "label": "Page setup"
+              },
+              "checkout_process_options": {
+                "label": ""
+              },
+              "checkout_endpoint_options": {
+                "label": "Checkout endpoints"
+              },
+              "account_endpoint_options": {
+                "label": "Account endpoints"
+              }
+            }
+          },
+          "rest_api": {
+            "label": "REST API",
+            "subsections": []
+          },
+          "webhooks": {
+            "label": "Webhooks",
+            "subsections": []
+          },
+          "legacy_api": {
+            "label": "Legacy API",
+            "subsections": {
+              "legacy_api_options": {
+                "label": ""
+              }
+            }
+          },
+          "woocommerce.com": {
+            "label": "WooCommerce.com",
+            "subsections": {
+              "tracking_options": {
+                "label": "Usage Tracking"
+              },
+              "marketplace_suggestions": {
+                "label": "Marketplace suggestions"
+              }
+            }
+          },
+          "blueprint": {
+            "label": "Blueprint",
+            "subsections": {
+              "blueprint": {
+                "label": "Blueprint"
+              }
+            }
+          },
+          "features": {
+            "label": "Features",
+            "subsections": {
+              "features_options": {
+                "label": "Features"
+              },
+              "experimental_features_options": {
+                "label": "Experimental features"
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": [
+      {
+        "id": "woocommerce_store_address",
+        "value": "Address Line 1",
+        "title": "Address line 1",
+        "location": "general.general.store_address"
+      },
+      {
+        "id": "woocommerce_store_address_2",
+        "value": "Address Line 2",
+        "title": "Address line 2",
+        "location": "general.general.store_address"
+      },
+      {
+        "id": "woocommerce_store_city",
+        "value": "Los Angeles",
+        "title": "City",
+        "location": "general.general.store_address"
+      },
+      {
+        "id": "woocommerce_default_country",
+        "value": "US:CA",
+        "title": "Country / State",
+        "location": "general.general.store_address"
+      },
+      {
+        "id": "woocommerce_store_postcode",
+        "value": "",
+        "title": "Postcode / ZIP",
+        "location": "general.general.store_address"
+      },
+      {
+        "id": "woocommerce_allowed_countries",
+        "value": "all",
+        "title": "Selling location(s)",
+        "location": "general.general.general_options"
+      },
+      {
+        "id": "woocommerce_all_except_countries",
+        "value": [],
+        "title": "Sell to all countries, except for&hellip;",
+        "location": "general.general.general_options"
+      },
+      {
+        "id": "woocommerce_specific_allowed_countries",
+        "value": [],
+        "title": "Sell to specific countries",
+        "location": "general.general.general_options"
+      },
+      {
+        "id": "woocommerce_ship_to_countries",
+        "value": "",
+        "title": "Shipping location(s)",
+        "location": "general.general.general_options"
+      },
+      {
+        "id": "woocommerce_specific_ship_to_countries",
+        "value": [],
+        "title": "Ship to specific countries",
+        "location": "general.general.general_options"
+      },
+      {
+        "id": "woocommerce_default_customer_address",
+        "value": "base",
+        "title": "Default customer location",
+        "location": "general.general.general_options"
+      },
+      {
+        "id": "woocommerce_calc_taxes",
+        "value": "no",
+        "title": "Enable taxes",
+        "location": "general.general.general_options"
+      },
+      {
+        "id": "woocommerce_enable_coupons",
+        "value": "yes",
+        "title": "Enable coupons",
+        "location": "general.general.general_options"
+      },
+      {
+        "id": "woocommerce_calc_discounts_sequentially",
+        "value": "no",
+        "title": "Calculate coupon discounts sequentially",
+        "location": "general.general.general_options"
+      },
+      {
+        "id": "woocommerce_currency",
+        "value": "NZD",
+        "title": "Currency",
+        "location": "general.general.currency_options"
+      },
+      {
+        "id": "woocommerce_currency_pos",
+        "value": "left",
+        "title": "Currency position",
+        "location": "general.general.currency_options"
+      },
+      {
+        "id": "woocommerce_price_thousand_sep",
+        "value": ",",
+        "title": "Thousand separator",
+        "location": "general.general.currency_options"
+      },
+      {
+        "id": "woocommerce_price_decimal_sep",
+        "value": ".",
+        "title": "Decimal separator",
+        "location": "general.general.currency_options"
+      }
+    ]
   }
 }
