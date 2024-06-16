@@ -13,13 +13,18 @@ class ExportTaxRates implements ExportsStepSchema {
 			FROM {$wpdb->prefix}woocommerce_tax_rates as tax_rates
 		", ARRAY_A);
 
-		return $rates;
+		$locations = $wpdb->get_results("
+			SELECT *
+			FROM {$wpdb->prefix}woocommerce_tax_rate_locations as locations
+		", ARRAY_A);
+
+		return compact('rates', 'locations');
 	}
 
 	public function export_step_schema() {
 		return array(
 			'step' => $this->get_step_name(),
-			'rates' => $this->export()
+			'values' => $this->export()
 		);
 	}
 

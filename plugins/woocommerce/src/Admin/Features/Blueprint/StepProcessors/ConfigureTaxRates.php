@@ -10,8 +10,12 @@ class ConfigureTaxRates implements StepProcessor {
 	private StepProcessorResult $result;
 	public function process($schema): StepProcessorResult {
 		$this->result = StepProcessorResult::success('ConfigureTaxRaes');
-		foreach ($schema->rates as $rate ) {
+		foreach ($schema->values->rates as $rate ) {
 			$this->add_rate($rate);
+		}
+
+		foreach ($schema->values->locations as $location) {
+			$this->add_location($location);
 		}
 
 		return $this->result;
@@ -53,6 +57,16 @@ class ConfigureTaxRates implements StepProcessor {
 		}
 
 		return $tax_rate_id;
+	}
+
+	public function add_location($location) {
+		global $wpdb;
+		$location = (array) $location;
+		$columns = implode(',', array_keys($location));
+		$format =  implode(',', array('%d', '%s', '%d', '%s'));
+		$table = $wpdb->prefix.'woocommerce_tax_rate_locations';
+		$sql = $wpdb->prepare("REPLACE INTO $table ($columns) VALUES ($format)", $location);
+		$wpdb->query($sql);
 	}
 
 	public function get_supported_step(): string {
