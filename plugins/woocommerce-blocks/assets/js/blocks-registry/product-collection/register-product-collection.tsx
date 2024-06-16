@@ -125,7 +125,7 @@ const isValidProductCollectionConfig = ( config: ProductCollectionConfig ) => {
 		console.error( 'Invalid query: query must be an object.' );
 		return false;
 	}
-	//attributes. query.exclude
+	//attributes.query.exclude
 	if (
 		config.attributes?.query?.exclude !== undefined &&
 		! Array.isArray( config.attributes.query.exclude )
