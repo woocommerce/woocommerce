@@ -516,9 +516,11 @@ test.describe( 'Billing Address Form', () => {
 				'  [data-type="woocommerce/checkout-shipping-address-block"]'
 		);
 
-		const companyCheckbox = page.getByLabel( 'Company', {
+		const companyCheckbox = page.getByRole( 'checkbox', {
+			name: 'Company',
 			exact: true,
 		} );
+
 		await companyCheckbox.check();
 		await expect( companyCheckbox ).toBeChecked();
 
