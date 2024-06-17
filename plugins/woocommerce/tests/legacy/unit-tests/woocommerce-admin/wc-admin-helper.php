@@ -271,15 +271,10 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 			10,
 			1
 		);
+		global $wp_post_types;
+		$wp_post_types['product']->has_archive = 'shop';
 
 		$product_post_type = get_post_type_object( 'product' );
-
-		if ( ! $product_post_type || ! $product_post_type->has_archive ) {
-			// Make sure product post type has archive.
-			unregister_post_type( 'product' );
-			add_theme_support( 'woocommerce' );
-			WC_Post_types::register_post_types();
-		}
 
 		$link = get_post_type_archive_link( 'product' );
 		$this->assertTrue( WCAdminHelper::is_store_page( $link ) );
