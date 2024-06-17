@@ -159,7 +159,7 @@ jobs:
               shell: bash
 
             - name: 'Run plugin-check '
-              run: 'pnpm wp-env run tests-cli wp plugin check woocommerce.php --require./wp-content/plugins/plugin-check/cli.php'
+              run: 'pnpm wp-env run tests-cli wp plugin check woocommerce --require./wp-content/plugins/plugin-check/cli.php'
 
             - name: 'Run tests'
               env:
