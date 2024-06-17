@@ -343,6 +343,7 @@ jobs:
                   gh workflow run report.yml \
                     -f artifact="$REPORT_NAME" \
                     -f run_id="$GITHUB_RUN_ID" \
+                    -f run_attempt="$GITHUB_RUN_ATTEMPT" \
                     -f event="$EVENT_NAME" \
                     -f pr_number="$PR_NUMBER" \
                     -f ref_name="$REF_NAME" \
