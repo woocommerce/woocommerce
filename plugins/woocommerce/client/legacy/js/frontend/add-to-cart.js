@@ -9,9 +9,10 @@ jQuery( function( $ ) {
 	 * AddToCartHandler class.
 	 */
 	var AddToCartHandler = function() {
-		this.requests   = [];
-		this.addRequest = this.addRequest.bind( this );
-		this.run        = this.run.bind( this );
+		this.requests    = [];
+		this.addRequest  = this.addRequest.bind( this );
+		this.run         = this.run.bind( this );
+		this.$liveRegion = this.createLiveRegion();
 
 		$( document.body )
 			.on( 'click', '.add_to_cart_button:not(.wc-interactive)', { addToCartHandler: this }, this.onAddToCart )
@@ -65,9 +66,11 @@ jQuery( function( $ ) {
 				return true;
 			}
 
-			// Remove mini cart live region so screen readers can identify
-			// the next update if it's the same as the previous one.
-			$( '.widget_shopping_cart_live_region' ).remove();
+			// Clean existing text in mini cart live region and update aria-relevant attribute
+			// so screen readers can identify the next update if it's the same as the previous one.
+			e.data.addToCartHandler.$liveRegion
+				.text( '' )
+				.attr( 'aria-relevant', 'additions text' );
 
 			e.preventDefault();
 
@@ -131,7 +134,9 @@ jQuery( function( $ ) {
 		var $thisbutton = $( this ),
 			$row        = $thisbutton.closest( '.woocommerce-mini-cart-item' );
 
-		$( '.widget_shopping_cart_live_region' ).remove();
+		e.data.addToCartHandler.$liveRegion
+			.text( '' )
+			.attr( 'aria-relevant', 'additions text' );
 
 		e.preventDefault();
 
@@ -223,13 +228,22 @@ jQuery( function( $ ) {
 			return;
 		}
 
-		var $liveRegion = $( '.widget_shopping_cart_live_region' );
+		e.data.addToCartHandler.$liveRegion
+			.text( message )
+			.attr( 'aria-relevant', 'all' );
+	};
 
-		if ( !$liveRegion.length ) {
-			$liveRegion = $( '<div class="widget_shopping_cart_live_region screen-reader-text" role="status"></div>' ).appendTo( 'body' );
+	/**
+	 * Add live region into the body element.
+	 */
+	AddToCartHandler.prototype.createLiveRegion = function() {
+		var existingLiveRegion = $( '.widget_shopping_cart_live_region' );
+
+		if ( existingLiveRegion.length ) {
+			return existingLiveRegion;
 		}
-
-		$liveRegion.text( message );
+		
+		return $( '<div class="widget_shopping_cart_live_region screen-reader-text" role="status"></div>' ).appendTo( 'body' );
 	};
 
 	/**
