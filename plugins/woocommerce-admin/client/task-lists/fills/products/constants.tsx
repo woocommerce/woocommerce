@@ -131,8 +131,11 @@ export const supportedOnboardingProductTypes = [ 'physical', 'downloads' ];
 export const SETUP_TASKLIST_PRODUCT_TYPES_FILTER =
 	'experimental_woocommerce_tasklist_product_types';
 
+export const SETUP_TASKLIST_PRODUCTS_AFTER_FILTER =
+	'woocommerce_admin_task_products_after';
+
 addFilter(
-	'woocommerce_admin_task_products_after',
+	SETUP_TASKLIST_PRODUCTS_AFTER_FILTER,
 	'woocommerce/task-lists/products-sponsored-placement',
 	( products ) => {
 		return [ ...products, PrintfulAdvertProductPlacement ];

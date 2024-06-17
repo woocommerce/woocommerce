@@ -25,6 +25,7 @@ import LoadSampleProductModal from '../components/load-sample-product-modal';
 import useLoadSampleProducts from '../components/use-load-sample-products';
 import LoadSampleProductConfirmModal from '../components/load-sample-product-confirm-modal';
 import useRecordCompletionTime from '../use-record-completion-time';
+import { SETUP_TASKLIST_PRODUCTS_AFTER_FILTER } from './constants';
 
 const getOnboardingProductType = (): string[] => {
 	const onboardingData = getAdminSetting( 'onboarding' );
@@ -106,7 +107,7 @@ export const Products = () => {
 		 * @param {Array.<Object>} productTypes Array of product types.
 		 */
 		const surfacedProductTypesAndAppendedProducts = applyFilters(
-			'woocommerce_admin_task_products_after',
+			SETUP_TASKLIST_PRODUCTS_AFTER_FILTER,
 			surfacedProductTypes
 		) as typeof surfacedProductTypes;
 		return surfacedProductTypesAndAppendedProducts;
