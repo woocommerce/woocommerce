@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Set stock quantity value as 0 by default #48448
