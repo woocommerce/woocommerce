@@ -26,26 +26,20 @@ class ProductFormsController {
 	 */
 	public function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingFinal, WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag -- Not an injection.
 		add_action( 'upgrader_process_complete', array( $this, 'migrate_templates_when_plugin_updated' ), 10, 2 );
-		add_action( 'rest_post_dispatch', array( $this, 'maybe_add_product_form_templates' ), 10, 3 );
+		add_action( 'the_content', array( $this, 'maybe_add_product_form_templates' ), 10, 2 );
 	}
 
 	/**
 	 * Maybe add product form templates to the posts array.
 	 */
-	public function maybe_add_product_form_templates( $response, $server, $request ) {
-		if ( $request->get_route() === '/wp/v2/product_form' ) {
-			$test             = new SimpleProductTemplate();
-			$response->data[] = array(
-				'content' => array( 'raw' => $test->get_comment_delimited_template() ),
-				'id'      => 9999,
-				'title'   => array(
-					'raw'      => 'simple_test',
-					'rendered' => 'simple_test',
-				),
-				'excerpt' => array( 'ray' => 'simple_test' ),
-			);
+	public function maybe_add_product_form_templates( $content ) {
+		$post = get_post();
+
+		if ( 'product_form' === $post->post_type && 'Simple' === $post->post_title ) {
+			$simple = new SimpleProductTemplate();
+			return $simple->get_comment_delimited_template();
 		}
-		return $response;
+		return $content;
 	}
 
 	/**
