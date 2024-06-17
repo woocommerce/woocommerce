@@ -21,6 +21,11 @@ test.describe( 'Execute plugin check using plugin-check plugin', () => {
 		await expect( page.getByText( 'Checks complete.' ) ).toBeVisible( {
 			timeout: 120000,
 		} );
+
+		await page.screenshot( {
+			path: 'plugin-check-General.png',
+			fullPage: true,
+		} );
 	} );
 
 	test( 'Can execute plugin repo checks', async ( { page } ) => {
@@ -41,6 +46,11 @@ test.describe( 'Execute plugin check using plugin-check plugin', () => {
 
 		await expect( page.getByText( 'Checks complete.' ) ).toBeVisible( {
 			timeout: 120000,
+		} );
+
+		await page.screenshot( {
+			path: 'plugin-check-Plugin_repo.png',
+			fullPage: true,
 		} );
 	} );
 
@@ -63,6 +73,11 @@ test.describe( 'Execute plugin check using plugin-check plugin', () => {
 		await expect( page.getByText( 'Checks complete.' ) ).toBeVisible( {
 			timeout: 120000,
 		} );
+
+		await page.screenshot( {
+			path: 'plugin-check-Security.png',
+			fullPage: true,
+		} );
 	} );
 
 	test( 'Can execute performance checks', async ( { page } ) => {
@@ -83,6 +98,11 @@ test.describe( 'Execute plugin check using plugin-check plugin', () => {
 
 		await expect( page.getByText( 'Checks complete.' ) ).toBeVisible( {
 			timeout: 120000,
+		} );
+
+		await page.screenshot( {
+			path: 'plugin-check-Performance.png',
+			fullPage: true,
 		} );
 	} );
 
@@ -106,6 +126,11 @@ test.describe( 'Execute plugin check using plugin-check plugin', () => {
 			page.getByText( 'Checks complete. No errors found.' )
 		).toBeVisible( {
 			timeout: 120000,
+		} );
+
+		await page.screenshot( {
+			path: 'plugin-check-Accessibility.png',
+			fullPage: true,
 		} );
 	} );
 } );
