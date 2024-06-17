@@ -13,4 +13,9 @@
 	justify-content: space-between;
 	align-items: center;
 	user-select: none;
+
+	span {
+		width: 32px;
+		max-width: 32px;
+	}
 }
