@@ -1554,28 +1554,36 @@ class WC_Helper {
 	}
 
 	/**
-	 * Get the connected user's subscription list data.
-	 * This is used by the My Subscriptions page.
+	 * Get the connected user's subscription list data. Here, we merge connected
+	 * subscriptions with locally installed Woo plugins and themes. We also
+	 * add in information about available updates.
+	 *
+	 * Used by the My Subscriptions page.
 	 *
 	 * @return array
 	 */
 	public static function get_subscription_list_data() {
+		// First, connected subscriptions.
 		$subscriptions = self::get_subscriptions();
 
-		// Installed plugins and themes, with or without an active subscription.
+		// Then, installed plugins and themes, with or without an active subscription.
 		$woo_plugins = self::get_local_woo_plugins();
 		$woo_themes  = self::get_local_woo_themes();
 
+		// Get the product IDs of the subscriptions.
 		$subscriptions_product_ids = wp_list_pluck( $subscriptions, 'product_id' );
 
+		// Get the site ID.
 		$auth    = WC_Helper_Options::get( 'auth' );
 		$site_id = isset( $auth['site_id'] ) ? absint( $auth['site_id'] ) : 0;
 
-		// Installed products without a subscription.
+		// Now, merge installed products without a subscription.
 		foreach ( array_merge( $woo_plugins, $woo_themes ) as $filename => $data ) {
 			if ( in_array( $data['_product_id'], $subscriptions_product_ids, true ) ) {
 				continue;
 			}
+
+			// We add these as subscriptions to the previous connected subscriptions list.
 			$subscriptions[] = array(
 				'product_key'       => '',
 				'product_id'        => $data['_product_id'],
@@ -1587,6 +1595,7 @@ class WC_Helper {
 				'key_type_label'    => '',
 				'lifetime'          => false,
 				'product_status'    => 'publish',
+				// Connections is empty because this is not a connected subscription.
 				'connections'       => array(),
 				'expires'           => 0,
 				'expired'           => true,
@@ -1598,10 +1607,12 @@ class WC_Helper {
 			);
 		}
 
+		// Fetch updates so we can refine subscriptions with information about updates.
+		$updates = WC_Helper_Updater::get_update_data();
+
+		// Add local data to merged subscriptions list (both locally installed and purchased).
 		foreach ( $subscriptions as &$subscription ) {
 			$subscription['active'] = in_array( $site_id, $subscription['connections'], true );
-
-			$updates = WC_Helper_Updater::get_update_data();
 
 			$subscription['local'] = self::get_subscription_local_data( $subscription );
 
@@ -1612,6 +1623,11 @@ class WC_Helper {
 
 			if ( ! empty( $updates[ $subscription['product_id'] ] ) ) {
 				$subscription['version'] = $updates[ $subscription['product_id'] ]['version'];
+			}
+
+			// If the update endpoint returns a URL, we prefer it over the default PluginURI.
+			if ( ! empty( $updates[ $subscription['product_id'] ]['url'] ) ) {
+				$subscription['product_url'] = $updates[ $subscription['product_id'] ]['url'];
 			}
 		}
 
