@@ -184,3 +184,41 @@ form.rest-api-filter-new-form {
 		float: right;
 	}
 }
+
+
+#wc-admin-test-helper-request-redirects {
+	.btn-new {
+		float: right;
+	}
+
+	.action-btns {
+		display: flex;
+		justify-content: flex-end;
+		gap: 10px;
+	}
+}
+
+form.request-redirects-new-form {
+	.grid {
+		display: grid;
+		grid-template-columns: max-content max-content;
+		grid-gap: 5px;
+		input[type='text'] {
+			width: 350px;
+		}
+		label {
+			text-align: right;
+		}
+		label:after {
+			content: ':';
+		}
+	}
+
+	.btn-new {
+		color: #fff;
+		background-color: #007bff;
+		border-color: #007bff;
+		float: right;
+		margin-top: 10px;
+	}
+}

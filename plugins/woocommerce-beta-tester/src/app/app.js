@@ -14,6 +14,7 @@ import { default as Experiments } from '../experiments';
 import { default as Features } from '../features';
 import { default as RestAPIFilters } from '../rest-api-filters';
 import RemoteSpecValidator from '../remote-spec-validator';
+import RequestRedirects from '../request-redirects';
 
 const tabs = applyFilters( 'woocommerce_admin_test_helper_tabs', [
 	{
@@ -48,8 +49,13 @@ const tabs = applyFilters( 'woocommerce_admin_test_helper_tabs', [
 	},
 	{
 		name: 'remote-spec-validator',
-		title: 'Remote Spec Rule Validator',
+		title: 'Remote Spec Validator',
 		content: <RemoteSpecValidator />,
+	},
+	{
+		name: 'request-redirects',
+		title: 'Request Redirects',
+		content: <RequestRedirects />,
 	},
 ] );
 

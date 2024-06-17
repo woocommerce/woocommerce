@@ -61,3 +61,5 @@ require 'live-branches/manifest.php';
 require 'live-branches/install.php';
 require 'tools/set-block-template-logging-threshold.php';
 require 'remote-spec-validator/class-wca-test-helper-remote-spec-validator.php';
+require 'request-redirects/class-wca-test-helper-request-redirects.php';
+require 'request-redirects/hook.php';
