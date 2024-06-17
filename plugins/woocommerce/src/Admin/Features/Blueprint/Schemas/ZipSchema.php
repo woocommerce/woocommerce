@@ -16,6 +16,10 @@ class ZipSchema extends Schema {
 		$unzipped_dir_name = str_replace(".zip", '', basename($zip_path));
 		$json_path = $this->unzip_path.'/'.$unzipped_dir_name.'/woo-blueprint.json';
 		$this->unzipped_path = $this->unzip_path . '/' . $unzipped_dir_name;
+		if (!file_exists($json_path)) {
+			$this->unzipped_path = $this->unzip_path;
+			$json_path = $this->unzip_path.'/woo-blueprint.json';
+		}
 
 		$schema = json_decode(file_get_contents($json_path));
 		if (!$this->validate()) {
