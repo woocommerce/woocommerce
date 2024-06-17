@@ -81,7 +81,9 @@ export const PrintfulAdvertProductPlacement = {
 	title: (
 		<span className="printful-sponsored__text">
 			{ __( 'Print-on-demand products', 'woocommerce' ) }
-			<div className="woocommerce-label">Sponsored</div>
+			<div className="woocommerce-label">
+				{ __( 'Sponsored', 'woocommerce' ) }
+			</div>
 		</span>
 	),
 	content: __(
