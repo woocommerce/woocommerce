@@ -59,6 +59,9 @@ class ComingSoonRequestHandler {
 			get_header();
 		}
 
+		add_action('wp_head', function() {
+			echo "<input type='hidden' name='is-coming-soon-page' value='yes'>";
+		});
 
 		include $coming_soon_template;
 
