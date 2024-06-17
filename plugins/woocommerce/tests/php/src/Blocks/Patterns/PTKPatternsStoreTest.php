@@ -134,7 +134,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	public function test_fetch_patterns_should_not_set_the_patterns_cache_when_fetching_patterns_fails() {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$this->ptk_client
-			->expects( $this->once() )
+			->expects( $this->exactly( 2 ) )
 			->method( 'fetch_patterns' )
 			->willReturn( new WP_Error( 'error', 'Request failed.' ) );
 

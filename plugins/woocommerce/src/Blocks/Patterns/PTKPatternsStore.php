@@ -194,7 +194,6 @@ class PTKPatternsStore {
 					$dotcom_patterns->get_error_message()
 				),
 			);
-			return;
 		}
 
 		$woo_patterns = $this->ptk_client->fetch_patterns(
