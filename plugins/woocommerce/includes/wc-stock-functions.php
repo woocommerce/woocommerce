@@ -307,6 +307,20 @@ function wc_increase_stock_levels( $order_id ) {
 		$item->save();
 
 		$changes[] = $item_name . ' ' . ( $new_stock - $item_stock_reduced ) . '&rarr;' . $new_stock;
+
+		/**
+		 * Fires when stock restore to a specific line item within order.
+		 *
+		 * @param WC_Order_Item_Product $item Order item data.
+		 * @param array $change  Change Details.
+		 * @param WC_Order $order  Order data.
+		 * @since 7.6.0
+		 */
+		do_action( 'woocommerce_restore_order_item_stock', $item, array(
+			'product' => $product,
+			'from'    => $new_stock - $item_stock_reduced,
+			'to'      => $new_stock,
+		), $order );
 	}
 
 	if ( $changes ) {
