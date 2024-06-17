@@ -54,6 +54,6 @@ class WC_Admin_Tests_Note extends WC_Unit_Test_Case {
 		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://example.com/', 'unactioned' );
 
 		// Cause an exception by adding the nonce to an invalid action.
-		$note->add_nonce_to_action( 'learn-more', 'foo', 'bar' );
+		$note->add_nonce_to_action( 'learn-mor', 'foo', 'bar' );
 	}
 }
