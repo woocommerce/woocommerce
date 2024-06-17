@@ -58,8 +58,8 @@ test.describe( 'Shopper → Shipping', () => {
 		await userFrontendUtils.goToCart();
 
 		await expect(
-			userPage.locator( 'button', {
-				hasText: 'Enter the address to check delivery options',
+			userPage.getByRole( 'button', {
+				name: 'Enter the address to check delivery options',
 			} )
 		).toBeVisible();
 	} );

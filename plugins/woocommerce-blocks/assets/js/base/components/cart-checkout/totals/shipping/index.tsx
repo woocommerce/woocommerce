@@ -43,10 +43,6 @@ export interface TotalShippingProps {
 	isCheckout?: boolean;
 }
 
-export type ActiveShippingZones = {
-	description: string;
-}[];
-
 export const TotalsShipping = ( {
 	currency,
 	values,
@@ -110,7 +106,7 @@ export const TotalsShipping = ( {
 	const [ shippingCalculatorAddress, setShippingCalculatorAddress ] =
 		useState( '' );
 
-	const activeShippingZones: ActiveShippingZones = getSetting(
+	const activeShippingZones: { description: string }[] = getSetting(
 		'activeShippingZones'
 	);
 

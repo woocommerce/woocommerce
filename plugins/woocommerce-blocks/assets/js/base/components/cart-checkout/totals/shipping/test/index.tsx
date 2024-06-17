@@ -350,7 +350,7 @@ describe( 'TotalsShipping', () => {
 		);
 		expect(
 			screen.getByRole( 'button', {
-				name: /Delivers to W1T 4JG, London, United Kingdom \(UK\)/i,
+				name: /Delivers to W1T 4JG, London, United Kingdom \(UK\)/,
 			} )
 		).toBeInTheDocument();
 	} );

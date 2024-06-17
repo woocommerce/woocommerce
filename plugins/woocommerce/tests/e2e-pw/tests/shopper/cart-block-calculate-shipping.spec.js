@@ -138,8 +138,8 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await page.goto( cartBlockPage.slug );
 
 		await page
-			.locator( 'button', {
-				hasText: 'Enter the address to check delivery options',
+			.getByRole( 'button', {
+				name: 'Enter the address to check delivery options',
 			} )
 			.click();
 
@@ -176,8 +176,8 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await page.goto( cartBlockPage.slug );
 
 		await page
-			.locator( 'button', {
-				hasText: 'Enter the address to check delivery options',
+			.getByRole( 'button', {
+				name: 'Enter the address to check delivery options',
 			} )
 			.click();
 
@@ -221,8 +221,8 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await page.goto( cartBlockPage.slug );
 
 		await page
-			.locator( 'button', {
-				hasText: 'Enter the address to check delivery options',
+			.getByRole( 'button', {
+				name: 'Enter the address to check delivery options',
 			} )
 			.click();
 
@@ -261,8 +261,8 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await page.goto( cartBlockPage.slug );
 
 		await page
-			.locator( 'button', {
-				hasText: 'Enter the address to check delivery options',
+			.getByRole( 'button', {
+				name: 'Enter the address to check delivery options',
 			} )
 			.click();
 

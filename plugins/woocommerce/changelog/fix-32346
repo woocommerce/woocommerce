@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Do not create empty webhooks after failure to deliver deleted webhook.
