@@ -149,7 +149,6 @@ class WCAdminHelper {
 			return false;
 		}
 		$normalized_path = self::get_normalized_url_path( $url );
-		$p               = get_page_by_path( 'shop' );
 
 		// WC store pages.
 		$store_pages = array(
@@ -169,7 +168,8 @@ class WCAdminHelper {
 		 */
 		$store_pages = apply_filters( 'woocommerce_store_pages', $store_pages );
 
-		// If the shop page is not set, check if the URL is a product archive page.
+		// If the shop page is not set, we will still show the product archive page.
+		// Therefore, we need to check if the URL is a product archive page when the shop page is not set.
 		if ( $store_pages['shop'] <= 0 ) {
 			$product_post_archive_link = get_post_type_archive_link( 'product' );
 
@@ -186,7 +186,6 @@ class WCAdminHelper {
 			}
 
 			$permalink = get_permalink( $page_id );
-
 			if ( ! $permalink ) {
 				continue;
 			}
