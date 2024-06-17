@@ -17,6 +17,9 @@ wp-env run tests-cli wp plugin activate process-waiting-actions
 echo -e 'Activate Test Helper APIs utility plugin \n'
 wp-env run tests-cli wp plugin activate test-helper-apis
 
+echo -e 'Install Plugin-check utility plugin \n'
+wp-env run tests-cli wp plugin install plugin-check --activate
+
 echo -e 'Add Customer user \n'
 wp-env run tests-cli wp user create customer customer@woocommercecoree2etestsuite.com \
 	--user_pass=password \

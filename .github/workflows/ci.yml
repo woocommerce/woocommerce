@@ -6,7 +6,7 @@ on:
             - 'trunk'
             - 'release/*'
     release:
-      types: [ published, edited ]
+        types: [published, edited]
     workflow_call:
         inputs:
             trigger:
@@ -18,9 +18,9 @@ on:
 concurrency:
     group: '${{ github.workflow }}-${{ github.ref }}'
     cancel-in-progress: true
-    
-env: 
-  FORCE_COLOR: 1
+
+env:
+    FORCE_COLOR: 1
 
 jobs:
     project-jobs:
@@ -54,18 +54,18 @@ jobs:
                       }
 
                       let githubEvent = ${{ toJson( github.event_name ) }};
-                    
+
                       const refType = ${{ toJson( github.ref_type ) }};
                       const refName = ${{ toJson( github.ref_name ) }};
-                    
+
                       if ( refType === 'tag' && refName !== 'nightly' ) {
                         githubEvent = 'release-checks';
                       }
-                    
+
                       if ( refType === 'tag' && refName === 'nightly' ) {
                         githubEvent = 'nightly-checks';
                       }
-                    
+
                       let trigger = ${{ toJson( inputs.trigger ) }};
                       if ( trigger ) {
                         githubEvent = trigger;
@@ -88,19 +88,19 @@ jobs:
               name: 'Checkout'
               with:
                   fetch-depth: 0
-                  
+
             - uses: './.github/actions/setup-woocommerce-monorepo'
               name: 'Setup Monorepo'
               id: 'setup-monorepo'
               with:
                   install: '${{ matrix.projectName }}...'
                   build: '${{ matrix.projectName }}'
-                  
+
             - name: 'Lint'
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
     project-test-jobs:
-        name: "${{ matrix.name }}"
+        name: '${{ matrix.name }}'
         runs-on: 'ubuntu-20.04'
         needs: 'project-jobs'
         if: ${{ needs.project-jobs.outputs.test-jobs != '[]' }}
@@ -112,89 +112,92 @@ jobs:
         steps:
             - uses: 'actions/checkout@v4'
               name: 'Checkout'
-              
+
             - uses: './.github/actions/setup-woocommerce-monorepo'
               name: 'Install Monorepo'
               id: 'install-monorepo'
               with:
-                install: '${{ matrix.projectName }}...'
-                build: 'false'
+                  install: '${{ matrix.projectName }}...'
+                  build: 'false'
 
             - uses: './.github/actions/setup-woocommerce-monorepo'
               if: ${{ github.ref_type != 'tag' }}
               name: 'Build project'
               id: 'build-project'
               with:
-                install: 'false'
-                build: ${{ matrix.projectName }}
-                  
+                  install: 'false'
+                  build: ${{ matrix.projectName }}
+
             - name: 'Update wp-env config'
               if: ${{ github.ref_type == 'tag' }}
               env:
-                RELEASE_TAG: ${{ github.ref_name }}
-                ARTIFACT_NAME: ${{ github.ref_name == 'nightly' && 'woocommerce-trunk-nightly.zip' || 'woocommerce.zip' }}
+                  RELEASE_TAG: ${{ github.ref_name }}
+                  ARTIFACT_NAME: ${{ github.ref_name == 'nightly' && 'woocommerce-trunk-nightly.zip' || 'woocommerce.zip' }}
               working-directory: ${{ matrix.projectPath }}
               run: node ./tests/e2e-pw/bin/override-wp-env-plugins.js
-              
+
             - name: 'Start Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
               env: ${{ matrix.testEnv.envVars }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
-              
+
             - name: 'Get commit message'
               id: 'get_commit_message'
               env:
-                HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-                PR_TITLE: ${{ github.event.pull_request.title }}
+                  HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                  PR_TITLE: ${{ github.event.pull_request.title }}
               run: |
-                if [[ "${{ github.event_name }}" == "push" ]]; then
-                  COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
-                elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                  COMMIT_MESSAGE="$PR_TITLE"
-                else
-                  COMMIT_MESSAGE="${{ github.event_name }}"
-                fi
-                echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
+                  if [[ "${{ github.event_name }}" == "push" ]]; then
+                    COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+                  elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+                    COMMIT_MESSAGE="$PR_TITLE"
+                  else
+                    COMMIT_MESSAGE="${{ github.event_name }}"
+                  fi
+                  echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
               shell: bash
-              
+
+            - name: 'Run plugin-check '
+              run: 'pnpm wp-env run tests-cli wp plugin check woocommerce.php --require./wp-content/plugins/plugin-check/cli.php'
+
             - name: 'Run tests'
               env:
-                BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
-                BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
-                CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
+                  BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
+                  BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
+                  CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
-              
+
             - name: 'Resolve artifacts path'
               if: ${{ always() && matrix.report.resultsPath != '' }}
               # Blocks e2e use a relative path which is not supported by actions/upload-artifact@v4
               # https://github.com/actions/upload-artifact/issues/176
               env:
-                ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
+                  ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
               run: echo "ARTIFACTS_PATH=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
-              
+
             - name: 'Upload artifacts'
               if: ${{ always() && matrix.report.resultsPath != '' }}
               uses: actions/upload-artifact@v4
               with:
-                name: '${{ matrix.report.resultsBlobName }}__${{ strategy.job-index }}'
-                path: ${{ env.ARTIFACTS_PATH }}
-                
+                  name: '${{ matrix.report.resultsBlobName }}__${{ strategy.job-index }}'
+                  path: ${{ env.ARTIFACTS_PATH }}
+
             - name: 'Upload flaky test reports'
               uses: actions/upload-artifact@v4
               with:
-                name: flaky-tests-${{ strategy.job-index }}
-                path: ${{ env.ARTIFACTS_PATH }}/flaky-tests
-                if-no-files-found: ignore
+                  name: flaky-tests-${{ strategy.job-index }}
+                  path: ${{ env.ARTIFACTS_PATH }}/flaky-tests
+                  if-no-files-found: ignore
 
             - name: 'Archive metrics results'
               if: ${{ success() && startsWith(matrix.name, 'Metrics') }} # this seems too fragile, we should update the reporting path and use the generic upload step above
               uses: actions/upload-artifact@v4
               env:
-                WP_ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
+                  WP_ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
               with:
-                name: metrics-results
-                path: ${{ env.WP_ARTIFACTS_PATH }}/*.performance-results*.json
+                  name: metrics-results
+                  path: ${{ env.WP_ARTIFACTS_PATH }}/*.performance-results*.json
 
     evaluate-project-jobs:
         # In order to add a required status check we need a consistent job that we can grab onto.
@@ -204,12 +207,7 @@ jobs:
         # on the results of the other jobs in the workflow.
         name: 'Evaluate Project Job Statuses'
         runs-on: 'ubuntu-20.04'
-        needs:
-            [
-                'project-jobs',
-                'project-lint-jobs',
-                'project-test-jobs',
-            ]
+        needs: ['project-jobs', 'project-lint-jobs', 'project-test-jobs']
         if: ${{ always() && github.event_name == 'pull_request' }}
         steps:
             - uses: 'actions/checkout@v4'
@@ -233,12 +231,7 @@ jobs:
     alert-on-failure:
         name: 'Report results on Slack'
         runs-on: 'ubuntu-20.04'
-        needs:
-            [
-                'project-jobs',
-                'project-lint-jobs',
-                'project-test-jobs',
-            ]
+        needs: ['project-jobs', 'project-lint-jobs', 'project-test-jobs']
         if: ${{ always() && github.event_name != 'pull_request'  }}
         steps:
             - uses: 'actions/checkout@v4'
@@ -258,7 +251,7 @@ jobs:
                   RUN_TYPE: ${{ github.ref_type == 'tag' && (github.ref_name == 'nightly' && 'nightly-checks' || 'release-checks') || '' }}
               run: |
                   COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
-                
+
                   if [[ -n "${INPUT_TRIGGER}" ]]; then
                       CHECKS_TYPE="${INPUT_TRIGGER}"
                   else
@@ -271,16 +264,12 @@ jobs:
 
     test-reports:
         name: 'Test reports - ${{ matrix.report }}'
-        needs:
-          [
-            'project-jobs',
-            'project-test-jobs',
-          ]
+        needs: ['project-jobs', 'project-test-jobs']
         if: ${{ always() && needs.project-jobs.outputs.report-jobs != '[]' }}
         strategy:
-          fail-fast: false
-          matrix:
-            report: ${{ fromJSON( needs.project-jobs.outputs.report-jobs ) }}
+            fail-fast: false
+            matrix:
+                report: ${{ fromJSON( needs.project-jobs.outputs.report-jobs ) }}
         runs-on: ubuntu-latest
 
         steps:
@@ -290,14 +279,14 @@ jobs:
               env:
                   DESTINATION_PATH: ../
               run: ./.github/workflows/scripts/install-allure.sh
-              
+
             - name: 'Merge artifacts'
               uses: actions/upload-artifact/merge@v4
               continue-on-error: true
               with:
-                name: ${{ matrix.report }}
-                pattern: ${{ matrix.report }}__*
-                delete-merged: true
+                  name: ${{ matrix.report }}
+                  pattern: ${{ matrix.report }}__*
+                  delete-merged: true
 
             - name: 'Download merged artifacts'
               uses: actions/download-artifact@v4
@@ -308,9 +297,9 @@ jobs:
             - name: 'Generate Allure report'
               id: generate_allure_report
               run: |
-                ls -lh ./out
-                allure generate --clean ./out/allure-results --output ./out/allure-report
-                ls -lh ./out
+                  ls -lh ./out
+                  allure generate --clean ./out/allure-results --output ./out/allure-report
+                  ls -lh ./out
 
             - name: 'Re-upload artifacts with generated report'
               uses: actions/upload-artifact@v4
@@ -340,7 +329,7 @@ jobs:
                     REPORT_TITLE="$EVENT_NAME"
                     REF_NAME="$GITHUB_REF_NAME"
                   fi
-                
+
                   gh workflow run report.yml \
                     -f artifact="$REPORT_NAME" \
                     -f run_id="$GITHUB_RUN_ID" \
@@ -353,7 +342,7 @@ jobs:
                     -f suite="$REPORT_NAME" \
                     -f report_title="$REPORT_TITLE" \
                     --repo woocommerce/woocommerce-test-reports
-                
+
             - name: 'Publish report to dashboard (deprecated)'
               env:
                   GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
@@ -387,37 +376,36 @@ jobs:
               run: |
                   echo "::notice::🔗🔗 The e2e report for this run is available at https://woocommerce.github.io/woocommerce-test-reports/pr/${{ github.event.pull_request.number }}/e2e"
 
-
     report-flaky-tests:
         name: 'Create issues for flaky tests'
         if: ${{ !cancelled() && ! github.event.pull_request.head.repo.fork }}
         needs: ['project-test-jobs']
         runs-on: ubuntu-latest
         permissions:
-          contents: read
-          issues: write
+            contents: read
+            issues: write
 
         steps:
             - uses: actions/checkout@v4
               with:
                   repository: WordPress/gutenberg
                   ref: dbf201449e9736f672b61e422787d47659db327a
-                  
+
             - uses: actions/download-artifact@v4
               id: download-artifact
               with:
-                pattern: flaky-tests*
-                path: flaky-tests
-                merge-multiple: true
-                
+                  pattern: flaky-tests*
+                  path: flaky-tests
+                  merge-multiple: true
+
             - name: 'Check if there are flaky tests reports'
               run: |
-                downloadPath='${{ steps.download-artifact.outputs.download-path }}'
-                # make dir so that next step doesn't fail if it doesn't exist 
-                mkdir -p $downloadPath
-                # any output means there are reports
-                echo "FLAKY_REPORTS=$(ls -A $downloadPath | head -1)" >> $GITHUB_ENV
-                
+                  downloadPath='${{ steps.download-artifact.outputs.download-path }}'
+                  # make dir so that next step doesn't fail if it doesn't exist 
+                  mkdir -p $downloadPath
+                  # any output means there are reports
+                  echo "FLAKY_REPORTS=$(ls -A $downloadPath | head -1)" >> $GITHUB_ENV
+
             - name: 'Setup'
               if: ${{ !!env.FLAKY_REPORTS }}
               uses: ./.github/setup-node
