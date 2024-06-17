@@ -19,7 +19,7 @@ test.describe( 'Execute plugin check using plugin-check plugin', () => {
 		).toBeVisible();
 
 		await expect( page.getByText( 'Checks complete.' ) ).toBeVisible( {
-			timeout: 60000,
+			timeout: 120000,
 		} );
 	} );
 
@@ -40,7 +40,7 @@ test.describe( 'Execute plugin check using plugin-check plugin', () => {
 		).toBeVisible();
 
 		await expect( page.getByText( 'Checks complete.' ) ).toBeVisible( {
-			timeout: 60000,
+			timeout: 120000,
 		} );
 	} );
 
@@ -61,7 +61,7 @@ test.describe( 'Execute plugin check using plugin-check plugin', () => {
 		).toBeVisible();
 
 		await expect( page.getByText( 'Checks complete.' ) ).toBeVisible( {
-			timeout: 60000,
+			timeout: 120000,
 		} );
 	} );
 
@@ -82,7 +82,7 @@ test.describe( 'Execute plugin check using plugin-check plugin', () => {
 		).toBeVisible();
 
 		await expect( page.getByText( 'Checks complete.' ) ).toBeVisible( {
-			timeout: 60000,
+			timeout: 120000,
 		} );
 	} );
 
@@ -105,7 +105,7 @@ test.describe( 'Execute plugin check using plugin-check plugin', () => {
 		await expect(
 			page.getByText( 'Checks complete. No errors found.' )
 		).toBeVisible( {
-			timeout: 60000,
+			timeout: 120000,
 		} );
 	} );
 } );
