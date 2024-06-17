@@ -55,6 +55,7 @@ final class BlockTypesController {
 	 */
 	protected function init() {
 		add_action( 'init', array( $this, 'register_blocks' ) );
+		add_action( 'init', array( $this, 'cache_registered_blocks_with_woocommerce_parent' ) );
 		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 2 );
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
@@ -70,6 +71,25 @@ final class BlockTypesController {
 			'woocommerce_is_cart',
 			function ( $ret ) {
 				return $ret || $this->has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'cart' );
+			}
+		);
+	}
+
+	public function cache_registered_blocks_with_woocommerce_parent() {
+		$registered_blocks                                = \WP_Block_Type_Registry::get_instance()->get_all_registered();
+		$this->registered_blocks_with_woocommerce_parents = array_filter(
+			$registered_blocks,
+			function ( $block ) {
+				if ( empty( $block->parent ) ) {
+					return false;
+				}
+				$woocommerce_blocks = array_filter(
+					$block->parent,
+					function ( $parent_block_name ) {
+						return 'woocommerce' === strtok( $parent_block_name, '/' );
+					}
+				);
+				return ! empty( $woocommerce_blocks );
 			}
 		);
 	}
