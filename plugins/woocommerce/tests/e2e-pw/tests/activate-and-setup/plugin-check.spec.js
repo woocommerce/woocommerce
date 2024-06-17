@@ -102,7 +102,9 @@ test.describe( 'Execute plugin check using plugin-check plugin', () => {
 			page.getByRole( 'heading', { name: 'Plugin Check' } )
 		).toBeVisible();
 
-		await expect( page.getByText( 'Checks complete.' ) ).toBeVisible( {
+		await expect(
+			page.getByText( 'Checks complete. No errors found.' )
+		).toBeVisible( {
 			timeout: 60000,
 		} );
 	} );
