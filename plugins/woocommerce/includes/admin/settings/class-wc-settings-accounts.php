@@ -96,6 +96,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
 				'autoload'      => false,
+				'disabled'      => get_option( 'woocommerce_enable_myaccount_registration' ) === 'no' && get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) === 'no' ? true : false,
 			),
 			array(
 				'desc'          => __( 'Send password setup link (recommended)', 'woocommerce' ),
@@ -105,6 +106,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
 				'autoload'      => false,
+				'disabled'      => get_option( 'woocommerce_enable_myaccount_registration' ) === 'no' && get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) === 'no' ? true : false,
 			),
 			array(
 				'type' => 'sectionend',

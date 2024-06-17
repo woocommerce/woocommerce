@@ -514,8 +514,13 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							$visibility_class[] = $value['row_class'];
 						}
 
+						$must_disable = $value['disabled'] ?? false;
+
+						if ( $must_disable ) {
+							$visibility_class[] = 'disabled';
+						}
+
 						$container_class = implode( ' ', $visibility_class );
-						$must_disable    = $value['disabled'] ?? false;
 						$has_title       = isset( $value['title'] ) && '' !== $value['title'];
 						$has_legend      = isset( $value['legend'] ) && '' !== $value['legend'];
 
@@ -553,7 +558,6 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									type="checkbox"
 									class="<?php echo esc_attr( isset( $value['class'] ) ? $value['class'] : '' ); ?>"
 									value="1"
-									<?php disabled( $value['disabled'] ?? false ); ?>
 									<?php checked( $option_value, 'yes' ); ?>
 									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
 								/> <?php echo $description; // WPCS: XSS ok. ?>
