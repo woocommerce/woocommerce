@@ -51,7 +51,7 @@ test.describe( `${ blockData.name }`, () => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
 		const block = editor.canvas.getByLabel(
-			'Block: Product Filters (Beta)'
+			'Block: Product Filters (Experimental)'
 		);
 		await expect( block ).toBeVisible();
 
@@ -91,7 +91,7 @@ test.describe( `${ blockData.name }`, () => {
 			exact: true,
 		} );
 		const colorFilterBlock = block.getByLabel(
-			'Block: Product Filter: Attribute (Beta)'
+			'Block: Product Filter: Attribute (Experimental)'
 		);
 		const expectedColorFilterOptions = [
 			'Blue',
@@ -113,9 +113,50 @@ test.describe( `${ blockData.name }`, () => {
 			name: 'Rating',
 		} );
 		const ratingFilterBlock = block.getByLabel(
-			'Block: Product Filter: Rating (Beta)'
+			'Block: Product Filter: Rating (Experimental)'
 		);
 		await expect( ratingHeading ).toBeVisible();
 		await expect( ratingFilterBlock ).toBeVisible();
+	} );
+
+	test( 'should display the correct customization settings', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Experimental)'
+		);
+		await expect( block ).toBeVisible();
+
+		await editor.openDocumentSettingsSidebar();
+
+		// Color settings
+		const colorSettings = editor.page.getByText( 'ColorTextBackground' );
+		const colorTextStylesSetting =
+			colorSettings.getByLabel( 'Color Text styles' );
+		const colorBackgroundStylesSetting = colorSettings.getByLabel(
+			'Color Background styles'
+		);
+
+		await expect( colorSettings ).toBeVisible();
+		await expect( colorTextStylesSetting ).toBeVisible();
+		await expect( colorBackgroundStylesSetting ).toBeVisible();
+
+		// Typography settings
+		const typographySettings = editor.page.getByText( 'TypographyFont' );
+		const typographySizeSetting = typographySettings.getByRole( 'group', {
+			name: 'Font size',
+		} );
+
+		await expect( typographySettings ).toBeVisible();
+		await expect( typographySizeSetting ).toBeVisible();
+
+		// Border settings
+		const borderSettings = editor.page.getByRole( 'heading', {
+			name: 'Border',
+		} );
+		await expect( borderSettings ).toBeVisible();
 	} );
 } );

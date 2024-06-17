@@ -11,6 +11,7 @@ import {
 	enqueueActions,
 	DoneActorEvent,
 	fromCallback,
+	or,
 } from 'xstate5';
 import { useMachine, useSelector } from '@xstate5/react';
 import { useMemo } from '@wordpress/element';
@@ -426,11 +427,18 @@ const assignUserProfile = assign( {
 		event.payload.userProfile,
 } );
 
+type BusinessInfoPayload = Extract<
+	BusinessInfoEvent,
+	{ type: 'BUSINESS_INFO_COMPLETED' }
+>[ 'payload' ];
+
 const updateBusinessInfo = fromPromise(
 	async ( {
 		input,
 	}: {
-		input: { payload: BusinessInfoEvent[ 'payload' ] };
+		input: {
+			payload: BusinessInfoPayload;
+		};
 	} ) => {
 		const refreshedOnboardingProfile = ( await resolveSelect(
 			OPTIONS_STORE_NAME
@@ -589,6 +597,10 @@ export const getJetpackIsConnected = fromPromise( async () => {
 	return resolveSelect( PLUGINS_STORE_NAME ).isJetpackConnected();
 } );
 
+const reloadPage = () => {
+	window.location.reload();
+};
+
 export const preFetchActions = {
 	preFetchIsJetpackConnected,
 	preFetchJetpackAuthUrl,
@@ -614,6 +626,7 @@ const coreProfilerMachineActions = {
 	redirectToWooHome,
 	redirectToJetpackAuthPage,
 	updateLoaderProgressWithPluginInstall,
+	reloadPage,
 };
 
 const coreProfilerMachineActors = {
@@ -1095,6 +1108,18 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								'recordTracksIsEmailChanged',
 							],
 						},
+						RETRY_PRE_BUSINESS_INFO: {
+							actions: [ 'reloadPage' ],
+						},
+						SKIP_BUSINESS_INFO_STEP: {
+							target: '#plugins',
+							actions: [
+								{
+									type: 'recordTracksStepSkipped',
+									params: { step: 'business_info' },
+								},
+							],
+						},
 					},
 				},
 				postBusinessInfo: {
@@ -1267,7 +1292,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: [
 							{
 								target: 'isJetpackConnected',
-								guard: 'hasJetpackSelected',
+								guard: or( [
+									'hasJetpackSelectedForInstallation',
+									'hasJetpackActivated',
+								] ),
 							},
 							{ actions: [ 'redirectToWooHome' ] },
 						],
@@ -1342,7 +1370,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: [
 							{
 								target: 'isJetpackConnected',
-								guard: 'hasJetpackSelected',
+								guard: or( [
+									'hasJetpackSelectedForInstallation',
+									'hasJetpackActivated',
+								] ),
 							},
 							{ actions: 'redirectToWooHome' },
 						],
@@ -1358,8 +1389,14 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: [
 							{
 								target: 'sendToJetpackAuthPage',
-								guard: ( { event } ) => {
-									return ! event.output.data;
+								guard: ( {
+									event,
+								}: {
+									event: DoneActorEvent<
+										typeof getJetpackIsConnected
+									>;
+								} ) => {
+									return ! event.output;
 								},
 							},
 							{ actions: 'redirectToWooHome' },
@@ -1439,7 +1476,16 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					entry: enqueueActions( ( { enqueue, check } ) => {
-						if ( check( { type: 'hasJetpackSelected' } ) ) {
+						if (
+							check(
+								or( [
+									{
+										type: 'hasJetpackSelectedForInstallation',
+									},
+									{ type: 'hasJetpackActivated' },
+								] )
+							)
+						) {
 							enqueue( 'preFetchIsJetpackConnected' );
 							enqueue( 'preFetchJetpackAuthUrl' );
 						}
@@ -1504,13 +1550,17 @@ export const CoreProfilerController = ( {
 						!! step && step === ( params as { step: string } ).step
 					);
 				},
-				hasJetpackSelected: ( { context } ) => {
+				hasJetpackSelectedForInstallation: ( { context } ) => {
 					return (
 						context.pluginsSelected.find(
 							( plugin ) =>
 								plugin === 'jetpack' ||
 								plugin === 'jetpack-boost'
-						) !== undefined ||
+						) !== undefined
+					);
+				},
+				hasJetpackActivated: ( { context } ) => {
+					return (
 						context.pluginsAvailable.find(
 							( plugin: Extension ) =>
 								( plugin.key === 'jetpack' ||

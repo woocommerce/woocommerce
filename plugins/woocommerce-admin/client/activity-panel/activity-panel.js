@@ -65,6 +65,8 @@ const SetupTasksPanel = lazy( () =>
 );
 
 export const ActivityPanel = ( { isEmbedded, query } ) => {
+	const isHomescreen = query.page === 'wc-admin' && ! query.path;
+
 	const [ currentTab, setCurrentTab ] = useState( '' );
 	const [ isPanelClosing, setIsPanelClosing ] = useState( false );
 	const [ isPanelOpen, setIsPanelOpen ] = useState( false );
@@ -73,7 +75,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const hasExtendedNotifications = Boolean( fills?.length );
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 	const activeSetupList = useActiveSetupTasklist();
-	const { comingSoon } = useLaunchYourStore();
+	const { comingSoon } = useLaunchYourStore( {
+		enabled: isHomescreen,
+	} );
 
 	const closePanel = () => {
 		setIsPanelClosing( true );
@@ -232,10 +236,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		setIsPanelSwitching( panelSwitching );
 	};
 
-	const isHomescreen = () => {
-		return query.page === 'wc-admin' && ! query.path;
-	};
-
 	const isProductScreen = () => {
 		const [ firstPathSegment ] = getSegmentsFromPath( query.path );
 		return (
@@ -271,7 +271,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			icon: <IconFlag />,
 			unread: hasUnreadNotes || hasAbbreviatedNotifications,
 			visible:
-				( isEmbedded || ! isHomescreen() ) &&
+				( isEmbedded || ! isHomescreen ) &&
 				! isPerformingSetupTask() &&
 				! isProductScreen(),
 		};
@@ -334,7 +334,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				! requestingTaskListOptions &&
 				! setupTaskListComplete &&
 				! setupTaskListHidden &&
-				! isHomescreen() &&
+				! isHomescreen &&
 				! isProductScreen(),
 		};
 
@@ -343,8 +343,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			icon: <Icon icon={ helpIcon } />,
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
-				( ( isHomescreen() && ! isEmbedded ) ||
-					isPerformingSetupTask() ),
+				( ( isHomescreen && ! isEmbedded ) || isPerformingSetupTask() ),
 		};
 
 		const displayOptions = {
@@ -352,7 +351,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
 				! isEmbedded &&
-				isHomescreen() &&
+				isHomescreen &&
 				! isPerformingSetupTask(),
 		};
 
@@ -360,7 +359,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			name: 'previewSite',
 			title: __( 'Preview site', 'woocommerce' ),
 			icon: <Icon icon={ external } />,
-			visible: isHomescreen() && query.task === 'appearance',
+			visible: isHomescreen && query.task === 'appearance',
 			onClick: () => {
 				window.open( getAdminSetting( 'siteUrl' ) );
 				recordEvent(
@@ -379,7 +378,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 					__( 'Preview store', 'woocommerce' ) ) ||
 				( comingSoon === 'no' && __( 'View store', 'woocommerce' ) ) ||
 				'',
-			visible: isHomescreen() && query.task !== 'appearance',
+			visible: isHomescreen && query.task !== 'appearance',
 			onClick: () => {
 				window.open( getAdminSetting( 'shopUrl' ) );
 				recordEvent( 'wcadmin_previewstore_click' );
