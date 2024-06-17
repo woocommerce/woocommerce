@@ -82,8 +82,6 @@ WooCommerce is translated into multiple languages, including Danish, Ukrainian, 
 
 You can connect your store to [WooCommerce.com](https://woocommerce.com/) to manage your subscriptions on WooCommerce Marketplace and receive product updates without leaving WordPress admin. Connection also enables installation of purchased products right from WooCommerce.com and streamlines access to technical support. If you’d like to learn about what data is gathered and how it is used, please refer to our [Privacy Policy](https://automattic.com/privacy/).
 
-
-
 == Frequently Asked Questions ==
 
 = Where can I find WooCommerce documentation and user guides? =
