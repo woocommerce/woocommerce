@@ -32,6 +32,13 @@ final class BlockTypesController {
 	protected $asset_data_registry;
 
 	/**
+	 * Holds the registered blocks that have WooCommerce blocks as their parents.
+	 *
+	 * @var array List of registered blocks.
+	 */
+	private $registered_blocks_with_woocommerce_parents;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi          $asset_api Instance of the asset API.
