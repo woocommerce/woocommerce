@@ -149,6 +149,7 @@ class WCAdminHelper {
 			return false;
 		}
 		$normalized_path = self::get_normalized_url_path( $url );
+		$p               = get_page_by_path( 'shop' );
 
 		// WC store pages.
 		$store_pages = array(
@@ -168,12 +169,24 @@ class WCAdminHelper {
 		 */
 		$store_pages = apply_filters( 'woocommerce_store_pages', $store_pages );
 
+		// If the shop page is not set, check if the URL is a product archive page.
+		if ( $store_pages['shop'] <= 0 ) {
+			$product_post_archive_link = get_post_type_archive_link( 'product' );
+
+			if ( is_string( $product_post_archive_link ) &&
+				0 === strpos( $normalized_path, self::get_normalized_url_path( $product_post_archive_link ) )
+			) {
+				return true;
+			}
+		}
+
 		foreach ( $store_pages as $page => $page_id ) {
 			if ( 0 >= $page_id ) {
 				continue;
 			}
 
 			$permalink = get_permalink( $page_id );
+
 			if ( ! $permalink ) {
 				continue;
 			}
