@@ -5,12 +5,17 @@ import {
 	InnerBlocks,
 	useBlockProps,
 	useInnerBlocksProps,
+	InspectorControls,
+	store as blockEditorStore,
+	__experimentalListView as ListView,
+	BlockEditorProvider,
 } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { useCollection } from '@woocommerce/base-context/hooks';
 import { AttributeTerm } from '@woocommerce/types';
 import { Spinner } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -93,8 +98,15 @@ const addHighestProductCountAttributeToTemplate = (
 	} );
 };
 
-export const Edit = ( {}: BlockEditProps< ProductFiltersBlockAttributes > ) => {
+export const Edit = ( {
+	clientId,
+}: BlockEditProps< ProductFiltersBlockAttributes > ) => {
 	const blockProps = useBlockProps();
+	const innerBlocks = useSelect( ( select ) => {
+		const { getBlock } = select( blockEditorStore );
+		const block = getBlock( clientId );
+		return block?.innerBlocks;
+	} );
 	const { results: attributes, isLoading } = useCollection< AttributeTerm >( {
 		namespace: '/wc/store/v1',
 		resourceName: 'products/attributes',
@@ -120,9 +132,24 @@ export const Edit = ( {}: BlockEditProps< ProductFiltersBlockAttributes > ) => {
 	if ( isLoading ) {
 		return <Spinner />;
 	}
-
+	console.log( { innerBlocks, clientId } );
 	return (
 		<div { ...blockProps }>
+			<InspectorControls>
+				<BlockEditorProvider
+					value={ [ { clientId, innerBlocks: [] } ] }
+				>
+					<ListView
+						rootClientId={ clientId }
+						// isExpanded={ false }
+						// description={ 'Hello' }
+						// showAppender={ true }
+						// showBlockMovers={ true }
+						// blockSettingsMenu={ <div>Menu</div> }
+						// additionalBlockContent={ <div>Block content</div> }
+					/>
+				</BlockEditorProvider>
+			</InspectorControls>
 			<InnerBlocks templateLock={ false } template={ updatedTemplate } />
 		</div>
 	);
