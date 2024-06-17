@@ -10,6 +10,7 @@ import { Button } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -98,7 +99,17 @@ export const Products = () => {
 					surfacedProductTypes.push( productType )
 			);
 		}
-		return surfacedProductTypes;
+		/**
+		 * Can be used to add an item to the end of the Products task list.
+		 *
+		 * @filter woocommerce_admin_task_products_after
+		 * @param {Array.<Object>} productTypes Array of product types.
+		 */
+		const surfacedProductTypesAndAppendedProducts = applyFilters(
+			'woocommerce_admin_task_products_after',
+			surfacedProductTypes
+		) as typeof surfacedProductTypes;
+		return surfacedProductTypesAndAppendedProducts;
 	}, [ surfacedProductTypeKeys, isExpanded, productTypesWithTimeRecord ] );
 
 	return (
