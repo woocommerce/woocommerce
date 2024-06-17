@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
