@@ -15,56 +15,6 @@ test.describe( 'Products API tests: List All Products', () => {
 	let sampleData;
 
 	test.beforeAll( async ( { request } ) => {
-		const createSampleData = async () => {
-			const categories = await createSampleCategories();
-
-			const attributes = await createSampleAttributes();
-
-			const tags = await createSampleTags();
-
-			const shippingClasses = await createSampleShippingClasses();
-
-			const taxClasses = await createSampleTaxClasses();
-
-			const simpleProducts = await createSampleSimpleProducts(
-				categories,
-				attributes,
-				tags
-			);
-			const externalProducts = await createSampleExternalProducts(
-				categories
-			);
-			const groupedProducts = await createSampleGroupedProduct(
-				categories
-			);
-			const variableProducts = await createSampleVariableProducts(
-				categories,
-				attributes
-			);
-			const hierarchicalProducts =
-				await createSampleHierarchicalProducts();
-
-			const reviewIds = await createSampleProductReviews(
-				simpleProducts
-			);
-			const orders = await createSampleProductOrders( simpleProducts );
-
-			return {
-				categories,
-				attributes,
-				tags,
-				shippingClasses,
-				taxClasses,
-				simpleProducts,
-				externalProducts,
-				groupedProducts,
-				variableProducts,
-				hierarchicalProducts,
-				reviewIds,
-				orders,
-			};
-		};
-
 		const createSampleCategories = async () => {
 			const clothing = await request.post(
 				'/wp-json/wc/v3/products/categories',
@@ -300,7 +250,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -373,7 +323,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -452,7 +402,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -528,7 +478,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -593,7 +543,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -666,7 +616,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -739,7 +689,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -804,7 +754,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -881,7 +831,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: 'reduced-rate',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -950,7 +900,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -1023,7 +973,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -1088,7 +1038,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -1165,7 +1115,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -1238,7 +1188,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -1330,7 +1280,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -1421,7 +1371,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								backorders: 'no',
 								backorders_allowed: false,
 								backordered: false,
@@ -1506,7 +1456,7 @@ test.describe( 'Products API tests: List All Products', () => {
 					tax_status: 'taxable',
 					tax_class: '',
 					manage_stock: false,
-					stock_quantity: null,
+					stock_quantity: 0,
 					backorders: 'no',
 					backorders_allowed: false,
 					backordered: false,
@@ -1592,7 +1542,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								stock_status: 'instock',
 								backorders: 'no',
 								backorders_allowed: false,
@@ -1638,7 +1588,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								stock_status: 'instock',
 								backorders: 'no',
 								backorders_allowed: false,
@@ -1684,7 +1634,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								stock_status: 'instock',
 								backorders: 'no',
 								backorders_allowed: false,
@@ -1730,7 +1680,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								stock_status: 'instock',
 								backorders: 'no',
 								backorders_allowed: false,
@@ -1791,7 +1741,7 @@ test.describe( 'Products API tests: List All Products', () => {
 					tax_status: 'taxable',
 					tax_class: '',
 					manage_stock: false,
-					stock_quantity: null,
+					stock_quantity: 0,
 					backorders: 'no',
 					backorders_allowed: false,
 					backordered: false,
@@ -1868,7 +1818,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								stock_status: 'instock',
 								backorders: 'no',
 								backorders_allowed: false,
@@ -1909,7 +1859,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								stock_status: 'instock',
 								backorders: 'no',
 								backorders_allowed: false,
@@ -1950,7 +1900,7 @@ test.describe( 'Products API tests: List All Products', () => {
 								tax_status: 'taxable',
 								tax_class: '',
 								manage_stock: false,
-								stock_quantity: null,
+								stock_quantity: 0,
 								stock_status: 'instock',
 								backorders: 'no',
 								backorders_allowed: false,
@@ -2122,11 +2072,61 @@ test.describe( 'Products API tests: List All Products', () => {
 			return [ orderJSON ];
 		};
 
+		const createSampleData = async () => {
+			const categories = await createSampleCategories();
+
+			const attributes = await createSampleAttributes();
+
+			const tags = await createSampleTags();
+
+			const shippingClasses = await createSampleShippingClasses();
+
+			const taxClasses = await createSampleTaxClasses();
+
+			const simpleProducts = await createSampleSimpleProducts(
+				categories,
+				attributes,
+				tags
+			);
+			const externalProducts = await createSampleExternalProducts(
+				categories
+			);
+			const groupedProducts = await createSampleGroupedProduct(
+				categories
+			);
+			const variableProducts = await createSampleVariableProducts(
+				categories,
+				attributes
+			);
+			const hierarchicalProducts =
+				await createSampleHierarchicalProducts();
+
+			const reviewIds = await createSampleProductReviews(
+				simpleProducts
+			);
+			const orders = await createSampleProductOrders( simpleProducts );
+
+			return {
+				categories,
+				attributes,
+				tags,
+				shippingClasses,
+				taxClasses,
+				simpleProducts,
+				externalProducts,
+				groupedProducts,
+				variableProducts,
+				hierarchicalProducts,
+				reviewIds,
+				orders,
+			};
+		};
+
 		sampleData = await createSampleData();
 	}, 10000 );
 
 	test.afterAll( async ( { request } ) => {
-		const deleteSampleData = async ( sampleData ) => {
+		const deleteSampleData = async ( _sampleData ) => {
 			const {
 				categories,
 				attributes,
@@ -2139,7 +2139,7 @@ test.describe( 'Products API tests: List All Products', () => {
 				variableProducts,
 				hierarchicalProducts,
 				orders,
-			} = sampleData;
+			} = _sampleData;
 
 			const productIds = []
 				.concat( simpleProducts.map( ( p ) => p.id ) )
