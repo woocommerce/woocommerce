@@ -113,7 +113,7 @@ class Coupons {
 	 */
 	public function maybe_add_marketing_coupon_script() {
 		$current_screen = PageController::get_instance()->get_current_page();
-		if ( ! isset( $current_screen['id'] ) || $current_screen['id'] !== 'woocommerce-coupons' ) {
+		if ( ! isset( $current_screen['id'] ) || 'woocommerce-coupons' !== $current_screen['id'] ) {
 			return;
 		}
 
