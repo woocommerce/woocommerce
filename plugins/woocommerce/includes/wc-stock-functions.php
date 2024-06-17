@@ -318,7 +318,7 @@ function wc_increase_stock_levels( $order_id ) {
 		 * @param int $old_stock Old stock.
 		 * @param WC_Order $order  Order data.
 		 */
-        do_action( 'woocommerce_restore_order_item_stock', $item, $new_stock, $old_stock, $order );
+		do_action( 'woocommerce_restore_order_item_stock', $item, $new_stock, $old_stock, $order );
 	}
 
 	if ( $changes ) {
