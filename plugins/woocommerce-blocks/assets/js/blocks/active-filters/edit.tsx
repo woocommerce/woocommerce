@@ -40,6 +40,7 @@ const Edit = ( {
 				<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
 					<ToggleGroupControl
 						label={ __( 'Display Style', 'woocommerce' ) }
+						isBlock
 						value={ displayStyle }
 						onChange={ ( value: Attributes[ 'displayStyle' ] ) =>
 							setAttributes( {

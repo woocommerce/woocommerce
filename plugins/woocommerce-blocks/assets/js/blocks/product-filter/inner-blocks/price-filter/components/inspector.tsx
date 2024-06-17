@@ -25,6 +25,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 			<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 				<ToggleGroupControl
 					label={ __( 'Price Slider', 'woocommerce' ) }
+					isBlock
 					value={ showInputFields ? 'editable' : 'text' }
 					onChange={ ( value: string ) =>
 						setAttributes( {

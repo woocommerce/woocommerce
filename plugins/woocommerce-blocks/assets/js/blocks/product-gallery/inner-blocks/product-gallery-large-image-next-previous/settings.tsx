@@ -61,6 +61,7 @@ export const ProductGalleryNextPreviousBlockSettings = ( {
 	return (
 		<ToggleGroupControl
 			label={ __( 'Next/Prev Buttons', 'woocommerce' ) }
+			isBlock
 			className="wc-block-editor-product-gallery-large-image-next-previous-settings"
 			style={ {
 				width: '100%',

@@ -191,6 +191,7 @@ const Edit = ( {
 							'Allow selecting multiple options?',
 							'woocommerce'
 						) }
+						isBlock
 						value={ selectType || 'multiple' }
 						onChange={ ( value: string ) =>
 							setAttributes( {
@@ -219,6 +220,7 @@ const Edit = ( {
 					{ selectType === 'multiple' && (
 						<ToggleGroupControl
 							label={ __( 'Filter Conditions', 'woocommerce' ) }
+							isBlock
 							help={
 								queryType === 'and'
 									? __(
@@ -250,6 +252,7 @@ const Edit = ( {
 					) }
 					<ToggleGroupControl
 						label={ __( 'Display Style', 'woocommerce' ) }
+						isBlock
 						value={ displayStyle }
 						onChange={ ( value: string ) =>
 							setAttributes( {

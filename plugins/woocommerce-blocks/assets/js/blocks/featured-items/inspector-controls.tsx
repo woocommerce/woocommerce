@@ -167,6 +167,7 @@ export const InspectorControls = ( {
 										</>
 									}
 									label={ __( 'Image fit', 'woocommerce' ) }
+									isBlock
 									value={ imageFit }
 									onChange={ ( value: ImageFit ) =>
 										setAttributes( {

@@ -37,6 +37,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 						'Allow selecting multiple options?',
 						'woocommerce'
 					) }
+					isBlock
 					value={ selectType || 'single' }
 					onChange={ ( value: string ) =>
 						setAttributes( {
@@ -64,6 +65,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				</ToggleGroupControl>
 				<ToggleGroupControl
 					label={ __( 'Display Style', 'woocommerce' ) }
+					isBlock
 					value={ displayStyle }
 					onChange={ ( value ) =>
 						setAttributes( {

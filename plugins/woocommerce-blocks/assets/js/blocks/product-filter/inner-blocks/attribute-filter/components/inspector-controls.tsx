@@ -41,6 +41,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 						'Allow selecting multiple options?',
 						'woocommerce'
 					) }
+					isBlock
 					value={ selectType || 'multiple' }
 					onChange={ ( value: string ) =>
 						setAttributes( {
@@ -69,6 +70,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				{ selectType === 'multiple' && (
 					<ToggleGroupControl
 						label={ __( 'Filter Conditions', 'woocommerce' ) }
+						isBlock
 						help={
 							queryType === 'and'
 								? __(
@@ -100,6 +102,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				) }
 				<ToggleGroupControl
 					label={ __( 'Display Style', 'woocommerce' ) }
+					isBlock
 					value={ displayStyle }
 					onChange={ ( value: string ) =>
 						setAttributes( {

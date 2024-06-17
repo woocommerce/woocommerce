@@ -53,6 +53,7 @@ export const ProductGalleryPagerBlockSettings = ( {
 	return (
 		<ToggleGroupControl
 			label={ __( 'Pager', 'woocommerce' ) }
+			isBlock
 			style={ {
 				width: '100%',
 			} }

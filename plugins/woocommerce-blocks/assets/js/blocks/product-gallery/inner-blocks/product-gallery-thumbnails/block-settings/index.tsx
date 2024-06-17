@@ -60,7 +60,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 		<>
 			<ToggleGroupControl
 				className="wc-block-editor-product-gallery-thumbnails__position-toggle"
-				isBlock={ true }
+				isBlock
 				label={ __( 'Thumbnails', 'woocommerce' ) }
 				value={ context.thumbnailsPosition }
 				help={
