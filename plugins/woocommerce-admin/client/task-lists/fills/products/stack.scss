@@ -57,14 +57,15 @@
 					flex-direction: row;
 					align-items: center;
 					gap: 8px;
-		
+
 					.woocommerce-label {
-						background-color: rgba(var(--wp-admin-theme-color--rgb), 0.10);
+						background-color: rgba(var(--wp-admin-theme-color--rgb), 0.1);
 						color: var(--wp-admin-theme-color, #000);
 						padding: 4px 8px;
 						font-weight: 400;
 					}
-				}		
+				}
+		
 			}
 		}
 	}
