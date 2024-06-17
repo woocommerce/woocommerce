@@ -329,7 +329,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Returns number of items available for sale.
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @return int|null
+	 * @return int
 	 */
 	public function get_stock_quantity( $context = 'view' ) {
 		$value = $this->get_prop( 'stock_quantity', $context );
@@ -338,7 +338,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		if ( 'view' === $context && 'parent' === $this->get_manage_stock() ) {
 			$value = apply_filters( $this->get_hook_prefix() . 'stock_quantity', $this->parent_data['stock_quantity'], $this );
 		}
-		return $value;
+		return $value ?? 0;
 	}
 
 	/**
