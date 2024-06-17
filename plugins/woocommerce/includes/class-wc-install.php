@@ -1640,7 +1640,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `min_price` decimal(19,4) NULL default NULL,
   `max_price` decimal(19,4) NULL default NULL,
   `onsale` tinyint(1) NULL default 0,
-  `stock_quantity` double NULL default NULL,
+  `stock_quantity` double NULL default 0,
   `stock_status` varchar(100) NULL default 'instock',
   `rating_count` bigint(20) NULL default 0,
   `average_rating` decimal(3,2) NULL default 0.00,

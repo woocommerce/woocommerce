@@ -134,9 +134,12 @@ class CLIRunner {
 	 * <product-id>
 	 * : The id of the product for which the data will be regenerated.
 	 *
+	 * [--disable-db-optimization]
+	 * : Don't use optimized database access even if products are stored as custom post types.
+	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc palt regenerate_for_product 34
+	 *     wp wc palt regenerate_for_product 34 --disable-db-optimization
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -154,10 +157,28 @@ class CLIRunner {
 	private function regenerate_for_product_core( array $args = array(), array $assoc_args = array() ) {
 		$product_id = current( $args );
 		$this->data_regenerator->check_can_do_lookup_table_regeneration( $product_id );
+		$use_db_optimization = ! array_key_exists( 'disable-db-optimization', $assoc_args );
+		$this->check_can_use_db_optimization( $use_db_optimization );
 		$start_time = microtime( true );
-		$this->lookup_data_store->create_data_for_product( $product_id );
-		$total_time = microtime( true ) - $start_time;
-		WP_CLI::success( sprintf( 'Attributes lookup data for product %d regenerated in %f seconds.', $product_id, $total_time ) );
+		$this->lookup_data_store->create_data_for_product( $product_id, $use_db_optimization );
+
+		if ( $this->lookup_data_store->get_last_create_operation_failed() ) {
+			$this->error( "Lookup data regeneration failed.\nSee the WooCommerce logs (source is %9palt-updates%n) for details." );
+		} else {
+			$total_time = microtime( true ) - $start_time;
+			WP_CLI::success( sprintf( 'Attributes lookup data for product %d regenerated in %f seconds.', $product_id, $total_time ) );
+		}
+	}
+
+	/**
+	 * If database access optimization is requested but can't be used, show a warning.
+	 *
+	 * @param bool $use_db_optimization True if database access optimization is requested.
+	 */
+	private function check_can_use_db_optimization( bool $use_db_optimization ) {
+		if ( $use_db_optimization && ! $this->lookup_data_store->can_use_optimized_db_access() ) {
+			$this->warning( "Optimized database access can't be used (products aren't stored as custom post types)." );
+		}
 	}
 
 	/**
@@ -338,6 +359,9 @@ class CLIRunner {
 	 * [--from-scratch]
 	 * : Start table regeneration from scratch even if a regeneration is already in progress.
 	 *
+	 * [--disable-db-optimization]
+	 * : Don't use optimized database access even if products are stored as custom post types.
+	 *
 	 * [--batch-size=<size>]
 	 * : How many products to process in each iteration of the loop.
 	 * ---
@@ -407,20 +431,28 @@ class CLIRunner {
 
 		$this->data_regenerator->cancel_regeneration_scheduled_action();
 
+		$use_db_optimization = ! array_key_exists( 'disable-db-optimization', $assoc_args );
+		$this->check_can_use_db_optimization( $use_db_optimization );
 		$progress = WP_CLI\Utils\make_progress_bar( '', $products_count );
 		$this->log( "Regenerating %W{$table_name}%n..." );
-		if ( $processed_count > 0 ) {
-			$progress->tick( $processed_count );
-		}
+		$progress->tick( $processed_count );
 
-		while ( $this->data_regenerator->do_regeneration_step( $batch_size ) ) {
+		$regeneration_step_failed = false;
+		while ( $this->data_regenerator->do_regeneration_step( $batch_size, $use_db_optimization ) ) {
 			$progress->tick( $batch_size );
+			$regeneration_step_failed = $regeneration_step_failed || $this->data_regenerator->get_last_regeneration_step_failed();
 		}
 
 		$this->data_regenerator->finalize_regeneration( $was_enabled );
 		$time = $progress->formatTime( $progress->elapsed() );
 		$progress->finish();
-		$this->log( "%GSuccess:%n Table %W{$table_name}%n regenerated in {$time}." );
+
+		if ( $regeneration_step_failed ) {
+			$this->warning( "Lookup data regeneration failed for at least one product.\nSee the WooCommerce logs (source is %9palt-updates%n) for details.\n" );
+			$this->log( "Table %W{$table_name}%n regenerated in {$time}." );
+		} else {
+			$this->log( "%GSuccess:%n Table %W{$table_name}%n regenerated in {$time}." );
+		}
 
 		$info = $this->get_lookup_table_info();
 		$this->log( "The table contains now %C{$info['total_rows']}%n rows corresponding to %G{$info['products_count']}%n products." );

@@ -236,6 +236,10 @@ export function ImageBlockEdit( {
 										: propertyValue?.id ?? undefined
 								}
 								multipleSelect={ multiple ? 'add' : false }
+								maxUploadFileSize={
+									window.productBlockEditorSettings
+										?.maxUploadFileSize
+								}
 								onError={ handleMediaUploaderError }
 								onFileUploadChange={ uploadHandler(
 									'product_images_add_via_file_upload_area'

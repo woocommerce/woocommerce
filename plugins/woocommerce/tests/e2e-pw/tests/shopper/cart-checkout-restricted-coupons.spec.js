@@ -235,9 +235,8 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			).toBeVisible();
 
 			// add a couple more in order to hit minimum spend
-			for ( let i = 0; i < 2; i++ ) {
-				await addAProductToCart( page, firstProductId );
-			}
+			await addAProductToCart( page, firstProductId, 2 );
+
 			// passed because we're between 50 and 200 dollars
 			await page.goto( '/cart/' );
 			await page
@@ -280,9 +279,8 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			).toBeVisible();
 
 			// add a couple more in order to hit minimum spend
-			for ( let i = 0; i < 2; i++ ) {
-				await addAProductToCart( page, firstProductId );
-			}
+			await addAProductToCart( page, firstProductId, 2 );
+
 			// passed because we're between 50 and 200 dollars
 			await page.goto( '/checkout/' );
 			await page

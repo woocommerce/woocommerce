@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
-import { EmptyContent, Section } from '@woocommerce/components';
+import { Section } from '@woocommerce/components';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
 
 /**
@@ -77,23 +76,8 @@ export class StockPanel extends Component {
 			this.props;
 
 		if ( isError ) {
-			const title = __(
-				'There was an error getting your low stock products. Please try again.',
-				'woocommerce'
-			);
-			const actionLabel = __( 'Reload', 'woocommerce' );
-			const actionCallback = () => {
-				// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
-				window.location.reload();
-			};
-
-			return (
-				<EmptyContent
-					title={ title }
-					actionLabel={ actionLabel }
-					actionURL={ null }
-					actionCallback={ actionCallback }
-				/>
+			throw new Error(
+				'Failed to load low stock products, Raise error to trigger ErrorBoundary'
 			);
 		}
 
