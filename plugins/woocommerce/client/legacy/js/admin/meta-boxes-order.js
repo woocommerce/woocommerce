@@ -642,7 +642,7 @@ jQuery( function ( $ ) {
 			return false;
 		},
 
-		add_shipping: function() {			
+		add_shipping: function() {
 			wc_meta_boxes_order_items.block();
 
 			var data = {
