@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
  * @param  int|null       $stock_quantity Stock quantity.
  * @param  string         $operation      Type of operation, allows 'set', 'increase' and 'decrease'.
  * @param  bool           $updating       If true, the product object won't be saved here as it will be updated later.
- * @return bool|int|null
+ * @return bool|int
  */
 function wc_update_product_stock( $product, $stock_quantity = null, $operation = 'set', $updating = false ) {
 	if ( ! is_a( $product, 'WC_Product' ) ) {

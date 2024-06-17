@@ -511,7 +511,7 @@
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-hpos-disabled",
-						"resultsPath": "tests/e2e-pw/test-results",
+						"resultsPath": "tests/api-core-tests/test-results",
 						"allure": true
 					}
 				},

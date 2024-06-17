@@ -267,5 +267,34 @@
 				$( this ).addClass( 'is-busy' );
 			}
 		} );
+
+		/**
+		 * Support conditionally displaying a settings field description when another element
+		 * is set to a specific value.
+		 *
+		 * This logic is subject to change, and is not intended for use by other plugins.
+		 * Note that we can't avoid jQuery here, because of our current dependence on Select2
+		 * for various controls.
+		 */
+		document.querySelectorAll( 'body.woocommerce_page_wc-settings #mainform .conditional.description' ).forEach( description => {
+			const $underObservation = $( description.dataset.dependsOn );
+			const showIfEquals      = description.dataset.showIfEquals;
+
+			if ( undefined === showIfEquals || $underObservation.length === 0 ) {
+				return;
+			}
+
+			/**
+			 * Set visibility of the description element according to whether its value
+			 * matches that of showIfEquals.
+			 */
+			const changeAgent = () => {
+				description.style.visibility = $underObservation.val() === showIfEquals ? 'visible' : 'hidden';
+			};
+
+			// Monitor future changes, and take action based on the current state.
+			$underObservation.on( 'change', changeAgent );
+			changeAgent();
+		} );
 	} );
 } )( jQuery, woocommerce_settings_params, wp );
