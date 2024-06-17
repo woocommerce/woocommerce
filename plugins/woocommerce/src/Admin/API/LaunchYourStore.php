@@ -104,21 +104,14 @@ class LaunchYourStore {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/is-coming-soon-page',
+			'/' . $this->rest_base . '/is-coming-soon-page-shown',
 			array(
 				array(
 					'methods'             => 'GET',
-					'callback'            => array( $this, 'is_coming_soon_page' ),
+					'callback'            => array( $this, 'is_coming_soon_page_shown' ),
 					'permission_callback' => function () {
 						return true;
-					},
-					'args'                => array(
-						'page' => array(
-							'type'    => 'string',
-							'enum'    => array( 'shop' ),
-							'default' => 'shop',
-						),
-					),
+					}
 				),
 			)
 		);
@@ -242,24 +235,17 @@ class LaunchYourStore {
 	}
 
 	/**
-	 * Check if the given page is a coming soon page or not.
+	 * Check if we're still displaying the coming soon page.
 	 *
 	 * @return void
 	 */
-	public function is_coming_soon_page( \WP_REST_Request $request ) {
-		$page_name = $request->get_param( 'page' );
-		// Return false if coming soon is not enabled.
-		$is_coming_soon = get_option( 'woocommerce_coming_soon', 'no' );
-		if ( $is_coming_soon !== 'yes' ) {
-			return new \WP_REST_Response(
-				array(
-					'is_coming_soon' => false,
-				)
-			);
+	public function is_coming_soon_page_shown() {
+		$store_pages_only = get_option( 'woocommerce_store_pages_only', 'no' ) === 'yes';
+		if ($store_pages_only) {
+			$url = get_permalink( wc_get_page_id( 'shop' ) );
+		} else {
+			$url = site_url();
 		}
-
-		$page_id = wc_get_page_id( $page_name );
-		$url     = get_permalink( $page_id );
 
 		$content = wp_remote_get(
 			$url,
@@ -273,7 +259,7 @@ class LaunchYourStore {
 
 		return new \WP_REST_Response(
 			array(
-				'is_coming_soon' => $has_coming_soon_input,
+				'is_coming_soon_shown' => $has_coming_soon_input,
 			)
 		);
 	}
