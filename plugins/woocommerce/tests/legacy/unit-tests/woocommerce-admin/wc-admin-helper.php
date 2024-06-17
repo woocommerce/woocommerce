@@ -263,17 +263,25 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 		$shop_page_id = get_option( 'woocommerce_shop_page_id' );
 
 		// Unset shop page.
-		delete_option( 'woocommerce_shop_page_id' );
-		// Unregister product post type to register it again with theme support.
-		unregister_post_type( 'product' );
-		add_theme_support( 'woocommerce' );
-		WC_Post_types::register_post_types();
+		add_filter(
+			'woocommerce_get_shop_page_id',
+			function () {
+				return false;
+			},
+			10,
+			1
+		);
+
+		$product_post_type = get_post_type_object( 'product' );
+
+		if ( ! $product_post_type || ! $product_post_type->has_archive ) {
+			// Make sure product post type has archive.
+			unregister_post_type( 'product' );
+			add_theme_support( 'woocommerce' );
+			WC_Post_types::register_post_types();
+		}
 
 		$link = get_post_type_archive_link( 'product' );
 		$this->assertTrue( WCAdminHelper::is_store_page( $link ) );
-
-		// Reset.
-		add_option( 'woocommerce_shop_page_id', $shop_page_id );
-		remove_theme_support( 'woocommerce' );
 	}
 }
