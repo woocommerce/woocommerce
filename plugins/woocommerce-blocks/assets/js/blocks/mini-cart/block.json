@@ -58,6 +58,10 @@
 		},
 		"productCountColorValue": {
 			"type": "string"
+		},
+		"productCountVisibility": {
+			"type": "string",
+			"default": "greater_than_zero"
 		}
 	},
 	"apiVersion": 2,

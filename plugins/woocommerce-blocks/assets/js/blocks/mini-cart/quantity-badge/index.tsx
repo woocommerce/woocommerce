@@ -15,6 +15,7 @@ interface Props {
 	icon?: IconType;
 	iconColor: ColorItem | { color: undefined };
 	productCountColor: ColorItem | { color: undefined };
+	productCountVisibility: string;
 }
 
 const QuantityBadge = ( {
@@ -22,6 +23,7 @@ const QuantityBadge = ( {
 	icon,
 	iconColor,
 	productCountColor,
+	productCountVisibility,
 }: Props ): JSX.Element => {
 	function getIcon( iconName?: 'cart' | 'bag' | 'bag-alt' ) {
 		switch ( iconName ) {
@@ -36,6 +38,21 @@ const QuantityBadge = ( {
 		}
 	}
 
+	function determineCount( count: number, visibility: string ) {
+		switch ( visibility ) {
+			case 'greater_than_zero':
+				return count > 0 ? count : '';
+			case 'always':
+				return count;
+			case 'never':
+				return '';
+			default:
+				return count > 0 ? count : '';
+		}
+	}
+
+	const displayCount = determineCount( count, productCountVisibility );
+
 	return (
 		<span className="wc-block-mini-cart__quantity-badge">
 			<Icon
@@ -48,7 +65,7 @@ const QuantityBadge = ( {
 				className="wc-block-mini-cart__badge"
 				style={ { background: productCountColor.color } }
 			>
-				{ count > 0 ? count : '' }
+				{ displayCount }
 			</span>
 		</span>
 	);

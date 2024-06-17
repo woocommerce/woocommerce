@@ -10,6 +10,7 @@ import {
 	BaseControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	__experimentalToggleGroupControl as ToggleGroupControl,
+	SelectControl,
 } from '@wordpress/components';
 import { getSetting } from '@woocommerce/settings';
 import { __, isRTL } from '@wordpress/i18n';
@@ -22,6 +23,9 @@ import { Icon } from '@wordpress/icons';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { ColorPanel } from '@woocommerce/editor-components/color-panel';
 import type { ColorPaletteOption } from '@woocommerce/editor-components/color-panel/types';
+import { useEffect, useRef } from '@wordpress/element';
+import { useStoreCart } from '@woocommerce/base-context/hooks';
+import { isNumber } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -39,6 +43,8 @@ export interface Attributes {
 	priceColor: ColorPaletteOption;
 	iconColor: ColorPaletteOption;
 	productCountColor: ColorPaletteOption;
+	initialCartItemsCount: number;
+	productCountVisibility: string;
 }
 
 interface Props {
@@ -59,6 +65,8 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		iconColor = defaultColorItem,
 		productCountColor = defaultColorItem,
 		miniCartIcon,
+		initialCartItemsCount,
+		productCountVisibility,
 	} = migrateAttributesToColorPanel( attributes );
 
 	const miniCartColorAttributes = {
@@ -76,9 +84,26 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		},
 	};
 
+	const { cartItemsCount: cartItemsCountFromApi, cartIsLoading } =
+		useStoreCart();
+
+	const cartIsLoadingForTheFirstTime = useRef( cartIsLoading );
+
+	useEffect( () => {
+		if ( cartIsLoadingForTheFirstTime.current && ! cartIsLoading ) {
+			cartIsLoadingForTheFirstTime.current = false;
+		}
+	}, [ cartIsLoading, cartIsLoadingForTheFirstTime ] );
+
 	const blockProps = useBlockProps( {
 		className: 'wc-block-mini-cart',
 	} );
+
+	const cartItemsCount =
+		cartIsLoadingForTheFirstTime.current &&
+		isNumber( initialCartItemsCount )
+			? initialCartItemsCount
+			: cartItemsCountFromApi;
 
 	const isSiteEditor = isSiteEditorPage( select( 'core/edit-site' ) );
 
@@ -87,7 +112,6 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		''
 	) as string;
 
-	const productCount = 0;
 	const productTotal = 0;
 	return (
 		<div { ...blockProps }>
@@ -131,6 +155,38 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							onChange={ () =>
 								setAttributes( {
 									hasHiddenPrice: ! hasHiddenPrice,
+								} )
+							}
+						/>
+					</BaseControl>
+					<BaseControl
+						id="wc-block-mini-cart__product-count-toggle"
+						label={ __( 'Product Count', 'woocommerce' ) }
+					>
+						<SelectControl
+							label={ __( 'Show Product Count:' ) }
+							options={ [
+								{
+									label: __(
+										'Always show count (even if 0)'
+									),
+									value: 'always',
+								},
+								{
+									label: __( 'Never show count' ),
+									value: 'never',
+								},
+								{
+									label: __(
+										'Show count only when greater than 0'
+									),
+									value: 'greater_than_zero',
+								},
+							] }
+							value={ productCountVisibility }
+							onChange={ ( value ) =>
+								setAttributes( {
+									productCountVisibility: value,
 								} )
 							}
 						/>
@@ -229,10 +285,11 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						</span>
 					) }
 					<QuantityBadge
-						count={ productCount }
+						count={ cartItemsCount }
 						iconColor={ iconColor }
 						productCountColor={ productCountColor }
 						icon={ miniCartIcon }
+						productCountVisibility={ productCountVisibility }
 					/>
 				</button>
 			</Noninteractive>

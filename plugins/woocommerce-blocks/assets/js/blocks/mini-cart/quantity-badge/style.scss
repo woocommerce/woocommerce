@@ -25,8 +25,8 @@
 
 :where(.wc-block-mini-cart__badge) {
 	// These values will be overridden in JS.
-	background-color: transparent;
-	color: transparent;
+	background-color: #111111;
+	color: #f9f9f9;
 }
 
 .wc-block-mini-cart__badge:empty {

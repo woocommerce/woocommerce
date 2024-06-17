@@ -62,6 +62,7 @@ const renderMiniCartFrontend = () => {
 				contents:
 					el.querySelector( '.wc-block-mini-cart__template-part' )
 						?.innerHTML ?? '',
+				productCountVisibility: el.dataset.productCountVisibility,
 			};
 		},
 	} );

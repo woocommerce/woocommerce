@@ -24,4 +24,5 @@ export interface BlockAttributes {
 	priceColor: ColorItem;
 	iconColor: ColorItem;
 	productCountColor: ColorItem;
+	productCountVisibility: string;
 }
