@@ -87,7 +87,7 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		// be sure shop is always returning same id doesn't matter the test setup environment
 		add_filter(
 			'woocommerce_get_shop_page_id',
-			function ( $page ) {
+			function () {
 				return 5;
 			},
 			10,
