@@ -355,7 +355,9 @@ function installProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
-function updateProduct( subscription: Subscription ): Promise< WpAjaxResponse > {
+function updateProduct(
+	subscription: Subscription
+): Promise< WpAjaxResponse > {
 	return wpAjax( 'update-' + subscription.product_type, {
 		slug: subscription.local.slug,
 		[ subscription.product_type ]: subscription.local.path,
