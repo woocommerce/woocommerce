@@ -29,7 +29,7 @@ const { state } = store( NS, {
 	},
 	actions: {
 		loadProduct: function*() {
-			if ( ! product || product.id !== getProductId() ) {
+			if ( ! state.product || state.product.id !== getProductId() ) {
 				state.loading = true;
 				const product = yield wp.data.resolveSelect( 'core' ).getEntityRecord( 'postType', 'product', getProductId() );
 				state.product = product;
@@ -54,7 +54,7 @@ const { state } = store( NS, {
 			wp.data.dispatch( 'core' ).editEntityRecord(
 				'postType',
 				'product',
-				1751,
+				getProductId(),
 				{ [ property ]: value }
 			);
 		}

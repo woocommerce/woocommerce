@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductEditor;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 /**
  * Loads assets related to the product editor.
@@ -41,6 +42,8 @@ class Init {
     public function register_scripts_and_styles() {
         $suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
         $version      = Constants::get_constant( 'WC_VERSION' );
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'interactivity-components', false );
 
         wp_register_script_module(
             'product-editor-interactivity',

@@ -65,7 +65,7 @@ function woocommerce_wp_text_input( $field, WC_Data $data = null ) {
 		}
 	}
 
-	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">
+	echo '<div class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '" data-react-component="TextControl">
 		<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
 
 	if ( ! empty( $field['description'] ) && false !== $field['desc_tip'] ) {
@@ -78,7 +78,7 @@ function woocommerce_wp_text_input( $field, WC_Data $data = null ) {
 		echo '<span class="description">' . wp_kses_post( $field['description'] ) . '</span>';
 	}
 
-	echo '</p>';
+	echo '</div>';
 }
 
 /**
