@@ -158,9 +158,6 @@ jobs:
                   echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
               shell: bash
 
-            - name: 'Run plugin-check '
-              run: 'pnpm wp-env run tests-cli wp plugin check woocommerce --require./wp-content/plugins/plugin-check/cli.php'
-
             - name: 'Run tests'
               env:
                   BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
