@@ -12,18 +12,18 @@ export const ShippingPlaceholder = ( {
 	showCalculator,
 
 	isCheckout = false,
-}: ShippingPlaceholderProps ): JSX.Element => {
-	if ( ! showCalculator ) {
-		return (
-			<span>
-				{ isCheckout
-					? __( 'No shipping options available', 'woocommerce' )
-					: __( 'Calculated during checkout', 'woocommerce' ) }
-			</span>
-		);
+}: ShippingPlaceholderProps ): JSX.Element | null => {
+	if ( showCalculator ) {
+		return null;
 	}
 
-	return <></>;
+	return (
+		<span>
+			{ isCheckout
+				? __( 'No shipping options available', 'woocommerce' )
+				: __( 'Calculated during checkout', 'woocommerce' ) }
+		</span>
+	);
 };
 
 export default ShippingPlaceholder;

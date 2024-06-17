@@ -52,15 +52,9 @@ export const ShippingAddress = ( {
 		setShowPickupLocation( false );
 
 		const formattedAddress = formatShippingAddress( shippingAddress );
-		let deliveryLabel;
-		if ( hasRates ) {
-			deliveryLabel = __( 'Delivers to', 'woocommerce' );
-		} else {
-			deliveryLabel = __(
-				'No delivery options available for',
-				'woocommerce'
-			);
-		}
+		const deliveryLabel = hasRates
+			? __( 'Delivers to', 'woocommerce' )
+			: __( 'No delivery options available for', 'woocommerce' );
 
 		if ( formattedAddress ) {
 			setShippingCalculatorLabel( deliveryLabel );
