@@ -41,13 +41,13 @@ class ComingSoonCacheInvalidator {
 		}
 
 		// Invalidate the SiteGround Speed Optimizer cache.
-		if ( function_exists( 'sg_cachepress_purge_everything' ) ) {
-			sg_cachepress_purge_everything();
+		if ( function_exists( '\sg_cachepress_purge_everything' ) ) {
+			\sg_cachepress_purge_everything();
 		}
 
 		// Invalidate the WP Engine cache.
-		if ( class_exists( 'wpecommon' ) && method_exists( 'wpecommon', 'purge_varnish_cache' ) ) {
-			wpecommon::purge_varnish_cache();
+		if ( class_exists( '\wpecommon' ) && method_exists( 'wpecommon', 'purge_varnish_cache' ) ) {
+			\wpecommon::purge_varnish_cache();
 		}
 	}
 }
