@@ -296,7 +296,7 @@ function wc_increase_stock_levels( $order_id ) {
 
 		$item_name = $product->get_formatted_name();
 		$new_stock = wc_update_product_stock( $product, $item_stock_reduced, 'increase' );
-        $old_stock = $new_stock - $item_stock_reduced;
+		$old_stock = $new_stock - $item_stock_reduced;
 
 		if ( is_wp_error( $new_stock ) ) {
 			/* translators: %s item name. */
