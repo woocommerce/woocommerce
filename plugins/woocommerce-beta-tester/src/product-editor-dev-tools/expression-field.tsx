@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { check, close, edit } from '@wordpress/icons';
 import { evaluate } from '@woocommerce/expression-evaluation';
@@ -42,19 +43,31 @@ export function ExpressionField( {
 	onUpdate,
 	onCancel,
 }: ExpressionFieldProps ) {
+	const [ editedExpression, setEditedExpression ] = useState( expression );
+
+	useEffect( () => setEditedExpression( expression ), [ expression ] );
+
 	const { result, error } = evaluateExpression(
-		expression,
+		editedExpression,
 		evaluationContext
 	);
 
 	const resultString = error ? String( error ) : String( result );
 
+	const expressionTextAreaRef = useRef< HTMLTextAreaElement >( null );
+
+	function handleOnChange( event: React.ChangeEvent< HTMLTextAreaElement > ) {
+		setEditedExpression( event.target.value );
+	}
+
 	return (
 		<div className="woocommerce-product-editor-dev-tools-expression-field">
 			<textarea
+				ref={ expressionTextAreaRef }
 				className="woocommerce-product-editor-dev-tools-expression-field__expression"
 				readOnly={ mode === 'view' }
-				value={ expression }
+				value={ editedExpression }
+				onChange={ handleOnChange }
 			/>
 			<div className="woocommerce-product-editor-dev-tools-expression-field__result">
 				{ resultString }
