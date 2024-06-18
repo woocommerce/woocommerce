@@ -34,7 +34,7 @@ const FormTokenField =
  * Type copied from core FormTokenField component.
  * Todo: move to a shared location.
  */
-export interface TokenItem {
+interface TokenItem {
 	value: string;
 	status?: 'error' | 'success' | 'validating';
 	title?: string;
