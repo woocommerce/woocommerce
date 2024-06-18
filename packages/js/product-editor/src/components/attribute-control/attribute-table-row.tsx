@@ -54,7 +54,7 @@ const stringToTokenItem = ( v: string | TokenItem ): TokenItem => ( {
 } );
 
 /**
- * Convert a TokenItem to a string.
+ * Convert a string or a TokenItem to a string.
  *
  * @param {string | TokenItem} item - The item to convert.
  * @return {string} The string.
@@ -225,7 +225,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		);
 	} );
 
-	async function addNewTerms( newTerms: TokenItem[] ) {
+	async function addNewTerms( newTokens: TokenItem[] ) {
 		if ( ! attribute ) {
 			return;
 		}
@@ -235,14 +235,14 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		 * It will show the tokens in the token field
 		 * optimistically, before the terms are created.
 		 */
-		setTemporaryTerms( ( prevTerms ) => [ ...prevTerms, ...newTerms ] );
+		setTemporaryTerms( ( prevTerms ) => [ ...prevTerms, ...newTokens ] );
 
 		// Create the new terms.
-		const promises = newTerms.map( async ( term ) => {
+		const promises = newTokens.map( async ( token ) => {
 			const newTerm = ( await createProductAttributeTerm(
 				{
-					name: term.value,
-					slug: cleanForSlug( term.value ),
+					name: token.value,
+					slug: cleanForSlug( token.value ),
 					attribute_id: attributeId,
 				},
 				{
@@ -257,14 +257,11 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 			return newTerm;
 		} );
 
-		const newItems = await Promise.all( promises );
+		const newTerms = await Promise.all( promises );
 
-		/*
-		 * remove the recently created terms from the temporary terms,
-		 * and add them to the token field values.
-		 */
+		// Remove the recently created terms from the temporary state,
 		setTemporaryTerms( ( prevTerms ) =>
-			prevTerms.filter( ( term ) => ! newTerms.includes( term ) )
+			prevTerms.filter( ( term ) => ! newTokens.includes( term ) )
 		);
 
 		/*
@@ -288,7 +285,8 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 			tokenFieldValues.map( ( item ) => item.value ).includes( term.name )
 		);
 
-		onTermsSelect( [ ...newSelectedTerms, ...newItems ], index, attribute );
+		// Call the callback to update the Form terms.
+		onTermsSelect( [ ...newSelectedTerms, ...newTerms ], index, attribute );
 	}
 
 	/*
@@ -337,35 +335,31 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					disabled={ ! attribute }
 					suggestions={ tokenFieldSuggestions }
 					value={ tokenFieldValues }
-					onChange={ (
-						nextSelectedTerms: ( TokenItem | string )[]
-					) => {
+					onChange={ ( nextTokens: ( TokenItem | string )[] ) => {
 						if ( ! attribute ) {
 							return;
 						}
 
-						/*
-						 * Create a new strings array with the new selected terms,
-						 * used to pass to the Form component.
-						 */
-						const nextStringTerms =
-							nextSelectedTerms.map( tokenItemToString );
+						// Create a new strings array with the new selected tokens,
+						const nextStringTokens =
+							nextTokens.map( tokenItemToString );
 
 						/*
-						 * Create an array with the new terms to add,
-						 * filtering the new selected terms that are not in the
+						 * Create an array with the new tokens to add,
+						 * filtering the new selected ones that are not in the
 						 * suggestions array.
 						 */
-						const newItems = nextStringTerms
+						const newTokens = nextStringTokens
 							.filter(
 								( t ) => ! tokenFieldSuggestions.includes( t )
 							)
 							.map( stringToTokenItem );
 
+						// Selected Terms to pass to the Form.
 						const selectedTerms = isGlobalAttribute
-							? nextStringTerms
+							? nextStringTokens
 							: terms?.filter( ( term ) =>
-									nextStringTerms.includes( term.name )
+									nextStringTokens.includes( term.name )
 							  );
 
 						// Call the callback to update the Form terms.
@@ -375,7 +369,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 						if ( isGlobalAttribute ) {
 							return setLocalTerms( ( prevTerms ) => [
 								...prevTerms,
-								...newItems,
+								...newTokens,
 							] );
 						}
 
@@ -383,9 +377,9 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 						 * Create new terms, in case there are any,
 						 * when it is not a global attribute.
 						 */
-						if ( newItems.length ) {
+						if ( newTokens.length ) {
 							addNewTerms(
-								newItems.map( ( item ) => ( {
+								newTokens.map( ( item ) => ( {
 									...item,
 									status: 'validating',
 								} ) )
