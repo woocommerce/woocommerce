@@ -25,8 +25,8 @@ class OptionsManager {
 	 */
 	public function check_should_use_blockified_product_grid_templates() {
 		$option_name           = Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE;
-		$is_using_blockified   = get_option( $option_name );
-		$should_use_blockified = wc_current_theme_is_fse_theme();
+		$is_using_blockified   = wc_bool_to_string( get_option( $option_name ) );
+		$should_use_blockified = wc_bool_to_string( wc_current_theme_is_fse_theme() );
 
 		if ( $is_using_blockified === $should_use_blockified ) {
 			return;
