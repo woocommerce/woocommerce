@@ -260,6 +260,7 @@ class LaunchYourStore {
 		return new \WP_REST_Response(
 			array(
 				'is_coming_soon_shown' => $has_coming_soon_input,
+				'url' => $url,
 			)
 		);
 	}
