@@ -117,7 +117,7 @@ describe( 'crud actions', () => {
 			} );
 
 			// Step through the generator request action
-			const { value: requestAction } = generator.next() as any;
+			const { value: requestAction } = generator.next();
 
 			expect( requestAction.type ).toEqual( TYPES.CREATE_ITEM_REQUEST );
 			expect( requestAction.query ).toEqual( {
