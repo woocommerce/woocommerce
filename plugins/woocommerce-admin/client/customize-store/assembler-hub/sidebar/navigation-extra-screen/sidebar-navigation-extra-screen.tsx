@@ -19,18 +19,13 @@ const getPatternCategoryByPath = ( path: string ) => {
 	// Apply the regex pattern to the pathname part of the URL
 	const match = path.match( regex );
 
-	// If a match is found, return the captured group (everything after "/homepage/")
-	if ( match && match[ 1 ] ) {
-		return match[ 1 ];
-	}
-
-	const pattern_category = match && match[ 1 ];
+	const patternCategory = match && match[ 1 ];
 
 	if (
-		pattern_category &&
-		Object.keys( PATTERN_CATEGORIES ).includes( pattern_category )
+		patternCategory &&
+		Object.keys( PATTERN_CATEGORIES ).includes( patternCategory )
 	) {
-		return pattern_category;
+		return patternCategory;
 	}
 
 	return null;
