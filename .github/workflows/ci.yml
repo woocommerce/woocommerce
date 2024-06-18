@@ -166,6 +166,7 @@ jobs:
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
               
             - name: 'Resolve artifacts path'
+              if: ${{ always() && matrix.report.resultsPath != '' }}
               # Blocks e2e use a relative path which is not supported by actions/upload-artifact@v4
               # https://github.com/actions/upload-artifact/issues/176
               env:
@@ -343,6 +344,7 @@ jobs:
                   gh workflow run report.yml \
                     -f artifact="$REPORT_NAME" \
                     -f run_id="$GITHUB_RUN_ID" \
+                    -f run_attempt="$GITHUB_RUN_ATTEMPT" \
                     -f event="$EVENT_NAME" \
                     -f pr_number="$PR_NUMBER" \
                     -f ref_name="$REF_NAME" \
