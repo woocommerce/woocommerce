@@ -4,7 +4,7 @@ This living document serves as a guide for writing end-to-end (E2E) tests with P
 
 ## Preparing the environment
 
-Please refer to [the Getting Started section of the main `README.md`](https://github.com/woocommerce/woocommerce/blob/trunk/README.md) for a general-purpose guide on getting started. The rest of this document will assume that you've installed all of the prequisites and setup described there.
+Please refer to [the Getting Started section of the main `README.md`](https://github.com/woocommerce/woocommerce/blob/trunk/README.md) for a general-purpose guide on getting started. The rest of this document will assume that you've installed all of the prerequisites and setup described there.
 
 Run the following command from the repository root to build the WooCommerce plugin:
 
