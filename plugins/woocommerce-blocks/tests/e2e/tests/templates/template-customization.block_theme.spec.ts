@@ -174,12 +174,10 @@ test.describe( 'Template customization', () => {
 				} );
 
 				// Wait until search has finished.
-				await page.waitForFunction( ( templatesLength ) => {
-					return (
-						document.querySelectorAll( '[aria-label="Actions"]' )
-							.length < templatesLength
-					);
-				}, CUSTOMIZABLE_WC_TEMPLATES.length );
+				const searchResults = page.getByLabel( 'Actions' );
+				await expect
+					.poll( async () => await searchResults.count() )
+					.toBeLessThan( CUSTOMIZABLE_WC_TEMPLATES.length );
 
 				await page.getByLabel( 'Actions' ).first().click();
 				await page.getByRole( 'menuitem', { name: 'Reset' } ).click();
