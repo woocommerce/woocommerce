@@ -8,7 +8,12 @@ export function sendMessageToParent( message ) {
 }
 
 export function isIframe( windowObject ) {
-	return windowObject.document !== windowObject.parent.document;
+	return (
+		windowObject.document !== windowObject.parent.document &&
+		windowObject.parent.document.body.querySelector(
+			'.woocommerce-customize-store__container'
+		) !== null
+	);
 }
 
 export function editorIsLoaded() {

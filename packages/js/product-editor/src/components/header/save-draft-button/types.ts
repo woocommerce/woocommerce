@@ -10,4 +10,5 @@ export type SaveDraftButtonProps = Omit<
 > & {
 	productStatus: Product[ 'status' ];
 	productType?: string;
+	visibleTab?: string | null;
 };

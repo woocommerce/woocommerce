@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Optimize the regeneration of the product attributes lookup table

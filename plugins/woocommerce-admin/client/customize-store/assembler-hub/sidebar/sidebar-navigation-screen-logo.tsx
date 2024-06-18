@@ -31,6 +31,8 @@ import {
 } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
 import { store as noticesStore } from '@wordpress/notices';
+import interpolateComponents from '@automattic/interpolate-components';
+import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -370,7 +372,11 @@ const LogoEdit = ( {
 	);
 };
 
-export const SidebarNavigationScreenLogo = () => {
+export const SidebarNavigationScreenLogo = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	// Get the current logo block client ID and attributes. These are used for the logo settings.
 	const { logoBlockIds } = useContext( LogoBlockContext );
 	const { attributes, isAttributesLoading } = useLogoAttributes();
@@ -440,6 +446,7 @@ export const SidebarNavigationScreenLogo = () => {
 				"Ensure your store is on-brand by adding your logo. For best results, upload a SVG or PNG that's a minimum of 300px wide.",
 				'woocommerce'
 			) }
+			onNavigateBackClick={ onNavigateBackClick }
 			content={
 				<div className="woocommerce-customize-store__sidebar-logo-content">
 					<div className="woocommerce-customize-store__sidebar-group-header woocommerce-customize-store__logo-header-container">
@@ -521,6 +528,28 @@ export const SidebarNavigationScreenLogo = () => {
 						mediaItemData={ mediaItemData }
 						isLoading={ isLoading }
 					/>
+					<div className="woocommerce-customize-store__fiverr-cta-group">
+						<strong>
+							{ __( "DON'T HAVE A LOGO YET?", 'woocommerce' ) }
+						</strong>
+						<p>
+							{ interpolateComponents( {
+								mixedString: __(
+									'Get a custom logo designed by a professional on {{link}}Fiverr{{/link}}.',
+									'woocommerce'
+								),
+								components: {
+									link: (
+										<Link
+											href="https://www.fiverr.com/logo-maker/woo?afp=&cxd_token=917527_33214203&show_join=true"
+											target="_blank"
+											type="external"
+										/>
+									),
+								},
+							} ) }
+						</p>
+					</div>
 				</div>
 			}
 		/>
