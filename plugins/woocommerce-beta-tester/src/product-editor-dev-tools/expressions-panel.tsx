@@ -1,18 +1,18 @@
 /**
  * External dependencies
  */
-import { Product } from '@woocommerce/data';
-import { evaluate } from '@woocommerce/expression-evaluation';
 import { Button } from '@wordpress/components';
 import { useState } from 'react';
+
+/**
+ * Internal dependencies
+ */
+import { ExpressionField } from './expression-field';
 
 export function ExpressionsPanel( {
 	evaluationContext,
 }: {
-	evaluationContext: {
-		postType: string;
-		editedProduct: Product;
-	};
+	evaluationContext?: object;
 } ) {
 	const [ expressions, setExpressions ] = useState< Array< string > >( [] );
 	const [ expressionToAdd, setExpressionToAdd ] = useState< string >( '' );
@@ -28,18 +28,6 @@ export function ExpressionsPanel( {
 		setExpressionToAdd( '' );
 	};
 
-	const evaluateExpression = ( expression: string ) => {
-		let result;
-
-		try {
-			result = evaluate( expression, evaluationContext );
-		} catch ( error ) {
-			result = error;
-		}
-
-		return String( result );
-	};
-
 	return (
 		<div className="woocommerce-product-editor-dev-tools-expressions">
 			{ expressions.length === 0 && (
@@ -51,18 +39,10 @@ export function ExpressionsPanel( {
 				<ul className="woocommerce-product-editor-dev-tools-expressions-list">
 					{ expressions.map( ( expression, index ) => (
 						<li key={ index }>
-							<div>
-								<span className="woocommerce-product-editor-dev-tools-expressions-list-prompt">
-									&gt;
-								</span>{ ' ' }
-								{ expression }
-							</div>
-							<div>
-								<span className="woocommerce-product-editor-dev-tools-expressions-list-prompt">
-									&lt;
-								</span>{ ' ' }
-								{ evaluateExpression( expression ) }
-							</div>
+							<ExpressionField
+								expression={ expression }
+								evaluationContext={ evaluationContext }
+							/>
 						</li>
 					) ) }
 				</ul>
