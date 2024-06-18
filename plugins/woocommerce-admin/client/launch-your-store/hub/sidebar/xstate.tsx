@@ -72,24 +72,6 @@ const launchStoreAction = async () => {
 	throw new Error( JSON.stringify( results ) );
 };
 
-const assertComingSoonPageIsNotShown = async () => {
-	// Check to see if home is still a coming soon page
-	const isComingSoonPage = ( await apiFetch( {
-		path: '/wc-admin/launch-your-store/is-coming-soon-page-shown',
-		method: 'GET',
-	} ) ) as { is_coming_soon_shown: boolean };
-
-	if ( isComingSoonPage.is_coming_soon_shown === true ) {
-		// update woocommerce_coming_soon back to yes.
-		await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-			woocommerce_coming_soon: 'yes',
-		} );
-		throw new Error( 'Home page is still rendering the coming soon page' );
-	}
-
-	return true;
-};
-
 const getTestOrderCount = async () => {
 	const result = ( await apiFetch( {
 		path: '/wc-admin/launch-your-store/woopayments/test-orders/count',
@@ -172,10 +154,6 @@ export const sidebarMachine = setup( {
 			( { context } ) => context.mainContentMachineRef,
 			{ type: 'SHOW_LAUNCH_STORE_SUCCESS' }
 		),
-		showComingSoonPageStillShownWarning: sendTo(
-			( { context } ) => context.mainContentMachineRef,
-			{ type: 'SHOW_COMING_SOON_PAGE_STILL_SHOWN_WARNING' }
-		),
 		showLoadingPage: sendTo(
 			( { context } ) => context.mainContentMachineRef,
 			{ type: 'SHOW_LOADING' }
@@ -232,9 +210,6 @@ export const sidebarMachine = setup( {
 		getTestOrderCount: fromPromise( getTestOrderCount ),
 		updateLaunchStoreOptions: fromPromise( launchStoreAction ),
 		deleteTestOrders: fromPromise( deleteTestOrders ),
-		assertComingSoonPageIsNotShown: fromPromise(
-			assertComingSoonPageIsNotShown
-		),
 		fetchCongratsData,
 	},
 } ).createMachine( {
@@ -342,7 +317,7 @@ export const sidebarMachine = setup( {
 						{
 							src: 'updateLaunchStoreOptions',
 							onDone: {
-								target: 'confirmFrontendCacheCleared',
+								target: '#storeLaunchSuccessful',
 								actions: [
 									{
 										type: 'recordStoreLaunchResults',
@@ -385,17 +360,6 @@ export const sidebarMachine = setup( {
 						},
 					],
 				},
-				confirmFrontendCacheCleared: {
-					invoke: {
-						src: 'assertComingSoonPageIsNotShown',
-						onDone: {
-							target: '#storeLaunchSuccessful',
-						},
-						onError: {
-							target: '#warnComingSoonPageStillShown',
-						},
-					},
-				},
 			},
 		},
 		storeLaunchSuccessful: {
@@ -411,11 +375,6 @@ export const sidebarMachine = setup( {
 				},
 				{ type: 'showLaunchStoreSuccessPage' },
 			],
-		},
-		warnComingSoonPageStillShown: {
-			id: 'warnComingSoonPageStillShown',
-			tags: 'fullscreen',
-			entry: [ { type: 'showComingSoonPageStillShownWarning' } ],
 		},
 		openExternalUrl: {
 			id: 'openExternalUrl',

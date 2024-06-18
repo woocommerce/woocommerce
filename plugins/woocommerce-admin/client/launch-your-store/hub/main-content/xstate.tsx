@@ -28,6 +28,7 @@ export type MainContentMachineContext = {
 		hasCompleteSurvey: boolean;
 		allTasklists: TaskListType[];
 		activePlugins: string[];
+		isComingSoonShown: boolean;
 	};
 };
 
@@ -80,6 +81,7 @@ export const mainContentMachine = setup( {
 			hasCompleteSurvey: false,
 			allTasklists: [],
 			activePlugins: [],
+			isComingSoonShown: false,
 		},
 	},
 	invoke: {

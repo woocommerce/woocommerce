@@ -34,6 +34,7 @@ export const assignCongratsData = {
 	}: {
 		context: MainContentMachineContext;
 		event: DoneActorEvent< {
+			isComingSoonShown: boolean;
 			surveyCompleted: string | null;
 			tasklists: TaskListType[];
 			activePlugins: string[];
@@ -45,6 +46,7 @@ export const assignCongratsData = {
 			hasCompleteSurvey: event.output.surveyCompleted === 'yes',
 			allTasklists: event.output.tasklists,
 			activePlugins: event.output.activePlugins,
+			isComingSoonShown: event.output.isComingSoonShown,
 		};
 	},
 };
