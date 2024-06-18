@@ -21,6 +21,11 @@ import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
  */
 import type { ProductFiltersOverlayBlockAttributes } from './types';
 
+/**
+ * Internal dependencies
+ */
+import './editor.scss';
+
 const TEMPLATE: InnerBlockTemplate[] = [ [ 'woocommerce/product-filters' ] ];
 
 export const Edit = ( {
