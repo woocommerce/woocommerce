@@ -44,6 +44,9 @@ export function ExpressionField( {
 			<div className="woocommerce-product-editor-dev-tools-expression-field__result">
 				{ resultString }
 			</div>
+			<div className="woocommerce-product-editor-dev-tools-expression-field__actions">
+				TODO
+			</div>
 		</div>
 	);
 }

@@ -145,10 +145,16 @@
 }
 
 .woocommerce-product-editor-dev-tools-expression-field {
-
+	display: grid;
+	grid-template-columns: 1fr auto;
+	grid-template-areas:
+		"expression actions"
+		"result     actions";
 }
 
 .woocommerce-product-editor-dev-tools-expression-field__expression {
+	grid-area: expression;
+
 	&::before {
 		content: '> ';
 		color: var(--woocommerce-product-editor-dev-tools-border-color);
@@ -156,10 +162,16 @@
 }
 
 .woocommerce-product-editor-dev-tools-expression-field__result {
+	grid-area: result;
+
 	&::before {
 		content: '< ';
 		color: var(--woocommerce-product-editor-dev-tools-border-color);
 	}
+}
+
+.woocommerce-product-editor-dev-tools-expression-field__actions {
+	grid-area: actions;
 }
 
 .woocommerce-product-editor-dev-tools-expression-editor {
