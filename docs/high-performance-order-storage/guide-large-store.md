@@ -137,4 +137,4 @@ Now with synchronization fully disabled, test out various critical flows, check 
 3. [ ] Regularly communicate with stakeholders regarding testing progress and outcomes.
 4. [ ] Plan for potential fallback scenarios, ensuring the ability to revert to posts if issues arise.
 
-Did you follow this guide? Drop us a comment below to let us know how it went. Still have more questions? Reach to us on our dedicated HPOS upgrade channel in the Community Slack: [#hpos-upgrade-party](https://woocommercecommunity.slack.com/archives/C043X91E72M). If you are not yet a member of the Woo Slack Communtiy, you can join [here](https://woocommerce.com/community-slack/).
+Did you follow this guide? Drop us a comment below to let us know how it went. Still have more questions? Reach to us on our dedicated HPOS upgrade channel in the Community Slack: [#hpos-upgrade-party](https://woocommercecommunity.slack.com/archives/C043X91E72M). If you are not yet a member of the Woo Slack Community, you can join [here](https://woocommerce.com/community-slack/).
