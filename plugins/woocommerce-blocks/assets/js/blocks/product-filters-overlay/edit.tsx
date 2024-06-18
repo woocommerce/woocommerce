@@ -73,6 +73,7 @@ export const Edit = ( {
 							className="wc-block-editor-product-filters-overlay__overlay-position-toggle"
 							isBlock={ true }
 							value={ attributes.overlayPosition }
+							label={ __( 'POSITION', 'woocommerce' ) }
 							onChange={ ( value: 'left' | 'right' ) => {
 								setAttributes( {
 									overlayPosition: value,
