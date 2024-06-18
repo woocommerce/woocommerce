@@ -33,10 +33,7 @@ test.describe( 'Test the checkout template', () => {
 		await editor.page
 			.getByRole( 'button', { name: 'Checkout', exact: true } )
 			.click();
-		await page
-			.frameLocator( 'iframe[name="editor-canvas"]' )
-			.locator( 'body' )
-			.click();
+		await editor.canvas.locator( 'body' ).click();
 
 		await expect(
 			editor.canvas.getByRole( 'button', {

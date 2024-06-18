@@ -638,8 +638,7 @@ test.describe( `${ blockData.name }`, () => {
 			.getByRole( 'button', { name: 'Custom Single Product' } )
 			.click();
 
-		const editorFrame = page.frameLocator( 'iframe[name="editor-canvas"]' );
-		const productGalleryBlock = editorFrame.getByLabel(
+		const productGalleryBlock = editor.canvas.getByLabel(
 			'Block: Product Gallery (Beta)'
 		);
 
