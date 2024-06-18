@@ -75,6 +75,12 @@ final class BlockTypesController {
 		);
 	}
 
+	/**
+	 * Cache registered blocks that have WooCommerce blocks as their parents. Adds the value to the
+	 * `registered_blocks_with_woocommerce_parents` class property.
+	 *
+	 * @return void
+	 */
 	public function cache_registered_blocks_with_woocommerce_parent() {
 		$registered_blocks                                = \WP_Block_Type_Registry::get_instance()->get_all_registered();
 		$this->registered_blocks_with_woocommerce_parents = array_filter(
