@@ -41,6 +41,8 @@ use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Domain\Services\OnboardingTasks\TasksController;
+use Automattic\WooCommerce\Blocks\OptionsManager;
+
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -158,6 +160,7 @@ class Bootstrap {
 			$this->container->get( SingleProductTemplateCompatibility::class )->init();
 			$this->container->get( Notices::class )->init();
 			$this->container->get( PTKPatternsStore::class );
+			$this->container->get( OptionsManager::class )->init();
 
 			if ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) {
 				$this->container->get( BlockTemplatesController::class )->init();
@@ -345,6 +348,12 @@ class Bootstrap {
 			StoreApi::class,
 			function () {
 				return new StoreApi();
+			}
+		);
+		$this->container->register(
+			OptionsManager::class,
+			function () {
+				return new OptionsManager();
 			}
 		);
 		// Maintains backwards compatibility with previous Store API namespace.
