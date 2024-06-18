@@ -52,12 +52,14 @@ const QuantityBadge = ( {
 				size={ 20 }
 				icon={ getIcon( icon ) }
 			/>
-			<span
-				className="wc-block-mini-cart__badge"
-				style={ { background: productCountColor.color } }
-			>
-				{ displayCount }
-			</span>
+			{ shouldDisplayCount && (
+				<span
+					className="wc-block-mini-cart__badge"
+					style={ { background: productCountColor.color } }
+				>
+					{ displayCount }
+				</span>
+			) }
 		</span>
 	);
 };
