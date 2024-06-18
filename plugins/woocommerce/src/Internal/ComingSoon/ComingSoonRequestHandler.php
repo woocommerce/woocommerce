@@ -60,7 +60,7 @@ class ComingSoonRequestHandler {
 		}
 
 		add_action('wp_head', function() {
-			echo "<input type='hidden' name='is-coming-soon-page' value='yes'>";
+			echo "<meta name='woo-coming-soon-page' content='yes'>";
 		});
 
 		include $coming_soon_template;

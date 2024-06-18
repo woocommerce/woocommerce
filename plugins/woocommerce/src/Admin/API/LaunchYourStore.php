@@ -255,7 +255,7 @@ class LaunchYourStore {
 		);
 
 		$body                  = wp_remote_retrieve_body( $content );
-		$has_coming_soon_input = strpos( $body, "<input type='hidden' name='is-coming-soon-page' value='yes'>" ) !== false;
+		$has_coming_soon_input = strpos( $body, "<meta name='woo-coming-soon-page' content='yes'>" ) !== false;
 
 		return new \WP_REST_Response(
 			array(
