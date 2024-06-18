@@ -80,6 +80,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'      => false,
 			),
 			array(
+				'title'         => __( 'Account creation', 'woocommerce' ),
 				'desc'          => __( 'On "My account" page', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_myaccount_registration',
 				'default'       => 'no',
@@ -98,6 +99,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'      => false,
 			),
 			array(
+				'title'         => __( 'Account creation options', 'woocommerce' ),
 				'desc'          => __( 'Send password setup link (recommended)', 'woocommerce' ),
 				'desc_tip'      => __( 'New customers receive an email to set up their password.', 'woocommerce' ),
 				'id'            => 'woocommerce_registration_generate_password',
