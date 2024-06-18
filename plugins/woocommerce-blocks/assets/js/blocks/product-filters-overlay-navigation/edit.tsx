@@ -1,24 +1,135 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import { useDebounce } from '@wordpress/compose';
+import {
+	useBlockProps,
+	useInnerBlocksProps,
+	InspectorControls,
+} from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
+import {
+	PanelBody,
+	RadioControl,
+	__experimentalToggleGroupControl as ToggleGroupControl,
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+} from '@wordpress/components';
+import { Icon, close } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
 import type { BlockAttributes } from './types';
+import SizeControl from './components/size-control';
 
-export const Edit = ( {}: BlockEditProps< BlockAttributes > ) => {
+export const Edit = ( {
+	attributes,
+	setAttributes,
+}: BlockEditProps< BlockAttributes > ) => {
+	const { navigationStyle, buttonStyle, iconSize } = attributes;
 	const blockProps = useBlockProps( {
-		className: clsx( 'wc-block-product-filters-overlay-navigation' ),
+		className: clsx(
+			'wc-block-product-filters-overlay-navigation',
+			`button-style-${ buttonStyle }`,
+			{
+				'wp-element-button': buttonStyle !== 'link',
+			}
+		),
 	} );
+	// We need useInnerBlocksProps because Gutenberg only applies layout classes
+	// to parent block. We don't have any inner blocks but we want to use the
+	// layout controls.
+	const innerBlocksProps = useInnerBlocksProps( blockProps );
+
+	const setIconSize = useDebounce( ( value: string ) => {
+		setAttributes( {
+			iconSize: value,
+		} );
+	}, 50 );
 
 	return (
-		<div { ...blockProps }>
-			{ __( 'Navigation – hello from the editor!', 'woocommerce' ) }
-		</div>
+		<nav { ...innerBlocksProps }>
+			<InspectorControls group="styles">
+				<PanelBody title={ __( 'Style', 'woocommerce' ) }>
+					<RadioControl
+						selected={ navigationStyle }
+						options={ [
+							{
+								label: __( 'Label and icon', 'woocommerce' ),
+								value: 'full',
+							},
+							{
+								label: __( 'Label only', 'woocommerce' ),
+								value: 'label',
+							},
+							{
+								label: __( 'Icon only', 'woocommerce' ),
+								value: 'icon',
+							},
+						] }
+						onChange={ (
+							value: BlockAttributes[ 'navigationStyle' ]
+						) =>
+							setAttributes( {
+								navigationStyle: value,
+							} )
+						}
+					/>
+
+					<ToggleGroupControl
+						label={ __( 'Button', 'woocommerce' ) }
+						value={ buttonStyle }
+						isBlock
+						onChange={ (
+							value: BlockAttributes[ 'buttonStyle' ]
+						) =>
+							setAttributes( {
+								buttonStyle: value,
+							} )
+						}
+					>
+						<ToggleGroupControlOption
+							label={ __( 'Link', 'woocommerce' ) }
+							value="link"
+						/>
+						<ToggleGroupControlOption
+							label={ __( 'Fill', 'woocommerce' ) }
+							value="fill"
+						/>
+						<ToggleGroupControlOption
+							label={ __( 'Outline', 'woocommerce' ) }
+							value="outline"
+						/>
+					</ToggleGroupControl>
+					<SizeControl
+						label={ __( 'Icon size', 'woocommerce' ) }
+						onChange={ ( numericSize: number, unit: string ) =>
+							setIconSize( `${ numericSize }${ unit }` )
+						}
+						value={ iconSize }
+						units={ [
+							{ value: 'px', label: 'px', default: 16 },
+							{ value: 'rem', label: 'rem', default: 1 },
+							{ value: 'em', label: 'em', default: 1 },
+						] }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			{ navigationStyle !== 'icon' && (
+				<span>{ __( 'Close', 'woocommerce' ) }</span>
+			) }
+			{ navigationStyle !== 'label' && (
+				<Icon
+					fill="currentColor"
+					icon={ close }
+					style={ {
+						width: iconSize || '1rem',
+						height: iconSize || '1rem',
+					} }
+				/>
+			) }
+		</nav>
 	);
 };
