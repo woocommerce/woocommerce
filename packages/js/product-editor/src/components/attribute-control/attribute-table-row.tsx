@@ -267,7 +267,28 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 			prevTerms.filter( ( term ) => ! newTerms.includes( term ) )
 		);
 
-		onTermsSelect( newItems, index, attribute );
+		/*
+		 * Pull the recent terms list from the store
+		 * to get the terms that were just created.
+		 * @Todo: using this `sel` alias is a workaround.
+		 * The optimistic rendering should be implemented in the store.
+		 */
+		const recentTermsList = sel(
+			EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+		).getProductAttributeTerms( {
+			search: '',
+			attribute_id: attributeId,
+		} ) as ProductAttributeTerm[];
+
+		/*
+		 * New selected terms are the ones that are in the recent terms list
+		 * and also in the token field values.
+		 */
+		const newSelectedTerms = recentTermsList.filter( ( term ) =>
+			tokenFieldValues.map( ( item ) => item.value ).includes( term.name )
+		);
+
+		onTermsSelect( [ ...newSelectedTerms, ...newItems ], index, attribute );
 	}
 
 	/*
