@@ -109,9 +109,7 @@ class LaunchYourStore {
 				array(
 					'methods'             => 'GET',
 					'callback'            => array( $this, 'is_coming_soon_page_shown' ),
-					'permission_callback' => function () {
-						return true;
-					}
+					'permission_callback' => array( $this, 'must_be_shop_manager_or_admin' ),
 				),
 			)
 		);
