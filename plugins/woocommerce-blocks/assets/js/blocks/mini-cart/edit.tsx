@@ -44,7 +44,7 @@ export interface Attributes {
 	iconColor: ColorPaletteOption;
 	productCountColor: ColorPaletteOption;
 	initialCartItemsCount: number;
-	productCountVisibility: string;
+	productCountVisibility: 'always' | 'never' | 'greater_than_zero';
 }
 
 interface Props {
