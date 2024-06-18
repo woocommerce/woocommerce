@@ -145,6 +145,7 @@ test.describe( 'Search, browse by categories and sort items in the shop', () => 
 
 			// sort by price high to low
 			await page.getByLabel( 'Shop order' ).selectOption( 'price-desc' );
+			await page.waitForURL( /.*?orderby=price-desc.*/ );
 
 			await expect(
 				page.getByText( 'Add to cart View cart' ).nth( 2 )
@@ -174,6 +175,7 @@ test.describe( 'Search, browse by categories and sort items in the shop', () => 
 
 			// sort by price low to high
 			await page.getByLabel( 'Shop order' ).selectOption( 'price' );
+			await page.waitForURL( /.*?orderby=price.*/ );
 
 			await expect(
 				page.getByText( 'Add to cart View cart' ).nth( 2 )
