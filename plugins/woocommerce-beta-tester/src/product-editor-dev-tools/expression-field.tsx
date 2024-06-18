@@ -1,6 +1,9 @@
 /**
  * External dependencies
  */
+import { Button } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { check, close, edit } from '@wordpress/icons';
 import { evaluate } from '@woocommerce/expression-evaluation';
 
 function evaluateExpression(
@@ -22,13 +25,23 @@ function evaluateExpression(
 	};
 }
 
+type ExpressionFieldProps = {
+	expression: string;
+	evaluationContext?: object;
+	mode?: 'view' | 'edit';
+	onEnterEdit?: () => void;
+	onUpdate?: ( expression: string ) => void;
+	onCancel?: () => void;
+};
+
 export function ExpressionField( {
 	expression,
 	evaluationContext,
-}: {
-	expression: string;
-	evaluationContext?: object;
-} ) {
+	mode = 'view',
+	onEnterEdit,
+	onUpdate,
+	onCancel,
+}: ExpressionFieldProps ) {
 	const { result, error } = evaluateExpression(
 		expression,
 		evaluationContext
@@ -45,7 +58,26 @@ export function ExpressionField( {
 				{ resultString }
 			</div>
 			<div className="woocommerce-product-editor-dev-tools-expression-field__actions">
-				TODO
+				{ mode === 'view' ? (
+					<Button
+						icon={ edit }
+						label={ __( 'Edit', 'woocommerce' ) }
+						onClick={ () => onEnterEdit?.() }
+					/>
+				) : (
+					<>
+						<Button
+							icon={ check }
+							label={ __( 'Update', 'woocommerce' ) }
+							onClick={ () => onUpdate?.( expression ) }
+						/>
+						<Button
+							icon={ close }
+							label={ __( 'Cancel', 'woocommerce' ) }
+							onClick={ () => onCancel?.() }
+						/>
+					</>
+				) }
 			</div>
 		</div>
 	);
