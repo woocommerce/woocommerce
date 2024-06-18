@@ -87,9 +87,13 @@ test.describe( 'Merchant > Customer List', () => {
 		page,
 		customers,
 	} ) => {
+		const responsePromise = page.waitForResponse(
+			'**/wp-json/wc-analytics/reports/customers?orderby**'
+		);
 		await page.goto(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomers'
 		);
+		await responsePromise;
 
 		// may have more than 3 customers due to guest orders
 		// await test.step( 'Check that 3 customers are displayed', async () => {
