@@ -38,23 +38,11 @@ const QuantityBadge = ( {
 		}
 	}
 
-	function determineCount(
-		count: number,
-		visibility?: 'always' | 'never' | 'greater_than_zero'
-	) {
-		switch ( visibility ) {
-			case 'greater_than_zero':
-				return count > 0 ? count : '';
-			case 'always':
-				return count;
-			case 'never':
-				return '';
-			default:
-				return count > 0 ? count : '';
-		}
-	}
+	const shouldDisplayCount =
+		productCountVisibility === 'always' ||
+		( productCountVisibility === 'greater_than_zero' && count > 0 );
 
-	const displayCount = determineCount( count, productCountVisibility );
+	const displayCount = shouldDisplayCount ? count : '';
 
 	return (
 		<span className="wc-block-mini-cart__quantity-badge">
