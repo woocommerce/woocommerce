@@ -7,7 +7,7 @@ import {
 	Button,
 	FormTokenField as CoreFormTokenField,
 } from '@wordpress/components';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, select as sel } from '@wordpress/data';
 import { cleanForSlug } from '@wordpress/url';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
@@ -262,8 +262,13 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 
 		const newItems = await Promise.all( promises );
 
-		// Clean up temporary terms
-		setTemporaryTerms( [] );
+		/*
+		 * remove the recently created terms from the temporary terms,
+		 * and add them to the token field values.
+		 */
+		setTemporaryTerms( ( prevTerms ) =>
+			prevTerms.filter( ( term ) => ! newTerms.includes( term ) )
+		);
 
 		onTermsSelect( [ ...selectedTerms, ...newItems ], index, attribute );
 	}
