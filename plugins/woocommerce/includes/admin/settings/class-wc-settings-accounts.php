@@ -96,7 +96,6 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
 				'autoload'      => false,
-				'disabled'      => get_option( 'woocommerce_enable_myaccount_registration' ) === 'no' && get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) === 'no' ? true : false,
 			),
 			array(
 				'desc'          => __( 'Send password setup link (recommended)', 'woocommerce' ),
@@ -106,7 +105,37 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
 				'autoload'      => false,
-				'disabled'      => get_option( 'woocommerce_enable_myaccount_registration' ) === 'no' && get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) === 'no' ? true : false,
+			),
+			array(
+				'title'         => __( 'Account erasure requests', 'woocommerce' ),
+				'desc'          => __( 'Remove personal data from orders on request', 'woocommerce' ),
+				/* Translators: %s URL to erasure request screen. */
+				'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should personal data within orders be retained or removed?', 'woocommerce' ), $erasure_text ),
+				'id'            => 'woocommerce_erasure_request_removes_order_data',
+				'type'          => 'checkbox',
+				'default'       => 'no',
+				'checkboxgroup' => 'start',
+				'autoload'      => false,
+			),
+			array(
+				'desc'          => __( 'Remove access to downloads on request', 'woocommerce' ),
+				/* Translators: %s URL to erasure request screen. */
+				'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should access to downloadable files be revoked and download logs cleared?', 'woocommerce' ), $erasure_text ),
+				'id'            => 'woocommerce_erasure_request_removes_download_data',
+				'type'          => 'checkbox',
+				'default'       => 'no',
+				'checkboxgroup' => '',
+				'autoload'      => false,
+			),
+			array(
+				'title'         => __( 'Personal data removal', 'woocommerce' ),
+				'desc'          => __( 'Allow personal data to be removed in bulk from orders', 'woocommerce' ),
+				'desc_tip'      => __( 'Adds an option to the orders screen for removing personal data in bulk. Note that removing personal data cannot be undone.', 'woocommerce' ),
+				'id'            => 'woocommerce_allow_bulk_remove_personal_data',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'end',
+				'default'       => 'no',
+				'autoload'      => false,
 			),
 			array(
 				'type' => 'sectionend',
@@ -201,46 +230,53 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'    => false,
 			),
 			array(
-				'title'         => __( 'Account erasure requests', 'woocommerce' ),
-				'desc'          => __( 'Remove personal data from orders on request', 'woocommerce' ),
-				/* Translators: %s URL to erasure request screen. */
-				'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should personal data within orders be retained or removed?', 'woocommerce' ), $erasure_text ),
-				'id'            => 'woocommerce_erasure_request_removes_order_data',
-				'type'          => 'checkbox',
-				'default'       => 'no',
-				'checkboxgroup' => 'start',
-				'autoload'      => false,
-			),
-			array(
-				'desc'          => __( 'Remove access to downloads on request', 'woocommerce' ),
-				/* Translators: %s URL to erasure request screen. */
-				'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should access to downloadable files be revoked and download logs cleared?', 'woocommerce' ), $erasure_text ),
-				'id'            => 'woocommerce_erasure_request_removes_download_data',
-				'type'          => 'checkbox',
-				'default'       => 'no',
-				'checkboxgroup' => 'end',
-				'autoload'      => false,
-			),
-			array(
-				'title'         => __( 'Personal data removal', 'woocommerce' ),
-				'desc'          => __( 'Allow personal data to be removed in bulk from orders', 'woocommerce' ),
-				'desc_tip'      => __( 'Adds an option to the orders screen for removing personal data in bulk. Note that removing personal data cannot be undone.', 'woocommerce' ),
-				'id'            => 'woocommerce_allow_bulk_remove_personal_data',
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'start',
-				'default'       => 'no',
-				'autoload'      => false,
-			),
-			array(
 				'type' => 'sectionend',
 				'id'   => 'personal_data_retention',
 			),
 		);
 
-		return apply_filters(
-			'woocommerce_' . $this->id . '_settings',
-			$account_settings
-		);
+		/**
+		 * Filter account settings.
+		 *
+		 * @hook woocommerce_account_settings
+		 * @since 3.5.0
+		 * @param array $account_settings Account settings.
+		 */
+		return apply_filters( 'woocommerce_' . $this->id . '_settings', $account_settings );
+	}
+
+	/**
+	 * Output the HTML for the settings.
+	 */
+	public function output() {
+		parent::output();
+
+		// The following code toggles disabled state on the account options based on other values.
+		?>
+		<script type="text/javascript">
+			document.addEventListener('DOMContentLoaded', function() {
+				const checkboxes = [
+					document.getElementById("woocommerce_enable_signup_and_login_from_checkout"),
+					document.getElementById("woocommerce_enable_myaccount_registration")
+				];
+				const inputs = [
+					document.getElementById("woocommerce_registration_generate_username"),
+					document.getElementById("woocommerce_registration_generate_password")
+				];
+
+				function updateInputs() {
+					const isChecked = checkboxes.some(cb => cb.checked);
+					inputs.forEach(input => {
+						input.disabled = !isChecked;
+						input.closest('td').classList.toggle("disabled", !isChecked);
+					});
+				}
+
+				checkboxes.forEach(cb => cb.addEventListener('change', updateInputs));
+				updateInputs(); // Initial state
+			});
+		</script>
+		<?php
 	}
 }
 
