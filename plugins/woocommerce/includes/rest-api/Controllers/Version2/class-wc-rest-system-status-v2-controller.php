@@ -1407,36 +1407,39 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$shortcode_required = false;
 			$block_present      = false;
 			$block_required     = false;
+			$page               = false;
 
 			// Page checks.
 			if ( $page_id ) {
 				$page_set = true;
-			}
-			if ( get_post( $page_id ) ) {
-				$page_exists = true;
-			}
-			if ( 'publish' === get_post_status( $page_id ) ) {
-				$page_visible = true;
+				$page     = get_post( $page_id );
+
+				if ( $page ) {
+					$page_exists = true;
+
+					if ( 'publish' === $page->post_status ) {
+						$page_visible = true;
+					}
+				}
 			}
 
 			// Shortcode checks.
-			if ( $values['shortcode'] && get_post( $page_id ) ) {
+			if ( $values['shortcode'] && $page ) {
 				$shortcode_required = true;
-				$page               = get_post( $page_id );
-				if ( strstr( $page->post_content, $values['shortcode'] ) ) {
+				if ( has_shortcode( $page->post_content, trim( $values['shortcode'], '[]' ) ) ) {
 					$shortcode_present = true;
+				}
+
+				// Compatibility with the classic shortcode block which can be used instead of shortcodes.
+				if ( ! $shortcode_present && ( 'woocommerce/checkout' === $values['block'] || 'woocommerce/cart' === $values['block'] ) ) {
+					$shortcode_present = has_block( 'woocommerce/classic-shortcode', $page->post_content );
 				}
 			}
 
 			// Block checks.
-			if ( $values['block'] && get_post( $page_id ) ) {
+			if ( $values['block'] && $page ) {
 				$block_required = true;
-				$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, $values['block'] );
-
-				// Compatibility with the classic shortcode block which can be used instead of shortcodes.
-				if ( ! $block_present && ( 'woocommerce/checkout' === $values['block'] || 'woocommerce/cart' === $values['block'] ) ) {
-					$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, 'woocommerce/classic-shortcode', true );
-				}
+				$block_present  = has_block( $values['block'], $page->post_content );
 			}
 
 			// Wrap up our findings into an output array.
