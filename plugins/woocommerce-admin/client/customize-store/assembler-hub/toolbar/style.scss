@@ -15,7 +15,8 @@
 	user-select: none;
 
 	span {
-		width: 32px;
-		max-width: 32px;
+		max-width: fit-content;
+		padding-left: 6px;
+		padding-right: 6px;
 	}
 }
