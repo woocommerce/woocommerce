@@ -87,13 +87,15 @@ test.describe( 'Merchant > Customer List', () => {
 		page,
 		customers,
 	} ) => {
-		const responsePromise = page.waitForResponse(
-			'**/wp-json/wc-analytics/reports/customers?orderby**'
-		);
-		await page.goto(
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomers'
-		);
-		await responsePromise;
+		await test.step( 'Go to the customers reports page', async () => {
+			const responsePromise = page.waitForResponse(
+				'**/wp-json/wc-analytics/reports/customers?orderby**'
+			);
+			await page.goto(
+				'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomers'
+			);
+			await responsePromise;
+		} );
 
 		// may have more than 3 customers due to guest orders
 		// await test.step( 'Check that 3 customers are displayed', async () => {
@@ -115,7 +117,12 @@ test.describe( 'Merchant > Customer List', () => {
 			for ( const customer of customers ) {
 				await page
 					.locator( '#woocommerce-select-control-0__control-input' )
-					.fill( `${ customer.first_name } ${ customer.last_name }` );
+					.click();
+				await page
+					.locator( '#woocommerce-select-control-0__control-input' )
+					.pressSequentially(
+						`${ customer.first_name } ${ customer.last_name }`
+					);
 				await page
 					.getByRole( 'option', {
 						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
