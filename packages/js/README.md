@@ -1,6 +1,6 @@
 # WooCommerce Packages
 
-Currently we have a set of public-facing packages that can be dowloaded from [npm](https://www.npmjs.com/org/woocommerce) and used in external applications. Here is a non-exhaustive list.
+Currently we have a set of public-facing packages that can be downloaded from [npm](https://www.npmjs.com/org/woocommerce) and used in external applications. Here is a non-exhaustive list.
 
 - `@woocommerce/components`: A library of components that can be used to create pages in the WooCommerce dashboard and reports pages.
 - `@woocommerce/csv-export`: A set of functions to convert data into CSV values, and enable a browser download of the CSV data.
