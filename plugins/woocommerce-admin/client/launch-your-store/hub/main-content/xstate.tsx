@@ -20,8 +20,6 @@ import {
 	LaunchYourStoreSuccess,
 } from './pages/launch-store-success';
 
-import { CacheWarning } from './pages/cache-warning';
-
 export type MainContentMachineContext = {
 	congratsScreen: {
 		hasLoadedCongratsData: boolean;
@@ -37,7 +35,6 @@ export type MainContentComponentProps = LaunchYourStoreComponentProps & {
 };
 export type MainContentMachineEvents =
 	| { type: 'SHOW_LAUNCH_STORE_SUCCESS' }
-	| { type: 'SHOW_COMING_SOON_PAGE_STILL_SHOWN_WARNING' }
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'SHOW_LOADING' }
 	| congratsEvents;
@@ -115,18 +112,6 @@ export const mainContentMachine = setup( {
 				component: SitePreviewPage,
 			},
 		},
-		SHOW_COMING_SOON_PAGE_STILL_SHOWN_WARNING: {
-			id: 'comingSoonPageStillShownWarning',
-			entry: [
-				{
-					type: 'updateQueryParams',
-					params: { content: 'launch-store-cache-error' },
-				},
-			],
-			meta: {
-				component: CacheWarning,
-			},
-		},
 		launchStoreSuccess: {
 			id: 'launchStoreSuccess',
 			invoke: [
@@ -165,9 +150,6 @@ export const mainContentMachine = setup( {
 		},
 		SHOW_LAUNCH_STORE_SUCCESS: {
 			target: '#launchStoreSuccess',
-		},
-		SHOW_COMING_SOON_PAGE_STILL_SHOWN_WARNING: {
-			target: '#comingSoonPageStillShownWarning',
 		},
 		SHOW_LOADING: {
 			target: '#loading',
