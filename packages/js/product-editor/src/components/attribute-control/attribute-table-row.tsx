@@ -139,7 +139,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	 * combine the temporary terms with the attribute options or terms,
 	 * removing duplicates.
 	 */
-	const suggestions = [
+	const tokenFieldSuggestions = [
 		...( allTerms || [] ),
 		...temporaryTerms.map( tokenItemToString ),
 	].filter( ( value, i, self ) => self.indexOf( value ) === i );
@@ -158,7 +158,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 			  ) ) || [];
 
 	// Combine the temporary terms with the selected values.
-	const selectedValues: TokenItem[] = [
+	const tokenFieldValues: TokenItem[] = [
 		...( attributeTerms || [] ),
 		...temporaryTerms,
 	];
@@ -272,8 +272,8 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	 * comparing the suggestions length with the selected values length.
 	 */
 	const hasAvailableSuggestions =
-		suggestions?.length &&
-		suggestions.length > ( selectedValues?.length || 0 );
+		tokenFieldSuggestions?.length &&
+		tokenFieldSuggestions.length > ( tokenFieldValues?.length || 0 );
 
 	return (
 		<tr
@@ -310,8 +310,8 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 				<FormTokenField
 					placeholder={ termPlaceholder }
 					disabled={ ! attribute }
-					suggestions={ suggestions }
-					value={ selectedValues }
+					suggestions={ tokenFieldSuggestions }
+					value={ tokenFieldValues }
 					onChange={ (
 						nextSelectedTerms: ( TokenItem | string )[]
 					) => {
@@ -332,7 +332,9 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 						 * suggestions array.
 						 */
 						const newItems = nextStringTerms
-							.filter( ( t ) => ! suggestions.includes( t ) )
+							.filter(
+								( t ) => ! tokenFieldSuggestions.includes( t )
+							)
 							.map( stringToTokenItem );
 
 						const selectedTerms = isGlobalAttribute
