@@ -9,12 +9,19 @@ import { useState } from 'react';
  */
 import { ExpressionField } from './expression-field';
 
+type ExpressionItem = {
+	expression: string;
+	mode: 'view' | 'edit';
+};
+
 export function ExpressionsPanel( {
 	evaluationContext,
 }: {
 	evaluationContext?: object;
 } ) {
-	const [ expressions, setExpressions ] = useState< Array< string > >( [] );
+	const [ expressionItems, setExpressionItems ] = useState<
+		ExpressionItem[]
+	>( [] );
 	const [ expressionToAdd, setExpressionToAdd ] = useState< string >( '' );
 
 	const handleExpressionToAddChange = (
@@ -23,25 +30,43 @@ export function ExpressionsPanel( {
 		setExpressionToAdd( event.target.value );
 	};
 
-	const addExpression = () => {
-		setExpressions( [ ...expressions, expressionToAdd ] );
+	const addExpression = ( expression: string ) => {
+		setExpressionItems( [
+			...expressionItems,
+			{ expression, mode: 'view' },
+		] );
 		setExpressionToAdd( '' );
 	};
 
+	function enterEditMode( index: number ) {
+		const newItems = [ ...expressionItems ];
+		newItems[ index ].mode = 'edit';
+		setExpressionItems( newItems );
+	}
+
+	function cancelEdit( index: number ) {
+		const newItems = [ ...expressionItems ];
+		newItems[ index ].mode = 'view';
+		setExpressionItems( newItems );
+	}
+
 	return (
 		<div className="woocommerce-product-editor-dev-tools-expressions">
-			{ expressions.length === 0 && (
+			{ expressionItems.length === 0 && (
 				<div className="woocommerce-product-editor-dev-tools-expressions-list empty">
 					Enter an expression to evaluate below.
 				</div>
 			) }
-			{ expressions.length > 0 && (
+			{ expressionItems.length > 0 && (
 				<ul className="woocommerce-product-editor-dev-tools-expressions-list">
-					{ expressions.map( ( expression, index ) => (
+					{ expressionItems.map( ( expressionItem, index ) => (
 						<li key={ index }>
 							<ExpressionField
-								expression={ expression }
+								expression={ expressionItem.expression }
 								evaluationContext={ evaluationContext }
+								mode={ expressionItem.mode }
+								onEnterEdit={ () => enterEditMode( index ) }
+								onCancel={ () => cancelEdit( index ) }
 							/>
 						</li>
 					) ) }
@@ -52,7 +77,9 @@ export function ExpressionsPanel( {
 					value={ expressionToAdd }
 					onChange={ handleExpressionToAddChange }
 				/>
-				<Button onClick={ addExpression }>Add</Button>
+				<Button onClick={ () => addExpression( expressionToAdd ) }>
+					Add
+				</Button>
 			</div>
 		</div>
 	);

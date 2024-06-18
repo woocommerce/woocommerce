@@ -51,9 +51,11 @@ export function ExpressionField( {
 
 	return (
 		<div className="woocommerce-product-editor-dev-tools-expression-field">
-			<div className="woocommerce-product-editor-dev-tools-expression-field__expression">
-				{ expression }
-			</div>
+			<textarea
+				className="woocommerce-product-editor-dev-tools-expression-field__expression"
+				readOnly={ mode === 'view' }
+				value={ expression }
+			/>
 			<div className="woocommerce-product-editor-dev-tools-expression-field__result">
 				{ resultString }
 			</div>
