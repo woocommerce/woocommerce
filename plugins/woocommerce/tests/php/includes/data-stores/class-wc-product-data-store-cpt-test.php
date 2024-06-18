@@ -83,7 +83,7 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'The SKU (DUMMY SKU) you are trying to insert is already under processing'
 		);
 
-		// exception is only thrown during the REST API request
+		// exception is only thrown during the REST API request.
 		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
 		$this->create_products_concurrently();
 	}
