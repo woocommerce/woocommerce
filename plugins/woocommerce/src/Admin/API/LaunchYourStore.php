@@ -235,11 +235,11 @@ class LaunchYourStore {
 	/**
 	 * Check if we're still displaying the coming soon page.
 	 *
-	 * @return void
+	 * @return \WP_REST_Response
 	 */
 	public function is_coming_soon_page_shown() {
 		$store_pages_only = get_option( 'woocommerce_store_pages_only', 'no' ) === 'yes';
-		if ($store_pages_only) {
+		if ( $store_pages_only ) {
 			$url = get_permalink( wc_get_page_id( 'shop' ) );
 		} else {
 			$url = site_url();
@@ -258,7 +258,7 @@ class LaunchYourStore {
 		return new \WP_REST_Response(
 			array(
 				'is_coming_soon_shown' => $has_coming_soon_input,
-				'url' => $url,
+				'url'                  => $url,
 			)
 		);
 	}
