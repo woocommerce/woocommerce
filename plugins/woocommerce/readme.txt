@@ -169,7 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
-* Security - Redacted sensitive info from SSR for GitHub [#48568](https://github.com/woocommerce/woocommerce/pull/48568)
+* Security - Redacted sensitive info from SSR for GitHub [#48570](https://github.com/woocommerce/woocommerce/pull/48570)
 * Security - Prevent HTML & JS injection attacks on registration and checkout forms when the Order Attribution is enabled. [#48348](https://github.com/woocommerce/woocommerce/pull/48348)
 * Update - Toggle LYS feature flag off for 9.0 [#48231](https://github.com/woocommerce/woocommerce/pull/48231)
 * Fix - Fix settings-api textarea validation to prevent insertion of iframes in description areas by default [#48432](https://github.com/woocommerce/woocommerce/pull/48432)
