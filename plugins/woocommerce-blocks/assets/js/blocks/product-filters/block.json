@@ -24,6 +24,17 @@
 		"typography": {
 			"fontSize": true,
 			"textAlign": true
+		},
+		"layout": {
+			"default": {
+				"type": "flex",
+				"orientation": "vertical",
+				"justifyContent": "stretch"
+			},
+			"allowInheriting": false
+		},
+		"spacing": {
+			"blockGap": true
 		}
 	},
 	"textdomain": "woocommerce",
