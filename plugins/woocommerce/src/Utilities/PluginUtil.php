@@ -261,14 +261,19 @@ class PluginUtil {
 				);
 			}
 
-			$incompatible_plugins_url = add_query_arg(
-				array(
-					'plugin_status' => 'incompatible_with_feature',
-					'feature_id'    => $feature_id,
-				),
-				admin_url( 'plugins.php' )
-			);
-			$feature_warnings[]       = sprintf(
+			if ( wc_get_container()->get( FeaturesController::class )->feature_is_enabled( $feature_id ) ) {
+				$incompatible_plugins_url = add_query_arg(
+					array(
+						'plugin_status' => 'incompatible_with_feature',
+						'feature_id'    => $feature_id,
+					),
+					admin_url( 'plugins.php' )
+				);
+			} else {
+				$incompatible_plugins_url = admin_url( 'plugins.php' );
+			}
+
+			$feature_warnings[] = sprintf(
 				/* translators: %1$s opening link tag %2$s closing link tag. */
 				__( '%1$sView and manage%2$s', 'woocommerce' ),
 				'<a href="' . esc_url( $incompatible_plugins_url ) . '">',
