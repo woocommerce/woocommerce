@@ -108,6 +108,12 @@ const addInertToAssemblerPatterns = (
 		'/customize-store/assembler-hub/homepage': `[data-is-parent-block='true']:not([data-type='core/template-part'])`,
 	};
 
+	const pathInteractiveBlocks = page.includes(
+		'/customize-store/assembler-hub/homepage'
+	)
+		? interactiveBlocks[ '/customize-store/assembler-hub/homepage' ]
+		: interactiveBlocks[ page ];
+
 	const addInertToTemplateParts = () => {
 		for ( const disableClick of documentElement.querySelectorAll(
 			`[data-is-parent-block='true']`
@@ -116,7 +122,7 @@ const addInertToAssemblerPatterns = (
 		}
 
 		for ( const element of documentElement.querySelectorAll(
-			interactiveBlocks[ page ]
+			pathInteractiveBlocks
 		) ) {
 			makeInteractive( element );
 		}
