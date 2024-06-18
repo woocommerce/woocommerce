@@ -93,7 +93,7 @@ class WC_REST_Product_Custom_Fields_Controller extends WC_REST_Controller {
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $base_query has been prepared already.
 		$total_query = "SELECT COUNT(1) FROM ($base_query) AS t";
-		
+
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $query has been prepared already.
 		$query_result = $wpdb->get_results( $query );
 
