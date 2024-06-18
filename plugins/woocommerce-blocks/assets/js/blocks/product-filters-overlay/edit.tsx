@@ -90,8 +90,7 @@ export const Edit = ( {
 							/>
 						</ToggleGroupControl>
 					) }
-				</PanelBody>
-				<PanelBody>
+
 					{ attributes.overlayStyle === 'drawer' ? (
 						<img
 							className="wc-block-editor-product-filters-overlay__drawer-image"
