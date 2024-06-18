@@ -8,14 +8,14 @@ import { Icon } from '@wordpress/icons';
  * Internal dependencies
  */
 import './style.scss';
-import { IconType, ColorItem } from '.././types';
+import { IconType, ColorItem, productCountVisibilityType } from '.././types';
 
 interface Props {
 	count: number;
 	icon?: IconType;
 	iconColor: ColorItem | { color: undefined };
 	productCountColor: ColorItem | { color: undefined };
-	productCountVisibility: string;
+	productCountVisibility?: productCountVisibilityType;
 }
 
 const QuantityBadge = ( {
@@ -38,7 +38,10 @@ const QuantityBadge = ( {
 		}
 	}
 
-	function determineCount( count: number, visibility: string ) {
+	function determineCount(
+		count: number,
+		visibility?: 'always' | 'never' | 'greater_than_zero'
+	) {
 		switch ( visibility ) {
 			case 'greater_than_zero':
 				return count > 0 ? count : '';

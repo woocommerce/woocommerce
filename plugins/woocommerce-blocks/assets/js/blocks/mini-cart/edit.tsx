@@ -164,7 +164,6 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						label={ __( 'Product Count', 'woocommerce' ) }
 					>
 						<SelectControl
-							label={ __( 'Show Product Count:' ) }
 							options={ [
 								{
 									label: __(
