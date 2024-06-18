@@ -69,7 +69,7 @@ class ComingSoonRequestHandler {
 			get_footer();
 		}
 
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( $is_fse_theme ) {
 			// Since we've already rendered a template, return null to ensure no other template is rendered.
 			return null;
 		} else {
