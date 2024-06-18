@@ -19,7 +19,7 @@ const getPatternCategoryByPath = ( path: string ) => {
 	// Apply the regex pattern to the pathname part of the URL
 	const match = path.match( regex );
 
-	const patternCategory = match && match[ 1 ];
+	const patternCategory = match?.[ 1 ];
 
 	if (
 		patternCategory &&
