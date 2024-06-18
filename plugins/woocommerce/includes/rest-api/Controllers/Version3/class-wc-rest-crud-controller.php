@@ -166,12 +166,6 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 				return $object;
 			}
 
-			/**
-			 * Setting a dynamic property to indicate that this is a REST request.
-			 * We are doing this to ensure that unique SKU validation
-			 * is only triggered for REST requests where we are handling the exception.
-			 */
-			$object->is_rest_request = true;
 			try {
 				$object->save();
 			} catch ( Exception $e ) {

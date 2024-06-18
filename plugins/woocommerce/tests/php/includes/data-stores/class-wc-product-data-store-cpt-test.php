@@ -69,21 +69,23 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * Test that only one product is created with a unique SKU
-	 * during concurrent requests.
+	 * during concurrent requests and when request is initiated via REST API.
 	 *
 	 * Throw error when two concurrent requests try to create a product with the same SKU.
 	 *
 	 * @return void
 	 */
 	public function test_create_product_with_unique_sku_on_concurrent_requests() {
-		try {
-			$this->create_products_concurrently();
-		} catch ( Exception $e ) {
-			$this->assertMatchesRegularExpression(
-				'/The SKU \(DUMMY SKU\) you are trying to insert with Product Id \(\d+\) is already under processing/',
-				$e->getMessage()
-			);
-		}
+		$this->expectException(
+			'Exception',
+		);
+		$this->expectExceptionMessage(
+			'The SKU (DUMMY SKU) you are trying to insert is already under processing'
+		);
+
+		// exception is only thrown during the REST API request
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
+		$this->create_products_concurrently();
 	}
 
 	/**
@@ -107,10 +109,6 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product1->set_props( $default_props );
 		$product2->set_props( $default_props );
 		$product3->set_props( $default_props );
-
-		$product1->is_rest_request = true;
-		$product2->is_rest_request = true;
-		$product3->is_rest_request = true;
 
 		$product1->save();
 		$product2->save();
