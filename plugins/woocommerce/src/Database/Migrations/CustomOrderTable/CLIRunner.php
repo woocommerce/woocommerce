@@ -1251,7 +1251,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		$this->log(
 			sprintf(
 				// translators: $1$d = plugins count, %2$s = colon (if list follows) or empty.
-				__( '%%C%1$d%%n compatible plugins found%2$s', 'woocommerce' ),
+				_n( "\n%%C%1\$d%%n compatible plugin found%2\$s", "\n%%C%1\$d%%n compatible plugins found%2\$s", $compatibles_count, 'woocommerce' ),
 				$compatibles_count,
 				$compatibles_count > 0 ? ":\n" : ''
 			)
@@ -1263,7 +1263,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		$this->log(
 			sprintf(
 				// translators: $1$d = plugins count, %2$s = colon (if list follows) or empty.
-				__( "\n%%C%1\$d%%n incompatible plugins found%2\$s", 'woocommerce' ),
+				_n( "\n%%C%1\$d%%n incompatible plugin found%2\$s", "\n%%C%1\$d%%n incompatible plugins found%2\$s", $incompatibles_count, 'woocommerce' ),
 				$incompatibles_count,
 				$incompatibles_count > 0 ? ":\n" : ''
 			)
@@ -1275,7 +1275,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		$this->log(
 			sprintf(
 				// translators: $1$d = plugins count, %2$s = colon (if list follows) or empty.
-				__( "\n%%C%1\$d%%n uncertain plugins found%2\$s", 'woocommerce' ),
+				_n( "\n%%C%1\$d%%n uncertain plugin found%2\$s", "\n%%C%1\$d%%n uncertain plugins found%2\$s", $uncertain_count, 'woocommerce' ),
 				$uncertain_count,
 				$uncertain_count > 0 ? ":\n" : ''
 			)
