@@ -63,13 +63,7 @@ test.describe( 'Test the checkout template', () => {
 		await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
 
 		// Close welcome popup.
-		const getStartedButton = admin.page.getByRole( 'button', {
-			name: 'Get started',
-		} );
-		const isGetStartedButtonVisible = await getStartedButton.isVisible();
-		if ( isGetStartedButtonVisible ) {
-			await getStartedButton.click();
-		}
+		await admin.page.getByRole( 'button', { name: 'Get started' } ).click();
 
 		await expect(
 			editor.canvas.getByRole( 'button', {
