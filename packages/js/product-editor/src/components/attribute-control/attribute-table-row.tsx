@@ -43,10 +43,22 @@ export interface TokenItem {
 	onMouseLeave?: MouseEventHandler< HTMLSpanElement >;
 }
 
+/**
+ * Convert a string or a TokenItem to a TokenItem.
+ *
+ * @param {string | TokenItem} v - The value to convert.
+ * @return {TokenItem} The TokenItem.
+ */
 const stringToTokenItem = ( v: string | TokenItem ): TokenItem => ( {
 	value: typeof v === 'string' ? v : v.value,
 } );
 
+/**
+ * Convert a TokenItem to a string.
+ *
+ * @param {string | TokenItem} item - The item to convert.
+ * @return {string} The string.
+ */
 const tokenItemToString = ( item: string | TokenItem ): string =>
 	typeof item === 'string' ? item : item.value;
 
@@ -114,10 +126,8 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	const isGlobalAttribute = attribute?.id === 0;
 
 	/*
-	 * Set initially the the FormTokenField suggestions
-	 * with the attribute options (localTerms), but
-	 * if it's not a global attribute
-	 * set the suggestions with the terms names.
+	 * When isGlobalAttribute is true, allTerms is the localTerms,
+	 * otherwise, it is the attribute terms (mapped to their names)
 	 */
 	const allTerms =
 		( isGlobalAttribute
@@ -125,7 +135,8 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 			: terms?.map( ( term: ProductAttributeTerm ) => term.name ) ) || [];
 
 	/*
-	 * Combine the temporary terms with the attribute options or terms,
+	 * For `suggestions` (the values of the FormTokenField component),
+	 * combine the temporary terms with the attribute options or terms,
 	 * removing duplicates.
 	 */
 	const suggestions = [
@@ -134,23 +145,21 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	].filter( ( value, i, self ) => self.indexOf( value ) === i );
 
 	/*
-	 * Build selected options object from the attribute,
+	 * Build attribute terms object from the attribute,
 	 * used to populate the token field.
-	 * When the attribute is global, uses straigh the attribute options.
-	 * Otherwise, maps the terms to their names.
+	 * When the attribute is global, uses straight the attribute options.
+	 * Otherwise, uses the (mapped) attribute terms.
 	 */
-	const allSelectedValues = isGlobalAttribute
-		? attribute.options?.map( stringToTokenItem )
-		: attribute?.terms?.map( ( option ) =>
-				stringToTokenItem( option.name )
-		  ) || [];
+	const attributeTerms =
+		( isGlobalAttribute
+			? attribute.options?.map( stringToTokenItem )
+			: attribute?.terms?.map( ( { name } ) =>
+					stringToTokenItem( name )
+			  ) ) || [];
 
-	/*
-	 * Combine the temporary terms with the selected values,
-	 * removing duplicates.
-	 */
+	// Combine the temporary terms with the selected values.
 	const selectedValues: TokenItem[] = [
-		...( allSelectedValues || [] ),
+		...( attributeTerms || [] ),
 		...temporaryTerms,
 	];
 
@@ -304,7 +313,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					suggestions={ suggestions }
 					value={ selectedValues }
 					onChange={ (
-						newSelectedTerms: ( TokenItem | string )[]
+						nextSelectedTerms: ( TokenItem | string )[]
 					) => {
 						if ( ! attribute ) {
 							return;
@@ -314,26 +323,23 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 						 * Create a new strings array with the new selected terms,
 						 * used to pass to the Form component.
 						 */
-
-						const newSelectedStringTerms =
-							newSelectedTerms.map( tokenItemToString );
+						const nextStringTerms =
+							nextSelectedTerms.map( tokenItemToString );
 
 						/*
 						 * Create an array with the new terms to add,
 						 * filtering the new selected terms that are not in the
 						 * suggestions array.
 						 */
-						const newItems = newSelectedStringTerms
+						const newItems = nextStringTerms
 							.filter( ( t ) => ! suggestions.includes( t ) )
 							.map( stringToTokenItem );
 
 						const selectedTerms = isGlobalAttribute
-							? newSelectedStringTerms
-							: terms?.filter( ( term ) => {
-									return newSelectedStringTerms.includes(
-										term.name
-									);
-							  } );
+							? nextStringTerms
+							: terms?.filter( ( term ) =>
+									nextStringTerms.includes( term.name )
+							  );
 
 						// Call the callback to update the Form terms.
 						onTermsSelect( selectedTerms, index, attribute );
