@@ -37,17 +37,11 @@ export function ExpressionField( {
 	const resultString = error ? String( error ) : String( result );
 
 	return (
-		<div>
-			<div>
-				<span className="woocommerce-product-editor-dev-tools-expressions-list-prompt">
-					&gt;
-				</span>{ ' ' }
+		<div className="woocommerce-product-editor-dev-tools-expression-field">
+			<div className="woocommerce-product-editor-dev-tools-expression-field__expression">
 				{ expression }
 			</div>
-			<div>
-				<span className="woocommerce-product-editor-dev-tools-expressions-list-prompt">
-					&lt;
-				</span>{ ' ' }
+			<div className="woocommerce-product-editor-dev-tools-expression-field__result">
 				{ resultString }
 			</div>
 		</div>

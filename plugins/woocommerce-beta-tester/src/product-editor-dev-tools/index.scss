@@ -144,6 +144,24 @@
 	color: var(--woocommerce-product-editor-dev-tools-border-color);
 }
 
+.woocommerce-product-editor-dev-tools-expression-field {
+
+}
+
+.woocommerce-product-editor-dev-tools-expression-field__expression {
+	&::before {
+		content: '> ';
+		color: var(--woocommerce-product-editor-dev-tools-border-color);
+	}
+}
+
+.woocommerce-product-editor-dev-tools-expression-field__result {
+	&::before {
+		content: '< ';
+		color: var(--woocommerce-product-editor-dev-tools-border-color);
+	}
+}
+
 .woocommerce-product-editor-dev-tools-expression-editor {
 	display: flex;
 	flex-direction: row;
