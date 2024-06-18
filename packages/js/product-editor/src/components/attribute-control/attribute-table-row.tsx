@@ -225,10 +225,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		);
 	} );
 
-	async function addNewTerms(
-		newTerms: TokenItem[],
-		selectedTerms: ProductAttributeTerm[]
-	) {
+	async function addNewTerms( newTerms: TokenItem[] ) {
 		if ( ! attribute ) {
 			return;
 		}
@@ -270,7 +267,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 			prevTerms.filter( ( term ) => ! newTerms.includes( term ) )
 		);
 
-		onTermsSelect( [ ...selectedTerms, ...newItems ], index, attribute );
+		onTermsSelect( newItems, index, attribute );
 	}
 
 	/*
@@ -370,8 +367,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 								newItems.map( ( item ) => ( {
 									...item,
 									status: 'validating',
-								} ) ),
-								selectedTerms as ProductAttributeTerm[]
+								} ) )
 							);
 						}
 					} }
