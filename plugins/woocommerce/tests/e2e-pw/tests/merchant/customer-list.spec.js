@@ -111,15 +111,17 @@ test.describe( 'Merchant > Customer List', () => {
 			for ( const customer of customers ) {
 				await page
 					.locator( '#woocommerce-select-control-0__control-input' )
-					.fill( customer.first_name );
+					.fill( `${ customer.first_name } ${ customer.last_name }` );
 				await page
 					.getByRole( 'option', {
-						name: `All customers with names that include ${ customer.first_name }`,
+						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
+						exact: true,
 					} )
 					.waitFor( { state: 'visible' } );
 				await page
 					.getByRole( 'option', {
-						name: `All customers with names that include ${ customer.first_name }`,
+						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
+						exact: true,
 					} )
 					.click( { delay: 300 } );
 				await expect(
