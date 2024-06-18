@@ -87,7 +87,11 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
 	);
 
-	const { terms } = useSelect(
+	/*
+	 * Get the terms for the current attribute,
+	 * used in the token field suggestions and values.
+	 */
+	const terms = useSelect(
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		( select: WCDataSelector ) => {
@@ -95,14 +99,12 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
 			);
 
-			return {
-				terms: attributeId
-					? ( getProductAttributeTerms( {
-							search: '',
-							attribute_id: attributeId,
-					  } ) as ProductAttributeTerm[] )
-					: [],
-			};
+			return attributeId
+				? ( getProductAttributeTerms( {
+						search: '',
+						attribute_id: attributeId,
+				  } ) as ProductAttributeTerm[] )
+				: [];
 		},
 		[ attributeId ]
 	);
