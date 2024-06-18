@@ -31,7 +31,7 @@ const FormTokenField =
 	CoreFormTokenField as React.ComponentType< FormTokenFieldProps >;
 
 /*
- * Type copied form core FormTokenField component.
+ * Type copied from core FormTokenField component.
  * Todo: move to a shared location.
  */
 export interface TokenItem {
