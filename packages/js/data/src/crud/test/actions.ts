@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { apiFetch } from '@wordpress/data-controls';
+import { AnyAction } from 'redux';
 
 /**
  * Internal dependencies
@@ -10,6 +11,15 @@ import { createDispatchActions } from '../actions';
 import TYPES from '../action-types';
 import { cleanQuery, getRestPath, getUrlParameters } from '../utils';
 import type { Item } from '../types';
+
+interface RequestAction {
+	type: string;
+	query: Record< string, any >; // eslint-disable-line @typescript-eslint/no-explicit-any
+	options?: {
+		optimisticPropagation?: boolean;
+		tempId?: string;
+	};
+}
 
 const selectors = createDispatchActions( {
 	resourceName: 'Product',
@@ -104,7 +114,7 @@ describe( 'crud actions', () => {
 			} );
 		} );
 
-		it( 'with optimistc propagation', async () => {
+		it( 'with optimistic propagation', async () => {
 			const query = {
 				name: 'Zuri',
 				kind: 'dog',
@@ -117,7 +127,10 @@ describe( 'crud actions', () => {
 			} );
 
 			// Step through the generator request action
-			const { value: requestAction } = generator.next();
+			const { value: requestAction } = generator.next() as IteratorResult<
+				RequestAction,
+				AnyAction
+			>;
 
 			expect( requestAction.type ).toEqual( TYPES.CREATE_ITEM_REQUEST );
 			expect( requestAction.query ).toEqual( {
