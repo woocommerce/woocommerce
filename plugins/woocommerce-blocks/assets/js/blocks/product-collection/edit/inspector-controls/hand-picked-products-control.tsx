@@ -170,7 +170,11 @@ const HandPickedProductsControl = ( {
 				__experimentalValidateInput={ ( value: string ) =>
 					productsMap.has( value )
 				}
-				value={ selectedProductIds || [] }
+				value={
+					! productsMap.size
+						? [ __( 'Loading…', 'woocommerce' ) ]
+						: selectedProductIds || []
+				}
 				__experimentalExpandOnFocus={ true }
 				__experimentalShowHowTo={ false }
 			/>
