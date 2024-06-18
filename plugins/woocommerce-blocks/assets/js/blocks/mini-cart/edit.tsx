@@ -23,9 +23,6 @@ import { Icon } from '@wordpress/icons';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { ColorPanel } from '@woocommerce/editor-components/color-panel';
 import type { ColorPaletteOption } from '@woocommerce/editor-components/color-panel/types';
-import { useEffect, useRef } from '@wordpress/element';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
-import { isNumber } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -43,7 +40,6 @@ export interface Attributes {
 	priceColor: ColorPaletteOption;
 	iconColor: ColorPaletteOption;
 	productCountColor: ColorPaletteOption;
-	initialCartItemsCount: number;
 	productCountVisibility: 'always' | 'never' | 'greater_than_zero';
 }
 
@@ -65,7 +61,6 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		iconColor = defaultColorItem,
 		productCountColor = defaultColorItem,
 		miniCartIcon,
-		initialCartItemsCount,
 		productCountVisibility,
 	} = migrateAttributesToColorPanel( attributes );
 
@@ -84,26 +79,9 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		},
 	};
 
-	const { cartItemsCount: cartItemsCountFromApi, cartIsLoading } =
-		useStoreCart();
-
-	const cartIsLoadingForTheFirstTime = useRef( cartIsLoading );
-
-	useEffect( () => {
-		if ( cartIsLoadingForTheFirstTime.current && ! cartIsLoading ) {
-			cartIsLoadingForTheFirstTime.current = false;
-		}
-	}, [ cartIsLoading, cartIsLoadingForTheFirstTime ] );
-
 	const blockProps = useBlockProps( {
 		className: 'wc-block-mini-cart',
 	} );
-
-	const cartItemsCount =
-		cartIsLoadingForTheFirstTime.current &&
-		isNumber( initialCartItemsCount )
-			? initialCartItemsCount
-			: cartItemsCountFromApi;
 
 	const isSiteEditor = isSiteEditorPage( select( 'core/edit-site' ) );
 
@@ -111,6 +89,20 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		'templatePartEditUri',
 		''
 	) as string;
+
+	const getDisplayCount = () => {
+		switch ( productCountVisibility ) {
+			case 'never':
+				// Used 0 instead of '' to prevent typescript error.
+				return 0;
+			case 'always':
+				return 0;
+			case 'greater_than_zero':
+				return 2;
+			default:
+				return 2;
+		}
+	};
 
 	const productTotal = 0;
 	return (
@@ -167,17 +159,22 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							options={ [
 								{
 									label: __(
-										'Always show count (even if 0)'
+										'Always show count (even if 0)',
+										'woocommerce'
 									),
 									value: 'always',
 								},
 								{
-									label: __( 'Never show count' ),
+									label: __(
+										'Never show count',
+										'woocommerce'
+									),
 									value: 'never',
 								},
 								{
 									label: __(
-										'Show count only when greater than 0'
+										'Show count only when greater than 0',
+										'woocommerce'
 									),
 									value: 'greater_than_zero',
 								},
@@ -284,7 +281,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						</span>
 					) }
 					<QuantityBadge
-						count={ cartItemsCount }
+						count={ getDisplayCount() }
 						iconColor={ iconColor }
 						productCountColor={ productCountColor }
 						icon={ miniCartIcon }
