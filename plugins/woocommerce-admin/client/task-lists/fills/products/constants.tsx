@@ -6,6 +6,8 @@ import ProductIcon from 'gridicons/dist/product';
 import CloudOutlineIcon from 'gridicons/dist/cloud-outline';
 import TypesIcon from 'gridicons/dist/types';
 import { Icon, chevronRight } from '@wordpress/icons';
+import { addFilter } from '@wordpress/hooks';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -14,8 +16,6 @@ import Link from './icon/link_24px.js';
 import Widget from './icon/widgets_24px.js';
 import LightBulb from './icon/lightbulb_24px.js';
 import PrintfulIcon from './icon/printful.png';
-import { addFilter } from '@wordpress/hooks';
-import { recordEvent } from '@woocommerce/tracks';
 
 export const productTypes = Object.freeze( [
 	{
@@ -102,9 +102,8 @@ export const PrintfulAdvertProductPlacement = {
 	onClick: () => {
 		recordEvent( 'tasklist_product_printful_advert_click' );
 		window.open(
-			'https://href.li/?https://www.printful.com/integrations/woocommerce',
-			'_blank',
-			'noopener,noreferrer'
+			'https://www.printful.com/integrations/woocommerce',
+			'_blank'
 		);
 	},
 };
