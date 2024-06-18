@@ -148,6 +148,10 @@ test.describe( 'Store owner can view the Transitional page', () => {
 			name: 'Cancel',
 		} );
 
+		await expect(
+			page.locator( '.edit-site-site-hub__site-title' )
+		).toBeVisible();
+
 		await shareFeedbackButton.click();
 
 		await expect( shareFeedbackModal ).toBeVisible();
@@ -158,10 +162,25 @@ test.describe( 'Store owner can view the Transitional page', () => {
 
 		await shareFeedbackButton.click();
 
+		await expect( shareFeedbackModal ).toBeVisible();
+		await expect( sendButton ).toBeDisabled();
+		await expect(
+			assembler.locator( 'text=I wanted to design my own theme.' )
+		).toBeVisible();
+
 		await assembler.getByRole( 'button', { name: '★' } ).first().click();
 		await assembler
 			.locator( 'text=I wanted to design my own theme.' )
 			.click();
+		await assembler.getByRole( 'button', { name: '★' } ).first().click();
+		await assembler
+			.locator( `text=I didn't like any of the available themes.` )
+			.click();
+		await assembler.getByRole( 'button', { name: '★' } ).first().click();
+		await assembler
+			.locator( `text=I didn't find a theme that matched my needs.` )
+			.click();
+		await expect( sendButton ).toBeEnabled();
 		await sendButton.click();
 		await expect( shareFeedbackModal ).toBeHidden();
 
