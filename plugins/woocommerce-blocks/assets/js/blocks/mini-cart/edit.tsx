@@ -17,6 +17,7 @@ import { __, isRTL } from '@wordpress/i18n';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import { isSiteEditorPage } from '@woocommerce/utils';
 import type { ReactElement } from 'react';
+import { useEffect } from '@wordpress/element';
 import { select } from '@wordpress/data';
 import { cartOutline, bag, bagAlt } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
@@ -90,19 +91,57 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		''
 	) as string;
 
-	const getDisplayCount = () => {
-		switch ( productCountVisibility ) {
-			case 'never':
-				// Used 0 instead of '' to prevent typescript error.
-				return 0;
-			case 'always':
-				return 0;
-			case 'greater_than_zero':
-				return 2;
-			default:
-				return 2;
+	/**
+	 * This is a workaround for the Site Editor to set the correct
+	 * background color of the Mini-Cart QuantityBadge block based on
+	 * the main background color set by the theme.
+	 */
+	useEffect( () => {
+		const editorStylesWrapper = document.querySelector(
+			'.editor-styles-wrapper'
+		);
+
+		if ( ! editorStylesWrapper ) {
+			return;
 		}
-	};
+
+		if (
+			document.getElementById(
+				'mini-cart-quantity-badge-foreground-color'
+			)
+		) {
+			return;
+		}
+
+		const editorBackgroundColor =
+			window.getComputedStyle( editorStylesWrapper )?.backgroundColor;
+		const editorColor =
+			window.getComputedStyle( editorStylesWrapper )?.color;
+
+		if ( ! editorBackgroundColor || ! editorColor ) {
+			return;
+		}
+		const badgeStyle = document.createElement( 'style' );
+		badgeStyle.id = 'mini-cart-quantity-badge-foreground-color';
+
+		// The badge's background should be the theme's foreground color, and it's text color should be the theme's background color.
+		badgeStyle.appendChild(
+			document.createTextNode(
+				`:where(.wc-block-mini-cart__badge) {
+			color: ${ editorBackgroundColor };
+			background-color: ${ editorColor };
+		}`
+			)
+		);
+
+		editorStylesWrapper.appendChild( badgeStyle );
+	}, [] );
+
+	const productCount =
+		productCountVisibility === 'never' ||
+		productCountVisibility === 'always'
+			? 0
+			: 2;
 
 	const productTotal = 0;
 	return (
@@ -281,7 +320,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						</span>
 					) }
 					<QuantityBadge
-						count={ getDisplayCount() }
+						count={ productCount }
 						iconColor={ iconColor }
 						productCountColor={ productCountColor }
 						icon={ miniCartIcon }
