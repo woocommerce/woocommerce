@@ -78,20 +78,27 @@ class WC_REST_Product_Custom_Fields_Controller extends WC_REST_Controller {
 		$base_query = $wpdb->prepare(
 			"SELECT DISTINCT m.meta_key
 			FROM {$wpdb->postmeta} m LEFT JOIN {$wpdb->posts} p ON m.post_id = p.id
-			WHERE p.post_type = '{$this->post_type}' AND m.meta_key NOT LIKE '\_%' AND m.meta_key LIKE %s",
-			"%{$search}%",
+			WHERE p.post_type = %s AND m.meta_key NOT LIKE %s AND m.meta_key LIKE %s",
+			$this->post_type,
+			$wpdb->esc_like( '_' ) . '%',
+			"%{$search}%"
 		);
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $base_query has been prepared already and $order is a static value.
 		$query = $wpdb->prepare(
 			"$base_query ORDER BY m.meta_key $order LIMIT %d, %d",
 			$offset,
 			$limit
 		);
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $base_query has been prepared already.
 		$total_query = "SELECT COUNT(1) FROM ($base_query) AS t";
-
+		
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $query has been prepared already.
 		$query_result = $wpdb->get_results( $query );
-		$total_items  = $wpdb->get_var( $total_query );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $total_query has been prepared already.
+		$total_items = $wpdb->get_var( $total_query );
 
 		$custom_field_names = array();
 		foreach ( $query_result as $custom_field_name ) {
