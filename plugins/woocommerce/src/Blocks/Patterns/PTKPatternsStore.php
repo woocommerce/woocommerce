@@ -14,7 +14,7 @@ class PTKPatternsStore {
 	// Some patterns need to be excluded because they have dependencies which
 	// are not installed by default (like Jetpack). Otherwise, the user
 	// would see an error when trying to insert them in the editor.
-	const EXCLUDED_PATTERNS = array( '13923', '14781', '14779', '13666', '13664', '13660', '13588', '14922', '14880', '13596', '13967', '13958', '15050', '15027' );
+	const EXCLUDED_PATTERNS = array( '13923', '14781', '14779', '13666', '13664', '13660', '13588', '14922', '14880', '13596', '13967', '13958', '15050', '15027', '13950', '13654', '13500', '13480', '13478' );
 
 	/**
 	 * PatternsToolkit instance.
@@ -181,7 +181,7 @@ class PTKPatternsStore {
 
 		$patterns = $this->ptk_client->fetch_patterns(
 			array(
-				'categories' => array( 'intro', 'about', 'services', 'testimonials' ),
+				'categories' => array( 'intro', 'about', 'services', 'testimonials', 'contact' ),
 			)
 		);
 
