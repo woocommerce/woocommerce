@@ -249,7 +249,7 @@ class WC_Site_Tracking {
 	 */
 	public static function set_tracking_cookie( string $cookie_key, string $cookie_value, int $expire = 0, bool $secure = false, bool $http_only = false ): bool {
 		if ( self::is_tracking_enabled() ) {
-			wc_setcookie( $cookie_key, $cookie_value, $expire, $secure, $http_only);
+			wc_setcookie( $cookie_key, $cookie_value, $expire, $secure, $http_only );
 			return true;
 		}
 
