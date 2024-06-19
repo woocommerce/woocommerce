@@ -493,18 +493,6 @@ class BlockTemplatesController {
 	}
 
 	/**
-	 * Returns the path of a template on the Blocks template folder.
-	 *
-	 * @param string $template_slug Block template slug e.g. single-product.
-	 * @param string $template_type wp_template or wp_template_part.
-	 *
-	 * @return string
-	 */
-	public function get_template_path_from_woocommerce( $template_slug, $template_type = 'wp_template' ) {
-		return BlockTemplateUtils::get_templates_directory( $template_type ) . '/' . $template_slug . '.html';
-	}
-
-	/**
 	 * Checks whether a block template with that name exists in Woo Blocks
 	 *
 	 * @param string $template_name Template to check.
