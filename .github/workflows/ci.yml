@@ -337,7 +337,7 @@ jobs:
                   PR_NUMBER: ${{ github.event.pull_request.number }}
                   RUN_ID: ${{ github.run_id }}
                   REPORT_NAME: ${{ matrix.report }}
-              if: ${{ contains(matrix.report, 'e2e') }} # temporary until we adapt the woocommerce-test-reports side to not care about the test type
+              if: ${{ contains(matrix.report, 'e2e') && !! steps.merge-artifacts.outputs.artifact-id }} # temporary until we adapt the woocommerce-test-reports side to not care about the test type
               run: |
                   if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
                     gh workflow run publish-test-reports-pr.yml \
