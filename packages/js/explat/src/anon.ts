@@ -30,7 +30,7 @@ export const readAnonCookie = (): string | null => {
  * can take a lot longer.
  *
  * The state of initializeAnonIdPromise should be used rather than the return of this function.
- * The return is only avaliable to make this easier to test.
+ * The return is only available to make this easier to test.
  *
  * Throws on error.
  */
