@@ -9,7 +9,7 @@
 		@include font-size(regular);
 		position: absolute;
 		transform: translateY(em($gap));
-		line-height: 1.25; // =20px when font-size is 16px.
+		line-height: 1;
 		left: em($gap-smaller + 1px);
 		top: 0;
 		transform-origin: top left;
@@ -44,7 +44,7 @@
 	input[type="number"],
 	input[type="email"] {
 		@include font-size(regular);
-		padding: em($gap);
+		padding: em($gap) em($gap-smaller);
 		line-height: em($gap);
 		width: 100%;
 		border-radius: $universal-border-radius;
@@ -54,7 +54,7 @@
 		margin: 0;
 		box-sizing: border-box;
 		min-height: 0;
-		max-height: 50px;
+		max-height: 52px;
 		background-color: #fff;
 		color: currentColor;
 

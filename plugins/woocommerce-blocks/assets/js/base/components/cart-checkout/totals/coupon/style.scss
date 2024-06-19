@@ -13,23 +13,25 @@
 	display: flex;
 	width: 100%;
 	margin-bottom: 0;
+	gap: $gap-smaller;
+	flex-wrap: wrap;
+
+	.wc-block-components-totals-coupon__input,
+	.wc-block-components-totals-coupon__button {
+		margin: 0;
+		flex-basis: auto;
+	}
 
 	.wc-block-components-totals-coupon__input {
-		margin-bottom: 0;
-		margin-top: 0;
-		flex-grow: 1;
+		flex-grow: 3;
+		min-width: 120px;
 	}
 
 	.wc-block-components-totals-coupon__button {
-		flex-shrink: 0;
-		margin-left: $gap-smaller;
-		padding-left: $gap-large;
-		padding-right: $gap-large;
+		padding-left: $gap;
+		padding-right: $gap;
 		white-space: nowrap;
-	}
-
-	.wc-block-components-totals-coupon__button.no-margin {
-		margin: 0;
+		flex-grow: 1;
 	}
 }
 
