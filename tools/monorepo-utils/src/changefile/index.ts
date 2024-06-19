@@ -77,7 +77,6 @@ const program = new Command( 'changefile' )
 			}
 
 			const details = getChangelogDetails( prBody );
-			console.log( details );
 			const { significance, type, message, comment } = details;
 			const changelogDetailsError = getChangelogDetailsError( details );
 
