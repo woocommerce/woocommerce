@@ -33,7 +33,8 @@ PAYMENT_METHOD_PROMOTIONS.forEach( ( paymentMethod ) => {
 			'wc-payment-gateway-method-title'
 		);
 		const subTitle = container.getElementsByClassName( 'gateway-subtitle' );
-
+		console.log(title[ 0 ].innerHTML);
+		console.log(subTitle[ 0 ].innerHTML);
 		render(
 			<PaymentPromotionRow
 				columns={ columns }

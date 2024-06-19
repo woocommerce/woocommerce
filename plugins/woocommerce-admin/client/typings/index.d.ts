@@ -20,6 +20,8 @@ declare module 'gridicons/dist/*' {
 	} >;
 	export default value;
 }
+declare module '@woocommerce/onboarding/build-module/components/WooPaymentMethodLogos';
+
 declare module '*.png';
 declare module '*.jpg';
 declare module '*.svg';

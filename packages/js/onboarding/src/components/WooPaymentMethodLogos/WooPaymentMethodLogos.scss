@@ -1,0 +1,34 @@
+.woocommerce-payments-method-logos_count {
+  width: 38px;
+  height: 24px;
+  background-color: #f2f2f2;
+  text-align: center;
+  line-height: 24px;
+  border-radius: 3px;
+}
+
+.woocommerce-payments-method-logos>svg, .woocommerce-payments-method-logos_mini>svg {
+  width: 38px;
+  height: 24px;
+  margin-right: 8px;
+}
+
+@media only screen and (min-width: 480px) {
+  .woocommerce-payments-method-logos {
+    display: flex;
+    align-items: center;
+  }
+  .woocommerce-payments-method-logos_mini {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .woocommerce-payments-method-logos {
+    display: none;
+  }
+  .woocommerce-payments-method-logos_mini {
+    display: flex;
+    align-items: center;
+  }
+}

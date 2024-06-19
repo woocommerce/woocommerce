@@ -28,7 +28,10 @@ export const WCPayBannerFooter: React.VFC< {
 				) }
 			</Text>
 		</div>
-		<PaymentMethodsIcons isWooPayEligible={ isWooPayEligible } />
+		<PaymentMethodsIcons
+			isWooPayEligible={ isWooPayEligible }
+			maxNrElements={ 10 }
+		/>
 	</CardFooter>
 );
 

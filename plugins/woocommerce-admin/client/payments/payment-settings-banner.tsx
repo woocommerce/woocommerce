@@ -51,7 +51,7 @@ const WCPaySettingBanner = () => {
 
 const DefaultPaymentMethodsHeaderText = () => (
 	<>
-		<h2>{ __( 'Payment Methods', 'woocommerce' ) }</h2>
+		<h2>{ __( 'Payment Methods 123', 'woocommerce' ) }</h2>
 		<div id="payment_gateways_options-description">
 			<p>
 				{ __(

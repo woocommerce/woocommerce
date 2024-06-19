@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Card, CardBody, Button, CardDivider } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import {createElement, useState} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -11,8 +11,9 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import sanitizeHTML from '~/lib/sanitize-html';
 import WooPaymentsLogo from './woopayments.svg';
 import ExitSurveyModal from './exit-survey-modal';
-import PaymentMethods from './payment-methods';
 import strings from './strings';
+import { WooPaymentMethodLogos } from '@woocommerce/onboarding/build-module/components/WooPaymentMethodLogos';
+
 
 interface Props {
 	isSubmitted: boolean;
@@ -76,7 +77,10 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 			<CardDivider />
 			<CardBody className="woopayments-welcome-page__payments">
 				<p>{ strings.paymentOptions }</p>
-				<PaymentMethods />
+				<WooPaymentMethodLogos
+					isWooPayEligible={ isWooPayEligible }
+					maxNrElements={ 10 }
+				/>
 			</CardBody>
 			{ isExitSurveyModalOpen && (
 				<ExitSurveyModal
