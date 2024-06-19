@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a null parameter being passed into strpos in Admin/Orders/PageController.php
