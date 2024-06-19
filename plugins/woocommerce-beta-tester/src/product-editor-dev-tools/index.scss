@@ -154,20 +154,11 @@
 
 .woocommerce-product-editor-dev-tools-expression-field__expression {
 	grid-area: expression;
-
-	&::before {
-		content: '> ';
-		color: var(--woocommerce-product-editor-dev-tools-border-color);
-	}
 }
 
 .woocommerce-product-editor-dev-tools-expression-field__result {
 	grid-area: result;
-
-	&::before {
-		content: '< ';
-		color: var(--woocommerce-product-editor-dev-tools-border-color);
-	}
+	white-space: pre-wrap;
 }
 
 .woocommerce-product-editor-dev-tools-expression-field__actions {
