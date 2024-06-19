@@ -351,36 +351,65 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					suggestions={ tokenFieldSuggestions }
 					value={ tokenFieldValues }
 					onChange={ ( nextTokens: ( TokenItem | string )[] ) => {
+						// If there is no attribute, exit the function.
 						if ( ! attribute ) {
 							return;
 						}
 
-						// Create a new strings array with the new selected tokens,
+						/*
+						 * Convert the current suggestions to slugs
+						 * using the cleanForSlug function.
+						 * Slugs are used to check the new tokens
+						 * against the (slugged) suggestions.
+						 */
+						const slugSuggestions =
+							tokenFieldSuggestions.map( cleanForSlug );
+
+						/*
+						 * Filter the tokens that are strings and convert them to slugs.
+						 * These slugs represent the tokens provided
+						 * by the callback (potential new terms)
+						 */
+						const slugTokens = nextTokens
+							.filter(
+								( token ): token is string =>
+									typeof token === 'string'
+							)
+							.map( cleanForSlug );
+
+						/*
+						 * Identify new tokens that are not found
+						 * in the (slugged) suggestions.
+						 * This helps prevent creating duplicate terms
+						 * with different cases, for example.
+						 */
+						const newStringTokens = slugTokens.filter(
+							( token ) => ! slugSuggestions.includes( token )
+						);
+
+						// Convert the selected tokens to an array of strings.
 						const nextStringTokens =
 							nextTokens.map( tokenItemToString );
 
 						/*
-						 * Create an array with the new tokens to add,
-						 * filtering the new selected ones that are not in the
-						 * suggestions array.
+						 * Determine the selected terms to pass to the form.
+						 * If it's a global attribute, use the new string tokens directly.
+						 * Otherwise, filter the existing terms based on the selected tokens.
 						 */
-						const newTokens = nextStringTokens
-							.filter(
-								( t ) => ! tokenFieldSuggestions.includes( t )
-							)
-							.map( stringToTokenItem );
-
-						// Selected Terms to pass to the Form.
 						const selectedTerms = isGlobalAttribute
 							? nextStringTokens
 							: terms?.filter( ( term ) =>
 									nextStringTokens.includes( term.name )
 							  );
 
-						// Call the callback to update the Form terms.
+						// Update the form terms using the callback function.
 						onTermsSelect( selectedTerms, index, attribute );
 
-						// If it is a global attribute, set the local terms.
+						// Map the new string tokens to TokenItems.
+						const newTokens =
+							newStringTokens.map( stringToTokenItem );
+
+						// If it is a global attribute, update the local terms.
 						if ( isGlobalAttribute ) {
 							return setLocalTerms( ( prevTerms ) => [
 								...prevTerms,
@@ -389,8 +418,9 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 						}
 
 						/*
-						 * Create new terms, in case there are any,
-						 * when it is not a global attribute.
+						 * For non-global attributes,
+						 * create new terms if there are any new tokens.
+						 * Set the status of new terms to 'validating'.
 						 */
 						if ( newTokens.length ) {
 							addNewTerms(
