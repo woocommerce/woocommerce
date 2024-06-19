@@ -37,7 +37,7 @@ interface ComboboxControlProps
 }
 
 /*
- * Create an alias for the CombobBoxControl core component,
+ * Create an alias for the ComboboxControl core component,
  * but with the custom ComboboxControlProps interface.
  */
 const ComboboxControl =
