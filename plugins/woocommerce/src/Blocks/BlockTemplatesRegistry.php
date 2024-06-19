@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Blocks\Templates\ProductFiltersTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductFiltersOverlayTemplate;
 
 /**
  * BlockTemplatesRegistry class.
@@ -59,9 +60,10 @@ class BlockTemplatesRegistry {
 		}
 		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) ) {
 			$template_parts = array(
-				MiniCartTemplate::SLUG       => new MiniCartTemplate(),
-				CheckoutHeaderTemplate::SLUG => new CheckoutHeaderTemplate(),
-				ProductFiltersTemplate::SLUG => new ProductFiltersTemplate(),
+				MiniCartTemplate::SLUG              => new MiniCartTemplate(),
+				CheckoutHeaderTemplate::SLUG        => new CheckoutHeaderTemplate(),
+				ProductFiltersTemplate::SLUG        => new ProductFiltersTemplate(),
+				ProductFiltersOverlayTemplate::SLUG => new ProductFiltersOverlayTemplate(),
 			);
 		} else {
 			$template_parts = array();

@@ -317,6 +317,7 @@ class BlockTemplateUtils {
 			'checkout-header.html',
 			'mini-cart.html',
 			'product-filters.html',
+			'product-filters-overlay.html',
 		);
 
 		/*
