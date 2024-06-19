@@ -17,6 +17,7 @@ import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { Product } from '@woocommerce/data';
+import { getPath, getQuery } from '@woocommerce/navigation';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -52,6 +53,7 @@ import { BlockEditorProps } from './types';
 import { LoadingState } from './loading-state';
 import type { ProductFormPostProps, ProductTemplate } from '../../types';
 import isProductFormTemplateSystemEnabled from '../../utils/is-product-form-template-system-enabled';
+import useProductEntityProp from '../../hooks/use-product-entity-prop';
 
 const PluginArea = lazy( () =>
 	import( '@wordpress/plugins' ).then( ( module ) => ( {
@@ -198,6 +200,11 @@ export function BlockEditor( {
 		[ product?.meta_data ]
 	);
 
+	const [ , setProductTemplateId ] = useProductEntityProp(
+		'meta_data._product_template_id',
+		{ postType }
+	);
+
 	const { productTemplate } = useProductTemplate(
 		productTemplateId,
 		hasResolved ? product : null
@@ -302,6 +309,18 @@ export function BlockEditor( {
 	useEffect( () => {
 		setIsEditorLoading( isEditorLoading );
 	}, [ isEditorLoading ] );
+
+	useEffect( function maybeSetProductTemplateFromURL() {
+		const query: { template?: string } = getQuery();
+		const isAddProduct = getPath().endsWith( 'add-product' );
+		if ( isAddProduct && query.template ) {
+			const productTemplates =
+				window.productBlockEditorSettings?.productTemplates ?? [];
+			if ( productTemplates.find( ( t ) => t.id === query.template ) ) {
+				setProductTemplateId( query.template );
+			}
+		}
+	}, [] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( selectCore ) => {
