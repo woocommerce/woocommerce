@@ -35,7 +35,7 @@ const getIntHeaderValues = (
 		const value = response.headers.get( key );
 		if ( value === undefined ) {
 			throw new Error(
-				`Malformed response from server. '${ key }' header is missing when retriving ./report/${ endpoint }.`
+				`Malformed response from server. '${ key }' header is missing when retrieving ./report/${ endpoint }.`
 			);
 		}
 		return parseInt( value, 10 );
