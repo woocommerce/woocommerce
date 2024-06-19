@@ -285,14 +285,14 @@ class ListTable extends WP_List_Table {
 					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
 				</div>
 
-				<?php
-				/**
-				 * Renders after the 'blank state' message for the order list table has rendered.
-				 *
-				 * @since 6.6.1
-				 */
-				do_action( 'wc_marketplace_suggestions_orders_empty_state' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
-				?>
+			<?php
+			/**
+			 * Renders after the 'blank state' message for the order list table has rendered.
+			 *
+			 * @since 6.6.1
+			 */
+			do_action( 'wc_marketplace_suggestions_orders_empty_state' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			?>
 
 			</div>
 		<?php
@@ -1553,19 +1553,19 @@ class ListTable extends WP_List_Table {
 									<div class="wc-order-preview-address">
 										<h2><?php esc_html_e( 'Shipping details', 'woocommerce' ); ?></h2>
 										<# if ( data.ship_to_billing ) { #>
-										{{{ data.formatted_billing_address }}}
+											{{{ data.formatted_billing_address }}}
 										<# } else { #>
-										<a href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
+											<a href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
 										<# } #>
 
 										<# if ( data.data.shipping.phone ) { #>
-										<strong><?php esc_html_e( 'Phone', 'woocommerce' ); ?></strong>
-										<a href="tel:{{ data.data.shipping.phone }}">{{ data.data.shipping.phone }}</a>
+											<strong><?php esc_html_e( 'Phone', 'woocommerce' ); ?></strong>
+											<a href="tel:{{ data.data.shipping.phone }}">{{ data.data.shipping.phone }}</a>
 										<# } #>
 
 										<# if ( data.shipping_via ) { #>
-										<strong><?php esc_html_e( 'Shipping method', 'woocommerce' ); ?></strong>
-										{{ data.shipping_via }}
+											<strong><?php esc_html_e( 'Shipping method', 'woocommerce' ); ?></strong>
+											{{ data.shipping_via }}
 										<# } #>
 									</div>
 								<# } #>
