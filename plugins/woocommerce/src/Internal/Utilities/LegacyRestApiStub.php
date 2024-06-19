@@ -57,8 +57,8 @@ class LegacyRestApiStub {
 	private static function parse_legacy_rest_api_request() {
 		global $wp;
 
-		// The WC_API class existing means that the Legacy REST API extension is installed and active.
-		if ( class_exists( 'WC_API' ) ) {
+		// The WC_Legacy_REST_API_Plugin class existence means that the Legacy REST API extension is installed and active.
+		if ( class_exists( 'WC_Legacy_REST_API_Plugin' ) ) {
 			return;
 		}
 
