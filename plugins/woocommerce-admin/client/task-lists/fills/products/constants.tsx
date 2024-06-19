@@ -101,10 +101,7 @@ export const PrintfulAdvertProductPlacement = {
 	after: <Icon icon={ chevronRight } />,
 	onClick: () => {
 		recordEvent( 'tasklist_product_printful_advert_click' );
-		window.open(
-			'https://www.printful.com/integrations/woocommerce',
-			'_blank'
-		);
+		window.open( 'https://woocommerce.com/products/printful', '_blank' );
 	},
 };
 
