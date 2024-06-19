@@ -46,6 +46,7 @@ export function ExpressionField( {
 	updateLabel = __( 'Update', 'woocommerce' ),
 }: ExpressionFieldProps ) {
 	const [ editedExpression, setEditedExpression ] = useState( expression );
+	const isDirty = editedExpression !== expression;
 
 	useEffect( () => setEditedExpression( expression ), [ expression ] );
 
@@ -54,7 +55,11 @@ export function ExpressionField( {
 		evaluationContext
 	);
 
-	const resultString = error ? String( error ) : String( result );
+	const errorString = error && isDirty ? String( error ) : '';
+
+	const resultString = error
+		? errorString
+		: JSON.stringify( result, null, 4 );
 
 	const expressionTextAreaRef = useRef< HTMLTextAreaElement >( null );
 
