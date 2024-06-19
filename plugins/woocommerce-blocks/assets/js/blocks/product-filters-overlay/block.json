@@ -1,0 +1,38 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "woocommerce/product-filters-overlay",
+	"version": "1.0.0",
+	"title": "Product Filters Overlay (Experimental)",
+	"description": "Display product filters in an overlay on top of a page.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"supports": {
+		"align": true,
+		"multiple": false,
+		"inserter": false,
+		"layout": {
+			"allowCustomContentAndWideSize": true
+		},
+		"color": {},
+		"typography": {},
+		"dimensions": {},
+		"spacing": {
+			"padding": true,
+			"blockGap": true
+		}
+	},
+	"textdomain": "woocommerce",
+	"providesContext": {},
+	"attributes": {
+		"overlayStyle": {
+			"type": "string",
+			"default": "drawer"
+		},
+		"overlayPosition": {
+			"type": "string",
+			"default": "left"
+		}
+	},
+	"example": {}
+}
