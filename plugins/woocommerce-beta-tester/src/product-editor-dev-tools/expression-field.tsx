@@ -27,7 +27,7 @@ function evaluateExpression(
 }
 
 type ExpressionFieldProps = {
-	expression: string;
+	expression?: string;
 	evaluationContext?: object;
 	mode?: 'view' | 'edit';
 	onEnterEdit?: () => void;
@@ -36,7 +36,7 @@ type ExpressionFieldProps = {
 };
 
 export function ExpressionField( {
-	expression,
+	expression = '',
 	evaluationContext,
 	mode = 'view',
 	onEnterEdit,
