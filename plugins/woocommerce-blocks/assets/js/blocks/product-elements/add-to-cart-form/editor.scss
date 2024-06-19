@@ -35,4 +35,18 @@ input {
 		margin: 0 4px 0 0;
 		background: #fff;
 	}
+
+	.wc-block-editor-add-to-cart-form-container--disabled {
+		display: flex;
+		align-items: stretch;
+	}
+
+	.quantity.wc-block-components-quantity-selector {
+		align-items: baseline;
+	}
+
+	.quantity.wc-block-components-quantity-selector
+		> input[type="number"].input-text.qty.text {
+		padding: 0.9rem 1.1rem;
+	}
 }

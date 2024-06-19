@@ -56,7 +56,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 				>
 					<div className="wc-block-editor-add-to-cart-form-container">
 						<Skeleton numberOfLines={ 3 } />
-						<Disabled>
+						<Disabled className="wc-block-editor-add-to-cart-form-container--disabled">
 							{ props.attributes.quantitySelectorStyle ===
 								QuantitySelectorStyle.Input && (
 								<>
