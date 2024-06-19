@@ -68,7 +68,10 @@ export function ExpressionField( {
 	}
 
 	return (
-		<div className="woocommerce-product-editor-dev-tools-expression-field">
+		<div
+			className="woocommerce-product-editor-dev-tools-expression-field"
+			data-mode={ mode }
+		>
 			<textarea
 				ref={ expressionTextAreaRef }
 				className="woocommerce-product-editor-dev-tools-expression-field__expression"

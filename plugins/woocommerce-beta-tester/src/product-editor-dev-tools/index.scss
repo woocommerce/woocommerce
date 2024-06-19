@@ -179,6 +179,13 @@
 	white-space: pre-wrap;
 }
 
+.woocommerce-product-editor-dev-tools-expression-field[data-mode='edit']
+.woocommerce-product-editor-dev-tools-expression-field__result {
+	min-height: 1lh;
+	max-height: 1lh;
+	overflow-y: hidden;
+}
+
 .woocommerce-product-editor-dev-tools-expression-field__actions {
 	grid-area: actions;
 }
