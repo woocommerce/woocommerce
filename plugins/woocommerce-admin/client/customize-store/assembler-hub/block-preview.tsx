@@ -21,6 +21,7 @@ import { ChangeHandler } from './hooks/use-editor-blocks';
 import { Toolbar } from './toolbar/toolbar';
 import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
 import { IsResizingContext } from './resizable-frame';
+import { SelectedBlockContextProvider } from './context/selected-block-ref-context';
 
 export const BlockPreview = ( {
 	blocks,
@@ -49,14 +50,16 @@ export const BlockPreview = ( {
 				onChange={ onChange }
 				useSubRegistry={ useSubRegistry }
 			>
-				{ isFullComposabilityFeatureAndAPIAvailable() &&
-					! isPatternPreview &&
-					! isResizing && <Toolbar /> }
-				<AutoHeightBlockPreview
-					isPatternPreview={ isPatternPreview }
-					settings={ settings }
-					{ ...props }
-				/>
+				<SelectedBlockContextProvider>
+					{ isFullComposabilityFeatureAndAPIAvailable() &&
+						! isPatternPreview &&
+						! isResizing && <Toolbar /> }
+					<AutoHeightBlockPreview
+						isPatternPreview={ isPatternPreview }
+						settings={ settings }
+						{ ...props }
+					/>
+				</SelectedBlockContextProvider>
 			</BlockEditorProvider>
 		</>
 	);
