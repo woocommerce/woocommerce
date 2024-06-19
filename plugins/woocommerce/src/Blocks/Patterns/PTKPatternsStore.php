@@ -124,19 +124,25 @@ class PTKPatternsStore {
 	 * @return array
 	 */
 	private function filter_patterns( array $patterns, array $pattern_ids ) {
-		return array_filter(
-			$patterns,
-			function ( $pattern ) use ( $pattern_ids ) {
-				if ( ! isset( $pattern['ID'] ) ) {
-					return true;
-				}
+		return array_values(
+			array_filter(
+				$patterns,
+				function ( $pattern ) use ( $pattern_ids ) {
+					if ( ! isset( $pattern['ID'] ) ) {
+						return true;
+					}
 
-				if ( isset( $pattern['post_type'] ) && 'wp_block' !== $pattern['post_type'] ) {
-					return false;
-				}
+					if ( isset( $pattern['post_type'] ) && 'wp_block' !== $pattern['post_type'] ) {
+						return false;
+					}
 
-				return ! in_array( (string) $pattern['ID'], $pattern_ids, true );
-			}
+					if ( $this->has_external_dependencies( $pattern ) ) {
+						return false;
+					}
+
+					return ! in_array( (string) $pattern['ID'], $pattern_ids, true );
+				}
+			)
 		);
 	}
 
@@ -208,5 +214,26 @@ class PTKPatternsStore {
 	 */
 	private function allowed_tracking_is_enabled(): bool {
 		return 'yes' === get_option( 'woocommerce_allow_tracking' );
+	}
+
+	/**
+	 * Check if the pattern has external dependencies.
+	 *
+	 * @param array $pattern The pattern to check.
+	 *
+	 * @return bool
+	 */
+	private function has_external_dependencies( $pattern ) {
+		if ( ! isset( $pattern['dependencies'] ) || ! is_array( $pattern['dependencies'] ) ) {
+			return false;
+		}
+
+		foreach ( $pattern['dependencies'] as $dependency ) {
+			if ( 'woocommerce' !== $dependency ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

@@ -197,6 +197,68 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test fetch_patterns should filter out the patterns with dependencies.
+	 */
+	public function test_fetch_patterns_should_filter_out_the_patterns_with_dependencies_diff_than_woocommerce() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		$ptk_patterns = array(
+			array(
+				'ID'    => 1,
+				'title' => 'No deps',
+			),
+			array(
+				'ID'           => 2,
+				'title'        => 'Jetpack dep',
+				'dependencies' => [ 'jetpack' ],
+			),
+			array(
+				'ID'           => 3,
+				'title'        => 'Jetpack and WooCommerce dep',
+				'dependencies' => [ 'woocommerce', 'jetpack' ],
+			),
+			array(
+				'ID'           => 4,
+				'title'        => 'WooCommerce dep',
+				'dependencies' => [ 'woocommerce' ],
+			),
+			array(
+				'ID'           => 5,
+				'title'        => 'Empty deps',
+				'dependencies' => [],
+			),
+		);
+
+		$expected_patterns = array(
+			array(
+				'ID'    => 1,
+				'title' => 'No deps',
+			),
+			array(
+				'ID'           => 4,
+				'title'        => 'WooCommerce dep',
+				'dependencies' => [ 'woocommerce' ],
+			),
+			array(
+				'ID'           => 5,
+				'title'        => 'Empty deps',
+				'dependencies' => [],
+			),
+		);
+
+		$this->ptk_client
+			->expects( $this->once() )
+			->method( 'fetch_patterns' )
+			->willReturn( $ptk_patterns );
+
+		$this->pattern_store->fetch_patterns();
+
+		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
+
+		$this->assertEquals( $expected_patterns, $patterns );
+		$this->assertEquals( $expected_patterns, get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
+	}
+
+	/**
 	 * Asserts that the response is an error with the expected error code and message.
 	 *
 	 * @param array|WP_Error $response The response to assert.
