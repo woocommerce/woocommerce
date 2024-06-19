@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
+import { parse, synchronizeBlocksWithTemplate } from '@wordpress/blocks';
 import {
 	createElement,
 	useMemo,
@@ -17,6 +17,7 @@ import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { Product } from '@woocommerce/data';
+import { getPath, getQuery } from '@woocommerce/navigation';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -49,8 +50,10 @@ import { PostTypeContext } from '../../contexts/post-type-context';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
-import { ProductTemplate } from '../../types';
 import { LoadingState } from './loading-state';
+import type { ProductFormPostProps, ProductTemplate } from '../../types';
+import isProductFormTemplateSystemEnabled from '../../utils/is-product-form-template-system-enabled';
+import useProductEntityProp from '../../hooks/use-product-entity-prop';
 
 const PluginArea = lazy( () =>
 	import( '@wordpress/plugins' ).then( ( module ) => ( {
@@ -65,7 +68,7 @@ const ModalEditor = lazy( () =>
 );
 
 function getLayoutTemplateId(
-	productTemplate: ProductTemplate | undefined,
+	productTemplate: ProductTemplate | undefined | null,
 	postType: string
 ) {
 	if ( productTemplate?.layoutTemplateId ) {
@@ -86,6 +89,10 @@ export function BlockEditor( {
 	productId,
 	setIsEditorLoading,
 }: BlockEditorProps ) {
+	const [ selectedProductFormId, setSelectedProductFormId ] = useState<
+		number | null
+	>( null );
+
 	useConfirmUnsavedProductChanges( postType );
 
 	/**
@@ -176,7 +183,7 @@ export function BlockEditor( {
 		};
 	}, [ settingsGlobal ] );
 
-	const { editedRecord: product } = useEntityRecord< Product >(
+	const { editedRecord: product, hasResolved } = useEntityRecord< Product >(
 		'postType',
 		postType,
 		productId,
@@ -193,13 +200,18 @@ export function BlockEditor( {
 		[ product?.meta_data ]
 	);
 
+	const [ , setProductTemplateId ] = useProductEntityProp(
+		'meta_data._product_template_id',
+		{ postType }
+	);
+
 	const { productTemplate } = useProductTemplate(
 		productTemplateId,
-		product
+		hasResolved ? product : null
 	);
 
 	const { layoutTemplate } = useLayoutTemplate(
-		getLayoutTemplateId( productTemplate, postType )
+		hasResolved ? getLayoutTemplateId( productTemplate, postType ) : null
 	);
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
@@ -209,41 +221,106 @@ export function BlockEditor( {
 		{ id: productId !== -1 ? productId : 0 }
 	);
 
+	// Pull the product templates from the store.
+	const productForms = useSelect( ( sel ) => {
+		return (
+			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
+				per_page: -1,
+			} ) || []
+		);
+	}, [] ) as ProductFormPostProps[];
+
+	// Set the default product form template ID.
+	useEffect( () => {
+		if ( ! productForms.length ) {
+			return;
+		}
+
+		setSelectedProductFormId( productForms[ 0 ].id );
+	}, [ productForms ] );
+
 	const isEditorLoading =
 		! settings ||
 		! layoutTemplate ||
 		// variations don't have a product template
 		( postType !== 'product_variation' && ! productTemplate ) ||
-		productId === -1;
+		productId === -1 ||
+		! hasResolved;
 
-	useLayoutEffect( () => {
-		if ( isEditorLoading ) {
-			return;
-		}
+	const productFormTemplate = useMemo(
+		function pickAndParseTheProductFormTemplate() {
+			if (
+				! isProductFormTemplateSystemEnabled() ||
+				! selectedProductFormId
+			) {
+				return undefined;
+			}
 
-		const blockInstances = synchronizeBlocksWithTemplate(
-			[],
-			layoutTemplate.blockTemplates
-		);
+			const productFormPost = productForms.find(
+				( form ) => form.id === selectedProductFormId
+			);
 
-		onChange( blockInstances, {} );
+			if ( productFormPost ) {
+				return parse( productFormPost.content.raw );
+			}
 
-		dispatch( 'core/editor' ).updateEditorSettings( {
-			...settings,
+			return undefined;
+		},
+		[ productForms, selectedProductFormId ]
+	);
+
+	useLayoutEffect(
+		function setupEditor() {
+			if ( isEditorLoading ) {
+				return;
+			}
+
+			const blockInstances = synchronizeBlocksWithTemplate(
+				[],
+				layoutTemplate.blockTemplates
+			);
+
+			/*
+			 * If the product form template is not available, use the block instances.
+			 * ToDo: Remove this fallback once the product form template is stable/available.
+			 */
+			const editorTemplate = blockInstances ?? productFormTemplate;
+
+			onChange( editorTemplate, {} );
+
+			dispatch( 'core/editor' ).updateEditorSettings( {
+				...settings,
+				productTemplate,
+			} as Partial< ProductEditorSettings > );
+
+			// We don't need to include onChange in the dependencies, since we get new
+			// instances of it on every render, which would cause an infinite loop.
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+		},
+		[
+			isEditorLoading,
+			layoutTemplate,
+			settings,
 			productTemplate,
-		} as Partial< ProductEditorSettings > );
+			productFormTemplate,
+		]
+	);
 
+	useEffect( () => {
 		setIsEditorLoading( isEditorLoading );
+	}, [ isEditorLoading ] );
 
-		// We don't need to include onChange or updateEditorSettings in the dependencies,
-		// since we get new instances of them on every render, which would cause an infinite loop.
-		//
-		// We include productId in the dependencies to make sure that the effect is run when the
-		// product is changed, since we need to synchronize the blocks with the template and update
-		// the blocks by calling onChange.
-		//
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ isEditorLoading, productId ] );
+	useEffect( function maybeSetProductTemplateFromURL() {
+		const query: { template?: string } = getQuery();
+		const isAddProduct = getPath().endsWith( 'add-product' );
+		if ( isAddProduct && query.template ) {
+			const productTemplates =
+				window.productBlockEditorSettings?.productTemplates ?? [];
+			if ( productTemplates.find( ( t ) => t.id === query.template ) ) {
+				setProductTemplateId( query.template );
+			}
+		}
+	}, [] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( selectCore ) => {

@@ -131,7 +131,7 @@ describe( 'updateLinkHref', () => {
 	} );
 } );
 
-describe( 'Layout', () => {
+describe( 'EmbedLayout', () => {
 	it( 'should call recordPageView with correct parameters', () => {
 		window.history.pushState( {}, 'Page Title', '/url?search' );
 		render( <EmbedLayout /> );
@@ -148,6 +148,7 @@ describe( 'PageLayout', () => {
 			jest.fn()
 		);
 		jest.useFakeTimers();
+		jest.clearAllMocks();
 	} );
 
 	afterEach( () => {
@@ -162,6 +163,17 @@ describe( 'PageLayout', () => {
 		};
 		mockedGetHistory.mockReturnValue( historyMock );
 	}
+
+	it( 'should call recordPageView with correct parameters', () => {
+		mockPath( '/analytics/overview' );
+		render( <PageLayout /> );
+		expect( recordPageView ).toHaveBeenCalledWith( 'analytics_overview', {
+			has_navigation: true,
+			jetpack_active: false,
+			jetpack_connected: false,
+			jetpack_installed: false,
+		} );
+	} );
 
 	describe( 'NoMatch', () => {
 		const message = 'Sorry, you are not allowed to access this page.';

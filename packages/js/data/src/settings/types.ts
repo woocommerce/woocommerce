@@ -1,6 +1,6 @@
 export type Settings = {
 	[ key: string ]: unknown;
-} & {
+} & { siteUrl?: string; shopUrl?: string } & {
 	general?: {
 		[ key: string ]: string;
 	};

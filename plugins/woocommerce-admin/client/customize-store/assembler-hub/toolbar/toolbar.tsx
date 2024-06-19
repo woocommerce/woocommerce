@@ -20,10 +20,12 @@ import {
  */
 import { useQuery } from '@woocommerce/navigation';
 import Shuffle from './shuffle';
+import Delete from './delete';
 import './style.scss';
+import { useIsNoBlocksPlaceholderPresent } from '../hooks/block-placeholder/use-is-no-blocks-placeholder-present';
 
 const isHomepageUrl = ( path: string ) => {
-	return path === '/customize-store/assembler-hub/homepage';
+	return path.includes( '/customize-store/assembler-hub/homepage' );
 };
 
 export const Toolbar = () => {
@@ -89,23 +91,57 @@ export const Toolbar = () => {
 
 	useEffect( () => {
 		const path = query.path;
-
+		if ( ! path ) {
+			return;
+		}
 		setIsHomepageSidebarOpen( isHomepageUrl( path ) );
 	}, [ query ] );
-	const { isPreviousBlockTemplatePart, isNextBlockTemplatePart } =
-		useMemo( () => {
-			return {
-				isPreviousBlockTemplatePart:
-					previousBlock?.name === 'core/template-part',
-				isNextBlockTemplatePart:
-					nextBlock?.name === 'core/template-part',
-			};
-		}, [ nextBlock?.name, previousBlock?.name ] );
 
 	const selectedBlockClientId =
 		currentBlock?.clientId ?? firstBlock?.clientId;
 
-	if ( ! isHomepageSidebarOpen || ! selectedBlockClientId ) {
+	const { isBlockMoverUpButtonDisabled, isBlockMoverDownButtonDisabled } =
+		useMemo( () => {
+			const isPreviousBlockTemplatePart =
+				previousBlock?.name === 'core/template-part';
+			const isNextBlockTemplatePart =
+				nextBlock?.name === 'core/template-part';
+
+			return {
+				isBlockMoverUpButtonDisabled:
+					isPreviousBlockTemplatePart ||
+					// The first block is the header, which is not movable.
+					allBlocks[ 1 ]?.clientId === selectedBlockClientId,
+				isBlockMoverDownButtonDisabled:
+					isNextBlockTemplatePart ||
+					// The last block is the footer, which is not movable.
+					allBlocks[ allBlocks.length - 2 ]?.clientId ===
+						selectedBlockClientId,
+			};
+		}, [
+			allBlocks,
+			nextBlock?.name,
+			previousBlock?.name,
+			selectedBlockClientId,
+		] );
+
+	const isNoBlocksPlaceholderPresent =
+		useIsNoBlocksPlaceholderPresent( allBlocks );
+
+	const isHeaderOrFooter = useMemo( () => {
+		const selectedBlock = allBlocks.find( ( { clientId } ) => {
+			return clientId === selectedBlockClientId;
+		} );
+
+		return selectedBlock?.name === 'core/template-part';
+	}, [ allBlocks, selectedBlockClientId ] );
+
+	if (
+		! isHomepageSidebarOpen ||
+		! selectedBlockClientId ||
+		isNoBlocksPlaceholderPresent ||
+		isHeaderOrFooter
+	) {
 		return null;
 	}
 
@@ -118,14 +154,18 @@ export const Toolbar = () => {
 							<BlockMover
 								clientIds={ [ selectedBlockClientId ] }
 								isBlockMoverUpButtonDisabled={
-									isPreviousBlockTemplatePart
+									isBlockMoverUpButtonDisabled
 								}
 								isBlockMoverDownButtonDisabled={
-									isNextBlockTemplatePart
+									isBlockMoverDownButtonDisabled
 								}
 							/>
 						</ToolbarGroup>
 						<Shuffle clientId={ selectedBlockClientId } />
+						<Delete
+							clientId={ selectedBlockClientId }
+							nextBlockClientId={ nextBlock?.clientId }
+						/>
 					</>
 				</WPToolbar>
 			</div>

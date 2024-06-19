@@ -50,14 +50,12 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
 		"build:check-assets": "rimraf build/* && cross-env ASSET_CHECK=true BABEL_ENV=default NODE_ENV=production webpack",
-		"build:deploy": "rimraf vendor/* && cross-env WOOCOMMERCE_BLOCKS_PHASE=2 composer install --no-dev && cross-env WOOCOMMERCE_BLOCKS_PHASE=2 pnpm run build --loglevel error",
 		"prebuild:docs": "rimraf docs/extensibility/actions.md & rimraf docs/extensibility/filters.md",
 		"build:docs": "./vendor/bin/wp-hooks-generator --input=src --output=bin/hook-docs/data && node ./bin/hook-docs && pnpm build:docs:block-references",
 		"build:docs:block-references": "node ./bin/gen-block-list-doc.js",
 		"postbuild:docs": "./bin/add-doc-footer.sh",
 		"changelog:zenhub": "node ./bin/changelog --changelogSrcType='ZENHUB_RELEASE'",
 		"change-versions": "source ./bin/change-versions.sh",
-		"deploy": "pnpm run build:deploy && sh ./bin/github-deploy.sh",
 		"dev": "rimraf build/* && cross-env BABEL_ENV=default webpack",
 		"labels:dry": "github-label-sync --labels ./.github/label-sync-config.json --allow-added-labels --dry-run woocommerce/woocommerce-gutenberg-products-block",
 		"labels:sync": "github-label-sync --labels ./.github/label-sync-config.json --allow-added-labels woocommerce/woocommerce-gutenberg-products-block",
@@ -89,6 +87,7 @@
 		"test:e2e:block-theme": "pnpm run test:e2e block_theme",
 		"test:e2e:classic-theme": "pnpm run test:e2e classic_theme",
 		"test:e2e:block-theme-with-templates": "pnpm run test:e2e block_theme_with_templates",
+		"test:e2e:fake": "echo 'It should trigger Blocks e2e tests in @woocommerce/plugin-woocommerce'",
 		"test:e2e:jest": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js",
 		"test:e2e:jest:dev": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config-dev.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js",
 		"test:e2e:jest:dev-watch": "pnpm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e-jest/config/jest-puppeteer.config-dev.js NODE_CONFIG_DIR=tests/e2e-jest/config wp-scripts test-e2e --config tests/e2e-jest/config/jest.config.js --watch",
@@ -123,7 +122,7 @@
 		"@bartekbp/typescript-checkstyle": "5.0.0",
 		"@octokit/action": "5.0.2",
 		"@octokit/graphql": "5.0.5",
-		"@playwright/test": "^1.40.1",
+		"@playwright/test": "^1.44.1",
 		"@storybook/addon-a11y": "7.5.2",
 		"@storybook/addon-actions": "^7.6.4",
 		"@storybook/addon-docs": "^7.6.4",
@@ -186,7 +185,7 @@
 		"@wordpress/e2e-test-utils-playwright": "wp-6.5",
 		"@wordpress/e2e-tests": "^4.9.2",
 		"@wordpress/element": "5.22.0",
-		"@wordpress/env": "8.2.0",
+		"@wordpress/env": "^9.7.0",
 		"@wordpress/html-entities": "3.24.0",
 		"@wordpress/i18n": "4.45.0",
 		"@wordpress/is-shallow-equal": "4.24.0",
@@ -372,6 +371,17 @@
 						"pull_request",
 						"push"
 					]
+				},
+				{
+					"name": "Blocks e2e - trigger for Blocks e2e tests in @woocommerce/plugin-woocommerce",
+					"testType": "e2e",
+					"command": "test:e2e:fake",
+					"changes": [
+						"tests/e2e/**"
+					],
+					"events": [
+						"pull_request"
+					]
 				}
 			]
 		}
@@ -388,9 +398,6 @@
 				"BABEL_ENV": {
 					"external": true,
 					"default": "default"
-				},
-				"WOOCOMMERCE_BLOCKS_PHASE": {
-					"external": true
 				}
 			},
 			"files": [

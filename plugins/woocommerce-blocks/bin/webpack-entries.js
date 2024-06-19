@@ -9,8 +9,11 @@ const glob = require( 'glob' );
 // path should be defined in the `customDir` property. The scripts below will
 // take care of looking for `index.js`, `frontend.js` and `*.scss` files in each
 // block directory.
+//
 // If a block is experimental, it should be marked with the `isExperimental`
 // property.
+// Update plugins/woocommerce-blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
+// when you mark/unmark block experimental.
 const blocks = {
 	'active-filters': {},
 	'add-to-cart-form': {
@@ -166,16 +169,8 @@ const blocks = {
 // `**/*.scss`...).
 // It also filters out elements with undefined props and experimental blocks.
 const getBlockEntries = ( relativePath ) => {
-	const experimental =
-		! parseInt( process.env.WOOCOMMERCE_BLOCKS_PHASE, 10 ) < 3;
-
 	return Object.fromEntries(
 		Object.entries( blocks )
-			.filter(
-				( [ , config ] ) =>
-					! config.isExperimental ||
-					config.isExperimental === experimental
-			)
 			.map( ( [ blockCode, config ] ) => {
 				const filePaths = glob.sync(
 					`./assets/js/blocks/${ config.customDir || blockCode }/` +

@@ -109,7 +109,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 	test( 'can create Cart Block page', async ( { page } ) => {
 		await goToPageEditor( { page } );
 		await fillPageTitle( page, cartBlockPageTitle );
-		await insertBlockByShortcut( page, '/cart' );
+		await insertBlockByShortcut( page, 'Cart' );
 		await publishPage( page, cartBlockPageTitle );
 	} );
 
@@ -117,7 +117,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 	test( 'can create Checkout Block page', async ( { page } ) => {
 		await goToPageEditor( { page } );
 		await fillPageTitle( page, checkoutBlockPageTitle );
-		await insertBlockByShortcut( page, '/checkout' );
+		await insertBlockByShortcut( page, 'Checkout' );
 		await publishPage( page, checkoutBlockPageTitle );
 	} );
 
@@ -293,8 +293,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Rounding', () => {
 
 		// all tests use the same products
 		await addAProductToCart( page, productId );
-		await addAProductToCart( page, productId2 );
-		await addAProductToCart( page, productId2 );
+		await addAProductToCart( page, productId2, 2 );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {

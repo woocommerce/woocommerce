@@ -74,7 +74,7 @@ body:
         Without this report we won't be able to fully evaluate this issue.
       placeholder: |
         The System Status Report is found in your WordPress admin under **WooCommerce > Status**. 
-        Please select “Get system report”, then “Copy for support”, and then paste it here.
+        Please select “Get system report”, then “Copy for GitHub”, and then paste it here.
     validations:
       required: true
   - type: checkboxes

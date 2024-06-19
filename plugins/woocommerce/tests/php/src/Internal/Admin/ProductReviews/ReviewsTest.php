@@ -192,58 +192,6 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `edit_comments_screen_text` will update the page heading when editing or moderating a review or a reply to a review.
-	 *
-	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::edit_comments_screen_text()
-	 * @dataProvider data_provider_edit_comments_screen_text
-	 *
-	 * @param string $translated_text Translated text.
-	 * @param string $original_text   Original text (raw).
-	 * @param bool   $is_review       Whether we should test a review comment.
-	 * @param bool   $is_reply        Whether we should test a reply to a review comment.
-	 * @param string $expected_text   Expected text output.
-	 *
-	 * @return void
-	 * @throws ReflectionException If the method doesn't exist.
-	 */
-	public function test_edit_comments_screen_text( string $translated_text, string $original_text, bool $is_review, bool $is_reply, string $expected_text ) : void {
-		global $comment;
-
-		$product = $this->factory()->post->create( [ 'post_type' => 'product' ] );
-		$review  = $this->factory()->comment->create_and_get( [ 'comment_post_ID' => $product ] );
-		$reply   = $this->factory()->comment->create_and_get(
-			[
-				'comment_post_ID' => $product,
-				'comment_parent'  => $review->comment_ID,
-			]
-		);
-
-		if ( ! $is_review ) {
-			$post    = $this->factory()->post->create();
-			$comment = $this->factory()->comment->create_and_get( [ 'comment_post_ID' => $post ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		} else {
-			$comment = $is_reply ? $reply : $review; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		}
-
-		$reviews = ( wc_get_container()->get( Reviews::class ) );
-
-		$method = ( new ReflectionClass( $reviews ) )->getMethod( 'edit_comments_screen_text' );
-		$method->setAccessible( true );
-
-		$this->assertSame( $expected_text, $method->invoke( $reviews, $translated_text, $original_text ) );
-	}
-
-	/** @see test_edit_comments_screen_text */
-	public function data_provider_edit_comments_screen_text() : Generator {
-		yield 'Regular comment' => [ 'Edit Comment', 'Edit Comment', false, false, 'Edit Comment' ];
-		yield 'Not the expected text'  => [ 'Foo', 'Bar', true, false, 'Foo' ];
-		yield 'Edit Review' => [ 'Edit Comment Translated', 'Edit Comment', true, false, 'Edit Review' ];
-		yield 'Edit Review Reply' => [ 'Edit Comment Translated', 'Edit Comment', true, true, 'Edit Review Reply' ];
-		yield 'Moderate Review' => [ 'Moderate Comment Translated', 'Moderate Comment', true, false, 'Moderate Review' ];
-		yield 'Moderate Review Reply' => [ 'Moderate Comment Translated', 'Moderate Comment', true, true, 'Moderate Review Reply' ];
-	}
-
-	/**
 	 * @testdox `render_reviews_list_table` will output the filterable reviews list table.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::render_reviews_list_table()

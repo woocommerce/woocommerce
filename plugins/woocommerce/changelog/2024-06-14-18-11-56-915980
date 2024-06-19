@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Added 'woocommerce_restore_order_item_stock' filter for restored line item stock on canceled orders

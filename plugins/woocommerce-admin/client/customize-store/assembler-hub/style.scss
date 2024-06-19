@@ -1,46 +1,3 @@
-@mixin custom-scrollbars-on-hover($handle-color, $handle-color-hover) {
-	// WebKit
-	&::-webkit-scrollbar {
-		width: 12px;
-		height: 12px;
-	}
-	&::-webkit-scrollbar-track {
-		background-color: transparent;
-	}
-	&::-webkit-scrollbar-thumb {
-		background-color: $handle-color;
-		border-radius: 8px;
-		border: 3px solid transparent;
-		background-clip: padding-box;
-	}
-	&:hover::-webkit-scrollbar-thumb, // This needs specificity.
-	&:focus::-webkit-scrollbar-thumb,
-	&:focus-within::-webkit-scrollbar-thumb {
-		background-color: $handle-color-hover;
-	}
-
-	// Firefox 109+ and Chrome 111+
-	scrollbar-width: thin;
-	scrollbar-gutter: stable both-edges;
-	scrollbar-color: $handle-color transparent; // Syntax, "dark", "light", or "#handle-color #track-color"
-
-	&:hover,
-	&:focus,
-	&:focus-within {
-		scrollbar-color: $handle-color-hover transparent;
-	}
-
-	// Needed to fix a Safari rendering issue.
-	will-change: transform;
-
-	// Always show scrollbar on Mobile devices.
-	@media (hover: none) {
-		& {
-			scrollbar-color: $handle-color-hover transparent;
-		}
-	}
-}
-
 @keyframes containerFadeIn {
 	0%,
 	80% {
@@ -56,6 +13,11 @@
 	.edit-site-site-hub__view-mode-toggle-container a {
 		color: unset;
 	}
+}
+
+.edit-site-layout__header-container {
+	position: fixed;
+	z-index: 4;
 }
 
 body.woocommerce-assembler {
@@ -383,6 +345,17 @@ body.woocommerce-assembler {
 		}
 	}
 
+	.woocommerce-customize-store__fiverr-cta-group {
+		margin-top: 32px;
+		padding-top: 32px;
+		border-top: 1px solid var(--gutenberg-gray-700, #dcdcde);
+		color: var(--gutenberg-gray-900, #1e1e1e);
+
+		p {
+			margin-top: 6px;
+		}
+	}
+
 	.block-editor-block-patterns-list__item-title {
 		display: none;
 	}
@@ -477,6 +450,24 @@ body.woocommerce-assembler {
 
 		.global-styles-variation-container__iframe {
 			box-shadow: none;
+		}
+	}
+
+	.woocommerce-customize-store_sidebar-patterns-upgrade-notice {
+		color: #1e1e1e;
+		padding: 0 0 40px;
+
+		h4 {
+			text-transform: uppercase;
+			margin-bottom: 4px;
+		}
+		p {
+			margin: 0;
+		}
+
+		a,
+		button {
+			text-decoration: none;
 		}
 	}
 
@@ -832,4 +823,19 @@ body.woocommerce-assembler {
 .components-resizable-box__container.has-show-handle.block-library-cover__resize-container,
 .components-resizable-box__handle.components-resizable-box__side-handle.components-resizable-box__handle-left {
 	display: none;
+}
+
+.woocommerce-customize-store_popover-tooltip {
+	pointer-events: none;
+	.components-popover__content {
+		width: fit-content;
+		user-select: none;
+	}
+}
+
+.edit-site-layout__content {
+	.edit-site-layout__sidebar {
+		display: flex;
+		max-width: 700px;
+	}
 }

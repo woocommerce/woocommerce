@@ -15,12 +15,13 @@ const simpleProductName = 'AAA Filter Products';
 
 let product1Id, product2Id, product3Id;
 
-baseTest.describe( 'Filter items in the shop by product price', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		testPageTitlePrefix: 'Products filter',
-	} );
+// Extend the baseTest object
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	testPageTitlePrefix: 'Products filter',
+} );
 
+test.describe( 'Filter items in the shop by product price', () => {
 	test.beforeAll( async ( { api } ) => {
 		// add products
 		await api
@@ -66,7 +67,7 @@ baseTest.describe( 'Filter items in the shop by product price', () => {
 
 		await goToPageEditor( { page } );
 		await fillPageTitle( page, testPage.title );
-		await insertBlockByShortcut( page, '/filter' );
+		await insertBlockByShortcut( page, 'Filter by Price' );
 		await insertBlock( page, 'All Products' );
 		await publishPage( page, testPage.title );
 

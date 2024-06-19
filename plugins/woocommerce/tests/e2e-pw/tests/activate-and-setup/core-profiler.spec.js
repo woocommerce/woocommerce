@@ -342,22 +342,48 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			await expect(
 				page.getByText( 'Plugin deactivated.' )
 			).toBeVisible();
-			await page.getByLabel( 'Delete Google Listings' ).click();
+			// delete plugin regularly or, if attempted, accept deleting data as well
+			try {
+				await page.getByLabel( 'Delete Google Listings' ).click();
+				await expect(
+					page.getByText(
+						'Google Listings and Ads was successfully deleted.'
+					)
+				).toBeVisible( { timeout: 5000 } );
+			} catch ( e ) {
+				await page
+					.getByText( 'Yes, delete these files and data' )
+					.click();
+				await page
+					.getByText( 'The selected plugin has been deleted.' )
+					.waitFor();
+			}
 			await expect(
-				page.getByText(
-					'Google Listings and Ads was successfully deleted.'
-				)
-			).toBeVisible();
+				page.getByLabel( 'Delete Google Listings' )
+			).toBeHidden();
 			await page.getByLabel( 'Deactivate Pinterest for' ).click();
 			await expect(
 				page.getByText( 'Plugin deactivated.' )
 			).toBeVisible();
-			await page.getByLabel( 'Delete Pinterest for' ).click();
+			// delete plugin regularly or, if attempted, accept deleting data as well
+			try {
+				await page.getByLabel( 'Delete Pinterest for' ).click();
+				await expect(
+					page.getByText(
+						'Pinterest for WooCommerce was successfully deleted.'
+					)
+				).toBeVisible( { timeout: 5000 } );
+			} catch ( e ) {
+				await page
+					.getByText( 'Yes, delete these files and data' )
+					.click();
+				await page
+					.getByText( 'The selected plugin has been deleted.' )
+					.waitFor();
+			}
 			await expect(
-				page.getByText(
-					'Pinterest for WooCommerce was successfully deleted.'
-				)
-			).toBeVisible();
+				page.getByLabel( 'Delete Pinterest for' )
+			).toBeHidden();
 		} );
 	} );
 } );
@@ -397,21 +423,28 @@ test.describe( 'Store owner can skip the core profiler', () => {
 	test( 'Can connect to WooCommerce.com', async ( { page } ) => {
 		await test.step( 'Go to WC Home and make sure the connect button is visible', async () => {
 			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-
 			await expect(
 				page.getByRole( 'heading', {
 					name: 'Connect to WooCommerce.com',
 				} )
 			).toBeVisible();
 			await page
-				.getByRole( 'link', { name: 'Connect', exact: true } )
-				.click();
+				.getByRole( 'menuitem', { name: 'Total sales' } )
+				.waitFor( { state: 'visible' } );
 		} );
 
-		await test.step( 'Ensure we are redirected to the correct URL and connect store', async () => {
+		await test.step( 'Click Connect and ensure we are redirected to the correct URL and connect store', async () => {
+			await page
+				.getByRole( 'link', { name: 'Connect', exact: true } )
+				.click();
 			await expect( page.url() ).toContain(
 				'?page=wc-admin&tab=my-subscriptions&path=%2Fextensions'
 			);
+			await expect(
+				page.getByText(
+					'Hundreds of vetted products and services. Unlimited potential.'
+				)
+			).toBeVisible();
 			await expect(
 				page.getByRole( 'button', { name: 'My Subscriptions' } )
 			).toBeVisible();
@@ -425,6 +458,8 @@ test.describe( 'Store owner can skip the core profiler', () => {
 
 		await test.step( 'Check that we are sent to wp.com', async () => {
 			await expect( page.url() ).toContain( 'wordpress.com/log-in' );
+			// reload to avoid flaky blank page
+			await page.reload();
 			await expect(
 				page.getByRole( 'heading', {
 					name: 'Log in to your account',
