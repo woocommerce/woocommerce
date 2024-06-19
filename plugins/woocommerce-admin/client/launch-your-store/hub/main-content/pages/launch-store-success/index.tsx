@@ -43,6 +43,9 @@ export const LaunchYourStoreSuccess = ( props: MainContentComponentProps ) => {
 				}
 				isWooExpress={ isWooExpress() }
 				completeSurvey={ completeSurvey }
+				siteIsShowingCachedContent={
+					props.context.siteIsShowingCachedContent
+				}
 			>
 				<h2 className="woocommerce-launch-store__congrats-main-actions-title">
 					{ __( "What's next?", 'woocommerce' ) }
