@@ -50,33 +50,29 @@ export function ExpressionsPanel( {
 	}
 
 	return (
-		<div className="woocommerce-product-editor-dev-tools-expressions">
-			<ul className="woocommerce-product-editor-dev-tools-expressions-list">
-				{ expressionItems.map( ( expressionItem, index ) => (
-					<li key={ index }>
-						<ExpressionField
-							expression={ expressionItem.expression }
-							evaluationContext={ evaluationContext }
-							mode={ expressionItem.mode }
-							onEnterEdit={ () => enterEditMode( index ) }
-							onCancel={ () => cancelEdit( index ) }
-							onUpdate={ ( expression ) =>
-								updateExpression( index, expression )
-							}
-						/>
-					</li>
-				) ) }
-				<li key={ expressionItems.length + 1 }>
+		<ul className="woocommerce-product-editor-dev-tools-expressions-list">
+			{ expressionItems.map( ( expressionItem, index ) => (
+				<li key={ index }>
 					<ExpressionField
+						expression={ expressionItem.expression }
 						evaluationContext={ evaluationContext }
-						mode={ 'edit' }
+						mode={ expressionItem.mode }
+						onEnterEdit={ () => enterEditMode( index ) }
+						onCancel={ () => cancelEdit( index ) }
 						onUpdate={ ( expression ) =>
-							addExpression( expression )
+							updateExpression( index, expression )
 						}
-						updateLabel={ __( 'Add', 'woocommerce' ) }
 					/>
 				</li>
-			</ul>
-		</div>
+			) ) }
+			<li key={ expressionItems.length + 1 }>
+				<ExpressionField
+					evaluationContext={ evaluationContext }
+					mode={ 'edit' }
+					onUpdate={ ( expression ) => addExpression( expression ) }
+					updateLabel={ __( 'Add', 'woocommerce' ) }
+				/>
+			</li>
+		</ul>
 	);
 }

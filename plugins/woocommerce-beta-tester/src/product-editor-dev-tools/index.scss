@@ -108,19 +108,14 @@
 	font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
 }
 
-.woocommerce-product-editor-dev-tools-expressions {
+.woocommerce-product-editor-dev-tools-expressions-list {
 	flex: 1;
 
 	display: flex;
 	flex-direction: column;
+	justify-content: flex-end;
 
 	height: 100%;
-
-	overflow: auto;
-}
-
-.woocommerce-product-editor-dev-tools-expressions-list {
-	flex: 1;
 
 	margin: 0;
 	padding: var(--woocommerce-product-editor-dev-tools-gap);
@@ -131,6 +126,10 @@
 		padding-bottom: var(--woocommerce-product-editor-dev-tools-gap);
 
 		font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
+
+		&:last-child {
+			padding-bottom: 0;
+		}
 	}
 
 	&.empty {
