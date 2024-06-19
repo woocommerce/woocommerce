@@ -244,7 +244,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 										{ isSponsored() && (
 											<span className="woocommerce-marketplace__product-card__sponsored-label">
 												{ __(
-													'Recommended',
+													'Sponsored',
 													'woocommerce'
 												) }
 											</span>
