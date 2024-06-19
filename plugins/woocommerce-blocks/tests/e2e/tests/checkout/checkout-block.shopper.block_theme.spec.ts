@@ -251,8 +251,8 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 
 		await editor.selectBlocks(
 			blockSelectorInEditor +
