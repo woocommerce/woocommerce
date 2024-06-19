@@ -237,7 +237,7 @@ class WC_Site_Tracking {
 	 * Sets a cookie for tracking purposes, but only if tracking is enabled/allowed.
 	 *
 	 * @internal
-	 * @since 9.1.0
+	 * @since 9.2.0
 	 *
 	 * @param string $cookie_key   The key of the cookie.
 	 * @param string $cookie_value The value of the cookie.
