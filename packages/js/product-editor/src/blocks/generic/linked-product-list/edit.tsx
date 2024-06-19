@@ -213,7 +213,7 @@ export function LinkedProductListBlockEdit( {
 		setLinkedProductIds( newLinkedProducts );
 	}
 
-	function handleAdviceCardDissmiss() {
+	function handleAdviceCardDismiss() {
 		recordEvent( 'linked_products_placeholder_dismiss', {
 			source: TRACKS_SOURCE,
 			field: property,
@@ -250,7 +250,7 @@ export function LinkedProductListBlockEdit( {
 					tip={ emptyState.tip }
 					dismissPreferenceId={ `woocommerce-product-${ property }-advice-card-dismissed` }
 					isDismissible={ emptyState.isDismissible }
-					onDismiss={ handleAdviceCardDissmiss }
+					onDismiss={ handleAdviceCardDismiss }
 				>
 					<EmptyStateImage { ...emptyState } />
 				</AdviceCard>
