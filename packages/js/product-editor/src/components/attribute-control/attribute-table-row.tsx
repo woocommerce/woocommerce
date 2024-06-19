@@ -62,6 +62,9 @@ const stringToTokenItem = ( v: string | TokenItem ): TokenItem => ( {
 const tokenItemToString = ( item: string | TokenItem ): string =>
 	typeof item === 'string' ? item : item.value;
 
+const INITIAL_MAX_TOKENS_TO_SHOW = 20;
+const MAX_TERMS_TO_LOAD = 100;
+
 export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	index,
 	attribute,
@@ -103,6 +106,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 				? ( getProductAttributeTerms( {
 						search: '',
 						attribute_id: attributeId,
+						per_page: MAX_TERMS_TO_LOAD, // @todo: handle this by using `search` arg
 				  } ) as ProductAttributeTerm[] )
 				: [];
 		},
@@ -202,8 +206,12 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 			return onTermsSelect( [ terms[ 0 ] ], index, attribute );
 		}
 
-		// auto select all terms
-		onTermsSelect( terms, index, attribute );
+		// auto select the first INITIAL_MAX_TOKENS_TO_SHOW terms
+		onTermsSelect(
+			terms.slice( 0, INITIAL_MAX_TOKENS_TO_SHOW ),
+			index,
+			attribute
+		);
 	}, [
 		termsAutoSelection,
 		initiallyPopulated,
