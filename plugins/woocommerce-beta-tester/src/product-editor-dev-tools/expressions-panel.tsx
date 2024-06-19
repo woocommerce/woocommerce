@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { useState } from 'react';
+import { useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -72,6 +73,7 @@ export function ExpressionsPanel( {
 						onUpdate={ ( expression ) =>
 							addExpression( expression )
 						}
+						updateLabel={ __( 'Add', 'woocommerce' ) }
 					/>
 				</li>
 			</ul>

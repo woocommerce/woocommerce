@@ -33,6 +33,7 @@ type ExpressionFieldProps = {
 	onEnterEdit?: () => void;
 	onUpdate?: ( expression: string ) => void;
 	onCancel?: () => void;
+	updateLabel?: string;
 };
 
 export function ExpressionField( {
@@ -42,6 +43,7 @@ export function ExpressionField( {
 	onEnterEdit,
 	onUpdate,
 	onCancel,
+	updateLabel = __( 'Update', 'woocommerce' ),
 }: ExpressionFieldProps ) {
 	const [ editedExpression, setEditedExpression ] = useState( expression );
 
@@ -83,14 +85,16 @@ export function ExpressionField( {
 					<>
 						<Button
 							icon={ check }
-							label={ __( 'Update', 'woocommerce' ) }
+							label={ updateLabel }
 							onClick={ () => onUpdate?.( editedExpression ) }
 						/>
-						<Button
-							icon={ close }
-							label={ __( 'Cancel', 'woocommerce' ) }
-							onClick={ () => onCancel?.() }
-						/>
+						{ onCancel && (
+							<Button
+								icon={ close }
+								label={ __( 'Cancel', 'woocommerce' ) }
+								onClick={ () => onCancel?.() }
+							/>
+						) }
 					</>
 				) }
 			</div>
