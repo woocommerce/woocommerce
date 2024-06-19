@@ -24,6 +24,7 @@ import type { AttributeTableRowProps } from './types';
 interface FormTokenFieldProps extends CoreFormTokenField.Props {
 	__experimentalExpandOnFocus: boolean;
 	__experimentalAutoSelectFirstMatch: boolean;
+	__experimentalShowHowTo?: boolean;
 	placeholder: string;
 	label?: string;
 }
@@ -82,7 +83,6 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	onRemove,
 } ) => {
 	const attributeId = attribute ? attribute.id : undefined;
-
 	const { createProductAttributeTerm } = useDispatch(
 		EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
 	);
@@ -388,6 +388,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					} }
 					__experimentalExpandOnFocus={ true }
 					__experimentalAutoSelectFirstMatch={ true }
+					__experimentalShowHowTo={ true }
 				/>
 			</td>
 			<td className="woocommerce-new-attribute-modal__table-attribute-trash-column">
