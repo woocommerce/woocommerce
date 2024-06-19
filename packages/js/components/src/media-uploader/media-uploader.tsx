@@ -23,6 +23,7 @@ export type MediaUploaderErrorCallback = ( error: ErrorType ) => void;
 type MediaUploaderProps = {
 	allowedMediaTypes?: string[];
 	buttonText?: string;
+	buttonProps?: Button.Props;
 	hasDropZone?: boolean;
 	icon?: JSX.Element;
 	label?: string | JSX.Element;
@@ -47,6 +48,7 @@ type MediaUploaderProps = {
 export const MediaUploader = ( {
 	allowedMediaTypes = DEFAULT_ALLOWED_MEDIA_TYPES,
 	buttonText = __( 'Choose images', 'woocommerce' ),
+	buttonProps,
 	hasDropZone = true,
 	label = __( 'Drag images here or click to upload', 'woocommerce' ),
 	maxUploadFileSize = 10000000,
@@ -89,9 +91,8 @@ export const MediaUploader = ( {
 						event: React.MouseEvent< HTMLDivElement, MouseEvent >
 					) => {
 						const { target } = event;
-						if (
-							( target as HTMLButtonElement )?.type !== 'button'
-						) {
+						// is the click on the button from MediaUploadComponent or on the div?
+						if ( ! ( target as HTMLElement ).closest( 'button' ) ) {
 							openFileDialog();
 						}
 					} }
@@ -109,9 +110,10 @@ export const MediaUploader = ( {
 							// @ts-expect-error - TODO multiple also accepts string.
 							multiple={ multipleSelect }
 							render={ ( { open } ) =>
-								buttonText ? (
+								buttonText || buttonProps ? (
 									<Button
 										variant="secondary"
+										{ ...buttonProps }
 										onClick={ () => {
 											onMediaGalleryOpen();
 											open();
