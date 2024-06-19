@@ -27,7 +27,7 @@ export const WCPayBenefits: React.VFC< {
 				</Flex>
 				<Text as="p">
 					{ __(
-						'Offer your customers card payments, Sofort, iDeal, and the ability to sell in-person with Woo mobile app.',
+						'Offer your customers card payments, iDeal, and the ability to sell in-person with Woo mobile app.',
 						'woocommerce'
 					) }
 				</Text>

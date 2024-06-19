@@ -10,8 +10,7 @@ import { Button } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
-import { useSelect } from '@wordpress/data';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -26,7 +25,7 @@ import LoadSampleProductModal from '../components/load-sample-product-modal';
 import useLoadSampleProducts from '../components/use-load-sample-products';
 import LoadSampleProductConfirmModal from '../components/load-sample-product-confirm-modal';
 import useRecordCompletionTime from '../use-record-completion-time';
-import { getCountryCode } from '~/dashboard/utils';
+import { SETUP_TASKLIST_PRODUCTS_AFTER_FILTER } from './constants';
 
 const getOnboardingProductType = (): string[] => {
 	const onboardingData = getAdminSetting( 'onboarding' );
@@ -59,29 +58,12 @@ export const Products = () => {
 		setIsConfirmingLoadSampleProducts,
 	] = useState( false );
 
-	const { isStoreInUS } = useSelect( ( select ) => {
-		const { getSettings } = select( SETTINGS_STORE_NAME );
-		const { general: settings = {} } = getSettings( 'general' );
-
-		const country =
-			typeof settings.woocommerce_default_country === 'string'
-				? settings.woocommerce_default_country
-				: '';
-
-		return {
-			isStoreInUS: getCountryCode( country ) === 'US',
-		};
-	} );
-
 	const surfacedProductTypeKeys = getSurfacedProductTypeKeys(
 		getOnboardingProductType()
 	);
 
 	const { productTypes, isRequesting } = useProductTypeListItems(
-		// Subscriptions only in the US
-		getProductTypes( {
-			exclude: isStoreInUS ? [] : [ 'subscription' ],
-		} ),
+		getProductTypes(),
 		surfacedProductTypeKeys
 	);
 	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
@@ -118,7 +100,17 @@ export const Products = () => {
 					surfacedProductTypes.push( productType )
 			);
 		}
-		return surfacedProductTypes;
+		/**
+		 * Can be used to add an item to the end of the Products task list.
+		 *
+		 * @filter woocommerce_admin_task_products_after
+		 * @param {Array.<Object>} productTypes Array of product types.
+		 */
+		const surfacedProductTypesAndAppendedProducts = applyFilters(
+			SETUP_TASKLIST_PRODUCTS_AFTER_FILTER,
+			surfacedProductTypes
+		) as typeof surfacedProductTypes;
+		return surfacedProductTypesAndAppendedProducts;
 	}, [ surfacedProductTypeKeys, isExpanded, productTypesWithTimeRecord ] );
 
 	return (

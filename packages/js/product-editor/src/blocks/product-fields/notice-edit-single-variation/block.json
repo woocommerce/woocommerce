@@ -1,0 +1,34 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "woocommerce/product-single-variation-notice",
+	"title": "Notice",
+	"category": "woocommerce",
+	"description": "Notice description",
+	"keywords": [ "products", "notice" ],
+	"textdomain": "default",
+	"attributes": {
+		"title": {
+			"type": "string"
+		},
+		"content": {
+			"type": "string"
+		},
+		"isDismissible": {
+			"type": "boolean"
+		},
+		"type": {
+			"type": "string"
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": true,
+		"multiple": true,
+		"reusable": false,
+		"inserter": false,
+		"lock": false,
+		"__experimentalToolbar": false
+	},
+	"editorStyle": "file:./editor.css"
+}

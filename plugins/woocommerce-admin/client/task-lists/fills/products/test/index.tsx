@@ -4,13 +4,17 @@
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { recordEvent } from '@woocommerce/tracks';
-import { useSelect } from '@wordpress/data';
+import { removeAllFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
 import { Products } from '..';
-import { defaultSurfacedProductTypes, productTypes } from '../constants';
+import {
+	SETUP_TASKLIST_PRODUCTS_AFTER_FILTER,
+	defaultSurfacedProductTypes,
+	productTypes,
+} from '../constants';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 jest.mock( '@wordpress/data', () => ( {
@@ -38,20 +42,13 @@ global.fetch = jest.fn().mockImplementation( () =>
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
 const confirmModalText =
-	"We'll import images from woocommerce.com to set up your sample products.";
+	"We'll import images from WooCommerce.com to set up your sample products.";
 
 describe( 'Products', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-			fn( () => ( {
-				getSettings: () => ( {
-					general: {
-						woocommerce_default_country: 'US',
-					},
-				} ),
-			} ) )
-		);
+		// @ts-expect-error -- outdated type definition
+		removeAllFilters( SETUP_TASKLIST_PRODUCTS_AFTER_FILTER );
 	} );
 
 	it( 'should render default products types when onboardingData.profile.productType is null', () => {
@@ -80,66 +77,6 @@ describe( 'Products', () => {
 		expect( queryByText( 'Digital product' ) ).toBeInTheDocument();
 		expect( queryByRole( 'menu' )?.childElementCount ).toBe( 1 );
 		expect( queryByText( 'View more product types' ) ).toBeInTheDocument();
-	} );
-
-	it( 'should not render subscriptions products type when store is not in the US', () => {
-		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
-			profile: {
-				product_types: [ 'subscriptions' ],
-			},
-		} ) );
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-			fn( () => ( {
-				getSettings: () => ( {
-					general: {
-						woocommerce_default_country: 'GB',
-					},
-				} ),
-			} ) )
-		);
-		const { queryByText } = render( <Products /> );
-
-		expect( queryByText( 'Subscription product' ) ).not.toBeInTheDocument();
-	} );
-
-	it( 'should not render subscriptions products type when store country is unknown', () => {
-		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
-			profile: {
-				product_types: [ 'subscriptions' ],
-			},
-		} ) );
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-			fn( () => ( {
-				getSettings: () => ( {
-					general: {
-						woocommerce_default_country: undefined,
-					},
-				} ),
-			} ) )
-		);
-		const { queryByText } = render( <Products /> );
-
-		expect( queryByText( 'Subscription product' ) ).not.toBeInTheDocument();
-	} );
-
-	it( 'should render subscriptions products type when store is in the US', () => {
-		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
-			profile: {
-				product_types: [ 'subscriptions' ],
-			},
-		} ) );
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-			fn( () => ( {
-				getSettings: () => ( {
-					general: {
-						woocommerce_default_country: 'US',
-					},
-				} ),
-			} ) )
-		);
-		const { queryByText } = render( <Products /> );
-
-		expect( queryByText( 'Subscription product' ) ).toBeInTheDocument();
 	} );
 
 	it( 'clicking on suggested product should fire event tasklist_add_product with method: product_template, tasklist_product_template_selection with is_suggested:true and task_completion_time', () => {

@@ -35,6 +35,11 @@ const program = new Command()
 		'Git repo url or local path to a git repo.',
 		join( process.cwd(), '../../' )
 	)
+	.option(
+		'-e, --exclude <exclude...>',
+		'List of folders / files to exclude.',
+		[]
+	)
 	.addOption(
 		new Option( '-o, --outputStyle <outputStyle>' ).choices( [
 			'github',
@@ -42,14 +47,16 @@ const program = new Command()
 		] as const )
 	)
 	.action( async ( compare, sinceVersion, options ) => {
-		const { source, base, outputStyle = 'cli' } = options;
+		const { source, base, outputStyle = 'cli', exclude = [] } = options;
 
 		const changes = await scanForChanges(
 			compare,
 			sinceVersion,
 			source,
 			base,
-			outputStyle
+			outputStyle,
+			undefined,
+			exclude
 		);
 
 		if ( changes.templates.size ) {

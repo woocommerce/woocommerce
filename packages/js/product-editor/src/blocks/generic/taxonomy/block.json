@@ -1,0 +1,51 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "woocommerce/product-taxonomy-field",
+	"title": "Taxonomy",
+	"category": "widgets",
+	"description": "A block that displays a taxonomy field, allowing searching, selection, and creation of new items",
+	"keywords": [ "taxonomy" ],
+	"textdomain": "default",
+	"attributes": {
+		"slug": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"property": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"label": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"createTitle": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"dialogNameHelpText": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"parentTaxonomyText": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"placeholder": {
+			"type": "string",
+			"__experimentalRole": "content"
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": true,
+		"reusable": false,
+		"inserter": false,
+		"lock": false,
+		"__experimentalToolbar": false
+	},
+	"editorStyle": "file:./editor.css",
+	"usesContext": [ "postType", "isInSelectedTab" ]
+}

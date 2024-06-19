@@ -7,9 +7,9 @@ import { DragEvent } from 'react';
 /**
  * Move an item from an index in an array to a new index.s
  *
- * @param  fromIndex Index to move the item from.
- * @param  toIndex   Index to move the item to.
- * @param  arr       The array to copy.
+ * @param fromIndex Index to move the item from.
+ * @param toIndex   Index to move the item to.
+ * @param arr       The array to copy.
  * @return array
  */
 export const moveIndex = < T >(
@@ -27,12 +27,12 @@ export const moveIndex = < T >(
 /**
  * Check whether the mouse is over the first half of the event target.
  *
- * @param  event        Drag event.
- * @param  isHorizontal Check horizontally or vertically.
+ * @param event        Drag event.
+ * @param isHorizontal Check horizontally or vertically.
  * @return boolean
  */
 export const isBefore = (
-	event: DragEvent< HTMLLIElement >,
+	event: DragEvent< HTMLDivElement >,
 	isHorizontal = false
 ) => {
 	const target = event.target as HTMLElement;
@@ -123,7 +123,7 @@ export const getPreviousIndex = ( currentIndex: number, itemCount: number ) => {
 };
 
 export const getItemName = (
-	parentNode: HTMLOListElement | null,
+	parentNode: HTMLDivElement | null,
 	index: number
 ) => {
 	const listItemNode = parentNode?.childNodes[ index ] as HTMLLIElement;

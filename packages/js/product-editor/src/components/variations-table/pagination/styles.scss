@@ -1,0 +1,41 @@
+.woocommerce-product-variations-pagination {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	gap: $gap;
+	width: 100%;
+	user-select: none;
+
+	&__info,
+	&__current-page,
+	&__page-size {
+		display: flex;
+		align-items: center;
+	}
+
+	&__current-page {
+		justify-content: center;
+
+		.woocommerce-pagination__page-arrow-picker-input {
+			border-radius: 2px;
+		}
+
+		.components-button.has-icon {
+			min-width: initial;
+			width: 30px;
+			height: 30px;
+			padding: 3px;
+		}
+	}
+
+	&__page-size {
+		justify-content: flex-end;
+
+		> .woocommerce-pagination__per-page-picker
+			.components-base-control
+			.components-select-control
+			.components-input-control__container
+			.components-select-control__input {
+			min-height: 30px;
+		}
+	}
+}

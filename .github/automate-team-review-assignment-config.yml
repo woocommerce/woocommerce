@@ -1,0 +1,25 @@
+when:
+  - author:
+      teamIs:
+        - rubik
+      ignore:
+        nameIs:
+    assign:
+      teams:
+        - rubik
+  - author:
+      teamIs:
+        - woo-fse
+      ignore:
+        nameIs:
+    assign:
+      teams:
+        - woo-fse
+  - author:
+      teamIs:
+        - vortex
+      ignore:
+        nameIs:
+    assign:
+      teams:
+        - vortex

@@ -18,11 +18,16 @@ class CustomBlock extends AbstractBlock implements CustomBlockInterface {
 
 	/**
 	 * Custom method.
+	 *
+	 * @param string $title The title.
 	 */
-	public function add_custom_inner_block(): BlockInterface {
+	public function add_custom_inner_block( string $title ): BlockInterface {
 		$block = new Block(
 			[
-				'blockName' => 'custom-inner-block',
+				'blockName'  => 'custom-inner-block',
+				'attributes' => [
+					'title' => $title,
+				],
 			],
 			$this->get_root_template(),
 			$this

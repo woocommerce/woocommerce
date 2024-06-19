@@ -1,5 +1,4 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 # Lint branch
 #
 # Runs phpcs-changed, comparing the current branch to its "base" or "parent" branch.
@@ -11,7 +10,12 @@
 
 baseBranch=${1:-"trunk"}
 
-changedFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only -- '*.php')
+changedFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only --diff-filter=d -- '*.php')
 
 # Only complete this if changed files are detected.
-[[ -z $changedFiles ]] || composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles
+if [[ -z $changedFiles ]]; then
+    echo "No changed files detected."
+    exit 0
+fi
+
+composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles

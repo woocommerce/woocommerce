@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, select } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
-import { __ } from '@wordpress/i18n';
+import { store as preferencesStore } from '@wordpress/preferences';
+import { __, sprintf } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import {
 	__experimentalUseCompletion as useCompletion,
@@ -16,9 +17,14 @@ import {
 import {
 	MAX_TITLE_LENGTH,
 	MIN_TITLE_LENGTH_FOR_DESCRIPTION,
+	DESCRIPTION_MAX_LENGTH,
 	WOO_AI_PLUGIN_FEATURE_NAME,
 } from '../constants';
-import { StopCompletionBtn, WriteItForMeBtn } from '../components';
+import {
+	StopCompletionBtn,
+	WriteItForMeBtn,
+	TourSpotlight,
+} from '../components';
 import { useFeedbackSnackbar, useStoreBranding, useTinyEditor } from '../hooks';
 import {
 	getProductName,
@@ -29,23 +35,10 @@ import {
 	recordTracksFactory,
 } from '../utils';
 import { Attribute } from '../utils/types';
+import { translateApiErrors as getApiError } from '../utils/apiErrors';
+import { buildShortDescriptionPrompt } from '../product-short-description/product-short-description-button-container';
 
-const DESCRIPTION_MAX_LENGTH = 300;
-
-const getApiError = ( error?: string ) => {
-	switch ( error ) {
-		case 'connection_error':
-			return __(
-				'❗ We were unable to reach the experimental service. Please check back in shortly.',
-				'woocommerce'
-			);
-		default:
-			return __(
-				`❗ We encountered an issue with this experimental feature. Please check back in shortly.`,
-				'woocommerce'
-			);
-	}
-};
+const preferenceId = 'modalDismissed-shortDescriptionGenerated';
 
 const recordDescriptionTracks = recordTracksFactory(
 	'description_completion',
@@ -66,6 +59,12 @@ export function WriteItForMeButtonContainer() {
 	const [ productTitle, setProductTitle ] = useState< string >(
 		titleEl.current?.value || ''
 	);
+
+	const hasBeenDismissedBefore = select( preferencesStore ).get(
+		'woo-ai-plugin',
+		preferenceId
+	);
+	const { set } = useDispatch( preferencesStore );
 
 	const { createErrorNotice } = useDispatch( noticesStore );
 	const [ errorNoticeDismissed, setErrorNoticeDismissed ] = useState( false );
@@ -161,12 +160,16 @@ export function WriteItForMeButtonContainer() {
 			);
 		};
 
-		title?.addEventListener( 'keyup', updateTitleHandler );
-		title?.addEventListener( 'change', updateTitleHandler );
+		// We have to keep track of manually typing, pasting, undo/redo, and when description is generated.
+		const eventsToTrack = [ 'keyup', 'change', 'undo', 'redo', 'paste' ];
+		for ( const event of eventsToTrack ) {
+			title?.addEventListener( event, updateTitleHandler );
+		}
 
 		return () => {
-			title?.removeEventListener( 'keyup', updateTitleHandler );
-			title?.removeEventListener( 'change', updateTitleHandler );
+			for ( const event of eventsToTrack ) {
+				title?.removeEventListener( event, updateTitleHandler );
+			}
 		};
 	}, [ titleEl ] );
 
@@ -228,7 +231,10 @@ export function WriteItForMeButtonContainer() {
 			);
 		}
 
-		if ( brandingData?.toneOfVoice ) {
+		if (
+			brandingData?.toneOfVoice &&
+			brandingData?.toneOfVoice !== 'neutral'
+		) {
 			instructions.push(
 				`Generate the description using a ${ brandingData.toneOfVoice } tone.`
 			);
@@ -236,7 +242,7 @@ export function WriteItForMeButtonContainer() {
 
 		if ( brandingData?.businessDescription ) {
 			instructions.push(
-				`For more context on the business, refer to the following business description: "${ brandingData.businessDescription }."`
+				`For more context on the business, refer to the following business description: "${ brandingData.businessDescription }"`
 			);
 		}
 
@@ -254,19 +260,11 @@ export function WriteItForMeButtonContainer() {
 
 		try {
 			await requestCompletion( prompt );
+			const longDescription = tinyEditor.getContent();
 			if ( ! shortTinyEditor.getContent() || shortDescriptionGenerated ) {
-				await requestShortCompletion(
-					[
-						'Please write a high-converting Meta Description for the WooCommerce product description below.',
-						'It should strictly adhere to the following guidelines:',
-						'It should entice someone from a search results page to click on the product link.',
-						'It should be no more than 155 characters so that the entire meta description fits within the space provided by the search engine result without being cut off or truncated.',
-						'It should explain what users will see if they click on the product page link.',
-						'Do not wrap in double quotes or use any other special characters.',
-						`It should include the target keyword for the product.`,
-						`Here is the full product description: \n${ tinyEditor.getContent() }`,
-					].join( '\n' )
-				);
+				const shortDescriptionPrompt =
+					buildShortDescriptionPrompt( longDescription );
+				await requestShortCompletion( shortDescriptionPrompt );
 				setShortDescriptionGenerated( true );
 			}
 		} catch ( err ) {
@@ -277,9 +275,36 @@ export function WriteItForMeButtonContainer() {
 	return completionActive ? (
 		<StopCompletionBtn onClick={ stopCompletion } />
 	) : (
-		<WriteItForMeBtn
-			disabled={ ! writeItForMeEnabled }
-			onClick={ onWriteItForMeClick }
-		/>
+		<>
+			<WriteItForMeBtn
+				disabled={ ! writeItForMeEnabled }
+				onClick={ onWriteItForMeClick }
+				disabledMessage={ sprintf(
+					/* translators: %d: Message shown when short description button is disabled because of a minimum description length */
+					__(
+						'Please create a product title before generating a description. It must be at least %d characters long.',
+						'woocommerce'
+					),
+					MIN_TITLE_LENGTH_FOR_DESCRIPTION
+				) }
+			/>
+			{ shortDescriptionGenerated && ! hasBeenDismissedBefore && (
+				<TourSpotlight
+					id="shortDescriptionGenerated"
+					reference="#postexcerpt"
+					// message should be translatable.
+					description={ __(
+						'The short description was automatically generated by AI using the long description. This normally appears at the top of your product pages.',
+						'woocommerce'
+					) }
+					// title should also be translatable.
+					title={ __( 'Short Description Generated', 'woocommerce' ) }
+					placement="top"
+					onDismissal={ () =>
+						set( 'woo-ai-plugin', preferenceId, true )
+					}
+				/>
+			) }
+		</>
 	);
 }

@@ -2,37 +2,29 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	useState,
-	createElement,
-	Fragment,
-	useEffect,
-} from '@wordpress/element';
-import { trash } from '@wordpress/icons';
+import { createElement, Fragment, useEffect } from '@wordpress/element';
+import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	Form,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
 } from '@woocommerce/components';
-import { ProductAttributeTerm } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
 import {
-	Button,
-	Modal,
-	Notice,
-	// @ts-expect-error ConfirmDialog is not part of the typescript definition yet.
-	__experimentalConfirmDialog as ConfirmDialog,
-} from '@wordpress/components';
+	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
+	type ProductAttributesActions,
+	type WPDataActions,
+	type ProductAttributeTerm,
+	type ProductAttribute,
+} from '@woocommerce/data';
+import { Button, Modal, Notice } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { AttributeInputField } from '../attribute-input-field';
-import {
-	AttributeTermInputField,
-	CustomAttributeTermInputField,
-} from '../attribute-term-input-field';
-import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
-import { getProductAttributeObject } from './utils';
+import { TRACKS_SOURCE } from '../../constants';
+import { AttributeTableRow } from './attribute-table-row';
+import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
+import type { AttributesComboboxControlItem } from '../attribute-combobox-field/types';
 
 type NewAttributeModalProps = {
 	title?: string;
@@ -48,26 +40,32 @@ type NewAttributeModalProps = {
 	cancelLabel?: string;
 	addAccessibleLabel?: string;
 	addLabel?: string;
-	confirmMessage?: string;
-	confirmCancelLabel?: string;
-	confirmConfirmLabel?: string;
 	onCancel: () => void;
 	onAdd: ( newCategories: EnhancedProductAttribute[] ) => void;
+	onAddAnother?: () => void;
+	onRemoveItem?: () => void;
 	selectedAttributeIds?: number[];
 	createNewAttributesAsGlobal?: boolean;
+	disabledAttributeIds?: number[];
+	disabledAttributeMessage?: string;
+	termsAutoSelection?: 'first' | 'all';
+	defaultVisibility?: boolean;
+	defaultSearch?: string;
 };
 
 type AttributeForm = {
 	attributes: Array< EnhancedProductAttribute | null >;
 };
 
+/*
+ * Sort criteria for the attributes.
+ */
+const attributeSortCriteria = { order_by: 'name' };
+
 export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
 	description = '',
-	notice = __(
-		'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
-		'woocommerce'
-	),
+	notice,
 	attributeLabel = __( 'Attribute', 'woocommerce' ),
 	valueLabel = __( 'Values', 'woocommerce' ),
 	attributePlaceholder = __( 'Search or create attribute', 'woocommerce' ),
@@ -78,16 +76,20 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	cancelLabel = __( 'Cancel', 'woocommerce' ),
 	addAccessibleLabel = __( 'Add attributes', 'woocommerce' ),
 	addLabel = __( 'Add', 'woocommerce' ),
-	confirmMessage = __(
-		'You have some attributes added to the list, are you sure you want to cancel?',
-		'woocommerce'
-	),
-	confirmCancelLabel = __( 'No thanks', 'woocommerce' ),
-	confirmConfirmLabel = __( 'Yes please!', 'woocommerce' ),
 	onCancel,
 	onAdd,
+	onAddAnother = () => {},
+	onRemoveItem = () => {},
 	selectedAttributeIds = [],
 	createNewAttributesAsGlobal = false,
+	disabledAttributeIds = [],
+	disabledAttributeMessage = __(
+		'Already used in Attributes',
+		'woocommerce'
+	),
+	termsAutoSelection,
+	defaultVisibility = false,
+	defaultSearch,
 } ) => {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
@@ -97,7 +99,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 			attributeRow?.scrollIntoView( { behavior: 'smooth' } );
 		}, 0 );
 	};
-	const [ showConfirmClose, setShowConfirmClose ] = useState( false );
 	const addAnother = (
 		values: AttributeForm,
 		setValue: (
@@ -107,6 +108,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	) => {
 		setValue( 'attributes', [ ...values.attributes, null ] );
 		scrollAttributeIntoView( values.attributes.length );
+		onAddAnother();
 	};
 
 	const hasTermsOrOptions = ( attribute: EnhancedProductAttribute ) => {
@@ -145,7 +147,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	};
 
 	const getVisibleOrTrue = ( attribute: EnhancedProductAttribute ) =>
-		attribute.visible !== undefined ? attribute.visible : true;
+		attribute.visible !== undefined ? attribute.visible : defaultVisibility;
 
 	const onAddingAttributes = ( values: AttributeForm ) => {
 		const newAttributesToAdd: EnhancedProductAttribute[] = [];
@@ -166,45 +168,17 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		values: AttributeForm,
 		setValue: (
 			name: string,
-			value: AttributeForm[ keyof AttributeForm ]
+			value: AttributeForm[ keyof AttributeForm ] | null
 		) => void
 	) => {
-		recordEvent(
-			'product_add_attributes_modal_remove_attribute_button_click'
-		);
+		onRemoveItem();
 		if ( values.attributes.length > 1 ) {
 			setValue(
 				'attributes',
 				values.attributes.filter( ( val, i ) => i !== index )
 			);
 		} else {
-			setValue( `attributes[${ index }]`, [ null ] );
-		}
-	};
-
-	const focusValueField = ( index: number ) => {
-		setTimeout( () => {
-			const valueInputField: HTMLInputElement | null =
-				document.querySelector(
-					'.woocommerce-new-attribute-modal__table-row-' +
-						index +
-						' .woocommerce-new-attribute-modal__table-attribute-value-column .woocommerce-experimental-select-control__input'
-				);
-			if ( valueInputField ) {
-				valueInputField.focus();
-			}
-		}, 0 );
-	};
-
-	const onClose = ( values: AttributeForm ) => {
-		const hasValuesSet = values.attributes.some(
-			( value ) =>
-				value !== null && value?.terms && value?.terms.length > 0
-		);
-		if ( hasValuesSet ) {
-			setShowConfirmClose( true );
-		} else {
-			onCancel();
+			setValue( `attributes[${ index }]`, null );
 		}
 	};
 
@@ -213,15 +187,47 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 			document.querySelector< HTMLLabelElement >(
 				'.woocommerce-new-attribute-modal__table-row .woocommerce-attribute-input-field label'
 			);
+		const timeoutId = setTimeout( () => {
+			firstAttributeFieldLabel?.focus();
+		}, 100 );
 
-		firstAttributeFieldLabel?.focus();
+		return () => clearTimeout( timeoutId );
 	}, [] );
+
+	const initialAttribute = {
+		name: defaultSearch,
+	} as EnhancedProductAttribute;
+
+	const { attributes, isLoadingAttributes } = useSelect(
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		( select: WCDataSelector ) => {
+			const {
+				getProductAttributes: getAttributes,
+				hasFinishedResolution: hasLoadedAttributes,
+			} = select( EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME );
+
+			return {
+				isLoadingAttributes: ! hasLoadedAttributes(
+					'getProductAttributes',
+					[ attributeSortCriteria ]
+				),
+				attributes: getAttributes( attributeSortCriteria ),
+			};
+		},
+		[]
+	);
+
+	const { createErrorNotice } = useDispatch( 'core/notices' );
+	const { createProductAttribute } = useDispatch(
+		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
+	) as unknown as ProductAttributesActions & WPDataActions;
 
 	return (
 		<>
 			<Form< AttributeForm >
 				initialValues={ {
-					attributes: [ null ],
+					attributes: [ defaultSearch ? initialAttribute : null ],
 				} }
 			>
 				{ ( {
@@ -232,6 +238,136 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					setValue: ( name: string, value: any ) => void;
 				} ) => {
+					/**
+					 * Select the attribute in the form field.
+					 * If the attribute does not exist, create it.
+					 * ToDo: Improve Id. Adding a attribute with id -99
+					 * does not seem a good idea.
+					 *
+					 * @param {AttributesComboboxControlItem} nextAttribute - The attribute to select.
+					 * @param { number }                      index         - The index of the attribute in the form field.
+					 * @return { void }
+					 */
+					function selectAttribute(
+						nextAttribute: AttributesComboboxControlItem,
+						index: number
+					): void {
+						recordEvent( 'product_attribute_add_custom_attribute', {
+							source: TRACKS_SOURCE,
+						} );
+
+						return setValue(
+							`attributes[${ index }]`,
+							nextAttribute
+						);
+					}
+
+					/**
+					 * Create a new attribute and fill the form field with it.
+					 * If the attribute is not global, create it locally.
+					 *
+					 * @param {string} newAttributeName - The name of the new attribute.
+					 * @param {number} index            - The index of the attribute in the form field.
+					 * @return {void}
+					 */
+					function addNewAttribute(
+						newAttributeName: string,
+						index: number
+					): void {
+						if ( ! createNewAttributesAsGlobal ) {
+							return setValue( `attributes[${ index }]`, {
+								id: 0,
+								name: newAttributeName,
+								slug: newAttributeName,
+							} );
+						}
+
+						createProductAttribute(
+							{
+								name: newAttributeName,
+								generate_slug: true,
+							},
+							{
+								optimisticQueryUpdate: attributeSortCriteria,
+							}
+						)
+							.then( ( newAttribute ) => {
+								setValue(
+									`attributes[${ index }]`,
+									newAttribute
+								);
+							} )
+							.catch( ( error ) => {
+								let message = __(
+									'Failed to create new attribute.',
+									'woocommerce'
+								);
+								if (
+									error.code ===
+									'woocommerce_rest_cannot_create'
+								) {
+									message = error.message;
+								}
+
+								createErrorNotice( message, {
+									explicitDismiss: true,
+								} );
+							} );
+					}
+
+					/**
+					 * Set the attribute terms in the form field.
+					 *
+					 * @param {ProductAttributeTerm[] | string[]} terms     - The terms to set.
+					 * @param {number}                            index     - The index of the attribute in the form field.
+					 * @param {EnhancedProductAttribute}          attribute - The attribute to set the terms.
+					 */
+					function selectTerms(
+						terms: ProductAttributeTerm[] | string[],
+						index: number,
+						attribute?: EnhancedProductAttribute
+					) {
+						/*
+						 * By convention, it's a global attribute if the attribute ID is 0.
+						 * For global attributes, the field name suffix
+						 * to set the attribute terms is 'options',
+						 * for local attributes, the field name suffix is 'terms'.
+						 */
+						const attributeTermPropName =
+							attribute?.id === 0 ? 'options' : 'terms';
+
+						const fieldName = `attributes[${ index }].${ attributeTermPropName }`;
+
+						setValue( fieldName, terms );
+					}
+
+					/*
+					 * Get the attribute ids that are already selected
+					 * by other form fields.
+					 */
+					const attributeBelongTo = values.attributes
+						.map( ( attr ) => ( attr ? attr.id : null ) )
+						.filter( ( id ) => typeof id === 'number' );
+
+					/*
+					 * Compute the available attributes to show in the attribute input field,
+					 * filtering out the ignored attributes,
+					 * marking the disabled ones,
+					 * and setting the `takenBy` property.
+					 */
+					const availableAttributes = attributes
+						?.filter(
+							( attribute: ProductAttribute ) =>
+								! selectedAttributeIds.includes( attribute.id )
+						)
+						?.map( ( attribute: ProductAttribute ) => ( {
+							...attribute,
+							isDisabled: disabledAttributeIds.includes(
+								attribute.id
+							),
+							takenBy: attributeBelongTo.indexOf( attribute.id ),
+						} ) ) as AttributesComboboxControlItem[];
+
 					return (
 						<Modal
 							title={ title }
@@ -242,10 +378,13 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									| React.FocusEvent< Element >
 							) => {
 								if ( ! event.isPropagationStopped() ) {
-									onClose( values );
+									onCancel();
 								}
 							} }
 							className="woocommerce-new-attribute-modal"
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore
+							size="medium"
 						>
 							{ notice && (
 								<Notice isDismissible={ false }>
@@ -266,148 +405,48 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									<tbody>
 										{ values.attributes.map(
 											( attribute, index ) => (
-												<tr
+												<AttributeTableRow
 													key={ index }
-													className={ `woocommerce-new-attribute-modal__table-row woocommerce-new-attribute-modal__table-row-${ index }` }
-												>
-													<td className="woocommerce-new-attribute-modal__table-attribute-column">
-														<AttributeInputField
-															placeholder={
-																attributePlaceholder
-															}
-															value={ attribute }
-															label={
-																attributeLabel
-															}
-															onChange={ (
-																val
-															) => {
-																setValue(
-																	'attributes[' +
-																		index +
-																		']',
-																	val &&
-																		getProductAttributeObject(
-																			val
-																		)
-																);
-																if ( val ) {
-																	focusValueField(
-																		index
-																	);
-																}
-															} }
-															ignoredAttributeIds={ [
-																...selectedAttributeIds,
-																...values.attributes
-																	.map(
-																		(
-																			attr
-																		) =>
-																			attr?.id
-																	)
-																	.filter(
-																		(
-																			attrId
-																		): attrId is number =>
-																			attrId !==
-																			undefined
-																	),
-															] }
-															createNewAttributesAsGlobal={
-																createNewAttributesAsGlobal
-															}
-														/>
-													</td>
-													<td className="woocommerce-new-attribute-modal__table-attribute-value-column">
-														{ attribute === null ||
-														attribute.id !== 0 ? (
-															<AttributeTermInputField
-																placeholder={
-																	termPlaceholder
-																}
-																disabled={
-																	attribute
-																		? ! attribute.id
-																		: true
-																}
-																attributeId={
-																	attribute
-																		? attribute.id
-																		: undefined
-																}
-																value={
-																	attribute ===
-																	null
-																		? []
-																		: attribute.terms
-																}
-																label={
-																	valueLabel
-																}
-																onChange={ (
-																	val
-																) =>
-																	setValue(
-																		'attributes[' +
-																			index +
-																			'].terms',
-																		val
-																	)
-																}
-															/>
-														) : (
-															<CustomAttributeTermInputField
-																placeholder={
-																	termPlaceholder
-																}
-																disabled={
-																	! attribute.name
-																}
-																value={
-																	attribute.options
-																}
-																label={
-																	valueLabel
-																}
-																onChange={ (
-																	val
-																) =>
-																	setValue(
-																		'attributes[' +
-																			index +
-																			'].options',
-																		val
-																	)
-																}
-															/>
-														) }
-													</td>
-													<td className="woocommerce-new-attribute-modal__table-attribute-trash-column">
-														<Button
-															icon={ trash }
-															disabled={
-																values
-																	.attributes
-																	.length ===
-																	1 &&
-																values
-																	.attributes[ 0 ] ===
-																	null
-															}
-															label={
-																removeLabel
-															}
-															onClick={ () =>
-																onRemove(
-																	index,
-																	values,
-																	setValue
-																)
-															}
-														></Button>
-													</td>
-												</tr>
+													index={ index }
+													attribute={ attribute }
+													attributePlaceholder={
+														attributePlaceholder
+													}
+													disabledAttributeMessage={
+														disabledAttributeMessage
+													}
+													isLoadingAttributes={
+														isLoadingAttributes
+													}
+													attributes={
+														availableAttributes
+													}
+													onNewAttributeAdd={
+														addNewAttribute
+													}
+													onAttributeSelect={
+														selectAttribute
+													}
+													termPlaceholder={
+														termPlaceholder
+													}
+													removeLabel={ removeLabel }
+													onTermsSelect={
+														selectTerms
+													}
+													onRemove={ (
+														removedIndex
+													) =>
+														onRemove(
+															removedIndex,
+															values,
+															setValue
+														)
+													}
+													termsAutoSelection={
+														termsAutoSelection
+													}
+												/>
 											)
 										) }
 									</tbody>
@@ -419,9 +458,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									variant="tertiary"
 									label={ addAnotherAccessibleLabel }
 									onClick={ () => {
-										recordEvent(
-											'product_add_attributes_modal_add_another_attribute_button_click'
-										);
 										addAnother( values, setValue );
 									} }
 								>
@@ -432,7 +468,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								<Button
 									isSecondary
 									label={ cancelLabel }
-									onClick={ () => onClose( values ) }
+									onClick={ () => onCancel() }
 								>
 									{ cancelLabel }
 								</Button>
@@ -441,7 +477,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									label={ addAccessibleLabel }
 									disabled={
 										values.attributes.length === 1 &&
-										values.attributes[ 0 ] === null
+										( values.attributes[ 0 ] === null ||
+											values.attributes[ 0 ] ===
+												undefined )
 									}
 									onClick={ () =>
 										onAddingAttributes( values )
@@ -456,16 +494,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 			</Form>
 			{ /* Add slot so select control menu renders correctly within Modal */ }
 			<SelectControlMenuSlot />
-			{ showConfirmClose && (
-				<ConfirmDialog
-					cancelButtonText={ confirmCancelLabel }
-					confirmButtonText={ confirmConfirmLabel }
-					onCancel={ () => setShowConfirmClose( false ) }
-					onConfirm={ onCancel }
-				>
-					{ confirmMessage }
-				</ConfirmDialog>
-			) }
 		</>
 	);
 };

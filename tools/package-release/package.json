@@ -16,22 +16,30 @@
 		"/npm-shrinkwrap.json",
 		"/oclif.manifest.json"
 	],
+	"scripts": {
+		"build": "shx rm -rf dist && tsc --project tsconfig.json",
+		"lint": "eslint . --ext .ts --config .eslintrc",
+		"prepack": "pnpm build && oclif manifest",
+		"postpack": "shx rm -f oclif.manifest.json",
+		"posttest": "pnpm lint"
+	},
 	"dependencies": {
-		"@oclif/core": "^1",
-		"@oclif/plugin-help": "^5",
-		"@oclif/plugin-plugins": "^2.0.1",
-		"@types/semver": "^7.3.10",
-		"semver": "^7.3.2"
+		"@oclif/core": "^1.26.2",
+		"@oclif/plugin-help": "^5.2.20",
+		"@oclif/plugin-plugins": "^2.4.7",
+		"@types/semver": "^7.5.6",
+		"semver": "^7.5.4"
 	},
 	"devDependencies": {
-		"@types/node": "^16.18.18",
+		"@types/node": "^16.18.68",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"globby": "^11",
-		"oclif": "^2",
-		"shx": "^0.3.3",
-		"ts-node": "^10.2.1",
-		"tslib": "^2.3.1",
-		"typescript": "^5.1.6"
+		"globby": "^11.1.0",
+		"oclif": "^2.7.0",
+		"shx": "^0.3.4",
+		"ts-node": "^10.9.2",
+		"tslib": "^2.6.2",
+		"typescript": "^5.3.3",
+		"wireit": "0.14.3"
 	},
 	"oclif": {
 		"bin": "package-release",
@@ -48,17 +56,17 @@
 			}
 		}
 	},
-	"scripts": {
-		"turbo:build": "shx rm -rf dist && tsc --project tsconfig.json",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"lint": "eslint . --ext .ts --config .eslintrc",
-		"postpack": "shx rm -f oclif.manifest.json",
-		"posttest": "pnpm lint",
-		"prepack": "pnpm build && oclif manifest"
-	},
 	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"node": "^20.11.1",
+		"pnpm": "^9.1.0"
 	},
-	"types": "dist/index.d.ts"
+	"types": "dist/index.d.ts",
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.ts"
+			}
+		}
+	}
 }

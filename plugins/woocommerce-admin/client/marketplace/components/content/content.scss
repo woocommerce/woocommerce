@@ -1,0 +1,15 @@
+@import "../../stylesheets/_variables.scss";
+
+.woocommerce-marketplace__content {
+	box-sizing: content-box;
+	margin: auto;
+	max-width: $content-max-width;
+	padding: $grid-unit-30 $grid-unit-20;
+	min-height: 500px;
+}
+
+@media screen and (min-width: $breakpoint-medium) {
+	.woocommerce-marketplace__content {
+		padding: $grid-unit-60 $grid-unit-40;
+	}
+}

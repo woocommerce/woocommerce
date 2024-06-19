@@ -1,19 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const { API_BASE_URL } = process.env;
-
-const skipTestIfCI = () => {
-	const skipMessage = 'Skipping this test because running on CI';
-	// !FIXME This test fails on CI because of differences in environment.
-	test.skip( () => {
-		const shouldSkip = API_BASE_URL != undefined;
-
-		if ( shouldSkip ) {
-			console.log( skipMessage );
-		}
-
-		return shouldSkip;
-	}, skipMessage );
-};
+const shouldSkip = API_BASE_URL != undefined;
 
 /**
  * Internal dependencies
@@ -1212,7 +1199,7 @@ test.describe( 'Products API tests: CRUD', () => {
 		} );
 	} );
 
-	test.describe( 'Product variation tests: CRUD', () => {
+	test.describe.serial( 'Product variation tests: CRUD', () => {
 		let variableProductId;
 		let productVariationId;
 
@@ -1287,8 +1274,6 @@ test.describe( 'Products API tests: CRUD', () => {
 			expect( responseJSON.regular_price ).toEqual( '30.00' );
 		} );
 
-		skipTestIfCI();
-
 		test( 'can permanently delete a product variation', async ( {
 			request,
 		} ) => {
@@ -1303,16 +1288,17 @@ test.describe( 'Products API tests: CRUD', () => {
 			);
 			expect( response.status() ).toEqual( 200 );
 
-			// Verify that the product variation can no longer be retrieved.
-			const getDeletedProductVariationResponse = await request.get(
-				`wp-json/wc/v3/products/${ variableProductId }/variations/${ productVariationId }`
-			);
-			expect( getDeletedProductVariationResponse.status() ).toEqual(
-				404
-			);
+			// if we're running on CI, then skip -- because objects are cached and they don't disappear instantly.
+			if ( ! shouldSkip ) {
+				// Verify that the product variation can no longer be retrieved.
+				const getDeletedProductVariationResponse = await request.get(
+					`wp-json/wc/v3/products/${ variableProductId }/variations/${ productVariationId }`
+				);
+				expect( getDeletedProductVariationResponse.status() ).toEqual(
+					404
+				);
+			}
 		} );
-
-		skipTestIfCI();
 
 		test( 'can batch update product variations', async ( { request } ) => {
 			// Batch create 2 product variations
@@ -1391,13 +1377,17 @@ test.describe( 'Products API tests: CRUD', () => {
 				'35.99'
 			);
 
-			// Verify that the deleted product variation can no longer be retrieved.
-			const getDeletedProductVariationResponse = await request.get(
-				`wp-json/wc/v3/products/${ variableProductId }/variations/${ variation1Id }`
-			);
-			expect( getDeletedProductVariationResponse.status() ).toEqual(
-				404
-			);
+			// if we're running on CI, then skip -- because objects are cached and they don't disappear instantly.
+			if ( ! shouldSkip ) {
+				// Verify that the deleted product variation can no longer be retrieved.
+				const getDeletedProductVariationResponse = await request.get(
+					`wp-json/wc/v3/products/${ variableProductId }/variations/${ variation1Id }`
+				);
+
+				expect( getDeletedProductVariationResponse.status() ).toEqual(
+					404
+				);
+			}
 
 			// Batch delete the created product variations
 			await request.post(
@@ -1421,8 +1411,6 @@ test.describe( 'Products API tests: CRUD', () => {
 		} );
 	} );
 
-	skipTestIfCI();
-
 	test( 'can view a single product', async ( { request } ) => {
 		const response = await request.get(
 			`wp-json/wc/v3/products/${ productId }`
@@ -1431,8 +1419,6 @@ test.describe( 'Products API tests: CRUD', () => {
 		expect( response.status() ).toEqual( 200 );
 		expect( responseJSON.id ).toEqual( productId );
 	} );
-
-	skipTestIfCI();
 
 	test( 'can update a single product', async ( { request } ) => {
 		const updatePayload = {
@@ -1453,8 +1439,6 @@ test.describe( 'Products API tests: CRUD', () => {
 			updatePayload.regular_price
 		);
 	} );
-
-	skipTestIfCI();
 
 	test( 'can delete a product', async ( { request } ) => {
 		const response = await request.delete(

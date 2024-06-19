@@ -65,8 +65,8 @@
 
     var namespace = slider.vars.namespace,
         touch = (( "ontouchstart" in window ) || window.DocumentTouch && document instanceof DocumentTouch) && slider.vars.touch,
-        // deprecating this idea, as devices are being released with both of these events
-        eventType = "click touchend keyup",
+        // we add a custom event so we can differentiate manually triggering events when needed.
+        eventType = "click touchend keyup flexslider-click",
         watchedEvent = "",
         watchedEventClearTimer,
         easing = easings[slider.vars.easing] || "ease",
@@ -301,7 +301,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -326,7 +326,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -379,7 +379,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -433,7 +433,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -496,7 +496,7 @@
 
               if ( ! scrolling || Number( new Date() ) - startT > fxms ) {
                 e.preventDefault();
-                if (!fade && slider.transitions) {
+                if (!fade) {
                   if (!slider.vars.animationLoop) {
                     dx = dx/((slider.currentSlide === 0 && dx < 0 || slider.currentSlide === slider.last && dx > 0) ? (Math.abs(dx)/cwidth+2) : 1);
                   }
@@ -684,7 +684,7 @@
             slideString = (reverse) ? ((slider.count - 1) - target + slider.cloneOffset) * dimension : (target + slider.cloneOffset) * dimension;
           }
           slider.setProps(slideString, "", slider.vars.animationSpeed);
-          if (slider.transitions) {
+
             if (!slider.vars.animationLoop || !slider.atEnd) {
               slider.animating = false;
               slider.currentSlide = slider.animatingTo;
@@ -703,29 +703,17 @@
               slider.wrapup(dimension);
             }, slider.vars.animationSpeed + 100);
 
-          } else {
-            var prop = slider.prop;
-            slider.container.each(function() {
-              var container = this;
-              var keyframes = {};
-              keyframes[prop] = [
-                window.getComputedStyle(container)[prop],
-                slider.args[prop]
-              ];
-
-              container.animate(keyframes, { duration: slider.vars.animationSpeed, easing: easing }).onfinish = function() {
-                container.style[prop] = slider.args[prop];
-                slider.wrapup(dimension);
-              };
-            });
-          }
         } else { // FADE:
+          // if (!touch) calls slider.wrapup() on fade animation end; if (touch) calls slider.wrapup() immediately
           if (!touch) {
-            slider.slides.eq(slider.currentSlide).css({"zIndex": 1}).animate({"opacity": 0}, slider.vars.animationSpeed, slider.vars.easing);
-            slider.slides.eq(target).css({"zIndex": 2}).animate({"opacity": 1}, slider.vars.animationSpeed, slider.vars.easing, slider.wrapup);
-          } else {
-            slider.slides.eq(slider.currentSlide).css({ "opacity": 0, "zIndex": 1 });
-            slider.slides.eq(target).css({ "opacity": 1, "zIndex": 2 });
+            slider.slides.eq(slider.currentSlide).off("transitionend");
+            slider.slides.eq(target).off("transitionend").on("transitionend", slider.wrapup);
+          }
+
+          slider.slides.eq(slider.currentSlide).css({ "opacity": 0, "zIndex": 1 });
+          slider.slides.eq(target).css({ "opacity": 1, "zIndex": 2 });
+
+          if (touch) {
             slider.wrapup(dimension);
           }
         }
@@ -822,16 +810,17 @@
             return (posCalc * ((slider.vars.rtl)?1:-1)) + "px";
           }());
 
+      dur = (dur !== undefined) ? (dur/1000) + "s" : "0s";
+      slider.container.css("transition-duration", dur);
+
       if (slider.transitions) {
         target = (vertical) ? "translate3d(0," + target + ",0)" : "translate3d(" + (parseInt(target)+'px') + ",0,0)";
-        dur = (dur !== undefined) ? (dur/1000) + "s" : "0s";
-         slider.container.css("transition-duration", dur);
+      } else {
+        slider.container.css("transition-timing-function", easing);
       }
 
       slider.args[slider.prop] = target;
-      if (slider.transitions || dur === undefined) { slider.container.css(slider.args); }
-
-      slider.container.css('transform',target);
+      slider.container.css(slider.args);
     };
 
     slider.setup = function(type) {
@@ -896,12 +885,15 @@
         }
         if (type === "init") {
           if (!touch) {
-            //slider.slides.eq(slider.currentSlide).fadeIn(slider.vars.animationSpeed, slider.vars.easing);
+            // Every "opacity" change before outerWidth() does NOT get animated; every "opacity" change after outerWidth() becomes a fadeIn
             if (slider.vars.fadeFirstSlide == false) {
               slider.slides.css({ "opacity": 0, "display": "block", "zIndex": 1 }).eq(slider.currentSlide).css({"zIndex": 2}).css({"opacity": 1});
+              slider.slides.outerWidth();
             } else {
-              slider.slides.css({ "opacity": 0, "display": "block", "zIndex": 1 }).eq(slider.currentSlide).css({"zIndex": 2}).animate({"opacity": 1},slider.vars.animationSpeed,slider.vars.easing);
+              slider.slides.css({ "opacity": 0, "display": "block", "zIndex": 1 }).outerWidth();
+              slider.slides.eq(slider.currentSlide).css({"zIndex": 2}).css({"opacity": 1});
             }
+            slider.slides.css({ "transition": "opacity " + slider.vars.animationSpeed / 1000 + "s " + easing });
           } else {
             slider.slides.css({ "opacity": 0, "display": "block", "transition": "opacity " + slider.vars.animationSpeed / 1000 + "s ease", "zIndex": 1 }).eq(slider.currentSlide).css({ "opacity": 1, "zIndex": 2});
           }
@@ -1127,7 +1119,8 @@
             $slides = $this.find(selector);
 
       if ( ( $slides.length === 1 && options.allowOneSlide === false ) || $slides.length === 0 ) {
-          $slides.fadeIn(400);
+          var fadeIn = [{ opacity: 0 }, { opacity: 1 }];
+          if ($slides.length) { $slides[0].animate(fadeIn, 400); }
           if (options.start) { options.start($this); }
         } else if ($this.data('flexslider') === undefined) {
           new $.flexslider(this, options);

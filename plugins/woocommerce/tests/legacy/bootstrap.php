@@ -59,9 +59,6 @@ class WC_Unit_Tests_Bootstrap {
 		// load test function so tests_add_filter() is available.
 		require_once $this->wp_tests_dir . '/includes/functions.php';
 
-		// Always load PayPal Standard for unit tests.
-		tests_add_filter( 'woocommerce_should_load_paypal_standard', '__return_true' );
-
 		// load WC.
 		tests_add_filter( 'muplugins_loaded', array( $this, 'load_wc' ) );
 
@@ -108,7 +105,7 @@ class WC_Unit_Tests_Bootstrap {
 				$helpers_directory = $tests_directory . '/php/helpers';
 
 				// Support loading top-level classes from the `php/helpers` directory.
-				if ( ! str_contains( $class, '\\' ) ) {
+				if ( false === strpos( $class, '\\' ) ) {
 					$helper_path = realpath( "$helpers_directory/$class.php" );
 
 					if ( dirname( $helper_path ) === $helpers_directory && file_exists( $helper_path ) ) {
@@ -226,6 +223,16 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_REMOVE_ALL_DATA', true );
 		include $this->plugin_dir . '/uninstall.php';
 
+		if ( ! getenv( 'HPOS' ) ) {
+			add_filter( 'woocommerce_enable_hpos_by_default_for_new_shops', '__return_false' );
+		}
+
+		// Always load PayPal Standard for unit tests.
+		$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
+		if ( $paypal ) {
+			$paypal->update_option( '_should_load', wc_bool_to_string( true ) );
+		}
+
 		WC_Install::install();
 
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
@@ -279,6 +286,7 @@ class WC_Unit_Tests_Bootstrap {
 		// Traits.
 		require_once $this->tests_dir . '/framework/traits/trait-wc-rest-api-complex-meta.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/HPOSToggleTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/SerializingCacheTrait.php';
 	}
 
 	/**

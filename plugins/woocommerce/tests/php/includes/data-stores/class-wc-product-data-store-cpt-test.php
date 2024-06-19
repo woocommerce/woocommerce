@@ -38,4 +38,32 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$results = $data_store->search_products( 'test-widget', '', true, true );
 		$this->assertContains( $variation->get_id(), $results );
 	}
+
+	/**
+	 * Ensure product rating counts are calculated correctly.
+	 *
+	 * @return void
+	 */
+	public function test_rating_counts_are_summed_correctly(): void {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array( 'manage_stock' => true )
+		);
+
+		// Introduce an empty string as one of the values (to simulate bad or legacy data). Doing this through the
+		// product model won't work, because of sanitization (the empty string will become 0).
+		update_post_meta( $product->get_id(), '_wc_rating_count', array( 1, 2, 3, '', '4' ) );
+
+		// We alter the manage stock property not as part of the test but as a way to ensure a lookup table update
+		// takes place when we save (which won't happen if the product model doesn't know of any property changes).
+		$product->set_manage_stock( false );
+
+		// No type errors should be raised during this process, since in #41203 we discovered that a type error could be
+		// raised from within WC_Product_Data_Store_CPT::get_data_for_lookup_table().
+		$product->save();
+
+		// Grab a fresh instance of the product (to avoid caching problems) and verify the rating count.
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 10, $product->get_rating_count(), 'The product rating count is the expected value.' );
+	}
 }

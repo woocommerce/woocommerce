@@ -1,0 +1,73 @@
+$break-small: 600px;
+
+$grid-gap: 1.25em;
+$min-product-width: 150px;
+
+@mixin break-small() {
+	@media (min-width: #{ ($break-small) }) {
+		@content;
+	}
+}
+
+.wc-block-product-template {
+	margin-top: 0;
+	margin-bottom: 0;
+	max-width: 100%;
+	list-style: none;
+	padding: 0;
+
+	// Unset background colors that can be inherited from Global Styles with extra specificity.
+	&.wc-block-product-template {
+		background: none;
+	}
+
+	&.is-flex-container {
+		flex-direction: row;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1.25em;
+
+		> li {
+			margin: 0;
+			width: 100%;
+			// Below style is required to override high-specificity Storefront styles
+			list-style: none;
+		}
+
+		@include break-small {
+			@for $i from 2 through 6 {
+				&.is-flex-container.columns-#{ $i } > li {
+					width: calc((100% / #{ $i }) - 1.25em + (1.25em / #{ $i }));
+				}
+			}
+		}
+	}
+
+	&__responsive {
+		display: grid;
+		grid-gap: $grid-gap;
+
+		@for $i from 2 through 6 {
+			$gap-count: calc(#{ $i } - 1);
+			$total-gap-width: calc(#{ $gap-count } * #{ $grid-gap });
+			$max-product-width: calc((100% - #{ $total-gap-width }) / #{ $i });
+
+			&.columns-#{ $i } {
+				grid-template-columns: repeat(auto-fill, minmax(max(#{ $min-product-width }, #{ $max-product-width }), 1fr));
+			}
+		}
+
+		> li {
+			margin-block-start: 0;
+		}
+	}
+}
+
+/**
+ * Default spacing between product elements
+ */
+:where(.wc-block-product-template .wc-block-product) > *:not(:last-child) {
+	margin-bottom: 0.75rem;
+	margin-top: 0;
+}
+

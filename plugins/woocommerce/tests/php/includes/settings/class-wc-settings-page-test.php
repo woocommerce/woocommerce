@@ -180,6 +180,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 	 * Test for output_sections.
 	 */
 	public function test_output_sections() {
+		global $current_section;
 		$sut = new WC_Settings_Example();
 
 		$domain = WP_TESTS_DOMAIN;
@@ -194,6 +195,7 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 			<br class="clear" />
 HTML;
 
+		$current_section = 'foobar';
 		$this->assertOutputsHTML( $expected, array( $sut, 'output_sections' ) );
 	}
 

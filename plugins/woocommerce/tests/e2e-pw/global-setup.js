@@ -2,7 +2,12 @@ const { chromium, expect } = require( '@playwright/test' );
 const { admin, customer } = require( './test-data/data' );
 const fs = require( 'fs' );
 const { site } = require( './utils' );
+const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { DISABLE_HPOS } = process.env;
 
+/**
+ * @param {import('@playwright/test').FullConfig} config
+ */
 module.exports = async ( config ) => {
 	const { stateDir, baseURL, userAgent } = config.projects[ 0 ].use;
 
@@ -19,7 +24,7 @@ module.exports = async ( config ) => {
 		console.log( 'Admin state file deleted successfully.' );
 	} catch ( err ) {
 		if ( err.code === 'ENOENT' ) {
-			console.log( 'Admin state file does not exist.' );
+			console.log( 'Admin state file does not exist' );
 		} else {
 			console.log( 'Admin state file could not be deleted: ' + err );
 		}
@@ -39,6 +44,7 @@ module.exports = async ( config ) => {
 	let adminLoggedIn = false;
 	let customerLoggedIn = false;
 	let customerKeyConfigured = false;
+	let hposConfigured = false;
 
 	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
 	const contextOptions = { baseURL, userAgent };
@@ -63,6 +69,7 @@ module.exports = async ( config ) => {
 				.locator( 'input[name="pwd"]' )
 				.fill( admin.password );
 			await adminPage.locator( 'text=Log In' ).click();
+			// eslint-disable-next-line playwright/no-networkidle
 			await adminPage.waitForLoadState( 'networkidle' );
 			await adminPage.goto( `/wp-admin` );
 			await adminPage.waitForLoadState( 'domcontentloaded' );
@@ -177,6 +184,71 @@ module.exports = async ( config ) => {
 		);
 		process.exit( 1 );
 	}
+
+	// While we're here, let's set HPOS according to the passed in DISABLE_HPOS env variable
+	// (if a value for DISABLE_HPOS was set)
+	// This was always being set to 'yes' after login in wp-env so this step ensures the
+	// correct value is set before we begin our tests
+	console.log( `DISABLE_HPOS: ${ DISABLE_HPOS }` );
+
+	const api = new wcApi( {
+		url: baseURL,
+		consumerKey: process.env.CONSUMER_KEY,
+		consumerSecret: process.env.CONSUMER_SECRET,
+		version: 'wc/v3',
+	} );
+
+	if ( DISABLE_HPOS ) {
+		const hposSettingRetries = 5;
+
+		const value = DISABLE_HPOS === '1' ? 'no' : 'yes';
+
+		for ( let i = 0; i < hposSettingRetries; i++ ) {
+			try {
+				console.log(
+					`Trying to switch ${
+						value === 'yes' ? 'on' : 'off'
+					} HPOS...`
+				);
+				const response = await api.post(
+					'settings/advanced/woocommerce_custom_orders_table_enabled',
+					{ value }
+				);
+				if ( response.data.value === value ) {
+					console.log(
+						`HPOS Switched ${
+							value === 'yes' ? 'on' : 'off'
+						} successfully`
+					);
+					hposConfigured = true;
+					break;
+				}
+			} catch ( e ) {
+				console.log(
+					`HPOS setup failed. Retrying... ${ i }/${ hposSettingRetries }`
+				);
+				console.log( e );
+			}
+		}
+
+		if ( ! hposConfigured ) {
+			console.error(
+				'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct DISABLE_HPOS value was used and the test site has been setup correctly.'
+			);
+			process.exit( 1 );
+		}
+	}
+
+	const response = await api.get(
+		'settings/advanced/woocommerce_custom_orders_table_enabled'
+	);
+	const dataValue = response.data.value;
+	const enabledOption = response.data.options[ dataValue ];
+	console.log(
+		`HPOS configuration (woocommerce_custom_orders_table_enabled): ${ dataValue } - ${ enabledOption }`
+	);
+
+	await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
 
 	await adminContext.close();
 	await customerContext.close();

@@ -6,7 +6,7 @@
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
 	"minimum-stability": "dev",
-	"version": "2.2.2",
+	"version": "2.3.1",
 	"require": {
 		"composer/installers": "~1.7"
 	},

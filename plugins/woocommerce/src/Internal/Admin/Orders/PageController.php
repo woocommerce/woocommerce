@@ -143,7 +143,7 @@ class PageController {
 		}
 
 		// Not on an Orders page.
-		if ( 'admin.php' !== $pagenow || 0 !== strpos( $plugin_page, 'wc-orders' ) ) {
+		if ( empty( $plugin_page ) || 'admin.php' !== $pagenow || 0 !== strpos( $plugin_page, 'wc-orders' ) ) {
 			return;
 		}
 
@@ -384,6 +384,7 @@ class PageController {
 		$this->order = new $order_class_name();
 		$this->order->set_object_read( false );
 		$this->order->set_status( 'auto-draft' );
+		$this->order->set_created_via( 'admin' );
 		$this->order->save();
 		$this->handle_edit_lock();
 

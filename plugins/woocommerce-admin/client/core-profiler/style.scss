@@ -1,7 +1,7 @@
-@import './shared.scss';
+@import "./shared.scss";
 
 .woocommerce-layout .woocommerce-layout__main {
-	@include breakpoint( '<782px' ) {
+	@include breakpoint("<782px") {
 		padding-top: 0 !important;
 	}
 }
@@ -24,14 +24,16 @@
 	align-items: center;
 	flex-direction: column;
 
-	@include breakpoint( '<782px' ) {
+	--color-error: #cc1818; // used by some @automattic/components
+
+	@include breakpoint("<782px") {
 		padding: 0 20px;
 	}
 
 	.woocommerce-profiler-button-container {
 		width: 100%;
 		max-width: 404px;
-		@include breakpoint( '<782px' ) {
+		@include breakpoint("<782px") {
 			position: absolute;
 			bottom: 20px;
 			padding: 0 20px;
@@ -131,7 +133,7 @@
 	padding-top: 110px;
 	flex: 1;
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint("<782px") {
 		padding-top: 70px;
 	}
 
@@ -146,10 +148,10 @@
 		background: url(./assets/images/welcome-desktop.svg) no-repeat center
 			center;
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint("<782px") {
 			margin-bottom: 40px;
-			background: url(./assets/images/welcome-mobile.svg) no-repeat
-				center center;
+			background: url(./assets/images/welcome-mobile.svg) no-repeat center
+				center;
 			width: 222px;
 			height: 144px;
 		}
@@ -165,7 +167,7 @@
 		font-size: 14px;
 		font-weight: normal;
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint("<782px") {
 			width: 100%;
 			margin-top: auto;
 		}
@@ -176,7 +178,7 @@
 		display: flex;
 		justify-content: center;
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint("<782px") {
 			margin: 16px auto 20px;
 		}
 
@@ -227,9 +229,7 @@
 	#woocommerce-select-control__listbox-0 {
 		top: 40px !important;
 	}
-
 }
-
 
 .woocommerce-profiler-business-location {
 	display: flex;
@@ -273,63 +273,6 @@
 	}
 }
 
-// Loader page
-.woocommerce-profiler-loader {
-	min-height: 100vh;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	flex-direction: column;
-	@include breakpoint( '<782px' ) {
-		padding: 0 20px;
-	}
-
-	.loader-hearticon {
-		position: relative;
-		top: 2px;
-		left: 2px;
-	}
-
-	h1 {
-		padding: 0;
-		margin: 58px 0 0 0;
-		font-size: 28px;
-		font-weight: 500;
-		@include breakpoint( '<782px' ) {
-			font-size: 20px;
-		}
-	}
-	.woocommerce-profiler-loader-wrapper {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		max-width: 520px;
-	}
-	.woocommerce-profiler-progress-bar {
-		width: 520px;
-		margin: 16px 0 16px 0;
-		@include breakpoint( '<782px' ) {
-			width: 100%;
-		}
-	}
-	.woocommerce-profiler-progress-bar__container {
-		height: 4px;
-	}
-
-	.woocommerce-profiler-loader__paragraph {
-		font-size: 16px;
-		line-height: 24px;
-		color: #2f2f2f;
-		opacity: 0.8;
-		text-align: center;
-		@include breakpoint( '<782px' ) {
-			font-size: 14px;
-			line-height: 20px;
-		}
-	}
-}
-
 // User profile page
 .woocommerce-profiler-user-profile {
 	.woocommerce-profiler-user-profile__content {
@@ -340,7 +283,11 @@
 		}
 	}
 
-	.woocommerce-experimental-select-control .components-popover .components-popover__content ul li:hover {
+	.woocommerce-experimental-select-control
+	.components-popover
+	.components-popover__content
+	ul
+	li:hover {
 		background-color: #f6f7f7 !important; // Gray-0
 		color: $gray-900;
 	}
@@ -393,7 +340,7 @@
 	}
 	.woocommerce-profiler-heading__subtitle {
 		margin: 12px 0 48px 0 !important;
-		@include breakpoint( '<782px' ) {
+		@include breakpoint("<782px") {
 			margin-top: 12px !important;
 		}
 	}
@@ -439,12 +386,12 @@
 	}
 
 	.woocommerce-profiler-plugins-continue-button-container {
-		@include breakpoint( '<782px' ) {
+		@include breakpoint("<782px") {
 			width: 100%;
 		}
 
 		.woocommerce-profiler-plugins-continue-button {
-			@include breakpoint( '<782px' ) {
+			@include breakpoint("<782px") {
 				width: 100%;
 			}
 		}
@@ -452,7 +399,6 @@
 }
 
 // Business Info Page
-
 .woocommerce-profiler-business-information {
 	display: flex;
 	flex-direction: column;
@@ -473,9 +419,17 @@
 			height: 100%;
 			max-width: 404px;
 			width: 100%;
+
+			&:has(.woocommerce-profiler-geolocation-notice) {
+				@include breakpoint("<782px") {
+					margin-bottom: 82px;
+				}
+			}
 		}
 
 		.woocommerce-profiler-question-label,
+		.woocommerce-profiler-business-info-email-adddress
+		.components-base-control__label,
 		.woocommerce-profiler-business-info-store-name
 		.components-base-control__label {
 			text-transform: uppercase;
@@ -487,11 +441,15 @@
 		}
 
 		.woocommerce-profiler-question-label
+		.woocommerce-profiler-question-required,
+		.woocommerce-profiler-business-info-email-adddress
 		.woocommerce-profiler-question-required {
 			color: #cc1818;
 			padding-left: 3px;
 		}
 
+		.woocommerce-profiler-business-info-email-adddress
+		.components-text-control__input,
 		.woocommerce-profiler-business-info-store-name
 		.components-text-control__input {
 			height: 40px;
@@ -502,6 +460,40 @@
 			&:focus {
 				border-color: transparent;
 				box-shadow: 0 0 0 2px var(--wp-admin-theme-color, #006088);
+			}
+		}
+
+		.woocommerce-profiler-business-info-email-adddress.is-error {
+			& .components-text-control__input {
+				box-shadow: 0 0 0 1px var(--color-error);
+			}
+		}
+
+		.form-input-validation.is-error span svg {
+			height: 20px;
+			width: 20px;
+		}
+
+		.woocommerce-profiler-select-control__country-spacer + .woocommerce-profiler-business-info-email-adddress {
+			margin-top: 8px;
+		}
+
+		.woocommerce-profiler-business-info-email-adddress {
+			margin-top: 20px;
+		}
+
+		.core-profiler__checkbox {
+			margin-top: 4px;
+
+			.components-checkbox-control__input-container {
+				margin-right: 16px;
+			}
+
+			.components-checkbox-control__label {
+				color: $gray-700;
+				font-size: 12px;
+				line-height: 16px;
+				font-weight: 400;
 			}
 		}
 
@@ -521,6 +513,33 @@
 		.woocommerce-profiler-select-control__country {
 			max-width: 404px;
 			margin: 0;
+		}
+
+		.woocommerce-profiler-select-control__country-error {
+			background: #fce2e4;
+			padding: $gap-small;
+			font-size: 13px;
+			font-style: normal;
+			font-weight: 400;
+			line-height: 24px;
+			color: $gray-900;
+			margin: 12px 0;
+
+			.components-notice__content {
+				margin: 0;
+			}
+
+			.components-button {
+				padding: 0;
+				height: initial;
+				min-width: 24px;
+				min-height: 24px;
+
+				svg {
+					width: 16px;
+					fill: $gray-900;
+				}
+			}
 		}
 
 		.woocommerce-profiler-select-control__country-spacer {
@@ -558,10 +577,6 @@
 			padding-right: 0;
 			color: $gray-900;
 
-			@include breakpoint( '<782px' ) {
-				margin-bottom: 100px;
-			}
-
 			.components-notice__dismiss > svg {
 				height: 16px;
 				fill: #000;
@@ -598,6 +613,14 @@
 		.woocommerce-profiler-button-container {
 			position: inherit;
 			padding: 0;
+		}
+	}
+}
+
+@media screen and (max-height: 850px) {
+	.woocommerce-profiler-select-control__industry {
+		.woocommerce-select-control__listbox {
+			max-height: 162px;
 		}
 	}
 }

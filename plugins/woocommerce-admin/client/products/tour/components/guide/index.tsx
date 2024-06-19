@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useState, useRef, createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Modal, Button } from '@wordpress/components';
@@ -11,7 +11,6 @@ import { Modal, Button } from '@wordpress/components';
  */
 import PageControl from './page-control';
 import type { GuideProps } from './types';
-import './style.scss';
 
 /*
  * This component was copied from @wordpress/components since we needed
@@ -54,7 +53,7 @@ function Guide( {
 
 	return (
 		<Modal
-			className={ classnames( 'components-guide', className ) }
+			className={ clsx( 'components-guide', className ) }
 			title={ contentLabel }
 			onRequestClose={ () => {
 				onFinish( currentPage, 'close' );

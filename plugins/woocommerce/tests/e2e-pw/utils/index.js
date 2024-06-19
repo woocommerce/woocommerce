@@ -1,12 +1,19 @@
-const onboarding = require( './onboarding' );
 const api = require( './api' );
 const site = require( './site' );
 const variableProducts = require( './variable-products' );
 const features = require( './features' );
+const tours = require( './tours' );
+const login = require( './login' );
+const editor = require( './editor' );
+const helpers = require( './helpers' );
+
 module.exports = {
-	onboarding,
 	api,
 	site,
 	variableProducts,
-	features
+	features,
+	tours,
+	login,
+	editor,
+	helpers,
 };

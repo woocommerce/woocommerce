@@ -59,27 +59,13 @@ const pinterest = {
 	show_extension_promotions: true,
 };
 
-const amazon = {
-	title: 'Amazon, eBay & Walmart Integration for WooCommerce',
-	description:
-		'Convert WooCommerce into a fully-featured omnichannel commerce platform, leveraging powerful automation and real-time sync to connect your brand with millions of new customers on the world’s largest online marketplaces.',
-	url: 'https://woocommerce.com/products/amazon-ebay-integration/?utm_source=marketingtab&utm_medium=product&utm_campaign=wcaddons',
-	direct_install: false,
-	icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/amazon-ebay.svg',
-	product: 'amazon-ebay-integration',
-	plugin: 'woocommerce-amazon-ebay-integration/woocommerce-amazon-ebay-integration.php',
-	categories: [ 'marketing' ],
-	subcategories: [ { slug: 'sales-channels', name: 'Sales channels' } ],
-	tags: [],
-};
-
 describe( 'CreateNewCampaignModal component', () => {
 	it( 'renders new campaign types with recommended channels', async () => {
 		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			data: [ google ],
 		} );
 		( useRecommendedChannels as jest.Mock ).mockReturnValue( {
-			data: [ pinterest, amazon ],
+			data: [ pinterest ],
 		} );
 		render( <CreateNewCampaignModal onRequestClose={ () => {} } /> );
 
@@ -99,12 +85,6 @@ describe( 'CreateNewCampaignModal component', () => {
 
 		expect(
 			screen.getByText( 'Pinterest for WooCommerce' )
-		).toBeInTheDocument();
-
-		expect(
-			screen.getByText(
-				'Amazon, eBay & Walmart Integration for WooCommerce'
-			)
 		).toBeInTheDocument();
 	} );
 

@@ -3,6 +3,16 @@
  */
 const path = require( 'path' );
 
+// These modules need to be transformed because they are not transpiled to CommonJS.
+// The top-level keys are the names of the packages and the values are the file
+// regexes that need to be transformed. Note that these are relative to the 
+// package root and should be treated as such.
+const transformModules = {
+	'is-plain-obj': {
+		'index\\.js$': 'babel-jest',
+	},
+};
+
 module.exports = {
 	moduleNameMapper: {
 		tinymce: path.resolve( __dirname, 'build/mocks/tinymce' ),
@@ -24,6 +34,9 @@ module.exports = {
 			__dirname,
 			'build/mocks/style-mock.js'
 		),
+		// Force some modulse  to resolve with the CJS entry point, because Jest does not support package.json.exports.
+		uuid: require.resolve( 'uuid' ),
+		memize: require.resolve( 'memize' ),
 	},
 	restoreMocks: true,
 	setupFiles: [
@@ -39,19 +52,27 @@ module.exports = {
 		'**/?(*.)test.[jt]s?(x)',
 	],
 	testPathIgnorePatterns: [
-		'/node_modules/',
-		'<rootDir>/.*/build/',
-		'<rootDir>/.*/build-module/',
-		'<rootDir>/tests/e2e/',
+		'\\.d\\.ts$', // This regex pattern matches any file that ends with .d.ts
 	],
+	// The keys for the transformed modules contains the name of the packages that should be transformed.
 	transformIgnorePatterns: [
-		`node_modules/(?!.pnpm/is-plain-obj|is-plain-obj)`,
-		'/build/',
+		'node_modules/(?!(?:\\.pnpm|' + Object.keys( transformModules ).join( '|' ) + ')/)',
+		__dirname
 	],
-	transform: {
-		'^.+\\is-plain-obj/index\\.js$': 'babel-jest',
-		'^.+\\.[jt]sx?$': 'ts-jest',
-	},
+	// The values for the transformed modules contain an object with the transforms to apply.
+	transform: Object.entries( transformModules ).reduce(
+		( acc, [ moduleName, transform ] ) => {
+			for ( const key in transform ) {
+				acc[ `node_modules/${ moduleName }/${ key }` ] =
+				transform[ key ];
+			}
+
+			return acc;
+		},
+		{
+			'(?:src|client|assets/js)/.*\\.[jt]sx?$': 'ts-jest',
+		}
+	),
 	testEnvironment: 'jest-environment-jsdom',
 	timers: 'modern',
 	verbose: true,

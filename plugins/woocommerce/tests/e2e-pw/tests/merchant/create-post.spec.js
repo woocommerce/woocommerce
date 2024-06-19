@@ -1,88 +1,34 @@
-const { test, expect, request } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
+const { test: baseTest } = require( '../../fixtures/fixtures' );
+const {
+	goToPostEditor,
+	fillPageTitle,
+	getCanvas,
+	publishPage,
+} = require( '../../utils/editor' );
 
-const postTitle = `Post-${ new Date().getTime().toString() }`;
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+} );
 
 test.describe( 'Can create a new post', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+	// eslint-disable-next-line playwright/expect-expect
+	test( 'can create new post', async ( { page, testPost } ) => {
+		await goToPostEditor( { page } );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const base64auth = Buffer.from(
-			`${ admin.username }:${ admin.password }`
-		).toString( 'base64' );
-		const wpApi = await request.newContext( {
-			baseURL: `${ baseURL }/wp-json/wp/v2/`,
-			extraHTTPHeaders: {
-				Authorization: `Basic ${ base64auth }`,
-			},
-		} );
+		await fillPageTitle( page, testPost.title );
 
-		let response = await wpApi.get( `posts` );
-		const allPosts = await response.json();
+		const canvas = await getCanvas( page );
 
-		await allPosts.forEach( async ( post ) => {
-			if ( post.title.rendered === postTitle ) {
-				response = await wpApi.delete( `posts/${ post.id }`, {
-					data: {
-						force: true,
-					},
-				} );
-//				expect( response.ok() ).toBeTruthy();
-			}
-		} );
-	} );
+		await canvas
+			.getByRole( 'button', { name: 'Add default block' } )
+			.click();
 
-	test( 'can create new post', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php' );
-
-		const welcomeModalVisible = await test.step(
-			'Check if the Welcome modal appeared',
-			async () => {
-				return await page
-					.getByRole( 'heading', {
-						name: 'Welcome to the block editor',
-					} )
-					.isVisible();
-			}
-		);
-
-		if ( welcomeModalVisible ) {
-			await test.step( 'Welcome modal appeared. Close it.', async () => {
-				await page
-					.getByRole( 'document' )
-					.getByRole( 'button', { name: 'Close' } )
-					.click();
-			} );
-		} else {
-			await test.step( 'Welcome modal did not appear.', async () => {
-				// do nothing.
-			} );
-		}
-
-		await page
-			.getByRole( 'textbox', { name: 'Add Title' } )
-			.fill( postTitle );
-
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
-
-		await page
+		await canvas
 			.getByRole( 'document', {
-				name:
-					'Empty block; start writing or type forward slash to choose a block',
+				name: 'Empty block; start writing or type forward slash to choose a block',
 			} )
 			.fill( 'Test Post' );
 
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-
-		await expect(
-			page.getByText( `${ postTitle } is now live.` )
-		).toBeVisible();
+		await publishPage( page, testPost.title );
 	} );
 } );

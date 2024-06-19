@@ -138,6 +138,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
 
+			// get the post object so that we can set the status
+			// to the correct value; it is possible that the status was
+			// changed by the woocommerce_new_product_data filter above.
+			$post_object = get_post( $product->get_id() );
+			$product->set_status( $post_object->post_status );
+
 			$this->update_post_meta( $product, true );
 			$this->update_terms( $product, true );
 			$this->update_visibility( $product, true );
@@ -647,7 +653,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				}
 			}
 
-			if ( in_array( 'date_on_sale_from', $this->updated_props, true ) || in_array( 'date_on_sale_to', $this->updated_props, true ) || in_array( 'regular_price', $this->updated_props, true ) || in_array( 'sale_price', $this->updated_props, true ) || in_array( 'product_type', $this->updated_props, true ) ) {
+			/**
+			 * It's tempting to add a check for `_price` in the updated props, so that when `wc_scheduled_sales` is called, we don't have to rely on `date_on_sale_from` being present in the list of updated props.
+			 *
+			 * However, it has a side effect of overriding the `_price` meta value with the `_sale_price` meta value when product is in sale, or with `_regular_price` meta value when product is not in sale. This is not desirable, because `_price` can also be set as a temporary active price for a product, and we don't want to override it.
+			 *
+			 * If we want to preserve previous sales schedules, a better way would be to store them in dedicated meta keys as logs.
+			 */
+			$product_price_props = array( 'date_on_sale_from', 'date_on_sale_to', 'regular_price', 'sale_price', 'product_type' );
+			if ( count( array_intersect( $product_price_props, $this->updated_props ) ) > 0 ) {
 				if ( $product->is_on_sale( 'edit' ) ) {
 					update_post_meta( $product->get_id(), '_price', $product->get_sale_price( 'edit' ) );
 					$product->set_price( $product->get_sale_price( 'edit' ) );
@@ -1091,6 +1105,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return int Matching variation ID or 0.
 	 */
 	public function find_matching_product_variation( $product, $match_attributes = array() ) {
+		if ( 'variation' === $product->get_type() ) {
+			// Can't get a variation of a variation.
+			return 0;
+		}
+
 		global $wpdb;
 
 		$meta_attribute_names = array();
@@ -1180,9 +1199,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @todo   Add to interface in 4.0.
 	 * @param  WC_Product $product Variable product.
 	 * @param  int        $limit Limit the number of created variations.
+	 * @param  array      $default_values Key value pairs to set on created variations.
+	 * @param  array      $metadata Key value pairs to set as meta data on created variations.
 	 * @return int        Number of created variations.
 	 */
-	public function create_all_product_variations( $product, $limit = -1 ) {
+	public function create_all_product_variations( $product, $limit = -1, $default_values = array(), $metadata = array() ) {
 		$count = 0;
 
 		if ( ! $product ) {
@@ -1211,13 +1232,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				continue;
 			}
 			$variation = wc_get_product_object( 'variation' );
+			$variation->set_props( $default_values );
+			foreach ( $metadata as $meta ) {
+				$variation->add_meta_data( $meta['key'], $meta['value'] );
+			}
 			$variation->set_parent_id( $product->get_id() );
 			$variation->set_attributes( $possible_attribute );
 			$variation_id = $variation->save();
 
 			do_action( 'product_variation_linked', $variation_id );
 
-			$count ++;
+			++$count;
 
 			if ( $limit > 0 && $count >= $limit ) {
 				break;
@@ -1373,12 +1398,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Uses locking to update the quantity. If the lock is not acquired, change is lost.
 	 *
 	 * @since  3.0.0 this supports set, increase and decrease.
-	 * @param  int            $product_id_with_stock Product ID.
-	 * @param  int|float|null $stock_quantity Stock quantity.
-	 * @param  string         $operation Set, increase and decrease.
+	 * @param  int       $product_id_with_stock Product ID.
+	 * @param  int|float $stock_quantity Stock quantity.
+	 * @param  string    $operation Set, increase and decrease.
 	 * @return int|float New stock level.
 	 */
-	public function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' ) {
+	public function update_product_stock( $product_id_with_stock, $stock_quantity = 0, $operation = 'set' ) {
 		global $wpdb;
 
 		// Ensures a row exists to update.
@@ -1864,6 +1889,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'field'    => 'slug',
 				'terms'    => $query_vars['category'],
 			);
+		} elseif ( ! empty( $query_vars['product_category_id'] ) ) {
+			$wp_query_args['tax_query'][] = array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'term_id',
+				'terms'    => $query_vars['product_category_id'],
+			);
 		}
 
 		// Handle product tags.
@@ -1873,6 +1904,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'taxonomy' => 'product_tag',
 				'field'    => 'slug',
 				'terms'    => $query_vars['tag'],
+			);
+		} elseif ( ! empty( $query_vars['product_tag_id'] ) ) {
+			$wp_query_args['tax_query'][] = array(
+				'taxonomy' => 'product_tag',
+				'field'    => 'term_id',
+				'terms'    => $query_vars['product_tag_id'],
 			);
 		}
 
@@ -2072,7 +2109,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( 'wc_product_meta_lookup' === $table ) {
 			$price_meta   = (array) get_post_meta( $id, '_price', false );
 			$manage_stock = get_post_meta( $id, '_manage_stock', true );
-			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : null;
+			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : 0;
 			$price        = wc_format_decimal( get_post_meta( $id, '_price', true ) );
 			$sale_price   = wc_format_decimal( get_post_meta( $id, '_sale_price', true ) );
 			return array(
@@ -2085,7 +2122,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'onsale'         => $sale_price && $price === $sale_price ? 1 : 0,
 				'stock_quantity' => $stock,
 				'stock_status'   => get_post_meta( $id, '_stock_status', true ),
-				'rating_count'   => array_sum( (array) get_post_meta( $id, '_wc_rating_count', true ) ),
+				'rating_count'   => array_sum( array_map( 'intval', (array) get_post_meta( $id, '_wc_rating_count', true ) ) ),
 				'average_rating' => get_post_meta( $id, '_wc_average_rating', true ),
 				'total_sales'    => get_post_meta( $id, 'total_sales', true ),
 				'tax_status'     => get_post_meta( $id, '_tax_status', true ),
@@ -2120,7 +2157,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		global $wpdb;
 		return $wpdb->prepare(
 			"
-			SELECT COALESCE ( MAX( meta_value ), 0 ) FROM $wpdb->postmeta as meta_table
+			SELECT COALESCE( MAX( meta_value ), 0 ) FROM $wpdb->postmeta as meta_table
 			WHERE meta_table.meta_key = '_stock'
 			AND meta_table.post_id = %d
 			",

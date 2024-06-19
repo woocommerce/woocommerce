@@ -24,6 +24,15 @@ export interface WooStep extends Step {
 			isDisabled?: boolean;
 			isHidden?: boolean;
 		};
+		secondaryButton?: {
+			/** Set a text for the button. Default to "Back" */
+			text?: string;
+		};
+		skipButton?: {
+			/** Set a text for the button. Default to "Skip" */
+			text?: string;
+			isVisible?: boolean;
+		};
 	};
 	/** Auto apply the focus state for the element. Default to null */
 	focusElement?: {

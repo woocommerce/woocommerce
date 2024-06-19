@@ -81,7 +81,7 @@ abstract class CustomMetaDataStore {
 	 *
 	 * @return bool
 	 */
-	public function delete_meta( &$object, $meta ) {
+	public function delete_meta( &$object, $meta ) : bool {
 		global $wpdb;
 
 		if ( ! isset( $meta->id ) ) {
@@ -99,7 +99,8 @@ abstract class CustomMetaDataStore {
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing ->key and ->value).
-	 * @return int meta ID
+	 *
+	 * @return int|false meta ID
 	 */
 	public function add_meta( &$object, $meta ) {
 		global $wpdb;
@@ -132,7 +133,7 @@ abstract class CustomMetaDataStore {
 	 *
 	 * @return bool
 	 */
-	public function update_meta( &$object, $meta ) {
+	public function update_meta( &$object, $meta ) : bool {
 		global $wpdb;
 
 		if ( ! isset( $meta->id ) || empty( $meta->key ) ) {
@@ -229,6 +230,39 @@ abstract class CustomMetaDataStore {
 		}
 
 		return $meta;
+	}
+
+	/**
+	 * Returns distinct meta keys in use.
+	 *
+	 * @since 8.8.0
+	 *
+	 * @param int    $limit           Maximum number of meta keys to return. Defaults to 100.
+	 * @param string $order           Order to use for the results. Either 'ASC' or 'DESC'. Defaults to 'ASC'.
+	 * @param bool   $include_private Whether to include private meta keys in the results. Defaults to FALSE.
+	 * @return string[]
+	 */
+	public function get_meta_keys( $limit = 100, $order = 'ASC', $include_private = false ) {
+		global $wpdb;
+
+		$db_info = $this->get_db_info();
+
+		$query = "SELECT DISTINCT meta_key FROM {$db_info['table']} ";
+
+		if ( ! $include_private ) {
+			$query .= $wpdb->prepare( "WHERE meta_key !='' AND meta_key NOT BETWEEN '_' AND '_z' AND meta_key NOT LIKE %s ", $wpdb->esc_like( '_' ) . '%' );
+		} else {
+			$query .= "WHERE meta_key != '' ";
+		}
+
+		$order  = in_array( strtoupper( $order ), array( 'ASC', 'DESC' ), true ) ? $order : 'ASC';
+		$query .= 'ORDER BY meta_key ' . $order . ' ';
+
+		if ( $limit ) {
+			$query .= $wpdb->prepare( 'LIMIT %d ', $limit );
+		}
+
+		return $wpdb->get_col( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query is prepared.
 	}
 
 }

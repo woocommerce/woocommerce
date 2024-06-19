@@ -10,13 +10,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <div id="inventory_product_data" class="panel woocommerce_options_panel hidden">
-	<div class="inline notice woocommerce-message show_if_variable">
-		<p>
-			<?php echo esc_html_e( 'Settings below apply to all variations without manual stock management enabled.', 'woocommerce' ); ?> <a target="_blank" href="https://woocommerce.com/document/variable-product/"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
-		</p>
-	</div>
 	<div class="options_group">
 		<?php
+		$info_img_url = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/info.svg';
+
 		if ( wc_product_sku_enabled() ) {
 			woocommerce_wp_text_input(
 				array(
@@ -30,6 +27,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 		}
 
 		do_action( 'woocommerce_product_options_sku' );
+
+		?>
+		<div class="inline notice woocommerce-message show_if_variable">
+			<img class="info-icon" src="<?php echo esc_url( $info_img_url ); ?>" />
+			<p>
+				<?php echo esc_html_e( 'Settings below apply to all variations without manual stock management enabled. ', 'woocommerce' ); ?> <a target="_blank" href="https://woocommerce.com/document/variable-product/"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
+			</p>
+		</div>
+		<?php
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 
@@ -50,7 +56,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			woocommerce_wp_text_input(
 				array(
 					'id'                => '_stock',
-					'value'             => wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ?? 1 ),
+					'value'             => wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ),
 					'label'             => __( 'Quantity', 'woocommerce' ),
 					'desc_tip'          => true,
 					'description'       => __( 'Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level.', 'woocommerce' ),
@@ -65,12 +71,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			echo '<input type="hidden" name="_original_stock" value="' . esc_attr( wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ) ) . '" />';
 
 			$backorder_args = array(
-				'id'          => '_backorders',
-				'value'       => $product_object->get_backorders( 'edit' ),
-				'label'       => __( 'Allow backorders?', 'woocommerce' ),
-				'options'     => wc_get_product_backorder_options(),
-				'desc_tip'    => true,
-				'description' => __( 'If managing stock, this controls whether or not backorders are allowed. If enabled, stock quantity can go below 0.', 'woocommerce' ),
+				'id'      => '_backorders',
+				'value'   => $product_object->get_backorders( 'edit' ),
+				'label'   => __( 'Allow backorders?', 'woocommerce' ),
+				'options' => wc_get_product_backorder_options(),
 			);
 
 			/**

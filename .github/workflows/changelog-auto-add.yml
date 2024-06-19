@@ -18,29 +18,13 @@ jobs:
             issues: write
             pull-requests: write
         steps:
-            - name: Checkout code
+            - name: Checkout
               uses: actions/checkout@v3
 
-            - name: Setup PNPM
-              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
-              with:
-                  version: '8.6.7'
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
 
-            - name: Setup Node
-              uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
-              with:
-                  node-version-file: .nvmrc
-                  cache: pnpm
-                  registry-url: 'https://registry.npmjs.org'
-
-            - name: Install prerequisites
-              run: |
-                  pnpm install --filter monorepo-utils --ignore-scripts
-                  # ignore scripts speeds up setup signficantly, but we still need to build monorepo utils
-                  pnpm build
-              working-directory: tools/monorepo-utils
-
-            - name: Add changelog
+            - name: Generate Changelog File
               env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GITHUB_TOKEN: ${{ secrets.PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
               run: pnpm utils changefile ${{github.event.number || inputs.prNumber}} -o ${{ github.repository_owner }}

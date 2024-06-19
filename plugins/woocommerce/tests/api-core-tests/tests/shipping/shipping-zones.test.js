@@ -2,28 +2,14 @@
 const { test, expect } = require('@playwright/test');
 const { getShippingZoneExample } = require( '../../data' );
 const { API_BASE_URL } = process.env;
-
-const skipTestIfCI = () => {
-	const skipMessage = 'Skipping this test because running on CI';
-	// !FIXME This test fails on CI because of differences in environment.
-	test.skip( () => {
-		const shouldSkip = API_BASE_URL != undefined;
-
-		if ( shouldSkip ) {
-			console.log( skipMessage );
-		}
-
-		return shouldSkip;
-	}, skipMessage );
-};
+const shouldSkip = API_BASE_URL != undefined;
 /**
  * Tests for the WooCommerce Shipping zones API.
  * @group api
  * @group shipping
  */
-skipTestIfCI();
 
-test.describe( 'Shipping zones API tests', () => {
+test.describe.serial( 'Shipping zones API tests', () => {
 
 	//Shipping zone to be created, retrieved, updated, and deleted by the tests.
 	let shippingZone = getShippingZoneExample();
@@ -183,8 +169,10 @@ test.describe( 'Shipping zones API tests', () => {
 		});
 
 		const putResponseStateOnlyJSON = await putResponseStateOnly.json();
-		expect( putResponseStateOnly.status() ).toEqual( 200 );
-		expect( putResponseStateOnlyJSON).toHaveLength(0);
+		await expect( putResponseStateOnly.status() ).toEqual( 200 );
+
+		// running on external hosts, this can be 0 or 1
+		expect([0, 1]).toContain(putResponseStateOnlyJSON.length);
 
 	} );
 
@@ -198,13 +186,16 @@ test.describe( 'Shipping zones API tests', () => {
 		const deleteResponseJSON = await deleteResponse.json();
 
 		//validate response
-		expect( deleteResponse.status() ).toEqual( 200 );
-		expect( deleteResponseJSON.id ).toEqual( shippingZone.id );
+		await expect( deleteResponse.status() ).toEqual( 200 );
+		await expect( deleteResponseJSON.id ).toEqual( shippingZone.id );
 
-		//call API to attempt to retrieve the deleted shipping zone
-		const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`);
-		//validate response
-		expect( response.status() ).toEqual( 404 );
+		// only run on wp-env because caching on external hosts makes unreliable
+		if ( ! shouldSkip ) {
+			//call API to attempt to retrieve the deleted shipping zone
+			const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`);
+			//validate response
+			await expect( response.status() ).toEqual( 404 );
+		}
 	} );
 
 

@@ -1,90 +1,434 @@
-name: Run CI
+name: 'CI'
 on:
+    pull_request:
     push:
         branches:
-            - trunk
-            - 'release/**'
-    workflow_dispatch:
+            - 'trunk'
+            - 'release/*'
+    release:
+      types: [ published, edited ]
+    workflow_call:
+        inputs:
+            trigger:
+                description: 'Type of run to trigger. E.g. daily-e2e, release-checks, etc.'
+                required: true
+                default: 'default'
+                type: string
 
-defaults:
-    run:
-        shell: bash
 concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
+    group: '${{ github.workflow }}-${{ github.ref }}'
     cancel-in-progress: true
-
-permissions: {}
+    
+env: 
+  FORCE_COLOR: 1
 
 jobs:
-    test:
-        name: PHP ${{ matrix.php }} WP ${{ matrix.wp }} - ${{ matrix.unittests }}
-        timeout-minutes: 30
-        runs-on: ubuntu-20.04
-        permissions:
-            contents: read
-        continue-on-error: ${{ matrix.wp == 'nightly' }}
+    project-jobs:
+        # Since this is a monorepo, not every pull request or change is going to impact every project.
+        # Instead of running CI tasks on all projects indiscriminately, we use a command to detect
+        # which projects have changed and what kind of change occurred. This lets us build the
+        # matrices that we can use to run CI tasks only on the projects that need them.
+        name: 'Build Project Jobs'
+        runs-on: 'ubuntu-20.04'
+        outputs:
+            lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
+            test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
+            report-jobs: ${{ steps.project-jobs.outputs.report-jobs }}
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+              with:
+                  fetch-depth: 0
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              name: 'Setup Monorepo'
+              with:
+                  php-version: false # We don't want to waste time installing PHP since we aren't using it in this job.
+            - uses: actions/github-script@v7
+              name: 'Build Matrix'
+              id: 'project-jobs'
+              with:
+                  script: |
+                      let baseRef = ${{ toJson( github.base_ref ) }};
+                      if ( baseRef ) {
+                        baseRef = `--base-ref origin/${ baseRef }`;
+                      }
+
+                      let githubEvent = ${{ toJson( github.event_name ) }};
+                    
+                      const refType = ${{ toJson( github.ref_type ) }};
+                      const refName = ${{ toJson( github.ref_name ) }};
+                    
+                      if ( refType === 'tag' && refName !== 'nightly' ) {
+                        githubEvent = 'release-checks';
+                      }
+                    
+                      if ( refType === 'tag' && refName === 'nightly' ) {
+                        githubEvent = 'nightly-checks';
+                      }
+                    
+                      let trigger = ${{ toJson( inputs.trigger ) }};
+                      if ( trigger ) {
+                        githubEvent = trigger;
+                      }
+
+                      const child_process = require( 'node:child_process' );
+                      child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
+
+    project-lint-jobs:
+        name: "Lint - ${{ matrix.projectName }} ${{ matrix.optional && ' (optional)' || ''}}"
+        runs-on: 'ubuntu-20.04'
+        needs: 'project-jobs'
+        if: ${{ needs.project-jobs.outputs.lint-jobs != '[]' && github.event_name == 'pull_request' }}
         strategy:
             fail-fast: false
             matrix:
-                php: ['7.4', '8.0']
-                wp: ['latest']
-                unittests: ['shard1', 'shard2']
-                include:
-                    - wp: nightly
-                      php: '7.4'
-                      unittests: 'shard1'
-                    - wp: nightly
-                      php: '7.4'
-                      unittests: 'shard2'
-                    - wp: '6.1'
-                      php: 7.4
-                      unittests: 'shard1'
-                    - wp: '6.1'
-                      php: 7.4
-                      unittests: 'shard2'
-        services:
-            database:
-                image: mysql:5.6
-                env:
-                    MYSQL_ROOT_PASSWORD: root
-                ports:
-                    - 3306:3306
-                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+                include: ${{ fromJSON( needs.project-jobs.outputs.lint-jobs ) }}
         steps:
-            - uses: actions/checkout@v3
-
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
               with:
-                  build-filters: woocommerce
+                  fetch-depth: 0
+                  
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              name: 'Setup Monorepo'
+              id: 'setup-monorepo'
+              with:
+                  install: '${{ matrix.projectName }}...'
+                  build: '${{ matrix.projectName }}'
+                  
+            - name: 'Lint'
+              run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
-            - name: Tool versions
+    project-test-jobs:
+        name: "${{ matrix.name }}"
+        runs-on: 'ubuntu-20.04'
+        needs: 'project-jobs'
+        if: ${{ needs.project-jobs.outputs.test-jobs != '[]' }}
+        env: ${{ matrix.testEnv.envVars }}
+        strategy:
+            fail-fast: false
+            matrix:
+                include: ${{ fromJSON( needs.project-jobs.outputs.test-jobs ) }}
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+              
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              name: 'Install Monorepo'
+              id: 'install-monorepo'
+              with:
+                install: '${{ matrix.projectName }}...'
+                build: 'false'
+
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              if: ${{ github.ref_type != 'tag' }}
+              name: 'Build project'
+              id: 'build-project'
+              with:
+                install: 'false'
+                build: ${{ matrix.projectName }}
+                  
+            - name: 'Update wp-env config'
+              if: ${{ github.ref_type == 'tag' }}
+              env:
+                RELEASE_TAG: ${{ github.ref_name }}
+                ARTIFACT_NAME: ${{ github.ref_name == 'nightly' && 'woocommerce-trunk-nightly.zip' || 'woocommerce.zip' }}
+              working-directory: ${{ matrix.projectPath }}
+              run: node ./tests/e2e-pw/bin/override-wp-env-plugins.js
+              
+            - name: 'Start Test Environment'
+              id: 'prepare-test-environment'
+              if: ${{ matrix.testEnv.shouldCreate }}
+              env: ${{ matrix.testEnv.envVars }}
+              run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+              
+            - name: 'Get commit message'
+              id: 'get_commit_message'
+              env:
+                HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                PR_TITLE: ${{ github.event.pull_request.title }}
               run: |
-                  php --version
-                  composer --version
-
-            - name: Build Admin feature config
-              working-directory: plugins/woocommerce
-              run: pnpm run build:feature-config
-
-            - id: parseMatrix
-              name: Parse Matrix Variables
-              uses: actions/github-script@v6
+                if [[ "${{ github.event_name }}" == "push" ]]; then
+                  COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+                elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+                  COMMIT_MESSAGE="$PR_TITLE"
+                else
+                  COMMIT_MESSAGE="${{ github.event_name }}"
+                fi
+                echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
+              shell: bash
+              
+            - name: 'Run tests'
+              env:
+                BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
+                BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
+                CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
+              run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
+              
+            - name: 'Resolve artifacts path'
+              if: ${{ always() && matrix.report.resultsPath != '' }}
+              # Blocks e2e use a relative path which is not supported by actions/upload-artifact@v4
+              # https://github.com/actions/upload-artifact/issues/176
+              env:
+                ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
+              run: echo "ARTIFACTS_PATH=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
+              
+            - name: 'Upload artifacts'
+              if: ${{ always() && matrix.report.resultsPath != '' }}
+              uses: actions/upload-artifact@v4
               with:
-                  script: |
-                      const parseWPVersion = require( './.github/workflows/scripts/parse-wp-version' );
-                      parseWPVersion( '${{ matrix.wp }}' ).then( ( version ) => {
-                        core.setOutput( 'wpVersion', version );
-                      } );
+                name: '${{ matrix.report.resultsBlobName }}__${{ strategy.job-index }}'
+                path: ${{ env.ARTIFACTS_PATH }}
+                
+            - name: 'Upload flaky test reports'
+              uses: actions/upload-artifact@v4
+              with:
+                name: flaky-tests-${{ strategy.job-index }}
+                path: ${{ env.ARTIFACTS_PATH }}/flaky-tests
+                if-no-files-found: ignore
 
-            - name: Prepare Testing Environment
+            - name: 'Archive metrics results'
+              if: ${{ success() && startsWith(matrix.name, 'Metrics') }} # this seems too fragile, we should update the reporting path and use the generic upload step above
+              uses: actions/upload-artifact@v4
               env:
-                  WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
-                  WP_ENV_PHP_VERSION: ${{ matrix.php }}
-              run: pnpm --filter=woocommerce env:test
+                WP_ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
+              with:
+                name: metrics-results
+                path: ${{ env.WP_ARTIFACTS_PATH }}/*.performance-results*.json
 
-            - name: Run Tests
+    evaluate-project-jobs:
+        # In order to add a required status check we need a consistent job that we can grab onto.
+        # Since we are dynamically generating a matrix for the project jobs, however, we can't
+        # rely on any specific job being present. We can get around this limitation by
+        # using a job that runs after all the others and either passes or fails based
+        # on the results of the other jobs in the workflow.
+        name: 'Evaluate Project Job Statuses'
+        runs-on: 'ubuntu-20.04'
+        needs:
+            [
+                'project-jobs',
+                'project-lint-jobs',
+                'project-test-jobs',
+            ]
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+
+            - name: 'Evaluation'
               env:
-                  WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
-                  WP_ENV_PHP_VERSION: ${{ matrix.php }}
-              run: pnpm --filter=woocommerce test:unit:env --testsuite ${{ matrix.unittests }}
+                  REPOSITORY: ${{ github.repository }}
+                  RUN_ID: ${{ github.run_id }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  # Check if project-jobs was successful. Fail for any other status, including skipped. 
+                  result="${{ needs.project-jobs.result }}"
+                  if [[ $result != "success" ]]; then
+                    echo "Generating CI jobs was not successful."
+                    exit 1
+                  fi
+
+                  node .github/workflows/scripts/evaluate-jobs-conclusions.js
+
+    alert-on-failure:
+        name: 'Report results on Slack'
+        runs-on: 'ubuntu-20.04'
+        needs:
+            [
+                'project-jobs',
+                'project-lint-jobs',
+                'project-test-jobs',
+            ]
+        if: ${{ always() && github.event_name != 'pull_request'  }}
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              name: 'Setup Monorepo'
+              with:
+                  php-version: false
+
+            - name: 'Send messages for failed jobs'
+              env:
+                  SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+                  SLACK_CHANNEL: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
+                  HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                  INPUT_TRIGGER: ${{ inputs.trigger }}
+                  RUN_TYPE: ${{ github.ref_type == 'tag' && (github.ref_name == 'nightly' && 'nightly-checks' || 'release-checks') || '' }}
+              run: |
+                  COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+                
+                  if [[ -n "${INPUT_TRIGGER}" ]]; then
+                      CHECKS_TYPE="${INPUT_TRIGGER}"
+                  else
+                      CHECKS_TYPE="${RUN_TYPE}"
+                  fi
+
+                  pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$CHECKS_TYPE Build jobs matrix" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$CHECKS_TYPE Linting" -m "$COMMIT_MESSAGE"
+                  pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE Tests" -m "$COMMIT_MESSAGE"
+
+    test-reports:
+        name: 'Test reports - ${{ matrix.report }}'
+        needs:
+          [
+            'project-jobs',
+            'project-test-jobs',
+          ]
+        if: ${{ always() && needs.project-jobs.outputs.report-jobs != '[]' }}
+        strategy:
+          fail-fast: false
+          matrix:
+            report: ${{ fromJSON( needs.project-jobs.outputs.report-jobs ) }}
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: 'Install Allure CLI'
+              env:
+                  DESTINATION_PATH: ../
+              run: ./.github/workflows/scripts/install-allure.sh
+              
+            - name: 'Merge artifacts'
+              uses: actions/upload-artifact/merge@v4
+              continue-on-error: true
+              with:
+                name: ${{ matrix.report }}
+                pattern: ${{ matrix.report }}__*
+                delete-merged: true
+
+            - name: 'Download merged artifacts'
+              uses: actions/download-artifact@v4
+              with:
+                  name: ${{ matrix.report }}
+                  path: ./out
+
+            - name: 'Generate Allure report'
+              id: generate_allure_report
+              run: |
+                ls -lh ./out
+                allure generate --clean ./out/allure-results --output ./out/allure-report
+                ls -lh ./out
+
+            - name: 'Re-upload artifacts with generated report'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ matrix.report }}
+                  path: ./out
+                  if-no-files-found: ignore
+                  retention-days: 10
+                  overwrite: true
+
+            - name: 'Publish report to dashboard'
+              env:
+                  GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+                  REPORT_NAME: ${{ matrix.report }}
+                  HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                  PR_TITLE: ${{ github.event.pull_request.title }}
+                  EVENT_NAME: ${{ inputs.trigger == '' && github.event_name || inputs.trigger }}
+              run: |
+                  if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+                    REPORT_TITLE="$PR_TITLE"
+                    REF_NAME="$GITHUB_HEAD_REF"
+                  elif [[ "${{ github.event_name }}" == "push" ]]; then
+                    REPORT_TITLE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+                    REF_NAME="$GITHUB_REF_NAME"
+                  else
+                    REPORT_TITLE="$EVENT_NAME"
+                    REF_NAME="$GITHUB_REF_NAME"
+                  fi
+                
+                  gh workflow run report.yml \
+                    -f artifact="$REPORT_NAME" \
+                    -f run_id="$GITHUB_RUN_ID" \
+                    -f run_attempt="$GITHUB_RUN_ATTEMPT" \
+                    -f event="$EVENT_NAME" \
+                    -f pr_number="$PR_NUMBER" \
+                    -f ref_name="$REF_NAME" \
+                    -f commit_sha="$GITHUB_SHA" \
+                    -f repository="$GITHUB_REPOSITORY" \
+                    -f suite="$REPORT_NAME" \
+                    -f report_title="$REPORT_TITLE" \
+                    --repo woocommerce/woocommerce-test-reports
+                
+            - name: 'Publish report to dashboard (deprecated)'
+              env:
+                  GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+                  RUN_ID: ${{ github.run_id }}
+                  REPORT_NAME: ${{ matrix.report }}
+              if: ${{ contains(matrix.report, 'e2e') }} # temporary until we adapt the woocommerce-test-reports side to not care about the test type
+              run: |
+                  if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
+                    gh workflow run publish-test-reports-pr.yml \
+                      -f run_id=$RUN_ID \
+                      -f e2e_artifact=$REPORT_NAME \
+                      -f pr_number=$PR_NUMBER \
+                      -f commit_sha=$GITHUB_SHA \
+                      -f s3_root=public \
+                      --repo woocommerce/woocommerce-test-reports
+                  elif [ "$GITHUB_EVENT_NAME" == push ]; then
+                    gh workflow run publish-test-reports-trunk-merge.yml \
+                      -f run_id=$RUN_ID \
+                      -f artifact=$REPORT_NAME \
+                      -f pr_number=$PR_NUMBER \
+                      -f commit_sha=$GITHUB_SHA \
+                      -f test_type="e2e" \
+                      --repo woocommerce/woocommerce-test-reports
+                  else
+                    echo "No report will be created for '$GITHUB_EVENT_NAME' event"
+                  fi
+
+            - name: 'Add annotation to workflow run linking to PR'
+              if: ${{ github.event_name == 'pull_request' && contains(matrix.report, 'e2e') }}
+              run: |
+                  echo "::notice::🔗🔗 The e2e report for this run is available at https://woocommerce.github.io/woocommerce-test-reports/pr/${{ github.event.pull_request.number }}/e2e"
+
+
+    report-flaky-tests:
+        name: 'Create issues for flaky tests'
+        if: ${{ !cancelled() && ! github.event.pull_request.head.repo.fork }}
+        needs: ['project-test-jobs']
+        runs-on: ubuntu-latest
+        permissions:
+          contents: read
+          issues: write
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  repository: WordPress/gutenberg
+                  ref: dbf201449e9736f672b61e422787d47659db327a
+                  
+            - uses: actions/download-artifact@v4
+              id: download-artifact
+              with:
+                pattern: flaky-tests*
+                path: flaky-tests
+                merge-multiple: true
+                
+            - name: 'Check if there are flaky tests reports'
+              run: |
+                downloadPath='${{ steps.download-artifact.outputs.download-path }}'
+                # make dir so that next step doesn't fail if it doesn't exist 
+                mkdir -p $downloadPath
+                # any output means there are reports
+                echo "FLAKY_REPORTS=$(ls -A $downloadPath | head -1)" >> $GITHUB_ENV
+                
+            - name: 'Setup'
+              if: ${{ !!env.FLAKY_REPORTS }}
+              uses: ./.github/setup-node
+
+            - name: 'Build packages'
+              if: ${{ !!env.FLAKY_REPORTS }}
+              run: npm run build:packages
+
+            - name: 'Report flaky tests'
+              if: ${{ !!env.FLAKY_REPORTS }}
+              uses: ./packages/report-flaky-tests
+              with:
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+                  label: 'metric: flaky e2e test'

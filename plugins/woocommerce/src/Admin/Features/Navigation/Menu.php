@@ -223,13 +223,16 @@ class Menu {
 		}
 
 		if ( isset( self::$menu_items[ $args['id'] ] ) ) {
-			error_log(  // phpcs:ignore
+			wc_doing_it_wrong(
+				__METHOD__,
 				sprintf(
 					/* translators: 1: Duplicate menu item path. */
 					esc_html__( 'You have attempted to register a duplicate item with WooCommerce Navigation: %1$s', 'woocommerce' ),
 					'`' . $args['id'] . '`'
-				)
+				),
+				'6.5.0'
 			);
+
 			return;
 		}
 

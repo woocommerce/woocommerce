@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import moment from 'moment';
 import { saveAs } from 'browser-filesaver'; // TODO: Replace this with https://www.npmjs.com/package/file-saver since browser-filesaver is not maintained anymore.
 
 export type Header = {
@@ -20,10 +19,19 @@ function escapeCSVValue( value: string | number ) {
 	let stringValue = value.toString();
 
 	// Prevent CSV injection.
-	// See: http://www.contextis.com/resources/blog/comma-separated-vulnerabilities/
+	// See: https://owasp.org/www-community/attacks/CSV_Injection
 	// See: WC_CSV_Exporter::escape_data()
-	if ( [ '=', '+', '-', '@' ].includes( stringValue.charAt( 0 ) ) ) {
-		stringValue = '"\t' + stringValue + '"';
+	if (
+		[
+			'=',
+			'+',
+			'-',
+			'@',
+			String.fromCharCode( 0x09 ), // tab
+			String.fromCharCode( 0x0d ), // carriage return
+		].includes( stringValue.charAt( 0 ) )
+	) {
+		stringValue = '"\'' + stringValue + '"';
 	} else if ( stringValue.match( /[,"\s]/ ) ) {
 		stringValue = '"' + stringValue.replace( /"/g, '""' ) + '"';
 	}
@@ -74,6 +82,18 @@ export function generateCSVDataFromTable( headers: Header[], rows: Rows ) {
 }
 
 /**
+ * Today's date in the format YYYY-MM-DD
+ *
+ * @return {string} the formatted date.
+ */
+function todayDateStr() {
+	const date = new Date();
+	const dateStr = date.toISOString().split( 'T' )[ 0 ];
+
+	return dateStr;
+}
+
+/**
  * Generates a file name for CSV files based on the provided name, the current date
  * and the provided params, which are all appended with hyphens.
  *
@@ -87,7 +107,7 @@ export function generateCSVFileName(
 ) {
 	const fileNameSections = [
 		name.toLowerCase().replace( /[^a-z0-9]/g, '-' ),
-		moment().format( 'YYYY-MM-DD' ),
+		todayDateStr(),
 		Object.keys( params )
 			.map(
 				( key ) =>

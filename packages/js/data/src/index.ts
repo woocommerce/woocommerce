@@ -87,12 +87,14 @@ export * from './onboarding/types';
 export * from './plugins/types';
 export * from './products/types';
 export type {
+	PartialProductVariation,
 	ProductVariation,
 	ProductVariationAttribute,
 	ProductVariationImage,
 } from './product-variations/types';
 export {
 	QueryProductAttribute,
+	ProductAttribute,
 	ProductAttributeSelectors,
 } from './product-attributes/types';
 export * from './product-shipping-classes/types';
@@ -107,6 +109,9 @@ export {
 	ProductCategorySelectors,
 } from './product-categories/types';
 export { TaxClass } from './tax-classes/types';
+export { ProductTag, Query } from './product-tags/types';
+export { WCUser } from './user/types';
+export { UserPreferences } from './user/types';
 
 /**
  * Internal dependencies
@@ -241,7 +246,7 @@ export interface WCDataSelector {
 
 // Other exports
 export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
-export { ActionDispatchers as ProductAttributesActions } from './product-attributes/types';
+export { CustomActionDispatchers as ProductAttributesActions } from './product-attributes/types';
 export { ActionDispatchers as ProductTagsActions } from './product-tags/types';
 export { ActionDispatchers as ProductCategoryActions } from './product-categories/types';
 export { ActionDispatchers as ProductAttributeTermsActions } from './product-attribute-terms/types';

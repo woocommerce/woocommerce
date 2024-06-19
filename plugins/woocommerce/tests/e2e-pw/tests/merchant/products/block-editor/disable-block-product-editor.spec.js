@@ -6,33 +6,26 @@ const {
 	isBlockProductEditorEnabled,
 	toggleBlockProductEditor,
 } = require( '../../../../utils/simple-products' );
-
-const ALL_PRODUCTS_URL = 'wp-admin/edit.php?post_type=product';
-const NEW_EDITOR_ADD_PRODUCT_URL =
-	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
-const SETTINGS_URL =
-	'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features';
+const { toggleBlockProductTour } = require( '../../../../utils/tours' );
 
 let isNewProductEditorEnabled = false;
 
 const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 
 async function dismissFeedbackModalIfShown( page ) {
-	// if ( ! isTrackingSupposedToBeEnabled ) {
-	// 	// no modal should be shown, so don't even look for button
-	// 	console.log('Feedback modal not shown');
-	// 	return;
-	// }
-
 	try {
 		await page
-			.getByText('Skip').nth(3)
-			.click( { timeout: 5000 } );
+			.getByRole( 'button', { name: 'Skip' } )
+			.click( { timeout: 10000 } );
 	} catch ( error ) {}
 }
 
 test.describe.serial( 'Disable block product editor', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
+
+	test.beforeAll( async ( { request } ) => {
+		await toggleBlockProductTour( request, false );
+	} );
 
 	test.beforeEach( async ( { page } ) => {
 		isNewProductEditorEnabled = await isBlockProductEditorEnabled( page );
@@ -56,19 +49,25 @@ test.describe.serial( 'Disable block product editor', () => {
 	);
 
 	test( 'is hooked up to sidebar "Add New"', async ( { page } ) => {
-		await page.goto( ALL_PRODUCTS_URL );
+		await page.goto( '/wp-admin/edit.php?post_type=product' );
 		await clickAddNewMenuItem( page );
 		await expectBlockProductEditor( page );
 	} );
 
 	test( 'can be disabled from the header', async ( { page } ) => {
-		await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
+		await page.goto(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fadd-product'
+		);
+
+		try {
+			// dismiss feature highlight if shown
+			await page
+				.getByRole( 'button', { name: 'Close Tour' } )
+				.click( { timeout: 5000 } );
+		} catch ( e ) {}
 
 		// turn off block product editor from the header
-		await page
-			.locator( '.components-dropdown-menu' )
-			.getByRole( 'button', { name: 'Options' } )
-			.click();
+		await page.locator( 'button[aria-label="Options"]' ).click();
 		await page
 			.getByRole( 'menuitem', {
 				name: 'Turn off the new product form',
@@ -77,9 +76,10 @@ test.describe.serial( 'Disable block product editor', () => {
 		await dismissFeedbackModalIfShown( page );
 		await expectOldProductEditor( page );
 	} );
+
 	test( 'can be disabled from settings', async ( { page } ) => {
 		await toggleBlockProductEditor( 'disable', page );
-		await page.goto( ALL_PRODUCTS_URL );
+		await page.goto( '/wp-admin/edit.php?post_type=product' );
 		await clickAddNewMenuItem( page );
 		await expectOldProductEditor( page );
 	} );

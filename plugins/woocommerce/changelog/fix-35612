@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Support inserting NULL values for strict DB mode for DataBase Util's insert_on_duplicate_key_update method.

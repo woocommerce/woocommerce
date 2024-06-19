@@ -8,8 +8,8 @@ import './Marketing';
 import './appearance';
 import './tax';
 import './woocommerce-payments';
-import './purchase';
 import './deprecated-tasks';
+import './launch-your-store';
 
 const possiblyImportProductTask = async () => {
 	if ( isImportProduct() ) {

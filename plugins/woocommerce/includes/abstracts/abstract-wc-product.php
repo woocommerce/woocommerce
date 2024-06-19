@@ -74,7 +74,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'tax_status'         => 'taxable',
 		'tax_class'          => '',
 		'manage_stock'       => false,
-		'stock_quantity'     => null,
+		'stock_quantity'     => 0,
 		'stock_status'       => 'instock',
 		'backorders'         => 'no',
 		'low_stock_amount'   => '',
@@ -358,10 +358,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Returns number of items available for sale.
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @return int|null
+	 * @return int
 	 */
 	public function get_stock_quantity( $context = 'view' ) {
-		return $this->get_prop( 'stock_quantity', $context );
+		return $this->get_prop( 'stock_quantity', $context ) ?? 0;
 	}
 
 	/**
@@ -966,7 +966,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float|null $quantity Stock quantity.
 	 */
 	public function set_stock_quantity( $quantity ) {
-		$this->set_prop( 'stock_quantity', '' !== $quantity ? wc_stock_amount( $quantity ) : null );
+		$this->set_prop( 'stock_quantity', '' !== $quantity ? wc_stock_amount( $quantity ) : 0 );
 	}
 
 	/**
@@ -1603,7 +1603,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( $this->get_parent_id() ) {
 			$parent_product = wc_get_product( $this->get_parent_id() );
 
-			if ( $parent_product && 'publish' !== $parent_product->get_status() ) {
+			if ( $parent_product && 'publish' !== $parent_product->get_status() && ! current_user_can( 'edit_post', $parent_product->get_id() ) ) {
 				$visible = false;
 			}
 		}

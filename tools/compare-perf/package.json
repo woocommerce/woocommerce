@@ -1,0 +1,24 @@
+{
+	"name": "compare-perf",
+	"version": "0.0.1",
+	"description": "A tool to compare performance accross tow branches in WooCommerce Monorepo.",
+	"author": "Automattic",
+	"homepage": "https://github.com/woocommerce/woocommerce",
+	"license": "GPLv2",
+	"repository": "woocommerce/woocommerce",
+	"scripts": {
+		"compare": "node index.js",
+		"log": "node log-to-codevitals.js"
+	},
+	"dependencies": {
+		"@wordpress/env": "^9.0.7",
+		"commander": "9.5.0",
+		"chalk": "^4.1.2",
+		"inquirer": "^7.1.0",
+		"simple-git": "^3.21.0"
+	},
+	"engines": {
+		"node": "^20.11.1",
+		"pnpm": "^9.1.0"
+	}
+}

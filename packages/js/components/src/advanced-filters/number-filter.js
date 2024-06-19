@@ -141,7 +141,6 @@ class NumberFilter extends Component {
 		let labelFormat = '';
 
 		if ( filter.rule === 'lessthan' ) {
-			/* eslint-disable-next-line max-len */
 			/* translators: Sentence fragment, "maximum amount" refers to a numeric value the field must be less than. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
 			labelFormat = _x(
 				'%(field)s maximum amount',
@@ -149,7 +148,6 @@ class NumberFilter extends Component {
 				'woocommerce'
 			);
 		} else {
-			/* eslint-disable-next-line max-len */
 			/* translators: Sentence fragment, "minimum amount" refers to a numeric value the field must be more than. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
 			labelFormat = _x(
 				'%(field)s minimum amount',
@@ -198,7 +196,6 @@ class NumberFilter extends Component {
 				type: inputType,
 				value: rangeStart || '',
 				label: sprintf(
-					/* eslint-disable-next-line max-len */
 					/* translators: Sentence fragment, "range start" refers to the first of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
 					__( '%(field)s range start', 'woocommerce' ),
 					{ field: get( config, [ 'labels', 'add' ] ) }
@@ -211,7 +208,6 @@ class NumberFilter extends Component {
 				type: inputType,
 				value: rangeEnd || '',
 				label: sprintf(
-					/* eslint-disable-next-line max-len */
 					/* translators: Sentence fragment, "range end" refers to the second of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
 					__( '%(field)s range end', 'woocommerce' ),
 					{ field: get( config, [ 'labels', 'add' ] ) }

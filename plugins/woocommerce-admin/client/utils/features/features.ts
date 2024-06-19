@@ -9,7 +9,7 @@ const ADMIN_SETTINGS_FEATURES_NAME = 'features';
 /**
  * Get the feature flag from admin settings.
  *
- * @param  featureId The feature id
+ * @param featureId The feature id
  * @return The feature flag
  */
 export function getFeature( featureId: string ): Feature | undefined {
@@ -20,7 +20,7 @@ export function getFeature( featureId: string ): Feature | undefined {
 /**
  * Returns if the feature is enabled.
  *
- * @param  featureId The feature id
+ * @param featureId The feature id
  * @return `true` or `false` if the given feature is enabled
  */
 export function isFeatureEnabled( featureId: string ): boolean {
@@ -31,7 +31,7 @@ export function isFeatureEnabled( featureId: string ): boolean {
 /**
  * Returns if the feature is experimental.
  *
- * @param  featureId The feature id
+ * @param featureId The feature id
  * @return `true` or `false` if the given feature is experimental
  */
 export function isFeatureExperimental( featureId: string ): boolean {

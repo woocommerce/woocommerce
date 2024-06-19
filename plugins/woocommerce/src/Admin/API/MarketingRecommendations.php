@@ -7,7 +7,7 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
-use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
+use Automattic\WooCommerce\Admin\Features\MarketingRecommendations\Init as MarketingRecommendationsInit;
 use WC_REST_Controller;
 use WP_Error;
 use WP_REST_Request;
@@ -88,18 +88,11 @@ class MarketingRecommendations extends WC_REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) {
-		/**
-		 * MarketingSpecs class.
-		 *
-		 * @var MarketingSpecs $marketing_specs
-		 */
-		$marketing_specs = wc_get_container()->get( MarketingSpecs::class );
-
 		$category = $request->get_param( 'category' );
 		if ( 'channels' === $category ) {
-			$items = $marketing_specs->get_recommended_marketing_channels();
+			$items = MarketingRecommendationsInit::get_recommended_marketing_channels();
 		} elseif ( 'extensions' === $category ) {
-			$items = $marketing_specs->get_recommended_marketing_extensions_excluding_channels();
+			$items = MarketingRecommendationsInit::get_recommended_marketing_extensions_excluding_channels();
 		} else {
 			return new WP_Error( 'woocommerce_rest_invalid_category', __( 'The specified category for recommendations is invalid. Allowed values: "channels", "extensions".', 'woocommerce' ), array( 'status' => 400 ) );
 		}

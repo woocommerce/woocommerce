@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Fixing mismatched dependencies between @types/react-dom and react-dom

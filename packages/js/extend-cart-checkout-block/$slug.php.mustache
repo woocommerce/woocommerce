@@ -18,34 +18,119 @@
  *
  * @package         {{namespace}}
  */
-add_action('woocommerce_blocks_loaded', function() {
-    require_once __DIR__ . '/{{slug}}-blocks-integration.php';
-	add_action(
-		'woocommerce_blocks_cart_block_registration',
-		function( $integration_registry ) {
-			$integration_registry->register( new {{slugPascalCase}}_Blocks_Integration() );
-		}
-	);
-	add_action(
-		'woocommerce_blocks_checkout_block_registration',
-		function( $integration_registry ) {
-			$integration_registry->register( new {{slugPascalCase}}_Blocks_Integration() );
-		}
-	);
-});
+add_action( 'woocommerce_blocks_loaded',
+	function () {
+		require_once __DIR__ . '/{{slug}}-blocks-integration.php';
+		add_action(
+			'woocommerce_blocks_cart_block_registration',
+			function ( $integration_registry ) {
+				$integration_registry->register( new {{slugPascalCase}}_Blocks_Integration() );
+			}
+		);
+		add_action(
+			'woocommerce_blocks_checkout_block_registration',
+			function ( $integration_registry ) {
+				$integration_registry->register( new {{slugPascalCase}}_Blocks_Integration() );
+			}
+		);
+	}
+);
 
 /**
  * Registers the slug as a block category with WordPress.
  */
 function register_{{slugPascalCase}}_block_category( $categories ) {
-    return array_merge(
-        $categories,
-        [
-            [
-                'slug'  => '{{slug}}',
-                'title' => __( '{{slugPascalCase}} Blocks', '{{slug}}' ),
-            ],
-        ]
-    );
+	return array_merge(
+		$categories,
+		[
+			[
+				'slug'  => '{{slug}}',
+				'title' => __( '{{slugPascalCase}} Blocks', '{{slug}}' ),
+			],
+		]
+	);
 }
+
 add_action( 'block_categories_all', 'register_{{slugPascalCase}}_block_category', 10, 2 );
+
+
+add_action( 'woocommerce_init', '{{slugPascalCase}}_register_custom_checkout_fields' );
+
+/**
+ * Registers custom checkout fields for the WooCommerce checkout form.
+ *
+ * @return void
+ * @throws Exception If there is an error during the registration of the checkout fields.
+ */
+function {{slugPascalCase}}_register_custom_checkout_fields() {
+
+	if ( ! function_exists( 'woocommerce_register_additional_checkout_field' ) ) {
+		return;
+	}
+
+	woocommerce_register_additional_checkout_field(
+		array(
+			'id'       => '{{slug}}/custom-checkbox',
+			'label'    => 'Check this box to see a custom field on the order.',
+			'location' => 'contact',
+			'type'     => 'checkbox',
+		)
+	);
+
+	woocommerce_register_additional_checkout_field(
+		array(
+			'id'       => '{{slug}}/custom-text-input',
+			'label'    => "{{slugPascalCase}}'s example text input",
+			'location' => 'address',
+			'type'     => 'text',
+		)
+	);
+
+	/**
+	 * Sanitizes the value of the custom text input field. For demo purposes we will just turn it to all caps.
+	 */
+	add_action(
+		'woocommerce_sanitize_additional_field',
+		function ( $value, $key, $group ) {
+			if ( '{{slug}}/custom-text-input' === $key ) {
+				return strtoupper( $value );
+			}
+			return $value;
+		},
+		10,
+		3
+	);
+
+	/**
+	 * Validates the custom text input field. For demo purposes we will not accept the string 'INVALID'.
+	 */
+	add_action(
+		'woocommerce_blocks_validate_location_address_fields',
+		function ( \WP_Error $errors, $fields, $group ) {
+			if ( 'INVALID' === $fields['{{slug}}/custom-text-input'] ) {
+				$errors->add( 'invalid_text_detected', 'Please ensure your custom text input is not "INVALID".' );
+			}
+		},
+		10,
+		3
+	);
+
+	woocommerce_register_additional_checkout_field(
+		array(
+			'id'       => '{{slug}}/custom-select-input',
+			'label'    => "{{slugPascalCase}}'s example select input",
+			'location' => 'order',
+			'type'     => 'select',
+			'options'  => [
+				[
+					'label' => 'Option 1',
+					'value' => 'option1',
+				],
+				[
+					'label' => 'Option 2',
+					'value' => 'option2',
+				],
+			],
+		)
+	);
+}

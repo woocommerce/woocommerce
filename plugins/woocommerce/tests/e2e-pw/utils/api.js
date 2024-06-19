@@ -247,6 +247,19 @@ const create = {
 
 		return response.data.id;
 	},
+	shippingZone: async ( zone ) => {
+		const response = await api.post( 'shipping/zones', zone );
+
+		return response.data.id;
+	},
+	shippingMethod: async ( zoneId, method ) => {
+		const response = await api.post(
+			`shipping/zones/${ zoneId }/methods`,
+			method
+		);
+
+		return response.data.id;
+	},
 	/**
 	 * Batch create product variations.
 	 *

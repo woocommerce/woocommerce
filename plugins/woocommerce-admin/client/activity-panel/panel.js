@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Suspense, useRef, useCallback } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Spinner } from '@woocommerce/components';
 
 /**
@@ -21,6 +21,9 @@ export const Panel = ( {
 	clearPanel,
 } ) => {
 	const panelClass = 'woocommerce-layout__activity-panel-wrapper';
+
+	const focusOnMountRef = useFocusOnMount();
+	const containerRef = useRef( null );
 
 	const handleFocusOutside = ( event ) => {
 		const isClickOnModalOrSnackbar =
@@ -50,9 +53,7 @@ export const Panel = ( {
 		}
 	};
 
-	const focusOnMountRef = useFocusOnMount();
 	const useFocusOutsideProps = useFocusOutside( handleFocusOutside );
-	const containerRef = useRef( null );
 
 	const mergedContainerRef = useCallback( ( node ) => {
 		containerRef.current = node;
@@ -67,7 +68,7 @@ export const Panel = ( {
 		return null;
 	}
 
-	const classNames = classnames( panelClass, {
+	const classNames = clsx( panelClass, {
 		'is-open': isPanelOpen,
 		'is-switching': isPanelSwitching,
 	} );

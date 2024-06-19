@@ -17,7 +17,11 @@ import type {
 	GenerateRequest,
 } from './types';
 import CRUD_ACTIONS from './crud-actions';
-import { ProductAttribute } from '../products/types';
+import {
+	Product,
+	ProductProductAttribute,
+	ProductDefaultAttribute,
+} from '../products/types';
 
 export function generateProductVariationsError( key: IdType, error: unknown ) {
 	return {
@@ -46,9 +50,12 @@ export const generateProductVariations = function* (
 	idQuery: IdQuery,
 	productData: {
 		type?: string;
-		attributes: ProductAttribute[];
+		attributes: ProductProductAttribute[];
+		default_attributes?: ProductDefaultAttribute[];
+		meta_data?: Product[ 'meta_data' ];
 	},
-	data: GenerateRequest
+	data: GenerateRequest,
+	saveAttributes = true
 ) {
 	const urlParameters = getUrlParameters(
 		WC_PRODUCT_VARIATIONS_NAMESPACE,
@@ -57,20 +64,22 @@ export const generateProductVariations = function* (
 	const { key } = parseId( idQuery, urlParameters );
 	yield generateProductVariationsRequest( key );
 
-	try {
-		yield controls.dispatch(
-			'core',
-			'saveEntityRecord',
-			'postType',
-			'product',
-			{
-				id: urlParameters[ 0 ],
-				...productData,
-			}
-		);
-	} catch ( error ) {
-		yield generateProductVariationsError( key, error );
-		throw error;
+	if ( saveAttributes ) {
+		try {
+			yield controls.dispatch(
+				'core',
+				'saveEntityRecord',
+				'postType',
+				'product',
+				{
+					id: urlParameters[ 0 ],
+					...productData,
+				}
+			);
+		} catch ( error ) {
+			yield generateProductVariationsError( key, error );
+			throw error;
+		}
 	}
 
 	try {
@@ -83,7 +92,6 @@ export const generateProductVariations = function* (
 			method: 'POST',
 			data,
 		} );
-
 		yield generateProductVariationsSuccess( key );
 		return result;
 	} catch ( error ) {

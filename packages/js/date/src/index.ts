@@ -189,7 +189,7 @@ export function getStoreTimeZoneMoment() {
  *
  * @param {moment.DurationInputArg2} period  - the chosen period
  * @param {string}                   compare - `previous_period` or `previous_year`
- * @return {DateValue} -  DateValue data about the selected period
+ * @return {DateValue} - DateValue data about the selected period
  */
 export function getLastPeriod(
 	period: moment.DurationInputArg2,
@@ -241,7 +241,7 @@ export function getLastPeriod(
  *
  * @param {moment.DurationInputArg2} period  - the chosen period
  * @param {string}                   compare - `previous_period` or `previous_year`
- * @return {DateValue} -  DateValue data about the selected period
+ * @return {DateValue} - DateValue data about the selected period
  */
 export function getCurrentPeriod(
 	period: moment.DurationInputArg2,
@@ -600,7 +600,7 @@ export const getPreviousDate = (
 	date: string,
 	date1: string,
 	date2: string,
-	compare: string,
+	compare = 'previous_year',
 	interval: moment.unitOfTime.Diff | moment.DurationInputArg2
 ) => {
 	const dateMoment = moment( date );
@@ -970,4 +970,38 @@ export function validateDateInputForRange(
 		};
 	}
 	return { date };
+}
+
+/**
+ * Checks whether the year is a leap year.
+ *
+ * @param  year Year to check
+ * @return {boolean} True if leap year
+ */
+export function isLeapYear( year: number ) {
+	return ( year % 4 === 0 && year % 100 !== 0 ) || year % 400 === 0;
+}
+
+/**
+ * Checks whether a date range contains leap year.
+ *
+ * @param {string} startDate Start date
+ * @param {string} endDate   End date
+ * @return {boolean} True if date range contains a leap year
+ */
+export function containsLeapYear( startDate: string, endDate: string ) {
+	// Parse the input dates to get the years
+	const startYear = new Date( startDate ).getFullYear();
+	const endYear = new Date( endDate ).getFullYear();
+
+	if ( ! isNaN( startYear ) && ! isNaN( endYear ) ) {
+		// Check each year in the range
+		for ( let year = startYear; year <= endYear; year++ ) {
+			if ( isLeapYear( year ) ) {
+				return true;
+			}
+		}
+	}
+
+	return false; // No leap years in the range or invalid date
 }

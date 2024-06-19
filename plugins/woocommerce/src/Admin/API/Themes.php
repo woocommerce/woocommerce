@@ -192,7 +192,7 @@ class Themes extends \WC_REST_Data_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params['context']   = $this->get_context_param( array( 'default' => 'view' ) );
+		$params              = array( 'context' => $this->get_context_param( array( 'default' => 'view' ) ) );
 		$params['pluginzip'] = array(
 			'description'       => __( 'A zip file of the theme to be uploaded.', 'woocommerce' ),
 			'type'              => 'file',

@@ -1,6 +1,6 @@
 # WooCommerce Playwright End to End Tests
 
-This is the documentation for the new e2e testing setup based on Playwright and wp-env. It superseedes the Puppeteer and e2e-environment [setup](../tests/e2e), which we will gradually deprecate.
+This is the documentation for the e2e testing setup based on Playwright and wp-env. It superseedes the Puppeteer and e2e-environment [setup](../tests/e2e), which we will gradually deprecate.
 
 ## Table of contents
 
@@ -19,10 +19,8 @@ This is the documentation for the new e2e testing setup based on Playwright and 
 
 ## Pre-requisites
 
--   Node.js ([Installation instructions](https://nodejs.org/en/download/))
--   NVM ([Installation instructions](https://github.com/nvm-sh/nvm))
--   PNPM ([Installation instructions](https://pnpm.io/installation))
--   Docker and Docker Compose ([Installation instructions](https://docs.docker.com/engine/install/))
+-   Go through the [WooCommerce Monorepo prerequisites](https://github.com/woocommerce/woocommerce/blob/trunk/README.md#prerequisites) first, including the commands to get everything working.
+-   Install Docker and Docker Compose ([Installation instructions](https://docs.docker.com/engine/install/)). Docker Compose comes installed in Docker Desktop by default.
 
 Note, that if you are on Mac and you install docker through other methods such as homebrew, for example, your steps to set it up might be different. The commands listed in steps below may also vary.
 
@@ -30,13 +28,13 @@ If you are using Windows, we recommend using [Windows Subsystem for Linux (WSL)]
 
 ### Introduction
 
-End-to-end tests are powered by Playwright. The test site is spinned up using `wp-env` (recommended), but we will continue to support `e2e-environment` in the meantime.
+End-to-end tests are powered by Playwright. The test site is spun up using `wp-env` (recommended), but we will continue to support `e2e-environment` in the meantime.
 
 **Running tests for the first time:**
 
 -   `nvm use` (uses the default node version you have set in NVM)
 -   `pnpm install` (installs dependencies)
--   `pnpm run build --filter=woocommerce` (builds WooCommerce locally)
+-   `pnpm --filter='@woocommerce/plugin-woocommerce' build` (builds WooCommerce locally)
 -   `cd plugins/woocommerce` (changes into the WooCommerce plugin folder)
 -   `npx playwright install` (installs the latest Playwright version)
 -   `pnpm env:start` (starts the local environment)
@@ -54,6 +52,7 @@ Other ways of running tests (make sure you are in the `plugins/woocommerce` fold
 -   `pnpm test:e2e-pw --debug` (runs tests in debug mode)
 -   `pnpm test:e2e-pw ./tests/e2e-pw/tests/activate-and-setup/basic-setup.spec.js` (runs a single test)
 -   `pnpm test:e2e-pw --ui` (open tests in [Playwright UI mode](https://playwright.dev/docs/test-ui-mode)). You may need to increase the [test timeout](https://playwright.dev/docs/api/class-testconfig#test-config-timeout) by setting the `DEFAULT_TIMEOUT_OVERRIDE` environment variable like so:
+
     ```bash
     # Increase test timeout to 3 minutes
     export DEFAULT_TIMEOUT_OVERRIDE=180000
@@ -66,14 +65,28 @@ To see all options, make sure you are in the `plugins/woocommerce` folder and ru
 
 The default values are:
 
-- Latest stable WordPress version
-- PHP 7.4
-- Latest stable WordPress version
-- MariaDB
-- URL: `http://localhost:8086/`
-- Admin credentials: `admin/password`
+-   Latest stable WordPress version
+-   PHP 7.4
+-   Latest stable WordPress version
+-   MariaDB
+-   URL: `http://localhost:8086/`
+-   Admin credentials: `admin/password`
 
 For more information how to configure the test environment for `wp-env`, please checkout the [documentation](https://github.com/WordPress/gutenberg/tree/trunk/packages/env) documentation.
+
+#### Alternate environments
+
+If you'd like to run the test suite against an alternate environment (external host for example), you can create a `.env` file in `tests/e2e-pw/` containing the following values:
+
+```bash
+BASE_URL='https://www.example.com'
+ADMIN_USER='admin.username'
+ADMIN_PASSWORD='admin.password'
+CUSTOMER_USER='customer.username'
+CUSTOMER_PASSWORD='customer.password'
+DEFAULT_TIMEOUT_OVERRIDE=100000
+
+```
 
 ### Test Variables
 
@@ -97,11 +110,11 @@ The test environment uses the following test variables:
 
 If you need to modify the port for your local test environment (eg. port is already in use) or use, edit [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/playwright.config.js). Depending on what environment tool you are using, you will need to also edit the respective `.json` file.
 
-**Modiify the port wp-env**
+#### Modify the port wp-env
 
 Edit [.wp-env.json](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/.wp-env.json) and [playwright.config.js](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/playwright.config.js).
 
-**Modify port for e2e-environment**
+#### Modify port for e2e-environment
 
 Edit [tests/e2e/config/default.json](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/config/default.json).\*\*\*\*
 
@@ -116,9 +129,11 @@ After you run a test, it's best to restart the environment to start from a fresh
 
 ## Guide for writing e2e tests
 
+### Tools for writing tests
+
 ### Creating test structure
 
-It is a good practice to start working on the test by identifying what needs to be tested on the higher and lower levels. For example, if you are writing a test to verify that merchant can create a virtual product, the overview of the test will be as follows:
+It is a good practice to start working on the test by identifying what needs to be tested at the higher and lower levels. For example, if you are writing a test to verify that merchant can create a virtual product, the overview of the test will be as follows:
 
 -   Merchant can create virtual product
     -   Merchant can log in
@@ -198,14 +213,14 @@ A browser window should open the Allure report.
 
 If you're on [WSL](https://learn.microsoft.com/en-us/windows/wsl/about) however, you might get this message right after running the `allure open` command:
 
-```
+```bash
 Starting web server...
 2022-12-09 18:52:01.323:INFO::main: Logging initialized @286ms to org.eclipse.jetty.util.log.StdErrLog
 Can not open browser because this capability is not supported on your platform. You can use the link below to open the report manually.
 Server started at <http://127.0.1.1:38917/>. Press <Ctrl+C> to exit
 ```
 
-In this case, take note of the port number (38917 in the example above) and then use it to navigate to `http://localhost`. Taking the example above, you should be able to view the Allure report on http://localhost:38917.
+In this case, take note of the port number (38917 in the example above) and then use it to navigate to localhost. Taking the example above, you should be able to view the Allure report on localhost:38917 in your browser.
 
 To know more about the allure-playwright integration, see their [GitHub documentation](https://github.com/allure-framework/allure-js/tree/master/packages/allure-playwright).
 

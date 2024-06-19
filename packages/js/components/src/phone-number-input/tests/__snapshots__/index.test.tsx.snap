@@ -1,0 +1,93 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PhoneNumberInput should match snapshot 1`] = `
+<div>
+  <div
+    class="wcpay-component-phone-number-input"
+  >
+    <button
+      aria-expanded="false"
+      aria-haspopup="listbox"
+      aria-labelledby="downshift-0-label downshift-0-toggle-button"
+      class="wcpay-component-phone-number-input__button"
+      id="downshift-0-toggle-button"
+      type="button"
+    >
+      <img
+        alt="US flag"
+        class="wcpay-component-phone-number-input__flag"
+        src="https://s.w.org/images/core/emoji/14.0.0/72x72/1f1fa-1f1f8.png"
+      />
+       +1
+      <span
+        class="wcpay-component-phone-number-input__button-arrow"
+      >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="18"
+          viewBox="0 0 24 24"
+          width="18"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M17.5 11.6L12 16l-5.5-4.4.9-1.2L12 14l4.5-3.6 1 1.2z"
+          />
+        </svg>
+      </span>
+    </button>
+    <input
+      class="wcpay-component-phone-number-input__input"
+      style="padding-left: 0px;"
+      type="text"
+      value=""
+    />
+    <ul
+      aria-hidden="true"
+      aria-labelledby="downshift-0-label"
+      class="wcpay-component-phone-number-input__menu"
+      id="downshift-0-menu"
+      role="listbox"
+      tabindex="-1"
+    />
+  </div>
+</div>
+`;
+
+exports[`PhoneNumberInput should match snapshot with custom renders 1`] = `
+<div>
+  <div
+    class="wcpay-component-phone-number-input"
+  >
+    <button
+      aria-expanded="false"
+      aria-haspopup="listbox"
+      aria-labelledby="downshift-1-label downshift-1-toggle-button"
+      class="wcpay-component-phone-number-input__button"
+      id="downshift-1-toggle-button"
+      type="button"
+    >
+      US
+      <span
+        class="wcpay-component-phone-number-input__button-arrow"
+      >
+        ⬇️
+      </span>
+    </button>
+    <input
+      class="wcpay-component-phone-number-input__input"
+      style="padding-left: 0px;"
+      type="text"
+      value=""
+    />
+    <ul
+      aria-hidden="true"
+      aria-labelledby="downshift-1-label"
+      class="wcpay-component-phone-number-input__menu"
+      id="downshift-1-menu"
+      role="listbox"
+      tabindex="-1"
+    />
+  </div>
+</div>
+`;

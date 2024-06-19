@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Modify order index to also include date for faster order list query.

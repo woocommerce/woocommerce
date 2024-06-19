@@ -12,6 +12,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -614,6 +615,20 @@ function wc_get_product_types() {
  * @return bool
  */
 function wc_product_has_unique_sku( $product_id, $sku ) {
+	/**
+	 * Gives plugins an opportunity to verify SKU uniqueness themselves.
+	 *
+	 * @since 9.0.0
+	 *
+	 * @param bool|null $has_unique_sku Set to a boolean value to short-circuit the default SKU check.
+	 * @param int $product_id The ID of the current product.
+	 * @param string $sku The SKU to check for uniqueness.
+	 */
+	$has_unique_sku = apply_filters( 'wc_product_pre_has_unique_sku', null, $product_id, $sku );
+	if ( ! is_null( $has_unique_sku ) ) {
+		return boolval( $has_unique_sku );
+	}
+
 	$data_store = WC_Data_Store::load( 'product' );
 	$sku_found  = $data_store->is_existing_sku( $product_id, $sku );
 
@@ -686,7 +701,7 @@ function wc_get_product_id_by_sku( $sku ) {
  */
 function wc_get_product_variation_attributes( $variation_id ) {
 	// Build variation data from meta.
-	$all_meta                = get_post_meta( $variation_id );
+	$all_meta                = is_array( get_post_meta( $variation_id ) ) ? get_post_meta( $variation_id ) : array();
 	$parent_id               = wp_get_post_parent_id( $variation_id );
 	$parent_attributes       = array_filter( (array) get_post_meta( $parent_id, '_product_attributes', true ) );
 	$found_parent_attributes = array();
@@ -990,9 +1005,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : (float) $product->get_price();
 	$qty   = '' !== $args['qty'] ? max( 0.0, (float) $args['qty'] ) : 1;
 
-	if ( '' === $price ) {
-		return '';
-	} elseif ( empty( $qty ) ) {
+	if ( empty( $qty ) ) {
 		return 0.0;
 	}
 
@@ -1079,9 +1092,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : (float) $product->get_price();
 	$qty   = '' !== $args['qty'] ? max( 0.0, (float) $args['qty'] ) : 1;
 
-	if ( '' === $price ) {
-		return '';
-	} elseif ( empty( $qty ) ) {
+	if ( empty( $qty ) ) {
 		return 0.0;
 	}
 
@@ -1565,13 +1576,17 @@ function wc_update_product_lookup_tables_column( $column ) {
 						{$wpdb->wc_product_meta_lookup} lookup_table
 						LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
 						LEFT JOIN {$wpdb->postmeta} meta2 ON lookup_table.product_id = meta2.post_id AND meta2.meta_key = '_sale_price'
+	  					LEFT JOIN {$wpdb->postmeta} meta3 ON lookup_table.product_id = meta3.post_id AND meta3.meta_key = '_regular_price'
 					SET
 						lookup_table.`{$column}` = IF (
 							CAST( meta1.meta_value AS DECIMAL ) >= 0
 							AND CAST( meta2.meta_value AS CHAR ) != ''
 							AND CAST( meta1.meta_value AS DECIMAL( 10, %d ) ) = CAST( meta2.meta_value AS DECIMAL( 10, %d ) )
+							AND CAST( meta3.meta_value AS DECIMAL( 10, %d ) ) > CAST( meta2.meta_value AS DECIMAL( 10, %d ) )
 						, 1, 0 )
 					",
+					$decimals,
+					$decimals,
 					$decimals,
 					$decimals
 				)
@@ -1657,3 +1672,48 @@ function wc_update_product_lookup_tables_rating_count_batch( $offset = 0, $limit
 	}
 }
 add_action( 'wc_update_product_lookup_tables_rating_count_batch', 'wc_update_product_lookup_tables_rating_count_batch', 10, 2 );
+
+/**
+ * Attach product featured image. Use image filename to match a product sku when product is not provided.
+ *
+ * @since 8.5.0
+ * @param int        $attachment_id Media attachment ID.
+ * @param WC_Product $product Optional product object.
+ * @param bool       $save_product If true, the changes in the product will be saved before the method returns.
+ * @return void
+ */
+function wc_product_attach_featured_image( $attachment_id, $product = null, $save_product = true ) {
+	$attachment_post = get_post( $attachment_id );
+	if ( ! $attachment_post ) {
+		return;
+	}
+
+	if ( null === $product && wc_get_container()->get( MatchImageBySKU::class )->is_enabled() ) {
+		// On upload the attachment post title is the uploaded file's filename.
+		$file_name = pathinfo( $attachment_post->post_title, PATHINFO_FILENAME );
+		if ( ! $file_name ) {
+			return;
+		}
+
+		$product_id = wc_get_product_id_by_sku( $file_name );
+		$product    = wc_get_product( $product_id );
+	}
+
+	if ( ! $product ) {
+		return;
+	}
+
+	$product->set_image_id( $attachment_id );
+	if ( $save_product ) {
+		$product->save();
+	}
+	if ( 0 === $attachment_post->post_parent ) {
+		wp_update_post(
+			array(
+				'ID'          => $attachment_id,
+				'post_parent' => $product->get_id(),
+			)
+		);
+	}
+}
+add_action( 'add_attachment', 'wc_product_attach_featured_image' );

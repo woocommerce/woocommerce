@@ -45,14 +45,23 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	private $cot_state;
 
 	/**
+	 * Temporarily store webhook delivery counters.
+	 * @var array
+	 */
+	private $delivery_counter = array();
+
+	/**
 	 * Initializes system under test.
 	 */
 	public function setUp(): void {
+		parent::setUp();
+
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
 		$this->reset_legacy_proxy_mocks();
 		$this->original_time_zone = wp_timezone_string();
 		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
 		update_option( 'timezone_string', 'Asia/Kolkata' );
-		parent::setUp();
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		$this->setup_cot();
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
@@ -73,6 +82,9 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		update_option( 'timezone_string', $this->original_time_zone );
 		$this->toggle_cot_feature_and_usage( $this->cot_state );
 		$this->clean_up_cot_setup();
+
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+
 		parent::tearDown();
 	}
 
@@ -188,6 +200,34 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 		$this->sut->backfill_post_record( $order );
 		$this->assertEquals( $hardcoded_modified_date, get_post_modified_time( 'U', true, $order->get_id() ) );
+	}
+
+	/**
+	 * @testDox Tests that array metadata is handled properly when backfilling posts.
+	 */
+	public function test_backfill_array_meta() {
+		$tricky_meta = array(
+			'an_array'                        => array( 'because', 'why', 'not' ),
+			'something_that_looks_serialized' => 'a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}',
+		);
+
+		$this->disable_cot_sync();
+
+		$order = new \WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		foreach ( $tricky_meta as $meta_key => $meta_value ) {
+			$order->add_meta_data( $meta_key, $meta_value );
+		}
+		$order->save();
+
+		$this->sut->backfill_post_record( $order );
+
+		$post_meta = get_post_meta( $order->get_id() );
+
+		foreach ( $tricky_meta as $meta_key => $meta_value ) {
+			$this->assertArrayHasKey( $meta_key, $post_meta );
+			$this->assertEquals( $meta_value, maybe_unserialize( $post_meta[ $meta_key ][0] ) );
+		}
 	}
 
 	/**
@@ -1167,7 +1207,9 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 */
 	public function test_get_unpaid_orders(): void {
 		// phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- Intentional usage since timezone is changed for this file.
-		$now = current_time( 'timestamp' );
+		$now_gmt = time();
+		// phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- Testing a legacy code that does expect the offset timestamp.
+		$now_ist = current_time( 'timestamp', 0 ); // IST (Indian standard time) is 5.5 hours ahead of GMT and is set as timezone for this class.
 
 		// Create a few orders.
 		$orders_by_status = array(
@@ -1180,7 +1222,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 				$order = new \WC_Order();
 				$this->switch_data_store( $order, $this->sut );
 				$order->set_status( $order_status );
-				$order->set_date_modified( $now - DAY_IN_SECONDS );
+				$order->set_date_modified( $now_gmt - DAY_IN_SECONDS );
 				$order->save();
 
 				if ( ! $order->is_paid() ) {
@@ -1193,12 +1235,11 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( $orders_by_status['wc-completed'], $this->sut->get_order_count( 'wc-completed' ) );
 
 		// Find unpaid orders.
-		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now ) );
-		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now - HOUR_IN_SECONDS ) );
+		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now_ist ) );
+		$this->assertEqualsCanonicalizing( $unpaid_ids, $this->sut->get_unpaid_orders( $now_ist - HOUR_IN_SECONDS ) );
 
 		// No unpaid orders from before yesterday.
-		$this->assertCount( 0, $this->sut->get_unpaid_orders( $now - WEEK_IN_SECONDS ) );
-
+		$this->assertCount( 0, $this->sut->get_unpaid_orders( $now_ist - DAY_IN_SECONDS ) );
 	}
 
 	/**
@@ -1636,6 +1677,30 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
 		$this->assertEqualsCanonicalizing( array( $order_ids[0], $order_ids[2] ), $query->orders );
 
+		// Complex field query with NOT IN.
+		$field_query = array(
+			array(
+				'field'   => 'billing_first_name',
+				'value'   => array( 'Werner', 'Édouard' ),
+				'compare' => 'NOT IN',
+			),
+			array(
+				'relation' => 'OR',
+				array(
+					'field'   => 'billing_last_name',
+					'value'   => 'Planck',
+					'compare' => 'LIKE',
+				),
+				array(
+					'field'   => 'billing_city',
+					'value'   => 'Tid',
+					'compare' => 'LIKE',
+				),
+			),
+		);
+		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
+		$this->assertEqualsCanonicalizing( array( $order_ids[1] ), $query->orders );
+
 		// Find orders with order_key ending in a number (i.e. all).
 		$field_query = array(
 			array(
@@ -1780,6 +1845,34 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		);
 		$query              = new OrdersTableQuery( $args );
 		$this->assertEqualsCanonicalizing( array( $order_ids[1] ), $query->orders );
+
+		// Max and Werner are born in either 1858, or 1901.
+		$args  = array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Intentional usage for test.
+			'meta_query' => array(
+				array(
+					'key'     => 'customer_birthdate',
+					'value'   => array( '1858-04-23', '1901-12-05' ),
+					'compare' => 'IN',
+				),
+			),
+		);
+		$query = new OrdersTableQuery( $args );
+		$this->assertEqualsCanonicalizing( array( $order_ids[0], $order_ids[1] ), $query->orders );
+
+		// Let's do the same query, other way around, by excluding Édouard.
+		$args  = array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Intentional usage for test.
+			'meta_query' => array(
+				array(
+					'key'     => 'customer_birthdate',
+					'value'   => array( '1820-10-17' ),
+					'compare' => 'NOT IN',
+				),
+			),
+		);
+		$query = new OrdersTableQuery( $args );
+		$this->assertEqualsCanonicalizing( array( $order_ids[0], $order_ids[1] ), $query->orders );
 	}
 
 	/**
@@ -2677,7 +2770,8 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->toggle_cot_authoritative( $cot_is_authoritative );
 		$this->disable_cot_sync();
 
-		$new_count = $update_count = 0;
+		$new_count    = 0;
+		$update_count = 0;
 
 		$callback = function( $order_id ) use ( &$new_count, &$update_count ) {
 			$new_count    += 'woocommerce_new_order' === current_action() ? 1 : 0;
@@ -2693,21 +2787,26 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( 1, $new_count );
 		$this->assertEquals( 0, $update_count );
 
-		// An update to the order should only trigger 'woocommerce_update_order'.
-		$order->set_billing_city( 'Los Angeles' );
+		// Saving an order again (with no changes) should still trigger 'woocommerce_update_order'.
 		$order->save();
 		$this->assertEquals( 1, $new_count );
 		$this->assertEquals( 1, $update_count );
 
+		// An update to the order should only trigger 'woocommerce_update_order'.
+		$order->set_billing_city( 'Los Angeles' );
+		$order->save();
+		$this->assertEquals( 1, $new_count );
+		$this->assertEquals( 2, $update_count );
+
 		// Updating datastore-level props should not trigger anything.
 		$order->get_data_store()->set_download_permissions_granted( $order->get_id(), true );
 		$this->assertEquals( 1, $new_count );
-		$this->assertEquals( 1, $update_count );
+		$this->assertEquals( 2, $update_count );
 
 		// Trashing should not fire an update.
 		$order->get_data_store()->delete( $order );
 		$this->assertEquals( $order->get_status(), 'trash' );
-		$this->assertEquals( 1, $update_count );
+		$this->assertEquals( 2, $update_count );
 
 		// Untrashing should not fire an update.
 		if ( $cot_is_authoritative ) {
@@ -2718,7 +2817,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			$order = wc_get_order( $order->get_id() ); // Refresh order.
 		}
 		$this->assertNotEquals( $order->get_status(), 'trash' );
-		$this->assertEquals( 1, $update_count );
+		$this->assertEquals( 2, $update_count );
 
 		// An auto-draft order should not trigger 'woocommerce_new_order' until first saved with a valid status.
 		if ( $cot_is_authoritative ) {
@@ -2727,18 +2826,609 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			$order->save();
 
 			$this->assertEquals( 1, $new_count );
-			$this->assertEquals( 1, $update_count );
+			$this->assertEquals( 2, $update_count );
 
 			$order->set_status( 'on-hold' );
 			$order->save();
 
 			$this->assertEquals( 2, $new_count );
-			$this->assertEquals( 1, $update_count );
+			$this->assertEquals( 2, $update_count );
 		}
 
 		remove_action( 'woocommerce_new_order', $callback );
 		remove_action( 'woocommerce_update_order', $callback );
 	}
 
+	/**
+	 * @testDox Stale data is not read when sync is off, but then switched on again after a while.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $different_request Whether to simulate different requests (as much as we can in a unit test).
+	 */
+	public function test_stale_data_is_not_read_sync_off_on( $different_request ) {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$cot_store = wc_get_container()->get( OrdersTableDataStore::class );
+
+		$order = OrderHelper::create_order();
+		$order->set_customer_id( 1 ); // Change a custom table column.
+		$order->set_billing_address_1( 'test' ); // Change an address column and a meta row.
+		$order->set_download_permissions_granted( true ); // Change an operational data column.
+		$order->save();
+
+		$different_request && $this->reset_order_data_store_state( $cot_store );
+
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save_meta_data();
+
+		$different_request && $this->reset_order_data_store_state( $cot_store );
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 1, $r_order->get_customer_id() );
+		$this->assertEquals( 'test', $r_order->get_billing_address_1() );
+		$this->assertTrue( $order->get_download_permissions_granted() );
+		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
+
+		$different_request && $this->reset_order_data_store_state( $cot_store );
+		sleep( 2 );
+
+		$this->disable_cot_sync();
+		$r_order->update_meta_data( 'test_key', 'test_value_updated' );
+		$r_order->add_meta_data( 'test_key2', 'test_value2' );
+		$r_order->save_meta_data();
+
+		$different_request && $this->reset_order_data_store_state( $cot_store );
+
+		$this->enable_cot_sync();
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 1, $r_order->get_customer_id() );
+		$this->assertEquals( 'test', $r_order->get_billing_address_1() );
+		$this->assertTrue( $order->get_download_permissions_granted() );
+		$this->assertEquals( 'test_value_updated', $r_order->get_meta( 'test_key', true ) );
+		$this->assertEquals( 'test_value2', $r_order->get_meta( 'test_key2', true ) );
+	}
+
+	/**
+	 * Helper method to reset order data store state (to help simulate multiple requests).
+	 *
+	 * @param OrdersTableDataStore $sut System under test.
+	 */
+	private function reset_order_data_store_state( $sut ) {
+		$reset_state = function () use ( $sut ) {
+			self::$backfilling_order_ids = array();
+			self::$reading_order_ids     = array();
+		};
+		$reset_state->call( $sut );
+		wp_cache_flush();
+	}
+
+	/**
+	 * @testDox Test that we can delete metadata just by sending the meta ID.
+	 */
+	public function test_allow_deleting_meta_with_id_only() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save();
+
+		$meta_data = $this->sut->read_meta( $order );
+
+		foreach ( $meta_data as $meta ) {
+			$this->sut->delete_meta( $order, (object) array( 'id' => $meta->meta_id ) );
+		}
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEmpty( $r_order->get_meta_data() );
+		$this->assertEquals( '', get_post_meta( $order->get_id(), 'test_key', true ) );
+	}
+
+	/**
+	 * @testDox Test that the protected method get_order_data_for_ids stays backward compatible.
+	 */
+	public function test_get_order_data_for_ids_is_back_compat() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+		$order = OrderHelper::create_complex_data_store_order( $this->sut );
+		$order->set_date_paid( new \WC_DateTime( '2023-01-01 00:00:00' ) );
+		$order->set_date_completed( new \WC_DateTime( '2023-01-01 00:00:00' ) );
+		$order->set_cart_tax( '1.23' );
+		$order->set_customer_id( 1 );
+		$order->set_shipping_address_1( 'Line1 Shipping' );
+		$order->set_shipping_city( 'City Shipping' );
+		$order->set_shipping_postcode( '12345' );
+		$order->set_shipping_tax( '12.34' );
+		$order->set_shipping_total( '123.45' );
+		$order->set_total( '25' );
+		$order->set_discount_tax( '2.111' );
+		$order->set_discount_total( '1.23' );
+		$order->save();
+
+		$call_protected = function( $ids ) {
+			return $this->get_order_data_for_ids( $ids );
+		};
+
+		$order_data = $call_protected->call( $this->sut, array( $order->get_id() ) );
+
+		$expected_data_array = array(
+			'id'                           => $order->get_id(),
+			'status'                       => 'wc-' . $order->get_status(),
+			'type'                         => $order->get_type(),
+			'currency'                     => $order->get_currency(),
+			'cart_tax'                     => '1.23000000',
+			'total'                        => '25.00000000',
+			'customer_id'                  => $order->get_customer_id(),
+			'billing_email'                => $order->get_billing_email(),
+			'date_created'                 => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->format( 'U' ) ),
+			'date_modified'                => gmdate( 'Y-m-d H:i:s', $order->get_date_modified()->format( 'U' ) ),
+			'parent_id'                    => $order->get_parent_id(),
+			'payment_method'               => $order->get_payment_method(),
+			'payment_method_title'         => $order->get_payment_method_title(),
+			'customer_ip_address'          => $order->get_customer_ip_address(),
+			'transaction_id'               => $order->get_transaction_id(),
+			'customer_user_agent'          => $order->get_customer_user_agent(),
+			'customer_note'                => $order->get_customer_note(),
+			'billing_first_name'           => $order->get_billing_first_name(),
+			'billing_last_name'            => $order->get_billing_last_name(),
+			'billing_company'              => $order->get_billing_company(),
+			'billing_address_1'            => $order->get_billing_address_1(),
+			'billing_address_2'            => $order->get_billing_address_2(),
+			'billing_city'                 => $order->get_billing_city(),
+			'billing_state'                => $order->get_billing_state(),
+			'billing_postcode'             => $order->get_billing_postcode(),
+			'billing_country'              => $order->get_billing_country(),
+			'billing_phone'                => $order->get_billing_phone(),
+			'shipping_first_name'          => $order->get_shipping_first_name(),
+			'shipping_last_name'           => $order->get_shipping_last_name(),
+			'shipping_company'             => $order->get_shipping_company(),
+			'shipping_address_1'           => $order->get_shipping_address_1(),
+			'shipping_address_2'           => $order->get_shipping_address_2(),
+			'shipping_city'                => $order->get_shipping_city(),
+			'shipping_state'               => $order->get_shipping_state(),
+			'shipping_postcode'            => $order->get_shipping_postcode(),
+			'shipping_country'             => $order->get_shipping_country(),
+			'shipping_phone'               => $order->get_shipping_phone(),
+			'created_via'                  => $order->get_created_via(),
+			'version'                      => $order->get_version(),
+			'prices_include_tax'           => $order->get_prices_include_tax(),
+			'recorded_coupon_usage_counts' => $order->get_recorded_coupon_usage_counts(),
+			'download_permissions_granted' => $order->get_download_permissions_granted(),
+			'cart_hash'                    => $order->get_cart_hash(),
+			'new_order_email_sent'         => $order->get_new_order_email_sent(),
+			'order_key'                    => $order->get_order_key(),
+			'order_stock_reduced'          => $order->get_order_stock_reduced(),
+			'date_paid'                    => gmdate( 'Y-m-d H:i:s', $order->get_date_paid()->format( 'U' ) ),
+			'date_completed'               => gmdate( 'Y-m-d H:i:s', $order->get_date_completed()->format( 'U' ) ),
+			'shipping_tax'                 => '12.34000000',
+			'shipping_total'               => '123.45000000',
+			'discount_tax'                 => '2.11100000',
+			'discount_total'               => '1.23000000',
+			'recorded_sales'               => $order->get_recorded_sales(),
+		);
+
+		foreach ( $expected_data_array as $key => $value ) {
+			$this->assertEquals( $value, $order_data[ $order->get_id() ]->{$key}, "Unable to match $key for {$order_data[ $order->get_id() ]->{$key}}. Expected $value" );
+		}
+	}
+
+	/**
+	 * @testDox Test that duplicate key, value pairs are also synced properly.
+	 */
+	public function test_duplicate_meta_is_synced_properly() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = WC_Helper_Order::create_order();
+		// Force an earlier modified date to trigger the `should_save_after_meta_change` to be true later in the test.
+		$order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$current_date_time = new \WC_DateTime( current_time( 'mysql', 1 ), new \DateTimeZone( 'GMT' ) );
+		assert( $order->get_date_modified() < $current_date_time ); // Meta check, to make sure our test stay effective if we run testsuite in a different timezone.
+		$order->save();
+
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save_meta_data();
+
+		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
+		$this->assertCount( 1, $post_meta );
+		$this->assertEquals( 'test_value', $post_meta[0] );
+
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save_meta_data();
+
+		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
+		$this->assertCount( 2, $post_meta );
+		$this->assertEquals( 'test_value', $post_meta[0] );
+		$this->assertEquals( 'test_value', $post_meta[1] );
+
+		$order->add_meta_data( 'test_key', 'test_value2' );
+		$order->save_meta_data();
+
+		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
+		$this->assertCount( 3, $post_meta );
+		$this->assertTrue( in_array( 'test_value2', $post_meta, true ) );
+
+		$order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-1 hour' ) ) );
+		$order->save();
+		$order->update_meta_data( 'test_key', 'test_value3' );
+		$order->save_meta_data();
+
+		/**
+		 * Note that WC_Data has a bug where if we update a duplicate key, it will delete rest of other keys. But since this bug has been there for 5 years as of writing this code, we will not assert whether postmeta is exactly the same as order_meta but only test that out value was saved.
+		 */
+		$post_meta = get_post_meta( $order->get_id(), 'test_key' );
+		$this->assertTrue( in_array( 'test_value3', $post_meta, true ) );
+
+		$order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$order->save();
+
+		add_post_meta( $order->get_id(), 'test_key2', 'test_value5' );
+		$order->add_meta_data( 'test_key2', 'test_value4' );
+		$order->save();
+
+		$post_meta = get_post_meta( $order->get_id(), 'test_key2' );
+		$this->assertTrue( in_array( 'test_value4', $post_meta, true ) );
+		$this->assertFalse( in_array( 'test_value5', $post_meta, true ) );
+	}
+
+	/**
+	 * @testDox Test that date queries correctly handle timezones.
+	 */
+	public function test_timezone_date_query_support() {
+		$order = new WC_Order();
+		$order->set_date_created( '2023-09-01T00:30:00' ); // This would be 2023-08-31T18:00:00 UTC given the current timezone.
+		$this->sut->create( $order );
+
+		$query = new OrdersTableQuery( array( 'date_created_gmt' => '2023-09-01' ) );
+		$this->assertEquals( 0, count( $query->orders ) ); // Should not return anything as the order was created on 2023-08-31 UTC.
+
+		$query = new OrdersTableQuery( array( 'date_created_gmt' => '2023-08-31' ) );
+		$this->assertEquals( 1, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created_gmt' => '<=2023-09-01' ) );
+		$this->assertEquals( 1, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created' => '2023-08-31' ) );
+		$this->assertEquals( 0, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created' => '2023-09-01' ) );
+		$this->assertEquals( 1, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created' => '>2023-09-01' ) );
+		$this->assertEquals( 0, count( $query->orders ) );
+
+		$query = new OrdersTableQuery( array( 'date_created' => '<2023-09-01' ) );
+		$this->assertEquals( 0, count( $query->orders ) );
+	}
+
+	/**
+	 * @testDox Hooking into woocommerce_delete_shop_order_transients does not cause data loss.
+	 */
+	public function test_data_retained_when_hooked_in_cache_filter() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		add_action(
+			'woocommerce_delete_shop_order_transients',
+			function ( $order_id ) {
+				wc_get_order( $order_id );
+			}
+		);
+		$order = OrderHelper::create_order();
+
+		$this->assertEquals( 1, $order->get_customer_id() );
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 1, $r_order->get_customer_id() );
+
+		$this->reset_order_data_store_state( wc_get_container()->get( OrdersTableDataStore::class ) );
+		$order->set_customer_id( 2 );
+		$order->save();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 2, $r_order->get_customer_id() );
+
+		remove_all_actions( 'woocommerce_delete_shop_order_transients' );
+	}
+
+	/**
+	 * @testDox Cache is cleared when order meta is saved.
+	 */
+	public function test_order_cache_is_cleared_on_meta_save() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = OrderHelper::create_order();
+
+		// set the cache.
+		wc_get_order( $order->get_id() );
+
+		$order->add_meta_data( 'test_key', 'test_value' );
+		$order->save_meta_data();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key' ) );
+	}
+
+	/**
+	 * @testDox Test that order save is not called frequently on meta save.
+	 */
+	public function test_order_save_is_not_called_frequently_on_meta_save() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$orders_table_data_store = fn() => wc_get_container()->get( OrdersTableDataStore::class );
+		add_filter( 'woocommerce_order_data_store', $orders_table_data_store, 1000, 0 );
+
+		$order = wc_create_order();
+
+		assert( empty( $order->get_changes() ), 'Order was not saved properly, test cannot continue.' );
+		$call_private = function ( $order ) {
+			return $this->should_save_after_meta_change( $order );
+		};
+
+		$order->set_date_modified( time() - 1 );
+		$order->save();
+
+		$this->assertTrue( $call_private->call( $this->sut, $order ) );
+
+		// count the calls to the filter to ensure it's called only once.
+		$count = 0;
+		add_filter(
+			'woocommerce_before_order_object_save',
+			function () use ( &$count ) {
+				$count++;
+			}
+		);
+
+		/**
+		 * fix for previously flaky test:
+		 * freeze time to ensure less than a second passes while the following saves happen.
+		 */
+		$current_time_called = false;
+		$datetime            = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
+		$now                 = $datetime->format( 'Y-m-d H:i:s' );
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'current_time' => function( $type, $gmt ) use ( &$current_time_called, $now ) {
+					$current_time_called = true;
+					return $now;
+				},
+			)
+		);
+
+		$order->add_meta_data( 'key1', 'value' );
+		$order->save_meta_data();
+		$order->add_meta_data( 'key2', 'value' );
+		$order->save_meta_data();
+		$order->add_meta_data( 'key2', 'value2' );
+		$order->save_meta_data();
+		$order->update_meta_data( 'key1', 'value2' );
+		$order->save_meta_data();
+		$order->delete_meta_data( 'key1' );
+		$order->save_meta_data();
+
+		$this->assertEquals( 1, $count );
+		$this->assertTrue( $current_time_called, 'current_time mock was not called' );
+
+		remove_filter( 'woocommerce_order_data_store', $orders_table_data_store, 1000 );
+		remove_all_actions( 'woocommerce_before_order_object_save' );
+	}
+
+	/**
+	 * @testDox Test webhooks are not fired multiple times on order save.
+	 */
+	public function test_order_updated_webhook_delivered_once() {
+		$this->markTestSkipped( 'Skipped temporarily due to increased flakiness.' );
+
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$webhook_tests = new WC_Tests_Webhook_Functions();
+		$webhook       = $webhook_tests->create_webhook( 'order.updated' );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_date_modified( time() - 100 );
+		$order->save();
+
+		$this->assertTrue( wc_load_webhooks( 'active' ) );
+		add_action( 'woocommerce_webhook_process_delivery', array( $webhook_tests, 'woocommerce_webhook_process_delivery' ), 1, 2 );
+		add_filter( 'woocommerce_webhook_should_deliver', '__return_true' );
+		$call_private = function ( $order ) {
+			return $this->should_save_after_meta_change( $order );
+		};
+		$this->assertTrue( $call_private->call( $this->sut, $order ) );
+		$order->add_meta_data( 'test', 'value' );
+		$order->save_meta_data();
+		$order->add_meta_data( 'key2', 'value' );
+		$order->save_meta_data();
+		$order->add_meta_data( 'key2', 'value2' );
+		$order->save_meta_data();
+		$order->update_meta_data( 'key1', 'value2' );
+		$order->save_meta_data();
+		$order->delete_meta_data( 'key1' );
+		$order->save_meta_data();
+		$this->assertEquals( 1, $webhook_tests->delivery_counter[ $webhook->get_id() . $order->get_id() ] );
+		remove_all_actions( 'woocommerce_webhook_process_delivery' );
+		remove_all_actions( 'woocommerce_webhook_should_deliver' );
+	}
+
+	/**
+	 * @testDox Check that functions in the datastore correctly hold and release coupons from the order.
+	 */
+	public function test_datastore_coupon_methods() {
+		$this->toggle_cot_authoritative( true );
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( '10off' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10.0 );
+		$coupon->set_usage_limit_per_user( 2 );
+		$coupon->save();
+
+		$product = WC_Helper_Product::create_simple_product( true );
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->add_discount( $coupon->get_code() );
+
+		$this->assertEquals( 0, $coupon->get_data_store()->get_usage_by_email( $coupon, 'user@woo.test' ) );
+
+		$order_id = WC()->checkout->create_order(
+			array(
+				'billing_email'  => 'user@woo.test',
+				'payment_method' => 'dummy',
+			)
+		);
+
+		$this->assertEquals( 1, $coupon->get_data_store()->get_tentative_usages_for_user( $coupon->get_id(), array( 'user@woo.test' ) ) );
+		$this->assertEquals( 1, $coupon->get_data_store()->get_usage_by_email( $coupon, 'user@woo.test' ) );
+
+		wc_get_order( $order_id )->payment_complete();
+
+		$this->assertEquals( 0, $coupon->get_data_store()->get_tentative_usages_for_user( $coupon->get_id(), array( 'user@woo.test' ) ) );
+		$this->assertEquals( 1, $coupon->get_data_store()->get_usage_by_email( $coupon, 'user@woo.test' ) );
+
+		// Load a fresh copy of the coupon and make sure things look ok.
+		$coupon = new \WC_Coupon( $coupon->get_id() );
+		$this->assertContains( 'user@woo.test', $coupon->get_used_by( 'edit' ) );
+	}
+
+	/**
+	 * Tests that changes to certain keys don't trigger full order updates.
+	 */
+	public function test_ephemeral_meta_updates() {
+		$this->toggle_cot_authoritative( true );
+
+		// Set order in the past so that we can accurately compare dates.
+		$order = WC_Helper_Order::create_order();
+		$order->set_date_modified( time() - DAY_IN_SECONDS );
+		$order->save();
+
+		$date_modified = $order->get_date_modified();
+		$order->update_meta_data( '_edit_lock', 'whatever' );
+		$order->save_meta_data();
+		$this->assertEquals( $date_modified, $order->get_date_modified() );
+
+		$order->update_meta_data( 'other_meta', 'whatever' );
+		$order->save_meta_data();
+		$this->assertNotEquals( $date_modified, $order->get_date_modified() );
+	}
+
+	/**
+	 * Tests that unserializing meta that contains a non-existent class doesn't cause a fatal error.
+	 */
+	public function test_unserialize_meta_with_nonexistent_class() {
+		global $wpdb;
+		$meta_key   = 'test_unserialize_meta_with_nonexistent_class';
+		$meta_value = 'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.833300000000001;s:9:"longitude";d:4.3333000000000004;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}}';
+
+		// Create a fake logger to capture log entries.
+		// phpcs:disable Squiz.Commenting
+		$fake_logger = new class() {
+			public $warnings = array();
+
+			public function warning( $message, $data = array() ) {
+				$this->warnings[] = array(
+					'message' => $message,
+					'data'    => $data,
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_get_logger' => function() use ( $fake_logger ) {
+					return $fake_logger;
+				},
+			)
+		);
+
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+		$order_meta_table = $this->sut::get_meta_table_name();
+
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+		$order_id = $order->get_id();
+
+		$wpdb->query( "INSERT INTO {$order_meta_table} (order_id, meta_key, meta_value) VALUES ({$order_id}, '{$meta_key}', '{$meta_value}')" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		$order->set_date_modified( time() + 1 );
+		$order->save();
+
+		// Test fetching an order with meta data containing an object of a non-existent class.
+		$fetched_order = wc_get_order( $order->get_id() );
+		$meta          = $fetched_order->get_meta( $meta_key );
+
+		$this->assertNotEmpty( $meta );
+		$this->assertEquals( 'object', gettype( $meta ) );
+		$this->assertEquals( '__PHP_Incomplete_Class', get_class( $meta ) );
+
+		$meta_object_vars = get_object_vars( $meta );
+		$this->assertEquals( 'geoiprecord', $meta_object_vars['__PHP_Incomplete_Class_Name'] );
+		$this->assertEquals( 'Belgium', $meta_object_vars['country_name'] );
+		$this->assertEquals( 'Brussels', $meta_object_vars['city'] );
+		$this->assertEquals( 'Europe/Brussels', $meta_object_vars['timezone'] );
+
+		// Check that the log entry was created.
+		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `update_order_meta_from_object` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
+
+		// Test deleting meta data containing an object of a non-existent class.
+		$meta_data = $this->sut->read_meta( $order );
+		foreach ( $meta_data as $meta ) {
+			$this->sut->delete_meta( $order, (object) array( 'id' => $meta->meta_id ) );
+		}
+		$fetched_order = wc_get_order( $order->get_id() );
+
+		$this->assertEmpty( $fetched_order->get_meta_data() );
+		$this->assertEquals( '', get_post_meta( $order->get_id(), $meta_key, true ) );
+
+		// Check that the log entry was created.
+		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
+	}
+
+	/**
+	 * Tests that OrderUtil::get_count_for_type() counts orders correctly.
+	 *
+	 * @testWith ["hpos"]
+	 *           ["posts"]
+	 *
+	 * @param string $datastore_to_use Which datastore to use. Either 'hpos' or 'posts'.
+	 */
+	public function test_order_util_get_count_for_type( $datastore_to_use ) {
+		$this->disable_cot_sync();
+
+		if ( 'hpos' === $datastore_to_use ) {
+			$this->toggle_cot_authoritative( true );
+		} else {
+			$this->toggle_cot_authoritative( false );
+		}
+
+		// Create a few orders in various states.
+		$order_statuses = array_keys( wc_get_order_statuses() );
+
+		$expected_counts = array_combine( $order_statuses, array_fill( 0, count( $order_statuses ), 0 ) );
+		foreach ( $order_statuses as $i => $status ) {
+			foreach ( range( 0, $i ) as $_ ) {
+				$expected_counts[ $status ] = $i + 1;
+
+				$order = WC_Helper_Order::create_order();
+				$order->set_status( $status );
+				$order->save();
+			}
+		}
+
+		$real_counts = OrderUtil::get_count_for_type( 'shop_order' );
+		foreach ( $expected_counts as $status => $count ) {
+			$this->assertArrayHasKey( $status, $real_counts );
+			$this->assertEquals( $count, $real_counts[ $status ] );
+		}
+
+		$other_counts = OrderUtil::get_count_for_type( 'shop_something' );
+		$this->assertEquals( 0, array_pop( $other_counts ) );
+
+	}
 
 }

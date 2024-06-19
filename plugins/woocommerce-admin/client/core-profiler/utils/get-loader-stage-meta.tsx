@@ -12,7 +12,7 @@ import LayoutImage from '../assets/images/loader-layout.svg';
 import OpeningTheDoorsImage from '../assets/images/loader-openingthedoors.svg';
 import Hearticon from '../assets/images/loader-hearticon.svg';
 
-import { Stages } from '../pages/Loader';
+import { Stages } from '../components/loader/Loader';
 
 const LightbulbStage = {
 	title: __( 'Turning on the lights', 'woocommerce' ),

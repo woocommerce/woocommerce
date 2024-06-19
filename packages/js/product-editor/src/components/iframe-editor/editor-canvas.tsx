@@ -31,37 +31,35 @@ export function EditorCanvas( {
 	const mouseMoveTypingRef = useMouseMoveTypingReset();
 	return (
 		<Iframe
-			head={
-				<>
-					<EditorStyles styles={ settings?.styles } />
-					<style>
-						{
-							// Forming a "block formatting context" to prevent margin collapsing.
-							// @see https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Block_formatting_context
-							`.is-root-container {
-								padding: 36px;
-								display: flow-root;
-							}
-							body { position: relative; }`
-						}
-					</style>
-					{ enableResizing && (
-						<style>
-							{
-								// Some themes will have `min-height: 100vh` for the root container,
-								// which isn't a requirement in auto resize mode.
-								`.is-root-container { min-height: 0 !important; }`
-							}
-						</style>
-					) }
-				</>
-			}
 			ref={ mouseMoveTypingRef }
 			name="editor-canvas"
 			className="edit-site-visual-editor__editor-canvas"
 			{ ...props }
 		>
-			{ children }
+			<>
+				<EditorStyles styles={ settings?.styles } />
+				<style>
+					{
+						// Forming a "block formatting context" to prevent margin collapsing.
+						// @see https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Block_formatting_context
+						`.is-root-container {
+								padding: 36px;
+								display: flow-root;
+							}
+							body { position: relative; }`
+					}
+				</style>
+				{ enableResizing && (
+					<style>
+						{
+							// Some themes will have `min-height: 100vh` for the root container,
+							// which isn't a requirement in auto resize mode.
+							`.is-root-container { min-height: 0 !important; }`
+						}
+					</style>
+				) }
+				{ children }
+			</>
 		</Iframe>
 	);
 }

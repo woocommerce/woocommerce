@@ -3,38 +3,66 @@
  */
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
-	ProductAttribute,
+	Product,
+	type ProductProductAttribute,
 	ProductAttributeTerm,
+	ProductDefaultAttribute,
 } from '@woocommerce/data';
 import { resolveSelect } from '@wordpress/data';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { sift } from '../utils';
 
-export type EnhancedProductAttribute = ProductAttribute & {
+export type EnhancedProductAttribute = ProductProductAttribute & {
 	isDefault?: boolean;
 	terms?: ProductAttributeTerm[];
 	visible?: boolean;
 };
 
 type useProductAttributesProps = {
-	allAttributes: ProductAttribute[];
+	allAttributes: ProductProductAttribute[];
 	isVariationAttributes?: boolean;
-	onChange: ( attributes: ProductAttribute[] ) => void;
+	onChange: (
+		attributes: ProductProductAttribute[],
+		defaultAttributes: ProductDefaultAttribute[]
+	) => void;
 	productId?: number;
 };
 
 const getFilteredAttributes = (
-	attr: ProductAttribute[],
+	attr: ProductProductAttribute[],
 	isVariationAttributes: boolean
 ) => {
 	return isVariationAttributes
 		? attr.filter( ( attribute ) => !! attribute.variation )
 		: attr.filter( ( attribute ) => ! attribute.variation );
 };
+
+function manageDefaultAttributes( values: EnhancedProductAttribute[] ) {
+	return values.reduce< Product[ 'default_attributes' ] >(
+		( prevDefaultAttributes, currentAttribute ) => {
+			if (
+				// defaults to true.
+				currentAttribute.isDefault === undefined ||
+				currentAttribute.isDefault === true
+			) {
+				return [
+					...prevDefaultAttributes,
+					{
+						id: currentAttribute.id,
+						name: currentAttribute.name,
+						option: currentAttribute.options[ 0 ],
+					},
+				];
+			}
+			return prevDefaultAttributes;
+		},
+		[]
+	);
+}
 
 export function useProductAttributes( {
 	allAttributes = [],
@@ -67,7 +95,7 @@ export function useProductAttributes( {
 	);
 
 	const enhanceAttribute = (
-		globalAttribute: ProductAttribute,
+		globalAttribute: ProductProductAttribute,
 		allTerms: ProductAttributeTerm[]
 	) => {
 		return {
@@ -82,7 +110,7 @@ export function useProductAttributes( {
 		atts: EnhancedProductAttribute[],
 		variation: boolean,
 		startPosition: number
-	): ProductAttribute[] => {
+	): ProductProductAttribute[] => {
 		return atts.map( ( { isDefault, terms, ...attribute }, index ) => ( {
 			...attribute,
 			variation,
@@ -91,6 +119,7 @@ export function useProductAttributes( {
 	};
 
 	const handleChange = ( newAttributes: EnhancedProductAttribute[] ) => {
+		const defaultAttributes = manageDefaultAttributes( newAttributes );
 		let otherAttributes = isVariationAttributes
 			? allAttributes.filter( ( attribute ) => ! attribute.variation )
 			: allAttributes.filter( ( attribute ) => !! attribute.variation );
@@ -126,24 +155,26 @@ export function useProductAttributes( {
 		);
 
 		if ( isVariationAttributes ) {
-			onChange( [
-				...otherAugmentedAttributes,
-				...newAugmentedAttributes,
-			] );
+			onChange(
+				[ ...otherAugmentedAttributes, ...newAugmentedAttributes ],
+				defaultAttributes
+			);
 		} else {
-			onChange( [
-				...newAugmentedAttributes,
-				...otherAugmentedAttributes,
-			] );
+			onChange(
+				[ ...newAugmentedAttributes, ...otherAugmentedAttributes ],
+				defaultAttributes
+			);
 		}
 	};
 
-	useEffect( () => {
-		const [ localAttributes, globalAttributes ]: ProductAttribute[][] =
-			sift(
-				getFilteredAttributes( allAttributes, isVariationAttributes ),
-				( attr: ProductAttribute ) => attr.id === 0
-			);
+	const fetchAttributes = useCallback( () => {
+		const [
+			localAttributes,
+			globalAttributes,
+		]: ProductProductAttribute[][] = sift(
+			getFilteredAttributes( allAttributes, isVariationAttributes ),
+			( attr: ProductProductAttribute ) => attr.id === 0
+		);
 
 		Promise.all(
 			globalAttributes.map( ( attr ) => fetchTerms( attr.id ) )
@@ -159,6 +190,7 @@ export function useProductAttributes( {
 
 	return {
 		attributes,
+		fetchAttributes,
 		handleChange,
 		setAttributes,
 	};

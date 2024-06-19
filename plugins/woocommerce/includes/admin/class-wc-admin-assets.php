@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,6 +28,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		public function __construct() {
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
+			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		}
 
 		/**
@@ -145,7 +147,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_register_script( 'wc-backbone-modal', WC()->plugin_url() . '/assets/js/admin/backbone-modal' . $suffix . '.js', array( 'underscore', 'backbone', 'wp-util' ), $version );
 			wp_register_script( 'wc-shipping-zones', WC()->plugin_url() . '/assets/js/admin/wc-shipping-zones' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'jquery-ui-sortable', 'wc-enhanced-select', 'wc-backbone-modal' ), $version );
 			wp_register_script( 'wc-shipping-zone-methods', WC()->plugin_url() . '/assets/js/admin/wc-shipping-zone-methods' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'jquery-ui-sortable', 'wc-backbone-modal' ), $version );
-			wp_register_script( 'wc-shipping-classes', WC()->plugin_url() . '/assets/js/admin/wc-shipping-classes' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone' ), $version );
+			wp_register_script( 'wc-shipping-classes', WC()->plugin_url() . '/assets/js/admin/wc-shipping-classes' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'wc-backbone-modal' ), $version, array( 'in_footer' => false ) );
 			wp_register_script( 'wc-clipboard', WC()->plugin_url() . '/assets/js/admin/wc-clipboard' . $suffix . '.js', array( 'jquery' ), $version );
 			wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2.full' . $suffix . '.js', array( 'jquery' ), '4.0.3' );
 			wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.6' );
@@ -229,7 +231,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'gateway_toggle' => current_user_can( 'manage_woocommerce' ) ? wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ) : null,
 					),
 					'urls'                              => array(
-						'add_product'     => Features::is_enabled( 'new-product-management-experience' ) || \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
+						'add_product'     => \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
@@ -368,74 +370,77 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				}
 
 				$params = array(
-					'remove_item_notice'                 => $remove_item_notice,
-					'remove_fee_notice'                  => $remove_fee_notice,
-					'remove_shipping_notice'             => $remove_shipping_notice,
-					'i18n_select_items'                  => __( 'Please select some items.', 'woocommerce' ),
-					'i18n_do_refund'                     => __( 'Are you sure you wish to process this refund? This action cannot be undone.', 'woocommerce' ),
-					'i18n_delete_refund'                 => __( 'Are you sure you wish to delete this refund? This action cannot be undone.', 'woocommerce' ),
-					'i18n_delete_tax'                    => __( 'Are you sure you wish to delete this tax column? This action cannot be undone.', 'woocommerce' ),
-					'remove_item_meta'                   => __( 'Remove this item meta?', 'woocommerce' ),
-					'name_label'                         => __( 'Name', 'woocommerce' ),
-					'remove_label'                       => __( 'Remove', 'woocommerce' ),
-					'click_to_toggle'                    => __( 'Click to toggle', 'woocommerce' ),
-					'values_label'                       => __( 'Value(s)', 'woocommerce' ),
-					'text_attribute_tip'                 => __( 'Enter some text, or some attributes by pipe (|) separating values.', 'woocommerce' ),
-					'visible_label'                      => __( 'Visible on the product page', 'woocommerce' ),
-					'used_for_variations_label'          => __( 'Used for variations', 'woocommerce' ),
-					'new_attribute_prompt'               => __( 'Enter a name for the new attribute term:', 'woocommerce' ),
-					'calc_totals'                        => __( 'Recalculate totals? This will calculate taxes based on the customers country (or the store base country) and update totals.', 'woocommerce' ),
-					'copy_billing'                       => __( 'Copy billing information to shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
-					'load_billing'                       => __( "Load the customer's billing information? This will remove any currently entered billing information.", 'woocommerce' ),
-					'load_shipping'                      => __( "Load the customer's shipping information? This will remove any currently entered shipping information.", 'woocommerce' ),
-					'featured_label'                     => __( 'Featured', 'woocommerce' ),
-					'prices_include_tax'                 => esc_attr( get_option( 'woocommerce_prices_include_tax' ) ),
-					'tax_based_on'                       => esc_attr( get_option( 'woocommerce_tax_based_on' ) ),
-					'round_at_subtotal'                  => esc_attr( get_option( 'woocommerce_tax_round_at_subtotal' ) ),
-					'no_customer_selected'               => __( 'No customer selected', 'woocommerce' ),
-					'plugin_url'                         => WC()->plugin_url(),
-					'ajax_url'                           => admin_url( 'admin-ajax.php' ),
-					'order_item_nonce'                   => wp_create_nonce( 'order-item' ),
-					'add_attribute_nonce'                => wp_create_nonce( 'add-attribute' ),
-					'save_attributes_nonce'              => wp_create_nonce( 'save-attributes' ),
-					'add_attributes_and_variations'      => wp_create_nonce( 'add-attributes-and-variations' ),
-					'calc_totals_nonce'                  => wp_create_nonce( 'calc-totals' ),
-					'get_customer_details_nonce'         => wp_create_nonce( 'get-customer-details' ),
-					'search_products_nonce'              => wp_create_nonce( 'search-products' ),
-					'grant_access_nonce'                 => wp_create_nonce( 'grant-access' ),
-					'revoke_access_nonce'                => wp_create_nonce( 'revoke-access' ),
-					'add_order_note_nonce'               => wp_create_nonce( 'add-order-note' ),
-					'delete_order_note_nonce'            => wp_create_nonce( 'delete-order-note' ),
-					'calendar_image'                     => WC()->plugin_url() . '/assets/images/calendar.png',
-					'post_id'                            => $this->is_order_meta_box_screen( $screen_id ) && isset( $order_or_post_object ) ? \Automattic\WooCommerce\Utilities\OrderUtil::get_post_or_order_id( $order_or_post_object ) : $post_id,
-					'base_country'                       => WC()->countries->get_base_country(),
-					'currency_format_num_decimals'       => wc_get_price_decimals(),
-					'currency_format_symbol'             => get_woocommerce_currency_symbol( $currency ),
-					'currency_format_decimal_sep'        => esc_attr( wc_get_price_decimal_separator() ),
-					'currency_format_thousand_sep'       => esc_attr( wc_get_price_thousand_separator() ),
-					'currency_format'                    => esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ), // For accounting JS.
-					'rounding_precision'                 => wc_get_rounding_precision(),
-					'tax_rounding_mode'                  => wc_get_tax_rounding_mode(),
-					'product_types'                      => array_unique( array_merge( array( 'simple', 'grouped', 'variable', 'external' ), array_keys( wc_get_product_types() ) ) ),
-					'i18n_download_permission_fail'      => __( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ),
-					'i18n_permission_revoke'             => __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
-					'i18n_tax_rate_already_exists'       => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
-					'i18n_delete_note'                   => __( 'Are you sure you wish to delete this note? This action cannot be undone.', 'woocommerce' ),
-					'i18n_apply_coupon'                  => __( 'Enter a coupon code to apply. Discounts are applied to line totals, before taxes.', 'woocommerce' ),
-					'i18n_add_fee'                       => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ),
-					'i18n_attribute_name_placeholder'    => __( 'New attribute', 'woocommerce' ),
-					'i18n_product_simple_tip'            => __( '<b>Simple –</b> covers the vast majority of any products you may sell. Simple products are shipped and have no options. For example, a book.', 'woocommerce' ),
-					'i18n_product_grouped_tip'           => __( '<b>Grouped –</b> a collection of related products that can be purchased individually and only consist of simple products. For example, a set of six drinking glasses.', 'woocommerce' ),
-					'i18n_product_external_tip'          => __( '<b>External or Affiliate –</b> one that you list and describe on your website but is sold elsewhere.', 'woocommerce' ),
-					'i18n_product_variable_tip'          => __( '<b>Variable –</b> a product with variations, each of which may have a different SKU, price, stock option, etc. For example, a t-shirt available in different colors and/or sizes.', 'woocommerce' ),
-					'i18n_product_other_tip'             => __( 'Product types define available product details and attributes, such as downloadable files and variations. They’re also used for analytics and inventory management.', 'woocommerce' ),
-					'i18n_product_description_tip'       => __( 'Describe this product. What makes it unique? What are its most important features?', 'woocommerce' ),
-					'i18n_product_short_description_tip' => __( 'Summarize this product in 1-2 short sentences. We’ll show it at the top of the page.', 'woocommerce' ),
-					'i18n_save_attribute_variation_tip'  => __( 'Make sure you enter the name and values for each attribute.', 'woocommerce' ),
+					'remove_item_notice'                              => $remove_item_notice,
+					'remove_fee_notice'                               => $remove_fee_notice,
+					'remove_shipping_notice'                          => $remove_shipping_notice,
+					'i18n_select_items'                               => __( 'Please select some items.', 'woocommerce' ),
+					'i18n_do_refund'                                  => __( 'Are you sure you wish to process this refund? This action cannot be undone.', 'woocommerce' ),
+					'i18n_delete_refund'                              => __( 'Are you sure you wish to delete this refund? This action cannot be undone.', 'woocommerce' ),
+					'i18n_delete_tax'                                 => __( 'Are you sure you wish to delete this tax column? This action cannot be undone.', 'woocommerce' ),
+					'remove_item_meta'                                => __( 'Remove this item meta?', 'woocommerce' ),
+					'name_label'                                      => __( 'Name', 'woocommerce' ),
+					'remove_label'                                    => __( 'Remove', 'woocommerce' ),
+					'click_to_toggle'                                 => __( 'Click to toggle', 'woocommerce' ),
+					'values_label'                                    => __( 'Value(s)', 'woocommerce' ),
+					'text_attribute_tip'                              => __( 'Enter some text, or some attributes by pipe (|) separating values.', 'woocommerce' ),
+					'visible_label'                                   => __( 'Visible on the product page', 'woocommerce' ),
+					'used_for_variations_label'                       => __( 'Used for variations', 'woocommerce' ),
+					'new_attribute_prompt'                            => __( 'Enter a name for the new attribute term:', 'woocommerce' ),
+					'calc_totals'                                     => __( 'Recalculate totals? This will calculate taxes based on the customers country (or the store base country) and update totals.', 'woocommerce' ),
+					'copy_billing'                                    => __( 'Copy billing information to shipping information? This will remove any currently entered shipping information.', 'woocommerce' ),
+					'load_billing'                                    => __( "Load the customer's billing information? This will remove any currently entered billing information.", 'woocommerce' ),
+					'load_shipping'                                   => __( "Load the customer's shipping information? This will remove any currently entered shipping information.", 'woocommerce' ),
+					'featured_label'                                  => __( 'Featured', 'woocommerce' ),
+					'prices_include_tax'                              => esc_attr( get_option( 'woocommerce_prices_include_tax' ) ),
+					'tax_based_on'                                    => esc_attr( get_option( 'woocommerce_tax_based_on' ) ),
+					'round_at_subtotal'                               => esc_attr( get_option( 'woocommerce_tax_round_at_subtotal' ) ),
+					'no_customer_selected'                            => __( 'No customer selected', 'woocommerce' ),
+					'plugin_url'                                      => WC()->plugin_url(),
+					'ajax_url'                                        => admin_url( 'admin-ajax.php' ),
+					'order_item_nonce'                                => wp_create_nonce( 'order-item' ),
+					'add_attribute_nonce'                             => wp_create_nonce( 'add-attribute' ),
+					'save_attributes_nonce'                           => wp_create_nonce( 'save-attributes' ),
+					'add_attributes_and_variations'                   => wp_create_nonce( 'add-attributes-and-variations' ),
+					'calc_totals_nonce'                               => wp_create_nonce( 'calc-totals' ),
+					'get_customer_details_nonce'                      => wp_create_nonce( 'get-customer-details' ),
+					'search_products_nonce'                           => wp_create_nonce( 'search-products' ),
+					'grant_access_nonce'                              => wp_create_nonce( 'grant-access' ),
+					'revoke_access_nonce'                             => wp_create_nonce( 'revoke-access' ),
+					'add_order_note_nonce'                            => wp_create_nonce( 'add-order-note' ),
+					'delete_order_note_nonce'                         => wp_create_nonce( 'delete-order-note' ),
+					'calendar_image'                                  => WC()->plugin_url() . '/assets/images/calendar.png',
+					'post_id'                                         => $this->is_order_meta_box_screen( $screen_id ) && isset( $order_or_post_object ) ? \Automattic\WooCommerce\Utilities\OrderUtil::get_post_or_order_id( $order_or_post_object ) : $post_id,
+					'base_country'                                    => WC()->countries->get_base_country(),
+					'currency_format_num_decimals'                    => wc_get_price_decimals(),
+					'currency_format_symbol'                          => get_woocommerce_currency_symbol( $currency ),
+					'currency_format_decimal_sep'                     => esc_attr( wc_get_price_decimal_separator() ),
+					'currency_format_thousand_sep'                    => esc_attr( wc_get_price_thousand_separator() ),
+					'currency_format'                                 => esc_attr( str_replace( array( '%1$s', '%2$s' ), array( '%s', '%v' ), get_woocommerce_price_format() ) ), // For accounting JS.
+					'rounding_precision'                              => wc_get_rounding_precision(),
+					'tax_rounding_mode'                               => wc_get_tax_rounding_mode(),
+					'product_types'                                   => array_unique( array_merge( array( 'simple', 'grouped', 'variable', 'external' ), array_keys( wc_get_product_types() ) ) ),
+					'i18n_download_permission_fail'                   => __( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ),
+					'i18n_permission_revoke'                          => __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
+					'i18n_tax_rate_already_exists'                    => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
+					'i18n_delete_note'                                => __( 'Are you sure you wish to delete this note? This action cannot be undone.', 'woocommerce' ),
+					'i18n_apply_coupon'                               => __( 'Enter a coupon code to apply. Discounts are applied to line totals, before taxes.', 'woocommerce' ),
+					'i18n_add_fee'                                    => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ),
+					'i18n_attribute_name_placeholder'                 => __( 'New attribute', 'woocommerce' ),
+					'i18n_product_simple_tip'                         => __( '<b>Simple –</b> covers the vast majority of any products you may sell. Simple products are shipped and have no options. For example, a book.', 'woocommerce' ),
+					'i18n_product_grouped_tip'                        => __( '<b>Grouped –</b> a collection of related products that can be purchased individually and only consist of simple products. For example, a set of six drinking glasses.', 'woocommerce' ),
+					'i18n_product_external_tip'                       => __( '<b>External or Affiliate –</b> one that you list and describe on your website but is sold elsewhere.', 'woocommerce' ),
+					'i18n_product_variable_tip'                       => __( '<b>Variable –</b> a product with variations, each of which may have a different SKU, price, stock option, etc. For example, a t-shirt available in different colors and/or sizes.', 'woocommerce' ),
+					'i18n_product_other_tip'                          => __( 'Product types define available product details and attributes, such as downloadable files and variations. They’re also used for analytics and inventory management.', 'woocommerce' ),
+					'i18n_product_description_tip'                    => __( 'Describe this product. What makes it unique? What are its most important features?', 'woocommerce' ),
+					'i18n_product_short_description_tip'              => __( 'Summarize this product in 1-2 short sentences. We’ll show it at the top of the page.', 'woocommerce' ),
+					'i18n_save_attribute_variation_tip'               => __( 'Make sure you enter the name and values for each attribute.', 'woocommerce' ),
 					/* translators: %1$s: maximum file size */
-					'i18n_product_image_tip'             => sprintf( __( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. Maximum upload file size: %1$s.', 'woocommerce' ) , size_format( wp_max_upload_size() ) ),
+					'i18n_product_image_tip'                          => sprintf( __( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. Maximum upload file size: %1$s.', 'woocommerce' ), size_format( wp_max_upload_size() ) ),
 					'i18n_remove_used_attribute_confirmation_message' => __( 'If you remove this attribute, customers will no longer be able to purchase some variations of this product.', 'woocommerce' ),
-					'i18n_add_attribute_error_notice'    => __( 'Adding new attribute failed.', 'woocommerce' ),
+					'i18n_add_attribute_error_notice'                 => __( 'Adding new attribute failed.', 'woocommerce' ),
+					/* translators: %s: WC_DELIMITER */
+					'i18n_attributes_default_placeholder'             => sprintf( esc_attr__( 'Enter some descriptive text. Use “%s” to separate different values.', 'woocommerce' ), esc_attr( WC_DELIMITER ) ),
+					'i18n_attributes_used_for_variations_placeholder' => sprintf( esc_attr__( 'Enter options for customers to choose from, f.e. “Blue” or “Large”. Use “%s” to separate different options.', 'woocommerce' ), esc_attr( WC_DELIMITER ) )
 				);
 
 				wp_localize_script( 'wc-admin-meta-boxes', 'woocommerce_admin_meta_boxes', $params );
@@ -550,6 +555,107 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'marketplace-suggestions' );
 			}
 
+			// Marketplace promotions.
+			if ( in_array( $screen_id, array( 'woocommerce_page_wc-admin' ), true ) ) {
+
+				$promotions = WC_Admin_Marketplace_Promotions::get_active_promotions();
+
+				if ( false === $promotions ) {
+					return;
+				}
+
+				wp_add_inline_script(
+					'wc-admin-app',
+					'window.wcMarketplace = ' . wp_json_encode( array( 'promotions' => $promotions ) ),
+					'before'
+				);
+			}
+		}
+
+		/**
+		 * Enqueue a script in the block editor.
+		 * Similar to `WCAdminAssets::register_script()` but without enqueuing unnecessary dependencies.
+		 *
+		 * @return void
+		 */
+		private function enqueue_block_editor_script( $script_path_name, $script_name ) {
+			$script_assets_filename = WCAdminAssets::get_script_asset_filename( $script_path_name, $script_name );
+			$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER .  $script_path_name . '/' . $script_assets_filename;
+
+			wp_enqueue_script(
+				'wc-admin-' . $script_name,
+				WCAdminAssets::get_url( $script_path_name . '/' . $script_name, 'js' ),
+				$script_assets['dependencies'],
+				WCAdminAssets::get_file_version( 'js', $script_assets['version'] ),
+				true
+			);
+		}
+
+		/**
+		 * Enqueue block editor assets.
+		 *
+		 * @return void
+		 */
+		public function enqueue_block_editor_assets() {
+			$settings_tabs = apply_filters('woocommerce_settings_tabs_array', []);
+
+			if ( is_array( $settings_tabs ) && count( $settings_tabs ) > 0  ) {
+				$formatted_settings_tabs = array();
+				foreach ($settings_tabs as $key => $label) {
+					if (
+						is_string( $key ) && $key !== "" &&
+						is_string( $label ) && $label !== ""
+					) {
+						$formatted_settings_tabs[] = array(
+							'key'   => $key,
+							'label' => wp_strip_all_tags( $label ),
+						);
+					}
+				}
+
+				self::enqueue_block_editor_script( 'wp-admin-scripts', 'command-palette' );
+				wp_localize_script(
+					'wc-admin-command-palette',
+					'wcCommandPaletteSettings',
+					array(
+						'settingsTabs'    => $formatted_settings_tabs,
+					)
+				);
+			}
+
+			$admin_features_disabled = apply_filters( 'woocommerce_admin_disabled', false );
+			if ( ! $admin_features_disabled ) {
+				$analytics_reports = Analytics::get_report_pages();
+				if ( is_array( $analytics_reports ) && count( $analytics_reports ) > 0 ) {
+					$formatted_analytics_reports = array_map( function( $report ) {
+						if ( ! is_array( $report ) ) {
+							return null;
+						}
+						$title = array_key_exists( 'title', $report ) ? $report['title'] : '';
+						$path = array_key_exists( 'path', $report ) ? $report['path'] : '';
+						if (
+							is_string( $title ) && $title !== "" &&
+							is_string( $path ) && $path !== ""
+						) {
+							return array(
+								'title' => wp_strip_all_tags( $title ),
+								'path' => $path,
+							);
+						}
+						return null;
+					}, $analytics_reports );
+					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
+
+					self::enqueue_block_editor_script( 'wp-admin-scripts', 'command-palette-analytics' );
+					wp_localize_script(
+						'wc-admin-command-palette-analytics',
+						'wcCommandPaletteAnalytics',
+						array(
+							'reports'    => $formatted_analytics_reports,
+						)
+					);
+				}
+			}
 		}
 
 		/**

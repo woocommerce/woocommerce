@@ -1,13 +1,21 @@
 const { test, expect } = require( '@playwright/test' );
 const { customer, storeDetails } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
+const { getOrderIdFromUrl } = require( '../../utils/order' );
+const { addAProductToCart } = require( '../../utils/cart' );
 
-let productId, orderId;
+let productId, orderId, zoneId;
 
 const product = {
 	name: 'Order email product',
 	type: 'simple',
 	regular_price: '42.77',
+};
+const zoneInfo = {
+	name: 'Free shipping',
+};
+const methodInfo = {
+	method_id: 'free_shipping',
 };
 
 const storeName = 'WooCommerce Core E2E Test Suite';
@@ -18,6 +26,9 @@ test.describe( 'Shopper Order Email Receiving', () => {
 	test.beforeAll( async () => {
 		productId = await api.create.product( product );
 		await api.update.enableCashOnDelivery();
+
+		zoneId = await api.create.shippingZone( zoneInfo );
+		await api.create.shippingMethod( zoneId, methodInfo );
 	} );
 
 	test.beforeEach( async ( { page } ) => {
@@ -48,6 +59,8 @@ test.describe( 'Shopper Order Email Receiving', () => {
 			await api.deletePost.order( orderId );
 		}
 		await api.update.disableCashOnDelivery();
+
+		await api.deletePost.shippingZone( zoneId );
 	} );
 
 	test( 'should receive order email after purchasing an item', async ( {
@@ -56,8 +69,7 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		// ensure that the store's address is in the US
 		await api.update.storeDetails( storeDetails.us.store );
 
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
+		await addAProductToCart( page, productId );
 
 		await page.goto( '/checkout/' );
 
@@ -90,11 +102,9 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		await page.locator( 'text=Place order' ).click();
 
 		await expect(
-			page.locator( 'li.woocommerce-order-overview__order > strong' )
+			page.getByText( 'Your order has been received' )
 		).toBeVisible();
-		orderId = await page
-			.locator( 'li.woocommerce-order-overview__order > strong' )
-			.textContent();
+		orderId = getOrderIdFromUrl( page );
 
 		// search to narrow it down to just the messages we want
 		await page.goto(
@@ -102,7 +112,6 @@ test.describe( 'Shopper Order Email Receiving', () => {
 				customer.email
 			) }`
 		);
-		await page.waitForLoadState( 'networkidle' );
 		await expect(
 			page.locator( 'td.column-receiver >> nth=0' )
 		).toContainText( customer.email );

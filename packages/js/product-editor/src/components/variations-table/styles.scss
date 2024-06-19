@@ -1,12 +1,111 @@
+@import "./variation-actions-menus/styles.scss";
+@import "./downloads-menu-item/styles.scss";
+@import "./pagination/styles.scss";
+@import "./table-empty-or-error-state/styles.scss";
+@import "./variations-filter/styles.scss";
+@import "./table-row-skeleton/styles.scss";
+@import "./add-image-menu-item/style.scss";
+@import "./image-actions-menu/style.scss";
+@import "./variation-stock-status-form/styles.scss";
+@import "./variation-pricing-form/styles.scss";
+
 .woocommerce-product-variations {
 	display: flex;
 	flex-direction: column;
 	position: relative;
 
-	> div {
+	&__attributes-cell {
 		display: flex;
-		flex-direction: column;
-		flex-grow: 1;
+		align-items: center;
+	}
+
+	&__table {
+		&-header {
+			.woocommerce-product-variations__table-row {
+				min-height: auto;
+			}
+			.woocommerce-product-variations__table-rowheader {
+				text-transform: uppercase;
+				color: $gray-700;
+				font-weight: 500;
+				font-size: 11px;
+				line-height: $grid-unit-20;
+				border-bottom: 1px solid $gray-200;
+			}
+		}
+		&-body {
+			.woocommerce-product-variations__table-row {
+				&:not(:last-child) {
+					border-bottom: 1px solid $gray-200;
+				}
+			}
+		}
+		&-footer {
+			border-top: 1px solid $gray-200;
+			padding-top: $grid-unit-30;
+		}
+		&-row {
+			position: relative;
+			display: grid;
+			grid-template-columns: $grid-unit-30 3fr 1fr 1fr 2fr;
+			column-gap: $grid-unit-30;
+			align-items: center;
+			border: none;
+			min-height: 9 * $grid-unit;
+			padding: $grid-unit + $grid-unit-05 0;
+		}
+
+		.woocommerce-sortable__handle {
+			display: none;
+		}
+
+		.components-checkbox-control__input[type="checkbox"] {
+			&:not(:checked):not(:focus) {
+				border-color: $gray-600;
+			}
+		}
+	}
+
+	&__notice {
+		border-left: 0px;
+		margin: 0 0 $gap-large 0;
+		&.is-error {
+			background-color: #fcf0f1;
+		}
+
+		.components-notice__actions {
+			margin-top: $gap-small;
+			.components-button:first-child {
+				margin-left: 0px;
+			}
+		}
+	}
+
+	&__selection {
+		margin-left: $gap-smallest;
+		display: flex;
+		align-items: center;
+
+		.woocommerce-tooltip {
+			position: absolute;
+			left: -$grid-unit-40;
+			rotate: 180deg;
+
+			.components-button {
+				padding: 0;
+				width: 24px;
+				height: 24px;
+				color: $alert-red;
+			}
+		}
+	}
+
+	&__filters {
+		display: inline-flex;
+		flex-wrap: wrap;
+		gap: $grid-unit;
+		align-items: center;
+		grid-column: span 4;
 	}
 
 	&__loading {
@@ -24,6 +123,17 @@
 			width: $gap-largest;
 			height: $gap-largest;
 		}
+	}
+
+	&__price {
+		text-align: right;
+	}
+
+	&__regular-price--on-sale {
+		text-decoration: line-through;
+		color: $gray-600;
+		margin-left: 6px;
+		word-wrap: normal;
 	}
 
 	&__status-dot {
@@ -48,6 +158,18 @@
 		display: flex;
 		align-items: center;
 		justify-content: flex-end;
+		gap: $gap-smaller;
+		margin-right: $gap-smallest;
+
+		.variations-actions-menu__toogle:disabled {
+			cursor: not-allowed;
+		}
+
+		&--delete {
+			&.components-button.components-menu-item__button.is-link {
+				text-decoration: none;
+			}
+		}
 
 		.components-button {
 			position: relative;
@@ -57,14 +179,6 @@
 			&[aria-disabled="true"] {
 				opacity: 1;
 			}
-
-			.components-spinner {
-				margin: 4px;
-			}
-		}
-
-		.components-button svg {
-			fill: none;
 		}
 
 		.components-button--visible {
@@ -75,29 +189,39 @@
 			color: $alert-red;
 		}
 	}
-
-	.woocommerce-list-item {
-		display: grid;
-		grid-template-columns: auto 25% 25% 88px;
+	&__add-image-button {
+		border-radius: 2px;
+		border: 1px dashed $gray-400;
+		margin-right: $gap-small;
+		width: $grid-unit-40;
+		height: $grid-unit-40;
 		padding: 0;
-		min-height: calc($grid-unit * 9);
-		border: none;
-	}
+		display: flex;
+		align-items: center;
+		justify-content: center;
 
-	.woocommerce-sortable {
-		margin: 0;
-		flex: 1 0 auto;
-
-		&__item:not(:last-child) .woocommerce-list-item {
-			border-bottom: 1px solid $gray-200;
-		}
-
-		&__handle {
-			display: none;
+		.components-spinner {
+			margin: 0;
 		}
 	}
+	&__image-button {
+		margin-right: $gap-small;
+		width: $grid-unit-40;
+		height: $grid-unit-40;
+		padding: 0;
+	}
+	&__image {
+		width: 100%;
+		height: 100%;
+		background-position: center center;
+		background-size: contain;
+		background-repeat: no-repeat;
+	}
 
-	&__footer {
-		padding: $gap;
+	&__stock-status-actions-menu,
+	&__pricing-actions-menu {
+		.components-popover__content {
+			padding: 0;
+		}
 	}
 }

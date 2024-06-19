@@ -103,7 +103,8 @@ class CartModal extends Component {
 			if ( themeInfo ) {
 				listItems.push( {
 					title: sprintf(
-						__( '%s — %s per year', 'woocommerce' ),
+						/* translators: 1: theme title, 2: theme price */
+						__( '%1$s — %2$s per year', 'woocommerce' ),
 						themeInfo.title,
 						decodeEntities( themeInfo.price )
 					),

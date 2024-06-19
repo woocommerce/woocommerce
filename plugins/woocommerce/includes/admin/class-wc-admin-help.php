@@ -45,7 +45,7 @@ class WC_Admin_Help {
 					'<p>' . sprintf(
 						/* translators: %s: Documentation URL */
 						__( 'Should you need help understanding, using, or extending WooCommerce, <a href="%s">please read our documentation</a>. You will find all kinds of resources including snippets, tutorials and much more.', 'woocommerce' ),
-						'https://docs.woocommerce.com/documentation/plugins/woocommerce/?utm_source=helptab&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin'
+						'https://woocommerce.com/documentation/plugins/woocommerce/?utm_source=helptab&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin'
 					) . '</p>' .
 					'<p>' . sprintf(
 						/* translators: %s: Forum URL */
@@ -76,7 +76,7 @@ class WC_Admin_Help {
 			'<p><a href="https://woocommerce.com/?utm_source=helptab&utm_medium=product&utm_content=about&utm_campaign=woocommerceplugin" target="_blank">' . __( 'About WooCommerce', 'woocommerce' ) . '</a></p>' .
 			'<p><a href="https://wordpress.org/plugins/woocommerce/" target="_blank">' . __( 'WordPress.org project', 'woocommerce' ) . '</a></p>' .
 			'<p><a href="https://github.com/woocommerce/woocommerce/" target="_blank">' . __( 'GitHub project', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="https://woocommerce.com/storefront/?utm_source=helptab&utm_medium=product&utm_content=wcthemes&utm_campaign=woocommerceplugin" target="_blank">' . __( 'Official theme', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="https://woocommerce.com/product-category/themes/?utm_source=helptab&utm_medium=product&utm_content=wcthemes&utm_campaign=woocommerceplugin" target="_blank">' . __( 'Official themes', 'woocommerce' ) . '</a></p>' .
 			'<p><a href="https://woocommerce.com/product-category/woocommerce-extensions/?utm_source=helptab&utm_medium=product&utm_content=wcextensions&utm_campaign=woocommerceplugin" target="_blank">' . __( 'Official extensions', 'woocommerce' ) . '</a></p>'
 		);
 	}

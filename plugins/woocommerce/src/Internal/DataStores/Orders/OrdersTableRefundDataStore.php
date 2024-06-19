@@ -6,7 +6,8 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-use WC_Meta_Data;
+use \WC_Cache_Helper;
+use \WC_Meta_Data;
 
 /**
  * Class OrdersTableRefundDataStore.
@@ -76,6 +77,9 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 		if ( ! $refund_id ) {
 			return;
 		}
+
+		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $refund->get_parent_id();
+		wp_cache_delete( $refund_cache_key, 'orders' );
 
 		$this->delete_order_data_from_custom_order_tables( $refund_id );
 		$refund->set_id( 0 );

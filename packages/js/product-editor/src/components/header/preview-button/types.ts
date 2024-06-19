@@ -9,4 +9,6 @@ export type PreviewButtonProps = Omit<
 	'aria-disabled' | 'variant' | 'href' | 'children'
 > & {
 	productStatus: Product[ 'status' ];
+	productType: string;
+	visibleTab?: string | null;
 };

@@ -11,8 +11,8 @@
 		"puppeteer"
 	],
 	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"node": "^20.11.1",
+		"pnpm": "^9.1.0"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment/README.md",
 	"bugs": {
@@ -24,33 +24,57 @@
 	},
 	"main": "index.js",
 	"module": "build-module/index.js",
+	"bin": {
+		"wc-e2e": "bin/wc-e2e.sh"
+	},
+	"scripts": {
+		"build": "pnpm clean && pnpm compile",
+		"clean": "rm -rf ./build ./build-module",
+		"compile": "e2e-builds",
+		"docker:clear-all": "docker rmi --force $(docker images -q)",
+		"docker:down": "./bin/docker-compose.sh down",
+		"docker:ssh": "docker exec -it $(node utils/get-app-name.js)_wordpress-www /bin/bash",
+		"docker:up": "./bin/docker-compose.sh up",
+		"docker:wait": "bash ./bin/wait-for-build.sh",
+		"lint": "eslint --ext=js,ts,tsx src",
+		"lint:fix": "eslint --ext=js,ts,tsx src --fix",
+		"prepack": "pnpm build",
+		"test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
+		"test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
+		"test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
+	},
 	"dependencies": {
 		"@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
 		"@jest/test-sequencer": "^27.5.1",
-		"@slack/web-api": "^6.1.0",
+		"@slack/web-api": "^6.10.0",
 		"@woocommerce/api": "^0.2.0",
 		"@wordpress/e2e-test-utils": "^4.16.1",
 		"@wordpress/jest-preset-default": "^7.1.3",
-		"app-root-path": "^3.0.0",
+		"app-root-path": "^3.1.0",
 		"commander": "4.1.1",
 		"config": "3.3.7",
-		"jest": "^27.5.1",
+		"jest": "~27.5.1",
 		"jest-circus": "27.5.1",
 		"jest-each": "27.5.1",
 		"jest-puppeteer": "^5.0.4",
-		"node-stream-zip": "^1.13.6",
+		"node-stream-zip": "^1.15.0",
 		"puppeteer": "2.1.1",
 		"readline-sync": "^1.4.10",
 		"request": "^2.88.2",
-		"sprintf-js": "^1.1.2"
+		"sprintf-js": "^1.1.3"
 	},
 	"devDependencies": {
 		"@babel/cli": "7.12.8",
 		"@babel/core": "7.12.9",
-		"@babel/plugin-proposal-async-generator-functions": "^7.16.4",
-		"@babel/plugin-proposal-object-rest-spread": "^7.16.0",
-		"@babel/plugin-transform-react-jsx": "^7.16.0",
-		"@babel/plugin-transform-runtime": "^7.16.4",
+		"@babel/plugin-proposal-async-generator-functions": "^7.20.7",
+		"@babel/plugin-proposal-object-rest-spread": "^7.20.7",
+		"@babel/plugin-transform-react-jsx": "^7.23.4",
+		"@babel/plugin-transform-runtime": "^7.23.4",
 		"@babel/polyfill": "7.12.1",
 		"@babel/preset-env": "7.12.7",
 		"@woocommerce/eslint-plugin": "workspace:*",
@@ -59,34 +83,18 @@
 		"@wordpress/babel-preset-default": "3.0.2",
 		"@wordpress/browserslist-config": "wp-6.0",
 		"ndb": "^1.1.5",
-		"semver": "^7.3.2"
+		"semver": "^7.5.4",
+		"wireit": "0.14.3"
 	},
 	"publishConfig": {
 		"access": "public"
 	},
-	"scripts": {
-		"turbo:build": "pnpm run clean && pnpm run compile",
-		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"clean": "rm -rf ./build ./build-module",
-		"compile": "e2e-builds",
-		"prepack": "pnpm run build",
-		"docker:up": "./bin/docker-compose.sh up",
-		"docker:wait": "bash ./bin/wait-for-build.sh",
-		"docker:down": "./bin/docker-compose.sh down",
-		"docker:clear-all": "docker rmi --force $(docker images -q)",
-		"docker:ssh": "docker exec -it $(node utils/get-app-name.js)_wordpress-www /bin/bash",
-		"test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
-		"test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
-		"test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev",
-		"lint": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src",
-		"lint:fix": "eslint --output-file eslint_report.json --format json --ext=js,ts,tsx src --fix"
-	},
-	"bin": {
-		"wc-e2e": "bin/wc-e2e.sh"
-	},
-	"lint-staged": {
-		"*.(t|j)s?(x)": [
-			"pnpm lint:fix"
-		]
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,ts,tsx}"
+			}
+		}
 	}
 }

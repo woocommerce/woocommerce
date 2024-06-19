@@ -39,6 +39,20 @@ $task-alert-yellow: #f0b849;
 
 	.woocommerce-task-list__item-title {
 		color: $foreground-color;
+		display: flex;
+		column-gap: $gap-small;
+		row-gap: $gap-smallest;
+		flex-wrap: wrap;
+	}
+
+	.woocommerce-task-list__item-badge {
+		padding: 0 10px;
+		background-color: #f6f7f7;
+		border-radius: 2px;
+		color: $gray-800;
+		font-size: 11px;
+		font-weight: 500;
+		line-height: 20px;
 	}
 
 	.woocommerce-task__additional-info,

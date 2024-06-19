@@ -51,6 +51,10 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 		$order_3->set_billing_email( 'test@example.com' );
 		$order_3->set_status( 'pending' );
 		$order_3->save();
+		$order_4 = wc_create_order();
+		$order_4->add_product( $product_1 );
+		$order_4->set_status( 'completed' );
+		$order_4->save();
 
 		$this->assertTrue( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_1 ) );
 		$this->assertTrue( wc_customer_bought_product( '', $customer_id_1, $product_id_1 ) );

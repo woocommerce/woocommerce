@@ -70,6 +70,10 @@ class Tracks_Debug_Log {
 		}
 
 		foreach ( $properties as $key => $property ) {
+			if ( is_array( $property ) ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+				$property = print_r( $property, true );
+			}
 			if ( $logger ) {
 				$logger->debug(
 					"  - {$key}: {$property}",

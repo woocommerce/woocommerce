@@ -13,31 +13,6 @@ class Block extends AbstractBlock implements BlockContainerInterface {
 	use BlockContainerTrait;
 
 	/**
-	 * Get the block configuration as a formatted template.
-	 *
-	 * @return array The block configuration as a formatted template.
-	 */
-	public function get_formatted_template(): array {
-		$arr = [
-			$this->get_name(),
-			$this->get_attributes(),
-		];
-
-		$inner_blocks = $this->get_inner_blocks_sorted_by_order();
-
-		if ( ! empty( $inner_blocks ) ) {
-			$arr[] = array_map(
-				function( BlockInterface $block ) {
-					return $block->get_formatted_template();
-				},
-				$inner_blocks
-			);
-		}
-
-		return $arr;
-	}
-
-	/**
 	 * Add an inner block to this block.
 	 *
 	 * @param array $block_config The block data.

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -11,7 +11,7 @@ import './choice.scss';
 type Props = {
 	className?: string;
 	selected: boolean;
-	title: string;
+	title: string | React.ReactNode;
 	name: string;
 	value: string;
 	onChange: ( value: string ) => void;
@@ -35,7 +35,7 @@ export const Choice = ( {
 	return (
 		<div
 			role="radio"
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-profiler-choice-container',
 				className
 			) }

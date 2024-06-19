@@ -7,30 +7,25 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
+
 /**
  * Rule processor for sending when WooCommerce Admin has been updated.
+ *
+ * @deprecated 8.8.0
  */
-class WooCommerceAdminUpdatedRuleProcessor implements RuleProcessorInterface {
+class WooCommerceAdminUpdatedRuleProcessor extends DeprecatedClassFacade {
 	/**
-	 * Process the rule.
+	 * The name of the non-deprecated class that this facade covers.
 	 *
-	 * @param object $rule         The specific rule being processed by this rule processor.
-	 * @param object $stored_state Stored state.
-	 *
-	 * @return bool Whether the rule passes or not.
+	 * @var string
 	 */
-	public function process( $rule, $stored_state ) {
-		return get_option( RemoteInboxNotificationsEngine::WCA_UPDATED_OPTION_NAME, false );
-	}
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\WooCommerceAdminUpdatedRuleProcessor';
 
 	/**
-	 * Validates the rule.
+	 * The version that this class was deprecated in.
 	 *
-	 * @param object $rule The rule to validate.
-	 *
-	 * @return bool Pass/fail.
+	 * @var string
 	 */
-	public function validate( $rule ) {
-		return true;
-	}
+	protected static $deprecated_in_version = '8.8.0';
 }

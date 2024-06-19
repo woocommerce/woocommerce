@@ -17,7 +17,7 @@ jobs:
         permissions:
             contents: read
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Get current version
               id: version
@@ -30,8 +30,6 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  build: false
 
             - name: Prepare plugin zips
               id: prepare
@@ -39,7 +37,7 @@ jobs:
                   CURRENT_VERSION: ${{ steps.version.outputs.version }}
               run: |
 
-                  # Current version must compare greather than any previously used current version for this PR.
+                  # Current version must compare greater than any previously used current version for this PR.
                   # Assume GH run IDs are monotonic.
                   VERSUFFIX="${GITHUB_RUN_ID}-g$(git rev-parse --short HEAD)"
 
@@ -66,7 +64,7 @@ jobs:
                   echo "plugin-data=$PLUGIN_DATA" >> $GITHUB_OUTPUT
 
             - name: Create plugins artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               if: steps.prepare.outputs.plugin-data != '{}'
               with:
                   name: plugins

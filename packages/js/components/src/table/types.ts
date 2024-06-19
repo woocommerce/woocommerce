@@ -164,7 +164,10 @@ export type TableCardProps = CommonTableProps & {
 	/**
 	 * A callback function that is invoked when the current page is changed.
 	 */
-	onPageChange?: ( newPage: number, direction?: 'previous' | 'next' ) => void;
+	onPageChange?: (
+		newPage: number,
+		direction?: 'previous' | 'next' | 'goto'
+	) => void;
 	/**
 	 * The total number of rows to display per page.
 	 */

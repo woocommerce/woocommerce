@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed a race condition that was causing page views on intro-opt-in page to be sent before tracks was enabled.

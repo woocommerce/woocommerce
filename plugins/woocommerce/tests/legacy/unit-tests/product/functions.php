@@ -228,6 +228,108 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox We can search for products by category slugs and category IDs.
+	 */
+	public function test_searching_products_by_category() {
+		$cat1      = wp_insert_term( 'Cat One', 'product_cat' );
+		$cat1_term = get_term_by( 'id', $cat1['term_id'], 'product_cat' );
+		$cat2      = wp_insert_term( 'Cat Two', 'product_cat' );
+		$cat3      = wp_insert_term( 'Cat Three', 'product_cat' );
+
+		$product1 = WC_Helper_Product::create_simple_product();
+		$product1->set_name( 'Product 1' );
+		$product1->set_category_ids( array( $cat1['term_id'] ) );
+		$product1->save();
+
+		$product2 = WC_Helper_Product::create_simple_product();
+		$product2->set_name( 'Product 2' );
+		$product2->set_category_ids( array( $cat2['term_id'], $cat3['term_id'] ) );
+		$product2->save();
+
+		$product3 = WC_Helper_Product::create_simple_product();
+		$product3->set_name( 'Product 3' );
+		$product3->save();
+
+		// Search by category slug.
+		$products = wc_get_products(
+			array(
+				'category' => $cat1_term->slug,
+			)
+		);
+		$this->assertCount( 1, $products );
+		$this->assertEquals( $product1->get_id(), $products[0]->get_id() );
+
+		// Search by category ID.
+		$products = wc_get_products(
+			array(
+				'product_category_id' => $cat2['term_id'],
+			)
+		);
+		$this->assertCount( 1, $products );
+		$this->assertEquals( $product2->get_id(), $products[0]->get_id() );
+
+		// Search by multiple category IDs.
+		$products = wc_get_products(
+			array(
+				'product_category_id' => array( $cat2['term_id'], $cat3['term_id'] ),
+			)
+		);
+		$this->assertCount( 1, $products );
+		$this->assertEquals( $product2->get_id(), $products[0]->get_id() );
+	}
+
+	/**
+	 * @testdox We can search for products by tag slugs and tag IDs.
+	 */
+	public function test_searching_products_by_tag() {
+		$tag1      = wp_insert_term( 'Tag One', 'product_tag' );
+		$tag1_term = get_term_by( 'id', $tag1['term_id'], 'product_tag' );
+		$tag2      = wp_insert_term( 'Tag Two', 'product_tag' );
+		$tag3      = wp_insert_term( 'Tag Three', 'product_tag' );
+
+		$product1 = WC_Helper_Product::create_simple_product();
+		$product1->set_name( 'Product 1' );
+		$product1->set_tag_ids( array( $tag1['term_id'] ) );
+		$product1->save();
+
+		$product2 = WC_Helper_Product::create_simple_product();
+		$product2->set_name( 'Product 2' );
+		$product2->set_tag_ids( array( $tag2['term_id'], $tag3['term_id'] ) );
+		$product2->save();
+
+		$product3 = WC_Helper_Product::create_simple_product();
+		$product3->set_name( 'Product 3' );
+		$product3->save();
+
+		// Search by tag slug.
+		$products = wc_get_products(
+			array(
+				'tag' => $tag1_term->slug,
+			)
+		);
+		$this->assertCount( 1, $products );
+		$this->assertEquals( $product1->get_id(), $products[0]->get_id() );
+
+		// Search by tag ID.
+		$products = wc_get_products(
+			array(
+				'product_tag_id' => $tag2['term_id'],
+			)
+		);
+		$this->assertCount( 1, $products );
+		$this->assertEquals( $product2->get_id(), $products[0]->get_id() );
+
+		// Search by multiple tag IDs.
+		$products = wc_get_products(
+			array(
+				'product_tag_id' => array( $tag2['term_id'], $tag3['term_id'] ),
+			)
+		);
+		$this->assertCount( 1, $products );
+		$this->assertEquals( $product2->get_id(), $products[0]->get_id() );
+	}
+
+	/**
 	 * Tests wc_get_products() with dimension parameters.
 	 *
 	 * @since 3.2.0
@@ -815,14 +917,11 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: test_wc_update_product_stock_should_return_null_if_not_managing_stock.
+	 * Test: test_wc_update_product_stock_should_return_old_value_if_not_managing_stock.
 	 */
-	public function test_wc_update_product_stock_should_return_null_if_not_managing_stock() {
+	public function test_wc_update_product_stock_should_return_old_value_if_not_managing_stock() {
 		$product = WC_Helper_Product::create_simple_product();
-		$product->set_stock_quantity( 5 );
-		$product->save();
-
-		$this->assertNull( wc_update_product_stock( $product, 3 ) );
+		$this->assertEquals( 0, wc_update_product_stock( $product, 3 ) );
 	}
 
 	/**
@@ -1209,5 +1308,4 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 100, $price_shop );
 	}
-
 }

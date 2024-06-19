@@ -27,7 +27,7 @@
 
 	<!-- Configs -->
 	<config name="minimum_supported_wp_version" value="5.2" />
-	<config name="testVersion" value="7.3-" />
+	<config name="testVersion" value="7.4-" />
 
 	<!-- Rules -->
 	<rule ref="WooCommerce-Core" />
@@ -107,18 +107,24 @@
 	<rule ref="Generic.Arrays.DisallowShortArraySyntax.Found">
 		<exclude-pattern>src/Internal/Admin/</exclude-pattern>
 		<exclude-pattern>src/Admin/</exclude-pattern>
+		<exclude-pattern>src/Blocks/</exclude-pattern>
+		<exclude-pattern>src/StoreApi/</exclude-pattern>
 	</rule>
 
 	<!-- Temporary -->
 	<rule ref="WooCommerce.Functions.InternalInjectionMethod.MissingFinal">
 		<exclude-pattern>src/Internal/Admin/</exclude-pattern>
 		<exclude-pattern>src/Admin/</exclude-pattern>
+		<exclude-pattern>src/Blocks/</exclude-pattern>
+		<exclude-pattern>src/StoreApi/</exclude-pattern>
 	</rule>
 
 	<!-- Temporary -->
 	<rule ref="WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag">
 		<exclude-pattern>src/Internal/Admin/</exclude-pattern>
 		<exclude-pattern>src/Admin/</exclude-pattern>
+		<exclude-pattern>src/Blocks/</exclude-pattern>
+		<exclude-pattern>src/StoreApi/</exclude-pattern>
 	</rule>
 
 	<!-- Temporary -->

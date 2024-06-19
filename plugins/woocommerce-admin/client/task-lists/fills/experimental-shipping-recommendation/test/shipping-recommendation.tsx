@@ -60,7 +60,20 @@ const ShippingRecommendation = ( props: ShippingRecommendationProps ) => {
 };
 
 describe( 'ShippingRecommendation', () => {
-	test( 'should show plugins step when jetpack is not installed and activated', () => {
+	test( 'should show plugins step when woocommerce-services is not installed and activated', () => {
+		const { getByRole } = render(
+			<ShippingRecommendation
+				isJetpackConnected={ false }
+				isResolving={ false }
+				activePlugins={ [ 'foo' ] }
+			/>
+		);
+		expect(
+			getByRole( 'button', { name: 'Install & enable' } )
+		).toBeInTheDocument();
+	} );
+
+	test( 'should show connect step when WCS&T is activated but not yet connected', () => {
 		const { getByRole } = render(
 			<ShippingRecommendation
 				isJetpackConnected={ false }
@@ -69,42 +82,16 @@ describe( 'ShippingRecommendation', () => {
 			/>
 		);
 		expect(
-			getByRole( 'button', { name: 'Install & enable' } )
-		).toBeInTheDocument();
-	} );
-
-	test( 'should show plugins step when woocommerce-services is not installed and activated', () => {
-		const { getByRole } = render(
-			<ShippingRecommendation
-				isJetpackConnected={ false }
-				isResolving={ false }
-				activePlugins={ [ 'jetpack' ] }
-			/>
-		);
-		expect(
-			getByRole( 'button', { name: 'Install & enable' } )
-		).toBeInTheDocument();
-	} );
-
-	test( 'should show connect step when both plugins are activated', () => {
-		const { getByRole } = render(
-			<ShippingRecommendation
-				isJetpackConnected={ false }
-				isResolving={ false }
-				activePlugins={ [ 'jetpack', 'woocommerce-services' ] }
-			/>
-		);
-		expect(
 			getByRole( 'button', { name: 'Connect' } )
 		).toBeInTheDocument();
 	} );
 
-	test( 'should show "complete task" button when both plugins are activated and jetpack is connected', () => {
+	test( 'should show "complete task" button when WCS&T is activated and Jetpack is connected', () => {
 		const { getByRole } = render(
 			<ShippingRecommendation
 				isJetpackConnected={ true }
 				isResolving={ false }
-				activePlugins={ [ 'jetpack', 'woocommerce-services' ] }
+				activePlugins={ [ 'woocommerce-services' ] }
 			/>
 		);
 		expect(
@@ -117,7 +104,7 @@ describe( 'ShippingRecommendation', () => {
 			<ShippingRecommendation
 				isJetpackConnected={ true }
 				isResolving={ false }
-				activePlugins={ [ 'jetpack', 'woocommerce-services' ] }
+				activePlugins={ [ 'woocommerce-services' ] }
 			/>
 		);
 

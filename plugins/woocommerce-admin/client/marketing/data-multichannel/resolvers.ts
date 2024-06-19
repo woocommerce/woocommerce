@@ -75,8 +75,8 @@ const getTotalFromResponse = ( response: Response ) => {
 /**
  * Get campaigns from API backend.
  *
- * @param  page    Page number. First page is `1`.
- * @param  perPage Page size, i.e. number of records in one page.
+ * @param page    Page number. First page is `1`.
+ * @param perPage Page size, i.e. number of records in one page.
  */
 export function* getCampaigns( page: number, perPage: number ) {
 	try {

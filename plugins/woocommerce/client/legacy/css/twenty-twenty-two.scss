@@ -1,29 +1,7 @@
 /**
 * Fonts
 */
-@font-face {
-	font-family: star;
-	src: url(../fonts/star.eot);
-	src:
-		url(../fonts/star.eot?#iefix) format("embedded-opentype"),
-		url(../fonts/star.woff) format("woff"),
-		url(../fonts/star.ttf) format("truetype"),
-		url(../fonts/star.svg#star) format("svg");
-	font-weight: 400;
-	font-style: normal;
-}
-
-@font-face {
-	font-family: WooCommerce;
-	src: url(../fonts/WooCommerce.eot);
-	src:
-		url(../fonts/WooCommerce.eot?#iefix) format("embedded-opentype"),
-		url(../fonts/WooCommerce.woff) format("woff"),
-		url(../fonts/WooCommerce.ttf) format("truetype"),
-		url(../fonts/WooCommerce.svg#WooCommerce) format("svg");
-	font-weight: 400;
-	font-style: normal;
-}
+@import "fonts";
 
 @import "mixins";
 @import "animation";
@@ -244,7 +222,8 @@ $tt2-gray: #f7f7f7;
 				margin-bottom: 0;
 			}
 
-			a.add_to_cart_button {
+			a.add_to_cart_button,
+			a.product_type_grouped {
 				padding: 0.8rem 2.7rem;
 
 				&.loading {
@@ -434,7 +413,7 @@ $tt2-gray: #f7f7f7;
 		height: 1em;
 		line-height: 1;
 		width: 5.4rem;
-		font-family: star;
+		font-family: WooCommerce;
 		color: var(--wp--preset--color--secondary);
 		margin: 1rem auto 0.7rem auto;
 
@@ -544,11 +523,6 @@ $tt2-gray: #f7f7f7;
 			border: 2px solid var(--wp--preset--color--primary);
 			padding: 0.7rem 2rem;
 		}
-	}
-
-	mark {
-		background: var(--wp--preset--color--secondary);
-		color: initial;
 	}
 }
 
@@ -1006,25 +980,13 @@ ul.wc-tabs {
 	}
 
 	.woocommerce-thankyou-order-received,
-	h2.woocommerce-column__title {
+	.woocommerce-column__title,
+	.woocommerce-customer-details h2 {
 		font-family: var(--wp--preset--font-family--source-serif-pro);
 	}
 
 	.woocommerce-order > * {
 		margin-bottom: var(--wp--style--block-gap);
-	}
-
-	ul.woocommerce-order-overview {
-
-		li {
-			display: inline;
-			text-transform: uppercase;
-
-			strong {
-				text-transform: none;
-				display: block;
-			}
-		}
 	}
 
 	.woocommerce-customer-details {

@@ -2,7 +2,14 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, TextControl, Notice, Spinner } from '@wordpress/components';
+import {
+	Button,
+	TextControl,
+	Notice,
+	Spinner,
+	CheckboxControl,
+} from '@wordpress/components';
+import { FormInputValidation } from '@automattic/components';
 import { SelectControl } from '@woocommerce/components';
 import { Icon, chevronDown } from '@wordpress/icons';
 import {
@@ -12,11 +19,14 @@ import {
 } from '@wordpress/element';
 import { findCountryOption, getCountry } from '@woocommerce/onboarding';
 import { decodeEntities } from '@wordpress/html-entities';
+import { z } from 'zod';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
-import { CoreProfilerStateMachineContext, BusinessInfoEvent } from '../index';
+import { CoreProfilerStateMachineContext } from '../index';
+import { BusinessInfoEvent } from '../events';
 import { CountryStateOption } from '../services/country';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
@@ -35,24 +45,32 @@ export const industryChoices = [
 		key: 'clothing_and_accessories' as const,
 	},
 	{
-		label: __( 'Health and beauty', 'woocommerce' ),
-		key: 'health_and_beauty' as const,
-	},
-	{
 		label: __( 'Food and drink', 'woocommerce' ),
 		key: 'food_and_drink' as const,
 	},
 	{
-		label: __( 'Home, furniture and garden', 'woocommerce' ),
-		key: 'home_furniture_and_garden' as const,
+		label: __( 'Electronics and computers', 'woocommerce' ),
+		key: 'electronics_and_computers' as const,
+	},
+	{
+		label: __( 'Health and beauty', 'woocommerce' ),
+		key: 'health_and_beauty' as const,
 	},
 	{
 		label: __( 'Education and learning', 'woocommerce' ),
 		key: 'education_and_learning' as const,
 	},
 	{
-		label: __( 'Electronics and computers', 'woocommerce' ),
-		key: 'electronics_and_computers' as const,
+		label: __( 'Home, furniture and garden', 'woocommerce' ),
+		key: 'home_furniture_and_garden' as const,
+	},
+	{
+		label: __( 'Arts and crafts', 'woocommerce' ),
+		key: 'arts_and_crafts' as const,
+	},
+	{
+		label: __( 'Sports and recreation', 'woocommerce' ),
+		key: 'sports_and_recreation' as const,
 	},
 	{
 		label: __( 'Other', 'woocommerce' ),
@@ -83,9 +101,13 @@ export type BusinessInfoContextProps = Pick<
 > & {
 	onboardingProfile: Pick<
 		CoreProfilerStateMachineContext[ 'onboardingProfile' ],
-		'industry' | 'business_choice' | 'is_store_country_set'
+		| 'industry'
+		| 'business_choice'
+		| 'is_store_country_set'
+		| 'is_agree_marketing'
+		| 'store_email'
 	>;
-};
+} & Partial< Pick< CoreProfilerStateMachineContext, 'currentUserEmail' > >;
 
 export const BusinessInfo = ( {
 	context,
@@ -105,7 +127,10 @@ export const BusinessInfo = ( {
 			is_store_country_set: isStoreCountrySet,
 			industry: industryFromOnboardingProfile,
 			business_choice: businessChoiceFromOnboardingProfile,
+			is_agree_marketing: isOptInMarketingFromOnboardingProfile,
+			store_email: storeEmailAddressFromOnboardingProfile,
 		},
+		currentUserEmail,
 	} = context;
 
 	const [ storeName, setStoreName ] = useState(
@@ -175,6 +200,29 @@ export const BusinessInfo = ( {
 		useState( false );
 
 	const [ hasSubmitted, setHasSubmitted ] = useState( false );
+
+	const [ isEmailInvalid, setIsEmailInvalid ] = useState( false );
+
+	const [ storeEmailAddress, setEmailAddress ] = useState(
+		storeEmailAddressFromOnboardingProfile || currentUserEmail || ''
+	);
+
+	const [ isOptInMarketing, setIsOptInMarketing ] = useState< boolean >(
+		isOptInMarketingFromOnboardingProfile || false
+	);
+
+	const [ doValidate, setDoValidate ] = useState( false );
+
+	useEffect( () => {
+		if ( doValidate ) {
+			const parseEmail = z
+				.string()
+				.email()
+				.safeParse( storeEmailAddress );
+			setIsEmailInvalid( isOptInMarketing && ! parseEmail.success );
+			setDoValidate( false );
+		}
+	}, [ isOptInMarketing, doValidate, storeEmailAddress ] );
 
 	return (
 		<div
@@ -282,6 +330,52 @@ export const BusinessInfo = ( {
 						showAllOnFocus
 						isSearchable
 					/>
+					{ countries.length === 0 && (
+						<Notice
+							className="woocommerce-profiler-select-control__country-error"
+							isDismissible={ false }
+							status="error"
+						>
+							{ createInterpolateElement(
+								__(
+									'Oops! We encountered a problem while fetching the list of countries to choose from. <retryButton/> or <skipButton/>',
+									'woocommerce'
+								),
+								{
+									retryButton: (
+										<Button
+											onClick={ () => {
+												sendEvent( {
+													type: 'RETRY_PRE_BUSINESS_INFO',
+												} );
+											} }
+											variant="tertiary"
+										>
+											{ __(
+												'Please try again',
+												'woocommerce'
+											) }
+										</Button>
+									),
+									skipButton: (
+										<Button
+											onClick={ () => {
+												sendEvent( {
+													type: 'SKIP_BUSINESS_INFO_STEP',
+												} );
+											} }
+											variant="tertiary"
+										>
+											{ __(
+												'skip this step',
+												'woocommerce'
+											) }
+										</Button>
+									),
+								}
+							) }
+						</Notice>
+					) }
 					{ /* woocommerce-profiler-select-control__country-spacer exists purely because the select-control above has an unremovable and unstyleable div and that's preventing margin collapse */ }
 					<div className="woocommerce-profiler-select-control__country-spacer" />
 					{ geolocationOverruled && ! dismissedGeolocationNotice && (
@@ -345,12 +439,70 @@ export const BusinessInfo = ( {
 							</ul>
 						</Notice>
 					) }
+					{
+						<>
+							<TextControl
+								className={ clsx(
+									'woocommerce-profiler-business-info-email-adddress',
+									{ 'is-error': isEmailInvalid }
+								) }
+								onChange={ ( value ) => {
+									if ( isEmailInvalid ) {
+										setDoValidate( true ); // trigger validation as we want to feedback to the user as soon as it becomes valid
+									}
+									setEmailAddress( value );
+								} }
+								onBlur={ () => {
+									setDoValidate( true );
+								} }
+								value={ decodeEntities( storeEmailAddress ) }
+								label={
+									<>
+										{ __(
+											'Your email address',
+											'woocommerce'
+										) }
+										{ isOptInMarketing && (
+											<span className="woocommerce-profiler-question-required">
+												{ '*' }
+											</span>
+										) }
+									</>
+								}
+								placeholder={ __(
+									'wordpress@example.com',
+									'woocommerce'
+								) }
+							/>
+							{ isEmailInvalid && (
+								<FormInputValidation
+									isError
+									text={ __(
+										'This email is not valid.',
+										'woocommerce'
+									) }
+								/>
+							) }
+							<CheckboxControl
+								className="core-profiler__checkbox"
+								label={ __(
+									'Opt-in to receive tips, discounts, and recommendations from the Woo team directly in your inbox.',
+									'woocommerce'
+								) }
+								checked={ isOptInMarketing }
+								onChange={ ( isChecked ) => {
+									setIsOptInMarketing( isChecked );
+									setDoValidate( true );
+								} }
+							/>
+						</>
+					}
 				</form>
 				<div className="woocommerce-profiler-button-container">
 					<Button
 						className="woocommerce-profiler-button"
 						variant="primary"
-						disabled={ ! storeCountry.key }
+						disabled={ ! storeCountry.key || isEmailInvalid }
 						onClick={ () => {
 							sendEvent( {
 								type: 'BUSINESS_INFO_COMPLETED',
@@ -360,6 +512,8 @@ export const BusinessInfo = ( {
 									storeLocation: storeCountry.key,
 									geolocationOverruled:
 										geolocationOverruled || false,
+									isOptInMarketing,
+									storeEmailAddress,
 								},
 							} );
 							setHasSubmitted( true );

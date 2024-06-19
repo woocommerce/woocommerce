@@ -2,7 +2,6 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\BlockTemplates;
 
-use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
 
@@ -11,6 +10,32 @@ use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
  */
 abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 	use BlockContainerTrait;
+
+	/**
+	 * Get the template ID.
+	 */
+	abstract public function get_id(): string;
+
+	/**
+	 * Get the template title.
+	 */
+	public function get_title(): string {
+		return '';
+	}
+
+	/**
+	 * Get the template description.
+	 */
+	public function get_description(): string {
+		return '';
+	}
+
+	/**
+	 * Get the template area.
+	 */
+	public function get_area(): string {
+		return 'uncategorized';
+	}
 
 	/**
 	 * The block cache.
@@ -30,7 +55,7 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 
 	/**
 	 * Caches a block in the template. This is an internal method and should not be called directly
-	 * except for classes that implement BlockContainerInterface, in their add_block() method.
+	 * except for from the BlockContainerTrait's add_inner_block() method.
 	 *
 	 * @param BlockInterface $block The block to cache.
 	 *
@@ -51,6 +76,20 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 		}
 
 		$this->block_cache[ $id ] = $block;
+	}
+
+	/**
+	 * Uncaches a block in the template. This is an internal method and should not be called directly
+	 * except for from the BlockContainerTrait's remove_block() method.
+	 *
+	 * @param string $block_id The block ID.
+	 *
+	 * @ignore
+	 */
+	public function uncache_block( string $block_id ) {
+		if ( isset( $this->block_cache[ $block_id ] ) ) {
+			unset( $this->block_cache[ $block_id ] );
+		}
 	}
 
 	/**
@@ -84,12 +123,27 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 		$inner_blocks = $this->get_inner_blocks_sorted_by_order();
 
 		$inner_blocks_formatted_template = array_map(
-			function( Block $block ) {
+			function( BlockInterface $block ) {
 				return $block->get_formatted_template();
 			},
 			$inner_blocks
 		);
 
 		return $inner_blocks_formatted_template;
+	}
+
+	/**
+	 * Get the template as JSON like array.
+	 *
+	 * @return array The JSON.
+	 */
+	public function to_json(): array {
+		return array(
+			'id'             => $this->get_id(),
+			'title'          => $this->get_title(),
+			'description'    => $this->get_description(),
+			'area'           => $this->get_area(),
+			'blockTemplates' => $this->get_formatted_template(),
+		);
 	}
 }

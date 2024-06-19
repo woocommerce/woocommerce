@@ -9,7 +9,6 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\ReviewShippingOptions;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\TourInAppMarketplace;
 /**
  * Task Lists class.
  */
@@ -45,7 +44,6 @@ class TaskLists {
 	 */
 	const DEFAULT_TASKS = array(
 		'StoreDetails',
-		'Purchase',
 		'Products',
 		'WooCommercePayments',
 		'Payments',
@@ -56,7 +54,6 @@ class TaskLists {
 		'AdditionalPayments',
 		'ReviewShippingOptions',
 		'GetMobileApp',
-		'TourInAppMarketplace',
 	);
 
 	/**
@@ -114,14 +111,14 @@ class TaskLists {
 		$tasks = array(
 			'CustomizeStore',
 			'StoreDetails',
-			'Purchase',
 			'Products',
+			'Appearance',
 			'WooCommercePayments',
 			'Payments',
 			'Tax',
 			'Shipping',
 			'Marketing',
-			'Appearance',
+			'LaunchYourStore',
 		);
 
 		if ( Features::is_enabled( 'core-profiler' ) ) {
@@ -168,6 +165,7 @@ class TaskLists {
 					),
 				),
 				'tasks'   => array(
+					'StoreConnect',
 					'AdditionalPayments',
 					'GetMobileApp',
 				),
@@ -195,11 +193,6 @@ class TaskLists {
 					'visible'      => false,
 				)
 			);
-		}
-
-		if ( ! wp_is_mobile() ) { // Permit In-App Marketplace Tour on desktops only.
-			$tour_task = new TourInAppMarketplace();
-			self::add_task( 'extended', $tour_task );
 		}
 
 		if ( has_filter( 'woocommerce_admin_experimental_onboarding_tasklists' ) ) {
@@ -416,7 +409,7 @@ class TaskLists {
 	public static function setup_tasks_remaining() {
 		$setup_list = self::get_list( 'setup' );
 
-		if ( ! $setup_list || $setup_list->is_hidden() || $setup_list->is_complete() ) {
+		if ( ! $setup_list || $setup_list->is_hidden() || $setup_list->has_previously_completed() || $setup_list->is_complete() ) {
 			return;
 		}
 

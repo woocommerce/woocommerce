@@ -57,6 +57,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-accounts.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-emails.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-integrations.php';
+				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'launch-your-store' ) ) {
+					$settings[] = include __DIR__ . '/settings/class-wc-settings-site-visibility.php';
+				}
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-advanced.php';
 
 				self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
@@ -240,6 +243,12 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				if ( ! isset( $value['placeholder'] ) ) {
 					$value['placeholder'] = '';
 				}
+				if ( ! isset( $value['row_class'] ) ) {
+					$value['row_class'] = '';
+				}
+				if ( ! empty( $value['row_class'] ) && substr( $value['row_class'], 0, 16 ) !== 'wc-settings-row-' ) {
+					$value['row_class'] = 'wc-settings-row-' . $value['row_class'];
+				}
 				if ( ! isset( $value['suffix'] ) ) {
 					$value['suffix'] = '';
 				}
@@ -281,7 +290,10 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						break;
 
 					case 'info':
-						echo '<tr><th scope="row" class="titledesc"/><td style="' . esc_attr( $value['css'] ) . '">';
+						?><tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
+							<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ); ?></th>
+							<td style="<?php echo esc_attr( $value['css'] ); ?>">
+						<?php
 						echo wp_kses_post( wpautop( wptexturize( $value['text'] ) ) );
 						echo '</td></tr>';
 						break;
@@ -312,7 +324,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					case 'tel':
 						$option_value = $value['value'];
 
-						?><tr valign="top">
+						?>
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -337,7 +350,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value = $value['value'];
 
 						?>
-						<tr valign="top">
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -365,7 +378,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value = $value['value'];
 
 						?>
-						<tr valign="top">
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -391,7 +404,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value = $value['value'];
 
 						?>
-						<tr valign="top">
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -434,7 +447,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$show_desc_at_end = $value['desc_at_end'] ?? false;
 
 						?>
-						<tr valign="top">
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -454,7 +467,10 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 												name="<?php echo esc_attr( $value['field_name'] ); ?>"
 												value="<?php echo esc_attr( $key ); ?>"
 												type="radio"
-												<?php if( in_array( $key, $disabled_values ) ) { echo 'disabled'; } ?>
+												<?php
+												if ( in_array( $key, $disabled_values, true ) ) {
+													echo 'disabled'; }
+												?>
 												style="<?php echo esc_attr( $value['css'] ); ?>"
 												class="<?php echo esc_attr( $value['class'] ); ?>"
 												<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
@@ -494,14 +510,18 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						if ( 'option' === $value['show_if_checked'] ) {
 							$visibility_class[] = 'show_options_if_checked';
 						}
+						if ( $value['row_class'] ) {
+							$visibility_class[] = $value['row_class'];
+						}
 
-						$must_disable = $value['disabled'] ?? false;
+						$container_class = implode( ' ', $visibility_class );
+						$must_disable    = $value['disabled'] ?? false;
 
 						if ( ! isset( $value['checkboxgroup'] ) || 'start' === $value['checkboxgroup'] ) {
 							$has_tooltip             = isset( $value['tooltip'] ) && '' !== $value['tooltip'];
 							$tooltip_container_class = $has_tooltip ? 'with-tooltip' : '';
 							?>
-								<tr valign="top" class="<?php echo esc_attr( implode( ' ', $visibility_class ) ); ?>">
+								<tr class="<?php echo esc_attr( $container_class ); ?>">
 									<th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ); ?></th>
 									<td class="forminp forminp-checkbox <?php echo esc_html( $tooltip_container_class ); ?>">
 										<?php if ( $has_tooltip ) : ?>
@@ -511,7 +531,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							<?php
 						} else {
 							?>
-								<fieldset class="<?php echo esc_attr( implode( ' ', $visibility_class ) ); ?>">
+								<fieldset class="<?php echo esc_attr( $container_class ); ?>">
 							<?php
 						}
 
@@ -566,7 +586,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 
 						?>
-						<tr valign="top">
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 							<label><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html . $disabled_message; // WPCS: XSS ok. ?></label>
 						</th>
@@ -600,7 +620,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 
 						?>
-						<tr valign="top" class="single_select_page">
+						<tr class="single_select_page <?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -625,7 +645,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							);
 						}
 						?>
-						<tr valign="top" class="single_select_page">
+						<tr class="single_select_page <?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
 							</th>
@@ -665,7 +685,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							$state   = '*';
 						}
 						?>
-						<tr valign="top">
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -689,7 +709,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 						asort( $countries );
 						?>
-						<tr valign="top">
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -718,7 +738,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						);
 						$option_value = wc_parse_relative_date_option( $value['value'] );
 						?>
-						<tr valign="top">
+						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
@@ -747,6 +767,15 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						<?php
 						break;
 
+					case 'slotfill_placeholder':
+						?>
+						<div
+							id="<?php echo esc_attr( $value['id'] ); ?>"
+							class="<?php echo esc_attr( $value['class'] ); ?>"
+						>
+						</div>
+						<?php
+						break;
 					// Default: run an action.
 					default:
 						do_action( 'woocommerce_admin_field_' . $value['type'], $value );
@@ -776,16 +805,18 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$description = $value['desc'];
 			}
 
+			$error_class = ( ! empty( $value['description_is_error'] ) ) ? 'is-error' : '';
+
 			if ( $description && in_array( $value['type'], array( 'textarea', 'radio' ), true ) ) {
 				$description = '<p style="margin-top:0">' . wp_kses_post( $description ) . '</p>';
 			} elseif ( $description && in_array( $value['type'], array( 'checkbox' ), true ) ) {
 				$description = wp_kses_post( $description );
 			} elseif ( $description ) {
-				$description = '<p class="description">' . wp_kses_post( $description ) . '</p>';
+				$description = '<p class="description ' . $error_class . '">' . wp_kses_post( $description ) . '</p>';
 			}
 
 			if ( $tooltip_html && in_array( $value['type'], array( 'checkbox' ), true ) ) {
-				$tooltip_html = '<p class="description">' . $tooltip_html . '</p>';
+				$tooltip_html = '<p class="description ' . $error_class . '">' . $tooltip_html . '</p>';
 			} elseif ( $tooltip_html ) {
 				$tooltip_html = wc_help_tip( $tooltip_html );
 			}

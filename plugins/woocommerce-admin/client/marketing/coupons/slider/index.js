@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useRef, useState, useEffect } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
@@ -17,7 +17,7 @@ const Slider = ( { children, animationKey, animate } ) => {
 
 	const container = useRef();
 
-	const containerClasses = classnames(
+	const containerClasses = clsx(
 		'woocommerce-marketing-slider',
 		animate && `animate-${ animate }`
 	);

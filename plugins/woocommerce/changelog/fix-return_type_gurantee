@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Always return bool values from WPCacheEngine functions when expected.

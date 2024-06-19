@@ -1,0 +1,43 @@
+.woocommerce-table-row-skeleton {
+	@mixin skeleton {
+		@include placeholder();
+		background-color: $gray-200;
+		border-radius: $grid-unit-05;
+		width: $grid-unit-30;
+		min-height: $grid-unit-30;
+	}
+
+	&__checkbox {
+		@include skeleton();
+		flex-shrink: 0;
+	}
+
+	&__attribute-option {
+		@include skeleton();
+		width: 9 * $grid-unit;
+	}
+
+	&__regular-price,
+	&__quantity {
+		@include skeleton();
+		width: $grid-unit-80;
+		display: inline-block;
+	}
+
+	&__visibility-icon {
+		@include skeleton();
+		flex-shrink: 0;
+	}
+
+	&__edit-link {
+		@include skeleton();
+		width: $grid-unit-70;
+		flex-shrink: 0;
+	}
+
+	&__menu-toggle {
+		@include skeleton();
+		width: $grid-unit-40 + $grid-unit-05;
+		flex-shrink: 0;
+	}
+}

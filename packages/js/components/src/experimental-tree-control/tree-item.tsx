@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { chevronDown, chevronUp } from '@wordpress/icons';
 import classNames from 'classnames';
 import { createElement, forwardRef } from 'react';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -57,6 +58,9 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 							}
 							checked={ selection.checkedStatus === 'checked' }
 							onChange={ selection.onSelectChild }
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore __nextHasNoMarginBottom is a valid prop
+							__nextHasNoMarginBottom={ true }
 						/>
 					) : (
 						<input
@@ -72,7 +76,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 					{ typeof getLabel === 'function' ? (
 						getLabel( item )
 					) : (
-						<span>{ item.data.label }</span>
+						<span>{ decodeEntities( item.data.label ) }</span>
 					) }
 				</label>
 

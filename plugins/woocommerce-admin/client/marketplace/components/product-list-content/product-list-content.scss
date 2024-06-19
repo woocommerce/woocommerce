@@ -1,0 +1,77 @@
+@import "../../stylesheets/_variables.scss";
+
+.woocommerce-marketplace {
+	&__product-list-content {
+		display: grid;
+		gap: $medium-gap;
+		margin-top: $grid-unit-20;
+	}
+
+	&__extension-card {
+		background-color: #3c3c3c;
+		color: $white;
+		height: 270px;
+	}
+
+	.woocommerce-customize-store-banner {
+		grid-column: 1 / -1;
+		display: block;
+		width: 100%;
+		margin: 16px 0;
+	}
+
+	.woocommerce-customize-store-banner-content {
+		margin-top: 63px;
+	}
+
+	&__browse-wp-theme-directory {
+		margin-top: 24px;
+
+		a {
+			text-decoration: none;
+		}
+	}
+}
+
+@media screen and (min-width: $breakpoint-medium) {
+	.woocommerce-marketplace {
+		&__product-list-content {
+			gap: $large-gap;
+			grid-template-columns: repeat(2, 1fr);
+		}
+
+		// Hide third and above product cards on Discover and suggestions on "no results" search results page
+		// due to item count. We display progressively more on larger screen sizes.
+		&__discover .woocommerce-marketplace__product-card:nth-child(n+3),
+		&__no-results .woocommerce-marketplace__product-card:nth-child(n+3) {
+			display: none;
+		}
+	}
+}
+
+@media screen and (min-width: $breakpoint-large) {
+	.woocommerce-marketplace {
+		&__product-list-content {
+			gap: $large-gap;
+			grid-template-columns: repeat(3, 1fr);
+		}
+
+		&__discover .woocommerce-marketplace__product-card:nth-child(3),
+		&__no-results .woocommerce-marketplace__product-card:nth-child(3) {
+			display: block;
+		}
+	}
+}
+
+@media screen and (min-width: $breakpoint-huge) {
+	.woocommerce-marketplace {
+		&__product-list-content {
+			grid-template-columns: repeat(4, 1fr);
+		}
+
+		&__discover .woocommerce-marketplace__product-card:nth-child(4),
+		&__no-results .woocommerce-marketplace__product-card:nth-child(4) {
+			display: block;
+		}
+	}
+}

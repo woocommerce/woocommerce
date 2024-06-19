@@ -167,7 +167,6 @@ export const createPullRequest = async ( options: {
 		}
 	);
 
-	//@ts-expect-error There is a type mismatch between the graphql schema and the response. pullRequest.data.head.repo.has_discussions is a boolean, but the graphql schema doesn't have that field.
 	return pullRequest.data;
 };
 
@@ -195,7 +194,6 @@ export const getPullRequest = async ( options: {
 		}
 	);
 
-	//@ts-expect-error Not sure why this error comes up. All versions are up to date and the schema is correct.
 	return pr.data;
 };
 

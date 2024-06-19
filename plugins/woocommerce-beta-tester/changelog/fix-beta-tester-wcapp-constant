@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-check for WC_ADMIN_APP constant before using it

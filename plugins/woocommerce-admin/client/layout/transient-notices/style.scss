@@ -1,11 +1,11 @@
-@import '../../navigation/stylesheets/variables.scss';
+@import "../../navigation/stylesheets/variables.scss";
 
 .woocommerce-transient-notices {
 	position: absolute;
 	left: $gap;
 	bottom: 100%;
 	margin-bottom: $gap-small;
-	z-index: calc(z-index('.components-snackbar-list') + 1);
+	z-index: calc(z-index(".components-snackbar-list") + 1);
 	width: auto;
 
 	.woocommerce-profile-wizard__body & {
@@ -24,14 +24,18 @@
 		cursor: default;
 	}
 
+	&__content {
+		white-space: pre-line;
+	}
+
 	.components-snackbar__content-with-icon {
-		margin-left: 32px;
+		margin-left: 0;
 	}
 
 	.components-snackbar__icon {
-		position: absolute;
-		top: 24px;
-		left: 26px;
+		position: static;
+		display: inline-block;
+		margin-right: $grid-unit-20;
 	}
 
 	.components-snackbar__dismiss-button {

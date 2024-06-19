@@ -28,11 +28,18 @@ export type UserPreferences = {
 	variable_product_tour_shown?: string;
 	variable_product_block_tour_shown?: string;
 	variations_report_columns?: string;
-	product_block_variable_options_notice_dismissed?: string;
+	local_attributes_notice_dismissed_ids?: number[];
+	variable_items_without_price_notice_dismissed?: Record< number, string >;
+	product_advice_card_dismissed?: {
+		[ key: string ]: 'yes' | 'no';
+	};
 };
 
 export type WoocommerceMeta = UserPreferences & {
 	task_list_tracked_started_tasks?: string;
+	variable_items_without_price_notice_dismissed?: string;
+	local_attributes_notice_dismissed_ids?: string;
+	product_advice_card_dismissed?: string;
 };
 
 export type WCUser<

@@ -5,8 +5,8 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"node": "^20.11.1",
+		"pnpm": "^9.1.0"
 	},
 	"keywords": [
 		"wordpress",
@@ -21,36 +21,52 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"main": "index.js",
-	"dependencies": {
-		"@automattic/color-studio": "^2.5.0",
-		"@wordpress/base-styles": "wp-6.0",
-		"@wordpress/postcss-plugins-preset": "wp-6.0",
-		"css-loader": "^3.6.0",
-		"mini-css-extract-plugin": "^2.6.0",
-		"postcss-loader": "^4.3.0",
-		"sass-loader": "^10.2.1",
-		"webpack-remove-empty-scripts": "^0.7.3",
-		"webpack-rtl-plugin": "^2.0.0"
-	},
+	"files": [
+		"index.js",
+		"abstracts"
+	],
 	"scripts": {
-		"lint": "eslint index.js",
-		"lint:fix": "eslint index.js --fix"
-	},
-	"private": true,
-	"devDependencies": {
-		"@babel/core": "^7.17.5",
-		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.32.0",
-		"jest": "^27.5.1",
-		"jest-cli": "^27.5.1",
-		"rimraf": "^3.0.2",
-		"ts-jest": "^27.1.3",
-		"typescript": "^5.1.6",
-		"webpack": "^5.70.0"
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint index.js --fix",
+		"lint:lang:js": "eslint index.js"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
 			"pnpm lint:fix"
 		]
+	},
+	"dependencies": {
+		"@automattic/color-studio": "^2.5.0",
+		"@wordpress/base-styles": "wp-6.0",
+		"@wordpress/postcss-plugins-preset": "wp-6.0",
+		"css-loader": "^3.6.0",
+		"json2php": "^0.0.7",
+		"mini-css-extract-plugin": "^2.7.6",
+		"postcss-loader": "^4.3.0",
+		"sass-loader": "^10.5.0",
+		"webpack-remove-empty-scripts": "^0.7.3",
+		"webpack-rtl-plugin": "^2.0.0"
+	},
+	"private": true,
+	"devDependencies": {
+		"@babel/core": "^7.23.5",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"eslint": "^8.55.0",
+		"jest": "~27.5.1",
+		"jest-cli": "~27.5.1",
+		"rimraf": "5.0.5",
+		"ts-jest": "~29.1.1",
+		"typescript": "^5.3.3",
+		"webpack": "^5.89.0",
+		"wireit": "0.14.3"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "index.js"
+			}
+		}
 	}
 }

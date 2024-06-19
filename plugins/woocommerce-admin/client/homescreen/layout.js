@@ -9,8 +9,8 @@ import {
 	useRef,
 } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { withDispatch, withSelect } from '@wordpress/data';
-import classnames from 'classnames';
+import { withSelect } from '@wordpress/data';
+import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import {
 	useUserPreferences,
@@ -35,12 +35,6 @@ import {
 	useActiveSetupTasklist,
 	ProgressTitle,
 } from '../task-lists';
-import {
-	WELCOME_MODAL_DISMISSED_OPTION_NAME,
-	WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME,
-} from './constants';
-import { WelcomeFromCalypsoModal } from './welcome-from-calypso-modal';
-import { WelcomeModal } from './welcome-modal';
 import { MobileAppModal } from './mobile-app-modal';
 import './style.scss';
 import '../dashboard/style.scss';
@@ -63,17 +57,14 @@ export const Layout = ( {
 	hasTaskList,
 	showingProgressHeader,
 	isLoadingTaskLists,
-	shouldShowWelcomeModal,
-	shouldShowWelcomeFromCalypsoModal,
 	isTaskListHidden,
-	updateOptions,
 } ) => {
 	const userPrefs = useUserPreferences();
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
 	const shouldShowWCPayFeature = taskListComplete || isTaskListHidden;
 	const hasTwoColumnContent =
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
-	const isDashboardShown = ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
+	const isDashboardShown = Object.keys( query ).length > 0 && ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
 	const activeSetupTaskList = useActiveSetupTasklist();
 
 	const twoColumns =
@@ -97,6 +88,19 @@ export const Layout = ( {
 	const shouldStickColumns = isWideViewport.current && twoColumns;
 	const shouldShowMobileAppModal = query.mobileAppModal ?? false;
 
+	const renderTaskList = () => {
+		return (
+			<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
+				{ activeSetupTaskList && isDashboardShown && (
+					<>
+						<ProgressTitle taskListId={ activeSetupTaskList } />
+					</>
+				) }
+				<TaskLists query={ query } />
+			</Suspense>
+		);
+	};
+
 	const renderColumns = () => {
 		return (
 			<>
@@ -112,7 +116,7 @@ export const Layout = ( {
 						/>
 					) }
 					{ shouldShowWCPayFeature && <WooHomescreenWCPayFeature /> }
-					{ <ActivityPanel /> }
+					{ isTaskListHidden && <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
 					<InboxPanel />
 				</Column>
@@ -124,53 +128,21 @@ export const Layout = ( {
 		);
 	};
 
-	const renderTaskList = () => {
-		return (
-			<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
-				{ activeSetupTaskList && isDashboardShown && (
-					<>
-						<ProgressTitle taskListId={ activeSetupTaskList } />
-					</>
-				) }
-				<TaskLists query={ query } />
-			</Suspense>
-		);
-	};
-
 	return (
 		<>
 			{ isDashboardShown && (
 				<WooHomescreenHeaderBanner
-					className={ classnames( 'woocommerce-homescreen', {
+					className={ clsx( 'woocommerce-homescreen', {
 						'woocommerce-homescreen-column': ! twoColumns,
 					} ) }
 				/>
 			) }
 			<div
-				className={ classnames( 'woocommerce-homescreen', {
+				className={ clsx( 'woocommerce-homescreen', {
 					'two-columns': twoColumns,
 				} ) }
 			>
 				{ isDashboardShown ? renderColumns() : renderTaskList() }
-				{ shouldShowWelcomeModal && (
-					<WelcomeModal
-						onClose={ () => {
-							updateOptions( {
-								[ WELCOME_MODAL_DISMISSED_OPTION_NAME ]: 'yes',
-							} );
-						} }
-					/>
-				) }
-				{ shouldShowWelcomeFromCalypsoModal && (
-					<WelcomeFromCalypsoModal
-						onClose={ () => {
-							updateOptions( {
-								[ WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ]:
-									'yes',
-							} );
-						} }
-					/>
-				) }
 				{ shouldShowMobileAppModal && <MobileAppModal /> }
 				{ window.wcAdminFeatures.navigation && (
 					<NavigationIntroModal />
@@ -202,14 +174,6 @@ Layout.propTypes = {
 	 */
 	shouldShowWelcomeFromCalypsoModal: PropTypes.bool,
 	/**
-	 * Timestamp of WooCommerce Admin installation.
-	 */
-	installTimestamp: PropTypes.string,
-	/**
-	 * Resolution of WooCommerce Admin installation timetsamp.
-	 */
-	installTimestampHasResolved: PropTypes.bool,
-	/**
 	 * Dispatch an action to update an option
 	 */
 	updateOptions: PropTypes.func.isRequired,
@@ -218,8 +182,7 @@ Layout.propTypes = {
 export default compose(
 	withSelect( ( select ) => {
 		const { isNotesRequesting } = select( NOTES_STORE_NAME );
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption } = select( OPTIONS_STORE_NAME );
 		const {
 			getTaskList,
 			getTaskLists,
@@ -228,35 +191,6 @@ export default compose(
 		const taskLists = getTaskLists();
 		const isLoadingTaskLists = ! taskListFinishResolution( 'getTaskLists' );
 
-		const welcomeFromCalypsoModalDismissed =
-			getOption( WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ) !==
-			'no';
-		const welcomeFromCalypsoModalDismissedResolved = hasFinishedResolution(
-			'getOption',
-			[ WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ]
-		);
-		const fromCalypsoUrlArgIsPresent =
-			!! window.location.search.match( 'from-calypso' );
-
-		const shouldShowWelcomeFromCalypsoModal =
-			welcomeFromCalypsoModalDismissedResolved &&
-			! welcomeFromCalypsoModalDismissed &&
-			fromCalypsoUrlArgIsPresent;
-
-		const welcomeModalDismissed =
-			getOption( WELCOME_MODAL_DISMISSED_OPTION_NAME ) !== 'no';
-
-		const welcomeModalDismissedHasResolved = hasFinishedResolution(
-			'getOption',
-			[ WELCOME_MODAL_DISMISSED_OPTION_NAME ]
-		);
-
-		const shouldShowWelcomeModal =
-			welcomeModalDismissedHasResolved &&
-			! welcomeModalDismissed &&
-			welcomeFromCalypsoModalDismissedResolved &&
-			! welcomeFromCalypsoModalDismissed;
-
 		const defaultHomescreenLayout =
 			getOption( 'woocommerce_default_homepage_layout' ) ||
 			'single_column';
@@ -264,8 +198,6 @@ export default compose(
 		return {
 			defaultHomescreenLayout,
 			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
-			shouldShowWelcomeModal,
-			shouldShowWelcomeFromCalypsoModal,
 			isLoadingTaskLists,
 			isTaskListHidden: getTaskList( 'setup' )?.isHidden,
 			hasTaskList: getAdminSetting( 'visibleTaskListIds', [] ).length > 0,
@@ -274,8 +206,5 @@ export default compose(
 			),
 			taskListComplete: getTaskList( 'setup' )?.isComplete,
 		};
-	} ),
-	withDispatch( ( dispatch ) => ( {
-		updateOptions: dispatch( OPTIONS_STORE_NAME ).updateOptions,
-	} ) )
+	} )
 )( Layout );

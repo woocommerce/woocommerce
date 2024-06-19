@@ -304,6 +304,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = $this->get_cached_data( $cache_key );
 
+		if ( isset( $query_args['date_type'] ) ) {
+			$this->date_column_name = $query_args['date_type'];
+		}
+
 		if ( false === $data ) {
 			$this->initialize_queries();
 
@@ -717,7 +721,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore Generic.Commenting.Todo.TaskFound
-				// TODO: use the %i placeholder to prepare the table name when available in the the minimum required WordPress version.
+				// TODO: use the %i placeholder to prepare the table name when available in the minimum required WordPress version.
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"UPDATE {$orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
 				$order_id,

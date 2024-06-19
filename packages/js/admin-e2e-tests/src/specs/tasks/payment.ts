@@ -44,7 +44,7 @@ export const testAdminPaymentSetupTask = () => {
 		} );
 
 		it( 'Can visit the payment setup task from the homescreen if the setup wizard has been skipped', async () => {
-			await homeScreen.clickOnTaskList( 'Set up payments' );
+			await homeScreen.clickOnTaskList( 'Get paid' );
 			await paymentsSetup.possiblyCloseHelpModal();
 			await paymentsSetup.isDisplayed();
 		} );
@@ -71,7 +71,7 @@ export const testAdminPaymentSetupTask = () => {
 			await homeScreen.navigate();
 			await homeScreen.isDisplayed();
 			await waitForTimeout( 1000 );
-			await homeScreen.clickOnTaskList( 'Set up payments' );
+			await homeScreen.clickOnTaskList( 'Get paid' );
 			await paymentsSetup.possiblyCloseHelpModal();
 			await paymentsSetup.isDisplayed();
 			await paymentsSetup.showOtherPaymentMethods();

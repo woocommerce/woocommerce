@@ -1,0 +1,43 @@
+.woocommerce-product-form__checkbox {
+	.components-checkbox-control__input:disabled {
+		opacity: 1;
+		background-color: $gray-100;
+		border-color: $gray-400;
+	}
+	.components-checkbox-control__input:disabled + svg {
+		fill: $gray-400;
+	}
+	.components-base-control__field,
+	.components-checkbox-control__label,
+	&-wrapper,
+	&-tooltip-icon {
+		display: flex;
+		align-items: center;
+	}
+
+	.components-base-control__field {
+		display: flex;
+		align-items: center;
+		margin-bottom: 0;
+	}
+
+	.components-checkbox-control__label {
+		margin-bottom: 0;
+	}
+}
+
+.woocommerce-product-form__checkbox-wrapper {
+	gap: $gap-smallest;
+}
+
+.woocommerce-product-form__checkbox-tooltip {
+	.components-popover__content {
+		width: 200px;
+		min-width: auto;
+		white-space: normal !important;
+	}
+}
+
+.components-tooltip {
+	max-width: 300px;
+}

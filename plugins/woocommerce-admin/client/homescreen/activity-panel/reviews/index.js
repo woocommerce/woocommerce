@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Component, Fragment } from '@wordpress/element';
 import { Button, Tooltip } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
@@ -12,7 +12,6 @@ import StarIcon from 'gridicons/dist/star';
 import StarOutlineIcon from 'gridicons/dist/star-outline';
 import interpolateComponents from '@automattic/interpolate-components';
 import {
-	EmptyContent,
 	Link,
 	ReviewRating,
 	ProductImage,
@@ -150,8 +149,9 @@ class ReviewsPanel extends Component {
 
 		const title = interpolateComponents( {
 			mixedString: sprintf(
+				/* translators: product reviewer as author, and product name  */
 				__(
-					'{{authorLink}}%s{{/authorLink}}{{verifiedCustomerIcon/}} reviewed {{productLink}}%s{{/productLink}}',
+					'{{authorLink}}%1$s{{/authorLink}}{{verifiedCustomerIcon/}} reviewed {{productLink}}%2$s{{/productLink}}',
 					'woocommerce'
 				),
 				review.reviewer,
@@ -200,7 +200,7 @@ class ReviewsPanel extends Component {
 
 		const productImage =
 			get( product, [ 'images', 0 ] ) || get( product, [ 'image' ] );
-		const productImageClasses = classnames(
+		const productImageClasses = clsx(
 			'woocommerce-review-activity-card__image-overlay__product',
 			{
 				'is-placeholder': ! productImage || ! productImage.src,
@@ -306,25 +306,8 @@ class ReviewsPanel extends Component {
 		const { isRequesting, isError, reviews } = this.props;
 
 		if ( isError ) {
-			const title = __(
-				'There was an error getting your reviews. Please try again.',
-				'woocommerce'
-			);
-			const actionLabel = __( 'Reload', 'woocommerce' );
-			const actionCallback = () => {
-				// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
-				window.location.reload();
-			};
-
-			return (
-				<Fragment>
-					<EmptyContent
-						title={ title }
-						actionLabel={ actionLabel }
-						actionURL={ null }
-						actionCallback={ actionCallback }
-					/>
-				</Fragment>
+			throw new Error(
+				'Failed to load reviews, Raise error to trigger ErrorBoundary'
 			);
 		}
 

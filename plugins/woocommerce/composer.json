@@ -2,7 +2,7 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "8.0.0",
+	"version": "9.1.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
@@ -11,43 +11,48 @@
 		{
 			"type": "path",
 			"url": "lib"
+		},
+		{
+			"type": "path",
+			"url": "../../packages/php/monorepo-plugin"
 		}
 	],
 	"require": {
-		"php": ">=7.3",
+		"php": ">=7.4",
 		"automattic/jetpack-autoloader": "2.11.18",
 		"automattic/jetpack-config": "1.15.2",
-		"automattic/jetpack-connection": "1.51.7",
+		"automattic/jetpack-connection": "^1.57",
 		"automattic/jetpack-constants": "^1.6.22",
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.6.2",
-		"woocommerce/woocommerce-blocks": "10.9.0"
+		"woocommerce/action-scheduler": "3.7.4"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
 		"bamarni/composer-bin-plugin": "^1.4",
 		"dms/phpunit-arraysubset-asserts": "^0.4.0",
-		"phpunit/phpunit": "^9.0",
+		"mockery/mockery": "1.6.6",
+		"phpunit/phpunit": "^9.6",
 		"sebastian/comparator": "^4.0",
-		"yoast/phpunit-polyfills": "^1.0"
+		"spatie/phpunit-watcher": "^1.23",
+		"woocommerce/monorepo-plugin": "*",
+		"yoast/phpunit-polyfills": "^2.0"
 	},
 	"config": {
 		"optimize-autoloader": true,
 		"preferred-install": {
-			"woocommerce/action-scheduler": "dist",
-			"woocommerce/woocommerce-rest-api": "dist",
-			"woocommerce/woocommerce-blocks": "dist"
+			"woocommerce/action-scheduler": "dist"
 		},
 		"sort-packages": true,
 		"platform": {
-			"php": "7.3"
+			"php": "7.4"
 		},
 		"allow-plugins": {
 			"automattic/jetpack-autoloader": true,
 			"composer/installers": true,
-			"bamarni/composer-bin-plugin": true
+			"bamarni/composer-bin-plugin": true,
+			"woocommerce/monorepo-plugin": true
 		}
 	},
 	"autoload": {
@@ -64,7 +69,12 @@
 		},
 		"psr-0": {
 			"Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
-		}
+		},
+		"files": [
+			"src/StoreApi/deprecated.php",
+			"src/StoreApi/functions.php",
+			"src/Blocks/Domain/Services/functions.php"
+		]
 	},
 	"autoload-dev": {
 		"psr-4": {
@@ -97,13 +107,13 @@
 			"chg=$(git diff HEAD --relative --name-only -- '*.php'); [[ -z $chg ]] || phpcs-changed -s --git $chg"
 		],
 		"lint-branch": [
-			"sh ./bin/lint-branch.sh"
+			"bash ./bin/lint-branch.sh"
 		],
 		"phpcbf": [
 			"phpcbf -p"
 		],
 		"makepot-audit": [
-			"wp --allow-root i18n make-pot . --exclude=\".github,.wordpress-org,bin,sample-data,node_modules,tests\" --slug=woocommerce"
+			"wp --allow-root i18n make-pot . --include=\"woocommerce.php,client,i18n,includes,lib,packages,patterns,src,templates\" --slug=woocommerce"
 		],
 		"makepot": [
 			"@makepot-audit --skip-audit"
@@ -118,9 +128,7 @@
 	"extra": {
 		"installer-paths": {
 			"packages/{$name}": [
-				"woocommerce/action-scheduler",
-				"woocommerce/woocommerce-blocks",
-				"woocommerce/woocommerce-admin"
+				"woocommerce/action-scheduler"
 			]
 		},
 		"scripts-description": {

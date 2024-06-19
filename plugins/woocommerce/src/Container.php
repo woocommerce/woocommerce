@@ -9,21 +9,28 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\COTMigrationServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadPermissionsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AssignDefaultCategoryServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\EnginesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\FeaturesServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\LoggingServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\MarketingServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\MarketplaceServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrdersControllersServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderAdminServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderMetaBoxServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ObjectCacheServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrdersDataStoreServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OptionSanitizerServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderAttributionServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductAttributesLookupServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductDownloadsServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductImageBySKUServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductReviewsServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\RestockRefundedItemsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\UtilsClassesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\BatchProcessingServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\LayoutTemplatesServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ComingSoonServiceProvider;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -55,18 +62,25 @@ final class Container {
 		OrdersDataStoreServiceProvider::class,
 		ProductAttributesLookupServiceProvider::class,
 		ProductDownloadsServiceProvider::class,
+		ProductImageBySKUServiceProvider::class,
 		ProductReviewsServiceProvider::class,
 		ProxiesServiceProvider::class,
 		RestockRefundedItemsAdjusterServiceProvider::class,
 		UtilsClassesServiceProvider::class,
 		COTMigrationServiceProvider::class,
 		OrdersControllersServiceProvider::class,
+		OrderAttributionServiceProvider::class,
 		ObjectCacheServiceProvider::class,
 		BatchProcessingServiceProvider::class,
 		OrderMetaBoxServiceProvider::class,
 		OrderAdminServiceProvider::class,
 		FeaturesServiceProvider::class,
 		MarketingServiceProvider::class,
+		MarketplaceServiceProvider::class,
+		LayoutTemplatesServiceProvider::class,
+		LoggingServiceProvider::class,
+		EnginesServiceProvider::class,
+		ComingSoonServiceProvider::class,
 	);
 
 	/**
@@ -102,7 +116,7 @@ final class Container {
 	 *
 	 * @return mixed Entry.
 	 */
-	public function get( string $id ): object {
+	public function get( string $id ) {
 		return $this->container->get( $id );
 	}
 

@@ -7,67 +7,25 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
+use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
 
 /**
  * Rule processor for sending when the provided plugins are activated.
+ *
+ * @deprecated 8.8.0
  */
-class PluginsActivatedRuleProcessor implements RuleProcessorInterface {
+class PluginsActivatedRuleProcessor extends DeprecatedClassFacade {
+	/**
+	 * The name of the non-deprecated class that this facade covers.
+	 *
+	 * @var string
+	 */
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\PluginsActivatedRuleProcessor';
 
 	/**
-	 * The plugins provider.
+	 * The version that this class was deprecated in.
 	 *
-	 * @var PluginsProviderInterface
+	 * @var string
 	 */
-	protected $plugins_provider;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param PluginsProviderInterface $plugins_provider The plugins provider.
-	 */
-	public function __construct( $plugins_provider = null ) {
-		$this->plugins_provider = null === $plugins_provider
-			? new PluginsProvider()
-			: $plugins_provider;
-	}
-
-	/**
-	 * Process the rule.
-	 *
-	 * @param object $rule         The specific rule being processed by this rule processor.
-	 * @param object $stored_state Stored state.
-	 *
-	 * @return bool Whether the rule passes or not.
-	 */
-	public function process( $rule, $stored_state ) {
-		if ( 0 === count( $rule->plugins ) ) {
-			return false;
-		}
-
-		$active_plugin_slugs = $this->plugins_provider->get_active_plugin_slugs();
-
-		foreach ( $rule->plugins as $plugin_slug ) {
-			if ( ! in_array( $plugin_slug, $active_plugin_slugs, true ) ) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * Validates the rule.
-	 *
-	 * @param object $rule The rule to validate.
-	 *
-	 * @return bool Pass/fail.
-	 */
-	public function validate( $rule ) {
-		if ( ! isset( $rule->plugins ) || ! is_array( $rule->plugins ) ) {
-			return false;
-		}
-
-		return true;
-	}
+	protected static $deprecated_in_version = '8.8.0';
 }

@@ -1,6 +1,9 @@
 export type ValidatorResponse = Promise< ValidationError >;
 
-export type Validator< T > = ( initialValue?: T ) => ValidatorResponse;
+export type Validator< T > = (
+	initialValue?: T,
+	newData?: Record< string, unknown >
+) => ValidatorResponse;
 
 export type ValidationContextProps< T > = {
 	errors: ValidationErrors;
@@ -8,20 +11,25 @@ export type ValidationContextProps< T > = {
 		validatorId: string,
 		validator: Validator< T >
 	): React.Ref< HTMLElement >;
-	validateField( name: string ): ValidatorResponse;
-	validateAll(): Promise< ValidationErrors >;
+	unRegisterValidator( validatorId: string ): void;
+	validateField(
+		name: string,
+		newData?: Record< string, unknown >
+	): ValidatorResponse;
+	validateAll( newData?: Partial< T > ): Promise< ValidationErrors >;
 };
 
-export type ValidationProviderProps< T > = {
-	initialValue?: T;
+export type ValidationProviderProps = {
+	postType: string;
+	productId: number;
 };
 
 export type ValidationError = string | undefined;
 export type ValidationErrors = Record< string, ValidationError >;
 
-export type ValidatorRegistration = {
+export type ValidatorRegistration< T > = {
 	name: string;
 	ref: React.Ref< HTMLElement >;
 	error?: ValidationError;
-	validate(): ValidatorResponse;
+	validate( newData?: Partial< T > ): ValidatorResponse;
 };

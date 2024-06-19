@@ -1,7 +1,7 @@
 name: ✨ Enhancement Request
 description: If you have an idea to improve existing functionality in core or need something for development (such as a new hook) please let us know or submit a Pull Request!
 title: "[Enhancement]: "
-labels: ["type: enhancement", "status: awaiting triage"]
+labels: ["type: enhancement"]
 body:
   - type: markdown
     attributes:

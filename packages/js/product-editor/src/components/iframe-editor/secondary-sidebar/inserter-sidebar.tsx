@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import { Button, VisuallyHidden } from '@wordpress/components';
-import { close } from '@wordpress/icons';
-import {
-	useViewportMatch,
-	__experimentalUseDialog as useDialog,
-} from '@wordpress/compose';
+import { useViewportMatch } from '@wordpress/compose';
 import {
 	createElement,
 	useCallback,
@@ -15,7 +10,7 @@ import {
 	useRef,
 } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { __ } from '@wordpress/i18n';
+import { ESCAPE } from '@wordpress/keycodes';
 import {
 	store as blockEditorStore,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -38,7 +33,7 @@ export default function InserterSidebar() {
 		const { getBlockRootClientId } = select( blockEditorStore );
 
 		return {
-			rootClientId: getBlockRootClientId(),
+			rootClientId: getBlockRootClientId( '' ),
 		};
 	} );
 
@@ -46,38 +41,36 @@ export default function InserterSidebar() {
 		return setIsInserterOpened( false );
 	}, [ setIsInserterOpened ] );
 
-	const TagName = ! isMobileViewport ? VisuallyHidden : 'div';
-	const [ inserterDialogRef, inserterDialogProps ] = useDialog( {
-		onClose: closeInserter,
-		focusOnMount: false,
-	} );
+	const closeOnEscape = useCallback(
+		( event ) => {
+			if ( event.keyCode === ESCAPE && ! event.defaultPrevented ) {
+				event.preventDefault();
+				closeInserter();
+			}
+		},
+		[ closeInserter ]
+	);
 
 	const libraryRef = useRef< Library | null >( null );
 	useEffect( () => {
-		libraryRef.current?.focusSearch();
+		// Focus the search input when the inserter is opened,
+		// if using an older version of the Library.
+		libraryRef.current?.focusSearch?.();
 	}, [] );
 
 	return (
+		// eslint-disable-next-line jsx-a11y/no-static-element-interactions
 		<div
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore Types are not provided by useDialog.
-			ref={ inserterDialogRef }
-			{ ...inserterDialogProps }
+			onKeyDown={ closeOnEscape }
 			className="woocommerce-iframe-editor__inserter-panel"
 		>
-			<TagName className="woocommerce-iframe-editor__inserter-panel-header">
-				<Button
-					icon={ close }
-					onClick={ closeInserter }
-					label={ __( 'Close block inserter', 'woocommerce' ) }
-				/>
-			</TagName>
 			<div className="woocommerce-iframe-editor__inserter-panel-content">
 				<Library
 					showInserterHelpPanel
 					shouldFocusBlock={ isMobileViewport }
 					rootClientId={ rootClientId }
 					ref={ libraryRef }
+					onClose={ closeInserter }
 				/>
 			</div>
 		</div>

@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -47,8 +48,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	protected function get_own_sections() {
 		$sections = array(
 			''        => __( 'Shipping zones', 'woocommerce' ),
-			'options' => __( 'Shipping options', 'woocommerce' ),
-			'classes' => __( 'Shipping classes', 'woocommerce' ),
+			'options' => __( 'Shipping settings', 'woocommerce' ),
+			'classes' => __( 'Classes', 'woocommerce' ),
 		);
 
 		if ( ! $this->wc_is_installing() ) {
@@ -108,7 +109,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		$settings =
 			array(
 				array(
-					'title' => __( 'Shipping options', 'woocommerce' ),
+					'title' => __( 'Shipping settings', 'woocommerce' ),
 					'type'  => 'title',
 					'id'    => 'shipping_options',
 				),
@@ -248,6 +249,48 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
+	 * Get all available regions.
+	 *
+	 * @param int $allowed_countries Zone ID.
+	 * @param int $shipping_continents Zone ID.
+	 */
+	protected function get_region_options( $allowed_countries, $shipping_continents ) {
+		$options = array();
+		foreach ( $shipping_continents as $continent_code => $continent ) {
+			$continent_data = array(
+				'value'    => 'continent:' . esc_attr( $continent_code ),
+				'label'    => esc_html( $continent['name'] ),
+				'children' => array(),
+			);
+
+			$countries = array_intersect( array_keys( $allowed_countries ), $continent['countries'] );
+
+			foreach ( $countries as $country_code ) {
+				$country_data = array(
+					'value'    => 'country:' . esc_attr( $country_code ),
+					'label'    => esc_html( $allowed_countries[ $country_code ] ),
+					'children' => array(),
+				);
+
+				$states = WC()->countries->get_states( $country_code );
+
+				if ( $states ) {
+					foreach ( $states as $state_code => $state_name ) {
+						$country_data['children'][] = array(
+							'value' => 'state:' . esc_attr( $country_code . ':' . $state_code ),
+							'label' => esc_html( $state_name . ', ' . $allowed_countries[ $country_code ] ),
+						);
+					}
+				}
+				$continent_data['children'][] = $country_data;
+			}
+			$options[] = $continent_data;
+		}
+
+		return $options;
+	}
+
+	/**
 	 * Show method for a zone
 	 *
 	 * @param int $zone_id Zone ID.
@@ -278,26 +321,34 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			}
 		}
 
+		$localized_object = array(
+			'methods'                 => $zone->get_shipping_methods( false, 'json' ),
+			'zone_name'               => $zone->get_zone_name(),
+			'zone_id'                 => $zone->get_id(),
+			'locations'               => $locations,
+			'wc_shipping_zones_nonce' => wp_create_nonce( 'wc_shipping_zones_nonce' ),
+			'strings'                 => array(
+				'unload_confirmation_msg'             => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
+				'save_changes_prompt'                 => __( 'Do you wish to save your changes first? Your changed data will be discarded if you choose to cancel.', 'woocommerce' ),
+				'save_failed'                         => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
+				'add_method_failed'                   => __( 'Shipping method could not be added. Please retry.', 'woocommerce' ),
+				'remove_method_failed'                => __( 'Shipping method could not be removed. Please retry.', 'woocommerce' ),
+				'yes'                                 => __( 'Yes', 'woocommerce' ),
+				'no'                                  => __( 'No', 'woocommerce' ),
+				'default_zone_name'                   => __( 'Zone', 'woocommerce' ),
+				'delete_shipping_method_confirmation' => __( 'Are you sure you want to delete this shipping method?', 'woocommerce' ),
+			),
+		);
+
+		if ( 0 !== $zone->get_id() ) {
+			WCAdminAssets::register_script( 'wp-admin-scripts', 'shipping-settings-region-picker', true, array( 'wc-shipping-zone-methods' ) );
+			$localized_object['region_options'] = $this->get_region_options( $allowed_countries, $shipping_continents );
+		}
+
 		wp_localize_script(
 			'wc-shipping-zone-methods',
 			'shippingZoneMethodsLocalizeScript',
-			array(
-				'methods'                 => $zone->get_shipping_methods( false, 'json' ),
-				'zone_name'               => $zone->get_zone_name(),
-				'zone_id'                 => $zone->get_id(),
-				'wc_shipping_zones_nonce' => wp_create_nonce( 'wc_shipping_zones_nonce' ),
-				'strings'                 => array(
-					'unload_confirmation_msg'             => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
-					'save_changes_prompt'                 => __( 'Do you wish to save your changes first? Your changed data will be discarded if you choose to cancel.', 'woocommerce' ),
-					'save_failed'                         => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
-					'add_method_failed'                   => __( 'Shipping method could not be added. Please retry.', 'woocommerce' ),
-					'remove_method_failed'                => __( 'Shipping method could not be removed. Please retry.', 'woocommerce' ),
-					'yes'                                 => __( 'Yes', 'woocommerce' ),
-					'no'                                  => __( 'No', 'woocommerce' ),
-					'default_zone_name'                   => __( 'Zone', 'woocommerce' ),
-					'delete_shipping_method_confirmation' => __( 'Are you sure you want to delete this shipping method?', 'woocommerce' ),
-				),
-			)
+			$localized_object,
 		);
 		wp_enqueue_script( 'wc-shipping-zone-methods' );
 

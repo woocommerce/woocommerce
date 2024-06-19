@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Modified the error message shown to customers in the event that no payment gateways are available.

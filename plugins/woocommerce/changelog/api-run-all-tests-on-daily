@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Runs all API tests on daily run. Skips failing tests on CI.

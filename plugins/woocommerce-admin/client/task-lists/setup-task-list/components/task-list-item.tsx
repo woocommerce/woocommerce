@@ -8,7 +8,7 @@ import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 export type TaskListItemProps = {
 	task: TaskType;
@@ -33,6 +33,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	const {
 		id: taskId,
 		title,
+		badge,
 		content,
 		time,
 		actionLabel,
@@ -61,8 +62,8 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	};
 
 	const DefaultTaskItem = useCallback(
-		( props ) => {
-			const className = classnames(
+		( props: { onClick?: () => void; isClickable?: boolean } ) => {
+			const className = clsx(
 				'woocommerce-task-list__item index-' + taskIndex,
 				{
 					complete: isComplete,
@@ -70,27 +71,29 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 				}
 			);
 
-			const onClickActions = () => {
+			const onClick = ( e: React.MouseEvent< HTMLButtonElement > ) => {
+				if ( ( e.target as HTMLElement ).tagName === 'A' ) {
+					return;
+				}
 				if ( props.onClick ) {
 					trackClick();
 					return props.onClick();
 				}
 				goToTask();
 			};
+
 			return (
 				<TaskItem
 					key={ taskId }
 					className={ className }
 					title={ title }
+					badge={ badge }
 					completed={ isComplete }
 					additionalInfo={ additionalInfo }
 					content={ content }
-					onClick={ ( e: React.MouseEvent< HTMLButtonElement > ) => {
-						if ( ( e.target as HTMLElement ).tagName === 'A' ) {
-							return;
-						}
-						onClickActions();
-					} }
+					onClick={
+						props.isClickable === false ? undefined : onClick
+					}
 					onDismiss={
 						isDismissable ? () => onDismissTask() : undefined
 					}
@@ -99,7 +102,16 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 				/>
 			);
 		},
-		[ taskId, title, content, time, actionLabel, isComplete, activeTaskId ]
+		[
+			taskId,
+			title,
+			badge,
+			content,
+			time,
+			actionLabel,
+			isComplete,
+			activeTaskId,
+		]
 	);
 
 	return hasFills ? (

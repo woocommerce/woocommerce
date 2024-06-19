@@ -34,18 +34,23 @@ class WC_Meta_Box_Order_Data {
 	protected static $shipping_fields = array();
 
 	/**
-	 * Init billing and shipping fields we display + save.
+	 * Get billing fields for the meta box.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @param string    $context Context of fields (view or edit).
+	 * @return array
 	 */
-	public static function init_address_fields() {
-
+	protected static function get_billing_fields( $order = false, $context = 'edit' ) {
 		/**
 		 * Provides an opportunity to modify the list of order billing fields displayed on the admin.
 		 *
 		 * @since 1.4.0
 		 *
 		 * @param array Billing fields.
+		 * @param WC_Order|false $order Order object.
+		 * @param string $context Context of fields (view or edit).
 		 */
-		self::$billing_fields = apply_filters(
+		return apply_filters(
 			'woocommerce_admin_billing_fields',
 			array(
 				'first_name' => array(
@@ -94,17 +99,30 @@ class WC_Meta_Box_Order_Data {
 				'phone'      => array(
 					'label' => __( 'Phone', 'woocommerce' ),
 				),
-			)
+			),
+			$order,
+			$context
 		);
+	}
 
+	/**
+	 * Get shipping fields for the meta box.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @param string    $context Context of fields (view or edit).
+	 * @return array
+	 */
+	protected static function get_shipping_fields( $order = false, $context = 'edit' ) {
 		/**
 		 * Provides an opportunity to modify the list of order shipping fields displayed on the admin.
 		 *
 		 * @since 1.4.0
 		 *
 		 * @param array Shipping fields.
+		 * @param WC_Order|false $order Order object.
+		 * @param string $context Context of fields (view or edit).
 		 */
-		self::$shipping_fields = apply_filters(
+		return apply_filters(
 			'woocommerce_admin_shipping_fields',
 			array(
 				'first_name' => array(
@@ -150,8 +168,18 @@ class WC_Meta_Box_Order_Data {
 				'phone'      => array(
 					'label' => __( 'Phone', 'woocommerce' ),
 				),
-			)
+			),
+			$order,
+			$context
 		);
+	}
+
+	/**
+	 * Init billing and shipping fields we display + save. Maintained for backwards compat.
+	 */
+	public static function init_address_fields() {
+		self::$billing_fields  = self::get_billing_fields();
+		self::$shipping_fields = self::get_shipping_fields();
 	}
 
 	/**
@@ -165,8 +193,6 @@ class WC_Meta_Box_Order_Data {
 		OrderUtil::init_theorder_object( $post );
 
 		$order = $theorder;
-
-		self::init_address_fields();
 
 		if ( WC()->payment_gateways() ) {
 			$payment_gateways = WC()->payment_gateways->payment_gateways();
@@ -373,7 +399,6 @@ class WC_Meta_Box_Order_Data {
 						</h3>
 						<div class="address">
 							<?php
-
 							// Display values.
 							if ( $order->get_formatted_billing_address() ) {
 								echo '<p>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
@@ -381,7 +406,9 @@ class WC_Meta_Box_Order_Data {
 								echo '<p class="none_set"><strong>' . esc_html__( 'Address:', 'woocommerce' ) . '</strong> ' . esc_html__( 'No billing address set.', 'woocommerce' ) . '</p>';
 							}
 
-							foreach ( self::$billing_fields as $key => $field ) {
+							$billing_fields = self::get_billing_fields( $order, 'view' );
+
+							foreach ( $billing_fields as $key => $field ) {
 								if ( isset( $field['show'] ) && false === $field['show'] ) {
 									continue;
 								}
@@ -413,9 +440,10 @@ class WC_Meta_Box_Order_Data {
 
 						<div class="edit_address">
 							<?php
-
 							// Display form.
-							foreach ( self::$billing_fields as $key => $field ) {
+							$billing_fields = self::get_billing_fields( $order, 'edit' );
+
+							foreach ( $billing_fields as $key => $field ) {
 								if ( ! isset( $field['type'] ) ) {
 									$field['type'] = 'text';
 								}
@@ -436,6 +464,9 @@ class WC_Meta_Box_Order_Data {
 								switch ( $field['type'] ) {
 									case 'select':
 										woocommerce_wp_select( $field, $order );
+										break;
+									case 'checkbox':
+										woocommerce_wp_checkbox( $field, $order );
 										break;
 									default:
 										woocommerce_wp_text_input( $field, $order );
@@ -493,7 +524,6 @@ class WC_Meta_Box_Order_Data {
 						</h3>
 						<div class="address">
 							<?php
-
 							// Display values.
 							if ( $order->get_formatted_shipping_address() ) {
 								echo '<p>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
@@ -501,15 +531,19 @@ class WC_Meta_Box_Order_Data {
 								echo '<p class="none_set"><strong>' . esc_html__( 'Address:', 'woocommerce' ) . '</strong> ' . esc_html__( 'No shipping address set.', 'woocommerce' ) . '</p>';
 							}
 
-							if ( ! empty( self::$shipping_fields ) ) {
-								foreach ( self::$shipping_fields as $key => $field ) {
+							$shipping_fields = self::get_shipping_fields( $order, 'view' );
+
+							if ( ! empty( $shipping_fields ) ) {
+								foreach ( $shipping_fields as $key => $field ) {
 									if ( isset( $field['show'] ) && false === $field['show'] ) {
 										continue;
 									}
 
 									$field_name = 'shipping_' . $key;
 
-									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+									if ( isset( $field['value'] ) ) {
+										$field_value = $field['value'];
+									} elseif ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
 										$field_value = $order->{"get_$field_name"}( 'edit' );
 									} else {
 										$field_value = $order->get_meta( '_' . $field_name );
@@ -519,9 +553,11 @@ class WC_Meta_Box_Order_Data {
 										$field_value = wc_make_phone_clickable( $field_value );
 									}
 
-									if ( $field_value ) {
-										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
+									if ( ! $field_value ) {
+										continue;
 									}
+
+									echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
 								}
 							}
 
@@ -532,10 +568,11 @@ class WC_Meta_Box_Order_Data {
 						</div>
 						<div class="edit_address">
 							<?php
-
 							// Display form.
-							if ( ! empty( self::$shipping_fields ) ) {
-								foreach ( self::$shipping_fields as $key => $field ) {
+							$shipping_fields = self::get_shipping_fields( $order, 'edit' );
+
+							if ( ! empty( $shipping_fields ) ) {
+								foreach ( $shipping_fields as $key => $field ) {
 									if ( ! isset( $field['type'] ) ) {
 										$field['type'] = 'text';
 									}
@@ -545,15 +582,20 @@ class WC_Meta_Box_Order_Data {
 
 									$field_name = 'shipping_' . $key;
 
-									if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
-										$field['value'] = $order->{"get_$field_name"}( 'edit' );
-									} else {
-										$field['value'] = $order->get_meta( '_' . $field_name );
+									if ( ! isset( $field['value'] ) ) {
+										if ( is_callable( array( $order, 'get_' . $field_name ) ) ) {
+											$field['value'] = $order->{"get_$field_name"}( 'edit' );
+										} else {
+											$field['value'] = $order->get_meta( '_' . $field_name );
+										}
 									}
 
 									switch ( $field['type'] ) {
 										case 'select':
 											woocommerce_wp_select( $field, $order );
+											break;
+										case 'checkbox':
+											woocommerce_wp_checkbox( $field, $order );
 											break;
 										default:
 											woocommerce_wp_text_input( $field, $order );
@@ -604,8 +646,6 @@ class WC_Meta_Box_Order_Data {
 			throw new Exception( __( 'Payment method is missing.', 'woocommerce' ), 400 );
 		}
 
-		self::init_address_fields();
-
 		// Ensure gateways are loaded in case they need to insert data into the emails.
 		WC()->payment_gateways();
 		WC()->shipping();
@@ -626,8 +666,10 @@ class WC_Meta_Box_Order_Data {
 		}
 
 		// Update billing fields.
-		if ( ! empty( self::$billing_fields ) ) {
-			foreach ( self::$billing_fields as $key => $field ) {
+		$billing_fields = self::get_billing_fields( $order, 'edit' );
+
+		if ( ! empty( $billing_fields ) ) {
+			foreach ( $billing_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ) {
 					$field['id'] = '_billing_' . $key;
 				}
@@ -636,17 +678,24 @@ class WC_Meta_Box_Order_Data {
 					continue;
 				}
 
-				if ( is_callable( array( $order, 'set_billing_' . $key ) ) ) {
-					$props[ 'billing_' . $key ] = wc_clean( wp_unslash( $_POST[ $field['id'] ] ) );
+				$value = wc_clean( wp_unslash( $_POST[ $field['id'] ] ) );
+
+				// Update a field if it includes an update callback.
+				if ( isset( $field['update_callback'] ) ) {
+					call_user_func( $field['update_callback'], $field['id'], $value, $order );
+				} elseif ( is_callable( array( $order, 'set_billing_' . $key ) ) ) {
+					$props[ 'billing_' . $key ] = $value;
 				} else {
-					$order->update_meta_data( $field['id'], wc_clean( wp_unslash( $_POST[ $field['id'] ] ) ) );
+					$order->update_meta_data( $field['id'], $value );
 				}
 			}
 		}
 
 		// Update shipping fields.
-		if ( ! empty( self::$shipping_fields ) ) {
-			foreach ( self::$shipping_fields as $key => $field ) {
+		$shipping_fields = self::get_shipping_fields( $order, 'edit' );
+
+		if ( ! empty( $shipping_fields ) ) {
+			foreach ( $shipping_fields as $key => $field ) {
 				if ( ! isset( $field['id'] ) ) {
 					$field['id'] = '_shipping_' . $key;
 				}
@@ -655,10 +704,15 @@ class WC_Meta_Box_Order_Data {
 					continue;
 				}
 
-				if ( is_callable( array( $order, 'set_shipping_' . $key ) ) ) {
-					$props[ 'shipping_' . $key ] = wc_clean( wp_unslash( $_POST[ $field['id'] ] ) );
+				$value = isset( $_POST[ $field['id'] ] ) ? wc_clean( wp_unslash( $_POST[ $field['id'] ] ) ) : '';
+
+				// Update a field if it includes an update callback.
+				if ( isset( $field['update_callback'] ) ) {
+					call_user_func( $field['update_callback'], $field['id'], $value, $order );
+				} elseif ( is_callable( array( $order, 'set_shipping_' . $key ) ) ) {
+					$props[ 'shipping_' . $key ] = $value;
 				} else {
-					$order->update_meta_data( $field['id'], wc_clean( wp_unslash( $_POST[ $field['id'] ] ) ) );
+					$order->update_meta_data( $field['id'], $value );
 				}
 			}
 		}

@@ -57,7 +57,7 @@ function getProductTypeOptionsString(
 		.join( ', ' );
 }
 
-const getProductData = () => {
+export const getProductData = () => {
 	const isBlockEditor =
 		document.querySelectorAll( '.block-editor' ).length > 0;
 
@@ -177,7 +177,7 @@ const getProductData = () => {
 /**
  * Get the publish date as a string.
  *
- * @param  prefix Prefix for date element selectors.
+ * @param prefix Prefix for date element selectors.
  * @return string
  */
 const getPublishDate = ( prefix = '' ) => {
@@ -228,8 +228,8 @@ const getPublishingWidgetData = () => {
 /**
  * Prefix all object keys with a string.
  *
- * @param  obj    Object to create keys from.
- * @param  prefix Prefix used before all keys.
+ * @param obj    Object to create keys from.
+ * @param prefix Prefix used before all keys.
  * @return object
  */
 const prefixObjectKeys = (
@@ -244,7 +244,7 @@ const prefixObjectKeys = (
 /**
  * Gets the tab name for a tab element.
  *
- * @param  tab Tab element to get slug for.
+ * @param tab Tab element to get slug for.
  * @return string
  */
 const getTabName = ( tab: Element ) => {
@@ -266,7 +266,7 @@ const getTabName = ( tab: Element ) => {
 /**
  * Gets additional data associated with a product tab click.
  *
- * @param  tabName The name of the tab to get data for.
+ * @param tabName The name of the tab to get data for.
  * @return object
  */
 const getDataForProductTabClickEvent = ( tabName: string ) => {

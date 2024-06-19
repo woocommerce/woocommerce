@@ -1,5 +1,6 @@
 .woocommerce-admin-page__add-product,
-.woocommerce-admin-page__product_product-id {
+.woocommerce-admin-page__product_product-id,
+.woocommerce-admin-page__product_product-id_variation_variation-id {
 	.woocommerce-store-alerts {
 		display: none;
 	}
@@ -16,11 +17,24 @@
 
 	.interface-interface-skeleton {
 		background-color: $white;
-		position: static;
 	}
 
-	.interface-interface-skeleton__sidebar {
+	.interface-interface-skeleton__sidebar,
+	.interface-interface-skeleton__actions {
 		width: 280px;
+	}
+	.interface-interface-skeleton__actions {
+		top: $admin-bar-height-big;
+		border-left: 1px solid $gray-200;
+		background-color: $white;
+		height: 100%;
+		z-index: 9999;
+		width: 100%;
+		overflow: auto;
+		@include break-medium() {
+			top: $admin-bar-height;
+			width: $sidebar-width;
+		}
 	}
 
 	.interface-interface-skeleton__header,
@@ -29,11 +43,11 @@
 		position: fixed;
 		width: calc(100% - $admin-menu-width);
 		left: $admin-menu-width;
-		@include breakpoint( '<960px' ) {
+		@include breakpoint( "<960px" ) {
 			left: $admin-menu-width-collapsed;
 			width: calc(100% - $admin-menu-width-collapsed);
 		}
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			left: 0;
 			width: 100%;
 		}
@@ -49,7 +63,7 @@
 
 	.interface-interface-skeleton__header {
 		top: $adminbar-height;
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			top: $adminbar-height-mobile;
 		}
 	}
@@ -62,13 +76,21 @@
 }
 
 html.interface-interface-skeleton__html-container {
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		position: inherit;
+	}
+	.woocommerce-layout__footer.at-bottom {
+		border-top: none;
+		box-shadow: none;
 	}
 }
 
-div#wpwrap {
-	.woocommerce-product-block-editor {
+body {
+	.is-product-editor {
 		background-color: $white;
+
+		&.woocommerce-admin-page.woocommerce_page_wc-admin #wpbody-content {
+			min-height: calc(100vh - 96px);
+		}
 	}
 }

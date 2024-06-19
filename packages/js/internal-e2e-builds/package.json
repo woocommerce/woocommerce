@@ -4,9 +4,13 @@
 	"description": "Utility build files for e2e packages",
 	"private": true,
 	"main": "build.js",
+	"files": [
+		"build.js",
+		"get-babel-config.js"
+	],
 	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.6.7"
+		"node": "^20.11.1",
+		"pnpm": "^9.1.0"
 	},
 	"bin": {
 		"e2e-builds": "./build.js"
@@ -21,21 +25,32 @@
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce#readme",
 	"scripts": {
-		"lint": "eslint build.js",
-		"lint:fix": "eslint build.js --fix"
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint build.js --fix",
+		"lint:lang:js": "eslint build.js"
 	},
 	"devDependencies": {
 		"@babel/core": "7.12.9",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"chalk": "^4.1.2",
-		"eslint": "^8.32.0",
-		"glob": "^7.2.0",
+		"eslint": "^8.55.0",
+		"glob": "^10.3.10",
 		"lodash": "^4.17.21",
-		"mkdirp": "^1.0.4"
+		"mkdirp": "^1.0.4",
+		"wireit": "0.14.3"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
 			"pnpm lint:fix"
 		]
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "build.js"
+			}
+		}
 	}
 }
