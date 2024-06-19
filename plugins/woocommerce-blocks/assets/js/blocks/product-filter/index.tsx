@@ -42,10 +42,7 @@ if ( isExperimentalBlocksEnabled() ) {
 		variations: [
 			{
 				name: 'product-filter-active',
-				title: __(
-					'Product Filter: Active Filters (Experimental)',
-					'woocommerce'
-				),
+				title: __( 'Active (Experimental)', 'woocommerce' ),
 				description: __(
 					'Display the currently active filters.',
 					'woocommerce'
@@ -66,10 +63,7 @@ if ( isExperimentalBlocksEnabled() ) {
 			},
 			{
 				name: 'product-filter-price',
-				title: __(
-					'Product Filter: Price (Experimental)',
-					'woocommerce'
-				),
+				title: __( 'Price (Experimental)', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by choosing a price range.',
 					'woocommerce'
@@ -89,10 +83,7 @@ if ( isExperimentalBlocksEnabled() ) {
 			},
 			{
 				name: 'product-filter-stock-status',
-				title: __(
-					'Product Filter: Stock Status (Experimental)',
-					'woocommerce'
-				),
+				title: __( 'Status (Experimental)', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by stock status.',
 					'woocommerce'
@@ -112,10 +103,7 @@ if ( isExperimentalBlocksEnabled() ) {
 			},
 			{
 				name: 'product-filter-attribute',
-				title: __(
-					'Product Filter: Attribute (Experimental)',
-					'woocommerce'
-				),
+				title: __( 'Attribute (Experimental)', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by selecting one or more attributes, such as color.',
 					'woocommerce'
@@ -123,6 +111,7 @@ if ( isExperimentalBlocksEnabled() ) {
 				attributes: {
 					filterType: 'attribute-filter',
 					heading: __( 'Filter by Attribute', 'woocommerce' ),
+					attributeId: 1,
 				},
 				icon: {
 					src: (
@@ -135,10 +124,7 @@ if ( isExperimentalBlocksEnabled() ) {
 			},
 			{
 				name: 'product-filter-rating',
-				title: __(
-					'Product Filter: Rating (Experimental)',
-					'woocommerce'
-				),
+				title: __( 'Rating (Experimental)', 'woocommerce' ),
 				description: __(
 					'Enable customers to filter the product collection by rating.',
 					'woocommerce'

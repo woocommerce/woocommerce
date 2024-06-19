@@ -26,42 +26,11 @@ const TEMPLATE: InnerBlockTemplate[] = [
 			content: __( 'Filters', 'woocommerce' ),
 		},
 	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'active-filters',
-			heading: __( 'Active', 'woocommerce' ),
-		},
-	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'price-filter',
-			heading: __( 'Price', 'woocommerce' ),
-		},
-	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'stock-filter',
-			heading: __( 'Status', 'woocommerce' ),
-		},
-	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'attribute-filter',
-			heading: __( 'Attribute', 'woocommerce' ),
-			attributeId: 0,
-		},
-	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'rating-filter',
-			heading: __( 'Rating', 'woocommerce' ),
-		},
-	],
+	[ 'woocommerce/product-filter-active' ],
+	[ 'woocommerce/product-filter-price' ],
+	[ 'woocommerce/product-filter-stock-status' ],
+	[ 'woocommerce/product-filter-attribute' ],
+	[ 'woocommerce/product-filter-rating' ],
 ];
 
 const addHighestProductCountAttributeToTemplate = (
@@ -75,10 +44,7 @@ const addHighestProductCountAttributeToTemplate = (
 		const blockAttributesIndex = 1;
 		const blockName = block[ blockNameIndex ];
 		const blockAttributes = block[ blockAttributesIndex ];
-		if (
-			blockName === 'woocommerce/product-filter' &&
-			blockAttributes?.filterType === 'attribute-filter'
-		) {
+		if ( blockName === 'woocommerce/product-filter-attribute' ) {
 			return [
 				blockName,
 				{
