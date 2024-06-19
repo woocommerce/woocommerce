@@ -19,19 +19,17 @@
 	.wc-block-components-totals-coupon__input,
 	.wc-block-components-totals-coupon__button {
 		margin: 0;
-		flex-basis: auto;
 	}
 
 	.wc-block-components-totals-coupon__input {
-		flex-grow: 3;
-		min-width: 120px;
+		flex: 3 1 120px;
 	}
 
 	.wc-block-components-totals-coupon__button {
 		padding-left: $gap;
 		padding-right: $gap;
 		white-space: nowrap;
-		flex-grow: 1;
+		flex: 1 1 auto;
 	}
 }
 
