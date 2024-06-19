@@ -20,30 +20,16 @@ const fetchSurveyCompletedOption =
 		return cachedSurveyCompleted;
 	};
 
-const fetchIsComingSoonShown = async (): Promise< boolean > => {
-	const isComingSoonPage = ( await apiFetch( {
-		path:
-			'/wc-admin/launch-your-store/is-coming-soon-page-shown?t=' +
-			Date.now(),
-		method: 'GET',
-	} ) ) as { is_coming_soon_shown: boolean };
-
-	return isComingSoonPage.is_coming_soon_shown;
-};
-
 export const fetchCongratsData = fromPromise( async () => {
-	const [ isComingSoonShown, surveyCompleted, tasklists, activePlugins ] =
-		await Promise.all( [
-			fetchIsComingSoonShown(),
-			fetchSurveyCompletedOption(),
-			resolveSelect( ONBOARDING_STORE_NAME ).getTaskListsByIds( [
-				'setup',
-				'extended',
-			] ),
-			resolveSelect( PLUGINS_STORE_NAME ).getActivePlugins(),
-		] );
+	const [ surveyCompleted, tasklists, activePlugins ] = await Promise.all( [
+		fetchSurveyCompletedOption(),
+		resolveSelect( ONBOARDING_STORE_NAME ).getTaskListsByIds( [
+			'setup',
+			'extended',
+		] ),
+		resolveSelect( PLUGINS_STORE_NAME ).getActivePlugins(),
+	] );
 	return {
-		isComingSoonShown,
 		surveyCompleted: surveyCompleted as string | null,
 		tasklists,
 		activePlugins,

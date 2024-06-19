@@ -26,8 +26,8 @@ export type MainContentMachineContext = {
 		hasCompleteSurvey: boolean;
 		allTasklists: TaskListType[];
 		activePlugins: string[];
-		isComingSoonShown: boolean;
 	};
+	siteIsShowingCachedContent: boolean;
 };
 
 export type MainContentComponentProps = LaunchYourStoreComponentProps & {
@@ -35,6 +35,7 @@ export type MainContentComponentProps = LaunchYourStoreComponentProps & {
 };
 export type MainContentMachineEvents =
 	| { type: 'SHOW_LAUNCH_STORE_SUCCESS' }
+	| { type: 'SHOW_LAUNCH_STORE_PENDING_CACHE' }
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'SHOW_LOADING' }
 	| congratsEvents;
@@ -55,6 +56,9 @@ export const mainContentMachine = setup( {
 		) => {
 			updateQueryParams( params );
 		},
+		assignSiteCachedStatus: assign( {
+			siteIsShowingCachedContent: true,
+		} ),
 	},
 	guards: {
 		hasContentLocation: (
@@ -78,8 +82,8 @@ export const mainContentMachine = setup( {
 			hasCompleteSurvey: false,
 			allTasklists: [],
 			activePlugins: [],
-			isComingSoonShown: false,
 		},
+		siteIsShowingCachedContent: false,
 	},
 	invoke: {
 		id: 'contentQueryParamListener',
@@ -149,6 +153,10 @@ export const mainContentMachine = setup( {
 			target: '.navigate',
 		},
 		SHOW_LAUNCH_STORE_SUCCESS: {
+			target: '#launchStoreSuccess',
+		},
+		SHOW_LAUNCH_STORE_PENDING_CACHE: {
+			actions: [ 'assignSiteCachedStatus' ],
 			target: '#launchStoreSuccess',
 		},
 		SHOW_LOADING: {

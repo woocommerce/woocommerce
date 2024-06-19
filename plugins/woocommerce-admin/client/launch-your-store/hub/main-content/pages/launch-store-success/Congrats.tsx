@@ -29,15 +29,15 @@ export type CongratsProps = {
 	isWooExpress: boolean;
 	completeSurvey: () => void;
 	children?: React.ReactNode;
-	isComingSoonShown: boolean;
+	siteIsShowingCachedContent: boolean;
 };
 
 export const Congrats = ( {
 	hasCompleteSurvey,
 	isWooExpress,
 	completeSurvey,
+	siteIsShowingCachedContent,
 	children,
-	isComingSoonShown,
 }: CongratsProps ) => {
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
@@ -118,7 +118,7 @@ export const Congrats = ( {
 			</div>
 			<div className="woocommerce-launch-store__congrats-content">
 				<h1 className="woocommerce-launch-store__congrats-heading">
-					{ isComingSoonShown
+					{ siteIsShowingCachedContent
 						? __(
 								'Congratulations! Your store will launch soon',
 								'woocommerce'
@@ -129,7 +129,7 @@ export const Congrats = ( {
 						  ) }
 				</h1>
 				<h2 className="woocommerce-launch-store__congrats-subheading">
-					{ isComingSoonShown
+					{ siteIsShowingCachedContent
 						? createInterpolateElement(
 								__(
 									'It’ll be ready to view as soon as your <link></link> have updated. Please wait, or contact your web host to find out how to do this manually.',

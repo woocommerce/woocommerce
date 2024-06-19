@@ -101,18 +101,6 @@ class LaunchYourStore {
 				),
 			)
 		);
-
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/is-coming-soon-page-shown',
-			array(
-				array(
-					'methods'             => 'GET',
-					'callback'            => array( $this, 'is_coming_soon_page_shown' ),
-					'permission_callback' => array( $this, 'must_be_shop_manager_or_admin' ),
-				),
-			)
-		);
 	}
 
 	/**
@@ -230,36 +218,5 @@ class LaunchYourStore {
 	 */
 	public function has_survey_completed() {
 		return new \WP_REST_Response( get_option( 'woocommerce_admin_launch_your_store_survey_completed', 'no' ) );
-	}
-
-	/**
-	 * Check if we're still displaying the coming soon page.
-	 *
-	 * @return \WP_REST_Response
-	 */
-	public function is_coming_soon_page_shown() {
-		$store_pages_only = get_option( 'woocommerce_store_pages_only', 'no' ) === 'yes';
-		if ( $store_pages_only ) {
-			$url = get_permalink( wc_get_page_id( 'shop' ) );
-		} else {
-			$url = site_url();
-		}
-
-		$content = wp_remote_get(
-			$url,
-			array(
-				'sslverify' => false,
-			)
-		);
-
-		$body                  = wp_remote_retrieve_body( $content );
-		$has_coming_soon_input = strpos( $body, "<meta name='woo-coming-soon-page' content='yes'>" ) !== false;
-
-		return new \WP_REST_Response(
-			array(
-				'is_coming_soon_shown' => $has_coming_soon_input,
-				'url'                  => $url,
-			)
-		);
 	}
 }
