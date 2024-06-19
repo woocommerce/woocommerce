@@ -24,6 +24,7 @@ import type { AttributeTableRowProps } from './types';
 interface FormTokenFieldProps extends CoreFormTokenField.Props {
 	__experimentalExpandOnFocus: boolean;
 	__experimentalAutoSelectFirstMatch: boolean;
+	__experimentalShowHowTo?: boolean;
 	placeholder: string;
 	label?: string;
 }
@@ -82,6 +83,11 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	onRemove,
 } ) => {
 	const attributeId = attribute ? attribute.id : undefined;
+
+	/*
+	 * Add a flag to know whether a term has been selected/added.
+	 */
+	const [ termSelected, setTermSelected ] = useState( false );
 
 	const { createProductAttributeTerm } = useDispatch(
 		EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
@@ -378,6 +384,12 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 						 * when it is not a global attribute.
 						 */
 						if ( newTokens.length ) {
+							/*
+							 * If the term is selected, set the flag to true.
+							 * It will be used to show/hide the how-to message.
+							 */
+							setTermSelected( true );
+
 							addNewTerms(
 								newTokens.map( ( item ) => ( {
 									...item,
@@ -388,6 +400,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					} }
 					__experimentalExpandOnFocus={ true }
 					__experimentalAutoSelectFirstMatch={ true }
+					__experimentalShowHowTo={ ! termSelected }
 				/>
 			</td>
 			<td className="woocommerce-new-attribute-modal__table-attribute-trash-column">
