@@ -941,10 +941,7 @@ class DefaultFreeExtensions {
 						return array_filter(
 							$rule['operand'],
 							function ( $operand ) {
-								// Ignore "plugin_activated" rules except for WooCommerce Shipping and WooCommerce Tax.
-								return 'plugins_activated' !== $operand['type'] ||
-								       in_array( 'woocommerce-shipping', $operand['plugins'] ) ||
-								       in_array( 'woocommerce-tax', $operand['plugins'] );
+								return 'plugins_activated' !== $operand['type'];
 							}
 						);
 					},
