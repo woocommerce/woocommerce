@@ -45,9 +45,5 @@ class ComingSoonCacheInvalidator {
 			\sg_cachepress_purge_cache();
 		}
 
-		// Invalidate the WP Engine cache.
-		if ( class_exists( '\wpecommon' ) && method_exists( 'wpecommon', 'purge_varnish_cache' ) ) {
-			\wpecommon::purge_varnish_cache();
-		}
 	}
 }
