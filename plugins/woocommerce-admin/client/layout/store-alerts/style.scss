@@ -79,8 +79,10 @@
 
 .woocommerce-embed-page {
 	.woocommerce-store-alerts {
-		margin: 40px 20px 20px;
+		left: 0;
+		
 		@include breakpoint("<782px") {
+			left: 0;
 			margin-top: $gap-large;
 		}
 	}
