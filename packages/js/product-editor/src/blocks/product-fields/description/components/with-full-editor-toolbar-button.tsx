@@ -24,7 +24,7 @@ const wooBlockwithFullEditorToolbarButton =
 				}
 
 				/*
-				 * Extend the toolbar only to the sumary field block instance
+				 * Extend the toolbar only to the summary field block instance
 				 * that has the `woocommerce/product-description-field__content` template block ID.
 				 */
 				if (
