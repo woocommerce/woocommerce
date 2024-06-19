@@ -108,6 +108,10 @@ class AddToCartForm extends AbstractBlock {
 			}
 		}
 
+		if ( $is_stepper_style ) {
+			return '<div class="wc-block-add-to-cart-form--stepper-container">' . $html->get_updated_html() . '</div>';
+		}
+
 		return $html->get_updated_html();
 	}
 

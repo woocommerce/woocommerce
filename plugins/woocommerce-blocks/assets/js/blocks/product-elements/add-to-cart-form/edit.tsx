@@ -30,7 +30,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 			: 'wc-block-add-to-cart-form--stepper';
 
 	const blockProps = useBlockProps( {
-		className: `wc-block-add-to-cart-form ${ quantitySelectorStyleClass }`,
+		className: `wc-block-add-to-cart-form ${ quantitySelectorStyleClass } wc-block-add-to-cart-form-editor`,
 	} );
 	const { isDescendentOfSingleProductBlock } =
 		useIsDescendentOfSingleProductBlock( {

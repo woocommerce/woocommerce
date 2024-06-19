@@ -30,7 +30,11 @@
 
 // Stepper CSS
 .wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
-	display: inline-flex;
+	display: block;
+
+	.wc-block-add-to-cart-form--stepper-container {
+		display: inline-flex;
+	}
 
 	.wc-block-components-quantity-selector {
 		height: 100%;
