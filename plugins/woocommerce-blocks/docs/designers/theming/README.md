@@ -1,18 +1,58 @@
 # Theming
 
-This page includes all documentation regarding WooCommerce Blocks and themes.
+This page includes documentation about theming WooCommerce blocks and block themes.
+
+---
+
+**Note:** this document assumes some previous knowledge about block theme development and some WordPress concepts. If you are completely new to block theme development, please check [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/)
+to learn about block theme development, and explore
+the [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/) tool when you're ready to create a
+new theme.
+
+---
 
 ## General concepts
+
+### Block templates
+
+WooCommerce comes with several [block templates](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/templates/templates/blockified) by default. Those are:
+
+- Single Product (`single-product.html`)
+- Product Catalog (`archive-product.html`)
+    - Products by Category (`taxonomy-product_cat.html`)
+    - Products by Tag (`taxonomy-product_tag.html`)
+    - Products by Attribute (`taxonomy-product_attribute.html`)
+- Product Search Results (`product-search-results.html`)
+- Page: Coming soon (`page-coming-soon.html`)
+- Page: Cart (`page-cart.html`)
+- Page: Checkout (`page-checkout.html`)
+- Order Confirmation (`order-confirmation.html`)
+
+Block themes can customize those templates in the following ways:
+
+- It's possible to override the templates by creating a file with the same file name under the `/templates` folder. For example, if a block theme contains a `wp-content/themes/yourtheme/templates/single-product.html` template, it will take priority over the WooCommerce default Single Product template.
+- Products by Category, Products by Tag and Products by Attribute templates fall back to the Product Catalog template. In other words, if a theme provides an `archive-product.html` template but doesn't provide a `taxonomy-product_cat.html` template, the Products by Category template will use the `archive-product.html` template. Same for the Products by Tag and Products by Attribute templates.
+- It's possible to create templates for specific products and taxonomies. For example, if the theme provides a template with file name of `single-product-cap.html`, that template will be used when rendering the product with slug `cap`. Similarly, themes can provide specific taxonomy templates: `taxonomy-product_cat-clothing.html` would be used in the product category with slug `clothing`.
+- Always keep in mind users can make modifications to the templates provided by the theme via the Site Editor.
+
+### Block template parts
+
+WooCommerce also comes with two specific [block template parts](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/templates/parts):
+
+- Mini-Cart (`mini-cart.html`): used inside the Mini-Cart block drawer.
+- Checkout header (`checkout-header.html`): used as the header in the Checkout template.
+
+Similarly to the templates, they can be overriden by themes by adding a file with the same file name under the `/parts` folder.
 
 ### Global styles
 
 WooCommerce blocks rely on [global styles](https://developer.wordpress.org/themes/global-settings-and-styles/styles/) for their styling. Global styles can be defined by themes via `theme.json` or by users via Appearance > Editor > Styles and offer several advantages over plain CSS:
 
-* Better performance, as only the required CSS is printed into the page, reducing the bundle size to render a page.
-* Can be easily customized by users via the UI.
-* Gracefully handle conflicts between plugins and themes.
-* Are not affected by markup or class name updates into individual blocks or components.
-* Don't depend on a specific nesting order of blocks: users can freely move blocks around without styles breaking.
+- Better performance, as only the required CSS is printed into the page, reducing the bundle size to render a page.
+- Can be easily customized by users via the UI.
+- Gracefully handle conflicts between plugins and themes.
+- Are not affected by markup or class name updates into individual blocks or components.
+- Don't depend on a specific nesting order of blocks: users can freely move blocks around without styles breaking.
 
 #### Example
 
@@ -43,83 +83,9 @@ Before                                                                          
 
 You can find more [documentation on global styles](https://developer.wordpress.org/themes/global-settings-and-styles/styles/) in developer.wordpress.org. You can also find the [list of WooCommerce blocks and their names in the docs](../../block-references/block-references.md).
 
-### Block and component class names
-
-**Important: we strongly discourage writing CSS code based on existing block class names and prioritize using global styles when possible. We especially discourage writing CSS selectors that rely on a specific block being a descendant of another one, as users can move blocks around freely, so they are prone to breaking. Similar to WordPress itself, we consider the HTML structure within components, blocks, and block templates to be “private”, and subject to further change in the future, so using CSS to target the internals of a block or a block template is _not recommended or supported_.**
-
-WooCommerce Blocks follows BEM for class names, as [stated in our coding guidelines](../../contributors/coding-guidelines.md). All classes start with one of these two prefixes:
-
-* `.wc-block-`: class names specific to a single block.
-* `.wc-block-components-`: class names specific to a component. The component might be reused by different blocks.
-
-The combination of block class names and component class names allows themes to style each component either globally or only in specific blocks. As an example, you could style all prices to be italics with:
-
-```css
-/* This will apply to all block prices */
-.wc-block-components-formatted-money-amount {
-	font-style: italic;
-}
-```
-
-But if you only wanted to make it italic in the Checkout block, that could be done adding the block selector:
-
-```css
-/* This will apply to prices in the checkout block */
-.wc-block-checkout .wc-block-components-formatted-money-amount {
-	font-style: italic;
-}
-```
-
-**Note:** for backwards compatibility, some components might have class names with both prefixes (ie: `wc-block-sort-select` and `wc-block-components-sort-select`). In those cases, the class name with `.wc-block-` prefix is deprecated and shouldn't be used in new code. It will be removed in future versions. If an element has both classes always style the one with `.wc-block-components-` prefix.
-
-### Container query class names
-
-Some of our components have responsive classes depending on the container width. The reason to use these classes instead of CSS media queries is to adapt to the container where the block is added (CSS media queries only allow reacting to viewport sizes).
-
-Those classes are:
-
-Container width | Class name
-----------------|------------
-\>700px         | `is-large`
-521px-700px     | `is-medium`
-401px-520px     | `is-small`
-<=400px         | `is-mobile`
-
-As an example, if we wanted to do the Checkout font size 10% larger when the container has a width of 521px or wider, we could do so with this code:
-
-```css
-.wc-block-checkout.is-medium,
-.wc-block-checkout.is-large {
-	font-size: 1.1em;
-}
-```
-
-### WC Blocks _vs._ theme style conflicts for semantic elements
-
-WooCommerce Blocks uses HTML elements according to their semantic meaning, not their default layout. That means that some times blocks might use an anchor link (`<a>`) but display it as a button. Or the other way around, a `<button>` might be displayed as a text link. Similarly, headings might be displayed as regular text.
-
-In these cases, Blocks include some CSS resets to undo most default styles introduced by themes. A `<button>` that is displayed as a text link will probably have resets for the background, border, etc. That will solve most conflicts out-of-the-box but in some occasions those CSS resets might not have effect if the theme has a specific CSS selector with higher specificity. When that happens, we really encourage theme developers to decrease their selectors specificity so Blocks styles have preference, if that's not possible, themes can write CSS resets on top.
-
-### Hidden elements
-
-WC Blocks use the [`hidden` HTML attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden) to hide some elements from the UI so they are not displayed in screens neither read by assistive technologies. If your theme has some generic styles that tweak the CSS display property of blocks elements (ie: `div { display: block; }`), make sure you correctly handle the hidden attribute: `div[hidden] { display: none; }`.
-
-### Legacy classes from WooCommerce (.price, .star-rating, .button...)
-
-WooCommerce Blocks avoids using legacy unprefixed classes as much as possible. However, you might find some of them that have been added for backwards compatibility. We still encourage themes to use the prefixed classes when possible, this avoids conflicts with other plugins, the editor, etc.
-
-## Blocks
-
-* [Filter blocks](filter-blocks.md)
-* [Cart and Checkout](cart-and-checkout.md)
-
 ## Other docs
 
-* [Product grid blocks style update in 2.7.0](product-grid-270.md)
-* [Class names update in 2.8.0](class-names-update-280.md)
-* [Class names update in 3.3.0](class-names-update-330.md)
-* [Class names update in 3.4.0](class-names-update-340.md)
-* [Class names update in 4.6.0](class-names-update-460.md)
+- [CSS styling](css-styling.md)
 
 <!-- FEEDBACK -->
 

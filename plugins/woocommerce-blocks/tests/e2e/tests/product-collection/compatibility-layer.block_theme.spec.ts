@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -76,16 +76,11 @@ const multipleOccurrenceScenarios: Scenario[] = [
 ];
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
-	pageObject: async (
-		{ page, admin, editor, templateApiUtils, editorUtils },
-		use
-	) => {
+	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new ProductCollectionPage( {
 			page,
 			admin,
 			editor,
-			templateApiUtils,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},
@@ -96,10 +91,6 @@ test.describe( 'Compatibility Layer with Product Collection block', () => {
 		test.beforeEach( async ( { pageObject, requestUtils } ) => {
 			await requestUtils.activatePlugin(
 				'woocommerce-blocks-test-product-collection-compatibility-layer'
-			);
-
-			await pageObject.replaceProductsWithProductCollectionInTemplate(
-				'woocommerce/woocommerce//archive-product'
 			);
 			await pageObject.goToProductCatalogFrontend();
 		} );

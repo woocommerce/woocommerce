@@ -3390,33 +3390,72 @@ ul.wc_coupon_list_block {
 		}
 	}
 
+	.woocommerce_page_wc-orders .wc-orders-list-table.wp-list-table,
 	.post-type-shop_order .wp-list-table {
-		td.check-column {
+		.check-column {
 			width: 1em;
+			vertical-align: top;
+		}
+
+		thead th.column-order_number {
+			width: 100%;
 		}
 
 		td.column-order_number {
-			padding-left: 0;
-			padding-bottom: 0.5em;
-		}
+			.toggle-row {
+				height: 20px;
+			}
 
-		td.column-order_status,
-		td.column-order_date {
-			display: inline-block !important;
-			padding: 0 1em 1em 1em !important;
-
-			&::before {
-				display: none !important;
+			.order-preview {
+				margin-top: 13px;
 			}
 		}
 
-		td.column-order_date {
-			padding-left: 0 !important;
+		td.column-order_total,
+		td.column-wc_actions {
+			text-align: left;
 		}
 
-		td.column-order_status {
-			float: right;
+		td.column-wc_actions {
+			min-height: 2.0em !important;
 		}
+
+		tr:not(.is-expanded) {
+			td.column-order_number {
+				vertical-align: top;
+
+				a.order-view {
+					display: inline-block;
+					width: calc(100% - 48px - 10ch - 20ch);
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+				}
+			}
+
+			td.column-order_date {
+				width: 10ch !important;
+				top: 1em;
+				right: calc(20ch + 48px);
+			}
+
+			td.column-order_status {
+				top: -1em;
+				right: 48px;
+			}
+
+			td.column-order_status,
+			td.column-order_date {
+				padding: 0 !important;
+				display: block !important;
+				float: right;
+
+				&::before {
+					display: none !important;
+				}
+			}
+		}
+
 	}
 }
 
@@ -4990,6 +5029,13 @@ img.help_tip {
 
 	textarea[disabled="disabled"] {
 		background: #dfdfdf !important;
+	}
+
+	.settings-panel {
+		ul.advice {
+			list-style: square;
+			list-style-position: inside;
+		}
 	}
 
 	table.form-table {
@@ -7538,10 +7584,6 @@ table.bar_chart {
 			.is-expanded td:not(.hidden) {
 				overflow: visible;
 			}
-
-			.toggle-row {
-				top: -15px;
-			}
 		}
 	}
 }
@@ -8676,4 +8718,8 @@ table.bar_chart {
 			}
 		}
 	}
+}
+
+html:has(#status-table-templates){
+	scroll-padding-top: 80px;
 }

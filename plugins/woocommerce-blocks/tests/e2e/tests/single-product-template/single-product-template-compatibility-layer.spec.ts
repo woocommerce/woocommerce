@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -14,7 +14,7 @@ type Scenario = {
 	amount: number;
 };
 
-const singleOccurranceScenarios: Scenario[] = [
+const singleOccurrenceScenarios: Scenario[] = [
 	{
 		title: 'Before Main Content',
 		dataTestId: 'woocommerce_before_main_content',
@@ -83,25 +83,22 @@ const singleOccurranceScenarios: Scenario[] = [
 	},
 ];
 
-test.describe( 'Compatibility Layer with Product Collection block', () => {
+test.describe( 'Compatibility Layer in Single Product template', () => {
 	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.activatePlugin(
 			'woocommerce-blocks-test-single-product-template-compatibility-layer'
 		);
 	} );
 
-	// eslint-disable-next-line playwright/valid-describe-callback
-	test.describe( 'Product Archive with Product Collection block', () => {
-		for ( const scenario of singleOccurranceScenarios ) {
-			test( `${ scenario.title } is attached to the page`, async ( {
-				page,
-			} ) => {
-				await page.goto( '/product/hoodie/' );
-				const hooks = page.getByTestId( scenario.dataTestId );
+	for ( const scenario of singleOccurrenceScenarios ) {
+		test( `${ scenario.title } is attached to the page`, async ( {
+			page,
+		} ) => {
+			await page.goto( '/product/hoodie/' );
+			const hooks = page.getByTestId( scenario.dataTestId );
 
-				await expect( hooks ).toHaveCount( scenario.amount );
-				await expect( hooks ).toHaveText( scenario.content );
-			} );
-		}
-	} );
+			await expect( hooks ).toHaveCount( scenario.amount );
+			await expect( hooks ).toHaveText( scenario.content );
+		} );
+	}
 } );

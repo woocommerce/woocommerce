@@ -29,12 +29,14 @@ export type CongratsProps = {
 	isWooExpress: boolean;
 	completeSurvey: () => void;
 	children?: React.ReactNode;
+	siteIsShowingCachedContent: boolean;
 };
 
 export const Congrats = ( {
 	hasCompleteSurvey,
 	isWooExpress,
 	completeSurvey,
+	siteIsShowingCachedContent,
 	children,
 }: CongratsProps ) => {
 	const copyLink = __( 'Copy link', 'woocommerce' );
@@ -49,12 +51,12 @@ export const Congrats = ( {
 	const [ isShowSurvey, setIsShowSurvey ] = useState< boolean >(
 		! hasCompleteSurvey
 	);
-	const [ emojiValue, setEmojiValue ] = useState< number | null >( null );
+	const [ score, setScore ] = useState< number | null >( null );
 	const [ feedbackText, setFeedbackText ] = useState< string >( '' );
 	const [ isShowThanks, setIsShowThanks ] = useState< boolean >( false );
 	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
 
-	const shouldShowComment = isInteger( emojiValue );
+	const shouldShowComment = isInteger( score );
 
 	const copyClipboardRef = useCopyToClipboard< HTMLAnchorElement >(
 		homeUrl,
@@ -71,19 +73,10 @@ export const Congrats = ( {
 	);
 
 	const sendData = () => {
-		const emojis = {
-			1: 'very_difficult',
-			2: 'difficult',
-			3: 'neutral',
-			4: 'good',
-			5: 'very_good',
-		} as const;
-		const emoji_value = emojiValue
-			? emojis[ emojiValue as keyof typeof emojis ]
-			: 'none';
 		recordEvent( 'launch_your_store_congrats_survey_complete', {
-			emoji: emoji_value,
-			feedback: feedbackText,
+			action: 'lys_experience',
+			score,
+			comments: feedbackText,
 		} );
 
 		setIsShowThanks( true );
@@ -125,16 +118,42 @@ export const Congrats = ( {
 			</div>
 			<div className="woocommerce-launch-store__congrats-content">
 				<h1 className="woocommerce-launch-store__congrats-heading">
-					{ __(
-						'Congratulations! Your store is now live',
-						'woocommerce'
-					) }
+					{ siteIsShowingCachedContent
+						? __(
+								'Congratulations! Your store will launch soon',
+								'woocommerce'
+						  )
+						: __(
+								'Congratulations! Your store is now live',
+								'woocommerce'
+						  ) }
 				</h1>
 				<h2 className="woocommerce-launch-store__congrats-subheading">
-					{ __(
-						"You've successfully launched your store and are ready to start selling! We can't wait to see your business grow.",
-						'woocommerce'
-					) }
+					{ siteIsShowingCachedContent
+						? createInterpolateElement(
+								__(
+									'It’ll be ready to view as soon as your <link></link> have updated. Please wait, or contact your web host to find out how to do this manually.',
+									'woocommerce'
+								),
+								{
+									link: (
+										<a
+											href="https://woocommerce.com/document/server-caches/"
+											target="_blank"
+											rel="noreferrer"
+										>
+											{ __(
+												'server caches',
+												'woocommerce'
+											) }
+										</a>
+									),
+								}
+						  )
+						: __(
+								"You've successfully launched your store and are ready to start selling! We can't wait to see your business grow.",
+								'woocommerce'
+						  ) }
 				</h2>
 				<div className="woocommerce-launch-store__congrats-midsection-container">
 					<div className="woocommerce-launch-store__congrats-visit-store">
@@ -205,10 +224,8 @@ export const Congrats = ( {
 												'How was the experience of launching your store?',
 												'woocommerce'
 											) }
-											onSelect={ ( score ) =>
-												setEmojiValue( score )
-											}
-											selectedValue={ emojiValue }
+											onSelect={ setScore }
+											selectedValue={ score }
 										/>
 									</div>
 									{ shouldShowComment && (
@@ -266,7 +283,7 @@ export const Congrats = ( {
 											className=""
 											variant="tertiary"
 											onClick={ () => {
-												setEmojiValue( null );
+												setScore( null );
 											} }
 										>
 											{ __( 'Cancel', 'woocommerce' ) }

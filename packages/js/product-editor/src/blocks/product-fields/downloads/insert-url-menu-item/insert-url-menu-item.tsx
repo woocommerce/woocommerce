@@ -33,8 +33,8 @@ function validateInput( input: HTMLInputElement ) {
 }
 
 export function InsertUrlMenuItem( {
-	onUploadSuccess,
-	onUploadError,
+	onLinkSuccess,
+	onLinkError,
 }: InsertUrlMenuItemProps ) {
 	function handleSubmit( event: FormEvent< HTMLFormElement > ) {
 		event.preventDefault();
@@ -50,9 +50,9 @@ export function InsertUrlMenuItem( {
 				url,
 			} as MediaItem;
 
-			onUploadSuccess( [ mediaItem ] );
+			onLinkSuccess( [ mediaItem ] );
 		} else {
-			onUploadError( urlInput.validationMessage );
+			onLinkError( urlInput.validationMessage );
 		}
 	}
 

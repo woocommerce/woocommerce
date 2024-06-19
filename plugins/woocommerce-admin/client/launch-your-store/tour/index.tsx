@@ -64,8 +64,14 @@ export const SiteVisibilityTour = ( { onClose }: { onClose: () => void } ) => {
 										'woocommerce'
 									),
 									{
-										// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/anchor-is-valid
-										link: <a href="#" target="_blank" />,
+										link: (
+											// eslint-disable-next-line jsx-a11y/anchor-has-content
+											<a
+												href="https://woocommerce.com/document/configuring-woocommerce-settings/coming-soon-mode/"
+												target="_blank"
+												rel="noreferrer"
+											/>
+										),
 									}
 								),
 							},

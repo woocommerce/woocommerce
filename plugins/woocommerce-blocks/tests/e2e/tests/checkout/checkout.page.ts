@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { expect } from '@woocommerce/e2e-playwright-utils';
+import { expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -196,7 +196,7 @@ export class CheckoutPage {
 				// your road?" field.
 			} );
 		await this.waitForCheckoutToFinishUpdating();
-		await this.page.getByText( 'Place Order' ).click();
+		await this.page.getByText( 'Place Order', { exact: true } ).click();
 		if ( waitForRedirect ) {
 			await this.page.waitForURL( /order-received/ );
 		}

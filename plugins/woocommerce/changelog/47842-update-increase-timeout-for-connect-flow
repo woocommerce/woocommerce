@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Increase connection timeout to 30 seconds for the requests in WCCOM connection flow

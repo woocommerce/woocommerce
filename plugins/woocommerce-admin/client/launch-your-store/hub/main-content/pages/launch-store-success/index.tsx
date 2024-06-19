@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Spinner } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 
@@ -32,7 +32,7 @@ export const LaunchYourStoreSuccess = ( props: MainContentComponentProps ) => {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'launch-store-success-page__container',
 				props.className
 			) }
@@ -43,6 +43,9 @@ export const LaunchYourStoreSuccess = ( props: MainContentComponentProps ) => {
 				}
 				isWooExpress={ isWooExpress() }
 				completeSurvey={ completeSurvey }
+				siteIsShowingCachedContent={
+					props.context.siteIsShowingCachedContent
+				}
 			>
 				<h2 className="woocommerce-launch-store__congrats-main-actions-title">
 					{ __( "What's next?", 'woocommerce' ) }

@@ -58,26 +58,26 @@ const customerData = {
 	},
 };
 
-baseTest.describe( 'Merchant > Customer List', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		customers: async ( { api }, use ) => {
-			const customers = [];
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	customers: async ( { api }, use ) => {
+		const customers = [];
 
-			for ( const customer of Object.values( customerData ) ) {
-				await api.post( 'customers', customer ).then( ( response ) => {
-					customers.push( response.data );
-				} );
-			}
-
-			await use( customers );
-
-			await api.post( `customers/batch`, {
-				delete: customers.map( ( customer ) => customer.id ),
+		for ( const customer of Object.values( customerData ) ) {
+			await api.post( 'customers', customer ).then( ( response ) => {
+				customers.push( response.data );
 			} );
-		},
-	} );
+		}
 
+		await use( customers );
+
+		await api.post( `customers/batch`, {
+			delete: customers.map( ( customer ) => customer.id ),
+		} );
+	},
+} );
+
+test.describe( 'Merchant > Customer List', () => {
 	test.beforeEach( async ( { context } ) => {
 		// prevents the column picker from saving state between tests
 		await context.route( '**/users/**', ( route ) => route.abort() );
@@ -87,9 +87,15 @@ baseTest.describe( 'Merchant > Customer List', () => {
 		page,
 		customers,
 	} ) => {
-		await page.goto(
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomers'
-		);
+		await test.step( 'Go to the customers reports page', async () => {
+			const responsePromise = page.waitForResponse(
+				'**/wp-json/wc-analytics/reports/customers?orderby**'
+			);
+			await page.goto(
+				'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomers'
+			);
+			await responsePromise;
+		} );
 
 		// may have more than 3 customers due to guest orders
 		// await test.step( 'Check that 3 customers are displayed', async () => {
@@ -111,12 +117,24 @@ baseTest.describe( 'Merchant > Customer List', () => {
 			for ( const customer of customers ) {
 				await page
 					.locator( '#woocommerce-select-control-0__control-input' )
-					.fill( customer.first_name );
+					.click();
+				await page
+					.locator( '#woocommerce-select-control-0__control-input' )
+					.pressSequentially(
+						`${ customer.first_name } ${ customer.last_name }`
+					);
 				await page
 					.getByRole( 'option', {
-						name: 'All customers with names that',
+						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
+						exact: true,
 					} )
-					.click();
+					.waitFor( { state: 'visible' } );
+				await page
+					.getByRole( 'option', {
+						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
+						exact: true,
+					} )
+					.click( { delay: 300 } );
 				await expect(
 					page.getByRole( 'link', { name: customer.email } )
 				).toBeVisible();

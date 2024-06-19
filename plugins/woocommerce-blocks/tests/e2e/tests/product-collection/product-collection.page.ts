@@ -2,13 +2,19 @@
  * External dependencies
  */
 import { Locator, Page } from '@playwright/test';
-import { EditorUtils } from '@woocommerce/e2e-utils';
-import { expect, Editor, Admin } from '@wordpress/e2e-test-utils-playwright';
+import { Editor, Admin } from '@woocommerce/e2e-utils';
+import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
 /**
  * Internal dependencies
  */
 import { BLOCK_THEME_SLUG } from '../../utils/constants';
+
+export const BLOCK_LABELS = {
+	productTemplate: 'Block: Product Template',
+	pagination: 'Block: Pagination',
+	productImage: 'Block: Product Image',
+};
 
 export const SELECTORS = {
 	productTemplate: '.wc-block-product-template',
@@ -78,7 +84,6 @@ class ProductCollectionPage {
 	private page: Page;
 	private admin: Admin;
 	private editor: Editor;
-	private editorUtils: EditorUtils;
 	BLOCK_NAME = 'Product Collection';
 	productTemplate!: Locator;
 	products!: Locator;
@@ -92,17 +97,14 @@ class ProductCollectionPage {
 		page,
 		admin,
 		editor,
-		editorUtils,
 	}: {
 		page: Page;
 		admin: Admin;
 		editor: Editor;
-		editorUtils: EditorUtils;
 	} ) {
 		this.page = page;
 		this.admin = admin;
 		this.editor = editor;
-		this.editorUtils = editorUtils;
 	}
 
 	async chooseCollectionInPost( collection?: Collections ) {
@@ -165,32 +167,47 @@ class ProductCollectionPage {
 		await this.refreshLocators( 'frontend' );
 	}
 
-	async replaceProductsWithProductCollectionInTemplate(
-		template: string,
-		collection?: Collections
+	async replaceBlockByBlockName( name: string, nameToInsert: string ) {
+		await this.page.evaluate(
+			( { name: _name, nameToInsert: _nameToInsert } ) => {
+				const blocks = window.wp.data
+					.select( 'core/block-editor' )
+					.getBlocks();
+				const firstMatchingBlock = blocks
+					.flatMap(
+						( {
+							innerBlocks,
+						}: {
+							innerBlocks: BlockRepresentation[];
+						} ) => innerBlocks
+					)
+					.find(
+						( block: BlockRepresentation ) => block.name === _name
+					);
+				const { clientId } = firstMatchingBlock;
+				const block = window.wp.blocks.createBlock( _nameToInsert );
+				window.wp.data
+					.dispatch( 'core/block-editor' )
+					.replaceBlock( clientId, block );
+			},
+			{ name, nameToInsert }
+		);
+	}
+
+	// Going to Product Catalog by default
+	async goToEditorTemplate(
+		template = 'woocommerce/woocommerce//archive-product'
 	) {
 		await this.admin.visitSiteEditor( {
 			postId: template,
 			postType: 'wp_template',
 		} );
-
-		await this.editorUtils.enterEditMode();
-
-		await expect(
-			this.editor.canvas.locator( `[data-type="core/query"]` )
-		).toBeVisible();
-
-		await this.editorUtils.replaceBlockByBlockName(
-			'core/query',
-			this.BLOCK_SLUG
-		);
-		await this.chooseCollectionInTemplate( collection );
+		await this.editor.enterEditMode();
 		await this.refreshLocators( 'editor' );
-		await this.editor.saveSiteEditorEntities();
 	}
 
 	async goToProductCatalogFrontend() {
-		await this.page.goto( `/shop` );
+		await this.page.goto( '/shop' );
 		await this.refreshLocators( 'frontend' );
 	}
 
@@ -211,7 +228,7 @@ class ProductCollectionPage {
 			postId: template,
 			postType: 'wp_template',
 		} );
-		await this.editorUtils.enterEditMode();
+		await this.editor.enterEditMode();
 		await this.editor.canvas.locator( 'body' ).click();
 		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
@@ -221,13 +238,6 @@ class ProductCollectionPage {
 	async goToHomePageAndInsertCollection( collection?: Collections ) {
 		await this.goToTemplateAndInsertCollection(
 			`${ BLOCK_THEME_SLUG }//home`,
-			collection
-		);
-	}
-
-	async goToProductCatalogAndInsertCollection( collection?: Collections ) {
-		await this.goToTemplateAndInsertCollection(
-			'woocommerce/woocommerce//archive-product',
 			collection
 		);
 	}
@@ -406,7 +416,7 @@ class ProductCollectionPage {
 
 		// Add new values.
 		for ( const name of filterValue ) {
-			await input.fill( name );
+			await input.pressSequentially( name );
 			await sidebarSettings
 				.getByRole( 'option', { name } )
 				.getByText( name )
@@ -424,13 +434,24 @@ class ProductCollectionPage {
 		await this.refreshLocators( 'editor' );
 	}
 
+	async focusProductCollection() {
+		const editorSelector = this.editor.canvas
+			.getByLabel( 'Block: Product Collection', { exact: true } )
+			.first();
+
+		const postSelector = this.page
+			.getByLabel( 'Block: Product Collection', { exact: true } )
+			.first();
+
+		await Promise.any( [
+			this.editor.selectBlocks( editorSelector ),
+			this.editor.selectBlocks( postSelector ),
+		] );
+	}
+
 	async clickDisplaySettings() {
 		// Select the block, so that toolbar is visible.
-		const block = this.page
-			.locator( `[data-type="${ this.BLOCK_SLUG }"]` )
-			.first();
-		await this.editor.selectBlocks( block );
-
+		await this.focusProductCollection();
 		// Open the display settings.
 		await this.page
 			.getByRole( 'button', { name: 'Display settings' } )
@@ -535,36 +556,31 @@ class ProductCollectionPage {
 		name: string;
 		attributes: object;
 	} ) {
-		const productTemplate = await this.editorUtils.getBlockByName(
+		const productTemplate = await this.editor.getBlockByName(
 			'woocommerce/product-template'
 		);
 		const productTemplateId =
 			( await productTemplate.getAttribute( 'data-block' ) ) ?? '';
 
 		await this.editor.selectBlocks( productTemplate );
-		await this.editorUtils.insertBlock(
-			block,
-			undefined,
-			productTemplateId
-		);
+		await this.editor.insertBlock( block, { clientId: productTemplateId } );
 	}
 
 	async insertProductCollectionInSingleProductBlock() {
 		await this.insertSingleProductBlock();
 
-		const siblingBlock = await this.editorUtils.getBlockByName(
+		const siblingBlock = await this.editor.getBlockByName(
 			'woocommerce/product-price'
 		);
 		const clientId =
 			( await siblingBlock.getAttribute( 'data-block' ) ) ?? '';
 		const parentClientId =
-			( await this.editorUtils.getBlockRootClientId( clientId ) ) ?? '';
+			( await this.editor.getBlockRootClientId( clientId ) ) ?? '';
 
 		await this.editor.selectBlocks( siblingBlock );
-		await this.editorUtils.insertBlock(
+		await this.editor.insertBlock(
 			{ name: this.BLOCK_SLUG },
-			undefined,
-			parentClientId
+			{ clientId: parentClientId }
 		);
 	}
 
@@ -585,12 +601,17 @@ class ProductCollectionPage {
 		return this.page.getByRole( 'heading' );
 	}
 
+	async getProductNames() {
+		const products = this.page.locator( '.wp-block-post-title' );
+		return products.allTextContents();
+	}
+
 	/**
 	 * Private methods to be used by the class.
 	 */
 	private async insertSingleProductBlock() {
 		await this.editor.insertBlock( { name: 'woocommerce/single-product' } );
-		const singleProductBlock = await this.editorUtils.getBlockByName(
+		const singleProductBlock = await this.editor.getBlockByName(
 			'woocommerce/single-product'
 		);
 		await singleProductBlock

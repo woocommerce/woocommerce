@@ -51,6 +51,9 @@ module.exports = {
 		'**/test/*.[jt]s?(x)',
 		'**/?(*.)test.[jt]s?(x)',
 	],
+	testPathIgnorePatterns: [
+		'\\.d\\.ts$', // This regex pattern matches any file that ends with .d.ts
+	],
 	// The keys for the transformed modules contains the name of the packages that should be transformed.
 	transformIgnorePatterns: [
 		'node_modules/(?!(?:\\.pnpm|' + Object.keys( transformModules ).join( '|' ) + ')/)',

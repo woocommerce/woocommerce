@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockData } from '@woocommerce/e2e-types';
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect, BlockData } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -10,10 +9,12 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import {
 	getProductsNameFromClassicTemplate,
 	getProductsNameFromProductQuery,
+	insertProductsQuery,
 } from './utils';
 
 const blockData: BlockData = {
 	name: 'core/query',
+	slug: '',
 	mainClass: '.wc-block-price-filter',
 	selectors: {
 		frontend: {},
@@ -35,12 +36,12 @@ const templates = {
 		frontendPage: '/product-category/music/',
 		legacyBlockName: 'woocommerce/legacy-template',
 	},
-	// We don't have products with tags in the test site. Uncomment this when we have products with tags.
-	// 'taxonomy-product_tag': {
-	// 	templateTitle: 'Product Tag',
-	// 	slug: 'taxonomy-product_tag',
-	// 	frontendPage: '/product-tag/hoodie/',
-	// },
+	'taxonomy-product_tag': {
+		templateTitle: 'Product Tag',
+		slug: 'taxonomy-product_tag',
+		frontendPage: '/product-tag/recommended/',
+		legacyBlockName: 'woocommerce/legacy-template',
+	},
 	'archive-product': {
 		templateTitle: 'Product Catalog',
 		slug: 'archive-product',
@@ -56,9 +57,8 @@ const templates = {
 };
 
 test.describe( `${ blockData.name } Block `, () => {
-	test( 'when Inherit Query from template is enabled all the settings that customize the query should be hidden', async ( {
+	test( 'when Inherits Query From Template other options are hidden, show up otherwise', async ( {
 		admin,
-		editorUtils,
 		editor,
 		page,
 	} ) => {
@@ -66,14 +66,12 @@ test.describe( `${ blockData.name } Block `, () => {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
 		} );
-
-		await editor.canvas.locator( 'body' ).click();
-
-		const block = await editorUtils.getBlockByName( blockData.name );
+		await editor.enterEditMode();
+		await editor.setContent( '' );
+		await insertProductsQuery( editor );
+		const block = await editor.getBlockByName( blockData.name );
 		await editor.selectBlocks( block );
-
 		await editor.openDocumentSettingsSidebar();
-
 		const advancedFilterOption = page.getByLabel(
 			'Advanced Filters options'
 		);
@@ -83,31 +81,6 @@ test.describe( `${ blockData.name } Block `, () => {
 
 		await expect( advancedFilterOption ).toBeHidden();
 		await expect( inheritQueryFromTemplateOption ).toBeVisible();
-	} );
-	test( 'when Inherit Query from template is disabled all the settings that customize the query should be visble', async ( {
-		admin,
-		editorUtils,
-		editor,
-		page,
-	} ) => {
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//archive-product',
-			postType: 'wp_template',
-		} );
-
-		await editor.canvas.locator( 'body' ).click();
-
-		const block = await editorUtils.getBlockByName( blockData.name );
-		await editor.selectBlocks( block );
-
-		await editor.openDocumentSettingsSidebar();
-
-		const advancedFilterOption = page.getByLabel(
-			'Advanced Filters options'
-		);
-		const inheritQueryFromTemplateOption = page.getByLabel(
-			'Inherit query from template'
-		);
 
 		await inheritQueryFromTemplateOption.click();
 
@@ -127,26 +100,16 @@ for ( const {
 			admin,
 			editor,
 			page,
-			editorUtils,
 		} ) => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//${ slug }`,
 				postType: 'wp_template',
 			} );
-
+			await editor.enterEditMode();
+			await editor.setContent( '' );
+			await insertProductsQuery( editor );
+			await editor.insertBlock( { name: legacyBlockName } );
 			await editor.canvas.locator( 'body' ).click();
-			const block = await editorUtils.getBlockByName( blockData.name );
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			const clientId = ( await block.getAttribute( 'data-block' ) ) ?? '';
-			const parentClientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
-			await editor.selectBlocks( block );
-			await editorUtils.insertBlock(
-				{ name: legacyBlockName },
-				undefined,
-				parentClientId
-			);
 
 			await editor.saveSiteEditorEntities();
 
