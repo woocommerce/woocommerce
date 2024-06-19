@@ -179,7 +179,7 @@ test.describe( 'Template customization', () => {
 					.poll( async () => await searchResults.count() )
 					.toBeLessThan( CUSTOMIZABLE_WC_TEMPLATES.length );
 
-				await page.getByLabel( 'Actions' ).first().click();
+				await searchResults.first().click();
 				await page.getByRole( 'menuitem', { name: 'Reset' } ).click();
 				await page.getByRole( 'button', { name: 'Reset' } ).click();
 
