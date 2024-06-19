@@ -67,6 +67,11 @@ export function ExpressionField( {
 		setEditedExpression( event.target.value );
 	}
 
+	function handleOnClickCancel() {
+		setEditedExpression( expression );
+		onCancel?.();
+	}
+
 	return (
 		<div
 			className="woocommerce-product-editor-dev-tools-expression-field"
@@ -101,7 +106,7 @@ export function ExpressionField( {
 							<Button
 								icon={ close }
 								label={ __( 'Cancel', 'woocommerce' ) }
-								onClick={ () => onCancel?.() }
+								onClick={ handleOnClickCancel }
 							/>
 						) }
 					</>
