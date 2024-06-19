@@ -74,6 +74,7 @@ export function ExpressionField( {
 				className="woocommerce-product-editor-dev-tools-expression-field__expression"
 				readOnly={ mode === 'view' }
 				value={ editedExpression }
+				placeholder={ __( 'Enter an expression', 'woocommerce' ) }
 				onChange={ handleOnChange }
 			/>
 			<div className="woocommerce-product-editor-dev-tools-expression-field__result">
