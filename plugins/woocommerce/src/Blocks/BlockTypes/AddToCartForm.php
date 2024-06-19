@@ -42,75 +42,10 @@ class AddToCartForm extends AbstractBlock {
 		// These should match what's set in JS `registerBlockType`.
 		$defaults = array(
 			'isDescendentOfSingleProductBlock' => false,
-			'quantitySelectorStyle'            => 'input',
 		);
 
 		return wp_parse_args( $attributes, $defaults );
 	}
-
-
-	/**
-	 * Enqueue assets specific to this block.
-	 * We enqueue frontend scripts only if the quantitySelectorStyle is set to 'stepper'.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
-	 */
-	protected function enqueue_assets( $attributes, $content, $block ) {
-		if ( 'stepper' !== $attributes['quantitySelectorStyle'] ) {
-			return;
-		}
-
-		parent::enqueue_assets( $attributes, $content, $block );
-	}
-
-	/**
-	 * Add increment and decrement buttons to the quantity input field.
-	 *
-	 * @param string $product add-to-cart form HTML.
-	 * @return stringa add-to-cart form HTML with increment and decrement buttons.
-	 */
-	private function add_steppers( $product ) {
-		// Regex pattern to match the <input> element with id starting with 'quantity_'.
-		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
-		// Replacement string to add button BEFORE the matched <input> element.
-		$minus_button = '<button type="button" data-wc-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>$1';
-		// Replacement string to add button AFTER the matched <input> element.
-		$plus_button = '$1<button type="button" data-wc-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
-		$new_html    = preg_replace( $pattern, $minus_button, $product );
-		$new_html    = preg_replace( $pattern, $plus_button, $new_html );
-		return $new_html;
-	}
-
-	/**
-	 * Add classes to the Add to Cart form input.
-	 *
-	 * @param string $product The Add to Cart form HTML.
-	 * @param array  $attributes Block attributes.
-	 *
-	 * @return string The Add to Cart form HTML with classes added.
-	 */
-	private function add_classes_to_add_to_cart_form_input( $product, $attributes ) {
-		$is_stepper_style = 'stepper' === $attributes['quantitySelectorStyle'];
-
-		$html = new \WP_HTML_Tag_Processor( $product );
-
-		if ( $is_stepper_style ) {
-			// Add classes to the form.
-			while ( $html->next_tag( array( 'class_name' => 'quantity' ) ) ) {
-				$html->add_class( 'wc-block-components-quantity-selector' );
-			}
-
-			$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
-			while ( $html->next_tag( array( 'class_name' => 'input-text' ) ) ) {
-				$html->add_class( 'wc-block-components-quantity-selector__input' );
-			}
-		}
-
-		return $html->get_updated_html();
-	}
-
 
 	/**
 	 * Render the block.
@@ -155,32 +90,19 @@ class AddToCartForm extends AbstractBlock {
 			return '';
 		}
 
-		$is_stepper_style = 'stepper' === $attributes['quantitySelectorStyle'];
-
-		$product = $is_stepper_style ? $this->add_steppers( $product ) : $product;
-
 		$parsed_attributes                     = $this->parse_attributes( $attributes );
 		$is_descendent_of_single_product_block = $parsed_attributes['isDescendentOfSingleProductBlock'];
 		$product                               = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
-
-		$product = $this->add_classes_to_add_to_cart_form_input( $product, $attributes );
 
 		$classname          = $attributes['className'] ?? '';
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 		$product_classname  = $is_descendent_of_single_product_block ? 'product' : '';
 
 		$form = sprintf(
-			'<div class="wp-block-add-to-cart-form wp-block-woocommerce-add-to-cart-form wc-block-add-to-cart-form %1$s %2$s %3$s %4$s" %5$s style="%6$s">%7$s</div>',
+			'<div class="wp-block-add-to-cart-form wc-block-add-to-cart-form %1$s %2$s %3$s" style="%4$s">%5$s</div>',
 			esc_attr( $classes_and_styles['classes'] ),
 			esc_attr( $classname ),
 			esc_attr( $product_classname ),
-			$is_stepper_style ? 'wc-block-add-to-cart-form--stepper' : 'wc-block-add-to-cart-form--input',
-			$is_stepper_style ? 'data-wc-interactive=\'' . wp_json_encode(
-				array(
-					'namespace' => 'woocommerce/add-to-cart-form',
-				),
-				JSON_NUMERIC_CHECK
-			) . '\'' : '',
 			esc_attr( $classes_and_styles['styles'] ),
 			$product
 		);
@@ -249,5 +171,30 @@ class AddToCartForm extends AbstractBlock {
 		}
 
 		return $url;
+	}
+
+	/**
+	 * Get the frontend script handle for this block type.
+	 *
+	 * @param string $key Data to get, or default to everything.
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
+	}
+
+	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_style() {
+		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
+	}
+
+	/**
+	 * It isn't necessary register block assets because it is a server side block.
+	 */
+	protected function register_block_type_assets() {
+		return null;
 	}
 }
