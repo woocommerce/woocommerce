@@ -60,7 +60,10 @@ function useProducts(
 						// product name.
 						per_page: 40,
 				  }
-				: {},
+				: {
+						// For a small catalog we fetch all the products.
+						per_page: 0,
+				  },
 		};
 		getProducts( query ).then( ( results ) => {
 			const newProductsMap = new Map();
