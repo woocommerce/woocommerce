@@ -13,6 +13,10 @@
 		@include breakpoint("<782px") {
 			max-width: inherit;
 		}
+
+		@include breakpoint( ">1280px" ) {
+			max-width: 1032px;
+		}
 	}
 
 	@include breakpoint("<782px") {
@@ -80,6 +84,8 @@
 .woocommerce-embed-page {
 	.woocommerce-store-alerts {
 		left: 0;
+		width: 100%;
+		max-width: 1032px;
 		
 		@include breakpoint("<782px") {
 			left: 0;
