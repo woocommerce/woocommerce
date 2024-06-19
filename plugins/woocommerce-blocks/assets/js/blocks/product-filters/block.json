@@ -9,27 +9,44 @@
 	"keywords": [ "WooCommerce" ],
 	"supports": {
 		"align": true,
-		"__experimentalBorder": {
-			"color": true,
-			"radius": true,
-			"style": true,
-			"width": true
-		},
+		"multiple": false,
+		"interactivity": true,
 		"color": {
 			"background": true,
 			"text": true
 		},
-		"multiple": false,
-		"interactivity": true,
-		"typography": {
-			"fontSize": true,
-			"textAlign": true
+		"layout": {
+			"default": {
+				"type": "flex",
+				"orientation": "vertical",
+				"justifyContent": "left"
+			},
+			"allowJustification": true,
+			"allowOrientation": true,
+			"allowInheriting": false
 		}
 	},
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId" ],
 	"providesContext": {},
-	"attributes": {},
+	"attributes": {
+		"overlay": {
+			"type": "string",
+			"default": "never"
+		},
+		"overlayButton": {
+			"type": "string",
+			"default": "filter-icon-1"
+		},
+		"overlayButtonStyle": {
+			"type": "string",
+			"default": "icon"
+		},
+		"overlayButtonSize": {
+			"type": "number",
+			"default": "32"
+		}
+	},
 	"viewScript": "wc-product-filters-frontend",
 	"example": {}
 }
