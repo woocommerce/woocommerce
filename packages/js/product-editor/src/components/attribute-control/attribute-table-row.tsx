@@ -351,31 +351,54 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					suggestions={ tokenFieldSuggestions }
 					value={ tokenFieldValues }
 					onChange={ ( nextTokens: ( TokenItem | string )[] ) => {
-						// If there is no attribute, exit the function.
+						// If there is no attribute, exit.
 						if ( ! attribute ) {
 							return;
 						}
 
 						/*
-						 * Convert the current suggestions to slugs
-						 * using the cleanForSlug function.
-						 * Slugs are used to check the new tokens
-						 * against the (slugged) suggestions.
+						 * Pick the new tokens from the nextTokens array.
+						 * (all new tokens are strings).
+						 */
+						const newTokens = nextTokens.filter(
+							( token ): token is string =>
+								typeof token === 'string'
+						);
+
+						// Create a list of the next string tokens.
+						const nextStringTokens =
+							nextTokens.map( tokenItemToString );
+
+						// *** LOCAL Attributes ***
+						if ( isGlobalAttribute ) {
+							// Update the local terms with the new tokens.
+							setLocalTerms( ( prevTerms ) => [
+								...prevTerms,
+								...newTokens.map( stringToTokenItem ),
+							] );
+
+							// Update the form terms using the callback function.
+							onTermsSelect( nextStringTokens, index, attribute );
+
+							return;
+						}
+
+						// *** GLOBAL Attributes ***
+
+						/*
+						 * Convert the current suggestions (tokenFieldSuggestions)
+						 * to slugs[] using the cleanForSlug helper.
+						 * It's used to compare the new tokens with the suggestions,
+						 * to avoid creating duplicate terms.
 						 */
 						const slugSuggestions =
 							tokenFieldSuggestions.map( cleanForSlug );
 
 						/*
-						 * Filter the tokens that are strings and convert them to slugs.
-						 * These slugs represent the tokens provided
-						 * by the callback (potential new terms)
+						 * Filter the newTokens and convert them to slugs.
+						 * These slugs represent potential new terms.
 						 */
-						const slugTokens = nextTokens
-							.filter(
-								( token ): token is string =>
-									typeof token === 'string'
-							)
-							.map( cleanForSlug );
+						const slugTokens = newTokens.map( cleanForSlug );
 
 						/*
 						 * Identify new tokens that are not found
@@ -387,44 +410,28 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 							( token ) => ! slugSuggestions.includes( token )
 						);
 
-						// Convert the selected tokens to an array of strings.
-						const nextStringTokens =
-							nextTokens.map( tokenItemToString );
-
 						/*
-						 * Determine the selected terms to pass to the form.
-						 * If it's a global attribute, use the new string tokens directly.
-						 * Otherwise, filter the existing terms based on the selected tokens.
+						 * Determine the selected terms to pass to the form,
+						 * filtering the terms by the new string tokens.
 						 */
-						const selectedTerms = isGlobalAttribute
-							? nextStringTokens
-							: terms?.filter( ( term ) =>
-									nextStringTokens.includes( term.name )
-							  );
+						const selectedTerms = terms?.filter( ( term ) =>
+							nextStringTokens.includes( term.name )
+						);
 
 						// Update the form terms using the callback function.
 						onTermsSelect( selectedTerms, index, attribute );
 
-						// Map the new string tokens to TokenItems.
-						const newTokens =
-							newStringTokens.map( stringToTokenItem );
-
-						// If it is a global attribute, update the local terms.
-						if ( isGlobalAttribute ) {
-							return setLocalTerms( ( prevTerms ) => [
-								...prevTerms,
-								...newTokens,
-							] );
-						}
-
 						/*
-						 * For non-global attributes,
-						 * create new terms if there are any new tokens.
+						 * Create new terms if there are any new tokens.
 						 * Set the status of new terms to 'validating'.
 						 */
-						if ( newTokens.length ) {
+						if ( newStringTokens.length ) {
+							// Map the new string tokens to TokenItems.
+							const newTokenItems =
+								newStringTokens.map( stringToTokenItem );
+
 							addNewTerms(
-								newTokens.map( ( item ) => ( {
+								newTokenItems.map( ( item ) => ( {
 									...item,
 									status: 'validating',
 								} ) )
