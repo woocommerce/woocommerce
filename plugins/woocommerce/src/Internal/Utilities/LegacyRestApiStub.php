@@ -58,7 +58,7 @@ class LegacyRestApiStub {
 		global $wp;
 
 		// The WC_API class existing means that the Legacy REST API extension is installed and active.
-		if ( class_exists( 'WC_API' ) ) {
+		if ( class_exists( 'WC_Legacy_API' ) ) {
 			return;
 		}
 
