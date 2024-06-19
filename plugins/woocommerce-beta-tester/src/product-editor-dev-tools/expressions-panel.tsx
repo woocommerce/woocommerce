@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
 import { useState } from 'react';
 
 /**
@@ -22,21 +21,6 @@ export function ExpressionsPanel( {
 	const [ expressionItems, setExpressionItems ] = useState<
 		ExpressionItem[]
 	>( [] );
-	const [ expressionToAdd, setExpressionToAdd ] = useState< string >( '' );
-
-	const handleExpressionToAddChange = (
-		event: React.ChangeEvent< HTMLTextAreaElement >
-	) => {
-		setExpressionToAdd( event.target.value );
-	};
-
-	const addExpression = ( expression: string ) => {
-		setExpressionItems( [
-			...expressionItems,
-			{ expression, mode: 'view' },
-		] );
-		setExpressionToAdd( '' );
-	};
 
 	function enterEditMode( index: number ) {
 		const newItems = [ ...expressionItems ];
@@ -50,6 +34,13 @@ export function ExpressionsPanel( {
 		setExpressionItems( newItems );
 	}
 
+	function addExpression( expression: string ) {
+		setExpressionItems( [
+			...expressionItems,
+			{ expression, mode: 'view' },
+		] );
+	}
+
 	function updateExpression( index: number, expression: string ) {
 		const newItems = [ ...expressionItems ];
 		newItems[ index ].expression = expression;
@@ -59,38 +50,31 @@ export function ExpressionsPanel( {
 
 	return (
 		<div className="woocommerce-product-editor-dev-tools-expressions">
-			{ expressionItems.length === 0 && (
-				<div className="woocommerce-product-editor-dev-tools-expressions-list empty">
-					Enter an expression to evaluate below.
-				</div>
-			) }
-			{ expressionItems.length > 0 && (
-				<ul className="woocommerce-product-editor-dev-tools-expressions-list">
-					{ expressionItems.map( ( expressionItem, index ) => (
-						<li key={ index }>
-							<ExpressionField
-								expression={ expressionItem.expression }
-								evaluationContext={ evaluationContext }
-								mode={ expressionItem.mode }
-								onEnterEdit={ () => enterEditMode( index ) }
-								onCancel={ () => cancelEdit( index ) }
-								onUpdate={ ( expression ) =>
-									updateExpression( index, expression )
-								}
-							/>
-						</li>
-					) ) }
-				</ul>
-			) }
-			<div className="woocommerce-product-editor-dev-tools-expression-editor">
-				<textarea
-					value={ expressionToAdd }
-					onChange={ handleExpressionToAddChange }
-				/>
-				<Button onClick={ () => addExpression( expressionToAdd ) }>
-					Add
-				</Button>
-			</div>
+			<ul className="woocommerce-product-editor-dev-tools-expressions-list">
+				{ expressionItems.map( ( expressionItem, index ) => (
+					<li key={ index }>
+						<ExpressionField
+							expression={ expressionItem.expression }
+							evaluationContext={ evaluationContext }
+							mode={ expressionItem.mode }
+							onEnterEdit={ () => enterEditMode( index ) }
+							onCancel={ () => cancelEdit( index ) }
+							onUpdate={ ( expression ) =>
+								updateExpression( index, expression )
+							}
+						/>
+					</li>
+				) ) }
+				<li key={ expressionItems.length + 1 }>
+					<ExpressionField
+						evaluationContext={ evaluationContext }
+						mode={ 'edit' }
+						onUpdate={ ( expression ) =>
+							addExpression( expression )
+						}
+					/>
+				</li>
+			</ul>
 		</div>
 	);
 }
