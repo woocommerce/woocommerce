@@ -154,10 +154,29 @@
 
 .woocommerce-product-editor-dev-tools-expression-field__expression {
 	grid-area: expression;
+
+	overflow-y: hidden;
+	resize: none;
+
+	border: none;
+	border-radius: 0;
+
+	background-color: var(--woocommerce-product-editor-dev-tools-border-color);
+	color: white;
+
+	font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
+
+	&[readonly] {
+		background-color: transparent;
+		color: var(--woocommerce-product-editor-dev-tools-text-color);
+	}
 }
 
 .woocommerce-product-editor-dev-tools-expression-field__result {
 	grid-area: result;
+
+	font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
+
 	white-space: pre-wrap;
 }
 
