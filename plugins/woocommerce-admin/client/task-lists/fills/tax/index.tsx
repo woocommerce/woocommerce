@@ -64,23 +64,22 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 			};
 		}
 	);
+
 	const onManual = useCallback( async () => {
 		setIsPending( true );
 		if ( generalSettings?.woocommerce_calc_taxes !== 'yes' ) {
-			await Promise.all( [
-				updateAndPersistSettingsForGroup( 'tax', {
-					tax: {
-						...taxSettings,
-						wc_connect_taxes_enabled: 'no',
-					},
-				} ),
-				updateAndPersistSettingsForGroup( 'general', {
-					general: {
-						...generalSettings,
-						woocommerce_calc_taxes: 'yes',
-					},
-				} ),
-			] )
+			updateAndPersistSettingsForGroup( 'tax', {
+				tax: {
+					...taxSettings,
+					wc_connect_taxes_enabled: 'no',
+				},
+			} );
+			updateAndPersistSettingsForGroup( 'general', {
+				general: {
+					...generalSettings,
+					woocommerce_calc_taxes: 'yes',
+				},
+			} )
 				.then( () => redirectToTaxSettings() )
 				.catch( ( error: unknown ) => {
 					setIsPending( false );
