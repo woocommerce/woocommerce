@@ -50,6 +50,13 @@ export function ExpressionsPanel( {
 		setExpressionItems( newItems );
 	}
 
+	function updateExpression( index: number, expression: string ) {
+		const newItems = [ ...expressionItems ];
+		newItems[ index ].expression = expression;
+		newItems[ index ].mode = 'view';
+		setExpressionItems( newItems );
+	}
+
 	return (
 		<div className="woocommerce-product-editor-dev-tools-expressions">
 			{ expressionItems.length === 0 && (
@@ -67,6 +74,9 @@ export function ExpressionsPanel( {
 								mode={ expressionItem.mode }
 								onEnterEdit={ () => enterEditMode( index ) }
 								onCancel={ () => cancelEdit( index ) }
+								onUpdate={ ( expression ) =>
+									updateExpression( index, expression )
+								}
 							/>
 						</li>
 					) ) }

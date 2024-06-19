@@ -84,7 +84,7 @@ export function ExpressionField( {
 						<Button
 							icon={ check }
 							label={ __( 'Update', 'woocommerce' ) }
-							onClick={ () => onUpdate?.( expression ) }
+							onClick={ () => onUpdate?.( editedExpression ) }
 						/>
 						<Button
 							icon={ close }
