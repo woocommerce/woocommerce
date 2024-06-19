@@ -13,7 +13,7 @@ class ProductFilters extends AbstractBlock {
 	protected $block_name = 'product-filters';
 
 	/**
-	 *  Register the context
+	 * Register the context.
 	 *
 	 * @return string[]
 	 */

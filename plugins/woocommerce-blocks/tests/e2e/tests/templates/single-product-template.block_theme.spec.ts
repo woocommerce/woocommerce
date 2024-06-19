@@ -37,7 +37,9 @@ test.describe( 'Single Product template', () => {
 			name: 'core/paragraph',
 			attributes: { content: userText },
 		} );
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 
 		// Verify edits are visible.
 		await page.goto( testData.permalink );

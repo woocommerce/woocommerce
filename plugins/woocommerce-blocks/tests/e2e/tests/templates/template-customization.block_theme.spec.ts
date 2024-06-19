@@ -32,15 +32,16 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postId: `woocommerce/woocommerce//${ testData.templatePath }`,
 					postType: testData.templateType,
+					canvas: 'edit',
 				} );
-
-				await editor.enterEditMode();
 
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: userText },
 				} );
-				await editor.saveSiteEditorEntities();
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 				// Verify template name didn't change.
 				// See: https://github.com/woocommerce/woocommerce/issues/42221
 				await expect(
@@ -66,9 +67,8 @@ test.describe( 'Template customization', () => {
 					await admin.visitSiteEditor( {
 						postId: `woocommerce/woocommerce//${ testData.fallbackTemplate?.templatePath }`,
 						postType: testData.templateType,
+						canvas: 'edit',
 					} );
-
-					await editor.enterEditMode();
 
 					await editor.insertBlock( {
 						name: 'core/paragraph',
@@ -76,7 +76,9 @@ test.describe( 'Template customization', () => {
 							content: fallbackTemplateUserText,
 						},
 					} );
-					await editor.saveSiteEditorEntities();
+					await editor.saveSiteEditorEntities( {
+						isOnlyCurrentEntityDirty: true,
+					} );
 					await testData.visitPage( { frontendUtils, page } );
 					await expect(
 						page.getByText( fallbackTemplateUserText ).first()
@@ -106,14 +108,16 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postId: `woocommerce/woocommerce//${ testData.templatePath }`,
 					postType: testData.templateType,
+					canvas: 'edit',
 				} );
-				await editor.enterEditMode();
 
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: woocommerceTemplateUserText },
 				} );
-				await editor.saveSiteEditorEntities();
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 
 				await requestUtils.activateTheme(
 					BLOCK_THEME_WITH_TEMPLATES_SLUG
@@ -125,14 +129,16 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
 					postType: testData.templateType,
+					canvas: 'edit',
 				} );
-				await editor.enterEditMode();
 
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: userText },
 				} );
-				await editor.saveSiteEditorEntities();
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 
 				// Verify the template is the one modified by the user based on the theme.
 				await testData.visitPage( { frontendUtils, page } );
@@ -149,32 +155,35 @@ test.describe( 'Template customization', () => {
 				// duplicate templates with the same name.
 				// See: https://github.com/woocommerce/woocommerce/issues/42220
 				await admin.visitSiteEditor( {
-					path: `/${ testData.templateType }/all`,
+					postType: testData.templateType,
 				} );
 
 				await page
 					.getByPlaceholder( 'Search' )
 					.fill( testData.templateName );
 
-				const templateRow = page.getByRole( 'row' ).filter( {
-					has: page.getByRole( 'link', {
-						name: testData.templateName,
-						exact: true,
-					} ),
-				} );
-				const resetButton = templateRow.getByLabel( 'Reset', {
-					exact: true,
-				} );
-				const revertedNotice = page
+				const resetNotice = page
 					.getByLabel( 'Dismiss this notice' )
-					.getByText( `"${ testData.templateName }" reverted.` );
+					.getByText(
+						testData.templateType === 'wp_template'
+							? `"${ testData.templateName }" reset.`
+							: `"${ testData.templateName }" deleted.`
+					);
 				const savedButton = page.getByRole( 'button', {
 					name: 'Saved',
 				} );
 
-				await resetButton.click();
+				// Wait until search has finished.
+				const searchResults = page.getByLabel( 'Actions' );
+				await expect
+					.poll( async () => await searchResults.count() )
+					.toBeLessThan( CUSTOMIZABLE_WC_TEMPLATES.length );
 
-				await expect( revertedNotice ).toBeVisible();
+				await searchResults.first().click();
+				await page.getByRole( 'menuitem', { name: 'Reset' } ).click();
+				await page.getByRole( 'button', { name: 'Reset' } ).click();
+
+				await expect( resetNotice ).toBeVisible();
 				await expect( savedButton ).toBeVisible();
 
 				await testData.visitPage( { frontendUtils, page } );
