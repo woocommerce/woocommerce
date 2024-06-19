@@ -282,46 +282,23 @@ jobs:
           matrix:
             report: ${{ fromJSON( needs.project-jobs.outputs.report-jobs ) }}
         runs-on: ubuntu-latest
+        env:
+          ARTIFACT_NAME: ${{ matrix.report }}-attempt-${{ github.run_attempt }}
 
         steps:
             - uses: actions/checkout@v4
-
-            - name: 'Install Allure CLI'
-              env:
-                  DESTINATION_PATH: ../
-              run: ./.github/workflows/scripts/install-allure.sh
               
             - name: 'Merge artifacts'
+              id: merge-artifacts
               uses: actions/upload-artifact/merge@v4
               continue-on-error: true
               with:
-                name: ${{ matrix.report }}
+                name: ${{ env.ARTIFACT_NAME }}
                 pattern: ${{ matrix.report }}__*
                 delete-merged: true
 
-            - name: 'Download merged artifacts'
-              uses: actions/download-artifact@v4
-              with:
-                  name: ${{ matrix.report }}
-                  path: ./out
-
-            - name: 'Generate Allure report'
-              id: generate_allure_report
-              run: |
-                ls -lh ./out
-                allure generate --clean ./out/allure-results --output ./out/allure-report
-                ls -lh ./out
-
-            - name: 'Re-upload artifacts with generated report'
-              uses: actions/upload-artifact@v4
-              with:
-                  name: ${{ matrix.report }}
-                  path: ./out
-                  if-no-files-found: ignore
-                  retention-days: 10
-                  overwrite: true
-
             - name: 'Publish report to dashboard'
+              if: ${{ !! steps.merge-artifacts.outputs.artifact-id }}
               env:
                   GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -342,7 +319,7 @@ jobs:
                   fi
                 
                   gh workflow run report.yml \
-                    -f artifact="$REPORT_NAME" \
+                    -f artifact="$ARTIFACT_NAME" \
                     -f run_id="$GITHUB_RUN_ID" \
                     -f run_attempt="$GITHUB_RUN_ATTEMPT" \
                     -f event="$EVENT_NAME" \
@@ -360,12 +337,12 @@ jobs:
                   PR_NUMBER: ${{ github.event.pull_request.number }}
                   RUN_ID: ${{ github.run_id }}
                   REPORT_NAME: ${{ matrix.report }}
-              if: ${{ contains(matrix.report, 'e2e') }} # temporary until we adapt the woocommerce-test-reports side to not care about the test type
+              if: ${{ contains(matrix.report, 'e2e') && !! steps.merge-artifacts.outputs.artifact-id }} # temporary until we adapt the woocommerce-test-reports side to not care about the test type
               run: |
                   if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
                     gh workflow run publish-test-reports-pr.yml \
                       -f run_id=$RUN_ID \
-                      -f e2e_artifact=$REPORT_NAME \
+                      -f e2e_artifact=$ARTIFACT_NAME \
                       -f pr_number=$PR_NUMBER \
                       -f commit_sha=$GITHUB_SHA \
                       -f s3_root=public \
@@ -373,7 +350,7 @@ jobs:
                   elif [ "$GITHUB_EVENT_NAME" == push ]; then
                     gh workflow run publish-test-reports-trunk-merge.yml \
                       -f run_id=$RUN_ID \
-                      -f artifact=$REPORT_NAME \
+                      -f artifact=$ARTIFACT_NAME \
                       -f pr_number=$PR_NUMBER \
                       -f commit_sha=$GITHUB_SHA \
                       -f test_type="e2e" \
