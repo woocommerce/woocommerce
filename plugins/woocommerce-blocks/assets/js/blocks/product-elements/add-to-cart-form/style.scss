@@ -50,8 +50,7 @@ div.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
 		*
 		* @link https://github.com/woocommerce/woocommerce/blob/95ca53675f2817753d484583c96ca9ab9f725172/plugins/woocommerce/client/legacy/css/woocommerce-blocktheme.scss#L203-L206
 		*/
-		padding: 0.9rem 1.1rem;
-		height: 100%;
+		padding: 0.9rem 0;
 		margin-right: unset;
 		font-size: var(--wp--preset--font-size--small);
 	}
@@ -59,8 +58,6 @@ div.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
 	// Grouped Product
 	table.woocommerce-grouped-product-list.group_table > tbody {
 		td .wc-block-components-quantity-selector {
-			height: 40px;
-			width: 120px;
 
 			input.input-text.qty.text {
 				min-width: 60px;
@@ -100,7 +97,6 @@ div.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
 			margin: 0;
 			border: unset;
 			order: 1;
-			height: 100%;
 		}
 	}
 }
