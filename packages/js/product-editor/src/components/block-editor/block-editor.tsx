@@ -53,7 +53,6 @@ import { BlockEditorProps } from './types';
 import { LoadingState } from './loading-state';
 import type { ProductFormPostProps, ProductTemplate } from '../../types';
 import isProductFormTemplateSystemEnabled from '../../utils/is-product-form-template-system-enabled';
-import useProductEntityProp from '../../hooks/use-product-entity-prop';
 
 const PluginArea = lazy( () =>
 	import( '@wordpress/plugins' ).then( ( module ) => ( {
@@ -198,11 +197,6 @@ export function BlockEditor( {
 					metaEntry.key === '_product_template_id'
 			)?.value,
 		[ product?.meta_data ]
-	);
-
-	const [ , setProductTemplateId ] = useProductEntityProp(
-		'meta_data._product_template_id',
-		{ postType }
 	);
 
 	const { productTemplate } = useProductTemplate(
