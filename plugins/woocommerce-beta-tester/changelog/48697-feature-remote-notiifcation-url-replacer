@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add 'Request Redirects' tool to the beta tester to help re-routing wp_remote_get calls.
