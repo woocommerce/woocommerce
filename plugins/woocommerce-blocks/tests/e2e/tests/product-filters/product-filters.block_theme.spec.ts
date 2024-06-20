@@ -198,7 +198,6 @@ test.describe( `${ blockData.name }`, () => {
 		const block = editor.canvas.getByLabel(
 			'Block: Product Filters (Experimental)'
 		);
-
 		await expect( block ).toBeVisible();
 
 		await editor.openDocumentSettingsSidebar();
@@ -218,5 +217,42 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( layoutSettings.getByLabel( 'Vertical' ) ).toHaveAttribute(
 			'data-active-item'
 		);
+	} );
+
+	test( 'Layout > Justification: changing option should update preview', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Experimental)'
+		);
+		await expect( block ).toBeVisible();
+
+		await editor.openDocumentSettingsSidebar();
+
+		const layoutSettings = editor.page.getByText(
+			'LayoutJustificationOrientation'
+		);
+		await layoutSettings.getByLabel( 'Justify items left' ).click();
+		await expect(
+			layoutSettings.getByLabel( 'Justify items left' )
+		).toHaveAttribute( 'data-active-item' );
+		await expect(
+			block.locator(
+				'.wp-block-woocommerce-product-filters-is-layout-flex'
+			)
+		).toHaveCSS( 'align-items', 'flex-start' );
+
+		await layoutSettings.getByLabel( 'Justify items center' ).click();
+		await expect(
+			layoutSettings.getByLabel( 'Justify items center' )
+		).toHaveAttribute( 'data-active-item' );
+		await expect(
+			block.locator(
+				'.wp-block-woocommerce-product-filters-is-layout-flex'
+			)
+		).toHaveCSS( 'align-items', 'center' );
 	} );
 } );
