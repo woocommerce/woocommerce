@@ -128,6 +128,7 @@ export class CheckSubscriptionModal extends Component {
 				<Flex
 					gap={ 0 }
 					align={ 'stretch' }
+					direction={ [ 'column', 'row' ] }
 				>
 					<FlexItem>
 						<Card className="primary">
