@@ -32,6 +32,19 @@
 		"overlayPosition": {
 			"type": "string",
 			"default": "left"
+		},
+		"style": {
+			"type": "object",
+			"default": {
+				"spacing": {
+					"padding": {
+						"top": "var:preset|spacing|10",
+						"right": "var:preset|spacing|10",
+						"bottom": "var:preset|spacing|10",
+						"left": "var:preset|spacing|10"
+					}
+				}
+			}
 		}
 	},
 	"example": {}

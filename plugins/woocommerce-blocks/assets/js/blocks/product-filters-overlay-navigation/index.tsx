@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
+import { Icon, navigation } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -14,4 +15,5 @@ import './style.scss';
 registerBlockType( metadata, {
 	edit: Edit,
 	save: Save,
+	icon: <Icon icon={ navigation } />,
 } );

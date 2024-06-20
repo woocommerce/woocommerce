@@ -23,12 +23,13 @@
 			"type": "object",
 			"default": {
 				"spacing": {
-					"blockGap": "0"
+					"blockGap": "var:preset|spacing|10"
 				}
 			}
 		}
 	},
 	"supports": {
+		"inserter": false,
 		"color": {
 			"__experimentalDefaultControls": {
 				"text": false,
