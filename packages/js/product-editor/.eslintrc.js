@@ -6,6 +6,7 @@ module.exports = {
 			files: [ '**/*.js', '**/*.jsx', '**/*.tsx' ],
 			rules: {
 				'react/react-in-jsx-scope': 'off',
+				'func-style': [ 'error', 'declaration' ],
 			},
 		},
 	],
