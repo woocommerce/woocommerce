@@ -106,16 +106,16 @@ const Block = ( {
 	return (
 		<div className={ clsx( 'wc-block-cart__submit', className ) }>
 			{ positionReferenceElement }
-			{ /* The non-sticky container must always be visible because it gives height to its parent, which is required to calculate when it becomes visible in the viewport. */ }
-			<div className="wc-block-cart__submit-container">
-				{ submitContainerContents }
-			</div>
-			{ /* If the positionReferenceElement is below the viewport, display the sticky container. */ }
-			{ positionRelativeToViewport === 'below' && (
+			{ /* Choose which container to display based on the position of the reference element */ }
+			{ positionRelativeToViewport === 'below' ? (
 				<div
 					className="wc-block-cart__submit-container wc-block-cart__submit-container--sticky"
 					style={ { backgroundColor } }
 				>
+					{ submitContainerContents }
+				</div>
+			) : (
+				<div className="wc-block-cart__submit-container">
 					{ submitContainerContents }
 				</div>
 			) }
