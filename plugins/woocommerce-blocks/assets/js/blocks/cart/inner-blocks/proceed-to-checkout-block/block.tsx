@@ -110,7 +110,7 @@ const Block = ( {
 			<div className="wc-block-cart__submit-container">
 				{ submitContainerContents }
 			</div>
-			{ /* If the positionReferenceElement is below the viewport and if the the zoom level is <= 100%, display the sticky container. */ }
+			{ /* If the positionReferenceElement is below the viewport, display the sticky container. */ }
 			{ positionRelativeToViewport === 'below' && (
 				<div
 					className="wc-block-cart__submit-container wc-block-cart__submit-container--sticky"
