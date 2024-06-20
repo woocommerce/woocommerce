@@ -201,8 +201,8 @@ class ProductCollectionPage {
 		await this.admin.visitSiteEditor( {
 			postId: template,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await this.editor.enterEditMode();
 		await this.refreshLocators( 'editor' );
 	}
 
@@ -227,8 +227,8 @@ class ProductCollectionPage {
 		await this.admin.visitSiteEditor( {
 			postId: template,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await this.editor.enterEditMode();
 		await this.editor.canvas.locator( 'body' ).click();
 		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
