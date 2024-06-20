@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-If a variable product doesn't have a Product Image but variations do have images, the zoom and flex slider will be initiated as expected

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure permission checks for the customer downloads REST API endpoint use the correct customer ID.
