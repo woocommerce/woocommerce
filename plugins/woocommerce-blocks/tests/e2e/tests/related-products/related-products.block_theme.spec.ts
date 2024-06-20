@@ -31,8 +31,8 @@ test.describe( `${ blockData.name } Block`, () => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//archive-product`,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 
 		await editor.setContent( '' );
 
@@ -54,8 +54,8 @@ test.describe( `${ blockData.name } Block`, () => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//single-product`,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await editor.setContent( '' );
 		await editor.insertBlock( { name: blockData.slug } );
 
@@ -72,8 +72,8 @@ test.describe( `${ blockData.name } Block`, () => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//single-product`,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		const relatedProducts = await editor.getBlockByName( blockData.slug );
 		await editor.selectBlocks( relatedProducts );
 		await editor.openDocumentSettingsSidebar();

@@ -8,19 +8,11 @@
 		"isDescendentOfSingleProductBlock": {
 			"type": "boolean",
 			"default": false
-		},
-		"quantitySelectorStyle": {
-			"type": "string",
-			"enum": [ "input", "stepper" ],
-			"default": "input"
 		}
 	},
 	"keywords": [ "WooCommerce" ],
 	"usesContext": [ "postId" ],
 	"textdomain": "woocommerce",
-	"supports": {
-		"interactivity": true
-	},
 	"apiVersion": 2,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

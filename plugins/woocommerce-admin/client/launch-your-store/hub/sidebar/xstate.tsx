@@ -9,12 +9,18 @@ import {
 	fromPromise,
 	assign,
 	spawnChild,
+	enqueueActions,
 } from 'xstate5';
 import React from 'react';
 import clsx from 'clsx';
 import { getQuery, navigateTo } from '@woocommerce/navigation';
-import { OPTIONS_STORE_NAME, TaskListType, TaskType } from '@woocommerce/data';
-import { dispatch } from '@wordpress/data';
+import {
+	OPTIONS_STORE_NAME,
+	SETTINGS_STORE_NAME,
+	TaskListType,
+	TaskType,
+} from '@woocommerce/data';
+import { dispatch, resolveSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -44,6 +50,7 @@ export type SidebarMachineContext = {
 	launchStoreError?: {
 		message: string;
 	};
+	siteIsShowingCachedContent?: boolean;
 };
 export type SidebarComponentProps = LaunchYourStoreComponentProps & {
 	context: SidebarMachineContext;
@@ -79,6 +86,64 @@ const getTestOrderCount = async () => {
 	} ) ) as { count: number };
 
 	return result.count;
+};
+
+export const pageHasComingSoonMetaTag = async ( {
+	url,
+}: {
+	url: string;
+} ): Promise< boolean > => {
+	try {
+		const response = await fetch( url, {
+			method: 'GET',
+			credentials: 'omit',
+			cache: 'no-store',
+		} );
+		if ( ! response.ok ) {
+			throw new Error( `Failed to fetch ${ url }` );
+		}
+		const html = await response.text();
+		const parser = new DOMParser();
+		const doc = parser.parseFromString( html, 'text/html' );
+		const metaTag = doc.querySelector(
+			'meta[name="woo-coming-soon-page"]'
+		);
+
+		if ( metaTag ) {
+			return true;
+		}
+		return false;
+	} catch ( error ) {
+		throw new Error( `Error fetching ${ url }: ${ error }` );
+	}
+};
+
+const getSiteCachedStatus = async () => {
+	const settings = await resolveSelect( SETTINGS_STORE_NAME ).getSettings(
+		'wc_admin'
+	);
+
+	// if store URL exists, check both storeUrl and siteUrl otherwise only check siteUrl
+	// we want to check both because there's a chance that caching is especially disabled for woocommerce pages, e.g WPEngine
+	const requests = [] as Promise< boolean >[];
+	if ( settings?.shopUrl ) {
+		requests.push(
+			pageHasComingSoonMetaTag( {
+				url: settings.shopUrl,
+			} )
+		);
+	}
+
+	if ( settings?.siteUrl ) {
+		requests.push(
+			pageHasComingSoonMetaTag( {
+				url: settings.siteUrl,
+			} )
+		);
+	}
+
+	const results = await Promise.all( requests );
+	return results.some( ( result ) => result );
 };
 
 const deleteTestOrders = async ( {
@@ -154,6 +219,10 @@ export const sidebarMachine = setup( {
 			( { context } ) => context.mainContentMachineRef,
 			{ type: 'SHOW_LAUNCH_STORE_SUCCESS' }
 		),
+		showLaunchStorePendingCache: sendTo(
+			( { context } ) => context.mainContentMachineRef,
+			{ type: 'SHOW_LAUNCH_STORE_PENDING_CACHE' }
+		),
 		showLoadingPage: sendTo(
 			( { context } ) => context.mainContentMachineRef,
 			{ type: 'SHOW_LOADING' }
@@ -189,6 +258,11 @@ export const sidebarMachine = setup( {
 				success
 			);
 		},
+		recordStoreLaunchCachedContentDetected: () => {
+			recordEvent(
+				'launch_your_store_hub_store_launch_cached_content_detected'
+			);
+		},
 	},
 	guards: {
 		hasSidebarLocation: (
@@ -203,11 +277,15 @@ export const sidebarMachine = setup( {
 				'woocommerce-payments'
 			);
 		},
+		siteIsShowingCachedContent: ( { context } ) => {
+			return !! context.siteIsShowingCachedContent;
+		},
 	},
 	actors: {
 		sidebarQueryParamListener,
 		getTasklist: fromPromise( getLysTasklist ),
 		getTestOrderCount: fromPromise( getTestOrderCount ),
+		getSiteCachedStatus: fromPromise( getSiteCachedStatus ),
 		updateLaunchStoreOptions: fromPromise( launchStoreAction ),
 		deleteTestOrders: fromPromise( deleteTestOrders ),
 		fetchCongratsData,
@@ -317,13 +395,13 @@ export const sidebarMachine = setup( {
 						{
 							src: 'updateLaunchStoreOptions',
 							onDone: {
-								target: '#storeLaunchSuccessful',
 								actions: [
 									{
 										type: 'recordStoreLaunchResults',
 										params: { success: true },
 									},
 								],
+								target: 'checkingForCachedContent',
 							},
 							onError: {
 								actions: [
@@ -360,6 +438,23 @@ export const sidebarMachine = setup( {
 						},
 					],
 				},
+				checkingForCachedContent: {
+					invoke: [
+						{
+							src: 'getSiteCachedStatus',
+							onDone: {
+								target: '#storeLaunchSuccessful',
+								actions: assign( {
+									siteIsShowingCachedContent: ( { event } ) =>
+										event.output,
+								} ),
+							},
+							onError: {
+								target: '#storeLaunchSuccessful',
+							},
+						},
+					],
+				},
 			},
 		},
 		storeLaunchSuccessful: {
@@ -373,7 +468,18 @@ export const sidebarMachine = setup( {
 						content: 'launch-store-success',
 					},
 				},
-				{ type: 'showLaunchStoreSuccessPage' },
+				enqueueActions( ( { check, enqueue } ) => {
+					if ( check( 'siteIsShowingCachedContent' ) ) {
+						enqueue( {
+							type: 'showLaunchStorePendingCache',
+						} );
+						enqueue( {
+							type: 'recordStoreLaunchCachedContentDetected',
+						} );
+						return;
+					}
+					enqueue( { type: 'showLaunchStoreSuccessPage' } );
+				} ),
 			],
 		},
 		openExternalUrl: {

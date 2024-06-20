@@ -275,7 +275,9 @@ test.describe( 'Checkout Block page', () => {
 			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Cannot create order from empty cart.' )
+			page.locator( '.wc-block-checkout-empty', {
+				hasText: 'Your cart is currently empty',
+			} )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'link', { name: 'Browse store' } )

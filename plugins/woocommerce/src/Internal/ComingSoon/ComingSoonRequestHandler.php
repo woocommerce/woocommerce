@@ -52,17 +52,27 @@ class ComingSoonRequestHandler {
 
 		$coming_soon_template = get_query_template( 'coming-soon' );
 
-		if ( ! wc_current_theme_is_fse_theme() && $this->coming_soon_helper->is_store_coming_soon() ) {
+		$is_fse_theme         = wc_current_theme_is_fse_theme();
+		$is_store_coming_soon = $this->coming_soon_helper->is_store_coming_soon();
+
+		if ( ! $is_fse_theme && $is_store_coming_soon ) {
 			get_header();
 		}
 
+		add_action(
+			'wp_head',
+			function () {
+				echo "<meta name='woo-coming-soon-page' content='yes'>";
+			}
+		);
+
 		include $coming_soon_template;
 
-		if ( ! wc_current_theme_is_fse_theme() && $this->coming_soon_helper->is_store_coming_soon() ) {
+		if ( ! $is_fse_theme && $is_store_coming_soon ) {
 			get_footer();
 		}
 
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( $is_fse_theme ) {
 			// Since we've already rendered a template, return null to ensure no other template is rendered.
 			return null;
 		} else {
