@@ -285,4 +285,30 @@ test.describe( `${ blockData.name }`, () => {
 			)
 		).toHaveCSS( 'flex-direction', 'row' );
 	} );
+
+	test( 'Dimentions > Block spacing: changing option should update the preview', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Experimental)'
+		);
+		await expect( block ).toBeVisible();
+
+		await editor.openDocumentSettingsSidebar();
+
+		await editor.page.getByRole( 'tab', { name: 'Styles' } ).click();
+
+		const blockSpacingSettings = editor.page.getByLabel( 'Block spacing' );
+
+		await blockSpacingSettings.fill( '4' );
+
+		await expect(
+			block.locator(
+				'.wp-block-woocommerce-product-filters-is-layout-flex'
+			)
+		).toHaveCSS( 'gap', 'var(--wp--preset--spacing--30)' );
+	} );
 } );
