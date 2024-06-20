@@ -22,13 +22,13 @@
 
 		&.primary {
 			padding: 40px;
-			width: 468px;
+			max-width: 468px;
 		}
 
 		&.secondary {
 			background-color: #FAF7F3;
 			height: 100%;
-			width: 392px;
+			min-width: 392px;
 		}
 
 		.subscription-status {
