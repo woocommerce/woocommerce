@@ -7,6 +7,11 @@ import { __ } from '@wordpress/i18n';
 import { check, close, edit } from '@wordpress/icons';
 import { evaluate } from '@woocommerce/expression-evaluation';
 
+/**
+ * Internal dependencies
+ */
+import { ExpressionTextArea } from './expression-text-area';
+
 function evaluateExpression(
 	expression: string,
 	evaluationContext: object | undefined
@@ -61,12 +66,6 @@ export function ExpressionField( {
 		? errorString
 		: JSON.stringify( result, null, 4 );
 
-	const expressionTextAreaRef = useRef< HTMLTextAreaElement >( null );
-
-	function handleOnChange( event: React.ChangeEvent< HTMLTextAreaElement > ) {
-		setEditedExpression( event.target.value );
-	}
-
 	function handleOnClickCancel() {
 		setEditedExpression( expression );
 		onCancel?.();
@@ -77,13 +76,10 @@ export function ExpressionField( {
 			className="woocommerce-product-editor-dev-tools-expression-field"
 			data-mode={ mode }
 		>
-			<textarea
-				ref={ expressionTextAreaRef }
-				className="woocommerce-product-editor-dev-tools-expression-field__expression"
+			<ExpressionTextArea
 				readOnly={ mode === 'view' }
-				value={ editedExpression }
-				placeholder={ __( 'Enter an expression', 'woocommerce' ) }
-				onChange={ handleOnChange }
+				expression={ editedExpression }
+				onChange={ setEditedExpression }
 			/>
 			<div className="woocommerce-product-editor-dev-tools-expression-field__result">
 				{ resultString }
