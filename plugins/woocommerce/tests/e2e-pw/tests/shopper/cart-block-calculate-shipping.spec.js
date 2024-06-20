@@ -139,7 +139,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 
 		await page
 			.getByRole( 'button', {
-				name: 'Enter the address to check delivery options',
+				name: 'Enter address to check delivery options',
 			} )
 			.click();
 
@@ -177,7 +177,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 
 		await page
 			.getByRole( 'button', {
-				name: 'Enter the address to check delivery options',
+				name: 'Enter address to check delivery options',
 			} )
 			.click();
 
@@ -222,7 +222,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 
 		await page
 			.getByRole( 'button', {
-				name: 'Enter the address to check delivery options',
+				name: 'Enter address to check delivery options',
 			} )
 			.click();
 
@@ -262,7 +262,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 
 		await page
 			.getByRole( 'button', {
-				name: 'Enter the address to check delivery options',
+				name: 'Enter address to check delivery options',
 			} )
 			.click();
 

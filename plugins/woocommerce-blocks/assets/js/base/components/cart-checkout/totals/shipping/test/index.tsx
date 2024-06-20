@@ -397,7 +397,7 @@ describe( 'TotalsShipping', () => {
 			</SlotFillProvider>
 		);
 		expect(
-			screen.getByText( 'Enter the address to check delivery options' )
+			screen.getByText( 'Enter address to check delivery options' )
 		).toBeInTheDocument();
 	} );
 
@@ -459,7 +459,7 @@ describe( 'TotalsShipping', () => {
 			</SlotFillProvider>
 		);
 		expect(
-			screen.queryByText( 'Enter the address to check delivery options' )
+			screen.queryByText( 'Enter address to check delivery options' )
 		).not.toBeInTheDocument();
 	} );
 	it( 'should show the calculator panel with address when default rates are available and has formatted address', () => {

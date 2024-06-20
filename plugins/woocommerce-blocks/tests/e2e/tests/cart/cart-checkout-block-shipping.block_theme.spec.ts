@@ -59,7 +59,7 @@ test.describe( 'Shopper → Shipping', () => {
 
 		await expect(
 			userPage.getByRole( 'button', {
-				name: 'Enter the address to check delivery options',
+				name: 'Enter address to check delivery options',
 			} )
 		).toBeVisible();
 	} );
