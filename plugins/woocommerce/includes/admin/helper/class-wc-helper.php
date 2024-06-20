@@ -1297,6 +1297,25 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get subscription state of a given product ID.
+	 *
+	 * @since TBD
+	 *
+	 * @param int $product_id The product id.
+	 *
+	 * @return array Array of state_name => (bool) state
+	 */
+	public static function get_product_subscription_state( $product_id ) {
+		$subscription = self::_get_subscriptions_from_product_id( $product_id, true );
+
+		return array(
+			'unregistered' => empty( $subscription ),
+			'expired'      => ( ! empty( $subscription['expired'] ) && ! $subscription['expired'] ),
+			'expiring'     => ( ! empty( $subscription['expiring'] ) && ! $subscription['expiring'] ),
+		);
+	}
+
+	/**
 	 * Get a subscription entry from product_id. If multiple subscriptions are
 	 * found with the same product id and $single is set to true, will return the
 	 * first one in the list, so you can use this method to get things like extension
