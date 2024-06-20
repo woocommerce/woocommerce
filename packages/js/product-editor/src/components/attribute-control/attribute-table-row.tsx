@@ -125,7 +125,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	);
 
 	/*
-	 * Local terms to handle not global attributes.
+	 * Local terms to handle not global (local) attributes.
 	 * Set initially with the attribute options.
 	 */
 	const [ localTerms, setLocalTerms ] = useState< TokenItem[] >(
@@ -139,15 +139,18 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	 */
 	const [ temporaryTerms, setTemporaryTerms ] = useState< TokenItem[] >( [] );
 
-	// By convention, it's a global attribute if the attribute ID is 0.
-	const isGlobalAttribute = attribute?.id === 0;
+	/*
+	 * By convention, it's a local attribute when the id is 0.
+	 * Local attributes are store as part of the product data.
+	 */
+	const isLocalAttribute = attribute?.id === 0;
 
 	/*
-	 * When isGlobalAttribute is true, allTerms is the localTerms,
+	 * When isLocalAttribute is true, allTerms is the localTerms,
 	 * otherwise, it is the attribute terms (mapped to their names)
 	 */
 	const allTerms =
-		( isGlobalAttribute
+		( isLocalAttribute
 			? localTerms.map( tokenItemToString )
 			: terms?.map( ( term: ProductAttributeTerm ) => term.name ) ) || [];
 
@@ -168,7 +171,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	 * Otherwise, uses the (mapped) attribute terms.
 	 */
 	const attributeTerms =
-		( isGlobalAttribute
+		( isLocalAttribute
 			? attribute.options?.map( stringToTokenItem )
 			: attribute?.terms?.map( ( { name } ) =>
 					stringToTokenItem( name )
@@ -370,7 +373,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 							nextTokens.map( tokenItemToString );
 
 						// *** LOCAL Attributes ***
-						if ( isGlobalAttribute ) {
+						if ( isLocalAttribute ) {
 							// Update the local terms with the new tokens.
 							setLocalTerms( ( prevTerms ) => [
 								...prevTerms,
