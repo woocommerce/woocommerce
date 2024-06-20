@@ -16,6 +16,10 @@ class PTKPatternsStore {
 	// would see an error when trying to insert them in the editor.
 	const EXCLUDED_PATTERNS = array( '13923', '14781', '14779', '13666', '13664', '13660', '13588', '14922', '14880', '13596', '13967', '13958', '15050', '15027' );
 
+	const CATEGORY_MAPPING = array(
+		'testimonials' => 'reviews',
+	);
+
 	/**
 	 * PatternsToolkit instance.
 	 *
@@ -197,6 +201,7 @@ class PTKPatternsStore {
 		}
 
 		$patterns = $this->filter_patterns( $patterns, self::EXCLUDED_PATTERNS );
+		$patterns = $this->map_categories( $patterns );
 
 		set_transient( self::TRANSIENT_NAME, $patterns );
 	}
@@ -208,5 +213,31 @@ class PTKPatternsStore {
 	 */
 	private function allowed_tracking_is_enabled(): bool {
 		return 'yes' === get_option( 'woocommerce_allow_tracking' );
+	}
+
+	/**
+	 * Change the categories of the patterns to match the ones used in the CYS flow
+	 *
+	 * @param array $patterns The patterns to map categories for.
+	 * @return array The patterns with the categories mapped.
+	 */
+	private function map_categories( array $patterns ) {
+		return array_map(
+			function ( $pattern ) {
+				if ( isset( $pattern['categories'] ) ) {
+					foreach ( $pattern['categories'] as $key => $category ) {
+						if ( isset( $category['slug'] ) && isset( self::CATEGORY_MAPPING[ $key ] ) ) {
+							$new_category = self::CATEGORY_MAPPING[ $key ];
+							unset( $pattern['categories'][ $key ] );
+							$pattern['categories'][ $new_category ]['slug']  = $new_category;
+							$pattern['categories'][ $new_category ]['title'] = ucfirst( $new_category );
+						}
+					}
+				}
+
+				return $pattern;
+			},
+			$patterns
+		);
 	}
 }
