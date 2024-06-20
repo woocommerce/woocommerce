@@ -88,7 +88,7 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		} else {
 			redirectToTaxSettings();
 		}
-	}, [] );
+	}, [ generalSettings, taxSettings, updateAndPersistSettingsForGroup ] );
 
 	const onAutomate = useCallback( async () => {
 		setIsPending( true );
@@ -127,7 +127,13 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 			)
 		);
 		onComplete();
-	}, [] );
+	}, [
+		createNotice,
+		generalSettings,
+		onComplete,
+		taxSettings,
+		updateAndPersistSettingsForGroup,
+	] );
 
 	const onDisable = useCallback( () => {
 		setIsPending( true );
@@ -142,7 +148,7 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		} ).then( () => {
 			window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
 		} );
-	}, [] );
+	}, [ updateOptions ] );
 
 	const getVisiblePartners = () => {
 		const countryCode =
@@ -190,7 +196,7 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		recordEvent( 'tasklist_tax_view_options', {
 			options: partners.map( ( partner ) => partner.id ),
 		} );
-	}, [] );
+	}, [ onAutomate, partners, query ] );
 
 	const getCurrentPartner = () => {
 		if ( ! query.partner ) {
