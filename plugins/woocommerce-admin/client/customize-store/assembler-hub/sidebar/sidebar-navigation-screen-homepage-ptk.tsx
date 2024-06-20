@@ -201,15 +201,18 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 									>
 										<div className="edit-site-sidebar-navigation-screen-patterns__group-homepage-label-container">
 											<span>{ capitalize( label ) }</span>
-											{ blocks.length > 0 && (
-												<span className="edit-site-sidebar-navigation-screen-patterns__group-homepage-number-pattern">
-													{
-														numberOfPatternsAdded[
-															categoryKey
-														]
-													}
-												</span>
-											) }
+											{ blocks.length > 0 &&
+												numberOfPatternsAdded[
+													categoryKey
+												] > 0 && (
+													<span className="edit-site-sidebar-navigation-screen-patterns__group-homepage-number-pattern">
+														{
+															numberOfPatternsAdded[
+																categoryKey
+															]
+														}
+													</span>
+												) }
 										</div>
 									</NavigatorButton>
 								</ItemGroup>
