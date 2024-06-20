@@ -166,7 +166,7 @@ export class CheckSubscriptionModal extends Component {
 					<Button
 						isPrimary
 						target="_blank"
-						href={ this.props.manageSubscriptionsUrl }
+						href={ isExpired ? this.props.renewUrl : this.props.subscribeUrl }
 						onClick={ () => this.dismiss() }
 					>
 						{

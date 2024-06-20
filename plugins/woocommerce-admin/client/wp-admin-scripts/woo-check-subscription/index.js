@@ -10,7 +10,8 @@ import { CheckSubscriptionModal } from './modal';
 import './style.scss';
 
 const {
-	manageSubscriptionsUrl,
+	renewUrl,
+	subscribeUrl,
 	productId,
 	productName,
 	productRegularPrice,
@@ -27,7 +28,8 @@ container.setAttribute( 'id', 'woo-check-subscription' );
 
 render(
 	<CheckSubscriptionModal
-		manageSubscriptionsUrl={ manageSubscriptionsUrl }
+		renewUrl={ renewUrl }
+		subscribeUrl={ subscribeUrl }
 		productId={ productId }
 		productName={ productName }
 		productRegularPrice={ productRegularPrice }

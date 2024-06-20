@@ -211,11 +211,19 @@ class WC_Helper_Admin {
 		WCAdminAssets::register_style( 'woo-check-subscription', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-check-subscription', true );
 
+		$subscribe_url = add_query_arg( 'add-to-cart', self::$checked_screen_param['id'], 'https://woocommerce.com/cart/' );
+		$renew_url     = add_query_arg( array(
+			'renew_product' => self::$checked_screen_param['id'],
+			'product_key'   => self::$checked_screen_param['state']['key'],
+			'order_id'      => self::$checked_screen_param['state']['order_id'],
+		), 'https://woocommerce.com/cart/' );
+
 		wp_localize_script(
 			'wc-admin-woo-check-subscription',
 			'wooCheckSubscriptionData',
 			array(
-				'manageSubscriptionsUrl' => 'https://woocommerce.com/my-account/my-subscriptions/',
+				'subscribeUrl'           => $subscribe_url,
+				'renewUrl'               => $renew_url,
 				'dismissAction'          => 'woocommerce_helper_check_subscription_dismissed',
 				'remindLaterAction'      => 'woocommerce_helper_check_subscription_remind_later',
 				'productId'              => self::$checked_screen_param['id'],
