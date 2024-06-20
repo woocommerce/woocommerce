@@ -165,9 +165,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.0.1 2024-06-19 =
+= 9.0.1 2024-06-20 =
 
 **WooCommerce**
 
+* Fix - Check WC_Legacy_API instead of WC_API as that seems to be cached by lightspeed servers. [#48593](https://github.com/woocommerce/woocommerce/pull/48593)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
