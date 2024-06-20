@@ -10,6 +10,7 @@ import { evaluate } from '@woocommerce/expression-evaluation';
 /**
  * Internal dependencies
  */
+import { ExpressionResult } from './expression-result';
 import { ExpressionTextArea } from './expression-text-area';
 
 function evaluateExpression(
@@ -60,12 +61,6 @@ export function ExpressionField( {
 		evaluationContext
 	);
 
-	const errorString = error && isDirty ? String( error ) : '';
-
-	const resultString = error
-		? errorString
-		: JSON.stringify( result, null, 4 );
-
 	function handleOnClickCancel() {
 		setEditedExpression( expression );
 		onCancel?.();
@@ -81,9 +76,11 @@ export function ExpressionField( {
 				expression={ editedExpression }
 				onChange={ setEditedExpression }
 			/>
-			<div className="woocommerce-product-editor-dev-tools-expression-field__result">
-				{ resultString }
-			</div>
+			<ExpressionResult
+				result={ result }
+				error={ error }
+				isDirty={ isDirty }
+			/>
 			<div className="woocommerce-product-editor-dev-tools-expression-field__actions">
 				{ mode === 'view' ? (
 					<Button
