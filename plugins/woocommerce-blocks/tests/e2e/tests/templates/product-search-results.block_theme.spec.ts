@@ -17,7 +17,7 @@ test.describe( 'Product Search Results template', () => {
 		await page.getByPlaceholder( 'Search' ).fill( templateName );
 		// Wait until search has finished.
 		const searchResults = page.getByLabel( 'Actions' );
-		await expect.poll( async () => await searchResults.count() ).toBe( 1 );
+		await expect( searchResults ).toHaveCount( 1 );
 		await page.getByLabel( templateName, { exact: true } ).click();
 
 		// Make sure the correct template is loaded.
