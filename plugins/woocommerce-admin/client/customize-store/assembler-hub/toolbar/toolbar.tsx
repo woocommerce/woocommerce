@@ -172,7 +172,7 @@ export const Toolbar = () => {
 
 				return new window.DOMRect(
 					rect?.left + 10,
-					top + 100,
+					Math.max( top + 100, 110 ),
 					width,
 					height
 				);
