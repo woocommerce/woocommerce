@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+CYS: fix crash of CYS on WordPress 6.6
