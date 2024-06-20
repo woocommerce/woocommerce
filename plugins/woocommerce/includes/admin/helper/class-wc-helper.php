@@ -1312,6 +1312,8 @@ class WC_Helper {
 			'unregistered' => empty( $subscription ),
 			'expired'      => ( isset( $subscription['expired'] ) && $subscription['expired'] ),
 			'expiring'     => ( isset( $subscription['expiring'] ) && $subscription['expiring'] ),
+			'key'          => $subscription['product_key'] ?? '',
+			'order_id'     => $subscription['order_id'] ?? '',
 		);
 	}
 
