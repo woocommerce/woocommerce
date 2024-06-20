@@ -96,12 +96,12 @@ const Block = ( { noShippingPlaceholder = null } ): ReactElement | null => {
 
 	if ( ! hasCalculatedShipping && ! shippingRatesPackageCount ) {
 		return (
-			<p>
+			<div className="wc-block-components-shipping-rates-control__incomplete-address-message">
 				{ __(
-					'Shipping options will be displayed here after entering your full shipping address.',
+					'Enter a shipping address to view shipping options',
 					'woocommerce'
 				) }
-			</p>
+			</div>
 		);
 	}
 	const addressComplete = isAddressComplete( shippingAddress );
@@ -124,15 +124,17 @@ const Block = ( { noShippingPlaceholder = null } ): ReactElement | null => {
 									status="warning"
 								>
 									{ __(
-										'There are no shipping options available. Please check your shipping address.',
+										'No shipping options are available for this address. Please verify the address is correct or try a different address.',
 										'woocommerce'
 									) }
 								</NoticeBanner>
 							) : (
-								__(
-									'Add a shipping address to view shipping options.',
-									'woocommerce'
-								)
+								<div className="wc-block-components-shipping-rates-control__incomplete-address-message">
+									{ __(
+										'Enter a shipping address to view shipping options',
+										'woocommerce'
+									) }
+								</div>
 							) }
 						</>
 					}

@@ -11,22 +11,15 @@ import ShippingPlaceholder from '../shipping-placeholder';
 describe( 'ShippingPlaceholder', () => {
 	it( 'should show correct text if showCalculator is false', () => {
 		const { rerender } = render(
-			<ShippingPlaceholder
-				showCalculator={ false }
-				isCheckout={ true }
-				isShippingCalculatorOpen={ false }
-				setIsShippingCalculatorOpen={ jest.fn() }
-			/>
+			<ShippingPlaceholder showCalculator={ false } isCheckout={ true } />
 		);
 		expect(
-			screen.getByText( 'No shipping options available' )
+			screen.getByText( 'Enter the address to calculate' )
 		).toBeInTheDocument();
 		rerender(
 			<ShippingPlaceholder
 				showCalculator={ false }
 				isCheckout={ false }
-				isShippingCalculatorOpen={ false }
-				setIsShippingCalculatorOpen={ jest.fn() }
 			/>
 		);
 		expect(

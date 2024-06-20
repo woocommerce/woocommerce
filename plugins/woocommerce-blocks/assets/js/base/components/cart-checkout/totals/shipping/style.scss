@@ -49,6 +49,9 @@
 			opacity: 0.8;
 		}
 	}
+	.wc-block-components-totals-item-shipping-placeholder {
+		@include font-size(small);
+	}
 }
 
 // Extra classes for specificity.
