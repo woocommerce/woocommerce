@@ -296,21 +296,24 @@ export const Edit = ( {
 											}
 										/>
 									</ToggleGroupControl>
-									<RangeControl
-										label={ __(
-											'ICON SIZE',
-											'woocommerce'
-										) }
-										value={ attributes.overlayButtonSize }
-										onChange={ ( value ) =>
-											setAttributes( {
-												overlayButtonSize: value,
-											} )
-										}
-										min={ 20 }
-										max={ 80 }
-										afterIcon={ 'px' }
-									/>
+									<div className="wc-block-editor-product-filters__overlay-button-size">
+										<RangeControl
+											label={ __(
+												'ICON SIZE',
+												'woocommerce'
+											) }
+											value={
+												attributes.overlayButtonSize
+											}
+											onChange={ ( value ) =>
+												setAttributes( {
+													overlayButtonSize: value,
+												} )
+											}
+											min={ 20 }
+											max={ 80 }
+										/>
+									</div>
 								</>
 							) }
 						</>
