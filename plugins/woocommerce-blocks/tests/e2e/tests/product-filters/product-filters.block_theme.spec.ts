@@ -33,7 +33,7 @@ const test = base.extend< { pageObject: ProductFiltersPage } >( {
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, requestUtils } ) => {
+	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
 		await requestUtils.activatePlugin(
 			'woocommerce-blocks-test-enable-experimental-features'
 		);
@@ -42,6 +42,9 @@ test.describe( `${ blockData.name }`, () => {
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
+		// Even visitSiteEditor disables welcome modal by default, sometimes
+		// the modal still shows up, which causes tests to fail.
+		await editor.disableWelcomeModal();
 	} );
 
 	test( 'should be visible and contain correct inner blocks', async ( {
@@ -119,7 +122,8 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( ratingFilterBlock ).toBeVisible();
 	} );
 
-	test( 'should display the correct customization settings', async ( {
+	test( 'should display the correct inspector style controls', async ( {
+		page,
 		editor,
 		pageObject,
 	} ) => {
@@ -131,6 +135,8 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( block ).toBeVisible();
 
 		await editor.openDocumentSettingsSidebar();
+
+		await page.getByRole( 'tab', { name: 'Styles' } ).click();
 
 		// Color settings
 		const colorSettings = editor.page.getByText( 'ColorTextBackground' );
