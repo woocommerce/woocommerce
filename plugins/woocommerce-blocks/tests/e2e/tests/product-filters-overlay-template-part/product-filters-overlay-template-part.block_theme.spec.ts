@@ -9,12 +9,15 @@ test.describe( 'Filters Overlay Template Part', () => {
 			'woocommerce-blocks-test-enable-experimental-features'
 		);
 		await admin.visitSiteEditor( {
-			path: '/wp_template_part/all',
+			postType: 'wp_template_part',
 		} );
 	} );
 
 	test( 'should be visible', async ( { page } ) => {
-		const block = page.getByRole( 'button', { name: 'Filters Overlay 1' } );
+		const block = page
+			.getByLabel( 'Patterns content' )
+			.getByText( 'Filters Overlay' )
+			.and( page.getByRole( 'button' ) );
 		await expect( block ).toBeVisible();
 	} );
 } );
