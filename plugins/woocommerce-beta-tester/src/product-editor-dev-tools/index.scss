@@ -143,6 +143,8 @@
 	grid-template-areas:
 		"expression actions"
 		"result     actions";
+
+	gap: var(--woocommerce-product-editor-dev-tools-gap-small);
 }
 
 .woocommerce-product-editor-dev-tools-expression-field__expression {
@@ -173,16 +175,37 @@
 .woocommerce-product-editor-dev-tools-expression-field__result {
 	grid-area: result;
 
-	font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
 
-	white-space: pre-wrap;
+	gap: var(--woocommerce-product-editor-dev-tools-gap-small);
 }
 
 .woocommerce-product-editor-dev-tools-expression-field[data-mode='edit']
 .woocommerce-product-editor-dev-tools-expression-field__result {
-	min-height: 1lh;
-	max-height: 1lh;
+	min-height: 1.2lh;
+	max-height: 1.2lh;
 	overflow-y: hidden;
+}
+
+.woocommerce-product-editor-dev-tools-expression-field__result-type {
+	border: 1px solid red;
+	border-radius: 5px;
+
+	padding: 0px 5px;
+
+	font-size: .75em;
+
+	text-transform: uppercase;
+}
+
+.woocommerce-product-editor-dev-tools-expression-field__result-value {
+	flex: 1;
+
+	font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
+
+	white-space: pre-wrap;
 }
 
 .woocommerce-product-editor-dev-tools-expression-field__actions {

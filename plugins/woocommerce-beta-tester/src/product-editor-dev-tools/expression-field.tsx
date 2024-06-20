@@ -79,7 +79,7 @@ export function ExpressionField( {
 			<ExpressionResult
 				result={ result }
 				error={ error }
-				isDirty={ isDirty }
+				showIfError={ editedExpression.length > 0 }
 			/>
 			<div className="woocommerce-product-editor-dev-tools-expression-field__actions">
 				{ mode === 'view' ? (
@@ -93,6 +93,7 @@ export function ExpressionField( {
 						<Button
 							icon={ check }
 							label={ updateLabel }
+							disabled={ ! isDirty }
 							onClick={ () => onUpdate?.( editedExpression ) }
 						/>
 						{ onCancel && (
