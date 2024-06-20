@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { createElement, useEffect, useState } from '@wordpress/element';
+import {
+	createElement,
+	useEffect,
+	useMemo,
+	useState,
+} from '@wordpress/element';
 import { closeSmall } from '@wordpress/icons';
 import {
 	Button,
@@ -89,6 +94,14 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	const { createProductAttributeTerm } = useDispatch(
 		EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
 	);
+	const selectItemsQuery = useMemo(
+		() => ( {
+			search: '',
+			attribute_id: attributeId,
+			per_page: MAX_TERMS_TO_LOAD, // @todo: handle this by using `search` arg
+		} ),
+		[ attributeId ]
+	);
 
 	/*
 	 * Get the terms for the current attribute,
@@ -103,14 +116,12 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 			);
 
 			return attributeId
-				? ( getProductAttributeTerms( {
-						search: '',
-						attribute_id: attributeId,
-						per_page: MAX_TERMS_TO_LOAD, // @todo: handle this by using `search` arg
-				  } ) as ProductAttributeTerm[] )
+				? ( getProductAttributeTerms(
+						selectItemsQuery
+				  ) as ProductAttributeTerm[] )
 				: [];
 		},
-		[ attributeId ]
+		[ attributeId, selectItemsQuery ]
 	);
 
 	/*
@@ -254,10 +265,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					attribute_id: attributeId,
 				},
 				{
-					optimisticQueryUpdate: {
-						search: '',
-						attribute_id: attributeId,
-					},
+					optimisticQueryUpdate: selectItemsQuery,
 					optimisticUrlParameters: [ attributeId ],
 				}
 			) ) as ProductAttributeTerm;
@@ -280,10 +288,9 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		 */
 		const recentTermsList = sel(
 			EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-		).getProductAttributeTerms( {
-			search: '',
-			attribute_id: attributeId,
-		} ) as ProductAttributeTerm[];
+		).getProductAttributeTerms(
+			selectItemsQuery
+		) as ProductAttributeTerm[];
 
 		/*
 		 * New selected terms are the ones that are in the recent terms list
