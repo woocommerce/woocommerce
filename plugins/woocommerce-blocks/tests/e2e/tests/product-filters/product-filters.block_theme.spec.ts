@@ -33,7 +33,7 @@ const test = base.extend< { pageObject: ProductFiltersPage } >( {
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
+	test.beforeEach( async ( { admin, requestUtils } ) => {
 		await requestUtils.activatePlugin(
 			'woocommerce-blocks-test-enable-experimental-features'
 		);
@@ -42,9 +42,6 @@ test.describe( `${ blockData.name }`, () => {
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
-		// Even visitSiteEditor disables welcome modal by default, sometimes
-		// the modal still shows up, which causes tests to fail.
-		await editor.disableWelcomeModal();
 	} );
 
 	test( 'should be visible and contain correct inner blocks', async ( {

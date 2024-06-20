@@ -94,10 +94,4 @@ export class Editor extends CoreEditor {
 			.first()
 			.click();
 	}
-
-	async disableWelcomeModal() {
-		await this.setPreferences( 'core/edit-site', {
-			welcomeGuide: false,
-		} );
-	}
 }
