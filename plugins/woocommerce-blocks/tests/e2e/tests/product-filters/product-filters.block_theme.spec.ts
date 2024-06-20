@@ -219,7 +219,7 @@ test.describe( `${ blockData.name }`, () => {
 		);
 	} );
 
-	test( 'Layout > Justification: changing option should update preview', async ( {
+	test( 'Layout > Justification: changing option should update the preview', async ( {
 		editor,
 		pageObject,
 	} ) => {
@@ -254,5 +254,35 @@ test.describe( `${ blockData.name }`, () => {
 				'.wp-block-woocommerce-product-filters-is-layout-flex'
 			)
 		).toHaveCSS( 'align-items', 'center' );
+	} );
+
+	test( 'Layout > Orientation: changing option should update the preview', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Experimental)'
+		);
+		await expect( block ).toBeVisible();
+
+		await editor.openDocumentSettingsSidebar();
+
+		const layoutSettings = editor.page.getByText(
+			'LayoutJustificationOrientation'
+		);
+		await layoutSettings.getByLabel( 'Horizontal' ).click();
+		await expect(
+			layoutSettings.getByLabel( 'Stretch items' )
+		).toBeHidden();
+		await expect(
+			layoutSettings.getByLabel( 'Space between items' )
+		).toBeVisible();
+		await expect(
+			block.locator(
+				'.wp-block-woocommerce-product-filters-is-layout-flex'
+			)
+		).toHaveCSS( 'flex-direction', 'row' );
 	} );
 } );
