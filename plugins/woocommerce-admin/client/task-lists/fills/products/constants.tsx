@@ -82,7 +82,7 @@ export const PrintfulAdvertProductPlacement = {
 		<span className="printful-sponsored__text">
 			{ __( 'Print-on-demand products', 'woocommerce' ) }
 			<div className="woocommerce-label">
-				{ __( 'Sponsored', 'woocommerce' ) }
+				{ __( 'Recommended', 'woocommerce' ) }
 			</div>
 		</span>
 	),
@@ -101,10 +101,7 @@ export const PrintfulAdvertProductPlacement = {
 	after: <Icon icon={ chevronRight } />,
 	onClick: () => {
 		recordEvent( 'tasklist_product_printful_advert_click' );
-		window.open(
-			'https://www.printful.com/integrations/woocommerce',
-			'_blank'
-		);
+		window.open( 'https://woocommerce.com/products/printful', '_blank' );
 	},
 };
 
