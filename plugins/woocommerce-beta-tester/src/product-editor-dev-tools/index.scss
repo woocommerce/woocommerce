@@ -165,6 +165,11 @@
 	}
 }
 
+.woocommerce-product-editor-dev-tools-expression-field[data-mode='view']:hover
+.woocommerce-product-editor-dev-tools-expression-field__expression {
+	outline: 1px solid var(--woocommerce-product-editor-dev-tools-border-color);
+}
+
 .woocommerce-product-editor-dev-tools-expression-field__result {
 	grid-area: result;
 
@@ -182,7 +187,19 @@
 
 .woocommerce-product-editor-dev-tools-expression-field__actions {
 	grid-area: actions;
+
+	button {
+		color: var(--woocommerce-product-editor-dev-tools-text-color);
+	}
 }
+
+.woocommerce-product-editor-dev-tools-expression-field[data-mode='view']:not(:hover)
+.woocommerce-product-editor-dev-tools-expression-field__actions {
+	button {
+		color: var(--woocommerce-product-editor-dev-tools-border-color);
+	}
+}
+
 
 .woocommerce-product-editor-dev-tools-expression-editor {
 	display: flex;
