@@ -184,7 +184,8 @@ export const Toolbar = () => {
 		! isHomepageSidebarOpen ||
 		! selectedBlockClientId ||
 		isNoBlocksPlaceholderPresent ||
-		isHeaderOrFooter
+		isHeaderOrFooter ||
+		! popoverAnchor
 	) {
 		return null;
 	}
@@ -192,7 +193,8 @@ export const Toolbar = () => {
 	return (
 		<Popover
 			as="div"
-			className="components-tooltip woocommerce-customize-store_popover-tooltip"
+			className="components-tooltip woocommerce-customize-store_block-toolbar-popover"
+			// @ts-expect-error missing type
 			variant="unstyled"
 			resize={ false }
 			flip={ false }
