@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Utilities;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -181,15 +182,34 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test the `get_compatible_plugins_for_feature` method.
-	 *
-	 * @testWith [true]
-	 *           [false]
-	 *
-	 * @param bool $compatible_by_default True if the setting for considering uncertain plugins as incompatible is set.
+	 * @testdox Test the `get_items_considered_incompatible` method.
 	 */
-	public function test_get_incompatible_plugins_for_feature( bool $compatible_by_default ) {
-		update_option( FeaturesController::PLUGINS_COMPATIBLE_BY_DEFAULT_OPTION, $compatible_by_default ? 'yes' : 'no' );
+	public function test_get_items_considered_incompatible() {
+		$this->reset_container_resolutions();
+
+		add_action(
+			'woocommerce_register_feature_definitions',
+			function ( $features_controller ) {
+				$features = array(
+					'test_feature_1' => array(
+						'name' => 'Test feature 1',
+						'plugins_are_incompatible_by_default' => true,
+					),
+					'test_feature_2' => array(
+						'name' => 'Test feature 2',
+						'plugins_are_incompatible_by_default' => false,
+					),
+					'test_feature_3' => array(
+						'name' => 'Test feature 2',
+					),
+				);
+
+				foreach ( $features as $slug => $definition ) {
+					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
+				}
+			},
+			20
+		);
 
 		$plugin_compatibility_info = array(
 			'compatible'   => array(
@@ -206,23 +226,30 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 			),
 		);
 
-		$expected =
-			$compatible_by_default ?
-			array(
-				'incompatible_1.php',
-				'incompatible_2.php',
-			) : array(
-				'incompatible_1.php',
-				'incompatible_2.php',
-				'uncertain_1.php',
-				'uncertain_2.php',
-			);
+		$expected = array(
+			'incompatible_1.php',
+			'incompatible_2.php',
+			'uncertain_1.php',
+			'uncertain_2.php',
+		);
 
-		$actual = $this->sut->get_plugins_considered_incompatible( $plugin_compatibility_info );
-		delete_option( FeaturesController::PLUGINS_COMPATIBLE_BY_DEFAULT_OPTION );
+		$actual = $this->sut->get_items_considered_incompatible( 'test_feature_1', $plugin_compatibility_info );
 
 		sort( $actual );
 		sort( $expected );
+		$this->assertEquals( $expected, $actual );
+
+		$expected = array(
+			'incompatible_1.php',
+			'incompatible_2.php',
+		);
+
+		$actual = $this->sut->get_items_considered_incompatible( 'test_feature_2', $plugin_compatibility_info );
+		sort( $actual );
+		$this->assertEquals( $expected, $actual );
+
+		$actual = $this->sut->get_items_considered_incompatible( 'test_feature_3', $plugin_compatibility_info );
+		sort( $actual );
 		$this->assertEquals( $expected, $actual );
 	}
 }

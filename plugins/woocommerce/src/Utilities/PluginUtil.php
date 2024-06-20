@@ -195,7 +195,7 @@ class PluginUtil {
 	 * @return string Warning string.
 	 */
 	public function generate_incompatible_plugin_feature_warning( string $feature_id, array $plugin_feature_info ): string {
-		$incompatibles      = $this->get_plugins_considered_incompatible( $plugin_feature_info );
+		$incompatibles      = $this->get_items_considered_incompatible( $feature_id, $plugin_feature_info );
 		$incompatibles      = array_filter( $incompatibles, 'is_plugin_active' );
 		$incompatibles      = array_values( array_diff( $incompatibles, $this->get_plugins_excluded_from_compatibility_ui() ) );
 		$incompatible_count = count( $incompatibles );
@@ -261,17 +261,13 @@ class PluginUtil {
 				);
 			}
 
-			if ( wc_get_container()->get( FeaturesController::class )->feature_is_enabled( $feature_id ) ) {
-				$incompatible_plugins_url = add_query_arg(
-					array(
-						'plugin_status' => 'incompatible_with_feature',
-						'feature_id'    => $feature_id,
-					),
-					admin_url( 'plugins.php' )
-				);
-			} else {
-				$incompatible_plugins_url = admin_url( 'plugins.php' );
-			}
+            $incompatible_plugins_url = add_query_arg(
+                array(
+                    'plugin_status' => 'incompatible_with_feature',
+                    'feature_id'    => $feature_id,
+                ),
+                admin_url( 'plugins.php' )
+            );
 
 			$feature_warnings[] = sprintf(
 				/* translators: %1$s opening link tag %2$s closing link tag. */
@@ -285,16 +281,20 @@ class PluginUtil {
 	}
 
 	/**
-	 * Filter a plugin  compatibility info for a feature, returning the names of the plugins that are considered incompatible.
-	 * Uncertain plugins will be included or not depending on the value of the FeaturesController::PLUGINS_INCOMPATIBLE_BY_DEFAULT_OPTION setting.
+	 * Filter plugin/feature compatibility info, returning the names of the plugins/features that are considered incompatible.
+	 * "Uncertain" information will be included or not depending on the value of the value of the 'plugins_are_incompatible_by_default'
+     * flag in the feature definition (default is true).
 	 *
-	 * @param array $compatibility_info Array of plugin feature info, as provided by FeaturesController->get_compatible_plugins_for_feature().
-	 * @return array List of plugin file names.
+     * @param bool $feature_id Feature id.
+	 * @param array $compatibility_info Array containing "compatible', 'incompatible' and 'uncertain' keys.
+	 * @return array Items in 'incompatible' and 'uncertain' if plugins are incompatible by default with the feature; only items in 'incompatible' otherwise.
 	 */
-	public function get_plugins_considered_incompatible( array $compatibility_info ): array {
-		return $this->plugins_are_compatible_with_features_by_default() ?
-				$compatibility_info['incompatible'] :
-				array_merge( $compatibility_info['incompatible'], $compatibility_info['uncertain'] );
+	public function get_items_considered_incompatible(string $feature_id, array $compatibility_info ): array {
+        $incompatible_by_default = wc_get_container()->get(FeaturesController::class)->get_plugins_are_incompatible_by_default($feature_id);
+
+		return $incompatible_by_default ?
+			array_merge( $compatibility_info['incompatible'], $compatibility_info['uncertain'] ) :
+            $compatibility_info['incompatible'];
 	}
 
 	/**
@@ -306,15 +306,5 @@ class PluginUtil {
 	 */
 	public function get_plugins_excluded_from_compatibility_ui() {
 		return $this->plugins_excluded_from_compatibility_ui;
-	}
-
-	/**
-	 * Gets a value indicating if uncertain plugins are considered as compatible with a given feature or not.
-	 * "Uncertain" plugins are those that don't explicitly declare themselves as compatible nor incompatible with the feature.
-	 *
-	 * @return bool True if uncertain plugins are considered as compatible with each feature.
-	 */
-	public function plugins_are_compatible_with_features_by_default() {
-		return 'yes' === get_option( FeaturesController::PLUGINS_COMPATIBLE_BY_DEFAULT_OPTION );
 	}
 }

@@ -777,7 +777,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			$compatibility_info = $feature_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
 			/** Plugin util instance @var PluginUtil $plugin_util */
 			$plugin_util   = $container->get( PluginUtil::class );
-			$incompatibles = $plugin_util->get_plugins_considered_incompatible( $compatibility_info );
+			$incompatibles = $plugin_util->get_items_considered_incompatible( 'custom_order_tables', $compatibility_info );
 			if ( count( $incompatibles ) > 0 ) {
 				WP_CLI::warning( __( '[Failed] Some installed plugins are incompatible. Please review the plugins by going to WooCommerce > Settings > Advanced > Features and see the "Order data storage" section.', 'woocommerce' ) );
 				$enable_hpos = false;
