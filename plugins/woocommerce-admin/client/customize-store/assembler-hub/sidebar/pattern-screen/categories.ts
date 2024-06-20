@@ -12,16 +12,43 @@ export const PATTERN_CATEGORIES = {
 			'woocommerce'
 		),
 	},
+	featured_selling: {
+		label: __( 'Featured selling', 'woocommerce' ),
+		description: __(
+			'Put the spotlight on one or more of your products or product categories.',
+			'woocommerce'
+		),
+	},
 	about: {
 		label: __( 'about', 'woocommerce' ),
-		description: __( 'about', 'woocommerce' ),
+		description: __(
+			'Show your shoppers what’s special about your business.',
+			'woocommerce'
+		),
 	},
 	services: {
 		label: __( 'services', 'woocommerce' ),
-		description: __( 'services', 'woocommerce' ),
+		description: __( '', 'woocommerce' ),
 	},
-	testimonials: {
-		label: __( 'testimonials', 'woocommerce' ),
-		description: __( 'testimonials', 'woocommerce' ),
+	reviews: {
+		label: __( 'Reviews', 'woocommerce' ),
+		description: __(
+			'Encourage sales by sharing positive feedback from happy shoppers.',
+			'woocommerce'
+		),
 	},
+	social_media: {
+		label: __( 'Social media', 'woocommerce' ),
+		description: __(
+			'Promote your social channels and give shoppers a way to see your latest products and news.',
+			'woocommerce'
+		),
+	},
+	// newsletter: {
+	// 	label: __( 'Newsletter', 'woocommerce' ),
+	// 	description: __(
+	// 		'Keep in touch with your shoppers with a newsletter signup form.',
+	// 		'woocommerce'
+	// 	),
+	// },
 };
