@@ -14,7 +14,7 @@ test.describe( 'Filters Overlay Template Part', () => {
 	} );
 
 	test( 'should be visible', async ( { page } ) => {
-		const block = page.getByText( 'Filters Overlay' );
+		const block = page.getByRole( 'button', { name: 'Filters Overlay 1' } );
 		await expect( block ).toBeVisible();
 	} );
 } );
