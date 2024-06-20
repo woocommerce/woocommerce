@@ -34,7 +34,7 @@ Refer to the [ESLint documentation on Shareable Configs](http://eslint.org/docs/
 
 The `recommended` preset will include rules governing an ES2015+ environment, and includes rules from the [`@wordpress/eslint-plugin/recommended`](https://github.com/WordPress/gutenberg/tree/trunk/packages/eslint-plugin) project.
 
-If you want to use prettier in your code editor, you'll need ot create a `.prettierrc.js` file at the root of your project with the following:
+If you want to use prettier in your code editor, you'll need to create a `.prettierrc.js` file at the root of your project with the following:
 
 ```js
 module.exports = require("@wordpress/prettier-config");
