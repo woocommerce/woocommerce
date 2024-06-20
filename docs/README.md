@@ -76,7 +76,7 @@ Available READMe files for the WooCommerce Admin plugin:
 - [`client/header`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-admin/client/header/README.md)
 - [`client/marketing`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-admin/client/marketing/README.md)
 - [`client/marketing/components/button`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-admin/client/marketing/components/button/README.md)
-- [`client/marketing/components/card`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-admin/client/marketing/components/card/README.md)
+- [`client/marketing/components/card`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-admin/client/marketing/coupons/card/README.md)
 - [`client/marketing/components/product-icon`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-admin/client/marketing/components/product-icon/README.md)
 - [`client/utils`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-admin/client/utils/README.md)
 - [`client/wp-admin-scripts`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-admin/client/wp-admin-scripts/README.md)
