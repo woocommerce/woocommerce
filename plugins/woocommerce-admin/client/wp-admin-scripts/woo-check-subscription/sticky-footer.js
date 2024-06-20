@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { Notice } from '@wordpress/components';
@@ -22,7 +22,7 @@ export class CheckSubscriptionStickyFooter extends Component {
 	}
 
 	render() {
-		const classes = classnames(
+		const classes = clsx(
 			'woocommerce-check-subscription-sticky-footer',
 			'woocommerce-check-subscription-sticky-footer__' + this.props.colorScheme
 		);
