@@ -164,5 +164,10 @@ test.describe( `${ blockData.name }`, () => {
 			name: 'Border',
 		} );
 		await expect( borderSettings ).toBeVisible();
+
+		// Block spacing settings
+		await expect(
+			editor.page.getByText( 'DimensionsBlock spacing' )
+		).toBeVisible();
 	} );
 } );
