@@ -118,9 +118,9 @@ test.describe('Tax Classes API tests: CRUD', () => {
 				`/wp-json/wc/v3/taxes/classes/${ taxClassSlug }`
 			);
 			const getDeletedTaxClassResponseJSON = await getDeletedTaxClassResponse.json();
-			expect(getDeletedTaxClassResponse.status()).toEqual(200);
+			expect(getDeletedTaxClassResponse.status()).toEqual(404);
 			expect(Array.isArray(getDeletedTaxClassResponseJSON)).toBe(true);
-			
+
 		});
 	});
 
