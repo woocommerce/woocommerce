@@ -242,7 +242,8 @@
 					},
 					"events": [
 						"daily-checks",
-						"release-checks"
+						"release-checks",
+						"push"
 					]
 				},
 				{
