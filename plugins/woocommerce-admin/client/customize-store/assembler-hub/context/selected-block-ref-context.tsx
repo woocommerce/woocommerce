@@ -1,5 +1,8 @@
-import { createContext } from '@wordpress/element';
-import { ReactNode, useState } from 'react';
+/**
+ * External dependencies
+ */
+import { createContext, useState } from '@wordpress/element';
+import { ReactNode } from 'react';
 
 type SelectedBlockContextType = {
 	selectedBlockRef: HTMLElement | null;
