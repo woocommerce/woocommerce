@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Redirect users to WooCommerce Home when Jetpack auth endpoint returns an invalid URL

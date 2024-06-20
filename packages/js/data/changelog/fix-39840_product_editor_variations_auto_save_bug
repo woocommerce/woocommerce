@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Update generateProductVariations action to add support for default_attributes and allowing to disable the product saving.

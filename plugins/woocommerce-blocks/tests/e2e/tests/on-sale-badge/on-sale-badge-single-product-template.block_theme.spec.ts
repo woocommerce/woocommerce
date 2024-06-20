@@ -96,8 +96,8 @@ test.describe( `${ blockData.name }`, () => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//${ blockData.slug }`,
 				postType: 'wp_template',
+				canvas: 'edit',
 			} );
-			await editor.enterEditMode();
 			await editor.setContent( '' );
 		} );
 
@@ -124,7 +124,9 @@ test.describe( `${ blockData.name }`, () => {
 
 			await pageObject.toggleFullScreenOnClickSetting( false );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -146,7 +148,9 @@ test.describe( `${ blockData.name }`, () => {
 
 			await pageObject.toggleFullScreenOnClickSetting( false );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPageNotOnSale );
 
@@ -186,7 +190,9 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 				.toEqual( blockData.margin );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -231,7 +237,9 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 				.toBe( true );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -268,7 +276,9 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 				.toEqual( blockData.margin );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 

@@ -116,7 +116,7 @@ test.describe( 'General tab', () => {
 				.click();
 
 			await expect(
-				page.getByLabel( 'Dismiss this notice' )
+				page.locator( '.components-snackbar__content' )
 			).toContainText( 'Invalid or duplicated SKU.' );
 		} );
 

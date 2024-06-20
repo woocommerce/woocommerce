@@ -205,7 +205,7 @@ First, you create a class that extends `Automattic\WooCommerce\Blocks\Payments\I
 
 In your class:
 
--   Define a `name` property (which is a string used to reference your payment method).
+-   Define a `name` property (This property is a string used to reference your payment method. It is important to use the same name as in your client-side JavaScript payment method registration, see `name: 'my_payment_method'` in the options object above).
 -   Define an `initialize` function. This function will get called during the server side initialization process and is a good place to put any settings population etc. Basically anything you need to do to initialize your gateway. **Note, this will be called on every request so don't put anything expensive here.**
 -   Define an `is_active` function. This should return whether the payment method is active or not.
 -   Define a `get_payment_method_script_handles` function. In this function you should register your payment method scripts (using `wp_register_script`) and then return the script handles you registered with. This will be used to add your payment method as a dependency of the checkout script and thus take sure of loading it correctly. **Note:** You should still make sure any other asset dependencies your script has are registered properly here, if you're using Webpack to build your assets, you may want to use the [WooCommerce Webpack Dependency Extraction Plugin](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin) to make this easier for you.

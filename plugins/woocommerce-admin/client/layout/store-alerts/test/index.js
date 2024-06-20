@@ -85,11 +85,15 @@ describe( 'StoreAlerts', () => {
 		);
 
 		expect(
-			container.querySelector( '.components-button' ).textContent
+			container.querySelector(
+				'.components-button:not(.woocommerce-store-alerts__close)'
+			).textContent
 		).toBe( 'Click me!' );
 		expect(
 			container
-				.querySelector( '.components-button' )
+				.querySelector(
+					'.components-button:not(.woocommerce-store-alerts__close)'
+				)
 				.getAttribute( 'href' )
 		).toBe( '#' );
 		expect(
@@ -105,11 +109,15 @@ describe( 'StoreAlerts', () => {
 		);
 
 		expect(
-			container.querySelector( '.components-button' ).textContent
+			container.querySelector(
+				'.components-button:not(.woocommerce-store-alerts__close)'
+			).textContent
 		).toBe( 'Click me!' );
 		expect(
 			container
-				.querySelector( '.components-button' )
+				.querySelector(
+					'.components-button:not(.woocommerce-store-alerts__close)'
+				)
 				.getAttribute( 'href' )
 		).toBe( '#' );
 		expect(

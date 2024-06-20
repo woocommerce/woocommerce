@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Calling $product->get_status() after $product->save() on a new product now returns correct status.

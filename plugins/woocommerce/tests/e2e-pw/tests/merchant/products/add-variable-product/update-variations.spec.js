@@ -479,13 +479,11 @@ test.describe( 'Update variations', () => {
 		await test.step( 'Expect the default attributes to be pre-selected', async () => {
 			for ( const attribute of defaultVariation ) {
 				await test.step( `Expect "${ attribute.option }" is selected as the default "${ attribute.name }"`, async () => {
-					const defaultSelectedAttribute = page
-						.getByRole( 'row', {
-							name: attribute.name,
-						} )
-						.locator( 'option[selected]' );
+					const defaultSelectedAttribute = page.getByLabel(
+						attribute.name
+					);
 
-					await expect( defaultSelectedAttribute ).toHaveText(
+					await expect( defaultSelectedAttribute ).toContainText(
 						attribute.option
 					);
 				} );

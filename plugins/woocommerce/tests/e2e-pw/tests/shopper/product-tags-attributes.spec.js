@@ -261,7 +261,7 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 	} );
 
 	test( 'can see products showcase', async ( { page } ) => {
-		// create as a merchant a new page with Products block
+		// create as a merchant a new page with Product Collection block
 		await goToPageEditor( { page } );
 
 		await page
@@ -274,8 +274,15 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 			.getByRole( 'document', {
 				name: 'Empty block; start writing or type forward slash to choose a block',
 			} )
-			.fill( '/products' );
+			.pressSequentially( '/product collection' );
 		await page.keyboard.press( 'Enter' );
+
+		// Product Collection requires choosing some collection.
+		await page
+			.getByRole( 'button', {
+				name: 'Product Catalog Display all products in your catalog. Results can (change to) match the current template, page, or search term.',
+			} )
+			.click();
 
 		await page
 			.getByRole( 'button', { name: 'Publish', exact: true } )

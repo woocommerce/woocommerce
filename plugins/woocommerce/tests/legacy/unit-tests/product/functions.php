@@ -917,14 +917,11 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: test_wc_update_product_stock_should_return_null_if_not_managing_stock.
+	 * Test: test_wc_update_product_stock_should_return_old_value_if_not_managing_stock.
 	 */
-	public function test_wc_update_product_stock_should_return_null_if_not_managing_stock() {
+	public function test_wc_update_product_stock_should_return_old_value_if_not_managing_stock() {
 		$product = WC_Helper_Product::create_simple_product();
-		$product->set_stock_quantity( 5 );
-		$product->save();
-
-		$this->assertNull( wc_update_product_stock( $product, 3 ) );
+		$this->assertEquals( 0, wc_update_product_stock( $product, 3 ) );
 	}
 
 	/**
@@ -1311,5 +1308,4 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 100, $price_shop );
 	}
-
 }

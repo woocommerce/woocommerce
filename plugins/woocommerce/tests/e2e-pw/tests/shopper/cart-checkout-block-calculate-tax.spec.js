@@ -293,8 +293,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Rounding', () => {
 
 		// all tests use the same products
 		await addAProductToCart( page, productId );
-		await addAProductToCart( page, productId2 );
-		await addAProductToCart( page, productId2 );
+		await addAProductToCart( page, productId2, 2 );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {

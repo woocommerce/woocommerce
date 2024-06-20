@@ -10,4 +10,4 @@ export type ErrorType = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type File = { id: number } & { [ k: string ]: any };
+export type File = { id?: number } & { [ k: string ]: any };

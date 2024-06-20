@@ -42,17 +42,24 @@ export type UserProfileEvent =
 			payload: { userProfile: { skipped: true } };
 	  };
 
-export type BusinessInfoEvent = {
-	type: 'BUSINESS_INFO_COMPLETED';
-	payload: {
-		storeName?: string;
-		industry?: IndustryChoice;
-		storeLocation: CountryStateOption[ 'key' ];
-		geolocationOverruled: boolean;
-		isOptInMarketing: boolean;
-		storeEmailAddress: string;
-	};
-};
+export type BusinessInfoEvent =
+	| {
+			type: 'BUSINESS_INFO_COMPLETED';
+			payload: {
+				storeName?: string;
+				industry?: IndustryChoice;
+				storeLocation: CountryStateOption[ 'key' ];
+				geolocationOverruled: boolean;
+				isOptInMarketing: boolean;
+				storeEmailAddress: string;
+			};
+	  }
+	| {
+			type: 'RETRY_PRE_BUSINESS_INFO';
+	  }
+	| {
+			type: 'SKIP_BUSINESS_INFO_STEP';
+	  };
 
 export type BusinessLocationEvent = {
 	type: 'BUSINESS_LOCATION_COMPLETED';
