@@ -92,7 +92,9 @@ test.describe( `${ blockData.name } Block `, () => {
 				attributes: { content: 'Hello World' },
 			} );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( template.path );
 
