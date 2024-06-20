@@ -226,6 +226,26 @@
 					]
 				},
 				{
+					"name": "Checks from plugin-check plugin",
+					"command": "pnpm wp-env run tests-cli wp plugin check woocommerce",
+					"optional": true,
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php"
+					],
+					"testEnv": {
+						"start": "env:test"
+					},
+					"events": [
+						"daily-checks",
+						"release-checks"
+					]
+				},
+				{
 					"name": "Core e2e tests",
 					"testType": "e2e",
 					"command": "test:e2e:with-env default",
