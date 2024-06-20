@@ -1,0 +1,10 @@
+{
+	"name": "woocommerce/product-filters-overlay-navigation",
+	"title": "Navigation",
+	"description": "Display overlay navigation controls.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3
+}
