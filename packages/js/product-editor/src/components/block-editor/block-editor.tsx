@@ -11,7 +11,7 @@ import {
 	lazy,
 	Suspense,
 } from '@wordpress/element';
-import { dispatch, select, useSelect } from '@wordpress/data';
+import { dispatch, select, useDispatch, useSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
@@ -310,14 +310,29 @@ export function BlockEditor( {
 		setIsEditorLoading( isEditorLoading );
 	}, [ isEditorLoading ] );
 
+	const { editEntityRecord } = useDispatch( 'core' );
+
 	useEffect( function maybeSetProductTemplateFromURL() {
 		const query: { template?: string } = getQuery();
 		const isAddProduct = getPath().endsWith( 'add-product' );
 		if ( isAddProduct && query.template ) {
 			const productTemplates =
 				window.productBlockEditorSettings?.productTemplates ?? [];
-			if ( productTemplates.find( ( t ) => t.id === query.template ) ) {
-				setProductTemplateId( query.template );
+			const selectedProductTemplate = productTemplates.find(
+				( t ) => t.id === query.template
+			);
+			if ( selectedProductTemplate ) {
+				editEntityRecord( 'postType', postType, productId, {
+					...selectedProductTemplate.productData,
+					meta_data: [
+						...( selectedProductTemplate.productData.meta_data ??
+							[] ),
+						{
+							key: '_product_template_id',
+							value: selectedProductTemplate.id,
+						},
+					],
+				} );
 			}
 		}
 	}, [] );
