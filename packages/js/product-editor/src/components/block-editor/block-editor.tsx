@@ -304,6 +304,8 @@ export function BlockEditor( {
 		setIsEditorLoading( isEditorLoading );
 	}, [ isEditorLoading ] );
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const { editEntityRecord } = useDispatch( 'core' );
 
 	useEffect( function maybeSetProductTemplateFromURL() {
