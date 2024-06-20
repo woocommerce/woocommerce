@@ -235,7 +235,8 @@
 						"includes/**/*.php",
 						"patterns/**/*.php",
 						"src/**/*.php",
-						"templates/**/*.php"
+						"templates/**/*.php",
+						"package-lock.json"
 					],
 					"testEnv": {
 						"start": "env:test"
