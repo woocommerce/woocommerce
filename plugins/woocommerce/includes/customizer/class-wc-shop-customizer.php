@@ -8,6 +8,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\ImageProcessing;
+
 /**
  * WC_Shop_Customizer class.
  */
@@ -577,7 +579,7 @@ class WC_Shop_Customizer {
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
 	private function add_product_images_section( $wp_customize ) {
-		if ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) {
+		if ( ImageProcessing::is_photon_active() ) {
 			$regen_description = ''; // Nothing to report; Jetpack will handle magically.
 		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		} elseif ( apply_filters( 'woocommerce_background_image_regeneration', true ) && ! is_multisite() ) {

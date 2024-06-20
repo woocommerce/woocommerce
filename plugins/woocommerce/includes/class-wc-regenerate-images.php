@@ -11,6 +11,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\ImageProcessing;
+
 /**
  * Regenerate Images Class
  */
@@ -36,12 +38,13 @@ class WC_Regenerate_Images {
 	public static function init() {
 		add_action( 'image_get_intermediate_size', array( __CLASS__, 'filter_image_get_intermediate_size' ), 10, 3 );
 		add_filter( 'wp_generate_attachment_metadata', array( __CLASS__, 'add_uncropped_metadata' ) );
-		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
 
 		// Not required when Jetpack Photon is in use.
-		if ( method_exists( 'Jetpack', 'is_module_active' ) && Jetpack::is_module_active( 'photon' ) ) {
+		if ( ImageProcessing::is_photon_active() ) {
 			return;
 		}
+
+		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 );
 
 		if ( apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
 			include_once WC_ABSPATH . 'includes/class-wc-regenerate-images-request.php';
@@ -65,7 +68,7 @@ class WC_Regenerate_Images {
 	 * @param array  $data Size data.
 	 * @param int    $attachment_id Attachment ID.
 	 * @param string $size Size name.
-	 * @return array
+	 * @return array|bool
 	 */
 	public static function filter_image_get_intermediate_size( $data, $attachment_id, $size ) {
 		if ( ! is_string( $size ) || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single' ) ), true ) ) {
@@ -80,7 +83,7 @@ class WC_Regenerate_Images {
 		// See if the image size has changed from our settings.
 		if ( ! self::image_size_matches_settings( $data, $size ) ) {
 			// If Photon is running we can just return false and let Jetpack handle regeneration.
-			if ( method_exists( 'Jetpack', 'is_module_active' ) && Jetpack::is_module_active( 'photon' ) ) {
+			if ( ImageProcessing::is_photon_active() ) {
 				return false;
 			} else {
 				// If we get here, Jetpack is not running and we don't have the correct image sized stored. Try to return closest match.
@@ -203,8 +206,26 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
+		// If Photon is active, don't attempt to resize images, Photon will handle it outside WP.
+		if ( ImageProcessing::is_photon_active() ) {
+			return $image;
+		}
+
 		// List of sizes we want to resize. Ignore others.
 		if ( ! $image || ! in_array( $size, apply_filters( 'woocommerce_image_sizes_to_resize', array( 'woocommerce_thumbnail', 'woocommerce_gallery_thumbnail', 'woocommerce_single' ) ), true ) ) {
+			return $image;
+		}
+
+		// Skip resizing if the image is too large to be loaded into the memory. A heuristic to prevent out of memory errors.
+		// Once https://core.trac.wordpress.org/ticket/23127 is merged, we can catch the error from GD instead.
+		$full_size               = self::get_full_size_image_dimensions( $attachment_id );
+		$gd_image_size_in_memory = 0;
+		if ( is_int( $full_size['width'] ) && is_int( $full_size['height'] ) ) {
+			$gd_image_size_in_memory = $full_size['width'] * $full_size['height'] * 5; // 5 bytes per pixel, https://stackoverflow.com/questions/18465390/php-fatal-error-out-of-memory-when-creating-an-image#comment27312125_18465539
+		}
+
+		$available_memory = ImageProcessing::get_image_memory_limit();
+		if ( $gd_image_size_in_memory >= $available_memory ) {
 			return $image;
 		}
 
@@ -452,6 +473,11 @@ class WC_Regenerate_Images {
 		global $wpdb;
 		// First lets cancel existing running queue to avoid running it more than once.
 		self::$background_process->kill_process();
+
+		// In case Photon is active, don't enqueue image regeneration, thumbnails are handled by Photon.
+		if ( ImageProcessing::is_photon_active() ) {
+			return;
+		}
 
 		// Now lets find all product image attachments IDs and pop them onto the queue.
 		$images = $wpdb->get_results( // @codingStandardsIgnoreLine

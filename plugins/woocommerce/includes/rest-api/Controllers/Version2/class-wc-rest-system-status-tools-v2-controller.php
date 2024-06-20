@@ -8,6 +8,8 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Internal\ImageProcessing;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -220,7 +222,13 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 		}
 
 		// Jetpack does the image resizing heavy lifting so you don't have to.
-		if ( ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) || ! apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
+		/**
+		 * Allow disabling background image regeneration.
+		 *
+		 * @since 3.3.0
+		 * @param bool Flag indicating whether to regenerate images in the background. Default: true.
+		 */
+		if ( ImageProcessing::is_photon_active() || ! apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
 			unset( $tools['regenerate_thumbnails'] );
 		}
 
