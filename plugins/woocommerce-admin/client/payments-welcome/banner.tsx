@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { Card, CardBody, Button, CardDivider } from '@wordpress/components';
-import {createElement, useState} from '@wordpress/element';
+import { useState } from '@wordpress/element';
+import { WooPaymentMethodLogos } from '@woocommerce/onboarding/build-module/components/WooPaymentMethodLogos';
 
 /**
  * Internal dependencies
@@ -12,7 +13,6 @@ import sanitizeHTML from '~/lib/sanitize-html';
 import WooPaymentsLogo from './woopayments.svg';
 import ExitSurveyModal from './exit-survey-modal';
 import strings from './strings';
-import { WooPaymentMethodLogos } from '@woocommerce/onboarding/build-module/components/WooPaymentMethodLogos';
 
 
 interface Props {

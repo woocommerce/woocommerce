@@ -23,47 +23,47 @@ import {
 const Payments = [
 	{
 		name: 'visa',
-		component: <Visa />,
+		component: <Visa key="visa" />,
 	},
 	{
 		name: 'mastercard',
-		component: <MasterCard />,
+		component: <MasterCard key="mastercard" />,
 	},
 	{
 		name: 'amex',
-		component: <Amex />,
+		component: <Amex key="amex" />,
 	},
 	{
 		name: 'discover',
-		component: <Discover />,
+		component: <Discover key="discover" />,
 	},
 	{
 		name: 'woopay',
-		component: <WooPay />,
+		component: <WooPay key="woopay" />,
 	},
 	{
 		name: 'applepay',
-		component: <ApplePay />,
+		component: <ApplePay key="applepay" />,
 	},
 	{
 		name: 'googlepay',
-		component: <GooglePay />,
+		component: <GooglePay key="googlepay" />,
 	},
 	{
 		name: 'afterpay',
-		component: <Afterpay />,
+		component: <Afterpay key="afterpay" />,
 	},
 	{
 		name: 'affirm',
-		component: <Affirm />,
+		component: <Affirm key="affirm" />,
 	},
 	{
 		name: 'klarna',
-		component: <Klarna />,
+		component: <Klarna key="klarna" />,
 	},
 	{
 		name: 'jcb',
-		component: <JCB />,
+		component: <JCB key="jcb" />,
 	},
 ];
 
@@ -76,41 +76,42 @@ export const WooPaymentMethodLogos: React.VFC< {
 	return (
 		<>
 			<div className="woocommerce-payments-method-logos">
-				{Payments.map((payment) => {
-					if (i == maxNrElements) {
-						return <Fragment></Fragment>;
+				{ Payments.map( ( payment) => {
+					if ( i >= maxNrElements ) {
+						return <Fragment key={ payment.name }></Fragment>;
 					}
-					if (!isWooPayEligible && payment.name === 'woopay') {
-						return <Fragment></Fragment>;
+					if ( ! isWooPayEligible && payment.name === 'woopay' ) {
+						return <Fragment key={ payment.name }></Fragment>;
 					}
 					i++;
-
 					return payment.component;
-				})}
+				} ) }
 				{ i < 21 && (
 					<div className="woocommerce-payments-method-logos_count">
 						+ { 21 - i }
 					</div>
-				)}
+				) }
 			</div>
 
 			<div className="woocommerce-payments-method-logos_mini">
-				{ Payments.map((payment) => {
-					if (j == 5) {
-						return <Fragment></Fragment>;
+				{ Payments.map( ( payment) => {
+					if ( j >= 5 ) {
+						j++;
+						return <Fragment key={ payment.name }></Fragment>;
 					}
-					if (!isWooPayEligible && payment.name === 'woopay') {
-						return <Fragment></Fragment>;
+					if ( ! isWooPayEligible && payment.name === 'woopay' ) {
+						j++;
+						return <Fragment key={ payment.name }></Fragment>;
 					}
 					j++;
 
 					return payment.component;
-				})}
+				} ) }
 				{ j < 21 && (
 					<div className="woocommerce-payments-method-logos_count">
 						+ { 21 - j }
 					</div>
-				)}
+				) }
 			</div>
 		</>
 )

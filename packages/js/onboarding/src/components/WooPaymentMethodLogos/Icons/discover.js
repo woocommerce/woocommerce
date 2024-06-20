@@ -6,7 +6,7 @@ import { createElement } from '@wordpress/element';
 export const Discover = () => (
 	/* eslint-disable */
 	<svg width="39" height="25" viewBox="0 0 39 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-		<g clip-path="url(#clip0_2196_13211)">
+		<g clipPath="url(#clip0_2196_13211)">
 			<rect x="0.825012" width="38.025" height="24.0158" rx="2.00132" fill="white"/>
 			<rect x="0.825012" width="38.025" height="24.0158" fill="url(#paint0_linear_2196_13211)"/>
 			<path
@@ -45,32 +45,32 @@ export const Discover = () => (
 				  fill="url(#paint2_linear_2196_13211)"/>
 		</g>
 		<rect x="1.32534" y="0.500329" width="37.0243" height="23.0151" rx="1.50099" stroke="black"
-			  stroke-opacity="0.25" stroke-width="1.00066"/>
+			  strokeOpacity="0.25" strokeWidth="1.00066"/>
 		<defs>
 			<linearGradient id="paint0_linear_2196_13211" x1="19.8375" y1="0" x2="19.8375" y2="24.0158"
 							gradientUnits="userSpaceOnUse">
-				<stop stop-color="#E96418"/>
-				<stop offset="1" stop-color="#F9A020"/>
+				<stop stopColor="#E96418"/>
+				<stop offset="1" stopColor="#F9A020"/>
 			</linearGradient>
 			<linearGradient id="paint1_linear_2196_13211" x1="20.7384" y1="14.5067" x2="19.0095" y2="11.794"
 							gradientUnits="userSpaceOnUse">
-				<stop stop-color="#FF9200"/>
-				<stop offset="0.21" stop-color="#FF8D00"/>
-				<stop offset="0.45" stop-color="#FF8000"/>
-				<stop offset="0.62" stop-color="#FF7100"/>
-				<stop offset="0.82" stop-color="#FF5E00"/>
-				<stop offset="1" stop-color="#FF5200"/>
+				<stop stopColor="#FF9200"/>
+				<stop offset="0.21" stopColor="#FF8D00"/>
+				<stop offset="0.45" stopColor="#FF8000"/>
+				<stop offset="0.62" stopColor="#FF7100"/>
+				<stop offset="0.82" stopColor="#FF5E00"/>
+				<stop offset="1" stopColor="#FF5200"/>
 			</linearGradient>
 			<linearGradient id="paint2_linear_2196_13211" x1="20.463" y1="14.4724" x2="17.9395" y2="9.51957"
 							gradientUnits="userSpaceOnUse">
-				<stop stop-color="#FF7100" stop-opacity="0"/>
-				<stop offset="0.03" stop-color="#FF6E00" stop-opacity="0.03"/>
-				<stop offset="0.21" stop-color="#FF5A00" stop-opacity="0.25"/>
-				<stop offset="0.39" stop-color="#FF4900" stop-opacity="0.42"/>
-				<stop offset="0.56" stop-color="#FF3C00" stop-opacity="0.56"/>
-				<stop offset="0.72" stop-color="#FF3300" stop-opacity="0.66"/>
-				<stop offset="0.86" stop-color="#FF2D00" stop-opacity="0.72"/>
-				<stop offset="0.98" stop-color="#FF2B00" stop-opacity="0.74"/>
+				<stop stopColor="#FF7100" stopOpacity="0"/>
+				<stop offset="0.03" stopColor="#FF6E00" stopOpacity="0.03"/>
+				<stop offset="0.21" stopColor="#FF5A00" stopOpacity="0.25"/>
+				<stop offset="0.39" stopColor="#FF4900" stopOpacity="0.42"/>
+				<stop offset="0.56" stopColor="#FF3C00" stopOpacity="0.56"/>
+				<stop offset="0.72" stopColor="#FF3300" stopOpacity="0.66"/>
+				<stop offset="0.86" stopColor="#FF2D00" stopOpacity="0.72"/>
+				<stop offset="0.98" stopColor="#FF2B00" stopOpacity="0.74"/>
 			</linearGradient>
 			<clipPath id="clip0_2196_13211">
 				<rect x="0.825012" width="38.025" height="24.0158" rx="2.00132" fill="white"/>

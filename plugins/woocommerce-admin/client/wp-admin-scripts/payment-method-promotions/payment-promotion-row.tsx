@@ -17,6 +17,8 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './payment-promotion-row.scss';
+import { WooPaymentMethodLogos } from '@woocommerce/onboarding/build-module/components/WooPaymentMethodLogos';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 function sanitizeHTML( html: string ) {
 	return {
@@ -115,6 +117,7 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 	if ( ! isVisible ) {
 		return null;
 	}
+	const isWooPayEligible = getAdminSetting( 'isWooPayEligible' );
 
 	return (
 		<>
@@ -131,7 +134,20 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 								>
 									{ title }
 								</Link>
-								{ subTitleContent ? (
+								{ gatewayId ===
+									'pre_install_woocommerce_payments_promotion' && (
+									<div className="pre-install-payment-gateway__subtitle">
+										<WooPaymentMethodLogos
+											maxNrElements={ 5 }
+											isWooPayEligible={
+												isWooPayEligible
+											}
+										/>
+									</div>
+								) }
+								{ gatewayId !==
+									'pre_install_woocommerce_payments_promotion' &&
+								subTitleContent ? (
 									<div
 										className="pre-install-payment-gateway__subtitle"
 										dangerouslySetInnerHTML={ sanitizeHTML(
