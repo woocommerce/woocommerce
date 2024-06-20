@@ -97,44 +97,71 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 	 * the main background color set by the theme.
 	 */
 	useEffect( () => {
+		const applyBadgeStyle = (
+			container: HTMLElement | Element | null,
+			backgroundColor: string | null,
+			color: string | null
+		) => {
+			if (
+				container &&
+				! container.querySelector(
+					'#mini-cart-quantity-badge-foreground-color'
+				) &&
+				backgroundColor &&
+				color
+			) {
+				const style = document.createElement( 'style' );
+				style.id = 'mini-cart-quantity-badge-foreground-color';
+				style.appendChild(
+					document.createTextNode(
+						`:where(.wc-block-mini-cart__badge) {
+							color: ${ backgroundColor };
+							background-color: ${ color };
+						}`
+					)
+				);
+				container.appendChild( style );
+			}
+		};
+
 		const editorStylesWrapper = document.querySelector(
 			'.editor-styles-wrapper'
 		);
-
-		if ( ! editorStylesWrapper ) {
-			return;
+		if ( editorStylesWrapper ) {
+			const editorBackgroundColor =
+				window.getComputedStyle( editorStylesWrapper )?.backgroundColor;
+			const editorColor =
+				window.getComputedStyle( editorStylesWrapper )?.color;
+			applyBadgeStyle(
+				editorStylesWrapper,
+				editorBackgroundColor,
+				editorColor
+			);
 		}
 
-		if (
-			document.getElementById(
-				'mini-cart-quantity-badge-foreground-color'
-			)
-		) {
-			return;
-		}
-
-		const editorBackgroundColor =
-			window.getComputedStyle( editorStylesWrapper )?.backgroundColor;
-		const editorColor =
-			window.getComputedStyle( editorStylesWrapper )?.color;
-
-		if ( ! editorBackgroundColor || ! editorColor ) {
-			return;
-		}
-		const badgeStyle = document.createElement( 'style' );
-		badgeStyle.id = 'mini-cart-quantity-badge-foreground-color';
-
-		// The badge's background should be the theme's foreground color, and it's text color should be the theme's background color.
-		badgeStyle.appendChild(
-			document.createTextNode(
-				`:where(.wc-block-mini-cart__badge) {
-			color: ${ editorBackgroundColor };
-			background-color: ${ editorColor };
-		}`
-			)
+		const canvasEl = document.querySelector(
+			'.edit-site-visual-editor__editor-canvas'
 		);
-
-		editorStylesWrapper.appendChild( badgeStyle );
+		if ( canvasEl instanceof HTMLIFrameElement ) {
+			const canvas =
+				canvasEl.contentDocument || canvasEl.contentWindow?.document;
+			if ( canvas ) {
+				const canvasBody = canvas.querySelector(
+					'.editor-styles-wrapper'
+				);
+				const canvasBackgroundColor = window.getComputedStyle(
+					canvas.body
+				)?.backgroundColor;
+				const canvasColor = window.getComputedStyle(
+					canvas.body
+				)?.color;
+				applyBadgeStyle(
+					canvasBody,
+					canvasBackgroundColor,
+					canvasColor
+				);
+			}
+		}
 	}, [] );
 
 	const productCount =
