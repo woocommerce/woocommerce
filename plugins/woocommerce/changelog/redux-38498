@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add 'woocommerce_order_note_deleted' hook for order note deletions.

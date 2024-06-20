@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-REST API: extened shipping_classes namespace with the /suggest-slug endpoint

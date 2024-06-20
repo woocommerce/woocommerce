@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a bug with the woocommerce_get_default_value_for_{key} filter that was preventing setting a falsey value on a checkbox (i.e. to uncheck it dynamically)

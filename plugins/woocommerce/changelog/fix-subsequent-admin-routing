@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the issue that the React-powered admin routing pages added after the filter initialization could not be displayed.

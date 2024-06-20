@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-In general, the `last_access` field of a REST API key should only be updated once-per-request.
