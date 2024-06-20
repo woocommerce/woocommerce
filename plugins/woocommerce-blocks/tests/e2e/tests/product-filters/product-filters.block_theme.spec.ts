@@ -15,6 +15,8 @@ const blockData = {
 		frontend: {},
 		editor: {
 			settings: {},
+			layoutWrapper:
+				'.wp-block-woocommerce-product-filters-is-layout-flex',
 		},
 	},
 	slug: 'archive-product',
@@ -237,9 +239,7 @@ test.describe( `${ blockData.name }`, () => {
 			layoutSettings.getByLabel( 'Justify items left' )
 		).toHaveAttribute( 'data-active-item' );
 		await expect(
-			block.locator(
-				'.wp-block-woocommerce-product-filters-is-layout-flex'
-			)
+			block.locator( blockData.selectors.editor.layoutWrapper )
 		).toHaveCSS( 'align-items', 'flex-start' );
 
 		await layoutSettings.getByLabel( 'Justify items center' ).click();
@@ -247,9 +247,7 @@ test.describe( `${ blockData.name }`, () => {
 			layoutSettings.getByLabel( 'Justify items center' )
 		).toHaveAttribute( 'data-active-item' );
 		await expect(
-			block.locator(
-				'.wp-block-woocommerce-product-filters-is-layout-flex'
-			)
+			block.locator( blockData.selectors.editor.layoutWrapper )
 		).toHaveCSS( 'align-items', 'center' );
 	} );
 
@@ -277,9 +275,7 @@ test.describe( `${ blockData.name }`, () => {
 			layoutSettings.getByLabel( 'Space between items' )
 		).toBeVisible();
 		await expect(
-			block.locator(
-				'.wp-block-woocommerce-product-filters-is-layout-flex'
-			)
+			block.locator( blockData.selectors.editor.layoutWrapper )
 		).toHaveCSS( 'flex-direction', 'row' );
 	} );
 
@@ -301,11 +297,13 @@ test.describe( `${ blockData.name }`, () => {
 		const blockSpacingSettings = editor.page.getByLabel( 'Block spacing' );
 
 		await blockSpacingSettings.fill( '4' );
-
 		await expect(
-			block.locator(
-				'.wp-block-woocommerce-product-filters-is-layout-flex'
-			)
-		).toHaveCSS( 'gap', 'var(--wp--preset--spacing--30)' );
+			block.locator( blockData.selectors.editor.layoutWrapper )
+		).not.toHaveCSS( 'gap', '0px' );
+
+		await blockSpacingSettings.fill( '0' );
+		await expect(
+			block.locator( blockData.selectors.editor.layoutWrapper )
+		).toHaveCSS( 'gap', '0px' );
 	} );
 } );
