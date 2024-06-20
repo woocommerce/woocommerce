@@ -46,7 +46,6 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		// Check shop page
 		$this->load_shop_page();
 		$this->assertDefaultTemplateFileName( 'archive-product' );
-
 	}
 
 	public function test_wc_template_loader_loads_template_with_blocks() {
@@ -81,21 +80,27 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		// Check shop page
 		$this->load_shop_page();
 		$this->assertDefaultTemplateFileName();
-
 	}
 
 
 	private function initialize_template_loader() {
 		// be sure shop is always returning same id doesn't matter the test setup environment
-		add_filter( 'woocommerce_get_shop_page_id', function ( $page ) {
-			return 5;
-		}, 10, 1 );
+		add_filter(
+			'woocommerce_get_shop_page_id',
+			function () {
+				return 5;
+			},
+			10,
+			1
+		);
 
 		if ( ! function_exists( 'wp_is_block_theme' ) ) {
 			function wp_is_block_theme() {
 				return true;
 			}
 		}
+
+		add_theme_support( 'woocommerce' );
 
 		WC_Template_Loader::init();
 	}

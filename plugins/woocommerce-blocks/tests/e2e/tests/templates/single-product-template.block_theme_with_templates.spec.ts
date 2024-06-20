@@ -31,14 +31,16 @@ test.describe( 'Single Product Template', () => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
 			postType: testData.templateType,
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 
 		await editor.insertBlock( {
 			name: 'core/paragraph',
 			attributes: { content: userText },
 		} );
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 		await page.goto( testData.permalink );
 
 		// Verify edits are visible in the frontend.

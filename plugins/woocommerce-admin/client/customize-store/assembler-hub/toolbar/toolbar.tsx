@@ -4,13 +4,22 @@
  */
 
 import { BlockInstance } from '@wordpress/blocks';
-import { ToolbarGroup, Toolbar as WPToolbar } from '@wordpress/components';
+import {
+	ToolbarGroup,
+	Toolbar as WPToolbar,
+	Popover,
+} from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import {
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from '@wordpress/element';
 
 import {
 	BlockMover,
-	BlockPopover,
 	store as blockEditorStore,
 	// @ts-expect-error missing type
 } from '@wordpress/block-editor';
@@ -23,9 +32,10 @@ import Shuffle from './shuffle';
 import Delete from './delete';
 import './style.scss';
 import { useIsNoBlocksPlaceholderPresent } from '../hooks/block-placeholder/use-is-no-blocks-placeholder-present';
+import { SelectedBlockContext } from '../context/selected-block-ref-context';
 
 const isHomepageUrl = ( path: string ) => {
-	return path === '/customize-store/assembler-hub/homepage';
+	return path.includes( '/customize-store/assembler-hub/homepage' );
 };
 
 export const Toolbar = () => {
@@ -91,7 +101,9 @@ export const Toolbar = () => {
 
 	useEffect( () => {
 		const path = query.path;
-
+		if ( ! path ) {
+			return;
+		}
 		setIsHomepageSidebarOpen( isHomepageUrl( path ) );
 	}, [ query ] );
 
@@ -134,17 +146,63 @@ export const Toolbar = () => {
 		return selectedBlock?.name === 'core/template-part';
 	}, [ allBlocks, selectedBlockClientId ] );
 
+	const { selectedBlockRef } = useContext( SelectedBlockContext );
+
+	const blockPopoverRef = useRef< HTMLDivElement | null >( null );
+
+	const popoverAnchor = useMemo( () => {
+		if ( ! selectedBlockRef || ! selectedBlockClientId ) {
+			return undefined;
+		}
+
+		return {
+			getBoundingClientRect() {
+				const { top, width, height } =
+					selectedBlockRef.getBoundingClientRect();
+
+				const rect = window.document
+					.querySelector(
+						'.woocommerce-customize-store-assembler > iframe[name="editor-canvas"]'
+					)
+					?.getBoundingClientRect();
+
+				if ( ! rect ) {
+					return new window.DOMRect( 0, 0, 0, 0 );
+				}
+
+				return new window.DOMRect(
+					rect?.left + 10,
+					Math.max( top + 100, 110 ),
+					width,
+					height
+				);
+			},
+		};
+	}, [ selectedBlockRef, selectedBlockClientId ] );
+
 	if (
 		! isHomepageSidebarOpen ||
 		! selectedBlockClientId ||
 		isNoBlocksPlaceholderPresent ||
-		isHeaderOrFooter
+		isHeaderOrFooter ||
+		! popoverAnchor
 	) {
 		return null;
 	}
 
 	return (
-		<BlockPopover clientId={ selectedBlockClientId }>
+		<Popover
+			as="div"
+			className="components-tooltip woocommerce-customize-store_block-toolbar-popover"
+			// @ts-expect-error missing type
+			variant="unstyled"
+			resize={ false }
+			flip={ false }
+			shift={ true }
+			anchor={ popoverAnchor }
+			placement="top-start"
+			ref={ blockPopoverRef }
+		>
 			<div className="woocommerce-customize-store-block-toolbar">
 				<WPToolbar label="Options">
 					<>
@@ -167,6 +225,6 @@ export const Toolbar = () => {
 					</>
 				</WPToolbar>
 			</div>
-		</BlockPopover>
+		</Popover>
 	);
 };

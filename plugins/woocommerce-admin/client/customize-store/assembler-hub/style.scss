@@ -832,3 +832,19 @@ body.woocommerce-assembler {
 		user-select: none;
 	}
 }
+
+.edit-site-layout__content {
+	.edit-site-layout__sidebar {
+		display: flex;
+		max-width: 700px;
+	}
+}
+
+.edit-site-sidebar-navigation-screen-patterns__group-homepage-label-container {
+	display: flex;
+	justify-content: space-between;
+
+	.edit-site-sidebar-navigation-screen-patterns__group-homepage-number-pattern {
+		color: var(--gutenberg-gray-400, #ccc);
+	}
+}

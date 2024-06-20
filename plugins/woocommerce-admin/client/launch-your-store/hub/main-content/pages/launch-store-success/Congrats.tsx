@@ -29,12 +29,14 @@ export type CongratsProps = {
 	isWooExpress: boolean;
 	completeSurvey: () => void;
 	children?: React.ReactNode;
+	siteIsShowingCachedContent: boolean;
 };
 
 export const Congrats = ( {
 	hasCompleteSurvey,
 	isWooExpress,
 	completeSurvey,
+	siteIsShowingCachedContent,
 	children,
 }: CongratsProps ) => {
 	const copyLink = __( 'Copy link', 'woocommerce' );
@@ -116,16 +118,42 @@ export const Congrats = ( {
 			</div>
 			<div className="woocommerce-launch-store__congrats-content">
 				<h1 className="woocommerce-launch-store__congrats-heading">
-					{ __(
-						'Congratulations! Your store is now live',
-						'woocommerce'
-					) }
+					{ siteIsShowingCachedContent
+						? __(
+								'Congratulations! Your store will launch soon',
+								'woocommerce'
+						  )
+						: __(
+								'Congratulations! Your store is now live',
+								'woocommerce'
+						  ) }
 				</h1>
 				<h2 className="woocommerce-launch-store__congrats-subheading">
-					{ __(
-						"You've successfully launched your store and are ready to start selling! We can't wait to see your business grow.",
-						'woocommerce'
-					) }
+					{ siteIsShowingCachedContent
+						? createInterpolateElement(
+								__(
+									'It’ll be ready to view as soon as your <link></link> have updated. Please wait, or contact your web host to find out how to do this manually.',
+									'woocommerce'
+								),
+								{
+									link: (
+										<a
+											href="https://woocommerce.com/document/server-caches/"
+											target="_blank"
+											rel="noreferrer"
+										>
+											{ __(
+												'server caches',
+												'woocommerce'
+											) }
+										</a>
+									),
+								}
+						  )
+						: __(
+								"You've successfully launched your store and are ready to start selling! We can't wait to see your business grow.",
+								'woocommerce'
+						  ) }
 				</h2>
 				<div className="woocommerce-launch-store__congrats-midsection-container">
 					<div className="woocommerce-launch-store__congrats-visit-store">
