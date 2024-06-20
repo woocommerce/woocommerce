@@ -730,7 +730,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order' => 10,
 			)
 		);
-		$inventory_columns                         = $product_inventory_inner_section->add_block(
+		$inventory_columns               = $product_inventory_inner_section->add_block(
 			array(
 				'id'        => 'product-inventory-inner-columns',
 				'blockName' => 'core/columns',
@@ -745,6 +745,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			array(
 				'id'                => 'product-sku-field',
 				'blockName'         => 'woocommerce/product-sku-field',
+				'order'             => 10,
 				'disableConditions' => array(
 					array(
 						'expression' => 'editedProduct.type === "variable"',
@@ -761,6 +762,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			array(
 				'id'                => 'product-unique-id-field',
 				'blockName'         => 'woocommerce/product-text-field',
+				'order'             => 20,
 				'attributes'        => array(
 					'property' => 'unique_id',
 					'label'    => __( 'GTIN, UPC, EAN or ISBN', 'woocommerce' ),
