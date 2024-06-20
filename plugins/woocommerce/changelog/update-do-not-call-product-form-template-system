@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Do not initialize product form template systems. The project is on standby for the moment
