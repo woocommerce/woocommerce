@@ -1,3 +1,4 @@
 Significance: patch
-Type: dev
-Comment: Fix e2e test
+Type: tweak
+Comment: Just fixing an e2e test.
+
