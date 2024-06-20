@@ -32,6 +32,7 @@ export function ExpressionTextArea( {
 		<textarea
 			ref={ textAreaRef }
 			className="woocommerce-product-editor-dev-tools-expression-field__expression"
+			rows={ 1 }
 			readOnly={ readOnly }
 			value={ expression }
 			placeholder={ __( 'Enter an expression', 'woocommerce' ) }

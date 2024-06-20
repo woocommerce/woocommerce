@@ -190,7 +190,7 @@
 }
 
 .woocommerce-product-editor-dev-tools-expression-field__result-type {
-	border: 1px solid red;
+	border: 1px solid var(--woocommerce-product-editor-dev-tools-border-color);
 	border-radius: 5px;
 
 	padding: 0px 5px;
