@@ -123,7 +123,6 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test( 'should display the correct inspector style controls', async ( {
-		page,
 		editor,
 		pageObject,
 	} ) => {
@@ -136,7 +135,7 @@ test.describe( `${ blockData.name }`, () => {
 
 		await editor.openDocumentSettingsSidebar();
 
-		await page.getByRole( 'tab', { name: 'Styles' } ).click();
+		await editor.page.getByRole( 'tab', { name: 'Styles' } ).click();
 
 		// Color settings
 		const colorSettings = editor.page.getByText( 'ColorTextBackground' );
@@ -188,5 +187,36 @@ test.describe( `${ blockData.name }`, () => {
 		await expect(
 			editor.page.getByText( 'LayoutJustificationOrientation' )
 		).toBeVisible();
+	} );
+
+	test( 'Layout > default to vertical stretch', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Experimental)'
+		);
+
+		await expect( block ).toBeVisible();
+
+		await editor.openDocumentSettingsSidebar();
+
+		const layoutSettings = editor.page.getByText(
+			'LayoutJustificationOrientation'
+		);
+		await expect(
+			layoutSettings.getByLabel( 'Justify items left' )
+		).not.toHaveAttribute( 'data-active-item' );
+		await expect(
+			layoutSettings.getByLabel( 'Stretch items' )
+		).toHaveAttribute( 'data-active-item' );
+		await expect(
+			layoutSettings.getByLabel( 'Horizontal' )
+		).not.toHaveAttribute( 'data-active-item' );
+		await expect( layoutSettings.getByLabel( 'Vertical' ) ).toHaveAttribute(
+			'data-active-item'
+		);
 	} );
 } );
