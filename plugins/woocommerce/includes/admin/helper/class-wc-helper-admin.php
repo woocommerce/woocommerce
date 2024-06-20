@@ -211,9 +211,6 @@ class WC_Helper_Admin {
 		WCAdminAssets::register_style( 'woo-check-subscription', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-check-subscription', true );
 
-		$product_id         = self::$checked_screen_param['id'];
-		$subscription_state = WC_Helper::get_product_subscription_state( $product_id );
-
 		wp_localize_script(
 			'wc-admin-woo-check-subscription',
 			'wooCheckSubscriptionData',
@@ -221,14 +218,14 @@ class WC_Helper_Admin {
 				'manageSubscriptionsUrl' => 'https://woocommerce.com/my-account/my-subscriptions/',
 				'dismissAction'          => 'woocommerce_helper_check_subscription_dismissed',
 				'remindLaterAction'      => 'woocommerce_helper_check_subscription_remind_later',
-				'productId'              => $product_id,
+				'productId'              => self::$checked_screen_param['id'],
 				'productName'            => self::$checked_screen_param['name'],
 				'productRegularPrice'    => self::$checked_screen_param['regular_price'],
 				'dismissNonce'           => wp_create_nonce( 'check_subscription_dismissed' ),
 				'remindLaterNonce'       => wp_create_nonce( 'check_subscription_remind_later' ),
 				'showAs'                 => self::$checked_screen_param['show_as'],
 				'colorScheme'            => self::$checked_screen_param['color_scheme'],
-				'subscriptionState'      => $subscription_state,
+				'subscriptionState'      => self::$checked_screen_param['state'],
 			)
 		);
 	}
@@ -245,8 +242,10 @@ class WC_Helper_Admin {
 			}
 
 			$product_id = absint( $product_id );
-			if ( ! WC_Helper::has_product_subscription( $product_id ) ) {
-				$param['id'] = $product_id;
+			$state      = WC_Helper::get_product_subscription_state( $product_id );
+			if ( $state['expired'] || $state['unregistered'] ) {
+				$param['id']    = $product_id;
+				$param['state'] = $state;
 				return $param;
 			}
 		}

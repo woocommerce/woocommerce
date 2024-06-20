@@ -1310,8 +1310,8 @@ class WC_Helper {
 
 		return array(
 			'unregistered' => empty( $subscription ),
-			'expired'      => ( ! empty( $subscription['expired'] ) && ! $subscription['expired'] ),
-			'expiring'     => ( ! empty( $subscription['expiring'] ) && ! $subscription['expiring'] ),
+			'expired'      => ( isset( $subscription['expired'] ) && $subscription['expired'] ),
+			'expiring'     => ( isset( $subscription['expiring'] ) && $subscription['expiring'] ),
 		);
 	}
 

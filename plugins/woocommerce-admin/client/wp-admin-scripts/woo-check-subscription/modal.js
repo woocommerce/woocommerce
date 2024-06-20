@@ -113,6 +113,96 @@ export class CheckSubscriptionModal extends Component {
 		)
 	}
 
+	renderPrimaryCard() {
+		const isExpired = this.props.subscriptionState.expired;
+
+		return (
+			<Card className="primary">
+				<CardHeader>
+					<div>
+						<Text
+							className="subscription-status subscription-status__expired"
+						>
+							{
+								isExpired
+									? __( 'Expired', 'woocommerce' )
+									: __( 'Unregistered', 'woocommerce' )
+							}
+						</Text>
+					</div>
+					<h2>
+						{
+							isExpired
+								? sprintf(
+									/* translators: %s is product name */
+									__(
+										'Renew %s',
+										'woocommerce'
+									),
+									this.props.productName
+								)
+								: sprintf(
+									/* translators: %s is product name */
+									__(
+										'Subscribe to %s',
+										'woocommerce'
+									),
+									this.props.productName
+								)
+						}
+					</h2>
+				</CardHeader>
+				<CardBody>
+					{ this.renderBenefits() }
+				</CardBody>
+				<CardFooter>
+					<Button
+						isDefault
+						onClick={ () => this.remindLater() }
+					>
+						{ __( 'Maybe later', 'woocommerce' ) }
+					</Button>
+
+					<Button
+						isPrimary
+						target="_blank"
+						href={ this.props.manageSubscriptionsUrl }
+						onClick={ () => this.dismiss() }
+					>
+						{
+							isExpired
+								? sprintf(
+									/* translators: %s is product price */
+									__( 'Renew for $%s', 'woocommerce' ),
+									this.props.productRegularPrice
+								)
+								: sprintf(
+									/* translators: %s is product price */
+									__( 'Subscribe for $%s', 'woocommerce' ),
+									this.props.productRegularPrice
+								)
+						}
+					</Button>
+				</CardFooter>
+			</Card>
+		);
+	}
+
+	renderSecondaryCard() {
+		return (
+			<Card className="secondary">
+				<CardMedia>
+					<ResponsiveWrapper naturalWidth={ 240 } naturalHeight={ 240 }>
+						<img
+							src={ extensionsSvg }
+							alt=""
+						/>
+					</ResponsiveWrapper>
+				</CardMedia>
+			</Card>
+		);
+	}
+
 	render() {
 		const { isModalOpen } = this.state;
 		if ( ! isModalOpen ) {
@@ -131,66 +221,10 @@ export class CheckSubscriptionModal extends Component {
 					direction={ [ 'column-reverse', 'row' ] }
 				>
 					<FlexItem>
-						<Card className="primary">
-							<CardHeader>
-								<div>
-									<Text
-										className="subscription-status subscription-status__expired"
-									>
-										{ 'Expired' }
-									</Text>
-								</div>
-								<h2>
-									{
-										sprintf(
-											__(
-												'Renew %s',
-												'woocommerce'
-											),
-											this.props.productName
-										)
-									}
-								</h2>
-							</CardHeader>
-							<CardBody>
-								{ this.renderBenefits() }
-							</CardBody>
-							<CardFooter>
-								<Button
-									isDefault
-									onClick={ () => this.remindLater() }
-								>
-									{ __( 'Maybe later', 'woocommerce' ) }
-								</Button>
-
-								<Button
-									isPrimary
-									target="_blank"
-									href={ this.props.manageSubscriptionsUrl }
-									onClick={ () => this.dismiss() }
-								>
-									{
-										sprintf(
-											// translators: product price
-											__( 'Renew for $%s', 'woocommerce' ),
-											this.props.productRegularPrice
-										)
-									}
-								</Button>
-							</CardFooter>
-						</Card>
+						{ this.renderPrimaryCard() }
 					</FlexItem>
 					<FlexItem>
-						<Card className="secondary">
-							<CardMedia>
-								<ResponsiveWrapper naturalWidth={ 240 } naturalHeight={ 240 }>
-									<img
-										src={ extensionsSvg }
-										alt=""
-									/>
-								</ResponsiveWrapper>
-							</CardMedia>
-						</Card>
+						{ this.renderSecondaryCard() }
 					</FlexItem>
 				</Flex>
 			</Modal>
