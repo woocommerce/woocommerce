@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Product Editor: Skip momentarily the 'can create a variation option and publish the product' E2E test

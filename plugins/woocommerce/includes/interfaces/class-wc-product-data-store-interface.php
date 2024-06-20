@@ -96,11 +96,11 @@ interface WC_Product_Data_Store_Interface {
 	 *
 	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
 	 *
-	 * @param int      $product_id_with_stock Product ID.
-	 * @param int|null $stock_quantity Stock quantity to update to.
-	 * @param string   $operation Either set, increase or decrease.
+	 * @param int    $product_id_with_stock Product ID.
+	 * @param int    $stock_quantity Stock quantity to update to.
+	 * @param string $operation Either set, increase or decrease.
 	 */
-	public function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' );
+	public function update_product_stock( $product_id_with_stock, $stock_quantity = 0, $operation = 'set' );
 
 	/**
 	 * Update a product's sale count directly.

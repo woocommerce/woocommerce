@@ -34,6 +34,20 @@
 				position: absolute;
 				z-index: 10;
 			}
+
+			.components-form-token-field__token.is-validating {
+				animation: components-button__busy-animation 2s linear infinite;
+				background-image: linear-gradient(-45deg, #fafafa 33%, #e0e0e0 0, #e0e0e0 70%, #fafafa 0);
+				background-size: 100px 100%;
+				box-shadow: 0 0 1px black inset;
+				opacity: 1;
+
+				.components-form-token-field__token-text,
+				.components-form-token-field__remove-token {
+					background-color:transparent;
+					pointer-events: none;
+				}
+			}
 		}
 	}
 
@@ -76,7 +90,6 @@
 			position: absolute;
 			top: 36px;
 			z-index: 0;
-			display: none;
 		}
 
 		.components-form-token-field__label {
@@ -84,6 +97,9 @@
 		}
 
 		.components-form-token-field__input-container {
+			position: relative;
+			z-index: 10;
+
 			> .components-flex {
 				min-height: 34px;
 			}

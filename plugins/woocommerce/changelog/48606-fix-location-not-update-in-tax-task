@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix location settings not updated in tax task

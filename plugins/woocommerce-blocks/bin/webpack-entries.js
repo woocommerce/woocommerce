@@ -16,9 +16,7 @@ const glob = require( 'glob' );
 // when you mark/unmark block experimental.
 const blocks = {
 	'active-filters': {},
-	'add-to-cart-form': {
-		customDir: 'product-elements/add-to-cart-form',
-	},
+	'add-to-cart-form': {},
 	'all-products': {
 		customDir: 'products/all-products',
 	},
@@ -98,6 +96,9 @@ const blocks = {
 		isExperimental: true,
 	},
 	'product-filters': {
+		isExperimental: true,
+	},
+	'product-filters-overlay': {
 		isExperimental: true,
 	},
 	'product-filter-stock-status': {
@@ -200,6 +201,8 @@ const entries = {
 			'./assets/js/atomic/blocks/product-elements/product-reviews/index.tsx',
 		'product-details':
 			'./assets/js/atomic/blocks/product-elements/product-details/index.tsx',
+		'add-to-cart-form':
+			'./assets/js/atomic/blocks/product-elements/add-to-cart-form/index.tsx',
 		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}' ),
 
 		// Interactivity component styling

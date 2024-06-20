@@ -62,7 +62,7 @@ for ( const template of templates ) {
 				attributes: { content: userText },
 			} );
 
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+			await page.getByRole( 'button', { name: 'Save' } ).click();
 
 			await page
 				.getByRole( 'button', { name: 'Dismiss this notice' } )

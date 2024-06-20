@@ -25,7 +25,7 @@ import './style.scss';
 import { useIsNoBlocksPlaceholderPresent } from '../hooks/block-placeholder/use-is-no-blocks-placeholder-present';
 
 const isHomepageUrl = ( path: string ) => {
-	return path === '/customize-store/assembler-hub/homepage';
+	return path.includes( '/customize-store/assembler-hub/homepage' );
 };
 
 export const Toolbar = () => {
@@ -91,21 +91,39 @@ export const Toolbar = () => {
 
 	useEffect( () => {
 		const path = query.path;
-
+		if ( ! path ) {
+			return;
+		}
 		setIsHomepageSidebarOpen( isHomepageUrl( path ) );
 	}, [ query ] );
-	const { isPreviousBlockTemplatePart, isNextBlockTemplatePart } =
-		useMemo( () => {
-			return {
-				isPreviousBlockTemplatePart:
-					previousBlock?.name === 'core/template-part',
-				isNextBlockTemplatePart:
-					nextBlock?.name === 'core/template-part',
-			};
-		}, [ nextBlock?.name, previousBlock?.name ] );
 
 	const selectedBlockClientId =
 		currentBlock?.clientId ?? firstBlock?.clientId;
+
+	const { isBlockMoverUpButtonDisabled, isBlockMoverDownButtonDisabled } =
+		useMemo( () => {
+			const isPreviousBlockTemplatePart =
+				previousBlock?.name === 'core/template-part';
+			const isNextBlockTemplatePart =
+				nextBlock?.name === 'core/template-part';
+
+			return {
+				isBlockMoverUpButtonDisabled:
+					isPreviousBlockTemplatePart ||
+					// The first block is the header, which is not movable.
+					allBlocks[ 1 ]?.clientId === selectedBlockClientId,
+				isBlockMoverDownButtonDisabled:
+					isNextBlockTemplatePart ||
+					// The last block is the footer, which is not movable.
+					allBlocks[ allBlocks.length - 2 ]?.clientId ===
+						selectedBlockClientId,
+			};
+		}, [
+			allBlocks,
+			nextBlock?.name,
+			previousBlock?.name,
+			selectedBlockClientId,
+		] );
 
 	const isNoBlocksPlaceholderPresent =
 		useIsNoBlocksPlaceholderPresent( allBlocks );
@@ -136,10 +154,10 @@ export const Toolbar = () => {
 							<BlockMover
 								clientIds={ [ selectedBlockClientId ] }
 								isBlockMoverUpButtonDisabled={
-									isPreviousBlockTemplatePart
+									isBlockMoverUpButtonDisabled
 								}
 								isBlockMoverDownButtonDisabled={
-									isNextBlockTemplatePart
+									isBlockMoverDownButtonDisabled
 								}
 							/>
 						</ToolbarGroup>

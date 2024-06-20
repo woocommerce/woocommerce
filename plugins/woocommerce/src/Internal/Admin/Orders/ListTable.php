@@ -1030,33 +1030,8 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function render_order_status_column( WC_Order $order ): void {
-		$tooltip = '';
-		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-		$comment_count = get_comment_count( $order->get_id() );
-		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-		$approved_comments_count = absint( $comment_count['approved'] );
-
-		if ( $approved_comments_count ) {
-			$latest_notes = wc_get_order_notes(
-				array(
-					'order_id' => $order->get_id(),
-					'limit'    => 1,
-					'orderby'  => 'date_created_gmt',
-				)
-			);
-
-			$latest_note = current( $latest_notes );
-
-			if ( isset( $latest_note->content ) && 1 === $approved_comments_count ) {
-				$tooltip = wc_sanitize_tooltip( $latest_note->content );
-			} elseif ( isset( $latest_note->content ) ) {
-				/* translators: %d: notes count */
-				$tooltip = wc_sanitize_tooltip( $latest_note->content . '<br/><small style="display:block">' . sprintf( _n( 'Plus %d other note', 'Plus %d other notes', ( $approved_comments_count - 1 ), 'woocommerce' ), $approved_comments_count - 1 ) . '</small>' );
-			} else {
-				/* translators: %d: notes count */
-				$tooltip = wc_sanitize_tooltip( sprintf( _n( '%d note', '%d notes', $approved_comments_count, 'woocommerce' ), $approved_comments_count ) );
-			}
-		}
+		/* translators: %s: order status label */
+		$tooltip = wc_sanitize_tooltip( $this->get_order_status_label( $order ) );
 
 		// Gracefully handle legacy statuses.
 		if ( in_array( $order->get_status(), array( 'trash', 'draft', 'auto-draft' ), true ) ) {
@@ -1070,6 +1045,39 @@ class ListTable extends WP_List_Table {
 		} else {
 			printf( '<mark class="order-status %s"><span>%s</span></mark>', esc_attr( sanitize_html_class( 'status-' . $order->get_status() ) ), esc_html( $status_name ) );
 		}
+	}
+
+	/**
+	 * Gets the order status label for an order.
+	 *
+	 * @param WC_Order $order The order object.
+	 *
+	 * @return string
+	 */
+	private function get_order_status_label( WC_Order $order ): string {
+		$status_names = array(
+			'Pending payment' => __( 'The order has been received, but no payment has been made. Pending payment orders are generally awaiting customer action.', 'woocommerce' ),
+			'On hold'         => __( 'The order is awaiting payment confirmation. Stock is reduced, but you need to confirm payment.', 'woocommerce' ),
+			'Processing'      => __( 'Payment has been received (paid), and the stock has been reduced. The order is awaiting fulfillment.', 'woocommerce' ),
+			'Completed'       => __( 'Order fulfilled and complete.', 'woocommerce' ),
+			'Failed'          => __( 'The customer’s payment failed or was declined, and no payment has been successfully made.', 'woocommerce' ),
+			'Draft'           => __( 'Draft orders are created when customers start the checkout process while the block version of the checkout is in place.', 'woocommerce' ),
+			'Canceled'        => __( 'The order was canceled by an admin or the customer.', 'woocommerce' ),
+			'Refunded'        => __( 'Orders are automatically put in the Refunded status when an admin or shop manager has fully refunded the order’s value after payment.', 'woocommerce' ),
+		);
+
+		/**
+		 * Provides an opportunity to modify and extend the order status labels.
+		 *
+		 * @param array    $action Order actions.
+		 * @param WC_Order $order  Current order object.
+		 * @since 9.1.0
+		 */
+		$status_names = apply_filters( 'woocommerce_get_order_status_labels', $status_names );
+
+		$status_name = wc_get_order_status_name( $order->get_status() );
+
+		return isset( $status_names[ $status_name ] ) ? $status_names[ $status_name ] : '';
 	}
 
 	/**

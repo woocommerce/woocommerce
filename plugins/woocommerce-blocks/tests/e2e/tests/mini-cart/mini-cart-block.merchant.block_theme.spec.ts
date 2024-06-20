@@ -22,8 +22,8 @@ test.describe( 'Merchant → Mini Cart', () => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//single-product`,
 				postType: 'wp_template',
+				canvas: 'edit',
 			} );
-			await editor.enterEditMode();
 
 			await editor.setContent( '' );
 
@@ -37,8 +37,8 @@ test.describe( 'Merchant → Mini Cart', () => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//single-product`,
 				postType: 'wp_template',
+				canvas: 'edit',
 			} );
-			await editor.enterEditMode();
 			await editor.openGlobalBlockInserter();
 
 			await editor.page

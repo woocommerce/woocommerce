@@ -345,6 +345,17 @@ body.woocommerce-assembler {
 		}
 	}
 
+	.woocommerce-customize-store__fiverr-cta-group {
+		margin-top: 32px;
+		padding-top: 32px;
+		border-top: 1px solid var(--gutenberg-gray-700, #dcdcde);
+		color: var(--gutenberg-gray-900, #1e1e1e);
+
+		p {
+			margin-top: 6px;
+		}
+	}
+
 	.block-editor-block-patterns-list__item-title {
 		display: none;
 	}
@@ -819,5 +830,12 @@ body.woocommerce-assembler {
 	.components-popover__content {
 		width: fit-content;
 		user-select: none;
+	}
+}
+
+.edit-site-layout__content {
+	.edit-site-layout__sidebar {
+		display: flex;
+		max-width: 700px;
 	}
 }
