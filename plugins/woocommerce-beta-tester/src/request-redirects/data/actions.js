@@ -78,6 +78,7 @@ export function* saveRedirector(
 			new_endpoint: newEndpoint,
 			username,
 			password,
+			enabled,
 		};
 
 		if ( index !== null ) {
@@ -95,7 +96,7 @@ export function* saveRedirector(
 			type: TYPES.SAVE_REDIRECTOR,
 			redirector,
 		};
-	} catch {
-		throw new Error();
+	} catch ( e ) {
+		throw new Error( e.message );
 	}
 }

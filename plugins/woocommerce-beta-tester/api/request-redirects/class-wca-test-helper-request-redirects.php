@@ -36,6 +36,11 @@ register_woocommerce_admin_test_helper_rest_route(
 				'type'              => 'number',
 				'required'          => false,
 			),
+			'enabled'  => array(
+				'description'       => 'Whether the redirector is enabled or not',
+				'type'              => 'boolean',
+				'required'          => false,
+			),
 		),
 	)
 );
@@ -82,6 +87,7 @@ class WCA_Test_Helper_Remote_Get_Redirector {
 			'new_endpoint' => $request->get_param('new_endpoint'),
 			'username' => $request->get_param('username'),
 			'password' => $request->get_param('password'),
+			'enabled' => $request->get_param('enabled'),
 			'index' => $request->get_param('index')
 		];
 
@@ -90,6 +96,7 @@ class WCA_Test_Helper_Remote_Get_Redirector {
 			'new_endpoint' => $params['new_endpoint'],
 			'username' => $params['username'],
 			'password' => $params['password'],
+			'enabled' => $params['enabled']
 		];
 
 		self::update(function($redirectors) use ($params, $redirector) {
@@ -102,7 +109,7 @@ class WCA_Test_Helper_Remote_Get_Redirector {
 			return $redirectors;
 		});
 
-    	return new WP_REST_RESPONSE(null, 200);
+    	return new WP_REST_RESPONSE( [], 200);
 	}
 
 	/**
@@ -131,7 +138,7 @@ class WCA_Test_Helper_Remote_Get_Redirector {
 			}
 		);
 
-		return new WP_REST_RESPONSE( null, 200 );
+		return new WP_REST_RESPONSE( [], 200 );
 	}
 
 	/**
@@ -148,6 +155,6 @@ class WCA_Test_Helper_Remote_Get_Redirector {
 				return $filters;
 			}
 		);
-		return new WP_REST_RESPONSE( null, 200 );
+		return new WP_REST_RESPONSE( [], 200 );
 	}
 }
