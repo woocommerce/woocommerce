@@ -77,8 +77,9 @@ const ShippingCalculatorAddress = ( {
 					}
 				} }
 				type="submit"
+				variant="outlined"
 			>
-				{ __( 'Update', 'woocommerce' ) }
+				{ __( 'Check delivery options', 'woocommerce' ) }
 			</Button>
 		</form>
 	);

@@ -6,6 +6,7 @@ import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import { previewCart as mockPreviewCart } from '@woocommerce/resource-previews';
 import * as wpData from '@wordpress/data';
 import * as baseContextHooks from '@woocommerce/base-context/hooks';
+const woocommerceSettings = jest.requireMock( '@woocommerce/settings' );
 
 /**
  * Internal dependencies
@@ -18,24 +19,54 @@ jest.mock( '@wordpress/data', () => ( {
 	useSelect: jest.fn(),
 } ) );
 
-// Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
-wpData.useSelect.mockImplementation(
-	jest.fn().mockImplementation( ( passedMapSelect ) => {
-		const mockedSelect = jest.fn().mockImplementation( ( storeName ) => {
-			if ( storeName === 'wc/store/checkout' ) {
-				return {
-					prefersCollection() {
-						return false;
+// Mock the settings module to return the active shipping zones.
+jest.mock( '@woocommerce/settings', () => {
+	const originalModule = jest.requireActual( '@woocommerce/settings' );
+
+	return {
+		...originalModule,
+		getSetting: jest.fn().mockImplementation( ( setting, ...rest ) => {
+			if ( setting === 'activeShippingZones' ) {
+				return [
+					{
+						id: 7,
+						title: 'India',
+						description: 'India',
 					},
-				};
+					{
+						id: 0,
+						title: 'International',
+						description: 'Locations outside all other zones',
+					},
+				];
 			}
-			return jest.requireActual( '@wordpress/data' ).select( storeName );
-		} );
-		passedMapSelect( mockedSelect, {
-			dispatch: jest.requireActual( '@wordpress/data' ).dispatch,
-		} );
-	} )
-);
+			return originalModule.getSetting( setting, ...rest );
+		} ),
+	};
+} );
+
+const setGetSettingImplementation = ( implementation ) => {
+	woocommerceSettings.getSetting.mockImplementation( implementation );
+};
+
+// Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
+wpData.useSelect.mockImplementation( ( selector ) => {
+	const mockSelect = ( storeName: string ) => {
+		if ( storeName === 'wc/store/checkout' ) {
+			return {
+				getCustomerData: () => ( {
+					firstName: 'John',
+					lastName: 'Doe',
+					email: 'john.doe@example.com',
+				} ),
+				isInitialized: true,
+				prefersCollection: () => false,
+			};
+		}
+		return jest.requireActual( '@wordpress/data' ).select( storeName );
+	};
+	return selector( mockSelect );
+} );
 
 const shippingAddress = {
 	first_name: 'John',
@@ -292,7 +323,8 @@ describe( 'TotalsShipping', () => {
 		expect( screen.queryByText( 'Free' ) ).not.toBeInTheDocument();
 		expect( screen.getByText( '56.78' ) ).toBeInTheDocument();
 	} );
-	it( 'should show correct calculator button label if address is complete', () => {
+
+	it( 'should show correct shipping calculator panel text if address is complete', () => {
 		render(
 			<SlotFillProvider>
 				<TotalsShipping
@@ -317,61 +349,13 @@ describe( 'TotalsShipping', () => {
 			</SlotFillProvider>
 		);
 		expect(
-			screen.getByText(
-				'Shipping to W1T 4JG, London, United Kingdom (UK)'
-			)
-		).toBeInTheDocument();
-		expect( screen.getByText( 'Change address' ) ).toBeInTheDocument();
-	} );
-	it( 'should show correct calculator button label if address is incomplete', () => {
-		baseContextHooks.useStoreCart.mockReturnValue( {
-			cartItems: mockPreviewCart.items,
-			cartTotals: [ mockPreviewCart.totals ],
-			cartCoupons: mockPreviewCart.coupons,
-			cartFees: mockPreviewCart.fees,
-			cartNeedsShipping: mockPreviewCart.needs_shipping,
-			shippingRates: [],
-			shippingAddress: {
-				...shippingAddress,
-				city: '',
-				country: '',
-				postcode: '',
-			},
-			billingAddress: mockPreviewCart.billing_address,
-			cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
-			isLoadingRates: false,
-		} );
-		render(
-			<SlotFillProvider>
-				<TotalsShipping
-					currency={ {
-						code: 'USD',
-						symbol: '$',
-						minorUnit: 2,
-						decimalSeparator: '.',
-						prefix: '',
-						suffix: '',
-						thousandSeparator: ', ',
-					} }
-					values={ {
-						total_shipping: '0',
-						total_shipping_tax: '0',
-					} }
-					showCalculator={ true }
-					showRateSelector={ true }
-					isCheckout={ false }
-					className={ '' }
-				/>
-			</SlotFillProvider>
-		);
-		expect(
-			screen.queryByText( 'Change address' )
-		).not.toBeInTheDocument();
-		expect(
-			screen.getByText( 'Add an address for shipping options' )
+			screen.getByRole( 'button', {
+				name: /Delivers to W1T 4JG, London, United Kingdom \(UK\)/,
+			} )
 		).toBeInTheDocument();
 	} );
-	it( 'does not show the calculator button when default rates are available and no address has been entered', () => {
+
+	it( 'should show calculator panel if address is incomplete', () => {
 		baseContextHooks.useStoreCart.mockReturnValue( {
 			cartItems: mockPreviewCart.items,
 			cartTotals: [ mockPreviewCart.totals ],
@@ -413,13 +397,27 @@ describe( 'TotalsShipping', () => {
 			</SlotFillProvider>
 		);
 		expect(
-			screen.queryByText( 'Change address' )
-		).not.toBeInTheDocument();
-		expect(
-			screen.queryByText( 'Add an address for shipping options' )
-		).not.toBeInTheDocument();
+			screen.getByText( 'Enter address to check delivery options' )
+		).toBeInTheDocument();
 	} );
-	it( 'does show the calculator button when default rates are available and has formatted address', () => {
+
+	it( 'does not show the calculator button when only default rates are available and no address has been entered', () => {
+		// Mock active shipping zones to have only one zone.
+		setGetSettingImplementation( ( setting, ...rest ) => {
+			if ( setting === 'activeShippingZones' ) {
+				return [
+					{
+						id: 0,
+						title: 'International',
+						description: 'Locations outside all other zones',
+					},
+				];
+			}
+			const originalModule = jest.requireActual(
+				'@woocommerce/settings'
+			);
+			return originalModule.getSetting( setting, ...rest );
+		} );
 		baseContextHooks.useStoreCart.mockReturnValue( {
 			cartItems: mockPreviewCart.items,
 			cartTotals: [ mockPreviewCart.totals ],
@@ -430,9 +428,54 @@ describe( 'TotalsShipping', () => {
 			shippingAddress: {
 				...shippingAddress,
 				city: '',
-				state: 'California',
+				country: '',
+				postcode: '',
+			},
+			billingAddress: mockPreviewCart.billing_address,
+			cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
+			isLoadingRates: false,
+		} );
+		render(
+			<SlotFillProvider>
+				<TotalsShipping
+					currency={ {
+						code: 'USD',
+						symbol: '$',
+						minorUnit: 2,
+						decimalSeparator: '.',
+						prefix: '',
+						suffix: '',
+						thousandSeparator: ', ',
+					} }
+					values={ {
+						total_shipping: '0',
+						total_shipping_tax: '0',
+					} }
+					showCalculator={ true }
+					showRateSelector={ true }
+					isCheckout={ false }
+					className={ '' }
+				/>
+			</SlotFillProvider>
+		);
+		expect(
+			screen.queryByText( 'Enter address to check delivery options' )
+		).not.toBeInTheDocument();
+	} );
+	it( 'should show the calculator panel with address when default rates are available and has formatted address', () => {
+		baseContextHooks.useStoreCart.mockReturnValue( {
+			cartItems: mockPreviewCart.items,
+			cartTotals: [ mockPreviewCart.totals ],
+			cartCoupons: mockPreviewCart.coupons,
+			cartFees: mockPreviewCart.fees,
+			cartNeedsShipping: mockPreviewCart.needs_shipping,
+			shippingRates: mockPreviewCart.shipping_rates,
+			shippingAddress: {
+				...shippingAddress,
+				city: 'San Francisco',
+				state: 'CA',
 				country: 'US',
-				postcode: '',
+				postcode: '94107',
 			},
 			billingAddress: mockPreviewCart.billing_address,
 			cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
@@ -461,9 +504,10 @@ describe( 'TotalsShipping', () => {
 				/>
 			</SlotFillProvider>
 		);
-		expect( screen.queryByText( 'Change address' ) ).toBeInTheDocument();
 		expect(
-			screen.queryByText( 'Add an address for shipping options' )
-		).not.toBeInTheDocument();
+			screen.getByRole( 'button', {
+				name: /Delivers to 94107, San Francisco, CA/,
+			} )
+		).toBeInTheDocument();
 	} );
 } );

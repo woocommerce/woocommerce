@@ -3,40 +3,26 @@
  */
 import { __ } from '@wordpress/i18n';
 
-/**
- * Internal dependencies
- */
-import { CalculatorButton, CalculatorButtonProps } from './calculator-button';
-
 export interface ShippingPlaceholderProps {
 	showCalculator: boolean;
-	isShippingCalculatorOpen: boolean;
 	isCheckout?: boolean;
-	setIsShippingCalculatorOpen: CalculatorButtonProps[ 'setIsShippingCalculatorOpen' ];
 }
 
 export const ShippingPlaceholder = ( {
 	showCalculator,
-	isShippingCalculatorOpen,
-	setIsShippingCalculatorOpen,
+
 	isCheckout = false,
-}: ShippingPlaceholderProps ): JSX.Element => {
-	if ( ! showCalculator ) {
-		return (
-			<span>
-				{ isCheckout
-					? __( 'No shipping options available', 'woocommerce' )
-					: __( 'Calculated during checkout', 'woocommerce' ) }
-			</span>
-		);
+}: ShippingPlaceholderProps ): JSX.Element | null => {
+	if ( showCalculator ) {
+		return null;
 	}
 
 	return (
-		<CalculatorButton
-			label={ __( 'Add an address for shipping options', 'woocommerce' ) }
-			isShippingCalculatorOpen={ isShippingCalculatorOpen }
-			setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
-		/>
+		<span>
+			{ isCheckout
+				? __( 'No shipping options available', 'woocommerce' )
+				: __( 'Calculated during checkout', 'woocommerce' ) }
+		</span>
 	);
 };
 

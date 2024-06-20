@@ -193,12 +193,21 @@ export const isAddressComplete = (
 		{},
 		address.country
 	);
-
 	return addressForm.every(
 		( { key = '', hidden = false, required = false } ) => {
 			if ( hidden || ! required ) {
 				return true;
 			}
+
+			// Ignore these keys as they are not present in shipping calculator.
+			if (
+				key === 'first_name' ||
+				key === 'last_name' ||
+				key === 'address_1'
+			) {
+				return true;
+			}
+
 			return isValidAddressKey( key, address ) && address[ key ] !== '';
 		}
 	);

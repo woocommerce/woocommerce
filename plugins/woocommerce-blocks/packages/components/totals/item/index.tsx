@@ -33,13 +33,17 @@ const TotalsItemValue = ( {
 		);
 	}
 
-	return Number.isFinite( value ) ? (
+	if ( ! Number.isFinite( value ) ) {
+		return <>-</>;
+	}
+
+	return (
 		<FormattedMonetaryAmount
 			className="wc-block-components-totals-item__value"
 			currency={ currency || {} }
 			value={ value as number }
 		/>
-	) : null;
+	);
 };
 
 const TotalsItem = ( {

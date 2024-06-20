@@ -7,23 +7,25 @@ import { useState } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { TotalsItem } from '@woocommerce/blocks-components';
 import type { Currency } from '@woocommerce/types';
+import { getSetting } from '@woocommerce/settings';
 import { ShippingVia } from '@woocommerce/base-components/cart-checkout/totals/shipping/shipping-via';
 import {
 	isAddressComplete,
 	isPackageRateCollectable,
 } from '@woocommerce/base-utils';
+import { useEditorContext } from '@woocommerce/base-context';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import ShippingCalculator from '../../shipping-calculator';
 import {
 	hasShippingRate,
 	getTotalShippingValue,
 	areShippingMethodsMissing,
 } from './utils';
+import ShippingCalculator from '../../shipping-calculator';
 import ShippingPlaceholder from './shipping-placeholder';
 import ShippingAddress from './shipping-address';
 import ShippingRateSelector from './shipping-rate-selector';
@@ -40,6 +42,7 @@ export interface TotalShippingProps {
 	className?: string;
 	isCheckout?: boolean;
 }
+
 export const TotalsShipping = ( {
 	currency,
 	values,
@@ -56,6 +59,7 @@ export const TotalsShipping = ( {
 		shippingRates,
 		isLoadingRates,
 	} = useStoreCart();
+	const { isEditor } = useEditorContext();
 	const totalShippingValue = getTotalShippingValue( values );
 	const hasRates = hasShippingRate( shippingRates ) || totalShippingValue > 0;
 	const showShippingCalculatorForm =
@@ -92,6 +96,46 @@ export const TotalsShipping = ( {
 			totalShippingValue
 		);
 
+	const defaultShippingCalculatorLabel = __(
+		'Enter address to check delivery options',
+		'woocommerce'
+	);
+	const [ shippingCalculatorLabel, setShippingCalculatorLabel ] = useState(
+		defaultShippingCalculatorLabel
+	);
+	const [ shippingCalculatorAddress, setShippingCalculatorAddress ] =
+		useState( '' );
+
+	const activeShippingZones: { description: string }[] = getSetting(
+		'activeShippingZones'
+	);
+
+	const hideShippingCostsUntilAddressEntered: boolean = getSetting(
+		'hideShippingCostsUntilAddressEntered',
+		false
+	);
+
+	const hasMultipleAndDefaultZone =
+		activeShippingZones.length > 1 &&
+		activeShippingZones.some(
+			( zone: { description: string } ) =>
+				zone.description === 'Everywhere' ||
+				zone.description === 'Locations outside all other zones'
+		);
+
+	// If there is no default customer location set in the store,
+	// and the customer hasn't provided their address,
+	// and only one default shipping method is available for all locations,
+	// and shipping cost is not hidden until address is entered,
+	// then the shipping calculator will be hidden to avoid confusion.
+	if (
+		! addressComplete &&
+		! isEditor &&
+		! hasMultipleAndDefaultZone &&
+		! hideShippingCostsUntilAddressEntered
+	) {
+		showCalculator = false;
+	}
 	return (
 		<div
 			className={ clsx(
@@ -109,12 +153,6 @@ export const TotalsShipping = ( {
 								<ShippingPlaceholder
 									showCalculator={ showCalculator }
 									isCheckout={ isCheckout }
-									isShippingCalculatorOpen={
-										isShippingCalculatorOpen
-									}
-									setIsShippingCalculatorOpen={
-										setIsShippingCalculatorOpen
-									}
 								/>
 						  )
 				}
@@ -129,13 +167,13 @@ export const TotalsShipping = ( {
 							{ showCalculator && (
 								<ShippingAddress
 									shippingAddress={ shippingAddress }
-									showCalculator={ showCalculator }
-									isShippingCalculatorOpen={
-										isShippingCalculatorOpen
+									setShippingCalculatorLabel={
+										setShippingCalculatorLabel
 									}
-									setIsShippingCalculatorOpen={
-										setIsShippingCalculatorOpen
+									setShippingCalculatorAddress={
+										setShippingCalculatorAddress
 									}
+									hasRates={ hasRates }
 								/>
 							) }
 						</>
@@ -143,7 +181,7 @@ export const TotalsShipping = ( {
 				}
 				currency={ currency }
 			/>
-			{ showShippingCalculatorForm && (
+			{ showCalculator && (
 				<ShippingCalculator
 					onUpdate={ () => {
 						setIsShippingCalculatorOpen( false );
@@ -151,6 +189,10 @@ export const TotalsShipping = ( {
 					onCancel={ () => {
 						setIsShippingCalculatorOpen( false );
 					} }
+					isShippingCalculatorOpen={ isShippingCalculatorOpen }
+					setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
+					label={ shippingCalculatorLabel }
+					shippingCalculatorAddress={ shippingCalculatorAddress }
 				/>
 			) }
 			{ showRateSelector &&
@@ -162,6 +204,7 @@ export const TotalsShipping = ( {
 						isLoadingRates={ isLoadingRates }
 						isAddressComplete={ addressComplete }
 						shippingAddress={ shippingAddress }
+						showCalculator={ showCalculator }
 					/>
 				) }
 		</div>

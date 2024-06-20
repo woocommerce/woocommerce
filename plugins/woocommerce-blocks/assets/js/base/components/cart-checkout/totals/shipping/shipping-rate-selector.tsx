@@ -21,6 +21,7 @@ export interface ShippingRateSelectorProps {
 	isLoadingRates: boolean;
 	isAddressComplete: boolean;
 	shippingAddress: CartResponseShippingAddress;
+	showCalculator?: boolean;
 }
 
 export const ShippingRateSelector = ( {
@@ -29,6 +30,7 @@ export const ShippingRateSelector = ( {
 	isLoadingRates,
 	isAddressComplete,
 	shippingAddress,
+	showCalculator = true,
 }: ShippingRateSelectorProps ): JSX.Element => {
 	const legend = hasRates
 		? __( 'Shipping options', 'woocommerce' )
@@ -52,7 +54,7 @@ export const ShippingRateSelector = ( {
 				className="wc-block-components-totals-shipping__options"
 				noResultsMessage={
 					<>
-						{ isAddressComplete && (
+						{ isAddressComplete && ! showCalculator && (
 							<NoticeBanner
 								isDismissible={ false }
 								className="wc-block-components-shipping-rates-control__no-results-notice"

@@ -1,15 +1,26 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { isObject, objectHasProp } from '@woocommerce/types';
 import { isPackageRateCollectable } from '@woocommerce/base-utils';
 
+export interface PickupLocationProps {
+	setShippingCalculatorLabel: React.Dispatch<
+		React.SetStateAction< string >
+	>;
+	setShippingCalculatorAddress: React.Dispatch<
+		React.SetStateAction< string >
+	>;
+}
 /**
  * Shows a formatted pickup location.
  */
-const PickupLocation = (): JSX.Element | null => {
+const PickupLocation = ( {
+	setShippingCalculatorLabel,
+	setShippingCalculatorAddress,
+}: PickupLocationProps ): JSX.Element | null => {
 	const { pickupAddress } = useSelect( ( select ) => {
 		const cartShippingRates = select( 'wc/store/cart' ).getShippingRates();
 
@@ -55,16 +66,11 @@ const PickupLocation = (): JSX.Element | null => {
 		return null;
 	}
 
-	// Show the pickup method's name if we don't have an address to show.
-	return (
-		<span className="wc-block-components-shipping-address">
-			{ sprintf(
-				/* translators: %s: shipping method name, e.g. "Amazon Locker" */
-				__( 'Collection from %s', 'woocommerce' ),
-				pickupAddress
-			) + ' ' }
-		</span>
-	);
+	const pickupLabel = __( 'Collection from', 'woocommerce' );
+
+	setShippingCalculatorLabel( pickupLabel );
+	setShippingCalculatorAddress( pickupAddress );
+	return null;
 };
 
 export default PickupLocation;

@@ -58,7 +58,9 @@ test.describe( 'Shopper → Shipping', () => {
 		await userFrontendUtils.goToCart();
 
 		await expect(
-			userPage.getByLabel( 'Add an address for shipping options' )
+			userPage.getByRole( 'button', {
+				name: 'Enter address to check delivery options',
+			} )
 		).toBeVisible();
 	} );
 
