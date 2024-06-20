@@ -150,6 +150,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await page
 			.getByRole( 'button', {
 				name: 'Check delivery options',
+				exact: true,
 			} )
 			.click();
 
@@ -188,6 +189,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await page
 			.getByRole( 'button', {
 				name: 'Check delivery options',
+				exact: true,
 			} )
 			.click();
 
@@ -233,6 +235,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await page
 			.getByRole( 'button', {
 				name: 'Check delivery options',
+				exact: true,
 			} )
 			.click();
 
@@ -273,6 +276,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await page
 			.getByRole( 'button', {
 				name: 'Check delivery options',
+				exact: true,
 			} )
 			.click();
 
