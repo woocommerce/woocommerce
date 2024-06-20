@@ -16,10 +16,15 @@ import {
 import {
 	createInterpolateElement,
 	useContext,
+	useMemo,
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
+import {
+	store as coreStore,
+	// @ts-expect-error No types for this exist yet.
+} from '@wordpress/core-data';
 // @ts-expect-error Missing type.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 
@@ -40,6 +45,7 @@ import { useSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
+import { useEditorBlocks } from '../hooks/use-editor-blocks';
 
 export const SidebarNavigationScreenHomepagePTK = ( {
 	onNavigateBackClick,
@@ -54,6 +60,48 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 		sel( OPTIONS_STORE_NAME ).getOption( 'woocommerce_allow_tracking' )
 	);
 	const isTrackingDisallowed = trackingAllowed === 'no' || ! trackingAllowed;
+
+	const currentTemplate = useSelect(
+		( sel ) =>
+			// @ts-expect-error No types for this exist yet.
+			sel( coreStore ).__experimentalGetTemplateForLink( '/' ),
+		[]
+	);
+
+	const [ blocks ] = useEditorBlocks(
+		'wp_template',
+		currentTemplate?.id ?? ''
+	);
+
+	const numberOfPatternsAdded = useMemo( () => {
+		const categories = Object.keys( PATTERN_CATEGORIES );
+
+		const initialAccumulator = categories.reduce(
+			( acc, cat ) => ( {
+				...acc,
+				[ cat ]: 0,
+			} ),
+			{} as Record< string, number >
+		);
+
+		return blocks.reduce( ( acc, block ) => {
+			const blockCategories: Array< string > =
+				block.attributes?.metadata?.categories ?? [];
+
+			const foundCategory = blockCategories.find( ( blockCategory ) =>
+				categories.includes( blockCategory )
+			);
+
+			if ( foundCategory ) {
+				return {
+					...acc,
+					[ foundCategory ]: acc[ foundCategory ] + 1,
+				};
+			}
+
+			return acc;
+		}, initialAccumulator );
+	}, [ blocks ] );
 
 	let notice;
 	if ( isNetworkOffline ) {
@@ -151,7 +199,18 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 										as={ SidebarNavigationItem }
 										withChevron
 									>
-										{ capitalize( label ) }
+										<div className="edit-site-sidebar-navigation-screen-patterns__group-homepage-label-container">
+											<span>{ capitalize( label ) }</span>
+											{ blocks.length > 0 && (
+												<span className="edit-site-sidebar-navigation-screen-patterns__group-homepage-number-pattern">
+													{
+														numberOfPatternsAdded[
+															categoryKey
+														]
+													}
+												</span>
+											) }
+										</div>
 									</NavigatorButton>
 								</ItemGroup>
 							)
