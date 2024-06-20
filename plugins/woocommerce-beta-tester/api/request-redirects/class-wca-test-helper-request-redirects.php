@@ -102,7 +102,7 @@ class WCA_Test_Helper_Remote_Get_Redirector {
 			return $redirectors;
 		});
 
-    	return new WP_REST_RESPONSE(null, 204);
+    	return new WP_REST_RESPONSE(null, 200);
 	}
 
 	/**
@@ -131,7 +131,7 @@ class WCA_Test_Helper_Remote_Get_Redirector {
 			}
 		);
 
-		return new WP_REST_RESPONSE( null, 204 );
+		return new WP_REST_RESPONSE( null, 200 );
 	}
 
 	/**
@@ -148,6 +148,6 @@ class WCA_Test_Helper_Remote_Get_Redirector {
 				return $filters;
 			}
 		);
-		return new WP_REST_RESPONSE( null, 204 );
+		return new WP_REST_RESPONSE( null, 200 );
 	}
 }
