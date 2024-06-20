@@ -170,4 +170,23 @@ test.describe( `${ blockData.name }`, () => {
 			editor.page.getByText( 'DimensionsBlock spacing' )
 		).toBeVisible();
 	} );
+
+	test( 'should display the correct inspector setting controls', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Experimental)'
+		);
+		await expect( block ).toBeVisible();
+
+		await editor.openDocumentSettingsSidebar();
+
+		// Layout settings
+		await expect(
+			editor.page.getByText( 'LayoutJustificationOrientation' )
+		).toBeVisible();
+	} );
 } );
