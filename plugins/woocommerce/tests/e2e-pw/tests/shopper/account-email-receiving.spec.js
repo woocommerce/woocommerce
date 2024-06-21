@@ -48,9 +48,11 @@ test.describe(
 		} ) => {
 			// create a new customer
 			await page.goto( 'wp-admin/user-new.php' );
+			await expect( page ).toHaveTitle( /Add New User/ );
 
-			await page.waitForLoadState( 'networkidle' );
-
+			await page
+				.getByLabel( ' Username (required) ' )
+				.waitFor( { state: 'visible' } );
 			await page.getByLabel( ' Username (required) ' ).fill( username );
 			await page.getByLabel( ' Email (required) ' ).fill( email );
 			await page.getByLabel( ' First Name ' ).fill( 'New' );
@@ -95,9 +97,11 @@ test.describe(
 		} ) => {
 			// create a new customer
 			await page.goto( 'wp-admin/user-new.php' );
+			await expect( page ).toHaveTitle( /Add New User/ );
 
-			await page.waitForLoadState( 'networkidle' );
-
+			await page
+				.getByLabel( ' Username (required) ' )
+				.waitFor( { state: 'visible' } );
 			await page.getByLabel( ' Username (required) ' ).fill( username );
 			await page.getByLabel( ' Email (required) ' ).fill( email );
 			await page.getByLabel( ' First Name ' ).fill( 'New' );

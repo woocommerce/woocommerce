@@ -246,7 +246,6 @@ test.describe(
 	'Shopper > Update variable product',
 	{ tag: [ '@payments', '@services' ] },
 	() => {
-		let variableProductId;
 		const slug = variableProductName.replace( / /gi, '-' ).toLowerCase();
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {

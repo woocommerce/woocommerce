@@ -12,9 +12,9 @@ test.describe(
 			await page
 				.getByLabel( 'Move “Shop” to the Trash' )
 				.click( { force: true } );
-			await expect(
-				page.getByText( 'page moved to the Trash. Undo' )
-			).toBeVisible();
+			await page
+				.getByText( 'page moved to the Trash. Undo' )
+				.waitFor( { state: 'visible' } );
 		} );
 
 		test.afterEach( async ( { page } ) => {
@@ -27,9 +27,9 @@ test.describe(
 			await page
 				.getByLabel( 'Restore “Shop” from the Trash' )
 				.click( { force: true } );
-			await expect(
-				page.getByText( '1 page restored from the Trash.' )
-			).toBeVisible();
+			await page
+				.getByText( '1 page restored from the Trash.' )
+				.waitFor( { state: 'visible' } );
 		} );
 
 		test( 'Check the title of the shop page after the page has been deleted', async ( {

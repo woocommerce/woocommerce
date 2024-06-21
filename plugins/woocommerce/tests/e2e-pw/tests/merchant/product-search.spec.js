@@ -52,9 +52,9 @@ test.describe(
 
 			await page.goto( 'wp-admin/edit.php?post_type=product' );
 
+			await expect( page.locator( '#post-search-input' ) ).toBeVisible();
 			await page.locator( '#post-search-input' ).fill( searchString );
 			await page.locator( '#search-submit' ).click();
-			await page.waitForLoadState( 'networkidle' );
 
 			await expect( page.locator( '.row-title' ) ).toContainText(
 				productName
