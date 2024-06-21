@@ -139,7 +139,7 @@ export const Edit = ( {
 	}
 
 	const templatePartEditUri = getSetting(
-		'productFiltersTemplatePartEditUri',
+		'templatePartProductFiltersOverlayEditUri',
 		''
 	) as string;
 

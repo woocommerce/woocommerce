@@ -39,8 +39,10 @@ class ProductFilters extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		return <<<HTML
-			<div>Product Filters</div>
-		HTML;
+		ob_start();
+		printf( '<div>%s</div>', esc_html__( 'Product Filters', 'woocommerce' ) );
+		$html = ob_get_clean();
+
+		return $html;
 	}
 }

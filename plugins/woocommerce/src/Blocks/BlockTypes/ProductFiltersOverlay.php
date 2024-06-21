@@ -1,6 +1,11 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
+use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
+
 /**
  * ProductFiltersOverlay class.
  */
@@ -11,6 +16,17 @@ class ProductFiltersOverlay extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'product-filters-overlay';
+
+	/**
+	 * Constructor.
+	 *
+	 * @param AssetApi            $asset_api Instance of the asset API.
+	 * @param AssetDataRegistry   $asset_data_registry Instance of the asset data registry.
+	 * @param IntegrationRegistry $integration_registry Instance of the integration registry.
+	 */
+	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry, IntegrationRegistry $integration_registry ) {
+		parent::__construct( $asset_api, $asset_data_registry, $integration_registry, $this->block_name );
+	}
 
 	/**
 	 * Get the frontend style handle for this block type.
@@ -35,5 +51,55 @@ class ProductFiltersOverlay extends AbstractBlock {
 		$html = ob_get_clean();
 
 		return $html;
+	}
+
+	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = [] ) {
+		parent::enqueue_data( $attributes );
+
+		$template_part_edit_uri = '';
+
+		if (
+			current_user_can( 'edit_theme_options' ) &&
+			( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) )
+		) {
+			$theme_slug = BlockTemplateUtils::theme_has_template_part( 'product-filters-overlay' ) ? wp_get_theme()->get_stylesheet() : BlockTemplateUtils::PLUGIN_SLUG;
+
+			if ( version_compare( get_bloginfo( 'version' ), '5.9', '<' ) ) {
+				$site_editor_uri = add_query_arg(
+					array( 'page' => 'gutenberg-edit-site' ),
+					admin_url( 'themes.php' )
+				);
+			} else {
+				$site_editor_uri = add_query_arg(
+					array(
+						'canvas' => 'edit',
+						'path'   => '/template-parts/single',
+					),
+					admin_url( 'site-editor.php' )
+				);
+			}
+
+			$template_part_edit_uri = esc_url_raw(
+				add_query_arg(
+					array(
+						'postId'   => sprintf( '%s//%s', $theme_slug, 'product-filters-overlay' ),
+						'postType' => 'wp_template_part',
+					),
+					$site_editor_uri
+				)
+			);
+		}
+
+		$this->asset_data_registry->add(
+			'templatePartProductFiltersOverlayEditUri',
+			$template_part_edit_uri
+		);
 	}
 }
