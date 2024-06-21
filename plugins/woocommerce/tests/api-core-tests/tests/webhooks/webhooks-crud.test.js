@@ -128,7 +128,7 @@ test.describe('Webhooks API tests', () => {
 			 * consistent with the other API calls
 			 * Issue: https://github.com/woocommerce/woocommerce/issues/35290
 			 */
-			expect(getDeletedWebhookResponse.status()).toEqual(400);
+			expect(getDeletedWebhookResponse.status()).toEqual(404);
 		});
 	});
 
