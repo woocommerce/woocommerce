@@ -259,7 +259,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			document.addEventListener('DOMContentLoaded', function() {
 				const checkboxes = [
 					document.getElementById("woocommerce_enable_signup_and_login_from_checkout"),
-					document.getElementById("woocommerce_enable_myaccount_registration")
+					document.getElementById("woocommerce_enable_myaccount_registration"),
+					document.getElementById("woocommerce_enable_signup_from_checkout_for_subscriptions")
 				];
 				const inputs = [
 					document.getElementById("woocommerce_registration_generate_username"),
@@ -267,7 +268,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				];
 
 				function updateInputs() {
-					const isChecked = checkboxes.some(cb => cb.checked);
+					const isChecked = checkboxes.some(cb => cb && cb.checked);
 					inputs.forEach(input => {
 						input.disabled = !isChecked;
 						input.closest('td').classList.toggle("disabled", !isChecked);
