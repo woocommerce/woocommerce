@@ -23,11 +23,6 @@ const tabs = applyFilters( 'woocommerce_admin_test_helper_tabs', [
 		content: <Options />,
 	},
 	{
-		name: 'admin-notes',
-		title: 'Admin notes',
-		content: <AdminNotes />,
-	},
-	{
 		name: 'tools',
 		title: 'Tools',
 		content: <Tools />,
