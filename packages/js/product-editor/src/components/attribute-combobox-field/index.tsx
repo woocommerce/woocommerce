@@ -37,7 +37,7 @@ interface ComboboxControlProps
 }
 
 /*
- * Create an alias for the CombobBoxControl core component,
+ * Create an alias for the ComboboxControl core component,
  * but with the custom ComboboxControlProps interface.
  */
 const ComboboxControl =
@@ -130,9 +130,6 @@ const AttributesComboboxControl: React.FC<
 		];
 	}, [ attributeOptions, createNewAttributeOption ] );
 
-	// Attribute selected flag.
-	const [ attributeSelected, setAttributeSelected ] = useState( false );
-
 	// Get current of the selected item.
 	let currentValue = current ? `attr-${ current.id }` : '';
 	if ( createNewAttributeOption.state === 'creating' ) {
@@ -180,14 +177,14 @@ const AttributesComboboxControl: React.FC<
 	}, [ instanceNumber ] );
 
 	if ( ! help ) {
-		help = ! attributeSelected ? (
+		help = (
 			<div className="woocommerce-attributes-combobox-help">
 				{ __(
 					'Select an attribute or type to create.',
 					'woocommerce'
 				) }
 			</div>
-		) : null;
+		);
 
 		if ( isLoading ) {
 			help = (
@@ -237,8 +234,6 @@ const AttributesComboboxControl: React.FC<
 
 							return onAddNew?.( createNewAttributeOption.label );
 						}
-
-						setAttributeSelected( true );
 
 						const selectedAttribute = items?.find(
 							( item ) =>

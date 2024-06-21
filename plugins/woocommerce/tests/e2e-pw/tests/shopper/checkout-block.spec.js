@@ -57,6 +57,10 @@ test.describe( 'Checkout Block page', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
+		// make sure the currency is USD
+		await api.put( 'settings/general/woocommerce_currency', {
+			value: 'USD',
+		} );
 		// add product
 		await api
 			.post( 'products', {
@@ -271,7 +275,9 @@ test.describe( 'Checkout Block page', () => {
 			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Cannot create order from empty cart.' )
+			page.locator( '.wc-block-checkout-empty', {
+				hasText: 'Your cart is currently empty',
+			} )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'link', { name: 'Browse store' } )
@@ -287,8 +293,7 @@ test.describe( 'Checkout Block page', () => {
 		testPage,
 	} ) => {
 		// this time we're going to add two products to the cart
-		await addAProductToCart( page, productId );
-		await addAProductToCart( page, productId );
+		await addAProductToCart( page, productId, 2 );
 		await page.goto( testPage.slug );
 
 		await expect(
@@ -325,9 +330,7 @@ test.describe( 'Checkout Block page', () => {
 		testPage,
 	} ) => {
 		// this time we're going to add three products to the cart
-		await addAProductToCart( page, productId );
-		await addAProductToCart( page, productId );
-		await addAProductToCart( page, productId );
+		await addAProductToCart( page, productId, 3 );
 		await page.goto( testPage.slug );
 
 		await expect(
@@ -601,8 +604,7 @@ test.describe( 'Checkout Block page', () => {
 		testPage,
 	} ) => {
 		// adding 2 products to the cart
-		await addAProductToCart( page, productId );
-		await addAProductToCart( page, productId );
+		await addAProductToCart( page, productId, 2 );
 		await page.goto( testPage.slug );
 
 		await expect(
@@ -727,8 +729,7 @@ test.describe( 'Checkout Block page', () => {
 		page,
 		testPage,
 	} ) => {
-		await addAProductToCart( page, productId );
-		await addAProductToCart( page, productId );
+		await addAProductToCart( page, productId, 2 );
 		await page.goto( testPage.slug );
 
 		await expect(

@@ -59,28 +59,28 @@ class DefaultShippingPartners {
 						array(
 							'icon'        => $check_icon,
 							'description' => __(
-								'Print labels from Royal Mail, Parcel Force, DPD, and many more',
+								'Discounted labels from top global carriers',
 								'woocommerce'
 							),
 						),
 						array(
 							'icon'        => $check_icon,
 							'description' => __(
-								'Shop for the best rates, in real-time',
+								'Sync all your selling channels in one place',
 								'woocommerce'
 							),
 						),
 						array(
 							'icon'        => $check_icon,
-							'description' => __( 'Connect selling channels easily', 'woocommerce' ),
+							'description' => __( 'Advanced automated workflows and customs', 'woocommerce' ),
 						),
 						array(
 							'icon'        => $check_icon,
-							'description' => __( 'Advance automated workflows', 'woocommerce' ),
+							'description' => __( 'Instantly send tracking to your customers', 'woocommerce' ),
 						),
 						array(
 							'icon'        => $check_icon,
-							'description' => __( '30-days free trial', 'woocommerce' ),
+							'description' => __( '30-day free trial', 'woocommerce' ),
 						),
 					),
 				),

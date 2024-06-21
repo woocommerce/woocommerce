@@ -5031,6 +5031,13 @@ img.help_tip {
 		background: #dfdfdf !important;
 	}
 
+	.settings-panel {
+		ul.advice {
+			list-style: square;
+			list-style-position: inside;
+		}
+	}
+
 	table.form-table {
 		margin: 0;
 		position: relative;

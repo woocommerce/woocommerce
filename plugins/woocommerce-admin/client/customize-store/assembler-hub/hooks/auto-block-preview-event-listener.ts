@@ -108,6 +108,12 @@ const addInertToAssemblerPatterns = (
 		'/customize-store/assembler-hub/homepage': `[data-is-parent-block='true']:not([data-type='core/template-part'])`,
 	};
 
+	const pathInteractiveBlocks = page.includes(
+		'/customize-store/assembler-hub/homepage'
+	)
+		? interactiveBlocks[ '/customize-store/assembler-hub/homepage' ]
+		: interactiveBlocks[ page ];
+
 	const addInertToTemplateParts = () => {
 		for ( const disableClick of documentElement.querySelectorAll(
 			`[data-is-parent-block='true']`
@@ -116,7 +122,7 @@ const addInertToAssemblerPatterns = (
 		}
 
 		for ( const element of documentElement.querySelectorAll(
-			interactiveBlocks[ page ]
+			pathInteractiveBlocks
 		) ) {
 			makeInteractive( element );
 		}
@@ -191,8 +197,6 @@ const updateSelectedBlock = (
 		} );
 
 		updatePopoverPosition( {
-			mainBodyWidth: window.document.body.clientWidth,
-			iframeWidth: body.clientWidth,
 			event,
 			hoveredBlockClientId: null,
 			clickedBlockClientId: clickedBlockClientId as string,
@@ -208,8 +212,6 @@ const updateSelectedBlock = (
 
 		if ( selectedBlockClientId ) {
 			updatePopoverPosition( {
-				mainBodyWidth: window.document.body.clientWidth,
-				iframeWidth: body.clientWidth,
 				event,
 				hoveredBlockClientId: selectedBlockClientId,
 				clickedBlockClientId: null,
@@ -272,8 +274,6 @@ type useAutoBlockPreviewEventListenersCallbacks = {
 	getBlockParents: ( clientId: string ) => string[];
 	setBlockEditingMode: ( clientId: string ) => void;
 	updatePopoverPosition: ( options: {
-		mainBodyWidth: number;
-		iframeWidth: number;
 		event: MouseEvent;
 		hoveredBlockClientId: string | null;
 		clickedBlockClientId: string | null;

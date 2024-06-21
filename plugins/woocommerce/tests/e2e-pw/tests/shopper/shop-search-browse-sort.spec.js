@@ -94,89 +94,107 @@ test.describe( 'Search, browse by categories and sort items in the shop', () => 
 
 	// default theme doesn't have a search box, but can simulate a search by visiting the search URL
 	test( 'should let user search the store', async ( { page } ) => {
-		await page.goto( `shop/?s=${ simpleProductName }%201` );
+		await test.step( 'Go to the shop and perform the search', async () => {
+			await page.goto( `shop/?s=${ simpleProductName }%201` );
 
-		await expect(
-			page.getByRole( 'heading', {
-				name: `${ simpleProductName } 1`,
-			} )
-		).toBeVisible();
-		await expect( page.getByLabel( 'Breadcrumb' ) ).toContainText(
-			`${ simpleProductName } 1`
-		);
+			await expect(
+				page.getByRole( 'heading', {
+					name: `${ simpleProductName } 1`,
+				} )
+			).toBeVisible();
+			await expect( page.getByLabel( 'Breadcrumb' ) ).toContainText(
+				`${ simpleProductName } 1`
+			);
+		} );
 	} );
 
 	test( 'should let user browse products by categories', async ( {
 		page,
 	} ) => {
-		// browse the Audio category
-		await page.goto( 'shop/' );
-		await page.locator( `text=${ simpleProductName } 2` ).click();
-		await page
-			.getByLabel( 'Breadcrumb' )
-			.getByRole( 'link', { name: categoryB } )
-			.click();
+		await test.step( 'Go to the shop and browse by the Audio category', async () => {
+			await page.goto( 'shop/' );
+			await page.locator( `text=${ simpleProductName } 2` ).click();
+			await page
+				.getByLabel( 'Breadcrumb' )
+				.getByRole( 'link', { name: categoryB } )
+				.click();
+		} );
 
-		// verify the Audio category page
-		await expect(
-			page.getByRole( 'heading', { name: categoryB } )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'heading', { name: simpleProductName + ' 2' } )
-		).toBeVisible();
-		await page.locator( `text=${ simpleProductName } 2` ).click();
-		await expect(
-			page.getByRole( 'heading', { name: simpleProductName + ' 2' } )
-		).toBeVisible();
+		await test.step( 'Ensure the Audio category page contains all the relevant products', async () => {
+			await expect(
+				page.getByRole( 'heading', { name: categoryB } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'heading', { name: simpleProductName + ' 2' } )
+			).toBeVisible();
+			await page.locator( `text=${ simpleProductName } 2` ).click();
+			await expect(
+				page.getByRole( 'heading', { name: simpleProductName + ' 2' } )
+			).toBeVisible();
+		} );
 	} );
 
 	test( 'should let user sort the products in the shop', async ( {
 		page,
 	} ) => {
-		await page.goto( 'shop/' );
+		await test.step( 'Go to the shop and sort by price high to low', async () => {
+			await page.goto( 'shop/' );
+			await expect(
+				page.getByLabel( `Add to cart: “${ simpleProductName } 1”` )
+			).toBeVisible();
 
-		// sort by price high to low
-		await page.getByLabel( 'Shop order' ).selectOption( 'price-desc' );
+			// sort by price high to low
+			await page.getByLabel( 'Shop order' ).selectOption( 'price-desc' );
+			await page.waitForURL( /.*?orderby=price-desc.*/ );
 
-		await expect(
-			page.getByText( 'Add to cart View cart' ).nth( 2 )
-		).toBeVisible();
+			await expect(
+				page.getByText( 'Add to cart View cart' ).nth( 2 )
+			).toBeVisible();
 
-		// Check that the priciest appears before the cheapest in the list
-		const highToLowList = await page
-			.getByRole( 'listitem' )
-			.getByRole( 'heading' )
-			.allInnerTexts();
-		const highToLow_index_priciest = highToLowList.indexOf(
-			`${ simpleProductName } 3`
-		);
-		const highToLow_index_cheapest = highToLowList.indexOf(
-			`${ simpleProductName } 1`
-		);
-		expect( highToLow_index_priciest ).toBeLessThan(
-			highToLow_index_cheapest
-		);
+			// Check that the priciest appears before the cheapest in the list
+			const highToLowList = await page
+				.getByRole( 'listitem' )
+				.getByRole( 'heading' )
+				.allInnerTexts();
+			const highToLow_index_priciest = highToLowList.indexOf(
+				`${ simpleProductName } 3`
+			);
+			const highToLow_index_cheapest = highToLowList.indexOf(
+				`${ simpleProductName } 1`
+			);
+			expect( highToLow_index_priciest ).toBeLessThan(
+				highToLow_index_cheapest
+			);
+		} );
 
-		// sort by price low to high
-		await page.getByLabel( 'Shop order' ).selectOption( 'price' );
+		await test.step( 'Go to the shop and sort by price low to high', async () => {
+			await page.goto( 'shop/' );
+			await expect(
+				page.getByLabel( `Add to cart: “${ simpleProductName } 1”` )
+			).toBeVisible();
 
-		await expect(
-			page.getByText( 'Add to cart View cart' ).nth( 2 )
-		).toBeVisible();
+			// sort by price low to high
+			await page.getByLabel( 'Shop order' ).selectOption( 'price' );
+			await page.waitForURL( /.*?orderby=price.*/ );
 
-		// Check that the cheapest appears before the priciest in the list
-		const lowToHighList = await page
-			.getByRole( 'listitem' )
-			.getByRole( 'heading' )
-			.allInnerTexts();
-		const lowToHigh_index_priciest = lowToHighList.indexOf(
-			`${ simpleProductName } 3`
-		);
-		const lowToHigh_index_cheapest = lowToHighList.indexOf(
-			`${ simpleProductName } 1`
-		);
-		expect( lowToHigh_index_cheapest ).toBeLessThan(
-			lowToHigh_index_priciest
-		);
+			await expect(
+				page.getByText( 'Add to cart View cart' ).nth( 2 )
+			).toBeVisible();
+
+			// Check that the cheapest appears before the priciest in the list
+			const lowToHighList = await page
+				.getByRole( 'listitem' )
+				.getByRole( 'heading' )
+				.allInnerTexts();
+			const lowToHigh_index_priciest = lowToHighList.indexOf(
+				`${ simpleProductName } 3`
+			);
+			const lowToHigh_index_cheapest = lowToHighList.indexOf(
+				`${ simpleProductName } 1`
+			);
+			expect( lowToHigh_index_cheapest ).toBeLessThan(
+				lowToHigh_index_priciest
+			);
+		} );
 	} );
 } );

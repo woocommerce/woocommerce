@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add woocommerce_manage_stock option to the default_option_permissions list in the Options rest controller

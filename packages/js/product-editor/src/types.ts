@@ -50,7 +50,7 @@ export interface TaxonomyMetadata {
 	hierarchical: boolean;
 }
 
-export type ProductFormTemplateProps = {
+export type ProductFormPostProps = {
 	id: number;
 	date: string;
 	date_gmt: string;
