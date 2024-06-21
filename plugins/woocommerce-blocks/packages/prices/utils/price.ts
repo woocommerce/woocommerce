@@ -35,15 +35,21 @@ export const getCurrencyFromPriceResponse = (
 	} = currencyData;
 
 	return {
-		code: code || 'USD',
-		symbol: symbol || '$',
+		code: code || SITE_CURRENCY.code,
+		symbol: symbol || SITE_CURRENCY.symbol,
 		thousandSeparator:
-			typeof thousandSeparator === 'string' ? thousandSeparator : ',',
+			typeof thousandSeparator === 'string'
+				? thousandSeparator
+				: SITE_CURRENCY.thousandSeparator,
 		decimalSeparator:
-			typeof decimalSeparator === 'string' ? decimalSeparator : '.',
-		minorUnit: Number.isFinite( minorUnit ) ? minorUnit : 2,
-		prefix: typeof prefix === 'string' ? prefix : '$',
-		suffix: typeof suffix === 'string' ? suffix : '',
+			typeof decimalSeparator === 'string'
+				? decimalSeparator
+				: SITE_CURRENCY.decimalSeparator,
+		minorUnit: Number.isFinite( minorUnit )
+			? minorUnit
+			: SITE_CURRENCY.minorUnit,
+		prefix: typeof prefix === 'string' ? prefix : SITE_CURRENCY.prefix,
+		suffix: typeof suffix === 'string' ? suffix : SITE_CURRENCY.suffix,
 	};
 };
 
