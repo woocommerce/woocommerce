@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 // @todo: Implement the right copy for the pattern categories: https://github.com/woocommerce/woocommerce/issues/48381
 export const PATTERN_CATEGORIES = {
 	intro: {
-		label: __( 'intro', 'woocommerce' ),
+		label: __( 'Intro', 'woocommerce' ),
 		description: __(
 			'Welcome shoppers to your store with one of our introductory patterns.',
 			'woocommerce'
@@ -20,14 +20,14 @@ export const PATTERN_CATEGORIES = {
 		),
 	},
 	about: {
-		label: __( 'about', 'woocommerce' ),
+		label: __( 'About', 'woocommerce' ),
 		description: __(
 			'Show your shoppers what’s special about your business.',
 			'woocommerce'
 		),
 	},
 	services: {
-		label: __( 'services', 'woocommerce' ),
+		label: __( 'Services', 'woocommerce' ),
 		description: __(
 			'Share information on any services that your business can provide.',
 			'woocommerce'
