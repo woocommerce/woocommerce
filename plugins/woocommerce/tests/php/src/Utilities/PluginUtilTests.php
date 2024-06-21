@@ -33,6 +33,43 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `get_active_and_valid_plugins` gets the active plugins *that actually exist* and returns them
+	 *          as a list of absolute file paths.
+	 *
+	 * The tested function is just a wrapper around a core WP function that's marked as "private" so this is
+	 * mostly just to ensure that there haven't been any breaking changes to that function.
+	 */
+	public function test_get_active_and_valid_plugins() {
+		self::touch( WP_PLUGIN_DIR . '/test1/test1.php' );
+		self::touch( WP_PLUGIN_DIR . '/test2/test2_x.php' );
+
+		$orig_active_plugins = get_option( 'active_plugins' );
+
+		update_option(
+			'active_plugins',
+			array(
+				'test1/test1.php',
+				'test2/test2.php',
+			)
+		);
+
+		$active_valid_plugins = $this->sut->get_active_and_valid_plugins();
+		$this->assertCount( 1, $active_valid_plugins );
+		$this->assertContains( WP_PLUGIN_DIR . '/test1/test1.php', $active_valid_plugins );
+
+		if ( false === $orig_active_plugins ) {
+			delete_option( 'active_plugins' );
+		} else {
+			update_option( 'active_plugins', $orig_active_plugins );
+		}
+
+		$this->rmdir( WP_PLUGIN_DIR . '/test1' );
+		$this->rmdir( WP_PLUGIN_DIR . '/test2' );
+		$this->delete_folders( WP_PLUGIN_DIR . '/test1' );
+		$this->delete_folders( WP_PLUGIN_DIR . '/test2' );
+	}
+
+	/**
 	 * @testdox 'get_woocommerce_aware_plugins' properly gets the names of all the existing WooCommerce aware plugins.
 	 */
 	public function test_get_all_woo_aware_plugins() {

@@ -68,6 +68,23 @@ class PluginUtil {
 	}
 
 	/**
+	 * Wrapper for WP's private `wp_get_active_and_valid_plugins` function.
+	 *
+	 * This function is more useful in some cases compared to just using get_option( 'active_plugins' )
+	 * because it also validates that the plugin files actually exist. We're wrapping it here rather than
+	 * using the function directly because it's marked as "@access private", so if it changes in a
+	 * backward-incompatible way, we can update our method here to preserve the functionality.
+	 *
+	 * Note that the doc block for the WP function says it returns "Array of paths to plugin files relative
+	 * to the plugins directory", but it actually returns absolute paths.
+	 *
+	 * @return string[] Array of absolute paths to plugin files.
+	 */
+	public function get_active_and_valid_plugins() {
+		return wp_get_active_and_valid_plugins();
+	}
+
+	/**
 	 * Get a list with the names of the WordPress plugins that are WooCommerce aware
 	 * (they have a "WC tested up to" header).
 	 *
