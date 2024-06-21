@@ -18,7 +18,7 @@ const test = base.extend( {
 	},
 } );
 
-test.describe( 'Assembler -> headers', () => {
+test.describe( 'Assembler -> headers', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -94,7 +94,7 @@ test.describe( 'Assembler -> headers', () => {
 		baseURL,
 	} ) => {
 		const assembler = await assemblerPage.getAssembler();
-		const header = await assembler
+		const header = assembler
 			.locator( '.block-editor-block-patterns-list__list-item' )
 			.nth( 1 )
 			.frameLocator( 'iframe' )
@@ -155,7 +155,7 @@ test.describe( 'Assembler -> headers', () => {
 
 			const expectedHeaderClass = extractHeaderClass( headerPickerClass );
 
-			const headerPattern = await editor.locator(
+			const headerPattern = editor.locator(
 				'header div.wc-blocks-header-pattern'
 			);
 

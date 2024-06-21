@@ -28,7 +28,20 @@ const productData = {
 
 const attributesData = {
 	name: 'Size',
-	options: [ 'Small', 'Medium', 'Large' ],
+	terms: [
+		{
+			name: 'Small',
+			slug: 'small',
+		},
+		{
+			name: 'Medium',
+			slug: 'medium',
+		},
+		{
+			name: 'Large',
+			slug: 'large',
+		},
+	],
 };
 
 const tabs = [
@@ -53,7 +66,7 @@ let productId_editVariations,
 	productId_deleteVariations,
 	productId_singleVariation;
 
-test.describe( 'Variations tab', () => {
+test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Create variable product', () => {
 		test.beforeAll( async ( { browser } ) => {
 			productId_editVariations = await createVariableProduct(
@@ -76,7 +89,7 @@ test.describe( 'Variations tab', () => {
 			'The block product editor is not being tested'
 		);
 
-		test.skip( 'can create a variation option and publish the product', async ( {
+		test( 'can create a variation option and publish the product', async ( {
 			page,
 		} ) => {
 			await test.step( 'Load new product editor, disable tour', async () => {
@@ -118,27 +131,97 @@ test.describe( 'Variations tab', () => {
 
 				await page.waitForLoadState( 'domcontentloaded' );
 
-				await page
-					.locator(
-						'input[aria-describedby^="components-form-token-suggestions-howto-combobox-control"]'
-					)
-					.fill( attributesData.name );
+				/*
+				 * AttributeTableRow is the row that contains
+				 * the attribute name and the options (terms).
+				 */
+				const rowSelector =
+					'.woocommerce-new-attribute-modal__table-row';
+
+				/*
+				 * Check the app loads the attributes,
+				 * based on the Spinner visibility.
+				 */
+				const spinnerLocator = page.locator(
+					`${ rowSelector } .components-spinner`
+				);
+				await spinnerLocator.waitFor( {
+					state: 'visible',
+				} );
+				await spinnerLocator.waitFor( { state: 'hidden' } );
+
+				// Attribute combobox input
+				const attributeInputLocator = page.locator(
+					'input[aria-describedby^="components-form-token-suggestions-howto-combobox-control"]'
+				);
+
+				await attributeInputLocator.fill( attributesData.name );
 
 				await page.locator( 'text=Create "Size"' ).click();
 
-				for ( const option of attributesData.options ) {
-					const container = page.locator(
-						'td.woocommerce-new-attribute-modal__table-attribute-value-column'
-					);
+				// Wait for the create-attribute async request to finish
+				const newAttrResponse = await page.waitForResponse(
+					( response ) =>
+						response
+							.url()
+							.includes(
+								`wp-json/wc/v3/products/attributes?name=${ attributesData.name }&generate_slug=true`
+							) && response.status() === 201
+				);
 
-					const inputLocator = container.locator(
+				const newAttrData = await newAttrResponse.json();
+
+				const FormTokenFieldLocator = page.locator(
+					'td.woocommerce-new-attribute-modal__table-attribute-value-column'
+				);
+
+				const FormTokenFieldInputLocator =
+					FormTokenFieldLocator.locator(
 						'input[id^="components-form-token-input-"]'
 					);
 
-					await inputLocator.fill( option );
-					await page.waitForTimeout( 500 ); // needs some time to be able to press Enter.
-					await inputLocator.press( 'Enter' );
-					await expect( container ).toContainText( option );
+				for ( const term of attributesData.terms ) {
+					// Fill the input field with the option
+					await FormTokenFieldInputLocator.fill( term.name );
+					await FormTokenFieldInputLocator.press( 'Enter' );
+
+					/*
+					 * Check the new option is added to the list,
+					 * by checking the last aria-hidden
+					 */
+					const newAriaHiddenTokenLocator =
+						FormTokenFieldLocator.locator(
+							'span.components-form-token-field__token-text > span[aria-hidden="true"]'
+						).last();
+
+					await expect( newAriaHiddenTokenLocator ).toHaveText(
+						term.name
+					);
+
+					/*
+					 * Check the option being added to the list,
+					 * by checking the token with validating state.
+					 */
+					const newValidatingTokenLocator =
+						FormTokenFieldLocator.locator( '.is-validating' );
+
+					await newValidatingTokenLocator.waitFor( {
+						state: 'visible',
+					} );
+
+					/*
+					 * Wait for the async POST request
+					 * that creates the new attribute term to finish.
+					 */
+					await page.waitForResponse( ( response ) => {
+						return (
+							response
+								.url()
+								.includes(
+									`/wp-json/wc/v3/products/attributes/${ newAttrData.id }/terms?name=${ term.name }&slug=${ term.slug }&_locale=user`
+								) && response.status() === 201
+						);
+					} );
 				}
 
 				await page
@@ -162,9 +245,7 @@ test.describe( 'Variations tab', () => {
 					.getByRole( 'button', { name: 'Set prices' } )
 					.click();
 
-				await expect(
-					page.getByText( '$50.00' ).nth( 2 )
-				).toBeVisible();
+				await expect( page.getByText( '50' ).nth( 2 ) ).toBeVisible();
 
 				await expect(
 					page.getByLabel( 'Dismiss this notice' )
@@ -183,17 +264,25 @@ test.describe( 'Variations tab', () => {
 					} )
 					.click();
 
-				const element = page.locator(
+				const snackbarLocator = page.locator(
 					'div.components-snackbar__content'
 				);
-				if ( Array.isArray( element ) ) {
-					await expect( await element[ 0 ].innerText() ).toMatch(
-						`${ attributesData.options.length } variations updated.`
-					);
-					await expect( await element[ 1 ].innerText() ).toMatch(
-						/Product published/
-					);
-				}
+
+				// Wait for the snackbar to appear
+				await snackbarLocator.waitFor( {
+					state: 'visible',
+					timeout: 20000,
+				} );
+
+				// Verify that the first message is the expected one
+				await expect( snackbarLocator.nth( 0 ) ).toHaveText(
+					`${ attributesData.terms.length } variations updated.`
+				);
+
+				// Verify that the second message is the expected one
+				await expect( snackbarLocator.nth( 1 ) ).toHaveText(
+					/Product published/
+				);
 			} );
 		} );
 

@@ -2,7 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const uuid = require( 'uuid' );
 
-test.describe( 'Edit order', () => {
+test.describe( 'Edit order', { tag: '@services' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	let orderId, orderToCancel;
@@ -284,373 +284,387 @@ test.describe( 'Edit order', () => {
 	} );
 } );
 
-test.describe( 'Edit order > Downloadable product permissions', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+test.describe(
+	'Edit order > Downloadable product permissions',
+	{ tag: '@services' },
+	() => {
+		test.use( { storageState: process.env.ADMINSTATE } );
 
-	const productName = 'TDP 001';
-	const product2Name = 'TDP 002';
-	const customerBilling = {
-		email: 'john.doe@example.com',
-	};
+		const productName = 'TDP 001';
+		const product2Name = 'TDP 002';
+		const customerBilling = {
+			email: 'john.doe@example.com',
+		};
 
-	let orderId,
-		productId,
-		product2Id,
-		noProductOrderId,
-		initialGrantAccessAfterPaymentSetting;
+		let orderId,
+			productId,
+			product2Id,
+			noProductOrderId,
+			initialGrantAccessAfterPaymentSetting;
 
-	/**
-	 * Enable the "Grant access to downloadable products after payment" setting in WooCommerce > Settings > Products > Downloadable products.
-	 */
-	const enableGrantAccessAfterPaymentSetting = async ( api ) => {
-		const endpoint =
-			'settings/products/woocommerce_downloads_grant_access_after_payment';
+		/**
+		 * Enable the "Grant access to downloadable products after payment" setting in WooCommerce > Settings > Products > Downloadable products.
+		 */
+		const enableGrantAccessAfterPaymentSetting = async ( api ) => {
+			const endpoint =
+				'settings/products/woocommerce_downloads_grant_access_after_payment';
 
-		// Get current value
-		const response = await api.get( endpoint );
-		initialGrantAccessAfterPaymentSetting = response.data.value;
+			// Get current value
+			const response = await api.get( endpoint );
+			initialGrantAccessAfterPaymentSetting = response.data.value;
 
-		// Enable
-		if ( initialGrantAccessAfterPaymentSetting !== 'yes' ) {
+			// Enable
+			if ( initialGrantAccessAfterPaymentSetting !== 'yes' ) {
+				await api.put( endpoint, {
+					value: 'yes',
+				} );
+			}
+		};
+
+		const revertGrantAccessAfterPaymentSetting = async ( api ) => {
+			const endpoint =
+				'settings/products/woocommerce_downloads_grant_access_after_payment';
+
 			await api.put( endpoint, {
-				value: 'yes',
+				value: initialGrantAccessAfterPaymentSetting,
 			} );
-		}
-	};
+		};
 
-	const revertGrantAccessAfterPaymentSetting = async ( api ) => {
-		const endpoint =
-			'settings/products/woocommerce_downloads_grant_access_after_payment';
+		test.beforeEach( async ( { baseURL } ) => {
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
+			} );
+			await api
+				.post( 'products', {
+					name: productName,
+					downloadable: true,
+					download_limit: -1,
+					downloads: [
+						{
+							id: uuid.v4(),
+							name: 'Single',
+							file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+						},
+					],
+				} )
+				.then( ( response ) => {
+					productId = response.data.id;
+				} );
 
-		await api.put( endpoint, {
-			value: initialGrantAccessAfterPaymentSetting,
+			await enableGrantAccessAfterPaymentSetting( api );
+
+			await api
+				.post( 'products', {
+					name: product2Name,
+					downloadable: true,
+					download_limit: -1,
+					downloads: [
+						{
+							id: uuid.v4(),
+							name: 'Single',
+							file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+						},
+					],
+				} )
+				.then( ( response ) => {
+					product2Id = response.data.id;
+				} );
+			await api
+				.post( 'orders', {
+					status: 'processing',
+					line_items: [
+						{
+							product_id: productId,
+							quantity: 1,
+						},
+					],
+					billing: customerBilling,
+				} )
+				.then( ( response ) => {
+					orderId = response.data.id;
+				} );
+			await api
+				.post( 'orders', {
+					status: 'processing',
+					billing: customerBilling,
+				} )
+				.then( ( response ) => {
+					noProductOrderId = response.data.id;
+				} );
 		} );
-	};
 
-	test.beforeEach( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
+		test.afterEach( async ( { baseURL } ) => {
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
+			} );
+			await api.delete( `products/${ productId }`, { force: true } );
+			await api.delete( `products/${ product2Id }`, { force: true } );
+			await api.delete( `orders/${ orderId }`, { force: true } );
+			await api.delete( `orders/${ noProductOrderId }`, { force: true } );
+			await revertGrantAccessAfterPaymentSetting( api );
 		} );
-		await api
-			.post( 'products', {
-				name: productName,
-				downloadable: true,
-				download_limit: -1,
-				downloads: [
-					{
-						id: uuid.v4(),
-						name: 'Single',
-						file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
-					},
-				],
-			} )
-			.then( ( response ) => {
-				productId = response.data.id;
-			} );
 
-		await enableGrantAccessAfterPaymentSetting( api );
+		// these tests aren't completely independent.  Needs some refactoring.
 
-		await api
-			.post( 'products', {
-				name: product2Name,
-				downloadable: true,
-				download_limit: -1,
-				downloads: [
-					{
-						id: uuid.v4(),
-						name: 'Single',
-						file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
-					},
-				],
-			} )
-			.then( ( response ) => {
-				product2Id = response.data.id;
-			} );
-		await api
-			.post( 'orders', {
-				status: 'processing',
-				line_items: [
-					{
-						product_id: productId,
-						quantity: 1,
-					},
-				],
-				billing: customerBilling,
-			} )
-			.then( ( response ) => {
-				orderId = response.data.id;
-			} );
-		await api
-			.post( 'orders', {
-				status: 'processing',
-				billing: customerBilling,
-			} )
-			.then( ( response ) => {
-				noProductOrderId = response.data.id;
-			} );
-	} );
+		test( 'can add downloadable product permissions to order without product', async ( {
+			page,
+		} ) => {
+			// go to the order with no products
+			await page.goto(
+				`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ noProductOrderId }`
+			);
 
-	test.afterEach( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
+			// add downloadable product permissions
+			await page
+				.locator( 'input.select2-search__field' )
+				.type( productName );
+			await page
+				.locator(
+					'li.select2-results__option.select2-results__option--highlighted'
+				)
+				.click();
+			await page.locator( 'button.grant_access' ).click();
+
+			// verify new downloadable product permission details
+			await expect(
+				page.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+				)
+			).toContainText( productName );
+			await expect(
+				page.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
+				)
+			).toHaveAttribute( 'placeholder', 'Unlimited' );
+			await expect(
+				page.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
+				)
+			).toHaveAttribute( 'placeholder', 'Never' );
+			await expect(
+				page.locator( 'button.revoke_access' )
+			).toBeVisible();
+			await expect(
+				page.locator( 'a:has-text("Copy link")' )
+			).toBeVisible();
+			await expect(
+				page.locator( 'a:has-text("View report")' )
+			).toBeVisible();
 		} );
-		await api.delete( `products/${ productId }`, { force: true } );
-		await api.delete( `products/${ product2Id }`, { force: true } );
-		await api.delete( `orders/${ orderId }`, { force: true } );
-		await api.delete( `orders/${ noProductOrderId }`, { force: true } );
-		await revertGrantAccessAfterPaymentSetting( api );
-	} );
 
-	// these tests aren't completely independent.  Needs some refactoring.
+		test( 'can add downloadable product permissions to order with product', async ( {
+			page,
+		} ) => {
+			// open the order that already has a product assigned
+			await page.goto(
+				`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
 
-	test( 'can add downloadable product permissions to order without product', async ( {
-		page,
-	} ) => {
-		// go to the order with no products
-		await page.goto(
-			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ noProductOrderId }`
-		);
+			// add downloadable product permissions
+			await page
+				.locator( 'input.select2-search__field' )
+				.type( product2Name );
+			await page
+				.locator(
+					'li.select2-results__option.select2-results__option--highlighted'
+				)
+				.click();
+			await page.locator( 'button.grant_access' ).click();
 
-		// add downloadable product permissions
-		await page.locator( 'input.select2-search__field' ).type( productName );
-		await page
-			.locator(
-				'li.select2-results__option.select2-results__option--highlighted'
-			)
-			.click();
-		await page.locator( 'button.grant_access' ).click();
+			// verify new downloadable product permission details
+			await expect(
+				page.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong',
+					{ hasText: product2Name }
+				)
+			).toBeVisible();
 
-		// verify new downloadable product permission details
-		await expect(
-			page.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-			)
-		).toContainText( productName );
-		await expect(
-			page.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
-			)
-		).toHaveAttribute( 'placeholder', 'Unlimited' );
-		await expect(
-			page.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
-			)
-		).toHaveAttribute( 'placeholder', 'Never' );
-		await expect( page.locator( 'button.revoke_access' ) ).toBeVisible();
-		await expect( page.locator( 'a:has-text("Copy link")' ) ).toBeVisible();
-		await expect(
-			page.locator( 'a:has-text("View report")' )
-		).toBeVisible();
-	} );
+			await expect(
+				page.locator(
+					'#woocommerce-order-downloads input[name^="downloads_remaining"] >> nth=-1'
+				)
+			).toHaveAttribute( 'placeholder', 'Unlimited' );
+			await expect(
+				page.locator(
+					'#woocommerce-order-downloads input[name^="access_expires"] >> nth=-1'
+				)
+			).toHaveAttribute( 'placeholder', 'Never' );
+		} );
 
-	test( 'can add downloadable product permissions to order with product', async ( {
-		page,
-	} ) => {
-		// open the order that already has a product assigned
-		await page.goto(
-			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
-		);
+		test( 'can edit downloadable product permissions', async ( {
+			page,
+		} ) => {
+			const expectedDownloadsRemaining = '10';
+			const expectedDownloadsExpirationDate = '2050-01-01';
 
-		// add downloadable product permissions
-		await page
-			.locator( 'input.select2-search__field' )
-			.type( product2Name );
-		await page
-			.locator(
-				'li.select2-results__option.select2-results__option--highlighted'
-			)
-			.click();
-		await page.locator( 'button.grant_access' ).click();
+			// open the order that already has a product assigned
+			await page.goto(
+				`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
 
-		// verify new downloadable product permission details
-		await expect(
-			page.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong',
-				{ hasText: product2Name }
-			)
-		).toBeVisible();
+			// expand product download permissions
+			await page
+				.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+				)
+				.click();
 
-		await expect(
-			page.locator(
-				'#woocommerce-order-downloads input[name^="downloads_remaining"] >> nth=-1'
-			)
-		).toHaveAttribute( 'placeholder', 'Unlimited' );
-		await expect(
-			page.locator(
-				'#woocommerce-order-downloads input[name^="access_expires"] >> nth=-1'
-			)
-		).toHaveAttribute( 'placeholder', 'Never' );
-	} );
+			// edit download permissions
+			await page
+				.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
+				)
+				.fill( expectedDownloadsRemaining );
+			await page
+				.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
+				)
+				.fill( expectedDownloadsExpirationDate );
+			await page.locator( 'button.save_order' ).click();
 
-	test( 'can edit downloadable product permissions', async ( { page } ) => {
-		const expectedDownloadsRemaining = '10';
-		const expectedDownloadsExpirationDate = '2050-01-01';
+			// verify new downloadable product permissions
+			await page
+				.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+				)
+				.click();
+			await expect(
+				page.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
+				)
+			).toHaveValue( expectedDownloadsRemaining );
+			await expect(
+				page.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
+				)
+			).toHaveValue( expectedDownloadsExpirationDate );
+		} );
 
-		// open the order that already has a product assigned
-		await page.goto(
-			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
-		);
+		test( 'can revoke downloadable product permissions', async ( {
+			page,
+		} ) => {
+			// open the order that already has a product assigned
+			await page.goto(
+				`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
 
-		// expand product download permissions
-		await page
-			.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-			)
-			.click();
+			// expand product download permissions
+			await page
+				.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+				)
+				.click();
 
-		// edit download permissions
-		await page
-			.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
-			)
-			.fill( expectedDownloadsRemaining );
-		await page
-			.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
-			)
-			.fill( expectedDownloadsExpirationDate );
-		await page.locator( 'button.save_order' ).click();
+			// verify prior state before revoking
+			await expect(
+				page.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+				)
+			).toHaveCount( 1 );
 
-		// verify new downloadable product permissions
-		await page
-			.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-			)
-			.click();
-		await expect(
-			page.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
-			)
-		).toHaveValue( expectedDownloadsRemaining );
-		await expect(
-			page.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
-			)
-		).toHaveValue( expectedDownloadsExpirationDate );
-	} );
+			// click revoke access
+			page.on( 'dialog', ( dialog ) => dialog.accept() );
+			await page.locator( 'button.revoke_access' ).click();
 
-	test( 'can revoke downloadable product permissions', async ( { page } ) => {
-		// open the order that already has a product assigned
-		await page.goto(
-			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
-		);
+			// verify permissions gone
+			await expect(
+				page.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+				)
+			).toHaveCount( 0 );
+		} );
 
-		// expand product download permissions
-		await page
-			.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-			)
-			.click();
+		test( 'should not allow downloading a product if download attempts are exceeded', async ( {
+			page,
+		} ) => {
+			const expectedReason =
+				'Sorry, you have reached your download limit for this file';
 
-		// verify prior state before revoking
-		await expect(
-			page.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-			)
-		).toHaveCount( 1 );
+			// open the order that already has a product assigned
+			await page.goto(
+				`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
 
-		// click revoke access
-		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.locator( 'button.revoke_access' ).click();
+			// set the download limit to 0
+			// expand product download permissions
+			await page
+				.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+				)
+				.click();
 
-		// verify permissions gone
-		await expect(
-			page.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-			)
-		).toHaveCount( 0 );
-	} );
+			// edit download permissions
+			await page
+				.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
+				)
+				.fill( '0' );
+			await page.locator( 'button.save_order' ).click();
 
-	test( 'should not allow downloading a product if download attempts are exceeded', async ( {
-		page,
-	} ) => {
-		const expectedReason =
-			'Sorry, you have reached your download limit for this file';
+			// get the download link
+			await page
+				.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+				)
+				.click();
+			const downloadPage = await page
+				.locator( 'a#copy-download-link' )
+				.getAttribute( 'href' );
 
-		// open the order that already has a product assigned
-		await page.goto(
-			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
-		);
+			// open download page
+			await page.goto( downloadPage );
+			await expect( page.locator( 'div.wp-die-message' ) ).toContainText(
+				expectedReason
+			);
+		} );
 
-		// set the download limit to 0
-		// expand product download permissions
-		await page
-			.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-			)
-			.click();
+		test( 'should not allow downloading a product if expiration date has passed', async ( {
+			page,
+		} ) => {
+			const expectedReason = 'Sorry, this download has expired';
 
-		// edit download permissions
-		await page
-			.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
-			)
-			.fill( '0' );
-		await page.locator( 'button.save_order' ).click();
+			// open the order that already has a product assigned
+			await page.goto(
+				`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
 
-		// get the download link
-		await page
-			.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-			)
-			.click();
-		const downloadPage = await page
-			.locator( 'a#copy-download-link' )
-			.getAttribute( 'href' );
+			// set the download limit to 0
+			// expand product download permissions
+			await page
+				.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+				)
+				.click();
 
-		// open download page
-		await page.goto( downloadPage );
-		await expect( page.locator( 'div.wp-die-message' ) ).toContainText(
-			expectedReason
-		);
-	} );
+			// edit download permissions
+			await page
+				.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
+				)
+				.fill( '2018-12-14' );
+			await page.locator( 'button.save_order' ).click();
 
-	test( 'should not allow downloading a product if expiration date has passed', async ( {
-		page,
-	} ) => {
-		const expectedReason = 'Sorry, this download has expired';
+			// get the download link
+			await page
+				.locator(
+					'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
+				)
+				.click();
+			const downloadPage = await page
+				.locator( 'a#copy-download-link' )
+				.getAttribute( 'href' );
 
-		// open the order that already has a product assigned
-		await page.goto(
-			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
-		);
-
-		// set the download limit to 0
-		// expand product download permissions
-		await page
-			.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-			)
-			.click();
-
-		// edit download permissions
-		await page
-			.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
-			)
-			.fill( '2018-12-14' );
-		await page.locator( 'button.save_order' ).click();
-
-		// get the download link
-		await page
-			.locator(
-				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
-			)
-			.click();
-		const downloadPage = await page
-			.locator( 'a#copy-download-link' )
-			.getAttribute( 'href' );
-
-		// open download page
-		await page.goto( downloadPage );
-		await expect( page.locator( 'div.wp-die-message' ) ).toContainText(
-			expectedReason
-		);
-	} );
-} );
+			// open download page
+			await page.goto( downloadPage );
+			await expect( page.locator( 'div.wp-die-message' ) ).toContainText(
+				expectedReason
+			);
+		} );
+	}
+);
