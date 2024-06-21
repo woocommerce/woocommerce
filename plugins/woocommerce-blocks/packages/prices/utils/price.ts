@@ -1,68 +1,12 @@
 /**
  * External dependencies
  */
-import { CURRENCY } from '@woocommerce/settings';
+import { SITE_CURRENCY } from '@woocommerce/settings';
 import type {
 	Currency,
 	CurrencyResponse,
 	CartShippingPackageShippingRate,
-	SymbolPosition,
 } from '@woocommerce/types';
-
-/**
- * Get currency prefix.
- */
-const getPrefix = (
-	// Currency symbol.
-	symbol: string,
-	// Position of currency symbol from settings.
-	symbolPosition: SymbolPosition
-): string => {
-	const prefixes = {
-		left: symbol,
-		left_space: ' ' + symbol,
-		right: '',
-		right_space: '',
-	};
-	return prefixes[ symbolPosition ] || '';
-};
-
-/**
- * Get currency suffix.
- */
-const getSuffix = (
-	// Currency symbol.
-	symbol: string,
-	// Position of currency symbol from settings.
-	symbolPosition: SymbolPosition
-): string => {
-	const suffixes = {
-		left: '',
-		left_space: '',
-		right: symbol,
-		right_space: ' ' + symbol,
-	};
-	return suffixes[ symbolPosition ] || '';
-};
-
-/**
- * Currency information in normalized format from server settings.
- */
-const siteCurrencySettings: Currency = {
-	code: CURRENCY.code,
-	symbol: CURRENCY.symbol,
-	thousandSeparator: CURRENCY.thousandSeparator,
-	decimalSeparator: CURRENCY.decimalSeparator,
-	minorUnit: CURRENCY.precision,
-	prefix: getPrefix(
-		CURRENCY.symbol,
-		CURRENCY.symbolPosition as SymbolPosition
-	),
-	suffix: getSuffix(
-		CURRENCY.symbol,
-		CURRENCY.symbolPosition as SymbolPosition
-	),
-};
 
 /**
  * Gets currency information in normalized format from an API response or the server.
@@ -77,7 +21,7 @@ export const getCurrencyFromPriceResponse = (
 		| CartShippingPackageShippingRate
 ): Currency => {
 	if ( ! currencyData?.currency_code ) {
-		return siteCurrencySettings;
+		return SITE_CURRENCY;
 	}
 
 	const {
@@ -110,7 +54,7 @@ export const getCurrency = (
 	currencyData: Partial< Currency > = {}
 ): Currency => {
 	return {
-		...siteCurrencySettings,
+		...SITE_CURRENCY,
 		...currencyData,
 	};
 };

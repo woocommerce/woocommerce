@@ -8,8 +8,26 @@ import { render, screen } from '@testing-library/react';
  */
 import FormattedMonetaryAmount from '../index';
 
+const settingsMock = jest.requireMock( '@woocommerce/settings' );
+
 describe( 'FormattedMonetaryAmount', () => {
 	describe( 'separators', () => {
+		test( 'should default to store currency configuration', () => {
+			settingsMock.SITE_CURRENCY = {
+				code: 'EUR',
+				symbol: 'TEST',
+				thousandSeparator: '.',
+				decimalSeparator: ',',
+				minorUnit: 2,
+				prefix: '',
+				suffix: ' TEST',
+			};
+
+			render( <FormattedMonetaryAmount value="156345" /> );
+
+			expect( screen.getByText( '1.563,45 TEST' ) ).toBeInTheDocument();
+		} );
+
 		test( 'should add the thousand separator', () => {
 			render(
 				<FormattedMonetaryAmount
