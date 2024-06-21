@@ -236,7 +236,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		}
 
 		$review = 0 <= $id ? get_comment( $id ) : null;
-		if ( empty( $review ) || empty( $review->comment_ID ) || empty( $review->comment_post_ID ) || (int) $review->comment_post_ID !== $product_id ) {
+		if ( empty( $review ) || empty( $review->comment_ID ) || 'review' !== get_comment_type( $id ) || empty( $review->comment_post_ID ) || (int) $review->comment_post_ID !== $product_id ) {
 			return new WP_Error( 'woocommerce_rest_product_review_invalid_id', __( 'Invalid product review ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
