@@ -70,7 +70,7 @@ jQuery( function( $ ) {
 			// so screen readers can identify the next update if it's the same as the previous one.
 			e.data.addToCartHandler.$liveRegion
 				.text( '' )
-				.attr( 'aria-relevant', 'additions text' );
+				.removeAttr( 'aria-relevant' );
 
 			e.preventDefault();
 
@@ -136,7 +136,7 @@ jQuery( function( $ ) {
 
 		e.data.addToCartHandler.$liveRegion
 			.text( '' )
-			.attr( 'aria-relevant', 'additions text' );
+			.removeAttr( 'aria-relevant' );
 
 		e.preventDefault();
 
