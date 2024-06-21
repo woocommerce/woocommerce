@@ -22,7 +22,6 @@ const blockConfig: BlockConfiguration = {
 	title,
 	description,
 	icon: { src: icon },
-	apiVersion: 3,
 	supports,
 	attributes,
 	edit,

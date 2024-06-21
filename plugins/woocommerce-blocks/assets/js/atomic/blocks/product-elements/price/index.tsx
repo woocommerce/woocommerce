@@ -18,7 +18,6 @@ import {
 
 const blockConfig = {
 	...sharedConfig,
-	apiVersion: 3,
 	title,
 	description,
 	usesContext: [ 'query', 'queryId', 'postId' ],

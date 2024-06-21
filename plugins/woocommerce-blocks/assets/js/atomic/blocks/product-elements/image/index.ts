@@ -20,7 +20,6 @@ import {
 
 const blockConfig: BlockConfiguration = {
 	...sharedConfig,
-	apiVersion: 3,
 	name: 'woocommerce/product-image',
 	title,
 	icon: { src: icon },

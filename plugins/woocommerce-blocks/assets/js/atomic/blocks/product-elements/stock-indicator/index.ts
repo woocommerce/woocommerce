@@ -20,7 +20,6 @@ import {
 
 const blockConfig: BlockConfiguration = {
 	...sharedConfig,
-	apiVersion: 3,
 	title,
 	description,
 	icon: { src: icon },
