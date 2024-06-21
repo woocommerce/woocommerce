@@ -227,7 +227,7 @@
 				},
 				{
 					"name": "Checks from plugin-check plugin",
-					"command": "pnpm wp-env run tests-cli wp plugin check woocommerce",
+					"command": "wp-env run tests-cli wp plugin check woocommerce",
 					"optional": true,
 					"changes": [
 						"**"
