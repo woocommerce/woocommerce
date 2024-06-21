@@ -261,13 +261,13 @@ class PluginUtil {
 				);
 			}
 
-            $incompatible_plugins_url = add_query_arg(
-                array(
-                    'plugin_status' => 'incompatible_with_feature',
-                    'feature_id'    => $feature_id,
-                ),
-                admin_url( 'plugins.php' )
-            );
+			$incompatible_plugins_url = add_query_arg(
+				array(
+					'plugin_status' => 'incompatible_with_feature',
+					'feature_id'    => $feature_id,
+				),
+				admin_url( 'plugins.php' )
+			);
 
 			$feature_warnings[] = sprintf(
 				/* translators: %1$s opening link tag %2$s closing link tag. */
@@ -283,18 +283,18 @@ class PluginUtil {
 	/**
 	 * Filter plugin/feature compatibility info, returning the names of the plugins/features that are considered incompatible.
 	 * "Uncertain" information will be included or not depending on the value of the value of the 'plugins_are_incompatible_by_default'
-     * flag in the feature definition (default is true).
+	 * flag in the feature definition (default is true).
 	 *
-     * @param bool $feature_id Feature id.
-	 * @param array $compatibility_info Array containing "compatible', 'incompatible' and 'uncertain' keys.
+	 * @param string $feature_id Feature id.
+	 * @param array  $compatibility_info Array containing "compatible', 'incompatible' and 'uncertain' keys.
 	 * @return array Items in 'incompatible' and 'uncertain' if plugins are incompatible by default with the feature; only items in 'incompatible' otherwise.
 	 */
-	public function get_items_considered_incompatible(string $feature_id, array $compatibility_info ): array {
-        $incompatible_by_default = wc_get_container()->get(FeaturesController::class)->get_plugins_are_incompatible_by_default($feature_id);
+	public function get_items_considered_incompatible( string $feature_id, array $compatibility_info ): array {
+		$incompatible_by_default = wc_get_container()->get( FeaturesController::class )->get_plugins_are_incompatible_by_default( $feature_id );
 
 		return $incompatible_by_default ?
 			array_merge( $compatibility_info['incompatible'], $compatibility_info['uncertain'] ) :
-            $compatibility_info['incompatible'];
+			$compatibility_info['incompatible'];
 	}
 
 	/**
