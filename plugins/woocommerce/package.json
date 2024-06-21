@@ -230,14 +230,7 @@
 					"name": "Checks from plugin-check plugin",
 					"command": "test:plugincheck",
 					"optional": true,
-					"changes": [
-						"client/admin/config/*.json",
-						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php"
-					],
+					"changes": [],
 					"testEnv": {
 						"start": "env:test"
 					},
