@@ -3,6 +3,7 @@
  */
 import { render, screen } from '@testing-library/react';
 import { TaskType } from '@woocommerce/data';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -10,11 +11,8 @@ import { TaskType } from '@woocommerce/data';
 import { Tax } from '..';
 
 jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
 } ) );
-
-let useSelect: jest.Mock;
 
 const fakeTask: {
 	additionalData: {
@@ -29,7 +27,7 @@ beforeEach( () => {
 		woocommerceTaxCountries: [ 'US' ],
 	};
 
-	useSelect.mockImplementation( () => ( {
+	( useSelect as jest.Mock ).mockImplementation( () => ( {
 		generalSettings: {
 			woocommerce_default_country: 'US',
 		},
@@ -103,7 +101,7 @@ it( `does not render WooCommerce Tax (powered by WCS&T) if the TaxJar plugin is 
 } );
 
 it( 'does not render WooCommerce Tax (powered by WCS&T) if not in a supported country', () => {
-	useSelect.mockReturnValue( {
+	( useSelect as jest.Mock ).mockReturnValue( {
 		generalSettings: { woocommerce_default_country: 'FOO' },
 	} );
 
