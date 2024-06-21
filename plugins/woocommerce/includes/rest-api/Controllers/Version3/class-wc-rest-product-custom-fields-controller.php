@@ -76,9 +76,9 @@ class WC_REST_Product_Custom_Fields_Controller extends WC_REST_Controller {
 		$offset = ( $page - 1 ) * $limit;
 
 		$base_query = $wpdb->prepare(
-			"SELECT DISTINCT m.meta_key
-			FROM {$wpdb->postmeta} m LEFT JOIN {$wpdb->posts} p ON m.post_id = p.id
-			WHERE p.post_type = %s AND m.meta_key NOT LIKE %s AND m.meta_key LIKE %s",
+			"SELECT DISTINCT post_metas.meta_key
+			FROM {$wpdb->postmeta} post_metas LEFT JOIN {$wpdb->posts} posts ON post_metas.post_id = posts.id
+			WHERE posts.post_type = %s AND post_metas.meta_key NOT LIKE %s AND post_metas.meta_key LIKE %s",
 			$this->post_type,
 			$wpdb->esc_like( '_' ) . '%',
 			"%{$search}%"
@@ -86,13 +86,13 @@ class WC_REST_Product_Custom_Fields_Controller extends WC_REST_Controller {
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $base_query has been prepared already and $order is a static value.
 		$query = $wpdb->prepare(
-			"$base_query ORDER BY m.meta_key $order LIMIT %d, %d",
+			"$base_query ORDER BY post_metas.meta_key $order LIMIT %d, %d",
 			$offset,
 			$limit
 		);
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $base_query has been prepared already.
-		$total_query = "SELECT COUNT(1) FROM ($base_query) AS t";
+		$total_query = "SELECT COUNT(1) FROM ($base_query) AS total";
 
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $query has been prepared already.
 		$query_result = $wpdb->get_results( $query );
