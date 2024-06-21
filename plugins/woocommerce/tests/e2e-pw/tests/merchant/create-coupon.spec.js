@@ -39,7 +39,7 @@ const test = baseTest.extend( {
 	},
 } );
 
-test.describe( 'Coupon management', () => {
+test.describe( 'Coupon management', { tag: '@services' }, () => {
 	for ( const couponType of Object.keys( couponData ) ) {
 		test( `can create new ${ couponType } coupon`, async ( {
 			page,
