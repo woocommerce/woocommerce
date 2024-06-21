@@ -8,7 +8,7 @@ const { getOrderIdFromUrl } = require( '../../utils/order' );
 
 const guestEmail = 'checkout-guest@example.com';
 
-test.describe( 'Checkout page', () => {
+test.describe( 'Checkout page', { tag: [ '@payments', '@services' ] }, () => {
 	const singleProductPrice = '9.99';
 	const simpleProductName = 'Checkout Page Product';
 	const twoProductPrice = ( singleProductPrice * 2 ).toString();
