@@ -11,6 +11,7 @@ import { useSelect } from '@wordpress/data';
 import { Tax } from '..';
 
 jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
 } ) );
 
