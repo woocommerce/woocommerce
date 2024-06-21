@@ -12,7 +12,7 @@ export const PATTERN_CATEGORIES = {
 			'woocommerce'
 		),
 	},
-	featured_selling: {
+	'featured-selling': {
 		label: __( 'Featured selling', 'woocommerce' ),
 		description: __(
 			'Put the spotlight on one or more of your products or product categories.',
@@ -40,7 +40,7 @@ export const PATTERN_CATEGORIES = {
 			'woocommerce'
 		),
 	},
-	social_media: {
+	'social-media': {
 		label: __( 'Social media', 'woocommerce' ),
 		description: __(
 			'Promote your social channels and give shoppers a way to see your latest products and news.',
