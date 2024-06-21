@@ -2,7 +2,7 @@
 /**
  * REST API CustomFields controller
  *
- * Handles requests to the /products endpoint.
+ * Handles requests to the /products/custom-fields endpoint.
  *
  * @package WooCommerce\RestApi
  * @since   9.2.0
