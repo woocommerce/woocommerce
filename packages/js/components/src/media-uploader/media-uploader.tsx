@@ -113,11 +113,11 @@ export const MediaUploader = ( {
 								buttonText || buttonProps ? (
 									<Button
 										variant="secondary"
-										{ ...buttonProps }
 										onClick={ () => {
 											onMediaGalleryOpen();
 											open();
 										} }
+										{ ...buttonProps }
 									>
 										{ buttonText }
 									</Button>
