@@ -202,6 +202,50 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test fetch_patterns should register testimonials category as reviews.
+	 */
+	public function test_fetch_patterns_should_register_testimonials_category_as_reviews() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		$ptk_patterns = array(
+			array(
+				'title'      => 'My pattern',
+				'slug'       => 'my-pattern',
+				'categories' => array(
+					'testimonials' => array(
+						'slug'  => 'testimonials',
+						'title' => 'Testimonials',
+					),
+				),
+			),
+		);
+
+		$expected_patterns = array(
+			array(
+				'title'      => 'My pattern',
+				'slug'       => 'my-pattern',
+				'categories' => array(
+					'reviews' => array(
+						'slug'  => 'reviews',
+						'title' => 'Reviews',
+					),
+				),
+			),
+		);
+
+		$this->ptk_client
+			->expects( $this->once() )
+			->method( 'fetch_patterns' )
+			->willReturn( $ptk_patterns );
+
+		$this->pattern_store->fetch_patterns();
+
+		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
+
+		$this->assertEquals( $expected_patterns, $patterns );
+		$this->assertEquals( $expected_patterns, get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
+	}
+
+	/**
 	 * Asserts that the response is an error with the expected error code and message.
 	 *
 	 * @param array|WP_Error $response The response to assert.
