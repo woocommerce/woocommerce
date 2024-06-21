@@ -288,6 +288,7 @@ const settings = {
 			isDefault: true,
 		},
 	],
+	apiVersion: 3,
 };
 
 registerBlockType( metadata, settings );
