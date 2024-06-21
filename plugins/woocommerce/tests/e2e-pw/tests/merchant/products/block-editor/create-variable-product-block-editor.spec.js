@@ -279,17 +279,25 @@ test.describe( 'Variations tab', () => {
 					} )
 					.click();
 
-				const element = page.locator(
+				const snackbarLocator = page.locator(
 					'div.components-snackbar__content'
 				);
-				if ( Array.isArray( element ) ) {
-					await expect( await element[ 0 ].innerText() ).toMatch(
-						`${ attributesData.options.length } variations updated.`
-					);
-					await expect( await element[ 1 ].innerText() ).toMatch(
-						/Product published/
-					);
-				}
+
+				// Wait for the snackbar to appear
+				await snackbarLocator.waitFor( {
+					state: 'visible',
+					timeout: 20000,
+				} );
+
+				// Verify that the first message is the expected one
+				await expect( snackbarLocator.nth( 0 ) ).toHaveText(
+					`${ attributesData.terms.length } variations updated.`
+				);
+
+				// Verify that the second message is the expected one
+				await expect( snackbarLocator.nth( 1 ) ).toHaveText(
+					/Product published/
+				);
 			} );
 		} );
 
