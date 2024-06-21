@@ -162,6 +162,11 @@ class Bootstrap {
 			$this->container->get( PTKPatternsStore::class );
 			$this->container->get( OptionsManager::class )->init();
 
+			error_log( 'From Bootstrap.php:' );
+			error_log( 'Theme: ' . wp_get_theme()->get( 'Name' ) );
+			error_log( 'Supports BTP: ' . wc_bool_to_string( current_theme_supports( 'block-template-parts' ) ) );
+			error_log( '-------------------------------' );
+
 			if ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) {
 				$this->container->get( BlockTemplatesController::class )->init();
 			}
