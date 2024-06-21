@@ -165,7 +165,7 @@ class TaskLists {
 					),
 				),
 				'tasks'   => array(
-					'BrowseMarketplace',
+					'ExtendStore',
 					'AdditionalPayments',
 					'GetMobileApp',
 				),

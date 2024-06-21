@@ -5,16 +5,16 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
 /**
- * Connect store to WooCommerce.com Task
+ * ExtendStore Task
  */
-class BrowseMarketplace extends Task {
+class ExtendStore extends Task {
 	/**
 	 * ID.
 	 *
 	 * @return string
 	 */
 	public function get_id() {
-		return 'browse-marketplace';
+		return 'extend-store';
 	}
 
 	/**
@@ -23,7 +23,7 @@ class BrowseMarketplace extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Browse the WooCommerce Marketplace', 'woocommerce' );
+		return __( 'Extend your store', 'woocommerce' );
 	}
 
 	/**
@@ -59,7 +59,7 @@ class BrowseMarketplace extends Task {
 	 * @return bool
 	 */
 	public function is_dismissable() {
-		return true;
+		return false;
 	}
 
 	/**
