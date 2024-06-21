@@ -275,8 +275,13 @@ test.describe( `${ blockData.name }`, () => {
 			layoutSettings.getByLabel( 'Space between items' )
 		).toBeVisible();
 		await expect(
-			block.locator( blockData.selectors.editor.layoutWrapper )
-		).toHaveCSS( 'flex-direction', 'row' );
+			block.locator( ':text("Status"):right-of(:text("Price"))' )
+		).toBeVisible();
+
+		await layoutSettings.getByLabel( 'Vertical' ).click();
+		await expect(
+			block.locator( ':text("Status"):below(:text("Price"))' )
+		).toBeVisible();
 	} );
 
 	test( 'Dimentions > Block spacing: changing option should update the preview', async ( {
