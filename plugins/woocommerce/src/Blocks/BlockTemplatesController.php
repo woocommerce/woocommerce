@@ -469,14 +469,6 @@ class BlockTemplatesController {
 				continue;
 			}
 
-			// At this point the template only exists in the Blocks filesystem, if is a taxonomy-product_cat/tag/attribute.html template
-			// let's use the archive-product.html template from Blocks.
-			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $template_slug ) ) {
-				$template_file = $this->get_template_path_from_woocommerce( ProductCatalogTemplate::SLUG );
-				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, false );
-				continue;
-			}
-
 			// At this point the template only exists in the Blocks filesystem and has not been saved in the DB,
 			// or superseded by the theme.
 			$templates[] = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug );
@@ -498,18 +490,6 @@ class BlockTemplatesController {
 		$templates_from_woo = $this->get_block_templates_from_woocommerce( $slugs, $templates_from_db, $template_type );
 
 		return array_merge( $templates_from_db, $templates_from_woo );
-	}
-
-	/**
-	 * Returns the path of a template on the Blocks template folder.
-	 *
-	 * @param string $template_slug Block template slug e.g. single-product.
-	 * @param string $template_type wp_template or wp_template_part.
-	 *
-	 * @return string
-	 */
-	public function get_template_path_from_woocommerce( $template_slug, $template_type = 'wp_template' ) {
-		return BlockTemplateUtils::get_templates_directory( $template_type ) . '/' . $template_slug . '.html';
 	}
 
 	/**
