@@ -125,7 +125,9 @@ test.describe( 'Product Collection', () => {
 			).toHaveCount( 16 );
 
 			await insertProductElements( pageObject );
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 			await pageObject.goToProductCatalogFrontend();
 
 			// Workaround for the issue with the product change not being
@@ -151,7 +153,9 @@ test.describe( 'Product Collection', () => {
 			).toHaveCount( 9 );
 
 			await insertProductElements( pageObject );
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 			await pageObject.goToHomePageFrontend();
 
 			for ( const content of expectedProductContent ) {
@@ -793,9 +797,9 @@ test.describe( 'Product Collection', () => {
 			await admin.visitSiteEditor( {
 				postId: 'woocommerce/woocommerce//archive-product',
 				postType: 'wp_template',
+				canvas: 'edit',
 			} );
 
-			await editor.enterEditMode();
 			await editor.setContent( '' );
 
 			await pageObject.insertProductCollection();
@@ -1012,8 +1016,8 @@ test.describe( 'Product Collection', () => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//taxonomy-product_cat`,
 				postType: 'wp_template',
+				canvas: 'edit',
 			} );
-			await editor.enterEditMode();
 			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
 			);
@@ -1041,8 +1045,8 @@ test.describe( 'Product Collection', () => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//taxonomy-product_tag`,
 				postType: 'wp_template',
+				canvas: 'edit',
 			} );
-			await editor.enterEditMode();
 			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
 			);
@@ -1220,7 +1224,9 @@ test.describe( 'Product Collection', () => {
 			await expect( productTemplate ).toHaveCount( 2 );
 
 			// Refresh the template and verify "On Sale" collection is still visible
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 			await page.reload();
 			await expect( productTemplate ).toHaveCount( 2 );
 		} );
@@ -1308,11 +1314,13 @@ test.describe( 'Product Collection', () => {
 				await admin.visitSiteEditor( {
 					postId: `woocommerce/woocommerce//${ slug }`,
 					postType: 'wp_template',
+					canvas: 'edit',
 				} );
-				await editor.enterEditMode();
 				await editor.insertBlock( { name: legacyBlockName } );
 				await editor.canvas.locator( 'body' ).click();
-				await editor.saveSiteEditorEntities();
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 				await page.goto( frontendPage );
 				await pageObject.refreshLocators( 'frontend' );
 

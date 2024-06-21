@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Check WC_Legacy_API instead of WC_API as that seems to be cached by lightspeed servers.

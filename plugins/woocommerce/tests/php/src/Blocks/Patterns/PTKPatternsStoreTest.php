@@ -134,7 +134,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	public function test_fetch_patterns_should_not_set_the_patterns_cache_when_fetching_patterns_fails() {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$this->ptk_client
-			->expects( $this->once() )
+			->expects( $this->exactly( 2 ) )
 			->method( 'fetch_patterns' )
 			->willReturn( new WP_Error( 'error', 'Request failed.' ) );
 
@@ -156,14 +156,14 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 			),
 		);
 		$this->ptk_client
-			->expects( $this->once() )
+			->expects( $this->exactly( 2 ) )
 			->method( 'fetch_patterns' )
 			->willReturn( $expected_patterns );
-
 		$this->pattern_store->fetch_patterns();
 
 		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
-		$this->assertEquals( $expected_patterns, $patterns );
+
+		$this->assertEquals( array_merge( $expected_patterns, $expected_patterns ), $patterns );
 	}
 
 	/**
@@ -171,7 +171,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	 */
 	public function test_fetch_patterns_should_filter_out_the_excluded_patterns() {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
-		$expected_patterns = array(
+		$api_patterns = array(
 			array(
 				'title' => 'My pattern',
 				'slug'  => 'my-pattern',
@@ -184,16 +184,68 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		);
 
 		$this->ptk_client
-			->expects( $this->once() )
+			->expects( $this->exactly( 2 ) )
 			->method( 'fetch_patterns' )
-			->willReturn( $expected_patterns );
+			->willReturn( $api_patterns );
 
 		$this->pattern_store->fetch_patterns();
 
 		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
 
-		$this->assertEquals( array( $expected_patterns[0] ), $patterns );
-		$this->assertEquals( array( $expected_patterns[0] ), get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
+		$expected_patterns = array(
+			$api_patterns[0],
+			$api_patterns[0],
+		);
+
+		$this->assertEquals( $expected_patterns, $patterns );
+		$this->assertEquals( $expected_patterns, get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
+	}
+
+	/**
+	 * Test fetch_patterns should register testimonials category as reviews.
+	 */
+	public function test_fetch_patterns_should_register_testimonials_category_as_reviews() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		$ptk_patterns = array(
+			array(
+				'title'      => 'My pattern',
+				'slug'       => 'my-pattern',
+				'categories' => array(
+					'testimonials' => array(
+						'slug'  => 'testimonials',
+						'title' => 'Testimonials',
+					),
+				),
+			),
+		);
+
+		$expected_patterns = array(
+			array(
+				'title'      => 'My pattern',
+				'slug'       => 'my-pattern',
+				'categories' => array(
+					'reviews' => array(
+						'slug'  => 'reviews',
+						'title' => 'Reviews',
+					),
+				),
+			),
+		);
+
+		$this->ptk_client
+			->expects( $this->exactly( 2 ) )
+			->method( 'fetch_patterns' )
+			->willReturnOnConsecutiveCalls(
+				$ptk_patterns,
+				array()
+			);
+
+		$this->pattern_store->fetch_patterns();
+
+		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
+
+		$this->assertEquals( $expected_patterns, $patterns );
+		$this->assertEquals( $expected_patterns, get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
 	}
 
 	/**
