@@ -298,9 +298,12 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		);
 
 		$this->ptk_client
-			->expects( $this->once() )
+			->expects( $this->exactly( 2 ) )
 			->method( 'fetch_patterns' )
-			->willReturn( $ptk_patterns );
+			->willReturnOnConsecutiveCalls(
+				$ptk_patterns,
+				array()
+			);
 
 		$this->pattern_store->fetch_patterns();
 
