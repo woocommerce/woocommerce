@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+CYS: fix logic to disable click on the no block placeholder
