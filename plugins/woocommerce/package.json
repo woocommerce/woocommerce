@@ -238,7 +238,8 @@
 					"events": [
 						"daily-checks",
 						"release-checks",
-						"push"
+						"push",
+						"pull_request"
 					]
 				},
 				{
