@@ -236,16 +236,14 @@
 						"includes/**/*.php",
 						"patterns/**/*.php",
 						"src/**/*.php",
-						"templates/**/*.php",
-						"package.json"
+						"templates/**/*.php"
 					],
 					"testEnv": {
 						"start": "env:test"
 					},
 					"events": [
 						"daily-checks",
-						"release-checks",
-						"pull_request"
+						"release-checks"
 					]
 				},
 				{
