@@ -32,7 +32,7 @@ class WC_REST_Product_Custom_Fields_Controller extends WC_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'product-custom-fields';
+	protected $rest_base = 'products/custom-fields';
 
 	/**
 	 * Post type.
@@ -141,5 +141,22 @@ class WC_REST_Product_Custom_Fields_Controller extends WC_REST_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Add new options for 'order' to the collection params.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params          = parent::get_collection_params();
+		$params['order'] = array(
+			'description'       => __( 'Order sort items ascending or descending.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'asc',
+			'enum'              => array( 'asc', 'desc' ),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		return $params;
 	}
 }

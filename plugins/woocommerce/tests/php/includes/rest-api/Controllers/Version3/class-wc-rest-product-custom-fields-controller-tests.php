@@ -85,7 +85,7 @@ class WC_REST_Product_Custom_Fields_Controller_Tests extends WC_REST_Unit_Test_C
 	 * @return void
 	 */
 	public function test_custom_fields_without_params() {
-		$request = new WP_REST_Request( 'GET', '/wc/v3/product-custom-fields/names' );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/custom-fields/names' );
 
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
@@ -110,7 +110,7 @@ class WC_REST_Product_Custom_Fields_Controller_Tests extends WC_REST_Unit_Test_C
 	 * @return void
 	 */
 	public function test_custom_fields_searching() {
-		$request = new WP_REST_Request( 'GET', '/wc/v3/product-custom-fields/names' );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/custom-fields/names' );
 		$request->set_query_params(
 			array(
 				'search' => '0',
@@ -131,7 +131,7 @@ class WC_REST_Product_Custom_Fields_Controller_Tests extends WC_REST_Unit_Test_C
 	 * @return void
 	 */
 	public function test_custom_fields_ordering() {
-		$request = new WP_REST_Request( 'GET', '/wc/v3/product-custom-fields/names' );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/custom-fields/names' );
 		$request->set_query_params(
 			array(
 				'order'  => 'desc',
@@ -161,7 +161,7 @@ class WC_REST_Product_Custom_Fields_Controller_Tests extends WC_REST_Unit_Test_C
 	 * @return void
 	 */
 	public function test_custom_fields_pagination() {
-		$request = new WP_REST_Request( 'GET', '/wc/v3/product-custom-fields/names' );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/custom-fields/names' );
 		$request->set_query_params(
 			array(
 				'per_page' => 3,
