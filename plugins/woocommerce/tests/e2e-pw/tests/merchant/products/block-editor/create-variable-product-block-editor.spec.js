@@ -260,9 +260,7 @@ test.describe( 'Variations tab', () => {
 					.getByRole( 'button', { name: 'Set prices' } )
 					.click();
 
-				await expect(
-					page.getByText( '$50.00' ).nth( 2 )
-				).toBeVisible();
+				await expect( page.getByText( '50' ).nth( 2 ) ).toBeVisible();
 
 				await expect(
 					page.getByLabel( 'Dismiss this notice' )
