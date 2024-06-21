@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
-import { useSelect } from '@wordpress/data';
+import { TaskType } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -11,19 +11,29 @@ import { Tax } from '..';
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn( () => ( {
-		generalSettings: {
-			woocommerce_default_country: 'US',
-		},
-	} ) ),
+	useSelect: jest.fn(),
 } ) );
 
-const fakeTask = {};
+let useSelect: jest.Mock;
+
+const fakeTask: {
+	additionalData: {
+		[ key: string ]: boolean | string[];
+	};
+} = {
+	additionalData: {},
+};
 
 beforeEach( () => {
 	fakeTask.additionalData = {
 		woocommerceTaxCountries: [ 'US' ],
 	};
+
+	useSelect.mockImplementation( () => ( {
+		generalSettings: {
+			woocommerce_default_country: 'US',
+		},
+	} ) );
 } );
 
 const assertWooCommerceTaxIsNotRecommended = () => {
@@ -39,7 +49,13 @@ const assertWooCommerceTaxIsNotRecommended = () => {
 };
 
 it( 'renders WooCommerce Tax (powered by WCS&T)', () => {
-	render( <Tax onComplete={ () => {} } query={ {} } task={ fakeTask } /> );
+	render(
+		<Tax
+			onComplete={ () => {} }
+			query={ {} }
+			task={ fakeTask as TaskType }
+		/>
+	);
 
 	expect( screen.getByText( 'Choose a tax partner' ) ).toBeInTheDocument();
 } );
@@ -47,7 +63,13 @@ it( 'renders WooCommerce Tax (powered by WCS&T)', () => {
 it( `does not render WooCommerce Tax (powered by WCS&T) if the WooCommerce Tax plugin is active`, () => {
 	fakeTask.additionalData.woocommerceTaxActivated = true;
 
-	render( <Tax onComplete={ () => {} } query={ {} } task={ fakeTask } /> );
+	render(
+		<Tax
+			onComplete={ () => {} }
+			query={ {} }
+			task={ fakeTask as TaskType }
+		/>
+	);
 
 	assertWooCommerceTaxIsNotRecommended();
 } );
@@ -55,7 +77,13 @@ it( `does not render WooCommerce Tax (powered by WCS&T) if the WooCommerce Tax p
 it( `does not render WooCommerce Tax (powered by WCS&T) if the WooCommerce Shipping plugin is active`, () => {
 	fakeTask.additionalData.woocommerceShippingActivated = true;
 
-	render( <Tax onComplete={ () => {} } query={ {} } task={ fakeTask } /> );
+	render(
+		<Tax
+			onComplete={ () => {} }
+			query={ {} }
+			task={ fakeTask as TaskType }
+		/>
+	);
 
 	assertWooCommerceTaxIsNotRecommended();
 } );
@@ -63,7 +91,13 @@ it( `does not render WooCommerce Tax (powered by WCS&T) if the WooCommerce Shipp
 it( `does not render WooCommerce Tax (powered by WCS&T) if the TaxJar plugin is active`, () => {
 	fakeTask.additionalData.taxJarActivated = true;
 
-	render( <Tax onComplete={ () => {} } query={ {} } task={ fakeTask } /> );
+	render(
+		<Tax
+			onComplete={ () => {} }
+			query={ {} }
+			task={ fakeTask as TaskType }
+		/>
+	);
 
 	assertWooCommerceTaxIsNotRecommended();
 } );
@@ -73,7 +107,13 @@ it( 'does not render WooCommerce Tax (powered by WCS&T) if not in a supported co
 		generalSettings: { woocommerce_default_country: 'FOO' },
 	} );
 
-	render( <Tax onComplete={ () => {} } query={ {} } task={ fakeTask } /> );
+	render(
+		<Tax
+			onComplete={ () => {} }
+			query={ {} }
+			task={ fakeTask as TaskType }
+		/>
+	);
 
 	assertWooCommerceTaxIsNotRecommended();
 } );
