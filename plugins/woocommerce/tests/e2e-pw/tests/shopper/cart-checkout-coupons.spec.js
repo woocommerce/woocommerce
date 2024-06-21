@@ -97,6 +97,10 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 				await page.goto( '/cart/' );
 				await page.locator( '#coupon_code' ).fill( coupons[ i ].code );
 				await page
+					.locator( '.blockOverlay' )
+					.first()
+					.waitFor( { state: 'hidden' } );
+				await page
 					.getByRole( 'button', { name: 'Apply coupon' } )
 					.click();
 
@@ -123,6 +127,10 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 					.locator( 'text=Click here to enter your code' )
 					.click();
 				await page.locator( '#coupon_code' ).fill( coupons[ i ].code );
+				await page
+					.locator( '.blockOverlay' )
+					.first()
+					.waitFor( { state: 'hidden' } );
 				await page.locator( 'text=Apply coupon' ).click();
 
 				await expect(

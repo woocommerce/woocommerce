@@ -276,12 +276,14 @@ class ProductCollection extends AbstractBlock {
 		static $dirty_enhanced_queries             = array();
 		static $render_product_collection_callback = null;
 
-		$block_name               = $parsed_block['blockName'];
-		$force_page_reload_global =
+		$block_name                  = $parsed_block['blockName'];
+		$is_product_collection_block = $parsed_block['attrs']['query']['isProductCollectionBlock'] ?? false;
+		$force_page_reload_global    =
 			$parsed_block['attrs']['forcePageReload'] ?? false &&
 			isset( $block['attrs']['queryId'] );
 
 		if (
+			$is_product_collection_block &&
 			'woocommerce/product-collection' === $block_name &&
 			! $force_page_reload_global
 		) {
