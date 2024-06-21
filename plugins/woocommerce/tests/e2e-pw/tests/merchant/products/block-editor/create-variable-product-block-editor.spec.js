@@ -161,21 +161,12 @@ test.describe( 'Variations tab', () => {
 
 				// Wait for the create-attribute async request to finish
 				const newAttrResponse = await page.waitForResponse(
-					( response ) => {
-						const url = response.url();
-						console.log( url );
-						const status = response.status();
-						console.log( status );
-						return (
-							response
-								.url()
-								.includes(
-									`wp-json/wc/v3/products/attributes?name=${ attributesData.name }&generate_slug=true`
-								) &&
-							( response.status() === 200 ||
-								response.status() === 201 )
-						);
-					}
+					( response ) =>
+						response
+							.url()
+							.includes(
+								`wp-json/wc/v3/products/attributes?name=${ attributesData.name }&generate_slug=true`
+							) && response.status() === 201
 				);
 
 				const newAttrData = await newAttrResponse.json();
@@ -190,14 +181,8 @@ test.describe( 'Variations tab', () => {
 					);
 
 				for ( const term of attributesData.terms ) {
-					await FormTokenFieldInputLocator.fill( term.name );
-					await FormTokenFieldInputLocator.press( 'Enter' );
-
 					// Fill the input field with the option
 					await FormTokenFieldInputLocator.fill( term.name );
-
-					// Ensure the input field is focused before pressing Enter
-					await FormTokenFieldInputLocator.focus();
 					await FormTokenFieldInputLocator.press( 'Enter' );
 
 					/*
