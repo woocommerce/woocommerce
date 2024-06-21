@@ -58,6 +58,7 @@
 		"test:e2e:blocks": "pnpm --filter='@woocommerce/block-library' test:e2e",
 		"test:e2e:with-env": "bash ./tests/e2e-pw/run-tests-with-env.sh",
 		"test:perf": "./k6 run ./tests/performance/tests/gh-action-pr-requests.js",
+		"test:plugincheck": "wp-env run tests-cli wp plugin check woocommerce",
 		"test:env:start": "pnpm env:test",
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:watch": "./vendor/bin/phpunit-watcher watch",
@@ -227,10 +228,16 @@
 				},
 				{
 					"name": "Checks from plugin-check plugin",
-					"command": "wp-env run tests-cli wp plugin check woocommerce",
+					"command": "test:plugincheck",
 					"optional": true,
 					"changes": [
-						"**"
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"package.json"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -238,7 +245,6 @@
 					"events": [
 						"daily-checks",
 						"release-checks",
-						"push",
 						"pull_request"
 					]
 				},
