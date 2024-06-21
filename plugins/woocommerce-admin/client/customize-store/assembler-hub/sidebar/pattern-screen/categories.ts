@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 
-// @todo: Implement the right copy for the pattern categories: https://github.com/woocommerce/woocommerce/issues/48381
 export const PATTERN_CATEGORIES = {
 	intro: {
 		label: __( 'Intro', 'woocommerce' ),
