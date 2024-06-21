@@ -28,7 +28,10 @@ export const PATTERN_CATEGORIES = {
 	},
 	services: {
 		label: __( 'services', 'woocommerce' ),
-		description: __( '', 'woocommerce' ),
+		description: __(
+			'Share information on any services that your business can provide.',
+			'woocommerce'
+		),
 	},
 	reviews: {
 		label: __( 'Reviews', 'woocommerce' ),
