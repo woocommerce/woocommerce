@@ -31,7 +31,6 @@ import { store as noticesStore } from '@wordpress/notices';
 import { useEntityRecord } from '@wordpress/core-data';
 import { debounce } from '@woocommerce/base-utils';
 import { woo } from '@woocommerce/icons';
-import { isNumber } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -296,7 +295,7 @@ const registerClassicTemplateBlock = ( {
 	template,
 	inserter,
 }: {
-	template?: string;
+	template?: string | null;
 	inserter: boolean;
 } ) => {
 	/**
@@ -409,63 +408,59 @@ const tryToRecoverClassicTemplateBlockWhenItFailsToRender = debounce( () => {
 }, 100 );
 
 // @todo Refactor when there will be possible to show a block according on a template/post with a Gutenberg API. https://github.com/WordPress/gutenberg/pull/41718
-
-let currentTemplateId: string | undefined;
+let previousEditedTemplate: string | number | null = null;
+let isBlockRegistered = false;
+let isBlockInInserter: boolean | null = null;
 
 subscribe( () => {
-	const previousTemplateId = currentTemplateId;
-	const store = select( 'core/edit-site' );
-	// With GB 16.3.0 the return type can be a number: https://github.com/WordPress/gutenberg/issues/53230
-	const editedPostId = store?.getEditedPostId() as
-		| string
-		| number
-		| undefined;
+	const editorStore = select( 'core/editor' );
+	const templateSlug = editorStore?.getEditedPostSlug() as string | null;
+	// We use blockCount to know if we are editing a template or in the navigation.
+	const blockCount = editorStore?.getBlockCount() as number;
+	const editedTemplate = blockCount && blockCount > 0 ? templateSlug : null;
 
-	currentTemplateId = isNumber( editedPostId ) ? undefined : editedPostId;
-
-	const parsedTemplate = currentTemplateId?.split( '//' )[ 1 ];
-
-	if ( parsedTemplate === null || parsedTemplate === undefined ) {
+	if ( isBlockRegistered && previousEditedTemplate === editedTemplate ) {
 		return;
 	}
+	previousEditedTemplate = editedTemplate;
 
-	const block = getBlockType( BLOCK_SLUG );
-	const isBlockRegistered = Boolean( block );
+	const templateSupportsClassicTemplateBlock =
+		editedTemplate &&
+		hasTemplateSupportForClassicTemplateBlock( editedTemplate, TEMPLATES );
 
-	if (
-		isBlockRegistered &&
-		hasTemplateSupportForClassicTemplateBlock( parsedTemplate, TEMPLATES )
-	) {
-		tryToRecoverClassicTemplateBlockWhenItFailsToRender();
-	}
-
-	if ( previousTemplateId === currentTemplateId ) {
-		return;
-	}
-
-	if (
-		isBlockRegistered &&
-		( ! hasTemplateSupportForClassicTemplateBlock(
-			parsedTemplate,
-			TEMPLATES
-		) ||
+	if ( ! editedTemplate || templateSupportsClassicTemplateBlock ) {
+		if ( isBlockInInserter !== true ) {
+			if ( isBlockRegistered ) {
+				unregisterBlockType( BLOCK_SLUG );
+			}
+			isBlockInInserter = true;
+			registerClassicTemplateBlock( {
+				template: editedTemplate,
+				inserter: true,
+			} );
+		} else if (
+			editedTemplate &&
 			isClassicTemplateBlockRegisteredWithAnotherTitle(
-				block,
-				parsedTemplate
-			) )
-	) {
-		unregisterBlockType( BLOCK_SLUG );
-		currentTemplateId = undefined;
-		return;
-	}
-
-	if (
-		! isBlockRegistered &&
-		hasTemplateSupportForClassicTemplateBlock( parsedTemplate, TEMPLATES )
-	) {
+				getBlockType( BLOCK_SLUG ),
+				editedTemplate
+			)
+		) {
+			unregisterBlockType( BLOCK_SLUG );
+			isBlockInInserter = true;
+			registerClassicTemplateBlock( {
+				template: editedTemplate,
+				inserter: true,
+			} );
+		}
+	} else if ( isBlockInInserter !== false ) {
+		if ( isBlockRegistered ) {
+			unregisterBlockType( BLOCK_SLUG );
+		}
+		isBlockInInserter = false;
 		registerClassicTemplateBlock( {
-			template: parsedTemplate,
-			inserter: true,
+			template: editedTemplate,
+			inserter: false,
 		} );
 	}
+	isBlockRegistered = true;
 }, 'core/blocks-editor' );
