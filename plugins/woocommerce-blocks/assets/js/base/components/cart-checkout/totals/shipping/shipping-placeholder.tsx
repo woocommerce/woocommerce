@@ -23,11 +23,11 @@ export const ShippingPlaceholder = ( {
 }: ShippingPlaceholderProps ): JSX.Element => {
 	if ( ! showCalculator ) {
 		return (
-			<em>
+			<span>
 				{ isCheckout
 					? __( 'No shipping options available', 'woocommerce' )
 					: __( 'Calculated during checkout', 'woocommerce' ) }
-			</em>
+			</span>
 		);
 	}
 

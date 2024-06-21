@@ -12,6 +12,9 @@
 .wc-block-components-totals-item__value {
 	font-weight: bold;
 }
+.wc-block-components-totals-item__value span {
+	font-weight: normal;
+}
 
 .wc-block-components-totals-item__description {
 	@include font-size(small);
