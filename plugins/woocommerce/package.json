@@ -230,13 +230,7 @@
 					"command": "pnpm wp-env run tests-cli wp plugin check woocommerce",
 					"optional": true,
 					"changes": [
-						"client/admin/config/*.json",
-						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"package-lock.json"
+						"**"
 					],
 					"testEnv": {
 						"start": "env:test"
