@@ -20,12 +20,16 @@ function RemoteInboxNotifications( {
 	notice,
 	setNotice,
 } ) {
-	const getFromStagingAndImport = async () => {
-		const url =
-			'https://staging.woocommerce.com/wp-json/wccom/inbox-notifications/2.0/notifications.json';
+	const importFromEnv = async ( env ) => {
+		const urls = {
+			staging:
+				'https://staging.woocommerce.com/wp-json/wccom/inbox-notifications/2.0/notifications.json',
+			production:
+				'https://woocommerce.com/wp-json/wccom/inbox-notifications/2.0/notifications.json',
+		};
 
 		try {
-			const response = await fetch( url );
+			const response = await fetch( urls[ env ] );
 			const data = await response.json();
 			importNotifications( data );
 			setNotice( {
@@ -33,11 +37,17 @@ function RemoteInboxNotifications( {
 				status: 'success',
 			} );
 		} catch ( error ) {
-			setNotice( {
-				message:
-					'Failed to fetch notifications. Please make sure you are connected to Automattic proxy.',
-				status: 'error',
-			} );
+			if ( env === 'staging' ) {
+				const messages = {
+					staging:
+						'Failed to fetch notifications. Please make sure you are connected to Automattic proxy.',
+					production: error.message,
+				};
+				setNotice( {
+					message: messages[ env ],
+					status: 'error',
+				} );
+			}
 		}
 	};
 	const renderLoading = () => {
@@ -110,7 +120,7 @@ function RemoteInboxNotifications( {
 
 					<input
 						type="button"
-						className="button btn-primary"
+						className="button btn-primary staging"
 						value="Import from staging"
 						onClick={ () => {
 							if (
@@ -118,7 +128,21 @@ function RemoteInboxNotifications( {
 									'Are you sure you want to import notifications from staging? Existing notifications will be overwritten.'
 								)
 							) {
-								getFromStagingAndImport();
+								importFromEnv( 'staging' );
+							}
+						} }
+					/>
+					<input
+						type="button"
+						className="button btn-primary"
+						value="Import from production"
+						onClick={ () => {
+							if (
+								confirm(
+									'Are you sure you want to import notifications from production? Existing notifications will be overwritten.'
+								)
+							) {
+								importFromEnv( 'production' );
 							}
 						} }
 					/>
