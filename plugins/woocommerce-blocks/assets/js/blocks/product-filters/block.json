@@ -9,21 +9,36 @@
 	"keywords": [ "WooCommerce" ],
 	"supports": {
 		"align": true,
-		"multiple": false,
-		"interactivity": true,
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true
+		},
 		"color": {
 			"background": true,
 			"text": true
+		},
+		"multiple": false,
+		"interactivity": true,
+		"typography": {
+			"fontSize": true,
+			"textAlign": true
 		},
 		"layout": {
 			"default": {
 				"type": "flex",
 				"orientation": "vertical",
-				"justifyContent": "left"
+				"justifyContent": "stretch",
+				"verticalAlignment": "top"
 			},
+			"allowVerticalAlignment": true,
 			"allowJustification": true,
 			"allowOrientation": true,
 			"allowInheriting": false
+		},
+		"spacing": {
+			"blockGap": true
 		}
 	},
 	"textdomain": "woocommerce",
