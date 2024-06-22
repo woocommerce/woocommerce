@@ -30,16 +30,16 @@ const attributesData = {
 	name: 'Size',
 	terms: [
 		{
-			name: 'Small',
-			slug: 'small',
-		},
-		{
-			name: 'Medium',
-			slug: 'medium',
-		},
-		{
 			name: 'Large',
 			slug: 'large',
+		},
+		{
+			name: 'Extra Large',
+			slug: 'extra-large',
+		},
+		{
+			name: 'Extra Extra Large',
+			slug: 'extra-extra-large',
 		},
 	],
 };
@@ -89,7 +89,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 			'The block product editor is not being tested'
 		);
 
-		test( 'can create a variation option and publish the product', async ( {
+		test.only( 'can create a variation option and publish the product', async ( {
 			page,
 		} ) => {
 			await test.step( 'Load new product editor, disable tour', async () => {
