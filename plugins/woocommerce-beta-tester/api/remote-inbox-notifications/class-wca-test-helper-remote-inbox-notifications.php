@@ -179,7 +179,7 @@ class WCA_Test_Helper_Remote_Inbox_Notifications {
 			}
 		}
 
-		$message = $test ? $name . ': All rules passed sucessfully' : $failed_rules;
+		$message = $test ? $name . ': All rules passed successfully' : $failed_rules;
 
 		if ( $test ) {
 			$stored_state = RemoteInboxNotificationsEngine::get_stored_state();
