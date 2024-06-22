@@ -86,7 +86,7 @@ function RemoteInboxNotifications( {
 								testNotification( notification.name );
 							} }
 						>
-							Test
+							Run
 						</button>
 						<button
 							className="button btn-danger"
