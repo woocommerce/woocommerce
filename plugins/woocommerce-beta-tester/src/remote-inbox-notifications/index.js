@@ -16,6 +16,7 @@ function RemoteInboxNotifications( {
 	deleteNotification,
 	importNotifications,
 	deleteAllNotifications,
+	runNotification,
 	isLoading,
 	notice,
 	setNotice,
@@ -78,7 +79,15 @@ function RemoteInboxNotifications( {
 					<td>{ notification.name }</td>
 					<td>{ notification.type }</td>
 					<td>{ notification.status }</td>
-					<td>
+					<td className="notification-actions">
+						<button
+							className="button btn"
+							onClick={ () => {
+								runNotification( notification.name );
+							} }
+						>
+							Run
+						</button>
 						<button
 							className="button btn-danger"
 							onClick={ () => {
@@ -169,7 +178,6 @@ function RemoteInboxNotifications( {
 								Status
 							</td>
 							<td className="manage-column column-thumb align-center"></td>
-							<td className="manage-column column-thumb align-center"></td>
 						</tr>
 					</thead>
 					<tbody>
@@ -198,10 +206,12 @@ export default compose(
 			deleteNotification,
 			importNotifications,
 			deleteAllNotifications,
+			runNotification,
 			setNotice,
 		} = dispatch( STORE_KEY );
 
 		return {
+			runNotification,
 			deleteAllNotifications,
 			setNotice,
 			deleteNotification,

@@ -73,6 +73,22 @@ export function* deleteNotification( id ) {
 	}
 }
 
+export function* runNotification( name ) {
+	try {
+		const response = yield apiFetch( {
+			method: 'GET',
+			path: `${ API_NAMESPACE }/remote-inbox-notifications/${ name }/run`,
+		} );
+
+		yield setNotice( {
+			message: response.message,
+			status: response.success ? 'success' : 'error',
+		} );
+	} catch ( e ) {
+		throw new Error( e );
+	}
+}
+
 export function* deleteAllNotifications() {
 	try {
 		yield apiFetch( {

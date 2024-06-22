@@ -70,6 +70,7 @@ class RuleEvaluator {
 			$evaluation_logger = new EvaluationLogger( $logger_args['slug'], $source );
 		}
 
+
 		foreach ( $rules as $rule ) {
 			if ( ! is_object( $rule ) ) {
 				return false;
