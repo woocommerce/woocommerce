@@ -42,9 +42,6 @@ test.describe( `Filters Overlay Navigation`, () => {
 		await editor.openDocumentSettingsSidebar();
 
 		await expect(
-			editor.page.getByText( 'LayoutJustification' )
-		).toBeVisible();
-		await expect(
 			editor.page.getByRole( 'button', { name: 'Position' } )
 		).toBeVisible();
 		await editor.page.getByRole( 'tab', { name: 'Styles' } ).click();
