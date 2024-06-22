@@ -43,11 +43,6 @@ const tabs = applyFilters( 'woocommerce_admin_test_helper_tabs', [
 		content: <RestAPIFilters />,
 	},
 	{
-		name: 'remote-spec-validator',
-		title: 'Remote Spec Rule Validator',
-		content: <RemoteSpecValidator />,
-	},
-	{
 		name: 'remote-inbox-notifications',
 		title: 'Remote Inbox Notifications',
 		content: <RemoteInboxNotifications />,
