@@ -41,9 +41,10 @@ const FormTokenField =
  * Todo: move to a shared location.
  */
 interface TokenItem {
-	value: string;
-	status?: 'error' | 'success' | 'validating';
 	title?: string;
+	value: string;
+	slug: string;
+	status?: 'error' | 'success' | 'validating';
 	isBorderless?: boolean;
 	onMouseEnter?: MouseEventHandler< HTMLSpanElement >;
 	onMouseLeave?: MouseEventHandler< HTMLSpanElement >;
@@ -57,6 +58,7 @@ interface TokenItem {
  */
 const stringToTokenItem = ( v: string | TokenItem ): TokenItem => ( {
 	value: typeof v === 'string' ? v : v.value,
+	slug: typeof v === 'string' ? cleanForSlug( v ) : cleanForSlug( v.value ),
 } );
 
 /**
@@ -264,7 +266,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 			const newTerm = ( await createProductAttributeTerm(
 				{
 					name: token.value,
-					slug: cleanForSlug( token.value ),
+					slug: token.slug,
 					attribute_id: attributeId,
 				},
 				{
@@ -361,14 +363,17 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 
 						/*
 						 * Pick the new tokens from the nextTokens array.
-						 * (all new tokens are strings).
+						 * (all string are considered new tokens)
+						 * and map them to a new TermItem[] array.
 						 */
-						const newTokens = nextTokens.filter(
-							( token ): token is string =>
-								typeof token === 'string'
-						);
+						const newTokens = nextTokens
+							.filter(
+								( token ): token is string =>
+									typeof token === 'string'
+							)
+							.map( stringToTokenItem );
 
-						// Create a list of the next string tokens.
+						// Create a string list of the next string tokens.
 						const nextStringTokens =
 							nextTokens.map( tokenItemToString );
 
@@ -393,24 +398,24 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 						 * to slugs[] using the cleanForSlug helper.
 						 * It's used to compare the new tokens with the suggestions,
 						 * to avoid creating duplicate terms.
+						 *
+						 * @todo: this should be handled by the API,
+						 * probably allowing to create terms with the same name,
+						 * but different slugs.
 						 */
 						const slugSuggestions =
 							tokenFieldSuggestions.map( cleanForSlug );
 
 						/*
-						 * Filter the newTokens and convert them to slugs.
-						 * These slugs represent potential new terms.
-						 */
-						const slugTokens = newTokens.map( cleanForSlug );
-
-						/*
 						 * Identify new tokens that are not found
 						 * in the (slugged) suggestions.
+						 *
 						 * This helps prevent creating duplicate terms
 						 * with different cases, for example.
 						 */
-						const newStringTokens = slugTokens.filter(
-							( token ) => ! slugSuggestions.includes( token )
+						const newTermsToAdd = newTokens.filter(
+							( itemToken ) =>
+								! slugSuggestions.includes( itemToken.slug )
 						);
 
 						/*
@@ -428,13 +433,9 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 						 * Create new terms if there are any new tokens.
 						 * Set the status of new terms to 'validating'.
 						 */
-						if ( newStringTokens.length ) {
-							// Map the new string tokens to TokenItems.
-							const newTokenItems =
-								newStringTokens.map( stringToTokenItem );
-
+						if ( newTermsToAdd.length ) {
 							addNewTerms(
-								newTokenItems.map( ( item ) => ( {
+								newTermsToAdd.map( ( item ) => ( {
 									...item,
 									status: 'validating',
 								} ) )
