@@ -38,10 +38,10 @@
 			"default": {
 				"spacing": {
 					"padding": {
-						"top": "var:preset|spacing|10",
-						"right": "var:preset|spacing|10",
-						"bottom": "var:preset|spacing|10",
-						"left": "var:preset|spacing|10"
+						"top": "1rem",
+						"right": "1rem",
+						"bottom": "1rem",
+						"left": "1rem"
 					}
 				}
 			}

@@ -30,13 +30,9 @@ export const Edit = ( {
 }: BlockEditProps< BlockAttributes > ) => {
 	const { navigationStyle, buttonStyle, iconSize } = attributes;
 	const blockProps = useBlockProps( {
-		className: clsx(
-			'wc-block-product-filters-overlay-navigation',
-			`button-style-${ buttonStyle }`,
-			{
-				'wp-element-button': buttonStyle !== 'link',
-			}
-		),
+		className: clsx( 'wc-block-product-filters-overlay-navigation', {
+			'wp-block-button__link wp-element-button': buttonStyle !== 'link',
+		} ),
 	} );
 	// We need useInnerBlocksProps because Gutenberg only applies layout classes
 	// to parent block. We don't have any inner blocks but we want to use the
@@ -50,7 +46,30 @@ export const Edit = ( {
 	}, 50 );
 
 	return (
-		<nav { ...innerBlocksProps }>
+		<nav
+			className={ clsx(
+				'wc-block-product-filters-overlay-navigation-wrapper',
+				`is-style-${ buttonStyle }`,
+				{
+					'wp-block-button': buttonStyle !== 'link',
+				}
+			) }
+		>
+			<div { ...innerBlocksProps }>
+				{ navigationStyle !== 'icon' && (
+					<span>{ __( 'Close', 'woocommerce' ) }</span>
+				) }
+				{ navigationStyle !== 'label' && (
+					<Icon
+						fill="currentColor"
+						icon={ close }
+						style={ {
+							width: iconSize || '1rem',
+							height: iconSize || '1rem',
+						} }
+					/>
+				) }
+			</div>
 			<InspectorControls group="styles">
 				<PanelBody title={ __( 'Style', 'woocommerce' ) }>
 					<RadioControl
@@ -117,19 +136,6 @@ export const Edit = ( {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			{ navigationStyle !== 'icon' && (
-				<span>{ __( 'Close', 'woocommerce' ) }</span>
-			) }
-			{ navigationStyle !== 'label' && (
-				<Icon
-					fill="currentColor"
-					icon={ close }
-					style={ {
-						width: iconSize || '1rem',
-						height: iconSize || '1rem',
-					} }
-				/>
-			) }
 		</nav>
 	);
 };

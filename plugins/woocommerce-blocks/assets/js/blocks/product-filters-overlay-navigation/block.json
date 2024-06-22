@@ -7,6 +7,10 @@
 	"textdomain": "woocommerce",
 	"ancestor": [ "woocommerce/product-filters-overlay" ],
 	"attributes": {
+		"align": {
+			"type": "string",
+			"default": "right"
+		},
 		"navigationStyle": {
 			"type": "string",
 			"default": "full"
@@ -23,12 +27,13 @@
 			"type": "object",
 			"default": {
 				"spacing": {
-					"blockGap": "var:preset|spacing|10"
+					"blockGap": "1rem"
 				}
 			}
 		}
 	},
 	"supports": {
+		"align": [ "left", "right", "center"],
 		"inserter": false,
 		"color": {
 			"__experimentalDefaultControls": {
@@ -51,11 +56,9 @@
 			"default": {
 				"type": "flex",
 				"orientation": "horizontal",
-				"flexWrap": "nowrap",
-				"justifyContent": "right"
+				"flexWrap": "nowrap"
 			},
-			"allowSizingOnChildren": true,
-			"allowOrientation": false
+			"allowEditing": false
 		},
 		"spacing": {
 			"margin": true,
