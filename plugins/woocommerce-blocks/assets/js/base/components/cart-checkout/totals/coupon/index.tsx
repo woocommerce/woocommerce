@@ -2,13 +2,14 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useRef } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { withInstanceId } from '@wordpress/compose';
 import {
 	ValidatedTextInput,
 	ValidationInputError,
+	ValidatedTextInputHandle,
 	Panel,
 } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
@@ -55,6 +56,7 @@ export const TotalsCoupon = ( {
 			validationErrorId: store.getValidationErrorId( textInputId ),
 		};
 	} );
+	const inputRef = useRef< ValidatedTextInputHandle >( null );
 
 	const handleCouponSubmit: MouseEventHandler< HTMLButtonElement > = (
 		e: MouseEvent< HTMLButtonElement >
@@ -65,6 +67,8 @@ export const TotalsCoupon = ( {
 				if ( result ) {
 					setCouponValue( '' );
 					setIsCouponFormVisible( false );
+				} else if ( inputRef.current?.focus ) {
+					inputRef.current.focus();
 				}
 			} );
 		} else {
@@ -104,6 +108,7 @@ export const TotalsCoupon = ( {
 							focusOnMount={ true }
 							validateOnMount={ false }
 							showError={ false }
+							ref={ inputRef }
 						/>
 						<Button
 							className="wc-block-components-totals-coupon__button"
