@@ -89,7 +89,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 			'The block product editor is not being tested'
 		);
 
-		test.only( 'can create a variation option and publish the product', async ( {
+		test( 'can create a variation option and publish the product', async ( {
 			page,
 		} ) => {
 			await test.step( 'Load new product editor, disable tour', async () => {
@@ -214,12 +214,13 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 					 * that creates the new attribute term to finish.
 					 */
 					await page.waitForResponse( ( response ) => {
+						const urlToMatch = `/wp-json/wc/v3/products/attributes/${ newAttrData.id }/terms?name=${ term.name }&slug=${ term.slug }&_locale=user`;
+
 						return (
 							response
 								.url()
-								.includes(
-									`/wp-json/wc/v3/products/attributes/${ newAttrData.id }/terms?name=${ term.name }&slug=${ term.slug }&_locale=user`
-								) && response.status() === 201
+								.includes( encodeURI( urlToMatch ) ) &&
+							response.status() === 201
 						);
 					} );
 				}
