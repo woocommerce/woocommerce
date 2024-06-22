@@ -124,7 +124,8 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 					.click();
 			} );
 
-			await test.step( 'Add attribute options', async () => {
+			let newAttrData;
+			await test.step( 'Create attribute', async () => {
 				await page
 					.getByRole( 'heading', { name: 'Add variation options' } )
 					.isVisible();
@@ -169,8 +170,10 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 							) && response.status() === 201
 				);
 
-				const newAttrData = await newAttrResponse.json();
+				newAttrData = await newAttrResponse.json();
+			} );
 
+			await test.step( 'Add new terms to the attribute', async () => {
 				const FormTokenFieldLocator = page.locator(
 					'td.woocommerce-new-attribute-modal__table-attribute-value-column'
 				);
