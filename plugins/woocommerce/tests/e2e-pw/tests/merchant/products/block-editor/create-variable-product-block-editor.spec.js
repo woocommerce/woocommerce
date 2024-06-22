@@ -125,7 +125,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 			} );
 
 			let newAttrData;
-			await test.step( 'Create attribute', async () => {
+			await test.step( 'Create global attribute', async () => {
 				await page
 					.getByRole( 'heading', { name: 'Add variation options' } )
 					.isVisible();
