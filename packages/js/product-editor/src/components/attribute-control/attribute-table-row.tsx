@@ -41,8 +41,20 @@ const FormTokenField =
  * Todo: move to a shared location.
  */
 interface TokenItem {
+	/*
+	 * `title` is used to set the `title` property
+	 * of the main wrapper element of the token.
+	 */
 	title?: string;
+
+	/*
+	 * `value` is used to set the token text.
+	 */
 	value: string;
+
+	/*
+	 * `slug` is used internally to identify the token.
+	 */
 	slug: string;
 	status?: 'error' | 'success' | 'validating';
 	isBorderless?: boolean;
