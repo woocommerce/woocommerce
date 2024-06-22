@@ -77,7 +77,7 @@ export function* testNotification( name ) {
 	try {
 		const response = yield apiFetch( {
 			method: 'GET',
-			path: `${ API_NAMESPACE }/remote-inbox-notifications/${ name }/run`,
+			path: `${ API_NAMESPACE }/remote-inbox-notifications/${ name }/test`,
 		} );
 
 		yield setNotice( {
@@ -88,6 +88,14 @@ export function* testNotification( name ) {
 					  JSON.stringify( response.message, null, 2 ),
 			status: response.success ? 'success' : 'error',
 		} );
+
+		if ( response.success ) {
+			yield controls.dispatch(
+				STORE_KEY,
+				'invalidateResolutionForStoreSelector',
+				'getNotifications'
+			);
+		}
 	} catch ( e ) {
 		throw new Error( e );
 	}

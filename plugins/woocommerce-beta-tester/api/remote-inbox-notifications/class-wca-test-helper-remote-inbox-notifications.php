@@ -32,8 +32,8 @@ register_woocommerce_admin_test_helper_rest_route(
 );
 
 register_woocommerce_admin_test_helper_rest_route(
-	'/remote-inbox-notifications/(?P<name>(.*)+)/run',
-	array( WCA_Test_Helper_Remote_Inbox_Notifications::class, 'run' ),
+	'/remote-inbox-notifications/(?P<name>(.*)+)/test',
+	array( WCA_Test_Helper_Remote_Inbox_Notifications::class, 'test' ),
 	array(
 		'methods' => 'GET',
 		'args'    => array(
@@ -147,7 +147,7 @@ class WCA_Test_Helper_Remote_Inbox_Notifications {
 		return 'woocommerce_admin_' . RemoteInboxNotificationsDataSourcePoller::ID . '_specs';
 	}
 
-	public static function run( $request ) {
+	public static function test( $request ) {
 		$name          = $request->get_param( 'name' );
 		$notifications = get_transient( static::get_transient_name() );
 		$locale        = get_locale();
@@ -180,6 +180,11 @@ class WCA_Test_Helper_Remote_Inbox_Notifications {
 		}
 
 		$message = $test ? $name . ': All rules passed sucessfully' : $failed_rules;
+
+		if ( $test ) {
+			$stored_state = RemoteInboxNotificationsEngine::get_stored_state();
+			SpecRunner::run_spec( $spec, $stored_state );
+		}
 
 		return new WP_REST_Response(
 			array(
