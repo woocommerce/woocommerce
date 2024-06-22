@@ -2,17 +2,19 @@
  * External dependencies
  */
 import { useDebounce } from '@wordpress/compose';
+import { useSelect } from '@wordpress/data';
 import {
 	useBlockProps,
 	useInnerBlocksProps,
 	InspectorControls,
 } from '@wordpress/block-editor';
-import { BlockEditProps } from '@wordpress/blocks';
+import { BlockEditProps, store as blocksStore } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import {
 	PanelBody,
 	RadioControl,
+	SelectControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
@@ -38,6 +40,20 @@ export const Edit = ( {
 	// to parent block. We don't have any inner blocks but we want to use the
 	// layout controls.
 	const innerBlocksProps = useInnerBlocksProps( blockProps );
+
+	const buttonBlockStyles = useSelect(
+		( select ) => select( blocksStore ).getBlockStyles( 'core/button' ),
+		[]
+	);
+
+	const buttonStyles = [
+		{ value: 'link', label: __( 'Link', 'woocommerce' ) },
+	];
+
+	buttonBlockStyles.forEach( ( style: { name: string; label: string } ) => {
+		if ( style.name === 'link' ) return;
+		buttonStyles.push( { value: style.name, label: style.label } );
+	} );
 
 	const setIconSize = useDebounce( ( value: string ) => {
 		setAttributes( {
@@ -97,31 +113,43 @@ export const Edit = ( {
 						}
 					/>
 
-					<ToggleGroupControl
-						label={ __( 'Button', 'woocommerce' ) }
-						value={ buttonStyle }
-						isBlock
-						onChange={ (
-							value: BlockAttributes[ 'buttonStyle' ]
-						) =>
-							setAttributes( {
-								buttonStyle: value,
-							} )
-						}
-					>
-						<ToggleGroupControlOption
-							label={ __( 'Link', 'woocommerce' ) }
-							value="link"
+					{ buttonStyles.length <= 3 && (
+						<ToggleGroupControl
+							label={ __( 'Button', 'woocommerce' ) }
+							value={ buttonStyle }
+							isBlock
+							onChange={ (
+								value: BlockAttributes[ 'buttonStyle' ]
+							) =>
+								setAttributes( {
+									buttonStyle: value,
+								} )
+							}
+						>
+							{ buttonStyles.map( ( style ) => (
+								<ToggleGroupControlOption
+									key={ style.value }
+									label={ style.label }
+									value={ style.value }
+								/>
+							) ) }
+						</ToggleGroupControl>
+					) }
+					{ buttonStyles.length > 3 && (
+						<SelectControl
+							label={ __( 'Button', 'woocommerce' ) }
+							value={ buttonStyle }
+							options={ buttonStyles }
+							onChange={ (
+								value: BlockAttributes[ 'buttonStyle' ]
+							) =>
+								setAttributes( {
+									buttonStyle: value,
+								} )
+							}
 						/>
-						<ToggleGroupControlOption
-							label={ __( 'Fill', 'woocommerce' ) }
-							value="fill"
-						/>
-						<ToggleGroupControlOption
-							label={ __( 'Outline', 'woocommerce' ) }
-							value="outline"
-						/>
-					</ToggleGroupControl>
+					) }
+
 					<SizeControl
 						label={ __( 'Icon size', 'woocommerce' ) }
 						onChange={ ( numericSize: number, unit: string ) =>
