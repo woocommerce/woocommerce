@@ -106,10 +106,10 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	);
 
 	/*
-	 * Get the terms for the current attribute,
+	 * Get the global terms from the current attribute,
 	 * used in the token field suggestions and values.
 	 */
-	const terms = useSelect(
+	const globalAttributeTerms = useSelect(
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		( select: WCDataSelector ) => {
@@ -154,7 +154,9 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	const allTerms =
 		( isLocalAttribute
 			? localTerms.map( tokenItemToString )
-			: terms?.map( ( term: ProductAttributeTerm ) => term.name ) ) || [];
+			: globalAttributeTerms?.map(
+					( term: ProductAttributeTerm ) => term.name
+			  ) ) || [];
 
 	/*
 	 * For `suggestions` (the values of the FormTokenField component),
@@ -206,7 +208,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		}
 
 		// If the terms are not loaded, bail early.
-		if ( ! terms?.length ) {
+		if ( ! globalAttributeTerms?.length ) {
 			return;
 		}
 
@@ -219,12 +221,16 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		 * and bail early.
 		 */
 		if ( termsAutoSelection === 'first' ) {
-			return onTermsSelect( [ terms[ 0 ] ], index, attribute );
+			return onTermsSelect(
+				[ globalAttributeTerms[ 0 ] ],
+				index,
+				attribute
+			);
 		}
 
 		// auto select the first INITIAL_MAX_TOKENS_TO_SHOW terms
 		onTermsSelect(
-			terms.slice( 0, INITIAL_MAX_TOKENS_TO_SHOW ),
+			globalAttributeTerms.slice( 0, INITIAL_MAX_TOKENS_TO_SHOW ),
 			index,
 			attribute
 		);
@@ -232,7 +238,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		termsAutoSelection,
 		initiallyPopulated,
 		attribute,
-		terms,
+		globalAttributeTerms,
 		onTermsSelect,
 		index,
 	] );
@@ -422,8 +428,9 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 						 * Determine the selected terms to pass to the form,
 						 * filtering the terms by the new string tokens.
 						 */
-						const selectedTerms = terms?.filter( ( term ) =>
-							nextStringTokens.includes( term.name )
+						const selectedTerms = globalAttributeTerms?.filter(
+							( globalTerm ) =>
+								nextStringTokens.includes( globalTerm.name )
 						);
 
 						// Update the form terms using the callback function.
