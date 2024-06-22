@@ -163,7 +163,7 @@ function RemoteInboxNotifications( {
 							setNotice( { message: '' } );
 						} }
 					>
-						{ notice.message }
+						<pre>{ notice.message }</pre>
 					</Notice>
 				) }
 				<table className="wp-list-table striped table-view-list widefat">

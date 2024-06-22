@@ -186,6 +186,10 @@ form.rest-api-filter-new-form {
 }
 
 #wc-admin-test-helper-remote-inbox-notifications {
+	pre {
+		margin: 0;
+		padding: 0;
+	}
 	.action-btns {
 		justify-content: end;
 		display: flex;

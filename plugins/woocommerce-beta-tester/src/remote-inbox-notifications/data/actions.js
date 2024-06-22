@@ -81,7 +81,11 @@ export function* runNotification( name ) {
 		} );
 
 		yield setNotice( {
-			message: response.message,
+			message:
+				typeof response.message === 'string'
+					? response.message
+					: 'The following rule(s) have failed.\n\n' +
+					  JSON.stringify( response.message, null, 2 ),
 			status: response.success ? 'success' : 'error',
 		} );
 	} catch ( e ) {

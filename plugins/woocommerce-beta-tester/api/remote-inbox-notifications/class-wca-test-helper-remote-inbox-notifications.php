@@ -5,6 +5,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\SpecRunner;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsDataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\GetRuleProcessor;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
 
 register_woocommerce_admin_test_helper_rest_route(
@@ -161,9 +162,24 @@ class WCA_Test_Helper_Remote_Inbox_Notifications {
 			);
 		}
 
-		$rule_evaluator = new RuleEvaluator();
-		$test           = $rule_evaluator->evaluate( $notifications[ $locale ][ $name ]->rules );
-		$message        = $test ? $name . ': All rules passed sucessfully' : $name . ': Validation failed. Some rules did not pass.';
+		$spec           = $notifications[ $locale ][ $name ];
+		$test           = true;
+		$failed_rules   = array();
+		$rule_processor = new GetRuleProcessor();
+		foreach ( $spec->rules as $rule ) {
+			if ( ! is_object( $rule ) ) {
+				$test = false;
+				break;
+			}
+			$processor        = $rule_processor->get_processor( $rule->type );
+			$processor_result = $processor->process( $rule, null );
+			if ( ! $processor_result ) {
+				$test           = false;
+				$failed_rules[] = $rule;
+			}
+		}
+
+		$message = $test ? $name . ': All rules passed sucessfully' : $failed_rules;
 
 		return new WP_REST_Response(
 			array(
