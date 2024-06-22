@@ -73,7 +73,7 @@ export function* deleteNotification( id ) {
 	}
 }
 
-export function* runNotification( name ) {
+export function* testNotification( name ) {
 	try {
 		const response = yield apiFetch( {
 			method: 'GET',

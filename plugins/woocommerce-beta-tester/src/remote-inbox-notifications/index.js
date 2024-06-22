@@ -16,7 +16,7 @@ function RemoteInboxNotifications( {
 	deleteNotification,
 	importNotifications,
 	deleteAllNotifications,
-	runNotification,
+	testNotification,
 	isLoading,
 	notice,
 	setNotice,
@@ -83,10 +83,10 @@ function RemoteInboxNotifications( {
 						<button
 							className="button btn"
 							onClick={ () => {
-								runNotification( notification.name );
+								testNotification( notification.name );
 							} }
 						>
-							Run
+							Test
 						</button>
 						<button
 							className="button btn-danger"
@@ -206,12 +206,12 @@ export default compose(
 			deleteNotification,
 			importNotifications,
 			deleteAllNotifications,
-			runNotification,
+			testNotification,
 			setNotice,
 		} = dispatch( STORE_KEY );
 
 		return {
-			runNotification,
+			testNotification,
 			deleteAllNotifications,
 			setNotice,
 			deleteNotification,
