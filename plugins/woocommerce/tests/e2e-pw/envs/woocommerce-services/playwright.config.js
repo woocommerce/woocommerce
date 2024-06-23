@@ -7,7 +7,7 @@ config = {
 	projects: [
 		{
 			name: 'WooCommerce Shipping & Tax',
-			testMatch: /.*basic\/*/,
+			grep: /@services/,
 		},
 	],
 };

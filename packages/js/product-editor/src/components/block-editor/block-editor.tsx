@@ -30,7 +30,7 @@ import {
 	BlockTools,
 	ObserveTyping,
 } from '@wordpress/block-editor';
-// It doesn't seem to notice the External dependency block whn @ts-ignore is added.
+// It doesn't seem to notice the External dependency block when @ts-ignore is added.
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment

@@ -21,7 +21,7 @@ const steps = [
 	'Opening the doors',
 ];
 
-test.describe( 'Assembler - Loading Page', () => {
+test.describe( 'Assembler - Loading Page', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
