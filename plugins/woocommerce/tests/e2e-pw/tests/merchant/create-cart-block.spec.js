@@ -12,30 +12,34 @@ const test = baseTest.extend( {
 	testPageTitlePrefix: 'Transformed cart',
 } );
 
-test.describe( 'Transform Classic Cart To Cart Block', () => {
-	test( 'can transform classic cart to cart block', async ( {
-		page,
-		testPage,
-	} ) => {
-		await goToPageEditor( { page } );
+test.describe(
+	'Transform Classic Cart To Cart Block',
+	{ tag: [ '@gutenberg', '@services' ] },
+	() => {
+		test( 'can transform classic cart to cart block', async ( {
+			page,
+			testPage,
+		} ) => {
+			await goToPageEditor( { page } );
 
-		await fillPageTitle( page, testPage.title );
-		await insertBlock( page, 'Classic Cart' );
-		await transformIntoBlocks( page );
-		await publishPage( page, testPage.title );
+			await fillPageTitle( page, testPage.title );
+			await insertBlock( page, 'Classic Cart' );
+			await transformIntoBlocks( page );
+			await publishPage( page, testPage.title );
 
-		// go to frontend to verify transformed cart block
-		await page.goto( testPage.slug );
-		await expect(
-			page.getByRole( 'heading', { name: testPage.title } )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'heading', {
-				name: 'Your cart is currently empty!',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'link', { name: 'Browse store' } )
-		).toBeVisible();
-	} );
-} );
+			// go to frontend to verify transformed cart block
+			await page.goto( testPage.slug );
+			await expect(
+				page.getByRole( 'heading', { name: testPage.title } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'Your cart is currently empty!',
+				} )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'link', { name: 'Browse store' } )
+			).toBeVisible();
+		} );
+	}
+);
