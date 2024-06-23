@@ -80,14 +80,14 @@ p.demo_store,
 		text-align: center;
 		line-height: 1;
 		border-radius: 100%;
-		color: red !important; // Required for default theme compatibility
+		color: $red !important; // Required for default theme compatibility
 		text-decoration: none;
 		font-weight: 700;
 		border: 0;
 
 		&:hover {
 			color: #fff !important; // Required for default theme compatibility
-			background: red;
+			background: $red;
 		}
 	}
 
@@ -1224,7 +1224,7 @@ p.demo_store,
 		}
 
 		.required {
-			color: red;
+			color: $red;
 			font-weight: 700;
 			border: 0 !important;
 			text-decoration: none;
@@ -1793,7 +1793,7 @@ p.demo_store,
 		}
 
 		.out-of-stock {
-			color: red;
+			color: $red;
 		}
 	}
 
@@ -2290,7 +2290,7 @@ p.demo_store,
 
 .woocommerce-invalid {
 	#terms {
-		outline: 2px solid red;
+		outline: 2px solid $red;
 		outline-offset: 2px;
 	}
 }
