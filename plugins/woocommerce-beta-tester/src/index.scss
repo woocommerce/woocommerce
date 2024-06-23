@@ -196,6 +196,9 @@ form.rest-api-filter-new-form {
 		gap: 5px;
 		margin-top: 10px;
 		margin-bottom: 10px;
+		.btn-danger {
+			margin-right: auto;
+		}
 	}	
 	.notification-actions {
 		display: flex;
@@ -210,5 +213,14 @@ form.rest-api-filter-new-form {
 		background-color: #de9816;
 		color: #fff;
 		border-color: #de9816;
+	}
+
+	.column-status {
+		display: flex;
+		svg {
+			width: 18px;
+			height: 18px;
+			margin-left: 2px;
+		}
 	}
 }
