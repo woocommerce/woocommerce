@@ -3,7 +3,7 @@
  */
 import { useCallback, useMemo, useRef, useState } from '@wordpress/element';
 import { useSelect, useDispatch, select } from '@wordpress/data';
-import { cloneBlock } from '@wordpress/blocks';
+import { BlockInstance, cloneBlock } from '@wordpress/blocks';
 import { close } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
@@ -68,11 +68,13 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 				select( blockEditorStore )
 			).__experimentalGetParsedPattern( pattern.name );
 
-			const clonedParsedPattern = parsedPattern.blocks.map( cloneBlock );
+			const cloneBlocks = parsedPattern.blocks.map(
+				( blockInstance: BlockInstance ) => cloneBlock( blockInstance )
+			);
 
-			insertBlocks( clonedParsedPattern, insertableIndex );
+			insertBlocks( cloneBlocks, insertableIndex );
 
-			selectBlock( clonedParsedPattern[ 0 ].clientId, -1 );
+			selectBlock( cloneBlocks.blocks[ 0 ].clientId, -1 );
 		},
 		[ insertBlocks, insertableIndex, selectBlock ]
 	);
