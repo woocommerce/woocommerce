@@ -105,7 +105,7 @@ const addInertToAssemblerPatterns = (
 	const interactiveBlocks: Record< string, string > = {
 		'/customize-store/assembler-hub/header': `header[data-type='core/template-part']`,
 		'/customize-store/assembler-hub/footer': `footer[data-type='core/template-part']`,
-		'/customize-store/assembler-hub/homepage': `[data-is-parent-block='true']:not([data-type='core/template-part'])`,
+		'/customize-store/assembler-hub/homepage': `[data-is-parent-block='true']:not([data-type='core/template-part']):not(.${ DISABLE_CLICK_CLASS })`,
 	};
 
 	const pathInteractiveBlocks = page.includes(
@@ -157,7 +157,7 @@ const addInertToAllInnerBlocks = ( documentElement: HTMLElement ) => {
 		}
 
 		for ( const disableClick of documentElement.querySelectorAll(
-			`[data-is-parent-block='true'] *, header *, footer *, .${ DISABLE_CLICK_CLASS }`
+			`[data-is-parent-block='true'] *`
 		) ) {
 			makeInert( disableClick );
 		}

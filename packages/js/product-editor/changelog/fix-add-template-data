@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Add data from the template to the product when it is selected via URL query parameter
+
+

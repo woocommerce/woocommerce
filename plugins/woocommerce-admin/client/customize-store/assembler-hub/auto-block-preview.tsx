@@ -294,6 +294,10 @@ function ScaledBlockPreview( {
 							cursor: pointer !important;
 						}
 
+						.components-resizable-box__handle {
+							display: none !important;
+						}
+
 						${ additionalStyles }
 					` }
 						</style>
