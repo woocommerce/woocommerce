@@ -2738,6 +2738,7 @@ function wc_update_910_add_launch_your_store_tour_option() {
 function wc_update_920_add_old_refunded_order_items_to_product_lookup_table() {
 	global $wpdb;
 
+	// Get every order ID where the total sales is less than 0 and is not present in the table wc_order_product_lookup.
 	$select_query = "
 	SELECT order_stats.parent_id FROM {$wpdb->prefix}wc_order_stats AS order_stats
 	WHERE order_stats.total_sales < 0
@@ -2749,17 +2750,17 @@ function wc_update_920_add_old_refunded_order_items_to_product_lookup_table() {
     ) = 0";
 
 	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input in the query, everything is hardcoded.
-	$order_ids = $wpdb->get_results( $select_query );
+	$orders = $wpdb->get_results( $select_query );
 
-	if ( $order_ids ) {
-		foreach ( $order_ids as $order_id ) {
+	if ( $orders ) {
+		foreach ( $orders as $order ) {
 			/**
-			 * Trigger an action to schedule import for old refunded order items.
+			 * Trigger an action to schedule the data import for old refunded order items.
 			 *
-			 * @param int $order_id The ID of the parent order.
+			 * @param int $order_id The ID of the order to be synced.
 			 * @since 9.2.0
 			 */
-			do_action( 'woocommerce_schedule_import', intval( $order_id->parent_id ) );
+			do_action( 'woocommerce_schedule_import', intval( $order->parent_id ) );
 		}
 	}
 }
