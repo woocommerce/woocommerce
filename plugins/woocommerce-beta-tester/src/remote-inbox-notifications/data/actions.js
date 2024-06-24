@@ -86,6 +86,14 @@ export function* testNotification( name ) {
 			path: `${ API_NAMESPACE }/remote-inbox-notifications/${ name }/test`,
 		} );
 
+		if ( response.success ) {
+			yield controls.dispatch(
+				STORE_KEY,
+				'invalidateResolutionForStoreSelector',
+				'getNotifications'
+			);
+		}
+
 		yield setNotice( {
 			message:
 				typeof response.message === 'string'
@@ -94,14 +102,6 @@ export function* testNotification( name ) {
 					  JSON.stringify( response.message, null, 2 ),
 			status: response.success ? 'success' : 'error',
 		} );
-
-		if ( response.success ) {
-			yield controls.dispatch(
-				STORE_KEY,
-				'invalidateResolutionForStoreSelector',
-				'getNotifications'
-			);
-		}
 	} catch ( e ) {
 		setNotice( {
 			message: 'Failed to test notification',
@@ -122,6 +122,11 @@ export function* deleteAllNotifications() {
 			'invalidateResolutionForStoreSelector',
 			'getNotifications'
 		);
+
+		setNotice( {
+			message: 'All notifications deleted successfully.',
+			status: 'success',
+		} );
 	} catch {
 		setNotice( {
 			message: 'Failed to delete all notifications',

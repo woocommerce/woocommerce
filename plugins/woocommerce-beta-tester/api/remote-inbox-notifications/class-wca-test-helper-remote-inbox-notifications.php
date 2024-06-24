@@ -93,7 +93,7 @@ class WCA_Test_Helper_Remote_Inbox_Notifications {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function delete_all_items() {
+	public static function delete_all_items() {
 		$deleted = WC_Beta_Tester_Remote_Inbox_Notifications_Helper::delete_all();
 		return new WP_REST_Response( $deleted, 200 );
 	}
