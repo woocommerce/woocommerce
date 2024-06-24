@@ -158,7 +158,7 @@ class WCA_Test_Helper_Remote_Inbox_Notifications {
 		$result = WC_Beta_Tester_Remote_Inbox_Notifications_Helper::test( $name, null, true );
 
 		if ( $result instanceof WP_Error ) {
-			$message = $result->get_data();
+			$message = $result->get_error_data();
 		} else {
 			$message = $name . ': All rules passed successfully';
 		}

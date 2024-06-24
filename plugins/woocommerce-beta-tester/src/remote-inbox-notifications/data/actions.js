@@ -71,6 +71,10 @@ export function* deleteNotification( id ) {
 			type: TYPES.DELETE_NOTIFICATION,
 			id,
 		};
+		setNotice( {
+			message: 'Notifications deleted successfully.',
+			status: 'success',
+		} );
 	} catch {
 		setNotice( {
 			message: 'Failed to delete notification',
