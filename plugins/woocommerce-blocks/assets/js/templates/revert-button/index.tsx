@@ -112,7 +112,7 @@ const RevertClassicTemplateButton = () => {
 									strongText: (
 										<strong>
 											{ template?.record?.title?.rendered
-												? `Classic ${ template.record.title.rendered }`
+												? `${ template.record.title.rendered } (Classic)`
 												: '' }
 										</strong>
 									),
