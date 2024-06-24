@@ -22,15 +22,17 @@ function RemoteInboxNotifications( {
 	setNotice,
 } ) {
 	const importFromEnv = async ( env ) => {
-		const urls = {
+		const preDefinedUrls = {
 			staging:
 				'https://staging.woocommerce.com/wp-json/wccom/inbox-notifications/2.0/notifications.json',
 			production:
 				'https://woocommerce.com/wp-json/wccom/inbox-notifications/2.0/notifications.json',
 		};
 
+		const url = preDefinedUrls[ env ] || env;
+
 		try {
-			const response = await fetch( urls[ env ] );
+			const response = await fetch( url );
 			const data = await response.json();
 			importNotifications( data );
 			setNotice( {
@@ -126,7 +128,19 @@ function RemoteInboxNotifications( {
 							}
 						} }
 					/>
-
+					<input
+						type="button"
+						className="button url"
+						value="Import from URL"
+						onClick={ () => {
+							const url = prompt(
+								'Enter the URL to import notifications from'
+							);
+							if ( url ) {
+								importFromEnv( url );
+							}
+						} }
+					/>
 					<input
 						type="button"
 						className="button btn-primary staging"
