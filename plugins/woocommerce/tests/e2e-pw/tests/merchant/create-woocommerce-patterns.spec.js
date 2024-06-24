@@ -14,14 +14,6 @@ const wooPatterns = [
 		button: 'Shop now',
 	},
 	{
-		name: 'Just Arrived Full Hero',
-		button: 'Shop now',
-	},
-	{
-		name: 'Hero Product 3 Split',
-		button: 'Shop now',
-	},
-	{
 		name: 'Featured Category Cover Image',
 		button: 'Shop chairs',
 	},
