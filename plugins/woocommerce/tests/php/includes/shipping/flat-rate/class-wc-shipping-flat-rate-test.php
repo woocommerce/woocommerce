@@ -45,7 +45,7 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 
 
 	/**
-	 * @testDox Shipping cost with decimal seperator works as expected.
+	 * @testDox Shipping cost with decimal separator works as expected.
 	 */
 	public function test_evaluate_cost_sep_dec() {
 		$val = $this->call_evaluate_cost->call(
@@ -60,9 +60,9 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Shipping cost with incorrect decimal seperator works as expected.
+	 * @testDox Shipping cost with incorrect decimal separator works as expected.
 	 */
-	public function test_evaluate_cost_dec_seperator_inverse() {
+	public function test_evaluate_cost_dec_separator_inverse() {
 		$val = $this->call_evaluate_cost->call(
 			$this->sut,
 			'12345.67',
@@ -75,10 +75,10 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Shipping cost with thousand and decimal seperator works as expected.
+	 * @testDox Shipping cost with a thousand and decimal separator works as expected.
 	 */
 	public function test_evaluate_cost_sep_thou_dec() {
-		$this->markTestSkipped( 'This test currently fails because we dont support thousand seperator in shipping price.' );
+		$this->markTestSkipped( 'This test currently fails because we dont support thousand separator in shipping price.' );
 		$val = $this->call_evaluate_cost->call(
 			$this->sut,
 			'12.345,67',
@@ -94,7 +94,7 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	 * @testDox Shipping cost with two decimal separator works as expected.
 	 */
 	public function test_evaluate_cost_sep_dec_dec() {
-		$this->markTestSkipped( 'This test currently fails because we dont support thousand seperator in shipping price.' );
+		$this->markTestSkipped( 'This test currently fails because we dont support thousand separator in shipping price.' );
 		$val = $this->call_evaluate_cost->call(
 			$this->sut,
 			'12,345,67',
@@ -110,7 +110,7 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	 * @testDox Shipping cost with two thousand separator works as expected.
 	 */
 	public function test_evaluate_cost_sep_thou_thou() {
-		$this->markTestSkipped( 'This test currently fails because we dont support thousand seperator in shipping price.' );
+		$this->markTestSkipped( 'This test currently fails because we dont support thousand separator in shipping price.' );
 		$val = $this->call_evaluate_cost->call(
 			$this->sut,
 			'12.345.67',
