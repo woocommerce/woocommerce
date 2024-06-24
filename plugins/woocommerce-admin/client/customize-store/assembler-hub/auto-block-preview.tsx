@@ -301,6 +301,11 @@ function ScaledBlockPreview( {
 							display: none !important;
 						}
 
+						footer.is-selected::after,
+						header.is-selected::after {
+							outline-color: var(--wp-admin-theme-color) !important;
+						}
+
 						${ additionalStyles }
 					` }
 						</style>
