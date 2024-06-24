@@ -245,7 +245,7 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ) );
 		$this->asset_data_registry->register_page_id( isset( $attributes['checkoutPageId'] ) ? $attributes['checkoutPageId'] : 0 );
 		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme() );
-		$this->asset_data_registry->add( 'hasOnlyDefaultShippingMethod', CartCheckoutUtils::has_only_default_shipping_method() );
+		$this->asset_data_registry->add( 'shippingMethodSettings', CartCheckoutUtils::get_shipping_method_settings() );
 		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
 		$this->asset_data_registry->add( 'localPickupEnabled', $pickup_location_settings['enabled'] );
 

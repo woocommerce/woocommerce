@@ -46,6 +46,7 @@ describe( 'ShippingAddress', () => {
 				isShippingCalculatorOpen={ false }
 				setIsShippingCalculatorOpen={ jest.fn() }
 				shippingAddress={ testShippingAddress }
+				activeShippingRates={ 1 }
 			/>
 		);
 		expect( screen.getByText( /Shipping to 94107/ ) ).toBeInTheDocument();
@@ -80,6 +81,7 @@ describe( 'ShippingAddress', () => {
 				isShippingCalculatorOpen={ false }
 				setIsShippingCalculatorOpen={ jest.fn() }
 				shippingAddress={ testShippingAddress }
+				activeShippingRates={ 1 }
 			/>
 		);
 		expect(

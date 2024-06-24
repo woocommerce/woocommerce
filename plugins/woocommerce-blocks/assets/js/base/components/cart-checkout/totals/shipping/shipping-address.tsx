@@ -23,35 +23,41 @@ export interface ShippingAddressProps {
 	isShippingCalculatorOpen: boolean;
 	setIsShippingCalculatorOpen: CalculatorButtonProps[ 'setIsShippingCalculatorOpen' ];
 	shippingAddress: ShippingAddressType;
+	activeShippingRates: number;
 }
+
+type ShippingMethodSettings = {
+	hasOnlyDefaultShippingMethod: boolean;
+	activeMethodsCount: number;
+};
 
 export const ShippingAddress = ( {
 	showCalculator,
 	isShippingCalculatorOpen,
 	setIsShippingCalculatorOpen,
 	shippingAddress,
+	activeShippingRates = 0,
 }: ShippingAddressProps ): JSX.Element | null => {
 	const { isEditor } = useEditorContext();
 	const prefersCollection = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).prefersCollection()
 	);
-	const hasOnlyDefaultShippingMethod: boolean = getSetting(
-		'hasOnlyDefaultShippingMethod'
-	);
 
 	const hasFormattedAddress = !! formatShippingAddress( shippingAddress );
 
-	// If there is no default customer location set in the store,
-	// and the customer hasn't provided their address,
-	// and only one default shipping method is available for all locations,
-	// then the shipping calculator will be hidden to avoid confusion.
-	if (
-		! hasFormattedAddress &&
-		! isEditor &&
-		! hasOnlyDefaultShippingMethod
-	) {
+	const {
+		hasOnlyDefaultShippingMethod,
+		activeMethodsCount,
+	}: ShippingMethodSettings = getSetting( 'shippingMethodSettings' );
+
+	const displayCalculatorButton =
+		! hasOnlyDefaultShippingMethod ||
+		activeShippingRates > activeMethodsCount;
+
+	if ( ! hasFormattedAddress && ! isEditor && ! displayCalculatorButton ) {
 		return null;
 	}
+
 	const label = hasFormattedAddress
 		? __( 'Change address', 'woocommerce' )
 		: __( 'Calculate shipping for your location', 'woocommerce' );

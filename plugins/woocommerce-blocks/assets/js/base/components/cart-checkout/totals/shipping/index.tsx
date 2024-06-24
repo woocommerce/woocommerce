@@ -63,6 +63,12 @@ export const TotalsShipping = ( {
 	const prefersCollection = useSelect( ( select ) => {
 		return select( CHECKOUT_STORE_KEY ).prefersCollection();
 	} );
+	const activeShippingRates = shippingRates.reduce(
+		( total, shippingPackage ) => {
+			return total + shippingPackage.shipping_rates.length;
+		},
+		0
+	);
 	const selectedShippingRates = shippingRates.flatMap(
 		( shippingPackage ) => {
 			return shippingPackage.shipping_rates
@@ -135,6 +141,7 @@ export const TotalsShipping = ( {
 								setIsShippingCalculatorOpen={
 									setIsShippingCalculatorOpen
 								}
+								activeShippingRates={ activeShippingRates }
 							/>
 						</>
 					) : null
