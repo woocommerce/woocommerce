@@ -203,7 +203,7 @@ class WCA_Test_Helper_Remote_Inbox_Notifications {
 		$transient = get_transient( static::get_transient_name() );
 
 		foreach ( $specs as $spec ) {
-			SpecRunner::run_spec( $spec, $stored_statre );
+			SpecRunner::run_spec( $spec, $stored_state );
 			if ( isset( $spec->locales ) && is_array( $spec->locales ) ) {
 				foreach ( $spec->locales as $locale ) {
 					$transient[ $locale->locale ][ $spec->slug ] = $spec;
