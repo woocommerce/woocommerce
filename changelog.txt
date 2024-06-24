@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 9.0.2 2024-06-24 =
+
+**WooCommerce**
+
+* Fix - Revert 46857 to preserve backcompat with earlier WC versions. [#48753](https://github.com/woocommerce/woocommerce/pull/48753)
+
+
 = 9.0.0 2024-06-18 =
 
 **WooCommerce**
