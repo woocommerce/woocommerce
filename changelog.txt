@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 9.0.1 2024-06-20 =
+
+**WooCommerce**
+
+* Fix - Check WC_Legacy_API instead of WC_API as that seems to be cached by lightspeed servers. [#48593](https://github.com/woocommerce/woocommerce/pull/48593)
+
 = 9.0.0 2024-06-18 =
 
 **WooCommerce**
