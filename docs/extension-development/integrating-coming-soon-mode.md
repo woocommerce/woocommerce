@@ -9,7 +9,7 @@ This guide provides examples for third-party developers and hosting providers on
 
 ## Clear server cache on site visibility settings change
 
-When the site's visibility settings is changed, it may be necessary to clear the server cache in order for the changes to be applied and customer-facing pages re-cached. We can utilize [`update_option`](https://developer.wordpress.org/reference/hooks/update_option/) hook to achieve this.
+When the site's visibility settings is changed, it may be necessary to clear a server cache in order for the changes to be applied and customer-facing pages re-cached. We can utilize [`update_option`](https://developer.wordpress.org/reference/hooks/update_option/) hook to achieve this.
 
 ```php
 add_action( 'update_option_woocommerce_coming_soon', 'clear_server_cache', 10, 3 );
