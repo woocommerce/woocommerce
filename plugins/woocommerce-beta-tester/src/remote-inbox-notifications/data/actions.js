@@ -60,8 +60,8 @@ export function* importNotifications( notifications ) {
 export function* deleteNotification( id ) {
 	try {
 		yield apiFetch( {
-			method: 'DELETE',
-			path: `${ API_NAMESPACE }/remote-inbox-notifications/${ id }`,
+			method: 'POST',
+			path: `${ API_NAMESPACE }/remote-inbox-notifications/${ id }/delete`,
 		} );
 
 		yield {
@@ -104,8 +104,8 @@ export function* testNotification( name ) {
 export function* deleteAllNotifications() {
 	try {
 		yield apiFetch( {
-			method: 'DELETE',
-			path: `${ API_NAMESPACE }/remote-inbox-notifications/`,
+			method: 'POST',
+			path: `${ API_NAMESPACE }/remote-inbox-notifications/delete-all`,
 		} );
 
 		yield controls.dispatch(

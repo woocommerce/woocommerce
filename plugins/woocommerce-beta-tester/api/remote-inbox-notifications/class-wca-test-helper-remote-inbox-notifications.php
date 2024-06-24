@@ -8,6 +8,8 @@ use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificatio
 use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\GetRuleProcessor;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
 
+require_once dirname( __FILE__ ) . '/class-wc-beta-tester-remote-inbox-notifications-helper.php';
+
 register_woocommerce_admin_test_helper_rest_route(
 	'/remote-inbox-notifications',
 	array( WCA_Test_Helper_Remote_Inbox_Notifications::class, 'get_items' ),
@@ -17,10 +19,10 @@ register_woocommerce_admin_test_helper_rest_route(
 );
 
 register_woocommerce_admin_test_helper_rest_route(
-	'/remote-inbox-notifications/(?P<id>\d+)',
+	'/remote-inbox-notifications/(?P<id>\d+)/delete',
 	array( WCA_Test_Helper_Remote_Inbox_Notifications::class, 'delete' ),
 	array(
-		'methods' => 'DELETE',
+		'methods' => 'POST',
 		'args'    => array(
 			'id' => array(
 				'description' => 'Rest API endpoint.',
@@ -47,10 +49,10 @@ register_woocommerce_admin_test_helper_rest_route(
 );
 
 register_woocommerce_admin_test_helper_rest_route(
-	'/remote-inbox-notifications/',
+	'/remote-inbox-notifications/delete-all',
 	array( WCA_Test_Helper_Remote_Inbox_Notifications::class, 'delete_all_items' ),
 	array(
-		'methods' => 'DELETE',
+		'methods' => 'POST',
 	)
 );
 
@@ -69,19 +71,15 @@ register_woocommerce_admin_test_helper_rest_route(
 class WCA_Test_Helper_Remote_Inbox_Notifications {
 
 	/**
-	 * Delete a filter.
+	 * Delete a notification.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public static function delete( $request ) {
-		global $wpdb;
+		WC_Beta_Tester_Remote_Inbox_Notifications_Helper::delete_by_id( $request->get_param( 'id' ) );
 
-		$id = $request->get_param( 'id' );
-		$wpdb->delete( $wpdb->prefix . 'wc_admin_notes', array( 'note_id' => $id ) );
-		$wpdb->delete( $wpdb->prefix . 'wc_admin_note_actions', array( 'note_id' => $id ) );
-
-		return new WP_REST_RESPONSE(
+		return new WP_REST_Response(
 			array(
 				'success' => true,
 				'message' => 'Remote inbox notification deleted.',
@@ -90,28 +88,28 @@ class WCA_Test_Helper_Remote_Inbox_Notifications {
 		);
 	}
 
-	private static function delete_all() {
-		global $wpdb;
-
-		$deleted_note_count   = $wpdb->query( "DELETE FROM {$wpdb->prefix}wc_admin_notes" );
-		$deleted_action_count = $wpdb->query( "DELETE FROM {$wpdb->prefix}wc_admin_note_actions" );
-		return array(
-			'deleted_note_count'   => $deleted_note_count,
-			'deleted_action_count' => $deleted_action_count,
-		);
-	}
-
-	public function delete_all_items( $request ) {
-		$deleted = self::delete_all();
+	/**
+	 * Delete all notifications.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function delete_all_items() {
+		$deleted = WC_Beta_Tester_Remote_Inbox_Notifications_Helper::delete_all();
 		return new WP_REST_Response( $deleted, 200 );
 	}
 
+	/**
+	 * Return a list of class-based notes.
+	 * These should be excluded from the list of notes to be displayed in the inbox as we don't have control over them.
+	 *
+	 * @return array
+	 */
 	private static function get_notes_to_exclude() {
-		$vars            = array( 'other_note_classes', 'note_classes_to_added_or_updated' );
-		$note_names      = array();
-		$reflectionClass = new ReflectionClass( '\Automattic\WooCommerce\Internal\Admin\Events' );
+		$vars       = array( 'other_note_classes', 'note_classes_to_added_or_updated' );
+		$note_names = array();
+		$reflection = new ReflectionClass( '\Automattic\WooCommerce\Internal\Admin\Events' );
 		foreach ( $vars as $var ) {
-			$property = $reflectionClass->getProperty( $var );
+			$property = $reflection->getProperty( $var );
 			$property->setAccessible( true );
 			$notes      = $property->getValue();
 			$note_names = array_merge(
@@ -128,7 +126,12 @@ class WCA_Test_Helper_Remote_Inbox_Notifications {
 		return $note_names;
 	}
 
-	public static function get_items( $request ) {
+	/**
+	 * Return all notifications.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public static function get_items() {
 		global $wpdb;
 		$items = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}wc_admin_notes ORDER BY note_id desc", ARRAY_A );
 
@@ -136,82 +139,50 @@ class WCA_Test_Helper_Remote_Inbox_Notifications {
 		$items                   = array_filter(
 			$items,
 			function ( $item ) use ( $notes_added_via_classes ) {
-				return ! in_array( $item['name'], $notes_added_via_classes );
+				return ! in_array( $item['name'], $notes_added_via_classes, true );
 			}
 		);
 
 		return new WP_REST_Response( array_values( $items ), 200 );
 	}
 
-	public static function get_transient_name() {
-		return 'woocommerce_admin_' . RemoteInboxNotificationsDataSourcePoller::ID . '_specs';
-	}
-
+	/**
+	 * Test and run a remote inbox notification.
+	 *
+	 * @param WP_REST_Request $request The full request data.
+	 *
+	 * @return WP_REST_Response
+	 */
 	public static function test( $request ) {
-		$name          = $request->get_param( 'name' );
-		$notifications = get_transient( static::get_transient_name() );
-		$locale        = get_locale();
+		$name   = $request->get_param( 'name' );
+		$result = WC_Beta_Tester_Remote_Inbox_Notifications_Helper::test( $name, null, true );
 
-		if ( ! isset( $notifications[ $locale ][ $name ] ) ) {
-			return new WP_REST_Response(
-				array(
-					'success' => false,
-					'message' => "'{$name}' was not found in the latest remote inbox notification transient. Please re-run the import command.",
-				),
-				200
-			);
-		}
-
-		$spec           = $notifications[ $locale ][ $name ];
-		$test           = true;
-		$failed_rules   = array();
-		$rule_processor = new GetRuleProcessor();
-		foreach ( $spec->rules as $rule ) {
-			if ( ! is_object( $rule ) ) {
-				$test = false;
-				break;
-			}
-			$processor        = $rule_processor->get_processor( $rule->type );
-			$processor_result = $processor->process( $rule, null );
-			if ( ! $processor_result ) {
-				$test           = false;
-				$failed_rules[] = $rule;
-			}
-		}
-
-		$message = $test ? $name . ': All rules passed successfully' : $failed_rules;
-
-		if ( $test ) {
-			$stored_state = RemoteInboxNotificationsEngine::get_stored_state();
-			SpecRunner::run_spec( $spec, $stored_state );
+		if ( $result instanceof WP_Error ) {
+			$message = $result->get_data();
+		} else {
+			$message = $name . ': All rules passed successfully';
 		}
 
 		return new WP_REST_Response(
 			array(
-				'success' => $test,
+				'success' => true === $result,
 				'message' => $message,
 			),
 			200
 		);
 	}
 
+	/**
+	 * Import remote inbox notifications.
+	 *
+	 * @param WP_REST_Request $request The full request data.
+	 *
+	 * @return WP_REST_Response
+	 */
 	public static function import( $request ) {
-		// Get the JSON data from the request body
-		$specs         = json_decode( json_encode( $request->get_json_params() ) );
-		$stored_state = RemoteInboxNotificationsEngine::get_stored_state();
-
-		$transient = get_transient( static::get_transient_name() );
-
-		foreach ( $specs as $spec ) {
-			SpecRunner::run_spec( $spec, $stored_state );
-			if ( isset( $spec->locales ) && is_array( $spec->locales ) ) {
-				foreach ( $spec->locales as $locale ) {
-					$transient[ $locale->locale ][ $spec->slug ] = $spec;
-				}
-			}
-		}
-
-		set_transient( static::get_transient_name(), $transient );
+		// Get the JSON data from the request body.
+		$specs = json_decode( wp_json_encode( $request->get_json_params() ) );
+		WC_Beta_Tester_Remote_Inbox_Notifications_Helper::import( $specs );
 
 		return new WP_REST_Response(
 			array(
