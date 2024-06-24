@@ -28,6 +28,12 @@ updateTotals( getMiniCartTotalsFromLocalStorage() );
 getMiniCartTotalsFromServer().then( updateTotals );
 setStyles();
 
+declare global {
+	interface Window {
+		wcBlocksMiniCartFrontendDependencies: Record< string, dependencyData >;
+	}
+}
+
 window.addEventListener( 'load', () => {
 	const miniCartBlocks = document.querySelectorAll( '.wc-block-mini-cart' );
 	let wasLoadScriptsCalled = false;
@@ -36,10 +42,7 @@ window.addEventListener( 'load', () => {
 		return;
 	}
 
-	const dependencies = window.wcBlocksMiniCartFrontendDependencies as Record<
-		string,
-		dependencyData
-	>;
+	const dependencies = window.wcBlocksMiniCartFrontendDependencies;
 
 	// Preload scripts
 	for ( const dependencyHandle in dependencies ) {
