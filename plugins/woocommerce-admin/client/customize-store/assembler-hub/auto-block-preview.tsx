@@ -243,9 +243,7 @@ function ScaledBlockPreview( {
 						scrolling={ isScrollable ? 'yes' : 'no' }
 						tabIndex={ -1 }
 						readonly={
-							isFullComposabilityFeatureAndAPIAvailable()
-								? false
-								: true
+							! isFullComposabilityFeatureAndAPIAvailable()
 						}
 						style={
 							autoScale
