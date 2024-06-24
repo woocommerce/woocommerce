@@ -21,7 +21,7 @@ function RemoteInboxNotifications( {
 	notice,
 	setNotice,
 } ) {
-	const importFromEnv = async ( env ) => {
+	const importFromUrl = async ( _url ) => {
 		const preDefinedUrls = {
 			staging:
 				'https://staging.woocommerce.com/wp-json/wccom/inbox-notifications/2.0/notifications.json',
@@ -29,7 +29,7 @@ function RemoteInboxNotifications( {
 				'https://woocommerce.com/wp-json/wccom/inbox-notifications/2.0/notifications.json',
 		};
 
-		const url = preDefinedUrls[ env ] || env;
+		const url = preDefinedUrls[ _url ] || _url;
 
 		try {
 			const response = await fetch( url );
@@ -40,14 +40,14 @@ function RemoteInboxNotifications( {
 				status: 'success',
 			} );
 		} catch ( error ) {
-			if ( env === 'staging' ) {
+			if ( _url === 'staging' ) {
 				const messages = {
 					staging:
 						'Failed to fetch notifications. Please make sure you are connected to Automattic proxy.',
 					production: error.message,
 				};
 				setNotice( {
-					message: messages[ env ],
+					message: messages[ _url ],
 					status: 'error',
 				} );
 			}
@@ -137,7 +137,7 @@ function RemoteInboxNotifications( {
 								'Enter the URL to import notifications from'
 							);
 							if ( url ) {
-								importFromEnv( url );
+								importFromUrl( url );
 							}
 						} }
 					/>
@@ -151,7 +151,7 @@ function RemoteInboxNotifications( {
 									'Are you sure you want to import notifications from staging? Existing notifications will be overwritten.'
 								)
 							) {
-								importFromEnv( 'staging' );
+								importFromUrl( 'staging' );
 							}
 						} }
 					/>
@@ -165,7 +165,7 @@ function RemoteInboxNotifications( {
 									'Are you sure you want to import notifications from production? Existing notifications will be overwritten.'
 								)
 							) {
-								importFromEnv( 'production' );
+								importFromUrl( 'production' );
 							}
 						} }
 					/>
