@@ -158,6 +158,16 @@ window.addEventListener( 'load', () => {
 			loadContents();
 		};
 
+		// Load the scripts if a device is touch-enabled. We don't get the mouseover or focus events on touch devices,
+		// so the event listeners below won't work.
+		if (
+			'ontouchstart' in window ||
+			navigator.maxTouchPoints > 0 ||
+			window.matchMedia( '(pointer:coarse)' ).matches
+		) {
+			loadScripts();
+		}
+
 		miniCartButton.addEventListener( 'mouseover', loadScripts );
 		miniCartButton.addEventListener( 'focus', loadScripts );
 		miniCartButton.addEventListener( 'click', openDrawer );
