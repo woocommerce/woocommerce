@@ -185,6 +185,8 @@ export const SidebarNavigationScreenHomepage = ( {
 		);
 	}, [ homeTemplates, isActiveNewNeutralVariation ] );
 
+	console.log( homePatterns );
+
 	useEffect( () => {
 		if (
 			selectedPattern ||
