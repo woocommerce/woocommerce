@@ -171,4 +171,5 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 * Fix - Revert 46857 to preserve backcompat with earlier WC versions. [#48753](https://github.com/woocommerce/woocommerce/pull/48753)
 
+
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
