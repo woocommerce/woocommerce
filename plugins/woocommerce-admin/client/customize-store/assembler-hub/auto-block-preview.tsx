@@ -39,6 +39,7 @@ import { __ } from '@wordpress/i18n';
 import { useQuery } from '@woocommerce/navigation';
 import clsx from 'clsx';
 import { SelectedBlockContext } from './context/selected-block-ref-context';
+import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
