@@ -121,11 +121,11 @@ class WC_Beta_Tester_Remote_Inbox_Notifications_Helper {
 	 * @return bool True on success.
 	 */
 	public static function import( $specs ) {
-		$stored_statre = RemoteInboxNotificationsEngine::get_stored_state();
+		$stored_state = RemoteInboxNotificationsEngine::get_stored_state();
 		$transient     = static::get_transient();
 
 		foreach ( $specs as $spec ) {
-			SpecRunner::run_spec( $spec, $stored_statre );
+			SpecRunner::run_spec( $spec, $stored_state );
 			if ( isset( $spec->locales ) && is_array( $spec->locales ) ) {
 				foreach ( $spec->locales as $locale ) {
 					$transient[ $locale->locale ][ $spec->slug ] = $spec;
