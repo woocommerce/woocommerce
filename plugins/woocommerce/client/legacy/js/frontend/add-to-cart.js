@@ -227,8 +227,12 @@ jQuery( function( $ ) {
 		if ( !message ) {
 			return;
 		}
-
+		
+		// If the response after adding/removing an item to/from the cart is really fast,
+		// screen readers may not have time to identify the changes in the live region element. 
+		// So, we add a delay to ensure an interval between messages.
 		e.data.addToCartHandler.$liveRegion
+			.delay(1000)
 			.text( message )
 			.attr( 'aria-relevant', 'all' );
 	};
