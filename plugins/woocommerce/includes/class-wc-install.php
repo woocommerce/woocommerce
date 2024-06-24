@@ -258,6 +258,9 @@ class WC_Install {
 		'9.1.0' => array(
 			'wc_update_910_add_launch_your_store_tour_option',
 		),
+		'9.2.0' => array(
+			'wc_update_910_add_old_refunded_order_items_to_product_lookup_table',
+		),
 	);
 
 	/**

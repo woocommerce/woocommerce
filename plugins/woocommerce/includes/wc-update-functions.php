@@ -2731,3 +2731,35 @@ function wc_update_891_create_plugin_autoinstall_history_option() {
 function wc_update_910_add_launch_your_store_tour_option() {
 	add_option( 'woocommerce_show_lys_tour', 'yes' );
 }
+
+/**
+ * Add old refunded order items to the product_lookup_table.
+ */
+function wc_update_920_add_old_refunded_order_items_to_product_lookup_table() {
+	global $wpdb;
+
+	$select_query = "
+	SELECT order_stats.parent_id FROM {$wpdb->prefix}wc_order_stats AS order_stats
+	WHERE order_stats.total_sales < 0
+    AND (
+        SELECT COUNT(*)
+        FROM {$wpdb->prefix}wc_order_product_lookup AS product_lookup
+        WHERE product_lookup.order_id = order_stats.parent_id
+          AND product_lookup.product_net_revenue = order_stats.total_sales
+    ) = 0";
+
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input in the query, everything is hardcoded.
+	$order_ids = $wpdb->get_results( $select_query );
+
+	if ( $order_ids ) {
+		foreach ( $order_ids as $order_id ) {
+			/**
+			 * Trigger an action to schedule import for old refunded order items.
+			 *
+			 * @param int $order_id The ID of the parent order.
+			 * @since 9.2.0
+			 */
+			do_action( 'woocommerce_schedule_import', intval( $order_id->parent_id ) );
+		}
+	}
+}

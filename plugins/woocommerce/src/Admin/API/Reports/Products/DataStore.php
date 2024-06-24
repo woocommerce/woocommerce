@@ -405,6 +405,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$decimals       = wc_get_price_decimals();
 		$round_tax      = 'no' === get_option( 'woocommerce_tax_round_at_subtotal' );
 
+		foreach ( $order->get_refunds() as $refund ) {
+			$items        = $refund->get_items();
+			$refund_items = ! empty( $items ) ? $items : array( $refund );
+
+			$order_items = array_merge( $order_items, $refund_items );
+		}
+
 		foreach ( $order_items as $order_item ) {
 			$order_item_id = $order_item->get_id();
 			unset( $existing_items[ $order_item_id ] );
@@ -415,7 +422,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			// Skip line items without changes to product quantity.
 			if ( ! $product_qty ) {
-				$num_updated++;
+				++$num_updated;
 				continue;
 			}
 
@@ -433,24 +440,29 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$tax_amount = round( $tax_amount, $decimals );
 			}
 
+			$gross_revenue  = $net_revenue < 0 ? 0 : $net_revenue;
+			$gross_revenue += $tax_amount + $shipping_amount + $shipping_tax_amount;
+
+			$data = array(
+				'order_item_id'         => $order_item_id,
+				'order_id'              => $order->get_id(),
+				'product_id'            => wc_get_order_item_meta( $order_item_id, '_product_id' ),
+				'variation_id'          => wc_get_order_item_meta( $order_item_id, '_variation_id' ),
+				'customer_id'           => $order->get_report_customer_id(),
+				'product_qty'           => $product_qty,
+				'product_net_revenue'   => $net_revenue,
+				'date_created'          => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
+				'coupon_amount'         => $coupon_amount,
+				'tax_amount'            => $tax_amount,
+				'shipping_amount'       => $shipping_amount,
+				'shipping_tax_amount'   => $shipping_tax_amount,
+				// @todo Can this be incorrect if modified by filters?
+				'product_gross_revenue' => $gross_revenue,
+			);
+
 			$result = $wpdb->replace(
 				self::get_db_table_name(),
-				array(
-					'order_item_id'         => $order_item_id,
-					'order_id'              => $order->get_id(),
-					'product_id'            => wc_get_order_item_meta( $order_item_id, '_product_id' ),
-					'variation_id'          => wc_get_order_item_meta( $order_item_id, '_variation_id' ),
-					'customer_id'           => $order->get_report_customer_id(),
-					'product_qty'           => $product_qty,
-					'product_net_revenue'   => $net_revenue,
-					'date_created'          => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
-					'coupon_amount'         => $coupon_amount,
-					'tax_amount'            => $tax_amount,
-					'shipping_amount'       => $shipping_amount,
-					'shipping_tax_amount'   => $shipping_tax_amount,
-					// @todo Can this be incorrect if modified by filters?
-					'product_gross_revenue' => $net_revenue + $tax_amount + $shipping_amount + $shipping_tax_amount,
-				),
+				$data,
 				array(
 					'%d', // order_item_id.
 					'%d', // order_id.
