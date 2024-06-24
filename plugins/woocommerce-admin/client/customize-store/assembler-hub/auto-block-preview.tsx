@@ -207,7 +207,11 @@ function ScaledBlockPreview( {
 						// @ts-ignore disabled prop exists
 						scrolling={ isScrollable ? 'yes' : 'no' }
 						tabIndex={ -1 }
-						readonly={ false }
+						readonly={
+							isFullComposabilityFeatureAndAPIAvailable()
+								? false
+								: true
+						}
 						style={
 							autoScale
 								? {
