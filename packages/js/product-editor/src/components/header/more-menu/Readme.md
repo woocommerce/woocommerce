@@ -1,4 +1,4 @@
-# WooProductMoreMenuItem
+# 
 
 The `WooProductMoreMenuItem` slot allows developers to add custom items to the "More" menu
 in the WooCommerce Product Editor header.
@@ -65,8 +65,8 @@ export const MoreMenu = () => {
 
 #### WooProductMoreMenuItem
 
-  * **children** `React.ReactNode`: The content to be rendered inside the fill.
-  * **order** `number`: The order in which this fill should appear relative to other fills in the same slot. Default is 1.
+* **children** `React.ReactNode`: The content to be rendered inside the fill.
+* **order** `number`: The order in which this fill should appear relative to other fills in the same slot. Default is 1.
 
 #### WooProductMoreMenuItem.Slot
 
