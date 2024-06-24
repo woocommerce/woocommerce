@@ -997,7 +997,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'unique_id'             => array(
-					'description' => __( 'Unique identifier.', 'woocommerce' ),
+					'description' => __( 'GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
