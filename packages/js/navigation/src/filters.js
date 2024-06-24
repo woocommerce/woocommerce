@@ -49,7 +49,7 @@ export function flattenFilters( filters ) {
 /**
  * Given a query object, return an array of activeFilters, if any.
  *
- * @param {Object} query  - query oject
+ * @param {Object} query  - query object
  * @param {Object} config - config object
  * @return {Array} - array of activeFilters
  */

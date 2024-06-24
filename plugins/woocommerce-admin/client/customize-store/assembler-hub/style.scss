@@ -820,9 +820,8 @@ body.woocommerce-assembler {
 	color: #cc1818;
 }
 
-.components-resizable-box__container.has-show-handle.block-library-cover__resize-container,
-.components-resizable-box__handle.components-resizable-box__side-handle.components-resizable-box__handle-left {
-	display: none;
+.components-resizable-box__handle {
+	display: none !important;
 }
 
 .woocommerce-customize-store_popover-tooltip {
@@ -837,5 +836,14 @@ body.woocommerce-assembler {
 	.edit-site-layout__sidebar {
 		display: flex;
 		max-width: 700px;
+	}
+}
+
+.edit-site-sidebar-navigation-screen-patterns__group-homepage-label-container {
+	display: flex;
+	justify-content: space-between;
+
+	.edit-site-sidebar-navigation-screen-patterns__group-homepage-number-pattern {
+		color: var(--gutenberg-gray-400, #ccc);
 	}
 }
