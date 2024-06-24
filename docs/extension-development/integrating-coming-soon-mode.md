@@ -5,7 +5,7 @@ tags: how-to, coming-soon
 
 # Integrating with coming soon mode
 
-This guide provides examples for third-party developers and hosting providers on how to integrate their systems with WooCommerce's coming soon mode. We will cover common tasks using hooks as described in the [WooCommerce Developer Blog Post](https://developer.woocommerce.com/2024/06/18/introducing-coming-soon-mode/).
+This guide provides examples for third-party developers and hosting providers on how to integrate their systems with WooCommerce's coming soon mode. For more details, please read the [developer blog post](https://developer.woocommerce.com/2024/06/18/introducing-coming-soon-mode/).
 
 ## Clear server cache on site visibility settings change
 
@@ -23,27 +23,53 @@ function clear_server_cache( $old_value, $new_value, $option ) {
 }
 ```
 
-## Syncing coming soon mode from other plugins
+## Syncing coming soon mode with other plugins
 
-You can also programatically sync the coming soon mode from your application by direcly setting the relevant options. An example use case is such as using the coming soon page as a maintenance page.
+You can programmatically sync the coming soon mode from your plugin or application. Here are some example use cases:
+
+- Integrating with a maintenance mode plugin.
+- Integrating with hosting provider's coming soon mode.
+
+### Trigger from WooCommerce
 
 ```php
-function enable_coming_soon() {
+// Priority set to 11 to ensure the options are already saved.
+add_action( 'woocommerce_update_options_site-visibility', 'sync_coming_soon_to_other_plugins', 11 );
+
+function sync_coming_soon_to_other_plugins() {
+    $is_enabled = get_option( 'woocommerce_coming_soon' ) === 'yes';
+
+    // Implement your logic to sync coming soon status.
+    if ( function_exists( 'set_your_plugin_status' ) ) {
+        set_your_plugin_status( $is_enabled );
+    }
+}
+```
+
+### Trigger from other plugins
+
+The following function example can be called from another plugin to enable or disable WooCommerce coming soon mode.
+
+```php
+function sync_coming_soon_from_other_plugins( $is_enabled ) {
     // Check user capability.
     if ( ! current_user_can( 'manage_options' ) ) {
         wp_die( 'You do not have sufficient permissions to access this page.' );
     }
 
-    // Enable coming soon.
-    update_option( 'woocommerce_coming_soon', 'yes' );
+    // Set coming soon mode.
+    if ( isset( $is_enabled ) ) {
+        update_option( 'woocommerce_coming_soon', $is_enabled ? 'yes' : 'no' );
+    }
 }
 ```
 
 ## Disable coming soon customer-facing page
 
-If you already have another feature that behaves similar to WooCommerce's coming soon mode, it can cause unintended conflicts. You could disable the coming soon mode by excluding all shopper-facing pages.
+If you already have another feature that behaves similarly to WooCommerce's coming soon mode, it can cause unintended conflicts. You can disable the coming soon mode by excluding all shopper-facing pages.
 
 ```php
+// Exclude all customer-facing pages from coming soon mode.
 add_filter( 'woocommerce_coming_soon_exclude', function() {
     return true;
 }, 10 );
