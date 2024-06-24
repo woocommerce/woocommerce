@@ -198,7 +198,7 @@ class WCA_Test_Helper_Remote_Inbox_Notifications {
 	public static function import( $request ) {
 		// Get the JSON data from the request body
 		$specs         = json_decode( json_encode( $request->get_json_params() ) );
-		$stored_statre = RemoteInboxNotificationsEngine::get_stored_state();
+		$stored_state = RemoteInboxNotificationsEngine::get_stored_state();
 
 		$transient = get_transient( static::get_transient_name() );
 
