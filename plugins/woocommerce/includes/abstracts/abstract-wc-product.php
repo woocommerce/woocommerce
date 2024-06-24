@@ -850,10 +850,23 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set unique_id
 	 *
-	 * @since 9.0.0
+	 * @since 9.1.0
 	 * @param string $unique_id Unique ID.
 	 */
 	public function set_unique_id( $unique_id ) {
+		$unique_id = (string) $unique_id;
+		if ( $this->get_object_read() && ! empty( $unique_id ) && ! wc_product_has_unique_id( $this->get_id(), $unique_id ) ) {
+			$unique_id_found = wc_get_product_id_by_unique_id( $unique_id );
+
+			$this->error(
+				'product_invalid_unique_id',
+				__( 'Invalid or duplicated Unique ID.', 'woocommerce' ),
+				400,
+				array(
+					'resource_id' => $unique_id_found,
+				)
+			);
+		}
 		$this->set_prop( 'unique_id', $unique_id );
 	}
 
