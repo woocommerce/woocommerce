@@ -53,7 +53,10 @@ export function* importNotifications( notifications ) {
 			'getNotifications'
 		);
 	} catch ( error ) {
-		throw new Error();
+		setNotice( {
+			message: 'Failed to import notifications',
+			status: 'error',
+		} );
 	}
 }
 
@@ -69,7 +72,10 @@ export function* deleteNotification( id ) {
 			id,
 		};
 	} catch {
-		throw new Error();
+		setNotice( {
+			message: 'Failed to delete notification',
+			status: 'error',
+		} );
 	}
 }
 
@@ -97,7 +103,10 @@ export function* testNotification( name ) {
 			);
 		}
 	} catch ( e ) {
-		throw new Error( e );
+		setNotice( {
+			message: 'Failed to test notification',
+			status: 'error',
+		} );
 	}
 }
 
@@ -114,6 +123,9 @@ export function* deleteAllNotifications() {
 			'getNotifications'
 		);
 	} catch {
-		throw new Error();
+		setNotice( {
+			message: 'Failed to delete all notifications',
+			status: 'error',
+		} );
 	}
 }
