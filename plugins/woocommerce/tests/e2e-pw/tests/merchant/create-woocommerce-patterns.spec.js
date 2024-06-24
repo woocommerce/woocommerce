@@ -10,16 +10,16 @@ const {
 // some WooCommerce Patterns to use
 const wooPatterns = [
 	{
-		name: 'Banner',
-		button: 'Shop vinyl records',
-	},
-	{
-		name: 'Discount Banner with Image',
+		name: 'Hero Product 3 Split',
 		button: 'Shop now',
 	},
 	{
-		name: 'Featured Category Focus',
-		button: 'Shop prints',
+		name: 'Just Arrived Full Hero',
+		button: 'Shop now',
+	},
+	{
+		name: 'Hero Product 3 Split',
+		button: 'Shop now',
 	},
 	{
 		name: 'Featured Category Cover Image',
