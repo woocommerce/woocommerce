@@ -1101,7 +1101,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$product_id
 			)
 		);
-
 	}
 
 	/**
@@ -1138,7 +1137,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Return product ID based on Unique ID.
 	 *
 	 * @since 9.1.0
-	 * @param string $sku Product Unique ID.
+	 * @param string $unique_id Product Unique ID.
 	 * @return int
 	 */
 	public function get_product_id_by_unique_id( $unique_id ) {
