@@ -37,7 +37,7 @@ class WC_Tests_Product_Variable extends WC_Unit_Test_Case {
 		$product->set_stock_quantity( 5 );
 		$product->set_stock_status( 'instock' );
 		$product->save();
-		$this->assertEquals( '', $product->get_stock_quantity() );
+		$this->assertEquals( 0, $product->get_stock_quantity() );
 		$this->assertEquals( 'outofstock', $product->get_stock_status() );
 
 		$product->set_manage_stock( true );

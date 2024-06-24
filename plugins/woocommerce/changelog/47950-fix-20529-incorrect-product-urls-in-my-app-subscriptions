@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prefer update URLs over PluginURI in My Subscriptions for plugins without a subscription.
