@@ -2735,7 +2735,7 @@ function wc_update_910_add_launch_your_store_tour_option() {
 /**
  * Add old refunded order items to the product_lookup_table.
  */
-function wc_update_920_add_old_refunded_order_items_to_product_lookup_table() {
+function wc_update_910_add_old_refunded_order_items_to_product_lookup_table() {
 	global $wpdb;
 
 	// Get every order ID where the total sales is less than 0 and is not present in the table wc_order_product_lookup.
