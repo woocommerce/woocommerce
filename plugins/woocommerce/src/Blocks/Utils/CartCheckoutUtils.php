@@ -146,4 +146,52 @@ class CartCheckoutUtils {
 		];
 		return $formatted_shipping_zones;
 	}
+
+	public static function has_only_default_shipping_method() {
+        $shipping_zones = \WC_Shipping_Zones::get_zones();
+
+		// Retrieve the default shipping zone (Rest of the World).
+		$default_shipping_zone = \WC_Shipping_Zones::get_zone(0);
+
+        $active_zones = 0;
+		$has_default_zone = false;
+		// Include the default shipping zone in the list of shipping zones.
+		$shipping_zones[] = [
+            'id'                      => $default_shipping_zone->get_id(),
+            'zone_name'               => $default_shipping_zone->get_zone_name(),
+            'zone_locations'          => $default_shipping_zone->get_zone_locations(),
+            'zone_id'                 => $default_shipping_zone->get_id(),
+            'formatted_zone_location' => $default_shipping_zone->get_formatted_location(),
+            'shipping_methods'        => $default_shipping_zone->get_shipping_methods(),
+        ];
+
+        foreach ($shipping_zones as $zone) {
+
+            $is_default_zone = empty( $zone['zone_locations'] );
+            $has_active_method = self::has_active_shipping_method( $zone['shipping_methods'] );
+
+            if ( $has_active_method ) {
+                $active_zones++;
+            }
+			if ( $is_default_zone && $has_active_method ) {
+				$has_default_zone = true;
+			}
+
+            if ( $active_zones > 1 && $has_default_zone ) {
+                return false;
+            }
+        }
+
+        return $active_zones === 1;
+    }
+
+
+    private static function has_active_shipping_method( $shipping_methods ) {
+        foreach ( $shipping_methods as $method ) {
+            if ( $method->enabled === 'yes' ) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
