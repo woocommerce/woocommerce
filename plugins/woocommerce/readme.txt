@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online
 Requires at least: 6.4
 Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 9.0.0
+Stable tag: 9.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -165,10 +165,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.0.1 2024-06-20 =
+= 9.0.2 2024-06-24 =
 
 **WooCommerce**
 
-* Fix - Check WC_Legacy_API instead of WC_API as that seems to be cached by lightspeed servers. [#48593](https://github.com/woocommerce/woocommerce/pull/48593)
+* Fix - Revert 46857 to preserve backcompat with earlier WC versions. [#48753](https://github.com/woocommerce/woocommerce/pull/48753)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
