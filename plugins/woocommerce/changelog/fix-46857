@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revert 46857 to preserve backcompat with earlier WC versions.
