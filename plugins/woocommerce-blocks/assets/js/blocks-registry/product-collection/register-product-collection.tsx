@@ -27,12 +27,22 @@ export interface ProductCollectionConfig extends BlockVariation {
 	};
 }
 
+/**
+ * Validates the configuration object of new collection. This function checks
+ * whether the provided config object adheres to the required schema and conditions necessary
+ * for a valid collection.
+ *
+ * Each validation step may log errors or warnings to the console if the corresponding property
+ * does not meet the expected criteria. It will bail early and return false, if any of the
+ * required properties are missing or invalid.
+ */
 const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	// Basic checks for the top-level argument
 	if ( typeof config !== 'object' || config === null ) {
-		console.warn(
+		console.error(
 			'Invalid arguments: You must pass an object to __experimentalRegisterProductCollection.'
 		);
+		return false;
 	}
 
 	/**
@@ -40,7 +50,8 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	 */
 	// name
 	if ( typeof config.name !== 'string' || config.name.length === 0 ) {
-		console.warn( 'Invalid name: name must be a non-empty string.' );
+		console.error( 'Invalid name: name must be a non-empty string.' );
+		return false;
 	} else if (
 		! config.name.match(
 			/^[a-zA-Z0-9-]+\/product-collection\/[a-zA-Z0-9-]+$/
@@ -52,7 +63,8 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	}
 	// title
 	if ( typeof config.title !== 'string' || config.title.length === 0 ) {
-		console.warn( 'Invalid title: title must be a non-empty string.' );
+		console.error( 'Invalid title: title must be a non-empty string.' );
+		return false;
 	}
 	// description
 	if (
@@ -216,12 +228,6 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	) {
 		console.warn( 'Invalid priceRange: priceRange must be an object.' );
 	}
-	// attributes.queryId - queryId is generated automatically
-	if ( config.attributes?.queryId !== undefined ) {
-		console.warn(
-			'Invalid queryId: queryId must not be set as it will be generated automatically.'
-		);
-	}
 	// attributes.displayLayout
 	if (
 		config.attributes?.displayLayout !== undefined &&
@@ -230,13 +236,6 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 		console.warn(
 			'Invalid displayLayout: displayLayout must be an object.'
 		);
-	}
-	// attributes.collection - It will be derived from args.name
-	if ( config.attributes?.collection !== undefined ) {
-		console.error(
-			'Invalid collection: collection must not be set as it will be automatically derived from config.name.'
-		);
-		return false;
 	}
 	// attributes.hideControls
 	if (
@@ -302,6 +301,8 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 			}
 		}
 	}
+
+	return true;
 };
 
 /**
@@ -314,8 +315,13 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 export const __experimentalRegisterProductCollection = (
 	config: ProductCollectionConfig
 ) => {
-	// Check if the config is valid. It will log warnings in the console if the config is invalid.
-	isValidCollectionConfig( config );
+	// If the config is invalid, return early.
+	if ( ! isValidCollectionConfig( config ) ) {
+		console.error(
+			'Collection could not be registered due to invalid configuration.'
+		);
+		return;
+	}
 
 	const { preview: { setPreviewState, initialPreviewState } = {} } = config;
 
