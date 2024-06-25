@@ -364,57 +364,81 @@ const registerClassicTemplateBlock = ( {
 // @todo Refactor when there will be possible to show a block according on a template/post with a Gutenberg API. https://github.com/WordPress/gutenberg/pull/41718
 let previousEditedTemplate: string | number | null = null;
 let isBlockRegistered = false;
-let isBlockInInserter: boolean | null = null;
+let isBlockInInserter = false;
+const handleRegisterClassicTemplateBlock = ( {
+	template,
+	inserter,
+}: {
+	template: string | null;
+	inserter: boolean;
+} ) => {
+	if ( isBlockRegistered ) {
+		unregisterBlockType( BLOCK_SLUG );
+	}
+	isBlockInInserter = inserter;
+	isBlockRegistered = true;
+	registerClassicTemplateBlock( {
+		template,
+		inserter,
+	} );
+};
 
 subscribe( () => {
 	const editorStore = select( 'core/editor' );
-	const templateSlug = editorStore?.getEditedPostSlug() as string | null;
 	// We use blockCount to know if we are editing a template or in the navigation.
 	const blockCount = editorStore?.getBlockCount() as number;
+	const templateSlug = editorStore?.getEditedPostSlug() as string | null;
 	const editedTemplate = blockCount && blockCount > 0 ? templateSlug : null;
 
+	// Skip if we are in the same template, except if the block hasn't been registered yet.
 	if ( isBlockRegistered && previousEditedTemplate === editedTemplate ) {
 		return;
 	}
 	previousEditedTemplate = editedTemplate;
 
+	// Handle the case when we are not editing a template (ie: in the navigation screen).
+	if ( ! editedTemplate ) {
+		if ( ! isBlockRegistered ) {
+			handleRegisterClassicTemplateBlock( {
+				template: editedTemplate,
+				inserter: false,
+			} );
+		}
+		return;
+	}
+
 	const templateSupportsClassicTemplateBlock =
-		editedTemplate &&
 		hasTemplateSupportForClassicTemplateBlock( editedTemplate, TEMPLATES );
 
-	if ( ! editedTemplate || templateSupportsClassicTemplateBlock ) {
-		if ( isBlockInInserter !== true ) {
-			if ( isBlockRegistered ) {
-				unregisterBlockType( BLOCK_SLUG );
-			}
-			isBlockInInserter = true;
-			registerClassicTemplateBlock( {
-				template: editedTemplate,
-				inserter: true,
-			} );
-		} else if (
-			editedTemplate &&
-			isClassicTemplateBlockRegisteredWithAnotherTitle(
-				getBlockType( BLOCK_SLUG ),
-				editedTemplate
-			)
-		) {
-			unregisterBlockType( BLOCK_SLUG );
-			isBlockInInserter = true;
-			registerClassicTemplateBlock( {
-				template: editedTemplate,
-				inserter: true,
-			} );
-		}
-	} else if ( isBlockInInserter !== false ) {
-		if ( isBlockRegistered ) {
-			unregisterBlockType( BLOCK_SLUG );
-		}
-		isBlockInInserter = false;
-		registerClassicTemplateBlock( {
+	// Handle the case when we are editing a template that doesn't support the Classic Template block (ie: Blog Home).
+	if ( ! templateSupportsClassicTemplateBlock && isBlockInInserter ) {
+		handleRegisterClassicTemplateBlock( {
 			template: editedTemplate,
 			inserter: false,
 		} );
+		return;
 	}
-	isBlockRegistered = true;
+
+	// Handle the case when we are editing a template that does support the Classic Template block (ie: Product Catalog).
+	if ( templateSupportsClassicTemplateBlock && ! isBlockInInserter ) {
+		handleRegisterClassicTemplateBlock( {
+			template: editedTemplate,
+			inserter: true,
+		} );
+		return;
+	}
+
+	// Handle the case when we are editing a template that does support the Classic Template block but it's currently registered with another title (ie: navigating from the Product Catalog template to the Product Search Results template).
+	if (
+		templateSupportsClassicTemplateBlock &&
+		isClassicTemplateBlockRegisteredWithAnotherTitle(
+			getBlockType( BLOCK_SLUG ),
+			editedTemplate
+		)
+	) {
+		handleRegisterClassicTemplateBlock( {
+			template: editedTemplate,
+			inserter: true,
+		} );
+	}
 }, 'core/blocks-editor' );

@@ -257,7 +257,6 @@ test.describe( `${ blockData.name } Block `, () => {
 			.getByText( `"Single Product" reset.` );
 		const searchResults = editor.page.getByLabel( 'Actions' );
 		await expect.poll( async () => await searchResults.count() ).toBe( 1 );
-
 		await searchResults.first().click();
 		await editor.page.getByRole( 'menuitem', { name: 'Reset' } ).click();
 		await editor.page.getByRole( 'button', { name: 'Reset' } ).click();
