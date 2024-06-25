@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Replaced `classnames` package with the faster and smaller `clsx` package.
