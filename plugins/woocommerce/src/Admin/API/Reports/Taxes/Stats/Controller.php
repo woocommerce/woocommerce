@@ -6,6 +6,7 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -90,7 +91,7 @@ class Controller extends GenericStatsController {
 	 */
 	public function get_items( $request ) {
 		$query_args  = $this->prepare_reports_query( $request );
-		$taxes_query = new Query( $query_args );
+		$taxes_query = new GenericQuery( $query_args, 'taxes-stats' );
 		$report_data = $taxes_query->get_data();
 
 		$out_data = array(

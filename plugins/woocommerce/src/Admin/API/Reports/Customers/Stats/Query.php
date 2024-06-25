@@ -15,15 +15,14 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Customers\Stats;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 defined( 'ABSPATH' ) || exit;
-
-use Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
  * API\Reports\Customers\Stats\Query
  */
-class Query extends ReportsQuery {
+class Query extends GenericQuery {
 
 	/**
 	 * Valid fields for Customers report.
@@ -38,18 +37,5 @@ class Query extends ReportsQuery {
 			'orderby'  => 'date_registered',
 			'fields'   => '*', // @todo Needed?
 		);
-	}
-
-	/**
-	 * Get product data based on the current query vars.
-	 *
-	 * @return array
-	 */
-	public function get_data() {
-		$args = apply_filters( 'woocommerce_analytics_customers_stats_query_args', $this->get_query_vars() );
-
-		$data_store = \WC_Data_Store::load( 'report-customers-stats' );
-		$results    = $data_store->get_data( $args );
-		return apply_filters( 'woocommerce_analytics_customers_stats_select_query', $results, $args );
 	}
 }

@@ -6,6 +6,7 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Products\Stats;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -75,7 +76,7 @@ class Controller extends GenericStatsController {
 			}
 		}
 
-		$query = new Query( $query_args );
+		$query = new GenericQuery( $query_args, 'products-stats' );
 		try {
 			$report_data = $query->get_data();
 		} catch ( ParameterException $e ) {

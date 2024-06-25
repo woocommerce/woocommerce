@@ -16,15 +16,16 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Orders\Stats;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 defined( 'ABSPATH' ) || exit;
-
-use Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
  * API\Reports\Orders\Stats\Query
  */
-class Query extends ReportsQuery {
+class Query extends GenericQuery {
+
+	protected $name = 'orders-stats';
 
 	/**
 	 * Valid fields for Orders report.
@@ -44,18 +45,5 @@ class Query extends ReportsQuery {
 				'total_customers',
 			),
 		);
-	}
-
-	/**
-	 * Get revenue data based on the current query vars.
-	 *
-	 * @return array
-	 */
-	public function get_data() {
-		$args = apply_filters( 'woocommerce_analytics_orders_stats_query_args', $this->get_query_vars() );
-
-		$data_store = \WC_Data_Store::load( 'report-orders-stats' );
-		$results    = $data_store->get_data( $args );
-		return apply_filters( 'woocommerce_analytics_orders_stats_select_query', $results, $args );
 	}
 }

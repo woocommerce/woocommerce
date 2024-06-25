@@ -18,25 +18,19 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Orders;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
  * API\Reports\Orders\Query
  */
-class Query extends ReportsQuery {
+class Query extends GenericQuery {
+	protected $name = 'orders';
 
-	/**
-	 * Get order data based on the current query vars.
-	 *
-	 * @return array
-	 */
-	public function get_data() {
-		$args       = apply_filters( 'woocommerce_analytics_orders_query_args', $this->get_query_vars() );
-		$data_store = \WC_Data_Store::load( 'report-orders' );
-		$results    = $data_store->get_data( $args );
-		return apply_filters( 'woocommerce_analytics_orders_select_query', $results, $args );
+	protected function get_default_query_vars() {
+		return \WC_Object_Query::get_default_query_vars();
 	}
+
 }

@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -57,7 +58,7 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function get_items( $request ) {
 		$query_args    = $this->prepare_reports_query( $request );
-		$coupons_query = new Query( $query_args );
+		$coupons_query = new GenericQuery( $query_args, 'coupons' );
 		$report_data   = $coupons_query->get_data();
 
 		$data = array();

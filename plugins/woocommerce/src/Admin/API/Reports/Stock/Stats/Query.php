@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
  * API\Reports\Stock\Stats\Query
+ * This query takes no arguments, so we do not inherit from GenericQuery.
  */
 class Query extends ReportsQuery {
 
