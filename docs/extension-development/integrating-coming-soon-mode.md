@@ -27,8 +27,8 @@ function clear_server_cache( $old_value, $new_value, $option ) {
 
 You can programmatically sync the coming soon mode from your plugin or application. Here are some example use cases:
 
-- Integrating with a maintenance mode plugin.
-- Integrating with hosting provider's coming soon mode.
+-   Integrating with a maintenance mode plugin.
+-   Integrating with hosting provider's coming soon mode.
 
 ### Trigger from WooCommerce
 
