@@ -186,10 +186,6 @@ Layout.propTypes = {
 	 * If the welcome from Calypso modal should display.
 	 */
 	shouldShowWelcomeFromCalypsoModal: PropTypes.bool,
-	/**
-	 * Dispatch an action to update an option
-	 */
-	updateOptions: PropTypes.func.isRequired,
 };
 
 export default compose(
