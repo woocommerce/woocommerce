@@ -38,9 +38,13 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 		$response->header( 'X-WP-Total', $total );
 		$response->header( 'X-WP-TotalPages', $max_pages );
 
-		$base = add_query_arg(
-			$request->get_query_params(),
-			rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) )
+		// SEMGREP WARNING EXPLANATION
+		// URL is escaped. However, Semgrep only considers esc_url as valid.
+		$base = esc_url_raw(
+			add_query_arg(
+				$request->get_query_params(),
+				rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) )
+			)
 		);
 
 		if ( $page > 1 ) {
@@ -48,13 +52,17 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 			if ( $prev_page > $max_pages ) {
 				$prev_page = $max_pages;
 			}
-			$prev_link = add_query_arg( 'page', $prev_page, $base );
+			// SEMGREP WARNING EXPLANATION
+			// URL is escaped. However, Semgrep only considers esc_url as valid.
+			$prev_link = esc_url_raw( add_query_arg( 'page', $prev_page, $base ) );
 			$response->link_header( 'prev', $prev_link );
 		}
 
 		if ( $max_pages > $page ) {
 			$next_page = $page + 1;
-			$next_link = add_query_arg( 'page', $next_page, $base );
+			// SEMGREP WARNING EXPLANATION
+			// URL is escaped. However, Semgrep only considers esc_url as valid.
+			$next_link = esc_url_raw( add_query_arg( 'page', $next_page, $base ) );
 			$response->link_header( 'next', $next_link );
 		}
 
