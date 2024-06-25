@@ -348,21 +348,42 @@ export const __experimentalRegisterProductCollection = (
 		scope: config.scope,
 		attributes: {
 			query: {
-				offset: query.offset,
-				order: query.order,
-				orderBy: query.orderBy,
-				pages: query.pages,
-				perPage: query.perPage,
-				search: query.search,
-				taxQuery: query.taxQuery,
-				featured: query.featured,
-				timeFrame: query.timeFrame,
-				woocommerceOnSale: query.woocommerceOnSale,
-				woocommerceStockStatus: query.woocommerceStockStatus,
-				woocommerceAttributes: query.woocommerceAttributes,
-				woocommerceHandPickedProducts:
-					query.woocommerceHandPickedProducts,
-				priceRange: query.priceRange,
+				...DEFAULT_QUERY,
+				...( query.offset !== undefined && { offset: query.offset } ),
+				...( query.order !== undefined && { order: query.order } ),
+				...( query.orderBy !== undefined && {
+					orderBy: query.orderBy,
+				} ),
+				...( query.pages !== undefined && { pages: query.pages } ),
+				...( query.perPage !== undefined && {
+					perPage: query.perPage,
+				} ),
+				...( query.search !== undefined && { search: query.search } ),
+				...( query.taxQuery !== undefined && {
+					taxQuery: query.taxQuery,
+				} ),
+				...( query.featured !== undefined && {
+					featured: query.featured,
+				} ),
+				...( query.timeFrame !== undefined && {
+					timeFrame: query.timeFrame,
+				} ),
+				...( query.woocommerceOnSale !== undefined && {
+					woocommerceOnSale: query.woocommerceOnSale,
+				} ),
+				...( query.woocommerceStockStatus !== undefined && {
+					woocommerceStockStatus: query.woocommerceStockStatus,
+				} ),
+				...( query.woocommerceAttributes !== undefined && {
+					woocommerceAttributes: query.woocommerceAttributes,
+				} ),
+				...( query.woocommerceHandPickedProducts !== undefined && {
+					woocommerceHandPickedProducts:
+						query.woocommerceHandPickedProducts,
+				} ),
+				...( query.priceRange !== undefined && {
+					priceRange: query.priceRange,
+				} ),
 			},
 			displayLayout: config.attributes?.displayLayout,
 			hideControls,
