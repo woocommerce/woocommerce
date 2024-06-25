@@ -204,19 +204,6 @@ trait Woo_Analytics_Trait {
 			}
 		}
 
-		if ( function_exists( 'gutenberg_get_block_template' ) ) {
-			$checkout_template = gutenberg_get_block_template( 'woocommerce/woocommerce//page-checkout' );
-			$cart_template     = gutenberg_get_block_template( 'woocommerce/woocommerce//page-cart' );
-
-			if ( ! $checkout_template ) {
-				$checkout_template = gutenberg_get_block_template( 'woocommerce/woocommerce//checkout' );
-			}
-
-			if ( ! $cart_template ) {
-				$cart_template = gutenberg_get_block_template( 'woocommerce/woocommerce//cart' );
-			}
-		}
-
 		if ( ! empty( $checkout_template->content ) ) {
 			// Checkout template is in use, but we need to see if the page-content-wrapper is in use, or if the template is being used directly.
 			$this->checkout_content_source = $checkout_template->content;

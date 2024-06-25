@@ -1,0 +1,4 @@
+Significance: patch
+Type: removed
+
+Remove use of `gutenberg_get_block_template()`. Its replacement has been in WP Core since 5.8.
