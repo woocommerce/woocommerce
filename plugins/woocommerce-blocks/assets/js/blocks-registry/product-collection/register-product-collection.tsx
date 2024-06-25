@@ -27,7 +27,7 @@ export interface ProductCollectionConfig extends BlockVariation {
 	};
 }
 
-const isValidProductCollectionConfig = ( config: ProductCollectionConfig ) => {
+const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	// Basic checks for the top-level argument
 	if ( typeof config !== 'object' || config === null ) {
 		console.warn(
@@ -289,9 +289,8 @@ const isValidProductCollectionConfig = ( config: ProductCollectionConfig ) => {
 export const __experimentalRegisterProductCollection = (
 	config: ProductCollectionConfig
 ) => {
-	// Check if the config is valid.
-	// It will log warnings in the console if the config is invalid.
-	isValidProductCollectionConfig( config );
+	// Check if the config is valid. It will log warnings in the console if the config is invalid.
+	isValidCollectionConfig( config );
 
 	const { preview: { setPreviewState, initialPreviewState } = {} } = config;
 
@@ -313,7 +312,7 @@ export const __experimentalRegisterProductCollection = (
 			...( config.attributes?.hideControls || [] ),
 		] ),
 	];
-	const configWithoutExtraArgs: ProductCollectionConfig = {
+	const collectionConfigWithoutExtraArgs = {
 		name: config.name,
 		title: config.title,
 		description: config.description,
@@ -339,28 +338,22 @@ export const __experimentalRegisterProductCollection = (
 				woocommerceHandPickedProducts:
 					query.woocommerceHandPickedProducts,
 				priceRange: query.priceRange,
-				/**
-				 * Ensure that the postType and isProductCollectionBlock are set to the default values.
-				 */
-				postType: DEFAULT_QUERY.postType,
-				isProductCollectionBlock:
-					DEFAULT_QUERY.isProductCollectionBlock,
 			},
 			displayLayout: config.attributes?.displayLayout,
 			hideControls,
 			queryContextIncludes: config.attributes?.queryContextIncludes,
-			// We always want to set the collection attribute to the block name.
+			// collection should be set to the name of the collection i.e. config.name
 			collection: config.name,
-			// We don't allow collections to change "inherit" attribute.
+			// Collections should always have inherit set to false.
 			inherit: false,
 		},
 		/**
 		 * We always want following properties to be set to the default values.
 		 */
-		isDefault: false,
 		innerBlocks: config.innerBlocks || INNER_BLOCKS_TEMPLATE,
 		isActive,
-	};
+		isDefault: false,
+	} as BlockVariation;
 
 	/**
 	 * If setPreviewState or initialPreviewState is provided, inject the setPreviewState & initialPreviewState props.
@@ -372,7 +365,8 @@ export const __experimentalRegisterProductCollection = (
 			( props: BlockEditProps< ProductCollectionAttributes > ) => {
 				// If collection name does not match, return the original BlockEdit component.
 				if (
-					props.attributes.collection !== configWithoutExtraArgs.name
+					props.attributes.collection !==
+					collectionConfigWithoutExtraArgs.name
 				) {
 					return <BlockEdit { ...props } />;
 				}
@@ -390,23 +384,23 @@ export const __experimentalRegisterProductCollection = (
 			};
 		addFilter(
 			'editor.BlockEdit',
-			configWithoutExtraArgs.name,
+			collectionConfigWithoutExtraArgs.name,
 			withSetPreviewState
 		);
 	}
 
 	registerBlockVariation( BLOCK_NAME, {
-		...configWithoutExtraArgs,
+		...collectionConfigWithoutExtraArgs,
 		attributes: {
 			...DEFAULT_ATTRIBUTES,
-			...configWithoutExtraArgs.attributes,
+			...collectionConfigWithoutExtraArgs.attributes,
 			query: {
 				...DEFAULT_QUERY,
-				...configWithoutExtraArgs.attributes?.query,
+				...collectionConfigWithoutExtraArgs.attributes?.query,
 			},
 			displayLayout: {
 				...DEFAULT_ATTRIBUTES.displayLayout,
-				...configWithoutExtraArgs.attributes?.displayLayout,
+				...collectionConfigWithoutExtraArgs.attributes?.displayLayout,
 			},
 		},
 	} );
