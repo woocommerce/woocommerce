@@ -358,7 +358,7 @@
           "post_title": "Integrating with coming soon mode",
           "tags": "how-to, coming-soon",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/integrating-coming-soon-mode.md",
-          "hash": "05b5644f50a898e6b3635ef12d91bef88693cb6cfbbc7685725468a22fcefdc6",
+          "hash": "eea34a5e37ceb5448f859d3bb350b6716e4c843a1477bfa5b9a7c369ed837f78",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/integrating-coming-soon-mode.md",
           "id": "787743efb6ef0ad509b17735eaf58b2a9a08afbc"
         },
@@ -1367,5 +1367,5 @@
       "categories": []
     }
   ],
-  "hash": "b9057fdc98f6a72a39c759097bc8f3a5a2d43f8e33aaebccf73a1eb0140175ca"
+  "hash": "f28ecd23ddeca12c13736f3708c95e0bf8918cca5431abbeb066a9950745bc1e"
 }
