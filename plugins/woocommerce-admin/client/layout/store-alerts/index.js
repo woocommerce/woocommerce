@@ -22,6 +22,7 @@ import {
 	QUERY_DEFAULTS,
 	OPTIONS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
+	useUserPreferences,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
@@ -81,6 +82,8 @@ export const StoreAlerts = ( props ) => {
 	const { triggerNoteAction, updateNote, removeNote } =
 		useDispatch( NOTES_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
+
+	const userPrefs = useUserPreferences();
 
 	function previousAlert( event ) {
 		event?.stopPropagation();
@@ -237,6 +240,7 @@ export const StoreAlerts = ( props ) => {
 	);
 
 	const hasTwoColumns = hasTwoColumnLayout(
+		userPrefs.homepage_layout,
 		defaultHomescreenLayout,
 		taskListComplete,
 		isTaskListHidden

@@ -51,6 +51,7 @@ const TaskLists = lazy( () =>
 );
 
 export const hasTwoColumnLayout = (
+	userPrefLayout,
 	defaultHomescreenLayout,
 	taskListComplete,
 	isTaskListHidden
@@ -60,7 +61,10 @@ export const hasTwoColumnLayout = (
 		isTaskListHidden ||
 		window.wcAdminFeatures.analytics;
 
-	return defaultHomescreenLayout === 'two_columns' && hasTwoColumnContent;
+	return (
+		( userPrefLayout || defaultHomescreenLayout ) === 'two_columns' &&
+		hasTwoColumnContent
+	);
 };
 
 export const Layout = ( {
@@ -79,7 +83,8 @@ export const Layout = ( {
 	const activeSetupTaskList = useActiveSetupTasklist();
 
 	const twoColumns = hasTwoColumnLayout(
-		userPrefs.homepage_layout || defaultHomescreenLayout,
+		userPrefs.homepage_layout,
+		defaultHomescreenLayout,
 		taskListComplete,
 		isTaskListHidden
 	);
