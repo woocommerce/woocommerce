@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add aria-label to mini-cart button on first render to improve accessibility
