@@ -35,7 +35,9 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 		);
 	}
 
-	// BlockVariation properties
+	/**
+	 * BlockVariation properties validation
+	 */
 	// name
 	if ( typeof config.name !== 'string' || config.name.length === 0 ) {
 		console.warn( 'Invalid name: name must be a non-empty string.' );
@@ -255,7 +257,9 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 		);
 	}
 
-	// Preview validation
+	/**
+	 * Preview validation
+	 */
 	if ( config.preview !== undefined ) {
 		// preview
 		if ( typeof config.preview !== 'object' || config.preview === null ) {
