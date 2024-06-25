@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Fragment } from '@wordpress/element';
 import {
 	Button,
 	Card,
@@ -13,8 +13,7 @@ import {
 } from '@wordpress/components';
 import clsx from 'clsx';
 import interpolateComponents from '@automattic/interpolate-components';
-import { compose } from '@wordpress/compose';
-import { withDispatch, useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import moment from 'moment';
 import { Icon, chevronLeft, chevronRight, close } from '@wordpress/icons';
 import {
