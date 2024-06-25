@@ -32,11 +32,11 @@ if ( is_user_logged_in() ) {
 
 	<p class="form-row form-row-first">
 		<label for="username"><?php esc_html_e( 'Username or email', 'woocommerce' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span><span class="screen-reader-text"><?php esc_html_e( 'Required', 'woocommerce' ); ?></span></label>
-		<input type="text" class="input-text" name="username" id="username" autocomplete="username" required />
+		<input type="text" class="input-text" name="username" id="username" autocomplete="username" required aria-required="true" />
 	</p>
 	<p class="form-row form-row-last">
 		<label for="password"><?php esc_html_e( 'Password', 'woocommerce' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span><span class="screen-reader-text"><?php esc_html_e( 'Required', 'woocommerce' ); ?></span></label>
-		<input class="input-text woocommerce-Input" type="password" name="password" id="password" autocomplete="current-password" required />
+		<input class="input-text woocommerce-Input" type="password" name="password" id="password" autocomplete="current-password" required aria-required="true" />
 	</p>
 	<div class="clear"></div>
 
