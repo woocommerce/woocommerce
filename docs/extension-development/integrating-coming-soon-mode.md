@@ -110,11 +110,13 @@ function sync_coming_soon_from_other_plugins( $is_enabled ) {
 }
 ```
 
-### Disable coming soon customer-facing page
+### Custom exclusions filter
 
-If there is another feature that behaves similarly to WooCommerce's coming soon mode, it can cause unintended conflicts. The coming soon mode can be disabled by excluding all shopper-facing pages.
+It is possible for developers to add custom exclusions that bypass the coming soon protection. This is useful for exclusions like always bypassing the screen on a specific IP address, or making a specific landing page available.
 
-Exclude all customer-facing pages from coming soon mode by adding the following code:
+#### Disabling coming soon in all pages
+
+If there is another feature that behaves similarly to WooCommerce's coming soon mode, it can cause unintended conflicts. The coming soon mode can be disabled by excluding all customer-facing pages. The following is an example:
 
 ```php
 add_filter( 'woocommerce_coming_soon_exclude', function() {
@@ -122,7 +124,9 @@ add_filter( 'woocommerce_coming_soon_exclude', function() {
 }, 10 );
 ```
 
-Apply coming soon mode to all pages except for a specific page by using this code:
+#### Disabling coming soon except for a specific page
+
+Use the following example to exclude a certain page based on the page's ID. Replace `<page-id>` with your page identifier:
 
 ```php
 add_filter( 'woocommerce_coming_soon_exclude', function( $is_excluded ) {
