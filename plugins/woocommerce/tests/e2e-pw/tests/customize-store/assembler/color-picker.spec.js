@@ -223,7 +223,7 @@ const colorPalette = {
 	},
 };
 
-test.describe( 'Assembler -> Color Pickers', () => {
+test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {

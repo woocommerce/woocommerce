@@ -39,6 +39,7 @@ import { __ } from '@wordpress/i18n';
 import { useQuery } from '@woocommerce/navigation';
 import clsx from 'clsx';
 import { SelectedBlockContext } from './context/selected-block-ref-context';
+import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -241,7 +242,9 @@ function ScaledBlockPreview( {
 						// @ts-ignore disabled prop exists
 						scrolling={ isScrollable ? 'yes' : 'no' }
 						tabIndex={ -1 }
-						readonly={ false }
+						readonly={
+							! isFullComposabilityFeatureAndAPIAvailable()
+						}
 						style={
 							autoScale
 								? {
@@ -292,6 +295,10 @@ function ScaledBlockPreview( {
 						.wp-block-navigation .wp-block-pages-list__item__link {
 							pointer-events: all !important;
 							cursor: pointer !important;
+						}
+
+						.components-resizable-box__handle {
+							display: none !important;
 						}
 
 						${ additionalStyles }

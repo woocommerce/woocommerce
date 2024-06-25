@@ -70,7 +70,7 @@ const test = baseTest.extend( {
 	},
 } );
 
-test( 'can add images', async ( { page, product } ) => {
+test( 'can add images', { tag: '@gutenberg' }, async ( { page, product } ) => {
 	const images = [ 'image-01', 'image-02' ];
 
 	await test.step( 'navigate to product edit page', async () => {
@@ -112,136 +112,148 @@ test( 'can add images', async ( { page, product } ) => {
 	} );
 } );
 
-test( 'can replace an image', async ( { page, productWithGallery } ) => {
-	const initialImagesCount = productWithGallery.images.length;
-	const newImageName = 'image-01';
-	const replacedImgLocator = page
-		.getByLabel( 'Block: Product images' )
-		.locator( 'img' )
-		.nth( 1 );
-	let dataIds = [];
+test(
+	'can replace an image',
+	{ tag: '@gutenberg' },
+	async ( { page, productWithGallery } ) => {
+		const initialImagesCount = productWithGallery.images.length;
+		const newImageName = 'image-01';
+		const replacedImgLocator = page
+			.getByLabel( 'Block: Product images' )
+			.locator( 'img' )
+			.nth( 1 );
+		let dataIds = [];
 
-	await test.step( 'navigate to product edit page', async () => {
-		await page.goto(
-			`wp-admin/post.php?post=${ productWithGallery.id }&action=edit`
-		);
-	} );
+		await test.step( 'navigate to product edit page', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productWithGallery.id }&action=edit`
+			);
+		} );
 
-	await test.step( 'replace an image', async () => {
-		await replacedImgLocator.click();
-		await page
-			.getByRole( 'toolbar', { name: 'Options' } )
-			.getByLabel( 'Options' )
-			.click();
-		await page.getByRole( 'menuitem', { name: 'Replace' } ).click();
-		dataIds = await selectImagesInLibrary( page, [ newImageName ] );
+		await test.step( 'replace an image', async () => {
+			await replacedImgLocator.click();
+			await page
+				.getByRole( 'toolbar', { name: 'Options' } )
+				.getByLabel( 'Options' )
+				.click();
+			await page.getByRole( 'menuitem', { name: 'Replace' } ).click();
+			dataIds = await selectImagesInLibrary( page, [ newImageName ] );
 
-		expect( await replacedImgLocator.getAttribute( 'src' ) ).toContain(
-			newImageName
-		);
-	} );
+			expect( await replacedImgLocator.getAttribute( 'src' ) ).toContain(
+				newImageName
+			);
+		} );
 
-	await test.step( 'update the product', async () => {
-		await page.getByRole( 'button', { name: 'Update' } ).click();
-		// Verify product was updated
-		await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
-			'Product updated'
-		);
-	} );
+		await test.step( 'update the product', async () => {
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+			// Verify product was updated
+			await expect(
+				page.getByLabel( 'Dismiss this notice' )
+			).toContainText( 'Product updated' );
+		} );
 
-	await test.step( 'verify product image was set', async () => {
-		await expect( replacedImgLocator ).toHaveId( dataIds[ 0 ] );
-		await expect(
-			page.getByLabel( 'Block: Product images' ).locator( 'img' )
-		).toHaveCount( initialImagesCount );
+		await test.step( 'verify product image was set', async () => {
+			await expect( replacedImgLocator ).toHaveId( dataIds[ 0 ] );
+			await expect(
+				page.getByLabel( 'Block: Product images' ).locator( 'img' )
+			).toHaveCount( initialImagesCount );
 
-		// Verify image in store frontend
-		await page.goto( productWithGallery.permalink );
-		await expect( page.getByTitle( newImageName ) ).toBeVisible();
-	} );
-} );
+			// Verify image in store frontend
+			await page.goto( productWithGallery.permalink );
+			await expect( page.getByTitle( newImageName ) ).toBeVisible();
+		} );
+	}
+);
 
-test( 'can remove an image', async ( { page, productWithGallery } ) => {
-	const initialImagesCount = productWithGallery.images.length;
-	const removedImgLocator = page
-		.getByLabel( 'Block: Product images' )
-		.locator( 'img' )
-		.nth( 1 );
+test(
+	'can remove an image',
+	{ tag: '@gutenberg' },
+	async ( { page, productWithGallery } ) => {
+		const initialImagesCount = productWithGallery.images.length;
+		const removedImgLocator = page
+			.getByLabel( 'Block: Product images' )
+			.locator( 'img' )
+			.nth( 1 );
 
-	await test.step( 'navigate to product edit page', async () => {
-		await page.goto(
-			`wp-admin/post.php?post=${ productWithGallery.id }&action=edit`
-		);
-	} );
+		await test.step( 'navigate to product edit page', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productWithGallery.id }&action=edit`
+			);
+		} );
 
-	await test.step( 'remove an image', async () => {
-		await removedImgLocator.click();
-		await page
-			.getByRole( 'toolbar', { name: 'Options' } )
-			.getByLabel( 'Options' )
-			.click();
-		await page.getByRole( 'menuitem', { name: 'Remove' } ).click();
+		await test.step( 'remove an image', async () => {
+			await removedImgLocator.click();
+			await page
+				.getByRole( 'toolbar', { name: 'Options' } )
+				.getByLabel( 'Options' )
+				.click();
+			await page.getByRole( 'menuitem', { name: 'Remove' } ).click();
 
-		await expect(
-			page.getByLabel( 'Block: Product images' ).locator( 'img' )
-		).toHaveCount( initialImagesCount - 1 );
-	} );
+			await expect(
+				page.getByLabel( 'Block: Product images' ).locator( 'img' )
+			).toHaveCount( initialImagesCount - 1 );
+		} );
 
-	await test.step( 'update the product', async () => {
-		await page.getByRole( 'button', { name: 'Update' } ).click();
-		// Verify product was updated
-		await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
-			'Product updated'
-		);
-	} );
+		await test.step( 'update the product', async () => {
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+			// Verify product was updated
+			await expect(
+				page.getByLabel( 'Dismiss this notice' )
+			).toContainText( 'Product updated' );
+		} );
 
-	await test.step( 'verify product image was set', async () => {
-		await expect(
-			page.getByLabel( 'Block: Product images' ).locator( 'img' )
-		).toHaveCount( initialImagesCount - 1 );
+		await test.step( 'verify product image was set', async () => {
+			await expect(
+				page.getByLabel( 'Block: Product images' ).locator( 'img' )
+			).toHaveCount( initialImagesCount - 1 );
 
-		// Verify image in store frontend
-		await page.goto( productWithGallery.permalink );
-		await expect(
-			page.locator( '.woocommerce-product-gallery ol img' )
-		).toHaveCount( initialImagesCount - 1 );
-	} );
-} );
+			// Verify image in store frontend
+			await page.goto( productWithGallery.permalink );
+			await expect(
+				page.locator( '.woocommerce-product-gallery ol img' )
+			).toHaveCount( initialImagesCount - 1 );
+		} );
+	}
+);
 
-test( 'can set an image as cover', async ( { page, productWithGallery } ) => {
-	const newCoverImgLocator = page
-		.getByLabel( 'Block: Product images' )
-		.locator( 'img' )
-		.nth( 1 );
+test(
+	'can set an image as cover',
+	{ tag: '@gutenberg' },
+	async ( { page, productWithGallery } ) => {
+		const newCoverImgLocator = page
+			.getByLabel( 'Block: Product images' )
+			.locator( 'img' )
+			.nth( 1 );
 
-	await test.step( 'navigate to product edit page', async () => {
-		await page.goto(
-			`wp-admin/post.php?post=${ productWithGallery.id }&action=edit`
-		);
-	} );
+		await test.step( 'navigate to product edit page', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productWithGallery.id }&action=edit`
+			);
+		} );
 
-	const newCoverImgId = await newCoverImgLocator.getAttribute( 'id' );
+		const newCoverImgId = await newCoverImgLocator.getAttribute( 'id' );
 
-	await test.step( 'remove an image', async () => {
-		await newCoverImgLocator.click();
-		await page.getByLabel( 'Set as cover' ).click();
+		await test.step( 'remove an image', async () => {
+			await newCoverImgLocator.click();
+			await page.getByLabel( 'Set as cover' ).click();
 
-		await expect(
-			page.getByRole( 'button', { name: 'Cover' } ).locator( 'img' )
-		).toHaveId( newCoverImgId );
-	} );
+			await expect(
+				page.getByRole( 'button', { name: 'Cover' } ).locator( 'img' )
+			).toHaveId( newCoverImgId );
+		} );
 
-	await test.step( 'update the product', async () => {
-		await page.getByRole( 'button', { name: 'Update' } ).click();
-		// Verify product was updated
-		await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
-			'Product updated'
-		);
-	} );
+		await test.step( 'update the product', async () => {
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+			// Verify product was updated
+			await expect(
+				page.getByLabel( 'Dismiss this notice' )
+			).toContainText( 'Product updated' );
+		} );
 
-	await test.step( 'verify product image was set', async () => {
-		await expect(
-			page.getByRole( 'button', { name: 'Cover' } ).locator( 'img' )
-		).toHaveId( newCoverImgId );
-	} );
-} );
+		await test.step( 'verify product image was set', async () => {
+			await expect(
+				page.getByRole( 'button', { name: 'Cover' } ).locator( 'img' )
+			).toHaveId( newCoverImgId );
+		} );
+	}
+);

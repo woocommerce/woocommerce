@@ -157,6 +157,7 @@ class Server {
 			'product-attribute-terms'  => 'WC_REST_Product_Attribute_Terms_Controller',
 			'product-attributes'       => 'WC_REST_Product_Attributes_Controller',
 			'product-categories'       => 'WC_REST_Product_Categories_Controller',
+			'product-custom-fields'    => 'WC_REST_Product_Custom_Fields_Controller',
 			'product-reviews'          => 'WC_REST_Product_Reviews_Controller',
 			'product-shipping-classes' => 'WC_REST_Product_Shipping_Classes_Controller',
 			'product-tags'             => 'WC_REST_Product_Tags_Controller',
