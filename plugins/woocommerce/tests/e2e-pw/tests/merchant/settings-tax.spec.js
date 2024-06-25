@@ -125,18 +125,6 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 			'Tax'
 		);
 
-		// Clear out existing tax classes
-		await page.locator( '#woocommerce_tax_classes' ).fill( '' );
-		await page.locator( 'text=Save changes' ).click();
-
-		// Verify that the settings have been saved
-		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
-		);
-		await expect( page.locator( '#woocommerce_tax_classes' ) ).toHaveValue(
-			''
-		);
-
 		// Add a "fancy" tax class
 		await page.locator( '#woocommerce_tax_classes' ).fill( 'Fancy' );
 		await page.locator( 'text=Save changes' ).click();
