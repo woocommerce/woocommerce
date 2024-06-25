@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
+import { useState, useCallback } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
 import {
 	useBlockProps,
 	useInnerBlocksProps,
 	InspectorControls,
+	useSettings,
 } from '@wordpress/block-editor';
 import { BlockEditProps, store as blocksStore } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
@@ -15,6 +17,7 @@ import {
 	PanelBody,
 	RadioControl,
 	SelectControl,
+	FontSizePicker,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
@@ -50,16 +53,28 @@ export const Edit = ( {
 		{ value: 'link', label: __( 'Link', 'woocommerce' ) },
 	];
 
-	buttonBlockStyles.forEach( ( style: { name: string; label: string } ) => {
-		if ( style.name === 'link' ) return;
-		buttonStyles.push( { value: style.name, label: style.label } );
-	} );
+	buttonBlockStyles.forEach(
+		( buttonBlockStyle: { name: string; label: string } ) => {
+			if ( buttonBlockStyle.name === 'link' ) return;
+			buttonStyles.push( {
+				value: buttonBlockStyle.name,
+				label: buttonBlockStyle.label,
+			} );
+		}
+	);
 
-	const setIconSize = useDebounce( ( value: string ) => {
-		setAttributes( {
-			iconSize: value,
-		} );
-	}, 50 );
+	const [ iconSizeEditor, setIconSizeEditor ] =
+		useState< string >( iconSize );
+	const setIconSizeAttribute = useCallback(
+		useDebounce( ( value: string ) => {
+			setAttributes( {
+				iconSize: value,
+			} );
+		}, 500 ),
+		[]
+	);
+
+	const [ fontSizes ] = useSettings( 'typography.fontSizes' );
 
 	return (
 		<nav
@@ -80,8 +95,8 @@ export const Edit = ( {
 						fill="currentColor"
 						icon={ close }
 						style={ {
-							width: iconSize || '1rem',
-							height: iconSize || '1rem',
+							width: iconSizeEditor || '1rem',
+							height: iconSizeEditor || '1rem',
 						} }
 					/>
 				) }
@@ -126,11 +141,11 @@ export const Edit = ( {
 								} )
 							}
 						>
-							{ buttonStyles.map( ( style ) => (
+							{ buttonStyles.map( ( option ) => (
 								<ToggleGroupControlOption
-									key={ style.value }
-									label={ style.label }
-									value={ style.value }
+									key={ option.value }
+									label={ option.label }
+									value={ option.value }
 								/>
 							) ) }
 						</ToggleGroupControl>
@@ -152,15 +167,26 @@ export const Edit = ( {
 
 					<SizeControl
 						label={ __( 'Icon size', 'woocommerce' ) }
-						onChange={ ( numericSize: number, unit: string ) =>
-							setIconSize( `${ numericSize }${ unit }` )
-						}
+						onChange={ ( numericSize: number, unit: string ) => {
+							setIconSizeEditor( `${ numericSize }${ unit }` );
+							setIconSizeAttribute( `${ numericSize }${ unit }` );
+						} }
 						value={ iconSize }
 						units={ [
 							{ value: 'px', label: 'px', default: 16 },
 							{ value: 'rem', label: 'rem', default: 1 },
 							{ value: 'em', label: 'em', default: 1 },
 						] }
+					/>
+					<FontSizePicker
+						withReset={ false }
+						withSlider={ true }
+						fontSizes={ fontSizes }
+						value={ iconSizeEditor }
+						onChange={ ( newFontSize ) => {
+							setIconSizeEditor( newFontSize );
+							setIconSizeAttribute( newFontSize );
+						} }
 					/>
 				</PanelBody>
 			</InspectorControls>
