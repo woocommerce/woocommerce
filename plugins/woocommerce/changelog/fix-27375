@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Allow products with non-integer stock to be created via REST API.

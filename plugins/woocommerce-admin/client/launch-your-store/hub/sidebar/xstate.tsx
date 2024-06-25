@@ -118,7 +118,7 @@ export const pageHasComingSoonMetaTag = async ( {
 	}
 };
 
-const getSiteCachedStatus = async () => {
+export const getSiteCachedStatus = async () => {
 	const settings = await resolveSelect( SETTINGS_STORE_NAME ).getSettings(
 		'wc_admin'
 	);

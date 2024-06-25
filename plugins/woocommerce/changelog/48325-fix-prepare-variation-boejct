@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Run possibly_add_template_id function in woocommerce_rest_prepare_product_variation_object hook

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Adds a new tool to the WCA Test Helper that helps import remote inbox notifications from staging or production for testing purposes
