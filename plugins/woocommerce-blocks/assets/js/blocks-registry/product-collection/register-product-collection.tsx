@@ -49,10 +49,7 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 		);
 	}
 	// title
-	if (
-		config.title !== undefined &&
-		( typeof config.title !== 'string' || config.title.length === 0 )
-	) {
+	if ( typeof config.title !== 'string' || config.title.length === 0 ) {
 		console.warn( 'Invalid title: title must be a non-empty string.' );
 	}
 	// description
