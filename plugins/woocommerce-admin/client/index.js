@@ -2,7 +2,7 @@
  * External dependencies
  */
 import '@wordpress/notices';
-import { render } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 import { CustomerEffortScoreTracksContainer } from '@woocommerce/customer-effort-score';
 import {
 	withCurrentUserHydration,
@@ -50,11 +50,12 @@ if ( appRoot ) {
 		HydratedPageLayout =
 			withCurrentUserHydration( hydrateUser )( HydratedPageLayout );
 	}
-	render(
+
+	const appRootReactNode = createRoot( appRoot );
+	appRootReactNode.render(
 		<ErrorBoundary>
 			<HydratedPageLayout />
-		</ErrorBoundary>,
-		appRoot
+		</ErrorBoundary>
 	);
 } else if ( embeddedRoot ) {
 	let HydratedEmbedLayout = withSettingsHydration(
@@ -66,7 +67,8 @@ if ( appRoot ) {
 			withCurrentUserHydration( hydrateUser )( HydratedEmbedLayout );
 	}
 	// Render the header.
-	render( <HydratedEmbedLayout />, embeddedRoot );
+	const embeddedRootReactNode = createRoot( embeddedRoot );
+	embeddedRootReactNode.render( <HydratedEmbedLayout /> );
 
 	embeddedRoot.classList.remove( 'is-embed-loading' );
 
@@ -79,17 +81,19 @@ if ( appRoot ) {
 		wpBody.querySelector( '.wrap' );
 	const noticeContainer = document.createElement( 'div' );
 
-	render(
-		<div className="woocommerce-layout">
-			<NoticeArea />
-		</div>,
+	const noticeContainerReactNode = createRoot(
 		wpBody.insertBefore( noticeContainer, wrap )
 	);
+	noticeContainerReactNode.render(
+		<div className="woocommerce-layout">
+			<NoticeArea />
+		</div>
+	);
 	const embeddedBodyContainer = document.createElement( 'div' );
-	render(
-		<EmbeddedBodyLayout />,
+	const embeddedBodyContainerReactNode = createRoot(
 		wpBody.insertBefore( embeddedBodyContainer, wrap.nextSibling )
 	);
+	embeddedBodyContainerReactNode.render( <EmbeddedBodyLayout /> );
 
 	possiblyRenderSettingsSlots();
 
@@ -112,10 +116,9 @@ if (
 	// Set up customer effort score survey.
 	( function () {
 		const root = appRoot || embeddedRoot;
-
-		render(
-			<CustomerEffortScoreTracksContainer />,
+		const rootReactNode = createRoot(
 			root.insertBefore( document.createElement( 'div' ), null )
 		);
+		rootReactNode.render( <CustomerEffortScoreTracksContainer /> );
 	} )();
 }
