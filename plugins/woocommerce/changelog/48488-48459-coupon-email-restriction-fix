@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-</details>  <details>  <summary>Changelog Entry Comment</summary>
+Fixed a bug causing account email not to be taken in consideration for coupon validation when a customer has a different billing email set.
