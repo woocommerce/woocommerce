@@ -8,7 +8,6 @@ import {
 	useBlockProps,
 	useInnerBlocksProps,
 	InspectorControls,
-	useSettings,
 } from '@wordpress/block-editor';
 import { BlockEditProps, store as blocksStore } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
@@ -17,7 +16,6 @@ import {
 	PanelBody,
 	RadioControl,
 	SelectControl,
-	FontSizePicker,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
@@ -73,8 +71,6 @@ export const Edit = ( {
 		}, 500 ),
 		[]
 	);
-
-	const [ fontSizes ] = useSettings( 'typography.fontSizes' );
 
 	return (
 		<nav
@@ -177,16 +173,6 @@ export const Edit = ( {
 							{ value: 'rem', label: 'rem', default: 1 },
 							{ value: 'em', label: 'em', default: 1 },
 						] }
-					/>
-					<FontSizePicker
-						withReset={ false }
-						withSlider={ true }
-						fontSizes={ fontSizes }
-						value={ iconSizeEditor }
-						onChange={ ( newFontSize ) => {
-							setIconSizeEditor( newFontSize );
-							setIconSizeAttribute( newFontSize );
-						} }
 					/>
 				</PanelBody>
 			</InspectorControls>
