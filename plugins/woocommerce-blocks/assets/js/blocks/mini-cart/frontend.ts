@@ -169,10 +169,11 @@ window.addEventListener( 'load', () => {
 			window.matchMedia( '(pointer:coarse)' ).matches
 		) {
 			loadScripts();
+		} else {
+			miniCartButton.addEventListener( 'mouseover', loadScripts );
+			miniCartButton.addEventListener( 'focus', loadScripts );
 		}
 
-		miniCartButton.addEventListener( 'mouseover', loadScripts );
-		miniCartButton.addEventListener( 'focus', loadScripts );
 		miniCartButton.addEventListener( 'click', openDrawer );
 
 		const funcOnAddToCart =
