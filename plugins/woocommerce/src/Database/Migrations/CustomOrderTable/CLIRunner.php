@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Monorepo\Composer\Plugin;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 use WP_CLI;
 
@@ -1240,7 +1239,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * @param array $args       Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
 	 */
-	public function compatibility_info( array $args = array(), array $assoc_args = array() ) {
+	public function compatibility_info( array $args = array(), array $assoc_args = array() ): void {
 		$container          = wc_get_container();
 		$feature_controller = $container->get( FeaturesController::class );
 		$plugin_info        = $feature_controller->get_compatible_plugins_for_feature( 'custom_order_tables', ! ( (bool) ( $assoc_args['include-inactive'] ?? null ) ) );
@@ -1290,7 +1289,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * @param bool  $display_filenames True to simply return the sorted list of plugin file names.
 	 * @return array A sorted array of plugin names or file names.
 	 */
-	private function get_printable_plugin_names( array $plugins, bool $display_filenames ) {
+	private function get_printable_plugin_names( array $plugins, bool $display_filenames ): array {
 		if ( $display_filenames ) {
 			sort( $plugins );
 			return $plugins;
@@ -1309,7 +1308,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 *
 	 * @param array $plugins The names to print.
 	 */
-	private function print_plugin_names( array $plugins ) {
+	private function print_plugin_names( array $plugins ): void {
 		foreach ( $plugins as $plugin_file ) {
 			$this->log( '  ' . $plugin_file );
 		}

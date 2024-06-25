@@ -347,11 +347,10 @@ class FeaturesController {
 		 *
 		 * @param bool $incompatible_by_default Default value, true if plugins are to be considered incompatible by default with the feature.
 		 * @param string $feature_id The feature to check.
-		 * @return bool New value.
 		 *
 		 * @since 9.2.0
 		 */
-		return apply_filters( 'woocommerce_plugins_are_incompatible_with_feature_by_default', $incompatible_by_default, $feature_id );
+		return (bool) apply_filters( 'woocommerce_plugins_are_incompatible_with_feature_by_default', $incompatible_by_default, $feature_id );
 	}
 
 	/**
