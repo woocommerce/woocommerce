@@ -14,12 +14,7 @@ import {
 import clsx from 'clsx';
 import interpolateComponents from '@automattic/interpolate-components';
 import { compose } from '@wordpress/compose';
-import {
-	withDispatch,
-	withSelect,
-	useDispatch,
-	useSelect,
-} from '@wordpress/data';
+import { withDispatch, useDispatch, useSelect } from '@wordpress/data';
 import moment from 'moment';
 import { Icon, chevronLeft, chevronRight, close } from '@wordpress/icons';
 import {
@@ -83,6 +78,10 @@ export const StoreAlerts = ( props ) => {
 		};
 	} );
 
+	const { triggerNoteAction, updateNote, removeNote } =
+		useDispatch( NOTES_STORE_NAME );
+	const { createNotice } = useDispatch( 'core/notices' );
+
 	function previousAlert( event ) {
 		event?.stopPropagation();
 
@@ -100,7 +99,6 @@ export const StoreAlerts = ( props ) => {
 	}
 
 	function renderActions( alert ) {
-		const { triggerNoteAction, updateNote, createNotice } = props;
 		const actions = alert.actions.map( ( action ) => {
 			return (
 				<Button
@@ -269,7 +267,6 @@ export const StoreAlerts = ( props ) => {
 
 	const onDismiss = async ( note ) => {
 		const screen = getScreenName();
-		const { createNotice, removeNote } = props;
 
 		recordEvent( 'inbox_action_dismiss', {
 			note_name: note.name,
@@ -283,7 +280,6 @@ export const StoreAlerts = ( props ) => {
 
 		try {
 			await removeNote( noteId );
-			// setAlerts( alerts.filter( ( _alert ) => _alert.id !== noteId ) );
 			createNotice( 'success', __( 'Message dismissed', 'woocommerce' ) );
 		} catch ( e ) {
 			createNotice(
@@ -373,17 +369,4 @@ export const StoreAlerts = ( props ) => {
 	);
 };
 
-export default compose(
-	withDispatch( ( dispatch ) => {
-		const { triggerNoteAction, updateNote, removeNote } =
-			dispatch( NOTES_STORE_NAME );
-		const { createNotice } = dispatch( 'core/notices' );
-
-		return {
-			triggerNoteAction,
-			updateNote,
-			createNotice,
-			removeNote,
-		};
-	} )
-)( StoreAlerts );
+export default StoreAlerts;
