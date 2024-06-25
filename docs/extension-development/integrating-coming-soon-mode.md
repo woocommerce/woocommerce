@@ -7,9 +7,19 @@ tags: how-to, coming-soon
 
 This guide provides examples for third-party developers and hosting providers on how to integrate their systems with WooCommerce's coming soon mode. For more details, please read the [developer blog post](https://developer.woocommerce.com/2024/06/18/introducing-coming-soon-mode/).
 
-## Clear server cache on site visibility settings change
+## Introduction
 
-When the site's visibility settings is changed, it may be necessary to clear a server cache in order for the changes to be applied and customer-facing pages re-cached. You can utilize [`update_option`](https://developer.wordpress.org/reference/hooks/update_option/) hook to achieve this.
+WooCommerce's coming soon mode allows you to temporarily make your site invisible to the public while you work on it. This guide will show you how to integrate this feature with your system, clear server cache when site visibility settings change, and sync coming soon mode with other plugins.
+
+## Prerequisites
+
+-   Familiarity with PHP and WordPress development.
+
+## Step-by-step instructions
+
+### Clear server cache on site visibility settings change
+
+When the site's visibility settings change, it may be necessary to clear a server cache to apply the changes and re-cache customer-facing pages. The [`update_option`](https://developer.wordpress.org/reference/hooks/update_option/) hook can be used to achieve this.
 
 ```php
 add_action( 'update_option_woocommerce_coming_soon', 'clear_server_cache', 10, 3 );
@@ -23,14 +33,16 @@ function clear_server_cache( $old_value, $new_value, $option ) {
 }
 ```
 
-## Syncing coming soon mode with other plugins
+### Syncing coming soon mode with other plugins
 
-You can programmatically sync the coming soon mode from your plugin or application. Here are some example use cases:
+The coming soon mode can be programmatically synced from a plugin or application. Here are some example use cases:
 
 -   Integrating with a maintenance mode plugin.
--   Integrating with hosting provider's coming soon mode.
+-   Integrating with a hosting provider's coming soon mode.
 
-### Trigger from WooCommerce
+#### Trigger from WooCommerce
+
+You can use the following example to run a code such as setting your plugin's status when coming soon mode option is updated:
 
 ```php
 add_action( 'update_option_woocommerce_coming_soon', 'sync_coming_soon_to_other_plugins', 10, 3 );
@@ -45,9 +57,9 @@ function sync_coming_soon_to_other_plugins( $old_value, $new_value, $option ) {
 }
 ```
 
-### Trigger from other plugins
+#### Trigger from other plugins
 
-The following function example can be called from another plugin to enable or disable WooCommerce coming soon mode.
+You can use the following example to enable or disable WooCommerce coming soon mode from another plugin by directy updating `woocommerce_coming_soon` option:
 
 ```php
 function sync_coming_soon_from_other_plugins( $is_enabled ) {
@@ -63,9 +75,9 @@ function sync_coming_soon_from_other_plugins( $is_enabled ) {
 }
 ```
 
-### 2-way sync with plugins
+#### 2-way sync with plugins
 
-If 2-way sync is needed, you can use the following example where `update_option` will not recursively call `sync_coming_soon_from_other_plugins`.
+If 2-way sync is needed, use the following example where `update_option` will not recursively call `sync_coming_soon_from_other_plugins`:
 
 ```php
 add_action( 'update_option_woocommerce_coming_soon', 'sync_coming_soon_to_other_plugins', 10, 3 );
@@ -98,18 +110,19 @@ function sync_coming_soon_from_other_plugins( $is_enabled ) {
 }
 ```
 
-## Disable coming soon customer-facing page
+### Disable coming soon customer-facing page
 
-If you already have another feature that behaves similarly to WooCommerce's coming soon mode, it can cause unintended conflicts. You can disable the coming soon mode by excluding all shopper-facing pages.
+If there is another feature that behaves similarly to WooCommerce's coming soon mode, it can cause unintended conflicts. The coming soon mode can be disabled by excluding all shopper-facing pages.
+
+Exclude all customer-facing pages from coming soon mode by adding the following code:
 
 ```php
-// Exclude all customer-facing pages from coming soon mode.
 add_filter( 'woocommerce_coming_soon_exclude', function() {
     return true;
 }, 10 );
 ```
 
-You can also use it to apply coming soon mode to all pages except for a specific page:
+Apply coming soon mode to all pages except for a specific page by using this code:
 
 ```php
 add_filter( 'woocommerce_coming_soon_exclude', function( $is_excluded ) {
