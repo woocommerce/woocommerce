@@ -220,7 +220,6 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		await localPickupUtils.setLocalPickupTitle(
 			'Edited from settings page'
 		);
-		await localPickupUtils.saveLocalPickupSettings();
 
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
