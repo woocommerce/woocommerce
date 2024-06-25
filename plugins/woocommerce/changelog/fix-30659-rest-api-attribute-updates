@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-When a product attribute is updated, unchanged values should not be reset to their defaults.
