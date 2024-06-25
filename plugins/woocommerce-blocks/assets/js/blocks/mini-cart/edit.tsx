@@ -10,7 +10,7 @@ import {
 	BaseControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	__experimentalToggleGroupControl as ToggleGroupControl,
-	SelectControl,
+	RadioControl,
 } from '@wordpress/components';
 import { getSetting } from '@woocommerce/settings';
 import { __, isRTL } from '@wordpress/i18n';
@@ -97,70 +97,56 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 	 * the main background color set by the theme.
 	 */
 	useEffect( () => {
-		const applyBadgeStyle = (
-			container: HTMLElement | Element | null,
-			backgroundColor: string | null,
-			color: string | null
-		) => {
-			if (
-				container &&
-				! container.querySelector(
-					'#mini-cart-quantity-badge-foreground-color'
-				) &&
-				backgroundColor &&
-				color
-			) {
-				const style = document.createElement( 'style' );
-				style.id = 'mini-cart-quantity-badge-foreground-color';
-				style.appendChild(
-					document.createTextNode(
-						`:where(.wc-block-mini-cart__badge) {
-							color: ${ backgroundColor };
-							background-color: ${ color };
-						}`
-					)
-				);
-				container.appendChild( style );
-			}
-		};
-
-		const editorStylesWrapper = document.querySelector(
+		let editorStylesWrapper = document.querySelector(
 			'.editor-styles-wrapper'
 		);
-		if ( editorStylesWrapper ) {
-			const editorBackgroundColor =
-				window.getComputedStyle( editorStylesWrapper )?.backgroundColor;
-			const editorColor =
-				window.getComputedStyle( editorStylesWrapper )?.color;
-			applyBadgeStyle(
-				editorStylesWrapper,
-				editorBackgroundColor,
-				editorColor
+		// If the editor styles wrapper is not available, look in the site editor canvas for it.
+		if ( ! editorStylesWrapper ) {
+			const canvasEl = document.querySelector(
+				'.edit-site-visual-editor__editor-canvas'
+			);
+
+			if ( ! ( canvasEl instanceof HTMLIFrameElement ) ) {
+				return;
+			}
+			const canvas =
+				canvasEl.contentDocument || canvasEl.contentWindow?.document;
+			if ( ! canvas ) {
+				return;
+			}
+			editorStylesWrapper = canvas.querySelector(
+				'.editor-styles-wrapper'
 			);
 		}
 
-		const canvasEl = document.querySelector(
-			'.edit-site-visual-editor__editor-canvas'
-		);
-		if ( canvasEl instanceof HTMLIFrameElement ) {
-			const canvas =
-				canvasEl.contentDocument || canvasEl.contentWindow?.document;
-			if ( canvas ) {
-				const canvasBody = canvas.querySelector(
-					'.editor-styles-wrapper'
-				);
-				const canvasBackgroundColor = window.getComputedStyle(
-					canvas.body
-				)?.backgroundColor;
-				const canvasColor = window.getComputedStyle(
-					canvas.body
-				)?.color;
-				applyBadgeStyle(
-					canvasBody,
-					canvasBackgroundColor,
-					canvasColor
-				);
-			}
+		if ( ! editorStylesWrapper ) {
+			return;
+		}
+
+		const editorBackgroundColor =
+			window.getComputedStyle( editorStylesWrapper )?.backgroundColor;
+		const editorColor =
+			window.getComputedStyle( editorStylesWrapper )?.color;
+
+		if (
+			editorStylesWrapper &&
+			! editorStylesWrapper.querySelector(
+				'#mini-cart-quantity-badge-foreground-color'
+			) &&
+			editorBackgroundColor &&
+			editorColor
+		) {
+			const style = document.createElement( 'style' );
+			style.id = 'mini-cart-quantity-badge-foreground-color';
+			style.appendChild(
+				document.createTextNode(
+					`:where(.wc-block-mini-cart__badge) {
+						color: ${ editorBackgroundColor };
+						background-color: ${ editorColor };
+					}`
+				)
+			);
+			editorStylesWrapper.appendChild( style );
 		}
 	}, [] );
 
@@ -218,34 +204,36 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						/>
 					</BaseControl>
 					<BaseControl
-						id="wc-block-mini-cart__product-count-toggle"
-						label={ __( 'Product Count', 'woocommerce' ) }
+						id="wc-block-mini-cart__product-count-basecontrol"
+						label={ __( 'Show quantity badge', 'woocommerce' ) }
 					>
-						<SelectControl
+						<RadioControl
+							className="wc-block-mini-cart__product-count-radiocontrol"
+							selected={ productCountVisibility }
 							options={ [
 								{
 									label: __(
-										'Always show count (even if 0)',
+										'Always (even if 0)',
 										'woocommerce'
 									),
 									value: 'always',
 								},
 								{
-									label: __(
-										'Never show count',
-										'woocommerce'
-									),
+									label: __( 'Never', 'woocommerce' ),
 									value: 'never',
 								},
 								{
 									label: __(
-										'Show count only when greater than 0',
+										'Only when cart is not empty',
 										'woocommerce'
 									),
 									value: 'greater_than_zero',
 								},
 							] }
-							value={ productCountVisibility }
+							help={ __(
+								'The editor does not display the real count value, but a placeholder to indicate how it will look on the front-end.',
+								'woocommerce'
+							) }
 							onChange={ ( value ) =>
 								setAttributes( {
 									productCountVisibility: value,
