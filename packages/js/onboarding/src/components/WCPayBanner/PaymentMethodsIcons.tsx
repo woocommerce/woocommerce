@@ -15,7 +15,7 @@ export const PaymentMethodsIcons: React.VFC< {
 		<div className="woocommerce-recommended-payments-banner__footer_icon_container">
 			<WooPaymentMethodLogos
 				isWooPayEligible={ isWooPayEligible }
-				maxNrElements={ 10 }
+				maxElements={ 10 }
 			/>
 		</div>
 	);

@@ -20,7 +20,7 @@ import {
 	Klarna,
 } from './Icons';
 
-const Payments = [
+const PaymentMethods = [
 	{
 		name: 'visa',
 		component: <Visa key="visa" />,
@@ -69,51 +69,40 @@ const Payments = [
 
 export const WooPaymentMethodLogos: React.VFC< {
 	isWooPayEligible: boolean;
-	maxNrElements: number;
-} > = ( { isWooPayEligible = false, maxNrElements = 10 } ) => {
-	let i = 0;
-	let j = 0;
+	maxElements: number;
+} > = ( { isWooPayEligible = false, maxElements = 10 } ) => {
+	const totalPaymentMethods = 21;
+	const maxElementsMiniView = 5;
 	return (
 		<>
 			<div className="woocommerce-payments-method-logos">
-				{ Payments.map( ( payment) => {
-					if ( i >= maxNrElements ) {
-						return <Fragment key={ payment.name }></Fragment>;
+				{ PaymentMethods.slice( 0, maxElements ).map( ( pm ) => {
+					if ( ! isWooPayEligible && pm.name === 'woopay' ) {
+						return <Fragment key={ pm.name }></Fragment>;
 					}
-					if ( ! isWooPayEligible && payment.name === 'woopay' ) {
-						return <Fragment key={ payment.name }></Fragment>;
-					}
-					i++;
-					return payment.component;
+
+					return pm.component;
 				} ) }
-				{ i < 21 && (
+				{ maxElements < totalPaymentMethods && (
 					<div className="woocommerce-payments-method-logos_count">
-						+ { 21 - i }
+						+ { totalPaymentMethods - maxElements }
 					</div>
 				) }
 			</div>
 
 			<div className="woocommerce-payments-method-logos_mini">
-				{ Payments.map( ( payment) => {
-					if ( j >= 5 ) {
-						j++;
-						return <Fragment key={ payment.name }></Fragment>;
+				{ PaymentMethods.slice( 0, maxElementsMiniView ).map(
+					( pm ) => {
+						if ( ! isWooPayEligible && pm.name === 'woopay' ) {
+							return <Fragment key={ pm.name }></Fragment>;
+						}
+						return pm.component;
 					}
-					if ( ! isWooPayEligible && payment.name === 'woopay' ) {
-						j++;
-						return <Fragment key={ payment.name }></Fragment>;
-					}
-					j++;
-
-					return payment.component;
-				} ) }
-				{ j < 21 && (
-					<div className="woocommerce-payments-method-logos_count">
-						+ { 21 - j }
-					</div>
 				) }
+				<div className="woocommerce-payments-method-logos_count">
+					+ { totalPaymentMethods - maxElementsMiniView }
+				</div>
 			</div>
 		</>
-)
-	;
+	);
 };

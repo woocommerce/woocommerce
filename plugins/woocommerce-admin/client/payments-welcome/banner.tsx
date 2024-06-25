@@ -79,7 +79,7 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 				<p>{ strings.paymentOptions }</p>
 				<WooPaymentMethodLogos
 					isWooPayEligible={ isWooPayEligible }
-					maxNrElements={ 10 }
+					maxElements={ 10 }
 				/>
 			</CardBody>
 			{ isExitSurveyModalOpen && (

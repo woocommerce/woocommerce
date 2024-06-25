@@ -138,7 +138,7 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 									'pre_install_woocommerce_payments_promotion' && (
 									<div className="pre-install-payment-gateway__subtitle">
 										<WooPaymentMethodLogos
-											maxNrElements={ 5 }
+											maxElements={ 5 }
 											isWooPayEligible={
 												isWooPayEligible
 											}
