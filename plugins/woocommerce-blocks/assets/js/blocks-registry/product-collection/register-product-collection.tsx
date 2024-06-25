@@ -36,32 +36,46 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	}
 
 	// BlockVariation properties
+	// name
 	if ( typeof config.name !== 'string' || config.name.length === 0 ) {
 		console.warn( 'Invalid name: name must be a non-empty string.' );
+	} else if (
+		! config.name.match(
+			/^[a-zA-Z0-9-]+\/product-collection\/[a-zA-Z0-9-]+$/
+		)
+	) {
+		console.warn(
+			`To prevent conflicts with other collections, please use a unique name following the pattern: "<plugin-name>/product-collection/<collection-name>". Ensure "<plugin-name>" is your plugin name and "<collection-name>" is your collection name. Both should consist only of alphanumeric characters and hyphens (e.g., "my-plugin/product-collection/my-collection").`
+		);
 	}
+	// title
 	if (
 		config.title !== undefined &&
 		( typeof config.title !== 'string' || config.title.length === 0 )
 	) {
 		console.warn( 'Invalid title: title must be a non-empty string.' );
 	}
+	// description
 	if (
 		config.description !== undefined &&
 		typeof config.description !== 'string'
 	) {
 		console.warn( 'Invalid description: description must be a string.' );
 	}
+	// category
 	if (
 		config.category !== undefined &&
 		typeof config.category !== 'string'
 	) {
 		console.warn( 'Invalid category: category must be a string.' );
 	}
+	// keywords
 	if ( config.keywords !== undefined && ! Array.isArray( config.keywords ) ) {
 		console.warn(
 			'Invalid keywords: keywords must be an array of strings.'
 		);
 	}
+	// icon
 	if (
 		config.icon !== undefined &&
 		typeof config.icon !== 'string' &&
@@ -69,9 +83,11 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	) {
 		console.warn( 'Invalid icon: icon must be a string or an object.' );
 	}
+	// example
 	if ( config.example !== undefined && typeof config.example !== 'object' ) {
 		console.warn( 'Invalid example: example must be an object.' );
 	}
+	// scope
 	if ( config.scope !== undefined && ! Array.isArray( config.scope ) ) {
 		console.warn(
 			'Invalid scope: scope must be an array of type WPBlockVariationScope.'
@@ -81,12 +97,14 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	/**
 	 * Attributes validation
 	 */
+	// attributes
 	if (
 		config.attributes !== undefined &&
 		typeof config.attributes !== 'object'
 	) {
 		console.warn( 'Invalid attributes: attributes must be an object.' );
 	}
+	// attributes.query
 	if (
 		config.attributes?.query !== undefined &&
 		typeof config.attributes.query !== 'object'
@@ -242,9 +260,11 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 
 	// Preview validation
 	if ( config.preview !== undefined ) {
+		// preview
 		if ( typeof config.preview !== 'object' || config.preview === null ) {
 			console.warn( 'Invalid preview: preview must be an object.' );
 		}
+		// preview.setPreviewState
 		if (
 			config.preview.setPreviewState !== undefined &&
 			typeof config.preview.setPreviewState !== 'function'
@@ -253,12 +273,15 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 				'Invalid preview: setPreviewState must be a function.'
 			);
 		}
+
 		if ( config.preview.initialPreviewState !== undefined ) {
+			// preview.initialPreviewState
 			if ( typeof config.preview.initialPreviewState !== 'object' ) {
 				console.warn(
 					'Invalid preview: initialPreviewState must be an object.'
 				);
 			}
+			// preview.initialPreviewState.isPreview
 			if (
 				typeof config.preview.initialPreviewState.isPreview !==
 				'boolean'
@@ -267,6 +290,7 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 					'Invalid preview: preview.isPreview must be a boolean.'
 				);
 			}
+			// preview.initialPreviewState.previewMessage
 			if (
 				typeof config.preview.initialPreviewState.previewMessage !==
 				'string'
