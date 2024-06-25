@@ -56,9 +56,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 	} );
 
 	test( 'can set tax options', async ( { page } ) => {
-		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=tax', {
-			waitUntil: 'networkidle',
-		} );
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=tax', {} );
 
 		// Make sure we're on the tax tab
 		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
@@ -117,9 +115,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 	} );
 
 	test( 'can add tax classes', async ( { page } ) => {
-		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=tax', {
-			waitUntil: 'networkidle',
-		} );
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=tax', {} );
 
 		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
 			'Tax'
@@ -140,8 +136,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 
 	test( 'can set rate settings', async ( { page } ) => {
 		await page.goto(
-			'wp-admin/admin.php?page=wc-settings&tab=tax&section=fancy',
-			{ waitUntil: 'networkidle' }
+			'wp-admin/admin.php?page=wc-settings&tab=tax&section=fancy'
 		);
 
 		// Make sure the tax tab is active, with the "fancy" subsection
