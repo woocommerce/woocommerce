@@ -26,7 +26,6 @@ const variations = [
 		attributes: {
 			heading: __( 'Active filters', 'woocommerce' ),
 			filterType: 'active-filters',
-			providerNameSlug: 'product-filter-active',
 		},
 		icon: {
 			src: activeFiltersIcon,
@@ -43,7 +42,6 @@ const variations = [
 		attributes: {
 			filterType: 'price-filter',
 			heading: __( 'Filter by Price', 'woocommerce' ),
-			providerNameSlug: 'product-filter-price',
 		},
 		icon: {
 			src: priceFilterIcon,
@@ -59,7 +57,6 @@ const variations = [
 		attributes: {
 			filterType: 'stock-filter',
 			heading: __( 'Filter by Stock Status', 'woocommerce' ),
-			providerNameSlug: 'product-filter-stock-status',
 		},
 		icon: {
 			src: stockStatusFilterIcon,
@@ -76,7 +73,6 @@ const variations = [
 			filterType: 'attribute-filter',
 			heading: __( 'Filter by Attribute', 'woocommerce' ),
 			attributeId: 0,
-			providerNameSlug: 'product-filter-attribute',
 		},
 		icon: {
 			src: attributeFilterIcon,
@@ -92,7 +88,6 @@ const variations = [
 		attributes: {
 			filterType: 'rating-filter',
 			heading: __( 'Filter by Rating', 'woocommerce' ),
-			providerNameSlug: 'product-filter-rating',
 		},
 		icon: {
 			src: ratingFilterIcon,
@@ -101,10 +96,12 @@ const variations = [
 ];
 
 type Variation = ( typeof variations )[ 0 ] & {
-	isActive: (
-		blockAttributes: BlockAttributes,
-		variationAttributes: BlockAttributes
-	) => boolean;
+	isActive:
+		| ( (
+				blockAttributes: BlockAttributes,
+				variationAttributes: BlockAttributes
+		  ) => boolean )
+		| string[];
 };
 
 /**
@@ -113,12 +110,7 @@ type Variation = ( typeof variations )[ 0 ] & {
  *  Block by providing its attributes.
  */
 ( variations as Variation[] ).forEach( ( variation ) => {
-	variation.isActive = (
-		blockAttributes: BlockAttributes,
-		variationAttributes: BlockAttributes
-	) =>
-		blockAttributes.providerNameSlug ===
-		variationAttributes.providerNameSlug;
+	variation.isActive = [ 'filterType' ];
 } );
 
 export const blockVariations = variations;

@@ -26,10 +26,6 @@
 		"attributeId": {
 			"type": "number",
 			"default": 0
-		},
-		"providerNameSlug": {
-			"type": "string",
-			"default": ""
 		}
 	},
 	"example": {

@@ -31,7 +31,6 @@ const TEMPLATE: InnerBlockTemplate[] = [
 		{
 			filterType: 'active-filters',
 			heading: 'Active',
-			providerNameSlug: 'product-filter-active',
 		},
 	],
 	[
@@ -39,7 +38,6 @@ const TEMPLATE: InnerBlockTemplate[] = [
 		{
 			filterType: 'price-filter',
 			heading: 'Filter by Price',
-			providerNameSlug: 'product-filter-price',
 		},
 	],
 	[
@@ -47,7 +45,6 @@ const TEMPLATE: InnerBlockTemplate[] = [
 		{
 			filterType: 'stock-filter',
 			heading: 'Filter by Stock Status',
-			providerNameSlug: 'product-filter-stock-status',
 		},
 	],
 	[
@@ -56,7 +53,6 @@ const TEMPLATE: InnerBlockTemplate[] = [
 			filterType: 'attribute-filter',
 			heading: __( 'Filter by Attribute', 'woocommerce' ),
 			attributeId: 0,
-			providerNameSlug: 'product-filter-attribute',
 		},
 	],
 	[
@@ -64,7 +60,6 @@ const TEMPLATE: InnerBlockTemplate[] = [
 		{
 			filterType: 'rating-filter',
 			heading: __( 'Filter by Rating', 'woocommerce' ),
-			providerNameSlug: 'product-filter-rating',
 		},
 	],
 ];
