@@ -33,11 +33,10 @@ You can programmatically sync the coming soon mode from your plugin or applicati
 ### Trigger from WooCommerce
 
 ```php
-// Priority set to 11 to ensure the options are already saved.
-add_action( 'woocommerce_update_options_site-visibility', 'sync_coming_soon_to_other_plugins', 11 );
+add_action( 'update_option_woocommerce_coming_soon', 'sync_coming_soon_to_other_plugins', 10, 3 );
 
-function sync_coming_soon_to_other_plugins() {
-    $is_enabled = get_option( 'woocommerce_coming_soon' ) === 'yes';
+function sync_coming_soon_to_other_plugins( $old_value, $new_value, $option ) {
+    $is_enabled = $new_value === 'yes';
 
     // Implement your logic to sync coming soon status.
     if ( function_exists( 'set_your_plugin_status' ) ) {
@@ -60,6 +59,41 @@ function sync_coming_soon_from_other_plugins( $is_enabled ) {
     // Set coming soon mode.
     if ( isset( $is_enabled ) ) {
         update_option( 'woocommerce_coming_soon', $is_enabled ? 'yes' : 'no' );
+    }
+}
+```
+
+### 2-way sync with plugins
+
+If 2-way sync is needed, you can use the following example where `update_option` will not recursively call `sync_coming_soon_from_other_plugins`.
+
+```php
+add_action( 'update_option_woocommerce_coming_soon', 'sync_coming_soon_to_other_plugins', 10, 3 );
+
+function sync_coming_soon_to_other_plugins( $old_value, $new_value, $option ) {
+    $is_enabled = $new_value === 'yes';
+
+    // Implement your logic to sync coming soon status.
+    if ( function_exists( 'set_your_plugin_status' ) ) {
+        set_your_plugin_status( $is_enabled );
+    }
+}
+
+function sync_coming_soon_from_other_plugins( $is_enabled ) {
+    // Check user capability.
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( 'You do not have sufficient permissions to access this page.' );
+    }
+
+    if ( isset( $is_enabled ) ) {
+        // Temporarily remove the action to prevent a recursive call.
+        remove_action( 'update_option_woocommerce_coming_soon', 'sync_coming_soon_to_other_plugins', 10, 3 );
+
+        // Set coming soon mode.
+        update_option( 'woocommerce_coming_soon', $is_enabled ? 'yes' : 'no' );
+
+        // Re-add the action.
+        add_action( 'update_option_woocommerce_coming_soon', 'sync_coming_soon_to_other_plugins', 10, 3 );
     }
 }
 ```
