@@ -19,13 +19,15 @@ import {
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
-import { Icon, close } from '@wordpress/icons';
+import { Icon } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
 import type { BlockAttributes } from './types';
 import SizeControl from './components/size-control';
+import metadata from './block.json';
+import { navigationClose } from './components/icons';
 
 export const Edit = ( {
 	attributes,
@@ -61,8 +63,9 @@ export const Edit = ( {
 		}
 	);
 
-	const [ iconSizeEditor, setIconSizeEditor ] =
-		useState< string >( iconSize );
+	const [ iconSizeEditor, setIconSizeEditor ] = useState< string >(
+		iconSize || metadata.attributes.iconSize.default
+	);
 	const setIconSizeAttribute = useCallback(
 		useDebounce( ( value: string ) => {
 			setAttributes( {
@@ -89,10 +92,14 @@ export const Edit = ( {
 				{ navigationStyle !== 'label' && (
 					<Icon
 						fill="currentColor"
-						icon={ close }
+						icon={ navigationClose }
 						style={ {
-							width: iconSizeEditor || '1rem',
-							height: iconSizeEditor || '1rem',
+							width:
+								iconSizeEditor ||
+								metadata.attributes.iconSize.default,
+							height:
+								iconSizeEditor ||
+								metadata.attributes.iconSize.default,
 						} }
 					/>
 				) }
@@ -167,7 +174,7 @@ export const Edit = ( {
 							setIconSizeEditor( `${ numericSize }${ unit }` );
 							setIconSizeAttribute( `${ numericSize }${ unit }` );
 						} }
-						value={ iconSize }
+						value={ iconSizeEditor }
 						units={ [
 							{ value: 'px', label: 'px', default: 16 },
 							{ value: 'rem', label: 'rem', default: 1 },

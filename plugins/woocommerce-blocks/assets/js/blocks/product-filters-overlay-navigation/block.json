@@ -20,7 +20,8 @@
 			"default": "link"
 		},
 		"iconSize": {
-			"type": "string"
+			"type": "string",
+			"default": "10px"
 		},
 		"style": {
 			"type": "object",
