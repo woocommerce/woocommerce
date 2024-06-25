@@ -137,10 +137,37 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	 *
 	 * @since  3.0.0
 	 * @param  int $id Object ID.
-	 * @return WC_Data
+	 * @return WC_Data|null
 	 */
 	protected function get_object( $id ) {
-		return wc_get_product( $id );
+		$object = wc_get_product( $id );
+		return ( $object && 0 !== $object->get_parent_id() ) ? $object : null;
+	}
+
+	protected function get_object_for_parent( int $id, int $parent_id ) {
+		$object = $this->get_object( $id );
+		$parent = wc_get_product( $parent_id );
+
+		if ( $object && ( ! $parent || $parent_id !== $object->get_parent_id() ) ) {
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		return $object;
+	}
+
+	/**
+	 * Check if a given request has access to read an item.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_item_permissions_check( $request ) {
+		$object = $this->get_object_for_parent( (int) $request['id'], (int) $request['product_id'] );
+		if ( is_wp_error( $object ) ) {
+			return $object;
+		}
+
+		return parent::get_item_permissions_check( $request );
 	}
 
 	/**
