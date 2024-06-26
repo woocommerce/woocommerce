@@ -235,7 +235,7 @@ export const NoAIBanner = ( {
 		return select( 'core' ).getCurrentTheme() as Theme;
 	}, [] );
 
-	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
+	const isDefaultTheme = true;
 
 	return (
 		<>

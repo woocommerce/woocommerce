@@ -68,6 +68,8 @@ export const updateTemplatePrePTK = async ( {
 		// @ts-ignore No types for this exist yet.
 	).getBlockPatterns() ) as Pattern[];
 
+	const { template } = await resolveSelect( coreStore ).getCurrentTheme();
+
 	const patternsByName = patternsToNameMap( patterns );
 	const homepageTemplate = getTemplatePatterns(
 		HOMEPAGE_TEMPLATES[ homepageTemplateId ].blocks,
@@ -121,7 +123,7 @@ export const updateTemplatePrePTK = async ( {
 			'postType',
 			'wp_template_part',
 			{
-				id: `${ THEME_SLUG }//header`,
+				id: `${ template }//header`,
 				content: headerTemplateContent,
 			},
 			{
@@ -132,7 +134,7 @@ export const updateTemplatePrePTK = async ( {
 			'postType',
 			'wp_template_part',
 			{
-				id: `${ THEME_SLUG }//footer`,
+				id: `${ template }//footer`,
 				content: footerTemplateContent,
 			},
 			{
