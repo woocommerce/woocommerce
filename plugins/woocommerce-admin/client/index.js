@@ -51,8 +51,7 @@ if ( appRoot ) {
 			withCurrentUserHydration( hydrateUser )( HydratedPageLayout );
 	}
 
-	const appRootReactNode = createRoot( appRoot );
-	appRootReactNode.render(
+	createRoot( appRoot ).render(
 		<ErrorBoundary>
 			<HydratedPageLayout />
 		</ErrorBoundary>
@@ -67,8 +66,7 @@ if ( appRoot ) {
 			withCurrentUserHydration( hydrateUser )( HydratedEmbedLayout );
 	}
 	// Render the header.
-	const embeddedRootReactNode = createRoot( embeddedRoot );
-	embeddedRootReactNode.render( <HydratedEmbedLayout /> );
+	createRoot( embeddedRoot ).render( <HydratedEmbedLayout /> );
 
 	embeddedRoot.classList.remove( 'is-embed-loading' );
 
@@ -81,19 +79,16 @@ if ( appRoot ) {
 		wpBody.querySelector( '.wrap' );
 	const noticeContainer = document.createElement( 'div' );
 
-	const noticeContainerReactNode = createRoot(
-		wpBody.insertBefore( noticeContainer, wrap )
-	);
-	noticeContainerReactNode.render(
+	createRoot( wpBody.insertBefore( noticeContainer, wrap ) ).render(
 		<div className="woocommerce-layout">
 			<NoticeArea />
 		</div>
 	);
 	const embeddedBodyContainer = document.createElement( 'div' );
-	const embeddedBodyContainerReactNode = createRoot(
+
+	createRoot(
 		wpBody.insertBefore( embeddedBodyContainer, wrap.nextSibling )
-	);
-	embeddedBodyContainerReactNode.render( <EmbeddedBodyLayout /> );
+	).render( <EmbeddedBodyLayout /> );
 
 	possiblyRenderSettingsSlots();
 
@@ -116,9 +111,8 @@ if (
 	// Set up customer effort score survey.
 	( function () {
 		const root = appRoot || embeddedRoot;
-		const rootReactNode = createRoot(
+		createRoot(
 			root.insertBefore( document.createElement( 'div' ), null )
-		);
-		rootReactNode.render( <CustomerEffortScoreTracksContainer /> );
+		).render( <CustomerEffortScoreTracksContainer /> );
 	} )();
 }
