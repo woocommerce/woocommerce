@@ -51,7 +51,7 @@ import { isEqual } from 'lodash';
 import { COLOR_PALETTES } from './global-styles/color-palette-variations/constants';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
-import { useTrackingAllowed } from '../hooks/use-tracking-allowed';
+import { isTrackingAllowed } from '../utils/is-tracking-allowed';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
@@ -224,8 +224,6 @@ export const SidebarNavigationScreenHomepage = ( {
 	const isNetworkOffline = useNetworkStatus();
 	const isPTKPatternsAPIAvailable = context.isPTKPatternsAPIAvailable;
 
-	const isTrackingAllowed = useTrackingAllowed();
-
 	let notice;
 	if ( isNetworkOffline ) {
 		notice = __(
@@ -237,7 +235,7 @@ export const SidebarNavigationScreenHomepage = ( {
 			"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns.",
 			'woocommerce'
 		);
-	} else if ( ! isTrackingAllowed ) {
+	} else if ( ! isTrackingAllowed() ) {
 		notice = __(
 			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
 			'woocommerce'

@@ -45,7 +45,7 @@ import { useSelect } from '@wordpress/data';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
-import { useTrackingAllowed } from '../hooks/use-tracking-allowed';
+import { isTrackingAllowed } from '../utils/is-tracking-allowed';
 
 export const SidebarNavigationScreenHomepagePTK = ( {
 	onNavigateBackClick,
@@ -56,8 +56,6 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 
 	const isNetworkOffline = useNetworkStatus();
 	const isPTKPatternsAPIAvailable = context.isPTKPatternsAPIAvailable;
-
-	const isTrackingAllowed = useTrackingAllowed();
 
 	const currentTemplate = useSelect(
 		( sel ) =>
@@ -112,7 +110,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 			"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns.",
 			'woocommerce'
 		);
-	} else if ( ! isTrackingAllowed ) {
+	} else if ( ! isTrackingAllowed() ) {
 		notice = __(
 			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
 			'woocommerce'
