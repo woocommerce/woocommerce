@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, Suspense } from '@wordpress/element';
+import { createRoot, useEffect, Suspense } from '@wordpress/element';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 
 // Some blocks take care of rendering their inner blocks automatically. For
@@ -56,19 +56,30 @@ export const renderBlock = <
 	props = {} as BlockProps< TProps, TAttributes >,
 	errorBoundaryProps = {},
 }: RenderBlockParams< TProps, TAttributes > ): void => {
-	render(
-		<BlockErrorBoundary { ...errorBoundaryProps }>
-			<Suspense fallback={ <div className="wc-block-placeholder" /> }>
-				{ Block && <Block { ...props } attributes={ attributes } /> }
-			</Suspense>
-		</BlockErrorBoundary>,
-		container,
-		() => {
+	const BlockWrapper = () => {
+		useEffect( () => {
 			if ( container.classList ) {
 				container.classList.remove( 'is-loading' );
 			}
-		}
-	);
+		}, [] );
+
+		return (
+			<BlockErrorBoundary { ...errorBoundaryProps }>
+				<Suspense
+					fallback={
+						<div className="wc-block-placeholder">Loading...</div>
+					}
+				>
+					{ Block && (
+						<Block { ...props } attributes={ attributes } />
+					) }
+				</Suspense>
+			</BlockErrorBoundary>
+		);
+	};
+
+	const root = createRoot( container );
+	root.render( <BlockWrapper /> );
 };
 
 interface RenderBlockInContainersParams<
