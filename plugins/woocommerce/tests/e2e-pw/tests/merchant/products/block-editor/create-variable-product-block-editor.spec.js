@@ -224,6 +224,8 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 					} );
 				}
 
+				await expect( page.locator( '.is-validating' ) ).toBeHidden();
+
 				await page
 					.locator( '.woocommerce-new-attribute-modal__buttons' )
 					.getByRole( 'button', {
