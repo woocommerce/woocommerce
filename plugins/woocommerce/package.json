@@ -10,7 +10,7 @@
 	},
 	"license": "GPL-3.0+",
 	"scripts": {
-		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\"  --parallel '/^build:project:.*$/'",
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" --parallel '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present --parallel '/^build:project:.*$/'",
 		"build:project:copy-assets": "wireit",
 		"build:zip": "./bin/build-zip.sh",
