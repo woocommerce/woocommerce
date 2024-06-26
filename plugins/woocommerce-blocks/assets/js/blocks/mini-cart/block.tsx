@@ -22,7 +22,6 @@ import {
 } from '@woocommerce/types';
 import {
 	createRoot,
-	unmount,
 	useCallback,
 	useEffect,
 	useRef,
