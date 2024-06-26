@@ -20,13 +20,13 @@
 			"phpunit"
 		],
 		"phpcs": [
-			"XDEBUG_MODE=off phpcs -s -p"
+			"phpcs -s -p"
 		],
 		"phpcs-pre-commit": [
-			"XDEBUG_MODE=off phpcs -s -p -n"
+			"phpcs -s -p -n"
 		],
 		"phpcbf": [
-			"XDEBUG_MODE=off phpcbf -p"
+			"phpcbf -p"
 		]
 	},
 	"extra": {

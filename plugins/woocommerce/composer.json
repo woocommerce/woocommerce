@@ -98,7 +98,7 @@
 			"phpunit"
 		],
 		"phpcs": [
-			"XDEBUG_MODE=off phpcs -s -p"
+			"phpcs -s -p"
 		],
 		"lint": [
 			"chg=$(git diff --relative --name-only -- '*.php'); [[ -z $chg ]] || phpcs-changed -s --git --git-unstaged $chg"
@@ -110,7 +110,7 @@
 			"bash ./bin/lint-branch.sh"
 		],
 		"phpcbf": [
-			"XDEBUG_MODE=off phpcbf -p"
+			"phpcbf -p"
 		],
 		"makepot-audit": [
 			"wp --allow-root i18n make-pot . --include=\"woocommerce.php,client,i18n,includes,lib,packages,patterns,src,templates\" --slug=woocommerce"
