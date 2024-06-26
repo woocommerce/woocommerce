@@ -9,17 +9,17 @@
 
 1. Using `@woocommerce/dependency-extraction-webpack-plugin` in a Webpack configuration: This will allow you to import the function from the package & use it in your code. For example:
 
-```tsx
-import { __experimentalRegisterProductCollection } from "@woocommerce/blocks-registry";
-```
+	```tsx
+	import { __experimentalRegisterProductCollection } from "@woocommerce/blocks-registry";
+	```
 
 2. Using the global `wc` object: This will allow you to use the function using the global JS object without importing it. For example:
 
-```tsx
-wc.wcBlocksRegistry.__experimentalRegisterProductCollection({
-  ...
-});
-```
+	```tsx
+	wc.wcBlocksRegistry.__experimentalRegisterProductCollection({
+	...
+	});
+	```
 
 > [!TIP]
 > The first method is recommended if you are using Webpack.
