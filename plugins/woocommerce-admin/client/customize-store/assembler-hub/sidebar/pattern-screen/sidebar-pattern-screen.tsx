@@ -33,9 +33,18 @@ import { usePatternsByCategory } from '../../hooks/use-patterns';
 import './style.scss';
 import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { PATTERN_CATEGORIES } from './categories';
+import { THEME_SLUG } from '~/customize-store/data/constants';
 
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const { patterns, isLoading } = usePatternsByCategory( category );
+
+	const patternsWithoutThemePatterns = useMemo(
+		() =>
+			patterns.filter(
+				( pattern ) => ! pattern.name.includes( THEME_SLUG )
+			),
+		[ patterns ]
+	);
 
 	const [ patternPagination, setPatternPagination ] = useState( 10 );
 
@@ -132,8 +141,14 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 			) }
 			{ ! isLoading && (
 				<BlockPatternList
-					shownPatterns={ patterns.slice( 0, patternPagination ) }
-					blockPatterns={ patterns.slice( 0, patternPagination ) }
+					shownPatterns={ patternsWithoutThemePatterns.slice(
+						0,
+						patternPagination
+					) }
+					blockPatterns={ patternsWithoutThemePatterns.slice(
+						0,
+						patternPagination
+					) }
 					onClickPattern={ onClickPattern }
 					label={ 'Homepage' }
 					orientation="vertical"
