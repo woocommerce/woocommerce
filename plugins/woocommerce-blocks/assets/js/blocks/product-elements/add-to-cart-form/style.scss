@@ -31,9 +31,12 @@
 // Stepper CSS
 div.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
 	form.cart {
+		&:not(.grouped_form):not(.variations_form) {
+			display: flex;
+		}
+
 		div.wc-block-components-quantity-selector {
 			display: inline-flex;
-			height: 100%;
 			width: unset;
 			background-color: #fff;
 			margin-right: 0.5em;
