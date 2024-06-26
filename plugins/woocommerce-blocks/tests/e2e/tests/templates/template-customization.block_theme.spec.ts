@@ -54,6 +54,17 @@ test.describe( 'Template customization', () => {
 				await expect(
 					page.getByText( userText ).first()
 				).toBeVisible();
+
+				// Verify the edition can be reverted.
+				await admin.visitSiteEditor( {
+					postType: testData.templateType,
+				} );
+				await editor.revertTemplateCustomizations( {
+					templateName: testData.templateName,
+					templateType: testData.templateType,
+				} );
+				await testData.visitPage( { frontendUtils, page } );
+				await expect( page.getByText( userText ) ).toHaveCount( 0 );
 			} );
 
 			if ( testData.fallbackTemplate ) {
@@ -83,6 +94,20 @@ test.describe( 'Template customization', () => {
 					await expect(
 						page.getByText( fallbackTemplateUserText ).first()
 					).toBeVisible();
+
+					// Verify the edition can be reverted.
+					await admin.visitSiteEditor( {
+						postType: testData.templateType,
+					} );
+					await editor.revertTemplateCustomizations( {
+						templateName:
+							testData.fallbackTemplate?.templateName || '',
+						templateType: 'wp_template',
+					} );
+					await testData.visitPage( { frontendUtils, page } );
+					await expect(
+						page.getByText( fallbackTemplateUserText )
+					).toHaveCount( 0 );
 				} );
 			}
 		} );
@@ -158,33 +183,10 @@ test.describe( 'Template customization', () => {
 					postType: testData.templateType,
 				} );
 
-				await page
-					.getByPlaceholder( 'Search' )
-					.fill( testData.templateName );
-
-				const resetNotice = page
-					.getByLabel( 'Dismiss this notice' )
-					.getByText(
-						testData.templateType === 'wp_template'
-							? `"${ testData.templateName }" reset.`
-							: `"${ testData.templateName }" deleted.`
-					);
-				const savedButton = page.getByRole( 'button', {
-					name: 'Saved',
+				await editor.revertTemplateCustomizations( {
+					templateName: testData.templateName,
+					templateType: testData.templateType,
 				} );
-
-				// Wait until search has finished.
-				const searchResults = page.getByLabel( 'Actions' );
-				await expect
-					.poll( async () => await searchResults.count() )
-					.toBeLessThan( CUSTOMIZABLE_WC_TEMPLATES.length );
-
-				await searchResults.first().click();
-				await page.getByRole( 'menuitem', { name: 'Reset' } ).click();
-				await page.getByRole( 'button', { name: 'Reset' } ).click();
-
-				await expect( resetNotice ).toBeVisible();
-				await expect( savedButton ).toBeVisible();
 
 				await testData.visitPage( { frontendUtils, page } );
 
