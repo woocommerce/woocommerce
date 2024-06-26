@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
+import { Fragment, useState } from '@wordpress/element';
 import {
 	Button,
 	Card,
@@ -26,7 +26,6 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
 import { navigateTo, parseAdminUrl } from '@woocommerce/navigation';
-import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -52,7 +51,7 @@ function getUnactionedVisibleAlerts( alerts ) {
 	);
 }
 
-export const StoreAlerts = ( props ) => {
+export const StoreAlerts = () => {
 	const [ currentIndex, setCurrentIndex ] = useState( 0 );
 
 	const {
@@ -236,20 +235,13 @@ export const StoreAlerts = ( props ) => {
 		}
 	}
 
-	const preloadAlertCount = getAdminSetting( 'alertCount', 0, ( count ) =>
-		parseInt( count, 10 )
-	);
-
-	const hasTwoColumns = hasTwoColumnLayout(
-		userPrefs.homepage_layout,
-		defaultHomescreenLayout,
-		taskListComplete,
-		isTaskListHidden
-	);
-
 	if ( isLoadingTaskLists ) {
 		return null;
 	}
+
+	const preloadAlertCount = getAdminSetting( 'alertCount', 0, ( count ) =>
+		parseInt( count, 10 )
+	);
 
 	if ( preloadAlertCount > 0 && isLoading ) {
 		return (
@@ -260,6 +252,13 @@ export const StoreAlerts = ( props ) => {
 	} else if ( alerts.length === 0 ) {
 		return null;
 	}
+
+	const hasTwoColumns = hasTwoColumnLayout(
+		userPrefs.homepage_layout,
+		defaultHomescreenLayout,
+		taskListComplete,
+		isTaskListHidden
+	);
 
 	const numberOfAlerts = alerts.length;
 	const alert = alerts[ currentIndex ];
