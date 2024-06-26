@@ -2,7 +2,7 @@
 /**
  * Title: Social: Follow us on social media
  * Slug: woocommerce-blocks/social-follow-us-in-social-media
- * Categories: WooCommerce
+ * Categories: WooCommerce, social-media
  */
 
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
