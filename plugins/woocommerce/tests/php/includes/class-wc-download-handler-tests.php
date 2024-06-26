@@ -86,10 +86,10 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		$email                   = 'admin@example.org';
-		$product_id              = $product->get_id();
-		$downloads               = $product->get_downloads();
-		$download_keys           = array_keys( $downloads );
+		$email         = 'admin@example.org';
+		$product_id    = $product->get_id();
+		$downloads     = $product->get_downloads();
+		$download_keys = array_keys( $downloads );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		$_GET = array(
