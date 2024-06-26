@@ -7,7 +7,6 @@ import {
 	getBlockType,
 	registerBlockType,
 	unregisterBlockType,
-	parse,
 } from '@wordpress/blocks';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
@@ -19,19 +18,11 @@ import {
 import { Button, Placeholder, Popover } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { box, Icon } from '@wordpress/icons';
-import {
-	useDispatch,
-	subscribe,
-	useSelect,
-	select,
-	dispatch,
-} from '@wordpress/data';
+import { useDispatch, subscribe, useSelect, select } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
 import { useEntityRecord } from '@wordpress/core-data';
-import { debounce } from '@woocommerce/base-utils';
 import { woo } from '@woocommerce/icons';
-import { isNumber } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -296,7 +287,7 @@ const registerClassicTemplateBlock = ( {
 	template,
 	inserter,
 }: {
-	template?: string;
+	template?: string | null;
 	inserter: boolean;
 } ) => {
 	/**
@@ -370,101 +361,83 @@ const registerClassicTemplateBlock = ( {
 	} );
 };
 
-/**
- * Attempts to recover the Classic Template block if it fails to render on the Single Product template
- * due to the user resetting customizations without refreshing the page.
- *
- * When the Classic Template block fails to render, it is replaced by the 'core/missing' block, which
- * displays an error message stating that the WooCommerce Classic template block is unsupported.
- *
- * This function replaces the 'core/missing' block with the original Classic Template block that failed
- * to render, allowing the block to be displayed correctly.
- *
- * @see {@link https://github.com/woocommerce/woocommerce-blocks/issues/9637|Issue: Block error is displayed on clearing customizations for Woo Templates}
- *
- */
-const tryToRecoverClassicTemplateBlockWhenItFailsToRender = debounce( () => {
-	const blocks = select( 'core/block-editor' ).getBlocks();
-	const blocksIncludingInnerBlocks = blocks.flatMap( ( block ) => [
-		block,
-		...block.innerBlocks,
-	] );
-	const classicTemplateThatFailedToRender = blocksIncludingInnerBlocks.find(
-		( block ) =>
-			block.name === 'core/missing' &&
-			block.attributes.originalName === BLOCK_SLUG
-	);
-
-	if ( classicTemplateThatFailedToRender ) {
-		const blockToReplaceClassicTemplateBlockThatFailedToRender = parse(
-			classicTemplateThatFailedToRender.attributes.originalContent
-		);
-		if ( blockToReplaceClassicTemplateBlockThatFailedToRender ) {
-			dispatch( 'core/block-editor' ).replaceBlock(
-				classicTemplateThatFailedToRender.clientId,
-				blockToReplaceClassicTemplateBlockThatFailedToRender
-			);
-		}
-	}
-}, 100 );
-
 // @todo Refactor when there will be possible to show a block according on a template/post with a Gutenberg API. https://github.com/WordPress/gutenberg/pull/41718
-
-let currentTemplateId: string | undefined;
+let previousEditedTemplate: string | number | null = null;
+let isBlockRegistered = false;
+let isBlockInInserter = false;
+const handleRegisterClassicTemplateBlock = ( {
+	template,
+	inserter,
+}: {
+	template: string | null;
+	inserter: boolean;
+} ) => {
+	if ( isBlockRegistered ) {
+		unregisterBlockType( BLOCK_SLUG );
+	}
+	isBlockInInserter = inserter;
+	isBlockRegistered = true;
+	registerClassicTemplateBlock( {
+		template,
+		inserter,
+	} );
+};
 
 subscribe( () => {
-	const previousTemplateId = currentTemplateId;
-	const store = select( 'core/edit-site' );
-	// With GB 16.3.0 the return type can be a number: https://github.com/WordPress/gutenberg/issues/53230
-	const editedPostId = store?.getEditedPostId() as
-		| string
-		| number
-		| undefined;
+	const editorStore = select( 'core/editor' );
+	// We use blockCount to know if we are editing a template or in the navigation.
+	const blockCount = editorStore?.getBlockCount() as number;
+	const templateSlug = editorStore?.getEditedPostSlug() as string | null;
+	const editedTemplate = blockCount && blockCount > 0 ? templateSlug : null;
 
-	currentTemplateId = isNumber( editedPostId ) ? undefined : editedPostId;
+	// Skip if we are in the same template, except if the block hasn't been registered yet.
+	if ( isBlockRegistered && previousEditedTemplate === editedTemplate ) {
+		return;
+	}
+	previousEditedTemplate = editedTemplate;
 
-	const parsedTemplate = currentTemplateId?.split( '//' )[ 1 ];
-
-	if ( parsedTemplate === null || parsedTemplate === undefined ) {
+	// Handle the case when we are not editing a template (ie: in the navigation screen).
+	if ( ! editedTemplate ) {
+		if ( ! isBlockRegistered ) {
+			handleRegisterClassicTemplateBlock( {
+				template: editedTemplate,
+				inserter: false,
+			} );
+		}
 		return;
 	}
 
-	const block = getBlockType( BLOCK_SLUG );
-	const isBlockRegistered = Boolean( block );
+	const templateSupportsClassicTemplateBlock =
+		hasTemplateSupportForClassicTemplateBlock( editedTemplate, TEMPLATES );
 
-	if (
-		isBlockRegistered &&
-		hasTemplateSupportForClassicTemplateBlock( parsedTemplate, TEMPLATES )
-	) {
-		tryToRecoverClassicTemplateBlockWhenItFailsToRender();
-	}
-
-	if ( previousTemplateId === currentTemplateId ) {
+	// Handle the case when we are editing a template that doesn't support the Classic Template block (ie: Blog Home).
+	if ( ! templateSupportsClassicTemplateBlock && isBlockInInserter ) {
+		handleRegisterClassicTemplateBlock( {
+			template: editedTemplate,
+			inserter: false,
+		} );
 		return;
 	}
 
-	if (
-		isBlockRegistered &&
-		( ! hasTemplateSupportForClassicTemplateBlock(
-			parsedTemplate,
-			TEMPLATES
-		) ||
-			isClassicTemplateBlockRegisteredWithAnotherTitle(
-				block,
-				parsedTemplate
-			) )
-	) {
-		unregisterBlockType( BLOCK_SLUG );
-		currentTemplateId = undefined;
+	// Handle the case when we are editing a template that does support the Classic Template block (ie: Product Catalog).
+	if ( templateSupportsClassicTemplateBlock && ! isBlockInInserter ) {
+		handleRegisterClassicTemplateBlock( {
+			template: editedTemplate,
+			inserter: true,
+		} );
 		return;
 	}
 
+	// Handle the case when we are editing a template that does support the Classic Template block but it's currently registered with another title (ie: navigating from the Product Catalog template to the Product Search Results template).
 	if (
-		! isBlockRegistered &&
-		hasTemplateSupportForClassicTemplateBlock( parsedTemplate, TEMPLATES )
+		templateSupportsClassicTemplateBlock &&
+		isClassicTemplateBlockRegisteredWithAnotherTitle(
+			getBlockType( BLOCK_SLUG ),
+			editedTemplate
+		)
 	) {
-		registerClassicTemplateBlock( {
-			template: parsedTemplate,
+		handleRegisterClassicTemplateBlock( {
+			template: editedTemplate,
 			inserter: true,
 		} );
 	}
