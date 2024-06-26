@@ -3,7 +3,7 @@
  * Checkout terms and conditions area.
  *
  * @package WooCommerce\Templates
- * @version 3.4.0
+ * @version 9.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
