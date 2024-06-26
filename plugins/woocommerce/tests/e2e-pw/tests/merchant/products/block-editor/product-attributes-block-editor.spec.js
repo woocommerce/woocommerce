@@ -95,7 +95,7 @@ const test = baseTest.extend( {
 	},
 } );
 
-test.only(
+test(
 	'add local attribute (with terms) to the Product',
 	{ tag: '@gutenberg' },
 	async ( { page, product } ) => {
@@ -158,7 +158,6 @@ test.only(
 			for ( const term of newAttributes ) {
 				const attributeRowLocator = attributeRowsLocator.last();
 
-				// Attribute combobox input
 				const attributeComboboxLocator = attributeRowLocator
 					.locator(
 						'input[aria-describedby^="components-form-token-suggestions-howto-combobox-control"]'
@@ -211,7 +210,7 @@ test.only(
 				await expect( attributeRowLocator ).toBeVisible();
 
 				for ( const term of attribute.terms ) {
-					// Pick the term element/locator by aria-hidden="true"
+					// Pick the term element/locator
 					const termLocator = attributeRowLocator
 						.locator( `[aria-hidden="true"]` )
 						.filter( {
