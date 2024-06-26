@@ -286,7 +286,7 @@ class DefaultShippingPartners {
 				'is_visible'        => array(
 					self::get_rules_for_countries( array( 'US' ) ),
 					(object) array(
-						'type' => 'not',
+						'type'    => 'not',
 						'operand' => array(
 							(object) array(
 								'type'    => 'plugins_activated',
@@ -295,7 +295,7 @@ class DefaultShippingPartners {
 						),
 					),
 					(object) array(
-						'type' => 'not',
+						'type'    => 'not',
 						'operand' => array(
 							(object) array(
 								'type'    => 'plugins_activated',

@@ -955,6 +955,7 @@ class DefaultFreeExtensions {
 		foreach ( $plugins as &$plugin ) {
 			if ( isset( $_plugins[ $plugin['key'] ] ) ) {
 				$plugin = array_merge( $plugin, $_plugins[ $plugin['key'] ] );
+
 				/*
 				 * Removes the "not plugins_activated" rules from the "is_visible"
 				 * ruleset except for the WooCommerce Services plugin.
@@ -978,7 +979,7 @@ class DefaultFreeExtensions {
 				if (
 					isset( $plugin['is_visible'] ) &&
 					is_array( $plugin['is_visible'] ) &&
-					! in_array( $plugin['key'], [ 'woocommerce-services:shipping', 'woocommerce-services:tax' ], true )
+					! in_array( $plugin['key'], array( 'woocommerce-services:shipping', 'woocommerce-services:tax' ), true )
 				) {
 					$plugin['is_visible'] = $remove_plugins_activated_rule( $plugin['is_visible'] );
 				}
