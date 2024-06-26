@@ -739,6 +739,8 @@ class WC_Download_Handler {
 			 * Determines how long the window of time is for tracking unique download attempts, in relation to
 			 * partial (ranged) download requests.
 			 *
+			 * @since 9.2.0
+			 *
 			 * @param int $window_in_seconds      Non-negative number of seconds. Defaults to 1800 (30 minutes).
 			 * @param int $download_permission_id References the download permission being tracked.
 			 */
