@@ -25,7 +25,12 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
-import { navigateTo, parseAdminUrl } from '@woocommerce/navigation';
+import {
+	navigateTo,
+	parseAdminUrl,
+	getScreenFromPath,
+	isWCAdmin,
+} from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -253,6 +258,8 @@ export const StoreAlerts = () => {
 		return null;
 	}
 
+	const isHomescreen = isWCAdmin() && getScreenFromPath() === 'homescreen';
+
 	const hasTwoColumns = hasTwoColumnLayout(
 		userPrefs.homepage_layout,
 		defaultHomescreenLayout,
@@ -266,7 +273,7 @@ export const StoreAlerts = () => {
 	const className = clsx( 'woocommerce-store-alerts', {
 		'is-alert-error': type === 'error',
 		'is-alert-update': type === 'update',
-		'two-columns': hasTwoColumns,
+		'two-columns': hasTwoColumns || ! isHomescreen,
 	} );
 
 	const onDismiss = async ( note ) => {
