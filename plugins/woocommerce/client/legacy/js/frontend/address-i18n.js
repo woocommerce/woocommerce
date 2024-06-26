@@ -15,7 +15,7 @@ jQuery( function( $ ) {
 
 			if ( field.find( 'label .required' ).length === 0 ) {
 				field.find( 'label' ).append(
-					'&nbsp;<abbr class="required" title="' +
+					'&nbsp;<abbr class="required" aria-hidden="true" title="' +
 					wc_address_i18n_params.i18n_required_text +
 					'">*</abbr>'
 				);
