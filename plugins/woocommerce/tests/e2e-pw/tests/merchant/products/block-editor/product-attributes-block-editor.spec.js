@@ -101,12 +101,19 @@ test.only(
 	async ( { page, product } ) => {
 		const newAttributes = [
 			{
-				name: `pa_0_${ Date.now() }`,
-				value: `value_0_${ Date.now() }`,
+				name: 'Color',
+				value: 'color',
+				terms: [ 'Red', 'Blue', 'Green' ],
 			},
 			{
-				name: `pa_1_${ Date.now() }`,
-				value: `value_1_${ Date.now() }`,
+				name: 'Size',
+				value: 'size',
+				terms: [ 'Small', 'Medium', 'Large' ],
+			},
+			{
+				name: 'Style',
+				value: 'style',
+				terms: [ 'Modern', 'Classic', 'Vintage' ],
 			},
 		];
 
@@ -130,53 +137,64 @@ test.only(
 		} );
 
 		await test.step( 'Create local attributes with terms', async () => {
-			// Add attributes that do not exist
-			await page.getByPlaceholder( 'Search or create attribute' ).click();
+			// // Add attributes that do not exist
+			// await page.getByPlaceholder( 'Search or create attribute' ).click();
 
-			// Unless we wait for the list to be visible, the attribute name will be filled too soon and the test will fail.
-			await waitForAttributeList( page );
+			// // Unless we wait for the list to be visible, the attribute name will be filled too soon and the test will fail.
+			// await waitForAttributeList( page );
 
-			await page
-				.getByPlaceholder( 'Search or create attribute' )
-				.fill( newAttributes[ 0 ].name );
-			await page
-				.getByText( `Create "${ newAttributes[ 0 ].name }"` )
-				.click();
+			/*
+			 * AttributeTableRow is the row that contains
+			 * the attribute name and the options (terms).
+			 */
+			const rowSelector = '.woocommerce-new-attribute-modal__table-row';
+			/*
+			 * Check the app loads the attributes,
+			 * based on the Spinner visibility.
+			 */
+			const spinnerLocator = page.locator(
+				`${ rowSelector } .components-spinner`
+			);
+			await spinnerLocator.waitFor( {
+				state: 'visible',
+			} );
+			await spinnerLocator.waitFor( { state: 'hidden' } );
 
-			await page.getByPlaceholder( 'Search or create value' ).click();
-			await page
-				.getByPlaceholder( 'Search or create value' )
-				.fill( newAttributes[ 0 ].value );
-			await page
-				.getByText( `Create "${ newAttributes[ 0 ].value }"` )
-				.click();
+			for ( const term of newAttributes ) {
+				// Attribute/Terms row
+				const attributeRowLocator = page.locator( rowSelector ).last();
 
-			// Add another attribute
-			await page.getByLabel( 'Add another attribute' ).click();
-			await page
-				.getByPlaceholder( 'Search or create attribute' )
-				.nth( 1 )
-				.click();
+				// Attribute combobox input
+				const attributeInputLocator = attributeRowLocator
+					.locator(
+						'input[aria-describedby^="components-form-token-suggestions-howto-combobox-control"]'
+					)
+					.last();
 
-			await waitForAttributeList( page );
+				// Create new (local) product attribute.
+				await attributeInputLocator.fill( term.name );
+				await page.locator( `text=Create "${ term.name }"` ).click();
 
-			await page
-				.getByPlaceholder( 'Search or create attribute' )
-				.nth( 1 )
-				.fill( newAttributes[ 1 ].name );
-			await page
-				.getByText( `Create "${ newAttributes[ 1 ].name }"` )
-				.click();
+				const FormTokenFieldLocator = attributeRowLocator.locator(
+					'td.woocommerce-new-attribute-modal__table-attribute-value-column'
+				);
 
-			await page.getByPlaceholder( 'Search or create value' ).click();
-			await page
-				.getByPlaceholder( 'Search or create value' )
-				.fill( newAttributes[ 1 ].value );
-			await page
-				.getByText( `Create "${ newAttributes[ 1 ].value }"` )
-				.click();
+				// Term FormTokenField input locator
+				const FormTokenFieldInputLocator =
+					FormTokenFieldLocator.locator(
+						'input[id^="components-form-token-input-"]'
+					);
 
-			// Add attributes
+				// Add terms to the attribute.
+				for ( const attributeTerm of term.terms ) {
+					await FormTokenFieldInputLocator.fill( attributeTerm );
+					await FormTokenFieldInputLocator.press( 'Enter' );
+				}
+
+				await page.getByLabel( 'Add another attribute' ).click();
+			}
+
+			// Add the product attributes
 			await page
 				.getByRole( 'button', { name: 'Add attributes' } )
 				.click();
