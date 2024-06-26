@@ -18,6 +18,7 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
  * Internal dependencies
  */
 import { defaultPlaceOrderButtonLabel } from './constants';
+import './editor.scss';
 
 export const Edit = ( {
 	attributes,
