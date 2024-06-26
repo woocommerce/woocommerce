@@ -271,7 +271,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			),
 			'1'
 		);
-		$expected_html = '<p class="form-row validate-required" id="test_field" data-priority=""><span class="woocommerce-input-wrapper"><label class="checkbox " ><input type="checkbox" name="test" id="test" value="1" class="input-checkbox "  checked=\'checked\' aria-required="true" /> Checkbox&nbsp;<abbr class="required" title="required">*</abbr></label></span></p>';
+		$expected_html = '<p class="form-row validate-required" id="test_field" data-priority=""><span class="woocommerce-input-wrapper"><label class="checkbox " ><input type="checkbox" name="test" id="test" value="1" class="input-checkbox "  checked=\'checked\' aria-required="true" /> Checkbox&nbsp;<abbr class="required" aria-hidden="true" title="required">*</abbr></label></span></p>';
 
 		$this->assertEquals( $expected_html, $actual_html );
 	}
