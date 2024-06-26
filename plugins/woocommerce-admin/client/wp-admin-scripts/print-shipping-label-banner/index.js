@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 import { withPluginsHydration } from '@woocommerce/data';
 
 /**
@@ -19,4 +19,7 @@ const HydratedShippingBanner = withPluginsHydration( {
 	...getAdminSetting( 'plugins' ),
 	jetpackStatus: getAdminSetting( 'dataEndpoints', {} ).jetpackStatus,
 } )( ShippingBanner );
-render( <HydratedShippingBanner itemsCount={ args.items } />, metaBox );
+
+createRoot( metaBox ).render(
+	<HydratedShippingBanner itemsCount={ args.items } />
+);
