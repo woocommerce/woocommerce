@@ -21,6 +21,16 @@ runs:
           uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
           with:
               version: ${{ steps.read-pnpm-version.outputs.version }}
+        - name: 'Get PNPM store directory'
+          shell: 'bash'
+          run: |
+              echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+        - name: 'Cache PNPM Dependencies'
+          uses: 'actions/cache@v4'
+          with:
+            path: ${{ env.PNPM_STORE_PATH }}
+            key: "${{ runner.os }}-pnpm-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
+            restore-keys: '${{ runner.os }}-pnpm-'
         - name: 'Setup Node'
           uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
           with:
@@ -35,7 +45,7 @@ runs:
               coverage: 'none'
         - name: 'Cache Composer Dependencies'
           if: ${{ inputs.php-version != 'false' }}
-          uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+          uses: 'actions/cache@v4'
           with:
               path: '~/.cache/composer/files'
               key: "${{ runner.os }}-composer-${{ hashFiles( '**/composer.lock' ) }}"
