@@ -22,7 +22,6 @@ import {
 } from '@wordpress/components';
 import { Icon, settings, menu } from '@wordpress/icons';
 import { getSetting } from '@woocommerce/settings';
-import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
