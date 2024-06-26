@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update Playwright from 1.41.1 to 1.44.1 (latest) and fixed tests

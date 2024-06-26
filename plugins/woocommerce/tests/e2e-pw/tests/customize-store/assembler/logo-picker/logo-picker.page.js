@@ -68,7 +68,6 @@ export class LogoPickerPage {
 
 	async saveLogoSettings( assemblerLocator ) {
 		await assemblerLocator.locator( '[aria-label="Back"]' ).click();
-		await assemblerLocator.getByText( 'Save' ).click();
 		const waitForLogoResponse = this.page.waitForResponse(
 			( response ) =>
 				response.url().includes( 'wp-json/wp/v2/settings' ) &&
@@ -82,6 +81,7 @@ export class LogoPickerPage {
 						'wp-json/wp/v2/template-parts/twentytwentyfour//header'
 					) && response.status() === 200
 		);
+		await assemblerLocator.getByText( 'Save' ).click();
 		await Promise.all( [ waitForLogoResponse, waitForHeaderResponse ] );
 	}
 }
