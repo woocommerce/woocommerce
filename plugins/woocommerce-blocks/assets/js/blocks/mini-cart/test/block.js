@@ -112,8 +112,7 @@ describe( 'Testing Mini-Cart', () => {
 			expect( screen.getByText( /your cart/i ) ).toBeInTheDocument()
 		);
 
-		// The opening of the drawer uses deprecated ReactDOM.render.
-		expect( console ).toHaveErroredWith(
+		expect( console ).not.toHaveErroredWith(
 			`Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot%s`,
 			// The stack trace
 			expect.any( String )
@@ -147,8 +146,7 @@ describe( 'Testing Mini-Cart', () => {
 			).not.toBeInTheDocument();
 		} );
 
-		// The opening of the drawer uses deprecated ReactDOM.render.
-		expect( console ).toHaveErroredWith(
+		expect( console ).not.toHaveErroredWith(
 			`Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot%s`,
 			// The stack trace
 			expect.any( String )
@@ -168,8 +166,7 @@ describe( 'Testing Mini-Cart', () => {
 
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 
-		// The opening of the drawer uses deprecated ReactDOM.render.
-		expect( console ).toHaveErroredWith(
+		expect( console ).not.toHaveErroredWith(
 			`Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot%s`,
 			// The stack trace
 			expect.any( String )
