@@ -104,7 +104,7 @@ jQuery( function ( $ ) {
 		// Remove errors
 		if ( ! preserve_notices ) {
 			$(
-				'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success'
+				'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success, .coupon-error-message'
 			).remove();
 		}
 
@@ -136,10 +136,31 @@ jQuery( function ( $ ) {
 				$( document.body ).trigger( 'update_checkout' );
 			}
 
+			if ( preserve_notices ) {
+				var $new_coupon_field = $( '#coupon_code', $new_form );
+				var $new_coupon_wrapper = $new_coupon_field.closest( '.coupon' );
+				var $coupon_error_msg = $( '#coupon_code' )
+					.closest( '.coupon' )
+					.find( '.coupon-error-message' );
+
+				if ( $new_coupon_wrapper.length === 0 || $coupon_error_msg.length === 0) {
+					return;
+				}
+
+				$new_coupon_field.addClass( 'has-error' );
+				$new_coupon_wrapper.append( $coupon_error_msg );
+			}
+
 			$( '.woocommerce-cart-form' ).replaceWith( $new_form );
 			$( '.woocommerce-cart-form' )
 				.find( ':input[name="update_cart"]' )
 				.prop( 'disabled', true );
+
+			// Focus on the first input with error. 
+			// Likely the coupon field.
+			$( '.woocommerce-cart-form' )
+				.find( 'input.has-error' )
+				.focus();
 
 			if ( $notices.length > 0 ) {
 				show_notice( $notices );
@@ -175,6 +196,23 @@ jQuery( function ( $ ) {
 		}
 		$target.prepend( html_element );
 	};
+
+	/**
+	 * Shows coupon form errors.
+	 *
+	 * @param {string} html_element The HTML string response after applying an invalid coupon.
+	 * @param {Object} $target Coupon field wrapper.
+	 */
+	var show_coupon_error = function ( html_element, $target ) {
+		if ($target.length === 0) {
+			return;
+		}
+
+		var msg = $( $.parseHTML( html_element ) ).text();
+
+		$target.append( '<div class="coupon-error-message" role="alert">' + msg + '<div>' );
+		$target.find( '#coupon_code' ).addClass( 'has-error' );
+	};	
 
 	/**
 	 * Object to handle AJAX calls for cart shipping changes.
@@ -309,6 +347,7 @@ jQuery( function ( $ ) {
 			this.apply_coupon = this.apply_coupon.bind( this );
 			this.remove_coupon_clicked =
 				this.remove_coupon_clicked.bind( this );
+			this.remove_coupon_error = this.remove_coupon_error.bind( this );
 			this.quantity_update = this.quantity_update.bind( this );
 			this.item_remove_clicked = this.item_remove_clicked.bind( this );
 			this.item_restore_clicked = this.item_restore_clicked.bind( this );
@@ -351,6 +390,11 @@ jQuery( function ( $ ) {
 				'change input',
 				'.woocommerce-cart-form .cart_item :input',
 				this.input_changed
+			);
+			$( document ).on(
+				'blur change input',
+				'#coupon_code',
+				this.remove_coupon_error
 			);
 
 			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop(
@@ -512,16 +556,28 @@ jQuery( function ( $ ) {
 				coupon_code: coupon_code,
 			};
 
+			$(
+				'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success, .coupon-error-message'
+			).remove();
+
 			$.ajax( {
 				type: 'POST',
 				url: get_url( 'apply_coupon' ),
 				data: data,
 				dataType: 'html',
 				success: function ( response ) {
-					$(
-						'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success'
-					).remove();
-					show_notice( response );
+					if ( response.indexOf('woocommerce-error') === -1 ) {
+						show_notice( response );						
+					} else {
+						var $coupon_wrapper = $text_field.closest( '.coupon' );
+
+						if ( $coupon_wrapper.length === 0 ) {
+							return;
+						}
+						
+						show_coupon_error( response, $coupon_wrapper );
+					}
+
 					$( document.body ).trigger( 'applied_coupon', [
 						coupon_code,
 					] );
@@ -570,6 +626,19 @@ jQuery( function ( $ ) {
 					cart.update_cart( true );
 				},
 			} );
+		},
+
+		/**
+		 * Handle when the coupon input loses focus.
+		 *
+		 * @param {Object} evt The JQuery event
+		 */
+		remove_coupon_error: function ( evt ) {
+			$( evt.currentTarget )
+				.removeClass( 'has-error' )
+				.closest( '.coupon' )
+				.find( '.coupon-error-message' )
+				.remove();
 		},
 
 		/**
