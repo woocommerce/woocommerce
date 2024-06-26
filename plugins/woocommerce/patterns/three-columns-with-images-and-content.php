@@ -11,7 +11,7 @@ $header        = __( 'Our services', 'woocommerce' );
 $product_title = __( 'Create anything', 'woocommerce' );
 $description   = __( 'Navigating life\'s intricate fabric, choices unfold paths to the extraordinary, demanding creativity, curiosity, and courage for a truly fulfilling journey.', 'woocommerce' );
 $image_0       = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/table-wood-house-chair-floor-window.jpg' );
-$image_1       = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/hand-light-architecture-wood-white-house-89813-pxhere.jpe g' );
+$image_1       = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/hand-light-architecture-wood-white-house-89813-pxhere.jpeg' );
 $image_2       = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/Image-table-wood-chair-stool-interior-restaurant-876054-pxhere.com.jpeg ' );
 
 ?>

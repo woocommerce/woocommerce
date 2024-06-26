@@ -36,7 +36,7 @@ $button_link   = __( 'Get started', 'woocommerce' );
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"is-service-description"} -->
-<p class="is-service-description"><?php echo esc_html( $product_title ); ?></p>
+<p class="is-service-description"><?php echo esc_html( $description ); ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"className":"is-service-link"} -->
@@ -50,7 +50,7 @@ $button_link   = __( 'Get started', 'woocommerce' );
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"is-service-description"} -->
-<p class="is-service-description"><?php echo esc_html( $product_title ); ?></p>
+<p class="is-service-description"><?php echo esc_html( $description ); ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"className":"is-service-link"} -->
@@ -64,7 +64,7 @@ $button_link   = __( 'Get started', 'woocommerce' );
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"is-service-description"} -->
-<p class="is-service-description"><?php echo esc_html( $product_title ); ?></p>
+<p class="is-service-description"><?php echo esc_html( $description ); ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"className":"is-service-link"} -->

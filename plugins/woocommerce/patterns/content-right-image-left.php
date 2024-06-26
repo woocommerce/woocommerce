@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: Content right with image left
- * Slug: woocommerce-blocks/hero-product-split
+ * Slug: woocommerce-blocks/content-right-with-image-left
  * Categories: WooCommerce, About
  */
 

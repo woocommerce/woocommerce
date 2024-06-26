@@ -169,7 +169,7 @@ class PatternRegistry {
 				register_block_pattern_category(
 					$category_slug,
                     // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
-					array( 'label' => __( $category, 'woocommerce' ) )
+					array( 'label' => __( self::kebab_to_capital_case( $category_slug ), 'woocommerce' ) )
 				);
 			}
 		}
@@ -193,5 +193,20 @@ class PatternRegistry {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Convert a kebab-case string to capital case.
+	 *
+	 * @param string $value The kebab-case string.
+	 *
+	 * @return string
+	 */
+	private static function kebab_to_capital_case( $value ) {
+		$string = str_replace( '-', ' ', $value );
+
+		$string = ucwords( $string );
+
+		return $string;
 	}
 }
