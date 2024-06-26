@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.7] - 2024-06-26
+### Removed
+- Remove use of `gutenberg_get_block_template()`. Its replacement has been in WP Core since 5.8. [#38015]
+
 ## [0.1.6] - 2024-05-20
 ### Fixed
 - Customer creation: avoid PHP warnings when other plugins hook into customer creation process and return malformed user data. [#37440]
@@ -39,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix namespace issue with WooCommerce class reference. [#35857]
 - General: bail early when WooCommerce is not active. [#36278]
 
+[0.1.7]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.3...v0.1.4
