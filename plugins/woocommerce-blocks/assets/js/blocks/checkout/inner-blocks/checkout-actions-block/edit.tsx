@@ -25,6 +25,7 @@ export const Edit = ( {
 }: {
 	attributes: {
 		showReturnToCart: boolean;
+		showPrice: boolean;
 		cartPageId: number;
 		placeOrderButtonLabel: string;
 	};
@@ -35,6 +36,7 @@ export const Edit = ( {
 		cartPageId = 0,
 		showReturnToCart = false,
 		placeOrderButtonLabel,
+		showPrice = true,
 	} = attributes;
 	const { current: savedCartPageId } = useRef( cartPageId );
 	const currentPostId = useSelect(
@@ -65,6 +67,18 @@ export const Edit = ( {
 						onChange={ () =>
 							setAttributes( {
 								showReturnToCart: ! showReturnToCart,
+							} )
+						}
+					/>
+					<ToggleControl
+						label={ __(
+							'Show price in the button',
+							'woocommerce'
+						) }
+						checked={ showPrice }
+						onChange={ () =>
+							setAttributes( {
+								showPrice: ! showPrice,
 							} )
 						}
 					/>
