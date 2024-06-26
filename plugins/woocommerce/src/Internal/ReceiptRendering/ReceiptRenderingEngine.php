@@ -200,7 +200,17 @@ class ReceiptRenderingEngine {
 
 		ob_start();
 		include __DIR__ . '/Templates/order-receipt.php';
-		$rendered_template = ob_get_contents();
+		/**
+		 * Filter to customize the rendered receipt template.
+		 *
+		 * @param string   $rendered_template The original rendered template.
+		 * @param array    $data The set of data that is used to render the receipt.
+		 * @param WC_Order $order The order for which the receipt is being generated.
+		 * @return string The updated rendered template.
+		 *
+		 * @since 9.1.0
+		 */
+		$rendered_template = apply_filters( 'woocommerce_printable_order_receipt_rendered_template', ob_get_contents(), $data, $order );
 		ob_end_clean();
 
 		$file_name = $this->transient_files_engine->create_transient_file( $rendered_template, $expiration_date );
