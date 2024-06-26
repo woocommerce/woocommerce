@@ -11,7 +11,7 @@ $header  = __( 'Create anything', 'woocommerce' );
 $content = __( 'Navigating life\'s intricate fabric, choices unfold paths to the extraordinary, demanding creativity, curiosity, and courage for a truly fulfilling journey.', 'woocommerce' );
 $button  = __( 'Get Started', 'woocommerce' );
 
-$image_0 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/sun-glass-vase-green-ceramic-shelf-818097-pxhere.jpeg' );
+$image_0 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/sun-glass-vase-green-ceramic-shelf.jpg' );
 $image_1 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/white-vase-decoration-pattern-ceramic-lamp.jpg' );
 $image_2 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/plant-white-leaf-flower-vase-green.jpg' );
 $image_3 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/tree-branch-plant-wood-leaf-flower.jpg' );
