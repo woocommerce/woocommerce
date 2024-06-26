@@ -186,6 +186,7 @@ export const Toolbar = () => {
 	return (
 		<Popover
 			as="div"
+			animate={ false }
 			className="components-tooltip woocommerce-customize-store_block-toolbar-popover"
 			// @ts-expect-error missing type
 			variant="unstyled"

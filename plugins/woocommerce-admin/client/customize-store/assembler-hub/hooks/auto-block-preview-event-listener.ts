@@ -201,6 +201,7 @@ const updateSelectedBlock = (
 			hoveredBlockClientId: null,
 			clickedBlockClientId: clickedBlockClientId as string,
 		} );
+		( event.target as HTMLElement ).focus();
 	};
 
 	const handleMouseMove = ( event: MouseEvent ) => {
