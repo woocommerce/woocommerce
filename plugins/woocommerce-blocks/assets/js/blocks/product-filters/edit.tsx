@@ -170,18 +170,11 @@ export const Edit = ( {
 					</ToggleGroupControl>
 					{ ( attributes.overlay === 'always' ||
 						attributes.overlay === 'mobile' ) && (
-						<>
-							<img
-								className="wc-block-editor-product-filters__overlay-image"
-								src={ `${ WC_BLOCKS_IMAGE_URL }blocks/product-filters/overlay-preview.svg` }
-								alt={ __( 'Overlay preview', 'woocommerce' ) }
-							/>
-							<p className="wc-block-editor-product-filters__overlay-link">
-								<ExternalLink href={ templatePartEditUri }>
-									{ __( 'Edit overlay', 'woocommerce' ) }
-								</ExternalLink>
-							</p>
-						</>
+						<p className="wc-block-editor-product-filters__overlay-link">
+							<ExternalLink href={ templatePartEditUri }>
+								{ __( 'Edit overlay', 'woocommerce' ) }
+							</ExternalLink>
+						</p>
 					) }
 					{ ( attributes.overlay === 'mobile' ||
 						attributes.overlay === 'always' ) && (
