@@ -337,7 +337,7 @@ export class CheckoutPage {
 		await email.fill( customerBillingDetails.email );
 		await firstName.fill( customerBillingDetails.firstname );
 		await lastName.fill( customerBillingDetails.lastname );
-		await country.fill( customerBillingDetails.country );
+		await country.selectOption( customerBillingDetails.country );
 		await address1.fill( customerBillingDetails.addressfirstline );
 
 		if ( customerBillingDetails.addresssecondline ) {
@@ -407,7 +407,7 @@ export class CheckoutPage {
 
 		await firstName.fill( customerShippingDetails.firstname );
 		await lastName.fill( customerShippingDetails.lastname );
-		await country.fill( customerShippingDetails.country );
+		await country.selectOption( customerShippingDetails.country );
 		await address1.fill( customerShippingDetails.addressfirstline );
 
 		if ( customerShippingDetails.addresssecondline ) {
