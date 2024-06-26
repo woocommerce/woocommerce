@@ -215,6 +215,13 @@ class ProductCollectionPage {
 		await this.refreshLocators( 'editor' );
 	}
 
+	async goToProductCatalogAndInsertCollection( collection: Collections ) {
+		await this.goToTemplateAndInsertCollection(
+			'woocommerce/woocommerce//archive-product',
+			collection
+		);
+	}
+
 	async goToProductCatalogFrontend() {
 		await this.page.goto( '/shop' );
 		await this.refreshLocators( 'frontend' );
