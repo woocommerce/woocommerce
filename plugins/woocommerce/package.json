@@ -10,8 +10,7 @@
 	},
 	"license": "GPL-3.0+",
 	"scripts": {
-		"build:pre": "pnpm --if-present --workspace-concurrency=8 --stream --filter @woocommerce/admin-library --filter @woocommerce/block-library --filter @woocommerce/classic-assets --parallel build",
-		"build": "pnpm --filter $npm_package_name build:pre && pnpm --if-present --workspace-concurrency=8 --stream --filter=\"$npm_package_name...\" --parallel build:project",
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:copy-assets": "wireit",
 		"build:zip": "./bin/build-zip.sh",
