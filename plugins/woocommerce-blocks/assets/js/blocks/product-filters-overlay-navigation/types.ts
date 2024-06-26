@@ -10,7 +10,7 @@ type BorderSide = {
 };
 
 export type BlockAttributes = {
-	navigationStyle: 'full' | 'label' | 'icon';
+	navigationStyle: 'label-and-icon' | 'label-only' | 'icon-only';
 	buttonStyle: string;
 	iconSize?: number;
 	style: {

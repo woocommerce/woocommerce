@@ -13,7 +13,7 @@
 		},
 		"navigationStyle": {
 			"type": "string",
-			"default": "full"
+			"default": "label-and-icon"
 		},
 		"buttonStyle": {
 			"type": "string",

@@ -63,7 +63,7 @@ export const Edit = ( {
 	return (
 		<nav
 			className={ clsx(
-				'wc-block-product-filters-overlay-navigation-wrapper',
+				'wc-block-product-filters-overlay-navigation__wrapper',
 				`is-style-${ buttonStyle }`,
 				{
 					'wp-block-button': buttonStyle !== 'link',
@@ -71,10 +71,10 @@ export const Edit = ( {
 			) }
 		>
 			<div { ...innerBlocksProps }>
-				{ navigationStyle !== 'icon' && (
+				{ navigationStyle !== 'icon-only' && (
 					<span>{ __( 'Close', 'woocommerce' ) }</span>
 				) }
-				{ navigationStyle !== 'label' && (
+				{ navigationStyle !== 'label-only' && (
 					<Icon
 						fill="currentColor"
 						icon={ close }
@@ -98,15 +98,15 @@ export const Edit = ( {
 						options={ [
 							{
 								label: __( 'Label and icon', 'woocommerce' ),
-								value: 'full',
+								value: 'label-and-icon',
 							},
 							{
 								label: __( 'Label only', 'woocommerce' ),
-								value: 'label',
+								value: 'label-only',
 							},
 							{
 								label: __( 'Icon only', 'woocommerce' ),
-								value: 'icon',
+								value: 'icon-only',
 							},
 						] }
 						onChange={ (
@@ -155,16 +155,18 @@ export const Edit = ( {
 						/>
 					) }
 
-					<RangeControl
-						className="wc-block-product-filters-overlay-navigation-icon-size-control"
-						label={ __( 'Icon Size', 'woocommerce' ) }
-						value={ iconSize }
-						onChange={ ( newSize: number ) => {
-							setAttributes( { iconSize: newSize } );
-						} }
-						min={ 0 }
-						max={ 300 }
-					/>
+					{ navigationStyle !== 'label-only' && (
+						<RangeControl
+							className="wc-block-product-filters-overlay-navigation__icon-size-control"
+							label={ __( 'Icon Size', 'woocommerce' ) }
+							value={ iconSize }
+							onChange={ ( newSize: number ) => {
+								setAttributes( { iconSize: newSize } );
+							} }
+							min={ 0 }
+							max={ 300 }
+						/>
+					) }
 				</PanelBody>
 			</InspectorControls>
 		</nav>
