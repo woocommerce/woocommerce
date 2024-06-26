@@ -29,28 +29,31 @@
 }
 
 // Stepper CSS
-.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
-	display: inline-flex;
+div.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
+	form.cart {
+		&:not(.grouped_form):not(.variations_form) {
+			display: flex;
+		}
 
-	.wc-block-components-quantity-selector {
-		height: 100%;
-		width: unset;
-		background-color: #fff;
-		margin-right: 0.5em;
-		margin-bottom: 0;
-	}
-
-	.wc-block-components-quantity-selector__button--plus,
-	.wc-block-components-quantity-selector__button--minus {
-		height: 100%;
+		div.wc-block-components-quantity-selector {
+			display: inline-flex;
+			width: unset;
+			background-color: #fff;
+			margin-right: 0.5em;
+			margin-bottom: 0;
+		}
 	}
 
 	input[type="number"].input-text.qty.text {
 		border: unset;
 		text-align: center;
 		order: 1;
-		padding: unset;
-		height: 100%;
+		/**
+		* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.
+		*
+		* @link https://github.com/woocommerce/woocommerce/blob/95ca53675f2817753d484583c96ca9ab9f725172/plugins/woocommerce/client/legacy/css/woocommerce-blocktheme.scss#L203-L206
+		*/
+		padding: 0.9rem 0;
 		margin-right: unset;
 		font-size: var(--wp--preset--font-size--small);
 	}
@@ -58,8 +61,6 @@
 	// Grouped Product
 	table.woocommerce-grouped-product-list.group_table > tbody {
 		td .wc-block-components-quantity-selector {
-			height: 40px;
-			width: 120px;
 
 			input.input-text.qty.text {
 				min-width: 60px;
@@ -87,7 +88,6 @@
 		display: inline-flex;
 		.input-text {
 			font-size: var(--wp--preset--font-size--small);
-			padding: unset;
 		}
 
 		input[type="number"]::-webkit-inner-spin-button,
@@ -100,7 +100,6 @@
 			margin: 0;
 			border: unset;
 			order: 1;
-			height: 100%;
 		}
 	}
 }
