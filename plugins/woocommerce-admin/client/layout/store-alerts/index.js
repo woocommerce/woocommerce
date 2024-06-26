@@ -55,7 +55,7 @@ export const StoreAlerts = () => {
 	const [ currentIndex, setCurrentIndex ] = useState( 0 );
 
 	const {
-		alerts,
+		alerts = [],
 		isLoading,
 		defaultHomescreenLayout,
 		taskListComplete,
