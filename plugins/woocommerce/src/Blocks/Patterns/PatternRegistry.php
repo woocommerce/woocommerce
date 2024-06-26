@@ -205,8 +205,6 @@ class PatternRegistry {
 	private static function kebab_to_capital_case( $value ) {
 		$string = str_replace( '-', ' ', $value );
 
-		$string = ucwords( $string );
-
 		return $string;
 	}
 }
