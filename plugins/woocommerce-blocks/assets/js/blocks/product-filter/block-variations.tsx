@@ -105,7 +105,7 @@ type Variation = ( typeof variations )[ 0 ] & {
 };
 
 /**
- * Add `isActive` function to all `embed` variations, if not defined.
+ * Add `isActive` function to all Product Filter block variations.
  * `isActive` function is used to find a variation match from a created
  *  Block by providing its attributes.
  */
