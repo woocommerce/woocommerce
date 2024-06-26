@@ -46,8 +46,10 @@ const ALERTS_QUERY = {
 	status: 'unactioned',
 };
 
-function getUnactionedAlerts( alerts ) {
-	return ( alerts || [] ).filter( ( note ) => note.status === 'unactioned' );
+function getUnactionedVisibleAlerts( alerts ) {
+	return ( alerts || [] ).filter(
+		( note ) => note.status === 'unactioned' && note.is_deleted !== true
+	);
 }
 
 export const StoreAlerts = ( props ) => {
@@ -67,7 +69,7 @@ export const StoreAlerts = ( props ) => {
 			select( ONBOARDING_STORE_NAME );
 
 		return {
-			alerts: getUnactionedAlerts( getNotes( ALERTS_QUERY ) ),
+			alerts: getUnactionedVisibleAlerts( getNotes( ALERTS_QUERY ) ),
 			isLoading: ! hasFinishedResolution( 'getNotes', [ ALERTS_QUERY ] ),
 			defaultHomescreenLayout:
 				getOption( 'woocommerce_default_homepage_layout' ) ||
