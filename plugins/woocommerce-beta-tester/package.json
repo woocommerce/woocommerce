@@ -71,7 +71,7 @@
 		"check-engines": "wp-scripts check-engines",
 		"check-licenses": "wp-scripts check-licenses",
 		"format:js": "wp-scripts format-js",
-		"postinstall": "XDEBUG_MODE=off composer install --no-progress --quiet",
+		"postinstall": "XDEBUG_MODE=off composer install",
 		"lint:css": "wp-scripts lint-style",
 		"lint:css:fix": "wp-scripts lint-style --fix",
 		"lint:js": "wp-scripts lint-js",
