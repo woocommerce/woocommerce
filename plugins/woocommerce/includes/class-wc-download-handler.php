@@ -730,6 +730,11 @@ class WC_Download_Handler {
 				return;
 			}
 
+			// Counting of partial downloads may be disabled by the site operator.
+			if ( get_option( 'woocommerce_downloads_count_partial', 'yes' ) !== 'yes' ) {
+				return;
+			}
+
 			/**
 			 * Determines how long the window of time is for tracking unique download attempts, in relation to
 			 * partial (ranged) download requests.
