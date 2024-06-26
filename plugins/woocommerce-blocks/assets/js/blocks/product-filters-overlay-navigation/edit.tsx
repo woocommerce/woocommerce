@@ -1,8 +1,6 @@
 /**
  * External dependencies
  */
-import { useState, useCallback } from '@wordpress/element';
-import { useDebounce } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
 import {
 	useBlockProps,
@@ -16,24 +14,23 @@ import {
 	PanelBody,
 	RadioControl,
 	SelectControl,
+	RangeControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
-import { Icon } from '@wordpress/icons';
+import { Icon, close } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
 import type { BlockAttributes } from './types';
-import SizeControl from './components/size-control';
-import metadata from './block.json';
-import { navigationClose } from './components/icons';
+import './editor.scss';
 
 export const Edit = ( {
 	attributes,
 	setAttributes,
 }: BlockEditProps< BlockAttributes > ) => {
-	const { navigationStyle, buttonStyle, iconSize } = attributes;
+	const { navigationStyle, buttonStyle, iconSize, style } = attributes;
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filters-overlay-navigation', {
 			'wp-block-button__link wp-element-button': buttonStyle !== 'link',
@@ -63,18 +60,6 @@ export const Edit = ( {
 		}
 	);
 
-	const [ iconSizeEditor, setIconSizeEditor ] = useState< string >(
-		iconSize || metadata.attributes.iconSize.default
-	);
-	const setIconSizeAttribute = useCallback(
-		useDebounce( ( value: string ) => {
-			setAttributes( {
-				iconSize: value,
-			} );
-		}, 500 ),
-		[]
-	);
-
 	return (
 		<nav
 			className={ clsx(
@@ -92,14 +77,16 @@ export const Edit = ( {
 				{ navigationStyle !== 'label' && (
 					<Icon
 						fill="currentColor"
-						icon={ navigationClose }
+						icon={ close }
 						style={ {
 							width:
-								iconSizeEditor ||
-								metadata.attributes.iconSize.default,
+								iconSize ||
+								style?.typography?.fontSize ||
+								'16px',
 							height:
-								iconSizeEditor ||
-								metadata.attributes.iconSize.default,
+								iconSize ||
+								style?.typography?.fontSize ||
+								'16px',
 						} }
 					/>
 				) }
@@ -168,18 +155,15 @@ export const Edit = ( {
 						/>
 					) }
 
-					<SizeControl
-						label={ __( 'Icon size', 'woocommerce' ) }
-						onChange={ ( numericSize: number, unit: string ) => {
-							setIconSizeEditor( `${ numericSize }${ unit }` );
-							setIconSizeAttribute( `${ numericSize }${ unit }` );
+					<RangeControl
+						className="wc-block-product-filters-overlay-navigation-icon-size-control"
+						label={ __( 'Icon Size', 'woocommerce' ) }
+						value={ iconSize }
+						onChange={ ( newSize: number ) => {
+							setAttributes( { iconSize: newSize } );
 						} }
-						value={ iconSizeEditor }
-						units={ [
-							{ value: 'px', label: 'px', default: 16 },
-							{ value: 'rem', label: 'rem', default: 1 },
-							{ value: 'em', label: 'em', default: 1 },
-						] }
+						min={ 0 }
+						max={ 300 }
 					/>
 				</PanelBody>
 			</InspectorControls>
