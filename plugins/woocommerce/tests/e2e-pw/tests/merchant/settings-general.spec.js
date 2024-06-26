@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-test.describe( 'WooCommerce General Settings', () => {
+test.describe( 'WooCommerce General Settings', { tag: '@services' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -16,6 +16,28 @@ test.describe( 'WooCommerce General Settings', () => {
 		} );
 	} );
 
+	test( 'Save Changes button is disabled by default and enabled only after changes.', async ( {
+		page,
+	} ) => {
+		await page.goto( 'wp-admin/admin.php?page=wc-settings' );
+
+		// make sure the general tab is active
+		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
+			'General'
+		);
+
+		// See the Save changes button is disabled.
+		await expect( page.locator( 'text=Save changes' ) ).toBeDisabled();
+
+		// Change the base location
+		await page
+			.locator( 'select[name="woocommerce_default_country"]' )
+			.selectOption( 'US:NC' );
+
+		// See the Save changes button is now enabled.
+		await expect( page.locator( 'text=Save changes' ) ).toBeEnabled();
+	} );
+
 	test( 'can update settings', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings' );
 
@@ -23,6 +45,11 @@ test.describe( 'WooCommerce General Settings', () => {
 		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
 			'General'
 		);
+
+		// Set selling location to something different so we can save.
+		await page
+			.locator( '#woocommerce_allowed_countries' )
+			.selectOption( 'all_except' );
 
 		// Set selling location to all countries first so we can
 		// choose California as base location.
@@ -38,6 +65,11 @@ test.describe( 'WooCommerce General Settings', () => {
 		await expect(
 			page.locator( '#woocommerce_allowed_countries' )
 		).toHaveValue( 'all' );
+
+		// set the base location with state NC so we can save.
+		await page
+			.locator( 'select[name="woocommerce_default_country"]' )
+			.selectOption( 'US:NC' );
 
 		// set the base location with state CA.
 		await page
