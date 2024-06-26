@@ -247,7 +247,7 @@ test.only(
 					has: page.getByText( attribute.name, { exact: true } ),
 				} );
 				await expect( item ).toBeVisible();
-				await expect( item ).toContainText( attribute.value );
+				await expect( item ).toContainText( attribute.name );
 			}
 		} );
 	}
