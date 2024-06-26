@@ -38,7 +38,8 @@ __experimentalRegisterProductCollection({
 });
 ```
 
-As you can see in the example above, we are registering a new collection with the name `woocommerce/product-collection/my-custom-collection` & title `My Custom Collection`.
+As you can see in the example above, we are registering a new collection with the name `woocommerce/product-collection/my-custom-collection` & title `My Custom Collection`. Here is screenshot of how it will look like:
+![image](https://github.com/woocommerce/woocommerce/assets/16707866/7fddbc02-a6cd-494e-b2f4-13dd5ef9cf96)
 
 ### Example 2: Register a new collection with a preview
 
@@ -71,6 +72,9 @@ __experimentalRegisterProductCollection({
   },
 });
 ```
+
+Here is how it will look like:
+![image](https://github.com/woocommerce/woocommerce/assets/16707866/5fc1aa20-552a-4e09-b811-08babab46665)
 
 ### Example 3: Advanced usage of preview
 
