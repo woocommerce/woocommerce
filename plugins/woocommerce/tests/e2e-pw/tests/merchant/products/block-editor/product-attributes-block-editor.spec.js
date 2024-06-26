@@ -3,6 +3,7 @@ const {
 } = require( '../../../../fixtures/block-editor-fixtures' );
 const { expect } = require( '../../../../fixtures/fixtures' );
 const { updateProduct } = require( '../../../../utils/product-block-editor' );
+const { clickOnTab } = require( '../../../../utils/simple-products' );
 
 async function waitForAttributeList( page ) {
 	// The list child is different in case there are no results versus when there already are some attributes, so we need to wait for either one to be visible.
@@ -94,8 +95,8 @@ const test = baseTest.extend( {
 	},
 } );
 
-test.skip(
-	'can create and add attributes',
+test.only(
+	'Add local attribute (with terms) to the Product',
 	{ tag: '@gutenberg' },
 	async ( { page, product } ) => {
 		const newAttributes = [
@@ -109,18 +110,26 @@ test.skip(
 			},
 		];
 
-		await test.step( 'go to product editor, Organization tab', async () => {
+		await test.step( 'Go to product editor -> Organization tab -> Click on `Add new`', async () => {
 			await page.goto(
 				`wp-admin/post.php?post=${ product.id }&action=edit`
 			);
-			await page.getByRole( 'tab', { name: 'Organization' } ).click();
-		} );
+			await clickOnTab( 'Organization', page );
 
-		await test.step( 'add new attributes', async () => {
+			await page
+				.getByRole( 'heading', { name: 'Attributes' } )
+				.isVisible();
+
 			await page.getByRole( 'button', { name: 'Add new' } ).click();
 
-			await page.waitForLoadState( 'domcontentloaded' );
+			await page
+				.getByRole( 'heading', { name: 'Add variation options' } )
+				.isVisible();
 
+			await page.waitForLoadState( 'domcontentloaded' );
+		} );
+
+		await test.step( 'Create local attributes with terms', async () => {
 			// Add attributes that do not exist
 			await page.getByPlaceholder( 'Search or create attribute' ).click();
 
