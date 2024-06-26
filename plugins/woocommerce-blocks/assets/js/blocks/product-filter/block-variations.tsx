@@ -2,18 +2,18 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { BlockVariation } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import { BlockAttributes } from './types';
 import { activeFiltersIcon } from './inner-blocks/active-filters/icon';
 import { attributeFilterIcon } from './inner-blocks/attribute-filter/icon';
 import { priceFilterIcon } from './inner-blocks/price-filter/icon';
 import { ratingFilterIcon } from './inner-blocks/rating-filter/icon';
 import { stockStatusFilterIcon } from './inner-blocks/stock-filter/icon';
 
-const variations = [
+const variations: BlockVariation[] = [
 	{
 		name: 'product-filter-active',
 		title: __( 'Active (Experimental)', 'woocommerce' ),
@@ -93,22 +93,13 @@ const variations = [
 	},
 ];
 
-type Variation = ( typeof variations )[ 0 ] & {
-	isActive:
-		| ( (
-				blockAttributes: BlockAttributes,
-				variationAttributes: BlockAttributes
-		  ) => boolean )
-		| string[];
-};
-
 /**
  * Add `isActive` function to all Product Filter block variations.
  * `isActive` function is used to find a variation match from a created
  *  Block by providing its attributes.
  */
-( variations as Variation[] ).forEach( ( variation ) => {
-	variation.isActive = [ 'filterType' ];
+variations.forEach( ( variation ) => {
+	variation.isActive = () => [ 'filterType' ];
 } );
 
 export const blockVariations = variations;
