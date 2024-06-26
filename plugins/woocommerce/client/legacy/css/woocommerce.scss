@@ -1970,6 +1970,18 @@ p.demo_store,
 			padding: 6px 6px 5px;
 			margin: 0 4px 0 0;
 			outline: 0;
+
+			&.has-error:focus {
+				border-color: $red;
+			}
+		}
+
+		td.actions .coupon .coupon-error-message {
+			color: $red;
+			float: none;
+			font-size: 0.75em;
+			text-align: left;
+			width: auto;
 		}
 
 		input {

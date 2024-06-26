@@ -152,6 +152,14 @@
 				.button.alt {
 					float: right;
 				}
+
+				.coupon-error-message {
+					color: $red;
+					float: left;
+					font-size: 0.75em;
+					text-align: left;
+					width: 50%;
+				}
 			}
 
 			.button {
