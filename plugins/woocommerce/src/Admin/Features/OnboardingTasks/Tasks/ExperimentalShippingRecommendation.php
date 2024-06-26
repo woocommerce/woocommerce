@@ -63,8 +63,8 @@ class ExperimentalShippingRecommendation extends Task {
 	 */
 	public function can_view() {
 		return Features::is_enabled( 'shipping-smart-defaults' ) &&
-		       ! PluginsHelper::is_plugin_active( 'woocommerce-shipping' ) &&
-		       ! PluginsHelper::is_plugin_active( 'woocommerce-tax' );
+			! PluginsHelper::is_plugin_active( 'woocommerce-shipping' ) &&
+			! PluginsHelper::is_plugin_active( 'woocommerce-tax' );
 	}
 
 	/**
