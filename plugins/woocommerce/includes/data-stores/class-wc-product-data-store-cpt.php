@@ -1243,7 +1243,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			do_action( 'product_variation_linked', $variation_id );
 
-			$count ++;
+			$count++;
 
 			if ( $limit > 0 && $count >= $limit ) {
 				break;
