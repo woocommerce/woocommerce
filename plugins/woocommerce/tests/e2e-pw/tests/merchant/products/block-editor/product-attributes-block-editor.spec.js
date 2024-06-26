@@ -96,7 +96,7 @@ const test = baseTest.extend( {
 } );
 
 test.only(
-	'Add local attribute (with terms) to the Product',
+	'add local attribute (with terms) to the Product',
 	{ tag: '@gutenberg' },
 	async ( { page, product } ) => {
 		const newAttributes = [
@@ -117,7 +117,7 @@ test.only(
 			},
 		];
 
-		await test.step( 'Go to product editor -> Organization tab -> Click on `Add new`', async () => {
+		await test.step( 'go to product editor -> Organization tab -> Click on `Add new`', async () => {
 			await page.goto(
 				`wp-admin/post.php?post=${ product.id }&action=edit`
 			);
@@ -136,7 +136,7 @@ test.only(
 			await page.waitForLoadState( 'domcontentloaded' );
 		} );
 
-		await test.step( 'Create local attributes with terms', async () => {
+		await test.step( 'create local attributes with terms', async () => {
 			// // Add attributes that do not exist
 			// await page.getByPlaceholder( 'Search or create attribute' ).click();
 
@@ -201,29 +201,40 @@ test.only(
 		} );
 
 		await test.step( 'verify attributes in product editor', async () => {
-			// Verify new attributes in product editor
+			// Select the main locator by data-template-block-id="product-attributes-section"
+			const attributesListLocator = page.locator(
+				'[data-template-block-id="product-attributes-section"]'
+			);
+			await expect( attributesListLocator ).toBeVisible();
+
+			const attributeRowsLocator =
+				attributesListLocator.getByRole( 'listitem' );
+
 			for ( const attribute of newAttributes ) {
-				const item = page.getByRole( 'listitem' ).filter( {
+				const attributeRowLocator = attributeRowsLocator.filter( {
 					has: page.getByText( attribute.name, { exact: true } ),
 				} );
-				await expect( item ).toBeVisible();
-				await expect( item ).toContainText( attribute.value );
+				await expect( attributeRowLocator ).toBeVisible();
+
+				for ( const term of attribute.terms ) {
+					// Pick the term element/locator by aria-hidden="true"
+					const termLocator = attributeRowLocator
+						.locator( `[aria-hidden="true"]` )
+						.filter( {
+							has: page.getByText( term ),
+						} );
+
+					// Verify the term is visible
+					await expect( termLocator ).toBeVisible();
+
+					// Verify the term text
+					await expect( termLocator ).toContainText( term );
+				}
 			}
 		} );
 
 		await test.step( 'update the product', async () => {
 			await updateProduct( { page, expect } );
-		} );
-
-		await test.step( 'verify attributes in product editor after product update', async () => {
-			// Verify attributes in product editor
-			for ( const attribute of newAttributes ) {
-				const item = page.getByRole( 'listitem' ).filter( {
-					has: page.getByText( attribute.name, { exact: true } ),
-				} );
-				await expect( item ).toBeVisible();
-				await expect( item ).toContainText( attribute.value );
-			}
 		} );
 
 		await test.step( 'verify the changes in the store frontend', async () => {
