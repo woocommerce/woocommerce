@@ -2,7 +2,7 @@ export interface ProductFiltersBlockAttributes {
 	productId?: string;
 	setAttributes: ( attributes: ProductFiltersBlockAttributes ) => void;
 	overlay: string;
-	overlayButton: string;
+	overlayIcon: string;
 	overlayButtonStyle: string;
-	overlayButtonSize: number | undefined;
+	overlayIconSize: number | undefined;
 }

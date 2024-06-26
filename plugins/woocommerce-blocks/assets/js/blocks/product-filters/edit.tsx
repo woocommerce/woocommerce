@@ -216,7 +216,7 @@ export const Edit = ( {
 									<ToggleGroupControl
 										className="wc-block-editor-product-filters__overlay-button-toggle"
 										isBlock={ true }
-										value={ attributes.overlayButton }
+										value={ attributes.overlayIcon }
 										onChange={ (
 											value:
 												| 'filter-icon-1'
@@ -225,7 +225,7 @@ export const Edit = ( {
 												| 'filter-icon-4'
 										) => {
 											setAttributes( {
-												overlayButton: value,
+												overlayIcon: value,
 											} );
 										} }
 									>
@@ -295,12 +295,10 @@ export const Edit = ( {
 												'ICON SIZE',
 												'woocommerce'
 											) }
-											value={
-												attributes.overlayButtonSize
-											}
+											value={ attributes.overlayIconSize }
 											onChange={ ( value ) =>
 												setAttributes( {
-													overlayButtonSize: value,
+													overlayIconSize: value,
 												} )
 											}
 											min={ 20 }
