@@ -236,7 +236,8 @@ export class Shipping extends Component {
 		};
 
 		const requiresJetpackConnection =
-			! isJetpackConnected && countryCode === 'US';
+			! isJetpackConnected &&
+			pluginsToActivate.includes( 'woocommerce-services' );
 
 		let steps = [
 			{
