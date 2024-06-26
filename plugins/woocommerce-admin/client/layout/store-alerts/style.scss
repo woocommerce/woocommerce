@@ -77,6 +77,12 @@
 	}
 }
 
+.woocommerce-store-alerts__actions {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
 .woocommerce-embed-page {
 	.woocommerce-store-alerts {
 		left: 0;

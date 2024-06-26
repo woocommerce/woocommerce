@@ -310,8 +310,8 @@ export const StoreAlerts = () => {
 				<Text
 					variant="title.medium"
 					as="h2"
-					size="24"
-					lineHeight="32px"
+					size="18"
+					lineHeight="24px"
 				>
 					{ alert.title }
 				</Text>
