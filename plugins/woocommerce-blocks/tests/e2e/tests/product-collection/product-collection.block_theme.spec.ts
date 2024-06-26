@@ -1174,6 +1174,7 @@ test.describe( 'Product Collection', () => {
 		} );
 	} );
 
+	// Tests for regressions of https://github.com/woocommerce/woocommerce/pull/47994
 	test.describe( 'Product Collection should be visible after Refresh', () => {
 		test( 'Product Collection should be visible after Refresh in a Template', async ( {
 			page,
