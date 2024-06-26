@@ -20,6 +20,10 @@
 				"move": true
 			}
 		},
+		"showPrice": {
+			"type": "boolean",
+			"default": true
+		},
 		"cartPageId": {
 			"type": "number",
 			"default": 0
