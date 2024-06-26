@@ -14,7 +14,7 @@
 			max-width: inherit;
 		}
 
-		@include breakpoint( ">1280px" ) {
+		@include breakpoint(">1280px") {
 			max-width: 1032px;
 		}
 	}
@@ -50,10 +50,6 @@
 			padding: 5px 16px;
 		}
 
-		+ .components-button {
-			margin-left: 10px;
-		}
-
 		&.is-button {
 			color: $gray-700;
 		}
@@ -86,7 +82,7 @@
 		left: 0;
 		width: 100%;
 		max-width: 1032px;
-		
+
 		@include breakpoint("<782px") {
 			left: 0;
 			margin-top: $gap-large;
@@ -216,6 +212,10 @@
 	}
 
 	.woocommerce-store-alerts__actions {
+		display: flex;
+		gap: 10px;
+		flex-wrap: wrap;
+
 		.is-placeholder {
 			width: 110px;
 			height: 26px;
