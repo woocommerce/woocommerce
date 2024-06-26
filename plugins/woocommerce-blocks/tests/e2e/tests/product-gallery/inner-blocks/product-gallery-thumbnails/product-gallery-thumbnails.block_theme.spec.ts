@@ -44,7 +44,9 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 				)
 			).toBeVisible();
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 		} );
 
 		await test.step( 'in frontend', async () => {
@@ -90,7 +92,9 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 
 				await expect( thumbailsBlock ).toBeHidden();
 
-				await editor.saveSiteEditorEntities();
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 			} );
 
 			await test.step( 'in frontend', async () => {
@@ -145,7 +149,9 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 						)
 					).toBeVisible();
 
-					await editor.saveSiteEditorEntities();
+					await editor.saveSiteEditorEntities( {
+						isOnlyCurrentEntityDirty: true,
+					} );
 				} );
 
 				await test.step( 'in frontend', async () => {

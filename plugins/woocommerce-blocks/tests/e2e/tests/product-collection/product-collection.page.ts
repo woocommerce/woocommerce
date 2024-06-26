@@ -201,8 +201,8 @@ class ProductCollectionPage {
 		await this.admin.visitSiteEditor( {
 			postId: template,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await this.editor.enterEditMode();
 		await this.refreshLocators( 'editor' );
 	}
 
@@ -227,8 +227,8 @@ class ProductCollectionPage {
 		await this.admin.visitSiteEditor( {
 			postId: template,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await this.editor.enterEditMode();
 		await this.editor.canvas.locator( 'body' ).click();
 		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
@@ -416,7 +416,7 @@ class ProductCollectionPage {
 
 		// Add new values.
 		for ( const name of filterValue ) {
-			await input.fill( name );
+			await input.pressSequentially( name );
 			await sidebarSettings
 				.getByRole( 'option', { name } )
 				.getByText( name )

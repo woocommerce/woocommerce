@@ -1,18 +1,24 @@
 /**
  * External dependencies
  */
-import { createElement, useEffect, useState } from '@wordpress/element';
+import {
+	createElement,
+	useEffect,
+	useMemo,
+	useState,
+} from '@wordpress/element';
 import { closeSmall } from '@wordpress/icons';
 import {
 	Button,
 	FormTokenField as CoreFormTokenField,
 } from '@wordpress/components';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, select as sel } from '@wordpress/data';
 import { cleanForSlug } from '@wordpress/url';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	type ProductAttributeTerm,
 } from '@woocommerce/data';
+import type { MouseEventHandler } from 'react';
 
 /**
  * Internal dependencies
@@ -23,11 +29,47 @@ import type { AttributeTableRowProps } from './types';
 interface FormTokenFieldProps extends CoreFormTokenField.Props {
 	__experimentalExpandOnFocus: boolean;
 	__experimentalAutoSelectFirstMatch: boolean;
+	__experimentalShowHowTo?: boolean;
 	placeholder: string;
 	label?: string;
 }
 const FormTokenField =
 	CoreFormTokenField as React.ComponentType< FormTokenFieldProps >;
+
+/*
+ * Type copied from core FormTokenField component.
+ * Todo: move to a shared location.
+ */
+interface TokenItem {
+	value: string;
+	status?: 'error' | 'success' | 'validating';
+	title?: string;
+	isBorderless?: boolean;
+	onMouseEnter?: MouseEventHandler< HTMLSpanElement >;
+	onMouseLeave?: MouseEventHandler< HTMLSpanElement >;
+}
+
+/**
+ * Convert a string or a TokenItem to a TokenItem.
+ *
+ * @param {string | TokenItem} v - The value to convert.
+ * @return {TokenItem} The TokenItem.
+ */
+const stringToTokenItem = ( v: string | TokenItem ): TokenItem => ( {
+	value: typeof v === 'string' ? v : v.value,
+} );
+
+/**
+ * Convert a string or a TokenItem to a string.
+ *
+ * @param {string | TokenItem} item - The item to convert.
+ * @return {string} The string.
+ */
+const tokenItemToString = ( item: string | TokenItem ): string =>
+	typeof item === 'string' ? item : item.value;
+
+const INITIAL_MAX_TOKENS_TO_SHOW = 20;
+const MAX_TERMS_TO_LOAD = 100;
 
 export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	index,
@@ -49,11 +91,23 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	onRemove,
 } ) => {
 	const attributeId = attribute ? attribute.id : undefined;
+	const { createProductAttributeTerm } = useDispatch(
+		EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+	);
+	const selectItemsQuery = useMemo(
+		() => ( {
+			search: '',
+			attribute_id: attributeId,
+			per_page: MAX_TERMS_TO_LOAD, // @todo: handle this by using `search` arg
+		} ),
+		[ attributeId ]
+	);
 
-	const { createProductAttributeTerm, invalidateResolutionForStoreSelector } =
-		useDispatch( EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME );
-
-	const { terms } = useSelect(
+	/*
+	 * Get the terms for the current attribute,
+	 * used in the token field suggestions and values.
+	 */
+	const terms = useSelect(
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		( select: WCDataSelector ) => {
@@ -61,55 +115,75 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
 			);
 
-			return {
-				terms: attributeId
-					? ( getProductAttributeTerms( {
-							search: '',
-							attribute_id: attributeId,
-					  } ) as ProductAttributeTerm[] )
-					: [],
-			};
+			return attributeId
+				? ( getProductAttributeTerms(
+						selectItemsQuery
+				  ) as ProductAttributeTerm[] )
+				: [];
 		},
-		[ attributeId ]
+		[ attributeId, selectItemsQuery ]
 	);
 
-	/**
+	/*
 	 * Local terms to handle not global attributes.
 	 * Set initially with the attribute options.
 	 */
-	const [ localTerms, setLocalTerms ] = useState< string[] | undefined >(
-		attribute?.options
+	const [ localTerms, setLocalTerms ] = useState< TokenItem[] >(
+		attribute?.options?.map( stringToTokenItem ) || []
 	);
+
+	/**
+	 * Use the temporary terms to store and show
+	 * the new terms on the fly,
+	 * before they are created by hitting the API.
+	 */
+	const [ temporaryTerms, setTemporaryTerms ] = useState< TokenItem[] >( [] );
 
 	// By convention, it's a global attribute if the attribute ID is 0.
 	const isGlobalAttribute = attribute?.id === 0;
 
 	/*
-	 * Set initially the the FormTokenField suggestions
-	 * with the attribute options (localTerms), but
-	 * if it's not a global attribute
-	 * set the suggestions with the terms names.
+	 * When isGlobalAttribute is true, allTerms is the localTerms,
+	 * otherwise, it is the attribute terms (mapped to their names)
 	 */
-	const suggestions = isGlobalAttribute
-		? localTerms
-		: terms?.map( ( term: ProductAttributeTerm ) => term.name );
+	const allTerms =
+		( isGlobalAttribute
+			? localTerms.map( tokenItemToString )
+			: terms?.map( ( term: ProductAttributeTerm ) => term.name ) ) || [];
 
 	/*
-	 * Build selected options object from the attribute,
-	 * used to populate the token field.
-	 * When the attribute is global, uses straigh the attribute options.
-	 * Otherwise, maps the terms to their names.
+	 * For `suggestions` (the values of the FormTokenField component),
+	 * combine the temporary terms with the attribute options or terms,
+	 * removing duplicates.
 	 */
-	const selectedValues = isGlobalAttribute
-		? attribute.options
-		: attribute?.terms?.map( ( option ) => option.name );
+	const tokenFieldSuggestions = [
+		...( allTerms || [] ),
+		...temporaryTerms.map( tokenItemToString ),
+	].filter( ( value, i, self ) => self.indexOf( value ) === i );
+
+	/*
+	 * Build attribute terms object from the attribute,
+	 * used to populate the token field.
+	 * When the attribute is global, uses straight the attribute options.
+	 * Otherwise, uses the (mapped) attribute terms.
+	 */
+	const attributeTerms =
+		( isGlobalAttribute
+			? attribute.options?.map( stringToTokenItem )
+			: attribute?.terms?.map( ( { name } ) =>
+					stringToTokenItem( name )
+			  ) ) || [];
+
+	// Combine the temporary terms with the selected values.
+	const tokenFieldValues: TokenItem[] = [
+		...( attributeTerms || [] ),
+		...temporaryTerms,
+	];
 
 	// Flag to track if the terms are initially populated.
 	const [ initiallyPopulated, setInitiallyPopulated ] = useState( false );
 
-	/*
-	 * Auto select terms based on the termsAutoSelection prop.
-	 */
+	// Auto select terms based on the termsAutoSelection prop.
 	useEffect( () => {
 		// If the terms are not set, bail early.
 		if ( ! termsAutoSelection ) {
@@ -143,8 +217,12 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 			return onTermsSelect( [ terms[ 0 ] ], index, attribute );
 		}
 
-		// auto select all terms
-		onTermsSelect( terms, index, attribute );
+		// auto select the first INITIAL_MAX_TOKENS_TO_SHOW terms
+		onTermsSelect(
+			terms.slice( 0, INITIAL_MAX_TOKENS_TO_SHOW ),
+			index,
+			attribute
+		);
 	}, [
 		termsAutoSelection,
 		initiallyPopulated,
@@ -166,37 +244,64 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		);
 	} );
 
-	async function addNewTerms(
-		termNames: string[],
-		selectedTerms: ProductAttributeTerm[]
-	) {
+	async function addNewTerms( newTokens: TokenItem[] ) {
 		if ( ! attribute ) {
 			return;
 		}
 
+		/*
+		 * Create the temporary terms.
+		 * It will show the tokens in the token field
+		 * optimistically, before the terms are created.
+		 */
+		setTemporaryTerms( ( prevTerms ) => [ ...prevTerms, ...newTokens ] );
+
 		// Create the new terms.
-		const promises = termNames.map( async ( termName ) => {
-			const newTerm = ( await createProductAttributeTerm( {
-				name: termName,
-				slug: cleanForSlug( termName ),
-				attribute_id: attributeId,
-			} ) ) as ProductAttributeTerm;
+		const promises = newTokens.map( async ( token ) => {
+			const newTerm = ( await createProductAttributeTerm(
+				{
+					name: token.value,
+					slug: cleanForSlug( token.value ),
+					attribute_id: attributeId,
+				},
+				{
+					optimisticQueryUpdate: selectItemsQuery,
+					optimisticUrlParameters: [ attributeId ],
+				}
+			) ) as ProductAttributeTerm;
 
 			return newTerm;
 		} );
 
-		const newItems = await Promise.all( promises );
+		const newTerms = await Promise.all( promises );
+
+		// Remove the recently created terms from the temporary state,
+		setTemporaryTerms( ( prevTerms ) =>
+			prevTerms.filter( ( term ) => ! newTokens.includes( term ) )
+		);
 
 		/*
-		 * Refresh attribute terms, invalidating the resolution
-		 * to include the newly created terms.
-		 * ToDo: Implement it optimally.
+		 * Pull the recent terms list from the store
+		 * to get the terms that were just created.
+		 * @Todo: using this `sel` alias is a workaround.
+		 * The optimistic rendering should be implemented in the store.
 		 */
-		invalidateResolutionForStoreSelector( 'getProductAttributeTerms', [
-			{ search: '', attribute_id: attributeId },
-		] );
+		const recentTermsList = sel(
+			EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+		).getProductAttributeTerms(
+			selectItemsQuery
+		) as ProductAttributeTerm[];
 
-		onTermsSelect( [ ...selectedTerms, ...newItems ], index, attribute );
+		/*
+		 * New selected terms are the ones that are in the recent terms list
+		 * and also in the token field values.
+		 */
+		const newSelectedTerms = recentTermsList.filter( ( term ) =>
+			tokenFieldValues.map( ( item ) => item.value ).includes( term.name )
+		);
+
+		// Call the callback to update the Form terms.
+		onTermsSelect( [ ...newSelectedTerms, ...newTerms ], index, attribute );
 	}
 
 	/*
@@ -205,8 +310,8 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	 * comparing the suggestions length with the selected values length.
 	 */
 	const hasAvailableSuggestions =
-		suggestions?.length &&
-		suggestions.length > ( selectedValues?.length || 0 );
+		tokenFieldSuggestions?.length &&
+		tokenFieldSuggestions.length > ( tokenFieldValues?.length || 0 );
 
 	return (
 		<tr
@@ -243,39 +348,43 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 				<FormTokenField
 					placeholder={ termPlaceholder }
 					disabled={ ! attribute }
-					suggestions={ suggestions }
-					value={ selectedValues }
-					onChange={ ( newSelectedTerms: string[] ) => {
+					suggestions={ tokenFieldSuggestions }
+					value={ tokenFieldValues }
+					onChange={ ( nextTokens: ( TokenItem | string )[] ) => {
 						if ( ! attribute ) {
 							return;
 						}
 
-						/*
-						 * Extract new terms (string[]) from the selected terms,
-						 * by extracting the terms that are not in the suggestions.
-						 * If the new terms are not in the suggestions, they are new ones.
-						 */
-						const newStringTerms = newSelectedTerms.filter(
-							( term ) => ! suggestions?.includes( term )
-						);
+						// Create a new strings array with the new selected tokens,
+						const nextStringTokens =
+							nextTokens.map( tokenItemToString );
 
 						/*
-						 * Selected terms are the selected ones when it is a global attribute,
-						 * otherwise, the selected terms are the terms that are in ProductAttributeTerm[].
+						 * Create an array with the new tokens to add,
+						 * filtering the new selected ones that are not in the
+						 * suggestions array.
 						 */
+						const newTokens = nextStringTokens
+							.filter(
+								( t ) => ! tokenFieldSuggestions.includes( t )
+							)
+							.map( stringToTokenItem );
+
+						// Selected Terms to pass to the Form.
 						const selectedTerms = isGlobalAttribute
-							? newSelectedTerms
-							: terms.filter( ( term ) =>
-									newSelectedTerms.includes( term.name )
+							? nextStringTokens
+							: terms?.filter( ( term ) =>
+									nextStringTokens.includes( term.name )
 							  );
 
+						// Call the callback to update the Form terms.
 						onTermsSelect( selectedTerms, index, attribute );
 
 						// If it is a global attribute, set the local terms.
 						if ( isGlobalAttribute ) {
-							return setLocalTerms( ( prevTerms = [] ) => [
+							return setLocalTerms( ( prevTerms ) => [
 								...prevTerms,
-								...newStringTerms,
+								...newTokens,
 							] );
 						}
 
@@ -283,15 +392,18 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 						 * Create new terms, in case there are any,
 						 * when it is not a global attribute.
 						 */
-						if ( newStringTerms.length ) {
+						if ( newTokens.length ) {
 							addNewTerms(
-								newStringTerms,
-								selectedTerms as ProductAttributeTerm[]
+								newTokens.map( ( item ) => ( {
+									...item,
+									status: 'validating',
+								} ) )
 							);
 						}
 					} }
 					__experimentalExpandOnFocus={ true }
 					__experimentalAutoSelectFirstMatch={ true }
+					__experimentalShowHowTo={ true }
 				/>
 			</td>
 			<td className="woocommerce-new-attribute-modal__table-attribute-trash-column">

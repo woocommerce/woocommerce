@@ -129,7 +129,7 @@ Other repository examples:
 - Storefront Theme - ```WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content/themes/storefront npx wc-e2e docker:up```
 - Site Project - ```WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content npx wc-e2e docker:up```
 
-Since the introduction of the WooCommerce Monorepo, a `WC_CORE_PATH` environment variable maps to Core WooCommerce at `plugins/woocommerce`. It can also be overriden in a similar fashion.
+Since the introduction of the WooCommerce Monorepo, a `WC_CORE_PATH` environment variable maps to Core WooCommerce at `plugins/woocommerce`. It can also be overridden in a similar fashion.
 
 ### Specifying Server Software versions
 
