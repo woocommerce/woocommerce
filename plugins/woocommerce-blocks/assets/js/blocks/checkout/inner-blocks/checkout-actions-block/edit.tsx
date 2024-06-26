@@ -50,6 +50,10 @@ export const Edit = ( {
 		[ savedCartPageId ]
 	);
 
+	const buttonLabel = `${ placeOrderButtonLabel } · ${
+		showPrice ? '£20.99' : ''
+	}`;
+
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
@@ -138,7 +142,18 @@ export const Edit = ( {
 								placeOrderButtonLabel: content,
 							} );
 						} }
-					/>
+					>
+						{ showPrice && (
+							<div className="wc-block-components-checkout-place-order-button__separator">
+								·
+							</div>
+						) }
+						{ showPrice && (
+							<div className="wc-block-components-checkout-place-order-button__price">
+								£20.99
+							</div>
+						) }
+					</EditableButton>
 				</div>
 			</div>
 		</div>
