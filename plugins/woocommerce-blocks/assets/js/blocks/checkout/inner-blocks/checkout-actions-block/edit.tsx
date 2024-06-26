@@ -125,6 +125,10 @@ export const Edit = ( {
 							{
 								'wc-block-components-checkout-place-order-button--full-width':
 									! showReturnToCart,
+							},
+							{
+								'wc-block-components-checkout-place-order-button--with-price':
+									showPrice,
 							}
 						) }
 						value={ placeOrderButtonLabel }
