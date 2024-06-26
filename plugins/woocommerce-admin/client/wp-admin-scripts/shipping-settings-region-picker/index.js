@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, createRoot } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -24,9 +24,5 @@ const ShippingApp = () => (
 );
 
 if ( shippingZoneRegionPickerRoot ) {
-	if ( createRoot ) {
-		createRoot( shippingZoneRegionPickerRoot ).render( <ShippingApp /> );
-	} else {
-		render( <ShippingApp />, shippingZoneRegionPickerRoot );
-	}
+	createRoot( shippingZoneRegionPickerRoot ).render( <ShippingApp /> );
 }
