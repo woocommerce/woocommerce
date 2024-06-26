@@ -360,10 +360,15 @@ export class CheckoutPage {
 			} );
 			const county = billingForm.getByLabel( 'County' );
 
-			await state
-				.or( province )
-				.or( county )
-				.fill( customerBillingDetails.state );
+			const elementToFill = state.or( province ).or( county );
+			const tagName = await elementToFill.getAttribute( 'tagName' );
+			if ( tagName === 'select' ) {
+				await elementToFill.selectOption(
+					customerBillingDetails.state
+				);
+			} else {
+				await elementToFill.fill( customerBillingDetails.state );
+			}
 		}
 
 		if ( customerBillingDetails.postcode ) {
