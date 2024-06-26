@@ -7,13 +7,11 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { BlockAttributes } from './types';
-import {
-	activeFiltersIcon,
-	attributeFilterIcon,
-	priceFilterIcon,
-	ratingFilterIcon,
-	stockStatusFilterIcon,
-} from './icon';
+import { activeFiltersIcon } from './inner-blocks/active-filters/icon';
+import { attributeFilterIcon } from './inner-blocks/attribute-filter/icon';
+import { priceFilterIcon } from './inner-blocks/price-filter/icon';
+import { ratingFilterIcon } from './inner-blocks/rating-filter/icon';
+import { stockStatusFilterIcon } from './inner-blocks/stock-filter/icon';
 
 const variations = [
 	{
