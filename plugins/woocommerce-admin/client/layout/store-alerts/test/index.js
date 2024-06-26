@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, fireEvent } from '@testing-library/react';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -30,8 +31,6 @@ const alerts = [
 		],
 	},
 ];
-
-import { useSelect } from '@wordpress/data';
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
