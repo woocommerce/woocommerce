@@ -102,17 +102,15 @@ test.only(
 		const newAttributes = [
 			{
 				name: 'Color',
-				value: 'color',
+
 				terms: [ 'Red', 'Blue', 'Green' ],
 			},
 			{
 				name: 'Size',
-				value: 'size',
 				terms: [ 'Small', 'Medium', 'Large' ],
 			},
 			{
 				name: 'Style',
-				value: 'style',
 				terms: [ 'Modern', 'Classic', 'Vintage' ],
 			},
 		];
