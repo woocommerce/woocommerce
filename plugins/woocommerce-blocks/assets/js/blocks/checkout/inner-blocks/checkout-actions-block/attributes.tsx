@@ -10,7 +10,7 @@ export default {
 	},
 	showReturnToCart: {
 		type: 'boolean',
-		default: true,
+		default: false,
 	},
 	className: {
 		type: 'string',

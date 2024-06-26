@@ -45,7 +45,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '9.1.0';
+	public $version = '9.2.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -229,7 +229,9 @@ final class WooCommerce {
 			'connection',
 			array(
 				'slug' => 'woocommerce',
-				'name' => __( 'WooCommerce', 'woocommerce' ),
+				// Cannot use __() here because it would cause translations to be loaded too early.
+				// See https://github.com/woocommerce/woocommerce/pull/47113.
+				'name' => 'WooCommerce',
 			)
 		);
 	}

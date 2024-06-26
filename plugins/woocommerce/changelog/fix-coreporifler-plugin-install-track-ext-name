@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Update plugin installation error logger to use plugin track key for extension name
