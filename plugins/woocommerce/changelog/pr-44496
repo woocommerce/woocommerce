@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix for the dependency injection container resolution by tag

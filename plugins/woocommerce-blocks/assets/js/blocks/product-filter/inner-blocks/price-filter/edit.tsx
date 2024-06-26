@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useBlockProps } from '@wordpress/block-editor';
-import classNames from 'classnames';
+import { Disabled } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -12,18 +12,14 @@ import { PriceSlider } from './components/price-slider';
 import { Inspector } from './components/inspector';
 
 const Edit = ( props: EditProps ) => {
-	const { showInputFields, inlineInput } = props.attributes;
-
-	const blockProps = useBlockProps( {
-		className: classNames( {
-			'inline-input': inlineInput && showInputFields,
-		} ),
-	} );
+	const blockProps = useBlockProps();
 
 	return (
 		<div { ...blockProps }>
 			<Inspector { ...props } />
-			<PriceSlider { ...props } />
+			<Disabled>
+				<PriceSlider { ...props } />
+			</Disabled>
 		</div>
 	);
 };

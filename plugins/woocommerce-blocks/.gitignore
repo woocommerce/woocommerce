@@ -48,6 +48,8 @@ tests/cli/vendor
 /artifacts/
 /playwright-report/
 **/e2e/.auth
+**/e2e/bin/themes/*.zip
+**/e2e/utils/performance/reports/
 
 # Logs
 /logs

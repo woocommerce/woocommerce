@@ -100,7 +100,7 @@ This selector will return the state from the collections store.
 
 #### _Returns_ <!-- omit in toc -->
 
--   `object`: The state from the collections storew ith the following properties:
+-   `object`: The state from the collections store with the following properties:
    	- _namespace_ `string`: The route namespace for the collection, eg. `/wc/blocks`.
     - _resourceName_ `string`: The resource name for the collection, eg. `products/attributes`.
     - _query_ `object`: The query arguments for the collection, eg. `{ order: 'ASC', sortBy: Price }`.
@@ -196,7 +196,7 @@ const lastModified = store.getCollectionLastModified( state, namespace, resource
 
 ---
 
-[We're hiring!](https://woo.com/careers/) Come work with us!
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/blocks/feature-flags-and-experimental-interfaces.md)
 

@@ -13,11 +13,11 @@
 		width: 100%;
 	}
 
-	@include breakpoint('782px-960px') {
+	@include breakpoint("782px-960px") {
 		width: calc(100% - 36px);
 	}
 
-	@include breakpoint('<782px') {
+	@include breakpoint("<782px") {
 		flex-flow: row wrap;
 		width: 100%;
 	}

@@ -4,7 +4,7 @@
 	"title": "Product Image Gallery",
 	"icon": "gallery",
 	"description": "Display a product's images.",
-	"category": "woocommerce",
+	"category": "woocommerce-product-elements",
 	"supports": {
 		"align": true,
 		"multiple": false

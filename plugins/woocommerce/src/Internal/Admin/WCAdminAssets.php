@@ -98,15 +98,22 @@ class WCAdminAssets {
 	}
 
 	/**
-	 * Gets the file modified time as a cache buster if we're in dev mode, or the plugin version otherwise.
+	 * Gets the file modified time as a cache buster if we're in dev mode,
+	 * or the asset version (file content hash) if exists, or the WooCommerce version.
 	 *
-	 * @param string $ext File extension.
+	 * @param string      $ext File extension.
+	 * @param string|null $asset_version Optional. The version from the asset file.
 	 * @return string The cache buster value to use for the given file.
 	 */
-	public static function get_file_version( $ext ) {
+	public static function get_file_version( $ext, $asset_version = null ) {
 		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
 			return filemtime( WC_ADMIN_ABSPATH . self::get_path( $ext ) );
 		}
+
+		if ( ! empty( $asset_version ) ) {
+			return $asset_version;
+		}
+
 		return WC_VERSION;
 	}
 
@@ -253,9 +260,7 @@ class WCAdminAssets {
 			return;
 		}
 
-		$js_file_version  = self::get_file_version( 'js' );
-		$css_file_version = self::get_file_version( 'css' );
-
+		// Register the JS scripts.
 		$scripts = array(
 			'wc-admin-layout',
 			'wc-explat',
@@ -299,6 +304,7 @@ class WCAdminAssets {
 			try {
 				$script_assets_filename = self::get_script_asset_filename( $script_path_name, 'index' );
 				$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/' . $script_assets_filename;
+				$script_version         = self::get_file_version( 'js', $script_assets['version'] );
 
 				global $wp_version;
 				if ( 'app' === $script_path_name && version_compare( $wp_version, '6.3', '<' ) ) {
@@ -320,13 +326,24 @@ class WCAdminAssets {
 				wp_register_script(
 					$script,
 					self::get_url( $script_path_name . '/index', 'js' ),
-					$script_assets ['dependencies'],
-					$js_file_version,
+					$script_assets['dependencies'],
+					$script_version,
 					true
 				);
 
 				if ( in_array( $script, $translated_scripts, true ) ) {
 					wp_set_script_translations( $script, 'woocommerce' );
+				}
+
+				if ( WC_ADMIN_APP === $script ) {
+					wp_localize_script(
+						WC_ADMIN_APP,
+						'wcAdminAssets',
+						array(
+							'path'    => plugins_url( self::get_path( 'js' ), WC_ADMIN_PLUGIN_FILE ),
+							'version' => $script_version,
+						)
+					);
 				}
 			} catch ( \Exception $e ) {
 				// Avoid crashing WordPress if an asset file could not be loaded.
@@ -334,78 +351,58 @@ class WCAdminAssets {
 			}
 		}
 
-		wp_register_style(
-			'wc-admin-layout',
-			self::get_url( 'admin-layout/style', 'css' ),
-			array(),
-			$css_file_version
-		);
-		wp_style_add_data( 'wc-admin-layout', 'rtl', 'replace' );
-
-		wp_register_style(
-			'wc-components',
-			self::get_url( 'components/style', 'css' ),
-			array(),
-			$css_file_version
-		);
-		wp_style_add_data( 'wc-components', 'rtl', 'replace' );
-
-		wp_register_style(
-			'wc-block-templates',
-			self::get_url( 'block-templates/style', 'css' ),
-			array(),
-			$css_file_version
-		);
-		wp_style_add_data( 'wc-block-templates', 'rtl', 'replace' );
-
-		wp_register_style(
-			'wc-product-editor',
-			self::get_url( 'product-editor/style', 'css' ),
-			array(),
-			$css_file_version
-		);
-		wp_style_add_data( 'wc-product-editor', 'rtl', 'replace' );
-
-		wp_register_style(
-			'wc-customer-effort-score',
-			self::get_url( 'customer-effort-score/style', 'css' ),
-			array(),
-			$css_file_version
-		);
-		wp_style_add_data( 'wc-customer-effort-score', 'rtl', 'replace' );
-
-		wp_register_style(
-			'wc-experimental',
-			self::get_url( 'experimental/style', 'css' ),
-			array(),
-			$css_file_version
-		);
-		wp_style_add_data( 'wc-experimental', 'rtl', 'replace' );
-
-		wp_localize_script(
-			WC_ADMIN_APP,
-			'wcAdminAssets',
+		// Register the CSS styles.
+		$styles = array(
 			array(
-				'path'    => plugins_url( self::get_path( 'js' ), WC_ADMIN_PLUGIN_FILE ),
-				'version' => $js_file_version,
-			)
+				'handle' => 'wc-admin-layout',
+			),
+			array(
+				'handle' => 'wc-components',
+			),
+			array(
+				'handle' => 'wc-block-templates',
+			),
+			array(
+				'handle' => 'wc-product-editor',
+			),
+			array(
+				'handle' => 'wc-customer-effort-score',
+			),
+			array(
+				'handle' => 'wc-experimental',
+			),
+			array(
+				'handle'       => WC_ADMIN_APP,
+				'dependencies' => array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wc-product-editor', 'wp-components', 'wc-experimental' ),
+			),
+			array(
+				'handle' => 'wc-onboarding',
+			),
 		);
 
-		wp_register_style(
-			WC_ADMIN_APP,
-			self::get_url( 'app/style', 'css' ),
-			array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wc-product-editor', 'wp-components', 'wc-experimental' ),
-			$css_file_version
-		);
-		wp_style_add_data( WC_ADMIN_APP, 'rtl', 'replace' );
+		$css_file_version = self::get_file_version( 'css' );
+		foreach ( $styles as $style ) {
+			$handle          = $style['handle'];
+			$style_path_name = isset( $scripts_map[ $handle ] ) ? $scripts_map[ $handle ] : str_replace( 'wc-', '', $handle );
 
-		wp_register_style(
-			'wc-onboarding',
-			self::get_url( 'onboarding/style', 'css' ),
-			array(),
-			$css_file_version
-		);
-		wp_style_add_data( 'wc-onboarding', 'rtl', 'replace' );
+			try {
+				$style_assets_filename = self::get_script_asset_filename( $style_path_name, 'style' );
+				$style_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $style_path_name . '/' . $style_assets_filename;
+				$version               = $style_assets['version'];
+			} catch ( \Throwable $e ) {
+				// Use the default version if the asset file could not be loaded.
+				$version = $css_file_version;
+			}
+
+			$dependencies = isset( $style['dependencies'] ) ? $style['dependencies'] : array();
+			wp_register_style(
+				$handle,
+				self::get_url( $style_path_name . '/style', 'css' ),
+				$dependencies,
+				self::get_file_version( 'css', $version ),
+			);
+			wp_style_add_data( $handle, 'rtl', 'replace' );
+		}
 	}
 
 	/**
@@ -475,11 +472,32 @@ class WCAdminAssets {
 			'wc-admin-' . $script_name,
 			self::get_url( $script_path_name . '/' . $script_name, 'js' ),
 			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'], $dependencies ),
-			self::get_file_version( 'js' ),
+			self::get_file_version( 'js', $script_assets['version'] ),
 			true
 		);
 		if ( $need_translation ) {
 			wp_set_script_translations( 'wc-admin-' . $script_name, 'woocommerce' );
 		}
+	}
+
+	/**
+	 * Loads a style
+	 *
+	 * @param string $style_path_name The style path name.
+	 * @param string $style_name Filename of the style to load.
+	 * @param array  $dependencies Array of any extra dependencies.
+	 */
+	public static function register_style( $style_path_name, $style_name, $dependencies = array() ) {
+		$style_assets_filename = self::get_script_asset_filename( $style_path_name, $style_name );
+		$style_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_CSS_FOLDER . $style_path_name . '/' . $style_assets_filename;
+
+		$handle = 'wc-admin-' . $style_name;
+		wp_enqueue_style(
+			$handle,
+			self::get_url( $style_path_name . '/' . $style_name, 'css' ),
+			$dependencies,
+			self::get_file_version( 'css', $style_assets['version'] ),
+		);
+		wp_style_add_data( $handle, 'rtl', 'replace' );
 	}
 }

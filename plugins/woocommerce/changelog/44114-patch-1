@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Ensure WC admin functions are defined before attempting to add notices.

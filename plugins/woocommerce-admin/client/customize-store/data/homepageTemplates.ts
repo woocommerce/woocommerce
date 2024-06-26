@@ -2,15 +2,39 @@
  * Internal dependencies
  */
 import { isWooExpress } from '~/utils/is-woo-express';
+import { THEME_SLUG } from './constants';
 
 const introPatternWooExpress = 'woocommerce-blocks/hero-product-split';
+export const headerTemplateId = `${ THEME_SLUG }//header`;
+export const footerTemplateId = `${ THEME_SLUG }//footer`;
+
+export const HEADER_TEMPLATES = {
+	template1: {
+		blocks: [ 'woocommerce-blocks/header-centered-menu' ],
+	},
+	template2: {
+		blocks: [ 'woocommerce-blocks/header-essential' ],
+	},
+	template3: {
+		blocks: [ 'woocommerce-blocks/header-centered-menu' ],
+	},
+};
+
+export const FOOTER_TEMPLATES = {
+	template1: {
+		blocks: [ 'woocommerce-blocks/footer-with-3-menus' ],
+	},
+	template2: {
+		blocks: [ 'woocommerce-blocks/footer-large' ],
+	},
+	template3: {
+		blocks: [ 'woocommerce-blocks/footer-with-3-menus' ],
+	},
+};
 
 export const HOMEPAGE_TEMPLATES = {
 	template1: {
 		blocks: [
-			// Header
-			'woocommerce-blocks/header-centered-menu',
-
 			// Body
 			isWooExpress()
 				? introPatternWooExpress
@@ -21,9 +45,6 @@ export const HOMEPAGE_TEMPLATES = {
 			'woocommerce-blocks/testimonials-3-columns',
 			'woocommerce-blocks/featured-category-triple',
 			'woocommerce-blocks/social-follow-us-in-social-media',
-
-			// Footer
-			'woocommerce-blocks/footer-with-3-menus',
 		],
 		metadata: {
 			businessType: [ 'e-commerce', 'large-business' ],
@@ -41,9 +62,6 @@ export const HOMEPAGE_TEMPLATES = {
 	},
 	template2: {
 		blocks: [
-			// Header
-			'woocommerce-blocks/header-essential',
-
 			// Body
 			isWooExpress()
 				? introPatternWooExpress
@@ -52,9 +70,6 @@ export const HOMEPAGE_TEMPLATES = {
 			'woocommerce-blocks/hero-product-chessboard',
 			'woocommerce-blocks/product-collection-5-columns',
 			'woocommerce-blocks/testimonials-3-columns',
-
-			// Footer
-			'woocommerce-blocks/footer-large',
 		],
 		metadata: {
 			businessType: [ 'e-commerce', 'subscription', 'large-business' ],
@@ -67,17 +82,11 @@ export const HOMEPAGE_TEMPLATES = {
 	},
 	template3: {
 		blocks: [
-			// Header
-			'woocommerce-blocks/header-centered-menu',
-
 			// Body
 			'woocommerce-blocks/hero-product-split',
 			'woocommerce-blocks/product-collection-featured-products-5-columns',
 			'woocommerce-blocks/featured-category-triple',
 			'woocommerce-blocks/product-query-product-gallery',
-
-			// Footer
-			'woocommerce-blocks/footer-with-3-menus',
 		],
 		metadata: {
 			businessType: [ 'subscription', 'large-business' ],

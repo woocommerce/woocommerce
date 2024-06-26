@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Removes the ability to test if arbitrary files exist on a server through the product editor's downloadable files UI.

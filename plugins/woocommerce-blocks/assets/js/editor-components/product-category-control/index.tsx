@@ -9,7 +9,7 @@ import {
 import { SelectControl } from '@wordpress/components';
 import { withSearchedCategories } from '@woocommerce/block-hocs';
 import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import type { RenderItemArgs } from '@woocommerce/editor-components/search-list-control/types';
 import type {
 	ProductCategoryResponseItem,
@@ -118,7 +118,7 @@ const ProductCategoryControl = ( {
 
 		return (
 			<SearchListItem
-				className={ classNames(
+				className={ clsx(
 					'woocommerce-product-categories__item',
 					'has-count',
 					{

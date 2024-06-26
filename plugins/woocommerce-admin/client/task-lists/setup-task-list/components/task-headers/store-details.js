@@ -7,7 +7,6 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import TimerImage from './timer.svg';
 import { WC_ASSET_URL } from '../../../../utils/admin-settings';
 
 const StoreDetailsHeader = ( { task, goToTask } ) => {
@@ -38,10 +37,6 @@ const StoreDetailsHeader = ( { task, goToTask } ) => {
 				>
 					{ __( 'Add details', 'woocommerce' ) }
 				</Button>
-				<p className="woocommerce-task-header__timer">
-					<img src={ TimerImage } alt="Timer" />{ ' ' }
-					<span>{ __( '2 minutes', 'woocommerce' ) }</span>
-				</p>
 			</div>
 		</div>
 	);

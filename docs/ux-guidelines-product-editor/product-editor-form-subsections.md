@@ -5,7 +5,7 @@ menu_title: Subsections
 
 Subsections add extra fields to existing form groups. They are small forms with a low to medium level of complexity. This interface location works best for extensions that add extra features that build off an existing Woo functionality.
 
-![Subsections example](https://developer.woo.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-subsections.png)
+![Subsections example](https://developer.woocommerce.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-subsections.png)
 
 
 ## What they are for

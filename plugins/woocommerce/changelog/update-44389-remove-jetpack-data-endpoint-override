@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Remove override of /jetpack/v4/connection/data that was added as a workaround to fix issues with the mobile apps.

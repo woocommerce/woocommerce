@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Move the test out of isolation (tax folder) and update it to reflect cart flow

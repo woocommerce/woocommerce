@@ -40,7 +40,7 @@ function Experiments( {
 						rel="noreferrer"
 					>
 						WooCommerce &#8594; Settings &#8594; Advanced &#8594;
-						Woo.com
+						WooCommerce.com
 					</a>
 					&nbsp;and check{ ' ' }
 					<b>Allow usage of WooCommerce to be tracked</b>.

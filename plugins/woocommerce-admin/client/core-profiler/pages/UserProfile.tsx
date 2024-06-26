@@ -6,12 +6,13 @@ import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { SelectControl } from '@woocommerce/components';
 import { Icon, chevronDown } from '@wordpress/icons';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
-import { UserProfileEvent, CoreProfilerStateMachineContext } from '../index';
+import { CoreProfilerStateMachineContext } from '../index';
+import { UserProfileEvent } from '../events';
 import { Navigation } from '../components/navigation/navigation';
 import { Heading } from '../components/heading/heading';
 import { Choice } from '../components/choice/choice';
@@ -236,7 +237,7 @@ export const UserProfile = ( {
 				}
 			/>
 			<div
-				className={ classnames(
+				className={ clsx(
 					'woocommerce-profiler-page__content woocommerce-profiler-user-profile__content',
 					{
 						'is-platform-selector-open': isPlatformDropdownOpen,

@@ -26,7 +26,7 @@ class ExperimentalShippingRecommendation extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Set up shipping', 'woocommerce' );
+		return __( 'Get your products shipped', 'woocommerce' );
 	}
 
 	/**

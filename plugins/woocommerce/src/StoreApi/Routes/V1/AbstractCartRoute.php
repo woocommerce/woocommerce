@@ -332,24 +332,15 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return \WP_Error WP Error object.
 	 */
 	protected function get_route_error_response( $error_code, $error_message, $http_status_code = 500, $additional_data = [] ) {
-		switch ( $http_status_code ) {
-			case 409:
-				// If there was a conflict, return the cart so the client can resolve it.
-				$cart = $this->cart_controller->get_cart_instance();
 
-				return new \WP_Error(
-					$error_code,
-					$error_message,
-					array_merge(
-						$additional_data,
-						[
-							'status' => $http_status_code,
-							'cart'   => $this->cart_schema->get_item_response( $cart ),
-						]
-					)
-				);
+		$additional_data['status'] = $http_status_code;
+
+		// If there was a conflict, return the cart so the client can resolve it.
+		if ( 409 === $http_status_code ) {
+			$cart                    = $this->cart_controller->get_cart_instance();
+			$additional_data['cart'] = $this->cart_schema->get_item_response( $cart );
 		}
 
-		return new \WP_Error( $error_code, $error_message, [ 'status' => $http_status_code ] );
+		return new \WP_Error( $error_code, $error_message, $additional_data );
 	}
 }

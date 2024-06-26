@@ -7,30 +7,25 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
+
 /**
  * Rule processor that fails.
+ *
+ * @deprecated 8.8.0
  */
-class FailRuleProcessor implements RuleProcessorInterface {
+class FailRuleProcessor extends DeprecatedClassFacade {
 	/**
-	 * Fails the rule.
+	 * The name of the non-deprecated class that this facade covers.
 	 *
-	 * @param object $rule         The specific rule being processed by this rule processor.
-	 * @param object $stored_state Stored state.
-	 *
-	 * @return bool Always false.
+	 * @var string
 	 */
-	public function process( $rule, $stored_state ) {
-		return false;
-	}
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\FailRuleProcessor';
 
 	/**
-	 * Validates the rule.
+	 * The version that this class was deprecated in.
 	 *
-	 * @param object $rule The rule to validate.
-	 *
-	 * @return bool Pass/fail.
+	 * @var string
 	 */
-	public function validate( $rule ) {
-		return true;
-	}
+	protected static $deprecated_in_version = '8.8.0';
 }

@@ -12,7 +12,9 @@ export type ThemeCard = {
 	description: string;
 	thumbnail_url: string;
 	is_active: boolean;
+	is_free: boolean;
 	link_url?: string;
+	price: string;
 	color_palettes: ColorPalette[];
 	total_palettes: number;
 };

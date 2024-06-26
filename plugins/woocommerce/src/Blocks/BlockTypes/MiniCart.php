@@ -159,15 +159,13 @@ class MiniCart extends AbstractBlock {
 
 			$this->asset_data_registry->add(
 				'taxLabel',
-				$this->tax_label,
-				''
+				$this->tax_label
 			);
 		}
 
 		$this->asset_data_registry->add(
 			'displayCartPricesIncludingTax',
-			$this->display_cart_prices_including_tax,
-			true
+			$this->display_cart_prices_including_tax
 		);
 
 		$template_part_edit_uri = '';
@@ -206,8 +204,7 @@ class MiniCart extends AbstractBlock {
 
 		$this->asset_data_registry->add(
 			'templatePartEditUri',
-			$template_part_edit_uri,
-			''
+			$template_part_edit_uri
 		);
 
 		/**

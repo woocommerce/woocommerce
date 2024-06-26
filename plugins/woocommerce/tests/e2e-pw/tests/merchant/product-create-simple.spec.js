@@ -1,75 +1,73 @@
-const { test: baseTest, expect } = require( '../../fixtures' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
-baseTest.describe( 'Products > Add Simple Product', () => {
-	const productData = {
-		virtual: {
-			name: `Virtual product ${ Date.now() }`,
-			description: `Virtual product longer description`,
-			shortDescription: `Virtual product short description`,
-			regularPrice: '100.05',
-			sku: `0_${ Date.now() }`,
-			virtual: true,
-			purchaseNote: 'Virtual product purchase note',
+const productData = {
+	virtual: {
+		name: `Virtual product ${ Date.now() }`,
+		description: `Virtual product longer description`,
+		shortDescription: `Virtual product short description`,
+		regularPrice: '100.05',
+		sku: `0_${ Date.now() }`,
+		virtual: true,
+		purchaseNote: 'Virtual product purchase note',
+	},
+	'non virtual': {
+		name: `Simple product ${ Date.now() }`,
+		description: `Simple product longer description`,
+		shortDescription: `Simple product short description`,
+		regularPrice: '100.05',
+		sku: `1_${ Date.now() }`,
+		shipping: {
+			weight: '2',
+			length: '20',
+			width: '10',
+			height: '30',
 		},
-		'non virtual': {
-			name: `Simple product ${ Date.now() }`,
-			description: `Simple product longer description`,
-			shortDescription: `Simple product short description`,
-			regularPrice: '100.05',
-			sku: `1_${ Date.now() }`,
-			shipping: {
-				weight: '2',
-				length: '20',
-				width: '10',
-				height: '30',
-			},
-			purchaseNote: 'Simple product purchase note',
-		},
-		downloadable: {
-			name: `Downloadable product ${ Date.now() }`,
-			regularPrice: '100.05',
-			description: `Downloadable product longer description`,
-			shortDescription: `Downloadable product short description`,
-			sku: `2_${ Date.now() }`,
-			purchaseNote: 'Downloadable product purchase note',
-			fileName: 'e2e-product.zip',
-		},
-	};
+		purchaseNote: 'Simple product purchase note',
+	},
+	downloadable: {
+		name: `Downloadable product ${ Date.now() }`,
+		regularPrice: '100.05',
+		description: `Downloadable product longer description`,
+		shortDescription: `Downloadable product short description`,
+		sku: `2_${ Date.now() }`,
+		purchaseNote: 'Downloadable product purchase note',
+		fileName: 'e2e-product.zip',
+	},
+};
 
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		product: async ( { api }, use ) => {
-			const product = {};
-			await use( product );
-			await api.delete( `products/${ product.id }`, { force: true } );
-		},
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	product: async ( { api }, use ) => {
+		const product = {};
+		await use( product );
+		await api.delete( `products/${ product.id }`, { force: true } );
+	},
 
-		category: async ( { api }, use ) => {
-			let category = {};
+	category: async ( { api }, use ) => {
+		let category = {};
 
-			await api
-				.post( 'products/categories', {
-					name: `cat_${ Date.now() }`,
-				} )
-				.then( ( response ) => {
-					category = response.data;
-				} );
-
-			await use( category );
-
-			// Category cleanup
-			await api.delete( `products/categories/${ category.id }`, {
-				force: true,
+		await api
+			.post( 'products/categories', {
+				name: `cat_${ Date.now() }`,
+			} )
+			.then( ( response ) => {
+				category = response.data;
 			} );
-		},
-	} );
 
-	for ( const productType of Object.keys( productData ) ) {
-		test( `can create a simple ${ productType } product`, async ( {
-			page,
-			category,
-			product,
-		} ) => {
+		await use( category );
+
+		// Category cleanup
+		await api.delete( `products/categories/${ category.id }`, {
+			force: true,
+		} );
+	},
+} );
+
+for ( const productType of Object.keys( productData ) ) {
+	test(
+		`can create a simple ${ productType } product`,
+		{ tag: [ '@gutenberg', '@services' ] },
+		async ( { page, category, product } ) => {
 			await test.step( 'add new product', async () => {
 				await page.goto( 'wp-admin/post-new.php?post_type=product' );
 			} );
@@ -178,6 +176,9 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 					await page
 						.getByRole( 'link', { name: 'Shipping' } )
 						.click();
+					await expect(
+						page.getByText( 'Shipping class', { exact: true } )
+					).toBeVisible();
 					await page
 						.getByPlaceholder( '0' )
 						.fill( productData[ productType ].shipping.weight );
@@ -249,69 +250,47 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 				await page.goto( permalink );
 
 				// Verify product name
-				await expect
-					.soft(
-						page.getByRole( 'heading', {
-							name: productData[ productType ].name,
-						} )
-					)
-					.toBeVisible();
+				await expect(
+					page.getByRole( 'heading', {
+						name: productData[ productType ].name,
+					} )
+				).toBeVisible();
 
 				// Verify price
-				await expect
-					.soft(
-						page
-							.getByText(
-								productData[ productType ].regularPrice
-							)
-							.first()
-					)
-					.toBeVisible();
+				await expect(
+					page
+						.getByText( productData[ productType ].regularPrice )
+						.first()
+				).toBeVisible();
 
 				// Verify description
-				await expect
-					.soft(
-						page.getByText(
-							productData[ productType ].shortDescription
-						)
+				await expect(
+					page.getByText(
+						productData[ productType ].shortDescription
 					)
-					.toBeVisible();
-				await expect
-					.soft(
-						page.getByText( productData[ productType ].description )
-					)
-					.toBeVisible();
-				await expect
-					.soft(
-						page.getByText(
-							`SKU: ${ productData[ productType ].sku }`
-						)
-					)
-					.toBeVisible();
+				).toBeVisible();
+				await expect(
+					page.getByText( productData[ productType ].description )
+				).toBeVisible();
+				await expect(
+					page.getByText( `SKU: ${ productData[ productType ].sku }` )
+				).toBeVisible();
 
 				// Verify category
-				await expect
-					.soft(
-						page
-							.getByText( 'Category' )
-							.getByRole( 'link', { name: category.name } )
-					)
-					.toBeVisible();
+				await expect(
+					page.getByText( `Category: ${ category.name }` )
+				).toBeVisible();
 
 				// Verify tags
-				await expect
-					.soft(
-						page.getByRole( 'link', { name: 'e2e', exact: true } )
-					)
-					.toBeVisible();
-				await expect
-					.soft(
-						page.getByRole( 'link', {
-							name: 'test products',
-							exact: true,
-						} )
-					)
-					.toBeVisible();
+				await expect(
+					page.getByRole( 'link', { name: 'e2e', exact: true } )
+				).toBeVisible();
+				await expect(
+					page.getByRole( 'link', {
+						name: 'test products',
+						exact: true,
+					} )
+				).toBeVisible();
 			} );
 
 			await test.step( 'shopper can add the product to cart', async () => {
@@ -340,6 +319,6 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 						.filter( { hasText: productData[ productType ].name } )
 				).toBeVisible();
 			} );
-		} );
-	}
-} );
+		}
+	);
+}

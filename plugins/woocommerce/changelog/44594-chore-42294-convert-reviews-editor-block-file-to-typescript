@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Convert editor-block.js from the Reviews block to editor-block.tsx and replace propTypes with TypeScript definitions.
-

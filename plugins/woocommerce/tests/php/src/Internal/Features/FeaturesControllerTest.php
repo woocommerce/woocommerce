@@ -39,7 +39,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function( $features_controller ) {
+			function ( $features_controller ) {
 				$this->reset_features_list( $this->sut );
 
 				$features = array(
@@ -187,7 +187,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		// No option for experimental2.
 
 		$actual = array_map(
-			function( $feature ) {
+			function ( $feature ) {
 				return array_intersect_key(
 					$feature,
 					array( 'is_enabled' => '' )
@@ -402,7 +402,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->simulate_inside_before_woocommerce_init_hook();
 
 		$this->ExpectException( \Exception::class );
-		$this->ExpectExceptionMessage( "Plugin the_plugin is trying to declare itself as incompatible with the 'mature1' feature, but it already declared itself as compatible" );
+		$this->ExpectExceptionMessage( esc_html( "Plugin the_plugin is trying to declare itself as incompatible with the 'mature1' feature, but it already declared itself as compatible" ) );
 
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', true );
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', false );
@@ -491,7 +491,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	public function test_get_compatible_enabled_features_for_registered_plugin() {
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function( $features_controller ) {
+			function ( $features_controller ) {
 				$this->reset_features_list( $this->sut );
 
 				$features = array(
@@ -799,7 +799,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_no_warning_when_all_plugin_are_hpos_compatible() {
 		$this->simulate_inside_before_woocommerce_init_hook();
-		// phpcs:disable Squiz.Commenting
+		// phpcs:disable Squiz.Commenting, Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		$fake_plugin_util = new class() extends PluginUtil {
 			private $active_plugins;
 
@@ -813,6 +813,10 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			public function get_woocommerce_aware_plugins( bool $active_only = false ): array {
 				return $this->active_plugins;
 			}
+
+			public function get_plugins_excluded_from_compatibility_ui() {
+				return array();
+			}
 		};
 
 		$this->register_legacy_proxy_function_mocks(
@@ -822,13 +826,13 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 				},
 			)
 		);
-		// phpcs:enable
+		// phpcs:enable Squiz.Commenting, Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
 		$local_sut = new FeaturesController();
 
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function( $features_controller ) use ( $local_sut ) {
+			function ( $features_controller ) use ( $local_sut ) {
 				$this->reset_features_list( $local_sut );
 
 				$features = array(
@@ -880,10 +884,15 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testDox If there is an incompatible plugin, it is returned by get_incompatible_plugins.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_is_enabled True to test with HPOS enabled, false to test with HPOS disabled.
 	 */
-	public function test_show_warning_when_a_plugin_is_not_hpos_compatible() {
+	public function test_show_warning_when_a_plugin_is_not_hpos_compatible_if_hpos_is_enabled( bool $hpos_is_enabled ) {
 		$this->simulate_inside_before_woocommerce_init_hook();
-		// phpcs:disable Squiz.Commenting
+		// phpcs:disable Squiz.Commenting, Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		$fake_plugin_util = new class() extends PluginUtil {
 			private $active_plugins;
 
@@ -897,8 +906,11 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			public function get_woocommerce_aware_plugins( bool $active_only = false ): array {
 				return $this->active_plugins;
 			}
+
+			public function get_plugins_excluded_from_compatibility_ui() {
+				return array();
+			}
 		};
-		// phpcs:enable
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
@@ -907,19 +919,23 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 				},
 			)
 		);
+        // phpcs:enable Squiz.Commenting, Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
 		$local_sut = new FeaturesController();
+		$local_sut->change_feature_enable( 'custom_order_tables', $hpos_is_enabled );
 
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function( $features_controller ) use ( $local_sut ) {
+			function ( $features_controller ) use ( $local_sut ) {
 				$this->reset_features_list( $local_sut );
 
 				$features = array(
 					'custom_order_tables'  => array(
 						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
-						'is_experimental'    => true,
+						'is_experimental'    => false,
 						'enabled_by_default' => false,
+						'option_key'         => CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+						'plugins_are_incompatible_by_default' => true,
 					),
 					'cart_checkout_blocks' => array(
 						'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
@@ -958,6 +974,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$incompatible_plugins = function () use ( $plugins ) {
 			return $this->get_incompatible_plugins( 'all', array_flip( $plugins ) );
 		};
-		$this->assertEquals( array( 'incompatible_plugin' ), array_keys( $incompatible_plugins->call( $local_sut ) ) );
+
+		$expected = $hpos_is_enabled ? array( 'incompatible_plugin' ) : array();
+		$this->assertEquals( $expected, array_keys( $incompatible_plugins->call( $local_sut ) ) );
 	}
 }

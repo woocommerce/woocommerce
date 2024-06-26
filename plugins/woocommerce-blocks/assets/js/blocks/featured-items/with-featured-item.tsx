@@ -6,7 +6,7 @@
 import type { BlockAlignment } from '@wordpress/blocks';
 import { ProductResponseItem, isEmpty } from '@woocommerce/types';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useCallback, useState } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
 import { useStyleProps } from '@woocommerce/base-hooks';
@@ -192,7 +192,7 @@ export const withFeaturedItem =
 				textColor,
 			} = attributes;
 
-			const containerClass = classnames(
+			const containerClass = clsx(
 				className,
 				{
 					'is-selected':
@@ -266,7 +266,7 @@ export const withFeaturedItem =
 									/>
 								) : (
 									<div
-										className={ classnames(
+										className={ clsx(
 											`${ className }__background-image`,
 											{
 												'has-parallax': hasParallax,

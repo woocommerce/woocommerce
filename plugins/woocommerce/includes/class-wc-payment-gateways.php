@@ -222,7 +222,7 @@ class WC_Payment_Gateways {
 The payment gateway "%2$s" was just enabled on this site:
 %3$s
 
-If this was intentional you can safely ignore and delete this email. 
+If this was intentional you can safely ignore and delete this email.
 
 If you did not enable this payment gateway, please log in to your site and consider disabling it here:
 %4$s
@@ -400,6 +400,8 @@ All at %6$s
 	 * @return bool Whether PayPal Standard should be loaded or not.
 	 */
 	protected function should_load_paypal_standard() {
+		// Tech debt: This class needs to be initialized to make sure any existing subscriptions gets processed as expected, even if the gateway is not enabled for new orders.
+		// Eventually, we want to load this via a singleton pattern to avoid unnecessary instantiation.
 		$paypal = new WC_Gateway_Paypal();
 		return $paypal->should_load();
 	}

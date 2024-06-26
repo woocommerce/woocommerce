@@ -4,7 +4,7 @@
 	"icon": "admin-comments",
 	"title": "Product Reviews",
 	"description": "A block that shows the reviews for a product.",
-	"category": "woocommerce",
+	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],
 	"supports": {},
 	"attributes": {},

@@ -223,7 +223,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		$settings = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['settings'];
 
-		$this->assertEquals( 17, count( $settings ) );
+		$this->assertEquals( 16, count( $settings ) );
 		$this->assertEquals( ( 'yes' === get_option( 'woocommerce_api_enabled' ) ), $settings['api_enabled'] );
 		$this->assertEquals( get_woocommerce_currency(), $settings['currency'] );
 		$this->assertEquals( $term_response, $settings['taxonomies'] );
@@ -523,7 +523,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	protected function mock_http_responses( $request, $url ) {
 		$mocked_response = false;
 
-		if ( in_array( $url, array( 'https://www.paypal.com/cgi-bin/webscr', 'https://woo.com/wc-api/product-key-api?request=ping&network=0' ), true ) ) {
+		if ( in_array( $url, array( 'https://www.paypal.com/cgi-bin/webscr', 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=0' ), true ) ) {
 			$mocked_response = array(
 				'response' => array( 'code' => 200 ),
 			);

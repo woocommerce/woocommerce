@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure a consistent border style is applied to combobox suggestions and the main input.

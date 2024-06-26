@@ -13,11 +13,9 @@ import type { ButtonWithDropdownMenuProps } from './types';
 
 export * from './types';
 
-export const ButtonWithDropdownMenu: React.FC<
-	ButtonWithDropdownMenuProps
-> = ( {
+export function ButtonWithDropdownMenu( {
 	dropdownButtonLabel = __( 'More options', 'woocommerce' ),
-	controls = [],
+	controls,
 	defaultOpen = false,
 	popoverProps: {
 		placement = 'bottom-end',
@@ -29,8 +27,10 @@ export const ButtonWithDropdownMenu: React.FC<
 		offset: 0,
 	},
 	className,
+	renderMenu,
+	onToggle = () => {},
 	...props
-} ) => {
+}: ButtonWithDropdownMenuProps ) {
 	return (
 		<Flex
 			className={ `woocommerce-button-with-dropdown-menu${
@@ -65,8 +65,11 @@ export const ButtonWithDropdownMenu: React.FC<
 						offset,
 					} }
 					defaultOpen={ defaultOpen }
-				/>
+					onToggle={ onToggle }
+				>
+					{ renderMenu }
+				</DropdownMenu>
 			</FlexItem>
 		</Flex>
 	);
-};
+}

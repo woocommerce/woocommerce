@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix whitespace in package.json

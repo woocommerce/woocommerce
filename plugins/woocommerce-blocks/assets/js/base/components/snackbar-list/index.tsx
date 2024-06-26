@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import type { NoticeType } from '@woocommerce/types';
 import { useReducedMotion } from '@wordpress/compose';
 import { useRef } from '@wordpress/element';
@@ -38,7 +38,7 @@ const SnackbarList = ( {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				className,
 				'wc-block-components-notice-snackbar-list'
 			) }

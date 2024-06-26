@@ -123,14 +123,7 @@ class Init {
 			return;
 		}
 
-		$rtl = is_rtl() ? '.rtl' : '';
-		wp_enqueue_style(
-			'wc-admin-navigation-opt-out',
-			WCAdminAssets::get_url( "navigation-opt-out/style{$rtl}", 'css' ),
-			array( 'wp-components' ),
-			WCAdminAssets::get_file_version( 'css' )
-		);
-
+		WCAdminAssets::register_style( 'navigation-opt-out', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'navigation-opt-out', true );
 		wp_localize_script(
 			'wc-admin-navigation-opt-out',

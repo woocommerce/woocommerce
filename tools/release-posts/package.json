@@ -10,8 +10,8 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^16.14.1",
-		"pnpm": "^8.12.1"
+		"node": "^20.11.1",
+		"pnpm": "^9.1.0"
 	},
 	"devDependencies": {
 		"@tsconfig/node16": "^1.0.4",

@@ -13,17 +13,14 @@ import { default as Options } from '../options';
 import { default as Experiments } from '../experiments';
 import { default as Features } from '../features';
 import { default as RestAPIFilters } from '../rest-api-filters';
+import RemoteSpecValidator from '../remote-spec-validator';
+import RemoteInboxNotifications from '../remote-inbox-notifications';
 
 const tabs = applyFilters( 'woocommerce_admin_test_helper_tabs', [
 	{
 		name: 'options',
 		title: 'Options',
 		content: <Options />,
-	},
-	{
-		name: 'admin-notes',
-		title: 'Admin notes',
-		content: <AdminNotes />,
 	},
 	{
 		name: 'tools',
@@ -44,6 +41,11 @@ const tabs = applyFilters( 'woocommerce_admin_test_helper_tabs', [
 		name: 'rest-api-filters',
 		title: 'REST API FIlters',
 		content: <RestAPIFilters />,
+	},
+	{
+		name: 'remote-inbox-notifications',
+		title: 'Remote Inbox Notifications',
+		content: <RemoteInboxNotifications />,
 	},
 ] );
 

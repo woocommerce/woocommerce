@@ -25,7 +25,11 @@ import Iframe from './iframe';
 
 const WithToolTip = ( { showTooltip, title, children } ) => {
 	if ( showTooltip ) {
-		return <Tooltip text={ title }>{ children }</Tooltip>;
+		return (
+			<Tooltip text={ title }>
+				<span>{ children }</span>
+			</Tooltip>
+		);
 	}
 	return <>{ children }</>;
 };
@@ -76,6 +80,7 @@ function BlockPattern( { pattern, onClick, onHover, composite, showTooltip } ) {
 							isScrollable={ false }
 							autoScale={ true }
 							CustomIframeComponent={ Iframe }
+							isPatternPreview={ true }
 						/>
 						{ ! showTooltip && (
 							<div className="block-editor-block-patterns-list__item-title">

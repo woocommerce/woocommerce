@@ -1,4 +1,4 @@
 {
 	"type": "string",
-	"enum": ["=", "<", "<=", ">", ">=", "!=", "contains", "!contains", "in", "!in"]
+	"enum": ["=", "<", "<=", ">", ">=", "!=", "contains", "!contains", "in", "!in", "range"]
 }

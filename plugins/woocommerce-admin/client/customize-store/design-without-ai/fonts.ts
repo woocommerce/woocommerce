@@ -187,7 +187,9 @@ export const installFontFace = async (
 	index: number
 ) => {
 	const { fontFamilyId, ...font } = data;
-	const fontFaceAssets = await downloadFontFaceAssets( font.src );
+	const fontFaceAssets = await downloadFontFaceAssets(
+		Array.isArray( font.src ) ? font.src[ 0 ] : font.src
+	);
 	const formData = new FormData();
 
 	const fontFile = await makeFontFacesFormData(

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import {
 	Button,
@@ -11,12 +11,12 @@ import {
 	CardHeader,
 	SelectControl,
 } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import interpolateComponents from '@automattic/interpolate-components';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import moment from 'moment';
-import { Icon, chevronLeft, chevronRight } from '@wordpress/icons';
+import { Icon, chevronLeft, chevronRight, close } from '@wordpress/icons';
 import { NOTES_STORE_NAME, QUERY_DEFAULTS } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
@@ -28,6 +28,7 @@ import { navigateTo, parseAdminUrl } from '@woocommerce/navigation';
 import sanitizeHTML from '../../lib/sanitize-html';
 import StoreAlertsPlaceholder from './placeholder';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { getScreenName } from '../../utils';
 
 import './style.scss';
 
@@ -37,10 +38,17 @@ export class StoreAlerts extends Component {
 
 		this.state = {
 			currentIndex: 0,
+			alerts: props.alerts,
 		};
 
 		this.previousAlert = this.previousAlert.bind( this );
 		this.nextAlert = this.nextAlert.bind( this );
+	}
+
+	componentDidUpdate( prevProps ) {
+		if ( prevProps.alerts !== this.props.alerts ) {
+			this.setState( { alerts: this.props.alerts } );
+		}
 	}
 
 	previousAlert( event ) {
@@ -202,7 +210,7 @@ export class StoreAlerts extends Component {
 	}
 
 	getAlerts() {
-		return ( this.props.alerts || [] ).filter(
+		return ( this.state.alerts || [] ).filter(
 			( note ) => note.status === 'unactioned'
 		);
 	}
@@ -227,13 +235,57 @@ export class StoreAlerts extends Component {
 		const numberOfAlerts = alerts.length;
 		const alert = alerts[ currentIndex ];
 		const type = alert.type;
-		const className = classnames( 'woocommerce-store-alerts', {
+		const className = clsx( 'woocommerce-store-alerts', {
 			'is-alert-error': type === 'error',
 			'is-alert-update': type === 'update',
 		} );
 
+		const onDismiss = async ( note ) => {
+			const screen = getScreenName();
+			const { createNotice, removeNote } = this.props;
+
+			recordEvent( 'inbox_action_dismiss', {
+				note_name: note.name,
+				note_title: note.title,
+				note_name_dismiss_all: false,
+				note_name_dismiss_confirmation: true,
+				screen,
+			} );
+
+			const noteId = note.id;
+
+			try {
+				await removeNote( noteId );
+				this.setState( {
+					alerts: this.state.alerts.filter(
+						( _alert ) => _alert.id !== noteId
+					),
+				} );
+				createNotice(
+					'success',
+					__( 'Message dismissed', 'woocommerce' )
+				);
+			} catch ( e ) {
+				createNotice(
+					'error',
+					_n(
+						'Message could not be dismissed',
+						'Messages could not be dismissed',
+						1,
+						'woocommerce'
+					)
+				);
+			}
+		};
+
 		return (
 			<Card className={ className } size={ null }>
+				<Button
+					className="woocommerce-store-alerts__close"
+					onClick={ () => onDismiss( alert ) }
+				>
+					<Icon icon={ close } />
+				</Button>
 				<CardHeader isBorderless>
 					<Text
 						variant="title.medium"
@@ -330,13 +382,15 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { triggerNoteAction, updateNote } = dispatch( NOTES_STORE_NAME );
+		const { triggerNoteAction, updateNote, removeNote } =
+			dispatch( NOTES_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {
 			triggerNoteAction,
 			updateNote,
 			createNotice,
+			removeNote,
 		};
 	} )
 )( StoreAlerts );

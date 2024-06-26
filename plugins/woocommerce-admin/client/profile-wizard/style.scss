@@ -64,7 +64,7 @@
 			margin-right: auto;
 		}
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			padding-left: $gap;
 			padding-right: $gap;
 			margin-bottom: 56 + $gap; /* 56px is height of footer */
@@ -107,7 +107,7 @@
 			margin-bottom: $gap * 2 !important;
 			border-color: $studio-red-50;
 
-			@include breakpoint( '<782px' ) {
+			@include breakpoint( "<782px" ) {
 				margin-bottom: $gap-small + $gap * 2 !important;
 			}
 
@@ -217,7 +217,7 @@
 			display: none;
 		}
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			.components-form-toggle {
 				display: inline-block;
 			}
@@ -275,7 +275,7 @@
 		}
 	}
 
-	@include breakpoint( '<600px' ) {
+	@include breakpoint( "<600px" ) {
 		svg.dashicon.components-checkbox-control__checked {
 			left: -2px;
 			top: -1px;
@@ -309,7 +309,7 @@
 			line-height: 56px;
 			font-family: dashicons, sans-serif;
 			font-size: 20px;
-			content: '\f140';
+			content: "\f140";
 			z-index: 1;
 			height: 24px;
 			width: 24px;
@@ -350,7 +350,7 @@
 		transform: initial;
 	}
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		position: fixed;
 		z-index: 999;
 		width: 100%;

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update the daily test workflow to run e2e tests with sharding

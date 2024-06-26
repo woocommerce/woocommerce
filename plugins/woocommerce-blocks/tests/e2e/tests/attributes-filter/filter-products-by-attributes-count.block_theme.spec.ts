@@ -1,23 +1,32 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect, PostCompiler } from '@woocommerce/e2e-utils';
+
+const test = base.extend< {
+	postCompiler: PostCompiler;
+} >( {
+	postCompiler: async ( { requestUtils }, use ) => {
+		const post = await requestUtils.createPostFromFile(
+			'filters-with-all-products'
+		);
+
+		await use( post );
+	},
+} );
 
 test.describe( 'Filter by Attributes Block - with All products Block', () => {
 	test( 'should show correct attrs count (color=blue|query_type_color=or)', async ( {
 		page,
+		postCompiler,
 	} ) => {
+		const post = await postCompiler.compile( {} );
+
 		await page.goto(
-			'/active-filters-block/?filter_color=blue&query_type_color=or',
-			{
-				waitUntil: 'commit',
-			}
+			`${ post.link }?filter_color=blue&query_type_color=or`
 		);
 
-		// Check if the page has loaded successfully.
-		await expect( page.getByText( 'Active Filters block' ) ).toBeVisible();
-
-		const expectedValues = [ '4', '0', '2', '2', '0' ];
+		const expectedValues = [ '4', '2', '3', '4', '1' ];
 
 		await expect(
 			page
@@ -31,18 +40,15 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 
 	test( 'should show correct attrs count (color=blue,gray|query_type_color=or)', async ( {
 		page,
+		postCompiler,
 	} ) => {
+		const post = await postCompiler.compile( {} );
+
 		await page.goto(
-			'/active-filters-block/?filter_color=blue,gray&query_type_color=or',
-			{
-				waitUntil: 'commit',
-			}
+			`${ post.link }?filter_color=blue,gray&query_type_color=or`
 		);
 
-		// Check if the page has loaded successfully.
-		await expect( page.getByText( 'Active Filters block' ) ).toBeVisible();
-
-		const expectedValues = [ '4', '3', '2', '2', '0' ];
+		const expectedValues = [ '4', '2', '3', '4', '1' ];
 
 		await expect(
 			page
@@ -56,18 +62,15 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 
 	test( 'should show correct attrs count (color=blue|query_type_color=or|min_price=15|max_price=40)', async ( {
 		page,
+		postCompiler,
 	} ) => {
+		const post = await postCompiler.compile( {} );
+
 		await page.goto(
-			'/active-filters-block/?filter_color=blue&query_type_color=or&min_price=15&max_price=40',
-			{
-				waitUntil: 'commit',
-			}
+			`${ post.link }?filter_color=blue&query_type_color=or&min_price=15&max_price=40`
 		);
 
-		// Check if the page has loaded successfully.
-		await expect( page.getByText( 'Active Filters block' ) ).toBeVisible();
-
-		const expectedValues = [ '2', '0', '1', '1', '0' ];
+		const expectedValues = [ '2', '2', '2', '3', '1' ];
 
 		await expect(
 			page

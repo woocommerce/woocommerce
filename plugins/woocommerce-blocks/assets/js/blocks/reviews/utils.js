@@ -2,7 +2,7 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { getSetting } from '@woocommerce/settings';
 
 export const getSortArgs = ( sortValue ) => {
@@ -71,7 +71,7 @@ export const getBlockClassName = ( attributes ) => {
 		blockClassName = 'wc-block-reviews-by-category';
 	}
 
-	return classNames( blockClassName, className, {
+	return clsx( blockClassName, className, {
 		'has-image': showReviewImage,
 		'has-name': showReviewerName,
 		'has-date': showReviewDate,

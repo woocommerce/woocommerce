@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Move rendering of Order Attribution inputs to `woocommerce_checkout_after_customer_details`. Expose a method for custom theming.

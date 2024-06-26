@@ -135,7 +135,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$product->set_stock_quantity( 5 );
 		$product->set_stock_status( 'instock' );
 		$product->save();
-		$this->assertEquals( '', $product->get_stock_quantity() );
+		$this->assertEquals( 0, $product->get_stock_quantity() );
 		$this->assertEquals( 'instock', $product->get_stock_status() );
 		$product->set_stock_status( 'outofstock' );
 		$product->save();
@@ -262,11 +262,11 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 
 		$product = wc_get_product( $product1_id );
 		$this->assertEquals( $product1_id, $product->get_id() );
-		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>10.00</bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>7.00</bdi></span></ins>', $product->get_price_html() );
+		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>10.00</bdi></span></del> <span class="screen-reader-text">Original price was: &#036;10.00.</span><ins aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>7.00</bdi></span></ins><span class="screen-reader-text">Current price is: &#036;7.00.</span>', $product->get_price_html() );
 
 		$product = wc_get_product( $product2_id );
 		$this->assertEquals( $product2_id, $product->get_id() );
-		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>20.00</bdi></span></del> <ins><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>16.00</bdi></span></ins>', $product->get_price_html() );
+		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>20.00</bdi></span></del> <span class="screen-reader-text">Original price was: &#036;20.00.</span><ins aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>16.00</bdi></span></ins><span class="screen-reader-text">Current price is: &#036;16.00.</span>', $product->get_price_html() );
 
 		$product = wc_get_product( $product3_id );
 		$this->assertEquals( $product3_id, $product->get_id() );

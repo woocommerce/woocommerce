@@ -138,6 +138,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
 
+			// get the post object so that we can set the status
+			// to the correct value; it is possible that the status was
+			// changed by the woocommerce_new_product_data filter above.
+			$post_object = get_post( $product->get_id() );
+			$product->set_status( $post_object->post_status );
+
 			$this->update_post_meta( $product, true );
 			$this->update_terms( $product, true );
 			$this->update_visibility( $product, true );
@@ -272,7 +278,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$product->apply_changes();
 
-		do_action( 'woocommerce_update_product', $product->get_id(), $product );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_update_product', $product->get_id(), $product, $changes );
 	}
 
 	/**
@@ -1099,6 +1106,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return int Matching variation ID or 0.
 	 */
 	public function find_matching_product_variation( $product, $match_attributes = array() ) {
+		if ( 'variation' === $product->get_type() ) {
+			// Can't get a variation of a variation.
+			return 0;
+		}
+
 		global $wpdb;
 
 		$meta_attribute_names = array();
@@ -1188,10 +1200,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @todo   Add to interface in 4.0.
 	 * @param  WC_Product $product Variable product.
 	 * @param  int        $limit Limit the number of created variations.
-	 * @param  array  	  $default_values Key value pairs to set on created variations.
+	 * @param  array      $default_values Key value pairs to set on created variations.
+	 * @param  array      $metadata Key value pairs to set as meta data on created variations.
 	 * @return int        Number of created variations.
 	 */
-	public function create_all_product_variations( $product, $limit = -1, $default_values = array() ) {
+	public function create_all_product_variations( $product, $limit = -1, $default_values = array(), $metadata = array() ) {
 		$count = 0;
 
 		if ( ! $product ) {
@@ -1221,13 +1234,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 			$variation = wc_get_product_object( 'variation' );
 			$variation->set_props( $default_values );
+			foreach ( $metadata as $meta ) {
+				$variation->add_meta_data( $meta['key'], $meta['value'] );
+			}
 			$variation->set_parent_id( $product->get_id() );
 			$variation->set_attributes( $possible_attribute );
 			$variation_id = $variation->save();
 
 			do_action( 'product_variation_linked', $variation_id );
 
-			$count ++;
+			++$count;
 
 			if ( $limit > 0 && $count >= $limit ) {
 				break;
@@ -1383,12 +1399,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Uses locking to update the quantity. If the lock is not acquired, change is lost.
 	 *
 	 * @since  3.0.0 this supports set, increase and decrease.
-	 * @param  int            $product_id_with_stock Product ID.
-	 * @param  int|float|null $stock_quantity Stock quantity.
-	 * @param  string         $operation Set, increase and decrease.
+	 * @param  int       $product_id_with_stock Product ID.
+	 * @param  int|float $stock_quantity Stock quantity.
+	 * @param  string    $operation Set, increase and decrease.
 	 * @return int|float New stock level.
 	 */
-	public function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' ) {
+	public function update_product_stock( $product_id_with_stock, $stock_quantity = 0, $operation = 'set' ) {
 		global $wpdb;
 
 		// Ensures a row exists to update.
@@ -2094,7 +2110,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( 'wc_product_meta_lookup' === $table ) {
 			$price_meta   = (array) get_post_meta( $id, '_price', false );
 			$manage_stock = get_post_meta( $id, '_manage_stock', true );
-			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : null;
+			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : 0;
 			$price        = wc_format_decimal( get_post_meta( $id, '_price', true ) );
 			$sale_price   = wc_format_decimal( get_post_meta( $id, '_sale_price', true ) );
 			return array(

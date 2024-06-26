@@ -27,4 +27,3 @@ export * from './sidebar-layout';
 export * from './snackbar-list';
 export * from './state-input';
 export * from './summary';
-export * from './tabs';

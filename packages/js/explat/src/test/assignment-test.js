@@ -1,3 +1,7 @@
+// Define that tracking is enabled before import
+// so that assignments can get the correct value.
+global.wcTracks.isEnabled = true;
+
 /**
  * External dependencies
  */
@@ -16,7 +20,6 @@ global.fetch = jest.fn().mockImplementation( () =>
 		status: 200,
 	} )
 );
-global.wcTracks.isEnabled = true;
 
 const fetchMock = jest.spyOn( global, 'fetch' );
 

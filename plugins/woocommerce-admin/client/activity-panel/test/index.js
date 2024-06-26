@@ -32,6 +32,14 @@ jest.mock( '@woocommerce/admin-layout', () => {
 	};
 } );
 
+jest.mock( '~/launch-your-store', () => ( {
+	useLaunchYourStore: jest.fn( () => ( {
+		comingSoon: 'yes',
+		launchYourStoreEnabled: true,
+		isLoading: true,
+	} ) ),
+} ) );
+
 jest.mock( '@woocommerce/data', () => ( {
 	...jest.requireActual( '@woocommerce/data' ),
 	useUser: jest.fn().mockReturnValue( { currentUserCan: () => true } ),
@@ -115,13 +123,15 @@ describe( 'Activity Panel', () => {
 			<ActivityPanel query={ { page: 'wc-admin', path: '/customers' } } />
 		);
 
-		expect( screen.queryByText( 'Help' ) ).toBeNull();
+		expect( screen.queryByTestId( 'activity-panel-tab-help' ) ).toBeNull();
 	} );
 
 	it( 'should render help tab if on home screen', () => {
 		render( <ActivityPanel query={ { page: 'wc-admin' } } /> );
 
-		expect( screen.getByText( 'Help' ) ).toBeDefined();
+		expect(
+			screen.queryByTestId( 'activity-panel-tab-help' )
+		).toBeDefined();
 	} );
 
 	it( 'should render help tab before options load', async () => {
@@ -140,7 +150,9 @@ describe( 'Activity Panel', () => {
 
 		// Expect that the only tab is "Help".
 		expect( tabs ).toHaveLength( 1 );
-		expect( screen.getByText( 'Help' ) ).toBeDefined();
+		expect(
+			screen.queryByTestId( 'activity-panel-tab-help' )
+		).toBeDefined();
 	} );
 
 	it( 'should not render help tab when not on main route', () => {
@@ -391,7 +403,7 @@ describe( 'Activity Panel', () => {
 		} );
 
 		it( 'should have panel open and panel switching as false by default', () => {
-			const { queryByText, getByRole } = render(
+			const { queryByText } = render(
 				<ActivityPanel
 					query={ {
 						task: 'products',
@@ -403,11 +415,13 @@ describe( 'Activity Panel', () => {
 			expect(
 				queryByText( '[panelSwitching=false]' )
 			).toBeInTheDocument();
-			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+			fireEvent.click(
+				screen.queryByTestId( 'activity-panel-tab-help' )
+			);
 		} );
 
 		it( 'should allow user to toggle, an individual panel without setting panelSwitching to true', () => {
-			const { queryByText, getByRole } = render(
+			const { queryByText } = render(
 				<ActivityPanel
 					query={ {
 						task: '',
@@ -421,13 +435,17 @@ describe( 'Activity Panel', () => {
 				queryByText( '[panelSwitching=false]' )
 			).toBeInTheDocument();
 			// toggle open
-			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+			fireEvent.click(
+				screen.queryByTestId( 'activity-panel-tab-help' )
+			);
 			expect( queryByText( '[panelOpen=true]' ) ).toBeInTheDocument();
 			expect(
 				queryByText( '[panelSwitching=false]' )
 			).toBeInTheDocument();
 			// toggle close
-			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+			fireEvent.click(
+				screen.queryByTestId( 'activity-panel-tab-help' )
+			);
 			expect( queryByText( '[panelOpen=false]' ) ).toBeInTheDocument();
 			expect(
 				queryByText( '[panelSwitching=false]' )
@@ -435,7 +453,7 @@ describe( 'Activity Panel', () => {
 		} );
 
 		it( 'should remove panel element after clearPanel is triggered', () => {
-			const { queryByText, getByRole } = render(
+			const { queryByText } = render(
 				<ActivityPanel
 					query={ {
 						task: '',
@@ -444,13 +462,17 @@ describe( 'Activity Panel', () => {
 				/>
 			);
 			// toggle open
-			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+			fireEvent.click(
+				screen.queryByTestId( 'activity-panel-tab-help' )
+			);
 			expect( queryByText( '[panelOpen=true]' ) ).toBeInTheDocument();
 			expect(
 				queryByText( '[panelSwitching=false]' )
 			).toBeInTheDocument();
 			// toggle close
-			fireEvent.click( getByRole( 'tab', { name: 'Help' } ) );
+			fireEvent.click(
+				screen.queryByTestId( 'activity-panel-tab-help' )
+			);
 			expect( queryByText( '[panelOpen=false]' ) ).toBeInTheDocument();
 			expect( queryByText( '[hasTab=true]' ) ).toBeInTheDocument();
 			expect(

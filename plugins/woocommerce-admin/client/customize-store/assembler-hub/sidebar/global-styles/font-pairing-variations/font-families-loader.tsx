@@ -55,19 +55,19 @@ export const FontFamiliesLoader = ( {
 		};
 	} );
 
-	const themeUrl =
-		site?.url + '/wp-content/themes/' + currentTheme?.stylesheet;
-
 	useEffect( () => {
-		if ( ! Array.isArray( fontFamilies ) ) {
+		if ( ! Array.isArray( fontFamilies ) || ! site ) {
 			return;
 		}
+
+		const themeUrl =
+			site?.url + '/wp-content/themes/' + currentTheme?.stylesheet;
 		fontFamilies.forEach( async ( fontFamily ) => {
 			fontFamily.fontFace?.forEach( async ( fontFace ) => {
-				const srcFont = getDisplaySrcFromFontFace(
-					fontFace.src,
-					themeUrl
-				);
+				const src = Array.isArray( fontFace.src )
+					? fontFace.src[ 0 ]
+					: fontFace.src;
+				const srcFont = getDisplaySrcFromFontFace( src, themeUrl );
 				const dataSource = `url(${ srcFont })`;
 				const newFont = new FontFace( fontFace.fontFamily, dataSource, {
 					style: fontFace.fontStyle,
@@ -85,7 +85,13 @@ export const FontFamiliesLoader = ( {
 				}
 			} );
 		} );
-	}, [ fontFamilies, iframeInstance, onLoad, themeUrl ] );
+	}, [
+		currentTheme?.stylesheet,
+		fontFamilies,
+		iframeInstance,
+		onLoad,
+		site,
+	] );
 
 	return <></>;
 };

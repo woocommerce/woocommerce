@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix - Add back the parent machine to the `designWithNoAiStateMachineDefinition` child machine option.
