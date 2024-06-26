@@ -9,11 +9,13 @@ import Button from '@woocommerce/base-components/button';
 interface PlaceOrderButton {
 	label: string;
 	fullWidth?: boolean | undefined;
+	showPrice?: boolean | undefined;
 }
 
 const PlaceOrderButton = ( {
 	label,
 	fullWidth = false,
+	showPrice = true,
 }: PlaceOrderButton ): JSX.Element => {
 	const {
 		onSubmit,
@@ -23,6 +25,8 @@ const PlaceOrderButton = ( {
 		waitingForRedirect,
 	} = useCheckoutSubmit();
 
+	const buttonLabel = `${ label } - ${ showPrice ? '€0.00' : '' }`;
+
 	return (
 		<Button
 			className={ clsx(
@@ -30,6 +34,10 @@ const PlaceOrderButton = ( {
 				{
 					'wc-block-components-checkout-place-order-button--full-width':
 						fullWidth,
+				},
+				{
+					'wc-block-components-checkout-place-order-button--with-price':
+						showPrice,
 				}
 			) }
 			onClick={ onSubmit }
@@ -41,7 +49,7 @@ const PlaceOrderButton = ( {
 			}
 			showSpinner={ waitingForProcessing }
 		>
-			{ waitingForRedirect ? <Icon icon={ check } /> : label }
+			{ waitingForRedirect ? <Icon icon={ check } /> : buttonLabel }
 		</Button>
 	);
 };
