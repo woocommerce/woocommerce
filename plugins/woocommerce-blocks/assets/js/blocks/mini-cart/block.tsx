@@ -21,7 +21,8 @@ import {
 	isNumber,
 } from '@woocommerce/types';
 import {
-	unmountComponentAtNode,
+	createRoot,
+	unmount,
 	useCallback,
 	useEffect,
 	useRef,
@@ -158,8 +159,10 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 				const container = contentsNode.querySelector(
 					'.wp-block-woocommerce-mini-cart-contents'
 				);
+
 				if ( container ) {
-					unmountComponentAtNode( container );
+					const root = createRoot( container );
+					root.unmount();
 				}
 			}
 		};
