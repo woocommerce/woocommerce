@@ -435,10 +435,15 @@ export class CheckoutPage {
 			} );
 			const county = shippingForm.getByLabel( 'County' );
 
-			await state
-				.or( province )
-				.or( county )
-				.fill( customerShippingDetails.state );
+			const elementToFill = state.or( province ).or( county );
+			const tagName = await elementToFill.getAttribute( 'tagName' );
+			if ( tagName === 'select' ) {
+				await elementToFill.selectOption(
+					customerShippingDetails.state
+				);
+			} else {
+				await elementToFill.fill( customerShippingDetails.state );
+			}
 		}
 
 		if ( customerShippingDetails.postcode ) {
