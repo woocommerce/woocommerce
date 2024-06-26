@@ -135,23 +135,20 @@ test.only(
 		} );
 
 		await test.step( 'create local attributes with terms', async () => {
-			// // Add attributes that do not exist
-			// await page.getByPlaceholder( 'Search or create attribute' ).click();
-
-			// // Unless we wait for the list to be visible, the attribute name will be filled too soon and the test will fail.
-			// await waitForAttributeList( page );
-
 			/*
-			 * AttributeTableRow is the row that contains
-			 * the attribute name and the options (terms).
+			 * attributeRowsLocator are the rows that contains
+			 * the Attribute combobox and the Term FormTokenField.
 			 */
-			const rowSelector = '.woocommerce-new-attribute-modal__table-row';
+			const attributeRowsLocator = page.locator(
+				'.woocommerce-new-attribute-modal__table-row'
+			);
+
 			/*
-			 * Check the app loads the attributes,
+			 * First, check the app loads the attributes,
 			 * based on the Spinner visibility.
 			 */
-			const spinnerLocator = page.locator(
-				`${ rowSelector } .components-spinner`
+			const spinnerLocator = attributeRowsLocator.locator(
+				'.components-spinner'
 			);
 			await spinnerLocator.waitFor( {
 				state: 'visible',
@@ -159,18 +156,17 @@ test.only(
 			await spinnerLocator.waitFor( { state: 'hidden' } );
 
 			for ( const term of newAttributes ) {
-				// Attribute/Terms row
-				const attributeRowLocator = page.locator( rowSelector ).last();
+				const attributeRowLocator = attributeRowsLocator.last();
 
 				// Attribute combobox input
-				const attributeInputLocator = attributeRowLocator
+				const attributeComboboxLocator = attributeRowLocator
 					.locator(
 						'input[aria-describedby^="components-form-token-suggestions-howto-combobox-control"]'
 					)
 					.last();
 
 				// Create new (local) product attribute.
-				await attributeInputLocator.fill( term.name );
+				await attributeComboboxLocator.fill( term.name );
 				await page.locator( `text=Create "${ term.name }"` ).click();
 
 				const FormTokenFieldLocator = attributeRowLocator.locator(
