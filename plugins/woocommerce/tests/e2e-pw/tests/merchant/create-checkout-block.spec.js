@@ -79,6 +79,14 @@ test.describe(
 			// When Gutenberg is active, the canvas is in an iframe
 			let canvas = await getCanvas( page );
 
+			// Open Settings sidebar if closed
+			if (
+				await page
+					.getByLabel( 'Editor Settings', { exact: true } )
+					.isHidden()
+			) {
+				await canvas.getByLabel( 'Settings', { exact: true } ).click();
+			}
 			// Activate the terms and conditions checkbox
 			await canvas.getByLabel( 'Block: Terms and Conditions' ).click();
 			await page.getByLabel( 'Require checkbox' ).check();
