@@ -11,7 +11,7 @@ const { variableProducts: utils } = require( '../../../../utils' );
 const attributes = require( './fixtures/attributes' );
 const tabs = require( './data/tabs' );
 const {
-	confirmGlobalAttributesLoaded,
+	waitForGlobalAttributesLoaded,
 } = require( './helpers/confirm-global-attributes-loaded' );
 
 const {
@@ -111,7 +111,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 				 * Check the app loads the attributes,
 				 * based on the Spinner visibility.
 				 */
-				await confirmGlobalAttributesLoaded( page );
+				await waitForGlobalAttributesLoaded( page );
 
 				// Attribute combobox input
 				const attributeInputLocator = page.locator(

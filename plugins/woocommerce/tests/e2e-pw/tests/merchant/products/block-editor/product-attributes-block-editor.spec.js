@@ -6,7 +6,7 @@ const { updateProduct } = require( '../../../../utils/product-block-editor' );
 const { clickOnTab } = require( '../../../../utils/simple-products' );
 const attributesData = require( './fixtures/attributes' );
 const {
-	confirmGlobalAttributesLoaded,
+	waitForGlobalAttributesLoaded,
 } = require( './helpers/confirm-global-attributes-loaded' );
 
 async function waitForAttributeList( page ) {
@@ -135,7 +135,7 @@ test(
 			 * First, check the app loads the attributes,
 			 * based on the Spinner visibility.
 			 */
-			await confirmGlobalAttributesLoaded( page );
+			await waitForGlobalAttributesLoaded( page );
 
 			for ( const attribute of attributesData ) {
 				const attributeRowLocator = attributeRowsLocator.last();

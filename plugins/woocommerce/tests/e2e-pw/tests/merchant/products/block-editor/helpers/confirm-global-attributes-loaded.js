@@ -9,7 +9,7 @@
  *
  * @param {Object} page - The Playwright Page object.
  */
-export async function confirmGlobalAttributesLoaded( page ) {
+export async function waitForGlobalAttributesLoaded( page ) {
 	const spinnerLocator = page.locator(
 		'.woocommerce-new-attribute-modal__table-row .components-spinner'
 	);
