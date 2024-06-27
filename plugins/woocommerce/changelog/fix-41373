@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Enforce product parent checks in variations REST API.
