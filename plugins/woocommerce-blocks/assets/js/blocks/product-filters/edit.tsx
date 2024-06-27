@@ -137,10 +137,10 @@ export const Edit = ( {
 		return <Spinner />;
 	}
 
-	const templatePartEditUri = getSetting(
+	const templatePartEditUri = getSetting< string >(
 		'templatePartProductFiltersOverlayEditUri',
 		''
-	) as string;
+	);
 
 	return (
 		<div { ...blockProps }>
