@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "12ea33bcea6a641c43d24712adc9f0b6",
+    "content-hash": "b0d83e1f33f324fa07f8b3874f17ae55",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -1000,6 +1000,24 @@
                 "source": "https://github.com/woocommerce/action-scheduler/tree/3.7.4"
             },
             "time": "2024-04-05T14:42:07+00:00"
+        },
+        {
+            "name": "woocommerce/blueprint",
+            "version": "dev-add/add-blueprint",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/php/blueprint",
+                "reference": "4e46927bc9d19aad86f3d1f539a2f43259921a7d"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Automattic\\Woocommerce\\Blueprint\\": "src/"
+                }
+            },
+            "transport-options": {
+                "relative": true
+            }
         }
     ],
     "packages-dev": [
@@ -4620,7 +4638,7 @@
         },
         {
             "name": "woocommerce/monorepo-plugin",
-            "version": "dev-update/action-scheduler-3.7.4",
+            "version": "dev-add/add-blueprint",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",
