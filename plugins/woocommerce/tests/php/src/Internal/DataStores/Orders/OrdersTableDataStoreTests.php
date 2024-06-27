@@ -3442,7 +3442,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$new_count = 0;
 
 		$callback = function () use ( &$new_count ) {
-			$new_count ++;
+			++$new_count;
 		};
 
 		add_action( 'woocommerce_new_order', $callback );
@@ -3450,7 +3450,6 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$draft_statuses = array( 'auto-draft', 'draft', 'checkout-draft' );
 
 		$orders_data_store = new OrdersTableDataStore();
-
 
 		foreach ( $draft_statuses as $status ) {
 			$order = WC_Helper_Order::create_order();

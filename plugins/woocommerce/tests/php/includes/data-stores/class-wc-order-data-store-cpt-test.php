@@ -447,7 +447,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$new_count = 0;
 
 		$callback = function () use ( &$new_count ) {
-			$new_count ++;
+			++$new_count;
 		};
 
 		add_action( 'woocommerce_new_order', $callback );
@@ -455,7 +455,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$draft_statuses = array( 'auto-draft', 'draft', 'checkout-draft' );
 
 		$order_data_store_cpt = new WC_Order_Data_Store_CPT();
-
 
 		foreach ( $draft_statuses as $status ) {
 			$order = wc_create_order();
