@@ -26,12 +26,14 @@ runs:
           run: |
               echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
         - name: 'Cache PNPM Dependencies'
+          if: ${{ inputs.build == 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
             path: ${{ env.PNPM_STORE_PATH }}
             key: "${{ runner.os }}-pnpm-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
             restore-keys: '${{ runner.os }}-pnpm-'
         - name: 'Cache Playwright Dependencies'
+          if: ${{ inputs.build == 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
             path: '~/.cache/ms-playwright/'
@@ -50,7 +52,7 @@ runs:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'
         - name: 'Cache Composer Dependencies'
-          if: ${{ inputs.php-version != 'false' }}
+          if: ${{ inputs.build == 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: '~/.cache/composer/files'
