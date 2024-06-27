@@ -34,7 +34,7 @@ runs:
         - name: 'Cache Playwright Dependencies'
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
-            path: '!/.cache/ms-playwright/'
+            path: '~/.cache/ms-playwright/'
             key: "${{ runner.os }}-playwright-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
             restore-keys: '${{ runner.os }}-playwright-'
         - name: 'Setup Node'
