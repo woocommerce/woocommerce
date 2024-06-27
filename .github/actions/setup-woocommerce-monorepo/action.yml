@@ -32,8 +32,8 @@ runs:
             path: ${{ env.PNPM_STORE_PATH }}
             key: "${{ runner.os }}-pnpm-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
             restore-keys: '${{ runner.os }}-pnpm-'
-        - name: 'Cache Playwright Dependencies'
-          if: ${{ inputs.build == 'false' }}
+        - name: 'Cache Playwright Downloads'
+          if: ${{ inputs.build != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
             path: '~/.cache/ms-playwright/'
