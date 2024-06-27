@@ -193,19 +193,36 @@ test.only(
 				} );
 				await expect( attributeRowLocator ).toBeVisible();
 
-				for ( const term of attribute.terms ) {
+				// UI only shows 3 terms, so we need to check if the term is visible.
+				const shownTerms = attribute.terms.slice( 0, 3 ).entries();
+
+				// Check if there are more terms than three.
+				const moreThanThreeTerms = attribute.terms.length > 3;
+
+				for ( const [ index, term ] of shownTerms ) {
+					/*
+					 * Disabling the eslint rule because the text
+					 * is different when there are more than three terms.
+					 */
+					const termLabel =
+						// eslint-disable-next-line playwright/no-conditional-in-test
+						moreThanThreeTerms && index === 2
+							? '+ 3 more'
+							: term.name;
 					// Pick the term element/locator
 					const termLocator = attributeRowLocator
 						.locator( `[aria-hidden="true"]` )
 						.filter( {
-							has: page.getByText( term.name ),
+							has: page.getByText( termLabel, {
+								exact: true,
+							} ),
 						} );
 
 					// Verify the term is visible
 					await expect( termLocator ).toBeVisible();
 
 					// Verify the term text
-					await expect( termLocator ).toContainText( term.name );
+					await expect( termLocator ).toContainText( termLabel );
 				}
 			}
 		} );
