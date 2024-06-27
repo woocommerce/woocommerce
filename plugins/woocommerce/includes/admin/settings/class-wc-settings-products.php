@@ -455,7 +455,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc_tip' => sprintf(
 						/* Translators: 1: opening link tag 2: closing link tag. */
 						__( 'Repeat fetches made within a reasonable window of time (by default, 30 minutes) will not be counted twice. This is a generally reasonably way to enforce download limits in relation to ranged requests. %1$sLearn more.%2$s', 'woocommerce' ),
-						'<a href="https://woocommerce.com/documentation/woocommerce/todo">',
+						'<a href="https://woocommerce.com/document/digital-downloadable-product-handling/">',
 						'</a>'
 					),
 				),
