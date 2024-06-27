@@ -330,7 +330,7 @@ const getFrontConfig = ( options = {} ) => {
 			// translations which we must avoid.
 			// @see https://github.com/Automattic/jetpack/pull/20926
 			chunkFilename: `[name]-frontend${ fileSuffix }.js?ver=[contenthash]`,
-			filename: ( pathData ) => {
+			filename: () => {
 				return `[name]-frontend${ fileSuffix }.js`;
 			},
 			uniqueName: 'webpackWcBlocksFrontendJsonp',

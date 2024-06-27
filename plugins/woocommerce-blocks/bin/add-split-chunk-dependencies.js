@@ -7,7 +7,7 @@ class AddSplitChunkDependencies {
 	apply( compiler ) {
 		compiler.hooks.thisCompilation.tap(
 			'AddStableChunksToAssets',
-			( compilation, callback ) => {
+			( compilation ) => {
 				compilation.hooks.processAssets.tap(
 					{
 						name: 'AddStableChunksToAssets',

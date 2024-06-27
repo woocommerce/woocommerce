@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useCallback, useMemo, useEffect, useRef } from '@wordpress/element';
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
@@ -35,7 +34,6 @@ const StateInput = ( {
 	autoComplete = 'off',
 	value = '',
 	required = false,
-	errorId = '',
 }: StateInputWithStatesProps ): JSX.Element => {
 	const countryStates = states[ country ];
 	const options = useMemo(
