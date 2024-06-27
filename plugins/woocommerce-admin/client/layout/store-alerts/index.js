@@ -248,17 +248,8 @@ export const StoreAlerts = () => {
 		parseInt( count, 10 )
 	);
 
-	if ( preloadAlertCount > 0 && isLoading ) {
-		return (
-			<StoreAlertsPlaceholder
-				hasMultipleAlerts={ preloadAlertCount > 1 }
-			/>
-		);
-	} else if ( alerts.length === 0 ) {
-		return null;
-	}
-
-	const isHomescreen = isWCAdmin() && getScreenFromPath() === 'homescreen';
+	const isWCAdminPage = isWCAdmin();
+	const isHomescreen = isWCAdminPage && getScreenFromPath() === 'homescreen';
 
 	const hasTwoColumns = hasTwoColumnLayout(
 		userPrefs.homepage_layout,
@@ -267,13 +258,30 @@ export const StoreAlerts = () => {
 		isTaskListHidden
 	);
 
+	if ( preloadAlertCount > 0 && isLoading ) {
+		return (
+			<StoreAlertsPlaceholder
+				className={ clsx( {
+					'is-wc-admin-page': isWCAdminPage,
+					'is-homescreen': isHomescreen,
+					'two-columns': hasTwoColumns && isHomescreen,
+				} ) }
+				hasMultipleAlerts={ preloadAlertCount > 1 }
+			/>
+		);
+	} else if ( alerts.length === 0 ) {
+		return null;
+	}
+
 	const numberOfAlerts = alerts.length;
 	const alert = alerts[ currentIndex ];
 	const type = alert.type;
 	const className = clsx( 'woocommerce-store-alerts', {
 		'is-alert-error': type === 'error',
 		'is-alert-update': type === 'update',
-		'two-columns': hasTwoColumns || ! isHomescreen,
+		'is-wc-admin-page': isWCAdminPage,
+		'is-homescreen': isHomescreen,
+		'two-columns': hasTwoColumns && isHomescreen,
 	} );
 
 	const onDismiss = async ( note ) => {

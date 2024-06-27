@@ -1,15 +1,29 @@
 .woocommerce-store-alerts {
 	position: relative;
-	margin: 40px auto;
+	margin: 40px 20px;
 	padding: $gap-large;
 	border: 0;
 	box-shadow: 0 0 8px -2px rgba(0, 0, 0, 0.3);
-	max-width: 682px;
-	left: calc(-1 * var(--main-gap));
+	left: 0;
+	width: 100%;
+	max-width: calc(100% - var(--main-gap) * 2);
+
+	@include breakpoint("<782px") {
+		left: 0;
+		margin-top: $gap-large;
+	}
+
+	&.is-wc-admin-page {
+		margin: 40px 20px 40px 0px;
+	}
+
+	&.is-homescreen {
+		margin: 40px auto;
+		max-width: 682px;
+		left: calc(-1 * var(--main-gap));
+	}
 
 	&.two-columns {
-		max-width: calc(100% - var(--main-gap) * 2);
-
 		@include breakpoint("<782px") {
 			max-width: inherit;
 		}
@@ -85,14 +99,14 @@
 
 .woocommerce-embed-page {
 	.woocommerce-store-alerts {
-		left: 0;
-		width: 100%;
-		max-width: 1032px;
+		// left: 0;
+		// width: 100%;
+		// max-width: 1032px;
 
-		@include breakpoint("<782px") {
-			left: 0;
-			margin-top: $gap-large;
-		}
+		// @include breakpoint("<782px") {
+		// 	left: 0;
+		// 	margin-top: $gap-large;
+		// }
 	}
 }
 
