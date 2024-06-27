@@ -175,8 +175,7 @@ export const Edit = ( {
 							</ExternalLink>
 						</p>
 					) }
-					{ ( attributes.overlay === 'mobile' ||
-						attributes.overlay === 'always' ) && (
+					{ ( attributes.overlay !== 'never' ) && (
 						<>
 							<RadioControl
 								className="wc-block-editor-product-filters__overlay-button-style-toggle"
