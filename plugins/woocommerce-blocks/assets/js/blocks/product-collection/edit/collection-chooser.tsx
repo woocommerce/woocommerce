@@ -14,6 +14,7 @@ import {
 	// @ts-expect-error Type definitions for this function are missing in Guteberg
 	store as blocksStore,
 	BlockVariation,
+	BlockIcon,
 } from '@wordpress/blocks';
 
 /**
@@ -26,7 +27,7 @@ import { getDefaultProductCollection } from '../constants';
 
 type CollectionButtonProps = {
 	title: string;
-	icon: Icon.IconType< JSX.Element >;
+	icon: BlockIcon | undefined;
 	description: string | undefined;
 	onClick: () => void;
 };
