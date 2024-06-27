@@ -55,11 +55,11 @@
 		},
 		"overlayButtonStyle": {
 			"type": "string",
-			"default": "icon"
+			"default": "label-icon"
 		},
 		"overlayIconSize": {
 			"type": "number",
-			"default": "32"
+			"default": "12"
 		}
 	},
 	"viewScript": "wc-product-filters-frontend",

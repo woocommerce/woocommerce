@@ -26,7 +26,7 @@ import { getSetting } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import type { ProductFiltersBlockAttributes } from './types';
+import type { BlockAttributes } from './types';
 import './editor.scss';
 
 const TEMPLATE: InnerBlockTemplate[] = [
@@ -108,7 +108,7 @@ const addHighestProductCountAttributeToTemplate = (
 export const Edit = ( {
 	setAttributes,
 	attributes,
-}: BlockEditProps< ProductFiltersBlockAttributes > ) => {
+}: BlockEditProps< BlockAttributes > ) => {
 	const blockProps = useBlockProps();
 	const { results: attributeTerms, isLoading } =
 		useCollection< AttributeTerm >( {
@@ -150,7 +150,7 @@ export const Edit = ( {
 						className="wc-block-editor-product-filters__overlay-toggle"
 						isBlock={ true }
 						value={ attributes.overlay }
-						onChange={ ( value: 'never' | 'mobile' | 'always' ) => {
+						onChange={ ( value: BlockAttributes[ 'overlay' ] ) => {
 							setAttributes( { overlay: value } );
 						} }
 					>
@@ -167,22 +167,19 @@ export const Edit = ( {
 							label={ __( 'Always', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
-					{ ( attributes.overlay === 'always' ||
-						attributes.overlay === 'mobile' ) && (
-						<p className="wc-block-editor-product-filters__overlay-link">
-							<ExternalLink href={ templatePartEditUri }>
-								{ __( 'Edit overlay', 'woocommerce' ) }
-							</ExternalLink>
-						</p>
-					) }
-					{ ( attributes.overlay !== 'never' ) && (
+					{ attributes.overlay !== 'never' && (
 						<>
+							<p className="wc-block-editor-product-filters__overlay-link">
+								<ExternalLink href={ templatePartEditUri }>
+									{ __( 'Edit overlay', 'woocommerce' ) }
+								</ExternalLink>
+							</p>
 							<RadioControl
 								className="wc-block-editor-product-filters__overlay-button-style-toggle"
-								label={ __( 'BUTTON', 'woocommerce' ) }
+								label={ __( 'Button', 'woocommerce' ) }
 								selected={ attributes.overlayButtonStyle }
 								onChange={ (
-									value: 'label-icon' | 'label' | 'icon'
+									value: BlockAttributes[ 'overlayButtonStyle' ]
 								) => {
 									setAttributes( {
 										overlayButtonStyle: value,
@@ -216,11 +213,7 @@ export const Edit = ( {
 										isBlock={ true }
 										value={ attributes.overlayIcon }
 										onChange={ (
-											value:
-												| 'filter-icon-1'
-												| 'filter-icon-2'
-												| 'filter-icon-3'
-												| 'filter-icon-4'
+											value: BlockAttributes[ 'overlayIcon' ]
 										) => {
 											setAttributes( {
 												overlayIcon: value,
@@ -287,22 +280,21 @@ export const Edit = ( {
 											}
 										/>
 									</ToggleGroupControl>
-									<div className="wc-block-editor-product-filters__overlay-button-size">
-										<RangeControl
-											label={ __(
-												'ICON SIZE',
-												'woocommerce'
-											) }
-											value={ attributes.overlayIconSize }
-											onChange={ ( value ) =>
-												setAttributes( {
-													overlayIconSize: value,
-												} )
-											}
-											min={ 20 }
-											max={ 80 }
-										/>
-									</div>
+									<RangeControl
+										label={ __(
+											'Icon size',
+											'woocommerce'
+										) }
+										className="wc-block-editor-product-filters__overlay-button-size"
+										value={ attributes.overlayIconSize }
+										onChange={ ( value: number ) =>
+											setAttributes( {
+												overlayIconSize: value,
+											} )
+										}
+										min={ 20 }
+										max={ 80 }
+									/>
 								</>
 							) }
 						</>
