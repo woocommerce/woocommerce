@@ -168,8 +168,9 @@ class PatternRegistry {
 
 				register_block_pattern_category(
 					$category_slug,
-                    // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
-					array( 'label' => __( self::kebab_to_capital_case( $category_slug ), 'woocommerce' ) )
+					array(
+						'label' => self::kebab_to_capital_case( $category_slug ),
+					),
 				);
 			}
 		}
