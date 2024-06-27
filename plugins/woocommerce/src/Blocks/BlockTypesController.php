@@ -210,6 +210,8 @@ final class BlockTypesController {
 		 */
 		$allowed_blocks = (array) apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_block', array() );
 
+		$blocks_with_woo_parents = $this->get_registered_blocks_with_woocommerce_parent();
+
 		$block_has_woo_parent = in_array( $block_name, array_keys( $this->registered_blocks_with_woocommerce_parents ), true );
 
 		if ( ! $block_has_woo_parent && ! in_array( $block_namespace, $allowed_namespaces, true ) && ! in_array( $block_name, $allowed_blocks, true ) ) {
