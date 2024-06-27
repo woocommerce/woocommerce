@@ -35,7 +35,6 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 
 import { trackEvent } from '~/customize-store/tracking';
-import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '..';
 import { Link } from '@woocommerce/components';
 import { PATTERN_CATEGORIES } from './pattern-screen/categories';
