@@ -125,6 +125,54 @@ __experimentalRegisterProductCollection({
 });
 ```
 
+### Example 4: Collection with inner blocks
+
+As you can see below, it's also possible to define inner blocks for the collection. In the example below, we are defining inner blocks for the collection.
+
+```tsx
+__experimentalRegisterProductCollection({
+  name: "woocommerce/product-collection/my-custom-collection-with-inner-blocks",
+  title: "My Custom Collection with Inner Blocks",
+  icon: "games",
+  description: "This is a custom collection with inner blocks.",
+  keywords: ["My Custom Collection with Inner Blocks", "product collection"],
+  innerBlocks: [
+    [
+      "core/heading",
+      {
+        textAlign: "center",
+        level: 2,
+        content: "Title of the collection",
+      },
+    ],
+    [
+      "woocommerce/product-template",
+      {},
+      [
+        ["woocommerce/product-image"],
+        [
+          "woocommerce/product-price",
+          {
+            textAlign: "center",
+            fontSize: "small",
+          },
+        ],
+      ],
+    ],
+  ],
+});
+```
+
+This will create a collection with a heading, product image, and product price. Here is how it will look like:
+
+<img width="800" alt="image" src="https://github.com/woocommerce/woocommerce/assets/16707866/3d92c084-91e9-4872-a898-080b4b93afca">
+
+> ![TIP]
+> You can learn more about inner blocks template in the [Inner Blocks](https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/nested-blocks-inner-blocks/#template) documentation.
+
+> ![TIP]
+> You can also take a look at how we are defining our core collections at `plugins/woocommerce-blocks/assets/js/blocks/product-collection/collections` directory. Our core collections will also evolve over time.
+
 ## Defining a Collection
 
 We will explain important arguments that can be passed to `__experimentalRegisterProductCollection`. For other arguments, you can refer to the [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation) documentation.
