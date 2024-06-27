@@ -3,7 +3,7 @@
  */
 import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { Button, Dropdown, Tooltip } from '@wordpress/components';
+import { Button, Dropdown, Icon, Tooltip } from '@wordpress/components';
 import { useResizeObserver } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import {
@@ -14,7 +14,6 @@ import {
 	// @ts-expect-error Type definitions for this function are missing in Guteberg
 	store as blocksStore,
 	BlockVariation,
-	BlockIcon,
 } from '@wordpress/blocks';
 
 /**
@@ -27,7 +26,7 @@ import { getDefaultProductCollection } from '../constants';
 
 type CollectionButtonProps = {
 	title: string;
-	icon: BlockIcon | undefined;
+	icon: Icon.IconType< JSX.Element >;
 	description: string | undefined;
 	onClick: () => void;
 };
@@ -77,7 +76,7 @@ const CollectionButton = ( {
 				onClick={ onClick }
 			>
 				<div className="wc-blocks-product-collection__collection-button-icon">
-					{ icon }
+					<Icon icon={ icon } />
 				</div>
 				<p className="wc-blocks-product-collection__collection-button-title">
 					{ title }
