@@ -99,7 +99,7 @@ const test = baseTest.extend( {
 	},
 } );
 
-test.only(
+test(
 	'add local attribute (with terms) to the Product',
 	{ tag: '@gutenberg' },
 	async ( { page, product } ) => {
