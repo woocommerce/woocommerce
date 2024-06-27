@@ -75,13 +75,23 @@ final class BlockTypesController {
 	}
 
 	/**
-	 * Cache registered blocks that have WooCommerce blocks as their parents. Adds the value to the
-	 * `registered_blocks_with_woocommerce_parents` class property.
+	 * Get registered blocks that have WooCommerce blocks as their parents. Adds the value to the
+	 * `registered_blocks_with_woocommerce_parents` cache if `init` has been fired.
 	 *
-	 * @return void
+	 * @return array Registered blocks with WooCommerce blocks as parents.
 	 */
-	public function cache_registered_blocks_with_woocommerce_parent() {
-		$registered_blocks                                = \WP_Block_Type_Registry::get_instance()->get_all_registered();
+	public function get_registered_blocks_with_woocommerce_parent() {
+		// If init has run and the cache is already set, return it.
+		if ( did_action( 'init' ) && ! empty( $this->registered_blocks_with_woocommerce_parents ) ) {
+			return $this->registered_blocks_with_woocommerce_parents;
+		}
+
+		$registered_blocks = \WP_Block_Type_Registry::get_instance()->get_all_registered();
+
+		if ( ! is_array( $registered_blocks ) ) {
+			return array();
+		}
+
 		$this->registered_blocks_with_woocommerce_parents = array_filter(
 			$registered_blocks,
 			function ( $block ) {
@@ -100,6 +110,7 @@ final class BlockTypesController {
 				return ! empty( $woocommerce_blocks );
 			}
 		);
+		return $this->registered_blocks_with_woocommerce_parents;
 	}
 
 	/**
