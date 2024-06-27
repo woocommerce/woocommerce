@@ -7,13 +7,7 @@ import { capitalize } from 'lodash';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import {
-	Button,
-	Path,
-	SVG,
-	ToolbarButton,
-	ToolbarGroup,
-} from '@wordpress/components';
+import { Button, Path, SVG, ToolbarGroup } from '@wordpress/components';
 import {
 	unlock,
 	// @ts-expect-error No types for this exist yet.
