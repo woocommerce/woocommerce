@@ -14,11 +14,11 @@ import { AttributeTerm } from '@woocommerce/types';
 import {
 	PanelBody,
 	RadioControl,
-	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
-	__experimentalToggleGroupControl as ToggleGroupControl,
 	Spinner,
 	ExternalLink,
 	RangeControl,
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	__experimentalToggleGroupControl as ToggleGroupControl,
 } from '@wordpress/components';
 import { Icon, settings, menu } from '@wordpress/icons';
 import { getSetting } from '@woocommerce/settings';
