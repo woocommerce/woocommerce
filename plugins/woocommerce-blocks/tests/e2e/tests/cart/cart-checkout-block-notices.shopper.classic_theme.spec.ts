@@ -43,7 +43,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 	} );
 
-	test( 'default classic notice templates are visible', async ( {
+	test( 'default classic notice templates, except for coupon errors, are visible', async ( {
 		frontendUtils,
 		page,
 	} ) => {
@@ -73,7 +73,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		// We're explicitly checking the CSS classes of the classic notices.
 		await expect(
 			page.locator( '.woocommerce-notices-wrapper .woocommerce-error' )
-		).toBeVisible();
+		).toBeHidden();
 
 		await page.getByLabel( 'Remove Polo from cart' ).click();
 
@@ -87,7 +87,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		).toBeVisible();
 	} );
 
-	test( 'custom classic notice templates are visible by template overwrite', async ( {
+	test( 'custom classic notice templates, except for coupon errors, are visible by template overwrite', async ( {
 		requestUtils,
 		frontendUtils,
 		page,
@@ -124,7 +124,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		// We're explicitly checking the CSS classes of the classic notices.
 		await expect(
 			page.locator( '.woocommerce-notices-wrapper .woocommerce-error' )
-		).toBeVisible();
+		).toBeHidden();
 
 		await page.getByLabel( 'Remove Polo from cart' ).click();
 

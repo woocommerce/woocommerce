@@ -140,7 +140,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await requestUtils.activateTheme( BLOCK_THEME_SLUG );
 	} );
 
-	test( 'classic notice templates are visible by template overwrite', async ( {
+	test( 'classic notice templates, except for coupon errors, are visible by template overwrite', async ( {
 		requestUtils,
 		frontendUtils,
 		page,
@@ -177,7 +177,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		// We're explicitly checking the CSS classes of the classic notices.
 		await expect(
 			page.locator( '.woocommerce-notices-wrapper .woocommerce-error' )
-		).toBeVisible();
+		).toBeHidden();
 
 		await page.getByLabel( 'Remove Polo from cart' ).click();
 
