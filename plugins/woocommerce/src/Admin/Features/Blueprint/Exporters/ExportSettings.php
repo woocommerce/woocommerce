@@ -145,13 +145,17 @@ class ExportSettings implements ExportsStepSchema {
 	}
 
 	public function export_step_schema() {
+		$export = $this->export();
 		return array(
 			'step' => $this->get_step_name(),
-			'values' => $this->export()
+			'options' => $export['options'],
+			'meta' => array(
+				'pages' => $export['pages']
+			)
 		);
 	}
 
 	public function get_step_name() {
-	    return 'configureSettings';
+	    return 'setOptions';
 	}
 }

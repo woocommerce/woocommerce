@@ -17,6 +17,6 @@ class ExportTaskOptions implements ExportsStepSchema {
 	}
 
 	public function get_step_name() {
-		return 'configureTaskOptions';
+		return 'setOptions';
 	}
 }
