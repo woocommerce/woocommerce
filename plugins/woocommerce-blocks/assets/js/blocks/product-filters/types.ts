@@ -4,5 +4,5 @@ export interface ProductFiltersBlockAttributes {
 	overlay: string;
 	overlayIcon: string;
 	overlayButtonStyle: string;
-	overlayIconSize: number | undefined;
+	overlayIconSize?: number;
 }
