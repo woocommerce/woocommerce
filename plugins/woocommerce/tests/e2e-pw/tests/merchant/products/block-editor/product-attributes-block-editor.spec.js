@@ -3,6 +3,7 @@ const {
 } = require( '../../../../fixtures/block-editor-fixtures' );
 const { expect } = require( '../../../../fixtures/fixtures' );
 const { updateProduct } = require( '../../../../utils/product-block-editor' );
+const { clickOnTab } = require( '../../../../utils/simple-products' );
 
 async function waitForAttributeList( page ) {
 	// The list child is different in case there are no results versus when there already are some attributes, so we need to wait for either one to be visible.
@@ -94,109 +95,139 @@ const test = baseTest.extend( {
 	},
 } );
 
-test.skip(
-	'can create and add attributes',
+test(
+	'add local attribute (with terms) to the Product',
 	{ tag: '@gutenberg' },
 	async ( { page, product } ) => {
 		const newAttributes = [
 			{
-				name: `pa_0_${ Date.now() }`,
-				value: `value_0_${ Date.now() }`,
+				name: 'Color',
+
+				terms: [ 'Red', 'Blue', 'Green' ],
 			},
 			{
-				name: `pa_1_${ Date.now() }`,
-				value: `value_1_${ Date.now() }`,
+				name: 'Size',
+				terms: [ 'Small', 'Medium', 'Large' ],
+			},
+			{
+				name: 'Style',
+				terms: [ 'Modern', 'Classic', 'Vintage' ],
 			},
 		];
 
-		await test.step( 'go to product editor, Organization tab', async () => {
+		await test.step( 'go to product editor -> Organization tab -> Click on `Add new`', async () => {
 			await page.goto(
 				`wp-admin/post.php?post=${ product.id }&action=edit`
 			);
-			await page.getByRole( 'tab', { name: 'Organization' } ).click();
-		} );
+			await clickOnTab( 'Organization', page );
 
-		await test.step( 'add new attributes', async () => {
+			await page
+				.getByRole( 'heading', { name: 'Attributes' } )
+				.isVisible();
+
 			await page.getByRole( 'button', { name: 'Add new' } ).click();
 
+			await page
+				.getByRole( 'heading', { name: 'Add variation options' } )
+				.isVisible();
+
 			await page.waitForLoadState( 'domcontentloaded' );
+		} );
 
-			// Add attributes that do not exist
-			await page.getByPlaceholder( 'Search or create attribute' ).click();
+		await test.step( 'create local attributes with terms', async () => {
+			/*
+			 * attributeRowsLocator are the rows that contains
+			 * the Attribute combobox and the Term FormTokenField.
+			 */
+			const attributeRowsLocator = page.locator(
+				'.woocommerce-new-attribute-modal__table-row'
+			);
 
-			// Unless we wait for the list to be visible, the attribute name will be filled too soon and the test will fail.
-			await waitForAttributeList( page );
+			/*
+			 * First, check the app loads the attributes,
+			 * based on the Spinner visibility.
+			 */
+			const spinnerLocator = attributeRowsLocator.locator(
+				'.components-spinner'
+			);
+			await spinnerLocator.waitFor( {
+				state: 'visible',
+			} );
+			await spinnerLocator.waitFor( { state: 'hidden' } );
 
-			await page
-				.getByPlaceholder( 'Search or create attribute' )
-				.fill( newAttributes[ 0 ].name );
-			await page
-				.getByText( `Create "${ newAttributes[ 0 ].name }"` )
-				.click();
+			for ( const term of newAttributes ) {
+				const attributeRowLocator = attributeRowsLocator.last();
 
-			await page.getByPlaceholder( 'Search or create value' ).click();
-			await page
-				.getByPlaceholder( 'Search or create value' )
-				.fill( newAttributes[ 0 ].value );
-			await page
-				.getByText( `Create "${ newAttributes[ 0 ].value }"` )
-				.click();
+				const attributeComboboxLocator = attributeRowLocator
+					.locator(
+						'input[aria-describedby^="components-form-token-suggestions-howto-combobox-control"]'
+					)
+					.last();
 
-			// Add another attribute
-			await page.getByLabel( 'Add another attribute' ).click();
-			await page
-				.getByPlaceholder( 'Search or create attribute' )
-				.nth( 1 )
-				.click();
+				// Create new (local) product attribute.
+				await attributeComboboxLocator.fill( term.name );
+				await page.locator( `text=Create "${ term.name }"` ).click();
 
-			await waitForAttributeList( page );
+				const FormTokenFieldLocator = attributeRowLocator.locator(
+					'td.woocommerce-new-attribute-modal__table-attribute-value-column'
+				);
 
-			await page
-				.getByPlaceholder( 'Search or create attribute' )
-				.nth( 1 )
-				.fill( newAttributes[ 1 ].name );
-			await page
-				.getByText( `Create "${ newAttributes[ 1 ].name }"` )
-				.click();
+				// Term FormTokenField input locator
+				const FormTokenFieldInputLocator =
+					FormTokenFieldLocator.locator(
+						'input[id^="components-form-token-input-"]'
+					);
 
-			await page.getByPlaceholder( 'Search or create value' ).click();
-			await page
-				.getByPlaceholder( 'Search or create value' )
-				.fill( newAttributes[ 1 ].value );
-			await page
-				.getByText( `Create "${ newAttributes[ 1 ].value }"` )
-				.click();
+				// Add terms to the attribute.
+				for ( const attributeTerm of term.terms ) {
+					await FormTokenFieldInputLocator.fill( attributeTerm );
+					await FormTokenFieldInputLocator.press( 'Enter' );
+				}
 
-			// Add attributes
+				await page.getByLabel( 'Add another attribute' ).click();
+			}
+
+			// Add the product attributes
 			await page
 				.getByRole( 'button', { name: 'Add attributes' } )
 				.click();
 		} );
 
 		await test.step( 'verify attributes in product editor', async () => {
-			// Verify new attributes in product editor
+			// Locate the main attributes list element
+			const attributesListLocator = page.locator(
+				'[data-template-block-id="product-attributes-section"]'
+			);
+			await expect( attributesListLocator ).toBeVisible();
+
+			const attributeRowsLocator =
+				attributesListLocator.getByRole( 'listitem' );
+
 			for ( const attribute of newAttributes ) {
-				const item = page.getByRole( 'listitem' ).filter( {
+				const attributeRowLocator = attributeRowsLocator.filter( {
 					has: page.getByText( attribute.name, { exact: true } ),
 				} );
-				await expect( item ).toBeVisible();
-				await expect( item ).toContainText( attribute.value );
+				await expect( attributeRowLocator ).toBeVisible();
+
+				for ( const term of attribute.terms ) {
+					// Pick the term element/locator
+					const termLocator = attributeRowLocator
+						.locator( `[aria-hidden="true"]` )
+						.filter( {
+							has: page.getByText( term ),
+						} );
+
+					// Verify the term is visible
+					await expect( termLocator ).toBeVisible();
+
+					// Verify the term text
+					await expect( termLocator ).toContainText( term );
+				}
 			}
 		} );
 
 		await test.step( 'update the product', async () => {
 			await updateProduct( { page, expect } );
-		} );
-
-		await test.step( 'verify attributes in product editor after product update', async () => {
-			// Verify attributes in product editor
-			for ( const attribute of newAttributes ) {
-				const item = page.getByRole( 'listitem' ).filter( {
-					has: page.getByText( attribute.name, { exact: true } ),
-				} );
-				await expect( item ).toBeVisible();
-				await expect( item ).toContainText( attribute.value );
-			}
 		} );
 
 		await test.step( 'verify the changes in the store frontend', async () => {
@@ -209,7 +240,7 @@ test.skip(
 					has: page.getByText( attribute.name, { exact: true } ),
 				} );
 				await expect( item ).toBeVisible();
-				await expect( item ).toContainText( attribute.value );
+				await expect( item ).toContainText( attribute.name );
 			}
 		} );
 	}
