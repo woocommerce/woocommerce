@@ -55,7 +55,6 @@ final class BlockTypesController {
 	 */
 	protected function init() {
 		add_action( 'init', array( $this, 'register_blocks' ) );
-		add_action( 'init', array( $this, 'cache_registered_blocks_with_woocommerce_parent' ) );
 		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 2 );
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
