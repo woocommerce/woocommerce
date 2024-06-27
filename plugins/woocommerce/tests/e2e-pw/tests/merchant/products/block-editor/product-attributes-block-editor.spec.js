@@ -4,6 +4,9 @@ const {
 const { expect } = require( '../../../../fixtures/fixtures' );
 const { updateProduct } = require( '../../../../utils/product-block-editor' );
 const { clickOnTab } = require( '../../../../utils/simple-products' );
+const {
+	confirmGlobalAttributesLoaded,
+} = require( './helpers/confirm-global-attributes-loaded' );
 
 async function waitForAttributeList( page ) {
 	// The list child is different in case there are no results versus when there already are some attributes, so we need to wait for either one to be visible.
@@ -147,13 +150,7 @@ test(
 			 * First, check the app loads the attributes,
 			 * based on the Spinner visibility.
 			 */
-			const spinnerLocator = attributeRowsLocator.locator(
-				'.components-spinner'
-			);
-			await spinnerLocator.waitFor( {
-				state: 'visible',
-			} );
-			await spinnerLocator.waitFor( { state: 'hidden' } );
+			await confirmGlobalAttributesLoaded( page );
 
 			for ( const term of newAttributes ) {
 				const attributeRowLocator = attributeRowsLocator.last();
