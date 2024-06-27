@@ -2,23 +2,40 @@
  * External dependencies
  */
 import type { Ref } from 'react';
+import apiFetch from '@wordpress/api-fetch';
 import { ComboboxControl } from '@wordpress/components';
+import { useDebounce, useInstanceId } from '@wordpress/compose';
 import {
 	createElement,
 	forwardRef,
+	useCallback,
 	useEffect,
 	useLayoutEffect,
 	useMemo,
 	useRef,
+	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
-import { CustomFieldNameControlProps } from './types';
-import { useInstanceId } from '@wordpress/compose';
-import classNames from 'classnames';
+import type { CustomFieldNameControlProps } from './types';
+
+async function searchCustomFieldNames( search?: string ) {
+	return apiFetch< string[] >( {
+		path: addQueryArgs( '/wc/v3/products/custom-fields/names', {
+			search,
+		} ),
+	} ).then( ( data ) =>
+		( data ?? [] ).map( ( customFieldName ) => ( {
+			value: customFieldName,
+			label: customFieldName,
+		} ) )
+	);
+}
 
 export const CustomFieldNameControl = forwardRef(
 	function ForwardedCustomFieldNameControl(
@@ -30,9 +47,7 @@ export const CustomFieldNameControl = forwardRef(
 			label,
 			messages,
 			value,
-			options,
 			onChange,
-			onFilterValueChange,
 			...props
 		}: CustomFieldNameControlProps,
 		ref: Ref< HTMLInputElement >
@@ -42,6 +57,10 @@ export const CustomFieldNameControl = forwardRef(
 			CustomFieldNameControl,
 			'woocommerce-custom-field-name'
 		);
+
+		const [ customFieldNames, setCustomFieldNames ] = useState<
+			ComboboxControl.Props[ 'options' ]
+		>( [] );
 
 		useLayoutEffect(
 			function initializeRefs() {
@@ -56,12 +75,11 @@ export const CustomFieldNameControl = forwardRef(
 			[ id ]
 		);
 
-		const {
-			attrs,
-			events,
-		}: Record< string, Record< string, unknown > > = useMemo(
+		const { attrs, events } = useMemo(
 			function splitAttrsAndEvents() {
-				return Object.entries( props ).reduce(
+				return Object.entries( props ).reduce<
+					Record< string, Record< string, unknown > >
+				>(
 					( current, [ key, value ] ) => {
 						if ( value !== undefined ) {
 							if ( key.startsWith( 'on' ) ) {
@@ -76,10 +94,7 @@ export const CustomFieldNameControl = forwardRef(
 
 						return current;
 					},
-					{ attrs: {}, events: {} } as Record<
-						string,
-						Record< string, unknown >
-					>
+					{ attrs: {}, events: {} }
 				);
 			},
 			[ props ]
@@ -96,7 +111,6 @@ export const CustomFieldNameControl = forwardRef(
 
 		useEffect(
 			function initializeEvents() {
-				console.log( events );
 				Object.entries( events ).forEach( ( [ key, value ] ) => {
 					comboboxRef.current?.addEventListener(
 						key,
@@ -116,6 +130,13 @@ export const CustomFieldNameControl = forwardRef(
 			[ events ]
 		);
 
+		const handleFilterValueChange = useDebounce(
+			useCallback( function onFilterValueChange( search: string ) {
+				searchCustomFieldNames( search ).then( setCustomFieldNames );
+			}, [] ),
+			250
+		);
+
 		return (
 			<ComboboxControl
 				allowReset={ allowReset }
@@ -124,10 +145,14 @@ export const CustomFieldNameControl = forwardRef(
 				label={ label }
 				messages={ messages }
 				value={ value }
-				options={ options }
+				options={ customFieldNames }
 				onChange={ onChange }
-				onFilterValueChange={ onFilterValueChange }
-				className={ classNames( id, className ) }
+				onFilterValueChange={ handleFilterValueChange }
+				className={ classNames(
+					id,
+					'woocommerce-custom-field-name-control',
+					className
+				) }
 			/>
 		);
 	}
