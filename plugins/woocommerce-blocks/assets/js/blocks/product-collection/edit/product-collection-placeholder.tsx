@@ -19,7 +19,6 @@ import type {
 	CollectionName,
 	ProductCollectionEditComponentProps,
 } from '../types';
-import Icon from '../icon';
 
 const ProductCollectionPlaceholder = (
 	props: ProductCollectionEditComponentProps
