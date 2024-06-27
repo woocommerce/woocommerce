@@ -90,7 +90,6 @@
 			position: absolute;
 			top: 36px;
 			z-index: 0;
-			display: none;
 		}
 
 		.components-form-token-field__label {
@@ -98,6 +97,9 @@
 		}
 
 		.components-form-token-field__input-container {
+			position: relative;
+			z-index: 10;
+
 			> .components-flex {
 				min-height: 34px;
 			}
