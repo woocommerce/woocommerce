@@ -192,7 +192,6 @@ export class Shipping extends Component {
 
 	getSteps() {
 		const {
-			countryCode,
 			createNotice,
 			invalidateResolutionForStoreSelector,
 			isJetpackConnected,
