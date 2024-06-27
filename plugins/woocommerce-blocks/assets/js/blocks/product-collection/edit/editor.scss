@@ -27,21 +27,26 @@ $max-button-width: calc(100% / #{$max-button-columns});
 
 .wc-blocks-product-collection__placeholder,
 .wc-blocks-product-collection__modal {
+	.components-placeholder__instructions {
+		width: 100%;
+		margin: $gap-small 0;
+		text-align: center;
+	}
+
 	.wc-blocks-product-collection__selection-subtitle {
 		margin-bottom: $gap-large;
 	}
 
 	.wc-blocks-product-collection__collections-section {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(max(#{$min-button-width}, #{$max-button-width}), 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(max(#{$min-button-width}, #{$max-button-width}), 1fr));
 		grid-auto-rows: 1fr;
-		margin: $gap-large auto;
+		margin: $gap-small auto;
 		max-width: 1000px;
 		width: 100%;
 	}
 
 	.wc-blocks-product-collection__collection-button {
-		color: var(--wp-admin-theme-color);
 		box-shadow: none;
 		display: flex;
 		flex-wrap: wrap;
@@ -52,12 +57,14 @@ $max-button-width: calc(100% / #{$max-button-columns});
 		margin: 0;
 
 		&:hover {
-			box-shadow: none;
+			color: var(--wp-admin-theme-color);
 			background-color: rgba(var(--wp-admin-theme-color--rgb), 0.04);
+			box-shadow: none;
 		}
 
 		&:focus {
-			background-color: rgba(var(--wp-admin-theme-color--rgb), 0.04);
+			color: var(--wp-admin-theme-color);
+			background-color: rgba(var(--wp-admin-theme-color--rgb), 0.08);
 		}
 
 		&-icon {
@@ -70,6 +77,21 @@ $max-button-width: calc(100% / #{$max-button-columns});
 			text-wrap: balance;
 			text-align: center;
 			margin: 0;
+		}
+	}
+
+	.wc-blocks-product-collection__collections-custom {
+		text-align: center;
+		width: 100%;
+
+		&-button {
+			color: var(--wp-admin-theme-color);
+			padding: 0;
+			margin-left: 0.5em;
+
+			&:hover {
+				color: var(--wp-admin-theme-color-darker-20);
+			}
 		}
 	}
 
