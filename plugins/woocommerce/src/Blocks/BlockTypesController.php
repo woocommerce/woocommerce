@@ -178,14 +178,15 @@ final class BlockTypesController {
 	}
 
 	/**
-	 * Add data- attributes to blocks when rendered if the block is under the woocommerce/ namespace.
+	 * Check if a block should have data attributes appended on render. If it's in an allowed namespace, or the block
+	 * has explicitly been added to the allowed block list, or if one of the block's parents is in the WooCommerce
+	 * namespace it can have data attributes.
 	 *
-	 * @param string $content Block content.
-	 * @param array  $block Parsed block data.
-	 * @return string
+	 * @param string $block_name Name of the block to check.
+	 *
+	 * @return mixed|void
 	 */
-	public function add_data_attributes( $content, $block ) {
-		$block_name      = $block['blockName'];
+	public function block_should_have_data_attributes( $block_name ) {
 		$block_namespace = strtok( $block_name ?? '', '/' );
 
 		/**
@@ -210,11 +211,28 @@ final class BlockTypesController {
 		 */
 		$allowed_blocks = (array) apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_block', array() );
 
-		$blocks_with_woo_parents = $this->get_registered_blocks_with_woocommerce_parent();
+		$blocks_with_woo_parents   = $this->get_registered_blocks_with_woocommerce_parent();
+		$block_has_woo_parent      = in_array( $block_name, array_keys( $blocks_with_woo_parents ), true );
+		$in_allowed_namespace_list = in_array( $block_namespace, $allowed_namespaces, true );
+		$in_allowed_block_list     = in_array( $block_name, $allowed_blocks, true );
 
-		$block_has_woo_parent = in_array( $block_name, array_keys( $this->registered_blocks_with_woocommerce_parents ), true );
+		if ( $block_has_woo_parent || $in_allowed_block_list || $in_allowed_namespace_list ) {
+			return true;
+		}
+		return false;
+	}
 
-		if ( ! $block_has_woo_parent && ! in_array( $block_namespace, $allowed_namespaces, true ) && ! in_array( $block_name, $allowed_blocks, true ) ) {
+	/**
+	 * Add data- attributes to blocks when rendered if the block is under the woocommerce/ namespace.
+	 *
+	 * @param string $content Block content.
+	 * @param array  $block Parsed block data.
+	 * @return string
+	 */
+	public function add_data_attributes( $content, $block ) {
+		$block_name = $block['blockName'];
+
+		if ( ! $this->block_should_have_data_attributes( $block_name ) ) {
 			return $content;
 		}
 
