@@ -457,8 +457,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order_data_store_cpt = new WC_Order_Data_Store_CPT();
 
 		foreach ( $draft_statuses as $status ) {
-			$order = wc_create_order();
-			$order->set_status( $status );
+			$order = wc_create_order( array( 'status' => $status ) );
 			$order_data_store_cpt->create( $order );
 		}
 

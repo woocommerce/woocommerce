@@ -3452,8 +3452,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$orders_data_store = new OrdersTableDataStore();
 
 		foreach ( $draft_statuses as $status ) {
-			$order = WC_Helper_Order::create_order();
-			$order->set_status( $status );
+			$order = WC_Helper_Order::create_order( 1, null, array( 'status' => $status ) );
 			$orders_data_store->create( $order );
 		}
 
