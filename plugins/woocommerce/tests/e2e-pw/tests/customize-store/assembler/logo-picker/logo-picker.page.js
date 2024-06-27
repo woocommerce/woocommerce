@@ -39,7 +39,9 @@ export class LogoPickerPage {
 	}
 
 	async pickImage( assemblerLocator ) {
-		await assemblerLocator.getByText( 'Media Library' ).click();
+		await assemblerLocator
+			.getByRole( 'tab', { name: 'Media Library' } )
+			.click();
 
 		await assemblerLocator.getByLabel( 'image-03' ).click();
 		await assemblerLocator
@@ -75,11 +77,8 @@ export class LogoPickerPage {
 		);
 		const waitForHeaderResponse = this.page.waitForResponse(
 			( response ) =>
-				response
-					.url()
-					.includes(
-						'wp-json/wp/v2/template-parts/twentytwentyfour//header'
-					) && response.status() === 200
+				response.url().includes( '//header' ) &&
+				response.status() === 200
 		);
 		await assemblerLocator.getByText( 'Save' ).click();
 		await Promise.all( [ waitForLogoResponse, waitForHeaderResponse ] );
