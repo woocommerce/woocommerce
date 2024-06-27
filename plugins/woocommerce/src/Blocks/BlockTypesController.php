@@ -89,6 +89,9 @@ final class BlockTypesController {
 				if ( empty( $block->parent ) ) {
 					return false;
 				}
+				if ( ! is_array( $block->parent ) ) {
+					$block->parent = array( $block->parent );
+				}
 				$woocommerce_blocks = array_filter(
 					$block->parent,
 					function ( $parent_block_name ) {
