@@ -4,6 +4,7 @@ const {
 const { expect } = require( '../../../../fixtures/fixtures' );
 const { updateProduct } = require( '../../../../utils/product-block-editor' );
 const { clickOnTab } = require( '../../../../utils/simple-products' );
+const attributesData = require( './fixtures/attributes' );
 const {
 	confirmGlobalAttributesLoaded,
 } = require( './helpers/confirm-global-attributes-loaded' );
@@ -98,26 +99,10 @@ const test = baseTest.extend( {
 	},
 } );
 
-test(
+test.only(
 	'add local attribute (with terms) to the Product',
 	{ tag: '@gutenberg' },
 	async ( { page, product } ) => {
-		const newAttributes = [
-			{
-				name: 'Color',
-
-				terms: [ 'Red', 'Blue', 'Green' ],
-			},
-			{
-				name: 'Size',
-				terms: [ 'Small', 'Medium', 'Large' ],
-			},
-			{
-				name: 'Style',
-				terms: [ 'Modern', 'Classic', 'Vintage' ],
-			},
-		];
-
 		await test.step( 'go to product editor -> Organization tab -> Click on `Add new`', async () => {
 			await page.goto(
 				`wp-admin/post.php?post=${ product.id }&action=edit`
@@ -152,7 +137,7 @@ test(
 			 */
 			await confirmGlobalAttributesLoaded( page );
 
-			for ( const term of newAttributes ) {
+			for ( const attribute of attributesData ) {
 				const attributeRowLocator = attributeRowsLocator.last();
 
 				const attributeComboboxLocator = attributeRowLocator
@@ -162,8 +147,10 @@ test(
 					.last();
 
 				// Create new (local) product attribute.
-				await attributeComboboxLocator.fill( term.name );
-				await page.locator( `text=Create "${ term.name }"` ).click();
+				await attributeComboboxLocator.fill( attribute.name );
+				await page
+					.locator( `text=Create "${ attribute.name }"` )
+					.click();
 
 				const FormTokenFieldLocator = attributeRowLocator.locator(
 					'td.woocommerce-new-attribute-modal__table-attribute-value-column'
@@ -176,8 +163,8 @@ test(
 					);
 
 				// Add terms to the attribute.
-				for ( const attributeTerm of term.terms ) {
-					await FormTokenFieldInputLocator.fill( attributeTerm );
+				for ( const term of attribute.terms ) {
+					await FormTokenFieldInputLocator.fill( term.name );
 					await FormTokenFieldInputLocator.press( 'Enter' );
 				}
 
@@ -200,7 +187,7 @@ test(
 			const attributeRowsLocator =
 				attributesListLocator.getByRole( 'listitem' );
 
-			for ( const attribute of newAttributes ) {
+			for ( const attribute of attributesData ) {
 				const attributeRowLocator = attributeRowsLocator.filter( {
 					has: page.getByText( attribute.name, { exact: true } ),
 				} );
@@ -211,14 +198,14 @@ test(
 					const termLocator = attributeRowLocator
 						.locator( `[aria-hidden="true"]` )
 						.filter( {
-							has: page.getByText( term ),
+							has: page.getByText( term.name ),
 						} );
 
 					// Verify the term is visible
 					await expect( termLocator ).toBeVisible();
 
 					// Verify the term text
-					await expect( termLocator ).toContainText( term );
+					await expect( termLocator ).toContainText( term.name );
 				}
 			}
 		} );
@@ -232,7 +219,7 @@ test(
 			await page.goto( product.permalink );
 
 			// Verify attributes in store frontend
-			for ( const attribute of newAttributes ) {
+			for ( const attribute of attributesData ) {
 				const item = page.getByRole( 'row' ).filter( {
 					has: page.getByText( attribute.name, { exact: true } ),
 				} );
