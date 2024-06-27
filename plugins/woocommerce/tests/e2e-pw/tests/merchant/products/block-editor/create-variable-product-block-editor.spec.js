@@ -30,16 +30,16 @@ const attributesData = {
 	name: 'Size',
 	terms: [
 		{
-			name: 'Small',
-			slug: 'small',
-		},
-		{
-			name: 'Medium',
-			slug: 'medium',
-		},
-		{
 			name: 'Large',
 			slug: 'large',
+		},
+		{
+			name: 'Extra Large',
+			slug: 'extra-large',
+		},
+		{
+			name: 'Extra Extra Large',
+			slug: 'extra-extra-large',
 		},
 	],
 };
@@ -124,7 +124,8 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 					.click();
 			} );
 
-			await test.step( 'Add attribute options', async () => {
+			let newAttrData;
+			await test.step( 'Create global attribute', async () => {
 				await page
 					.getByRole( 'heading', { name: 'Add variation options' } )
 					.isVisible();
@@ -169,8 +170,10 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 							) && response.status() === 201
 				);
 
-				const newAttrData = await newAttrResponse.json();
+				newAttrData = await newAttrResponse.json();
+			} );
 
+			await test.step( 'Add new terms to the attribute', async () => {
 				const FormTokenFieldLocator = page.locator(
 					'td.woocommerce-new-attribute-modal__table-attribute-value-column'
 				);
@@ -214,12 +217,13 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 					 * that creates the new attribute term to finish.
 					 */
 					await page.waitForResponse( ( response ) => {
+						const urlToMatch = `/wp-json/wc/v3/products/attributes/${ newAttrData.id }/terms?name=${ term.name }&slug=${ term.slug }&_locale=user`;
+
 						return (
 							response
 								.url()
-								.includes(
-									`/wp-json/wc/v3/products/attributes/${ newAttrData.id }/terms?name=${ term.name }&slug=${ term.slug }&_locale=user`
-								) && response.status() === 201
+								.includes( encodeURI( urlToMatch ) ) &&
+							response.status() === 201
 						);
 					} );
 				}
