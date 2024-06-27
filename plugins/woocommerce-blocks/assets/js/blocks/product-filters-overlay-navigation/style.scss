@@ -13,13 +13,4 @@
 		margin-left: auto;
 		margin-right: auto;
 	}
-
-	.is-style-link & {
-		background: transparent;
-		color: inherit;
-		&:hover {
-			background: transparent;
-			color: inherit;
-		}
-	}
 }
