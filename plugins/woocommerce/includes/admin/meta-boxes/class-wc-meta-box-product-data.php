@@ -197,7 +197,7 @@ class WC_Meta_Box_Product_Data {
 		if ( ! empty( $file_urls ) ) {
 			$file_url_size = count( $file_urls );
 
-			for ( $i = 0; $i < $file_url_size; $i ++ ) {
+			for ( $i = 0; $i < $file_url_size; $i++ ) {
 				if ( ! empty( $file_urls[ $i ] ) ) {
 					$downloads[] = array(
 						'name'        => wc_clean( $file_names[ $i ] ),
@@ -413,6 +413,9 @@ class WC_Meta_Box_Product_Data {
 		if ( is_wp_error( $errors ) ) {
 			WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );
 		}
+
+		// Remove _product_template_id for products that were created with the new product editor.
+		$product->delete_meta_data( '_product_template_id' );
 
 		/**
 		 * Set props before save.

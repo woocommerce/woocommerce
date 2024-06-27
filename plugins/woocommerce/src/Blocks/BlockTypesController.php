@@ -321,9 +321,12 @@ final class BlockTypesController {
 			MiniCartContents::get_mini_cart_block_types()
 		);
 
+		// Update plugins/woocommerce-blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
+		// when modifying this list.
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
 			$block_types[] = 'ProductFilter';
 			$block_types[] = 'ProductFilters';
+			$block_types[] = 'ProductFiltersOverlay';
 			$block_types[] = 'ProductFilterStockStatus';
 			$block_types[] = 'ProductFilterPrice';
 			$block_types[] = 'ProductFilterAttribute';
@@ -342,6 +345,7 @@ final class BlockTypesController {
 					'AllProducts',
 					'Cart',
 					'Checkout',
+					'ProductGallery',
 				)
 			);
 		}
@@ -353,6 +357,7 @@ final class BlockTypesController {
 			$block_types = array_diff(
 				$block_types,
 				array(
+					'AddToCartForm',
 					'Breadcrumbs',
 					'CatalogSorting',
 					'ClassicTemplate',
@@ -371,6 +376,7 @@ final class BlockTypesController {
 					'OrderConfirmation\AdditionalInformation',
 					'OrderConfirmation\AdditionalFieldsWrapper',
 					'OrderConfirmation\AdditionalFields',
+					'ProductGallery',
 				)
 			);
 		}

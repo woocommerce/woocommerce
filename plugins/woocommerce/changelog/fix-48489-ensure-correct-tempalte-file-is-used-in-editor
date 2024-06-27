@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make sure the correct block template file is used in the Site Editor for templates with fallback

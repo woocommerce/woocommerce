@@ -107,9 +107,8 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-
-		await editor.enterEditMode();
 
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -120,7 +119,9 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		} );
 
 		await page.keyboard.press( 'Escape' );
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 
 		await page.goto( '/shop' );
 	} );
@@ -210,9 +211,8 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await admin.visitSiteEditor( {
 			postId: template.id,
 			postType: template.type,
+			canvas: 'edit',
 		} );
-
-		await editor.enterEditMode();
 
 		const ratingFilterControls = await editor.getBlockByName(
 			'woocommerce/rating-filter'
@@ -222,7 +222,9 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await editor.openDocumentSettingsSidebar();
 		await page.getByText( "Show 'Apply filters' button" ).click();
 
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 		await page.goto( '/shop' );
 
 		await page

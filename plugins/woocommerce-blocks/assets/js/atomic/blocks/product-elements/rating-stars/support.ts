@@ -1,4 +1,5 @@
 export const supports = {
+	inserter: false,
 	color: {
 		text: true,
 		background: false,

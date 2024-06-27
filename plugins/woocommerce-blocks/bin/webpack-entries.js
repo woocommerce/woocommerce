@@ -9,13 +9,14 @@ const glob = require( 'glob' );
 // path should be defined in the `customDir` property. The scripts below will
 // take care of looking for `index.js`, `frontend.js` and `*.scss` files in each
 // block directory.
+//
 // If a block is experimental, it should be marked with the `isExperimental`
 // property.
+// Update plugins/woocommerce-blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
+// when you mark/unmark block experimental.
 const blocks = {
 	'active-filters': {},
-	'add-to-cart-form': {
-		customDir: 'product-elements/add-to-cart-form',
-	},
+	'add-to-cart-form': {},
 	'all-products': {
 		customDir: 'products/all-products',
 	},
@@ -95,6 +96,9 @@ const blocks = {
 		isExperimental: true,
 	},
 	'product-filters': {
+		isExperimental: true,
+	},
+	'product-filters-overlay': {
 		isExperimental: true,
 	},
 	'product-filter-stock-status': {
@@ -197,6 +201,8 @@ const entries = {
 			'./assets/js/atomic/blocks/product-elements/product-reviews/index.tsx',
 		'product-details':
 			'./assets/js/atomic/blocks/product-elements/product-details/index.tsx',
+		'add-to-cart-form':
+			'./assets/js/atomic/blocks/product-elements/add-to-cart-form/index.tsx',
 		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}' ),
 
 		// Interactivity component styling

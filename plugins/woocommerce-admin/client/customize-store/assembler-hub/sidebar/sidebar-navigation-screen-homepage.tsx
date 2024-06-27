@@ -40,7 +40,7 @@ import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { select, useDispatch, useSelect } from '@wordpress/data';
+import { select, useSelect } from '@wordpress/data';
 
 import { trackEvent } from '~/customize-store/tracking';
 import {
@@ -55,7 +55,11 @@ import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
-export const SidebarNavigationScreenHomepage = () => {
+export const SidebarNavigationScreenHomepage = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'top',
@@ -73,11 +77,8 @@ export const SidebarNavigationScreenHomepage = () => {
 
 	const [ blocks, , onChange ] = useEditorBlocks(
 		'wp_template',
-		currentTemplate.id ?? ''
+		currentTemplate?.id ?? ''
 	);
-
-	// @ts-expect-error No types for this exist yet.
-	const { selectBlock } = useDispatch( blockEditorStore );
 
 	const onClickPattern = useCallback(
 		( pattern, selectedBlocks ) => {
@@ -85,21 +86,13 @@ export const SidebarNavigationScreenHomepage = () => {
 				return;
 			}
 			setSelectedPattern( pattern );
-			selectBlock( pattern.blocks[ 0 ].clientId );
 			onChange(
 				[ blocks[ 0 ], ...selectedBlocks, blocks[ blocks.length - 1 ] ],
 				{ selection: {} }
 			);
 			scroll();
 		},
-		[
-			selectedPattern,
-			setSelectedPattern,
-			selectBlock,
-			onChange,
-			blocks,
-			scroll,
-		]
+		[ selectedPattern, setSelectedPattern, onChange, blocks, scroll ]
 	);
 
 	const isEditorLoading = useIsSiteEditorLoading();
@@ -276,6 +269,7 @@ export const SidebarNavigationScreenHomepage = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
+			onNavigateBackClick={ onNavigateBackClick }
 			description={ createInterpolateElement( sidebarMessage, {
 				EditorLink: (
 					<Link

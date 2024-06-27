@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -873,10 +874,38 @@ if ( 0 < $mu_plugins_count ) :
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . ( $_page['block_required'] ? sprintf( esc_html__( 'Page does not contain the %1$s shortcode or the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) : sprintf( esc_html__( 'Page does not contain the %s shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
 					$found_error = true;
 				}
+
+				// Warn merchants if both the shortcode and block are present, which will be a confusing shopper experience.
+				if ( $_page['shortcode_present'] && $_page['block_present'] ) {
+					/* Translators: %1$s: shortcode text, %2$s: block slug. */
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'Page contains both the %1$s shortcode and the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
+					$found_error = true;
+				}
 			}
 
 			if ( ! $found_error ) {
-				echo '<mark class="yes">#' . absint( $_page['page_id'] ) . ' - ' . esc_html( str_replace( home_url(), '', get_permalink( $_page['page_id'] ) ) ) . '</mark>';
+
+				$additional_info = '';
+
+				// We only state the used type on the Checkout and the Cart page.
+				if ( in_array( $_page['block'], array( 'woocommerce/checkout', 'woocommerce/cart' ), true ) ) {
+					// We check first if, in a blocks theme, the template content does not load the page content.
+					if ( CartCheckoutUtils::is_overriden_by_custom_template_content( $_page['block'] ) ) {
+						$additional_info = __( "This page's content is overridden by custom template content", 'woocommerce' );
+					} elseif ( $_page['shortcode_present'] ) {
+						/* Translators: %1$s: shortcode text. */
+						$additional_info = sprintf( __( 'Contains the <strong>%1$s</strong> shortcode', 'woocommerce' ), esc_html( $_page['shortcode'] ) );
+					} elseif ( $_page['block_present'] ) {
+						/* Translators: %1$s: block slug. */
+						$additional_info = sprintf( __( 'Contains the <strong>%1$s</strong> block', 'woocommerce' ), esc_html( $_page['block'] ) );
+					}
+
+					if ( ! empty( $additional_info ) ) {
+						$additional_info = '<mark class="no"> - <span class="dashicons dashicons-info"></span> ' . $additional_info . '</mark>';
+					}
+				}
+
+				echo '<mark class="yes">#' . absint( $_page['page_id'] ) . ' - ' . esc_html( str_replace( home_url(), '', get_permalink( $_page['page_id'] ) ) ) . '</mark>' . $additional_info; /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped */
 			}
 
 			echo '</td></tr>';
@@ -969,7 +998,7 @@ if ( 0 < $mu_plugins_count ) :
 		</tr>
 	</tbody>
 </table>
-<table class="wc_status_table widefat" cellspacing="0">
+<table class="wc_status_table widefat" id="status-table-templates" cellspacing="0">
 	<thead>
 		<tr>
 			<th colspan="3" data-export-label="Templates"><h2><?php esc_html_e( 'Templates', 'woocommerce' ); ?><?php echo wc_help_tip( esc_html__( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce' ) ); ?></h2></th>

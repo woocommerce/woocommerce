@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Adds new hook `woocommerce_rest_delete_shipping_zone_method` which will fire after a shipping zone method is deleted via the REST API.

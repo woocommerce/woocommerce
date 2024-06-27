@@ -69,6 +69,7 @@ export function Editor( { productId, postType = 'product' }: EditorProps ) {
 										<Header
 											onTabSelect={ setSelectedTab }
 											productType={ postType }
+											selectedTab={ selectedTab }
 										/>
 									}
 									content={

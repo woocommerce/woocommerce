@@ -9,7 +9,6 @@ import {
 	ProductVariation,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { ListItem, Sortable } from '@woocommerce/components';
 import {
 	createElement,
 	Fragment,
@@ -304,12 +303,12 @@ export const VariationsTable = forwardRef<
 
 	function renderTableBody() {
 		return totalCount > 0 ? (
-			<Sortable
+			<div
 				className="woocommerce-product-variations__table-body"
 				role="rowgroup"
 			>
 				{ variations.map( ( variation ) => (
-					<ListItem
+					<div
 						key={ `${ variation.id }` }
 						className="woocommerce-product-variations__table-row"
 						role="row"
@@ -326,9 +325,9 @@ export const VariationsTable = forwardRef<
 							onEdit={ editVariationClickHandler( variation ) }
 							onSelect={ onSelect( variation ) }
 						/>
-					</ListItem>
+					</div>
 				) ) }
-			</Sortable>
+			</div>
 		) : (
 			<EmptyOrErrorTableState
 				isError={ false }

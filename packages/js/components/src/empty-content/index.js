@@ -45,12 +45,13 @@ class EmptyContent extends Component {
 				: this.props.actionCallback;
 
 		const isPrimary = type === 'secondary' ? false : true;
+		const buttonVariant = isPrimary ? 'primary' : 'secondary';
 
 		if ( actionURL && actionCallback ) {
 			return (
 				<Button
 					className="woocommerce-empty-content__action"
-					isPrimary={ isPrimary }
+					variant={ buttonVariant }
 					onClick={ actionCallback }
 					href={ actionURL }
 				>
@@ -61,7 +62,7 @@ class EmptyContent extends Component {
 			return (
 				<Button
 					className="woocommerce-empty-content__action"
-					isPrimary={ isPrimary }
+					variant={ buttonVariant }
 					href={ actionURL }
 				>
 					{ actionLabel }
@@ -71,7 +72,7 @@ class EmptyContent extends Component {
 			return (
 				<Button
 					className="woocommerce-empty-content__action"
-					isPrimary={ isPrimary }
+					variant={ buttonVariant }
 					onClick={ actionCallback }
 				>
 					{ actionLabel }

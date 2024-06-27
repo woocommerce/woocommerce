@@ -47,23 +47,27 @@ const fillPageTitle = async ( page, title ) => {
 };
 
 const insertBlock = async ( page, blockName ) => {
-	const canvas = await getCanvas( page );
-	// Click the title to activate the block inserter.
-	await canvas.getByRole( 'textbox', { name: 'Add title' } ).click();
-	await canvas.getByLabel( 'Add block' ).click();
+	await page.getByLabel( 'Toggle block inserter' ).click();
 	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
+	await page.getByLabel( 'Toggle block inserter' ).click();
 };
 
-const insertBlockByShortcut = async ( page, blockShortcut ) => {
+const insertBlockByShortcut = async ( page, blockName ) => {
 	const canvas = await getCanvas( page );
 	await canvas.getByRole( 'button', { name: 'Add default block' } ).click();
 	await canvas
 		.getByRole( 'document', {
 			name: 'Empty block; start writing or type forward slash to choose a block',
 		} )
-		.fill( blockShortcut );
-	await page.keyboard.press( 'Enter' );
+		.pressSequentially( `/${ blockName }` );
+	await expect(
+		page.getByRole( 'option', { name: blockName, exact: true } )
+	).toBeVisible();
+	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
+	await expect(
+		page.getByLabel( `Block: ${ blockName }` ).first()
+	).toBeVisible();
 };
 
 const transformIntoBlocks = async ( page ) => {

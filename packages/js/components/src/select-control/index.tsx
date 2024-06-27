@@ -307,7 +307,7 @@ export class SelectControl extends Component< Props, State > {
 		// After selecting option, the list will reset and we'd need to correct selectedIndex.
 		const newSelectedIndex = this.props.excludeSelectedOptions
 			? // Since we're excluding the selected option, invalidate selection
-			  // so re-focusing wont immediately set it to the neigbouring option.
+			  // so re-focusing wont immediately set it to the neighbouring option.
 			  null
 			: this.getOptions().findIndex( ( i ) => i.key === option.key );
 

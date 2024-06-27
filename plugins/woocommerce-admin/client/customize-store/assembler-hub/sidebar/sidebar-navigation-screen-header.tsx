@@ -40,8 +40,11 @@ const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-minimal',
 	'woocommerce-blocks/header-large',
 ];
-
-export const SidebarNavigationScreenHeader = () => {
+export const SidebarNavigationScreenHeader = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'top',
@@ -58,7 +61,7 @@ export const SidebarNavigationScreenHeader = () => {
 
 	const [ mainTemplateBlocks ] = useEditorBlocks(
 		'wp_template',
-		currentTemplate.id
+		currentTemplate?.id ?? ''
 	);
 
 	const [ blocks, , onChange ] = useEditorBlocks(
@@ -128,7 +131,10 @@ export const SidebarNavigationScreenHeader = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
-			onNavigateBackClick={ resetHighlightedBlockClientId }
+			onNavigateBackClick={ () => {
+				resetHighlightedBlockClientId();
+				onNavigateBackClick();
+			} }
 			description={ createInterpolateElement(
 				__(
 					"Select a new header from the options below. Your header includes your site's navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
