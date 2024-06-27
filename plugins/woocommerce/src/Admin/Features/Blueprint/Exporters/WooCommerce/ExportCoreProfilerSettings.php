@@ -13,11 +13,15 @@ class ExportCoreProfilerSettings implements ExportsStepSchema {
 	public function export_step_schema() {
 		return array(
 			'step' => $this->get_step_name(),
-			'options' => $this->export()
+			'alias' => 'configureCoreProfilerSettings',
+			'options' => $this->export(),
+			'meta' => array(
+				'plugin' => 'woocommerce'
+			)
 		);
 	}
 
 	public function get_step_name() {
-		return 'configureCoreProfiler';
+		return 'setOptions';
 	}
 }

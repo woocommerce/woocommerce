@@ -12,7 +12,11 @@ class ExportTaskOptions implements ExportsStepSchema {
 	public function export_step_schema() {
 		return array(
 			'step' => $this->get_step_name(),
-			'options' => $this->export()
+			'alias' => 'configureTaskOptions',
+			'options' => $this->export(),
+			'meta' => array(
+				'plugin' => 'woocommerce'
+			)
 		);
 	}
 

@@ -148,9 +148,11 @@ class ExportSettings implements ExportsStepSchema {
 		$export = $this->export();
 		return array(
 			'step' => $this->get_step_name(),
+			'alias' => 'configureSettings',
 			'options' => $export['options'],
 			'meta' => array(
-				'pages' => $export['pages']
+				'pages' => $export['pages'],
+				'plugin' => 'woocommerce'
 			)
 		);
 	}
