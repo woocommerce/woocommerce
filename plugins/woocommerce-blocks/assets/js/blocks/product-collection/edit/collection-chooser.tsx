@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { Button } from '@wordpress/components';
+import { Button, Tooltip } from '@wordpress/components';
 import {
 	BlockInstance,
 	createBlock,
@@ -21,7 +21,6 @@ import { getCollectionByName } from '../collections';
 import { getDefaultProductCollection } from '../constants';
 
 type CollectionButtonProps = {
-	active?: boolean;
 	title: string;
 	icon: string;
 	description: string;
@@ -54,32 +53,25 @@ export const applyCollection = (
 };
 
 const CollectionButton = ( {
-	active = false,
 	title,
 	icon,
 	description,
 	onClick,
 }: CollectionButtonProps ) => {
-	const variant = active ? 'primary' : 'secondary';
-
 	return (
-		<Button
-			className="wc-blocks-product-collection__collection-button"
-			variant={ variant }
-			onClick={ onClick }
-		>
-			<div className="wc-blocks-product-collection__collection-button-icon">
-				{ icon }
-			</div>
-			<div className="wc-blocks-product-collection__collection-button-text">
+		<Tooltip text={ description } placement="top">
+			<Button
+				className="wc-blocks-product-collection__collection-button"
+				onClick={ onClick }
+			>
+				<div className="wc-blocks-product-collection__collection-button-icon">
+					{ icon }
+				</div>
 				<p className="wc-blocks-product-collection__collection-button-title">
 					{ title }
 				</p>
-				<p className="wc-blocks-product-collection__collection-button-description">
-					{ description }
-				</p>
-			</div>
-		</Button>
+			</Button>
+		</Tooltip>
 	);
 };
 
@@ -87,7 +79,7 @@ const CollectionChooser = ( props: {
 	chosenCollection?: CollectionName | undefined;
 	onCollectionClick: ( name: string ) => void;
 } ) => {
-	const { chosenCollection, onCollectionClick } = props;
+	const { onCollectionClick } = props;
 
 	// Get Collections
 	const blockCollections = [
@@ -103,7 +95,6 @@ const CollectionChooser = ( props: {
 		<div className="wc-blocks-product-collection__collections-section">
 			{ blockCollections.map( ( { name, title, icon, description } ) => (
 				<CollectionButton
-					active={ chosenCollection === name }
 					key={ name }
 					title={ title }
 					description={ description }
