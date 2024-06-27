@@ -141,20 +141,12 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 		);
 	};
 
-	const aiOnline = context.flowType === FlowType.AIOnline;
+	const title = __( 'Design your homepage', 'woocommerce' );
 
-	const title = aiOnline
-		? __( 'Change your homepage', 'woocommerce' )
-		: __( 'Choose your homepage', 'woocommerce' );
-	const sidebarMessage = aiOnline
-		? __(
-				'Based on the most successful stores in your industry and location, our AI tool has recommended this template for your business. Prefer a different layout? Choose from the templates below now, or later via the <EditorLink>Editor</EditorLink>.',
-				'woocommerce'
-		  )
-		: __(
-				'Create an engaging homepage by selecting one of our pre-designed layouts. You can continue customizing this page, including the content, later via the <EditorLink>Editor</EditorLink>.',
-				'woocommerce'
-		  );
+	const sidebarMessage = __(
+		'Create an engaging homepage by adding and combining different patterns and layouts. You can continue customizing this page, including the content, later via the <EditorLink>Editor</EditorLink>.',
+		'woocommerce'
+	);
 
 	return (
 		<SidebarNavigationScreen
