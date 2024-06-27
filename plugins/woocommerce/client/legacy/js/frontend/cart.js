@@ -135,32 +135,27 @@ jQuery( function ( $ ) {
 			if ( $( '.woocommerce-checkout' ).length ) {
 				$( document.body ).trigger( 'update_checkout' );
 			}
-
-			if ( preserve_notices ) {
-				var $new_coupon_field = $( '#coupon_code', $new_form );
-				var $new_coupon_field_wrapper = $new_coupon_field.closest( '.coupon' );
-				var $coupon_error_msg = $( '#coupon_code' )
+			
+			// Store the old coupon error message before the 
+			// .woocommerce-cart-form is replaced with the new form.
+			var $old_coupon_error_msg = $( '#coupon_code' )
 					.closest( '.coupon' )
 					.find( '.coupon-error-message' );
-
-				if ( $new_coupon_field_wrapper.length === 0 || $coupon_error_msg.length === 0) {
-					return;
-				}
-
-				$new_coupon_field.addClass( 'has-error' );
-				$new_coupon_field_wrapper.append( $coupon_error_msg );
-			}
 
 			$( '.woocommerce-cart-form' ).replaceWith( $new_form );
 			$( '.woocommerce-cart-form' )
 				.find( ':input[name="update_cart"]' )
 				.prop( 'disabled', true );
 
-			// Focus on the first input with error. 
-			// Likely the coupon field.
-			$( '.woocommerce-cart-form' )
-				.find( 'input.has-error' )
-				.focus();
+			if ( preserve_notices && $old_coupon_error_msg.length > 0) {
+				var $new_coupon_field = $( '.woocommerce-cart-form' ).find( '#coupon_code' );
+				var $new_coupon_field_wrapper = $new_coupon_field.closest( '.coupon' );
+				
+				// The coupon input with error needs to be focused before adding the live region
+				// with the error message, otherwise the screen reader won't read it.
+				$new_coupon_field.focus();
+				show_coupon_error( $old_coupon_error_msg, $new_coupon_field_wrapper, true );
+			}
 
 			if ( $notices.length > 0 ) {
 				show_notice( $notices );
@@ -200,22 +195,38 @@ jQuery( function ( $ ) {
 	/**
 	 * Shows coupon form errors.
 	 *
-	 * @param {string} html_element The HTML string response after applying an invalid coupon.
-	 * @param {Object} $target Coupon field wrapper.
+	 * @param {string|object} html_element The HTML string response after applying an invalid coupon or a jQuey element.
+	 * @param {Object} $target Coupon field wrapper jQuery element.
+	 * @param {boolean} is_live_region Whether role="alert" should be added or not.
 	 */
-	var show_coupon_error = function ( html_element, $target ) {
-		if ($target.length === 0) {
+	var show_coupon_error = function ( html_element, $target, is_live_region ) {
+		if ( $target.length === 0 ) {
 			return;
 		}
 
-		var msg = $( $.parseHTML( html_element ) ).text().trim();
+		var $coupon_error_el = '';
 
-		if ( msg === '' ) {
-			return;
+		if ( typeof html_element === 'string' ) {
+			var msg = $( $.parseHTML( html_element ) ).text().trim();
+			
+			if ( msg === '' ) {
+				return;
+			}
+			
+			$coupon_error_el = $( '<div class="coupon-error-message" id="coupon-error-message">' + msg + '</div>' );
+		} else {
+			$coupon_error_el = html_element;
 		}
 
-		$target.append( '<div class="coupon-error-message" role="alert">' + msg + '<div>' );
-		$target.find( '#coupon_code' ).addClass( 'has-error' );
+		if ( is_live_region ) {
+			$coupon_error_el.attr( 'role', 'alert' );
+		}
+		
+		$target.find( '#coupon_code' )
+			.addClass( 'has-error' )
+			.attr( 'aria-invalid', 'true' )
+			.attr( 'aria-describedby', 'coupon-error-message' );
+		$target.append( $coupon_error_el );
 	};	
 
 	/**
@@ -579,7 +590,7 @@ jQuery( function ( $ ) {
 							return;
 						}
 						
-						show_coupon_error( response, $coupon_wrapper );
+						show_coupon_error( response, $coupon_wrapper, false );
 					}
 
 					$( document.body ).trigger( 'applied_coupon', [
@@ -640,6 +651,8 @@ jQuery( function ( $ ) {
 		remove_coupon_error: function ( evt ) {
 			$( evt.currentTarget )
 				.removeClass( 'has-error' )
+				.removeAttr( 'aria-invalid' )
+				.removeAttr( 'aria-describedby' )
 				.closest( '.coupon' )
 				.find( '.coupon-error-message' )
 				.remove();
