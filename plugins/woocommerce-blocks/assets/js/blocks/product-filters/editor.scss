@@ -1,4 +1,4 @@
-$blue: #3858e9;
+$blue: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
 
 .wc-block-editor-product-filters__overlay-link {
 	border-style: solid;
