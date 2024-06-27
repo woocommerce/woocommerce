@@ -569,7 +569,7 @@ jQuery( function ( $ ) {
 			var data = {
 				security: wc_cart_params.apply_coupon_nonce,
 				coupon_code: coupon_code,
-			};			
+			};
 
 			$.ajax( {
 				type: 'POST',
@@ -586,11 +586,9 @@ jQuery( function ( $ ) {
 					} else {
 						var $coupon_wrapper = $text_field.closest( '.coupon' );
 
-						if ( $coupon_wrapper.length === 0 ) {
-							return;
-						}
-						
-						show_coupon_error( response, $coupon_wrapper, false );
+						if ( $coupon_wrapper.length > 0 ) {
+							show_coupon_error( response, $coupon_wrapper, false );
+						}						
 					}
 
 					$( document.body ).trigger( 'applied_coupon', [
