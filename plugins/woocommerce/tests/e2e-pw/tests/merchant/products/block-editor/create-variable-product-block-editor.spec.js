@@ -8,6 +8,7 @@ const {
 } = require( '../../../../utils/product-block-editor' );
 
 const { variableProducts: utils } = require( '../../../../utils' );
+const attributes = require( './fixtures/attributes' );
 
 const {
 	createVariableProduct,
@@ -26,23 +27,11 @@ const productData = {
 	summary: 'This is a product summary',
 };
 
-const attributesData = {
-	name: 'Size',
-	terms: [
-		{
-			name: 'Large',
-			slug: 'large',
-		},
-		{
-			name: 'Extra Large',
-			slug: 'extra-large',
-		},
-		{
-			name: 'Extra Extra Large',
-			slug: 'extra-extra-large',
-		},
-	],
-};
+const sizeAttribute = attributes.find(
+	( attribute ) => attribute.name === 'Size'
+);
+
+const termsLength = sizeAttribute.terms.length;
 
 const tabs = [
 	{
@@ -156,7 +145,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 					'input[aria-describedby^="components-form-token-suggestions-howto-combobox-control"]'
 				);
 
-				await attributeInputLocator.fill( attributesData.name );
+				await attributeInputLocator.fill( sizeAttribute.name );
 
 				await page.locator( 'text=Create "Size"' ).click();
 
@@ -166,7 +155,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 						response
 							.url()
 							.includes(
-								`wp-json/wc/v3/products/attributes?name=${ attributesData.name }&generate_slug=true`
+								`wp-json/wc/v3/products/attributes?name=${ sizeAttribute.name }&generate_slug=true`
 							) && response.status() === 201
 				);
 
@@ -183,7 +172,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 						'input[id^="components-form-token-input-"]'
 					);
 
-				for ( const term of attributesData.terms ) {
+				for ( const term of sizeAttribute.terms ) {
 					// Fill the input field with the option
 					await FormTokenFieldInputLocator.fill( term.name );
 					await FormTokenFieldInputLocator.press( 'Enter' );
@@ -228,6 +217,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 					} );
 				}
 
+				// Wait for the last term to be validated/added
 				await expect( page.locator( '.is-validating' ) ).toBeHidden();
 
 				await page
@@ -241,7 +231,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 			await test.step( 'Add prices to variations', async () => {
 				await expect(
 					page.getByText(
-						'3 variations do not have prices. Variations that do not have prices will not be visible to customers.Set prices'
+						`${ termsLength } variations do not have prices. Variations that do not have prices will not be visible to customers.Set prices`
 					)
 				).toBeVisible();
 
@@ -255,10 +245,12 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 
 				await expect(
 					page.getByLabel( 'Dismiss this notice' )
-				).toContainText( '3 variations updated.' );
+				).toContainText( `${ termsLength } variations updated.` );
 
 				await expect(
-					page.getByRole( 'button', { name: 'Select all (3)' } )
+					page.getByRole( 'button', {
+						name: `Select all (${ termsLength })`,
+					} )
 				).toBeVisible();
 			} );
 
@@ -282,7 +274,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 
 				// Verify that the first message is the expected one
 				await expect( snackbarLocator.nth( 0 ) ).toHaveText(
-					`${ attributesData.terms.length } variations updated.`
+					`${ sizeAttribute.terms.length } variations updated.`
 				);
 
 				// Verify that the second message is the expected one
