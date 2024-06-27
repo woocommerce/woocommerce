@@ -124,6 +124,34 @@ class Bootstrap {
 			0
 		);
 
+		// We need to initialize BlockTemplatesController and BlockTemplatesRegistry on `init` so themes had the
+		// opporunity to declare support for template parts in `after_setup_theme` (which fires before `init`).
+		add_action(
+			'init',
+			function () {
+				$is_rest = wc()->is_rest_api_request();
+				// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$is_store_api_request = $is_rest && ! empty( $_SERVER['REQUEST_URI'] ) && ( false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) );
+
+				if ( ! $is_store_api_request && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
+					$this->container->register(
+						BlockTemplatesRegistry::class,
+						function () {
+							return new BlockTemplatesRegistry();
+						}
+					);
+					$this->container->register(
+						BlockTemplatesController::class,
+						function () {
+							return new BlockTemplatesController();
+						}
+					);
+					$this->container->get( BlockTemplatesRegistry::class )->init();
+					$this->container->get( BlockTemplatesController::class )->init();
+				}
+			}
+		);
+
 		$is_rest = wc()->is_rest_api_request();
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$is_store_api_request = $is_rest && ! empty( $_SERVER['REQUEST_URI'] ) && ( false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) );
@@ -154,7 +182,6 @@ class Bootstrap {
 			$this->container->get( AIPatterns::class );
 			$this->container->get( BlockPatterns::class );
 			$this->container->get( BlockTypesController::class );
-			$this->container->get( BlockTemplatesRegistry::class )->init();
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
 			$this->container->get( SingleProductTemplateCompatibility::class )->init();
@@ -166,10 +193,6 @@ class Bootstrap {
 			error_log( 'Theme: ' . wp_get_theme()->get( 'Name' ) );
 			error_log( 'Supports BTP: ' . wc_bool_to_string( current_theme_supports( 'block-template-parts' ) ) );
 			error_log( '-------------------------------' );
-
-			if ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) {
-				$this->container->get( BlockTemplatesController::class )->init();
-			}
 		}
 
 		$this->container->get( QueryFilters::class )->init();
@@ -263,12 +286,6 @@ class Bootstrap {
 				$asset_api           = $container->get( AssetApi::class );
 				$asset_data_registry = $container->get( AssetDataRegistry::class );
 				return new BlockTypesController( $asset_api, $asset_data_registry );
-			}
-		);
-		$this->container->register(
-			BlockTemplatesRegistry::class,
-			function () {
-				return new BlockTemplatesRegistry();
 			}
 		);
 		$this->container->register(
@@ -438,15 +455,6 @@ class Bootstrap {
 				return new QueryFilters();
 			}
 		);
-
-		if ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) {
-			$this->container->register(
-				BlockTemplatesController::class,
-				function () {
-					return new BlockTemplatesController();
-				}
-			);
-		}
 	}
 
 	/**
