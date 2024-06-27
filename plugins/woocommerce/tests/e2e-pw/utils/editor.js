@@ -47,12 +47,10 @@ const fillPageTitle = async ( page, title ) => {
 };
 
 const insertBlock = async ( page, blockName ) => {
-	const canvas = await getCanvas( page );
-	// Click the title to activate the block inserter.
-	await canvas.getByRole( 'textbox', { name: 'Add title' } ).click();
-	await canvas.getByLabel( 'Add block' ).click();
+	await page.getByLabel( 'Toggle block inserter' ).click();
 	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
+	await page.getByLabel( 'Toggle block inserter' ).click();
 };
 
 const insertBlockByShortcut = async ( page, blockName ) => {
