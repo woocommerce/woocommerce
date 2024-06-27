@@ -194,7 +194,7 @@ test(
 		} );
 
 		await test.step( 'verify attributes in product editor', async () => {
-			// Select the main locator by data-template-block-id="product-attributes-section"
+			// Locate the main attributes list element
 			const attributesListLocator = page.locator(
 				'[data-template-block-id="product-attributes-section"]'
 			);
