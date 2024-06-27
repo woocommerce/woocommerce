@@ -165,7 +165,7 @@ __experimentalRegisterProductCollection({
 
 This will create a collection with a heading, product image, and product price. Here is how it will look like:
 
-<img width="800" alt="image" src="https://github.com/woocommerce/woocommerce/assets/16707866/3d92c084-91e9-4872-a898-080b4b93afca">
+![image](https://github.com/woocommerce/woocommerce/assets/16707866/3d92c084-91e9-4872-a898-080b4b93afca)
 
 > ![TIP]
 > You can learn more about inner blocks template in the [Inner Blocks](https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/nested-blocks-inner-blocks/#template) documentation.
