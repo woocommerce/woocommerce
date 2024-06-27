@@ -11,32 +11,45 @@
 	@include breakpoint("<782px") {
 		left: 0;
 		margin-top: $gap-large;
+		max-width: 100%;
+		margin: 24px auto;
+		width: calc(100% + var(--main-gap));
 	}
 
 	&.is-wc-admin-page {
 		margin: 40px 20px 40px 0px;
+
+		@include breakpoint("<782px") {
+			left: calc(-1 * var(--main-gap));
+			width: calc(100% + var(--main-gap));
+			max-width: calc(100% + var(--main-gap));
+		}
 	}
 
 	&.is-homescreen {
 		margin: 40px auto;
 		max-width: 682px;
 		left: calc(-1 * var(--main-gap));
+
+		@include breakpoint("<782px") {
+			width: calc(100% + var(--main-gap));
+			max-width: calc(100% + var(--main-gap));
+		}
 	}
 
 	&.two-columns {
+		max-width: 1032px;
+
+		@include breakpoint("<960px") {
+			left: 0;
+			max-width: calc(100% - var(--main-gap));
+			margin: 40px 20px 40px 0px;
+		}
+
 		@include breakpoint("<782px") {
-			max-width: inherit;
+			left: calc(-1 * var(--main-gap));
+			max-width: calc(100% + var(--main-gap));
 		}
-
-		@include breakpoint(">1280px") {
-			max-width: 1032px;
-		}
-	}
-
-	@include breakpoint("<782px") {
-		margin: 24px auto;
-		left: calc(-1 * var(--main-gap));
-		width: calc(100% + var(--main-gap));
 	}
 
 	&::before {
