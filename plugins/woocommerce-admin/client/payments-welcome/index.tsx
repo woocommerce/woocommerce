@@ -70,9 +70,18 @@ const ConnectAccountPage = () => {
 
 	const handleSetup = async () => {
 		setSubmitted( true );
+
+		const urlParams = new URLSearchParams( window.location.search );
+		const from = urlParams.get( 'from' ) || '';
+
 		recordEvent( 'wcpay_connect_account_clicked', {
 			wpcom_connection: isJetpackConnected ? 'Yes' : 'No',
 			incentive_id: incentive.id,
+			path: 'payments_connect_core_test',
+			source:
+				from === 'WCADMIN_PAYMENT_TASK'
+					? 'wcadmin-payment-task'
+					: 'wcadmin',
 		} );
 
 		const pluginsToInstall = [ ...enabledApms ].map(
