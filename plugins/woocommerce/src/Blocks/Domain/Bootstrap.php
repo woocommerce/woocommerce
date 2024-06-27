@@ -188,11 +188,6 @@ class Bootstrap {
 			$this->container->get( Notices::class )->init();
 			$this->container->get( PTKPatternsStore::class );
 			$this->container->get( OptionsManager::class )->init();
-
-			error_log( 'From Bootstrap.php:' );
-			error_log( 'Theme: ' . wp_get_theme()->get( 'Name' ) );
-			error_log( 'Supports BTP: ' . wc_bool_to_string( current_theme_supports( 'block-template-parts' ) ) );
-			error_log( '-------------------------------' );
 		}
 
 		$this->container->get( QueryFilters::class )->init();
