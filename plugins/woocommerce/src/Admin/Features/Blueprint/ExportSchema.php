@@ -30,7 +30,11 @@ class ExportSchema {
 	protected array $exporters = array();
 
 	public function add_exporter(ExportsStepSchema $exporter) {
-	    $this->exporters[$exporter->get_step_name()] = $exporter;
+		if (!isset($this->exporters[$exporter->get_step_name()])) {
+			$this->exporters[$exporter->get_step_name()] = array();
+		}
+
+	    $this->exporters[$exporter->get_step_name()][] = $exporter;
 	}
 
 	public function get_exporter($step) {
@@ -58,6 +62,8 @@ class ExportSchema {
 		} else {
 			$exporters = $this->exporters;
 		}
+
+		$exporters = array_merge(...array_values($exporters));
 
 		foreach ($exporters as $exporter) {
 			$schema['steps'][] = $exporter->export_step_schema();
