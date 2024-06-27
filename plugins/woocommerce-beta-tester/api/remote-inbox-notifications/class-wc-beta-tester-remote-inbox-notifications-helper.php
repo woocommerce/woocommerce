@@ -122,7 +122,7 @@ class WC_Beta_Tester_Remote_Inbox_Notifications_Helper {
 	 */
 	public static function import( $specs ) {
 		$stored_state = RemoteInboxNotificationsEngine::get_stored_state();
-		$transient     = static::get_transient();
+		$transient    = static::get_transient();
 
 		foreach ( $specs as $spec ) {
 			SpecRunner::run_spec( $spec, $stored_state );
