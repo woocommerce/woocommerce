@@ -3,7 +3,8 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const https = require( 'https' );
-const [ token, branch, hash, baseHash, timestamp ] = process.argv.slice( 2 );
+const [ token, branch, hash, baseHash, timestamp, artifacts_path ] =
+	process.argv.slice( 2 );
 
 const resultsFiles = [
 	{
@@ -17,12 +18,7 @@ const resultsFiles = [
 ];
 
 const performanceResults = resultsFiles.map( ( { file } ) =>
-	JSON.parse(
-		fs.readFileSync(
-			path.join( process.env.WP_ARTIFACTS_PATH, file ),
-			'utf8'
-		)
-	)
+	JSON.parse( fs.readFileSync( path.join( artifacts_path, file ), 'utf8' ) )
 );
 
 const data = new TextEncoder().encode(

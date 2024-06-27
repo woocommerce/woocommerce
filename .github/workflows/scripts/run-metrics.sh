@@ -25,7 +25,7 @@ elif [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
 
 	echo "Publish results to CodeVitals"
 	COMMITTED_AT=$(git show -s $GITHUB_SHA --format="%cI")
-    pnpm --filter="compare-perf" run log $CODEVITALS_PROJECT_TOKEN trunk $GITHUB_SHA 19f3d0884617d7ecdcf37664f648a51e2987cada $COMMITTED_AT
+    pnpm --filter="compare-perf" run log $CODEVITALS_PROJECT_TOKEN trunk $GITHUB_SHA 19f3d0884617d7ecdcf37664f648a51e2987cada $COMMITTED_AT "$GITHUB_WORKSPACE/artifacts"
 else
   	echo "Unsupported event: $GITHUB_EVENT_NAME"
 fi
