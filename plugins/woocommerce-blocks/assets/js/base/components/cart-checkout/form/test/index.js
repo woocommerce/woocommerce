@@ -73,7 +73,10 @@ const inputAddress = async ( {
 		const countryInput = screen.queryByRole( 'combobox', {
 			name: countryRegExp,
 		} );
-		await userEvent.type( countryInput, country + '{arrowdown}{enter}' );
+
+		if ( countryInput ) {
+			await userEvent.selectOptions( countryInput, country );
+		}
 	}
 	if ( city ) {
 		const cityInput = screen.getByLabelText( cityRegExp );
