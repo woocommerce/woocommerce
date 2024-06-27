@@ -49,7 +49,7 @@ runs:
               packages/js/*/build
               packages/js/*/build-*
             key: "${{ runner.os }}-prebuild-${{ inputs.build }}-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
-            restore-keys: '${{ runner.os }}-prebuild-${{ inputs.build }}'
+            restore-keys: '${{ runner.os }}-prebuild-${{ inputs.build }}-'
         - name: 'Setup Node'
           uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
           with:
