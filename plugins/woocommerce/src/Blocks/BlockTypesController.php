@@ -184,7 +184,7 @@ final class BlockTypesController {
 	 *
 	 * @param string $block_name Name of the block to check.
 	 *
-	 * @return mixed|void
+	 * @return boolean
 	 */
 	public function block_should_have_data_attributes( $block_name ) {
 		$block_namespace = strtok( $block_name ?? '', '/' );
@@ -216,10 +216,7 @@ final class BlockTypesController {
 		$in_allowed_namespace_list = in_array( $block_namespace, $allowed_namespaces, true );
 		$in_allowed_block_list     = in_array( $block_name, $allowed_blocks, true );
 
-		if ( $block_has_woo_parent || $in_allowed_block_list || $in_allowed_namespace_list ) {
-			return true;
-		}
-		return false;
+		return $block_has_woo_parent || $in_allowed_block_list || $in_allowed_namespace_list;
 	}
 
 	/**
