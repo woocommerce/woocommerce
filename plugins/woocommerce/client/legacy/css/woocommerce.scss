@@ -1306,6 +1306,19 @@ p.demo_store,
 		border-radius: 5px;
 	}
 
+	form.checkout_coupon {
+		.coupon-error-message {
+			color: $red;
+			font-size: 0.75em;
+			margin-top: -1em;
+			width: auto;
+		}
+
+		.input-text.has-error:focus {
+			border-color: $red;
+		}
+	}
+
 	ul#shipping_method {
 		list-style: none outside;
 		margin: 0;
