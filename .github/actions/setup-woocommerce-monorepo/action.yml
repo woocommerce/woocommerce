@@ -39,6 +39,17 @@ runs:
             path: '~/.cache/ms-playwright/'
             key: "${{ runner.os }}-playwright-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
             restore-keys: '${{ runner.os }}-playwright-'
+        - name: 'Cache build folders (mimics incremental builds)'
+          if: ${{ inputs.build != 'false' }}
+          uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+          with:
+            path: |
+              plugins/*/build
+              plugins/woocommerce/client/legacy/build
+              packages/js/*/build
+              packages/js/*/build-*
+            key: "${{ runner.os }}-prebuild-${{ inputs.build }}-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
+            restore-keys: '${{ runner.os }}-prebuild-${{ inputs.build }}'
         - name: 'Setup Node'
           uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
           with:
