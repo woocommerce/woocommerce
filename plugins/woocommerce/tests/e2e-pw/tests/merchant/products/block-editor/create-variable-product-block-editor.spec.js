@@ -10,6 +10,9 @@ const {
 const { variableProducts: utils } = require( '../../../../utils' );
 const attributes = require( './fixtures/attributes' );
 const tabs = require( './data/tabs' );
+const {
+	confirmGlobalAttributesLoaded,
+} = require( './helpers/confirm-global-attributes-loaded' );
 
 const {
 	createVariableProduct,
@@ -39,7 +42,7 @@ let productId_editVariations,
 	productId_singleVariation;
 
 test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
-	test.describe( 'Create variable product', () => {
+	test.describe( 'Create variable products', () => {
 		test.beforeAll( async ( { browser } ) => {
 			productId_editVariations = await createVariableProduct(
 				productAttributes
@@ -105,23 +108,10 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 				await page.waitForLoadState( 'domcontentloaded' );
 
 				/*
-				 * AttributeTableRow is the row that contains
-				 * the attribute name and the options (terms).
-				 */
-				const rowSelector =
-					'.woocommerce-new-attribute-modal__table-row';
-
-				/*
 				 * Check the app loads the attributes,
 				 * based on the Spinner visibility.
 				 */
-				const spinnerLocator = page.locator(
-					`${ rowSelector } .components-spinner`
-				);
-				await spinnerLocator.waitFor( {
-					state: 'visible',
-				} );
-				await spinnerLocator.waitFor( { state: 'hidden' } );
+				await confirmGlobalAttributesLoaded( page );
 
 				// Attribute combobox input
 				const attributeInputLocator = page.locator(
