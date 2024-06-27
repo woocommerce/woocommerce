@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 $header  = __( 'Find your shade', 'woocommerce' );
 $content = __( 'Explore our exclusive collection of sunglasses, crafted to elevate your look and safeguard your eyes. Find your perfect pair and see the world through a new lens.', 'woocommerce' );
 $button  = __( 'Shop now', 'woocommerce' );
-$image_0 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/table-wood-house-chair-floor-window.jpg' );
+$image_0 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/girls-in-the-hills.jpg' );
 
 ?>
 
