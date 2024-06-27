@@ -138,17 +138,17 @@ jQuery( function ( $ ) {
 
 			if ( preserve_notices ) {
 				var $new_coupon_field = $( '#coupon_code', $new_form );
-				var $new_coupon_wrapper = $new_coupon_field.closest( '.coupon' );
+				var $new_coupon_field_wrapper = $new_coupon_field.closest( '.coupon' );
 				var $coupon_error_msg = $( '#coupon_code' )
 					.closest( '.coupon' )
 					.find( '.coupon-error-message' );
 
-				if ( $new_coupon_wrapper.length === 0 || $coupon_error_msg.length === 0) {
+				if ( $new_coupon_field_wrapper.length === 0 || $coupon_error_msg.length === 0) {
 					return;
 				}
 
 				$new_coupon_field.addClass( 'has-error' );
-				$new_coupon_wrapper.append( $coupon_error_msg );
+				$new_coupon_field_wrapper.append( $coupon_error_msg );
 			}
 
 			$( '.woocommerce-cart-form' ).replaceWith( $new_form );
@@ -208,7 +208,11 @@ jQuery( function ( $ ) {
 			return;
 		}
 
-		var msg = $( $.parseHTML( html_element ) ).text();
+		var msg = $( $.parseHTML( html_element ) ).text().trim();
+
+		if ( msg === '' ) {
+			return;
+		}
 
 		$target.append( '<div class="coupon-error-message" role="alert">' + msg + '<div>' );
 		$target.find( '#coupon_code' ).addClass( 'has-error' );
@@ -554,11 +558,7 @@ jQuery( function ( $ ) {
 			var data = {
 				security: wc_cart_params.apply_coupon_nonce,
 				coupon_code: coupon_code,
-			};
-
-			$(
-				'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success, .coupon-error-message'
-			).remove();
+			};			
 
 			$.ajax( {
 				type: 'POST',
@@ -566,6 +566,10 @@ jQuery( function ( $ ) {
 				data: data,
 				dataType: 'html',
 				success: function ( response ) {
+					$(
+						'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success, .coupon-error-message'
+					).remove();
+					
 					if ( response.indexOf('woocommerce-error') === -1 ) {
 						show_notice( response );						
 					} else {
