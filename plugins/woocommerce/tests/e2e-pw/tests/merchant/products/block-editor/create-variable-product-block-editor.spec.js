@@ -9,6 +9,7 @@ const {
 
 const { variableProducts: utils } = require( '../../../../utils' );
 const attributes = require( './fixtures/attributes' );
+const tabs = require( './data/tabs' );
 
 const {
 	createVariableProduct,
@@ -32,24 +33,6 @@ const sizeAttribute = attributes.find(
 );
 
 const termsLength = sizeAttribute.terms.length;
-
-const tabs = [
-	{
-		name: 'General',
-		noteText:
-			"This product has options, such as size or color. You can manage each variation's images, downloads, and other details individually.",
-	},
-	{
-		name: 'Inventory',
-		noteText:
-			"This product has options, such as size or color. You can now manage each variation's inventory and other details individually.",
-	},
-	{
-		name: 'Shipping',
-		noteText:
-			"This product has options, such as size or color. You can now manage each variation's shipping settings and other details individually.",
-	},
-];
 
 let productId_editVariations,
 	productId_deleteVariations,
