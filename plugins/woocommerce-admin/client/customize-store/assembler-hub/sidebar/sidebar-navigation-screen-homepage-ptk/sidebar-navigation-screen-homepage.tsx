@@ -51,6 +51,7 @@ import { isEqual } from 'lodash';
 import { COLOR_PALETTES } from '../global-styles/color-palette-variations/constants';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
+import { isTrackingAllowed } from '../../utils/is-tracking-allowed';
 import './style.scss';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
