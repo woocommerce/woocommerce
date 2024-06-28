@@ -21,6 +21,7 @@ import {
 	__experimentalToggleGroupControl as ToggleGroupControl,
 } from '@wordpress/components';
 import { Icon, settings, menu } from '@wordpress/icons';
+import { filter, filterThreeLines } from '@woocommerce/icons';
 import { getSetting } from '@woocommerce/settings';
 
 /**
@@ -225,17 +226,7 @@ export const Edit = ( {
 											label={
 												<Icon
 													size={ 32 }
-													icon={
-														<svg
-															xmlns="http://www.w3.org/2000/svg"
-															viewBox="0 0 24 24"
-															width="32"
-															height="32"
-															aria-hidden="true"
-														>
-															<path d="M10.541 4.20007H5.20245C4.27908 4.20007 3.84904 5.34461 4.54394 5.95265L10.541 11.2001V16.2001L10.541 17.9428C10.541 18.1042 10.619 18.2558 10.7504 18.3496L13.2504 20.1353C13.5813 20.3717 14.041 20.1352 14.041 19.7285V11.2001L19.3339 5.90718C19.9639 5.27722 19.5177 4.20007 18.6268 4.20007H13.041H10.541Z" />
-														</svg>
-													}
+													icon={ filter }
 												/>
 											}
 										/>
@@ -244,20 +235,7 @@ export const Edit = ( {
 											label={
 												<Icon
 													size={ 32 }
-													icon={
-														<svg
-															xmlns="http://www.w3.org/2000/svg"
-															viewBox="0 0 24 24"
-															width="32"
-															height="32"
-															aria-hidden="true"
-														>
-															<path
-																d="M4 11.5H8V10H4V11.5ZM0 0V1.5H12V0H0ZM2 6.5H10V5H2V6.5Z"
-																transform="translate(6,6)"
-															/>
-														</svg>
-													}
+													icon={ filterThreeLines }
 												/>
 											}
 										/>
