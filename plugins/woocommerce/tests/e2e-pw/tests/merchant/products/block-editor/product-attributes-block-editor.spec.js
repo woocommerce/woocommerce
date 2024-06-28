@@ -170,19 +170,32 @@ test(
 					await FormTokenFieldInputLocator.press( 'Enter' );
 				}
 
+				// Terms accepted, so the Add button should be enabled.
+				await expect(
+					page.getByRole( 'button', { name: 'Add attributes' } )
+				).toBeEnabled();
+
 				await page.getByLabel( 'Add another attribute' ).click();
+
+				// Attribute no defined, so the Add button should be disabled.
+				await expect(
+					page.getByRole( 'button', { name: 'Add attributes' } )
+				).toBeDisabled();
 			}
-
-			// Since there are no more attributes to add, the button should be enabled.
-			await expect(
-				page.getByRole( 'button', { name: 'Add attributes' } )
-			).toBeEnabled();
-
-			// Add the product attributes
-			await page
-				.getByRole( 'button', { name: 'Add attributes' } )
-				.click();
 		} );
+
+		// Remove the last row, as it was added by the last click on "Add another attribute".
+		await page
+			.getByRole( 'button', { name: 'Remove attribute' } )
+			.last()
+			.click();
+
+		await expect(
+			page.getByRole( 'button', { name: 'Add attributes' } )
+		).toBeEnabled();
+
+		// Add the product attributes
+		await page.getByRole( 'button', { name: 'Add attributes' } ).click();
 
 		await test.step( 'verify attributes in product editor', async () => {
 			// Locate the main attributes list element
