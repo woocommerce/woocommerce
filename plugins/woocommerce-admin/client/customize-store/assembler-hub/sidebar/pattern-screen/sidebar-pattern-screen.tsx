@@ -111,7 +111,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 
 						navigateTo( { url: homepageUrl } );
 					} }
-					iconSize={ 22 }
+					iconSize={ 18 }
 					icon={ close }
 					label={ __( 'Close', 'woocommerce' ) }
 				/>
