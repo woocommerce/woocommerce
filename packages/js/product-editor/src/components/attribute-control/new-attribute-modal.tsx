@@ -118,7 +118,15 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		);
 	};
 
-	const isGlobalAttribute = ( attribute: EnhancedProductAttribute ) => {
+	/**
+	 * By convention, a global attribute has an ID different from 0.
+	 *
+	 * @param {EnhancedProductAttribute} attribute - The attribute to check.
+	 * @return {boolean}                             True if the attribute is global, false it's local.
+	 */
+	const isGlobalAttribute = (
+		attribute: EnhancedProductAttribute
+	): boolean => {
 		return attribute.id !== 0;
 	};
 
@@ -328,13 +336,14 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 						attribute?: EnhancedProductAttribute
 					) {
 						/*
-						 * By convention, it's a global attribute if the attribute ID is 0.
-						 * For global attributes, the field name suffix
+						 * For local (Product) attributes, the field name suffix
 						 * to set the attribute terms is 'options',
-						 * for local attributes, the field name suffix is 'terms'.
+						 * for global attributes, the field name suffix is 'terms'.
 						 */
 						const attributeTermPropName =
-							attribute?.id === 0 ? 'options' : 'terms';
+							attribute && isGlobalAttribute( attribute )
+								? 'terms'
+								: 'options';
 
 						const fieldName = `attributes[${ index }].${ attributeTermPropName }`;
 
