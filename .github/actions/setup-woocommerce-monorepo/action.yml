@@ -34,7 +34,7 @@ runs:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'
         - name: 'Cache Composer Dependencies'
-          if: ${{ inputs.php-version != 'false' }}
+          if: ${{ inputs.build == 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: '~/.cache/composer/files'
