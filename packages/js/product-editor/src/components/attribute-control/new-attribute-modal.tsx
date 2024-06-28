@@ -112,12 +112,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		onAddAnother();
 	};
 
-	/**
-	 * By convention, a global attribute has an ID different from 0.
-	 *
-	 * @param {EnhancedProductAttribute} attribute - The attribute to check.
-	 * @return {boolean}                             True if the attribute is global, false it's local.
-	 */
 	const isGlobalAttribute = (
 		attribute: EnhancedProductAttribute
 	): boolean => {
