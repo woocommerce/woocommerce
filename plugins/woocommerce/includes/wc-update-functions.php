@@ -2740,7 +2740,7 @@ function wc_update_910_add_old_refunded_order_items_to_product_lookup_table() {
 
 	// Get every order ID where the total sales is less than 0 and is not present in the table wc_order_product_lookup.
 	$select_query = "
-	SELECT order_stats.parent_id FROM {$wpdb->prefix}wc_order_stats AS order_stats
+	SELECT order_stats.order_id FROM {$wpdb->prefix}wc_order_stats AS order_stats
 	WHERE order_stats.total_sales < 0
     AND (
         SELECT COUNT(*)
@@ -2760,7 +2760,7 @@ function wc_update_910_add_old_refunded_order_items_to_product_lookup_table() {
 			 * @param int $order_id The ID of the order to be synced.
 			 * @since 9.2.0
 			 */
-			do_action( 'woocommerce_schedule_import', intval( $order->parent_id ) );
+			do_action( 'woocommerce_schedule_import', intval( $order->order_id ) );
 		}
 	}
 }
