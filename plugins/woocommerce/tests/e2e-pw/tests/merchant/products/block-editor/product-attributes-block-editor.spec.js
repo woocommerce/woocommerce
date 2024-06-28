@@ -7,7 +7,7 @@ const { clickOnTab } = require( '../../../../utils/simple-products' );
 const attributesData = require( './fixtures/attributes' );
 const {
 	waitForGlobalAttributesLoaded,
-} = require( './helpers/confirm-global-attributes-loaded' );
+} = require( './helpers/wait-for-global-attributes-loaded' );
 
 async function waitForAttributeList( page ) {
 	// The list child is different in case there are no results versus when there already are some attributes, so we need to wait for either one to be visible.
