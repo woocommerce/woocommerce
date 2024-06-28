@@ -75,6 +75,30 @@ const TEMPLATE: InnerBlockTemplate[] = [
 			heading: __( 'Rating', 'woocommerce' ),
 		},
 	],
+	[
+		'core/buttons',
+		{ layout: { type: 'flex' } },
+		[
+			[
+				'core/button',
+				{
+					text: __( 'Apply', 'woocommerce' ),
+					className: 'wc-block-product-filters__apply-button',
+					style: {
+						border: {
+							width: '0px',
+							style: 'none',
+						},
+						typography: {
+							textDecoration: 'none',
+						},
+						outline: 'none',
+						fontSize: 'medium',
+					},
+				},
+			],
+		],
+	],
 ];
 
 const addHighestProductCountAttributeToTemplate = (
