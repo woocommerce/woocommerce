@@ -492,7 +492,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									{ cancelLabel }
 								</Button>
 								<Button
-									isPrimary
+									variant="primary"
 									label={ addAccessibleLabel }
 									disabled={ isAddButtonDisabled }
 									onClick={ () =>
