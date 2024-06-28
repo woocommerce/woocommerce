@@ -1,4 +1,4 @@
 Significance: patch
 Type: update
 
-Enforce product parent checks in variations REST API.
+Ensures the product ID is valid when interacting with product variations via the REST API.
