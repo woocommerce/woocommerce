@@ -64,9 +64,9 @@ export function reorderSortableProductAttributePositions(
 export const hasTermsOrOptions = (
 	attribute: EnhancedProductAttribute
 ): boolean => {
-	return (
-		( attribute.terms && attribute.terms.length > 0 ) ||
-		( attribute.options && attribute.options.length > 0 )
+	return !! (
+		( attribute?.terms && attribute.terms.length > 0 ) ||
+		( attribute?.options && attribute.options.length > 0 )
 	);
 };
 
