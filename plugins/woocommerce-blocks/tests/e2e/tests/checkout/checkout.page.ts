@@ -361,8 +361,8 @@ export class CheckoutPage {
 			const county = billingForm.getByLabel( 'County' );
 
 			const elementToFill = state.or( province ).or( county );
-			const tagName = await elementToFill.evaluate(
-				( element ) => element.tagName
+			const tagName = await elementToFill.evaluate( ( element ) =>
+				element.tagName.toLowerCase()
 			);
 			if ( tagName === 'select' ) {
 				await elementToFill.selectOption(
@@ -438,8 +438,8 @@ export class CheckoutPage {
 			const county = shippingForm.getByLabel( 'County' );
 
 			const elementToFill = state.or( province ).or( county );
-			const tagName = await elementToFill.evaluate(
-				( element ) => element.tagName
+			const tagName = await elementToFill.evaluate( ( element ) =>
+				element.tagName.toLowerCase()
 			);
 			if ( tagName === 'select' ) {
 				await elementToFill.selectOption(
