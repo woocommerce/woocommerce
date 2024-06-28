@@ -434,29 +434,24 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$tax_amount = round( $tax_amount, $decimals );
 			}
 
-			$gross_revenue  = $net_revenue < 0 ? 0 : $net_revenue;
-			$gross_revenue += $tax_amount + $shipping_amount + $shipping_tax_amount;
-
-			$data = array(
-				'order_item_id'         => $order_item_id,
-				'order_id'              => $order->get_id(),
-				'product_id'            => wc_get_order_item_meta( $order_item_id, '_product_id' ),
-				'variation_id'          => wc_get_order_item_meta( $order_item_id, '_variation_id' ),
-				'customer_id'           => $order->get_report_customer_id(),
-				'product_qty'           => $product_qty,
-				'product_net_revenue'   => $net_revenue,
-				'date_created'          => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
-				'coupon_amount'         => $coupon_amount,
-				'tax_amount'            => $tax_amount,
-				'shipping_amount'       => $shipping_amount,
-				'shipping_tax_amount'   => $shipping_tax_amount,
-				// @todo Can this be incorrect if modified by filters?
-				'product_gross_revenue' => $gross_revenue,
-			);
-
 			$result = $wpdb->replace(
 				self::get_db_table_name(),
-				$data,
+				array(
+					'order_item_id'         => $order_item_id,
+					'order_id'              => $order->get_id(),
+					'product_id'            => wc_get_order_item_meta( $order_item_id, '_product_id' ),
+					'variation_id'          => wc_get_order_item_meta( $order_item_id, '_variation_id' ),
+					'customer_id'           => $order->get_report_customer_id(),
+					'product_qty'           => $product_qty,
+					'product_net_revenue'   => $net_revenue,
+					'date_created'          => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
+					'coupon_amount'         => $coupon_amount,
+					'tax_amount'            => $tax_amount,
+					'shipping_amount'       => $shipping_amount,
+					'shipping_tax_amount'   => $shipping_tax_amount,
+					// @todo Can this be incorrect if modified by filters?
+					'product_gross_revenue' => $net_revenue + $tax_amount + $shipping_amount + $shipping_tax_amount,
+				),
 				array(
 					'%d', // order_item_id.
 					'%d', // order_id.
