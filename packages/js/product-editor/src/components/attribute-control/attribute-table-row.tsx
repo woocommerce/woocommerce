@@ -461,6 +461,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 							);
 						}
 					} }
+					onInputChange={ console.log }
 					__experimentalExpandOnFocus={ true }
 					__experimentalAutoSelectFirstMatch={ true }
 					__experimentalShowHowTo={ true }

@@ -317,11 +317,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 						index: number,
 						attribute?: EnhancedProductAttribute
 					) {
-						/*
-						 * For local (Product) attributes, the field name suffix
-						 * to set the attribute terms is 'options',
-						 * for global attributes, the field name suffix is 'terms'.
-						 */
 						const attributeTermPropName =
 							attribute && isGlobalAttribute( attribute )
 								? 'terms'
@@ -473,6 +468,10 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 											: ''
 									}
 								>
+									{ /*
+									 * we need to wrap the button in a div to make the tooltip work,
+									 * since when the button is disabled, the tooltip is not shown.
+									 */ }
 									<div>
 										<Button
 											variant="primary"

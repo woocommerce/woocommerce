@@ -126,7 +126,7 @@ describe( 'hasTermsOrOptions', () => {
 
 		const attribute: EnhancedProductAttribute = {
 			name: 'Color',
-			id: 123,
+			id: 0,
 			slug: 'color',
 			position: 0,
 			visible: true,
@@ -286,7 +286,7 @@ describe( 'isAttributeFilledOut', () => {
 
 		const attribute: EnhancedProductAttribute = {
 			name: 'Color',
-			id: 123,
+			id: 0,
 			slug: 'color',
 			position: 0,
 			visible: true,
@@ -314,13 +314,13 @@ describe( 'isAttributeFilledOut', () => {
 
 	it( 'should return false if the attribute is null', () => {
 		const attribute = null;
-		expect( isAttributeFilledOut( attribute as any ) ).toBe( false ); // eslint-disable-line @typescript-eslint/no-explicit-any
+		expect( isAttributeFilledOut( attribute ) ).toBe( false );
 	} );
 
 	it( 'should return false if the attribute has no name', () => {
 		const attribute: EnhancedProductAttribute = {
 			name: '',
-			id: 123,
+			id: 0,
 			slug: 'color',
 			position: 0,
 			visible: true,

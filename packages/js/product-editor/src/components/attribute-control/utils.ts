@@ -62,13 +62,8 @@ export function reorderSortableProductAttributePositions(
  * @return {boolean} True if the attribute has terms or options, false otherwise.
  */
 export const hasTermsOrOptions = (
-	attribute: EnhancedProductAttribute
-): boolean => {
-	return !! (
-		( attribute?.terms && attribute.terms.length > 0 ) ||
-		( attribute?.options && attribute.options.length > 0 )
-	);
-};
+	attribute: EnhancedProductAttribute | null
+): boolean => !! ( attribute?.terms?.length || attribute?.options?.length );
 
 /**
  * Checks if the given attribute is filled out,
@@ -79,10 +74,5 @@ export const hasTermsOrOptions = (
  */
 export const isAttributeFilledOut = (
 	attribute: EnhancedProductAttribute | null
-): attribute is EnhancedProductAttribute => {
-	return (
-		attribute !== null &&
-		attribute.name.length > 0 &&
-		hasTermsOrOptions( attribute )
-	);
-};
+): attribute is EnhancedProductAttribute =>
+	!! attribute?.name.length && hasTermsOrOptions( attribute );
