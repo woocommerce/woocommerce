@@ -13,6 +13,7 @@
 		"build"
 	],
 	"scripts": {
+		"ci-trigger-the-job": "",
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
