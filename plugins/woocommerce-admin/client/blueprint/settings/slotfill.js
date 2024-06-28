@@ -27,8 +27,8 @@ const Blueprint = () => {
 		'Payment Gateways': 'configurePaymentGateways',
 		Shipping: 'configureShipping',
 		'Tax rates': 'configureTaxRates',
-		Plugins: 'installPlugins',
-		Themes: 'installThemes',
+		Plugins: 'installPlugin',
+		Themes: 'installTheme',
 		'Task Options': 'configureTaskOptions',
 	};
 
