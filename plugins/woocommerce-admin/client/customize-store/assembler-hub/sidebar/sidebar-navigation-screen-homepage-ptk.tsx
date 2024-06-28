@@ -41,10 +41,10 @@ import { PATTERN_CATEGORIES } from './pattern-screen/categories';
 import { capitalize } from 'lodash';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
+import { isTrackingAllowed } from '../utils/is-tracking-allowed';
 
 export const SidebarNavigationScreenHomepagePTK = ( {
 	onNavigateBackClick,
@@ -55,10 +55,6 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 
 	const isNetworkOffline = useNetworkStatus();
 	const isPTKPatternsAPIAvailable = context.isPTKPatternsAPIAvailable;
-	const trackingAllowed = useSelect( ( sel ) =>
-		sel( OPTIONS_STORE_NAME ).getOption( 'woocommerce_allow_tracking' )
-	);
-	const isTrackingDisallowed = trackingAllowed === 'no' || ! trackingAllowed;
 
 	const currentTemplate = useSelect(
 		( sel ) =>
@@ -113,7 +109,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 			"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns.",
 			'woocommerce'
 		);
-	} else if ( isTrackingDisallowed ) {
+	} else if ( ! isTrackingAllowed() ) {
 		notice = __(
 			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
 			'woocommerce'

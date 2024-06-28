@@ -49,9 +49,9 @@ import {
 } from '../utils/hero-pattern';
 import { isEqual } from 'lodash';
 import { COLOR_PALETTES } from './global-styles/color-palette-variations/constants';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
+import { isTrackingAllowed } from '../utils/is-tracking-allowed';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
@@ -223,10 +223,6 @@ export const SidebarNavigationScreenHomepage = ( {
 
 	const isNetworkOffline = useNetworkStatus();
 	const isPTKPatternsAPIAvailable = context.isPTKPatternsAPIAvailable;
-	const trackingAllowed = useSelect( ( sel ) =>
-		sel( OPTIONS_STORE_NAME ).getOption( 'woocommerce_allow_tracking' )
-	);
-	const isTrackingDisallowed = trackingAllowed === 'no' || ! trackingAllowed;
 
 	let notice;
 	if ( isNetworkOffline ) {
@@ -239,7 +235,7 @@ export const SidebarNavigationScreenHomepage = ( {
 			"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns.",
 			'woocommerce'
 		);
-	} else if ( isTrackingDisallowed ) {
+	} else if ( ! isTrackingAllowed() ) {
 		notice = __(
 			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
 			'woocommerce'
