@@ -535,7 +535,6 @@
 						"start": "env:perf"
 					},
 					"events": [
-						"pull_request",
 						"push"
 					]
 				},
@@ -555,7 +554,6 @@
 						"tests/metrics/**"
 					],
 					"events": [
-						"pull_request",
 						"push"
 					]
 				},
