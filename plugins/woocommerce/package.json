@@ -379,7 +379,7 @@
 						"--shard=5/5"
 					],
 					"events": [
-						"push",
+						"daily-checks",
 						"release-checks"
 					],
 					"changes": [
@@ -422,6 +422,7 @@
 						}
 					},
 					"events": [
+						"daily-checks",
 						"release-checks"
 					],
 					"report": {
@@ -449,6 +450,7 @@
 						}
 					},
 					"events": [
+						"daily-checks",
 						"release-checks"
 					],
 					"report": {
