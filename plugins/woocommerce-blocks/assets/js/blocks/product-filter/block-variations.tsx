@@ -99,7 +99,8 @@ const variations: BlockVariation[] = [
  *  Block by providing its attributes.
  */
 variations.forEach( ( variation ) => {
-	variation.isActive = () => [ 'filterType' ];
+	// @ts-expect-error: `isActive` is currently typed wrong in `@wordpress/blocks`.
+	variation.isActive = [ 'filterType' ];
 } );
 
 export const blockVariations = variations;
