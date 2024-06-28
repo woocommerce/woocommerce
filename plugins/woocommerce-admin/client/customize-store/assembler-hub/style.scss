@@ -174,7 +174,8 @@ body.woocommerce-assembler {
 
 			&:hover,
 			&:active,
-			&:focus {
+			&:focus,
+			&.edit-site-sidebar-navigation-screen-patterns__group-homepage-item--active {
 				background: #ededed;
 				color: $gray-600;
 			}
