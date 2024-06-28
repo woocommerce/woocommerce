@@ -6551,13 +6551,6 @@ S2.define('jquery.select2',[
           var instanceOptions = $.extend(true, {}, options);
 
           var instance = new Select2($(this), instanceOptions);
-          if ( options.hasOwnProperty( 'required' ) && options.required === true ) {
-            if ( instance.$selection ) {
-              // adding `aria-required` to both of these elements to improve screen reader support in Chrome/Firefox on Android.
-              instance.$selection.attr( 'aria-required', 'true' );
-              instance.$selection.find('span').first().attr( 'aria-required', 'true' );
-            }
-          }
         });
 
         return this;
