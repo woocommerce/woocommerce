@@ -131,10 +131,7 @@ test(
 				'.woocommerce-new-attribute-modal__table-row'
 			);
 
-			/*
-			 * First, check the app loads the attributes,
-			 * based on the Spinner visibility.
-			 */
+			// First, check the app loads the attributes,
 			await waitForGlobalAttributesLoaded( page );
 
 			for ( const attribute of attributesData ) {
