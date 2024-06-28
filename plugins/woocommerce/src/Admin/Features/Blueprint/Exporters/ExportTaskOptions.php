@@ -3,8 +3,9 @@
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
 use Automattic\WooCommerce\Blueprint\Exporters\ExportsStep;
+use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
 
-class ExportTaskOptions implements ExportsStep {
+class ExportTaskOptions implements ExportsStep, HasAlias {
 	public function export() {
 	    return array(
 			'woocommerce_admin_customize_store_completed' => get_option('woocommerce_admin_customize_store_completed', 'no'),
@@ -14,7 +15,7 @@ class ExportTaskOptions implements ExportsStep {
 	public function export_step() {
 		return array(
 			'step' => $this->get_step_name(),
-			'alias' => 'configureTaskOptions',
+			'alias' => $this->get_alias(),
 			'options' => $this->export(),
 			'meta' => array(
 				'plugin' => 'woocommerce'
@@ -24,5 +25,9 @@ class ExportTaskOptions implements ExportsStep {
 
 	public function get_step_name() {
 		return 'setOptions';
+	}
+
+	public function get_alias() {
+		return 'configureTaskOptions';
 	}
 }

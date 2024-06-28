@@ -31,6 +31,6 @@ class ExportTaxRates implements ExportsStep {
 	}
 
 	public function get_step_name() {
-	    return 'configureTaxRates';
+		return 'configureTaxRates';
 	}
 }

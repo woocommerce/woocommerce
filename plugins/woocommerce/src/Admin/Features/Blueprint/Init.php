@@ -32,6 +32,7 @@ class Init {
 	public function add_woo_exporters(array $exporters) {
 		$classes = array(
 			__NAMESPACE__ . '\Exporters\ExportCoreProfilerSettings',
+			__NAMESPACE__ . '\Exporters\ExportSettings',
 			__NAMESPACE__ . '\Exporters\ExportPaymentGateways',
 			__NAMESPACE__ . '\Exporters\ExportShipping',
 			__NAMESPACE__ . '\Exporters\ExportTaskOptions',

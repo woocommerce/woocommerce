@@ -3,11 +3,12 @@
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
 use Automattic\WooCommerce\Blueprint\Exporters\ExportsStep;
+use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
 use Automattic\WooCommerce\Blueprint\Util;
 use WC_Admin_Settings;
 use WC_Settings_Page;
 
-class ExportSettings implements ExportsStep {
+class ExportSettings implements ExportsStep, HasAlias {
 	/**
 	 * @var WC_Settings_Page[]
 	 */
@@ -149,7 +150,7 @@ class ExportSettings implements ExportsStep {
 		$export = $this->export();
 		return array(
 			'step' => $this->get_step_name(),
-			'alias' => 'configureSettings',
+			'alias' => $this->get_alias(),
 			'options' => $export['options'],
 			'meta' => array(
 				'pages' => $export['pages'],
@@ -160,5 +161,9 @@ class ExportSettings implements ExportsStep {
 
 	public function get_step_name() {
 	    return 'setOptions';
+	}
+
+	public function get_alias() {
+		return 'configureSettings';
 	}
 }
