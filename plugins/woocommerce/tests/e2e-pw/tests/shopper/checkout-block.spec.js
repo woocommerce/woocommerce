@@ -376,9 +376,7 @@ test.describe(
 			await expect(
 				page.getByText( '+ Add apartment, suite, etc.' )
 			).toBeEnabled();
-			await expect(
-				page.getByLabel( 'United States (US), Country/Region' )
-			).toBeEditable();
+			await expect( page.getByLabel( 'Country/Region' ) ).toBeEnabled();
 			await expect(
 				page.getByLabel( 'California, State' )
 			).toBeEditable();
