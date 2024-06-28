@@ -8,8 +8,6 @@ use InvalidArgumentException;
  * Utilities to help ensure type safety.
  */
 class Types {
-	public const UNABLE_TO_ENSURE_INSTANCE_IS_OF_EXPECTED_TYPE = 'unable-to-ensure-instance-is-of-expected-type';
-
 	/**
 	 * Checks if $thing is an instance of $desired_type.
 	 *
@@ -60,9 +58,6 @@ class Types {
 			return $on_failure( $thing, $desired_type );
 		}
 
-		throw new InvalidArgumentException(
-			esc_html( $summary ),
-			esc_html( self::UNABLE_TO_ENSURE_INSTANCE_IS_OF_EXPECTED_TYPE )
-		);
+		throw new InvalidArgumentException( esc_html( $summary ) );
 	}
 }
