@@ -40,6 +40,9 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
 
+            - name: Preload build dependencies
+              uses: 'google/wireit@4aad131006ea85c1e42af927534ebb13426dd730'
+
             - name: Prepare plugin zips
               id: prepare
               env:
