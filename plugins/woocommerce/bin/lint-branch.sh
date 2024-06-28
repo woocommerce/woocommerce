@@ -17,7 +17,7 @@ if [[ -n $changedFiles ]]; then
 fi
 
 # Lint new (excl. renamed) php-files to contain strict types directive.
-newFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only --diff-filter=r -- '*.php')
+newFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only --diff-filter=dmr -- '*.php')
 if [[ -n $newFiles ]]; then
 	passingFiles=$(find $newFiles -type f -exec grep -xl --regexp='declare(\s*strict_types\s*=\s*1\s*);' /dev/null {} +)
 	violatingFiles=$(grep -vxf <(printf "%s\n" $passingFiles | sort) <(printf "%s\n" $newFiles | sort))
