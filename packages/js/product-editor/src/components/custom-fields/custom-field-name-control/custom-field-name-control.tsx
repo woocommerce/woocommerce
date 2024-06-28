@@ -23,18 +23,29 @@ import classNames from 'classnames';
  * Internal dependencies
  */
 import type { CustomFieldNameControlProps } from './types';
+import { ComboboxControlOption } from '../../attribute-combobox-field/types';
 
 async function searchCustomFieldNames( search?: string ) {
 	return apiFetch< string[] >( {
 		path: addQueryArgs( '/wc/v3/products/custom-fields/names', {
 			search,
 		} ),
-	} ).then( ( data ) =>
-		( data ?? [] ).map( ( customFieldName ) => ( {
-			value: customFieldName,
-			label: customFieldName,
-		} ) )
-	);
+	} ).then( ( customFieldNames = [] ) => {
+		let options: ComboboxControlOption[] = [];
+
+		if ( search && customFieldNames.indexOf( search ) === -1 ) {
+			options.push( { value: search, label: search } );
+		}
+
+		customFieldNames.forEach( ( customFieldName ) => {
+			options.push( {
+				value: customFieldName,
+				label: customFieldName,
+			} );
+		} );
+
+		return options;
+	} );
 }
 
 export const CustomFieldNameControl = forwardRef(
@@ -48,6 +59,7 @@ export const CustomFieldNameControl = forwardRef(
 			messages,
 			value,
 			onChange,
+			onBlur,
 			...props
 		}: CustomFieldNameControlProps,
 		ref: Ref< HTMLInputElement >
@@ -131,10 +143,36 @@ export const CustomFieldNameControl = forwardRef(
 		);
 
 		const handleFilterValueChange = useDebounce(
-			useCallback( function onFilterValueChange( search: string ) {
-				searchCustomFieldNames( search ).then( setCustomFieldNames );
-			}, [] ),
+			useCallback(
+				function onFilterValueChange( search: string ) {
+					searchCustomFieldNames(
+						search === '' ? value : search
+					).then( setCustomFieldNames );
+				},
+				[ value ]
+			),
 			250
+		);
+
+		useEffect(
+			function overrideBlur() {
+				function handleBlur( event: FocusEvent ) {
+					if ( comboboxRef.current ) {
+						comboboxRef.current.value = value;
+					}
+					onBlur?.( event as never );
+				}
+
+				comboboxRef.current?.addEventListener( 'blur', handleBlur );
+
+				return () => {
+					comboboxRef.current?.removeEventListener(
+						'blur',
+						handleBlur
+					);
+				};
+			},
+			[ value, onBlur ]
 		);
 
 		return (
