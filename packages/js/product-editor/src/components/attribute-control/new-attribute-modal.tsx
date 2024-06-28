@@ -25,6 +25,7 @@ import { TRACKS_SOURCE } from '../../constants';
 import { AttributeTableRow } from './attribute-table-row';
 import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 import type { AttributesComboboxControlItem } from '../attribute-combobox-field/types';
+import { isAttributeFilledOut } from './utils';
 
 type NewAttributeModalProps = {
 	title?: string;
@@ -111,13 +112,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		onAddAnother();
 	};
 
-	const hasTermsOrOptions = ( attribute: EnhancedProductAttribute ) => {
-		return (
-			( attribute.terms && attribute.terms.length > 0 ) ||
-			( attribute.options && attribute.options.length > 0 )
-		);
-	};
-
 	/**
 	 * By convention, a global attribute has an ID different from 0.
 	 *
@@ -142,16 +136,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		return isGlobalAttribute( attribute )
 			? mapTermsToOptions( attribute.terms )
 			: attribute.options;
-	};
-
-	const isAttributeFilledOut = (
-		attribute: EnhancedProductAttribute | null
-	): attribute is EnhancedProductAttribute => {
-		return (
-			attribute !== null &&
-			attribute.name.length > 0 &&
-			hasTermsOrOptions( attribute )
-		);
 	};
 
 	const getVisibleOrTrue = ( attribute: EnhancedProductAttribute ) =>
