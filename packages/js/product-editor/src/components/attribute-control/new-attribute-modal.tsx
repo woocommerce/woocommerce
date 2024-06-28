@@ -246,6 +246,16 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					setValue: ( name: string, value: any ) => void;
 				} ) => {
+					/*
+					 * Handle if the Add button is disabled.
+					 * - attributes should be not empty array
+					 * - attributes should not be an array of null or undefined
+					 * - It should be at least one term or option in the attribute
+					 */
+					const isAddButtonDisabled = ! values.attributes.some(
+						( attr ) => isAttributeFilledOut( attr )
+					);
+
 					/**
 					 * Select the attribute in the form field.
 					 * If the attribute does not exist, create it.
@@ -484,12 +494,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								<Button
 									isPrimary
 									label={ addAccessibleLabel }
-									disabled={
-										values.attributes.length === 1 &&
-										( values.attributes[ 0 ] === null ||
-											values.attributes[ 0 ] ===
-												undefined )
-									}
+									disabled={ isAddButtonDisabled }
 									onClick={ () =>
 										onAddingAttributes( values )
 									}
