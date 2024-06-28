@@ -39,7 +39,7 @@ const variations: BlockVariation[] = [
 		),
 		attributes: {
 			filterType: 'price-filter',
-			heading: __( 'Filter by Price', 'woocommerce' ),
+			heading: __( 'Price', 'woocommerce' ),
 		},
 		icon: {
 			src: priceFilterIcon,
@@ -54,7 +54,7 @@ const variations: BlockVariation[] = [
 		),
 		attributes: {
 			filterType: 'stock-filter',
-			heading: __( 'Filter by Stock Status', 'woocommerce' ),
+			heading: __( 'Status', 'woocommerce' ),
 		},
 		icon: {
 			src: stockStatusFilterIcon,
@@ -69,7 +69,7 @@ const variations: BlockVariation[] = [
 		),
 		attributes: {
 			filterType: 'attribute-filter',
-			heading: __( 'Filter by Attribute', 'woocommerce' ),
+			heading: __( 'Attribute', 'woocommerce' ),
 			attributeId: 0,
 		},
 		icon: {
@@ -85,7 +85,7 @@ const variations: BlockVariation[] = [
 		),
 		attributes: {
 			filterType: 'rating-filter',
-			heading: __( 'Filter by Rating', 'woocommerce' ),
+			heading: __( 'Rating', 'woocommerce' ),
 		},
 		icon: {
 			src: ratingFilterIcon,

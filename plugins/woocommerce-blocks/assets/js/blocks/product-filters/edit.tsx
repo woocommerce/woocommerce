@@ -37,21 +37,21 @@ const TEMPLATE: InnerBlockTemplate[] = [
 		'woocommerce/product-filter',
 		{
 			filterType: 'price-filter',
-			heading: 'Filter by Price',
+			heading: 'Price',
 		},
 	],
 	[
 		'woocommerce/product-filter',
 		{
 			filterType: 'stock-filter',
-			heading: 'Filter by Stock Status',
+			heading: 'Status',
 		},
 	],
 	[
 		'woocommerce/product-filter',
 		{
 			filterType: 'attribute-filter',
-			heading: __( 'Filter by Attribute', 'woocommerce' ),
+			heading: __( 'Attribute', 'woocommerce' ),
 			attributeId: 0,
 		},
 	],
@@ -59,7 +59,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 		'woocommerce/product-filter',
 		{
 			filterType: 'rating-filter',
-			heading: __( 'Filter by Rating', 'woocommerce' ),
+			heading: __( 'Rating', 'woocommerce' ),
 		},
 	],
 ];
