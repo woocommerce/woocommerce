@@ -1163,12 +1163,8 @@ test.describe( 'Product Collection', () => {
 				await editor.selectBlocks( otherBlockSelector );
 				await expect( previewButtonLocator ).toBeHidden();
 
-				// Preview button should be visible when any of inner block is selected
-				await editor.canvas
-					.getByLabel( BLOCK_LABELS.productTemplate )
-					.getByLabel( BLOCK_LABELS.productImage )
-					.first()
-					.click();
+				// Preview button should be visible again when the block is selected.
+				await pageObject.focusProductCollection();
 				await expect( previewButtonLocator ).toBeVisible();
 			} );
 		} );

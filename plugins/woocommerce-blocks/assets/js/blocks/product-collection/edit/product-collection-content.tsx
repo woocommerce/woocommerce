@@ -120,25 +120,6 @@ const ProductCollectionContent = ( {
 		[]
 	);
 
-	const isSelectedOrInnerBlockSelected = useSelect(
-		( select ) => {
-			const { getSelectedBlockClientId, hasSelectedInnerBlock } =
-				select( 'core/block-editor' );
-
-			// Check if the current block is selected.
-			const isSelected = getSelectedBlockClientId() === clientId;
-
-			// Check if any inner block of the current block is selected.
-			const isInnerBlockSelected = hasSelectedInnerBlock(
-				clientId,
-				true
-			);
-
-			return isSelected || isInnerBlockSelected;
-		},
-		[ clientId ]
-	);
-
 	/**
 	 * If default attributes are not set, we don't wanna render anything.
 	 * Default attributes are set in the useEffect above.
@@ -153,7 +134,7 @@ const ProductCollectionContent = ( {
 	return (
 		<div { ...blockProps }>
 			{ attributes.__privatePreviewState?.isPreview &&
-				isSelectedOrInnerBlockSelected && (
+				props.isSelected && (
 					<Button
 						variant="primary"
 						size="small"

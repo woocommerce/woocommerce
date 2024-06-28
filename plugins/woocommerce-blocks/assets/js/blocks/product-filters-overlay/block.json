@@ -32,6 +32,19 @@
 		"overlayPosition": {
 			"type": "string",
 			"default": "left"
+		},
+		"style": {
+			"type": "object",
+			"default": {
+				"spacing": {
+					"padding": {
+						"top": "1rem",
+						"right": "1rem",
+						"bottom": "1rem",
+						"left": "1rem"
+					}
+				}
+			}
 		}
 	},
 	"example": {}
