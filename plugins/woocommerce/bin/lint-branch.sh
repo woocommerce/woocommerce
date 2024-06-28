@@ -11,7 +11,7 @@
 baseBranch=${1:-"trunk"}
 
 # Lint changed php-files to match code style.
-changedFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only --diff-filter=dr -- '*.php')
+changedFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only --diff-filter=d -- '*.php')
 if [[ -n $changedFiles ]]; then
     composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles
 fi
