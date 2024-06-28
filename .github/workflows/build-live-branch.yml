@@ -30,8 +30,12 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+
+            - name: Cache PNPM Dependencies
+              uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65
               with:
-                install: true
+                node-version-file: .nvmrc
+                cache: pnpm
 
             - name: Prepare plugin zips
               id: prepare
