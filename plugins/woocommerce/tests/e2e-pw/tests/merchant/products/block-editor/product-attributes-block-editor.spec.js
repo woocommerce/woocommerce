@@ -173,6 +173,11 @@ test(
 				await page.getByLabel( 'Add another attribute' ).click();
 			}
 
+			// Since there are no more attributes to add, the button should be enabled.
+			await expect(
+				page.getByRole( 'button', { name: 'Add attributes' } )
+			).toBeEnabled();
+
 			// Add the product attributes
 			await page
 				.getByRole( 'button', { name: 'Add attributes' } )
