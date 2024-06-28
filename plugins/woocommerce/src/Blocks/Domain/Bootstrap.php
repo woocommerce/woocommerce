@@ -124,10 +124,10 @@ class Bootstrap {
 			0
 		);
 
-		// We need to initialize BlockTemplatesController and BlockTemplatesRegistry on `init` so themes had the
-		// opporunity to declare support for template parts in `after_setup_theme` (which fires before `init`).
+		// We need to initialize BlockTemplatesController and BlockTemplatesRegistry at the end of `after_setup_theme`
+		// so themes had the opportunity to declare support for template parts.
 		add_action(
-			'init',
+			'after_setup_theme',
 			function () {
 				$is_rest = wc()->is_rest_api_request();
 				// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -149,7 +149,8 @@ class Bootstrap {
 					$this->container->get( BlockTemplatesRegistry::class )->init();
 					$this->container->get( BlockTemplatesController::class )->init();
 				}
-			}
+			},
+			999
 		);
 
 		$is_rest = wc()->is_rest_api_request();
