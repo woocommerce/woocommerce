@@ -15,7 +15,6 @@ import {
 	useRef,
 	useState,
 } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import classNames from 'classnames';
 
@@ -31,7 +30,7 @@ async function searchCustomFieldNames( search?: string ) {
 			search,
 		} ),
 	} ).then( ( customFieldNames = [] ) => {
-		let options: ComboboxControlOption[] = [];
+		const options: ComboboxControlOption[] = [];
 
 		if ( search && customFieldNames.indexOf( search ) === -1 ) {
 			options.push( { value: search, label: search } );
@@ -88,7 +87,7 @@ export const CustomFieldNameControl = forwardRef(
 					}
 				}
 			},
-			[ id ]
+			[ id, ref ]
 		);
 
 		const { attrs, events } = useMemo(
@@ -96,15 +95,16 @@ export const CustomFieldNameControl = forwardRef(
 				return Object.entries( props ).reduce<
 					Record< string, Record< string, unknown > >
 				>(
-					( current, [ key, value ] ) => {
-						if ( value !== undefined ) {
-							if ( key.startsWith( 'on' ) ) {
-								const eventName = key
+					( current, [ propName, propValue ] ) => {
+						if ( propValue !== undefined ) {
+							if ( propName.startsWith( 'on' ) ) {
+								const eventName = propName
 									.substring( 2 )
 									.toLowerCase();
-								current.events[ eventName ] = value as never;
+								current.events[ eventName ] =
+									propValue as never;
 							} else {
-								current.attrs[ key ] = value as never;
+								current.attrs[ propName ] = propValue as never;
 							}
 						}
 
@@ -118,29 +118,38 @@ export const CustomFieldNameControl = forwardRef(
 
 		useEffect(
 			function initializeAttrs() {
-				Object.entries( attrs ).forEach( ( [ key, value ] ) => {
-					comboboxRef.current?.setAttribute( key, `${ value }` );
-				} );
+				Object.entries( attrs ).forEach(
+					( [ propName, propValue ] ) => {
+						comboboxRef.current?.setAttribute(
+							propName,
+							`${ propValue }`
+						);
+					}
+				);
 			},
 			[ attrs ]
 		);
 
 		useEffect(
 			function initializeEvents() {
-				Object.entries( events ).forEach( ( [ key, value ] ) => {
-					comboboxRef.current?.addEventListener(
-						key,
-						value as () => void
-					);
-				} );
+				Object.entries( events ).forEach(
+					( [ propName, propValue ] ) => {
+						comboboxRef.current?.addEventListener(
+							propName,
+							propValue as () => void
+						);
+					}
+				);
 
 				return () => {
-					Object.entries( events ).forEach( ( [ key, value ] ) => {
-						comboboxRef.current?.removeEventListener(
-							key,
-							value as () => void
-						);
-					} );
+					Object.entries( events ).forEach(
+						( [ propName, propValue ] ) => {
+							comboboxRef.current?.removeEventListener(
+								propName,
+								propValue as () => void
+							);
+						}
+					);
 				};
 			},
 			[ events ]
