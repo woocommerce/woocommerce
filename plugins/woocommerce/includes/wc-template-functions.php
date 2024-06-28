@@ -2871,9 +2871,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			}
 
 			$args['class'][] = 'validate-required';
-			// added `aria-hidden="true"` because the fields themselves have an `aria-required` attribute that is picked up by Screen Readers.
-			// this way, the "required" isn't announced twice.
-			$required = '&nbsp;<abbr class="required" aria-hidden="true" title="' . esc_attr__( 'required', 'woocommerce' ) . '">*</abbr>';
+			$required = '&nbsp;<abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '">*</abbr>';
 		} else {
 			$required = '&nbsp;<span class="optional">(' . esc_html__( 'optional', 'woocommerce' ) . ')</span>';
 		}
