@@ -318,23 +318,23 @@ test.describe( 'Checkout page', { tag: [ '@payments', '@services' ] }, () => {
 
 		await test.step( 'Complete the checkout form', async () => {
 			await page
-				.getByRole( 'textbox', { name: 'First name *' } )
+				.getByRole( 'textbox', { name: 'First name' } )
 				.fill( 'Lisa' );
 			await page
-				.getByRole( 'textbox', { name: 'Last name *' } )
+				.getByRole( 'textbox', { name: 'Last name' } )
 				.fill( 'Simpson' );
 			await page
-				.getByRole( 'textbox', { name: 'Street address *' } )
+				.getByRole( 'textbox', { name: 'Street address' } )
 				.fill( '123 Evergreen Terrace' );
 			await page
-				.getByRole( 'textbox', { name: 'Town / City *' } )
+				.getByRole( 'textbox', { name: 'Town / City' } )
 				.fill( 'Springfield' );
 			await page.locator( '#billing_state' ).selectOption( 'OR' );
 			await page
-				.getByRole( 'textbox', { name: 'ZIP Code *' } )
+				.getByRole( 'textbox', { name: 'ZIP Code' } )
 				.fill( '97403' );
-			await page.getByLabel( 'Phone *' ).fill( '555 555-5555' );
-			await page.getByLabel( 'Email address *' ).fill( guestEmail );
+			await page.getByLabel( 'Phone' ).fill( '555 555-5555' );
+			await page.getByLabel( 'Email address' ).fill( guestEmail );
 
 			await page.getByText( 'Cash on delivery' ).click();
 
