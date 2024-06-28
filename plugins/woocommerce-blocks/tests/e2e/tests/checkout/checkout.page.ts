@@ -346,7 +346,7 @@ export class CheckoutPage {
 		await email.fill( customerBillingDetails.email );
 		await firstName.fill( customerBillingDetails.firstname );
 		await lastName.fill( customerBillingDetails.lastname );
-		await country.selectOption( customerBillingDetails.country );
+		await country.selectOption( customerBillingDetails.countryKey );
 		await address1.fill( customerBillingDetails.addressfirstline );
 
 		if ( customerBillingDetails.addresssecondline ) {

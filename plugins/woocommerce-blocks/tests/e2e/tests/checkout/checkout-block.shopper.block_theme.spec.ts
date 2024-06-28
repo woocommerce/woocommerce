@@ -228,6 +228,7 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 		city: 'San Francisco',
 		state: 'California',
 		country: 'United Kingdom',
+		countryKey: 'GB',
 		postcode: 'SW1 1AA',
 		phone: '123456789',
 		email: 'john.doe@example.com',
@@ -241,6 +242,7 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 		city: 'Los Angeles',
 		phone: '987654321',
 		country: 'Albania',
+		countryKey: 'AL',
 		state: 'Berat',
 		postcode: '1234',
 	};
@@ -576,9 +578,9 @@ test.describe( 'Billing Address Form', () => {
 			await expect( shippingForm.getByLabel( 'City' ) ).toHaveValue(
 				'New York'
 			);
-			await expect(
-				shippingForm.getByLabel( 'New York, State' )
-			).toHaveValue( 'New York' );
+			await expect( shippingForm.getByLabel( 'State' ) ).toHaveValue(
+				'NY'
+			);
 			await expect( shippingForm.getByLabel( 'ZIP Code' ) ).toHaveValue(
 				'90210'
 			);
