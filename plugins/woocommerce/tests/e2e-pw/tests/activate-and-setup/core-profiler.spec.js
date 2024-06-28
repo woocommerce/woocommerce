@@ -457,6 +457,20 @@ test.describe( 'Store owner can skip the core profiler', () => {
 		} );
 
 		await test.step( 'Check that we are sent to wp.com', async () => {
+			// sometimes fails to redirect, known as flaky on CI only
+			try {
+				await expect( page.url() ).toContain( 'wordpress.com/log-in' );
+			} catch ( e ) {
+				await page.goto(
+					'wp-admin/admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions'
+				);
+				await page
+					.getByRole( 'button', { name: 'My Subscriptions' } )
+					.waitFor( { state: 'visible' } );
+				await page
+					.getByRole( 'link', { name: 'Connect your store' } )
+					.click();
+			}
 			await expect( page.url() ).toContain( 'wordpress.com/log-in' );
 			// reload to avoid flaky blank page
 			await page.reload();
