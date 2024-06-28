@@ -306,6 +306,14 @@ function ScaledBlockPreview( {
 							outline-color: var(--wp-admin-theme-color) !important;
 						}
 
+						header.is-selected::after {
+						    border-top-left-radius: 20px;
+					    }
+
+						footer.is-selected::after {
+						    border-bottom-left-radius: 20px;
+					    }
+
 						${ additionalStyles }
 					` }
 						</style>
