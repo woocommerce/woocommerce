@@ -12,7 +12,7 @@ const attributes = require( './fixtures/attributes' );
 const tabs = require( './data/tabs' );
 const {
 	waitForGlobalAttributesLoaded,
-} = require( './helpers/confirm-global-attributes-loaded' );
+} = require( './helpers/wait-for-global-attributes-loaded' );
 
 const {
 	createVariableProduct,
