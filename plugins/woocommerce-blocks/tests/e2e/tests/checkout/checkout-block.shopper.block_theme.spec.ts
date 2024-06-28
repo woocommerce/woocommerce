@@ -610,9 +610,9 @@ test.describe( 'Billing Address Form', () => {
 				billingForm.getByLabel( 'Country/Region' )
 			).toHaveValue( 'US' );
 			await expect( billingForm.getByLabel( 'City' ) ).toHaveValue( '' );
-			await expect(
-				billingForm.getByLabel( 'New York, State' )
-			).toHaveValue( 'New York' );
+			await expect( billingForm.getByLabel( 'State' ) ).toHaveValue(
+				'NY'
+			);
 			await expect( billingForm.getByLabel( 'ZIP Code' ) ).toHaveValue(
 				''
 			);
