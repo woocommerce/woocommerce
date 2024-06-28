@@ -1,14 +1,8 @@
 /**
  * External dependencies
  */
-import { Button, ComboboxControl, Modal } from '@wordpress/components';
-import {
-	createElement,
-	useState,
-	useRef,
-	useEffect,
-	useCallback,
-} from '@wordpress/element';
+import { Button, Modal } from '@wordpress/components';
+import { createElement, useState, useRef, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { closeSmall } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
@@ -26,31 +20,14 @@ import {
 	type ValidationErrors,
 } from '../utils/validations';
 import type { Metadata } from '../../../types';
+import { CustomFieldNameControl } from '../custom-field-name-control';
 import type { CreateModalProps } from './types';
-import { select } from '@wordpress/data';
-import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
-import { useAsyncFilter } from '@woocommerce/components';
-import { useDebounce } from '@wordpress/compose';
 
 const DEFAULT_CUSTOM_FIELD = {
 	id: 1,
 	key: '',
 	value: '',
 } satisfies Metadata< string >;
-
-async function searchCustomFieldNames( search?: string ) {
-	return apiFetch< string[] >( {
-		path: addQueryArgs( '/wc/v3/products/custom-fields/names', {
-			search,
-		} ),
-	} ).then( ( data ) =>
-		( data ?? [] ).map( ( customFieldName ) => ( {
-			value: customFieldName,
-			label: customFieldName,
-		} ) )
-	);
-}
 
 export function CreateModal( {
 	values,
@@ -60,16 +37,6 @@ export function CreateModal( {
 }: CreateModalProps ) {
 	const [ customFields, setCustomFields ] = useState< Metadata< string >[] >(
 		[ DEFAULT_CUSTOM_FIELD ]
-	);
-	const [ customFieldNames, setCustomFieldNames ] = useState<
-		ComboboxControl.Props[ 'options' ]
-	>( [] );
-
-	const handleFilterValueChange = useDebounce(
-		useCallback( function onFilterValueChange( search: string ) {
-			searchCustomFieldNames( search ).then( setCustomFieldNames );
-		}, [] ),
-		250
 	);
 
 	const [ validationError, setValidationError ] =
@@ -259,7 +226,8 @@ export function CreateModal( {
 					{ customFields.map( ( customField ) => (
 						<div key={ customField.id } role="row">
 							<div role="cell">
-								<ComboboxControl
+								<CustomFieldNameControl
+									ref={ getRef( customField, 'key' ) }
 									label={ __( 'Name', 'woocommerce' ) }
 									hideLabelFromVision
 									allowReset={ false }
@@ -267,16 +235,12 @@ export function CreateModal( {
 										customField,
 										'key'
 									) }
-									options={ customFieldNames }
 									value={ customField.key }
 									onChange={ changeHandler(
 										customField,
 										'key'
 									) }
 									onBlur={ blurHandler( customField, 'key' ) }
-									onFilterValueChange={
-										handleFilterValueChange
-									}
 									className={ classNames(
 										'woocommerce-product-text-control',
 										{
@@ -287,21 +251,6 @@ export function CreateModal( {
 										}
 									) }
 								/>
-								{ /* <TextControl
-									ref={ getRef( customField, 'key' ) }
-									label={ '' }
-									aria-label={ __( 'Name', 'woocommerce' ) }
-									error={ getValidationError(
-										customField,
-										'key'
-									) }
-									value={ customField.key }
-									onChange={ changeHandler(
-										customField,
-										'key'
-									) }
-									onBlur={ blurHandler( customField, 'key' ) }
-								/> */ }
 							</div>
 							<div role="cell">
 								<TextControl
