@@ -41,52 +41,47 @@ import { Pattern } from '~/customize-store/types/pattern';
  * priorizied DotCom Patterns. For intro category, it also prioritizes the "centered-content-with-image-below" pattern.
  * For other categories, it simply sorts patterns to prioritize Woo Patterns.
  */
-const sortByCategory =
-	( category: keyof typeof PATTERN_CATEGORIES ) =>
-	( patterns: Pattern[] ) => {
-		const prefix = 'woocommerce-blocks';
-		if ( category === 'intro' || category === 'about' ) {
-			return patterns.sort( ( a, b ) => {
-				if (
-					a.name ===
-					'woocommerce-blocks/centered-content-with-image-below'
-				) {
-					return -1;
-				}
-
-				if (
-					b.name ===
-					'woocommerce-blocks/centered-content-with-image-below'
-				) {
-					return 1;
-				}
-
-				if (
-					a.name.includes( prefix ) &&
-					! b.name.includes( prefix )
-				) {
-					return 1;
-				}
-				if (
-					! a.name.includes( prefix ) &&
-					b.name.includes( prefix )
-				) {
-					return -1;
-				}
-				return 0;
-			} );
-		}
-
+const sortPatternsByCategory = (
+	patterns: Pattern[],
+	category: keyof typeof PATTERN_CATEGORIES
+) => {
+	const prefix = 'woocommerce-blocks';
+	if ( category === 'intro' || category === 'about' ) {
 		return patterns.sort( ( a, b ) => {
-			if ( a.name.includes( prefix ) && ! b.name.includes( prefix ) ) {
+			if (
+				a.name ===
+				'woocommerce-blocks/centered-content-with-image-below'
+			) {
 				return -1;
 			}
-			if ( ! a.name.includes( prefix ) && b.name.includes( prefix ) ) {
+
+			if (
+				b.name ===
+				'woocommerce-blocks/centered-content-with-image-below'
+			) {
 				return 1;
+			}
+
+			if ( a.name.includes( prefix ) && ! b.name.includes( prefix ) ) {
+				return 1;
+			}
+			if ( ! a.name.includes( prefix ) && b.name.includes( prefix ) ) {
+				return -1;
 			}
 			return 0;
 		} );
-	};
+	}
+
+	return patterns.sort( ( a, b ) => {
+		if ( a.name.includes( prefix ) && ! b.name.includes( prefix ) ) {
+			return -1;
+		}
+		if ( ! a.name.includes( prefix ) && b.name.includes( prefix ) ) {
+			return 1;
+		}
+		return 0;
+	} );
+};
 
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const { patterns, isLoading } = usePatternsByCategory( category );
@@ -96,8 +91,9 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 			( pattern ) => ! pattern.name.includes( THEME_SLUG )
 		);
 
-		return sortByCategory( category as keyof typeof PATTERN_CATEGORIES )(
-			patternsWithoutThemePatterns
+		return sortPatternsByCategory(
+			patternsWithoutThemePatterns,
+			category as keyof typeof PATTERN_CATEGORIES
 		);
 	}, [ category, patterns ] );
 
