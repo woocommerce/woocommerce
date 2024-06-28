@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Ref } from 'react';
+import type { ForwardedRef } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { ComboboxControl } from '@wordpress/components';
 import { useDebounce, useInstanceId } from '@wordpress/compose';
@@ -22,8 +22,8 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
+import type { ComboboxControlOption } from '../../attribute-combobox-field/types';
 import type { CustomFieldNameControlProps } from './types';
-import { ComboboxControlOption } from '../../attribute-combobox-field/types';
 
 async function searchCustomFieldNames( search?: string ) {
 	return apiFetch< string[] >( {
@@ -62,7 +62,7 @@ export const CustomFieldNameControl = forwardRef(
 			onBlur,
 			...props
 		}: CustomFieldNameControlProps,
-		ref: Ref< HTMLInputElement >
+		ref: ForwardedRef< HTMLInputElement >
 	) {
 		const comboboxRef = useRef< HTMLInputElement >();
 		const id = useInstanceId(
@@ -80,8 +80,12 @@ export const CustomFieldNameControl = forwardRef(
 					`.${ id } [role="combobox"]`
 				) as HTMLInputElement;
 
-				if ( typeof ref === 'function' ) {
-					ref( comboboxRef.current );
+				if ( ref ) {
+					if ( typeof ref === 'function' ) {
+						ref( comboboxRef.current );
+					} else {
+						ref.current = comboboxRef.current;
+					}
 				}
 			},
 			[ id ]
