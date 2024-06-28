@@ -6,7 +6,7 @@ const variableProductName = 'Variable Product with Three Variations';
 
 let productId;
 
-test.describe( 'Add variable product', () => {
+test.describe( 'Add variable product', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { browser } ) => {

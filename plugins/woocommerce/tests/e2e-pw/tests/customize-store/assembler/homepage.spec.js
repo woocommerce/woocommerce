@@ -20,7 +20,7 @@ async function prepareAssembler( pageObject, baseURL ) {
 		.waitFor( { state: 'hidden' } );
 }
 
-test.describe( 'Assembler -> Homepage', () => {
+test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -254,46 +254,55 @@ test.describe( 'Assembler -> Homepage', () => {
 	} );
 } );
 
-test.describe( 'Assembler -> Homepage -> PTK API is down', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+test.describe(
+	'Assembler -> Homepage -> PTK API is down',
+	{ tag: '@gutenberg' },
+	() => {
+		test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		try {
-			// In some environments the tour blocks clicking other elements.
+		test.beforeAll( async ( { baseURL } ) => {
+			try {
+				// In some environments the tour blocks clicking other elements.
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_customize_store_onboarding_tour_hidden',
+					'yes'
+				);
+			} catch ( error ) {
+				console.log( 'Store completed option not updated' );
+			}
+		} );
+
+		test( 'Should show the "Want more patterns?" banner with the PTK API unavailable message', async ( {
+			baseURL,
+			pageObject,
+			page,
+		} ) => {
 			await setOption(
 				request,
 				baseURL,
-				'woocommerce_customize_store_onboarding_tour_hidden',
-				'yes'
+				'woocommerce_allow_tracking',
+				'no'
 			);
-		} catch ( error ) {
-			console.log( 'Store completed option not updated' );
-		}
-	} );
 
-	test( 'Should show the "Want more patterns?" banner with the PTK API unavailable message', async ( {
-		baseURL,
-		pageObject,
-		page,
-	} ) => {
-		await setOption( request, baseURL, 'woocommerce_allow_tracking', 'no' );
-
-		await page.route( '**/wp-json/wc/private/patterns*', ( route ) => {
-			route.fulfill( {
-				status: 500,
+			await page.route( '**/wp-json/wc/private/patterns*', ( route ) => {
+				route.fulfill( {
+					status: 500,
+				} );
 			} );
+
+			await prepareAssembler( pageObject, baseURL );
+
+			const assembler = await pageObject.getAssembler();
+			await expect(
+				assembler.getByText( 'Want more patterns?' )
+			).toBeVisible();
+			await expect(
+				assembler.getByText(
+					"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns."
+				)
+			).toBeVisible();
 		} );
-
-		await prepareAssembler( pageObject, baseURL );
-
-		const assembler = await pageObject.getAssembler();
-		await expect(
-			assembler.getByText( 'Want more patterns?' )
-		).toBeVisible();
-		await expect(
-			assembler.getByText(
-				"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns."
-			)
-		).toBeVisible();
-	} );
-} );
+	}
+);

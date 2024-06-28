@@ -16,10 +16,15 @@ import {
 import {
 	createInterpolateElement,
 	useContext,
+	useMemo,
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
+import {
+	store as coreStore,
+	// @ts-expect-error No types for this exist yet.
+} from '@wordpress/core-data';
 // @ts-expect-error Missing type.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 
@@ -30,7 +35,6 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 
 import { trackEvent } from '~/customize-store/tracking';
-import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '..';
 import { Link } from '@woocommerce/components';
 import { PATTERN_CATEGORIES } from './pattern-screen/categories';
@@ -40,6 +44,7 @@ import { useSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
+import { useEditorBlocks } from '../hooks/use-editor-blocks';
 
 export const SidebarNavigationScreenHomepagePTK = ( {
 	onNavigateBackClick,
@@ -54,6 +59,48 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 		sel( OPTIONS_STORE_NAME ).getOption( 'woocommerce_allow_tracking' )
 	);
 	const isTrackingDisallowed = trackingAllowed === 'no' || ! trackingAllowed;
+
+	const currentTemplate = useSelect(
+		( sel ) =>
+			// @ts-expect-error No types for this exist yet.
+			sel( coreStore ).__experimentalGetTemplateForLink( '/' ),
+		[]
+	);
+
+	const [ blocks ] = useEditorBlocks(
+		'wp_template',
+		currentTemplate?.id ?? ''
+	);
+
+	const numberOfPatternsAdded = useMemo( () => {
+		const categories = Object.keys( PATTERN_CATEGORIES );
+
+		const initialAccumulator = categories.reduce(
+			( acc, cat ) => ( {
+				...acc,
+				[ cat ]: 0,
+			} ),
+			{} as Record< string, number >
+		);
+
+		return blocks.reduce( ( acc, block ) => {
+			const blockCategories: Array< string > =
+				block.attributes?.metadata?.categories ?? [];
+
+			const foundCategory = blockCategories.find( ( blockCategory ) =>
+				categories.includes( blockCategory )
+			);
+
+			if ( foundCategory ) {
+				return {
+					...acc,
+					[ foundCategory ]: acc[ foundCategory ] + 1,
+				};
+			}
+
+			return acc;
+		}, initialAccumulator );
+	}, [ blocks ] );
 
 	let notice;
 	if ( isNetworkOffline ) {
@@ -93,20 +140,12 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 		);
 	};
 
-	const aiOnline = context.flowType === FlowType.AIOnline;
+	const title = __( 'Design your homepage', 'woocommerce' );
 
-	const title = aiOnline
-		? __( 'Change your homepage', 'woocommerce' )
-		: __( 'Choose your homepage', 'woocommerce' );
-	const sidebarMessage = aiOnline
-		? __(
-				'Based on the most successful stores in your industry and location, our AI tool has recommended this template for your business. Prefer a different layout? Choose from the templates below now, or later via the <EditorLink>Editor</EditorLink>.',
-				'woocommerce'
-		  )
-		: __(
-				'Create an engaging homepage by selecting one of our pre-designed layouts. You can continue customizing this page, including the content, later via the <EditorLink>Editor</EditorLink>.',
-				'woocommerce'
-		  );
+	const sidebarMessage = __(
+		'Create an engaging homepage by adding and combining different patterns and layouts. You can continue customizing this page, including the content, later via the <EditorLink>Editor</EditorLink>.',
+		'woocommerce'
+	);
 
 	return (
 		<SidebarNavigationScreen
@@ -151,7 +190,21 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 										as={ SidebarNavigationItem }
 										withChevron
 									>
-										{ capitalize( label ) }
+										<div className="edit-site-sidebar-navigation-screen-patterns__group-homepage-label-container">
+											<span>{ capitalize( label ) }</span>
+											{ blocks.length > 0 &&
+												numberOfPatternsAdded[
+													categoryKey
+												] > 0 && (
+													<span className="edit-site-sidebar-navigation-screen-patterns__group-homepage-number-pattern">
+														{
+															numberOfPatternsAdded[
+																categoryKey
+															]
+														}
+													</span>
+												) }
+										</div>
 									</NavigatorButton>
 								</ItemGroup>
 							)
