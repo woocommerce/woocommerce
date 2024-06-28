@@ -6,6 +6,7 @@ const {
 	insertBlock,
 	transformIntoBlocks,
 	publishPage,
+	openEditorSettings,
 } = require( '../../utils/editor' );
 
 const simpleProductName = 'Very Simple Product';
@@ -78,6 +79,9 @@ test.describe(
 
 			// When Gutenberg is active, the canvas is in an iframe
 			let canvas = await getCanvas( page );
+
+			// Open Settings sidebar if closed
+			await openEditorSettings( { page } );
 
 			// Activate the terms and conditions checkbox
 			await canvas.getByLabel( 'Block: Terms and Conditions' ).click();
