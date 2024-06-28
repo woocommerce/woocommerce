@@ -662,7 +662,7 @@ function wc_product_has_global_unique_id( $product_id, $global_unique_id ) {
 		return boolval( $has_global_unique_id );
 	}
 
-	$data_store      = WC_Data_Store::load( 'product' );
+	$data_store             = WC_Data_Store::load( 'product' );
 	$global_unique_id_found = $data_store->is_existing_global_unique_id( $product_id, $global_unique_id );
 	/**
 	 * Gives plugins an opportunity to verify Unique ID uniqueness themselves.
