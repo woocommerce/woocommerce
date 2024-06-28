@@ -124,7 +124,7 @@ class WC_Tracker {
 
 			if ( is_callable( array( $jp_status, 'in_safe_mode' ) ) ) {
 				return $jp_status->in_safe_mode();
-			} else if ( is_callable( array( $jp_status, 'is_staging_site' ) ) ) {
+			} elseif ( is_callable( array( $jp_status, 'is_staging_site' ) ) ) {
 				// Preferred way of checking with Jetpack 8.1+.
 				return $jp_status->is_staging_site();
 			}
