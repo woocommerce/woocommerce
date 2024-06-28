@@ -14,7 +14,7 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:copy-assets": "wireit",
 		"build:zip": "./bin/build-zip.sh",
-		"changelog": "composer install --quiet && composer exec -- changelogger",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"docker:down": "pnpm exec wc-e2e docker:down",
 		"docker:ssh": "pnpm exec wc-e2e docker:ssh",
 		"docker:up": "pnpm exec wc-e2e docker:up",
