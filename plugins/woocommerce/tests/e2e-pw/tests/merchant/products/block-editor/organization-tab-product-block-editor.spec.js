@@ -38,12 +38,6 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 			await page
 				.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
 				.fill( productData.name );
-			await page
-				.locator(
-					'[data-template-block-id="basic-details"] .components-summary-control'
-				)
-				.last()
-				.fill( productData.summary );
 
 			const regularPrice = page
 				.locator( 'input[name="regular_price"]' )
@@ -58,6 +52,13 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 			await salePrice.waitFor( { state: 'visible' } );
 			await salePrice.click();
 			await salePrice.fill( productData.salePrice );
+
+			await page
+				.locator(
+					'[data-template-block-id="basic-details"] .components-summary-control'
+				)
+				.last()
+				.fill( productData.summary );
 
 			await clickOnTab( 'Organization', page );
 
