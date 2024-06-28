@@ -15,7 +15,7 @@ import {
 	type ProductAttributeTerm,
 	type ProductAttribute,
 } from '@woocommerce/data';
-import { Button, Modal, Notice } from '@wordpress/components';
+import { Button, Modal, Notice, Tooltip } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -475,16 +475,30 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								>
 									{ cancelLabel }
 								</Button>
-								<Button
-									variant="primary"
-									label={ addAccessibleLabel }
-									disabled={ isAddButtonDisabled }
-									onClick={ () =>
-										onAddingAttributes( values )
+								<Tooltip
+									text={
+										isAddButtonDisabled
+											? __(
+													'Add at least one attribute and one value. Press Enter to select.',
+													'woocommerce'
+											  )
+											: ''
 									}
 								>
-									{ addLabel }
-								</Button>
+									<div>
+										<Button
+											variant="primary"
+											label={ addAccessibleLabel }
+											showTooltip={ true }
+											disabled={ isAddButtonDisabled }
+											onClick={ () =>
+												onAddingAttributes( values )
+											}
+										>
+											{ addLabel }
+										</Button>
+									</div>
+								</Tooltip>
 							</div>
 						</Modal>
 					);
