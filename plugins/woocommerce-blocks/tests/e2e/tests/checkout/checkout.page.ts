@@ -23,6 +23,7 @@ export class CheckoutPage {
 			addressfirstline: '123 Easy Street',
 			addresssecondline: 'Testville',
 			country: 'United States (US)',
+			countryKey: 'US',
 			city: 'New York',
 			state: 'New York',
 			postcode: '90210',
