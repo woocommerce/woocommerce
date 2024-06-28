@@ -6,6 +6,7 @@ const {
 	insertBlock,
 	transformIntoBlocks,
 	publishPage,
+	openEditorSettings,
 } = require( '../../utils/editor' );
 
 const simpleProductName = 'Very Simple Product';
@@ -80,13 +81,8 @@ test.describe(
 			let canvas = await getCanvas( page );
 
 			// Open Settings sidebar if closed
-			if (
-				await page
-					.getByLabel( 'Editor Settings', { exact: true } )
-					.isHidden()
-			) {
-				await canvas.getByLabel( 'Settings', { exact: true } ).click();
-			}
+			await openEditorSettings( { page } );
+
 			// Activate the terms and conditions checkbox
 			await canvas.getByLabel( 'Block: Terms and Conditions' ).click();
 			await page.getByLabel( 'Require checkbox' ).check();
