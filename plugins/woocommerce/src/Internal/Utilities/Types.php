@@ -38,8 +38,7 @@ class Types {
 
 		// Summarize the error for use in logging and in case we have to throw an exception.
 		$summary = sprintf(
-			/* translators: %1$s: name of the expected type */
-			__( 'Unable to ensure that an object was of expected type %1$s. This is not necessarily a problem within WooCommerce, and may indicate there is a problem with code from another plugin that has hooked into one or more WooCommerce filters (please refer to the backtrace).', 'woocommerce' ),
+			'Object was not of expected type %1$s.',
 			$desired_type
 		);
 
