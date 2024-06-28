@@ -1,3 +1,5 @@
+declare( strict_types = 1)
+
 <?php
 /**
  * WooCommerce Tracker
