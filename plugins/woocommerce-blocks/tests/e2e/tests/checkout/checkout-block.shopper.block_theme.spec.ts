@@ -571,8 +571,8 @@ test.describe( 'Billing Address Form', () => {
 				shippingForm.getByLabel( 'Apartment, suite, etc. (optional)' )
 			).toHaveValue( 'Testville' );
 			await expect(
-				shippingForm.getByLabel( 'United States (US), Country/' )
-			).toHaveValue( 'United States (US)' );
+				shippingForm.getByLabel( 'Country/Region' )
+			).toHaveValue( 'US' );
 			await expect( shippingForm.getByLabel( 'City' ) ).toHaveValue(
 				'New York'
 			);
@@ -605,8 +605,8 @@ test.describe( 'Billing Address Form', () => {
 				} )
 			).toBeVisible();
 			await expect(
-				billingForm.getByLabel( 'United States (US), Country/' )
-			).toHaveValue( 'United States (US)' );
+				billingForm.getByLabel( 'Country/Region' )
+			).toHaveValue( 'US' );
 			await expect( billingForm.getByLabel( 'City' ) ).toHaveValue( '' );
 			await expect(
 				billingForm.getByLabel( 'New York, State' )
