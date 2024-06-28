@@ -120,6 +120,11 @@ test(
 				.isVisible();
 
 			await page.waitForLoadState( 'domcontentloaded' );
+
+			// Confirm the Add button is disabled
+			await expect(
+				page.getByRole( 'button', { name: 'Add attributes' } )
+			).toBeDisabled();
 		} );
 
 		await test.step( 'create local attributes with terms', async () => {
