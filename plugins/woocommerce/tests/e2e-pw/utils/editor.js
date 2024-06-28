@@ -26,6 +26,15 @@ const disableWelcomeModal = async ( { page } ) => {
 	}
 };
 
+const openEditorSettings = async ( { page } ) => {
+	// Open Settings sidebar if closed
+	if ( await page.getByLabel( 'Editor Settings' ).isVisible() ) {
+		console.log( 'Editor Settings is open, skipping action.' );
+	} else {
+		await page.getByLabel( 'Settings', { exact: true } ).click();
+	}
+};
+
 const getCanvas = async ( page ) => {
 	return page.frame( 'editor-canvas' ) || page;
 };
@@ -106,6 +115,7 @@ module.exports = {
 	goToPageEditor,
 	goToPostEditor,
 	disableWelcomeModal,
+	openEditorSettings,
 	getCanvas,
 	fillPageTitle,
 	insertBlock,
