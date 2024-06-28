@@ -5,9 +5,6 @@ PROJECT_PATH=$(pwd)
 BUILD_PATH="${PROJECT_PATH}/build"
 DEST_PATH="$BUILD_PATH/$PLUGIN_SLUG"
 
-# If xdebug is installed, it can slow down execution of PHP scripts.
-XDEBUG_MODE=off
-
 echo "Generating build directory..."
 rm -rf "$BUILD_PATH"
 mkdir -p "$DEST_PATH"

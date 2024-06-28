@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# If xdebug is installed, it can slow down execution of PHP scripts.
-XDEBUG_MODE=off
-
 # Output colorized strings
 #
 # Color codes:
