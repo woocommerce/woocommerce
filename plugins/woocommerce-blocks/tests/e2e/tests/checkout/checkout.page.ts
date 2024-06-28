@@ -148,7 +148,16 @@ export class CheckoutPage {
 		// Rest of additional data passed in from the overrideData object.
 		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
 			const field = contactSection.getByLabel( label );
-			await field.fill( value );
+
+			const tagName = await field.evaluate( ( element ) =>
+				element.tagName.toLowerCase()
+			);
+
+			if ( tagName === 'select' ) {
+				await field.selectOption( value );
+			} else {
+				await field.fill( value );
+			}
 		}
 	}
 
@@ -161,7 +170,16 @@ export class CheckoutPage {
 		// Rest of additional data passed in from the overrideData object.
 		for ( const { label, value } of additionalFields ) {
 			const field = this.page.getByLabel( label );
-			await field.fill( value );
+
+			const tagName = await field.evaluate( ( element ) =>
+				element.tagName.toLowerCase()
+			);
+
+			if ( tagName === 'select' ) {
+				await field.selectOption( value );
+			} else {
+				await field.fill( value );
+			}
 		}
 	}
 
@@ -393,7 +411,16 @@ export class CheckoutPage {
 		// Rest of additional data passed in from the overrideData object.
 		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
 			const field = billingForm.getByLabel( label, { exact: true } );
-			await field.fill( value );
+
+			const tagName = await field.evaluate( ( element ) =>
+				element.tagName.toLowerCase()
+			);
+
+			if ( tagName === 'select' ) {
+				await field.selectOption( value );
+			} else {
+				await field.fill( value );
+			}
 		}
 	}
 
@@ -470,7 +497,16 @@ export class CheckoutPage {
 		// Rest of additional data passed in from the overrideData object.
 		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
 			const field = shippingForm.getByLabel( label, { exact: true } );
-			await field.fill( value );
+
+			const tagName = await field.evaluate( ( element ) =>
+				element.tagName.toLowerCase()
+			);
+
+			if ( tagName === 'select' ) {
+				await field.selectOption( value );
+			} else {
+				await field.fill( value );
+			}
 		}
 
 		// Blur active field to trigger customer address update.
