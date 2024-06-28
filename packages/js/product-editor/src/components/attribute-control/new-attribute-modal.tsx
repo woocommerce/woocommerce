@@ -224,13 +224,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					setValue: ( name: string, value: any ) => void;
 				} ) => {
-					/*
-					 * Handle if the Add button is disabled.
-					 * - attributes should be not empty array
-					 * - attributes should not be an array of null or undefined
-					 * - It should be at least one term or option in the attribute
-					 */
-					const isAddButtonDisabled = ! values.attributes.some(
+					const isAddButtonDisabled = ! values.attributes.every(
 						( attr ) => isAttributeFilledOut( attr )
 					);
 
