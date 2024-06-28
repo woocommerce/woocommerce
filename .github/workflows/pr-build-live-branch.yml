@@ -65,7 +65,7 @@ jobs:
                   mkdir -p "$GITHUB_WORKSPACE/unzips/woocommerce"
                   cp "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce.zip" "$GITHUB_WORKSPACE/zips/woocommerce.zip"
                   cd "$GITHUB_WORKSPACE/zips"
-                  unzip woocommerce.zip
+                  unzip -qq woocommerce.zip
                   cp -r woocommerce "$GITHUB_WORKSPACE/unzips/woocommerce/woocommerce"
                   rm woocommerce.zip
                   mv woocommerce woocommerce-dev
