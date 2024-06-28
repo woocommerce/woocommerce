@@ -30,6 +30,12 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 		// Switch to a block theme and initialize template logic.
 		switch_theme( 'twentytwentytwo' );
 		$this->container = Package::container();
+		$this->container->register(
+			BlockTemplatesRegistry::class,
+			function () {
+				return new BlockTemplatesRegistry();
+			}
+		);
 		$this->container->get( BlockTemplatesRegistry::class )->init();
 
 		// Reset options.
