@@ -187,11 +187,13 @@ final class WooCommerce {
 	public function __get( $key ) {
 		if ( 'api' === $key ) {
 			// The Legacy REST API was removed from WooCommerce core as of version 9.0 (moved to a dedicated plugin),
-			// but some plugins are still using wc()->api->get_endpoint_data. This method now lives in the RestApiUtil class.
+			// but some plugins are still using wc()->api->get_endpoint_data. This method now lives in the RestApiUtil class,
+			// but we expose it through LegacyRestApiStub to limit the scope of what can be done via WC()->api.
+			//
 			// On the other hand, if the dedicated plugin is installed it will set the $api property by itself
 			// to an instance of the old WC_API class, which of course still has the get_endpoint_data method.
 			if ( is_null( $this->api ) && ! $this->legacy_rest_api_is_available() ) {
-				$this->api = wc_get_container()->get( RestApiUtil::class );
+				$this->api = wc_get_container()->get( LegacyRestApiStub::class );
 			}
 
 			return $this->api;
@@ -727,8 +729,6 @@ final class WooCommerce {
 
 		$this->theme_support_includes();
 		$this->query = new WC_Query();
-
-		LegacyRestApiStub::setup();
 	}
 
 	/**
