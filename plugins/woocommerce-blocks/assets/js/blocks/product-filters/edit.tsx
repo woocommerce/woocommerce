@@ -170,11 +170,6 @@ export const Edit = ( {
 					</ToggleGroupControl>
 					{ attributes.overlay !== 'never' && (
 						<>
-							<p className="wc-block-editor-product-filters__overlay-link">
-								<ExternalLink href={ templatePartEditUri }>
-									{ __( 'Edit overlay', 'woocommerce' ) }
-								</ExternalLink>
-							</p>
 							<RadioControl
 								className="wc-block-editor-product-filters__overlay-button-style-toggle"
 								label={ __( 'Button', 'woocommerce' ) }
@@ -275,6 +270,11 @@ export const Edit = ( {
 									/>
 								</>
 							) }
+							<p className="wc-block-editor-product-filters__overlay-link">
+								<ExternalLink href={ templatePartEditUri }>
+									{ __( 'Edit overlay', 'woocommerce' ) }
+								</ExternalLink>
+							</p>
 						</>
 					) }
 				</PanelBody>
