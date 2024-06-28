@@ -1635,7 +1635,7 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `product_id` bigint(20) NOT NULL,
   `sku` varchar(100) NULL default '',
-  `unique_id` varchar(100) NULL default '',
+  `global_unique_id` varchar(100) NULL default '',
   `virtual` tinyint(1) NULL default 0,
   `downloadable` tinyint(1) NULL default 0,
   `min_price` decimal(19,4) NULL default NULL,

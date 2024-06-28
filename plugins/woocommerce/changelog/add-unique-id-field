@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Adds unique_id field to product and product variations
+Adds global_unique_id field to product and product variations

@@ -562,8 +562,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Unique ID.
-		if ( isset( $request['unique_id'] ) ) {
-			$product->set_unique_id( wc_clean( $request['unique_id'] ) );
+		if ( isset( $request['global_unique_id'] ) ) {
+			$product->set_global_unique_id( wc_clean( $request['global_unique_id'] ) );
 		}
 
 		// Attributes.
@@ -996,7 +996,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'unique_id'             => array(
+				'global_unique_id'      => array(
 					'description' => __( 'GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -1672,8 +1672,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				$data['post_password'] = $product->get_post_password( $context );
 			}
 
-			if ( in_array( 'unique_id', $fields, true ) ) {
-				$data['unique_id'] = $product->get_unique_id( $context );
+			if ( in_array( 'global_unique_id', $fields, true ) ) {
+				$data['global_unique_id'] = $product->get_global_unique_id( $context );
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );

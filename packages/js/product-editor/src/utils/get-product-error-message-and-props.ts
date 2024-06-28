@@ -7,7 +7,7 @@ export type WPErrorCode =
 	| 'variable_product_no_variation_prices'
 	| 'product_form_field_error'
 	| 'product_invalid_sku'
-	| 'product_invalid_unique_id'
+	| 'product_invalid_global_unique_id'
 	| 'product_create_error'
 	| 'product_publish_error'
 	| 'product_preview_error';
@@ -57,7 +57,7 @@ export function getProductErrorMessageAndProps(
 				response.errorProps = { explicitDismiss: true };
 			}
 			break;
-		case 'product_invalid_unique_id':
+		case 'product_invalid_global_unique_id':
 			response.message = __(
 				'Invalid or duplicated GTIN, UPC, EAN or ISBN.',
 				'woocommerce'

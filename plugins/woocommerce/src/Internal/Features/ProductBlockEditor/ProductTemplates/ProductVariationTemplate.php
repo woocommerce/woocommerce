@@ -338,7 +338,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'blockName'  => 'woocommerce/product-text-field',
 				'order'      => 20,
 				'attributes' => array(
-					'property' => 'unique_id',
+					'property' => 'global_unique_id',
 					'label'    => __( 'GTIN, UPC, EAN or ISBN', 'woocommerce' ),
 					'tooltip'  => __( 'Enter a barcode or any other identifier unique to this product. It can help you list this product on other channels or marketplaces.', 'woocommerce' ),
 				),

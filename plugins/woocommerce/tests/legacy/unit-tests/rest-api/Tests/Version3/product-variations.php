@@ -407,7 +407,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'description', $properties );
 		$this->assertArrayHasKey( 'permalink', $properties );
 		$this->assertArrayHasKey( 'sku', $properties );
-		$this->assertArrayHasKey( 'unique_id', $properties );
+		$this->assertArrayHasKey( 'global_unique_id', $properties );
 		$this->assertArrayHasKey( 'price', $properties );
 		$this->assertArrayHasKey( 'regular_price', $properties );
 		$this->assertArrayHasKey( 'sale_price', $properties );

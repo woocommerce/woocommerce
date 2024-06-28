@@ -29,7 +29,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected $internal_meta_keys = array(
 		'_visibility',
 		'_sku',
-		'_unique_id',
+		'_global_unique_id',
 		'_price',
 		'_regular_price',
 		'_sale_price',
@@ -387,7 +387,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$post_meta_values  = get_post_meta( $id );
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
-			'_unique_id'             => 'unique_id',
+			'_global_unique_id'      => 'global_unique_id',
 			'_regular_price'         => 'regular_price',
 			'_sale_price'            => 'sale_price',
 			'_price'                 => 'price',
@@ -579,7 +579,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected function update_post_meta( &$product, $force = false ) {
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
-			'_unique_id'             => 'unique_id',
+			'_global_unique_id'      => 'global_unique_id',
 			'_regular_price'         => 'regular_price',
 			'_sale_price'            => 'sale_price',
 			'_sale_price_dates_from' => 'date_on_sale_from',
@@ -746,7 +746,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( array_intersect( $this->updated_props, array( 'sku', 'unique_id', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' ) ) ) {
+		if ( array_intersect( $this->updated_props, array( 'sku', 'global_unique_id', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' ) ) ) {
 			$this->update_lookup_table( $product->get_id(), 'wc_product_meta_lookup' );
 		}
 
@@ -1077,10 +1077,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @since 9.1.0
 	 * @param int    $product_id Product ID.
-	 * @param string $unique_id Will be slashed to work around https://core.trac.wordpress.org/ticket/27421.
+	 * @param string $global_unique_id Will be slashed to work around https://core.trac.wordpress.org/ticket/27421.
 	 * @return bool
 	 */
-	public function is_existing_unique_id( $product_id, $unique_id ) {
+	public function is_existing_global_unique_id( $product_id, $global_unique_id ) {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
@@ -1093,11 +1093,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				WHERE
 				posts.post_type IN ( 'product', 'product_variation' )
 				AND posts.post_status != 'trash'
-				AND lookup.unique_id = %s
+				AND lookup.global_unique_id = %s
 				AND lookup.product_id <> %d
 				LIMIT 1
 				",
-				wp_slash( $unique_id ),
+				wp_slash( $global_unique_id ),
 				$product_id
 			)
 		);
@@ -1137,10 +1137,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Return product ID based on Unique ID.
 	 *
 	 * @since 9.1.0
-	 * @param string $unique_id Product Unique ID.
+	 * @param string $global_unique_id Product Unique ID.
 	 * @return int
 	 */
-	public function get_product_id_by_unique_id( $unique_id ) {
+	public function get_product_id_by_global_unique_id( $global_unique_id ) {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
@@ -1153,20 +1153,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				WHERE
 				posts.post_type IN ( 'product', 'product_variation' )
 				AND posts.post_status != 'trash'
-				AND lookup.unique_id = %s
+				AND lookup.global_unique_id = %s
 				LIMIT 1
 				",
-				$unique_id
+				$global_unique_id
 			)
 		);
 		/**
-		 * Hook woocommerce_get_product_id_by_unique_id.
+		 * Hook woocommerce_get_product_id_by_global_unique_id.
 		 *
 		 * @since 9.1.0
 		 * @param mixed $id List of post statuses.
-		 * @param string $unique_id Unique ID.
+		 * @param string $global_unique_id Unique ID.
 		 */
-		return (int) apply_filters( 'woocommerce_get_product_id_by_unique_id', $id, $unique_id );
+		return (int) apply_filters( 'woocommerce_get_product_id_by_global_unique_id', $id, $global_unique_id );
 	}
 
 	/**
@@ -2240,7 +2240,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return array(
 				'product_id'     => absint( $id ),
 				'sku'            => get_post_meta( $id, '_sku', true ),
-				'unique_id'      => get_post_meta( $id, '_unique_id', true ),
+				'global_unique_id'      => get_post_meta( $id, '_global_unique_id', true ),
 				'virtual'        => 'yes' === get_post_meta( $id, '_virtual', true ) ? 1 : 0,
 				'downloadable'   => 'yes' === get_post_meta( $id, '_downloadable', true ) ? 1 : 0,
 				'min_price'      => reset( $price_meta ),

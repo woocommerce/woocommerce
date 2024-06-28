@@ -108,7 +108,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'description'           => wc_format_content( $object->get_description() ),
 			'permalink'             => $object->get_permalink(),
 			'sku'                   => $object->get_sku(),
-			'unique_id'             => $object->get_unique_id(),
+			'global_unique_id'      => $object->get_global_unique_id(),
 			'price'                 => $object->get_price(),
 			'regular_price'         => $object->get_regular_price(),
 			'sale_price'            => $object->get_sale_price(),
@@ -195,8 +195,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		// Unique ID.
-		if ( isset( $request['unique_id'] ) ) {
-			$variation->set_unique_id( wc_clean( $request['unique_id'] ) );
+		if ( isset( $request['global_unique_id'] ) ) {
+			$variation->set_global_unique_id( wc_clean( $request['global_unique_id'] ) );
 		}
 
 		// Thumbnail.
@@ -545,8 +545,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'unique_id'             => array(
-					'description' => __( 'Unique identifier.', 'woocommerce' ),
+				'global_unique_id'      => array(
+					'description' => __( 'GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),

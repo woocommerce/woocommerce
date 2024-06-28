@@ -65,7 +65,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'description'        => '',
 		'short_description'  => '',
 		'sku'                => '',
-		'unique_id'          => '',
+		'global_unique_id'   => '',
 		'price'              => '',
 		'regular_price'      => '',
 		'sale_price'         => '',
@@ -268,8 +268,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
-	public function get_unique_id( $context = 'view' ) {
-		return $this->get_prop( 'unique_id', $context );
+	public function get_global_unique_id( $context = 'view' ) {
+		return $this->get_prop( 'global_unique_id', $context );
 	}
 
 	/**
@@ -848,26 +848,26 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set unique_id
+	 * Set global_unique_id
 	 *
 	 * @since 9.1.0
-	 * @param string $unique_id Unique ID.
+	 * @param string $global_unique_id Unique ID.
 	 */
-	public function set_unique_id( $unique_id ) {
-		$unique_id = (string) $unique_id;
-		if ( $this->get_object_read() && ! empty( $unique_id ) && ! wc_product_has_unique_id( $this->get_id(), $unique_id ) ) {
-			$unique_id_found = wc_get_product_id_by_unique_id( $unique_id );
+	public function set_global_unique_id( $global_unique_id ) {
+		$global_unique_id = (string) $global_unique_id;
+		if ( $this->get_object_read() && ! empty( $global_unique_id ) && ! wc_product_has_global_unique_id( $this->get_id(), $global_unique_id ) ) {
+			$global_unique_id_found = wc_get_product_id_by_global_unique_id( $global_unique_id );
 
 			$this->error(
-				'product_invalid_unique_id',
+				'product_invalid_global_unique_id',
 				__( 'Invalid or duplicated Unique ID.', 'woocommerce' ),
 				400,
 				array(
-					'resource_id' => $unique_id_found,
+					'resource_id' => $global_unique_id_found,
 				)
 			);
 		}
-		$this->set_prop( 'unique_id', $unique_id );
+		$this->set_prop( 'global_unique_id', $global_unique_id );
 	}
 
 	/**
