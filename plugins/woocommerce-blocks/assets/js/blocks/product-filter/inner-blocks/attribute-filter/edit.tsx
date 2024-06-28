@@ -204,19 +204,22 @@ const Edit = ( props: EditProps ) => {
 	useEffect( () => {
 		if ( productFilterWrapperBlockId ) {
 			updateBlockAttributes( productFilterWrapperBlockId, {
-				heading: attributeObject?.label,
+				heading:
+					attributeObject?.label ?? __( 'Attribute', 'woocommerce' ),
 				metadata: {
 					name: sprintf(
 						/* translators: %s is referring to the filter attribute name. For example: Color, Size, etc. */
 						__( '%s (Experimental)', 'woocommerce' ),
-						attributeObject?.label
+						attributeObject?.label ??
+							__( 'Attribute', 'woocommerce' )
 					),
 				},
 			} );
 		}
 		if ( productFilterWrapperHeadingBlockId ) {
 			updateBlockAttributes( productFilterWrapperHeadingBlockId, {
-				content: attributeObject?.label,
+				content:
+					attributeObject?.label ?? __( 'Attribute', 'woocommerce' ),
 			} );
 		}
 	}, [
