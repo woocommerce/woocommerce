@@ -213,7 +213,7 @@ jQuery( function ( $ ) {
 				return;
 			}
 			
-			$coupon_error_el = $( '<div class="coupon-error-message" id="coupon-error-message">' + msg + '</div>' );
+			$coupon_error_el = $( '<p class="coupon-error-message" id="coupon-error-message">' + msg + '</p>' );
 		} else {
 			$coupon_error_el = html_element;
 		}

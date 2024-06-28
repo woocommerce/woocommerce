@@ -629,7 +629,7 @@ jQuery( function( $ ) {
 				.addClass( 'has-error' )
 				.attr( 'aria-invalid', 'true' )
 				.attr( 'aria-describedby', 'coupon-error-message' );
-			$target.append( '<div class="coupon-error-message" id="coupon-error-message" role="alert">' + msg + '</div>' );
+			$target.append( '<span class="coupon-error-message" id="coupon-error-message" role="alert">' + msg + '</span>' );
 		},
 		remove_coupon_error: function( evt ) {
 			$( evt.currentTarget )

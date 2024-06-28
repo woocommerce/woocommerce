@@ -1309,9 +1309,8 @@ p.demo_store,
 	form.checkout_coupon {
 		.coupon-error-message {
 			color: $red;
+			display: block;
 			font-size: 0.75em;
-			margin-top: -1em;
-			width: auto;
 		}
 
 		.input-text.has-error:focus {
@@ -1993,6 +1992,7 @@ p.demo_store,
 			color: $red;
 			float: none;
 			font-size: 0.75em;
+			margin-bottom: 0;
 			text-align: left;
 			width: auto;
 		}
