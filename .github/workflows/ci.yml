@@ -135,6 +135,15 @@ jobs:
                 ARTIFACT_NAME: ${{ github.ref_name == 'nightly' && 'woocommerce-trunk-nightly.zip' || 'woocommerce.zip' }}
               working-directory: ${{ matrix.projectPath }}
               run: node ./tests/e2e-pw/bin/override-wp-env-plugins.js
+
+            - name: 'Cache Playwright Downloads'
+              id: 'cache-playwright-downloads'
+              if: ${{ matrix.testEnv.shouldCreate }}
+              uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+              with:
+                path: '~/.cache/ms-playwright/'
+                key: "${{ runner.os }}-playwright-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
+                restore-keys: '${{ runner.os }}-playwright-'
               
             - name: 'Start Test Environment'
               id: 'prepare-test-environment'
