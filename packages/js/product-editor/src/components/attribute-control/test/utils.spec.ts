@@ -195,7 +195,7 @@ describe( 'hasTermsOrOptions', () => {
 
 	it( 'should return false if the attribute is null', () => {
 		const attribute = null;
-		expect( hasTermsOrOptions( attribute as any ) ).toBe( false );
+		expect( hasTermsOrOptions( attribute as any ) ).toBe( false ); // eslint-disable-line @typescript-eslint/no-explicit-any
 	} );
 } );
 
@@ -314,7 +314,7 @@ describe( 'isAttributeFilledOut', () => {
 
 	it( 'should return false if the attribute is null', () => {
 		const attribute = null;
-		expect( isAttributeFilledOut( attribute as any ) ).toBe( false );
+		expect( isAttributeFilledOut( attribute as any ) ).toBe( false ); // eslint-disable-line @typescript-eslint/no-explicit-any
 	} );
 
 	it( 'should return false if the attribute has no name', () => {
