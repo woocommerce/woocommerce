@@ -218,7 +218,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						name: 'Billing address',
 					} )
 					.getByLabel( 'How wide is your road?' )
-			).toHaveValue( 'Narrow' );
+			).toHaveValue( 'narrow' );
 		} );
 
 		test( 'Shopper can change the values of fields multiple times and place the order', async ( {
@@ -588,7 +588,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						name: 'Billing address',
 					} )
 					.getByLabel( 'How wide is your road?' )
-			).toHaveValue( 'Narrow' );
+			).toHaveValue( 'narrow' );
 		} );
 
 		test( 'Shopper can see server-side validation errors', async ( {
@@ -923,7 +923,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await govIdInput.fill( '11111' );
 			await confirmGovIdInput.fill( '11111' );
 			await shippingTruckFittingCheckbox.uncheck();
-			await shippingRoadSizeSelect.selectOption( 'Narrow' );
+			await shippingRoadSizeSelect.selectOption( 'narrow' );
 			await checkoutPageObject.page.getByText( 'Save address' ).click();
 
 			// Check the updated values are visible in the addresses.

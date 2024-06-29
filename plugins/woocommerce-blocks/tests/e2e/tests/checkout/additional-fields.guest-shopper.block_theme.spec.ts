@@ -280,7 +280,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						name: 'Billing address',
 					} )
 					.getByLabel( 'How wide is your road?' )
-			).toHaveValue( 'Narrow' );
+			).toHaveValue( 'narrow' );
 		} );
 	} );
 } );
