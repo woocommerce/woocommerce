@@ -252,7 +252,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						name: 'Shipping address',
 					} )
 					.getByLabel( 'How wide is your road?' )
-			).toHaveValue( 'Wide' );
+			).toHaveValue( 'wide' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
