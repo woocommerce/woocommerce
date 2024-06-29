@@ -1,0 +1,9 @@
+{
+    "name": "woocommerce/blueprint",
+    "autoload": {
+        "psr-4": {
+            "Automattic\\WooCommerce\\Blueprint\\": "src/"
+        }
+    },
+    "require": {}
+}
