@@ -1,8 +1,8 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+const { customer } = require( '../../test-data/data' );
 
 const emailContent = '#wp-mail-logging-modal-content-body-content';
-const emailContentJson = '#wp-mail-logging-modal-format-json';
-const emailContentRaw = '#wp-mail-logging-modal-format-raw';
+const emailContentHtml = '#wp-mail-logging-modal-format-html';
 
 const now = Date.now();
 const username = `${ now }`;
@@ -101,12 +101,13 @@ test.describe(
 					.getByRole( 'button', { name: 'View log' } )
 					.first()
 					.click();
-				// Sometimes does not render json in json view
-				await page.locator( emailContentJson ).click();
-				await page.locator( emailContentRaw ).click();
-				await page.locator( emailContentJson ).click();
+
+				await page.locator( emailContentHtml ).click();
+				await page
+					.locator( '.wp-mail-logging-modal-row-html-container' )
+					.waitFor( { state: 'visible' } );
 				await expect( page.locator( emailContent ) ).toContainText(
-					`Username: ${ username }`
+					email
 				);
 			} );
 		} );
@@ -184,11 +185,12 @@ test.describe(
 					.getByRole( 'button', { name: 'View log' } )
 					.first()
 					.click();
-				await page.locator( emailContentJson ).click();
-				await page.locator( emailContentRaw ).click();
-				await page.locator( emailContentJson ).click();
+				await page.locator( emailContentHtml ).click();
+				await page
+					.locator( '.wp-mail-logging-modal-row-html-container' )
+					.waitFor( { state: 'visible' } );
 				await expect( page.locator( emailContent ) ).toContainText(
-					`Username: ${ username }`
+					email
 				);
 			} );
 		} );
@@ -204,7 +206,7 @@ test.describe(
 		test.beforeEach( async ( { page } ) => {
 			await page.goto(
 				`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-					'customer@woocommercecoree2etestsuite.com'
+					customer.email
 				) }`
 			);
 			// clear out the email logs before each test
@@ -233,7 +235,7 @@ test.describe(
 			await test.step( 'initiate password reset from my account', async () => {
 				await page
 					.getByLabel( 'Username or email' )
-					.fill( 'customer@woocommercecoree2etestsuite.com' );
+					.fill( customer.email );
 				await page
 					.getByRole( 'button', { name: 'Reset password' } )
 					.click();
@@ -256,13 +258,13 @@ test.describe(
 				await page.getByRole( 'button', { name: 'Log In' } ).click();
 				await page.goto(
 					`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-						'customer@woocommercecoree2etestsuite.com'
+						customer.email
 					) }`
 				);
 
 				await expect(
 					page.locator( 'td.column-receiver' ).first()
-				).toHaveText( 'customer@woocommercecoree2etestsuite.com' );
+				).toHaveText( customer.email );
 				await expect(
 					page
 						.getByRole( 'cell', {
@@ -275,11 +277,12 @@ test.describe(
 					.getByRole( 'button', { name: 'View log' } )
 					.first()
 					.click();
-				await page.locator( emailContentJson ).click();
-				await page.locator( emailContentRaw ).click();
-				await page.locator( emailContentJson ).click();
+				await page.locator( emailContentHtml ).click();
+				await page
+					.locator( '.wp-mail-logging-modal-row-html-container' )
+					.waitFor( { state: 'visible' } );
 				await expect( page.locator( emailContent ) ).toContainText(
-					'Username: customer'
+					customer.email
 				);
 			} );
 		} );
