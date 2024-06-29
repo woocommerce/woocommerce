@@ -1,9 +1,24 @@
-const { test, expect } = require( '@playwright/test' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
-const email = `test-${ Math.random() }@example.com`;
-const username = `newcustomer-${ Math.random() }`;
 const emailContent = '#wp-mail-logging-modal-content-body-content';
 const emailContentJson = '#wp-mail-logging-modal-format-json';
+
+const now = Date.now();
+const username = `${ now }`;
+const email = `${ now }@example.com`;
+const firstName = `Customer`;
+const lastName = `the ${ now }th`;
+const role = 'Customer';
+
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	user: async ( { api }, use ) => {
+		const user = {};
+		await use( user );
+		console.log( `Deleting user ${ user.id }` );
+		await api.delete( `customers/${ user.id }`, { force: true } );
+	},
+} );
 
 test.describe(
 	'Shopper Account Email Receiving',
@@ -33,131 +48,143 @@ test.describe(
 			}
 		} );
 
-		test.afterEach( async ( { page } ) => {
-			// delete created customer
-			await page.goto( 'wp-admin/users.php' );
-			await page.getByText( username ).last().hover();
-			await page.getByRole( 'link', { name: 'Delete' } ).last().click();
-			await page
-				.getByRole( 'button', { name: 'Confirm Deletion' } )
-				.click();
-		} );
-
 		test( 'should receive an email when creating an account', async ( {
 			page,
+			user,
 		} ) => {
 			// create a new customer
 			await page.goto( 'wp-admin/user-new.php' );
 			await expect( page ).toHaveTitle( /Add New User/ );
 
-			await page
-				.getByLabel( ' Username (required) ' )
-				.waitFor( { state: 'visible' } );
-			await page.getByLabel( ' Username (required) ' ).fill( username );
-			await page.getByLabel( ' Email (required) ' ).fill( email );
-			await page.getByLabel( ' First Name ' ).fill( 'New' );
-			await page.getByLabel( ' Last Name ' ).fill( 'Customer' );
+			await test.step( 'create a new user', async () => {
+				// Wait for the password to be generated otherwise it will steal the focus from other fields
+				await expect( page.locator( '#pass1' ) ).not.toHaveValue( '' );
 
-			await page.getByLabel( 'Send the new user an email' ).check();
+				user.password = await page.locator( '#pass1' ).inputValue();
 
-			await page.getByLabel( 'Role' ).selectOption( 'Customer' );
+				await page.getByLabel( 'Username' ).fill( username );
+				await page.getByLabel( 'Email (required)' ).fill( email );
+				await page.getByLabel( 'First Name' ).fill( firstName );
+				await page.getByLabel( 'Last Name' ).fill( lastName );
+				await page.getByText( 'Send the new user an email' ).check();
+				await page.getByLabel( 'Role' ).selectOption( role );
+				await page
+					.getByRole( 'button', { name: 'Add New User' } )
+					.click();
 
-			await page.getByRole( 'button', { name: 'Add New User' } ).click();
+				await expect( page ).toHaveTitle( /Users/ );
 
-			await page.waitForSelector( '.notice' );
+				// We need the newly created user id to delete it during cleanup
+				user.id = new URLSearchParams(
+					new URL( page.url() ).search
+				).get( 'id' );
+			} );
 
-			// verify that the email was sent
-			await page.goto(
-				`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-					email
-				) }`
-			);
+			await test.step( 'verify that the email was sent', async () => {
+				await page.goto(
+					`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+						email
+					) }`
+				);
 
-			await expect(
-				page.locator( 'td.column-receiver' ).first()
-			).toHaveText( email );
-			await expect(
-				page.getByRole( 'cell', {
-					name: '[WooCommerce Core E2E Test Suite] Login Details',
-				} )
-			).toBeVisible();
+				await expect(
+					page.locator( 'td.column-receiver' ).first()
+				).toHaveText( email );
+				await expect(
+					page.getByRole( 'cell', {
+						name: '[WooCommerce Core E2E Test Suite] Login Details',
+					} )
+				).toBeVisible();
 
-			await page
-				.getByRole( 'button', { name: 'View log' } )
-				.first()
-				.click();
-			await page.locator( emailContentJson ).click();
-			await expect( page.locator( emailContent ) ).toContainText(
-				`Username: ${ username }`
-			);
+				await page
+					.getByRole( 'button', { name: 'View log' } )
+					.first()
+					.click();
+				await page.locator( emailContentJson ).click();
+				await expect( page.locator( emailContent ) ).toContainText(
+					`Username: ${ username }`
+				);
+			} );
 		} );
 
 		test( 'should receive an email when password reset initiated from admin', async ( {
 			page,
+			user,
 		} ) => {
 			// create a new customer
 			await page.goto( 'wp-admin/user-new.php' );
 			await expect( page ).toHaveTitle( /Add New User/ );
 
-			await page
-				.getByLabel( ' Username (required) ' )
-				.waitFor( { state: 'visible' } );
-			await page.getByLabel( ' Username (required) ' ).fill( username );
-			await page.getByLabel( ' Email (required) ' ).fill( email );
-			await page.getByLabel( ' First Name ' ).fill( 'New' );
-			await page.getByLabel( ' Last Name ' ).fill( 'Customer' );
+			await test.step( 'create a new user', async () => {
+				// Wait for the password to be generated otherwise it will steal the focus from other fields
+				await expect( page.locator( '#pass1' ) ).not.toHaveValue( '' );
 
-			await page.getByLabel( 'Send the new user an email' ).uncheck();
+				user.password = await page.locator( '#pass1' ).inputValue();
 
-			await page.getByLabel( 'Role' ).selectOption( 'Customer' );
+				await page.getByLabel( 'Username' ).fill( username );
+				await page.getByLabel( 'Email (required)' ).fill( email );
+				await page.getByLabel( 'First Name' ).fill( firstName );
+				await page.getByLabel( 'Last Name' ).fill( lastName );
+				await page.getByText( 'Send the new user an email' ).uncheck();
+				await page.getByLabel( 'Role' ).selectOption( role );
+				await page
+					.getByRole( 'button', { name: 'Add New User' } )
+					.click();
 
-			await page.getByRole( 'button', { name: 'Add New User' } ).click();
+				await expect( page ).toHaveTitle( /Users/ );
 
-			await page.waitForSelector( '.notice' );
+				// We need the newly created user id to delete it during cleanup
+				user.id = new URLSearchParams(
+					new URL( page.url() ).search
+				).get( 'id' );
+			} );
 
-			// verify that no email was sent on account creation
-			await page.goto(
-				`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-					email
-				) }`
-			);
-			await expect(
-				page.locator( 'td.column-receiver' ).first()
-			).not.toHaveText( email );
+			await test.step( 'verify that no email was sent on account creation', async () => {
+				await page.goto(
+					`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+						email
+					) }`
+				);
+				await expect(
+					page.locator( 'td.column-receiver' ).first()
+				).not.toHaveText( email );
+			} );
 
-			// initiate password reset from admin
-			await page.goto( 'wp-admin/users.php' );
+			await test.step( 'initiate password reset from admin', async () => {
+				await page.goto( 'wp-admin/users.php' );
 
-			await page.getByText( username ).last().hover();
-			await page
-				.getByRole( 'link', { name: 'Send password reset' } )
-				.last()
-				.click();
+				await page.getByText( email ).hover();
+				await page
+					.locator( `#user-${ user.id }` )
+					.getByRole( 'link', { name: 'Send password reset' } )
+					.click();
+			} );
 
-			// verify that the email was sent
-			await page.goto(
-				`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-					email
-				) }`
-			);
+			await test.step( 'verify that the email was sent', async () => {
+				await page.goto(
+					`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+						email
+					) }`
+				);
 
-			await expect(
-				page.locator( 'td.column-receiver' ).first()
-			).toHaveText( email );
-			await expect(
-				page.getByRole( 'cell', {
-					name: '[WooCommerce Core E2E Test Suite] Password Reset',
-				} )
-			).toBeVisible();
+				await expect(
+					page.locator( 'td.column-receiver' ).first()
+				).toHaveText( email );
+				await expect(
+					page.getByRole( 'cell', {
+						name: '[WooCommerce Core E2E Test Suite] Password Reset',
+					} )
+				).toBeVisible();
 
-			await page
-				.getByRole( 'button', { name: 'View log' } )
-				.first()
-				.click();
-			await page.locator( emailContentJson ).click();
-			await expect( page.locator( emailContent ) ).toContainText(
-				`Username: ${ username }`
-			);
+				await page
+					.getByRole( 'button', { name: 'View log' } )
+					.first()
+					.click();
+				await page.locator( emailContentJson ).click();
+				await expect( page.locator( emailContent ) ).toContainText(
+					`Username: ${ username }`
+				);
+			} );
 		} );
 	}
 );
@@ -197,51 +224,56 @@ test.describe(
 		} ) => {
 			await page.goto( 'my-account/lost-password/' );
 
-			await page
-				.getByLabel( 'Username or email' )
-				.fill( 'customer@woocommercecoree2etestsuite.com' );
-			await page
-				.getByRole( 'button', { name: 'Reset password' } )
-				.click();
-
-			await expect(
+			await test.step( 'initiate password reset from my account', async () => {
 				await page
-					.getByText( 'Password reset email has been sent' )
-					.count()
-			).toBeGreaterThan( 0 );
+					.getByLabel( 'Username or email' )
+					.fill( 'customer@woocommercecoree2etestsuite.com' );
+				await page
+					.getByRole( 'button', { name: 'Reset password' } )
+					.click();
 
-			// verify that the email was sent
-			await page.goto( 'wp-login.php' );
-			await page
-				.getByLabel( 'Username or Email Address' )
-				.fill( 'admin' );
-			await page
-				.getByLabel( 'Password', { exact: true } )
-				.fill( 'password' );
-			await page.getByRole( 'button', { name: 'Log In' } ).click();
-			await page.goto(
-				`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-					'customer@woocommercecoree2etestsuite.com'
-				) }`
-			);
+				await expect(
+					await page
+						.getByText( 'Password reset email has been sent' )
+						.count()
+				).toBeGreaterThan( 0 );
+			} );
 
-			await expect(
-				page.locator( 'td.column-receiver' ).first()
-			).toHaveText( 'customer@woocommercecoree2etestsuite.com' );
-			await expect(
-				page
-					.getByRole( 'cell', { name: 'Password Reset Request for' } )
+			await test.step( 'verify that the email was sent', async () => {
+				await page.goto( 'wp-login.php' );
+				await page
+					.getByLabel( 'Username or Email Address' )
+					.fill( 'admin' );
+				await page
+					.getByLabel( 'Password', { exact: true } )
+					.fill( 'password' );
+				await page.getByRole( 'button', { name: 'Log In' } ).click();
+				await page.goto(
+					`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+						'customer@woocommercecoree2etestsuite.com'
+					) }`
+				);
+
+				await expect(
+					page.locator( 'td.column-receiver' ).first()
+				).toHaveText( 'customer@woocommercecoree2etestsuite.com' );
+				await expect(
+					page
+						.getByRole( 'cell', {
+							name: 'Password Reset Request for',
+						} )
+						.first()
+				).toBeVisible();
+
+				await page
+					.getByRole( 'button', { name: 'View log' } )
 					.first()
-			).toBeVisible();
-
-			await page
-				.getByRole( 'button', { name: 'View log' } )
-				.first()
-				.click();
-			await page.locator( emailContentJson ).click();
-			await expect( page.locator( emailContent ) ).toContainText(
-				'Username: customer'
-			);
+					.click();
+				await page.locator( emailContentJson ).click();
+				await expect( page.locator( emailContent ) ).toContainText(
+					'Username: customer'
+				);
+			} );
 		} );
 	}
 );
