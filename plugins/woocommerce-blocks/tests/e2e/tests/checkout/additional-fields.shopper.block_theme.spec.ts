@@ -73,13 +73,13 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					name: 'Shipping address',
 				} )
 				.getByLabel( 'How wide is your road?' )
-				.fill( 'wide' );
+				.selectOption( 'wide' );
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Billing address',
 				} )
 				.getByLabel( 'How wide is your road?' )
-				.fill( 'narrow' );
+				.selectOption( 'narrow' );
 
 			await checkoutPageObject.page.evaluate(
 				'document.activeElement.blur()'
@@ -261,13 +261,13 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					name: 'Shipping address',
 				} )
 				.getByLabel( 'How wide is your road?' )
-				.fill( 'wide' );
+				.selectOption( 'wide' );
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Billing address',
 				} )
 				.getByLabel( 'How wide is your road?' )
-				.fill( 'narrow' );
+				.selectOption( 'narrow' );
 			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			// Change the shipping and billing select fields again.
@@ -276,13 +276,13 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					name: 'Billing address',
 				} )
 				.getByLabel( 'How wide is your road?' )
-				.fill( 'wide' );
+				.selectOption( 'wide' );
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Shipping address',
 				} )
 				.getByLabel( 'How wide is your road?' )
-				.fill( 'super-wide' );
+				.selectOption( 'super-wide' );
 			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.page
@@ -445,13 +445,13 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					name: 'Shipping address',
 				} )
 				.getByLabel( 'How wide is your road?' )
-				.fill( 'wide' );
+				.selectOption( 'wide' );
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Billing address',
 				} )
 				.getByLabel( 'How wide is your road?' )
-				.fill( 'narrow' );
+				.selectOption( 'narrow' );
 
 			await checkoutPageObject.page.evaluate(
 				'document.activeElement.blur()'
@@ -682,13 +682,13 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					name: 'Shipping address',
 				} )
 				.getByLabel( 'How wide is your road?' )
-				.fill( 'wide' );
+				.selectOption( 'wide' );
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Billing address',
 				} )
 				.getByLabel( 'How wide is your road?' )
-				.fill( 'narrow' );
+				.selectOption( 'narrow' );
 			await checkoutPageObject.page.evaluate(
 				'document.activeElement.blur()'
 			);
@@ -766,13 +766,13 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					name: 'Shipping address',
 				} )
 				.getByLabel( 'How wide is your road?' )
-				.fill( 'wide' );
+				.selectOption( 'wide' );
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Billing address',
 				} )
 				.getByLabel( 'How wide is your road?' )
-				.fill( 'narrow' );
+				.selectOption( 'narrow' );
 
 			// Blur after editing the select fields since they need to be blurred to save.
 			await checkoutPageObject.page.evaluate(
