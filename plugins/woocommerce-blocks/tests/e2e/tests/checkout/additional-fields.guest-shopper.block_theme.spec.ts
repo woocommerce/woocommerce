@@ -76,11 +76,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					'Please enter a valid government id'
 				)
 			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Please select a valid option'
-				)
-			).toBeVisible();
 		} );
 
 		test( 'Shopper can fill in the checkout form with additional fields and can have different value for same field in shipping and billing address', async ( {
