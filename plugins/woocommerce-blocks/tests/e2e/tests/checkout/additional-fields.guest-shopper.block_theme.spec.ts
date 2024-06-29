@@ -217,7 +217,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByLabel(
 						'Is this a personal purchase or a business purchase?'
 					)
-			).toHaveValue( 'Business' );
+			).toHaveValue( 'business' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {

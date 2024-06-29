@@ -155,7 +155,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByLabel(
 						'Is this a personal purchase or a business purchase?'
 					)
-			).toHaveValue( 'Business' );
+			).toHaveValue( 'business' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
@@ -354,11 +354,9 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.getByRole( 'group', {
 					name: 'Additional order information',
 				} )
-				.locator(
-					'ul.components-form-token-field__suggestions-list > li'
-				)
+				.locator( 'select' )
 				.first()
-				.click();
+				.selectOption( { index: 0 } );
 			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.placeOrder();
@@ -527,7 +525,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByLabel(
 						'Is this a personal purchase or a business purchase?'
 					)
-			).toHaveValue( 'Business' );
+			).toHaveValue( 'business' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
