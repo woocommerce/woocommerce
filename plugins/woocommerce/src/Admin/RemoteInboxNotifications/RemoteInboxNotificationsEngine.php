@@ -21,10 +21,12 @@ use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\StoredStateSetupForP
  */
 class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	const STORED_STATE_OPTION_NAME = 'wc_remote_inbox_notifications_stored_state';
-	const WCA_UPDATED_OPTION_NAME = 'wc_remote_inbox_notifications_wca_updated';
+	const WCA_UPDATED_OPTION_NAME  = 'wc_remote_inbox_notifications_wca_updated';
 
 	/**
 	 * Initialize the engine.
+	 * phpcs:disable WooCommerce.Functions.InternalInjectionMethod.MissingFinal
+	 * phpcs:disable WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag
 	 */
 	public static function init() {
 		// Init things that need to happen before admin_init.
@@ -43,8 +45,10 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 
 		// Hook into WCA updated. This is hooked up here rather than in
 		// on_admin_init because that runs too late to hook into the action.
-		add_action( 'woocommerce_run_on_woocommerce_admin_updated',
-			array( __CLASS__, 'run_on_woocommerce_admin_updated' ) );
+		add_action(
+			'woocommerce_run_on_woocommerce_admin_updated',
+			array( __CLASS__, 'run_on_woocommerce_admin_updated' )
+		);
 		add_action(
 			'woocommerce_updated',
 			function () {
@@ -66,8 +70,10 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 
 		add_filter( 'woocommerce_get_note_from_db', array( __CLASS__, 'get_note_from_db' ), 10, 1 );
 		add_filter( 'woocommerce_debug_tools', array( __CLASS__, 'add_debug_tools' ) );
-		add_action( 'wp_ajax_woocommerce_json_remote_inbox_notifications_search',
-			array( __CLASS__, 'ajax_action_remote_inbox_notification_search' ) );
+		add_action(
+			'wp_ajax_woocommerce_json_remote_inbox_notifications_search',
+			array( __CLASS__, 'ajax_action_remote_inbox_notification_search' )
+		);
 	}
 
 	/**
@@ -160,7 +166,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	public static function get_stored_state() {
 		$stored_state = get_option( self::STORED_STATE_OPTION_NAME );
 
-		if ( $stored_state === false ) {
+		if ( false === $stored_state ) {
 			$stored_state = new \stdClass();
 
 			$stored_state = StoredStateSetupForProducts::init_stored_state(
@@ -217,7 +223,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 				continue;
 			}
 			$locale = SpecRunner::get_locale( $spec->locales, true );
-			if ( $locale === null ) {
+			if ( null === $locale ) {
 				// No locale found, so don't update the note.
 				break;
 			}
@@ -243,7 +249,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	/**
 	 * Add the debug tools to the WooCommerce debug tools (WooCommerce > Status > Tools).
 	 *
-	 * @param $tools
+	 * @param array $tools a list of tools.
 	 *
 	 * @return mixed
 	 */
@@ -272,29 +278,45 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 				'placeholder'   => esc_attr__( 'Search for a notification&hellip;', 'woocommerce' ),
 			),
 			'callback' => function () {
-				$note_id = wc_clean( wp_unslash( $_GET['delete_remote_notification_note_id'] ) );
+				check_ajax_referer( 'debug_action', '_wpnonce' );
+
+				if ( ! isset( $_GET['delete_remote_notification_note_id'] ) ) {
+					return __( 'No remote inbox notification selected', 'woocommerce' );
+				}
+				$note_id = wc_clean( sanitize_text_field( wp_unslash( $_GET['delete_remote_notification_note_id'] ) ) );
 				$note = Notes::get_note( $note_id );
-				$note->delete(true);
+				$note->delete( true );
 				return __( 'Remote inbox notification has been deleted', 'woocommerce' );
-			}
+			},
 		);
 
 		return $tools;
 	}
 
+	/**
+	 * Add ajax action for remote inbox notification search.
+	 *
+	 * @return void
+	 */
 	public static function ajax_action_remote_inbox_notification_search() {
 		global $wpdb;
 
-		$search = wc_clean( sanitize_text_field( wp_unslash( $_GET['term'] ) ) );
+		check_ajax_referer( 'search-products', 'security' );
+
+		if ( ! isset( $_GET['term'] ) ) {
+			wp_send_json( array() );
+		}
+
+		$search  = wc_clean( sanitize_text_field( wp_unslash( $_GET['term'] ) ) );
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT note_id, name FROM {$wpdb->prefix}wc_admin_notes WHERE name LIKE %s",
-				"%" . $wpdb->esc_like( $search ) . "%"
+				'%' . $wpdb->esc_like( $search ) . '%'
 			)
 		);
-		$rows = array();
+		$rows    = array();
 		foreach ( $results as $result ) {
-			$rows[$result->note_id] = $result->name;
+			$rows[ $result->note_id ] = $result->name;
 		}
 		wp_send_json( $rows );
 	}
