@@ -285,7 +285,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	public static function ajax_action_remote_inbox_notification_search() {
 		global $wpdb;
 
-		$search = wc_clean( wp_unslash( $_GET['term'] ) );
+		$search = wc_clean( sanitize_text_field( wp_unslash( $_GET['term'] ) ) );
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT note_id, name FROM {$wpdb->prefix}wc_admin_notes WHERE name LIKE %s",
