@@ -2,6 +2,7 @@ const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 const emailContent = '#wp-mail-logging-modal-content-body-content';
 const emailContentJson = '#wp-mail-logging-modal-format-json';
+const emailContentRaw = '#wp-mail-logging-modal-format-raw';
 
 const now = Date.now();
 const username = `${ now }`;
@@ -100,6 +101,9 @@ test.describe(
 					.getByRole( 'button', { name: 'View log' } )
 					.first()
 					.click();
+				// Sometimes does not render json in json view
+				await page.locator( emailContentJson ).click();
+				await page.locator( emailContentRaw ).click();
 				await page.locator( emailContentJson ).click();
 				await expect( page.locator( emailContent ) ).toContainText(
 					`Username: ${ username }`
@@ -180,6 +184,8 @@ test.describe(
 					.getByRole( 'button', { name: 'View log' } )
 					.first()
 					.click();
+				await page.locator( emailContentJson ).click();
+				await page.locator( emailContentRaw ).click();
 				await page.locator( emailContentJson ).click();
 				await expect( page.locator( emailContent ) ).toContainText(
 					`Username: ${ username }`
@@ -269,6 +275,8 @@ test.describe(
 					.getByRole( 'button', { name: 'View log' } )
 					.first()
 					.click();
+				await page.locator( emailContentJson ).click();
+				await page.locator( emailContentRaw ).click();
 				await page.locator( emailContentJson ).click();
 				await expect( page.locator( emailContent ) ).toContainText(
 					'Username: customer'
