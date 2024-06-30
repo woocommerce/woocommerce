@@ -41,10 +41,6 @@ const blocks = {
 		customDir: 'classic-template',
 	},
 	'classic-shortcode': {},
-	'mini-cart': {},
-	'mini-cart-contents': {
-		customDir: 'mini-cart/mini-cart-contents',
-	},
 	'store-notices': {},
 	'page-content-wrapper': {},
 	'price-filter': {},
@@ -168,6 +164,10 @@ const blocks = {
 const cartAndCheckoutBlocks = {
 	cart: {},
 	checkout: {},
+	'mini-cart': {},
+	'mini-cart-contents': {
+		customDir: 'mini-cart/mini-cart-contents',
+	},
 };
 
 // Returns the entries for each block given a relative path (ie: `index.js`,
