@@ -695,8 +695,8 @@ if ( 0 < $mu_plugins_count ) :
 	</thead>
 	<tbody>
 		<tr>
-			<td data-export-label="API Enabled"><?php esc_html_e( 'API enabled', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Does your site have REST API enabled?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td data-export-label="Legacy API Enabled"><?php esc_html_e( 'Legacy API enabled', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Does your site have the Legacy REST API enabled?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo $settings['api_enabled'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>

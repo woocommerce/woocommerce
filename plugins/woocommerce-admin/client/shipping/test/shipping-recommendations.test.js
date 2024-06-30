@@ -50,6 +50,32 @@ describe( 'ShippingRecommendations', () => {
 		).not.toBeInTheDocument();
 	} );
 
+	it( 'should not render when the WooCommerce Shipping plugin is active', () => {
+		useSelect.mockImplementation( ( fn ) =>
+			fn( () => ( {
+				getActivePlugins: () => [ 'woocommerce-shipping' ],
+			} ) )
+		);
+		render( <ShippingRecommendations /> );
+
+		expect(
+			screen.queryByText( 'WooCommerce Shipping' )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'should not render when the WooCommerce Tax plugin is active', () => {
+		useSelect.mockImplementation( ( fn ) =>
+			fn( () => ( {
+				getActivePlugins: () => [ 'woocommerce-shipping' ],
+			} ) )
+		);
+		render( <ShippingRecommendations /> );
+
+		expect(
+			screen.queryByText( 'WooCommerce Shipping' )
+		).not.toBeInTheDocument();
+	} );
+
 	it( 'should render WCS when not installed', () => {
 		render( <ShippingRecommendations /> );
 
