@@ -46,6 +46,14 @@ export class CheckSubscriptionModal extends Component {
 		} );
 	}
 
+	renew() {
+		this.setState( { isModalOpen: false } )
+	}
+
+	subscribe() {
+		this.setState( { isModalOpen: false } )
+	}
+
 	renderBenefits() {
 		const isExpired = this.props.subscriptionState.expired;
 		const subtitle = isExpired
@@ -167,7 +175,7 @@ export class CheckSubscriptionModal extends Component {
 						isPrimary
 						target="_blank"
 						href={ isExpired ? this.props.renewUrl : this.props.subscribeUrl }
-						onClick={ () => this.dismiss() }
+						onClick={ () => isExpired ? this.renew() : this.subscribe() }
 					>
 						{
 							isExpired
