@@ -42,6 +42,7 @@
 	input[type="url"],
 	input[type="text"],
 	input[type="number"],
+	input[type="password"],
 	input[type="email"] {
 		@include font-size(regular);
 		padding: em($gap) em($gap-smaller);
@@ -82,6 +83,7 @@
 	&.is-active input[type="url"],
 	&.is-active input[type="text"],
 	&.is-active input[type="number"],
+	&.is-active input[type="password"],
 	&.is-active input[type="email"] {
 		padding: em($gap + $gap-smaller) em($gap-smaller) em($gap-smaller);
 	}
