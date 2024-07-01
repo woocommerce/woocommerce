@@ -41,7 +41,7 @@ use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Domain\Services\OnboardingTasks\TasksController;
-use Automattic\WooCommerce\Blocks\OptionsManager;
+use Automattic\WooCommerce\Blocks\TemplateOptions;
 
 
 /**
@@ -188,7 +188,7 @@ class Bootstrap {
 			$this->container->get( SingleProductTemplateCompatibility::class )->init();
 			$this->container->get( Notices::class )->init();
 			$this->container->get( PTKPatternsStore::class );
-			$this->container->get( OptionsManager::class )->init();
+			$this->container->get( TemplateOptions::class )->init();
 		}
 
 		$this->container->get( QueryFilters::class )->init();
@@ -369,9 +369,9 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			OptionsManager::class,
+			TemplateOptions::class,
 			function () {
-				return new OptionsManager();
+				return new TemplateOptions();
 			}
 		);
 		// Maintains backwards compatibility with previous Store API namespace.

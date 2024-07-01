@@ -4,11 +4,11 @@ namespace Automattic\WooCommerce\Blocks;
 use Automattic\WooCommerce\Blocks\Options;
 
 /**
- * OptionsManager class.
+ * TemplateOptions class.
  *
  * @internal
  */
-class OptionsManager {
+class TemplateOptions {
 
 	/**
 	 * Initialization method.
