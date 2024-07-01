@@ -23,7 +23,7 @@ class ExtendStore extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Extend your store', 'woocommerce' );
+		return __( 'Enhance your store with extensions', 'woocommerce' );
 	}
 
 	/**
