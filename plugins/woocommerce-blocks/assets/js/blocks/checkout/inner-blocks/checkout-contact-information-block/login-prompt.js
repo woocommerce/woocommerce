@@ -21,12 +21,9 @@ const LoginPrompt = () => {
 	}
 
 	return (
-		<>
-			{ __( 'Already have an account? ', 'woocommerce' ) }
-			<a href={ LOGIN_TO_CHECKOUT_URL }>
-				{ __( 'Log in.', 'woocommerce' ) }
-			</a>
-		</>
+		<a className="login-prompt" href={ LOGIN_TO_CHECKOUT_URL }>
+			{ __( 'Log in', 'woocommerce' ) }
+		</a>
 	);
 };
 
