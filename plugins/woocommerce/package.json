@@ -11,7 +11,7 @@
 	"license": "GPL-3.0+",
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
-		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project": "pnpm --if-present '/^build:project:.*$/' && XDEBUG_MODE=off composer dump-autoload --optimize --quiet",
 		"build:project:copy-assets": "wireit",
 		"build:zip": "./bin/build-zip.sh",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
@@ -29,7 +29,7 @@
 		"env:start": "pnpm wp-env start",
 		"env:start:blocks": "pnpm --filter='@woocommerce/block-library' env:start && pnpm playwright install chromium --with-deps",
 		"env:stop": "pnpm wp-env stop",
-		"env:test": "composer dump-autoload --optimize --quiet && pnpm env:dev && pnpm playwright install chromium",
+		"env:test": "pnpm env:dev && pnpm playwright install chromium",
 		"env:perf:install-k6": "curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1",
 		"env:perf": "pnpm env:dev && pnpm env:performance-init && pnpm env:perf:install-k6",
 		"preinstall": "npx only-allow pnpm",
