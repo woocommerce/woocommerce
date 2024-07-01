@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Component, createInterpolateElement } from '@wordpress/element';
+import { createInterpolateElement, useState } from '@wordpress/element';
 import {
 	Button,
 	Card,
@@ -26,47 +26,58 @@ import { Text } from '@woocommerce/experimental';
 import extensionsSvg from './illustration.svg';
 import { dismissRequest, remindLaterRequest } from './actions';
 
-export class CheckSubscriptionModal extends Component {
-	constructor( props ) {
-		super( props );
-		this.state = {
-			isModalOpen: true,
-		};
-	}
+export default function CheckSubscriptionModal( {
+	renewUrl,
+	subscribeUrl,
+	productId,
+	productName,
+	productRegularPrice,
+	dismissAction,
+	dismissNonce,
+	remindLaterAction,
+	remindLaterNonce,
+	subscriptionState,
+} ) {
+	const [ isModalOpen, setIsModalOpen ] = useState( true );
+	const isExpired = subscriptionState.expired;
 
-	dismiss() {
-		dismissRequest( this.props, ( response ) => {
-			this.setState( { isModalOpen: false } )
-		} );
-	}
+	const dismiss = () => {
+		dismissRequest(
+			{
+				dismissAction,
+				productId,
+				dismissNonce,
+			},
+			() => {
+				setIsModalOpen( false );
+			}
+		);
+	};
+	const remindLater = () => {
+		remindLaterRequest(
+			{
+				remindLaterAction,
+				productId,
+				remindLaterNonce,
+			},
+			() => {
+				setIsModalOpen( false );
+			}
+		);
+	};
+	const renew = () => {
+		setIsModalOpen( false );
+	};
+	const subscribe = () => {
+		setIsModalOpen( false );
+	};
 
-	remindLater() {
-		remindLaterRequest( this.props, ( response ) => {
-			this.setState( { isModalOpen: false } )
-		} );
-	}
-
-	renew() {
-		this.setState( { isModalOpen: false } )
-	}
-
-	subscribe() {
-		this.setState( { isModalOpen: false } )
-	}
-
-	renderBenefits() {
-		const isExpired = this.props.subscriptionState.expired;
+	const renderBenefits = () => {
 		const subtitle = isExpired
-			? __(
-				'Reactivate your subscription and benefit from:',
-				'woocommerce'
-			)
-			: __(
-				'Purchase a subscription to benefit from:',
-				'woocommerce'
-			);
+			? __( 'Reactivate your subscription and benefit from:', 'woocommerce' )
+			: __( 'Purchase a subscription to benefit from:', 'woocommerce' );
 
-		const benefits =  [
+		const benefits = [
 			{
 				key: 'get-updates',
 				icon: reusableBlock,
@@ -119,11 +130,9 @@ export class CheckSubscriptionModal extends Component {
 				) ) }
 			</div>
 		)
-	}
+	};
 
-	renderPrimaryCard() {
-		const isExpired = this.props.subscriptionState.expired;
-
+	const renderPrimaryCard = () => {
 		return (
 			<Card className="primary">
 				<CardHeader>
@@ -147,7 +156,7 @@ export class CheckSubscriptionModal extends Component {
 										'Renew %s',
 										'woocommerce'
 									),
-									this.props.productName
+									productName
 								)
 								: sprintf(
 									/* translators: %s is product name */
@@ -155,17 +164,17 @@ export class CheckSubscriptionModal extends Component {
 										'Subscribe to %s',
 										'woocommerce'
 									),
-									this.props.productName
+									productName
 								)
 						}
 					</h2>
 				</CardHeader>
 				<CardBody>
-					{ this.renderBenefits() }
+					{ renderBenefits() }
 				</CardBody>
 				<CardFooter>
 					<Button
-						onClick={ () => this.remindLater() }
+						onClick={ remindLater }
 						variant="secondary"
 					>
 						{ __( 'Maybe later', 'woocommerce' ) }
@@ -174,29 +183,29 @@ export class CheckSubscriptionModal extends Component {
 					<Button
 						isPrimary
 						target="_blank"
-						href={ isExpired ? this.props.renewUrl : this.props.subscribeUrl }
-						onClick={ () => isExpired ? this.renew() : this.subscribe() }
+						href={ isExpired ? renewUrl : subscribeUrl }
+						onClick={ () => isExpired ? renew() : subscribe() }
 					>
 						{
 							isExpired
 								? sprintf(
 									/* translators: %s is product price */
 									__( 'Renew for $%s', 'woocommerce' ),
-									this.props.productRegularPrice
+									productRegularPrice
 								)
 								: sprintf(
 									/* translators: %s is product price */
 									__( 'Subscribe for $%s', 'woocommerce' ),
-									this.props.productRegularPrice
+									productRegularPrice
 								)
 						}
 					</Button>
 				</CardFooter>
 			</Card>
 		);
-	}
+	};
 
-	renderSecondaryCard() {
+	const renderSecondaryCard = () => {
 		return (
 			<Card className="secondary">
 				<CardMedia>
@@ -209,33 +218,30 @@ export class CheckSubscriptionModal extends Component {
 				</CardMedia>
 			</Card>
 		);
+	};
+
+	if ( ! isModalOpen ) {
+		return null;
 	}
 
-	render() {
-		const { isModalOpen } = this.state;
-		if ( ! isModalOpen ) {
-			return null;
-		}
-
-		return (
-			<Modal
-				style={ { borderRadius: '2px' } }
-				onRequestClose={ () => this.dismiss() }
-				className="woocommerce-check-subscription-modal"
+	return (
+		<Modal
+			style={ { borderRadius: '2px' } }
+			onRequestClose={ dismiss }
+			className="woocommerce-check-subscription-modal"
+		>
+			<Flex
+				gap={ 0 }
+				align={ 'stretch' }
+				direction={ [ 'column-reverse', 'row' ] }
 			>
-				<Flex
-					gap={ 0 }
-					align={ 'stretch' }
-					direction={ [ 'column-reverse', 'row' ] }
-				>
-					<FlexItem>
-						{ this.renderPrimaryCard() }
-					</FlexItem>
-					<FlexItem>
-						{ this.renderSecondaryCard() }
-					</FlexItem>
-				</Flex>
-			</Modal>
-		);
-	}
+				<FlexItem>
+					{ renderPrimaryCard() }
+				</FlexItem>
+				<FlexItem>
+					{ renderSecondaryCard() }
+				</FlexItem>
+			</Flex>
+		</Modal>
+	);
 }

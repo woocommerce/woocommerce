@@ -6,7 +6,7 @@ import { render } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { CheckSubscriptionModal } from './modal';
+import CheckSubscriptionModal from './modal';
 import './style.scss';
 
 const {
