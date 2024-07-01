@@ -213,16 +213,9 @@
 }
 
 .woocommerce-customize-store-cards {
-	display: grid;
-	flex-wrap: wrap;
+	display: flex;
 	gap: 32px;
-	row-gap: 54px;
-	grid-template-columns: repeat(2, 1fr);
 	margin-bottom: 40px;
-
-	@media only screen and (min-width: 1600px) {
-		grid-template-columns: repeat(4, 1fr);
-	}
 
 	.intro-card {
 		border-radius: 4px;
@@ -230,6 +223,7 @@
 		text-align: center;
 		padding: 36px 51px;
 		margin-top: 0;
+		width: 500px;
 
 		img {
 			width: 100%;
