@@ -236,7 +236,7 @@ export function getLastPeriod(
 }
 
 /**
- * Get a DateValue object for a curent period. The period begins on the first day of the period,
+ * Get a DateValue object for a current period. The period begins on the first day of the period,
  * and ends on the current day.
  *
  * @param {moment.DurationInputArg2} period  - the chosen period

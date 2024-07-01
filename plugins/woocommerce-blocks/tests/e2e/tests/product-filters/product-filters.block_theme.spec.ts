@@ -15,6 +15,8 @@ const blockData = {
 		frontend: {},
 		editor: {
 			settings: {},
+			layoutWrapper:
+				'.wp-block-woocommerce-product-filters-is-layout-flex',
 		},
 	},
 	slug: 'archive-product',
@@ -33,15 +35,15 @@ const test = base.extend< { pageObject: ProductFiltersPage } >( {
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
+	test.beforeEach( async ( { admin, requestUtils } ) => {
 		await requestUtils.activatePlugin(
 			'woocommerce-blocks-test-enable-experimental-features'
 		);
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 	} );
 
 	test( 'should be visible and contain correct inner blocks', async ( {
@@ -119,7 +121,7 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( ratingFilterBlock ).toBeVisible();
 	} );
 
-	test( 'should display the correct customization settings', async ( {
+	test( 'should display the correct inspector style controls', async ( {
 		editor,
 		pageObject,
 	} ) => {
@@ -131,6 +133,8 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( block ).toBeVisible();
 
 		await editor.openDocumentSettingsSidebar();
+
+		await editor.page.getByRole( 'tab', { name: 'Styles' } ).click();
 
 		// Color settings
 		const colorSettings = editor.page.getByText( 'ColorTextBackground' );
@@ -158,5 +162,153 @@ test.describe( `${ blockData.name }`, () => {
 			name: 'Border',
 		} );
 		await expect( borderSettings ).toBeVisible();
+
+		// Block spacing settings
+		await expect(
+			editor.page.getByText( 'DimensionsBlock spacing' )
+		).toBeVisible();
+	} );
+
+	test( 'should display the correct inspector setting controls', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Experimental)'
+		);
+		await expect( block ).toBeVisible();
+
+		await editor.openDocumentSettingsSidebar();
+
+		// Layout settings
+		await expect(
+			editor.page.getByText( 'LayoutJustificationOrientation' )
+		).toBeVisible();
+	} );
+
+	test( 'Layout > default to vertical stretch', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Experimental)'
+		);
+		await expect( block ).toBeVisible();
+
+		await editor.openDocumentSettingsSidebar();
+
+		const layoutSettings = editor.page.getByText(
+			'LayoutJustificationOrientation'
+		);
+		await expect(
+			layoutSettings.getByLabel( 'Justify items left' )
+		).not.toHaveAttribute( 'data-active-item' );
+		await expect(
+			layoutSettings.getByLabel( 'Stretch items' )
+		).toHaveAttribute( 'data-active-item' );
+		await expect(
+			layoutSettings.getByLabel( 'Horizontal' )
+		).not.toHaveAttribute( 'data-active-item' );
+		await expect( layoutSettings.getByLabel( 'Vertical' ) ).toHaveAttribute(
+			'data-active-item'
+		);
+	} );
+
+	test( 'Layout > Justification: changing option should update the preview', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Experimental)'
+		);
+		await expect( block ).toBeVisible();
+
+		await editor.openDocumentSettingsSidebar();
+
+		const layoutSettings = editor.page.getByText(
+			'LayoutJustificationOrientation'
+		);
+		await layoutSettings.getByLabel( 'Justify items left' ).click();
+		await expect(
+			layoutSettings.getByLabel( 'Justify items left' )
+		).toHaveAttribute( 'data-active-item' );
+		await expect(
+			block.locator( blockData.selectors.editor.layoutWrapper )
+		).toHaveCSS( 'align-items', 'flex-start' );
+
+		await layoutSettings.getByLabel( 'Justify items center' ).click();
+		await expect(
+			layoutSettings.getByLabel( 'Justify items center' )
+		).toHaveAttribute( 'data-active-item' );
+		await expect(
+			block.locator( blockData.selectors.editor.layoutWrapper )
+		).toHaveCSS( 'align-items', 'center' );
+	} );
+
+	test( 'Layout > Orientation: changing option should update the preview', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Experimental)'
+		);
+		await expect( block ).toBeVisible();
+
+		await editor.openDocumentSettingsSidebar();
+
+		const layoutSettings = editor.page.getByText(
+			'LayoutJustificationOrientation'
+		);
+		await layoutSettings.getByLabel( 'Horizontal' ).click();
+		await expect(
+			layoutSettings.getByLabel( 'Stretch items' )
+		).toBeHidden();
+		await expect(
+			layoutSettings.getByLabel( 'Space between items' )
+		).toBeVisible();
+		await expect(
+			block.locator( ':text("Status"):right-of(:text("Price"))' )
+		).toBeVisible();
+
+		await layoutSettings.getByLabel( 'Vertical' ).click();
+		await expect(
+			block.locator( ':text("Status"):below(:text("Price"))' )
+		).toBeVisible();
+	} );
+
+	test( 'Dimentions > Block spacing: changing option should update the preview', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Experimental)'
+		);
+		await expect( block ).toBeVisible();
+
+		await editor.openDocumentSettingsSidebar();
+
+		await editor.page.getByRole( 'tab', { name: 'Styles' } ).click();
+
+		const blockSpacingSettings = editor.page.getByLabel( 'Block spacing' );
+
+		await blockSpacingSettings.fill( '4' );
+		await expect(
+			block.locator( blockData.selectors.editor.layoutWrapper )
+		).not.toHaveCSS( 'gap', '0px' );
+
+		await blockSpacingSettings.fill( '0' );
+		await expect(
+			block.locator( blockData.selectors.editor.layoutWrapper )
+		).toHaveCSS( 'gap', '0px' );
 	} );
 } );

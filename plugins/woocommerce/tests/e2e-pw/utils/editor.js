@@ -26,6 +26,15 @@ const disableWelcomeModal = async ( { page } ) => {
 	}
 };
 
+const openEditorSettings = async ( { page } ) => {
+	// Open Settings sidebar if closed
+	if ( await page.getByLabel( 'Editor Settings' ).isVisible() ) {
+		console.log( 'Editor Settings is open, skipping action.' );
+	} else {
+		await page.getByLabel( 'Settings', { exact: true } ).click();
+	}
+};
+
 const getCanvas = async ( page ) => {
 	return page.frame( 'editor-canvas' ) || page;
 };
@@ -47,12 +56,10 @@ const fillPageTitle = async ( page, title ) => {
 };
 
 const insertBlock = async ( page, blockName ) => {
-	const canvas = await getCanvas( page );
-	// Click the title to activate the block inserter.
-	await canvas.getByRole( 'textbox', { name: 'Add title' } ).click();
-	await canvas.getByLabel( 'Add block' ).click();
+	await page.getByLabel( 'Toggle block inserter' ).click();
 	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
+	await page.getByLabel( 'Toggle block inserter' ).click();
 };
 
 const insertBlockByShortcut = async ( page, blockName ) => {
@@ -108,6 +115,7 @@ module.exports = {
 	goToPageEditor,
 	goToPostEditor,
 	disableWelcomeModal,
+	openEditorSettings,
 	getCanvas,
 	fillPageTitle,
 	insertBlock,
