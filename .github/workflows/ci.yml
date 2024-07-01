@@ -135,7 +135,7 @@ jobs:
       'dispatch-handler'
     ]
     # Because dispatch-handler may be skipped, we need the always() here.
-    if: ${{ always() && needs.project-jobs.outputs.lint-jobs != '[]' && github.event_name == 'pull_request' }}
+    if: ${{ always() && needs.project-jobs.outputs.lint-jobs != '[]' && ( github.event_name == 'pull_request' || inputs.pr_simulate != '' ) }}
     strategy:
       fail-fast: false
       matrix:
