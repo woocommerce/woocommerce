@@ -40,6 +40,7 @@
 		"yoast/phpunit-polyfills": "^2.0"
 	},
 	"config": {
+		"optimize-autoloader": true,
 		"preferred-install": {
 			"woocommerce/action-scheduler": "dist"
 		},
