@@ -199,7 +199,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 												// The CTA text and label is "Finish set up" if the account is not connected or not completely onboarded.
 												$setup_url = WC_Payments_Account::get_connect_url(); // Plugin will handle the redirection to the connect page or directly to the provider (e.g. Stripe).
 												/* Translators: %s Payment gateway name. */
-												echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish set up', 'woocommerce' ) . '</a>';
+												echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish setup', 'woocommerce' ) . '</a>';
 											} else {
 												// If the account is fully onboarded, the CTA text and label is "Manage" regardless gateway is enabled or not.
 												/* Translators: %s Payment gateway name. */
@@ -210,7 +210,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Manage the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Manage', 'woocommerce' ) . '</a>';
 										} else {
 											/* Translators: %s Payment gateway name. */
-											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish set up', 'woocommerce' ) . '</a>';
+											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish setup', 'woocommerce' ) . '</a>';
 										}
 										break;
 									case 'status':
