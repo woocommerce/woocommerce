@@ -205,7 +205,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 					</BaseControl>
 					<BaseControl
 						id="wc-block-mini-cart__product-count-basecontrol"
-						label={ __( 'Show quantity badge', 'woocommerce' ) }
+						label={ __( 'Show Cart Item Count:', 'woocommerce' ) }
 					>
 						<RadioControl
 							className="wc-block-mini-cart__product-count-radiocontrol"
@@ -213,21 +213,21 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							options={ [
 								{
 									label: __(
-										'Always (even if 0)',
+										'Always (even if empty)',
 										'woocommerce'
 									),
 									value: 'always',
 								},
 								{
-									label: __( 'Never', 'woocommerce' ),
-									value: 'never',
-								},
-								{
 									label: __(
-										'Only when cart is not empty',
+										'Only if cart has items',
 										'woocommerce'
 									),
 									value: 'greater_than_zero',
+								},
+								{
+									label: __( 'Never', 'woocommerce' ),
+									value: 'never',
 								},
 							] }
 							help={ __(
