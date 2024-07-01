@@ -4,17 +4,17 @@ const { customer } = require( '../../test-data/data' );
 const emailContent = '#wp-mail-logging-modal-content-body-content';
 const emailContentHtml = '#wp-mail-logging-modal-format-html';
 
-const now = Date.now();
-const username = `${ now }`;
-const email = `${ now }@example.com`;
-const firstName = `Customer`;
-const lastName = `the ${ now }th`;
-const role = 'Customer';
-
 const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
 	user: async ( { api }, use ) => {
-		const user = {};
+		const now = Date.now();
+		const user = {
+			username: `${ now }`,
+			email: `${ now }@example.com`,
+			firstName: `Customer`,
+			lastName: `the ${ now }th`,
+			role: 'Customer',
+		};
 		await use( user );
 		console.log( `Deleting user ${ user.id }` );
 		await api.delete( `customers/${ user.id }`, { force: true } );
@@ -27,10 +27,10 @@ test.describe(
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
-		test.beforeEach( async ( { page } ) => {
+		test.beforeEach( async ( { page, user } ) => {
 			await page.goto(
 				`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-					email
+					user.email
 				) }`
 			);
 			// clear out the email logs before each test
@@ -63,12 +63,12 @@ test.describe(
 
 				user.password = await page.locator( '#pass1' ).inputValue();
 
-				await page.getByLabel( 'Username' ).fill( username );
-				await page.getByLabel( 'Email (required)' ).fill( email );
-				await page.getByLabel( 'First Name' ).fill( firstName );
-				await page.getByLabel( 'Last Name' ).fill( lastName );
+				await page.getByLabel( 'Username' ).fill( user.username );
+				await page.getByLabel( 'Email (required)' ).fill( user.email );
+				await page.getByLabel( 'First Name' ).fill( user.firstName );
+				await page.getByLabel( 'Last Name' ).fill( user.lastName );
 				await page.getByText( 'Send the new user an email' ).check();
-				await page.getByLabel( 'Role' ).selectOption( role );
+				await page.getByLabel( 'Role' ).selectOption( user.role );
 				await page
 					.getByRole( 'button', { name: 'Add New User' } )
 					.click();
@@ -84,13 +84,13 @@ test.describe(
 			await test.step( 'verify that the email was sent', async () => {
 				await page.goto(
 					`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-						email
+						user.email
 					) }`
 				);
 
 				await expect(
 					page.locator( 'td.column-receiver' ).first()
-				).toHaveText( email );
+				).toHaveText( user.email );
 				await expect(
 					page.getByRole( 'cell', {
 						name: '[WooCommerce Core E2E Test Suite] Login Details',
@@ -107,7 +107,7 @@ test.describe(
 					.locator( '.wp-mail-logging-modal-row-html-container' )
 					.waitFor( { state: 'visible' } );
 				await expect( page.locator( emailContent ) ).toContainText(
-					email
+					user.email
 				);
 			} );
 		} );
@@ -126,12 +126,12 @@ test.describe(
 
 				user.password = await page.locator( '#pass1' ).inputValue();
 
-				await page.getByLabel( 'Username' ).fill( username );
-				await page.getByLabel( 'Email (required)' ).fill( email );
-				await page.getByLabel( 'First Name' ).fill( firstName );
-				await page.getByLabel( 'Last Name' ).fill( lastName );
+				await page.getByLabel( 'Username' ).fill( user.username );
+				await page.getByLabel( 'Email (required)' ).fill( user.email );
+				await page.getByLabel( 'First Name' ).fill( user.firstName );
+				await page.getByLabel( 'Last Name' ).fill( user.lastName );
 				await page.getByText( 'Send the new user an email' ).uncheck();
-				await page.getByLabel( 'Role' ).selectOption( role );
+				await page.getByLabel( 'Role' ).selectOption( user.role );
 				await page
 					.getByRole( 'button', { name: 'Add New User' } )
 					.click();
@@ -147,18 +147,18 @@ test.describe(
 			await test.step( 'verify that no email was sent on account creation', async () => {
 				await page.goto(
 					`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-						email
+						user.email
 					) }`
 				);
 				await expect(
 					page.locator( 'td.column-receiver' ).first()
-				).not.toHaveText( email );
+				).not.toHaveText( user.email );
 			} );
 
 			await test.step( 'initiate password reset from admin', async () => {
 				await page.goto( 'wp-admin/users.php' );
 
-				await page.getByText( email ).hover();
+				await page.getByText( user.email ).hover();
 				await page
 					.locator( `#user-${ user.id }` )
 					.getByRole( 'link', { name: 'Send password reset' } )
@@ -168,13 +168,13 @@ test.describe(
 			await test.step( 'verify that the email was sent', async () => {
 				await page.goto(
 					`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-						email
+						user.email
 					) }`
 				);
 
 				await expect(
 					page.locator( 'td.column-receiver' ).first()
-				).toHaveText( email );
+				).toHaveText( user.email );
 				await expect(
 					page.getByRole( 'cell', {
 						name: '[WooCommerce Core E2E Test Suite] Password Reset',
@@ -190,7 +190,7 @@ test.describe(
 					.locator( '.wp-mail-logging-modal-row-html-container' )
 					.waitFor( { state: 'visible' } );
 				await expect( page.locator( emailContent ) ).toContainText(
-					email
+					user.email
 				);
 			} );
 		} );
