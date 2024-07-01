@@ -3,6 +3,11 @@ const {
 } = require( '../../../../fixtures/block-editor-fixtures' );
 const { expect } = require( '../../../../fixtures/fixtures' );
 const { updateProduct } = require( '../../../../utils/product-block-editor' );
+const { clickOnTab } = require( '../../../../utils/simple-products' );
+const attributesData = require( './fixtures/attributes' );
+const {
+	waitForGlobalAttributesLoaded,
+} = require( './helpers/wait-for-global-attributes-loaded' );
 
 async function waitForAttributeList( page ) {
 	// The list child is different in case there are no results versus when there already are some attributes, so we need to wait for either one to be visible.
@@ -94,93 +99,131 @@ const test = baseTest.extend( {
 	},
 } );
 
-test.skip(
-	'can create and add attributes',
+test(
+	'add local attribute (with terms) to the Product',
 	{ tag: '@gutenberg' },
 	async ( { page, product } ) => {
-		const newAttributes = [
-			{
-				name: `pa_0_${ Date.now() }`,
-				value: `value_0_${ Date.now() }`,
-			},
-			{
-				name: `pa_1_${ Date.now() }`,
-				value: `value_1_${ Date.now() }`,
-			},
-		];
-
-		await test.step( 'go to product editor, Organization tab', async () => {
+		await test.step( 'go to product editor -> Organization tab -> Click on `Add new`', async () => {
 			await page.goto(
 				`wp-admin/post.php?post=${ product.id }&action=edit`
 			);
-			await page.getByRole( 'tab', { name: 'Organization' } ).click();
-		} );
+			await clickOnTab( 'Organization', page );
 
-		await test.step( 'add new attributes', async () => {
+			await page
+				.getByRole( 'heading', { name: 'Attributes' } )
+				.isVisible();
+
 			await page.getByRole( 'button', { name: 'Add new' } ).click();
 
+			await page
+				.getByRole( 'heading', { name: 'Add variation options' } )
+				.isVisible();
+
 			await page.waitForLoadState( 'domcontentloaded' );
+		} );
 
-			// Add attributes that do not exist
-			await page.getByPlaceholder( 'Search or create attribute' ).click();
+		await test.step( 'create local attributes with terms', async () => {
+			/*
+			 * attributeRowsLocator are the rows that contains
+			 * the Attribute combobox and the Term FormTokenField.
+			 */
+			const attributeRowsLocator = page.locator(
+				'.woocommerce-new-attribute-modal__table-row'
+			);
 
-			// Unless we wait for the list to be visible, the attribute name will be filled too soon and the test will fail.
-			await waitForAttributeList( page );
+			/*
+			 * First, check the app loads the attributes,
+			 * based on the Spinner visibility.
+			 */
+			await waitForGlobalAttributesLoaded( page );
 
-			await page
-				.getByPlaceholder( 'Search or create attribute' )
-				.fill( newAttributes[ 0 ].name );
-			await page
-				.getByText( `Create "${ newAttributes[ 0 ].name }"` )
-				.click();
+			for ( const attribute of attributesData ) {
+				const attributeRowLocator = attributeRowsLocator.last();
 
-			await page.getByPlaceholder( 'Search or create value' ).click();
-			await page
-				.getByPlaceholder( 'Search or create value' )
-				.fill( newAttributes[ 0 ].value );
-			await page
-				.getByText( `Create "${ newAttributes[ 0 ].value }"` )
-				.click();
+				const attributeComboboxLocator = attributeRowLocator
+					.locator(
+						'input[aria-describedby^="components-form-token-suggestions-howto-combobox-control"]'
+					)
+					.last();
 
-			// Add another attribute
-			await page.getByLabel( 'Add another attribute' ).click();
-			await page
-				.getByPlaceholder( 'Search or create attribute' )
-				.nth( 1 )
-				.click();
+				// Create new (local) product attribute.
+				await attributeComboboxLocator.fill( attribute.name );
+				await page
+					.locator( `text=Create "${ attribute.name }"` )
+					.click();
 
-			await waitForAttributeList( page );
+				const FormTokenFieldLocator = attributeRowLocator.locator(
+					'td.woocommerce-new-attribute-modal__table-attribute-value-column'
+				);
 
-			await page
-				.getByPlaceholder( 'Search or create attribute' )
-				.nth( 1 )
-				.fill( newAttributes[ 1 ].name );
-			await page
-				.getByText( `Create "${ newAttributes[ 1 ].name }"` )
-				.click();
+				// Term FormTokenField input locator
+				const FormTokenFieldInputLocator =
+					FormTokenFieldLocator.locator(
+						'input[id^="components-form-token-input-"]'
+					);
 
-			await page.getByPlaceholder( 'Search or create value' ).click();
-			await page
-				.getByPlaceholder( 'Search or create value' )
-				.fill( newAttributes[ 1 ].value );
-			await page
-				.getByText( `Create "${ newAttributes[ 1 ].value }"` )
-				.click();
+				// Add terms to the attribute.
+				for ( const term of attribute.terms ) {
+					await FormTokenFieldInputLocator.fill( term.name );
+					await FormTokenFieldInputLocator.press( 'Enter' );
+				}
 
-			// Add attributes
+				await page.getByLabel( 'Add another attribute' ).click();
+			}
+
+			// Add the product attributes
 			await page
 				.getByRole( 'button', { name: 'Add attributes' } )
 				.click();
 		} );
 
 		await test.step( 'verify attributes in product editor', async () => {
-			// Verify new attributes in product editor
-			for ( const attribute of newAttributes ) {
-				const item = page.getByRole( 'listitem' ).filter( {
+			// Locate the main attributes list element
+			const attributesListLocator = page.locator(
+				'[data-template-block-id="product-attributes-section"]'
+			);
+			await expect( attributesListLocator ).toBeVisible();
+
+			const attributeRowsLocator =
+				attributesListLocator.getByRole( 'listitem' );
+
+			for ( const attribute of attributesData ) {
+				const attributeRowLocator = attributeRowsLocator.filter( {
 					has: page.getByText( attribute.name, { exact: true } ),
 				} );
-				await expect( item ).toBeVisible();
-				await expect( item ).toContainText( attribute.value );
+				await expect( attributeRowLocator ).toBeVisible();
+
+				// UI only shows 3 terms, so we need to check if the term is visible.
+				const shownTerms = attribute.terms.slice( 0, 3 ).entries();
+
+				// Check if there are more terms than three.
+				const moreThanThreeTerms = attribute.terms.length > 3;
+
+				for ( const [ index, term ] of shownTerms ) {
+					/*
+					 * Disabling the eslint rule because the text
+					 * is different when there are more than three terms.
+					 */
+					const termLabel =
+						// eslint-disable-next-line playwright/no-conditional-in-test
+						moreThanThreeTerms && index === 2
+							? '+ 3 more'
+							: term.name;
+					// Pick the term element/locator
+					const termLocator = attributeRowLocator
+						.locator( `[aria-hidden="true"]` )
+						.filter( {
+							has: page.getByText( termLabel, {
+								exact: true,
+							} ),
+						} );
+
+					// Verify the term is visible
+					await expect( termLocator ).toBeVisible();
+
+					// Verify the term text
+					await expect( termLocator ).toContainText( termLabel );
+				}
 			}
 		} );
 
@@ -188,28 +231,17 @@ test.skip(
 			await updateProduct( { page, expect } );
 		} );
 
-		await test.step( 'verify attributes in product editor after product update', async () => {
-			// Verify attributes in product editor
-			for ( const attribute of newAttributes ) {
-				const item = page.getByRole( 'listitem' ).filter( {
-					has: page.getByText( attribute.name, { exact: true } ),
-				} );
-				await expect( item ).toBeVisible();
-				await expect( item ).toContainText( attribute.value );
-			}
-		} );
-
 		await test.step( 'verify the changes in the store frontend', async () => {
 			// Verify attributes in store frontend
 			await page.goto( product.permalink );
 
 			// Verify attributes in store frontend
-			for ( const attribute of newAttributes ) {
+			for ( const attribute of attributesData ) {
 				const item = page.getByRole( 'row' ).filter( {
 					has: page.getByText( attribute.name, { exact: true } ),
 				} );
 				await expect( item ).toBeVisible();
-				await expect( item ).toContainText( attribute.value );
+				await expect( item ).toContainText( attribute.name );
 			}
 		} );
 	}

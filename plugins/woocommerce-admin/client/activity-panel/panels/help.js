@@ -190,7 +190,10 @@ function getProductsItems() {
 function getShippingItems( { activePlugins, countryCode } ) {
 	const showWCS =
 		countryCode === 'US' &&
-		! activePlugins.includes( 'woocommerce-services' );
+		! activePlugins.includes( 'woocommerce-services' ) &&
+		! activePlugins.includes( 'woocommerce-shipping' ) &&
+		! activePlugins.includes( 'woocommerce-tax' );
+
 	return [
 		{
 			title: __( 'Setting up Shipping Zones', 'woocommerce' ),
@@ -235,11 +238,18 @@ function getTaxItems( props ) {
 	}
 
 	const { additionalData } = task;
-	const { woocommerceTaxCountries = [], taxJarActivated } = additionalData;
+	const {
+		woocommerceTaxCountries = [],
+		taxJarActivated,
+		woocommerceTaxActivated,
+		woocommerceShippingActivated,
+	} = additionalData;
 
 	const showWCS =
 		! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
-		woocommerceTaxCountries.includes( countryCode );
+		woocommerceTaxCountries.includes( countryCode ) &&
+		! woocommerceTaxActivated &&
+		! woocommerceShippingActivated;
 
 	return [
 		{

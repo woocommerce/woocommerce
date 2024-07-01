@@ -62,6 +62,25 @@ test.describe( 'Template customization', () => {
 				await expect(
 					page.getByText( userText ).first()
 				).toBeVisible();
+
+				// Revert edition and verify the template from the theme is used.
+				await admin.visitSiteEditor( {
+					postType: testData.templateType,
+				} );
+				await editor.revertTemplateCustomizations( {
+					templateName: testData.templateName,
+					templateType: testData.templateType,
+				} );
+				await testData.visitPage( { frontendUtils, page } );
+
+				await expect(
+					page
+						.getByText(
+							`${ testData.templateName } template loaded from theme`
+						)
+						.first()
+				).toBeVisible();
+				await expect( page.getByText( userText ) ).toHaveCount( 0 );
 			} );
 
 			if ( testData.fallbackTemplate ) {

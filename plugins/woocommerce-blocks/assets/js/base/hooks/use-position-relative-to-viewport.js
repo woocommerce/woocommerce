@@ -59,7 +59,7 @@ export const usePositionRelativeToViewport = () => {
 					);
 				}
 			},
-			{ threshold: 1.0 }
+			{ threshold: [ 0, 0.5, 1 ] }
 		)
 	);
 
