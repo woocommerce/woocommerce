@@ -75,10 +75,8 @@ class BlockTemplatesController {
 			2
 		);
 
-		/**
-		 * Prevents the pages that are assigned as cart/checkout from showing the "template" selector in the page-editor.
-		 * We want to avoid this flow and point users towards the site editor instead.
-		 */
+		// Prevents the pages that are assigned as cart/checkout from showing the "template" selector in the page-editor.
+		// We want to avoid this flow and point users towards the site editor instead.
 		add_action(
 			'current_screen',
 			function () {
