@@ -2,6 +2,9 @@
  * External dependencies
  */
 import { useBlockProps } from '@wordpress/block-editor';
+import { useEffect } from '@wordpress/element';
+import type { BlockEditProps } from '@wordpress/blocks';
+import type { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 
 /**
  * Internal dependencies
@@ -14,14 +17,43 @@ import {
 	BLOCK_DESCRIPTION as description,
 } from './constants';
 import './editor.scss';
-import type { BlockAttributes } from './types';
+import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
+import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
+import type { Attributes } from './types';
 
-interface Props {
-	attributes: BlockAttributes;
-}
-
-const Edit = ( { attributes }: Props ): JSX.Element => {
+const Edit = ( {
+	attributes,
+	setAttributes,
+	context,
+}: BlockEditProps< Attributes > & { context: Context } ): JSX.Element => {
 	const blockProps = useBlockProps();
+
+	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
+	const { isDescendentOfSingleProductBlock } =
+		useIsDescendentOfSingleProductBlock( { blockClientId: blockProps.id } );
+
+	let { isDescendentOfSingleProductTemplate } =
+		useIsDescendentOfSingleProductTemplate();
+
+	if ( isDescendentOfQueryLoop ) {
+		isDescendentOfSingleProductTemplate = false;
+	}
+
+	useEffect(
+		() =>
+			setAttributes( {
+				isDescendentOfQueryLoop,
+				isDescendentOfSingleProductTemplate,
+				isDescendentOfSingleProductBlock,
+			} ),
+		[
+			setAttributes,
+			isDescendentOfQueryLoop,
+			isDescendentOfSingleProductTemplate,
+			isDescendentOfSingleProductBlock,
+		]
+	);
+
 	return (
 		<div { ...blockProps }>
 			<Block { ...attributes } />

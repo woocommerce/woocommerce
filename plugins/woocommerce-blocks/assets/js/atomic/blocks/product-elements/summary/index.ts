@@ -16,7 +16,6 @@ import {
 	BLOCK_ICON as icon,
 	BLOCK_DESCRIPTION as description,
 } from './constants';
-import { Save } from './save';
 
 const blockConfig: BlockConfiguration = {
 	...sharedConfig,
@@ -27,7 +26,6 @@ const blockConfig: BlockConfiguration = {
 	attributes,
 	supports,
 	edit,
-	save: Save,
 };
 
 registerBlockType( 'woocommerce/product-summary', blockConfig );
