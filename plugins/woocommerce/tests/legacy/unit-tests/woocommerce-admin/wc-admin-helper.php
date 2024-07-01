@@ -219,14 +219,14 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	 * @return array[] list of store page test data.
 	 */
 	public function get_store_page_test_data() {
-			return array(
-				array( get_permalink( wc_get_page_id( 'cart' ) ), true ), // Test case 1: URL matches cart page.
-				array( 'https://example.com/product-category/sample-category/', true ), // Test case 3: URL matches product category page.
-				array( 'https://example.com/product-tag/sample-tag/', true ), // Test case 4: URL matches product tag page.
-				array( 'https://example.com/shop/uncategorized/test/', true ), // Test case 5: URL matches product page.
-				array( '/shop/t-shirt/test/', true ), // Test case 6: URL path matches product page.
-				array( 'https://example.com/about-us/', false ), // Test case 7: URL does not match any store page.
-			);
+		return array(
+			array( get_permalink( wc_get_page_id( 'cart' ) ), true ), // Test case 1: URL matches cart page.
+			array( 'https://example.com/product-category/sample-category/', true ), // Test case 3: URL matches product category page.
+			array( 'https://example.com/product-tag/sample-tag/', true ), // Test case 4: URL matches product tag page.
+			array( 'https://example.com/shop/uncategorized/test/', true ), // Test case 5: URL matches product page.
+			array( '/shop/t-shirt/test/', true ), // Test case 6: URL path matches product page.
+			array( 'https://example.com/about-us/', false ), // Test case 7: URL does not match any store page.
+		);
 	}
 
 	/**
@@ -235,26 +235,48 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	 *
 	 */
 	public function test_is_store_page() {
-			global $wp_rewrite;
+		global $wp_rewrite;
 
-			$wp_rewrite = $this->getMockBuilder( 'WP_Rewrite' )->getMock(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_rewrite = $this->getMockBuilder( 'WP_Rewrite' )->getMock(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-			$permalink_structure = array(
-				'category_base' => 'product-category',
-				'tag_base'      => 'product-tag',
-				'product_base'  => 'product',
-			);
+		$permalink_structure = array(
+			'category_base' => 'product-category',
+			'tag_base'      => 'product-tag',
+			'product_base'  => 'product',
+		);
 
-			$wp_rewrite->expects( $this->any() )
-				->method( 'generate_rewrite_rule' )
-				->willReturn( array( 'shop/(.+?)/?$' => 'index.php?product_cat=$matches[1]&year=$matches[2]' ) );
+		$wp_rewrite->expects( $this->any() )
+			->method( 'generate_rewrite_rule' )
+			->willReturn( array( 'shop/(.+?)/?$' => 'index.php?product_cat=$matches[1]&year=$matches[2]' ) );
 
-			$test_data = $this->get_store_page_test_data();
+		$test_data = $this->get_store_page_test_data();
 
-			foreach ( $test_data as $data ) {
-				list( $url, $expected_result ) = $data;
-				$result                        = WCAdminHelper::is_store_page( $url );
-				$this->assertEquals( $expected_result, $result );
-			}
+		foreach ( $test_data as $data ) {
+			list( $url, $expected_result ) = $data;
+			$result                        = WCAdminHelper::is_store_page( $url );
+			$this->assertEquals( $expected_result, $result );
+		}
+	}
+
+	/** Test product archive link is store page even if shop page not set. */
+	public function test_is_store_page_even_if_shop_page_not_set() {
+		$shop_page_id = get_option( 'woocommerce_shop_page_id' );
+
+		// Unset shop page.
+		add_filter(
+			'woocommerce_get_shop_page_id',
+			function () {
+				return false;
+			},
+			10,
+			1
+		);
+		global $wp_post_types;
+		$wp_post_types['product']->has_archive = 'shop';
+
+		$product_post_type = get_post_type_object( 'product' );
+
+		$link = get_post_type_archive_link( 'product' );
+		$this->assertTrue( WCAdminHelper::is_store_page( $link ) );
 	}
 }

@@ -28,6 +28,12 @@ updateTotals( getMiniCartTotalsFromLocalStorage() );
 getMiniCartTotalsFromServer().then( updateTotals );
 setStyles();
 
+declare global {
+	interface Window {
+		wcBlocksMiniCartFrontendDependencies: Record< string, dependencyData >;
+	}
+}
+
 window.addEventListener( 'load', () => {
 	const miniCartBlocks = document.querySelectorAll( '.wc-block-mini-cart' );
 	let wasLoadScriptsCalled = false;
@@ -36,10 +42,7 @@ window.addEventListener( 'load', () => {
 		return;
 	}
 
-	const dependencies = window.wcBlocksMiniCartFrontendDependencies as Record<
-		string,
-		dependencyData
-	>;
+	const dependencies = window.wcBlocksMiniCartFrontendDependencies;
 
 	// Preload scripts
 	for ( const dependencyHandle in dependencies ) {
@@ -158,8 +161,19 @@ window.addEventListener( 'load', () => {
 			loadContents();
 		};
 
-		miniCartButton.addEventListener( 'mouseover', loadScripts );
-		miniCartButton.addEventListener( 'focus', loadScripts );
+		// Load the scripts if a device is touch-enabled. We don't get the mouseover or focus events on touch devices,
+		// so the event listeners below won't work.
+		if (
+			'ontouchstart' in window ||
+			navigator.maxTouchPoints > 0 ||
+			window.matchMedia( '(pointer:coarse)' ).matches
+		) {
+			loadScripts();
+		} else {
+			miniCartButton.addEventListener( 'mouseover', loadScripts );
+			miniCartButton.addEventListener( 'focus', loadScripts );
+		}
+
 		miniCartButton.addEventListener( 'click', openDrawer );
 
 		const funcOnAddToCart =

@@ -197,7 +197,7 @@ class WC_Meta_Box_Product_Data {
 		if ( ! empty( $file_urls ) ) {
 			$file_url_size = count( $file_urls );
 
-			for ( $i = 0; $i < $file_url_size; $i ++ ) {
+			for ( $i = 0; $i < $file_url_size; $i++ ) {
 				if ( ! empty( $file_urls[ $i ] ) ) {
 					$downloads[] = array(
 						'name'        => wc_clean( $file_names[ $i ] ),

@@ -53,17 +53,17 @@ export class ErrorBoundary extends Component<
 	render() {
 		if ( this.state.hasError ) {
 			return (
-				<div className="woocommerce-error-boundary">
-					<h1 className="woocommerce-error-boundary__heading">
+				<div className="woocommerce-global-error-boundary">
+					<h1 className="woocommerce-global-error-boundary__heading">
 						{ __( 'Oops, something went wrong', 'woocommerce' ) }
 					</h1>
-					<p className="woocommerce-error-boundary__subheading">
+					<p className="woocommerce-global-error-boundary__subheading">
 						{ __(
 							"We're sorry for the inconvenience. Please try reloading the page, or you can get support from the community forums.",
 							'woocommerce'
 						) }
 					</p>
-					<div className="woocommerce-error-boundary__actions">
+					<div className="woocommerce-global-error-boundary__actions">
 						<Button
 							variant="secondary"
 							onClick={ this.handleOpenSupport }
@@ -77,12 +77,12 @@ export class ErrorBoundary extends Component<
 							{ __( 'Reload Page', 'woocommerce' ) }
 						</Button>
 					</div>
-					<details className="woocommerce-error-boundary__details">
+					<details className="woocommerce-global-error-boundary__details">
 						<summary>
 							{ __( 'Click for error details', 'woocommerce' ) }
 						</summary>
-						<div className="woocommerce-error-boundary__details-content">
-							<strong className="woocommerce-error-boundary__error">
+						<div className="woocommerce-global-error-boundary__details-content">
+							<strong className="woocommerce-global-error-boundary__error">
 								{ this.state.error &&
 									this.state.error.toString() }
 							</strong>

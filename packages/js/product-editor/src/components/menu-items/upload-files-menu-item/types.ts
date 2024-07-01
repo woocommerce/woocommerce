@@ -6,6 +6,7 @@ import {
 	MenuItem as DropdownMenuItem,
 } from '@wordpress/components';
 import { MediaItem, UploadMediaOptions } from '@wordpress/media-utils';
+import { MediaUploaderErrorCallback } from '@woocommerce/components';
 
 export type UploadFilesMenuItemProps = Omit<
 	FormFileUpload.Props,
@@ -23,5 +24,5 @@ export type UploadFilesMenuItemProps = Omit<
 	> & {
 		onUploadProgress?( files: MediaItem[] ): void;
 		onUploadSuccess( files: MediaItem[] ): void;
-		onUploadError( error: unknown ): void;
+		onUploadError: MediaUploaderErrorCallback;
 	};

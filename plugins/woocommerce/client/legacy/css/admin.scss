@@ -4522,8 +4522,8 @@ table {
 	display: flex;
 	align-items: center;
 
-	.page-title-action {
-		margin: 0 12px;
+	.page-title-action, .page-title-action:active {
+		margin: 7px 0 0 10px;
 	}
 }
 
@@ -5029,6 +5029,13 @@ img.help_tip {
 
 	textarea[disabled="disabled"] {
 		background: #dfdfdf !important;
+	}
+
+	.settings-panel {
+		ul.advice {
+			list-style: square;
+			list-style-position: inside;
+		}
 	}
 
 	table.form-table {

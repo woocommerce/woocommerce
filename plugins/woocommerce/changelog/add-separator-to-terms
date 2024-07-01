@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Add a control to enable a separator on the Checkout block's "Checkout Terms" block. This will enable a separator above the block that can be turned off in case the block is moved.

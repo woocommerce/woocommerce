@@ -8,14 +8,6 @@ import { Product } from '@woocommerce/data';
  */
 import { Metadata, ProductTemplate } from '../../types';
 
-declare global {
-	interface Window {
-		productBlockEditorSettings: {
-			productTemplates: ProductTemplate[];
-		};
-	}
-}
-
 const matchesAllTemplateMetaFields = (
 	templateMeta: Metadata< string >[],
 	productMeta: Metadata< string >[]
