@@ -4,14 +4,18 @@
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { Card, CardBody, CardFooter, CardHeader } from '@wordpress/components';
+import clsx from 'clsx';
 
 class StoreAlertsPlaceholder extends Component {
 	render() {
-		const { hasMultipleAlerts } = this.props;
+		const { hasMultipleAlerts, className } = this.props;
 
 		return (
 			<Card
-				className="woocommerce-store-alerts is-loading"
+				className={ clsx(
+					'woocommerce-store-alerts is-loading',
+					className
+				) }
 				aria-hidden
 				size={ null }
 			>

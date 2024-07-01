@@ -6,8 +6,9 @@ The Compatibility Layer is disabled when either of classic template blocks are a
 
 - `Product (Classic)`,
 - `Product Attribute (Classic)`,
-- `Product Taxonomy (Classic)`,
+- `Product Category (Classic)`,
 - `Product Tag (Classic)`,
+- `Product's Custom Taxonomy (Classic)`,
 - `Product Search Results (Classic)`,
 - `Product Grid (Classic)`.
 

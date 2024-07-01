@@ -249,6 +249,10 @@ test.describe(
 			// but I could see it as checked/enabled in the settings
 			// workaround for the change to take effect is to just save the settings.
 			await page.goto( 'wp-admin/admin.php?page=wc-settings' );
+			// Modify a random unrelated settings so we can save the form.
+			await page
+				.locator( '#woocommerce_allowed_countries' )
+				.selectOption( 'all' );
 			await page.locator( 'text=Save changes' ).click();
 
 			const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
