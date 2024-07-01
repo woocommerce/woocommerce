@@ -88,7 +88,7 @@ test.describe( 'Shopper → Account (guest user)', () => {
 
 		await page.reload();
 
-		const createAccount = page.getByLabel( 'Create an account?' );
+		const createAccount = page.getByLabel( 'Create an account' );
 		await createAccount.check();
 
 		const testEmail = `test-${ Date.now() }@example.com`;

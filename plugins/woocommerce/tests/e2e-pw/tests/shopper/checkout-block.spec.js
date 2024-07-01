@@ -870,11 +870,11 @@ test.describe(
 
 			// check create account during checkout
 			await expect(
-				page.getByLabel( 'Create an account?' )
+				page.getByLabel( 'Create an account' )
 			).toBeVisible();
-			await page.getByLabel( 'Create an account?' ).check();
+			await page.getByLabel( 'Create an account' ).check();
 			await expect(
-				page.getByLabel( 'Create an account?' )
+				page.getByLabel( 'Create an account' )
 			).toBeChecked();
 
 			// For flakiness, sometimes the email address is not filled
