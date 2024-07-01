@@ -25,8 +25,6 @@ test.describe(
 	'Shopper Account Email Receiving',
 	{ tag: [ '@payments', '@services' ] },
 	() => {
-		test.use( { storageState: process.env.ADMINSTATE } );
-
 		test.beforeEach( async ( { page, user } ) => {
 			await page.goto(
 				`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
@@ -201,8 +199,6 @@ test.describe(
 	'Shopper Password Reset Email Receiving',
 	{ tag: [ '@payments', '@services' ] },
 	() => {
-		test.use( { storageState: process.env.ADMINSTATE } );
-
 		test.beforeEach( async ( { page } ) => {
 			await page.goto(
 				`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
