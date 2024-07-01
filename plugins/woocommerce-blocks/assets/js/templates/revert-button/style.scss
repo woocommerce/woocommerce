@@ -2,6 +2,8 @@
 	display: flex;
 	flex-direction: column;
 	gap: $gap;
+	justify-content: center;
+
 	span {
 		color: $gray-700;
 	}
