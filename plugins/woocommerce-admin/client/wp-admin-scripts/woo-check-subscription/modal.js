@@ -23,7 +23,7 @@ import { Text } from '@woocommerce/experimental';
 /**
  * Internal dependencies
  */
-import extensionsSvg from './extensions.svg';
+import extensionsSvg from './illustration.svg';
 import { dismissRequest, remindLaterRequest } from './actions';
 
 export class CheckSubscriptionModal extends Component {
