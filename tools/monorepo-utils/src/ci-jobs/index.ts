@@ -3,6 +3,7 @@
  */
 import { Command } from '@commander-js/extra-typings';
 import { setOutput } from '@actions/core';
+import { writeFileSync } from 'fs';
 
 /**
  * Internal dependencies
@@ -27,6 +28,7 @@ const program = new Command( 'ci-jobs' )
 		'Github event for which to run the jobs. If not specified, all events will be considered.',
 		''
 	)
+	.option( '--json', 'Save the jobs in a json file.' )
 	.action( async ( options ) => {
 		Logger.startTask( 'Parsing Project Graph', true );
 		const projectGraph = buildProjectGraph();
@@ -112,6 +114,30 @@ const program = new Command( 'ci-jobs' )
 			Logger.notice( `${ reports }` );
 		} else {
 			Logger.notice( `No report jobs to run.` );
+		}
+
+		if ( options.json ) {
+			Logger.notice( 'Saving jobs to json file.' );
+
+			Object.keys( jobs ).forEach( ( key ) => {
+				jobs[ key ] = jobs[ key ].map(
+					( {
+						name,
+						projectName,
+						projectPath,
+						optional,
+						events,
+					} ) => ( {
+						name,
+						projectName,
+						projectPath,
+						optional,
+						events,
+					} )
+				);
+			} );
+
+			writeFileSync( 'jobs.json', JSON.stringify( jobs, null, 2 ) );
 		}
 	} );
 
