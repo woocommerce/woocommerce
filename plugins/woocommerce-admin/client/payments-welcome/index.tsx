@@ -37,7 +37,8 @@ const ConnectAccountPage = () => {
 				'admin.php?wcpay-connect=1&promo=' +
 				encodeURIComponent( incentive.id ) +
 				'&_wpnonce=' +
-				getAdminSetting( 'wcpay_welcome_page_connect_nonce' ),
+				getAdminSetting( 'wcpay_welcome_page_connect_nonce' ) +
+				'&from=WCADMIN_PAYMENT_INCENTIVE',
 		};
 	} );
 
