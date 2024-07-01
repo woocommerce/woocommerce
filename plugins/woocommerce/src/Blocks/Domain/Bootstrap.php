@@ -129,9 +129,7 @@ class Bootstrap {
 		add_action(
 			'after_setup_theme',
 			function () {
-				$is_rest = wc()->is_rest_api_request();
-				// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$is_store_api_request = $is_rest && ! empty( $_SERVER['REQUEST_URI'] ) && ( false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) );
+				$is_store_api_request = wc()->is_store_api_request();
 
 				if ( ! $is_store_api_request && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
 					$this->container->register(
@@ -153,9 +151,8 @@ class Bootstrap {
 			999
 		);
 
-		$is_rest = wc()->is_rest_api_request();
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$is_store_api_request = $is_rest && ! empty( $_SERVER['REQUEST_URI'] ) && ( false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) );
+		$is_rest              = wc()->is_rest_api_request();
+		$is_store_api_request = wc()->is_store_api_request();
 
 		// Load and init assets.
 		$this->container->get( StoreApi::class )->init();
