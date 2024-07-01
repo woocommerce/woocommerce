@@ -173,6 +173,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Revert "Set stock quantity value as 0 by default (#48448)" #48863 [#48863](https://github.com/woocommerce/woocommerce/pull/48863)
 * Fix - Add product id to product_edit_view track in classic product edit screen [#47853](https://github.com/woocommerce/woocommerce/pull/47853)
 * Fix - Address responsiveness issues in orders list table. [#47684](https://github.com/woocommerce/woocommerce/pull/47684)
 * Fix - Add screen-reader-text styles to e-mails. [#47738](https://github.com/woocommerce/woocommerce/pull/47738)
