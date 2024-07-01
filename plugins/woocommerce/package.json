@@ -175,7 +175,7 @@
 					]
 				},
 				{
-					"name": "PHP WP: latest - 2",
+					"name": "PHP WP latest - 2",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
