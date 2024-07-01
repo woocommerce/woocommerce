@@ -94,7 +94,7 @@ jobs:
           PR_SIM: ${{ needs.dispatch-handler.outputs.base }}
         with:
           script: |
-            let prSim = process.env.PR_SIM;
+            const prSim = process.env.PR_SIM;
             
             let baseRef = prSim || ${{ toJson( github.base_ref ) }};
             if ( baseRef ) {
@@ -119,7 +119,7 @@ jobs:
               githubEvent = trigger;
             }
             
-            # Override the event 'workflow_dispatch' event type if we're simulating a PR.
+            // Override the event 'workflow_dispatch' event type if we're simulating a PR.
             if ( prSim ) {
               githubEvent = 'pull_request';
             }
