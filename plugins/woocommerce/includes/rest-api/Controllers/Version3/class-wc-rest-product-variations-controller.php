@@ -541,7 +541,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'readonly'    => true,
 				),
 				'sku'                   => array(
-					'description' => __( 'SKU.', 'woocommerce' ),
+					'description' => __( 'Stock Keeping Unit.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),

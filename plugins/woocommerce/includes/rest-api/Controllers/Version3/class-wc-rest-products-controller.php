@@ -992,7 +992,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'sku'                   => array(
-					'description' => __( 'SKU.', 'woocommerce' ),
+					'description' => __( 'Stock Keeping Unit.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
