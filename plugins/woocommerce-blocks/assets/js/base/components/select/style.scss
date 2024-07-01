@@ -33,6 +33,7 @@
 		border: none;
 		background: none;
 		padding: em($gap) em($gap-smaller) 0;
+		color: currentColor;
 
 		&:focus {
 			outline: 0;
@@ -73,5 +74,6 @@
 		top: 50%;
 		right: $gap-small;
 		pointer-events: none;
+		fill: currentColor;
 	}
 }
