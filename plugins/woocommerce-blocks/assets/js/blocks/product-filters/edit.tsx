@@ -30,21 +30,21 @@ const TEMPLATE: InnerBlockTemplate[] = [
 		'woocommerce/product-filter',
 		{
 			filterType: 'active-filters',
-			heading: 'Active',
+			heading: __( 'Active', 'woocommerce' ),
 		},
 	],
 	[
 		'woocommerce/product-filter',
 		{
 			filterType: 'price-filter',
-			heading: 'Price',
+			heading: __( 'Price', 'woocommerce' ),
 		},
 	],
 	[
 		'woocommerce/product-filter',
 		{
 			filterType: 'stock-filter',
-			heading: 'Status',
+			heading: __( 'Status', 'woocommerce' ),
 		},
 	],
 	[

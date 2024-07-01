@@ -69,7 +69,7 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( activeHeading ).toBeVisible();
 		await expect( activeFilterBlock ).toBeVisible();
 
-		const priceHeading = block.getByText( 'Filter by Price', {
+		const priceHeading = block.getByText( 'Price', {
 			exact: true,
 		} );
 		const priceFilterBlock = block.getByLabel(
@@ -78,7 +78,7 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( priceHeading ).toBeVisible();
 		await expect( priceFilterBlock ).toBeVisible();
 
-		const statusHeading = block.getByText( 'Filter by Stock Status', {
+		const statusHeading = block.getByText( 'Status', {
 			exact: true,
 		} );
 		const statusFilterBlock = block.getByLabel(
@@ -109,7 +109,7 @@ test.describe( `${ blockData.name }`, () => {
 			expect.arrayContaining( expectedColorFilterOptions )
 		);
 
-		const ratingHeading = block.getByText( 'Filter by Rating', {
+		const ratingHeading = block.getByText( 'Rating', {
 			exact: true,
 		} );
 		const ratingFilterBlock = block.getByLabel(
