@@ -28,7 +28,7 @@ class TemplateOptions {
 		$should_use_blockified = wc_bool_to_string( wc_current_theme_is_fse_theme() );
 
 		// We don't need to do anything if the user switched to a classic theme or if the option is already set to true.
-		if ( ! $should_use_blockified || get_option( $option_name ) === 'true' ) {
+		if ( ! $should_use_blockified || get_option( $option_name ) === wc_bool_to_string( true ) ) {
 			return;
 		}
 
