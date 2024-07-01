@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	useCheckoutAddress,
 	useStoreEvents,
@@ -43,11 +43,15 @@ const Block = (): JSX.Element => {
 		! customerId &&
 		getSetting( 'checkoutAllowsGuest', false ) &&
 		getSetting( 'checkoutAllowsSignup', false );
-
+	const siteTitle = getSetting( 'siteTitle', '' );
 	const createAccountUI = createAccountVisible && (
 		<CheckboxControl
 			className="wc-block-checkout__create-account"
-			label={ __( 'Create an account?', 'woocommerce' ) }
+			label={ sprintf(
+				/* translators: Store name */
+				__( 'Create an account with %s', 'woocommerce' ),
+				siteTitle
+			) }
 			checked={ shouldCreateAccount }
 			onChange={ ( value ) => __internalSetShouldCreateAccount( value ) }
 		/>
