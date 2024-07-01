@@ -21,6 +21,7 @@ const {
 	remindLaterNonce,
 	colorScheme,
 	subscriptionState,
+	screenId,
 } = window.wooCheckSubscriptionData;
 
 const container = document.createElement( 'div' );
@@ -39,6 +40,7 @@ render(
 		remindLaterNonce={ remindLaterNonce }
 		colorScheme={ colorScheme }
 		subscriptionState={ subscriptionState }
+		screenId={ screenId }
 	/>,
 	document.body.appendChild( container )
 );
