@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { createInterpolateElement, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import {
 	Button,
 	Card,
@@ -19,6 +23,7 @@ import {
 } from '@wordpress/components';
 import { commentContent, people, reusableBlock } from '@wordpress/icons';
 import { Text } from '@woocommerce/experimental';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -37,8 +42,19 @@ export default function CheckSubscriptionModal( {
 	remindLaterAction,
 	remindLaterNonce,
 	subscriptionState,
+	screenId,
 } ) {
 	const [ isModalOpen, setIsModalOpen ] = useState( true );
+
+	useEffect( () => {
+		if ( isModalOpen ) {
+			recordEvent( 'check_subscription_modal_opened', {
+				product_id: productId,
+				screen_id: screenId,
+			} );
+		}
+	}, [ isModalOpen, productId, screenId ] );
+
 	const isExpired = subscriptionState.expired;
 
 	const dismiss = () => {
@@ -50,6 +66,10 @@ export default function CheckSubscriptionModal( {
 			},
 			() => {
 				setIsModalOpen( false );
+				recordEvent( 'check_subscription_modal_dismissed', {
+					product_id: productId,
+					screen_id: screenId,
+				} );
 			}
 		);
 	};
@@ -62,14 +82,26 @@ export default function CheckSubscriptionModal( {
 			},
 			() => {
 				setIsModalOpen( false );
+				recordEvent( 'check_subscription_modal_maybe_later_clicked', {
+					product_id: productId,
+					screen_id: screenId,
+				} );
 			}
 		);
 	};
 	const renew = () => {
 		setIsModalOpen( false );
+		recordEvent( 'check_subscription_modal_renew_clicked', {
+			product_id: productId,
+			screen_id: screenId,
+		} );
 	};
 	const subscribe = () => {
 		setIsModalOpen( false );
+		recordEvent( 'check_subscription_modal_subscribe_clicked', {
+			product_id: productId,
+			screen_id: screenId,
+		} );
 	};
 
 	const renderBenefits = () => {
