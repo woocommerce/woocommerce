@@ -264,7 +264,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get Unique ID.
 	 *
-	 * @since 9.0.0
+	 * @since 9.1.0
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
