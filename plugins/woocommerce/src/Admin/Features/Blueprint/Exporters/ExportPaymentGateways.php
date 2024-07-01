@@ -5,19 +5,19 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 use Automattic\WooCommerce\Blueprint\Exporters\ExportsStep;
 
 class ExportPaymentGateways implements ExportsStep {
-	protected array $exclude_ids = array('pre_install_woocommerce_payments_promotion');
+	protected array $exclude_ids = array( 'pre_install_woocommerce_payments_promotion' );
 
 	public function export() {
 		$payment_gateways = array();
 		$this->maybe_hide_wcpay_gateways();
-		foreach (WC()->payment_gateways->payment_gateways() as $id => $payment_gateway) {
-			if (in_array($id, $this->exclude_ids, true)) {
+		foreach ( WC()->payment_gateways->payment_gateways() as $id => $payment_gateway ) {
+			if ( in_array( $id, $this->exclude_ids, true ) ) {
 				continue;
 			}
-			$payment_gateways[$id] = array(
-				'title'	=> $payment_gateway->get_title(),
+			$payment_gateways[ $id ] = array(
+				'title'       => $payment_gateway->get_title(),
 				'description' => $payment_gateway->get_description(),
-				'enabled' => $payment_gateway->is_available() ? 'yes' : 'no',
+				'enabled'     => $payment_gateway->is_available() ? 'yes' : 'no',
 			);
 		}
 
@@ -26,8 +26,8 @@ class ExportPaymentGateways implements ExportsStep {
 
 	public function export_step() {
 		return array(
-			'step' => $this->get_step_name(),
-			'payment_gateways' => $this->export()
+			'step'             => $this->get_step_name(),
+			'payment_gateways' => $this->export(),
 		);
 	}
 
@@ -36,7 +36,7 @@ class ExportPaymentGateways implements ExportsStep {
 	}
 
 	protected function maybe_hide_wcpay_gateways() {
-		if (class_exists('WC_Payments')) {
+		if ( class_exists( 'WC_Payments' ) ) {
 			\WC_Payments::hide_gateways_on_settings_page();
 		}
 	}

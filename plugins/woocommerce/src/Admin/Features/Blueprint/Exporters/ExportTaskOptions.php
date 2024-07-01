@@ -7,19 +7,19 @@ use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
 
 class ExportTaskOptions implements ExportsStep, HasAlias {
 	public function export() {
-	    return array(
-			'woocommerce_admin_customize_store_completed' => get_option('woocommerce_admin_customize_store_completed', 'no'),
-		    'woocommerce_task_list_tracked_completed_actions' => get_option('woocommerce_task_list_tracked_completed_actions', array())
-	    );
+		return array(
+			'woocommerce_admin_customize_store_completed' => get_option( 'woocommerce_admin_customize_store_completed', 'no' ),
+			'woocommerce_task_list_tracked_completed_actions' => get_option( 'woocommerce_task_list_tracked_completed_actions', array() ),
+		);
 	}
 	public function export_step() {
 		return array(
-			'step' => $this->get_step_name(),
-			'alias' => $this->get_alias(),
+			'step'    => $this->get_step_name(),
+			'alias'   => $this->get_alias(),
 			'options' => $this->export(),
-			'meta' => array(
-				'plugin' => 'woocommerce'
-			)
+			'meta'    => array(
+				'plugin' => 'woocommerce',
+			),
 		);
 	}
 

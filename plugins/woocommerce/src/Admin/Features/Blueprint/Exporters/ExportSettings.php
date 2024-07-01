@@ -13,105 +13,107 @@ class ExportSettings implements ExportsStep, HasAlias {
 	 * @var WC_Settings_Page[]
 	 */
 	private array $setting_pages;
-	private array $exclude_pages = array('integration', 'site-visibility');
+	private array $exclude_pages = array( 'integration', 'site-visibility' );
 
-	public function __construct(array $setting_pages = array()) {
-		if (empty($setting_pages)){
+	public function __construct( array $setting_pages = array() ) {
+		if ( empty( $setting_pages ) ) {
 			$setting_pages = WC_Admin_Settings::get_settings_pages();
 		}
 		$this->setting_pages = $setting_pages;
-		$this->add_filter('wooblueprint_export_setttings', array($this, 'add_site_visibility_setttings'));
+		$this->add_filter( 'wooblueprint_export_setttings', array( $this, 'add_site_visibility_setttings' ) );
 	}
 
-	public function add_filter($name, $callback) {
-		return \add_filter($name, $callback);
+	public function add_filter( $name, $callback ) {
+		return \add_filter( $name, $callback );
 	}
 
-	public function apply_filters($name, $args) {
-		return \apply_filters($name, $args);
+	public function apply_filters( $name, $args ) {
+		return \apply_filters( $name, $args );
 	}
 
 	public function export() {
-		$pages = [];
-		$options = [];
+		$pages   = array();
+		$options = array();
 
-		foreach ($this->setting_pages as $page) {
+		foreach ( $this->setting_pages as $page ) {
 			$id = $page->get_id();
-			if (in_array($id, $this->exclude_pages, true)) {
+			if ( in_array( $id, $this->exclude_pages, true ) ) {
 				continue;
 			}
 
-			$pages[$id] = $this->get_page_info($page);
-			foreach ($pages[$id]['options'] as $option) {
+			$pages[ $id ] = $this->get_page_info( $page );
+			foreach ( $pages[ $id ]['options'] as $option ) {
 				$options[] = $option;
 			}
-			unset($pages[$id]['options']);
+			unset( $pages[ $id ]['options'] );
 		}
 
-		$export_data =  compact('pages', 'options');
+		$export_data = compact( 'pages', 'options' );
 
-		$this->apply_filters('wooblueprint_export_setttings', $export_data);
+		$this->apply_filters( 'wooblueprint_export_setttings', $export_data );
 
 		return $export_data;
- 	}
+	}
 
-	 protected function get_page_info(WC_Settings_Page $page) {
+	protected function get_page_info( WC_Settings_Page $page ) {
 		$info = array(
-			'label' => $page->get_label(),
+			'label'    => $page->get_label(),
 			'sections' => array(),
 		);
 
-		foreach ($page->get_sections() as $id => $section) {
-			$section_id = Util::camel_to_snake(strtolower($section));
-			$info['sections'][$section_id] = array(
-				'label' => $section,
+		foreach ( $page->get_sections() as $id => $section ) {
+			$section_id                      = Util::camel_to_snake( strtolower( $section ) );
+			$info['sections'][ $section_id ] = array(
+				'label'       => $section,
 				'subsections' => array(),
 			);
 
-			$settings = $page->get_settings_for_section($id);
+			$settings = $page->get_settings_for_section( $id );
 
 			// Get subsections
-			$subsections = array_filter($settings, function($setting) {
-				return isset($setting['type']) && $setting['type'] === 'title' && isset($setting['title']);
-			});
+			$subsections = array_filter(
+				$settings,
+				function ( $setting ) {
+					return isset( $setting['type'] ) && $setting['type'] === 'title' && isset( $setting['title'] );
+				}
+			);
 
-
-			foreach ($subsections as $subsection) {
-				if (!isset($subsection['id'])) {
+			foreach ( $subsections as $subsection ) {
+				if ( ! isset( $subsection['id'] ) ) {
 					$subsection['id'] = Util::camel_to_snake( strtolower( $subsection['title'] ) );
 				}
 
-				$info['sections'][$section_id]['subsections'][$subsection['id']] = array(
-					'label' => $subsection['title']
+				$info['sections'][ $section_id ]['subsections'][ $subsection['id'] ] = array(
+					'label' => $subsection['title'],
 				);
 			}
 
 			// Ge opttions
-			$info['options'] = $this->get_page_section_settings($settings, $page->get_id(), $section_id);
+			$info['options'] = $this->get_page_section_settings( $settings, $page->get_id(), $section_id );
 		}
 		return $info;
-	 }
+	}
 
-	private function get_page_section_settings($settings, $page, $section = '') {
+	private function get_page_section_settings( $settings, $page, $section = '' ) {
 		$current_title = '';
-		$data = array();
-		foreach ($settings as $setting) {
-			if ($setting['type'] === 'sectionend' || $setting['type'] === 'slotfill_placeholder' || !isset($setting['id']) ) {
+		$data          = array();
+		foreach ( $settings as $setting ) {
+			if ( $setting['type'] === 'sectionend' || $setting['type'] === 'slotfill_placeholder' || ! isset( $setting['id'] ) ) {
 				continue;
 			}
 
-			if ($setting['type'] == 'title') {
-				$current_title = Util::camel_to_snake(strtolower($setting['title']));
+			if ( $setting['type'] == 'title' ) {
+				$current_title = Util::camel_to_snake( strtolower( $setting['title'] ) );
 			} else {
-				$location = $page.'.'.$section;
-				if ($current_title) {
-					$location .= '.'.$current_title;
+				$location = $page . '.' . $section;
+				if ( $current_title ) {
+					$location .= '.' . $current_title;
 				}
 
 				$data[] = array(
-					'id' => $setting['id'],
-					'value' => get_option($setting['id'], $setting['default'] ?? null),
-					'title' => $setting['title'] ?? $setting['desc'] ?? '',
+					'id'       => $setting['id'],
+					'value'    => get_option( $setting['id'], $setting['default'] ?? null ),
+					'title'    => $setting['title'] ?? $setting['desc'] ?? '',
 					'location' => $location,
 				);
 			}
@@ -119,27 +121,27 @@ class ExportSettings implements ExportsStep, HasAlias {
 		return $data;
 	}
 
-	public function add_site_visibility_setttings($export_data) {
+	public function add_site_visibility_setttings( $export_data ) {
 		$export_data['pages']['site_visibility'] = array(
-			'label' => 'Site Visibility',
-			'sections'=> array(
+			'label'    => 'Site Visibility',
+			'sections' => array(
 				'general' => array(
-					'label' => 'General'
-				)
-			)
+					'label' => 'General',
+				),
+			),
 		);
 
 		$export_data['options'][] = array(
-			'id' => 'woocommerce_coming_soon',
-			'value' => get_option('woocommerce_coming_soon'),
-			'title' => 'Coming soon',
-			'location' => 'site_visibilitty.general'
+			'id'       => 'woocommerce_coming_soon',
+			'value'    => get_option( 'woocommerce_coming_soon' ),
+			'title'    => 'Coming soon',
+			'location' => 'site_visibilitty.general',
 		);
 
 		$export_data['options'][] = array(
-			'id' => 'woocommerce_store_pages_only',
-			'value' => get_option('woocommerce_store_pages_only'),
-			'title' => 'Restrict to store pages only',
+			'id'       => 'woocommerce_store_pages_only',
+			'value'    => get_option( 'woocommerce_store_pages_only' ),
+			'title'    => 'Restrict to store pages only',
 			'location' => 'site_visibilitty.general',
 		);
 
@@ -149,18 +151,18 @@ class ExportSettings implements ExportsStep, HasAlias {
 	public function export_step() {
 		$export = $this->export();
 		return array(
-			'step' => $this->get_step_name(),
-			'alias' => $this->get_alias(),
+			'step'    => $this->get_step_name(),
+			'alias'   => $this->get_alias(),
 			'options' => $export['options'],
-			'meta' => array(
-				'pages' => $export['pages'],
-				'plugin' => 'woocommerce'
-			)
+			'meta'    => array(
+				'pages'  => $export['pages'],
+				'plugin' => 'woocommerce',
+			),
 		);
 	}
 
 	public function get_step_name() {
-	    return 'setOptions';
+		return 'setOptions';
 	}
 
 	public function get_alias() {
