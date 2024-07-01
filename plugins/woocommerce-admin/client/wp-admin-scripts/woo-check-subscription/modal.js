@@ -154,8 +154,8 @@ export class CheckSubscriptionModal extends Component {
 				</CardBody>
 				<CardFooter>
 					<Button
-						isDefault
 						onClick={ () => this.remindLater() }
+						variant="secondary"
 					>
 						{ __( 'Maybe later', 'woocommerce' ) }
 					</Button>

@@ -78,6 +78,11 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 		}
 		&__footer {
 			justify-content: right;
+
+			.is-secondary,
+			.is-secondary:hover {
+				box-shadow: none;
+			}
 		}
 
 		&__media {
