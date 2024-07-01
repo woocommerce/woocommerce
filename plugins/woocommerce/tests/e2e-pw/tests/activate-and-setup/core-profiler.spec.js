@@ -459,6 +459,8 @@ test.describe( 'Store owner can skip the core profiler', () => {
 		await test.step( 'Check that we are sent to wp.com', async () => {
 			// sometimes fails to redirect, known as flaky on CI only
 			try {
+				// we will monitor test failing with console log to investigate it further
+				page.on( 'console', ( msg ) => console.log( msg.text() ) );
 				await expect( page.url() ).toContain( 'wordpress.com/log-in' );
 			} catch ( e ) {
 				await page.goto(
