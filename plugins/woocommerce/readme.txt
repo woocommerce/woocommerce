@@ -356,6 +356,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Update the React version in the pnpm-lock file [#47993](https://github.com/woocommerce/woocommerce/pull/47993)
 * Dev - Update the URLs for order-related e2e tests to use new URLs from HPOS [#46397](https://github.com/woocommerce/woocommerce/pull/46397)
 * Dev - [e2e tests] Fix e2e test reports paths [#48320](https://github.com/woocommerce/woocommerce/pull/48320)
+* Tweak - Update Printful label [#48778](https://github.com/woocommerce/woocommerce/pull/48778)
 * Tweak - </details>  <details>  <summary>Changelog Entry Comment</summary>  Add a close button to dismiss store alerts [#48453](https://github.com/woocommerce/woocommerce/pull/48453)
 * Tweak - Adds a defensive check to reduce error log noise when regenerating images. [#47785](https://github.com/woocommerce/woocommerce/pull/47785)
 * Tweak - Adds best practice advice to the API key generation screen. [#48483](https://github.com/woocommerce/woocommerce/pull/48483)
