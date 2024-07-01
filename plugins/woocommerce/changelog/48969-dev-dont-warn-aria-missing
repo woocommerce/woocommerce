@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid PHP warnings if `add-to-cart.php` template does not pass `aria-describedby_text`
