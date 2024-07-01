@@ -42,6 +42,24 @@ const ConnectAccountPage = () => {
 		};
 	} );
 
+	const determineTrackingSource = () => {
+		const urlParams = new URLSearchParams( window.location.search );
+		const from = urlParams.get( 'from' ) || '';
+
+		// Determine where the user came from.
+		let source = 'wcadmin';
+		switch ( from ) {
+			case 'WCADMIN_PAYMENT_TASK':
+				source = 'wcadmin-payment-task';
+				break;
+			case 'WCADMIN_PAYMENT_SETTINGS':
+				source = 'wcadmin-settings-page';
+				break;
+		}
+
+		return source;
+	};
+
 	/**
 	 * Record page view and save viewed timestamp.
 	 */
@@ -49,6 +67,7 @@ const ConnectAccountPage = () => {
 		recordEvent( 'page_view', {
 			path: 'payments_connect_core_test',
 			incentive_id: incentive.id,
+			source: determineTrackingSource(),
 		} );
 		updateOptions( {
 			wcpay_welcome_page_viewed_timestamp: Math.floor(
@@ -69,21 +88,19 @@ const ConnectAccountPage = () => {
 		}
 	};
 
-	const handleSetup = async () => {
-		setSubmitted( true );
-
-		const urlParams = new URLSearchParams( window.location.search );
-		const from = urlParams.get( 'from' ) || '';
-
+	const trackConnectAccountClicked = () => {
 		recordEvent( 'wcpay_connect_account_clicked', {
 			wpcom_connection: isJetpackConnected ? 'Yes' : 'No',
 			incentive_id: incentive.id,
 			path: 'payments_connect_core_test',
-			source:
-				from === 'WCADMIN_PAYMENT_TASK'
-					? 'wcadmin-payment-task'
-					: 'wcadmin',
+			source: determineTrackingSource(),
 		} );
+	};
+
+	const handleSetup = async () => {
+		setSubmitted( true );
+
+		trackConnectAccountClicked();
 
 		const pluginsToInstall = [ ...enabledApms ].map(
 			( apm ) => apm.extension
