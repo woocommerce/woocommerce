@@ -60,16 +60,19 @@ export class CheckSubscriptionModal extends Component {
 
 		const benefits =  [
 			{
+				key: 'get-updates',
 				icon: reusableBlock,
 				title: __( 'Improvements and security updates', 'woocommerce' ),
 				content: __( 'Access the latest features and product updates.', 'woocommerce' ),
 			},
 			{
+				key: 'get-supports',
 				icon: commentContent,
 				title: __( 'Help when you need it', 'woocommerce' ),
 				content: __( 'Get streamlined support from our global support team.', 'woocommerce' ),
 			},
 			{
+				key: 'supporting-ecosystem',
 				icon: people,
 				title: __( 'Supporting the ecosystem', 'woocommerce' ),
 				content: createInterpolateElement(
@@ -87,8 +90,8 @@ export class CheckSubscriptionModal extends Component {
 			<div className="woocommerce-subscription-benefits">
 				<h3>{ subtitle }</h3>
 
-				{ benefits.map( ( { icon, title, content } ) => (
-					<div className="woocommerce-subscription-benefits__item">
+				{ benefits.map( ( { key, icon, title, content } ) => (
+					<div className="woocommerce-subscription-benefits__item" key={ key }>
 						<div className="woocommerce-subscription-benefits__icon">
 							<Icon icon={ icon } />
 						</div>
