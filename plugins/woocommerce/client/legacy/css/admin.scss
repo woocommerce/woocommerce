@@ -4522,8 +4522,8 @@ table {
 	display: flex;
 	align-items: center;
 
-	.page-title-action {
-		margin: 0 12px;
+	.page-title-action, .page-title-action:active {
+		margin: 7px 0 0 10px;
 	}
 }
 

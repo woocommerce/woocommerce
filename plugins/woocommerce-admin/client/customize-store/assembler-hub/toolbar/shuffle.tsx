@@ -7,7 +7,7 @@ import { capitalize } from 'lodash';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Path, SVG, ToolbarButton, ToolbarGroup } from '@wordpress/components';
+import { Button, Path, SVG, ToolbarGroup } from '@wordpress/components';
 import {
 	unlock,
 	// @ts-expect-error No types for this exist yet.
@@ -115,9 +115,9 @@ export default function Shuffle( { clientId }: { clientId: string } ) {
 
 	return (
 		<ToolbarGroup className="woocommerce-customize-your-store-toolbar-shuffle-container">
-			<ToolbarButton
-				label={ __( 'Shuffle', 'woocommerce' ) }
+			<Button
 				icon={ shuffleIcon }
+				label={ __( 'Shuffle', 'woocommerce' ) }
 				onClick={ () => {
 					const nextPattern = getNextPattern();
 					// @ts-expect-error - attributes is marked as readonly.
@@ -130,8 +130,11 @@ export default function Shuffle( { clientId }: { clientId: string } ) {
 					};
 					replaceBlocks( clientId, nextPattern.blocks );
 				} }
-			/>
-			{ categoryLabel && <span>{ capitalize( categoryLabel ) }</span> }
+			>
+				{ categoryLabel && (
+					<span>{ capitalize( categoryLabel ) }</span>
+				) }
+			</Button>
 		</ToolbarGroup>
 	);
 }

@@ -1,10 +1,55 @@
 .woocommerce-store-alerts {
 	position: relative;
-	margin: 0 0 $gap-largest 0;
-	margin-right: var(--large-gap);
+	margin: 40px 20px;
 	padding: $gap-large;
 	border: 0;
 	box-shadow: 0 0 8px -2px rgba(0, 0, 0, 0.3);
+	left: 0;
+	width: 100%;
+	max-width: calc(100% - var(--main-gap) * 2);
+
+	@include breakpoint("<782px") {
+		left: 0;
+		max-width: 100%;
+		margin: $gap-large auto;
+		width: calc(100% + var(--main-gap));
+	}
+
+	&.is-wc-admin-page {
+		margin: 40px 20px 40px 0;
+
+		@include breakpoint("<782px") {
+			left: calc(-1 * var(--main-gap));
+			width: calc(100% + var(--main-gap));
+			max-width: calc(100% + var(--main-gap));
+		}
+	}
+
+	&.is-homescreen {
+		margin: 40px auto;
+		max-width: 682px;
+		left: calc(-1 * var(--main-gap));
+
+		@include breakpoint("<782px") {
+			width: calc(100% + var(--main-gap));
+			max-width: calc(100% + var(--main-gap));
+		}
+	}
+
+	&.two-columns {
+		max-width: 1032px;
+
+		@include breakpoint("<960px") {
+			left: 0;
+			max-width: calc(100% - var(--main-gap));
+			margin: 40px 20px 40px 0;
+		}
+
+		@include breakpoint("<782px") {
+			left: calc(-1 * var(--main-gap));
+			max-width: calc(100% + var(--main-gap));
+		}
+	}
 
 	&::before {
 		content: "";
@@ -24,15 +69,11 @@
 		min-height: 36px;
 		padding: 4px 16px;
 
-		@include breakpoint( "<782px" ) {
+		@include breakpoint("<782px") {
 			min-height: 36px;
 			font-size: 16px;
 			line-height: 1.625;
 			padding: 5px 16px;
-		}
-
-		+ .components-button {
-			margin-left: 10px;
 		}
 
 		&.is-button {
@@ -50,7 +91,7 @@
 		}
 	}
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint("<782px") {
 		margin-bottom: $gap-large;
 		padding: $gap;
 
@@ -62,13 +103,10 @@
 	}
 }
 
-.woocommerce-embed-page {
-	.woocommerce-store-alerts {
-		margin: 40px 20px 20px;
-		@include breakpoint( "<782px" ) {
-			margin-top: $gap-large;
-		}
-	}
+.woocommerce-store-alerts__actions {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
 }
 
 .is-alert-error {
@@ -128,10 +166,10 @@
 		border-color: $button-border;
 		border-style: solid;
 		flex: 1 1;
-		@include font-size( 14 );
+		@include font-size(14);
 	}
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint("<782px") {
 		margin-left: 0;
 		margin-bottom: 14px;
 
@@ -193,13 +231,17 @@
 	}
 
 	.woocommerce-store-alerts__actions {
+		display: flex;
+		gap: 10px;
+		flex-wrap: wrap;
+
 		.is-placeholder {
 			width: 110px;
 			height: 26px;
 		}
 	}
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint("<782px") {
 		.components-card__header h2 {
 			width: 100%;
 

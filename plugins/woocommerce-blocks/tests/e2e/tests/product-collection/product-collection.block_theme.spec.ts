@@ -1163,17 +1163,14 @@ test.describe( 'Product Collection', () => {
 				await editor.selectBlocks( otherBlockSelector );
 				await expect( previewButtonLocator ).toBeHidden();
 
-				// Preview button should be visible when any of inner block is selected
-				await editor.canvas
-					.getByLabel( BLOCK_LABELS.productTemplate )
-					.getByLabel( BLOCK_LABELS.productImage )
-					.first()
-					.click();
+				// Preview button should be visible again when the block is selected.
+				await pageObject.focusProductCollection();
 				await expect( previewButtonLocator ).toBeVisible();
 			} );
 		} );
 	} );
 
+	// Tests for regressions of https://github.com/woocommerce/woocommerce/pull/47994
 	test.describe( 'Product Collection should be visible after Refresh', () => {
 		test( 'Product Collection should be visible after Refresh in a Template', async ( {
 			page,
