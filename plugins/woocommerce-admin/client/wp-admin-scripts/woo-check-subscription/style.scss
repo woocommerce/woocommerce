@@ -63,6 +63,10 @@
 		}
 		&__body {
 			padding-bottom: 40px;
+			h3 {
+				font-size: 1em;
+				margin: 0;
+			}
 		}
 		&__footer {
 			justify-content: right;
@@ -104,12 +108,14 @@
 		flex-direction: column;
 		gap: $gap-smallest;
 	}
-	&__content h3 {
+	&__content h4 {
 		color: #1e1e1e;
-		height: 24px;
+		font-size: 0.875em;
+		font-weight: 600;
 	}
 	&__content p {
 		color: #757575;
-		height: 32px;
+		font-size: 0.75em;
+		font-weight: 400;
 	}
 }

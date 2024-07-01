@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { Component, createInterpolateElement } from '@wordpress/element';
 import {
 	Button,
 	Card,
@@ -17,7 +17,7 @@ import {
 	Modal,
 	ResponsiveWrapper,
 } from '@wordpress/components';
-import { commentContent, reusableBlock } from '@wordpress/icons';
+import { commentContent, people, reusableBlock } from '@wordpress/icons';
 import { Text } from '@woocommerce/experimental';
 
 /**
@@ -47,68 +47,65 @@ export class CheckSubscriptionModal extends Component {
 	}
 
 	renderBenefits() {
+		const isExpired = this.props.subscriptionState.expired;
+		const subtitle = isExpired
+			? __(
+				'Reactivate your subscription and benefit from:',
+				'woocommerce'
+			)
+			: __(
+				'Purchase a subscription to benefit from:',
+				'woocommerce'
+			);
+
+		const benefits =  [
+			{
+				icon: reusableBlock,
+				title: __( 'Improvements and security updates', 'woocommerce' ),
+				content: __( 'Access the latest features and product updates.', 'woocommerce' ),
+			},
+			{
+				icon: commentContent,
+				title: __( 'Help when you need it', 'woocommerce' ),
+				content: __( 'Get streamlined support from our global support team.', 'woocommerce' ),
+			},
+			{
+				icon: people,
+				title: __( 'Supporting the ecosystem', 'woocommerce' ),
+				content: createInterpolateElement(
+					__( 'A subscription helps us to continuously improve your extensions, themes, and WooCommerce experience. <readMore />', 'woocommerce' ),
+					{
+						readMore: (
+						<ExternalLink href="#">{ __( 'Read more', 'woocommerce' ) }</ExternalLink>
+					),
+					}
+				),
+			},
+		];
+
 		return (
 			<div className="woocommerce-subscription-benefits">
-				<div className="woocommerce-subscription-benefits__item">
-					<div className="woocommerce-subscription-benefits__icon">
-						<Icon icon={ reusableBlock } />
-					</div>
-					<div className="woocommerce-subscription-benefits__content">
-						<Text
-							as="h3"
-							lineHeight={ "20px" }
-							size={ "14px" }
-							weight={ 600 }
-						>
-							{ __( 'New features and improvements', 'woocommerce' ) }
-						</Text>
-						<Text as="p">
-							{ __( 'Continue receiving the latest product updates and ongoing improvements.', 'woocommerce' )
-							}
-						</Text>
-					</div>
-				</div>
+				<h3>{ subtitle }</h3>
 
-				<div className="woocommerce-subscription-benefits__item">
-					<div className="woocommerce-subscription-benefits__icon">
-						<Icon icon={ commentContent } />
-					</div>
-					<div className="woocommerce-subscription-benefits__content">
-						<Text
-							as="h3"
-							lineHeight={ "20px" }
-							size={ "14px" }
-							weight={ 600 }
-						>
-							{ __( 'Get help when you need it', 'woocommerce' ) }
-						</Text>
-						<Text as="p">
-							{ __( 'Continue receiving streamlined support from our global support team.', 'woocommerce' )
-							}
-						</Text>
-					</div>
-				</div>
+				{ benefits.map( ( { icon, title, content } ) => (
+					<div className="woocommerce-subscription-benefits__item">
+						<div className="woocommerce-subscription-benefits__icon">
+							<Icon icon={ icon } />
+						</div>
 
-				<div className="woocommerce-subscription-benefits__item">
-					<div className="woocommerce-subscription-benefits__icon">
-						<Icon icon={ commentContent } />
+						<div className="woocommerce-subscription-benefits__content">
+							<Text
+								as="h4"
+								lineHeight={ "20px" }
+							>
+								{ title }
+							</Text>
+							<Text as="p">
+								{ content }
+							</Text>
+						</div>
 					</div>
-					<div className="woocommerce-subscription-benefits__content">
-						<Text
-							as="h3"
-							lineHeight={ "20px" }
-							size={ "14px" }
-							weight={ 600 }
-						>
-							{ __( 'Support the ecosystem', 'woocommerce' ) }
-						</Text>
-						<Text as="p">
-							{ __( 'This helps support the Woo ecosystem to continuously improve extensions and themes.', 'woocommerce' )
-							}
-							<ExternalLink href="#">{ __( 'Read more', 'woocommerce' ) }</ExternalLink>
-						</Text>
-					</div>
-				</div>
+				) ) }
 			</div>
 		)
 	}
