@@ -62,17 +62,17 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 			flex-direction: column;
 			padding-bottom: 40px;
 			h2 {
-				font-size: 1.5em;
+				font-size: 24px;
 				font-weight: 400;
-				line-height: 2.188em;
+				line-height: 35px;
 				margin: 0;
 			}
 		}
 		&__body {
 			padding-bottom: 40px;
 			h3 {
-				font-size: 1em;
-				line-height: 1.5em;
+				font-size: 16px;
+				line-height: 24px;
 				margin: 0;
 			}
 		}
@@ -123,12 +123,14 @@ $font-sf-pro-text: helveticaneue-light, "Helvetica Neue Light",
 	}
 	&__content h4 {
 		color: #1e1e1e;
-		font-size: 0.875em;
+		font-size: 14px;
 		font-weight: 600;
+		line-height: 20px;
 	}
 	&__content p {
 		color: #757575;
-		font-size: 0.75em;
+		font-size: 12px;
 		font-weight: 400;
+		line-height: 16px;
 	}
 }
