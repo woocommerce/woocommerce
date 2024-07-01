@@ -10,6 +10,18 @@ inputs:
     build:
         description: 'Given a boolean or PNPM filter, runs the build command for monorepo project(s).'
         default: false
+    pull-pnpm-cache:
+      description: 'Given a boolean value, invokes pnpm dependencies caching.'
+      default: false
+    pull-composer-cache:
+      description: 'Given a boolean value, invokes Composer dependencies caching.'
+      default: false
+    pull-playwright-cache:
+      description: 'Given a boolean value, invokes Playwright dependencies caching.'
+      default: false
+    pull-cache-key:
+      description: 'Given a string value, uses it to compose cache keys.'
+      default: false
 runs:
     using: 'composite'
     steps:
