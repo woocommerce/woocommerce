@@ -4,7 +4,7 @@
 		"."
 	],
 	"config": {
-		"JETPACK_AUTOLOAD_DEV": true,
+		"JETPACK_AUTOLOAD_DEV": false,
 		"WP_DEBUG_LOG": true,
 		"WP_DEBUG_DISPLAY": true,
 		"ALTERNATE_WP_CRON": true
