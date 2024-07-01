@@ -21,10 +21,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * an account on WooCommerce.com.
  */
 class WC_Helper_Admin {
-	const CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_count';
+	const CHECK_SUBSCRIPTION_DISMISSED_COUNT_META = '_woocommerce_helper_check_subscription_dismissed_count';
 
-	const CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_timestamp';
-	const CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_remind_later_timestamp';
+	const CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META = '_woocommerce_helper_check_subscription_dismissed_timestamp';
+	const CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META = '_woocommerce_helper_check_subscription_remind_later_timestamp';
 
 	private static $checked_products = array();
 
@@ -180,27 +180,24 @@ class WC_Helper_Admin {
 
 		// Check when the last time user clicked "remind later". If it's still
 		// in the wait period, don't show the nudge.
-		$remind_later_ts_meta    = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX, $product_id );
-		$last_remind_later       = absint( get_user_meta( $user_id, $remind_later_ts_meta, true ) );
-		$wait_after_remind_later = self::$checked_screen_param['wait_in_seconds_after_remind_later'];
-		if ( $last_remind_later > 0 && ( time() - $last_remind_later ) < $wait_after_remind_later ) {
+		$last_remind_later_ts    = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META, true ) );
+		$wait_after_remind_later = self::$checked_products['wait_in_seconds_after_remind_later'];
+		if ( $last_remind_later_ts > 0 && ( time() - $last_remind_later_ts ) < $wait_after_remind_later ) {
 			return;
 		}
 
 		// Don't show the nudge after dismissed max_dismissals times.
-		$count_meta     = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX, $product_id );
-		$dismiss_count  = absint( get_user_meta( $user_id, $count_meta, true ) );
-		$max_dismissals = self::$checked_screen_param['max_dismissals'];
+		$dismiss_count  = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META, true ) );
+		$max_dismissals = self::$checked_products['max_dismissals'];
 		if ( $dismiss_count >= $max_dismissals ) {
 			return;
 		}
 
 		// Check when the last time user dismissed the nudge. If it's still in
 		// the wait period, don't show the nudge
-		$dismiss_ts_meta    = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX, $product_id );
-		$last_dismissed     = absint( get_user_meta( $user_id, $dismiss_ts_meta, true) );
-		$wait_after_dismiss = self::$checked_screen_param['wait_in_seconds_after_dismiss'];
-		if ( $last_dismissed > 0 && ( time() - $last_dismissed ) < $wait_after_dismiss ) {
+		$last_dismissed_ts  = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META, true) );
+		$wait_after_dismiss = self::$checked_products['wait_in_seconds_after_dismiss'];
+		if ( $last_dismissed_ts > 0 && ( time() - $last_dismissed_ts ) < $wait_after_dismiss ) {
 			return;
 		}
 
@@ -239,7 +236,7 @@ class WC_Helper_Admin {
 	}
 
 	private static function get_checked_screen_param( $screen ) {
-		foreach ( self::$checked_products as $product_id => $param ) {
+		foreach ( self::$checked_products['products'] as $product_id => $param ) {
 			if ( ! isset( $param['screens'][ $screen->id ] ) ) {
 				continue;
 			}
@@ -285,17 +282,16 @@ class WC_Helper_Admin {
 			wp_die( -1 );
 		}
 
+		// TODO: Store product_id in the meta?
 		$product_id = absint( $_GET['product_id'] );
 		if ( ! $product_id ) {
 			wp_die( -1 );
 		}
 
-		$count_meta = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX, $product_id );
-		$dismiss_count = (int) get_user_meta( $user_id, $count_meta, true );
-		update_user_meta( $user_id, $count_meta, $dismiss_count + 1 );
+		$dismiss_count = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META, true ) );
+		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META, $dismiss_count + 1 );
 
-		$timestamp_meta = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX, $product_id );
-		update_user_meta( $user_id, $timestamp_meta, time() );
+		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META, time() );
 
 		wp_die( 1 );
 	}
@@ -310,13 +306,13 @@ class WC_Helper_Admin {
 			wp_die( -1 );
 		}
 
+		// TODO: Store product_id in the meta?
 		$product_id = absint( $_GET['product_id'] );
 		if ( ! $product_id ) {
 			wp_die( -1 );
 		}
 
-		$timestamp_meta = sprintf( '%s_%d', self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX , $product_id );
-		update_user_meta( $user_id, $timestamp_meta, time() );
+		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META, time() );
 
 		wp_die( 1 );
 	}
