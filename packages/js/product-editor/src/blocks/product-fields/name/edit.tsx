@@ -82,15 +82,22 @@ export function NameBlockEdit( {
 	} = useValidation< Product >(
 		'name',
 		async function nameValidator() {
+			const context = 'general';
 			if ( ! name || name === AUTO_DRAFT_NAME ) {
-				return __( 'Product name is required.', 'woocommerce' );
+				return {
+					message: __( 'Product name is required.', 'woocommerce' ),
+					context,
+				};
 			}
 
 			if ( name.length > 120 ) {
-				return __(
-					'Please enter a product name shorter than 120 characters.',
-					'woocommerce'
-				);
+				return {
+					message: __(
+						'Please enter a product name shorter than 120 characters.',
+						'woocommerce'
+					),
+					context,
+				};
 			}
 		},
 		[ name ]

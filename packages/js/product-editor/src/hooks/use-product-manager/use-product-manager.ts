@@ -14,6 +14,7 @@ import type { WPError } from '../../utils/get-product-error-message-and-props';
 import { AUTO_DRAFT_NAME } from '../../utils/constants';
 
 export function errorHandler( error: WPError, productStatus: ProductStatus ) {
+	// console.log( 'errorHandler ->', error );
 	if ( error.code ) {
 		return error;
 	}
@@ -27,12 +28,15 @@ export function errorHandler( error: WPError, productStatus: ProductStatus ) {
 
 	const errorMessage = Object.values( error ).find(
 		( value ) => value !== undefined
-	) as string | undefined;
+	) as { validatorId?: string; message?: string; context?: string };
+	// const errorMessage = Object.values( error ).find(
+	// 	( value ) => value !== undefined
+	// ) as string | undefined;
 
 	if ( errorMessage !== undefined ) {
 		return {
 			code: 'product_form_field_error',
-			message: errorMessage,
+			...errorMessage,
 		};
 	}
 

@@ -11,7 +11,8 @@ import { ValidationContextProps } from './types';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const ValidationContext = createContext< ValidationContextProps< any > >(
 	{
-		errors: {},
+		errors: { message: {}, context: '' },
+		getFieldAndTabByValidatorId: () => () => {},
 		registerValidator: () => () => {},
 		unRegisterValidator: () => () => {},
 		validateField: () => Promise.resolve( undefined ),

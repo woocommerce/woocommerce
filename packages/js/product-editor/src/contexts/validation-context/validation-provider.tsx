@@ -4,6 +4,7 @@
 import type { PropsWithChildren } from 'react';
 import { useEntityRecord } from '@wordpress/core-data';
 import { createElement, useRef, useState } from '@wordpress/element';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -24,7 +25,11 @@ export function ValidationProvider< T >( {
 }: PropsWithChildren< ValidationProviderProps > ) {
 	const validatorsRef = useRef< Record< string, Validator< T > > >( {} );
 	const fieldRefs = useRef< Record< string, HTMLElement > >( {} );
-	const [ errors, setErrors ] = useState< ValidationErrors >( {} );
+	const [ errors, setErrors ] = useState< {
+		message?: ValidationErrors;
+		context?: string;
+	} >( {} );
+	// const [ errors, setErrors ] = useState< ValidationErrors >( {} );
 	const { record: initialValue } = useEntityRecord< T >(
 		'postType',
 		postType,
@@ -56,7 +61,8 @@ export function ValidationProvider< T >( {
 
 	async function validateField(
 		validatorId: string,
-		newData?: Partial< T >
+		newData?: Partial< T >,
+		errorContext = ''
 	): ValidatorResponse {
 		const validators = validatorsRef.current;
 		if ( validatorId in validators ) {
@@ -64,15 +70,62 @@ export function ValidationProvider< T >( {
 			const result = validator( initialValue, newData );
 
 			return result.then( ( error ) => {
+				// console.log( 'errorContext', errorContext );
+				// console.log( 'validatorId', validatorId );
+				// console.log( 'error', error );
+				// const aaaa = {
+				// 	[ validatorId ]: { message: error, context: errorContext },
+				// };
+				// console.log( 'aaaa', aaaa );
+				// setErrors( ( currentErrors ) => ( {
+				// 	...currentErrors,
+				// 	[ validatorId ]: { message: error, context: errorContext },
+				// } ) );
 				setErrors( ( currentErrors ) => ( {
 					...currentErrors,
-					[ validatorId ]: error,
+					[ validatorId ]: { validatorId, ...error },
 				} ) );
+				// return { message: error, context: errorContext };
 				return error;
 			} );
 		}
 
 		return Promise.resolve( undefined );
+	}
+	// console.log( '======> errors', errors );
+
+	async function getFieldAndTabByValidatorId(
+		_validatorId: string
+	): Promise< ValidationErrors > {
+		console.log( '======> errors', errors );
+		// console.log( '======> fieldRefs', fieldRefs );
+		// console.log( 'validatorId', validatorId );
+		// console.log( '======>222222 errors', errors[ validatorId ] );
+		// console.log( '======>333333 fieldRefs', fieldRefs.current[ validatorId ] );
+		const newErrors: ValidationErrors = {};
+		const validators = validatorsRef.current;
+		for ( const validatorId in validators ) {
+			newErrors[ validatorId ] = await validateField(
+				validatorId,
+				undefined
+			);
+		}
+
+		console.log( 'getFieldAndTabByValidatorId', newErrors );
+		// return {
+		// 	fieldRef: fieldRefs.current[ validatorId ],
+		// 	context: errors,
+		// };
+		// const field = fieldRefs.current[ validatorId ];
+		// setTimeout( () => {
+		// 	const props = block_id ? { tab, block_id } : { tab };
+		// 	return getNewPath( props );
+		// 	navigateTo( { url } );
+		// }
+		// , 1000 );
+		// if ( field ) {
+		// 	field.focus();
+		// }
 	}
 
 	async function validateAll(
@@ -80,6 +133,7 @@ export function ValidationProvider< T >( {
 	): Promise< ValidationErrors > {
 		const newErrors: ValidationErrors = {};
 		const validators = validatorsRef.current;
+		console.log( 'newData', newData );
 
 		for ( const validatorId in validators ) {
 			newErrors[ validatorId ] = await validateField(
@@ -87,8 +141,12 @@ export function ValidationProvider< T >( {
 				newData
 			);
 		}
+		// console.log( 'errors', errors );
+		// console.log( 'validators2', validators );
+		console.log( 'newErrors2', newErrors );
 
 		setErrors( newErrors );
+		console.log( 'errors2', errors );
 
 		const firstElementWithError = findFirstInvalidElement(
 			fieldRefs.current,
@@ -104,6 +162,7 @@ export function ValidationProvider< T >( {
 		<ValidationContext.Provider
 			value={ {
 				errors,
+				getFieldAndTabByValidatorId,
 				registerValidator,
 				unRegisterValidator,
 				validateField,

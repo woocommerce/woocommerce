@@ -13,7 +13,8 @@ import { ValidationContext } from './validation-context';
 export function useValidation< T >(
 	validatorId: string,
 	validator: Validator< T >,
-	deps: DependencyList = []
+	deps: DependencyList = [],
+	errorContext?: string
 ) {
 	const context = useContext( ValidationContext );
 	const [ isValidating, setIsValidating ] = useState( false );
@@ -29,14 +30,17 @@ export function useValidation< T >(
 		};
 	}, [] );
 
+	// console.log( '-------->>>>>>2 errorContext', errorContext );
+	// console.log( 'context.errors[ validatorId ]', context.errors[ validatorId ] );
+
 	return {
 		ref,
-		error: context.errors[ validatorId ],
+		error: context.errors[ validatorId ]?.message,
 		isValidating,
 		async validate( newData?: Record< string, unknown > ) {
 			setIsValidating( true );
 			return context
-				.validateField( validatorId, newData )
+				.validateField( validatorId, newData, errorContext )
 				.finally( () => {
 					setIsValidating( false );
 				} );

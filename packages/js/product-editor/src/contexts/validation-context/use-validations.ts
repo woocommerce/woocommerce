@@ -17,6 +17,15 @@ export function useValidations< T = unknown >() {
 	const context = useContext( ValidationContext );
 	const [ isValidating, setIsValidating ] = useState( false );
 
+	function focusByValidatiorId( validatorId: string ) {
+		const field = context.getFieldAndTabByValidatorId( validatorId );
+		console.log( '----> context', context );
+		// console.log( 'field', field );
+		// if ( element ) {
+		// 	element.focus();
+		// }
+	}
+
 	return {
 		isValidating,
 		async validate( newData?: Partial< T > ) {
@@ -25,6 +34,7 @@ export function useValidations< T = unknown >() {
 				context
 					.validateAll( newData )
 					.then( ( errors ) => {
+						console.log( '---> errors', errors );
 						if ( isInvalid( errors ) ) {
 							reject( errors );
 						} else {
@@ -35,8 +45,10 @@ export function useValidations< T = unknown >() {
 						reject( context.errors );
 					} );
 			} ).finally( () => {
+				console.log( '----> context', context );
 				setIsValidating( false );
 			} );
 		},
+		focusByValidatiorId,
 	};
 }
