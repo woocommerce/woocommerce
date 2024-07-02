@@ -73,16 +73,6 @@ To call this filter within the editor, wrap the filter registration in a `DOMCon
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="367" alt="Before applying the Additional Cart and Checkout inner block types filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/0d4560c8-c2b1-4ed8-8aee-469b248ccb08">
-
-</td>
-<td valign="top">After:
-<br><br>
-<img width="366" alt="After applying the Additional Cart and Checkout inner block types filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/d38cd568-6c8c-4158-9269-d8dffdf66988">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Additional Cart and Checkout inner block types filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/0d4560c8-c2b1-4ed8-8aee-469b248ccb08) |![After applying the Additional Cart and Checkout inner block types filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/d38cd568-6c8c-4158-9269-d8dffdf66988) |

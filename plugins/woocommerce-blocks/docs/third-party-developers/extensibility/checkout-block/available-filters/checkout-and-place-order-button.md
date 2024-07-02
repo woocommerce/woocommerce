@@ -92,18 +92,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="379" alt="Before applying the Proceed To Checkout Button Label filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/fb0216c1-a091-4d58-b443-f49ccff98ed8">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="379" alt="After applying the Proceed To Checkout Button Label filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/ef15b6df-fbd7-43e7-a359-b4adfbba961a">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Proceed To Checkout Button Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/fb0216c1-a091-4d58-b443-f49ccff98ed8) |![After applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/ef15b6df-fbd7-43e7-a359-b4adfbba961a) |
 
 ## `proceedToCheckoutButtonLink`
 
@@ -180,18 +171,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="380" alt="Before applying the Proceed To Checkout Button Link filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3f657e0f-4fcc-4746-a554-64221e071b2e">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="384" alt="After applying the Proceed To Checkout Button Link filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/064df213-439e-4d8f-b29c-55962604cb97">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Proceed To Checkout Button Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3f657e0f-4fcc-4746-a554-64221e071b2e) |![After applying the Proceed To Checkout Button Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/064df213-439e-4d8f-b29c-55962604cb97) |
 
 ## `placeOrderButtonLabel`
 
@@ -226,18 +208,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="358" alt="Before applying the Place Order Button Label filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/aa6d9b65-4d56-45f7-8162-a6bbfe171250">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="358" alt="After applying the Place Order Button Label filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a5cc2572-16e7-4781-a5ab-5d6cdced2ff6">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Place Order Button Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/aa6d9b65-4d56-45f7-8162-a6bbfe171250) |![After applying the Place Order Button Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a5cc2572-16e7-4781-a5ab-5d6cdced2ff6) |
 
 <!-- FEEDBACK -->
 
