@@ -1,10 +1,21 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { useEffect } from '@wordpress/element';
 import type { BlockEditProps } from '@wordpress/blocks';
 import type { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
+import {
+	RangeControl,
+	ToggleControl,
+	// @ts-expect-error Using experimental features
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// @ts-expect-error Using experimental features
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -57,6 +68,75 @@ const Edit = ( {
 	return (
 		<div { ...blockProps }>
 			<Block { ...attributes } />
+			<InspectorControls>
+				<ToolsPanel
+					label={ __( 'Settings', 'woocommerce' ) }
+					resetAll={ () => {
+						const defaultSettings = {};
+						setAttributes( defaultSettings );
+					} }
+				>
+					<ToolsPanelItem
+						label={ __(
+							'Fallback to product description',
+							'woocommerce'
+						) }
+						hasValue={ () => true }
+						isShownByDefault
+					>
+						<ToggleControl
+							label={ __(
+								'Fallback to product description',
+								'woocommerce'
+							) }
+							checked={ false }
+							onChange={ ( showPostContent ) => {
+								setAttributes( {
+									showPostContent,
+								} );
+							} }
+						/>
+					</ToolsPanelItem>
+					<ToolsPanelItem
+						label={ __( 'Show link on new line', 'woocommerce' ) }
+						hasValue={ () => true }
+						isShownByDefault
+					>
+						<ToggleControl
+							label={ __(
+								'Show link on new line',
+								'woocommerce'
+							) }
+							checked={ false }
+							onChange={ ( showLink ) => {
+								setAttributes( {
+									showLink,
+								} );
+							} }
+						/>
+					</ToolsPanelItem>
+					<ToolsPanelItem
+						label={ __( 'Max word count', 'woocommerce' ) }
+						hasValue={ () => true }
+						isShownByDefault
+					>
+						<RangeControl
+							label={ __( 'Max word count', 'woocommerce' ) }
+							value={ 100 }
+							onChange={ ( summaryLength ) => {
+								setAttributes( { summaryLength } );
+							} }
+							min={ 0 }
+							max={ 1000 }
+							step={ 5 }
+							help={ __(
+								'Set to 0 to remove the limit completely',
+								'woocommerce'
+							) }
+						/>
+					</ToolsPanelItem>
+				</ToolsPanel>
+			</InspectorControls>
 		</div>
 	);
 };
