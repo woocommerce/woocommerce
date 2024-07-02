@@ -21,8 +21,6 @@ const getValidityMessageForInput = (
 		return inputElement.validationMessage;
 	}
 
-	console.log( inputElement.validationMessage );
-
 	const invalidFieldMessage = sprintf(
 		/* translators: %s field label */
 		__( 'Please enter a valid %s', 'woocommerce' ),
