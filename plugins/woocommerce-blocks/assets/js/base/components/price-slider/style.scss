@@ -310,13 +310,6 @@
 	}
 }
 
-
-/* IE 11 will not support multi-range slider due to poor pointer-events support on the thumb. Reverts to 2 sliders. */
-
-@include ie11() {
-	@include ie-fixes();
-}
-
 // Targets Edge <= 18.
 @supports (-ms-ime-align:auto) {
 	@include ie-fixes();
@@ -370,21 +363,6 @@
 		}
 		&::-ms-track {
 			border-color: transparent !important;
-		}
-	}
-	@include ie11() {
-		.wc-block-components-price-slider__range-input-wrapper {
-			border: 0;
-			position: relative;
-			height: 50px;
-		}
-		.wc-block-components-price-slider__range-input-progress {
-			display: none;
-		}
-		.wc-block-price-filter__range-input {
-			height: 100%;
-			margin: 0;
-			width: 100%;
 		}
 	}
 }
