@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { useCallback, useMemo, useRef, useState } from '@wordpress/element';
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import { useSelect, useDispatch, select } from '@wordpress/data';
 import { BlockInstance, cloneBlock } from '@wordpress/blocks';
 import { close } from '@wordpress/icons';
@@ -13,7 +19,9 @@ import {
 	unlock,
 	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/edit-site/build-module/lock-unlock';
-
+// @ts-expect-error No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	store as coreStore,
@@ -113,8 +121,48 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		currentTemplate?.id ?? ''
 	);
 
+	const blockToScroll = useRef< string | null >( null );
+
+	const isEditorLoading = useIsSiteEditorLoading();
+
+	const isSpinnerVisible = isLoading || isEditorLoading;
+
+	useEffect( () => {
+		if ( isEditorLoading ) {
+			return;
+		}
+		const iframe = window.document.querySelector(
+			'.woocommerce-customize-store-assembler > iframe[name="editor-canvas"]'
+		) as HTMLIFrameElement;
+
+		const blockList = iframe?.contentWindow?.document.body.querySelector(
+			'.block-editor-block-list__layout'
+		);
+
+		const observer = new MutationObserver( () => {
+			if ( blockToScroll.current ) {
+				const block = blockList?.querySelector(
+					`[id="block-${ blockToScroll.current }"]`
+				);
+
+				if ( block ) {
+					block.scrollIntoView();
+					blockToScroll.current = null;
+				}
+			}
+		} );
+
+		if ( blockList ) {
+			observer.observe( blockList, { childList: true } );
+		}
+
+		return () => {
+			observer.disconnect();
+		};
+	}, [ isEditorLoading ] );
+
 	// @ts-expect-error No types for this exist yet.
-	const { selectBlock, insertBlocks } = useDispatch( blockEditorStore );
+	const { insertBlocks } = useDispatch( blockEditorStore );
 
 	const insertableIndex = useMemo( () => {
 		return blocks.findLastIndex(
@@ -132,11 +180,11 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 				( blockInstance: BlockInstance ) => cloneBlock( blockInstance )
 			);
 
-			insertBlocks( cloneBlocks, insertableIndex );
+			insertBlocks( cloneBlocks, insertableIndex, undefined, false );
 
-			selectBlock( cloneBlocks.blocks[ 0 ].clientId, -1 );
+			blockToScroll.current = cloneBlocks[ 0 ].clientId;
 		},
-		[ insertBlocks, insertableIndex, selectBlock ]
+		[ insertBlocks, insertableIndex ]
 	);
 
 	return (
@@ -171,7 +219,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 
 						navigateTo( { url: homepageUrl } );
 					} }
-					iconSize={ 22 }
+					iconSize={ 18 }
 					icon={ close }
 					label={ __( 'Close', 'woocommerce' ) }
 				/>
@@ -185,12 +233,12 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 					}
 				</span>
 			</div>
-			{ isLoading && (
+			{ isSpinnerVisible && (
 				<span className="components-placeholder__preview">
 					<Spinner />
 				</span>
 			) }
-			{ ! isLoading && (
+			{ ! isSpinnerVisible && (
 				<BlockPatternList
 					shownPatterns={ sortedPatterns.slice(
 						0,
