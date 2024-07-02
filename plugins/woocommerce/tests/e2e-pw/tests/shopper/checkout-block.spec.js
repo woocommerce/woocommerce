@@ -19,6 +19,7 @@ const { getOrderIdFromUrl } = require( '../../utils/order' );
 
 const guestEmail = 'checkout-guest@example.com';
 const newAccountEmail = 'marge-test-account@example.com';
+const newAccountCustomPassword = 'supersecurepassword123';
 
 const simpleProductName = 'Very Simple Product';
 const simpleProductDesc = 'Lorem ipsum dolor.';
@@ -206,6 +207,12 @@ test.describe(
 				'settings/account/woocommerce_enable_signup_and_login_from_checkout',
 				{
 					value: 'no',
+				}
+			);
+			await api.put(
+				'settings/account/woocommerce_registration_generate_password',
+				{
+					value: 'yes',
 				}
 			);
 			// delete the orders we created
@@ -924,6 +931,98 @@ test.describe(
 			await expect( page.locator( 'tbody#the-list' ) ).toContainText(
 				newAccountEmail
 			);
+		} );
+
+		test( 'can create an account during checkout with custom password', async ( {
+			page,
+			testPage,
+		} ) => {
+			// Password generation off
+			await api.put(
+				'settings/account/woocommerce_registration_generate_password',
+				{
+					value: 'no',
+				}
+			);
+			await addAProductToCart( page, productId );
+			await page.goto( testPage.slug );
+
+			await expect(
+				page.getByRole( 'heading', { name: testPage.title } )
+			).toBeVisible();
+
+			// wait for product price to show up in the summary
+			await page
+				.locator(
+					'.wc-block-components-order-summary-item__individual-prices'
+				)
+				.waitFor( { state: 'visible' } );
+
+			// check create account during checkout
+			await expect(
+				page.getByLabel( 'Create an account' )
+			).toBeVisible();
+			await page.getByLabel( 'Create an account' ).check();
+			await expect(
+				page.getByLabel( 'Create an account' )
+			).toBeChecked();
+
+			// Fill password field.
+			await expect(
+				page.getByLabel( 'Create a password' )
+			).toBeVisible();
+			await page.getByLabel( 'Create a password' ).click();
+			await page
+				.getByLabel( 'Create a password' )
+				.fill( newAccountCustomPassword );
+
+			// For flakiness, sometimes the email address is not filled
+			await page.getByLabel( 'Email address' ).click();
+			await page.getByLabel( 'Email address' ).fill( newAccountEmail );
+			await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
+				newAccountEmail
+			);
+
+			// fill shipping address and check cash on delivery method
+			await fillShippingCheckoutBlocks( page, 'Marge' );
+			await page.getByLabel( 'Cash on delivery' ).check();
+			await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
+
+			// add note to the order
+			await page.getByLabel( 'Add a note to your order' ).check();
+			await page
+				.getByPlaceholder(
+					'Notes about your order, e.g. special notes for delivery.'
+				)
+				.fill( 'This is to avoid flakiness' );
+
+			// place an order
+			await page.getByRole( 'button', { name: 'Place order' } ).click();
+			await expect(
+				page.getByText( 'Your order has been received' )
+			).toBeVisible();
+
+			// get order ID from the page
+			newAccountOrderId = getOrderIdFromUrl( page );
+
+			// confirms that an account was created
+			await page.goto( '/my-account/' );
+			await expect(
+				page.getByRole( 'heading', { name: 'My account' } )
+			).toBeVisible();
+			await page
+				.getByRole( 'navigation' )
+				.getByRole( 'link', { name: 'Log out' } )
+				.click();
+
+			// Log in again.
+			await page.goto( '/my-account/' );
+			await page.locator( '#username' ).fill( newAccountEmail );
+			await page.locator( '#password' ).fill( newAccountCustomPassword );
+			await page.locator( 'text=Log in' ).click();
+			await expect(
+				page.getByRole( 'heading', { name: 'My account' } )
+			).toBeVisible();
 		} );
 	}
 );
