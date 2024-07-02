@@ -114,7 +114,8 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		// Since wp_delete_post($order->get_id()) & $order->delete() will delete the refund as well,
+		// Since $order->delete() will delete the refund as well and
+		// wp_delete_post($order->get_id()) can be prevented by the following filter: maybe_prevent_deletion_of_post (see https://github.com/woocommerce/woocommerce/blob/97a0d9b16006b089f7d1e98af19d61f6d71b621b/plugins/woocommerce/src/Internal/DataStores/Orders/DataSynchronizer.php#L916 )
 		// we need to update the post_parent to a non-existent order to simulate an orphaned refund.
 		wp_update_post(
 			array(
