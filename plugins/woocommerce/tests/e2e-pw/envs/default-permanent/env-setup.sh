@@ -9,4 +9,7 @@ SCRIPT_PATH=$(
   pwd -P
 )
 
-"$SCRIPT_PATH"/../validate-required-variables.sh
+dotenvPath="$SCRIPT_PATH"/../../.env
+echo "Decrypting .env.enc file to $dotenvPath"
+
+openssl enc -aes-256-cbc -iter 1000 -d -pass env:E2E_ENV_KEY -in "$SCRIPT_PATH"/.env.enc -out "$dotenvPath"
