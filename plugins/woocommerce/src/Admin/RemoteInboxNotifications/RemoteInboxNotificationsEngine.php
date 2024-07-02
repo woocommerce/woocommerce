@@ -254,7 +254,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	 * @return mixed
 	 */
 	public static function add_debug_tools( $tools ) {
-		$tools['refres_remote_inbox_notifications'] = array(
+		$tools['refresh_remote_inbox_notifications'] = array(
 			'name'     => __( 'Refresh Remote Inbox Notifications', 'woocommerce' ),
 			'button'   => __( 'Refresh', 'woocommerce' ),
 			'desc'     => __( 'This will refresh the remote inbox notifications', 'woocommerce' ),
