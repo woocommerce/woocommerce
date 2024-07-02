@@ -122,9 +122,9 @@ class WC_Product_Collection_Block_Tracking {
 			if ( 'woocommerce/product-collection' === $block['blockName'] ) {
 				$instances[] = array(
 					'collection'        => $block['attrs']['collection'] ?? 'product-catalog',
-					'in-single-product' => $is_in_single_product ? 'yes' : 'no',
-					'in-template-part'  => $is_in_template_part ? 'yes' : 'no',
-					'in-synced-pattern' => $is_in_synced_pattern ? 'yes' : 'no',
+					'in_single_product' => $is_in_single_product ? 'yes' : 'no',
+					'in_template_part'  => $is_in_template_part ? 'yes' : 'no',
+					'in_synced_pattern' => $is_in_synced_pattern ? 'yes' : 'no',
 					'filters'           => $this->get_query_filters_usage_data( $block ),
 				);
 			}
@@ -249,20 +249,20 @@ class WC_Product_Collection_Block_Tracking {
 
 		$query_attrs = $block['attrs']['query'] ?? array();
 		$filters     = array(
-			'on-sale'      => 0,
-			'stock-status' => 0,
-			'handpicked'   => 0,
-			'keyword'      => 0,
-			'attributes'   => 0,
-			'category'     => 0,
-			'tag'          => 0,
-			'featured'     => 0,
-			'created'      => 0,
-			'price'        => 0,
+			'on-sale'      => 'no',
+			'stock-status' => 'no',
+			'handpicked'   => 'no',
+			'keyword'      => 'no',
+			'attributes'   => 'no',
+			'category'     => 'no',
+			'tag'          => 'no',
+			'featured'     => 'no',
+			'created'      => 'no',
+			'price'        => 'no',
 		);
 
 		if ( ! empty( $query_attrs['woocommerceOnSale'] ) ) {
-			$filters['on-sale'] = 1;
+			$filters['on-sale'] = 'yes';
 		}
 
 		if ( ! empty( $query_attrs['woocommerceStockStatus'] ) ) {
@@ -270,43 +270,43 @@ class WC_Product_Collection_Block_Tracking {
 			$default_values = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? array_diff_key( $stock_statuses, array( 'outofstock' => '' ) ) : $stock_statuses;
 			$default_diff   = array_diff( array_keys( $default_values ), $query_attrs['woocommerceStockStatus'] );
 			if ( ! empty( $default_diff ) ) {
-				$filters['stock-status'] = 1;
+				$filters['stock-status'] = 'yes';
 			}
 		}
 
 		if ( ! empty( $query_attrs['woocommerceAttributes'] ) ) {
-			$filters['attributes'] = 1;
+			$filters['attributes'] = 'yes';
 		}
 
 		if ( ! empty( $query_attrs['timeFrame'] ) ) {
-			$filters['created'] = 1;
+			$filters['created'] = 'yes';
 		}
 
 		if ( ! empty( $query_attrs['taxQuery'] ) ) {
 
 			if ( ! empty( $query_attrs['taxQuery']['product_cat'] ) ) {
-				$filters['category'] = 1;
+				$filters['category'] = 'yes';
 			}
 
 			if ( ! empty( $query_attrs['taxQuery']['product_tag'] ) ) {
-				$filters['tag'] = 1;
+				$filters['tag'] = 'yes';
 			}
 		}
 
 		if ( ! empty( $query_attrs['woocommerceHandPickedProducts'] ) ) {
-			$filters['handpicked'] = 1;
+			$filters['handpicked'] = 'yes';
 		}
 
 		if ( ! empty( $query_attrs['search'] ) ) {
-			$filters['keyword'] = 1;
+			$filters['keyword'] = 'yes';
 		}
 
 		if ( ! empty( $query_attrs['featured'] ) ) {
-			$filters['featured'] = 1;
+			$filters['featured'] = 'yes';
 		}
 
 		if ( ! empty( $query_attrs['priceRange'] ) ) {
-			$filters['price'] = 1;
+			$filters['price'] = 'yes';
 		}
 
 		return $filters;
