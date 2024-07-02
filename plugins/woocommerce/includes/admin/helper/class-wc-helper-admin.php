@@ -208,11 +208,20 @@ class WC_Helper_Admin {
 		WCAdminAssets::register_style( 'woo-check-subscription', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-check-subscription', true );
 
-		$subscribe_url = add_query_arg( 'add-to-cart', self::$checked_screen_param['id'], 'https://woocommerce.com/cart/' );
-		$renew_url     = add_query_arg( array(
+		$subscribe_url = add_query_arg( array(
+			'add-to-cart'  => self::$checked_screen_param['id'],
+			'utm_source'   => 'pu_' . self::$checked_screen_param['show_as'],
+			'utm_medium'   => 'product',
+			'utm_campaign' => 'pu',
+		), 'https://woocommerce.com/cart/' );
+
+		$renew_url = add_query_arg( array(
 			'renew_product' => self::$checked_screen_param['id'],
 			'product_key'   => self::$checked_screen_param['state']['key'],
 			'order_id'      => self::$checked_screen_param['state']['order_id'],
+			'utm_source'    => 'pu_' . self::$checked_screen_param['show_as'],
+			'utm_medium'    => 'product',
+			'utm_campaign'  => 'pu',
 		), 'https://woocommerce.com/cart/' );
 
 		wp_localize_script(
@@ -231,6 +240,7 @@ class WC_Helper_Admin {
 				'showAs'                 => self::$checked_screen_param['show_as'],
 				'colorScheme'            => self::$checked_screen_param['color_scheme'],
 				'subscriptionState'      => self::$checked_screen_param['state'],
+				'screenId'               => get_current_screen()->id,
 			)
 		);
 	}
