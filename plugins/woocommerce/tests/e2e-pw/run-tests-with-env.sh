@@ -16,7 +16,7 @@ cleanDotEnv=0
 
 if [ -f "$SCRIPT_PATH/envs/$envName/.env.enc" ]; then
 	echo "Found encrypted .env file for environment: $envName"
-	"$SCRIPT_PATH/bin/dotenv.sh" -d "$SCRIPT_PATH/envs/$envName"
+	"$SCRIPT_PATH/bin/dotenv.sh" -d "$envName"
 	cleanDotEnv=1
 fi
 
