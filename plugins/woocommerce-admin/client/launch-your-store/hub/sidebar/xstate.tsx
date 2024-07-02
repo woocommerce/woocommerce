@@ -299,7 +299,6 @@ export const sidebarMachine = setup( {
 			return !! sidebar && sidebar === sidebarLocation;
 		},
 		hasWooPayments: ( { context } ) => {
-			console.log( context.hasWooPayments );
 			return !! context.hasWooPayments;
 		},
 		siteIsShowingCachedContent: ( { context } ) => {
