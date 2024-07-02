@@ -71,7 +71,10 @@ $max-button-width: calc(100% / #{$max-button-columns});
 		&:hover {
 			color: var(--wp-admin-theme-color);
 			background-color: rgba(var(--wp-admin-theme-color--rgb), 0.04);
-			box-shadow: none;
+
+			&:not(:focus) {
+				box-shadow: none;
+			}
 		}
 
 		&:focus {
