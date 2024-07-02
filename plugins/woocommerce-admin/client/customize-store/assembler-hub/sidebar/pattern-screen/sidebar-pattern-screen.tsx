@@ -96,7 +96,10 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 
 	const sortedPatterns = useMemo( () => {
 		const patternsWithoutThemePatterns = patterns.filter(
-			( pattern ) => ! pattern.name.includes( THEME_SLUG )
+			( pattern ) =>
+				! pattern.name.includes( THEME_SLUG ) &&
+				pattern.source !== 'pattern-directory/theme' &&
+				pattern.source !== 'pattern-directory/core'
 		);
 
 		return sortPatternsByCategory(
