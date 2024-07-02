@@ -77,7 +77,7 @@ const CollectionButton = ( {
 				onClick={ onClick }
 			>
 				<div className="wc-blocks-product-collection__collection-button-icon">
-					<Icon icon={ icon } />
+					<Icon icon={ icon as Icon.IconType< BlockIcon > } />
 				</div>
 				<p className="wc-blocks-product-collection__collection-button-title">
 					{ title }
