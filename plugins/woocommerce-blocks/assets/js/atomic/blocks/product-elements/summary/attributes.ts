@@ -36,6 +36,10 @@ export const blockAttributes: BlockAttributes = {
 		type: 'number',
 		default: 0,
 	},
+	linkText: {
+		type: 'string',
+		default: '',
+	},
 };
 
 export default blockAttributes;

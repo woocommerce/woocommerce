@@ -14,6 +14,7 @@ export interface Attributes {
 	showDescriptionIfEmpty: boolean;
 	showLink: boolean;
 	summaryLength: number;
+	linkText: string;
 }
 
 export type SetAttributes = Pick<

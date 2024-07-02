@@ -2,8 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { useEffect } from '@wordpress/element';
+import {
+	useBlockProps,
+	InspectorControls,
+	RichText,
+} from '@wordpress/block-editor';
 import {
 	RangeControl,
 	ToggleControl,
@@ -120,6 +124,25 @@ const LinkToDescriptionControl = ( {
 	);
 };
 
+const LinkToDescription = ( {
+	linkText,
+	setAttributes,
+}: ControlProps< 'linkText' > ) => {
+	return (
+		<p>
+			<RichText
+				identifier="linkToDescrption"
+				className="wp-block-post-excerpt__more-link"
+				tagName="a"
+				aria-label={ __( '“Read more” link text', 'woocommerce' ) }
+				placeholder={ __( 'Add "read more" link text', 'woocommerce' ) }
+				value={ linkText }
+				onChange={ ( value ) => setAttributes( { linkText: value } ) }
+				withoutInteractiveFormatting
+			/>
+		</p>
+	);
+};
 
 const Edit = ( {
 	attributes,
@@ -183,6 +206,10 @@ const Edit = ( {
 					/>
 				</ToolsPanel>
 			</InspectorControls>
+			<LinkToDescription
+				linkText={ linkText }
+				setAttributes={ setAttributes }
+			/>
 		</div>
 	);
 };
