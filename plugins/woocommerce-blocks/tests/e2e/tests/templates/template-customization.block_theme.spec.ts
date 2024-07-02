@@ -4,7 +4,6 @@
 import {
 	test,
 	expect,
-	BLOCK_THEME_SLUG,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
 } from '@woocommerce/e2e-utils';
 
