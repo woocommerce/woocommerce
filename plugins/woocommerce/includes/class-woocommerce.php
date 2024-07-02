@@ -1238,7 +1238,9 @@ final class WooCommerce {
 	 * - Automattic\Woocommerce_Analytics package is available
 	 * - Jetpack plugin is not active or its version is >= x.x.x (before this version, the package is loaded in Jetpack)
 	 * - woocommerce_analytics_allow_tracking filter is true (false by default)
-	 * @since x.x.x
+	 *
+	 * @since 9.4.0
+	 *
 	 * @return void
 	 */
 	public function maybe_init_wc_analytics() {
@@ -1247,15 +1249,21 @@ final class WooCommerce {
 			return;
 		}
 
-		if ( ! apply_filters( 'woocommerce_analytics_allow_tracking', false ) ) {
+		/**
+		 * Hook: woocommerce_analytics_allow_tracking.
+		 *
+		 * @since 9.4.0
+		 * @param boolean $is_allowd Indicates if WooCommerce Analytics should be enabled.
+		 */
+		if ( ! apply_filters( 'woocommerce_analytics_allow_tracking', true ) ) {
 			return;
 		}
 
 		$jetpack_plugin = 'jetpack/jetpack.php';
-		if ( is_plugin_active( $jetpack_plugin) ) {
+		if ( is_plugin_active( $jetpack_plugin ) ) {
 			$jetpack_plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $jetpack_plugin );
-			// TODO: Update final JP version after knowing it
-			if ( ! isset( $jetpack_plugin_data[ 'Version' ] ) && version_compare( $jetpack_plugin_data[ 'Version' ], 'x.x.x', '<' ) ) {
+			// TODO: Update final JP version after knowing it.
+			if ( ! isset( $jetpack_plugin_data['Version'] ) && version_compare( $jetpack_plugin_data['Version'], 'x.x.x', '<' ) ) {
 				return;
 			}
 		}
