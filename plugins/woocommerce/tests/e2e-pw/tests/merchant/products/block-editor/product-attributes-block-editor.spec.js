@@ -120,6 +120,11 @@ test(
 				.isVisible();
 
 			await page.waitForLoadState( 'domcontentloaded' );
+
+			// Confirm the Add button is disabled
+			await expect(
+				page.getByRole( 'button', { name: 'Add attributes' } )
+			).toBeDisabled();
 		} );
 
 		await test.step( 'create local attributes with terms', async () => {
@@ -131,10 +136,7 @@ test(
 				'.woocommerce-new-attribute-modal__table-row'
 			);
 
-			/*
-			 * First, check the app loads the attributes,
-			 * based on the Spinner visibility.
-			 */
+			// First, check the app loads the attributes,
 			await waitForGlobalAttributesLoaded( page );
 
 			for ( const attribute of attributesData ) {
@@ -170,6 +172,11 @@ test(
 
 				await page.getByLabel( 'Add another attribute' ).click();
 			}
+
+			// Since there are no more attributes to add, the button should be enabled.
+			await expect(
+				page.getByRole( 'button', { name: 'Add attributes' } )
+			).toBeEnabled();
 
 			// Add the product attributes
 			await page
