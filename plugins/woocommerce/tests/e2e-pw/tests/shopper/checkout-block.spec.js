@@ -936,7 +936,14 @@ test.describe(
 		test( 'can create an account during checkout with custom password', async ( {
 			page,
 			testPage,
+			baseURL,
 		} ) => {
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
+			} );
 			// Password generation off
 			await api.put(
 				'settings/account/woocommerce_registration_generate_password',
