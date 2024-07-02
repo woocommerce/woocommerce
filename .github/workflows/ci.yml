@@ -136,15 +136,6 @@ jobs:
               working-directory: ${{ matrix.projectPath }}
               run: node ./tests/e2e-pw/bin/override-wp-env-plugins.js
 
-            - name: 'Cache Playwright Downloads'
-              id: 'cache-playwright-downloads'
-              if: ${{ matrix.testType == 'e2e'}}
-              uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
-              with:
-                path: '~/.cache/ms-playwright/'
-                key: "${{ runner.os }}-playwright-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
-                restore-keys: '${{ runner.os }}-playwright-'
-              
             - name: 'Start Test Environment'
               id: 'prepare-test-environment'
               if: ${{ matrix.testEnv.shouldCreate }}
@@ -166,6 +157,15 @@ jobs:
                 fi
                 echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
               shell: bash
+              
+            - name: 'Cache Playwright Downloads'
+              id: 'cache-playwright-downloads'
+              if: ${{ matrix.testType == 'e2e'}}
+              uses: 'actions/cache@v4'
+              with:
+                path: '~/.cache/ms-playwright/'
+                key: "${{ runner.os }}-playwright-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
+                restore-keys: '${{ runner.os }}-playwright-'
               
             - name: 'Run tests'
               env:
