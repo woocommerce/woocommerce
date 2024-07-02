@@ -38,6 +38,7 @@ const Edit = ( {
 	context,
 }: BlockEditProps< Attributes > & { context: Context } ): JSX.Element => {
 	const blockProps = useBlockProps();
+	const { showDescriptionIfEmpty, showLink, summaryLength } = attributes;
 
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
 	const { isDescendentOfSingleProductBlock } =
@@ -81,7 +82,7 @@ const Edit = ( {
 							'Fallback to product description',
 							'woocommerce'
 						) }
-						hasValue={ () => true }
+						hasValue={ () => showDescriptionIfEmpty === true }
 						isShownByDefault
 					>
 						<ToggleControl
@@ -89,17 +90,17 @@ const Edit = ( {
 								'Fallback to product description',
 								'woocommerce'
 							) }
-							checked={ false }
-							onChange={ ( showPostContent ) => {
+							checked={ showDescriptionIfEmpty }
+							onChange={ ( value ) => {
 								setAttributes( {
-									showPostContent,
+									showDescriptionIfEmpty: value,
 								} );
 							} }
 						/>
 					</ToolsPanelItem>
 					<ToolsPanelItem
 						label={ __( 'Show link on new line', 'woocommerce' ) }
-						hasValue={ () => true }
+						hasValue={ () => showLink === false }
 						isShownByDefault
 					>
 						<ToggleControl
@@ -107,24 +108,26 @@ const Edit = ( {
 								'Show link on new line',
 								'woocommerce'
 							) }
-							checked={ false }
-							onChange={ ( showLink ) => {
+							checked={ showLink }
+							onChange={ ( value ) => {
 								setAttributes( {
-									showLink,
+									showLink: value,
 								} );
 							} }
 						/>
 					</ToolsPanelItem>
 					<ToolsPanelItem
 						label={ __( 'Max word count', 'woocommerce' ) }
-						hasValue={ () => true }
+						hasValue={ () => summaryLength !== 0 }
 						isShownByDefault
 					>
 						<RangeControl
 							label={ __( 'Max word count', 'woocommerce' ) }
-							value={ 100 }
-							onChange={ ( summaryLength ) => {
-								setAttributes( { summaryLength } );
+							value={ summaryLength }
+							onChange={ ( value ) => {
+								setAttributes( {
+									summaryLength: value || 0,
+								} );
 							} }
 							min={ 0 }
 							max={ 1000 }

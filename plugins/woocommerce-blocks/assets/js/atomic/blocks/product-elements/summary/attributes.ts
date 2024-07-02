@@ -16,6 +16,18 @@ export const blockAttributes: BlockAttributes = {
 		type: 'boolean',
 		default: false,
 	},
+	showDescriptionIfEmpty: {
+		type: 'boolean',
+		default: false,
+	},
+	showLink: {
+		type: 'boolean',
+		default: true,
+	},
+	summaryLength: {
+		type: 'number',
+		default: 0,
+	},
 };
 
 export default blockAttributes;
