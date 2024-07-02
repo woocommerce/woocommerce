@@ -244,7 +244,7 @@ module.exports = async ( config ) => {
 		`HPOS configuration (woocommerce_custom_orders_table_enabled): ${ dataValue } - ${ enabledOption }`
 	);
 
-	// await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
+	await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
 
 	await browser.close();
 
