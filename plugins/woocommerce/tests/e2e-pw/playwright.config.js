@@ -81,6 +81,4 @@ const config = {
 	projects: [],
 };
 
-console.log( 'Trace config:', config.use.trace );
-
 module.exports = config;
