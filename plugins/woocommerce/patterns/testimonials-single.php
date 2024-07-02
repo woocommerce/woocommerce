@@ -2,7 +2,7 @@
 /**
  * Title: Testimonials Single
  * Slug: woocommerce-blocks/testimonials-single
- * Categories: WooCommerce
+ * Categories: WooCommerce, Reviews
  */
 
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
