@@ -4,11 +4,15 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
 use Automattic\WooCommerce\Blueprint\Exporters\ExportsStep;
 use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
+use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
+use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
+use Automattic\WooCommerce\Blueprint\UseHooks;
 use Automattic\WooCommerce\Blueprint\Util;
 use WC_Admin_Settings;
 use WC_Settings_Page;
 
-class ExportSettings implements ExportsStep, HasAlias {
+class ExportWCSettings implements StepExporter, HasAlias {
+	use UseHooks;
 	/**
 	 * @var WC_Settings_Page[]
 	 */
@@ -20,15 +24,7 @@ class ExportSettings implements ExportsStep, HasAlias {
 			$setting_pages = WC_Admin_Settings::get_settings_pages();
 		}
 		$this->setting_pages = $setting_pages;
-		$this->add_filter( 'wooblueprint_export_setttings', array( $this, 'add_site_visibility_setttings' ) );
-	}
-
-	public function add_filter( $name, $callback ) {
-		return \add_filter( $name, $callback );
-	}
-
-	public function apply_filters( $name, $args ) {
-		return \apply_filters( $name, $args );
+		$this->add_filter( 'wooblueprint_export_setttings', array( $this, 'add_site_visibility_setttings' ), 10, 2 );
 	}
 
 	public function export() {
@@ -40,7 +36,6 @@ class ExportSettings implements ExportsStep, HasAlias {
 			if ( in_array( $id, $this->exclude_pages, true ) ) {
 				continue;
 			}
-
 			$pages[ $id ] = $this->get_page_info( $page );
 			foreach ( $pages[ $id ]['options'] as $option ) {
 				$options[] = $option;
@@ -48,11 +43,16 @@ class ExportSettings implements ExportsStep, HasAlias {
 			unset( $pages[ $id ]['options'] );
 		}
 
-		$export_data = compact( 'pages', 'options' );
+		$filtered = $this->apply_filters('wooblueprint_export_setttings', $options, $pages);
 
-		$this->apply_filters( 'wooblueprint_export_setttings', $export_data );
+		$step = new SetSiteOptions($filtered['options']);
+		$step->set_meta_values(array(
+			'plugin' => 'woocommerce',
+			'pages' => $filtered['pages'],
+			'alias' => $this->get_alias()
+		));
 
-		return $export_data;
+		return $step;
 	}
 
 	protected function get_page_info( WC_Settings_Page $page ) {
@@ -121,8 +121,8 @@ class ExportSettings implements ExportsStep, HasAlias {
 		return $data;
 	}
 
-	public function add_site_visibility_setttings( $export_data ) {
-		$export_data['pages']['site_visibility'] = array(
+	public function add_site_visibility_setttings( array $options, array $pages ) {
+		$pages['site_visibility'] = array(
 			'label'    => 'Site Visibility',
 			'sections' => array(
 				'general' => array(
@@ -131,41 +131,28 @@ class ExportSettings implements ExportsStep, HasAlias {
 			),
 		);
 
-		$export_data['options'][] = array(
+		$options[] = array(
 			'id'       => 'woocommerce_coming_soon',
 			'value'    => get_option( 'woocommerce_coming_soon' ),
 			'title'    => 'Coming soon',
 			'location' => 'site_visibilitty.general',
 		);
 
-		$export_data['options'][] = array(
+		$options[] = array(
 			'id'       => 'woocommerce_store_pages_only',
 			'value'    => get_option( 'woocommerce_store_pages_only' ),
 			'title'    => 'Restrict to store pages only',
 			'location' => 'site_visibilitty.general',
 		);
 
-		return $export_data;
-	}
-
-	public function export_step() {
-		$export = $this->export();
-		return array(
-			'step'    => $this->get_step_name(),
-			'alias'   => $this->get_alias(),
-			'options' => $export['options'],
-			'meta'    => array(
-				'pages'  => $export['pages'],
-				'plugin' => 'woocommerce',
-			),
-		);
+		return compact( 'options', 'pages');
 	}
 
 	public function get_step_name() {
-		return 'setOptions';
+		return 'setSiteOptions';
 	}
 
 	public function get_alias() {
-		return 'configureSettings';
+		return 'setWCSettings';
 	}
 }

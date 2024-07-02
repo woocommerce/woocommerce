@@ -22,14 +22,14 @@ const Blueprint = () => {
 	const [ exportEnabled, setExportEnabled ] = useState( true );
 	const [ exportAsZip, setExportAsZip ] = useState( false );
 	const steps = {
-		Settings: 'configureSettings',
-		'Core Profiler Settings': 'configureCoreProfiler',
-		'Payment Gateways': 'configurePaymentGateways',
-		Shipping: 'configureShipping',
-		'Tax rates': 'configureTaxRates',
+		Settings: 'setWCSettings',
+		'Core Profiler Options': 'setWCCoreProfilerOptions',
+		'Payment Gateways': 'setWCPaymentGateways',
+		Shipping: 'setWCShipping',
+		'Tax rates': 'setWCTaxRates',
 		Plugins: 'installPlugin',
 		Themes: 'installTheme',
-		'Task Options': 'configureTaskOptions',
+		'Task Options': 'setWCTaskOptions',
 	};
 
 	// Initialize state to keep track of checkbox values

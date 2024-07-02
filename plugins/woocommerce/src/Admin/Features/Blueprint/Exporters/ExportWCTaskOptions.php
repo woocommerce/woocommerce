@@ -4,23 +4,22 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
 use Automattic\WooCommerce\Blueprint\Exporters\ExportsStep;
 use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
+use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
+use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
 
-class ExportTaskOptions implements ExportsStep, HasAlias {
+class ExportWCTaskOptions implements StepExporter, HasAlias {
 	public function export() {
-		return array(
+		$step = new SetSiteOptions(array(
 			'woocommerce_admin_customize_store_completed' => get_option( 'woocommerce_admin_customize_store_completed', 'no' ),
 			'woocommerce_task_list_tracked_completed_actions' => get_option( 'woocommerce_task_list_tracked_completed_actions', array() ),
-		);
-	}
-	public function export_step() {
-		return array(
-			'step'    => $this->get_step_name(),
-			'alias'   => $this->get_alias(),
-			'options' => $this->export(),
-			'meta'    => array(
-				'plugin' => 'woocommerce',
-			),
-		);
+		));
+
+		$step->set_meta_values(array(
+			'plugin' => 'woocommerce',
+			'alias'  => $this->get_alias(),
+		) );
+
+		return $step;
 	}
 
 	public function get_step_name() {
@@ -28,6 +27,6 @@ class ExportTaskOptions implements ExportsStep, HasAlias {
 	}
 
 	public function get_alias() {
-		return 'configureTaskOptions';
+		return 'setWCTaskOptions';
 	}
 }

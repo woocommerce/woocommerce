@@ -2,9 +2,10 @@
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
-use Automattic\WooCommerce\Blueprint\Exporters\ExportsStep;
+use Automattic\WooCommerce\Admin\Features\Blueprint\Steps\SetWCShipping;
+use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 
-class ExportShipping implements ExportsStep {
+class ExportWCShipping implements StepExporter {
 	public function export() {
 		global $wpdb;
 		$classes = $wpdb->get_results(
@@ -81,21 +82,15 @@ class ExportShipping implements ExportsStep {
 			$locations_by_zone_id[ $location->zone_id ][] = $location->location_id;
 		}
 
-		$settings['shipping_methods']   = $methods;
-		$settings['shipping_locations'] = $locations;
-		$settings['shipping_zones']     = $zones;
+		$step = new SetWCShipping($methods, $locations, $zones);
+		$step->set_meta_values( array(
+			'plugin' => 'woocommerce',
+		) );
 
-		return $settings;
-	}
-
-	public function export_step() {
-		return array(
-			'step'   => $this->get_step_name(),
-			'values' => $this->export(),
-		);
+		return $step;
 	}
 
 	public function get_step_name() {
-		return 'configureShipping';
+		return 'setWCShipping';
 	}
 }

@@ -2,37 +2,32 @@
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
-use Automattic\WooCommerce\Blueprint\Exporters\ExportsStep;
+use Automattic\WooCommerce\Admin\Features\Blueprint\Steps\SetWCPaymentGateways;
+use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 
-class ExportPaymentGateways implements ExportsStep {
+class ExportWCPaymentGateways implements StepExporter {
 	protected array $exclude_ids = array( 'pre_install_woocommerce_payments_promotion' );
 
 	public function export() {
-		$payment_gateways = array();
+		$step = new SetWCPaymentGateways();
 		$this->maybe_hide_wcpay_gateways();
 		foreach ( WC()->payment_gateways->payment_gateways() as $id => $payment_gateway ) {
 			if ( in_array( $id, $this->exclude_ids, true ) ) {
 				continue;
 			}
-			$payment_gateways[ $id ] = array(
-				'title'       => $payment_gateway->get_title(),
-				'description' => $payment_gateway->get_description(),
-				'enabled'     => $payment_gateway->is_available() ? 'yes' : 'no',
+
+			$step->add_payment_gateway(
+				$payment_gateway->get_title(),
+				$payment_gateway->get_description(),
+				$payment_gateway->is_available() ? 'yes' : 'no'
 			);
 		}
 
-		return $payment_gateways;
-	}
-
-	public function export_step() {
-		return array(
-			'step'             => $this->get_step_name(),
-			'payment_gateways' => $this->export(),
-		);
+		return $step;
 	}
 
 	public function get_step_name() {
-		return 'configurePaymentGateways';
+		return 'setWCPaymentGateways';
 	}
 
 	protected function maybe_hide_wcpay_gateways() {

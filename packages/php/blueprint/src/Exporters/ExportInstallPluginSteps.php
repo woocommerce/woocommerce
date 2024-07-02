@@ -2,7 +2,9 @@
 
 namespace Automattic\WooCommerce\Blueprint\Exporters;
 
-class ExportPluginList implements ExportsStep {
+use Automattic\WooCommerce\Blueprint\Steps\InstallPlugin;
+
+class ExportInstallPluginSteps implements StepExporter {
 	private bool $include_private_plugins = false;
 	public function include_private_plugins(bool $boolean) {
 		$this->include_private_plugins = $boolean;
@@ -15,12 +17,12 @@ class ExportPluginList implements ExportsStep {
 		if ( ! function_exists( 'plugins_api' ) ) {
 			require_once ABSPATH . '/wp-admin/includes/plugin-install.php';
 		}
-		$export = array();
 		$plugins = get_plugins();
 
 		// @todo temporary fix for JN site -- it includes WooCommerce as a custom plugin
 		// since JN sites are using a different slug.
 		$exclude = array('WooCommerce');
+		$steps = array();
 		foreach ($plugins as $path => $plugin) {
 			if (in_array($plugin['Name'], $exclude, true)) {
 				continue;
@@ -45,27 +47,20 @@ class ExportPluginList implements ExportsStep {
 				continue;
 			}
 
-			$export[] = array(
-				'step' => $this->get_step_name(),
-				'pluginZipFile' => array(
-					'resource' => $has_download_link ? 'wordpress.org/plugins' : 'self/plugins',
-					'slug' => $slug,
-				),
-				'options' => array(
+			$resource = $has_download_link ? 'wordpress.org/plugins' : 'self/plugins';
+			$steps[] = new InstallPlugin(
+				$slug,
+				$resource,
+				array(
 					'activate' => \is_plugin_active($path)
 				)
 			);
 		}
-	    return $export;
-	}
 
-	public function export_step() {
-		return array(
-			'steps' => $this->export()
-		);
+	    return $steps;
 	}
 
 	public function get_step_name() {
-		return 'installPlugin';
+		return InstallPlugin::get_step_name();
 	}
 }

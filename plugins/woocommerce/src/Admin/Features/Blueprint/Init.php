@@ -3,7 +3,13 @@
 namespace Automattic\WooCommerce\Admin\Features\Blueprint;
 
 
-use Automattic\WooCommerce\Blueprint\Exporters\ExportsStep;
+use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCCoreProfilerOptions;
+use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCPaymentGateways;
+use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettings;
+use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCShipping;
+use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCTaskOptions;
+use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCTaxRates;
+use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 
 class Init {
 	public function __construct() {
@@ -20,23 +26,24 @@ class Init {
 	 * @return void
 	 */
 	public function init_rest_api() {
-		$controller = new RestApi();
-		$controller->register_routes();
+		(new RestApi())->register_routes();
 	}
 
 	/**
-	 * @param ExportsStep[] $exporters
+	 * Add Woo Specific Exporters.
 	 *
-	 * @return ExportsStep[]
+	 * @param StepExporter[] $exporters
+	 *
+	 * @return StepExporter[]
 	 */
 	public function add_woo_exporters(array $exporters) {
 		$classes = array(
-			__NAMESPACE__ . '\Exporters\ExportCoreProfilerSettings',
-			__NAMESPACE__ . '\Exporters\ExportSettings',
-			__NAMESPACE__ . '\Exporters\ExportPaymentGateways',
-			__NAMESPACE__ . '\Exporters\ExportShipping',
-			__NAMESPACE__ . '\Exporters\ExportTaskOptions',
-			__NAMESPACE__ . '\Exporters\ExportTaxRates',
+			ExportWCCoreProfilerOptions::class,
+			ExportWCSettings::class,
+			ExportWCPaymentGateways::class,
+			ExportWCShipping::class,
+			ExportWCTaskOptions::class,
+			ExportWCTaxRates::class,
 		);
 
 		foreach ($classes as $class) {

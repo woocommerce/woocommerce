@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Blueprint\StepProcessors;
+namespace Automattic\WooCommerce\Blueprint\Importers;
 
 use Automattic\WooCommerce\Blueprint\ResourceStorage;
 use Automattic\WooCommerce\Blueprint\StepProcessor;

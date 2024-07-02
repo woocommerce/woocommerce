@@ -7,8 +7,8 @@ use Automattic\WooCommerce\Blueprint\ResourceDownloaders\OrgThemeResourceDownloa
 use Automattic\WooCommerce\Blueprint\ResourceDownloaders\LocalPluginResourceDownloader;
 use Automattic\WooCommerce\Blueprint\ResourceDownloaders\OrgPluginResourceDownloader;
 
-use Automattic\WooCommerce\Blueprint\StepProcessors\InstallPlugins;
-use Automattic\WooCommerce\Blueprint\StepProcessors\InstallThemes;
+use Automattic\WooCommerce\Blueprint\Importers\InstallPlugins;
+use Automattic\WooCommerce\Blueprint\Importers\InstallThemes;
 
 /**
  * Simple factory to create step processors.

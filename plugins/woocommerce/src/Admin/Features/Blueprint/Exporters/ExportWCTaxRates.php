@@ -2,9 +2,10 @@
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
-use Automattic\WooCommerce\Blueprint\Exporters\ExportsStep;
+use Automattic\WooCommerce\Admin\Features\Blueprint\Steps\SetWCTaxRates;
+use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 
-class ExportTaxRates implements ExportsStep {
+class ExportWCTaxRates implements StepExporter {
 
 	public function export() {
 		global $wpdb;
@@ -26,17 +27,15 @@ class ExportTaxRates implements ExportsStep {
 			ARRAY_A
 		);
 
-		return compact( 'rates', 'locations' );
-	}
+		$step = new SetWCTaxRates( $rates, $locations);
+		$step->set_meta_values( array(
+			'plugin' => 'woocommerce',
+		) );
 
-	public function export_step() {
-		return array(
-			'step'   => $this->get_step_name(),
-			'values' => $this->export(),
-		);
+		return $step;
 	}
 
 	public function get_step_name() {
-		return 'configureTaxRates';
+		return 'setWCTaxRates';
 	}
 }
