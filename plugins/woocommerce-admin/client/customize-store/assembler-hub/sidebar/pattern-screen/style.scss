@@ -13,6 +13,10 @@
 		justify-content: space-between;
 		gap: 10px;
 
+		h1 {
+			font-size: 16px;
+		}
+
 		span {
 			font-size: 16px;
 			font-weight: 600;
@@ -26,5 +30,6 @@
 
 	.block-editor-block-patterns-list {
 		overflow-y: unset;
+		height: unset;
 	}
 }
