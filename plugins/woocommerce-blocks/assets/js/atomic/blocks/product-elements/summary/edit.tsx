@@ -150,8 +150,13 @@ const Edit = ( {
 	setAttributes,
 }: EditProps ): JSX.Element => {
 	const blockProps = useBlockProps();
-	const { showDescriptionIfEmpty, showLink, summaryLength, linkText } =
-		attributes;
+	const {
+		showDescriptionIfEmpty,
+		showLink,
+		summaryLength,
+		linkText,
+		isDescendantOfAllProducts,
+	} = attributes;
 
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
 	const { isDescendentOfSingleProductBlock } =
@@ -200,16 +205,20 @@ const Edit = ( {
 							setAttributes={ setAttributes }
 						/>
 					) }
-					<LinkToDescriptionControl
-						showLink={ showLink }
-						setAttributes={ setAttributes }
-					/>
+					{ ! isDescendantOfAllProducts && (
+						<LinkToDescriptionControl
+							showLink={ showLink }
+							setAttributes={ setAttributes }
+						/>
+					) }
 				</ToolsPanel>
 			</InspectorControls>
-			<LinkToDescription
-				linkText={ linkText }
-				setAttributes={ setAttributes }
-			/>
+			{ ! isDescendantOfAllProducts && showLink && (
+				<LinkToDescription
+					linkText={ linkText }
+					setAttributes={ setAttributes }
+				/>
+			) }
 		</div>
 	);
 };
