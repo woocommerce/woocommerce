@@ -194,8 +194,6 @@ test.describe( 'Template customization', () => {
 					page.getByText( woocommerceTemplateUserText ).first()
 				).toBeVisible();
 				await expect( page.getByText( userText ) ).toHaveCount( 0 );
-
-				await requestUtils.activateTheme( BLOCK_THEME_SLUG );
 			} );
 		} );
 	}

@@ -154,10 +154,6 @@ test.describe( 'Template part customization', () => {
 				page.getByText( woocommerceTemplateUserText ).first()
 			).toBeVisible();
 			await expect( page.getByText( userText ) ).toHaveCount( 0 );
-
-			await requestUtils.activateTheme(
-				CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SUPPORT_SLUG
-			);
 		} );
 	} );
 } );
