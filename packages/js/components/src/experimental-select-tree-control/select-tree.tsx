@@ -141,6 +141,24 @@ export const SelectTree = function SelectTree( {
 				setIsOpen( false );
 				recalculateInputValue();
 			}
+			if ( event.key === ',' || event.key === 'Enter' ) {
+				event.preventDefault();
+				const item = items.find(
+					( i ) => i.label === escapeHTML( inputValue )
+				);
+				const isAlreadySelected =
+					Array.isArray( props.selected ) &&
+					Boolean(
+						props.selected.find(
+							( i ) => i.label === escapeHTML( inputValue )
+						)
+					);
+				if ( props.onSelect && item && ! isAlreadySelected ) {
+					props.onSelect( item );
+					setInputValue( '' );
+					recalculateInputValue();
+				}
+			}
 		},
 		onChange: ( event ) => {
 			if ( onInputChange ) {
