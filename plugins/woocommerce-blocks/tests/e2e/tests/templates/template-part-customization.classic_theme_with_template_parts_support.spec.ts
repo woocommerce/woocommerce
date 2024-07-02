@@ -2,13 +2,45 @@
  * External dependencies
  */
 import {
-	test,
+	test as base,
 	expect,
 	CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SUPPORT_SLUG,
 	CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SLUG,
 	FrontendUtils,
 } from '@woocommerce/e2e-utils';
 import type { Page } from '@playwright/test';
+
+class TestUtils {
+	page: Page;
+	frontendUtils: FrontendUtils;
+
+	constructor( {
+		page,
+		frontendUtils,
+	}: {
+		page: Page;
+		frontendUtils: FrontendUtils;
+	} ) {
+		this.page = page;
+		this.frontendUtils = frontendUtils;
+	}
+
+	async openMiniCart() {
+		await this.frontendUtils.goToShop();
+		await this.frontendUtils.addToCart();
+		await this.page.goto( '/mini-cart' );
+		const miniCart = await this.frontendUtils.getBlockByName(
+			'woocommerce/mini-cart'
+		);
+		await miniCart.click();
+	}
+}
+
+const test = base.extend< { testUtils: TestUtils } >( {
+	testUtils: async ( { page, frontendUtils }, use ) => {
+		await use( new TestUtils( { page, frontendUtils } ) );
+	},
+} );
 
 test.describe( 'Template part customization', () => {
 	test.beforeEach( async ( { requestUtils } ) => {
@@ -17,37 +49,20 @@ test.describe( 'Template part customization', () => {
 		);
 	} );
 
-	const testData = {
-		visitPage: async ( {
-			frontendUtils,
-			page,
-		}: {
-			frontendUtils: FrontendUtils;
-			page: Page;
-		} ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart();
-			await page.goto( '/mini-cart' );
-			const block = await frontendUtils.getBlockByName(
-				'woocommerce/mini-cart'
-			);
-			await block.click();
-		},
-		templateName: 'Mini-Cart',
-		templatePath: 'mini-cart',
-	};
-	const userText = `Hello World in the ${ testData.templateName } template`;
-	const woocommerceTemplateUserText = `Hello World in the WooCommerce ${ testData.templateName } template`;
+	const templateName = 'Mini-Cart';
+	const templatePath = 'mini-cart';
+	const userText = `Hello World in the ${ templateName } template`;
+	const woocommerceTemplateUserText = `Hello World in the WooCommerce ${ templateName } template`;
 
-	test.describe( `${ testData.templateName } template`, () => {
+	test.describe( `${ templateName } template`, () => {
 		test( 'can be modified and reverted', async ( {
 			admin,
-			frontendUtils,
 			editor,
 			page,
+			testUtils,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ testData.templatePath }`,
+				postId: `woocommerce/woocommerce//${ templatePath }`,
 				postType: 'wp_template_part',
 				canvas: 'edit',
 			} );
@@ -63,11 +78,11 @@ test.describe( 'Template part customization', () => {
 			// See: https://github.com/woocommerce/woocommerce/issues/42221
 			await expect(
 				page.getByRole( 'heading', {
-					name: `Editing template part: ${ testData.templateName }`,
+					name: `Editing template part: ${ templateName }`,
 				} )
 			).toBeVisible();
 
-			await testData.visitPage( { frontendUtils, page } );
+			await testUtils.openMiniCart();
 			await expect( page.getByText( userText ).first() ).toBeVisible();
 
 			// Verify the edition can be reverted.
@@ -75,25 +90,25 @@ test.describe( 'Template part customization', () => {
 				postType: 'wp_template_part',
 			} );
 			await editor.revertTemplateCustomizations( {
-				templateName: testData.templateName,
+				templateName,
 				templateType: 'wp_template_part',
 			} );
-			await testData.visitPage( { frontendUtils, page } );
+			await testUtils.openMiniCart();
 			await expect( page.getByText( userText ) ).toBeHidden();
 		} );
 	} );
 
-	test.describe( `${ testData.templateName } template`, () => {
-		test( `user-modified ${ testData.templateName } template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
+	test.describe( `${ templateName } template`, () => {
+		test( `user-modified ${ templateName } template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
 			page,
 			admin,
 			editor,
 			requestUtils,
-			frontendUtils,
+			testUtils,
 		} ) => {
 			// Edit the WooCommerce default template
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ testData.templatePath }`,
+				postId: `woocommerce/woocommerce//${ templatePath }`,
 				postType: 'wp_template_part',
 				canvas: 'edit',
 			} );
@@ -114,7 +129,7 @@ test.describe( 'Template part customization', () => {
 			// directly available from the UI, because the customized
 			// one takes priority, so we go directly to its URL.
 			await admin.visitSiteEditor( {
-				postId: `${ CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SLUG }//${ testData.templatePath }`,
+				postId: `${ CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SLUG }//${ templatePath }`,
 				postType: 'wp_template_part',
 				canvas: 'edit',
 			} );
@@ -128,7 +143,7 @@ test.describe( 'Template part customization', () => {
 			} );
 
 			// Verify the template is the one modified by the user based on the theme.
-			await testData.visitPage( { frontendUtils, page } );
+			await testUtils.openMiniCart();
 			await expect( page.getByText( userText ).first() ).toBeVisible();
 			await expect(
 				page.getByText( woocommerceTemplateUserText )
@@ -144,11 +159,11 @@ test.describe( 'Template part customization', () => {
 			} );
 
 			await editor.revertTemplateCustomizations( {
-				templateName: testData.templateName,
+				templateName,
 				templateType: 'wp_template_part',
 			} );
 
-			await testData.visitPage( { frontendUtils, page } );
+			await testUtils.openMiniCart();
 
 			await expect(
 				page.getByText( woocommerceTemplateUserText ).first()
