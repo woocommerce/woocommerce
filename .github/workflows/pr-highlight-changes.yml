@@ -17,6 +17,10 @@ jobs:
         with:
           install: 'code-analyzer...'
           build: 'code-analyzer'
+          pull-composer-cache: true
+          pull-pnpm-cache: true
+          pull-cache-key: 'code-analyzer'
+
       - name: 'Analyze'
         id: 'analyze'
         working-directory: 'tools/code-analyzer'

@@ -11,17 +11,17 @@ inputs:
         description: 'Given a boolean or PNPM filter, runs the build command for monorepo project(s).'
         default: false
     pull-pnpm-cache:
-      description: 'Given a boolean value, invokes pnpm dependencies caching.'
-      default: false
+        description: 'Given a boolean value, invokes pnpm dependencies caching.'
+        default: false
     pull-composer-cache:
-      description: 'Given a boolean value, invokes Composer dependencies caching.'
-      default: false
+        description: 'Given a boolean value, invokes Composer dependencies caching.'
+        default: false
     pull-playwright-cache:
-      description: 'Given a boolean value, invokes Playwright dependencies caching.'
-      default: false
+        description: 'Given a boolean value, invokes Playwright dependencies caching.'
+        default: false
     pull-cache-key:
-      description: 'Given a string value, uses it to compose cache keys.'
-      default: false
+        description: 'Given a string value, uses it to compose cache keys.'
+        default: false
 runs:
     using: 'composite'
     steps:
@@ -37,21 +37,38 @@ runs:
           uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
           with:
               node-version-file: '.nvmrc'
-              # We only want to use the cache if something is being installed.
-              cache: ${{ inputs.install != 'false' && 'pnpm' || '' }}
         - name: 'Setup PHP'
           if: ${{ inputs.php-version != 'false' }}
           uses: 'shivammathur/setup-php@a36e1e52ff4a1c9e9c9be31551ee4712a6cb6bd0'
           with:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'
-        - name: 'Cache Composer Dependencies'
-          if: ${{ inputs.build == 'false' }}
+        - name: 'Cache: identify pnpm caching directory'
+          if: ${{ inputs.pull-pnpm-cache != 'false' }}
+          shell: 'bash'
+          run: |
+            echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+        - name: 'Cache: pnpm downloads'
+          if: ${{ inputs.pull-pnpm-cache != 'false' }}
+          uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+          with:
+            path: "${{ env.PNPM_STORE_PATH }}"
+            key: "${{ runner.os }}-pnpm-${{ inputs.pull-cache-key }}-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
+            restore-keys: '${{ runner.os }}-pnpm-${{ inputs.pull-cache-key }}-'
+        - name: 'Cache: playwright downloads'
+          if: ${{ inputs.pull-playwright-cache != 'false' }}
+          uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+          with:
+            path: '~/.cache/ms-playwright/'
+            key: "${{ runner.os }}-playwright-${{ inputs.pull-cache-key }}-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
+            restore-keys: '${{ runner.os }}-playwright-${{ inputs.pull-cache-key }}-'
+        - name: 'Cache: composer dependencies'
+          if: ${{ inputs.pull-composer-cache != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: '~/.cache/composer/files'
-              key: "${{ runner.os }}-composer-${{ hashFiles( '**/composer.lock' ) }}"
-              restore-keys: '${{ runner.os }}-composer-'
+              key: "${{ runner.os }}-composer-${{ inputs.pull-cache-key }}-${{ hashFiles( '**/composer.lock' ) }}"
+              restore-keys: '${{ runner.os }}-composer-${{ inputs.pull-cache-key }}-'
         - name: 'Parse Project Filters'
           id: 'project-filters'
           shell: 'bash'
