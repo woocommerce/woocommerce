@@ -138,7 +138,7 @@ jobs:
 
             - name: 'Cache Playwright Downloads'
               id: 'cache-playwright-downloads'
-              if: ${{ matrix.testEnv.shouldCreate }}
+              if: ${{ matrix.testType == 'e2e'}}
               uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
               with:
                 path: '~/.cache/ms-playwright/'
