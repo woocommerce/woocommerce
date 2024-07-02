@@ -61,7 +61,10 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to log-in as admin...' );
 			await adminPage.goto( `/wp-admin` );
-			await logIn( adminPage, admin.username, admin.password, true );
+			await logIn( adminPage, admin.username, admin.password, false );
+			await expect(
+				adminPage.getByRole( 'heading', { name: 'Dashboard' } )
+			).toBeVisible();
 			await adminPage
 				.context()
 				.storageState( { path: process.env.ADMINSTATE } );
