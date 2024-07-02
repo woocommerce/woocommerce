@@ -121,7 +121,7 @@ jobs:
                 build: 'false'
 
             - uses: './.github/actions/setup-woocommerce-monorepo'
-              if: ${{ github.ref_type != 'tag' }}
+              if: ${{ github.ref_type != 'tag' &&  matrix.testEnv.shouldCreate }}
               name: 'Build project'
               id: 'build-project'
               with:
