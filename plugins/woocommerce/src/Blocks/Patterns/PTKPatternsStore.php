@@ -185,39 +185,31 @@ class PTKPatternsStore {
 
 		$this->flush_cached_patterns();
 
-		$dotcom_patterns = $this->ptk_client->fetch_patterns(
-			array(
-				'categories' => array( 'intro', 'about', 'services', 'testimonials' ),
-			)
-		);
-		if ( is_wp_error( $dotcom_patterns ) ) {
-			wc_get_logger()->warning(
-				sprintf(
-				// translators: %s is a generated error message.
-					__( 'Failed to get Dotcom patterns from the PTK: "%s"', 'woocommerce' ),
-					$dotcom_patterns->get_error_message()
-				),
-			);
-		}
-
-		$woo_patterns = $this->ptk_client->fetch_patterns(
+		$patterns = $this->ptk_client->fetch_patterns(
 			array(
 				'site'       => 'wooblockpatterns.wpcomstaging.com',
-				'categories' => array( '_woo_intro', '_woo_featured_selling', '_woo_about', '_woo_reviews', '_woo_social_media' ),
+				'categories' => array(
+					'_woo_intro',
+					'_woo_featured_selling',
+					'_woo_about',
+					'_woo_reviews',
+					'_woo_social_media',
+					'_dotcom_imported_intro',
+					'_dotcom_imported_about',
+					'_dotcom_imported_services',
+				),
 			)
 		);
-		if ( is_wp_error( $woo_patterns ) ) {
+		if ( is_wp_error( $patterns ) ) {
 			wc_get_logger()->warning(
 				sprintf(
 				// translators: %s is a generated error message.
 					__( 'Failed to get WooCommerce patterns from the PTK: "%s"', 'woocommerce' ),
-					$woo_patterns->get_error_message()
+					$patterns->get_error_message()
 				),
 			);
 			return;
 		}
-
-		$patterns = array_merge( $dotcom_patterns, $woo_patterns );
 
 		$patterns = $this->filter_patterns( $patterns, self::EXCLUDED_PATTERNS );
 		$patterns = $this->map_categories( $patterns );

@@ -41,9 +41,72 @@ import { usePatternsByCategory } from '../../hooks/use-patterns';
 import './style.scss';
 import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { PATTERN_CATEGORIES } from './categories';
+import { THEME_SLUG } from '~/customize-store/data/constants';
+import { Pattern } from '~/customize-store/types/pattern';
+
+/**
+ * Sorts patterns by category. For 'intro' and 'about' categories
+ * priorizied DotCom Patterns. For intro category, it also prioritizes the "centered-content-with-image-below" pattern.
+ * For other categories, it simply sorts patterns to prioritize Woo Patterns.
+ */
+const sortPatternsByCategory = (
+	patterns: Pattern[],
+	category: keyof typeof PATTERN_CATEGORIES
+) => {
+	const prefix = 'woocommerce-blocks';
+	if ( category === 'intro' || category === 'about' ) {
+		return patterns.sort( ( a, b ) => {
+			if (
+				a.name ===
+				'woocommerce-blocks/centered-content-with-image-below'
+			) {
+				return -1;
+			}
+
+			if (
+				b.name ===
+				'woocommerce-blocks/centered-content-with-image-below'
+			) {
+				return 1;
+			}
+
+			if ( a.name.includes( prefix ) && ! b.name.includes( prefix ) ) {
+				return 1;
+			}
+			if ( ! a.name.includes( prefix ) && b.name.includes( prefix ) ) {
+				return -1;
+			}
+			return 0;
+		} );
+	}
+
+	return patterns.sort( ( a, b ) => {
+		if ( a.name.includes( prefix ) && ! b.name.includes( prefix ) ) {
+			return -1;
+		}
+		if ( ! a.name.includes( prefix ) && b.name.includes( prefix ) ) {
+			return 1;
+		}
+		return 0;
+	} );
+};
 
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const { patterns, isLoading } = usePatternsByCategory( category );
+
+	const sortedPatterns = useMemo( () => {
+		const patternsWithoutThemePatterns = patterns.filter(
+			( pattern ) =>
+				! pattern.name.includes( THEME_SLUG ) &&
+				pattern.source !== 'pattern-directory/theme' &&
+				pattern.source !== 'pattern-directory/core'
+		);
+
+		return sortPatternsByCategory(
+			patternsWithoutThemePatterns,
+			category as keyof typeof PATTERN_CATEGORIES
+		);
+	}, [ category, patterns ] );
 
 	const [ patternPagination, setPatternPagination ] = useState( 10 );
 
@@ -180,8 +243,14 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 			) }
 			{ ! isSpinnerVisible && (
 				<BlockPatternList
-					shownPatterns={ patterns.slice( 0, patternPagination ) }
-					blockPatterns={ patterns.slice( 0, patternPagination ) }
+					shownPatterns={ sortedPatterns.slice(
+						0,
+						patternPagination
+					) }
+					blockPatterns={ sortedPatterns.slice(
+						0,
+						patternPagination
+					) }
 					onClickPattern={ onClickPattern }
 					label={ 'Homepage' }
 					orientation="vertical"
