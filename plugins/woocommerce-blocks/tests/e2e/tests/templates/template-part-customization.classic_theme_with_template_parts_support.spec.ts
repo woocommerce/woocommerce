@@ -79,7 +79,7 @@ test.describe( 'Template part customization', () => {
 				templateType: 'wp_template_part',
 			} );
 			await testData.visitPage( { frontendUtils, page } );
-			await expect( page.getByText( userText ) ).toHaveCount( 0 );
+			await expect( page.getByText( userText ) ).toBeHidden();
 		} );
 	} );
 
@@ -132,7 +132,7 @@ test.describe( 'Template part customization', () => {
 			await expect( page.getByText( userText ).first() ).toBeVisible();
 			await expect(
 				page.getByText( woocommerceTemplateUserText )
-			).toHaveCount( 0 );
+			).toBeHidden();
 
 			// Revert edition and verify the user-modified WC template is used.
 			// Note: we need to revert it from the admin (instead of calling
@@ -153,7 +153,7 @@ test.describe( 'Template part customization', () => {
 			await expect(
 				page.getByText( woocommerceTemplateUserText ).first()
 			).toBeVisible();
-			await expect( page.getByText( userText ) ).toHaveCount( 0 );
+			await expect( page.getByText( userText ) ).toBeHidden();
 		} );
 	} );
 } );
