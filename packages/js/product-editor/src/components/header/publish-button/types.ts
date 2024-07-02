@@ -10,4 +10,5 @@ export type PublishButtonProps = Omit<
 	productType?: string;
 	isMenuButton?: boolean;
 	isPrePublishPanelVisible?: boolean;
+	visibleTab?: string | null;
 };

@@ -110,6 +110,8 @@ $max-button-width: calc((100% - #{$total-gap-width}) / #{$max-columns});
 	right: 0;
 	transform: translateY(-100%);
 	font-family: var(--wp--preset--font-family--system-sans-serif);
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
 
 	&.is-primary:focus:not(:disabled) {
 		outline: none;

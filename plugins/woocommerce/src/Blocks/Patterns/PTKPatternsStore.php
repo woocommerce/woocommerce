@@ -16,6 +16,10 @@ class PTKPatternsStore {
 	// would see an error when trying to insert them in the editor.
 	const EXCLUDED_PATTERNS = array( '13923', '14781', '14779', '13666', '13664', '13660', '13588', '14922', '14880', '13596', '13967', '13958', '15050', '15027' );
 
+	const CATEGORY_MAPPING = array(
+		'testimonials' => 'reviews',
+	);
+
 	/**
 	 * PatternsToolkit instance.
 	 *
@@ -124,19 +128,21 @@ class PTKPatternsStore {
 	 * @return array
 	 */
 	private function filter_patterns( array $patterns, array $pattern_ids ) {
-		return array_filter(
-			$patterns,
-			function ( $pattern ) use ( $pattern_ids ) {
-				if ( ! isset( $pattern['ID'] ) ) {
-					return true;
-				}
+		return array_values(
+			array_filter(
+				$patterns,
+				function ( $pattern ) use ( $pattern_ids ) {
+					if ( ! isset( $pattern['ID'] ) ) {
+						return true;
+					}
 
-				if ( isset( $pattern['post_type'] ) && 'wp_block' !== $pattern['post_type'] ) {
-					return false;
-				}
+					if ( isset( $pattern['post_type'] ) && 'wp_block' !== $pattern['post_type'] ) {
+						return false;
+					}
 
-				return ! in_array( (string) $pattern['ID'], $pattern_ids, true );
-			}
+					return ! in_array( (string) $pattern['ID'], $pattern_ids, true );
+				}
+			)
 		);
 	}
 
@@ -179,24 +185,42 @@ class PTKPatternsStore {
 
 		$this->flush_cached_patterns();
 
-		$patterns = $this->ptk_client->fetch_patterns(
+		$dotcom_patterns = $this->ptk_client->fetch_patterns(
 			array(
 				'categories' => array( 'intro', 'about', 'services', 'testimonials' ),
 			)
 		);
-
-		if ( is_wp_error( $patterns ) ) {
+		if ( is_wp_error( $dotcom_patterns ) ) {
 			wc_get_logger()->warning(
 				sprintf(
 				// translators: %s is a generated error message.
-					__( 'Failed to get the patterns from the PTK: "%s"', 'woocommerce' ),
-					$patterns->get_error_message()
+					__( 'Failed to get Dotcom patterns from the PTK: "%s"', 'woocommerce' ),
+					$dotcom_patterns->get_error_message()
+				),
+			);
+		}
+
+		$woo_patterns = $this->ptk_client->fetch_patterns(
+			array(
+				'site'       => 'wooblockpatterns.wpcomstaging.com',
+				'categories' => array( '_woo_intro', '_woo_featured_selling', '_woo_about', '_woo_reviews', '_woo_social_media' ),
+			)
+		);
+		if ( is_wp_error( $woo_patterns ) ) {
+			wc_get_logger()->warning(
+				sprintf(
+				// translators: %s is a generated error message.
+					__( 'Failed to get WooCommerce patterns from the PTK: "%s"', 'woocommerce' ),
+					$woo_patterns->get_error_message()
 				),
 			);
 			return;
 		}
 
+		$patterns = array_merge( $dotcom_patterns, $woo_patterns );
+
 		$patterns = $this->filter_patterns( $patterns, self::EXCLUDED_PATTERNS );
+		$patterns = $this->map_categories( $patterns );
 
 		set_transient( self::TRANSIENT_NAME, $patterns );
 	}
@@ -208,5 +232,31 @@ class PTKPatternsStore {
 	 */
 	private function allowed_tracking_is_enabled(): bool {
 		return 'yes' === get_option( 'woocommerce_allow_tracking' );
+	}
+
+	/**
+	 * Change the categories of the patterns to match the ones used in the CYS flow
+	 *
+	 * @param array $patterns The patterns to map categories for.
+	 * @return array The patterns with the categories mapped.
+	 */
+	private function map_categories( array $patterns ) {
+		return array_map(
+			function ( $pattern ) {
+				if ( isset( $pattern['categories'] ) ) {
+					foreach ( $pattern['categories'] as $key => $category ) {
+						if ( isset( $category['slug'] ) && isset( self::CATEGORY_MAPPING[ $key ] ) ) {
+							$new_category = self::CATEGORY_MAPPING[ $key ];
+							unset( $pattern['categories'][ $key ] );
+							$pattern['categories'][ $new_category ]['slug']  = $new_category;
+							$pattern['categories'][ $new_category ]['title'] = ucfirst( $new_category );
+						}
+					}
+				}
+
+				return $pattern;
+			},
+			$patterns
+		);
 	}
 }

@@ -11,13 +11,14 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getProductErrorMessage } from '../../../utils/get-product-error-message';
+import { getProductErrorMessageAndProps } from '../../../utils/get-product-error-message-and-props';
 import { usePreview } from '../hooks/use-preview';
 import { PreviewButtonProps } from './types';
 import { TRACKS_SOURCE } from '../../../constants';
 
 export function PreviewButton( {
 	productStatus,
+	visibleTab = 'general',
 	...props
 }: PreviewButtonProps ) {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
@@ -35,8 +36,11 @@ export function PreviewButton( {
 			}
 		},
 		onSaveError( error ) {
-			const message = getProductErrorMessage( error );
-			createErrorNotice( message );
+			const { message, errorProps } = getProductErrorMessageAndProps(
+				error,
+				visibleTab
+			);
+			createErrorNotice( message, errorProps );
 		},
 	} );
 

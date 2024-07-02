@@ -2,9 +2,11 @@
  * External dependencies
  */
 import { Dropdown, MenuGroup } from '@wordpress/components';
+import { useDispatch } from '@wordpress/data';
 import { createElement, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { MediaItem } from '@wordpress/media-utils';
+import { MediaUploaderErrorCallback } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -23,6 +25,8 @@ export function ImageActionsMenu( {
 }: ImageActionsMenuProps ) {
 	const [ isUploading, setIsUploading ] = useState( false );
 
+	const { createErrorNotice } = useDispatch( 'core/notices' );
+
 	function uploadSuccessHandler( onClose: () => void ) {
 		return function handleUploadSuccess( files: MediaItem[] ) {
 			const image =
@@ -39,6 +43,17 @@ export function ImageActionsMenu( {
 			onClose();
 		};
 	}
+
+	const uploadErrorHandler: MediaUploaderErrorCallback = function ( error ) {
+		createErrorNotice(
+			sprintf(
+				/* translators: %1$s is a line break, %2$s is the detailed error message */
+				__( 'Error uploading file:%1$s%2$s', 'woocommerce' ),
+				'\n',
+				error.message
+			)
+		);
+	};
 
 	function mediaLibraryMenuItemSelectHandler( onClose: () => void ) {
 		return function handleMediaLibraryMenuItemSelect( media: never ) {
@@ -79,7 +94,8 @@ export function ImageActionsMenu( {
 								onClose();
 							} }
 							onUploadSuccess={ uploadSuccessHandler( onClose ) }
-							onUploadError={ () => {
+							onUploadError={ ( error ) => {
+								uploadErrorHandler( error );
 								setIsUploading( false );
 								onClose();
 							} }
