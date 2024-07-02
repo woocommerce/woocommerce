@@ -1,15 +1,42 @@
 {
-	"name": "@woocommerce/block-library-tests-and-docs",
+	"name": "@woocommerce/block-library",
 	"private": true,
-	"title": "WooCommerce Blocks Tests and Documentation",
+	"title": "WooCommerce Blocks",
 	"author": "Automattic",
 	"version": "11.8.0-dev",
-	"description": "WooCommerce blocks tests and documentation.",
+	"description": "WooCommerce blocks for the Gutenberg editor.",
 	"homepage": "https://github.com/woocommerce/woocommerce/plugins/woocommerce-blocks/",
 	"keywords": [
 		"woocommerce",
 		"wordpress",
 		"blocks"
+	],
+	"sideEffects": [
+		"*.css",
+		"*.scss",
+		"./assets/js/atomic/blocks/**",
+		"./assets/js/filters/**",
+		"./assets/js/middleware/**",
+		"./assets/js/types/**",
+		"./assets/js/blocks/checkout/inner-blocks/**/index.tsx",
+		"./assets/js/blocks/checkout/inner-blocks/register-components.ts",
+		"./assets/js/blocks/cart/inner-blocks/**/index.tsx",
+		"./assets/js/blocks/cart/inner-blocks/register-components.ts",
+		"./assets/js/base/components/**/*.{tsx,ts}",
+		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/**/index.tsx",
+		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/register-components.ts",
+		"./assets/js/blocks/cart-checkout-shared/sidebar-notices/index.tsx",
+		"./assets/js/blocks/cart-checkout-shared/view-switcher/index.tsx",
+		"./assets/js/blocks/filter-wrapper/register-components.ts",
+		"./assets/js/blocks/product-query/variations/**.tsx",
+		"./assets/js/blocks/product-query/index.tsx",
+		"./assets/js/blocks/product-query/inspector-controls.tsx",
+		"./assets/js/blocks/product-gallery/**.tsx",
+		"./assets/js/blocks/product-gallery/inner-blocks/**/index.tsx",
+		"./assets/js/templates/revert-button/index.tsx",
+		"./assets/js/settings/blocks/index.ts",
+		"./assets/js/atomic/utils/blocks-registration-manager/index.ts",
+		"./packages/**/*.{tsx,ts,js}"
 	],
 	"repository": {
 		"type": "git",
@@ -17,9 +44,11 @@
 	},
 	"license": "GPL-3.0+",
 	"scripts": {
+		"analyze-bundles": "cross-env WP_BUNDLE_ANALYZER=1 pnpm run build",
 		"changelog": "composer install && composer exec -- changelogger",
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project:bundle": "wireit",
 		"build:check-assets": "rimraf build/* && cross-env ASSET_CHECK=true BABEL_ENV=default NODE_ENV=production webpack",
 		"prebuild:docs": "rimraf docs/extensibility/actions.md & rimraf docs/extensibility/filters.md",
 		"build:docs": "./vendor/bin/wp-hooks-generator --input=src --output=bin/hook-docs/data && node ./bin/hook-docs && pnpm build:docs:block-references",
@@ -185,9 +214,6 @@
 		"eslint-import-resolver-typescript": "3.6.1",
 		"eslint-import-resolver-webpack": "0.13.2",
 		"eslint-plugin-import": "2.28.1",
-		"eslint-plugin-playwright": "1.6.0",
-		"eslint-plugin-rulesdir": "^0.2.2",
-		"eslint-plugin-storybook": "^0.6.15",
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"eslint-plugin-you-dont-need-lodash-underscore": "6.12.0",
 		"expect-puppeteer": "6.1.1",
@@ -354,6 +380,57 @@
 						"pull_request"
 					]
 				}
+			]
+		}
+	},
+	"wireit": {
+		"build:project:bundle": {
+			"command": "webpack",
+			"clean": "if-file-deleted",
+			"env": {
+				"NODE_ENV": {
+					"external": true,
+					"default": "production"
+				},
+				"BABEL_ENV": {
+					"external": true,
+					"default": "default"
+				}
+			},
+			"files": [
+				"webpack.config.js",
+				"bin/webpack-*.js",
+				"tsconfig.json",
+				"tsconfig.base.json",
+				"babel.config.js",
+				"assets",
+				"packages"
+			],
+			"output": [
+				"build",
+				"blocks.ini"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"watch:build:project:bundle": {
+			"command": "webpack --watch",
+			"service": true
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/data/build",
+				"node_modules/@woocommerce/data/build-module",
+				"node_modules/@woocommerce/data/build-types",
+				"node_modules/@woocommerce/tracks/build",
+				"node_modules/@woocommerce/tracks/build-module",
+				"node_modules/@woocommerce/tracks/build-types",
+				"package.json"
 			]
 		}
 	}

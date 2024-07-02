@@ -4,7 +4,7 @@
 const path = require( 'path' );
 const fs = require( 'fs' );
 const { paramCase } = require( 'change-case' );
-const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
+const RemoveFilesPlugin = require( '../../../../woocommerce-blocks/bin/remove-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
@@ -838,6 +838,7 @@ const getStylingConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
+					exclude: /node_modules/,
 					use: {
 						loader: 'babel-loader?cacheDirectory',
 						options: {
