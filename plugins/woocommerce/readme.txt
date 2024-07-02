@@ -173,6 +173,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - CYS: Disable readonly mode only when full composability feature flag is enabled. [#48752](https://github.com/woocommerce/woocommerce/pull/48752)
 * Fix - CYS: fix crash of CYS on WordPress 6.6 [#48664](https://github.com/woocommerce/woocommerce/pull/48664)
 * Fix - Revert "Set stock quantity value as 0 by default (#48448)" #48863 [#48863](https://github.com/woocommerce/woocommerce/pull/48863)
 * Fix - Add product id to product_edit_view track in classic product edit screen [#47853](https://github.com/woocommerce/woocommerce/pull/47853)
