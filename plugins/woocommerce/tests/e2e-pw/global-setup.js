@@ -53,12 +53,10 @@ module.exports = async ( config ) => {
 	// Create browser, browserContext, and page for customer and admin users
 	const browser = await chromium.launch();
 	const adminContext = await browser.newContext( contextOptions );
-	const customerContext = await browser.newContext( contextOptions );
 	const adminPage = await adminContext.newPage();
-	const customerPage = await customerContext.newPage();
 
 	// Sign in as admin user and save state
-	const adminRetries = 5;
+	const adminRetries = 2;
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as admin...' );
@@ -129,23 +127,26 @@ module.exports = async ( config ) => {
 		process.exit( 1 );
 	}
 
+	await adminContext.close();
+
 	// Sign in as customer user and save state
-	const customerRetries = 5;
+	const customerRetries = 2;
+	const customerContext = await browser.newContext( contextOptions );
+	const customerPage = await customerContext.newPage();
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as customer...' );
-			await customerPage.goto( `/wp-admin` );
+			await customerPage.goto( `/my-account` );
 			await logIn(
 				customerPage,
 				customer.username,
 				customer.password,
 				false
 			);
+			await expect( customerPage ).toHaveTitle( /My Account.*/i );
 			await expect(
-				customerPage.locator(
-					'div.woocommerce-MyAccount-content > p >> nth=0'
-				)
-			).toContainText( 'Hello' );
+				customerPage.getByRole( 'link', { name: 'Log out' } ).first()
+			).toBeVisible();
 
 			await customerPage
 				.context()
@@ -158,12 +159,14 @@ module.exports = async ( config ) => {
 				`Customer log-in failed. Retrying... ${ i }/${ customerRetries }`
 			);
 			console.log( e );
-			await adminPage.screenshot( {
+			await customerPage.screenshot( {
 				fullPage: true,
 				path: `tests/e2e-pw/test-results/customer-login-fail-${ i }.png`,
 			} );
 		}
 	}
+
+	await customerContext.close();
 
 	if ( ! customerLoggedIn ) {
 		console.error(
@@ -237,8 +240,6 @@ module.exports = async ( config ) => {
 
 	// await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
 
-	await adminContext.close();
-	await customerContext.close();
 	await browser.close();
 
 	if ( process.env.RESET_SITE === 'true' ) {
