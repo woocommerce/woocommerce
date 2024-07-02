@@ -1,7 +1,86 @@
-# Woo Blueprint
+# Blueprint
 
-### Supported Steps
+This PHP Composer package facilitates exporting and importing WordPress Blueprint compatible JSON formats. 
+It offers a solid framework for seamless integration with WordPress sites and supports extensibility, 
+enabling plugins to customize export and import functionalities. Manage site configurations, options, 
+and settings effortlessly with JSON files.
+
+# Built-in Steps
+
+| Step             | Description |
+|------------------| --- |
+| `installPlugin`  |  |
+| `installTheme`   |  |
+| `activatePlugin` |  |
+| `activateTheme`  |  |
+
+# Hooks
 
 
-### CLI Commands
+| Hook                     | Description |
+|--------------------------| --- |
+| `wooblueprint_exporters` |  |
+| `wooblueprint_importers` |  |
 
+# Example: Adding a Custom Exporter
+
+1. Create a new class that extends `Automattic\WooCommerce\Blueprint\Exporters\StepExporter`.
+
+```php
+<?php
+
+use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
+use Automattic\WooCommerce\Blueprint\Steps\Step;
+
+class MyCustomExporter extends StepExporter {
+    public function export( array $data ): Step {
+       
+    }
+}
+```
+
+2. The `export` method should return a `Step` object.
+3. Let's use built-in `SetSiteOptions` step for this example. We'll cover how to add a custom Step later in this document.
+4. Create a new instance of `SetSiteOptions` and return it.
+
+```php
+
+
+use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
+use Automattic\WooCommerce\Blueprint\Steps\Step;
+
+class MyCustomExporter extends StepExporter {
+    public function export(): Step {
+        $data = [
+            'option1' => get_option( 'option1' ),
+            'option2' => get_option( 'option2' ),
+       ];
+       return new SetSiteOptions( $data );
+    }
+}
+
+```
+5. Lastly, register the exporter with the Blueprint package via `wooblueprint_exporters` filter.
+
+```php
+
+
+use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
+use Automattic\WooCommerce\Blueprint\Steps\Step;
+
+class MyCustomExporter extends StepExporter {
+    public function export(): Step {
+        $data = [
+            'option1' => get_option( 'option1' ),
+            'option2' => get_option( 'option2' ),
+       ];
+       return new SetSiteOptions( $data );
+    }
+}
+
+add_filter( 'wooblueprint_exporters', function( array $exporters ) {
+    $exporters[] = new MyCustomExporter();
+    return $exporters;
+} );
+
+```
