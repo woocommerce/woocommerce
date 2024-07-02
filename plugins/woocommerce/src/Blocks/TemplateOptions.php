@@ -26,14 +26,21 @@ class TemplateOptions {
 	 * @return void
 	 */
 	public function check_should_use_blockified_product_grid_templates() {
-		$option_name           = Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE;
-		$should_use_blockified = wc_bool_to_string( wc_current_theme_is_fse_theme() );
-
-		// We don't need to do anything if the user switched to a classic theme or if the option is already set to true.
-		if ( ! $should_use_blockified || get_option( $option_name ) === wc_bool_to_string( true ) ) {
+		$should_use_blockified = wc_current_theme_is_fse_theme();
+		// We don't need to do anything if the user switched to a classic theme.
+		if ( ! $should_use_blockified ) {
 			return;
 		}
 
-		update_option( $option_name, wc_bool_to_string( $should_use_blockified ) );
+		$option_name = Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE;
+		// We previously stored "yes" or "no" values. This will convert them to true or false.
+		$option_value = wc_string_to_bool( get_option( $option_name ) );
+
+		// We don't need to do anything if the option is already set to true.
+		if ( $option_value ) {
+			return;
+		}
+
+		update_option( $option_name, $should_use_blockified );
 	}
 }
