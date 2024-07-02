@@ -94,7 +94,7 @@ const CreateCollectionButton = ( props: CollectionButtonProps ) => {
 		<div className="wc-blocks-product-collection__collections-create">
 			<span>{ __( 'or', 'woocommerce' ) }</span>
 			<Tooltip text={ description } placement="top">
-				<Button onClick={ () => onClick() }>
+				<Button onClick={ onClick }>
 					{ __( 'create your own', 'woocommerce' ) }
 				</Button>
 			</Tooltip>
