@@ -536,6 +536,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'slug'               => 'product_cat',
 					'property'           => 'categories',
 					'label'              => __( 'Categories', 'woocommerce' ),
+					/* translators: %1$s: bold opening tag. %2$s: bold closing tag. */
+					'help'               => sprintf( __( 'Type and press %1$sENTER%2$s or %1$scomma%2$s to select an existing category. You can also use the %1$sUp/Down%2$s keys to navigate the combo box, the %1$sRight/Left%2$s keys to show/hide children from a category, and the %1$sspace bar%2$s to select a category.', 'woocommerce' ), '<b>', '</b>' ),
 					'createTitle'        => __( 'Create new category', 'woocommerce' ),
 					'dialogNameHelpText' => __( 'Shown to customers on the product page.', 'woocommerce' ),
 					'parentTaxonomyText' => __( 'Parent category', 'woocommerce' ),
