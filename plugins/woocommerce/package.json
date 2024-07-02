@@ -588,6 +588,26 @@
 						"resultsBlobName": "blocks-e2e-report",
 						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results"
 					}
+				},
+				{
+					"name": "Core e2e tests - default permanent site",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default-permanent",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"pull_request"
+					],
+					"testEnv": {
+						"config": {
+							"wpVersion": "latest-1"
+						}
+					},
+					"report": {
+						"resultsBlobName": "gutenberg-stable-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
 				}
 			]
 		}
