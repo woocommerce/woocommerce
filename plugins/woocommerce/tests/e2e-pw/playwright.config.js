@@ -66,7 +66,10 @@ const config = {
 		baseURL: BASE_URL ?? 'http://localhost:8086',
 		screenshot: { mode: 'only-on-failure', fullPage: true },
 		stateDir: `${ testsRootPath }/.state/`,
-		trace: 'retain-on-failure',
+		trace:
+			/^https?:\/\/localhost/.test( BASE_URL ) || ! CI
+				? 'retain-on-failure'
+				: 'off',
 		video: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
 		actionTimeout: 20 * 1000,
@@ -75,5 +78,8 @@ const config = {
 	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
 	projects: [],
 };
+
+console.log( 'Running tests against:', config.use.baseURL );
+console.log( 'Trace config:', config.use.trace );
 
 module.exports = config;
