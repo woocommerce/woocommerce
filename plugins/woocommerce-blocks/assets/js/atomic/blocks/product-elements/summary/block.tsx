@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import Summary from '@woocommerce/base-components/summary';
 import { blocksConfig } from '@woocommerce/block-settings';
@@ -11,21 +12,44 @@ import {
 } from '@woocommerce/shared-context';
 import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
-import type { HTMLAttributes } from 'react';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { Attributes } from './types';
+import type { BlockProps } from './types';
 
-type Props = Attributes & HTMLAttributes< HTMLDivElement >;
+const getSource = (
+	product: { short_description?: string; description?: string },
+	showDescriptionIfEmpty: boolean
+) => {
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	const { short_description, description } = product;
 
-const Block = ( props: Props ): JSX.Element | null => {
-	const { className } = props;
+	if ( short_description ) {
+		return short_description;
+	}
+
+	if ( showDescriptionIfEmpty && description ) {
+		return description;
+	}
+
+	return '';
+};
+
+const Block = ( props: BlockProps ): JSX.Element | null => {
+	const {
+		className,
+		showDescriptionIfEmpty,
+		summaryLength,
+		isDescendantOfAllProducts,
+	} = props;
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const styleProps = useStyleProps( props );
+
+	const source = getSource( product, showDescriptionIfEmpty );
+	const maxLength = summaryLength || Infinity;
 
 	if ( ! product ) {
 		return (
@@ -42,12 +66,10 @@ const Block = ( props: Props ): JSX.Element | null => {
 		);
 	}
 
-	const source = product.short_description
-		? product.short_description
-		: product.description;
-
 	if ( ! source ) {
-		return null;
+		return isDescendantOfAllProducts ? null : (
+			<p>{ __( 'No product summary to show.', 'woocommerce' ) }</p>
+		);
 	}
 
 	return (
@@ -62,7 +84,7 @@ const Block = ( props: Props ): JSX.Element | null => {
 				}
 			) }
 			source={ source }
-			maxLength={ 150 }
+			maxLength={ maxLength }
 			countType={ blocksConfig.wordCountType || 'words' }
 			style={ styleProps.style }
 		/>
