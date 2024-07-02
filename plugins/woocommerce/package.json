@@ -107,6 +107,7 @@
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
