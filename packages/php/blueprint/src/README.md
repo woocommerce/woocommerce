@@ -101,16 +101,16 @@ When exporting a Blueprint, the `MyCustomExporter` class will be called and the 
 
 Output:
     
-    ```json
-    {
-        "steps": [
-            {
-                "name": "setSiteOptions",
-                "options": {
-                    "option1": "value1",
-                    "option2": "value2"
-                }
-            }
-        ]
-    }
-    ```
+  ```json
+  {
+      "steps": [
+          {
+              "name": "setSiteOptions",
+              "options": {
+                  "option1": "value1",
+                  "option2": "value2"
+              }
+          }
+      ]
+  }
+  ```
