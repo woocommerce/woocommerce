@@ -2,4 +2,4 @@
 
 set -eo pipefail
 
-echo "Default permanent site setup."
+echo "Default environment setup."
