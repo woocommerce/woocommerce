@@ -57,8 +57,8 @@ use Automattic\WooCommerce\Blueprint\Steps\Step;
 class MyCustomExporter extends StepExporter {
     public function export(): Step {
         $data = [
-            'option1' => get_option( 'option1' ),
-            'option2' => get_option( 'option2' ),
+            'option1' => get_option( 'option1', 'value1' ),
+            'option2' => get_option( 'option2', 'value2' ),
        ];
        return new SetSiteOptions( $data );
     }
@@ -80,8 +80,8 @@ use Automattic\WooCommerce\Blueprint\Steps\Step;
 class MyCustomExporter extends StepExporter {
     public function export(): Step {
         $data = [
-            'option1' => get_option( 'option1' ),
-            'option2' => get_option( 'option2' ),
+            'option1' => get_option( 'option1', 'value1' ),
+            'option2' => get_option( 'option2', 'value2' ),
        ];
        return new SetSiteOptions( $data );
     }
@@ -97,3 +97,20 @@ add_filter( 'wooblueprint_exporters', function( array $exporters ) {
 } );
 
 ```
+When exporting a Blueprint, the `MyCustomExporter` class will be called and the `SetSiteOptions` step will be added to the Blueprint JSON.
+
+Output:
+    
+    ```json
+    {
+        "steps": [
+            {
+                "name": "setSiteOptions",
+                "options": {
+                    "option1": "value1",
+                    "option2": "value2"
+                }
+            }
+        ]
+    }
+    ```
