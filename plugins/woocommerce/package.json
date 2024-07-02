@@ -598,11 +598,6 @@
 					"events": [
 						"pull_request"
 					],
-					"testEnv": {
-						"config": {
-							"wpVersion": "latest-1"
-						}
-					},
 					"report": {
 						"resultsBlobName": "default-permanent-site",
 						"resultsPath": "tests/e2e-pw/test-results",
