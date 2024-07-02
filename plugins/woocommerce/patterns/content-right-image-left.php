@@ -5,6 +5,7 @@
  * Categories: WooCommerce, About
  */
 
+declare(strict_types=1);
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 

@@ -4,7 +4,7 @@
  * Slug: woocommerce-blocks/form-image-grid-content-left
  * Categories: WooCommerce, About
  */
-
+declare(strict_types=1);
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 $header  = __( 'Create anything', 'woocommerce' );

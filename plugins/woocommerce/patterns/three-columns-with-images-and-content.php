@@ -5,6 +5,7 @@
  * Categories: WooCommerce, Services
  */
 
+declare(strict_types=1);
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 $header        = __( 'Our services', 'woocommerce' );

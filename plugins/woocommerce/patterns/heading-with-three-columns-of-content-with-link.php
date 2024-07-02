@@ -4,7 +4,7 @@
  * Slug: woocommerce-blocks/heading-with-three-columns-of-content-with-link
  * Categories: WooCommerce, Services
  */
-
+declare(strict_types=1);
 
 $header        = __( 'Our services', 'woocommerce' );
 $product_title = __( 'Create anything', 'woocommerce' );
