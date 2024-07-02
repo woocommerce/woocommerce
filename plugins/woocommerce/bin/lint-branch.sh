@@ -23,7 +23,7 @@ if [[ -n $newFiles ]]; then
 	violatingFiles=$(grep -vxf <(printf "%s\n" $passingFiles | sort) <(printf "%s\n" $newFiles | sort))
 	if [[ -n $violatingFiles ]]; then
 		redColoured='\033[0;31m'
-		printf "${redColoured}Following files are missing 'declare( strict_types = 1)' directive:\n"
+		printf "${redColoured}Following files are missing 'declare( strict_types = 1 )' directive:\n"
 		printf "${redColoured}%s\n" $violatingFiles
 		exit 1
 	fi
