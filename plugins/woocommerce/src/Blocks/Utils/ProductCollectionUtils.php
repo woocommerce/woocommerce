@@ -123,6 +123,10 @@ class ProductCollectionUtils {
 			$type  = 'cart';
 			$items = array();
 			foreach ( WC()->cart->get_cart() as $cart_item ) {
+				if ( ! isset( $cart_item['product_id'] ) ) {
+					continue;
+				}
+
 				$items[] = absint( $cart_item['product_id'] );
 			}
 			$items       = array_unique( array_filter( $items ) );
@@ -131,8 +135,9 @@ class ProductCollectionUtils {
 		} elseif ( is_product_taxonomy() ) {
 
 			$source      = $wp_query->get_queried_object();
-			$taxonomy    = is_a( $source, 'WP_Term' ) ? $source->taxonomy : '';
-			$term_id     = is_a( $source, 'WP_Term' ) ? $source->term_id : '';
+			$is_valid    = is_a( $source, 'WP_Term' );
+			$taxonomy    = $is_valid ? $source->taxonomy : '';
+			$term_id     = $is_valid ? $source->term_id : '';
 			$type        = 'archive';
 			$source_data = array(
 				'taxonomy' => wc_clean( $taxonomy ),
