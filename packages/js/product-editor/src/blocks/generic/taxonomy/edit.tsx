@@ -103,6 +103,10 @@ export function Edit( {
 		value: String( taxonomy.id ),
 	} ) );
 
+	function onClear() {
+		setSelectedEntries( [] );
+	}
+
 	return (
 		<div { ...blockProps }>
 			<>
@@ -175,6 +179,10 @@ export function Edit( {
 							);
 						}
 					} }
+					onClear={ onClear }
+					isClearButtonVisible={
+						( selectedEntries || [] ).length > 0
+					}
 				></SelectTreeControl>
 				{ showCreateNewModal && (
 					<CreateTaxonomyModal
