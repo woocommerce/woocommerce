@@ -336,7 +336,7 @@ describe( 'Testing Checkout', () => {
 		} );
 
 		// Render the CheckoutBlock
-		render( <CheckoutBlock /> );
+		const { rerender } = render( <CheckoutBlock /> );
 
 		// Wait for the component to fully load, assuming fetch calls or state updates
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
@@ -351,6 +351,8 @@ describe( 'Testing Checkout', () => {
 			allSettings.checkoutAllowsSignup = true;
 			dispatch( CHECKOUT_STORE_KEY ).__internalSetCustomerId( 1 );
 		} );
+
+		rerender( <CheckoutBlock /> );
 
 		expect(
 			screen.getByText( /You are currently checking out as a guest./i )
