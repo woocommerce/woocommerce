@@ -22,7 +22,7 @@ fi
 
 # Autoloader
 output 3 "Updating autoloader classmaps..."
-composer dump-autoload
+composer dump-autoload --optimize
 output 2 "Done"
 
 if [ -z "$SKIP_UPDATE_TEXTDOMAINS" ]; then
