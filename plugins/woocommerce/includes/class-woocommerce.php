@@ -1262,7 +1262,6 @@ final class WooCommerce {
 		$jetpack_plugin = 'jetpack/jetpack.php';
 		if ( is_plugin_active( $jetpack_plugin ) ) {
 			$jetpack_plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $jetpack_plugin );
-			// TODO: Update final JP version after knowing it.
 			if ( ! isset( $jetpack_plugin_data['Version'] ) && version_compare( $jetpack_plugin_data['Version'], 'x.x.x', '<' ) ) {
 				return;
 			}
