@@ -62,6 +62,9 @@ module.exports = async ( config ) => {
 			console.log( 'Trying to log-in as admin...' );
 			await adminPage.goto( `/wp-admin` );
 			await logIn( adminPage, admin.username, admin.password, false );
+			// eslint-disable-next-line playwright/no-networkidle
+			await adminPage.waitForLoadState( 'networkidle' );
+			await adminPage.goto( `/wp-admin` );
 			await expect(
 				adminPage.getByRole( 'heading', { name: 'Dashboard' } )
 			).toBeVisible();
