@@ -8,6 +8,7 @@ import {
 	useRef,
 	useState,
 } from '@wordpress/element';
+import { useAsyncList } from '@wordpress/compose';
 import { useSelect, useDispatch, select } from '@wordpress/data';
 import { BlockInstance, cloneBlock } from '@wordpress/blocks';
 import { close } from '@wordpress/icons';
@@ -43,7 +44,6 @@ import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { PATTERN_CATEGORIES } from './categories';
 import { THEME_SLUG } from '~/customize-store/data/constants';
 import { Pattern } from '~/customize-store/types/pattern';
-import { useAsyncList } from '@wordpress/compose';
 
 /**
  * Sorts patterns by category. For 'intro' and 'about' categories
