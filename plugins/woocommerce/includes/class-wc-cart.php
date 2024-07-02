@@ -9,6 +9,7 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -1669,7 +1670,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				// Limit to defined email addresses.
 				$restrictions = $coupon->get_email_restrictions();
 
-				if ( is_array( $restrictions ) && 0 < count( $restrictions ) && ! $this->is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
+				if ( is_array( $restrictions ) && 0 < count( $restrictions ) && ! DiscountsUtil::is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
 					$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
 					$this->remove_coupon( $code );
 				}
@@ -1696,29 +1697,18 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @param array $check_emails Array of customer email addresses.
 	 * @param array $restrictions Array of allowed email addresses.
+	 *
 	 * @return bool
+	 * @deprecated 9.0.0 In favor of static method Automattic\WooCommerce\Utilities\DiscountsUtil::is_coupon_emails_allowed.
 	 */
 	public function is_coupon_emails_allowed( $check_emails, $restrictions ) {
+		wc_doing_it_wrong(
+			'WC_Cart::is_coupon_emails_allowed',
+			__( 'This method has been deprecated and will be removed soon. Use Automattic\WooCommerce\Utilities\DiscountsUtil::is_coupon_emails_allowed instead.', 'woocommerce' ),
+			'9.0.0'
+		);
 
-		foreach ( $check_emails as $check_email ) {
-			// With a direct match we return true.
-			if ( in_array( $check_email, $restrictions, true ) ) {
-				return true;
-			}
-
-			// Go through the allowed emails and return true if the email matches a wildcard.
-			foreach ( $restrictions as $restriction ) {
-				// Convert to PHP-regex syntax.
-				$regex = '/^' . str_replace( '*', '(.+)?', $restriction ) . '$/';
-				preg_match( $regex, $check_email, $match );
-				if ( ! empty( $match ) ) {
-					return true;
-				}
-			}
-		}
-
-		// No matches, this one isn't allowed.
-		return false;
+		return DiscountsUtil::is_coupon_emails_allowed( $check_emails, $restrictions );
 	}
 
 

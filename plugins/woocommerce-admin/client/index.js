@@ -21,6 +21,8 @@ import { deriveWpAdminBackgroundColours } from './utils/derive-wp-admin-backgrou
 import { possiblyRenderSettingsSlots } from './settings/settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './settings/conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from './payments/payments-settings-banner-slotfill';
+import { registerSiteVisibilitySlotFill } from './launch-your-store';
+import { ErrorBoundary } from './error-boundary';
 
 const appRoot = document.getElementById( 'root' );
 const embeddedRoot = document.getElementById( 'woocommerce-embedded-root' );
@@ -48,7 +50,12 @@ if ( appRoot ) {
 		HydratedPageLayout =
 			withCurrentUserHydration( hydrateUser )( HydratedPageLayout );
 	}
-	render( <HydratedPageLayout />, appRoot );
+	render(
+		<ErrorBoundary>
+			<HydratedPageLayout />
+		</ErrorBoundary>,
+		appRoot
+	);
 } else if ( embeddedRoot ) {
 	let HydratedEmbedLayout = withSettingsHydration(
 		settingsGroup,
@@ -88,6 +95,12 @@ if ( appRoot ) {
 
 	registerTaxSettingsConflictErrorFill();
 	registerPaymentsSettingsBannerFill();
+	if (
+		window.wcAdminFeatures &&
+		window.wcAdminFeatures[ 'launch-your-store' ] === true
+	) {
+		registerSiteVisibilitySlotFill();
+	}
 }
 
 // Render the CustomerEffortScoreTracksContainer only if

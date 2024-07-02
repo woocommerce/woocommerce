@@ -4,7 +4,7 @@ menu_title: Troubleshooting Endpoints
 tags: how-to
 ---
 
-This document outlines common troubleshooting steps for [WooCommerce Endpoints](.woocommerce-endpoints.md). 
+This document outlines common troubleshooting steps for [WooCommerce Endpoints](./woocommerce-endpoints.md). 
 
 For more information, learn how to [Customize Endpoints](./customizing-endpoint-urls.md).
 
@@ -46,4 +46,4 @@ Landing on the wrong page when clicking an endpoint URL is typically caused by i
 
 Sometimes the "Downloads" endpoint on the "My account" page does not need to be displayed. This can be removed by going to **WooCommerce → Settings → Advanced → Account endpoints** and clearing the Downloads endpoint field.
 
-![Account endpoints](https://developer.woo.com/wp-content/uploads/2023/12/Screenshot-2023-04-09-at-11.45.58-PM.png)
+![Account endpoints](https://developer.woocommerce.com/wp-content/uploads/2023/12/Screenshot-2023-04-09-at-11.45.58-PM.png)

@@ -60,7 +60,7 @@ class ClassicTemplatesCompatibility {
 		global $pagenow;
 
 		if ( is_shop() || is_product_taxonomy() || 'widgets.php' === $pagenow ) {
-			$this->asset_data_registry->add( 'hasFilterableProducts', true, true );
+			$this->asset_data_registry->add( 'hasFilterableProducts', true );
 		}
 	}
 
@@ -75,7 +75,7 @@ class ClassicTemplatesCompatibility {
 	 */
 	public function set_php_template_data() {
 		if ( is_shop() || is_product_taxonomy() ) {
-			$this->asset_data_registry->add( 'isRenderingPhpTemplate', true, true );
+			$this->asset_data_registry->add( 'isRenderingPhpTemplate', true );
 		}
 	}
 }

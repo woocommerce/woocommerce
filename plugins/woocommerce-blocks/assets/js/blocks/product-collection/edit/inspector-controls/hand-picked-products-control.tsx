@@ -5,7 +5,9 @@ import { getProducts } from '@woocommerce/editor-components/utils';
 import { ProductResponseItem } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
+import { useDebounce } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
+import { blocksConfig } from '@woocommerce/block-settings';
 import {
 	FormTokenField,
 	// @ts-expect-error Using experimental features
@@ -16,14 +18,19 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../../types';
+import { QueryControlProps, CoreFilterNames } from '../../types';
+import { DEFAULT_FILTERS } from '../../constants';
 
 /**
  * Returns:
  * - productsMap: Map of products by id and name.
  * - productsList: List of products retrieved.
  */
-function useProducts() {
+function useProducts(
+	isLargeCatalog: boolean,
+	search: string,
+	selected: string[]
+) {
 	// Creating a map for fast lookup of products by id or name.
 	const [ productsMap, setProductsMap ] = useState<
 		Map< number | string, ProductResponseItem >
@@ -35,7 +42,30 @@ function useProducts() {
 	);
 
 	useEffect( () => {
-		getProducts( { selected: [] } ).then( ( results ) => {
+		// We take two strategies here because of internal logic of
+		// `getProducts` and `getProductsRequests` that skips request for
+		// `selected` products for small stores. So fetching products per user's input
+		// breaks selected items:
+		// 1. For large stores (>100 products) we fetch products as input changes AND
+		// `selected` products.
+		// 2. For small stores (<=100 products) we fetch all products just once.
+
+		const query = {
+			selected: isLargeCatalog ? selected.map( Number ) : [],
+			queryArgs: isLargeCatalog
+				? {
+						search,
+						// Limit search to 40 results. If results are not satisfying
+						// user needs to type more characters to get closer to actual
+						// product name.
+						per_page: 40,
+				  }
+				: {
+						// For a small catalog we fetch all the products.
+						per_page: 0,
+				  },
+		};
+		getProducts( query ).then( ( results ) => {
 			const newProductsMap = new Map();
 			( results as ProductResponseItem[] ).forEach( ( product ) => {
 				newProductsMap.set( product.id, product );
@@ -45,17 +75,25 @@ function useProducts() {
 			setProductsList( results as ProductResponseItem[] );
 			setProductsMap( newProductsMap );
 		} );
-	}, [] );
+	}, [ isLargeCatalog, search, selected ] );
 
 	return { productsMap, productsList };
 }
 
 const HandPickedProductsControl = ( {
 	query,
+	trackInteraction,
 	setQueryAttribute,
 }: QueryControlProps ) => {
+	const isLargeCatalog = ( blocksConfig.productCount || 0 ) > 100;
 	const selectedProductIds = query.woocommerceHandPickedProducts;
-	const { productsMap, productsList } = useProducts();
+	const [ searchQuery, setSearchQuery ] = useState( '' );
+	const { productsMap, productsList } = useProducts(
+		isLargeCatalog,
+		searchQuery,
+		selectedProductIds
+	);
+	const handleSearch = useDebounce( setSearchQuery, 250 );
 
 	const onTokenChange = useCallback(
 		( values: string[] ) => {
@@ -76,8 +114,9 @@ const HandPickedProductsControl = ( {
 					newHandPickedProductsSet
 				),
 			} );
+			trackInteraction( CoreFilterNames.HAND_PICKED );
 		},
-		[ setQueryAttribute, productsMap ]
+		[ setQueryAttribute, trackInteraction, productsMap ]
 	);
 
 	const suggestions = useMemo( () => {
@@ -109,21 +148,26 @@ const HandPickedProductsControl = ( {
 		return decodeEntities( product?.name ) || '';
 	};
 
+	const deselectCallback = () => {
+		setQueryAttribute( {
+			woocommerceHandPickedProducts:
+				DEFAULT_FILTERS.woocommerceHandPickedProducts,
+		} );
+		trackInteraction( CoreFilterNames.HAND_PICKED );
+	};
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'Hand-picked Products', 'woocommerce' ) }
 			hasValue={ () => !! selectedProductIds?.length }
-			onDeselect={ () => {
-				setQueryAttribute( {
-					woocommerceHandPickedProducts: [],
-				} );
-			} }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			<FormTokenField
-				disabled={ ! productsMap.size }
 				displayTransform={ transformTokenIntoProductName }
 				label={ __( 'Hand-picked Products', 'woocommerce' ) }
 				onChange={ onTokenChange }
+				onInputChange={ isLargeCatalog ? handleSearch : undefined }
 				suggestions={ suggestions }
 				// @ts-expect-error Using experimental features
 				__experimentalValidateInput={ ( value: string ) =>

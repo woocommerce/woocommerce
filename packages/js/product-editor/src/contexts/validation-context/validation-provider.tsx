@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
+import type { PropsWithChildren } from 'react';
+import { useEntityRecord } from '@wordpress/core-data';
 import { createElement, useRef, useState } from '@wordpress/element';
-import { PropsWithChildren } from 'react';
 
 /**
  * Internal dependencies
@@ -17,12 +18,18 @@ import { ValidationContext } from './validation-context';
 import { findFirstInvalidElement } from './helpers';
 
 export function ValidationProvider< T >( {
-	initialValue,
+	postType,
+	productId,
 	children,
-}: PropsWithChildren< ValidationProviderProps< T > > ) {
+}: PropsWithChildren< ValidationProviderProps > ) {
 	const validatorsRef = useRef< Record< string, Validator< T > > >( {} );
 	const fieldRefs = useRef< Record< string, HTMLElement > >( {} );
 	const [ errors, setErrors ] = useState< ValidationErrors >( {} );
+	const { record: initialValue } = useEntityRecord< T >(
+		'postType',
+		postType,
+		productId
+	);
 
 	function registerValidator(
 		validatorId: string,

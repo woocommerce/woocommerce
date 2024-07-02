@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import { BlockControls, useBlockProps } from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
@@ -21,6 +21,7 @@ import {
 	withSpokenMessages,
 	Notice,
 } from '@wordpress/components';
+import { dispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -35,6 +36,7 @@ import { getAttributeFromId } from './utils';
 import { Inspector } from './components/inspector-controls';
 import { AttributeCheckboxList } from './components/attribute-checkbox-list';
 import { AttributeDropdown } from './components/attribute-dropdown';
+import { attributeOptionsPreview } from './constants';
 import './style.scss';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
@@ -105,6 +107,7 @@ const Edit = ( props: EditProps ) => {
 		attributes: blockAttributes,
 		setAttributes,
 		debouncedSpeak,
+		clientId,
 	} = props;
 
 	const { attributeId, queryType, isPreview, displayStyle, showCounts } =
@@ -119,6 +122,8 @@ const Edit = ( props: EditProps ) => {
 	const [ attributeOptions, setAttributeOptions ] = useState<
 		AttributeTerm[]
 	>( [] );
+
+	const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
 	const { results: attributeTerms } = useCollection< AttributeTerm >( {
 		namespace: '/wc/store/v1',
@@ -137,6 +142,47 @@ const Edit = ( props: EditProps ) => {
 		isEditor: true,
 	} );
 
+	const { productFilterWrapperBlockId, productFilterWrapperHeadingBlockId } =
+		useSelect(
+			( select ) => {
+				if ( ! clientId )
+					return {
+						productFilterWrapperBlockId: undefined,
+						productFilterWrapperHeadingBlockId: undefined,
+					};
+
+				const { getBlockParentsByBlockName, getBlock } =
+					select( 'core/block-editor' );
+
+				const parentBlocksByBlockName = getBlockParentsByBlockName(
+					clientId,
+					'woocommerce/product-filter'
+				);
+
+				if ( parentBlocksByBlockName.length === 0 )
+					return {
+						productFilterWrapperBlockId: undefined,
+						productFilterWrapperHeadingBlockId: undefined,
+					};
+
+				const parentBlockId = parentBlocksByBlockName[ 0 ];
+
+				const parentBlock = getBlock( parentBlockId );
+				const headerGroupBlock = parentBlock?.innerBlocks.find(
+					( block ) => block.name === 'core/group'
+				);
+				const headingBlock = headerGroupBlock?.innerBlocks.find(
+					( block ) => block.name === 'core/heading'
+				);
+
+				return {
+					productFilterWrapperBlockId: parentBlockId,
+					productFilterWrapperHeadingBlockId: headingBlock?.clientId,
+				};
+			},
+			[ clientId ]
+		);
+
 	const blockProps = useBlockProps();
 
 	useEffect( () => {
@@ -154,6 +200,36 @@ const Edit = ( props: EditProps ) => {
 			} )
 		);
 	}, [ attributeTerms, filteredCounts ] );
+
+	useEffect( () => {
+		if ( productFilterWrapperBlockId ) {
+			updateBlockAttributes( productFilterWrapperBlockId, {
+				heading:
+					attributeObject?.label ?? __( 'Attribute', 'woocommerce' ),
+				metadata: {
+					name: sprintf(
+						/* translators: %s is referring to the filter attribute name. For example: Color, Size, etc. */
+						__( '%s (Experimental)', 'woocommerce' ),
+						attributeObject?.label ??
+							__( 'Attribute', 'woocommerce' )
+					),
+				},
+			} );
+		}
+		if ( productFilterWrapperHeadingBlockId ) {
+			updateBlockAttributes( productFilterWrapperHeadingBlockId, {
+				content:
+					attributeObject?.label ?? __( 'Attribute', 'woocommerce' ),
+			} );
+		}
+	}, [
+		attributeId,
+		attributeObject?.id,
+		attributeObject?.label,
+		productFilterWrapperBlockId,
+		productFilterWrapperHeadingBlockId,
+		updateBlockAttributes,
+	] );
 
 	const onClickDone = useCallback( () => {
 		setIsEditing( false );
@@ -177,6 +253,23 @@ const Edit = ( props: EditProps ) => {
 	const toggleEditing = useCallback( () => {
 		setIsEditing( ! isEditing );
 	}, [ isEditing ] );
+
+	if ( isPreview ) {
+		return (
+			<Wrapper
+				onClickToolbarEdit={ toggleEditing }
+				isEditing={ isEditing }
+				blockProps={ blockProps }
+			>
+				<Disabled>
+					<AttributeCheckboxList
+						showCounts={ showCounts }
+						attributeTerms={ attributeOptionsPreview }
+					/>
+				</Disabled>
+			</Wrapper>
+		);
+	}
 
 	// Block rendering starts.
 	if ( Object.keys( ATTRIBUTES ).length === 0 )
@@ -241,18 +334,13 @@ const Edit = ( props: EditProps ) => {
 			</Wrapper>
 		);
 
-	const inspectorProps = {
-		...props,
-		setAttributeId,
-	};
-
 	return (
 		<Wrapper
 			onClickToolbarEdit={ toggleEditing }
 			isEditing={ isEditing }
 			blockProps={ blockProps }
 		>
-			<Inspector { ...inspectorProps } />
+			<Inspector { ...props } />
 			<Disabled>
 				{ displayStyle === 'dropdown' ? (
 					<AttributeDropdown

@@ -416,7 +416,7 @@ class WC_Email extends WC_Settings_API {
 		 * @param object|bool $object             The object (ie, product or order) this email relates to, if any.
 		 * @param WC_Email    $email              WC_Email instance managing the email.
 		 */
-		return apply_filters( 'woocommerce_email_additional_content_' . $this->id, $this->format_string( $this->get_option( 'additional_content', $this->get_default_additional_content() ) ), $this->object, $this );
+		return apply_filters( 'woocommerce_email_additional_content_' . $this->id, $this->format_string( $this->get_option( 'additional_content' ) ), $this->object, $this );
 	}
 
 	/**
@@ -602,9 +602,23 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function style_inline( $content ) {
 		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ), true ) ) {
+			$css  = '';
+			$css .= $this->get_must_use_css_styles();
+			$css .= "\n";
+
 			ob_start();
 			wc_get_template( 'emails/email-styles.php' );
-			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean(), $this );
+			$css .= ob_get_clean();
+
+			/**
+			 * Provides an opportunity to filter the CSS styles included in e-mails.
+			 *
+			 * @since 2.3.0
+			 *
+			 * @param string    $css   CSS code.
+			 * @param \WC_Email $email E-mail instance.
+			 */
+			$css = apply_filters( 'woocommerce_email_styles', $css, $this );
 
 			$css_inliner_class = CssInliner::class;
 
@@ -630,6 +644,29 @@ class WC_Email extends WC_Settings_API {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Returns CSS styles that should be included with all HTML e-mails, regardless of theme specific customizations.
+	 *
+	 * @since 9.1.0
+	 *
+	 * @return string
+	 */
+	protected function get_must_use_css_styles(): string {
+		$css = <<<'EOF'
+
+		/*
+		* Temporary measure until e-mail clients more properly support the correct styles.
+		* See https://github.com/woocommerce/woocommerce/pull/47738.
+		*/
+		.screen-reader-text {
+			display: none;
+		}
+
+		EOF;
+
+		return $css;
 	}
 
 	/**

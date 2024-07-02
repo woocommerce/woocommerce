@@ -1,19 +1,20 @@
 /**
  * External dependencies
  */
+import { isWpVersion } from '@woocommerce/settings';
+import { __, sprintf } from '@wordpress/i18n';
+import {
+	INNER_BLOCKS_TEMPLATE as productCollectionInnerBlocksTemplate,
+	DEFAULT_ATTRIBUTES as productCollectionDefaultAttributes,
+	DEFAULT_QUERY as productCollectionDefaultQuery,
+} from '@woocommerce/blocks/product-collection/constants';
 import {
 	createBlock,
+	// @ts-expect-error Type definitions for this function are missing in Guteberg
 	createBlocksFromInnerBlocksTemplate,
 	type BlockInstance,
 	type InnerBlockTemplate,
 } from '@wordpress/blocks';
-import { isWpVersion } from '@woocommerce/settings';
-import { __, sprintf } from '@wordpress/i18n';
-import {
-	INNER_BLOCKS_TEMPLATE as productsInnerBlocksTemplate,
-	QUERY_DEFAULT_ATTRIBUTES as productsQueryDefaultAttributes,
-	PRODUCT_QUERY_VARIATION_NAME as productsVariationName,
-} from '@woocommerce/blocks/product-query/constants';
 
 /**
  * Internal dependencies
@@ -43,18 +44,23 @@ const extendInnerBlocksWithNoResultsContent = (
 	innerBlocks: InnerBlockTemplate[],
 	inheritedAttributes: InheritedAttributes
 ) => {
+	// InnerBlockTemplate is an array block representation so properties
+	// like name or attributes need to be accessed with array indexes.
+	const nameArrayIndex = 0;
+	const attributesArrayIndex = 1;
+
 	const noResultsContent = [
 		createNoResultsParagraph(),
 		createProductSearch(),
 	];
 
-	const noResultsBlockName = 'core/query-no-results';
+	const noResultsBlockName = 'woocommerce/product-collection-no-results';
 	const noResultsBlockIndex = innerBlocks.findIndex(
-		( block ) => block[ 0 ] === noResultsBlockName
+		( block ) => block[ nameArrayIndex ] === noResultsBlockName
 	);
 	const noResultsBlock = innerBlocks[ noResultsBlockIndex ];
 	const attributes = {
-		...( noResultsBlock[ 1 ] || {} ),
+		...( noResultsBlock[ attributesArrayIndex ] || {} ),
 		...inheritedAttributes,
 	};
 
@@ -65,31 +71,34 @@ const extendInnerBlocksWithNoResultsContent = (
 	];
 
 	return [
-		...productsInnerBlocksTemplate.slice( 0, noResultsBlockIndex ),
+		...innerBlocks.slice( 0, noResultsBlockIndex ),
 		extendedNoResults,
-		...productsInnerBlocksTemplate.slice( noResultsBlockIndex + 1 ),
+		...innerBlocks.slice( noResultsBlockIndex + 1 ),
 	];
 };
 
-const createProductsBlock = ( inheritedAttributes: InheritedAttributes ) => {
-	const productsInnerBlocksWithNoResults =
+const createProductCollectionBlock = (
+	inheritedAttributes: InheritedAttributes
+) => {
+	const productCollectionInnerBlocksWithNoResults =
 		extendInnerBlocksWithNoResultsContent(
-			productsInnerBlocksTemplate,
+			productCollectionInnerBlocksTemplate,
 			inheritedAttributes
 		);
 
 	return createBlock(
-		'core/query',
+		'woocommerce/product-collection',
 		{
-			...productsQueryDefaultAttributes,
+			...productCollectionDefaultAttributes,
 			...inheritedAttributes,
-			namespace: productsVariationName,
 			query: {
-				...productsQueryDefaultAttributes.query,
+				...productCollectionDefaultQuery,
 				inherit: true,
 			},
 		},
-		createBlocksFromInnerBlocksTemplate( productsInnerBlocksWithNoResults )
+		createBlocksFromInnerBlocksTemplate(
+			productCollectionInnerBlocksWithNoResults
+		)
 	);
 };
 
@@ -104,7 +113,7 @@ const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) =>
 			],
 			inheritedAttributes
 		),
-		createProductsBlock( inheritedAttributes ),
+		createProductCollectionBlock( inheritedAttributes ),
 	].filter( Boolean ) as BlockInstance[];
 
 const isConversionPossible = () => {

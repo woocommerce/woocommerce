@@ -2,13 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
-import { Button, Modal } from '@wordpress/components';
+import clsx from 'clsx';
+import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
-import { recordEvent } from '@woocommerce/tracks';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -17,6 +17,8 @@ import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
+import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
+import { trackEvent } from '../tracking';
 
 export const BaseIntroBanner = ( {
 	bannerTitle,
@@ -43,7 +45,7 @@ export const BaseIntroBanner = ( {
 } ) => {
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-customize-store-banner',
 				bannerClass
 			) }
@@ -217,11 +219,23 @@ export const ThemeHasModsBanner = ( {
 };
 
 export const NoAIBanner = ( {
-	sendEvent,
+	redirectToCYSFlow,
 }: {
-	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
+	redirectToCYSFlow: () => void;
 } ) => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
+	interface Theme {
+		is_block_theme?: boolean;
+		stylesheet?: string;
+	}
+
+	const currentTheme = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
+
+	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
 
 	return (
 		<>
@@ -234,50 +248,19 @@ export const NoAIBanner = ( {
 				bannerClass="no-ai-banner"
 				bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
 				bannerButtonOnClick={ () => {
-					setIsModalOpen( true );
+					if ( ! isDefaultTheme ) {
+						setIsModalOpen( true );
+					} else {
+						redirectToCYSFlow();
+					}
 				} }
 				showAIDisclaimer={ false }
 			/>
 			{ isModalOpen && (
-				<Modal
-					className={
-						'woocommerce-customize-store__theme-switch-warning-modal'
-					}
-					title={ __(
-						'Are you sure you want to design a new theme?',
-						'woocommerce'
-					) }
-					onRequestClose={ () => setIsModalOpen( false ) }
-					shouldCloseOnClickOutside={ false }
-				>
-					<p>
-						{ __(
-							'Your active theme will be changed and you could lose any changes you’ve made to it.',
-							'woocommerce'
-						) }
-					</p>
-					<div className="woocommerce-customize-store__theme-switch-warning-modal-footer">
-						<Button
-							onClick={ () => {
-								setIsModalOpen( false );
-							} }
-							variant="link"
-						>
-							{ __( 'Cancel', 'woocommerce' ) }
-						</Button>
-						<Button
-							onClick={ () => {
-								sendEvent( {
-									type: 'DESIGN_WITHOUT_AI',
-								} );
-								setIsModalOpen( false );
-							} }
-							variant="primary"
-						>
-							{ __( 'Design a new theme', 'woocommerce' ) }
-						</Button>
-					</div>
-				</Modal>
+				<ThemeSwitchWarningModal
+					setIsModalOpen={ setIsModalOpen }
+					redirectToCYSFlow={ redirectToCYSFlow }
+				/>
 			) }
 		</>
 	);
@@ -292,7 +275,7 @@ export const ExistingAiThemeBanner = ( {
 		<Button
 			className=""
 			onClick={ () => {
-				recordEvent(
+				trackEvent(
 					'customize_your_store_intro_create_a_new_one_click'
 				);
 				setOpenDesignChangeWarningModal( true );
@@ -314,7 +297,7 @@ export const ExistingAiThemeBanner = ( {
 			bannerClass="existing-ai-theme-banner"
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
-				recordEvent( 'customize_your_store_intro_customize_click' );
+				trackEvent( 'customize_your_store_intro_customize_click' );
 				navigateOrParent(
 					window,
 					getNewPath(
@@ -340,9 +323,21 @@ export const ExistingAiThemeBanner = ( {
 export const ExistingNoAiThemeBanner = () => {
 	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
 
+	interface Theme {
+		is_block_theme?: boolean;
+	}
+
+	const currentTheme = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
+
+	const isBlockTheme = currentTheme?.is_block_theme;
+
 	return (
 		<BaseIntroBanner
-			bannerTitle={ __( 'Edit your custom theme', 'woocommerce' ) }
+			bannerTitle={ __( 'Customize your theme', 'woocommerce' ) }
 			bannerText={ __(
 				'Continue to customize your store using the store designer. Change your color palette, fonts, page layouts, and more.',
 				'woocommerce'
@@ -350,15 +345,24 @@ export const ExistingNoAiThemeBanner = () => {
 			bannerClass="existing-no-ai-theme-banner"
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
-				recordEvent( 'customize_your_store_intro_customize_click' );
-				navigateOrParent(
-					window,
-					getNewPath(
-						{ customizing: true },
-						'/customize-store/assembler-hub',
-						{}
-					)
-				);
+				trackEvent( 'customize_your_store_intro_customize_click', {
+					theme_type: isBlockTheme ? 'block' : 'classic',
+				} );
+				if ( isBlockTheme ) {
+					navigateOrParent(
+						window,
+						getNewPath(
+							{ customizing: true },
+							'/customize-store/assembler-hub',
+							{}
+						)
+					);
+				} else {
+					navigateOrParent(
+						window,
+						'customize.php?return=/wp-admin/themes.php'
+					);
+				}
 			} }
 			bannerButtonText={ __( 'Customize your theme', 'woocommerce' ) }
 			showAIDisclaimer={ false }

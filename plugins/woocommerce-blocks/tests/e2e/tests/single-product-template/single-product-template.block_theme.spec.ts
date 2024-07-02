@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 const products = [
 	{
@@ -41,7 +41,7 @@ const products = [
 ];
 
 for ( const { classes, product, frontendPage } of products ) {
-	test.describe( `The Single Product page of the ${ product }`, () =>
+	test.describe( `The Single Product page of the ${ product }`, () => {
 		test( 'add product specific classes to the body', async ( {
 			page,
 		} ) => {
@@ -52,5 +52,23 @@ for ( const { classes, product, frontendPage } of products ) {
 			classes.forEach( ( className ) => {
 				expect( bodyClasses?.split( ' ' ) ).toContain( className );
 			} );
-		} ) );
+		} );
+	} );
 }
+
+test( 'shows password form in products protected with password', async ( {
+	page,
+} ) => {
+	// Sunglasses are defined as requiring password in /bin/scripts/products.sh.
+	await page.goto( '/product/sunglasses/' );
+	await expect(
+		page.getByText( 'This content is password protected.' ).first()
+	).toBeVisible();
+
+	// Verify after introducing the password, the page is visible.
+	await page.getByLabel( 'Password:' ).fill( 'password' );
+	await page.getByRole( 'button', { name: 'Enter' } ).click();
+	await expect(
+		page.getByRole( 'link', { name: 'Description' } )
+	).toBeVisible();
+} );

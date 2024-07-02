@@ -9,7 +9,12 @@
     &__text .components-popover__content {
         font-size: $default-font-size;
         padding: $gap;
-        width: max-content;
+		/* Allow tooltip to be wider than the default of `fit-content`
+		 * from the Popover component, but limit it to a reasonable
+		 * maximum width.
+		 */
+		width: auto;
+        max-width: 300px;
     }
 
 	&__text {

@@ -72,9 +72,20 @@ export function cart() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
+			'title is: "Cart – WooCommerce Core E2E Test Suite"': (
+				response
+			) =>
+				response.html().find( 'head title' ).text() ===
+				'Cart – WooCommerce Core E2E Test Suite',
 			"body does not contain: 'your cart is currently empty'": (
 				response
 			) => ! response.body.includes( 'Your cart is currently empty.' ),
+			'footer contains: Built with WooCommerce': ( response ) =>
+				response
+					.html()
+					.find( 'body footer' )
+					.text()
+					.includes( 'Built with WooCommerce' ),
 		} );
 	} );
 

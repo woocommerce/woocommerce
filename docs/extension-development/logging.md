@@ -12,17 +12,17 @@ You can view the entries created by the logger by going to **WooCommerce > Statu
 
 With the default file system storage method, the first thing you will see is the list of existing log files:
 
-![The default log viewing interface, showing a list of log files](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/02/file-browse.png)
+![The default log viewing interface, showing a list of log files](https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2024/02/file-browse.png)
 
 The name of a log file is based on the source of the entries it contains (meaning the extension or the part of the WooCommerce codebase), as well as the date the entries were generated. In this file browsing view, you can sort the files in different ways as well as filtering them to show only those from a specific source. Clicking on a file will take you to a single file view, where you can see the actual log entries:
 
-![The contents of a log file](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/02/file-view-new.png)
+![The contents of a log file](https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2024/02/file-view-new.png)
 
 Click on a line number in the file to highlight it. This can also be used to link to a specific line in a file from elsewhere.
 
 From the file browser view, you can sort and filter a list of log files, and then search for a string within the contents of those files:
 
-![A list of search results](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/02/search-results.png)
+![A list of search results](https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2024/02/search-results.png)
 
 Clicking on a search result line number will take you to that line in the single file view.
 
@@ -30,7 +30,7 @@ Clicking on a search result line number will take you to that line in the single
 
 With the database storage method, you will see a list of log entries, starting with the most recent:
 
-![The log viewing interface when log entries are stored in the database](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/02/database-logs.png)
+![The log viewing interface when log entries are stored in the database](https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2024/02/database-logs.png)
 
 These entries can be sorted by timestamp, level, and source, as well as filtered to only show a particular source or a minimum level. You can also search for a string within the log entry message fields.
 
@@ -38,7 +38,7 @@ These entries can be sorted by timestamp, level, and source, as well as filtered
 
 From the Logs screen at **WooCommerce > Status > Logs**, click the "Settings" link to make configuration changes:
 
-![The Logs settings screen](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/02/settings.png)
+![The Logs settings screen](https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2024/02/settings.png)
 
 ### Logger
 
@@ -104,7 +104,7 @@ If a source is not specified, the logger will generate a source value based on t
 
 Setting the `backtrace` key in your context parameter to `true` will cause the logger to generate a backtrace (i.e. stack trace) in array format, which will be included in the context in place of the `true` value. This is useful particularly for error-related logs, so you can see what code was executed that led to the log entry being generated.
 
-![A backtrace displayed in the log file viewer](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/02/backtrace.png)
+![A backtrace displayed in the log file viewer](https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2024/02/backtrace.png)
 
 ### Full example
 
@@ -136,13 +136,13 @@ wc_get_logger()->info(
 
 ### When _not_ to use logging
 
-* To let a developer know that they’re using a method or API incorrectly. This can lead to a large volume of useless log entries, especially if it will get triggered on every page request. Better to give them immediate feedback in the form of an error or exception (e.g. `wc_doing_it_wrong()`).
+* To let a developer know that they're using a method or API incorrectly. This can lead to a large volume of useless log entries, especially if it will get triggered on every page request. Better to give them immediate feedback in the form of an error or exception (e.g. `wc_doing_it_wrong()`).
 
 ### Best practices
 
-* Rather than using the `WC_Logger`‘s `log()` method directly, it’s better to use one of the wrapper methods that’s specific to the log level. E.g. `info()` or `error()`.
-* Write a message that is a complete, coherent sentence. This will make it more useful for people who aren’t familiar with the codebase.
-* Log messages should not be translatable (see the discussion about this in the comments). Keeping the message in English makes it easier to search for solutions based on the message contents, and also makes it easier for Happiness Engineers to understand what’s happening, since they may not speak the same language as the site owner.
+* Rather than using the `WC_Logger`‘s `log()` method directly, it's better to use one of the wrapper methods that's specific to the log level. E.g. `info()` or `error()`.
+* Write a message that is a complete, coherent sentence. This will make it more useful for people who aren't familiar with the codebase.
+* Log messages should not be translatable (see the discussion about this in the comments). Keeping the message in English makes it easier to search for solutions based on the message contents, and also makes it easier for Happiness Engineers to understand what's happening, since they may not speak the same language as the site owner.
 * Ideally, each log entry message should be a single line (i.e. no line breaks within the message string). Additional lines or extra data should be put in the context array.
 * Avoid outputting structured data in the message string. Put it in a key in the context array instead. The logger will handle converting it to JSON and making it legible in the log viewer.
 * If you need to include a stack trace, let the logger generate it for you.

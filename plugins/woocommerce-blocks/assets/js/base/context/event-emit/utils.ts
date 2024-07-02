@@ -35,7 +35,7 @@ export enum noticeContexts {
 	BILLING_ADDRESS = 'wc/checkout/billing-address',
 	SHIPPING_METHODS = 'wc/checkout/shipping-methods',
 	CHECKOUT_ACTIONS = 'wc/checkout/checkout-actions',
-	ADDITIONAL_INFORMATION = 'wc/checkout/additional-information',
+	ORDER_INFORMATION = 'wc/checkout/additional-information',
 }
 
 export interface ResponseType extends Record< string, unknown > {

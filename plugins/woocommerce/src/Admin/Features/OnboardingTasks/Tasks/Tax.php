@@ -62,13 +62,7 @@ class Tax extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
-			if ( $this->is_complete() ) {
-				return __( 'You added tax rates', 'woocommerce' );
-			}
-			return __( 'Add tax rates', 'woocommerce' );
-		}
-		return __( 'Set up tax rates', 'woocommerce' );
+		return __( 'Collect sales tax', 'woocommerce' );
 	}
 
 	/**
@@ -133,9 +127,11 @@ class Tax extends Task {
 	 */
 	public function get_additional_data() {
 		return array(
-			'avalara_activated'         => PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
-			'tax_jar_activated'         => class_exists( 'WC_Taxjar' ),
-			'woocommerce_tax_countries' => self::get_automated_support_countries(),
+			'avalara_activated'              => PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
+			'tax_jar_activated'              => class_exists( 'WC_Taxjar' ),
+			'woocommerce_tax_activated'      => PluginsHelper::is_plugin_active( 'woocommerce-tax' ),
+			'woocommerce_shipping_activated' => PluginsHelper::is_plugin_active( 'woocommerce-shipping' ),
+			'woocommerce_tax_countries'      => self::get_automated_support_countries(),
 		);
 	}
 

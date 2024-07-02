@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="inline notice woocommerce-message show_if_variable">
 			<img class="info-icon" src="<?php echo esc_url( $info_img_url ); ?>" />
 			<p>
-				<?php echo esc_html_e( 'Settings below apply to all variations without manual stock management enabled. ', 'woocommerce' ); ?> <a target="_blank" href="https://woo.com/document/variable-product/"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
+				<?php echo esc_html_e( 'Settings below apply to all variations without manual stock management enabled. ', 'woocommerce' ); ?> <a target="_blank" href="https://woocommerce.com/document/variable-product/"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
 			</p>
 		</div>
 		<?php
@@ -71,10 +71,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			echo '<input type="hidden" name="_original_stock" value="' . esc_attr( wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ) ) . '" />';
 
 			$backorder_args = array(
-				'id'          => '_backorders',
-				'value'       => $product_object->get_backorders( 'edit' ),
-				'label'       => __( 'Allow backorders?', 'woocommerce' ),
-				'options'     => wc_get_product_backorder_options(),
+				'id'      => '_backorders',
+				'value'   => $product_object->get_backorders( 'edit' ),
+				'label'   => __( 'Allow backorders?', 'woocommerce' ),
+				'options' => wc_get_product_backorder_options(),
 			);
 
 			/**

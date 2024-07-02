@@ -1311,5 +1311,4 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 100, $price_shop );
 	}
-
 }

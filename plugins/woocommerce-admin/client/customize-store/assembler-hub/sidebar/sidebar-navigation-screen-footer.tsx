@@ -12,7 +12,6 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
-import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 // @ts-expect-error No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
@@ -33,14 +32,19 @@ import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
 import { footerTemplateId } from '~/customize-store/data/homepageTemplates';
 import { useSelect } from '@wordpress/data';
+import { trackEvent } from '~/customize-store/tracking';
 
 const SUPPORTED_FOOTER_PATTERNS = [
-	'woocommerce-blocks/footer-simple-menu',
 	'woocommerce-blocks/footer-with-3-menus',
+	'woocommerce-blocks/footer-simple-menu',
 	'woocommerce-blocks/footer-large',
 ];
 
-export const SidebarNavigationScreenFooter = () => {
+export const SidebarNavigationScreenFooter = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'bottom',
@@ -57,7 +61,7 @@ export const SidebarNavigationScreenFooter = () => {
 
 	const [ mainTemplateBlocks ] = useEditorBlocks(
 		'wp_template',
-		currentTemplate.id
+		currentTemplate?.id ?? ''
 	);
 
 	const [ blocks, , onChange ] = useEditorBlocks(
@@ -142,12 +146,15 @@ export const SidebarNavigationScreenFooter = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
-			onNavigateBackClick={ resetHighlightedBlockClientId }
+			onNavigateBackClick={ () => {
+				resetHighlightedBlockClientId();
+				onNavigateBackClick();
+			} }
 			description={ createInterpolateElement( description, {
 				EditorLink: (
 					<Link
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_assembler_hub_editor_link_click',
 								{
 									source: 'footer',

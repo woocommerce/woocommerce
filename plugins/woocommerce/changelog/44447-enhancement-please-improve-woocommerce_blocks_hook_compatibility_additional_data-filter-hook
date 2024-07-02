@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Compatibility Layer: pass additional context to woocommerce_blocks_hook_compatibility_additional_data hook which is a class name in which it was called

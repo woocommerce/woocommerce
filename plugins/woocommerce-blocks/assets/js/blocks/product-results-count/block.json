@@ -15,6 +15,7 @@
 		}
 	},
 	"attributes": {},
+	"usesContext": [ "queryId" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 2,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

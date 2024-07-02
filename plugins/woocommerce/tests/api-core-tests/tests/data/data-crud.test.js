@@ -1,6 +1,4 @@
 const { test, expect } = require( '@playwright/test' );
-const { API_BASE_URL } = process.env;
-const shouldSkip = API_BASE_URL != undefined;
 
 // 259 countries total
 const countryCodes = [
@@ -2940,7 +2938,7 @@ test.describe( 'Data API tests', () => {
 							name: 'CFP franc',
 							currency_code: 'XPF',
 							currency_pos: 'right_space',
-							decimal_sep: ',',
+							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 0,
 							thousand_sep: ' ',
@@ -3000,7 +2998,7 @@ test.describe( 'Data API tests', () => {
 							name: 'CFP franc',
 							currency_code: 'XPF',
 							currency_pos: 'right_space',
-							decimal_sep: ',',
+							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 0,
 							thousand_sep: ' ',
@@ -3120,7 +3118,7 @@ test.describe( 'Data API tests', () => {
 							name: 'CFP franc',
 							currency_code: 'XPF',
 							currency_pos: 'right_space',
-							decimal_sep: ',',
+							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 0,
 							thousand_sep: ' ',
@@ -7992,7 +7990,7 @@ test.describe( 'Data API tests', () => {
 				expect.objectContaining( {
 					code: 'XPF',
 					name: 'CFP franc',
-					symbol: 'Fr',
+					symbol: 'XPF',
 					_links: {
 						self: [
 							{

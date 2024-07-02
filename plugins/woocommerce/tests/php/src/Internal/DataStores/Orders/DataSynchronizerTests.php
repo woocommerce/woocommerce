@@ -206,13 +206,24 @@ class DataSynchronizerTests extends HposTestCase {
 	 * change should propagate across to the other table.
 	 */
 	public function test_order_deletions_propagate_with_sync_enabled(): void {
-		// Sync enabled and COT authoritative.
+		// Sync enabled.
 		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
-		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 
+		// COT authoritative.
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		$order = OrderHelper::create_order();
+
+		// Deleting the backup post while COT is authoritative shouldn't delete the COT version.
+		wp_delete_post( $order->get_id(), true );
+		$this->assertNotFalse( wc_get_order( $order->get_id() ) );
+
+		// Deleting the backup post while posts is authoritative should delete everything.
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 		$order = OrderHelper::create_order();
 		wp_delete_post( $order->get_id(), true );
+		$this->assertFalse( wc_get_order( $order->get_id() ) );
 
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 		$this->assertFalse(
 			wc_get_order( $order->get_id() ),
 			'After the order post record was deleted, the order was also deleted from COT.'
@@ -653,7 +664,7 @@ class DataSynchronizerTests extends HposTestCase {
 		);
 		$sync_setting = array_values( $sync_setting )[0];
 		$this->assertEquals( $sync_setting['value'], 'no' );
-		$this->assertTrue( str_contains( $sync_setting['desc_tip'], "There's 1 order pending sync" ) );
+		$this->assertTrue( str_contains( $sync_setting['desc_tip'], $auth_table_change_allowed_with_sync_pending ? "There's 1 order pending sync" : "There's currently 1 order out of sync" ) );
 		$this->assertTrue(
 			str_contains(
 				$sync_setting['desc_tip'],

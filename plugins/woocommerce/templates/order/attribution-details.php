@@ -6,7 +6,7 @@
  *
  * @see     Automattic\WooCommerce\Internal\Orders\OrderAttributionController
  * @package WooCommerce\Templates
- * @version 8.6.0-dev
+ * @version 9.0.0
  */
 
 declare( strict_types=1 );
@@ -66,7 +66,6 @@ defined( 'ABSPATH' ) || exit;
 		<?php if ( array_key_exists( 'utm_source', $meta ) ) : ?>
 			<h4>
 				<?php esc_html_e( 'Source', 'woocommerce' ); ?>
-
 			</h4>
 			<span class="order-attribution-utm-source">
 				<?php echo esc_html( $meta['utm_source'] ); ?>
@@ -79,6 +78,33 @@ defined( 'ABSPATH' ) || exit;
 			</h4>
 			<span class="order-attribution-utm-medium">
 				<?php echo esc_html( $meta['utm_medium'] ); ?>
+			</span>
+		<?php endif; ?>
+
+		<?php if ( array_key_exists( 'utm_source_platform', $meta ) ) : ?>
+			<h4>
+				<?php esc_html_e( 'Source platform', 'woocommerce' ); ?>
+			</h4>
+			<span class="order-attribution-utm-source-platform">
+				<?php echo esc_html( $meta['utm_source_platform'] ); ?>
+			</span>
+		<?php endif; ?>
+
+		<?php if ( array_key_exists( 'utm_creative_format', $meta ) ) : ?>
+			<h4>
+				<?php esc_html_e( 'Creative format', 'woocommerce' ); ?>
+			</h4>
+			<span class="order-attribution-utm-creative-format">
+				<?php echo esc_html( $meta['utm_creative_format'] ); ?>
+			</span>
+		<?php endif; ?>
+
+		<?php if ( array_key_exists( 'utm_marketing_tactic', $meta ) ) : ?>
+			<h4>
+				<?php esc_html_e( 'Marketing tactic', 'woocommerce' ); ?>
+			</h4>
+			<span class="order-attribution-utm-marketing-tactic">
+				<?php echo esc_html( $meta['utm_marketing_tactic'] ); ?>
 			</span>
 		<?php endif; ?>
 

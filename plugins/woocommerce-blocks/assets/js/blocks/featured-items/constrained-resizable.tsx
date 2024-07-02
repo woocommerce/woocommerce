@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useState } from '@wordpress/element';
 import { ResizableBox } from '@wordpress/components';
 import { useThrottledCallback } from 'use-debounce';
@@ -15,7 +15,7 @@ export const ConstrainedResizable = ( {
 }: ResizableBox.Props ): JSX.Element => {
 	const [ isResizing, setIsResizing ] = useState( false );
 
-	const classNames = classnames( className, {
+	const classNames = clsx( className, {
 		'is-resizing': isResizing,
 	} );
 	const throttledResize = useThrottledCallback< ResizeCallback >(

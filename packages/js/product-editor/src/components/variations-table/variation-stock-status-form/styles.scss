@@ -1,0 +1,42 @@
+.woocommerce-variation-stock-status-form {
+	display: flex;
+	flex-direction: column;
+	min-width: 345px;
+
+	&__controls,
+	&__actions {
+		display: flex;
+		gap: $grid-unit-20;
+		padding: $grid-unit-20;
+	}
+
+	&__controls {
+		&:first-child {
+			padding-top: $grid-unit-20;
+		}
+
+		padding-top: 0;
+
+		.components-base-control.components-toggle-control {
+			margin: 0;
+		}
+
+		.components-base-control {
+			width: 100%;
+
+			&.has-error {
+				.components-input-control__backdrop {
+					border-color: $studio-red-50;
+				}
+
+				.components-base-control__help {
+					color: $studio-red-50;
+				}
+			}
+		}
+	}
+
+	&__actions {
+		justify-content: flex-end;
+	}
+}

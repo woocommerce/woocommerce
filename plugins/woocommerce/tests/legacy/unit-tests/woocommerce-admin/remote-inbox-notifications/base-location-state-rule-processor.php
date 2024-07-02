@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\BaseLocationStateRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\BaseLocationStateRuleProcessor;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
 /**

@@ -420,12 +420,12 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 *  Kicks off the WCCOM Connect process.
 	 *
-	 * @return WP_Error|array Connection URL for Woo.com
+	 * @return WP_Error|array Connection URL for WooCommerce.com
 	 */
 	public function request_wccom_connect() {
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-api.php';
 		if ( ! class_exists( 'WC_Helper_API' ) ) {
-			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the Woo.com Helper API.', 'woocommerce' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce' ), 404 );
 		}
 
 		$redirect_uri = wc_admin_url( '&task=connect&wccom-connected=1' );
@@ -442,12 +442,12 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		$code = wp_remote_retrieve_response_code( $request );
 		if ( 200 !== $code ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Woo.com. Please try again.', 'woocommerce' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		$secret = json_decode( wp_remote_retrieve_body( $request ) );
 		if ( empty( $secret ) ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Woo.com. Please try again.', 'woocommerce' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		do_action( 'woocommerce_helper_connect_start' );
@@ -477,7 +477,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Finishes connecting to Woo.com.
+	 * Finishes connecting to WooCommerce.com.
 	 *
 	 * @param  object $rest_request Request details.
 	 * @return WP_Error|array Contains success status.
@@ -488,7 +488,7 @@ class Plugins extends \WC_REST_Data_Controller {
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-updater.php';
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php';
 		if ( ! class_exists( 'WC_Helper_API' ) ) {
-			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the Woo.com Helper API.', 'woocommerce' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce' ), 404 );
 		}
 
 		// Obtain an access token.
@@ -504,12 +504,12 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		$code = wp_remote_retrieve_response_code( $request );
 		if ( 200 !== $code ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Woo.com. Please try again.', 'woocommerce' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		$access_token = json_decode( wp_remote_retrieve_body( $request ), true );
 		if ( ! $access_token ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Woo.com. Please try again.', 'woocommerce' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		\WC_Helper_Options::update(
@@ -525,7 +525,7 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		if ( ! \WC_Helper::_flush_authentication_cache() ) {
 			\WC_Helper_Options::update( 'auth', array() );
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Woo.com. Please try again.', 'woocommerce' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		delete_transient( '_woocommerce_helper_subscriptions' );
@@ -592,25 +592,22 @@ class Plugins extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Returns a URL that can be used to by WCPay to verify business details with Stripe.
+	 * Returns a URL that can be used to by WCPay to verify business details.
 	 *
 	 * @return WP_Error|array Connect URL.
 	 */
 	public function connect_wcpay() {
-		if ( ! class_exists( 'WC_Payments_Account' ) ) {
+		if ( ! class_exists( 'WC_Payments' ) ) {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooPayments plugin.', 'woocommerce' ), 500 );
 		}
 
-		$args = WooCommercePayments::is_account_partially_onboarded() ? [
-			'wcpay-login' => '1',
-			'_wpnonce'    => wp_create_nonce( 'wcpay-login' ),
-		] : [
-			'wcpay-connect' => 'WCADMIN_PAYMENT_TASK',
-			'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
-		];
+		// Redirect to the WooPayments overview page if the merchant started onboarding (aka WooPayments is already connected).
+		// Redirect to the WooPayments connect page if they haven't started onboarding.
+		$path = WooCommercePayments::is_connected() ? '/payments/overview' : '/payments/connect';
 
+		// Point to the WooPayments Connect page rather than straight to the onboarding flow.
 		return( array(
-			'connectUrl' => add_query_arg( $args, admin_url() ),
+			'connectUrl' => add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=' . $path ) ),
 		) );
 	}
 

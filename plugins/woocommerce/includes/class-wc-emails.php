@@ -220,7 +220,7 @@ class WC_Emails {
 	 */
 	public function init() {
 		// Include email classes.
-		include_once dirname( __FILE__ ) . '/emails/class-wc-email.php';
+		include_once __DIR__ . '/emails/class-wc-email.php';
 
 		$this->emails['WC_Email_New_Order']                 = include __DIR__ . '/emails/class-wc-email-new-order.php';
 		$this->emails['WC_Email_Cancelled_Order']           = include __DIR__ . '/emails/class-wc-email-cancelled-order.php';
@@ -302,8 +302,8 @@ class WC_Emails {
 				$this->get_blogname(),
 				$domain,
 				$domain,
-				'<a href="https://woo.com">WooCommerce</a>',
-				'<a href="https://woo.com">WooCommerce</a>',
+				'<a href="https://woocommerce.com">WooCommerce</a>',
+				'<a href="https://woocommerce.com">WooCommerce</a>',
 			),
 			$string
 		);
@@ -597,7 +597,7 @@ class WC_Emails {
 	}
 
 	/**
-	 * Renders any additional fields captured during block based checkout.
+	 * Renders any additional fields captured during block-based checkout.
 	 *
 	 * @param WC_Order $order         Order instance.
 	 * @param bool     $sent_to_admin If email is sent to admin.
@@ -610,8 +610,8 @@ class WC_Emails {
 
 		$checkout_fields = Package::container()->get( CheckoutFields::class );
 		$fields          = array_merge(
-			$checkout_fields->get_order_additional_fields_with_values( $order, 'contact', '', 'view' ),
-			$checkout_fields->get_order_additional_fields_with_values( $order, 'additional', '', 'view' ),
+			$checkout_fields->get_order_additional_fields_with_values( $order, 'contact', 'other', 'view' ),
+			$checkout_fields->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' ),
 		);
 
 		if ( ! $fields ) {
@@ -634,7 +634,7 @@ class WC_Emails {
 	}
 
 	/**
-	 * Renders any additional address fields captured during block based checkout.
+	 * Renders any additional address fields captured during block-based checkout.
 	 *
 	 * @param string   $address_type Address type.
 	 * @param WC_Order $order         Order instance.

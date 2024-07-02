@@ -5,6 +5,10 @@
  * @package WooCommerce\Admin\Shipping
  */
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -15,7 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<span class="wc-shipping-zone-name"><?php echo esc_html( $zone->get_zone_name() ? $zone->get_zone_name() : __( 'Zone', 'woocommerce' ) ); ?></span>
 </h2>
 
-<?php do_action( 'woocommerce_shipping_zone_before_methods_table', $zone ); ?>
+<?php
+// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+do_action( 'woocommerce_shipping_zone_before_methods_table', $zone );
+?>
 
 <table class="form-table wc-shipping-zone-settings">
 	<tbody>
@@ -52,7 +59,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="wc-shipping-zone-postcodes">
 						<textarea name="zone_postcodes" data-attribute="zone_postcodes" id="zone_postcodes" placeholder="<?php esc_attr_e( 'List 1 postcode per line', 'woocommerce' ); ?>" class="input-text large-text" cols="25" rows="5"><?php echo esc_textarea( implode( "\n", $postcodes ) ); ?></textarea>
 						<?php /* translators: WooCommerce link to setting up shipping zones */ ?>
-						<span class="description"><?php printf( __( 'Postcodes containing wildcards (e.g. CB23*) or fully numeric ranges (e.g. <code>90210...99000</code>) are also supported. Please see the shipping zones <a href="%s" target="_blank">documentation</a> for more information.', 'woocommerce' ), 'https://woo.com/document/setting-up-shipping-zones/#section-3' ); ?></span><?php // @codingStandardsIgnoreLine. ?>
+						<span class="description"><?php printf( __( 'Postcodes containing wildcards (e.g. CB23*) or fully numeric ranges (e.g. <code>90210...99000</code>) are also supported. Please see the shipping zones <a href="%s" target="_blank">documentation</a> for more information.', 'woocommerce' ), 'https://woocommerce.com/document/setting-up-shipping-zones/#section-3' ); ?></span><?php // @codingStandardsIgnoreLine. ?>
 					</div>
 				</td>
 			</tr>
@@ -84,16 +91,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tr>
 			<th scope="row"></th>
 			<td>
-				<button type="submit" class="button button-primary wc-shipping-zone-add-method" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
+				<button type="submit" class="wc-shipping-zone-add-method components-button is-primary" value="<?php esc_attr_e( 'Add shipping method', 'woocommerce' ); ?>"><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></button>
 			</td>
 		</tr>
 	</tbody>
 </table>
 
-<?php do_action( 'woocommerce_shipping_zone_after_methods_table', $zone ); ?>
+<?php
+// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+do_action( 'woocommerce_shipping_zone_after_methods_table', $zone );
+?>
 
 <p class="submit">
-	<button type="submit" name="submit" id="submit" class="button button-primary button-large wc-shipping-zone-method-save" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" disabled><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
+	<button type="submit" name="submit" id="submit" class="button-primary button-large wc-shipping-zone-method-save components-button is-primary" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" disabled><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
 </p>
 
 <script type="text/html" id="tmpl-wc-shipping-zone-method-row-blank">
@@ -198,6 +208,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 							$methods_placed_in_order = array_merge( $methods_placed_in_order, array_values( $methods ) );
 
 							foreach ( $methods_placed_in_order as $method ) {
+								if ( CartCheckoutUtils::is_checkout_block_default() && ! ShippingController::is_legacy_local_pickup_active() && 'local_pickup' === $method->id ) {
+									continue;
+								}
+
 								if ( ! $method->supports( 'shipping-zones' ) ) {
 									continue;
 								}
@@ -214,7 +228,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 								echo '<div id=' . esc_attr( $method->id ) . '-description class="wc-shipping-zone-method-input-help-text"><span>' . wp_kses_post( wpautop( $method->get_method_description() ) ) . '</span></div>';
 							}
-							echo '</div>'
+
+							if ( CartCheckoutUtils::is_checkout_block_default() ) {
+								echo '<p class="wc-shipping-legacy-local-pickup-help-text-container">';
+
+								if ( ShippingController::is_legacy_local_pickup_active() ) {
+									printf(
+										wp_kses(
+										/* translators: %s: Local pickup settings page URL. */
+											__( 'Explore a new enhanced delivery method that allows you to easily offer one or more pickup locations to your customers in the <a href="%s">Local pickup settings page</a>.', 'woocommerce' ),
+											array( 'a' => array( 'href' => array() ) )
+										),
+										esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
+									);
+
+								} else {
+									/* translators: %s: Local pickup settings page URL. */
+									$message = __( 'Local pickup: Set up pickup locations in the <a href="%s">Local pickup settings page</a>.', 'woocommerce' );
+									if ( LocalPickupUtils::is_local_pickup_enabled() ) {
+										/* translators: %s: Local pickup settings page URL. */
+										$message = __( 'Local pickup: Manage existing pickup locations in the <a href="%s">Local pickup settings page</a>.', 'woocommerce' );
+									}
+									printf(
+										wp_kses(
+											$message,
+											array( 'a' => array( 'href' => array() ) )
+										),
+										esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
+									);
+								}
+
+								echo '</p>';
+							}
+
+							echo '</div>';
+
 							?>
 						</fieldset>
 					</form>

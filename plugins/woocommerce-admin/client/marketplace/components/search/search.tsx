@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Icon, search } from '@wordpress/icons';
-import { useEffect, useState } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
 
 /**
@@ -11,8 +11,14 @@ import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
  */
 import './search.scss';
 import { MARKETPLACE_PATH } from '../constants';
+import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 const searchPlaceholder = __(
+	'Search for extensions, themes, and business services',
+	'woocommerce'
+);
+
+const searchPlaceholderNoBusinessServices = __(
 	'Search for extensions and themes',
 	'woocommerce'
 );
@@ -24,8 +30,13 @@ const searchPlaceholder = __(
  */
 function Search(): JSX.Element {
 	const [ searchTerm, setSearchTerm ] = useState( '' );
+	const { hasBusinessServices } = useContext( MarketplaceContext );
 
 	const query = useQuery();
+
+	const placeholder = hasBusinessServices
+		? searchPlaceholder
+		: searchPlaceholderNoBusinessServices;
 
 	useEffect( () => {
 		if ( query.term ) {
@@ -80,7 +91,7 @@ function Search(): JSX.Element {
 				className="screen-reader-text"
 				htmlFor="woocommerce-marketplace-search-query"
 			>
-				{ searchPlaceholder }
+				{ placeholder }
 			</label>
 			<input
 				id="woocommerce-marketplace-search-query"
@@ -88,7 +99,7 @@ function Search(): JSX.Element {
 				className="woocommerce-marketplace__search-input"
 				type="search"
 				name="woocommerce-marketplace-search-query"
-				placeholder={ searchPlaceholder }
+				placeholder={ placeholder }
 				onChange={ handleInputChange }
 				onKeyUp={ handleKeyUp }
 			/>

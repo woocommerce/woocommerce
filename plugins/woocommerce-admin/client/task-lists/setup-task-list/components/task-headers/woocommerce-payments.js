@@ -7,13 +7,10 @@ import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
-import { Link } from '@woocommerce/components';
-import interpolateComponents from '@automattic/interpolate-components';
 
 /**
  * Internal dependencies
  */
-import TimerImage from './timer.svg';
 import { WC_ASSET_URL, getAdminSetting } from '~/utils/admin-settings';
 import sanitizeHTML from '~/lib/sanitize-html';
 
@@ -52,7 +49,7 @@ const WoocommercePaymentsHeader = ( { task, trackClick } ) => {
 			<img
 				alt={ __( 'Payment illustration', 'woocommerce' ) }
 				src={
-					WC_ASSET_URL + 'images/task_list/payment-illustration.png'
+					WC_ASSET_URL + 'images/task_list/payment-illustration.svg'
 				}
 				className="svg-background"
 			/>
@@ -67,29 +64,11 @@ const WoocommercePaymentsHeader = ( { task, trackClick } ) => {
 				) : (
 					<p>
 						{ __(
-							"You're only one step away from getting paid. Verify your business details to start managing transactions with WooPayments.",
+							'Power your payments with a simple, all-in-one option. Verify your business details to start managing transactions with WooCommerce Payments.',
 							'woocommerce'
 						) }
 					</p>
 				) }
-				<p>
-					{ interpolateComponents( {
-						mixedString: __(
-							'By clicking "Verify Details", you agree to the {{link}}Terms of Service{{/link}}',
-							'woocommerce'
-						),
-						components: {
-							link: (
-								<Link
-									href="https://wordpress.com/tos/"
-									target="_blank"
-									type="external"
-									rel="noreferrer"
-								/>
-							),
-						},
-					} ) }
-				</p>
 				<Button
 					isSecondary={ task.isComplete }
 					isPrimary={ ! task.isComplete }
@@ -97,12 +76,8 @@ const WoocommercePaymentsHeader = ( { task, trackClick } ) => {
 					disabled={ isBusy }
 					onClick={ onClick }
 				>
-					{ __( 'Verify details', 'woocommerce' ) }
+					{ __( 'Get paid', 'woocommerce' ) }
 				</Button>
-				<p className="woocommerce-task-header__timer">
-					<img src={ TimerImage } alt="Timer" />{ ' ' }
-					<span>{ __( '2 minutes', 'woocommerce' ) }</span>
-				</p>
 			</div>
 		</div>
 	);

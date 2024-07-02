@@ -40,10 +40,21 @@ export function myAccountOrders() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
+			'title is: "My account – WooCommerce Core E2E Test Suite"': (
+				response
+			) =>
+				response.html().find( 'head title' ).text() ===
+				'My account – WooCommerce Core E2E Test Suite',
 			'body contains: my account welcome message': ( response ) =>
 				response.body.includes(
 					'From your account dashboard you can view'
 				),
+			'footer contains: Built with WooCommerce': ( response ) =>
+				response
+					.html()
+					.find( 'body footer' )
+					.text()
+					.includes( 'Built with WooCommerce' ),
 		} );
 	} );
 
@@ -64,8 +75,19 @@ export function myAccountOrders() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
+			'title is: "My account – WooCommerce Core E2E Test Suite"': (
+				response
+			) =>
+				response.html().find( 'head title' ).text() ===
+				'My account – WooCommerce Core E2E Test Suite',
 			"body contains: 'Orders' title": ( response ) =>
 				response.body.includes( '>Orders</h1>' ),
+			'footer contains: Built with WooCommerce': ( response ) =>
+				response
+					.html()
+					.find( 'body footer' )
+					.text()
+					.includes( 'Built with WooCommerce' ),
 		} );
 		my_account_order_id = findBetween(
 			response.body,
@@ -94,8 +116,19 @@ export function myAccountOrders() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
+			'title is: "My account – WooCommerce Core E2E Test Suite"': (
+				response
+			) =>
+				response.html().find( 'head title' ).text() ===
+				'My account – WooCommerce Core E2E Test Suite',
 			"body contains: 'Order number' title": ( response ) =>
 				response.body.includes( `${ my_account_order_id }</h1>` ),
+			'footer contains: Built with WooCommerce': ( response ) =>
+				response
+					.html()
+					.find( 'body footer' )
+					.text()
+					.includes( 'Built with WooCommerce' ),
 		} );
 	} );
 

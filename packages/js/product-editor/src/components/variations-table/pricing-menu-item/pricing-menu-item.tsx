@@ -87,7 +87,7 @@ export function PricingMenuItem( {
 			) }
 			renderContent={ () => (
 				<div className="components-dropdown-menu__menu">
-					<MenuGroup label={ __( 'List price', 'woocommerce' ) }>
+					<MenuGroup label={ __( 'Regular price', 'woocommerce' ) }>
 						<SetListPriceMenuItem
 							selection={ selection }
 							onChange={ onChange }
@@ -134,7 +134,7 @@ export function PricingMenuItem( {
 								onClose();
 							} }
 						>
-							{ __( 'Increase list price', 'woocommerce' ) }
+							{ __( 'Increase regular price', 'woocommerce' ) }
 						</MenuItem>
 						<MenuItem
 							onClick={ () => {
@@ -178,7 +178,7 @@ export function PricingMenuItem( {
 								onClose();
 							} }
 						>
-							{ __( 'Decrease list price', 'woocommerce' ) }
+							{ __( 'Decrease regular price', 'woocommerce' ) }
 						</MenuItem>
 					</MenuGroup>
 					<MenuGroup label={ __( 'Sale price', 'woocommerce' ) }>

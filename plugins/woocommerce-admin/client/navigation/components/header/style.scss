@@ -12,7 +12,7 @@
 
 		&:hover,
 		&:focus,
-		&:not([aria-disabled='true']):active {
+		&:not([aria-disabled="true"]):active {
 			color: #fff;
 		}
 	}

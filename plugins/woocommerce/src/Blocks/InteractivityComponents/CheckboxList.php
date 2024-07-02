@@ -43,13 +43,13 @@ class CheckboxList {
 							// translators: %s: checkbox label.
 							$i18n_label = sprintf( __( 'Checkbox: %s', 'woocommerce' ), $item['aria_label'] ?? '' );
 							?>
-							<li>
+							<li data-wc-key="<?php echo esc_attr( $item['id'] ); ?>">
 								<div class="wc-block-components-checkbox">
 									<label for="<?php echo esc_attr( $item['id'] ); ?>">
-										<input 
-											id="<?php echo esc_attr( $item['id'] ); ?>" 
-											class="wc-block-components-checkbox__input" 
-											type="checkbox" 
+										<input
+											id="<?php echo esc_attr( $item['id'] ); ?>"
+											class="wc-block-components-checkbox__input"
+											type="checkbox"
 											aria-invalid="false"
 											aria-label="<?php echo esc_attr( $i18n_label ); ?>"
 											data-wc-on--change--select-item="actions.selectCheckboxItem"

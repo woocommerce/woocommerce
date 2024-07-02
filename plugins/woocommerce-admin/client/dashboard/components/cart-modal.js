@@ -42,7 +42,7 @@ class CartModal extends Component {
 		} );
 
 		const url = getInAppPurchaseUrl(
-			'https://woo.com/cart?utm_medium=product',
+			'https://woocommerce.com/cart?utm_medium=product',
 			{
 				'wccom-replace-with': productIds.join( ',' ),
 			}

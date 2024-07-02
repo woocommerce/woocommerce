@@ -99,4 +99,24 @@ jQuery( function( $ ) {
 			}
 		}
 	);
+
+
+	$( 'a.coming-soon-footer-banner-dismiss' ).on( 'click', function( e ) {
+		var target = $( e.target );
+		$.ajax( {
+			type: 'post',
+			url: target.data( 'rest-url' ),
+			data: {
+				meta: {
+					'woocommerce_coming_soon_banner_dismissed': 'yes'
+				}
+			},
+			beforeSend: function ( xhr ) {
+				xhr.setRequestHeader( 'X-WP-Nonce',  target.data( 'rest-nonce' ) );
+			},
+			complete: function () {
+				$('#coming-soon-footer-banner').hide();
+			}
+		} );
+	} );
 });

@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { getCategories, setCategories } from '@wordpress/blocks';
-import { __ } from '@wordpress/i18n';
+import { updateCategory } from '@wordpress/blocks';
 import { woo } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 
@@ -16,24 +15,12 @@ import './filters/get-block-attributes';
 import './base/components/notice-banner/style.scss';
 import './atomic/utils/blocks-registration-manager';
 
-setCategories( [
-	...getCategories().filter(
-		( { slug } ) =>
-			slug !== 'woocommerce' && slug !== 'woocommerce-product-elements'
+// Icons are set on the front-end to make use of WordPress SVG primitive,
+// See: https://developer.wordpress.org/block-editor/reference-guides/filters/block-filters/#wp-blocks-updatecategory
+
+updateCategory( 'woocommerce', { icon: <Icon icon={ woo } /> } );
+updateCategory( 'woocommerce-product-elements', {
+	icon: (
+		<Icon icon={ woo } className="wc-block-editor-components-block-icon" />
 	),
-	{
-		slug: 'woocommerce',
-		title: __( 'WooCommerce', 'woocommerce' ),
-		icon: <Icon icon={ woo } />,
-	},
-	{
-		slug: 'woocommerce-product-elements',
-		title: __( 'WooCommerce Product Elements', 'woocommerce' ),
-		icon: (
-			<Icon
-				icon={ woo }
-				className="wc-block-editor-components-block-icon"
-			/>
-		),
-	},
-] );
+} );

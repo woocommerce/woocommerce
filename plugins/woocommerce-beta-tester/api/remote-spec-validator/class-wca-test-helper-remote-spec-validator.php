@@ -2,14 +2,14 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
 
 register_woocommerce_admin_test_helper_rest_route(
 	'/remote-spec-validator/validate',
 	'wca_test_helper_validate_remote_spec',
 	array(
 		'methods' => 'POST',
-		'args'	=> array(
+		'args'    => array(
 			'spec' => array(
 				'description'       => 'The remote spec to validate.',
 				'type'              => 'string',
@@ -21,14 +21,16 @@ register_woocommerce_admin_test_helper_rest_route(
 );
 
 /**
+ * Test the spec.
+ *
  * @param WP_REST_Request $request The full request data.
  */
 function wca_test_helper_validate_remote_spec( $request ) {
-	$spec = json_decode( $request->get_param( 'spec' ) );
+	$spec           = json_decode( $request->get_param( 'spec' ) );
 	$rule_evaluator = new RuleEvaluator();
-	$result = [
+	$result         = array(
 		'valid' => $rule_evaluator->evaluate( $spec ),
-	];
-	
-	return new WP_REST_RESPONSE( $result, 200 );
+	);
+
+	return new WP_REST_Response( $result, 200 );
 }

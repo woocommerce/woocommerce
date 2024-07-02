@@ -5,7 +5,7 @@ menu_title: Classic theme development
 
 ---
 
-**Note:** this document is geared toward the development of classic themes. For the recommended modern approach, visit [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/) to learn about block theme development, and explore the [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/) tool when you're ready to create a new theme.
+**Note:** this document is geared toward the development of classic themes. Check this other document for [block theme development](../../plugins/woocommerce-blocks/docs/designers/theming/README.md).
 
 ---
 
@@ -137,7 +137,7 @@ The `product_grid` settings let theme developers set default, minimum, and maxim
 
 ### Product gallery features (zoom, swipe, lightbox)
 
-The product gallery introduced in 3.0.0 ([read here for more information](https://developer.woo.com/2016/10/19/new-product-gallery-merged-in-to-core-for-2-7/)) uses Flexslider, Photoswipe, and the jQuery Zoom plugin to offer swiping, lightboxes, and other neat features.
+The product gallery introduced in 3.0.0 ([read here for more information](https://developer.woocommerce.com/2016/10/19/new-product-gallery-merged-in-to-core-for-2-7/)) uses Flexslider, Photoswipe, and the jQuery Zoom plugin to offer swiping, lightboxes, and other neat features.
 
 In versions `3.0`, `3.1`, and `3.2`, the new gallery is off by default and needs to be enabled using a snippet (below) or by using a compatible theme. This is because it's common for themes to disable the WooCommerce gallery and replace it with their own scripts.
 

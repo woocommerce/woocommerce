@@ -18,7 +18,7 @@
 		padding-top: 0;
 		font-weight: 500;
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			font-size: 28px;
 			line-height: 36px;
 		}
@@ -32,7 +32,7 @@
 		text-align: center;
 		color: $gray-700;
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			color: $gray-700;
 		}
 	}

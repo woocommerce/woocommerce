@@ -35,3 +35,12 @@ body.wc-lock-selected-block--remove {
 		box-sizing: border-box;
 	}
 }
+
+.wc-block-cart {
+	.wc-block-cart__totals-title {
+		textarea {
+			font-weight: 700; // Ensure correct font-weight in site-editor.
+			vertical-align: middle;
+		}
+	}
+}

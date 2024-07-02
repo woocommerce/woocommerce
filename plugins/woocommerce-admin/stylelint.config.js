@@ -14,7 +14,7 @@ module.exports = {
 		'no-duplicate-selectors': null,
 		'rule-empty-line-before': null,
 		'selector-class-pattern': null,
-		'string-quotes': 'single',
+		'string-quotes': 'double',
 		'value-keyword-case': null,
 		'value-list-comma-newline-after': null,
 		// TODO: fix these rules

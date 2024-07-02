@@ -36,6 +36,15 @@ export function homePage() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
+			'title is: "WooCommerce Core E2E Test Suite"': ( response ) =>
+				response.html().find( 'head title' ).text() ===
+				'WooCommerce Core E2E Test Suite',
+			'footer contains: Built with WooCommerce': ( response ) =>
+				response
+					.html()
+					.find( 'body footer' )
+					.text()
+					.includes( 'Built with WooCommerce' ),
 		} );
 	} );
 

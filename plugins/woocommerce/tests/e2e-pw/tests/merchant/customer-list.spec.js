@@ -58,56 +58,51 @@ const customerData = {
 	},
 };
 
-baseTest.describe( 'Merchant > Customer List', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		customers: async ( { api }, use ) => {
-			const customers = [];
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	customers: async ( { api }, use ) => {
+		const customers = [];
 
-			for ( const customer of Object.values( customerData ) ) {
-				await api.post( 'customers', customer ).then( ( response ) => {
-					customers.push( response.data );
-				} );
-			}
-
-			await use( customers );
-
-			await api.post( `customers/batch`, {
-				delete: customers.map( ( customer ) => customer.id ),
+		for ( const customer of Object.values( customerData ) ) {
+			await api.post( 'customers', customer ).then( ( response ) => {
+				customers.push( response.data );
 			} );
-		},
-	} );
+		}
 
+		await use( customers );
+
+		await api.post( `customers/batch`, {
+			delete: customers.map( ( customer ) => customer.id ),
+		} );
+	},
+} );
+
+test.describe( 'Merchant > Customer List', { tag: '@services' }, () => {
 	test.beforeEach( async ( { context } ) => {
 		// prevents the column picker from saving state between tests
 		await context.route( '**/users/**', ( route ) => route.abort() );
-	} );
-
-	test( 'Merchant can view an empty customer list', async ( { page } ) => {
-		await page.goto(
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomers'
-		);
-		await expect(
-			page.getByRole( 'cell', { name: 'No data to display' } )
-		).toBeVisible();
-		await expect(
-			page.getByText( '0customers0Average orders$0.' )
-		).toBeVisible();
 	} );
 
 	test( 'Merchant can view a list of all customers, filter and download', async ( {
 		page,
 		customers,
 	} ) => {
-		await page.goto(
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomers'
-		);
-
-		await test.step( 'Check that 3 customers are displayed', async () => {
-			await expect(
-				page.getByText( '3customers0Average orders$0.' )
-			).toBeVisible();
+		await test.step( 'Go to the customers reports page', async () => {
+			const responsePromise = page.waitForResponse(
+				'**/wp-json/wc-analytics/reports/customers?orderby**'
+			);
+			await page.goto(
+				'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomers'
+			);
+			await responsePromise;
 		} );
+
+		// may have more than 3 customers due to guest orders
+		// await test.step( 'Check that 3 customers are displayed', async () => {
+		// 	await expect(
+		// 		page.getByText( '3customers0Average orders$0.' )
+		// 	).toBeVisible();
+		// } );
 
 		await test.step( 'Check that the customers are displayed in the list', async () => {
 			for ( const customer of customers ) {
@@ -122,12 +117,24 @@ baseTest.describe( 'Merchant > Customer List', () => {
 			for ( const customer of customers ) {
 				await page
 					.locator( '#woocommerce-select-control-0__control-input' )
-					.fill( customer.first_name );
+					.click();
+				await page
+					.locator( '#woocommerce-select-control-0__control-input' )
+					.pressSequentially(
+						`${ customer.first_name } ${ customer.last_name }`
+					);
 				await page
 					.getByRole( 'option', {
-						name: 'All customers with names that',
+						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
+						exact: true,
 					} )
-					.click();
+					.waitFor( { state: 'visible' } );
+				await page
+					.getByRole( 'option', {
+						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
+						exact: true,
+					} )
+					.click( { delay: 300 } );
 				await expect(
 					page.getByRole( 'link', { name: customer.email } )
 				).toBeVisible();
@@ -155,13 +162,13 @@ baseTest.describe( 'Merchant > Customer List', () => {
 
 			await expect(
 				page.getByRole( 'columnheader', { name: 'Username' } )
-			).not.toBeVisible();
+			).toBeHidden();
 			await expect(
 				page.getByRole( 'columnheader', { name: 'Last active' } )
-			).not.toBeVisible();
+			).toBeHidden();
 			await expect(
 				page.getByRole( 'columnheader', { name: 'Total spend' } )
-			).not.toBeVisible();
+			).toBeHidden();
 
 			// show the columns again
 			await page
@@ -187,7 +194,7 @@ baseTest.describe( 'Merchant > Customer List', () => {
 			).toBeVisible();
 		} );
 
-		test.step( 'Download the customer list', async () => {
+		await test.step( 'Download the customer list', async () => {
 			const downloadPromise = page.waitForEvent( 'download' );
 			await page.getByRole( 'button', { name: 'Download' } ).click();
 			const download = await downloadPromise;
@@ -235,7 +242,7 @@ baseTest.describe( 'Merchant > Customer List', () => {
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', { name: customers[ 1 ].email } )
-			).not.toBeVisible();
+			).toBeHidden();
 			await expect(
 				page.getByRole( 'button', {
 					name: `${ customers[ 0 ].first_name } ${ customers[ 0 ].last_name } Single Customer`,
@@ -262,7 +269,7 @@ baseTest.describe( 'Merchant > Customer List', () => {
 		} );
 
 		await test.step( 'Add a filter for email', async () => {
-			await page.getByRole( 'button', { name: 'Add a Filter' } ).click();
+			await page.getByRole( 'button', { name: 'Add a filter' } ).click();
 			await page
 				.locator( 'li' )
 				.filter( { hasText: 'Email' } )
@@ -279,7 +286,7 @@ baseTest.describe( 'Merchant > Customer List', () => {
 		} );
 
 		await test.step( 'Add a filter for country', async () => {
-			await page.getByRole( 'button', { name: 'Add a Filter' } ).click();
+			await page.getByRole( 'button', { name: 'Add a filter' } ).click();
 			await page
 				.locator( 'li' )
 				.filter( { hasText: 'Country / Region' } )
@@ -305,7 +312,7 @@ baseTest.describe( 'Merchant > Customer List', () => {
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', { name: customers[ 0 ].email } )
-			).not.toBeVisible();
+			).toBeHidden();
 		} );
 	} );
 } );

@@ -10,7 +10,7 @@ The [full plugin code](https://github.com/EdithAllison/woo-product-custom-fields
 
 ## Prerequisites
 
-To do this tutorial you will need to have a WordPress install with the WooCommerce plugin activated, and you will need at least one [simple product set up](https://woo.com/document/managing-products/), or you can [import the WooCommerce sample product range](https://woo.com/document/importing-woocommerce-sample-data/).
+To do this tutorial you will need to have a WordPress install with the WooCommerce plugin activated, and you will need at least one [simple product set up](https://woocommerce.com/document/managing-products/), or you can [import the WooCommerce sample product range](https://woocommerce.com/document/importing-woocommerce-sample-data/).
 
 ## Setting up the plugin
 
@@ -205,7 +205,7 @@ Below is a bonus task if you are interested in variable products. Feel free to c
 
 ## How to handle variable products?
 
-The above example was done with a simple product. But what if we have variations, for example, a T-Shirt in multiple sizes and we wanted to store different stock information for each variant? WooCommerce lets us do that with the [variable product type](https://woo.com/document/variable-product/).
+The above example was done with a simple product. But what if we have variations, for example, a T-Shirt in multiple sizes and we wanted to store different stock information for each variant? WooCommerce lets us do that with the [variable product type](https://woocommerce.com/document/variable-product/).
 
 A variable product type has variations as its children. To add a custom field to a variation, we can use the `woocommerce_variation_options_inventory` hook, and to save `woocommerce_save_product_variation` so let's update our `hooks()` method with the new action hooks like so:
 
