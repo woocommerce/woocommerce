@@ -8,6 +8,18 @@ export const blockAttributes: BlockAttributes = {
 		type: 'number',
 		default: 0,
 	},
+	isDescendentOfQueryLoop: {
+		type: 'boolean',
+		default: false,
+	},
+	isDescendentOfSingleProductTemplate: {
+		type: 'boolean',
+		default: false,
+	},
+	isDescendentOfSingleProductBlock: {
+		type: 'boolean',
+		default: false,
+	},
 	isDescendantOfAllProducts: {
 		type: 'boolean',
 		default: false,

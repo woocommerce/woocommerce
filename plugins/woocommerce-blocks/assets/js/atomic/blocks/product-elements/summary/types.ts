@@ -7,6 +7,9 @@ import type { CSSProperties } from '@wordpress/element';
 
 export interface Attributes {
 	productId: number;
+	isDescendentOfQueryLoop: boolean;
+	isDescendentOfSingleProductTemplate: boolean;
+	isDescendentOfSingleProductBlock: boolean;
 	isDescendantOfAllProducts: boolean;
 	showDescriptionIfEmpty: boolean;
 	showLink: boolean;
