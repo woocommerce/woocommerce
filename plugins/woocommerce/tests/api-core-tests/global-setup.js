@@ -96,7 +96,7 @@ module.exports = async ( config ) => {
 				await expect( setupPage.locator( 'div.wrap > h1' ) ).toHaveText(
 					'Dashboard'
 				);
-				console.log( 'Logged-in as admin successfully' );
+				console.log( 'Logged-in as admin successfully.' );
 				adminLoggedIn = true;
 				break;
 			} catch ( e ) {
