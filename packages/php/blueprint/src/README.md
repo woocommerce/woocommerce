@@ -36,11 +36,16 @@ class MyCustomExporter extends StepExporter {
     public function export( array $data ): Step {
        
     }
+    
+    public function get_step_name() {
+        return 'setSiteOptions';
+    }
+
 }
 ```
 
 2. The `export` method should return a `Step` object.
-3. Let's use built-in `SetSiteOptions` step for this example. We'll cover how to add a custom Step later in this document.
+3. Let's use a built-in `SetSiteOptions` step for this example. We'll cover how to add a custom Step later in this document.
 4. Create a new instance of `SetSiteOptions` and return it.
 
 ```php
@@ -56,6 +61,10 @@ class MyCustomExporter extends StepExporter {
             'option2' => get_option( 'option2' ),
        ];
        return new SetSiteOptions( $data );
+    }
+    
+    public function get_step_name() {
+        return 'setSiteOptions';
     }
 }
 
@@ -75,6 +84,10 @@ class MyCustomExporter extends StepExporter {
             'option2' => get_option( 'option2' ),
        ];
        return new SetSiteOptions( $data );
+    }
+    
+    public function get_step_name() {
+        return 'setSiteOptions';
     }
 }
 
