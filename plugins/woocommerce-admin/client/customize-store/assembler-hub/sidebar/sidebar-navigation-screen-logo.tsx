@@ -535,7 +535,7 @@ export const SidebarNavigationScreenLogo = ( {
 						<p>
 							{ interpolateComponents( {
 								mixedString: __(
-									'Get a custom logo designed by a professional on {{link}}Fiverr{{/link}}.',
+									'Build your brand by creating a memorable logo using {{link}}Fiverr{{/link}}.',
 									'woocommerce'
 								),
 								components: {
