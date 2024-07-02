@@ -46,6 +46,7 @@ class ProductCollection extends AbstractBlock {
 	 */
 	protected $custom_order_opts = array( 'popularity', 'rating' );
 
+
 	/**
 	 * Initialize this block type.
 	 *
@@ -107,11 +108,11 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @param array $context  The block context.
 	 * @return array $context {
-	 *     The context including the product collection location context.
+	 *     The block context including the product collection location context.
 	 *
 	 *     @type array $productCollectionLocation {
 	 *         @type string  $type        The context type. Possible values are 'site', 'order', 'cart', 'archive', 'product'.
-	 *         @type array   $sourceData  The context source data. Can be the product ID of the viewed product, the order ID of the current order, etc.
+	 *         @type array   $sourceData  The context source data. Can be the product ID of the viewed product, the order ID of the current order viewed, etc. See structure above for more details.
 	 *     }
 	 * }
 	 */
@@ -142,14 +143,14 @@ class ProductCollection extends AbstractBlock {
 	 * Get the global location context.
 	 * Serve as a runtime cache for the location context.
 	 *
-	 * @see ProductCollectionUtils::parse_global_location_context()
+	 * @see ProductCollectionUtils::parse_frontend_location_context()
 	 *
 	 * @return array The location context.
 	 */
 	private function get_location_context() {
 		static $location_context = null;
 		if ( null === $location_context ) {
-			$location_context = ProductCollectionUtils::parse_global_location_context();
+			$location_context = ProductCollectionUtils::parse_frontend_location_context();
 		}
 		return $location_context;
 	}
@@ -519,6 +520,7 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$block_context_query = $block->context['query'];
+
 		// phpcs:ignore WordPress.DB.SlowDBQuery
 		$block_context_query['tax_query'] = ! empty( $query['tax_query'] ) ? $query['tax_query'] : array();
 
