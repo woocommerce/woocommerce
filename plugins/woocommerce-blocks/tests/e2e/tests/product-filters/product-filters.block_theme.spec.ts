@@ -62,17 +62,15 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 		await expect( filtersbBlockHeading ).toBeVisible();
 
-		const activeHeading = block.getByRole( 'document', {
-			name: 'Active',
-		} );
+		const activeHeading = block.getByText( 'Active', { exact: true } );
 		const activeFilterBlock = block.getByLabel(
 			'Block: Product Filter: Active'
 		);
 		await expect( activeHeading ).toBeVisible();
 		await expect( activeFilterBlock ).toBeVisible();
 
-		const priceHeading = block.getByRole( 'document', {
-			name: 'Price',
+		const priceHeading = block.getByText( 'Price', {
+			exact: true,
 		} );
 		const priceFilterBlock = block.getByLabel(
 			'Block: Product Filter: Price'
@@ -80,8 +78,8 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( priceHeading ).toBeVisible();
 		await expect( priceFilterBlock ).toBeVisible();
 
-		const statusHeading = block.getByRole( 'document', {
-			name: 'Status',
+		const statusHeading = block.getByText( 'Status', {
+			exact: true,
 		} );
 		const statusFilterBlock = block.getByLabel(
 			'Block: Product Filter: Stock'
@@ -111,14 +109,71 @@ test.describe( `${ blockData.name }`, () => {
 			expect.arrayContaining( expectedColorFilterOptions )
 		);
 
-		const ratingHeading = block.getByRole( 'document', {
-			name: 'Rating',
+		const ratingHeading = block.getByText( 'Rating', {
+			exact: true,
 		} );
 		const ratingFilterBlock = block.getByLabel(
 			'Block: Product Filter: Rating (Experimental)'
 		);
 		await expect( ratingHeading ).toBeVisible();
 		await expect( ratingFilterBlock ).toBeVisible();
+	} );
+
+	test( 'should contain the correct inner block names in the list view', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Experimental)'
+		);
+		await expect( block ).toBeVisible();
+
+		await pageObject.page.getByLabel( 'Document Overview' ).click();
+		const listView = pageObject.page.getByLabel( 'List View' );
+
+		await expect( listView ).toBeVisible();
+
+		const productFiltersBlockListItem = listView.getByRole( 'link', {
+			name: 'Product Filters (Experimental)',
+		} );
+		await expect( productFiltersBlockListItem ).toBeVisible();
+		const listViewExpander =
+			pageObject.page.getByTestId( 'list-view-expander' );
+		const listViewExpanderIcon = listViewExpander.locator( 'svg' );
+
+		await listViewExpanderIcon.click();
+
+		const productFilterHeadingListItem = listView.getByText( 'Filters', {
+			exact: true,
+		} );
+		await expect( productFilterHeadingListItem ).toBeVisible();
+
+		const productFilterActiveBlocksListItem = listView.getByText(
+			'Active (Experimental)'
+		);
+		await expect( productFilterActiveBlocksListItem ).toBeVisible();
+
+		const productFilterPriceBlockListItem = listView.getByText(
+			'Price (Experimental)'
+		);
+		await expect( productFilterPriceBlockListItem ).toBeVisible();
+
+		const productFilterStatusBlockListItem = listView.getByText(
+			'Status (Experimental)'
+		);
+		await expect( productFilterStatusBlockListItem ).toBeVisible();
+
+		const productFilterAttributeBlockListItem = listView.getByText(
+			'Color (Experimental)' // it must select the attribute with the highest product count
+		);
+		await expect( productFilterAttributeBlockListItem ).toBeVisible();
+
+		const productFilterRatingBlockListItem = listView.getByText(
+			'Rating (Experimental)'
+		);
+		await expect( productFilterRatingBlockListItem ).toBeVisible();
 	} );
 
 	test( 'should display the correct inspector style controls', async ( {
@@ -310,5 +365,69 @@ test.describe( `${ blockData.name }`, () => {
 		await expect(
 			block.locator( blockData.selectors.editor.layoutWrapper )
 		).toHaveCSS( 'gap', '0px' );
+	} );
+
+	test.describe( 'product-filter-attribute', () => {
+		test( 'should dynamically set block title and heading based on the selected attribute', async ( {
+			editor,
+			pageObject,
+		} ) => {
+			await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+			await pageObject.page.getByLabel( 'Document Overview' ).click();
+			const listView = pageObject.page.getByLabel( 'List View' );
+
+			const productFiltersBlockListItem = listView.getByRole( 'link', {
+				name: 'Product Filters (Experimental)',
+			} );
+			await expect( productFiltersBlockListItem ).toBeVisible();
+			const listViewExpander =
+				pageObject.page.getByTestId( 'list-view-expander' );
+			const listViewExpanderIcon = listViewExpander.locator( 'svg' );
+
+			await listViewExpanderIcon.click();
+
+			const productFilterAttributeColorBlockListItem = listView.getByText(
+				'Color (Experimental)' // it must select the attribute with the highest product count
+			);
+			await expect(
+				productFilterAttributeColorBlockListItem
+			).toBeVisible();
+
+			const productFilterAttributeBlock = editor.canvas.getByLabel(
+				'Block: Product Filter: Attribute (Experimental)'
+			);
+			await editor.selectBlocks( productFilterAttributeBlock );
+			await editor.clickBlockToolbarButton( 'Edit' );
+			await editor.canvas
+				.locator( 'label' )
+				.filter( { hasText: 'Size' } )
+				.click();
+			await editor.canvas.getByRole( 'button', { name: 'Done' } ).click();
+
+			await expect(
+				productFilterAttributeColorBlockListItem
+			).toBeHidden();
+
+			const productFilterAttributeSizeBlockListItem = listView.getByText(
+				'Size (Experimental)' // it must select the attribute with the highest product count
+			);
+			await expect(
+				productFilterAttributeSizeBlockListItem
+			).toBeVisible();
+
+			const productFilterAttributeWrapperBlock = editor.canvas.getByLabel(
+				'Block: Attribute (Experimental)'
+			);
+			await editor.selectBlocks( productFilterAttributeWrapperBlock );
+			await expect( productFilterAttributeWrapperBlock ).toBeVisible();
+
+			const productFilterAttributeBlockHeading =
+				productFilterAttributeWrapperBlock.getByText( 'Size', {
+					exact: true,
+				} );
+
+			await expect( productFilterAttributeBlockHeading ).toBeVisible();
+		} );
 	} );
 } );
