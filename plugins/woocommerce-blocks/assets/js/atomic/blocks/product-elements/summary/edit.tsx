@@ -26,8 +26,6 @@ import {
 	BLOCK_DESCRIPTION as description,
 } from './constants';
 import './editor.scss';
-import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
-import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 import type { EditProps, ControlProps } from './types';
 
 const ShowDescriptionIfEmptyControl = ( {
@@ -84,7 +82,7 @@ const MaxWordCountControl = ( {
 				} }
 				min={ 0 }
 				max={ 1000 }
-				step={ 5 }
+				step={ 10 }
 			/>
 		</ToolsPanelItem>
 	);
@@ -120,39 +118,9 @@ const LinkToDescriptionControl = ( {
 	);
 };
 
-const Edit = ( {
-	attributes,
-	setAttributes,
-	context,
-}: EditProps ): JSX.Element => {
+const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 	const blockProps = useBlockProps();
 	const { showDescriptionIfEmpty, showLink, summaryLength } = attributes;
-
-	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
-	const { isDescendentOfSingleProductBlock } =
-		useIsDescendentOfSingleProductBlock( { blockClientId: blockProps.id } );
-
-	let { isDescendentOfSingleProductTemplate } =
-		useIsDescendentOfSingleProductTemplate();
-
-	if ( isDescendentOfQueryLoop ) {
-		isDescendentOfSingleProductTemplate = false;
-	}
-
-	useEffect(
-		() =>
-			setAttributes( {
-				isDescendentOfQueryLoop,
-				isDescendentOfSingleProductTemplate,
-				isDescendentOfSingleProductBlock,
-			} ),
-		[
-			setAttributes,
-			isDescendentOfQueryLoop,
-			isDescendentOfSingleProductTemplate,
-			isDescendentOfSingleProductBlock,
-		]
-	);
 
 	return (
 		<div { ...blockProps }>
