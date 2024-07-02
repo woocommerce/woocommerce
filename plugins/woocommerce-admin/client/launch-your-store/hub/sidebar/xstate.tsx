@@ -45,7 +45,7 @@ export type SidebarMachineContext = {
 	externalUrl: string | null;
 	mainContentMachineRef: ActorRefFrom< typeof mainContentMachine >;
 	tasklist?: LYSAugmentedTaskListType;
-	hasWooPayments: boolean;
+	hasWooPayments?: boolean;
 	testOrderCount: number;
 	removeTestOrders?: boolean;
 	launchStoreAttemptTimestamp?: number;
