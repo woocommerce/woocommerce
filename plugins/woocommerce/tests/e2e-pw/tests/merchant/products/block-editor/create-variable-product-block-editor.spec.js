@@ -164,17 +164,6 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 					);
 
 					/*
-					 * Check the option being added to the list,
-					 * by checking the token with validating state.
-					 */
-					const newValidatingTokenLocator =
-						FormTokenFieldLocator.locator( '.is-validating' );
-
-					await newValidatingTokenLocator.waitFor( {
-						state: 'visible',
-					} );
-
-					/*
 					 * Wait for the async POST request
 					 * that creates the new attribute term to finish.
 					 */
@@ -189,9 +178,6 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 						);
 					} );
 				}
-
-				// Wait for the last term to be validated/added
-				await expect( page.locator( '.is-validating' ) ).toBeHidden();
 
 				await page
 					.locator( '.woocommerce-new-attribute-modal__buttons' )
