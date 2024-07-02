@@ -6,7 +6,6 @@ import userEvent from '@testing-library/user-event';
 import { CheckoutProvider } from '@woocommerce/base-context';
 import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
 import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
-import { createRoot } from 'react-dom/client';
 
 /**
  * Internal dependencies
@@ -156,29 +155,28 @@ describe( 'Form Component', () => {
 	it( 'input fields update when changing the country', async () => {
 		renderInCheckoutProvider( <WrappedAddressForm type="shipping" /> );
 
-		// await act( async () => {
-		// 	await inputAddress( primaryAddress );
-		// } );
+		await act( async () => {
+			await inputAddress( primaryAddress );
+		} );
 
-		// // Verify correct labels are used.
-		// expect( screen.getByLabelText( /City/ ) ).toBeInTheDocument();
-		// expect( screen.getByLabelText( /County/ ) ).toBeInTheDocument();
-		// expect( screen.getByLabelText( /Postcode/ ) ).toBeInTheDocument();
+		// Verify correct labels are used.
+		expect( screen.getByLabelText( /City/ ) ).toBeInTheDocument();
+		expect( screen.getByLabelText( /County/ ) ).toBeInTheDocument();
+		expect( screen.getByLabelText( /Postcode/ ) ).toBeInTheDocument();
 
-		// await act( async () => {
-		// 	await inputAddress( secondaryAddress );
-		// } );
+		await act( async () => {
+			await inputAddress( secondaryAddress );
+		} );
 
-		// // Verify state input has been removed.
-		// expect( screen.queryByText( stateRegExp ) ).not.toBeInTheDocument();
+		// Verify state input has been removed.
+		expect( screen.queryByText( stateRegExp ) ).not.toBeInTheDocument();
 
-		// await act( async () => {
-		// 	await inputAddress( tertiaryAddress );
-		// } );
+		await act( async () => {
+			await inputAddress( tertiaryAddress );
+		} );
 
-		// // Verify postal code input label changed.
-		// expect( screen.getByLabelText( /Postal code/ ) ).toBeInTheDocument();
-		expect( true ).toBe( true );
+		// Verify postal code input label changed.
+		expect( screen.getByLabelText( /Postal code/ ) ).toBeInTheDocument();
 	} );
 
 	it( 'input values are reset after changing the country', async () => {
@@ -188,21 +186,20 @@ describe( 'Form Component', () => {
 			await inputAddress( secondaryAddress );
 		} );
 
-		// // Only update `country` to verify other values are reset.
-		// await act( async () => {
-		// 	await inputAddress( { country: primaryAddress.country } );
-		// } );
+		// Only update `country` to verify other values are reset.
+		await act( async () => {
+			await inputAddress( { country: primaryAddress.country } );
+		} );
 
-		// expect( screen.getByLabelText( stateRegExp ).value ).toBe( '' );
+		expect( screen.getByLabelText( stateRegExp ).value ).toBe( '' );
 
-		// // Repeat the test with an address which has a select for the state.
-		// await act( async () => {
-		// 	await inputAddress( tertiaryAddress );
-		// } );
-		// await act( async () => {
-		// 	await inputAddress( { country: primaryAddress.country } );
-		// } );
-		// expect( screen.getByLabelText( stateRegExp ).value ).toBe( '' );
-		expect( true ).toBe( true );
+		// Repeat the test with an address which has a select for the state.
+		await act( async () => {
+			await inputAddress( tertiaryAddress );
+		} );
+		await act( async () => {
+			await inputAddress( { country: primaryAddress.country } );
+		} );
+		expect( screen.getByLabelText( stateRegExp ).value ).toBe( '' );
 	} );
 } );
