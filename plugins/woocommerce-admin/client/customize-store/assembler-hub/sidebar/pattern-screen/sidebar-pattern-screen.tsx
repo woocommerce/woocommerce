@@ -43,6 +43,7 @@ import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { PATTERN_CATEGORIES } from './categories';
 import { THEME_SLUG } from '~/customize-store/data/constants';
 import { Pattern } from '~/customize-store/types/pattern';
+import { useAsyncList } from '@wordpress/compose';
 
 /**
  * Sorts patterns by category. For 'intro' and 'about' categories
@@ -107,6 +108,8 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 			category as keyof typeof PATTERN_CATEGORIES
 		);
 	}, [ category, patterns ] );
+
+	const asyncSortedPatterns = useAsyncList( sortedPatterns );
 
 	const [ patternPagination, setPatternPagination ] = useState( 10 );
 
@@ -243,11 +246,11 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 			) }
 			{ ! isSpinnerVisible && (
 				<BlockPatternList
-					shownPatterns={ sortedPatterns.slice(
+					shownPatterns={ asyncSortedPatterns.slice(
 						0,
 						patternPagination
 					) }
-					blockPatterns={ sortedPatterns.slice(
+					blockPatterns={ asyncSortedPatterns.slice(
 						0,
 						patternPagination
 					) }
