@@ -12,12 +12,14 @@ SCRIPT_PATH=$(
 
 echo "Setting up environment: $envName"
 
-cleanDotEnv=0
 
 if [ -f "$SCRIPT_PATH/envs/$envName/.env.enc" ]; then
-	echo "Found encrypted .env file for environment: $envName"
+	echo "Found encrypted .env file for environment '$envName'"
 	"$SCRIPT_PATH/bin/dotenv.sh" -d "$envName"
-	cleanDotEnv=1
+else
+	echo "No encrypted .env file found for environment '$envName'."
+	echo "Removing .env file if it exists."
+	rm -f "$SCRIPT_PATH/.env"
 fi
 
 "$SCRIPT_PATH/envs/$envName/env-setup.sh"
@@ -25,8 +27,3 @@ fi
 echo "Running tests with environment: '$envName'"
 echo "Arguments: $*"
 pnpm playwright test --config="$SCRIPT_PATH"/envs/"$envName"/playwright.config.js "$@"
-
-if [ "$cleanDotEnv" -eq 1 ]; then
-	echo "Cleaning up .env file"
-	rm "$SCRIPT_PATH/.env"
-fi
