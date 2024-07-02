@@ -113,8 +113,8 @@ const ValidatedTextInput = forwardRef<
 				inputObject.setCustomValidity( '' );
 
 				if (
-					inputObject.checkValidity() &&
-					customValidationRef.current( inputObject )
+					customValidationRef.current( inputObject ) &&
+					inputObject.checkValidity()
 				) {
 					clearValidationError( errorIdString );
 					return;
