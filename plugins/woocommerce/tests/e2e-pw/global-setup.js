@@ -2,6 +2,7 @@ const { chromium, expect } = require( '@playwright/test' );
 const { admin, customer } = require( './test-data/data' );
 const fs = require( 'fs' );
 const { site } = require( './utils' );
+const { logIn } = require( './utils/login' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { DISABLE_HPOS } = process.env;
 
@@ -62,21 +63,7 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to log-in as admin...' );
 			await adminPage.goto( `/wp-admin` );
-			await adminPage
-				.locator( 'input[name="log"]' )
-				.fill( admin.username );
-			await adminPage
-				.locator( 'input[name="pwd"]' )
-				.fill( admin.password );
-			await adminPage.locator( 'text=Log In' ).click();
-			// eslint-disable-next-line playwright/no-networkidle
-			await adminPage.waitForLoadState( 'networkidle' );
-			await adminPage.goto( `/wp-admin` );
-			await adminPage.waitForLoadState( 'domcontentloaded' );
-
-			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
-				'Dashboard'
-			);
+			await logIn( adminPage, admin.username, admin.password, true );
 			await adminPage
 				.context()
 				.storageState( { path: process.env.ADMINSTATE } );
@@ -88,6 +75,10 @@ module.exports = async ( config ) => {
 				`Admin log-in failed, Retrying... ${ i }/${ adminRetries }`
 			);
 			console.log( e );
+			await adminPage.screenshot( {
+				fullPage: true,
+				path: `tests/e2e-pw/test-results/admin-login-fail-${ i }.png`,
+			} );
 		}
 	}
 
@@ -144,20 +135,12 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to log-in as customer...' );
 			await customerPage.goto( `/wp-admin` );
-			await customerPage
-				.locator( 'input[name="log"]' )
-				.fill( customer.username );
-			await customerPage
-				.locator( 'input[name="pwd"]' )
-				.fill( customer.password );
-			await customerPage.locator( 'text=Log In' ).click();
-
-			await customerPage.goto( `/my-account` );
-			await expect(
-				customerPage.locator(
-					'.woocommerce-MyAccount-navigation-link--customer-logout'
-				)
-			).toBeVisible();
+			await logIn(
+				customerPage,
+				customer.username,
+				customer.password,
+				false
+			);
 			await expect(
 				customerPage.locator(
 					'div.woocommerce-MyAccount-content > p >> nth=0'
@@ -175,6 +158,10 @@ module.exports = async ( config ) => {
 				`Customer log-in failed. Retrying... ${ i }/${ customerRetries }`
 			);
 			console.log( e );
+			await adminPage.screenshot( {
+				fullPage: true,
+				path: `tests/e2e-pw/test-results/customer-login-fail-${ i }.png`,
+			} );
 		}
 	}
 
@@ -248,7 +235,7 @@ module.exports = async ( config ) => {
 		`HPOS configuration (woocommerce_custom_orders_table_enabled): ${ dataValue } - ${ enabledOption }`
 	);
 
-	await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
+	// await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
 
 	await adminContext.close();
 	await customerContext.close();

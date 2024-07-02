@@ -79,7 +79,6 @@ const config = {
 	projects: [],
 };
 
-console.log( 'Running tests against:', config.use.baseURL );
 console.log( 'Trace config:', config.use.trace );
 
 module.exports = config;
