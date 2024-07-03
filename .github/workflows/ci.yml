@@ -119,7 +119,7 @@ jobs:
               with:
                 install: '${{ matrix.projectName }}...'
                 build: 'false'
-                pull-playwright-cache: true
+                pull-playwright-cache: ${{ matrix.testEnv.shouldCreate }}
 
             - uses: './.github/actions/setup-woocommerce-monorepo'
               if: ${{ github.ref_type != 'tag' }}
