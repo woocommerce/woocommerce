@@ -69,7 +69,7 @@ const CreateAccountUI = (): JSX.Element => {
 					type="password"
 					label={ __( 'Create a password', 'woocommerce' ) }
 					className={ `wc-block-components-address-form__password` }
-					value={ customerPassword || '' }
+					value={ customerPassword }
 					required={ true }
 					customValidityMessage={ (
 						validity: ValidityState
