@@ -79,7 +79,7 @@ describe( 'Leaderboard', () => {
 				title={ '' }
 				headers={ headers }
 				rows={ rows }
-				totalRows={ 0 }
+				totalRows={ 5 }
 			/>
 		);
 
