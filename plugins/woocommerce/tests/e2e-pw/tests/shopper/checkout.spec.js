@@ -211,25 +211,39 @@ test.describe( 'Checkout page', { tag: [ '@payments', '@services' ] }, () => {
 			page.locator( 'form[name="checkout"]' ).getByRole( 'alert' )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Billing First name is a required field.' )
+			page.getByRole( 'link', {
+				name: 'Billing First name is a required field.',
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Billing Last name is a required field.' )
+			page.getByRole( 'link', {
+				name: 'Billing Last name is a required field.',
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Billing Street address is a required field.' )
+			page.getByRole( 'link', {
+				name: 'Billing Street address is a required field.',
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Billing Town / City is a required field.' )
+			page.getByRole( 'link', {
+				name: 'Billing Town / City is a required field.',
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Billing ZIP Code is a required field.' )
+			page.getByRole( 'link', {
+				name: 'Billing ZIP Code is a required field.',
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Billing Phone is a required field.' )
+			page.getByRole( 'link', {
+				name: 'Billing Phone is a required field.',
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Billing Email address is a required field.' )
+			page.getByRole( 'link', {
+				name: 'Billing Email address is a required field.',
+			} )
 		).toBeVisible();
 
 		// toggle ship to different address, fill out billing info and confirm error shown
@@ -318,23 +332,25 @@ test.describe( 'Checkout page', { tag: [ '@payments', '@services' ] }, () => {
 
 		await test.step( 'Complete the checkout form', async () => {
 			await page
-				.getByRole( 'textbox', { name: 'First name *' } )
+				.getByRole( 'textbox', { name: 'First name * required' } )
 				.fill( 'Lisa' );
 			await page
-				.getByRole( 'textbox', { name: 'Last name *' } )
+				.getByRole( 'textbox', { name: 'Last name * required' } )
 				.fill( 'Simpson' );
 			await page
-				.getByRole( 'textbox', { name: 'Street address *' } )
+				.getByRole( 'textbox', { name: 'Street address * required' } )
 				.fill( '123 Evergreen Terrace' );
 			await page
-				.getByRole( 'textbox', { name: 'Town / City *' } )
+				.getByRole( 'textbox', { name: 'Town / City * required' } )
 				.fill( 'Springfield' );
 			await page.locator( '#billing_state' ).selectOption( 'OR' );
 			await page
-				.getByRole( 'textbox', { name: 'ZIP Code *' } )
+				.getByRole( 'textbox', { name: 'ZIP Code * required' } )
 				.fill( '97403' );
-			await page.getByLabel( 'Phone *' ).fill( '555 555-5555' );
-			await page.getByLabel( 'Email address *' ).fill( guestEmail );
+			await page.getByLabel( 'Phone * required' ).fill( '555 555-5555' );
+			await page
+				.getByLabel( 'Email address * required' )
+				.fill( guestEmail );
 
 			await page.getByText( 'Cash on delivery' ).click();
 
