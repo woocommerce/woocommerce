@@ -84,6 +84,14 @@ class ProductSummary extends AbstractBlock
 		return '';
 	}
 
+	private function create_anchor($product, $link_text)
+	{
+		$href = esc_url($product->get_permalink());
+		$text = wp_kses_post($link_text);
+
+		return '</br></br><a class="wp-block-woocommerce-product-summary__read_more" href="' . $href . '">' . $text . '</a>';
+	}
+
 	/**
 	 * Include and render the block.
 	 *
@@ -115,17 +123,20 @@ class ProductSummary extends AbstractBlock
 		}
 
 		$summary_length = isset($attributes['summaryLength']) ? $attributes['summaryLength'] : false;
+		$link_text      = isset($attributes['linkText']) ? $attributes['linkText'] : '';
+		$show_link      = isset($attributes['showLink']) && $attributes['showLink'];
 		$summary        = $summary_length ? wp_trim_words($source, $summary_length) : $source;
+		$final_summary  = $show_link && $link_text ? $summary . $this->create_anchor($product, $link_text) : $summary;
 
 		$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes($attributes);
 
 		return sprintf(
-			'<p class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta %1$s" style="%2$s">
+			'<div class="wp-block-woocommerce-product-summary"><p class="wc-block-components-product-summary %1$s" style="%2$s">
 				%3$s
-			</p>',
+			</p></div>',
 			esc_attr($styles_and_classes['classes']),
 			esc_attr($styles_and_classes['styles'] ?? ''),
-			$summary
+			$final_summary
 		);
 	}
 }

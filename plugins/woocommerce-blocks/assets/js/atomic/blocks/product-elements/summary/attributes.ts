@@ -30,7 +30,7 @@ export const blockAttributes: BlockAttributes = {
 	},
 	showLink: {
 		type: 'boolean',
-		default: true,
+		default: false,
 	},
 	summaryLength: {
 		type: 'number',
