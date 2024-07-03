@@ -5,16 +5,16 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
 /**
- * Connect store to WooCommerce.com Task
+ * ExtendStore Task
  */
-class StoreConnect extends Task {
+class ExtendStore extends Task {
 	/**
 	 * ID.
 	 *
 	 * @return string
 	 */
 	public function get_id() {
-		return 'connect-store';
+		return 'extend-store';
 	}
 
 	/**
@@ -23,7 +23,7 @@ class StoreConnect extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Manage your WooCommerce.com Marketplace subscriptions', 'woocommerce' );
+		return __( 'Enhance your store with extensions', 'woocommerce' );
 	}
 
 	/**
@@ -50,7 +50,7 @@ class StoreConnect extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		return \WC_Helper::is_site_connected();
+		return $this->is_visited();
 	}
 
 	/**
@@ -59,7 +59,7 @@ class StoreConnect extends Task {
 	 * @return bool
 	 */
 	public function is_dismissable() {
-		return true;
+		return false;
 	}
 
 	/**
@@ -68,6 +68,6 @@ class StoreConnect extends Task {
 	 * @return string
 	 */
 	public function get_action_url() {
-		return admin_url( 'admin.php?page=wc-admin&tab=my-subscriptions&path=/extensions' );
+		return admin_url( 'admin.php?page=wc-admin&path=/extensions' );
 	}
 }
