@@ -1239,7 +1239,7 @@ final class WooCommerce {
 	 * - Jetpack plugin is not active or its version is >= x.x.x (before this version, the package is loaded in Jetpack)
 	 * - woocommerce_analytics_allow_tracking filter is true (false by default)
 	 *
-	 * @since 9.4.0
+	 * @since x.x.x
 	 *
 	 * @return void
 	 */
@@ -1255,7 +1255,7 @@ final class WooCommerce {
 		 * @since 9.4.0
 		 * @param boolean $is_allowd Indicates if WooCommerce Analytics should be enabled.
 		 */
-		if ( ! apply_filters( 'woocommerce_analytics_allow_tracking', true ) ) {
+		if ( ! apply_filters( 'woocommerce_analytics_allow_tracking', false ) ) {
 			return;
 		}
 
