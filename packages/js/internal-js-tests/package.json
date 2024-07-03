@@ -50,6 +50,7 @@
 		"regenerator-runtime": "^0.13.11"
 	},
 	"devDependencies": {
+		"@automattic/i18n-utils": "wp-6.0",
 		"@babel/core": "^7.23.5",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"babel-jest": "~27.5.1",
