@@ -528,7 +528,7 @@ class Checkout extends AbstractCartRoute {
 					$request['billing_address']['email'],
 					$request['billing_address']['first_name'],
 					$request['billing_address']['last_name'],
-					$request['customer_password'] ?? null
+					$request['customer_password']
 				);
 
 				// Associate customer with the order. This is done before login to ensure the order is associated with
@@ -625,7 +625,7 @@ class Checkout extends AbstractCartRoute {
 	 *
 	 * @return int User id if successful
 	 */
-	private function create_customer_account( $user_email, $first_name, $last_name, $password = null ) {
+	private function create_customer_account( $user_email, $first_name, $last_name, $password = '' ) {
 		if ( empty( $user_email ) || ! is_email( $user_email ) ) {
 			throw new \Exception( 'registration-error-invalid-email' );
 		}
@@ -634,12 +634,11 @@ class Checkout extends AbstractCartRoute {
 			throw new \Exception( 'registration-error-email-exists' );
 		}
 
-		// Handle password creation.
-		if ( is_null( $password ) ) {
+		// Handle password creation if not provided.
+		if ( empty( $password ) ) {
 			$password           = wp_generate_password();
 			$password_generated = true;
 		} else {
-			$password           = (string) $password;
 			$password_generated = false;
 		}
 
