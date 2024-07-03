@@ -206,7 +206,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$nonTriggeringOrderStatuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft', 'refunded', 'failed', 'cancelled');
 
-		error_log( $previous_status . ' / '. $new_status );
 		// This hook should be fired only if the new status is not one of the non-triggering statuses and the previous status was one of the non-triggering statuses.
 		if (
 			$new_status !== $previous_status &&
