@@ -262,19 +262,29 @@ test.describe( 'Checkout page', { tag: [ '@payments', '@services' ] }, () => {
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 		await expect(
-			page.getByText( 'Shipping First name is a required field.' )
+			page.getByRole( 'link', {
+				name: 'Shipping First name is a required field.',
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Shipping Last name is a required field.' )
+			page.getByRole( 'link', {
+				name: 'Shipping Last name is a required field.',
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Shipping Street address is a required field.' )
+			page.getByRole( 'link', {
+				name: 'Shipping Street address is a required field.',
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Shipping Town / City is a required field.' )
+			page.getByRole( 'link', {
+				name: 'Shipping Town / City is a required field.',
+			} )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Shipping ZIP Code is a required field.' )
+			page.getByRole( 'link', {
+				name: 'Shipping ZIP Code is a required field.',
+			} )
 		).toBeVisible();
 	} );
 
