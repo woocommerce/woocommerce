@@ -68,17 +68,18 @@ run `pnpm playwright test --help`
 
 ## Test environment
 
-The find the default setup check the `.wp-env.json` configuration file in the `plugins/woocommerce` folder.
+The find the default environment setup you check the `.wp-env.json` configuration file in the `plugins/woocommerce`
+folder.
 
-For more information how to configure the test environment for `wp-env`, please check out
-the [documentation](https://github.com/WordPress/gutenberg/tree/trunk/packages/env).
+For more information on how to configure the test environment for `wp-env`, please check out
+the official [documentation](https://github.com/WordPress/gutenberg/tree/trunk/packages/env).
 
 ### Alternate environments
 
 The default URL and the credentials for the test environment can be set via environment variables.
 
-If you'd like to quickly overwrite the default values to run against a different environment (external host for
-example), you can create a `.env` file in `tests/e2e-pw/` containing the following values:
+If you'd like to overwrite the default values to run against a different environment (external host for
+example), you can create a `.env` file in `tests/e2e-pw/`:
 
 ```bash
 BASE_URL='https://www.example.com'
@@ -86,7 +87,6 @@ ADMIN_USER='admin.username'
 ADMIN_PASSWORD='admin.password'
 CUSTOMER_USER='customer.username'
 CUSTOMER_PASSWORD='customer.password'
-DEFAULT_TIMEOUT_OVERRIDE=100000
 ```
 
 There are some pre-defined environments set in the `tests/e2e-pw/envs` path.
@@ -96,16 +96,28 @@ encrypted `.env` file.
 To run the tests using one of these environment, you can use the `test:e2e:with-env` script. Some examples:
 
 ```bash
-pnpm test:e2e:with-env gutenberg-stable # runs the tests using the gutenberg-stable environment, which is set up to run a subset of relevant tests against a wp-env instance with the latest stable version of the Gutenberg plugin
+# Runs the tests using the gutenberg-stable environment, 
+# which is set up to run a subset of relevant tests against a wp-env instance with the latest stable version of the Gutenberg plugin
+pnpm test:e2e:with-env gutenberg-stable
 
-pnpm test:e2e:with-env default-permanent # runs the tests using the default-permanent environment, which is an external site configured to run the tests against a permanent environment. The envs/default-permanent/.env.enc file will be decrypted into .env and used to set the required environment variables
+# Runs the tests using the default-permanent environment, 
+# which is an external site configured to run the tests against a permanent environment. 
+# The envs/default-permanent/.env.enc file will be decrypted into .env and used to set the required environment variables
+pnpm test:e2e:with-env default-permanent 
 
-pnpm test:e2e:with-env default # runs all the tests with the default environment, similar to running `pnpm test:e2e-pw`
+# Runs all the tests with the default environment, similar to running `pnpm test:e2e-pw`
+pnpm test:e2e:with-env default 
 ```
 
 Some of the environments are using encrypted `.env` files.
 To run command includes a decryption step, which requires the `E2E_ENV_KEY` environment variable to be set.
 If you're an a11n you can find the key in the Secret Store.
+
+Run with the `E2E_ENV_KEY` environment variable set:
+
+```bash
+E2E_ENV_KEY='your-key' pnpm test:e2e:with-env default-permanent
+```
 
 ### Creating an alternate environment
 
@@ -113,13 +125,14 @@ If you need to create a new pre-defined environment, you can follow these steps:
 
 - create a new folder in the `tests/e2e-pw/envs` directory with the name of the environment.
   Example: `tests/e2e-pw/envs/my-new-env`
-- create an `env-setup.sh` file in the new folder. This file should contain the setup steps for the environment.
+- create an `env-setup.sh` file in the new folder. This file should contain any setup steps for the environment. This
+  will run before any test execution.
 - create a `playwright.config.js` file in the new folder. This file should contain the configuration for the
   environment.
   It's recommended that the config extends the default configuration and only updates the necessary values.
 - if you need to store an encrypted `.env` file, first create the `.env` file in the `tests/e2e-pw` folder, then
-  run `./tests/e2e-pw/bin/dotenv.sh -e my-new-env`. This script command will encrypt the `.env` file into
-  and `tests/e2e-pw/envs/my-new-env/.enc.env`.
+  run `E2E_ENV_KEY='your-key' ./tests/e2e-pw/bin/dotenv.sh -e my-new-env`. This script command will encrypt the `.env`
+  file into `tests/e2e-pw/envs/my-new-env/.env.enc`.
 
 ## Writing e2e tests
 
