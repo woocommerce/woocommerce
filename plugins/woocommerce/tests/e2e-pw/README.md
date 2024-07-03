@@ -6,9 +6,9 @@ This is the documentation for the e2e testing setup based on Playwright and wp-e
 
 -   [Pre-requisites](#pre-requisites)
 -   [Introduction](#introduction)
--   [About the Environment](#about-the-environment)
--   [Guide for writing e2e tests](#guide-for-writing-e2e-tests)
--   [Guide for using test reports](#guide-for-using-test-reports)
+-   [About the Environment](#test-environment)
+-   [Guide for writing e2e tests](#writing-e2e-tests)
+-   [Guide for using test reports](#test-reports)
 -   [Debugging tests](#debugging-tests)
 
 ## Pre-requisites
@@ -20,7 +20,7 @@ Note, that if you are on Mac and you install Docker through other methods such a
 
 If you are using Windows, we recommend using [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/) for running E2E tests. Follow the [WSL Setup Instructions](./WSL_SETUP_INSTRUCTIONS.md) first before proceeding with the steps below.
 
-### Introduction
+## Introduction
 
 End-to-end tests are powered by Playwright. By default, the test site is spun up using `wp-env`.
 
@@ -53,15 +53,15 @@ Other ways of running tests (make sure you are in the `plugins/woocommerce` fold
     export DEFAULT_TIMEOUT_OVERRIDE=180000 pnpm test:e2e-pw --ui
     ```
 
-To see all Playwright options, make sure you are in the `plugins/woocommerce` folder and run `pnpm playwright test --help`
+To see all the Playwright options, make sure you are in the `plugins/woocommerce` folder and run `pnpm playwright test --help`
 
-### About the environment
+## Test environment
 
-The find the default setup check the .wp-env.json configuration file in the `plugins/woocommerce` folder.
+The find the default setup check the `.wp-env.json` configuration file in the `plugins/woocommerce` folder.
 
 For more information how to configure the test environment for `wp-env`, please check out the [documentation](https://github.com/WordPress/gutenberg/tree/trunk/packages/env).
 
-#### Alternate environments
+### Alternate environments
 
 The default URL and the credentials for the test environment can be set via environment variables.
 
@@ -76,7 +76,8 @@ CUSTOMER_PASSWORD='customer.password'
 DEFAULT_TIMEOUT_OVERRIDE=100000
 ```
 
-There are some pre-defined environments set in the tests/e2e-pw/envs path. Each folder represents an environment, and contains a setup script, a `playwright.config.js` file and optionally an encrypted `.env` file.
+There are some pre-defined environments set in the `tests/e2e-pw/envs` path. 
+Each folder represents an environment, and contains a setup script, a `playwright.config.js` file and optionally an encrypted `.env` file.
 
 To run the tests using one of these environment, you can use the `test:e2e:with-env` script. Some examples:
 
@@ -88,9 +89,21 @@ pnpm test:e2e:with-env default-permanent # runs the tests using the default-perm
 pnpm test:e2e:with-env default # runs all the tests with the default environment, similar to running `pnpm test:e2e-pw`
 ```
 
-Some of the environments are using encrypted `.env` files. To run command includes a decryption step, which requires the `E2E_ENV_KEY` environment variable to be set. If you're an a11n you can find the key in the Secret Store.
+Some of the environments are using encrypted `.env` files. 
+To run command includes a decryption step, which requires the `E2E_ENV_KEY` environment variable to be set. 
+If you're an a11n you can find the key in the Secret Store.
 
-## Guide for writing e2e tests
+### Creating an alternate environment
+
+If you need to create a new pre-defined environment, you can follow these steps:
+
+- create a new folder in the `tests/e2e-pw/envs` directory with the name of the environment. Example: `tests/e2e-pw/envs/my-new-env`
+- create an `env-setup.sh` file in the new folder. This file should contain the setup steps for the environment.
+- create a `playwright.config.js` file in the new folder. This file should contain the configuration for the environment.
+It's recommended that the config extends the default configuration and only updates the necessary values.
+- if you need to store an encrypted `.env` file, first create the `.env` file in the `tests/e2e-pw` folder, then run `./tests/e2e-pw/bin/dotenv.sh -e my-new-env`. This script command will encrypt the `.env` file into and `tests/e2e-pw/envs/my-new-env/.enc.env`.
+
+## Writing e2e tests
 
 There are no hard rules for writing tests, but use your common sense when it comes to code duplication and layers of abstractions. The tests should be easy to read and maintain.
 We think that Playwright offers a good balance between simplicity and power, so we recommend using it as it is.
@@ -104,7 +117,7 @@ Still, here's a few tips to get you started:
 
 Playwright's Best Practices guide is a good read: [Playwright Best Practices](https://playwright.dev/docs/best-practices).
 
-## Guide for using test reports
+## Test reports
 
 The tests would generate three kinds of reports after the run:
 
