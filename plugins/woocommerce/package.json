@@ -117,7 +117,7 @@
 						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:dev"
 					},
 					"events": [
 						"pull_request",
@@ -139,7 +139,7 @@
 						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:dev",
 						"config": {
 							"phpVersion": "8.0"
 						}
@@ -164,7 +164,7 @@
 						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:dev",
 						"config": {
 							"wpVersion": "latest-1"
 						}
@@ -189,7 +189,7 @@
 						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:dev",
 						"config": {
 							"wpVersion": "latest-2"
 						}
@@ -215,7 +215,7 @@
 						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:dev",
 						"config": {
 							"wpVersion": "nightly"
 						}
