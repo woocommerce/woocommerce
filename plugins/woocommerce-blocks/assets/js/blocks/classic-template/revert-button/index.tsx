@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { PluginTemplateSettingPanel } from '@wordpress/edit-site';
-import { subscribe, select, useSelect, useDispatch } from '@wordpress/data';
+import { PluginDocumentSettingPanel } from '@wordpress/editor';
+import { select, useSelect, useDispatch } from '@wordpress/data';
 import { BlockInstance, createBlock } from '@wordpress/blocks';
-import { Button, PanelBody } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useMemo } from '@wordpress/element';
 import { useEntityRecord } from '@wordpress/core-data';
@@ -21,7 +21,7 @@ import {
 /**
  * Internal dependencies
  */
-import './style.scss';
+import './editor.scss';
 
 const hasLegacyTemplateBlock = ( blocks: Array< BlockInstance > ): boolean => {
 	return blocks.some( ( block ) => {
@@ -67,61 +67,58 @@ const RevertClassicTemplateButton = () => {
 	const clientIds = useMemo( () => pickBlockClientIds( blocks ), [ blocks ] );
 
 	return (
-		<>
-			{ ! isLegacyTemplateBlockAdded && (
-				<PluginTemplateSettingPanel>
-					<PanelBody className="wc-block-editor-revert-button-container">
-						<Button
-							variant="secondary"
-							onClick={ () => {
-								replaceBlocks(
-									clientIds,
-									createBlock(
-										'core/group',
-										{
-											layout: {
-												inherit: true,
-												type: 'constrained',
-											},
-										},
-										[
-											createBlock(
-												'woocommerce/legacy-template',
-												{
-													template:
-														template?.record?.slug,
-												}
-											),
-										]
-									)
-								);
-							} }
-						>
-							{ __(
-								'Revert to Classic Product Template',
-								'woocommerce'
-							) }
-						</Button>
-						<span>
-							{ createInterpolateElement(
-								__(
-									`The <strongText /> template doesn’t allow for reordering or customizing blocks, but might work better with your extensions`,
-									'woocommerce'
-								),
+		! isLegacyTemplateBlockAdded && (
+			<PluginDocumentSettingPanel
+				name="revert-template"
+				title="Revert template"
+			>
+				<Button
+					variant="secondary"
+					onClick={ () => {
+						replaceBlocks(
+							clientIds,
+							createBlock(
+								'core/group',
 								{
-									strongText: (
-										<strong>
-											{ template?.record?.title
-												?.rendered ?? '' }
-										</strong>
+									layout: {
+										inherit: true,
+										type: 'constrained',
+									},
+								},
+								[
+									createBlock(
+										'woocommerce/legacy-template',
+										{
+											template: template?.record?.slug,
+										}
 									),
-								}
-							) }
-						</span>
-					</PanelBody>
-				</PluginTemplateSettingPanel>
-			) }
-		</>
+								]
+							)
+						);
+					} }
+				>
+					{ __(
+						'Revert to Classic Product Template',
+						'woocommerce'
+					) }
+				</Button>
+				<p className="wc-block-editor-revert-button-text">
+					{ createInterpolateElement(
+						__(
+							`The <strongText /> template doesn’t allow for reordering or customizing blocks, but might work better with your extensions`,
+							'woocommerce'
+						),
+						{
+							strongText: (
+								<strong>
+									{ template?.record?.title?.rendered ?? '' }
+								</strong>
+							),
+						}
+					) }
+				</p>
+			</PluginDocumentSettingPanel>
+		)
 	);
 };
 
@@ -137,7 +134,7 @@ const templateSlugs = [
 const REVERT_BUTTON_PLUGIN_NAME = 'woocommerce-blocks-revert-button-templates';
 
 let currentTemplateId: string | undefined;
-subscribe( () => {
+export const revertButtonRegistration = () => {
 	const previousTemplateId = currentTemplateId;
 	const store = select( 'core/edit-site' );
 
@@ -156,7 +153,7 @@ subscribe( () => {
 	);
 
 	const hasSupportForPluginTemplateSettingPanel =
-		PluginTemplateSettingPanel !== undefined;
+		PluginDocumentSettingPanel !== undefined;
 
 	if ( isWooTemplate && hasSupportForPluginTemplateSettingPanel ) {
 		if ( getPlugin( REVERT_BUTTON_PLUGIN_NAME ) ) {
@@ -173,4 +170,4 @@ subscribe( () => {
 	}
 
 	unregisterPlugin( REVERT_BUTTON_PLUGIN_NAME );
-}, 'core/edit-site' );
+};
