@@ -1,4 +1,4 @@
-<!-- markdownlint-disable-line no-duplicate-heading -->
+<!-- markdownlint-disable MD024 -->
 
 # Option Transformer
 
