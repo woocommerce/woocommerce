@@ -24,6 +24,7 @@ $max-button-width: calc((100% - #{$total-gap-width}) / #{$max-columns});
 
 	.components-button.wc-blocks-product-collection__collection-button {
 		margin: 0;
+		justify-content: start;
 	}
 }
 
