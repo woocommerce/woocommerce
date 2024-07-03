@@ -71,7 +71,7 @@ test.describe( 'Shopper → Account (guest user)', () => {
 		baseURL,
 	} ) => {
 		//Get the login link from checkout page.
-		const loginLink = page.getByRole( 'link', { name: 'Log in.' } );
+		const loginLink = page.getByRole( 'link', { name: 'Log in' } );
 
 		await expect( loginLink ).toHaveAttribute(
 			'href',
