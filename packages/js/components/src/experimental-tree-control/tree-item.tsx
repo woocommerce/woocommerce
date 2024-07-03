@@ -58,6 +58,15 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 							}
 							checked={ selection.checkedStatus === 'checked' }
 							onChange={ selection.onSelectChild }
+							onKeyDown={ ( event ) => {
+								if (
+									event.key === 'Escape' &&
+									props.onEscape
+								) {
+									event.preventDefault();
+									props.onEscape();
+								}
+							} }
 							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 							// @ts-ignore __nextHasNoMarginBottom is a valid prop
 							__nextHasNoMarginBottom={ true }
