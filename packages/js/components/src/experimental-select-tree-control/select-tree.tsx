@@ -245,7 +245,10 @@ export const SelectTree = function SelectTree( {
 				isOpen={ isOpen }
 				items={ linkedTree }
 				shouldShowCreateButton={ shouldShowCreateButton }
-				onEscape={ focusOnInput }
+				onEscape={ () => {
+					focusOnInput();
+					setIsOpen( false );
+				} }
 				onClose={ () => {
 					setIsOpen( false );
 				} }
