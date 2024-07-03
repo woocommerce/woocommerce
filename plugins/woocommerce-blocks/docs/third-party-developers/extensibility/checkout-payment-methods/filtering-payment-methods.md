@@ -4,6 +4,8 @@ menu_title: Filtering Payment Methods
 tags: how-to, checkout-payment-methods
 ---
 
+<!-- markdownlint-disable MD024 -->
+
 # Filtering Payment Methods in the Checkout block <!-- omit in toc -->
 
 ## Table of Contents <!-- omit in toc -->
