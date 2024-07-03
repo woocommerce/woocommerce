@@ -2,7 +2,7 @@
 /**
  * Title: Featured Category Triple
  * Slug: woocommerce-blocks/featured-category-triple
- * Categories: WooCommerce
+ * Categories: WooCommerce, featured-selling
  */
 
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
