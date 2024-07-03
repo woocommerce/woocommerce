@@ -145,7 +145,7 @@ class Controller extends GenericController {
 	protected function get_order_number( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! $order instanceof \WC_Order && ! $order instanceof \WC_Order_Refund ) {
+		if ( ! $this->is_valid_order( $order ) ) {
 			return null;
 		}
 
@@ -153,7 +153,7 @@ class Controller extends GenericController {
 			$order = wc_get_order( $order->get_parent_id() );
 
 			// If the parent order doesn't exist, return null.
-			if ( ! $order instanceof \WC_Order && ! $order instanceof \WC_Order_Refund ) {
+			if ( ! $this->is_valid_order( $order ) ) {
 				return null;
 			}
 		}
@@ -166,6 +166,16 @@ class Controller extends GenericController {
 	}
 
 	/**
+	 * Whether the order is valid.
+	 *
+	 * @param bool|WC_Order|WC_Order_Refund $order Order object.
+	 * @return bool True if the order is valid, false otherwise.
+	 */
+	protected function is_valid_order( $order ) {
+		return $order instanceof \WC_Order || $order instanceof \WC_Order_Refund;
+	}
+
+	/**
 	 * Get the order total with the related currency formatting.
 	 * Returns the parent order total if the order is actually a refund.
 	 *
@@ -175,14 +185,14 @@ class Controller extends GenericController {
 	protected function get_total_formatted( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! $order instanceof \WC_Order && ! $order instanceof \WC_Order_Refund ) {
+		if ( ! $this->is_valid_order( $order ) ) {
 			return null;
 		}
 
 		if ( 'shop_order_refund' === $order->get_type() ) {
 			$order = wc_get_order( $order->get_parent_id() );
 
-			if ( ! $order instanceof \WC_Order && ! $order instanceof \WC_Order_Refund ) {
+			if ( ! $this->is_valid_order( $order ) ) {
 				return null;
 			}
 		}
