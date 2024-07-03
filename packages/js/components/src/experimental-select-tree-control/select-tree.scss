@@ -11,8 +11,10 @@
 	}
 	&__suffix, &__suffix-items {
 		display: flex;
+		align-items: center;
 		button {
-			padding-right: 0;
+			height: $gap-large;
+			padding: 0 $gap-smallest;
 		}
 	}
 	&__icon-clear {
