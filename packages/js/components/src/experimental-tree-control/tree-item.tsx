@@ -79,6 +79,15 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 							onChange={ ( event ) =>
 								selection.onSelectChild( event.target.checked )
 							}
+							onKeyDown={ ( event ) => {
+								if (
+									event.key === 'Escape' &&
+									props.onEscape
+								) {
+									event.preventDefault();
+									props.onEscape();
+								}
+							} }
 						/>
 					) }
 
