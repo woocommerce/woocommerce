@@ -39,12 +39,19 @@ import { CustomizeStoreContext } from '..';
 import { Link } from '@woocommerce/components';
 import { PATTERN_CATEGORIES } from './pattern-screen/categories';
 import { capitalize } from 'lodash';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 import { useEditorBlocks } from '../hooks/use-editor-blocks';
 import { isTrackingAllowed } from '../utils/is-tracking-allowed';
+import clsx from 'clsx';
+
+const isActiveElement = ( path: string | undefined, category: string ) => {
+	if ( path?.includes( category ) ) {
+		return true;
+	}
+};
 
 export const SidebarNavigationScreenHomepagePTK = ( {
 	onNavigateBackClick,
@@ -143,6 +150,8 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 		'woocommerce'
 	);
 
+	const path = useQuery().path;
+
 	return (
 		<SidebarNavigationScreen
 			title={ title }
@@ -174,6 +183,13 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 							( [ categoryKey, { label } ], index ) => (
 								<ItemGroup key={ index }>
 									<NavigatorButton
+										className={ clsx( {
+											'edit-site-sidebar-navigation-screen-patterns__group-homepage-item--active':
+												isActiveElement(
+													path,
+													categoryKey
+												),
+										} ) }
 										path={ `/customize-store/assembler-hub/homepage/${ categoryKey }` }
 										onClick={ () => {
 											const categoryUrl = getNewPath(
@@ -181,7 +197,9 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 												`/customize-store/assembler-hub/homepage/${ categoryKey }`,
 												{}
 											);
-											navigateTo( { url: categoryUrl } );
+											navigateTo( {
+												url: categoryUrl,
+											} );
 										} }
 										as={ SidebarNavigationItem }
 										withChevron
