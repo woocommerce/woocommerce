@@ -36,6 +36,10 @@ export interface ValidatedTextInputProps
 	customValidation?:
 		| ( ( inputObject: HTMLInputElement ) => boolean )
 		| undefined;
+	// Custom validation message to display when validity is false. Given the input element. Expected to use inputObject.validity.
+	customValidityMessage?:
+		| ( ( validity: ValidityState ) => undefined | string )
+		| undefined;
 	// Custom formatted to format values as they are typed.
 	customFormatter?: ( value: string ) => string;
 	// Whether validation should run when focused - only has an effect when focusOnMount is also true.

@@ -49,6 +49,7 @@ const ValidatedTextInput = forwardRef<
 			errorMessage: passedErrorMessage = '',
 			value = '',
 			customValidation = () => true,
+			customValidityMessage,
 			customFormatter = ( newValue: string ) => newValue,
 			label,
 			validateOnMount = true,
@@ -113,8 +114,8 @@ const ValidatedTextInput = forwardRef<
 				inputObject.setCustomValidity( '' );
 
 				if (
-					customValidationRef.current( inputObject ) &&
-					inputObject.checkValidity()
+					inputObject.checkValidity() &&
+					customValidationRef.current( inputObject )
 				) {
 					clearValidationError( errorIdString );
 					return;
@@ -122,14 +123,22 @@ const ValidatedTextInput = forwardRef<
 
 				setValidationErrors( {
 					[ errorIdString ]: {
-						message: label
-							? getValidityMessageForInput( label, inputObject )
-							: inputObject.validationMessage,
+						message: getValidityMessageForInput(
+							label,
+							inputObject,
+							customValidityMessage
+						),
 						hidden: errorsHidden,
 					},
 				} );
 			},
-			[ clearValidationError, errorIdString, setValidationErrors, label ]
+			[
+				clearValidationError,
+				errorIdString,
+				setValidationErrors,
+				label,
+				customValidityMessage,
+			]
 		);
 
 		// Allows parent to trigger revalidation.

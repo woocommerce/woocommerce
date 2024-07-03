@@ -71,19 +71,19 @@ const CreateAccountUI = (): JSX.Element => {
 					className={ `wc-block-components-address-form__password` }
 					value={ customerPassword || '' }
 					required={ true }
-					customValidation={ (
-						inputObject: HTMLInputElement
-					): boolean => {
-						if ( ! inputObject.value ) {
-							inputObject.setCustomValidity(
-								__(
-									'Please enter a valid password',
-									'woocommerce'
-								)
+					customValidityMessage={ (
+						validity: ValidityState
+					): string | undefined => {
+						if (
+							validity.valueMissing ||
+							validity.badInput ||
+							validity.typeMismatch
+						) {
+							return __(
+								'Please enter a valid password',
+								'woocommerce'
 							);
-							return false;
 						}
-						return true;
 					} }
 					onChange={ ( value: string ) =>
 						__internalSetCustomerPassword( value )
