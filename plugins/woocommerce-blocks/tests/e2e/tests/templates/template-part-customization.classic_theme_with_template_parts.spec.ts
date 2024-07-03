@@ -103,7 +103,7 @@ test.describe( 'Template part customization', () => {
 					)
 					.first()
 			).toBeVisible();
-			await expect( page.getByText( userText ) ).toHaveCount( 0 );
+			await expect( page.getByText( userText ) ).toBeHidden();
 		} );
 	} );
 } );
