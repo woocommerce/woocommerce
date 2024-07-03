@@ -35,7 +35,7 @@ export const Select = ( props: SelectProps ) => {
 		restOfProps.id || `wc-blocks-components-select-${ generatedId }`;
 
 	return (
-		<div className="wc-blocks-components-select">
+		<div className={ `wc-blocks-components-select ${ className || '' }` }>
 			<div className="wc-blocks-components-select__container">
 				<label
 					htmlFor={ inputId }
@@ -44,9 +44,7 @@ export const Select = ( props: SelectProps ) => {
 					{ label }
 				</label>
 				<select
-					className={ `wc-blocks-components-select__select ${
-						className || ''
-					}` }
+					className="wc-blocks-components-select__select"
 					id={ inputId }
 					size={ size !== undefined ? size : 1 }
 					onChange={ selectOnChange }
