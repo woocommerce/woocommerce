@@ -4,6 +4,7 @@ menu_title: Cart Line Items
 tags: reference, checkout-available-filters
 ---
 
+<!-- markdownlint-disable-line no-duplicate-heading -->
 
 # Cart Line Items
 
@@ -417,6 +418,7 @@ registerCheckoutFilters( 'example-extension', {
 > 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
+
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
 |![Before applying the Show Remove Item Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a4254f3b-f056-47ad-b34a-d5f6d5500e56) |![After applying the Show Remove Item Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/32c55dc7-ef65-4f35-ab90-9533bc79d362) |
@@ -506,6 +508,7 @@ registerCheckoutFilters( 'example-extension', {
 > 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
+
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
 |![Before applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a392cb24-4c40-4e25-8396-bf4971830e22) |![After applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/af69b26f-662a-4ef9-a288-3713b6e46373) |

@@ -3,7 +3,7 @@ post_title: Cart and Checkout Filters - Checkout and Place Order Button
 menu_title: Checkout and Place Order Button
 tags: reference, checkout-available-filters
 ---
-
+<!-- markdownlint-disable-line no-duplicate-heading -->
 # Checkout and place order button
 
 The following Checkout and place order button filters are available:
