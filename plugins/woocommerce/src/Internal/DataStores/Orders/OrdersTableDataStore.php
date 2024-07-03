@@ -2621,25 +2621,23 @@ FROM $order_meta_table
 		$order->apply_changes();
 		$this->clear_caches( $order );
 
-		if ( ! empty( $changes['status'] ) ) {
+		$nonTriggeringOrderStatuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft', 'refunded', 'failed', 'cancelled');
 
-			$nonTriggeringOrderStatuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft', 'refunded', 'failed', 'cancelled');
+		// For backwards compatibility, this hook should be fired only if the new status is not one of the non-triggering statuses and the previous status was one of the non-triggering statuses.
+		if (
+			! empty( $changes['status'] )
+			&& $changes['status'] !== $previous_status
+			&& ! in_array( $changes['status'], $nonTriggeringOrderStatuses, true )
+			&& in_array( $previous_status, $nonTriggeringOrderStatuses, true )
+		) {
+			do_action( 'woocommerce_new_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			return;
+		}
 
-			// For backwards compatibility, this hook should be fired only if the new status is not one of the non-triggering statuses and the previous status was one of the non-triggering statuses.
-			if (
-				$changes['status'] !== $previous_status
-				&& ! in_array( $changes['status'], $nonTriggeringOrderStatuses, true )
-				&& in_array( $previous_status, $nonTriggeringOrderStatuses, true )
-			) {
-				do_action( 'woocommerce_new_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-				return;
-			}
-
-			// For backwards compat with CPT, trashing/untrashing and changing previously datastore-level props does not trigger the update hook.
-			if ( in_array( 'trash', array( $changes['status'], $previous_status ), true )
-				|| ( ! empty( $changes ) && ! array_diff_key( $changes, array_flip( $this->get_post_data_store_for_backfill()->get_internal_data_store_key_getters() ) ) ) ) {
-				return;
-			}
+		// For backwards compat with CPT, trashing/untrashing and changing previously datastore-level props does not trigger the update hook.
+		if ( ( ! empty( $changes['status'] ) && in_array( 'trash', array( $changes['status'], $previous_status ), true ) )
+			|| ( ! empty( $changes ) && ! array_diff_key( $changes, array_flip( $this->get_post_data_store_for_backfill()->get_internal_data_store_key_getters() ) ) ) ) {
+			return;
 		}
 
 		do_action( 'woocommerce_update_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
