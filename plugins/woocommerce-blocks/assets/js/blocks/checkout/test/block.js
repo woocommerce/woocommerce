@@ -336,14 +336,14 @@ describe( 'Testing Checkout', () => {
 		} );
 
 		// Render the CheckoutBlock
-		const { rerender } = render( <CheckoutBlock /> );
+		const { rerender, queryByText } = render( <CheckoutBlock /> );
 
 		// Wait for the component to fully load, assuming fetch calls or state updates
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 
 		// Query the text.
 		expect(
-			screen.getByText( /You are currently checking out as a guest./i )
+			queryByText( /You are currently checking out as a guest./i )
 		).toBeInTheDocument();
 
 		await act( async () => {
@@ -355,7 +355,7 @@ describe( 'Testing Checkout', () => {
 		rerender( <CheckoutBlock /> );
 
 		expect(
-			screen.getByText( /You are currently checking out as a guest./i )
+			queryByText( /You are currently checking out as a guest./i )
 		).not.toBeInTheDocument();
 
 		await act( async () => {
