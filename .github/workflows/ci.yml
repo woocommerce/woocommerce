@@ -95,9 +95,9 @@ jobs:
         with:
           install: '${{ matrix.projectName }}...'
           build: '${{ matrix.projectName }}'
-                  pull-composer-cache: true
-                  pull-pnpm-cache: true
-                  pull-cache-key: '${{ matrix.projectName }}'
+          pull-composer-cache: true
+          pull-pnpm-cache: true
+          pull-cache-key: '${{ matrix.projectName }}'
 
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
@@ -142,7 +142,7 @@ jobs:
           ARTIFACT_NAME: ${{ github.ref_name == 'nightly' && 'woocommerce-trunk-nightly.zip' || 'woocommerce.zip' }}
         working-directory: ${{ matrix.projectPath }}
         run: node ./tests/e2e-pw/bin/override-wp-env-plugins.js
-        
+
       - name: 'Start Test Environment'
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
