@@ -67,6 +67,23 @@ class ProductSummary extends AbstractBlock
 		return ['query', 'queryId', 'postId'];
 	}
 
+	private function get_source($product, $show_description_if_empty)
+	{
+		$short_description = $product->get_short_description();
+
+		if ($short_description) {
+			return $short_description;
+		}
+
+		$description = $product->get_description();
+
+		if ($show_description_if_empty && $description) {
+			return $description;
+		}
+
+		return '';
+	}
+
 	/**
 	 * Include and render the block.
 	 *
@@ -90,11 +107,15 @@ class ProductSummary extends AbstractBlock
 			return '';
 		}
 
-		$excerpt = get_the_excerpt($block->context['postId']);
+		$show_description_if_empty = isset($attributes['showDescriptionIfEmpty']) && $attributes['showDescriptionIfEmpty'];
+		$source                    = $this->get_source($product, $show_description_if_empty);
 
-		if (!$excerpt) {
+		if (!$source) {
 			return '';
 		}
+
+		$summary_length = isset($attributes['summaryLength']) ? $attributes['summaryLength'] : false;
+		$summary        = $summary_length ? wp_trim_words($source, $summary_length) : $source;
 
 		$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes($attributes);
 
@@ -104,7 +125,7 @@ class ProductSummary extends AbstractBlock
 			</p>',
 			esc_attr($styles_and_classes['classes']),
 			esc_attr($styles_and_classes['styles'] ?? ''),
-			$excerpt
+			$summary
 		);
 	}
 }
