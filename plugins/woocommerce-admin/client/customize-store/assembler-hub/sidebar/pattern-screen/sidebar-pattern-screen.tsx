@@ -8,6 +8,7 @@ import {
 	useRef,
 	useState,
 } from '@wordpress/element';
+import { useAsyncList } from '@wordpress/compose';
 import { useSelect, useDispatch, select } from '@wordpress/data';
 import { BlockInstance, cloneBlock } from '@wordpress/blocks';
 import { close } from '@wordpress/icons';
@@ -107,6 +108,8 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 			category as keyof typeof PATTERN_CATEGORIES
 		);
 	}, [ category, patterns ] );
+
+	const asyncSortedPatterns = useAsyncList( sortedPatterns );
 
 	const [ patternPagination, setPatternPagination ] = useState( 10 );
 
@@ -243,11 +246,11 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 			) }
 			{ ! isSpinnerVisible && (
 				<BlockPatternList
-					shownPatterns={ sortedPatterns.slice(
+					shownPatterns={ asyncSortedPatterns.slice(
 						0,
 						patternPagination
 					) }
-					blockPatterns={ sortedPatterns.slice(
+					blockPatterns={ asyncSortedPatterns.slice(
 						0,
 						patternPagination
 					) }
