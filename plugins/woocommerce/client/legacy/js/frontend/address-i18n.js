@@ -17,7 +17,10 @@ jQuery( function( $ ) {
 				field.find( 'label' ).append(
 					'&nbsp;<abbr class="required" title="' +
 					wc_address_i18n_params.i18n_required_text +
-					'">*</abbr>'
+					'" aria-hidden="true">*</abbr>' + 
+					'<span class="screen-reader-text">' + 
+					wc_address_i18n_params.i18n_required_text +
+					'</span>'
 				);
 			}
 		} else {
