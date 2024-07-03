@@ -197,23 +197,6 @@ $fontSizes: (
 	word-break: break-word;
 }
 
-// Add support for content alignment classes
-@mixin with-alignment() {
-	// Apply max-width to floated items that have no intrinsic width
-	&.alignleft,
-	&.alignright {
-		max-width: $content-width * 0.5;
-		width: 100%;
-	}
-
-	// Aligned cover blocks should not use our global alignment rules
-	&.aligncenter,
-	&.alignleft,
-	&.alignright {
-		display: flex;
-	}
-}
-
 // Shows an semi-transparent overlay
 @mixin with-background-dim($opacity: 0.5) {
 	&.has-background-dim {
