@@ -95,10 +95,8 @@ export class Editor extends CoreEditor {
 
 	async revertTemplateCustomizations( {
 		templateName,
-		templateType,
 	}: {
 		templateName: string;
-		templateType: 'wp_template' | 'wp_template_part';
 	} ) {
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
 
