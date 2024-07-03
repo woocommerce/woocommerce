@@ -9,7 +9,7 @@ import {
 	createInterpolateElement,
 } from '@wordpress/element';
 import { Button, Notice } from '@wordpress/components';
-import { ProductAttribute } from '@woocommerce/data';
+import { ProductProductAttribute } from '@woocommerce/data';
 import {
 	Sortable,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
@@ -17,7 +17,6 @@ import {
 } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
-import { useViewportMatch } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -33,9 +32,10 @@ import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
 import { RemoveConfirmationModal } from '../remove-confirmation-modal';
 import { TRACKS_SOURCE } from '../../constants';
-import { AttributeEmptyStateSkeleton } from './attribute-empty-state-skeleton';
+import { EmptyState } from '../empty-state';
 import { SectionActions } from '../block-slot-fill';
 import { AttributeControlProps } from './types';
+import { getEmptyStateSequentialNames } from '../../utils';
 
 export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	value,
@@ -77,7 +77,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	const [ defaultAttributeSearch, setDefaultAttributeSearch ] =
 		useState< string >();
 	const [ removingAttribute, setRemovingAttribute ] =
-		useState< null | ProductAttribute >();
+		useState< null | ProductProductAttribute >();
 	const [ currentAttributeId, setCurrentAttributeId ] = useState<
 		null | string
 	>( null );
@@ -97,7 +97,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		);
 	};
 
-	const handleRemove = ( attribute: ProductAttribute ) => {
+	const handleRemove = ( attribute: ProductProductAttribute ) => {
 		handleChange(
 			value.filter(
 				( attr ) =>
@@ -108,7 +108,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		setRemovingAttribute( null );
 	};
 
-	const showRemoveConfirmation = ( attribute: ProductAttribute ) => {
+	const showRemoveConfirmation = ( attribute: ProductProductAttribute ) => {
 		if ( useRemoveConfirmationModal ) {
 			setRemovingAttribute( attribute );
 			return;
@@ -132,7 +132,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		onNewModalClose();
 	};
 
-	const openEditModal = ( attribute: ProductAttribute ) => {
+	const openEditModal = ( attribute: ProductProductAttribute ) => {
 		recordEvent( 'product_options_edit', {
 			source: TRACKS_SOURCE,
 			attribute: attribute.name,
@@ -141,7 +141,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		onEditModalOpen( attribute );
 	};
 
-	const closeEditModal = ( attribute: ProductAttribute ) => {
+	const closeEditModal = ( attribute: ProductProductAttribute ) => {
 		setCurrentAttributeId( null );
 		onEditModalClose( attribute );
 	};
@@ -150,7 +150,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		const addedAttributesOnly = newAttributes.filter(
 			( newAttr ) =>
 				! value.some(
-					( current: ProductAttribute ) =>
+					( current: ProductProductAttribute ) =>
 						getAttributeId( newAttr ) === getAttributeId( current )
 				)
 		);
@@ -188,23 +188,21 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const attributeKeyValues = value.reduce(
 		(
-			keyValue: Record< number | string, ProductAttribute >,
-			attribute: ProductAttribute
+			keyValue: Record< number | string, ProductProductAttribute >,
+			attribute: ProductProductAttribute
 		) => {
 			keyValue[ getAttributeKey( attribute ) ] = attribute;
 			return keyValue;
 		},
-		{} as Record< number | string, ProductAttribute >
+		{} as Record< number | string, ProductProductAttribute >
 	);
 
 	const currentAttribute = value.find(
 		( attr ) => getAttributeId( attr ) === currentAttributeId
 	);
 
-	const isMobileViewport = useViewportMatch( 'medium', '<' );
-
 	function renderEmptyState() {
-		if ( isMobileViewport || value.length ) return null;
+		if ( value.length ) return null;
 
 		if ( renderCustomEmptyState ) {
 			return renderCustomEmptyState( {
@@ -215,7 +213,14 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			} );
 		}
 
-		return <AttributeEmptyStateSkeleton />;
+		return (
+			<EmptyState
+				names={ getEmptyStateSequentialNames(
+					__( 'Attribute', 'woocommerce' ),
+					3
+				) }
+			/>
+		);
 	}
 
 	function renderSectionActions() {

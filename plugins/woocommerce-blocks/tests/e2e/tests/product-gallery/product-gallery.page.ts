@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { EditorUtils, FrontendUtils } from '@woocommerce/e2e-utils';
-import { Editor } from '@wordpress/e2e-test-utils-playwright';
+import { Editor, FrontendUtils } from '@woocommerce/e2e-utils';
 
 const selectors = {
 	editor: {
@@ -18,22 +17,19 @@ export class ProductGalleryPage {
 	editor: Editor;
 	page: Page;
 	frontendUtils: FrontendUtils;
-	editorUtils: EditorUtils;
 	constructor( {
 		editor,
 		page,
 		frontendUtils,
-		editorUtils,
 	}: {
 		editor: Editor;
 		page: Page;
 		frontendUtils: FrontendUtils;
-		editorUtils: EditorUtils;
 	} ) {
 		this.editor = editor;
 		this.page = page;
 		this.frontendUtils = frontendUtils;
-		this.editorUtils = editorUtils;
+		this.editor = editor;
 	}
 
 	async addProductGalleryBlock( { cleanContent = true } ) {
@@ -96,7 +92,7 @@ export class ProductGalleryPage {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
-		return this.editorUtils.getBlockByName( blockName );
+		return this.editor.getBlockByName( blockName );
 	}
 
 	async getThumbnailsBlock( { page }: { page: 'frontend' | 'editor' } ) {
@@ -108,7 +104,7 @@ export class ProductGalleryPage {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
-		return this.editorUtils.getBlockByName( blockName );
+		return this.editor.getBlockByName( blockName );
 	}
 
 	async getNextPreviousButtonsBlock( {
@@ -125,7 +121,7 @@ export class ProductGalleryPage {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
-		return this.editorUtils.getBlockByName( blockName );
+		return this.editor.getBlockByName( blockName );
 	}
 
 	async getPagerBlock( { page }: { page: 'frontend' | 'editor' } ) {
@@ -137,7 +133,7 @@ export class ProductGalleryPage {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
-		return this.editorUtils.getBlockByName( blockName );
+		return this.editor.getBlockByName( blockName );
 	}
 
 	async getBlock( { page }: { page: 'frontend' | 'editor' } ) {
@@ -149,7 +145,7 @@ export class ProductGalleryPage {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
-		return this.editorUtils.getBlockByName( blockName );
+		return this.editor.getBlockByName( blockName );
 	}
 
 	async getAddToCartWithOptionsBlock( {
@@ -165,6 +161,6 @@ export class ProductGalleryPage {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
-		return this.editorUtils.getBlockByName( blockName );
+		return this.editor.getBlockByName( blockName );
 	}
 }

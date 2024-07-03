@@ -59,28 +59,28 @@ class DefaultShippingPartners {
 						array(
 							'icon'        => $check_icon,
 							'description' => __(
-								'Print labels from Royal Mail, Parcel Force, DPD, and many more',
+								'Discounted labels from top global carriers',
 								'woocommerce'
 							),
 						),
 						array(
 							'icon'        => $check_icon,
 							'description' => __(
-								'Shop for the best rates, in real-time',
+								'Sync all your selling channels in one place',
 								'woocommerce'
 							),
 						),
 						array(
 							'icon'        => $check_icon,
-							'description' => __( 'Connect selling channels easily', 'woocommerce' ),
+							'description' => __( 'Advanced automated workflows and customs', 'woocommerce' ),
 						),
 						array(
 							'icon'        => $check_icon,
-							'description' => __( 'Advance automated workflows', 'woocommerce' ),
+							'description' => __( 'Instantly send tracking to your customers', 'woocommerce' ),
 						),
 						array(
 							'icon'        => $check_icon,
-							'description' => __( '30-days free trial', 'woocommerce' ),
+							'description' => __( '30-day free trial', 'woocommerce' ),
 						),
 					),
 				),
@@ -114,7 +114,7 @@ class DefaultShippingPartners {
 					'image'    => $asset_base_url . 'envia-column.svg',
 					'features' => $column_layout_features,
 				),
-				'learn_more_link'   => 'https://woo.com/products/envia-shipping-and-fulfillment/',
+				'learn_more_link'   => 'https://woocommerce.com/products/envia-shipping-and-fulfillment/',
 				'is_visible'        => array(
 					self::get_rules_for_countries( array( 'CL', 'AR', 'PE', 'BR', 'UY', 'GT' ) ),
 				),
@@ -157,7 +157,7 @@ class DefaultShippingPartners {
 						),
 					),
 				),
-				'learn_more_link'   => 'https://woo.com/products/easyship-shipping-rates/',
+				'learn_more_link'   => 'https://woocommerce.com/products/easyship-shipping-rates/',
 				'is_visible'        => array(
 					self::get_rules_for_countries( array( 'SG', 'HK', 'AU', 'NZ' ) ),
 				),
@@ -282,9 +282,27 @@ class DefaultShippingPartners {
 						),
 					),
 				),
-				'learn_more_link'   => 'https://woo.com/products/shipping/',
+				'learn_more_link'   => 'https://woocommerce.com/products/shipping/',
 				'is_visible'        => array(
 					self::get_rules_for_countries( array( 'US' ) ),
+					(object) array(
+						'type'    => 'not',
+						'operand' => array(
+							(object) array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'woocommerce-shipping' ),
+							),
+						),
+					),
+					(object) array(
+						'type'    => 'not',
+						'operand' => array(
+							(object) array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'woocommerce-tax' ),
+							),
+						),
+					),
 				),
 				'available_layouts' => array( 'column' ),
 			),

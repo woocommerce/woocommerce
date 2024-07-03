@@ -16,10 +16,8 @@ import {
 	BLOCK_DESCRIPTION as description,
 } from './constants';
 
-const { ancestor, ...configuration } = sharedConfig;
-
 const blockConfig = {
-	...configuration,
+	...sharedConfig,
 	apiVersion: 2,
 	title,
 	description,

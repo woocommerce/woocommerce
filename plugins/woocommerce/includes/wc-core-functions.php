@@ -824,7 +824,7 @@ function get_woocommerce_currency_symbols() {
 			'XAF' => 'CFA',
 			'XCD' => '&#36;',
 			'XOF' => 'CFA',
-			'XPF' => 'Fr',
+			'XPF' => 'XPF',
 			'YER' => '&#xfdfc;',
 			'ZAR' => '&#82;',
 			'ZMW' => 'ZK',
@@ -1102,20 +1102,21 @@ function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = 
 }
 
 /**
- * Get the URL to the WooCommerce REST API.
+ * Get the URL to the WooCommerce Legacy REST API.
+ *
+ * Note that as of WooCommerce 9.0 the WooCommerce Legacy REST API has been moved to a dedicated extension,
+ * and the implementation of its root endpoint in WooCommerce core is now just a stub that will always return an error.
+ * See the setup_legacy_api_stub method in includes/class-woocommerce.php and:
+ * https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/
+ *
+ * @deprecated 9.0.0 The Legacy REST API has been removed from WooCommerce core.
  *
  * @since 2.1
  * @param string $path an endpoint to include in the URL.
  * @return string the URL.
  */
 function get_woocommerce_api_url( $path ) {
-	if ( Constants::is_defined( 'WC_API_REQUEST_VERSION' ) ) {
-		$version = Constants::get_constant( 'WC_API_REQUEST_VERSION' );
-	} else {
-		$version = substr( WC_API::VERSION, 0, 1 );
-	}
-
-	$url = get_home_url( null, "wc-api/v{$version}/", is_ssl() ? 'https' : 'http' );
+	$url = get_home_url( null, 'wc-api/v3/', is_ssl() ? 'https' : 'http' );
 
 	if ( ! empty( $path ) && is_string( $path ) ) {
 		$url .= ltrim( $path, '/' );
@@ -1539,12 +1540,18 @@ function wc_get_credit_card_type_label( $type ) {
 			'visa'             => _x( 'Visa', 'Name of credit card', 'woocommerce' ),
 			'discover'         => _x( 'Discover', 'Name of credit card', 'woocommerce' ),
 			'american express' => _x( 'American Express', 'Name of credit card', 'woocommerce' ),
+			'cartes bancaires' => _x( 'Cartes Bancaires', 'Name of credit card', 'woocommerce' ),
 			'diners'           => _x( 'Diners', 'Name of credit card', 'woocommerce' ),
 			'jcb'              => _x( 'JCB', 'Name of credit card', 'woocommerce' ),
 		)
 	);
 
-	return apply_filters( 'woocommerce_get_credit_card_type_label', ( array_key_exists( $type, $labels ) ? $labels[ $type ] : ucfirst( $type ) ) );
+	/**
+	 * Fallback to title case, uppercasing the first letter of each word.
+	 *
+	 * @since 8.9.0
+	 */
+	return apply_filters( 'woocommerce_get_credit_card_type_label', ( array_key_exists( $type, $labels ) ? $labels[ $type ] : ucwords( $type ) ) );
 }
 
 /**
@@ -1554,7 +1561,7 @@ function wc_get_credit_card_type_label( $type ) {
  * @param string $url   URL of the page to return to.
  */
 function wc_back_link( $label, $url ) {
-	echo '<small class="wc-admin-breadcrumb"><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '">&#x2934;</a></small>';
+	echo '<small class="wc-admin-breadcrumb"><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '">&#x2934;&#xfe0e;</a></small>';
 }
 
 /**

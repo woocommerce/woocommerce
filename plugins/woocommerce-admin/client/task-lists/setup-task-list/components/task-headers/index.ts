@@ -24,5 +24,5 @@ export const taskHeaders: Record< string, React.ElementType > = {
 	products: ProductsHeader,
 	purchase: PurchaseHeader,
 	'woocommerce-payments': WoocommercePaymentsHeader,
-	launch_your_store: LaunchYourStoreHeader,
+	'launch-your-store': LaunchYourStoreHeader,
 };

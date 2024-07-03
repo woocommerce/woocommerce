@@ -106,7 +106,7 @@ for ( const key in resources ) {
 // We need to convert the collection to JSON so that it can be exported to a file
 const collectionJSON = postmanCollection.toJSON();
 
-// Create a colleciton.json file. It can be imported to postman
+// Create a collection.json file. It can be imported to postman
 fs.writeFile(
 	'./collection.json',
 	JSON.stringify( collectionJSON ),

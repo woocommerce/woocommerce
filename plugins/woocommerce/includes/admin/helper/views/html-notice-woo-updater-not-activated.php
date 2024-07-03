@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 			sprintf(
 			/* translators: 1: WP plugin management URL */
 				__(
-					'Please <a href="%1$s">activate the Woo.com Update Manager</a> to continue receiving the updates and streamlined support included in your Woo.com subscriptions.',
+					'Please <a href="%1$s">activate the WooCommerce.com Update Manager</a> to continue receiving the updates and streamlined support included in your WooCommerce.com subscriptions.',
 					'woocommerce'
 				),
 				esc_url( admin_url( 'plugins.php' ) ),

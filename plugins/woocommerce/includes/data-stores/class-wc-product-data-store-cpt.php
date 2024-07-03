@@ -96,6 +96,46 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected $updated_props = array();
 
+
+	/**
+	 * Method to obtain DB lock on SKU to make sure we only
+	 * create product with unique SKU for concurrent requests.
+	 *
+	 * We are doing so by inserting a row in the wc_product_meta_lookup table
+	 * upfront with the SKU of the product we are trying to insert.
+	 *
+	 * If the SKU is already present in the table, it means that another
+	 * request is processing the same SKU and we should not proceed
+	 * with the insert.
+	 *
+	 * Using $wpdb->options as it always has some data, if we select from a table
+	 * that does not have any data, then our query will always return null set
+	 * and the where subquery won't be fired, effectively bypassing any lock.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @return bool True if lock is obtained (unique SKU), false otherwise.
+	 */
+	private function obtain_lock_on_sku_for_concurrent_requests( $product ) {
+		global $wpdb;
+		$product_id = $product->get_id();
+		$sku        = $product->get_sku();
+
+		$query = $wpdb->prepare(
+			"INSERT INTO $wpdb->wc_product_meta_lookup (product_id, sku)
+			SELECT %d, %s FROM $wpdb->options
+			WHERE NOT EXISTS (
+				SELECT * FROM $wpdb->wc_product_meta_lookup WHERE sku = %s LIMIT 1
+			) LIMIT 1;",
+			$product_id,
+			$sku,
+			$sku
+		);
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$result = $wpdb->query( $query );
+
+		return (bool) $result;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD Methods
@@ -106,6 +146,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Method to create a new product in the database.
 	 *
 	 * @param WC_Product $product Product object.
+	 * @throws Exception If SKU is already under processing.
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created( 'edit' ) ) {
@@ -137,6 +178,25 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
+			$sku = $product->get_sku();
+
+			/**
+			 * If SKU is already under processing aka Duplicate SKU
+			 * because of concurrent requests, then we should not proceed
+			 * Delete the product and throw an exception only if the request is
+			 * initiated via REST API
+			 */
+			if ( ! empty( $sku ) && WC()->is_rest_api_request() && ! $this->obtain_lock_on_sku_for_concurrent_requests( $product ) ) {
+				$product->delete( true );
+				// translators: 1: SKU.
+				throw new Exception( esc_html( sprintf( __( 'The SKU (%1$s) you are trying to insert is already under processing', 'woocommerce' ), $sku ) ) );
+			}
+
+			// get the post object so that we can set the status
+			// to the correct value; it is possible that the status was
+			// changed by the woocommerce_new_product_data filter above.
+			$post_object = get_post( $product->get_id() );
+			$product->set_status( $post_object->post_status );
 
 			$this->update_post_meta( $product, true );
 			$this->update_terms( $product, true );
@@ -272,7 +332,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$product->apply_changes();
 
-		do_action( 'woocommerce_update_product', $product->get_id(), $product );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_update_product', $product->get_id(), $product, $changes );
 	}
 
 	/**
@@ -1193,10 +1254,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @todo   Add to interface in 4.0.
 	 * @param  WC_Product $product Variable product.
 	 * @param  int        $limit Limit the number of created variations.
-	 * @param  array  	  $default_values Key value pairs to set on created variations.
+	 * @param  array      $default_values Key value pairs to set on created variations.
+	 * @param  array      $metadata Key value pairs to set as meta data on created variations.
 	 * @return int        Number of created variations.
 	 */
-	public function create_all_product_variations( $product, $limit = -1, $default_values = array() ) {
+	public function create_all_product_variations( $product, $limit = -1, $default_values = array(), $metadata = array() ) {
 		$count = 0;
 
 		if ( ! $product ) {
@@ -1226,13 +1288,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 			$variation = wc_get_product_object( 'variation' );
 			$variation->set_props( $default_values );
+			foreach ( $metadata as $meta ) {
+				$variation->add_meta_data( $meta['key'], $meta['value'] );
+			}
 			$variation->set_parent_id( $product->get_id() );
 			$variation->set_attributes( $possible_attribute );
 			$variation_id = $variation->save();
 
 			do_action( 'product_variation_linked', $variation_id );
 
-			$count ++;
+			++$count;
 
 			if ( $limit > 0 && $count >= $limit ) {
 				break;

@@ -36,7 +36,7 @@ export function TextAreaBlockEdit( {
 		required,
 		note,
 		tooltip,
-		disabled,
+		disabled = false,
 		align,
 		allowedFormats,
 		direction,
@@ -146,7 +146,7 @@ export function TextAreaBlockEdit( {
 						placeholder={ placeholder }
 						required={ required }
 						aria-required={ required }
-						disabled={ disabled }
+						readOnly={ disabled }
 						onBlur={ hideToolbar }
 					/>
 				) }

@@ -55,7 +55,11 @@ if ( isDevelopmentEnvironment && isXStateInspectEnabled ) {
 
 export const useXStateInspect = ( machineVersion ) => {
 	let xstateV5Inspector;
-	if ( isXStateV5InspectEnabled && machineVersion === 'V5' ) {
+	if (
+		isDevelopmentEnvironment &&
+		isXStateV5InspectEnabled &&
+		machineVersion === 'V5'
+	) {
 		xstateV5Inspector = XStateV5Inspect().inspect;
 	}
 

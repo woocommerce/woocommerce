@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Adds support for sanitizing styled chunks of HTML (a slight expansion of normal `wp_kses_post` rules).

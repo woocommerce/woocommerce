@@ -70,7 +70,7 @@ export function Edit( {
 					listPrice <= Number.parseFloat( salePrice )
 				) {
 					return __(
-						'Sale price must be lower than the list price.',
+						'Sale price must be lower than the regular price.',
 						'woocommerce'
 					);
 				}

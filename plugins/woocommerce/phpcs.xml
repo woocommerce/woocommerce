@@ -114,6 +114,10 @@
 	<rule ref="Squiz.Commenting.FileComment.MissingPackageTag">
 		<exclude-pattern>src/</exclude-pattern>
 		<exclude-pattern>tests/php/</exclude-pattern>
+		<exclude-pattern>patterns</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FileComment.SpacingAfterComment">
+		<exclude-pattern>patterns</exclude-pattern>
 	</rule>
 	<rule ref="Squiz.Commenting.FileComment.Missing">
 		<exclude-pattern>src/</exclude-pattern>

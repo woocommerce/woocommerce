@@ -15,7 +15,7 @@
 		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:70%">
 			<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"left"}} -->
 			<div class="wp-block-group"><!-- wp:site-logo {"shouldSyncIcon":false} /-->
-				<!-- wp:site-title {"style":{"layout":{"selfStretch":"fixed","flexSize":"200px"},"typography":{"fontStyle":"normal","fontWeight":"700"}}} /-->
+				<!-- wp:site-title {"typography":{"fontStyle":"normal","fontWeight":"700"}}} /-->
 			</div>
 			<!-- /wp:group -->
 		</div>

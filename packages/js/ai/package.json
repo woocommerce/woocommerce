@@ -90,7 +90,7 @@
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2",
 		"react-hooks^8.0.1": "link:@testing-library/react-hooks^8.0.1",
-		"rimraf": "^3.0.2",
+		"rimraf": "5.0.5",
 		"sass-loader": "^10.5.0",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
@@ -116,7 +116,11 @@
 					"name": "JavaScript",
 					"command": "test:js",
 					"changes": "src/**/*.{js,jsx,ts,tsx}",
-					"cascade": "test:js"
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}

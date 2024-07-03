@@ -36,7 +36,7 @@ class WC_Order_Factory {
 			$order_cache = wc_get_container()->get( OrderCache::class );
 			$order       = $order_cache->get( $order_id );
 			if ( ! is_null( $order ) ) {
-				return $order;
+				return 0 === $order->get_id() ? false : $order;
 			}
 		}
 

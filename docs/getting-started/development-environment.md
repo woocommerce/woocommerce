@@ -6,7 +6,7 @@ tags: tutorial, setup
 
 ## Introduction
 
-Creating a WooCommerce extension - which extends the WooCommerce plugin, or developing a theme for the WooCommerce plugin can be excellent ways to build custom functionality into your store and even monetize your development through the [WooCommerce Marketplace](https://woo.com/products/). 
+Creating a WooCommerce extension - which extends the WooCommerce plugin, or developing a theme for the WooCommerce plugin can be excellent ways to build custom functionality into your store and even monetize your development through the [WooCommerce Marketplace](https://woocommerce.com/products/). 
 
 This guide will walk you through the steps of getting a basic development environment set up for building WooCommerce extensions.
 
@@ -16,7 +16,7 @@ If you would like to contribute to the WooCommerce core platform; please read ou
 
 WooCommerce does adhere to WordPress code standards and guidelines, so it’s best to familiarize yourself with [WordPress Development](https://learn.wordpress.org/tutorial/introduction-to-wordpress/) as well as [PHP](https://www.php.net/). 
 
-Knowledge and understanding of [WooCommerce Hooks and Filters](https://woo.com/document/introduction-to-hooks-actions-and-filters/) will allow you to add and change code without editing core files. You can learn more about WordPress hooks and filters in the [WordPress Plugin Development Handbook](https://developer.wordpress.org/plugins/hooks/).
+Knowledge and understanding of [WooCommerce Hooks and Filters](https://woocommerce.com/document/introduction-to-hooks-actions-and-filters/) will allow you to add and change code without editing core files. You can learn more about WordPress hooks and filters in the [WordPress Plugin Development Handbook](https://developer.wordpress.org/plugins/hooks/).
 
 ### Recommended reading
 
@@ -54,7 +54,7 @@ In addition to the software listed above, you'll also want to have some way of s
 
 ### Minimum server requirements
 
-Regardless of the tool you choose for managing your development environment, you should make sure it [meets the server recommendations](https://woo.com/document/server-requirements/?utm_source=wooextdevguide) for WooCommerce as well as the [requirements for running WordPress](https://wordpress.org/about/requirements/).
+Regardless of the tool you choose for managing your development environment, you should make sure it [meets the server recommendations](https://woocommerce.com/document/server-requirements/?utm_source=wooextdevguide) for WooCommerce as well as the [requirements for running WordPress](https://wordpress.org/about/requirements/).
 
 ## Anatomy of a WordPress development environment (public_html/)
 

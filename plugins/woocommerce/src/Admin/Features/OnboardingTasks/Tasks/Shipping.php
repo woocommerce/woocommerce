@@ -45,7 +45,7 @@ class Shipping extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Get your products shipped', 'woocommerce' );
+		return __( 'Select your shipping options', 'woocommerce' );
 	}
 
 	/**

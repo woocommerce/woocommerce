@@ -615,15 +615,19 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		if ( isset( $request['customer'] ) ) {
-			if ( ! empty( $args['meta_query'] ) ) {
-				$args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			}
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+				$args['customer_id'] = $request['customer'];
+			} else {
+				if ( ! empty( $args['meta_query'] ) ) {
+					$args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				}
 
-			$args['meta_query'][] = array(
-				'key'   => '_customer_user',
-				'value' => $request['customer'],
-				'type'  => 'NUMERIC',
-			);
+				$args['meta_query'][] = array(
+					'key'   => '_customer_user',
+					'value' => $request['customer'],
+					'type'  => 'NUMERIC',
+				);
+			}
 		}
 
 		// Search by product.
@@ -925,6 +929,11 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
 		$this->maybe_set_item_meta_data( $item, $posted );
+
+		if ( 'update' === $action ) {
+			require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
+			wc_maybe_adjust_line_item_product_stock( $item );
+		}
 
 		return $item;
 	}
@@ -1615,7 +1624,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							),
 							'rate_id'            => array(
 								'description' => __( 'Tax rate ID.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),

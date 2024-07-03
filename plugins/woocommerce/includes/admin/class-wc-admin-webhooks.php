@@ -302,13 +302,15 @@ class WC_Admin_Webhooks {
 		$num_webhooks = $data_store->get_count_webhooks_by_status();
 		$count        = array_sum( $num_webhooks );
 
-		if ( 0 < $count ) {
+		if ( $count > 0 ) {
 			$webhooks_table_list->process_bulk_action();
 			$webhooks_table_list->prepare_items();
 
 			echo '<input type="hidden" name="page" value="wc-settings" />';
 			echo '<input type="hidden" name="tab" value="advanced" />';
 			echo '<input type="hidden" name="section" value="webhooks" />';
+
+			self::maybe_display_legacy_rest_api_warning();
 
 			$webhooks_table_list->views();
 			$webhooks_table_list->search_box( __( 'Search webhooks', 'woocommerce' ), 'webhook' );
@@ -321,6 +323,81 @@ class WC_Admin_Webhooks {
 			<style type="text/css">#posts-filter .wp-list-table, #posts-filter .tablenav.top, .tablenav.bottom .actions { display: none; }</style>
 			<?php
 		}
+	}
+
+	/**
+	 * Display a warning message if the Legacy REST API extension is not installed
+	 * and there are webhooks configured to use the legacy payload format.
+	 */
+	private static function maybe_display_legacy_rest_api_warning() {
+		global $webhooks_table_list;
+
+		if ( ! is_null( wc()->api ) ) {
+			return;
+		}
+
+		$legacy_api_webhooks_count = $webhooks_table_list->get_legacy_api_webhooks_count();
+		if ( 0 === $legacy_api_webhooks_count ) {
+			return;
+		}
+
+		?>
+		<div class='error inline'>
+			<p><strong>
+				<?php echo esc_html__( 'Incompatible webhooks warning', 'woocommerce' ); ?>
+			</strong></p>
+			<p>
+				<?php
+				echo wp_kses_data(
+					sprintf(
+						/* translators: %s = webhooks count */
+						_n(
+							"There's %d webhook that is configured to be delivered using the Legacy REST API, which has been removed from WooCommerce. This webhook will fail to be sent.",
+							'There are %d webhooks that are configured to be delivered using the Legacy REST API, which has been removed from WooCommerce. These webhooks will fail to be sent.',
+							$legacy_api_webhooks_count,
+							'woocommerce'
+						),
+						$legacy_api_webhooks_count,
+						'woocommerce'
+					)
+				);
+				?>
+			</p>
+			<p>
+				<?php
+				echo wp_kses(
+					sprintf(
+						/* translators: %s = URL */
+						_n(
+							'This webhook has the ⚠️ symbol in front of its name in the list below. Please either edit the webhook to use a different delivery format, or install and activate <a href="%s" target="_blank">the WooCommerce Legacy REST API extension</a>.',
+							'These webhooks have the ⚠️ symbol in front of their names in the list below. Please either edit the webhooks to use a different delivery format, or install and activate <a href="%s" target="_blank">the WooCommerce Legacy REST API extension</a>.',
+							$legacy_api_webhooks_count,
+							'woocommerce'
+						),
+						'https://wordpress.org/plugins/woocommerce-legacy-rest-api/'
+					),
+					array(
+						'a' => array(
+							'href'   => array(),
+							'target' => array(),
+						),
+					)
+				);
+				?>
+			</p>
+			<p><strong>
+				<?php
+				echo wp_kses_data(
+					sprintf(
+						/* translators: %s is an URL */
+						__( "<a href='%s'>More information</a>", 'woocommerce' ),
+						'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
+					)
+				);
+				?>
+			</strong></p>
+		</div>
+		<?php
 	}
 
 	/**

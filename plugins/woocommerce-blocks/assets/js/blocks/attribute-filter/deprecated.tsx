@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { useBlockProps } from '@wordpress/block-editor';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -15,13 +14,11 @@ import metadata from './block.json';
 const v1 = {
 	supports: {
 		...metadata.supports,
-		...( isFeaturePluginBuild() && {
-			__experimentalBorder: {
-				radius: false,
-				color: true,
-				width: false,
-			},
-		} ),
+		__experimentalBorder: {
+			radius: false,
+			color: true,
+			width: false,
+		},
 	},
 	attributes: {
 		...metadata.attributes,
@@ -62,7 +59,7 @@ const v1 = {
 		return (
 			<div
 				{ ...useBlockProps.save( {
-					className: classNames( 'is-loading', className ),
+					className: clsx( 'is-loading', className ),
 				} ) }
 				{ ...data }
 			>

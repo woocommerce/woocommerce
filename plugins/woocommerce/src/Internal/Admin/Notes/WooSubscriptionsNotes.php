@@ -1,8 +1,8 @@
 <?php
 /**
- * WooCommerce Admin (Dashboard) Woo.com Extension Subscriptions Note Provider.
+ * WooCommerce Admin (Dashboard) WooCommerce.com Extension Subscriptions Note Provider.
  *
- * Adds notes to the merchant's inbox concerning Woo.com extension subscriptions.
+ * Adds notes to the merchant's inbox concerning WooCommerce.com extension subscriptions.
  */
 
 namespace Automattic\WooCommerce\Internal\Admin\Notes;
@@ -129,7 +129,7 @@ class WooSubscriptionsNotes {
 	}
 
 	/**
-	 * Whether or not we think the site is currently connected to Woo.com.
+	 * Whether or not we think the site is currently connected to WooCommerce.com.
 	 *
 	 * @return bool
 	 */
@@ -139,7 +139,7 @@ class WooSubscriptionsNotes {
 	}
 
 	/**
-	 * Returns the Woo.com provided site ID for this site.
+	 * Returns the WooCommerce.com provided site ID for this site.
 	 *
 	 * @return int|false
 	 */
@@ -187,7 +187,7 @@ class WooSubscriptionsNotes {
 	}
 
 	/**
-	 * Adds a note prompting to connect to Woo.com.
+	 * Adds a note prompting to connect to WooCommerce.com.
 	 */
 	public function add_no_connection_note() {
 		$note = self::get_note();
@@ -195,11 +195,11 @@ class WooSubscriptionsNotes {
 	}
 
 	/**
-	 * Get the Woo.com connection note
+	 * Get the WooCommerce.com connection note
 	 */
 	public static function get_note() {
 		$note = new Note();
-		$note->set_title( __( 'Connect to Woo.com', 'woocommerce' ) );
+		$note->set_title( __( 'Connect to WooCommerce.com', 'woocommerce' ) );
 		$note->set_content( __( 'Connect to get important product notifications and updates.', 'woocommerce' ) );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
@@ -221,6 +221,9 @@ class WooSubscriptionsNotes {
 	 * @return int|false
 	 */
 	public function get_product_id_from_subscription_note( &$note ) {
+		if ( ! is_object( $note ) ) {
+			return false;
+		}
 		$content_data = $note->get_content_data();
 
 		if ( property_exists( $content_data, 'product_id' ) ) {
@@ -358,7 +361,7 @@ class WooSubscriptionsNotes {
 		$note->add_action(
 			'enable-autorenew',
 			__( 'Enable Autorenew', 'woocommerce' ),
-			'https://woo.com/my-account/my-subscriptions/?utm_medium=product'
+			'https://woocommerce.com/my-account/my-subscriptions/?utm_medium=product'
 		);
 		$note->set_content( $note_content );
 		$note->set_content_data( $note_content_data );

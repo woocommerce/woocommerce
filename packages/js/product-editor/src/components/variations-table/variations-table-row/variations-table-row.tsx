@@ -1,26 +1,34 @@
 /**
  * External dependencies
  */
-
 import { Tag, __experimentalTooltip as Tooltip } from '@woocommerce/components';
 import { CurrencyContext } from '@woocommerce/currency';
 import { PartialProductVariation, ProductVariation } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
-import { Button, CheckboxControl, Spinner } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
+import {
+	Button,
+	CheckboxControl,
+	Dropdown,
+	Spinner,
+} from '@wordpress/components';
 import {
 	createElement,
 	Fragment,
 	useContext,
 	useMemo,
 } from '@wordpress/element';
+import { plus, info, Icon } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
-import { Icon, info } from '@wordpress/icons';
 import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
-import { PRODUCT_VARIATION_TITLE_LIMIT } from '../../../constants';
+import {
+	PRODUCT_VARIATION_TITLE_LIMIT,
+	TRACKS_SOURCE,
+} from '../../../constants';
 import HiddenIcon from '../../../icons/hidden-icon';
 import {
 	getProductStockStatus,
@@ -28,6 +36,9 @@ import {
 	truncate,
 } from '../../../utils';
 import { SingleUpdateMenu } from '../variation-actions-menus';
+import { ImageActionsMenu } from '../image-actions-menu';
+import { VariationStockStatusForm } from '../variation-stock-status-form/variation-stock-status-form';
+import { VariationPricingForm } from '../variation-pricing-form';
 import { VariationsTableRowProps } from './types';
 
 const NOT_VISIBLE_TEXT = __( 'Not visible to customers', 'woocommerce' );
@@ -90,12 +101,193 @@ export function VariationsTableRow( {
 		[ variableAttributes, variation ]
 	);
 
-	function handleChange( values: PartialProductVariation[] ) {
-		onChange( values[ 0 ] );
+	function handleChange(
+		values: PartialProductVariation[],
+		showSuccess: boolean
+	) {
+		onChange( values[ 0 ], showSuccess );
 	}
 
 	function handleDelete( values: PartialProductVariation[] ) {
 		onDelete( values[ 0 ] );
+	}
+
+	function toggleHandler(
+		option: string,
+		isOpen: boolean,
+		onToggle: () => void
+	) {
+		return function handleToggle() {
+			if ( ! isOpen ) {
+				recordEvent( 'product_variations_inline_select', {
+					source: TRACKS_SOURCE,
+					product_id: variation.parent_id,
+					variation_id: variation.id,
+					selected_option: option,
+				} );
+			}
+			onToggle();
+		};
+	}
+
+	function renderImageActionsMenu() {
+		return (
+			<ImageActionsMenu
+				selection={ [ variation ] }
+				onChange={ handleChange }
+				onDelete={ handleDelete }
+				renderToggle={ ( { isOpen, onToggle, isBusy } ) =>
+					isBusy ? (
+						<div className="woocommerce-product-variations__add-image-button">
+							<Spinner
+								aria-label={ __(
+									'Loading image',
+									'woocommerce'
+								) }
+							/>
+						</div>
+					) : (
+						<Button
+							className={ classNames(
+								variation.image
+									? 'woocommerce-product-variations__image-button'
+									: 'woocommerce-product-variations__add-image-button'
+							) }
+							icon={ variation.image ? undefined : plus }
+							iconSize={ variation.image ? undefined : 16 }
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore this exists in the props but is not typed
+							size="compact"
+							onClick={ toggleHandler(
+								'image',
+								isOpen,
+								onToggle
+							) }
+						>
+							{ variation.image && (
+								<div
+									className="woocommerce-product-variations__image"
+									style={ {
+										backgroundImage: `url('${ variation.image.src }')`,
+									} }
+								/>
+							) }
+						</Button>
+					)
+				}
+			/>
+		);
+	}
+
+	function renderPrices() {
+		return (
+			<>
+				{ variation.on_sale && (
+					<span className="woocommerce-product-variations__sale-price">
+						{ formatAmount( variation.sale_price ) }
+					</span>
+				) }
+				<span
+					className={ classNames(
+						'woocommerce-product-variations__regular-price',
+						{
+							'woocommerce-product-variations__regular-price--on-sale':
+								variation.on_sale,
+						}
+					) }
+				>
+					{ formatAmount( variation.regular_price ) }
+				</span>
+			</>
+		);
+	}
+
+	function renderPriceForm( onClose: () => void ) {
+		return (
+			<VariationPricingForm
+				initialValue={ variation }
+				onSubmit={ ( editedVariation ) => {
+					onChange( { ...editedVariation, id: variation.id }, true );
+					onClose();
+				} }
+				onCancel={ onClose }
+			/>
+		);
+	}
+
+	function renderPriceCellContent() {
+		if ( ! variation.regular_price ) return null;
+		return (
+			<Dropdown
+				contentClassName="woocommerce-product-variations__pricing-actions-menu"
+				// @ts-expect-error missing prop in types.
+				popoverProps={ {
+					placement: 'bottom',
+				} }
+				renderToggle={ ( { isOpen, onToggle } ) => (
+					<Button
+						onClick={ toggleHandler( 'price', isOpen, onToggle ) }
+					>
+						{ renderPrices() }
+					</Button>
+				) }
+				renderContent={ ( { onClose } ) => renderPriceForm( onClose ) }
+			/>
+		);
+	}
+
+	function renderStockStatus() {
+		return (
+			<>
+				<span
+					className={ classNames(
+						'woocommerce-product-variations__status-dot',
+						getProductStockStatusClass( variation )
+					) }
+				>
+					●
+				</span>
+				{ getProductStockStatus( variation ) }
+			</>
+		);
+	}
+
+	function renderStockStatusForm( onClose: () => void ) {
+		return (
+			<VariationStockStatusForm
+				initialValue={ variation }
+				onSubmit={ ( editedVariation ) => {
+					onChange( { ...editedVariation, id: variation.id }, true );
+					onClose();
+				} }
+				onCancel={ onClose }
+			/>
+		);
+	}
+
+	function renderStockCellContent() {
+		if ( ! variation.regular_price ) return null;
+
+		return (
+			<Dropdown
+				contentClassName="woocommerce-product-variations__stock-status-actions-menu"
+				// @ts-expect-error missing prop in types.
+				popoverProps={ {
+					placement: 'bottom',
+				} }
+				renderToggle={ ( { isOpen, onToggle } ) => (
+					<Button
+						onClick={ toggleHandler( 'stock', isOpen, onToggle ) }
+						variant="tertiary"
+					>
+						{ renderStockStatus() }
+					</Button>
+				) }
+				renderContent={ ( { onClose } ) =>
+					renderStockStatusForm( onClose )
+				}
+			/>
+		);
 	}
 
 	return (
@@ -134,35 +326,39 @@ export function VariationsTableRow( {
 				) }
 			</div>
 			<div
-				className="woocommerce-product-variations__attributes"
+				className="woocommerce-product-variations__attributes-cell"
 				role="cell"
 			>
-				{ tags.map( ( tagInfo ) => {
-					const tag = (
-						<Tag
-							id={ tagInfo.id }
-							className="woocommerce-product-variations__attribute"
-							key={ tagInfo.id }
-							label={ truncate(
-								tagInfo.label,
-								PRODUCT_VARIATION_TITLE_LIMIT
-							) }
-							screenReaderLabel={ tagInfo.label }
-						/>
-					);
+				{ renderImageActionsMenu() }
 
-					return tags.length <= PRODUCT_VARIATION_TITLE_LIMIT ? (
-						tag
-					) : (
-						<Tooltip
-							key={ tagInfo.id }
-							text={ tagInfo.label }
-							position="top center"
-						>
-							<span>{ tag }</span>
-						</Tooltip>
-					);
-				} ) }
+				<div className="woocommerce-product-variations__attributes">
+					{ tags.map( ( tagInfo ) => {
+						const tag = (
+							<Tag
+								id={ tagInfo.id }
+								className="woocommerce-product-variations__attribute"
+								key={ tagInfo.id }
+								label={ truncate(
+									tagInfo.label,
+									PRODUCT_VARIATION_TITLE_LIMIT
+								) }
+								screenReaderLabel={ tagInfo.label }
+							/>
+						);
+
+						return tags.length <= PRODUCT_VARIATION_TITLE_LIMIT ? (
+							tag
+						) : (
+							<Tooltip
+								key={ tagInfo.id }
+								text={ tagInfo.label }
+								position="top center"
+							>
+								<span>{ tag }</span>
+							</Tooltip>
+						);
+					} ) }
+				</div>
 			</div>
 			<div
 				className={ classNames(
@@ -174,22 +370,7 @@ export function VariationsTableRow( {
 				) }
 				role="cell"
 			>
-				{ variation.on_sale && (
-					<span className="woocommerce-product-variations__sale-price">
-						{ formatAmount( variation.sale_price ) }
-					</span>
-				) }
-				<span
-					className={ classNames(
-						'woocommerce-product-variations__regular-price',
-						{
-							'woocommerce-product-variations__regular-price--on-sale':
-								variation.on_sale,
-						}
-					) }
-				>
-					{ formatAmount( variation.regular_price ) }
-				</span>
+				{ renderPriceCellContent() }
 			</div>
 			<div
 				className={ classNames(
@@ -201,19 +382,7 @@ export function VariationsTableRow( {
 				) }
 				role="cell"
 			>
-				{ variation.regular_price && (
-					<>
-						<span
-							className={ classNames(
-								'woocommerce-product-variations__status-dot',
-								getProductStockStatusClass( variation )
-							) }
-						>
-							●
-						</span>
-						{ getProductStockStatus( variation ) }
-					</>
-				) }
+				{ renderStockCellContent() }
 			</div>
 			<div
 				className="woocommerce-product-variations__actions"

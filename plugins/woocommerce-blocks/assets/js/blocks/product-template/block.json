@@ -15,7 +15,8 @@
 		"templateSlug",
 		"postId",
 		"queryContextIncludes",
-		"collection"
+		"collection",
+		"__privateProductCollectionPreviewState"
 	],
 	"supports": {
 		"inserter": false,

@@ -15,6 +15,9 @@ jobs:
         run: sleep 2m
         shell: bash
 
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Calculate test date
         id: calculate_date
         run: |
@@ -40,35 +43,10 @@ jobs:
 
       - name: Determine Milestone Date
         id: get_milestone_date
-        run: |
-          #!/bin/bash
-          
-          MILESTONE_TITLE="${{ github.event.pull_request.milestone.title }}"
-          MILESTONE_DATE="Undefined"
-          
-          # Mapping of milestone titles to release dates
-          declare -A MILESTONE_DATES
-          MILESTONE_DATES=(
-            ["8.0.0"]="2023-08-08"
-            ["8.1.0"]="2023-09-12"
-            ["8.2.0"]="2023-10-10"
-            ["8.3.0"]="2023-11-14"
-            ["8.4.0"]="2023-12-12"
-            ["8.5.0"]="2024-01-09"
-            ["8.6.0"]="2024-02-13"
-            ["8.7.0"]="2024-03-12"
-            ["8.8.0"]="2024-04-09"
-            ["8.9.0"]="2024-05-14"
-            ["9.0.0"]="2024-06-11"
-          )
-          
-          # Check if the milestone title exists in our predefined list and get the date
-          if [[ -v "MILESTONE_DATES[${MILESTONE_TITLE}]" ]]; then
-            MILESTONE_DATE=${MILESTONE_DATES[${MILESTONE_TITLE}]}
-          fi
-          
-          # Export for later steps
-          echo "MILESTONE_DATE=${MILESTONE_DATE}" >> $GITHUB_ENV
+        working-directory: .github/workflows/scripts
+        run: bash determine_milestone_date.sh
+        env:
+          GITHUB_EVENT_PATH_PULL_REQUEST_MILESTONE_TITLE: ${{ github.event.pull_request.milestone.title }}
 
       # Notify Slack Step
       - name: Notify Slack

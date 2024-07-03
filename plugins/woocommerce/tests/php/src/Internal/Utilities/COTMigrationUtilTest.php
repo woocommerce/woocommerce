@@ -92,10 +92,10 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 	 */
 	public function test_is_custom_order_tables_in_sync_is_true() {
 		$data_sync_mock = $this->getMockBuilder( DataSynchronizer::class )
-			->setMethods( array( 'get_sync_status', 'data_sync_is_enabled' ) )
+			->setMethods( array( 'get_current_orders_pending_sync_count', 'data_sync_is_enabled' ) )
 			->getMock();
 
-		$data_sync_mock->method( 'get_sync_status' )->willReturn( array( 'current_pending_count' => 0 ) );
+		$data_sync_mock->method( 'get_current_orders_pending_sync_count' )->willReturn( 0 );
 		$data_sync_mock->method( 'data_sync_is_enabled' )->willReturn( true );
 
 		// This is needed to prevent "Call to private method Mock_DataSynchronizer_xxxx::process_added_option" errors.
@@ -113,10 +113,10 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 	 */
 	public function test_is_custom_order_tables_in_sync_is_false() {
 		$data_sync_mock = $this->getMockBuilder( DataSynchronizer::class )
-							->setMethods( array( 'get_sync_status', 'data_sync_is_enabled' ) )
+							->setMethods( array( 'get_current_orders_pending_sync_count', 'data_sync_is_enabled' ) )
 							->getMock();
 
-		$data_sync_mock->method( 'get_sync_status' )->willReturn( array( 'current_pending_count' => 0 ) );
+		$data_sync_mock->method( 'get_current_orders_pending_sync_count' )->willReturn( 0 );
 		$data_sync_mock->method( 'data_sync_is_enabled' )->willReturn( false );
 
 		// This is needed to prevent "Call to private method Mock_DataSynchronizer_xxxx::process_added_option" errors.

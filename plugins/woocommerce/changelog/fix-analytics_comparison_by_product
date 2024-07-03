@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Removed count from is_array check to fix Analytics comparison filter.

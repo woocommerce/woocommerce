@@ -38,7 +38,7 @@ export default function InstallWooConnectModal( props: ConnectProps ) {
 							sprintf(
 								// translators: %s is the product version number (e.g. 1.0.2).
 								__(
-									'Version %s is available. To access this update, please first <b>install the Woo.com Update Manager</b> extension. Alternatively, you can download and install it manually.',
+									'Version %s is available. To access this update, please first <b>install the WooCommerce.com Update Manager</b> extension. Alternatively, you can download and install it manually.',
 									'woocommerce'
 								),
 								props.subscription.version
@@ -80,7 +80,7 @@ export default function InstallWooConnectModal( props: ConnectProps ) {
 							sprintf(
 								// translators: %s is the product version number (e.g. 1.0.2).
 								__(
-									'Version %s is available. To access this update, please <b>activate the Woo.com Update Manager</b> extension.',
+									'Version %s is available. To access this update, please <b>activate the WooCommerce.com Update Manager</b> extension.',
 									'woocommerce'
 								),
 								props.subscription.version

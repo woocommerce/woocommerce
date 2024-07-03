@@ -5,7 +5,7 @@ use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
- * SingleProductTemplae class.
+ * SingleProductTemplate class.
  *
  * @internal
  */
@@ -51,7 +51,7 @@ class SingleProductTemplate extends AbstractTemplate {
 		if ( ! is_embed() && is_singular( 'product' ) ) {
 			global $post;
 
-			$valid_slugs = [ self::SLUG ];
+			$valid_slugs = array( self::SLUG );
 			if ( 'product' === $post->post_type && $post->post_name ) {
 				$valid_slugs[] = 'single-product-' . $post->post_name;
 			}
@@ -75,7 +75,7 @@ class SingleProductTemplate extends AbstractTemplate {
 	 */
 	public function update_single_product_content( $query_result, $query, $template_type ) {
 		$query_result = array_map(
-			function( $template ) {
+			function ( $template ) {
 				if ( str_contains( $template->slug, self::SLUG ) ) {
 					// We don't want to add the compatibility layer on the Editor Side.
 					// The second condition is necessary to not apply the compatibility layer on the REST API. Gutenberg uses the REST API to clone the template.
@@ -84,7 +84,7 @@ class SingleProductTemplate extends AbstractTemplate {
 						// Add the product class to the body. We should move this to a more appropriate place.
 						add_filter(
 							'body_class',
-							function( $classes ) {
+							function ( $classes ) {
 								return array_merge( $classes, wc_get_product_class() );
 							}
 						);
@@ -125,7 +125,7 @@ class SingleProductTemplate extends AbstractTemplate {
 		$single_product_template_blocks = array( 'woocommerce/product-image-gallery', 'woocommerce/product-details', 'woocommerce/add-to-cart-form', 'woocommerce/product-meta', 'woocommerce/product-rating', 'woocommerce/product-price', 'woocommerce/related-products' );
 		return array_reduce(
 			$parsed_blocks,
-			function( $carry, $block ) use ( $single_product_template_blocks ) {
+			function ( $carry, $block ) use ( $single_product_template_blocks ) {
 				if ( in_array( $block['blockName'], $single_product_template_blocks, true ) ) {
 					if ( $carry['is_already_replaced'] ) {
 						return array(

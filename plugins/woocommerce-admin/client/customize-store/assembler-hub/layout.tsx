@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	useReducedMotion,
 	useResizeObserver,
@@ -47,12 +47,13 @@ import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
 import { Transitional } from '../transitional';
 import { CustomizeStoreContext } from './';
-import { recordEvent } from '@woocommerce/tracks';
 import { AiOfflineModal } from '~/customize-store/assembler-hub/onboarding-tour/ai-offline-modal';
 import { useQuery } from '@woocommerce/navigation';
 import { FlowType } from '../types';
 import { isOfflineAIFlow } from '../guards';
 import { isWooExpress } from '~/utils/is-woo-express';
+import { trackEvent } from '../tracking';
+import { SidebarNavigationExtraScreen } from './sidebar/navigation-extra-screen/sidebar-navigation-extra-screen';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -89,13 +90,13 @@ export const Layout = () => {
 
 	const takeTour = () => {
 		// Click on "Take a tour" button
-		recordEvent( 'customize_your_store_assembler_hub_tour_start' );
+		trackEvent( 'customize_your_store_assembler_hub_tour_start' );
 		setShowWelcomeTour( false );
 		setShowAiOfflineModal( false );
 	};
 
 	const skipTour = () => {
-		recordEvent( 'customize_your_store_assembler_hub_tour_skip' );
+		trackEvent( 'customize_your_store_assembler_hub_tour_skip' );
 		onClose();
 		setShowAiOfflineModal( false );
 	};
@@ -156,7 +157,7 @@ export const Layout = () => {
 						type={ templateType }
 						id={ templateId }
 					>
-						<div className={ classnames( 'edit-site-layout' ) }>
+						<div className={ clsx( 'edit-site-layout' ) }>
 							<motion.div
 								className="edit-site-layout__header-container"
 								animate={ 'view' }
@@ -172,30 +173,33 @@ export const Layout = () => {
 							</motion.div>
 
 							<div className="edit-site-layout__content">
-								<NavigableRegion
-									ariaLabel={ __(
-										'Navigation',
-										'woocommerce'
-									) }
-									className="edit-site-layout__sidebar-region"
-								>
-									<motion.div
-										animate={ { opacity: 1 } }
-										transition={ {
-											type: 'tween',
-											duration:
-												// Disable transitiont in mobile to emulate a full page transition.
-												disableMotion ||
-												isMobileViewport
-													? 0
-													: ANIMATION_DURATION,
-											ease: 'easeOut',
-										} }
-										className="edit-site-layout__sidebar"
+								<div className="edit-site-layout__sidebar">
+									<NavigableRegion
+										ariaLabel={ __(
+											'Navigation',
+											'woocommerce'
+										) }
+										className="edit-site-layout__sidebar-region"
 									>
-										<Sidebar />
-									</motion.div>
-								</NavigableRegion>
+										<motion.div
+											animate={ { opacity: 1 } }
+											transition={ {
+												type: 'tween',
+												duration:
+													// Disable transitiont in mobile to emulate a full page transition.
+													disableMotion ||
+													isMobileViewport
+														? 0
+														: ANIMATION_DURATION,
+												ease: 'easeOut',
+											} }
+											className="edit-site-layout__sidebar"
+										>
+											<Sidebar />
+										</motion.div>
+									</NavigableRegion>
+									<SidebarNavigationExtraScreen />
+								</div>
 
 								{ ! isMobileViewport && (
 									<div className="edit-site-layout__canvas-container">
@@ -204,7 +208,7 @@ export const Layout = () => {
 											<motion.div
 												initial={ false }
 												layout="position"
-												className={ classnames(
+												className={ clsx(
 													'edit-site-layout__canvas'
 												) }
 											>

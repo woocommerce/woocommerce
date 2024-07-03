@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 
@@ -23,7 +23,7 @@ const FrontendBlock = ( {
 	if ( cartIsLoading || cartItems.length >= 1 ) {
 		return (
 			<SidebarLayout
-				className={ classnames( 'wc-block-cart', className, {
+				className={ clsx( 'wc-block-cart', className, {
 					'has-dark-controls': hasDarkControls,
 				} ) }
 			>

@@ -14,7 +14,7 @@ import CollectionChooserToolbar from './collection-chooser-toolbar';
 import type { ProductCollectionEditComponentProps } from '../../types';
 
 export default function ToolbarControls(
-	props: ProductCollectionEditComponentProps
+	props: Omit< ProductCollectionEditComponentProps, 'preview' >
 ) {
 	const { attributes, openCollectionSelectionModal, setAttributes } = props;
 	const { query, displayLayout } = attributes;

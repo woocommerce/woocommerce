@@ -16,7 +16,9 @@ export class AssemblerPage {
 			'.cys-fullscreen-iframe[style="opacity: 1;"]'
 		);
 
-		await frame.getByRole( 'button', { name: 'Done' } ).waitFor();
+		await frame
+			.getByRole( 'button', { name: 'Save' } )
+			.waitFor( { timeout: 25000 } );
 	}
 
 	/**
@@ -41,6 +43,8 @@ export class AssemblerPage {
 	 */
 	async getEditor() {
 		const assembler = await this.getAssembler();
-		return assembler.frameLocator( '[name="editor-canvas"]' );
+		return assembler.frameLocator(
+			'.woocommerce-customize-store__edit-site-editor [name="editor-canvas"]'
+		);
 	}
 }

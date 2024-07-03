@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	useState,
 	createPortal,
@@ -123,7 +123,7 @@ function Iframe( {
 					createPortal(
 						<body
 							ref={ bodyRef }
-							className={ classnames(
+							className={ clsx(
 								'block-editor-iframe__body',
 								'editor-styles-wrapper'
 							) }
