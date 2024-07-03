@@ -3025,9 +3025,6 @@ importers:
       '@wordpress/browserslist-config':
         specifier: wp-6.0
         version: 4.1.3
-      buildkite-test-collector:
-        specifier: ^1.7.1
-        version: 1.7.1
     devDependencies:
       '@babel/cli':
         specifier: 7.12.8
@@ -3107,6 +3104,9 @@ importers:
       babel-eslint:
         specifier: 10.1.0
         version: 10.1.0(eslint@8.55.0)
+      buildkite-test-collector:
+        specifier: ^1.7.1
+        version: 1.7.1
       chai:
         specifier: 4.2.0
         version: 4.2.0
@@ -42458,14 +42458,14 @@ snapshots:
       minimist: 1.2.8
       npm-package-json-lint: 5.4.2
       postcss: 8.4.32
-      postcss-loader: 6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
+      postcss-loader: 6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4))
       prettier: wp-prettier@2.2.1-beta-1
       puppeteer-core: 10.4.0
       read-pkg-up: 1.0.1
       resolve-bin: 0.4.3
       sass: 1.69.5
-      sass-loader: 12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
-      source-map-loader: 3.0.2(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
+      sass-loader: 12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4))
+      source-map-loader: 3.0.2(webpack@5.89.0(uglify-js@3.17.4))
       stylelint: 13.13.1
       terser-webpack-plugin: 5.3.6(uglify-js@3.17.4)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
       url-loader: 4.1.1(file-loader@6.2.0(webpack@5.89.0(uglify-js@3.17.4)))(webpack@5.89.0(uglify-js@3.17.4))
@@ -42537,14 +42537,14 @@ snapshots:
       minimist: 1.2.8
       npm-package-json-lint: 5.4.2
       postcss: 8.4.32
-      postcss-loader: 6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
+      postcss-loader: 6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4))
       prettier: wp-prettier@2.2.1-beta-1
       puppeteer-core: 10.4.0
       read-pkg-up: 1.0.1
       resolve-bin: 0.4.3
       sass: 1.69.5
-      sass-loader: 12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
-      source-map-loader: 3.0.2(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
+      sass-loader: 12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4))
+      source-map-loader: 3.0.2(webpack@5.89.0(uglify-js@3.17.4))
       stylelint: 13.13.1
       terser-webpack-plugin: 5.3.6(uglify-js@3.17.4)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
       url-loader: 4.1.1(file-loader@6.2.0(webpack@5.91.0(uglify-js@3.17.4)))(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
@@ -56471,7 +56471,7 @@ snapshots:
       semver: 7.5.4
       webpack: 5.91.0(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
 
-  postcss-loader@6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0)):
+  postcss-loader@6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4)):
     dependencies:
       cosmiconfig: 7.1.0
       klona: 2.0.6
@@ -59172,7 +59172,7 @@ snapshots:
     optionalDependencies:
       sass: 1.69.5
 
-  sass-loader@12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0)):
+  sass-loader@12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4)):
     dependencies:
       klona: 2.0.6
       neo-async: 2.6.2
@@ -59649,7 +59649,7 @@ snapshots:
       async: 2.6.4
       loader-utils: 1.4.2
 
-  source-map-loader@3.0.2(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0)):
+  source-map-loader@3.0.2(webpack@5.89.0(uglify-js@3.17.4)):
     dependencies:
       abab: 2.0.6
       iconv-lite: 0.6.3
