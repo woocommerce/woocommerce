@@ -4,6 +4,7 @@ menu_title: Totals Footer Item
 tags: reference, checkout-available-filters
 ---
 
+<!-- markdownlint-disable MD024 -->
 
 # Totals Footer Item
 
@@ -18,22 +19,22 @@ The following object is used in the filter:
 
 -   [Cart object](#cart-object)
 
-### totalLabel Description <!-- omit in toc -->
+### Description <!-- omit in toc -->
 
 The `totalLabel` filter allows to change the label of the total item in the footer of the Cart and Checkout blocks.
 
-### totalLabel Parameters <!-- omit in toc -->
+### Parameters <!-- omit in toc -->
 
 -   _defaultValue_ `string` (default: `Total`) - The total label.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
     -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
 
-### totalLabel Returns <!-- omit in toc -->
+### Returns <!-- omit in toc -->
 
 -   `string` - The updated total label.
 
-### totalLabel Code example <!-- omit in toc -->
+### Code example <!-- omit in toc -->
 
 ```ts
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -49,7 +50,7 @@ registerCheckoutFilters( 'example-extension', {
 
 > 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
 
-### totalLabel Screenshots <!-- omit in toc -->
+### Screenshots <!-- omit in toc -->
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
@@ -62,11 +63,11 @@ The following object is used in the filter:
 
 -   [Cart object](#cart-object)
 
-### totalValue Description <!-- omit in toc -->
+### Description <!-- omit in toc -->
 
 The `totalValue` filter allows to format the total price in the footer of the Cart and Checkout blocks.
 
-### totalValue Parameters <!-- omit in toc -->
+### Parameters <!-- omit in toc -->
 
 -   _defaultValue_ `string` (default: `Total`) - The total label.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -74,11 +75,11 @@ The `totalValue` filter allows to format the total price in the footer of the Ca
     -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
 -   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
 
-### totalValue Returns <!-- omit in toc -->
+### Returns <!-- omit in toc -->
 
 -   `string` - The modified format of the total price, which must contain the substring `<price/>`, or the original price format.
 
-### totalValue Code example <!-- omit in toc -->
+### Code example <!-- omit in toc -->
 
 ```ts
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -94,7 +95,7 @@ registerCheckoutFilters( 'my-extension', {
 
 > 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
 
-### totalValue Screenshots <!-- omit in toc -->
+### Screenshots <!-- omit in toc -->
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|

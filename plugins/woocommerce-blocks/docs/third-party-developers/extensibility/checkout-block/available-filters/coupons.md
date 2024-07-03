@@ -1,3 +1,11 @@
+---
+post_title: Cart and Checkout Filters - Coupons
+menu_title: Coupons
+tags: reference, checkout-available-filters
+---
+
+<!-- markdownlint-disable MD024 -->
+
 # Coupons
 
 The following Coupon filters are available:
@@ -7,7 +15,7 @@ The following Coupon filters are available:
 -   [`showRemoveCouponNotice`](#showremovecouponnotice)
 
 ## `coupons`
-<!-- markdownlint-disable MD024 -->
+
 ### Description <!-- omit in toc -->
 
 The current functionality is to display the coupon codes in the Cart and Checkout sidebars. This could be undesirable if you dynamically generate a coupon code that is not user-friendly. It may, therefore, be desirable to change the way this code is displayed. To achieve this, the filter `coupons` exists. This filter could also be used to show or hide coupons. This filter must _not_ be used to alter the value/totals of a coupon. This will not carry through to the Cart totals.
