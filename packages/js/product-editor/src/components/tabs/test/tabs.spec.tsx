@@ -3,9 +3,8 @@
  */
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
-import { getQuery, navigateTo } from '@woocommerce/navigation';
 import { SlotFillProvider } from '@wordpress/components';
-import { useState, createElement } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { select } from '@wordpress/data';
 
@@ -13,10 +12,7 @@ import { select } from '@wordpress/data';
  * Internal dependencies
  */
 import { Tabs } from '../';
-import {
-	TabBlockEdit as Tab,
-	TabBlockAttributes,
-} from '../../../blocks/generic/tab/edit';
+import { TabBlockEdit as Tab } from '../../../blocks/generic/tab/edit';
 import { TRACKS_SOURCE } from '../../../constants';
 
 jest.mock( '@woocommerce/block-templates', () => ( {
