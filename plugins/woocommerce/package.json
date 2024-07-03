@@ -595,7 +595,7 @@
 				{
 					"name": "Core e2e tests - default Pressable site",
 					"testType": "e2e",
-					"command": "test:e2e:with-env default-permanent",
+					"command": "test:e2e:with-env default-pressable",
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
