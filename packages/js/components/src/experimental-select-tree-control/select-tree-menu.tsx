@@ -42,6 +42,7 @@ export const SelectTreeMenu = ( {
 	treeRef: ref,
 	onClose = () => {},
 	shouldShowCreateButton,
+	onFirstItemLoop,
 	...props
 }: MenuProps ) => {
 	const [ boundingRect, setBoundingRect ] = useState< DOMRect >();
@@ -134,6 +135,7 @@ export const SelectTreeMenu = ( {
 									shouldShowCreateButton={
 										shouldShowCreateButton
 									}
+									onFirstItemLoop={ onFirstItemLoop }
 									style={ {
 										width: boundingRect?.width,
 									} }

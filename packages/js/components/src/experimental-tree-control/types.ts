@@ -76,6 +76,8 @@ type BaseTreeProps = {
 	 * Called when the create button is clicked to help closing any related popover.
 	 */
 	onTreeBlur?(): void;
+
+	onFirstItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;
 };
 
 export type TreeProps = BaseTreeProps &

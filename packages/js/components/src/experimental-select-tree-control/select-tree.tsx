@@ -296,6 +296,7 @@ export const SelectTree = function SelectTree( {
 							onClose={ () => {
 								setIsOpen( false );
 							} }
+							onFirstItemLoop={ focusOnInput }
 						/>
 					</>
 				</BaseControl>
