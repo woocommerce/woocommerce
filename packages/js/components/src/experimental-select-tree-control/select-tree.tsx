@@ -28,7 +28,7 @@ interface SelectTreeProps extends TreeControlProps {
 	label: string | JSX.Element;
 	onInputChange?: ( value: string | undefined ) => void;
 	initialInputValue?: string | undefined;
-	isClearButtonVisible?: boolean;
+	isClearingAllowed?: boolean;
 	onClear?: () => void;
 }
 
@@ -40,7 +40,7 @@ export const SelectTree = function SelectTree( {
 	initialInputValue,
 	onInputChange,
 	shouldShowCreateButton,
-	isClearButtonVisible = false,
+	isClearingAllowed = false,
 	onClear = () => {},
 	...props
 }: SelectTreeProps ) {
@@ -156,8 +156,8 @@ export const SelectTree = function SelectTree( {
 		value: inputValue,
 	};
 
-	const handleOnClear = () => {
-		if ( isClearButtonVisible ) {
+	const handleClear = () => {
+		if ( isClearingAllowed ) {
 			onClear();
 		}
 	};
@@ -195,8 +195,8 @@ export const SelectTree = function SelectTree( {
 							inputProps={ inputProps }
 							suffix={
 								<div className="woocommerce-experimental-select-control__suffix-items">
-									{ isClearButtonVisible && isOpen && (
-										<Button onClick={ handleOnClear }>
+									{ isClearingAllowed && isOpen && (
+										<Button onClick={ handleClear }>
 											<SuffixIcon
 												className="woocommerce-experimental-select-control__icon-clear"
 												icon={ closeSmall }
