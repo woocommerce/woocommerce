@@ -134,7 +134,7 @@ jobs:
         with:
           install: 'false'
           build: ${{ matrix.projectName }}
-            
+
       - name: 'Update wp-env config'
         if: ${{ github.ref_type == 'tag' }}
         env:
