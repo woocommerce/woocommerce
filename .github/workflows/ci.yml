@@ -38,7 +38,7 @@ jobs:
       base: ${{ steps.pr-info.outputs.base }}
 
     steps:
-      - uses: actions/github-script@v6
+      - uses: actions/github-script@v7
         name: 'Grab PR info.'
         id: 'pr-info'
         env:
