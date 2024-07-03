@@ -6,6 +6,8 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import { getQuery, navigateTo } from '@woocommerce/navigation';
 import { SlotFillProvider } from '@wordpress/components';
 import { useState, createElement } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
+import { select } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -15,6 +17,7 @@ import {
 	TabBlockEdit as Tab,
 	TabBlockAttributes,
 } from '../../../blocks/generic/tab/edit';
+import { TRACKS_SOURCE } from '../../../constants';
 
 jest.mock( '@woocommerce/block-templates', () => ( {
 	...jest.requireActual( '@woocommerce/block-templates' ),
@@ -26,6 +29,19 @@ jest.mock( '@woocommerce/navigation', () => ( {
 	navigateTo: jest.fn(),
 	getQuery: jest.fn().mockReturnValue( {} ),
 } ) );
+
+jest.mock( '@woocommerce/tracks', () => ( {
+	...jest.requireActual( '@woocommerce/tracks' ),
+	recordEvent: jest.fn(),
+} ) );
+
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...originalModule,
+		select: jest.fn( ( ...args ) => originalModule.select( ...args ) ),
+	};
+} );
 
 const blockProps = {
 	setAttributes: () => {},
@@ -109,6 +125,7 @@ function MockTabs( { onChange = jest.fn() } ) {
 
 describe( 'Tabs', () => {
 	beforeEach( () => {
+		jest.clearAllMocks();
 		( getQuery as jest.Mock ).mockReturnValue( {
 			tab: null,
 		} );
@@ -223,5 +240,22 @@ describe( 'Tabs', () => {
 
 		expect( panel1.classList ).not.toContain( 'is-selected' );
 		expect( panel2.classList ).toContain( 'is-selected' );
+	} );
+
+	it( 'should trigger wcadmin_product_tab_click track event when tab is clicked', async () => {
+		( select as jest.Mock ).mockImplementation( () => ( {
+			getEditedEntityRecord: () => ( {
+				type: 'simple',
+			} ),
+		} ) );
+		render( <MockTabs /> );
+
+		const button = screen.getByText( 'Test button 2' );
+		fireEvent.click( button );
+		expect( recordEvent ).toBeCalledWith( 'product_tab_click', {
+			product_tab: 'test2',
+			product_type: 'simple',
+			source: TRACKS_SOURCE,
+		} );
 	} );
 } );

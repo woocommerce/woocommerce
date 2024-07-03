@@ -2,7 +2,7 @@
 /**
  * Title: Just Arrived Full Hero
  * Slug: woocommerce-blocks/just-arrived-full-hero
- * Categories: WooCommerce
+ * Categories: WooCommerce, Intro
  */
 
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;

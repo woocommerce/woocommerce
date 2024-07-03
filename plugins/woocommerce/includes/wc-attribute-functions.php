@@ -633,6 +633,16 @@ function wc_update_attribute( $id, $args ) {
 
 	$args['id'] = $attribute ? $attribute->id : 0;
 
+	// When updating an existing attribute, populate any undefined args with the existing value.
+	// This prevents those values from being reset to their respective defaults.
+	if ( $args['id'] ) {
+		$args['has_archives'] = $args['has_archives'] ?? $attribute->has_archives;
+		$args['name']         = $args['name'] ?? $attribute->name;
+		$args['order_by']     = $args['order_by'] ?? $attribute->order_by;
+		$args['slug']         = $args['slug'] ?? $attribute->slug;
+		$args['type']         = $args['type'] ?? $attribute->type;
+	}
+
 	if ( $args['id'] && empty( $args['name'] ) ) {
 		$args['name'] = $attribute->name;
 	}

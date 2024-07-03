@@ -195,8 +195,8 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		const block = editor.canvas.locator(
 			'[data-type="woocommerce/checkout-shipping-method-block"]'
 		);
@@ -220,13 +220,12 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		await localPickupUtils.setLocalPickupTitle(
 			'Edited from settings page'
 		);
-		await localPickupUtils.saveLocalPickupSettings();
 
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 
 		await expect(
 			editor.canvas.getByText( 'Edited from settings page' )

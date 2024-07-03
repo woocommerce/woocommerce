@@ -87,8 +87,8 @@ export const ApiCallLoader = () => {
 					}, 0 );
 				} }
 			>
-				{ augmentedSteps.map( ( step, index ) => (
-					<Loader.Layout key={ index }>
+				{ augmentedSteps.map( ( step ) => (
+					<Loader.Layout key={ step.title }>
 						<Loader.Illustration>
 							{ step.image }
 						</Loader.Illustration>
@@ -115,6 +115,10 @@ const AssemblerHub = ( { sendEvent }: { sendEvent: SendEventFn } ) => {
 		window.addEventListener( 'message', ( event ) => {
 			if ( event.data?.type === 'INSTALL_FONTS' ) {
 				sendEvent( { type: 'INSTALL_FONTS' } );
+			}
+
+			if ( event.data?.type === 'INSTALL_PATTERNS' ) {
+				sendEvent( { type: 'INSTALL_PATTERNS' } );
 			}
 		} );
 	}, [ sendEvent ] );

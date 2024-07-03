@@ -25,7 +25,8 @@ import clsx from 'clsx';
 /**
  * Internal dependencies
  */
-import { CoreProfilerStateMachineContext, BusinessInfoEvent } from '../index';
+import { CoreProfilerStateMachineContext } from '../index';
+import { BusinessInfoEvent } from '../events';
 import { CountryStateOption } from '../services/country';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
@@ -329,6 +330,52 @@ export const BusinessInfo = ( {
 						showAllOnFocus
 						isSearchable
 					/>
+					{ countries.length === 0 && (
+						<Notice
+							className="woocommerce-profiler-select-control__country-error"
+							isDismissible={ false }
+							status="error"
+						>
+							{ createInterpolateElement(
+								__(
+									'Oops! We encountered a problem while fetching the list of countries to choose from. <retryButton/> or <skipButton/>',
+									'woocommerce'
+								),
+								{
+									retryButton: (
+										<Button
+											onClick={ () => {
+												sendEvent( {
+													type: 'RETRY_PRE_BUSINESS_INFO',
+												} );
+											} }
+											variant="tertiary"
+										>
+											{ __(
+												'Please try again',
+												'woocommerce'
+											) }
+										</Button>
+									),
+									skipButton: (
+										<Button
+											onClick={ () => {
+												sendEvent( {
+													type: 'SKIP_BUSINESS_INFO_STEP',
+												} );
+											} }
+											variant="tertiary"
+										>
+											{ __(
+												'skip this step',
+												'woocommerce'
+											) }
+										</Button>
+									),
+								}
+							) }
+						</Notice>
+					) }
 					{ /* woocommerce-profiler-select-control__country-spacer exists purely because the select-control above has an unremovable and unstyleable div and that's preventing margin collapse */ }
 					<div className="woocommerce-profiler-select-control__country-spacer" />
 					{ geolocationOverruled && ! dismissedGeolocationNotice && (
