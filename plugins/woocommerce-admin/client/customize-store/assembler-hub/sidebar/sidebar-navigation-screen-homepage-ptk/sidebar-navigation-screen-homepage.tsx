@@ -31,13 +31,13 @@ import interpolateComponents from '@automattic/interpolate-components';
 /**
  * Internal dependencies
  */
-import { SidebarNavigationScreen } from './sidebar-navigation-screen';
+import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { useEditorBlocks } from '../hooks/use-editor-blocks';
-import { useHomeTemplates } from '../hooks/use-home-templates';
+import { useEditorBlocks } from '../../hooks/use-editor-blocks';
+import { useHomeTemplates } from '../../hooks/use-home-templates';
 import { BlockInstance } from '@wordpress/blocks';
-import { useSelectedPattern } from '../hooks/use-selected-pattern';
-import { useEditorScroll } from '../hooks/use-editor-scroll';
+import { useSelectedPattern } from '../../hooks/use-selected-pattern';
+import { useEditorScroll } from '../../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { select, useSelect } from '@wordpress/data';
@@ -46,12 +46,13 @@ import { trackEvent } from '~/customize-store/tracking';
 import {
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
 	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
-} from '../utils/hero-pattern';
+} from '../../utils/hero-pattern';
 import { isEqual } from 'lodash';
-import { COLOR_PALETTES } from './global-styles/color-palette-variations/constants';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { COLOR_PALETTES } from '../global-styles/color-palette-variations/constants';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
+import { isTrackingAllowed } from '../../utils/is-tracking-allowed';
+import './style.scss';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
@@ -223,10 +224,6 @@ export const SidebarNavigationScreenHomepage = ( {
 
 	const isNetworkOffline = useNetworkStatus();
 	const isPTKPatternsAPIAvailable = context.isPTKPatternsAPIAvailable;
-	const trackingAllowed = useSelect( ( sel ) =>
-		sel( OPTIONS_STORE_NAME ).getOption( 'woocommerce_allow_tracking' )
-	);
-	const isTrackingDisallowed = trackingAllowed === 'no' || ! trackingAllowed;
 
 	let notice;
 	if ( isNetworkOffline ) {
@@ -239,7 +236,7 @@ export const SidebarNavigationScreenHomepage = ( {
 			"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns.",
 			'woocommerce'
 		);
-	} else if ( isTrackingDisallowed ) {
+	} else if ( ! isTrackingAllowed() ) {
 		notice = __(
 			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
 			'woocommerce'
