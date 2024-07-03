@@ -265,6 +265,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - WooCommerce: introduce `product-editor-template-system` feature flag [#48136](https://github.com/woocommerce/woocommerce/pull/48136)
 * Add - WooCommerce: update CPT product_form posts when plugin updates [#48265](https://github.com/woocommerce/woocommerce/pull/48265)
 * Add - WooCommerce Blocks: Added a GitHub Action to create issues for flaky E2E tests [#47758](https://github.com/woocommerce/woocommerce/pull/47758)
+* Update - Add feature flag for Printful placement [#49104](https://github.com/woocommerce/woocommerce/pull/49104)
 * Update - Add a control to enable a separator on the Checkout block's "Checkout Terms" block. This will enable a separator above the block that can be turned off in case the block is moved. [#47565](https://github.com/woocommerce/woocommerce/pull/47565)
 * Update - Change the item schemas for Orders and Order Refunds API endpoints to correctly specify that the rate_id property in a tax_line object is an integer, not a string [#47779](https://github.com/woocommerce/woocommerce/pull/47779)
 * Update - Clean up theming sections in WooCommerce blocks docs [#48420](https://github.com/woocommerce/woocommerce/pull/48420)
