@@ -199,7 +199,7 @@ jQuery( function( $ ) {
 			}
 		},
 		validate_field: function( e ) {
-			var $this         = $( this ),
+			var $this             = $( this ),
 				$parent           = $this.closest( '.form-row' ),
 				validated         = true,
 				validate_required = $parent.is( '.validate-required' ),
