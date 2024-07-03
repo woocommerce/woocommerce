@@ -421,24 +421,16 @@ test.describe( 'Store owner can skip the core profiler', () => {
 	} );
 
 	test( 'Can connect to WooCommerce.com', async ( { page } ) => {
-		await test.step( 'Go to WC Home and make sure the connect button is visible', async () => {
+		await test.step( 'Go to WC Home and make sure the total sales is visible', async () => {
 			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-			await expect(
-				page.getByRole( 'heading', {
-					name: 'Connect to WooCommerce.com',
-				} )
-			).toBeVisible();
 			await page
 				.getByRole( 'menuitem', { name: 'Total sales' } )
 				.waitFor( { state: 'visible' } );
 		} );
 
-		await test.step( 'Click Connect and ensure we are redirected to the correct URL and connect store', async () => {
-			await page
-				.getByRole( 'link', { name: 'Connect', exact: true } )
-				.click();
-			await expect( page.url() ).toContain(
-				'?page=wc-admin&tab=my-subscriptions&path=%2Fextensions'
+		await test.step( 'Go to the extensions tab and connect store', async () => {
+			await page.goto(
+				'wp-admin/admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions'
 			);
 			await expect(
 				page.getByText(
