@@ -2095,6 +2095,12 @@ p.demo_store,
 		.shipping_address {
 			clear: both;
 		}
+
+		.checkout-inline-error-message {
+			color: $red;
+			font-size: 0.75em;
+			margin-bottom: 0;
+		}
 	}
 
 	#payment {
