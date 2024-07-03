@@ -14,6 +14,7 @@
  * @package WooCommerce
  */
 
+ // Adding a comment.
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
