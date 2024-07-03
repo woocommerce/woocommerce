@@ -208,9 +208,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		// This hook should be fired only if the new status is not one of the non-triggering statuses and the previous status was one of the non-triggering statuses.
 		if (
-			$new_status !== $previous_status &&
-			! in_array( $new_status, $nonTriggeringOrderStatuses, true ) &&
-			in_array( $previous_status, $nonTriggeringOrderStatuses, true )
+			$new_status !== $previous_status
+			&& ! in_array( $new_status, $nonTriggeringOrderStatuses, true )
+			&& in_array( $previous_status, $nonTriggeringOrderStatuses, true )
 		) {
 			do_action( 'woocommerce_new_order', $order->get_id(), $order );
 			return;
