@@ -17,7 +17,6 @@ type BlockProps<
 	attributes?: TAttribute;
 };
 
-// Temporary change to code to make CI run.
 type BlockType<
 	TProps extends Record< string, unknown >,
 	TAttribute extends Record< string, unknown >
