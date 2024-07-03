@@ -3,7 +3,7 @@ post_title: Cart and Checkout Filters - Order Summary Items
 menu_title: Order Summary Items
 tags: reference, checkout-available-filters
 ---
-<!-- markdownlint-disable-line no-duplicate-heading -->
+<!-- markdownlint-disable MD024 -->
 # Order Summary Items
 
 The following Order Summary Items filters are available:

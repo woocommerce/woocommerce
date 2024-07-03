@@ -4,7 +4,7 @@ menu_title: Cart Line Items
 tags: reference, checkout-available-filters
 ---
 
-<!-- markdownlint-disable-line no-duplicate-heading -->
+<!-- markdownlint-disable MD024 -->
 
 # Cart Line Items
 

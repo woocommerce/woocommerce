@@ -3,7 +3,7 @@ post_title: Cart and Checkout - Available Slots
 menu_title: Available Slots
 tags: reference
 ---
-<!-- markdownlint-disable-line no-duplicate-heading -->
+<!-- markdownlint-disable MD024 -->
 # Available Slots <!-- omit in toc -->
 
 ## Table of Contents <!-- omit in toc -->
