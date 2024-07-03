@@ -23,7 +23,7 @@ const test = base.extend( {
 	},
 } );
 
-test.describe( 'Assembler -> Logo Picker', () => {
+test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -143,7 +143,8 @@ test.describe( 'Assembler -> Logo Picker', () => {
 			.getByRole( 'spinbutton', { name: 'Image width' } )
 			.fill( '100' );
 		const { width } = await editor
-			.locator( 'header .components-resizable-box__container' )
+			.getByLabel( 'Block: Header' )
+			.getByLabel( 'Block: Site Logo' )
 			.boundingBox();
 
 		expect( Math.floor( width ) ).toBe( 100 );

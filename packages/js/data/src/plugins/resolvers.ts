@@ -36,7 +36,20 @@ type PluginGetResponse = {
 } & Response;
 
 type JetpackConnectionResponse = {
+	// https://github.com/Automattic/jetpack/blob/2db5b61f15b9923f7438caaef29311b75db64ac5/tools/js-tools/types/global.d.ts#L33
 	isActive: boolean;
+	isStaging: boolean;
+	isRegistered: boolean;
+	isUserConnected: boolean;
+	hasConnectedOwner: boolean;
+	offlineMode: {
+		isActive: boolean;
+		constant: boolean;
+		url: boolean;
+		filter: boolean;
+		wpLocalConstant: boolean;
+	};
+	isPublic: boolean;
 } & Response;
 
 type ConnectJetpackResponse = {
@@ -86,7 +99,7 @@ export function* isJetpackConnected() {
 			method: 'GET',
 		} );
 
-		yield updateIsJetpackConnected( results.isActive );
+		yield updateIsJetpackConnected( results.hasConnectedOwner );
 	} catch ( error ) {
 		yield setError( 'isJetpackConnected', error );
 	}

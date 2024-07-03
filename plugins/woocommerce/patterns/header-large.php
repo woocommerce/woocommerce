@@ -19,7 +19,7 @@
 				<div class="wp-block-group">
 					<!-- wp:site-logo {"shouldSyncIcon":true} /-->
 
-					<!-- wp:site-title {"style":{"layout":{"selfStretch":"fixed","flexSize":"200px"}}} /-->
+					<!-- wp:site-title /-->
 				</div>
 				<!-- /wp:group -->
 			</div>
