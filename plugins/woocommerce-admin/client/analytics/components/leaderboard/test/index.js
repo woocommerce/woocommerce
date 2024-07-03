@@ -57,7 +57,7 @@ const rows = mockData.map( ( row ) => {
 
 describe( 'Leaderboard', () => {
 	test( 'should render empty message when there are no rows', () => {
-		const { queryByText } = render(
+		render(
 			<Leaderboard
 				id="products"
 				title={ '' }
@@ -68,12 +68,12 @@ describe( 'Leaderboard', () => {
 		);
 
 		expect(
-			queryByText( 'No data recorded for the selected time period.' )
+			screen.getByText( 'No data recorded for the selected time period.' )
 		).toBeInTheDocument();
 	} );
 
 	test( 'should render the headers', () => {
-		const { queryByText } = render(
+		render(
 			<Leaderboard
 				id="products"
 				title={ '' }
@@ -83,14 +83,14 @@ describe( 'Leaderboard', () => {
 			/>
 		);
 
-		expect( queryByText( 'Name' ) ).toBeInTheDocument();
-		expect( queryByText( 'Items sold' ) ).toBeInTheDocument();
-		expect( queryByText( 'Orders' ) ).toBeInTheDocument();
-		expect( queryByText( 'Net sales' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Name' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Items sold' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Orders' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Net sales' ) ).toBeInTheDocument();
 	} );
 
 	test( 'should render formatted data in the table', () => {
-		const { container } = render(
+		render(
 			<Leaderboard
 				id="products"
 				title={ '' }
@@ -100,9 +100,7 @@ describe( 'Leaderboard', () => {
 			/>
 		);
 
-		const tableRows = container.querySelectorAll( 'tr' );
-
-		expect( tableRows.length ).toBe( 6 );
+		expect( screen.getAllByRole( 'row' ) ).toHaveLength( 6 );
 		expect( screen.getByText( 'awesome shirt' ) ).toBeInTheDocument();
 		expect( screen.getByText( '123,456,789' ) ).toBeInTheDocument();
 		expect( screen.getByText( '54' ) ).toBeInTheDocument();
