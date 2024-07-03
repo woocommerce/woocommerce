@@ -36,7 +36,7 @@ jobs:
     outputs:
       head: ${{ steps.pr-info.outputs.head }}
       base: ${{ steps.pr-info.outputs.base }}
-    
+
     steps:
       - uses: actions/github-script@v6
         name: 'Grab PR info.'
@@ -56,7 +56,6 @@ jobs:
             } );
             core.setOutput( 'head', PR.data.head.ref );
             core.setOutput( 'base', PR.data.base.ref );
-  
   project-jobs:
     # Since this is a monorepo, not every pull request or change is going to impact every project.
     # Instead of running CI tasks on all projects indiscriminately, we use a command to detect
@@ -126,7 +125,7 @@ jobs:
             
             const child_process = require( 'node:child_process' );
             child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
-  
+
   project-lint-jobs:
     name: "Lint - ${{ matrix.projectName }} ${{ matrix.optional && ' (optional)' || ''}}"
     runs-on: 'ubuntu-20.04'
@@ -140,7 +139,7 @@ jobs:
       fail-fast: false
       matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.lint-jobs ) }}
-    
+
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -158,7 +157,7 @@ jobs:
 
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
-  
+
   project-test-jobs:
     name: "${{ matrix.name }}"
     runs-on: 'ubuntu-20.04'
@@ -172,7 +171,7 @@ jobs:
       fail-fast: false
       matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.test-jobs ) }}
-    
+
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -315,7 +314,7 @@ jobs:
         'project-lint-jobs',
         'project-test-jobs',
       ]
-    if: ${{ always() && github.event_name != 'pull_request' && ! github.event.pull_request.head.repo.fork  }}
+    if: ${{ always() && github.event_name != 'pull_request' && ! github.event.pull_request.head.repo.fork }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -352,7 +351,7 @@ jobs:
         'project-jobs',
         'project-test-jobs',
       ]
-    if: ${{ always() && needs.project-jobs.outputs.report-jobs != '[]' && ! github.event.pull_request.head.repo.fork  }}
+    if: ${{ always() && needs.project-jobs.outputs.report-jobs != '[]' && ! github.event.pull_request.head.repo.fork }}
     strategy:
       fail-fast: false
       matrix:
@@ -407,40 +406,6 @@ jobs:
             -f report_title="$REPORT_TITLE" \
             --repo woocommerce/woocommerce-test-reports
 
-      - name: 'Publish report to dashboard (deprecated)'
-        env:
-          GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          RUN_ID: ${{ github.run_id }}
-          REPORT_NAME: ${{ matrix.report }}
-        if: ${{ contains(matrix.report, 'e2e') && !! steps.merge-artifacts.outputs.artifact-id }} # temporary until we adapt the woocommerce-test-reports side to not care about the test type
-        run: |
-          if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
-            gh workflow run publish-test-reports-pr.yml \
-              -f run_id=$RUN_ID \
-              -f e2e_artifact=$ARTIFACT_NAME \
-              -f pr_number=$PR_NUMBER \
-              -f commit_sha=$GITHUB_SHA \
-              -f s3_root=public \
-              --repo woocommerce/woocommerce-test-reports
-          elif [ "$GITHUB_EVENT_NAME" == push ]; then
-            gh workflow run publish-test-reports-trunk-merge.yml \
-              -f run_id=$RUN_ID \
-              -f artifact=$ARTIFACT_NAME \
-              -f pr_number=$PR_NUMBER \
-              -f commit_sha=$GITHUB_SHA \
-              -f test_type="e2e" \
-              --repo woocommerce/woocommerce-test-reports
-          else
-            echo "No report will be created for '$GITHUB_EVENT_NAME' event"
-          fi
-
-      - name: 'Add annotation to workflow run linking to PR'
-        if: ${{ github.event_name == 'pull_request' && contains(matrix.report, 'e2e') }}
-        run: |
-          echo "::notice::🔗🔗 The e2e report for this run is available at https://woocommerce.github.io/woocommerce-test-reports/pr/${{ github.event.pull_request.number }}/e2e"
-  
-  
   report-flaky-tests:
     name: 'Create issues for flaky tests'
     if: ${{ !cancelled() && ! github.event.pull_request.head.repo.fork }}
