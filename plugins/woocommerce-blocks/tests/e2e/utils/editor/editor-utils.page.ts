@@ -104,11 +104,7 @@ export class Editor extends CoreEditor {
 
 		const resetNotice = this.page
 			.getByLabel( 'Dismiss this notice' )
-			.getByText(
-				templateType === 'wp_template'
-					? `"${ templateName }" reset.`
-					: `"${ templateName }" deleted.`
-			);
+			.getByText( `"${ templateName }" reset.` );
 		const savedButton = this.page.getByRole( 'button', {
 			name: 'Saved',
 		} );
