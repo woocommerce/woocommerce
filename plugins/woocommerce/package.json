@@ -599,7 +599,6 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"pull_request",
 						"daily-checks"
 					],
 					"report": {
