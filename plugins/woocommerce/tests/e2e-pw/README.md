@@ -1,7 +1,6 @@
-# WooCommerce Playwright End to End Tests
+# WooCommerce Playwright End-to-End Tests
 
-This is the documentation for the e2e testing setup based on Playwright and wp-env. It superseedes the Puppeteer and
-e2e-environment [setup](../tests/e2e), which we will gradually deprecate.
+This is the documentation for the e2e testing setup based on Playwright and `wp-env`.
 
 ## Table of contents
 
@@ -100,10 +99,10 @@ To run the tests using one of these environment, you can use the `test:e2e:with-
 # which is set up to run a subset of relevant tests against a wp-env instance with the latest stable version of the Gutenberg plugin
 pnpm test:e2e:with-env gutenberg-stable
 
-# Runs the tests using the default-permanent environment, 
+# Runs the tests using the default-pressable environment, 
 # which is an external site configured to run the tests against a permanent environment. 
-# The envs/default-permanent/.env.enc file will be decrypted into .env and used to set the required environment variables
-pnpm test:e2e:with-env default-permanent 
+# The envs/default-pressable/.env.enc file will be decrypted into .env and used to set the required environment variables
+pnpm test:e2e:with-env default-pressable
 
 # Runs all the tests with the default environment, similar to running `pnpm test:e2e-pw`
 pnpm test:e2e:with-env default 
@@ -116,7 +115,7 @@ If you're an a11n you can find the key in the Secret Store.
 Run with the `E2E_ENV_KEY` environment variable set:
 
 ```bash
-E2E_ENV_KEY='your-key' pnpm test:e2e:with-env default-permanent
+E2E_ENV_KEY='your-key' pnpm test:e2e:with-env default-pressable
 ```
 
 ### Creating an alternate environment

@@ -8,7 +8,7 @@ config = {
 		{
 			name: 'default',
 			use: { ...devices[ 'Desktop Chrome' ] },
-			testMatch: '**order*.spec.js',
+			testMatch: '**basic.spec.js',
 		},
 	],
 };
