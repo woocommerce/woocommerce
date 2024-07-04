@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { BlockVariation, registerBlockVariation } from '@wordpress/blocks';
+import { BlockVariation } from '@wordpress/blocks';
 import { addFilter } from '@wordpress/hooks';
 import { EditorBlock } from '@woocommerce/types';
 import type { ElementType } from '@wordpress/element';
@@ -441,19 +441,31 @@ export const __experimentalRegisterProductCollection = (
 		);
 	}
 
-	registerBlockVariation( BLOCK_NAME, {
-		...collectionConfigWithoutExtraArgs,
-		attributes: {
-			...DEFAULT_ATTRIBUTES,
-			...collectionConfigWithoutExtraArgs.attributes,
-			query: {
-				...DEFAULT_QUERY,
-				...collectionConfigWithoutExtraArgs.attributes?.query,
+	/**
+	 * Instead of importing `registerBlockVariation` from `@wordpress/blocks`, We are
+	 * directly using `wp.blocks.registerBlockVariation` because it leads to increase in
+	 * number of JS files on Frontend i.e. /shop page.
+	 *
+	 * In future, we should ship `registerProductCollection` function in a new package,
+	 * which is only loaded on the editor. This way, we won't need to use
+	 * `wp.blocks.registerBlockVariation` to avoid extra JS files on the frontend.
+	 */
+	if ( wp?.blocks?.registerBlockVariation ) {
+		wp.blocks.registerBlockVariation( BLOCK_NAME, {
+			...collectionConfigWithoutExtraArgs,
+			attributes: {
+				...DEFAULT_ATTRIBUTES,
+				...collectionConfigWithoutExtraArgs.attributes,
+				query: {
+					...DEFAULT_QUERY,
+					...collectionConfigWithoutExtraArgs.attributes?.query,
+				},
+				displayLayout: {
+					...DEFAULT_ATTRIBUTES.displayLayout,
+					...collectionConfigWithoutExtraArgs.attributes
+						?.displayLayout,
+				},
 			},
-			displayLayout: {
-				...DEFAULT_ATTRIBUTES.displayLayout,
-				...collectionConfigWithoutExtraArgs.attributes?.displayLayout,
-			},
-		},
-	} );
+		} );
+	}
 };
