@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Product Collection: collections that don't inherit query from template are non-filterable

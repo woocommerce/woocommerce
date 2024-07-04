@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Button, Card, CardHeader } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -20,7 +20,7 @@ export const TaskListCompleted = ( {
 	return (
 		<>
 			<div
-				className={ classnames(
+				className={ clsx(
 					'woocommerce-task-dashboard__container setup-task-list'
 				) }
 			>

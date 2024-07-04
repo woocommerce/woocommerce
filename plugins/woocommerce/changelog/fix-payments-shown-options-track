@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix tasklist_payments_options to record only shown payment gateways

@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Removed bold highlight from selected payment method in the Checkout block. This has been replaced with a border highlight.

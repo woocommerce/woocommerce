@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Replace forward slashes in additional fields IDs with hyphens.

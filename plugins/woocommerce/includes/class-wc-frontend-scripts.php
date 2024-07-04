@@ -298,6 +298,11 @@ class WC_Frontend_Scripts {
 				'deps'    => array( 'jquery', 'woocommerce' ),
 				'version' => $version,
 			),
+			'wc-account-i18n'            => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/account-i18n' . $suffix . '.js' ),
+				'deps'    => array( 'jquery' ),
+				'version' => $version,
+			),
 			'wc-password-strength-meter' => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/password-strength-meter' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'password-strength-meter' ),
@@ -388,6 +393,9 @@ class WC_Frontend_Scripts {
 			if ( ( 'no' === get_option( 'woocommerce_registration_generate_password' ) && ! is_user_logged_in() ) || is_edit_account_page() || is_lost_password_page() ) {
 				self::enqueue_script( 'wc-password-strength-meter' );
 			}
+		}
+		if ( is_account_page() ) {
+			self::enqueue_script( 'wc-account-i18n' );
 		}
 		if ( is_checkout() ) {
 			self::enqueue_script( 'wc-checkout' );

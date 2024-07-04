@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	InnerBlocks,
 	useBlockProps,
@@ -207,7 +207,7 @@ export const Edit = ( {
 				<SlotFillProvider>
 					<CheckoutProvider>
 						<SidebarLayout
-							className={ classnames( 'wc-block-checkout', {
+							className={ clsx( 'wc-block-checkout', {
 								'has-dark-controls': attributes.hasDarkControls,
 							} ) }
 						>

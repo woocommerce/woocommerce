@@ -1,14 +1,15 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
-import { useEffect, useId, useRef } from '@wordpress/element';
+import { useEffect, useId, useRef, useState } from '@wordpress/element';
 import { ComboboxControl } from 'wordpress-components';
 import { ValidationInputError } from '@woocommerce/blocks-components';
 import { isObject } from '@woocommerce/types';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -65,6 +66,8 @@ const Combobox = ( {
 		};
 	} );
 
+	const [ isFocused, setIsFocused ] = useState( false );
+
 	useEffect( () => {
 		if ( ! required || value ) {
 			clearValidationError( errorId );
@@ -93,16 +96,22 @@ const Combobox = ( {
 	return (
 		<div
 			id={ controlId }
-			className={ classnames( 'wc-block-components-combobox', className, {
+			className={ clsx( 'wc-block-components-combobox', className, {
 				'is-active': value,
 				'has-error': error?.message && ! error?.hidden,
 			} ) }
 			ref={ controlRef }
+			onFocus={ () => setIsFocused( true ) }
+			onBlur={ () => setIsFocused( false ) }
 		>
 			<ComboboxControl
 				className={ 'wc-block-components-combobox-control' }
 				label={ label }
-				onChange={ onChange }
+				onChange={ ( selectedValue: string ) => {
+					onChange( selectedValue );
+					setIsFocused( false );
+				} }
+				onSelect={ () => setIsFocused( false ) }
 				onFilterValueChange={ ( filterValue: string ) => {
 					if ( filterValue.length ) {
 						// If we have a value and the combobox is not focussed, this could be from browser autofill.
@@ -154,6 +163,7 @@ const Combobox = ( {
 				aria-invalid={ error?.message && ! error?.hidden }
 				aria-errormessage={ validationErrorId }
 			/>
+			<Icon icon={ isFocused ? chevronUp : chevronDown } />
 			<ValidationInputError propertyName={ errorId } />
 		</div>
 	);

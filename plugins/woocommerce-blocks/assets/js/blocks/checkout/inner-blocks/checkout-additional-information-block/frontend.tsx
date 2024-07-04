@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { FormStep } from '@woocommerce/blocks-components';
 import { ORDER_FORM_KEYS } from '@woocommerce/block-settings';
 import { useSelect } from '@wordpress/data';
@@ -39,7 +39,7 @@ const FrontendBlock = ( {
 		<FormStep
 			id="additional-information-fields"
 			disabled={ checkoutIsProcessing }
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__additional-information-fields',
 				className
 			) }

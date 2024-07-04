@@ -9,7 +9,7 @@ import { test, Metrics } from '@wordpress/e2e-test-utils-playwright';
  * Internal dependencies
  */
 import { PerfUtils } from '../fixtures';
-import { median } from '../utils';
+import { getTotalBlockingTime, median } from '../utils';
 
 // See https://github.com/WordPress/gutenberg/issues/51383#issuecomment-1613460429
 const BROWSER_IDLE_WAIT = 1000;
@@ -57,11 +57,11 @@ test.describe( 'Editor Performance', () => {
 
 	test.afterAll( async ( {}, testInfo ) => {
 		const medians = {};
-		Object.keys( results ).map( ( metric ) => {
+		Object.keys( results ).forEach( ( metric ) => {
 			medians[ metric ] = median( results[ metric ] );
 		} );
 		await testInfo.attach( 'results', {
-			body: JSON.stringify( medians, null, 2 ),
+			body: JSON.stringify( { editor: medians }, null, 2 ),
 			contentType: 'application/json',
 		} );
 	} );
@@ -95,8 +95,32 @@ test.describe( 'Editor Performance', () => {
 				// Get the durations.
 				const loadingDurations = await metrics.getLoadingDurations();
 
+				// Measure CLS
+				const cumulativeLayoutShift =
+					await metrics.getCumulativeLayoutShift();
+
+				// Measure LCP
+				const largestContentfulPaint =
+					await metrics.getLargestContentfulPaint();
+
+				// Measure TBT
+				const totalBlockingTime = await getTotalBlockingTime(
+					page,
+					BROWSER_IDLE_WAIT
+				);
+
 				// Save the results.
 				if ( i > throwaway ) {
+					results.totalBlockingTime = results.tbt || [];
+					results.totalBlockingTime.push( totalBlockingTime );
+					results.cumulativeLayoutShift =
+						results.cumulativeLayoutShift || [];
+					results.cumulativeLayoutShift.push( cumulativeLayoutShift );
+					results.largestContentfulPaint =
+						results.largestContentfulPaint || [];
+					results.largestContentfulPaint.push(
+						largestContentfulPaint
+					);
 					Object.entries( loadingDurations ).forEach(
 						( [ metric, duration ] ) => {
 							const metricKey =

@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import {
 	useBlockProps,
@@ -47,7 +47,7 @@ export const Edit = ( { clientId, className, attributes, setAttributes } ) => {
 		[ 'woocommerce/empty-cart-block', {}, [] ],
 	];
 	const blockProps = useBlockPropsWithLocking( {
-		className: classnames( className, 'wp-block-woocommerce-cart', {
+		className: clsx( className, 'wp-block-woocommerce-cart', {
 			'is-editor-preview': isPreview,
 		} ),
 	} );

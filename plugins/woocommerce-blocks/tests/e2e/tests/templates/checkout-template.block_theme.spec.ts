@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 const permalink = '/checkout';
 const templatePath = 'woocommerce/woocommerce//page-checkout';
@@ -11,16 +11,15 @@ test.describe( 'Test the checkout template', () => {
 	test( 'Template can be opened in the site editor', async ( {
 		admin,
 		editor,
-		editorUtils,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
+			canvas: 'edit',
 		} );
-		await editorUtils.enterEditMode();
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place Order · <price/>',
+				name: 'Place Order',
 			} )
 		).toBeVisible();
 	} );
@@ -29,21 +28,16 @@ test.describe( 'Test the checkout template', () => {
 		admin,
 		editor,
 		page,
-		editorUtils,
 	} ) => {
-		await admin.visitSiteEditor( {
-			postId: templatePath,
-			postType: templateType,
-		} );
-		await admin.visitSiteEditor( { path: '/page' } );
+		await admin.visitSiteEditor( { postType: 'page' } );
 		await editor.page
 			.getByRole( 'button', { name: 'Checkout', exact: true } )
 			.click();
-		await editorUtils.enterEditMode();
+		await editor.canvas.locator( 'body' ).click();
 
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place Order · <price/>',
+				name: 'Place Order',
 			} )
 		).toBeVisible();
 
@@ -53,7 +47,7 @@ test.describe( 'Test the checkout template', () => {
 
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place Order · <price/>',
+				name: 'Place Order',
 			} )
 		).toBeVisible();
 	} );
@@ -67,9 +61,13 @@ test.describe( 'Test the checkout template', () => {
 		await frontendUtils.addToCart();
 		await admin.page.goto( permalink );
 		await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
+
+		// Close welcome popup.
+		await admin.page.getByRole( 'button', { name: 'Get started' } ).click();
+
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place Order · <price/>',
+				name: 'Place Order',
 			} )
 		).toBeVisible();
 	} );
@@ -78,14 +76,13 @@ test.describe( 'Test the checkout template', () => {
 test.describe( 'Test editing the checkout template', () => {
 	test( 'Merchant can transform shortcode block into blocks', async ( {
 		admin,
-		editorUtils,
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
+			canvas: 'edit',
 		} );
-		await editorUtils.enterEditMode();
 		await editor.setContent(
 			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"checkout"} /-->'
 		);

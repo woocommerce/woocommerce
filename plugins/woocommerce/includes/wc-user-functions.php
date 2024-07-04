@@ -367,7 +367,7 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 				$user_id_clause = 'OR o.customer_id = ' . absint( $user_id );
 			}
 			$sql = "
-SELECT im.meta_value FROM $order_table AS o
+SELECT DISTINCT im.meta_value FROM $order_table AS o
 INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON o.id = i.order_id
 INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
 WHERE o.status IN ('" . implode( "','", $statuses ) . "')
@@ -379,7 +379,7 @@ AND ( o.billing_email IN ('" . implode( "','", $customer_data ) . "') $user_id_c
 		} else {
 			$result = $wpdb->get_col(
 				"
-SELECT im.meta_value FROM {$wpdb->posts} AS p
+SELECT DISTINCT im.meta_value FROM {$wpdb->posts} AS p
 INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
 INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
 INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id

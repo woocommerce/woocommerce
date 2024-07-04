@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useContext, useEffect, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 
 /**
@@ -118,7 +118,7 @@ const renderTabs = (
 		tabContent.push(
 			tabs[ tabKey ]?.href ? (
 				<a
-					className={ classNames(
+					className={ clsx(
 						'woocommerce-marketplace__tab-button',
 						'components-button',
 						`woocommerce-marketplace__tab-${ tabKey }`
@@ -130,7 +130,7 @@ const renderTabs = (
 				</a>
 			) : (
 				<Button
-					className={ classNames(
+					className={ clsx(
 						'woocommerce-marketplace__tab-button',
 						`woocommerce-marketplace__tab-${ tabKey }`,
 						{
@@ -176,7 +176,7 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	}, [ selectedTab, hasBusinessServices ] );
 	return (
 		<nav
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-marketplace__tabs',
 				additionalClassNames || []
 			) }

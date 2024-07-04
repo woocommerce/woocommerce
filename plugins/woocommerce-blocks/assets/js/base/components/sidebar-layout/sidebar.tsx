@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { forwardRef } from '@wordpress/element';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -14,10 +14,7 @@ const Sidebar = forwardRef< HTMLDivElement, ForwardRefProps >(
 		return (
 			<div
 				ref={ ref }
-				className={ classNames(
-					'wc-block-components-sidebar',
-					className
-				) }
+				className={ clsx( 'wc-block-components-sidebar', className ) }
 			>
 				{ children }
 			</div>

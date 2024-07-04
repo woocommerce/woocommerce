@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix coupon rest api returning 500 error on delete.

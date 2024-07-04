@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 /**
  * Internal dependencies
  */
@@ -33,7 +33,7 @@ export const PluginBanner = ( {
 }: PluginBannerProps ) => {
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-task-shipping-recommendation__plugins-install',
 				layout
 			) }

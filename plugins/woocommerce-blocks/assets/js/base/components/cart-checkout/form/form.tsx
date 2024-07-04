@@ -18,7 +18,7 @@ import { useEffect, useMemo, useRef } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { useShallowEqual } from '@woocommerce/base-hooks';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	AddressFormValues,
 	ContactFormValues,
@@ -231,7 +231,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 						<Combobox
 							key={ field.key }
 							{ ...fieldProps }
-							className={ classnames(
+							className={ clsx(
 								'wc-block-components-select-input',
 								`wc-block-components-select-input-${ field.key }`.replaceAll(
 									'/',
