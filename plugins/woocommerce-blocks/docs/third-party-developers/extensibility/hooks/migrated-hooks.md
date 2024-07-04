@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout Filters - Legacy Hooks and Filters
-menu_title: Legacy Hooks and Filters
+menu_title: Legacy Hooks
 tags: reference, checkout-hooks
 ---
 
