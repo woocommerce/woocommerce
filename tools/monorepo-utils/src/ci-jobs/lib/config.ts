@@ -22,7 +22,7 @@ export const enum JobType {
 }
 
 /**
-` * The type of the test job.
+ * The type of the test job.
  */
 export const testTypes = [
 	'unit:php',
