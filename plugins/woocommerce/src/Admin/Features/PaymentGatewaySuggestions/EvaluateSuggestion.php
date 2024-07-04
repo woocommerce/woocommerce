@@ -27,8 +27,8 @@ class EvaluateSuggestion {
 
 		if ( isset( $suggestion->is_visible ) ) {
 			$is_visible             = $rule_evaluator->evaluate( $suggestion->is_visible, null, [
-				'slug'   => $suggestion->id ?? $suggestion->title ?? 'unknown',
-				'source' => $logger_args['source'] ?? 'wc-payment-gateway-suggestions',
+				'slug'   => sanitize_title_with_dashes( $suggestion->id ??  $suggestion->title ?? 'unknown' ),
+				'source' => sanitize_title_with_dashes( $logger_args['source'] ?? 'wc-payment-gateway-suggestions' ),
 			] );
 			$suggestion->is_visible = $is_visible;
 		}
