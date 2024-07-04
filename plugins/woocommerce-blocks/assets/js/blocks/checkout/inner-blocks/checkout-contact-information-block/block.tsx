@@ -18,6 +18,11 @@ import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { CONTACT_FORM_KEYS } from '@woocommerce/block-settings';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 
+/**
+ * Internal dependencies
+ */
+import PasswordStrengthMeter from '../../password-strength-meter';
+
 const CreateAccountUI = (): JSX.Element => {
 	const { customerPassword, shouldCreateAccount } = useSelect( ( select ) => {
 		const store = select( CHECKOUT_STORE_KEY );
@@ -65,30 +70,33 @@ const CreateAccountUI = (): JSX.Element => {
 				/>
 			) }
 			{ showCreateAccountPassword && (
-				<ValidatedTextInput
-					type="password"
-					label={ __( 'Create a password', 'woocommerce' ) }
-					className={ `wc-block-components-address-form__password` }
-					value={ customerPassword }
-					required={ true }
-					customValidityMessage={ (
-						validity: ValidityState
-					): string | undefined => {
-						if (
-							validity.valueMissing ||
-							validity.badInput ||
-							validity.typeMismatch
-						) {
-							return __(
-								'Please enter a valid password',
-								'woocommerce'
-							);
+				<>
+					<ValidatedTextInput
+						type="password"
+						label={ __( 'Create a password', 'woocommerce' ) }
+						className={ `wc-block-components-address-form__password` }
+						value={ customerPassword }
+						required={ true }
+						customValidityMessage={ (
+							validity: ValidityState
+						): string | undefined => {
+							if (
+								validity.valueMissing ||
+								validity.badInput ||
+								validity.typeMismatch
+							) {
+								return __(
+									'Please enter a valid password',
+									'woocommerce'
+								);
+							}
+						} }
+						onChange={ ( value: string ) =>
+							__internalSetCustomerPassword( value )
 						}
-					} }
-					onChange={ ( value: string ) =>
-						__internalSetCustomerPassword( value )
-					}
-				/>
+					/>
+					<PasswordStrengthMeter password={ customerPassword } />
+				</>
 			) }
 		</>
 	);

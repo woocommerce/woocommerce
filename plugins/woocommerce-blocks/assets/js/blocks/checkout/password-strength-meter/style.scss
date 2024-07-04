@@ -1,0 +1,97 @@
+.wc-block-components-address-form__password-strength {
+	margin: $gap-small 0 0;
+	width: 100%;
+	display: block;
+	height: 6px;
+	border-radius: 4px;
+	border: 0;
+	background-color: $universal-border-light;
+	color: $universal-border-light;
+
+	&[value="1"] {
+		color: $alert-red;
+	}
+	&[value="2"] {
+		color: #ff6f00;
+	}
+	&[value="3"] {
+		color: $alert-yellow;
+	}
+	&[value="4"] {
+		color: $alert-green;
+	}
+	&::-webkit-meter-bar,
+	&::-webkit-meter-inner-element {
+		background: none;
+		border: 0;
+		height: 6px;
+		vertical-align: middle;
+	}
+	&::-webkit-meter-optimum-value,
+	&::-webkit-meter-even-less-good-value,
+	&::-webkit-meter-suboptimum-value {
+		background: none;
+		background-color: currentColor;
+		transition: 0.2s ease;
+		border-radius: 3px;
+		border: 0;
+		height: 6px;
+		vertical-align: middle;
+	}
+
+	&:-moz-meter-optimum::-moz-meter-bar,
+	&:-moz-meter-sub-optimum::-moz-meter-bar,
+	&:-moz-meter-sub-sub-optimum::-moz-meter-bar {
+		background: none;
+		background-color: currentColor;
+		transition: 0.2s ease;
+		border-radius: 3px;
+		border: 0;
+		height: 6px;
+		vertical-align: middle;
+	}
+
+	&::after {
+		content: attr(data-textvalue);
+		@include font-size(small);
+		display: block;
+		text-align: right;
+		margin: $gap-smallest 0 0;
+	}
+
+	/*
+	span {
+		background: currentColor;
+		display: block;
+		width: 0;
+		height: 6px;
+		border-radius: 3px;
+		border: 0;
+		transition: 0.2s ease;
+		overflow: hidden;
+	}
+	&[value="1"] {
+		color: $alert-red;
+		span {
+			width: 25%;
+		}
+	}
+	&[value="2"] {
+		color: #ff6f00;
+		span {
+			width: 50%;
+		}
+	}
+	&[value="3"] {
+		color: $alert-yellow;
+		span {
+			width: 75%;
+		}
+	}
+	&[value="4"] {
+		color: $alert-green;
+		span {
+			width: 100%;
+		}
+	}*/
+}
