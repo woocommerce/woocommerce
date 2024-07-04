@@ -104,7 +104,7 @@
 			"tests": [
 				{
 					"name": "PHP",
-					"testType": "phpunit",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -128,7 +128,7 @@
 				},
 				{
 					"name": "PHP 8.0",
-					"testType": "phpunit",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -155,7 +155,7 @@
 				},
 				{
 					"name": "PHP WP: latest - 1",
-					"testType": "phpunit",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -182,7 +182,7 @@
 				},
 				{
 					"name": "PHP WP: latest - 2",
-					"testType": "phpunit",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -209,7 +209,7 @@
 				},
 				{
 					"name": "PHP WP: nightly",
-					"testType": "phpunit",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"optional": true,
 					"changes": [
