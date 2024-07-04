@@ -122,7 +122,7 @@ jobs:
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
         if: ${{ github.ref_type != 'tag' && matrix.testEnv.shouldCreate && matrix.testType != 'unit:php' }}
-        name: 'Build project'
+        name: "Build project (aiming: ${{ matrix.testType }})"
         id: 'build-project'
         with:
           build: ${{ matrix.projectName }}
