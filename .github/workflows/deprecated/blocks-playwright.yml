@@ -51,6 +51,7 @@ jobs:
               with:
                   install: '@woocommerce/plugin-woocommerce...'
                   build: '@woocommerce/plugin-woocommerce'
+                  pull-playwright-cache: true
 
             - name: Install Playwright dependencies
               run: pnpm exec playwright install chromium --with-deps
