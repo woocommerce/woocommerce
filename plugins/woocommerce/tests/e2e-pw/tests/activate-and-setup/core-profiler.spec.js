@@ -474,13 +474,11 @@ test.describe( 'Store owner can skip the core profiler', () => {
 					.click();
 			}
 			await expect( page.url() ).toContain( 'wordpress.com/log-in' );
-			// reload to avoid flaky blank page
-			await page.reload();
 			await expect(
 				page.getByRole( 'heading', {
 					name: 'Log in to your account',
 				} )
-			).toBeVisible();
+			).toBeVisible( { timeout: 30000 } );
 		} );
 	} );
 } );
