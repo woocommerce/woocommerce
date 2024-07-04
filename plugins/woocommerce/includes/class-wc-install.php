@@ -318,7 +318,7 @@ class WC_Install {
 			do_action_deprecated( 'woocommerce_admin_newly_installed', array(), '6.5.0', 'woocommerce_newly_installed' );
 
 			update_option( self::NEWLY_INSTALLED_OPTION, 'no' );
-			update_option( self::INITIAL_INSTALL_VERSION_OPTION, WC()->version );
+			add_option( self::INITIAL_INSTALL_VERSION_OPTION, WC()->version );
 		}
 	}
 
