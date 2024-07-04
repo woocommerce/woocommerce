@@ -122,7 +122,7 @@ jobs:
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
         if: ${{ github.ref_type != 'tag' && matrix.testEnv.shouldCreate && matrix.testType != 'unit:php' }}
-        name: "Build project (aiming: ${{ matrix.testType }})"
+        name: 'Build project'
         id: 'build-project'
         with:
           build: ${{ matrix.projectName }}
@@ -157,7 +157,7 @@ jobs:
           echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
         shell: bash
 
-      - name: 'Run tests'
+      - name: 'Run tests (${{ matrix.testType }})'
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
           BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
