@@ -1,5 +1,5 @@
 ---
-post_title: Cart and Checkout Filters - Cart Line Items
+post_title: Cart and Checkout - Cart Line Items
 menu_title: Cart Line Items
 tags: reference, checkout-available-filters
 ---
