@@ -510,6 +510,12 @@ class BlockTemplatesController {
 			return;
 		}
 
+
+		if ( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-view-template' ) ) {
+			return;
+		}
+
+
 		$referer = wp_parse_url( wp_get_referer() );
 
 		if (
@@ -538,7 +544,8 @@ class BlockTemplatesController {
 		$page_url = $this->get_woocommerce_page_by_template_slug( $template_slug );
 
 		if ( $page_url ) {
-			wp_safe_redirect( $page_url );
+
+			wp_safe_redirect( wp_nonce_url( $page_url, 'woocommerce-preview-block-template' ) );
 			exit;
 		}
 	}
