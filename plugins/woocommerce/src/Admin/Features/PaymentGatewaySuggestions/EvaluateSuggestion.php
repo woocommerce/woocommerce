@@ -16,20 +16,25 @@ class EvaluateSuggestion {
 	/**
 	 * Evaluates the spec and returns the suggestion.
 	 *
-	 * @param object|array $spec The suggestion to evaluate.
-	 * @param array $logger_args Optional. Arguments for the rule evaluator logger.
+	 * @param object|array $spec        The suggestion to evaluate.
+	 * @param array        $logger_args Optional. Arguments for the rule evaluator logger.
 	 *
 	 * @return object The evaluated suggestion.
 	 */
-	public static function evaluate( $spec, $logger_args = [] ) {
+	public static function evaluate( $spec, $logger_args = array() ) {
 		$rule_evaluator = new RuleEvaluator();
 		$suggestion     = is_array( $spec ) ? (object) $spec : clone $spec;
 
 		if ( isset( $suggestion->is_visible ) ) {
-			$is_visible             = $rule_evaluator->evaluate( $suggestion->is_visible, null, [
-				'slug'   => sanitize_title_with_dashes( $suggestion->id ??  $suggestion->title ?? 'unknown' ),
-				'source' => sanitize_title_with_dashes( $logger_args['source'] ?? 'wc-payment-gateway-suggestions' ),
-			] );
+			$is_visible = $rule_evaluator->evaluate(
+				$suggestion->is_visible,
+				null,
+				array(
+					'slug'   => sanitize_title_with_dashes( $suggestion->id ?? $suggestion->title ?? 'unknown' ),
+					'source' => sanitize_title_with_dashes( $logger_args['source'] ?? 'wc-payment-gateway-suggestions' ),
+				)
+			);
+
 			$suggestion->is_visible = $is_visible;
 		}
 
@@ -44,7 +49,7 @@ class EvaluateSuggestion {
 	 *
 	 * @return array The visible suggestions and errors.
 	 */
-	public static function evaluate_specs( $specs, $logger_args = [] ) {
+	public static function evaluate_specs( $specs, $logger_args = array() ) {
 		$suggestions = array();
 		$errors      = array();
 
