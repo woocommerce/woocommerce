@@ -318,6 +318,12 @@ class WC_Install {
 			do_action_deprecated( 'woocommerce_admin_newly_installed', array(), '6.5.0', 'woocommerce_newly_installed' );
 
 			update_option( self::NEWLY_INSTALLED_OPTION, 'no' );
+
+			/**
+			 * This option is used to track the initial version of WooCommerce that was installed.
+			 *
+			 * @since 9.2.0
+			 */
 			add_option( self::INITIAL_INSTALL_VERSION_OPTION, WC()->version );
 		}
 	}
