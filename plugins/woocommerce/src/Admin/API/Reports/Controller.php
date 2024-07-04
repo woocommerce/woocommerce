@@ -140,17 +140,22 @@ class Controller extends GenericController {
 	 * Returns the parent order number if the order is actually a refund.
 	 *
 	 * @param  int $order_id Order ID.
-	 * @return string
+	 * @return string|null The Order Number or null if the order doesn't exist.
 	 */
 	protected function get_order_number( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! $order instanceof \WC_Order && ! $order instanceof \WC_Order_Refund ) {
+		if ( ! $this->is_valid_order( $order ) ) {
 			return null;
 		}
 
 		if ( 'shop_order_refund' === $order->get_type() ) {
 			$order = wc_get_order( $order->get_parent_id() );
+
+			// If the parent order doesn't exist, return null.
+			if ( ! $this->is_valid_order( $order ) ) {
+				return null;
+			}
 		}
 
 		if ( ! has_filter( 'woocommerce_order_number' ) ) {
@@ -161,21 +166,35 @@ class Controller extends GenericController {
 	}
 
 	/**
+	 * Whether the order is valid.
+	 *
+	 * @param bool|WC_Order|WC_Order_Refund $order Order object.
+	 * @return bool True if the order is valid, false otherwise.
+	 */
+	protected function is_valid_order( $order ) {
+		return $order instanceof \WC_Order || $order instanceof \WC_Order_Refund;
+	}
+
+	/**
 	 * Get the order total with the related currency formatting.
 	 * Returns the parent order total if the order is actually a refund.
 	 *
 	 * @param  int $order_id Order ID.
-	 * @return string
+	 * @return string|null The Order Number or null if the order doesn't exist.
 	 */
 	protected function get_total_formatted( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! $order instanceof \WC_Order && ! $order instanceof \WC_Order_Refund ) {
+		if ( ! $this->is_valid_order( $order ) ) {
 			return null;
 		}
 
 		if ( 'shop_order_refund' === $order->get_type() ) {
 			$order = wc_get_order( $order->get_parent_id() );
+
+			if ( ! $this->is_valid_order( $order ) ) {
+				return null;
+			}
 		}
 
 		return wp_strip_all_tags( html_entity_decode( $order->get_formatted_order_total() ), true );
