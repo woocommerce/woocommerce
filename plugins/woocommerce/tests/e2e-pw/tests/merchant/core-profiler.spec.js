@@ -98,8 +98,8 @@ test.describe( 'Core Profiler', { tag: [ '@gutenberg', '@services' ] }, () => {
 
 		const checkboxes = page.getByRole( 'checkbox' );
 
-		await checkboxes.evaluateAll( ( checkboxes ) => {
-			checkboxes.forEach( ( checkbox ) => {
+		await checkboxes.evaluateAll( ( collection ) => {
+			collection.forEach( ( checkbox ) => {
 				if ( checkbox.checked ) {
 					checkbox.click();
 				}
