@@ -1,22 +1,13 @@
 /**
  * External dependencies
  */
-import {
-	createElement,
-	useEffect,
-	useState,
-	Fragment,
-} from '@wordpress/element';
+import { createElement, useEffect, Fragment } from '@wordpress/element';
 import { KeyboardEvent, ReactElement, useMemo } from 'react';
 import { NavigableMenu, Slot } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { select } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -25,7 +16,8 @@ import { getTabTracksData } from './utils/get-tab-tracks-data';
 import { TABS_SLOT_NAME } from './constants';
 
 type TabsProps = {
-	onChange?: ( tabId: string | null ) => void;
+	selected: string | null;
+	onChange: ( tabId: string ) => void;
 };
 
 export type TabsFillProps = {
@@ -34,10 +26,12 @@ export type TabsFillProps = {
 
 function TabFills( {
 	fills,
-	onDefaultSelection,
+	selected,
+	onChange,
 }: {
 	fills: readonly ( readonly ReactElement[] )[];
-	onDefaultSelection( tabId: string ): void;
+	selected: string | null;
+	onChange: ( tabId: string ) => void;
 } ) {
 	const sortedFills = useMemo(
 		function sortFillsByOrder() {
@@ -49,36 +43,33 @@ function TabFills( {
 	);
 
 	useEffect( () => {
-		for ( let i = 0; i < sortedFills.length; i++ ) {
-			const [ { props } ] = fills[ i ];
-			if ( ! props.disabled ) {
-				const tabId = props.children?.key;
-				if ( tabId ) {
-					onDefaultSelection( tabId );
-				}
-				return;
-			}
+		// If a tab is already selected, do nothing
+		if ( selected ) {
+			return;
 		}
-	}, [ sortedFills ] );
+
+		// Select the first tab that is not disabled
+		const firstEnabledTab = sortedFills.find( ( element ) => {
+			const [ { props } ] = element;
+			return ! props.disabled;
+		} );
+
+		const tabIdToSelect = firstEnabledTab?.[ 0 ]?.props?.children?.key;
+
+		if ( tabIdToSelect ) {
+			onChange( tabIdToSelect );
+		}
+	}, [ sortedFills, selected, onChange ] );
 
 	return <>{ sortedFills }</>;
 }
 
-export function Tabs( { onChange = () => {} }: TabsProps ) {
-	const [ selected, setSelected ] = useState< string | null >( null );
-	const query = getQuery() as Record< string, string >;
+export function Tabs( { selected, onChange }: TabsProps ) {
 	const [ productId ] = useEntityProp< number >(
 		'postType',
 		'product',
 		'id'
 	);
-
-	useEffect( () => {
-		if ( query.tab ) {
-			setSelected( query.tab );
-			onChange( query.tab );
-		}
-	}, [ query.tab ] );
 
 	function selectTabOnNavigate(
 		_childIndex: number,
@@ -115,13 +106,8 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 		return (
 			<TabFills
 				fills={ fills }
-				onDefaultSelection={ ( tabId ) => {
-					if ( selected ) {
-						return;
-					}
-					setSelected( tabId );
-					onChange( tabId );
-				} }
+				selected={ selected }
+				onChange={ onChange }
 			/>
 		);
 	}
@@ -138,9 +124,7 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 				fillProps={
 					{
 						onClick: ( tabId ) => {
-							navigateTo( {
-								url: getNewPath( { tab: tabId } ),
-							} );
+							onChange( tabId );
 
 							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 							// @ts-ignore
