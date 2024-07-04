@@ -1,3 +1,9 @@
+---
+post_title: Cart and Checkout - Handling scripts, styles, and data
+menu_title: Script, styles, and data handling
+tags: how-to
+---
+
 # `IntegrationRegistry` and `IntegrationInterface` <!-- omit in toc -->
 
 ## Table of Contents <!-- omit in toc -->
@@ -203,14 +209,3 @@ We associated some data with the extension in the `get_script_data` method of ou
 In the `@woocommerce/settings` package there is a method you can import called `getSetting`. This method accepts a string. The name of the setting containing the data added in `get_script_data` is the name of your integration (i.e. the value returned by `get_name`) suffixed with `_data`. In our example it would be: `woocommerce-example-plugin_data`.
 
 The value returned here is a plain old JavaScript object, keyed by the keys of the array returned by `get_script_data`, the values will serialized.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/integration-interface.md)
-
-<!-- /FEEDBACK -->
-
