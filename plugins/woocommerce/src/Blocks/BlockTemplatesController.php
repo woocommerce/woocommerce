@@ -28,6 +28,7 @@ class BlockTemplatesController {
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
 		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_archive_product_to_eligible_for_fallback_templates' ), 10, 1 );
+		add_filter( 'template_redirect', array( $this, 'redirect_to_woocommerce_page' ) );
 
 		// By default, the Template Part Block only supports template parts that are in the current theme directory.
 		// This render_callback wrapper allows us to add support for plugin-housed template parts.
@@ -494,5 +495,66 @@ class BlockTemplatesController {
 		return is_readable(
 			$directory
 		) || $this->get_block_templates( array( $template_name ), $template_type );
+	}
+
+	/**
+	 * Redirect to the coresponding page on the front end after admins click on
+	 * the View Site button while editing a WooCommerce template.
+	 */
+	public function redirect_to_woocommerce_page() {
+		if (
+			! is_home() ||
+			! current_user_can( 'edit_theme_options' ) ||
+			! wp_get_referer()
+		) {
+			return;
+		}
+
+		$referer = wp_parse_url( wp_get_referer() );
+
+		if (
+			! $referer ||
+			! strpos( $referer['path'], 'site-editor.php' ) ||
+			empty( $referer['query'] )
+		) {
+			return;
+		}
+
+		$query = array();
+
+		wp_parse_str( $referer['query'], $query );
+
+		$query = wp_parse_args( $query, array(
+			'postId'   => '',
+			'postType' => '',
+		) );
+
+		$template_slug = str_replace( 'woocommerce/woocommerce//', '', $query['postId'] );
+
+		$page_url = $this->get_woocommerce_page_by_template_slug( $template_slug );
+
+		if ( $page_url ) {
+			wp_safe_redirect( $page_url );
+			exit;
+		}
+	}
+
+	/**
+	 * Get the WooCommerce page URL by template slug.
+	 *
+	 * @param string $slug The template slug.
+	 * @return string
+	 */
+	private function get_woocommerce_page_by_template_slug( $slug ) {
+		switch ( $slug ) {
+			case 'page-cart':
+				return wc_get_cart_url();
+			case 'page-checkout':
+				return wc_get_checkout_url();
+			case 'archive-product':
+				return wc_get_page_permalink( 'shop' );
+			default:
+				return '';
+		}
 	}
 }
