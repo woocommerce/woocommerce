@@ -52,7 +52,6 @@ export function ExpressionField( {
 	updateLabel = __( 'Update', 'woocommerce' ),
 }: ExpressionFieldProps ) {
 	const [ editedExpression, setEditedExpression ] = useState( expression );
-	const isDirty = editedExpression !== expression;
 
 	useEffect( () => setEditedExpression( expression ), [ expression ] );
 
@@ -93,7 +92,7 @@ export function ExpressionField( {
 						<Button
 							icon={ check }
 							label={ updateLabel }
-							disabled={ ! isDirty }
+							disabled={ !! error }
 							onClick={ () => onUpdate?.( editedExpression ) }
 						/>
 						{ onCancel && (
