@@ -118,15 +118,13 @@ jobs:
         id: 'install-monorepo'
         with:
           install: '${{ matrix.projectName }}...'
-          build: 'false'
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && matrix.testType == 'e2e' }}
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
-        if: ${{ github.ref_type != 'tag' }}
+        if: ${{ github.ref_type != 'tag' && matrix.testEnv.shouldCreate && matrix.testType != 'phpunit' }}
         name: 'Build project'
         id: 'build-project'
         with:
-          install: 'false'
           build: ${{ matrix.projectName }}
 
       - name: 'Update wp-env config'
