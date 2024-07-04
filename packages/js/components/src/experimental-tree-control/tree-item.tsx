@@ -33,6 +33,15 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 		ref,
 	} );
 
+	function handleEscapePress(
+		event: React.KeyboardEvent< HTMLInputElement >
+	) {
+		if ( event.key === 'Escape' && props.onEscape ) {
+			event.preventDefault();
+			props.onEscape();
+		}
+	}
+
 	return (
 		<li
 			{ ...treeItemProps }
@@ -58,15 +67,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 							}
 							checked={ selection.checkedStatus === 'checked' }
 							onChange={ selection.onSelectChild }
-							onKeyDown={ ( event ) => {
-								if (
-									event.key === 'Escape' &&
-									props.onEscape
-								) {
-									event.preventDefault();
-									props.onEscape();
-								}
-							} }
+							onKeyDown={ handleEscapePress }
 							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 							// @ts-ignore __nextHasNoMarginBottom is a valid prop
 							__nextHasNoMarginBottom={ true }
@@ -79,15 +80,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 							onChange={ ( event ) =>
 								selection.onSelectChild( event.target.checked )
 							}
-							onKeyDown={ ( event ) => {
-								if (
-									event.key === 'Escape' &&
-									props.onEscape
-								) {
-									event.preventDefault();
-									props.onEscape();
-								}
-							} }
+							onKeyDown={ handleEscapePress }
 						/>
 					) }
 
