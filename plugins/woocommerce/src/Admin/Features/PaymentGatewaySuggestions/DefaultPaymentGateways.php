@@ -1081,7 +1081,7 @@ class DefaultPaymentGateways {
 	 * Get default rules for CBD based on given argument.
 	 *
 	 * @param bool $should_have Whether or not the store should have CBD as an industry (true) or not (false).
-	 * @return array Rules to match.
+	 * @return object Rules to match.
 	 */
 	public static function get_rules_for_cbd( $should_have ) {
 		return (object) array(
