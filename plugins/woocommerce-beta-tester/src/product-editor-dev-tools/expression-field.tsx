@@ -4,7 +4,7 @@
 import { Button } from '@wordpress/components';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { check, closeSmall, edit } from '@wordpress/icons';
+import { check, closeSmall, edit, trash } from '@wordpress/icons';
 import { evaluate } from '@woocommerce/expression-evaluation';
 
 /**
@@ -39,6 +39,7 @@ type ExpressionFieldProps = {
 	onEnterEdit?: () => void;
 	onUpdate?: ( expression: string ) => void;
 	onCancel?: () => void;
+	onRemove?: () => void;
 	updateLabel?: string;
 };
 
@@ -49,6 +50,7 @@ export function ExpressionField( {
 	onEnterEdit,
 	onUpdate,
 	onCancel,
+	onRemove,
 	updateLabel = __( 'Update', 'woocommerce' ),
 }: ExpressionFieldProps ) {
 	const textAreaRef = useRef< HTMLTextAreaElement >( null );
@@ -100,11 +102,18 @@ export function ExpressionField( {
 			/>
 			<div className="woocommerce-product-editor-dev-tools-expression-field__actions">
 				{ mode === 'view' ? (
-					<Button
-						icon={ edit }
-						label={ __( 'Edit', 'woocommerce' ) }
-						onClick={ handleOnClickEdit }
-					/>
+					<>
+						<Button
+							icon={ edit }
+							label={ __( 'Edit', 'woocommerce' ) }
+							onClick={ handleOnClickEdit }
+						/>
+						<Button
+							icon={ trash }
+							label={ __( 'Remove', 'woocommerce' ) }
+							onClick={ () => onRemove?.() }
+						/>
+					</>
 				) : (
 					<>
 						<Button

@@ -49,6 +49,15 @@ export function ExpressionsPanel( {
 		setExpressionItems( newItems );
 	}
 
+	function removeExpression( index: number ) {
+		return () => {
+			const newItems = expressionItems.filter(
+				( item, i ) => i !== index
+			);
+			setExpressionItems( newItems );
+		};
+	}
+
 	return (
 		<ul className="woocommerce-product-editor-dev-tools-expressions-list">
 			{ expressionItems.map( ( expressionItem, index ) => (
@@ -62,6 +71,7 @@ export function ExpressionsPanel( {
 						onUpdate={ ( expression ) =>
 							updateExpression( index, expression )
 						}
+						onRemove={ removeExpression( index ) }
 					/>
 				</li>
 			) ) }
