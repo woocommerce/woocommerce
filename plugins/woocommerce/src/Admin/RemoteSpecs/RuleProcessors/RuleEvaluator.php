@@ -72,6 +72,9 @@ class RuleEvaluator {
 
 		foreach ( $rules as $rule ) {
 			if ( ! is_object( $rule ) ) {
+				$evaluation_logger && $evaluation_logger->add_result( 'rule not an object', false );
+				$evaluation_logger && $evaluation_logger->log();
+
 				return false;
 			}
 
