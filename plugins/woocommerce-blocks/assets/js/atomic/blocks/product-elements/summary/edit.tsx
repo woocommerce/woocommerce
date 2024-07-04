@@ -48,6 +48,9 @@ const ShowDescriptionIfEmptyControl = ( {
 		<ToolsPanelItem
 			label={ label }
 			hasValue={ () => showDescriptionIfEmpty === true }
+			onDeselect={ () =>
+				setAttributes( { showDescriptionIfEmpty: false } )
+			}
 			isShownByDefault
 		>
 			<ToggleControl
@@ -75,6 +78,7 @@ const MaxWordCountControl = ( {
 		<ToolsPanelItem
 			label={ label }
 			hasValue={ () => summaryLength !== 0 }
+			onDeselect={ () => setAttributes( { summaryLength: 0 } ) }
 			isShownByDefault
 		>
 			<RangeControl
@@ -108,6 +112,7 @@ const LinkToDescriptionControl = ( {
 		<ToolsPanelItem
 			label={ label }
 			hasValue={ () => showLink === false }
+			onDeselect={ () => setAttributes( { showLink: false } ) }
 			isShownByDefault
 		>
 			<ToggleControl
