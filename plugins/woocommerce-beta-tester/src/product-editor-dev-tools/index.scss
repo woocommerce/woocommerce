@@ -208,6 +208,9 @@
 	font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
 
 	white-space: pre-wrap;
+
+	overflow-y: scroll;
+	height: 100%;
 }
 
 .woocommerce-product-editor-dev-tools-expression-field__actions {
