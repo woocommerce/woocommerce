@@ -8,6 +8,7 @@ export { default as checkPayment } from './library/check-payment';
 export { default as customerAccount } from './library/customer-account';
 export { default as customerAccountStyle } from './library/customer-account-style';
 export { default as customerAccountStyleAlt } from './library/customer-account-style-alt';
+export { default as customerAccountStyleLine } from './library/customer-account-style-line';
 export { default as eye } from './library/eye';
 export { default as fields } from './library/fields';
 export { default as filledCart } from './library/filled-cart';

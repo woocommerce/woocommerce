@@ -69,7 +69,6 @@ test.describe( 'Template customization', () => {
 				} );
 				await editor.revertTemplateCustomizations( {
 					templateName: testData.templateName,
-					templateType: testData.templateType,
 				} );
 				await testData.visitPage( { frontendUtils, page } );
 
