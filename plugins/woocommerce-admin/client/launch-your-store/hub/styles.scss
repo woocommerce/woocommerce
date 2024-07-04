@@ -2,8 +2,9 @@
 	min-width: 600px;
 	overflow: auto;
 
-	&.woocommerce-admin-page.woocommerce_page_wc-admin #wpbody-content {
-		overflow-x: clip !important; // Overriding inherit !important from plugins/woocommerce-admin/client/homescreen/style.scss as it's causing a horizontal scrollbar in LYS Congrats on small screens
+	&.woocommerce-launch-your-store-success {
+		overflow-x: clip;
+		min-width: none;
 	}
 
 	.woocommerce-layout__primary {
