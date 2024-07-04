@@ -34,6 +34,7 @@ export const Choice = ( {
 
 	return (
 		<div
+			role="button"
 			className={ clsx(
 				'woocommerce-profiler-choice-container',
 				className
