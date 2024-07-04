@@ -1,5 +1,5 @@
 ---
-post_title: Cart and Checkout Filters - Checkout and Place Order Button
+post_title: Cart and Checkout - Checkout and Place Order Button
 menu_title: Checkout and Place Order Button
 tags: reference, checkout-available-filters
 ---
