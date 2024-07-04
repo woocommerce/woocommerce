@@ -524,6 +524,10 @@ class BlockTemplatesController {
 
 		wp_parse_str( $referer['query'], $query );
 
+		if ( empty( $query['postId'] ) || empty( $query['postType'] ) ) {
+			return;
+		}
+
 		$query = wp_parse_args( $query, array(
 			'postId'   => '',
 			'postType' => '',
