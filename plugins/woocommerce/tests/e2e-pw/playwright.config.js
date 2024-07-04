@@ -70,9 +70,9 @@ const config = {
 		stateDir: `${ testsRootPath }/.state/`,
 		trace:
 			/^https?:\/\/localhost/.test( BASE_URL ) || ! CI
-				? 'retain-on-failure'
+				? 'on-first-retry'
 				: 'off',
-		video: 'retain-on-failure',
+		video: 'on-first-retry',
 		viewport: { width: 1280, height: 720 },
 		actionTimeout: 20 * 1000,
 		navigationTimeout: 20 * 1000,

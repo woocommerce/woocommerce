@@ -3,7 +3,7 @@ const { devices } = require( '@playwright/test' );
 
 config = {
 	...config,
-	retries: 0,
+	retries: 1,
 	projects: [
 		{
 			name: 'default',
