@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { useLayoutEffect, useRef } from '@wordpress/element';
+import {
+	forwardRef,
+	useImperativeHandle,
+	useLayoutEffect,
+	useRef,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 type ExpressionTextAreaProps = {
@@ -10,12 +15,14 @@ type ExpressionTextAreaProps = {
 	onChange?: ( expression: string ) => void;
 };
 
-export function ExpressionTextArea( {
-	expression,
-	readOnly = false,
-	onChange,
-}: ExpressionTextAreaProps ) {
+export const ExpressionTextArea = forwardRef<
+	HTMLTextAreaElement,
+	ExpressionTextAreaProps
+>( ( { expression, readOnly = false, onChange }, outerRef ) => {
 	const textAreaRef = useRef< HTMLTextAreaElement >( null );
+
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+	useImperativeHandle( outerRef, () => textAreaRef.current!, [] );
 
 	useLayoutEffect( () => {
 		const textArea = textAreaRef.current;
@@ -39,4 +46,4 @@ export function ExpressionTextArea( {
 			onChange={ ( event ) => onChange?.( event.target.value ) }
 		/>
 	);
-}
+} );

@@ -51,6 +51,8 @@ export function ExpressionField( {
 	onCancel,
 	updateLabel = __( 'Update', 'woocommerce' ),
 }: ExpressionFieldProps ) {
+	const textAreaRef = useRef< HTMLTextAreaElement >( null );
+
 	const [ editedExpression, setEditedExpression ] = useState( expression );
 
 	useEffect( () => setEditedExpression( expression ), [ expression ] );
@@ -59,6 +61,13 @@ export function ExpressionField( {
 		editedExpression,
 		evaluationContext
 	);
+
+	function handleOnClickEdit() {
+		const textArea = textAreaRef.current;
+		textArea?.focus();
+
+		onEnterEdit?.();
+	}
 
 	function handleOnClickCancel() {
 		setEditedExpression( expression );
@@ -71,6 +80,7 @@ export function ExpressionField( {
 			data-mode={ mode }
 		>
 			<ExpressionTextArea
+				ref={ textAreaRef }
 				readOnly={ mode === 'view' }
 				expression={ editedExpression }
 				onChange={ setEditedExpression }
@@ -85,7 +95,7 @@ export function ExpressionField( {
 					<Button
 						icon={ edit }
 						label={ __( 'Edit', 'woocommerce' ) }
-						onClick={ () => onEnterEdit?.() }
+						onClick={ handleOnClickEdit }
 					/>
 				) : (
 					<>
