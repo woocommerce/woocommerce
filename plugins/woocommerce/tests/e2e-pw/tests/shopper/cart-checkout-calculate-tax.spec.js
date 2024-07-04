@@ -274,10 +274,10 @@ test.describe.serial(
 						.getByRole( 'textbox', { name: 'ZIP Code required' } )
 						.type( customer.billing.us.zip );
 					await page
-						.getByLabel( 'Phone required' )
+						.getByLabel( 'Phone * required' )
 						.fill( customer.billing.us.phone );
 					await page
-						.getByLabel( 'Email address required' )
+						.getByLabel( 'Email address * required' )
 						.fill( customer.billing.us.email );
 
 					await expect(

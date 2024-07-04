@@ -357,9 +357,9 @@ test.describe( 'Checkout page', { tag: [ '@payments', '@services' ] }, () => {
 			await page
 				.getByRole( 'textbox', { name: 'ZIP Code required' } )
 				.fill( '97403' );
-			await page.getByLabel( 'Phone required' ).fill( '555 555-5555' );
+			await page.getByLabel( 'Phone * required' ).fill( '555 555-5555' );
 			await page
-				.getByLabel( 'Email address required' )
+				.getByLabel( 'Email address * required' )
 				.fill( guestEmail );
 
 			await page.getByText( 'Cash on delivery' ).click();
