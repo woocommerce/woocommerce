@@ -18,7 +18,7 @@ import {
 	INNER_BLOCKS_TEMPLATE,
 	PRODUCT_COLLECTION_BLOCK_NAME as BLOCK_NAME,
 	DEFAULT_QUERY,
-} from '@woocommerce/blocks/product-collection/constants';
+} from '@woocommerce/blocks/product-collection/constants-register-product-collection';
 
 export interface ProductCollectionConfig extends BlockVariation {
 	preview?: {
