@@ -114,7 +114,7 @@ export function EditModal( {
 				value={ customField.key }
 				onChange={ changeHandler( 'key' ) }
 				onBlur={ blurHandler( 'key' ) }
-				className={ classNames( 'woocommerce-product-text-control', {
+				className={ classNames( {
 					'has-error': validationError?.key,
 				} ) }
 			/>

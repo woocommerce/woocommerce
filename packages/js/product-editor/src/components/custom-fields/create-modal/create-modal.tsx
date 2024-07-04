@@ -242,7 +242,6 @@ export function CreateModal( {
 									) }
 									onBlur={ blurHandler( customField, 'key' ) }
 									className={ classNames(
-										'woocommerce-product-text-control',
 										{
 											'has-error': getValidationError(
 												customField,
