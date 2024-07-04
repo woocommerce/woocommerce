@@ -294,6 +294,22 @@ class WC_Customer_Download extends WC_Data implements ArrayAccess {
 	public function track_download( $user_id = null, $user_ip_address = null ) {
 		global $wpdb;
 
+		/**
+		 * Filter to possibly disable the download track.
+		 * If 'false' is returned, the download log entry won't be created.
+		 *
+		 * @param bool $track True, meaning that the download log entry will in principle bre created.
+		 * @param WC_Customer_Download $download The download to track.
+		 * @param $user_id|null Id of the user performing the download, if available.
+		 * @param string|null $user_ip_address IP Address of the user performing the download, if available.
+		 *
+		 * @since 9.2.0
+		 */
+		$should_track = apply_filters( 'woocommerce_track_customer_download', true, $this, $user_id, $user_ip_address );
+		if ( ! $should_track ) {
+			return;
+		}
+
 		// Must have a permission_id to track download log.
 		if ( ! ( $this->get_id() > 0 ) ) {
 			throw new Exception( __( 'Invalid permission ID.', 'woocommerce' ) );
