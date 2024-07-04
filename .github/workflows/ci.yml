@@ -139,7 +139,11 @@ jobs:
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
         env: ${{ matrix.testEnv.envVars }}
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+        run: |
+          if [[ '${{ matrix.testType }}' == 'unit:php' ]]; then
+            pnpm --filter="@woocommerce/admin-library" build:project:feature-config
+          fi
+          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
 
       - name: 'Get commit message'
         id: 'get_commit_message'
@@ -163,11 +167,7 @@ jobs:
           BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
           BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
-        run: |
-          if [[ '${{ matrix.testType }}' == 'unit:php' ]]; then
-            pnpm --filter="@woocommerce/admin-library" build:project:feature-config
-          fi
-          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}
+        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
       - name: 'Resolve artifacts path'
         if: ${{ always() && matrix.report.resultsPath != '' }}
