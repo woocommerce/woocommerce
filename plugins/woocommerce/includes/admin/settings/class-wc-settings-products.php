@@ -353,6 +353,14 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * @return array
 	 */
 	protected function get_settings_for_downloadable_section() {
+		$download_logs_count = ( WC_Data_Store::load( 'customer-download-log' ) )->get_download_logs_count();
+
+		$downloads_log_size_desc = __( "Sets the maximum number of entries in the download logs table (oldest entries are deleted as needed), 0 or empty means 'unlimited'.", 'woocommerce' );
+		if ( false !== $download_logs_count ) {
+			// translators: %1$ = main message, %2$ = count of entries.
+			$downloads_log_size_desc = sprintf( __( '%1$s<br/>The download logs table currently contains %2$d entries.', 'woocommerce' ), $downloads_log_size_desc, $download_logs_count );
+		}
+
 		$settings =
 			array(
 				array(
@@ -444,6 +452,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 						__( "Not required if your download directory is protected. <a href='%s'>See this guide</a> for more details. Files already uploaded will not be affected.", 'woocommerce' ),
 						'https://woocommerce.com/document/digital-downloadable-product-handling#unique-string'
 					),
+				),
+
+				array(
+					'title'    => __( 'Downloads log size', 'woocommerce' ),
+					'desc_tip' => __( 'The download logs table will be trimmed down to the new value of the setting (if needed) as soon as changes in this page are saved. Depending on the current length of the table, this may take a while.', 'woocommerce' ),
+					'id'       => 'woocommerce_file_download_logs_max_entries',
+					'type'     => 'number',
+					'default'  => 0,
+					'desc'     => $downloads_log_size_desc,
+					'autoload' => false,
 				),
 
 				array(

@@ -1,19 +1,21 @@
 <?php
 /**
- * DownloadPermissionsAdjuster class file.
+ * DownloadsUtil class file.
  */
 
-namespace Automattic\WooCommerce\Internal;
+namespace Automattic\WooCommerce\Internal\Utilities;
 
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Product;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Class to adjust download permissions on product save.
+ * Class with utility methods related to the download of digital products.
  */
-class DownloadPermissionsAdjuster {
+class DownloadsUtil {
+	use AccessiblePrivateMethods;
 
 	/**
 	 * The downloads data store to use.
@@ -30,6 +32,7 @@ class DownloadPermissionsAdjuster {
 	final public function init() {
 		$this->downloads_data_store = wc_get_container()->get( LegacyProxy::class )->get_instance_of( \WC_Data_Store::class, 'customer-download' );
 		add_action( 'adjust_download_permissions', array( $this, 'adjust_download_permissions' ), 10, 1 );
+		self::add_action( 'update_option_woocommerce_file_download_logs_max_entries', array( $this, 'handle_woocommerce_file_download_logs_max_entries_changed' ), 10, 2 );
 	}
 
 	/**
@@ -187,5 +190,21 @@ class DownloadPermissionsAdjuster {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Handler for the update_option_woocommerce_file_download_logs_max_entries action,
+	 * trims the download logs table as needed so that the number of log entries is
+	 * less than or equal to the value of the setting.
+	 *
+	 * @param mixed $old_value Old value of the setting.
+	 * @param mixed $new_value New value of the setting.
+	 */
+	private function handle_woocommerce_file_download_logs_max_entries_changed( $old_value, $new_value ) {
+		$new_max_table_entries = absint( $new_value );
+		if ( $new_max_table_entries > 0 && absint( $old_value ) !== $new_max_table_entries ) {
+			$data_store = \WC_Data_Store::load( 'customer-download-log' );
+			$data_store->trim_download_logs_table( $new_value );
+		}
 	}
 }

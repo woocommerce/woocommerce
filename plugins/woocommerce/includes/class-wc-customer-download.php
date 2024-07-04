@@ -331,6 +331,12 @@ WHERE permission_id = %d",
 		}
 
 		$download_log->save();
+
+		$max_log_entries = absint( get_option( 'woocommerce_file_download_logs_max_entries', 0 ) );
+		if ( $max_log_entries > 0 ) {
+			$logs_data_store = WC_Data_Store::load( 'customer-download-log' );
+			$logs_data_store->trim_download_logs_table( $max_log_entries );
+		}
 	}
 
 	/*
