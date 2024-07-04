@@ -9,7 +9,6 @@ import type { InnerBlockTemplate } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
-import { VARIATION_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
 import {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
@@ -17,6 +16,7 @@ import {
 } from './types';
 
 export const PRODUCT_COLLECTION_BLOCK_NAME = 'woocommerce/product-collection';
+const PRODUCT_TITLE_ID = `${ PRODUCT_COLLECTION_BLOCK_NAME }/product-title`;
 
 export const STOCK_STATUS_OPTIONS = getSetting< Record< string, string > >(
 	'stockStatusOptions',
