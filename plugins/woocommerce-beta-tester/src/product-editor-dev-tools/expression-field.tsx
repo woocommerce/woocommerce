@@ -4,7 +4,7 @@
 import { Button } from '@wordpress/components';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { check, close, edit } from '@wordpress/icons';
+import { check, closeSmall, edit } from '@wordpress/icons';
 import { evaluate } from '@woocommerce/expression-evaluation';
 
 /**
@@ -98,7 +98,7 @@ export function ExpressionField( {
 						/>
 						{ onCancel && (
 							<Button
-								icon={ close }
+								icon={ closeSmall }
 								label={ __( 'Cancel', 'woocommerce' ) }
 								onClick={ handleOnClickCancel }
 							/>
