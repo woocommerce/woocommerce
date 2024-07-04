@@ -1,5 +1,5 @@
 ---
-post_title: Cart and Checkout Filters - Legacy Hooks and Filters
+post_title: Cart and Checkout - Legacy hooks
 menu_title: Legacy Hooks
 tags: reference, checkout-hooks
 ---
