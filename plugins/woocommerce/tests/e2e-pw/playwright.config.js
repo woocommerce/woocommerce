@@ -23,6 +23,12 @@ const reporter = [
 				`${ testsRootPath }/test-results/allure-results`,
 			detail: true,
 			suiteTitle: true,
+			environmentInfo: {
+				Node: process.version,
+				OS: process.platform,
+				WP: process.env.WP_VERSION,
+				CI: process.env.CI,
+			},
 		},
 	],
 	[

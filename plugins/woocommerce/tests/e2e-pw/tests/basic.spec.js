@@ -4,7 +4,6 @@ const { admin, customer } = require( '../test-data/data' );
 
 test( 'Load the home page', async ( { page } ) => {
 	await page.goto( '/' );
-	expect( 1 ).toBe( 2 );
 	await expect(
 		await page
 			.getByRole( 'link', { name: 'WooCommerce Core E2E Test' } )
