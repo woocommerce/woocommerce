@@ -65,6 +65,41 @@ class DefaultPaymentGateways {
 							'CA',
 						)
 					),
+					(object) array(
+						'type'     => 'or',
+						'operands' => array(
+							array(
+								'type'    => 'not',
+								'operand' => [
+									(object) array(
+										'type'    => 'plugins_activated',
+										'plugins' => [ 'woocommerce-payments' ],
+									),
+								],
+							),
+							array(
+								'type'         => 'option',
+								'transformers' => array(
+									// Extract only the 'data' key from the option.
+									(object) array(
+										'use'       => 'dot_notation',
+										'arguments' => (object) array(
+											'path' => 'data',
+										),
+									),
+									// Extract the keys from the data array.
+									(object) array(
+										'use' => 'array_keys',
+									),
+								),
+								'option_name'  => 'wcpay_account_data',
+								// The rule will be true if the 'account_id' key is not present in the data array.
+								'operation'    => '!contains',
+								'value'        => 'account_id',
+								'default'      => array(),
+							),
+						),
+					),
 				),
 				'category_other'      => array(),
 				'category_additional' => array(
@@ -86,6 +121,41 @@ class DefaultPaymentGateways {
 							'CA',
 							'AU',
 						)
+					),
+					(object) array(
+						'type'     => 'or',
+						'operands' => array(
+							(object) array(
+								'type'    => 'not',
+								'operand' => [
+									(object) array(
+										'type'    => 'plugins_activated',
+										'plugins' => [ 'woocommerce-payments' ],
+									),
+								],
+							),
+							(object) array(
+								'type'         => 'option',
+								'transformers' => array(
+									// Extract only the 'data' key from the option.
+									(object) array(
+										'use'       => 'dot_notation',
+										'arguments' => (object) array(
+											'path' => 'data',
+										),
+									),
+									// Extract the keys from the data array.
+									(object) array(
+										'use' => 'array_keys',
+									),
+								),
+								'option_name'  => 'wcpay_account_data',
+								// The rule will be true if the 'account_id' key is not present in the data array.
+								'operation'    => '!contains',
+								'value'        => 'account_id',
+								'default'      => array(),
+							),
+						),
 					),
 				),
 				'category_other'      => array(),
@@ -250,6 +320,41 @@ class DefaultPaymentGateways {
 						)
 					),
 					self::get_rules_for_cbd( false ),
+					(object) array(
+						'type'     => 'or',
+						'operands' => array(
+							(object) array(
+								'type'    => 'not',
+								'operand' => [
+									(object) array(
+										'type'    => 'plugins_activated',
+										'plugins' => [ 'woocommerce-payments' ],
+									),
+								],
+							),
+							(object) array(
+								'type'         => 'option',
+								'transformers' => array(
+									// Extract only the 'data' key from the option.
+									(object) array(
+										'use'       => 'dot_notation',
+										'arguments' => (object) array(
+											'path' => 'data',
+										),
+									),
+									// Extract the keys from the data array.
+									(object) array(
+										'use' => 'array_keys',
+									),
+								),
+								'option_name'  => 'wcpay_account_data',
+								// The rule will be true if the 'account_id' key is not present in the data array.
+								'operation'    => '!contains',
+								'value'        => 'account_id',
+								'default'      => array(),
+							),
+						),
+					),
 				),
 				'category_other'      => array(),
 				'category_additional' => array(
