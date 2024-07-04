@@ -42,6 +42,8 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 		className,
 		showDescriptionIfEmpty,
 		summaryLength,
+		showLink,
+		linkText,
 		isDescendantOfAllProducts,
 	} = props;
 	const { parentClassName } = useInnerBlockLayoutContext();
@@ -73,21 +75,28 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 	}
 
 	return (
-		<Summary
-			className={ clsx(
-				className,
-				styleProps.className,
-				`wc-block-components-product-summary`,
-				{
-					[ `${ parentClassName }__product-summary` ]:
-						parentClassName,
-				}
-			) }
-			source={ source }
-			maxLength={ maxLength }
-			countType={ blocksConfig.wordCountType || 'words' }
-			style={ styleProps.style }
-		/>
+		<>
+			<Summary
+				className={ clsx(
+					className,
+					styleProps.className,
+					`wc-block-components-product-summary`,
+					{
+						[ `${ parentClassName }__product-summary` ]:
+							parentClassName,
+					}
+				) }
+				source={ source }
+				maxLength={ maxLength }
+				countType={ blocksConfig.wordCountType || 'words' }
+				style={ styleProps.style }
+			/>
+			{ isDescendantOfAllProducts && showLink && linkText ? (
+				<a href={ `${ product.permalink }#tab-description` }>
+					{ linkText }
+				</a>
+			) : null }
+		</>
 	);
 };
 
