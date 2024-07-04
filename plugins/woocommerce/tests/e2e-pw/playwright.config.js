@@ -56,7 +56,7 @@ const config = {
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: `${ testsRootPath }/tests`,
-	retries: CI ? 2 : 0,
+	retries: CI ? 1 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
 	workers: 1,
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
@@ -66,7 +66,7 @@ const config = {
 		baseURL: BASE_URL ?? 'http://localhost:8086',
 		screenshot: { mode: 'only-on-failure', fullPage: true },
 		stateDir: `${ testsRootPath }/.state/`,
-		trace: 'retain-on-failure',
+		trace: 'retain-on-first-failure',
 		video: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
 		actionTimeout: 20 * 1000,
