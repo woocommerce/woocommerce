@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { capitalize } from 'lodash';
+import { capitalize, get } from 'lodash';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -21,8 +21,9 @@ import {
 /**
  * Internal dependencies
  */
-import { PatternWithBlocks } from '~/customize-store/types/pattern';
+import { Pattern } from '~/customize-store/types/pattern';
 import { PATTERN_CATEGORIES } from '../sidebar/pattern-screen/categories';
+import { usePatternsByCategory } from '../hooks/use-patterns';
 
 // This is the icon that is used in the Shuffle button. Currently we are using an outdated version of @wordpress/icons.
 // import { shuffle } from '@wordpress/icons';
@@ -44,74 +45,72 @@ const getCategoryLabelFromCategories = ( categories: string[] ) => {
 	}
 };
 
+const getNextPattern = (
+	patterns: Pattern[],
+	patternName: string
+): Pattern => {
+	const numberOfPatterns = patterns.length;
+	const currentPatternIndex = patterns.findIndex(
+		( { name } ) => name === patternName
+	);
+	const nextPatternIndex = Math.floor( Math.random() * numberOfPatterns );
+
+	if ( nextPatternIndex !== currentPatternIndex ) {
+		return patterns[ nextPatternIndex ];
+	}
+
+	if ( currentPatternIndex === nextPatternIndex ) {
+		if ( nextPatternIndex === 0 ) {
+			return patterns[ 1 ];
+		}
+
+		if ( nextPatternIndex === numberOfPatterns ) {
+			return patterns[ 0 ];
+		}
+
+		return patterns[ nextPatternIndex - 1 ];
+	}
+
+	return patterns[ 0 ];
+};
+
 export default function Shuffle( { clientId }: { clientId: string } ) {
 	const {
-		categories,
-		patterns,
+		category,
 		patternName,
 	}: {
-		categories: string[];
-		patterns: PatternWithBlocks[];
+		category: string;
 		patternName: string;
 	} = useSelect(
 		( select ) => {
 			// @ts-expect-error missing type
-			const { getBlockAttributes, getBlockRootClientId } =
-				select( blockEditorStore );
+			const { getBlockAttributes } = select( blockEditorStore );
 			const attributes = getBlockAttributes( clientId );
-			const _categories = attributes?.metadata?.categories || [];
+			const categories = attributes?.metadata?.categories;
+			const _category = Object.keys( PATTERN_CATEGORIES ).find( ( cat ) =>
+				categories?.includes( cat )
+			) as string;
+
 			const _patternName = attributes?.metadata?.patternName;
-			const rootBlock = getBlockRootClientId( clientId );
-			const _patterns = unlock(
-				select( blockEditorStore )
-			).__experimentalGetAllowedPatterns( rootBlock );
 
 			return {
-				categories: _categories,
-				patterns: _patterns,
+				category: _category,
 				patternName: _patternName,
 			};
 		},
 		[ clientId ]
 	);
+
+	const { patterns } = usePatternsByCategory( category );
+
 	// @ts-expect-error missing type
 	const { replaceBlocks } = useDispatch( blockEditorStore );
-	const sameCategoryPatternsWithSingleWrapper = useMemo( () => {
-		if (
-			! categories ||
-			categories.length === 0 ||
-			! patterns ||
-			patterns.length === 0
-		) {
-			return [];
-		}
-		return patterns.filter( ( pattern ) => {
-			return (
-				// Check if the pattern has only one top level block,
-				// otherwise we may shuffle to pattern that will not allow to continue shuffling.
-				pattern.blocks.length === 1 &&
-				pattern.categories?.some( ( category ) => {
-					return categories.includes( category );
-				} )
-			);
-		} );
-	}, [ categories, patterns ] );
 
-	if ( sameCategoryPatternsWithSingleWrapper.length === 0 ) {
+	if ( patterns.length === 0 ) {
 		return null;
 	}
 
-	function getNextPattern() {
-		const numberOfPatterns = sameCategoryPatternsWithSingleWrapper.length;
-		const patternIndex = sameCategoryPatternsWithSingleWrapper.findIndex(
-			( { name } ) => name === patternName
-		);
-		const nextPatternIndex =
-			patternIndex + 1 < numberOfPatterns ? patternIndex + 1 : 0;
-		return sameCategoryPatternsWithSingleWrapper[ nextPatternIndex ];
-	}
-
-	const categoryLabel = getCategoryLabelFromCategories( categories );
+	const categoryLabel = getCategoryLabelFromCategories( [ category ] );
 
 	return (
 		<ToolbarGroup className="woocommerce-customize-your-store-toolbar-shuffle-container">
@@ -119,13 +118,14 @@ export default function Shuffle( { clientId }: { clientId: string } ) {
 				icon={ shuffleIcon }
 				label={ __( 'Shuffle', 'woocommerce' ) }
 				onClick={ () => {
-					const nextPattern = getNextPattern();
+					const nextPattern = getNextPattern( patterns, patternName );
 					// @ts-expect-error - attributes is marked as readonly.
 					nextPattern.blocks[ 0 ].attributes = {
 						...nextPattern.blocks[ 0 ].attributes,
 						metadata: {
 							...nextPattern.blocks[ 0 ].attributes.metadata,
-							categories,
+							categories: [ category ],
+							patternName: nextPattern.name,
 						},
 					};
 					replaceBlocks( clientId, nextPattern.blocks );
