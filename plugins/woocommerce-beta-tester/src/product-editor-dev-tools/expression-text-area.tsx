@@ -13,12 +13,13 @@ type ExpressionTextAreaProps = {
 	expression?: string;
 	readOnly?: boolean;
 	onChange?: ( expression: string ) => void;
+	onClick?: () => void;
 };
 
 export const ExpressionTextArea = forwardRef<
 	HTMLTextAreaElement,
 	ExpressionTextAreaProps
->( ( { expression, readOnly = false, onChange }, outerRef ) => {
+>( ( { expression, readOnly = false, onChange, onClick }, outerRef ) => {
 	const textAreaRef = useRef< HTMLTextAreaElement >( null );
 
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -44,6 +45,7 @@ export const ExpressionTextArea = forwardRef<
 			value={ expression }
 			placeholder={ __( 'Enter an expression', 'woocommerce' ) }
 			onChange={ ( event ) => onChange?.( event.target.value ) }
+			onClick={ () => onClick?.() }
 		/>
 	);
 } );

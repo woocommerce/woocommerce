@@ -91,6 +91,7 @@ export function ExpressionField( {
 				readOnly={ mode === 'view' }
 				expression={ editedExpression }
 				onChange={ setEditedExpression }
+				onClick={ onEnterEdit }
 			/>
 			<ExpressionResult
 				result={ result }
