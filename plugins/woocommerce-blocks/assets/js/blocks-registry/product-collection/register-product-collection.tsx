@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { BlockVariation, registerBlockVariation } from '@wordpress/blocks';
+import { BlockVariation } from '@wordpress/blocks';
 import { addFilter } from '@wordpress/hooks';
 import { EditorBlock } from '@woocommerce/types';
 import type { ElementType } from '@wordpress/element';
@@ -18,7 +18,7 @@ import {
 	INNER_BLOCKS_TEMPLATE,
 	PRODUCT_COLLECTION_BLOCK_NAME as BLOCK_NAME,
 	DEFAULT_QUERY,
-} from '@woocommerce/blocks/product-collection/constants';
+} from '@woocommerce/blocks/product-collection/constants-register-product-collection';
 
 export interface ProductCollectionConfig extends BlockVariation {
 	preview?: {
@@ -441,19 +441,32 @@ export const __experimentalRegisterProductCollection = (
 		);
 	}
 
-	registerBlockVariation( BLOCK_NAME, {
-		...collectionConfigWithoutExtraArgs,
-		attributes: {
-			...DEFAULT_ATTRIBUTES,
-			...collectionConfigWithoutExtraArgs.attributes,
-			query: {
-				...DEFAULT_QUERY,
-				...collectionConfigWithoutExtraArgs.attributes?.query,
+	/**
+	 * Temporarily utilizing `wp.blocks.registerBlockVariation` directly instead of importing
+	 * from `@wordpress/blocks` to mitigate the increase in the number of JavaScript files
+	 * loaded on the frontend, specifically on the /shop page.
+	 *
+	 * TODO - Future Improvement:
+	 * It is recommended to encapsulate the `registerProductCollection` function within a new
+	 * package that is exclusively loaded in the editor. This strategy will eliminate
+	 * the need to directly use `wp.blocks.registerBlockVariation`.
+	 */
+	if ( wp?.blocks?.registerBlockVariation ) {
+		wp.blocks.registerBlockVariation( BLOCK_NAME, {
+			...collectionConfigWithoutExtraArgs,
+			attributes: {
+				...DEFAULT_ATTRIBUTES,
+				...collectionConfigWithoutExtraArgs.attributes,
+				query: {
+					...DEFAULT_QUERY,
+					...collectionConfigWithoutExtraArgs.attributes?.query,
+				},
+				displayLayout: {
+					...DEFAULT_ATTRIBUTES.displayLayout,
+					...collectionConfigWithoutExtraArgs.attributes
+						?.displayLayout,
+				},
 			},
-			displayLayout: {
-				...DEFAULT_ATTRIBUTES.displayLayout,
-				...collectionConfigWithoutExtraArgs.attributes?.displayLayout,
-			},
-		},
-	} );
+		} );
+	}
 };
