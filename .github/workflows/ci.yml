@@ -163,7 +163,11 @@ jobs:
           BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
           BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
+        run: |
+          if [[ '${{ matrix.testType }}' == 'unit:php' ]]; then
+            pnpm --filter="@woocommerce/admin-library" build:project:feature-config
+          fi
+          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}
 
       - name: 'Resolve artifacts path'
         if: ${{ always() && matrix.report.resultsPath != '' }}
