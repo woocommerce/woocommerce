@@ -25,10 +25,10 @@ import type { ComboboxControlOption } from '../../attribute-combobox-field/types
 import type { CustomFieldNameControlProps } from './types';
 
 /**
- * Since the Combobox does not support an arbitrary value, the 
+ * Since the Combobox does not support an arbitrary value, the
  * way to make it behave as an autocomplete, is by converting
  * the arbitrary value into an option so it can be selected as
- * a valid value.
+ * a valid value
  *
  * @param search The seraching criteria.
  * @return The list of filtered custom field names as a Promise.
@@ -58,9 +58,9 @@ async function searchCustomFieldNames( search?: string ) {
 
 /**
  * This is a wrapper + a work around the Combobox to
- * expose important properties and events from the 
- * internal input element that are required when 
- * validating the field in the context of a form.
+ * expose important properties and events from the
+ * internal input element that are required when
+ * validating the field in the context of a form
  */
 export const CustomFieldNameControl = forwardRef(
 	function ForwardedCustomFieldNameControl(
@@ -93,7 +93,7 @@ export const CustomFieldNameControl = forwardRef(
 			 * The Combobox component does not expose the ref to the
 			 * internal native input element removing the ability to
 			 * focus the element when validating it in the context
-			 * of a form.
+			 * of a form
 			 */
 			function initializeRefs() {
 				comboboxRef.current = document.querySelector(
@@ -142,7 +142,7 @@ export const CustomFieldNameControl = forwardRef(
 			 * The Combobox component does not expose any attribute
 			 * of the internal native input element removing the ability
 			 * to set attribute's values like name important in the
-			 * context of form submission. 
+			 * context of form submission
 			 */
 			function initializeAttrs() {
 				Object.entries( attrs ).forEach(
@@ -162,7 +162,7 @@ export const CustomFieldNameControl = forwardRef(
 			 * The Combobox component does not expose any event
 			 * of the internal native input element removing the ability
 			 * to focus the element and other things related also to
-			 * validations. 
+			 * validations
 			 */
 			function initializeEvents() {
 				Object.entries( events ).forEach(
@@ -206,7 +206,7 @@ export const CustomFieldNameControl = forwardRef(
 				 * The Combobox component clear the value of its internal
 				 * input control when losing the focus, even when the
 				 * selected value is set, afecting the validation behavior
-				 * on bluring. 
+				 * on bluring
 				 */
 				function handleBlur( event: FocusEvent ) {
 					if ( comboboxRef.current ) {

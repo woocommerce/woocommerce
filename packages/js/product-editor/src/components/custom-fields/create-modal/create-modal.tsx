@@ -241,14 +241,12 @@ export function CreateModal( {
 										'key'
 									) }
 									onBlur={ blurHandler( customField, 'key' ) }
-									className={ classNames(
-										{
-											'has-error': getValidationError(
-												customField,
-												'key'
-											),
-										}
-									) }
+									className={ classNames( {
+										'has-error': getValidationError(
+											customField,
+											'key'
+										),
+									} ) }
 								/>
 							</div>
 							<div role="cell">
