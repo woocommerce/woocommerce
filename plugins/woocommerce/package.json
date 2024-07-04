@@ -107,6 +107,7 @@
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -129,6 +130,7 @@
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -154,6 +156,7 @@
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -179,6 +182,7 @@
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -205,6 +209,7 @@
 					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -238,6 +243,7 @@
 					],
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -384,6 +390,7 @@
 					],
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -466,6 +473,7 @@
 					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -494,6 +502,7 @@
 					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -524,6 +533,7 @@
 					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -545,6 +555,7 @@
 					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
