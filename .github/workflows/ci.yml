@@ -121,7 +121,7 @@ jobs:
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && matrix.testType == 'e2e' }}
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
-        if: ${{ github.ref_type != 'tag' && matrix.testType != 'unit:php' }}
+        if: ${{ github.ref_type != 'tag' && matrix.testType != 'unit:php' && matrix.testType != 'api' }}
         name: 'Build project'
         id: 'build-project'
         with:
@@ -140,7 +140,7 @@ jobs:
         if: ${{ matrix.testEnv.shouldCreate }}
         env: ${{ matrix.testEnv.envVars }}
         run: |
-          if [[ '${{ matrix.testType }}' == 'unit:php' ]]; then
+          if [[ '${{ matrix.testType }}' == 'unit:php' || '${{ matrix.testType }}' == 'api' ]]; then
             pnpm --filter="@woocommerce/admin-library" build:project:feature-config
           fi
           pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
