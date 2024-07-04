@@ -91,6 +91,11 @@ class ProductSummary extends AbstractBlock
 
 		return '</br></br><a class="wp-block-woocommerce-product-summary__read_more" href="' . $href . '#tab-description">' . $text . '</a>';
 	}
+
+	private function trim_keeping_html_formatting($input, $length)
+	{
+
+		return html_entity_decode(wp_trim_words(htmlentities(wpautop($input)), $length));
 	}
 
 	/**
@@ -126,15 +131,15 @@ class ProductSummary extends AbstractBlock
 		$summary_length = isset($attributes['summaryLength']) ? $attributes['summaryLength'] : false;
 		$link_text      = isset($attributes['linkText']) ? $attributes['linkText'] : '';
 		$show_link      = isset($attributes['showLink']) && $attributes['showLink'];
-		$summary        = $summary_length ? wp_trim_words($source, $summary_length) : $source;
+		$summary        = $summary_length ? $this->trim_keeping_html_formatting($source, $summary_length) : $source;
 		$final_summary  = $show_link && $link_text ? $summary . $this->create_anchor($product, $link_text) : $summary;
 
 		$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes($attributes);
 
 		return sprintf(
-			'<div class="wp-block-woocommerce-product-summary"><p class="wc-block-components-product-summary %1$s" style="%2$s">
+			'<div class="wp-block-woocommerce-product-summary"><div class="wc-block-components-product-summary %1$s" style="%2$s">
 				%3$s
-			</p></div>',
+			</div></div>',
 			esc_attr($styles_and_classes['classes']),
 			esc_attr($styles_and_classes['styles'] ?? ''),
 			$final_summary
