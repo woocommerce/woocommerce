@@ -89,7 +89,8 @@ class ProductSummary extends AbstractBlock
 		$href = esc_url($product->get_permalink());
 		$text = wp_kses_post($link_text);
 
-		return '</br></br><a class="wp-block-woocommerce-product-summary__read_more" href="' . $href . '">' . $text . '</a>';
+		return '</br></br><a class="wp-block-woocommerce-product-summary__read_more" href="' . $href . '#tab-description">' . $text . '</a>';
+	}
 	}
 
 	/**
