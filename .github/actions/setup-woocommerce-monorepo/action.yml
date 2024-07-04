@@ -10,6 +10,9 @@ inputs:
     build:
         description: 'Given a boolean or PNPM filter, runs the build command for monorepo project(s).'
         default: false
+    pull-playwright-cache:
+        description: 'Given a boolean value, invokes Playwright dependencies caching.'
+        default: false
 runs:
     using: 'composite'
     steps:
@@ -40,6 +43,13 @@ runs:
               path: '~/.cache/composer/files'
               key: "${{ runner.os }}-composer-${{ hashFiles( '**/composer.lock' ) }}"
               restore-keys: '${{ runner.os }}-composer-'
+        - name: 'Cache: playwright downloads'
+          if: ${{ inputs.pull-playwright-cache != 'false' }}
+          uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+          with:
+              path: '~/.cache/ms-playwright/'
+              key: "${{ runner.os }}-playwright-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
+              restore-keys: '${{ runner.os }}-playwright-'
         - name: 'Parse Project Filters'
           id: 'project-filters'
           shell: 'bash'
