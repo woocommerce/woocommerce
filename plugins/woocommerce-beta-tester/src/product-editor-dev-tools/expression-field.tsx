@@ -64,7 +64,14 @@ export function ExpressionField( {
 
 	function handleOnClickEdit() {
 		const textArea = textAreaRef.current;
-		textArea?.focus();
+
+		if ( textArea ) {
+			textArea.focus();
+			textArea.setSelectionRange(
+				textArea.value.length,
+				textArea.value.length
+			);
+		}
 
 		onEnterEdit?.();
 	}
