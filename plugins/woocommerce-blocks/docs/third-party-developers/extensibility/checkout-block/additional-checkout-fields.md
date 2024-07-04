@@ -1,5 +1,5 @@
 ---
-post_title: Additional Checkout Fields
+post_title: Cart and Checkout - Additional Checkout Fields
 tags: reference
 ---
 
