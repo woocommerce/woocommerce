@@ -50,19 +50,30 @@ export const useAddNoBlocksPlaceholder = ( {
 						url: NoBlocks,
 						align: 'center',
 					} ),
-					createBlock( 'core/paragraph', {
-						align: 'center',
-						fontFamily: 'inter',
-						style: {
-							color: {
-								text: '#000000',
+					createBlock(
+						'core/group',
+						{
+							layout: {
+								type: 'constrained',
+								contentSize: '350px',
 							},
 						},
-						content: __(
-							'Unlock your creativity and populate your homepage by adding as many patterns as you like.',
-							'woocommerce'
-						),
-					} ),
+						[
+							createBlock( 'core/paragraph', {
+								align: 'center',
+								fontFamily: 'inter',
+								style: {
+									color: {
+										text: '#000000',
+									},
+								},
+								content: __(
+									'Add one or more of our homepage patterns to create a page that welcomes shoppers.',
+									'woocommerce'
+								),
+							} ),
+						]
+					),
 				]
 			);
 			insertBlock( noBlocksBlock, 1 );

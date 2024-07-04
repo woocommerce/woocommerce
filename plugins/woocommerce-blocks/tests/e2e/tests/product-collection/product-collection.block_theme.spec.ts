@@ -458,6 +458,62 @@ test.describe( 'Product Collection', () => {
 				).toBeHidden();
 			} );
 
+			const archiveTemplates = [
+				'woocommerce/woocommerce//archive-product',
+				'woocommerce/woocommerce//taxonomy-product_cat',
+				'woocommerce/woocommerce//taxonomy-product_tag',
+				'woocommerce/woocommerce//taxonomy-product_attribute',
+				'woocommerce/woocommerce//product-search-results',
+			];
+
+			const nonArchiveTemplates = [
+				'woocommerce/woocommerce//single-product',
+				'twentytwentyfour//home',
+				'twentytwentyfour//index',
+			];
+
+			archiveTemplates.map( async ( template ) => {
+				test( `should be visible in archive template: ${ template }`, async ( {
+					pageObject,
+					editor,
+				} ) => {
+					await pageObject.goToEditorTemplate( template );
+					await pageObject.insertProductCollection();
+					await pageObject.chooseCollectionInTemplate();
+					await pageObject.focusProductCollection();
+					await editor.openDocumentSettingsSidebar();
+
+					const sidebarSettings =
+						await pageObject.locateSidebarSettings();
+					await expect(
+						sidebarSettings.locator(
+							SELECTORS.inheritQueryFromTemplateControl
+						)
+					).toBeVisible();
+				} );
+			} );
+
+			nonArchiveTemplates.map( async ( template ) => {
+				test( `should not be visible in non-archive template: ${ template }`, async ( {
+					pageObject,
+					editor,
+				} ) => {
+					await pageObject.goToEditorTemplate( template );
+					await pageObject.insertProductCollection();
+					await pageObject.chooseCollectionInTemplate();
+					await pageObject.focusProductCollection();
+					await editor.openDocumentSettingsSidebar();
+
+					const sidebarSettings =
+						await pageObject.locateSidebarSettings();
+					await expect(
+						sidebarSettings.locator(
+							SELECTORS.inheritQueryFromTemplateControl
+						)
+					).toBeHidden();
+				} );
+			} );
+
 			test( 'should work as expected in Product Catalog template', async ( {
 				pageObject,
 				editor,
