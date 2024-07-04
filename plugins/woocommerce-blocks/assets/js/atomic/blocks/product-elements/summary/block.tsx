@@ -91,4 +91,15 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 	);
 };
 
-export default withProductDataContext( Block );
+export default ( props: BlockProps ) => {
+	// It is necessary because this block has to support serveral contexts:
+	// - Inside `All Products Block` -> `withProductDataContext` HOC
+	// - Inside `Products Block` -> Gutenberg Context
+	// - Inside `Single Product Template` -> Gutenberg Context
+	// - Without any parent -> `WithSelector` and `withProductDataContext` HOCs
+	// For more details, check https://github.com/woocommerce/woocommerce-blocks/pull/8609
+	if ( props.isDescendentOfSingleProductTemplate ) {
+		return <Block { ...props } />;
+	}
+	return withProductDataContext( Block )( props );
+};
