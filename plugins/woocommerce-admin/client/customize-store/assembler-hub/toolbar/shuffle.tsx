@@ -1,18 +1,10 @@
-// This logic is copied from: https://github.com/WordPress/gutenberg/blob/29c620c79a4c3cfa4c1300cd3c9eeeb06709d3e0/packages/block-editor/src/components/block-toolbar/shuffle.js
-
 /**
  * External dependencies
  */
-import { capitalize, get } from 'lodash';
+import { capitalize } from 'lodash';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button, Path, SVG, ToolbarGroup } from '@wordpress/components';
-import {
-	unlock,
-	// @ts-expect-error No types for this exist yet.
-} from '@wordpress/edit-site/build-module/lock-unlock';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	store as blockEditorStore,
 	// @ts-expect-error missing type
@@ -21,7 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import { Pattern } from '~/customize-store/types/pattern';
+import { PatternWithBlocks } from '~/customize-store/types/pattern';
 import { PATTERN_CATEGORIES } from '../sidebar/pattern-screen/categories';
 import { usePatternsByCategory } from '../hooks/use-patterns';
 
@@ -45,10 +37,16 @@ const getCategoryLabelFromCategories = ( categories: string[] ) => {
 	}
 };
 
+/**
+ * Selects a random pattern from the provided array that is not the current pattern.
+ * If the randomly selected pattern is the same as the current, it attempts to select the next pattern in the array.
+ * If the current pattern is the last in the array, it selects the first pattern.
+ * If there's only one pattern in the array, it will return that pattern.
+ */
 const getNextPattern = (
-	patterns: Pattern[],
+	patterns: PatternWithBlocks[],
 	patternName: string
-): Pattern => {
+) => {
 	const numberOfPatterns = patterns.length;
 	const currentPatternIndex = patterns.findIndex(
 		( { name } ) => name === patternName
@@ -87,6 +85,7 @@ export default function Shuffle( { clientId }: { clientId: string } ) {
 			const { getBlockAttributes } = select( blockEditorStore );
 			const attributes = getBlockAttributes( clientId );
 			const categories = attributes?.metadata?.categories;
+			// We know that the category is one of the keys of PATTERN_CATEGORIES.
 			const _category = Object.keys( PATTERN_CATEGORIES ).find( ( cat ) =>
 				categories?.includes( cat )
 			) as string;
