@@ -200,16 +200,14 @@ const Edit = ( {
 						setAttributes( defaultSettings );
 					} }
 				>
+					<MaxWordCountControl
+						summaryLength={ summaryLength }
+						setAttributes={ setAttributes }
+					/>
 					<ShowDescriptionIfEmptyControl
 						showDescriptionIfEmpty={ showDescriptionIfEmpty }
 						setAttributes={ setAttributes }
 					/>
-					{ showDescriptionIfEmpty && (
-						<MaxWordCountControl
-							summaryLength={ summaryLength }
-							setAttributes={ setAttributes }
-						/>
-					) }
 					{ ! isDescendantOfAllProducts && (
 						<LinkToDescriptionControl
 							showLink={ showLink }
