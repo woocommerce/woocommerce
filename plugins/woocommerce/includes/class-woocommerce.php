@@ -1253,7 +1253,7 @@ final class WooCommerce {
 		 * Hook: woocommerce_analytics_allow_tracking.
 		 *
 		 * @since 9.4.0
-		 * @param boolean $is_allowd Indicates if WooCommerce Analytics should be enabled.
+		 * @param boolean $is_allowed Indicates if WooCommerce Analytics should be enabled.
 		 */
 		if ( ! apply_filters( 'woocommerce_analytics_allow_tracking', false ) ) {
 			return;
