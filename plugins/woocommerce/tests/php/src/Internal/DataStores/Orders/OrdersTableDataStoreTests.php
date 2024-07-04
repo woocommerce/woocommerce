@@ -3461,4 +3461,48 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		remove_action( 'woocommerce_new_order', $callback );
 	}
 
+	/**
+	 * @testDox Updating an order status correctly triggers the "woocommerce_new_order" action.
+	 */
+	public function test_update_order_status_correctly_triggers_new_order_hook() {
+
+		$new_count = 0;
+
+		$callback = function () use ( &$new_count ) {
+			++$new_count;
+		};
+
+		add_action( 'woocommerce_new_order', $callback );
+
+		$nonTriggeringOrderStatuses = array( 'checkout-draft', 'refunded', 'failed', 'cancelled' );
+
+		$orders_data_store = $this->sut;
+
+		$order = WC_Helper_Order::create_order( 1, null, array( 'status' => 'checkout-draft' ) );
+		$order->save();
+
+		$this->assertEquals( 0, $new_count );
+
+		foreach ( $nonTriggeringOrderStatuses as $status ) {
+			$order->set_status( $status );
+			$orders_data_store->update( $order );
+			$order->save();
+		}
+
+		$this->assertEquals( 0, $new_count );
+
+		$triggeringOrderStatuses = array( 'pending', 'on-hold', 'completed', 'processing' );
+
+		foreach ( $triggeringOrderStatuses as $status ) {
+			$order->set_status( $status );
+			$orders_data_store->update( $order );
+			$order->set_status( 'checkout-draft' ); // Revert back to draft.
+			$order->save();
+		}
+
+		$this->assertEquals( 4, $new_count );
+
+		remove_action( 'woocommerce_new_order', $callback );
+	}
+
 }
