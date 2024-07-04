@@ -3,6 +3,7 @@
 
 	&.has-error {
 		.components-combobox-control__suggestions-container {
+			&:focus-within > .components-flex,
 			> .components-flex,
 			> .components-form-token-field__suggestions-list {
 				border-color: $studio-red-50;
