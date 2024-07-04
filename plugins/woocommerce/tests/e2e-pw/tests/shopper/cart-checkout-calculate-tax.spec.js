@@ -988,25 +988,29 @@ test.describe.serial(
 					).toBeVisible();
 
 					await page
-						.getByRole( 'textbox', { name: 'First name *' } )
+						.getByRole( 'textbox', { name: 'First name required' } )
 						.fill( customer.billing.us.first_name );
 					await page
-						.getByRole( 'textbox', { name: 'Last name *' } )
+						.getByRole( 'textbox', { name: 'Last name required' } )
 						.fill( customer.billing.us.last_name );
 					await page
-						.getByRole( 'textbox', { name: 'Street address *' } )
+						.getByRole( 'textbox', {
+							name: 'Street address required',
+						} )
 						.fill( customer.billing.us.address );
 					await page
-						.getByRole( 'textbox', { name: 'Town / City *' } )
+						.getByRole( 'textbox', {
+							name: 'Town / City required',
+						} )
 						.type( customer.billing.us.city );
 					await page
-						.getByRole( 'textbox', { name: 'ZIP Code *' } )
+						.getByRole( 'textbox', { name: 'ZIP Code required' } )
 						.type( customer.billing.us.zip );
 					await page
-						.getByLabel( 'Phone *' )
+						.getByLabel( 'Phone * required' )
 						.fill( customer.billing.us.phone );
 					await page
-						.getByLabel( 'Email address *' )
+						.getByLabel( 'Email address * required' )
 						.fill( customer.billing.us.email );
 
 					await expect(
