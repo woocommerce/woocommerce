@@ -268,6 +268,13 @@ class WC_Install {
 	const NEWLY_INSTALLED_OPTION = 'woocommerce_newly_installed';
 
 	/**
+	 * Option name used to track new installation versions of WooCommerce.
+	 *
+	 * @var string
+	 */
+	const INITIAL_INSTALL_VERSION_OPTION = 'woocommerce_initial_install_version';
+
+	/**
 	 * Option name used to uniquely identify installations of WooCommerce.
 	 *
 	 * @var string
@@ -311,6 +318,7 @@ class WC_Install {
 			do_action_deprecated( 'woocommerce_admin_newly_installed', array(), '6.5.0', 'woocommerce_newly_installed' );
 
 			update_option( self::NEWLY_INSTALLED_OPTION, 'no' );
+			update_option( self::INITIAL_INSTALL_VERSION_OPTION, WC()->version );
 		}
 	}
 
