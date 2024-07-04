@@ -457,22 +457,6 @@ test.describe( 'Store owner can skip the core profiler', () => {
 		} );
 
 		await test.step( 'Check that we are sent to wp.com', async () => {
-			// sometimes fails to redirect, known as flaky on CI only
-			try {
-				// we will monitor test failing with console log to investigate it further
-				page.on( 'console', ( msg ) => console.log( msg.text() ) );
-				await expect( page.url() ).toContain( 'wordpress.com/log-in' );
-			} catch ( e ) {
-				await page.goto(
-					'wp-admin/admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions'
-				);
-				await page
-					.getByRole( 'button', { name: 'My Subscriptions' } )
-					.waitFor( { state: 'visible' } );
-				await page
-					.getByRole( 'link', { name: 'Connect your store' } )
-					.click();
-			}
 			await expect( page.url() ).toContain( 'wordpress.com/log-in' );
 			await expect(
 				page.getByRole( 'heading', {
