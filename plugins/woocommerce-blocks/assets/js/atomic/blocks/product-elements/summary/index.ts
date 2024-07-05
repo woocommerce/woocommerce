@@ -21,7 +21,6 @@ const deprecated = [
 			// We don't deprecate attributes, but adding new ones.
 			// For backwards compatibility, some new attributes require
 			// different defaults than new ones.
-			console.log( 'migration' );
 			return {
 				...attributes,
 				showDescriptionIfEmpty: true,
