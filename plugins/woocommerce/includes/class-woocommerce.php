@@ -27,6 +27,7 @@ use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\Woocommerce_Analytics;
 use Automattic\WooCommerce\Utilities\{ LoggingUtil, TimeUtil };
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Admin\Features\Features;
@@ -259,6 +260,7 @@ final class WooCommerce {
 		if ( $this->is_request( 'admin' ) || ( $this->is_rest_api_request() && ! $this->is_store_api_request() ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 			add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
 		}
+		add_action( 'init', array( $this, 'maybe_init_wc_analytics' ) );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
@@ -387,6 +389,7 @@ final class WooCommerce {
 		$this->define( 'WC_DELIMITER', '|' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
+		$this->define( 'WC_ANALYTICS', true );
 
 		/**
 		 * As of 8.8.0, it is preferable to use the `woocommerce_log_directory` filter hook to change the log
@@ -1228,5 +1231,42 @@ final class WooCommerce {
 			$slug = dirname( WC_PLUGIN_BASENAME );
 		}
 		return $slug;
+	}
+
+	/**
+	 * Initialize WC Analytics package only if
+	 * - Automattic\Woocommerce_Analytics package is available
+	 * - Jetpack plugin is not active or its version is >= x.x.x (before this version, the package is loaded in Jetpack)
+	 * - woocommerce_analytics_allow_tracking filter is true (false by default)
+	 *
+	 * @since x.x.x
+	 *
+	 * @return void
+	 */
+	public function maybe_init_wc_analytics() {
+
+		if ( ! class_exists( '\Automattic\Woocommerce_Analytics' ) ) {
+			return;
+		}
+
+		/**
+		 * Hook: woocommerce_analytics_allow_tracking.
+		 *
+		 * @since 9.4.0
+		 * @param boolean $is_allowed Indicates if WooCommerce Analytics should be enabled.
+		 */
+		if ( ! apply_filters( 'woocommerce_analytics_allow_tracking', false ) ) {
+			return;
+		}
+
+		$jetpack_plugin = 'jetpack/jetpack.php';
+		if ( is_plugin_active( $jetpack_plugin ) ) {
+			$jetpack_plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $jetpack_plugin );
+			if ( ! isset( $jetpack_plugin_data['Version'] ) && version_compare( $jetpack_plugin_data['Version'], 'x.x.x', '<' ) ) {
+				return;
+			}
+		}
+
+		Woocommerce_Analytics::init();
 	}
 }
