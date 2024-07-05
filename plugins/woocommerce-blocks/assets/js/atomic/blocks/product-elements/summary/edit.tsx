@@ -85,7 +85,7 @@ const MaxWordCountControl = ( {
 					} );
 				} }
 				min={ 0 }
-				max={ 1000 }
+				max={ 200 }
 				step={ 10 }
 			/>
 		</ToolsPanelItem>
