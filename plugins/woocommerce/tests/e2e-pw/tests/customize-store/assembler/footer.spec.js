@@ -18,7 +18,7 @@ const test = base.extend( {
 	},
 } );
 
-test.describe( 'Assembler -> Footers', () => {
+test.describe( 'Assembler -> Footers', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -156,7 +156,7 @@ test.describe( 'Assembler -> Footers', () => {
 
 			const expectedFooterClass = extractFooterClass( footerPickerClass );
 
-			const footerPattern = await editor.locator(
+			const footerPattern = editor.locator(
 				`footer div.wc-blocks-footer-pattern`
 			);
 

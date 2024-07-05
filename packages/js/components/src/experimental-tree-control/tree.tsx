@@ -59,6 +59,7 @@ export const Tree = forwardRef( function ForwardedTree(
 										) as HTMLButtonElement
 								 )?.focus();
 							} }
+							onEscape={ props.onEscape }
 						/>
 					) ) }
 				</ol>
@@ -94,6 +95,9 @@ export const Tree = forwardRef( function ForwardedTree(
 									)
 									?.focus();
 							}
+						} else if ( event.key === 'Escape' && props.onEscape ) {
+							event.preventDefault();
+							props.onEscape();
 						}
 					} }
 				>

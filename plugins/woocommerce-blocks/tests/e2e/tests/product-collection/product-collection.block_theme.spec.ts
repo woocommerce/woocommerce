@@ -458,6 +458,62 @@ test.describe( 'Product Collection', () => {
 				).toBeHidden();
 			} );
 
+			const archiveTemplates = [
+				'woocommerce/woocommerce//archive-product',
+				'woocommerce/woocommerce//taxonomy-product_cat',
+				'woocommerce/woocommerce//taxonomy-product_tag',
+				'woocommerce/woocommerce//taxonomy-product_attribute',
+				'woocommerce/woocommerce//product-search-results',
+			];
+
+			const nonArchiveTemplates = [
+				'woocommerce/woocommerce//single-product',
+				'twentytwentyfour//home',
+				'twentytwentyfour//index',
+			];
+
+			archiveTemplates.map( async ( template ) => {
+				test( `should be visible in archive template: ${ template }`, async ( {
+					pageObject,
+					editor,
+				} ) => {
+					await pageObject.goToEditorTemplate( template );
+					await pageObject.insertProductCollection();
+					await pageObject.chooseCollectionInTemplate();
+					await pageObject.focusProductCollection();
+					await editor.openDocumentSettingsSidebar();
+
+					const sidebarSettings =
+						await pageObject.locateSidebarSettings();
+					await expect(
+						sidebarSettings.locator(
+							SELECTORS.inheritQueryFromTemplateControl
+						)
+					).toBeVisible();
+				} );
+			} );
+
+			nonArchiveTemplates.map( async ( template ) => {
+				test( `should not be visible in non-archive template: ${ template }`, async ( {
+					pageObject,
+					editor,
+				} ) => {
+					await pageObject.goToEditorTemplate( template );
+					await pageObject.insertProductCollection();
+					await pageObject.chooseCollectionInTemplate();
+					await pageObject.focusProductCollection();
+					await editor.openDocumentSettingsSidebar();
+
+					const sidebarSettings =
+						await pageObject.locateSidebarSettings();
+					await expect(
+						sidebarSettings.locator(
+							SELECTORS.inheritQueryFromTemplateControl
+						)
+					).toBeHidden();
+				} );
+			} );
+
 			test( 'should work as expected in Product Catalog template', async ( {
 				pageObject,
 				editor,
@@ -1163,17 +1219,14 @@ test.describe( 'Product Collection', () => {
 				await editor.selectBlocks( otherBlockSelector );
 				await expect( previewButtonLocator ).toBeHidden();
 
-				// Preview button should be visible when any of inner block is selected
-				await editor.canvas
-					.getByLabel( BLOCK_LABELS.productTemplate )
-					.getByLabel( BLOCK_LABELS.productImage )
-					.first()
-					.click();
+				// Preview button should be visible again when the block is selected.
+				await pageObject.focusProductCollection();
 				await expect( previewButtonLocator ).toBeVisible();
 			} );
 		} );
 	} );
 
+	// Tests for regressions of https://github.com/woocommerce/woocommerce/pull/47994
 	test.describe( 'Product Collection should be visible after Refresh', () => {
 		test( 'Product Collection should be visible after Refresh in a Template', async ( {
 			page,

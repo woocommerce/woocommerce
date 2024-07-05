@@ -39,6 +39,7 @@ import { __ } from '@wordpress/i18n';
 import { useQuery } from '@woocommerce/navigation';
 import clsx from 'clsx';
 import { SelectedBlockContext } from './context/selected-block-ref-context';
+import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -241,7 +242,9 @@ function ScaledBlockPreview( {
 						// @ts-ignore disabled prop exists
 						scrolling={ isScrollable ? 'yes' : 'no' }
 						tabIndex={ -1 }
-						readonly={ false }
+						readonly={
+							! isFullComposabilityFeatureAndAPIAvailable()
+						}
 						style={
 							autoScale
 								? {
@@ -297,6 +300,19 @@ function ScaledBlockPreview( {
 						.components-resizable-box__handle {
 							display: none !important;
 						}
+
+						footer.is-selected::after,
+						header.is-selected::after {
+							outline-color: var(--wp-admin-theme-color) !important;
+						}
+
+						header.is-selected::after {
+						    border-top-left-radius: 20px;
+					    }
+
+						footer.is-selected::after {
+						    border-bottom-left-radius: 20px;
+					    }
 
 						${ additionalStyles }
 					` }

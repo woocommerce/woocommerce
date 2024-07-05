@@ -82,7 +82,7 @@ export const PrintfulAdvertProductPlacement = {
 		<span className="printful-sponsored__text">
 			{ __( 'Print-on-demand products', 'woocommerce' ) }
 			<div className="woocommerce-label">
-				{ __( 'Recommended', 'woocommerce' ) }
+				{ __( 'Promoted', 'woocommerce' ) }
 			</div>
 		</span>
 	),
@@ -132,10 +132,12 @@ export const SETUP_TASKLIST_PRODUCT_TYPES_FILTER =
 export const SETUP_TASKLIST_PRODUCTS_AFTER_FILTER =
 	'woocommerce_admin_task_products_after';
 
-addFilter(
-	SETUP_TASKLIST_PRODUCTS_AFTER_FILTER,
-	'woocommerce/task-lists/products-sponsored-placement',
-	( products ) => {
-		return [ ...products, PrintfulAdvertProductPlacement ];
-	}
-);
+if ( window.wcAdminFeatures && window.wcAdminFeatures.printful === true ) {
+	addFilter(
+		SETUP_TASKLIST_PRODUCTS_AFTER_FILTER,
+		'woocommerce/task-lists/products-sponsored-placement',
+		( products ) => {
+			return [ ...products, PrintfulAdvertProductPlacement ];
+		}
+	);
+}
