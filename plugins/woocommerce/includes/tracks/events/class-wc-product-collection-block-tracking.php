@@ -1,9 +1,6 @@
-<?php declare( strict_types = 1);
-/**
- * WooCommerce Product Collection Block Tracking
- *
- * @package WooCommerce\Tracks
- */
+<?php
+
+declare( strict_types = 1);
 
 defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
