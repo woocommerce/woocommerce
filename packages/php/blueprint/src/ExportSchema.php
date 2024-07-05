@@ -10,11 +10,6 @@ use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
 class ExportSchema {
 	use UseWPFunctions;
 
-	protected array $default_exporter_classes = array(
-		ExportInstallPluginSteps::class,
-		ExportInstallThemeSteps::class,
-	);
-
 	protected array $exporters = array();
 
 	/**
@@ -22,14 +17,6 @@ class ExportSchema {
 	 */
 	public function __construct( $exporters = array() ) {
 		$this->exporters = $exporters;
-	}
-
-	public function add_exporter( StepExporter $exporter ) {
-		if ( ! isset( $this->exporters[ $exporter->get_step_name() ] ) ) {
-			$this->exporters[ $exporter->get_step_name() ] = array();
-		}
-
-		$this->exporters[ $exporter->get_step_name() ][] = $exporter;
 	}
 
 	public function get_exporter( $step ) {
@@ -45,14 +32,8 @@ class ExportSchema {
 			'steps'       => array(),
 		);
 
-		$exporters = $this->wp_apply_filters( 'wooblueprint_exporters', $this->exporters );
-
-		$this->add_default_exporters();
-		foreach ( $exporters as $exporter ) {
-			$this->add_exporter( $exporter );
-		}
-
-		$exporters = array_merge( ...array_values( $this->exporters ) );
+		$built_in_exporters = (new BuiltInExporters())->get_all();
+		$exporters = $this->wp_apply_filters( 'wooblueprint_exporters', $built_in_exporters );
 
 		// Filter out any exporters that are not in the list of steps to export.
 		if ( count( $steps ) ) {
@@ -80,11 +61,5 @@ class ExportSchema {
 		}
 
 		return $schema;
-	}
-
-	protected function add_default_exporters() {
-		foreach ( $this->default_exporter_classes as $exporter ) {
-			$this->add_exporter( new $exporter() );
-		}
 	}
 }

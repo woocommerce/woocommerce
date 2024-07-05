@@ -2,17 +2,16 @@
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
-use Automattic\WooCommerce\Blueprint\Exporters\ExportsStep;
 use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
-use Automattic\WooCommerce\Blueprint\UseHooks;
+use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 use Automattic\WooCommerce\Blueprint\Util;
 use WC_Admin_Settings;
 use WC_Settings_Page;
 
 class ExportWCSettings implements StepExporter, HasAlias {
-	use UseHooks;
+	use UseWPFunctions;
 	/**
 	 * @var WC_Settings_Page[]
 	 */
@@ -24,7 +23,7 @@ class ExportWCSettings implements StepExporter, HasAlias {
 			$setting_pages = WC_Admin_Settings::get_settings_pages();
 		}
 		$this->setting_pages = $setting_pages;
-		$this->add_filter( 'wooblueprint_export_setttings', array( $this, 'add_site_visibility_setttings' ), 10, 2 );
+		$this->wp_add_filter( 'wooblueprint_export_setttings', array( $this, 'add_site_visibility_setttings' ), 10, 2 );
 	}
 
 	public function export() {
@@ -43,7 +42,7 @@ class ExportWCSettings implements StepExporter, HasAlias {
 			unset( $pages[ $id ]['options'] );
 		}
 
-		$filtered = $this->apply_filters('wooblueprint_export_setttings', $options, $pages);
+		$filtered = $this->wp_apply_filters('wooblueprint_export_setttings', $options, $pages);
 
 		$step = new SetSiteOptions($filtered['options']);
 		$step->set_meta_values(array(
