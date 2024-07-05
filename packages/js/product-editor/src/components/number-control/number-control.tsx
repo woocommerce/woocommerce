@@ -4,6 +4,7 @@
 import {
 	createElement,
 	Fragment,
+	isValidElement,
 	useEffect,
 	useRef,
 	useState,
@@ -28,12 +29,13 @@ import { Label } from '../label/label';
 export type NumberProps = {
 	value: string;
 	onChange: ( selected: string ) => void;
-	label: string;
+	label: string | JSX.Element;
 	suffix?: string;
 	help?: string;
 	error?: string;
 	placeholder?: string;
 	onBlur?: () => void;
+	onFocus?: () => void;
 	required?: boolean;
 	tooltip?: string;
 	disabled?: boolean;
@@ -53,6 +55,7 @@ export const NumberControl: React.FC< NumberProps > = ( {
 	help,
 	error,
 	onBlur,
+	onFocus,
 	required,
 	tooltip,
 	placeholder,
@@ -76,7 +79,10 @@ export const NumberControl: React.FC< NumberProps > = ( {
 	const inputProps = useNumberInputProps( {
 		value: value || '',
 		onChange,
-		onFocus: () => setIsFocused( true ),
+		onFocus: () => {
+			setIsFocused( true );
+			onFocus?.();
+		},
 		min,
 		max,
 	} );
@@ -128,11 +134,15 @@ export const NumberControl: React.FC< NumberProps > = ( {
 			} ) }
 			id={ id }
 			label={
-				<Label
-					label={ label }
-					required={ required }
-					tooltip={ tooltip }
-				/>
+				isValidElement( label ) ? (
+					label
+				) : (
+					<Label
+						label={ label as string }
+						required={ required }
+						tooltip={ tooltip }
+					/>
+				)
 			}
 			help={ error || help }
 		>
