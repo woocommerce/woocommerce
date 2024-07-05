@@ -9,4 +9,18 @@ module.exports = {
 			},
 		},
 	],
+	settings: {
+		'import/core-modules': [
+			'@woocommerce/block-templates',
+			'@woocommerce/components',
+			'@woocommerce/data',
+			'@woocommerce/navigation',
+			'@woocommerce/tracks',
+		],
+		'import/resolver': {
+			node: {},
+			webpack: {},
+			typescript: {},
+		},
+	},
 };
