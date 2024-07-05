@@ -14,8 +14,10 @@ pnpm --filter='@woocommerce/plugin-woocommerce' watch:build
 
 Next, run the following command from the [`woocommerce-blocks` plugin folder](../../../woocommerce-blocks/) to start a `wp-env` instance and install all the testing products, languages, etc.:
 
-````shell
+```sh
 cd plugins/woocommerce-blocks/
+pnpm env:start
+```
 
 > [!TIP]
 > If you want to start/stop the environment without running the whole setup, use the native `wp-env` commands directly, e.g. `npx wp-env start` and `npx wp-env stop`.
@@ -26,9 +28,9 @@ The testing environment should now be ready under [localhost:8889](http://localh
 
 Occasionally, you'll need to reset the environment, e.g., when testing products have been updated. To do that, run the following command and go make yourself some coffee:
 
-```shell
+```sh
 pnpm env:restart
-````
+```
 
 ## Running and debugging tests
 
@@ -37,7 +39,7 @@ pnpm env:restart
 
 Here is a basic set of commands to quickly start running and debugging the tests. For full documentation, see the official Playwright guide on [Running and Debugging Tests](https://playwright.dev/docs/running-tests).
 
-```shell
+```sh
 # Run all available tests.
 pnpm test:e2e
 
@@ -76,7 +78,7 @@ When a test fails in CI, a failure artifact is zipped and uploaded to the Summar
 
 Once you download and extract that zip, you'll see dedicated folders for the failed test artifacts. In CI, we retry running a failed test twice before considering it a failure, so there can be up to three folders per failed test. Each of those folders should contain a Playwright trace zip file and a screenshot from the failure moment. On the first retry, we also record the entire test, so the first retry folder should contain a video recording as well. To view a trace, head to the [Playwright Trace Viewer](https://trace.playwright.dev) page and drag and drop the trace zip file there, or run it from the command line:
 
-```shell
+```sh
 npx playwright show-trace <path-to-the-trace>
 ```
 

@@ -197,6 +197,7 @@ class PTKPatternsStore {
 					'_dotcom_imported_intro',
 					'_dotcom_imported_about',
 					'_dotcom_imported_services',
+					'_dotcom_imported_reviews',
 				),
 			)
 		);
