@@ -11,7 +11,7 @@ inputs:
         description: 'Given a boolean or PNPM filter, runs the build command for monorepo project(s).'
         default: false
     build-type:
-        description: 'Given "full" or "backend" will performs build optimized build steps.'
+        description: 'Given "full" or "backend" will perform optimized build steps.'
         default: 'full'
     pull-playwright-cache:
         description: 'Given a boolean value, invokes Playwright dependencies caching.'
