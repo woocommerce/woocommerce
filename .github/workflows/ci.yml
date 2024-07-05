@@ -134,11 +134,7 @@ jobs:
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
         env: ${{ matrix.testEnv.envVars }}
-        run: |
-          if [[ '${{ matrix.testType }}' == 'unit:php' || '${{ matrix.testType }}' == 'api' ]]; then
-            pnpm --filter="@woocommerce/admin-library" build:project:feature-config
-          fi
-          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
+        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
 
       - name: 'Get commit message'
         id: 'get_commit_message'
