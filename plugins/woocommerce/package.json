@@ -56,7 +56,7 @@
 		"test:e2e-pw": "pnpm test:e2e:install && pnpm playwright test --config=tests/e2e-pw/envs/default/playwright.config.js",
 		"test:e2e": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
-		"test:e2e:blocks": "pnpm --filter='@woocommerce/block-library' test:e2e",
+		"test:e2e:blocks": "pnpm --filter='@woocommerce/block-library-tests-and-docs' test:e2e",
 		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e-pw/run-tests-with-env.sh",
 		"test:perf": "./k6 run ./tests/performance/tests/gh-action-pr-requests.js",
 		"test:env:start": "pnpm env:test",
