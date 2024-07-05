@@ -13,9 +13,17 @@ module.exports = {
 		'import/core-modules': [
 			'@woocommerce/block-templates',
 			'@woocommerce/components',
+			'@woocommerce/currency',
 			'@woocommerce/data',
+			'@woocommerce/currency',
 			'@woocommerce/navigation',
+			'@woocommerce/settings',
 			'@woocommerce/tracks',
+			'@wordpress/components',
+			'@wordpress/blocks',
+			'@wordpress/date',
+			'@wordpress/media-utils',
+			'@testing-library/react',
 		],
 		'import/resolver': {
 			node: {},

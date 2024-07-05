@@ -19,6 +19,7 @@ module.exports = {
 	],
 	settings: {
 		'import/core-modules': [
+			'@woocommerce/components',
 			'@woocommerce/currency',
 			'@woocommerce/data',
 			'@woocommerce/date',
@@ -27,6 +28,7 @@ module.exports = {
 			'@automattic/tour-kit',
 			'@wordpress/blocks',
 			'@wordpress/components',
+			'@wordpress/element',
 			'@wordpress/media-utils',
 			'dompurify',
 			'downshift',

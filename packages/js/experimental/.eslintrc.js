@@ -5,6 +5,8 @@ module.exports = {
 		'import/core-modules': [
 			'@woocommerce/components',
 			'@wordpress/components',
+			'@storybook/react',
+			'eact-transition-group/CSSTransition',
 		],
 		'import/resolver': {
 			node: {},

@@ -7,6 +7,7 @@ module.exports = {
 			'@woocommerce/experimental',
 			'@woocommerce/navigation',
 			'@woocommerce/tracks',
+			'@testing-library/react',
 		],
 		'import/resolver': {
 			node: {},
