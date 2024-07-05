@@ -123,7 +123,7 @@ test.describe( 'Payment setup task', () => {
 		page,
 		baseURL,
 	} ) => {
-		// Payments page differs if located outside of a WCPay-supported country, so make sure we aren't.
+		// Payments page differs if store is located outside of a WCPay-supported country, so make sure we aren't.
 		const api = new wcApi( {
 			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
@@ -157,15 +157,19 @@ test.describe( 'Payment setup task', () => {
 		page.locator( '.components-button.is-small.has-icon' )
 			.click()
 			.catch( () => {} );
-		await page.waitForLoadState( 'networkidle' );
 
-		// enable COD payment option
+		// Enable COD payment option.
 		await page
 			.locator(
 				'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > button'
 			)
 			.click();
-		await page.waitForLoadState( 'networkidle' );
+		// Check that COD was set up.
+		await expect(
+			page.locator(
+				'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > button'
+			)
+		).toContainText( 'Manage' );
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
 
