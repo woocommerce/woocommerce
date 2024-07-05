@@ -10,12 +10,14 @@ import {
 	BaseControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	__experimentalToggleGroupControl as ToggleGroupControl,
+	RadioControl,
 } from '@wordpress/components';
 import { getSetting } from '@woocommerce/settings';
 import { __, isRTL } from '@wordpress/i18n';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import { isSiteEditorPage } from '@woocommerce/utils';
 import type { ReactElement } from 'react';
+import { useEffect } from '@wordpress/element';
 import { select } from '@wordpress/data';
 import { cartOutline, bag, bagAlt } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
@@ -39,6 +41,7 @@ export interface Attributes {
 	priceColor: ColorPaletteOption;
 	iconColor: ColorPaletteOption;
 	productCountColor: ColorPaletteOption;
+	productCountVisibility: 'always' | 'never' | 'greater_than_zero';
 }
 
 interface Props {
@@ -59,6 +62,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		iconColor = defaultColorItem,
 		productCountColor = defaultColorItem,
 		miniCartIcon,
+		productCountVisibility,
 	} = migrateAttributesToColorPanel( attributes );
 
 	const miniCartColorAttributes = {
@@ -87,7 +91,71 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		''
 	) as string;
 
-	const productCount = 0;
+	/**
+	 * This is a workaround for the Site Editor to set the correct
+	 * background color of the Mini-Cart QuantityBadge block based on
+	 * the main background color set by the theme.
+	 */
+	useEffect( () => {
+		let editorStylesWrapper = document.querySelector(
+			'.editor-styles-wrapper'
+		);
+		// If the editor styles wrapper is not available, look in the site editor canvas for it.
+		if ( ! editorStylesWrapper ) {
+			const canvasEl = document.querySelector(
+				'.edit-site-visual-editor__editor-canvas'
+			);
+
+			if ( ! ( canvasEl instanceof HTMLIFrameElement ) ) {
+				return;
+			}
+			const canvas =
+				canvasEl.contentDocument || canvasEl.contentWindow?.document;
+			if ( ! canvas ) {
+				return;
+			}
+			editorStylesWrapper = canvas.querySelector(
+				'.editor-styles-wrapper'
+			);
+		}
+
+		if ( ! editorStylesWrapper ) {
+			return;
+		}
+
+		const editorBackgroundColor =
+			window.getComputedStyle( editorStylesWrapper )?.backgroundColor;
+		const editorColor =
+			window.getComputedStyle( editorStylesWrapper )?.color;
+
+		if (
+			editorStylesWrapper &&
+			! editorStylesWrapper.querySelector(
+				'#mini-cart-quantity-badge-foreground-color'
+			) &&
+			editorBackgroundColor &&
+			editorColor
+		) {
+			const style = document.createElement( 'style' );
+			style.id = 'mini-cart-quantity-badge-foreground-color';
+			style.appendChild(
+				document.createTextNode(
+					`:where(.wc-block-mini-cart__badge) {
+						color: ${ editorBackgroundColor };
+						background-color: ${ editorColor };
+					}`
+				)
+			);
+			editorStylesWrapper.appendChild( style );
+		}
+	}, [] );
+
+	const productCount =
+		productCountVisibility === 'never' ||
+		productCountVisibility === 'always'
+			? 0
+			: 2;
+
 	const productTotal = 0;
 	return (
 		<div { ...blockProps }>
@@ -131,6 +199,44 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							onChange={ () =>
 								setAttributes( {
 									hasHiddenPrice: ! hasHiddenPrice,
+								} )
+							}
+						/>
+					</BaseControl>
+					<BaseControl
+						id="wc-block-mini-cart__product-count-basecontrol"
+						label={ __( 'Show Cart Item Count:', 'woocommerce' ) }
+					>
+						<RadioControl
+							className="wc-block-mini-cart__product-count-radiocontrol"
+							selected={ productCountVisibility }
+							options={ [
+								{
+									label: __(
+										'Always (even if empty)',
+										'woocommerce'
+									),
+									value: 'always',
+								},
+								{
+									label: __(
+										'Only if cart has items',
+										'woocommerce'
+									),
+									value: 'greater_than_zero',
+								},
+								{
+									label: __( 'Never', 'woocommerce' ),
+									value: 'never',
+								},
+							] }
+							help={ __(
+								'The editor does not display the real count value, but a placeholder to indicate how it will look on the front-end.',
+								'woocommerce'
+							) }
+							onChange={ ( value ) =>
+								setAttributes( {
+									productCountVisibility: value,
 								} )
 							}
 						/>
@@ -233,6 +339,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						iconColor={ iconColor }
 						productCountColor={ productCountColor }
 						icon={ miniCartIcon }
+						productCountVisibility={ productCountVisibility }
 					/>
 				</button>
 			</Noninteractive>

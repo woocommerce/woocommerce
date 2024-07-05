@@ -1,5 +1,7 @@
 require( 'dotenv' ).config( { path: __dirname + '/.env' } );
+
 const testsRootPath = __dirname;
+const testsResultsPath = `${ testsRootPath }/test-results`;
 
 const {
 	ALLURE_RESULTS_DIR,
@@ -41,7 +43,7 @@ if ( process.env.CI ) {
 		{
 			outputFolder:
 				PLAYWRIGHT_HTML_REPORT ??
-				`${ testsRootPath }/test-results/playwright-report`,
+				`${ testsResultsPath }/playwright-report`,
 			open: 'on-failure',
 		},
 	] );
@@ -52,7 +54,7 @@ const config = {
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
 		: 120 * 1000,
 	expect: { timeout: 20 * 1000 },
-	outputDir: `${ testsRootPath }/test-results/results-data`,
+	outputDir: `${ testsResultsPath }/results-data`,
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: `${ testsRootPath }/tests`,
@@ -66,7 +68,10 @@ const config = {
 		baseURL: BASE_URL ?? 'http://localhost:8086',
 		screenshot: { mode: 'only-on-failure', fullPage: true },
 		stateDir: `${ testsRootPath }/.state/`,
-		trace: 'retain-on-failure',
+		trace:
+			/^https?:\/\/localhost/.test( BASE_URL ) || ! CI
+				? 'retain-on-failure'
+				: 'off',
 		video: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
 		actionTimeout: 20 * 1000,

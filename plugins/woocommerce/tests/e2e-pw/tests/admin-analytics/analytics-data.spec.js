@@ -9,6 +9,11 @@ const test = baseTest.extend( {
 			woocommerce_task_list_reminder_bar_hidden: 'yes',
 		} );
 
+		// Disable the orders report date tour
+		await wcAdminApi.post( 'options', {
+			woocommerce_orders_report_date_tour_shown: 'yes',
+		} );
+
 		// Disable the revenue report date tour
 		await wcAdminApi.post( 'options', {
 			woocommerce_revenue_report_date_tour_shown: 'yes',
