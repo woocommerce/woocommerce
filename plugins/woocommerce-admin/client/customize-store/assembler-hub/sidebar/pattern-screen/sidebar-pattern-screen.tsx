@@ -7,6 +7,7 @@ import {
 	useMemo,
 	useRef,
 	useState,
+	useContext,
 } from '@wordpress/element';
 import { useAsyncList } from '@wordpress/compose';
 import { useSelect, useDispatch, select } from '@wordpress/data';
@@ -14,7 +15,7 @@ import { BlockInstance, cloneBlock } from '@wordpress/blocks';
 import { close } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
-import { capitalize } from 'lodash';
+import { capitalize, isEqual } from 'lodash';
 import { Button, Spinner } from '@wordpress/components';
 import {
 	unlock,
@@ -32,6 +33,7 @@ import {
 import {
 	__experimentalBlockPatternsList as BlockPatternList,
 	store as blockEditorStore,
+	privateApis as blockEditorPrivateApis,
 	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/block-editor';
 
@@ -44,6 +46,11 @@ import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { PATTERN_CATEGORIES } from './categories';
 import { THEME_SLUG } from '~/customize-store/data/constants';
 import { Pattern } from '~/customize-store/types/pattern';
+import {
+	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
+	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
+} from '../../utils/hero-pattern';
+import { COLOR_PALETTES } from '../global-styles/color-palette-variations/constants';
 
 /**
  * Sorts patterns by category. For 'intro' and 'about' categories
@@ -92,9 +99,19 @@ const sortPatternsByCategory = (
 	} );
 };
 
+const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
+
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const { patterns, isLoading } = usePatternsByCategory( category );
 
+	// @ts-expect-error No types for this exist yet.
+	const { user } = useContext( GlobalStylesContext );
+
+	const isActiveNewNeutralVariation = useMemo(
+		() =>
+			isEqual( COLOR_PALETTES[ 0 ].settings.color, user.settings.color ),
+		[ user ]
+	);
 	const sortedPatterns = useMemo( () => {
 		const patternsWithoutThemePatterns = patterns.filter(
 			( pattern ) =>
@@ -103,11 +120,41 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 				pattern.source !== 'pattern-directory/core'
 		);
 
+		const patt = patternsWithoutThemePatterns.map( ( pattern ) => {
+			if (
+				pattern.name !== 'woocommerce-blocks/just-arrived-full-hero'
+			) {
+				return pattern;
+			}
+
+			if ( ! isActiveNewNeutralVariation ) {
+				const blocks =
+					findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+						pattern.blocks,
+						( block: BlockInstance ) => {
+							block.attributes.style = {};
+						}
+					);
+				return { ...pattern, blocks };
+			}
+
+			const blocks =
+				findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+					pattern.blocks,
+					( block: BlockInstance ) => {
+						block.attributes.style =
+							PRODUCT_HERO_PATTERN_BUTTON_STYLE;
+					}
+				);
+
+			return { ...pattern, blocks };
+		} );
+
 		return sortPatternsByCategory(
-			patternsWithoutThemePatterns,
+			patt,
 			category as keyof typeof PATTERN_CATEGORIES
 		);
-	}, [ category, patterns ] );
+	}, [ category, isActiveNewNeutralVariation, patterns ] );
 
 	const asyncSortedPatterns = useAsyncList( sortedPatterns );
 
