@@ -185,6 +185,7 @@ class PTKPatternsStore {
 
 		$patterns = $this->ptk_client->fetch_patterns(
 			array(
+				'site'       => 'wooblockpatterns.wpcomstaging.com',
 				'categories' => array(
 					'_woo_intro',
 					'_woo_featured_selling',
