@@ -236,7 +236,7 @@ class WC_Frontend_Scripts {
 			'select2'                    => array(
 				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '4.0.3-wc.' . $version,
+				'version' => '1.0.9-wc.' . $version,
 			),
 			'selectWoo'                  => array(
 				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
