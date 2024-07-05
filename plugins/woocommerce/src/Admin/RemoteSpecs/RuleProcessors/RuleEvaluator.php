@@ -36,9 +36,9 @@ class RuleEvaluator {
 	 * Evaluate the given rules as an AND operation - return false early if a
 	 * rule evaluates to false.
 	 *
-	 * @param array|object $rules The rule or rules being processed.
+	 * @param array|object $rules        The rule or rules being processed.
 	 * @param object|null  $stored_state Stored state.
-	 * @param array        $logger_args Arguments for the rule evaluator logger. `slug` is required.
+	 * @param array        $logger_args  Arguments for the rule evaluator logger. `slug` is required.
 	 *
 	 * @throws \InvalidArgumentException Thrown when $logger_args is missing slug.
 	 *
