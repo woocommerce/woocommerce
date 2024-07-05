@@ -8,7 +8,6 @@ module.exports = {
 		'import/core-modules': [ '@woocommerce/e2e-utils' ],
 		'import/resolver': {
 			node: {},
-			webpack: {},
 			typescript: {},
 		},
 	},
