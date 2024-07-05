@@ -39,7 +39,7 @@ class ImportSchema {
 	/**
 	 * @return StepProcessorResult[]
 	 */
-	public function process() {
+	public function import() {
 		$results = array();
 		$result = StepProcessorResult::success('ImportSchema');
 		$results[] = $result;

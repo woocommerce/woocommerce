@@ -42,7 +42,7 @@ class StepProcessorFactory {
 			return $this->step_processors[$name];
 		}
 
-		$step_processor_class = __NAMESPACE__ . '\\StepProcessors\\' . Util::snake_to_camel($name);
+		$step_processor_class = __NAMESPACE__ . '\\Importers\\' . Util::snake_to_camel($name);
 		if (!class_exists($step_processor_class)) {
 			// throw error
 			return null;

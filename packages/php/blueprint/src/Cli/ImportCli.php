@@ -13,7 +13,7 @@ class ImportCli {
 
 	public function run($optional_args) {
 	    $blueprint = ImportSchema::crate_from_file($this->schema_path);
-		$results = $blueprint->process();
+		$results = $blueprint->import();
 
 		$result_formatter = new CliResultFormatter($results);
 		$is_success = $result_formatter->is_success();

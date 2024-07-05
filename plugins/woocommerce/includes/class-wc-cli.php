@@ -61,12 +61,12 @@ class WC_CLI {
 	}
 
 	private function maybe_include_blueprint_cli() {
-		if ( ! function_exists('wc_admin_get_feature_config') ) {
+		if ( ! function_exists( 'wc_admin_get_feature_config' ) ) {
 			require_once WC_ABSPATH . 'includes/react-admin/feature-config.php';
 		}
 
 		$features = wc_admin_get_feature_config();
-		if ( isset($features[ 'blueprint' ]) ) {
+		if ( isset( $features[ 'blueprint' ] ) ) {
 			require_once  dirname(WC_PLUGIN_FILE). '/vendor/woocommerce/blueprint/src/Cli.php';
 		}
 	}

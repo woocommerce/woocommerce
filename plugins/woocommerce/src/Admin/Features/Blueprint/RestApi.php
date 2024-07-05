@@ -34,7 +34,7 @@ class RestApi {
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'process' ),
+					'callback'            => array( $this, 'import' ),
 					'permission_callback' => function () {
 						return true;
 					},
@@ -104,7 +104,7 @@ class RestApi {
 		));
 	}
 
-	public function process() {
+	public function import() {
 		if ( !empty($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK ) {
 			$uploaded_file = $_FILES['file']['tmp_name'];
 
@@ -125,7 +125,7 @@ class RestApi {
 				), 400);
 			}
 
-			$results = $blueprint->process();
+			$results = $blueprint->import();
 			$result_formatter = new JsonResultFormatter($results);
 			$redirect = $blueprint->get_schema()->get_step('redirectToAfter');
 			$redirect_url = $redirect->url ?? 'admin.php?page=wc-admin';
