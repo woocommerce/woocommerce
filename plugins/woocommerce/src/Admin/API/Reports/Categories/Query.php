@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
- * API\Reports\Query
+ * API\Reports\Categories\Query
  *
  * @deprecated 9.1 Categories\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
  */
