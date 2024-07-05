@@ -30,9 +30,11 @@ $pattern_image       = PatternsHelper::get_image_url( $images, 0, 'assets/images
 
 			<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"left"}} -->
 			<div class="wp-block-buttons">
-				<!-- wp:button -->
+				<!-- wp:button {"backgroundColor":"theme-1","textColor":"theme-5","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-5"}}}}} -->
 				<div class="wp-block-button">
-					<a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>"><?php echo esc_html( $pattern_button ); ?></a>
+					<a class="wp-block-button__link has-theme-5-color has-theme-1-background-color has-text-color has-background has-link-color wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>">
+						<?php echo esc_html( $pattern_button ); ?>
+					</a>
 				</div>
 				<!-- /wp:button -->
 			</div>
