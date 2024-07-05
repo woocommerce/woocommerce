@@ -44,6 +44,11 @@ import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { PATTERN_CATEGORIES } from './categories';
 import { THEME_SLUG } from '~/customize-store/data/constants';
 import { Pattern } from '~/customize-store/types/pattern';
+import {
+	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
+	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
+} from '../../utils/hero-pattern';
+import { useIsActiveNewNeutralVariation } from '../../hooks/use-is-active-new-neutral-variation';
 
 /**
  * Sorts patterns by category. For 'intro' and 'about' categories
@@ -95,6 +100,7 @@ const sortPatternsByCategory = (
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const { patterns, isLoading } = usePatternsByCategory( category );
 
+	const isActiveNewNeutralVariation = useIsActiveNewNeutralVariation();
 	const sortedPatterns = useMemo( () => {
 		const patternsWithoutThemePatterns = patterns.filter(
 			( pattern ) =>
@@ -103,11 +109,42 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 				pattern.source !== 'pattern-directory/core'
 		);
 
+		const patternWithPatchedProductHeroPattern =
+			patternsWithoutThemePatterns.map( ( pattern ) => {
+				if (
+					pattern.name !== 'woocommerce-blocks/just-arrived-full-hero'
+				) {
+					return pattern;
+				}
+
+				if ( ! isActiveNewNeutralVariation ) {
+					const blocks =
+						findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+							pattern.blocks,
+							( block: BlockInstance ) => {
+								block.attributes.style = {};
+							}
+						);
+					return { ...pattern, blocks };
+				}
+
+				const blocks =
+					findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+						pattern.blocks,
+						( block: BlockInstance ) => {
+							block.attributes.style =
+								PRODUCT_HERO_PATTERN_BUTTON_STYLE;
+						}
+					);
+
+				return { ...pattern, blocks };
+			} );
+
 		return sortPatternsByCategory(
-			patternsWithoutThemePatterns,
+			patternWithPatchedProductHeroPattern,
 			category as keyof typeof PATTERN_CATEGORIES
 		);
-	}, [ category, patterns ] );
+	}, [ category, isActiveNewNeutralVariation, patterns ] );
 
 	const asyncSortedPatterns = useAsyncList( sortedPatterns );
 
