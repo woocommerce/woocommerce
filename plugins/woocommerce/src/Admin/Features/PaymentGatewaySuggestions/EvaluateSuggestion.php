@@ -26,12 +26,20 @@ class EvaluateSuggestion {
 		$suggestion     = is_array( $spec ) ? (object) $spec : clone $spec;
 
 		if ( isset( $suggestion->is_visible ) ) {
+			// Determine the suggestion's logger slug.
+			$logger_slug = ! empty( $suggestion->id ) ? $suggestion->id : '';
+			// If the suggestion has no ID, use the title to generate a slug.
+			if ( empty( $logger_slug ) ) {
+				$logger_slug = ! empty( $suggestion->title ) ? sanitize_title_with_dashes( trim( $suggestion->title ) ) : 'anonymous-suggestion';
+			}
+
+			// Evaluate the visibility of the suggestion.
 			$is_visible = $rule_evaluator->evaluate(
 				$suggestion->is_visible,
 				null,
 				array(
-					'slug'   => sanitize_title_with_dashes( $suggestion->id ?? $suggestion->title ?? 'unknown' ),
-					'source' => sanitize_title_with_dashes( $logger_args['source'] ?? 'wc-payment-gateway-suggestions' ),
+					'slug'   => $logger_slug,
+					'source' => $logger_args['source'] ?? 'wc-payment-gateway-suggestions',
 				)
 			);
 
