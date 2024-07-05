@@ -11,6 +11,7 @@ import {
 	useCallback,
 	useEffect,
 	useLayoutEffect,
+	useMemo,
 	useRef,
 	useState,
 } from '@wordpress/element';
@@ -86,6 +87,28 @@ export const CustomFieldNameControl = forwardRef(
 			ComboboxControl.Props[ 'options' ]
 		>( [] );
 
+		const options = useMemo(
+			/**
+			 * Prepend the selected value as an option to let
+			 * the Combobox know which option is the selected
+			 * one even when an async request is being performed
+			 *
+			 * @return The combobox options.
+			 */
+			function prependSelectedValueAsOption() {
+				if ( value ) {
+					const isExisting = customFieldNames.some(
+						( customFieldName ) => customFieldName.value === value
+					);
+					if ( ! isExisting ) {
+						return [ { label: value, value }, ...customFieldNames ];
+					}
+				}
+				return customFieldNames;
+			},
+			[ customFieldNames, value ]
+		);
+
 		useLayoutEffect(
 			/**
 			 * The Combobox component does not expose the ref to the
@@ -130,6 +153,7 @@ export const CustomFieldNameControl = forwardRef(
 				 * on bluring
 				 */
 				function handleBlur( event: FocusEvent ) {
+					setCustomFieldNames( [] );
 					if ( inputElementRef.current ) {
 						inputElementRef.current.value = value;
 					}
@@ -156,7 +180,7 @@ export const CustomFieldNameControl = forwardRef(
 				label={ label }
 				messages={ messages }
 				value={ value }
-				options={ customFieldNames }
+				options={ options }
 				onChange={ onChange }
 				onFilterValueChange={ handleFilterValueChange }
 				className={ classNames(
