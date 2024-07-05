@@ -263,7 +263,7 @@ class WC_Product_Collection_Block_Tracking {
 			'price'        => 'no',
 		);
 
-		if ( ! empty( $query_attrs['inherit'] ) && true === $query_attrs['inherit']) {
+		if ( ! empty( $query_attrs['inherit'] ) && true === $query_attrs['inherit'] ) {
 			$filters['inherit'] = 'yes';
 		}
 
