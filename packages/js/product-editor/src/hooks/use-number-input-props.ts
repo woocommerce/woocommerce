@@ -10,6 +10,7 @@ export type NumberInputProps = {
 	onFocus: ( event: React.FocusEvent< HTMLInputElement > ) => void;
 	onKeyDown: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
 	onKeyUp: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
+	inputMode: 'decimal';
 };
 
 type Props = {
@@ -46,6 +47,7 @@ export const useNumberInputProps = ( {
 				event.preventDefault();
 			}
 		},
+		inputMode: 'decimal',
 		onKeyDown( event: React.KeyboardEvent< HTMLInputElement > ) {
 			const amount = Number.parseFloat( value || '0' );
 			const step = Number( event.currentTarget.step || '1' );
