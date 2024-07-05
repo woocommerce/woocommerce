@@ -194,9 +194,11 @@ class PTKPatternsStore {
 					'_woo_about',
 					'_woo_reviews',
 					'_woo_social_media',
+					'_woo_woocommerce',
 					'_dotcom_imported_intro',
 					'_dotcom_imported_about',
 					'_dotcom_imported_services',
+					'_dotcom_imported_reviews',
 				),
 			)
 		);

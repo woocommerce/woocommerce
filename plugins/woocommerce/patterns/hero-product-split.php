@@ -10,8 +10,8 @@ use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 $hero_title = $content['titles'][0]['default'] ?? '';
 ?>
 
-<!-- wp:media-text {"align":"full","mediaPosition":"right","mediaType":"image","mediaSizeSlug":"full","imageFill":false,"style":{"spacing":{"margin":{"bottom":"80px"}}}} -->
-<div class="wp-block-media-text alignfull has-media-on-the-right is-stacked-on-mobile" style="margin-bottom:80px">
+<!-- wp:media-text {"align":"full","mediaPosition":"right","mediaType":"image","mediaSizeSlug":"full","imageFill":false} -->
+<div class="wp-block-media-text alignfull has-media-on-the-right is-stacked-on-mobile">
 	<div class="wp-block-media-text__content">
 		<!-- wp:heading {"level":3} -->
 		<h3 class="wp-block-heading"><?php echo esc_html( $hero_title ); ?></h3>
