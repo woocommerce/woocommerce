@@ -7,8 +7,8 @@ use Automattic\WooCommerce\Blueprint\ResourceDownloaders\OrgThemeResourceDownloa
 use Automattic\WooCommerce\Blueprint\ResourceDownloaders\LocalPluginResourceDownloader;
 use Automattic\WooCommerce\Blueprint\ResourceDownloaders\OrgPluginResourceDownloader;
 
-use Automattic\WooCommerce\Blueprint\Importers\InstallPlugins;
-use Automattic\WooCommerce\Blueprint\Importers\InstallThemes;
+use Automattic\WooCommerce\Blueprint\Importers\InstallPlugin;
+use Automattic\WooCommerce\Blueprint\Importers\InstallTheme;
 
 /**
  * Simple factory to create step processors.
@@ -45,14 +45,14 @@ class StepProcessorFactory {
 		$step_processor_class = __NAMESPACE__ . '\\Importers\\' . Util::snake_to_camel($name);
 		if (!class_exists($step_processor_class)) {
 			// throw error
-			return null;
+			throw new \InvalidArgumentException("Class for step processor {$name} does not exist at {$step_processor_class}");
 		}
 
 		switch ($name) {
-			case 'installPlugins':
+			case 'installPlugin':
 				$step_processor =  $this->create_install_plugins_processor();
 				break;
-			case 'installThemes':
+			case 'installTheme':
 				$step_processor = $this->create_install_themes_processor();
 				break;
 			default:
@@ -72,7 +72,7 @@ class StepProcessorFactory {
 			$storage->add_downloader( new LocalPluginResourceDownloader($this->schema->get_unzipped_path()) );
 		}
 
-		return new InstallPlugins($storage);
+		return new InstallPlugin($storage);
 	}
 
 	private function create_install_themes_processor() {
@@ -82,6 +82,6 @@ class StepProcessorFactory {
 			$storage->add_downloader( new LocalThemeResourceDownloader($this->schema->get_unzipped_path()) );
 		}
 
-		return new InstallThemes($storage);
+		return new InstallTheme($storage);
 	}
 }

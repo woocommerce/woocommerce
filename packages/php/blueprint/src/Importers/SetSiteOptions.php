@@ -1,10 +1,11 @@
 <?php
+
 namespace Automattic\WooCommerce\Blueprint\Importers;
 
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 
-class SetOptions implements StepProcessor {
+class SetSiteOptions implements StepProcessor {
 	public function process($schema): StepProcessorResult {
 		$result = StepProcessorResult::success('SetOptions');
 		foreach ( $schema->options as $key => $value ) {
@@ -26,6 +27,6 @@ class SetOptions implements StepProcessor {
 	}
 
 	public function get_supported_step(): string {
-		return 'setOptions';
+		return 'setSiteOptions';
 	}
 }

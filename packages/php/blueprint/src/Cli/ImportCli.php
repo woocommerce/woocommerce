@@ -23,6 +23,6 @@ class ImportCli {
 		}
 
 		$is_success && \WP_CLI::success("$this->schema_path imported successfully");
-		!$is_success && \WP_CLI::error("Failed to import $this->schema_path. Run with --message=all to debug");
+		!$is_success && \WP_CLI::error("Failed to import $this->schema_path. Run with --show-messages=all to debug");
 	}
 }

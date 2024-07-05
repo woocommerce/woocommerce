@@ -5,20 +5,25 @@ namespace Automattic\WooCommerce\Blueprint\Importers;
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Automattic\WooCommerce\Blueprint\Util;
-use WC_Tax;
 
-class ConfigureCoreProfiler extends SetOptions {
+class DeletePlugin implements StepProcessor {
+
 	public function process($schema): StepProcessorResult {
-		$result = parent::process((object)array(
-			'options' => $schema->options
-		));
+		$result = StepProcessorResult::success('DeletePlugins');
+		$name = $schema->pluginName;
 
-		$result->set_step_name('ConfigureCoreProfiler');
+		$delete = Util::delete_plugin_by_slug($name);
+		if ($delete) {
+			$result->add_info("Deleted {$name}.");
+		} else {
+			$result->add_error("Unable to delete {$name}.");
+		}
+
 		return $result;
 	}
 
 
 	public function get_supported_step(): string {
-		return 'configureCoreProfiler';
+		return 'deletePlugin';
 	}
 }

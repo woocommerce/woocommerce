@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Plugin_Upgrader;
 
-class InstallPlugins implements StepProcessor {
+class InstallPlugin implements StepProcessor {
 	private ResourceStorage $storage;
 	private array $installed_plugin_paths = array();
 
@@ -18,31 +18,29 @@ class InstallPlugins implements StepProcessor {
 		$result = StepProcessorResult::success('InstallPlugins');
 
 		$installed_plugins = $this->get_installed_plugins_paths();
+		$plugin = $schema->pluginZipFile;
 
-		foreach ($schema->plugins as $plugin) {
-			if (isset($installed_plugins[$plugin->slug])) {
-				$result->add_info("Skipped installing {$plugin->slug}. It is already installed.");
-				continue;
-			}
-			if ($this->storage->is_supported_resource($plugin->resource) === false ) {
-				$result->add_error("Invalid resource type for {$plugin->slug}.");
-				continue;
-			}
+		if (isset($installed_plugins[$plugin->slug])) {
+			$result->add_info("Skipped installing {$plugin->slug}. It is already installed.");
+			return $result;
+		}
+		if ($this->storage->is_supported_resource($plugin->resource) === false ) {
+			$result->add_error("Invalid resource type for {$plugin->slug}.");
+			return $result;
+		}
 
-			$downloaded_path = $this->storage->download($plugin->slug, $plugin->resource);
-			if (! $downloaded_path ) {
-				$result->add_error("Unable to download {$plugin->slug} with {$plugin->resource} resource type.");
-				continue;
-			}
+		$downloaded_path = $this->storage->download($plugin->slug, $plugin->resource);
+		if (! $downloaded_path ) {
+			$result->add_error("Unable to download {$plugin->slug} with {$plugin->resource} resource type.");
+			return $result;
+		}
 
-			$install = $this->install($downloaded_path);
-			$install && $result->add_info("Installed {$plugin->slug}.");
+		$install = $this->install($downloaded_path);
+		$install && $result->add_info("Installed {$plugin->slug}.");
 
-			if ($plugin->activate === true) {
-				$activate = $this->activate($plugin->slug);
-				$activate && $result->add_info("Activated {$plugin->slug}.");
-			}
-
+		if ($plugin->activate === true) {
+			$activate = $this->activate($plugin->slug);
+			$activate && $result->add_info("Activated {$plugin->slug}.");
 		}
 
 		return $result;
@@ -85,6 +83,6 @@ class InstallPlugins implements StepProcessor {
 	}
 
 	public function get_supported_step(): string {
-		return 'installPlugins';
+		return 'installPlugin';
 	}
 }
