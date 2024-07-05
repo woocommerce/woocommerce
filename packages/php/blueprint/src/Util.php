@@ -65,30 +65,6 @@ class Util {
 		return false;
 	}
 
-	// Function to deactivate and delete a plugin by its slug
-	public static function delete_plugin_by_slug($slug) {
-		// Check if the necessary functions exist to avoid errors
-		if (!function_exists('deactivate_plugins') || !function_exists('delete_plugins')) {
-			return;
-		}
-
-		// Get all installed plugins
-		$all_plugins = get_plugins();
-
-		// Loop through all plugins to find the one with the specified slug
-		foreach ($all_plugins as $plugin_path => $plugin_info) {
-			// Check if the plugin path contains the slug
-			if (strpos($plugin_path, $slug . '/') === 0) {
-				// Deactivate the plugin
-				static::deactivate_plugin_by_slug($slug);
-
-				// Delete the plugin
-				return delete_plugins(array($plugin_path));
-			}
-		}
-		return false;
-	}
-
 	public static function array_filter_by_field($array, $field_name, $force_convert = false) {
 		if (!is_array($array) && $force_convert) {
 			$array = json_decode(json_encode($array), true);

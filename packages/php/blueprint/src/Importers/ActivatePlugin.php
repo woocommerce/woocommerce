@@ -5,15 +5,16 @@ namespace Automattic\WooCommerce\Blueprint\Importers;
 
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
-use Automattic\WooCommerce\Blueprint\Util;
+use Automattic\WooCommerce\Blueprint\UsePluginHelpers;
 
 class ActivatePlugin implements StepProcessor {
+	use UsePluginHelpers;
 
 	public function process($schema): StepProcessorResult {
 		$result = StepProcessorResult::success('DeactivatePlugins');
 		$name = $schema->pluginName;
 
-		$activate = Util::activate_plugin_by_slug($name);
+		$activate = $this->activate_plugin_by_slug($name);
 		$activate && $result->add_info("Activated {$name}.");
 		! $activate && $result->add_info("Unable to activate {$name}.");
 

@@ -85,4 +85,20 @@ trait UseWPFunctions {
 	public function wp_themes_api($action, $args = array()) {
 		return themes_api($action, $args);
 	}
+
+	public function wp_activate_plugin($plugin, $redirect = '', $network_wide = false, $silent = false) {
+		if (!function_exists('activate_plugin')) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		return activate_plugin($plugin, $redirect, $network_wide, $silent);
+	}
+
+	public function wp_delete_plugins($plugins) {
+		if (!function_exists('delete_plugins')) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		return delete_plugins($plugins);
+	}
 }
