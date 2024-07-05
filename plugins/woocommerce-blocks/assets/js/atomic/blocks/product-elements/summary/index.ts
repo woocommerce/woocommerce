@@ -13,16 +13,31 @@ import { supports } from './supports';
 import { BLOCK_ICON as icon } from './constants';
 import metadata from './block.json';
 
-const blockConfig: BlockConfiguration = {
+const deprecated = [
+	{
+		migrate: () => {
+			// We don't deprecate attributes, but adding new ones.
+			// For backwards compatibility, some new attributes require
+			// different defaults than new ones.
+			return {
+				showDescriptionIfEmpty: true,
+				summaryLength: 150,
+			};
+		},
+	},
+];
+
+const blockSettings: BlockConfiguration = {
 	...sharedConfig,
 	icon: { src: icon },
 	supports,
+	deprecated,
 	edit,
 };
 
 registerBlockSingleProductTemplate( {
 	blockName: 'woocommerce/product-summary',
 	blockMetadata: metadata,
-	blockSettings: blockConfig,
+	blockSettings,
 	isAvailableOnPostEditor: true,
 } );
