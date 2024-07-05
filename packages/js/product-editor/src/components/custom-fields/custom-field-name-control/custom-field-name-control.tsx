@@ -76,7 +76,7 @@ export const CustomFieldNameControl = forwardRef(
 		}: CustomFieldNameControlProps,
 		ref: ForwardedRef< HTMLInputElement >
 	) {
-		const comboboxRef = useRef< HTMLInputElement >();
+		const inputElementRef = useRef< HTMLInputElement >();
 		const id = useInstanceId(
 			CustomFieldNameControl,
 			'woocommerce-custom-field-name'
@@ -94,15 +94,15 @@ export const CustomFieldNameControl = forwardRef(
 			 * of a form
 			 */
 			function initializeRefs() {
-				comboboxRef.current = document.querySelector(
+				inputElementRef.current = document.querySelector(
 					`.${ id } [role="combobox"]`
 				) as HTMLInputElement;
 
 				if ( ref ) {
 					if ( typeof ref === 'function' ) {
-						ref( comboboxRef.current );
+						ref( inputElementRef.current );
 					} else {
-						ref.current = comboboxRef.current;
+						ref.current = inputElementRef.current;
 					}
 				}
 			},
@@ -130,16 +130,16 @@ export const CustomFieldNameControl = forwardRef(
 				 * on bluring
 				 */
 				function handleBlur( event: FocusEvent ) {
-					if ( comboboxRef.current ) {
-						comboboxRef.current.value = value;
+					if ( inputElementRef.current ) {
+						inputElementRef.current.value = value;
 					}
 					onBlur?.( event as never );
 				}
 
-				comboboxRef.current?.addEventListener( 'blur', handleBlur );
+				inputElementRef.current?.addEventListener( 'blur', handleBlur );
 
 				return () => {
-					comboboxRef.current?.removeEventListener(
+					inputElementRef.current?.removeEventListener(
 						'blur',
 						handleBlur
 					);
