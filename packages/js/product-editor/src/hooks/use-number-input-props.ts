@@ -75,7 +75,7 @@ export const useNumberInputProps = ( {
 			} else if ( sanitizeValue && numberValue <= min ) {
 				sanitizeValue = String( min );
 			}
-			onChange( sanitizeValue );
+			onChange( ! Number.isNaN( numberValue ) ? sanitizeValue : '' );
 		},
 	};
 	return numberInputProps;
