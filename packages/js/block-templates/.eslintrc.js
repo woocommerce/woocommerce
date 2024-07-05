@@ -9,4 +9,15 @@ module.exports = {
 			},
 		},
 	],
+	settings: {
+		'import/core-modules': [
+			'@wordpress/core-data',
+			'@woocommerce/expression-evaluation',
+		],
+		'import/resolver': {
+			node: {},
+			webpack: {},
+			typescript: {},
+		},
+	},
 };
