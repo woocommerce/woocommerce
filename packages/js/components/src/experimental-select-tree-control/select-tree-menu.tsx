@@ -41,6 +41,7 @@ export const SelectTreeMenu = ( {
 	items,
 	treeRef: ref,
 	onClose = () => {},
+	onEscape,
 	shouldShowCreateButton,
 	onFirstItemLoop,
 	...props
@@ -136,6 +137,7 @@ export const SelectTreeMenu = ( {
 										shouldShowCreateButton
 									}
 									onFirstItemLoop={ onFirstItemLoop }
+									onEscape={ onEscape }
 									style={ {
 										width: boundingRect?.width,
 									} }

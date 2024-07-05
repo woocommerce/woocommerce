@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { chevronDown, chevronUp } from '@wordpress/icons';
+import { chevronDown, chevronUp, closeSmall } from '@wordpress/icons';
 import classNames from 'classnames';
 import {
 	createElement,
@@ -10,7 +10,7 @@ import {
 	Fragment,
 } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
-import { BaseControl, TextControl } from '@wordpress/components';
+import { BaseControl, Button, TextControl } from '@wordpress/components';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
@@ -36,6 +36,8 @@ interface SelectTreeProps extends TreeControlProps {
 	help?: string | JSX.Element;
 	onInputChange?: ( value: string | undefined ) => void;
 	initialInputValue?: string | undefined;
+	isClearingAllowed?: boolean;
+	onClear?: () => void;
 }
 
 export const SelectTree = function SelectTree( {
@@ -47,6 +49,8 @@ export const SelectTree = function SelectTree( {
 	onInputChange,
 	shouldShowCreateButton,
 	help = __( 'Separate with commas or the Enter key.', 'woocommerce' ),
+	isClearingAllowed = false,
+	onClear = () => {},
 	...props
 }: SelectTreeProps ) {
 	const linkedTree = useLinkedTree( items );
@@ -187,6 +191,12 @@ export const SelectTree = function SelectTree( {
 		value: inputValue,
 	};
 
+	const handleClear = () => {
+		if ( isClearingAllowed ) {
+			onClear();
+		}
+	};
+
 	return (
 		<div
 			id={ selectTreeInstanceId }
@@ -224,11 +234,21 @@ export const SelectTree = function SelectTree( {
 								} }
 								inputProps={ inputProps }
 								suffix={
-									<SuffixIcon
-										icon={
-											isOpen ? chevronUp : chevronDown
-										}
-									/>
+									<div className="woocommerce-experimental-select-control__suffix-items">
+										{ isClearingAllowed && isOpen && (
+											<Button onClick={ handleClear }>
+												<SuffixIcon
+													className="woocommerce-experimental-select-control__icon-clear"
+													icon={ closeSmall }
+												/>
+											</Button>
+										) }
+										<SuffixIcon
+											icon={
+												isOpen ? chevronUp : chevronDown
+											}
+										/>
+									</div>
 								}
 							>
 								<SelectedItems

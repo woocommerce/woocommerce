@@ -78,6 +78,10 @@ type BaseTreeProps = {
 	onTreeBlur?(): void;
 
 	onFirstItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;
+	/**
+	 * Called when the escape key is pressed.
+	 */
+	onEscape?(): void;
 };
 
 export type TreeProps = BaseTreeProps &
