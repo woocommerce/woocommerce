@@ -11,6 +11,7 @@ import { VARIATION_NAME as PRODUCT_SUMMARY_VARIATION_NAME } from '@woocommerce/b
  * Internal dependencies
  */
 import { OnClickCallbackParameter } from './types';
+import { useIsDescendentOfSingleProductTemplate } from 'assets/js/atomic/blocks/product-elements/shared/use-is-descendent-of-single-product-template';
 
 const getBlockifiedTemplate = () =>
 	[
@@ -40,9 +41,8 @@ const getBlockifiedTemplate = () =>
 					createBlock( 'woocommerce/product-price', {
 						fontSize: 'large',
 					} ),
-					createBlock( 'core/post-excerpt', {
-						__woocommerceNamespace: PRODUCT_SUMMARY_VARIATION_NAME,
-						excerptLength: 100,
+					createBlock( 'woocommerce/product-summary', {
+						useIsDescendentOfSingleProductTemplate: true,
 					} ),
 					createBlock( 'woocommerce/add-to-cart-form' ),
 					createBlock( 'woocommerce/product-meta' ),
