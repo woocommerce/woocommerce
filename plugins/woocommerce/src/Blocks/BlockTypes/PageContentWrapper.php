@@ -75,21 +75,19 @@ class PageContentWrapper extends AbstractBlock {
 			}
 
 			foreach ( $matches as $index => $match ) {
-				// Skip modifying if postId is already set.
-				if ( ! empty( $blocks[ $index ]['attrs']['postId'] ) ) {
-					continue;
-				}
+				// Keep the changed attributes separate so we can  avoid overwriting any that are already set.
+				$new_attributes = [ 'postType' => 'page' ];
 
 				// If there's no page attribute, skip modifying because we won't be able to tell which post ID to assign.
-				if ( empty( $blocks[ $index ]['attrs']['page'] ) ) {
+				if ( empty( $blocks[ $index ]['attrs']['page'] ) || ! is_array( $blocks[ $index ] ) || ! is_array( $blocks[ $index ]['attrs'] ) ) {
 					continue;
 				}
 
 				if ( 'cart' === $blocks[ $index ]['attrs']['page'] ) {
-					$blocks[ $index ]['attrs']['postId'] = wc_get_page_id( 'cart' );
+					$new_attributes['postId'] = wc_get_page_id( 'cart' );
 				}
 				if ( 'checkout' === $blocks[ $index ]['attrs']['page'] ) {
-					$blocks[ $index ]['attrs']['postId'] = wc_get_page_id( 'checkout' );
+					$new_attributes['postId'] = wc_get_page_id( 'checkout' );
 				}
 
 				// If we still don't have a post ID after the checks, skip modifying. This will happen if page was not cart or checkout.
@@ -97,7 +95,14 @@ class PageContentWrapper extends AbstractBlock {
 					continue;
 				}
 
-				$new_block                      = '<!-- wp:woocommerce/page-content-wrapper { "page": "' . $blocks[ $index ]['attrs']['page'] . '", "postId": ' . $blocks[ $index ]['attrs']['postId'] . ', "postType": "page" } -->';
+				// Merge the existing attributes with the ones that were added.
+				$final_attributes = array_replace( $new_attributes, $blocks[ $index ]['attrs'] );
+				if ( is_string( $final_attributes['postId'] ) ) {
+					$final_attributes['postId'] = (int) $final_attributes['postId'];
+				}
+				$json_final_attributes = wp_json_encode( $final_attributes, JSON_NUMERIC_CHECK );
+
+				$new_block                      = '<!-- wp:woocommerce/page-content-wrapper ' . $json_final_attributes . ' -->';
 				$page_wrapper_template->content = str_replace( $match, $new_block, $page_wrapper_template->content );
 			}
 			$block_templates[ $template_index ] = $page_wrapper_template;
