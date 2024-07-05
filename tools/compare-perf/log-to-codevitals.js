@@ -15,14 +15,11 @@ const resultsFiles = [
 		metricsPrefix: 'product-editor-',
 	},
 ];
+const ARTIFACTS_PATH =
+	process.env.WP_ARTIFACTS_PATH || path.join( process.cwd(), 'artifacts' );
 
 const performanceResults = resultsFiles.map( ( { file } ) =>
-	JSON.parse(
-		fs.readFileSync(
-			path.join( process.env.WP_ARTIFACTS_PATH, file ),
-			'utf8'
-		)
-	)
+	JSON.parse( fs.readFileSync( path.join( ARTIFACTS_PATH, file ), 'utf8' ) )
 );
 
 const data = new TextEncoder().encode(

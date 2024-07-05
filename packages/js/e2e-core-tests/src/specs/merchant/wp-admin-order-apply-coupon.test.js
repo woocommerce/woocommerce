@@ -88,7 +88,7 @@ const runOrderApplyCouponTest = () => {
 
 			await uiUnblocked();
 
-			await utils.waitForTimeout( 2000 ); // to avoid flakyness
+			await utils.waitForTimeout( 2000 ); // to avoid flakiness
 
 			// Verify the coupon pricing has been removed
 			await expect( page ).not.toMatchElement(
