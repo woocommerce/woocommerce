@@ -2,8 +2,13 @@
     "name": "woocommerce/blueprint",
     "autoload": {
         "psr-4": {
-            "Automattic\\WooCommerce\\Blueprint\\": "src/"
-        }
+            "Automattic\\WooCommerce\\Blueprint\\": "src/",
+		  	"Automattic\\WooCommerce\\Blueprint\\Tests\\": "tests/"
+		}
     },
-    "require": {}
+    "require": {},
+    "require-dev": {
+    	"phpunit/phpunit": "^9",
+        "mockery/mockery": "^1.5"
+    }
 }

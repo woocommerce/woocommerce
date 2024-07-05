@@ -3,21 +3,18 @@
 namespace Automattic\WooCommerce\Blueprint\Exporters;
 
 use Automattic\WooCommerce\Blueprint\Steps\InstallPlugin;
+use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 
 class ExportInstallPluginSteps implements StepExporter {
+
+	use UseWPFunctions;
+
 	private bool $include_private_plugins = false;
 	public function include_private_plugins(bool $boolean) {
 		$this->include_private_plugins = $boolean;
 	}
 	public function export() {
-		if (!function_exists('is_plugin_active') || !function_exists('get_plugins')) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-
-		if ( ! function_exists( 'plugins_api' ) ) {
-			require_once ABSPATH . '/wp-admin/includes/plugin-install.php';
-		}
-		$plugins = get_plugins();
+		$plugins = $this->wp_get_plugins();
 
 		// @todo temporary fix for JN site -- it includes WooCommerce as a custom plugin
 		// since JN sites are using a different slug.
@@ -32,7 +29,7 @@ class ExportInstallPluginSteps implements StepExporter {
 			if ($slug === '.') {
 				$slug = pathinfo($path)['filename'];
 			}
-			$info = \plugins_api(
+			$info = $this->wp_plugins_api(
 				'plugin_information',
 				array(
 					'slug'   => $slug,
@@ -52,7 +49,7 @@ class ExportInstallPluginSteps implements StepExporter {
 				$slug,
 				$resource,
 				array(
-					'activate' => \is_plugin_active($path)
+					'activate' => $this->wp_is_plugin_active($path)
 				)
 			);
 		}
