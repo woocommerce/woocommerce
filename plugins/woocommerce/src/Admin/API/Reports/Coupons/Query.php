@@ -29,7 +29,7 @@ class Query extends ReportsQuery {
 	/**
 	 * Valid fields for Products report.
 	 *
- 	 * @deprecated 9.1 Coupons\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
+	 * @deprecated 9.1 Coupons\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
 	 *
 	 * @return array
 	 */
@@ -42,7 +42,7 @@ class Query extends ReportsQuery {
 	/**
 	 * Get product data based on the current query vars.
 	 *
- 	 * @deprecated 9.1 Coupons\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
+	 * @deprecated 9.1 Coupons\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
 	 *
 	 * @return array
 	 */

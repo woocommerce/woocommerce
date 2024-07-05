@@ -6,13 +6,13 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Taxes;
-use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use WP_REST_Request;
 use WP_REST_Response;
 

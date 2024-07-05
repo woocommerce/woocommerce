@@ -58,10 +58,25 @@ class GenericQuery extends \WC_Object_Query {
 	 */
 	public function get_data() {
 		$snake_name = str_replace( '-', '_', $this->name );
+		/**
+		 * Filter query args given for the report.
+		 *
+		 * @since 9.0.0
+		 *
+		 * @param array $query_args Query args.
+		 */
 		$args = apply_filters( "woocommerce_analytics_{$snake_name}_query_args", $this->get_query_vars() );
 
 		$data_store = \WC_Data_Store::load( "report-{$this->name}" );
 		$results    = $data_store->get_data( $args );
+		/**
+		 * Filter report query results.
+		 *
+		 * @since 9.0.0
+		 *
+		 * @param stdClass|WP_Error $results Results from the data store.
+		 * @param array             $args    Query args used to get the data (potentially filtered).
+		 */
 		return apply_filters( "woocommerce_analytics_{$snake_name}_select_query", $results, $args );
 	}
 }

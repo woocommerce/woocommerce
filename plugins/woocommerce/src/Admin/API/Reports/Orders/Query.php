@@ -18,6 +18,7 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Orders;
+
 use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 defined( 'ABSPATH' ) || exit;
@@ -27,10 +28,23 @@ defined( 'ABSPATH' ) || exit;
  * API\Reports\Orders\Query
  */
 class Query extends GenericQuery {
+
+	/**
+	 * Specific query name.
+	 * Will be used to load the `report-{name}` data store,
+	 * and to call `woocommerce_analytics_{snake_case(name)}_*` filters.
+	 *
+	 * @var string
+	 */
 	protected $name = 'orders';
 
+
+	/**
+	 * Get the default allowed query vars.
+	 *
+	 * @return array
+	 */
 	protected function get_default_query_vars() {
 		return \WC_Object_Query::get_default_query_vars();
 	}
-
 }

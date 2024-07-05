@@ -16,6 +16,7 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Orders\Stats;
+
 use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 defined( 'ABSPATH' ) || exit;
@@ -25,6 +26,13 @@ defined( 'ABSPATH' ) || exit;
  */
 class Query extends GenericQuery {
 
+	/**
+	 * Specific query name.
+	 * Will be used to load the `report-{name}` data store,
+	 * and to call `woocommerce_analytics_{snake_case(name)}_*` filters.
+	 *
+	 * @var string
+	 */
 	protected $name = 'orders-stats';
 
 	/**

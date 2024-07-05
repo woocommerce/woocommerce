@@ -6,13 +6,13 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Variations;
-use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 /**
  * REST API Reports products controller class.

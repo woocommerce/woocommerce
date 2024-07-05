@@ -6,10 +6,10 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Downloads\Stats;
-use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
 use WP_REST_Request;
 use WP_REST_Response;
