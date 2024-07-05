@@ -3,6 +3,7 @@
  */
 import type { BlockConfiguration } from '@wordpress/blocks';
 import { registerBlockSingleProductTemplate } from '@woocommerce/atomic-utils';
+import { isEmptyObject } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -15,19 +16,19 @@ import metadata from './block.json';
 
 const deprecated = [
 	{
-		attributes: {},
 		save: sharedConfig.save,
 		migrate: ( attributes ) => {
 			// We don't deprecate attributes, but adding new ones.
 			// For backwards compatibility, some new attributes require
 			// different defaults than new ones.
+			console.log( 'migration' );
 			return {
 				...attributes,
 				showDescriptionIfEmpty: true,
 				summaryLength: 150,
 			};
 		},
-		isEligible: ( attributes ) => attributes?.isDescendantOfAllProducts,
+		isEligible: ( attributes ) => isEmptyObject( attributes ),
 	},
 ];
 
