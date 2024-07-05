@@ -68,7 +68,7 @@ class DefaultPaymentGateways {
 					(object) array(
 						'type'     => 'or',
 						'operands' => array(
-							array(
+							(object) array(
 								'type'    => 'not',
 								'operand' => [
 									(object) array(
@@ -77,7 +77,7 @@ class DefaultPaymentGateways {
 									),
 								],
 							),
-							array(
+							(object) array(
 								'type'         => 'option',
 								'transformers' => array(
 									// Extract only the 'data' key from the option.
