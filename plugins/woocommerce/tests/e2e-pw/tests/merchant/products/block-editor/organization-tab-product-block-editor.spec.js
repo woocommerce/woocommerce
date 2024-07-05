@@ -21,7 +21,7 @@ const tagName = `my-tag-${ new Date().getTime().toString() }`;
 
 test.describe.configure( { mode: 'serial' } );
 
-test.describe( 'General tab', () => {
+test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Create product - Organization tab', () => {
 		let productId;
 
@@ -38,12 +38,6 @@ test.describe( 'General tab', () => {
 			await page
 				.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
 				.fill( productData.name );
-			await page
-				.locator(
-					'[data-template-block-id="basic-details"] .components-summary-control'
-				)
-				.last()
-				.fill( productData.summary );
 
 			const regularPrice = page
 				.locator( 'input[name="regular_price"]' )
@@ -58,6 +52,13 @@ test.describe( 'General tab', () => {
 			await salePrice.waitFor( { state: 'visible' } );
 			await salePrice.click();
 			await salePrice.fill( productData.salePrice );
+
+			await page
+				.locator(
+					'[data-template-block-id="basic-details"] .components-summary-control'
+				)
+				.last()
+				.fill( productData.summary );
 
 			await clickOnTab( 'Organization', page );
 

@@ -1,3 +1,9 @@
+---
+post_title: Cart and Checkout - Payment method integration for the Checkout block
+menu_title: Payment Method Integration
+tags: reference, checkout-payment-methods
+---
+
 # Payment Method Integration for the Checkout Block <!-- omit in toc -->
 
 The checkout block has an API interface for payment methods to integrate that consists of both a server side and client side implementation.
@@ -257,13 +263,3 @@ function my_extension_woocommerce_blocks_support() {
 ```
 
 As an example, you can see how the Stripe extension adds it's integration in this [pull request](https://github.com/woocommerce/woocommerce-gateway-stripe/pull/1467/files).
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-payment-methods/payment-method-integration.md)
-
-<!-- /FEEDBACK -->

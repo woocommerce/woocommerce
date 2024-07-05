@@ -332,7 +332,7 @@ class WC_Meta_Box_Product_Data {
 		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : 'simple' );
 		$product      = new $classname( $post_id );
 		$attributes   = self::prepare_attributes();
-		$stock        = 0;
+		$stock        = null;
 
 		// Handle stock changes.
 		if ( isset( $_POST['_stock'] ) ) {
@@ -483,7 +483,7 @@ class WC_Meta_Box_Product_Data {
 				}
 				$variation_id = absint( $_POST['variable_post_id'][ $i ] );
 				$variation    = wc_get_product_object( 'variation', $variation_id );
-				$stock        = 0;
+				$stock        = null;
 
 				// Handle stock changes.
 				if ( isset( $_POST['variable_stock'], $_POST['variable_stock'][ $i ] ) ) {

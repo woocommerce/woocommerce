@@ -42,6 +42,7 @@ export const SelectTreeMenu = ( {
 	items,
 	treeRef: ref,
 	onClose = () => {},
+	onEscape,
 	shouldShowCreateButton,
 	...props
 }: MenuProps ) => {
@@ -135,6 +136,7 @@ export const SelectTreeMenu = ( {
 									shouldShowCreateButton={
 										shouldShowCreateButton
 									}
+									onEscape={ onEscape }
 									style={ {
 										width: boundingRect?.width,
 									} }

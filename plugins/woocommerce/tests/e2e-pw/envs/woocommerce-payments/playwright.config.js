@@ -7,7 +7,7 @@ config = {
 	projects: [
 		{
 			name: 'WooPayments',
-			testMatch: /.*basic\/*/,
+			grep: /@payments/,
 		},
 	],
 };
