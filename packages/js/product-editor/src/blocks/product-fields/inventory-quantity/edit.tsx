@@ -44,6 +44,8 @@ export function Edit( {
 		'product_stock_quantity'
 	) as string;
 
+	const errorContext = 'inventory';
+
 	const {
 		ref: stockQuantityRef,
 		error: stockQuantityValidationError,
@@ -52,10 +54,13 @@ export function Edit( {
 		`stock_quantity-${ clientId }`,
 		async function stockQuantityValidator() {
 			if ( manageStock && stockQuantity && stockQuantity < 0 ) {
-				return __(
-					'Stock quantity must be a positive number.',
-					'woocommerce'
-				);
+				return {
+					message: __(
+						'Stock quantity must be a positive number.',
+						'woocommerce'
+					),
+					context: errorContext,
+				};
 			}
 		},
 		[ manageStock, stockQuantity ]

@@ -1,26 +1,18 @@
-// export type ValidatorResponse = Promise< {
-// 	message?: ValidatorResponse;
-// 	context?: string;
-// } >;
 export type ValidatorResponse = Promise< ValidationError >;
 
 export type Validator< T > = (
 	initialValue?: T,
 	newData?: Record< string, unknown >
 ) => ValidatorResponse;
-// export type Validator< T > = (
-// 	initialValue?: T,
-// 	newData?: Record< string, unknown >
-// ) => ValidatorResponse | Promise< { message?: ValidatorResponse; context?: string } >;
 
 export type ValidationContextProps< T > = {
-	errors: { message?: ValidationErrors; context?: string };
+	errors: ValidationErrors;
 	registerValidator(
 		validatorId: string,
 		validator: Validator< T >
 	): React.Ref< HTMLElement >;
 	unRegisterValidator( validatorId: string ): void;
-	getFieldAndTabByValidatorId: ( validatorId: string ) => void;
+	getFieldByValidatorId: ( validatorId: string ) => Promise< HTMLElement >;
 	validateField(
 		name: string,
 		newData?: Record< string, unknown >,
@@ -34,7 +26,6 @@ export type ValidationProviderProps = {
 	productId: number;
 };
 
-// export type ValidationError = string | undefined;
 export type ValidationError =
 	| { message?: string; context?: string }
 	| undefined;

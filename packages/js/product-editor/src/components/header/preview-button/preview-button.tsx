@@ -15,7 +15,6 @@ import { useErrorHandler } from '../../../hooks/use-error-handler';
 import { usePreview } from '../hooks/use-preview';
 import { PreviewButtonProps } from './types';
 import { TRACKS_SOURCE } from '../../../constants';
-// import { getProductErrorMessageAndProps } from '../../../utils/get-product-error-message-and-props';
 
 export function PreviewButton( {
 	productStatus,

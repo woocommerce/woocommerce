@@ -10,11 +10,10 @@ import { Product, ProductStatus, PRODUCTS_STORE_NAME } from '@woocommerce/data';
  * Internal dependencies
  */
 import { useValidations } from '../../contexts/validation-context';
-import type { WPError } from '../../utils/get-product-error-message-and-props';
+import type { WPError } from '../../hooks/use-error-handler';
 import { AUTO_DRAFT_NAME } from '../../utils/constants';
 
 export function errorHandler( error: WPError, productStatus: ProductStatus ) {
-	// console.log( 'errorHandler ->', error );
 	if ( error.code ) {
 		return error;
 	}
@@ -26,12 +25,14 @@ export function errorHandler( error: WPError, productStatus: ProductStatus ) {
 		};
 	}
 
-	const errorMessage = Object.values( error ).find(
-		( value ) => value !== undefined
-	) as { validatorId?: string; message?: string; context?: string };
-	// const errorMessage = Object.values( error ).find(
-	// 	( value ) => value !== undefined
-	// ) as string | undefined;
+	const errorMessageEntry = Object.entries( error ).find(
+		( [ , value ] ) => value !== undefined
+	) as [ string, unknown ] | undefined;
+
+	const errorMessage =
+		errorMessageEntry && typeof errorMessageEntry[ 1 ] === 'object'
+			? { validatorId: errorMessageEntry[ 0 ], ...errorMessageEntry[ 1 ] }
+			: undefined;
 
 	if ( errorMessage !== undefined ) {
 		return {

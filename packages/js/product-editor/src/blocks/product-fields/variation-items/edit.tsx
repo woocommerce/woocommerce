@@ -100,6 +100,8 @@ export function Edit( {
 			itemsWithoutPriceNoticeDismissed,
 	} = useUserPreferences();
 
+	const errorContext = 'variations';
+
 	const { ref: variationTableRef } = useValidation< Product >(
 		`variations`,
 		async function regularPriceValidator( defaultValue, newData ) {
@@ -125,10 +127,13 @@ export function Edit( {
 						},
 					} );
 				}
-				return __(
-					'Set variation prices before adding this product.',
-					'woocommerce'
-				);
+				return {
+					message: __(
+						'Set variation prices before adding this product.',
+						'woocommerce'
+					),
+					context: errorContext,
+				};
 			}
 		},
 		[ totalCountWithoutPrice ]

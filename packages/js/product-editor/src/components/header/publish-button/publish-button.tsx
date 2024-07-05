@@ -14,7 +14,6 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { store as productEditorUiStore } from '../../../store/product-editor-ui';
-import { getProductErrorMessageAndProps } from '../../../utils/get-product-error-message-and-props';
 import { recordProductEvent } from '../../../utils/record-product-event';
 import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
 import { TRACKS_SOURCE } from '../../../constants';
@@ -22,6 +21,7 @@ import { usePublish } from '../hooks/use-publish';
 import { PublishButtonMenu } from './publish-button-menu';
 import { showSuccessNotice } from './utils';
 import type { PublishButtonProps } from './types';
+import { useErrorHandler } from '../../../hooks/use-error-handler';
 
 export function PublishButton( {
 	productType = 'product',
@@ -33,6 +33,7 @@ export function PublishButton( {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { maybeShowFeedbackBar } = useFeedbackBar();
 	const { openPrepublishPanel } = useDispatch( productEditorUiStore );
+	const { getProductErrorMessageAndProps } = useErrorHandler();
 
 	const [ editedStatus, , prevStatus ] = useEntityProp< Product[ 'status' ] >(
 		'postType',

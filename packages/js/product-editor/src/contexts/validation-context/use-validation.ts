@@ -30,9 +30,6 @@ export function useValidation< T >(
 		};
 	}, [] );
 
-	// console.log( '-------->>>>>>2 errorContext', errorContext );
-	// console.log( 'context.errors[ validatorId ]', context.errors[ validatorId ] );
-
 	return {
 		ref,
 		error: context.errors[ validatorId ]?.message,
