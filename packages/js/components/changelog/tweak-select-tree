@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Use default cursor for everything in select and tree components
+
+
