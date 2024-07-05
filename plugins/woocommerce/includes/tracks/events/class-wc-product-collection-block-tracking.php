@@ -249,6 +249,8 @@ class WC_Product_Collection_Block_Tracking {
 
 		$query_attrs = $block['attrs']['query'] ?? array();
 		$filters     = array(
+			'inherit'      => 'no',
+			'order-by'     => 'no',
 			'on-sale'      => 'no',
 			'stock-status' => 'no',
 			'handpicked'   => 'no',
@@ -260,6 +262,14 @@ class WC_Product_Collection_Block_Tracking {
 			'created'      => 'no',
 			'price'        => 'no',
 		);
+
+		if ( ! empty( $query_attrs['inherit'] ) && true === $query_attrs['inherit']) {
+			$filters['inherit'] = 'yes';
+		}
+
+		if ( ( ! empty( $query_attrs['order'] ) && 'asc' !== $query_attrs['order'] ) || ( ! empty( $query_attrs['orderBy'] ) && 'title' !== $query_attrs['orderBy'] ) ) {
+			$filters['order-by'] = 'yes';
+		}
 
 		if ( ! empty( $query_attrs['woocommerceOnSale'] ) ) {
 			$filters['on-sale'] = 'yes';
