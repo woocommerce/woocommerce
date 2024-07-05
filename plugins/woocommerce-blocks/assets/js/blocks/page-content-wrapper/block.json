@@ -21,8 +21,8 @@
 			"default": ""
 		},
 		"postType": {
-			"type": "page",
-			"default": ""
+			"type": "string",
+			"default": "page"
 		}
 	},
 	"providesContext": {
