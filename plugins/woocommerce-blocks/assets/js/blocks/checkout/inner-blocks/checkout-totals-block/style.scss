@@ -3,8 +3,6 @@
 		display: block;
 		color: inherit;
 		flex-grow: 1;
-		// Required by IE11.
-		flex-basis: 0;
 	}
 	.wc-block-components-totals-footer-item {
 		margin: 0;

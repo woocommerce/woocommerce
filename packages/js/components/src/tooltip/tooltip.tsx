@@ -73,6 +73,8 @@ export const Tooltip: React.FC< TooltipProps > = ( {
 					<Popover
 						focusOnMount="container"
 						position={ position }
+						// @ts-expect-error this prop does exist
+						inline
 						className="woocommerce-tooltip__text"
 						onFocusOutside={ ( event: FocusEvent ) => {
 							if (

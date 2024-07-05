@@ -77,119 +77,218 @@ describe( 'Activity Panels', () => {
 			} );
 		} );
 
-		it( 'only shows links for automated tax when supported', () => {
-			const taxjarPluginEnabled = render(
-				<HelpPanel
-					countryCode="US"
-					taskLists={ [
-						{
-							id: 'setup',
-							tasks: [
-								{
-									id: 'tax',
-									additionalData: {
-										woocommerceTaxCountries: [ 'US' ],
-										taxJarActivated: true,
+		describe( 'only shows links for WooCommerce Tax (powered by WCS&T) when supported', () => {
+			it( 'displays if no conflicting conditions are present', () => {
+				const supportedCountry = render(
+					<HelpPanel
+						countryCode="US"
+						taskLists={ [
+							{
+								id: 'setup',
+								tasks: [
+									{
+										id: 'tax',
+										additionalData: {
+											woocommerceTaxCountries: [ 'US' ],
+											taxJarActivated: false,
+										},
 									},
-								},
-							],
-						},
-					] }
-					taskName="tax"
-				/>
-			);
+								],
+							},
+						] }
+						taskName="tax"
+					/>
+				);
 
-			expect(
-				taxjarPluginEnabled.queryByText( /WooCommerce Tax/ )
-			).toBeNull();
+				expect(
+					supportedCountry.getByText( /WooCommerce Tax/ )
+				).toBeDefined();
+			} );
 
-			const unSupportedCountry = render(
-				<HelpPanel
-					countryCode="NZ"
-					taskLists={ [
-						{
-							id: 'setup',
-							tasks: [
-								{
-									id: 'tax',
-									additionalData: {
-										woocommerceTaxCountries: [ 'US' ],
-										taxJarActivated: false,
+			it( 'does not display if the TaxJar plugin is active', () => {
+				const taxjarPluginEnabled = render(
+					<HelpPanel
+						countryCode="US"
+						taskLists={ [
+							{
+								id: 'setup',
+								tasks: [
+									{
+										id: 'tax',
+										additionalData: {
+											woocommerceTaxCountries: [ 'US' ],
+											taxJarActivated: true,
+										},
 									},
-								},
-							],
-						},
-					] }
-					taskName="tax"
-				/>
-			);
+								],
+							},
+						] }
+						taskName="tax"
+					/>
+				);
 
-			expect(
-				unSupportedCountry.queryByText( /WooCommerce Tax/ )
-			).toBeNull();
+				expect(
+					taxjarPluginEnabled.queryByText( /WooCommerce Tax/ )
+				).toBeNull();
+			} );
 
-			const supportedCountry = render(
-				<HelpPanel
-					countryCode="US"
-					taskLists={ [
-						{
-							id: 'setup',
-							tasks: [
-								{
-									id: 'tax',
-									additionalData: {
-										woocommerceTaxCountries: [ 'US' ],
-										taxJarActivated: false,
+			it( 'does not display if in an unsupported country', () => {
+				const unSupportedCountry = render(
+					<HelpPanel
+						countryCode="NZ"
+						taskLists={ [
+							{
+								id: 'setup',
+								tasks: [
+									{
+										id: 'tax',
+										additionalData: {
+											woocommerceTaxCountries: [ 'US' ],
+											taxJarActivated: false,
+										},
 									},
-								},
-							],
-						},
-					] }
-					taskName="tax"
-				/>
-			);
+								],
+							},
+						] }
+						taskName="tax"
+					/>
+				);
 
-			expect(
-				supportedCountry.getByText( /WooCommerce Tax/ )
-			).toBeDefined();
+				expect(
+					unSupportedCountry.queryByText( /WooCommerce Tax/ )
+				).toBeNull();
+			} );
+
+			it( 'does not display if the WooCommerce Tax plugin is active', () => {
+				const woocommerceTaxActivated = render(
+					<HelpPanel
+						countryCode="US"
+						taskLists={ [
+							{
+								id: 'setup',
+								tasks: [
+									{
+										id: 'tax',
+										additionalData: {
+											woocommerceTaxCountries: [ 'US' ],
+											taxJarActivated: false,
+											woocommerceTaxActivated: true,
+										},
+									},
+								],
+							},
+						] }
+						taskName="tax"
+					/>
+				);
+
+				expect(
+					woocommerceTaxActivated.queryByText( /WooCommerce Tax/ )
+				).toBeNull();
+			} );
+
+			it( 'does not display if the WooCommerce Shipping plugin is active', () => {
+				const woocommerceShippingActivated = render(
+					<HelpPanel
+						countryCode="US"
+						taskLists={ [
+							{
+								id: 'setup',
+								tasks: [
+									{
+										id: 'tax',
+										additionalData: {
+											woocommerceTaxCountries: [ 'US' ],
+											taxJarActivated: false,
+											woocommerceTaxActivated: false,
+											woocommerceShippingActivated: true,
+										},
+									},
+								],
+							},
+						] }
+						taskName="tax"
+					/>
+				);
+
+				expect(
+					woocommerceShippingActivated.queryByText(
+						/WooCommerce Tax/
+					)
+				).toBeNull();
+			} );
 		} );
 
-		it( 'only shows links for WooCommerce Shipping when supported', () => {
-			const wcsActive = render(
-				<HelpPanel
-					activePlugins={ [ 'woocommerce-services' ] }
-					countryCode="US"
-					taskName="shipping"
-				/>
-			);
+		describe( 'only shows links for WooCommerce Shipping (powered by WCS&T) when supported', () => {
+			it( 'displays if no conflicting conditions are present', () => {
+				const supportedCountry = render(
+					<HelpPanel
+						activePlugins={ [] }
+						countryCode="US"
+						taskName="shipping"
+					/>
+				);
 
-			expect(
-				wcsActive.queryByText( /WooCommerce Shipping/ )
-			).toBeNull();
+				expect(
+					supportedCountry.getByText( /WooCommerce Shipping/ )
+				).toBeDefined();
+			} );
 
-			const unSupportedCountry = render(
-				<HelpPanel
-					activePlugins={ [ 'woocommerce-services' ] }
-					countryCode="UK"
-					taskName="shipping"
-				/>
-			);
+			it( 'does not display if the WooCommerce Shipping & Tax plugin is active', () => {
+				const wcsActive = render(
+					<HelpPanel
+						activePlugins={ [ 'woocommerce-services' ] }
+						countryCode="US"
+						taskName="shipping"
+					/>
+				);
 
-			expect(
-				unSupportedCountry.queryByText( /WooCommerce Shipping/ )
-			).toBeNull();
+				expect(
+					wcsActive.queryByText( /WooCommerce Shipping/ )
+				).toBeNull();
+			} );
 
-			const supportedCountry = render(
-				<HelpPanel
-					activePlugins={ [] }
-					countryCode="US"
-					taskName="shipping"
-				/>
-			);
+			it( 'does not display if the WooCommerce Shipping plugin is active', () => {
+				const wcsActive = render(
+					<HelpPanel
+						activePlugins={ [ 'woocommerce-shipping' ] }
+						countryCode="US"
+						taskName="shipping"
+					/>
+				);
 
-			expect(
-				supportedCountry.getByText( /WooCommerce Shipping/ )
-			).toBeDefined();
+				expect(
+					wcsActive.queryByText( /WooCommerce Shipping/ )
+				).toBeNull();
+			} );
+
+			it( 'does not display if the WooCommerce Tax plugin is active', () => {
+				const wcsActive = render(
+					<HelpPanel
+						activePlugins={ [ 'woocommerce-tax' ] }
+						countryCode="US"
+						taskName="shipping"
+					/>
+				);
+
+				expect(
+					wcsActive.queryByText( /WooCommerce Shipping/ )
+				).toBeNull();
+			} );
+
+			it( 'does not display if in an unsupported country', () => {
+				const unSupportedCountry = render(
+					<HelpPanel
+						activePlugins={ [] }
+						countryCode="UK"
+						taskName="shipping"
+					/>
+				);
+
+				expect(
+					unSupportedCountry.queryByText( /WooCommerce Shipping/ )
+				).toBeNull();
+			} );
 		} );
 
 		it( 'only shows links for home screen when supported', () => {

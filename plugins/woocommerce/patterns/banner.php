@@ -2,7 +2,7 @@
 /**
  * Title: Banner
  * Slug: woocommerce-blocks/banner
- * Categories: WooCommerce
+ * Categories: WooCommerce, featured-selling
  */
 
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;

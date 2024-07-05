@@ -278,7 +278,7 @@ export function Header( {
 					<MoreMenu />
 				</div>
 			</div>
-			<Tabs onChange={ onTabSelect } />
+			<Tabs selected={ selectedTab } onChange={ onTabSelect } />
 		</div>
 	);
 }

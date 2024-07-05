@@ -211,13 +211,17 @@ export const VariationsTable = forwardRef<
 		variation: PartialProductVariation,
 		showSuccess = true
 	) {
+		const { id, ...changes } = variation;
+
 		onUpdate( variation )
 			.then( ( response ) => {
 				recordEvent( 'product_variations_change', {
 					source: TRACKS_SOURCE,
 					product_id: productId,
 					variation_id: variation.id,
+					updated_options: Object.keys( changes ),
 				} );
+
 				if ( showSuccess ) {
 					createSuccessNotice(
 						getSnackbarText(
