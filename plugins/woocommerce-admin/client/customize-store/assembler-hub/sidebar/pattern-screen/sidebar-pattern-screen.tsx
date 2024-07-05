@@ -33,7 +33,6 @@ import {
 import {
 	__experimentalBlockPatternsList as BlockPatternList,
 	store as blockEditorStore,
-	privateApis as blockEditorPrivateApis,
 	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/block-editor';
 
@@ -50,7 +49,7 @@ import {
 	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
 } from '../../utils/hero-pattern';
-import { COLOR_PALETTES } from '../global-styles/color-palette-variations/constants';
+import { useIsActiveNewNeutralVariation } from '../../hooks/use-is-active-new-neutral-variation';
 
 /**
  * Sorts patterns by category. For 'intro' and 'about' categories
@@ -99,19 +98,10 @@ const sortPatternsByCategory = (
 	} );
 };
 
-const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
-
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const { patterns, isLoading } = usePatternsByCategory( category );
 
-	// @ts-expect-error No types for this exist yet.
-	const { user } = useContext( GlobalStylesContext );
-
-	const isActiveNewNeutralVariation = useMemo(
-		() =>
-			isEqual( COLOR_PALETTES[ 0 ].settings.color, user.settings.color ),
-		[ user ]
-	);
+	const isActiveNewNeutralVariation = useIsActiveNewNeutralVariation();
 	const sortedPatterns = useMemo( () => {
 		const patternsWithoutThemePatterns = patterns.filter(
 			( pattern ) =>
