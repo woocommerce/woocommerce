@@ -2,7 +2,7 @@
 /**
  * Title: Hero Product Chessboard
  * Slug: woocommerce-blocks/hero-product-chessboard
- * Categories: WooCommerce
+ * Categories: WooCommerce, featured-selling
  */
 
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;

@@ -60,7 +60,6 @@ test.describe( 'Template customization', () => {
 				} );
 				await editor.revertTemplateCustomizations( {
 					templateName: testData.templateName,
-					templateType: testData.templateType,
 				} );
 				await testData.visitPage( { frontendUtils, page } );
 				await expect( page.getByText( userText ) ).toBeHidden();
@@ -101,7 +100,6 @@ test.describe( 'Template customization', () => {
 					await editor.revertTemplateCustomizations( {
 						templateName:
 							testData.fallbackTemplate?.templateName || '',
-						templateType: 'wp_template',
 					} );
 					await testData.visitPage( { frontendUtils, page } );
 					await expect(
@@ -184,7 +182,6 @@ test.describe( 'Template customization', () => {
 
 				await editor.revertTemplateCustomizations( {
 					templateName: testData.templateName,
-					templateType: testData.templateType,
 				} );
 
 				await testData.visitPage( { frontendUtils, page } );

@@ -39,6 +39,7 @@ test( 'can update sku', { tag: '@gutenberg' }, async ( { page, product } ) => {
 	const sku = `SKU_${ Date.now() }`;
 
 	await test.step( 'update the sku value', async () => {
+		await page.locator( '[name="woocommerce-product-sku"]' ).click();
 		await page.locator( '[name="woocommerce-product-sku"]' ).fill( sku );
 	} );
 

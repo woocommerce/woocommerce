@@ -1,3 +1,9 @@
+---
+post_title: Cart and Checkout - Dom Events
+menu_title: Dom Events
+tags: reference
+---
+
 # DOM Events <!-- omit in toc -->
 
 ## Table of Contents <!-- omit in toc -->
@@ -40,14 +46,3 @@ _Example usage in WC Blocks:_ Cart and Mini-Cart blocks (via the `useStoreCart()
 This event is the equivalent to the jQuery event `removed_from_cart` triggered by WooCommerce core. It indicates that a product has been removed from the cart.
 
 _Example usage in WC Blocks:_ Cart and Mini-Cart blocks (via the `useStoreCart()` hook) listen to this event to know if they need to update their contents.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/dom-events.md)
-
-<!-- /FEEDBACK -->
-

@@ -2,7 +2,7 @@
 /**
  * Title: Hero Product 3 Split
  * Slug: woocommerce-blocks/hero-product-3-split
- * Categories: WooCommerce
+ * Categories: WooCommerce, featured-selling
  */
 
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
