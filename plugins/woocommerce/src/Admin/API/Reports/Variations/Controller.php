@@ -6,6 +6,7 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Variations;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -72,7 +73,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			}
 		}
 
-		$reports       = new Query( $args );
+		$reports       = new GenericQuery( $args, 'variations' );
 		$products_data = $reports->get_data();
 
 		$data = array();

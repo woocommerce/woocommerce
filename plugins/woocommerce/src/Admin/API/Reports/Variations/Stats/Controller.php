@@ -6,6 +6,7 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Variations\Stats;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -79,7 +80,7 @@ class Controller extends GenericStatsController {
 			}
 		}
 
-		$query = new Query( $query_args );
+		$query = new GenericQuery( $query_args, 'variations-stats' );
 		try {
 			$report_data = $query->get_data();
 		} catch ( ParameterException $e ) {

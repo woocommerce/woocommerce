@@ -6,6 +6,7 @@
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Downloads\Stats;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -66,7 +67,7 @@ class Controller extends GenericStatsController {
 	 */
 	public function get_items( $request ) {
 		$query_args      = $this->prepare_reports_query( $request );
-		$downloads_query = new Query( $query_args );
+		$downloads_query = new GenericQuery( $query_args, 'downloads' );
 		$report_data     = $downloads_query->get_data();
 
 		$out_data = array(
