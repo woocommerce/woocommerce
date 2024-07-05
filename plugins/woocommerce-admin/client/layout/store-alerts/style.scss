@@ -87,13 +87,6 @@
 		padding: 3px;
 		height: 24px;
 		width: 24px;
-		// position: absolute;
-		// top: -3px;
-		// right: -3px;
-		// svg {
-		// 	width: 14px;
-		// 	height: 14px;
-		// }
 	}
 
 	@include breakpoint("<782px") {
@@ -101,8 +94,6 @@
 		padding: $gap;
 
 		.components-card__header {
-			display: flex;
-			flex-direction: column-reverse;
 			align-items: flex-start;
 		}
 	}
@@ -160,18 +151,12 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 2px;
-	// border: 1px solid $button-border;
-	// border-radius: 4px;
-	// background: $button;
-	// margin-left: 16px;
-	// min-width: 120px;
 
 	.components-button {
 		padding: 0;
 		height: 24px;
 		width: 24px;
 		border: 1px solid #dcdcde;
-		// padding: 4px;
 
 		/*!rtl:ignore*/
 		.rtl & .arrow-left-icon,
@@ -183,32 +168,6 @@
 	.woocommerce-store-alerts__pagination-label {
 		font-size: 13px;
 		margin: 0 10px;
-		// padding: 5px 12px;
-		// border-width: 0 1px;
-		// border-color: $button-border;
-		// border-style: solid;
-		// flex: 1 1;
-		// @include font-size(14);
-	}
-
-	// @include breakpoint("<782px") {
-	// 	margin-left: 0;
-	// 	margin-bottom: 14px;
-
-	// 	.woocommerce-store-alerts__pagination-label {
-	// 		text-align: center;
-	// 	}
-	// }
-
-	button:first-child {
-		// margin-left: 12px;
-		// border-top-right-radius: 0;
-		// border-bottom-right-radius: 0;
-	}
-
-	button:last-child {
-		// border-top-left-radius: 0;
-		// border-bottom-left-radius: 0;
 	}
 }
 
