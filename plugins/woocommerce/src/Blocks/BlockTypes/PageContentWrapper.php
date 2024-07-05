@@ -15,6 +15,16 @@ class PageContentWrapper extends AbstractBlock {
 	protected $block_name = 'page-content-wrapper';
 
 	/**
+	 * Initialize this block type.
+	 *
+	 * - Intercept template loading to add post ID to this block.
+	 */
+	public function initialize() {
+		add_filter( 'get_block_templates', [ $this, 'add_correct_post_id_to_template' ], 10, 1 );
+		parent::initialize();
+	}
+
+	/**
 	 * @param \WP_Block_Template[] $block_templates Array of block templates.
 	 *
 	 * @return \WP_Block_Template[]
