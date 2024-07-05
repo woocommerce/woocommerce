@@ -117,16 +117,9 @@ jobs:
         id: 'install-monorepo'
         with:
           install: '${{ matrix.projectName }}...'
-          build: 'false'
+          build: ${{ ( github.ref_type == 'tag' && 'false' ) || matrix.projectName }}
+          build-type: ${{ ( ( matrix.testType == 'unit:php' || matrix.testType == 'api' ) && 'backend' ) || 'full' }}
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && matrix.testType == 'e2e' }}
-
-      - uses: './.github/actions/setup-woocommerce-monorepo'
-        if: ${{ github.ref_type != 'tag' }}
-        name: 'Build project'
-        id: 'build-project'
-        with:
-          install: 'false'
-          build: ${{ matrix.projectName }}
 
       - name: 'Update wp-env config'
         if: ${{ github.ref_type == 'tag' }}
@@ -158,7 +151,7 @@ jobs:
           echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
         shell: bash
 
-      - name: 'Run tests'
+      - name: 'Run tests (${{ matrix.testType }})'
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
           BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}

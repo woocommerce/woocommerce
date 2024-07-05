@@ -24,7 +24,13 @@ export const enum JobType {
 /**
  * The type of the test job.
  */
-export const testTypes = [ 'unit', 'e2e', 'api', 'performance' ] as const;
+export const testTypes = [
+	'unit:php',
+	'unit:js',
+	'e2e',
+	'api',
+	'performance',
+] as const;
 
 /**
  * The variables that can be used in tokens on command strings
@@ -400,7 +406,7 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		);
 	}
 
-	let testType: ( typeof testTypes )[ number ] = 'unit';
+	let testType: ( typeof testTypes )[ number ] = 'unit:js';
 	if (
 		raw.testType &&
 		testTypes.includes( raw.testType.toString().toLowerCase() )

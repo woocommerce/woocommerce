@@ -303,7 +303,7 @@ describe( 'Job Processing', () => {
 		} );
 
 		it( 'should trigger test job for single node', async () => {
-			const testType = 'unit';
+			const testType = 'unit:js';
 
 			const jobs = await createJobsForChanges(
 				{
@@ -347,7 +347,7 @@ describe( 'Job Processing', () => {
 		} );
 
 		it( 'should replace vars in test command', async () => {
-			const testType = 'unit';
+			const testType = 'unit:js';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -395,7 +395,7 @@ describe( 'Job Processing', () => {
 		} );
 
 		it( 'should not trigger a test job that has already been created', async () => {
-			const testType = 'unit';
+			const testType = 'unit:js';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -427,7 +427,7 @@ describe( 'Job Processing', () => {
 		} );
 
 		it( 'should not trigger test job for single node with no changes', async () => {
-			const testType = 'unit';
+			const testType = 'unit:js';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -456,7 +456,7 @@ describe( 'Job Processing', () => {
 		} );
 
 		it( 'should trigger test job for project graph', async () => {
-			const testType = 'unit';
+			const testType = 'unit:js';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -482,7 +482,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
-										testType: 'unit',
+										testType: 'unit:js',
 										name: 'Default A',
 										shardingArguments: [],
 										events: [],
@@ -500,7 +500,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
-										testType: 'unit',
+										testType: 'unit:js',
 										name: 'Default B',
 										shardingArguments: [],
 										events: [],
@@ -595,7 +595,7 @@ describe( 'Job Processing', () => {
 		);
 
 		it( 'should trigger test job for dependent without changes when dependency has matching cascade key', async () => {
-			const testType = 'unit';
+			const testType = 'unit:js';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -622,7 +622,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
-										testType: 'unit',
+										testType: 'unit:js',
 										name: 'Default A',
 										shardingArguments: [],
 										events: [],
@@ -671,7 +671,7 @@ describe( 'Job Processing', () => {
 		} );
 
 		it( 'should isolate dependency cascade keys to prevent cross-dependency matching', async () => {
-			const testType = 'unit';
+			const testType = 'unit:js';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -698,7 +698,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
-										testType: 'unit',
+										testType: 'unit:js',
 										name: 'Default A',
 										shardingArguments: [],
 										events: [],
@@ -717,7 +717,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
-										testType: 'unit',
+										testType: 'unit:js',
 										name: 'Default B',
 										shardingArguments: [],
 										events: [],
@@ -749,7 +749,7 @@ describe( 'Job Processing', () => {
 					shouldCreate: false,
 					envVars: {},
 				},
-				testType: 'unit',
+				testType: 'unit:js',
 			} );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-a',
@@ -761,12 +761,12 @@ describe( 'Job Processing', () => {
 					shouldCreate: false,
 					envVars: {},
 				},
-				testType: 'unit',
+				testType: 'unit:js',
 			} );
 		} );
 
 		it( 'should trigger test job for single node and parse test environment config', async () => {
-			const testType = 'unit';
+			const testType = 'unit:js';
 			jest.mocked( parseTestEnvConfig ).mockResolvedValue( {
 				WP_ENV_CORE: 'https://wordpress.org/latest.zip',
 			} );
@@ -822,12 +822,12 @@ describe( 'Job Processing', () => {
 						WP_ENV_CORE: 'https://wordpress.org/latest.zip',
 					},
 				},
-				testType: 'unit',
+				testType: 'unit:js',
 			} );
 		} );
 
 		it( 'should trigger all jobs for a single node with changes set to "true"', async () => {
-			const testType = 'unit';
+			const testType = 'unit:js';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -874,12 +874,12 @@ describe( 'Job Processing', () => {
 					shouldCreate: false,
 					envVars: {},
 				},
-				testType: 'unit',
+				testType: 'unit:js',
 			} );
 		} );
 
 		it( 'should trigger sharded test jobs for single node', async () => {
-			const testType = 'unit';
+			const testType = 'unit:js';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -922,7 +922,7 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
-						testType: 'unit',
+						testType: 'unit:js',
 					},
 					{
 						projectName: 'test',
@@ -934,14 +934,14 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
-						testType: 'unit',
+						testType: 'unit:js',
 					},
 				] )
 			);
 		} );
 
 		it( 'should trigger job with event configured but no event cli argument', async () => {
-			const testType = 'unit';
+			const testType = 'unit:js';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -984,7 +984,7 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
-						testType: 'unit',
+						testType: 'unit:js',
 					},
 					{
 						projectName: 'test',
@@ -996,14 +996,14 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
-						testType: 'unit',
+						testType: 'unit:js',
 					},
 				] )
 			);
 		} );
 
 		it( 'should trigger job with event configured and matching event cli argument', async () => {
-			const testType = 'unit';
+			const testType = 'unit:js';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -1046,7 +1046,7 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
-						testType: 'unit',
+						testType: 'unit:js',
 					},
 					{
 						projectName: 'test',
@@ -1058,14 +1058,14 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
-						testType: 'unit',
+						testType: 'unit:js',
 					},
 				] )
 			);
 		} );
 
 		it( 'should not trigger job with event configured but not matching event cli argument', async () => {
-			const testType = 'unit';
+			const testType = 'unit:js';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -1144,7 +1144,7 @@ describe( 'Job Processing', () => {
 		} );
 
 		it( 'should create optional test job', async () => {
-			const testType = 'unit';
+			const testType = 'unit:js';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -1190,7 +1190,7 @@ describe( 'Job Processing', () => {
 				},
 				optional: true,
 				report: undefined,
-				testType: 'unit',
+				testType: 'unit:js',
 			} );
 		} );
 	} );
