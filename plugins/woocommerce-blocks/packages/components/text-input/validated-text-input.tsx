@@ -50,6 +50,7 @@ const ValidatedTextInput = forwardRef<
 			value = '',
 			customValidation = () => true,
 			customValidityMessage,
+			feedback,
 			customFormatter = ( newValue: string ) => newValue,
 			label,
 			validateOnMount = true,
@@ -241,12 +242,15 @@ const ValidatedTextInput = forwardRef<
 				id={ textInputId }
 				type={ type }
 				feedback={
-					showError ? (
-						<ValidationInputError
-							errorMessage={ passedErrorMessage }
-							propertyName={ errorIdString }
-						/>
-					) : null
+					<>
+						{ feedback }
+						{ hasError ? (
+							<ValidationInputError
+								errorMessage={ passedErrorMessage }
+								propertyName={ errorIdString }
+							/>
+						) : null }
+					</>
 				}
 				ref={ inputRef }
 				onChange={ ( newValue ) => {
