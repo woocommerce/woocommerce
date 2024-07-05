@@ -5,14 +5,11 @@ namespace Automattic\WooCommerce\Blueprint;
 class ImportSchema {
 	use UseHooks;
 	private Schema $schema;
-	private StepProcessorFactory $step_factory;
-	public function __construct( Schema $schema, StepProcessorFactory $step_factory = null) {
-		$this->schema = $schema;
-		if ($step_factory === null) {
-			$step_factory = new StepProcessorFactory($schema);
-		}
+	private BuiltInStepProcessors $builtin_step_processors;
 
-		$this->step_factory = $step_factory;
+	public function __construct( Schema $schema ) {
+		$this->schema = $schema;
+		$this->builtin_step_processors = new BuiltInStepProcessors( $schema );
 	}
 
 	public function get_schema() {
@@ -44,11 +41,16 @@ class ImportSchema {
 		$result = StepProcessorResult::success('ImportSchema');
 		$results[] = $result;
 
-		$step_processors = $this->step_factory->get_step_processors();
-		$this->step_factory->set_step_processors( $this->apply_filters('woooblueprint_importers', $step_processors) );
+		$step_processors = $this->builtin_step_processors->get_all();
+		$step_processors = $this->apply_filters('wooblueprint_importers', $step_processors);
+		$indexed_processors = array();
+
+		foreach ( $step_processors as $step_processor ) {
+			$indexed_processors[$step_processor->get_supported_step()] = $step_processor;
+		}
 
 		foreach ( $this->schema->get_steps() as $stepSchema ) {
-			$stepProcessor = $this->step_factory->create_from_name($stepSchema->step);
+			$stepProcessor = $indexed_processors[$stepSchema->step] ?? null;
 			if ( ! $stepProcessor instanceof StepProcessor ) {
 				$result->add_error("Unable to create a step processor for {$stepSchema->step}");
 				continue;

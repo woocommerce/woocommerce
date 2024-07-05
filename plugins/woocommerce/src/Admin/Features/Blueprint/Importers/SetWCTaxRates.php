@@ -70,6 +70,6 @@ class SetWCTaxRates implements StepProcessor {
 	}
 
 	public function get_supported_step(): string {
-		return 'configureTaxRates';
+		return 'setWCTaxRates';
 	}
 }

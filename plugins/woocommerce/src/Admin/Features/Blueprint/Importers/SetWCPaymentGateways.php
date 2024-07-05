@@ -33,6 +33,6 @@ class SetWCPaymentGateways implements StepProcessor {
 	}
 
 	public function get_supported_step(): string {
-		return 'configurePaymentGateways';
+		return 'setWCPaymentGateways';
 	}
 }

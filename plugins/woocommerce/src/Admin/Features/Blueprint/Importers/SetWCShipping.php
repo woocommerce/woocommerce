@@ -54,6 +54,6 @@ class SetWCShipping implements StepProcessor {
 	}
 
 	public function get_supported_step(): string {
-		return 'configureShipping';
+		return 'setWCShipping';
 	}
 }
