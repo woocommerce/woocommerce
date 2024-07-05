@@ -6,8 +6,11 @@
 	border-radius: 4px;
 	border: 0;
 	background-color: $universal-border-light;
-	color: $universal-border-light;
+	color: $universal-body-low-emphasis;
 
+	&[value="0"] {
+		color: $alert-red;
+	}
 	&[value="1"] {
 		color: $alert-red;
 	}
@@ -53,45 +56,9 @@
 
 	&::after {
 		content: attr(data-textvalue);
-		@include font-size(small);
+		@include font-size(smaller);
 		display: block;
 		text-align: right;
 		margin: $gap-smallest 0 0;
 	}
-
-	/*
-	span {
-		background: currentColor;
-		display: block;
-		width: 0;
-		height: 6px;
-		border-radius: 3px;
-		border: 0;
-		transition: 0.2s ease;
-		overflow: hidden;
-	}
-	&[value="1"] {
-		color: $alert-red;
-		span {
-			width: 25%;
-		}
-	}
-	&[value="2"] {
-		color: #ff6f00;
-		span {
-			width: 50%;
-		}
-	}
-	&[value="3"] {
-		color: $alert-yellow;
-		span {
-			width: 75%;
-		}
-	}
-	&[value="4"] {
-		color: $alert-green;
-		span {
-			width: 100%;
-		}
-	}*/
 }

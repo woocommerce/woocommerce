@@ -3,52 +3,66 @@
  */
 import { __ } from '@wordpress/i18n';
 import { passwordStrength } from 'check-password-strength';
+import { usePrevious } from '@woocommerce/base-hooks';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
+declare global {
+	interface Window {
+		zxcvbn: ( password: string ) => {
+			score: number;
+		};
+	}
+}
+
+const scoreDescriptions = [
+	__( 'Too weak', 'woocommerce' ),
+	__( 'Weak', 'woocommerce' ),
+	__( 'Medium', 'woocommerce' ),
+	__( 'Strong', 'woocommerce' ),
+	__( 'Very strong', 'woocommerce' ),
+];
+
 /**
  * Renders a password strength meter.
+ *
+ * Uses zxcvbn to calculate the password strength if available, otherwise falls back to check-password-strength which
+ * does not include dictionaries of common passwords.
  */
 const PasswordStrengthMeter = ( {
 	password = '',
+	onChange,
 }: {
 	password: string;
-} ): JSX.Element => {
-	const strength = passwordStrength( password, [
-		{
-			id: 0,
-			value: '',
-			minDiversity: 0,
-			minLength: 0,
-		},
-		{
-			id: 1,
-			value: 'Too weak',
-			minDiversity: 0,
-			minLength: 1,
-		},
-		{
-			id: 2,
-			value: 'Weak',
-			minDiversity: 2,
-			minLength: 4,
-		},
-		{
-			id: 3,
-			value: 'Fair',
-			minDiversity: 3,
-			minLength: 8,
-		},
-		{
-			id: 4,
-			value: 'Strong',
-			minDiversity: 4,
-			minLength: 10,
-		},
-	] );
+	onChange?: ( strength: number ) => void;
+} ): JSX.Element | null => {
+	let strength = -1;
+
+	if ( password.length > 0 ) {
+		if ( typeof window.zxcvbn === 'undefined' ) {
+			const result = passwordStrength( password );
+			strength = result.id;
+		} else {
+			const result = window.zxcvbn( password );
+			strength = result.score;
+		}
+	}
+
+	const previousStrength = usePrevious( strength );
+
+	useEffect( () => {
+		if ( strength !== previousStrength && onChange ) {
+			onChange( strength );
+		}
+	}, [ strength, previousStrength, onChange ] );
+
+	if ( strength === -1 ) {
+		return null;
+	}
 
 	return (
 		<meter
@@ -56,10 +70,10 @@ const PasswordStrengthMeter = ( {
 			aria-label={ __( 'Password strength', 'woocommerce' ) }
 			min={ 0 }
 			max={ 4 }
-			value={ strength.id }
-			data-textvalue={ strength.value }
+			value={ strength > -1 ? strength : 0 }
+			data-textvalue={ scoreDescriptions[ strength ] || '' }
 		>
-			{ strength.value }
+			{ strength }
 		</meter>
 	);
 };
