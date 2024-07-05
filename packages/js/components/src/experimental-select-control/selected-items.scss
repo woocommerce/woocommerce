@@ -17,5 +17,8 @@
 
     .woocommerce-tag {
         margin: 0;
+		.woocommerce-tag__remove {
+			cursor: default;
+		}
     }
 }
