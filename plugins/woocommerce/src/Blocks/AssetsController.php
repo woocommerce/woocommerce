@@ -40,6 +40,7 @@ final class AssetsController {
 		add_action( 'admin_enqueue_scripts', array( $this, 'update_block_style_dependencies' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'update_block_settings_dependencies' ), 100 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'update_block_settings_dependencies' ), 100 );
+		add_filter( 'js_do_concat', array( $this, 'skip_boost_minification_for_cart_checkout' ), 10, 2 );
 	}
 
 	/**
@@ -66,8 +67,8 @@ final class AssetsController {
 		$this->api->register_script( 'wc-blocks-frontend-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-frontend-vendors-frontend' ), array(), false );
 
 		// Cart and checkout frontend scripts.
-		$this->api->register_script( 'cart-checkout-vendors', $this->api->get_block_asset_build_path( 'cart-checkout-vendors-frontend' ), array(), false );
-		$this->api->register_script( 'cart-checkout-base', $this->api->get_block_asset_build_path( 'cart-checkout-base-frontend' ), array(), false );
+		$this->api->register_script( 'wc-cart-checkout-vendors', $this->api->get_block_asset_build_path( 'wc-cart-checkout-vendors-frontend' ), array(), false );
+		$this->api->register_script( 'wc-cart-checkout-base', $this->api->get_block_asset_build_path( 'wc-cart-checkout-base-frontend' ), array(), false );
 		$this->api->register_script( 'wc-blocks-checkout', 'assets/client/blocks/blocks-checkout.js' );
 		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js' );
 
@@ -256,6 +257,23 @@ final class AssetsController {
 			$src = $wp_scripts->base_url . $src;
 		}
 		return $src;
+	}
+
+	/**
+	 * Skip Jetpack Boost minification on older versions of Jetpack Boost where it causes issues.
+	 *
+	 * @param mixed $do_concat Whether to concatenate the script or not.
+	 * @param mixed $handle The script handle.
+	 * @return mixed
+	 */
+	public function skip_boost_minification_for_cart_checkout( $do_concat, $handle ) {
+		$boost_is_outdated = defined( 'JETPACK_BOOST_VERSION' ) && version_compare( JETPACK_BOOST_VERSION, '3.4.2', '<' );
+		$scripts_to_ignore = [
+			'wc-cart-checkout-vendors',
+			'wc-cart-checkout-base',
+		];
+
+		return $boost_is_outdated && in_array( $handle, $scripts_to_ignore, true ) ? false : $do_concat;
 	}
 
 	/**
