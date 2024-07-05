@@ -67,7 +67,7 @@ class Controller extends GenericStatsController {
 	 */
 	public function get_items( $request ) {
 		$query_args      = $this->prepare_reports_query( $request );
-		$downloads_query = new GenericQuery( $query_args, 'downloads' );
+		$downloads_query = new GenericQuery( $query_args, 'downloads-stats' );
 		$report_data     = $downloads_query->get_data();
 
 		$out_data = array(
