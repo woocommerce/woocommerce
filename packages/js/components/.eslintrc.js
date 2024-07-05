@@ -17,4 +17,16 @@ module.exports = {
 			},
 		},
 	],
+	settings: {
+		'import/core-modules': [
+			'@woocommerce/date',
+			'@woocommerce/navigation',
+			'@woocommerce/currency',
+		],
+		'import/resolver': {
+			node: {},
+			webpack: {},
+			typescript: {},
+		},
+	},
 };
