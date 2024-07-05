@@ -62,6 +62,6 @@ class GenericQuery extends \WC_Object_Query {
 
 		$data_store = \WC_Data_Store::load( "report-{$this->name}" );
 		$results    = $data_store->get_data( $args );
-		return apply_filters( 'woocommerce_analytics_{$snake_name}_select_query', $results, $args );
+		return apply_filters( "woocommerce_analytics_{$snake_name}_select_query", $results, $args );
 	}
 }
