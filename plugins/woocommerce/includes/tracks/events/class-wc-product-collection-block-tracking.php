@@ -5,7 +5,7 @@
  * @package WooCommerce\Tracks
  */
 
-declare(strict_types=1);
+declare( strict_types = 1);
 
 defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
