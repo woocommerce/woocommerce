@@ -23,6 +23,12 @@ const reporter = [
 				`${ testsRootPath }/test-results/allure-results`,
 			detail: true,
 			suiteTitle: true,
+			environmentInfo: {
+				Node: process.version,
+				OS: process.platform,
+				WP: process.env.WP_VERSION,
+				CI: process.env.CI,
+			},
 		},
 	],
 	[
@@ -58,7 +64,7 @@ const config = {
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: `${ testsRootPath }/tests`,
-	retries: CI ? 2 : 0,
+	retries: CI ? 1 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
 	workers: 1,
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
@@ -70,7 +76,7 @@ const config = {
 		stateDir: `${ testsRootPath }/.state/`,
 		trace:
 			/^https?:\/\/localhost/.test( BASE_URL ) || ! CI
-				? 'retain-on-failure'
+				? 'retain-on-first-failure'
 				: 'off',
 		video: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
