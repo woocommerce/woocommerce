@@ -6,6 +6,11 @@ module.exports = {
 			'@woocommerce/date',
 			'@woocommerce/navigation',
 			'@woocommerce/tracks',
+			'@wordpress/api-fetch',
+			'@wordpress/core-data',
+			'@wordpress/data',
+			'@automattic/data-stores',
+			'redux',
 		],
 		'import/resolver': {
 			node: {},

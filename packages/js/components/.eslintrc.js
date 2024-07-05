@@ -19,9 +19,18 @@ module.exports = {
 	],
 	settings: {
 		'import/core-modules': [
+			'@woocommerce/currency',
+			'@woocommerce/data',
 			'@woocommerce/date',
 			'@woocommerce/navigation',
-			'@woocommerce/currency',
+			'@storybook/react',
+			'@automattic/tour-kit',
+			'@wordpress/blocks',
+			'@wordpress/components',
+			'@wordpress/media-utils',
+			'dompurify',
+			'downshift',
+			'moment',
 		],
 		'import/resolver': {
 			node: {},
