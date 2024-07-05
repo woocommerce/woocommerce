@@ -33,8 +33,7 @@ import {
 	CoreFilterNames,
 	FilterName,
 } from '../../types';
-import { setQueryAttribute } from '../../utils';
-import { getDefaultSettings } from '../../constants';
+import { setQueryAttribute, getDefaultSettings } from '../../utils';
 import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
 import InheritQueryControl from './inherit-query-control';

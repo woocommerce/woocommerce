@@ -1,50 +1,87 @@
 /**
+ * Purpose of this file:
+ * This file defines constants for use in `plugins/woocommerce-blocks/assets/js/blocks-registry/product-collection/register-product-collection.tsx`.
+ * By isolating constants here, we avoid loading unnecessary JS file on the frontend (e.g., the /shop page), enhancing site performance.
+ *
+ * Context: https://github.com/woocommerce/woocommerce/pull/48141#issuecomment-2208770592.
+ */
+
+/**
  * External dependencies
  */
-import {
-	createBlock,
-	// @ts-expect-error Type definitions for this function are missing in Guteberg
-	createBlocksFromInnerBlocksTemplate,
-} from '@wordpress/blocks';
+import { getSetting } from '@woocommerce/settings';
+import { objectOmit } from '@woocommerce/utils';
+import type { InnerBlockTemplate } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import {
-	ProductCollectionAttributes,
-	TProductCollectionOrder,
-	TProductCollectionOrderBy,
-	ProductCollectionQuery,
-	ProductCollectionDisplayLayout,
-} from './types';
-import { getDefaultValueOfInheritQueryFromTemplate } from './utils';
 import blockJson from './block.json';
 import {
-	DEFAULT_QUERY,
-	DEFAULT_ATTRIBUTES,
-	INNER_BLOCKS_TEMPLATE,
-} from './constants-register-product-collection';
+	ProductCollectionAttributes,
+	ProductCollectionQuery,
+	LayoutOptions,
+} from './types';
+import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 
-export * from './constants-register-product-collection';
+export const PRODUCT_COLLECTION_BLOCK_NAME = blockJson.name;
+const PRODUCT_TITLE_NAME = `${ PRODUCT_COLLECTION_BLOCK_NAME }/product-title`;
 
-export const getDefaultQuery = (
-	currentQuery: ProductCollectionQuery
-): ProductCollectionQuery => ( {
-	...currentQuery,
-	orderBy: DEFAULT_QUERY.orderBy as TProductCollectionOrderBy,
-	order: DEFAULT_QUERY.order as TProductCollectionOrder,
-	inherit: getDefaultValueOfInheritQueryFromTemplate(),
-} );
+export const STOCK_STATUS_OPTIONS = getSetting< Record< string, string > >(
+	'stockStatusOptions',
+	[]
+);
 
-export const getDefaultDisplayLayout = () =>
-	DEFAULT_ATTRIBUTES.displayLayout as ProductCollectionDisplayLayout;
+const GLOBAL_HIDE_OUT_OF_STOCK = getSetting< boolean >(
+	'hideOutOfStockItems',
+	false
+);
 
-export const getDefaultSettings = (
-	currentAttributes: ProductCollectionAttributes
-): Partial< ProductCollectionAttributes > => ( {
-	displayLayout: getDefaultDisplayLayout(),
-	query: getDefaultQuery( currentAttributes.query ),
-} );
+export const getDefaultStockStatuses = () => {
+	return GLOBAL_HIDE_OUT_OF_STOCK
+		? Object.keys( objectOmit( STOCK_STATUS_OPTIONS, 'outofstock' ) )
+		: Object.keys( STOCK_STATUS_OPTIONS );
+};
+
+export const DEFAULT_QUERY: ProductCollectionQuery = {
+	perPage: 9,
+	pages: 0,
+	offset: 0,
+	postType: 'product',
+	order: 'asc',
+	orderBy: 'title',
+	search: '',
+	exclude: [],
+	inherit: false,
+	taxQuery: {},
+	isProductCollectionBlock: true,
+	featured: false,
+	woocommerceOnSale: false,
+	woocommerceStockStatus: getDefaultStockStatuses(),
+	woocommerceAttributes: [],
+	woocommerceHandPickedProducts: [],
+	timeFrame: undefined,
+	priceRange: undefined,
+};
+
+export const DEFAULT_ATTRIBUTES: Pick<
+	ProductCollectionAttributes,
+	| 'query'
+	| 'tagName'
+	| 'displayLayout'
+	| 'queryContextIncludes'
+	| 'forcePageReload'
+> = {
+	query: DEFAULT_QUERY,
+	tagName: 'div',
+	displayLayout: {
+		type: LayoutOptions.GRID,
+		columns: 3,
+		shrinkColumns: true,
+	},
+	queryContextIncludes: [ 'collection' ],
+	forcePageReload: false,
+};
 
 export const DEFAULT_FILTERS: Pick<
 	ProductCollectionQuery,
@@ -67,15 +104,72 @@ export const DEFAULT_FILTERS: Pick<
 	priceRange: DEFAULT_QUERY.priceRange,
 };
 
-export const getDefaultProductCollection = () =>
-	createBlock(
-		blockJson.name,
-		{
-			...DEFAULT_ATTRIBUTES,
-			query: {
-				...DEFAULT_ATTRIBUTES.query,
-				inherit: getDefaultValueOfInheritQueryFromTemplate(),
+/**
+ * Default inner block templates for the product collection block.
+ * Exported for use in different collections, e.g., 'New Arrivals' collection.
+ */
+export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
+	'woocommerce/product-template',
+	{},
+	[
+		[
+			'woocommerce/product-image',
+			{
+				imageSizing: ImageSizing.THUMBNAIL,
 			},
+		],
+		[
+			'core/post-title',
+			{
+				textAlign: 'center',
+				level: 3,
+				fontSize: 'medium',
+				style: {
+					spacing: {
+						margin: {
+							bottom: '0.75rem',
+							top: '0',
+						},
+					},
+				},
+				isLink: true,
+				__woocommerceNamespace: PRODUCT_TITLE_NAME,
+			},
+		],
+		[
+			'woocommerce/product-price',
+			{
+				textAlign: 'center',
+				fontSize: 'small',
+			},
+		],
+		[
+			'woocommerce/product-button',
+			{
+				textAlign: 'center',
+				fontSize: 'small',
+			},
+		],
+	],
+];
+
+export const coreQueryPaginationBlockName = 'core/query-pagination';
+export const INNER_BLOCKS_PAGINATION_TEMPLATE: InnerBlockTemplate = [
+	coreQueryPaginationBlockName,
+	{
+		layout: {
+			type: 'flex',
+			justifyContent: 'center',
 		},
-		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )
-	);
+	},
+];
+
+export const INNER_BLOCKS_NO_RESULTS_TEMPLATE: InnerBlockTemplate = [
+	'woocommerce/product-collection-no-results',
+];
+
+export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
+	INNER_BLOCKS_PRODUCT_TEMPLATE,
+	INNER_BLOCKS_PAGINATION_TEMPLATE,
+	INNER_BLOCKS_NO_RESULTS_TEMPLATE,
+];
