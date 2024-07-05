@@ -6,7 +6,8 @@ module.exports = {
 			'@woocommerce/components',
 			'@wordpress/components',
 			'@storybook/react',
-			'eact-transition-group/CSSTransition',
+			'react-transition-group/CSSTransition',
+			'dompurify',
 		],
 		'import/resolver': {
 			node: {},
