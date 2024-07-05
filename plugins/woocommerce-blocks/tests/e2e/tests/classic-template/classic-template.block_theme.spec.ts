@@ -28,13 +28,11 @@ const templates = [
 		slug: 'single-product',
 		path: '/product/single/',
 	},
-	// This test is disabled because archives are disabled for attributes by
-	// default. This can be uncommented when this is toggled on.
-	//{
-	//	title: 'Product Attribute',
-	//	slug: 'taxonomy-product_attribute',
-	//	path: '/product-attribute/color/',
-	//},
+	{
+		title: 'Product Attribute',
+		slug: 'taxonomy-product_attribute',
+		path: '/product-attribute/color/',
+	},
 	{
 		title: 'Product Category',
 		slug: 'taxonomy-product_cat',
