@@ -1,7 +1,7 @@
 ---
-post_title: Cart and Checkout - Totals Footer Item
-menu_title: Totals Footer Item
-tags: reference, checkout-available-filters
+post_title: Cart and Checkout - Totals footer item
+menu_title: Totals footer item
+tags: reference
 ---
 
 <!-- markdownlint-disable MD024 -->
@@ -48,7 +48,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -93,7 +93,7 @@ registerCheckoutFilters( 'my-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 

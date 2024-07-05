@@ -1,6 +1,6 @@
 ---
-post_title: Cart and Checkout - Dom Events
-menu_title: Dom Events
+post_title: Cart and Checkout - Dom events
+menu_title: Dom events
 tags: reference
 ---
 

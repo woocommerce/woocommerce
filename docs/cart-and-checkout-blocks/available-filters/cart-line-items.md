@@ -1,7 +1,7 @@
 ---
-post_title: Cart and Checkout - Cart Line Items
-menu_title: Cart Line Items
-tags: reference, checkout-available-filters
+post_title: Cart and Checkout - Cart line items
+menu_title: Cart line items
+tags: reference
 ---
 
 <!-- markdownlint-disable MD024 -->
@@ -95,7 +95,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -174,7 +174,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -251,7 +251,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -337,7 +337,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -415,7 +415,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -505,7 +505,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 

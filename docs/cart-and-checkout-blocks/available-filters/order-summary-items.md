@@ -1,7 +1,7 @@
 ---
-post_title: Cart and Checkout Filters - Order Summary Items
-menu_title: Order Summary Items
-tags: reference, checkout-available-filters
+post_title: Cart and Checkout Filters - Order summary items
+menu_title: Order summary items
+tags: reference
 ---
 <!-- markdownlint-disable MD024 -->
 # Order Summary Items
@@ -91,7 +91,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -169,7 +169,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -246,7 +246,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -334,7 +334,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 

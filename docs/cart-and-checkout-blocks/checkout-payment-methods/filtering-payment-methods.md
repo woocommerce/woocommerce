@@ -1,7 +1,7 @@
 ---
 post_title: Cart and Checkout - Filtering payment methods in the Checkout block
-menu_title: Filtering Payment Methods
-tags: how-to, checkout-payment-methods
+menu_title: Filtering payment methods
+tags: how-to
 ---
 
 <!-- markdownlint-disable MD024 -->
@@ -105,7 +105,8 @@ interface CanMakePaymentArgument {
 }
 ```
 
-If you need data that is not available in the parameter received by the callback you can consider [exposing your data in the Store API](../rest-api/extend-rest-api-add-data.md).
+If you need data that is not available in the parameter received by the callback you can consider [exposing your data in the Store API](https://github.com/woocommerce/woocommerce/blob/1675c63bba94c59703f57c7ef06e7deff8fd6bba/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md).
+
 
 ## Filtering payment methods using requirements
 
@@ -121,7 +122,7 @@ To allow the shopper to check out without entering payment details, but still re
 
 Using the `supports` configuration of payment methods it is possible to prevent other payment methods (such as credit card, PayPal etc.) from being used to check out, and only allow the one your extension has added to appear in the Checkout block.
 
-For more information on how to register a payment method with WooCommerce Blocks, please refer to the [Payment method integration](../checkout-payment-methods/payment-method-integration.md) documentation.
+For more information on how to register a payment method with WooCommerce Blocks, please refer to the [Payment method integration](./payment-method-integration.md) documentation.
 
 ### Basic usage
 
