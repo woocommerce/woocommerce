@@ -62,7 +62,7 @@ class CartItemSchema extends ItemSchema {
 			'show_backorder_badge' => (bool) $product->backorders_require_notification() && $product->is_on_backorder( $cart_item['quantity'] ),
 			'sold_individually'    => $product->is_sold_individually(),
 			'permalink'            => $product_permalink,
-			'images'               => $this->get_images( $product ),
+			'images'               => $this->get_cart_images( $product, $cart_item, $cart_item['key'] ),
 			'variation'            => $this->format_variation_data( $cart_item['variation'], $product ),
 			'item_data'            => $this->get_item_data( $cart_item ),
 			'prices'               => (object) $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) ),
@@ -77,6 +77,31 @@ class CartItemSchema extends ItemSchema {
 			'catalog_visibility'   => $product->get_catalog_visibility(),
 			self::EXTENDING_KEY    => $this->get_extended_data( self::IDENTIFIER, $cart_item ),
 		];
+	}
+
+	/**
+	 * Get list of product images for the cart item.
+	 *
+	 * @param \WC_Product $product       Product instance.
+	 * @param array       $cart_item     Cart item array.
+	 * @param string      $cart_item_key Cart item key.
+	 * @return array
+	 */
+	protected function get_cart_images( \WC_Product $product, array $cart_item, string $cart_item_key ) {
+		// Get the images for the product
+		$images = $this->get_images($product);
+
+		/**
+		 * Filter the cart product images
+		 *
+		 * This hook allows for changing the cart item images. This is specific to the cart endpoint.
+		 *
+		 * @param array  $images            Array of image objects, as defined in ImageAttachmentSchema
+		 * @param string $product_permalink Product permalink.
+		 * @param array  $cart_item         Cart item array.
+		 * @param string $cart_item_key     Cart item key.
+		 */
+		return apply_filters('woocommerce_cart_item_images', $images, $cart_item, $cart_item_key);
 	}
 
 	/**
