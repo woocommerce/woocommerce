@@ -3,7 +3,7 @@
 namespace Automattic\WooCommerce\Blueprint;
 
 class ImportSchema {
-	use UseHooks;
+	use UseWPFunctions;
 	private Schema $schema;
 	private BuiltInStepProcessors $builtin_step_processors;
 
@@ -42,7 +42,7 @@ class ImportSchema {
 		$results[] = $result;
 
 		$step_processors = $this->builtin_step_processors->get_all();
-		$step_processors = $this->apply_filters('wooblueprint_importers', $step_processors);
+		$step_processors = $this->wp_apply_filters('wooblueprint_importers', $step_processors);
 		$indexed_processors = array();
 
 		foreach ( $step_processors as $step_processor ) {

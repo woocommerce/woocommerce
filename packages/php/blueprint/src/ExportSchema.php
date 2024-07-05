@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Blueprint\Exporters\ExportInstallThemeSteps;
 use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
 
 class ExportSchema {
-	use UseHooks;
+	use UseWPFunctions;
 
 	protected array $default_exporter_classes = array(
 		ExportInstallPluginSteps::class,
@@ -41,11 +41,11 @@ class ExportSchema {
 
 	public function export( $steps = array() ) {
 		$schema = array(
-			'landingPage' => $this->apply_filters( 'wooblueprint_export_landingpage', '/' ),
+			'landingPage' => $this->wp_apply_filters( 'wooblueprint_export_landingpage', '/' ),
 			'steps'       => array(),
 		);
 
-		$exporters = $this->apply_filters( 'wooblueprint_exporters', $this->exporters );
+		$exporters = $this->wp_apply_filters( 'wooblueprint_exporters', $this->exporters );
 
 		$this->add_default_exporters();
 		foreach ( $exporters as $exporter ) {
