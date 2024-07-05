@@ -56,7 +56,7 @@ jobs:
                 echo "PNPM Version: $version"
 
             - name: Setup PNPM
-              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
+              uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
               with:
                   version: ${{ steps.read-pnpm-version.outputs.version }}
 
@@ -149,7 +149,7 @@ jobs:
                   fetch-depth: 0
 
             - name: Setup PNPM
-              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
+              uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
               with:
                   version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
 
@@ -271,7 +271,7 @@ jobs:
                   fetch-depth: 0
 
             - name: Setup PNPM
-              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
+              uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
               with:
                   version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
 
@@ -342,7 +342,7 @@ jobs:
                   fetch-depth: 0
 
             - name: Setup PNPM
-              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
+              uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
               with:
                   version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
 
