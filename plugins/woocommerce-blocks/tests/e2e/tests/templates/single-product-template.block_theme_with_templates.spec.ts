@@ -55,7 +55,6 @@ test.describe( 'Single Product Template', () => {
 		} );
 		await editor.revertTemplateCustomizations( {
 			templateName: testData.templateName,
-			templateType: testData.templateType,
 		} );
 		await page.goto( testData.permalink );
 
