@@ -24,6 +24,7 @@ module.exports = {
 			'@woocommerce/settings',
 			'@woocommerce/tracks',
 			'@wordpress/blocks',
+			'@wordpress/block-editor',
 			'@wordpress/components',
 			'@wordpress/core-data',
 			'@wordpress/date',
