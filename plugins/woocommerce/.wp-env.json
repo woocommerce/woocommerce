@@ -1,4 +1,5 @@
 {
+	"core": "https://wordpress.org/wordpress-6.6-RC2.zip",
 	"phpVersion": "7.4",
 	"plugins": [
 		"."
