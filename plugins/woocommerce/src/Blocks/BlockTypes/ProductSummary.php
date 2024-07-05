@@ -95,7 +95,7 @@ class ProductSummary extends AbstractBlock
 	private function trim_keeping_html_formatting($input, $length)
 	{
 
-		return html_entity_decode(wp_trim_words(htmlentities(wpautop($input)), $length));
+		return html_entity_decode(wp_trim_words(htmlentities(wpautop($input, false)), $length));
 	}
 
 	/**
