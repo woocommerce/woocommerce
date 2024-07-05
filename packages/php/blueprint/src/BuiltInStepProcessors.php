@@ -8,10 +8,10 @@ use Automattic\WooCommerce\Blueprint\Importers\DeletePlugin;
 use Automattic\WooCommerce\Blueprint\Importers\InstallPlugin;
 use Automattic\WooCommerce\Blueprint\Importers\InstallTheme;
 use Automattic\WooCommerce\Blueprint\Importers\SetSiteOptions;
-use Automattic\WooCommerce\Blueprint\ResourceDownloaders\LocalPluginResourceDownloader;
-use Automattic\WooCommerce\Blueprint\ResourceDownloaders\LocalThemeResourceDownloader;
-use Automattic\WooCommerce\Blueprint\ResourceDownloaders\OrgPluginResourceDownloader;
-use Automattic\WooCommerce\Blueprint\ResourceDownloaders\OrgThemeResourceDownloader;
+use Automattic\WooCommerce\Blueprint\ResourceStorages\LocalPluginResourceStorage;
+use Automattic\WooCommerce\Blueprint\ResourceStorages\LocalThemeResourceStorage;
+use Automattic\WooCommerce\Blueprint\ResourceStorages\OrgPluginResourceStorage;
+use Automattic\WooCommerce\Blueprint\ResourceStorages\OrgThemeResourceStorage;
 
 class BuiltInStepProcessors {
 	private Schema $schema;
@@ -32,21 +32,21 @@ class BuiltInStepProcessors {
 	}
 
 	private function create_install_plugins_processor() {
-		$storage = new ResourceStorage();
-		$storage->add_downloader(new OrgPluginResourceDownloader());
+		$storage = new ResourceStorages();
+		$storage->add_storage(new OrgPluginResourceStorage());
 
 		if ( $this->schema instanceof ZipSchema) {
-			$storage->add_downloader( new LocalPluginResourceDownloader($this->schema->get_unzipped_path()) );
+			$storage->add_storage( new LocalPluginResourceStorage($this->schema->get_unzipped_path()) );
 		}
 
 		return new InstallPlugin($storage);
 	}
 
 	private function create_install_themes_processor() {
-		$storage = new ResourceStorage();
-		$storage->add_downloader(new OrgThemeResourceDownloader());
+		$storage = new ResourceStorages();
+		$storage->add_storage(new OrgThemeResourceStorage());
 		if ( $this->schema instanceof ZipSchema) {
-			$storage->add_downloader( new LocalThemeResourceDownloader($this->schema->get_unzipped_path()) );
+			$storage->add_storage( new LocalThemeResourceStorage($this->schema->get_unzipped_path()) );
 		}
 
 		return new InstallTheme($storage);

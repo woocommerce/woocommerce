@@ -1,8 +1,8 @@
 <?php
 
-namespace Automattic\WooCommerce\Blueprint\ResourceDownloaders;
+namespace Automattic\WooCommerce\Blueprint\ResourceStorages;
 
-class OrgThemeResourceDownloader extends OrgPluginResourceDownloader {
+class OrgThemeResourceStorage extends OrgPluginResourceStorage {
 	protected function get_download_link($slug) {
 		if ( ! function_exists( 'themes_api' ) ) {
 			include_once ABSPATH . '/wp-admin/includes/themes.php';

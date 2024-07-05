@@ -2,16 +2,16 @@
 
 namespace Automattic\WooCommerce\Blueprint\Importers;
 
-use Automattic\WooCommerce\Blueprint\ResourceStorage;
+use Automattic\WooCommerce\Blueprint\ResourceStorages;
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Plugin_Upgrader;
 
 class InstallTheme implements StepProcessor {
-	private ResourceStorage $storage;
+	private ResourceStorages $storage;
 	private StepProcessorResult $result;
 
-	public function __construct(ResourceStorage $storage) {
+	public function __construct(ResourceStorages $storage) {
 		$this->result = StepProcessorResult::success('InstallThemes');
 		$this->storage = $storage;
 	}

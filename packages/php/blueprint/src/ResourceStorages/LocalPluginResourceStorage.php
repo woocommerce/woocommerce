@@ -1,8 +1,8 @@
 <?php
 
-namespace Automattic\WooCommerce\Blueprint\ResourceDownloaders;
+namespace Automattic\WooCommerce\Blueprint\ResourceStorages;
 
-class LocalPluginResourceDownloader implements ResourceDownloader {
+class LocalPluginResourceStorage implements ResourceStorage {
 	protected array $paths = [];
 	protected string $suffix = 'plugins';
 	public function __construct($path) {

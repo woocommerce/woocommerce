@@ -1,8 +1,8 @@
 <?php
 
-namespace Automattic\WooCommerce\Blueprint\ResourceDownloaders;
+namespace Automattic\WooCommerce\Blueprint\ResourceStorages;
 
-interface ResourceDownloader {
+interface ResourceStorage {
 	public function get_supported_resource(): string;
 
 	/**

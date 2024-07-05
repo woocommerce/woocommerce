@@ -1,8 +1,8 @@
 <?php
 
-namespace Automattic\WooCommerce\Blueprint\ResourceDownloaders;
+namespace Automattic\WooCommerce\Blueprint\ResourceStorages;
 
-class OrgPluginResourceDownloader implements ResourceDownloader {
+class OrgPluginResourceStorage implements ResourceStorage {
 	public function download( $slug ): string {
 		return $this->download_url($this->get_download_link($slug));
 	}
