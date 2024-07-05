@@ -146,8 +146,8 @@ test.describe( 'Assembler -> Footers', { tag: '@gutenberg' }, () => {
 			.all();
 
 		for ( const footerPicker of footerPickers ) {
-			await footerPicker.waitFor();
-			await footerPicker.click();
+			await footerPicker.waitFor( { state: 'visible' } );
+			await footerPicker.click( { delay: 300 } );
 
 			const footerPickerClass = await footerPicker
 				.frameLocator( 'iframe' )
@@ -160,6 +160,7 @@ test.describe( 'Assembler -> Footers', { tag: '@gutenberg' }, () => {
 				`footer div.wc-blocks-footer-pattern`
 			);
 
+			await footerPattern.waitFor( { state: 'visible' } );
 			await expect(
 				await footerPattern.getAttribute( 'class' )
 			).toContain( expectedFooterClass );

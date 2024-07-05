@@ -37,9 +37,18 @@ const test = baseTest.extend( {
 
 test( 'can update sku', { tag: '@gutenberg' }, async ( { page, product } ) => {
 	const sku = `SKU_${ Date.now() }`;
+	const waitResponse = page.waitForResponse(
+		( response ) =>
+			response
+				.url()
+				.includes(
+					'wp-json/wc-admin/options?options=woocommerce_dimension_unit'
+				) && response.status() === 200
+	);
 
 	await test.step( 'update the sku value', async () => {
 		await page.locator( '[name="woocommerce-product-sku"]' ).click();
+		await waitResponse;
 		await page.locator( '[name="woocommerce-product-sku"]' ).fill( sku );
 	} );
 
