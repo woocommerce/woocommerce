@@ -136,7 +136,7 @@ describe( 'Config', () => {
 				jobs: [
 					{
 						type: JobType.Test,
-						testType: 'unit:js',
+						testType: 'unit',
 						shardingArguments: [],
 						name: 'default',
 						changes: [
@@ -304,10 +304,10 @@ describe( 'Config', () => {
 		);
 
 		it.each( [
-			[ '', 'unit:js' ],
-			[ 'bad', 'unit:js' ],
-			[ 1, 'unit:js' ],
-			[ undefined, 'unit:js' ],
+			[ '', 'unit' ],
+			[ 'bad', 'unit' ],
+			[ 1, 'unit' ],
+			[ undefined, 'unit' ],
 		] )(
 			'should parse test config with unexpected testType',
 			( input, result ) => {

@@ -26,7 +26,7 @@ export const enum JobType {
  */
 export const testTypes = [
 	'unit:php',
-	'unit:js',
+	'unit',
 	'e2e',
 	'api',
 	'performance',
@@ -406,7 +406,7 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		);
 	}
 
-	let testType: ( typeof testTypes )[ number ] = 'unit:js';
+	let testType: ( typeof testTypes )[ number ] = 'unit';
 	if (
 		raw.testType &&
 		testTypes.includes( raw.testType.toString().toLowerCase() )
