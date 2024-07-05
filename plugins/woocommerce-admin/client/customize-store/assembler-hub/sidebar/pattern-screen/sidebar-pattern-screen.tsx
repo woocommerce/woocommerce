@@ -7,7 +7,6 @@ import {
 	useMemo,
 	useRef,
 	useState,
-	useContext,
 } from '@wordpress/element';
 import { useAsyncList } from '@wordpress/compose';
 import { useSelect, useDispatch, select } from '@wordpress/data';
@@ -15,7 +14,7 @@ import { BlockInstance, cloneBlock } from '@wordpress/blocks';
 import { close } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
-import { capitalize, isEqual } from 'lodash';
+import { capitalize } from 'lodash';
 import { Button, Spinner } from '@wordpress/components';
 import {
 	unlock,
