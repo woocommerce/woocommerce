@@ -59,6 +59,7 @@ export const Tree = forwardRef( function ForwardedTree(
 										) as HTMLButtonElement
 								 )?.focus();
 							} }
+							onFirstItemLoop={ props.onFirstItemLoop }
 							onEscape={ props.onEscape }
 						/>
 					) ) }
