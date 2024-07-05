@@ -10,8 +10,8 @@ class SetWCPaymentGateways extends Step {
 		$this->payment_gateways = $payment_gateways;
 	}
 
-	public function add_payment_gateway($title, $description, $enabled) {
-	    $this->payment_gateways[] = array(
+	public function add_payment_gateway($id, $title, $description, $enabled) {
+	    $this->payment_gateways[$id] = array(
 	        'title' => $title,
 	        'description' => $description,
 	        'enabled' => $enabled,
@@ -19,7 +19,7 @@ class SetWCPaymentGateways extends Step {
 	}
 
 	public static function get_step_name() {
-		return 'configurePaymentGateWays';
+		return 'setWCPaymentGateways';
 	}
 
 	public function get_schema($version = 1) {

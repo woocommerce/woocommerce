@@ -18,6 +18,7 @@ class ExportWCPaymentGateways implements StepExporter {
 			}
 
 			$step->add_payment_gateway(
+				$id,
 				$payment_gateway->get_title(),
 				$payment_gateway->get_description(),
 				$payment_gateway->is_available() ? 'yes' : 'no'
@@ -28,7 +29,7 @@ class ExportWCPaymentGateways implements StepExporter {
 	}
 
 	public function get_step_name() {
-		return 'setWCPaymentGateways';
+		return SetWCPaymentGateways::get_step_name();
 	}
 
 	protected function maybe_hide_wcpay_gateways() {

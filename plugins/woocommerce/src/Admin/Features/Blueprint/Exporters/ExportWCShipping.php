@@ -91,6 +91,6 @@ class ExportWCShipping implements StepExporter {
 	}
 
 	public function get_step_name() {
-		return 'setWCShipping';
+		return SetWCShipping::get_step_name();
 	}
 }
