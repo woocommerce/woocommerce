@@ -45,6 +45,7 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 		showLink,
 		linkText,
 		isDescendantOfAllProducts,
+		isDescendentOfSingleProductTemplate,
 	} = props;
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
@@ -65,6 +66,17 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 					}
 				) }
 			/>
+		);
+	}
+
+	if ( isDescendentOfSingleProductTemplate ) {
+		return (
+			<p>
+				{ __(
+					'This block displays the product summary and all its customizations.',
+					'woocommerce'
+				) }
+			</p>
 		);
 	}
 

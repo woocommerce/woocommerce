@@ -23,16 +23,10 @@ import {
  * Internal dependencies
  */
 import Block from './block';
-import withProductSelector from '../shared/with-product-selector';
-import {
-	BLOCK_TITLE as title,
-	BLOCK_ICON as icon,
-	BLOCK_DESCRIPTION as description,
-} from './constants';
-import './editor.scss';
 import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
 import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 import type { EditProps, ControlProps } from './types';
+import './editor.scss';
 
 const ShowDescriptionIfEmptyControl = ( {
 	showDescriptionIfEmpty,
@@ -226,5 +220,4 @@ const Edit = ( {
 	);
 };
 
-// @todo: Refactor this to remove the HOC 'withProductSelector()' component as users will not see this block in the inserter. Therefore, we can export the Edit component by default. The HOC 'withProductSelector()' component should also be removed from other `product-elements` components. See also https://github.com/woocommerce/woocommerce-blocks/pull/7566#pullrequestreview-1168635469.
-export default withProductSelector( { icon, title, description } )( Edit );
+export default Edit;
