@@ -123,31 +123,19 @@ test.describe( 'Payment setup task', () => {
 		page,
 		baseURL,
 	} ) => {
-		// Payments page differs if store is located outside of a WCPay-supported country, so make sure we aren't.
 		const api = new wcApi( {
 			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		// ensure store address is US
+		// Ensure store's base country location is a WooPayments non-supported country (AF).
+		// Otherwise, the WooPayments task page logic or WooPayments redirects will kick in.
 		await api.post( 'settings/general/batch', {
 			update: [
 				{
-					id: 'woocommerce_store_address',
-					value: 'addr 1',
-				},
-				{
-					id: 'woocommerce_store_city',
-					value: 'San Francisco',
-				},
-				{
 					id: 'woocommerce_default_country',
-					value: 'US:CA',
-				},
-				{
-					id: 'woocommerce_store_postcode',
-					value: '94107',
+					value: 'AF',
 				},
 			],
 		} );
@@ -161,18 +149,19 @@ test.describe( 'Payment setup task', () => {
 		// Enable COD payment option.
 		await page
 			.locator(
-				'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > button'
+				'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > .woocommerce-task-payment__action'
 			)
 			.click();
 		// Check that COD was set up.
 		await expect(
 			page.locator(
-				'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > button'
+				'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > .woocommerce-task-payment__action'
 			)
 		).toContainText( 'Manage' );
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
 
+		// Check that the COD payment method was enabled.
 		await expect(
 			page.locator( '//tr[@data-gateway_id="cod"]/td[@class="status"]/a' )
 		).toHaveClass( 'wc-payment-gateway-method-toggle-enabled' );
