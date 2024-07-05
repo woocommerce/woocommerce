@@ -120,38 +120,39 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 				pattern.source !== 'pattern-directory/core'
 		);
 
-		const patt = patternsWithoutThemePatterns.map( ( pattern ) => {
-			if (
-				pattern.name !== 'woocommerce-blocks/just-arrived-full-hero'
-			) {
-				return pattern;
-			}
+		const patternWithPatchedProductHeroPattern =
+			patternsWithoutThemePatterns.map( ( pattern ) => {
+				if (
+					pattern.name !== 'woocommerce-blocks/just-arrived-full-hero'
+				) {
+					return pattern;
+				}
 
-			if ( ! isActiveNewNeutralVariation ) {
+				if ( ! isActiveNewNeutralVariation ) {
+					const blocks =
+						findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+							pattern.blocks,
+							( block: BlockInstance ) => {
+								block.attributes.style = {};
+							}
+						);
+					return { ...pattern, blocks };
+				}
+
 				const blocks =
 					findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
 						pattern.blocks,
 						( block: BlockInstance ) => {
-							block.attributes.style = {};
+							block.attributes.style =
+								PRODUCT_HERO_PATTERN_BUTTON_STYLE;
 						}
 					);
+
 				return { ...pattern, blocks };
-			}
-
-			const blocks =
-				findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
-					pattern.blocks,
-					( block: BlockInstance ) => {
-						block.attributes.style =
-							PRODUCT_HERO_PATTERN_BUTTON_STYLE;
-					}
-				);
-
-			return { ...pattern, blocks };
-		} );
+			} );
 
 		return sortPatternsByCategory(
-			patt,
+			patternWithPatchedProductHeroPattern,
 			category as keyof typeof PATTERN_CATEGORIES
 		);
 	}, [ category, isActiveNewNeutralVariation, patterns ] );
