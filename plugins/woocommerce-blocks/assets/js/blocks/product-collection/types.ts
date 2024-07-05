@@ -60,7 +60,7 @@ export interface PriceRange {
 
 export interface ProductCollectionQuery {
 	exclude: string[];
-	inherit: boolean | null;
+	inherit: boolean;
 	offset: number;
 	order: TProductCollectionOrder;
 	orderBy: TProductCollectionOrderBy;
