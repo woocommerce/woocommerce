@@ -15,26 +15,26 @@ import metadata from './block.json';
 
 const deprecated = [
 	{
-		migrate: () => {
+		attributes: {},
+		save: sharedConfig.save,
+		migrate: ( attributes ) => {
 			// We don't deprecate attributes, but adding new ones.
 			// For backwards compatibility, some new attributes require
 			// different defaults than new ones.
 			return {
+				...attributes,
 				showDescriptionIfEmpty: true,
 				summaryLength: 150,
 			};
 		},
-		isEligible: ( {
-			isDescendantOfAllProducts,
-		}: {
-			isDescendantOfAllProducts: boolean;
-		} ) => isDescendantOfAllProducts,
+		isEligible: ( attributes ) => attributes?.isDescendantOfAllProducts,
 	},
 ];
 
 const blockSettings: BlockConfiguration = {
 	...sharedConfig,
 	icon: { src: icon },
+	attributes: metadata.attributes,
 	supports,
 	deprecated,
 	edit,
