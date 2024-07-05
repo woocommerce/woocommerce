@@ -2,7 +2,7 @@
 /**
  * Title: Featured Category Cover Image
  * Slug: woocommerce-blocks/featured-category-cover-image
- * Categories: WooCommerce
+ * Categories: WooCommerce, Intro
  */
 
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
