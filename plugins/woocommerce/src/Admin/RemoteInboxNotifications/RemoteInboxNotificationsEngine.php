@@ -285,6 +285,11 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 				}
 				$note_id = wc_clean( sanitize_text_field( wp_unslash( $_GET['delete_remote_notification_note_id'] ) ) );
 				$note = Notes::get_note( $note_id );
+
+				if ( ! $note ) {
+					return __( 'Remote inbox notification not found', 'woocommerce' );
+				}
+				
 				$note->delete( true );
 				return __( 'Remote inbox notification has been deleted', 'woocommerce' );
 			},
