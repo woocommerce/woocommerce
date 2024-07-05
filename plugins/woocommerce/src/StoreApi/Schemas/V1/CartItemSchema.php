@@ -89,7 +89,7 @@ class CartItemSchema extends ItemSchema {
 	 */
 	protected function get_cart_images( \WC_Product $product, array $cart_item, string $cart_item_key ) {
 		// Get the images for the product
-		$images = $this->get_images($product);
+		$images = $this->get_images( $product );
 
 		/**
 		 * Filter the cart product images
@@ -101,7 +101,7 @@ class CartItemSchema extends ItemSchema {
 		 * @param array  $cart_item         Cart item array.
 		 * @param string $cart_item_key     Cart item key.
 		 */
-		return apply_filters('woocommerce_cart_item_images', $images, $cart_item, $cart_item_key);
+		return apply_filters( 'woocommerce_cart_item_images', $images, $cart_item, $cart_item_key );
 	}
 
 	/**
