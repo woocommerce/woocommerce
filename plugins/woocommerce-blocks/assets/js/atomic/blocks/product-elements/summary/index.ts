@@ -15,14 +15,18 @@ import metadata from './block.json';
 
 const deprecated = [
 	{
-		migrate: () => {
+		migrate: ( attributes ) => {
 			// We don't deprecate attributes, but adding new ones.
 			// For backwards compatibility, some new attributes require
 			// different defaults than new ones.
-			return {
-				showDescriptionIfEmpty: true,
-				summaryLength: 150,
-			};
+			if ( attributes.isDescendantOfAllProducts ) {
+				return {
+					showDescriptionIfEmpty: true,
+					summaryLength: 150,
+				};
+			}
+
+			return attributes;
 		},
 	},
 ];
