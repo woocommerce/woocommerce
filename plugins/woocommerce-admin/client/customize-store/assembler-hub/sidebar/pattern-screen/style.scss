@@ -32,4 +32,39 @@
 		overflow-y: unset;
 		height: unset;
 	}
+
+	.block-editor-block-patterns-list__item {
+		.auto-block-preview__container,
+		.block-editor-block-preview__container {
+			border: none;
+		}
+
+		&.is-added {
+			.auto-block-preview__container,
+			.block-editor-block-preview__container {
+				// WIP: This is a temporary CSS. Replace red with the actual color.
+				box-shadow: 0 0 0 1.5px #fff,
+					0 0 0 3.5px var(--gutenberg-gray-900, #1e1e1e);
+				border-color: var(--gutenberg-gray-900, #1e1e1e);
+				border-radius: 4px;
+				&::after {
+					outline: none;
+				}
+			}
+		}
+
+		&:hover,
+		&:focus {
+			.auto-block-preview__container,
+			.block-editor-block-preview__container {
+				box-shadow: 0 0 0 1.5px #fff,
+					0 0 0 3.5px var(--wp-admin-theme-color, #3858e9);
+				border-color: var(--wp-admin-theme-color);
+				border-radius: 4px;
+				&::after {
+					outline: none;
+				}
+			}
+		}
+	}
 }
