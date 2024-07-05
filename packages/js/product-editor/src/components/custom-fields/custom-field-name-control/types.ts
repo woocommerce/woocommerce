@@ -7,10 +7,10 @@ export type CustomFieldNameControlProps = Omit<
 	ComboboxControl.Props,
 	'options' | 'onFilterValueChange'
 > &
-	Omit<
+	Pick<
 		React.DetailedHTMLProps<
 			React.InputHTMLAttributes< HTMLInputElement >,
 			HTMLInputElement
 		>,
-		'className' | 'value' | 'onChange'
+		'onBlur'
 	>;

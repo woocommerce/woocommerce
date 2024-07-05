@@ -11,7 +11,6 @@ import {
 	useCallback,
 	useEffect,
 	useLayoutEffect,
-	useMemo,
 	useRef,
 	useState,
 } from '@wordpress/element';
@@ -74,7 +73,6 @@ export const CustomFieldNameControl = forwardRef(
 			value,
 			onChange,
 			onBlur,
-			...props
 		}: CustomFieldNameControlProps,
 		ref: ForwardedRef< HTMLInputElement >
 	) {
@@ -109,83 +107,6 @@ export const CustomFieldNameControl = forwardRef(
 				}
 			},
 			[ id, ref ]
-		);
-
-		const { attrs, events } = useMemo(
-			function splitAttrsAndEvents() {
-				return Object.entries( props ).reduce<
-					Record< string, Record< string, unknown > >
-				>(
-					( current, [ propName, propValue ] ) => {
-						if ( propValue !== undefined ) {
-							if ( propName.startsWith( 'on' ) ) {
-								const eventName = propName
-									.substring( 2 )
-									.toLowerCase();
-								current.events[ eventName ] =
-									propValue as never;
-							} else {
-								current.attrs[ propName ] = propValue as never;
-							}
-						}
-
-						return current;
-					},
-					{ attrs: {}, events: {} }
-				);
-			},
-			[ props ]
-		);
-
-		useEffect(
-			/**
-			 * The Combobox component does not expose any attribute
-			 * of the internal native input element removing the ability
-			 * to set attribute's values like name important in the
-			 * context of form submission
-			 */
-			function initializeAttrs() {
-				Object.entries( attrs ).forEach(
-					( [ propName, propValue ] ) => {
-						comboboxRef.current?.setAttribute(
-							propName,
-							`${ propValue }`
-						);
-					}
-				);
-			},
-			[ attrs ]
-		);
-
-		useEffect(
-			/**
-			 * The Combobox component does not expose any event
-			 * of the internal native input element removing the ability
-			 * to focus the element and other things related also to
-			 * validations
-			 */
-			function initializeEvents() {
-				Object.entries( events ).forEach(
-					( [ propName, propValue ] ) => {
-						comboboxRef.current?.addEventListener(
-							propName,
-							propValue as () => void
-						);
-					}
-				);
-
-				return () => {
-					Object.entries( events ).forEach(
-						( [ propName, propValue ] ) => {
-							comboboxRef.current?.removeEventListener(
-								propName,
-								propValue as () => void
-							);
-						}
-					);
-				};
-			},
-			[ events ]
 		);
 
 		const handleFilterValueChange = useDebounce(
