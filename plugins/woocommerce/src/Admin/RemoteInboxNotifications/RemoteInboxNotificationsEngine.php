@@ -254,6 +254,10 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	 * @return mixed
 	 */
 	public static function add_debug_tools( $tools ) {
+		if ( get_option("woocommerce_allow_tracking", "no" ) === "no" ) {
+			return $tools;
+		}
+
 		$tools['refresh_remote_inbox_notifications'] = array(
 			'name'     => __( 'Refresh Remote Inbox Notifications', 'woocommerce' ),
 			'button'   => __( 'Refresh', 'woocommerce' ),
@@ -289,7 +293,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 				if ( ! $note ) {
 					return __( 'Remote inbox notification not found', 'woocommerce' );
 				}
-				
+
 				$note->delete( true );
 				return __( 'Remote inbox notification has been deleted', 'woocommerce' );
 			},
