@@ -96,10 +96,9 @@ class CartItemSchema extends ItemSchema {
 		 *
 		 * This hook allows for changing the cart item images. This is specific to the cart endpoint.
 		 *
-		 * @param array  product_images     Array of image objects, as defined in ImageAttachmentSchema
-		 * @param string $product_permalink Product permalink.
-		 * @param array  $cart_item         Cart item array.
-		 * @param string $cart_item_key     Cart item key.
+		 * @param array  product_images  Array of image objects, as defined in ImageAttachmentSchema
+		 * @param array  $cart_item      Cart item array.
+		 * @param string $cart_item_key  Cart item key.
 		 */
 		return apply_filters( 'woocommerce_cart_item_images', $product_images, $cart_item, $cart_item_key );
 	}
