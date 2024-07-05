@@ -26,17 +26,17 @@ const templates = [
 	{
 		title: 'Single Product',
 		slug: 'single-product',
-		path: '/product/single/',
+		path: '/product/hoodie',
 	},
 	{
 		title: 'Product Attribute',
 		slug: 'taxonomy-product_attribute',
-		path: '/product-attribute/color/',
+		path: '/color/blue',
 	},
 	{
 		title: 'Product Category',
 		slug: 'taxonomy-product_cat',
-		path: '/product-category/music/',
+		path: '/product-category/clothing',
 	},
 	{
 		title: 'Product Tag',
@@ -51,7 +51,7 @@ const templates = [
 	{
 		title: 'Product Search Results',
 		slug: 'product-search-results',
-		path: '/?s=s&post_type=product',
+		path: '/?s=shirt&post_type=product',
 	},
 ];
 
@@ -279,6 +279,7 @@ test.describe( `${ blockData.name } Block `, () => {
 		test( `is rendered on ${ template.title } template`, async ( {
 			admin,
 			editor,
+			page,
 		} ) => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//${ template.slug }`,
@@ -291,38 +292,10 @@ test.describe( `${ blockData.name } Block `, () => {
 			);
 
 			await expect( block ).toBeVisible();
-		} );
-
-		// These tests consistently fail due to the default content of the
-		// page--potentially the classic block is not being used after
-		// another test runs. Reenable this when we have a solution for
-		// this.
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip( `is rendered on ${ template.title } template - frontend side`, async ( {
-			admin,
-			editor,
-			page,
-		} ) => {
-			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ template.slug }`,
-				postType: 'wp_template',
-				canvas: 'edit',
-			} );
-
-			await editor.insertBlock( {
-				name: 'core/paragraph',
-				attributes: { content: 'Hello World' },
-			} );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
 
 			await page.goto( template.path );
 
-			await expect(
-				page.getByText( 'Hello World' ).first()
-			).toBeVisible();
+			await expect( page.locator( 'div[data-template]' ) ).toBeVisible();
 		} );
 	}
 } );
