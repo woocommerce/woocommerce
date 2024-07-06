@@ -2,19 +2,22 @@
 
 namespace Automattic\WooCommerce\Blueprint;
 
+use Opis\JsonSchema\Validator;
+
 class ImportSchema {
 	use UseWPFunctions;
 
 	private Schema $schema;
+	private Validator $validator;
 	private BuiltInStepProcessors $builtin_step_processors;
 
-	public function __construct( Schema $schema ) {
-		$this->schema                  = $schema;
-		$this->builtin_step_processors = new BuiltInStepProcessors( $schema );
-	}
+	public function __construct( Schema $schema,  Validator $validator = null ) {
+		$this->schema = $schema;
+		if ( null === $validator ) {
+			$this->validator = new Validator();
+		}
 
-	public function get_schema() {
-		return $this->schema;
+		$this->builtin_step_processors = new BuiltInStepProcessors( $schema instanceof ZipSchema );
 	}
 
 	public static function crate_from_file( $file ) {

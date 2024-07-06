@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blueprint\Importers;
 
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
+use Automattic\WooCommerce\Blueprint\Steps\ActivatePlugin;
 use Automattic\WooCommerce\Blueprint\UsePluginHelpers;
 
 class ImportActivatePlugin implements StepProcessor {
@@ -20,7 +21,7 @@ class ImportActivatePlugin implements StepProcessor {
 		return $result;
 	}
 
-	public function get_supported_step(): string {
-		return 'activatePlugin';
+	public function get_step_class(): string {
+		return ActivatePlugin::class;
 	}
 }

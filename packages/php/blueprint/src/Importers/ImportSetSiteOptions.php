@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blueprint\Importers;
 
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
+use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 
 class ImportSetSiteOptions implements StepProcessor {
@@ -27,7 +28,7 @@ class ImportSetSiteOptions implements StepProcessor {
 		return $result;
 	}
 
-	public function get_supported_step(): string {
-		return 'setSiteOptions';
+	public function get_step_class(): string {
+		return SetSiteOptions::class;
 	}
 }

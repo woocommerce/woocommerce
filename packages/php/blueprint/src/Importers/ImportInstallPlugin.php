@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blueprint\Importers;
 use Automattic\WooCommerce\Blueprint\ResourceStorages;
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
+use Automattic\WooCommerce\Blueprint\Steps\InstallPlugin;
 use Plugin_Upgrader;
 
 class ImportInstallPlugin implements StepProcessor {
@@ -82,7 +83,7 @@ class ImportInstallPlugin implements StepProcessor {
 		return $installed_plugins;
 	}
 
-	public function get_supported_step(): string {
-		return 'installPlugin';
+	public function get_step_class(): string {
+		return InstallPlugin::class;
 	}
 }

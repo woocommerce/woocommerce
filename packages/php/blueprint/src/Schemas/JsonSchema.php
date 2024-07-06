@@ -2,22 +2,48 @@
 
 namespace Automattic\WooCommerce\Blueprint;
 
-class JsonSchema extends Schema {
+class JsonSchema {
+	protected object $schema;
+
 	public function __construct( $json_path ) {
 		$schema = json_decode( file_get_contents( $json_path ) );
 		if ( ! $this->validate() ) {
 			if ( ! $this->validate() ) {
-				throw new \InvalidArgumentException( $json_path . ' is not a valid JSON.' );
+				throw new \InvalidArgumentException( $json_path . " is not a valid JSON or missing 'steps' field." );
 			}
 		}
 
 		$this->schema = $schema;
 	}
 
+	public function get_steps() {
+		return $this->schema->steps;
+	}
+
+	public function get_step( $name ) {
+		if ( isset( $this->schema->steps->{$name} ) ) {
+			return $this->schema->steps->{$name};
+		}
+		return null;
+	}
+
+	/**
+	 * Just makes sure that the JSON contains 'steps' field.
+	 *
+	 * We're going to validate 'steps' later because we can't know the exact schema
+	 * ahead of time. 3rd party plugins can add their step processors.
+	 *
+	 * @return bool[
+	 */
 	public function validate() {
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
 			return false;
 		}
+
+		if ( ! isset( $this->schema->steps ) ) {
+			return false;
+		}
+
 		return true;
 	}
 }

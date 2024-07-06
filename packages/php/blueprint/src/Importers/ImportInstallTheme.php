@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blueprint\Importers;
 use Automattic\WooCommerce\Blueprint\ResourceStorages;
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
+use Automattic\WooCommerce\Blueprint\Steps\InstallTheme;
 use Plugin_Upgrader;
 
 class ImportInstallTheme implements StepProcessor {
@@ -64,7 +65,7 @@ class ImportInstallTheme implements StepProcessor {
 		return \switch_theme( $slug );
 	}
 
-	public function get_supported_step(): string {
-		return 'installTheme';
+	public function get_step_class(): string {
+		return InstallTheme::class;
 	}
 }
