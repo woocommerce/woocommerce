@@ -2,12 +2,12 @@
 
 namespace Automattic\WooCommerce\Blueprint;
 
-use Automattic\WooCommerce\Blueprint\Importers\ActivatePlugin;
-use Automattic\WooCommerce\Blueprint\Importers\DeactivatePlugin;
-use Automattic\WooCommerce\Blueprint\Importers\DeletePlugin;
-use Automattic\WooCommerce\Blueprint\Importers\InstallPlugin;
-use Automattic\WooCommerce\Blueprint\Importers\InstallTheme;
-use Automattic\WooCommerce\Blueprint\Importers\SetSiteOptions;
+use Automattic\WooCommerce\Blueprint\Importers\ImportActivatePlugin;
+use Automattic\WooCommerce\Blueprint\Importers\ImportDeactivatePlugin;
+use Automattic\WooCommerce\Blueprint\Importers\ImportDeletePlugin;
+use Automattic\WooCommerce\Blueprint\Importers\ImportInstallPlugin;
+use Automattic\WooCommerce\Blueprint\Importers\ImportInstallTheme;
+use Automattic\WooCommerce\Blueprint\Importers\ImportSetSiteOptions;
 use Automattic\WooCommerce\Blueprint\ResourceStorages\LocalPluginResourceStorage;
 use Automattic\WooCommerce\Blueprint\ResourceStorages\LocalThemeResourceStorage;
 use Automattic\WooCommerce\Blueprint\ResourceStorages\OrgPluginResourceStorage;
@@ -24,10 +24,10 @@ class BuiltInStepProcessors {
 		return array(
 			$this->create_install_plugins_processor(),
 			$this->create_install_themes_processor(),
-			new SetSiteOptions(),
-			new DeletePlugin(),
-			new ActivatePlugin(),
-			new DeactivatePlugin(),
+			new ImportSetSiteOptions(),
+			new ImportDeletePlugin(),
+			new ImportActivatePlugin(),
+			new ImportDeactivatePlugin(),
 		);
 	}
 
@@ -39,7 +39,7 @@ class BuiltInStepProcessors {
 			$storage->add_storage( new LocalPluginResourceStorage( $this->schema->get_unzipped_path() ) );
 		}
 
-		return new InstallPlugin( $storage );
+		return new ImportInstallPlugin( $storage );
 	}
 
 	private function create_install_themes_processor() {
@@ -49,6 +49,6 @@ class BuiltInStepProcessors {
 			$storage->add_storage( new LocalThemeResourceStorage( $this->schema->get_unzipped_path() ) );
 		}
 
-		return new InstallTheme( $storage );
+		return new ImportInstallTheme( $storage );
 	}
 }

@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Plugin_Upgrader;
 
-class InstallTheme implements StepProcessor {
+class ImportInstallTheme implements StepProcessor {
 	private ResourceStorages $storage;
 	private StepProcessorResult $result;
 

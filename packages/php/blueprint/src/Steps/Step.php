@@ -2,6 +2,13 @@
 
 namespace Automattic\WooCommerce\Blueprint\Steps;
 
+/**
+ * Abstract class Step
+ *
+ * This class defines the structure for a Step that requires arguments to perform an action.
+ * A Step should also be capable of returning formatted data that can be imported later.
+ * Additionally, a Step can validate data.
+ */
 abstract class Step {
 	protected array $meta_values = array();
 	abstract public static function get_step_name();

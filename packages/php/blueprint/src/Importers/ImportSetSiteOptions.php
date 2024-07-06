@@ -6,7 +6,7 @@ use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 
-class SetSiteOptions implements StepProcessor {
+class ImportSetSiteOptions implements StepProcessor {
 	use UseWPFunctions;
 	public function process( $schema ): StepProcessorResult {
 		$result = StepProcessorResult::success( 'SetOptions' );

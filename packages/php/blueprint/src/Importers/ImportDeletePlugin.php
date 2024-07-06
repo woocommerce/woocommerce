@@ -6,7 +6,7 @@ use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Automattic\WooCommerce\Blueprint\UsePluginHelpers;
 
-class DeletePlugin implements StepProcessor {
+class ImportDeletePlugin implements StepProcessor {
 	use UsePluginHelpers;
 
 	public function process( $schema ): StepProcessorResult {

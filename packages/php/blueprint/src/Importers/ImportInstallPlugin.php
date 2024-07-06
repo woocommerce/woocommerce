@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Plugin_Upgrader;
 
-class InstallPlugin implements StepProcessor {
+class ImportInstallPlugin implements StepProcessor {
 	private ResourceStorages $storage;
 	private array $installed_plugin_paths = array();
 
