@@ -11,43 +11,43 @@ class InstallPlugin implements StepProcessor {
 	private ResourceStorages $storage;
 	private array $installed_plugin_paths = array();
 
-	public function __construct(ResourceStorages $storage) {
+	public function __construct( ResourceStorages $storage ) {
 		$this->storage = $storage;
 	}
-	public function process($schema): StepProcessorResult {
-		$result = StepProcessorResult::success('InstallPlugins');
+	public function process( $schema ): StepProcessorResult {
+		$result = StepProcessorResult::success( 'InstallPlugins' );
 
 		$installed_plugins = $this->get_installed_plugins_paths();
-		$plugin = $schema->pluginZipFile;
+		$plugin            = $schema->pluginZipFile;
 
-		if (isset($installed_plugins[$plugin->slug])) {
-			$result->add_info("Skipped installing {$plugin->slug}. It is already installed.");
+		if ( isset( $installed_plugins[ $plugin->slug ] ) ) {
+			$result->add_info( "Skipped installing {$plugin->slug}. It is already installed." );
 			return $result;
 		}
-		if ($this->storage->is_supported_resource($plugin->resource) === false ) {
-			$result->add_error("Invalid resource type for {$plugin->slug}.");
-			return $result;
-		}
-
-		$downloaded_path = $this->storage->download($plugin->slug, $plugin->resource);
-		if (! $downloaded_path ) {
-			$result->add_error("Unable to download {$plugin->slug} with {$plugin->resource} resource type.");
+		if ( $this->storage->is_supported_resource( $plugin->resource ) === false ) {
+			$result->add_error( "Invalid resource type for {$plugin->slug}." );
 			return $result;
 		}
 
-		$install = $this->install($downloaded_path);
-		$install && $result->add_info("Installed {$plugin->slug}.");
+		$downloaded_path = $this->storage->download( $plugin->slug, $plugin->resource );
+		if ( ! $downloaded_path ) {
+			$result->add_error( "Unable to download {$plugin->slug} with {$plugin->resource} resource type." );
+			return $result;
+		}
 
-		if ($plugin->activate === true) {
-			$activate = $this->activate($plugin->slug);
-			$activate && $result->add_info("Activated {$plugin->slug}.");
+		$install = $this->install( $downloaded_path );
+		$install && $result->add_info( "Installed {$plugin->slug}." );
+
+		if ( $plugin->activate === true ) {
+			$activate = $this->activate( $plugin->slug );
+			$activate && $result->add_info( "Activated {$plugin->slug}." );
 		}
 
 		return $result;
 	}
 
 	protected function install( $local_plugin_path ) {
-		if (!class_exists('Plugin_Upgrader')) {
+		if ( ! class_exists( 'Plugin_Upgrader' ) ) {
 			include_once ABSPATH . '/wp-admin/includes/class-wp-upgrader.php';
 			include_once ABSPATH . '/wp-admin/includes/class-plugin-upgrader.php';
 		}
@@ -57,16 +57,16 @@ class InstallPlugin implements StepProcessor {
 	}
 
 	protected function activate( $slug ) {
-		if (empty($this->installed_plugin_paths)) {
+		if ( empty( $this->installed_plugin_paths ) ) {
 			$this->installed_plugin_paths = $this->get_installed_plugins_paths();
 		}
 
 		$path = $this->installed_plugin_paths[ $slug ] ?? false;
-		return activate_plugin($path);
+		return activate_plugin( $path );
 	}
 
 	protected function get_installed_plugins_paths() {
-		if (!function_exists('get_plugins')) {
+		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 

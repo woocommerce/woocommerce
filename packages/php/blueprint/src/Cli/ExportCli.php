@@ -22,7 +22,6 @@ class ExportCli {
 
 		$schema = $exporter->export($args['steps']);
 
-
 		if ($export_as_zip) {
 			$zipExportedSchema = new ZipExportedSchema($schema);
 			$this->save_to = $zipExportedSchema->zip();

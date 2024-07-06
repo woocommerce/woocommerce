@@ -7,8 +7,9 @@ use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 
 class ExportInstallThemeSteps implements StepExporter {
 	use UseWPFunctions;
+
 	public function export() {
-		$steps       = array();
+		$steps        = array();
 		$thmes        = $this->wp_get_themes();
 		$active_theme = $this->wp_get_theme();
 

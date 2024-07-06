@@ -32,13 +32,13 @@ class ExportSchema {
 			'steps'       => array(),
 		);
 
-		$built_in_exporters = (new BuiltInExporters())->get_all();
-		$exporters = $this->wp_apply_filters( 'wooblueprint_exporters', $built_in_exporters );
+		$built_in_exporters = ( new BuiltInExporters() )->get_all();
+		$exporters          = $this->wp_apply_filters( 'wooblueprint_exporters', $built_in_exporters );
 
 		// Filter out any exporters that are not in the list of steps to export.
 		if ( count( $steps ) ) {
 			foreach ( $exporters as $key => $exporter ) {
-				$name = $exporter->get_step_name();
+				$name  = $exporter->get_step_name();
 				$alias = $exporter instanceof HasAlias ? $exporter->get_alias() : $name;
 				if ( ! in_array( $name, $steps ) && ! in_array( $alias, $steps ) ) {
 					unset( $exporters[ $key ] );
@@ -51,8 +51,8 @@ class ExportSchema {
 		 */
 		foreach ( $exporters as $exporter ) {
 			$step = $exporter->export();
-			if (is_array($step)) {
-				foreach ($step as $_step) {
+			if ( is_array( $step ) ) {
+				foreach ( $step as $_step ) {
 					$schema['steps'][] = $_step->get_json_array();
 				}
 			} else {

@@ -9,15 +9,15 @@ use Automattic\WooCommerce\Blueprint\UsePluginHelpers;
 class DeletePlugin implements StepProcessor {
 	use UsePluginHelpers;
 
-	public function process($schema): StepProcessorResult {
-		$result = StepProcessorResult::success('DeletePlugins');
-		$name = $schema->pluginName;
+	public function process( $schema ): StepProcessorResult {
+		$result = StepProcessorResult::success( 'DeletePlugins' );
+		$name   = $schema->pluginName;
 
-		$delete = $this->delete_plugin_by_slug($name);
-		if ($delete) {
-			$result->add_info("Deleted {$name}.");
+		$delete = $this->delete_plugin_by_slug( $name );
+		if ( $delete ) {
+			$result->add_info( "Deleted {$name}." );
 		} else {
-			$result->add_error("Unable to delete {$name}.");
+			$result->add_error( "Unable to delete {$name}." );
 		}
 
 		return $result;

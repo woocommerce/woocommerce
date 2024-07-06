@@ -16,7 +16,7 @@ use Automattic\WooCommerce\Blueprint\ResourceStorages\OrgThemeResourceStorage;
 class BuiltInStepProcessors {
 	private Schema $schema;
 
-	public function __construct(Schema $schema) {
+	public function __construct( Schema $schema ) {
 		$this->schema = $schema;
 	}
 
@@ -33,22 +33,22 @@ class BuiltInStepProcessors {
 
 	private function create_install_plugins_processor() {
 		$storage = new ResourceStorages();
-		$storage->add_storage(new OrgPluginResourceStorage());
+		$storage->add_storage( new OrgPluginResourceStorage() );
 
-		if ( $this->schema instanceof ZipSchema) {
-			$storage->add_storage( new LocalPluginResourceStorage($this->schema->get_unzipped_path()) );
+		if ( $this->schema instanceof ZipSchema ) {
+			$storage->add_storage( new LocalPluginResourceStorage( $this->schema->get_unzipped_path() ) );
 		}
 
-		return new InstallPlugin($storage);
+		return new InstallPlugin( $storage );
 	}
 
 	private function create_install_themes_processor() {
 		$storage = new ResourceStorages();
-		$storage->add_storage(new OrgThemeResourceStorage());
-		if ( $this->schema instanceof ZipSchema) {
-			$storage->add_storage( new LocalThemeResourceStorage($this->schema->get_unzipped_path()) );
+		$storage->add_storage( new OrgThemeResourceStorage() );
+		if ( $this->schema instanceof ZipSchema ) {
+			$storage->add_storage( new LocalThemeResourceStorage( $this->schema->get_unzipped_path() ) );
 		}
 
-		return new InstallTheme($storage);
+		return new InstallTheme( $storage );
 	}
 }

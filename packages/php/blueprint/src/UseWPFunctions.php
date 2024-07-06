@@ -13,8 +13,8 @@ trait UseWPFunctions {
 	 *                                  associated with a particular action are executed. Default 10.
 	 * @param int      $accepted_args   Optional. The number of arguments the function accepts. Default 1.
 	 */
-	public function wp_add_filter($tag, $function_to_add, $priority = 10, $accepted_args = 1) {
-		add_filter($tag, $function_to_add, $priority, $accepted_args);
+	public function wp_add_filter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
+		add_filter( $tag, $function_to_add, $priority, $accepted_args );
 	}
 
 	/**
@@ -26,8 +26,8 @@ trait UseWPFunctions {
 	 *                                  associated with a particular action are executed. Default 10.
 	 * @param int      $accepted_args   Optional. The number of arguments the function accepts. Default 1.
 	 */
-	public function wp_add_action($tag, $function_to_add, $priority = 10, $accepted_args = 1) {
-		add_action($tag, $function_to_add, $priority, $accepted_args);
+	public function wp_add_action( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
+		add_action( $tag, $function_to_add, $priority, $accepted_args );
 	}
 
 	/**
@@ -37,9 +37,9 @@ trait UseWPFunctions {
 	 * @param mixed  $value The value on which the filters hooked to $tag are applied on.
 	 * @return mixed The filtered value after all hooked functions are applied to it.
 	 */
-	public function wp_apply_filters($tag, $value) {
+	public function wp_apply_filters( $tag, $value ) {
 		$args = func_get_args();
-		return call_user_func_array('apply_filters', $args);
+		return call_user_func_array( 'apply_filters', $args );
 	}
 
 	/**
@@ -48,57 +48,65 @@ trait UseWPFunctions {
 	 * @param string $tag The name of the action to be executed.
 	 * @param mixed  ...$arg Optional. Additional arguments which are passed on to the functions hooked to the action.
 	 */
-	public function wp_do_action($tag, ...$args) {
-		do_action($tag, ...$args);
+	public function wp_do_action( $tag, ...$args ) {
+		do_action( $tag, ...$args );
 	}
 
-	public function wp_is_plugin_active(string $plugin) {
-		if (!function_exists('is_plugin_active') || !function_exists('get_plugins')) {
+	public function wp_is_plugin_active( string $plugin ) {
+		if ( ! function_exists( 'is_plugin_active' ) || ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
-		return is_plugin_active($plugin);
+		return is_plugin_active( $plugin );
 	}
 
-	public function wp_plugins_api($action, $args = array()) {
+	public function wp_plugins_api( $action, $args = array() ) {
 		if ( ! function_exists( 'plugins_api' ) ) {
 			require_once ABSPATH . '/wp-admin/includes/plugin-install.php';
 		}
-		return plugins_api($action, $args);
+		return plugins_api( $action, $args );
 	}
 
-	public function wp_get_plugins(string $plugin_folder = '') {
+	public function wp_get_plugins( string $plugin_folder = '' ) {
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		return get_plugins($plugin_folder);
+		return get_plugins( $plugin_folder );
 	}
 
-	public function wp_get_themes($args = array()) {
-		return wp_get_themes($args);
+	public function wp_get_themes( $args = array() ) {
+		return wp_get_themes( $args );
 	}
 
-	public function wp_get_theme($stylesheet = null) {
-		return wp_get_theme($stylesheet);
+	public function wp_get_theme( $stylesheet = null ) {
+		return wp_get_theme( $stylesheet );
 	}
 
-	public function wp_themes_api($action, $args = array()) {
-		return themes_api($action, $args);
+	public function wp_themes_api( $action, $args = array() ) {
+		return themes_api( $action, $args );
 	}
 
-	public function wp_activate_plugin($plugin, $redirect = '', $network_wide = false, $silent = false) {
-		if (!function_exists('activate_plugin')) {
+	public function wp_activate_plugin( $plugin, $redirect = '', $network_wide = false, $silent = false ) {
+		if ( ! function_exists( 'activate_plugin' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		return activate_plugin($plugin, $redirect, $network_wide, $silent);
+		return activate_plugin( $plugin, $redirect, $network_wide, $silent );
 	}
 
-	public function wp_delete_plugins($plugins) {
-		if (!function_exists('delete_plugins')) {
+	public function wp_delete_plugins( $plugins ) {
+		if ( ! function_exists( 'delete_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		return delete_plugins($plugins);
+		return delete_plugins( $plugins );
+	}
+
+	public function wp_update_option( $option, $value, $autoload = null ) {
+		return update_option( $option, $value, $autoload );
+	}
+
+	public function wp_get_option( $option, $default = false ) {
+		return get_option( $option, $default );
 	}
 }

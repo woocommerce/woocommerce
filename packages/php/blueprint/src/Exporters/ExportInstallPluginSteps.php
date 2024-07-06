@@ -6,28 +6,28 @@ use Automattic\WooCommerce\Blueprint\Steps\InstallPlugin;
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 
 class ExportInstallPluginSteps implements StepExporter {
-
 	use UseWPFunctions;
-
 	private bool $include_private_plugins = false;
-	public function include_private_plugins(bool $boolean) {
+
+	public function include_private_plugins( bool $boolean ) {
 		$this->include_private_plugins = $boolean;
 	}
+
 	public function export() {
 		$plugins = $this->wp_get_plugins();
 
 		// @todo temporary fix for JN site -- it includes WooCommerce as a custom plugin
 		// since JN sites are using a different slug.
-		$exclude = array('WooCommerce');
-		$steps = array();
-		foreach ($plugins as $path => $plugin) {
-			if (in_array($plugin['Name'], $exclude, true)) {
+		$exclude = array( 'WooCommerce' );
+		$steps   = array();
+		foreach ( $plugins as $path => $plugin ) {
+			if ( in_array( $plugin['Name'], $exclude, true ) ) {
 				continue;
 			}
-			$slug = dirname($path);
+			$slug = dirname( $path );
 			// single-file plugin
-			if ($slug === '.') {
-				$slug = pathinfo($path)['filename'];
+			if ( $slug === '.' ) {
+				$slug = pathinfo( $path )['filename'];
 			}
 			$info = $this->wp_plugins_api(
 				'plugin_information',
@@ -39,22 +39,22 @@ class ExportInstallPluginSteps implements StepExporter {
 				)
 			);
 
-			$has_download_link = isset($info->download_link);
-			if ($this->include_private_plugins === false && !$has_download_link) {
+			$has_download_link = isset( $info->download_link );
+			if ( $this->include_private_plugins === false && ! $has_download_link ) {
 				continue;
 			}
 
 			$resource = $has_download_link ? 'wordpress.org/plugins' : 'self/plugins';
-			$steps[] = new InstallPlugin(
+			$steps[]  = new InstallPlugin(
 				$slug,
 				$resource,
 				array(
-					'activate' => $this->wp_is_plugin_active($path)
+					'activate' => $this->wp_is_plugin_active( $path ),
 				)
 			);
 		}
 
-	    return $steps;
+		return $steps;
 	}
 
 	public function get_step_name() {

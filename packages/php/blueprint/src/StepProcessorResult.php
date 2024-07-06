@@ -32,12 +32,12 @@ class StepProcessorResult {
 	 * @param bool $success Indicate whether the process was success or not.
 	 */
 	public function __construct( bool $success, string $step_name ) {
-		$this->success = $success;
+		$this->success   = $success;
 		$this->step_name = $step_name;
 	}
 
-	public function set_step_name($step_name) {
-	    $this->step_name = $step_name;
+	public function set_step_name( $step_name ) {
+		$this->step_name = $step_name;
 	}
 
 	/**
@@ -45,7 +45,7 @@ class StepProcessorResult {
 	 *
 	 * @return StepProcessorResult
 	 */
-	public static function success(string $stp_name): self {
+	public static function success( string $stp_name ): self {
 		return ( new self( true, $stp_name ) );
 	}
 
@@ -132,6 +132,6 @@ class StepProcessorResult {
 	}
 
 	public function get_step_name() {
-	    return $this->step_name;
+		return $this->step_name;
 	}
 }

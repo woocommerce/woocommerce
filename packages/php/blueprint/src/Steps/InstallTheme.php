@@ -7,55 +7,55 @@ class InstallTheme extends Step {
 	private string $resource;
 	private array $options;
 
-	public function __construct($slug, $resource, array $options = array()) {
-		$this->slug = $slug;
+	public function __construct( $slug, $resource, array $options = array() ) {
+		$this->slug     = $slug;
 		$this->resource = $resource;
-		$this->options = $options;
+		$this->options  = $options;
 	}
 
 	public function prepare_json_array() {
 		return array(
-			"step" => static::get_step_name(),
-			"themeZipFile" => array(
-				"resource" => $this->resource,
-				"slug" => $this->slug,
+			'step'         => static::get_step_name(),
+			'themeZipFile' => array(
+				'resource' => $this->resource,
+				'slug'     => $this->slug,
 			),
-			"options" => $this->options,
+			'options'      => $this->options,
 		);
 	}
 
-	public function get_schema($version = 1) {
-	    return array(
-		    '$id' => 1,
-		    "type" => "object",
-		    "properties" => [
-			    "step" => [
-				    "type" => "string",
-				    "enum" => [static::get_step_name()],
-			    ],
-			    "themeZipFile" => [
-				    "type" => "object",
-				    "properties" => [
-					    "resource" => [
-						    "type" => "string",
-					    ],
-					    "slug" => [
-						    "type" => "string",
-					    ],
-				    ],
-				    "required" => ["resource", "slug"],
-			    ],
-			    "options" => [
-				    "type" => "object",
-				    "properties" => [
-					    "activate" => [
-						    "type" => "boolean",
-					    ],
-				    ],
-			    ],
-		    ],
-		    "required" => ["step", "pluginZipFile"],
-	    );
+	public function get_schema( $version = 1 ) {
+		return array(
+			'$id'        => 1,
+			'type'       => 'object',
+			'properties' => array(
+				'step'         => array(
+					'type' => 'string',
+					'enum' => array( static::get_step_name() ),
+				),
+				'themeZipFile' => array(
+					'type'       => 'object',
+					'properties' => array(
+						'resource' => array(
+							'type' => 'string',
+						),
+						'slug'     => array(
+							'type' => 'string',
+						),
+					),
+					'required'   => array( 'resource', 'slug' ),
+				),
+				'options'      => array(
+					'type'       => 'object',
+					'properties' => array(
+						'activate' => array(
+							'type' => 'boolean',
+						),
+					),
+				),
+			),
+			'required'   => array( 'step', 'pluginZipFile' ),
+		);
 	}
 
 	public static function get_step_name() {

@@ -7,9 +7,9 @@ use Automattic\WooCommerce\Blueprint\Exporters\ExportInstallThemeSteps;
 
 class BuiltInExporters {
 	public function get_all() {
-	    return array(
+		return array(
 			new ExportInstallPluginSteps(),
-	        new ExportInstallThemeSteps(),
-	    );
+			new ExportInstallThemeSteps(),
+		);
 	}
 }

@@ -12,10 +12,10 @@ abstract class Schema {
 		return $this->schema->steps;
 	}
 
-	public function get_step($name) {
-	    if (isset($this->schema->steps->{$name})) {
+	public function get_step( $name ) {
+		if ( isset( $this->schema->steps->{$name} ) ) {
 			return $this->schema->steps->{$name};
-	    }
+		}
 		return null;
 	}
 }
