@@ -65,6 +65,15 @@ class Util {
 		return false;
 	}
 
+	public static function index_array( $array, $callback ) {
+		$result = array();
+		foreach ( $array as $key => $value ) {
+			$new_key = $callback( $key, $value );
+			$result[ $new_key ] = $value;
+		}
+		return $result;
+	}
+
 	public static function array_filter_by_field( $array, $field_name, $force_convert = false ) {
 		if ( ! is_array( $array ) && $force_convert ) {
 			$array = json_decode( json_encode( $array ), true );

@@ -2,11 +2,12 @@
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Importers;
 
+use Automattic\WooCommerce\Admin\Features\Blueprint\Steps\SetWCTaxRates;
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use WC_Tax;
 
-class SetWCTaxRates implements StepProcessor {
+class ImportSetWCTaxRates implements StepProcessor {
 	private StepProcessorResult $result;
 	public function process($schema): StepProcessorResult {
 		$this->result = StepProcessorResult::success('ConfigureTaxRaes');
@@ -69,7 +70,7 @@ class SetWCTaxRates implements StepProcessor {
 		$wpdb->query($sql);
 	}
 
-	public function get_supported_step(): string {
-		return 'setWCTaxRates';
+	public function get_step_class(): string {
+		return SetWCTaxRates::class;
 	}
 }

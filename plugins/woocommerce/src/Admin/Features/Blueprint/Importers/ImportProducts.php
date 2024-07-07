@@ -82,7 +82,7 @@ class ImportProducts implements StepProcessor {
 		return WP_CONTENT_DIR;
 	}
 
-	public function get_supported_step(): string {
-		return 'importProducts';
+	public function get_step_class(): string {
+		return 'test';
 	}
 }

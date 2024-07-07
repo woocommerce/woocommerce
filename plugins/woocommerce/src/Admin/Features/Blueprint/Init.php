@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettings;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCShipping;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCTaskOptions;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCTaxRates;
-use Automattic\WooCommerce\Admin\Features\Blueprint\Importers\SetWCPaymentGateways;
-use Automattic\WooCommerce\Admin\Features\Blueprint\Importers\SetWCShipping;
-use Automattic\WooCommerce\Admin\Features\Blueprint\Importers\SetWCTaxRates;
+use Automattic\WooCommerce\Admin\Features\Blueprint\Importers\ImportSetWCPaymentGateways;
+use Automattic\WooCommerce\Admin\Features\Blueprint\Importers\ImportSetWCShipping;
+use Automattic\WooCommerce\Admin\Features\Blueprint\Importers\ImportSetWCTaxRates;
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 
@@ -62,9 +62,9 @@ class Init {
 	 */
 	public function add_woo_importers(array $importers) {
 		return array_merge( $importers, array(
-			new SetWCPaymentGateways(),
-			new SetWCShipping(),
-			new SetWCTaxRates(),
+			new ImportSetWCPaymentGateways(),
+			new ImportSetWCShipping(),
+			new ImportSetWCTaxRates(),
 		) );
 	}
 }

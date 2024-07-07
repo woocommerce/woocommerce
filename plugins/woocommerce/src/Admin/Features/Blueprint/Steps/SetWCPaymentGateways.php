@@ -22,7 +22,7 @@ class SetWCPaymentGateways extends Step {
 		return 'setWCPaymentGateways';
 	}
 
-	public function get_schema($version = 1) {
+	public static function get_schema($version = 1) {
 		return array(
 			'$id' => 1,
 			"type" => "object",

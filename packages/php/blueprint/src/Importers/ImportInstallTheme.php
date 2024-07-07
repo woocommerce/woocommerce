@@ -6,9 +6,11 @@ use Automattic\WooCommerce\Blueprint\ResourceStorages;
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Automattic\WooCommerce\Blueprint\Steps\InstallTheme;
+use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 use Plugin_Upgrader;
 
 class ImportInstallTheme implements StepProcessor {
+	use UseWPFunctions;
 	private ResourceStorages $storage;
 	private StepProcessorResult $result;
 
@@ -40,7 +42,7 @@ class ImportInstallTheme implements StepProcessor {
 
 		$install = $this->install( $downloaded_path );
 		$install && $this->result->add_debug( "Theme '$theme->slug' installed successfully." );
-		$theme_switch = $theme->activate === true && $this->switch_theme( $theme->slug );
+		$theme_switch = $theme->activate === true && $this->wp_switch_theme( $theme->slug );
 		$theme_switch && $this->result->add_debug( "Switched theme to '$theme->slug'." );
 
 		return $this->result;
@@ -59,10 +61,6 @@ class ImportInstallTheme implements StepProcessor {
 		}
 
 		return true;
-	}
-
-	protected function switch_theme( $slug ) {
-		return \switch_theme( $slug );
 	}
 
 	public function get_step_class(): string {

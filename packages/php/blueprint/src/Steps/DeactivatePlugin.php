@@ -3,16 +3,23 @@
 namespace Automattic\WooCommerce\Blueprint\Steps;
 
 class DeactivatePlugin extends Step {
+	private string $plugin_name;
+	public function __construct($plugin_name) {
+	    $this->plugin_name = $plugin_name;
+	}
 	public static function get_step_name() {
-		// TODO: Implement get_step_name() method.
+		return 'deactivatePlugin';
 	}
 
-	public function get_schema( $version = 1 ) {
-		// TODO: Implement get_schema() method.
+	public static function get_schema( $version = 1 ) {
+		return array();
 	}
 
 	public function prepare_json_array() {
-		// TODO: Implement prepare_json_array() method.
+		return array(
+			'step' => static::get_step_name(),
+			'pluginName' => $this->plugin_name,
+		);
 	}
 }
 

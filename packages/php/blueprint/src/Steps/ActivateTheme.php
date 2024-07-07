@@ -2,13 +2,13 @@
 
 namespace Automattic\WooCommerce\Blueprint\Steps;
 
-class DeletePlugin extends Step {
-	private string $plugin_name;
-	public function __construct($plugin_name) {
-	    $this->plugin_name = $plugin_name;
+class ActivateTheme extends Step {
+	private string $theme_name;
+	public function __construct($theme_name) {
+	    $this->theme_name = $theme_name;
 	}
 	public static function get_step_name() {
-		return "deletePlugin";
+		return 'activateTheme';
 	}
 
 	public static function get_schema( $version = 1 ) {
@@ -18,7 +18,7 @@ class DeletePlugin extends Step {
 	public function prepare_json_array() {
 		return array(
 			'step' => static::get_step_name(),
-			'pluginName' => $this->plugin_name,
+			'themeName' => $this->theme_name,
 		);
 	}
 }

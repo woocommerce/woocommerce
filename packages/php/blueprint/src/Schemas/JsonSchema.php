@@ -7,13 +7,11 @@ class JsonSchema {
 
 	public function __construct( $json_path ) {
 		$schema = json_decode( file_get_contents( $json_path ) );
-		if ( ! $this->validate() ) {
-			if ( ! $this->validate() ) {
-				throw new \InvalidArgumentException( $json_path . " is not a valid JSON or missing 'steps' field." );
-			}
-		}
-
 		$this->schema = $schema;
+
+		if ( ! $this->validate() ) {
+			throw new \InvalidArgumentException( $json_path . " is not a valid JSON or missing 'steps' field." );
+		}
 	}
 
 	public function get_steps() {

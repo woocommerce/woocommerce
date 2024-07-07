@@ -30,7 +30,7 @@ class SetWCShipping extends Step {
 		return 'setWCShipping';
 	}
 
-	public function get_schema($version = 1) {
+	public static function get_schema($version = 1) {
 		return array(
 			"type" => "object",
 			"properties" => [

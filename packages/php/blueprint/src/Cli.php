@@ -4,6 +4,8 @@ namespace Automattic\WooCommerce\Blueprint;
 use Automattic\WooCommerce\Blueprint\Cli\ExportCli;
 use Automattic\WooCommerce\Blueprint\Cli\ImportCli;
 
+require_once __DIR__ . '/../vendor/autoload.php';
+
 /**
  * Class Cli.
  *

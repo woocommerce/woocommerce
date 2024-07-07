@@ -109,4 +109,8 @@ trait UseWPFunctions {
 	public function wp_get_option( $option, $default = false ) {
 		return get_option( $option, $default );
 	}
+
+	public function wp_switch_theme( $name ) {
+		return switch_theme( $name );
+	}
 }

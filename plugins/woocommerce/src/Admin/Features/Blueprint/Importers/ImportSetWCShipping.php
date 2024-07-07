@@ -2,11 +2,12 @@
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Importers;
 
+use Automattic\WooCommerce\Admin\Features\Blueprint\Steps\SetWCShipping;
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use WC_Tax;
 
-class SetWCShipping implements StepProcessor {
+class ImportSetWCShipping implements StepProcessor {
 	public function process($schema): StepProcessorResult {
 		$result = StepProcessorResult::success('ConfigureTaxRaes');
 
@@ -53,7 +54,7 @@ class SetWCShipping implements StepProcessor {
 		}
 	}
 
-	public function get_supported_step(): string {
-		return 'setWCShipping';
+	public function get_step_class(): string {
+		return SetWCShipping::class;
 	}
 }

@@ -2,10 +2,11 @@
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Importers;
 
+use Automattic\WooCommerce\Admin\Features\Blueprint\Steps\SetWCPaymentGateways;
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 
-class SetWCPaymentGateways implements StepProcessor {
+class ImportSetWCPaymentGateways implements StepProcessor {
 	public function process($schema): StepProcessorResult {
 		$result = StepProcessorResult::success(self::class);
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
@@ -32,7 +33,7 @@ class SetWCPaymentGateways implements StepProcessor {
 		return $result;
 	}
 
-	public function get_supported_step(): string {
-		return 'setWCPaymentGateways';
+	public function get_step_class(): string {
+		return SetWCPaymentGateways::class;
 	}
 }
