@@ -47,7 +47,7 @@ export function TabBlockEdit( {
 
 		const timeoutId = setTimeout( setCanRenderChildren, 300, true );
 		return () => clearTimeout( timeoutId );
-	}, [ context.selectedTab, id ] );
+	}, [ context.selectedTab, id, setAttributes ] );
 
 	return (
 		<div { ...blockProps }>
