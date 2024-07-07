@@ -6,6 +6,7 @@ import classnames from 'classnames';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import type { BlockAttributes } from '@wordpress/blocks';
 import { useWooBlockProps } from '@woocommerce/block-templates';
+import { __experimentalErrorBoundary as ErrorBoundary } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -60,11 +61,13 @@ export function TabBlockEdit( {
 				role="tabpanel"
 				className={ classes }
 			>
-				{ canRenderChildren && (
-					/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-					/* @ts-ignore Content only template locking does exist for this property. */
-					<InnerBlocks templateLock="contentOnly" />
-				) }
+				<ErrorBoundary>
+					{ canRenderChildren && (
+						/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+						/* @ts-ignore Content only template locking does exist for this property. */
+						<InnerBlocks templateLock="contentOnly" />
+					) }
+				</ErrorBoundary>
 			</div>
 		</div>
 	);
