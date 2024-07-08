@@ -12,18 +12,13 @@ import { useDispatch } from '@wordpress/data';
 
 import { Plugins } from '../index';
 
-jest.mock( '@wordpress/data', () => {
-	return {
-		useDispatch: jest
-			.fn()
-			.mockReturnValue( { installAndActivatePlugins: jest.fn() } ),
-		useSelect: jest.fn().mockReturnValue( false ),
-	};
-} );
-
-jest.mock( '@wordpress/core-data', () => {
-	return {};
-} );
+jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
+	useDispatch: jest
+		.fn()
+		.mockReturnValue( { installAndActivatePlugins: jest.fn() } ),
+	useSelect: jest.fn().mockReturnValue( false ),
+} ) );
 
 describe( 'Rendering', () => {
 	afterAll( () => {

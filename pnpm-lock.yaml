@@ -775,9 +775,6 @@ importers:
       prop-types:
         specifier: ^15.8.1
         version: 15.8.1
-      qrcode.react:
-        specifier: ^3.1.0
-        version: 3.1.0(react@17.0.2)
       react-dates:
         specifier: ^21.8.0
         version: 21.8.0(@babel/runtime@7.23.5)(moment@2.29.4)(react-dom@17.0.2(react@17.0.2))(react-with-direction@1.4.0(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(react@17.0.2)
@@ -30533,7 +30530,9 @@ snapshots:
       source-map: 0.6.1
       string-length: 2.0.0
     transitivePeerDependencies:
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@jest/reporters@25.5.1':
     dependencies:
@@ -37562,6 +37561,23 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@typescript-eslint/eslint-plugin@4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.3.3))(eslint@8.55.0)(typescript@5.3.3)':
+    dependencies:
+      '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.3.3)
+      '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.3.3)
+      '@typescript-eslint/scope-manager': 4.33.0
+      debug: 4.3.5
+      eslint: 8.55.0
+      functional-red-black-tree: 1.0.1
+      ignore: 5.3.0
+      regexpp: 3.2.0
+      semver: 7.5.4
+      tsutils: 3.21.0(typescript@5.3.3)
+    optionalDependencies:
+      typescript: 5.3.3
+    transitivePeerDependencies:
+      - supports-color
+
   '@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.55.0)(typescript@5.3.2))(eslint@8.55.0)(typescript@5.3.2)':
     dependencies:
       '@eslint-community/regexpp': 4.10.0
@@ -41287,7 +41303,7 @@ snapshots:
   '@wordpress/eslint-plugin@9.3.0(@babel/core@7.23.6)(eslint@7.32.0)(typescript@5.3.3)':
     dependencies:
       '@babel/eslint-parser': 7.23.3(@babel/core@7.23.6)(eslint@7.32.0)
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.3.3))(eslint@7.32.0)(typescript@5.3.3)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.3.3))(eslint@8.55.0)(typescript@5.3.3)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@5.3.3)
       '@wordpress/prettier-config': 1.4.0(wp-prettier@2.2.1-beta-1)
       cosmiconfig: 7.1.0
@@ -47747,7 +47763,7 @@ snapshots:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@5.3.3)
       eslint: 7.32.0
     optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@7.32.0)(typescript@5.3.3))(eslint@7.32.0)(typescript@5.3.3)
+      '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0(eslint@8.55.0)(typescript@5.3.3))(eslint@8.55.0)(typescript@5.3.3)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -52167,7 +52183,9 @@ snapshots:
       pretty-format: 24.9.0
       throat: 4.1.0
     transitivePeerDependencies:
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   jest-jasmine2@25.5.4:
     dependencies:
