@@ -79,6 +79,7 @@ runs:
           run: |
             if [[ '${{ inputs.build-type }}' == 'minimal' ]]; then
               pnpm --filter="@woocommerce/admin-library" build:project:feature-config
+              pnpm --filter="@woocommerce/internal-js-tests" build
             fi
             if [[ '${{ inputs.build-type }}' == 'full' ]]; then
               pnpm ${{ steps.project-filters.outputs.build }} build
