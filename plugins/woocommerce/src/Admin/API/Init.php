@@ -60,10 +60,6 @@ class Init {
 		$controllers           = array();
 		$analytics_controllers = array();
 
-		if ( Features::is_enabled( 'launch-your-store' ) ) {
-			$controllers[] = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
-		}
-
 		if ( wc_rest_should_load_namespace( 'wc-admin' ) ) {
 			// Controllers in the wc-admin namespace.
 			$controllers = array(
@@ -91,6 +87,10 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\MobileAppMagicLink',
 				'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
 			);
+		}
+
+		if ( Features::is_enabled( 'launch-your-store' ) ) {
+			$controllers[] = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
 		}
 
 		if ( wc_rest_should_load_namespace( 'wc-analytics' ) ) {
