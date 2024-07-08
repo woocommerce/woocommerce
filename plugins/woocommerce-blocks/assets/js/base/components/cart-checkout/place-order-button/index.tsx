@@ -38,6 +38,9 @@ const PlaceOrderButton = ( {
 
 	const buttonLabel = (
 		<div
+			// Hide this from screen readers while the checkout is processing. The text will not be removed from the
+			// DOM, it will just be hidden with CSS to maintain the button's size while the spinner appears.
+			aria-hidden={ waitingForProcessing }
 			className={ clsx(
 				'wc-block-components-checkout-place-order-button__text',
 				{
