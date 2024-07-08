@@ -122,6 +122,7 @@
 		"@types/react": "^17.0.71",
 		"@types/react-dom": "^17.0.25",
 		"@wordpress/data": "wp-6.0",
+		"@automattic/components": "^2.1.1",
 		"lodash": "^4.17.0",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
