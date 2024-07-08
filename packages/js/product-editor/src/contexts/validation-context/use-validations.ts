@@ -17,6 +17,13 @@ export function useValidations< T = unknown >() {
 	const context = useContext( ValidationContext );
 	const [ isValidating, setIsValidating ] = useState( false );
 
+	async function focusByValidatiorId( validatorId: string ) {
+		const field = await context.getFieldByValidatorId( validatorId );
+		if ( field ) {
+			field.focus();
+		}
+	}
+
 	return {
 		isValidating,
 		async validate( newData?: Partial< T > ) {
@@ -38,5 +45,6 @@ export function useValidations< T = unknown >() {
 				setIsValidating( false );
 			} );
 		},
+		focusByValidatiorId,
 	};
 }
