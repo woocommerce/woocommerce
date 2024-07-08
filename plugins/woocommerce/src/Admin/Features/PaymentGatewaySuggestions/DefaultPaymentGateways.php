@@ -68,36 +68,8 @@ class DefaultPaymentGateways {
 					(object) array(
 						'type'     => 'or',
 						'operands' => array(
-							(object) array(
-								'type'    => 'not',
-								'operand' => [
-									(object) array(
-										'type'    => 'plugins_activated',
-										'plugins' => [ 'woocommerce-payments' ],
-									),
-								],
-							),
-							(object) array(
-								'type'         => 'option',
-								'transformers' => array(
-									// Extract only the 'data' key from the option.
-									(object) array(
-										'use'       => 'dot_notation',
-										'arguments' => (object) array(
-											'path' => 'data',
-										),
-									),
-									// Extract the keys from the data array.
-									(object) array(
-										'use' => 'array_keys',
-									),
-								),
-								'option_name'  => 'wcpay_account_data',
-								// The rule will be true if the 'account_id' key is not present in the data array.
-								'operation'    => '!contains',
-								'value'        => 'account_id',
-								'default'      => array(),
-							),
+							self::get_rules_for_wcpay_activated( false ),
+							self::get_rules_for_wcpay_connected( false ),
 						),
 					),
 				),
@@ -125,36 +97,8 @@ class DefaultPaymentGateways {
 					(object) array(
 						'type'     => 'or',
 						'operands' => array(
-							(object) array(
-								'type'    => 'not',
-								'operand' => [
-									(object) array(
-										'type'    => 'plugins_activated',
-										'plugins' => [ 'woocommerce-payments' ],
-									),
-								],
-							),
-							(object) array(
-								'type'         => 'option',
-								'transformers' => array(
-									// Extract only the 'data' key from the option.
-									(object) array(
-										'use'       => 'dot_notation',
-										'arguments' => (object) array(
-											'path' => 'data',
-										),
-									),
-									// Extract the keys from the data array.
-									(object) array(
-										'use' => 'array_keys',
-									),
-								),
-								'option_name'  => 'wcpay_account_data',
-								// The rule will be true if the 'account_id' key is not present in the data array.
-								'operation'    => '!contains',
-								'value'        => 'account_id',
-								'default'      => array(),
-							),
+							self::get_rules_for_wcpay_activated( false ),
+							self::get_rules_for_wcpay_connected( false ),
 						),
 					),
 				),
@@ -323,36 +267,8 @@ class DefaultPaymentGateways {
 					(object) array(
 						'type'     => 'or',
 						'operands' => array(
-							(object) array(
-								'type'    => 'not',
-								'operand' => [
-									(object) array(
-										'type'    => 'plugins_activated',
-										'plugins' => [ 'woocommerce-payments' ],
-									),
-								],
-							),
-							(object) array(
-								'type'         => 'option',
-								'transformers' => array(
-									// Extract only the 'data' key from the option.
-									(object) array(
-										'use'       => 'dot_notation',
-										'arguments' => (object) array(
-											'path' => 'data',
-										),
-									),
-									// Extract the keys from the data array.
-									(object) array(
-										'use' => 'array_keys',
-									),
-								),
-								'option_name'  => 'wcpay_account_data',
-								// The rule will be true if the 'account_id' key is not present in the data array.
-								'operation'    => '!contains',
-								'value'        => 'account_id',
-								'default'      => array(),
-							),
+							self::get_rules_for_wcpay_activated( false ),
+							self::get_rules_for_wcpay_connected( false ),
 						),
 					),
 				),
@@ -1103,6 +1019,62 @@ class DefaultPaymentGateways {
 			'option_name'  => 'woocommerce_onboarding_profile',
 			'operation'    => $should_have ? 'contains' : '!contains',
 			'value'        => 'cbd-other-hemp-derived-products',
+			'default'      => array(),
+		);
+	}
+
+	/**
+	 * Get default rules for the WooPayments plugin being installed and activated.
+	 *
+	 * @param bool $should_be Whether WooPayments should be activated.
+	 *
+	 * @return object Rules to match.
+	 */
+	public static function get_rules_for_wcpay_activated( $should_be ) {
+		$active_rule = (object) array(
+			'type'    => 'plugins_activated',
+			'plugins' => array( 'woocommerce-payments' ),
+		);
+
+		if ( $should_be ) {
+			return $active_rule;
+		}
+
+		return (object) array(
+			'type'    => 'not',
+			'operand' => array( $active_rule ),
+		);
+	}
+
+	/**
+	 * Get default rules for WooPayments being connected or not.
+	 *
+	 * This does not include the check for the WooPayments plugin to be active.
+	 *
+	 * @param bool $should_be Whether WooPayments should be connected.
+	 *
+	 * @return object Rules to match.
+	 */
+	public static function get_rules_for_wcpay_connected( $should_be ) {
+		return (object) array(
+			'type'         => 'option',
+			'transformers' => array(
+				// Extract only the 'data' key from the option.
+				(object) array(
+					'use'       => 'dot_notation',
+					'arguments' => (object) array(
+						'path' => 'data',
+					),
+				),
+				// Extract the keys from the data array.
+				(object) array(
+					'use' => 'array_keys',
+				),
+			),
+			'option_name'  => 'wcpay_account_data',
+			// The rule will be look for the 'account_id' key in the account data array.
+			'operation'    => $should_be ? 'contains' : '!contains',
+			'value'        => 'account_id',
 			'default'      => array(),
 		);
 	}
