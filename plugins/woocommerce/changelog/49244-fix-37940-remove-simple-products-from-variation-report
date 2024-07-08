@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Prevent non-variation products from being included in variations reports by default.
