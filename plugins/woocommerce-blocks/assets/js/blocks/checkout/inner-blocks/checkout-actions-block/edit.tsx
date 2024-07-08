@@ -21,6 +21,7 @@ import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
  * Internal dependencies
  */
 import { defaultPlaceOrderButtonLabel } from './constants';
+import './editor.scss';
 
 export const Edit = ( {
 	attributes,
