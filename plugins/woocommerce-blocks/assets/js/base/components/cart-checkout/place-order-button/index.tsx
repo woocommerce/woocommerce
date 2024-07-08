@@ -2,9 +2,14 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
+import {
+	useCheckoutSubmit,
+	useStoreCart,
+} from '@woocommerce/base-context/hooks';
 import { Icon, check } from '@wordpress/icons';
 import Button from '@woocommerce/base-components/button';
+import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
+import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 
 interface PlaceOrderButton {
 	label: string;
@@ -24,6 +29,8 @@ const PlaceOrderButton = ( {
 		waitingForProcessing,
 		waitingForRedirect,
 	} = useCheckoutSubmit();
+	const { cartTotals } = useStoreCart();
+	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
 	const buttonLabel = (
 		<>
@@ -35,7 +42,10 @@ const PlaceOrderButton = ( {
 			) }
 			{ showPrice && (
 				<div className="wc-block-components-checkout-place-order-button__price">
-					$20.99
+					<FormattedMonetaryAmount
+						value={ cartTotals.total_price }
+						currency={ totalsCurrency }
+					/>
 				</div>
 			) }
 		</>

@@ -13,6 +13,9 @@ import { getSetting } from '@woocommerce/settings';
 import { ReturnToCartButton } from '@woocommerce/base-components/cart-checkout';
 import EditableButton from '@woocommerce/editor-components/editable-button';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
+import { useStoreCart } from '@woocommerce/base-context';
+import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
+import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies
@@ -38,6 +41,9 @@ export const Edit = ( {
 		placeOrderButtonLabel,
 		showPrice = true,
 	} = attributes;
+	const { cartTotals } = useStoreCart();
+	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
+
 	const { current: savedCartPageId } = useRef( cartPageId );
 	const currentPostId = useSelect(
 		( select ) => {
@@ -49,10 +55,6 @@ export const Edit = ( {
 		},
 		[ savedCartPageId ]
 	);
-
-	const buttonLabel = `${ placeOrderButtonLabel } · ${
-		showPrice ? '£20.99' : ''
-	}`;
 
 	return (
 		<div { ...blockProps }>
@@ -150,7 +152,10 @@ export const Edit = ( {
 						) }
 						{ showPrice && (
 							<div className="wc-block-components-checkout-place-order-button__price">
-								£20.99
+								<FormattedMonetaryAmount
+									value={ cartTotals.total_price }
+									currency={ totalsCurrency }
+								/>
 							</div>
 						) }
 					</EditableButton>
