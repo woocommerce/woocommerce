@@ -32,11 +32,20 @@ const PlaceOrderButton = ( {
 		waitingForProcessing,
 		waitingForRedirect,
 	} = useCheckoutSubmit();
+
 	const { cartTotals } = useStoreCart();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
 	const buttonLabel = (
-		<>
+		<div
+			className={ clsx(
+				'wc-block-components-checkout-place-order-button__text',
+				{
+					'wc-block-components-checkout-place-order-button__text--visually-hidden':
+						waitingForProcessing,
+				}
+			) }
+		>
 			{ label }
 			{ showPrice && (
 				<div className="wc-block-components-checkout-place-order-button__separator">
@@ -51,7 +60,7 @@ const PlaceOrderButton = ( {
 					/>
 				</div>
 			) }
-		</>
+		</div>
 	);
 
 	return (
