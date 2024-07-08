@@ -74,7 +74,10 @@ export const SelectTree = function SelectTree( {
 				'.woocommerce-experimental-select-tree-control__popover-menu'
 			)
 			?.contains( event.relatedTarget );
-		return ! ( isInsideSelect || isInsidePopover );
+		const isInRemoveTag = event.relatedTarget?.classList.contains(
+			'woocommerce-tag__remove'
+		);
+		return ! isInsideSelect && ! isInRemoveTag && ! isInsidePopover;
 	}
 
 	const recalculateInputValue = () => {
