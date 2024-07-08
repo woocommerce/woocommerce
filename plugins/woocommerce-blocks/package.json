@@ -194,6 +194,7 @@
 		"@wordpress/prettier-config": "1.4.0",
 		"@wordpress/scripts": "24.6.0",
 		"@wordpress/stylelint-config": "^21.36.0",
+		"allure-playwright": "^2.9.2",
 		"autoprefixer": "10.4.14",
 		"axios": "0.27.2",
 		"babel-jest": "^29.7.0",
