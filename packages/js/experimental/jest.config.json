@@ -3,5 +3,8 @@
 	"roots": [
 		"<rootDir>/src"
 	],
+	"moduleDirectories": [
+		"node_modules"
+	],
 	"preset": "./node_modules/@woocommerce/internal-js-tests/jest-preset.js"
 }
