@@ -13,11 +13,7 @@ import { CustomerEffortScore } from '..';
 const noop = () => {};
 
 jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
-
 	return {
-		__esModule: true,
-		...originalModule,
 		useDispatch: jest.fn().mockReturnValue( {
 			createNotice: jest.fn(),
 		} ),
