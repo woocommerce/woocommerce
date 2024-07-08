@@ -206,7 +206,7 @@ const CollectionChooser = (
 	const [ resizeListener, { width } ] = useResizeObserver();
 
 	let OptionsComponent;
-	if ( width === null || width >= 600 ) {
+	if ( width !== null && width >= 600 ) {
 		OptionsComponent = GridCollectionOptions;
 	} else {
 		OptionsComponent = DropdownCollectionOptions;
@@ -215,11 +215,13 @@ const CollectionChooser = (
 	return (
 		<>
 			{ resizeListener }
-			<OptionsComponent
-				{ ...props }
-				catalogVariation={ productCatalog }
-				collectionVariations={ collectionVariations }
-			/>
+			{ !! width && (
+				<OptionsComponent
+					{ ...props }
+					catalogVariation={ productCatalog }
+					collectionVariations={ collectionVariations }
+				/>
+			) }
 		</>
 	);
 };
