@@ -23,6 +23,7 @@ import ExternalIcon from 'gridicons/dist/external';
 import { List, Placeholder as ListPlaceholder } from './components/List';
 import { Setup, Placeholder as SetupPlaceholder } from './components/Setup';
 import { WCPaySuggestion } from './components/WCPay';
+import { WCPayBNPLSuggestion } from './components/WCPayBNPL';
 import { getCountryCode } from '~/dashboard/utils';
 import {
 	getEnrichedPaymentGateways,
@@ -151,7 +152,12 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			getIsGatewayWCPay
 		) !== -1;
 
-	const [ wcPayGateway, offlineGateways, additionalGateways ] = useMemo(
+	const [
+		wcPayGateway,
+		offlineGateways,
+		additionalGateways,
+		wcPayBnplGateway,
+	] = useMemo(
 		() =>
 			getSplitGateways(
 				paymentGateways,
@@ -174,6 +180,9 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			if ( wcPayGateway.length ) {
 				shownGateways.push( wcPayGateway[ 0 ].id );
 			}
+			if ( wcPayBnplGateway.length ) {
+				shownGateways.push( wcPayBnplGateway[ 0 ].id );
+			}
 			if ( additionalGateways.length ) {
 				shownGateways = shownGateways.concat(
 					additionalGateways.map( ( g ) => g.id )
@@ -185,7 +194,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				} );
 			}
 		}
-	}, [ additionalGateways, currentGateway, wcPayGateway ] );
+	}, [ additionalGateways, currentGateway, wcPayGateway, wcPayBnplGateway ] );
 
 	const trackSeeMore = () => {
 		recordEvent( 'tasklist_payment_see_more', {} );
@@ -275,6 +284,11 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			) : (
 				<>
 					{ additionalSection }
+					{ !! wcPayBnplGateway.length && (
+						<WCPayBNPLSuggestion
+							paymentGateway={ wcPayBnplGateway[ 0 ] }
+						/>
+					) }
 					{ offlineSection }
 				</>
 			) }
