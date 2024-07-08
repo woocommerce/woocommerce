@@ -323,6 +323,11 @@ export const SelectTree = function SelectTree( {
 											) {
 												focusOnInput();
 											}
+										} else if (
+											event.key === 'ArrowUp' ||
+											event.key === 'ArrowDown'
+										) {
+											event.preventDefault(); // prevent unwanted scroll
 										}
 									} }
 									getSelectedItemProps={ () => ( {} ) }
