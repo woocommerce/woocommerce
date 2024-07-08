@@ -486,7 +486,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 					'properties'  => array(
 						'api_enabled'                    => array(
-							'description' => __( 'REST API enabled?', 'woocommerce' ),
+							'description' => __( 'Legacy REST API enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,

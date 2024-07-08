@@ -10,6 +10,30 @@ class PatternRegistry {
 	const SLUG_REGEX            = '/^[A-z0-9\/_-]+$/';
 	const COMMA_SEPARATED_REGEX = '/[\s,]+/';
 
+
+	/**
+	 * Associates pattern slugs with their localized labels for categorization.
+	 * Each key represents a unique pattern slug, while the value is the localized label.
+	 *
+	 * @var array $category_labels
+	 */
+	private $category_labels;
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->category_labels = [
+			'woo-commerce'     => __( 'WooCommerce', 'woocommerce' ),
+			'intro'            => __( 'Intro', 'woocommerce' ),
+			'featured-selling' => __( 'Featured Selling', 'woocommerce' ),
+			'about'            => __( 'About', 'woocommerce' ),
+			'social-media'     => __( 'Social Media', 'woocommerce' ),
+			'services'         => __( 'Services', 'woocommerce' ),
+			'reviews'          => __( 'Reviews', 'woocommerce' ),
+		];
+	}
+
 	/**
 	 * Register a block pattern.
 	 *
@@ -166,10 +190,13 @@ class PatternRegistry {
 
 				$pattern_data['categories'][ $key ] = $category_slug;
 
+				$label = isset( $this->category_labels[ $category_slug ] ) ? $this->category_labels[ $category_slug ] : self::kebab_to_capital_case( $category_slug );
+
 				register_block_pattern_category(
 					$category_slug,
-                    // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
-					array( 'label' => __( $category, 'woocommerce' ) )
+					array(
+						'label' => $label,
+					),
 				);
 			}
 		}
@@ -193,5 +220,19 @@ class PatternRegistry {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Convert a kebab-case string to capital case.
+	 *
+	 * @param string $value The kebab-case string.
+	 *
+	 * @return string
+	 */
+	private static function kebab_to_capital_case( $value ) {
+		$string = str_replace( '-', ' ', $value );
+		$string = ucwords( $string );
+
+		return $string;
 	}
 }
