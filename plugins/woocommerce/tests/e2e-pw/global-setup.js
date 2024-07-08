@@ -185,7 +185,7 @@ module.exports = async ( config ) => {
 	// (if a value for DISABLE_HPOS was set)
 	// This was always being set to 'yes' after login in wp-env so this step ensures the
 	// correct value is set before we begin our tests
-	console.log( `DISABLE_HPOS: ${ DISABLE_HPOS }` );
+	console.log( `DISABLE_HPOS: ${ DISABLE_HPOS || '0' }` );
 
 	const api = new wcApi( {
 		url: baseURL,
