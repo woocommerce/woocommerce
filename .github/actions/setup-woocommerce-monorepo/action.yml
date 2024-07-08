@@ -10,6 +10,9 @@ inputs:
     build:
         description: 'Given a boolean or PNPM filter, runs the build command for monorepo project(s).'
         default: false
+    build-type:
+        description: 'Given "full" or "backend" will perform optimized build steps.'
+        default: 'full'
     pull-playwright-cache:
         description: 'Given a boolean value, invokes Playwright dependencies caching.'
         default: false
@@ -73,4 +76,10 @@ runs:
           # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
           if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
           shell: 'bash'
-          run: 'pnpm ${{ steps.project-filters.outputs.build }} build'
+          run: |
+            if [[ '${{ inputs.build-type }}' == 'backend' ]]; then
+              pnpm --filter="@woocommerce/admin-library" build:project:feature-config
+            fi
+            if [[ '${{ inputs.build-type }}' == 'full' ]]; then
+              pnpm ${{ steps.project-filters.outputs.build }} build
+            fi
