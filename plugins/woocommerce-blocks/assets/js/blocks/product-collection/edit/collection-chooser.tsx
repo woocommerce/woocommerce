@@ -23,7 +23,7 @@ import {
 import { type CollectionName, CoreCollectionNames } from '../types';
 import blockJson from '../block.json';
 import { getCollectionByName } from '../collections';
-import { getDefaultProductCollection } from '../utils';
+import { getDefaultProductCollection } from '../constants';
 
 type CollectionButtonProps = {
 	title: string;
@@ -206,7 +206,7 @@ const CollectionChooser = (
 	const [ resizeListener, { width } ] = useResizeObserver();
 
 	let OptionsComponent;
-	if ( width && width > 600 ) {
+	if ( width === null || width >= 600 ) {
 		OptionsComponent = GridCollectionOptions;
 	} else {
 		OptionsComponent = DropdownCollectionOptions;
