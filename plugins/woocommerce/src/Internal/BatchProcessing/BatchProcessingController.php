@@ -528,6 +528,15 @@ class BatchProcessingController {
 	 * @since 9.1.0
 	 */
 	private function remove_or_retry_failed_processors(): void {
+		if ( ! did_action( 'wp_loaded' ) ) {
+			return;
+		}
+
+		$last_error = error_get_last();
+		if ( ! is_null( $last_error ) && in_array( $last_error['type'], array( E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ), true ) ) {
+			return;
+		}
+
 		if ( as_has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
 			return;
 		}
