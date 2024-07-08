@@ -121,21 +121,32 @@ class ProductCollectionPage {
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		await this.admin.page
+		const isDropdownLayout = await this.admin.page
 			.locator( SELECTORS.collectionPlaceholder )
-			.getByRole( 'button', { name: buttonName } )
-			.click();
+			.locator( '.wc-blocks-product-collection__collections-dropdown' )
+			.isVisible();
+
+		if ( isDropdownLayout ) {
+			await this.admin.page
+				.getByRole( 'button', { name: 'Choose collection' } )
+				.click();
+
+			await this.admin.page
+				.locator(
+					'.wc-blocks-product-collection__collections-dropdown-content'
+				)
+				.getByRole( 'button', { name: buttonName, exact: true } )
+				.click();
+		} else {
+			await this.admin.page
+				.locator( SELECTORS.collectionPlaceholder )
+				.getByRole( 'button', { name: buttonName, exact: true } )
+				.click();
+		}
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
-		const buttonName = collection
-			? collectionToButtonNameMap[ collection ]
-			: collectionToButtonNameMap.productCatalog;
-
-		await this.editor.canvas
-			.locator( SELECTORS.collectionPlaceholder )
-			.getByRole( 'button', { name: buttonName } )
-			.click();
+		await this.chooseCollectionInPost( collection );
 	}
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
