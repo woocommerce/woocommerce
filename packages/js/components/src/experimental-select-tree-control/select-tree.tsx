@@ -3,10 +3,17 @@
  */
 import { chevronDown, chevronUp, closeSmall } from '@wordpress/icons';
 import classNames from 'classnames';
-import { createElement, useEffect, useState } from '@wordpress/element';
+import {
+	createElement,
+	useEffect,
+	useState,
+	Fragment,
+} from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { BaseControl, Button, TextControl } from '@wordpress/components';
 import { decodeEntities } from '@wordpress/html-entities';
+import { __ } from '@wordpress/i18n';
+import { speak } from '@wordpress/a11y';
 
 /**
  * Internal dependencies
@@ -26,6 +33,7 @@ interface SelectTreeProps extends TreeControlProps {
 	isLoading?: boolean;
 	disabled?: boolean;
 	label: string | JSX.Element;
+	help?: string | JSX.Element;
 	onInputChange?: ( value: string | undefined ) => void;
 	initialInputValue?: string | undefined;
 	isClearingAllowed?: boolean;
@@ -40,6 +48,7 @@ export const SelectTree = function SelectTree( {
 	initialInputValue,
 	onInputChange,
 	shouldShowCreateButton,
+	help = __( 'Separate with commas or the Enter key.', 'woocommerce' ),
 	isClearingAllowed = false,
 	onClear = () => {},
 	...props
@@ -110,6 +119,14 @@ export const SelectTree = function SelectTree( {
 		autoComplete: 'off',
 		disabled,
 		onFocus: ( event ) => {
+			if ( props.multiple ) {
+				speak(
+					__(
+						'To select existing items, type its exact label and separate with commas or the Enter key.',
+						'woocommerce'
+					)
+				);
+			}
 			if ( ! isOpen ) {
 				setIsOpen( true );
 			}
@@ -144,6 +161,24 @@ export const SelectTree = function SelectTree( {
 			if ( event.key === 'Tab' || event.key === 'Escape' ) {
 				setIsOpen( false );
 				recalculateInputValue();
+			}
+			if ( event.key === ',' || event.key === 'Enter' ) {
+				event.preventDefault();
+				const item = items.find(
+					( i ) => i.label === escapeHTML( inputValue )
+				);
+				const isAlreadySelected =
+					Array.isArray( props.selected ) &&
+					Boolean(
+						props.selected.find(
+							( i ) => i.label === escapeHTML( inputValue )
+						)
+					);
+				if ( props.onSelect && item && ! isAlreadySelected ) {
+					props.onSelect( item );
+					setInputValue( '' );
+					recalculateInputValue();
+				}
 			}
 		},
 		onChange: ( event ) => {
@@ -181,100 +216,111 @@ export const SelectTree = function SelectTree( {
 					}
 				) }
 			>
-				<BaseControl label={ props.label } id={ `${ props.id }-input` }>
-					{ props.multiple ? (
-						<ComboBox
-							comboBoxProps={ {
-								className:
-									'woocommerce-experimental-select-control__combo-box-wrapper',
-								role: 'combobox',
-								'aria-expanded': isOpen,
-								'aria-haspopup': 'tree',
-								'aria-owns': `${ props.id }-menu`,
-							} }
-							inputProps={ inputProps }
-							suffix={
-								<div className="woocommerce-experimental-select-control__suffix-items">
-									{ isClearingAllowed && isOpen && (
-										<Button onClick={ handleClear }>
-											<SuffixIcon
-												className="woocommerce-experimental-select-control__icon-clear"
-												icon={ closeSmall }
-											/>
-										</Button>
-									) }
-									<SuffixIcon
-										icon={
-											isOpen ? chevronUp : chevronDown
+				<BaseControl
+					label={ props.label }
+					id={ `${ props.id }-input` }
+					help={ help }
+				>
+					<>
+						{ props.multiple ? (
+							<ComboBox
+								comboBoxProps={ {
+									className:
+										'woocommerce-experimental-select-control__combo-box-wrapper',
+									role: 'combobox',
+									'aria-expanded': isOpen,
+									'aria-haspopup': 'tree',
+									'aria-owns': `${ props.id }-menu`,
+								} }
+								inputProps={ inputProps }
+								suffix={
+									<div className="woocommerce-experimental-select-control__suffix-items">
+										{ isClearingAllowed && isOpen && (
+											<Button onClick={ handleClear }>
+												<SuffixIcon
+													className="woocommerce-experimental-select-control__icon-clear"
+													icon={ closeSmall }
+												/>
+											</Button>
+										) }
+										<SuffixIcon
+											icon={
+												isOpen ? chevronUp : chevronDown
+											}
+										/>
+									</div>
+								}
+							>
+								<SelectedItems
+									isReadOnly={ isReadOnly }
+									items={ ( props.selected as Item[] ) || [] }
+									getItemLabel={ ( item ) =>
+										item?.label || ''
+									}
+									getItemValue={ ( item ) =>
+										item?.value || ''
+									}
+									onRemove={ ( item ) => {
+										if (
+											! Array.isArray( item ) &&
+											props.onRemove
+										) {
+											props.onRemove( item );
 										}
-									/>
-								</div>
-							}
-						>
-							<SelectedItems
-								isReadOnly={ isReadOnly }
-								items={ ( props.selected as Item[] ) || [] }
-								getItemLabel={ ( item ) => item?.label || '' }
-								getItemValue={ ( item ) => item?.value || '' }
-								onRemove={ ( item ) => {
-									if (
-										! Array.isArray( item ) &&
-										props.onRemove
-									) {
-										props.onRemove( item );
+									} }
+									getSelectedItemProps={ () => ( {} ) }
+								/>
+							</ComboBox>
+						) : (
+							<TextControl
+								{ ...inputProps }
+								value={ decodeEntities(
+									props.createValue || ''
+								) }
+								onChange={ ( value ) => {
+									if ( onInputChange ) onInputChange( value );
+									const item = items.find(
+										( i ) => i.label === escapeHTML( value )
+									);
+									if ( props.onSelect && item ) {
+										props.onSelect( item );
+									}
+									if ( ! value && props.onRemove ) {
+										props.onRemove(
+											props.selected as Item
+										);
 									}
 								} }
-								getSelectedItemProps={ () => ( {} ) }
 							/>
-						</ComboBox>
-					) : (
-						<TextControl
-							{ ...inputProps }
-							value={ decodeEntities( props.createValue || '' ) }
-							onChange={ ( value ) => {
-								if ( onInputChange ) onInputChange( value );
-								const item = items.find(
-									( i ) => i.label === escapeHTML( value )
-								);
-								if ( props.onSelect && item ) {
+						) }
+						<SelectTreeMenu
+							{ ...props }
+							onSelect={ ( item ) => {
+								if ( ! props.multiple && onInputChange ) {
+									onInputChange( ( item as Item ).label );
+									setIsOpen( false );
+									setIsFocused( false );
+									focusOnInput();
+								}
+								if ( props.onSelect ) {
 									props.onSelect( item );
 								}
-								if ( ! value && props.onRemove ) {
-									props.onRemove( props.selected as Item );
-								}
 							} }
+							id={ menuInstanceId }
+							ref={ ref }
+							isEventOutside={ isEventOutside }
+							isLoading={ isLoading }
+							isOpen={ isOpen }
+							items={ linkedTree }
+							shouldShowCreateButton={ shouldShowCreateButton }
+							onClose={ () => {
+								setIsOpen( false );
+							} }
+							onFirstItemLoop={ focusOnInput }
 						/>
-					) }
+					</>
 				</BaseControl>
 			</div>
-			<SelectTreeMenu
-				{ ...props }
-				onSelect={ ( item ) => {
-					if ( ! props.multiple && onInputChange ) {
-						onInputChange( ( item as Item ).label );
-						setIsOpen( false );
-						setIsFocused( false );
-						focusOnInput();
-					}
-					if ( props.onSelect ) {
-						props.onSelect( item );
-					}
-				} }
-				id={ menuInstanceId }
-				ref={ ref }
-				isEventOutside={ isEventOutside }
-				isLoading={ isLoading }
-				isOpen={ isOpen }
-				items={ linkedTree }
-				shouldShowCreateButton={ shouldShowCreateButton }
-				onEscape={ () => {
-					focusOnInput();
-					setIsOpen( false );
-				} }
-				onClose={ () => {
-					setIsOpen( false );
-				} }
-			/>
 		</div>
 	);
 };
