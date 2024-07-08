@@ -70,7 +70,7 @@ export function TabBlockEdit( {
 					onError={ ( error, errorInfo ) => {
 						// eslint-disable-next-line no-console
 						console.error(
-							`Error caught while loading tab '${ id }'`,
+							`Error caught in tab '${ id }'`,
 							error,
 							errorInfo
 						);
