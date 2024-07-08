@@ -140,9 +140,10 @@ class WC_Admin_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'label', $header_properties );
 
 		$row_properties = $schema['rows']['items']['properties'];
-		$this->assertCount( 2, $row_properties );
+		$this->assertCount( 3, $row_properties );
 		$this->assertArrayHasKey( 'display', $row_properties );
 		$this->assertArrayHasKey( 'value', $row_properties );
+		$this->assertArrayHasKey( 'format', $row_properties );
 	}
 
 	/**
