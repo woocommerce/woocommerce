@@ -21,6 +21,10 @@ jest.mock( '@wordpress/data', () => {
 	};
 } );
 
+jest.mock( '@wordpress/core-data', () => {
+	return {};
+} );
+
 describe( 'Rendering', () => {
 	afterAll( () => {
 		jest.restoreAllMocks();
