@@ -9,7 +9,10 @@ import {
 import { Icon, check } from '@wordpress/icons';
 import Button from '@woocommerce/base-components/button';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
+import {
+	FormattedMonetaryAmount,
+	Spinner,
+} from '@woocommerce/blocks-components';
 
 interface PlaceOrderButton {
 	label: string;
@@ -71,9 +74,10 @@ const PlaceOrderButton = ( {
 				waitingForProcessing ||
 				waitingForRedirect
 			}
-			showSpinner={ waitingForProcessing }
 		>
-			{ waitingForRedirect ? <Icon icon={ check } /> : buttonLabel }
+			{ waitingForProcessing && <Spinner /> }
+			{ ! waitingForProcessing &&
+				( waitingForRedirect ? <Icon icon={ check } /> : buttonLabel ) }
 		</Button>
 	);
 };
