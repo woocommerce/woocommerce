@@ -64,7 +64,7 @@ export function TabBlockEdit( {
 			>
 				<ErrorBoundary
 					errorMessage={ __(
-						'An error occurred while loading this tab. Make sure any unsaved changes are saved and then try reloading the page to see if the error recurs.',
+						'An unexpected error occurred in this tab. Make sure any unsaved changes are saved and then try reloading the page to see if the error recurs.',
 						'woocommerce'
 					) }
 					onError={ ( error, errorInfo ) => {
