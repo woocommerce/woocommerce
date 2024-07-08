@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { InnerBlocks } from '@wordpress/block-editor';
 import classnames from 'classnames';
 import { createElement, useEffect, useState } from '@wordpress/element';
@@ -61,7 +62,20 @@ export function TabBlockEdit( {
 				role="tabpanel"
 				className={ classes }
 			>
-				<ErrorBoundary>
+				<ErrorBoundary
+					errorMessage={ __(
+						'An error occurred while loading this tab. Make sure any unsaved changes are saved and then try reloading the page to see if the error recurs.',
+						'woocommerce'
+					) }
+					onError={ ( error, errorInfo ) => {
+						// eslint-disable-next-line no-console
+						console.error(
+							`Error caught while loading tab '${ id }'`,
+							error,
+							errorInfo
+						);
+					} }
+				>
 					{ canRenderChildren && (
 						/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
 						/* @ts-ignore Content only template locking does exist for this property. */
