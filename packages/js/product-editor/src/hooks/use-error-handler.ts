@@ -9,7 +9,6 @@ import { getNewPath, navigateTo } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { useValidations } from '../contexts/validation-context';
-// import { set } from 'lodash';
 
 export type WPErrorCode =
 	| 'variable_product_no_variation_prices'

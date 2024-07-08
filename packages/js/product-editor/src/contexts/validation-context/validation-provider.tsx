@@ -4,7 +4,6 @@
 import type { PropsWithChildren } from 'react';
 import { useEntityRecord } from '@wordpress/core-data';
 import { createElement, useRef, useState } from '@wordpress/element';
-// import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
