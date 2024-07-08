@@ -12,7 +12,6 @@ import { ProductAttributeTerm } from '@woocommerce/data';
 import { AttributeTermInputField } from '../attribute-term-input-field';
 
 jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
 	resolveSelect: jest.fn(),
 } ) );
 
