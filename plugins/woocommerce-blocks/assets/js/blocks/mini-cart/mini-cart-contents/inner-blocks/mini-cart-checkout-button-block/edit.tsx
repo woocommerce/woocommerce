@@ -3,7 +3,7 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 import EditableButton from '@woocommerce/editor-components/editable-button';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -21,7 +21,7 @@ export const Edit = ( {
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
 	const blockProps = useBlockProps( {
-		className: classNames( 'wc-block-mini-cart__footer-checkout' ),
+		className: clsx( 'wc-block-mini-cart__footer-checkout' ),
 	} );
 	const { checkoutButtonLabel } = attributes;
 

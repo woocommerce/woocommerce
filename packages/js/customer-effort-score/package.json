@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/customer-effort-score",
-	"version": "2.2.0",
+	"version": "3.0.0",
 	"description": "WooCommerce utility to measure user effort.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
@@ -121,7 +121,11 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js"
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}

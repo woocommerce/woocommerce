@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -75,24 +75,23 @@ const getBoundingClientRect = async ( {
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
-	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
+	pageObject: async ( { page, editor, frontendUtils }, use ) => {
 		const pageObject = new ProductGalleryPage( {
 			page,
 			editor,
 			frontendUtils,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editorUtils } ) => {
+	test.beforeEach( async ( { admin } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editorUtils.enterEditMode();
 	} );
 
 	// eslint-disable-next-line playwright/no-skipped-test
@@ -114,14 +113,15 @@ test.describe( `${ blockData.name }`, () => {
 	// eslint-disable-next-line playwright/no-skipped-test
 	test.skip( 'Renders Next/Previous Button block on the frontend side', async ( {
 		admin,
-		editorUtils,
 		editor,
 		page,
 		pageObject,
 	} ) => {
-		await addBlock( admin, editor, editorUtils );
+		await addBlock( admin, editor );
 
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 
 		await page.goto( blockData.productPage );
 
@@ -137,11 +137,10 @@ test.describe( `${ blockData.name }`, () => {
 		test.skip( 'Hide correctly the arrows', async ( {
 			page,
 			editor,
-			editorUtils,
 			pageObject,
 			admin,
 		} ) => {
-			await addBlock( admin, editor, editorUtils );
+			await addBlock( admin, editor );
 			await (
 				await pageObject.getNextPreviousButtonsBlock( {
 					page: 'editor',
@@ -159,7 +158,9 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( container ).toBeHidden();
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -179,25 +180,21 @@ test.describe( `${ blockData.name }`, () => {
 		test.skip( 'Show button outside of the image', async ( {
 			page,
 			editor,
-			editorUtils,
 			pageObject,
 		} ) => {
 			// Currently we are adding the block under the related products block, but in the future we have to add replace the product gallery block with this block.
-			const parentBlock = await editorUtils.getBlockByName(
+			const parentBlock = await editor.getBlockByName(
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
+				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
-			await editorUtils.insertBlock(
+			await editor.insertBlock(
 				{ name: 'woocommerce/product-gallery' },
-				undefined,
-				parentClientId
+				{ clientId: parentClientId }
 			);
 			await (
 				await pageObject.getNextPreviousButtonsBlock( {
@@ -227,7 +224,9 @@ test.describe( `${ blockData.name }`, () => {
 				editorBoundingClientRect.gallery.right
 			);
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -253,25 +252,21 @@ test.describe( `${ blockData.name }`, () => {
 		test.skip( 'Show button inside of the image', async ( {
 			page,
 			editor,
-			editorUtils,
 			pageObject,
 		} ) => {
 			// Currently we are adding the block under the related products block, but in the future we have to add replace the product gallery block with this block.
-			const parentBlock = await editorUtils.getBlockByName(
+			const parentBlock = await editor.getBlockByName(
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
+				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
-			await editorUtils.insertBlock(
+			await editor.insertBlock(
 				{ name: 'woocommerce/product-gallery' },
-				undefined,
-				parentClientId
+				{ clientId: parentClientId }
 			);
 			await (
 				await pageObject.getNextPreviousButtonsBlock( {
@@ -301,7 +296,9 @@ test.describe( `${ blockData.name }`, () => {
 				editorBoundingClientRect.gallery.right
 			);
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -327,25 +324,21 @@ test.describe( `${ blockData.name }`, () => {
 		test.skip( 'Show buttons at the top of the image', async ( {
 			page,
 			editor,
-			editorUtils,
 			pageObject,
 		} ) => {
 			// Currently we are adding the block under the related products block, but in the future we have to add replace the product gallery block with this block.
-			const parentBlock = await editorUtils.getBlockByName(
+			const parentBlock = await editor.getBlockByName(
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
+				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
-			await editorUtils.insertBlock(
+			await editor.insertBlock(
 				{ name: 'woocommerce/product-gallery' },
-				undefined,
-				parentClientId
+				{ clientId: parentClientId }
 			);
 			await (
 				await pageObject.getNextPreviousButtonsBlock( {
@@ -353,7 +346,10 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			 ).click();
 
-			await editorUtils.setLayoutOption( 'Align Top' );
+			await page
+				.locator( "button[aria-label='Change vertical alignment']" )
+				.click();
+			await page.getByText( 'Align Top' ).click();
 
 			const block = await pageObject.getNextPreviousButtonsBlock( {
 				page: 'editor',
@@ -361,7 +357,9 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( block ).toHaveCSS( 'align-items', 'flex-start' );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -381,25 +379,21 @@ test.describe( `${ blockData.name }`, () => {
 		test.skip( 'Show buttons at the middle of the image', async ( {
 			page,
 			editor,
-			editorUtils,
 			pageObject,
 		} ) => {
 			// Currently we are adding the block under the related products block, but in the future we have to add replace the product gallery block with this block.
-			const parentBlock = await editorUtils.getBlockByName(
+			const parentBlock = await editor.getBlockByName(
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
+				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
-			await editorUtils.insertBlock(
+			await editor.insertBlock(
 				{ name: 'woocommerce/product-gallery' },
-				undefined,
-				parentClientId
+				{ clientId: parentClientId }
 			);
 			await (
 				await pageObject.getNextPreviousButtonsBlock( {
@@ -407,7 +401,10 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			 ).click();
 
-			await editorUtils.setLayoutOption( 'Align Middle' );
+			await page
+				.locator( "button[aria-label='Change vertical alignment']" )
+				.click();
+			await page.getByText( 'Align Middle' ).click();
 
 			const block = await pageObject.getNextPreviousButtonsBlock( {
 				page: 'editor',
@@ -415,7 +412,9 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( block ).toHaveCSS( 'align-items', 'center' );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -432,25 +431,21 @@ test.describe( `${ blockData.name }`, () => {
 		test.skip( 'Show buttons at the bottom of the image by default', async ( {
 			page,
 			editor,
-			editorUtils,
 			pageObject,
 		} ) => {
 			// Currently we are adding the block under the related products block, but in the future we have to add replace the product gallery block with this block.
-			const parentBlock = await editorUtils.getBlockByName(
+			const parentBlock = await editor.getBlockByName(
 				'woocommerce/product-image-gallery'
 			);
 			const clientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
 				( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 			const parentClientId =
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
+				( await editor.getBlockRootClientId( clientId ) ) ?? '';
 
 			await editor.selectBlocks( parentBlock );
-			await editorUtils.insertBlock(
+			await editor.insertBlock(
 				{ name: 'woocommerce/product-gallery' },
-				undefined,
-				parentClientId
+				{ clientId: parentClientId }
 			);
 			await (
 				await pageObject.getNextPreviousButtonsBlock( {
@@ -464,7 +459,9 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( block ).toHaveCSS( 'align-items', 'flex-end' );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 

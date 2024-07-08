@@ -26,6 +26,15 @@ const disableWelcomeModal = async ( { page } ) => {
 	}
 };
 
+const openEditorSettings = async ( { page } ) => {
+	// Open Settings sidebar if closed
+	if ( await page.getByLabel( 'Editor Settings' ).isVisible() ) {
+		console.log( 'Editor Settings is open, skipping action.' );
+	} else {
+		await page.getByLabel( 'Settings', { exact: true } ).click();
+	}
+};
+
 const getCanvas = async ( page ) => {
 	return page.frame( 'editor-canvas' ) || page;
 };
@@ -47,23 +56,27 @@ const fillPageTitle = async ( page, title ) => {
 };
 
 const insertBlock = async ( page, blockName ) => {
-	const canvas = await getCanvas( page );
-	// Click the title to activate the block inserter.
-	await canvas.getByRole( 'textbox', { name: 'Add title' } ).click();
-	await canvas.getByLabel( 'Add block' ).click();
+	await page.getByLabel( 'Toggle block inserter' ).click();
 	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
+	await page.getByLabel( 'Toggle block inserter' ).click();
 };
 
-const insertBlockByShortcut = async ( page, blockShortcut ) => {
+const insertBlockByShortcut = async ( page, blockName ) => {
 	const canvas = await getCanvas( page );
 	await canvas.getByRole( 'button', { name: 'Add default block' } ).click();
 	await canvas
 		.getByRole( 'document', {
 			name: 'Empty block; start writing or type forward slash to choose a block',
 		} )
-		.fill( blockShortcut );
-	await page.keyboard.press( 'Enter' );
+		.pressSequentially( `/${ blockName }` );
+	await expect(
+		page.getByRole( 'option', { name: blockName, exact: true } )
+	).toBeVisible();
+	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
+	await expect(
+		page.getByLabel( `Block: ${ blockName }` ).first()
+	).toBeVisible();
 };
 
 const transformIntoBlocks = async ( page ) => {
@@ -85,7 +98,9 @@ const transformIntoBlocks = async ( page ) => {
 };
 
 const publishPage = async ( page, pageTitle ) => {
-	await page.getByRole( 'button', { name: 'Publish', exact: true } ).click();
+	await page
+		.getByRole( 'button', { name: 'Publish', exact: true } )
+		.dispatchEvent( 'click' );
 	await page
 		.getByRole( 'region', { name: 'Editor publish' } )
 		.getByRole( 'button', { name: 'Publish', exact: true } )
@@ -100,6 +115,7 @@ module.exports = {
 	goToPageEditor,
 	goToPostEditor,
 	disableWelcomeModal,
+	openEditorSettings,
 	getCanvas,
 	fillPageTitle,
 	insertBlock,

@@ -52,6 +52,8 @@ export function TabButton( {
 							id={ `woocommerce-product-tab__${ id }` }
 							aria-controls={ `woocommerce-product-tab__${ id }-content` }
 							aria-selected={ selected }
+							tabIndex={ selected ? undefined : -1 }
+							role="tab"
 						>
 							{ children }
 						</Button>

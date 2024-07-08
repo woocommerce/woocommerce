@@ -60,8 +60,11 @@ class Legacy {
 		// and a generic notice will be shown instead if payment failed.
 		wc_clear_notices();
 
-		// Handle result.
-		$result->set_status( isset( $gateway_result['result'] ) && 'success' === $gateway_result['result'] ? 'success' : 'failure' );
+		// Handle result. If status was not returned we consider this invalid and return failure.
+		$result_status = $gateway_result['result'] ?? 'failure';
+		// These are the same statuses supported by the API and indicate processing status. This is not the same as order status.
+		$valid_status = array( 'success', 'failure', 'pending', 'error' );
+		$result->set_status( in_array( $result_status, $valid_status, true ) ? $result_status : 'failure' );
 
 		// set payment_details from result.
 		$result->set_payment_details( array_merge( $result->payment_details, $gateway_result ) );

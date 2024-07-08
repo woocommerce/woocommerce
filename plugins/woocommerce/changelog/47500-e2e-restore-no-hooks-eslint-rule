@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Restore the playwright/no-hooks linter rule introduced in #46432 and accidentally removed in #47228.

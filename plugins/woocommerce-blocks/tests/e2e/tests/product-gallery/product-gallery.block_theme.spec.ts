@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 import { Locator } from '@playwright/test';
+import { test as base, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -26,12 +26,11 @@ const blockData = {
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
-	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
+	pageObject: async ( { page, editor, frontendUtils }, use ) => {
 		const pageObject = new ProductGalleryPage( {
 			page,
 			editor,
 			frontendUtils,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},
@@ -107,7 +106,9 @@ test.describe( `${ blockData.name }`, () => {
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -134,7 +135,9 @@ test.describe( `${ blockData.name }`, () => {
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -180,7 +183,9 @@ test.describe( `${ blockData.name }`, () => {
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -241,7 +246,9 @@ test.describe( `${ blockData.name }`, () => {
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -311,7 +318,9 @@ test.describe( `${ blockData.name }`, () => {
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: false } );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -372,7 +381,9 @@ test.describe( `${ blockData.name }`, () => {
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -478,7 +489,9 @@ test.describe( `${ blockData.name }`, () => {
 			editor,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -501,7 +514,9 @@ test.describe( `${ blockData.name }`, () => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			await editor.openDocumentSettingsSidebar();
 			await pageObject.toggleFullScreenOnClickSetting( false );
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -520,9 +535,9 @@ test.describe( `${ blockData.name }`, () => {
 	test.describe( 'block availability', () => {
 		test( 'should be available on the Single Product Template', async ( {
 			page,
-			editorUtils,
+			editor,
 		} ) => {
-			await editorUtils.openGlobalBlockInserter();
+			await editor.openGlobalBlockInserter();
 			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
 			const productGalleryBlockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
@@ -533,15 +548,15 @@ test.describe( `${ blockData.name }`, () => {
 
 		test( 'should be available on the Product Gallery template part', async ( {
 			admin,
-			editorUtils,
+			editor,
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//product-gallery`,
 				postType: 'wp_template_part',
+				canvas: 'edit',
 			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.openGlobalBlockInserter();
+			await editor.openGlobalBlockInserter();
 			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
 			const productGalleryBlockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
@@ -553,10 +568,10 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'should be hidden on the post editor', async ( {
 			admin,
 			page,
-			editorUtils,
+			editor,
 		} ) => {
 			await admin.createNewPost();
-			await editorUtils.openGlobalBlockInserter();
+			await editor.openGlobalBlockInserter();
 			const productGalleryBlockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
 				.getByRole( 'option', { name: blockData.title } );
@@ -577,7 +592,9 @@ test.describe( `${ blockData.name }`, () => {
 			.locator( blockData.selectors.editor.settings.cropImagesOption )
 			.click();
 
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 
 		await expect(
 			page.locator( blockData.selectors.editor.settings.cropImagesOption )
@@ -599,5 +616,32 @@ test.describe( `${ blockData.name }`, () => {
 		expect(
 			width === height + 1 || width === height - 1 || width === height
 		).toBeTruthy();
+	} );
+
+	test( 'should persistently display the block when navigating back to the template without a page reload', async ( {
+		editor,
+		pageObject,
+		page,
+	} ) => {
+		await pageObject.addProductGalleryBlock( { cleanContent: true } );
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		// Switch to the Index template.
+		await page.getByLabel( 'Open Navigation' ).click();
+		await page.getByRole( 'button', { name: 'Index' } ).click();
+
+		// Go back to the Custom Single Product template.
+		await page.getByLabel( 'Open Navigation' ).click();
+		await page
+			.getByRole( 'button', { name: 'Custom Single Product' } )
+			.click();
+
+		const productGalleryBlock = editor.canvas.getByLabel(
+			'Block: Product Gallery (Beta)'
+		);
+
+		await expect( productGalleryBlock ).toBeVisible();
 	} );
 } );

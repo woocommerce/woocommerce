@@ -269,6 +269,18 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}: PartialProductVariation ) {
 		if ( isUpdating[ variationId ] ) return;
 
+		setVariations( ( current ) =>
+			current.map( ( currentVariation ) => {
+				if ( currentVariation.id === variationId ) {
+					return {
+						...currentVariation,
+						...variation,
+					};
+				}
+				return currentVariation;
+			} )
+		);
+
 		const { updateProductVariation } = dispatch(
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 		);

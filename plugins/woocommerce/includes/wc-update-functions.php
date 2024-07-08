@@ -2671,7 +2671,7 @@ function wc_update_870_prevent_listing_of_transient_files_directory() {
 }
 
 /**
- * If it exists, remove and recreate the inbox note that asks users to connect to `Woo.com` so that the domain name is changed to the updated `WooCommerce.com`.
+ * If it exists, remove the inbox note that asks users to connect to `Woo.com`.
  */
 function wc_update_890_update_connect_to_woocommerce_note() {
 	$note = Notes::get_note_by_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
@@ -2685,8 +2685,6 @@ function wc_update_890_update_connect_to_woocommerce_note() {
 		return;
 	}
 	Notes::delete_notes_with_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
-	$new_note = WooSubscriptionsNotes::get_note();
-	$new_note->save();
 }
 
 /**
@@ -2728,6 +2726,6 @@ function wc_update_891_create_plugin_autoinstall_history_option() {
 /**
  * Add woocommerce_show_lys_tour.
  */
-function wc_update_900_add_launch_your_store_tour_option() {
+function wc_update_910_add_launch_your_store_tour_option() {
 	add_option( 'woocommerce_show_lys_tour', 'yes' );
 }

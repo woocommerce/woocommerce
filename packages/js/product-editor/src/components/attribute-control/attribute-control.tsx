@@ -17,7 +17,6 @@ import {
 } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
-import { useViewportMatch } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -202,10 +201,8 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		( attr ) => getAttributeId( attr ) === currentAttributeId
 	);
 
-	const isMobileViewport = useViewportMatch( 'medium', '<' );
-
 	function renderEmptyState() {
-		if ( isMobileViewport || value.length ) return null;
+		if ( value.length ) return null;
 
 		if ( renderCustomEmptyState ) {
 			return renderCustomEmptyState( {

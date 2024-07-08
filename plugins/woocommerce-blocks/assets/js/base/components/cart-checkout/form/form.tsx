@@ -18,7 +18,7 @@ import { useEffect, useMemo, useRef } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { useShallowEqual } from '@woocommerce/base-hooks';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	AddressFormValues,
 	ContactFormValues,
@@ -34,7 +34,7 @@ import prepareFormFields from './prepare-form-fields';
 import validateShippingCountry from './validate-shipping-country';
 import customValidationHandler from './custom-validation-handler';
 import Combobox from '../../combobox';
-import AddressFields from './address-fields';
+import AddressLineFields from './address-line-fields';
 import { createFieldProps, getFieldData } from './utils';
 
 /**
@@ -125,8 +125,6 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 				if ( field.type === 'checkbox' ) {
 					return (
 						<CheckboxControl
-							className={ `wc-block-components-address-form__${ field.key }` }
-							label={ field.label }
 							key={ field.key }
 							checked={ Boolean( values[ field.key ] ) }
 							onChange={ ( checked: boolean ) => {
@@ -154,11 +152,11 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 					);
 
 					return (
-						<AddressFields
+						<AddressLineFields
 							address1={ address1 }
 							address2={ address2 }
 							addressType={ addressType }
-							id={ id }
+							formId={ id }
 							key={ field.key }
 							onChange={ ( key, value ) => {
 								onChange( {
@@ -233,9 +231,12 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 						<Combobox
 							key={ field.key }
 							{ ...fieldProps }
-							className={ classnames(
+							className={ clsx(
 								'wc-block-components-select-input',
-								`wc-block-components-select-input-${ field.key }`
+								`wc-block-components-select-input-${ field.key }`.replaceAll(
+									'/',
+									'-'
+								)
 							) }
 							value={ values[ field.key ] }
 							onChange={ ( newValue: string ) => {

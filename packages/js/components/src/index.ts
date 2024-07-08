@@ -23,7 +23,7 @@ export { ImageGallery, ImageGalleryItem } from './image-gallery';
 export { default as ImageUpload } from './image-upload';
 export { Link } from './link';
 export { default as List } from './list';
-export { MediaUploader } from './media-uploader';
+export { MediaUploader, MediaUploaderErrorCallback } from './media-uploader';
 export { default as MenuItem } from './ellipsis-menu/menu-item';
 export { default as MenuTitle } from './ellipsis-menu/menu-title';
 export { default as OrderStatus } from './order-status';
@@ -99,10 +99,7 @@ export {
 	TreeControl as __experimentalTreeControl,
 	Item as TreeItemType,
 } from './experimental-tree-control';
-export {
-	SelectTree as __experimentalSelectTreeControl,
-	SelectTreeMenuSlot as __experimentalSelectTreeMenuSlot,
-} from './experimental-select-tree-control';
+export { SelectTree as __experimentalSelectTreeControl } from './experimental-select-tree-control';
 export { default as TreeSelectControl } from './tree-select-control';
 export { default as PhoneNumberInput } from './phone-number-input';
 
@@ -114,3 +111,4 @@ export {
 export { DisplayState } from './display-state';
 export { ProgressBar } from './progress-bar';
 export { ConfettiAnimation } from './confetti-animation';
+export { ErrorBoundary as __experimentalErrorBoundary } from './error-boundary';

@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Icon, moreVertical, edit, cog } from '@wordpress/icons';
 import { Dropdown, Button, MenuGroup, MenuItem } from '@wordpress/components';
 import { getAdminLink, getSetting } from '@woocommerce/settings';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -53,7 +53,7 @@ export const LaunchYourStoreStatus = ( {
 					renderToggle={ ( { isOpen, onToggle } ) => (
 						<Button onClick={ onToggle } aria-expanded={ isOpen }>
 							<div
-								className={ classnames(
+								className={ clsx(
 									'woocommerce-lys-status-pill',
 									{ 'is-live': ! isComingSoon }
 								) }

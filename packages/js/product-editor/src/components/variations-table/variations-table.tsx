@@ -9,7 +9,6 @@ import {
 	ProductVariation,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { ListItem, Sortable } from '@woocommerce/components';
 import {
 	createElement,
 	Fragment,
@@ -212,13 +211,17 @@ export const VariationsTable = forwardRef<
 		variation: PartialProductVariation,
 		showSuccess = true
 	) {
+		const { id, ...changes } = variation;
+
 		onUpdate( variation )
 			.then( ( response ) => {
 				recordEvent( 'product_variations_change', {
 					source: TRACKS_SOURCE,
 					product_id: productId,
 					variation_id: variation.id,
+					updated_options: Object.keys( changes ),
 				} );
+
 				if ( showSuccess ) {
 					createSuccessNotice(
 						getSnackbarText(
@@ -304,12 +307,12 @@ export const VariationsTable = forwardRef<
 
 	function renderTableBody() {
 		return totalCount > 0 ? (
-			<Sortable
+			<div
 				className="woocommerce-product-variations__table-body"
 				role="rowgroup"
 			>
 				{ variations.map( ( variation ) => (
-					<ListItem
+					<div
 						key={ `${ variation.id }` }
 						className="woocommerce-product-variations__table-row"
 						role="row"
@@ -326,9 +329,9 @@ export const VariationsTable = forwardRef<
 							onEdit={ editVariationClickHandler( variation ) }
 							onSelect={ onSelect( variation ) }
 						/>
-					</ListItem>
+					</div>
 				) ) }
-			</Sortable>
+			</div>
 		) : (
 			<EmptyOrErrorTableState
 				isError={ false }

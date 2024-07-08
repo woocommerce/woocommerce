@@ -3,6 +3,7 @@
  * Title: Coming Soon Entire Site
  * Slug: woocommerce/coming-soon-entire-site
  * Categories: WooCommerce
+ * Inserter: false
  * Feature Flag: launch-your-store
  *
  * @package WooCommerce\Blocks
@@ -47,7 +48,7 @@ if ( 'twentytwentyfour' === $current_theme ) {
 
 <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 <div class="wp-block-group"><!-- wp:heading {"textAlign":"center","level":1,"align":"wide","className":"woocommerce-coming-soon-banner","fontFamily":"<?php echo esc_html( $cardo_font_family ); ?>"} -->
-<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner has-<?php echo esc_html( $cardo_font_family ); ?>-font-family">Pardon our dust! We're working on something amazing — check back soon!</h1>
+<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner has-<?php echo esc_html( $cardo_font_family ); ?>-font-family"><?php echo esc_html__( "Pardon our dust! We're working on something amazing — check back soon!", 'woocommerce' ); ?></h1>
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 
@@ -182,7 +183,7 @@ body .is-layout-constrained > .woocommerce-coming-soon-banner.alignwide {
 .woocommerce-coming-soon-header {
 	height: 40px;
 }
-.woocommerce-coming-soon-banner {
+h1.wp-block-heading.woocommerce-coming-soon-banner {
 	font-size: clamp(27px, 1.74rem + ((1vw - 3px) * 2), 48px);
 	font-weight: 400;
 	line-height: 58px;

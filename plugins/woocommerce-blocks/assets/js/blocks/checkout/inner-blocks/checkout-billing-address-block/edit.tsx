@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
@@ -70,7 +70,7 @@ export const Edit = ( {
 		<FormStepBlock
 			setAttributes={ setAttributes }
 			attributes={ attributes }
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__billing-fields',
 				attributes?.className
 			) }

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-FIxed a bug where shop page isn't recognized as a WooCommerce page when WordPress is installed in a subdirectory with permalink set to plain.

@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { Product } from '@woocommerce/data';
 import {
 	EditorSettings,
 	EditorBlockListSettings,
@@ -29,6 +28,6 @@ export type ProductEditorSettings = Partial<
 };
 
 export type EditorProps = {
-	product?: Pick< Product, 'id' | 'type' > | null;
-	productType?: string;
+	productId: number;
+	postType?: string;
 };

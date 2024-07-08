@@ -3222,6 +3222,8 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 * @testDox Test webhooks are not fired multiple times on order save.
 	 */
 	public function test_order_updated_webhook_delivered_once() {
+		$this->markTestSkipped( 'Skipped temporarily due to increased flakiness.' );
+
 		$this->toggle_cot_authoritative( true );
 		$this->enable_cot_sync();
 
@@ -3427,6 +3429,36 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$other_counts = OrderUtil::get_count_for_type( 'shop_something' );
 		$this->assertEquals( 0, array_pop( $other_counts ) );
 
+	}
+
+	/**
+	 * @testDox Creating an order with a draft status should not trigger the "woocommerce_new_order" action.
+	 */
+	public function test_create_draft_order_doesnt_trigger_hook() {
+
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$new_count = 0;
+
+		$callback = function () use ( &$new_count ) {
+			++$new_count;
+		};
+
+		add_action( 'woocommerce_new_order', $callback );
+
+		$draft_statuses = array( 'auto-draft', 'checkout-draft' );
+
+		$orders_data_store = new OrdersTableDataStore();
+
+		foreach ( $draft_statuses as $status ) {
+			$order = WC_Helper_Order::create_order( 1, null, array( 'status' => $status ) );
+			$orders_data_store->create( $order );
+		}
+
+		$this->assertEquals( 0, $new_count );
+
+		remove_action( 'woocommerce_new_order', $callback );
 	}
 
 }

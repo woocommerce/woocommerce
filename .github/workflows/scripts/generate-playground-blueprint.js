@@ -25,6 +25,16 @@ const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 				},
 			},
 			{
+				step: 'installPlugin',
+				pluginZipFile: {
+					resource: 'url',
+					url: `https://github-proxy.com/https://github.com/woocommerce/woocommerce/releases/download/wc-beta-tester-2.3.1/woocommerce-beta-tester.zip`,
+				},
+				options: {
+					activate: true,
+				},
+			},
+			{
 				step: 'login',
 				username: 'admin',
 				password: 'password',

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Fragment } from '@wordpress/element';
 import { CardBody, CardMedia, CardDivider } from '@wordpress/components';
 import { SetupRequired } from '@woocommerce/onboarding';
@@ -48,7 +48,7 @@ export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 	);
 	const showRecommended = isRecommended && needsSetup;
 
-	const classes = classnames(
+	const classes = clsx(
 		'woocommerce-task-payment',
 		'woocommerce-task-card',
 		needsSetup && 'woocommerce-task-payment-not-configured',

@@ -116,7 +116,11 @@
 					"name": "JavaScript",
 					"command": "test:js",
 					"changes": "src/**/*.{js,jsx,ts,tsx}",
-					"cascade": "test:js"
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}

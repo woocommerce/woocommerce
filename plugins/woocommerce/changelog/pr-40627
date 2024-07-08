@@ -1,4 +1,0 @@
-Significance: major
-Type: update
-
-Replace the Legacy REST API with a stub that always returns an error

@@ -46,10 +46,10 @@ interface AddressFieldData {
 	value?: string | undefined;
 }
 
-export interface AddressFieldsProps< T >
+export interface AddressLineFieldsProps< T >
 	extends Omit< AddressFormProps< T >, 'fields' | 'values' | 'onChange' > {
 	// Overwriting the id for the fields.
-	id: string;
+	formId: string;
 	// Address 1 fields and value.
 	address1: AddressFieldData;
 	// Address 2 fields and value.
@@ -60,7 +60,7 @@ export interface AddressFieldsProps< T >
 	onChange: ( key: keyof T, value: string ) => void;
 }
 
-export interface AddressFieldProps< T > {
+export interface AddressLineFieldProps< T > {
 	// Form fields.
 	field: KeyedFormField;
 	// Props for the form field.

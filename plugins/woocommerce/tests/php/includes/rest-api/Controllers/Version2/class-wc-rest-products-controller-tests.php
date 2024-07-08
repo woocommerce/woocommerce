@@ -293,4 +293,24 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		$this->assertIsArray( $decoded_data_object[0]->meta_data );
 	}
+
+	/**
+	 * @testdox Test that an attribute with a multibyte name includes that name correctly in the attributes
+	 *          property of the product object.
+	 */
+	public function test_product_with_multibyte_attribute() {
+		$product   = WC_Helper_Product::create_simple_product();
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'Сирене', array( 'asdf', 'fdsa' ) );
+
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'Сирене', $data['attributes'][0]['name'] );
+	}
 }

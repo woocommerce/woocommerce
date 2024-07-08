@@ -8,7 +8,7 @@ import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 import {
 	BASE_URL,
 	adminFile,
-	cli,
+	wpCLI,
 	customerFile,
 	BLOCK_THEME_SLUG,
 	DB_EXPORT_FILE,
@@ -54,9 +54,10 @@ const prepareAttributes = async () => {
 	// Note that the two commands below are intentionally duplicated as we need
 	// to run the cron task twice as we need to process more than 1 batch of
 	// items.
-	const cronTask = `npm run wp-env run tests-cli -- wp action-scheduler run --hooks="woocommerce_run_product_attribute_lookup_regeneration_callback"`;
-	await cli( cronTask );
-	await cli( cronTask );
+	const cronTask =
+		'action-scheduler run --hooks="woocommerce_run_product_attribute_lookup_regeneration_callback"';
+	await wpCLI( cronTask );
+	await wpCLI( cronTask );
 };
 
 async function globalSetup() {
@@ -66,13 +67,19 @@ async function globalSetup() {
 	let databaseImported = false;
 
 	try {
-		console.log( '├ Attempting database import…' );
-		await cli(
-			`npm run wp-env run tests-cli wp db import ${ DB_EXPORT_FILE }`
-		);
+		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
+		console.log( '├ Database snapshot imported, running basic setup…' );
 		databaseImported = true;
-	} catch ( _error ) {
-		// noop
+	} catch ( error ) {
+		if (
+			error instanceof Error &&
+			! error.message.includes( 'Import file missing' )
+		) {
+			// Throw if the error is not related to the import file missing.
+			throw error;
+		}
+
+		console.log( '├ Database snapshot not found, running full setup…' );
 	}
 
 	const requestContext = await request.newContext( {
@@ -98,10 +105,8 @@ async function globalSetup() {
 		await prepareAttributes();
 	}
 
-	console.log( '├ Exporting database…' );
-	await cli(
-		`npm run wp-env run tests-cli wp db export ${ DB_EXPORT_FILE }`
-	);
+	console.log( '├ Exporting database snapshot…' );
+	await wpCLI( `db export ${ DB_EXPORT_FILE }` );
 
 	await requestContext.dispose();
 	console.timeEnd( '└ Total time' );

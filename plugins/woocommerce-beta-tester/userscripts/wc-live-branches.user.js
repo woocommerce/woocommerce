@@ -109,7 +109,6 @@
 				'async-product-editor-category-field',
 				'launch-your-store',
 				'minified-js',
-				'new-product-management-experience',
 				'product-custom-fields',
 				'settings',
 			];

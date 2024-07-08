@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -189,15 +189,14 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		localPickupUtils,
 		admin,
 		editor,
-		editorUtils,
 		frontendUtils,
 	} ) => {
 		// First update the title via the site editor then check the local pickup settings.
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editorUtils.enterEditMode();
 		const block = editor.canvas.locator(
 			'[data-type="woocommerce/checkout-shipping-method-block"]'
 		);
@@ -221,13 +220,12 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		await localPickupUtils.setLocalPickupTitle(
 			'Edited from settings page'
 		);
-		await localPickupUtils.saveLocalPickupSettings();
 
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editorUtils.enterEditMode();
 
 		await expect(
 			editor.canvas.getByText( 'Edited from settings page' )

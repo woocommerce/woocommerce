@@ -43,7 +43,7 @@ class Notices {
 	public function init() {
 		add_action(
 			'after_setup_theme',
-			function() {
+			function () {
 				/**
 				 * Allow classic theme developers to opt-in to using block notices.
 				 *
@@ -104,13 +104,14 @@ class Notices {
 	 * @return string
 	 */
 	public function get_notices_template( $template, $template_name, $args, $template_path, $default_path ) {
-		$directory = get_stylesheet_directory();
-		$file      = $directory . '/woocommerce/' . $template_name;
-		if ( file_exists( $file ) ) {
-			return $file;
-		}
-
 		if ( in_array( $template_name, $this->notice_templates, true ) ) {
+			$directory = get_stylesheet_directory();
+			$file      = $directory . '/woocommerce/' . $template_name;
+
+			if ( file_exists( $file ) ) {
+				return $file;
+			}
+
 			$template = $this->package->get_path( 'templates/block-' . $template_name );
 			wp_enqueue_style( 'wc-blocks-style' );
 		}
@@ -119,7 +120,7 @@ class Notices {
 	}
 
 	/**
-	 * Replaces all notices with the new block based notices.
+	 * Replaces all notices with the new block-based notices.
 	 *
 	 * @return void
 	 */
