@@ -101,6 +101,7 @@ body.woocommerce-assembler {
 	.edit-site-layout__sidebar-region {
 		width: 380px;
 		z-index: 3;
+		background-color: #fafafa;
 	}
 
 	.edit-site-layout__sidebar {
@@ -342,6 +343,7 @@ body.woocommerce-assembler {
 		padding-top: 32px;
 		border-top: 1px solid var(--gutenberg-gray-700, #dcdcde);
 		color: var(--gutenberg-gray-900, #1e1e1e);
+		font-size: 11px;
 
 		p {
 			margin-top: 6px;
@@ -448,6 +450,8 @@ body.woocommerce-assembler {
 	.woocommerce-customize-store_sidebar-patterns-upgrade-notice {
 		color: #1e1e1e;
 		padding: 0 0 40px;
+		margin-top: 48px;
+		font-size: 11px;
 
 		h4 {
 			text-transform: uppercase;
