@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent download permissions metabox from being toggled when toggling individual permission details.

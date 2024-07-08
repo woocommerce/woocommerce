@@ -61,7 +61,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 2, count( $products ) );
 		$this->assertEquals( 'Dummy Product', $products[0]['name'] );
-		$this->assertEquals( 'DUMMY SKU', $products[0]['sku'] );
+		$this->assertMatchesRegularExpression( '/^DUMMY SKU\d+$/', $products[0]['sku'] );
 		$this->assertEquals( 'Dummy External Product', $products[1]['name'] );
 		$this->assertEquals( 'DUMMY EXTERNAL SKU', $products[1]['sku'] );
 	}
@@ -228,7 +228,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$data         = $response->get_data();
 		$date_created = gmdate( 'Y-m-d\TH:i:s', current_time( 'timestamp' ) );
 
-		$this->assertEquals( 'DUMMY SKU', $data['sku'] );
+		$this->assertMatchesRegularExpression( '/^DUMMY SKU\d+$/', $data['sku'] );
 		$this->assertEquals( 10, $data['regular_price'] );
 		$this->assertEmpty( $data['sale_price'] );
 
@@ -649,7 +649,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 70, count( $properties ) );
+		$this->assertEquals( 71, count( $properties ) );
 	}
 
 	/**
