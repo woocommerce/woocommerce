@@ -29,7 +29,7 @@ jobs:
         working-directory: plugins/woocommerce
         run: bash bin/build-zip.sh
 
-      - name: Deploy nightly build
+      - name: Upload nightly build
         uses: WebFreak001/deploy-nightly@d147b5dbd2cb8245d2b5f83a41f5ebe9957575b4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -40,6 +40,22 @@ jobs:
           asset_name: woocommerce-${{ matrix.build }}-nightly.zip
           asset_content_type: application/zip
           max_releases: 1
+      
+      # Update the release body so that the release edited trigger is fired. ci.yml will run tests on this event.
+      - name: Update nightly release body
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const currentUTC = new Date().toUTCString();
+            const releaseId = 25945111;
+            const newBody = `Updated at ${currentUTC} UTC.`;
+            await github.rest.releases.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: releaseId,
+              body: newBody
+            });
 
   update:
     name: Update nightly tag commit ref
