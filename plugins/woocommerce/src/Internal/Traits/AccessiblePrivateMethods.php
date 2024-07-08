@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Traits;
 
-use Automattic\WooCommerce\Utilities\ArrayUtil;
+use SplObjectStorage;
 
 /**
  * This trait allows making private methods of a class accessible from outside.
@@ -41,10 +41,11 @@ trait AccessiblePrivateMethods {
 	//phpcs:disable PSR2.Classes.PropertyDeclaration.Underscore
 	/**
 	 * List of instance methods marked as externally accessible.
+	 * This is actually a dictionary where keys are object instances and values are arrays of method names.
 	 *
-	 * @var array
+	 * @var SplObjectStorage
 	 */
-	private $_accessible_private_methods = array();
+	private static $_accessible_private_methods = null;
 
 	/**
 	 * List of static methods marked as externally accessible.
@@ -52,6 +53,13 @@ trait AccessiblePrivateMethods {
 	 * @var array
 	 */
 	private static $_accessible_static_private_methods = array();
+
+	/**
+	 * Flag indicating that $_accessible_private_methods already contains an entry for this object.
+	 *
+	 * @var bool
+	 */
+	private bool $_accessible_private_methods_is_initialized_for_this = false;
 	//phpcs:enable PSR2.Classes.PropertyDeclaration.Underscore
 
 	/**
@@ -123,7 +131,18 @@ trait AccessiblePrivateMethods {
 		// Note that an "is_callable" check would be useless here:
 		// "is_callable" always returns true if the class implements __call.
 		if ( method_exists( $this, $method_name ) ) {
-			$this->_accessible_private_methods[ $method_name ] = $method_name;
+			if ( is_null( self::$_accessible_private_methods ) ) {
+				static::$_accessible_private_methods = new SplObjectStorage();
+			}
+
+			if ( ! $this->_accessible_private_methods_is_initialized_for_this ) {
+				static::$_accessible_private_methods[ $this ]              = array();
+				$this->_accessible_private_methods_is_initialized_for_this = true;
+			}
+
+			$methods                                      = static::$_accessible_private_methods[ $this ];
+			$methods[ $method_name ]                      = $method_name;
+			static::$_accessible_private_methods[ $this ] = $methods;
 			return true;
 		}
 
@@ -154,7 +173,8 @@ trait AccessiblePrivateMethods {
 	 * @throws \Error The called instance method doesn't exist or is private/protected and not marked as externally accessible.
 	 */
 	public function __call( $name, $arguments ) {
-		if ( isset( $this->_accessible_private_methods[ $name ] ) ) {
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		if ( $this->_accessible_private_methods_is_initialized_for_this && isset( static::$_accessible_private_methods[ $this ][ $name ] ) ) {
 			return call_user_func_array( array( $this, $name ), $arguments );
 		} elseif ( is_callable( array( 'parent', '__call' ) ) ) {
 			return parent::__call( $name, $arguments );
@@ -163,6 +183,7 @@ trait AccessiblePrivateMethods {
 		} else {
 			throw new \Error( 'Call to undefined method ' . get_class( $this ) . '::' . $name );
 		}
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 	}
 
 	/**
@@ -174,6 +195,7 @@ trait AccessiblePrivateMethods {
 	 * @throws \Error The called static method doesn't exist or is private/protected and not marked as externally accessible.
 	 */
 	public static function __callStatic( $name, $arguments ) {
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		if ( isset( static::$_accessible_static_private_methods[ $name ] ) ) {
 			return call_user_func_array( array( __CLASS__, $name ), $arguments );
 		} elseif ( is_callable( array( 'parent', '__callStatic' ) ) ) {
@@ -185,6 +207,21 @@ trait AccessiblePrivateMethods {
 			throw new \Error( 'Call to private method ' . __CLASS__ . '::' . $name );
 		} else {
 			throw new \Error( 'Call to undefined method ' . __CLASS__ . '::' . $name );
+		}
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+	}
+
+	/**
+	 * Class destructor, needed to remove this object from the dictionary of accessible instance methods.
+	 */
+	public function __destruct() {
+		if ( $this->_accessible_private_methods_is_initialized_for_this ) {
+			self::$_accessible_private_methods->detach( $this );
+			$this->_accessible_private_methods_is_initialized_for_this = false;
+		}
+
+		if ( is_callable( array( 'parent', '__destruct' ) ) ) {
+			parent::__destruct();
 		}
 	}
 }
