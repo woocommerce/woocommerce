@@ -39,9 +39,11 @@ class ImportInstallPlugin implements StepProcessor {
 		$install = $this->install( $downloaded_path );
 		$install && $result->add_info( "Installed {$plugin->slug}." );
 
-		if ( $plugin->activate === true ) {
+		if ( isset( $plugin->options, $plugin->options->activate ) && $plugin->options->activate === true ) {
 			$activate = $this->activate( $plugin->slug );
-			$activate && $result->add_info( "Activated {$plugin->slug}." );
+			if ( $activate ) {
+				$result->add_info( "Activated {$plugin->slug}." );
+			}
 		}
 
 		return $result;
