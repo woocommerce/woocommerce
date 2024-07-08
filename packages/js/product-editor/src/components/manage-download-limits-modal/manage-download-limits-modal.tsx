@@ -15,7 +15,9 @@ import { ManageDownloadLimitsModalProps } from './types';
 import { NumberControl } from '../number-control';
 
 const DOWNLOAD_LIMIT_MIN = 0;
+const DOWNLOAD_LIMIT_MAX = 10000000000;
 const DOWNLOAD_EXPIRY_MIN = 0;
+const DOWNLOAD_EXPIRY_MAX = 10000000000;
 
 /**
  * Download limit and download expiry currently support
@@ -123,8 +125,8 @@ export function ManageDownloadLimitsModal( {
 			BaseControl,
 			'product_download_limit_field'
 		) as string,
-		type: 'number',
 		min: DOWNLOAD_LIMIT_MIN,
+		max: DOWNLOAD_LIMIT_MAX,
 		className: classNames( {
 			'has-error': errors.downloadLimit,
 		} ),
@@ -149,8 +151,8 @@ export function ManageDownloadLimitsModal( {
 			BaseControl,
 			'product_download_expiry_field'
 		) as string,
-		type: 'number',
 		min: DOWNLOAD_EXPIRY_MIN,
+		max: DOWNLOAD_EXPIRY_MAX,
 		className: classNames( {
 			'has-error': errors.downloadExpiry,
 		} ),

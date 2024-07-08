@@ -61,8 +61,8 @@ export const NumberControl: React.FC< NumberProps > = ( {
 	placeholder,
 	disabled,
 	step = 1,
-	min = -1000000000000000,
-	max = 1000000000000000,
+	min = -Infinity,
+	max = Infinity,
 }: NumberProps ) => {
 	const id = useInstanceId( BaseControl, 'product_number_field' ) as string;
 	const [ isFocused, setIsFocused ] = useState( false );

@@ -28,6 +28,9 @@ import { useValidation } from '../../../contexts/validation-context';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { NumberControl } from '../../../components/number-control';
 
+const SHIPPING_AND_WEIGHT_MIN_VALUE = 0;
+const SHIPPING_AND_WEIGHT_MAX_VALUE = 100000;
+
 export function Edit( {
 	attributes,
 	clientId,
@@ -80,6 +83,8 @@ export function Edit( {
 			onBlur: () => setHighlightSide( undefined ),
 			suffix: dimensionUnit,
 			disabled: attributes.disabled || virtual,
+			min: SHIPPING_AND_WEIGHT_MIN_VALUE,
+			max: SHIPPING_AND_WEIGHT_MAX_VALUE,
 		};
 	}
 
@@ -162,6 +167,8 @@ export function Edit( {
 		ref: weightRef,
 		onBlur: validateWeight,
 		disabled: attributes.disabled || virtual,
+		min: SHIPPING_AND_WEIGHT_MIN_VALUE,
+		max: SHIPPING_AND_WEIGHT_MAX_VALUE,
 	};
 
 	return (
