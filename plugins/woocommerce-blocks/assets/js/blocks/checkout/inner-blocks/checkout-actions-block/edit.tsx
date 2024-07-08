@@ -39,7 +39,7 @@ export const Edit = ( {
 		cartPageId = 0,
 		showReturnToCart = false,
 		placeOrderButtonLabel,
-		showPrice = true,
+		showPrice = false,
 	} = attributes;
 	const { cartTotals } = useStoreCart();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
