@@ -12,7 +12,6 @@ jest.mock( '@woocommerce/data', () => ( {
 	OPTIONS_STORE_NAME: 'options',
 } ) );
 jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
 	dispatch: jest.fn(),
 } ) );
 
