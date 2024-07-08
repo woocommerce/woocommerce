@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import {
-	createInterpolateElement,
-	useEffect,
-	useState,
-} from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import {
 	Button,
 	Card,
@@ -14,7 +10,6 @@ import {
 	CardFooter,
 	CardHeader,
 	CardMedia,
-	ExternalLink,
 	Flex,
 	FlexItem,
 	Icon,
@@ -135,18 +130,9 @@ export default function CheckSubscriptionModal( {
 				key: 'supporting-ecosystem',
 				icon: people,
 				title: __( 'Supporting the ecosystem', 'woocommerce' ),
-				content: createInterpolateElement(
-					__(
-						'A subscription helps us to continuously improve your extensions, themes, and WooCommerce experience. <readMore />',
-						'woocommerce'
-					),
-					{
-						readMore: (
-							<ExternalLink href="#">
-								{ __( 'Read more', 'woocommerce' ) }
-							</ExternalLink>
-						),
-					}
+				content: __(
+					'A subscription helps us to continuously improve your extensions, themes, and WooCommerce experience.',
+					'woocommerce'
 				),
 			},
 		];
