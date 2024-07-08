@@ -48,7 +48,7 @@ export const SelectTree = function SelectTree( {
 	initialInputValue,
 	onInputChange,
 	shouldShowCreateButton,
-	help = __( 'Separate with commas or the Enter key.', 'woocommerce' ),
+	help,
 	isClearingAllowed = false,
 	onClear = () => {},
 	...props
@@ -235,7 +235,14 @@ export const SelectTree = function SelectTree( {
 				<BaseControl
 					label={ props.label }
 					id={ `${ props.id }-input` }
-					help={ help }
+					help={
+						props.multiple && ! help
+							? __(
+									'Separate with commas or the Enter key.',
+									'woocommerce'
+							  )
+							: help
+					}
 				>
 					<>
 						{ props.multiple ? (

@@ -180,7 +180,6 @@ export const CreateTaxonomyModal: React.FC< CreateTaxonomyModalProps > = ( {
 							setCategoryParentTypedValue( value || '' );
 						} }
 						createValue={ categoryParentTypedValue }
-						help=""
 					/>
 				) }
 				<div className="woocommerce-create-new-taxonomy-modal__buttons">
