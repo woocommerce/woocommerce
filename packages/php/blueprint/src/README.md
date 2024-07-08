@@ -7,20 +7,24 @@ and settings effortlessly with JSON files.
 
 # Built-in Steps
 
-| Step             | Description |
-|------------------| --- |
-| `installPlugin`  |  |
-| `installTheme`   |  |
-| `activatePlugin` |  |
-| `activateTheme`  |  |
+| Step             | 
+|------------------| 
+| `installPlugin`  | 
+| `activatePlugin` | 
+| `deactivatePlugin` | 
+| `deletePlugin`   | 
+| `installTheme`   | 
+| `activateTheme`  | 
+| `setSiteOptions` | 
+
 
 # Hooks
 
 
-| Hook                     | Description |
-|--------------------------| --- |
-| `wooblueprint_exporters` |  |
-| `wooblueprint_importers` |  |
+| Hook                     | Description                     |
+|--------------------------|---------------------------------|
+| `wooblueprint_exporters` | A hook to add custom exporters. |
+| `wooblueprint_importers` | A hook to add custom importers. |
 
 # Example: Adding a Custom Exporter
 
@@ -64,7 +68,7 @@ class MyCustomExporter extends StepExporter {
     }
     
     public function get_step_name() {
-        return 'setSiteOptions';
+        return SetSiteOptions::get_step_name();
     }
 }
 
@@ -87,7 +91,7 @@ class MyCustomExporter extends StepExporter {
     }
     
     public function get_step_name() {
-        return 'setSiteOptions';
+        return SetSiteOptions::get_step_name();
     }
 }
 
@@ -114,3 +118,7 @@ Output:
       ]
   }
   ```
+
+# Example: Adding a Custom Importer
+# Example: Adding a Custom Step
+# Example: Aliasing a Custom Exporter
