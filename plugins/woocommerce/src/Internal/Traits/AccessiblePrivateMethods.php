@@ -135,14 +135,11 @@ trait AccessiblePrivateMethods {
 				static::$_accessible_private_methods = new SplObjectStorage();
 			}
 
-			if ( ! $this->_accessible_private_methods_is_initialized_for_this ) {
-				static::$_accessible_private_methods[ $this ]              = array();
-				$this->_accessible_private_methods_is_initialized_for_this = true;
-			}
-
-			$methods                                      = static::$_accessible_private_methods[ $this ];
+			$methods                                      = $this->_accessible_private_methods_is_initialized_for_this ? static::$_accessible_private_methods[ $this ] : array();
 			$methods[ $method_name ]                      = $method_name;
 			static::$_accessible_private_methods[ $this ] = $methods;
+
+			$this->_accessible_private_methods_is_initialized_for_this = true;
 			return true;
 		}
 
