@@ -918,12 +918,6 @@ class DefaultPaymentGateways {
 						)
 					),
 					self::get_rules_for_cbd( false ),
-					(object) array(
-						'type'     => 'plugin_version',
-						'plugin'   => 'woocommerce',
-						'version'  => '9.2.0-dev',
-						'operator' => '>=',
-					),
 					self::get_rules_for_wcpay_activated( true ),
 					self::get_rules_for_wcpay_connected( true ),
 				),
