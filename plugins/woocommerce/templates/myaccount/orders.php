@@ -41,10 +41,12 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 				<tr class="woocommerce-orders-table__row woocommerce-orders-table__row--status-<?php echo esc_attr( $order->get_status() ); ?> order">
 					<?php foreach ( wc_get_account_orders_columns() as $column_id => $column_name ) :
 						$is_order_number = 'order-number' === $column_id;
-						$cell_html_tag   = $is_order_number ? 'th scope="row"' : 'td';
-						$cell_html_attrs = 'class="woocommerce-orders-table__cell woocommerce-orders-table__cell-' . esc_attr( $column_id ) . '"' . ' ' . 'data-title="' . esc_attr( $column_name ) . '"';
 					?>
-						<?php echo '<' . $cell_html_tag . ' ' . $cell_html_attrs . '>'; ?>
+						<?php if ( $is_order_number ) : ?>
+							<th class="woocommerce-orders-table__cell woocommerce-orders-table__cell-<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>" scope="row">
+						<?php else : ?>
+							<td class="woocommerce-orders-table__cell woocommerce-orders-table__cell-<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>">
+						<?php endif; ?>
 
 							<?php if ( has_action( 'woocommerce_my_account_my_orders_column_' . $column_id ) ) : ?>
 								<?php do_action( 'woocommerce_my_account_my_orders_column_' . $column_id, $order ); ?>
@@ -78,7 +80,12 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 								}
 								?>
 							<?php endif; ?>
-						<?php echo $is_order_number ? '</th>' : '</td>'; ?>
+						
+						<?php if ( $is_order_number ) : ?>
+							</th>
+						<?php else : ?>
+							</td>
+						<?php endif; ?>
 					<?php endforeach; ?>
 				</tr>
 				<?php
