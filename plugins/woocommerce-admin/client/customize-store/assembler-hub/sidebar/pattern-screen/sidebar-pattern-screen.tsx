@@ -59,6 +59,10 @@ const addIsAddedClassToPatternPreview = (
 	patternListEl: HTMLElement,
 	blocks: BlockInstance[]
 ) => {
+	patternListEl.querySelectorAll( '.is-added' ).forEach( ( element ) => {
+		element.classList.remove( 'is-added' );
+	} );
+
 	blocks.forEach( ( block ) => {
 		const patterName = block.attributes.metadata?.patternName;
 		if ( ! patterName ) {
@@ -75,7 +79,7 @@ const addIsAddedClassToPatternPreview = (
 
 /**
  * Sorts patterns by category. For 'intro' and 'about' categories
- * priorizied DotCom Patterns. For intro category, it also prioritizes the "centered-content-with-image-below" pattern.
+ * prioritized DotCom Patterns. For intro category, it also prioritizes the "centered-content-with-image-below" pattern.
  * For other categories, it simply sorts patterns to prioritize Woo Patterns.
  */
 const sortPatternsByCategory = (
