@@ -25,7 +25,21 @@ const PlaceOrderButton = ( {
 		waitingForRedirect,
 	} = useCheckoutSubmit();
 
-	const buttonLabel = `${ label } - ${ showPrice ? '€0.00' : '' }`;
+	const buttonLabel = (
+		<>
+			{ label }
+			{ showPrice && (
+				<div className="wc-block-components-checkout-place-order-button__separator">
+					·
+				</div>
+			) }
+			{ showPrice && (
+				<div className="wc-block-components-checkout-place-order-button__price">
+					$20.99
+				</div>
+			) }
+		</>
+	);
 
 	return (
 		<Button
