@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent BatchProcessingController from cleaning up processors after a premature shutdown.
