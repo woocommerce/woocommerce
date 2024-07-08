@@ -239,7 +239,13 @@ export const SelectTree = function SelectTree( {
 								suffix={
 									<div className="woocommerce-experimental-select-control__suffix-items">
 										{ isClearingAllowed && isOpen && (
-											<Button onClick={ handleClear }>
+											<Button
+												label={ __(
+													'Remove all',
+													'woocommerce'
+												) }
+												onClick={ handleClear }
+											>
 												<SuffixIcon
 													className="woocommerce-experimental-select-control__icon-clear"
 													icon={ closeSmall }
