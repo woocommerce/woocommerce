@@ -17,6 +17,7 @@ jest.mock( '@wordpress/data', () => {
 		useDispatch: jest
 			.fn()
 			.mockReturnValue( { installAndActivatePlugins: jest.fn() } ),
+		useSelect: jest.fn().mockReturnValue( false ),
 	};
 } );
 
