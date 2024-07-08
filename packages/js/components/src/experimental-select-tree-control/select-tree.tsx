@@ -144,11 +144,12 @@ export const SelectTree = function SelectTree( {
 			}
 		},
 		onBlur: ( event ) => {
-			if ( isOpen && isEventOutside( event ) ) {
+			event.preventDefault();
+			if ( isEventOutside( event ) ) {
 				setIsOpen( false );
+				setIsFocused( false );
 				recalculateInputValue();
 			}
-			setIsFocused( false );
 		},
 		onKeyDown: ( event ) => {
 			setIsOpen( true );
@@ -160,12 +161,10 @@ export const SelectTree = function SelectTree( {
 						`#${ menuInstanceId } input, #${ menuInstanceId } button`
 					) as HTMLInputElement | HTMLButtonElement
 				 )?.focus();
-			}
-			if ( event.key === 'Tab' || event.key === 'Escape' ) {
+			} else if ( event.key === 'Tab' || event.key === 'Escape' ) {
 				setIsOpen( false );
 				recalculateInputValue();
-			}
-			if ( event.key === ',' || event.key === 'Enter' ) {
+			} else if ( event.key === ',' || event.key === 'Enter' ) {
 				event.preventDefault();
 				const item = items.find(
 					( i ) => i.label === escapeHTML( inputValue )
@@ -182,6 +181,20 @@ export const SelectTree = function SelectTree( {
 					setInputValue( '' );
 					recalculateInputValue();
 				}
+			} else if (
+				( event.key === 'ArrowLeft' || event.key === 'Backspace' ) &&
+				( event.target as HTMLInputElement ).selectionStart === 0 &&
+				( event.target as HTMLInputElement ).selectionEnd === 0
+			) {
+				(
+					( event.target as HTMLElement )
+						.closest(
+							'.woocommerce-experimental-select-control__combo-box-wrapper'
+						)
+						?.querySelector(
+							'.woocommerce-experimental-select-control__selected-items > div:last-child button'
+						) as HTMLButtonElement
+				 )?.focus();
 			}
 		},
 		onChange: ( event ) => {
@@ -275,6 +288,41 @@ export const SelectTree = function SelectTree( {
 											props.onRemove
 										) {
 											props.onRemove( item );
+										}
+									} }
+									onBlur={ ( event ) => {
+										if ( isEventOutside( event ) ) {
+											setIsOpen( false );
+											setIsFocused( false );
+										}
+									} }
+									onKeyDown={ ( event ) => {
+										if (
+											event.key === 'ArrowLeft' ||
+											event.key === 'ArrowRight'
+										) {
+											const selectedItem = (
+												event.target as HTMLElement
+											 ).closest(
+												'.woocommerce-experimental-select-control__selected-item'
+											);
+											const sibling =
+												event.key === 'ArrowLeft'
+													? selectedItem?.previousSibling
+													: selectedItem?.nextSibling;
+											if ( sibling ) {
+												(
+													(
+														sibling as HTMLElement
+													 ).querySelector(
+														'.woocommerce-tag__remove'
+													) as HTMLElement
+												 )?.focus();
+											} else if (
+												event.key === 'ArrowRight'
+											) {
+												focusOnInput();
+											}
 										}
 									} }
 									getSelectedItemProps={ () => ( {} ) }
