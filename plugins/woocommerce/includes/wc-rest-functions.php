@@ -377,6 +377,8 @@ function wc_rest_is_from_product_editor() {
 /**
  * Check if a REST namespace should be loaded. Useful to maintain site performance even when lots of REST namespaces are registered.
  *
+ * @since 9.2.0.
+ *
  * @param string $ns The namespace to check.
  * @param string $rest_route (Optional) The REST route being checked.
  *
