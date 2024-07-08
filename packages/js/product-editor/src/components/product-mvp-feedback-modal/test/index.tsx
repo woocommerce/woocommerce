@@ -13,7 +13,6 @@ import { ProductMVPFeedbackModal } from '../index';
 const mockRecordScoreCallback = jest.fn();
 
 jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
 	useDispatch: jest.fn(),
 } ) );
 
