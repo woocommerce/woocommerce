@@ -285,7 +285,6 @@
 					],
 					"changes": [],
 					"events": [
-						"daily-checks",
 						"nightly-checks",
 						"release-checks"
 					],
@@ -311,7 +310,7 @@
 					],
 					"changes": [],
 					"events": [
-						"daily-checks",
+						"nightly-checks",
 						"release-checks"
 					],
 					"testEnv": {
@@ -330,7 +329,7 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks",
+						"nightly-checks",
 						"release-checks"
 					],
 					"testEnv": {
@@ -349,7 +348,7 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks",
+						"nightly-checks",
 						"release-checks"
 					],
 					"testEnv": {
@@ -368,7 +367,7 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks",
+						"nightly-checks",
 						"release-checks"
 					],
 					"testEnv": {
@@ -392,7 +391,7 @@
 						"--shard=5/5"
 					],
 					"events": [
-						"daily-checks",
+						"nightly-checks",
 						"release-checks"
 					],
 					"changes": [
@@ -436,7 +435,7 @@
 						}
 					},
 					"events": [
-						"daily-checks",
+						"nightly-checks",
 						"release-checks"
 					],
 					"report": {
@@ -464,7 +463,7 @@
 						}
 					},
 					"events": [
-						"daily-checks",
+						"nightly-checks",
 						"release-checks"
 					],
 					"report": {
@@ -616,7 +615,7 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks"
+						"nightly-checks"
 					],
 					"report": {
 						"resultsBlobName": "default-pressable-core-e2e",
