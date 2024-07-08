@@ -83,6 +83,9 @@ trait UseWPFunctions {
 	}
 
 	public function wp_themes_api( $action, $args = array() ) {
+		if ( ! function_exists( 'themes_api' ) ) {
+			require_once( ABSPATH . 'wp-admin/includes/theme.php' );
+		}
 		return themes_api( $action, $args );
 	}
 
