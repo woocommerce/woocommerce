@@ -884,6 +884,51 @@ class DefaultPaymentGateways {
 				),
 			),
 			array(
+				'id'          => 'woocommerce_payments:bnpl',
+				'title'       => __( 'Activate BNPL instantly on WooPayments', 'woocommerce' ),
+				'content'     => __(
+					'The world’s favorite buy now, pay later options and many more are right at your fingertips with WooPayments — all from one dashboard, without needing multiple extensions and logins.',
+					'woocommerce'
+				),
+				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay-bnpl.svg',
+				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay-bnpl.svg',
+				'plugins'     => array( 'woocommerce-payments' ),
+				'is_visible'  => array(
+					self::get_rules_for_countries(
+						array(
+							'US',
+							'CA',
+							'AU',
+							'MX',
+							'AT',
+							'BE',
+							'CH',
+							'DK',
+							'ES',
+							'FI',
+							'FR',
+							'DE',
+							'GB',
+							'IT',
+							'NL',
+							'NO',
+							'PL',
+							'SE',
+							'NZ',
+						)
+					),
+					self::get_rules_for_cbd( false ),
+					(object) array(
+						'type'     => 'plugin_version',
+						'plugin'   => 'woocommerce',
+						'version'  => '9.2.0-dev',
+						'operator' => '>=',
+					),
+					self::get_rules_for_wcpay_activated( true ),
+					self::get_rules_for_wcpay_connected( true ),
+				),
+			),
+			array(
 				'id'                  => 'zipmoney',
 				'title'               => __( 'Zip Co - Buy Now, Pay Later', 'woocommerce' ),
 				'content'             => __( 'Give your customers the power to pay later, interest free and watch your sales grow.', 'woocommerce' ),
