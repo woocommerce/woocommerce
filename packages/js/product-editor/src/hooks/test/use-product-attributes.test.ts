@@ -86,7 +86,6 @@ const attributeTerms: Record< number, ProductAttributeTerm[] > = {
 
 jest.useFakeTimers();
 jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
 	resolveSelect: jest.fn().mockReturnValue( {
 		getProductAttributeTerms: jest
 			.fn()
