@@ -121,12 +121,14 @@ class ProductCollectionPage {
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		const isDropdownLayout = await this.admin.page
+		const collectionBlockWidth = await this.admin.page
 			.locator( SELECTORS.collectionPlaceholder )
-			.locator( '.wc-blocks-product-collection__collections-dropdown' )
-			.isVisible();
+			.getAttribute( 'width' );
+		expect( collectionBlockWidth ).toBeTruthy();
 
-		if ( isDropdownLayout ) {
+		console.log( collectionBlockWidth );
+
+		if ( true ) {
 			await this.admin.page
 				.getByRole( 'button', { name: 'Choose collection' } )
 				.click();
