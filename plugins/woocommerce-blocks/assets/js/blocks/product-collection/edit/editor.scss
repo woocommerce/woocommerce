@@ -20,6 +20,13 @@ $max-button-width: calc(100% / #{$max-button-columns});
 		display: block;
 	}
 
+	&.is-medium,
+	&.is-small {
+		.components-button {
+			width: auto;
+		}
+	}
+
 	.components-button.wc-blocks-product-collection__collection-button {
 		margin: 0;
 	}
