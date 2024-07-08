@@ -1,4 +1,5 @@
 <?php
+
 namespace Automattic\WooCommerce\Blueprint;
 
 use Automattic\WooCommerce\Blueprint\Cli\ExportCli;
