@@ -193,6 +193,11 @@ while ( ( $line = fgets( $pipes[1] ) ) ) {
 		}
 		continue;
 	}
+	// Ignore dot-files: those are development related, and it makes no sense to create a changelog entry for them.
+	if ( '.' === basename( $line )[0] ) {
+		debug( 'Ignoring changes dot-file %s.', $line );
+		continue;
+	}
 
 	debug( 'PR touches file %s, marking %s as touched.', $line, $project_match );
 	if ( ! isset( $touched_projects[ $project_match ] ) ) {

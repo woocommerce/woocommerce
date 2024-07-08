@@ -105,6 +105,7 @@
 			"tests": [
 				{
 					"name": "PHP",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -128,6 +129,7 @@
 				},
 				{
 					"name": "PHP 8.0",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -154,6 +156,7 @@
 				},
 				{
 					"name": "PHP WP: latest - 1",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -180,6 +183,7 @@
 				},
 				{
 					"name": "PHP WP: latest - 2",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -206,6 +210,7 @@
 				},
 				{
 					"name": "PHP WP: nightly",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"optional": true,
 					"changes": [
@@ -236,11 +241,12 @@
 					"testType": "e2e",
 					"command": "test:e2e:with-env default",
 					"shardingArguments": [
-						"--shard=1/5",
-						"--shard=2/5",
-						"--shard=3/5",
-						"--shard=4/5",
-						"--shard=5/5"
+						"--shard=1/6",
+						"--shard=2/6",
+						"--shard=3/6",
+						"--shard=4/6",
+						"--shard=5/6",
+						"--shard=6/6"
 					],
 					"changes": [
 						"client/admin/config/*.json",
@@ -574,16 +580,15 @@
 					"testType": "e2e",
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
-						"--shard=1/10",
-						"--shard=2/10",
-						"--shard=3/10",
-						"--shard=4/10",
-						"--shard=5/10",
-						"--shard=6/10",
-						"--shard=7/10",
-						"--shard=8/10",
-						"--shard=9/10",
-						"--shard=10/10"
+						"--shard=1/9",
+						"--shard=2/9",
+						"--shard=3/9",
+						"--shard=4/9",
+						"--shard=5/9",
+						"--shard=6/9",
+						"--shard=7/9",
+						"--shard=8/9",
+						"--shard=9/9"
 					],
 					"changes": [
 						"src/Blocks/**",
@@ -600,7 +605,8 @@
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
-						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results"
+						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results",
+						"allure": true
 					}
 				},
 				{
@@ -626,7 +632,7 @@
 		"@babel/core": "7.12.9",
 		"@babel/preset-env": "7.12.7",
 		"@babel/register": "7.12.1",
-		"@playwright/test": "^1.44.1",
+		"@playwright/test": "^1.45.1",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/experimental-utils": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
