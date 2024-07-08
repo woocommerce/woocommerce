@@ -51,9 +51,9 @@ jobs:
               with:
                   install: '@woocommerce/plugin-woocommerce...'
                   build: '@woocommerce/plugin-woocommerce'
+                  pull-playwright-cache: true
                   pull-composer-cache: true
                   pull-pnpm-cache: true
-                  pull-playwright-cache: true
                   pull-cache-key: '@woocommerce/plugin-woocommerce'
 
             - name: Install Playwright dependencies

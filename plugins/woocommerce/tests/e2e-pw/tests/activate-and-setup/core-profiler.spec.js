@@ -450,13 +450,11 @@ test.describe( 'Store owner can skip the core profiler', () => {
 
 		await test.step( 'Check that we are sent to wp.com', async () => {
 			await expect( page.url() ).toContain( 'wordpress.com/log-in' );
-			// reload to avoid flaky blank page
-			await page.reload();
 			await expect(
 				page.getByRole( 'heading', {
 					name: 'Log in to your account',
 				} )
-			).toBeVisible();
+			).toBeVisible( { timeout: 30000 } );
 		} );
 	} );
 } );
