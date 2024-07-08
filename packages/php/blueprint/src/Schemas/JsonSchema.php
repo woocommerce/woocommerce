@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Blueprint;
+namespace Automattic\WooCommerce\Blueprint\Schemas;
 
 class JsonSchema {
 	protected object $schema;

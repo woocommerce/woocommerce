@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Blueprint;
 
+use Automattic\WooCommerce\Blueprint\Schemas\JsonSchema;
+use Automattic\WooCommerce\Blueprint\Schemas\ZipSchema;
 use Opis\JsonSchema\Validator;
 
 /**

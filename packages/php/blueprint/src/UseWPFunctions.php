@@ -3,7 +3,7 @@
 namespace Automattic\WooCommerce\Blueprint;
 
 trait UseWPFunctions {
-
+	private $_filesystem_initialized = false;
 	/**
 	 * Adds a filter to a specified tag.
 	 *
@@ -112,5 +112,22 @@ trait UseWPFunctions {
 
 	public function wp_switch_theme( $name ) {
 		return switch_theme( $name );
+	}
+
+	public function wp_unzip_file( $path, $to ) {
+		if ( ! $this->_filesystem_initialized ) {
+			if ( ! class_exists( 'WP_Filesystem' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+			}
+
+			WP_Filesystem();
+			$this->_filesystem_initialized = true;
+		}
+
+		return unzip_file( $path, $to );
+	}
+
+	public function wp_upload_dir() {
+		return wp_upload_dir();
 	}
 }

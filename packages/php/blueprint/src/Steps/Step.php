@@ -5,7 +5,10 @@ namespace Automattic\WooCommerce\Blueprint\Steps;
 /**
  * Abstract class Step
  *
+ *
  * This class defines the structure for a Step that requires arguments to perform an action.
+ * You can think it as a function described in JSON format.
+ *
  * A Step should also be capable of returning formatted data that can be imported later.
  * Additionally, a Step can validate data.
  */
