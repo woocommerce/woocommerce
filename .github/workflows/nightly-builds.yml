@@ -48,7 +48,7 @@ jobs:
       contents: write
     steps:
       - name: Update nightly tag
-        uses: richardsimko/github-tag-action@fb99300393a3e67cba818d58f48ec1e40b1e738c
+        uses: richardsimko/github-tag-action@e173a8ef8f54ab526a91dad6139a25efed62424c
         with:
           tag_name: nightly
         env:
