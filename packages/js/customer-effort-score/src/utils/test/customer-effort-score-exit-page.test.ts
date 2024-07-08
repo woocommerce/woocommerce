@@ -13,11 +13,7 @@ jest.mock( '@woocommerce/data', () => ( {
 } ) );
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
 	dispatch: jest.fn(),
-	resolveSelect: jest.fn().mockReturnValue( {
-		getOption: jest.fn().mockResolvedValue( 'yes' ),
-	} ),
 } ) );
 
 describe( 'triggerExitPageCesSurvey', () => {
