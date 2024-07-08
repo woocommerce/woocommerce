@@ -74,10 +74,6 @@ const PlaceOrderButton = ( {
 					'wc-block-components-checkout-place-order-button--full-width':
 						fullWidth,
 				},
-				{
-					'wc-block-components-checkout-place-order-button--with-price':
-						showPrice,
-				},
 				{ 'wc-block-components-button--loading': waitingForProcessing }
 			) }
 			onClick={ onSubmit }
