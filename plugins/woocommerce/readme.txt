@@ -238,7 +238,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - When a product attribute is updated, unchanged values should not be reset to their defaults. [#48120](https://github.com/woocommerce/woocommerce/pull/48120)
 * Fix - WooCommerce: fixes the checks when migrating the product form template [#48386](https://github.com/woocommerce/woocommerce/pull/48386)
 * Fix - [CYS Full Composability] Ensure that the assembler doesn't crash when the feature flag is enabled, but the site doesn't have the latest version of Gutenberg. [#47546](https://github.com/woocommerce/woocommerce/pull/47546)
-* Add - /home/konamiman/acf.php Add CLI tools for the product attributes lookup table [#47311](https://github.com/woocommerce/woocommerce/pull/47311)
+* Add - Add CLI tools for the product attributes lookup table [#47311](https://github.com/woocommerce/woocommerce/pull/47311)
 * Add - Add 'woocommerce_order_note_deleted' hook for order note deletions. [#47916](https://github.com/woocommerce/woocommerce/pull/47916)
 * Add - Add CLI tools to enable and disable HPOS compatibility mode. [#48117](https://github.com/woocommerce/woocommerce/pull/48117)
 * Add - Added 'woocommerce_restore_order_item_stock' filter for restored line item stock on canceled orders [#40848](https://github.com/woocommerce/woocommerce/pull/40848)
