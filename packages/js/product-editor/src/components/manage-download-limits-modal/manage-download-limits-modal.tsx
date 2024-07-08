@@ -15,9 +15,9 @@ import { ManageDownloadLimitsModalProps } from './types';
 import { NumberControl } from '../number-control';
 
 const DOWNLOAD_LIMIT_MIN = 0;
-const DOWNLOAD_LIMIT_MAX = 10000000000;
+const DOWNLOAD_LIMIT_MAX = 10_000_000_000;
 const DOWNLOAD_EXPIRY_MIN = 0;
-const DOWNLOAD_EXPIRY_MAX = 10000000000;
+const DOWNLOAD_EXPIRY_MAX = 10_000_000_000;
 
 /**
  * Download limit and download expiry currently support

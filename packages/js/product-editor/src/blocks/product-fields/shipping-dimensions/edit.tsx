@@ -29,7 +29,7 @@ import { ProductEditorBlockEditProps } from '../../../types';
 import { NumberControl } from '../../../components/number-control';
 
 const SHIPPING_AND_WEIGHT_MIN_VALUE = 0;
-const SHIPPING_AND_WEIGHT_MAX_VALUE = 100000;
+const SHIPPING_AND_WEIGHT_MAX_VALUE = 100_000_000_000_000;
 
 export function Edit( {
 	attributes,
