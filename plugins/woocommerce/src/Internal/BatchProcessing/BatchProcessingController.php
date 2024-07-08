@@ -537,7 +537,11 @@ class BatchProcessingController {
 			return;
 		}
 
-		if ( as_has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
+		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
+		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
+		$has_scheduled_action = function_exists( 'as_has_scheduled_action') ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
+
+		if ( call_user_func( $has_scheduled_action, self::WATCHDOG_ACTION_NAME ) ) {
 			return;
 		}
 
