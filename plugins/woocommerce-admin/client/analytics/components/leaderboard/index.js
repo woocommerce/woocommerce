@@ -28,7 +28,7 @@ import './style.scss';
 const formattable = new Set( [ 'currency', 'number' ] );
 
 export class Leaderboard extends Component {
-	getFormattedColumn( column ) {
+	getFormattedColumn = ( column ) => {
 		const { format } = column;
 
 		/*
@@ -63,7 +63,7 @@ export class Leaderboard extends Component {
 			),
 			value: column.value,
 		};
-	}
+	};
 
 	getFormattedHeaders() {
 		return this.props.headers.map( ( header, i ) => {
@@ -79,7 +79,7 @@ export class Leaderboard extends Component {
 
 	getFormattedRows() {
 		return this.props.rows.map( ( row ) => {
-			return row.map( this.getFormattedColumn.bind( this ) );
+			return row.map( this.getFormattedColumn );
 		} );
 	}
 
