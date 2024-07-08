@@ -173,6 +173,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Prevent BatchProcessingController from cleaning up processors after a premature shutdown. [#49243](https://github.com/woocommerce/woocommerce/pull/49243)
 * Fix - CYS: fix not template set correctly. [#49113](https://github.com/woocommerce/woocommerce/pull/49113)
 * Fix - CYS: Disable readonly mode only when full composability feature flag is enabled. [#48752](https://github.com/woocommerce/woocommerce/pull/48752)
 * Fix - CYS: fix crash of CYS on WordPress 6.6 [#48664](https://github.com/woocommerce/woocommerce/pull/48664)
