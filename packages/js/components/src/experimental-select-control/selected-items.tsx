@@ -22,6 +22,8 @@ type SelectedItemsProps< ItemType > = {
 		[ key: string ]: string;
 	};
 	onRemove: ( item: ItemType ) => void;
+	onBlur: ( event: React.FocusEvent ) => void;
+	onKeyDown: ( event: React.KeyboardEvent ) => void;
 };
 
 export const SelectedItems = < ItemType, >( {
@@ -31,6 +33,8 @@ export const SelectedItems = < ItemType, >( {
 	getItemValue,
 	getSelectedItemProps,
 	onRemove,
+	onBlur,
+	onKeyDown,
 }: SelectedItemsProps< ItemType > ) => {
 	const classes = classnames(
 		'woocommerce-experimental-select-control__selected-items',
@@ -71,6 +75,8 @@ export const SelectedItems = < ItemType, >( {
 						onClick={ ( event ) => {
 							event.preventDefault();
 						} }
+						onKeyDown={ onKeyDown }
+						onBlur={ onBlur }
 					>
 						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 						{ /* @ts-ignore Additional props are not required. */ }
