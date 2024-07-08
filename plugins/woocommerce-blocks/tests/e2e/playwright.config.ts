@@ -23,7 +23,17 @@ const config: PlaywrightTestConfig = {
 	// Don't report slow test "files", as we're running our tests in serial.
 	reportSlowTests: null,
 	reporter: process.env.CI
-		? [ [ 'github' ], [ 'list' ], [ './flaky-tests-reporter.ts' ] ]
+		? [
+				[ 'github' ],
+				[ 'list' ],
+				[ './flaky-tests-reporter.ts' ],
+				[
+					'allure-playwright',
+					{
+						outputFolder: `${ __dirname }/artifacts/test-results/allure-results`,
+					},
+				],
+		  ]
 		: 'list',
 	use: {
 		baseURL: BASE_URL,
