@@ -12,7 +12,19 @@ class DeletePlugin extends Step {
 	}
 
 	public static function get_schema( $version = 1 ) {
-		return array();
+		return array(
+			'type' => 'object',
+			'properties' => array(
+				'step' => array(
+					'type' => 'string',
+					'enum' => array( static::get_step_name() ),
+				),
+				'pluginName' => array(
+					'type' => 'string',
+				),
+			),
+			'required' => array( 'step', 'pluginName' ),
+		);
 	}
 
 	public function prepare_json_array() {

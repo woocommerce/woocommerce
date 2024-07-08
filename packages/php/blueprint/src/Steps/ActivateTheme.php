@@ -7,12 +7,25 @@ class ActivateTheme extends Step {
 	public function __construct($theme_name) {
 	    $this->theme_name = $theme_name;
 	}
+
 	public static function get_step_name() {
 		return 'activateTheme';
 	}
 
 	public static function get_schema( $version = 1 ) {
-		return array();
+		return array(
+			'type' => 'object',
+			'properties' => array(
+				'step' => array(
+					'type' => 'string',
+					'enum' => array( static::get_step_name() ),
+				),
+				'themeName' => array(
+					'type' => 'string',
+				),
+			),
+			'required' => array( 'step', 'themeName' ),
+		);
 	}
 
 	public function prepare_json_array() {

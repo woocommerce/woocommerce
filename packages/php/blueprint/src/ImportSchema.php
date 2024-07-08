@@ -110,6 +110,7 @@ class ImportSchema {
 			return $results;
 		}
 
+
 		foreach ( $this->schema->get_steps() as $step_schema ) {
 			$stepProcessor = $indexed_step_processors[ $step_schema->step ] ?? null;
 			if ( ! $stepProcessor instanceof StepProcessor ) {

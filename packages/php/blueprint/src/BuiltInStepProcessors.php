@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Blueprint;
 
 use Automattic\WooCommerce\Blueprint\Importers\ImportActivatePlugin;
+use Automattic\WooCommerce\Blueprint\Importers\ImportActivateTheme;
 use Automattic\WooCommerce\Blueprint\Importers\ImportDeactivatePlugin;
 use Automattic\WooCommerce\Blueprint\Importers\ImportDeletePlugin;
 use Automattic\WooCommerce\Blueprint\Importers\ImportInstallPlugin;
@@ -26,6 +27,7 @@ class BuiltInStepProcessors {
 			new ImportSetSiteOptions(),
 			new ImportDeletePlugin(),
 			new ImportActivatePlugin(),
+			new ImportActivateTheme(),
 			new ImportDeactivatePlugin(),
 		);
 	}
