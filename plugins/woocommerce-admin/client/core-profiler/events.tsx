@@ -18,7 +18,10 @@ export type InitializationCompleteEvent = {
 	payload: { optInDataSharing: boolean };
 };
 
-export type IntroOptInEvent = IntroCompletedEvent | IntroSkippedEvent;
+export type IntroOptInEvent =
+	| IntroCompletedEvent
+	| IntroSkippedEvent
+	| IntroBuilderEvent;
 
 export type IntroCompletedEvent = {
 	type: 'INTRO_COMPLETED';
@@ -27,6 +30,11 @@ export type IntroCompletedEvent = {
 
 export type IntroSkippedEvent = {
 	type: 'INTRO_SKIPPED';
+	payload: { optInDataSharing: false };
+}; // always false for now
+
+export type IntroBuilderEvent = {
+	type: 'INTRO_BUILDER';
 	payload: { optInDataSharing: false };
 }; // always false for now
 
@@ -130,4 +138,5 @@ export type CoreProfilerEvents =
 	| PluginsInstallationCompletedEvent
 	| PluginsInstallationCompletedWithErrorsEvent
 	| ExternalUrlUpdateEvent
-	| RedirectToWooHomeEvent;
+	| RedirectToWooHomeEvent
+	| IntroBuilderEvent;

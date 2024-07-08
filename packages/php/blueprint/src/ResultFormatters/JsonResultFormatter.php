@@ -20,7 +20,10 @@ class JsonResultFormatter {
 		foreach ( $this->results as $result ) {
 			$step_name = $result->get_step_name();
 			foreach ( $result->get_messages( $message_type ) as $message ) {
-				$data['messages'][ $message['type'] ] = array(
+				if ( ! isset( $data['messages'][ $message['type'] ] ) ) {
+					$data['messages'][ $message['type'] ] = array();
+				}
+				$data['messages'][ $message['type'] ][] = array(
 					'step'    => $step_name,
 					'type'    => $message['type'],
 					'message' => $message['message'],

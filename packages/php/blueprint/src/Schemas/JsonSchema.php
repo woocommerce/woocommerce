@@ -3,14 +3,14 @@
 namespace Automattic\WooCommerce\Blueprint\Schemas;
 
 class JsonSchema {
-	protected object $schema;
+	protected $schema;
 
 	public function __construct( $json_path ) {
 		$schema = json_decode( file_get_contents( $json_path ) );
 		$this->schema = $schema;
 
 		if ( ! $this->validate() ) {
-			throw new \InvalidArgumentException( $json_path . " is not a valid JSON or missing 'steps' field." );
+			throw new \InvalidArgumentException("Invalid JSON or missing 'steps' field." );
 		}
 	}
 
