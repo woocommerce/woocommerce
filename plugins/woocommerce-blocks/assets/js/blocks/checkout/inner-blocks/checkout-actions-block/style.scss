@@ -14,6 +14,7 @@
 				width: 100%;
 			}
 
+			// Keeps the text in the DOM but not visible, so it doesn't cause the button to resize while showing the spinner.
 			.wc-block-components-checkout-place-order-button__text--visually-hidden {
 				visibility: hidden;
 			}
