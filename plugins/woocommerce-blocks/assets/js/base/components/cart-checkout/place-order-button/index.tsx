@@ -40,12 +40,12 @@ const PlaceOrderButton = ( {
 		<div
 			// Hide this from screen readers while the checkout is processing. The text will not be removed from the
 			// DOM, it will just be hidden with CSS to maintain the button's size while the spinner appears.
-			aria-hidden={ waitingForProcessing }
+			aria-hidden={ waitingForProcessing || waitingForRedirect }
 			className={ clsx(
 				'wc-block-components-checkout-place-order-button__text',
 				{
 					'wc-block-components-checkout-place-order-button__text--visually-hidden':
-						waitingForProcessing,
+						waitingForProcessing || waitingForRedirect,
 				}
 			) }
 		>
@@ -89,7 +89,8 @@ const PlaceOrderButton = ( {
 			}
 		>
 			{ waitingForProcessing && <Spinner /> }
-			{ waitingForRedirect ? <Icon icon={ check } /> : buttonLabel }
+			{ waitingForRedirect && <Icon icon={ check } /> }
+			{ buttonLabel }
 		</Button>
 	);
 };

@@ -19,15 +19,13 @@
 				visibility: hidden;
 			}
 
-			&--with-price {
-				.wc-block-components-checkout-place-order-button__text {
-					display: flex;
-					align-items: center;
-				}
+			.wc-block-components-checkout-place-order-button__text {
+				display: flex;
+				align-items: center;
+			}
 
-				.wc-block-components-checkout-place-order-button__separator {
-					margin: 0 20px;
-				}
+			.wc-block-components-checkout-place-order-button__separator {
+				margin: 0 20px;
 			}
 
 			.wc-block-components-button__text {
@@ -35,6 +33,10 @@
 				> svg {
 					fill: $white;
 					vertical-align: top;
+					position: absolute;
+					top: 50%;
+					left: 50%;
+					transform: translate(-50%, -50%);
 				}
 			}
 		}
