@@ -318,6 +318,8 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 		 * The dynamic portion of the hook name, `$this->post_type`,
 		 * refers to the object type slug.
 		 *
+		 * @since 4.5.0
+		 *
 		 * @param WC_Data         $coupon   Object object.
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
