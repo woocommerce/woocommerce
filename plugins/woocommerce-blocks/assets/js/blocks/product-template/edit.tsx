@@ -306,7 +306,8 @@ const ProductTemplateEdit = (
 		className: clsx(
 			__unstableLayoutClassNames,
 			'wc-block-product-template',
-			customClassName
+			customClassName,
+			{ [ `is-product-collection-layout-${ layoutType }` ]: layoutType }
 		),
 	} );
 

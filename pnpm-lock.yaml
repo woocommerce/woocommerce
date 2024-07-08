@@ -4260,6 +4260,9 @@ importers:
       '@wordpress/stylelint-config':
         specifier: ^21.36.0
         version: 21.36.0(postcss@8.4.32)(stylelint@14.16.1)
+      allure-playwright:
+        specifier: ^2.9.2
+        version: 2.9.2
       autoprefixer:
         specifier: 10.4.14
         version: 10.4.14(postcss@8.4.32)
