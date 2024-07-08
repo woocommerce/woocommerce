@@ -18,7 +18,7 @@ import {
 import { type CollectionName, CoreCollectionNames } from '../types';
 import blockJson from '../block.json';
 import { getCollectionByName } from '../collections';
-import { getDefaultProductCollection } from '../constants';
+import { getDefaultProductCollection } from '../utils';
 
 type CollectionButtonProps = {
 	active?: boolean;
