@@ -14,8 +14,12 @@
 				width: 100%;
 			}
 
+			.wc-block-components-checkout-place-order-button__text--visually-hidden {
+				visibility: hidden;
+			}
+
 			&--with-price {
-				span.wc-block-components-button__text {
+				.wc-block-components-checkout-place-order-button__text {
 					display: flex;
 					align-items: center;
 				}

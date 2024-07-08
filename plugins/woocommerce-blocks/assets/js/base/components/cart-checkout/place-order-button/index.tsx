@@ -86,8 +86,7 @@ const PlaceOrderButton = ( {
 			}
 		>
 			{ waitingForProcessing && <Spinner /> }
-			{ ! waitingForProcessing &&
-				( waitingForRedirect ? <Icon icon={ check } /> : buttonLabel ) }
+			{ waitingForRedirect ? <Icon icon={ check } /> : buttonLabel }
 		</Button>
 	);
 };
