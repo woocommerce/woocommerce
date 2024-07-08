@@ -78,7 +78,7 @@ trait AccessiblePrivateMethods {
 	 * @param int             $accepted_args   Optional. The number of arguments the function accepts. Default 1.
 	 */
 	protected static function add_action( string $hook_name, $callback, int $priority = 10, int $accepted_args = 1 ): void {
-		self::process_callback_before_hooking( $callback );
+		static::process_callback_before_hooking( $callback );
 		add_action( $hook_name, $callback, $priority, $accepted_args );
 	}
 
@@ -98,7 +98,7 @@ trait AccessiblePrivateMethods {
 	 * @param int             $accepted_args   Optional. The number of arguments the function accepts. Default 1.
 	 */
 	protected static function add_filter( string $hook_name, $callback, int $priority = 10, int $accepted_args = 1 ): void {
-		self::process_callback_before_hooking( $callback );
+		static::process_callback_before_hooking( $callback );
 		add_filter( $hook_name, $callback, $priority, $accepted_args );
 	}
 
@@ -131,7 +131,7 @@ trait AccessiblePrivateMethods {
 		// Note that an "is_callable" check would be useless here:
 		// "is_callable" always returns true if the class implements __call.
 		if ( method_exists( $this, $method_name ) ) {
-			if ( is_null( self::$_accessible_private_methods ) ) {
+			if ( is_null( static::$_accessible_private_methods ) ) {
 				static::$_accessible_private_methods = new SplObjectStorage();
 			}
 
@@ -213,7 +213,7 @@ trait AccessiblePrivateMethods {
 	 */
 	public function __destruct() {
 		if ( $this->_accessible_private_methods_is_initialized_for_this ) {
-			self::$_accessible_private_methods->detach( $this );
+			static::$_accessible_private_methods->detach( $this );
 			$this->_accessible_private_methods_is_initialized_for_this = false;
 		}
 
