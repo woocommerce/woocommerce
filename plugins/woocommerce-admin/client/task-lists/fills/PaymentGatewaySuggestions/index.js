@@ -244,7 +244,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 					href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
 					target="_blank"
 					onClick={ trackSeeMore }
-					isTertiary
+					variant="tertiary"
 				>
 					{ __( 'See more', 'woocommerce' ) }
 					<ExternalIcon size={ 18 } />
