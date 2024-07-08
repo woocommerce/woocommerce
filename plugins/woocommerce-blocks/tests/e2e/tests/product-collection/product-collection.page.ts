@@ -133,6 +133,7 @@ class ProductCollectionPage {
 			: collectionToButtonNameMap.productCatalog;
 
 		await this.editor.canvas
+			.locator( SELECTORS.collectionPlaceholder )
 			.getByRole( 'button', { name: buttonName } )
 			.click();
 	}
