@@ -125,9 +125,11 @@ describe( 'Testing Mini-Cart', () => {
 
 		// Close drawer.
 		let closeButton = null;
+
 		await waitFor( () => {
 			closeButton = screen.getByLabelText( /close/i );
 		} );
+
 		if ( closeButton ) {
 			await act( async () => {
 				await user.click( closeButton );

@@ -220,7 +220,7 @@ describe( 'Filter by Stock block', () => {
 		fetchMock.resetMocks();
 	} );
 
-	it( 'renders the stock filter block', async () => {
+	test( 'renders the stock filter block', async () => {
 		const { container } = setup( {
 			showFilterButton: false,
 			showCounts: false,
@@ -228,7 +228,7 @@ describe( 'Filter by Stock block', () => {
 		expect( container ).toMatchSnapshot();
 	} );
 
-	it( 'renders the stock filter block with the filter button', async () => {
+	test( 'renders the stock filter block with the filter button', async () => {
 		const { container } = setup( {
 			showFilterButton: true,
 			showCounts: false,
@@ -236,7 +236,7 @@ describe( 'Filter by Stock block', () => {
 		expect( container ).toMatchSnapshot();
 	} );
 
-	it( 'renders the stock filter block with the product counts', async () => {
+	test( 'renders the stock filter block with the product counts', async () => {
 		const { container } = setup( {
 			showFilterButton: false,
 			showCounts: true,

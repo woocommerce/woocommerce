@@ -158,10 +158,10 @@ describe( 'Filter by Attribute block', () => {
 		test( 'should enable Apply button when filter attributes are changed', async () => {
 			const { applyButton, smallAttributeCheckbox } =
 				setupWithoutSelectedFilterAttributes();
+
 			await act( async () => {
 				await userEvent.click( smallAttributeCheckbox );
 			} );
-
 			expect( applyButton ).not.toBeDisabled();
 		} );
 	} );
@@ -176,16 +176,17 @@ describe( 'Filter by Attribute block', () => {
 		test( 'should enable Apply button when filter attributes are changed', async () => {
 			const { applyButton, smallAttributeCheckbox } =
 				setupWithSelectedFilterAttributes();
+
 			await act( async () => {
 				await userEvent.click( smallAttributeCheckbox );
 			} );
-
 			expect( applyButton ).not.toBeDisabled();
 		} );
 
 		test( 'should disable Apply button when deselecting the same previously selected attribute', async () => {
 			const { applyButton, smallAttributeCheckbox } =
 				setupWithSelectedFilterAttributes( { filterSize: 'small' } );
+
 			await act( async () => {
 				await userEvent.click( smallAttributeCheckbox );
 			} );
