@@ -60,6 +60,8 @@ export const SELECTORS = {
 		max: 'MAX',
 	},
 	previewButtonTestID: 'product-collection-preview-button',
+	collectionPlaceholder:
+		'[data-type="woocommerce/product-collection"] .components-placeholder',
 };
 
 export type Collections =
@@ -74,18 +76,16 @@ export type Collections =
 	| 'myCustomCollectionWithAdvancedPreview';
 
 const collectionToButtonNameMap = {
-	newArrivals: 'New Arrivals Recommend your newest products.',
-	topRated: 'Top Rated Recommend products with the highest review ratings.',
-	bestSellers: 'Best Sellers Recommend your best-selling products.',
-	onSale: 'On Sale Highlight products that are currently on sale.',
-	featured: 'Featured Showcase your featured products.',
-	productCatalog:
-		'Product Catalog Display all products in your catalog. Results can (change to) match the current template, page, or search term.',
-	myCustomCollection: 'My Custom Collection This is a custom collection.',
-	myCustomCollectionWithPreview:
-		'My Custom Collection with Preview This is a custom collection with preview.',
+	newArrivals: 'New Arrivals',
+	topRated: 'Top Rated',
+	bestSellers: 'Best Sellers',
+	onSale: 'On Sale',
+	featured: 'Featured',
+	productCatalog: 'create your own',
+	myCustomCollection: 'My Custom Collection',
+	myCustomCollectionWithPreview: 'My Custom Collection with Preview',
 	myCustomCollectionWithAdvancedPreview:
-		'My Custom Collection with Advanced Preview This is a custom collection with advanced preview.',
+		'My Custom Collection with Advanced Preview',
 };
 
 class ProductCollectionPage {
@@ -122,6 +122,7 @@ class ProductCollectionPage {
 			: collectionToButtonNameMap.productCatalog;
 
 		await this.admin.page
+			.locator( SELECTORS.collectionPlaceholder )
 			.getByRole( 'button', { name: buttonName } )
 			.click();
 	}
