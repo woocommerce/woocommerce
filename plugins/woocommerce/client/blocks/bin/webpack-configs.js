@@ -33,7 +33,7 @@ const isProduction = NODE_ENV === 'production';
 
 const PATH_TO_BUILD = path.resolve(
 	__dirname,
-	'../../../assets/client/blocks/build'
+	'../../../assets/client/blocks'
 );
 
 /**
@@ -93,6 +93,7 @@ const getCoreConfig = ( options = {} ) => {
 			library: [ 'wc', '[name]' ],
 			libraryTarget: 'this',
 			uniqueName: 'webpackWcBlocksCoreJsonp',
+			globalObject: 'this',
 		},
 		module: {
 			rules: [
