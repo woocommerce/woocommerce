@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Admin\API\Reports;
 
 defined( 'ABSPATH' ) || exit;
