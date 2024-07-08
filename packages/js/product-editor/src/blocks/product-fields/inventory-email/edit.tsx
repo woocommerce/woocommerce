@@ -44,6 +44,8 @@ export function Edit( {
 
 	const id = useInstanceId( BaseControl, 'low_stock_amount' ) as string;
 
+	const errorContext = 'inventory';
+
 	const {
 		ref: lowStockAmountRef,
 		error: lowStockAmountValidationError,
@@ -52,10 +54,13 @@ export function Edit( {
 		`low_stock_amount-${ clientId }`,
 		async function stockQuantityValidator() {
 			if ( lowStockAmount && lowStockAmount < 0 ) {
-				return __(
-					'This field must be a positive number.',
-					'woocommerce'
-				);
+				return {
+					message: __(
+						'This field must be a positive number.',
+						'woocommerce'
+					),
+					context: errorContext,
+				};
 			}
 		},
 		[ lowStockAmount ]

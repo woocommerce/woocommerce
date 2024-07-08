@@ -91,6 +91,8 @@ export function Edit( {
 	const _dateOnSaleFrom = moment( dateOnSaleFromGmt, moment.ISO_8601, true );
 	const _dateOnSaleTo = moment( dateOnSaleToGmt, moment.ISO_8601, true );
 
+	const errorContext = 'general';
+
 	const {
 		ref: dateOnSaleFromGmtRef,
 		error: dateOnSaleFromGmtValidationError,
@@ -100,14 +102,23 @@ export function Edit( {
 		async function dateOnSaleFromValidator() {
 			if ( showScheduleSale && dateOnSaleFromGmt ) {
 				if ( ! _dateOnSaleFrom.isValid() ) {
-					return __( 'Please enter a valid date.', 'woocommerce' );
+					return {
+						message: __(
+							'Please enter a valid date.',
+							'woocommerce'
+						),
+						context: errorContext,
+					};
 				}
 
 				if ( _dateOnSaleFrom.isAfter( _dateOnSaleTo ) ) {
-					return __(
-						'The start date of the sale must be before the end date.',
-						'woocommerce'
-					);
+					return {
+						message: __(
+							'The start date of the sale must be before the end date.',
+							'woocommerce'
+						),
+						context: errorContext,
+					};
 				}
 			}
 		},
@@ -123,14 +134,23 @@ export function Edit( {
 		async function dateOnSaleToValidator() {
 			if ( showScheduleSale && dateOnSaleToGmt ) {
 				if ( ! _dateOnSaleTo.isValid() ) {
-					return __( 'Please enter a valid date.', 'woocommerce' );
+					return {
+						message: __(
+							'Please enter a valid date.',
+							'woocommerce'
+						),
+						context: errorContext,
+					};
 				}
 
 				if ( _dateOnSaleTo.isBefore( _dateOnSaleFrom ) ) {
-					return __(
-						'The end date of the sale must be after the start date.',
-						'woocommerce'
-					);
+					return {
+						message: __(
+							'The end date of the sale must be after the start date.',
+							'woocommerce'
+						),
+						context: errorContext,
+					};
 				}
 			}
 		},

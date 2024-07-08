@@ -127,7 +127,10 @@ export function Edit( {
 			input.setCustomValidity( customErrorMessage );
 
 			if ( ! input.validity.valid ) {
-				return input.validationMessage;
+				return {
+					message: customErrorMessage,
+					context: '',
+				};
 			}
 		},
 		[ type, required, pattern, minLength, maxLength, min, max ]
