@@ -2129,6 +2129,9 @@ importers:
         specifier: ^0.13.11
         version: 0.13.11
     devDependencies:
+      '@automattic/i18n-utils':
+        specifier: ^1.2.1
+        version: 1.2.1
       '@babel/core':
         specifier: ^7.23.5
         version: 7.23.5
@@ -30741,7 +30744,10 @@ snapshots:
       jest-runner: 25.5.4
       jest-runtime: 25.5.4
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - utf-8-validate
 
   '@jest/test-sequencer@26.6.3(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))':
     dependencies:
