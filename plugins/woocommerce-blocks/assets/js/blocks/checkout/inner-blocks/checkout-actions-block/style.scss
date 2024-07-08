@@ -18,22 +18,16 @@
 				span.wc-block-components-button__text {
 					display: flex;
 					align-items: center;
-					justify-content: center;
-				}
-
-				.block-editor-rich-text__editable.rich-text {
-					flex-grow: 8;
-					flex-shrink: 0;
-					flex-basis: 0;
+					width: 100%;
 				}
 
 				.wc-block-components-checkout-place-order-button__separator {
 					flex-grow: 2;
+					margin: 0 20px;
 				}
 
 				.wc-block-components-checkout-place-order-button__price {
-					align-content: center;
-					flex-grow: 2;
+					flex-grow: 1;
 				}
 			}
 
