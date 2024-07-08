@@ -34,6 +34,8 @@ use WP_Error;
  * @internal
  */
 class BlockPatterns {
+	const CATEGORIES_PREFIXES = [ '_woo_', '_dotcom_imported_' ];
+
 	/**
 	 * Path to the patterns' directory.
 	 *
@@ -166,10 +168,12 @@ class BlockPatterns {
 			function ( $pattern ) {
 				$pattern['categories'] = array_map(
 					function ( $category ) {
-						if ( strpos( $category['title'], '_woo_' ) !== false ) {
-							$parsed_category   = str_replace( '_woo_', '', $category['title'] );
-							$parsed_category   = str_replace( '_', ' ', $parsed_category );
-							$category['title'] = ucfirst( $parsed_category );
+						foreach ( self::CATEGORIES_PREFIXES as $prefix ) {
+							if ( strpos( $category['title'], $prefix ) !== false ) {
+								$parsed_category   = str_replace( $prefix, '', $category['title'] );
+								$parsed_category   = str_replace( '_', ' ', $parsed_category );
+								$category['title'] = ucfirst( $parsed_category );
+							}
 						}
 
 						return $category;

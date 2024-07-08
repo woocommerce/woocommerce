@@ -45,7 +45,7 @@
 	"license": "GPL-3.0+",
 	"scripts": {
 		"analyze-bundles": "cross-env WP_BUNDLE_ANALYZER=1 pnpm run build",
-		"changelog": "composer install && composer exec -- changelogger",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
@@ -358,6 +358,7 @@
 					"name": "JavaScript",
 					"command": "test:js",
 					"changes": [
+						".wp-env.json",
 						"webpack.config.js",
 						"babel.config.js",
 						"tsconfig.json",

@@ -19,7 +19,6 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-expect-error No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 import {
-	privateApis as blockEditorPrivateApis,
 	__experimentalBlockPatternsList as BlockPatternList,
 	store as blockEditorStore,
 	// @ts-expect-error No types for this exist yet.
@@ -31,13 +30,13 @@ import interpolateComponents from '@automattic/interpolate-components';
 /**
  * Internal dependencies
  */
-import { SidebarNavigationScreen } from './sidebar-navigation-screen';
+import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { useEditorBlocks } from '../hooks/use-editor-blocks';
-import { useHomeTemplates } from '../hooks/use-home-templates';
+import { useEditorBlocks } from '../../hooks/use-editor-blocks';
+import { useHomeTemplates } from '../../hooks/use-home-templates';
 import { BlockInstance } from '@wordpress/blocks';
-import { useSelectedPattern } from '../hooks/use-selected-pattern';
-import { useEditorScroll } from '../hooks/use-editor-scroll';
+import { useSelectedPattern } from '../../hooks/use-selected-pattern';
+import { useEditorScroll } from '../../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { select, useSelect } from '@wordpress/data';
@@ -46,14 +45,12 @@ import { trackEvent } from '~/customize-store/tracking';
 import {
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
 	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
-} from '../utils/hero-pattern';
-import { isEqual } from 'lodash';
-import { COLOR_PALETTES } from './global-styles/color-palette-variations/constants';
+} from '../../utils/hero-pattern';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
-import { isTrackingAllowed } from '../utils/is-tracking-allowed';
-
-const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
+import { isTrackingAllowed } from '../../utils/is-tracking-allowed';
+import './style.scss';
+import { useIsActiveNewNeutralVariation } from '../../hooks/use-is-active-new-neutral-variation';
 
 export const SidebarNavigationScreenHomepage = ( {
 	onNavigateBackClick,
@@ -97,14 +94,7 @@ export const SidebarNavigationScreenHomepage = ( {
 
 	const isEditorLoading = useIsSiteEditorLoading();
 
-	// @ts-expect-error No types for this exist yet.
-	const { user } = useContext( GlobalStylesContext );
-
-	const isActiveNewNeutralVariation = useMemo(
-		() =>
-			isEqual( COLOR_PALETTES[ 0 ].settings.color, user.settings.color ),
-		[ user ]
-	);
+	const isActiveNewNeutralVariation = useIsActiveNewNeutralVariation();
 
 	const homePatterns = useMemo( () => {
 		return Object.entries( homeTemplates ).map(

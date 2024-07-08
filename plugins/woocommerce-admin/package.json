@@ -17,7 +17,7 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
 		"build:project:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
-		"changelog": "composer install && composer exec -- changelogger",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"example": "webpack --config docs/examples/extensions/examples.config.js",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
