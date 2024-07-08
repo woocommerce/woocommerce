@@ -604,6 +604,9 @@ importers:
       '@automattic/calypso-color-schemes':
         specifier: ^2.1.1
         version: 2.1.1
+      '@automattic/components':
+        specifier: ^2.1.1
+        version: 2.1.1(@types/react@17.0.71)(@wordpress/data@6.6.1(react@17.0.2))(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       '@automattic/interpolate-components':
         specifier: ^1.2.1
         version: 1.2.1(@types/react@17.0.71)(react@17.0.2)
@@ -25409,9 +25412,9 @@ snapshots:
     dependencies:
       '@automattic/load-script': 1.0.0
       cookie: 0.4.2
-      debug: 4.3.4(supports-color@9.4.0)
+      debug: 4.3.5
       hash.js: 1.1.7
-      tslib: 2.6.2
+      tslib: 2.6.3
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -25495,7 +25498,7 @@ snapshots:
 
   '@automattic/format-currency@2.0.0':
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@automattic/i18n-utils@1.2.1':
     dependencies:
@@ -25521,7 +25524,7 @@ snapshots:
 
   '@automattic/load-script@1.0.0':
     dependencies:
-      '@babel/runtime': 7.23.6
+      '@babel/runtime': 7.24.7
       debug: 3.2.7
     transitivePeerDependencies:
       - supports-color
@@ -50449,10 +50452,10 @@ snapshots:
   i18n-calypso@7.0.0(@types/react@17.0.71)(react@17.0.2):
     dependencies:
       '@automattic/interpolate-components': 1.2.1(@types/react@17.0.71)(react@17.0.2)
-      '@babel/runtime': 7.23.6
+      '@babel/runtime': 7.24.7
       '@tannin/sprintf': 1.2.0
       '@wordpress/compose': 6.34.0(react@17.0.2)
-      debug: 4.3.4(supports-color@9.4.0)
+      debug: 4.3.5
       events: 3.3.0
       hash.js: 1.1.7
       lodash: 4.17.21
