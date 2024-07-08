@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blueprint;
 
 use Automattic\WooCommerce\Blueprint\Schemas\JsonSchema;
 use Automattic\WooCommerce\Blueprint\Schemas\ZipSchema;
+use Opis\JsonSchema\Errors\ErrorFormatter;
 use Opis\JsonSchema\Validator;
 
 /**
@@ -40,7 +41,7 @@ class ImportSchema {
 	public function __construct( JsonSchema $schema,  Validator $validator = null ) {
 		$this->schema = $schema;
 		if ( null === $validator ) {
-//			$this->validator = new Validator();
+			$this->validator = new Validator();
 		}
 
 		$this->builtin_step_processors = new BuiltInStepProcessors( $schema instanceof ZipSchema );
@@ -102,34 +103,50 @@ class ImportSchema {
 			return $step_processor->get_step_class()::get_step_name();
 		} );
 
-		//		$validate = $this->validate_steps($indexed_processors);
+		// validate steps before processing
+		$this->validate_step_schemas( $indexed_step_processors, $result );
 
+		if ( count( $result->get_messages('error') ) !== 0 ) {
+			return $results;
+		}
 
-		foreach ( $this->schema->get_steps() as $stepSchema ) {
-			$stepProcessor = $indexed_step_processors[ $stepSchema->step ] ?? null;
+		foreach ( $this->schema->get_steps() as $step_schema ) {
+			$stepProcessor = $indexed_step_processors[ $step_schema->step ] ?? null;
 			if ( ! $stepProcessor instanceof StepProcessor ) {
-				$result->add_error( "Unable to create a step processor for {$stepSchema->step}" );
+				$result->add_error( "Unable to create a step processor for {$step_schema->step}" );
 				continue;
 			}
-			$results[] = $stepProcessor->process( $stepSchema );
+
+			$results[] = $stepProcessor->process( $step_schema );
 		}
 
 		return $results;
 	}
 
-	//
-//	private function validate_steps(array $indexed_processors) {
-//
-//
-//		$validate = $this->validator->validate( json_encode($this->schema->get_steps()), json_encode( $steps_schema ) );
-//
-//		if ( ! $validate->isValid() ) {
-////			$result->add_error( 'Schema validation failed' );
-//			$errors = ( new ErrorFormatter() )->format( $validate->error() );
-//
-//			var_dump($errors);
-//			exit;
-//
-//		}
-//	}
+	protected function validate_step_schemas( array $indexed_step_processors, StepProcessorResult $result ) {
+		$step_schemas = array_map( function($step_processor) {
+			return $step_processor->get_step_class()::get_schema();
+		}, $indexed_step_processors );
+
+		foreach ($this->schema->get_steps() as $step_json) {
+			$step_schema = $step_schemas[ $step_json->step ] ?? null;
+			if ( ! $step_schema ) {
+				$result->add_info( "No schema found for step $step_json->step" );
+				continue;
+			}
+
+			$validate = $this->validator->validate( $step_json, json_encode($step_schema) );
+
+			if ( ! $validate->isValid() ) {
+				$result->add_error( "Schema validation failed for step {$step_json->step}" );
+				$errors = ( new ErrorFormatter() )->format( $validate->error() );
+				$formatted_errors = array();
+				foreach ($errors as $value) {
+					$formatted_errors[] = implode("\n", $value);
+				}
+
+				$result->add_error( implode("\n", $formatted_errors) );
+			}
+		}
+	}
 }

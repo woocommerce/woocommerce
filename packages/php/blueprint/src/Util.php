@@ -2,6 +2,9 @@
 
 namespace Automattic\WooCommerce\Blueprint;
 
+use RecursiveArrayIterator;
+use RecursiveIteratorIterator;
+
 class Util {
 	public static function snake_to_camel( $string ) {
 		// Split the string by underscores
@@ -12,6 +15,10 @@ class Util {
 
 		// Join the words back together
 		return implode( '', $words );
+	}
+
+	public static function array_flatten($array) {
+		return new RecursiveIteratorIterator(new RecursiveArrayIterator($array));
 	}
 
 	public static function camel_to_snake( $input ) {

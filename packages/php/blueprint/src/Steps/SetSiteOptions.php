@@ -15,7 +15,6 @@ class SetSiteOptions extends Step {
 
 	public static function get_schema( $version = 1 ) {
 		return array(
-			'$id'        => 1,
 			'type'       => 'object',
 			'properties' => array(
 				'step'    => array(
@@ -24,9 +23,7 @@ class SetSiteOptions extends Step {
 				),
 				'options' => array(
 					'type'                 => 'object',
-					'additionalProperties' => array(
-						'type' => 'string',
-					),
+					'additionalProperties' => new \stdClass(),
 				),
 			),
 			'required'   => array( 'step', 'options' ),

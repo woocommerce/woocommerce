@@ -24,33 +24,36 @@ class SetWCPaymentGateways extends Step {
 
 	public static function get_schema($version = 1) {
 		return array(
-			'$id' => 1,
-			"type" => "object",
-			"properties" => [
-				"step" => [
-					"type" => "string",
-					"enum" => [static::get_step_name()],
+			'type' => 'object',
+			'properties' => [
+				'step' => [
+					'type' => 'string',
+					'enum' => ['setWCPaymentGateways']
 				],
-				"payment_gateways" => [
-					"type" => "array",
-					"items" => [
-						"type" => "object",
-						"properties" => [
-							"title" => [
-								"type" => "string"
+				'payment_gateways' => [
+					'type' => 'object',
+					'patternProperties' => [
+						'^[a-zA-Z0-9_]+$' => [
+							'type' => 'object',
+							'properties' => [
+								'title' => [
+									'type' => 'string'
+								],
+								'description' => [
+									'type' => 'string'
+								],
+								'enabled' => [
+									'type' => 'string',
+									'enum' => ['yes', 'no']
+								]
 							],
-							"description" => [
-								"type" => "string"
-							],
-							"enabled" => [
-								"type" => "boolean"
-							]
-						],
-						"required" => ["title", "description", "enabled"]
-					]
+							'required' => ['title', 'description', 'enabled']
+						]
+					],
+					'additionalProperties' => false
 				]
 			],
-			"required" => ["step", "payment_gateways"]
+			'required' => ['step', 'payment_gateways']
 		);
 	}
 

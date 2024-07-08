@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Blueprint\Steps\SetSiteOptions;
 class ExportWCCoreProfilerOptions implements StepExporter, HasAlias {
 	public function export() {
 		$step = new SetSiteOptions(array(
-			get_option( 'blogname' ),
-			get_option( 'woocommerce_allow_tracking', false ),
-			get_option( 'woocommerce_onboarding_profile', array() )
+			"blogname" => get_option( 'blogname' ),
+			"woocommerce_allow_tracking" => get_option( 'woocommerce_allow_tracking', false ),
+			"woocommerce_onboarding_profile" => get_option( 'woocommerce_onboarding_profile', array() )
 		));
 		$step->set_meta_values(array(
 			'plugin' => 'woocommerce',

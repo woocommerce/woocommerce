@@ -29,6 +29,7 @@ class ExportWCSettings implements StepExporter, HasAlias {
 	public function export() {
 		$pages   = array();
 		$options = array();
+		$option_info = array();
 
 		foreach ( $this->setting_pages as $page ) {
 			$id = $page->get_id();
@@ -37,7 +38,11 @@ class ExportWCSettings implements StepExporter, HasAlias {
 			}
 			$pages[ $id ] = $this->get_page_info( $page );
 			foreach ( $pages[ $id ]['options'] as $option ) {
-				$options[] = $option;
+				$options[$option['id']] = $option['value'];
+				$option_info[$option['id']] = array(
+					'location' => $option['location'],
+					'title' => $option['title'],
+				);
 			}
 			unset( $pages[ $id ]['options'] );
 		}
@@ -48,7 +53,8 @@ class ExportWCSettings implements StepExporter, HasAlias {
 		$step->set_meta_values(array(
 			'plugin' => 'woocommerce',
 			'pages' => $filtered['pages'],
-			'alias' => $this->get_alias()
+			'info' => $option_info,
+			'alias' => $this->get_alias(),
 		));
 
 		return $step;
@@ -130,19 +136,22 @@ class ExportWCSettings implements StepExporter, HasAlias {
 			),
 		);
 
-		$options[] = array(
-			'id'       => 'woocommerce_coming_soon',
-			'value'    => get_option( 'woocommerce_coming_soon' ),
-			'title'    => 'Coming soon',
-			'location' => 'site_visibilitty.general',
-		);
+//		$options[] = array(
+//			'id'       => 'woocommerce_coming_soon',
+//			'value'    => get_option( 'woocommerce_coming_soon' ),
+//			'title'    => 'Coming soon',
+//			'location' => 'site_visibilitty.general',
+//		);
+//
+//		$options[] = array(
+//			'id'       => 'woocommerce_store_pages_only',
+//			'value'    => get_option( 'woocommerce_store_pages_only' ),
+//			'title'    => 'Restrict to store pages only',
+//			'location' => 'site_visibilitty.general',
+//		);
 
-		$options[] = array(
-			'id'       => 'woocommerce_store_pages_only',
-			'value'    => get_option( 'woocommerce_store_pages_only' ),
-			'title'    => 'Restrict to store pages only',
-			'location' => 'site_visibilitty.general',
-		);
+		$options['woocommerce_coming_soon'] = get_option( 'woocommerce_coming_soon' );
+		$options['woocommerce_store_pages_only'] = get_option( 'woocommerce_store_pages_only' );
 
 		return compact( 'options', 'pages');
 	}
