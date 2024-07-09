@@ -82,11 +82,6 @@ test.describe( 'Shopper → Extensibility', () => {
 		} ) => {
 			await checkoutPageObject.fillInCheckoutWithTestData();
 			await checkoutPageObject.page.waitForFunction( () => {
-				console.log(
-					window.wp.data
-						.select( 'wc/store/cart' )
-						.isCustomerDataDirty()
-				);
 				return (
 					window.wp.data
 						.select( 'wc/store/cart' )
