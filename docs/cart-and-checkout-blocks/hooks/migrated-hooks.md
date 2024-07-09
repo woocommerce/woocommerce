@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout - Legacy hooks
-menu_title: Legacy hooks
+menu_title: Legacy Hooks
 tags: reference
 ---
 

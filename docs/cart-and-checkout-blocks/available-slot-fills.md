@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout - Available slots
-menu_title: Available slots
+menu_title: Available Slots
 tags: reference
 ---
 <!-- markdownlint-disable MD024 -->

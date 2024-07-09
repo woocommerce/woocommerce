@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout - Slot and fill
-menu_title: Slot and fill
+menu_title: Slot and Fill
 tags: reference
 ---
 

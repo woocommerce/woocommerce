@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout - Handling scripts, styles, and data
-menu_title: Script, styles, and data handling
+menu_title: Script, Styles, and Data Handling
 tags: how-to
 ---
 

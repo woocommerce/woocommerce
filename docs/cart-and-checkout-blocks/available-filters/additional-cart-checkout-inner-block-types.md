@@ -4,7 +4,6 @@ menu_title: Inner block types
 tags: reference
 ---
 
-
 The following Additional Cart and Checkout inner block types filter is available:
 
 -   `additionalCartCheckoutInnerBlockTypes`

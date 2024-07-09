@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout - Additional checkout fields
-menu_title: Additional checkout fields
+menu_title: Additional Checkout Fields
 tags: reference
 ---
 

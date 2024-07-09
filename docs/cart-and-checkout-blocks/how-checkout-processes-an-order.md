@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout - How the checkout block processes an order
-menu_title: Processing an order
+menu_title: Processing an Order
 tags: reference
 ---
 
