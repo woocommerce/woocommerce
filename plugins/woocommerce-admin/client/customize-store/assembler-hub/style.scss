@@ -101,6 +101,7 @@ body.woocommerce-assembler {
 	.edit-site-layout__sidebar-region {
 		width: 380px;
 		z-index: 3;
+		background-color: #fafafa;
 	}
 
 	.edit-site-layout__sidebar {
@@ -172,20 +173,12 @@ body.woocommerce-assembler {
 			width: 348px;
 			border: 1.5px solid transparent;
 
-			&:hover {
+			&:hover,
+			&:active,
+			&:focus,
+			&.edit-site-sidebar-navigation-screen-patterns__group-homepage-item--active {
 				background: #ededed;
 				color: $gray-600;
-			}
-
-			&:active {
-				color: #171717;
-				background: #fcfcfc;
-			}
-
-			&:focus {
-				color: #171717;
-				background: #fcfcfc;
-				border-color: var(--wp-admin-theme-color);
 			}
 
 			.components-flex-item {
@@ -198,8 +191,7 @@ body.woocommerce-assembler {
 			}
 		}
 
-		.edit-site-sidebar-navigation-item.components-item
-		.edit-site-sidebar-navigation-item__drilldown-indicator {
+		.edit-site-sidebar-navigation-item.components-item .edit-site-sidebar-navigation-item__drilldown-indicator {
 			fill: #ccc;
 		}
 
@@ -350,6 +342,7 @@ body.woocommerce-assembler {
 		padding-top: 32px;
 		border-top: 1px solid var(--gutenberg-gray-700, #dcdcde);
 		color: var(--gutenberg-gray-900, #1e1e1e);
+		font-size: 11px;
 
 		p {
 			margin-top: 6px;
@@ -456,6 +449,8 @@ body.woocommerce-assembler {
 	.woocommerce-customize-store_sidebar-patterns-upgrade-notice {
 		color: #1e1e1e;
 		padding: 0 0 40px;
+		margin-top: 48px;
+		font-size: 11px;
 
 		h4 {
 			text-transform: uppercase;
@@ -490,32 +485,6 @@ body.woocommerce-assembler {
 	}
 
 	/* Layout sidebar */
-	.block-editor-block-patterns-list__item {
-		.auto-block-preview__container,
-		.block-editor-block-preview__container {
-			border-radius: 4px;
-			border: 1.5px solid transparent;
-			align-items: center;
-			display: flex;
-			overflow: hidden;
-		}
-
-		&.is-selected,
-		&:hover,
-		&:focus {
-			.auto-block-preview__container,
-			.block-editor-block-preview__container {
-				box-shadow: none;
-				border-color: var(--wp-admin-theme-color);
-			}
-		}
-	}
-
-	/* Pattern thumbnails in sidebar */
-	.block-editor-block-preview__container,
-	.auto-block-preview__container {
-		box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px 0 !important;
-	}
 
 	.block-editor-block-preview__content {
 		height: 100%;
@@ -567,9 +536,7 @@ body.woocommerce-assembler {
 	}
 
 	.woocommerce-customize-store__block-editor,
-	.edit-site-layout:not(.is-full-canvas)
-	.edit-site-layout__canvas > div
-	.interface-interface-skeleton__content {
+	.edit-site-layout:not(.is-full-canvas) .edit-site-layout__canvas > div .interface-interface-skeleton__content {
 		border-radius: 20px;
 
 		.woocommerce-customize-store__block-editor,
@@ -585,7 +552,8 @@ body.woocommerce-assembler {
 		}
 	}
 
-	.edit-site-resizable-frame__inner-content {
+	.customize-your-store-edit-site-resizable-frame__inner-content {
+		height: 100%;
 		border-radius: 20px !important;
 	}
 }
@@ -789,8 +757,7 @@ body.woocommerce-assembler {
 	justify-content: space-between;
 }
 
-.components-dropdown-menu__menu
-.woocommerce-customize-store__logo-menu-group.components-menu-group {
+.components-dropdown-menu__menu	.woocommerce-customize-store__logo-menu-group.components-menu-group {
 	border-top: 0;
 	padding: 0 8px;
 
@@ -836,14 +803,5 @@ body.woocommerce-assembler {
 	.edit-site-layout__sidebar {
 		display: flex;
 		max-width: 700px;
-	}
-}
-
-.edit-site-sidebar-navigation-screen-patterns__group-homepage-label-container {
-	display: flex;
-	justify-content: space-between;
-
-	.edit-site-sidebar-navigation-screen-patterns__group-homepage-number-pattern {
-		color: var(--gutenberg-gray-400, #ccc);
 	}
 }

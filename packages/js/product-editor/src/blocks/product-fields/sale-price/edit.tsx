@@ -94,6 +94,7 @@ export function Edit( {
 					{ ...inputProps }
 					id={ salePriceId }
 					name={ 'sale_price' }
+					inputMode="decimal"
 					ref={ salePriceRef }
 					label={
 						tooltip ? (

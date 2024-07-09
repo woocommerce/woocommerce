@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Load REST API namespaces only when needed.

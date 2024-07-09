@@ -1,3 +1,10 @@
+---
+post_title: Cart and Checkout - Inner Block Types
+menu_title: Inner Block Types
+tags: reference, checkout-available-filters
+---
+
+
 # Additional Cart and Checkout inner block types
 
 The following Additional Cart and Checkout inner block types filter is available:
@@ -66,24 +73,6 @@ To call this filter within the editor, wrap the filter registration in a `DOMCon
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="367" alt="Before applying the Additional Cart and Checkout inner block types filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/0d4560c8-c2b1-4ed8-8aee-469b248ccb08">
-
-</td>
-<td valign="top">After:
-<br><br>
-<img width="366" alt="After applying the Additional Cart and Checkout inner block types filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/d38cd568-6c8c-4158-9269-d8dffdf66988">
-</td>
-</tr>
-</table>
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/available-filters/additional-cart-checkout-inner-block-types.md)
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Additional Cart and Checkout inner block types filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/0d4560c8-c2b1-4ed8-8aee-469b248ccb08) |![After applying the Additional Cart and Checkout inner block types filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/d38cd568-6c8c-4158-9269-d8dffdf66988) |
