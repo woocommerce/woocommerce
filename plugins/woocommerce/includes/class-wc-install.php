@@ -272,7 +272,7 @@ class WC_Install {
 	 *
 	 * @var string
 	 */
-	const INITIAL_INSTALL_VERSION_OPTION = 'woocommerce_initial_install_version';
+	const INITIAL_INSTALLED_VERSION = 'woocommerce_initial_installed_version';
 
 	/**
 	 * Option name used to uniquely identify installations of WooCommerce.
@@ -324,7 +324,7 @@ class WC_Install {
 			 *
 			 * @since 9.2.0
 			 */
-			add_option( self::INITIAL_INSTALL_VERSION_OPTION, WC()->version );
+			add_option( self::INITIAL_INSTALLED_VERSION, WC()->version, '', false );
 		}
 	}
 
