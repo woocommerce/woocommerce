@@ -48,7 +48,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             await github.rest.repos.updateRelease({
-              ...github.context.repo,
+              ...context.repo,
               release_id: 25945111,
               body: `Nightly build auto generated. Updated at ${ new Date().toUTCString() }.`
             });
@@ -59,12 +59,12 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const branchData = await github.rest.repos.updateRelease({
-              ...github.context.repo,
+              ...context.repo,
               branch: ${{ matrix.build }},
             });
             
             await github.rest.git.updateRef({
-              ...github.context.repo,
+              ...context.repo,
               ref: `tags/nightly`,
               sha: branchData.data.commit.sha,
             });
