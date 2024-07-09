@@ -299,8 +299,11 @@ test.describe(
 
 			// Product Collection requires choosing some collection.
 			await page
+				.locator(
+					'[data-type="woocommerce/product-collection"] .components-placeholder'
+				)
 				.getByRole( 'button', {
-					name: 'Product Catalog Display all products in your catalog. Results can (change to) match the current template, page, or search term.',
+					name: 'create your own',
 				} )
 				.click();
 

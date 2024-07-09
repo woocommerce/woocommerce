@@ -1419,9 +1419,15 @@ test.describe( 'Testing registerProductCollection', () => {
 		pageObject,
 		editor,
 		admin,
+		page,
 	} ) => {
 		await admin.createNewPost();
 		await editor.insertBlockUsingGlobalInserter( pageObject.BLOCK_NAME );
+		await page
+			.getByRole( 'button', {
+				name: 'Choose collection',
+			} )
+			.click();
 
 		// Get text of all buttons in the collection chooser
 		const collectionChooserButtonsTexts = await editor.page
