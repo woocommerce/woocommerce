@@ -22,7 +22,7 @@ const Edit = ( {
 					[
 						'core/heading',
 						{
-							level: 3,
+							level: 2,
 							style: { typography: { fontSize: '24px' } },
 							content: attributes.heading || '',
 							onChangeContent: ( value: string ) =>
