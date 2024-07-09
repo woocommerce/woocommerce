@@ -18,21 +18,26 @@ export function errorHandler( error: WPError, productStatus: ProductStatus ) {
 		return error;
 	}
 
+	const errorMessageEntry = Object.entries( error ).find(
+		( [ , value ] ) => value !== undefined
+	) as [ string, unknown ] | undefined;
+
+	const errorMessage =
+		errorMessageEntry && typeof errorMessageEntry[ 1 ] === 'object'
+			? { validatorId: errorMessageEntry[ 0 ], ...errorMessageEntry[ 1 ] }
+			: undefined;
+
 	if ( 'variations' in error && error.variations ) {
 		return {
 			code: 'variable_product_no_variation_prices',
-			message: error.variations,
+			...errorMessage,
 		};
 	}
-
-	const errorMessage = Object.values( error ).find(
-		( value ) => value !== undefined
-	) as string | undefined;
 
 	if ( errorMessage !== undefined ) {
 		return {
 			code: 'product_form_field_error',
-			message: errorMessage,
+			...errorMessage,
 		};
 	}
 
