@@ -4019,3 +4019,23 @@ function wc_update_product_archive_title( $post_type_name, $post_type ) {
 add_filter( 'post_type_archive_title', 'wc_update_product_archive_title', 10, 2 );
 
 // phpcs:enable Generic.Commenting.Todo.TaskFound
+
+/**
+ * Set the version of the hooked blocks in the database. Used when WC is installed for the first time.
+ *
+ * @since 9.2.0
+ */
+function wc_set_hooked_blocks_version() {
+	// Only set the version if the current theme is a block theme.
+	if ( ! wc_current_theme_is_fse_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
+		return;
+	}
+
+	$option_name = 'wc_hooked_blocks_version';
+
+	if ( get_option( $option_name ) ) {
+		return;
+	}
+
+	add_option( $option_name, WC()->version );
+}

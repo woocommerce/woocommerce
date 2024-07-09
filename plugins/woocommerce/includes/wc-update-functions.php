@@ -2729,3 +2729,31 @@ function wc_update_891_create_plugin_autoinstall_history_option() {
 function wc_update_910_add_launch_your_store_tour_option() {
 	add_option( 'woocommerce_show_lys_tour', 'yes' );
 }
+
+/**
+ * Add wc_hooked_blocks_version option for existing stores that are using a theme that supports the Block Hooks API
+ */
+function wc_update_920_add_wc_hooked_blocks_version_option() {
+	if ( ! wc_current_theme_is_fse_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
+		return;
+	}
+
+	$option_name       = 'wc_hooked_blocks_version';
+	$active_theme_name = wp_get_theme()->get( 'Name' );
+	/**
+	 * A list of theme slugs to execute this with. This is a temporary
+	 * measure until improvements to the Block Hooks API allow for exposing
+	 * to all block themes.
+	 *
+	 * @since 8.4.0
+	 */
+	$theme_include_list               = apply_filters( 'woocommerce_hooked_blocks_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
+	$should_set_hooked_blocks_version = in_array( $active_theme_name, $theme_include_list, true );
+
+	if ( $should_set_hooked_blocks_version && ! get_option( $option_name ) ) {
+		// Set 8.4.0 as the version for existing stores that are using a theme that supports the Block Hooks API.
+		// This will ensure that the Block Hooks API is enabled for these stores and works as expected.
+		// Existing stores that aren't running allowed these themes will not have the Block Hooks API enabled.
+		add_option( $option_name, '8.4.0' );
+	}
+}
