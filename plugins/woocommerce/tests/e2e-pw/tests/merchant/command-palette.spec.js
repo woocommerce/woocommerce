@@ -9,7 +9,12 @@ const clickOnCommandPaletteOption = async ( { page, optionName } ) => {
 	// Press `Ctrl` + `K` to open the command palette.
 	await page.keyboard.press( cmdKeyCombo );
 
-	await page.getByPlaceholderText( 'Search for commands' ).fill( optionName );
+	// Using a regex here because Gutenberg changes the text of the placeholder
+	await page
+		.getByPlaceholder(
+			/Search (?:commands(?: and settings)?|for commands)/
+		)
+		.fill( optionName );
 
 	// Click on the relevant option.
 	const option = page.getByRole( 'option', {
