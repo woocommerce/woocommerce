@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1);
+
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Importers;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\Steps\SetWCTaxRates;

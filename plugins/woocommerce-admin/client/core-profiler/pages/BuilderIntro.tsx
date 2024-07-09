@@ -21,6 +21,7 @@ export const BuilderIntro = ( {
 	const [ file, setFile ] = useState( null );
 	const [ message, setMessage ] = useState( '' );
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const handleFileChange = ( event: any ) => {
 		setFile( event.target.files[ 0 ] );
 	};

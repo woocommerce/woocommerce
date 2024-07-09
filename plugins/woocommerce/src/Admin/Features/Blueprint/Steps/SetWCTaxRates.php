@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1);
+
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Steps;
 
 use Automattic\WooCommerce\Blueprint\Steps\Step;

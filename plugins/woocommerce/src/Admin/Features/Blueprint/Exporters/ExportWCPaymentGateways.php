@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1);
+
 namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\Steps\SetWCPaymentGateways;
