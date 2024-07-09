@@ -8,21 +8,22 @@ import { render, screen } from '@testing-library/react';
  */
 import FormattedMonetaryAmount from '../index';
 
-const settingsMock = jest.requireMock( '@woocommerce/settings' );
+jest.mock( '@woocommerce/settings', () => ( {
+	...jest.requireActual( '@woocommerce/settings' ),
+	SITE_CURRENCY: {
+		code: 'EUR',
+		symbol: 'TEST',
+		thousandSeparator: '.',
+		decimalSeparator: ',',
+		minorUnit: 2,
+		prefix: '',
+		suffix: ' TEST',
+	},
+} ) );
 
 describe( 'FormattedMonetaryAmount', () => {
 	describe( 'separators', () => {
 		test( 'should default to store currency configuration', () => {
-			settingsMock.SITE_CURRENCY = {
-				code: 'EUR',
-				symbol: 'TEST',
-				thousandSeparator: '.',
-				decimalSeparator: ',',
-				minorUnit: 2,
-				prefix: '',
-				suffix: ' TEST',
-			};
-
 			render( <FormattedMonetaryAmount value="156345" /> );
 
 			expect( screen.getByText( '1.563,45 TEST' ) ).toBeInTheDocument();
@@ -55,6 +56,7 @@ describe( 'FormattedMonetaryAmount', () => {
 						code: 'EUR',
 						symbol: '€',
 						decimalSeparator: ',',
+						thousandSeparator: '',
 						minorUnit: 2,
 						prefix: '',
 						suffix: ' €',
@@ -94,6 +96,7 @@ describe( 'FormattedMonetaryAmount', () => {
 						thousandSeparator: '.',
 						decimalSeparator: ',',
 						minorUnit: 2,
+						prefix: '',
 						suffix: ' €',
 					} }
 				/>
@@ -112,6 +115,7 @@ describe( 'FormattedMonetaryAmount', () => {
 						decimalSeparator: ',',
 						minorUnit: 2,
 						prefix: '€ ',
+						suffix: '',
 					} }
 				/>
 			);
@@ -130,6 +134,7 @@ describe( 'FormattedMonetaryAmount', () => {
 						thousandSeparator: '.',
 						decimalSeparator: ',',
 						minorUnit: 0,
+						prefix: '',
 						suffix: ' €',
 					} }
 				/>
@@ -148,6 +153,7 @@ describe( 'FormattedMonetaryAmount', () => {
 						decimalSeparator: ',',
 						minorUnit: 0,
 						prefix: '€ ',
+						suffix: '',
 					} }
 				/>
 			);

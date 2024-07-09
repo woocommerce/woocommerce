@@ -23,7 +23,7 @@ export interface FormattedMonetaryAmountProps
 	allowNegative?: boolean;
 	isAllowed?: ( formattedValue: NumberFormatValues ) => boolean;
 	value: number | string; // Value of money amount.
-	currency?: Currency | Partial< Currency > | undefined; // Currency configuration object. Defaults to site currency.
+	currency?: Currency | undefined; // Currency configuration object. Defaults to site currency.
 	onValueChange?: ( unit: number ) => void; // Function to call when value changes.
 	style?: React.CSSProperties | undefined;
 	renderText?: ( value: string ) => JSX.Element;
@@ -61,7 +61,7 @@ const currencyToNumberFormat = ( currency: Currency ) => {
 const FormattedMonetaryAmount = ( {
 	className,
 	value: rawValue,
-	currency: rawCurrency,
+	currency: rawCurrency = SITE_CURRENCY,
 	onValueChange,
 	displayType = 'text',
 	...props
@@ -69,7 +69,7 @@ const FormattedMonetaryAmount = ( {
 	// Merge currency configuration with site currency.
 	const currency = {
 		...SITE_CURRENCY,
-		...( rawCurrency ?? {} ),
+		...rawCurrency,
 	};
 
 	// Convert values to int.
