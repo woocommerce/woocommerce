@@ -121,12 +121,18 @@ class ProductCollectionPage {
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		const isDropdownLayout = await this.admin.page
+		const inserterClass = await this.admin.page
 			.locator( SELECTORS.collectionPlaceholder )
-			.locator( '.wc-blocks-product-collection__collections-dropdown' )
-			.isVisible();
+			.locator(
+				'.wc-blocks-product-collection__collections-grid, .wc-blocks-product-collection__collections-dropdown'
+			)
+			.getAttribute( 'class' );
 
-		if ( isDropdownLayout ) {
+		const isDropdown = inserterClass?.includes(
+			'wc-blocks-product-collection__collections-dropdown'
+		);
+
+		if ( isDropdown ) {
 			await this.admin.page
 				.getByRole( 'button', { name: 'Choose collection' } )
 				.click();
