@@ -260,7 +260,7 @@ class DataStore extends ReportsDataStore {
 	 */
 	public function get_data( $query_args ) {
 		$data = parent::get_data( $query_args );
-		// Do not cache extended info -- this is required to get the latest stock data
+		// Do not cache extended info -- this is required to get the latest stock data.
 		$this->include_extended_info( $data->data, $query_args );
 
 		return $data;
@@ -286,7 +286,7 @@ class DataStore extends ReportsDataStore {
 	 * Will be called by `get_data` if there is no data in cache.
 	 *
 	 * @see get_data
-	 * @param array    $query_args              Query parameters.
+	 * @param array $query_args Query parameters.
 	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_data( $query_args ) {
@@ -374,6 +374,7 @@ class DataStore extends ReportsDataStore {
 			'page_no' => (int) $query_args['page'],
 		);
 
+		return $data;
 	}
 
 	/**
