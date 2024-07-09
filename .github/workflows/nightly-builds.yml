@@ -63,7 +63,7 @@ jobs:
           script: |
             const sourceRef = process.env.SOURCE_REF;
             const targetRef = process.env.TARGET_REF;
-            const branchData = await github.rest.repos.updateRelease({
+            const branchData = await github.rest.repos.getBranch({
               ...context.repo,
               branch: sourceRef,
             });
