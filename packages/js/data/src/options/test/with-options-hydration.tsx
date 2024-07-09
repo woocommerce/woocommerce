@@ -14,6 +14,7 @@ import {
 } from '../with-options-hydration';
 
 jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
 	useDispatch: jest.fn(),
 } ) );
