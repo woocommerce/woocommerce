@@ -268,7 +268,7 @@ class DefaultPaymentGateways {
 						'type'     => 'or',
 						'operands' => array(
 							(object) array(
-								'type' => 'not',
+								'type'    => 'not',
 								'operand' => array(
 									self::get_rules_for_countries( self::get_wcpay_countries() ),
 								),
