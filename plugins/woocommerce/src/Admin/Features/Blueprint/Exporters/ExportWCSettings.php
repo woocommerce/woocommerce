@@ -23,7 +23,7 @@ class ExportWCSettings implements StepExporter, HasAlias {
 			$setting_pages = WC_Admin_Settings::get_settings_pages();
 		}
 		$this->setting_pages = $setting_pages;
-		$this->wp_add_filter( 'wooblueprint_export_setttings', array( $this, 'add_site_visibility_setttings' ), 10, 2 );
+		$this->wp_add_filter( 'wooblueprint_export_setttings', array( $this, 'add_site_visibility_setttings' ), 10, 3 );
 	}
 
 	public function export() {
@@ -47,7 +47,7 @@ class ExportWCSettings implements StepExporter, HasAlias {
 			unset( $pages[ $id ]['options'] );
 		}
 
-		$filtered = $this->wp_apply_filters('wooblueprint_export_setttings', $options, $pages);
+		$filtered = $this->wp_apply_filters('wooblueprint_export_setttings', $options, $pages, $option_info);
 
 		$step = new SetSiteOptions($filtered['options']);
 		$step->set_meta_values(array(
@@ -126,7 +126,7 @@ class ExportWCSettings implements StepExporter, HasAlias {
 		return $data;
 	}
 
-	public function add_site_visibility_setttings( array $options, array $pages ) {
+	public function add_site_visibility_setttings( array $options, array $pages, array $option_info ) {
 		$pages['site_visibility'] = array(
 			'label'    => 'Site Visibility',
 			'sections' => array(
@@ -136,24 +136,20 @@ class ExportWCSettings implements StepExporter, HasAlias {
 			),
 		);
 
-//		$options[] = array(
-//			'id'       => 'woocommerce_coming_soon',
-//			'value'    => get_option( 'woocommerce_coming_soon' ),
-//			'title'    => 'Coming soon',
-//			'location' => 'site_visibilitty.general',
-//		);
-//
-//		$options[] = array(
-//			'id'       => 'woocommerce_store_pages_only',
-//			'value'    => get_option( 'woocommerce_store_pages_only' ),
-//			'title'    => 'Restrict to store pages only',
-//			'location' => 'site_visibilitty.general',
-//		);
-
 		$options['woocommerce_coming_soon'] = get_option( 'woocommerce_coming_soon' );
 		$options['woocommerce_store_pages_only'] = get_option( 'woocommerce_store_pages_only' );
 
-		return compact( 'options', 'pages');
+		$option_info['woocommerce_coming_soon'] = array(
+			'location' => 'site_visibilitty.general',
+			'title' => 'Coming soon',
+		);
+
+		$option_info['woocommerce_store_pages_only'] = array(
+			'location' => 'site_visibilitty.general',
+			'title' => 'Restrict to store pages only',
+		);
+
+		return compact( 'options', 'pages', 'option_info');
 	}
 
 	public function get_step_name() {
