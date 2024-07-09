@@ -54,20 +54,20 @@ jobs:
 #              body: `Nightly build auto generated. Updated at ${ new Date().toUTCString() }.`
 #            });
 #
-#      - name: Update nightly tag commit ref
-#        uses: actions/github-script@v7
-#        with:
-#          github-token: ${{ secrets.FINE_GRAINED_TOKEN_ACTIONS }}
-#          script: |
-#            const sourceRef = process.env.SOURCE_REF;
-#            const targetRef = process.env.TARGET_REF;
-#            const branchData = await github.rest.repos.getBranch({
-#              ...context.repo,
-#              branch: sourceRef,
-#            });
-#            
-#            await github.rest.git.updateRef({
-#              ...context.repo,
-#              ref: `tags/${ targetRef }`,
-#              sha: branchData.data.commit.sha,
-#            });
+      - name: Update nightly tag commit ref
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const sourceRef = process.env.SOURCE_REF;
+            const targetRef = process.env.TARGET_REF;
+            const branchData = await github.rest.repos.getBranch({
+              ...context.repo,
+              branch: sourceRef,
+            });
+
+            await github.rest.git.updateRef({
+              ...context.repo,
+              ref: `tags/${ targetRef }`,
+              sha: branchData.data.commit.sha,
+            });
