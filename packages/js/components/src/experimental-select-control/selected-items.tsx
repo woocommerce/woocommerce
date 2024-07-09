@@ -22,8 +22,8 @@ type SelectedItemsProps< ItemType > = {
 		[ key: string ]: string;
 	};
 	onRemove: ( item: ItemType ) => void;
-	onBlur: ( event: React.FocusEvent ) => void;
-	onKeyDown: ( event: React.KeyboardEvent ) => void;
+	onBlur?: ( event: React.FocusEvent ) => void;
+	onKeyDown?: ( event: React.KeyboardEvent ) => void;
 };
 
 export const SelectedItems = < ItemType, >( {
