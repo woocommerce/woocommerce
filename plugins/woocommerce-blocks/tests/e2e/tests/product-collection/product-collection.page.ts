@@ -121,20 +121,21 @@ class ProductCollectionPage {
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		const inserterClass = await this.admin.page
-			.locator( SELECTORS.collectionPlaceholder )
-			.locator(
-				'.wc-blocks-product-collection__collections-grid, .wc-blocks-product-collection__collections-dropdown'
-			)
-			.getAttribute( 'class' );
-
-		const isDropdown = inserterClass?.includes(
-			'wc-blocks-product-collection__collections-dropdown'
+		const placeholderSelector = this.admin.page.locator(
+			SELECTORS.collectionPlaceholder
 		);
 
-		if ( isDropdown ) {
-			await this.admin.page
-				.getByRole( 'button', { name: 'Choose collection' } )
+		const chooseCollectionFromPlaceholder = async () => {
+			await placeholderSelector
+				.getByRole( 'button', { name: buttonName, exact: true } )
+				.click();
+		};
+
+		const chooseCollectionFromDropdown = async () => {
+			await placeholderSelector
+				.getByRole( 'button', {
+					name: 'Choose collection',
+				} )
 				.click();
 
 			await this.admin.page
@@ -143,12 +144,12 @@ class ProductCollectionPage {
 				)
 				.getByRole( 'button', { name: buttonName, exact: true } )
 				.click();
-		} else {
-			await this.admin.page
-				.locator( SELECTORS.collectionPlaceholder )
-				.getByRole( 'button', { name: buttonName, exact: true } )
-				.click();
-		}
+		};
+
+		await Promise.any( [
+			chooseCollectionFromPlaceholder(),
+			chooseCollectionFromDropdown(),
+		] );
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
