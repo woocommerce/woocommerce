@@ -27,21 +27,21 @@ jobs:
       - name: Setup WooCommerce Monorepo
         uses: ./.github/actions/setup-woocommerce-monorepo
 
-      - name: Build zip
-        working-directory: plugins/woocommerce
-        run: bash bin/build-zip.sh
-
-      - name: Upload nightly build
-        uses: WebFreak001/deploy-nightly@d147b5dbd2cb8245d2b5f83a41f5ebe9957575b4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
-          release_id: ${{ env.RELEASE_ID }}
-          asset_path: plugins/woocommerce/woocommerce.zip
-          asset_name: woocommerce-${{ env.SOURCE_REF }}-nightly.zip
-          asset_content_type: application/zip
-          max_releases: 1
+#      - name: Build zip
+#        working-directory: plugins/woocommerce
+#        run: bash bin/build-zip.sh
+#
+#      - name: Upload nightly build
+#        uses: WebFreak001/deploy-nightly@d147b5dbd2cb8245d2b5f83a41f5ebe9957575b4
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
+#          release_id: ${{ env.RELEASE_ID }}
+#          asset_path: plugins/woocommerce/woocommerce.zip
+#          asset_name: woocommerce-${{ env.SOURCE_REF }}-nightly.zip
+#          asset_content_type: application/zip
+#          max_releases: 1
 
       # Update the release body so that the release edited trigger is fired. ci.yml will run tests on this event.
       - name: Update nightly release body
@@ -49,11 +49,12 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            // body: `Nightly build auto generated. Updated at ${ new Date().toUTCString() }.`
             const { RELEASE_ID } = process.env
             await github.rest.repos.updateRelease({
               ...context.repo,
               release_id: ${ RELEASE_ID },
-              body: `Nightly build auto generated. Updated at ${ new Date().toUTCString() }.`
+              body: `Nightly build auto generated.`
             });
 
       - name: Update nightly tag commit ref
