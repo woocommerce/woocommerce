@@ -9,6 +9,7 @@ import { getNewPath, navigateTo } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { useValidations } from '../contexts/validation-context';
+import { useBlocksHelper } from './use-blocks-helper';
 
 export type WPErrorCode =
 	| 'variable_product_no_variation_prices'
@@ -64,7 +65,6 @@ function getErrorPropsWithActions(
 					navigateTo( {
 						url: getUrl( errorContext ),
 					} );
-					// focusByValidatiorId( validatorId );
 					setTimeout( () => {
 						focusByValidatiorId( validatorId );
 					}, 100 );
@@ -76,6 +76,7 @@ function getErrorPropsWithActions(
 
 export const useErrorHandler = (): UseErrorHandlerTypes => {
 	const { focusByValidatiorId } = useValidations();
+	const { getParentTabId } = useBlocksHelper();
 
 	const getProductErrorMessageAndProps = useCallback(
 		( error: WPError, visibleTab: string | null ) => {
@@ -85,10 +86,11 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 			};
 			const {
 				code,
-				context: errorContext,
+				context = '',
 				message: errorMessage,
 				validatorId = '',
 			} = error;
+			const errorContext = getParentTabId( context );
 			switch ( code ) {
 				case 'variable_product_no_variation_prices':
 					response.message = errorMessage;
