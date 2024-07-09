@@ -18,7 +18,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ matrix.build }}
 
@@ -40,32 +40,31 @@ jobs:
           asset_name: woocommerce-${{ matrix.build }}-nightly.zip
           asset_content_type: application/zip
           max_releases: 1
-      
+
       # Update the release body so that the release edited trigger is fired. ci.yml will run tests on this event.
       - name: Update nightly release body
-        uses: actions/github-script@v4
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const currentUTC = new Date().toUTCString();
-            const releaseId = 25945111;
-            const newBody = `Updated at ${currentUTC} UTC.`;
-            await github.rest.releases.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: releaseId,
-              body: newBody
+            await github.rest.repos.updateRelease({
+              ...github.context.repo,
+              release_id: 25945111,
+              body: `Nightly build auto generated. Updated at ${ new Date().toUTCString() }.`
             });
 
-  update:
-    name: Update nightly tag commit ref
-    runs-on: ubuntu-20.04
-    permissions:
-      contents: write
-    steps:
-      - name: Update nightly tag
-        uses: richardsimko/github-tag-action@e173a8ef8f54ab526a91dad6139a25efed62424c
+      - name: Update nightly tag commit ref
+        uses: actions/github-script@v7
         with:
-          tag_name: nightly
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branchData = await github.rest.repos.updateRelease({
+              ...github.context.repo,
+              branch: ${{ matrix.build }},
+            });
+            
+            await github.rest.git.updateRef({
+              ...github.context.repo,
+              ref: `tags/nightly`,
+              sha: branchData.data.commit.sha,
+            });
