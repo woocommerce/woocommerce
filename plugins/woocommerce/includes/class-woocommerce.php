@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonCacheInvalidator;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
+use Automattic\WooCommerce\Internal\Utilities\DownloadsUtil;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -273,7 +273,7 @@ final class WooCommerce {
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
 		$container->get( ProductDownloadDirectories::class );
-		$container->get( DownloadPermissionsAdjuster::class );
+		$container->get( DownloadsUtil::class );
 		$container->get( AssignDefaultCategory::class );
 		$container->get( DataRegenerator::class );
 		$container->get( LookupDataStore::class );

@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\COTMigrationServiceProvider;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadPermissionsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AssignDefaultCategoryServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\EnginesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\FeaturesServiceProvider;
@@ -57,7 +56,6 @@ final class Container {
 	 */
 	private $service_providers = array(
 		AssignDefaultCategoryServiceProvider::class,
-		DownloadPermissionsAdjusterServiceProvider::class,
 		OptionSanitizerServiceProvider::class,
 		OrdersDataStoreServiceProvider::class,
 		ProductAttributesLookupServiceProvider::class,

@@ -238,4 +238,36 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}wc_download_log WHERE permission_id = %d", $id ) );
 	}
+
+	/**
+	 * Get the total count of rows in the download logs table.
+	 *
+	 * @return int|bool Count of rows in the download logs table, or false if there's an error querying the database.
+	 */
+	public function get_download_logs_count() {
+		global $wpdb;
+
+		$value = $wpdb->get_var( "SELECT COUNT(1) FROM {$wpdb->prefix}wc_download_log" );
+		return is_null( $value ) ? false : absint( $value );
+	}
+
+	/**
+	 * Trims the download logs table so that the number of rows is less than or equal to a given value.
+	 * The oldest entries (as identified by the 'timestamp' column) are the ones deleted.
+	 *
+	 * @param int $max_entries Maximum number of entries to keep in the table.
+	 * @return int|bool Number of rows deleted, or false if there's an error querying the database.
+	 * @throws InvalidArgumentException $max_entries is zero or a negative number.
+	 */
+	public function trim_download_logs_table( int $max_entries ) {
+		global $wpdb;
+
+		if ( $max_entries < 1 ) {
+			throw new InvalidArgumentException( 'trim_download_logs_table: $max_entries must be at least 1' );
+		}
+
+		$table_name = $wpdb->prefix . self::WC_DOWNLOAD_LOG_TABLE;
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return $wpdb->query( $wpdb->prepare( "DELETE FROM {$table_name} WHERE timestamp <= (SELECT timestamp FROM {$table_name} ORDER BY timestamp DESC LIMIT %d,1)", $max_entries ) );
+	}
 }
