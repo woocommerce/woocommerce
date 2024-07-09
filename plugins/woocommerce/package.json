@@ -719,6 +719,8 @@
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/block-library-tests-and-docs/build",
+				"node_modules/@woocommerce/block-library-tests-and-docs/blocks.ini",
 				"node_modules/@woocommerce/e2e-core-tests/build",
 				"node_modules/@woocommerce/e2e-core-tests/build-module",
 				"node_modules/@woocommerce/e2e-core-tests/test-data",
