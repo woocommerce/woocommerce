@@ -77,5 +77,28 @@ test.describe( 'Shopper → Extensibility', () => {
 				checkoutPageObject.page.getByLabel( 'Country/Region' )
 			).toHaveValue( 'United States (US)' );
 		} );
+		test( 'Cart data can be modified by extensions', async ( {
+			checkoutPageObject,
+		} ) => {
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			await checkoutPageObject.page.waitForFunction( () => {
+				console.log(
+					window.wp.data
+						.select( 'wc/store/cart' )
+						.isCustomerDataDirty()
+				);
+				return (
+					window.wp.data
+						.select( 'wc/store/cart' )
+						.isCustomerDataDirty() === false
+				);
+			} );
+			await checkoutPageObject.page.evaluate(
+				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', data: { 'test-name-change': true } } )"
+			);
+			await expect(
+				checkoutPageObject.page.getByLabel( 'First name' )
+			).toHaveValue( 'Mr. Test' );
+		} );
 	} );
 } );

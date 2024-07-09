@@ -26,7 +26,12 @@ add_action(
 			$extend->register_update_callback(
 				array(
 					'namespace' => 'woocommerce-blocks-test-extension-cart-update',
-					'callback'  => function ( $data ) {},
+					'callback'  => function ( $data ) {
+						if ( ! empty( $data['test-name-change'] ) ) {
+							WC()->cart->get_customer()->set_shipping_first_name( 'Mr. Test' );
+							WC()->cart->get_customer()->save();
+						}
+					},
 				)
 			);
 		}
