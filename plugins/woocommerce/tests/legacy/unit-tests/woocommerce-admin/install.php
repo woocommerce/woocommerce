@@ -187,6 +187,7 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 
 		$this->assertTrue( 1 === did_action( 'woocommerce_newly_installed' ) );
 		$this->assertEquals( get_option( WC_Install::NEWLY_INSTALLED_OPTION ), 'no' );
+		$this->assetEquals( get_option( WC_Install::NEWLY_INSTALLED_OPTION ), WC()->version );
 	}
 
 	/**
