@@ -2,7 +2,6 @@
  * External dependencies
  */
 import type { Reducer } from 'redux';
-import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * Internal dependencies
