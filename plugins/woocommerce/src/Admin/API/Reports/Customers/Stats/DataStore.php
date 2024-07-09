@@ -53,75 +53,53 @@ class DataStore extends CustomersDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Returns the report data based on parameters supplied by the user.
+	 * Returns the report data based on normalized parameters.
+	 * Will be called by `get_data` if there is no data in cache.
 	 *
-	 * @param array $query_args  Query parameters.
-	 * @return stdClass|WP_Error Data.
+	 * @see get_data
+	 * @param array    $query_args              Query parameters.
+	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
-	public function get_data( $query_args ) {
+	public function get_noncached_data( $query_args ) {
 		global $wpdb;
+		$this->initialize_queries();
 
-		$customers_table_name = self::get_db_table_name();
-
-		// These defaults are only partially applied when used via REST API, as that has its own defaults.
-		$defaults   = array(
-			'per_page' => get_option( 'posts_per_page' ),
-			'page'     => 1,
-			'order'    => 'DESC',
-			'orderby'  => 'date_registered',
-			'fields'   => '*',
+		$data = (object) array(
+			'customers_count'     => 0,
+			'avg_orders_count'    => 0,
+			'avg_total_spend'     => 0.0,
+			'avg_avg_order_value' => 0.0,
 		);
-		$query_args = wp_parse_args( $query_args, $defaults );
-		$this->normalize_timezones( $query_args, $defaults );
 
-		/*
-		 * We need to get the cache key here because
-		 * parent::update_intervals_sql_params() modifies $query_args.
-		 */
-		$cache_key = $this->get_cache_key( $query_args );
-		$data      = $this->get_cached_data( $cache_key );
+		$selections = $this->selected_columns( $query_args );
+		$this->add_sql_query_params( $query_args );
+		// Clear SQL clauses set for parent class queries that are different here.
+		$this->subquery->clear_sql_clause( 'select' );
+		$this->subquery->add_sql_clause( 'select', 'SUM( total_sales ) AS total_spend,' );
+		$this->subquery->add_sql_clause(
+			'select',
+			'SUM( CASE WHEN parent_id = 0 THEN 1 END ) as orders_count,'
+		);
+		$this->subquery->add_sql_clause(
+			'select',
+			'CASE WHEN SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) = 0 THEN NULL ELSE SUM( total_sales ) / SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) END AS avg_order_value'
+		);
 
-		if ( false === $data ) {
-			$this->initialize_queries();
+		$this->clear_sql_clause( array( 'order_by', 'limit' ) );
+		$this->add_sql_clause( 'select', $selections );
+		$this->add_sql_clause( 'from', "({$this->subquery->get_query_statement()}) AS tt" );
 
-			$data = (object) array(
-				'customers_count'     => 0,
-				'avg_orders_count'    => 0,
-				'avg_total_spend'     => 0.0,
-				'avg_avg_order_value' => 0.0,
-			);
+		$report_data = $wpdb->get_results(
+			$this->get_query_statement(), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			ARRAY_A
+		);
 
-			$selections = $this->selected_columns( $query_args );
-			$this->add_sql_query_params( $query_args );
-			// Clear SQL clauses set for parent class queries that are different here.
-			$this->subquery->clear_sql_clause( 'select' );
-			$this->subquery->add_sql_clause( 'select', 'SUM( total_sales ) AS total_spend,' );
-			$this->subquery->add_sql_clause(
-				'select',
-				'SUM( CASE WHEN parent_id = 0 THEN 1 END ) as orders_count,'
-			);
-			$this->subquery->add_sql_clause(
-				'select',
-				'CASE WHEN SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) = 0 THEN NULL ELSE SUM( total_sales ) / SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) END AS avg_order_value'
-			);
-
-			$this->clear_sql_clause( array( 'order_by', 'limit' ) );
-			$this->add_sql_clause( 'select', $selections );
-			$this->add_sql_clause( 'from', "({$this->subquery->get_query_statement()}) AS tt" );
-
-			$report_data = $wpdb->get_results(
-				$this->get_query_statement(), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-				ARRAY_A
-			);
-
-			if ( null === $report_data ) {
-				return $data;
-			}
-
-			$data = (object) $this->cast_numbers( $report_data[0] );
-
-			$this->set_cached_data( $cache_key, $data );
+		if ( null === $report_data ) {
+			return $data;
 		}
+
+		$data = (object) $this->cast_numbers( $report_data[0] );
+
 
 		return $data;
 	}

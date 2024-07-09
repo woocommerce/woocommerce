@@ -138,94 +138,84 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Returns the report data based on parameters supplied by the user.
+	 * Get the default query arguments to be used by get_data().
+	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
 	 *
-	 * @param array $query_args  Query parameters.
-	 * @return stdClass|WP_Error Data.
+	 * @return array Query parameters.
 	 */
-	public function get_data( $query_args ) {
+	public function get_default_query_vars() {
+		$defaults            = parent::get_default_query_vars();
+		$defaults['orderby'] = 'tax_rate_id';
+		$defaults['taxes']   = array();
+
+		return $defaults;
+	}
+
+	/**
+	 * Returns the report data based on normalized parameters.
+	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @see get_data
+	 * @param array    $query_args              Query parameters.
+	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 */
+	public function get_noncached_data( $query_args ) {
 		global $wpdb;
 
-		$table_name = self::get_db_table_name();
+		$this->initialize_queries();
 
-		// These defaults are only partially applied when used via REST API, as that has its own defaults.
-		$defaults   = array(
-			'per_page' => get_option( 'posts_per_page' ),
-			'page'     => 1,
-			'order'    => 'DESC',
-			'orderby'  => 'tax_rate_id',
-			'before'   => TimeInterval::default_before(),
-			'after'    => TimeInterval::default_after(),
-			'fields'   => '*',
-			'taxes'    => array(),
+		$data = (object) array(
+			'data'    => array(),
+			'total'   => 0,
+			'pages'   => 0,
+			'page_no' => 0,
 		);
-		$query_args = wp_parse_args( $query_args, $defaults );
-		$this->normalize_timezones( $query_args, $defaults );
 
-		/*
-		 * We need to get the cache key here because
-		 * parent::update_intervals_sql_params() modifies $query_args.
-		 */
-		$cache_key = $this->get_cache_key( $query_args );
-		$data      = $this->get_cached_data( $cache_key );
+		$this->add_sql_query_params( $query_args );
+		$params = $this->get_limit_params( $query_args );
 
-		if ( false === $data ) {
-			$this->initialize_queries();
-
-			$data = (object) array(
-				'data'    => array(),
-				'total'   => 0,
-				'pages'   => 0,
-				'page_no' => 0,
-			);
-
-			$this->add_sql_query_params( $query_args );
-			$params = $this->get_limit_params( $query_args );
-
-			if ( isset( $query_args['taxes'] ) && is_array( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
-				$total_results = count( $query_args['taxes'] );
-				$total_pages   = (int) ceil( $total_results / $params['per_page'] );
-			} else {
-				$db_records_count = (int) $wpdb->get_var(
-					"SELECT COUNT(*) FROM (
-						{$this->subquery->get_query_statement()}
-					) AS tt"
-				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
-
-				$total_results = $db_records_count;
-				$total_pages   = (int) ceil( $db_records_count / $params['per_page'] );
-
-				if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-					return $data;
-				}
-			}
-
-			$this->subquery->clear_sql_clause( 'select' );
-			$this->subquery->add_sql_clause( 'select', $this->selected_columns( $query_args ) );
-			$this->subquery->add_sql_clause( 'group_by', ", {$wpdb->prefix}woocommerce_order_items.order_item_name, {$wpdb->prefix}woocommerce_order_itemmeta.meta_value" );
-			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
-
-			$taxes_query = $this->subquery->get_query_statement();
-
-			$tax_data = $wpdb->get_results(
-				$taxes_query,
-				ARRAY_A
+		if ( isset( $query_args['taxes'] ) && is_array( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
+			$total_results = count( $query_args['taxes'] );
+			$total_pages   = (int) ceil( $total_results / $params['per_page'] );
+		} else {
+			$db_records_count = (int) $wpdb->get_var(
+				"SELECT COUNT(*) FROM (
+					{$this->subquery->get_query_statement()}
+				) AS tt"
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
-			if ( null === $tax_data ) {
+			$total_results = $db_records_count;
+			$total_pages   = (int) ceil( $db_records_count / $params['per_page'] );
+
+			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 				return $data;
 			}
-
-			$tax_data = array_map( array( $this, 'cast_numbers' ), $tax_data );
-			$data     = (object) array(
-				'data'    => $tax_data,
-				'total'   => $total_results,
-				'pages'   => $total_pages,
-				'page_no' => (int) $query_args['page'],
-			);
-
-			$this->set_cached_data( $cache_key, $data );
 		}
+
+		$this->subquery->clear_sql_clause( 'select' );
+		$this->subquery->add_sql_clause( 'select', $this->selected_columns( $query_args ) );
+		$this->subquery->add_sql_clause( 'group_by', ", {$wpdb->prefix}woocommerce_order_items.order_item_name, {$wpdb->prefix}woocommerce_order_itemmeta.meta_value" );
+		$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+
+		$taxes_query = $this->subquery->get_query_statement();
+
+		$tax_data = $wpdb->get_results(
+			$taxes_query,
+			ARRAY_A
+		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+
+		if ( null === $tax_data ) {
+			return $data;
+		}
+
+		$tax_data = array_map( array( $this, 'cast_numbers' ), $tax_data );
+		$data     = (object) array(
+			'data'    => $tax_data,
+			'total'   => $total_results,
+			'pages'   => $total_pages,
+			'page_no' => (int) $query_args['page'],
+		);
+
 
 		return $data;
 	}
