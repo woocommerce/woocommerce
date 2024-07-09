@@ -251,7 +251,7 @@ importers:
         version: 10.5.0(sass@1.69.5)(webpack@5.89.0(webpack-cli@3.3.12))
       ts-jest:
         specifier: ~29.1.1
-        version: 29.1.1(@babel/core@7.24.7)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.24.7))(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)))(typescript@5.3.3)
+        version: 29.1.1(@babel/core@7.23.6)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.23.6))(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)))(typescript@5.3.3)
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
@@ -30645,9 +30645,12 @@ snapshots:
       jest-runner: 25.5.4
       jest-runtime: 25.5.4
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - utf-8-validate
 
-  '@jest/test-sequencer@26.6.3':
+  '@jest/test-sequencer@26.6.3(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))':
     dependencies:
       '@jest/test-result': 26.6.2
       graceful-fs: 4.2.11
@@ -30655,7 +30658,11 @@ snapshots:
       jest-runner: 26.6.3(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-runtime: 26.6.3(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - ts-node
+      - utf-8-validate
 
   '@jest/test-sequencer@27.5.1':
     dependencies:
@@ -42333,7 +42340,7 @@ snapshots:
       expect-puppeteer: 4.4.0
       filenamify: 4.3.0
       jest: 26.6.3(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
-      jest-circus: 26.6.3
+      jest-circus: 26.6.3(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-dev-server: 5.0.3(debug@4.3.4)
       jest-environment-node: 26.6.2
       markdownlint: 0.23.1
@@ -42343,14 +42350,14 @@ snapshots:
       minimist: 1.2.8
       npm-package-json-lint: 5.4.2
       postcss: 8.4.32
-      postcss-loader: 6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
+      postcss-loader: 6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4))
       prettier: wp-prettier@2.2.1-beta-1
       puppeteer-core: 10.4.0
       read-pkg-up: 1.0.1
       resolve-bin: 0.4.3
       sass: 1.69.5
-      sass-loader: 12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
-      source-map-loader: 3.0.2(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
+      sass-loader: 12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4))
+      source-map-loader: 3.0.2(webpack@5.89.0(uglify-js@3.17.4))
       stylelint: 13.13.1
       terser-webpack-plugin: 5.3.6(uglify-js@3.17.4)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
       url-loader: 4.1.1(file-loader@6.2.0(webpack@5.89.0(uglify-js@3.17.4)))(webpack@5.89.0(uglify-js@3.17.4))
@@ -42412,7 +42419,7 @@ snapshots:
       expect-puppeteer: 4.4.0
       filenamify: 4.3.0
       jest: 26.6.3(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
-      jest-circus: 26.6.3
+      jest-circus: 26.6.3(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       jest-dev-server: 5.0.3(debug@4.3.4)
       jest-environment-node: 26.6.2
       markdownlint: 0.23.1
@@ -42422,14 +42429,14 @@ snapshots:
       minimist: 1.2.8
       npm-package-json-lint: 5.4.2
       postcss: 8.4.32
-      postcss-loader: 6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
+      postcss-loader: 6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4))
       prettier: wp-prettier@2.2.1-beta-1
       puppeteer-core: 10.4.0
       read-pkg-up: 1.0.1
       resolve-bin: 0.4.3
       sass: 1.69.5
-      sass-loader: 12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
-      source-map-loader: 3.0.2(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
+      sass-loader: 12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4))
+      source-map-loader: 3.0.2(webpack@5.89.0(uglify-js@3.17.4))
       stylelint: 13.13.1
       terser-webpack-plugin: 5.3.6(uglify-js@3.17.4)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
       url-loader: 4.1.1(file-loader@6.2.0(webpack@5.91.0(uglify-js@3.17.4)))(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0))
@@ -51161,7 +51168,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  jest-circus@26.6.3:
+  jest-circus@26.6.3(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)):
     dependencies:
       '@babel/traverse': 7.23.5
       '@jest/environment': 26.6.2
@@ -51185,7 +51192,11 @@ snapshots:
       stack-utils: 2.0.6
       throat: 5.0.0
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - ts-node
+      - utf-8-validate
 
   jest-circus@27.5.1:
     dependencies:
@@ -51443,7 +51454,7 @@ snapshots:
   jest-config@26.6.3(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)):
     dependencies:
       '@babel/core': 7.23.6
-      '@jest/test-sequencer': 26.6.3
+      '@jest/test-sequencer': 26.6.3(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
       '@jest/types': 26.6.2
       babel-jest: 26.6.3(@babel/core@7.23.6)
       chalk: 4.1.2
@@ -56310,7 +56321,7 @@ snapshots:
       semver: 7.5.4
       webpack: 5.91.0(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
 
-  postcss-loader@6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0)):
+  postcss-loader@6.2.1(postcss@8.4.32)(webpack@5.89.0(uglify-js@3.17.4)):
     dependencies:
       cosmiconfig: 7.1.0
       klona: 2.0.6
@@ -59011,7 +59022,7 @@ snapshots:
     optionalDependencies:
       sass: 1.69.5
 
-  sass-loader@12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0)):
+  sass-loader@12.6.0(sass@1.69.5)(webpack@5.89.0(uglify-js@3.17.4)):
     dependencies:
       klona: 2.0.6
       neo-async: 2.6.2
@@ -59488,7 +59499,7 @@ snapshots:
       async: 2.6.4
       loader-utils: 1.4.2
 
-  source-map-loader@3.0.2(webpack@5.89.0(uglify-js@3.17.4)(webpack-cli@4.10.0)):
+  source-map-loader@3.0.2(webpack@5.89.0(uglify-js@3.17.4)):
     dependencies:
       abab: 2.0.6
       iconv-lite: 0.6.3
@@ -60849,6 +60860,23 @@ snapshots:
       '@babel/core': 7.23.5
       '@jest/types': 29.6.3
       babel-jest: 29.7.0(@babel/core@7.23.5)
+
+  ts-jest@29.1.1(@babel/core@7.23.6)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.23.6))(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)))(typescript@5.3.3):
+    dependencies:
+      bs-logger: 0.2.6
+      fast-json-stable-stringify: 2.1.0
+      jest: 27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3))
+      jest-util: 29.7.0
+      json5: 2.2.3
+      lodash.memoize: 4.1.2
+      make-error: 1.3.6
+      semver: 7.5.4
+      typescript: 5.3.3
+      yargs-parser: 21.1.1
+    optionalDependencies:
+      '@babel/core': 7.23.6
+      '@jest/types': 29.6.3
+      babel-jest: 29.7.0(@babel/core@7.23.6)
 
   ts-jest@29.1.1(@babel/core@7.24.7)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.24.7))(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)))(typescript@5.3.3):
     dependencies:
