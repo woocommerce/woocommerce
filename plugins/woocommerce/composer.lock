@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "59ffaa9fd19748a4492d4877b9c0d4c3",
+    "content-hash": "d94caed70daa2a6da404bdfbede88b8b",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -1197,7 +1197,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/blueprint",
-                "reference": "18a461ca9bb586604c6c830d8afed21e84050a8b"
+                "reference": "4eac6cb480be161204cb4fbf81567215592daecc"
             },
             "require": {
                 "opis/json-schema": "^2.3"
@@ -1214,6 +1214,7 @@
                 }
             },
             "transport-options": {
+                "symlink": false,
                 "relative": true
             }
         }

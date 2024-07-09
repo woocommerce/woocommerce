@@ -18,7 +18,10 @@
 		},
 		{
 			"type": "path",
-			"url": "../../packages/php/blueprint"
+			"url": "../../packages/php/blueprint",
+			"options": {
+				"symlink": false
+			}
 		}
 	],
 	"require": {
@@ -31,7 +34,7 @@
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
 		"woocommerce/action-scheduler": "3.7.4",
-		"woocommerce/blueprint": "dev-add/blueprint-feature-flag"
+		"woocommerce/blueprint": "*"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
