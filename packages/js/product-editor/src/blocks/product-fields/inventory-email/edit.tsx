@@ -28,7 +28,6 @@ import { useEntityProp } from '@wordpress/core-data';
 import { useValidation } from '../../../contexts/validation-context';
 import { InventoryEmailBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
-import { useBlocksHelper } from '../../../hooks/use-blocks-helper';
 
 export function Edit( {
 	attributes,
@@ -44,8 +43,6 @@ export function Edit( {
 	);
 
 	const id = useInstanceId( BaseControl, 'low_stock_amount' ) as string;
-	const { getParentTabId } = useBlocksHelper();
-	const parentTabId = getParentTabId( clientId );
 
 	const {
 		ref: lowStockAmountRef,
@@ -60,7 +57,7 @@ export function Edit( {
 						'This field must be a positive number.',
 						'woocommerce'
 					),
-					context: parentTabId,
+					context: clientId,
 				};
 			}
 		},

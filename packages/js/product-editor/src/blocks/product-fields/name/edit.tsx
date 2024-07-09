@@ -38,7 +38,6 @@ import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { AUTO_DRAFT_NAME, getPermalinkParts } from '../../../utils';
 import { NameBlockAttributes } from './types';
-import { useBlocksHelper } from '../../../hooks/use-blocks-helper';
 
 export function NameBlockEdit( {
 	attributes,
@@ -76,9 +75,6 @@ export function NameBlockEdit( {
 	const { prefix: permalinkPrefix, suffix: permalinkSuffix } =
 		getPermalinkParts( product );
 
-	const { getParentTabId } = useBlocksHelper();
-	const parentTabId = getParentTabId( clientId );
-
 	const {
 		ref: nameRef,
 		error: nameValidationError,
@@ -89,7 +85,7 @@ export function NameBlockEdit( {
 			if ( ! name || name === AUTO_DRAFT_NAME ) {
 				return {
 					message: __( 'Product name is required.', 'woocommerce' ),
-					context: parentTabId,
+					context: clientId,
 				};
 			}
 
@@ -99,7 +95,7 @@ export function NameBlockEdit( {
 						'Please enter a product name shorter than 120 characters.',
 						'woocommerce'
 					),
-					context: parentTabId,
+					context: clientId,
 				};
 			}
 		},

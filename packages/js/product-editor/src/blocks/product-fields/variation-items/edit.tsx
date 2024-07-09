@@ -29,7 +29,6 @@ import { TRACKS_SOURCE } from '../../../constants';
 import { handlePrompt } from '../../../utils/handle-prompt';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { EmptyState } from '../../../components/empty-state';
-import { useBlocksHelper } from '../../../hooks/use-blocks-helper';
 
 export function Edit( {
 	attributes,
@@ -102,9 +101,6 @@ export function Edit( {
 			itemsWithoutPriceNoticeDismissed,
 	} = useUserPreferences();
 
-	const { getParentTabId } = useBlocksHelper();
-	const parentTabId = getParentTabId( clientId );
-
 	const { ref: variationTableRef } = useValidation< Product >(
 		`variations`,
 		async function regularPriceValidator( defaultValue, newData ) {
@@ -135,7 +131,7 @@ export function Edit( {
 						'Set variation prices before adding this product.',
 						'woocommerce'
 					),
-					context: parentTabId,
+					context: clientId,
 				};
 			}
 		},

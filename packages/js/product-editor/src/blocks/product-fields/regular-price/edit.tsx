@@ -23,7 +23,6 @@ import { useCurrencyInputProps } from '../../../hooks/use-currency-input-props';
 import { sanitizeHTML } from '../../../utils/sanitize-html';
 import type { ProductEditorBlockEditProps } from '../../../types';
 import type { SalePriceBlockAttributes } from './types';
-import { useBlocksHelper } from '../../../hooks/use-blocks-helper';
 
 export function Edit( {
 	attributes,
@@ -58,9 +57,6 @@ export function Edit( {
 		'wp-block-woocommerce-product-regular-price-field'
 	) as string;
 
-	const { getParentTabId } = useBlocksHelper();
-	const parentTabId = getParentTabId( clientId );
-
 	const {
 		ref: regularPriceRef,
 		error: regularPriceValidationError,
@@ -76,7 +72,7 @@ export function Edit( {
 							'Regular price must be greater than or equals to zero.',
 							'woocommerce'
 						),
-						context: parentTabId,
+						context: clientId,
 					};
 				}
 				if (
@@ -88,7 +84,7 @@ export function Edit( {
 							'Regular price must be greater than the sale price.',
 							'woocommerce'
 						),
-						context: parentTabId,
+						context: clientId,
 					};
 				}
 			} else if ( isRequired ) {
@@ -98,7 +94,7 @@ export function Edit( {
 						__( '%s is required.', 'woocommerce' ),
 						label
 					),
-					context: parentTabId,
+					context: clientId,
 				};
 			}
 		},

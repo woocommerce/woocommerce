@@ -20,6 +20,7 @@ import { TextBlockAttributes } from './types';
 
 export function Edit( {
 	attributes,
+	clientId,
 	context: { postType },
 }: ProductEditorBlockEditProps< TextBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
@@ -129,7 +130,7 @@ export function Edit( {
 			if ( ! input.validity.valid ) {
 				return {
 					message: customErrorMessage,
-					context: '',
+					context: clientId,
 				};
 			}
 		},

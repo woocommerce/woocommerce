@@ -22,7 +22,6 @@ import { ScheduleSalePricingBlockAttributes } from './types';
 import { useProductEdits } from '../../../hooks/use-product-edits';
 import { useValidation } from '../../../contexts/validation-context';
 import { ProductEditorBlockEditProps } from '../../../types';
-import { useBlocksHelper } from '../../../hooks/use-blocks-helper';
 
 export function Edit( {
 	attributes,
@@ -92,9 +91,6 @@ export function Edit( {
 	const _dateOnSaleFrom = moment( dateOnSaleFromGmt, moment.ISO_8601, true );
 	const _dateOnSaleTo = moment( dateOnSaleToGmt, moment.ISO_8601, true );
 
-	const { getParentTabId } = useBlocksHelper();
-	const parentTabId = getParentTabId( clientId );
-
 	const {
 		ref: dateOnSaleFromGmtRef,
 		error: dateOnSaleFromGmtValidationError,
@@ -109,7 +105,7 @@ export function Edit( {
 							'Please enter a valid date.',
 							'woocommerce'
 						),
-						context: parentTabId,
+						context: clientId,
 					};
 				}
 
@@ -119,7 +115,7 @@ export function Edit( {
 							'The start date of the sale must be before the end date.',
 							'woocommerce'
 						),
-						context: parentTabId,
+						context: clientId,
 					};
 				}
 			}
@@ -141,7 +137,7 @@ export function Edit( {
 							'Please enter a valid date.',
 							'woocommerce'
 						),
-						context: parentTabId,
+						context: clientId,
 					};
 				}
 
@@ -151,7 +147,7 @@ export function Edit( {
 							'The end date of the sale must be after the start date.',
 							'woocommerce'
 						),
-						context: parentTabId,
+						context: clientId,
 					};
 				}
 			}

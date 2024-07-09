@@ -22,7 +22,6 @@ import { useCurrencyInputProps } from '../../../hooks/use-currency-input-props';
 import { SalePriceBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { Label } from '../../../components/label/label';
-import { useBlocksHelper } from '../../../hooks/use-blocks-helper';
 
 export function Edit( {
 	attributes,
@@ -51,9 +50,6 @@ export function Edit( {
 		'wp-block-woocommerce-product-sale-price-field'
 	) as string;
 
-	const { getParentTabId } = useBlocksHelper();
-	const parentTabId = getParentTabId( clientId );
-
 	const {
 		ref: salePriceRef,
 		error: salePriceValidationError,
@@ -68,7 +64,7 @@ export function Edit( {
 							'Sale price must be greater than or equals to zero.',
 							'woocommerce'
 						),
-						context: parentTabId,
+						context: clientId,
 					};
 				}
 				const listPrice = Number.parseFloat( regularPrice );
@@ -81,7 +77,7 @@ export function Edit( {
 							'Sale price must be lower than the regular price.',
 							'woocommerce'
 						),
-						context: parentTabId,
+						context: clientId,
 					};
 				}
 			}
