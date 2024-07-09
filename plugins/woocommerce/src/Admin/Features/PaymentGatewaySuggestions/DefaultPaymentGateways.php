@@ -267,6 +267,12 @@ class DefaultPaymentGateways {
 					(object) array(
 						'type'     => 'or',
 						'operands' => array(
+							(object) array(
+								'type' => 'not',
+								'operand' => array(
+									self::get_rules_for_countries( self::get_wcpay_countries() ),
+								),
+							),
 							self::get_rules_for_wcpay_activated( false ),
 							self::get_rules_for_wcpay_connected( false ),
 						),
