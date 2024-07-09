@@ -12,6 +12,8 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { sanitize } from 'dompurify';
 import { __ } from '@wordpress/i18n';
+import { WooPaymentMethodsLogos } from '@woocommerce/onboarding';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 /**
  * Internal dependencies
@@ -48,6 +50,7 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 	subTitleContent,
 	columns,
 } ) => {
+	const isWooPayEligible = getAdminSetting( 'isWooPayEligible', false );
 	const { gatewayId, pluginSlug, url } = paymentMethod;
 	const [ installing, setInstalling ] = useState( false );
 	const [ isVisible, setIsVisible ] = useState( true );
@@ -131,7 +134,20 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 								>
 									{ title }
 								</Link>
-								{ subTitleContent ? (
+								{ gatewayId ===
+									'pre_install_woocommerce_payments_promotion' && (
+									<div className="pre-install-payment-gateway__subtitle">
+										<WooPaymentMethodsLogos
+											maxElements={ 5 }
+											isWooPayEligible={
+												isWooPayEligible
+											}
+										/>
+									</div>
+								) }
+								{ gatewayId !==
+									'pre_install_woocommerce_payments_promotion' &&
+									subTitleContent ? (
 									<div
 										className="pre-install-payment-gateway__subtitle"
 										dangerouslySetInnerHTML={ sanitizeHTML(
