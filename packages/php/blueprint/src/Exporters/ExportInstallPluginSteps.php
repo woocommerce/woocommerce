@@ -18,7 +18,7 @@ class ExportInstallPluginSteps implements StepExporter {
 
 		// @todo temporary fix for JN site -- it includes WooCommerce as a custom plugin
 		// since JN sites are using a different slug.
-		$exclude = array( 'WooCommerce' );
+		$exclude = array( 'WooCommerce', 'WooCommerce Beta Tester' );
 		$steps   = array();
 		foreach ( $plugins as $path => $plugin ) {
 			if ( in_array( $plugin['Name'], $exclude, true ) ) {

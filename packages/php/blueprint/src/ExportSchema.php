@@ -2,8 +2,8 @@
 
 namespace Automattic\WooCommerce\Blueprint;
 
-use Automattic\WooCommerce\Blueprint\Exporters\ExportInstallPluginSteps;
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
+use Automattic\WooCommerce\Blueprint\Exporters\ExportInstallPluginSteps;
 use Automattic\WooCommerce\Blueprint\Exporters\ExportInstallThemeSteps;
 use Automattic\WooCommerce\Blueprint\Exporters\HasAlias;
 
@@ -32,32 +32,19 @@ class ExportSchema {
 	}
 
 	/**
-	 * Get the exporter for a specific step.
-	 *
-	 * @param string $step The step name.
-	 * @return StepExporter|null The exporter for the given step, or null if not found.
-	 */
-	public function get_exporter($step) {
-		if (isset($this->exporters[$step])) {
-			return $this->exporters[$step];
-		}
-		return null;
-	}
-
-	/**
 	 * Export the schema steps.
 	 *
 	 * @param string[] $steps Array of step names to export, optional.
 	 * @return array The exported schema array.
 	 */
-	public function export($steps = array()) {
+	public function export($steps = array(), $zip = false) {
 		$schema = array(
 			'landingPage' => $this->wp_apply_filters('wooblueprint_export_landingpage', '/'),
 			'steps'       => array(),
 		);
 
 		$built_in_exporters = (new BuiltInExporters())->get_all();
-		$exporters = $this->wp_apply_filters('wooblueprint_exporters', $built_in_exporters);
+		$exporters = $this->wp_apply_filters('wooblueprint_exporters', array_merge($this->exporters, $built_in_exporters));
 
 		// Filter out any exporters that are not in the list of steps to export.
 		if (count($steps)) {
@@ -68,6 +55,15 @@ class ExportSchema {
 					unset($exporters[$key]);
 				}
 			}
+		}
+
+		if( $zip ) {
+			$exporters = array_map(function($exporter) {
+				if ( $exporter instanceof ExportInstallPluginSteps ) {
+					$exporter->include_private_plugins( true );
+				}
+				return $exporter;
+			}, $exporters);
 		}
 
 		/**

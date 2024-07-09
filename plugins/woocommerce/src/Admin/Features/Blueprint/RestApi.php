@@ -85,12 +85,7 @@ class RestApi {
 		$export_as_zip = $request->get_param('export_as_zip', false);
 		$exporter = new ExportSchema();
 
-		if ($export_as_zip) {
-			$exporter->get_exporter('installPlugins')->include_private_plugins(true);
-		}
-
-
-		$data = $exporter->export($steps);
+		$data = $exporter->export($steps, $export_as_zip);
 
 		if ($export_as_zip) {
 			$zip = new ZipExportedSchema($data);

@@ -72,15 +72,15 @@ class ZipExportedSchema {
 		return WP_CONTENT_DIR . '/uploads/blueprint';
 	}
 
-	protected function find_step( $step_name ) {
-		$step = array_filter(
+	protected function find_steps( $step_name ) {
+		$steps = array_filter(
 			$this->schema['steps'],
 			function ( $step ) use ( $step_name ) {
 				return $step['step'] === $step_name;
 			}
 		);
-		if ( count( $step ) ) {
-			return current( $step );
+		if ( count( $steps ) ) {
+			return $steps;
 		}
 		return null;
 	}
@@ -89,19 +89,25 @@ class ZipExportedSchema {
 
 		// check if we have any plugins with resource = self/plugins
 		// if not, we should just skip
-		$step = $this->find_step( $step );
-		if ( $step === null ) {
+		$steps = $this->find_steps( $step );
+		if ( $steps === null ) {
 			return array();
 		}
 
-		$resources = array_filter(
-			$step[ $type ],
+		$steps = array_filter(
+			$steps,
 			function ( $plugin ) use ( $type ) {
-				return $plugin['resource'] === 'self/' . $type;
+				if ( $type === 'plugins' ) {
+					return $plugin['pluginZipFile']['resource'] === 'self/plugins';
+				} else if ( $type === 'themes' ) {
+					return $plugin['themeZipFile']['resource'] === 'self/themes';
+				}
+
+				return false;
 			}
 		);
 
-		if ( count( $resources ) === 0 ) {
+		if ( count( $steps ) === 0 ) {
 			return array();
 		}
 
@@ -110,7 +116,8 @@ class ZipExportedSchema {
 
 		$files = array();
 
-		foreach ( $resources as $resource ) {
+		foreach ( $steps as $step ) {
+			$resource   = $step[ $type === 'plugins' ? 'pluginZipFile' : 'themeZipFile' ];
 			$destination = $this->working_dir . '/' . $type . '/' . $resource['slug'] . '.zip';
 			$plugin_dir  = WP_CONTENT_DIR . '/' . $type . '/' . $resource['slug'];
 			if ( ! is_dir( $plugin_dir ) ) {

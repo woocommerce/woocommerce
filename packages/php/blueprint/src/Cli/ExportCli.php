@@ -16,11 +16,7 @@ class ExportCli {
 
 		$exporter = new ExportSchema();
 
-		if ($export_as_zip) {
-			$exporter->get_exporter('installPlugins')->include_private_plugins(true);
-		}
-
-		$schema = $exporter->export($args['steps']);
+		$schema = $exporter->export($args['steps'], $export_as_zip);
 
 		if ($export_as_zip) {
 			$zipExportedSchema = new ZipExportedSchema($schema);
