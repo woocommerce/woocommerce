@@ -27,9 +27,9 @@ jobs:
       - name: Setup WooCommerce Monorepo
         uses: ./.github/actions/setup-woocommerce-monorepo
 
-      - name: Build zip
-        working-directory: plugins/woocommerce
-        run: bash bin/build-zip.sh
+#      - name: Build zip
+#        working-directory: plugins/woocommerce
+#        run: bash bin/build-zip.sh
 
 #      - name: Upload nightly build
 #        uses: WebFreak001/deploy-nightly@d147b5dbd2cb8245d2b5f83a41f5ebe9957575b4
