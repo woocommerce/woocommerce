@@ -94,8 +94,7 @@ jobs:
         id: 'setup-monorepo'
         with:
           install: '${{ matrix.projectName }}...'
-          pull-pnpm-cache: true
-          pull-cache-key: '${{ matrix.projectName }}'
+          pull-package-deps: '${{ matrix.projectName }}'
 
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
@@ -122,8 +121,7 @@ jobs:
           build: ${{ ( github.ref_type == 'tag' && 'false' ) || matrix.projectName }}
           build-type: ${{ ( matrix.testType == 'unit:php' && 'backend' ) || 'full' }}
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && matrix.testType == 'e2e' }}
-          pull-pnpm-cache: true
-          pull-cache-key: '${{ matrix.projectName }}'
+          pull-package-deps: '${{ matrix.projectName }}'
 
       - name: 'Update wp-env config'
         if: ${{ github.ref_type == 'tag' }}

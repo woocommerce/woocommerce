@@ -22,8 +22,7 @@ jobs:
               with:
                 install: '@woocommerce/plugin-woocommerce'
                 build: '@woocommerce/plugin-woocommerce'
-                pull-pnpm-cache: true
-                pull-cache-key: '@woocommerce/plugin-woocommerce-beta-tester'
+                pull-package-deps: '@woocommerce/plugin-woocommerce-beta-tester'
 
             - name: Lint
               working-directory: plugins/woocommerce-beta-tester

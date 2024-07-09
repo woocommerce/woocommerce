@@ -16,13 +16,9 @@ inputs:
     pull-playwright-cache:
         description: 'Given a boolean value, invokes Playwright dependencies caching.'
         default: false
-    pull-pnpm-cache:
-      description: 'Given a boolean value, invokes pnpm dependencies caching. Under the hood we invoke composer deps caching.'
-      default: false
-    pull-cache-key:
-      description: 'Given a string value, uses it to compose cache keys.'
-      default: false
-    # TODO: -pull-pnpm-cache -pull-cache-key => +pull-package-deps (where we specify the package name)
+    pull-package-deps:
+        description: 'Given a string value, will pull the package specific dependencies cache.'
+        default: false
 runs:
     using: 'composite'
     steps:
@@ -47,24 +43,24 @@ runs:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'
         - name: 'Cache: identify pnpm caching directory'
-          if: ${{ inputs.pull-pnpm-cache != 'false' }}
+          if: ${{ inputs.pull-package-deps != 'false' }}
           shell: 'bash'
           run: |
               echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
         - name: 'Cache: pnpm downloads'
-          if: ${{ inputs.pull-pnpm-cache != 'false' }}
+          if: ${{ inputs.pull-package-deps != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: "${{ env.PNPM_STORE_PATH }}"
-              key: "${{ runner.os }}-pnpm-${{ inputs.pull-cache-key }}v1-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
-              restore-keys: '${{ runner.os }}-pnpm-${{ inputs.pull-cache-key }}v1-'
+              key: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}v1-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
+              restore-keys: '${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}v1-'
         - name: 'Cache Composer Dependencies'
-          if: ${{ inputs.pull-pnpm-cache != 'false' }}
+          if: ${{ inputs.pull-package-deps != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: '~/.cache/composer/files'
-              key: "${{ runner.os }}-composer-${{ inputs.pull-cache-key }}v1-${{ hashFiles( 'packages/*/*/composer.lock', 'plugins/*/composer.lock' ) }}"
-              restore-keys: '${{ runner.os }}-composer-${{ inputs.pull-cache-key }}v1-'
+              key: "${{ runner.os }}-composer-${{ inputs.pull-package-deps }}v1-${{ hashFiles( 'packages/*/*/composer.lock', 'plugins/*/composer.lock' ) }}"
+              restore-keys: '${{ runner.os }}-composer-${{ inputs.pull-package-deps }}v1-'
         - name: 'Cache: playwright downloads'
           if: ${{ inputs.pull-playwright-cache != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
