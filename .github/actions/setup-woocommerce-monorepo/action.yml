@@ -22,6 +22,7 @@ inputs:
     pull-cache-key:
       description: 'Given a string value, uses it to compose cache keys.'
       default: false
+    # TODO: -pull-pnpm-cache -pull-cache-key => +pull-package-deps (where we specify the package name)
 runs:
     using: 'composite'
     steps:
