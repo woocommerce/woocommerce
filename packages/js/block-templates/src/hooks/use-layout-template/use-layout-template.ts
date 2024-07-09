@@ -49,11 +49,11 @@ export const useLayoutTemplate = ( layoutTemplateId: string | null ) => {
 		// To prevent this, we pass `__invalid-template-id` as the ID when there is no layout template ID.
 		// A request will still be triggered, but it will return no results.
 		layoutTemplateId || '__invalid-template-id',
-		// Only perform the query if we have a layout template ID; otherwise, just return null.
+		// Only perform the query if the layout template entity is registered and we have a layout template ID; otherwise, just return null.
 		// Note: Until we are using @woocommerce/core-data 6.24.0 (Gutenberg 17.2),
 		// the REST API requests will still be triggered even when the query is disabled due to a regression.
 		// See: https://github.com/WordPress/gutenberg/pull/56108
-		{ enabled: isEntityRegistered }
+		{ enabled: isEntityRegistered && !! layoutTemplateId }
 	);
 
 	return { layoutTemplate, isResolving };
