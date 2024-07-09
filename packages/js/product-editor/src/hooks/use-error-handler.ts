@@ -102,7 +102,7 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 					break;
 				case 'product_form_field_error':
 					response.message = errorMessage;
-					if ( visibleTab !== 'general' ) {
+					if ( visibleTab !== errorContext ) {
 						response.errorProps = getErrorPropsWithActions(
 							errorContext,
 							validatorId,
