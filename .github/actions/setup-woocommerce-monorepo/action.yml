@@ -55,21 +55,21 @@ runs:
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: "${{ env.PNPM_STORE_PATH }}"
-              key: "${{ runner.os }}-pnpm-${{ inputs.pull-cache-key }}v1-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
+              key: "${{ runner.os }}-pnpm-${{ inputs.pull-cache-key }}v1-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
               restore-keys: '${{ runner.os }}-pnpm-${{ inputs.pull-cache-key }}v1-'
         - name: 'Cache Composer Dependencies'
           if: ${{ inputs.pull-pnpm-cache != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: '~/.cache/composer/files'
-              key: "${{ runner.os }}-composer-${{ inputs.pull-cache-key }}v1-${{ hashFiles( '**/composer.lock' ) }}"
+              key: "${{ runner.os }}-composer-${{ inputs.pull-cache-key }}v1-${{ hashFiles( 'packages/*/*/composer.lock', 'plugins/*/composer.lock' ) }}"
               restore-keys: '${{ runner.os }}-composer-${{ inputs.pull-cache-key }}v1-'
         - name: 'Cache: playwright downloads'
           if: ${{ inputs.pull-playwright-cache != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: '~/.cache/ms-playwright/'
-              key: "${{ runner.os }}-playwright-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
+              key: "${{ runner.os }}-playwright-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
               restore-keys: '${{ runner.os }}-playwright-'
         - name: 'Parse Project Filters'
           id: 'project-filters'
