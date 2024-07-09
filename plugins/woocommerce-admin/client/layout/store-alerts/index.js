@@ -84,8 +84,6 @@ export const StoreAlerts = () => {
 		};
 	} );
 
-	console.log( alerts );
-
 	const { triggerNoteAction, updateNote, removeNote } =
 		useDispatch( NOTES_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
