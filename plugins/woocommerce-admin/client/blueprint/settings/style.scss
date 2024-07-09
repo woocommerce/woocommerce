@@ -1,4 +1,4 @@
-.blueprint-settings-slotfill{
+.blueprint-settings-slotfill {
 	label {
 		cursor: pointer;
 	}
@@ -8,7 +8,8 @@
 	}
 	button.is-link {
 		text-decoration: none;
-		&:active, &:focus {
+		&:active,
+		&:focus {
 			outline: none;
 			box-shadow: none;
 		}
