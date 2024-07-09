@@ -271,7 +271,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 		);
 
 		$tools['delete_inbox_notification'] = array(
-			'name'     => __( 'Delete Inbox Notification', 'woocommerce' ),
+			'name'     => __( 'Delete an Inbox Notification', 'woocommerce' ),
 			'button'   => __( 'Delete', 'woocommerce' ),
 			'desc'     => __( 'This will delete an inbox notification by slug', 'woocommerce' ),
 			'selector' => array(
