@@ -33,9 +33,10 @@ jobs:
 
       - name: Upload nightly build
         uses: WebFreak001/deploy-nightly@d147b5dbd2cb8245d2b5f83a41f5ebe9957575b4
-        env:
-          GITHUB_TOKEN: ${{ secrets.FINE_GRAINED_TOKEN_ACTIONS }}
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.FINE_GRAINED_TOKEN_ACTIONS }}
         with:
+          token: ${{ secrets.FINE_GRAINED_TOKEN_ACTIONS }}
           upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
           release_id: ${{ env.RELEASE_ID }}
           asset_path: plugins/woocommerce/woocommerce.zip
