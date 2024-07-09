@@ -30,7 +30,7 @@ export function Edit( {
 	context,
 }: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { label, help, isRequired, tooltip } = attributes;
+	const { label, help, isRequired, tooltip, disabled } = attributes;
 	const [ regularPrice, setRegularPrice ] = useEntityProp< string >(
 		'postType',
 		context.postType || 'product',
@@ -68,7 +68,7 @@ export function Edit( {
 			if ( listPrice ) {
 				if ( listPrice < 0 ) {
 					return __(
-						'List price must be greater than or equals to zero.',
+						'Regular price must be greater than or equals to zero.',
 						'woocommerce'
 					);
 				}
@@ -77,7 +77,7 @@ export function Edit( {
 					listPrice <= Number.parseFloat( salePrice )
 				) {
 					return __(
-						'List price must be greater than the sale price.',
+						'Regular price must be greater than the sale price.',
 						'woocommerce'
 					);
 				}
@@ -120,6 +120,7 @@ export function Edit( {
 							label
 						)
 					}
+					disabled={ disabled }
 					onBlur={ validateRegularPrice }
 				/>
 			</BaseControl>

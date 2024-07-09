@@ -21,7 +21,7 @@ const tagName = `my-tag-${ new Date().getTime().toString() }`;
 
 test.describe.configure( { mode: 'serial' } );
 
-test.describe( 'General tab', () => {
+test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Create product - Organization tab', () => {
 		let productId;
 
@@ -30,7 +30,7 @@ test.describe( 'General tab', () => {
 			'The block product editor is not being tested'
 		);
 
-		test( 'can create a simple product with categories, tags and with passowrd required', async ( {
+		test( 'can create a simple product with categories, tags and with password required', async ( {
 			page,
 		} ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
@@ -38,30 +38,31 @@ test.describe( 'General tab', () => {
 			await page
 				.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
 				.fill( productData.name );
+
+			const regularPrice = page
+				.locator( 'input[name="regular_price"]' )
+				.first();
+			await regularPrice.waitFor( { state: 'visible' } );
+			await regularPrice.click();
+			await regularPrice.fill( productData.productPrice );
+
+			const salePrice = page
+				.locator( 'input[name="sale_price"]' )
+				.first();
+			await salePrice.waitFor( { state: 'visible' } );
+			await salePrice.click();
+			await salePrice.fill( productData.salePrice );
+
 			await page
 				.locator(
 					'[data-template-block-id="basic-details"] .components-summary-control'
 				)
 				.last()
 				.fill( productData.summary );
-			await page
-				.locator(
-					'[id^="wp-block-woocommerce-product-regular-price-field"]'
-				)
-				.first()
-				.fill( productData.productPrice );
-			await page
-				.locator(
-					'[id^="wp-block-woocommerce-product-sale-price-field"]'
-				)
-				.first()
-				.fill( productData.salePrice );
 
 			await clickOnTab( 'Organization', page );
 
-			await page
-				.locator( '[id^="woocommerce-taxonomy-select-"]' )
-				.click();
+			await page.getByLabel( 'Categories' ).click();
 
 			await page.locator( 'text=Create new' ).click();
 
@@ -77,7 +78,7 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			await page.locator( '[id^="tag-field-"]' ).click();
+			await page.getByLabel( 'Tags' ).click();
 
 			await page.locator( 'text=Create new' ).click();
 
@@ -110,10 +111,9 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			const element = page.locator( 'div.components-snackbar__content' );
-			const textContent = await element.innerText();
-
-			await expect( textContent ).toMatch( /Product published/ );
+			await expect(
+				page.getByLabel( 'Dismiss this notice' )
+			).toContainText( 'Product published' );
 
 			const title = page.locator( '.woocommerce-product-header__title' );
 
@@ -139,8 +139,8 @@ test.describe( 'General tab', () => {
 			).toBeVisible();
 
 			await expect(
-				page.getByRole( 'link', { name: categoryName } )
-			).toBeVisible();
+				await page.getByRole( 'link', { name: categoryName } ).count()
+			).toBeGreaterThan( 0 );
 
 			await expect(
 				page.getByRole( 'link', { name: tagName } )

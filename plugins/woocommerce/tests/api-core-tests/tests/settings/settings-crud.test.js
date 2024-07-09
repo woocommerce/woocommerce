@@ -1,14 +1,10 @@
 const { test, expect } = require( '@playwright/test' );
 const { API_BASE_URL } = process.env;
-const shouldSkip = API_BASE_URL != undefined;
+const shouldSkip = API_BASE_URL !== undefined;
 
-const exp = require( 'constants' );
-const { keys } = require( 'lodash' );
 const {
 	countries,
 	currencies,
-	externalCurrencies,
-	externalCountries,
 	stateOptions,
 } = require( '../../data/settings' );
 
@@ -677,7 +673,6 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					},
 				}
 			);
-			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
 
 			// retrieve the updated settings values
@@ -1011,7 +1006,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						id: 'woocommerce_file_download_method',
 						label: 'File download method',
 						description:
-							"If you are using X-Accel-Redirect download method along with NGINX server, make sure that you have applied settings as described in <a href='https://woo.com/document/digital-downloadable-product-handling#nginx-setting'>Digital/Downloadable Product Handling</a> guide.",
+							"If you are using X-Accel-Redirect download method along with NGINX server, make sure that you have applied settings as described in <a href='https://woocommerce.com/document/digital-downloadable-product-handling#nginx-setting'>Digital/Downloadable Product Handling</a> guide.",
 						type: 'select',
 						default: 'force',
 						options: {
@@ -1339,9 +1334,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						id: 'woocommerce_enable_guest_checkout',
-						label: 'Guest checkout',
-						description:
-							'Allow customers to place orders without an account',
+						label: 'Checkout',
+						description: 'Enable guest checkout (recommended)',
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
@@ -1353,8 +1347,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_enable_checkout_login_reminder',
 						label: 'Login',
-						description:
-							'Allow customers to log into an existing account during checkout',
+						description: 'Enable log-in during checkout',
 						type: 'checkbox',
 						default: 'no',
 						value: 'no',
@@ -1366,8 +1359,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_enable_signup_and_login_from_checkout',
 						label: 'Account creation',
-						description:
-							'Allow customers to create an account during checkout',
+						description: 'During checkout',
 						type: 'checkbox',
 						default: 'no',
 						value: 'no',
@@ -1378,9 +1370,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						id: 'woocommerce_enable_myaccount_registration',
-						label: '',
-						description:
-							'Allow customers to create an account on the "My account" page',
+						label: 'Account creation',
+						description: 'On "My account" page',
 						type: 'checkbox',
 						default: 'no',
 						value: 'no',
@@ -1391,9 +1382,9 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						id: 'woocommerce_registration_generate_username',
-						label: '',
+						label: 'Account creation options',
 						description:
-							'When creating an account, automatically generate an account username for the customer based on their name, surname or email',
+							'Use email address as account login (recommended)',
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
@@ -1404,9 +1395,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						id: 'woocommerce_registration_generate_password',
-						label: '',
-						description:
-							'When creating an account, send the new user a link to set their password',
+						label: 'Account creation options',
+						description: 'Send password setup link (recommended)',
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
@@ -1422,11 +1412,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 							'Remove personal data from orders on request',
 						type: 'checkbox',
 						default: 'no',
-						tip: expect.stringContaining(
-							'When handling an <a href='
-						),
-						tip: expect.stringContaining(
-							'wp-admin/erase-personal-data.php">account erasure request</a>, should personal data within orders be retained or removed?'
+						tip: expect.stringMatching(
+							'When handling an <a href="[^"]*wp-admin/erase-personal-data.php">account erasure request</a>, should personal data within orders be retained or removed?'
 						),
 						value: 'no',
 					} ),
@@ -1440,11 +1427,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						description: 'Remove access to downloads on request',
 						type: 'checkbox',
 						default: 'no',
-						tip: expect.stringContaining(
-							'When handling an <a href='
-						),
-						tip: expect.stringContaining(
-							'wp-admin/erase-personal-data.php">account erasure request</a>, should access to downloadable files be revoked and download logs cleared?'
+						tip: expect.stringMatching(
+							'When handling an <a href="[^"]*wp-admin/erase-personal-data.php">account erasure request</a>, should access to downloadable files be revoked and download logs cleared?'
 						),
 						value: 'no',
 					} ),
@@ -1865,18 +1849,6 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_api_enabled',
-						label: 'Legacy API',
-						description: 'Enable the legacy REST API',
-						type: 'checkbox',
-						default: 'no',
-						value: 'no',
-					} ),
-				] )
-			);
 			if ( ! shouldSkip ) {
 				expect( responseJSON ).toEqual(
 					expect.arrayContaining( [
@@ -1887,7 +1859,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 								'Allow usage of WooCommerce to be tracked',
 							type: 'checkbox',
 							default: 'no',
-							tip: 'To opt out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: <a href="https://woo.com/usage-tracking" target="_blank">Woo.com Usage Tracking Documentation</a>.',
+							tip: 'To opt out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: <a href="https://woocommerce.com/usage-tracking" target="_blank">WooCommerce.com Usage Tracking Documentation</a>.',
 							value: 'no',
 						} ),
 					] )
@@ -1903,7 +1875,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						description: 'Display suggestions within WooCommerce',
 						type: 'checkbox',
 						default: 'yes',
-						tip: 'Leave this box unchecked if you do not want to pull suggested extensions from Woo.com. You will see a static list of extensions instead.',
+						tip: 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com. You will see a static list of extensions instead.',
 						value: 'yes',
 					} ),
 				] )
@@ -1917,19 +1889,6 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_navigation_enabled',
-						label: 'Navigation',
-						description: expect.stringContaining(
-							'Add the new WooCommerce navigation experience to the dashboard'
-						),
-						type: 'checkbox',
-						value: expect.any( String ),
 					} ),
 				] )
 			);
@@ -2116,9 +2075,9 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 							'Text to appear below the main email content. Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
 						type: 'textarea',
 						default:
-							'Hopefully they’ll be back. Read more about <a href="https://woo.com/document/managing-orders/">troubleshooting failed payments</a>.',
+							'Hopefully they’ll be back. Read more about <a href="https://woocommerce.com/document/managing-orders/">troubleshooting failed payments</a>.',
 						tip: 'Text to appear below the main email content. Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
-						value: 'Hopefully they’ll be back. Read more about <a href="https://woo.com/document/managing-orders/">troubleshooting failed payments</a>.',
+						value: 'Hopefully they’ll be back. Read more about <a href="https://woocommerce.com/document/managing-orders/">troubleshooting failed payments</a>.',
 					} ),
 				] )
 			);

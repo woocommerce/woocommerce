@@ -22,6 +22,7 @@ describe( 'useProductTemplate', () => {
 					icon: 'icon',
 					order: 1,
 					layoutTemplateId: 'layout-template-1',
+					isSelectableByUser: true,
 					productData: {
 						type: 'simple',
 					},
@@ -32,6 +33,7 @@ describe( 'useProductTemplate', () => {
 					description: 'Template 2 description',
 					icon: 'icon',
 					layoutTemplateId: 'layout-template-2',
+					isSelectableByUser: true,
 					order: 2,
 					productData: {
 						type: 'grouped',
@@ -43,6 +45,7 @@ describe( 'useProductTemplate', () => {
 					description: 'Template 3 description',
 					icon: 'icon',
 					layoutTemplateId: 'layout-template-3',
+					isSelectableByUser: true,
 					order: 3,
 					productData: {
 						type: 'simple',
@@ -54,6 +57,7 @@ describe( 'useProductTemplate', () => {
 					description: 'Standard Product Template description',
 					icon: 'icon',
 					layoutTemplateId: 'layout-template-4',
+					isSelectableByUser: true,
 					order: 4,
 					productData: {
 						type: 'simple',
@@ -65,6 +69,7 @@ describe( 'useProductTemplate', () => {
 					description: 'Gift CardProduct Template description',
 					icon: 'icon',
 					layoutTemplateId: 'layout-template-5',
+					isSelectableByUser: true,
 					order: 5,
 					productData: {
 						type: 'simple',
@@ -72,6 +77,7 @@ describe( 'useProductTemplate', () => {
 					},
 				},
 			],
+			maxUploadFileSize: 100 * 1024 * 1024, // 100 MB
 		};
 	} );
 
@@ -104,17 +110,9 @@ describe( 'useProductTemplate', () => {
 		expect( result.current.productTemplate?.id ).toEqual( 'template-2' );
 	} );
 
-	it( 'should return undefined if no matching product template by id or type', () => {
+	it( 'should return standard-product-template if no matching product template by id or type', () => {
 		const { result } = renderHook( () =>
 			useProductTemplate( 'invalid-template-id', { type: 'external' } )
-		);
-
-		expect( result.current.productTemplate ).toBeUndefined();
-	} );
-
-	it( 'should use the standard product template if the product type is variable', () => {
-		const { result } = renderHook( () =>
-			useProductTemplate( 'template-1', { type: 'variable' } )
 		);
 
 		expect( result.current.productTemplate?.id ).toEqual(
@@ -122,9 +120,9 @@ describe( 'useProductTemplate', () => {
 		);
 	} );
 
-	it( 'should use the product type to match if the product template id matches a template with a different product type', () => {
+	it( 'should match to a template with the same type if no template id is provided', () => {
 		const { result } = renderHook( () =>
-			useProductTemplate( 'template-2', { type: 'simple' } )
+			useProductTemplate( undefined, { type: 'simple' } )
 		);
 
 		expect( result.current.productTemplate?.id ).toEqual( 'template-1' );

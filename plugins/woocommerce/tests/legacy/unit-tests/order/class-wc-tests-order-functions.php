@@ -222,6 +222,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 2.6
 	 */
 	public function test_wc_order_get_payment_tokens() {
+		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Test only works against Post Meta' );
+		}
 		$order = WC_Helper_Order::create_order();
 		$this->assertEmpty( $order->get_payment_tokens() );
 
@@ -1469,6 +1472,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 			'content'       => $note_content,
 			'customer_note' => false,
 			'added_by'      => 'system',
+			'order_id'      => absint( $order->get_id() ),
 		);
 		$note         = (array) wc_get_order_note( $note_id );
 		unset( $note['date_created'] );

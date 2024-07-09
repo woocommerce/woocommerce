@@ -17,7 +17,7 @@ const testProps = {
 		paidProduct: {
 			description: 'Paid product type',
 			label: 'Paid product',
-			more_url: 'https://woo.com/paid-product',
+			more_url: 'https://woocommerce.com/paid-product',
 			product: 100,
 			slug: 'paid-product',
 			yearly_price: 120,

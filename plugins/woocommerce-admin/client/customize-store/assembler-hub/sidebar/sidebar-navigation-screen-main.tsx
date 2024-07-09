@@ -24,7 +24,6 @@ import {
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 import { Link } from '@woocommerce/components';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -33,12 +32,20 @@ import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
+import { trackEvent } from '~/customize-store/tracking';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import {
+	SidebarNavigationAnimationDirection,
+	SidebarNavigationContext,
+} from '../components/sidebar';
+import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
 
 export const SidebarNavigationScreenMain = () => {
 	const {
 		context: { flowType },
 	} = useContext( CustomizeStoreContext );
 	const aiOnline = flowType === FlowType.AIOnline;
+	const { navigate } = useContext( SidebarNavigationContext );
 
 	return (
 		<SidebarNavigationScreen
@@ -53,7 +60,7 @@ export const SidebarNavigationScreenMain = () => {
 					EditorLink: (
 						<Link
 							onClick={ () => {
-								recordEvent(
+								trackEvent(
 									'customize_your_store_assembler_hub_editor_link_click',
 									{
 										source: 'main',
@@ -84,7 +91,17 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ siteLogo }
 							onClick={ () => {
-								recordEvent(
+								const logoUrl = getNewPath(
+									{ customizing: true },
+									'/customize-store/assembler-hub/logo',
+									{}
+								);
+
+								navigateTo( { url: logoUrl } );
+								navigate(
+									SidebarNavigationAnimationDirection.Forward
+								);
+								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'logo',
@@ -100,7 +117,17 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ color }
 							onClick={ () => {
-								recordEvent(
+								const colorPaletteUrl = getNewPath(
+									{ customizing: true },
+									'/customize-store/assembler-hub/color-palette',
+									{}
+								);
+
+								navigateTo( { url: colorPaletteUrl } );
+								navigate(
+									SidebarNavigationAnimationDirection.Forward
+								);
+								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'color-palette',
@@ -124,7 +151,17 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ typography }
 							onClick={ () => {
-								recordEvent(
+								const typographyUrl = getNewPath(
+									{ customizing: true },
+									'/customize-store/assembler-hub/typography',
+									{}
+								);
+
+								navigateTo( { url: typographyUrl } );
+								navigate(
+									SidebarNavigationAnimationDirection.Forward
+								);
+								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'typography',
@@ -149,7 +186,17 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ header }
 							onClick={ () => {
-								recordEvent(
+								const headerUrl = getNewPath(
+									{ customizing: true },
+									'/customize-store/assembler-hub/header',
+									{}
+								);
+
+								navigateTo( { url: headerUrl } );
+								navigate(
+									SidebarNavigationAnimationDirection.Forward
+								);
+								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'header',
@@ -167,7 +214,24 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ home }
 							onClick={ () => {
-								recordEvent(
+								const homepageUrl =
+									isFullComposabilityFeatureAndAPIAvailable()
+										? getNewPath(
+												{ customizing: true },
+												'/customize-store/assembler-hub/homepage/intro',
+												{}
+										  )
+										: getNewPath(
+												{ customizing: true },
+												'/customize-store/assembler-hub/homepage',
+												{}
+										  );
+
+								navigateTo( { url: homepageUrl } );
+								navigate(
+									SidebarNavigationAnimationDirection.Forward
+								);
+								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'home',
@@ -185,7 +249,17 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ footer }
 							onClick={ () => {
-								recordEvent(
+								const footerUrl = getNewPath(
+									{ customizing: true },
+									'/customize-store/assembler-hub/footer',
+									{}
+								);
+
+								navigateTo( { url: footerUrl } );
+								navigate(
+									SidebarNavigationAnimationDirection.Forward
+								);
+								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'footer',

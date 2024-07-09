@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix failing e2e customer list test by skipping blank slate

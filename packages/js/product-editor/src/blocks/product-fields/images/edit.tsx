@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { DragEvent } from 'react';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { BlockAttributes } from '@wordpress/blocks';
 import { DropZone } from '@wordpress/components';
+import { useDispatch } from '@wordpress/data';
 import classnames from 'classnames';
 import { createElement, useState } from '@wordpress/element';
 import { Icon, trash } from '@wordpress/icons';
@@ -12,6 +13,7 @@ import { MediaItem } from '@wordpress/media-utils';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	MediaUploader,
+	MediaUploaderErrorCallback,
 	ImageGallery,
 	ImageGalleryItem,
 } from '@woocommerce/components';
@@ -27,6 +29,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { PlaceHolder } from './place-holder';
 import { SectionActions } from '../../../components/block-slot-fill';
+import { mapUploadImageToImage } from '../../../utils/map-upload-image-to-image';
 
 type UploadImage = {
 	id?: number;
@@ -37,16 +40,6 @@ export interface Image {
 	src: string;
 	name: string;
 	alt: string;
-}
-
-function mapUploadImageToImage( upload: UploadImage ): Image | null {
-	if ( ! upload.id ) return null;
-	return {
-		id: upload.id,
-		name: upload.title,
-		src: upload.url,
-		alt: upload.alt,
-	};
 }
 
 export function ImageBlockEdit( {
@@ -71,6 +64,8 @@ export function ImageBlockEdit( {
 				: Boolean( propertyValue ),
 		} ),
 	} );
+
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	function orderImages( newOrder: JSX.Element[] ) {
 		if ( Array.isArray( propertyValue ) ) {
@@ -195,6 +190,19 @@ export function ImageBlockEdit( {
 		}
 	}
 
+	const handleMediaUploaderError: MediaUploaderErrorCallback = function (
+		error
+	) {
+		createErrorNotice(
+			sprintf(
+				/* translators: %1$s is a line break, %2$s is the detailed error message */
+				__( 'Error uploading image:%1$s%2$s', 'woocommerce' ),
+				'\n',
+				error.message
+			)
+		);
+	};
+
 	const isImageGalleryVisible =
 		propertyValue !== null &&
 		( ! Array.isArray( propertyValue ) || propertyValue.length > 0 );
@@ -228,7 +236,11 @@ export function ImageBlockEdit( {
 										: propertyValue?.id ?? undefined
 								}
 								multipleSelect={ multiple ? 'add' : false }
-								onError={ () => null }
+								maxUploadFileSize={
+									window.productBlockEditorSettings
+										?.maxUploadFileSize
+								}
+								onError={ handleMediaUploaderError }
 								onFileUploadChange={ uploadHandler(
 									'product_images_add_via_file_upload_area'
 								) }
@@ -279,7 +291,7 @@ export function ImageBlockEdit( {
 					) ) }
 				</ImageGallery>
 			) : (
-				<PlaceHolder />
+				<PlaceHolder multiple={ multiple } />
 			) }
 		</div>
 	);

@@ -6,13 +6,13 @@ import { Sender } from 'xstate';
 import { __ } from '@wordpress/i18n';
 import { Link } from '@woocommerce/components';
 import { createInterpolateElement } from '@wordpress/element';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { customizeStoreStateMachineEvents } from '..';
 import { ADMIN_URL } from '~/utils/admin-settings';
+import { trackEvent } from '../tracking';
 export const DesignChangeWarningModal = ( {
 	setOpenDesignChangeWarningModal,
 	sendEvent,
@@ -182,7 +182,7 @@ export const StartOverWarningModal = ( {
 				<Button
 					onClick={ () => {
 						sendEvent( { type: 'DESIGN_WITH_AI' } );
-						recordEvent(
+						trackEvent(
 							'customize_your_store_intro_start_again_click'
 						);
 					} }
@@ -232,7 +232,7 @@ export const ThemeSwitchWarningModal = ( {
 				<Button
 					onClick={ () => {
 						setIsModalOpen( false );
-						recordEvent(
+						trackEvent(
 							'customize_your_store_agree_to_theme_switch_click'
 						);
 						redirectToCYSFlow();

@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/admin-layout",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "WooCommerce admin layout copmonents and utilities.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -70,7 +70,7 @@
 		"postcss-loader": "^4.3.0",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2",
-		"rimraf": "^3.0.2",
+		"rimraf": "5.0.5",
 		"sass-loader": "^10.5.0",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",

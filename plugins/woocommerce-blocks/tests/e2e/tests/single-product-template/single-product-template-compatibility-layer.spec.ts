@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import {
-	installPluginFromPHPFile,
-	uninstallPluginFromPHPFile,
-} from '@woocommerce/e2e-mocks/custom-plugins';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -18,7 +14,7 @@ type Scenario = {
 	amount: number;
 };
 
-const singleOccurranceScenarios: Scenario[] = [
+const singleOccurrenceScenarios: Scenario[] = [
 	{
 		title: 'Before Main Content',
 		dataTestId: 'woocommerce_before_main_content',
@@ -87,36 +83,22 @@ const singleOccurranceScenarios: Scenario[] = [
 	},
 ];
 
-const compatiblityPluginFileName = 'compatibility-plugin.php';
-
-test.describe( 'Compatibility Layer with Product Collection block', () => {
-	test.beforeAll( async () => {
-		await installPluginFromPHPFile(
-			`${ __dirname }/${ compatiblityPluginFileName }`
+test.describe( 'Compatibility Layer in Single Product template', () => {
+	test.beforeEach( async ( { requestUtils } ) => {
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-single-product-template-compatibility-layer'
 		);
 	} );
 
-	test.describe( 'Product Archive with Product Collection block', async () => {
-		test.beforeAll( async ( { page } ) => {
+	for ( const scenario of singleOccurrenceScenarios ) {
+		test( `${ scenario.title } is attached to the page`, async ( {
+			page,
+		} ) => {
 			await page.goto( '/product/hoodie/' );
+			const hooks = page.getByTestId( scenario.dataTestId );
+
+			await expect( hooks ).toHaveCount( scenario.amount );
+			await expect( hooks ).toHaveText( scenario.content );
 		} );
-
-		for ( const scenario of singleOccurranceScenarios ) {
-			test( `${ scenario.title } is attached to the page`, async ( {
-				page,
-			} ) => {
-				const hooks = page.getByTestId( scenario.dataTestId );
-
-				await expect( hooks ).toHaveCount( scenario.amount );
-				await expect( hooks ).toHaveText( scenario.content );
-			} );
-		}
-	} );
-} );
-
-test.afterAll( async ( { requestUtils } ) => {
-	await uninstallPluginFromPHPFile(
-		`${ __dirname }/${ compatiblityPluginFileName }`
-	);
-	await requestUtils.deleteAllTemplates( 'wp_template' );
+	}
 } );

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -27,7 +27,7 @@ const Slot = ( {
 } ) => {
 	return (
 		<OrderShippingPackagesSlot
-			className={ classnames(
+			className={ clsx(
 				'wc-block-components-shipping-rates-control',
 				className
 			) }

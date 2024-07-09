@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\ProductCountRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\ProductCountRuleProcessor;
 
 /**
  * class WC_Admin_Tests_RemoteInboxNotifications_ProductCountRuleProcessor

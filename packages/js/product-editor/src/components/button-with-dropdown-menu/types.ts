@@ -46,4 +46,5 @@ export type ButtonWithDropdownMenuProps = Omit<
 	controls?: DropdownOption[];
 	popoverProps?: PopoverProps;
 	renderMenu?( props: Dropdown.RenderProps ): React.ReactElement;
+	onToggle?: ( isOpen: boolean ) => void;
 };

@@ -53,7 +53,7 @@ class WooCommerceSubscriptions {
 		$note->add_action(
 			'learn-more',
 			__( 'Learn More', 'woocommerce' ),
-			'https://woo.com/products/woocommerce-subscriptions/?utm_source=inbox&utm_medium=product',
+			'https://woocommerce.com/products/woocommerce-subscriptions/?utm_source=inbox&utm_medium=product',
 			Note::E_WC_ADMIN_NOTE_UNACTIONED,
 			true
 		);

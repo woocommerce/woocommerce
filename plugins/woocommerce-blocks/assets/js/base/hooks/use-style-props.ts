@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { isString, isObject } from '@woocommerce/types';
 import type { Style as StyleEngineProperties } from '@wordpress/style-engine/src/types';
 import type { CSSProperties } from 'react';
@@ -72,7 +72,7 @@ export const useStyleProps = ( props: BlockAttributes ): StyleProps => {
 	const typographyProps = useTypographyProps( styleAttributes );
 
 	return {
-		className: classnames(
+		className: clsx(
 			typographyProps.className,
 			colorProps.className,
 			borderProps.className,

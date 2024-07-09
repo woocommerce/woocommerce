@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
@@ -49,7 +49,7 @@ const NoRating = ( { parentClassName }: { parentClassName: string } ) => {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'wc-block-components-product-rating__norating-container',
 				`${ parentClassName }-product-rating__norating-container`
 			) }
@@ -91,7 +91,7 @@ const Rating = ( props: RatingProps ): JSX.Element => {
 	};
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'wc-block-components-product-rating__stars',
 				`${ parentClassName }__product-rating__stars`
 			) }
@@ -146,7 +146,7 @@ export const Block = ( props: ProductRatingProps ): JSX.Element | undefined => {
 	const rating = getAverageRating( product );
 	const reviews = getRatingCount( product );
 
-	const className = classnames(
+	const className = clsx(
 		styleProps.className,
 		'wc-block-components-product-rating',
 		{

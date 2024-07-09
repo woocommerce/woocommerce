@@ -1,6 +1,6 @@
-@import './stylesheets/variables.scss';
-@import './components/container/style.scss';
-@import './components/header/style.scss';
+@import "./stylesheets/variables.scss";
+@import "./components/container/style.scss";
+@import "./components/header/style.scss";
 
 .woocommerce-navigation {
 	position: relative;
@@ -138,13 +138,13 @@ body.is-wc-nav-folded {
 
 	.woocommerce-layout__header.is-embed-loading {
 		&::before {
-			content: '';
+			content: "";
 			position: fixed;
 			width: $navigation-width;
 			height: 100%;
 			background: $gray-900;
 
-			@include breakpoint( '<960px' ) {
+			@include breakpoint( "<960px" ) {
 				width: $header-height;
 				height: $header-height;
 			}

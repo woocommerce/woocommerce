@@ -1,40 +1,39 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
-baseTest.describe( 'Products > Edit Product', () => {
-	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
-		products: async ( { api }, use ) => {
-			const products = [];
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	products: async ( { api }, use ) => {
+		const products = [];
 
-			for ( let i = 0; i < 2; i++ ) {
-				await api
-					.post( 'products', {
-						id: 0,
-						name: `Product ${ i }_${ Date.now() }`,
-						type: 'simple',
-						regular_price: `${ 12.99 + i }`,
-						manage_stock: true,
-						stock_quantity: 10 + i,
-						stock_status: 'instock',
-					} )
-					.then( ( response ) => {
-						products.push( response.data );
-					} );
-			}
+		for ( let i = 0; i < 2; i++ ) {
+			await api
+				.post( 'products', {
+					id: 0,
+					name: `Product ${ i }_${ Date.now() }`,
+					type: 'simple',
+					regular_price: `${ 12.99 + i }`,
+					manage_stock: true,
+					stock_quantity: 10 + i,
+					stock_status: 'instock',
+				} )
+				.then( ( response ) => {
+					products.push( response.data );
+				} );
+		}
 
-			await use( products );
+		await use( products );
 
-			// Cleanup
-			for ( const product of products ) {
-				await api.delete( `products/${ product.id }`, { force: true } );
-			}
-		},
-	} );
+		// Cleanup
+		for ( const product of products ) {
+			await api.delete( `products/${ product.id }`, { force: true } );
+		}
+	},
+} );
 
-	test( 'can edit a product and save the changes', async ( {
-		page,
-		products,
-	} ) => {
+test(
+	'can edit a product and save the changes',
+	{ tag: [ '@gutenberg', '@services' ] },
+	async ( { page, products } ) => {
 		await page.goto(
 			`wp-admin/post.php?post=${ products[ 0 ].id }&action=edit`
 		);
@@ -85,9 +84,13 @@ baseTest.describe( 'Products > Edit Product', () => {
 				newProduct.salePrice
 			);
 		} );
-	} );
+	}
+);
 
-	test( 'can bulk edit products', async ( { page, products } ) => {
+test(
+	'can bulk edit products',
+	{ tag: [ '@gutenberg', '@services' ] },
+	async ( { page, products } ) => {
 		await page.goto( `wp-admin/edit.php?post_type=product` );
 
 		const regularPriceIncrease = 10;
@@ -160,15 +163,25 @@ baseTest.describe( 'Products > Edit Product', () => {
 					product.stock_quantity + stockQtyIncrease;
 
 				await expect
-					.soft( page.locator( 'p' ).locator( 'del' ) )
-					.toHaveText( `$${ expectedRegularPrice }` );
+					.soft(
+						await page
+							.locator( 'del' )
+							.getByText( `$${ expectedRegularPrice }` )
+							.count()
+					)
+					.toBeGreaterThan( 0 );
 				await expect
-					.soft( page.locator( 'p' ).locator( 'ins' ) )
-					.toHaveText( `$${ expectedSalePrice }` );
+					.soft(
+						await page
+							.locator( 'ins' )
+							.getByText( `$${ expectedSalePrice }` )
+							.count()
+					)
+					.toBeGreaterThan( 0 );
 				await expect
 					.soft( page.getByText( `${ expectedStockQty } in stock` ) )
 					.toBeVisible();
 			}
 		} );
-	} );
-} );
+	}
+);

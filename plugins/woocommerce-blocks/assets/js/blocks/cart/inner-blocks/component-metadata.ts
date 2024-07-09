@@ -15,6 +15,7 @@ import CART_ORDER_SUMMARY from './cart-order-summary-block/block.json';
 import CART_ORDER_SUMMARY_SUBTOTAL from './cart-order-summary-subtotal/block.json';
 import CART_ORDER_SUMMARY_FEE from './cart-order-summary-fee/block.json';
 import CART_ORDER_SUMMARY_DISCOUNT from './cart-order-summary-discount/block.json';
+import CART_ORDER_SUMMARY_TOTALS from './cart-order-summary-totals/block.json';
 import CART_ORDER_SUMMARY_SHIPPING from './cart-order-summary-shipping/block.json';
 import CART_ORDER_SUMMARY_COUPON_FORM from './cart-order-summary-coupon-form/block.json';
 import CART_ORDER_SUMMARY_TAXES from './cart-order-summary-taxes/block.json';
@@ -38,5 +39,6 @@ export default {
 	CART_ORDER_SUMMARY_SHIPPING,
 	CART_ORDER_SUMMARY_COUPON_FORM,
 	CART_ORDER_SUMMARY_TAXES,
+	CART_ORDER_SUMMARY_TOTALS,
 	CART_ORDER_SUMMARY_HEADING,
 };

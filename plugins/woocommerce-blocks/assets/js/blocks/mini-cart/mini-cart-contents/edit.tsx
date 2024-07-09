@@ -8,7 +8,6 @@ import {
 	InspectorControls,
 } from '@wordpress/block-editor';
 import { EditorProvider } from '@woocommerce/base-context';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import type { TemplateArray } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
 import type { FocusEvent, ReactElement } from 'react';
@@ -115,41 +114,38 @@ const Edit = ( {
 
 	return (
 		<>
-			{ isFeaturePluginBuild() && (
-				<InspectorControls key="inspector">
-					<PanelBody
-						title={ __( 'Dimensions', 'woocommerce' ) }
-						initialOpen
-					>
-						<UnitControl
-							onChange={ ( value ) => {
-								setAttributes( { width: value } );
-							} }
-							onBlur={ ( e: FocusEvent< HTMLInputElement > ) => {
-								if ( e.target.value === '' ) {
-									setAttributes( {
-										width: defaultAttributes.width.default,
-									} );
-								} else if (
-									Number( e.target.value ) < MIN_WIDTH
-								) {
-									setAttributes( {
-										width: MIN_WIDTH + 'px',
-									} );
-								}
-							} }
-							value={ width }
-							units={ [
-								{
-									value: 'px',
-									label: 'px',
-									default: defaultAttributes.width.default,
-								},
-							] }
-						/>
-					</PanelBody>
-				</InspectorControls>
-			) }
+			<InspectorControls key="inspector">
+				<PanelBody
+					title={ __( 'Dimensions', 'woocommerce' ) }
+					initialOpen
+				>
+					<UnitControl
+						onChange={ ( value ) => {
+							setAttributes( { width: value } );
+						} }
+						onBlur={ ( e: FocusEvent< HTMLInputElement > ) => {
+							if ( e.target.value === '' ) {
+								setAttributes( {
+									width: defaultAttributes.width.default,
+								} );
+							} else if ( Number( e.target.value ) < MIN_WIDTH ) {
+								setAttributes( {
+									width: MIN_WIDTH + 'px',
+								} );
+							}
+						} }
+						value={ width }
+						units={ [
+							{
+								value: 'px',
+								label: 'px',
+								default: defaultAttributes.width.default,
+							},
+						] }
+					/>
+				</PanelBody>
+			</InspectorControls>
+
 			<div
 				className="wc-block-components-drawer__screen-overlay"
 				aria-hidden="true"

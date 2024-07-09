@@ -1,8 +1,12 @@
 /**
  * External dependencies
  */
-import { expect, test } from '@woocommerce/e2e-playwright-utils';
-import { BlockData } from '@woocommerce/e2e-types';
+import {
+	expect,
+	test,
+	CLASSIC_THEME_SLUG,
+	BlockData,
+} from '@woocommerce/e2e-utils';
 
 const blockData: BlockData = {
 	name: 'Mini-Cart',
@@ -15,16 +19,23 @@ const blockData: BlockData = {
 };
 
 test.describe( 'Merchant → Mini Cart', () => {
-	test.describe( 'in widget editor', () => {
-		test( 'can be inserted in a widget area', async ( { editorUtils } ) => {
-			await editorUtils.openWidgetEditor();
-			await editorUtils.openGlobalBlockInserter();
+	test.beforeEach( async ( { requestUtils } ) => {
+		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
+	} );
 
-			await editorUtils.page
+	test.describe( 'in widget editor', () => {
+		test( 'can be inserted in a widget area', async ( {
+			admin,
+			editor,
+		} ) => {
+			await admin.visitWidgetEditor();
+			await editor.openGlobalBlockInserter();
+
+			await editor.page
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( blockData.slug );
 
-			const miniCartButton = editorUtils.page.getByRole( 'option', {
+			const miniCartButton = editor.page.getByRole( 'option', {
 				name: blockData.name,
 				exact: true,
 			} );
@@ -34,18 +45,22 @@ test.describe( 'Merchant → Mini Cart', () => {
 			await miniCartButton.click();
 
 			await expect(
-				await editorUtils.getBlockByName( blockData.slug )
+				await editor.getBlockByName( blockData.slug )
 			).toBeVisible();
 		} );
-		test( 'can only be inserted once', async ( { editorUtils } ) => {
-			await editorUtils.openWidgetEditor();
-			await editorUtils.openGlobalBlockInserter();
+		test( 'can only be inserted once', async ( {
+			page,
+			admin,
+			editor,
+		} ) => {
+			await admin.visitWidgetEditor();
+			await editor.openGlobalBlockInserter();
 
-			await editorUtils.page
+			await editor.page
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( blockData.slug );
 
-			const miniCartButton = editorUtils.page.getByRole( 'option', {
+			const miniCartButton = page.getByRole( 'option', {
 				name: blockData.name,
 				exact: true,
 			} );

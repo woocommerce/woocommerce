@@ -1997,18 +1997,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test is_coupon_emails_allowed function on the cart, specifically test wildcard emails.
-	 *
-	 * @return void
-	 */
-	public function test_is_coupon_emails_allowed() {
-		$this->assertEquals( true, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( '*.local' ) ) );
-		$this->assertEquals( false, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( '*.test' ) ) );
-		$this->assertEquals( true, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( 'customer@wc.local' ) ) );
-		$this->assertEquals( false, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( 'customer2@wc.local' ) ) );
-	}
-
-	/**
 	 * Check subtotals align when using filters. Ref: 23340
 	 */
 	public function test_changing_tax_class_via_filter_issue_23340() {

@@ -20,7 +20,7 @@
 	.wrap {
 		padding: 0 20px;
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			p.search-box {
 				width: calc(100% - 40px);
 			}
@@ -66,7 +66,7 @@
 	.woocommerce-layout__primary {
 		margin: 0;
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			padding-top: 10px;
 		}
 	}
@@ -89,12 +89,12 @@
 		margin-top: 10px;
 		margin-bottom: 16px;
 
-		@include breakpoint( '<600px' ) {
+		@include breakpoint( "<600px" ) {
 			margin-top: 80px;
 			margin-bottom: -16px;
 		}
 
-		@include breakpoint( '600px-782px' ) {
+		@include breakpoint( "600px-782px" ) {
 			margin-top: 32px;
 		}
 	}

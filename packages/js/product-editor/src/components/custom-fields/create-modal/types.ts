@@ -12,6 +12,7 @@ export type CreateModalProps = Omit<
 	Modal.Props,
 	'title' | 'onRequestClose' | 'children'
 > & {
+	values: Metadata< string >[];
 	onCreate( value: Metadata< string >[] ): void;
 	onCancel(): void;
 };

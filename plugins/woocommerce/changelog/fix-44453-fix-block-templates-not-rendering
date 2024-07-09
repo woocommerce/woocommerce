@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix block templates not being rendered in extension taxonomies

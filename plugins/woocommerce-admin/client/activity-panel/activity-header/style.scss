@@ -6,7 +6,7 @@
 	justify-content: space-between;
 	align-items: center;
 
-	@include breakpoint( '>782px' ) {
+	@include breakpoint( ">782px" ) {
 		padding: 16px 24px 16px 24px;
 	}
 
@@ -18,8 +18,8 @@
 		padding: 0;
 	}
 
-	.woocommerce-ellipsis-menu__toggle.components-button:not(:disabled):not([aria-disabled='true']):focus,
-	.woocommerce-ellipsis-menu__toggle.components-button:not(:disabled):not([aria-disabled='true']):hover {
+	.woocommerce-ellipsis-menu__toggle.components-button:not(:disabled):not([aria-disabled="true"]):focus,
+	.woocommerce-ellipsis-menu__toggle.components-button:not(:disabled):not([aria-disabled="true"]):hover {
 		box-shadow: none;
 		border-radius: 10px;
 		background: $gray-400;

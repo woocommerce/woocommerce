@@ -12,7 +12,6 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
-import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 // @ts-expect-error No types for this exist yet.
@@ -33,6 +32,7 @@ import BlockPatternList from '../block-pattern-list';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
 import { headerTemplateId } from '~/customize-store/data/homepageTemplates';
+import { trackEvent } from '~/customize-store/tracking';
 
 const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-centered-menu',
@@ -40,8 +40,11 @@ const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-minimal',
 	'woocommerce-blocks/header-large',
 ];
-
-export const SidebarNavigationScreenHeader = () => {
+export const SidebarNavigationScreenHeader = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'top',
@@ -58,7 +61,7 @@ export const SidebarNavigationScreenHeader = () => {
 
 	const [ mainTemplateBlocks ] = useEditorBlocks(
 		'wp_template',
-		currentTemplate.id
+		currentTemplate?.id ?? ''
 	);
 
 	const [ blocks, , onChange ] = useEditorBlocks(
@@ -128,7 +131,10 @@ export const SidebarNavigationScreenHeader = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
-			onNavigateBackClick={ resetHighlightedBlockClientId }
+			onNavigateBackClick={ () => {
+				resetHighlightedBlockClientId();
+				onNavigateBackClick();
+			} }
 			description={ createInterpolateElement(
 				__(
 					"Select a new header from the options below. Your header includes your site's navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
@@ -138,7 +144,7 @@ export const SidebarNavigationScreenHeader = () => {
 					EditorLink: (
 						<Link
 							onClick={ () => {
-								recordEvent(
+								trackEvent(
 									'customize_your_store_assembler_hub_editor_link_click',
 									{
 										source: 'header',

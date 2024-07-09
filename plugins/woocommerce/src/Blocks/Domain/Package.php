@@ -116,29 +116,11 @@ class Package {
 	}
 
 	/**
-	 * Returns an instance of the the FeatureGating class.
+	 * Returns an instance of the FeatureGating class.
 	 *
 	 * @return FeatureGating
 	 */
 	public function feature() {
 		return $this->feature_gating;
-	}
-
-	/**
-	 * Checks if we're executing the code in an experimental build mode.
-	 *
-	 * @return boolean
-	 */
-	public function is_experimental_build() {
-		return $this->feature()->is_experimental_build();
-	}
-
-	/**
-	 * Checks if we're executing the code in an feature plugin or experimental build mode.
-	 *
-	 * @return boolean
-	 */
-	public function is_feature_plugin_build() {
-		return $this->feature()->is_feature_plugin_build();
 	}
 }

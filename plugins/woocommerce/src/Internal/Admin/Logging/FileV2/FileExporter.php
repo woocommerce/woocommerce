@@ -3,8 +3,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+use Exception;
 use WP_Error;
-use WP_Filesystem_Direct;
 
 /**
  * FileExport class.
@@ -39,11 +40,6 @@ class FileExporter {
 	 *                                   part of the path.
 	 */
 	public function __construct( string $path, string $alternate_filename = '' ) {
-		global $wp_filesystem;
-		if ( ! $wp_filesystem instanceof WP_Filesystem_Direct ) {
-			WP_Filesystem();
-		}
-
 		$this->path               = $path;
 		$this->alternate_filename = $alternate_filename;
 	}
@@ -54,8 +50,14 @@ class FileExporter {
 	 * @return WP_Error|void Only returns something if there is an error.
 	 */
 	public function emit_file() {
-		global $wp_filesystem;
-		if ( ! $wp_filesystem->is_file( $this->path ) || ! $wp_filesystem->is_readable( $this->path ) ) {
+		try {
+			$filesystem  = FilesystemUtil::get_wp_filesystem();
+			$is_readable = $filesystem->is_file( $this->path ) && $filesystem->is_readable( $this->path );
+		} catch ( Exception $exception ) {
+			$is_readable = false;
+		}
+
+		if ( ! $is_readable ) {
 			return new WP_Error(
 				'wc_logs_invalid_file',
 				__( 'Could not access file.', 'woocommerce' )
@@ -104,11 +106,11 @@ class FileExporter {
 	 * @return void
 	 */
 	private function send_contents(): void {
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen -- No suitable alternative.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- No suitable alternative.
 		$stream = fopen( $this->path, 'rb' );
 
 		while ( is_resource( $stream ) && ! feof( $stream ) ) {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fread -- No suitable alternative.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- No suitable alternative.
 			$chunk = fread( $stream, self::CHUNK_SIZE );
 
 			if ( is_string( $chunk ) ) {
@@ -117,7 +119,7 @@ class FileExporter {
 			}
 		}
 
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose -- No suitable alternative.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- No suitable alternative.
 		fclose( $stream );
 	}
 

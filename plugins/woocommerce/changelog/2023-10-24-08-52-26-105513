@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add new product archive header template and hook into woocommerce_before_main_content

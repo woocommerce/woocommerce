@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Tax task  - do not require postcode input for countries without postcode.

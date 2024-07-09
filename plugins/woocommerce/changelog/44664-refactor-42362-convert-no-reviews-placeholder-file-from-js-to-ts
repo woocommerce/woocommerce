@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Convert the No Reviews Placeholder component of the Reviews by Product block from JavaScript to TypeScript.
-

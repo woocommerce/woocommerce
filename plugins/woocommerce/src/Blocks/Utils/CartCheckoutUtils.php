@@ -15,12 +15,6 @@ class CartCheckoutUtils {
 		if ( wc_current_theme_is_fse_theme() ) {
 			// Ignore the pages and check the templates.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'cart' ), 'wp_template' );
-
-			// If there is no template file, we're using default which does use the block.
-			if ( empty( $templates_from_db ) ) {
-				return true;
-			}
-
 			foreach ( $templates_from_db as $template ) {
 				if ( has_block( 'woocommerce/cart', $template->content ) ) {
 					return true;
@@ -40,12 +34,6 @@ class CartCheckoutUtils {
 		if ( wc_current_theme_is_fse_theme() ) {
 			// Ignore the pages and check the templates.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'checkout' ), 'wp_template' );
-
-			// If there is no template file, we're using default which does use the block.
-			if ( empty( $templates_from_db ) ) {
-				return true;
-			}
-
 			foreach ( $templates_from_db as $template ) {
 				if ( has_block( 'woocommerce/checkout', $template->content ) ) {
 					return true;
@@ -54,6 +42,32 @@ class CartCheckoutUtils {
 		}
 		$checkout_page_id = wc_get_page_id( 'checkout' );
 		return $checkout_page_id && has_block( 'woocommerce/checkout', $checkout_page_id );
+	}
+
+
+	/**
+	 * Checks if the template overriding the page loads the page content or not.
+	 * Templates by default load the page content, but if that block is deleted the content can get out of sync with the one presented in the page editor.
+	 *
+	 * @param string $block The block to check.
+	 *
+	 * @return bool true if the template has out of sync content.
+	 */
+	public static function is_overriden_by_custom_template_content( string $block ): bool {
+
+		$block = str_replace( 'woocommerce/', '', $block );
+
+		if ( wc_current_theme_is_fse_theme() ) {
+			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'page-' . $block ) );
+			foreach ( $templates_from_db as $template ) {
+				if ( ! has_block( 'woocommerce/page-content-wrapper', $template->content ) ) {
+					// Return true if the template does not load the page content via the  woocommerce/page-content-wrapper block.
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -74,7 +88,7 @@ class CartCheckoutUtils {
 			$country_data[ $country_code ] = [
 				'allowBilling'  => isset( $billing_countries[ $country_code ] ),
 				'allowShipping' => isset( $shipping_countries[ $country_code ] ),
-				'states'        => self::deep_sort_with_accents( $country_states[ $country_code ] ?? [] ),
+				'states'        => $country_states[ $country_code ] ?? [],
 				'locale'        => $country_locales[ $country_code ] ?? [],
 			];
 		}

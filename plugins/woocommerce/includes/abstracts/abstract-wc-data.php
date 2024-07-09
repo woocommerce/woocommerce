@@ -815,7 +815,7 @@ abstract class WC_Data {
 	 * Sets a prop for a setter method.
 	 *
 	 * This stores changes in a special array so we can track what needs saving
-	 * the the DB later.
+	 * the DB later.
 	 *
 	 * @since 3.0.0
 	 * @param string $prop Name of prop to set.

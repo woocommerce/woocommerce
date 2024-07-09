@@ -2,12 +2,11 @@
  * External dependencies
  */
 import { select } from '@wordpress/data';
+import { __experimentalRegisterProductCollection as registerProductCollection } from '@woocommerce/blocks-registry';
 import {
 	// @ts-expect-error Type definition is missing
 	store as blocksStore,
 	type BlockVariation,
-	registerBlockVariation,
-	BlockAttributes,
 } from '@wordpress/blocks';
 
 /**
@@ -32,19 +31,9 @@ const collections: BlockVariation[] = [
 ];
 
 export const registerCollections = () => {
-	collections.forEach( ( collection ) => {
-		const isActive = (
-			blockAttrs: BlockAttributes,
-			variationAttributes: BlockAttributes
-		) => {
-			return blockAttrs.collection === variationAttributes.collection;
-		};
-
-		registerBlockVariation( blockJson.name, {
-			isActive,
-			...collection,
-		} );
-	} );
+	collections.forEach( ( collection ) =>
+		registerProductCollection( collection )
+	);
 };
 
 export const getCollectionByName = ( collectionName?: CollectionName ) => {

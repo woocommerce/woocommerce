@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Update deps and fix a bug where package rc files were not respected.

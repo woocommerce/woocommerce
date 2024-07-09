@@ -12,7 +12,6 @@ import {
 import { useSelect } from '@wordpress/data';
 import { Link } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
 import { Button, Modal, CheckboxControl } from '@wordpress/components';
 import interpolateComponents from '@automattic/interpolate-components';
 
@@ -25,7 +24,13 @@ import { FontPairing } from './global-styles';
 import { CustomizeStoreContext } from '..';
 import { FlowType } from '~/customize-store/types';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
-export const SidebarNavigationScreenTypography = () => {
+import { trackEvent } from '~/customize-store/tracking';
+
+export const SidebarNavigationScreenTypography = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const { context, sendEvent } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
@@ -69,13 +74,13 @@ export const SidebarNavigationScreenTypography = () => {
 	}
 
 	const optIn = () => {
-		recordEvent(
+		trackEvent(
 			'customize_your_store_assembler_hub_opt_in_usage_tracking'
 		);
 	};
 
 	const skipOptIn = () => {
-		recordEvent(
+		trackEvent(
 			'customize_your_store_assembler_hub_skip_opt_in_usage_tracking'
 		);
 	};
@@ -91,11 +96,12 @@ export const SidebarNavigationScreenTypography = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
+			onNavigateBackClick={ onNavigateBackClick }
 			description={ createInterpolateElement( label, {
 				EditorLink: (
 					<Link
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_assembler_hub_editor_link_click',
 								{
 									source: 'typography',
@@ -113,7 +119,7 @@ export const SidebarNavigationScreenTypography = () => {
 				StyleLink: (
 					<Link
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_assembler_hub_style_link_click',
 								{
 									source: 'typography',
@@ -164,7 +170,7 @@ export const SidebarNavigationScreenTypography = () => {
 										'woocommerce-customize-store__opt-in-usage-tracking-modal'
 									}
 									title={ __(
-										'Opt in to usage tracking',
+										'Get more fonts',
 										'woocommerce'
 									) }
 									onRequestClose={ closeModal }
@@ -174,13 +180,13 @@ export const SidebarNavigationScreenTypography = () => {
 										className="core-profiler__checkbox"
 										label={ interpolateComponents( {
 											mixedString: __(
-												'I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
+												'I would like to get store updates, including new fonts, on an ongoing basis. In doing so, I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
 												'woocommerce'
 											),
 											components: {
 												link: (
 													<Link
-														href="https://woo.com/usage-tracking?utm_medium=product"
+														href="https://woocommerce.com/usage-tracking?utm_medium=product"
 														target="_blank"
 														type="external"
 													/>

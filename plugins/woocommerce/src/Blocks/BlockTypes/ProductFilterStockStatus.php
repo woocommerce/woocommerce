@@ -110,8 +110,8 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	 */
 	protected function enqueue_data( array $stock_statuses = [] ) {
 		parent::enqueue_data( $stock_statuses );
-		$this->asset_data_registry->add( 'stockStatusOptions', wc_get_product_stock_status_options(), true );
-		$this->asset_data_registry->add( 'hideOutOfStockItems', 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ), true );
+		$this->asset_data_registry->add( 'stockStatusOptions', wc_get_product_stock_status_options() );
+		$this->asset_data_registry->add( 'hideOutOfStockItems', 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
 	}
 
 	/**

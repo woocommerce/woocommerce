@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\PluginVersionRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\PluginVersionRuleProcessor;
 
 /**
  * class WC_Admin_Tests_RemoteInboxNotifications_PluginVersionRuleProcessor

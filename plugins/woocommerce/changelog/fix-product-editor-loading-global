@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Product Editor pages do not pass global settings into Editor. Product Editor is responsible for loading settings itself.

@@ -138,6 +138,10 @@
 		margin-bottom: 0;
 	}
 
+	.wp-block-column {
+		word-break: normal;
+	}
+
 	.woocommerce-experimental-select-control__label {
 		text-transform: uppercase;
 		font-size: 11px;

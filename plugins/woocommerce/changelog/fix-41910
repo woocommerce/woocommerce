@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Add support for partial backfilling from or to the HPOS datastore using the CLI.

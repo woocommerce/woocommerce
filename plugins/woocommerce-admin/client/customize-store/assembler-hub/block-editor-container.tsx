@@ -3,19 +3,21 @@
 /**
  * External dependencies
  */
+import {
+	privateApis as blockEditorPrivateApis,
+	store as blockEditorStore,
+	// @ts-expect-error No types for this exist yet.
+} from '@wordpress/block-editor';
 // @ts-expect-error No types for this exist yet.
-import { store as blockEditorStore } from '@wordpress/block-editor';
-// @ts-expect-error No types for this exist yet.
-import { store as coreStore, useEntityRecords } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
-// @ts-expect-error No types for this exist yet.
-import { privateApis as routerPrivateApis } from '@wordpress/router';
-// @ts-expect-error No types for this exist yet.
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
+import { store as coreStore } from '@wordpress/core-data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { useQuery } from '@woocommerce/navigation';
 // @ts-expect-error No types for this exist yet.
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
+// @ts-expect-error No types for this exist yet.
 import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/block-editor/use-site-editor-settings';
-import { useCallback, useContext, useMemo } from '@wordpress/element';
+import { useContext, useEffect, useMemo } from '@wordpress/element';
+import { BlockInstance, createBlock } from '@wordpress/blocks';
 // @ts-expect-error No types for this exist yet.
 import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 
@@ -25,48 +27,18 @@ import { store as editSiteStore } from '@wordpress/edit-site/build-module/store'
 import { CustomizeStoreContext } from './';
 import { BlockEditor } from './block-editor';
 import { HighlightedBlockContext } from './context/highlighted-block-context';
+import { useAddNoBlocksPlaceholder } from './hooks/block-placeholder/use-add-no-blocks-placeholder';
 import { useEditorBlocks } from './hooks/use-editor-blocks';
 import { useScrollOpacity } from './hooks/use-scroll-opacity';
+import {
+	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
+	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
+} from './utils/hero-pattern';
+import { useIsActiveNewNeutralVariation } from './hooks/use-is-active-new-neutral-variation';
 
-const { useHistory } = unlock( routerPrivateApis );
-
-type Page = {
-	link: string;
-	title: { rendered: string; raw: string };
-	[ key: string ]: unknown;
-};
-
-const findPageIdByLinkOrTitle = ( event: MouseEvent, _pages: Page[] ) => {
-	const target = event.target as HTMLAnchorElement;
-	const clickedPage =
-		_pages.find( ( page ) => page.link === target.href ) ||
-		_pages.find( ( page ) => page.title.rendered === target.innerText );
-	return clickedPage ? clickedPage.id : null;
-};
-
-const findPageIdByBlockClientId = ( event: MouseEvent ) => {
-	const navLink = ( event.target as HTMLAnchorElement ).closest(
-		'.wp-block-navigation-link'
-	);
-	if ( navLink ) {
-		const blockClientId = navLink.getAttribute( 'data-block' );
-		const navLinkBlocks =
-			// @ts-expect-error No types for this exist yet.
-			select( blockEditorStore ).getBlocksByClientId( blockClientId );
-
-		if ( navLinkBlocks && navLinkBlocks.length ) {
-			return navLinkBlocks[ 0 ].attributes.id;
-		}
-	}
-	return null;
-};
-
-// We only show the edit option when page count is <= MAX_PAGE_COUNT
-// Performance of Navigation Links is not good past this value.
-const MAX_PAGE_COUNT = 100;
+const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
 export const BlockEditorContainer = () => {
-	const history = useHistory();
 	const settings = useSiteEditorSettings();
 
 	const currentTemplate:
@@ -108,45 +80,6 @@ export const BlockEditorContainer = () => {
 		scrollDirection
 	);
 
-	// // See packages/block-library/src/page-list/edit.js.
-	const { records: pages } = useEntityRecords( 'postType', 'page', {
-		per_page: MAX_PAGE_COUNT,
-		_fields: [ 'id', 'link', 'menu_order', 'parent', 'title', 'type' ],
-		// TODO: When https://core.trac.wordpress.org/ticket/39037 REST API support for multiple orderby
-		// values is resolved, update 'orderby' to [ 'menu_order', 'post_title' ] to provide a consistent
-		// sort.
-		orderby: 'menu_order',
-		order: 'asc',
-	} );
-
-	const onClickNavigationItem = useCallback(
-		( event: MouseEvent ) => {
-			// If the user clicks on a navigation item, we want to update the URL to reflect the page they are on.
-			// Because of bug in the block library (See https://github.com/woocommerce/team-ghidorah/issues/253#issuecomment-1665106817), we're not able to use href link to find the page ID. Instead, we'll use the link/title first, and if that doesn't work, we'll use the block client ID. It depends on the header block type to determine which one to use.
-			// This is a temporary solution until the block library is fixed.
-
-			const pageId =
-				findPageIdByLinkOrTitle( event, pages ) ||
-				findPageIdByBlockClientId( event );
-
-			if ( pageId ) {
-				history.push( {
-					...urlParams,
-					postId: pageId,
-					postType: 'page',
-				} );
-				return;
-			}
-
-			// Home page
-			const { postId, postType, ...params } = urlParams;
-			history.push( {
-				...params,
-			} );
-		},
-		[ history, urlParams, pages ]
-	);
-
 	const { highlightedBlockClientId } = useContext( HighlightedBlockContext );
 	const isHighlighting = highlightedBlockClientId !== null;
 	const additionalStyles = isHighlighting
@@ -159,36 +92,95 @@ export const BlockEditorContainer = () => {
 
 	const opacityClass = 'preview-opacity';
 
-	const renderedBlocks = useMemo(
-		() =>
-			blocks.map( ( block ) => {
+	const clientIds = blocks.map( ( block ) => block.clientId );
+
+	// @ts-expect-error No types for this exist yet.
+	const { updateBlockAttributes } = useDispatch( blockEditorStore );
+
+	// @ts-expect-error No types for this exist yet.
+	const { user } = useContext( GlobalStylesContext );
+
+	const isActiveNewNeutralVariation = useIsActiveNewNeutralVariation();
+
+	useEffect( () => {
+		if ( ! isActiveNewNeutralVariation ) {
+			findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+				blocks,
+				( block: BlockInstance ) => {
+					updateBlockAttributes( block.clientId, {
+						style: {},
+					} );
+				}
+			);
+			return;
+		}
+		findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+			blocks,
+			( block: BlockInstance ) => {
+				updateBlockAttributes( block.clientId, {
+					style: PRODUCT_HERO_PATTERN_BUTTON_STYLE,
+					// This is necessary; otherwise, the style won't be applied on the frontend during the style variation change.
+					className: '',
+				} );
+			}
+		);
+	}, [
+		blocks,
+		isActiveNewNeutralVariation,
+		updateBlockAttributes,
+		user.settings.color,
+	] );
+
+	// @ts-expect-error No types for this exist yet.
+	const { insertBlock, removeBlock } = useDispatch( blockEditorStore );
+
+	useAddNoBlocksPlaceholder( {
+		blocks,
+		createBlock,
+		insertBlock,
+		removeBlock,
+	} );
+
+	useEffect( () => {
+		const { blockIdToHighlight, restOfBlockIds } = clientIds.reduce(
+			( acc, clientId ) => {
 				if (
 					! isHighlighting ||
-					block.clientId === highlightedBlockClientId
+					clientId === highlightedBlockClientId
 				) {
 					return {
-						...block,
-						attributes: {
-							...block.attributes,
-							className: block.attributes.className?.replace(
-								opacityClass,
-								''
-							),
-						},
+						blockIdToHighlight: clientId,
+						restOfBlockIds: acc.restOfBlockIds,
 					};
 				}
 
 				return {
-					...block,
-					attributes: {
-						...block.attributes,
-						className:
-							block.attributes.className + ` ${ opacityClass }`,
-					},
+					blockIdToHighlight: acc.blockIdToHighlight,
+					restOfBlockIds: [ ...acc.restOfBlockIds, clientId ],
 				};
-			} ),
-		[ blocks, highlightedBlockClientId, isHighlighting ]
-	);
+			},
+			{
+				blockIdToHighlight: null,
+				restOfBlockIds: [],
+			} as {
+				blockIdToHighlight: string | null;
+				restOfBlockIds: string[];
+			}
+		);
+
+		updateBlockAttributes( blockIdToHighlight, {
+			className: '',
+		} );
+
+		updateBlockAttributes( restOfBlockIds, {
+			className: ` ${ opacityClass }`,
+		} );
+	}, [
+		clientIds,
+		highlightedBlockClientId,
+		isHighlighting,
+		updateBlockAttributes,
+	] );
 
 	const isScrollable = useMemo(
 		() =>
@@ -202,12 +194,11 @@ export const BlockEditorContainer = () => {
 
 	return (
 		<BlockEditor
-			renderedBlocks={ renderedBlocks }
+			renderedBlocks={ blocks }
 			isScrollable={ isScrollable }
 			onChange={ onChange }
 			settings={ settings }
 			additionalStyles={ additionalStyles }
-			onClickNavigationItem={ onClickNavigationItem }
 		/>
 	);
 };

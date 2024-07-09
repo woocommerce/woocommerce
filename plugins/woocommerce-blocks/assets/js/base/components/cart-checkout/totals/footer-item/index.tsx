@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { createInterpolateElement } from '@wordpress/element';
 import {
 	FormattedMonetaryAmount,
@@ -85,7 +85,7 @@ const TotalsFooterItem = ( {
 
 	const priceComponent = (
 		<FormattedMonetaryAmount
-			className="wc-block-components-totals-item__value"
+			className="wc-block-components-totals-footer-item-tax-value"
 			currency={ currency }
 			value={ parseInt( totalPrice, 10 ) }
 		/>
@@ -115,7 +115,7 @@ const TotalsFooterItem = ( {
 
 	return (
 		<TotalsItem
-			className={ classNames(
+			className={ clsx(
 				'wc-block-components-totals-footer-item',
 				className
 			) }

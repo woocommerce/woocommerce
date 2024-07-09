@@ -33,7 +33,7 @@ import {
 } from '@woocommerce/utils';
 import FormTokenField from '@woocommerce/base-components/form-token-field';
 import FilterTitlePlaceholder from '@woocommerce/base-components/filter-placeholder';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -130,7 +130,7 @@ const AttributeFilterBlock = ( {
 			resourceName: 'products/attributes/terms',
 			resourceValues: [ attributeObject?.id || 0 ],
 			shouldSelect: blockAttributes.attributeId > 0,
-			query: { orderby: 'menu_order' },
+			query: { orderby: attributeObject?.orderby || 'menu_order' },
 		} );
 
 	const { results: filteredCounts, isLoading: filteredCountsLoading } =
@@ -139,9 +139,7 @@ const AttributeFilterBlock = ( {
 				taxonomy: attributeObject?.taxonomy || '',
 				queryType: blockAttributes.queryType,
 			},
-			queryState: {
-				...queryState,
-			},
+			queryState,
 			isEditor,
 		} );
 
@@ -533,7 +531,7 @@ const AttributeFilterBlock = ( {
 		<>
 			{ ! isEditor && blockAttributes.heading && filterHeading }
 			<div
-				className={ classnames(
+				className={ clsx(
 					'wc-block-attribute-filter',
 					`style-${ blockAttributes.displayStyle }`
 				) }
@@ -542,7 +540,7 @@ const AttributeFilterBlock = ( {
 					<>
 						<FormTokenField
 							key={ remountKey }
-							className={ classnames( {
+							className={ clsx( {
 								'single-selection': ! multiple,
 								'is-loading': isLoading,
 							} ) }

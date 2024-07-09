@@ -6,33 +6,44 @@ import {
 	__experimentalInitBlocks as initBlocks,
 	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
 	productApiFetchMiddleware,
+	productEditorHeaderApiFetchMiddleware,
 	TRACKS_SOURCE,
 	__experimentalProductMVPCESFooter as FeedbackBar,
-	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
 	__experimentalEditorLoadingContext as EditorLoadingContext,
 } from '@woocommerce/product-editor';
+import { Spinner } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { useContext, useEffect } from '@wordpress/element';
+import React, { lazy, Suspense, useContext, useEffect } from 'react';
 import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
 import { useParams } from 'react-router-dom';
 import { WooFooterItem } from '@woocommerce/admin-layout';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { useProductEntityRecord } from './hooks/use-product-entity-record';
-import BlockEditorTourWrapper from './tour/block-editor/block-editor-tour-wrapper';
 import { MoreMenuFill } from './fills/product-block-editor-fills';
 import './product-page.scss';
 
+productEditorHeaderApiFetchMiddleware();
 productApiFetchMiddleware();
 
-export default function ProductPage() {
-	const { productId } = useParams();
+// Lazy load components
+const BlockEditorTourWrapper = lazy(
+	() => import( './tour/block-editor/block-editor-tour-wrapper' )
+);
+const ProductMVPFeedbackModalContainer = lazy( () =>
+	import( '@woocommerce/product-editor' ).then( ( module ) => ( {
+		default: module.__experimentalProductMVPFeedbackModalContainer,
+	} ) )
+);
 
-	const product = useProductEntityRecord( productId );
+export default function ProductPage() {
+	const { productId: productIdSearchParam } = useParams();
 
 	useEffect( () => {
+		document.body.classList.add( 'is-product-editor' );
 		registerPlugin( 'wc-admin-product-editor', {
 			// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 			scope: 'woocommerce-product-block-editor',
@@ -55,17 +66,24 @@ export default function ProductPage() {
 						<WooFooterItem>
 							<>
 								<FeedbackBar productType="product" />
-								<ProductMVPFeedbackModalContainer
-									productId={
-										productId
-											? parseInt( productId, 10 )
-											: undefined
-									}
-								/>
+								<Suspense fallback={ <Spinner /> }>
+									<ProductMVPFeedbackModalContainer
+										productId={
+											productIdSearchParam
+												? Number.parseInt(
+														productIdSearchParam,
+														10
+												  )
+												: undefined
+										}
+									/>
+								</Suspense>
 							</>
 						</WooFooterItem>
 
-						<BlockEditorTourWrapper />
+						<Suspense fallback={ <Spinner /> }>
+							<BlockEditorTourWrapper />
+						</Suspense>
 					</>
 				);
 			},
@@ -74,17 +92,18 @@ export default function ProductPage() {
 		const unregisterBlocks = initBlocks();
 
 		return () => {
-			unregisterPlugin( 'wc-admin-more-menu' );
+			document.body.classList.remove( 'is-product-editor' );
+			unregisterPlugin( 'wc-admin-product-editor' );
 			unregisterBlocks();
 		};
-	}, [ productId ] );
+	}, [ productIdSearchParam ] );
 
 	useEffect(
 		function trackViewEvents() {
-			if ( productId ) {
+			if ( productIdSearchParam ) {
 				recordEvent( 'product_edit_view', {
 					source: TRACKS_SOURCE,
-					product_id: productId,
+					product_id: productIdSearchParam,
 				} );
 			} else {
 				recordEvent( 'product_add_view', {
@@ -92,12 +111,20 @@ export default function ProductPage() {
 				} );
 			}
 		},
-		[ productId ]
+		[ productIdSearchParam ]
 	);
 
-	return (
-		<>
-			<Editor product={ product } />
-		</>
-	);
+	const productId = useProductEntityRecord( productIdSearchParam );
+
+	if ( ! productId ) {
+		return (
+			<div className="woocommerce-layout__loading">
+				<Spinner
+					aria-label={ __( 'Creating the product', 'woocommerce' ) }
+				/>
+			</div>
+		);
+	}
+
+	return <Editor productId={ productId } />;
 }

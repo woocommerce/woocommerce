@@ -486,7 +486,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 					'properties'  => array(
 						'api_enabled'                    => array(
-							'description' => __( 'REST API enabled?', 'woocommerce' ),
+							'description' => __( 'Legacy REST API enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -558,19 +558,13 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							),
 						),
 						'wccom_connected'                => array(
-							'description' => __( 'Is store connected to Woo.com?', 'woocommerce' ),
+							'description' => __( 'Is store connected to WooCommerce.com?', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'enforce_approved_download_dirs' => array(
 							'description' => __( 'Enforce approved download directories?', 'woocommerce' ),
-							'type'        => 'boolean',
-							'context'     => array( 'view' ),
-							'readonly'    => true,
-						),
-						'HPOS_feature_screen_enabled'    => array(
-							'description' => __( 'Is HPOS feature screen enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -855,7 +849,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 
 			if ( false === $get_response_code || is_wp_error( $get_response_code ) ) {
 				$response = wp_safe_remote_get(
-					'https://woo.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ),
+					'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ),
 					array(
 						'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 					)
@@ -1349,7 +1343,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'woocommerce_com_connected'      => ConnectionHelper::is_connected() ? 'yes' : 'no',
 			'enforce_approved_download_dirs' => wc_get_container()->get( Download_Directories::class )->get_mode() === Download_Directories::MODE_ENABLED,
 			'order_datastore'                => WC_Data_Store::load( 'order' )->get_current_class_name(),
-			'HPOS_feature_screen_enabled'    => wc_get_container()->get( Automattic\WooCommerce\Internal\Features\FeaturesController::class )->feature_is_enabled( 'custom_order_tables' ),
 			'HPOS_enabled'                   => OrderUtil::custom_orders_table_usage_is_enabled(),
 			'HPOS_sync_enabled'              => wc_get_container()->get( Order_DataSynchronizer::class )->data_sync_is_enabled(),
 		);
@@ -1414,36 +1407,39 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$shortcode_required = false;
 			$block_present      = false;
 			$block_required     = false;
+			$page               = false;
 
 			// Page checks.
 			if ( $page_id ) {
 				$page_set = true;
-			}
-			if ( get_post( $page_id ) ) {
-				$page_exists = true;
-			}
-			if ( 'publish' === get_post_status( $page_id ) ) {
-				$page_visible = true;
+				$page     = get_post( $page_id );
+
+				if ( $page ) {
+					$page_exists = true;
+
+					if ( 'publish' === $page->post_status ) {
+						$page_visible = true;
+					}
+				}
 			}
 
 			// Shortcode checks.
-			if ( $values['shortcode'] && get_post( $page_id ) ) {
+			if ( $values['shortcode'] && $page ) {
 				$shortcode_required = true;
-				$page               = get_post( $page_id );
-				if ( strstr( $page->post_content, $values['shortcode'] ) ) {
+				if ( has_shortcode( $page->post_content, trim( $values['shortcode'], '[]' ) ) ) {
 					$shortcode_present = true;
+				}
+
+				// Compatibility with the classic shortcode block which can be used instead of shortcodes.
+				if ( ! $shortcode_present && ( 'woocommerce/checkout' === $values['block'] || 'woocommerce/cart' === $values['block'] ) ) {
+					$shortcode_present = has_block( 'woocommerce/classic-shortcode', $page->post_content );
 				}
 			}
 
 			// Block checks.
-			if ( $values['block'] && get_post( $page_id ) ) {
+			if ( $values['block'] && $page ) {
 				$block_required = true;
-				$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, $values['block'] );
-
-				// Compatibility with the classic shortcode block which can be used instead of shortcodes.
-				if ( ! $block_present && ( 'woocommerce/checkout' === $values['block'] || 'woocommerce/cart' === $values['block'] ) ) {
-					$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, 'woocommerce/classic-shortcode', true );
-				}
+				$block_present  = has_block( $values['block'], $page->post_content );
 			}
 
 			// Wrap up our findings into an output array.

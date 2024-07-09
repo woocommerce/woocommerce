@@ -1,14 +1,8 @@
 /**
  * External dependencies
  */
-import {
-	createInterpolateElement,
-	Fragment,
-	useEffect,
-	useState,
-} from '@wordpress/element';
-import classnames from 'classnames';
-import { __ } from '@wordpress/i18n';
+import { Fragment, useEffect, useState } from '@wordpress/element';
+import clsx from 'clsx';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
@@ -34,7 +28,7 @@ export default function ProductListContent( props: {
 } ): JSX.Element {
 	const wccomHelperSettings = getAdminSetting( 'wccomHelper', {} );
 
-	const classes = classnames(
+	const classes = clsx(
 		'woocommerce-marketplace__product-list-content',
 		props.className
 	);
@@ -78,7 +72,10 @@ export default function ProductListContent( props: {
 								title: product.title,
 								image: product.image,
 								type: product.type,
+								freemium_type: product.freemium_type,
 								icon: product.icon,
+								label: product.label,
+								primary_color: product.primary_color,
 								vendorName: product.vendorName,
 								vendorUrl: product.vendorUrl
 									? appendURLParams( product.vendorUrl, [
@@ -105,6 +102,9 @@ export default function ProductListContent( props: {
 								reviewsCount: product.reviewsCount,
 								description: product.description,
 								isInstallable: product.isInstallable,
+								color: product.color,
+								featuredImage: product.featuredImage,
+								productCategory: product.productCategory,
 							} }
 							tracksData={ {
 								position: index + 1,
@@ -120,48 +120,25 @@ export default function ProductListContent( props: {
 								} ),
 							} }
 						/>
-						{ index === bannerPosition && (
-							<NoAIBanner
-								redirectToCYSFlow={ () => {
-									const customizeStoreDesignUrl =
-										addQueryArgs(
-											`${ ADMIN_URL }admin.php`,
-											{
-												page: 'wc-admin',
-												path: '/customize-store/design',
-											}
-										);
-									window.location.href =
-										customizeStoreDesignUrl;
-								} }
-							/>
-						) }
+						{ index === bannerPosition &&
+							props.type === 'theme' && (
+								<NoAIBanner
+									redirectToCYSFlow={ () => {
+										const customizeStoreDesignUrl =
+											addQueryArgs(
+												`${ ADMIN_URL }admin.php`,
+												{
+													page: 'wc-admin',
+													path: '/customize-store/design',
+												}
+											);
+										window.location.href =
+											customizeStoreDesignUrl;
+									} }
+								/>
+							) }
 					</Fragment>
 				) ) }
-			</div>
-			<div
-				className={
-					'woocommerce-marketplace__browse-wp-theme-directory'
-				}
-			>
-				<b>{ __( 'Didn’t find a theme you like?', 'woocommerce' ) }</b>
-				{ createInterpolateElement(
-					__(
-						' Browse the <a>WordPress.org theme directory</a> to discover more.',
-						'woocommerce'
-					),
-					{
-						a: (
-							// eslint-disable-next-line jsx-a11y/anchor-has-content
-							<a
-								href={
-									ADMIN_URL +
-									'theme-install.php?search=e-commerce'
-								}
-							/>
-						),
-					}
-				) }
 			</div>
 		</>
 	);

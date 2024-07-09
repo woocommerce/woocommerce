@@ -12,14 +12,14 @@ defined( 'ABSPATH' ) || exit;
  */
 class Init extends RemoteSpecsEngine {
 	/**
-	 * Slug of the category specifying marketing extensions on the Woo.com store.
+	 * Slug of the category specifying marketing extensions on the WooCommerce.com store.
 	 *
 	 * @var string
 	 */
 	const MARKETING_EXTENSION_CATEGORY_SLUG = 'marketing';
 
 	/**
-	 * Slug of the subcategory specifying marketing channels on the Woo.com store.
+	 * Slug of the subcategory specifying marketing channels on the WooCommerce.com store.
 	 *
 	 * @var string
 	 */
@@ -81,7 +81,7 @@ class Init extends RemoteSpecsEngine {
 	}
 
 	/**
-	 * Load recommended plugins from Woo.com
+	 * Load recommended plugins from WooCommerce.com
 	 *
 	 * @return array
 	 */
@@ -113,7 +113,7 @@ class Init extends RemoteSpecsEngine {
 	}
 
 	/**
-	 * Return only the recommended marketing channels from Woo.com.
+	 * Return only the recommended marketing channels from WooCommerce.com.
 	 *
 	 * @return array
 	 */
@@ -127,7 +127,7 @@ class Init extends RemoteSpecsEngine {
 	}
 
 	/**
-	 * Return all recommended marketing extensions EXCEPT the marketing channels from Woo.com.
+	 * Return all recommended marketing extensions EXCEPT the marketing channels from WooCommerce.com.
 	 *
 	 * @return array
 	 */

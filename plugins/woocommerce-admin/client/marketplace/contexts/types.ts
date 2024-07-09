@@ -15,6 +15,8 @@ export type MarketplaceContextType = {
 	setSelectedTab: ( tab: string ) => void;
 	isProductInstalled: ( slug: string ) => boolean;
 	addInstalledProduct: ( slug: string ) => void;
+	hasBusinessServices: boolean;
+	setHasBusinessServices: ( hasBusinessServices: boolean ) => void;
 };
 
 export type SubscriptionsContextType = {

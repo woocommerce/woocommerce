@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\MarketingRecommendations;
 
-use Automattic\WooCommerce\Admin\DataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 
 /**
  * Specs data source poller class for marketing recommendations.
