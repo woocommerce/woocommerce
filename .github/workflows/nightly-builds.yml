@@ -50,10 +50,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             // body: `Nightly build auto generated. Updated at ${ new Date().toUTCString() }.`
-            const { RELEASE_ID } = process.env
             await github.rest.repos.updateRelease({
               ...context.repo,
-              release_id: ${ RELEASE_ID },
+              release_id: process.env.RELEASE_ID,
               body: `Nightly build auto generated.`
             });
 
