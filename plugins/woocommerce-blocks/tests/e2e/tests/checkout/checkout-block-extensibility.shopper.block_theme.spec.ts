@@ -18,7 +18,7 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	},
 } );
 
-test.describe( 'Shopper → Account (guest user)', () => {
+test.describe( 'Shopper → Extensibility', () => {
 	test.use( { storageState: guestFile } );
 
 	test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
@@ -40,20 +40,42 @@ test.describe( 'Shopper → Account (guest user)', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 	} );
+	test.describe( 'extensionCartUpdate', () => {
+		test( 'Unpushed data is/is not overwritten depending on arg', async ( {
+			checkoutPageObject,
+		} ) => {
+			// First test by only partially filling in the address form.
+			await checkoutPageObject.page
+				.getByLabel( 'Country/Region' )
+				.fill( 'United Kingdom (UK)' );
+			await checkoutPageObject.page.getByLabel( 'Country/Region' ).blur();
 
-	test( 'Shopper can use extensionCartUpdate without the unpushed data being overwritten', async ( {
-		checkoutPageObject,
-	} ) => {
-		await checkoutPageObject.page
-			.getByLabel( 'Country/Region' )
-			.fill( 'United Kingdom (UK)' );
-		await checkoutPageObject.page.getByLabel( 'Country/Region' ).blur();
+			await checkoutPageObject.page.evaluate(
+				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update' } )"
+			);
+			await expect(
+				checkoutPageObject.page.getByLabel( 'Country/Region' )
+			).toHaveValue( 'United Kingdom (UK)' );
+			await checkoutPageObject.page.evaluate(
+				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } )"
+			);
+			await expect(
+				checkoutPageObject.page.getByLabel( 'Country/Region' )
+			).not.toHaveValue( 'United Kingdom (UK)' );
 
-		await checkoutPageObject.page.evaluate(
-			"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update' } )"
-		);
-		await expect(
-			checkoutPageObject.page.getByLabel( 'Country/Region' )
-		).toHaveValue( 'United Kingdom (UK)' );
+			// Next fully test the address form (so it pushes), then run extensionCartUpdate with
+			// overwriteDirtyCustomerData: true so overwriting is possible, but since the address pushed it should not
+			// be overwritten.
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			await checkoutPageObject.page
+				.getByLabel( 'Country/Region' )
+				.fill( 'United States (US)' );
+			await checkoutPageObject.page.evaluate(
+				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } )"
+			);
+			await checkoutPageObject.page
+				.getByLabel( 'Country/Region' )
+				.fill( 'United States (US)' );
+		} );
 	} );
 } );
