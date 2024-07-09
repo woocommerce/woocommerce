@@ -4,23 +4,25 @@ on:
     - cron: '0 0 * * *' # Run at 12 AM UTC.
   workflow_dispatch:
 
+env:
+  SOURCE_REF: trunk
+  TARGET_REF: nightly
+  RELEASE_ID: 25945111
+
 permissions: { }
 
 jobs:
   build:
     if: github.repository_owner == 'woocommerce'
     name: Nightly builds
-    strategy:
-      fail-fast: false
-      matrix:
-        build: [ trunk ]
+
     runs-on: ubuntu-20.04
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.build }}
+          ref: ${{ env.SOURCE_REF }}
 
       - name: Setup WooCommerce Monorepo
         uses: ./.github/actions/setup-woocommerce-monorepo
@@ -34,10 +36,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/25945111/assets{?name,label}
-          release_id: 25945111
+          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
+          release_id: ${{ env.RELEASE_ID }}
           asset_path: plugins/woocommerce/woocommerce.zip
-          asset_name: woocommerce-${{ matrix.build }}-nightly.zip
+          asset_name: woocommerce-${{ env.SOURCE_REF }}-nightly.zip
           asset_content_type: application/zip
           max_releases: 1
 
@@ -47,9 +49,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const { RELEASE_ID } = process.env
             await github.rest.repos.updateRelease({
               ...context.repo,
-              release_id: 25945111,
+              release_id: ${ RELEASE_ID },
               body: `Nightly build auto generated. Updated at ${ new Date().toUTCString() }.`
             });
 
@@ -58,13 +61,14 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const { SOURCE_REF, TARGET_REF } = process.env
             const branchData = await github.rest.repos.updateRelease({
               ...context.repo,
-              branch: ${{ matrix.build }},
+              branch: ${ SOURCE_REF },
             });
             
             await github.rest.git.updateRef({
               ...context.repo,
-              ref: `tags/nightly`,
+              ref: `tags/${ TARGET_REF}`,
               sha: branchData.data.commit.sha,
             });
