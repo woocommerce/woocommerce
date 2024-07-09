@@ -905,7 +905,6 @@ class DefaultPaymentGateways {
 							'US',
 							'CA',
 							'AU',
-							'MX',
 							'AT',
 							'BE',
 							'CH',
