@@ -21,10 +21,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * an account on WooCommerce.com.
  */
 class WC_Helper_Admin {
-	const CHECK_SUBSCRIPTION_DISMISSED_COUNT_META = '_woocommerce_helper_check_subscription_dismissed_count';
+	const CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_count_';
 
-	const CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META = '_woocommerce_helper_check_subscription_dismissed_timestamp';
-	const CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META = '_woocommerce_helper_check_subscription_remind_later_timestamp';
+	const CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_timestamp_';
+	const CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_remind_later_timestamp_';
 
 	private static $checked_products = array();
 
@@ -180,23 +180,23 @@ class WC_Helper_Admin {
 
 		// Check when the last time user clicked "remind later". If it's still
 		// in the wait period, don't show the nudge.
-		$last_remind_later_ts    = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META, true ) );
-		$wait_after_remind_later = self::$checked_products['wait_in_seconds_after_remind_later'];
+		$last_remind_later_ts    = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX . $product_id, true ) );
+		$wait_after_remind_later = self::$checked_screen_param['wait_in_seconds_after_remind_later'];
 		if ( $last_remind_later_ts > 0 && ( time() - $last_remind_later_ts ) < $wait_after_remind_later ) {
 			return;
 		}
 
 		// Don't show the nudge after dismissed max_dismissals times.
-		$dismiss_count  = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META, true ) );
-		$max_dismissals = self::$checked_products['max_dismissals'];
+		$dismiss_count  = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX . $product_id, true ) );
+		$max_dismissals = self::$checked_screen_param['max_dismissals'];
 		if ( $dismiss_count >= $max_dismissals ) {
 			return;
 		}
 
 		// Check when the last time user dismissed the nudge. If it's still in
 		// the wait period, don't show the nudge
-		$last_dismissed_ts  = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META, true) );
-		$wait_after_dismiss = self::$checked_products['wait_in_seconds_after_dismiss'];
+		$last_dismissed_ts  = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX . $product_id, true) );
+		$wait_after_dismiss = self::$checked_screen_param['wait_in_seconds_after_dismiss'];
 		if ( $last_dismissed_ts > 0 && ( time() - $last_dismissed_ts ) < $wait_after_dismiss ) {
 			return;
 		}
@@ -292,16 +292,15 @@ class WC_Helper_Admin {
 			wp_die( -1 );
 		}
 
-		// TODO: Store product_id in the meta?
 		$product_id = absint( $_GET['product_id'] );
 		if ( ! $product_id ) {
 			wp_die( -1 );
 		}
 
-		$dismiss_count = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META, true ) );
-		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META, $dismiss_count + 1 );
+		$dismiss_count = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX . $product_id, true ) );
+		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX . $product_id, $dismiss_count + 1 );
 
-		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META, time() );
+		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX . $product_id, time() );
 
 		wp_die( 1 );
 	}
@@ -316,13 +315,12 @@ class WC_Helper_Admin {
 			wp_die( -1 );
 		}
 
-		// TODO: Store product_id in the meta?
 		$product_id = absint( $_GET['product_id'] );
 		if ( ! $product_id ) {
 			wp_die( -1 );
 		}
 
-		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META, time() );
+		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX . $product_id, time() );
 
 		wp_die( 1 );
 	}
