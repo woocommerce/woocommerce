@@ -10,12 +10,13 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
-use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
 
 /**
  * API\Reports\Taxes\Stats\DataStore.
  */
 class DataStore extends ReportsDataStore implements DataStoreInterface {
+	use StatsDataStoreTrait;
 
 	/**
 	 * Table used to get the data.
@@ -245,19 +246,5 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$segmenter->add_intervals_segments( $data, $intervals_query, $table_name );
 		$this->create_interval_subtotals( $data->intervals );
 		return $data;
-	}
-
-	/**
-	 * Initialize query objects.
-	 */
-	protected function initialize_queries() {
-		$this->clear_all_clauses();
-		unset( $this->subquery );
-		$this->total_query = new SqlQuery( $this->context . '_total' );
-		$this->total_query->add_sql_clause( 'from', self::get_db_table_name() );
-
-		$this->interval_query = new SqlQuery( $this->context . '_interval' );
-		$this->interval_query->add_sql_clause( 'from', self::get_db_table_name() );
-		$this->interval_query->add_sql_clause( 'group_by', 'time_interval' );
 	}
 }

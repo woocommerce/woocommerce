@@ -9,12 +9,14 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
-use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
 
 /**
  * API\Reports\Coupons\Stats\DataStore.
  */
 class DataStore extends CouponsDataStore implements DataStoreInterface {
+	use StatsDataStoreTrait;
+
 	/**
 	 * Mapping columns to data type to return correct response types.
 	 *
@@ -220,19 +222,5 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 		$this->create_interval_subtotals( $data->intervals );
 
 		return $data;
-	}
-
-	/**
-	 * Initialize query objects.
-	 */
-	protected function initialize_queries() {
-		$this->clear_all_clauses();
-		unset( $this->subquery );
-		$this->total_query = new SqlQuery( $this->context . '_total' );
-		$this->total_query->add_sql_clause( 'from', self::get_db_table_name() );
-
-		$this->interval_query = new SqlQuery( $this->context . '_interval' );
-		$this->interval_query->add_sql_clause( 'from', self::get_db_table_name() );
-		$this->interval_query->add_sql_clause( 'group_by', 'time_interval' );
 	}
 }

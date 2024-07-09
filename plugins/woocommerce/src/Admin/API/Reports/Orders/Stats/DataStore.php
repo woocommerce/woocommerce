@@ -14,11 +14,13 @@ use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
 
 /**
  * API\Reports\Orders\Stats\DataStore.
  */
 class DataStore extends ReportsDataStore implements DataStoreInterface {
+	use StatsDataStoreTrait;
 
 	/**
 	 * Table used to get the data.
@@ -722,19 +724,5 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$customer_id
 			)
 		);
-	}
-
-	/**
-	 * Initialize query objects.
-	 */
-	protected function initialize_queries() {
-		$this->clear_all_clauses();
-		unset( $this->subquery );
-		$this->total_query = new SqlQuery( $this->context . '_total' );
-		$this->total_query->add_sql_clause( 'from', self::get_db_table_name() );
-
-		$this->interval_query = new SqlQuery( $this->context . '_interval' );
-		$this->interval_query->add_sql_clause( 'from', self::get_db_table_name() );
-		$this->interval_query->add_sql_clause( 'group_by', 'time_interval' );
 	}
 }
