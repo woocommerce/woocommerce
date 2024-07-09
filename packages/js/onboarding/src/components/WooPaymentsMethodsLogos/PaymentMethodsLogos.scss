@@ -1,4 +1,4 @@
-.connect-account-page__payment-methods--logos {
+.woocommerce-woopayments-payment-methods-logos {
 	display: flex;
 	align-items: center;
 	padding: $gap-small 0;
@@ -22,4 +22,8 @@
 		font-size: 11px;
 		font-weight: 600;
 	}
+}
+
+.wc_payment_gateways_wrapper .woocommerce-woopayments-payment-methods-logos {
+	padding: 0;
 }

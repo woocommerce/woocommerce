@@ -110,7 +110,7 @@ export const WooPaymentMethodsLogos: React.VFC< {
 
 	return (
 		<>
-			<div className="connect-account-page__payment-methods--logos">
+			<div className="woocommerce-woopayments-payment-methods-logos">
 				{ PaymentMethods.slice( 0, getMaxShownElements( maxShownElements, isWooPayEligible ) ).map( ( pm ) => {
 					if ( ! isWooPayEligible && pm.name === 'woopay' ) {
 						return;
@@ -119,7 +119,7 @@ export const WooPaymentMethodsLogos: React.VFC< {
 					return pm.component;
 				} ) }
 				{ maxShownElements < totalPaymentMethods && (
-					<div className="connect-account-page__payment-methods--logos-count">
+					<div className="woocommerce-woopayments-payment-methods-logos-count">
 						+ { totalPaymentMethods - maxShownElements }
 					</div>
 				) }
