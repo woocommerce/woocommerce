@@ -51,7 +51,6 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.5",
-		"@automattic/i18n-utils": "^1.2.1",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"babel-jest": "~27.5.1",
 		"eslint": "^8.55.0",

@@ -2132,9 +2132,6 @@ importers:
         specifier: ^0.13.11
         version: 0.13.11
     devDependencies:
-      '@automattic/i18n-utils':
-        specifier: ^1.2.1
-        version: 1.2.1
       '@babel/core':
         specifier: ^7.23.5
         version: 7.23.5
