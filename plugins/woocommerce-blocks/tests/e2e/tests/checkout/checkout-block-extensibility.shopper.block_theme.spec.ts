@@ -67,15 +67,15 @@ test.describe( 'Shopper → Extensibility', () => {
 			// overwriteDirtyCustomerData: true so overwriting is possible, but since the address pushed it should not
 			// be overwritten.
 			await checkoutPageObject.fillInCheckoutWithTestData();
-			await checkoutPageObject.page
-				.getByLabel( 'Country/Region' )
-				.fill( 'United States (US)' );
+			await expect(
+				checkoutPageObject.page.getByLabel( 'Country/Region' )
+			).toHaveValue( 'United States (US)' );
 			await checkoutPageObject.page.evaluate(
 				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } )"
 			);
-			await checkoutPageObject.page
-				.getByLabel( 'Country/Region' )
-				.fill( 'United States (US)' );
+			await expect(
+				checkoutPageObject.page.getByLabel( 'Country/Region' )
+			).toHaveValue( 'United States (US)' );
 		} );
 	} );
 } );
