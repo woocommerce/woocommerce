@@ -25,6 +25,7 @@ class WC_Helper_Admin {
 
 	const CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_timestamp_';
 	const CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_remind_later_timestamp_';
+	const CHECK_SUBSCRIPTION_LAST_DISMISSED_TIMESTAMP_META = '_woocommerce_helper_check_subscription_last_dismissed_timestamp';
 
 	private static $checked_products = array();
 
@@ -193,8 +194,16 @@ class WC_Helper_Admin {
 			return;
 		}
 
+		// Check the global cooldown (any dismisses) period. If it's still in
+		// the wait period, don't show the nudge.
+		$global_last_dismissed_ts = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_LAST_DISMISSED_TIMESTAMP_META, true) );
+		$wait_after_any_dismisses = self::$checked_products['wait_in_seconds_after_any_dismisses'];
+		if ( $global_last_dismissed_ts > 0 && ( time() - $global_last_dismissed_ts ) < $wait_after_any_dismisses ) {
+			return;
+		}
+
 		// Check when the last time user dismissed the nudge. If it's still in
-		// the wait period, don't show the nudge
+		// the wait period, don't show the nudge.
 		$last_dismissed_ts  = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX . $product_id, true) );
 		$wait_after_dismiss = self::$checked_screen_param['wait_in_seconds_after_dismiss'];
 		if ( $last_dismissed_ts > 0 && ( time() - $last_dismissed_ts ) < $wait_after_dismiss ) {
@@ -301,6 +310,7 @@ class WC_Helper_Admin {
 		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX . $product_id, $dismiss_count + 1 );
 
 		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX . $product_id, time() );
+		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_LAST_DISMISSED_TIMESTAMP_META, time() );
 
 		wp_die( 1 );
 	}
