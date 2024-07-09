@@ -23,7 +23,7 @@ interface PlaceOrderButton {
 const PlaceOrderButton = ( {
 	label,
 	fullWidth = false,
-	showPrice = true,
+	showPrice = false,
 }: PlaceOrderButton ): JSX.Element => {
 	const {
 		onSubmit,
