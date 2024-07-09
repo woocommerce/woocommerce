@@ -90,8 +90,6 @@ class WC_Admin_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Test to confirm that simple products are excluded from the variations reports by default
-	 *
-	 * @since x.x.x
 	 */
 	public function test_simple_products_excluded_from_variations_reports_by_default() {
 		wp_set_current_user( $this->user );
