@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { Reducer } from 'redux';
+import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * Internal dependencies
@@ -49,6 +50,13 @@ const reducer: Reducer< CartState > = ( state = defaultCartState, action ) => {
 		case types.SET_BILLING_ADDRESS:
 			state = {
 				...state,
+				metaData: {
+					...state.metaData,
+					isCustomerDataDirty: ! isShallowEqual(
+						action.billingAddress,
+						state.cartData.billingAddress
+					),
+				},
 				cartData: {
 					...state.cartData,
 					billingAddress: {
@@ -61,6 +69,13 @@ const reducer: Reducer< CartState > = ( state = defaultCartState, action ) => {
 		case types.SET_SHIPPING_ADDRESS:
 			state = {
 				...state,
+				metaData: {
+					...state.metaData,
+					isCustomerDataDirty: ! isShallowEqual(
+						action.shippingAddress,
+						state.cartData.shippingAddress
+					),
+				},
 				cartData: {
 					...state.cartData,
 					shippingAddress: {
