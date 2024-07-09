@@ -152,7 +152,38 @@ class ProductCollectionPage {
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
-		await this.chooseCollectionInPost( collection );
+		const buttonName = collection
+			? collectionToButtonNameMap[ collection ]
+			: collectionToButtonNameMap.productCatalog;
+
+		const inserterClass = await this.editor.canvas
+			.locator( SELECTORS.collectionPlaceholder )
+			.locator(
+				'.wc-blocks-product-collection__collections-grid, .wc-blocks-product-collection__collections-dropdown'
+			)
+			.getAttribute( 'class' );
+
+		const isDropdown = inserterClass?.includes(
+			'wc-blocks-product-collection__collections-dropdown'
+		);
+
+		if ( isDropdown ) {
+			await this.editor.canvas
+				.getByRole( 'button', { name: 'Choose collection' } )
+				.click();
+
+			await this.editor.canvas
+				.locator(
+					'.wc-blocks-product-collection__collections-dropdown-content'
+				)
+				.getByRole( 'button', { name: buttonName, exact: true } )
+				.click();
+		} else {
+			await this.editor.canvas
+				.locator( SELECTORS.collectionPlaceholder )
+				.getByRole( 'button', { name: buttonName, exact: true } )
+				.click();
+		}
 	}
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
