@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Made the "return to cart" link (in the checkout block) hidden by default.

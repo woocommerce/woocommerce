@@ -24,6 +24,6 @@ $theme = wp_get_theme();
 	</p>
 	<p class="submit">
 		<a class="button-primary" href="https://woocommerce.com/document/template-structure/" target="_blank"><?php esc_html_e( 'Learn more about templates', 'woocommerce' ); ?></a>
-		<a class="button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-status' ) ); ?>" target="_blank"><?php esc_html_e( 'View affected templates', 'woocommerce' ); ?></a>
+		<a class="button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-status#status-table-templates' ) ); ?>" target="_blank"><?php esc_html_e( 'View affected templates', 'woocommerce' ); ?></a>
 	</p>
 </div>

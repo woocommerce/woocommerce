@@ -10,7 +10,12 @@ import { ProductCategory } from '../product-categories/types';
 import { ProductTag } from '../product-tags/types';
 import { BaseQueryParams } from '../types';
 
-export type ProductType = 'simple' | 'grouped' | 'external' | 'variable';
+export type ProductType =
+	| 'simple'
+	| 'grouped'
+	| 'external'
+	| 'variable'
+	| 'variation';
 export type ProductStatus =
 	| 'auto-draft'
 	| 'deleted'

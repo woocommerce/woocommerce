@@ -77,7 +77,7 @@
 			},
 			"tests": [
 				{
-					"name": "JavaScript",
+					"name": "Monorepo Utils JS Tests",
 					"command": "test:js",
 					"changes": [
 						"jest.config.js",

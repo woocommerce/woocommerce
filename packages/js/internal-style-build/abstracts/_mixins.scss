@@ -152,7 +152,7 @@
 	}
 }
 
-// Hide an element from sighted users, but availble to screen reader users.
+// Hide an element from sighted users, but available to screen reader users.
 // @deprecated in favor of screen-reader-only
 @mixin visually-hidden() {
 	clip: rect( 1px, 1px, 1px, 1px );

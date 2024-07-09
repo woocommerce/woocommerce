@@ -41,6 +41,8 @@ Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerc
 
 <details>
 
+<summary>Changelog Entry Details</summary>
+
 #### Significance
 
 <!-- Choose only one -->
@@ -63,12 +65,12 @@ Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerc
 
 #### Message <!-- Add a changelog message here -->
 
-
 </details>
 
 <details>
 
-#### Comment <!-- If your Pull Request doesn't require a changelog entry, a comment explaining why is required instead -->
+<summary>Changelog Entry Comment</summary>
 
+#### Comment <!-- If your Pull Request doesn't require a changelog entry, a comment explaining why is required instead -->
 
 </details>

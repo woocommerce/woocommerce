@@ -4,7 +4,7 @@ menu_title: Image sizing
 tags: reference
 ---
 
-**Note:** this document was created for use when developing classic themes (as opposed to block themes). 
+**Note:** this document was created for use when developing classic themes (as opposed to block themes). Check this other document for [block theme development](../../plugins/woocommerce-blocks/docs/designers/theming/README.md).
 
 To display images in your catalog, WooCommerce registers a few image sizes which define the actual image dimensions to be used. These sizes include:
 

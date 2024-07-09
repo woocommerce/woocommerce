@@ -14,6 +14,7 @@ import { parse } from '@wordpress/blocks';
 import { useLogoAttributes } from '../hooks/use-logo-attributes';
 import { setLogoWidth } from '../../utils';
 import { Pattern } from '~/customize-store/types/pattern';
+import { THEME_SLUG } from '~/customize-store/data/constants';
 
 export const usePatterns = () => {
 	const { blockPatterns, isLoading } = useSelect(
@@ -53,8 +54,12 @@ export const usePatternsByCategory = ( category: string ) => {
 	}, [ isAttributesLoading, attributes.width, currentLogoWidth ] );
 
 	const patternsByCategory = useMemo( () => {
-		return ( blockPatterns || [] ).filter( ( pattern: Pattern ) =>
-			pattern.categories?.includes( category )
+		return ( blockPatterns || [] ).filter(
+			( pattern: Pattern ) =>
+				pattern.categories?.includes( category ) &&
+				! pattern.name.includes( THEME_SLUG ) &&
+				pattern.source !== 'pattern-directory/theme' &&
+				pattern.source !== 'pattern-directory/core'
 		);
 	}, [ blockPatterns, category ] );
 

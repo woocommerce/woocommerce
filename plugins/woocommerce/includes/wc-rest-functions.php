@@ -373,3 +373,56 @@ function wc_rest_check_product_reviews_permissions( $context = 'read', $object_i
 function wc_rest_is_from_product_editor() {
 	return isset( $_SERVER['HTTP_X_WC_FROM_PRODUCT_EDITOR'] ) && '1' === $_SERVER['HTTP_X_WC_FROM_PRODUCT_EDITOR'];
 }
+
+/**
+ * Check if a REST namespace should be loaded. Useful to maintain site performance even when lots of REST namespaces are registered.
+ *
+ * @since 9.2.0.
+ *
+ * @param string $ns The namespace to check.
+ * @param string $rest_route (Optional) The REST route being checked.
+ *
+ * @return bool True if the namespace should be loaded, false otherwise.
+ */
+function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): bool {
+	if ( '' === $rest_route ) {
+		$rest_route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
+	}
+
+	if ( '' === $rest_route ) {
+		return true;
+	}
+
+	$rest_route = trailingslashit( ltrim( $rest_route, '/' ) );
+	$ns         = trailingslashit( $ns );
+
+	/**
+	 * Known namespaces that we know are safe to not load if the request is not for them. Namespaces not in this namespace should always be loaded, because we don't know if they won't be making another internal REST request to an unloaded namespace.
+	 */
+	$known_namespaces = array(
+		'wc/v1',
+		'wc/v2',
+		'wc/v3',
+		'wc-telemetry',
+		'wc-admin',
+		'wc-analytics',
+		'wc/store',
+		'wc/private',
+	);
+
+	// We can consider allowing filtering this list in the future.
+
+	$known_namespace_request = false;
+	foreach ( $known_namespaces as $known_namespace ) {
+		if ( str_starts_with( $rest_route, $known_namespace ) ) {
+			$known_namespace_request = true;
+			break;
+		}
+	}
+
+	if ( ! $known_namespace_request ) {
+		return true;
+	}
+
+	return str_starts_with( $rest_route, $ns );
+}

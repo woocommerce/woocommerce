@@ -5,7 +5,6 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
-use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use WP_Error;
 
@@ -35,6 +34,8 @@ use WP_Error;
  * @internal
  */
 class BlockPatterns {
+	const CATEGORIES_PREFIXES = [ '_woo_', '_dotcom_imported_' ];
+
 	/**
 	 * Path to the patterns' directory.
 	 *
@@ -138,8 +139,6 @@ class BlockPatterns {
 			return;
 		}
 
-		$this->ptk_patterns_store = new PTKPatternsStore( new PTKClient() );
-
 		$patterns = $this->ptk_patterns_store->get_patterns();
 		if ( empty( $patterns ) ) {
 			wc_get_logger()->warning(
@@ -148,11 +147,42 @@ class BlockPatterns {
 			return;
 		}
 
+		$patterns = $this->parse_categories( $patterns );
+
 		foreach ( $patterns as $pattern ) {
 			$pattern['slug']    = $pattern['name'];
 			$pattern['content'] = $pattern['html'];
 
 			$this->pattern_registry->register_block_pattern( $pattern['ID'], $pattern, $this->dictionary );
 		}
+	}
+
+	/**
+	 * Parse prefixed categories from the PTK patterns into the actual WooCommerce categories.
+	 *
+	 * @param array $patterns The patterns to parse.
+	 * @return array The parsed patterns.
+	 */
+	private function parse_categories( array $patterns ) {
+		return array_map(
+			function ( $pattern ) {
+				$pattern['categories'] = array_map(
+					function ( $category ) {
+						foreach ( self::CATEGORIES_PREFIXES as $prefix ) {
+							if ( strpos( $category['title'], $prefix ) !== false ) {
+								$parsed_category   = str_replace( $prefix, '', $category['title'] );
+								$parsed_category   = str_replace( '_', ' ', $parsed_category );
+								$category['title'] = ucfirst( $parsed_category );
+							}
+						}
+
+						return $category;
+					},
+					$pattern['categories']
+				);
+				return $pattern;
+			},
+			$patterns
+		);
 	}
 }

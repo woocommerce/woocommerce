@@ -11,11 +11,12 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
+import { CoreProfilerStateMachineContext } from '../index';
 import {
-	CoreProfilerStateMachineContext,
-	PluginsLearnMoreLinkClicked,
-} from '../index';
-import { PluginsInstallationRequestedEvent, PluginsPageSkippedEvent } from '..';
+	PluginsLearnMoreLinkClickedEvent,
+	PluginsInstallationRequestedEvent,
+	PluginsPageSkippedEvent,
+} from '../events';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
 import { PluginCard } from '../components/plugin-card/plugin-card';
@@ -45,7 +46,7 @@ export const Plugins = ( {
 		payload:
 			| PluginsInstallationRequestedEvent
 			| PluginsPageSkippedEvent
-			| PluginsLearnMoreLinkClicked
+			| PluginsLearnMoreLinkClickedEvent
 	) => void;
 	navigationProgress: number;
 } ) => {

@@ -9,7 +9,7 @@ import classnames from 'classnames';
 
 /**
  * A button useful for a launcher of a dropdown component. The button is 100% width of its container and displays
- * single or multiple lines rendered as `<span/>` elments.
+ * single or multiple lines rendered as `<span/>` elements.
  *
  * @param {Object} props Props passed to component.
  * @return {Object} -
