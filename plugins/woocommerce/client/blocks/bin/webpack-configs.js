@@ -4,7 +4,7 @@
 const path = require( 'path' );
 const fs = require( 'fs' );
 const { paramCase } = require( 'change-case' );
-const RemoveFilesPlugin = require( '../../../../woocommerce-blocks/bin/remove-files-webpack-plugin' );
+const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
@@ -91,7 +91,7 @@ const getCoreConfig = ( options = {} ) => {
 			},
 			path: PATH_TO_BUILD,
 			library: [ 'wc', '[name]' ],
-			libraryTarget: 'this',
+			libraryTarget: 'umd',
 			uniqueName: 'webpackWcBlocksCoreJsonp',
 			globalObject: 'this',
 		},
@@ -103,10 +103,18 @@ const getCoreConfig = ( options = {} ) => {
 					use: {
 						loader: 'babel-loader',
 						options: {
-							presets: [ '@wordpress/babel-preset-default' ],
-							plugins: [
-								'@babel/plugin-proposal-optional-chaining',
-								'@babel/plugin-proposal-class-properties',
+							presets: [
+								[
+									'@wordpress/babel-preset-default',
+									{
+										modules: false,
+										targets: {
+											browsers: [
+												'extends @wordpress/browserslist-config',
+											],
+										},
+									},
+								],
 							],
 						},
 					},
