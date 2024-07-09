@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
+import type { InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, calendar } from '@wordpress/icons';
 
@@ -18,7 +18,7 @@ import {
 const collection = {
 	name: CoreCollectionNames.NEW_ARRIVALS,
 	title: __( 'New Arrivals', 'woocommerce' ),
-	icon: ( <Icon icon={ calendar } /> ) as BlockIcon,
+	icon: <Icon icon={ calendar } />,
 	description: __( 'Recommend your newest products.', 'woocommerce' ),
 	keywords: [ 'newest products', 'product collection' ],
 	scope: [],
