@@ -17,10 +17,7 @@ inputs:
         description: 'Given a boolean value, invokes Playwright dependencies caching.'
         default: false
     pull-pnpm-cache:
-      description: 'Given a boolean value, invokes pnpm dependencies caching.'
-      default: false
-    pull-composer-cache:
-      description: 'Given a boolean value, invokes Composer dependencies caching.'
+      description: 'Given a boolean value, invokes pnpm dependencies caching. Under the hood we invoke composer deps caching.'
       default: false
     pull-cache-key:
       description: 'Given a string value, uses it to compose cache keys.'
@@ -61,7 +58,7 @@ runs:
               key: "${{ runner.os }}-pnpm-${{ inputs.pull-cache-key }}v1-${{ hashFiles( '**/pnpm-lock.yaml' ) }}"
               restore-keys: '${{ runner.os }}-pnpm-${{ inputs.pull-cache-key }}v1-'
         - name: 'Cache Composer Dependencies'
-          if: ${{ inputs.build == 'false' }}
+          if: ${{ inputs.pull-pnpm-cache != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: '~/.cache/composer/files'

@@ -52,7 +52,6 @@ jobs:
                   install: '@woocommerce/plugin-woocommerce...'
                   build: '@woocommerce/plugin-woocommerce'
                   pull-playwright-cache: true
-                  pull-composer-cache: true
                   pull-pnpm-cache: true
                   pull-cache-key: '@woocommerce/plugin-woocommerce'
 

@@ -27,7 +27,6 @@ jobs:
               with:
                   install: true
                   build: './tools/package-release'
-                  pull-composer-cache: true
                   pull-pnpm-cache: true
                   pull-cache-key: 'tools/package-release'
 

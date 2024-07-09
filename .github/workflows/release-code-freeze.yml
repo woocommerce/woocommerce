@@ -192,7 +192,6 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                pull-composer-cache: true
                 pull-pnpm-cache: true
                 pull-cache-key: '@woocommerce/plugin-woocommerce'
 
@@ -224,7 +223,6 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                pull-composer-cache: true
                 pull-pnpm-cache: true
                 pull-cache-key: '@woocommerce/plugin-woocommerce'
 
