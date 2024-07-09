@@ -7,14 +7,13 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats;
 
 defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
 
 /**
  * API\Reports\Coupons\Stats\DataStore.
  */
-class DataStore extends CouponsDataStore implements DataStoreInterface {
+class DataStore extends CouponsDataStore {
 	use StatsDataStoreTrait;
 
 	/**

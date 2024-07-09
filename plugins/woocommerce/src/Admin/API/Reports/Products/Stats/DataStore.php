@@ -9,14 +9,13 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
 
 /**
  * API\Reports\Products\Stats\DataStore.
  */
-class DataStore extends ProductsDataStore implements DataStoreInterface {
+class DataStore extends ProductsDataStore {
 	use StatsDataStoreTrait;
 
 	/**

@@ -8,14 +8,13 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
 
 /**
  * API\Reports\Taxes\Stats\DataStore.
  */
-class DataStore extends ReportsDataStore implements DataStoreInterface {
+class DataStore extends ReportsDataStore {
 	use StatsDataStoreTrait;
 
 	/**

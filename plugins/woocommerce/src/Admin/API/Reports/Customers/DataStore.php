@@ -8,7 +8,6 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Customers;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
@@ -17,7 +16,7 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 /**
  * Admin\API\Reports\Customers\DataStore.
  */
-class DataStore extends ReportsDataStore implements DataStoreInterface {
+class DataStore extends ReportsDataStore {
 
 	/**
 	 * Table used to get the data.

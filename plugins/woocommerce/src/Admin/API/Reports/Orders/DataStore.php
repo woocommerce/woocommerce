@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
@@ -20,7 +19,7 @@ use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 /**
  * API\Reports\Orders\DataStore.
  */
-class DataStore extends ReportsDataStore implements DataStoreInterface {
+class DataStore extends ReportsDataStore {
 	use OrderAttributionMeta;
 
 	/**
