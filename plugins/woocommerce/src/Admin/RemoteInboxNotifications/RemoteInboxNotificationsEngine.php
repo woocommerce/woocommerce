@@ -71,8 +71,8 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 		add_filter( 'woocommerce_get_note_from_db', array( __CLASS__, 'get_note_from_db' ), 10, 1 );
 		add_filter( 'woocommerce_debug_tools', array( __CLASS__, 'add_debug_tools' ) );
 		add_action(
-			'wp_ajax_woocommerce_json_remote_inbox_notifications_search',
-			array( __CLASS__, 'ajax_action_remote_inbox_notification_search' )
+			'wp_ajax_woocommerce_json_inbox_notifications_search',
+			array( __CLASS__, 'ajax_action_inbox_notification_search' )
 		);
 	}
 
@@ -254,48 +254,48 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	 * @return mixed
 	 */
 	public static function add_debug_tools( $tools ) {
-		if ( get_option("woocommerce_allow_tracking", "no" ) === "no" ) {
+		if ( get_option( 'woocommerce_allow_tracking', 'no' ) === 'no' ) {
 			return $tools;
 		}
 
-		$tools['refresh_remote_inbox_notifications'] = array(
-			'name'     => __( 'Refresh Remote Inbox Notifications', 'woocommerce' ),
+		$tools['refresh_inbox_notifications'] = array(
+			'name'     => __( 'Refresh Inbox Notifications', 'woocommerce' ),
 			'button'   => __( 'Refresh', 'woocommerce' ),
-			'desc'     => __( 'This will refresh the remote inbox notifications', 'woocommerce' ),
+			'desc'     => __( 'This will refresh the inbox notifications', 'woocommerce' ),
 			'callback' => function () {
 				RemoteInboxNotificationsDataSourcePoller::get_instance()->read_specs_from_data_sources();
 				RemoteInboxNotificationsEngine::run();
 
-				return __( 'Remote inbox notifications have been refreshed', 'woocommerce' );
+				return __( 'Inbox notifications have been refreshed', 'woocommerce' );
 			},
 		);
 
-		$tools['delete_remote_notification'] = array(
-			'name'     => __( 'Delete Remote Notification', 'woocommerce' ),
+		$tools['delete_inbox_notification'] = array(
+			'name'     => __( 'Delete Inbox Notification', 'woocommerce' ),
 			'button'   => __( 'Delete', 'woocommerce' ),
-			'desc'     => __( 'This will delete a remote notification by slug', 'woocommerce' ),
+			'desc'     => __( 'This will delete an inbox notification by slug', 'woocommerce' ),
 			'selector' => array(
-				'description'   => __( 'Select a notification to delete:', 'woocommerce' ),
+				'description'   => __( 'Select an inbox notification to delete:', 'woocommerce' ),
 				'class'         => 'wc-product-search',
-				'search_action' => 'woocommerce_json_remote_inbox_notifications_search',
-				'name'          => 'delete_remote_notification_note_id',
-				'placeholder'   => esc_attr__( 'Search for a notification&hellip;', 'woocommerce' ),
+				'search_action' => 'woocommerce_json_inbox_notifications_search',
+				'name'          => 'delete_inbox_notification_note_id',
+				'placeholder'   => esc_attr__( 'Search for an inbox notification&hellip;', 'woocommerce' ),
 			),
 			'callback' => function () {
 				check_ajax_referer( 'debug_action', '_wpnonce' );
 
-				if ( ! isset( $_GET['delete_remote_notification_note_id'] ) ) {
-					return __( 'No remote inbox notification selected', 'woocommerce' );
+				if ( ! isset( $_GET['delete_inbox_notification_note_id'] ) ) {
+					return __( 'No inbox notification selected', 'woocommerce' );
 				}
-				$note_id = wc_clean( sanitize_text_field( wp_unslash( $_GET['delete_remote_notification_note_id'] ) ) );
+				$note_id = wc_clean( sanitize_text_field( wp_unslash( $_GET['delete_inbox_notification_note_id'] ) ) );
 				$note = Notes::get_note( $note_id );
 
 				if ( ! $note ) {
-					return __( 'Remote inbox notification not found', 'woocommerce' );
+					return __( 'Inbox notification not found', 'woocommerce' );
 				}
 
 				$note->delete( true );
-				return __( 'Remote inbox notification has been deleted', 'woocommerce' );
+				return __( 'Inbox notification has been deleted', 'woocommerce' );
 			},
 		);
 
@@ -307,7 +307,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	 *
 	 * @return void
 	 */
-	public static function ajax_action_remote_inbox_notification_search() {
+	public static function ajax_action_inbox_notification_search() {
 		global $wpdb;
 
 		check_ajax_referer( 'search-products', 'security' );
