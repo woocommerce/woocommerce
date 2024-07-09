@@ -51,7 +51,7 @@ const goToPostEditor = async ( { page } ) => {
 
 const fillPageTitle = async ( page, title ) => {
 	await ( await getCanvas( page ) )
-		.getByRole( 'textbox', { name: 'Add title' } )
+		.getByPlaceholder( 'Add title', { exact: true } )
 		.fill( title );
 };
 
