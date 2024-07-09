@@ -86,8 +86,9 @@ class DataStore extends DownloadsDataStore {
 		$this->interval_query->str_replace_clause( 'where_time', 'date_created', 'timestamp' );
 
 		$db_intervals = $wpdb->get_col(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
 			$this->interval_query->get_query_statement()
-		); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
+		);
 
 		$db_records_count = count( $db_intervals );
 
@@ -121,9 +122,10 @@ class DataStore extends DownloadsDataStore {
 		}
 
 		$intervals = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
 			$this->interval_query->get_query_statement(),
 			ARRAY_A
-		); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
+		);
 
 		if ( null === $intervals ) {
 			return new \WP_Error( 'woocommerce_analytics_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce' ) );

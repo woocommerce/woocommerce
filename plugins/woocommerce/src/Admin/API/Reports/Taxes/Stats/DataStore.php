@@ -169,8 +169,9 @@ class DataStore extends ReportsDataStore {
 		$this->interval_query->add_sql_clause( 'join', $order_stats_join );
 
 		$db_intervals            = $wpdb->get_col(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
 			$this->interval_query->get_query_statement()
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		);
 		$db_interval_count       = count( $db_intervals );
 		$expected_interval_count = TimeInterval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
 		$total_pages             = (int) ceil( $expected_interval_count / $params['per_page'] );
@@ -217,9 +218,10 @@ class DataStore extends ReportsDataStore {
 		$this->interval_query->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 
 		$intervals = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
 			$this->interval_query->get_query_statement(),
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		);
 
 		if ( null === $intervals ) {
 			return new \WP_Error( 'woocommerce_analytics_taxes_stats_result_failed', __( 'Sorry, fetching tax data failed.', 'woocommerce' ) );

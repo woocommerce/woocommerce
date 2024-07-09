@@ -148,8 +148,9 @@ class DataStore extends ProductsDataStore {
 		$this->interval_query->add_sql_clause( 'where_time', $this->get_sql_clause( 'where_time' ) );
 
 		$db_intervals = $wpdb->get_col(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
 			$this->interval_query->get_query_statement()
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		);
 
 		$db_interval_count       = count( $db_intervals );
 		$expected_interval_count = TimeInterval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
@@ -197,9 +198,10 @@ class DataStore extends ProductsDataStore {
 		}
 
 		$intervals = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
 			$this->interval_query->get_query_statement(),
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		);
 
 		if ( null === $intervals ) {
 			return new \WP_Error( 'woocommerce_analytics_products_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );

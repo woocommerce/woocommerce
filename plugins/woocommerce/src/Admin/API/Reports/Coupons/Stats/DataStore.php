@@ -148,8 +148,9 @@ class DataStore extends CouponsDataStore {
 		$this->update_sql_query_params( $query_args, $totals_query, $intervals_query );
 
 		$db_intervals = $wpdb->get_col(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
 			$this->interval_query->get_query_statement()
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		);
 
 		$db_interval_count       = count( $db_intervals );
 		$expected_interval_count = TimeInterval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
@@ -194,9 +195,10 @@ class DataStore extends CouponsDataStore {
 		}
 
 		$intervals = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
 			$this->interval_query->get_query_statement(),
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		);
 
 		if ( null === $intervals ) {
 			return $data;
