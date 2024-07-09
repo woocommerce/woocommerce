@@ -49,7 +49,10 @@ describe( 'PlaceOrderButton', () => {
 		const { container } = render(
 			<PlaceOrderButton label="Place order" showPrice={ true } />
 		);
-		expect( screen.queryByText( /Place order/ ) ).not.toBeInTheDocument();
+		expect( screen.queryByText( /Place order/ ) ).toHaveAttribute(
+			'aria-hidden',
+			'true'
+		);
 		expect(
 			container.querySelector( '.wc-block-components-spinner' )
 		).toBeInTheDocument();
