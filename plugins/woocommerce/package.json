@@ -105,6 +105,7 @@
 			"tests": [
 				{
 					"name": "PHP",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -128,6 +129,7 @@
 				},
 				{
 					"name": "PHP 8.0",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -154,6 +156,7 @@
 				},
 				{
 					"name": "PHP WP: latest - 1",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -180,6 +183,7 @@
 				},
 				{
 					"name": "PHP WP: latest - 2",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -206,6 +210,7 @@
 				},
 				{
 					"name": "PHP WP: nightly",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"optional": true,
 					"changes": [
@@ -600,7 +605,8 @@
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
-						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results"
+						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results",
+						"allure": true
 					}
 				},
 				{
@@ -626,7 +632,7 @@
 		"@babel/core": "7.12.9",
 		"@babel/preset-env": "7.12.7",
 		"@babel/register": "7.12.1",
-		"@playwright/test": "^1.44.1",
+		"@playwright/test": "^1.45.1",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/experimental-utils": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
