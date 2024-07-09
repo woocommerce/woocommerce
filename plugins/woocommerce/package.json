@@ -642,6 +642,7 @@
 		"@woocommerce/e2e-core-tests": "workspace:*",
 		"@woocommerce/e2e-environment": "workspace:*",
 		"@woocommerce/e2e-utils": "workspace:*",
+		"@woocommerce/block-library-tests-and-docs": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/woocommerce-rest-api": "^1.0.1",
 		"@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
