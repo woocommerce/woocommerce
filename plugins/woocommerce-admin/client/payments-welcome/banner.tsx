@@ -77,7 +77,7 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 			<CardBody className="woopayments-welcome-page__payments">
 				<p>{ strings.paymentOptions }</p>
 				<WooPaymentMethodsLogos
-					isWooPayEligible={ isWooPayEligible } 
+					isWooPayEligible={ isWooPayEligible }
 					maxElements={ 10 }
 				/>
 			</CardBody>

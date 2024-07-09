@@ -147,7 +147,7 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 									</div>
 								) }
 								{ gatewayId !==
-									'pre_install_woocommerce_payments_promotion' &&	
+								'pre_install_woocommerce_payments_promotion' &&
 								subTitleContent ? (
 									<div
 										className="pre-install-payment-gateway__subtitle"
