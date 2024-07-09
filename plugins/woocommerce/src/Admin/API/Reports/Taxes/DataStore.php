@@ -155,7 +155,7 @@ class DataStore extends ReportsDataStore {
 	 * Will be called by `get_data` if there is no data in cache.
 	 *
 	 * @see get_data
-	 * @param array    $query_args              Query parameters.
+	 * @param array $query_args Query parameters.
 	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_data( $query_args ) {
@@ -214,7 +214,6 @@ class DataStore extends ReportsDataStore {
 			'pages'   => $total_pages,
 			'page_no' => (int) $query_args['page'],
 		);
-
 
 		return $data;
 	}

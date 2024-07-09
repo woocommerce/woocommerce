@@ -170,7 +170,7 @@ class DataStore extends SqlQuery {
 	 * @param array $query_args Query parameters.
 	 * @return stdClass|WP_Error
 	 */
-	public function get_data( $query_args ){
+	public function get_data( $query_args ) {
 		$defaults   = $this->get_default_query_vars();
 		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->normalize_timezones( $query_args, $defaults );
@@ -188,7 +188,6 @@ class DataStore extends SqlQuery {
 		}
 
 		return $data;
-
 	}
 
 	/**
@@ -222,7 +221,7 @@ class DataStore extends SqlQuery {
 	 * Will be called by `get_data` if there is no data in cache.
 	 *
 	 * @see get_data
-	 * @param array    $query_args              Query parameters.
+	 * @param array $query_args Query parameters.
 	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_data( $query_args ) {

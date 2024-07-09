@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
  * Trait to contain *Stats specific methods for data stores.
+ *
  * @see Automattic\WooCommerce\Admin\API\Reports\DataStore
  */
 trait StatsDataStoreTrait {
