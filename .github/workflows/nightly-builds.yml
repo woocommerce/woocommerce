@@ -49,11 +49,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // body: `Nightly build auto generated. Updated at ${ new Date().toUTCString() }.`
             await github.rest.repos.updateRelease({
               ...context.repo,
               release_id: process.env.RELEASE_ID,
-              body: `Nightly build auto generated.`
+              body: `Nightly build auto generated. Updated at ${ new Date().toUTCString() }.`
             });
 
       - name: Update nightly tag commit ref
