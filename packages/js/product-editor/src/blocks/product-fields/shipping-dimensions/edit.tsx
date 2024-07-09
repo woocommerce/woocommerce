@@ -27,6 +27,7 @@ import {
 import { useValidation } from '../../../contexts/validation-context';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { NumberControl } from '../../../components/number-control';
+import { useBlocksHelper } from '../../../hooks/use-blocks-helper';
 
 const SHIPPING_AND_WEIGHT_MIN_VALUE = 0;
 const SHIPPING_AND_WEIGHT_MAX_VALUE = 100_000_000_000_000;
@@ -88,7 +89,8 @@ export function Edit( {
 		};
 	}
 
-	const errorContext = 'shipping';
+	const { getParentTabId } = useBlocksHelper();
+	const parentTabId = getParentTabId( clientId );
 
 	const {
 		ref: dimensionsWidthRef,
@@ -103,7 +105,7 @@ export function Edit( {
 						'Width must be greater than zero.',
 						'woocommerce'
 					),
-					context: errorContext,
+					context: parentTabId,
 				};
 			}
 		},
@@ -123,7 +125,7 @@ export function Edit( {
 						'Length must be greater than zero.',
 						'woocommerce'
 					),
-					context: errorContext,
+					context: parentTabId,
 				};
 			}
 		},
@@ -143,7 +145,7 @@ export function Edit( {
 						'Height must be greater than zero.',
 						'woocommerce'
 					),
-					context: errorContext,
+					context: parentTabId,
 				};
 			}
 		},
@@ -163,7 +165,7 @@ export function Edit( {
 						'Weight must be greater than zero.',
 						'woocommerce'
 					),
-					context: errorContext,
+					context: parentTabId,
 				};
 			}
 		},

@@ -29,9 +29,11 @@ import { TRACKS_SOURCE } from '../../../constants';
 import { handlePrompt } from '../../../utils/handle-prompt';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { EmptyState } from '../../../components/empty-state';
+import { useBlocksHelper } from '../../../hooks/use-blocks-helper';
 
 export function Edit( {
 	attributes,
+	clientId,
 	context: { isInSelectedTab },
 }: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > ) {
 	const noticeDimissed = useRef( false );
@@ -100,7 +102,8 @@ export function Edit( {
 			itemsWithoutPriceNoticeDismissed,
 	} = useUserPreferences();
 
-	const errorContext = 'variations';
+	const { getParentTabId } = useBlocksHelper();
+	const parentTabId = getParentTabId( clientId );
 
 	const { ref: variationTableRef } = useValidation< Product >(
 		`variations`,
@@ -132,7 +135,7 @@ export function Edit( {
 						'Set variation prices before adding this product.',
 						'woocommerce'
 					),
-					context: errorContext,
+					context: parentTabId,
 				};
 			}
 		},

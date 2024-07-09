@@ -19,6 +19,7 @@ import {
 import { TrackInventoryBlockAttributes } from './types';
 import { useValidation } from '../../../contexts/validation-context';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { useBlocksHelper } from '../../../hooks/use-blocks-helper';
 
 export function Edit( {
 	attributes,
@@ -44,7 +45,8 @@ export function Edit( {
 		'product_stock_quantity'
 	) as string;
 
-	const errorContext = 'inventory';
+	const { getParentTabId } = useBlocksHelper();
+	const parentTabId = getParentTabId( clientId );
 
 	const {
 		ref: stockQuantityRef,
@@ -59,7 +61,7 @@ export function Edit( {
 						'Stock quantity must be a positive number.',
 						'woocommerce'
 					),
-					context: errorContext,
+					context: parentTabId,
 				};
 			}
 		},
