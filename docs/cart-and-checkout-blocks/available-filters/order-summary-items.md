@@ -4,19 +4,18 @@ menu_title: Order summary items
 tags: reference
 ---
 <!-- markdownlint-disable MD024 -->
-# Order Summary Items
 
 The following Order Summary Items filters are available:
 
--   [`cartItemClass`](#cartitemclass)
--   [`cartItemPrice`](#cartitemprice)
--   [`itemName`](#itemname)
--   [`subtotalPriceFormat`](#subtotalpriceformat)
+-   `cartItemClass`
+-   `cartItemPrice`
+-   `itemName`
+-   `subtotalPriceFormat`
 
 The following objects are shared between the filters:
 
--   [Cart object](#cart-object)
--   [Cart Item object](#cart-item-object)
+-   Cart object
+-   Cart Item object
 
 The following screenshot shows which parts the individual filters affect:
 
@@ -91,7 +90,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -169,7 +168,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -246,7 +245,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -334,7 +333,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 

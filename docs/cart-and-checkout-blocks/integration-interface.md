@@ -4,21 +4,6 @@ menu_title: Script, styles, and data handling
 tags: how-to
 ---
 
-# `IntegrationRegistry` and `IntegrationInterface` <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [The problem](#the-problem)
--   [The solution](#the-solution)
--   [`IntegrationInterface` methods](#integrationinterface-methods)
-    -   [`get_name()`](#get_name)
-    -   [`initialize()`](#initialize)
-    -   [`get_script_handles()`](#get_script_handles)
-    -   [`get_editor_script_handles()`](#get_editor_script_handles)
-    -   [`get_script_data()`](#get_script_data)
--   [Usage example](#usage-example)
-    -   [Getting data added in `get_script_data`](#getting-data-added-in-get_script_data)
-
 ## The problem
 
 You are an extension developer, and to allow users to interact with your extension on the client-side, you have written some CSS and JavaScript that you would like to be included on the page. Your JavaScript also relies on some server-side data, and you'd like this to be available to your scripts.

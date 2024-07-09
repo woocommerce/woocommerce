@@ -4,18 +4,17 @@ menu_title: Checkout and place order button
 tags: reference
 ---
 <!-- markdownlint-disable MD024 -->
-# Checkout and place order button
 
 The following Checkout and place order button filters are available:
 
--   [`proceedToCheckoutButtonLabel`](#proceedtocheckoutbuttonlabel)
--   [`proceedToCheckoutButtonLink`](#proceedtocheckoutbuttonlink)
--   [`placeOrderButtonLabel`](#placeorderbuttonlabel)
+-   `proceedToCheckoutButtonLabel`
+-   `proceedToCheckoutButtonLink`
+-   `placeOrderButtonLabel`
 
 The following objects are shared between the filters:
 
--   [Cart object](#cart-object)
--   [Cart Item object](#cart-item-object)
+-   Cart object
+-   Cart Item object
 
 ## `proceedToCheckoutButtonLabel`
 
@@ -88,7 +87,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -167,7 +166,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -204,7 +203,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 

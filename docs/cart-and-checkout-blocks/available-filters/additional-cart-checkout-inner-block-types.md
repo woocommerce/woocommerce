@@ -5,11 +5,9 @@ tags: reference
 ---
 
 
-# Additional Cart and Checkout inner block types
-
 The following Additional Cart and Checkout inner block types filter is available:
 
--   [`additionalCartCheckoutInnerBlockTypes`](#additionalcartcheckoutinnerblocktypes)
+-   `additionalCartCheckoutInnerBlockTypes`
 
 ## `additionalCartCheckoutInnerBlockTypes`
 

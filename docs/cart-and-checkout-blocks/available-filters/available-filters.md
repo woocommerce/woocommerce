@@ -4,19 +4,6 @@ menu_title: Available filters
 tags: reference
 ---
 
-# Available filters <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [Cart Line Items filters](#cart-line-items-filters)
--   [Order Summary Items filters](#order-summary-items-filters)
--   [Totals Footer Item filter](#totals-footer-item-filter)
--   [Checkout and place order button filters](#checkout-and-place-order-button-filters)
--   [Coupon filters](#coupon-filters)
--   [Additional Cart and Checkout inner block types filter](#additional-cart-and-checkout-inner-block-types-filter)
--   [Combined filters](#combined-filters)
--   [Troubleshooting](#troubleshooting)
-
 This document lists the filters that are currently available to extensions and offers usage information for each one of them. Information on registering filters can be found on the [Checkout - Filter Registry](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/packages/checkout/filter-registry/README.md) page.
 
 ## Cart Line Items filters

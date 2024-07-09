@@ -6,21 +6,19 @@ tags: reference
 
 <!-- markdownlint-disable MD024 -->
 
-# Cart Line Items
-
 The following Cart Line Items filters are available:
 
--   [`cartItemClass`](#cartitemclass)
--   [`cartItemPrice`](#cartitemprice)
--   [`itemName`](#itemname)
--   [`saleBadgePriceFormat`](#salebadgepriceformat)
--   [`showRemoveItemLink`](#showremoveitemlink)
--   [`subtotalPriceFormat`](#subtotalpriceformat)
+-   `cartItemClass`
+-   `cartItemPrice`
+-   `itemName`
+-   `saleBadgePriceFormat`
+-   `showRemoveItemLink`
+-   `subtotalPriceFormat`
 
 The following objects are shared between the filters:
 
--   [Cart object](#cart-object)
--   [Cart Item object](#cart-item-object)
+-   Cart object
+-  [Cart Item object
 
 The following screenshot shows which parts the individual filters affect:
 
@@ -95,7 +93,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -174,7 +172,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -251,7 +249,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -337,7 +335,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -415,7 +413,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -505,7 +503,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 

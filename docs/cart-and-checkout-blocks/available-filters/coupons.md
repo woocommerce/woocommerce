@@ -6,13 +6,11 @@ tags: reference
 
 <!-- markdownlint-disable MD024 -->
 
-# Coupons
-
 The following Coupon filters are available:
 
--   [`coupons`](#coupons-1)
--   [`showApplyCouponNotice`](#showapplycouponnotice)
--   [`showRemoveCouponNotice`](#showremovecouponnotice)
+-   `coupons`
+-   `showApplyCouponNotice`
+-   `showRemoveCouponNotice`
 
 ## `coupons`
 
@@ -66,7 +64,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -124,7 +122,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -182,7 +180,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 

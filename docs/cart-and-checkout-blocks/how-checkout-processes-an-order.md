@@ -4,8 +4,6 @@ menu_title: Processing an order
 tags: reference
 ---
 
-# How The Checkout Block Processes an Order
-
 This document will shed some light on the inner workings of the Checkout flow. More specifically, what happens after a user hits the “Place Order” button.
 
 ## Structure

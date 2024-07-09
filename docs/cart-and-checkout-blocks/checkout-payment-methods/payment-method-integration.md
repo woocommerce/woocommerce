@@ -4,34 +4,6 @@ menu_title: Payment method integration
 tags: reference
 ---
 
-# Payment Method Integration for the Checkout Block <!-- omit in toc -->
-
-The checkout block has an API interface for payment methods to integrate that consists of both a server side and client side implementation.
-
-## Table of Contents <!-- omit in toc -->
-
--   [Client Side integration](#client-side-integration)
-    -   [Express payment methods - `registerExpressPaymentMethod( options )`](#express-payment-methods---registerexpresspaymentmethod-options-)
-        -   [Aliased import](#registerexpresspaymentmethod-aliased-import)
-        -   [`wc global`](#registerexpresspaymentmethod-on-the-wc-global)
-        -   [The registration options](#the-registerexpresspaymentmethod-registration-options)
-        -   [`name` (required)](#name-required)
-        -   [`content` (required)](#content-required)
-        -   [`edit` (required)](#edit-required)
-        -   [`canMakePayment` (required)](#canmakepayment-required)
-        -   [`paymentMethodId`](#paymentmethodid)
-        -   [`supports:features`](#supportsfeatures)
-    -   [Payment Methods - `registerPaymentMethod( options )`](#payment-methods---registerpaymentmethod-options-)
-        -   [Aliased import](#registerpaymentmethod-aliased-import)
-        -   [`wc global`](#registerpaymentmethod-on-the-wc-global)
-        -   [The registration options](#the-registerpaymentmethod-registration-options)
-    -   [Props Fed to Payment Method Nodes](#props-fed-to-payment-method-nodes)
--   [Server Side Integration](#server-side-integration)
-    -   [Processing Payment](#processing-payment)
-    -   [Registering Assets](#registering-assets)
-    -   [Hooking into the Checkout processing by the Store API](#hooking-into-the-checkout-processing-by-the-store-api)
-    -   [Putting it all together](#putting-it-all-together)
-
 ## Client Side integration
 
 The client side integration consists of an API for registering both _express_ payment methods (those that consist of a one-button payment process initiated by the shopper such as Stripe, ApplePay, or GooglePay), and payment methods such as _cheque_, PayPal Standard, or Stripe Credit Card.

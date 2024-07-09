@@ -4,18 +4,6 @@ menu_title: Available slots
 tags: reference
 ---
 <!-- markdownlint-disable MD024 -->
-# Available Slots <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [ExperimentalOrderMeta](#experimentalordermeta)
-    -   [Passed parameters](#passed-parameters)
--   [ExperimentalOrderShippingPackages](#experimentalordershippingpackages)
-    -   [Passed parameters](#passed-parameters-1)
--   [ExperimentalOrderLocalPickupPackages](#experimentalorderlocalpickuppackages)
-    -   [Passed parameters](#passed-parameters-2)
--   [ExperimentalDiscountsMeta](#experimentaldiscountsmeta)
-    -   [Passed parameters](#passed-parameters-3)
 
 This document presents the list of available Slots that you can use for adding your custom content (Fill).
 

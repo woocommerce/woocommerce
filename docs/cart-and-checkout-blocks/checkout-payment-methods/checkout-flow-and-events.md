@@ -4,30 +4,6 @@ menu_title: Checkout Flow and Events
 tags: reference
 ---
 
-# Checkout Flow and Events <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [General Concepts](#general-concepts)
-    -   [Tracking flow through status](#tracking-flow-through-status)
-        -   [Checkout Data Store Status](#checkout-data-store-status)
-        -   [Special States](#special-states)
-    -   [`ShippingProvider` Exposed Statuses](#shippingprovider-exposed-statuses)
-    -   [Payment Method Data Store Status](#payment-method-data-store-status)
-    -   [Emitting Events](#emitting-events)
-    -   [`onCheckoutValidation`](#oncheckoutvalidation)
-    -   [~~`onPaymentProcessing`~~](#onpaymentprocessing)
-    -   [`onPaymentSetup`](#onpaymentsetup)
-        -   [Success](#success)
-        -   [Fail](#fail)
-        -   [Error](#error)
-    -   [`onCheckoutSuccess`](#oncheckoutsuccess)
-    -   [`onCheckoutFail`](#oncheckoutfail)
-    -   [`onShippingRateSuccess`](#onshippingratesuccess)
-    -   [`onShippingRateFail`](#onshippingratefail)
-    -   [`onShippingRateSelectSuccess`](#onshippingrateselectsuccess)
-    -   [`onShippingRateSelectFail`](#onshippingrateselectfail)
-
 This document gives an overview of the flow for the checkout in the WooCommerce checkout block, and some general architectural overviews.
 
 The architecture of the Checkout Block is derived from the following principles:
