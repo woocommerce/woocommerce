@@ -9,6 +9,12 @@
 
 	.components-base-control {
 		width: 100%;
+
+		.components-input-base {
+			.components-input-control__input {
+				height: 36px;
+			}
+		}
 	}
 
 	.components-modal__content {

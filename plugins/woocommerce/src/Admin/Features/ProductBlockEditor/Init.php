@@ -150,9 +150,10 @@ class Init {
 	 * Enqueue styles needed for the rich text editor.
 	 */
 	public function enqueue_styles() {
-		if ( ! PageController::is_admin_or_embed_page() ) {
+		if ( ! PageController::is_admin_page() ) {
 			return;
 		}
+		wp_enqueue_style( 'wc-product-editor' );
 		wp_enqueue_style( 'wp-edit-blocks' );
 		wp_enqueue_style( 'wp-format-library' );
 		wp_enqueue_editor();
@@ -168,7 +169,7 @@ class Init {
 	 * Dequeue conflicting styles.
 	 */
 	public function dequeue_conflicting_styles() {
-		if ( ! PageController::is_admin_or_embed_page() ) {
+		if ( ! PageController::is_admin_page() ) {
 			return;
 		}
 		// Dequeing this to avoid conflicts, until we remove the 'woocommerce-page' class.

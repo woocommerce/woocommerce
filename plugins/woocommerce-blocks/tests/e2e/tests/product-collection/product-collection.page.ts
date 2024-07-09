@@ -59,24 +59,33 @@ export const SELECTORS = {
 		min: 'MIN',
 		max: 'MAX',
 	},
+	previewButtonTestID: 'product-collection-preview-button',
+	collectionPlaceholder:
+		'[data-type="woocommerce/product-collection"] .components-placeholder',
 };
 
-type Collections =
+export type Collections =
 	| 'newArrivals'
 	| 'topRated'
 	| 'bestSellers'
 	| 'onSale'
 	| 'featured'
-	| 'productCatalog';
+	| 'productCatalog'
+	| 'myCustomCollection'
+	| 'myCustomCollectionWithPreview'
+	| 'myCustomCollectionWithAdvancedPreview';
 
 const collectionToButtonNameMap = {
-	newArrivals: 'New Arrivals Recommend your newest products.',
-	topRated: 'Top Rated Recommend products with the highest review ratings.',
-	bestSellers: 'Best Sellers Recommend your best-selling products.',
-	onSale: 'On Sale Highlight products that are currently on sale.',
-	featured: 'Featured Showcase your featured products.',
-	productCatalog:
-		'Product Catalog Display all products in your catalog. Results can (change to) match the current template, page, or search term.',
+	newArrivals: 'New Arrivals',
+	topRated: 'Top Rated',
+	bestSellers: 'Best Sellers',
+	onSale: 'On Sale',
+	featured: 'Featured',
+	productCatalog: 'create your own',
+	myCustomCollection: 'My Custom Collection',
+	myCustomCollectionWithPreview: 'My Custom Collection with Preview',
+	myCustomCollectionWithAdvancedPreview:
+		'My Custom Collection with Advanced Preview',
 };
 
 class ProductCollectionPage {
@@ -112,9 +121,35 @@ class ProductCollectionPage {
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		await this.admin.page
-			.getByRole( 'button', { name: buttonName } )
-			.click();
+		const placeholderSelector = this.admin.page.locator(
+			SELECTORS.collectionPlaceholder
+		);
+
+		const chooseCollectionFromPlaceholder = async () => {
+			await placeholderSelector
+				.getByRole( 'button', { name: buttonName, exact: true } )
+				.click();
+		};
+
+		const chooseCollectionFromDropdown = async () => {
+			await placeholderSelector
+				.getByRole( 'button', {
+					name: 'Choose collection',
+				} )
+				.click();
+
+			await this.admin.page
+				.locator(
+					'.wc-blocks-product-collection__collections-dropdown-content'
+				)
+				.getByRole( 'button', { name: buttonName, exact: true } )
+				.click();
+		};
+
+		await Promise.any( [
+			chooseCollectionFromPlaceholder(),
+			chooseCollectionFromDropdown(),
+		] );
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
@@ -122,9 +157,34 @@ class ProductCollectionPage {
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		await this.editor.canvas
-			.getByRole( 'button', { name: buttonName } )
-			.click();
+		const inserterClass = await this.editor.canvas
+			.locator( SELECTORS.collectionPlaceholder )
+			.locator(
+				'.wc-blocks-product-collection__collections-grid, .wc-blocks-product-collection__collections-dropdown'
+			)
+			.getAttribute( 'class' );
+
+		const isDropdown = inserterClass?.includes(
+			'wc-blocks-product-collection__collections-dropdown'
+		);
+
+		if ( isDropdown ) {
+			await this.editor.canvas
+				.getByRole( 'button', { name: 'Choose collection' } )
+				.click();
+
+			await this.editor.canvas
+				.locator(
+					'.wc-blocks-product-collection__collections-dropdown-content'
+				)
+				.getByRole( 'button', { name: buttonName, exact: true } )
+				.click();
+		} else {
+			await this.editor.canvas
+				.locator( SELECTORS.collectionPlaceholder )
+				.getByRole( 'button', { name: buttonName, exact: true } )
+				.click();
+		}
 	}
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
@@ -204,6 +264,13 @@ class ProductCollectionPage {
 			canvas: 'edit',
 		} );
 		await this.refreshLocators( 'editor' );
+	}
+
+	async goToProductCatalogAndInsertCollection( collection: Collections ) {
+		await this.goToTemplateAndInsertCollection(
+			'woocommerce/woocommerce//archive-product',
+			collection
+		);
 	}
 
 	async goToProductCatalogFrontend() {
