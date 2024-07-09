@@ -98,6 +98,8 @@ runs:
         - name: 'Build'
           # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
           if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
+          env:
+            BROWSERSLIST_IGNORE_OLD_DATA: true
           shell: 'bash'
           run: |
             if [[ '${{ inputs.build-type }}' == 'backend' ]]; then
