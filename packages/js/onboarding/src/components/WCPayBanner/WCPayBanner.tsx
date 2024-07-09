@@ -29,7 +29,7 @@ export const WCPayBannerFooter: React.VFC< {
 			</Text>
 		</div>
 		<WooPaymentMethodsLogos
-			isWooPayEligible={ isWooPayEligible } 
+			isWooPayEligible={ isWooPayEligible }
 			maxElements={ 10 }
 		/>
 	</CardFooter>

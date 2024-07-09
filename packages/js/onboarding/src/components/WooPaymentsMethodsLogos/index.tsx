@@ -81,16 +81,19 @@ const totalPaymentMethods = 21;
 export const WooPaymentMethodsLogos: React.VFC< {
 	isWooPayEligible: boolean;
 	maxElements: number;
-} > = ( { isWooPayEligible = false, maxElements = maxElementsDesktop } ) => {
+} > = ( {
+	isWooPayEligible = false, 
+	maxElements = maxElementsDesktop
+} ) => {
 	const [ maxShownElements, setMaxShownElements ] = useState( maxElements );
 
 	// Determine the maximum number of logos to display, taking into account WooPay’s eligibility.
-	const getMaxShownElements = ( maxElements: number, isWooPayEligible: boolean ) => {
-		if ( ! isWooPayEligible ) {
-			return maxElements + 1;
+	const getMaxShownElements = ( maxElementsNumber: number, isWooPayAvailable: boolean ) => {
+		if ( ! isWooPayAvailable ) {
+			return maxElementsNumber + 1;
 		}
 
-		return maxElements;
+		return maxElementsNumber;
 	};
 
 	useEffect( () => {
@@ -111,11 +114,14 @@ export const WooPaymentMethodsLogos: React.VFC< {
 	return (
 		<>
 			<div className="woocommerce-woopayments-payment-methods-logos">
-				{ PaymentMethods.slice( 0, getMaxShownElements( maxShownElements, isWooPayEligible ) ).map( ( pm ) => {
+				{ PaymentMethods.slice(
+					0, 
+					getMaxShownElements( maxShownElements, isWooPayEligible )
+				).map( ( pm ) => {
 					if ( ! isWooPayEligible && pm.name === 'woopay' ) {
-						return;
+						return <></>;
 					}
-					
+
 					return pm.component;
 				} ) }
 				{ maxShownElements < totalPaymentMethods && (
