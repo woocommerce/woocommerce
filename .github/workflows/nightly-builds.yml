@@ -31,30 +31,30 @@ jobs:
         working-directory: plugins/woocommerce
         run: bash bin/build-zip.sh
 
-      - name: Upload nightly build
-        uses: WebFreak001/deploy-nightly@d147b5dbd2cb8245d2b5f83a41f5ebe9957575b4
+#      - name: Upload nightly build
+#        uses: WebFreak001/deploy-nightly@d147b5dbd2cb8245d2b5f83a41f5ebe9957575b4
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.FINE_GRAINED_TOKEN_ACTIONS }}
-        with:
-          token: ${{ secrets.FINE_GRAINED_TOKEN_ACTIONS }}
-          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
-          release_id: ${{ env.RELEASE_ID }}
-          asset_path: plugins/woocommerce/woocommerce.zip
-          asset_name: woocommerce-${{ env.SOURCE_REF }}-nightly.zip
-          asset_content_type: application/zip
-          max_releases: 1
-
-#      - name: Update nightly release body
-#        uses: actions/github-script@v7
 #        with:
-#          github-token: ${{ secrets.NIGHTLY_RELEASE_TOKEN }}
-#          script: |
-#            await github.rest.repos.updateRelease({
-#              ...context.repo,
-#              release_id: process.env.RELEASE_ID,
-#              body: `Nightly build auto generated. Updated at ${ new Date().toUTCString() }.`
-#            });
-#
+#          token: ${{ secrets.FINE_GRAINED_TOKEN_ACTIONS }}
+#          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
+#          release_id: ${{ env.RELEASE_ID }}
+#          asset_path: plugins/woocommerce/woocommerce.zip
+#          asset_name: woocommerce-${{ env.SOURCE_REF }}-nightly.zip
+#          asset_content_type: application/zip
+#          max_releases: 1
+
+      - name: Update nightly release body
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.REPORTS_TOKEN }}
+          script: |
+            await github.rest.repos.updateRelease({
+              ...context.repo,
+              release_id: process.env.RELEASE_ID,
+              body: `Nightly build auto generated. Updated at ${ new Date().toUTCString() }.`
+            });
+
       - name: Update nightly tag commit ref
         uses: actions/github-script@v7
         with:
