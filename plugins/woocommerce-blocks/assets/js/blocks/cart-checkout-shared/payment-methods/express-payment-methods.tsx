@@ -11,12 +11,10 @@ import {
 	isValidElement,
 	useCallback,
 	useRef,
-	useMemo,
 } from '@wordpress/element';
 import { useEditorContext } from '@woocommerce/base-context';
 import deprecated from '@wordpress/deprecated';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { getSetting } from '@woocommerce/settings';
 import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
 
 /**
@@ -26,26 +24,22 @@ import PaymentMethodErrorBoundary from './payment-method-error-boundary';
 import { STORE_KEY as PAYMENT_STORE_KEY } from '../../../data/payment/constants';
 
 const ExpressPaymentMethods = ( {
-	buttonHeight: buttonHeight,
+	buttonHeight,
+	buttonBorderRadius,
 }: {
 	buttonHeight: string;
+	buttonBorderRadius: string;
 } ) => {
 	const { isEditor } = useEditorContext();
 
 	const { hasDarkControls } = useCheckoutBlockContext();
 
 	// Get attributes set on the server
-	const buttonAttributes: {
-		height: string;
-		borderRadius: string;
-		minWidth: string;
-		darkMode: boolean;
-		label: string;
-	} = useMemo( () => getSetting( 'expressPaymentStyles' ), [] );
-	// any attritutes defined on client
-	buttonAttributes.height = buttonHeight;
-	buttonAttributes.darkMode = hasDarkControls;
-
+	const buttonAttributes = {
+		height: buttonHeight || '48',
+		borderRadius: buttonBorderRadius || '4',
+		darkMode: hasDarkControls,
+	};
 	const { activePaymentMethod, paymentMethodData } = useSelect(
 		( select ) => {
 			const store = select( PAYMENT_STORE_KEY );

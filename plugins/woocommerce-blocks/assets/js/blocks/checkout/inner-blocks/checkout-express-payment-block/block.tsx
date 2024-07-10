@@ -11,9 +11,11 @@ import { CheckoutExpressPayment } from '../../../cart-checkout-shared/payment-me
 const Block = ( {
 	className,
 	buttonHeight,
+	buttonBorderRadius,
 }: {
 	className?: string;
 	buttonHeight: string;
+	buttonBorderRadius: string;
 } ): JSX.Element | null => {
 	const { cartNeedsPayment } = useStoreCart();
 
@@ -23,7 +25,11 @@ const Block = ( {
 
 	return (
 		<div className={ className }>
-			<CheckoutExpressPayment buttonHeight={ buttonHeight } />
+			buttonBorderRadius,
+			<CheckoutExpressPayment
+				buttonHeight={ buttonHeight }
+				buttonBorderRadius={ buttonBorderRadius }
+			/>
 		</div>
 	);
 };
