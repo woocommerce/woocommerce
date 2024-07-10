@@ -4024,6 +4024,8 @@ add_filter( 'post_type_archive_title', 'wc_update_product_archive_title', 10, 2 
  * Set the version of the hooked blocks in the database. Used when WC is installed for the first time.
  *
  * @since 9.2.0
+ *
+ * @return void
  */
 function wc_set_hooked_blocks_version() {
 	// Only set the version if the current theme is a block theme.
@@ -4038,4 +4040,22 @@ function wc_set_hooked_blocks_version() {
 	}
 
 	add_option( $option_name, WC()->version );
+}
+
+/**
+ * If the user switches to a theme that supports FSE and they haven't already got a wc_hooked_blocks_version,
+ * set the version of the hooked blocks in the database as the latest WC version.
+ *
+ * @since 9.2.0
+ *
+ * @param string    $old_name Old theme name.
+ * @param \WP_Theme $old_theme Instance of the old theme.
+ * @return void
+ */
+function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
+	$option_name = 'wc_hooked_blocks_version';
+
+	if ( ! $old_theme->is_block_theme() && wc_current_theme_is_fse_theme() && ! get_option( $option_name ) ) {
+		add_option( $option_name, WC()->version );
+	}
 }
