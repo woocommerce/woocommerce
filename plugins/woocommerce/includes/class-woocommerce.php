@@ -1236,7 +1236,7 @@ final class WooCommerce {
 	/**
 	 * Initialize WC Analytics package only if
 	 * - Automattic\Woocommerce_Analytics package is available
-	 * - Jetpack plugin is not active or its version is >= x.x.x (before this version, the package is loaded in Jetpack)
+	 * - Jetpack plugin is not active or its version is >= 13.7 (before this version, the package is loaded in Jetpack)
 	 * - woocommerce_analytics_allow_tracking filter is true (false by default)
 	 *
 	 * @since x.x.x
@@ -1253,16 +1253,17 @@ final class WooCommerce {
 		 * Hook: woocommerce_analytics_allow_tracking.
 		 *
 		 * @since 9.4.0
-		 * @param boolean $is_allowed Indicates if WooCommerce Analytics should be enabled.
+		 * @param boolean $is_allowed Indicates if WooCommerce Analytics is allowed to track.
 		 */
 		if ( ! apply_filters( 'woocommerce_analytics_allow_tracking', false ) ) {
 			return;
 		}
 
+		// Prevent to load the package for sites with Jetpack < 13.7. That version loads the package itself.
 		$jetpack_plugin = 'jetpack/jetpack.php';
 		if ( is_plugin_active( $jetpack_plugin ) ) {
 			$jetpack_plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $jetpack_plugin );
-			if ( ! isset( $jetpack_plugin_data['Version'] ) && version_compare( $jetpack_plugin_data['Version'], 'x.x.x', '<' ) ) {
+			if ( ! isset( $jetpack_plugin_data['Version'] ) && version_compare( $jetpack_plugin_data['Version'], '13.7', '<' ) ) {
 				return;
 			}
 		}
