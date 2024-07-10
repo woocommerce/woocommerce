@@ -50,7 +50,7 @@ describe( 'fetchExperimentAssignment', () => {
 			experimentName: '123',
 			anonId: null,
 		} );
-		await expect( fetchPromise ).rejects.toThrowError();
+		await expect( fetchPromise ).rejects.toThrow();
 	} );
 
 	it( 'should throw error when experiment_name is empty', async () => {
@@ -58,7 +58,7 @@ describe( 'fetchExperimentAssignment', () => {
 			experimentName: '',
 			anonId: null,
 		} );
-		await expect( fetchPromise ).rejects.toThrowError();
+		await expect( fetchPromise ).rejects.toThrow();
 	} );
 
 	it( 'should throw error when experiment_name is invalid', async () => {
@@ -66,7 +66,7 @@ describe( 'fetchExperimentAssignment', () => {
 			experimentName: '',
 			anonId: null,
 		} );
-		await expect( fetchPromise ).rejects.toThrowError();
+		await expect( fetchPromise ).rejects.toThrow();
 	} );
 
 	it( 'should return .json response', async () => {

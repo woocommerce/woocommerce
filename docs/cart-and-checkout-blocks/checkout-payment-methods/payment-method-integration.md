@@ -1,36 +1,8 @@
 ---
 post_title: Cart and Checkout - Payment method integration for the Checkout block
 menu_title: Payment Method Integration
-tags: reference, checkout-payment-methods
+tags: reference
 ---
-
-# Payment Method Integration for the Checkout Block <!-- omit in toc -->
-
-The checkout block has an API interface for payment methods to integrate that consists of both a server side and client side implementation.
-
-## Table of Contents <!-- omit in toc -->
-
--   [Client Side integration](#client-side-integration)
-    -   [Express payment methods - `registerExpressPaymentMethod( options )`](#express-payment-methods---registerexpresspaymentmethod-options-)
-        -   [Aliased import](#registerexpresspaymentmethod-aliased-import)
-        -   [`wc global`](#registerexpresspaymentmethod-on-the-wc-global)
-        -   [The registration options](#the-registerexpresspaymentmethod-registration-options)
-        -   [`name` (required)](#name-required)
-        -   [`content` (required)](#content-required)
-        -   [`edit` (required)](#edit-required)
-        -   [`canMakePayment` (required)](#canmakepayment-required)
-        -   [`paymentMethodId`](#paymentmethodid)
-        -   [`supports:features`](#supportsfeatures)
-    -   [Payment Methods - `registerPaymentMethod( options )`](#payment-methods---registerpaymentmethod-options-)
-        -   [Aliased import](#registerpaymentmethod-aliased-import)
-        -   [`wc global`](#registerpaymentmethod-on-the-wc-global)
-        -   [The registration options](#the-registerpaymentmethod-registration-options)
-    -   [Props Fed to Payment Method Nodes](#props-fed-to-payment-method-nodes)
--   [Server Side Integration](#server-side-integration)
-    -   [Processing Payment](#processing-payment)
-    -   [Registering Assets](#registering-assets)
-    -   [Hooking into the Checkout processing by the Store API](#hooking-into-the-checkout-processing-by-the-store-api)
-    -   [Putting it all together](#putting-it-all-together)
 
 ## Client Side integration
 
@@ -89,7 +61,7 @@ This should be a unique string (wise to try to pick something unique for your ga
 
 #### `content` (required)
 
-This should be a React node that will output in the express payment method area when the block is rendered in the frontend. It will be cloned in the rendering process. When cloned, this React node will receive props passed in from the checkout payment method interface that will allow your component to interact with checkout data (more on [these props later](./payment-method-integration.md#props-fed-to-payment-method-nodes)).
+This should be a React node that will output in the express payment method area when the block is rendered in the frontend. It will be cloned in the rendering process. When cloned, this React node will receive props passed in from the checkout payment method interface that will allow your component to interact with checkout data (more on [these props later](#props-fed-to-payment-method-nodes)).
 
 #### `edit` (required)
 
@@ -165,7 +137,7 @@ The options you feed the configuration instance are the same as those for expres
 
 ### Props Fed to Payment Method Nodes
 
-A big part of the payment method integration is the interface that is exposed for payment methods to use via props when the node provided is cloned and rendered on block mount. While all the props are listed below, you can find more details about what the props reference, their types etc via the [typedefs described in this file](../../../../assets/js/types/type-defs/payment-method-interface.ts).
+A big part of the payment method integration is the interface that is exposed for payment methods to use via props when the node provided is cloned and rendered on block mount. While all the props are listed below, you can find more details about what the props reference, their types etc via the [typedefs described in this file](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/assets/js/types/type-defs/payment-method-interface.ts).
 
 | Property                 | Type     | Description                                                                                                                                                                                                                                                                                                        | Values                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
