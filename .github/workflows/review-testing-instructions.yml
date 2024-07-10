@@ -1,4 +1,4 @@
-name: Remind reviewers to also review the testing instructions.
+name: Remind reviewers to also review the testing instructions and test coverage
 on:
   pull_request_target:
     types: [review_requested]
