@@ -71,13 +71,6 @@
 		min-height: 36px;
 		padding: 4px 16px;
 
-		@include breakpoint("<782px") {
-			min-height: 36px;
-			font-size: 16px;
-			line-height: 1.625;
-			padding: 5px 16px;
-		}
-
 		&.is-button {
 			color: $gray-700;
 		}
@@ -97,9 +90,6 @@
 			align-items: flex-start;
 		}
 	}
-}
-
-.woocommerce-store-alerts__header {
 }
 
 .woocommerce-store-alerts__title {
