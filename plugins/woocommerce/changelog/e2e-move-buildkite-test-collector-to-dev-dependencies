@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move buildkite-test-collector to devDependencies

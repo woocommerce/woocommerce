@@ -29,7 +29,7 @@
 		"env:start": "pnpm wp-env start",
 		"env:start:blocks": "pnpm --filter='@woocommerce/block-library' env:start && pnpm playwright install chromium --with-deps",
 		"env:stop": "pnpm wp-env stop",
-		"env:test": "pnpm env:dev && pnpm playwright install chromium",
+		"env:test": "pnpm env:dev",
 		"env:perf:install-k6": "curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1",
 		"env:perf": "pnpm env:dev && pnpm env:performance-init && pnpm env:perf:install-k6",
 		"preinstall": "npx only-allow pnpm",
@@ -53,10 +53,11 @@
 		"test": "pnpm test:unit",
 		"test:api": "API_TEST_REPORT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
 		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
-		"test:e2e-pw": "pnpm playwright test --config=tests/e2e-pw/envs/default/playwright.config.js",
-		"test:e2e": "pnpm test:e2e:with-env default",
+		"test:e2e-pw": "pnpm test:e2e:install && pnpm playwright test --config=tests/e2e-pw/envs/default/playwright.config.js",
+		"test:e2e": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
+		"test:e2e:install": "pnpm playwright install chromium",
 		"test:e2e:blocks": "pnpm --filter='@woocommerce/block-library' test:e2e",
-		"test:e2e:with-env": "bash ./tests/e2e-pw/run-tests-with-env.sh",
+		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e-pw/run-tests-with-env.sh",
 		"test:perf": "./k6 run ./tests/performance/tests/gh-action-pr-requests.js",
 		"test:env:start": "pnpm env:test",
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
@@ -104,9 +105,11 @@
 			"tests": [
 				{
 					"name": "PHP",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -126,9 +129,11 @@
 				},
 				{
 					"name": "PHP 8.0",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -151,9 +156,11 @@
 				},
 				{
 					"name": "PHP WP: latest - 1",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -176,9 +183,11 @@
 				},
 				{
 					"name": "PHP WP: latest - 2",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -201,10 +210,12 @@
 				},
 				{
 					"name": "PHP WP: nightly",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -230,14 +241,16 @@
 					"testType": "e2e",
 					"command": "test:e2e:with-env default",
 					"shardingArguments": [
-						"--shard=1/5",
-						"--shard=2/5",
-						"--shard=3/5",
-						"--shard=4/5",
-						"--shard=5/5"
+						"--shard=1/6",
+						"--shard=2/6",
+						"--shard=3/6",
+						"--shard=4/6",
+						"--shard=5/6",
+						"--shard=6/6"
 					],
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -379,11 +392,12 @@
 						"--shard=5/5"
 					],
 					"events": [
-						"push",
+						"daily-checks",
 						"release-checks"
 					],
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -422,6 +436,7 @@
 						}
 					},
 					"events": [
+						"daily-checks",
 						"release-checks"
 					],
 					"report": {
@@ -449,6 +464,7 @@
 						}
 					},
 					"events": [
+						"daily-checks",
 						"release-checks"
 					],
 					"report": {
@@ -464,6 +480,7 @@
 					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -492,6 +509,7 @@
 					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -522,6 +540,7 @@
 					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -543,6 +562,7 @@
 					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
+						"composer.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -552,7 +572,7 @@
 						"tests/metrics/**"
 					],
 					"events": [
-						"push"
+						"disabled"
 					]
 				},
 				{
@@ -560,16 +580,15 @@
 					"testType": "e2e",
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
-						"--shard=1/10",
-						"--shard=2/10",
-						"--shard=3/10",
-						"--shard=4/10",
-						"--shard=5/10",
-						"--shard=6/10",
-						"--shard=7/10",
-						"--shard=8/10",
-						"--shard=9/10",
-						"--shard=10/10"
+						"--shard=1/9",
+						"--shard=2/9",
+						"--shard=3/9",
+						"--shard=4/9",
+						"--shard=5/9",
+						"--shard=6/9",
+						"--shard=7/9",
+						"--shard=8/9",
+						"--shard=9/9"
 					],
 					"changes": [
 						"src/Blocks/**",
@@ -586,7 +605,23 @@
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
-						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results"
+						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Core e2e tests - default Pressable site",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default-pressable",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-checks"
+					],
+					"report": {
+						"resultsBlobName": "default-pressable-core-e2e",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
 					}
 				}
 			]
@@ -597,7 +632,7 @@
 		"@babel/core": "7.12.9",
 		"@babel/preset-env": "7.12.7",
 		"@babel/register": "7.12.1",
-		"@playwright/test": "^1.44.1",
+		"@playwright/test": "^1.45.1",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/experimental-utils": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
@@ -619,6 +654,7 @@
 		"autoprefixer": "9.8.6",
 		"axios": "^0.24.0",
 		"babel-eslint": "10.1.0",
+		"buildkite-test-collector": "^1.7.1",
 		"chai": "4.2.0",
 		"chai-as-promised": "7.1.1",
 		"config": "3.3.7",
@@ -654,8 +690,7 @@
 		"@woocommerce/admin-library": "workspace:*",
 		"@woocommerce/block-library": "workspace:*",
 		"@woocommerce/classic-assets": "workspace:*",
-		"@wordpress/browserslist-config": "wp-6.0",
-		"buildkite-test-collector": "^1.7.1"
+		"@wordpress/browserslist-config": "wp-6.0"
 	},
 	"nodemonConfig": {
 		"delay": 2500,
