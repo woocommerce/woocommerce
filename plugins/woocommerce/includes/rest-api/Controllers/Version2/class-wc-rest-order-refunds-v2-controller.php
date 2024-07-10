@@ -10,6 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\Types;
+
 /**
  * REST API Order Refunds controller class.
  *
@@ -316,11 +318,28 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 		 * The dynamic portion of the hook name, `$this->post_type`,
 		 * refers to the object type slug.
 		 *
+		 * @since 4.5.0
+		 *
 		 * @param WC_Data         $coupon   Object object.
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
 		 */
-		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $refund, $request, $creating );
+		$refund = apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $refund, $request, $creating );
+
+		// If the filtered result is not a WC_Data instance and is not a WP_Error then something went wrong, but we
+		// still need to honor the declared return type.
+		return Types::ensure_instance_of(
+			$refund,
+			WC_Data::class,
+			function ( $thing ) {
+				return is_wp_error( $thing )
+					? $thing
+					: new WP_Error(
+						'woocommerce_rest_cannot_verify_refund_created',
+						__( 'An unexpected error occurred while generating the refund.', 'woocommerce' )
+					);
+			}
+		);
 	}
 
 	/**

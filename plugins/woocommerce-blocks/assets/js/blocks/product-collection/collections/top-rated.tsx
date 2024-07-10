@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
+import type { InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, starEmpty } from '@wordpress/icons';
 
@@ -14,7 +14,7 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 const collection = {
 	name: CoreCollectionNames.TOP_RATED,
 	title: __( 'Top Rated', 'woocommerce' ),
-	icon: ( <Icon icon={ starEmpty } /> ) as BlockIcon,
+	icon: <Icon icon={ starEmpty } />,
 	description: __(
 		'Recommend products with the highest review ratings.',
 		'woocommerce'

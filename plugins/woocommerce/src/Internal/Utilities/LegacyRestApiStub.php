@@ -2,24 +2,50 @@
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
+use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 /**
  * The Legacy REST API was removed in WooCommerce 9.0 and is now available as a dedicated extension.
- * A stub is kept in WooCommerce core that just returns a "The WooCommerce API is disabled on this site"
- * error if the extension is not installed or is inactive. See:
- * https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/
+ * A stub is kept in WooCommerce core that acts when the extension is not installed and has two purposes:
+ *
+ * 1. Return a "The WooCommerce API is disabled on this site" error for any request to the Legacy REST API endpoints.
+ *
+ * 2. Provide the not-endpoint related utility methods that were previously supplied by the WC_API class,
+ *    this is achieved by setting the value of WooCommerce::api (typically accessed via 'WC()->api') to an instance of this class.
+ *
+ * DO NOT add any additional public method to this class unless the method existed with the same signature in the old WC_API class.
+ *
+ * See: https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/
  */
-class LegacyRestApiStub {
+class LegacyRestApiStub implements RegisterHooksInterface {
 	use AccessiblePrivateMethods;
 
 	/**
-	 * Set up the Legacy REST API stub.
+	 * The instance of RestApiUtil to use.
+	 *
+	 * @var RestApiUtil
 	 */
-	public static function setup() {
+	private RestApiUtil $rest_api_util;
+
+	/**
+	 * Set up the Legacy REST API endpoints stub.
+	 */
+	public function register() {
 		self::add_action( 'init', array( __CLASS__, 'add_rewrite_rules_for_legacy_rest_api_stub' ), 0 );
 		self::add_action( 'query_vars', array( __CLASS__, 'add_query_vars_for_legacy_rest_api_stub' ), 0 );
 		self::add_action( 'parse_request', array( __CLASS__, 'parse_legacy_rest_api_request' ), 0 );
+	}
+
+	/**
+	 * Initialize the class dependencies.
+	 *
+	 * @internal
+	 * @param RestApiUtil $rest_api_util The instance of RestApiUtil to use.
+	 */
+	final public function init( RestApiUtil $rest_api_util ) {
+		$this->rest_api_util = $rest_api_util;
 	}
 
 	/**
@@ -141,5 +167,25 @@ class LegacyRestApiStub {
 			ob_end_clean();
 			die( '-1' );
 		}
+	}
+
+	/**
+	 * Get data from a WooCommerce API endpoint.
+	 * This method used to be part of the WooCommerce Legacy REST API.
+	 *
+	 * @since 9.1.0
+	 *
+	 * @param string $endpoint Endpoint.
+	 * @param array  $params Params to pass with request.
+	 * @return array|\WP_Error
+	 */
+	public function get_endpoint_data( $endpoint, $params = array() ) {
+		wc_doing_it_wrong(
+			'get_endpoint_data',
+			"'WC()->api->get_endpoint_data' is deprecated, please use the following instead: wc_get_container()->get(Automattic\WooCommerce\Utilities\RestApiUtil::class)->get_endpoint_data",
+			'9.1.0'
+		);
+
+		return $this->rest_api_util->get_endpoint_data( $endpoint, $params );
 	}
 }
