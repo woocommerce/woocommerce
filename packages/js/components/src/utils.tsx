@@ -11,7 +11,7 @@ type ChildrenProps = {
 
 /**
  * Returns an object with the children and props that will be used by `cloneElement`. They will change depending on the
- * type of children passed in.
+ * type of children passed in..
  *
  * @param {Node}   children    - Node children.
  * @param {number} order       - Node order.
