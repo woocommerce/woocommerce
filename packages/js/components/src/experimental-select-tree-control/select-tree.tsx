@@ -8,6 +8,7 @@ import {
 	useEffect,
 	useState,
 	Fragment,
+	useRef,
 } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { BaseControl, Button, TextControl } from '@wordpress/components';
@@ -62,6 +63,8 @@ export const SelectTree = function SelectTree( {
 		SelectTree,
 		'woocommerce-select-tree-control__menu'
 	) as string;
+
+	const lastRemoveButtonRef = useRef< HTMLButtonElement >( null );
 
 	function isEventOutside( event: React.FocusEvent ) {
 		const isInsideSelect = document
@@ -183,18 +186,11 @@ export const SelectTree = function SelectTree( {
 				}
 			} else if (
 				( event.key === 'ArrowLeft' || event.key === 'Backspace' ) &&
+				// test if the cursor is at the beginning of the input with nothing selected
 				( event.target as HTMLInputElement ).selectionStart === 0 &&
 				( event.target as HTMLInputElement ).selectionEnd === 0
 			) {
-				(
-					( event.target as HTMLElement )
-						.closest(
-							'.woocommerce-experimental-select-control__combo-box-wrapper'
-						)
-						?.querySelector(
-							'.woocommerce-experimental-select-control__selected-items > div:last-child button'
-						) as HTMLButtonElement
-				 )?.focus();
+				lastRemoveButtonRef.current?.focus();
 			}
 		},
 		onChange: ( event ) => {
@@ -282,6 +278,7 @@ export const SelectTree = function SelectTree( {
 							>
 								<SelectedItems
 									isReadOnly={ isReadOnly }
+									ref={ lastRemoveButtonRef }
 									items={ ( props.selected as Item[] ) || [] }
 									getItemLabel={ ( item ) =>
 										item?.label || ''
@@ -303,40 +300,7 @@ export const SelectTree = function SelectTree( {
 											setIsFocused( false );
 										}
 									} }
-									onKeyDown={ ( event ) => {
-										if (
-											event.key === 'ArrowLeft' ||
-											event.key === 'ArrowRight'
-										) {
-											const selectedItem = (
-												event.target as HTMLElement
-											 ).closest(
-												'.woocommerce-experimental-select-control__selected-item'
-											);
-											const sibling =
-												event.key === 'ArrowLeft'
-													? selectedItem?.previousSibling
-													: selectedItem?.nextSibling;
-											if ( sibling ) {
-												(
-													(
-														sibling as HTMLElement
-													 ).querySelector(
-														'.woocommerce-tag__remove'
-													) as HTMLElement
-												 )?.focus();
-											} else if (
-												event.key === 'ArrowRight'
-											) {
-												focusOnInput();
-											}
-										} else if (
-											event.key === 'ArrowUp' ||
-											event.key === 'ArrowDown'
-										) {
-											event.preventDefault(); // prevent unwanted scroll
-										}
-									} }
+									onSelectedItemsEnd={ focusOnInput }
 									getSelectedItemProps={ () => ( {} ) }
 								/>
 							</ComboBox>

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { createElement } from '@wordpress/element';
+import { createElement, forwardRef } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
@@ -24,18 +24,23 @@ type SelectedItemsProps< ItemType > = {
 	onRemove: ( item: ItemType ) => void;
 	onBlur?: ( event: React.FocusEvent ) => void;
 	onKeyDown?: ( event: React.KeyboardEvent ) => void;
+	onSelectedItemsEnd?: () => void;
 };
 
-export const SelectedItems = < ItemType, >( {
-	isReadOnly,
-	items,
-	getItemLabel,
-	getItemValue,
-	getSelectedItemProps,
-	onRemove,
-	onBlur,
-	onKeyDown,
-}: SelectedItemsProps< ItemType > ) => {
+const PrivateSelectedItems = < ItemType, >(
+	props: SelectedItemsProps< ItemType >,
+	lastRemoveButtonRef: React.ForwardedRef< HTMLButtonElement >
+) => {
+	const {
+		isReadOnly,
+		items,
+		getItemLabel,
+		getItemValue,
+		getSelectedItemProps,
+		onRemove,
+		onBlur,
+		onSelectedItemsEnd,
+	} = props;
 	const classes = classnames(
 		'woocommerce-experimental-select-control__selected-items',
 		{
@@ -75,7 +80,41 @@ export const SelectedItems = < ItemType, >( {
 						onClick={ ( event ) => {
 							event.preventDefault();
 						} }
-						onKeyDown={ onKeyDown }
+						onKeyDown={ ( event ) => {
+							if (
+								event.key === 'ArrowLeft' ||
+								event.key === 'ArrowRight'
+							) {
+								const selectedItem = (
+									event.target as HTMLElement
+								 ).closest(
+									'.woocommerce-experimental-select-control__selected-item'
+								);
+								const sibling =
+									event.key === 'ArrowLeft'
+										? selectedItem?.previousSibling
+										: selectedItem?.nextSibling;
+								if ( sibling ) {
+									(
+										(
+											sibling as HTMLElement
+										 ).querySelector(
+											'.woocommerce-tag__remove'
+										) as HTMLElement
+									 )?.focus();
+								} else if (
+									event.key === 'ArrowRight' &&
+									onSelectedItemsEnd
+								) {
+									onSelectedItemsEnd();
+								}
+							} else if (
+								event.key === 'ArrowUp' ||
+								event.key === 'ArrowDown'
+							) {
+								event.preventDefault(); // prevent unwanted scroll
+							}
+						} }
 						onBlur={ onBlur }
 					>
 						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
@@ -84,6 +123,11 @@ export const SelectedItems = < ItemType, >( {
 							id={ getItemValue( item ) }
 							remove={ () => () => onRemove( item ) }
 							label={ getItemLabel( item ) }
+							ref={
+								index === items.length - 1
+									? lastRemoveButtonRef
+									: undefined
+							}
 						/>
 					</div>
 				);
@@ -91,3 +135,9 @@ export const SelectedItems = < ItemType, >( {
 		</div>
 	);
 };
+
+export const SelectedItems = forwardRef( PrivateSelectedItems ) as < ItemType >(
+	props: SelectedItemsProps< ItemType > & {
+		ref?: React.ForwardedRef< HTMLButtonElement >;
+	}
+) => ReturnType< typeof PrivateSelectedItems >;
