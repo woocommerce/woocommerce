@@ -152,10 +152,14 @@ class DataStore extends VariationsDataStore {
 	 * Will be called by `get_data` if there is no data in cache.
 	 *
 	 * @see get_data
+	 * @see get_noncached_stats_data
 	 * @param array $query_args Query parameters.
+	 * @param array    $params                  Query limit parameters.
+	 * @param stdClass $data                    Reference to the data object to fill.
+	 * @param int      $expected_interval_count Number of expected intervals.
 	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
-	public function get_noncached_data( $query_args ) {
+	public function get_noncached_stats_data( $query_args, $params, &$data, $expected_interval_count ) {
 		global $wpdb;
 
 		$table_name = self::get_db_table_name();
@@ -163,7 +167,6 @@ class DataStore extends VariationsDataStore {
 		$this->initialize_queries();
 
 		$selections = $this->selected_columns( $query_args );
-		$params     = $this->get_limit_params( $query_args );
 
 		$this->update_sql_query_params( $query_args );
 		$this->get_limit_sql_params( $query_args );
@@ -175,12 +178,7 @@ class DataStore extends VariationsDataStore {
 		);
 		/* phpcs:enable */
 
-		$db_interval_count       = count( $db_intervals );
-		$expected_interval_count = TimeInterval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
-		$total_pages             = (int) ceil( $expected_interval_count / $params['per_page'] );
-		if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-			return array();
-		}
+		$db_interval_count = count( $db_intervals );
 
 		$intervals = array();
 		$this->update_intervals_sql_params( $query_args, $db_interval_count, $expected_interval_count, $table_name );
@@ -235,13 +233,8 @@ class DataStore extends VariationsDataStore {
 
 		$totals = (object) $this->cast_numbers( $totals[0] );
 
-		$data = (object) array(
-			'totals'    => $totals,
-			'intervals' => $intervals,
-			'total'     => $expected_interval_count,
-			'pages'     => $total_pages,
-			'page_no'   => (int) $query_args['page'],
-		);
+		$data->totals    = $totals;
+		$data->intervals = $intervals;
 
 		if ( TimeInterval::intervals_missing( $expected_interval_count, $db_interval_count, $params['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
 			$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );

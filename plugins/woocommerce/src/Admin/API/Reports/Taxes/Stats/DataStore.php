@@ -144,26 +144,21 @@ class DataStore extends ReportsDataStore {
 	 * Will be called by `get_data` if there is no data in cache.
 	 *
 	 * @see get_data
+	 * @see get_noncached_stats_data
 	 * @param array $query_args Query parameters.
+	 * @param array    $params                  Query limit parameters.
+	 * @param stdClass $data                    Reference to the data object to fill.
+	 * @param int      $expected_interval_count Number of expected intervals.
 	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
-	public function get_noncached_data( $query_args ) {
+	public function get_noncached_stats_data( $query_args, $params, &$data, $expected_interval_count ) {
 		global $wpdb;
 
 		$table_name = self::get_db_table_name();
 
 		$this->initialize_queries();
 
-		$data = (object) array(
-			'totals'    => (object) array(),
-			'intervals' => (object) array(),
-			'total'     => 0,
-			'pages'     => 0,
-			'page_no'   => 0,
-		);
-
 		$selections       = $this->selected_columns( $query_args );
-		$params           = $this->get_limit_params( $query_args );
 		$order_stats_join = "JOIN {$wpdb->prefix}wc_order_stats ON {$table_name}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 		$this->update_sql_query_params( $query_args );
 		$this->interval_query->add_sql_clause( 'join', $order_stats_join );
@@ -172,13 +167,8 @@ class DataStore extends ReportsDataStore {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
 			$this->interval_query->get_query_statement()
 		);
-		$db_interval_count       = count( $db_intervals );
-		$expected_interval_count = TimeInterval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
-		$total_pages             = (int) ceil( $expected_interval_count / $params['per_page'] );
+		$db_interval_count = count( $db_intervals );
 
-		if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-			return $data;
-		}
 		$this->total_query->add_sql_clause( 'select', $selections );
 		$this->total_query->add_sql_clause( 'join', $order_stats_join );
 		$this->total_query->add_sql_clause( 'where_time', $this->get_sql_clause( 'where_time' ) );
@@ -229,13 +219,8 @@ class DataStore extends ReportsDataStore {
 
 		$totals = (object) $this->cast_numbers( $totals[0] );
 
-		$data = (object) array(
-			'totals'    => $totals,
-			'intervals' => $intervals,
-			'total'     => $expected_interval_count,
-			'pages'     => $total_pages,
-			'page_no'   => (int) $query_args['page'],
-		);
+		$data->totals    = $totals;
+		$data->intervals = $intervals;
 
 		if ( TimeInterval::intervals_missing( $expected_interval_count, $db_interval_count, $params['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
 			$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
