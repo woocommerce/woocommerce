@@ -95,20 +95,14 @@ export class Editor extends CoreEditor {
 
 	async revertTemplateCustomizations( {
 		templateName,
-		templateType,
 	}: {
 		templateName: string;
-		templateType: 'wp_template' | 'wp_template_part';
 	} ) {
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
 
 		const resetNotice = this.page
 			.getByLabel( 'Dismiss this notice' )
-			.getByText(
-				templateType === 'wp_template'
-					? `"${ templateName }" reset.`
-					: `"${ templateName }" deleted.`
-			);
+			.getByText( `"${ templateName }" reset.` );
 		const savedButton = this.page.getByRole( 'button', {
 			name: 'Saved',
 		} );

@@ -12,6 +12,13 @@ use Automattic\WooCommerce\Utilities\ArrayUtil;
 class FiltererTest extends \WC_Unit_Test_Case {
 
 	/**
+	 * Counter to insert unique SKU for concurrent tests.
+	 *
+	 * @var int $sku_counter
+	 */
+	private static $sku_counter = 0;
+
+	/**
 	 * Runs before all the tests in the class.
 	 */
 	public static function setUpBeforeClass(): void {
@@ -161,13 +168,15 @@ class FiltererTest extends \WC_Unit_Test_Case {
 				'name'          => 'Product',
 				'regular_price' => 1,
 				'price'         => 1,
-				'sku'           => 'DUMMY SKU',
+				'sku'           => 'DUMMY SKU' . self::$sku_counter,
 				'manage_stock'  => false,
 				'tax_status'    => 'taxable',
 				'downloadable'  => false,
 				'virtual'       => false,
 			)
 		);
+
+		++self::$sku_counter;
 
 		$product->set_attributes( $attributes );
 

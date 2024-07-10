@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Add $wpdb->esc_like to the search criteria when searching for a product custom field name
