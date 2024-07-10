@@ -2,9 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useInstanceId } from '@wordpress/compose';
 import { passwordStrength } from 'check-password-strength';
 import { usePrevious } from '@woocommerce/base-hooks';
 import { useEffect } from '@wordpress/element';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -40,6 +42,11 @@ const PasswordStrengthMeter = ( {
 	password: string;
 	onChange?: ( strength: number ) => void;
 } ): JSX.Element | null => {
+	const instanceId = useInstanceId(
+		PasswordStrengthMeter,
+		'woocommerce-password-strength-meter'
+	) as string;
+
 	let strength = -1;
 
 	if ( password.length > 0 ) {
@@ -60,21 +67,43 @@ const PasswordStrengthMeter = ( {
 		}
 	}, [ strength, previousStrength, onChange ] );
 
-	if ( strength === -1 ) {
-		return null;
-	}
-
 	return (
-		<meter
-			className="wc-block-components-address-form__password-strength"
-			aria-label={ __( 'Password strength', 'woocommerce' ) }
-			min={ 0 }
-			max={ 4 }
-			value={ strength > -1 ? strength : 0 }
-			data-textvalue={ scoreDescriptions[ strength ] || '' }
+		<div
+			id={ instanceId }
+			className={ clsx( 'wc-block-components-password-strength', {
+				hidden: strength === -1,
+			} ) }
 		>
-			{ strength }
-		</meter>
+			<label
+				htmlFor={ instanceId + '-meter' }
+				className="screen-reader-text"
+			>
+				{ __( 'Password strength', 'woocommerce' ) }
+			</label>
+			<meter
+				id={ instanceId + '-meter' }
+				className="wc-block-components-password-strength__meter"
+				min={ 0 }
+				max={ 4 }
+				value={ strength > -1 ? strength : 0 }
+			>
+				{ scoreDescriptions[ strength ] ?? '' }
+			</meter>
+			<div
+				id={ instanceId + '-result' }
+				aria-live="polite"
+				className="wc-block-components-password-strength__result"
+			>
+				{ !! scoreDescriptions[ strength ] && (
+					<>
+						<span className="screen-reader-text">
+							{ __( 'Password strength', 'woocommerce' ) }
+						</span>{ ' ' }
+						{ scoreDescriptions[ strength ] }
+					</>
+				) }
+			</div>
+		</div>
 	);
 };
 
