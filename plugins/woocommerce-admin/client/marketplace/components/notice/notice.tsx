@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { useEffect, useState } from '@wordpress/element';
 import { Icon, check, closeSmall, info, percent } from '@wordpress/icons'; // See: https://wordpress.github.io/gutenberg/?path=/docs/icons-icon--docs
 
@@ -64,7 +64,7 @@ export default function Notice( props: NoticeProps ): JSX.Element | null {
 
 	if ( ! isVisible ) return null;
 
-	const classes = classNames(
+	const classes = clsx(
 		'woocommerce-marketplace__notice',
 		`woocommerce-marketplace__notice--${ variant }`,
 		{
@@ -74,7 +74,7 @@ export default function Notice( props: NoticeProps ): JSX.Element | null {
 
 	const iconElement = iconMap[ ( icon || 'info' ) as IconKey ];
 
-	const iconClass = classNames(
+	const iconClass = clsx(
 		'woocommerce-marketplace__notice-icon',
 		`woocommerce-marketplace__notice-icon--${ variant }`
 	);

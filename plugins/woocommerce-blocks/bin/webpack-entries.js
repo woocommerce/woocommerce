@@ -9,8 +9,11 @@ const glob = require( 'glob' );
 // path should be defined in the `customDir` property. The scripts below will
 // take care of looking for `index.js`, `frontend.js` and `*.scss` files in each
 // block directory.
+//
 // If a block is experimental, it should be marked with the `isExperimental`
 // property.
+// Update plugins/woocommerce-blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
+// when you mark/unmark block experimental.
 const blocks = {
 	'active-filters': {},
 	'add-to-cart-form': {},
@@ -22,9 +25,7 @@ const blocks = {
 	},
 	'attribute-filter': {},
 	breadcrumbs: {},
-	cart: {},
 	'catalog-sorting': {},
-	checkout: {},
 	'coming-soon': {},
 	'customer-account': {},
 	'featured-category': {
@@ -40,10 +41,6 @@ const blocks = {
 		customDir: 'classic-template',
 	},
 	'classic-shortcode': {},
-	'mini-cart': {},
-	'mini-cart-contents': {
-		customDir: 'mini-cart/mini-cart-contents',
-	},
 	'store-notices': {},
 	'page-content-wrapper': {},
 	'price-filter': {},
@@ -90,6 +87,15 @@ const blocks = {
 	'single-product': {},
 	'stock-filter': {},
 	'product-filter': {
+		isExperimental: true,
+	},
+	'product-filters': {
+		isExperimental: true,
+	},
+	'product-filters-overlay': {
+		isExperimental: true,
+	},
+	'product-filters-overlay-navigation': {
 		isExperimental: true,
 	},
 	'product-filter-stock-status': {
@@ -157,20 +163,22 @@ const blocks = {
 	},
 };
 
+// Intentional separation of cart and checkout entry points to allow for better code splitting.
+const cartAndCheckoutBlocks = {
+	cart: {},
+	checkout: {},
+	'mini-cart': {},
+	'mini-cart-contents': {
+		customDir: 'mini-cart/mini-cart-contents',
+	},
+};
+
 // Returns the entries for each block given a relative path (ie: `index.js`,
 // `**/*.scss`...).
 // It also filters out elements with undefined props and experimental blocks.
-const getBlockEntries = ( relativePath ) => {
-	const experimental =
-		! parseInt( process.env.WOOCOMMERCE_BLOCKS_PHASE, 10 ) < 3;
-
+const getBlockEntries = ( relativePath, blockEntries = blocks ) => {
 	return Object.fromEntries(
-		Object.entries( blocks )
-			.filter(
-				( [ , config ] ) =>
-					! config.isExperimental ||
-					config.isExperimental === experimental
-			)
+		Object.entries( blockEntries )
 			.map( ( [ blockCode, config ] ) => {
 				const filePaths = glob.sync(
 					`./assets/js/blocks/${ config.customDir || blockCode }/` +
@@ -202,7 +210,10 @@ const entries = {
 			'./assets/js/atomic/blocks/product-elements/product-details/index.tsx',
 		'add-to-cart-form':
 			'./assets/js/atomic/blocks/product-elements/add-to-cart-form/index.tsx',
-		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}' ),
+		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}', {
+			...blocks,
+			...cartAndCheckoutBlocks,
+		} ),
 
 		// Interactivity component styling
 		'wc-interactivity-checkbox-list':
@@ -235,17 +246,14 @@ const entries = {
 		'wc-blocks': './assets/js/index.js',
 
 		// Blocks
-		...getBlockEntries( 'index.{t,j}s{,x}' ),
+		...getBlockEntries( 'index.{t,j}s{,x}', {
+			...blocks,
+			...cartAndCheckoutBlocks,
+		} ),
 	},
 	frontend: {
 		reviews: './assets/js/blocks/reviews/frontend.ts',
 		...getBlockEntries( 'frontend.{t,j}s{,x}' ),
-
-		blocksCheckout: './packages/checkout/index.js',
-		blocksComponents: './packages/components/index.ts',
-
-		'mini-cart-component':
-			'./assets/js/blocks/mini-cart/component-frontend.tsx',
 		'product-button-interactivity':
 			'./assets/js/atomic/blocks/product-elements/button/frontend.tsx',
 	},
@@ -268,6 +276,13 @@ const entries = {
 	editor: {
 		'wc-blocks-classic-template-revert-button':
 			'./assets/js/templates/revert-button/index.tsx',
+	},
+	cartAndCheckoutFrontend: {
+		...getBlockEntries( 'frontend.{t,j}s{,x}', cartAndCheckoutBlocks ),
+		blocksCheckout: './packages/checkout/index.js',
+		blocksComponents: './packages/components/index.ts',
+		'mini-cart-component':
+			'./assets/js/blocks/mini-cart/component-frontend.tsx',
 	},
 };
 

@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useContext, useEffect, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 
 /**
@@ -60,6 +60,12 @@ const tabs: Tabs = {
 		showUpdateCount: false,
 		updateCount: 0,
 	},
+	'business-services': {
+		name: 'business-services',
+		title: __( 'Business services', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
+	},
 	'my-subscriptions': {
 		name: 'my-subscriptions',
 		title: __( 'My subscriptions', 'woocommerce' ),
@@ -78,13 +84,16 @@ const setUrlTabParam = ( tabKey: string ) => {
 	} );
 };
 
-const getVisibleTabs = ( selectedTab: string ) => {
+const getVisibleTabs = ( selectedTab: string, hasBusinessServices = false ) => {
 	if ( selectedTab === '' ) {
 		return tabs;
 	}
 	const currentVisibleTabs = { ...tabs };
 	if ( selectedTab !== 'search' ) {
 		delete currentVisibleTabs.search;
+	}
+	if ( ! hasBusinessServices ) {
+		delete currentVisibleTabs[ 'business-services' ];
 	}
 
 	return currentVisibleTabs;
@@ -109,7 +118,7 @@ const renderTabs = (
 		tabContent.push(
 			tabs[ tabKey ]?.href ? (
 				<a
-					className={ classNames(
+					className={ clsx(
 						'woocommerce-marketplace__tab-button',
 						'components-button',
 						`woocommerce-marketplace__tab-${ tabKey }`
@@ -121,7 +130,7 @@ const renderTabs = (
 				</a>
 			) : (
 				<Button
-					className={ classNames(
+					className={ clsx(
 						'woocommerce-marketplace__tab-button',
 						`woocommerce-marketplace__tab-${ tabKey }`,
 						{
@@ -148,7 +157,8 @@ const renderTabs = (
 const Tabs = ( props: TabsProps ): JSX.Element => {
 	const { additionalClassNames } = props;
 	const marketplaceContextValue = useContext( MarketplaceContext );
-	const { selectedTab, setSelectedTab } = marketplaceContextValue;
+	const { selectedTab, setSelectedTab, hasBusinessServices } =
+		marketplaceContextValue;
 	const [ visibleTabs, setVisibleTabs ] = useState( getVisibleTabs( '' ) );
 
 	const query: Record< string, string > = useQuery();
@@ -162,11 +172,11 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	}, [ query, setSelectedTab ] );
 
 	useEffect( () => {
-		setVisibleTabs( getVisibleTabs( selectedTab ) );
-	}, [ selectedTab ] );
+		setVisibleTabs( getVisibleTabs( selectedTab, hasBusinessServices ) );
+	}, [ selectedTab, hasBusinessServices ] );
 	return (
 		<nav
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-marketplace__tabs',
 				additionalClassNames || []
 			) }

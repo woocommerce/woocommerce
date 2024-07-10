@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
@@ -34,8 +34,9 @@ export const Edit = ( {
 } ): JSX.Element | null => {
 	const {
 		showCompanyField,
-		showApartmentField,
 		requireCompanyField,
+		showApartmentField,
+		requireApartmentField,
 		showPhoneField,
 		requirePhoneField,
 	} = useCheckoutBlockContext();
@@ -47,20 +48,27 @@ export const Edit = ( {
 		return null;
 	}
 
+	// This is needed to force the block to re-render when the requireApartmentField changes.
+	const blockKey = `shipping-address-${
+		requireApartmentField ? 'visible' : 'hidden'
+	}-address-2`;
+
 	return (
 		<FormStepBlock
 			setAttributes={ setAttributes }
 			attributes={ attributes }
-			className={ classnames(
+			className={ clsx(
 				'wc-block-checkout__shipping-fields',
 				attributes?.className
 			) }
 		>
 			<Controls />
 			<Block
+				key={ blockKey }
 				showCompanyField={ showCompanyField }
-				showApartmentField={ showApartmentField }
 				requireCompanyField={ requireCompanyField }
+				showApartmentField={ showApartmentField }
+				requireApartmentField={ requireApartmentField }
 				showPhoneField={ showPhoneField }
 				requirePhoneField={ requirePhoneField }
 			/>

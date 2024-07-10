@@ -17,7 +17,6 @@ import {
 } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
-import { useViewportMatch } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -33,9 +32,10 @@ import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
 import { RemoveConfirmationModal } from '../remove-confirmation-modal';
 import { TRACKS_SOURCE } from '../../constants';
-import { AttributeEmptyStateSkeleton } from './attribute-empty-state-skeleton';
+import { EmptyState } from '../empty-state';
 import { SectionActions } from '../block-slot-fill';
 import { AttributeControlProps } from './types';
+import { getEmptyStateSequentialNames } from '../../utils';
 
 export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	value,
@@ -201,10 +201,8 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		( attr ) => getAttributeId( attr ) === currentAttributeId
 	);
 
-	const isMobileViewport = useViewportMatch( 'medium', '<' );
-
 	function renderEmptyState() {
-		if ( isMobileViewport || value.length ) return null;
+		if ( value.length ) return null;
 
 		if ( renderCustomEmptyState ) {
 			return renderCustomEmptyState( {
@@ -215,7 +213,14 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			} );
 		}
 
-		return <AttributeEmptyStateSkeleton />;
+		return (
+			<EmptyState
+				names={ getEmptyStateSequentialNames(
+					__( 'Attribute', 'woocommerce' ),
+					3
+				) }
+			/>
+		);
 	}
 
 	function renderSectionActions() {

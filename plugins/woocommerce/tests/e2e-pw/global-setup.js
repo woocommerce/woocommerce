@@ -2,8 +2,9 @@ const { chromium, expect } = require( '@playwright/test' );
 const { admin, customer } = require( './test-data/data' );
 const fs = require( 'fs' );
 const { site } = require( './utils' );
+const { logIn } = require( './utils/login' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { ENABLE_HPOS } = process.env;
+const { DISABLE_HPOS } = process.env;
 
 /**
  * @param {import('@playwright/test').FullConfig} config
@@ -24,7 +25,7 @@ module.exports = async ( config ) => {
 		console.log( 'Admin state file deleted successfully.' );
 	} catch ( err ) {
 		if ( err.code === 'ENOENT' ) {
-			console.log( 'Admin state file does not exist.' );
+			console.log( 'Admin state file does not exist' );
 		} else {
 			console.log( 'Admin state file could not be deleted: ' + err );
 		}
@@ -52,31 +53,21 @@ module.exports = async ( config ) => {
 	// Create browser, browserContext, and page for customer and admin users
 	const browser = await chromium.launch();
 	const adminContext = await browser.newContext( contextOptions );
-	const customerContext = await browser.newContext( contextOptions );
 	const adminPage = await adminContext.newPage();
-	const customerPage = await customerContext.newPage();
 
 	// Sign in as admin user and save state
-	const adminRetries = 5;
+	const adminRetries = 2;
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as admin...' );
 			await adminPage.goto( `/wp-admin` );
-			await adminPage
-				.locator( 'input[name="log"]' )
-				.fill( admin.username );
-			await adminPage
-				.locator( 'input[name="pwd"]' )
-				.fill( admin.password );
-			await adminPage.locator( 'text=Log In' ).click();
+			await logIn( adminPage, admin.username, admin.password, false );
 			// eslint-disable-next-line playwright/no-networkidle
 			await adminPage.waitForLoadState( 'networkidle' );
 			await adminPage.goto( `/wp-admin` );
-			await adminPage.waitForLoadState( 'domcontentloaded' );
-
-			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
-				'Dashboard'
-			);
+			await expect(
+				adminPage.getByRole( 'heading', { name: 'Dashboard' } )
+			).toBeVisible();
 			await adminPage
 				.context()
 				.storageState( { path: process.env.ADMINSTATE } );
@@ -88,6 +79,10 @@ module.exports = async ( config ) => {
 				`Admin log-in failed, Retrying... ${ i }/${ adminRetries }`
 			);
 			console.log( e );
+			await adminPage.screenshot( {
+				fullPage: true,
+				path: `tests/e2e-pw/test-results/admin-login-fail-${ i }.png`,
+			} );
 		}
 	}
 
@@ -138,31 +133,26 @@ module.exports = async ( config ) => {
 		process.exit( 1 );
 	}
 
+	await adminContext.close();
+
 	// Sign in as customer user and save state
-	const customerRetries = 5;
+	const customerRetries = 2;
+	const customerContext = await browser.newContext( contextOptions );
+	const customerPage = await customerContext.newPage();
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
 			console.log( 'Trying to log-in as customer...' );
-			await customerPage.goto( `/wp-admin` );
-			await customerPage
-				.locator( 'input[name="log"]' )
-				.fill( customer.username );
-			await customerPage
-				.locator( 'input[name="pwd"]' )
-				.fill( customer.password );
-			await customerPage.locator( 'text=Log In' ).click();
-
 			await customerPage.goto( `/my-account` );
+			await logIn(
+				customerPage,
+				customer.username,
+				customer.password,
+				false
+			);
+			await expect( customerPage ).toHaveTitle( /My Account.*/i );
 			await expect(
-				customerPage.locator(
-					'.woocommerce-MyAccount-navigation-link--customer-logout'
-				)
+				customerPage.getByRole( 'link', { name: 'Log out' } ).first()
 			).toBeVisible();
-			await expect(
-				customerPage.locator(
-					'div.woocommerce-MyAccount-content > p >> nth=0'
-				)
-			).toContainText( 'Hello' );
 
 			await customerPage
 				.context()
@@ -175,8 +165,14 @@ module.exports = async ( config ) => {
 				`Customer log-in failed. Retrying... ${ i }/${ customerRetries }`
 			);
 			console.log( e );
+			await customerPage.screenshot( {
+				fullPage: true,
+				path: `tests/e2e-pw/test-results/customer-login-fail-${ i }.png`,
+			} );
 		}
 	}
+
+	await customerContext.close();
 
 	if ( ! customerLoggedIn ) {
 		console.error(
@@ -185,11 +181,11 @@ module.exports = async ( config ) => {
 		process.exit( 1 );
 	}
 
-	// While we're here, let's set HPOS according to the passed in ENABLE_HPOS env variable
-	// (if a value for ENABLE_HPOS was set)
+	// While we're here, let's set HPOS according to the passed in DISABLE_HPOS env variable
+	// (if a value for DISABLE_HPOS was set)
 	// This was always being set to 'yes' after login in wp-env so this step ensures the
 	// correct value is set before we begin our tests
-	console.log( `ENABLE_HPOS: ${ ENABLE_HPOS }` );
+	console.log( `DISABLE_HPOS: ${ DISABLE_HPOS }` );
 
 	const api = new wcApi( {
 		url: baseURL,
@@ -198,10 +194,10 @@ module.exports = async ( config ) => {
 		version: 'wc/v3',
 	} );
 
-	if ( ENABLE_HPOS ) {
+	if ( DISABLE_HPOS ) {
 		const hposSettingRetries = 5;
 
-		const value = ENABLE_HPOS === '0' ? 'no' : 'yes';
+		const value = DISABLE_HPOS === '1' ? 'no' : 'yes';
 
 		for ( let i = 0; i < hposSettingRetries; i++ ) {
 			try {
@@ -233,7 +229,7 @@ module.exports = async ( config ) => {
 
 		if ( ! hposConfigured ) {
 			console.error(
-				'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct ENABLE_HPOS value was used and the test site has been setup correctly.'
+				'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct DISABLE_HPOS value was used and the test site has been setup correctly.'
 			);
 			process.exit( 1 );
 		}
@@ -242,13 +238,14 @@ module.exports = async ( config ) => {
 	const response = await api.get(
 		'settings/advanced/woocommerce_custom_orders_table_enabled'
 	);
-
-	console.log( `HPOS configuration ${ response.data.value }` );
+	const dataValue = response.data.value;
+	const enabledOption = response.data.options[ dataValue ];
+	console.log(
+		`HPOS configuration (woocommerce_custom_orders_table_enabled): ${ dataValue } - ${ enabledOption }`
+	);
 
 	await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
 
-	await adminContext.close();
-	await customerContext.close();
 	await browser.close();
 
 	if ( process.env.RESET_SITE === 'true' ) {

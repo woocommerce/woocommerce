@@ -83,7 +83,7 @@ export function NameBlockEdit( {
 		'name',
 		async function nameValidator() {
 			if ( ! name || name === AUTO_DRAFT_NAME ) {
-				return __( 'Name field is required.', 'woocommerce' );
+				return __( 'Product name is required.', 'woocommerce' );
 			}
 
 			if ( name.length > 120 ) {

@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockData } from '@woocommerce/e2e-types';
-import { FrontendUtils } from '@woocommerce/e2e-utils';
+import { FrontendUtils, BlockData } from '@woocommerce/e2e-utils';
 
 export const blockData: BlockData = {
 	name: 'Mini-Cart',

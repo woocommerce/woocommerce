@@ -2671,7 +2671,7 @@ function wc_update_870_prevent_listing_of_transient_files_directory() {
 }
 
 /**
- * If it exists, remove and recreate the inbox note that asks users to connect to `Woo.com` so that the domain name is changed to the updated `WooCommerce.com`.
+ * If it exists, remove the inbox note that asks users to connect to `Woo.com`.
  */
 function wc_update_890_update_connect_to_woocommerce_note() {
 	$note = Notes::get_note_by_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
@@ -2685,8 +2685,6 @@ function wc_update_890_update_connect_to_woocommerce_note() {
 		return;
 	}
 	Notes::delete_notes_with_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
-	$new_note = WooSubscriptionsNotes::get_note();
-	$new_note->save();
 }
 
 /**
@@ -2709,4 +2707,25 @@ function wc_update_890_update_paypal_standard_load_eligibility() {
 	if ( ( 'yes' === $paypal->enabled || 'yes' === $paypal->get_option( '_should_load' ) ) && ! $paypal->get_option( 'api_username' ) && ! $paypal->has_paypal_orders() ) {
 		$paypal->update_option( '_should_load', wc_bool_to_string( false ) );
 	}
+}
+
+/**
+ * Create the woocommerce_history_of_autoinstalled_plugins option if it doesn't exist
+ * as a copy of woocommerce_autoinstalled_plugins if it exists.
+ */
+function wc_update_891_create_plugin_autoinstall_history_option() {
+	$autoinstalled_plugins_history_info = get_site_option( 'woocommerce_history_of_autoinstalled_plugins' );
+	if ( false === $autoinstalled_plugins_history_info ) {
+		$autoinstalled_plugins_info = get_site_option( 'woocommerce_autoinstalled_plugins' );
+		if ( false !== $autoinstalled_plugins_info ) {
+			update_site_option( 'woocommerce_history_of_autoinstalled_plugins', $autoinstalled_plugins_info );
+		}
+	}
+}
+
+/**
+ * Add woocommerce_show_lys_tour.
+ */
+function wc_update_910_add_launch_your_store_tour_option() {
+	add_option( 'woocommerce_show_lys_tour', 'yes' );
 }

@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { cli } from '@woocommerce/e2e-utils';
+import { test, expect, wpCLI } from '@woocommerce/e2e-utils';
 
 test.describe( 'Legacy templates', () => {
 	test( 'woocommerce//* slug is supported', async ( {
@@ -40,16 +39,17 @@ test.describe( 'Legacy templates', () => {
 				editor.canvas.getByText( template.customText )
 			).toBeVisible();
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 		} );
 
 		await test.step( 'Update created term to legacy format in the DB', async () => {
-			await cli(
-				`npm run wp-env run tests-cli -- \
-					wp term update wp_theme woocommerce-woocommerce \
-						--by="slug" \
-						--name="woocommerce" \
-						--slug="woocommerce"`
+			await wpCLI(
+				`term update wp_theme woocommerce-woocommerce \
+					--by="slug" \
+					--name="woocommerce" \
+					--slug="woocommerce"`
 			);
 		} );
 
@@ -67,7 +67,7 @@ test.describe( 'Legacy templates', () => {
 
 		await test.step( 'Verify the template is listed in the Site Editor UI', async () => {
 			await admin.visitSiteEditor( {
-				path: '/wp_template/all',
+				postType: 'wp_template',
 			} );
 
 			await page.getByPlaceholder( 'Search' ).fill( template.name );

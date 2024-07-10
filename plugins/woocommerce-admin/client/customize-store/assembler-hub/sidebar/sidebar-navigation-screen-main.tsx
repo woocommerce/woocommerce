@@ -33,12 +33,19 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
 import { trackEvent } from '~/customize-store/tracking';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import {
+	SidebarNavigationAnimationDirection,
+	SidebarNavigationContext,
+} from '../components/sidebar';
+import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
 
 export const SidebarNavigationScreenMain = () => {
 	const {
 		context: { flowType },
 	} = useContext( CustomizeStoreContext );
 	const aiOnline = flowType === FlowType.AIOnline;
+	const { navigate } = useContext( SidebarNavigationContext );
 
 	return (
 		<SidebarNavigationScreen
@@ -84,6 +91,16 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ siteLogo }
 							onClick={ () => {
+								const logoUrl = getNewPath(
+									{ customizing: true },
+									'/customize-store/assembler-hub/logo',
+									{}
+								);
+
+								navigateTo( { url: logoUrl } );
+								navigate(
+									SidebarNavigationAnimationDirection.Forward
+								);
 								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
@@ -100,6 +117,16 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ color }
 							onClick={ () => {
+								const colorPaletteUrl = getNewPath(
+									{ customizing: true },
+									'/customize-store/assembler-hub/color-palette',
+									{}
+								);
+
+								navigateTo( { url: colorPaletteUrl } );
+								navigate(
+									SidebarNavigationAnimationDirection.Forward
+								);
 								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
@@ -124,6 +151,16 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ typography }
 							onClick={ () => {
+								const typographyUrl = getNewPath(
+									{ customizing: true },
+									'/customize-store/assembler-hub/typography',
+									{}
+								);
+
+								navigateTo( { url: typographyUrl } );
+								navigate(
+									SidebarNavigationAnimationDirection.Forward
+								);
 								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
@@ -149,6 +186,16 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ header }
 							onClick={ () => {
+								const headerUrl = getNewPath(
+									{ customizing: true },
+									'/customize-store/assembler-hub/header',
+									{}
+								);
+
+								navigateTo( { url: headerUrl } );
+								navigate(
+									SidebarNavigationAnimationDirection.Forward
+								);
 								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
@@ -167,6 +214,23 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ home }
 							onClick={ () => {
+								const homepageUrl =
+									isFullComposabilityFeatureAndAPIAvailable()
+										? getNewPath(
+												{ customizing: true },
+												'/customize-store/assembler-hub/homepage/intro',
+												{}
+										  )
+										: getNewPath(
+												{ customizing: true },
+												'/customize-store/assembler-hub/homepage',
+												{}
+										  );
+
+								navigateTo( { url: homepageUrl } );
+								navigate(
+									SidebarNavigationAnimationDirection.Forward
+								);
 								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
@@ -185,6 +249,16 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ footer }
 							onClick={ () => {
+								const footerUrl = getNewPath(
+									{ customizing: true },
+									'/customize-store/assembler-hub/footer',
+									{}
+								);
+
+								navigateTo( { url: footerUrl } );
+								navigate(
+									SidebarNavigationAnimationDirection.Forward
+								);
 								trackEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{

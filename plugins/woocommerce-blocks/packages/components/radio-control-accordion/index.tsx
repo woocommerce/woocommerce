@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { withInstanceId } from '@wordpress/compose';
 import { useMemo } from '@wordpress/element';
 
@@ -47,7 +47,7 @@ const RadioControlAccordion = ( {
 	}
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'wc-block-components-radio-control',
 				{
 					'wc-block-components-radio-control--highlight-checked':
@@ -67,7 +67,7 @@ const RadioControlAccordion = ( {
 				const checked = option.value === selected;
 				return (
 					<div
-						className={ classnames(
+						className={ clsx(
 							'wc-block-components-radio-control-accordion-option',
 							{
 								'wc-block-components-radio-control-accordion-option--checked-option-highlighted':
@@ -89,7 +89,7 @@ const RadioControlAccordion = ( {
 						/>
 						{ hasOptionContent && checked && (
 							<div
-								className={ classnames(
+								className={ clsx(
 									'wc-block-components-radio-control-accordion-content',
 									{
 										'wc-block-components-radio-control-accordion-content-hide':

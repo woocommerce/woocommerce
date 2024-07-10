@@ -16,13 +16,11 @@ import { createNoticesFromResponse } from '../../../lib/notices';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 const EXPERIMENT_NAME =
-	'woocommerce_product_creation_experience_prepublish_panel_202404_v1';
+	'woocommerce_product_creation_experience_pricing_to_general_202406';
 
 export const useCreateProductByType = () => {
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
 	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
-	const isNewExperienceEnabled =
-		window.wcAdminFeatures[ 'new-product-management-experience' ];
 
 	const getProductEditPageLink = async (
 		type: ProductTypeKey,
@@ -70,13 +68,6 @@ export const useCreateProductByType = () => {
 			type === 'grouped' ||
 			type === 'external'
 		) {
-			if ( isNewExperienceEnabled ) {
-				const url = await getProductEditPageLink( type, false );
-				if ( url ) {
-					navigateTo( { url } );
-				}
-				return;
-			}
 			const assignment = await loadExperimentAssignment(
 				EXPERIMENT_NAME
 			);

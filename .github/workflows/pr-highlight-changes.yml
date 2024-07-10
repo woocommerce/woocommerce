@@ -20,6 +20,8 @@ jobs:
       - name: 'Analyze'
         id: 'analyze'
         working-directory: 'tools/code-analyzer'
+        env:
+          GIT_CLONE_PROTECTION_ACTIVE: false
         run: |
           HEAD_REF=$(git rev-parse HEAD)
           exclude="plugins/woocommerce/tests plugins/woocommerce-admin/tests plugins/woocommerce-blocks/tests"

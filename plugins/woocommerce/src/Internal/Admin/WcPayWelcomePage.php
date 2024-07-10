@@ -52,11 +52,13 @@ class WcPayWelcomePage {
 	/**
 	 * Whether the WooPayments welcome page should be visible.
 	 *
+	 * @param bool $skip_wcpay_active Whether to skip the check for the WooPayments plugin being active.
+	 *
 	 * @return boolean
 	 */
-	public function must_be_visible(): bool {
+	public function must_be_visible( $skip_wcpay_active = false ): bool {
 		// The WooPayments plugin must not be active.
-		if ( $this->is_wcpay_active() ) {
+		if ( ! $skip_wcpay_active && $this->is_wcpay_active() ) {
 			return false;
 		}
 
@@ -174,18 +176,20 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Adds allowed promo notes from the WooPayments incentive.
+	 * Adds allowed promo notes for the WooPayments incentives.
 	 *
 	 * @param array $promo_notes Allowed promo notes.
 	 * @return array
 	 */
 	public function allowed_promo_notes( $promo_notes = [] ): array {
-		// Return early if the incentive must not be visible.
-		if ( ! $this->must_be_visible() ) {
+		// Note: We need to disregard if WooPayments is active when adding the promo note to the list of
+		// allowed promo notes. The AJAX call that adds the promo note happens after WooPayments is installed and activated.
+		// Return early if the incentive page must not be visible, without checking if WooPayments is active.
+		if ( ! $this->must_be_visible( true ) ) {
 			return $promo_notes;
 		}
 
-		// Add our incentive ID to the promo notes.
+		// Add our incentive ID to the allowed promo notes so it can be added to the store.
 		$promo_notes[] = $this->get_incentive()['id'];
 
 		return $promo_notes;

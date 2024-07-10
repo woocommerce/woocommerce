@@ -1,50 +1,30 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import path from 'path';
-import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
+import { TemplateCompiler, test as base, expect } from '@woocommerce/e2e-utils';
 
-const TEMPLATE_PATH = path.join( __dirname, './stock-status.handlebars' );
-
-const test = base.extend< {
-	dropdownBlockPost: Post;
-	defaultBlockPost: Post;
-} >( {
-	defaultBlockPost: async ( { requestUtils }, use ) => {
-		const testingPost = await requestUtils.createPostFromTemplate(
-			{ title: 'Product Filter Stock Status Block' },
-			TEMPLATE_PATH,
-			{}
+const test = base.extend< { templateCompiler: TemplateCompiler } >( {
+	templateCompiler: async ( { requestUtils }, use ) => {
+		const compiler = await requestUtils.createTemplateFromFile(
+			'archive-product_stock-status'
 		);
-
-		await use( testingPost );
-		await requestUtils.deletePost( testingPost.id );
-	},
-
-	dropdownBlockPost: async ( { requestUtils }, use ) => {
-		const testingPost = await requestUtils.createPostFromTemplate(
-			{ title: 'Product Filter Stock Status Block' },
-			TEMPLATE_PATH,
-			{
-				attributes: {
-					displayStyle: 'dropdown',
-				},
-			}
-		);
-
-		await use( testingPost );
-		await requestUtils.deletePost( testingPost.id );
+		await use( compiler );
 	},
 } );
 
 test.describe( 'Product Filter: Stock Status Block', () => {
 	test.describe( 'With default display style', () => {
+		test.beforeEach( async ( { requestUtils, templateCompiler } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
+			await templateCompiler.compile();
+		} );
+
 		test( 'clear button is not shown on initial page load', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( '/shop' );
 
 			const button = page.getByRole( 'button', { name: 'Clear' } );
 
@@ -53,9 +33,8 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 		test( 'renders a checkbox list with the available stock statuses', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( '/shop' );
 
 			const stockStatuses = page.locator(
 				'.wc-block-components-checkbox__label'
@@ -68,9 +47,8 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 		test( 'filters the list of products by selecting a stock status', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( '/shop' );
 
 			const outOfStockCheckbox = page.getByText( 'Out of stock' );
 			await outOfStockCheckbox.click();
@@ -85,9 +63,8 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 		test( 'clear button appears after a filter is applied', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( '/shop' );
 
 			const outOfStockCheckbox = page.getByText( 'Out of stock' );
 			await outOfStockCheckbox.click();
@@ -102,11 +79,8 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 		test( 'clear button hides after deselecting all filters', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto(
-				`${ defaultBlockPost.link }?filter_stock_status=outofstock`
-			);
+			await page.goto( '/shop?filter_stock_status=outofstock' );
 
 			const outOfStockCheckbox = page.getByText( 'Out of stock' );
 			await outOfStockCheckbox.click();
@@ -118,11 +92,8 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 		test( 'filters are cleared after clear button is clicked', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto(
-				`${ defaultBlockPost.link }?filter_stock_status=outofstock`
-			);
+			await page.goto( '/shop?filter_stock_status=outofstock' );
 
 			const button = page.getByRole( 'button', { name: 'Clear' } );
 
@@ -137,11 +108,21 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 	} );
 
 	test.describe( 'With dropdown display style', () => {
+		test.beforeEach( async ( { requestUtils, templateCompiler } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
+			await templateCompiler.compile( {
+				attributes: {
+					displayStyle: 'dropdown',
+				},
+			} );
+		} );
+
 		test( 'clear button is not shown on initial page load', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( '/shop' );
 
 			const button = page.getByRole( 'button', { name: 'Clear' } );
 
@@ -150,9 +131,8 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 		test( 'a dropdown is displayed with the available stock statuses', async ( {
 			page,
-			dropdownBlockPost,
 		} ) => {
-			await page.goto( dropdownBlockPost.link );
+			await page.goto( '/shop' );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'
@@ -167,9 +147,8 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 		test( 'clear button appears after a filter is applied', async ( {
 			page,
-			dropdownBlockPost,
 		} ) => {
-			await page.goto( dropdownBlockPost.link );
+			await page.goto( '/shop' );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'
@@ -189,11 +168,8 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 		test( 'clear button hides after deselecting all filters', async ( {
 			page,
-			dropdownBlockPost,
 		} ) => {
-			await page.goto(
-				`${ dropdownBlockPost.link }?filter_stock_status=instock`
-			);
+			await page.goto( '/shop?filter_stock_status=instock' );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'
@@ -214,11 +190,8 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 
 		test( 'filters are cleared after clear button is clicked', async ( {
 			page,
-			dropdownBlockPost,
 		} ) => {
-			await page.goto(
-				`${ dropdownBlockPost.link }?filter_stock_status=instock`
-			);
+			await page.goto( '/shop?filter_stock_status=instock' );
 
 			const button = page.getByRole( 'button', { name: 'Clear' } );
 

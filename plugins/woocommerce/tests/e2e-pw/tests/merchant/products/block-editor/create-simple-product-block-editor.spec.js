@@ -17,7 +17,7 @@ const productData = {
 
 test.describe.configure( { mode: 'serial' } );
 
-test.describe( 'General tab', () => {
+test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Simple product form', () => {
 		test( 'renders each block without error', async ( { page } ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
@@ -51,8 +51,6 @@ test.describe( 'General tab', () => {
 				.last()
 				.fill( productData.summary );
 
-			await clickOnTab( 'Pricing', page );
-
 			const regularPrice = page
 				.locator( 'input[name="regular_price"]' )
 				.first();
@@ -69,13 +67,6 @@ test.describe( 'General tab', () => {
 
 			await page
 				.locator( '.woocommerce-product-header__actions' )
-				.getByRole( 'button', {
-					name: 'Publish',
-				} )
-				.click();
-
-			await page
-				.locator( '.woocommerce-product-publish-panel__header' )
 				.getByRole( 'button', {
 					name: 'Publish',
 				} )
@@ -111,7 +102,6 @@ test.describe( 'General tab', () => {
 				)
 				.fill( productData.summary );
 
-			await clickOnTab( 'Pricing', page );
 			await page
 				.locator(
 					'[id^="wp-block-woocommerce-product-regular-price-field"]'
@@ -125,15 +115,8 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			await page
-				.locator( '.woocommerce-product-publish-panel__header' )
-				.getByRole( 'button', {
-					name: 'Publish',
-				} )
-				.click();
-
 			await expect(
-				page.getByLabel( 'Dismiss this notice' )
+				page.locator( '.components-snackbar__content' )
 			).toContainText( 'Invalid or duplicated SKU.' );
 		} );
 

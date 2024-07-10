@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -32,24 +32,23 @@ const blockData = {
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
-	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
+	pageObject: async ( { page, editor, frontendUtils }, use ) => {
 		const pageObject = new ProductGalleryPage( {
 			page,
 			editor,
 			frontendUtils,
-			editorUtils,
 		} );
 		await use( pageObject );
 	},
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editorUtils, editor } ) => {
+	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editorUtils.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
 	} );
 
@@ -66,7 +65,9 @@ test.describe( `${ blockData.name }`, () => {
 
 		await expect( block ).toBeVisible();
 
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 
 		await page.goto( blockData.productPage );
 
@@ -100,7 +101,9 @@ test.describe( `${ blockData.name }`, () => {
 				)
 				.click();
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -133,7 +136,9 @@ test.describe( `${ blockData.name }`, () => {
 				)
 				.click();
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 
@@ -173,7 +178,9 @@ test.describe( `${ blockData.name }`, () => {
 				)
 				.click();
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( blockData.productPage );
 

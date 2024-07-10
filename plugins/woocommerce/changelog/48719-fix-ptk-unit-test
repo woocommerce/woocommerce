@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+CYS - Fix the "test_fetch_patterns_should_register_testimonials_category_as_reviews" tests.

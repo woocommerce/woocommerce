@@ -1,34 +1,30 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
-import path from 'path';
+import { TemplateCompiler, test as base, expect } from '@woocommerce/e2e-utils';
 
-const TEMPLATE_PATH = path.join( __dirname, './price-filter.handlebars' );
-
-const test = base.extend< {
-	defaultBlockPost: Post;
-} >( {
-	defaultBlockPost: async ( { requestUtils }, use ) => {
-		const testingPost = await requestUtils.createPostFromTemplate(
-			{ title: 'Price Filter Block' },
-			TEMPLATE_PATH,
-			{}
+const test = base.extend< { templateCompiler: TemplateCompiler } >( {
+	templateCompiler: async ( { requestUtils }, use ) => {
+		const compiler = await requestUtils.createTemplateFromFile(
+			'archive-product_price-filter'
 		);
-
-		await use( testingPost );
-		await requestUtils.deletePost( testingPost.id );
+		await use( compiler );
 	},
 } );
 
 test.describe( 'Product Filter: Price Filter Block', () => {
 	test.describe( 'frontend', () => {
+		test.beforeEach( async ( { requestUtils, templateCompiler } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-enable-experimental-features'
+			);
+			await templateCompiler.compile();
+		} );
+
 		test( 'clear button is not shown on initial page load', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( '/shop' );
 
 			const button = page.getByRole( 'button', { name: 'Clear' } );
 
@@ -37,11 +33,8 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 		test( 'With price filters applied it shows the correct price', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto(
-				`${ defaultBlockPost.link }?min_price=20&max_price=67`
-			);
+			await page.goto( '/shop?min_price=20&max_price=67' );
 
 			// Min price input field
 			const leftInputContainer = page.locator(
@@ -75,11 +68,8 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 		test( 'clear button appears after a filter is applied', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto(
-				`${ defaultBlockPost.link }?min_price=20&max_price=67`
-			);
+			await page.goto( '/shop?min_price=20&max_price=67' );
 
 			const button = page.getByRole( 'button', { name: 'Clear' } );
 
@@ -88,15 +78,12 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 		test( 'clear button hides after deselecting all filters', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto(
-				`${ defaultBlockPost.link }?min_price=20&max_price=67`
-			);
+			await page.goto( '/shop?min_price=20&max_price=67' );
 
-			const defaultRange = await page
+			const defaultRange = ( await page
 				.locator( '.wp-block-woocommerce-product-filter-price' )
-				.getAttribute( 'data-wc-context' );
+				.getAttribute( 'data-wc-context' ) ) as string;
 			const defaultMinRange = JSON.parse( defaultRange ).minRange;
 			const defaultMaxRange = JSON.parse( defaultRange ).maxRange;
 
@@ -123,21 +110,18 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 		test( 'filters are cleared after clear button is clicked', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto(
-				`${ defaultBlockPost.link }?min_price=20&max_price=67`
-			);
+			await page.goto( '/shop?min_price=20&max_price=67' );
 
 			const button = page.getByRole( 'button', { name: 'Clear' } );
 
 			await button.click();
 
-			await page.waitForURL( defaultBlockPost.link );
+			await page.waitForURL( '/shop/' );
 
-			const defaultRangePrice = await page
+			const defaultRangePrice = ( await page
 				.locator( '.wp-block-woocommerce-product-filter-price' )
-				.getAttribute( 'data-wc-context' );
+				.getAttribute( 'data-wc-context' ) ) as string;
 
 			const defaultMinRange = JSON.parse( defaultRangePrice ).minRange;
 			const defaultMaxRange = JSON.parse( defaultRangePrice ).maxRange;
@@ -150,11 +134,8 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 		test( 'Changes in the price input field triggers price slider updates', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto(
-				`${ defaultBlockPost.link }?min_price=20&max_price=67`
-			);
+			await page.goto( '/shop?min_price=20&max_price=67' );
 
 			// Min price input field
 			const leftInputContainer = page.locator(
@@ -192,11 +173,8 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 		test( 'Price input field rejects min price higher than max price', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto(
-				`${ defaultBlockPost.link }?min_price=20&max_price=67`
-			);
+			await page.goto( '/shop?min_price=20&max_price=67' );
 
 			// Min price input field
 			const minPriceInput = page
@@ -217,11 +195,8 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 		test( 'Price input field rejects max price lower than min price', async ( {
 			page,
-			defaultBlockPost,
 		} ) => {
-			await page.goto(
-				`${ defaultBlockPost.link }?min_price=20&max_price=67`
-			);
+			await page.goto( '/shop?min_price=20&max_price=67' );
 
 			// Max price input field
 			const maxPriceInput = page

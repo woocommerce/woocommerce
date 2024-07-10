@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useBlockProps } from '@wordpress/block-editor';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -27,7 +27,7 @@ const v1 = {
 		return (
 			<div
 				{ ...useBlockProps.save( {
-					className: classNames( 'is-loading', className ),
+					className: clsx( 'is-loading', className ),
 				} ) }
 				{ ...data }
 			>

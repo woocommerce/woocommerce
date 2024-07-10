@@ -5,6 +5,7 @@ use Exception;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Utilities\DiscountsUtil;
 
 /**
  * OrderController class.
@@ -432,7 +433,7 @@ class OrderController {
 	protected function validate_coupon_email_restriction( \WC_Coupon $coupon, \WC_Order $order ) {
 		$restrictions = $coupon->get_email_restrictions();
 
-		if ( ! empty( $restrictions ) && $order->get_billing_email() && ! wc()->cart->is_coupon_emails_allowed( array( $order->get_billing_email() ), $restrictions ) ) {
+		if ( ! empty( $restrictions ) && $order->get_billing_email() && ! DiscountsUtil::is_coupon_emails_allowed( array( $order->get_billing_email() ), $restrictions ) ) {
 			throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ) );
 		}
 	}
@@ -556,14 +557,20 @@ class OrderController {
 			throw $exception;
 		}
 
-		$valid_methods = array_keys( WC()->shipping()->get_shipping_methods() );
+		$packages = WC()->shipping()->get_packages();
+		foreach ( $packages as $package_id => $package ) {
+			$chosen_rate_for_package    = wc_get_chosen_shipping_method_for_package( $package_id, $package );
+			$valid_rate_ids_for_package = array_map(
+				function ( $rate ) {
+					return $rate->id;
+				},
+				$package['rates']
+			);
 
-		foreach ( $chosen_shipping_methods as $chosen_shipping_method ) {
 			if (
-				false === $chosen_shipping_method ||
-				! is_string( $chosen_shipping_method ) ||
-				! ArrayUtils::string_contains_array( $chosen_shipping_method, $valid_methods )
-			) {
+				false === $chosen_rate_for_package ||
+				! is_string( $chosen_rate_for_package ) ||
+				! ArrayUtils::string_contains_array( $chosen_rate_for_package, $valid_rate_ids_for_package ) ) {
 				throw $exception;
 			}
 		}

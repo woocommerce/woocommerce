@@ -1,3 +1,5 @@
+export const SETTINGS_SIDEBAR_IDENTIFIER =
+	'woocommerce-product-editor-settings-sidebar';
 export const SIDEBAR_COMPLEMENTARY_AREA_SCOPE =
 	'woocommerce/product-editor/modal-block-editor/sidebar';
 

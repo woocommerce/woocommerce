@@ -4,7 +4,7 @@
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useQuery } from '@woocommerce/navigation';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -19,6 +19,7 @@ import { ProductType } from '../product-list/types';
 const ALL_CATEGORIES_SLUGS = {
 	[ ProductType.extension ]: '_all',
 	[ ProductType.theme ]: 'themes',
+	[ ProductType.businessService ]: 'business-services',
 };
 
 interface CategorySelectorProps {
@@ -148,7 +149,7 @@ export default function CategorySelector(
 							type={ props.type }
 							label={ __( 'More', 'woocommerce' ) }
 							categories={ dropdownItems }
-							buttonClassName={ classNames(
+							buttonClassName={ clsx(
 								'woocommerce-marketplace__category-item-button',
 								{
 									'woocommerce-marketplace__category-item-button--selected':

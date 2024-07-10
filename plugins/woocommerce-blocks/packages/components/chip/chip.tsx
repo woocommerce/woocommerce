@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -51,7 +51,7 @@ const Chip: React.FC< ChipProps > = ( {
 	...props
 } ) => {
 	const Wrapper = element;
-	const wrapperClassName = classNames(
+	const wrapperClassName = clsx(
 		className,
 		'wc-block-components-chip',
 		'wc-block-components-chip--radius-' + radius

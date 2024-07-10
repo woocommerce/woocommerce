@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Add experimental support for FTS indexes in HPOS. Additionally, revert existing HPOS search queries to use post like structure.

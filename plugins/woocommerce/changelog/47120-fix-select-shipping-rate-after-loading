@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Select the first shipping rate when local pickup is enabled and customer switches to shipping.

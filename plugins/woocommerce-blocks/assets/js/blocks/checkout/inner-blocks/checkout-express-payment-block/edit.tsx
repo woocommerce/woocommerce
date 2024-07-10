@@ -4,8 +4,8 @@
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, RadioControl } from '@wordpress/components';
 import { useExpressPaymentMethods } from '@woocommerce/base-context/hooks';
-import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -30,7 +30,7 @@ export const Edit = ( {
 	const { paymentMethods, isInitialized } = useExpressPaymentMethods();
 	const hasExpressPaymentMethods = Object.keys( paymentMethods ).length > 0;
 	const blockProps = useBlockProps( {
-		className: classnames(
+		className: clsx(
 			{
 				'wp-block-woocommerce-checkout-express-payment-block--has-express-payment-methods':
 					hasExpressPaymentMethods,
