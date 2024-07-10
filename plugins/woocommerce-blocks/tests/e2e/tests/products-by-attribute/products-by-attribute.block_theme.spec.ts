@@ -33,7 +33,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 		editor,
 		admin,
 		frontendUtils,
-		page
+		page,
 	} ) => {
 		await admin.createNewPost();
 		await editor.insertBlock( { name: blockData.slug } );
