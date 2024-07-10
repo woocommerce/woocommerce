@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout Filters - Order summary items
-menu_title: Order summary items
+menu_title: Order Summary Items
 tags: reference
 ---
 <!-- markdownlint-disable MD024 -->

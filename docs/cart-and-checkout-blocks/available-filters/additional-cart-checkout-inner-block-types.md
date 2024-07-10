@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout - Inner block types
-menu_title: Inner block types
+menu_title: Inner Block Types
 tags: reference
 ---
 

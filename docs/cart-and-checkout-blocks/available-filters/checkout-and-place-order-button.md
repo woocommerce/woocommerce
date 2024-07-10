@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout - Checkout and place order button
-menu_title: Checkout and place order button
+menu_title: Checkout and Place Order Button
 tags: reference
 ---
 <!-- markdownlint-disable MD024 -->

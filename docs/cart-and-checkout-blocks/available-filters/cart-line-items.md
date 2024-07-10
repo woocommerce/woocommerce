@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout - Cart line items
-menu_title: Cart line items
+menu_title: Cart Line Items
 tags: reference
 ---
 

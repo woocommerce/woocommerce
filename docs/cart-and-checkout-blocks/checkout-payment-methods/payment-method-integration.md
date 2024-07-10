@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout - Payment method integration for the Checkout block
-menu_title: Payment method integration
+menu_title: Payment Method Integration
 tags: reference
 ---
 

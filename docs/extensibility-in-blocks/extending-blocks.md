@@ -3,12 +3,6 @@ post_title: An introduction to extensiblity in WooCommerce Blocks
 menu_title: Introduction
 ---
 
-<<<<<<< HEAD:docs/extensbility-in-blocks/extending-blocks.md
-=======
-
-# Extensibility in WooCommerce Blocks <!-- omit in toc -->
-
->>>>>>> e425de483a (update folder name and remove toc):docs/extensibility-in-blocks/extending-blocks.md
 These documents are all dealing with extensibility in the various WooCommerce Blocks.
 
 ## Imports and dependency extration

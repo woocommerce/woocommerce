@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout - Filtering payment methods in the Checkout block
-menu_title: Filtering payment methods
+menu_title: Filtering Payment Methods
 tags: how-to
 ---
 

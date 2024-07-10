@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout - DOM events
-menu_title: DOM events
+menu_title: DOM Events
 tags: reference
 ---
 

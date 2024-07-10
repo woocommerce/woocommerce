@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout - Available filters
-menu_title: Available filters
+menu_title: Available Filters
 tags: reference
 ---
 

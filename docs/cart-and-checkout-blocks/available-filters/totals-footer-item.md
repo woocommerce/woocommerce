@@ -1,6 +1,6 @@
 ---
 post_title: Cart and Checkout - Totals footer item
-menu_title: Totals footer item
+menu_title: Totals Footer Item
 tags: reference
 ---
 
