@@ -138,6 +138,5 @@ add_action(
 	}
 );
 
-
 // Initialize the live branches feature.
 require_once dirname( __FILE__ ) . '/includes/class-wc-beta-tester-live-branches.php';
