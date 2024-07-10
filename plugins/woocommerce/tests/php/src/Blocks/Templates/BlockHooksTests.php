@@ -9,7 +9,7 @@ use \WP_UnitTestCase;
  * Tests Block Hooks logic.
  *
  */
-class WC_BlockHooks_Tests extends WP_UnitTestCase {
+class BlockHooksTests extends WP_UnitTestCase {
 	/**
 	 * This variable holds our Product Query object.
 	 *
