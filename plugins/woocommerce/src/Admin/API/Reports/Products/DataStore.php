@@ -260,7 +260,14 @@ class DataStore extends ReportsDataStore {
 	 */
 	public function get_data( $query_args ) {
 		$data = parent::get_data( $query_args );
-		// Do not cache extended info -- this is required to get the latest stock data.
+
+		/*
+		 * Do not cache extended info -- this is required to get the latest stock data.
+		 * `include_extended_info` checks only `extended_info` key,
+		 * so we don't need to bother about normalizing timestamps.
+		 */
+		$defaults   = $this->get_default_query_vars();
+		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->include_extended_info( $data->data, $query_args );
 
 		return $data;
