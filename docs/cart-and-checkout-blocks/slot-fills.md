@@ -1,22 +1,12 @@
 ---
-post_title: Cart and Checkout - Slot and Fill
+post_title: Cart and Checkout - Slot and fill
 menu_title: Slot and Fill
 tags: reference
 ---
 
-# Slot and Fill <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [The problem](#the-problem)
--   [Solution](#solution)
--   [Basic Usage](#basic-usage)
--   [registerPlugin](#registerplugin)
--   [Requirements](#requirements)
-
 ## The problem
 
-You added custom data to the [Store API](../rest-api/extend-rest-api-add-data.md). You changed several strings using [Checkout filters](./available-filters.md). Now you want to render your own components in specific places in the Cart and Checkout.
+You added custom data to the [Store API](https://github.com/woocommerce/woocommerce/blob/1675c63bba94c59703f57c7ef06e7deff8fd6bba/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md). You changed several strings using [Checkout filters](./available-filters.md). Now you want to render your own components in specific places in the Cart and Checkout.
 
 ## Solution
 
