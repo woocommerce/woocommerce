@@ -32,7 +32,7 @@ class Query extends GenericQuery {
 	 *
 	 * @var string
 	 */
-	public $name = 'customers';
+	protected $name = 'customers';
 
 	/**
 	 * Valid fields for Customers report.
