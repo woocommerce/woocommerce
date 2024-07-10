@@ -23,15 +23,11 @@ type SelectedItemsProps< ItemType > = {
 	};
 	onRemove: ( item: ItemType ) => void;
 	onBlur?: ( event: React.FocusEvent ) => void;
-	onKeyDown?: ( event: React.KeyboardEvent ) => void;
 	onSelectedItemsEnd?: () => void;
 };
 
 const PrivateSelectedItems = < ItemType, >(
-	props: SelectedItemsProps< ItemType >,
-	lastRemoveButtonRef: React.ForwardedRef< HTMLButtonElement >
-) => {
-	const {
+	{
 		isReadOnly,
 		items,
 		getItemLabel,
@@ -40,7 +36,9 @@ const PrivateSelectedItems = < ItemType, >(
 		onRemove,
 		onBlur,
 		onSelectedItemsEnd,
-	} = props;
+	}: SelectedItemsProps< ItemType >,
+	lastRemoveButtonRef: React.ForwardedRef< HTMLButtonElement >
+) => {
 	const classes = classnames(
 		'woocommerce-experimental-select-control__selected-items',
 		{
