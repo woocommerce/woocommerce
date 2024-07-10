@@ -18,6 +18,8 @@ use WC_Data_Store;
  *         );
  * $report = new GenericQuery( $args, 'coupons' );
  * $mydata = $report->get_data();
+ *
+ * @since x.x.x
  */
 class GenericQuery extends \WC_Object_Query {
 
@@ -63,7 +65,7 @@ class GenericQuery extends \WC_Object_Query {
 		/**
 		 * Filter query args given for the report.
 		 *
-		 * @since 9.0.0
+		 * @since x.x.x
 		 *
 		 * @param array $query_args Query args.
 		 */
@@ -74,7 +76,7 @@ class GenericQuery extends \WC_Object_Query {
 		/**
 		 * Filter report query results.
 		 *
-		 * @since 9.0.0
+		 * @since x.x.x
 		 *
 		 * @param stdClass|WP_Error $results Results from the data store.
 		 * @param array             $args    Query args used to get the data (potentially filtered).

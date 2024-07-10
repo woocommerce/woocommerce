@@ -22,19 +22,19 @@ use Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 /**
  * API\Reports\Downloads\Query
  *
- * @deprecated 9.1 Downloads\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
+ * @deprecated x.x.x Downloads\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
  */
 class Query extends ReportsQuery {
 
 	/**
 	 * Valid fields for downloads report.
 	 *
-	 * @deprecated 9.1 Downloads\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
+	 * @deprecated x.x.x Downloads\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
 	 *
 	 * @return array
 	 */
 	protected function get_default_query_vars() {
-		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '9.1', 'Query class is deprecated, please use GenericQuery or \WC_Object_Query instead' );
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, 'x.x.x', 'Query class is deprecated, please use GenericQuery or \WC_Object_Query instead' );
 
 		return array();
 	}
@@ -42,12 +42,12 @@ class Query extends ReportsQuery {
 	/**
 	 * Get downloads data based on the current query vars.
 	 *
-	 * @deprecated 9.1 Downloads\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
+	 * @deprecated x.x.x Downloads\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
 	 *
 	 * @return array
 	 */
 	public function get_data() {
-		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '9.1', 'Query class is deprecated, please use GenericQuery or \WC_Object_Query instead' );
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, 'x.x.x', 'Query class is deprecated, please use GenericQuery or \WC_Object_Query instead' );
 
 		$args = apply_filters( 'woocommerce_analytics_downloads_query_args', $this->get_query_vars() );
 
