@@ -44,10 +44,42 @@ import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { PATTERN_CATEGORIES } from './categories';
 import { THEME_SLUG } from '~/customize-store/data/constants';
 import { Pattern } from '~/customize-store/types/pattern';
+import {
+	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
+	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
+} from '../../utils/hero-pattern';
+import { useIsActiveNewNeutralVariation } from '../../hooks/use-is-active-new-neutral-variation';
+
+/**
+ * Adds a 'is-added' CSS class to each pattern preview element in the pattern list that matches a block's pattern name.
+ * This function iterates through an array of blocks added in the page, extracts the pattern name from each block's metadata,
+ * and finds the corresponding pattern preview element in the pattern list by its ID. If found, the 'is-added' class is added to the element.
+ */
+const addIsAddedClassToPatternPreview = (
+	patternListEl: HTMLElement,
+	blocks: BlockInstance[]
+) => {
+	patternListEl.querySelectorAll( '.is-added' ).forEach( ( element ) => {
+		element.classList.remove( 'is-added' );
+	} );
+
+	blocks.forEach( ( block ) => {
+		const patterName = block.attributes.metadata?.patternName;
+		if ( ! patterName ) {
+			return;
+		}
+
+		const element = patternListEl.querySelector( `[id="${ patterName }"]` );
+
+		if ( element ) {
+			element.classList.add( 'is-added' );
+		}
+	} );
+};
 
 /**
  * Sorts patterns by category. For 'intro' and 'about' categories
- * priorizied DotCom Patterns. For intro category, it also prioritizes the "centered-content-with-image-below" pattern.
+ * prioritized DotCom Patterns. For intro category, it also prioritizes the "centered-content-with-image-below" pattern.
  * For other categories, it simply sorts patterns to prioritize Woo Patterns.
  */
 const sortPatternsByCategory = (
@@ -95,6 +127,7 @@ const sortPatternsByCategory = (
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const { patterns, isLoading } = usePatternsByCategory( category );
 
+	const isActiveNewNeutralVariation = useIsActiveNewNeutralVariation();
 	const sortedPatterns = useMemo( () => {
 		const patternsWithoutThemePatterns = patterns.filter(
 			( pattern ) =>
@@ -103,11 +136,42 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 				pattern.source !== 'pattern-directory/core'
 		);
 
+		const patternWithPatchedProductHeroPattern =
+			patternsWithoutThemePatterns.map( ( pattern ) => {
+				if (
+					pattern.name !== 'woocommerce-blocks/just-arrived-full-hero'
+				) {
+					return pattern;
+				}
+
+				if ( ! isActiveNewNeutralVariation ) {
+					const blocks =
+						findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+							pattern.blocks,
+							( block: BlockInstance ) => {
+								block.attributes.style = {};
+							}
+						);
+					return { ...pattern, blocks };
+				}
+
+				const blocks =
+					findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+						pattern.blocks,
+						( block: BlockInstance ) => {
+							block.attributes.style =
+								PRODUCT_HERO_PATTERN_BUTTON_STYLE;
+						}
+					);
+
+				return { ...pattern, blocks };
+			} );
+
 		return sortPatternsByCategory(
-			patternsWithoutThemePatterns,
+			patternWithPatchedProductHeroPattern,
 			category as keyof typeof PATTERN_CATEGORIES
 		);
-	}, [ category, patterns ] );
+	}, [ category, isActiveNewNeutralVariation, patterns ] );
 
 	const asyncSortedPatterns = useAsyncList( sortedPatterns );
 
@@ -132,6 +196,36 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const isEditorLoading = useIsSiteEditorLoading();
 
 	const isSpinnerVisible = isLoading || isEditorLoading;
+
+	useEffect( () => {
+		if ( isSpinnerVisible || refElement.current === null ) {
+			return;
+		}
+
+		// We want to add the is-added class to the pattern preview when the pattern is loaded in the editor and for each mutation.
+		addIsAddedClassToPatternPreview( refElement.current, blocks );
+
+		const observer = new MutationObserver( () => {
+			addIsAddedClassToPatternPreview(
+				refElement.current as HTMLElement,
+				blocks
+			);
+		} );
+
+		const previewPatternList = document.querySelector(
+			'.woocommerce-customize-store-edit-site-layout__sidebar-extra__pattern .block-editor-block-patterns-list'
+		);
+
+		if ( previewPatternList ) {
+			observer.observe( previewPatternList, {
+				childList: true,
+			} );
+		}
+
+		return () => {
+			observer.disconnect();
+		};
+	}, [ isLoading, blocks, isSpinnerVisible ] );
 
 	useEffect( () => {
 		if ( isEditorLoading ) {

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Change the custom field name component to be an autocomplete

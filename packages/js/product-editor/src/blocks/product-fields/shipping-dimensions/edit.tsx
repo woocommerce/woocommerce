@@ -7,7 +7,6 @@ import {
 	Product,
 	ProductDimensions,
 } from '@woocommerce/data';
-import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import {
@@ -16,24 +15,21 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
-import {
-	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
-	__experimentalInputControl as InputControl,
-} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { ShippingDimensionsBlockAttributes } from './types';
-import { useProductHelper } from '../../../hooks/use-product-helper';
 import {
 	HighlightSides,
 	ShippingDimensionsImage,
 } from '../../../components/shipping-dimensions-image';
 import { useValidation } from '../../../contexts/validation-context';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { NumberControl } from '../../../components/number-control';
+
+const SHIPPING_AND_WEIGHT_MIN_VALUE = 0;
+const SHIPPING_AND_WEIGHT_MAX_VALUE = 100_000_000_000_000;
 
 export function Edit( {
 	attributes,
@@ -63,8 +59,6 @@ export function Edit( {
 
 	const [ highlightSide, setHighlightSide ] = useState< HighlightSides >();
 
-	const { formatNumber, parseNumber } = useProductHelper();
-
 	const { dimensionUnit, weightUnit } = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
 		return {
@@ -79,18 +73,18 @@ export function Edit( {
 	) {
 		return {
 			name: `dimensions.${ name }`,
-			value: dimensions
-				? formatNumber( String( dimensions[ name ] ) )
-				: undefined,
+			value: ( dimensions && dimensions[ name ] ) ?? '',
 			onChange: ( value: string ) =>
 				setDimensions( {
 					...( dimensions ?? {} ),
-					[ name ]: parseNumber( value ),
+					[ name ]: value,
 				} ),
 			onFocus: () => setHighlightSide( side ),
 			onBlur: () => setHighlightSide( undefined ),
 			suffix: dimensionUnit,
 			disabled: attributes.disabled || virtual,
+			min: SHIPPING_AND_WEIGHT_MIN_VALUE,
+			max: SHIPPING_AND_WEIGHT_MAX_VALUE,
 		};
 	}
 
@@ -152,40 +146,29 @@ export function Edit( {
 
 	const dimensionsWidthProps = {
 		...getDimensionsControlProps( 'width', 'A' ),
-		id: useInstanceId(
-			BaseControl,
-			`product_shipping_dimensions_width`
-		) as string,
 		ref: dimensionsWidthRef,
 		onBlur: validateDimensionsWidth,
 	};
 	const dimensionsLengthProps = {
 		...getDimensionsControlProps( 'length', 'B' ),
-		id: useInstanceId(
-			BaseControl,
-			`product_shipping_dimensions_length`
-		) as string,
 		ref: dimensionsLengthRef,
 		onBlur: validateDimensionsLength,
 	};
 	const dimensionsHeightProps = {
 		...getDimensionsControlProps( 'height', 'C' ),
-		id: useInstanceId(
-			BaseControl,
-			`product_shipping_dimensions_height`
-		) as string,
 		ref: dimensionsHeightRef,
 		onBlur: validateDimensionsHeight,
 	};
 	const weightProps = {
-		id: useInstanceId( BaseControl, `product_shipping_weight` ) as string,
 		name: 'weight',
-		value: formatNumber( String( weight ) ),
-		onChange: ( value: string ) => setWeight( parseNumber( value ) ),
+		value: weight ?? '',
+		onChange: setWeight,
 		suffix: weightUnit,
 		ref: weightRef,
 		onBlur: validateWeight,
 		disabled: attributes.disabled || virtual,
+		min: SHIPPING_AND_WEIGHT_MIN_VALUE,
+		max: SHIPPING_AND_WEIGHT_MAX_VALUE,
 	};
 
 	return (
@@ -194,58 +177,35 @@ export function Edit( {
 
 			<div className="wp-block-columns">
 				<div className="wp-block-column">
-					<BaseControl
-						id={ dimensionsWidthProps.id }
+					<NumberControl
 						label={ createInterpolateElement(
 							__( 'Width <Side />', 'woocommerce' ),
 							{ Side: <span>A</span> }
 						) }
-						className={ classNames( {
-							'has-error': dimensionsWidthValidationError,
-						} ) }
-						help={ dimensionsWidthValidationError }
-					>
-						<InputControl { ...dimensionsWidthProps } />
-					</BaseControl>
-
-					<BaseControl
-						id={ dimensionsLengthProps.id }
+						error={ dimensionsWidthValidationError }
+						{ ...dimensionsWidthProps }
+					/>
+					<NumberControl
 						label={ createInterpolateElement(
-							__( 'Length <Side />', 'woocommerce' ),
+							__( 'Width <Side />', 'woocommerce' ),
 							{ Side: <span>B</span> }
 						) }
-						className={ classNames( {
-							'has-error': dimensionsLengthValidationError,
-						} ) }
-						help={ dimensionsLengthValidationError }
-					>
-						<InputControl { ...dimensionsLengthProps } />
-					</BaseControl>
-
-					<BaseControl
-						id={ dimensionsHeightProps.id }
+						error={ dimensionsLengthValidationError }
+						{ ...dimensionsLengthProps }
+					/>
+					<NumberControl
 						label={ createInterpolateElement(
 							__( 'Height <Side />', 'woocommerce' ),
 							{ Side: <span>C</span> }
 						) }
-						className={ classNames( {
-							'has-error': dimensionsHeightValidationError,
-						} ) }
-						help={ dimensionsHeightValidationError }
-					>
-						<InputControl { ...dimensionsHeightProps } />
-					</BaseControl>
-
-					<BaseControl
-						id={ weightProps.id }
+						error={ dimensionsHeightValidationError }
+						{ ...dimensionsHeightProps }
+					/>
+					<NumberControl
 						label={ __( 'Weight', 'woocommerce' ) }
-						className={ classNames( {
-							'has-error': weightValidationError,
-						} ) }
-						help={ weightValidationError }
-					>
-						<InputControl { ...weightProps } />
-					</BaseControl>
+						error={ weightValidationError }
+						{ ...weightProps }
+					/>
 				</div>
 
 				<div className="wp-block-column">

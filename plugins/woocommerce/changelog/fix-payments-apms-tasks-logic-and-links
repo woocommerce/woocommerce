@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fixes for keeping the WooPayments and general payments tasks mutually exclusive and predictable.
+
+
