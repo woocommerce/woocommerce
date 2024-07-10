@@ -530,7 +530,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'products'        => __( 'Product(s)', 'woocommerce' ),
 			'num_items_sold'  => __( 'Items sold', 'woocommerce' ),
 			'coupons'         => __( 'Coupon(s)', 'woocommerce' ),
-			'total_formatted' => __( 'Net Sales', 'woocommerce' ),
+			'net_total' 	  => __( 'Net Sales', 'woocommerce' ),
 			'attribution'     => __( 'Attribution', 'woocommerce' ),
 		);
 
@@ -562,7 +562,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'products'        => isset( $item['extended_info']['products'] ) ? $this->get_products( $item['extended_info']['products'] ) : null,
 			'num_items_sold'  => $item['num_items_sold'],
 			'coupons'         => isset( $item['extended_info']['coupons'] ) ? $this->get_coupons( $item['extended_info']['coupons'] ) : null,
-			'total_formatted' => $item['total_formatted'],
+			'net_total' 	  => $item['net_total'],
 			'attribution'     => $item['extended_info']['attribution']['origin'],
 		);
 
