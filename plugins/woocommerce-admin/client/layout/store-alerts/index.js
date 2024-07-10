@@ -24,7 +24,6 @@ import {
 	useUserPreferences,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { Text } from '@woocommerce/experimental';
 import {
 	navigateTo,
 	parseAdminUrl,
