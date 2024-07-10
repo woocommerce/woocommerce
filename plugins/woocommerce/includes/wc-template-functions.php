@@ -4043,7 +4043,7 @@ function wc_set_hooked_blocks_version() {
 }
 
 /**
- * If the user switches to a theme that supports FSE and they haven't already got a wc_hooked_blocks_version,
+ * If the user switches from a classic to a block theme and they haven't already got a wc_hooked_blocks_version,
  * set the version of the hooked blocks in the database as the latest WC version.
  *
  * @since 9.2.0
