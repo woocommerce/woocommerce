@@ -40,9 +40,9 @@ import { useShowPrepublishChecks } from '../../hooks/use-show-prepublish-checks'
 import { HeaderProps, Image } from './types';
 
 const PublishButton = lazy( () =>
-	import( './publish-button' ).then( ( module ) => ( {
-		default: module.PublishButton,
-	} ) )
+	import( /* webpackChunkName: "publish-button" */ './publish-button' ).then(
+		( module ) => ( { default: module.PublishButton } )
+	)
 );
 
 const RETURN_TO_MAIN_PRODUCT = __(

@@ -13,9 +13,9 @@ import './launch-your-store';
 
 const possiblyImportProductTask = async () => {
 	if ( isImportProduct() ) {
-		import( './import-products' );
+		import( /* webpackChunkName: "import-products" */ './import-products' );
 	} else {
-		import( './products' );
+		import( /* webpackChunkName: "products" */ './products' );
 	}
 };
 
@@ -25,5 +25,7 @@ if (
 	window.wcAdminFeatures &&
 	window.wcAdminFeatures[ 'shipping-smart-defaults' ]
 ) {
-	import( './experimental-shipping-recommendation' );
+	import(
+		/* webpackChunkName: "experimental-shipping-recommendation" */ './experimental-shipping-recommendation'
+	);
 }
