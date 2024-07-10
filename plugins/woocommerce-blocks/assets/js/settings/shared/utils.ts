@@ -149,7 +149,7 @@ export const getCurrencyPrefix = (
 ): string => {
 	const prefixes = {
 		left: symbol,
-		left_space: ' ' + symbol,
+		left_space: symbol + ' ',
 		right: '',
 		right_space: '',
 	};

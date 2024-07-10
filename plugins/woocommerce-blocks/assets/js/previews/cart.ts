@@ -4,12 +4,13 @@
 import { __ } from '@wordpress/i18n';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { CartResponse } from '@woocommerce/types';
-import { getSetting, SITE_CURRENCY } from '@woocommerce/settings';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import { previewShippingRates } from './shipping-rates';
+import { API_SITE_CURRENCY, displayForMinorUnit } from './utils';
 
 /**
  * Prices from the API may change because of this display setting. This makes the response use either
@@ -24,19 +25,6 @@ import { previewShippingRates } from './shipping-rates';
  * adding tax to a price.
  */
 const displayWithTax = getSetting( 'displayCartPricesIncludingTax', false );
-
-/**
- * Put site currency back in API format for the responses.
- */
-const API_SITE_CURRENCY = {
-	currency_code: SITE_CURRENCY.code,
-	currency_symbol: SITE_CURRENCY.symbol,
-	currency_minor_unit: SITE_CURRENCY.minorUnit,
-	currency_decimal_separator: SITE_CURRENCY.decimalSeparator,
-	currency_thousand_separator: SITE_CURRENCY.thousandSeparator,
-	currency_prefix: SITE_CURRENCY.prefix,
-	currency_suffix: SITE_CURRENCY.suffix,
-};
 
 // Sample data for cart block.
 // This closely resembles the data returned from the Store API /cart endpoint.
@@ -95,9 +83,15 @@ export const previewCart: CartResponse = {
 			],
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayWithTax ? '12000' : '10000',
-				regular_price: displayWithTax ? '12000' : '10000',
-				sale_price: displayWithTax ? '12000' : '10000',
+				price: displayForMinorUnit(
+					displayWithTax ? '12000' : '10000'
+				),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '120' : '100'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '12000' : '10000'
+				),
 				price_range: null,
 				raw_prices: {
 					precision: 6,
@@ -108,10 +102,10 @@ export const previewCart: CartResponse = {
 			},
 			totals: {
 				...API_SITE_CURRENCY,
-				line_subtotal: '2000',
-				line_subtotal_tax: '400',
-				line_total: '2000',
-				line_total_tax: '400',
+				line_subtotal: displayForMinorUnit( '2000' ),
+				line_subtotal_tax: displayForMinorUnit( '400' ),
+				line_total: displayForMinorUnit( '2000' ),
+				line_total_tax: displayForMinorUnit( '400' ),
 			},
 			extensions: {},
 			item_data: [],
@@ -158,9 +152,13 @@ export const previewCart: CartResponse = {
 			],
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayWithTax ? '2400' : '2000',
-				regular_price: displayWithTax ? '2400' : '2000',
-				sale_price: displayWithTax ? '2400' : '2000',
+				price: displayForMinorUnit( displayWithTax ? '2400' : '2000' ),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '2400' : '2000'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '2400' : '2000'
+				),
 				price_range: null,
 				raw_prices: {
 					precision: 6,
@@ -171,10 +169,10 @@ export const previewCart: CartResponse = {
 			},
 			totals: {
 				...API_SITE_CURRENCY,
-				line_subtotal: '2000',
-				line_subtotal_tax: '400',
-				line_total: '2000',
-				line_total_tax: '400',
+				line_subtotal: displayForMinorUnit( '2000' ),
+				line_subtotal_tax: displayForMinorUnit( '400' ),
+				line_total: displayForMinorUnit( '2000' ),
+				line_total_tax: displayForMinorUnit( '400' ),
 			},
 			extensions: {},
 			item_data: [],
@@ -195,9 +193,15 @@ export const previewCart: CartResponse = {
 			on_sale: false,
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayWithTax ? '24000' : '20000',
-				regular_price: displayWithTax ? '24000' : '20000',
-				sale_price: displayWithTax ? '12000' : '10000',
+				price: displayForMinorUnit(
+					displayWithTax ? '24000' : '20000'
+				),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '24000' : '20000'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '12000' : '10000'
+				),
 				price_range: null,
 			},
 			price_html: '',
@@ -247,9 +251,15 @@ export const previewCart: CartResponse = {
 			on_sale: false,
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayWithTax ? '30000' : '25000',
-				regular_price: displayWithTax ? '30000' : '25000',
-				sale_price: displayWithTax ? '30000' : '25000',
+				price: displayForMinorUnit(
+					displayWithTax ? '30000' : '25000'
+				),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '30000' : '25000'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '30000' : '25000'
+				),
 				price_range: null,
 			},
 			price_html: '',
@@ -300,9 +310,15 @@ export const previewCart: CartResponse = {
 			on_sale: true,
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayWithTax ? '15000' : '12500',
-				regular_price: displayWithTax ? '30000' : '25000',
-				sale_price: displayWithTax ? '15000' : '12500',
+				price: displayForMinorUnit(
+					displayWithTax ? '15000' : '12500'
+				),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '30000' : '25000'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '15000' : '12500'
+				),
 				price_range: null,
 			},
 			price_html: '',
@@ -354,9 +370,13 @@ export const previewCart: CartResponse = {
 			on_sale: false,
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayWithTax ? '4500' : '4250',
-				regular_price: displayWithTax ? '4500' : '4250',
-				sale_price: displayWithTax ? '4500' : '4250',
+				price: displayForMinorUnit( displayWithTax ? '4500' : '4250' ),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '4500' : '4250'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '4500' : '4250'
+				),
 				price_range: null,
 			},
 			price_html: '',
@@ -407,9 +427,13 @@ export const previewCart: CartResponse = {
 			on_sale: true,
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayWithTax ? '3500' : '3250',
-				regular_price: displayWithTax ? '4500' : '4250',
-				sale_price: displayWithTax ? '3500' : '3250',
+				price: displayForMinorUnit( displayWithTax ? '3500' : '3250' ),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '4500' : '4250'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '3500' : '3250'
+				),
 				price_range: null,
 			},
 			price_html: '',
@@ -461,9 +485,13 @@ export const previewCart: CartResponse = {
 			on_sale: false,
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayWithTax ? '1800' : '1500',
-				regular_price: displayWithTax ? '1800' : '1500',
-				sale_price: displayWithTax ? '1800' : '1500',
+				price: displayForMinorUnit( displayWithTax ? '1800' : '1500' ),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '1800' : '1500'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '1800' : '1500'
+				),
 				price_range: null,
 			},
 			price_html: '',
@@ -506,8 +534,8 @@ export const previewCart: CartResponse = {
 			name: __( 'Fee', 'woocommerce' ),
 			totals: {
 				...API_SITE_CURRENCY,
-				total: '100',
-				total_tax: '20',
+				total: displayForMinorUnit( '100' ),
+				total_tax: displayForMinorUnit( '20' ),
 			},
 		},
 	],
@@ -543,21 +571,21 @@ export const previewCart: CartResponse = {
 	},
 	totals: {
 		...API_SITE_CURRENCY,
-		total_items: '4000',
-		total_items_tax: '800',
-		total_fees: '100',
-		total_fees_tax: '20',
+		total_items: displayForMinorUnit( '4000' ),
+		total_items_tax: displayForMinorUnit( '800' ),
+		total_fees: displayForMinorUnit( '100' ),
+		total_fees_tax: displayForMinorUnit( '20' ),
 		total_discount: '0',
 		total_discount_tax: '0',
 		total_shipping: '0',
 		total_shipping_tax: '0',
-		total_tax: '820',
-		total_price: '4920',
+		total_tax: displayForMinorUnit( '820' ),
+		total_price: displayForMinorUnit( '4920' ),
 		tax_lines: [
 			{
 				name: __( 'Sales tax', 'woocommerce' ),
 				rate: '20%',
-				price: '820',
+				price: displayForMinorUnit( '820' ),
 			},
 		],
 	},
