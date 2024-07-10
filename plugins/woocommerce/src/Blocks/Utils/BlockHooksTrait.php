@@ -20,7 +20,7 @@ trait BlockHooksTrait {
 	public function register_hooked_block( $hooked_blocks, $position, $anchor_block, $context ) {
 		// Cache the block hooks version.
 		static $block_hooks_version = null;
-		if ( is_null( $block_hooks_version ) ) {
+		if ( defined( 'WP_RUN_CORE_TESTS' ) || is_null( $block_hooks_version ) ) {
 			$block_hooks_version = get_option( 'wc_hooked_blocks_version' );
 		}
 
