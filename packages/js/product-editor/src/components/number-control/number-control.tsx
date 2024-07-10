@@ -4,6 +4,7 @@
 import {
 	createElement,
 	Fragment,
+	isValidElement,
 	useEffect,
 	useRef,
 	useState,
@@ -28,12 +29,13 @@ import { Label } from '../label/label';
 export type NumberProps = {
 	value: string;
 	onChange: ( selected: string ) => void;
-	label: string;
+	label: string | JSX.Element;
 	suffix?: string;
 	help?: string;
 	error?: string;
 	placeholder?: string;
 	onBlur?: () => void;
+	onFocus?: () => void;
 	required?: boolean;
 	tooltip?: string;
 	disabled?: boolean;
@@ -43,7 +45,6 @@ export type NumberProps = {
 };
 
 const MEDIUM_DELAY = 500;
-
 const SHORT_DELAY = 100;
 
 export const NumberControl: React.FC< NumberProps > = ( {
@@ -54,13 +55,14 @@ export const NumberControl: React.FC< NumberProps > = ( {
 	help,
 	error,
 	onBlur,
+	onFocus,
 	required,
 	tooltip,
 	placeholder,
 	disabled,
 	step = 1,
 	min = -Infinity,
-	max = +Infinity,
+	max = Infinity,
 }: NumberProps ) => {
 	const id = useInstanceId( BaseControl, 'product_number_field' ) as string;
 	const [ isFocused, setIsFocused ] = useState( false );
@@ -77,7 +79,10 @@ export const NumberControl: React.FC< NumberProps > = ( {
 	const inputProps = useNumberInputProps( {
 		value: value || '',
 		onChange,
-		onFocus: () => setIsFocused( true ),
+		onFocus: () => {
+			setIsFocused( true );
+			onFocus?.();
+		},
 		min,
 		max,
 	} );
@@ -129,11 +134,15 @@ export const NumberControl: React.FC< NumberProps > = ( {
 			} ) }
 			id={ id }
 			label={
-				<Label
-					label={ label }
-					required={ required }
-					tooltip={ tooltip }
-				/>
+				isValidElement( label ) ? (
+					label
+				) : (
+					<Label
+						label={ label as string }
+						required={ required }
+						tooltip={ tooltip }
+					/>
+				)
 			}
 			help={ error || help }
 		>
