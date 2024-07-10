@@ -1,19 +1,14 @@
 ---
-category_title: Extensibility in blocks 
-category_slug: extensibility-in-blocks
-post_title:  Extensibility in blocks
+post_title: An introduction to extensiblity in WooCommerce Blocks
+menu_title: Introduction
 ---
+
+<<<<<<< HEAD:docs/extensbility-in-blocks/extending-blocks.md
+=======
 
 # Extensibility in WooCommerce Blocks <!-- omit in toc -->
 
-## Table of Contents <!-- omit in toc -->
-
--   [Imports and dependency extration](#imports-and-dependency-extration)
--   [Hooks (actions and filters)](#hooks-actions-and-filters)
--   [REST API](#rest-api)
--   [Checkout Payment Methods](#checkout-payment-methods)
--   [Checkout Block](#checkout-block)
-
+>>>>>>> e425de483a (update folder name and remove toc):docs/extensibility-in-blocks/extending-blocks.md
 These documents are all dealing with extensibility in the various WooCommerce Blocks.
 
 ## Imports and dependency extration
