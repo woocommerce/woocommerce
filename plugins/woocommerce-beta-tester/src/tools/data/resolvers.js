@@ -13,6 +13,7 @@ import {
 	setDBUpdateVersions,
 	setIsEmailDisabled,
 	setLoggingLevels,
+	setComingSoonMode,
 } from './actions';
 
 export function* getCronJobs() {
@@ -81,6 +82,20 @@ export function* getBlockTemplateLoggingThreshold() {
 			method: 'GET',
 		} );
 		yield setBlockTemplateLoggingThreshold( response );
+	} catch ( error ) {
+		throw new Error( error );
+	}
+}
+
+export function* getComingSoonMode() {
+	const path = `${ API_NAMESPACE }/tools/get-force-coming-soon-mode/v1`;
+
+	try {
+		const response = yield apiFetch( {
+			path,
+			method: 'GET',
+		} );
+		yield setComingSoonMode( response );
 	} catch ( error ) {
 		throw new Error( error );
 	}

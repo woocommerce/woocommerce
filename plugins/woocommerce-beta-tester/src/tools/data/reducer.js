@@ -14,6 +14,7 @@ const DEFAULT_STATE = {
 	dbUpdateVersions: [],
 	loggingLevels: null,
 	blockTemplateLoggingThreshold: null,
+	comingSoonMode: false,
 };
 
 const reducer = ( state = DEFAULT_STATE, action ) => {
@@ -92,6 +93,11 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				...state,
 				blockTemplateLoggingThreshold:
 					action.blockTemplateLoggingThreshold,
+			};
+		case TYPES.SET_COMING_SOON_MODE:
+			return {
+				...state,
+				comingSoonMode: action.comingSoonMode,
 			};
 		default:
 			return state;
