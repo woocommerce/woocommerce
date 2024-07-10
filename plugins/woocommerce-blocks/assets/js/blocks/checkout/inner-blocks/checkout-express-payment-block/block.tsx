@@ -25,7 +25,6 @@ const Block = ( {
 
 	return (
 		<div className={ className }>
-			buttonBorderRadius,
 			<CheckoutExpressPayment
 				buttonHeight={ buttonHeight }
 				buttonBorderRadius={ buttonBorderRadius }
