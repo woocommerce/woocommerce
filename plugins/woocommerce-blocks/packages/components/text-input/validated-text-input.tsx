@@ -242,15 +242,14 @@ const ValidatedTextInput = forwardRef<
 				id={ textInputId }
 				type={ type }
 				feedback={
-					<>
-						{ feedback }
-						{ hasError ? (
-							<ValidationInputError
-								errorMessage={ passedErrorMessage }
-								propertyName={ errorIdString }
-							/>
-						) : null }
-					</>
+					hasError ? (
+						<ValidationInputError
+							errorMessage={ passedErrorMessage }
+							propertyName={ errorIdString }
+						/>
+					) : (
+						feedback
+					)
 				}
 				ref={ inputRef }
 				onChange={ ( newValue ) => {
