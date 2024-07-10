@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { sprintf, __ } from '@wordpress/i18n';
 import { useInstanceId } from '@wordpress/compose';
 import { passwordStrength } from 'check-password-strength';
 import { usePrevious } from '@woocommerce/base-hooks';
@@ -91,15 +91,24 @@ const PasswordStrengthMeter = ( {
 			</meter>
 			<div
 				id={ instanceId + '-result' }
-				aria-live="polite"
 				className="wc-block-components-password-strength__result"
 			>
 				{ !! scoreDescriptions[ strength ] && (
 					<>
-						<span className="screen-reader-text">
-							{ __( 'Password strength', 'woocommerce' ) }
+						<span className="screen-reader-text" aria-live="polite">
+							{ sprintf(
+								/* translators: %s: Password strength */
+								__(
+									'Password strength: %1$s (%2$d characters long)',
+									'woocommerce'
+								),
+								scoreDescriptions[ strength ],
+								password.length
+							) }
 						</span>{ ' ' }
-						{ scoreDescriptions[ strength ] }
+						<span aria-hidden={ true }>
+							{ scoreDescriptions[ strength ] }
+						</span>
 					</>
 				) }
 			</div>
