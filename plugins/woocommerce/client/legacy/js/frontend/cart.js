@@ -225,8 +225,8 @@ jQuery( function ( $ ) {
 		/**
 		 * Handles when a shipping method is selected.
 		 */
-		shipping_method_selected: function () {
-			var shipping_methods = {};
+		shipping_method_selected: function ( event ) {
+			var shipping_methods = {};			
 
 			// eslint-disable-next-line max-len
 			$(
@@ -248,7 +248,10 @@ jQuery( function ( $ ) {
 				data: data,
 				dataType: 'html',
 				success: function ( response ) {
+					var target_id = $( event.currentTarget ).attr( 'id' );
+
 					update_cart_totals_div( response );
+					$( '.cart_totals' ).find( '#' + target_id ).focus();
 				},
 				complete: function () {
 					unblock( $( 'div.cart_totals' ) );
