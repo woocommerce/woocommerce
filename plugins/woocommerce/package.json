@@ -572,7 +572,7 @@
 						"tests/metrics/**"
 					],
 					"events": [
-						"push"
+						"disabled"
 					]
 				},
 				{
