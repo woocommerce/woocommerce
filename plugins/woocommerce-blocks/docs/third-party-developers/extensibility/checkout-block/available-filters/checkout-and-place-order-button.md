@@ -1,20 +1,21 @@
 ---
-post_title: Cart and Checkout - Checkout and place order button
+post_title: Cart and Checkout - Checkout and Place Order Button
 menu_title: Checkout and Place Order Button
-tags: reference
+tags: reference, checkout-available-filters
 ---
 <!-- markdownlint-disable MD024 -->
+# Checkout and place order button
 
 The following Checkout and place order button filters are available:
 
--   `proceedToCheckoutButtonLabel`
--   `proceedToCheckoutButtonLink`
--   `placeOrderButtonLabel`
+-   [`proceedToCheckoutButtonLabel`](#proceedtocheckoutbuttonlabel)
+-   [`proceedToCheckoutButtonLink`](#proceedtocheckoutbuttonlink)
+-   [`placeOrderButtonLabel`](#placeorderbuttonlabel)
 
 The following objects are shared between the filters:
 
--   Cart object
--   Cart Item object
+-   [Cart object](#cart-object)
+-   [Cart Item object](#cart-item-object)
 
 ## `proceedToCheckoutButtonLabel`
 
@@ -87,7 +88,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -106,7 +107,7 @@ The `proceedToCheckoutButtonLink` filter allows change the link of the "Proceed 
 -   _defaultValue_ `string` (default: `/checkout`) - The link of the "Proceed to checkout" button.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
-    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](./available-filters.md#cart-object).
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](../available-filters.md#cart-object).
 
 ### Returns <!-- omit in toc -->
 
@@ -166,7 +167,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -203,7 +204,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
