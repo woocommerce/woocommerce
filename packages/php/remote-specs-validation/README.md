@@ -38,6 +38,6 @@ $result = $validator->validate( $spec );
 if ( !$result->is_valid() ) {
 	var_dump( $result->get_errors() );
 } else {
-	var_dump('everyting looks good!');
+	var_dump('everything looks good!');
 }
 ```

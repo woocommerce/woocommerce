@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
+import type { InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, loop } from '@wordpress/icons';
 
@@ -14,7 +14,7 @@ import { CoreCollectionNames } from '../types';
 const collection = {
 	name: CoreCollectionNames.PRODUCT_CATALOG,
 	title: __( 'Product Catalog', 'woocommerce' ),
-	icon: ( <Icon icon={ loop } /> ) as BlockIcon,
+	icon: <Icon icon={ loop } />,
 	description:
 		'Display all products in your catalog. Results can (change to) match the current template, page, or search term.',
 	keywords: [ 'all products' ],
