@@ -1263,7 +1263,7 @@ class WC_Install {
 				return;
 			}
 
-			$active_valid_plugins = wc_get_container()->get( PluginUtil::class )->get_active_and_valid_plugins();
+			$active_valid_plugins = wc_get_container()->get( PluginUtil::class )->get_all_active_valid_plugins();
 			if ( in_array( $legacy_api_plugin, $active_valid_plugins, true ) ) {
 				return;
 			}

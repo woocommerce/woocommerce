@@ -1044,7 +1044,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				return array();
 			}
 
-			$active_valid_plugins = wc_get_container()->get( PluginUtil::class )->get_active_and_valid_plugins();
+			$active_valid_plugins = wc_get_container()->get( PluginUtil::class )->get_all_active_valid_plugins();
 			$active_plugins_data  = array();
 
 			foreach ( $active_valid_plugins as $plugin ) {

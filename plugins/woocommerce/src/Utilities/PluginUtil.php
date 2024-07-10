@@ -68,20 +68,31 @@ class PluginUtil {
 	}
 
 	/**
-	 * Wrapper for WP's private `wp_get_active_and_valid_plugins` function.
+	 * Wrapper for WP's private `wp_get_active_and_valid_plugins` and `wp_get_active_network_plugins` functions.
 	 *
-	 * This function is more useful in some cases compared to just using get_option( 'active_plugins' )
-	 * because it also validates that the plugin files actually exist. We're wrapping it here rather than
-	 * using the function directly because it's marked as "@access private", so if it changes in a
-	 * backward-incompatible way, we can update our method here to preserve the functionality.
+	 * This combines the results of the two functions to get a list of all plugins that are active within a site.
+	 * It's more useful than just retrieving the option values because it also validates that the plugin files exist.
+	 * This wrapper is also a hedge against backward-incompatible changes since both of the WP methods are marked as
+	 * being "@access private", so if need be we can update our methods here to preserve functionality.
 	 *
-	 * Note that the doc block for the WP function says it returns "Array of paths to plugin files relative
-	 * to the plugins directory", but it actually returns absolute paths.
+	 * Note that the doc block for `wp_get_active_and_valid_plugins` says it returns "Array of paths to plugin files
+	 * relative to the plugins directory", but it actually returns absolute paths.
 	 *
 	 * @return string[] Array of absolute paths to plugin files.
 	 */
-	public function get_active_and_valid_plugins() {
-		return wp_get_active_and_valid_plugins();
+	public function get_all_active_valid_plugins() {
+		$local = wp_get_active_and_valid_plugins();
+
+		if ( is_multisite() ) {
+			require_once ABSPATH . WPINC . '/ms-load.php';
+			$network = wp_get_active_network_plugins();
+		} else {
+			$network = array();
+		}
+
+		$all = array_merge( $local, $network );
+
+		return array_unique( $all );
 	}
 
 	/**
