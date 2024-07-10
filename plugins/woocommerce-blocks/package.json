@@ -209,6 +209,7 @@
 		"eslint-plugin-storybook": "^0.6.15",
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"eslint-plugin-you-dont-need-lodash-underscore": "6.12.0",
+		"expect-puppeteer": "6.1.1",
 		"gh-pages": "4.0.0",
 		"github-label-sync": "^2.3.1",
 		"glob": "7.2.3",
