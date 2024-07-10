@@ -11,9 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * WooCommerce Reports data store interface.
- * It's no longer in use, as of 9.2.0 DataStore implements `get_data` method directly.
+ * It's no longer in use, as of x.x.x DataStore implements `get_data` method directly.
  *
- * @deprecated 9.2.0
+ * @deprecated x.x.x
  *
  * @since 3.5.0
  */
