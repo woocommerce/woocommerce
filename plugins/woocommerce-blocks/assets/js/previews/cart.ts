@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { CartResponse } from '@woocommerce/types';
-import { getSetting } from '@woocommerce/settings';
+import { getSetting, SITE_CURRENCY } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -24,6 +24,19 @@ import { previewShippingRates } from './shipping-rates';
  * adding tax to a price.
  */
 const displayWithTax = getSetting( 'displayCartPricesIncludingTax', false );
+
+/**
+ * Put site currency back in API format for the responses.
+ */
+const API_SITE_CURRENCY = {
+	currency_code: SITE_CURRENCY.code,
+	currency_symbol: SITE_CURRENCY.symbol,
+	currency_minor_unit: SITE_CURRENCY.minorUnit,
+	currency_decimal_separator: SITE_CURRENCY.decimalSeparator,
+	currency_thousand_separator: SITE_CURRENCY.thousandSeparator,
+	currency_prefix: SITE_CURRENCY.prefix,
+	currency_suffix: SITE_CURRENCY.suffix,
+};
 
 // Sample data for cart block.
 // This closely resembles the data returned from the Store API /cart endpoint.
@@ -81,13 +94,7 @@ export const previewCart: CartResponse = {
 				},
 			],
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
+				...API_SITE_CURRENCY,
 				price: displayWithTax ? '12000' : '10000',
 				regular_price: displayWithTax ? '12000' : '10000',
 				sale_price: displayWithTax ? '12000' : '10000',
@@ -100,13 +107,7 @@ export const previewCart: CartResponse = {
 				},
 			},
 			totals: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
+				...API_SITE_CURRENCY,
 				line_subtotal: '2000',
 				line_subtotal_tax: '400',
 				line_total: '2000',
@@ -156,13 +157,7 @@ export const previewCart: CartResponse = {
 				},
 			],
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
+				...API_SITE_CURRENCY,
 				price: displayWithTax ? '2400' : '2000',
 				regular_price: displayWithTax ? '2400' : '2000',
 				sale_price: displayWithTax ? '2400' : '2000',
@@ -175,13 +170,7 @@ export const previewCart: CartResponse = {
 				},
 			},
 			totals: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
+				...API_SITE_CURRENCY,
 				line_subtotal: '2000',
 				line_subtotal_tax: '400',
 				line_total: '2000',
@@ -195,6 +184,7 @@ export const previewCart: CartResponse = {
 		{
 			id: 1,
 			name: __( 'Polo', 'woocommerce' ),
+			slug: 'polo',
 			parent: 0,
 			type: 'simple',
 			variation: '',
@@ -204,13 +194,7 @@ export const previewCart: CartResponse = {
 			description: __( 'Polo', 'woocommerce' ),
 			on_sale: false,
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
+				...API_SITE_CURRENCY,
 				price: displayWithTax ? '24000' : '20000',
 				regular_price: displayWithTax ? '24000' : '20000',
 				sale_price: displayWithTax ? '12000' : '10000',
@@ -252,6 +236,7 @@ export const previewCart: CartResponse = {
 		{
 			id: 2,
 			name: __( 'Long Sleeve Tee', 'woocommerce' ),
+			slug: 'long-sleeve-tee',
 			parent: 0,
 			type: 'simple',
 			variation: '',
@@ -261,13 +246,7 @@ export const previewCart: CartResponse = {
 			description: __( 'Long Sleeve Tee', 'woocommerce' ),
 			on_sale: false,
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
+				...API_SITE_CURRENCY,
 				price: displayWithTax ? '30000' : '25000',
 				regular_price: displayWithTax ? '30000' : '25000',
 				sale_price: displayWithTax ? '30000' : '25000',
@@ -310,6 +289,7 @@ export const previewCart: CartResponse = {
 		{
 			id: 3,
 			name: __( 'Hoodie with Zipper', 'woocommerce' ),
+			slug: 'hoodie-with-zipper',
 			parent: 0,
 			type: 'simple',
 			variation: '',
@@ -319,13 +299,7 @@ export const previewCart: CartResponse = {
 			description: __( 'Hoodie with Zipper', 'woocommerce' ),
 			on_sale: true,
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
+				...API_SITE_CURRENCY,
 				price: displayWithTax ? '15000' : '12500',
 				regular_price: displayWithTax ? '30000' : '25000',
 				sale_price: displayWithTax ? '15000' : '12500',
@@ -369,6 +343,7 @@ export const previewCart: CartResponse = {
 		{
 			id: 4,
 			name: __( 'Hoodie with Logo', 'woocommerce' ),
+			slug: 'hoodie-with-logo',
 			parent: 0,
 			type: 'simple',
 			variation: '',
@@ -378,13 +353,7 @@ export const previewCart: CartResponse = {
 			description: __( 'Polo', 'woocommerce' ),
 			on_sale: false,
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
+				...API_SITE_CURRENCY,
 				price: displayWithTax ? '4500' : '4250',
 				regular_price: displayWithTax ? '4500' : '4250',
 				sale_price: displayWithTax ? '4500' : '4250',
@@ -427,6 +396,7 @@ export const previewCart: CartResponse = {
 		{
 			id: 5,
 			name: __( 'Hoodie with Pocket', 'woocommerce' ),
+			slug: 'hoodie-with-pocket',
 			parent: 0,
 			type: 'simple',
 			variation: '',
@@ -436,13 +406,7 @@ export const previewCart: CartResponse = {
 			description: __( 'Hoodie with Pocket', 'woocommerce' ),
 			on_sale: true,
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
+				...API_SITE_CURRENCY,
 				price: displayWithTax ? '3500' : '3250',
 				regular_price: displayWithTax ? '4500' : '4250',
 				sale_price: displayWithTax ? '3500' : '3250',
@@ -486,6 +450,7 @@ export const previewCart: CartResponse = {
 		{
 			id: 6,
 			name: __( 'T-Shirt', 'woocommerce' ),
+			slug: 't-shirt',
 			parent: 0,
 			type: 'simple',
 			variation: '',
@@ -495,13 +460,7 @@ export const previewCart: CartResponse = {
 			description: __( 'T-Shirt', 'woocommerce' ),
 			on_sale: false,
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
+				...API_SITE_CURRENCY,
 				price: displayWithTax ? '1800' : '1500',
 				regular_price: displayWithTax ? '1800' : '1500',
 				sale_price: displayWithTax ? '1800' : '1500',
@@ -546,13 +505,7 @@ export const previewCart: CartResponse = {
 			id: 'fee',
 			name: __( 'Fee', 'woocommerce' ),
 			totals: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
+				...API_SITE_CURRENCY,
 				total: '100',
 				total_tax: '20',
 			},
@@ -589,13 +542,7 @@ export const previewCart: CartResponse = {
 		phone: '',
 	},
 	totals: {
-		currency_code: 'USD',
-		currency_symbol: '$',
-		currency_minor_unit: 2,
-		currency_decimal_separator: '.',
-		currency_thousand_separator: ',',
-		currency_prefix: '$',
-		currency_suffix: '',
+		...API_SITE_CURRENCY,
 		total_items: '4000',
 		total_items_tax: '800',
 		total_fees: '100',
