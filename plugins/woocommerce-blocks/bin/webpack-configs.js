@@ -330,6 +330,7 @@ const getFrontConfig = ( options = {} ) => {
 			// translations which we must avoid.
 			// @see https://github.com/Automattic/jetpack/pull/20926
 			chunkFilename: `[name]-frontend${ fileSuffix }.js?ver=[contenthash]`,
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars -- not used.
 			filename: ( pathData ) => {
 				return `[name]-frontend${ fileSuffix }.js`;
 			},
