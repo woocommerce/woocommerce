@@ -59,6 +59,7 @@ declare global {
 			'shipping-smart-defaults': boolean;
 			'shipping-setting-tour': boolean;
 			'launch-your-store': boolean;
+			'remote-error-logging': '"boolean';
 		};
 		wp: {
 			updates?: {

@@ -106,10 +106,11 @@
 		} else {
 			// TODO: Fetch the list of feature flags dynamically from the API or something.
 			const featureFlags = [
-				'async-product-editor-category-field',
-				'launch-your-store',
-				'minified-js',
-				'product-custom-fields',
+				'pattern-toolkit-full-composability',
+				'printful',
+				'product-editor-template-system',
+				'product-pre-publish-modal',
+				'remote-error-logging',
 				'settings',
 			];
 
