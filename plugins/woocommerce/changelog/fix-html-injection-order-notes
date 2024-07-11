@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent HTML tags being rendered on order confirmation and emails
