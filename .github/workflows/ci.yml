@@ -173,6 +173,12 @@ jobs:
         include: ${{ fromJSON( needs.project-jobs.outputs.test-jobs ) }}
 
     steps:
+      - name: 'Experimental: docker-related caching'
+        if: ${{ matrix.testEnv.shouldCreate }}
+        run: |
+          docker image pull --quiet mariadb &
+          docker image pull --quiet wordpress &
+
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
@@ -197,14 +203,6 @@ jobs:
           WP_ENV_CONFIG_PATH: ${{ matrix.projectPath }}
         working-directory: ${{ matrix.projectPath }}
         run: node ./github/workflows/scripts/override-wp-env-plugins.js
-
-      - name: 'Experimental: docker-related caching'
-        if: ${{ matrix.testEnv.shouldCreate }}
-        uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
-        with:
-          path: '/var/lib/docker/overlay2'
-          key: "${{ runner.os }}-docker-overlays"
-          restore-keys: '${{ runner.os }}-docker-overlays'
 
       - name: 'Start Test Environment'
         id: 'prepare-test-environment'
