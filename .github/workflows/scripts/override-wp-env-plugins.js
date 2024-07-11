@@ -20,6 +20,8 @@ if ( ! WP_ENV_CONFIG_PATH ) {
 
 const artifactUrl = `https://github.com/woocommerce/woocommerce/releases/download/${ RELEASE_TAG }/${ ARTIFACT_NAME }`;
 
+console.log( `Config path: ${ WP_ENV_CONFIG_PATH }` );
+
 const testEnvPlugins = {
 	env: {
 		tests: {
