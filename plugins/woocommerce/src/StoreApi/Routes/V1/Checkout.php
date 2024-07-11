@@ -2,11 +2,9 @@
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
-use Automattic\WooCommerce\StoreApi\Exceptions\InvalidStockLevelsInCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
-use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
@@ -181,7 +179,6 @@ class Checkout extends AbstractCartRoute {
 	 * 5. Process Payment
 	 *
 	 * @throws RouteException On error.
-	 * @throws InvalidStockLevelsInCartException On error.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -223,6 +220,29 @@ class Checkout extends AbstractCartRoute {
 		 * This logic ensures the order is valid before payment is attempted.
 		 */
 		$this->order_controller->validate_order_before_payment( $this->order );
+
+		/**
+		 * Reserve stock for the order.
+		 *
+		 * In the shortcode based checkout, when POSTing the checkout form the order would be created and fire the
+		 * `woocommerce_checkout_order_created` action. This in turn would trigger the `wc_reserve_stock_for_order`
+		 * function so that stock would be held pending payment.
+		 *
+		 * Via the block based checkout and Store API we already have a draft order, but when POSTing to the /checkout
+		 * endpoint we do the same; reserve stock for the order to allow time to process payment.
+		 *
+		 * @since 9.2 Stock is no longer held for all draft orders, nor on non-POST requests. See https://github.com/woocommerce/woocommerce/issues/44231
+		 * @since 9.2 Uses wc_reserve_stock_for_order() instead of using the ReserveStock class directly.
+		 */
+		try {
+			wc_reserve_stock_for_order( $this->order );
+		} catch ( ReserveStockException $e ) {
+			throw new RouteException(
+				esc_html( $e->getErrorCode() ),
+				esc_html( $e->getMessage() ),
+				esc_html( $e->getCode() )
+			);
+		}
 
 		wc_do_deprecated_action(
 			'__experimental_woocommerce_blocks_checkout_order_processed',
@@ -402,24 +422,6 @@ class Checkout extends AbstractCartRoute {
 
 		// Store order ID to session.
 		$this->set_draft_order_id( $this->order->get_id() );
-
-		/**
-		 * Try to reserve stock for the order.
-		 *
-		 * If creating a draft order on checkout entry, set the timeout to 10 mins.
-		 * If POSTing to the checkout (attempting to pay), set the timeout to 60 mins (using the woocommerce_hold_stock_minutes option).
-		 */
-		try {
-			$reserve_stock = new ReserveStock();
-			$duration      = $request->get_method() === 'POST' ? (int) get_option( 'woocommerce_hold_stock_minutes', 60 ) : 10;
-			$reserve_stock->reserve_stock_for_order( $this->order, $duration );
-		} catch ( ReserveStockException $e ) {
-			throw new RouteException(
-				$e->getErrorCode(),
-				$e->getMessage(),
-				$e->getCode()
-			);
-		}
 	}
 
 	/**
