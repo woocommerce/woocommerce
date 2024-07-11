@@ -824,6 +824,16 @@ class PluginsHelper {
 		// When payment method is missing on WooCommerce.com.
 		$helper_notices = WC_Helper::get_notices();
 		if ( ! empty( $helper_notices['missing_payment_method_notice'] ) ) {
+
+			$add_payment_method_link = add_query_arg(
+				array(
+					'utm_source'   => 'add_payment_method_link',
+					'utm_medium'   => 'wc_admin_notice',
+					'utm_campaign' => 'pu',
+				),
+				'https://woocommerce.com/my-account/add-payment-method/'
+			);
+
 			$description = $allowed_link
 				? sprintf(
 					/* translators: %s: WooCommerce.com URL to add payment method */
@@ -833,7 +843,7 @@ class PluginsHelper {
 						$total_expiring_subscriptions,
 						'woocommerce'
 					),
-					'https://woocommerce.com/my-account/add-payment-method/'
+					$add_payment_method_link
 				)
 				: _n(
 					'Your WooCommerce extension subscription is missing a payment method for renewal. Add a payment method to ensure you continue receiving updates and streamlined support.',
@@ -845,7 +855,7 @@ class PluginsHelper {
 			return array(
 				'description' => $description,
 				'button_text' => __( 'Add payment method', 'woocommerce' ),
-				'button_link' => 'https://woocommerce.com/my-account/add-payment-method/',
+				'button_link' => $add_payment_method_link,
 			);
 		}
 
