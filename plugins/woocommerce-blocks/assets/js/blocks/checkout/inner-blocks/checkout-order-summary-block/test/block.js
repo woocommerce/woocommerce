@@ -195,6 +195,15 @@ jest.mock( '@woocommerce/settings', () => {
 
 	return {
 		...originalModule,
+		SITE_CURRENCY: {
+			code: 'USD',
+			symbol: '$',
+			thousandSeparator: ',',
+			decimalSeparator: '.',
+			minorUnit: 2,
+			prefix: '$',
+			suffix: '',
+		},
 		getSetting: jest.fn().mockImplementation( ( setting, ...rest ) => {
 			if ( setting === 'couponsEnabled' ) {
 				return true;
