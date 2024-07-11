@@ -9,7 +9,7 @@ class BlockHooksVersionTests extends WC_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected static $option_name = 'wc_hooked_blocks_version';
+	protected static $option_name = 'woocommerce_hooked_blocks_version';
 
 	/**
 	 * Run before each test.

@@ -21,7 +21,7 @@ trait BlockHooksTrait {
 		// Cache the block hooks version.
 		static $block_hooks_version = null;
 		if ( defined( 'WP_RUN_CORE_TESTS' ) || is_null( $block_hooks_version ) ) {
-			$block_hooks_version = get_option( 'wc_hooked_blocks_version' );
+			$block_hooks_version = get_option( 'woocommerce_hooked_blocks_version' );
 		}
 
 		// If the allowed block hooks version is not set, return early.

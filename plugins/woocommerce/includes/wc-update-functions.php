@@ -2738,7 +2738,7 @@ function wc_update_920_add_wc_hooked_blocks_version_option() {
 		return;
 	}
 
-	$option_name       = 'wc_hooked_blocks_version';
+	$option_name       = 'woocommerce_hooked_blocks_version';
 	$active_theme_name = wp_get_theme()->get( 'Name' );
 	/**
 	 * A list of theme slugs to execute this with.

@@ -4033,7 +4033,7 @@ function wc_set_hooked_blocks_version() {
 		return;
 	}
 
-	$option_name = 'wc_hooked_blocks_version';
+	$option_name = 'woocommerce_hooked_blocks_version';
 
 	if ( get_option( $option_name ) ) {
 		return;
@@ -4053,7 +4053,7 @@ function wc_set_hooked_blocks_version() {
  * @return void
  */
 function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
-	$option_name = 'wc_hooked_blocks_version';
+	$option_name = 'woocommerce_hooked_blocks_version';
 
 	if ( ! $old_theme->is_block_theme() && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) && ! get_option( $option_name ) ) {
 		add_option( $option_name, WC()->version );

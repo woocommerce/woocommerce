@@ -22,7 +22,7 @@ class BlockHooksTests extends WP_UnitTestCase {
 	 *
 	 * @var string
 	 */
-	protected static $option_name = 'wc_hooked_blocks_version';
+	protected static $option_name = 'woocommerce_hooked_blocks_version';
 
 	/**
 	 * Initiate the mock object.
