@@ -2752,7 +2752,7 @@ function wc_update_920_add_wc_hooked_blocks_version_option() {
 	if ( $should_set_hooked_blocks_version && ! get_option( $option_name ) ) {
 		// Set 8.4.0 as the version for existing stores that are using a theme that supports the Block Hooks API.
 		// This will ensure that the Block Hooks API is enabled for these stores and works as expected.
-		// Existing stores that aren't running allowed these themes will not have the Block Hooks API enabled.
+		// Existing stores that aren't running approved block themes will not have the Block Hooks API enabled.
 		add_option( $option_name, '8.4.0' );
 	}
 }
