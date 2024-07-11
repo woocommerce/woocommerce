@@ -80,7 +80,10 @@ export class LogoPickerPage {
 				response.url().includes( '//header' ) &&
 				response.status() === 200
 		);
-		await assemblerLocator.getByText( 'Save' ).click();
-		await Promise.all( [ waitForLogoResponse, waitForHeaderResponse ] );
+		return await Promise.all( [
+			waitForLogoResponse,
+			waitForHeaderResponse,
+			assemblerLocator.getByText( 'Save' ).click(),
+		] );
 	}
 }
