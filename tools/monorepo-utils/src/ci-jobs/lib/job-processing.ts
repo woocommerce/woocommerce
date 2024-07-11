@@ -306,8 +306,9 @@ async function createJobsForProject(
 			// First line of detection: implicit changes list points to the dependency.
 			dependencyChanges = ( changes[ dependency.name ] || [] ).length > 0;
 			if ( dependencyChanges === false ) {
-				// Second line of detection: the dependency spawns testing jobs.
-				dependencyChanges = dependencyJobs.test.length > 0;
+				// Second line of detection: the dependency spawns jobs.
+				dependencyChanges =
+					dependencyJobs.test.length + dependencyJobs.lint.length > 0;
 			}
 		}
 
