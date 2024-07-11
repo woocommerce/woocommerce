@@ -173,13 +173,6 @@ jobs:
         include: ${{ fromJSON( needs.project-jobs.outputs.test-jobs ) }}
 
     steps:
-      - name: 'Experimental: docker-related caching'
-        if: ${{ matrix.testEnv.shouldCreate }}
-        shell: bash
-        run: |
-          docker image pull --quiet mariadb:latest &
-          docker image pull --quiet wordpress:latest &
-
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
@@ -209,7 +202,7 @@ jobs:
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
         env: ${{ matrix.testEnv.envVars }}
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }} && docker images'
 
       - name: 'Get commit message'
         id: 'get_commit_message'
