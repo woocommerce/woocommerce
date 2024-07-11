@@ -52,14 +52,14 @@ class TestMoneyFormatter extends \WP_UnitTestCase {
 	 */
 	public function test_format_int_overflow() {
 		$this->assertEquals( '922337203685477580800', $this->mock_formatter->format( '9223372036854775808' ) );
-		$this->assertEquals( '922337203685477580800', $this->mock_formatter->format( floatval('9223372036854775808') ) );
+		$this->assertEquals( '922337203685477580800', $this->mock_formatter->format( floatval( '9223372036854775808' ) ) );
 	}
 
 	/**
 	 * Test formatting expects exception on invalid array values.
 	 */
 	public function test_format_array_exception() {
-		$this->expectException(\TypeError::class);
-		$this->mock_formatter->format( array( 'This is not right') );
+		$this->expectException( \TypeError::class );
+		$this->mock_formatter->format( array( 'This is not right' ) );
 	}
 }
