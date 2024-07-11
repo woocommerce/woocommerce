@@ -41,7 +41,7 @@ const PasswordStrengthMeter = ( {
 }: {
 	password: string;
 	onChange?: ( strength: number ) => void;
-} ): JSX.Element | null => {
+} ): React.ReactElement | null => {
 	const instanceId = useInstanceId(
 		PasswordStrengthMeter,
 		'woocommerce-password-strength-meter'
