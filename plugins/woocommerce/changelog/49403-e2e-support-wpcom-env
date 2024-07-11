@@ -1,4 +1,4 @@
 Significance: patch
 Type: add
 
-Add support to run e2e tests against WPCOM website.
+Add support to run e2e tests against WPCOM website.   <summary>Changelog Entry Comment</summary>  #### Comment <!-- If your Pull Request doesn't require a changelog entry, a comment explaining why is required instead -->
