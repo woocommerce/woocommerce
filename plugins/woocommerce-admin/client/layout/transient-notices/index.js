@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { applyFilters } from '@wordpress/hooks';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { WooFooterItem } from '@woocommerce/admin-layout';
 import { OPTIONS_STORE_NAME, USER_STORE_NAME } from '@woocommerce/data';
 import PropTypes from 'prop-types';
@@ -82,7 +82,7 @@ export function TransientNotices( props ) {
 	};
 
 	const { className } = props;
-	const classes = classnames(
+	const classes = clsx(
 		'woocommerce-transient-notices',
 		'components-notices__snackbar',
 		className

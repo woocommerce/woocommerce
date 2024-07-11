@@ -1,0 +1,53 @@
+name: Compressed Size
+
+on:
+    pull_request:
+        paths:
+            - '**.jsx?'
+            - '**.tsx?'
+            - '**.css'
+            - '**.scss'
+            - '**package*.json'
+            - '**.eslint*'
+            - '**.prettier*'
+            - '**.tsconfig*'
+            - '**/webpack.config.js'
+            - '!.github/**'
+            - '!packages/js/*e2e*/**'
+            - '!packages/js/*plugin*/**'
+            - '!packages/js/*internal*/**'
+            - '!packages/js/*create*/**'
+            - '!**/*.spec.*'
+            - '!**/tests/**'
+            - '!tools/**'
+            - '!changelog/**'
+            - '!docs/**'
+            - '!bin/**'
+            - '.github/workflows/pr-assess-bundle-size.yml'
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
+    cancel-in-progress: true
+
+jobs:
+    build:
+        name: Check Asset Sizes
+        runs-on: ubuntu-latest
+        permissions:
+            pull-requests: write
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  # Both install and build are handled by compressed-size-action.
+                  install: false
+                  build: false
+            - uses: preactjs/compressed-size-action@f780fd104362cfce9e118f9198df2ee37d12946c
+              with:
+                  repo-token: '${{ secrets.GITHUB_TOKEN }}'
+                  pattern: './{packages/js/!(*e2e*|*internal*|*test*|*plugin*|*create*),plugins/woocommerce-blocks}/{build,build-style}/**/*.{js,css}'
+                  clean-script: '--if-present distclean'
+                  minimum-change-threshold: 100
+                  omit-unchanged: true

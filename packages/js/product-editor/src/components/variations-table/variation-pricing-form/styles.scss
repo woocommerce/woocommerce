@@ -1,0 +1,40 @@
+.woocommerce-variation-pricing-form {
+	display: flex;
+	flex-direction: column;
+	min-width: 345px;
+
+	&__controls,
+	&__actions {
+		gap: $grid-unit-20;
+		padding: $grid-unit-20;
+	}
+
+	&__controls {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		justify-content: stretch;
+
+		.components-base-control {
+			&.has-error {
+				.components-input-control__backdrop {
+					border-color: $studio-red-50;
+				}
+
+				.components-base-control__help {
+					color: $studio-red-50;
+				}
+			}
+
+			&.components-currency-control {
+				.components-input-control__prefix {
+					margin-left: $grid-unit;
+				}
+			}
+		}
+	}
+
+	&__actions {
+		display: flex;
+		justify-content: flex-end;
+	}
+}

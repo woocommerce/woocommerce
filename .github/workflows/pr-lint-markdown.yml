@@ -15,29 +15,30 @@ jobs:
 
             - name: Get repo changed files
               id: repo-changed-files
-              uses: tj-actions/changed-files@v37
+              uses: tj-actions/changed-files@v41
               with:
                   files: |
                       **/*.md
                   files_ignore: |
                       docs/**/*.md
+                      .github/**/*.md
 
             - name: Get docs changed files
               id: docs-changed-files
-              uses: tj-actions/changed-files@v37
+              uses: tj-actions/changed-files@v41
               with:
                 files: |
                   docs/**/*.md
 
             - name: Get docs manifest
               id: docs-manifest
-              uses: tj-actions/changed-files@v37
+              uses: tj-actions/changed-files@v41
               with:
                 files: |
                   docs/docs-manifest.json
 
             - name: Setup PNPM
-              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
+              uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
               with:
                   version: '8.6.7'
 

@@ -19,7 +19,7 @@ rsync -rc --exclude-from="$PROJECT_PATH/.distignore" "$PROJECT_PATH/" "$DEST_PAT
 
 echo "Generating zip file..."
 cd "$BUILD_PATH" || exit
-zip -q -r "${PLUGIN_SLUG}.zip" "$PLUGIN_SLUG/"
+zip -q -r -9 "${PLUGIN_SLUG}.zip" "$PLUGIN_SLUG/"
 
 cd "$PROJECT_PATH" || exit
 mv "$BUILD_PATH/${PLUGIN_SLUG}.zip" "$PROJECT_PATH"

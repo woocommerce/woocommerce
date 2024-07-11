@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Ensure the woocommerce_format_log_entry filter hook still has access to the log source value

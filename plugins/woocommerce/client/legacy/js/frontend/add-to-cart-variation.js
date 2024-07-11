@@ -668,7 +668,7 @@
 			var slideToImage = $gallery_nav.find( 'li img[src="' + variation.image.gallery_thumbnail_src + '"]' );
 
 			if ( slideToImage.length > 0 ) {
-				slideToImage.trigger( 'click' );
+				slideToImage.trigger( 'flexslider-click' );
 				$form.attr( 'current-image', variation.image_id );
 				window.setTimeout( function() {
 					$( window ).trigger( 'resize' );

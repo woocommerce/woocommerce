@@ -46,6 +46,10 @@
 	}
 
 	&__content {
+		&--block-gap-unit-20 > * + * {
+			margin-top: $grid-unit-20;
+		}
+
 		&--block-gap-unit-30 > * + * {
 			margin-top: $grid-unit-30;
 		}

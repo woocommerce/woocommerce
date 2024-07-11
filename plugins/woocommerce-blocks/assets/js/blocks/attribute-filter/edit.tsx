@@ -13,7 +13,7 @@ import { Icon, category, external } from '@wordpress/icons';
 import { SearchListControl } from '@woocommerce/editor-components/search-list-control';
 import { getAdminLink, getSetting } from '@woocommerce/settings';
 import BlockTitle from '@woocommerce/editor-components/block-title';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { SearchListItem } from '@woocommerce/editor-components/search-list-control/types';
 import { AttributeSetting } from '@woocommerce/types';
 import {
@@ -380,7 +380,7 @@ const Edit = ( {
 			{ isEditing ? (
 				renderEditMode()
 			) : (
-				<div className={ classnames( 'wc-block-attribute-filter' ) }>
+				<div className={ clsx( 'wc-block-attribute-filter' ) }>
 					{ heading && (
 						<BlockTitle
 							className="wc-block-attribute-filter__title"

@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Fix option search that accidentally had its wildcards removed

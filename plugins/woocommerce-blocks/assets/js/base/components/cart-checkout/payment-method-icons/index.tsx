@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import type { PaymentMethodIcons as PaymentMethodIconsType } from '@woocommerce/types';
 
 /**
@@ -32,7 +32,7 @@ export const PaymentMethodIcons = ( {
 		return null;
 	}
 
-	const containerClass = classnames(
+	const containerClass = clsx(
 		'wc-block-components-payment-method-icons',
 		{
 			'wc-block-components-payment-method-icons--align-left':

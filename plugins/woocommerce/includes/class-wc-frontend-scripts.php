@@ -234,9 +234,9 @@ class WC_Frontend_Scripts {
 				'version' => $version,
 			),
 			'select2'                    => array(
-				'src'     => self::get_asset_url( 'assets/js/select2/select2.full' . $suffix . '.js' ),
+				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '4.0.3-wc.' . $version,
+				'version' => '1.0.9-wc.' . $version,
 			),
 			'selectWoo'                  => array(
 				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
@@ -296,6 +296,11 @@ class WC_Frontend_Scripts {
 			'wc-lost-password'           => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/lost-password' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'woocommerce' ),
+				'version' => $version,
+			),
+			'wc-account-i18n'            => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/account-i18n' . $suffix . '.js' ),
+				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
 			'wc-password-strength-meter' => array(
@@ -388,6 +393,9 @@ class WC_Frontend_Scripts {
 			if ( ( 'no' === get_option( 'woocommerce_registration_generate_password' ) && ! is_user_logged_in() ) || is_edit_account_page() || is_lost_password_page() ) {
 				self::enqueue_script( 'wc-password-strength-meter' );
 			}
+		}
+		if ( is_account_page() ) {
+			self::enqueue_script( 'wc-account-i18n' );
 		}
 		if ( is_checkout() ) {
 			self::enqueue_script( 'wc-checkout' );

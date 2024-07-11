@@ -16,6 +16,8 @@ export const MarketplaceContext = createContext< MarketplaceContextType >( {
 	setSelectedTab: () => {},
 	isProductInstalled: () => false,
 	addInstalledProduct: () => {},
+	hasBusinessServices: false,
+	setHasBusinessServices: () => {},
 } );
 
 export function MarketplaceContextProvider( props: {
@@ -26,6 +28,7 @@ export function MarketplaceContextProvider( props: {
 	const [ installedPlugins, setInstalledPlugins ] = useState< string[] >(
 		[]
 	);
+	const [ hasBusinessServices, setHasBusinessServices ] = useState( false );
 
 	/**
 	 * Knowing installed products will help us to determine which products
@@ -54,6 +57,8 @@ export function MarketplaceContextProvider( props: {
 		setSelectedTab,
 		isProductInstalled,
 		addInstalledProduct,
+		hasBusinessServices,
+		setHasBusinessServices,
 	};
 
 	return (

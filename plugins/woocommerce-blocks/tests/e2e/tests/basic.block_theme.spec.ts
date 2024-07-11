@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { customerFile, guestFile } from '@woocommerce/e2e-utils';
+import { test, expect, customerFile, guestFile } from '@woocommerce/e2e-utils';
 
 test.describe( 'Basic role-based functionality tests', () => {
 	test.describe( 'As admin', () => {
@@ -20,6 +19,7 @@ test.describe( 'Basic role-based functionality tests', () => {
 		test.use( {
 			storageState: customerFile,
 		} );
+
 		test( 'Load My Account page', async ( { page } ) => {
 			await page.goto( '/my-account' );
 

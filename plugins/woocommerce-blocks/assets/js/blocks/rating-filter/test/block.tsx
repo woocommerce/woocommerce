@@ -2,7 +2,7 @@
  * External dependencies
  */
 import React from '@wordpress/element';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import * as hooks from '@woocommerce/base-context/hooks';
 import userEvent from '@testing-library/user-event';
 
@@ -78,7 +78,14 @@ const setup = ( params: SetupParams ) => {
 	} );
 
 	const { container, ...utils } = render(
-		<RatingFilterBlock attributes={ attributes } />
+		<RatingFilterBlock attributes={ attributes } />,
+		{ legacyRoot: true }
+	);
+
+	// We need to switch to React 17 rendering to allow these tests to keep passing, but as a result the React
+	// rendering error will be shown.
+	expect( console ).toHaveErroredWith(
+		`Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot`
 	);
 
 	const getList = () => container.querySelector( selectors.list );
@@ -210,7 +217,7 @@ describe( 'Filter by Rating block', () => {
 			expect( getRating5Chips() ).toBeNull();
 		} );
 
-		test( 'replaces chosen option when another one is clicked', () => {
+		test( 'replaces chosen option when another one is clicked', async () => {
 			const ratingParam = '2';
 			const {
 				getDropdown,
@@ -225,21 +232,21 @@ describe( 'Filter by Rating block', () => {
 			const dropdown = getDropdown();
 
 			if ( dropdown ) {
-				userEvent.click( dropdown );
+				await userEvent.click( dropdown );
 				acceptErrorWithDuplicatedKeys();
 			}
 
 			const rating4Suggestion = getRating4Suggestion();
 
 			if ( rating4Suggestion ) {
-				userEvent.click( rating4Suggestion );
+				await userEvent.click( rating4Suggestion );
 			}
 
 			expect( getRating2Chips() ).toBeNull();
 			expect( getRating4Chips() ).toBeInTheDocument();
 		} );
 
-		test( 'removes the option when the X button is clicked', () => {
+		test( 'removes the option when the X button is clicked', async () => {
 			const ratingParam = '4';
 			const {
 				getRating2Chips,
@@ -257,9 +264,7 @@ describe( 'Filter by Rating block', () => {
 			);
 
 			if ( removeRating4Button ) {
-				act( () => {
-					userEvent.click( removeRating4Button );
-				} );
+				await userEvent.click( removeRating4Button );
 				acceptErrorWithDuplicatedKeys();
 			}
 
@@ -286,7 +291,7 @@ describe( 'Filter by Rating block', () => {
 			expect( getRating5Chips() ).toBeNull();
 		} );
 
-		test( 'adds chosen option to another one that is clicked', () => {
+		test( 'adds chosen option to another one that is clicked', async () => {
 			const ratingParam = '2';
 			const {
 				getDropdown,
@@ -304,14 +309,14 @@ describe( 'Filter by Rating block', () => {
 			const dropdown = getDropdown();
 
 			if ( dropdown ) {
-				userEvent.click( dropdown );
+				await userEvent.click( dropdown );
 				acceptErrorWithDuplicatedKeys();
 			}
 
 			const rating4Suggestion = getRating4Suggestion();
 
 			if ( rating4Suggestion ) {
-				userEvent.click( rating4Suggestion );
+				await userEvent.click( rating4Suggestion );
 			}
 
 			expect( getRating2Chips() ).toBeInTheDocument();
@@ -321,7 +326,7 @@ describe( 'Filter by Rating block', () => {
 			const rating5Suggestion = getRating5Suggestion();
 
 			if ( rating5Suggestion ) {
-				userEvent.click( rating5Suggestion );
+				await userEvent.click( rating5Suggestion );
 			}
 
 			expect( getRating2Chips() ).toBeInTheDocument();
@@ -329,7 +334,7 @@ describe( 'Filter by Rating block', () => {
 			expect( getRating5Chips() ).toBeInTheDocument();
 		} );
 
-		test( 'removes the option when the X button is clicked', () => {
+		test( 'removes the option when the X button is clicked', async () => {
 			const ratingParam = '2,4,5';
 			const {
 				getRating2Chips,
@@ -347,9 +352,7 @@ describe( 'Filter by Rating block', () => {
 			);
 
 			if ( removeRating4Button ) {
-				act( () => {
-					userEvent.click( removeRating4Button );
-				} );
+				await userEvent.click( removeRating4Button );
 			}
 
 			expect( getRating2Chips() ).toBeInTheDocument();
@@ -393,7 +396,7 @@ describe( 'Filter by Rating block', () => {
 			const rating4checkbox = getRating4Checkbox();
 
 			if ( rating4checkbox ) {
-				userEvent.click( rating4checkbox );
+				await userEvent.click( rating4checkbox );
 			}
 
 			expect( getRating2Checkbox()?.checked ).toBeFalsy();
@@ -416,7 +419,7 @@ describe( 'Filter by Rating block', () => {
 			const rating4checkbox = getRating4Checkbox();
 
 			if ( rating4checkbox ) {
-				userEvent.click( rating4checkbox );
+				await userEvent.click( rating4checkbox );
 			}
 
 			await waitFor( () => {
@@ -462,7 +465,7 @@ describe( 'Filter by Rating block', () => {
 			const rating5checkbox = getRating5Checkbox();
 
 			if ( rating5checkbox ) {
-				userEvent.click( rating5checkbox );
+				await userEvent.click( rating5checkbox );
 			}
 
 			await waitFor( () => {
@@ -487,7 +490,7 @@ describe( 'Filter by Rating block', () => {
 			const rating2checkbox = getRating2Checkbox();
 
 			if ( rating2checkbox ) {
-				userEvent.click( rating2checkbox );
+				await userEvent.click( rating2checkbox );
 			}
 
 			await waitFor( () => {

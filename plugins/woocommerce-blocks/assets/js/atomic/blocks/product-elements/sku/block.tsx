@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
@@ -31,7 +31,7 @@ const Preview = ( {
 	style?: React.CSSProperties | undefined;
 } ) => (
 	<div
-		className={ classnames( className, {
+		className={ clsx( className, {
 			[ `${ parentClassName }__product-sku` ]: parentClassName,
 		} ) }
 		style={ style }
@@ -67,7 +67,7 @@ const Block = ( props: Props ): JSX.Element | null => {
 			parentClassName={ parentClassName }
 			sku={ sku }
 			{ ...( props.isDescendantOfAllProducts && {
-				className: classnames(
+				className: clsx(
 					className,
 					'wc-block-components-product-sku wp-block-woocommerce-product-sku',
 					styleProps.className

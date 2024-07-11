@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Added the `wc_product_pre_has_unique_sku` filter hook to allow SKU uniqueness to be determined externally

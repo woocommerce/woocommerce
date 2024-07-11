@@ -80,6 +80,7 @@ function BlockPattern( { pattern, onClick, onHover, composite, showTooltip } ) {
 							isScrollable={ false }
 							autoScale={ true }
 							CustomIframeComponent={ Iframe }
+							isPatternPreview={ true }
 						/>
 						{ ! showTooltip && (
 							<div className="block-editor-block-patterns-list__item-title">

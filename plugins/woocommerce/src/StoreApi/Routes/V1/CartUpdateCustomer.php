@@ -2,7 +2,6 @@
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
-use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
 
 /**
  * CartUpdateCustomer class.
@@ -240,21 +239,8 @@ class CartUpdateCustomer extends AbstractCartRoute {
 	 * @return array
 	 */
 	protected function get_customer_billing_address( \WC_Customer $customer ) {
-		$validation_util = new ValidationUtils();
-		$billing_country = $customer->get_billing_country();
-		$billing_state   = $customer->get_billing_state();
-
 		$additional_fields = $this->additional_fields_controller->get_all_fields_from_object( $customer, 'billing' );
 
-		/**
-		 * There's a bug in WooCommerce core in which not having a state ("") would result in us validating against the store's state.
-		 * This resets the state to an empty string if it doesn't match the country.
-		 *
-		 * @todo Removing this handling once we fix the issue with the state value always being the store one.
-		 */
-		if ( ! $validation_util->validate_state( $billing_state, $billing_country ) ) {
-			$billing_state = '';
-		}
 		return array_merge(
 			[
 				'first_name' => $customer->get_billing_first_name(),
@@ -263,9 +249,9 @@ class CartUpdateCustomer extends AbstractCartRoute {
 				'address_1'  => $customer->get_billing_address_1(),
 				'address_2'  => $customer->get_billing_address_2(),
 				'city'       => $customer->get_billing_city(),
-				'state'      => $billing_state,
+				'state'      => $customer->get_billing_state(),
 				'postcode'   => $customer->get_billing_postcode(),
-				'country'    => $billing_country,
+				'country'    => $customer->get_billing_country(),
 				'phone'      => $customer->get_billing_phone(),
 				'email'      => $customer->get_billing_email(),
 			],

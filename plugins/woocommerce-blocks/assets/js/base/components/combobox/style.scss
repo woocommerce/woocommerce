@@ -45,6 +45,7 @@
 			width: 100%;
 			opacity: initial;
 			border-radius: $universal-border-radius;
+			max-height: 52px;
 
 			&[aria-expanded="true"],
 			&:focus {
@@ -83,7 +84,7 @@
 			max-height: 300px;
 			min-width: 100%;
 			overflow: auto;
-			color: $input-text-active;
+			color: currentColor;
 			border-bottom-left-radius: $universal-border-radius;
 			border-bottom-right-radius: $universal-border-radius;
 			box-shadow: 0 1px 0 1px $input-border-gray;
@@ -121,7 +122,6 @@
 				&:active {
 					background-color: #00669e;
 					color: #fff;
-
 				}
 			}
 		}
@@ -133,7 +133,7 @@
 			transform: translateY(em($gap));
 			line-height: 1.25; // =20px when font-size is 16px.
 			left: em($gap-smaller);
-			top: 0;
+			top: -2px;
 			transform-origin: top left;
 			transition: all 200ms ease;
 			color: $universal-body-low-emphasis;
@@ -161,7 +161,8 @@
 
 	&.is-active,
 	&:focus-within {
-		.wc-block-components-combobox-control label.components-base-control__label {
+		.wc-block-components-combobox-control
+		label.components-base-control__label {
 			transform: translateY(em($gap-smaller)) scale(0.875);
 		}
 	}

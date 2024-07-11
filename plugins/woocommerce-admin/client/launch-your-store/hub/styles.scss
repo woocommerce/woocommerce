@@ -15,6 +15,10 @@
 			flex-direction: row;
 			background-color: #fcfcfc;
 
+			.customize-your-store-edit-site-resizable-frame__inner-content {
+				height: 100%;
+			}
+
 			.launch-your-store-layout__sidebar {
 				width: 380px;
 				z-index: 3;
@@ -72,6 +76,10 @@
 
 					.edit-site-site-icon__image {
 						border-radius: 2px;
+						width: 100%;
+						height: auto;
+						object-fit: cover;
+						background: rgba(0, 0, 0, 0);
 					}
 
 					.edit-site-site-hub__view-mode-toggle-container {
@@ -164,6 +172,10 @@
 								& .components-heading {
 									margin-bottom: 16px;
 								}
+							}
+
+							.edit-site-sidebar-navigation-screen-test-data__group-header {
+								margin-top: 40px;
 							}
 
 							.edit-site-sidebar-navigation-item {

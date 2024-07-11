@@ -28,7 +28,7 @@ class Server {
 	/**
 	 * Hook into WordPress ready to init the REST API as needed.
 	 */
-	public function init() {
+	public function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod -- Not an injection method.
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
 
 		\WC_REST_System_Status_V2_Controller::register_cache_clean();
@@ -57,13 +57,19 @@ class Server {
 	 * @return array List of Namespaces and Main controller classes.
 	 */
 	protected function get_rest_namespaces() {
+		/**
+		 * Filter the list of REST API controllers to load.
+		 *
+		 * @since 4.5.0
+		 * @param array $controllers List of $namespace => $controllers to load.
+		 */
 		return apply_filters(
 			'woocommerce_rest_api_get_rest_namespaces',
 			array(
-				'wc/v1'        => $this->get_v1_controllers(),
-				'wc/v2'        => $this->get_v2_controllers(),
-				'wc/v3'        => $this->get_v3_controllers(),
-				'wc-telemetry' => $this->get_telemetry_controllers(),
+				'wc/v1'        => wc_rest_should_load_namespace( 'wc/v1' ) ? $this->get_v1_controllers() : array(),
+				'wc/v2'        => wc_rest_should_load_namespace( 'wc/v2' ) ? $this->get_v2_controllers() : array(),
+				'wc/v3'        => wc_rest_should_load_namespace( 'wc/v3' ) ? $this->get_v3_controllers() : array(),
+				'wc-telemetry' => wc_rest_should_load_namespace( 'wc-telemetry' ) ? $this->get_telemetry_controllers() : array(),
 			)
 		);
 	}
@@ -157,11 +163,13 @@ class Server {
 			'product-attribute-terms'  => 'WC_REST_Product_Attribute_Terms_Controller',
 			'product-attributes'       => 'WC_REST_Product_Attributes_Controller',
 			'product-categories'       => 'WC_REST_Product_Categories_Controller',
+			'product-custom-fields'    => 'WC_REST_Product_Custom_Fields_Controller',
 			'product-reviews'          => 'WC_REST_Product_Reviews_Controller',
 			'product-shipping-classes' => 'WC_REST_Product_Shipping_Classes_Controller',
 			'product-tags'             => 'WC_REST_Product_Tags_Controller',
 			'products'                 => 'WC_REST_Products_Controller',
 			'product-variations'       => 'WC_REST_Product_Variations_Controller',
+			'refunds'                  => 'WC_REST_Refunds_Controller',
 			'reports-sales'            => 'WC_REST_Report_Sales_Controller',
 			'reports-top-sellers'      => 'WC_REST_Report_Top_Sellers_Controller',
 			'reports-orders-totals'    => 'WC_REST_Report_Orders_Totals_Controller',

@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Internal\BatchProcessing;
 /**
  * Interface BatchProcessorInterface
  *
- * @package Automattic\WooCommerce\DataBase
+ * @package Automattic\WooCommerce\Internal\BatchProcessing
  */
 interface BatchProcessorInterface {
 

@@ -70,7 +70,7 @@ export function EmptyStateImage( {
 
 export function LinkedProductListBlockEdit( {
 	attributes,
-	context: { postType },
+	context: { postType, isInSelectedTab },
 }: ProductEditorBlockEditProps< LinkedProductListBlockAttributes > ) {
 	const { property, emptyState } = attributes;
 	const blockProps = useWooBlockProps( attributes );
@@ -112,8 +112,13 @@ export function LinkedProductListBlockEdit( {
 	);
 
 	useEffect( () => {
+		// Only filter when the tab is selected.
+		if ( ! isInSelectedTab ) {
+			return;
+		}
+
 		filter();
-	}, [ filter ] );
+	}, [ filter, isInSelectedTab ] );
 
 	function handleSelect( product: Product ) {
 		const newLinkedProductIds = selectSearchedProductDispatcher(

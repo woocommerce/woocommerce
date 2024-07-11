@@ -227,7 +227,7 @@ const renderInnerBlocks = ( {
 						>
 							{
 								/**
-								 * Within this Inner Block Component we also need to recursively render it's children. This
+								 * Within this Inner Block Component we also need to recursively render its children. This
 								 * is done here with a depth+1. The same block map and parent is used, but we pass new
 								 * children from this element.
 								 */

@@ -129,6 +129,7 @@ async function fetchSearchResults(
 							title: product.title,
 							image: product.image,
 							type: product.type,
+							freemium_type: product.freemium_type,
 							description: product.excerpt,
 							vendorName: product.vendor_name,
 							vendorUrl: product.vendor_url,
@@ -139,6 +140,9 @@ async function fetchSearchResults(
 							averageRating: product.rating ?? null,
 							reviewsCount: product.reviews_count ?? null,
 							isInstallable: product.is_installable,
+							featuredImage: product.featured_image,
+							productCategory: product.product_category,
+							color: product.color,
 						};
 					}
 				);
@@ -176,6 +180,8 @@ function fetchCategories( type: ProductType ): Promise< CategoryAPIItem[] > {
 	// This is to ensure the old marketplace continues to work when this isn't defined
 	if ( type === ProductType.theme ) {
 		url.searchParams.set( 'parent', 'themes' );
+	} else if ( type === ProductType.businessService ) {
+		url.searchParams.set( 'parent', 'business-services' );
 	}
 
 	return (

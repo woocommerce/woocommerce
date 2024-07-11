@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
 use WP_Query;
 use WC_Tax;
 
@@ -76,6 +77,9 @@ class ProductCollection extends AbstractBlock {
 		// Extend allowed `collection_params` for the REST API.
 		add_filter( 'rest_product_collection_params', array( $this, 'extend_rest_query_allowed_params' ), 10, 1 );
 
+		// Provide location context into block's context.
+		add_filter( 'render_block_context', array( $this, 'provide_location_context_for_inner_blocks' ), 11, 1 );
+
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'enhance_product_collection_with_interactivity' ), 10, 2 );
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
@@ -84,7 +88,71 @@ class ProductCollection extends AbstractBlock {
 
 		// Disable client-side-navigation if incompatible blocks are detected.
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
+	}
 
+	/**
+	 * Provides the location context to each inner block of the product collection block.
+	 * Hint: Only blocks using the 'query' context will be affected.
+	 *
+	 * The sourceData structure depends on the context type as follows:
+	 * - site:    [ ]
+	 * - order:   [ 'orderId'    => int ]
+	 * - cart:    [ 'productIds' => int[] ]
+	 * - archive: [ 'taxonomy'   => string, 'termId' => int ]
+	 * - product: [ 'productId'  => int ]
+	 *
+	 * @example array(
+	 *   'type'       => 'product',
+	 *   'sourceData' => array( 'productId' => 123 ),
+	 * )
+	 *
+	 * @param array $context  The block context.
+	 * @return array $context {
+	 *     The block context including the product collection location context.
+	 *
+	 *     @type array $productCollectionLocation {
+	 *         @type string  $type        The context type. Possible values are 'site', 'order', 'cart', 'archive', 'product'.
+	 *         @type array   $sourceData  The context source data. Can be the product ID of the viewed product, the order ID of the current order viewed, etc. See structure above for more details.
+	 *     }
+	 * }
+	 */
+	public function provide_location_context_for_inner_blocks( $context ) {
+		// Run only on frontend.
+		// This is needed to avoid SSR renders while in editor. @see https://github.com/woocommerce/woocommerce/issues/45181.
+		if ( is_admin() || \WC()->is_rest_api_request() ) {
+			return $context;
+		}
+
+		// Target only product collection's inner blocks that use the 'query' context.
+		if ( ! isset( $context['query'] ) || ! isset( $context['query']['isProductCollectionBlock'] ) || ! $context['query']['isProductCollectionBlock'] ) {
+			return $context;
+		}
+
+		$is_in_single_product                 = isset( $context['singleProduct'] ) && ! empty( $context['postId'] );
+		$context['productCollectionLocation'] = $is_in_single_product ? array(
+			'type'       => 'product',
+			'sourceData' => array(
+				'productId' => absint( $context['postId'] ),
+			),
+		) : $this->get_location_context();
+
+		return $context;
+	}
+
+	/**
+	 * Get the global location context.
+	 * Serve as a runtime cache for the location context.
+	 *
+	 * @see ProductCollectionUtils::parse_frontend_location_context()
+	 *
+	 * @return array The location context.
+	 */
+	private function get_location_context() {
+		static $location_context = null;
+		if ( null === $location_context ) {
+			$location_context = ProductCollectionUtils::parse_frontend_location_context();
+		}
+		return $location_context;
 	}
 
 	/**
@@ -277,12 +345,14 @@ class ProductCollection extends AbstractBlock {
 		static $dirty_enhanced_queries             = array();
 		static $render_product_collection_callback = null;
 
-		$block_name               = $parsed_block['blockName'];
-		$force_page_reload_global =
+		$block_name                  = $parsed_block['blockName'];
+		$is_product_collection_block = $parsed_block['attrs']['query']['isProductCollectionBlock'] ?? false;
+		$force_page_reload_global    =
 			$parsed_block['attrs']['forcePageReload'] ?? false &&
 			isset( $block['attrs']['queryId'] );
 
 		if (
+			$is_product_collection_block &&
 			'woocommerce/product-collection' === $block_name &&
 			! $force_page_reload_global
 		) {
@@ -370,6 +440,14 @@ class ProductCollection extends AbstractBlock {
 			return $args;
 		}
 
+		// Is this a preview mode request?
+		// If yes, short-circuit the query and return the preview query args.
+		$product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
+		$is_preview                       = $product_collection_query_context['previewState']['isPreview'] ?? false;
+		if ( 'true' === $is_preview ) {
+			return $this->get_preview_query_args( $args, $request );
+		}
+
 		$orderby             = $request->get_param( 'orderBy' );
 		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
 		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
@@ -442,10 +520,13 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$block_context_query = $block->context['query'];
+
 		// phpcs:ignore WordPress.DB.SlowDBQuery
 		$block_context_query['tax_query'] = ! empty( $query['tax_query'] ) ? $query['tax_query'] : array();
 
-		return $this->get_final_frontend_query( $block_context_query, $page );
+		$is_exclude_applied_filters = ! ( $block->context['query']['inherit'] ?? false );
+
+		return $this->get_final_frontend_query( $block_context_query, $page, $is_exclude_applied_filters );
 	}
 
 
@@ -529,6 +610,29 @@ class ProductCollection extends AbstractBlock {
 		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
 
 		return $result;
+	}
+
+	/**
+	 * Get query args for preview mode. These query args will be used with WP_Query to fetch the products.
+	 *
+	 * @param array           $args    Query args.
+	 * @param WP_REST_Request $request Request.
+	 */
+	private function get_preview_query_args( $args, $request ) {
+		$collection_query = array();
+
+		/**
+		 * In future, Here we will modify the preview query based on the collection name. For example:
+		 *
+		 * $product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
+		 * $collection_name                  = $product_collection_query_context['collection'] ?? '';
+		 * if ( 'woocommerce/product-collection/on-sale' === $collection_name ) {
+		 *      $collection_query = $this->get_on_sale_products_query( true );
+		 * }.
+		 */
+
+		$args = $this->merge_queries( $args, $collection_query );
+		return $args;
 	}
 
 	/**

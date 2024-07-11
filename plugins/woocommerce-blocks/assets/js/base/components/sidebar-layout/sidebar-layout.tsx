@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { ContainerWidthContextProvider } from '@woocommerce/base-context';
 
 /**
@@ -19,7 +19,7 @@ const SidebarLayout = ( {
 }: SidebarLayoutProps ): JSX.Element => {
 	return (
 		<ContainerWidthContextProvider
-			className={ classNames(
+			className={ clsx(
 				'wc-block-components-sidebar-layout',
 				className
 			) }

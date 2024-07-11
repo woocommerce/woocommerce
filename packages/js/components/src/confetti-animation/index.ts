@@ -2,7 +2,7 @@
  * External dependencies
  */
 import confetti from 'canvas-confetti';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 
 /**
  * Note: This was copied over from https://github.com/Automattic/wp-calypso/blob/a39539547780871d0371a20fcf21c767a86a1010/packages/components/src/confetti/index.ts
@@ -83,9 +83,12 @@ export const ConfettiAnimation = ( {
 	delay = 0,
 	colors = COLORS,
 } ) => {
+	const hasRun = useRef( false );
+
 	useEffect( () => {
-		if ( trigger ) {
+		if ( ! hasRun.current && trigger ) {
 			setTimeout( () => fireConfetti( colors ), delay );
+			hasRun.current = true;
 		}
 	}, [ trigger, delay, colors ] );
 
