@@ -47,12 +47,22 @@ class Controller extends GenericStatsController {
 	}
 
 	/**
-	 * Get all reports.
+	 * Forwards a Query constructor.
 	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @param array $query_args Set of args to be forwarded to the constructor.
+	 * @return GenericQuery
 	 */
-	public function get_items( $request ) {
+	protected function construct_query( $query_args ) {
+		return new GenericQuery( $query_args, 'variations-stats' );
+	}
+
+	/**
+	 * Maps query arguments from the REST request, to be fed to Query.
+	 *
+	 * @param \WP_REST_Request $request Full request object.
+	 * @return array Simplified array of params.
+	 */
+	protected function prepare_reports_query( $request ) {
 		$query_args = array(
 			'fields' => array(
 				'items_sold',
@@ -80,30 +90,7 @@ class Controller extends GenericStatsController {
 			}
 		}
 
-		$query = new GenericQuery( $query_args, 'variations-stats' );
-		try {
-			$report_data = $query->get_data();
-		} catch ( ParameterException $e ) {
-			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		}
-
-		$out_data = array(
-			'totals'    => get_object_vars( $report_data->totals ),
-			'intervals' => array(),
-		);
-
-		foreach ( $report_data->intervals as $interval_data ) {
-			$item                    = $this->prepare_item_for_response( $interval_data, $request );
-			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
-		}
-
-		return $this->add_pagination_headers(
-			$request,
-			$out_data,
-			(int) $report_data->total,
-			(int) $report_data->page_no,
-			(int) $report_data->pages
-		);
+		return $query_args;
 	}
 
 	/**

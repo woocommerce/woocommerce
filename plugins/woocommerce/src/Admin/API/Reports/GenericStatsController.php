@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 /**
  * Generic base for all Stats controllers.
@@ -12,6 +13,19 @@ use Automattic\WooCommerce\Admin\API\Reports\GenericController;
  * @extends GenericController
  */
 abstract class GenericStatsController extends GenericController {
+
+	/**
+	 * Forwards a Query constructor,
+	 * to be able to customize Query class for a specific report.
+	 *
+	 * By default it creates `GenericQuery` with the rest base as name.
+	 *
+	 * @param array $query_args Set of args to be forwarded to the constructor.
+	 * @return GenericQuery
+	 */
+	protected function construct_query( $query_args ) {
+		return new GenericQuery( $query_args, $this->rest_base );
+	}
 
 	/**
 	 * Get the query params for collections.
@@ -154,5 +168,61 @@ abstract class GenericStatsController extends GenericController {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Get all reports.
+	 *
+	 * @param \WP_REST_Request $request Request data.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function get_items( $request ) {
+		$query_args = $this->prepare_reports_query( $request );
+		$query      = $this->construct_query( $query_args );
+		try {
+			$report_data = $query->get_data();
+		} catch ( ParameterException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+
+		$out_data = array(
+			'totals'    => $report_data->totals ? get_object_vars( $report_data->totals ) : null,
+			'intervals' => array(),
+		);
+
+		foreach ( $report_data->intervals as $interval_data ) {
+			$item                    = $this->prepare_item_for_response( (object) $interval_data, $request );
+			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
+		}
+
+		return $this->add_pagination_headers(
+			$request,
+			$out_data,
+			(int) $report_data->total,
+			(int) $report_data->page_no,
+			(int) $report_data->pages
+		);
+	}
+
+	/**
+	 * Maps query arguments from the REST request, to be fed to Query.
+	 *
+	 * `WP_REST_Request` does not expose a method to return all params covering defaults,
+	 * as it does for `$request['param']` accessor.
+	 * Therefore, we re-implement defaults resolution.
+	 *
+	 * @param \WP_REST_Request $request Full request object.
+	 * @return array Simplified array of params.
+	 */
+	protected function prepare_reports_query( $request ) {
+		$args = wp_parse_args(
+			array_intersect_key(
+				$request->get_query_params(),
+				$this->get_collection_params()
+			),
+			$request->get_default_params()
+		);
+
+		return $args;
 	}
 }
