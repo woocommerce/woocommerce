@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\Internal\Utilities;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
-use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Utilities\{ PluginUtil, StringUtil };
 
 /**
  * This class allows installing a plugin programmatically.
@@ -206,7 +206,14 @@ class PluginInstaller implements RegisterHooksInterface {
 	 * @return bool True if WooCommerce is installed and active in the current blog, false otherwise.
 	 */
 	private static function woocommerce_is_active_in_current_site(): bool {
-		return ! empty( array_filter( wp_get_active_and_valid_plugins(), fn( $plugin ) => substr_compare( $plugin, '/woocommerce.php', -strlen( '/woocommerce.php' ) ) === 0 ) );
+		$active_valid_plugins = wc_get_container()->get( PluginUtil::class )->get_all_active_valid_plugins();
+
+		return ! empty(
+			array_filter(
+				$active_valid_plugins,
+				fn( $plugin ) => substr_compare( $plugin, '/woocommerce.php', -strlen( '/woocommerce.php' ) ) === 0
+			)
+		);
 	}
 
 	/**
