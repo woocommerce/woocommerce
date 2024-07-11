@@ -190,7 +190,7 @@ jobs:
           pull-package-deps: '${{ matrix.projectName }}'
 
       - name: 'Update wp-env config'
-        if: ${{ github.ref_type == 'tag' }}
+        # if: ${{ github.ref_type == 'tag' }}
         env:
 #          RELEASE_TAG: ${{ github.ref_name }}
           RELEASE_TAG: nightly
