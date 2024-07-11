@@ -160,6 +160,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 					'type'       => 'info',
 				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type !== "variable"',
+					),
+				),
 			)
 		);
 		// Basic Details Section.
@@ -705,6 +710,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 					'type'       => 'info',
 				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type !== "variable"',
+					),
+				),
 			)
 		);
 		// Product Inventory Section.
@@ -984,6 +994,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'content'    => __( 'This product has options, such as size or color. You can now manage each variation\'s shipping settings and other details individually.', 'woocommerce' ),
 					'buttonText' => __( 'Go to Variations', 'woocommerce' ),
 					'type'       => 'info',
+				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type !== "variable"',
+					),
 				),
 			)
 		);
