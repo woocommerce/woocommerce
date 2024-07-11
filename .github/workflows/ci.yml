@@ -189,6 +189,13 @@ jobs:
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && matrix.testType == 'e2e' }}
           pull-package-deps: '${{ matrix.projectName }}'
 
+      - name: 'Experimental: wp-env caching'
+        if: ${{ matrix.testEnv.shouldCreate }}
+        with:
+          path: '~/wp-env'
+          key: "${{ runner.os }}-wp-env"
+          restore-keys: '${{ runner.os }}-wp-env'
+
       - name: 'Update wp-env config'
         if: ${{ github.ref_type == 'tag' }}
         env:
@@ -202,7 +209,7 @@ jobs:
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
         env: ${{ matrix.testEnv.envVars }}
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }} && docker images'
+        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
 
       - name: 'Get commit message'
         id: 'get_commit_message'
