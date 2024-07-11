@@ -41,7 +41,7 @@ class MoneyFormatter implements FormatterInterface {
 		$value = $value * pow( 10, absint( $options['decimals'] ) );
 		$value = round( $value, 0, $options['rounding_mode'] );
 
-		// This ensures returning the value as a string ready for price parsing.
+		// This ensures returning the value as a string without decimal points ready for price parsing.
 		return wc_format_decimal( $value, 0, true );
 	}
 }
