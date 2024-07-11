@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 9.1.1 2024-07-11 =
+
+**WooCommerce**
+
+* Tweak - Revert #46262, as that PR would render input values invisible under certain conditions. [49404](https://github.com/woocommerce/woocommerce/pull/49404)
+
 = 9.0.2 2024-06-24 =
 
 **WooCommerce**
