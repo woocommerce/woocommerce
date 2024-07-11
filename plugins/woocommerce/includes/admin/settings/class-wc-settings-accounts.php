@@ -11,6 +11,8 @@ if ( class_exists( 'WC_Settings_Accounts', false ) ) {
 	return new WC_Settings_Accounts();
 }
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+
 /**
  * WC_Settings_Accounts.
  */
@@ -236,6 +238,16 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'id'   => 'personal_data_retention',
 			),
 		);
+
+		// Hide username setting when using the block based checkout.
+		if ( CartCheckoutUtils::is_checkout_block_default() ) {
+			$account_settings = array_filter(
+				$account_settings,
+				function ( $setting ) {
+					return 'woocommerce_registration_generate_password' !== $setting['id'];
+				}
+			);
+		}
 
 		/**
 		 * Filter account settings.
