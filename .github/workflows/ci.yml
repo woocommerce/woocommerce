@@ -197,7 +197,7 @@ jobs:
 #          ARTIFACT_NAME: ${{ github.ref_name == 'nightly' && 'woocommerce-trunk-nightly.zip' || 'woocommerce.zip' }}
           ARTIFACT_NAME: 'woocommerce-trunk-nightly.zip'
           # hacky way to get the path to wp-env.json for blocks e2e tests, until they're migrated.
-          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.command == 'test:e2e:blocks' && 'plugins/woocommerce-blocks' || matrix.projectPath  }}
+          WP_ENV_CONFIG_PATH: ${{ matrix.command == 'test:e2e:blocks' && 'plugins/woocommerce-blocks' || matrix.projectPath  }}
         run: node .github/workflows/scripts/override-wp-env-plugins.js
 
       - name: 'Start Test Environment'
