@@ -4,7 +4,7 @@
  * - If a test fails, it will automatically re-run at most 2 times.
  * - If it pass after retrying (below 2 times), then it's marked as **flaky**
  *   but displayed as **passed** in the original test suite.
- * - If it fail all 3 times, then it's a **failed** test
+ * - If it fail all 3 times, then it's a **failed** test.
  */
 /**
  * External dependencies
