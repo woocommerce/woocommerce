@@ -26,6 +26,7 @@ import { ComboBox } from '../experimental-select-control/combo-box';
 import { SuffixIcon } from '../experimental-select-control/suffix-icon';
 import { SelectTreeMenu } from './select-tree-menu';
 import { escapeHTML } from '../utils';
+import { SelectedItemFocusHandle } from '../experimental-select-control/types';
 
 interface SelectTreeProps extends TreeControlProps {
 	id: string;
@@ -64,7 +65,7 @@ export const SelectTree = function SelectTree( {
 		'woocommerce-select-tree-control__menu'
 	) as string;
 
-	const lastRemoveButtonRef = useRef< HTMLButtonElement >( null );
+	const selectedItemsFocusHandle = useRef< SelectedItemFocusHandle >( null );
 
 	function isEventOutside( event: React.FocusEvent ) {
 		const isInsideSelect = document
@@ -188,9 +189,10 @@ export const SelectTree = function SelectTree( {
 				( event.key === 'ArrowLeft' || event.key === 'Backspace' ) &&
 				// test if the cursor is at the beginning of the input with nothing selected
 				( event.target as HTMLInputElement ).selectionStart === 0 &&
-				( event.target as HTMLInputElement ).selectionEnd === 0
+				( event.target as HTMLInputElement ).selectionEnd === 0 &&
+				selectedItemsFocusHandle.current
 			) {
-				lastRemoveButtonRef.current?.focus();
+				selectedItemsFocusHandle.current();
 			}
 		},
 		onChange: ( event ) => {
@@ -278,7 +280,7 @@ export const SelectTree = function SelectTree( {
 							>
 								<SelectedItems
 									isReadOnly={ isReadOnly }
-									ref={ lastRemoveButtonRef }
+									ref={ selectedItemsFocusHandle }
 									items={ ( props.selected as Item[] ) || [] }
 									getItemLabel={ ( item ) =>
 										item?.label || ''

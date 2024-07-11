@@ -2,14 +2,23 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { createElement, forwardRef } from '@wordpress/element';
+import {
+	createElement,
+	forwardRef,
+	useImperativeHandle,
+	useRef,
+} from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
  */
 import Tag from '../tag';
-import { getItemLabelType, getItemValueType } from './types';
+import {
+	getItemLabelType,
+	getItemValueType,
+	SelectedItemFocusHandle,
+} from './types';
 
 type SelectedItemsProps< ItemType > = {
 	isReadOnly: boolean;
@@ -37,13 +46,23 @@ const PrivateSelectedItems = < ItemType, >(
 		onBlur,
 		onSelectedItemsEnd,
 	}: SelectedItemsProps< ItemType >,
-	lastRemoveButtonRef: React.ForwardedRef< HTMLButtonElement >
+	ref: React.ForwardedRef< SelectedItemFocusHandle >
 ) => {
 	const classes = classnames(
 		'woocommerce-experimental-select-control__selected-items',
 		{
 			'is-read-only': isReadOnly,
 		}
+	);
+
+	const lastRemoveButtonRef = useRef< HTMLButtonElement >( null );
+
+	useImperativeHandle(
+		ref,
+		() => {
+			return () => lastRemoveButtonRef.current?.focus();
+		},
+		[]
 	);
 
 	if ( isReadOnly ) {
@@ -136,6 +155,6 @@ const PrivateSelectedItems = < ItemType, >(
 
 export const SelectedItems = forwardRef( PrivateSelectedItems ) as < ItemType >(
 	props: SelectedItemsProps< ItemType > & {
-		ref?: React.ForwardedRef< HTMLButtonElement >;
+		ref?: React.ForwardedRef< SelectedItemFocusHandle >;
 	}
 ) => ReturnType< typeof PrivateSelectedItems >;
