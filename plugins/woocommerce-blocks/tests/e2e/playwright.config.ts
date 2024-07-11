@@ -16,12 +16,10 @@ const config: PlaywrightTestConfig = {
 	),
 	testDir: './tests',
 	retries: CI ? 2 : 0,
-	// We're running our tests in serial, so we only need one worker.
 	workers: 1,
+	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	fullyParallel: false,
 	forbidOnly: !! CI,
-	// Don't report slow test "files", as we're running our tests in serial.
-	reportSlowTests: null,
 	reporter: process.env.CI
 		? [
 				[ 'github' ],
