@@ -39,8 +39,6 @@ if ( wpEnvConfig.env?.tests?.plugins ) {
 	};
 }
 
-console.log( overrideConfig );
-
 const entriesToReplace = [ '.', '../woocommerce' ];
 
 for ( const entry of entriesToReplace ) {
@@ -63,7 +61,9 @@ for ( const entry of entriesToReplace ) {
 	}
 }
 
+const overrideConfigPath = `${ WP_ENV_CONFIG_PATH }/.wp-env.override.json`;
+console.log( `Saving ${ configPath }` );
 fs.writeFileSync(
-	`${ WP_ENV_CONFIG_PATH }/.wp-env.override.json`,
+	overrideConfigPath,
 	JSON.stringify( overrideConfig, null, 2 )
 );
