@@ -50,9 +50,7 @@ const goToPostEditor = async ( { page } ) => {
 };
 
 const fillPageTitle = async ( page, title ) => {
-	await ( await getCanvas( page ) )
-		.getByRole( 'textbox', { name: 'Add title' } )
-		.fill( title );
+	await ( await getCanvas( page ) ).getByLabel( 'Add title' ).fill( title );
 };
 
 const insertBlock = async ( page, blockName ) => {
