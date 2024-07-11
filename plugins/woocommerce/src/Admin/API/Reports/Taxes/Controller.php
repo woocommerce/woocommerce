@@ -9,9 +9,10 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Taxes;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -62,7 +63,7 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function get_items( $request ) {
 		$query_args  = $this->prepare_reports_query( $request );
-		$taxes_query = new Query( $query_args );
+		$taxes_query = new GenericQuery( $query_args, 'taxes' );
 		$report_data = $taxes_query->get_data();
 
 		$data = array();

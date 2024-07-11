@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 /**
  * REST API Reports categories controller class.
@@ -59,7 +60,7 @@ class Controller extends ReportsController implements ExportableInterface {
 	 */
 	public function get_items( $request ) {
 		$query_args       = $this->prepare_reports_query( $request );
-		$categories_query = new Query( $query_args );
+		$categories_query = new GenericQuery( $query_args, 'categories' );
 		$report_data      = $categories_query->get_data();
 
 		if ( is_wp_error( $report_data ) ) {
@@ -119,7 +120,7 @@ class Controller extends ReportsController implements ExportableInterface {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param \Automattic\WooCommerce\Admin\API\Reports\Query $object Object data.
+	 * @param \Automattic\WooCommerce\Admin\API\Reports\GenericQuery $object Object data.
 	 * @return array
 	 */
 	protected function prepare_links( $object ) {
