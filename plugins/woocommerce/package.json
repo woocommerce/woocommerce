@@ -286,7 +286,6 @@
 					"changes": [],
 					"events": [
 						"daily-checks",
-						"nightly-checks",
 						"release-checks"
 					],
 					"testEnv": {
@@ -601,7 +600,8 @@
 					"events": [
 						"pull_request",
 						"push",
-						"release-checks"
+						"release-checks",
+						"nightly-checks"
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
