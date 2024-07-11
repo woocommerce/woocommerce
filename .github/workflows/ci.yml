@@ -177,8 +177,8 @@ jobs:
         if: ${{ matrix.testEnv.shouldCreate }}
         shell: bash
         run: |
-          docker image pull --quiet mariadb &
-          docker image pull --quiet wordpress &
+          docker image pull --quiet mariadb:latest &
+          docker image pull --quiet wordpress:latest &
 
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
