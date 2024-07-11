@@ -214,12 +214,8 @@ class Controller extends GenericController {
 			'path'        => $report->path,
 		);
 
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
 		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
+		$response = parent::prepare_item_for_response( $data, $request );
 		$response->add_links(
 			array(
 				'self'       => array(

@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Orders\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 
 /**
@@ -111,14 +112,8 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data = $report;
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
 		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
+		$response = GenericController::prepare_item_for_response( $report, $request );
 
 		/**
 		 * Filter a report returned from the API.

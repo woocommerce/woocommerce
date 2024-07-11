@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 /**
@@ -70,26 +71,20 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data = $report;
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
 		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
+		$response = GenericController::prepare_item_for_response( $report, $request );
 		$response->add_links( $this->prepare_links( $report ) );
 
-		$response->data['date'] = get_date_from_gmt( $data['date_gmt'], 'Y-m-d H:i:s' );
+		$response->data['date'] = get_date_from_gmt( $report['date_gmt'], 'Y-m-d H:i:s' );
 
 		// Figure out file name.
 		// Matches https://github.com/woocommerce/woocommerce/blob/4be0018c092e617c5d2b8c46b800eb71ece9ddef/includes/class-wc-download-handler.php#L197.
-		$product_id = intval( $data['product_id'] );
+		$product_id = intval( $report['product_id'] );
 		$_product   = wc_get_product( $product_id );
 
 		// Make sure the product hasn't been deleted.
 		if ( $_product ) {
-			$file_path                   = $_product->get_file_download_path( $data['download_id'] );
+			$file_path                   = $_product->get_file_download_path( $report['download_id'] );
 			$filename                    = basename( $file_path );
 			$response->data['file_name'] = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
 			$response->data['file_path'] = $file_path;
@@ -98,9 +93,9 @@ class Controller extends ReportsController implements ExportableInterface {
 			$response->data['file_path'] = '';
 		}
 
-		$customer                       = new \WC_Customer( $data['user_id'] );
+		$customer                       = new \WC_Customer( $report['user_id'] );
 		$response->data['username']     = $customer->get_username();
-		$response->data['order_number'] = $this->get_order_number( $data['order_id'] );
+		$response->data['order_number'] = $this->get_order_number( $report['order_id'] );
 
 		/**
 		 * Filter a report returned from the API.
