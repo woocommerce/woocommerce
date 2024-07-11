@@ -32,7 +32,7 @@ class MoneyFormatter implements FormatterInterface {
 		}
 
 		// This ensures we work with floats from this point on. Also, if $value skips this as an array/object,
-		// it will throw a fatal error or produce an E_NOTICE, or E_WARNING on PHP >8.0.
+		// it will throw a fatal error or produce an E_NOTICE (if Object on PHP <8.0).
 		if ( is_int( $value ) || is_string( $value ) ) {
 			$value = floatval( $value );
 		}
