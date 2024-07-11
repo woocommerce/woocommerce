@@ -194,8 +194,8 @@ jobs:
         uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
         with:
           path: '~/wp-env'
-          key: "${{ runner.os }}-wp-env"
-          restore-keys: '${{ runner.os }}-wp-env'
+          key: "${{ runner.os }}-wp-env-${{ matrix.testType }}"
+          restore-keys: '${{ runner.os }}-wp-env-'
 
       - name: 'Update wp-env config'
         if: ${{ github.ref_type == 'tag' }}
