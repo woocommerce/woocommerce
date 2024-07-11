@@ -145,12 +145,13 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		await assembler
 			.getByRole( 'spinbutton', { name: 'Image width' } )
 			.blur();
-		const { width } = await editor
-			.getByLabel( 'Block: Header' )
-			.getByLabel( 'Block: Site Logo' )
-			.boundingBox();
 
-		expect( Math.floor( width ) ).toBe( 100 );
+		await expect(
+			editor
+				.getByLabel( 'Block: Header' )
+				.getByLabel( 'Block: Site Logo' )
+		).toHaveCSS( 'width', '100px' );
+
 		await logoPickerPageObject.saveLogoSettings( assembler );
 		const imageFrontend = await logoPickerPageObject.getLogoLocator( page );
 		await page.goto( baseURL );
