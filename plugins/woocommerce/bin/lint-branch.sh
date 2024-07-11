@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+set -eo pipefail
+
 # Lint branch
 #
 # Runs phpcs-changed, comparing the current branch to its "base" or "parent" branch.
