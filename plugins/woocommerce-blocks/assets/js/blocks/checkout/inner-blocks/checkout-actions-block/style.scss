@@ -22,6 +22,10 @@
 			.wc-block-components-checkout-place-order-button__text {
 				display: flex;
 				align-items: center;
+
+				// Prevent runts/widows. Overwrite `balance` with `pretty`, as `pretty` is not supported in all browsers.
+				text-wrap: balance;
+				text-wrap: pretty;
 			}
 
 			.wc-block-components-checkout-place-order-button__separator {
