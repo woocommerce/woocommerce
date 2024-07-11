@@ -11,7 +11,7 @@ class MoneyFormatter implements FormatterInterface {
 	 * Format a given price value and return the result as a string without decimals.
 	 *
 	 * @param int|float|string $value Value to format. Int is allowed, as it may also represent a valid price.
-	 * @param array $options Options that influence the formatting.
+	 * @param array            $options Options that influence the formatting.
 	 * @return string
 	 */
 	public function format( $value, array $options = [] ) {
@@ -33,7 +33,7 @@ class MoneyFormatter implements FormatterInterface {
 
 		// This ensures we work with floats from this point on. Also, if $value skips this as an array/object,
 		// it will throw a fatal error or produce a notice respectively.
-		if( is_int( $value ) || is_string( $value ) ) {
+		if ( is_int( $value ) || is_string( $value ) ) {
 			$value = floatval( $value );
 		}
 
