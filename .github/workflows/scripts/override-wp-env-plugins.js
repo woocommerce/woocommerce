@@ -62,7 +62,7 @@ for ( const entry of entriesToReplace ) {
 }
 
 const overrideConfigPath = `${ WP_ENV_CONFIG_PATH }/.wp-env.override.json`;
-console.log( `Saving ${ configPath }` );
+console.log( `Saving ${ overrideConfigPath }` );
 fs.writeFileSync(
 	overrideConfigPath,
 	JSON.stringify( overrideConfig, null, 2 )
