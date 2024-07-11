@@ -142,9 +142,6 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		await assembler
 			.getByRole( 'spinbutton', { name: 'Image width' } )
 			.fill( '100' );
-		await assembler
-			.getByRole( 'spinbutton', { name: 'Image width' } )
-			.blur();
 
 		await expect(
 			editor
