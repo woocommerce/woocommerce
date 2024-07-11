@@ -46,4 +46,20 @@ class TestMoneyFormatter extends \WP_UnitTestCase {
 		$this->assertEquals( "156", $this->mock_formatter->format( 1.555, [ 'rounding_mode' => PHP_ROUND_HALF_UP ] ) );
 		$this->assertEquals( "155", $this->mock_formatter->format( 1.555, [ 'rounding_mode' => PHP_ROUND_HALF_DOWN ] ) );
 	}
+
+	/**
+	 * Test formatting for int overflow values.
+	 */
+	public function test_format_int_overflow() {
+		$this->assertEquals( '922337203685477580800', $this->mock_formatter->format( '9223372036854775808' ) );
+		$this->assertEquals( '922337203685477580800', $this->mock_formatter->format( floatval('9223372036854775808') ) );
+	}
+
+	/**
+	 * Test formatting expects exception on invalid array values.
+	 */
+	public function test_format_array_exception() {
+		$this->expectException(\TypeError::class);
+		$this->mock_formatter->format( array( 'This is not right') );
+	}
 }
