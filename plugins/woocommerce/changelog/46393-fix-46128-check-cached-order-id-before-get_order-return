@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Update `WC_Order_Factory::get_order()` to return false when failing to load cached order.

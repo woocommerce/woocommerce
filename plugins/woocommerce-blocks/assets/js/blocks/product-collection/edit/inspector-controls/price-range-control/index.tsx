@@ -14,17 +14,18 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../../../types';
+import { CoreFilterNames, QueryControlProps } from '../../../types';
 import { DEFAULT_FILTERS } from '../../../constants';
 import PriceTextField from './PriceTextField';
 
 const PriceRangeControl = ( props: QueryControlProps ) => {
-	const { query, setQueryAttribute } = props;
+	const { query, trackInteraction, setQueryAttribute } = props;
 
 	const value = query.priceRange;
 
 	const deselectCallback = () => {
 		setQueryAttribute( { priceRange: DEFAULT_FILTERS.priceRange } );
+		trackInteraction( CoreFilterNames.PRICE_RANGE );
 	};
 
 	return (
@@ -54,6 +55,7 @@ const PriceRangeControl = ( props: QueryControlProps ) => {
 								max: value?.max as number,
 							},
 						} );
+						trackInteraction( CoreFilterNames.PRICE_RANGE );
 					} }
 				/>
 
@@ -69,6 +71,7 @@ const PriceRangeControl = ( props: QueryControlProps ) => {
 								max,
 							},
 						} );
+						trackInteraction( CoreFilterNames.PRICE_RANGE );
 					} }
 				/>
 			</HStack>

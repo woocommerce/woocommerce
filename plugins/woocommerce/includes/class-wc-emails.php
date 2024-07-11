@@ -597,7 +597,7 @@ class WC_Emails {
 	}
 
 	/**
-	 * Renders any additional fields captured during block based checkout.
+	 * Renders any additional fields captured during block-based checkout.
 	 *
 	 * @param WC_Order $order         Order instance.
 	 * @param bool     $sent_to_admin If email is sent to admin.
@@ -634,7 +634,7 @@ class WC_Emails {
 	}
 
 	/**
-	 * Renders any additional address fields captured during block based checkout.
+	 * Renders any additional address fields captured during block-based checkout.
 	 *
 	 * @param string   $address_type Address type.
 	 * @param WC_Order $order         Order instance.

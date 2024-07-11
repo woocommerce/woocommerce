@@ -3,7 +3,7 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 import { useExpressPaymentMethods } from '@woocommerce/base-context/hooks';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -19,7 +19,7 @@ export const Edit = ( {
 	const { paymentMethods, isInitialized } = useExpressPaymentMethods();
 	const hasExpressPaymentMethods = Object.keys( paymentMethods ).length > 0;
 	const blockProps = useBlockProps( {
-		className: classnames( {
+		className: clsx( {
 			'wp-block-woocommerce-cart-express-payment-block--has-express-payment-methods':
 				hasExpressPaymentMethods,
 		} ),

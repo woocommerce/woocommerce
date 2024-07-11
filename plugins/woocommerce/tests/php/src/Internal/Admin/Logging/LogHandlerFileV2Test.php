@@ -187,6 +187,13 @@ MESSAGE;
 			),
 			$context_delineator . '{"yin":"yang","apple":"orange"}',
 		);
+		yield 'custom keys with multibyte and slashed values' => array(
+			array(
+				'multibyte'   => '中文字',
+				'backslashes' => 'C:\MS-DOS\\',
+			),
+			$context_delineator . '{"multibyte":"中文字","backslashes":"C:\MS-DOS\"}',
+		);
 		yield 'backtrace boolean only' => array(
 			array( 'backtrace' => true ),
 			$context_delineator . wp_json_encode( array( 'backtrace' => $this->get_mock_backtrace() ) ),

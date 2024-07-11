@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 import type { ReactNode, ReactElement } from 'react';
 
@@ -18,6 +18,7 @@ export interface PanelProps {
 	hasBorder?: boolean;
 	title: ReactNode;
 	titleTag?: keyof JSX.IntrinsicElements;
+	state?: [ boolean, React.Dispatch< React.SetStateAction< boolean > > ];
 }
 
 const Panel = ( {
@@ -27,12 +28,17 @@ const Panel = ( {
 	hasBorder = false,
 	title,
 	titleTag: TitleTag = 'div',
+	state,
 }: PanelProps ): ReactElement => {
-	const [ isOpen, setIsOpen ] = useState< boolean >( initialOpen );
+	let [ isOpen, setIsOpen ] = useState< boolean >( initialOpen );
+	// If state is managed externally, we override the internal state.
+	if ( Array.isArray( state ) && state.length === 2 ) {
+		[ isOpen, setIsOpen ] = state;
+	}
 
 	return (
 		<div
-			className={ classNames( className, 'wc-block-components-panel', {
+			className={ clsx( className, 'wc-block-components-panel', {
 				'has-border': hasBorder,
 			} ) }
 		>

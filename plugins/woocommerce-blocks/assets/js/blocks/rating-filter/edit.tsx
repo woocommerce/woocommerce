@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _x } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
 import {
@@ -48,7 +48,7 @@ const Edit = ( {
 	} = attributes;
 
 	const blockProps = useBlockProps( {
-		className: classnames( 'wc-block-rating-filter', className ),
+		className: clsx( 'wc-block-rating-filter', className ),
 	} );
 
 	const getInspectorControls = () => {

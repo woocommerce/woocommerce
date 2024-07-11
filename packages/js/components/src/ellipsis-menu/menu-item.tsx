@@ -78,7 +78,7 @@ const MenuItem = ( {
 				onClick={ onClick }
 				className="woocommerce-ellipsis-menu__item"
 			>
-				{ /* id props is actuall an optional prop. It looks like DefinitelyTyped has out-of-date types*/ }
+				{ /* id props is actually an optional prop. It looks like DefinitelyTyped has out-of-date types*/ }
 				{ /* @ts-expect-error: Suprressing `id` is required prop error.  */ }
 				<BaseControl className="components-toggle-control">
 					<FormToggle

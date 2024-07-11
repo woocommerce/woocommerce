@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-E2E tests: make payment page tests more resilient to theme changes

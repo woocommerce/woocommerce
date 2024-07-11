@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fixes a bug introduced previously where enabling localStorage.xstateV5_inspect would cause the page to crash because it's not supposed to be used in prod builds.

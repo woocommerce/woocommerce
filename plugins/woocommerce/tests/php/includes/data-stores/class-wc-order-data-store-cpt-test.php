@@ -355,4 +355,115 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$this->assertSame( $order, $order_from_before_delete );
 		}
 	}
+
+	/**
+	 * @testDox Deleting order items should only delete items of the specified type.
+	 */
+	public function test_delete_items() {
+		$order        = WC_Helper_Order::create_order();
+		$product      = WC_Helper_Product::create_simple_product();
+		$product_item = new WC_Order_Item_Product();
+		$product_item->set_product( $product );
+		$product_item->set_quantity( 1 );
+		$product_item->save();
+
+		$fee_item_1 = new WC_Order_Item_Fee();
+		$fee_item_1->set_amount( 20 );
+		$fee_item_1->save();
+
+		$fee_item_2 = new WC_Order_Item_Fee();
+		$fee_item_2->set_amount( 30 );
+		$fee_item_2->save();
+
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_name( 'dummy shipping' );
+		$shipping_item->set_total( 20 );
+		$shipping_item->save();
+
+		$order->add_item( $product_item );
+		$order->add_item( $fee_item_1 );
+		$order->add_item( $fee_item_2 );
+		$order->add_item( $shipping_item );
+
+		$order->save();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $r_order->get_item( $fee_item_1->get_id() )->get_id() === $fee_item_1->get_id() );
+		$this->assertTrue( $r_order->get_item( $fee_item_2->get_id() )->get_id() === $fee_item_2->get_id() );
+		$this->assertTrue( $r_order->get_item( $product_item->get_id() )->get_id() === $product_item->get_id() );
+		$this->assertTrue( $r_order->get_item( $shipping_item->get_id() )->get_id() === $shipping_item->get_id() );
+
+		// Deleting single item type should only delete that item type.
+		$r_order->get_data_store()->delete_items( $r_order, $fee_item_1->get_type() );
+		$this->assertFalse( $r_order->get_item( $fee_item_1->get_id() ) );
+		$this->assertFalse( $r_order->get_item( $fee_item_2->get_id() ) );
+		$this->assertTrue( $r_order->get_item( $product_item->get_id() )->get_id() === $product_item->get_id() );
+		$this->assertTrue( $r_order->get_item( $shipping_item->get_id() )->get_id() === $shipping_item->get_id() );
+
+		// Deleting all items should all items.
+		$r_order->get_data_store()->delete_items( $r_order );
+		$this->assertFalse( $r_order->get_item( $fee_item_1->get_id() ) );
+		$this->assertFalse( $r_order->get_item( $fee_item_2->get_id() ) );
+		$this->assertFalse( $r_order->get_item( $product_item->get_id() ) );
+		$this->assertFalse( $r_order->get_item( $shipping_item->get_id() ) );
+	}
+
+	/**
+	 * @testDox Deleting order item should delete items from only that order.
+	 */
+	public function test_delete_items_multi_order() {
+		$order_1        = WC_Helper_Order::create_order();
+		$product        = WC_Helper_Product::create_simple_product();
+		$product_item_1 = new WC_Order_Item_Product();
+		$product_item_1->set_product( $product );
+		$product_item_1->set_quantity( 1 );
+		$product_item_1->save();
+
+		$order_2        = WC_Helper_Order::create_order();
+		$product_item_2 = new WC_Order_Item_Product();
+		$product_item_2->set_product( $product );
+		$product_item_2->set_quantity( 1 );
+		$product_item_2->save();
+
+		$order_1->add_item( $product_item_1 );
+		$order_1->save();
+		$order_2->add_item( $product_item_2 );
+		$order_2->save();
+
+		$this->assertTrue( $order_1->get_item( $product_item_1->get_id() )->get_id() === $product_item_1->get_id() );
+		$this->assertTrue( $order_2->get_item( $product_item_2->get_id() )->get_id() === $product_item_2->get_id() );
+
+		$order_1->get_data_store()->delete_items( $order_1 );
+
+		$this->assertFalse( $order_1->get_item( $product_item_1->get_id() ) );
+		$this->assertTrue( $order_2->get_item( $product_item_2->get_id() )->get_id() === $product_item_2->get_id() );
+	}
+
+	/**
+	 * @testDox Creating an order with a draft status should not trigger the "woocommerce_new_order" action.
+	 */
+	public function test_create_draft_order_doesnt_trigger_hook() {
+
+		$new_count = 0;
+
+		$callback = function () use ( &$new_count ) {
+			++$new_count;
+		};
+
+		add_action( 'woocommerce_new_order', $callback );
+
+		$draft_statuses = array( 'auto-draft', 'checkout-draft' );
+
+		$order_data_store_cpt = new WC_Order_Data_Store_CPT();
+
+		foreach ( $draft_statuses as $status ) {
+			$order = new WC_Order();
+			$order->set_status( $status );
+			$order_data_store_cpt->create( $order );
+		}
+
+		$this->assertEquals( 0, $new_count );
+
+		remove_action( 'woocommerce_new_order', $callback );
+	}
 }

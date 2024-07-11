@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a bug where Site Visibility setting tab appears without launch-your-store feature flag turned on.

@@ -197,7 +197,7 @@ class WC_Meta_Box_Product_Data {
 		if ( ! empty( $file_urls ) ) {
 			$file_url_size = count( $file_urls );
 
-			for ( $i = 0; $i < $file_url_size; $i ++ ) {
+			for ( $i = 0; $i < $file_url_size; $i++ ) {
 				if ( ! empty( $file_urls[ $i ] ) ) {
 					$downloads[] = array(
 						'name'        => wc_clean( $file_names[ $i ] ),
@@ -369,6 +369,7 @@ class WC_Meta_Box_Product_Data {
 		$errors = $product->set_props(
 			array(
 				'sku'                => isset( $_POST['_sku'] ) ? wc_clean( wp_unslash( $_POST['_sku'] ) ) : null,
+				'global_unique_id'   => isset( $_POST['_global_unique_id'] ) ? wc_clean( wp_unslash( $_POST['_global_unique_id'] ) ) : null,
 				'purchase_note'      => isset( $_POST['_purchase_note'] ) ? wp_kses_post( wp_unslash( $_POST['_purchase_note'] ) ) : '',
 				'downloadable'       => isset( $_POST['_downloadable'] ),
 				'virtual'            => isset( $_POST['_virtual'] ),
@@ -413,6 +414,9 @@ class WC_Meta_Box_Product_Data {
 		if ( is_wp_error( $errors ) ) {
 			WC_Admin_Meta_Boxes::add_error( $errors->get_error_message() );
 		}
+
+		// Remove _product_template_id for products that were created with the new product editor.
+		$product->delete_meta_data( '_product_template_id' );
 
 		/**
 		 * Set props before save.
@@ -541,6 +545,7 @@ class WC_Meta_Box_Product_Data {
 						'image_id'          => isset( $_POST['upload_image_id'][ $i ] ) ? wc_clean( wp_unslash( $_POST['upload_image_id'][ $i ] ) ) : null,
 						'attributes'        => self::prepare_set_attributes( $parent->get_attributes(), 'attribute_', $i ),
 						'sku'               => isset( $_POST['variable_sku'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_sku'][ $i ] ) ) : '',
+						'global_unique_id'  => isset( $_POST['variable_global_unique_id'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_global_unique_id'][ $i ] ) ) : '',
 						'weight'            => isset( $_POST['variable_weight'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_weight'][ $i ] ) ) : '',
 						'length'            => isset( $_POST['variable_length'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_length'][ $i ] ) ) : '',
 						'width'             => isset( $_POST['variable_width'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_width'][ $i ] ) ) : '',

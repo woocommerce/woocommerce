@@ -11,10 +11,11 @@ import {
 	useState,
 	createInterpolateElement,
 	createElement,
+	useEffect,
 } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { useCopyToClipboard } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting } from '@woocommerce/settings';
@@ -32,38 +33,60 @@ import {
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
 const SiteVisibility = () => {
-	const shareKey =
-		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_share_key;
+	const setting = window?.wcSettings?.admin?.siteVisibilitySettings || {};
+	const shareKey = setting?.woocommerce_share_key;
 
 	const [ comingSoon, setComingSoon ] = useState(
-		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_coming_soon || 'no'
+		setting?.woocommerce_coming_soon || 'no'
 	);
 	const [ storePagesOnly, setStorePagesOnly ] = useState(
-		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_store_pages_only
+		setting?.woocommerce_store_pages_only || 'no'
 	);
 	const [ privateLink, setPrivateLink ] = useState(
-		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_private_link
+		setting?.woocommerce_private_link || 'no'
 	);
+
+	useEffect( () => {
+		const initValues = {
+			comingSoon: setting.woocommerce_coming_soon,
+			storePagesOnly: setting.woocommerce_store_pages_only,
+			privateLink: setting.woocommerce_private_link || 'no',
+		};
+
+		const currentValues = { comingSoon, storePagesOnly, privateLink };
+		const saveButton = document.getElementsByClassName(
+			'woocommerce-save-button'
+		)[ 0 ];
+		if ( saveButton ) {
+			saveButton.disabled =
+				initValues.comingSoon === currentValues.comingSoon &&
+				initValues.storePagesOnly === currentValues.storePagesOnly &&
+				initValues.privateLink === currentValues.privateLink;
+		}
+	}, [ comingSoon, storePagesOnly, privateLink ] );
 
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
 	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
 
 	const getPrivateLink = () => {
+		const settings = window?.wcSettings;
+		const homeUrl = settings?.homeUrl;
+		const urlObject = new URL( homeUrl );
+
 		if ( storePagesOnly === 'yes' ) {
-			return (
-				window?.wcSettings?.admin?.siteVisibilitySettings
-					?.shop_permalink +
-				'?woo-share=' +
-				shareKey
-			);
+			const shopPermalink =
+				settings?.admin?.siteVisibilitySettings?.shop_permalink;
+			if ( shopPermalink ) {
+				urlObject.href = shopPermalink;
+			}
 		}
 
-		return window?.wcSettings?.homeUrl + '?woo-share=' + shareKey;
+		const params = new URLSearchParams( urlObject.search );
+		params.set( 'woo-share', shareKey );
+		urlObject.search = params.toString();
+
+		return urlObject.toString();
 	};
 
 	const copyClipboardRef = useCopyToClipboard( getPrivateLink, () => {
@@ -132,7 +155,7 @@ const SiteVisibility = () => {
 						  ) }
 				</p>
 				<div
-					className={ classNames(
+					className={ clsx(
 						'site-visibility-settings-slotfill-section-content',
 						{
 							'is-hidden': comingSoon !== 'yes',

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the LYS Hub tasklist so that it only shows incomplete tasks and tasks that were recently actioned

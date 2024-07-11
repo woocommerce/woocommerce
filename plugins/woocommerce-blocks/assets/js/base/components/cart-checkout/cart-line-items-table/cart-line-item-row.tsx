@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __, sprintf } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
@@ -203,7 +203,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 
 		return (
 			<tr
-				className={ classnames(
+				className={ clsx(
 					'wc-block-cart-items__row',
 					cartItemClassNameFilter,
 					{

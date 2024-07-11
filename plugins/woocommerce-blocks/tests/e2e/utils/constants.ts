@@ -15,6 +15,8 @@ export const CLASSIC_THEME_NAME = 'Storefront';
 export const CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG = `${ CLASSIC_THEME_SLUG }-child__block-notices-filter`;
 export const CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG = `${ CLASSIC_THEME_SLUG }-child__block-notices-template`;
 export const CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG = `${ CLASSIC_THEME_SLUG }-child__classic-notices-template`;
+export const CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SLUG = `${ CLASSIC_THEME_SLUG }-child__with-block-template-part`;
+export const CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SUPPORT_SLUG = `${ CLASSIC_THEME_SLUG }-child__with-block-template-part-support`;
 export const BASE_URL = 'http://localhost:8889';
 
 export const WP_ARTIFACTS_PATH =
@@ -32,3 +34,5 @@ export const customerFile = path.join(
 	'customer.json'
 );
 export const guestFile = { cookies: [], origins: [] };
+
+export const DB_EXPORT_FILE = 'blocks_e2e.sql';

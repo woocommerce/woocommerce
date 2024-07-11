@@ -5,12 +5,17 @@
 	"attributes": {
 		"color": {
 			"type": "string"
+		},
+		"storeOnly": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {
 		"color": {
 			"background": false,
 			"text": true
-		}
+		},
+		"inserter": false
 	}
 }

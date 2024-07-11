@@ -13,6 +13,7 @@ declare module '@woocommerce/settings' {
 }
 
 declare module '@wordpress/core-data' {
+	function useEntityId( kind: string, name: unknown, id?: string ): any;
 	function useEntityProp< T = unknown >(
 		kind: string,
 		name: string,
@@ -22,8 +23,9 @@ declare module '@wordpress/core-data' {
 	function useEntityRecord< T = unknown >(
 		kind: string,
 		name: string,
-		id: number | string
-	): { record: T, editedRecord: T };
+		id: number | string,
+		options?: { enabled: boolean }
+	): { record: T, editedRecord: T, isResolving: boolean, hasResolved: boolean };
 }
 declare module '@wordpress/keyboard-shortcuts' {
 	function useShortcut(name: string, callback: (event: KeyboardEvent) => void): void;

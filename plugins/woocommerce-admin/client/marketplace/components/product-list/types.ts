@@ -6,6 +6,7 @@ export type SearchAPIProductType = {
 	title: string;
 	image: string;
 	type: ProductType;
+	freemium_type: 'unset' | 'primary';
 	excerpt: string;
 	link: string;
 	demo_url: string;
@@ -20,6 +21,9 @@ export type SearchAPIProductType = {
 	vendor_url: string;
 	icon: string;
 	is_installable: boolean;
+	featured_image: string;
+	product_category: string;
+	color: string;
 };
 
 export interface Product {
@@ -29,6 +33,7 @@ export interface Product {
 	title: string;
 	image: string;
 	type: ProductType;
+	freemium_type?: 'unset' | 'primary';
 	description: string;
 	vendorName: string;
 	vendorUrl: string;
@@ -44,6 +49,9 @@ export interface Product {
 	searchTerm?: string;
 	category?: string;
 	isInstallable: boolean;
+	featuredImage?: string;
+	productCategory?: string;
+	color?: string;
 }
 
 export interface ProductTracksData {
@@ -57,10 +65,12 @@ export interface ProductTracksData {
 export enum ProductType {
 	theme = 'theme',
 	extension = 'extension',
+	businessService = 'business-service',
 }
 
 export enum SearchResultType {
 	theme = 'theme',
 	extension = 'extension',
+	businessService = 'business-service',
 	all = 'all',
 }

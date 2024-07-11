@@ -103,7 +103,7 @@ const GeneralSettings = () => {
 						'This is the shipping method title shown to customers.',
 						'woocommerce'
 					) }
-					placeholder={ __( 'Local Pickup', 'woocommerce' ) }
+					placeholder={ __( 'Pickup', 'woocommerce' ) }
 					value={ settings.title }
 					onChange={ setSettingField( 'title' ) }
 					disabled={ false }

@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Don't show a product in the featured products block if the status is other than published and the user doesn't have read capability for that product.

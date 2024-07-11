@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { isSiteEditorPage } from '@woocommerce/utils';
 import { usePrevious } from '@woocommerce/base-hooks';
 import { select } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
@@ -16,7 +15,11 @@ import {
 /**
  * Internal dependencies
  */
-import { ProductCollectionQuery } from '../../types';
+import {
+	CoreFilterNames,
+	ProductCollectionQuery,
+	QueryControlProps,
+} from '../../types';
 import { DEFAULT_QUERY } from '../../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../../utils';
 
@@ -63,15 +66,11 @@ const getHelpTextForTemplate = ( templateId: string ): string => {
 	return productArchiveHelpText;
 };
 
-interface InheritQueryControlProps {
-	setQueryAttribute: ( value: Partial< ProductCollectionQuery > ) => void;
-	query: ProductCollectionQuery | undefined;
-}
-
 const InheritQueryControl = ( {
 	setQueryAttribute,
+	trackInteraction,
 	query,
-}: InheritQueryControlProps ) => {
+}: QueryControlProps ) => {
 	const inherit = query?.inherit;
 	const editSiteStore = select( 'core/edit-site' );
 
@@ -87,12 +86,6 @@ const InheritQueryControl = ( {
 		[]
 	);
 
-	// Hide the control if not in site editor.
-	const isSiteEditor = isSiteEditorPage( editSiteStore );
-	if ( ! isSiteEditor ) {
-		return null;
-	}
-
 	const currentTemplateId = editSiteStore.getEditedPostId() as string;
 	const helpText = getHelpTextForTemplate( currentTemplateId );
 
@@ -105,6 +98,7 @@ const InheritQueryControl = ( {
 				setQueryAttribute( {
 					inherit: defaultValue,
 				} );
+				trackInteraction( CoreFilterNames.INHERIT );
 			} }
 		>
 			<ToggleControl
@@ -127,6 +121,7 @@ const InheritQueryControl = ( {
 							inherit: newInherit,
 						} );
 					}
+					trackInteraction( CoreFilterNames.INHERIT );
 				} }
 			/>
 		</ToolsPanelItem>

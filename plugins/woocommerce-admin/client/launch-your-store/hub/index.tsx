@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { useMachine } from '@xstate5/react';
-import React from 'react';
-import classnames from 'classnames';
+import React, { useEffect } from 'react';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -34,6 +34,9 @@ export type LaunchYourStoreComponentProps = {
 
 const LaunchStoreController = () => {
 	useFullScreen( [ 'woocommerce-launch-your-store' ] );
+	useEffect( () => {
+		window.sessionStorage.setItem( 'lysWaiting', 'no' );
+	}, [] );
 	const { xstateV5Inspector: inspect } = useXStateInspect( 'V5' );
 
 	const [ mainContentState, sendToMainContent, mainContentMachineService ] =
@@ -66,7 +69,7 @@ const LaunchStoreController = () => {
 	return (
 		<div className={ 'launch-your-store-layout__container' }>
 			<SidebarContainer
-				className={ classnames( {
+				className={ clsx( {
 					'is-sidebar-hidden': ! isSidebarVisible,
 				} ) }
 			>

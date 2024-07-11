@@ -17,12 +17,12 @@ class LocalPickupUtils {
 			'woocommerce_pickup_location_settings',
 			[
 				'enabled' => 'no',
-				'title'   => __( 'Local Pickup', 'woocommerce' ),
+				'title'   => __( 'Pickup', 'woocommerce' ),
 			]
 		);
 
 		if ( empty( $pickup_location_settings['title'] ) ) {
-			$pickup_location_settings['title'] = __( 'Local Pickup', 'woocommerce' );
+			$pickup_location_settings['title'] = __( 'Pickup', 'woocommerce' );
 		}
 
 		if ( empty( $pickup_location_settings['enabled'] ) ) {
@@ -47,8 +47,20 @@ class LocalPickupUtils {
 	 * @return bool True if local pickup is enabled.
 	 */
 	public static function is_local_pickup_enabled() {
-		$pickup_location_settings = self::get_local_pickup_settings();
-		return $pickup_location_settings['enabled'];
+		// Get option directly to avoid early translation function call.
+		// See https://github.com/woocommerce/woocommerce/pull/47113.
+		$pickup_location_settings = get_option(
+			'woocommerce_pickup_location_settings',
+			[
+				'enabled' => 'no',
+			]
+		);
+
+		if ( empty( $pickup_location_settings['enabled'] ) ) {
+			$pickup_location_settings['enabled'] = 'no';
+		}
+
+		return wc_string_to_bool( $pickup_location_settings['enabled'] );
 	}
 	/**
 	 * Gets a list of payment method ids that support the 'local-pickup' feature.

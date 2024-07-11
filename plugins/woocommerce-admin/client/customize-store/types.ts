@@ -58,5 +58,6 @@ export type customizeStoreStateMachineContext = {
 	};
 	flowType: FlowType;
 	isFontLibraryAvailable: boolean | null;
+	isPTKPatternsAPIAvailable: boolean | null;
 	activeThemeHasMods: boolean | undefined;
 };

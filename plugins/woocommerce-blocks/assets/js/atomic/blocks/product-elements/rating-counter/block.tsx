@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
@@ -65,7 +65,7 @@ export const Block = (
 	const { product } = useProductDataContext();
 	const reviews = getRatingCount( product );
 
-	const className = classnames(
+	const className = clsx(
 		styleProps.className,
 		'wc-block-components-product-rating-counter',
 		{

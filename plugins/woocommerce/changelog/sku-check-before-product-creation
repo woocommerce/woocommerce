@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Ensuring product creation with unique sku for concurrent requests

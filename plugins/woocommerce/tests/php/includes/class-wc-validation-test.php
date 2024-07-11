@@ -18,7 +18,22 @@ class WC_Validation_Test extends \WC_Unit_Test_Case {
 			array( true, 'CZ-115 03', 'CZ' ),
 		);
 
-		return array_merge( $cz );
+		$se = array(
+			array( true, '123 45', 'SE' ),
+			array( true, '12345', 'SE' ),
+			array( false, '12 345', 'SE' ),
+			array( false, 'ABC 45', 'SE' ),
+		);
+
+		$li = array(
+			array( true, '9482', 'LI' ),
+			array( true, '9495', 'LI' ),
+			array( false, '8512', 'LI' ),
+			array( false, '0123', 'LI' ),
+			array( false, '948A', 'LI' ),
+		);
+
+		return array_merge( $cz, $se, $li );
 	}
 
 	/**

@@ -8,12 +8,14 @@ import { getCheckboxTracks } from './get-checkbox-tracks';
 import { getCurrencySymbolProps } from './get-currency-symbol-props';
 import { getDerivedProductType } from './get-derived-product-type';
 import { getHeaderTitle } from './get-header-title';
+import { getPermalinkParts } from './get-permalink-parts';
 import { getProductStatus, PRODUCT_STATUS_LABELS } from './get-product-status';
 import {
 	getProductStockStatus,
 	getProductStockStatusClass,
 } from './get-product-stock-status';
 import { getProductTitle } from './get-product-title';
+import { getEmptyStateSequentialNames } from './get-empty-state-names';
 import {
 	getProductVariationTitle,
 	getTruncatedProductVariationTitle,
@@ -41,7 +43,9 @@ export {
 	getCheckboxTracks,
 	getCurrencySymbolProps,
 	getDerivedProductType,
+	getEmptyStateSequentialNames,
 	getHeaderTitle,
+	getPermalinkParts,
 	getProductStatus,
 	getProductStockStatus,
 	getProductStockStatusClass,

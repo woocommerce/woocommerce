@@ -30,6 +30,7 @@ export type Item = {
 export type ItemQuery = BaseQueryParams & {
 	[ key: string ]: unknown;
 	parent_id?: IdType;
+	order_by?: string;
 };
 
 export type Params = {
@@ -41,7 +42,8 @@ type WithRequiredProperty< Type, Key extends keyof Type > = Type & {
 };
 
 export type CrudActionOptions = {
-	optimisticQueryUpdate?: boolean | Partial< Item >;
+	optimisticQueryUpdate?: ItemQuery;
+	optimisticUrlParameters?: IdType[];
 };
 
 export type CrudActions<

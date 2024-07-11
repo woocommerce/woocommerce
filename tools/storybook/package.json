@@ -19,7 +19,7 @@
 	},
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.1.0"
 	},
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
@@ -47,6 +47,7 @@
 		"@storybook/theming": "6.5.17-alpha.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"react": "^17.0.2",
+		"react18": "npm:react@^18.3.0",
 		"react-dom": "^17.0.2",
 		"typescript": "^5.3.3",
 		"webpack": "^5.89.0",

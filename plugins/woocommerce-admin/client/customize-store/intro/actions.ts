@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { assign, DoneInvokeEvent } from 'xstate';
+import { TaskReferralRecord } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
@@ -49,8 +50,26 @@ export const assignActiveTheme = assign<
 	},
 } );
 
+export const assignTaskReferral = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	intro: ( context, event ) => {
+		const taskReferral = (
+			event as DoneInvokeEvent< {
+				taskReferral: TaskReferralRecord | null;
+			} >
+		 ).data.taskReferral;
+		return { ...context.intro, taskReferral };
+	},
+} );
+
 export const recordTracksDesignWithAIClicked = () => {
 	trackEvent( 'customize_your_store_intro_design_with_ai_click' );
+};
+
+export const recordTracksDesignWithoutAIClicked = () => {
+	trackEvent( 'customize_your_store_intro_design_without_ai_click' );
 };
 
 export const recordTracksThemeSelected = (
@@ -129,6 +148,19 @@ export const assignIsFontLibraryAvailable = assign<
 	},
 } );
 
+export const assignIsPTKPatternsAPIAvailable = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	isPTKPatternsAPIAvailable: ( context, event: unknown ) => {
+		return (
+			event as {
+				payload: boolean;
+			}
+		 ).payload;
+	},
+} );
+
 export const assignActiveThemeHasMods = assign<
 	customizeStoreStateMachineContext,
 	customizeStoreStateMachineEvents
@@ -160,6 +192,14 @@ export const assignFlags = assign<
 		const isFontLibraryAvailable =
 			window.parent.__wcCustomizeStore.isFontLibraryAvailable || false;
 		return isFontLibraryAvailable;
+	},
+	isPTKPatternsAPIAvailable: () => {
+		if ( ! isIframe( window ) ) {
+			return window.__wcCustomizeStore.isPTKPatternsAPIAvailable;
+		}
+		const isPTKPatternsAPIAvailable =
+			window.parent.__wcCustomizeStore.isPTKPatternsAPIAvailable || false;
+		return isPTKPatternsAPIAvailable;
 	},
 	flowType: ( _context, event ) => {
 		const flowTypeData = event as DoneInvokeEvent< FlowType >;

@@ -78,8 +78,7 @@ class COTMigrationUtil {
 			return false;
 		}
 
-		$sync_status = $this->data_synchronizer->get_sync_status();
-		return 0 === $sync_status['current_pending_count'];
+		return 0 === $this->data_synchronizer->get_total_pending_count();
 	}
 
 	/**

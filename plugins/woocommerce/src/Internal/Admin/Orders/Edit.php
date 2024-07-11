@@ -474,7 +474,12 @@ class Edit {
 		wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false );
 		?>
 		<input type="hidden" id="hiddenaction" name="action" value="<?php echo esc_attr( $form_action ); ?>"/>
-		<input type="hidden" id="original_order_status" name="original_order_status" value="<?php echo esc_attr( $this->order->get_status() ); ?>"/>
+
+		<?php
+		$order_status = $this->order->get_status( 'edit' );
+		?>
+		<input type="hidden" id="original_order_status" name="original_order_status" value="<?php echo esc_attr( $order_status ); ?>"/>
+		<input type="hidden" id="original_post_status" name="original_post_status" value="<?php echo esc_attr( wc_is_order_status( 'wc-' . $order_status ) ? 'wc-' . $order_status : $order_status ); ?>"/>
 		<input type="hidden" id="referredby" name="referredby" value="<?php echo $referer ? esc_url( $referer ) : ''; ?>"/>
 		<input type="hidden" id="post_ID" name="post_ID" value="<?php echo esc_attr( $this->order->get_id() ); ?>"/>
 		<div id="poststuff">

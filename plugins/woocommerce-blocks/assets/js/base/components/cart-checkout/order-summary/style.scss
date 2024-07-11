@@ -1,5 +1,7 @@
 .wc-block-components-order-summary {
-
+	.wc-block-components-order-summary__button-text {
+		font-weight: 500;
+	}
 	.wc-block-components-panel__button {
 		padding-top: 0;
 		margin-top: 0;
@@ -40,7 +42,6 @@
 		.wc-block-components-product-metadata {
 			@include font-size(regular);
 		}
-
 	}
 
 	.wc-block-components-order-summary-item__image,
@@ -104,12 +105,10 @@
 		padding-top: $gap-smallest;
 	}
 
-
 	.wc-block-components-order-summary-item__individual-prices {
 		display: block;
 		padding-top: $gap-smaller;
 	}
-
 }
 
 .is-medium,

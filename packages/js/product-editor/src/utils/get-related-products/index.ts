@@ -28,11 +28,15 @@ export default async function getRelatedProducts(
 	options: getRelatedProductsOptions = {}
 ): Promise< Product[] | undefined > {
 	const { getEntityRecord } = select( 'core' );
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const product = getEntityRecord( 'postType', 'product', productId );
 	if ( ! product ) {
 		return;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	let relatedProductIds = product?.related_ids;
 	if ( ! relatedProductIds?.length ) {
 		if ( ! options?.fallbackToRandomProducts ) {
@@ -80,6 +84,7 @@ type getSuggestedProductsForOptions = {
 /**
  * Get suggested products for a given post ID.
  *
+ *
  * @param { getSuggestedProductsForOptions } options - Options.
  * @return { Promise<Product[] | undefined> } Suggested products.
  */
@@ -89,7 +94,8 @@ export async function getSuggestedProductsFor( {
 	forceRequest = false,
 	exclude = [],
 }: getSuggestedProductsForOptions ): Promise< Product[] | undefined > {
-	// @ts-expect-error There are no types for this.
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const { getEditedEntityRecord } = select( 'core' );
 
 	const data: Product = getEditedEntityRecord( 'postType', postType, postId );

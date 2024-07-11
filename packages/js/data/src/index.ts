@@ -94,6 +94,7 @@ export type {
 } from './product-variations/types';
 export {
 	QueryProductAttribute,
+	ProductAttribute,
 	ProductAttributeSelectors,
 } from './product-attributes/types';
 export * from './product-shipping-classes/types';

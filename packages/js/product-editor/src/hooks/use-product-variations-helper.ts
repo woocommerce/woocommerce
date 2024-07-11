@@ -112,7 +112,8 @@ export function useProductVariationsHelper() {
 
 		await Promise.all(
 			variations.map( ( variationId ) =>
-				// @ts-expect-error There are no types for this.
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 					'postType',
 					'product_variation',
@@ -157,7 +158,8 @@ export function useProductVariationsHelper() {
 				}
 			)
 			.then( async ( response ) => {
-				// @ts-expect-error There are no types for this.
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				await dispatch( 'core' ).invalidateResolution(
 					'getEntityRecord',
 					[ 'postType', 'product', productId ]

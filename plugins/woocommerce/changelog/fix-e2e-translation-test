@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Blocks E2E: Fix translation test where "Verzendmethoden" label is not visible

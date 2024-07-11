@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed "woocommerce_new_order" triggering on checkout blocks page visit.
