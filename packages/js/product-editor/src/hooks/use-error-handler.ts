@@ -65,7 +65,9 @@ function getErrorPropsWithActions(
 					navigateTo( {
 						url: getUrl( errorContext ),
 					} );
-					focusByValidatorId( validatorId );
+					setTimeout( () => {
+						focusByValidatorId( validatorId );
+					}, 100 );
 				},
 			},
 		],
@@ -89,6 +91,7 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 				validatorId = '',
 			} = error;
 			const errorContext = getParentTabId( context );
+			console.log( 'useErrorHandler', error );
 			switch ( code ) {
 				case 'variable_product_no_variation_prices':
 					response.message = errorMessage;

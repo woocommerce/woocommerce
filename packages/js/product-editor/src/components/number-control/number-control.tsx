@@ -29,6 +29,7 @@ import { useNumberInputProps } from '../../hooks/use-number-input-props';
 import { Label } from '../label/label';
 
 export type NumberProps = {
+	identifier?: string;
 	value: string;
 	onChange: ( selected: string ) => void;
 	label: string | JSX.Element;
@@ -52,6 +53,7 @@ const SHORT_DELAY = 100;
 export const NumberControl: React.FC< NumberProps > = forwardRef(
 	(
 		{
+			identifier,
 			value,
 			onChange,
 			label,
@@ -70,10 +72,11 @@ export const NumberControl: React.FC< NumberProps > = forwardRef(
 		}: NumberProps,
 		ref: ForwardedRef< HTMLInputElement >
 	) => {
-		const id = useInstanceId(
+		const instanceId = useInstanceId(
 			BaseControl,
 			'product_number_field'
 		) as string;
+		const id = identifier ?? instanceId;
 		const [ isFocused, setIsFocused ] = useState( false );
 		const unfocusIfOutside = ( event: React.FocusEvent ) => {
 			if (
