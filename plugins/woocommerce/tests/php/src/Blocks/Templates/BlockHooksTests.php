@@ -3,7 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Blocks\Templates;
 
 use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockHooksTestBlock;
-use \WP_UnitTestCase;
+use WP_UnitTestCase;
 
 /**
  * Tests Block Hooks logic.
@@ -38,6 +38,7 @@ class BlockHooksTests extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_mocked_block_does_not_get_hooked() {
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
 		$hooked_block_types = apply_filters( 'hooked_block_types', array(), 'after', 'core/navigation', array( 'mock-context' ) );
 		$this->assertEquals(
 			array(),
@@ -53,6 +54,7 @@ class BlockHooksTests extends WP_UnitTestCase {
 	 */
 	public function test_mocked_block_gets_hooked_with_correct_version() {
 		add_option( self::$option_name, '8.4.0' );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
 		$hooked_block_types = apply_filters( 'hooked_block_types', array(), 'after', 'core/navigation', array( 'mock-context' ) );
 		$this->assertEquals(
 			array( 'woocommerce/test-block' ),
@@ -69,6 +71,7 @@ class BlockHooksTests extends WP_UnitTestCase {
 	 */
 	public function test_mocked_block_does_not_get_hooked_with_incorrect_version() {
 		add_option( self::$option_name, '8.3.0' );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
 		$hooked_block_types = apply_filters( 'hooked_block_types', array(), 'after', 'core/navigation', array( 'mock-context' ) );
 		$this->assertEquals(
 			array(),
