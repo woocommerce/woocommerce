@@ -191,6 +191,7 @@ jobs:
 
       - name: 'Experimental: wp-env caching'
         if: ${{ matrix.testEnv.shouldCreate }}
+        uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
         with:
           path: '~/wp-env'
           key: "${{ runner.os }}-wp-env"
