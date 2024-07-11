@@ -241,11 +241,18 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 		// Hide username setting when using the block based checkout.
 		if ( CartCheckoutUtils::is_checkout_block_default() ) {
-			$account_settings = array_filter(
-				$account_settings,
+			$account_settings = array_map(
 				function ( $setting ) {
-					return 'woocommerce_registration_generate_password' !== $setting['id'];
-				}
+					switch ( $setting['id'] ) {
+						case 'woocommerce_registration_generate_username':
+							return array();
+						case 'woocommerce_registration_generate_password':
+							unset( $setting['checkboxgroup'] );
+							break;
+					}
+					return $setting;
+				},
+				$account_settings,
 			);
 		}
 
@@ -282,6 +289,9 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				function updateInputs() {
 					const isChecked = checkboxes.some(cb => cb && cb.checked);
 					inputs.forEach(input => {
+						if ( ! input ) {
+							return;
+						}
 						input.disabled = !isChecked;
 						input.closest('td').classList.toggle("disabled", !isChecked);
 					});
