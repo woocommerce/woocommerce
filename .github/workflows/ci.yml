@@ -198,6 +198,14 @@ jobs:
         working-directory: ${{ matrix.projectPath }}
         run: node ./github/workflows/scripts/override-wp-env-plugins.js
 
+      - name: 'Experimental: docker-related caching'
+        if: ${{ matrix.testEnv.shouldCreate }}
+        uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+        with:
+          path: '/var/lib/docker/overlay2'
+          key: "${{ runner.os }}-docker-overlays"
+          restore-keys: '${{ runner.os }}-docker-overlays'
+
       - name: 'Start Test Environment'
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
