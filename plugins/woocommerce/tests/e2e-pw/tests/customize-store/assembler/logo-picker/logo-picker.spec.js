@@ -193,7 +193,6 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 	test( 'Enabling the "use as site icon" option should set the image as the site icon', async ( {
 		assemblerPageObject,
 		logoPickerPageObject,
-		page,
 	} ) => {
 		const assembler = await assemblerPageObject.getAssembler();
 		const emptyLogoPicker =
@@ -202,17 +201,11 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		await logoPickerPageObject.pickImage( assembler );
 		await assembler.getByText( 'Use as site icon' ).click();
 
-		const [ res ] = await Promise.all( [
-			page.waitForResponse(
-				( response ) =>
-					response.url().includes( '/wp-json/wp/v2/settings' ) &&
-					response.request().method() === 'POST' &&
-					response.status() === 200
-			),
-			logoPickerPageObject.saveLogoSettings( assembler ),
-		] );
+		const [ logoResponse ] = await logoPickerPageObject.saveLogoSettings(
+			assembler
+		);
 
-		expect( res.ok() ).toBeTruthy();
+		expect( logoResponse.ok() ).toBeTruthy();
 	} );
 
 	test( 'The selected image should be visible on the frontend', async ( {
