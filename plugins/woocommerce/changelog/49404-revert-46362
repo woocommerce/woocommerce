@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: This PR reverts #46262, as that PR would render input values invisible under certain conditions.
+
