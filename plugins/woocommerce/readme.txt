@@ -173,5 +173,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Tweak - Revert #46262, as that PR would render input values invisible under certain conditions. [49404](https://github.com/woocommerce/woocommerce/pull/49404)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
