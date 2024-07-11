@@ -8,7 +8,7 @@ import { PlaywrightTestConfig, defineConfig, devices } from '@playwright/test';
 const { CI, DEFAULT_TIMEOUT_OVERRIDE } = process.env;
 
 const config: PlaywrightTestConfig = {
-	maxFailures: 0,
+	maxFailures: CI ? 30 : 0,
 	timeout: parseInt( DEFAULT_TIMEOUT_OVERRIDE || '', 10 ) || 100_000, // Defaults to 100s.
 	outputDir: `${ __dirname }/artifacts/test-results`,
 	globalSetup: fileURLToPath(
