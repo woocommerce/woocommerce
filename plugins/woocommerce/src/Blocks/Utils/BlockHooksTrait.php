@@ -35,7 +35,7 @@ trait BlockHooksTrait {
 		}
 
 		// Valid placements are those that have no version specified,
-		// or have a version that is less than or equal to version specified in the wc_hooked_blocks_version option.
+		// or have a version that is less than or equal to version specified in the woocommerce_hooked_blocks_version option.
 		$valid_placements = array_filter(
 			$this->hooked_block_placements,
 			function ( $placement ) use ( $block_hooks_version ) {

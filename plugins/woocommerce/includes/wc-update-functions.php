@@ -2731,7 +2731,7 @@ function wc_update_910_add_launch_your_store_tour_option() {
 }
 
 /**
- * Add wc_hooked_blocks_version option for existing stores that are using a theme that supports the Block Hooks API
+ * Add woocommerce_hooked_blocks_version option for existing stores that are using a theme that supports the Block Hooks API
  */
 function wc_update_920_add_wc_hooked_blocks_version_option() {
 	if ( ! wc_current_theme_is_fse_theme() && ! current_theme_supports( 'block-template-parts' ) ) {

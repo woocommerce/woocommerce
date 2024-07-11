@@ -21,7 +21,7 @@ class BlockHooksVersionTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_hooked_blocks_version option gets set on woocommerce_newly_installed action.
+	 * Test woocommerce_hooked_blocks_version option gets set on woocommerce_newly_installed action.
 	 *
 	 * @return void
 	 */
@@ -36,7 +36,7 @@ class BlockHooksVersionTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_hooked_blocks_version option gets set on theme switch from a classic to a block theme.
+	 * Test woocommerce_hooked_blocks_version option gets set on theme switch from a classic to a block theme.
 	 *
 	 * @return void
 	 */
