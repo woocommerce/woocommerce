@@ -141,7 +141,8 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		await logoPickerPageObject.pickImage( assembler );
 		await assembler
 			.getByRole( 'spinbutton', { name: 'Image width' } )
-			.fill( '100' );
+			.fill( '100' )
+			.blur();
 		const { width } = await editor
 			.getByLabel( 'Block: Header' )
 			.getByLabel( 'Block: Site Logo' )
@@ -198,18 +199,17 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		await logoPickerPageObject.pickImage( assembler );
 		await assembler.getByText( 'Use as site icon' ).click();
 
-		let isAValidResponse = false;
-		const waitForResponse = page.waitForResponse( ( response ) => {
-			isAValidResponse =
-				response.url().includes( '/wp-json/wp/v2/settings' ) &&
-				response.request().method() === 'POST' &&
-				response.status() === 200;
-			return isAValidResponse;
-		} );
-		await logoPickerPageObject.saveLogoSettings( assembler );
-		await waitForResponse;
+		const [ res ] = await Promise.all( [
+			page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/wp-json/wp/v2/settings' ) &&
+					response.request().method() === 'POST' &&
+					response.status() === 200
+			),
+			logoPickerPageObject.saveLogoSettings( assembler ),
+		] );
 
-		await expect( isAValidResponse ).toBe( true );
+		expect( res.ok() ).toBeTruthy();
 	} );
 
 	test( 'The selected image should be visible on the frontend', async ( {
