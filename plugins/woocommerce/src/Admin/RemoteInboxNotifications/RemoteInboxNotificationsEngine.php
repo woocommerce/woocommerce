@@ -258,15 +258,15 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 			return $tools;
 		}
 
-		$tools['refresh_inbox_notifications'] = array(
-			'name'     => __( 'Refresh Inbox Notifications', 'woocommerce' ),
+		$tools['refresh_remote_inbox_notifications'] = array(
+			'name'     => __( 'Refresh Remote Inbox Notifications', 'woocommerce' ),
 			'button'   => __( 'Refresh', 'woocommerce' ),
-			'desc'     => __( 'This will refresh the inbox notifications', 'woocommerce' ),
+			'desc'     => __( 'This will refresh the remote inbox notifications', 'woocommerce' ),
 			'callback' => function () {
 				RemoteInboxNotificationsDataSourcePoller::get_instance()->read_specs_from_data_sources();
 				RemoteInboxNotificationsEngine::run();
 
-				return __( 'Inbox notifications have been refreshed', 'woocommerce' );
+				return __( 'Remote inbox notifications have been refreshed', 'woocommerce' );
 			},
 		);
 
