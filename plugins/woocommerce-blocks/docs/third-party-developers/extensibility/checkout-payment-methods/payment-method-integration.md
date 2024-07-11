@@ -1,3 +1,9 @@
+---
+post_title: Cart and Checkout - Payment method integration for the Checkout block
+menu_title: Payment Method Integration
+tags: reference, checkout-payment-methods
+---
+
 # Payment Method Integration for the Checkout Block <!-- omit in toc -->
 
 The checkout block has an API interface for payment methods to integrate that consists of both a server side and client side implementation.
@@ -205,7 +211,7 @@ First, you create a class that extends `Automattic\WooCommerce\Blocks\Payments\I
 
 In your class:
 
--   Define a `name` property (which is a string used to reference your payment method).
+-   Define a `name` property (This property is a string used to reference your payment method. It is important to use the same name as in your client-side JavaScript payment method registration, see `name: 'my_payment_method'` in the options object above).
 -   Define an `initialize` function. This function will get called during the server side initialization process and is a good place to put any settings population etc. Basically anything you need to do to initialize your gateway. **Note, this will be called on every request so don't put anything expensive here.**
 -   Define an `is_active` function. This should return whether the payment method is active or not.
 -   Define a `get_payment_method_script_handles` function. In this function you should register your payment method scripts (using `wp_register_script`) and then return the script handles you registered with. This will be used to add your payment method as a dependency of the checkout script and thus take sure of loading it correctly. **Note:** You should still make sure any other asset dependencies your script has are registered properly here, if you're using Webpack to build your assets, you may want to use the [WooCommerce Webpack Dependency Extraction Plugin](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin) to make this easier for you.
@@ -257,13 +263,3 @@ function my_extension_woocommerce_blocks_support() {
 ```
 
 As an example, you can see how the Stripe extension adds it's integration in this [pull request](https://github.com/woocommerce/woocommerce-gateway-stripe/pull/1467/files).
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-payment-methods/payment-method-integration.md)
-
-<!-- /FEEDBACK -->

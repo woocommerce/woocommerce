@@ -70,16 +70,23 @@ const SiteVisibility = () => {
 	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
 
 	const getPrivateLink = () => {
+		const settings = window?.wcSettings;
+		const homeUrl = settings?.homeUrl;
+		const urlObject = new URL( homeUrl );
+
 		if ( storePagesOnly === 'yes' ) {
-			return (
-				window?.wcSettings?.admin?.siteVisibilitySettings
-					?.shop_permalink +
-				'?woo-share=' +
-				shareKey
-			);
+			const shopPermalink =
+				settings?.admin?.siteVisibilitySettings?.shop_permalink;
+			if ( shopPermalink ) {
+				urlObject.href = shopPermalink;
+			}
 		}
 
-		return window?.wcSettings?.homeUrl + '?woo-share=' + shareKey;
+		const params = new URLSearchParams( urlObject.search );
+		params.set( 'woo-share', shareKey );
+		urlObject.search = params.toString();
+
+		return urlObject.toString();
 	};
 
 	const copyClipboardRef = useCopyToClipboard( getPrivateLink, () => {

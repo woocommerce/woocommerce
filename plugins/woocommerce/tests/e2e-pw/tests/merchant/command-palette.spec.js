@@ -9,9 +9,11 @@ const clickOnCommandPaletteOption = async ( { page, optionName } ) => {
 	// Press `Ctrl` + `K` to open the command palette.
 	await page.keyboard.press( cmdKeyCombo );
 
+	// Using a regex here because Gutenberg changes the text of the placeholder
 	await page
-		.getByLabel( 'Command palette' )
-		.locator( 'input' )
+		.getByPlaceholder(
+			/Search (?:commands(?: and settings)?|for commands)/
+		)
 		.fill( optionName );
 
 	// Click on the relevant option.
@@ -48,86 +50,114 @@ const test = baseTest.extend( {
 	},
 } );
 
-test( 'can use the "Add new product" command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'Add new product',
-	} );
+test(
+	'can use the "Add new product" command',
+	{ tag: '@services' },
+	async ( { page } ) => {
+		await clickOnCommandPaletteOption( {
+			page,
+			optionName: 'Add new product',
+		} );
 
-	// Verify that the page has loaded.
-	await expect(
-		page.getByRole( 'heading', { name: 'Add new product' } )
-	).toBeVisible();
-} );
+		// Verify that the page has loaded.
+		await expect(
+			page.getByRole( 'heading', { name: 'Add new product' } )
+		).toBeVisible();
+	}
+);
 
-test( 'can use the "Add new order" command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'Add new order',
-	} );
+test(
+	'can use the "Add new order" command',
+	{ tag: '@services' },
+	async ( { page } ) => {
+		await clickOnCommandPaletteOption( {
+			page,
+			optionName: 'Add new order',
+		} );
 
-	// Verify that the page has loaded.
-	await expect(
-		page.getByRole( 'heading', { name: 'Add new order' } )
-	).toBeVisible();
-} );
+		// Verify that the page has loaded.
+		await expect(
+			page.getByRole( 'heading', { name: 'Add new order' } )
+		).toBeVisible();
+	}
+);
 
-test( 'can use the "Products" command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'Products',
-	} );
+test(
+	'can use the "Products" command',
+	{ tag: '@services' },
+	async ( { page } ) => {
+		await clickOnCommandPaletteOption( {
+			page,
+			optionName: 'Products',
+		} );
 
-	// Verify that the page has loaded.
-	await expect(
-		page.locator( 'h1' ).filter( { hasText: 'Products' } ).first()
-	).toBeVisible();
-} );
+		// Verify that the page has loaded.
+		await expect(
+			page.locator( 'h1' ).filter( { hasText: 'Products' } ).first()
+		).toBeVisible();
+	}
+);
 
-test( 'can use the "Orders" command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'Orders',
-	} );
+test(
+	'can use the "Orders" command',
+	{ tag: '@services' },
+	async ( { page } ) => {
+		await clickOnCommandPaletteOption( {
+			page,
+			optionName: 'Orders',
+		} );
 
-	// Verify that the page has loaded.
-	await expect(
-		page.locator( 'h1' ).filter( { hasText: 'Orders' } ).first()
-	).toBeVisible();
-} );
+		// Verify that the page has loaded.
+		await expect(
+			page.locator( 'h1' ).filter( { hasText: 'Orders' } ).first()
+		).toBeVisible();
+	}
+);
 
-test( 'can use the product search command', async ( { page, product } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: product.name,
-	} );
+test(
+	'can use the product search command',
+	{ tag: '@services' },
+	async ( { page, product } ) => {
+		await clickOnCommandPaletteOption( {
+			page,
+			optionName: product.name,
+		} );
 
-	// Verify that the page has loaded.
-	await expect( page.getByLabel( 'Product name' ) ).toHaveValue(
-		`${ product.name }`
-	);
-} );
+		// Verify that the page has loaded.
+		await expect( page.getByLabel( 'Product name' ) ).toHaveValue(
+			`${ product.name }`
+		);
+	}
+);
 
-test( 'can use a settings command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'WooCommerce Settings: Products',
-	} );
+test(
+	'can use a settings command',
+	{ tag: '@services' },
+	async ( { page } ) => {
+		await clickOnCommandPaletteOption( {
+			page,
+			optionName: 'WooCommerce Settings: Products',
+		} );
 
-	// Verify that the page has loaded.
-	await expect( page.getByText( 'Shop pages' ) ).toBeVisible();
-} );
+		// Verify that the page has loaded.
+		await expect( page.getByText( 'Shop pages' ) ).toBeVisible();
+	}
+);
 
-test( 'can use an analytics command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'WooCommerce Analytics: Products',
-	} );
+test(
+	'can use an analytics command',
+	{ tag: '@services' },
+	async ( { page } ) => {
+		await clickOnCommandPaletteOption( {
+			page,
+			optionName: 'WooCommerce Analytics: Products',
+		} );
 
-	// Verify that the page has loaded.
-	await expect(
-		page.locator( 'h1' ).filter( { hasText: 'Products' } )
-	).toBeVisible();
-	const pageTitle = await page.title();
-	expect( pageTitle.includes( 'Products ‹ Analytics' ) ).toBeTruthy();
-} );
+		// Verify that the page has loaded.
+		await expect(
+			page.locator( 'h1' ).filter( { hasText: 'Products' } )
+		).toBeVisible();
+		const pageTitle = await page.title();
+		expect( pageTitle.includes( 'Products ‹ Analytics' ) ).toBeTruthy();
+	}
+);

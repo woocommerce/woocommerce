@@ -376,8 +376,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			title:
 				( comingSoon === 'yes' &&
 					__( 'Preview store', 'woocommerce' ) ) ||
-				( comingSoon === 'no' && __( 'View store', 'woocommerce' ) ) ||
-				'',
+				__( 'View store', 'woocommerce' ),
 			visible: isHomescreen && query.task !== 'appearance',
 			onClick: () => {
 				window.open( getAdminSetting( 'shopUrl' ) );

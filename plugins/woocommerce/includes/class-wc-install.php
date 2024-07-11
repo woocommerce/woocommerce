@@ -257,6 +257,7 @@ class WC_Install {
 		),
 		'9.1.0' => array(
 			'wc_update_910_add_launch_your_store_tour_option',
+			'wc_update_910_remove_obsolete_user_meta',
 		),
 	);
 
@@ -266,6 +267,13 @@ class WC_Install {
 	 * @var string
 	 */
 	const NEWLY_INSTALLED_OPTION = 'woocommerce_newly_installed';
+
+	/**
+	 * Option name used to track new installation versions of WooCommerce.
+	 *
+	 * @var string
+	 */
+	const INITIAL_INSTALLED_VERSION = 'woocommerce_initial_installed_version';
 
 	/**
 	 * Option name used to uniquely identify installations of WooCommerce.
@@ -311,6 +319,13 @@ class WC_Install {
 			do_action_deprecated( 'woocommerce_admin_newly_installed', array(), '6.5.0', 'woocommerce_newly_installed' );
 
 			update_option( self::NEWLY_INSTALLED_OPTION, 'no' );
+
+			/**
+			 * This option is used to track the initial version of WooCommerce that was installed.
+			 *
+			 * @since 9.2.0
+			 */
+			add_option( self::INITIAL_INSTALLED_VERSION, WC()->version, '', false );
 		}
 	}
 
@@ -1635,6 +1650,7 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `product_id` bigint(20) NOT NULL,
   `sku` varchar(100) NULL default '',
+  `global_unique_id` varchar(100) NULL default '',
   `virtual` tinyint(1) NULL default 0,
   `downloadable` tinyint(1) NULL default 0,
   `min_price` decimal(19,4) NULL default NULL,

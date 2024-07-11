@@ -781,7 +781,7 @@ describe( 'loadLocaleData', () => {
 	} );
 
 	it( 'should load locale data on user locale', () => {
-		// initialize locale. Gutenberg normaly does this, but not in test environment.
+		// initialize locale. Gutenberg normally does this, but not in test environment.
 		moment.locale( 'fr_FR', {} );
 
 		const weekdaysShort = [

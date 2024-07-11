@@ -11,13 +11,13 @@ import {
 	lazy,
 	Suspense,
 } from '@wordpress/element';
-import { dispatch, select, useSelect } from '@wordpress/data';
+import { dispatch, select, useDispatch, useSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { Product } from '@woocommerce/data';
-import { SelectControl } from '@wordpress/components';
+import { getPath, getQuery } from '@woocommerce/navigation';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -30,7 +30,7 @@ import {
 	BlockTools,
 	ObserveTyping,
 } from '@wordpress/block-editor';
-// It doesn't seem to notice the External dependency block whn @ts-ignore is added.
+// It doesn't seem to notice the External dependency block when @ts-ignore is added.
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -51,7 +51,8 @@ import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { LoadingState } from './loading-state';
-import type { ProductFormTemplateProps, ProductTemplate } from '../../types';
+import type { ProductFormPostProps, ProductTemplate } from '../../types';
+import isProductFormTemplateSystemEnabled from '../../utils/is-product-form-template-system-enabled';
 
 const PluginArea = lazy( () =>
 	import( '@wordpress/plugins' ).then( ( module ) => ( {
@@ -87,9 +88,6 @@ export function BlockEditor( {
 	productId,
 	setIsEditorLoading,
 }: BlockEditorProps ) {
-	const isProductEditorTemplateSystemEnabled =
-		!! window.wcAdminFeatures?.[ 'product-editor-template-system' ];
-
 	const [ selectedProductFormId, setSelectedProductFormId ] = useState<
 		number | null
 	>( null );
@@ -224,7 +222,7 @@ export function BlockEditor( {
 				per_page: -1,
 			} ) || []
 		);
-	}, [] ) as ProductFormTemplateProps[];
+	}, [] ) as ProductFormPostProps[];
 
 	// Set the default product form template ID.
 	useEffect( () => {
@@ -246,7 +244,7 @@ export function BlockEditor( {
 	const productFormTemplate = useMemo(
 		function pickAndParseTheProductFormTemplate() {
 			if (
-				! isProductEditorTemplateSystemEnabled ||
+				! isProductFormTemplateSystemEnabled() ||
 				! selectedProductFormId
 			) {
 				return undefined;
@@ -262,11 +260,7 @@ export function BlockEditor( {
 
 			return undefined;
 		},
-		[
-			isProductEditorTemplateSystemEnabled,
-			productForms,
-			selectedProductFormId,
-		]
+		[ productForms, selectedProductFormId ]
 	);
 
 	useLayoutEffect(
@@ -284,7 +278,7 @@ export function BlockEditor( {
 			 * If the product form template is not available, use the block instances.
 			 * ToDo: Remove this fallback once the product form template is stable/available.
 			 */
-			const editorTemplate = productFormTemplate ?? blockInstances;
+			const editorTemplate = blockInstances ?? productFormTemplate;
 
 			onChange( editorTemplate, {} );
 
@@ -303,12 +297,42 @@ export function BlockEditor( {
 			settings,
 			productTemplate,
 			productFormTemplate,
+			productId,
 		]
 	);
 
 	useEffect( () => {
 		setIsEditorLoading( isEditorLoading );
 	}, [ isEditorLoading ] );
+
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	const { editEntityRecord } = useDispatch( 'core' );
+
+	useEffect( function maybeSetProductTemplateFromURL() {
+		const query: { template?: string } = getQuery();
+		const isAddProduct = getPath().endsWith( 'add-product' );
+		if ( isAddProduct && query.template ) {
+			const productTemplates =
+				window.productBlockEditorSettings?.productTemplates ?? [];
+			const selectedProductTemplate = productTemplates.find(
+				( t ) => t.id === query.template
+			);
+			if ( selectedProductTemplate ) {
+				editEntityRecord( 'postType', postType, productId, {
+					...selectedProductTemplate.productData,
+					meta_data: [
+						...( selectedProductTemplate.productData.meta_data ??
+							[] ),
+						{
+							key: '_product_template_id',
+							value: selectedProductTemplate.id,
+						},
+					],
+				} );
+			}
+		}
+	}, [] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( selectCore ) => {
@@ -336,34 +360,8 @@ export function BlockEditor( {
 		);
 	}
 
-	const formTemplateSelectValues = productForms?.map( ( form ) => ( {
-		label: form.title.raw,
-		value: String( form.id ),
-	} ) );
-
 	return (
 		<div className="woocommerce-product-block-editor">
-			{ isProductEditorTemplateSystemEnabled && (
-				<div style={ { margin: '32px', width: '250px' } }>
-					<SelectControl
-						label={ __(
-							'Choose form template type',
-							'woocommerce'
-						) }
-						options={ formTemplateSelectValues }
-						onChange={ ( value: string ) =>
-							setSelectedProductFormId( parseInt( value, 10 ) )
-						}
-						disabled={ ! productForms }
-						className="woocommerce-product-block-editor__product-type-selector"
-						help={ __(
-							'This is a temporary setting.',
-							'woocommerce'
-						) }
-					/>
-				</div>
-			) }
-
 			<BlockContextProvider value={ context }>
 				<BlockEditorProvider
 					value={ blocks }

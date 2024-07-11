@@ -14,7 +14,7 @@ pnpm --filter='@woocommerce/plugin-woocommerce' watch:build
 
 Next, run the following command from the [`woocommerce-blocks` plugin folder](../../../woocommerce-blocks/) to start a `wp-env` instance and install all the testing products, languages, etc.:
 
-```shell
+```sh
 cd plugins/woocommerce-blocks/
 pnpm env:start
 ```
@@ -28,7 +28,7 @@ The testing environment should now be ready under [localhost:8889](http://localh
 
 Occasionally, you'll need to reset the environment, e.g., when testing products have been updated. To do that, run the following command and go make yourself some coffee:
 
-```shell
+```sh
 pnpm env:restart
 ```
 
@@ -37,9 +37,9 @@ pnpm env:restart
 > [!NOTE]
 > If you're using VSCode, we recommend using the [Playwright Test](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright) extension to run and debug the tests.
 
-Here is a basic set of commands to quickly start running and debugging the tests. For full documentation, see the official Playwright guide on [Running and Debugging Tests](https://playwright.dev/docs/running-tests). 
+Here is a basic set of commands to quickly start running and debugging the tests. For full documentation, see the official Playwright guide on [Running and Debugging Tests](https://playwright.dev/docs/running-tests).
 
-```shell
+```sh
 # Run all available tests.
 pnpm test:e2e
 
@@ -78,7 +78,7 @@ When a test fails in CI, a failure artifact is zipped and uploaded to the Summar
 
 Once you download and extract that zip, you'll see dedicated folders for the failed test artifacts. In CI, we retry running a failed test twice before considering it a failure, so there can be up to three folders per failed test. Each of those folders should contain a Playwright trace zip file and a screenshot from the failure moment. On the first retry, we also record the entire test, so the first retry folder should contain a video recording as well. To view a trace, head to the [Playwright Trace Viewer](https://trace.playwright.dev) page and drag and drop the trace zip file there, or run it from the command line:
 
-```shell
+```sh
 npx playwright show-trace <path-to-the-trace>
 ```
 
@@ -120,7 +120,6 @@ function my_fancy_plugin() {
 add_action('wp_footer', 'my_fancy_plugin');
 ```
 
-
 Once the plugin is saved, it will be automatically picked up by `wp-env` - no need to restart the environment. To activate your plugin, use the `RequestUtils.activatePlugin()` API, for example:
 
 ```ts
@@ -129,17 +128,17 @@ Once the plugin is saved, it will be automatically picked up by `wp-env` - no ne
 import { test, expect } from '@woocommerce/e2e-utils';
 
 test( 'My fancy plugin', async ( { page, requestUtils } ) => {
-  await requestUtils.activatePlugin(
-    'woocommerce-blocks-test-my-fancy-plugin'
-  );
+	await requestUtils.activatePlugin(
+		'woocommerce-blocks-test-my-fancy-plugin'
+	);
 
-  await page.goto( '/shop' );
+	await page.goto( '/shop' );
 
-  await expect( page.getByText( 'Howdy!' ) ).toBeVisible();
+	await expect( page.getByText( 'Howdy!' ) ).toBeVisible();
 } );
 ```
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > A plugin's slug is created automatically **from the plugin's name**, not from the `@package` statement as you might think. So, if your plugin is named `WooCommerce Blocks Test Bazzinga`, you'll need to activate it by `woocommerce-blocks-test-bazzinga`.
 
 ### Themes
@@ -148,11 +147,11 @@ Currently, the default theme is Twenty Twenty Four. Activating other themes is d
 
 ```ts
 test.beforeEach( async ( { page, requestUtils } ) => {
-  await requestUtils.activateTheme( 'storefront' );
+	await requestUtils.activateTheme( 'storefront' );
 } );
 ```
 
-> [!NOTE]  
+> [!NOTE]
 > Unless it's a one-off thing, remember to use the `beforeEach` hook to activate your theme. Each test starts with a clean database, which means the theme will be reset to the default one as well.
 
 #### Adding a new theme
@@ -171,36 +170,36 @@ Most of the time, it's better to do a little repetition instead of creating a ut
 import { test as base, expect, Editor } from '@woocommerce/e2e-utils';
 
 class CartUtils {
-  editor: Editor
+	editor: Editor;
 
-  constructor( { editor }: { editor: Editor } ) {
-    this.editor = editor;
-  }
+	constructor( { editor }: { editor: Editor } ) {
+		this.editor = editor;
+	}
 
-  async addClothes( list ) {
-    // Add clothes from the list.
-  }
+	async addClothes( list ) {
+		// Add clothes from the list.
+	}
 
-  async addBooks( list ) {
-    // Add books from the list.
-  }
+	async addBooks( list ) {
+		// Add books from the list.
+	}
 }
 
 const test = base.extend< { cartUtils: CartUtils } >( {
-  cartUtils: async ( { editor }, use ) => {
-    await use( new CartUtils( { editor } ) );
-  },
+	cartUtils: async ( { editor }, use ) => {
+		await use( new CartUtils( { editor } ) );
+	},
 } );
 
-test( 'Add products', async( { admin, cartUtils } ) => {
-  await admin.createNewPost();
-  await cartUtils.addClotes( [ 'Shirt', 'Cap', 'Pants' ] );
-  await cartUtils.addBooks( [ 'Cooking with Woo' ] )
+test( 'Add products', async ( { admin, cartUtils } ) => {
+	await admin.createNewPost();
+	await cartUtils.addClotes( [ 'Shirt', 'Cap', 'Pants' ] );
+	await cartUtils.addBooks( [ 'Cooking with Woo' ] );
 
-  await page.goto( '/cart' );
+	await page.goto( '/cart' );
 
-  await expect( this.page.getByLabel( 'Shirt' ) ).toBeVisible();
-  // etc.
+	await expect( this.page.getByLabel( 'Shirt' ) ).toBeVisible();
+	// etc.
 } );
 ```
 
@@ -214,11 +213,11 @@ If you've come up with a utility that you think should be a part of the Core uti
 import { Editor as CoreEditor } from '@wordpress/e2e-test-utils-playwright';
 
 export class Editor extends CoreEditor {
-  async insertAllWooBlocks() {
-    for ( const wooBlock of [ 'all', 'woo', 'blocks' ] ) {
-      await this.insertBlock( wooBlock );
-    }
-  }
+	async insertAllWooBlocks() {
+		for ( const wooBlock of [ 'all', 'woo', 'blocks' ] ) {
+			await this.insertBlock( wooBlock );
+		}
+	}
 }
 ```
 
@@ -237,51 +236,51 @@ When you have the template ready, we recommend creating a [test fixture](https:/
 import { test as base, expect, TemplateCompiler } from '@woocommerce/e2e-utils';
 
 const test = base.extend< {
-  filteredProductsTemplate: TemplateCompiler
+	filteredProductsTemplate: TemplateCompiler;
 } >( {
-  filteredProductsTemplate: async ( { requestUtils }, use ) => {
-    const compiler = await requestUtils.createTemplateFromFile(
-      'archive-product_with-filters'
-    );
-    await use( compiler );
-  },
+	filteredProductsTemplate: async ( { requestUtils }, use ) => {
+		const compiler = await requestUtils.createTemplateFromFile(
+			'archive-product_with-filters'
+		);
+		await use( compiler );
+	},
 } );
 
 test( 'Renders correct products for $10-$99 price range', async ( {
-  page,
-  filteredProductsTemplate,
+	page,
+	filteredProductsTemplate,
 } ) => {
-  await filteredProductsTemplate.compile( {
-    price: {
-      from: '$10',
-      to: '$99',
-    },
-  } );
+	await filteredProductsTemplate.compile( {
+		price: {
+			from: '$10',
+			to: '$99',
+		},
+	} );
 
-  await page.goto( '/shop' );
+	await page.goto( '/shop' );
 
-  await expect( page.getByLabel( 'Products' ) ).toHaveText( [
-    'Socks',
-    'T-Shirt',
-  ] );
+	await expect( page.getByLabel( 'Products' ) ).toHaveText( [
+		'Socks',
+		'T-Shirt',
+	] );
 } );
 
 test( 'Renders correct products for $100-$999 price range', async ( {
-  page,
-  filteredProductsTemplate,
+	page,
+	filteredProductsTemplate,
 } ) => {
-  await filteredProductsTemplate.compile( {
-    price: {
-      from: '$100',
-      to: '$990',
-    },
-  } );
+	await filteredProductsTemplate.compile( {
+		price: {
+			from: '$100',
+			to: '$990',
+		},
+	} );
 
-  await page.goto( '/shop' );
+	await page.goto( '/shop' );
 
-  await expect( page.getByLabel( 'Products' ) ).toHaveText( [
-    'Rolex',
-    'Lambo',
-  ] );
+	await expect( page.getByLabel( 'Products' ) ).toHaveText( [
+		'Rolex',
+		'Lambo',
+	] );
 } );
 ```

@@ -7,7 +7,7 @@ import {
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useCollection } from '@woocommerce/base-context/hooks';
 import { AttributeTerm } from '@woocommerce/types';
 import { Spinner } from '@wordpress/components';
@@ -85,6 +85,13 @@ const addHighestProductCountAttributeToTemplate = (
 					...blockAttributes,
 					heading: highestProductCountAttribute.name,
 					attributeId: highestProductCountAttribute.id,
+					metadata: {
+						name: sprintf(
+							/* translators: %s is referring to the filter attribute name. For example: Color, Size, etc. */
+							__( '%s (Experimental)', 'woocommerce' ),
+							highestProductCountAttribute.name
+						),
+					},
 				},
 			];
 		}

@@ -1,3 +1,9 @@
+---
+post_title: Cart and Checkout Filters - Order Summary Items
+menu_title: Order Summary Items
+tags: reference, checkout-available-filters
+---
+<!-- markdownlint-disable MD024 -->
 # Order Summary Items
 
 The following Order Summary Items filters are available:
@@ -89,18 +95,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="377" alt="Before applying the Cart Item Class filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/ff555a84-8d07-4889-97e1-8f7d50d47350">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="383" alt="After applying the Cart Item Class filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/183809d8-03dc-466d-a415-d8d2062d880f">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/ff555a84-8d07-4889-97e1-8f7d50d47350) |![After applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/183809d8-03dc-466d-a415-d8d2062d880f) |
 
 ## `cartItemPrice`
 
@@ -176,18 +173,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="381" alt="Before applying the Cart Item Price filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/58137fc4-884d-4783-9275-5f78abec1473">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="382" alt="Before applying the Cart Item Price filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/fb502b74-6447-49a8-8d35-241e738f089d">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/58137fc4-884d-4783-9275-5f78abec1473) |![After applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/fb502b74-6447-49a8-8d35-241e738f089d) |
 
 ## `itemName`
 
@@ -262,18 +250,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="389" alt="Before applying the Item Name filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3dc0bda7-fccf-4f35-a2e2-aa04e616563a">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="383" alt="After applying the Item Name filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/c96b8394-03a7-45f6-813b-5335f4bf83b5">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3dc0bda7-fccf-4f35-a2e2-aa04e616563a) |![After applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/c96b8394-03a7-45f6-813b-5335f4bf83b5) |
 
 ## `subtotalPriceFormat`
 
@@ -359,18 +338,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="382" alt="Before applying the Subtotal Price Format filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3574e7ae-9857-4651-ac9e-e6b597e3a589">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="390" alt="After applying the Subtotal Price Format filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/94e18439-6d6b-44a4-ade1-8302c5984641">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3574e7ae-9857-4651-ac9e-e6b597e3a589) |![After applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/94e18439-6d6b-44a4-ade1-8302c5984641) |
 
 ## Cart object
 
@@ -485,11 +455,3 @@ The Cart Item object of the filters above has the following keys:
     -   _line_total_tax_ `string` - The line total tax.
 -   _type_ `string` - The item type.
 -   _variation_ `array` - The item variation array.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/available-filters/order-summary-items.md)

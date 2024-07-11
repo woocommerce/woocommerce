@@ -3,7 +3,8 @@ const { REPOSITORY, RUN_ID, GITHUB_TOKEN, TEST_MODE } = process.env;
 const IGNORED_JOBS = [
 	/Evaluate Project Job Statuses/,
 	/Report results on Slack/,
-	/Publish reports/,
+	/Test reports/,
+	/Create issues for flaky tests/,
 ];
 
 const isJobRequired = ( job ) => {
