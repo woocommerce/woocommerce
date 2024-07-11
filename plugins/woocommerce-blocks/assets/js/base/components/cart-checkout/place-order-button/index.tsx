@@ -51,9 +51,7 @@ const PlaceOrderButton = ( {
 		>
 			{ label }
 			{ showPrice && (
-				<div className="wc-block-components-checkout-place-order-button__separator">
-					·
-				</div>
+				<div className="wc-block-components-checkout-place-order-button__separator" />
 			) }
 			{ showPrice && (
 				<div className="wc-block-components-checkout-place-order-button__price">
