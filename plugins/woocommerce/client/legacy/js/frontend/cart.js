@@ -226,7 +226,7 @@ jQuery( function ( $ ) {
 		 * Handles when a shipping method is selected.
 		 */
 		shipping_method_selected: function ( event ) {
-			var shipping_methods = {};			
+			var shipping_methods = {};
 
 			// eslint-disable-next-line max-len
 			$(
