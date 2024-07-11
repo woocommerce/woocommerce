@@ -173,6 +173,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Prevent HTML tags being rendered on order confirmation and emails [#49370](https://github.com/woocommerce/woocommerce/pull/49370)
+* Security - Improve the way we cache information about recent customer activity, to prevent the wrong data being retrieved in some specific conditions involving multisite networks. [#49373](https://github.com/woocommerce/woocommerce/pull/49373)
 * Fix - Prevent BatchProcessingController from cleaning up processors after a premature shutdown. [#49243](https://github.com/woocommerce/woocommerce/pull/49243)
 * Fix - CYS: fix not template set correctly. [#49113](https://github.com/woocommerce/woocommerce/pull/49113)
 * Fix - CYS: Disable readonly mode only when full composability feature flag is enabled. [#48752](https://github.com/woocommerce/woocommerce/pull/48752)
