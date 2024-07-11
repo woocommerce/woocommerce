@@ -141,7 +141,9 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		await logoPickerPageObject.pickImage( assembler );
 		await assembler
 			.getByRole( 'spinbutton', { name: 'Image width' } )
-			.fill( '100' )
+			.fill( '100' );
+		await assembler
+			.getByRole( 'spinbutton', { name: 'Image width' } )
 			.blur();
 		const { width } = await editor
 			.getByLabel( 'Block: Header' )
