@@ -12,7 +12,7 @@
  *
  * @see         https://woocommerce.com/document/template-structure/
  * @package     WooCommerce\Templates
- * @version     2.3.0
+ * @version     9.2.0
  * @see         woocommerce_breadcrumb()
  */
 
