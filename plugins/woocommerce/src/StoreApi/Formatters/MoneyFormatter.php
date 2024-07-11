@@ -31,6 +31,8 @@ class MoneyFormatter implements FormatterInterface {
 			$options['rounding_mode'] = PHP_ROUND_HALF_UP;
 		}
 
+		// This ensures we work with floats from this point on. Also, if $value skips this as an array/object,
+		// it will throw a fatal error or produce a notice respectively.
 		if( is_int( $value ) || is_string( $value ) ) {
 			$value = floatval( $value );
 		}
