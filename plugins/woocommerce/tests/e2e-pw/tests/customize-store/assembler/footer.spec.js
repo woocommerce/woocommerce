@@ -18,7 +18,7 @@ const test = base.extend( {
 	},
 } );
 
-test.describe( 'Assembler -> Footers', () => {
+test.describe( 'Assembler -> Footers', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -147,7 +147,7 @@ test.describe( 'Assembler -> Footers', () => {
 
 		for ( const footerPicker of footerPickers ) {
 			await footerPicker.waitFor();
-			await footerPicker.click();
+			await footerPicker.click( { delay: 300 } );
 
 			const footerPickerClass = await footerPicker
 				.frameLocator( 'iframe' )
@@ -156,10 +156,11 @@ test.describe( 'Assembler -> Footers', () => {
 
 			const expectedFooterClass = extractFooterClass( footerPickerClass );
 
-			const footerPattern = await editor.locator(
+			const footerPattern = editor.locator(
 				`footer div.wc-blocks-footer-pattern`
 			);
 
+			await footerPattern.waitFor();
 			await expect(
 				await footerPattern.getAttribute( 'class' )
 			).toContain( expectedFooterClass );

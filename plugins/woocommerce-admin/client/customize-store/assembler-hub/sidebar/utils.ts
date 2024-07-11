@@ -7,7 +7,7 @@ import { isEqual } from 'lodash';
 /**
  * Internal dependencies
  */
-import { PatternWithBlocks } from '../hooks/use-patterns';
+import { PatternWithBlocks } from '~/customize-store/types/pattern';
 
 export const findPatternByBlock = (
 	patterns: PatternWithBlocks[],

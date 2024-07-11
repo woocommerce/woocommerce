@@ -5,7 +5,7 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { type ElementType, useMemo } from '@wordpress/element';
-import { EditorBlock, isEmpty } from '@woocommerce/types';
+import { EditorBlock } from '@woocommerce/types';
 import { addFilter } from '@wordpress/hooks';
 import { ProductCollectionFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import {
@@ -15,6 +15,7 @@ import {
 	HOURS_TO_DISPLAY_UPGRADE_NOTICE,
 	UPGRADE_NOTICE_DISPLAY_COUNT_THRESHOLD,
 } from '@woocommerce/blocks/migration-products-to-product-collection';
+import { recordEvent } from '@woocommerce/tracks';
 import {
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -25,13 +26,14 @@ import {
  * Internal dependencies
  */
 import metadata from '../../block.json';
+import { useTracksLocation } from '../../tracks-utils';
 import {
+	ProductCollectionEditComponentProps,
 	ProductCollectionAttributes,
 	CoreFilterNames,
 	FilterName,
 } from '../../types';
-import { setQueryAttribute } from '../../utils';
-import { getDefaultSettings } from '../../constants';
+import { setQueryAttribute, getDefaultSettings } from '../../utils';
 import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
 import InheritQueryControl from './inherit-query-control';
@@ -53,15 +55,30 @@ const prepareShouldShowFilter =
 	};
 
 const ProductCollectionInspectorControls = (
-	props: BlockEditProps< ProductCollectionAttributes >
+	props: ProductCollectionEditComponentProps
 ) => {
-	const { query, collection, hideControls } = props.attributes;
-	const inherit = query?.inherit;
+	const { attributes, context, setAttributes } = props;
+	const { query, hideControls, displayLayout } = attributes;
+
+	const tracksLocation = useTracksLocation( context.templateSlug );
+	const trackInteraction = ( filter: FilterName ) =>
+		recordEvent( 'blocks_product_collection_inspector_control_clicked', {
+			collection: attributes.collection,
+			location: tracksLocation,
+			filter,
+		} );
+
+	const inherit = query?.inherit || false;
+
 	const shouldShowFilter = prepareShouldShowFilter( hideControls );
 
+	const isArchiveTemplate =
+		tracksLocation === 'product-catalog' ||
+		tracksLocation === 'product-archive';
+
 	const showQueryControls = inherit === false;
-	const showInheritQueryControls =
-		isEmpty( collection ) || shouldShowFilter( CoreFilterNames.INHERIT );
+	const showInheritQueryControl =
+		isArchiveTemplate && shouldShowFilter( CoreFilterNames.INHERIT );
 	const showOrderControl =
 		showQueryControls && shouldShowFilter( CoreFilterNames.ORDER );
 	const showFeaturedControl = shouldShowFilter( CoreFilterNames.FEATURED );
@@ -73,12 +90,13 @@ const ProductCollectionInspectorControls = (
 	);
 
 	const displayControlProps = {
-		setAttributes: props.setAttributes,
-		displayLayout: props.attributes.displayLayout,
+		setAttributes,
+		displayLayout,
 	};
 
 	const queryControlProps = {
 		setQueryAttribute: setQueryAttributeBind,
+		trackInteraction,
 		query,
 	};
 
@@ -93,7 +111,7 @@ const ProductCollectionInspectorControls = (
 					props.setAttributes( defaultSettings );
 				} }
 			>
-				{ showInheritQueryControls && (
+				{ showInheritQueryControl && (
 					<InheritQueryControl { ...queryControlProps } />
 				) }
 				<LayoutOptionsControl { ...displayControlProps } />

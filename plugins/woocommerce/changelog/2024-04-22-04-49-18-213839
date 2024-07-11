@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix registration of plugin on woocommerce.com if plugin is already active on site.

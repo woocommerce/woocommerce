@@ -8,15 +8,17 @@ import { createContext, useContext } from '@wordpress/element';
  */
 export type CheckoutBlockContextProps = {
 	showCompanyField: boolean;
-	showApartmentField: boolean;
-	showPhoneField: boolean;
 	requireCompanyField: boolean;
+	showApartmentField: boolean;
+	requireApartmentField: boolean;
+	showPhoneField: boolean;
 	requirePhoneField: boolean;
 	showOrderNotes: boolean;
 	showPolicyLinks: boolean;
 	showReturnToCart: boolean;
 	cartPageId: number;
 	showRateAfterTaxName: boolean;
+	showFormStepNumbers: boolean;
 };
 
 export type CheckoutBlockControlsContextProps = {
@@ -26,15 +28,17 @@ export type CheckoutBlockControlsContextProps = {
 export const CheckoutBlockContext: React.Context< CheckoutBlockContextProps > =
 	createContext< CheckoutBlockContextProps >( {
 		showCompanyField: false,
-		showApartmentField: false,
-		showPhoneField: false,
 		requireCompanyField: false,
+		showApartmentField: false,
+		requireApartmentField: false,
+		showPhoneField: false,
 		requirePhoneField: false,
 		showOrderNotes: true,
 		showPolicyLinks: true,
 		showReturnToCart: true,
 		cartPageId: 0,
 		showRateAfterTaxName: false,
+		showFormStepNumbers: false,
 	} );
 
 export const CheckoutBlockControlsContext: React.Context< CheckoutBlockControlsContextProps > =

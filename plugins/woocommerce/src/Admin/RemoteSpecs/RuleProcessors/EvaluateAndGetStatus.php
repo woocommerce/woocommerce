@@ -46,6 +46,13 @@ class EvaluateAndGetStatus {
 				: Note::E_WC_ADMIN_NOTE_PENDING;
 		}
 
+		// If the spec is an alert type and the note is unactioned, set to pending if the spec no longer applies.
+		if ( isset( $spec->type ) && in_array( $spec->type, array( 'error', 'update' ), true )
+			&& Note::E_WC_ADMIN_NOTE_UNACTIONED === $current_status
+			&& ! $evaluated_result ) {
+			return Note::E_WC_ADMIN_NOTE_PENDING;
+		}
+
 		// When allow_redisplay isn't set, just leave the note alone.
 		if ( ! isset( $spec->allow_redisplay ) || ! $spec->allow_redisplay ) {
 			return $current_status;

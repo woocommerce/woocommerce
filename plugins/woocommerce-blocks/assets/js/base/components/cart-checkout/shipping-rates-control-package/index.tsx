@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { _n, sprintf } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Label, Panel } from '@woocommerce/blocks-components';
@@ -125,7 +125,7 @@ export const ShippingRatesControlPackage = ( {
 	if ( shouldBeCollapsible ) {
 		return (
 			<Panel
-				className={ classNames(
+				className={ clsx(
 					'wc-block-components-shipping-rates-control__package',
 					className,
 					{
@@ -147,7 +147,7 @@ export const ShippingRatesControlPackage = ( {
 
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				'wc-block-components-shipping-rates-control__package',
 				className,
 				{

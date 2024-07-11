@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Button, Popover } from '@wordpress/components';
 import { Icon, cancelCircleFilled } from '@wordpress/icons';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -47,7 +47,7 @@ const Tag = ( {
 		return null;
 	}
 	label = decodeEntities( label );
-	const classes = classnames( 'woocommerce-tag', className, {
+	const classes = clsx( 'woocommerce-tag', className, {
 		'has-remove': !! remove,
 	} );
 	const labelId = `woocommerce-tag__label-${ instanceId }`;

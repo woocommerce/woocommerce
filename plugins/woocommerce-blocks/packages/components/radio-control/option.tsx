@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -25,15 +25,11 @@ const Option = ( {
 	return (
 		// eslint-disable-next-line jsx-a11y/label-has-associated-control
 		<label
-			className={ classnames(
-				'wc-block-components-radio-control__option',
-				{
-					'wc-block-components-radio-control__option-checked':
-						checked,
-					'wc-block-components-radio-control__option--checked-option-highlighted':
-						checked && highlightChecked,
-				}
-			) }
+			className={ clsx( 'wc-block-components-radio-control__option', {
+				'wc-block-components-radio-control__option-checked': checked,
+				'wc-block-components-radio-control__option--checked-option-highlighted':
+					checked && highlightChecked,
+			} ) }
 			htmlFor={ `${ name }-${ value }` }
 		>
 			<input
@@ -44,14 +40,28 @@ const Option = ( {
 				value={ value }
 				onChange={ onChangeValue }
 				checked={ checked }
-				aria-describedby={ classnames( {
+				aria-describedby={ clsx( {
 					[ `${ name }-${ value }__label` ]: label,
 					[ `${ name }-${ value }__secondary-label` ]: secondaryLabel,
 					[ `${ name }-${ value }__description` ]: description,
 					[ `${ name }-${ value }__secondary-description` ]:
 						secondaryDescription,
 				} ) }
-				disabled={ disabled }
+				aria-disabled={ disabled }
+				onKeyDown={ ( event ) => {
+					// Prevent option changing via keyboard when loading from server.
+					if (
+						disabled &&
+						[
+							'ArrowUp',
+							'ArrowDown',
+							'AllowLeft',
+							'ArrowRight',
+						].includes( event.key )
+					) {
+						event.preventDefault();
+					}
+				} }
 			/>
 			<OptionLayout
 				id={ `${ name }-${ value }` }

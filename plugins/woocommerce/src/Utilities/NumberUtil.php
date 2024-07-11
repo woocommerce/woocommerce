@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Utilities;
  * A class of utilities for dealing with numbers.
  */
 final class NumberUtil {
-
 	/**
 	 * Round a number using the built-in `round` function, but unless the value to round is numeric
 	 * (a number or a string that can be parsed as a number), apply 'floatval' first to it
@@ -30,5 +29,24 @@ final class NumberUtil {
 			$val = floatval( $val );
 		}
 		return round( $val, $precision, $mode );
+	}
+
+	/**
+	 * Get the sum of an array of values using the built-in array_sum function, but sanitize the array values
+	 * first to ensure they are all floats.
+	 *
+	 * This is needed because in PHP 8.3 non-numeric values that cannot be cast as an int or a float will
+	 * cause an E_WARNING to be emitted. Prior to PHP 8.3 these values were just ignored.
+	 *
+	 * Note that, unlike the built-in array_sum, this one will always return a float, never an int.
+	 *
+	 * @param array $arr The array of values to sum.
+	 *
+	 * @return float
+	 */
+	public static function array_sum( array $arr ): float {
+		$sanitized_array = array_map( 'floatval', $arr );
+
+		return array_sum( $sanitized_array );
 	}
 }

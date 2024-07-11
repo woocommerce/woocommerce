@@ -14,6 +14,8 @@ export const useSiteVisibilityTour = () => {
 
 		const { getCurrentUser } = select( 'core' );
 		const wasTourShown =
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			( getCurrentUser() as { meta?: { [ key: string ]: string } } )
 				?.meta?.[ LYS_TOUR_HIDDEN ] === 'yes';
 
@@ -30,6 +32,8 @@ export const useSiteVisibilityTour = () => {
 	} );
 
 	const onClose = () => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		dispatch( 'core' ).saveUser( {
 			id: window?.wcSettings?.currentUserId,
 			meta: {

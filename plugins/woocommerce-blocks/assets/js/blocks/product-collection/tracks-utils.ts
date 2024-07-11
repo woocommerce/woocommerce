@@ -29,36 +29,36 @@ const templateSlugToTemplateMap: {
 	'page-checkout': Locations.CHECKOUT,
 };
 
-export const useTracksLocation = ( templateSlug: string ) => {
+export const useTracksLocation = ( templateSlug: string | undefined ) => {
 	const postType = useSelect( ( select ) => {
 		// @ts-expect-error Type definitions are missing
 		// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
 		return select( editorStore ).getCurrentPostType();
 	}, [] );
 
-	if ( postType === 'wp_template' ) {
-		const template = templateSlugToTemplateMap[ templateSlug ];
+	if ( postType === Locations.PAGE || postType === Locations.POST ) {
+		return postType;
+	}
 
-		if ( template ) {
-			return template;
-		}
-
-		if ( templateSlug.includes( 'single-product' ) ) {
-			return Locations.SINGLE_PRODUCT;
-		}
-
-		if (
-			templateSlug.includes( 'taxonomy-product_cat' ) ||
-			templateSlug.includes( 'taxonomy-product_tag' )
-		) {
-			return Locations.PRODUCT_ARCHIVE;
-		}
-
+	if ( ! templateSlug ) {
 		return Locations.OTHER;
 	}
 
-	if ( postType === Locations.PAGE || postType === Locations.POST ) {
-		return postType;
+	const template = templateSlugToTemplateMap[ templateSlug ];
+
+	if ( template ) {
+		return template;
+	}
+
+	if ( templateSlug.includes( 'single-product' ) ) {
+		return Locations.SINGLE_PRODUCT;
+	}
+
+	if (
+		templateSlug.includes( 'taxonomy-product_cat' ) ||
+		templateSlug.includes( 'taxonomy-product_tag' )
+	) {
+		return Locations.PRODUCT_ARCHIVE;
 	}
 
 	return Locations.OTHER;

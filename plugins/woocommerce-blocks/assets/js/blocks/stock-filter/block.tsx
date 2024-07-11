@@ -33,7 +33,7 @@ import {
 	PREFIX_QUERY_ARG_FILTER_TYPE,
 	normalizeQueryParams,
 } from '@woocommerce/utils';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -438,7 +438,7 @@ const StockStatusFilterBlock = ( {
 		<>
 			{ ! isEditor && blockAttributes.heading && filterHeading }
 			<div
-				className={ classnames(
+				className={ clsx(
 					'wc-block-stock-filter',
 					`style-${ blockAttributes.displayStyle }`,
 					{
@@ -450,7 +450,7 @@ const StockStatusFilterBlock = ( {
 					<>
 						<FormTokenField
 							key={ remountKey }
-							className={ classnames( {
+							className={ clsx( {
 								'single-selection': ! allowsMultipleOptions,
 								'is-loading': isLoading,
 							} ) }

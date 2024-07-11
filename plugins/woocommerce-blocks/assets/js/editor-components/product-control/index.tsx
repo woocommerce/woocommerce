@@ -25,7 +25,7 @@ import type {
 } from '@woocommerce/types';
 import { convertProductResponseItemToSearchItem } from '@woocommerce/utils';
 import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import ExpandableSearchListItem from '@woocommerce/editor-components/expandable-search-list-item/expandable-search-list-item';
 
 /**
@@ -101,7 +101,7 @@ const ProductControl = (
 			item.details?.variations && Array.isArray( item.details.variations )
 				? item.details.variations.length
 				: 0;
-		const classes = classNames(
+		const classes = clsx(
 			'woocommerce-search-product__item',
 			'woocommerce-search-list__item',
 			`depth-${ depth }`,
@@ -121,7 +121,7 @@ const ProductControl = (
 			return (
 				<ExpandableSearchListItem
 					{ ...args }
-					className={ classNames( classes, {
+					className={ clsx( classes, {
 						'is-selected': isSelected,
 					} ) }
 					isSelected={ isSelected }

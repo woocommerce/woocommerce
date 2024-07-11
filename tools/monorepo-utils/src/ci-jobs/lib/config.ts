@@ -24,7 +24,13 @@ export const enum JobType {
 /**
  * The type of the test job.
  */
-export const testTypes = [ 'default', 'e2e', 'api', 'performance' ] as const;
+export const testTypes = [
+	'unit:php',
+	'unit',
+	'e2e',
+	'api',
+	'performance',
+] as const;
 
 /**
  * The variables that can be used in tokens on command strings
@@ -59,6 +65,11 @@ interface BaseJobConfig {
 	 * Example: push, pull_request
 	 */
 	events: string[];
+
+	/**
+	 * Indicates whether a job should be required to pass in CI for merging to be allowed.
+	 */
+	optional?: boolean;
 
 	/**
 	 * Indicates whether or not a job has been created for this config.
@@ -166,30 +177,52 @@ function validateCommandVars( command: string ) {
 }
 
 /**
- * Parses the lint job configuration.
+ * Parses the base job configuration.
  *
  * @param {Object} raw The raw config to parse.
  */
-function parseLintJobConfig( raw: any ): LintJobConfig {
+function parseBaseJobConfig( raw: any ): BaseJobConfig {
 	if ( ! raw.changes ) {
-		throw new ConfigError(
-			'A "changes" option is required for the lint job.'
-		);
+		throw new ConfigError( 'A "changes" option is required for the job.' );
 	}
 
 	if ( ! raw.command || typeof raw.command !== 'string' ) {
 		throw new ConfigError(
-			'A string "command" option is required for the lint job.'
+			'A string "command" option is required for the job.'
 		);
 	}
 
 	validateCommandVars( raw.command );
 
+	let optional = false;
+	if ( raw.optional ) {
+		if ( typeof raw.optional !== 'boolean' ) {
+			throw new ConfigError(
+				'The "optional" property must be a boolean.'
+			);
+		}
+		optional = raw.optional;
+	}
+
 	return {
-		type: JobType.Lint,
+		type: null,
 		changes: parseChangesConfig( raw.changes, [ 'package.json' ] ),
 		command: raw.command,
 		events: raw.events || [],
+		optional,
+	};
+}
+
+/**
+ * Parses the lint job configuration.
+ *
+ * @param {Object} raw The raw config to parse.
+ */
+function parseLintJobConfig( raw: any ): LintJobConfig {
+	const baseJob = parseBaseJobConfig( raw );
+	return {
+		...baseJob,
+		type: JobType.Lint,
 	};
 }
 
@@ -206,6 +239,11 @@ export interface TestEnvConfigVars {
 	 * The version of PHP that should be used.
 	 */
 	phpVersion?: string;
+
+	/**
+	 * Whether the HPOS feature should be disabled in the test environment setup.
+	 */
+	disableHpos?: boolean;
 }
 
 /**
@@ -237,6 +275,16 @@ function parseTestEnvConfigVars( raw: any ): TestEnvConfigVars {
 		config.phpVersion = raw.phpVersion;
 	}
 
+	if ( raw.disableHpos ) {
+		if ( typeof raw.disableHpos !== 'boolean' ) {
+			throw new ConfigError(
+				'The "disableHpos" option must be a boolean.'
+			);
+		}
+
+		config.disableHpos = raw.disableHpos;
+	}
+
 	return config;
 }
 
@@ -253,6 +301,26 @@ interface TestEnvConfig {
 	 * Any configuration variables that should be used when building the environment.
 	 */
 	config: TestEnvConfigVars;
+}
+
+/**
+ * The configuration of a report.
+ */
+interface ReportConfig {
+	/**
+	 * The name of the artifact to be uploaded.
+	 */
+	resultsBlobName: string;
+
+	/**
+	 * The path to the results that will be uploaded under the resultsBlobName name.
+	 */
+	resultsPath: string;
+
+	/**
+	 * Whether Allure results exists and an Allure report should be generated and possibly published.
+	 */
+	allure: boolean;
 }
 
 /**
@@ -288,6 +356,11 @@ export interface TestJobConfig extends BaseJobConfig {
 	 * The key(s) to use when identifying what jobs should be triggered by a cascade.
 	 */
 	cascadeKeys?: string[];
+
+	/**
+	 * The configuration for the report if one is needed.
+	 */
+	report?: ReportConfig;
 }
 
 /**
@@ -325,25 +398,15 @@ function parseTestCascade( raw: unknown ): string[] {
  * @param {Object} raw The raw config to parse.
  */
 function parseTestJobConfig( raw: any ): TestJobConfig {
+	const baseJob = parseBaseJobConfig( raw );
+
 	if ( ! raw.name || typeof raw.name !== 'string' ) {
 		throw new ConfigError(
 			'A string "name" option is required for test jobs.'
 		);
 	}
 
-	if ( ! raw.changes ) {
-		throw new ConfigError(
-			'A "changes" option is required for the test jobs.'
-		);
-	}
-
-	if ( ! raw.command || typeof raw.command !== 'string' ) {
-		throw new ConfigError(
-			'A string "command" option is required for the test jobs.'
-		);
-	}
-
-	let testType: ( typeof testTypes )[ number ] = 'default';
+	let testType: ( typeof testTypes )[ number ] = 'unit';
 	if (
 		raw.testType &&
 		testTypes.includes( raw.testType.toString().toLowerCase() )
@@ -351,16 +414,12 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		testType = raw.testType.toLowerCase();
 	}
 
-	validateCommandVars( raw.command );
-
 	const config: TestJobConfig = {
+		...baseJob,
 		type: JobType.Test,
 		testType,
 		shardingArguments: raw.shardingArguments || [],
-		events: raw.events || [],
 		name: raw.name,
-		changes: parseChangesConfig( raw.changes, [ 'package.json' ] ),
-		command: raw.command,
 	};
 
 	if ( raw.testEnv ) {
@@ -379,6 +438,42 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		config.testEnv = {
 			start: raw.testEnv.start,
 			config: parseTestEnvConfigVars( raw.testEnv.config ),
+		};
+	}
+
+	if ( raw.report ) {
+		if ( typeof raw.report !== 'object' ) {
+			throw new ConfigError( 'The "report" option must be an object.' );
+		}
+
+		if (
+			! raw.report.resultsBlobName ||
+			typeof raw.report.resultsBlobName !== 'string'
+		) {
+			throw new ConfigError(
+				'A string "resultsBlobName" option is required for report.'
+			);
+		}
+
+		if (
+			! raw.report.resultsPath ||
+			typeof raw.report.resultsPath !== 'string'
+		) {
+			throw new ConfigError(
+				'A string "resultsPath" option is required for report.'
+			);
+		}
+
+		if ( raw.report.allure && typeof raw.report.allure !== 'boolean' ) {
+			throw new ConfigError(
+				'A boolean "allure" option is required for report.'
+			);
+		}
+
+		config.report = {
+			resultsBlobName: raw.report.resultsBlobName,
+			resultsPath: raw.report.resultsPath,
+			allure: raw.report.allure,
 		};
 	}
 

@@ -8,13 +8,7 @@ import {
 	ProductVariation,
 } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { useCallback, useMemo, useRef, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -275,6 +269,18 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}: PartialProductVariation ) {
 		if ( isUpdating[ variationId ] ) return;
 
+		setVariations( ( current ) =>
+			current.map( ( currentVariation ) => {
+				if ( currentVariation.id === variationId ) {
+					return {
+						...currentVariation,
+						...variation,
+					};
+				}
+				return currentVariation;
+			} )
+		);
+
 		const { updateProductVariation } = dispatch(
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 		);
@@ -283,7 +289,8 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			{ product_id: productId, id: variationId },
 			variation
 		).then( async ( response: ProductVariation ) => {
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product_variation',
@@ -311,14 +318,16 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		} ).then( async ( response: ProductVariation ) => {
 			onSelect( response )( false );
 
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product',
 				productId,
 			] );
 
-			// @ts-expect-error There are no types for this.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
 				'postType',
 				'product_variation',
@@ -337,7 +346,8 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}
 
 	async function onBatchUpdate( values: PartialProductVariation[] ) {
-		// @ts-expect-error There are no types for this.
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
 
@@ -405,7 +415,8 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}
 
 	async function onBatchDelete( values: PartialProductVariation[] ) {
-		// @ts-expect-error There are no types for this.
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
 
@@ -487,7 +498,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 	const wasGenerating = useRef( false );
 
-	useEffect( () => {
+	function getCurrentVariations() {
 		if ( isGenerating ) {
 			setFilters( [] );
 			onClearSelection();
@@ -508,7 +519,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		}
 
 		wasGenerating.current = Boolean( isGenerating );
-	}, [ productId, isGenerating ] );
+	}
 
 	return {
 		isLoading,
@@ -541,5 +552,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		isGenerating,
 		onGenerate,
 		variationsError: generateError ?? getVariationsError,
+		getCurrentVariations,
 	};
 }

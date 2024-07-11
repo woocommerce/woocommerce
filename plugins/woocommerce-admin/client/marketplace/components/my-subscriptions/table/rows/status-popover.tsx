@@ -42,6 +42,7 @@ export default function StatusPopover( props: {
 				<Popover
 					className="woocommerce-marketplace__my-subscriptions__popover"
 					position="top center"
+					focusOnMount={ false }
 				>
 					{ props.explanation }
 				</Popover>

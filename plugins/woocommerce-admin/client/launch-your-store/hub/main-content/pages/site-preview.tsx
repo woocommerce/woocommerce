@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useState, useRef, useEffect } from '@wordpress/element';
 import { Spinner } from '@woocommerce/components';
 import { useResizeObserver } from '@wordpress/compose';
@@ -53,7 +53,7 @@ export const SitePreviewPage = ( props: MainContentComponentProps ) => {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'launch-store-site-preview-page__container',
 				{ 'is-loading': isLoading },
 				props.className

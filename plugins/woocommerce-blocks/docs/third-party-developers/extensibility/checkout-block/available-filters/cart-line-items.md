@@ -1,3 +1,11 @@
+---
+post_title: Cart and Checkout - Cart Line Items
+menu_title: Cart Line Items
+tags: reference, checkout-available-filters
+---
+
+<!-- markdownlint-disable MD024 -->
+
 # Cart Line Items
 
 The following Cart Line Items filters are available:
@@ -91,18 +99,10 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="676" alt="Before applying the Cart Item Class filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a587a6ce-d051-4ed0-bba5-815b5d72179d">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="677" alt="After applying the Cart Item Class filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/9b25eeae-6d81-4e28-b177-32f942e1d0c2">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a587a6ce-d051-4ed0-bba5-815b5d72179d) |![After applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/9b25eeae-6d81-4e28-b177-32f942e1d0c2) |
+
 
 ## `cartItemPrice`
 
@@ -178,18 +178,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="673" alt="Before applying the Cart Item Price filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/78fdaabe-cb21-4697-bc64-56d0b95a501b">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="675" alt="After applying the Cart Item Price filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/bbaeb68a-492e-41e7-87b7-4b8b05ca3709">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/bbaeb68a-492e-41e7-87b7-4b8b05ca3709) |![After applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/bbaeb68a-492e-41e7-87b7-4b8b05ca3709) |
 
 ## `itemName`
 
@@ -264,19 +255,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="682" alt="Before applying the Item Name filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/97d0f501-138e-4448-93df-a4d865b524e6">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="683" alt="After applying the Item Name filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/69381932-d064-4e8f-b378-c2477fef56ae">
-
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/97d0f501-138e-4448-93df-a4d865b524e6) |![After applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/69381932-d064-4e8f-b378-c2477fef56ae) |
 
 ## `saleBadgePriceFormat`
 
@@ -360,18 +341,10 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="670" alt="Before applying the Sale Badge Price Format filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/d2aeb206-e620-44e0-93c1-31484cfcdca6">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="677" alt="After applying the Sale Badge Price Format filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/6b929695-5d89-433b-8694-b9201a7c0519">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Sale Badge Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/d2aeb206-e620-44e0-93c1-31484cfcdca6) |![After applying the Sale Badge Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/6b929695-5d89-433b-8694-b9201a7c0519) |
+
 
 ## `showRemoveItemLink`
 
@@ -446,18 +419,11 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="668" alt="Before applying the Show Remove Item Link filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a4254f3b-f056-47ad-b34a-d5f6d5500e56">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="669" alt="After applying the Show Remove Item Link filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/32c55dc7-ef65-4f35-ab90-9533bc79d362">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Show Remove Item Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a4254f3b-f056-47ad-b34a-d5f6d5500e56) |![After applying the Show Remove Item Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/32c55dc7-ef65-4f35-ab90-9533bc79d362) |
+
+
 
 ## `subtotalPriceFormat`
 
@@ -543,18 +509,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="668" alt="Before applying the Subtotal Price Format filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a392cb24-4c40-4e25-8396-bf4971830e22">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="670" alt="After applying the Subtotal Price Format filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/af69b26f-662a-4ef9-a288-3713b6e46373">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a392cb24-4c40-4e25-8396-bf4971830e22) |![After applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/af69b26f-662a-4ef9-a288-3713b6e46373) |
 
 ## Cart object
 
@@ -669,11 +626,3 @@ The Cart Item object of the filters above has the following keys:
     -   _line_total_tax_ `string` - The line total tax.
 -   _type_ `string` - The item type.
 -   _variation_ `array` - The item variation array.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/available-filters/cart-line-items.md)

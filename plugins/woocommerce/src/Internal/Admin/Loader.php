@@ -173,6 +173,7 @@ class Loader {
 		 * This class needs to be removed by those feature components (like <ProfileWizard />).
 		 *
 		 * @param bool $is_loading If WooCommerce Admin is loading a fullscreen view.
+		 * @since 6.5.0
 		 */
 		$is_loading = apply_filters( 'woocommerce_admin_is_loading', false );
 
@@ -189,7 +190,16 @@ class Loader {
 	 * See https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/PromotingAppswithAppBanners/PromotingAppswithAppBanners.html
 	 */
 	public static function smart_app_banner() {
-		if ( PageController::is_admin_or_embed_page() ) {
+		$exclude_paths = array(
+			'/customize-store',
+			'/setup-wizard',
+			'/launch-your-store',
+		);
+
+		/* phpcs:ignore */
+		$path = $_GET['path'] ?? '';
+
+		if ( PageController::is_admin_or_embed_page() && ! in_array( $path, $exclude_paths, true ) ) {
 			echo "
 				<meta name='apple-itunes-app' content='app-id=1389130815'>
 			";
@@ -319,7 +329,13 @@ class Loader {
 			);
 		}
 
+		/**
+		 * The woocommerce_component_settings_preload_endpoints filter
+		 *
+		 * @since 6.5.0
+		 */
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
+
 		$preload_data_endpoints['jetpackStatus'] = '/jetpack/v4/connection';
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$preload_data = array_reduce(
@@ -328,6 +344,11 @@ class Loader {
 			);
 		}
 
+		/**
+		 * The woocommerce_admin_preload_options filter
+		 *
+		 * @since 6.5.0
+		 */
 		$preload_options = apply_filters( 'woocommerce_admin_preload_options', array() );
 		if ( ! empty( $preload_options ) ) {
 			foreach ( $preload_options as $option ) {
@@ -335,6 +356,11 @@ class Loader {
 			}
 		}
 
+		/**
+		 * The woocommerce_admin_preload_settings filter
+		 *
+		 * @since 6.5.0
+		 */
 		$preload_settings = apply_filters( 'woocommerce_admin_preload_settings', array() );
 		if ( ! empty( $preload_settings ) ) {
 			$setting_options = new \WC_REST_Setting_Options_V2_Controller();
@@ -382,6 +408,7 @@ class Loader {
 		// E.g An extension that added statuses is now inactive or removed.
 		$settings['unregisteredOrderStatuses'] = self::get_unregistered_order_statuses();
 		// The separator used for attributes found in Variation titles.
+		/* phpcs:ignore */
 		$settings['variationTitleAttributesSeparator'] = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
 
 		if ( ! empty( $preload_data_endpoints ) ) {
@@ -527,6 +554,11 @@ class Loader {
 	public static function get_currency_settings() {
 		$code = get_woocommerce_currency();
 
+		/**
+		 * The wc_currency_settings hook
+		 *
+		 * @since 6.5.0
+		 */
 		return apply_filters(
 			'wc_currency_settings',
 			array(

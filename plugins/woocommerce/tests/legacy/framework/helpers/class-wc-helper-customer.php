@@ -101,7 +101,7 @@ class WC_Helper_Customer {
 	}
 
 	/**
-	 * Set the the current customer's billing details in the session.
+	 * Set the current customer's billing details in the session.
 	 *
 	 * @param string $default_shipping_method Shipping Method slug
 	 */

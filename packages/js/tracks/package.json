@@ -1,12 +1,12 @@
 {
 	"name": "@woocommerce/tracks",
-	"version": "1.3.0",
+	"version": "1.4.0",
 	"description": "WooCommerce user event tracking utilities for Automattic based projects.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.1.0"
 	},
 	"keywords": [
 		"wordpress",

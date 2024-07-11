@@ -5,7 +5,8 @@ import { __ } from '@wordpress/i18n';
 import { Icon, moreVertical, edit, cog } from '@wordpress/icons';
 import { Dropdown, Button, MenuGroup, MenuItem } from '@wordpress/components';
 import { getAdminLink, getSetting } from '@woocommerce/settings';
-import classnames from 'classnames';
+import clsx from 'clsx';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -52,7 +53,7 @@ export const LaunchYourStoreStatus = ( {
 					renderToggle={ ( { isOpen, onToggle } ) => (
 						<Button onClick={ onToggle } aria-expanded={ isOpen }>
 							<div
-								className={ classnames(
+								className={ clsx(
 									'woocommerce-lys-status-pill',
 									{ 'is-live': ! isComingSoon }
 								) }
@@ -66,6 +67,16 @@ export const LaunchYourStoreStatus = ( {
 						<>
 							<MenuGroup className="woocommerce-lys-status-popover">
 								<MenuItem
+									onClick={ () => {
+										recordEvent(
+											'launch_your_store_badge_menu_manage_site_visibility_click',
+											{
+												site_visibility: isComingSoon
+													? 'coming_soon'
+													: 'live',
+											}
+										);
+									} }
 									// @ts-expect-error Prop gets passed down to underlying button https://developer.wordpress.org/block-editor/reference-guides/components/menu-item/#props
 									href={ getAdminLink(
 										'admin.php?page=wc-settings&tab=site-visibility'
@@ -80,6 +91,11 @@ export const LaunchYourStoreStatus = ( {
 								{ isComingSoon &&
 									getSetting( 'currentThemeIsFSETheme' ) && (
 										<MenuItem
+											onClick={ () => {
+												recordEvent(
+													'launch_your_store_badge_menu_customize_coming_soon_click'
+												);
+											} }
 											// @ts-expect-error Prop gets passed down to underlying button https://developer.wordpress.org/block-editor/reference-guides/components/menu-item/#props
 											href={
 												COMING_SOON_PAGE_EDITOR_LINK

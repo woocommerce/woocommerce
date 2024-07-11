@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Label } from '@woocommerce/blocks-components';
 
 /**
@@ -26,7 +26,7 @@ const FilterResetButton = ( {
 }: FilterResetButtonProps ): JSX.Element => {
 	return (
 		<button
-			className={ classNames(
+			className={ clsx(
 				'wc-block-components-filter-reset-button',
 				className
 			) }
