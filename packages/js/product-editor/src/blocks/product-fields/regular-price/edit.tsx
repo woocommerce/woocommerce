@@ -112,6 +112,7 @@ export function Edit( {
 					{ ...inputProps }
 					id={ regularPriceId }
 					name={ 'regular_price' }
+					inputMode="decimal"
 					ref={ regularPriceRef }
 					label={
 						tooltip ? (

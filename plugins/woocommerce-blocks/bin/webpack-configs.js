@@ -1075,14 +1075,14 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 				cacheGroups: {
 					commons: {
 						test: /[\\/]node_modules[\\/]/,
-						name: 'cart-checkout-vendors',
+						name: 'wc-cart-checkout-vendors',
 						chunks: 'all',
 						enforce: true,
 					},
 					base: {
 						// A refined include blocks and settings that are shared between cart and checkout that produces the smallest possible bundle.
 						test: /assets[\\/]js[\\/](settings|previews|base|data|utils|blocks[\\/]cart-checkout-shared|icons)|packages[\\/](checkout|components)|atomic[\\/]utils/,
-						name: 'cart-checkout-base',
+						name: 'wc-cart-checkout-base',
 						chunks: 'all',
 						enforce: true,
 					},

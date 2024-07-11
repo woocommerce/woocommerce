@@ -535,7 +535,7 @@ export const SidebarNavigationScreenLogo = ( {
 						<p>
 							{ interpolateComponents( {
 								mixedString: __(
-									'Get a custom logo designed by a professional on {{link}}Fiverr{{/link}}.',
+									'Build your brand by creating a memorable logo using {{link}}Fiverr{{/link}}.',
 									'woocommerce'
 								),
 								components: {
@@ -544,6 +544,7 @@ export const SidebarNavigationScreenLogo = ( {
 											href="https://www.fiverr.com/logo-maker/woo?afp=&cxd_token=917527_33214203&show_join=true"
 											target="_blank"
 											type="external"
+											rel="noreferrer"
 										/>
 									),
 								},

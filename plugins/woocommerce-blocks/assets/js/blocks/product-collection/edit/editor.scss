@@ -1,8 +1,6 @@
-$max-columns: 3;
-$min-button-width: 250px;
-$gap-count: calc(#{$max-columns} - 1);
-$total-gap-width: calc(#{$gap-count} * #{$gap-small});
-$max-button-width: calc((100% - #{$total-gap-width}) / #{$max-columns});
+$max-button-columns: 6;
+$min-button-width: 80px;
+$max-button-width: calc(100% / #{$max-button-columns});
 
 .wc-block-editor-product-collection-inspector-toolspanel__filters {
 	.wc-block-editor-product-collection-inspector__taxonomy-control:not(:last-child) {
@@ -17,9 +15,16 @@ $max-button-width: calc((100% - #{$total-gap-width}) / #{$max-columns});
 }
 
 // Need to override high-specificity styles
-.wc-blocks-product-collection__placeholder.is-medium {
+.wc-blocks-product-collection__placeholder {
 	.components-placeholder__fieldset {
 		display: block;
+	}
+
+	&.is-medium,
+	&.is-small {
+		.components-button {
+			width: auto;
+		}
 	}
 
 	.components-button.wc-blocks-product-collection__collection-button {
@@ -29,64 +34,102 @@ $max-button-width: calc((100% - #{$total-gap-width}) / #{$max-columns});
 
 .wc-blocks-product-collection__placeholder,
 .wc-blocks-product-collection__modal {
+	.components-placeholder__instructions {
+		width: 100%;
+		margin: $gap-small 0;
+		text-align: center;
+	}
+
+	.wc-blocks-product-collection__collections-grid {
+		.wc-blocks-product-collection__collections-create {
+			width: 100%;
+		}
+	}
+
+	.wc-blocks-product-collection__collections-dropdown {
+		display: flex;
+		justify-content: center;
+		flex-wrap: wrap;
+		width: 100%;
+	}
+
 	.wc-blocks-product-collection__selection-subtitle {
 		margin-bottom: $gap-large;
 	}
 
 	.wc-blocks-product-collection__collections-section {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(max(#{$min-button-width}, #{$max-button-width}), 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(max(#{$min-button-width}, #{$max-button-width}), 1fr));
 		grid-auto-rows: 1fr;
-		grid-gap: $gap-small;
-		margin: $gap-large auto;
+		margin: $gap-small auto;
 		max-width: 1000px;
 		width: 100%;
 	}
 
 	.wc-blocks-product-collection__collection-button {
-		color: var(--wp-admin-theme-color);
+		box-shadow: none;
 		display: flex;
-		align-items: flex-start;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-items: center;
 		height: auto;
-		border-radius: $universal-border-radius;
-		box-sizing: border-box;
-		padding: $gap-smallest $gap-small;
+		padding: $gap-small;
 		margin: 0;
 
-		&.is-primary {
-			box-shadow: 0 0 0 2px var(--wp-admin-theme-color, #3858e9);
-			color: var(--wp-admin-theme-color-darker-20);
-			background-color: var(--wc-content-bg, #fff);
+		&:hover {
+			color: var(--wp-admin-theme-color);
+			background-color: rgba(var(--wp-admin-theme-color--rgb), 0.04);
 
-			&:hover {
-				background-color: var(--wc-content-bg, #fff);
-				color: var(--wp-admin-theme-color-darker-20);
+			&:not(:focus) {
+				box-shadow: none;
 			}
 		}
 
-		.wc-blocks-product-collection__collection-button-icon {
-			margin: 1em 0;
+		&:focus {
+			color: var(--wp-admin-theme-color);
+			background-color: rgba(var(--wp-admin-theme-color--rgb), 0.08);
 		}
 
-		.wc-blocks-product-collection__collection-button-text {
-			padding: 0 $gap-small;
-			text-align: left;
-			white-space: break-spaces;
+		&-icon {
+			width: 100%;
 		}
 
-		.wc-blocks-product-collection__collection-button-title {
-			@include font-size(large);
-			line-height: 1;
+		&-title {
+			@include font-size(small);
+			width: 100%;
+			text-wrap: balance;
+			text-align: center;
+			margin: 0;
 		}
+	}
 
-		.wc-blocks-product-collection__collection-button-description {
-			white-space: wrap;
+	.wc-blocks-product-collection__collections-create {
+		padding: 0 $gap-smallest;
+		text-align: center;
+
+		button {
+			color: var(--wp-admin-theme-color);
+			padding: 0;
+			margin-left: $gap-smallest;
+
+			&:hover {
+				color: var(--wp-admin-theme-color-darker-20);
+			}
 		}
 	}
 
 	.wc-blocks-product-collection__footer {
 		text-align: end;
 		margin: $gap-small 0;
+	}
+}
+
+.wc-blocks-product-collection__collections-dropdown-content {
+	.components-popover__content {
+		width: 20em;
+		display: flex;
+		flex: flex-grow;
+		flex-direction: column;
 	}
 }
 
@@ -110,6 +153,8 @@ $max-button-width: calc((100% - #{$total-gap-width}) / #{$max-columns});
 	right: 0;
 	transform: translateY(-100%);
 	font-family: var(--wp--preset--font-family--system-sans-serif);
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
 
 	&.is-primary:focus:not(:disabled) {
 		outline: none;
