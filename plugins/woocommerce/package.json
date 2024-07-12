@@ -128,33 +128,6 @@
 					]
 				},
 				{
-					"name": "PHP 8.0",
-					"testType": "unit:php",
-					"command": "test:php:env",
-					"changes": [
-						"client/admin/config/*.json",
-						"composer.json",
-						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php"
-					],
-					"testEnv": {
-						"start": "env:test",
-						"config": {
-							"phpVersion": "8.0"
-						}
-					},
-					"events": [
-						"pull_request",
-						"push"
-					]
-				},
-				{
 					"name": "PHP WP: latest - 1",
 					"testType": "unit:php",
 					"command": "test:php:env",
@@ -228,6 +201,7 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
+							"phpVersion": "8.1",
 							"wpVersion": "nightly"
 						}
 					},
