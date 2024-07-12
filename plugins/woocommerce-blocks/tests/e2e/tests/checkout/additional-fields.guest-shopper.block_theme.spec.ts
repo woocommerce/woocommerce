@@ -76,11 +76,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					'Please enter a valid government id'
 				)
 			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Please select a valid option'
-				)
-			).toBeVisible();
 		} );
 
 		test( 'Shopper can fill in the checkout form with additional fields and can have different value for same field in shipping and billing address', async ( {
@@ -122,13 +117,13 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					name: 'Shipping address',
 				} )
 				.getByLabel( 'How wide is your road?' )
-				.fill( 'wide' );
+				.selectOption( 'wide' );
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Billing address',
 				} )
 				.getByLabel( 'How wide is your road?' )
-				.fill( 'narrow' );
+				.selectOption( 'narrow' );
 
 			await checkoutPageObject.page.evaluate(
 				'document.activeElement.blur()'
@@ -217,7 +212,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByLabel(
 						'Is this a personal purchase or a business purchase?'
 					)
-			).toHaveValue( 'Business' );
+			).toHaveValue( 'business' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
@@ -252,7 +247,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						name: 'Shipping address',
 					} )
 					.getByLabel( 'How wide is your road?' )
-			).toHaveValue( 'Wide' );
+			).toHaveValue( 'wide' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
@@ -280,7 +275,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						name: 'Billing address',
 					} )
 					.getByLabel( 'How wide is your road?' )
-			).toHaveValue( 'Narrow' );
+			).toHaveValue( 'narrow' );
 		} );
 	} );
 } );
