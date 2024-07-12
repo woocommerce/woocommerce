@@ -188,15 +188,9 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 	} );
 
 	test( 'Enabling the "use as site icon" option should set the image as the site icon', async ( {
-		page,
 		assemblerPageObject,
 		logoPickerPageObject,
 	} ) => {
-		const waitForHeaderResponse = page.waitForResponse(
-			( response ) =>
-				response.url().includes( '//header' ) &&
-				response.status() === 200
-		);
 		const assembler = await assemblerPageObject.getAssembler();
 		const emptyLogoPicker =
 			logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
@@ -208,8 +202,6 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 			assembler
 		);
 
-		await waitForHeaderResponse;
-
 		expect( logoResponse.ok() ).toBeTruthy();
 	} );
 
@@ -219,11 +211,6 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		logoPickerPageObject,
 		assemblerPageObject,
 	} ) => {
-		const waitForHeaderResponse = page.waitForResponse(
-			( response ) =>
-				response.url().includes( '//header' ) &&
-				response.status() === 200
-		);
 		const assembler = await assemblerPageObject.getAssembler();
 		const emptyLogoPicker =
 			logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
@@ -231,8 +218,6 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		await emptyLogoPicker.click();
 		await logoPickerPageObject.pickImage( assembler );
 		await logoPickerPageObject.saveLogoSettings( assembler );
-
-		await waitForHeaderResponse;
 
 		await page.goto( baseURL );
 
