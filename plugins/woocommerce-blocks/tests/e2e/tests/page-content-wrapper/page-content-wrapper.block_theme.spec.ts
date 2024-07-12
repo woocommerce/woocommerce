@@ -3,8 +3,6 @@
  */
 import { test, expect, FrontendUtils } from '@woocommerce/e2e-utils';
 
-test.describe.configure( { mode: 'serial' } );
-
 // Instead of testing the block individually, we test the Cart and Checkout
 // templates, which make use of the block.
 const templates = [

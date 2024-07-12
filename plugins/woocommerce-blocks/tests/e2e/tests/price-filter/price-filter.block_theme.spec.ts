@@ -31,8 +31,6 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 	},
 } );
 
-test.describe.configure( { mode: 'serial' } );
-
 test.describe( `${ blockData.name } Block - editor side`, () => {
 	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.createNewPost();

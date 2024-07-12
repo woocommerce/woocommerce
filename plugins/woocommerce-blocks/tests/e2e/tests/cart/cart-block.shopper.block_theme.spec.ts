@@ -23,8 +23,6 @@ const test = base.extend< { pageObject: CartPage } >( {
 	},
 } );
 
-test.describe.configure( { mode: 'serial' } );
-
 test.describe( 'Shopper → Cart block', () => {
 	test( 'The discount label is only visible next to the discounted product', async ( {
 		pageObject,

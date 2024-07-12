@@ -11,8 +11,6 @@ const blockData: Partial< BlockData > = {
 	name: 'woocommerce/legacy-template',
 };
 
-test.describe.configure( { mode: 'serial' } );
-
 const classicTemplateBlockNames = [
 	'WooCommerce Classic Template',
 	'Product (Classic)',
