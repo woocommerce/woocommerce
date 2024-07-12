@@ -69,12 +69,15 @@ export class LogoPickerPage {
 	}
 
 	async saveLogoSettings( assemblerLocator ) {
-		await assemblerLocator.locator( '[aria-label="Back"]' ).click();
 		const waitForLogoResponse = this.page.waitForResponse(
 			( response ) =>
 				response.url().includes( 'wp-json/wp/v2/settings' ) &&
 				response.status() === 200
 		);
+		await assemblerLocator.locator( '[aria-label="Back"]' ).click();
+		await assemblerLocator
+			.getByRole( 'button', { name: 'Save', exact: true } )
+			.waitFor();
 		await Promise.all( [
 			waitForLogoResponse,
 			assemblerLocator.getByText( 'Save' ).click(),
