@@ -23,6 +23,8 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 	},
 } );
 
+test.describe.configure( { mode: 'serial' } );
+
 test.describe( `${ blockData.name } Block`, () => {
 	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.createNewPost();
