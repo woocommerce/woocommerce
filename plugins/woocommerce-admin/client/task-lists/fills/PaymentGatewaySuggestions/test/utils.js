@@ -4,9 +4,17 @@
 import { getSplitGateways, getIsWCPayOrOtherCategoryDoneSetup } from '../utils';
 
 const wcpay = {
+	id: 'woocommerce_payments:something',
 	plugins: [ 'woocommerce-payments' ],
 	installed: false,
 	needsSetup: true,
+};
+
+const wcpayBnpl = {
+	id: 'woocommerce_payments:bnpl',
+	plugins: [ 'woocommerce-payments' ],
+	installed: true,
+	needsSetup: false,
 };
 
 const cod = {
@@ -47,12 +55,13 @@ const amazonPay = {
 
 describe( 'getSplitGateways()', () => {
 	it( 'Returns WCPay gateways', () => {
-		const [ wcpayGateways ] = getSplitGateways(
-			[ wcpay, cod, paypal ],
+		const [ wcpayGateways, , , wcpayBnplGateway ] = getSplitGateways(
+			[ wcpay, cod, paypal, wcpayBnpl ],
 			'US',
 			true
 		);
 		expect( wcpayGateways ).toEqual( [ wcpay ] );
+		expect( wcpayBnplGateway ).toEqual( [ wcpayBnpl ] );
 	} );
 
 	it( 'Returns offline gateways', () => {

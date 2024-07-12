@@ -8,14 +8,14 @@ import { PlaywrightTestConfig, defineConfig, devices } from '@playwright/test';
 const { CI, DEFAULT_TIMEOUT_OVERRIDE } = process.env;
 
 const config: PlaywrightTestConfig = {
-	maxFailures: 0,
+	maxFailures: CI ? 30 : 0,
 	timeout: parseInt( DEFAULT_TIMEOUT_OVERRIDE || '', 10 ) || 100_000, // Defaults to 100s.
 	outputDir: `${ __dirname }/artifacts/test-results`,
 	globalSetup: fileURLToPath(
 		new URL( 'global-setup.ts', 'file:' + __filename ).href
 	),
 	testDir: './tests',
-	retries: CI ? 2 : 0,
+	retries: CI ? 1 : 0,
 	workers: 1,
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	fullyParallel: false,
@@ -36,7 +36,10 @@ const config: PlaywrightTestConfig = {
 	use: {
 		baseURL: BASE_URL,
 		screenshot: 'only-on-failure',
-		trace: 'retain-on-failure',
+		trace:
+			/^https?:\/\/localhost/.test( BASE_URL ) || ! CI
+				? 'retain-on-first-failure'
+				: 'off',
 		video: 'on-first-retry',
 		viewport: { width: 1280, height: 720 },
 		storageState: STORAGE_STATE_PATH,
