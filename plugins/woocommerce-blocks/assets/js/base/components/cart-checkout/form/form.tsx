@@ -48,8 +48,10 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 	addressType = 'shipping',
 	values,
 	children,
+	isEditing,
 }: AddressFormProps< T > ): JSX.Element => {
 	const instanceId = useInstanceId( Form );
+	const isFirstRender = useRef( true );
 
 	// Track incoming props.
 	const currentFields = useShallowEqual( fields );
@@ -105,6 +107,22 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 	useEffect( () => {
 		fieldsRef.current?.postcode?.revalidate();
 	}, [ currentCountry ] );
+
+	// Focus the first input when opening the form.
+	useEffect( () => {
+		if ( ! isFirstRender.current && isEditing && fieldsRef.current ) {
+			const firstFieldKey = addressFormFields.fields[ 0 ].key;
+
+			if ( firstFieldKey ) {
+				// Focus the first field after a short delay to ensure the form is rendered.
+				setTimeout( () => {
+					fieldsRef.current[ firstFieldKey ]?.input?.focus();
+				}, 300 );
+			}
+		}
+
+		isFirstRender.current = false;
+	}, [ isEditing, addressFormFields ] );
 
 	id = id || `${ instanceId }`;
 
