@@ -5,7 +5,7 @@ process.env.USE_WP_ENV = 'true';
 
 config = {
 	...config,
-	workers: 3,
+	workers: 4,
 	projects: [
 		{
 			name: 'default',

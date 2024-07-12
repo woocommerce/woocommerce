@@ -55,6 +55,7 @@ const test = baseTest.extend( {
 		await use( page );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Checkout Block Applying Coupons',
