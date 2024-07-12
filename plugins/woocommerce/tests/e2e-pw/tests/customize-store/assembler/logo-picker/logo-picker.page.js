@@ -75,14 +75,8 @@ export class LogoPickerPage {
 				response.url().includes( 'wp-json/wp/v2/settings' ) &&
 				response.status() === 200
 		);
-		const waitForHeaderResponse = this.page.waitForResponse(
-			( response ) =>
-				response.url().includes( '//header' ) &&
-				response.status() === 200
-		);
 		return await Promise.all( [
 			waitForLogoResponse,
-			waitForHeaderResponse,
 			assemblerLocator.getByText( 'Save' ).click(),
 		] );
 	}
