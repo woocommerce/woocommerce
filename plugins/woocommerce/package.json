@@ -104,7 +104,7 @@
 			},
 			"tests": [
 				{
-					"name": "PHP",
+					"name": "PHP WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
@@ -120,7 +120,11 @@
 						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test",
+						"config": {
+							"phpVersion": "7.4",
+							"wpVersion": "latest"
+						}
 					},
 					"events": [
 						"pull_request",
@@ -146,6 +150,7 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
+							"phpVersion": "8.0",
 							"wpVersion": "latest-1"
 						}
 					},
@@ -173,6 +178,7 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
+							"phpVersion": "8.0",
 							"wpVersion": "latest-2"
 						}
 					},
