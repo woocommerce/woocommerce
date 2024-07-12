@@ -75,8 +75,8 @@ const maxElementsMobile = 5;
 const maxElementsTablet = 7;
 // Maximum number of logos to be displayed on a desktop screen.
 const maxElementsDesktop = 10;
-// Total number of available payment methods.
-const totalPaymentMethods = 21;
+// Total number of available payment methods from https://woocommerce.com/document/woopayments/payment-methods.
+const totalPaymentMethods = 20;
 
 export const WooPaymentMethodsLogos: React.VFC< {
 	isWooPayEligible: boolean;
@@ -108,7 +108,12 @@ export const WooPaymentMethodsLogos: React.VFC< {
 		};
 
 		updateMaxElements();
+
 		window.addEventListener( 'resize', updateMaxElements );
+
+		return () => {
+			window.removeEventListener( 'resize', updateMaxElements );
+		};
 	}, [ maxElements ] );
 
 	return (
