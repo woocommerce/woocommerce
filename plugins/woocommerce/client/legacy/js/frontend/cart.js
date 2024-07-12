@@ -248,10 +248,13 @@ jQuery( function ( $ ) {
 				data: data,
 				dataType: 'html',
 				success: function ( response ) {
-					var target_id = $( event.currentTarget ).attr( 'id' );
-
 					update_cart_totals_div( response );
-					$( '.cart_totals' ).find( '#' + target_id ).focus();
+
+					var newCurrentTarget = document.getElementById( event.currentTarget.id );
+
+					if ( newCurrentTarget ) {
+						newCurrentTarget.focus();
+					}
 				},
 				complete: function () {
 					unblock( $( 'div.cart_totals' ) );
