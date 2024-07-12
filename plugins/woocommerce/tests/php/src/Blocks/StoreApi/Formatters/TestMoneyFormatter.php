@@ -45,6 +45,9 @@ class TestMoneyFormatter extends \WP_UnitTestCase {
 	public function test_format_rounding_mode() {
 		$this->assertEquals( "156", $this->mock_formatter->format( 1.555, [ 'rounding_mode' => PHP_ROUND_HALF_UP ] ) );
 		$this->assertEquals( "155", $this->mock_formatter->format( 1.555, [ 'rounding_mode' => PHP_ROUND_HALF_DOWN ] ) );
+		$this->assertEquals( "156", $this->mock_formatter->format( 1.555, [ 'rounding_mode' => PHP_ROUND_HALF_EVEN ] ) );
+		$this->assertEquals( "155", $this->mock_formatter->format( 1.555, [ 'rounding_mode' => PHP_ROUND_HALF_ODD ] ) );
+		$this->assertEquals( "156", $this->mock_formatter->format( 1.555, [ 'rounding_mode' => 123456 ] ) );
 	}
 
 	/**
