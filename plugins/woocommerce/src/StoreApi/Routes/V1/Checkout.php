@@ -145,6 +145,11 @@ class Checkout extends AbstractCartRoute {
 
 		if ( is_wp_error( $response ) ) {
 			$response = $this->error_to_response( $response );
+
+			// If we encountered an exception, free up stock.
+			if ( $this->order ) {
+				wc_release_stock_for_order( $this->order );
+			}
 		}
 
 		return $this->add_response_headers( $response );
@@ -192,32 +197,25 @@ class Checkout extends AbstractCartRoute {
 		$this->cart_controller->calculate_totals();
 
 		/**
-		 * Validate items etc are allowed in the order before the order is processed. This will fix violations and tell
-		 * the customer.
+		 * Validate items and fix violations before the order is processed.
 		 */
 		$this->cart_controller->validate_cart();
 
 		/**
-		 * Obtain Draft Order and process request data.
-		 *
-		 * Note: Customer data is persisted from the request first so that OrderController::update_addresses_from_cart
+		 * Persist customer session data from the request first so that OrderController::update_addresses_from_cart
 		 * uses the up to date customer address.
 		 */
 		$this->update_customer_from_request( $request );
-		$this->create_or_update_draft_order( $request );
-		$this->update_order_from_request( $request );
 
 		/**
-		 * Process customer data.
-		 *
-		 * Update order with customer details, and sign up a user account as necessary.
+		 * Create (or update) Draft Order and process request data.
 		 */
+		$this->create_or_update_draft_order( $request );
+		$this->update_order_from_request( $request );
 		$this->process_customer( $request );
 
 		/**
-		 * Validate order.
-		 *
-		 * This logic ensures the order is valid before payment is attempted.
+		 * Validate updated order before payment is attempted.
 		 */
 		$this->order_controller->validate_order_before_payment( $this->order );
 
@@ -230,6 +228,11 @@ class Checkout extends AbstractCartRoute {
 		 *
 		 * Via the block based checkout and Store API we already have a draft order, but when POSTing to the /checkout
 		 * endpoint we do the same; reserve stock for the order to allow time to process payment.
+		 *
+		 * Note, stock is only "held" while the order has the status wc-checkout-draft or pending. Stock is freed when
+		 * the order changes status, or there is an exception.
+		 *
+		 * @see ReserveStock::get_query_for_reserved_stock()
 		 *
 		 * @since 9.2 Stock is no longer held for all draft orders, nor on non-POST requests. See https://github.com/woocommerce/woocommerce/issues/44231
 		 * @since 9.2 Uses wc_reserve_stock_for_order() instead of using the ReserveStock class directly.
