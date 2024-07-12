@@ -20,7 +20,7 @@ const config = {
 	outputDir: './test-results/report',
 	testDir: 'tests',
 	retries: CI ? 4 : 2,
-	workers: 4,
+	workers: 8,
 	reporter: [
 		[ 'list' ],
 		[
