@@ -241,10 +241,9 @@
 					"testType": "e2e",
 					"command": "test:e2e:with-env default",
 					"shardingArguments": [
-						"--shard=1/4",
-						"--shard=2/4",
-						"--shard=3/4",
-						"--shard=4/4"
+						"--shard=1/3",
+						"--shard=2/3",
+						"--shard=3/3"
 					],
 					"changes": [
 						"client/admin/config/*.json",
