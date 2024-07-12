@@ -132,7 +132,7 @@
 					]
 				},
 				{
-					"name": "PHP: 8.0 WP: latest - 1",
+					"name": "PHP: 8.1 WP: latest - 1",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
@@ -150,7 +150,7 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.0",
+							"phpVersion": "8.1",
 							"wpVersion": "latest-1"
 						}
 					},
@@ -188,7 +188,7 @@
 					]
 				},
 				{
-					"name": "PHP: 8.0 WP: nightly",
+					"name": "PHP: 8.2 WP: nightly",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"optional": true,
@@ -207,7 +207,7 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.0",
+							"phpVersion": "8.2",
 							"wpVersion": "nightly"
 						}
 					},
