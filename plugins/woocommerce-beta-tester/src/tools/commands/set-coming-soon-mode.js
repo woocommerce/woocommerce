@@ -18,18 +18,16 @@ const OPTIONS = [
 ];
 
 export const SetComingSoonMode = () => {
-	const comingSoonMode = useSelect( ( select ) => {
-		const { getComingSoonMode } = select( STORE_KEY );
-		return getComingSoonMode();
-	} );
-
-	const { updateCommandParams, setComingSoonMode } = useDispatch( STORE_KEY );
+	const comingSoonMode = useSelect(
+		( select ) => select( STORE_KEY ).getComingSoonMode(),
+		[]
+	);
+	const { updateCommandParams } = useDispatch( STORE_KEY );
 
 	function onChange( mode ) {
 		updateCommandParams( UPDATE_COMING_SOON_MODE_ACTION_NAME, {
 			mode,
 		} );
-		setComingSoonMode( mode );
 	}
 
 	return (
