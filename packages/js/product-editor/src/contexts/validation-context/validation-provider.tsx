@@ -9,6 +9,7 @@ import { createElement, useRef, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import {
+	ValidationError,
 	ValidationErrors,
 	ValidationProviderProps,
 	Validator,
@@ -64,11 +65,15 @@ export function ValidationProvider< T >( {
 			const result = validator( initialValue, newData );
 
 			return result.then( ( error ) => {
+				let errorWithValidatorId: ValidationError;
+				if ( error !== undefined ) {
+					errorWithValidatorId = { validatorId, ...error };
+				}
 				setErrors( ( currentErrors ) => ( {
 					...currentErrors,
-					[ validatorId ]: error,
+					[ validatorId ]: errorWithValidatorId,
 				} ) );
-				return error;
+				return errorWithValidatorId;
 			} );
 		}
 
