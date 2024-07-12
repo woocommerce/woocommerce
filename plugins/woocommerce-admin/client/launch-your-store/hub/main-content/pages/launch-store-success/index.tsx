@@ -45,6 +45,7 @@ export type events =
 	  };
 import { WhatsNext } from './WhatsNext';
 import { LysSurvey } from './Survey';
+import { useFullScreen } from '~/utils';
 
 export const LaunchYourStoreSuccess = ( {
 	context: {
@@ -74,6 +75,8 @@ export const LaunchYourStoreSuccess = ( {
 			}, 2000 );
 		}
 	);
+
+	useFullScreen( [ 'woocommerce-launch-your-store-success' ] );
 
 	return (
 		<div

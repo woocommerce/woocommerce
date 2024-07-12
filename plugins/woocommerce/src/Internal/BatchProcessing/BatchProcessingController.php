@@ -24,7 +24,7 @@ namespace Automattic\WooCommerce\Internal\BatchProcessing;
 /**
  * Class BatchProcessingController
  *
- * @package Automattic\WooCommerce\Internal\Updates.
+ * @package Automattic\WooCommerce\Internal\BatchProcessing.
  */
 class BatchProcessingController {
 	/*

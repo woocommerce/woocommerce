@@ -87,7 +87,7 @@ describe( 'Search', () => {
 				userEvent.type( getByRole( 'combobox' ), 'A' );
 				// Wait for async options processing.
 				await waitFor( () => {
-					expect( optionsSpy ).toBeCalledWith( 'A' );
+					expect( optionsSpy ).toHaveBeenCalledWith( 'A' );
 				} );
 				await waitFor( () => {
 					expect( queryAllByRole( 'option' ) ).toHaveLength( 3 );
@@ -119,7 +119,7 @@ describe( 'Search', () => {
 				userEvent.type( getByRole( 'combobox' ), 'A' );
 				// Wait for async options processing.
 				await waitFor( () => {
-					expect( optionsSpy ).toBeCalledWith( 'A' );
+					expect( optionsSpy ).toHaveBeenCalledWith( 'A' );
 				} );
 				await waitFor( () => {
 					expect( queryAllByRole( 'option' ) ).toHaveLength( 3 );
