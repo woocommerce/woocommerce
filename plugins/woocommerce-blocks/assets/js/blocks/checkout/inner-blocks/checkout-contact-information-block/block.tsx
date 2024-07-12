@@ -42,7 +42,7 @@ const CreateAccountUI = (): React.ReactElement => {
 	return (
 		<>
 			{ allowGuestCheckout && (
-				<p className="guest-checkout-notice">
+				<p className="wc-block-checkout__guest-checkout-notice">
 					{ __(
 						'You are currently checking out as a guest.',
 						'woocommerce'

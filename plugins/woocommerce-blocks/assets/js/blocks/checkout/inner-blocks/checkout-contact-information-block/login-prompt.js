@@ -21,7 +21,10 @@ const LoginPrompt = () => {
 	}
 
 	return (
-		<a className="login-prompt" href={ LOGIN_TO_CHECKOUT_URL }>
+		<a
+			className="wc-block-checkout__login-prompt"
+			href={ LOGIN_TO_CHECKOUT_URL }
+		>
 			{ __( 'Log in', 'woocommerce' ) }
 		</a>
 	);
