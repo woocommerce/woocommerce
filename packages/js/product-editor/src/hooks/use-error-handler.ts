@@ -60,7 +60,7 @@ function getErrorPropsWithActions(
 		explicitDismiss: true,
 		actions: [
 			{
-				label: 'View error',
+				label: __( 'View error', 'woocommerce' ),
 				onClick: () => {
 					navigateTo( {
 						url: getUrl( errorContext ),

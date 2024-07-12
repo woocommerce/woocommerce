@@ -79,9 +79,9 @@ export function ValidationProvider< T >( {
 	}
 
 	async function getFieldByValidatorId(
-		_validatorId: string
+		validatorId: string
 	): Promise< HTMLElement > {
-		return fieldRefs.current[ _validatorId ];
+		return fieldRefs.current[ validatorId ];
 	}
 
 	async function validateAll(
