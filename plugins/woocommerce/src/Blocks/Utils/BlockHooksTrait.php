@@ -24,8 +24,8 @@ trait BlockHooksTrait {
 			$block_hooks_version = get_option( 'woocommerce_hooked_blocks_version' );
 		}
 
-		// If the allowed block hooks version is not set, return early.
-		if ( ! $block_hooks_version ) {
+		// If block hooks are disabled or the version is not set, return early.
+		if ( 'no' === $block_hooks_version || false === $block_hooks_version ) {
 			return $hooked_blocks;
 		}
 

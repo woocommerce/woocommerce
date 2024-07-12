@@ -4044,7 +4044,7 @@ function wc_set_hooked_blocks_version() {
 
 /**
  * If the user switches from a classic to a block theme and they haven't already got a woocommerce_hooked_blocks_version,
- * set the version of the hooked blocks in the database as the latest WC version.
+ * set the version of the hooked blocks in the database, or as "no" to disable all block hooks then set as the latest WC version.
  *
  * @since 9.2.0
  *
@@ -4053,9 +4053,11 @@ function wc_set_hooked_blocks_version() {
  * @return void
  */
 function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
-	$option_name = 'woocommerce_hooked_blocks_version';
+	$option_name  = 'woocommerce_hooked_blocks_version';
+	$option_value = get_option( $option_name, false );
 
-	if ( ! $old_theme->is_block_theme() && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) && ! get_option( $option_name ) ) {
+	// Sites with the option value set to "no" have already been migrated, and block hooks have been disabled. Checking explicitly for false to avoid setting the option again.
+	if ( ! $old_theme->is_block_theme() && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) && false === $option_value ) {
 		add_option( $option_name, WC()->version );
 	}
 }

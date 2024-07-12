@@ -2739,6 +2739,7 @@ function wc_update_920_add_wc_hooked_blocks_version_option() {
 	}
 
 	$option_name       = 'woocommerce_hooked_blocks_version';
+	$option_value      = get_option( $option_name );
 	$active_theme_name = wp_get_theme()->get( 'Name' );
 	/**
 	 * A list of theme slugs to execute this with.
@@ -2749,11 +2750,16 @@ function wc_update_920_add_wc_hooked_blocks_version_option() {
 	$theme_include_list               = apply_filters( 'woocommerce_hooked_blocks_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
 	$should_set_hooked_blocks_version = in_array( $active_theme_name, $theme_include_list, true );
 
-	if ( $should_set_hooked_blocks_version && ! get_option( $option_name ) ) {
+	if ( $should_set_hooked_blocks_version && false === $option_value ) {
 		// Set 8.4.0 as the version for existing stores that are using a theme that supports the Block Hooks API.
 		// This will ensure that the Block Hooks API is enabled for these stores and works as expected.
 		// Existing stores that aren't running approved block themes will not have the Block Hooks API enabled.
 		add_option( $option_name, '8.4.0' );
+	} elseif ( ! $should_set_hooked_blocks_version && false === $option_value ) {
+		// For block themes that aren't approved themes set this option to "no" so we can disable the Block Hooks API.
+		// This will allow us to set a version when users switch from a classic theme to a block theme.
+		// We have to use "no" instead of false since the latter is the default value for the option if it doesn't exist.
+		add_option( $option_name, 'no' );
 	}
 }
 
