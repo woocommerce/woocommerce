@@ -142,12 +142,13 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		await assembler
 			.getByRole( 'spinbutton', { name: 'Image width' } )
 			.fill( '100' );
-		const { width } = await editor
-			.getByLabel( 'Block: Header' )
-			.getByLabel( 'Block: Site Logo' )
-			.boundingBox();
 
-		expect( Math.floor( width ) ).toBe( 100 );
+		await expect(
+			editor
+				.getByLabel( 'Block: Header' )
+				.getByLabel( 'Block: Site Logo' )
+		).toHaveCSS( 'width', '100px' );
+
 		await logoPickerPageObject.saveLogoSettings( assembler );
 		const imageFrontend = await logoPickerPageObject.getLogoLocator( page );
 		await page.goto( baseURL );
@@ -189,7 +190,6 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 	test( 'Enabling the "use as site icon" option should set the image as the site icon', async ( {
 		assemblerPageObject,
 		logoPickerPageObject,
-		page,
 	} ) => {
 		const assembler = await assemblerPageObject.getAssembler();
 		const emptyLogoPicker =
@@ -198,18 +198,11 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		await logoPickerPageObject.pickImage( assembler );
 		await assembler.getByText( 'Use as site icon' ).click();
 
-		let isAValidResponse = false;
-		const waitForResponse = page.waitForResponse( ( response ) => {
-			isAValidResponse =
-				response.url().includes( '/wp-json/wp/v2/settings' ) &&
-				response.request().method() === 'POST' &&
-				response.status() === 200;
-			return isAValidResponse;
-		} );
-		await logoPickerPageObject.saveLogoSettings( assembler );
-		await waitForResponse;
+		const [ logoResponse ] = await logoPickerPageObject.saveLogoSettings(
+			assembler
+		);
 
-		await expect( isAValidResponse ).toBe( true );
+		expect( logoResponse.ok() ).toBeTruthy();
 	} );
 
 	test( 'The selected image should be visible on the frontend', async ( {
