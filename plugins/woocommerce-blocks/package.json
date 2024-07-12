@@ -69,10 +69,7 @@
 		"ts:check": "tsc --build",
 		"ts:log-errors": "npm --silent run ts:check | npx -y @bartekbp/typescript-checkstyle > checkstyle.xml",
 		"wp-env": "wp-env",
-		"wp-env:config": "./bin/wp-env-pre-config.sh",
-		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
-		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:bundle": "wireit"
+		"wp-env:config": "./bin/wp-env-pre-config.sh"
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "2.5.0",

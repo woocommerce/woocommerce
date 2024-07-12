@@ -28538,23 +28538,23 @@ snapshots:
   '@babel/plugin-transform-function-name@7.23.3(@babel/core@7.23.5)':
     dependencies:
       '@babel/core': 7.23.5
-      '@babel/helper-compilation-targets': 7.24.7
+      '@babel/helper-compilation-targets': 7.23.6
       '@babel/helper-function-name': 7.23.0
-      '@babel/helper-plugin-utils': 7.24.7
+      '@babel/helper-plugin-utils': 7.22.5
 
   '@babel/plugin-transform-function-name@7.23.3(@babel/core@7.23.6)':
     dependencies:
       '@babel/core': 7.23.6
-      '@babel/helper-compilation-targets': 7.24.7
+      '@babel/helper-compilation-targets': 7.23.6
       '@babel/helper-function-name': 7.23.0
-      '@babel/helper-plugin-utils': 7.24.7
+      '@babel/helper-plugin-utils': 7.22.5
 
   '@babel/plugin-transform-function-name@7.23.3(@babel/core@7.24.7)':
     dependencies:
       '@babel/core': 7.24.7
-      '@babel/helper-compilation-targets': 7.24.7
+      '@babel/helper-compilation-targets': 7.23.6
       '@babel/helper-function-name': 7.23.0
-      '@babel/helper-plugin-utils': 7.24.7
+      '@babel/helper-plugin-utils': 7.22.5
 
   '@babel/plugin-transform-function-name@7.24.7(@babel/core@7.12.9)':
     dependencies:

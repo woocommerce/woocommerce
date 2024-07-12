@@ -1014,7 +1014,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 		),
 		output: {
 			devtoolNamespace: 'wc',
-			path: path.resolve( __dirname, '../build/' ),
+			path: PATH_TO_BUILD,
 			// This is a cache busting mechanism which ensures that the script is loaded via the browser with a ?ver=hash
 			// string. The hash is based on the built file contents.
 			// @see https://github.com/webpack/webpack/issues/2329
