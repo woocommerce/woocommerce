@@ -25,7 +25,7 @@ class MoneyFormatter implements FormatterInterface {
 		);
 
 		// Ensure rounding mode is valid.
-		$rounding_modes           = [ PHP_ROUND_HALF_UP, PHP_ROUND_HALF_DOWN ];
+		$rounding_modes           = [ PHP_ROUND_HALF_UP, PHP_ROUND_HALF_DOWN, PHP_ROUND_HALF_EVEN, PHP_ROUND_HALF_ODD ];
 		$options['rounding_mode'] = absint( $options['rounding_mode'] );
 		if ( ! in_array( $options['rounding_mode'], $rounding_modes, true ) ) {
 			$options['rounding_mode'] = PHP_ROUND_HALF_UP;
