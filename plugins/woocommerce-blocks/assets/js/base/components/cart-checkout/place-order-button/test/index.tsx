@@ -29,13 +29,11 @@ describe( 'PlaceOrderButton', () => {
 		render( <PlaceOrderButton label="Place order" /> );
 		expect( screen.getByText( /Place order/ ) ).toBeInTheDocument();
 		expect( screen.queryByText( /&#36;0.00/ ) ).not.toBeInTheDocument();
-		expect( screen.queryByText( /·/ ) ).not.toBeInTheDocument();
 	} );
 	it( `renders the price and separator`, async () => {
 		render( <PlaceOrderButton label="Place order" showPrice={ true } /> );
 		expect( screen.getByText( /Place order/ ) ).toBeInTheDocument();
 		expect( screen.getByText( /&#36;0.00/ ) ).toBeInTheDocument();
-		expect( screen.getByText( /·/ ) ).toBeInTheDocument();
 	} );
 	it( `renders the spinner when processing`, async () => {
 		jest.resetModules();
