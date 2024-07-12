@@ -580,7 +580,11 @@
 						"patterns/**"
 					],
 					"testEnv": {
-						"start": "env:start:blocks"
+						"start": "env:start:blocks",
+						"config": {
+							"phpVersion": "8.0",
+							"wpVersion": "latest"
+						}
 					},
 					"events": [
 						"pull_request",
