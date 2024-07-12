@@ -22,8 +22,12 @@
 
 	/* On marketplace pages, reposition store alerts so they don't collide with other components */
 	.woocommerce-store-alerts {
-		margin-left: 16px;
+		margin-left: 24px;
 		margin-right: 16px;
 		margin-top: 16px;
+
+		@include breakpoint("<782px") {
+			width: 100%;
+		}
 	}
 }
