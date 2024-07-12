@@ -56,10 +56,12 @@ class TestMoneyFormatter extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test formatting expects exception on invalid array values.
+	 * Test formatting expects a $value of type INT, STRING or FLOAT.
 	 */
 	public function test_format_array_exception() {
-		$this->expectException( \Error::class );
-		$this->mock_formatter->format( array( 'This is not right' ) );
+		$this->assertEquals( '', $this->mock_formatter->format( true ) );
+		$this->assertEquals( '', $this->mock_formatter->format( null ) );
+		$this->assertEquals( '', $this->mock_formatter->format( array( 'Not right' ) ) );
+		$this->assertEquals( '', $this->mock_formatter->format( new \StdClass() ) );
 	}
 }
