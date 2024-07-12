@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Database\Migrations;
  * Base class for implementing WP posts to order tables migrations handlers.
  * It mainly contains methods to deal with error handling.
  *
- * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
+ * @package Automattic\WooCommerce\Database\Migrations
  */
 abstract class TableMigrator {
 
