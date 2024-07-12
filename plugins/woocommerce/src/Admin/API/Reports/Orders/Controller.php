@@ -524,14 +524,13 @@ class Controller extends ReportsController implements ExportableInterface {
 		$export_columns = array(
 			'date_created'    => __( 'Date', 'woocommerce' ),
 			'order_number'    => __( 'Order #', 'woocommerce' ),
-			'total_formatted' => __( 'N. Revenue (formatted)', 'woocommerce' ),
 			'status'          => __( 'Status', 'woocommerce' ),
 			'customer_name'   => __( 'Customer', 'woocommerce' ),
 			'customer_type'   => __( 'Customer type', 'woocommerce' ),
 			'products'        => __( 'Product(s)', 'woocommerce' ),
 			'num_items_sold'  => __( 'Items sold', 'woocommerce' ),
 			'coupons'         => __( 'Coupon(s)', 'woocommerce' ),
-			'net_total'       => __( 'N. Revenue', 'woocommerce' ),
+			'net_total' 	  => __( 'Net Sales', 'woocommerce' ),
 			'attribution'     => __( 'Attribution', 'woocommerce' ),
 		);
 
@@ -555,16 +554,15 @@ class Controller extends ReportsController implements ExportableInterface {
 	 */
 	public function prepare_item_for_export( $item ) {
 		$export_item = array(
-			'date_created'    => $item['date_created'],
+			'date_created'    => $item['date'],
 			'order_number'    => $item['order_number'],
-			'total_formatted' => $item['total_formatted'],
 			'status'          => $item['status'],
 			'customer_name'   => isset( $item['extended_info']['customer'] ) ? $this->get_customer_name( $item['extended_info']['customer'] ) : null,
 			'customer_type'   => $item['customer_type'],
 			'products'        => isset( $item['extended_info']['products'] ) ? $this->get_products( $item['extended_info']['products'] ) : null,
 			'num_items_sold'  => $item['num_items_sold'],
 			'coupons'         => isset( $item['extended_info']['coupons'] ) ? $this->get_coupons( $item['extended_info']['coupons'] ) : null,
-			'net_total'       => $item['net_total'],
+			'net_total' 	  => $item['net_total'],
 			'attribution'     => $item['extended_info']['attribution']['origin'],
 		);
 
