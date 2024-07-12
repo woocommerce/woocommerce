@@ -52,8 +52,8 @@ class DefaultPaymentGateways {
 		$payment_gateways = array(
 			array(
 				'id'                  => 'affirm',
-				'title'               => esc_html__( 'Affirm', 'woocommerce' ),
-				'content'             => esc_html__( 'Affirm’s tailored Buy Now Pay Later programs remove price as a barrier, turning browsers into buyers, increasing average order value, and expanding your customer base.', 'woocommerce' ),
+				'title'               => __( 'Affirm', 'woocommerce' ),
+				'content'             => __( 'Affirm’s tailored Buy Now Pay Later programs remove price as a barrier, turning browsers into buyers, increasing average order value, and expanding your customer base.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/affirm.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/affirm.png',
 				'plugins'             => array(),
@@ -81,8 +81,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'afterpay',
-				'title'               => esc_html__( 'Afterpay', 'woocommerce' ),
-				'content'             => esc_html__( 'Afterpay allows customers to receive products immediately and pay for purchases over four installments, always interest-free.', 'woocommerce' ),
+				'title'               => __( 'Afterpay', 'woocommerce' ),
+				'content'             => __( 'Afterpay allows customers to receive products immediately and pay for purchases over four installments, always interest-free.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/afterpay.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/afterpay.png',
 				'plugins'             => array( 'afterpay-gateway-for-woocommerce' ),
@@ -111,8 +111,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'airwallex_main',
-				'title'               => esc_html__( 'Airwallex Payments', 'woocommerce' ),
-				'content'             => esc_html__( 'Boost international sales and save on FX fees. Accept 60+ local payment methods including Apple Pay and Google Pay.', 'woocommerce' ),
+				'title'               => __( 'Airwallex Payments', 'woocommerce' ),
+				'content'             => __( 'Boost international sales and save on FX fees. Accept 60+ local payment methods including Apple Pay and Google Pay.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/airwallex.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/airwallex.png',
 				'plugins'             => array( 'airwallex-online-payments-gateway' ),
@@ -124,8 +124,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'amazon_payments_advanced',
-				'title'               => esc_html__( 'Amazon Pay', 'woocommerce' ),
-				'content'             => esc_html__( 'Enable a familiar, fast checkout for hundreds of millions of active Amazon customers globally.', 'woocommerce' ),
+				'title'               => __( 'Amazon Pay', 'woocommerce' ),
+				'content'             => __( 'Enable a familiar, fast checkout for hundreds of millions of active Amazon customers globally.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/amazonpay.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/amazonpay.png',
 				'plugins'             => array( 'woocommerce-gateway-amazon-payments-advanced' ),
@@ -177,8 +177,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'          => 'bacs',
-				'title'       => esc_html__( 'Direct bank transfer', 'woocommerce' ),
-				'content'     => esc_html__( 'Take payments via bank transfer.', 'woocommerce' ),
+				'title'       => __( 'Direct bank transfer', 'woocommerce' ),
+				'content'     => __( 'Take payments via bank transfer.', 'woocommerce' ),
 				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/bacs.svg',
 				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/bacs.png',
 				'is_visible'  => array(
@@ -188,8 +188,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'          => 'cod',
-				'title'       => esc_html__( 'Cash on delivery', 'woocommerce' ),
-				'content'     => esc_html__( 'Take payments in cash upon delivery.', 'woocommerce' ),
+				'title'       => __( 'Cash on delivery', 'woocommerce' ),
+				'content'     => __( 'Take payments in cash upon delivery.', 'woocommerce' ),
 				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/cod.svg',
 				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/cod.png',
 				'is_visible'  => array(
@@ -199,8 +199,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'eway',
-				'title'               => esc_html__( 'Eway', 'woocommerce' ),
-				'content'             => esc_html__( 'The Eway extension for WooCommerce allows you to take credit card payments directly on your store without redirecting your customers to a third party site to make payment.', 'woocommerce' ),
+				'title'               => __( 'Eway', 'woocommerce' ),
+				'content'             => __( 'The Eway extension for WooCommerce allows you to take credit card payments directly on your store without redirecting your customers to a third party site to make payment.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/eway.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/eway.png',
 				'plugins'             => array( 'woocommerce-gateway-eway' ),
@@ -210,8 +210,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'kco',
-				'title'               => esc_html__( 'Klarna Checkout', 'woocommerce' ),
-				'content'             => esc_html__( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries.', 'woocommerce' ),
+				'title'               => __( 'Klarna Checkout', 'woocommerce' ),
+				'content'             => __( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/klarna-black.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/klarna.png',
 				'plugins'             => array( 'klarna-checkout-for-woocommerce' ),
@@ -234,8 +234,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'klarna_payments',
-				'title'               => esc_html__( 'Klarna Payments', 'woocommerce' ),
-				'content'             => esc_html__( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries.', 'woocommerce' ),
+				'title'               => __( 'Klarna Payments', 'woocommerce' ),
+				'content'             => __( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/klarna-black.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/klarna.png',
 				'plugins'             => array( 'klarna-payments-for-woocommerce' ),
@@ -303,8 +303,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'mollie_wc_gateway_banktransfer',
-				'title'               => esc_html__( 'Mollie', 'woocommerce' ),
-				'content'             => esc_html__( 'Effortless payments by Mollie: Offer global and local payment methods, get onboarded in minutes, and supported in your language.', 'woocommerce' ),
+				'title'               => __( 'Mollie', 'woocommerce' ),
+				'content'             => __( 'Effortless payments by Mollie: Offer global and local payment methods, get onboarded in minutes, and supported in your language.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/mollie.svg',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/mollie.png',
 				'plugins'             => array( 'mollie-payments-for-woocommerce' ),
@@ -342,8 +342,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'payfast',
-				'title'               => esc_html__( 'Payfast', 'woocommerce' ),
-				'content'             => esc_html__( 'The Payfast extension for WooCommerce enables you to accept payments by Credit Card and EFT via one of South Africa’s most popular payment gateways. No setup fees or monthly subscription costs. Selecting this extension will configure your store to use South African rands as the selected currency.', 'woocommerce' ),
+				'title'               => __( 'Payfast', 'woocommerce' ),
+				'content'             => __( 'The Payfast extension for WooCommerce enables you to accept payments by Credit Card and EFT via one of South Africa’s most popular payment gateways. No setup fees or monthly subscription costs. Selecting this extension will configure your store to use South African rands as the selected currency.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/payfast.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/payfast.png',
 				'plugins'             => array( 'woocommerce-payfast-gateway' ),
@@ -356,8 +356,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'payoneer-checkout',
-				'title'               => esc_html__( 'Payoneer Checkout', 'woocommerce' ),
-				'content'             => esc_html__( 'Payoneer Checkout is the next generation of payment processing platforms, giving merchants around the world the solutions and direction they need to succeed in today’s hyper-competitive global market.', 'woocommerce' ),
+				'title'               => __( 'Payoneer Checkout', 'woocommerce' ),
+				'content'             => __( 'Payoneer Checkout is the next generation of payment processing platforms, giving merchants around the world the solutions and direction they need to succeed in today’s hyper-competitive global market.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/payoneer.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/payoneer.png',
 				'plugins'             => array( 'payoneer-checkout' ),
@@ -377,8 +377,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'paystack',
-				'title'               => esc_html__( 'Paystack', 'woocommerce' ),
-				'content'             => esc_html__( 'Paystack helps African merchants accept one-time and recurring payments online with a modern, safe, and secure payment gateway.', 'woocommerce' ),
+				'title'               => __( 'Paystack', 'woocommerce' ),
+				'content'             => __( 'Paystack helps African merchants accept one-time and recurring payments online with a modern, safe, and secure payment gateway.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/paystack.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/paystack.png',
 				'plugins'             => array( 'woo-paystack' ),
@@ -391,8 +391,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'payubiz',
-				'title'               => esc_html__( 'PayU for WooCommerce', 'woocommerce' ),
-				'content'             => esc_html__( 'Enable PayU’s exclusive plugin for WooCommerce to start accepting payments in 100+ payment methods available in India including credit cards, debit cards, UPI, & more!', 'woocommerce' ),
+				'title'               => __( 'PayU for WooCommerce', 'woocommerce' ),
+				'content'             => __( 'Enable PayU’s exclusive plugin for WooCommerce to start accepting payments in 100+ payment methods available in India including credit cards, debit cards, UPI, & more!', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/payu.svg',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/payu.png',
 				'plugins'             => array( 'payu-india' ),
@@ -409,8 +409,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'ppcp-gateway',
-				'title'               => esc_html__( 'PayPal Payments', 'woocommerce' ),
-				'content'             => esc_html__( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce' ),
+				'title'               => __( 'PayPal Payments', 'woocommerce' ),
+				'content'             => __( 'Safe and secure payments using credit cards or your customer’s PayPal account.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/paypal.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/paypal.png',
 				'plugins'             => array( 'woocommerce-paypal-payments' ),
@@ -577,8 +577,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'razorpay',
-				'title'               => esc_html__( 'Razorpay', 'woocommerce' ),
-				'content'             => esc_html__( 'The official Razorpay extension for WooCommerce allows you to accept credit cards, debit cards, netbanking, wallet, and UPI payments.', 'woocommerce' ),
+				'title'               => __( 'Razorpay', 'woocommerce' ),
+				'content'             => __( 'The official Razorpay extension for WooCommerce allows you to accept credit cards, debit cards, netbanking, wallet, and UPI payments.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/razorpay.svg',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/razorpay.png',
 				'plugins'             => array( 'woo-razorpay' ),
@@ -595,8 +595,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'square_credit_card',
-				'title'               => esc_html__( 'Square', 'woocommerce' ),
-				'content'             => esc_html__( 'Securely accept credit and debit cards with one low rate, no surprise fees (custom rates available). Sell online and in store and track sales and inventory in one place.', 'woocommerce' ),
+				'title'               => __( 'Square', 'woocommerce' ),
+				'content'             => __( 'Securely accept credit and debit cards with one low rate, no surprise fees (custom rates available). Sell online and in store and track sales and inventory in one place.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/square-black.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/square.png',
 				'plugins'             => array( 'woocommerce-square' ),
@@ -646,8 +646,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'stripe',
-				'title'               => esc_html__( ' Stripe', 'woocommerce' ),
-				'content'             => esc_html__( 'Accept debit and credit cards in 135+ currencies, methods such as Alipay, and one-touch checkout with Apple Pay.', 'woocommerce' ),
+				'title'               => __( ' Stripe', 'woocommerce' ),
+				'content'             => __( 'Accept debit and credit cards in 135+ currencies, methods such as Alipay, and one-touch checkout with Apple Pay.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/stripe.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/stripe.png',
 				'plugins'             => array( 'woocommerce-gateway-stripe' ),
@@ -745,8 +745,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'woo-mercado-pago-custom',
-				'title'               => esc_html__( 'Mercado Pago', 'woocommerce' ),
-				'content'             => esc_html__( 'Set up your payment methods and accept credit and debit cards, cash, bank transfers and money from your Mercado Pago account. Offer safe and secure payments with Latin America’s leading processor.', 'woocommerce' ),
+				'title'               => __( 'Mercado Pago', 'woocommerce' ),
+				'content'             => __( 'Set up your payment methods and accept credit and debit cards, cash, bank transfers and money from your Mercado Pago account. Offer safe and secure payments with Latin America’s leading processor.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/mercadopago.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/mercadopago.png',
 				'plugins'             => array( 'woocommerce-mercadopago' ),
@@ -780,15 +780,15 @@ class DefaultPaymentGateways {
 			// This is for backwards compatibility only (WC < 5.10.0-dev or WCA < 2.9.0-dev).
 			array(
 				'id'          => 'woocommerce_payments',
-				'title'       => esc_html__( 'WooPayments', 'woocommerce' ),
-				'content'     => esc_html__(
+				'title'       => __( 'WooPayments', 'woocommerce' ),
+				'content'     => __(
 					'Manage transactions without leaving your WordPress Dashboard. Only with WooPayments.',
 					'woocommerce'
 				),
 				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'plugins'     => array( 'woocommerce-payments' ),
-				'description' => esc_html__( 'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.', 'woocommerce' ),
+				'description' => __( 'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.', 'woocommerce' ),
 				'is_visible'  => array(
 					self::get_rules_for_cbd( false ),
 					self::get_rules_for_countries( self::get_wcpay_countries() ),
@@ -822,15 +822,15 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'          => 'woocommerce_payments:without-in-person-payments',
-				'title'       => esc_html__( 'WooPayments', 'woocommerce' ),
-				'content'     => esc_html__(
+				'title'       => __( 'WooPayments', 'woocommerce' ),
+				'content'     => __(
 					'Manage transactions without leaving your WordPress Dashboard. Only with WooPayments.',
 					'woocommerce'
 				),
 				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'plugins'     => array( 'woocommerce-payments' ),
-				'description' => esc_html__( 'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.', 'woocommerce' ),
+				'description' => __( 'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.', 'woocommerce' ),
 				'is_visible'  => array(
 					self::get_rules_for_cbd( false ),
 					self::get_rules_for_countries( array_diff( self::get_wcpay_countries(), array( 'US', 'CA' ) ) ),
@@ -857,15 +857,15 @@ class DefaultPaymentGateways {
 			// This is the same as the above, but with a different description for countries that support in-person payments such as US and CA.
 			array(
 				'id'          => 'woocommerce_payments:with-in-person-payments',
-				'title'       => esc_html__( 'WooPayments', 'woocommerce' ),
-				'content'     => esc_html__(
+				'title'       => __( 'WooPayments', 'woocommerce' ),
+				'content'     => __(
 					'Manage transactions without leaving your WordPress Dashboard. Only with WooPayments.',
 					'woocommerce'
 				),
 				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'plugins'     => array( 'woocommerce-payments' ),
-				'description' => esc_html__( 'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies – with no setup costs or monthly fees – and you can now accept in-person payments with the Woo mobile app.', 'woocommerce' ),
+				'description' => __( 'With WooPayments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies – with no setup costs or monthly fees – and you can now accept in-person payments with the Woo mobile app.', 'woocommerce' ),
 				'is_visible'  => array(
 					self::get_rules_for_cbd( false ),
 					self::get_rules_for_countries( array( 'US', 'CA' ) ),
@@ -891,8 +891,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'          => 'woocommerce_payments:bnpl',
-				'title'       => esc_html__( 'Activate BNPL instantly on WooPayments', 'woocommerce' ),
-				'content'     => esc_html__(
+				'title'       => __( 'Activate BNPL instantly on WooPayments', 'woocommerce' ),
+				'content'     => __(
 					'The world’s favorite buy now, pay later options and many more are right at your fingertips with WooPayments — all from one dashboard, without needing multiple extensions and logins.',
 					'woocommerce'
 				),
@@ -932,8 +932,8 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'zipmoney',
-				'title'               => esc_html__( 'Zip Co - Buy Now, Pay Later', 'woocommerce' ),
-				'content'             => esc_html__( 'Give your customers the power to pay later, interest free and watch your sales grow.', 'woocommerce' ),
+				'title'               => __( 'Zip Co - Buy Now, Pay Later', 'woocommerce' ),
+				'content'             => __( 'Give your customers the power to pay later, interest free and watch your sales grow.', 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/zipco.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/zipco.png',
 				'plugins'             => array( 'zipmoney-payments-woocommerce' ),
