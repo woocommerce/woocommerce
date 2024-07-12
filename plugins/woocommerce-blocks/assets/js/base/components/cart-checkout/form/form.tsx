@@ -110,18 +110,24 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 
 	// Focus the first input when opening the form.
 	useEffect( () => {
+		let timeoutId: ReturnType< typeof setTimeout >;
+
 		if ( ! isFirstRender.current && isEditing && fieldsRef.current ) {
 			const firstFieldKey = addressFormFields.fields[ 0 ].key;
 
 			if ( firstFieldKey ) {
 				// Focus the first field after a short delay to ensure the form is rendered.
-				setTimeout( () => {
+				timeoutId = setTimeout( () => {
 					fieldsRef.current[ firstFieldKey ]?.input?.focus();
 				}, 300 );
 			}
 		}
 
 		isFirstRender.current = false;
+
+		return () => {
+			clearTimeout( timeoutId );
+		};
 	}, [ isEditing, addressFormFields ] );
 
 	id = id || `${ instanceId }`;
