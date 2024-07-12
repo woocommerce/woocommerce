@@ -54,7 +54,7 @@ function getUrl( tab: string ): string {
 function getErrorPropsWithActions(
 	errorContext = '',
 	validatorId: string,
-	focusByValidatiorId: ( validatorId: string ) => void
+	focusByValidatorId: ( validatorId: string ) => void
 ): ErrorProps {
 	return {
 		explicitDismiss: true,
@@ -65,7 +65,7 @@ function getErrorPropsWithActions(
 					navigateTo( {
 						url: getUrl( errorContext ),
 					} );
-					focusByValidatiorId( validatorId );
+					focusByValidatorId( validatorId );
 				},
 			},
 		],
@@ -73,7 +73,7 @@ function getErrorPropsWithActions(
 }
 
 export const useErrorHandler = (): UseErrorHandlerTypes => {
-	const { focusByValidatiorId } = useValidations();
+	const { focusByValidatorId } = useValidations();
 	const { getParentTabId } = useBlocksHelper();
 
 	const getProductErrorMessageAndProps = useCallback(
@@ -96,7 +96,7 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 						response.errorProps = getErrorPropsWithActions(
 							errorContext,
 							validatorId,
-							focusByValidatiorId
+							focusByValidatorId
 						);
 					}
 					break;
@@ -106,7 +106,7 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 						response.errorProps = getErrorPropsWithActions(
 							errorContext,
 							validatorId,
-							focusByValidatiorId
+							focusByValidatorId
 						);
 					}
 					break;
@@ -119,7 +119,7 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 						response.errorProps = getErrorPropsWithActions(
 							'inventory',
 							validatorId,
-							focusByValidatiorId
+							focusByValidatorId
 						);
 					}
 					break;
@@ -132,7 +132,7 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 						response.errorProps = getErrorPropsWithActions(
 							'inventory',
 							validatorId,
-							focusByValidatiorId
+							focusByValidatorId
 						);
 					}
 					break;

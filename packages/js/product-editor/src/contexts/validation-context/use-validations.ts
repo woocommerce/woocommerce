@@ -17,7 +17,7 @@ export function useValidations< T = unknown >() {
 	const context = useContext( ValidationContext );
 	const [ isValidating, setIsValidating ] = useState( false );
 
-	async function focusByValidatiorId( validatorId: string ) {
+	async function focusByValidatorId( validatorId: string ) {
 		const field = await context.getFieldByValidatorId( validatorId );
 		if ( field ) {
 			field.focus();
@@ -45,6 +45,6 @@ export function useValidations< T = unknown >() {
 				setIsValidating( false );
 			} );
 		},
-		focusByValidatiorId,
+		focusByValidatorId,
 	};
 }
