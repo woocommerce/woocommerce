@@ -577,17 +577,16 @@
 					"testType": "e2e",
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
-						"--shard=1/11",
-						"--shard=2/11",
-						"--shard=3/11",
-						"--shard=4/11",
-						"--shard=5/11",
-						"--shard=6/11",
-						"--shard=7/11",
-						"--shard=8/11",
-						"--shard=9/11",
-						"--shard=10/11",
-						"--shard=11/11"
+						"--shard=1/10",
+						"--shard=2/10",
+						"--shard=3/10",
+						"--shard=4/10",
+						"--shard=5/10",
+						"--shard=6/10",
+						"--shard=7/10",
+						"--shard=8/10",
+						"--shard=9/10",
+						"--shard=10/10"
 					],
 					"changes": [
 						"src/Blocks/**",
