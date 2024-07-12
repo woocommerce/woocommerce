@@ -18,7 +18,7 @@ import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { CONTACT_FORM_KEYS } from '@woocommerce/block-settings';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 
-const CreateAccountUI = (): React.ReactElement => {
+const CreateAccountUI = (): React.ReactElement | null => {
 	const { customerPassword, shouldCreateAccount } = useSelect( ( select ) => {
 		const store = select( CHECKOUT_STORE_KEY );
 		return {
@@ -38,6 +38,14 @@ const CreateAccountUI = (): React.ReactElement => {
 		? false
 		: ( showCreateAccountCheckbox && shouldCreateAccount ) ||
 		  ! allowGuestCheckout;
+
+	if (
+		! allowGuestCheckout &&
+		! showCreateAccountCheckbox &&
+		! showCreateAccountPassword
+	) {
+		return null;
+	}
 
 	return (
 		<>
