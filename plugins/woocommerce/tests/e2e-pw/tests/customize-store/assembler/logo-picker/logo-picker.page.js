@@ -75,9 +75,10 @@ export class LogoPickerPage {
 				response.url().includes( 'wp-json/wp/v2/settings' ) &&
 				response.status() === 200
 		);
-		return await Promise.all( [
+		await Promise.all( [
 			waitForLogoResponse,
 			assemblerLocator.getByText( 'Save' ).click(),
 		] );
+		await assemblerLocator.getByText( 'Your store looks great!' ).waitFor();
 	}
 }
