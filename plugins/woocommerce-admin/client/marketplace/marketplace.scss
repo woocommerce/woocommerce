@@ -27,6 +27,7 @@
 		margin-top: 16px;
 
 		@include breakpoint("<782px") {
+			margin-left: 16px;
 			width: 100%;
 		}
 	}
