@@ -57,6 +57,7 @@ class TestMoneyFormatter extends \WP_UnitTestCase {
 
 	/**
 	 * Test formatting returns '' if a $value of type INT, STRING or FLOAT is not provided.
+	 * @expectedNotice
 	 */
 	public function test_format_unexpected_param_types() {
 		$this->assertEquals( '', $this->mock_formatter->format( true ) );
