@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Jetpack_Gutenberg;
+use WP_Post;
 
 /**
  * Customize Your Store Task
@@ -32,15 +33,15 @@ class CustomizeStore extends Task {
 	/**
 	 * Mark the CYS task as complete whenever the user updates their global styles.
 	 *
-	 * @param int      $post_id Post ID.
-	 * @param \WP_Post $post Post object.
-	 * @param bool     $update Whether this is an existing post being updated.
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post Post object.
+	 * @param bool    $update Whether this is an existing post being updated.
 	 *
 	 * @return void
 	 */
 	public function mark_task_as_complete( $post_id, $post, $update ) {
-		if ( $post instanceof \WP_Post ) {
-			$is_cys_complete = '{"version": 2, "isGlobalStylesUserThemeJSON": true }' !== $post->post_content || in_array( $post->post_type, array( 'wp_template', 'wp_template_part' ), true );
+		if ( $post instanceof WP_Post ) {
+			$is_cys_complete = $this->has_custom_global_styles( $post ) || $this->has_custom_template( $post );
 
 			if ( $is_cys_complete ) {
 				update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
@@ -259,5 +260,34 @@ class CustomizeStore extends Task {
 				body { overflow: hidden; }
 			</style>';
 		}
+	}
+
+	/**
+	 * Checks if the post has custom global styles stored (if it is different from the default global styles).
+	 *
+	 * @param WP_Post $post The post object.
+	 * @return bool
+	 */
+	private function has_custom_global_styles( WP_Post $post ) {
+		$required_keys = array( 'version', 'isGlobalStylesUserThemeJSON' );
+
+		$json_post_content = json_decode( $post->post_content, true );
+		if ( is_null( $json_post_content ) ) {
+			return false;
+		}
+
+		$post_content_keys = array_keys( $json_post_content );
+
+		return ! empty( array_diff( $post_content_keys, $required_keys ) ) || ! empty( array_diff( $required_keys, $post_content_keys ) );
+	}
+
+	/**
+	 * Checks if the post is a template or a template part.
+	 *
+	 * @param WP_Post $post The post object.
+	 * @return bool Whether the post is a template or a template part.
+	 */
+	private function has_custom_template( WP_Post $post ) {
+		return in_array( $post->post_type, array( 'wp_template', 'wp_template_part' ), true );
 	}
 }
