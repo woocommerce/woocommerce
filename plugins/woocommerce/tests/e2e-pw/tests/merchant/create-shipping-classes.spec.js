@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'Merchant can add shipping classes', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
