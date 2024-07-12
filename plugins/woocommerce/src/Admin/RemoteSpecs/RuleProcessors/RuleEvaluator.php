@@ -65,7 +65,7 @@ class RuleEvaluator {
 				throw new \InvalidArgumentException( 'Missing required field: slug in $logger_args.' );
 			}
 
-			array_key_exists( 'source', $logger_args ) ? $source = $logger_args['source'] : $source = null;
+			$source = isset( $logger_args['source'] ) ? $logger_args['source'] : null;
 
 			$evaluation_logger = new EvaluationLogger( $logger_args['slug'], $source );
 		}
