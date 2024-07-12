@@ -159,10 +159,12 @@ class ShippingPartnerSuggestionsTest extends WC_Unit_Test_Case {
 		$this->mock_logger
 			->expects( $this->exactly( count( $logger_debug_calls_args ) ) )
 			->method( 'debug' )
-			->willReturnCallback( function ( ...$args ) use ( &$logger_debug_calls_args ) {
-				$expectedArgs = array_shift( $logger_debug_calls_args );
-				$this->assertSame( $expectedArgs, $args );
-			} );
+			->willReturnCallback(
+				function ( ...$args ) use ( &$logger_debug_calls_args ) {
+					$expected_args = array_shift( $logger_debug_calls_args );
+					$this->assertSame( $expected_args, $args );
+				}
+			);
 
 		update_option( 'woocommerce_default_country', 'ZA' );
 		ShippingPartnerSuggestions::get_suggestions();
