@@ -130,23 +130,20 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		);
 		update_option( self::MOCK_OPTION, 'a' );
 
-		$this->mock_logger
-			->expects( $this->exactly( 3 ) )
-			->method( 'debug' )
-			->withConsecutive(
-				array(
-					'[mock-gateway] option: passed',
-					array( 'source' => 'unit-tests' ),
-				),
-				array(
-					'[mock-gateway] or: passed',
-					array( 'source' => 'unit-tests' ),
-				),
-				array(
-					'[mock-gateway] option: failed',
-					array( 'source' => 'unit-tests' ),
-				),
-			);
+		$this->mock_logger_debug_calls( array(
+			array(
+				'[mock-gateway] option: passed',
+				array( 'source' => 'unit-tests' ),
+			),
+			array(
+				'[mock-gateway] or: passed',
+				array( 'source' => 'unit-tests' ),
+			),
+			array(
+				'[mock-gateway] option: failed',
+				array( 'source' => 'unit-tests' ),
+			),
+		) );
 
 		EvaluateSuggestion::evaluate( (object) $suggestion, array( 'source' => 'unit-tests' ) );
 
@@ -180,9 +177,8 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		);
 		update_option( self::MOCK_OPTION, 'a' );
 
-		$this->mock_logger
-			->expects( $this->never() )
-			->method( 'debug' );
+		// No debug logs.
+		$this->mock_logger_debug_calls();
 
 		EvaluateSuggestion::evaluate( (object) $suggestion, array( 'source' => 'unit-tests' ) );
 
@@ -216,19 +212,16 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		);
 		update_option( self::MOCK_OPTION, 'a' );
 
-		$this->mock_logger
-			->expects( $this->exactly( 2 ) )
-			->method( 'debug' )
-			->withConsecutive(
-				array(
-					'[mock-gateway] option: passed',
-					array( 'source' => 'unit-tests' ),
-				),
-				array(
-					'[mock-gateway] rule not an object: failed',
-					array( 'source' => 'unit-tests' ),
-				),
-			);
+		$this->mock_logger_debug_calls( array(
+			array(
+				'[mock-gateway] option: passed',
+				array( 'source' => 'unit-tests' ),
+			),
+			array(
+				'[mock-gateway] rule not an object: failed',
+				array( 'source' => 'unit-tests' ),
+			),
+		) );
 
 		EvaluateSuggestion::evaluate( (object) $suggestion, array( 'source' => 'unit-tests' ) );
 
@@ -262,19 +255,16 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		);
 		update_option( self::MOCK_OPTION, 'a' );
 
-		$this->mock_logger
-			->expects( $this->exactly( 2 ) )
-			->method( 'debug' )
-			->withConsecutive(
-				array(
-					'[anonymous-suggestion] option: passed',
-					array( 'source' => 'unit-tests' ),
-				),
-				array(
-					'[anonymous-suggestion] rule not an object: failed',
-					array( 'source' => 'unit-tests' ),
-				),
-			);
+		$this->mock_logger_debug_calls( array(
+			array(
+				'[anonymous-suggestion] option: passed',
+				array( 'source' => 'unit-tests' ),
+			),
+			array(
+				'[anonymous-suggestion] rule not an object: failed',
+				array( 'source' => 'unit-tests' ),
+			),
+		) );
 
 		EvaluateSuggestion::evaluate( (object) $suggestion, array( 'source' => 'unit-tests' ) );
 
@@ -308,19 +298,16 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		);
 		update_option( self::MOCK_OPTION, 'a' );
 
-		$this->mock_logger
-			->expects( $this->exactly( 2 ) )
-			->method( 'debug' )
-			->withConsecutive(
-				array(
-					'[mock-gateway] option: passed',
-					array( 'source' => 'wc-payment-gateway-suggestions' ),
-				),
-				array(
-					'[mock-gateway] rule not an object: failed',
-					array( 'source' => 'wc-payment-gateway-suggestions' ),
-				),
-			);
+		$this->mock_logger_debug_calls( array(
+			array(
+				'[mock-gateway] option: passed',
+				array( 'source' => 'wc-payment-gateway-suggestions' ),
+			),
+			array(
+				'[mock-gateway] rule not an object: failed',
+				array( 'source' => 'wc-payment-gateway-suggestions' ),
+			),
+		) );
 
 		EvaluateSuggestion::evaluate( (object) $suggestion );
 
@@ -334,5 +321,30 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 	 */
 	public function override_wc_logger() {
 		return $this->mock_logger;
+	}
+
+	/**
+	 * Set expectations for the logger debug calls with each consecutive call args.
+	 *
+	 * @param array $calls_args List of expected arguments for each call.
+	 *
+	 * @return void
+	 */
+	private function mock_logger_debug_calls( array $calls_args = array() ) {
+		if ( empty( $calls_args ) ) {
+			$this->mock_logger
+				->expects( $this->never() )
+				->method( 'debug' );
+
+			return;
+		}
+
+		$this->mock_logger
+			->expects( $this->exactly( count( $calls_args ) ) )
+			->method( 'debug' )
+			->willReturnCallback( function ( ...$args ) use ( &$calls_args ) {
+				$expectedArgs = array_shift( $calls_args );
+				$this->assertSame( $expectedArgs, $args );
+			} );
 	}
 }
