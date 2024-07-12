@@ -178,8 +178,8 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'id', $order_note_id );
 
 		$this->assertEquals(
-			'woocommerce_rest_cannot_delete',
-			$this->sut->delete_item_permissions_check( $request )->get_error_code(),
+			'woocommerce_rest_review_invalid_id',
+			$this->sut->delete_item( $request )->get_error_code(),
 			'Comments that are not product reviews cannot be deleted via this endpoint.'
 		);
 
@@ -195,8 +195,8 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'id', $comment_id );
 
 		$this->assertEquals(
-			'woocommerce_rest_cannot_delete',
-			$this->sut->delete_item_permissions_check( $request )->get_error_code(),
+			'woocommerce_rest_review_invalid_id',
+			$this->sut->delete_item( $request )->get_error_code(),
 			'Comments that are not product reviews (including other types of comments belonging to products) cannot be deleted via this endpoint.'
 		);
 	}

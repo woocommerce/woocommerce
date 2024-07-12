@@ -68,6 +68,34 @@ class PluginUtil {
 	}
 
 	/**
+	 * Wrapper for WP's private `wp_get_active_and_valid_plugins` and `wp_get_active_network_plugins` functions.
+	 *
+	 * This combines the results of the two functions to get a list of all plugins that are active within a site.
+	 * It's more useful than just retrieving the option values because it also validates that the plugin files exist.
+	 * This wrapper is also a hedge against backward-incompatible changes since both of the WP methods are marked as
+	 * being "@access private", so if need be we can update our methods here to preserve functionality.
+	 *
+	 * Note that the doc block for `wp_get_active_and_valid_plugins` says it returns "Array of paths to plugin files
+	 * relative to the plugins directory", but it actually returns absolute paths.
+	 *
+	 * @return string[] Array of absolute paths to plugin files.
+	 */
+	public function get_all_active_valid_plugins() {
+		$local = wp_get_active_and_valid_plugins();
+
+		if ( is_multisite() ) {
+			require_once ABSPATH . WPINC . '/ms-load.php';
+			$network = wp_get_active_network_plugins();
+		} else {
+			$network = array();
+		}
+
+		$all = array_merge( $local, $network );
+
+		return array_unique( $all );
+	}
+
+	/**
 	 * Get a list with the names of the WordPress plugins that are WooCommerce aware
 	 * (they have a "WC tested up to" header).
 	 *

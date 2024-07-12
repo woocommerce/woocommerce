@@ -194,8 +194,9 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref_name }}
           ARTIFACT_NAME: ${{ github.ref_name == 'nightly' && 'woocommerce-trunk-nightly.zip' || 'woocommerce.zip' }}
-        working-directory: ${{ matrix.projectPath }}
-        run: node ./tests/e2e-pw/bin/override-wp-env-plugins.js
+          # band-aid to get the path to wp-env.json for blocks e2e tests, until they're migrated to plugins/woocommerce
+          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.testEnv.start == 'env:start:blocks' && 'plugins/woocommerce-blocks' || matrix.projectPath  }}
+        run: node .github/workflows/scripts/override-wp-env-plugins.js
 
       - name: 'Start Test Environment'
         id: 'prepare-test-environment'
