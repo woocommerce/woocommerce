@@ -12,6 +12,9 @@ use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
  */
 class TestMoneyFormatter extends \WP_UnitTestCase {
 
+	/**
+	 * @var MoneyFormatter
+	 */
 	private $formatter;
 
 	/**
@@ -27,28 +30,28 @@ class TestMoneyFormatter extends \WP_UnitTestCase {
 	 * Test formatting.
 	 */
 	public function test_format() {
-		$this->assertEquals( "1000", $this->formatter->format( 10 ) );
-		$this->assertEquals( "1000", $this->formatter->format( "10" ) );
+		$this->assertEquals( '1000', $this->formatter->format( 10 ) );
+		$this->assertEquals( '1000', $this->formatter->format( '10' ) );
 	}
 
 	/**
 	 * Test formatting with custom DP.
 	 */
 	public function test_format_dp() {
-		$this->assertEquals( "100000", $this->formatter->format( 10, [ 'decimals' => 4 ] ) );
-		$this->assertEquals( "100000", $this->formatter->format( "10", [ 'decimals' => 4 ] ) );
+		$this->assertEquals( '100000', $this->formatter->format( 10, [ 'decimals' => 4 ] ) );
+		$this->assertEquals( '100000', $this->formatter->format( '10', [ 'decimals' => 4 ] ) );
 	}
 
 	/**
 	 * Test formatting with custom DP.
 	 */
 	public function test_format_rounding_mode() {
-		$this->assertEquals( "156", $this->formatter->format( 1.555 ) );
-		$this->assertEquals( "156", $this->formatter->format( 1.555, [ 'rounding_mode' => PHP_ROUND_HALF_UP ] ) );
-		$this->assertEquals( "155", $this->formatter->format( 1.555, [ 'rounding_mode' => PHP_ROUND_HALF_DOWN ] ) );
-		$this->assertEquals( "156", $this->formatter->format( 1.555, [ 'rounding_mode' => PHP_ROUND_HALF_EVEN ] ) );
-		$this->assertEquals( "155", $this->formatter->format( 1.555, [ 'rounding_mode' => PHP_ROUND_HALF_ODD ] ) );
-		$this->assertEquals( "156", $this->formatter->format( 1.555, [ 'rounding_mode' => 123456 ] ) );
+		$this->assertEquals( '156', $this->formatter->format( 1.555 ) );
+		$this->assertEquals( '156', $this->formatter->format( 1.555, [ 'rounding_mode' => PHP_ROUND_HALF_UP ] ) );
+		$this->assertEquals( '155', $this->formatter->format( 1.555, [ 'rounding_mode' => PHP_ROUND_HALF_DOWN ] ) );
+		$this->assertEquals( '156', $this->formatter->format( 1.555, [ 'rounding_mode' => PHP_ROUND_HALF_EVEN ] ) );
+		$this->assertEquals( '155', $this->formatter->format( 1.555, [ 'rounding_mode' => PHP_ROUND_HALF_ODD ] ) );
+		$this->assertEquals( '156', $this->formatter->format( 1.555, [ 'rounding_mode' => 123456 ] ) );
 	}
 
 	/**
@@ -67,21 +70,23 @@ class TestMoneyFormatter extends \WP_UnitTestCase {
 			[ true ],
 			[ null ],
 			[ [ 'Not right' ] ],
-			[ new \StdClass() ]
+			[ new \StdClass() ],
 		];
 	}
 
 	/**
 	 * Test formatting returns '' if a $value of type INT, STRING or FLOAT is not provided.
 	 * @dataProvider invalidTypesProvider
+	 *
+	 * @param mixed $invalid_type The invalid type to test.
 	 */
-	public function test_format_unexpected_param_types( $invalidType ) {
+	public function test_format_unexpected_param_types( $invalid_type ) {
 		$this->expected_doing_it_wrong = array_merge(
 			$this->expected_doing_it_wrong,
 			[ 'format' ]
 		);
 
 		// Assert that the format method returns an empty string for invalid types.
-		$this->assertEquals( '', $this->formatter->format( $invalidType ) );
+		$this->assertEquals( '', $this->formatter->format( $invalid_type ) );
 	}
 }
