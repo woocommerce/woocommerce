@@ -1288,12 +1288,12 @@ final class WooCommerce {
 		}
 
 		/**
-		 * Hook: woocommerce_analytics_allow_tracking.
+		 * Hook: woocommerce_analytics_allow_customer_tracking.
 		 *
 		 * @since 9.4.0
-		 * @param boolean $is_allowed Indicates if WooCommerce Analytics is allowed to track.
+		 * @param boolean $is_allowed Indicates if WooCommerce Analytics is allowed to track customer data.
 		 */
-		if ( ! apply_filters( 'woocommerce_analytics_allow_tracking', false ) ) {
+		if ( ! apply_filters( 'woocommerce_analytics_allow_customer_tracking', false ) ) {
 			return;
 		}
 
@@ -1301,7 +1301,7 @@ final class WooCommerce {
 		$jetpack_plugin = 'jetpack/jetpack.php';
 		if ( is_plugin_active( $jetpack_plugin ) ) {
 			$jetpack_plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $jetpack_plugin );
-			if ( ! isset( $jetpack_plugin_data['Version'] ) && version_compare( $jetpack_plugin_data['Version'], '13.7', '<' ) ) {
+			if ( isset( $jetpack_plugin_data['Version'] ) && version_compare( $jetpack_plugin_data['Version'], '13.7', '<' ) ) {
 				return;
 			}
 		}
