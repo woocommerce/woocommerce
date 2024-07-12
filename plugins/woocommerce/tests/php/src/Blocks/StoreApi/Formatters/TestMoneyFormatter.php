@@ -59,7 +59,7 @@ class TestMoneyFormatter extends \WP_UnitTestCase {
 	 * Test formatting expects exception on invalid array values.
 	 */
 	public function test_format_array_exception() {
-		$this->expectException( \TypeError::class );
+		$this->expectException( \Error::class );
 		$this->mock_formatter->format( array( 'This is not right' ) );
 	}
 }
