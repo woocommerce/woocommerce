@@ -410,7 +410,7 @@ class DefaultPaymentGateways {
 			array(
 				'id'                  => 'ppcp-gateway',
 				'title'               => __( 'PayPal Payments', 'woocommerce' ),
-				'content'             => __( 'Safe and secure payments using credit cards or your customer’s PayPal account.', 'woocommerce' ),
+				'content'             => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce' ),
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/paypal.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/paypal.png',
 				'plugins'             => array( 'woocommerce-paypal-payments' ),
