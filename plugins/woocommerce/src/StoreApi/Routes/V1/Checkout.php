@@ -642,6 +642,7 @@ class Checkout extends AbstractCartRoute {
 			$password_generated = false;
 		}
 
+		// This ensures `wp_generate_password` returned something (it is filterable and could be empty string).
 		if ( empty( $password ) ) {
 			throw new \Exception( 'registration-error-empty-password' );
 		}
