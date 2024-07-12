@@ -90,6 +90,8 @@ const test = base.extend< {
 	},
 } );
 
+test.describe.configure( { mode: 'serial' } );
+
 test.describe( `${ blockData.name }`, () => {
 	test.describe( `On the Single Product Template`, () => {
 		test.beforeEach( async ( { admin, editor } ) => {
