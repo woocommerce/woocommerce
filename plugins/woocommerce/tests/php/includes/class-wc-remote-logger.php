@@ -24,6 +24,8 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->cleanup_filters();
+
+		delete_option( 'woocommerce_feature_remote_logging_enabled' );
 	}
 
 	/**
@@ -32,7 +34,6 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	private function cleanup_filters() {
-		remove_all_filters( 'woocommerce_admin_features' );
 		remove_all_filters( 'option_woocommerce_admin_remote_feature_enabled' );
 		remove_all_filters( 'option_woocommerce_allow_tracking' );
 		remove_all_filters( 'option_woocommerce_version' );
@@ -43,14 +44,8 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 	 * Test that remote logging is allowed when all conditions are met.
 	 */
 	public function test_remote_logging_allowed() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features['remote-error-logging'] = true;
-				return $features;
-			},
-			10
-		);
+		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
+
 		add_filter(
 			'option_woocommerce_allow_tracking',
 			function () {
@@ -86,14 +81,8 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 	 * Test that remote logging is not allowed when the feature flag is disabled.
 	 */
 	public function test_remote_logging_not_allowed_feature_flag_disabled() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features['remote-error-logging'] = false;
-				return $features;
-			},
-			10
-		);
+		update_option( 'woocommerce_feature_remote_logging_enabled', 'no' );
+
 		add_filter(
 			'option_woocommerce_allow_tracking',
 			function () {
@@ -117,14 +106,7 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 	 * Test that remote logging is not allowed when user tracking is not opted in.
 	 */
 	public function test_remote_logging_not_allowed_tracking_opted_out() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features['remote-error-logging'] = true;
-				return $features;
-			},
-			10
-		);
+		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
 		add_filter(
 			'option_woocommerce_allow_tracking',
 			function () {
@@ -148,14 +130,7 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 	 * Test that remote logging is not allowed when the WooCommerce version is outdated.
 	 */
 	public function test_remote_logging_not_allowed_outdated_version() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features['remote-error-logging'] = true;
-				return $features;
-			},
-			10
-		);
+		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
 		add_filter(
 			'option_woocommerce_allow_tracking',
 			function () {
@@ -180,14 +155,7 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 	 * Test that remote logging is not allowed when the variant assignment is high.
 	 */
 	public function test_remote_logging_not_allowed_high_variant_assignment() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features['remote-error-logging'] = true;
-				return $features;
-			},
-			10
-		);
+		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
 		add_filter(
 			'option_woocommerce_allow_tracking',
 			function () {

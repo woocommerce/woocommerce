@@ -1,6 +1,6 @@
 <?php
 
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * WooCommerce Remote Logger
@@ -34,7 +34,7 @@ class WC_Remote_Logger {
 	 * @return bool
 	 */
 	public function is_remote_logging_allowed() {
-		if ( ! Features::is_enabled( 'remote-error-logging' ) ) {
+		if ( ! FeaturesUtil::feature_is_enabled( 'remote_logging' ) ) {
 			return false;
 		}
 
