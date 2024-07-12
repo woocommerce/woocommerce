@@ -16,6 +16,16 @@ class MoneyFormatter implements FormatterInterface {
 	 */
 	public function format( $value, array $options = [] ) {
 
+		if ( ! is_int( $value ) && ! is_string( $value ) && ! is_float( $value ) ) {
+			wc_doing_it_wrong(
+				__FUNCTION__,
+				'Function expects a $value arg of type INT, STRING or FLOAT.',
+				'9.2'
+			);
+
+			return '';
+		}
+
 		$options = wp_parse_args(
 			$options,
 			[
@@ -29,16 +39,6 @@ class MoneyFormatter implements FormatterInterface {
 		$options['rounding_mode'] = absint( $options['rounding_mode'] );
 		if ( ! in_array( $options['rounding_mode'], $rounding_modes, true ) ) {
 			$options['rounding_mode'] = PHP_ROUND_HALF_UP;
-		}
-
-		if ( ! is_int( $value ) && ! is_string( $value ) && ! is_float( $value ) ) {
-			wc_doing_it_wrong(
-				__FUNCTION__,
-				__( 'This function expects a $value arg of type INT, STRING or FLOAT.', 'woocommerce' ),
-				'9.2'
-			);
-
-			return '';
 		}
 
 		$value = floatval( $value );
