@@ -60,13 +60,28 @@ class TestMoneyFormatter extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test formatting returns '' if a $value of type INT, STRING or FLOAT is not provided.
-	 * @expectedNotice
+	 * Data provider for invalid param types.
 	 */
-	public function test_format_unexpected_param_types() {
-		$this->assertEquals( '', $this->formatter->format( true ) );
-		$this->assertEquals( '', $this->formatter->format( null ) );
-		$this->assertEquals( '', $this->formatter->format( array( 'Not right' ) ) );
-		$this->assertEquals( '', $this->formatter->format( new \StdClass() ) );
+	public function invalidTypesProvider() {
+		return [
+			[ true ],
+			[ null ],
+			[ [ 'Not right' ] ],
+			[ new \StdClass() ]
+		];
+	}
+
+	/**
+	 * Test formatting returns '' if a $value of type INT, STRING or FLOAT is not provided.
+	 * @dataProvider invalidTypesProvider
+	 */
+	public function test_format_unexpected_param_types( $invalidType ) {
+		$this->expected_doing_it_wrong = array_merge(
+			$this->expected_doing_it_wrong,
+			[ 'format' ]
+		);
+
+		// Assert that the format method returns an empty string for invalid types.
+		$this->assertEquals( '', $this->formatter->format( $invalidType ) );
 	}
 }
