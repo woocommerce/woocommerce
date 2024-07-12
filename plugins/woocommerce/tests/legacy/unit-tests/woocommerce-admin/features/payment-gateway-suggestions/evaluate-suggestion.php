@@ -39,6 +39,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 	 */
 	public function tearDown(): void {
 		delete_option( self::MOCK_OPTION );
+		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
 
 		parent::tearDown();
 	}
