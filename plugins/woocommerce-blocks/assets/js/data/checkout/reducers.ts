@@ -99,7 +99,7 @@ const reducer = ( state = defaultState, action: CheckoutAction ) => {
 			break;
 
 		case types.SET_CUSTOMER_PASSWORD:
-			if ( action.customerPassword !== undefined ) {
+			if ( typeof action.customerPassword !== 'undefined' ) {
 				newState = {
 					...state,
 					customerPassword: action.customerPassword,
