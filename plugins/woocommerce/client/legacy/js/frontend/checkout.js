@@ -157,10 +157,10 @@ jQuery( function( $ ) {
 			wc_checkout_form.reset_update_checkout_timer();
 			wc_checkout_form.updateTimer = setTimeout( wc_checkout_form.maybe_update_checkout, '1000' );
 		},
-		trigger_update_checkout: function() {
+		trigger_update_checkout: function( event ) {
 			wc_checkout_form.reset_update_checkout_timer();
 			wc_checkout_form.dirtyInput = false;
-			$( document.body ).trigger( 'update_checkout' );
+			$( document.body ).trigger( 'update_checkout', { currentTarget: event.currentTarget } );
 		},
 		maybe_update_checkout: function() {
 			var update_totals = true;
@@ -420,6 +420,10 @@ jQuery( function( $ ) {
 						$form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).trigger( 'blur' );
 
 						wc_checkout_form.scroll_to_notices();
+					} 
+					// If there is no errors and the checkout update was triggered by changing the shipping method, focus its radio input.
+					else if ( args.currentTarget && args.currentTarget.id.includes( 'shipping_method' ) ) {
+						document.getElementById( args.currentTarget.id ).focus();
 					}
 
 					// Re-init methods
