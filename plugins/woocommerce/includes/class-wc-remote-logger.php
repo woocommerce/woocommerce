@@ -14,15 +14,6 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  * @package WooCommerce\Classes
  */
 class WC_Remote_Logger {
-
-	/**
-	 * The latest WooCommerce version.
-	 *
-	 * @var string|null
-	 */
-	private $latest_wc_version;
-
-
 	/**
 	 * Determines if remote logging is allowed based on the following conditions:
 	 *
@@ -78,13 +69,13 @@ class WC_Remote_Logger {
 	 * @return bool
 	 */
 	private function is_latest_woocommerce_version() {
-		$this->latest_wc_version = $this->fetch_latest_woocommerce_version();
+		$latest_wc_version = $this->fetch_latest_woocommerce_version();
 
-		if ( is_null( $this->latest_wc_version ) ) {
+		if ( is_null( $latest_wc_version ) ) {
 			return false;
 		}
 
-		return version_compare( WC()->version, $this->latest_wc_version, '>=' );
+		return version_compare( WC()->version, $latest_wc_version, '>=' );
 	}
 
 	/**

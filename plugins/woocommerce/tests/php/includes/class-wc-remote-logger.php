@@ -134,7 +134,7 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 		add_filter(
 			'option_woocommerce_allow_tracking',
 			function () {
-				return true;
+				return 'yes';
 			}
 		);
 		add_filter(
@@ -159,7 +159,7 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 		add_filter(
 			'option_woocommerce_allow_tracking',
 			function () {
-				return true;
+				return 'yes';
 			}
 		);
 		add_filter(
