@@ -1054,7 +1054,7 @@ final class WooCommerce {
 		$path = ( ! empty( $site_url['path'] ) ) ? $site_url['path'] : '';
 
 		$lines       = explode( PHP_EOL, $output );
-		$agent_index = array_search( 'User-agent: *', $lines );
+		$agent_index = array_search( 'User-agent: *', $lines, true );
 
 		if ( false !== $agent_index ) {
 			$above = array_slice( $lines, 0, $agent_index + 1 );
