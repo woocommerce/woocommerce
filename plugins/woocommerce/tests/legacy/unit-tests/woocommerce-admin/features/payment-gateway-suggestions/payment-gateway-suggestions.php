@@ -177,7 +177,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		// Replace the external data sources.
 		add_filter(
 			PaymentGatewaySuggestionsDataSourcePoller::FILTER_NAME,
-			function() {
+			function () {
 				return array(
 					'payment-gateway-suggestions-data-source.json',
 				);
@@ -188,10 +188,10 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		// skip defaulting to the default payment gateways suggestions too early.
 		add_filter(
 			'pre_http_request',
-			function( $pre, $parsed_args, $url ) {
+			function ( $pre, $parsed_args, $url ) {
 				$locale = get_locale();
 
-				if ( $url === 'payment-gateway-suggestions-data-source.json?locale=' . $locale ) {
+				if ( 'payment-gateway-suggestions-data-source.json?locale=' . $locale === $url ) {
 					return array(
 						'body' => wp_json_encode(
 							array(
@@ -212,13 +212,16 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 			3
 		);
 
-		// Finally return empty specs that should default the suggestions to the default payment gateways suggestions
-		add_filter( 'woocommerce_admin_payment_gateway_suggestion_specs', function() {
-			return array();
-		} );
+		// Finally return empty specs that should default the suggestions to the default payment gateways suggestions.
+		add_filter(
+			'woocommerce_admin_payment_gateway_suggestion_specs',
+			function () {
+				return array();
+			}
+		);
 
 		// Act.
-		$suggestions       = PaymentGatewaySuggestions::get_suggestions();
+		$suggestions               = PaymentGatewaySuggestions::get_suggestions();
 		$stored_specs_in_transient = get_transient( 'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
 
 		// Assert.
