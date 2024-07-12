@@ -119,7 +119,7 @@ export const WooPaymentMethodsLogos: React.VFC< {
 					getMaxShownElements( maxShownElements, isWooPayEligible )
 				).map( ( pm ) => {
 					if ( ! isWooPayEligible && pm.name === 'woopay' ) {
-						return <></>;
+						return null;
 					}
 
 					return pm.component;
