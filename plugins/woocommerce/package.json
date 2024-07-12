@@ -201,7 +201,7 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.1",
+							"phpVersion": "8.0",
 							"wpVersion": "nightly"
 						}
 					},
