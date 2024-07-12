@@ -302,13 +302,14 @@ async function createJobsForProject(
 			dependencyCascade
 		);
 
-		if (
-			dependencyChanges === false &&
-			Object.values( dependencyJobs ).some(
-				( array ) => array.length > 0
-			)
-		) {
-			dependencyChanges = true;
+		if ( dependencyChanges === false ) {
+			// First line of detection: implicit changes list points to the dependency.
+			dependencyChanges = ( changes[ dependency.name ] || [] ).length > 0;
+			if ( dependencyChanges === false ) {
+				// Second line of detection: the dependency spawns jobs.
+				dependencyChanges =
+					dependencyJobs.test.length + dependencyJobs.lint.length > 0;
+			}
 		}
 
 		newJobs.lint.push( ...dependencyJobs.lint );

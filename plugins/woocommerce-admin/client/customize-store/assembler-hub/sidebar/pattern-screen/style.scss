@@ -3,8 +3,10 @@
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-	background-color: #f0f0f0;
-	padding: 25px;
+	background-color: #fff;
+	border-radius: 12px;
+	box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.05);
+	padding: 16px 24px 24px 24px;
 	overflow: auto;
 
 	.woocommerce-customize-store-edit-site-layout__sidebar-extra__pattern__header {
@@ -15,6 +17,7 @@
 
 		h1 {
 			font-size: 16px;
+			padding: 0;
 		}
 
 		span {
@@ -43,10 +46,9 @@
 		&.is-added {
 			.auto-block-preview__container,
 			.block-editor-block-preview__container {
-				// WIP: This is a temporary CSS. Replace red with the actual color.
 				box-shadow: 0 0 0 1.5px #fff,
-					0 0 0 3.5px var(--gutenberg-gray-900, #1e1e1e);
-				border-color: var(--gutenberg-gray-900, #1e1e1e);
+					0 0 0 3.5px var(--wp-admin-theme-color, #3858e9);
+				border-color: var(--wp-admin-theme-color);
 				border-radius: 4px;
 				&::after {
 					outline: none;
