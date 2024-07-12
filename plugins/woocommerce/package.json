@@ -623,6 +623,21 @@
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
+				},
+				{
+					"name": "Core e2e tests - default WPCOM site",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default-wpcom",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-checks"
+					],
+					"report": {
+						"resultsBlobName": "default-wpcom-core-e2e",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
 				}
 			]
 		}
