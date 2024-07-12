@@ -16,7 +16,7 @@ const config: PlaywrightTestConfig = {
 	),
 	testDir: './tests',
 	retries: CI ? 1 : 0,
-	workers: 2,
+	workers: 1,
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	fullyParallel: false,
 	forbidOnly: !! CI,
