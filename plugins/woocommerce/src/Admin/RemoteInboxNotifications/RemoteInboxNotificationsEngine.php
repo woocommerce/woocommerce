@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
@@ -254,8 +255,14 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	 * @return mixed
 	 */
 	public static function add_debug_tools( $tools ) {
-		if ( get_option( 'woocommerce_allow_tracking', 'no' ) === 'no' ) {
-			return $tools;
+		// Check if the feature flag is disabled.
+		if ( ! Features::is_enabled( 'remote-inbox-notifications' ) ) {
+			return false;
+		}
+
+		// Check if the site has opted out of marketplace suggestions.
+		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) !== 'yes' ) {
+			return false;
 		}
 
 		$tools['refresh_remote_inbox_notifications'] = array(
