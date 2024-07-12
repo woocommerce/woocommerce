@@ -65,10 +65,8 @@ export function ValidationProvider< T >( {
 			const result = validator( initialValue, newData );
 
 			return result.then( ( error ) => {
-				let errorWithValidatorId: ValidationError;
-				if ( error !== undefined ) {
-					errorWithValidatorId = { validatorId, ...error };
-				}
+				const errorWithValidatorId: ValidationError =
+					error !== undefined ? { validatorId, ...error } : undefined;
 				setErrors( ( currentErrors ) => ( {
 					...currentErrors,
 					[ validatorId ]: errorWithValidatorId,
