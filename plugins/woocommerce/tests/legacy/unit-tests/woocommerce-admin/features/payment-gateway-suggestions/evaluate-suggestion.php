@@ -131,20 +131,22 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		);
 		update_option( self::MOCK_OPTION, 'a' );
 
-		$this->mock_logger_debug_calls( array(
+		$this->mock_logger_debug_calls(
 			array(
-				'[mock-gateway] option: passed',
-				array( 'source' => 'unit-tests' ),
-			),
-			array(
-				'[mock-gateway] or: passed',
-				array( 'source' => 'unit-tests' ),
-			),
-			array(
-				'[mock-gateway] option: failed',
-				array( 'source' => 'unit-tests' ),
-			),
-		) );
+				array(
+					'[mock-gateway] option: passed',
+					array( 'source' => 'unit-tests' ),
+				),
+				array(
+					'[mock-gateway] or: passed',
+					array( 'source' => 'unit-tests' ),
+				),
+				array(
+					'[mock-gateway] option: failed',
+					array( 'source' => 'unit-tests' ),
+				),
+			)
+		);
 
 		EvaluateSuggestion::evaluate( (object) $suggestion, array( 'source' => 'unit-tests' ) );
 
@@ -213,16 +215,18 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		);
 		update_option( self::MOCK_OPTION, 'a' );
 
-		$this->mock_logger_debug_calls( array(
+		$this->mock_logger_debug_calls(
 			array(
-				'[mock-gateway] option: passed',
-				array( 'source' => 'unit-tests' ),
-			),
-			array(
-				'[mock-gateway] rule not an object: failed',
-				array( 'source' => 'unit-tests' ),
-			),
-		) );
+				array(
+					'[mock-gateway] option: passed',
+					array( 'source' => 'unit-tests' ),
+				),
+				array(
+					'[mock-gateway] rule not an object: failed',
+					array( 'source' => 'unit-tests' ),
+				),
+			)
+		);
 
 		EvaluateSuggestion::evaluate( (object) $suggestion, array( 'source' => 'unit-tests' ) );
 
@@ -256,16 +260,18 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		);
 		update_option( self::MOCK_OPTION, 'a' );
 
-		$this->mock_logger_debug_calls( array(
+		$this->mock_logger_debug_calls(
 			array(
-				'[anonymous-suggestion] option: passed',
-				array( 'source' => 'unit-tests' ),
-			),
-			array(
-				'[anonymous-suggestion] rule not an object: failed',
-				array( 'source' => 'unit-tests' ),
-			),
-		) );
+				array(
+					'[anonymous-suggestion] option: passed',
+					array( 'source' => 'unit-tests' ),
+				),
+				array(
+					'[anonymous-suggestion] rule not an object: failed',
+					array( 'source' => 'unit-tests' ),
+				),
+			)
+		);
 
 		EvaluateSuggestion::evaluate( (object) $suggestion, array( 'source' => 'unit-tests' ) );
 
@@ -299,16 +305,18 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		);
 		update_option( self::MOCK_OPTION, 'a' );
 
-		$this->mock_logger_debug_calls( array(
+		$this->mock_logger_debug_calls(
 			array(
-				'[mock-gateway] option: passed',
-				array( 'source' => 'wc-payment-gateway-suggestions' ),
-			),
-			array(
-				'[mock-gateway] rule not an object: failed',
-				array( 'source' => 'wc-payment-gateway-suggestions' ),
-			),
-		) );
+				array(
+					'[mock-gateway] option: passed',
+					array( 'source' => 'wc-payment-gateway-suggestions' ),
+				),
+				array(
+					'[mock-gateway] rule not an object: failed',
+					array( 'source' => 'wc-payment-gateway-suggestions' ),
+				),
+			)
+		);
 
 		EvaluateSuggestion::evaluate( (object) $suggestion );
 
@@ -343,9 +351,11 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 		$this->mock_logger
 			->expects( $this->exactly( count( $calls_args ) ) )
 			->method( 'debug' )
-			->willReturnCallback( function ( ...$args ) use ( &$calls_args ) {
-				$expectedArgs = array_shift( $calls_args );
-				$this->assertSame( $expectedArgs, $args );
-			} );
+			->willReturnCallback(
+				function ( ...$args ) use ( &$calls_args ) {
+					$expected_args = array_shift( $calls_args );
+					$this->assertSame( $expected_args, $args );
+				}
+			);
 	}
 }
