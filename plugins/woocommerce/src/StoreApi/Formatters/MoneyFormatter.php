@@ -31,10 +31,18 @@ class MoneyFormatter implements FormatterInterface {
 			$options['rounding_mode'] = PHP_ROUND_HALF_UP;
 		}
 
-		// This ensures we work with floats from this point on. Also, if $value skips this as an array/object,
-		// it will throw a fatal error or produce an E_NOTICE (if Object on PHP <8.0).
-		if ( is_int( $value ) || is_string( $value ) ) {
-			$value = floatval( $value );
+		$is_array = is_array( $value );
+
+		if ( $is_array ) {
+			wc_doing_it_wrong(
+				__FUNCTION__,
+				__( 'Passing an array is not supported and will be blocked in the future. This will produce unexpected price values.', 'woocommerce' ),
+				'9.1.2'
+			);
+		}
+
+		if ( is_int( $value ) || is_string( $value ) || $is_array ) {
+			$value = floatval( $value ); // This will result in "1" if $value is an array. See the doing_it_wrong above.
 		}
 
 		// Remove the price decimal points for rounding purposes.
