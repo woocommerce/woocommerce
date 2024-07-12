@@ -53,6 +53,8 @@
 	<rule ref="Suin.Classes.PSR4">
 		<include-pattern>src/</include-pattern>
 		<include-pattern>tests/php/src/</include-pattern>
+		<exclude-pattern>plugins/woocommerce/src/Admin/Notes/DeprecatedNotes.php</exclude-pattern>
+		<exclude-pattern>plugins/woocommerce/tests/php/src/Proxies/ExampleClasses/</exclude-pattern>
 		<properties>
 			<property name="composerJsonPath" value="composer.json"/>
 		</properties>
