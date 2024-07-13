@@ -124,12 +124,12 @@ export const BusinessInfo = ( {
 		businessInfo,
 		countries,
 		onboardingProfile: {
-			is_store_country_set: isStoreCountrySet,
-			industry: industryFromOnboardingProfile,
-			business_choice: businessChoiceFromOnboardingProfile,
-			is_agree_marketing: isOptInMarketingFromOnboardingProfile,
-			store_email: storeEmailAddressFromOnboardingProfile,
-		},
+			is_store_country_set: isStoreCountrySet = false,
+			industry: industryFromOnboardingProfile = [],
+			business_choice: businessChoiceFromOnboardingProfile = '',
+			is_agree_marketing: isOptInMarketingFromOnboardingProfile = false,
+			store_email: storeEmailAddressFromOnboardingProfile = '',
+		} = {},
 		currentUserEmail,
 	} = context;
 
