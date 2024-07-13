@@ -134,7 +134,7 @@ const getCoreConfig = ( options = {} ) => {
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Core' ) ),
 			new CreateFileWebpack( {
-				path: './',
+				path: '../../',
 				// file name
 				fileName: 'blocks.ini',
 				// content of the file
