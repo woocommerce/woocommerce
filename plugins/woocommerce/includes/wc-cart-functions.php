@@ -541,3 +541,55 @@ function wc_get_cart_item_data_hash( $product ) {
 		)
 	);
 }
+
+
+if (!function_exists('wc_get_cart_item_data')) {
+	/**
+	 * Get cart item data
+	 * 
+	 * @param $cart_item
+	 * @return array 
+	 */
+    function wc_get_cart_item_data($cart_item) {
+        $item_data = array();
+
+        $is_taxonomy = false;
+        $taxonomy_slug = null;
+        $term_slug = null;
+
+        // Variation values are shown only if they are not found in the title as of 3.0.
+        // This is because variation titles display the attributes.
+        if ( $cart_item['data']->is_type( 'variation' ) && is_array( $cart_item['variation'] ) ) {
+            foreach ( $cart_item['variation'] as $name => $value ) {
+                $taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
+
+                if ( taxonomy_exists( $taxonomy ) ) {
+                    // If this is a term slug, get the term's nice name.
+                    $term = get_term_by( 'slug', $value, $taxonomy );
+                    if ( ! is_wp_error( $term ) && $term && $term->name ) {
+                        $value = $term->name;
+                    }
+                    $label = wc_attribute_label( $taxonomy );
+                    $is_taxonomy = true;
+                    $taxonomy_slug = $taxonomy;
+                    $term_slug = $term->slug;
+                } else {
+                    // If this is a custom option slug, get the options name.
+                    $value = apply_filters( 'woocommerce_variation_option_name', $value, null, $taxonomy, $cart_item['data'] );
+                    $label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $cart_item['data'] );
+                }
+
+                $item_data[] = array(
+                    'key'   => $label,
+                    'value' => $value,
+                    'is_taxonomy' => $is_taxonomy,
+                    'taxonomy_slug' => $taxonomy_slug,
+                    'term_slug' => $term_slug,
+                );
+            }
+        }
+
+        // Filter item data to allow 3rd parties to add more to the array.
+        return apply_filters( 'woocommerce_get_item_data', $item_data, $cart_item );
+    }
+}
