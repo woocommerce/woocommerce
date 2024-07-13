@@ -210,7 +210,7 @@ const getMainConfig = ( options = {} ) => {
 			chunkFilename: `[name]${ fileSuffix }.js?ver=[contenthash]`,
 			filename: `[name]${ fileSuffix }.js`,
 			library: [ 'wc', 'blocks', '[name]' ],
-			libraryTarget: 'this',
+			libraryTarget: 'umd',
 			uniqueName: 'webpackWcBlocksMainJsonp',
 		},
 		module: {
@@ -788,7 +788,7 @@ const getStylingConfig = ( options = {} ) => {
 			path: PATH_TO_BUILD,
 			filename: `[name]-style${ fileSuffix }.js`,
 			library: [ 'wc', 'blocks', '[name]' ],
-			libraryTarget: 'this',
+			libraryTarget: 'umd',
 			uniqueName: 'webpackWcBlocksStylingJsonp',
 		},
 		optimization: {
@@ -939,7 +939,7 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 			filename: '[name].js',
 			path: PATH_TO_BUILD,
 			library: [ 'wc', '__experimentalInteractivity' ],
-			libraryTarget: 'this',
+			libraryTarget: 'umd',
 			chunkLoadingGlobal: 'webpackWcBlocksJsonp',
 		},
 		resolve: {
