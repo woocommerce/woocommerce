@@ -10,7 +10,6 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
-use Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use WP_REST_Request;
 use WP_REST_Response;

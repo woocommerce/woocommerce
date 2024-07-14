@@ -11,7 +11,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
-use Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 use WP_REST_Request;
 use WP_REST_Response;
 
