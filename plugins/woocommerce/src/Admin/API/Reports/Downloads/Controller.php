@@ -30,37 +30,22 @@ class Controller extends ReportsController implements ExportableInterface {
 	protected $rest_base = 'reports/downloads';
 
 	/**
+	 * Forwards a Downloads Query constructor.
+	 *
+	 * @param array $query_args Set of args to be forwarded to the constructor.
+	 * @return GenericQuery
+	 */
+	protected function construct_query( $query_args ) {
+		return new GenericQuery( $query_args, 'downloads' );
+	}
+	/**
 	 * Get items.
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$args       = array();
-		$registered = array_keys( $this->get_collection_params() );
-		foreach ( $registered as $param_name ) {
-			if ( isset( $request[ $param_name ] ) ) {
-				$args[ $param_name ] = $request[ $param_name ];
-			}
-		}
-
-		$reports        = new GenericQuery( $args, 'downloads' );
-		$downloads_data = $reports->get_data();
-
-		$data = array();
-
-		foreach ( $downloads_data->data as $download_data ) {
-			$item   = $this->prepare_item_for_response( $download_data, $request );
-			$data[] = $this->prepare_response_for_collection( $item );
-		}
-
-		return $this->add_pagination_headers(
-			$request,
-			$data,
-			(int) $downloads_data->total,
-			(int) $downloads_data->page_no,
-			(int) $downloads_data->pages
-		);
+		return GenericController::get_items( $request );
 	}
 
 	/**
@@ -126,6 +111,22 @@ class Controller extends ReportsController implements ExportableInterface {
 		return $links;
 	}
 
+	/**
+	 * Maps query arguments from the REST request.
+	 *
+	 * @param array $request Request array.
+	 * @return array
+	 */
+	protected function prepare_reports_query( $request ) {
+		$args       = array();
+		$registered = array_keys( $this->get_collection_params() );
+		foreach ( $registered as $param_name ) {
+			if ( isset( $request[ $param_name ] ) ) {
+				$args[ $param_name ] = $request[ $param_name ];
+			}
+		}
+		return $args;
+	}
 	/**
 	 * Get the Report's schema, conforming to JSON Schema.
 	 *

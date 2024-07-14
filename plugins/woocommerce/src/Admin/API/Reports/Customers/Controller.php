@@ -34,6 +34,16 @@ class Controller extends GenericController implements ExportableInterface {
 	protected $rest_base = 'reports/customers';
 
 	/**
+	 * Forwards a Customers Query constructor.
+	 *
+	 * @param array $query_args Set of args to be forwarded to the constructor.
+	 * @return GenericQuery
+	 */
+	protected function construct_query( $query_args ) {
+		return new Query( $query_args );
+	}
+
+	/**
 	 * Maps query arguments from the REST request.
 	 *
 	 * @param array $request Request array.
@@ -83,34 +93,6 @@ class Controller extends GenericController implements ExportableInterface {
 
 		return $args;
 	}
-
-	/**
-	 * Get all reports.
-	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
-	 */
-	public function get_items( $request ) {
-		$query_args      = $this->prepare_reports_query( $request );
-		$customers_query = new Query( $query_args );
-		$report_data     = $customers_query->get_data();
-
-		$data = array();
-
-		foreach ( $report_data->data as $customer_data ) {
-			$item   = $this->prepare_item_for_response( $customer_data, $request );
-			$data[] = $this->prepare_response_for_collection( $item );
-		}
-
-		return $this->add_pagination_headers(
-			$request,
-			$data,
-			(int) $report_data->total,
-			(int) $report_data->page_no,
-			(int) $report_data->pages
-		);
-	}
-
 
 	/**
 	 * Get one report.

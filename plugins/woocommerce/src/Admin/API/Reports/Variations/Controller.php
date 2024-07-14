@@ -44,53 +44,23 @@ class Controller extends ReportsController implements ExportableInterface {
 	);
 
 	/**
-	 * Get items.
+	 * Forwards a Variations Query constructor.
+	 *
+	 * @param array $query_args Set of args to be forwarded to the constructor.
+	 * @return GenericQuery
+	 */
+	protected function construct_query( $query_args ) {
+		return new GenericQuery( $query_args, 'variations' );
+	}
+
+	/**
+	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 *
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$args = array();
-		/**
-		 * Experimental: Filter the list of parameters provided when querying data from the data store.
-		 *
-		 * @ignore
-		 *
-		 * @param array $collection_params List of parameters.
-		 */
-		$collection_params = apply_filters(
-			'experimental_woocommerce_analytics_variations_collection_params',
-			$this->get_collection_params()
-		);
-		$registered        = array_keys( $collection_params );
-		foreach ( $registered as $param_name ) {
-			if ( isset( $request[ $param_name ] ) ) {
-				if ( isset( $this->param_mapping[ $param_name ] ) ) {
-					$args[ $this->param_mapping[ $param_name ] ] = $request[ $param_name ];
-				} else {
-					$args[ $param_name ] = $request[ $param_name ];
-				}
-			}
-		}
-
-		$reports       = new GenericQuery( $args, 'variations' );
-		$products_data = $reports->get_data();
-
-		$data = array();
-
-		foreach ( $products_data->data as $product_data ) {
-			$item   = $this->prepare_item_for_response( $product_data, $request );
-			$data[] = $this->prepare_response_for_collection( $item );
-		}
-
-		return $this->add_pagination_headers(
-			$request,
-			$data,
-			(int) $products_data->total,
-			(int) $products_data->page_no,
-			(int) $products_data->pages
-		);
+		return GenericController::get_items( $request );
 	}
 
 	/**
@@ -116,6 +86,38 @@ class Controller extends ReportsController implements ExportableInterface {
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_variations', $response, $report, $request );
+	}
+
+	/**
+	 * Maps query arguments from the REST request.
+	 *
+	 * @param array $request Request array.
+	 * @return array
+	 */
+	protected function prepare_reports_query( $request ) {
+		$args = array();
+		/**
+		 * Experimental: Filter the list of parameters provided when querying data from the data store.
+		 *
+		 * @ignore
+		 *
+		 * @param array $collection_params List of parameters.
+		 */
+		$collection_params = apply_filters(
+			'experimental_woocommerce_analytics_variations_collection_params',
+			$this->get_collection_params()
+		);
+		$registered        = array_keys( $collection_params );
+		foreach ( $registered as $param_name ) {
+			if ( isset( $request[ $param_name ] ) ) {
+				if ( isset( $this->param_mapping[ $param_name ] ) ) {
+					$args[ $this->param_mapping[ $param_name ] ] = $request[ $param_name ];
+				} else {
+					$args[ $param_name ] = $request[ $param_name ];
+				}
+			}
+		}
+		return $args;
 	}
 
 	/**

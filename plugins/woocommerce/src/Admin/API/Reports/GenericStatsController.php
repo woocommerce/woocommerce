@@ -15,19 +15,6 @@ use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 abstract class GenericStatsController extends GenericController {
 
 	/**
-	 * Forwards a Query constructor,
-	 * to be able to customize Query class for a specific report.
-	 *
-	 * By default it creates `GenericQuery` with the rest base as name.
-	 *
-	 * @param array $query_args Set of args to be forwarded to the constructor.
-	 * @return GenericQuery
-	 */
-	protected function construct_query( $query_args ) {
-		return new GenericQuery( $query_args, $this->rest_base );
-	}
-
-	/**
 	 * Get the query params for collections.
 	 * Adds intervals to the generic list.
 	 *

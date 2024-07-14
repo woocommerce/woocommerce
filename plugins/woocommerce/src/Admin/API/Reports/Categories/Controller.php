@@ -30,6 +30,15 @@ class Controller extends ReportsController implements ExportableInterface {
 	protected $rest_base = 'reports/categories';
 
 	/**
+	 * Forwards a Categories Query constructor.
+	 *
+	 * @param array $query_args Set of args to be forwarded to the constructor.
+	 * @return GenericQuery
+	 */
+	protected function construct_query( $query_args ) {
+		return new GenericQuery( $query_args, 'categories' );
+	}
+	/**
 	 * Maps query arguments from the REST request.
 	 *
 	 * @param array $request Request array.
@@ -60,32 +69,7 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$query_args       = $this->prepare_reports_query( $request );
-		$categories_query = new GenericQuery( $query_args, 'categories' );
-		$report_data      = $categories_query->get_data();
-
-		if ( is_wp_error( $report_data ) ) {
-			return $report_data;
-		}
-
-		if ( ! isset( $report_data->data ) || ! isset( $report_data->page_no ) || ! isset( $report_data->pages ) ) {
-			return new \WP_Error( 'woocommerce_rest_reports_categories_invalid_response', __( 'Invalid response from data store.', 'woocommerce' ), array( 'status' => 500 ) );
-		}
-
-		$out_data = array();
-
-		foreach ( $report_data->data as $datum ) {
-			$item       = $this->prepare_item_for_response( $datum, $request );
-			$out_data[] = $this->prepare_response_for_collection( $item );
-		}
-
-		return $this->add_pagination_headers(
-			$request,
-			$out_data,
-			(int) $report_data->total,
-			(int) $report_data->page_no,
-			(int) $report_data->pages
-		);
+		return GenericController::get_items( $request );
 	}
 
 	/**

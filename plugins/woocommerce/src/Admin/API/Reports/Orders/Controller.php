@@ -29,6 +29,16 @@ class Controller extends ReportsController implements ExportableInterface {
 	protected $rest_base = 'reports/orders';
 
 	/**
+	 * Forwards a Orders Query constructor.
+	 *
+	 * @param array $query_args Set of args to be forwarded to the constructor.
+	 * @return GenericQuery
+	 */
+	protected function construct_query( $query_args ) {
+		return new Query( $query_args );
+	}
+
+	/**
 	 * Maps query arguments from the REST request.
 	 *
 	 * @param array $request Request array.
@@ -72,36 +82,19 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$query_args   = $this->prepare_reports_query( $request );
-		$orders_query = new Query( $query_args );
-		$report_data  = $orders_query->get_data();
-
-		$data = array();
-
-		foreach ( $report_data->data as $orders_data ) {
-			$orders_data['order_number']    = $this->get_order_number( $orders_data['order_id'] );
-			$orders_data['total_formatted'] = $this->get_total_formatted( $orders_data['order_id'] );
-			$item                           = $this->prepare_item_for_response( $orders_data, $request );
-			$data[]                         = $this->prepare_response_for_collection( $item );
-		}
-
-		return $this->add_pagination_headers(
-			$request,
-			$data,
-			(int) $report_data->total,
-			(int) $report_data->page_no,
-			(int) $report_data->pages
-		);
+		return GenericController::get_items( $request );
 	}
 
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass        $report  Report data.
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @param array        $report  Report data.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
+		$report['order_number']    = $this->get_order_number( $report['order_id'] );
+		$report['total_formatted'] = $this->get_total_formatted( $report['order_id'] );
 		// Wrap the data in a response object.
 		$response = GenericController::prepare_item_for_response( $report, $request );
 		$response->add_links( $this->prepare_links( $report ) );
