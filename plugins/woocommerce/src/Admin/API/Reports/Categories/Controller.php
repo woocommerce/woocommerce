@@ -189,8 +189,9 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                    = GenericController::get_collection_params();
-		$params['orderby']['enum'] = array(
+		$params                       = GenericController::get_collection_params();
+		$params['orderby']['default'] = 'category_id';
+		$params['orderby']['enum']    = array(
 			'category_id',
 			'items_sold',
 			'net_revenue',
@@ -198,7 +199,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'products_count',
 			'category',
 		);
-		$params['interval']        = array(
+		$params['interval']           = array(
 			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'week',
@@ -212,7 +213,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['status_is']       = array(
+		$params['status_is']          = array(
 			'description'       => __( 'Limit result set to items that have the specified order status.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
@@ -222,7 +223,7 @@ class Controller extends ReportsController implements ExportableInterface {
 				'type' => 'string',
 			),
 		);
-		$params['status_is_not']   = array(
+		$params['status_is_not']      = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
@@ -232,7 +233,7 @@ class Controller extends ReportsController implements ExportableInterface {
 				'type' => 'string',
 			),
 		);
-		$params['categories']      = array(
+		$params['categories']         = array(
 			'description'       => __( 'Limit result set to all items that have the specified term assigned in the categories taxonomy.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -241,7 +242,7 @@ class Controller extends ReportsController implements ExportableInterface {
 				'type' => 'integer',
 			),
 		);
-		$params['extended_info']   = array(
+		$params['extended_info']      = array(
 			'description'       => __( 'Add additional piece of info about each category to the report.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
