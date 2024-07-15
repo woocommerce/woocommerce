@@ -27,9 +27,19 @@ class WC_Helper_Admin {
 	const CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_remind_later_timestamp_';
 	const CHECK_SUBSCRIPTION_LAST_DISMISSED_TIMESTAMP_META = '_woocommerce_helper_check_subscription_last_dismissed_timestamp';
 
-	private static $checked_products = array();
+	/**
+	 * Array of product usage notice rules from helper API.
+	 *
+	 * @var array
+	 */
+	private static $product_usage_notice_rules = array();
 
-	private static $checked_screen_param = array();
+	/**
+	 * Current product usage notice rule applied to the current admin screen.
+	 *
+	 * @var array
+	 */
+	private static $current_notice_rule = array();
 
 	/**
 	 * Loads the class, runs on init
@@ -167,29 +177,29 @@ class WC_Helper_Admin {
 			return;
 		}
 
-		self::$checked_products = WC_Helper::get_product_usage_notice_rules();
-		if ( empty( self::$checked_products ) ) {
+		self::$product_usage_notice_rules = WC_Helper::get_product_usage_notice_rules();
+		if ( empty( self::$product_usage_notice_rules ) ) {
 			return;
 		}
 
-		self::$checked_screen_param = self::get_checked_screen_param( $screen );
-		if ( empty( self::$checked_screen_param ) ) {
+		self::$current_notice_rule = self::current_notice_rule( $screen );
+		if ( empty( self::$current_notice_rule ) ) {
 			return;
 		}
 
-		$product_id = self::$checked_screen_param['id'];
+		$product_id = self::$current_notice_rule['id'];
 
 		// Check when the last time user clicked "remind later". If it's still
 		// in the wait period, don't show the nudge.
 		$last_remind_later_ts    = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX . $product_id, true ) );
-		$wait_after_remind_later = self::$checked_screen_param['wait_in_seconds_after_remind_later'];
+		$wait_after_remind_later = self::$current_notice_rule['wait_in_seconds_after_remind_later'];
 		if ( $last_remind_later_ts > 0 && ( time() - $last_remind_later_ts ) < $wait_after_remind_later ) {
 			return;
 		}
 
 		// Don't show the nudge after dismissed max_dismissals times.
 		$dismiss_count  = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX . $product_id, true ) );
-		$max_dismissals = self::$checked_screen_param['max_dismissals'];
+		$max_dismissals = self::$current_notice_rule['max_dismissals'];
 		if ( $dismiss_count >= $max_dismissals ) {
 			return;
 		}
@@ -197,7 +207,7 @@ class WC_Helper_Admin {
 		// Check the global cooldown (any dismisses) period. If it's still in
 		// the wait period, don't show the nudge.
 		$global_last_dismissed_ts = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_LAST_DISMISSED_TIMESTAMP_META, true) );
-		$wait_after_any_dismisses = self::$checked_products['wait_in_seconds_after_any_dismisses'];
+		$wait_after_any_dismisses = self::$product_usage_notice_rules['wait_in_seconds_after_any_dismisses'];
 		if ( $global_last_dismissed_ts > 0 && ( time() - $global_last_dismissed_ts ) < $wait_after_any_dismisses ) {
 			return;
 		}
@@ -205,7 +215,7 @@ class WC_Helper_Admin {
 		// Check when the last time user dismissed the nudge. If it's still in
 		// the wait period, don't show the nudge.
 		$last_dismissed_ts  = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX . $product_id, true) );
-		$wait_after_dismiss = self::$checked_screen_param['wait_in_seconds_after_dismiss'];
+		$wait_after_dismiss = self::$current_notice_rule['wait_in_seconds_after_dismiss'];
 		if ( $last_dismissed_ts > 0 && ( time() - $last_dismissed_ts ) < $wait_after_dismiss ) {
 			return;
 		}
@@ -218,17 +228,17 @@ class WC_Helper_Admin {
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-check-subscription', true );
 
 		$subscribe_url = add_query_arg( array(
-			'add-to-cart'  => self::$checked_screen_param['id'],
-			'utm_source'   => 'pu_' . self::$checked_screen_param['show_as'],
+			'add-to-cart'  => self::$current_notice_rule['id'],
+			'utm_source'   => 'pu_' . self::$current_notice_rule['show_as'],
 			'utm_medium'   => 'product',
 			'utm_campaign' => 'pu',
 		), 'https://woocommerce.com/cart/' );
 
 		$renew_url = add_query_arg( array(
-			'renew_product' => self::$checked_screen_param['id'],
-			'product_key'   => self::$checked_screen_param['state']['key'],
-			'order_id'      => self::$checked_screen_param['state']['order_id'],
-			'utm_source'    => 'pu_' . self::$checked_screen_param['show_as'],
+			'renew_product' => self::$current_notice_rule['id'],
+			'product_key'   => self::$current_notice_rule['state']['key'],
+			'order_id'      => self::$current_notice_rule['state']['order_id'],
+			'utm_source'    => 'pu_' . self::$current_notice_rule['show_as'],
 			'utm_medium'    => 'product',
 			'utm_campaign'  => 'pu',
 		), 'https://woocommerce.com/cart/' );
@@ -241,21 +251,21 @@ class WC_Helper_Admin {
 				'renewUrl'               => $renew_url,
 				'dismissAction'          => 'woocommerce_helper_check_subscription_dismissed',
 				'remindLaterAction'      => 'woocommerce_helper_check_subscription_remind_later',
-				'productId'              => self::$checked_screen_param['id'],
-				'productName'            => self::$checked_screen_param['name'],
-				'productRegularPrice'    => self::$checked_screen_param['regular_price'],
+				'productId'              => self::$current_notice_rule['id'],
+				'productName'            => self::$current_notice_rule['name'],
+				'productRegularPrice'    => self::$current_notice_rule['regular_price'],
 				'dismissNonce'           => wp_create_nonce( 'check_subscription_dismissed' ),
 				'remindLaterNonce'       => wp_create_nonce( 'check_subscription_remind_later' ),
-				'showAs'                 => self::$checked_screen_param['show_as'],
-				'colorScheme'            => self::$checked_screen_param['color_scheme'],
-				'subscriptionState'      => self::$checked_screen_param['state'],
+				'showAs'                 => self::$current_notice_rule['show_as'],
+				'colorScheme'            => self::$current_notice_rule['color_scheme'],
+				'subscriptionState'      => self::$current_notice_rule['state'],
 				'screenId'               => get_current_screen()->id,
 			)
 		);
 	}
 
-	private static function get_checked_screen_param( $screen ) {
-		foreach ( self::$checked_products['products'] as $product_id => $param ) {
+	private static function current_notice_rule( $screen ) {
+		foreach ( self::$product_usage_notice_rules['products'] as $product_id => $param ) {
 			if ( ! isset( $param['screens'][ $screen->id ] ) ) {
 				continue;
 			}
