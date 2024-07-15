@@ -51,15 +51,15 @@ const PlaceOrderButton = ( {
 		>
 			{ label }
 			{ showPrice && (
-				<div className="wc-block-components-checkout-place-order-button__separator" />
-			) }
-			{ showPrice && (
-				<div className="wc-block-components-checkout-place-order-button__price">
-					<FormattedMonetaryAmount
-						value={ cartTotals.total_price }
-						currency={ totalsCurrency }
-					/>
-				</div>
+				<>
+					<div className="wc-block-components-checkout-place-order-button__separator" />
+					<div className="wc-block-components-checkout-place-order-button__price">
+						<FormattedMonetaryAmount
+							value={ cartTotals.total_price }
+							currency={ totalsCurrency }
+						/>
+					</div>
+				</>
 			) }
 		</div>
 	);
