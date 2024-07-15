@@ -2586,7 +2586,7 @@ FROM $order_meta_table
 	 * @param \WC_Order $order Order object.
 	 */
 	public function update( &$order ) {
-		$previous_status = ArrayUtil::get_value_or_default( $order->get_data(), 'status' );
+		$previous_status = ArrayUtil::get_value_or_default( $order->get_data(), 'status', 'new' );
 
 		// Before updating, ensure date paid is set if missing.
 		if (
