@@ -17,6 +17,8 @@ test.describe(
 	{ tag: [ '@gutenberg', '@services' ] },
 	() => {
 		test( 'can create new post', async ( { page, testPost, baseURL } ) => {
+			await goToPostEditor( { page } );
+
 			// check if Gutenberg is installed
 			const apiContext = await request.newContext( {
 				baseURL,
@@ -38,9 +40,6 @@ test.describe(
 			const gutenbergPlugin = pluginsList.find(
 				( { textdomain } ) => textdomain === 'gutenberg'
 			);
-
-			await goToPostEditor( { page } );
-
 			// if Gutenberg is active, wait for element before filling page title
 			if ( gutenbergPlugin ) {
 				await expect(

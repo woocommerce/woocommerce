@@ -35,6 +35,8 @@ test.describe(
 			testPage,
 			baseURL,
 		} ) => {
+			await goToPageEditor( { page } );
+
 			// check if Gutenberg is installed
 			const apiContext = await request.newContext( {
 				baseURL,
@@ -56,9 +58,6 @@ test.describe(
 			const gutenbergPlugin = pluginsList.find(
 				( { textdomain } ) => textdomain === 'gutenberg'
 			);
-
-			await goToPageEditor( { page } );
-
 			// if Gutenberg is active, wait for element before filling page title
 			if ( gutenbergPlugin ) {
 				await expect(
