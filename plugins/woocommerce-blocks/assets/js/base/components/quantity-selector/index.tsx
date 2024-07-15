@@ -47,11 +47,11 @@ export interface QuantitySelectorProps {
 	 */
 	itemName?: string;
 	/**
-	 * Whether the component should be interactable or not
+	 * Whether the component should be interactable
 	 */
 	disabled: boolean;
 	/**
-	 * Whether the component should be editable or not
+	 * Whether the component should be editable
 	 */
 	editable: boolean;
 }
