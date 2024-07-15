@@ -97,6 +97,8 @@ class Controller extends GenericController implements ExportableInterface {
 		 * @ignore
 		 *
 		 * @param array $collection_params List of parameters.
+		 *
+		 * @since 6.5.0
 		 */
 		$collection_params = apply_filters(
 			'experimental_woocommerce_analytics_variations_collection_params',
