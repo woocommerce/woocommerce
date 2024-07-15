@@ -193,23 +193,23 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		// Update the order.
 		parent::update( $order );
 
-		$new_status = $order->get_status( 'edit' );
+		$current_status = $order->get_status( 'edit' );
 
 		// We need to remove the wc- prefix from the status for comparison and proper evaluation of new vs updated orders.
 		if ( strpos( $previous_status, 'wc-' ) === 0 ) {
 			$previous_status = substr( $previous_status, 3 );
 		}
 
-		if ( strpos( $new_status, 'wc-' ) === 0 ) {
-			$new_status = substr( $new_status, 3 );
+		if ( strpos( $current_status, 'wc-' ) === 0 ) {
+			$current_status = substr( $current_status, 3 );
 		}
 
 		$nonTriggeringOrderStatuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft', 'refunded', 'failed', 'cancelled');
 
 		// This hook should be fired only if the new status is not one of the non-triggering statuses and the previous status was one of the non-triggering statuses.
 		if (
-			$new_status !== $previous_status
-			&& ! in_array( $new_status, $nonTriggeringOrderStatuses, true )
+			$current_status !== $previous_status
+			&& ! in_array( $current_status, $nonTriggeringOrderStatuses, true )
 			&& in_array( $previous_status, $nonTriggeringOrderStatuses, true )
 		) {
 			do_action( 'woocommerce_new_order', $order->get_id(), $order );
