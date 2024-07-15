@@ -50,6 +50,7 @@ const goToPostEditor = async ( { page } ) => {
 };
 
 const fillPageTitle = async ( page, title ) => {
+	await ( await getCanvas( page ) ).getByLabel( 'Add title' ).click();
 	await ( await getCanvas( page ) ).getByLabel( 'Add title' ).fill( title );
 };
 

@@ -146,6 +146,10 @@ test.describe(
 		} ) => {
 			await goToPageEditor( { page } );
 
+			await expect(
+				page.getByRole( 'button', { name: 'Set featured image' } )
+			).toBeVisible();
+
 			await fillPageTitle( page, testPage.title );
 
 			for ( let i = 0; i < blocks.length; i++ ) {

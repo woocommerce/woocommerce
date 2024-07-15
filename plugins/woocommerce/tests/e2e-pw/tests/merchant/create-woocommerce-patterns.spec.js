@@ -33,6 +33,11 @@ test.describe(
 			testPage,
 		} ) => {
 			await goToPageEditor( { page } );
+
+			await expect(
+				page.getByRole( 'button', { name: 'Set featured image' } )
+			).toBeVisible();
+
 			await fillPageTitle( page, testPage.title );
 
 			for ( let i = 0; i < wooPatterns.length; i++ ) {

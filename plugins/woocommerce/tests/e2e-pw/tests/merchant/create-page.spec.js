@@ -1,4 +1,4 @@
-const { test: baseTest } = require( '../../fixtures/fixtures' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
 	fillPageTitle,
@@ -14,9 +14,12 @@ test.describe(
 	'Can create a new page',
 	{ tag: [ '@gutenberg', '@services' ] },
 	() => {
-		// eslint-disable-next-line playwright/expect-expect
 		test( 'can create new page', async ( { page, testPage } ) => {
 			await goToPageEditor( { page } );
+
+			await expect(
+				page.getByRole( 'button', { name: 'Set featured image' } )
+			).toBeVisible();
 
 			await fillPageTitle( page, testPage.title );
 
