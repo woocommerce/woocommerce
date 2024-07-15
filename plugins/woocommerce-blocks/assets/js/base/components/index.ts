@@ -23,6 +23,7 @@ export * from './product-rating';
 export * from './quantity-selector';
 export * from './read-more';
 export * from './reviews';
+export * from './select';
 export * from './sidebar-layout';
 export * from './snackbar-list';
 export * from './state-input';
