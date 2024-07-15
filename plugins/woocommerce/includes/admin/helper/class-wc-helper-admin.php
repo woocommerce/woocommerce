@@ -50,7 +50,7 @@ class WC_Helper_Admin {
 		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_marketplace_settings' ) );
 		add_filter( 'rest_api_init', array( __CLASS__, 'register_rest_routes' ) );
 
-		add_action( 'current_screen', array( __CLASS__, 'check_subscriptions' ) );
+		add_action( 'current_screen', array( __CLASS__, 'maybe_show_product_usage_notice' ) );
 
 		add_action( 'wp_ajax_woocommerce_helper_check_subscription_dismissed', array( __CLASS__, 'check_subscription_dismissed' ) );
 		add_action( 'wp_ajax_woocommerce_helper_check_subscription_remind_later', array( __CLASS__, 'check_subscription_remind_later' ) );
@@ -171,7 +171,12 @@ class WC_Helper_Admin {
 		wp_send_json( $featured );
 	}
 
-	public static function check_subscriptions( $screen ) {
+	/**
+	 * Maybe show product usage notice in a given screen object.
+	 *
+	 * @param \WP_Screen Current \WP_Screen object.
+	 */
+	public static function maybe_show_product_usage_notice( $screen ) {
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
 			return;
