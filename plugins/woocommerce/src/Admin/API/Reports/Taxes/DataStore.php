@@ -146,8 +146,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public function get_data( $query_args ) {
 		global $wpdb;
 
-		$table_name = self::get_db_table_name();
-
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
 			'per_page' => get_option( 'posts_per_page' ),
