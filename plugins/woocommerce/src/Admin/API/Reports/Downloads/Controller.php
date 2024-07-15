@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
+use Automattic\WooCommerce\Admin\API\Reports\OrderAwareControllerTrait;
 
 /**
  * REST API Reports downloads controller class.
@@ -21,6 +22,8 @@ use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
  * @extends Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends ReportsController implements ExportableInterface {
+
+	use OrderAwareControllerTrait;
 
 	/**
 	 * Route base.
@@ -38,15 +41,6 @@ class Controller extends ReportsController implements ExportableInterface {
 	protected function construct_query( $query_args ) {
 		return new GenericQuery( $query_args, 'downloads' );
 	}
-	/**
-	 * Get items.
-	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
-	 */
-	public function get_items( $request ) {
-		return GenericController::get_items( $request );
-	}
 
 	/**
 	 * Prepare a report object for serialization.
@@ -57,7 +51,7 @@ class Controller extends ReportsController implements ExportableInterface {
 	 */
 	public function prepare_item_for_response( $report, $request ) {
 		// Wrap the data in a response object.
-		$response = GenericController::prepare_item_for_response( $report, $request );
+		$response = parent::prepare_item_for_response( $report, $request );
 		$response->add_links( $this->prepare_links( $report ) );
 
 		$response->data['date'] = get_date_from_gmt( $report['date_gmt'], 'Y-m-d H:i:s' );
@@ -222,7 +216,7 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                        = GenericController::get_collection_params();
+		$params                        = parent::get_collection_params();
 		$params['orderby']['enum']     = array(
 			'date',
 			'product',

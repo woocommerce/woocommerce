@@ -9,16 +9,20 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Orders\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\GenericController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
 use Automattic\WooCommerce\Admin\API\Reports\ParameterException;
+use Automattic\WooCommerce\Admin\API\Reports\OrderAwareControllerTrait;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Query;
 
 /**
  * REST API Reports orders stats controller class.
  *
  * @internal
- * @extends \Automattic\WooCommerce\Admin\API\Reports\Controller
+ * @extends \Automattic\WooCommerce\Admin\API\Reports\GenericStatsController
  */
-class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
+class Controller extends GenericStatsController {
+
+	use OrderAwareControllerTrait;
 
 	/**
 	 * Route base.
@@ -26,6 +30,19 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 * @var string
 	 */
 	protected $rest_base = 'reports/orders/stats';
+
+	/**
+	 * Forwards a Query constructor,
+	 * to be able to customize Query class for a specific report.
+	 *
+	 * By default it creates `GenericQuery` with the rest base as name.
+	 *
+	 * @param array $query_args Set of args to be forwarded to the constructor.
+	 * @return GenericQuery
+	 */
+	protected function construct_query( $query_args ) {
+		return new Query( $query_args );
+	}
 
 	/**
 	 * Maps query arguments from the REST request.
@@ -71,40 +88,6 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	}
 
 	/**
-	 * Get all reports.
-	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
-	 */
-	public function get_items( $request ) {
-		$query_args   = $this->prepare_reports_query( $request );
-		$orders_query = new Query( $query_args );
-		try {
-			$report_data = $orders_query->get_data();
-		} catch ( ParameterException $e ) {
-			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		}
-
-		$out_data = array(
-			'totals'    => get_object_vars( $report_data->totals ),
-			'intervals' => array(),
-		);
-
-		foreach ( $report_data->intervals as $interval_data ) {
-			$item                    = $this->prepare_item_for_response( $interval_data, $request );
-			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
-		}
-
-		return $this->add_pagination_headers(
-			$request,
-			$out_data,
-			(int) $report_data->total,
-			(int) $report_data->page_no,
-			(int) $report_data->pages
-		);
-	}
-
-	/**
 	 * Prepare a report object for serialization.
 	 *
 	 * @param Array           $report  Report data.
@@ -113,7 +96,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 */
 	public function prepare_item_for_response( $report, $request ) {
 		// Wrap the data in a response object.
-		$response = GenericController::prepare_item_for_response( $report, $request );
+		$response = parent::prepare_item_for_response( $report, $request );
 
 		/**
 		 * Filter a report returned from the API.
@@ -127,13 +110,15 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 		return apply_filters( 'woocommerce_rest_prepare_report_orders_stats', $response, $report, $request );
 	}
 
+
 	/**
-	 * Get the Report's schema, conforming to JSON Schema.
+	 * Get the Report's item properties schema.
+	 * Will be used by `get_item_schema` as `totals` and `subtotals`.
 	 *
 	 * @return array
 	 */
-	public function get_item_schema() {
-		$data_values = array(
+	protected function get_item_properties_schema() {
+		return array(
 			'net_revenue'         => array(
 				'description' => __( 'Net sales.', 'woocommerce' ),
 				'type'        => 'number',
@@ -194,104 +179,19 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 				'readonly'    => true,
 			),
 		);
+	}
 
-		$segments = array(
-			'segments' => array(
-				'description' => __( 'Reports data grouped by segment condition.', 'woocommerce' ),
-				'type'        => 'array',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-				'items'       => array(
-					'type'       => 'object',
-					'properties' => array(
-						'segment_id' => array(
-							'description' => __( 'Segment identificator.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'subtotals'  => array(
-							'description' => __( 'Interval subtotals.', 'woocommerce' ),
-							'type'        => 'object',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-							'properties'  => $data_values,
-						),
-					),
-				),
-			),
-		);
-
-		$totals = array_merge( $data_values, $segments );
+	/**
+	 * Get the Report's schema, conforming to JSON Schema.
+	 *
+	 * @return array
+	 */
+	public function get_item_schema() {
+		$schema = parent::get_item_schema();
+		$schema['title'] = 'report_orders_stats';
 
 		// Products is not shown in intervals.
-		unset( $data_values['products'] );
-
-		$intervals = array_merge( $data_values, $segments );
-
-		$schema = array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'report_orders_stats',
-			'type'       => 'object',
-			'properties' => array(
-				'totals'    => array(
-					'description' => __( 'Totals data.', 'woocommerce' ),
-					'type'        => 'object',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-					'properties'  => $totals,
-				),
-				'intervals' => array(
-					'description' => __( 'Reports data grouped by intervals.', 'woocommerce' ),
-					'type'        => 'array',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-					'items'       => array(
-						'type'       => 'object',
-						'properties' => array(
-							'interval'       => array(
-								'description' => __( 'Type of interval.', 'woocommerce' ),
-								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-								'enum'        => array( 'day', 'week', 'month', 'year' ),
-							),
-							'date_start'     => array(
-								'description' => __( "The date the report start, in the site's timezone.", 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_start_gmt' => array(
-								'description' => __( 'The date the report start, as GMT.', 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_end'       => array(
-								'description' => __( "The date the report end, in the site's timezone.", 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_end_gmt'   => array(
-								'description' => __( 'The date the report end, as GMT.', 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'subtotals'      => array(
-								'description' => __( 'Interval subtotals.', 'woocommerce' ),
-								'type'        => 'object',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-								'properties'  => $intervals,
-							),
-						),
-					),
-				),
-			),
-		);
+		unset( $schema['properties']['intervals']['items']['properties']['subtotals']['properties']['products'] );
 
 		return $this->add_additional_fields_schema( $schema );
 	}
@@ -302,26 +202,12 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                        = GenericController::get_collection_params();
+		$params                        = parent::get_collection_params();
 		$params['orderby']['enum']     = array(
 			'date',
 			'net_revenue',
 			'orders_count',
 			'avg_order_value',
-		);
-		$params['interval']         = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'week',
-			'enum'              => array(
-				'hour',
-				'day',
-				'week',
-				'month',
-				'quarter',
-				'year',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['match']            = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),
@@ -492,15 +378,8 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['fields']              = array(
-			'description'       => __( 'Limit stats fields to the specified items.', 'woocommerce' ),
-			'type'              => 'array',
-			'sanitize_callback' => 'wp_parse_slug_list',
-			'validate_callback' => 'rest_validate_request_arg',
-			'items'             => array(
-				'type' => 'string',
-			),
-		);
+		unset( $params['intervals'] );
+		unset( $params['fields'] );
 
 		return $params;
 	}

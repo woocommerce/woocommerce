@@ -9,17 +9,19 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\GenericController;
+use Automattic\WooCommerce\Admin\API\Reports\OrderAwareControllerTrait;
 
 /**
  * REST API Reports orders controller class.
  *
  * @internal
- * @extends \Automattic\WooCommerce\Admin\API\Reports\Controller
+ * @extends \Automattic\WooCommerce\Admin\API\Reports\GenericController
  */
-class Controller extends ReportsController implements ExportableInterface {
+class Controller extends GenericController implements ExportableInterface {
+
+	use OrderAwareControllerTrait;
 
 	/**
 	 * Route base.
@@ -76,16 +78,6 @@ class Controller extends ReportsController implements ExportableInterface {
 	}
 
 	/**
-	 * Get all reports.
-	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
-	 */
-	public function get_items( $request ) {
-		return GenericController::get_items( $request );
-	}
-
-	/**
 	 * Prepare a report object for serialization.
 	 *
 	 * @param array        $report  Report data.
@@ -96,7 +88,7 @@ class Controller extends ReportsController implements ExportableInterface {
 		$report['order_number']    = $this->get_order_number( $report['order_id'] );
 		$report['total_formatted'] = $this->get_total_formatted( $report['order_id'] );
 		// Wrap the data in a response object.
-		$response = GenericController::prepare_item_for_response( $report, $request );
+		$response = parent::prepare_item_for_response( $report, $request );
 		$response->add_links( $this->prepare_links( $report ) );
 
 		/**
@@ -236,7 +228,7 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                        = GenericController::get_collection_params();
+		$params                        = parent::get_collection_params();
 		$params['orderby']['enum']     = array(
 			'date',
 			'num_items_sold',

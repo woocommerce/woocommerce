@@ -91,7 +91,6 @@ class Controller extends GenericStatsController {
 		return apply_filters( 'woocommerce_rest_prepare_report_downloads_stats', $response, $report, $request );
 	}
 
-
 	/**
 	 * Get the Report's item properties schema.
 	 * Will be used by `get_item_schema` as `totals` and `subtotals`.
@@ -110,6 +109,7 @@ class Controller extends GenericStatsController {
 			),
 		);
 	}
+
 	/**
 	 * Get the Report's schema, conforming to JSON Schema.
 	 * It does not have the segments as in GenericStatsController.
