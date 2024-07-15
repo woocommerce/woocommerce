@@ -46,6 +46,7 @@ const test = baseTest.extend( {
 		} );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Product Reviews > Edit Product Review',

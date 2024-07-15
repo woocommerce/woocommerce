@@ -29,6 +29,7 @@ const test = baseTest.extend( {
 		}
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test(
 	'can edit a product and save the changes',

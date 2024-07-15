@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+test.describe.configure( { mode: 'serial' } );
 
 // test case for bug https://github.com/woocommerce/woocommerce/pull/46429
 test.describe(

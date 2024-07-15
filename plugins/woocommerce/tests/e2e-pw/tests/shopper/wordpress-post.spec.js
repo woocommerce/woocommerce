@@ -3,6 +3,7 @@ const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const test = baseTest.extend( {
 	storageState: process.env.CUSTOMERSTATE,
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test(
 	'logged-in customer can comment on a post',

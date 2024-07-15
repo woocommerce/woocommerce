@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'Analytics pages', { tag: [ '@payments', '@services' ] }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );

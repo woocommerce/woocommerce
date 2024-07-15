@@ -28,6 +28,7 @@ const test = baseTest.extend( {
 		await api.delete( `customers/${ user.id }`, { force: true } );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 for ( const userData of users ) {
 	test(

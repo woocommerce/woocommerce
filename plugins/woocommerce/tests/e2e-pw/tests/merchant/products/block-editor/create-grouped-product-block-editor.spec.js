@@ -1,4 +1,6 @@
 const { test } = require( '../../../../fixtures/block-editor-fixtures' );
+test.describe.configure( { mode: 'serial' } );
+
 const { expect } = require( '@playwright/test' );
 
 const { clickOnTab } = require( '../../../../utils/simple-products' );

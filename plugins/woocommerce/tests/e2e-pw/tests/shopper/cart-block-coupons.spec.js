@@ -54,6 +54,7 @@ const test = baseTest.extend( {
 		await use( page );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Cart Block Applying Coupons',

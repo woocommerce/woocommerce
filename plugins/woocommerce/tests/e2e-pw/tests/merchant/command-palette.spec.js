@@ -49,6 +49,7 @@ const test = baseTest.extend( {
 		await use( page );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test(
 	'can use the "Add new product" command',

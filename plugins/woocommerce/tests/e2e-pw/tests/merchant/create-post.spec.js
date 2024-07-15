@@ -9,6 +9,7 @@ const {
 const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Can create a new post',

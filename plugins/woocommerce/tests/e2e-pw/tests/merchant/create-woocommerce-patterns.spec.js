@@ -23,6 +23,7 @@ const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
 	testPageTitlePrefix: 'Woocommerce Patterns',
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Add WooCommerce Patterns Into Page',

@@ -51,6 +51,7 @@ const test = baseTest.extend( {
 		} );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 async function userDeletionTest( page, username ) {
 	await page.goto( `wp-admin/users.php?s=${ username }` );

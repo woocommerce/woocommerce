@@ -9,6 +9,7 @@ const test = base.extend( {
 		await use( pageObject );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 const getUsedFonts = async ( editorOrPage ) => {
 	return await editorOrPage.locator( ':root' ).evaluate( () => {

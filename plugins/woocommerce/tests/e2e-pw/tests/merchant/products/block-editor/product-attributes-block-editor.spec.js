@@ -98,6 +98,7 @@ const test = baseTest.extend( {
 		await use( updatedProduct );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test(
 	'add local attribute (with terms) to the Product',

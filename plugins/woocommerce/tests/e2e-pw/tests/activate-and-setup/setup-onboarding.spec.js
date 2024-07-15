@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'Store owner can login and make sure WooCommerce is activated', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );

@@ -1,4 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
+test.describe.configure( { mode: 'serial' } );
+
 const { customer, storeDetails } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
 const { getOrderIdFromUrl } = require( '../../utils/order' );

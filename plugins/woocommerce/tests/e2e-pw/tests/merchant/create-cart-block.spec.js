@@ -11,6 +11,7 @@ const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
 	testPageTitlePrefix: 'Transformed cart',
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Transform Classic Cart To Cart Block',

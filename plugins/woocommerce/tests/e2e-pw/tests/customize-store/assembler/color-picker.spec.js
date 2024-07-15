@@ -16,6 +16,7 @@ const test = base.extend( {
 		await use( assemblerPageObject );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 const colorPalette = {
 	'Blueberry Sorbet': {

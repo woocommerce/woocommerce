@@ -70,6 +70,7 @@ const test = baseTest.extend( {
 		await use( productWithGallery );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Products > Product Images',

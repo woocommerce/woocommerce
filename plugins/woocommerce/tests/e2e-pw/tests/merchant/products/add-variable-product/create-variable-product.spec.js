@@ -1,4 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
+test.describe.configure( { mode: 'serial' } );
+
 const { variableProducts: utils, api } = require( '../../../../utils' );
 const { showVariableProductTour } = utils;
 const productPageURL = 'wp-admin/post-new.php?post_type=product';

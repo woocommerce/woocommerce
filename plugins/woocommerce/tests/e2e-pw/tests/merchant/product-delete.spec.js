@@ -33,6 +33,7 @@ const test = baseTest.extend( {
 		await use( page );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Products > Delete Product',

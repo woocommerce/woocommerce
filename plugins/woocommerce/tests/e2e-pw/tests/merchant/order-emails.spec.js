@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
 const { test, expect } = require( '@playwright/test' );
+test.describe.configure( { mode: 'serial' } );
+
 const { admin } = require( '../../test-data/data' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 

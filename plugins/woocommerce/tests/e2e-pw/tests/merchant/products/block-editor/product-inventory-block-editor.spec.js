@@ -44,6 +44,7 @@ const test = baseTest.extend( {
 		await use( page );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test( 'can update sku', { tag: '@gutenberg' }, async ( { page, product } ) => {
 	const sku = `SKU_${ Date.now() }`;

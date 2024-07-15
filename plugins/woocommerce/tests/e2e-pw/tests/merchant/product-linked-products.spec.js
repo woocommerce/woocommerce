@@ -26,6 +26,7 @@ const test = baseTest.extend( {
 		}
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Products > Related products',

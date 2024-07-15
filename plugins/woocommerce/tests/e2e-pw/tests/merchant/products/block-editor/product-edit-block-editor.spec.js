@@ -26,6 +26,7 @@ const test = baseTest.extend( {
 		await api.delete( `products/${ product.id }`, { force: true } );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test(
 	'can update the general information of a product',

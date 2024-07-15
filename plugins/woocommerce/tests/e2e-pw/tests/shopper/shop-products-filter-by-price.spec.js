@@ -20,6 +20,7 @@ const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
 	testPageTitlePrefix: 'Products filter',
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Filter items in the shop by product price',

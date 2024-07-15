@@ -1,4 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
+test.describe.configure( { mode: 'serial' } );
+
 const { customer } = require( '../../test-data/data' );
 
 const pages = [ 'Orders', 'Downloads', 'Addresses', 'Account details' ];

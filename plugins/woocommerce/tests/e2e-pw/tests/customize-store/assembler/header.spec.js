@@ -17,6 +17,7 @@ const test = base.extend( {
 		await use( assemblerPage );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'Assembler -> headers', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );

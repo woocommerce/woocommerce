@@ -12,6 +12,7 @@ const test = base.extend( {
 		await use( pageObject );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Store owner can view the Intro page',

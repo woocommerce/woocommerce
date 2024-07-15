@@ -62,6 +62,7 @@ const test = baseTest.extend( {
 		} );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 for ( const productType of Object.keys( productData ) ) {
 	test(

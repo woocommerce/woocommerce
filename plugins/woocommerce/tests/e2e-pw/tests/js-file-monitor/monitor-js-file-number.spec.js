@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+test.describe.configure( { mode: 'serial' } );
 
 // add any non-authenticated pages here (that don't require a login)
 const shopperPages = [

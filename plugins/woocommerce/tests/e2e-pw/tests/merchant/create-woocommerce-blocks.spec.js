@@ -47,6 +47,7 @@ const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
 	testPageTitlePrefix: 'Woocommerce Blocks',
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Add WooCommerce Blocks Into Page',

@@ -30,6 +30,7 @@ const test = baseTest.extend( {
 		await use( testPage );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Cart Block Calculate Shipping',

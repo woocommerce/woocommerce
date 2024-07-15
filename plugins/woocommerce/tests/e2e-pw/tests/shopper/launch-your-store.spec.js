@@ -1,4 +1,6 @@
 const { test, expect, request } = require( '@playwright/test' );
+test.describe.configure( { mode: 'serial' } );
+
 const { setOption } = require( '../../utils/options' );
 
 test.describe(

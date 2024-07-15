@@ -9,6 +9,7 @@ const test = base.extend( {
 		await use( pageObject );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 async function prepareAssembler( pageObject, baseURL ) {
 	await pageObject.setupSite( baseURL );

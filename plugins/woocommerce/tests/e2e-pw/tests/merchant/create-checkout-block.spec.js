@@ -18,6 +18,7 @@ const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
 	testPageTitlePrefix: 'Transformed checkout',
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Transform Classic Checkout To Checkout Block',

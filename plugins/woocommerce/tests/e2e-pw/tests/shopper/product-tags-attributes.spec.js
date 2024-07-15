@@ -1,4 +1,6 @@
 const { test, expect, request } = require( '@playwright/test' );
+test.describe.configure( { mode: 'serial' } );
+
 const { admin } = require( '../../test-data/data' );
 const pageTitle = 'Product Showcase';
 const { goToPageEditor } = require( '../../utils/editor' );

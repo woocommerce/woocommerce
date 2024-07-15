@@ -1,4 +1,6 @@
 const { test, expect, Page, Locator } = require( '@playwright/test' );
+test.describe.configure( { mode: 'serial' } );
+
 const { admin } = require( '../../test-data/data' );
 
 const EXPECTED_SECTION_HEADERS = [ 'Performance', 'Charts', 'Leaderboards' ];

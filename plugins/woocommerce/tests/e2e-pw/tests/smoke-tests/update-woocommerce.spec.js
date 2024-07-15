@@ -3,6 +3,7 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { ADMINSTATE, GITHUB_TOKEN, UPDATE_WC } = process.env;
 const { downloadZip, deleteZip } = require( '../../utils/plugin-utils' );
 const { test, expect } = require( '@playwright/test' );
+test.describe.configure( { mode: 'serial' } );
 
 let woocommerceZipPath;
 

@@ -20,6 +20,7 @@ const test = baseTest.extend( {
 		await api.delete( `customers/${ user.id }`, { force: true } );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe(
 	'Shopper Account Email Receiving',

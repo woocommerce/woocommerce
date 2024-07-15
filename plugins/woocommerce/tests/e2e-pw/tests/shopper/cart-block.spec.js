@@ -25,6 +25,7 @@ const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
 	testPageTitlePrefix: 'Cart Block',
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'Cart Block page', { tag: [ '@payments', '@services' ] }, () => {
 	test.beforeAll( async ( { api } ) => {

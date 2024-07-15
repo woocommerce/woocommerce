@@ -1,4 +1,6 @@
 const { test } = require( '@playwright/test' );
+test.describe.configure( { mode: 'serial' } );
+
 const {
 	clickAddNewMenuItem,
 	expectBlockProductEditor,

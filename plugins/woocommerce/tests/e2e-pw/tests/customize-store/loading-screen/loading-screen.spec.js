@@ -14,6 +14,7 @@ const test = base.extend( {
 		await use( pageObject );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 const steps = [
 	'Setting up the foundations',

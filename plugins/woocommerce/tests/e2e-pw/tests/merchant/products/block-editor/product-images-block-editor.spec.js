@@ -69,6 +69,7 @@ const test = baseTest.extend( {
 		await use( productWithGallery );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test( 'can add images', { tag: '@gutenberg' }, async ( { page, product } ) => {
 	const images = [ 'image-01', 'image-02' ];

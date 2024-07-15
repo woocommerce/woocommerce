@@ -22,6 +22,7 @@ const test = base.extend( {
 		await use( logoPickerPageObject );
 	},
 } );
+test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
