@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+set -eo pipefail
+
 # Lint branch
 #
 # Runs phpcs-changed, comparing the current branch to its "base" or "parent" branch.
@@ -20,7 +23,7 @@ fi
 newFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only --diff-filter=dmr -- '*.php')
 if [[ -n $newFiles ]]; then
 	passingFiles=$(find $newFiles -type f -exec grep -xl --regexp='declare(\s*strict_types\s*=\s*1\s*);' /dev/null {} +)
-	violatingFiles=$(grep -vxf <(printf "%s\n" $passingFiles | sort) <(printf "%s\n" $newFiles | sort))
+	violatingFiles=$(grep -vxf <(printf "%s\n" $passingFiles | sort) <(printf "%s\n" $newFiles | sort) || echo '')
 	if [[ -n "$violatingFiles" ]]; then
 		redColoured='\033[0;31m'
 		printf "${redColoured}Following files are missing 'declare( strict_types = 1)' directive:\n"

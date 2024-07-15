@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: Fix flaky logo picker waiting for response tests
