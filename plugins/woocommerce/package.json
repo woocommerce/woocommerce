@@ -104,31 +104,7 @@
 			},
 			"tests": [
 				{
-					"name": "PHP",
-					"testType": "unit:php",
-					"command": "test:php:env",
-					"changes": [
-						"client/admin/config/*.json",
-						"composer.json",
-						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php"
-					],
-					"testEnv": {
-						"start": "env:test"
-					},
-					"events": [
-						"pull_request",
-						"push"
-					]
-				},
-				{
-					"name": "PHP 8.0",
+					"name": "PHP: 8.0 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
@@ -146,7 +122,8 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.0"
+							"phpVersion": "8.0",
+							"wpVersion": "latest"
 						}
 					},
 					"events": [
