@@ -111,7 +111,7 @@ export function* getComingSoonMode() {
 			method: 'GET',
 		} );
 		yield updateCommandParams( UPDATE_COMING_SOON_MODE_ACTION_NAME, {
-			mode,
+			mode: mode || 'disabled',
 		} );
 	} catch ( error ) {
 		throw new Error( error );
