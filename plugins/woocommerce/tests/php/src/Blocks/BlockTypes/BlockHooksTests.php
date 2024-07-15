@@ -62,7 +62,7 @@ class BlockHooksTests extends WP_UnitTestCase {
 		$this->assertNotContains(
 			'woocommerce/test-block',
 			$hooked_block_types,
-			'Hooked block shouldnt be added unless a version is set'
+			"Hooked block shouldn't be added unless a version is set"
 		);
 	}
 
