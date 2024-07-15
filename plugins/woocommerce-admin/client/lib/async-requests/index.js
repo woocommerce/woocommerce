@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { identity } from 'lodash';
@@ -106,7 +107,19 @@ export function getVariationName( { attributes, name } ) {
 	}
 
 	const attributeList = ( attributes || [] )
-		.map( ( { option } ) => option )
+		.map( ( { name: attributeName, option } ) => {
+			if ( ! option ) {
+				attributeName =
+					attributeName.charAt( 0 ).toUpperCase() +
+					attributeName.slice( 1 );
+				option = sprintf(
+					// translators: %s: the attribute name.
+					__( 'Any %s', 'woocommerce' ),
+					attributeName
+				);
+			}
+			return option;
+		} )
 		.join( ', ' );
 
 	return attributeList ? name + separator + attributeList : name;
