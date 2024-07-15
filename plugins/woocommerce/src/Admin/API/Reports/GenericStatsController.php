@@ -23,7 +23,7 @@ abstract class GenericStatsController extends GenericController {
 	public function get_collection_params() {
 		$params             = parent::get_collection_params();
 		$params['fields']   = array(
-			'description'       => __( 'Limit stats fields to the specified items.', 'automatewoo' ),
+			'description'       => __( 'Limit stats fields to the specified items.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
