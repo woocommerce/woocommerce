@@ -1,4 +1,4 @@
-const { test: baseTest, expect } = require( '@playwright/test' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
 	fillPageTitle,
