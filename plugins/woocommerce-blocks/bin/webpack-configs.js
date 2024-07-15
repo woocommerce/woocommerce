@@ -43,7 +43,7 @@ const getSharedPlugins = ( {
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
 			? new CircularDependencyPlugin( {
-					exclude: /node_modules|build/,
+					exclude: [ /build/, /node_modules/ ],
 					cwd: process.cwd(),
 					failOnError: 'warn',
 			  } )
@@ -94,7 +94,7 @@ const getCoreConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(t|j)sx?$/,
-					exclude: /node_modules|build/,
+					exclude: [ /build/, /node_modules/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -205,7 +205,7 @@ const getMainConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: /node_modules|build/,
+					exclude: [ /build/, /node_modules/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -343,7 +343,7 @@ const getFrontConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: /node_modules|build/,
+					exclude: [ /build/, /node_modules/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -462,7 +462,7 @@ const getPaymentsConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: /node_modules|build/,
+					exclude: [ /build/, /node_modules/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -570,7 +570,7 @@ const getExtensionsConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: /node_modules|build/,
+					exclude: [ /build/, /node_modules/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -678,7 +678,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: /node_modules|build/,
+					exclude: [ /build/, /node_modules/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -838,7 +838,7 @@ const getStylingConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					// Why don't we have `exclude: /node_modules|build/,` here?
+					exclude: [ /build/, /node_modules/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -956,7 +956,7 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: /node_modules|build/,
+					exclude: [ /build/, /node_modules/ ],
 					use: [
 						{
 							loader: require.resolve( 'babel-loader' ),
@@ -1040,7 +1040,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: /node_modules|build/,
+					exclude: [ /build/, /node_modules/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {
