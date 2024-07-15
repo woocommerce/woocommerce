@@ -104,6 +104,7 @@ jobs:
     runs-on: 'ubuntu-20.04'
     needs: 'project-jobs'
     if: ${{ needs.project-jobs.outputs.test-jobs != '[]' }}
+    environment: ${{ (github.event_name == 'pull_request' && github.event.pull_request.draft) && 'ci-checks-draft-mode' || 'ci-checks-normal-mode' }}
     env: ${{ matrix.testEnv.envVars }}
     strategy:
       fail-fast: false
