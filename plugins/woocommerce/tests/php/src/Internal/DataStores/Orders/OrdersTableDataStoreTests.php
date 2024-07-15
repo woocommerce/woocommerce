@@ -3518,12 +3518,12 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 		add_action( 'woocommerce_new_order', $callback );
 
-		$order = WC_Helper_Order::create_order( 1, null, array( 'status' => 'processing' ) );
+		$order = new WC_Order();
+		$order->set_status( 'processing' );
 
 		$this->assertEquals( 0, $new_count );
 
 		$this->sut->update( $order );
-		$order->save();
 
 		$this->assertEquals( 1, $new_count );
 
