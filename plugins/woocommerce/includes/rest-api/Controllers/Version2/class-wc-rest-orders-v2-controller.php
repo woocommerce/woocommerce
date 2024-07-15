@@ -468,7 +468,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		// Format the order status.
-		$data['status'] = 'wc-' === substr( $data['status'], 0, 3 ) ? substr( $data['status'], 3 ) : $data['status'];
+		$data['status'] = OrderUtil::remove_status_prefix( $data['status'] );
 
 		// Format line items.
 		foreach ( $format_line_items as $key ) {

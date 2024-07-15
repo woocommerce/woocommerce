@@ -196,13 +196,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$current_status = $order->get_status( 'edit' );
 
 		// We need to remove the wc- prefix from the status for comparison and proper evaluation of new vs updated orders.
-		if ( strpos( $previous_status, 'wc-' ) === 0 ) {
-			$previous_status = substr( $previous_status, 3 );
-		}
-
-		if ( strpos( $current_status, 'wc-' ) === 0 ) {
-			$current_status = substr( $current_status, 3 );
-		}
+		$previous_status = OrderUtil::remove_status_prefix( $previous_status );
+		$current_status  = OrderUtil::remove_status_prefix( $current_status );
 
 		$non_triggering_order_statuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft', 'refunded', 'failed', 'cancelled');
 

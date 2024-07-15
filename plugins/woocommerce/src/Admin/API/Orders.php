@@ -239,7 +239,7 @@ class Orders extends \WC_REST_Orders_Controller {
 		}
 
 		// Format the order status.
-		$data['status'] = 'wc-' === substr( $data['status'], 0, 3 ) ? substr( $data['status'], 3 ) : $data['status'];
+		$data['status'] = OrderUtil::remove_status_prefix( $data['status'] );
 
 		// Format requested line items.
 		$formatted_line_items = array();
