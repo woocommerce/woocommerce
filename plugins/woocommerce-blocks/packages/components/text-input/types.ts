@@ -21,7 +21,7 @@ export interface ValidatedTextInputProps
 	// id to use for the error message. If not provided, an id will be generated.
 	errorId?: string;
 	// Feedback to display alongside the input. May be hidden when validation errors are displayed.
-	feedback?: JSX.Element | undefined;
+	feedback?: JSX.Element | null;
 	// if true, the input will be focused on mount.
 	focusOnMount?: boolean;
 	// Callback to run on change which is passed the updated value.
