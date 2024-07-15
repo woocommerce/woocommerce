@@ -24,7 +24,9 @@ export type ValidationProviderProps = {
 	productId: number;
 };
 
-export type ValidationError = string | undefined;
+export type ValidationError =
+	| { message?: string; context?: string; validatorId?: string }
+	| undefined;
 export type ValidationErrors = Record< string, ValidationError >;
 
 export type ValidatorRegistration< T > = {

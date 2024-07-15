@@ -17,6 +17,7 @@ import { useProductEdits } from '../../../hooks/use-product-edits';
 
 export function Edit( {
 	attributes,
+	clientId,
 	context: { postType },
 }: ProductEditorBlockEditProps< NumberBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
@@ -47,31 +48,40 @@ export function Edit( {
 				value &&
 				parseFloat( value ) < min
 			) {
-				return sprintf(
-					// translators: %d is the minimum value of the number input.
-					__(
-						'Value must be greater than or equal to %d',
-						'woocommerce'
+				return {
+					message: sprintf(
+						// translators: %d is the minimum value of the number input.
+						__(
+							'Value must be greater than or equal to %d',
+							'woocommerce'
+						),
+						min
 					),
-					min
-				);
+					context: clientId,
+				};
 			}
 			if (
 				typeof max === 'number' &&
 				value &&
 				parseFloat( value ) > max
 			) {
-				return sprintf(
-					// translators: %d is the maximum value of the number input.
-					__(
-						'Value must be less than or equal to %d',
-						'woocommerce'
+				return {
+					message: sprintf(
+						// translators: %d is the minimum value of the number input.
+						__(
+							'Value must be less than or equal to %d',
+							'woocommerce'
+						),
+						min
 					),
-					max
-				);
+					context: clientId,
+				};
 			}
 			if ( required && ! value ) {
-				return __( 'This field is required.', 'woocommerce' );
+				return {
+					message: __( 'This field is required.', 'woocommerce' ),
+					context: clientId,
+				};
 			}
 		},
 		[ value ]

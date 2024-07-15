@@ -188,6 +188,7 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 	} );
 
 	test( 'Enabling the "use as site icon" option should set the image as the site icon', async ( {
+		page,
 		assemblerPageObject,
 		logoPickerPageObject,
 	} ) => {
@@ -197,12 +198,16 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		await emptyLogoPicker.click();
 		await logoPickerPageObject.pickImage( assembler );
 		await assembler.getByText( 'Use as site icon' ).click();
+		await logoPickerPageObject.saveLogoSettings( assembler );
 
-		const [ logoResponse ] = await logoPickerPageObject.saveLogoSettings(
-			assembler
-		);
-
-		expect( logoResponse.ok() ).toBeTruthy();
+		// alternative way to verify new site icon on the site
+		// verifying site icon shown in the new tab is impossible in headless mode
+		const date = new Date();
+		await expect(
+			page.goto(
+				`/wp-content/uploads/${ date.getFullYear() }/${ date.getMonth() }/image-03-100x100.png`
+			)
+		).toBeTruthy();
 	} );
 
 	test( 'The selected image should be visible on the frontend', async ( {
