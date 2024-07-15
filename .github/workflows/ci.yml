@@ -111,9 +111,12 @@ jobs:
       matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.test-jobs ) }}
     steps:
-      - name: 'Quick exit in draft mode'
+      - uses: actions/github-script@v7
+        name: 'Quick exit in draft mode'
         if: ${{ github.event.pull_request.draft }}
-        run: exit 78
+        with:
+            script: |
+                core.setFailed(`Failed for PRs in draft mode. Exiting early.`);
 
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
