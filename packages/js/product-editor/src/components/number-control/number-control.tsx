@@ -88,13 +88,16 @@ export const NumberControl: React.FC< NumberProps > = forwardRef(
 				onBlur?.();
 			}
 		};
+
+		function handleOnFocus() {
+			setIsFocused( true );
+			onFocus?.();
+		}
+
 		const inputProps = useNumberInputProps( {
 			value: value || '',
 			onChange,
-			onFocus: () => {
-				setIsFocused( true );
-				onFocus?.();
-			},
+			onFocus: handleOnFocus,
 			min,
 			max,
 		} );
@@ -105,7 +108,7 @@ export const NumberControl: React.FC< NumberProps > = forwardRef(
 
 		const isInitialClick = useRef< boolean >( false );
 
-		const incrementValue = () => {
+		function incrementValue() {
 			const newValue = parseFloat( value || '0' ) + increment;
 			if ( newValue >= min && newValue <= max )
 				onChange( String( newValue ) );
@@ -130,7 +133,7 @@ export const NumberControl: React.FC< NumberProps > = forwardRef(
 
 		const resetIncrement = () => setIncrement( 0 );
 
-		const handleIncrement = ( thisStep: number ) => {
+		function handleIncrement( thisStep: number ) {
 			const newValue = parseFloat( value || '0' ) + thisStep;
 			if ( newValue >= min && newValue <= max ) {
 				onChange( String( parseFloat( value || '0' ) + thisStep ) );
