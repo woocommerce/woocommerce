@@ -1,4 +1,5 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+const { request } = require( '@playwright/test' );
 const {
 	goToPageEditor,
 	fillPageTitle,
@@ -6,6 +7,7 @@ const {
 	getCanvas,
 	publishPage,
 } = require( '../../utils/editor' );
+const { encodeCredentials } = require( '../../utils/plugin-utils' );
 
 const simpleProductName = 'Simplest Product';
 const singleProductPrice = '555.00';
@@ -143,12 +145,38 @@ test.describe(
 		test( `can insert all WooCommerce blocks into page`, async ( {
 			page,
 			testPage,
+			baseURL,
 		} ) => {
+			// check if Gutenberg is installed
+			const apiContext = await request.newContext( {
+				baseURL,
+				extraHTTPHeaders: {
+					Authorization: `Basic ${ encodeCredentials(
+						'admin',
+						'password'
+					) }`,
+					cookie: '',
+				},
+			} );
+			const listPluginsResponse = await apiContext.get(
+				`/wp-json/wp/v2/plugins`,
+				{
+					failOnStatusCode: true,
+				}
+			);
+			const pluginsList = await listPluginsResponse.json();
+			const gutenbergPlugin = pluginsList.find(
+				( { textdomain } ) => textdomain === 'gutenberg'
+			);
+
 			await goToPageEditor( { page } );
 
-			await expect(
-				page.getByRole( 'button', { name: 'Set featured image' } )
-			).toBeVisible();
+			// if Gutenberg is active, wait for element before filling page title
+			if ( gutenbergPlugin ) {
+				await expect(
+					page.getByRole( 'button', { name: 'Set featured image' } )
+				).toBeVisible();
+			}
 
 			await fillPageTitle( page, testPage.title );
 
