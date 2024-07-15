@@ -8,7 +8,6 @@ import { BlockInstance } from '@wordpress/blocks';
  */
 import { Pattern } from '~/customize-store/types/pattern';
 import { PATTERN_CATEGORIES } from './categories';
-import { isNumber } from 'lodash';
 
 /**
  * Adds a 'is-added' CSS class to each pattern preview element in the pattern list that matches a block's pattern name.
@@ -39,10 +38,10 @@ export const addIsAddedClassToPatternPreview = (
 
 const orderPatternList = {
 	intro: [
-		'Two column with image and content',
+		'Intro: Two column with content and image',
 		'Heading with image and two columns below',
 		'Fullwidth content with background image',
-		'Intro: Two column with content and image',
+		'Two column with image and content',
 		'Centered heading with two column text',
 		'Content with button and fullwidth image',
 		'Center-aligned content overlaid on an image',
