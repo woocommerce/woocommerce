@@ -112,7 +112,7 @@ export const NumberControl: React.FC< NumberProps > = forwardRef(
 			const newValue = parseFloat( value || '0' ) + increment;
 			if ( newValue >= min && newValue <= max )
 				onChange( String( newValue ) );
-		};
+		}
 
 		useEffect( () => {
 			if ( increment !== 0 ) {
@@ -140,7 +140,7 @@ export const NumberControl: React.FC< NumberProps > = forwardRef(
 				setIncrement( thisStep );
 				isInitialClick.current = true;
 			}
-		};
+		}
 
 		return (
 			<BaseControl
