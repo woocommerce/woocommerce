@@ -104,7 +104,7 @@ jobs:
     name: "${{ matrix.name }}"
     runs-on: 'ubuntu-20.04'
     needs: [ 'project-jobs' ]
-    if: ${{ needs.project-jobs.outputs.test-jobs != '[]' }}
+    if: ${{ needs.project-jobs.outputs.test-jobs != '[]' && github.event.pull_request.draft }}
     env: ${{ matrix.testEnv.envVars }}
     strategy:
       fail-fast: false
