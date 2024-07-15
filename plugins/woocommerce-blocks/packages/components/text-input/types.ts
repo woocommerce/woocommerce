@@ -13,7 +13,7 @@ export interface ValidatedTextInputProps
 	// Unique instance ID. id will be used instead if provided.
 	instanceId?: string | undefined;
 	// Type of input, defaults to text.
-	type?: string;
+	type?: string | undefined;
 	// Class name to add to the input.
 	className?: string | undefined;
 	// aria-describedby attribute to add to the input.
@@ -27,7 +27,7 @@ export interface ValidatedTextInputProps
 	// Optional label for the field.
 	label?: string | undefined;
 	// Field value.
-	value: string;
+	value?: string | undefined;
 	// If true, validation errors will be shown.
 	showError?: boolean;
 	// Error message to display alongside the field regardless of validation.
@@ -35,6 +35,10 @@ export interface ValidatedTextInputProps
 	// Custom validation function that is run on change. Use setCustomValidity to set an error message.
 	customValidation?:
 		| ( ( inputObject: HTMLInputElement ) => boolean )
+		| undefined;
+	// Custom validation message to display when validity is false. Given the input element. Expected to use inputObject.validity.
+	customValidityMessage?:
+		| ( ( validity: ValidityState ) => undefined | string )
 		| undefined;
 	// Custom formatted to format values as they are typed.
 	customFormatter?: ( value: string ) => string;

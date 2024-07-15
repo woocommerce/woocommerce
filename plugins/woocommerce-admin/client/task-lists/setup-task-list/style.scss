@@ -129,10 +129,10 @@
 		}
 
 		.woocommerce-task-header__contents {
-			@include breakpoint( '<782px') {
+			@include breakpoint( "<782px") {
 				max-width: 380px;
 			}
-			@include breakpoint('<600px') {
+			@include breakpoint("<600px") {
 				max-width: 100%;
 			}
 
@@ -170,7 +170,7 @@
 		li.is-active::after {
 			background-color: var(--wp-admin-theme-color);
 			opacity: 0.1;
-			content: '';
+			content: "";
 			top: 0;
 			left: 0;
 			position: absolute;
@@ -211,14 +211,14 @@
 
 	@for $i from 1 through 10 {
 		.woocommerce-task-list__item:not(.complete).index-#{$i} .woocommerce-task__icon::after {
-			content: '#{$i}';
+			content: "#{$i}";
 			@extend .numbered-circle;
 			color: var(--wp-admin-theme-color);
 			font-weight: bold;
 		}
 	}
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		@include single-column;
 	}
 
@@ -235,11 +235,11 @@
 	}
 
 	.svg-background {
-		@include breakpoint('<600px') {
+		@include breakpoint("<600px") {
 			display: none;
 		}
 
-		@include breakpoint( '<782px') {
+		@include breakpoint( "<782px") {
 			right: 0.5%;
 			width: 40%;
 		}
@@ -266,7 +266,7 @@
 	}
 
 	.woocommerce-task-header__contents {
-		@include breakpoint( '<782px') {
+		@include breakpoint( "<782px") {
 			max-width: 380px;
 		}
 

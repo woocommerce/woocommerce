@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d170e6eb5a865b5eccdf3f305749e3f6",
+    "content-hash": "6168e7a5d5f44ed218761127fd844abc",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -960,16 +960,16 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "3.7.2",
+            "version": "3.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "cb3c7854b31a285b46964931425fef6f485be145"
+                "reference": "e331b534d7de10402d7545a0de50177b874c0779"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/cb3c7854b31a285b46964931425fef6f485be145",
-                "reference": "cb3c7854b31a285b46964931425fef6f485be145",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/e331b534d7de10402d7545a0de50177b874c0779",
+                "reference": "e331b534d7de10402d7545a0de50177b874c0779",
                 "shasum": ""
             },
             "require": {
@@ -997,9 +997,9 @@
             "homepage": "https://actionscheduler.org/",
             "support": {
                 "issues": "https://github.com/woocommerce/action-scheduler/issues",
-                "source": "https://github.com/woocommerce/action-scheduler/tree/3.7.2"
+                "source": "https://github.com/woocommerce/action-scheduler/tree/3.8.1"
             },
-            "time": "2024-02-14T21:35:25+00:00"
+            "time": "2024-06-20T19:53:06+00:00"
         }
     ],
     "packages-dev": [
@@ -4620,7 +4620,7 @@
         },
         {
             "name": "woocommerce/monorepo-plugin",
-            "version": "dev-trunk",
+            "version": "dev-update-action-sch-3.8.1",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",

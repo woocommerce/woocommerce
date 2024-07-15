@@ -18,8 +18,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
+use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
@@ -167,7 +170,7 @@ function wc_update_200_taxrates() {
 						)
 					);
 
-					$loop++;
+					++$loop;
 				}
 			}
 		}
@@ -216,7 +219,7 @@ function wc_update_200_taxrates() {
 				}
 			}
 
-			$loop++;
+			++$loop;
 		}
 	}
 
@@ -2571,7 +2574,6 @@ function wc_update_750_add_columns_to_order_stats_table() {
 			and postmeta.meta_key = '_date_completed'
 		SET order_stats.date_completed = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
 	);
-
 }
 
 /**
@@ -2666,4 +2668,111 @@ function wc_update_870_prevent_listing_of_transient_files_directory() {
 	\WP_Filesystem();
 	$wp_filesystem->put_contents( $default_transient_files_dir . '/.htaccess', 'deny from all' );
 	$wp_filesystem->put_contents( $default_transient_files_dir . '/index.html', '' );
+}
+
+/**
+ * If it exists, remove the inbox note that asks users to connect to `Woo.com`.
+ */
+function wc_update_890_update_connect_to_woocommerce_note() {
+	$note = Notes::get_note_by_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
+	if ( ! is_a( $note, 'Automattic\WooCommerce\Admin\Notes\Note' ) ) {
+		return;
+	}
+	if ( ! str_contains( $note->get_title(), 'Woo.com' ) ) {
+		return;
+	}
+	if ( $note->get_status() !== Note::E_WC_ADMIN_NOTE_SNOOZED && $note->get_status() !== Note::E_WC_ADMIN_NOTE_UNACTIONED ) {
+		return;
+	}
+	Notes::delete_notes_with_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
+}
+
+/**
+ * Disables the PayPal Standard gateway for stores that aren't using it.
+ *
+ * PayPal Standard has been deprecated since WooCommerce 5.5, but there are some stores that have it showing up in their
+ * list of available Payment methods even if it's not setup. In WooComerce 8.9 we will disable PayPal Standard for those stores
+ * to reduce the amount of new connections to the legacy gateway.
+ *
+ * Shows an admin notice to inform the store owner that PayPal Standard has been disabled and suggests installing PayPal Payments.
+ */
+function wc_update_890_update_paypal_standard_load_eligibility() {
+	$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
+
+	if ( ! $paypal ) {
+		return;
+	}
+
+	// If PayPal is enabled or set to load, but the store hasn't setup PayPal Standard live API keys and doesn't have any PayPal Orders, disable it.
+	if ( ( 'yes' === $paypal->enabled || 'yes' === $paypal->get_option( '_should_load' ) ) && ! $paypal->get_option( 'api_username' ) && ! $paypal->has_paypal_orders() ) {
+		$paypal->update_option( '_should_load', wc_bool_to_string( false ) );
+	}
+}
+
+/**
+ * Create the woocommerce_history_of_autoinstalled_plugins option if it doesn't exist
+ * as a copy of woocommerce_autoinstalled_plugins if it exists.
+ */
+function wc_update_891_create_plugin_autoinstall_history_option() {
+	$autoinstalled_plugins_history_info = get_site_option( 'woocommerce_history_of_autoinstalled_plugins' );
+	if ( false === $autoinstalled_plugins_history_info ) {
+		$autoinstalled_plugins_info = get_site_option( 'woocommerce_autoinstalled_plugins' );
+		if ( false !== $autoinstalled_plugins_info ) {
+			update_site_option( 'woocommerce_history_of_autoinstalled_plugins', $autoinstalled_plugins_info );
+		}
+	}
+}
+
+/**
+ * Add woocommerce_show_lys_tour.
+ */
+function wc_update_910_add_launch_your_store_tour_option() {
+	add_option( 'woocommerce_show_lys_tour', 'yes' );
+}
+
+/**
+ * Remove user meta associated with the keys '_last_order', '_order_count' and '_money_spent'.
+ *
+ * New keys are now used for these, to improve compatibility with multisite networks.
+ *
+ * @return void
+ */
+function wc_update_910_remove_obsolete_user_meta() {
+	global $wpdb;
+
+	$deletions = $wpdb->query( "
+		DELETE FROM $wpdb->usermeta
+		WHERE meta_key IN (
+			'_last_order',
+			'_order_count',
+			'_money_spent'
+		)
+	" );
+
+	$logger = wc_get_logger();
+
+	if ( null === $logger ) {
+		return;
+	}
+
+	if ( false === $deletions ) {
+		$logger->notice(
+			'During the update to 9.1.0, WooCommerce attempted to remove user meta with the keys "_last_order", "_order_count" and "_money_spent" but was unable to do so.',
+			array(
+				'source' => 'wc-updater',
+			)
+		);
+	} else {
+		$logger->info(
+			sprintf(
+				1 === $deletions
+					? 'During the update to 9.1.0, WooCommerce removed %d user meta row associated with the meta keys "_last_order", "_order_count" or "_money_spent".'
+					: 'During the update to 9.1.0, WooCommerce removed %d user meta rows associated with the meta keys "_last_order", "_order_count" or "_money_spent".',
+				number_format_i18n( $deletions )
+			),
+			array(
+				'source' => 'wc-updater',
+			)
+		);
+	}
 }

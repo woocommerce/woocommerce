@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { BlockData } from '@woocommerce/e2e-types';
+import { test, expect, BlockData } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -112,7 +111,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -135,7 +133,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -150,7 +147,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -171,7 +167,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -206,7 +201,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -229,7 +223,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -242,7 +235,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();

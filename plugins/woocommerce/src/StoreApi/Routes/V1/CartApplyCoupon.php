@@ -20,6 +20,15 @@ class CartApplyCoupon extends AbstractCartRoute {
 	 * @return string
 	 */
 	public function get_path() {
+		return self::get_path_regex();
+	}
+
+	/**
+	 * Get the path of this rest route.
+	 *
+	 * @return string
+	 */
+	public static function get_path_regex() {
 		return '/cart/apply-coupon';
 	}
 
@@ -55,18 +64,17 @@ class CartApplyCoupon extends AbstractCartRoute {
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		if ( ! wc_coupons_enabled() ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_disabled', __( 'Coupons are disabled.', 'woocommerce' ), 404 );
+			throw new RouteException( 'woocommerce_rest_cart_coupon_disabled', esc_html__( 'Coupons are disabled.', 'woocommerce' ), 404 );
 		}
 
-		$cart        = $this->cart_controller->get_cart_instance();
 		$coupon_code = wc_format_coupon_code( wp_unslash( $request['code'] ) );
 
 		try {
 			$this->cart_controller->apply_coupon( $coupon_code );
 		} catch ( \WC_REST_Exception $e ) {
-			throw new RouteException( $e->getErrorCode(), $e->getMessage(), $e->getCode() );
+			throw new RouteException( $e->getErrorCode(), $e->getMessage(), $e->getCode() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
-		return rest_ensure_response( $this->schema->get_item_response( $cart ) );
+		return rest_ensure_response( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) );
 	}
 }

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
@@ -74,7 +74,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 
 	return (
 		<div
-			className={ classnames( className, {
+			className={ clsx( className, {
 				[ `${ parentClassName }__stock-indicator` ]: parentClassName,
 				'wc-block-components-product-stock-indicator--in-stock':
 					inStock,

@@ -20,6 +20,15 @@ class CartAddItem extends AbstractCartRoute {
 	 * @return string
 	 */
 	public function get_path() {
+		return self::get_path_regex();
+	}
+
+	/**
+	 * Get the path of this rest route.
+	 *
+	 * @return string
+	 */
+	public static function get_path_regex() {
 		return '/cart/add-item';
 	}
 
@@ -86,10 +95,8 @@ class CartAddItem extends AbstractCartRoute {
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		// Do not allow key to be specified during creation.
 		if ( ! empty( $request['key'] ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_item_exists', __( 'Cannot create an existing cart item.', 'woocommerce' ), 400 );
+			throw new RouteException( 'woocommerce_rest_cart_item_exists', esc_html__( 'Cannot create an existing cart item.', 'woocommerce' ), 400 );
 		}
-
-		$cart = $this->cart_controller->get_cart_instance();
 
 		/**
 		 * Filters cart item data sent via the API before it is passed to the cart controller.
@@ -119,7 +126,7 @@ class CartAddItem extends AbstractCartRoute {
 
 		$this->cart_controller->add_to_cart( $add_to_cart_data );
 
-		$response = rest_ensure_response( $this->schema->get_item_response( $cart ) );
+		$response = rest_ensure_response( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) );
 		$response->set_status( 201 );
 		return $response;
 	}

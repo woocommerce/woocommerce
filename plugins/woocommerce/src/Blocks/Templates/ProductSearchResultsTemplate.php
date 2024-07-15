@@ -18,13 +18,6 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 	const SLUG = 'product-search-results';
 
 	/**
-	 * The template used as a fallback if that one is customized.
-	 *
-	 * @var string
-	 */
-	public $fallback_template = ProductCatalogTemplate::SLUG;
-
-	/**
 	 * Initialization method.
 	 */
 	public function init() {
@@ -61,9 +54,7 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 			}
 
-			if ( ! BlockTemplateUtils::theme_has_template( self::SLUG ) ) {
-				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-			}
+			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}
 	}
 

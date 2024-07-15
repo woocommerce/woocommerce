@@ -1,6 +1,4 @@
 .woocommerce-product-custom-fields__edit-modal {
-	min-width: 75%;
-
 	&-actions {
 		display: flex;
 		align-items: center;
@@ -11,5 +9,16 @@
 
 	.components-base-control {
 		width: 100%;
+
+		.components-input-base {
+			.components-input-control__input {
+				height: 36px;
+			}
+		}
+	}
+
+	.components-modal__content {
+		width: 500px;
+		max-width: 100%;
 	}
 }

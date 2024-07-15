@@ -4,7 +4,7 @@
 import { Icon } from '@wordpress/icons';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody } from '@wordpress/components';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -89,7 +89,7 @@ interface EditProps {
 export const Edit = ( props: EditProps ): JSX.Element => {
 	const { context } = props;
 	const blockProps = useBlockProps( {
-		className: classNames(
+		className: clsx(
 			'wc-block-editor-product-gallery-pager',
 			'wc-block-product-gallery-pager'
 		),

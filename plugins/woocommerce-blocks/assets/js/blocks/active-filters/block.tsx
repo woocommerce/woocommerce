@@ -5,7 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useQueryStateByKey } from '@woocommerce/base-context/hooks';
 import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
 import { useMemo, useEffect, useState } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Label } from '@woocommerce/blocks-components';
 import {
 	isAttributeQueryCollection,
@@ -329,7 +329,7 @@ const ActiveFiltersBlock = ( {
 
 	setWrapperVisibility( true );
 
-	const listClasses = classnames( 'wc-block-active-filters__list', {
+	const listClasses = clsx( 'wc-block-active-filters__list', {
 		'wc-block-active-filters__list--chips':
 			blockAttributes.displayStyle === 'chips',
 		'wc-block-active-filters--loading': shouldShowLoadingPlaceholders,

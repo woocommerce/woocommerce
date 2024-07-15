@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useSelect } from '@wordpress/data';
 import {
 	// @ts-ignore No types for this exist yet.
@@ -21,11 +21,14 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { forwardRef } from '@wordpress/element';
 // @ts-ignore No types for this exist yet.
 import SiteIcon from '@wordpress/edit-site/build-module/components/site-icon';
-import { getNewPath } from '@woocommerce/navigation';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
+import WordPressLogo from '~/lib/wordpress-logo';
+
 /**
  * Internal dependencies
  */
+import { isEntrepreneurFlow } from '~/customize-store/design-with-ai/entrepreneur-flow';
 
 const HUB_ANIMATION_DURATION = 0.3;
 
@@ -57,10 +60,7 @@ export const SiteHub = forwardRef(
 			<motion.div
 				ref={ ref }
 				{ ...restProps }
-				className={ classnames(
-					'edit-site-site-hub',
-					restProps.className
-				) }
+				className={ clsx( 'edit-site-site-hub', restProps.className ) }
 				initial={ false }
 				transition={ {
 					type: 'tween',
@@ -79,7 +79,7 @@ export const SiteHub = forwardRef(
 						spacing="0"
 					>
 						<div
-							className={ classnames(
+							className={ clsx(
 								'edit-site-site-hub__view-mode-toggle-container',
 								{
 									'has-transparent-background': isTransparent,
@@ -87,36 +87,49 @@ export const SiteHub = forwardRef(
 							) }
 						>
 							<Link
-								href={ getNewPath( {}, '/', {} ) }
+								href={ getNewPath(
+									getPersistedQuery(),
+									'/',
+									{}
+								) }
 								type="wp-admin"
 							>
-								<SiteIcon className="edit-site-layout__view-mode-toggle-icon" />
+								{ isEntrepreneurFlow() ? (
+									<WordPressLogo
+										size={ 24 }
+										className="woocommerce-cys-wordpress-header-logo"
+									/>
+								) : (
+									<SiteIcon className="edit-site-layout__view-mode-toggle-icon" />
+								) }
 							</Link>
 						</div>
 
-						<AnimatePresence>
-							<motion.div
-								layout={ false }
-								animate={ {
-									opacity: 1,
-								} }
-								exit={ {
-									opacity: 0,
-								} }
-								className={ classnames(
-									'edit-site-site-hub__site-title',
-									{ 'is-transparent': isTransparent }
-								) }
-								transition={ {
-									type: 'tween',
-									duration: disableMotion ? 0 : 0.2,
-									ease: 'easeOut',
-									delay: 0.1,
-								} }
-							>
-								{ decodeEntities( siteTitle ) }
-							</motion.div>
-						</AnimatePresence>
+						{ ! isEntrepreneurFlow() && (
+							<AnimatePresence>
+								<motion.div
+									layout={ false }
+									animate={ {
+										opacity: 1,
+									} }
+									exit={ {
+										opacity: 0,
+									} }
+									className={ clsx(
+										'edit-site-site-hub__site-title',
+										{ 'is-transparent': isTransparent }
+									) }
+									transition={ {
+										type: 'tween',
+										duration: disableMotion ? 0 : 0.2,
+										ease: 'easeOut',
+										delay: 0.1,
+									} }
+								>
+									{ decodeEntities( siteTitle ) }
+								</motion.div>
+							</AnimatePresence>
+						) }
 					</HStack>
 				</HStack>
 			</motion.div>

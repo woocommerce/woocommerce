@@ -39,3 +39,4 @@ export { init as initText } from './generic/text';
 export { init as initNumber } from './generic/number';
 export { init as initLinkedProductList } from './generic/linked-product-list';
 export { init as initTextArea } from './generic/text-area';
+export { init as initSelect } from './generic/select';

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __, sprintf } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
@@ -13,7 +13,10 @@ import {
 	useStoreCart,
 } from '@woocommerce/base-context/hooks';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import { applyCheckoutFilter, mustContain } from '@woocommerce/blocks-checkout';
+import {
+	applyCheckoutFilter,
+	productPriceValidation,
+} from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
 import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
@@ -42,9 +45,6 @@ const getAmountFromRawPrice = (
 ) => {
 	return priceObject.convertPrecision( currency.minorUnit ).getAmount();
 };
-
-const productPriceValidation = ( value: string ) =>
-	mustContain( value, '<price/>' );
 
 interface CartLineItemRowProps {
 	lineItem: CartItem | Record< string, never >;
@@ -203,7 +203,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 
 		return (
 			<tr
-				className={ classnames(
+				className={ clsx(
 					'wc-block-cart-items__row',
 					cartItemClassNameFilter,
 					{

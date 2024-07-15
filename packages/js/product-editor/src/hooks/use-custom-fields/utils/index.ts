@@ -4,8 +4,10 @@
 import type { Metadata } from '../../../types';
 import type { DisjoinMetas } from '../types';
 
-export function isCustomField< T extends Metadata< string > >( value: T ) {
-	return ! value.key.startsWith( '_' );
+export function isCustomField< T extends Metadata< string > >(
+	customField: T
+) {
+	return ! customField.key.startsWith( '_' ) && customField.value !== null;
 }
 
 export function disjoinMetas< T extends Metadata< string > >(
@@ -15,7 +17,7 @@ export function disjoinMetas< T extends Metadata< string > >(
 	if ( isCustomField( meta ) ) {
 		state.customFields.push( meta );
 	} else {
-		state.internalMetas.push( meta );
+		state.otherMetas.push( meta );
 	}
 	return state;
 }

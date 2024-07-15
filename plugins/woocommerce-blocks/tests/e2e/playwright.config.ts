@@ -1,59 +1,55 @@
 /**
  * External dependencies
  */
-import { defineConfig, PlaywrightTestConfig } from '@playwright/test';
-import { BASE_URL, STORAGE_STATE_PATH } from '@woocommerce/e2e-utils';
-
 import { fileURLToPath } from 'url';
+import { BASE_URL, STORAGE_STATE_PATH } from '@woocommerce/e2e-utils';
+import { PlaywrightTestConfig, defineConfig, devices } from '@playwright/test';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require( 'dotenv' ).config();
-interface ExtendedPlaywrightTestConfig extends PlaywrightTestConfig {
-	use: {
-		stateDir?: string;
-	} & PlaywrightTestConfig[ 'use' ];
-}
+const { CI, DEFAULT_TIMEOUT_OVERRIDE } = process.env;
 
-const { CI, DEFAULT_TIMEOUT_OVERRIDE, E2E_MAX_FAILURES } = process.env;
-
-const config: ExtendedPlaywrightTestConfig = {
+const config: PlaywrightTestConfig = {
+	maxFailures: CI ? 30 : 0,
 	timeout: parseInt( DEFAULT_TIMEOUT_OVERRIDE || '', 10 ) || 100_000, // Defaults to 100s.
-	outputDir: 'artifacts/test-results',
+	outputDir: `${ __dirname }/artifacts/test-results`,
 	globalSetup: fileURLToPath(
 		new URL( 'global-setup.ts', 'file:' + __filename ).href
 	),
-	globalTeardown: require.resolve( './global-teardown' ),
-	testDir: 'tests',
-	retries: CI ? 2 : 0,
+	testDir: './tests',
+	retries: CI ? 1 : 0,
 	workers: 1,
-	// Don't report slow test "files", as we're running our tests in serial.
-	reportSlowTests: null,
+	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
+	fullyParallel: false,
+	forbidOnly: !! CI,
 	reporter: process.env.CI
-		? [ [ 'github' ], [ 'list' ], [ 'html' ] ]
+		? [
+				[ 'github' ],
+				[ 'list' ],
+				[ './flaky-tests-reporter.ts' ],
+				[
+					'allure-playwright',
+					{
+						outputFolder: `${ __dirname }/artifacts/test-results/allure-results`,
+					},
+				],
+		  ]
 		: 'list',
-	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
-	snapshotPathTemplate:
-		'{testDir}/{testFileDir}/__screenshots__/{arg}{testName}{ext}',
 	use: {
 		baseURL: BASE_URL,
 		screenshot: 'only-on-failure',
-		stateDir: 'tests/e2e/test-results/storage/',
-		trace: 'retain-on-failure',
+		trace:
+			/^https?:\/\/localhost/.test( BASE_URL ) || ! CI
+				? 'retain-on-first-failure'
+				: 'off',
 		video: 'on-first-retry',
 		viewport: { width: 1280, height: 720 },
 		storageState: STORAGE_STATE_PATH,
 		actionTimeout: 10_000,
+		navigationTimeout: 10_000,
 	},
 	projects: [
 		{
-			name: 'blockThemeConfiguration',
-			testDir: '.',
-			testMatch: /block-theme.setup.ts/,
-		},
-		{
-			name: 'blockTheme',
-			testMatch: /.*.block_theme.spec.ts/,
-			dependencies: [ 'blockThemeConfiguration' ],
+			name: 'chromium',
+			use: { ...devices[ 'Desktop Chrome' ] },
 		},
 	],
 };

@@ -1,5 +1,0 @@
-Significance: patch
-Type: dev
-Comment: This PR only adds e2e tests for teh notice templates. Therefore, a changelog entry is not needed.
-
-

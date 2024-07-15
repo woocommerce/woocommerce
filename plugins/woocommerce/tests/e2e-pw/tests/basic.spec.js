@@ -1,31 +1,37 @@
 const { test, expect } = require( '@playwright/test' );
+const { logIn } = require( '../utils/login' );
+const { admin, customer } = require( '../test-data/data' );
 
-test.describe( 'A basic set of tests to ensure WP, wp-admin and my-account load', () => {
-	test( 'Load the home page', async ( { page } ) => {
-		await page.goto( '/' );
-		const title = page.locator( 'h1.site-title' );
-		await expect( title ).toHaveText( 'WooCommerce Core E2E Test Suite' );
-	} );
+test( 'Load the home page', async ( { page } ) => {
+	await page.goto( '/' );
+	await expect(
+		await page
+			.getByRole( 'link', { name: 'WooCommerce Core E2E Test' } )
+			.count()
+	).toBeGreaterThan( 0 );
+	await expect(
+		page.getByText( 'Proudly powered by WordPress' )
+	).toBeVisible();
+	expect( await page.title() ).toBe( 'WooCommerce Core E2E Test Suite' );
+	await expect(
+		page.getByRole( 'link', { name: 'WordPress' } )
+	).toBeVisible();
+} );
 
-	test.describe( 'Sign in as admin', () => {
-		test.use( {
-			storageState: process.env.ADMINSTATE,
-		} );
-		test( 'Load wp-admin', async ( { page } ) => {
-			await page.goto( '/wp-admin' );
-			const title = page.locator( 'div.wrap > h1' );
-			await expect( title ).toHaveText( 'Dashboard' );
-		} );
-	} );
+test( 'Load wp-admin as admin', async ( { page } ) => {
+	await page.context().clearCookies();
+	await page.goto( '/wp-admin' );
+	await logIn( page, admin.username, admin.password );
+	await expect(
+		page.getByRole( 'heading', { name: 'Dashboard' } )
+	).toBeVisible();
+} );
 
-	test.describe( 'Sign in as customer', () => {
-		test.use( {
-			storageState: process.env.CUSTOMERSTATE,
-		} );
-		test( 'Load customer my account page', async ( { page } ) => {
-			await page.goto( '/my-account' );
-			const title = page.locator( 'h1.entry-title' );
-			await expect( title ).toHaveText( 'My account' );
-		} );
-	} );
+test( 'Load my account page as customer', async ( { page } ) => {
+	await page.context().clearCookies();
+	await page.goto( '/my-account' );
+	await logIn( page, customer.username, customer.password, false );
+	await expect(
+		page.getByRole( 'heading', { name: 'My Account' } )
+	).toBeVisible();
 } );

@@ -28,16 +28,13 @@ import { VariableProductTour } from './variable-product-tour';
 import { TRACKS_SOURCE } from '../../../constants';
 import { handlePrompt } from '../../../utils/handle-prompt';
 import { ProductEditorBlockEditProps } from '../../../types';
-import { EmptyState } from './empty-state';
+import { EmptyState } from '../../../components/empty-state';
 
 export function Edit( {
 	attributes,
-	context,
-}: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > & {
-	context: {
-		isInSelectedTab?: boolean;
-	};
-} ) {
+	clientId,
+	context: { isInSelectedTab },
+}: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > ) {
 	const noticeDimissed = useRef( false );
 	const { invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
@@ -48,6 +45,11 @@ export function Edit( {
 		'postType',
 		'product',
 		'status'
+	);
+	const [ productHasOptions ] = useEntityProp< string >(
+		'postType',
+		'product',
+		'has_options'
 	);
 	const [ productAttributes ] =
 		useProductEntityProp< Product[ 'attributes' ] >( 'attributes' );
@@ -79,12 +81,18 @@ export function Edit( {
 
 			return {
 				totalCountWithoutPrice:
-					getProductVariationsTotalCount< number >(
-						totalCountWithoutPriceRequestParams
-					),
+					isInSelectedTab && productHasOptions
+						? getProductVariationsTotalCount< number >(
+								totalCountWithoutPriceRequestParams
+						  )
+						: 0,
 			};
 		},
-		[ totalCountWithoutPriceRequestParams ]
+		[
+			isInSelectedTab,
+			productHasOptions,
+			totalCountWithoutPriceRequestParams,
+		]
 	);
 
 	const {
@@ -118,10 +126,13 @@ export function Edit( {
 						},
 					} );
 				}
-				return __(
-					'Set variation prices before adding this product.',
-					'woocommerce'
-				);
+				return {
+					message: __(
+						'Set variation prices before adding this product.',
+						'woocommerce'
+					),
+					context: clientId,
+				};
 			}
 		},
 		[ totalCountWithoutPrice ]
@@ -176,12 +187,21 @@ export function Edit( {
 			: '';
 
 	if ( ! hasVariationOptions ) {
-		return <EmptyState />;
+		return (
+			<EmptyState
+				names={ [
+					__( 'Variation', 'woocommerce' ),
+					__( 'Colors', 'woocommerce' ),
+					__( 'Sizes', 'woocommerce' ),
+				] }
+			/>
+		);
 	}
 
 	return (
 		<div { ...blockProps }>
 			<VariationsTable
+				isVisible={ isInSelectedTab }
 				ref={ variationTableRef as React.Ref< HTMLDivElement > }
 				noticeText={ noticeText }
 				onNoticeDismiss={ () => {
@@ -218,7 +238,7 @@ export function Edit( {
 					}
 				} }
 			/>
-			{ context.isInSelectedTab && <VariableProductTour /> }
+			{ isInSelectedTab && <VariableProductTour /> }
 		</div>
 	);
 }

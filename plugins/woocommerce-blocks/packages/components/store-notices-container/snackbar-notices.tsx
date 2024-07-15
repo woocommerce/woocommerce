@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import SnackbarList from '@woocommerce/base-components/snackbar-list';
 import { useDispatch } from '@wordpress/data';
 import type { NoticeType } from '@woocommerce/types';
@@ -17,7 +17,7 @@ const SnackbarNotices = ( {
 
 	return (
 		<SnackbarList
-			className={ classnames(
+			className={ clsx(
 				className,
 				'wc-block-components-notices__snackbar'
 			) }

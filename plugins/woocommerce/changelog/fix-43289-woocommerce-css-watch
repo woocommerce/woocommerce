@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-WooCommerce build watching will now also detect CSS file changes.

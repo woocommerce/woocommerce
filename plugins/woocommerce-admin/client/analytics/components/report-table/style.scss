@@ -2,14 +2,14 @@
 	position: relative;
 	top: -#{$adminbar-height + $gap};
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		top: -#{$adminbar-height-mobile + $gap};
 	}
 
 	.woocommerce-feature-enabled-activity-panels & {
 		top: -#{$adminbar-height + $header-height + $gap};
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			top: -#{$adminbar-height-mobile + $header-height + $gap};
 		}
 	}
@@ -47,7 +47,7 @@ button.woocommerce-table__download-button {
 		width: 24px;
 	}
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		svg {
 			margin-right: 0;
 		}

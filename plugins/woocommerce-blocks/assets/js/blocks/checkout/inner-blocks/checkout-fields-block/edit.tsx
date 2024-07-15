@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { Main } from '@woocommerce/base-components/sidebar-layout';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
@@ -10,7 +10,10 @@ import type { TemplateArray } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { useCheckoutBlockControlsContext } from '../../context';
+import {
+	useCheckoutBlockContext,
+	useCheckoutBlockControlsContext,
+} from '../../context';
 import {
 	useForcedLayout,
 	getAllowedBlocks,
@@ -28,13 +31,11 @@ export const Edit = ( {
 	};
 } ): JSX.Element => {
 	const blockProps = useBlockProps( {
-		className: classnames(
-			'wc-block-checkout__main',
-			attributes?.className
-		),
+		className: clsx( 'wc-block-checkout__main', attributes?.className ),
 	} );
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CHECKOUT_FIELDS );
 
+	const { showFormStepNumbers } = useCheckoutBlockContext();
 	const { addressFieldControls: Controls } =
 		useCheckoutBlockControlsContext();
 
@@ -62,7 +63,15 @@ export const Edit = ( {
 	return (
 		<Main { ...blockProps }>
 			<Controls />
-			<form className="wc-block-components-form wc-block-checkout__form">
+			<form
+				className={ clsx(
+					'wc-block-components-form wc-block-checkout__form',
+					{
+						'wc-block-checkout__form--with-step-numbers':
+							showFormStepNumbers,
+					}
+				) }
+			>
 				<InnerBlocks
 					allowedBlocks={ allowedBlocks }
 					templateLock={ false }

@@ -28,7 +28,7 @@ export const LoadSampleProductConfirmModal: React.VFC< Props > = ( {
 		>
 			<Text className="woocommerce-confirmation-modal__message">
 				{ __(
-					"We'll import images from Woo.com to set up your sample products.",
+					"We'll import images from WooCommerce.com to set up your sample products.",
 					'woocommerce'
 				) }
 			</Text>

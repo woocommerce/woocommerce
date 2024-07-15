@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -469,7 +470,7 @@ function wc_get_loop_class() {
 	$loop_index = wc_get_loop_prop( 'loop', 0 );
 	$columns    = absint( max( 1, wc_get_loop_prop( 'columns', wc_get_default_products_per_row() ) ) );
 
-	$loop_index ++;
+	++$loop_index;
 	wc_set_loop_prop( 'loop', $loop_index );
 
 	if ( 0 === ( $loop_index - 1 ) % $columns || 1 === $columns ) {
@@ -896,10 +897,11 @@ function wc_terms_and_conditions_page_content() {
 		return;
 	}
 
-	$page = get_post( $terms_page_id );
+	$sanitizer = wc_get_container()->get( HtmlSanitizer::class );
+	$page      = get_post( $terms_page_id );
 
 	if ( $page && 'publish' === $page->post_status && $page->post_content && ! has_shortcode( $page->post_content, 'woocommerce_checkout' ) ) {
-		echo '<div class="woocommerce-terms-and-conditions" style="display: none; max-height: 200px; overflow: auto;">' . wc_format_content( wp_kses_post( $page->post_content ) ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<div class="woocommerce-terms-and-conditions" style="display: none; max-height: 200px; overflow: auto;">' . wc_format_content( $sanitizer->styled_post_content( $page->post_content ) ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }
 
@@ -1363,8 +1365,8 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 
 		if ( $product ) {
 			$defaults = array(
-				'quantity'   => 1,
-				'class'      => implode(
+				'quantity'              => 1,
+				'class'                 => implode(
 					' ',
 					array_filter(
 						array(
@@ -1376,11 +1378,11 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 						)
 					)
 				),
-				'attributes' => array(
+				'aria-describedby_text' => $product->add_to_cart_aria_describedby(),
+				'attributes'            => array(
 					'data-product_id'  => $product->get_id(),
 					'data-product_sku' => $product->get_sku(),
 					'aria-label'       => $product->add_to_cart_description(),
-					'aria-describedby' => $product->add_to_cart_aria_describedby(),
 					'rel'              => 'nofollow',
 				),
 			);
@@ -1606,6 +1608,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	$image_size        = apply_filters( 'woocommerce_gallery_image_size', $flexslider || $main_image ? 'woocommerce_single' : $thumbnail_size );
 	$full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
 	$thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
+	$thumbnail_srcset  = wp_get_attachment_image_srcset( $attachment_id, $thumbnail_size );
 	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
 	$alt_text          = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
 	$image             = wp_get_attachment_image(
@@ -1629,7 +1632,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 		)
 	);
 
-	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
+	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" data-thumb-srcset="' . esc_attr( $thumbnail_srcset ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
 }
 
 if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {
@@ -3517,7 +3520,7 @@ if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 		if ( ! empty( $downloads ) ) {
 			$i = 0;
 			foreach ( $downloads as $file ) {
-				$i ++;
+				++$i;
 
 				if ( $args['show_url'] ) {
 					$strings[] = '<strong class="wc-item-download-label">' . esc_html( $file['name'] ) . ':</strong> ' . esc_html( $file['download_url'] );
@@ -3987,9 +3990,32 @@ function wc_get_pay_buttons() {
 
 	echo '<div class="woocommerce-pay-buttons">';
 	foreach ( $supported_gateways as $pay_button_id ) {
-		echo sprintf( '<div class="woocommerce-pay-button__%1$s %1$s" id="%1$s"></div>', esc_attr( $pay_button_id ) );
+		printf( '<div class="woocommerce-pay-button__%1$s %1$s" id="%1$s"></div>', esc_attr( $pay_button_id ) );
 	}
 	echo '</div>';
 }
+
+/**
+ * Update the product archive title to the title of the shop page. Fallback to
+ * 'Shop' if the shop page doesn't exist.
+ *
+ * @param string $post_type_name Post type 'name' label.
+ * @param string $post_type      Post type.
+ *
+ * @return string
+ */
+function wc_update_product_archive_title( $post_type_name, $post_type ) {
+	if ( is_shop() && 'product' === $post_type ) {
+		$shop_page_title = get_the_title( wc_get_page_id( 'shop' ) );
+		if ( $shop_page_title ) {
+			return $shop_page_title;
+		}
+
+		return __( 'Shop', 'woocommerce' );
+	}
+
+	return $post_type_name;
+}
+add_filter( 'post_type_archive_title', 'wc_update_product_archive_title', 10, 2 );
 
 // phpcs:enable Generic.Commenting.Todo.TaskFound

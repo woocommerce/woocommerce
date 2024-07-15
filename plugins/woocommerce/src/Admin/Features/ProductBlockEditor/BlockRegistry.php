@@ -41,6 +41,7 @@ class BlockRegistry {
 		'woocommerce/product-text-area-field',
 		'woocommerce/product-number-field',
 		'woocommerce/product-linked-list-field',
+		'woocommerce/product-select-field',
 	);
 
 	/**

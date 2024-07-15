@@ -100,6 +100,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = array(
 			'id'                    => $object->get_id(),
+			'type'                  => $object->get_type(),
 			'date_created'          => wc_rest_prepare_date_response( $object->get_date_created(), false ),
 			'date_created_gmt'      => wc_rest_prepare_date_response( $object->get_date_created() ),
 			'date_modified'         => wc_rest_prepare_date_response( $object->get_date_modified(), false ),
@@ -107,6 +108,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'description'           => wc_format_content( $object->get_description() ),
 			'permalink'             => $object->get_permalink(),
 			'sku'                   => $object->get_sku(),
+			'global_unique_id'      => $object->get_global_unique_id(),
 			'price'                 => $object->get_price(),
 			'regular_price'         => $object->get_regular_price(),
 			'sale_price'            => $object->get_sale_price(),
@@ -190,6 +192,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// SKU.
 		if ( isset( $request['sku'] ) ) {
 			$variation->set_sku( wc_clean( $request['sku'] ) );
+		}
+
+		// Unique ID.
+		if ( isset( $request['global_unique_id'] ) ) {
+			$variation->set_global_unique_id( wc_clean( $request['global_unique_id'] ) );
 		}
 
 		// Thumbnail.
@@ -503,6 +510,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'type'                  => array(
+					'description' => __( 'Product type.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'date_created'          => array(
 					'description' => __( "The date the variation was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
@@ -528,7 +541,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'readonly'    => true,
 				),
 				'sku'                   => array(
-					'description' => __( 'Unique identifier.', 'woocommerce' ),
+					'description' => __( 'Stock Keeping Unit.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'global_unique_id'      => array(
+					'description' => __( 'GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -1121,8 +1139,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		$response          = array();
 		$product           = wc_get_product( $product_id );
 		$default_values    = isset( $request['default_values'] ) ? $request['default_values'] : array();
+		$meta_data         = isset( $request['meta_data'] ) ? $request['meta_data'] : array();
 		$data_store        = $product->get_data_store();
-		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ), $default_values );
+		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ), $default_values, $meta_data );
 
 		if ( isset( $request['delete'] ) && $request['delete'] ) {
 			$deleted_count             = $this->delete_unmatched_product_variations( $product );

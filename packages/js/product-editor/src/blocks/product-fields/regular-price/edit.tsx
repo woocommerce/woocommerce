@@ -3,17 +3,10 @@
  */
 import classNames from 'classnames';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { Link } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
-import { getNewPath } from '@woocommerce/navigation';
-import { recordEvent } from '@woocommerce/tracks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
-import {
-	createElement,
-	createInterpolateElement,
-	useEffect,
-} from '@wordpress/element';
+import { createElement, useEffect } from '@wordpress/element';
 import { sprintf, __ } from '@wordpress/i18n';
 import {
 	BaseControl,
@@ -24,11 +17,12 @@ import {
 /**
  * Internal dependencies
  */
+import { Label } from '../../../components/label/label';
 import { useValidation } from '../../../contexts/validation-context';
 import { useCurrencyInputProps } from '../../../hooks/use-currency-input-props';
-import { SalePriceBlockAttributes } from './types';
-import { ProductEditorBlockEditProps } from '../../../types';
-import { Label } from '../../../components/label/label';
+import { sanitizeHTML } from '../../../utils/sanitize-html';
+import type { ProductEditorBlockEditProps } from '../../../types';
+import type { SalePriceBlockAttributes } from './types';
 
 export function Edit( {
 	attributes,
@@ -36,7 +30,7 @@ export function Edit( {
 	context,
 }: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { label, help, isRequired, tooltip } = attributes;
+	const { label, help, isRequired, tooltip, disabled } = attributes;
 	const [ regularPrice, setRegularPrice ] = useEntityProp< string >(
 		'postType',
 		context.postType || 'product',
@@ -52,18 +46,11 @@ export function Edit( {
 		onChange: setRegularPrice,
 	} );
 
-	const interpolatedHelp = help
-		? createInterpolateElement( help, {
-				PricingTab: (
-					<Link
-						href={ getNewPath( { tab: 'pricing' } ) }
-						onClick={ () => {
-							recordEvent( 'product_pricing_help_click' );
-						} }
-					/>
-				),
-		  } )
-		: null;
+	function renderHelp() {
+		if ( help ) {
+			return <span dangerouslySetInnerHTML={ sanitizeHTML( help ) } />;
+		}
+	}
 
 	const regularPriceId = useInstanceId(
 		BaseControl,
@@ -80,23 +67,35 @@ export function Edit( {
 			const listPrice = Number.parseFloat( regularPrice );
 			if ( listPrice ) {
 				if ( listPrice < 0 ) {
-					return __(
-						'List price must be greater than or equals to zero.',
-						'woocommerce'
-					);
+					return {
+						message: __(
+							'Regular price must be greater than or equals to zero.',
+							'woocommerce'
+						),
+						context: clientId,
+					};
 				}
 				if (
 					salePrice &&
 					listPrice <= Number.parseFloat( salePrice )
 				) {
-					return __(
-						'List price must be greater than the sale price.',
-						'woocommerce'
-					);
+					return {
+						message: __(
+							'Regular price must be greater than the sale price.',
+							'woocommerce'
+						),
+						context: clientId,
+					};
 				}
 			} else if ( isRequired ) {
-				/* translators: label of required field. */
-				return sprintf( __( '%s is required.', 'woocommerce' ), label );
+				return {
+					message: sprintf(
+						/* translators: label of required field. */
+						__( '%s is required.', 'woocommerce' ),
+						label
+					),
+					context: clientId,
+				};
 			}
 		},
 		[ regularPrice, salePrice ]
@@ -115,7 +114,7 @@ export function Edit( {
 				help={
 					regularPriceValidationError
 						? regularPriceValidationError
-						: interpolatedHelp
+						: renderHelp()
 				}
 				className={ classNames( {
 					'has-error': regularPriceValidationError,
@@ -125,6 +124,7 @@ export function Edit( {
 					{ ...inputProps }
 					id={ regularPriceId }
 					name={ 'regular_price' }
+					inputMode="decimal"
 					ref={ regularPriceRef }
 					label={
 						tooltip ? (
@@ -133,6 +133,7 @@ export function Edit( {
 							label
 						)
 					}
+					disabled={ disabled }
 					onBlur={ validateRegularPrice }
 				/>
 			</BaseControl>

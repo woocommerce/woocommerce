@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useState, useRef, createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Modal, Button } from '@wordpress/components';
@@ -53,7 +53,7 @@ function Guide( {
 
 	return (
 		<Modal
-			className={ classnames( 'components-guide', className ) }
+			className={ clsx( 'components-guide', className ) }
 			title={ contentLabel }
 			onRequestClose={ () => {
 				onFinish( currentPage, 'close' );

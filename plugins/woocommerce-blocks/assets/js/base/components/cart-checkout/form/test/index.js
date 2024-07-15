@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CheckoutProvider } from '@woocommerce/base-context';
 import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
@@ -21,11 +21,18 @@ jest.mock( '@wordpress/element', () => {
 	};
 } );
 
-const renderInCheckoutProvider = ( ui, options = {} ) => {
+const renderInCheckoutProvider = ( ui, options = { legacyRoot: true } ) => {
 	const Wrapper = ( { children } ) => {
 		return <CheckoutProvider>{ children }</CheckoutProvider>;
 	};
-	return render( ui, { wrapper: Wrapper, ...options } );
+	const result = render( ui, { wrapper: Wrapper, ...options } );
+	// We need to switch to React 17 rendering to allow these tests to keep passing, but as a result the React
+	// rendering error will be shown.
+	expect( console ).toHaveErroredWith(
+		`Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot`
+	);
+
+	return result;
 };
 
 // Countries used in testing addresses must be in the wcSettings global.
@@ -39,7 +46,7 @@ const primaryAddress = {
 };
 const secondaryAddress = {
 	country: 'Austria', // We use Austria because it doesn't have states.
-	countryKey: 'AU',
+	countryKey: 'AT',
 	city: 'Vienna',
 	postcode: 'DCBA',
 };
@@ -50,42 +57,50 @@ const tertiaryAddress = {
 	state: 'Ontario',
 	postcode: 'EFGH',
 };
+const quaternaryAddress = {
+	country: 'Japan',
+	countryKey: 'JP',
+	city: 'Tokyo',
+	postcode: 'IJKL',
+};
 
-const countryRegExp = /country/i;
 const cityRegExp = /city/i;
 const stateRegExp = /county|province|state/i;
 const postalCodeRegExp = /postal code|postcode|zip/i;
 
 const inputAddress = async ( {
-	country = null,
+	countryKey = null,
 	city = null,
 	state = null,
 	postcode = null,
 } ) => {
-	if ( country ) {
-		const countryInput = screen.getByLabelText( countryRegExp );
-		userEvent.type( countryInput, country + '{arrowdown}{enter}' );
+	if ( countryKey ) {
+		const countryInput = screen.getByLabelText( 'Country/Region' );
+
+		if ( countryInput ) {
+			await userEvent.selectOptions( countryInput, countryKey );
+		}
 	}
 	if ( city ) {
 		const cityInput = screen.getByLabelText( cityRegExp );
-		userEvent.type( cityInput, city );
+		await userEvent.type( cityInput, city );
 	}
+
 	if ( state ) {
-		const stateButton = screen.queryByRole( 'combobox', {
-			name: stateRegExp,
+		const stateButton = screen.queryByLabelText( stateRegExp, {
+			selector: 'select',
 		} );
 		// State input might be a select or a text input.
 		if ( stateButton ) {
-			userEvent.click( stateButton );
-			userEvent.click( screen.getByRole( 'option', { name: state } ) );
+			await userEvent.selectOptions( stateButton, state );
 		} else {
 			const stateInput = screen.getByLabelText( stateRegExp );
-			userEvent.type( stateInput, state );
+			await userEvent.type( stateInput, state );
 		}
 	}
 	if ( postcode ) {
 		const postcodeInput = screen.getByLabelText( postalCodeRegExp );
-		userEvent.type( postcodeInput, postcode );
+		await userEvent.type( postcodeInput, postcode );
 	}
 };
 
@@ -114,7 +129,7 @@ describe( 'Form Component', () => {
 		);
 	};
 
-	it( 'updates context value when interacting with form elements', () => {
+	it( 'updates context value when interacting with form elements', async () => {
 		renderInCheckoutProvider(
 			<>
 				<WrappedAddressForm type="shipping" />
@@ -122,9 +137,11 @@ describe( 'Form Component', () => {
 			</>
 		);
 
-		inputAddress( primaryAddress );
+		await act( async () => {
+			await inputAddress( primaryAddress );
+		} );
 
-		expect( screen.getByText( /country/ ) ).toHaveTextContent(
+		expect( screen.getByText( /country:/ ) ).toHaveTextContent(
 			`country: ${ primaryAddress.countryKey }`
 		);
 		expect( screen.getByText( /city/ ) ).toHaveTextContent(
@@ -138,38 +155,46 @@ describe( 'Form Component', () => {
 		);
 	} );
 
-	it( 'input fields update when changing the country', () => {
+	it( 'input fields update when changing the country', async () => {
 		renderInCheckoutProvider( <WrappedAddressForm type="shipping" /> );
 
-		inputAddress( primaryAddress );
+		await act( async () => {
+			await inputAddress( primaryAddress );
+		} );
 
 		// Verify correct labels are used.
 		expect( screen.getByLabelText( /City/ ) ).toBeInTheDocument();
 		expect( screen.getByLabelText( /County/ ) ).toBeInTheDocument();
 		expect( screen.getByLabelText( /Postcode/ ) ).toBeInTheDocument();
 
-		inputAddress( secondaryAddress );
+		await act( async () => {
+			await inputAddress( secondaryAddress );
+		} );
 
 		// Verify state input has been removed.
 		expect( screen.queryByText( stateRegExp ) ).not.toBeInTheDocument();
 
-		inputAddress( tertiaryAddress );
+		await act( async () => {
+			await inputAddress( tertiaryAddress );
+		} );
 
 		// Verify postal code input label changed.
 		expect( screen.getByLabelText( /Postal code/ ) ).toBeInTheDocument();
 	} );
 
-	it( 'input values are reset after changing the country', () => {
+	it( 'input values are reset after changing the country', async () => {
 		renderInCheckoutProvider( <WrappedAddressForm type="shipping" /> );
 
-		inputAddress( secondaryAddress );
-		// Only update `country` to verify other values are reset.
-		inputAddress( { country: primaryAddress.country } );
-		expect( screen.getByLabelText( stateRegExp ).value ).toBe( '' );
+		// First enter an address with no state, but fill the city.
+		await act( async () => {
+			await inputAddress( secondaryAddress );
+		} );
 
-		// Repeat the test with an address which has a select for the state.
-		inputAddress( tertiaryAddress );
-		inputAddress( { country: primaryAddress.country } );
-		expect( screen.getByLabelText( stateRegExp ).value ).toBe( '' );
+		// Update country to another country without state.
+		await act( async () => {
+			await inputAddress( { countryKey: quaternaryAddress.countryKey } );
+		} );
+
+		expect( screen.getByLabelText( postalCodeRegExp ).value ).toBe( '' );
 	} );
 } );

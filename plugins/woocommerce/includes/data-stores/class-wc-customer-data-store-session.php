@@ -94,19 +94,22 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 				 * @param array $allowed_keys The allowed meta data keys.
 				 * @param WC_Customer $customer The customer object.
 				 */
-				$allowed_keys  = apply_filters( 'woocommerce_customer_allowed_session_meta_keys', array(), $customer );
-				$session_value = wp_json_encode(
-					array_filter(
-						$customer->get_meta_data(),
-						function( $meta_data ) use ( $allowed_keys ) {
-							return in_array( $meta_data->key, $allowed_keys, true );
-						}
-					)
-				);
+				$allowed_keys = apply_filters( 'woocommerce_customer_allowed_session_meta_keys', array(), $customer );
+
+				$session_value = array();
+				foreach ( $customer->get_meta_data() as $meta_data ) {
+					if ( in_array( $meta_data->key, $allowed_keys, true ) ) {
+						$session_value[] = array(
+							'key'   => $meta_data->key,
+							'value' => $meta_data->value,
+						);
+					}
+				}
+				$data['meta_data'] = $session_value;
 			} else {
-				$session_value = $customer->{"get_$function_key"}( 'edit' );
+				$session_value        = $customer->{"get_$function_key"}( 'edit' );
+				$data[ $session_key ] = (string) $session_value;
 			}
-			$data[ $session_key ] = (string) $session_value;
 		}
 		WC()->session->set( 'customer', $data );
 	}
@@ -137,9 +140,8 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 				}
 				if ( ! empty( $data[ $session_key ] ) && is_callable( array( $customer, "set_{$function_key}" ) ) ) {
 					if ( 'meta_data' === $session_key ) {
-						$meta_data_values = json_decode( wp_unslash( $data[ $session_key ] ), true );
-						if ( $meta_data_values ) {
-							foreach ( $meta_data_values as $meta_data_value ) {
+						if ( is_array( $data[ $session_key ] ) ) {
+							foreach ( $data[ $session_key ] as $meta_data_value ) {
 								if ( ! isset( $meta_data_value['key'], $meta_data_value['value'] ) ) {
 									continue;
 								}

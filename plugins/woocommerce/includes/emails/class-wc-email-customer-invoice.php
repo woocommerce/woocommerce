@@ -12,9 +12,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 
 	/**
-	 * Customer Invoice.
+	 * Order details email.
 	 *
-	 * An email sent to the customer via admin.
+	 * An email sent to the customer via admin, that summarizes the details of their order. This was
+	 * historically referred to as the 'invoice', and for backwards compatibility reasons that is still
+	 * reflected in the class name (although on a user-level we have moved away from that nomenclature).
 	 *
 	 * @class       WC_Email_Customer_Invoice
 	 * @version     3.5.0
@@ -29,8 +31,8 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		public function __construct() {
 			$this->id             = 'customer_invoice';
 			$this->customer_email = true;
-			$this->title          = __( 'Customer invoice / Order details', 'woocommerce' );
-			$this->description    = __( 'Customer invoice emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
+			$this->title          = __( 'Order details', 'woocommerce' );
+			$this->description    = __( 'Order detail emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
 			$this->template_html  = 'emails/customer-invoice.php';
 			$this->template_plain = 'emails/plain/customer-invoice.php';
 			$this->placeholders   = array(
@@ -52,11 +54,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject( $paid = false ) {
-			if ( $paid ) {
-				return __( 'Invoice for order #{order_number} on {site_title}', 'woocommerce' );
-			} else {
-				return __( 'Your latest {site_title} invoice', 'woocommerce' );
-			}
+			return __( 'Details for order #{order_number} on {site_title}', 'woocommerce' );
 		}
 
 		/**
@@ -67,11 +65,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading( $paid = false ) {
-			if ( $paid ) {
-				return __( 'Invoice for order #{order_number}', 'woocommerce' );
-			} else {
-				return __( 'Your invoice for order #{order_number}', 'woocommerce' );
-			}
+			return __( 'Details for order #{order_number}', 'woocommerce' );
 		}
 
 		/**

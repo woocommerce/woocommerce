@@ -4,12 +4,17 @@
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { recordEvent } from '@woocommerce/tracks';
+import { removeAllFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
 import { Products } from '..';
-import { defaultSurfacedProductTypes, productTypes } from '../constants';
+import {
+	SETUP_TASKLIST_PRODUCTS_AFTER_FILTER,
+	defaultSurfacedProductTypes,
+	productTypes,
+} from '../constants';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 jest.mock( '@wordpress/data', () => ( {
@@ -37,11 +42,13 @@ global.fetch = jest.fn().mockImplementation( () =>
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
 const confirmModalText =
-	"We'll import images from Woo.com to set up your sample products.";
+	"We'll import images from WooCommerce.com to set up your sample products.";
 
 describe( 'Products', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		// @ts-expect-error -- outdated type definition
+		removeAllFilters( SETUP_TASKLIST_PRODUCTS_AFTER_FILTER );
 	} );
 
 	it( 'should render default products types when onboardingData.profile.productType is null', () => {

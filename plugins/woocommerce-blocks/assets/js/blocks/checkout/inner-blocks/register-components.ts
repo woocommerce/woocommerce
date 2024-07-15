@@ -110,7 +110,7 @@ registerCheckoutBlock( {
 } );
 
 registerCheckoutBlock( {
-	metadata: metadata.CHECKOUT_ADDITIONAL_INFORMATION,
+	metadata: metadata.CHECKOUT_ORDER_INFORMATION,
 	component: lazy(
 		() =>
 			import(

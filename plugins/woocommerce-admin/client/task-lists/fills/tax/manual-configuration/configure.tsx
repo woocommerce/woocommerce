@@ -49,7 +49,7 @@ export const Configure: React.FC<
 						components: {
 							link: (
 								<Link
-									href="https://woo.com/document/setting-up-taxes-in-woocommerce/?utm_medium=product#section-1"
+									href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/?utm_medium=product#section-1"
 									target="_blank"
 									type="external"
 								>

@@ -138,13 +138,19 @@ class WebhookUtil {
 	/**
 	 * Gets the count of webhooks that are configured to use the Legacy REST API to compose their payloads.
 	 *
+	 * @param bool $clear_cache If true, the previously cached value of the count will be discarded if it exists.
+	 *
 	 * @return int
 	 */
-	public function get_legacy_webhooks_count(): int {
+	public function get_legacy_webhooks_count( bool $clear_cache = false ): int {
 		global $wpdb;
 
 		$cache_key = WC_Cache_Helper::get_cache_prefix( 'webhooks' ) . 'legacy_count';
-		$count     = wp_cache_get( $cache_key, 'webhooks' );
+		if ( $clear_cache ) {
+			wp_cache_delete( $cache_key, 'webhooks' );
+		}
+
+		$count = wp_cache_get( $cache_key, 'webhooks' );
 
 		if ( false === $count ) {
 			$count = absint( $wpdb->get_var( "SELECT count( webhook_id ) FROM {$wpdb->prefix}wc_webhooks WHERE `api_version` < 1;" ) );

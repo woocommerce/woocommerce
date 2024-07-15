@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useContext, useState } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
@@ -31,6 +31,7 @@ import { GoBackWarningModal } from '../go-back-warning-modal';
  */
 import { CustomizeStoreContext } from '../';
 import { isAIFlow } from '~/customize-store/guards';
+import { isEntrepreneurFlow } from '~/customize-store/design-with-ai/entrepreneur-flow';
 const { useLocation } = unlock( routerPrivateApis );
 
 export const SidebarNavigationScreen = ( {
@@ -65,12 +66,9 @@ export const SidebarNavigationScreen = ( {
 	return (
 		<>
 			<VStack
-				className={ classnames(
-					'edit-site-sidebar-navigation-screen__main',
-					{
-						'has-footer': !! footer,
-					}
-				) }
+				className={ clsx( 'edit-site-sidebar-navigation-screen__main', {
+					'has-footer': !! footer,
+				} ) }
 				spacing={ 0 }
 				justify="flex-start"
 			>
@@ -98,7 +96,7 @@ export const SidebarNavigationScreen = ( {
 							showTooltip={ false }
 						/>
 					) }
-					{ isRoot && (
+					{ isRoot && ! isEntrepreneurFlow() && (
 						<SidebarButton
 							onClick={ () => {
 								setOpenWarningModal( true );
@@ -110,6 +108,9 @@ export const SidebarNavigationScreen = ( {
 					) }
 					<Heading
 						className="edit-site-sidebar-navigation-screen__title"
+						style={
+							isEntrepreneurFlow() ? { padding: '0 16px' } : {}
+						}
 						color={ '#e0e0e0' /* $gray-200 */ }
 						level={ 1 }
 						size={ 20 }

@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { renderHook, cleanup } from '@testing-library/react-hooks';
-import { ProductAttribute, ProductAttributeTerm } from '@woocommerce/data';
+import type {
+	ProductProductAttribute,
+	ProductAttributeTerm,
+} from '@woocommerce/data';
 import { resolveSelect } from '@wordpress/data';
 
 /**
@@ -100,7 +103,7 @@ jest.mock( '@wordpress/data', () => ( {
 	} ),
 } ) );
 
-const testAttributes: ProductAttribute[] = [
+const testAttributes: ProductProductAttribute[] = [
 	{
 		id: 0,
 		name: 'Local',
@@ -149,6 +152,7 @@ describe( 'useProductAttributes', () => {
 				},
 			}
 		);
+		result.current.fetchAttributes();
 		await waitForNextUpdate();
 		expect( resolveSelect ).not.toHaveBeenCalled();
 		expect( result.current.attributes ).toEqual( [] );
@@ -172,6 +176,7 @@ describe( 'useProductAttributes', () => {
 					},
 				}
 			);
+			result.current.fetchAttributes();
 			jest.runOnlyPendingTimers();
 			await waitForNextUpdate();
 			result.current.handleChange( [
@@ -207,6 +212,7 @@ describe( 'useProductAttributes', () => {
 				}
 			);
 			jest.runOnlyPendingTimers();
+			result.current.fetchAttributes();
 			await waitForNextUpdate();
 			result.current.handleChange( [
 				{ ...testAttributes[ 0 ], isDefault: false },
@@ -239,6 +245,7 @@ describe( 'useProductAttributes', () => {
 				}
 			);
 			jest.runOnlyPendingTimers();
+			result.current.fetchAttributes();
 			await waitForNextUpdate();
 			result.current.handleChange( [
 				{ ...testAttributes[ 0 ], isDefault: false },
@@ -271,6 +278,7 @@ describe( 'useProductAttributes', () => {
 				}
 			);
 			jest.runOnlyPendingTimers();
+			result.current.fetchAttributes();
 			await waitForNextUpdate();
 			result.current.handleChange( [
 				{ ...testAttributes[ 1 ], isDefault: false },
@@ -302,6 +310,7 @@ describe( 'useProductAttributes', () => {
 				}
 			);
 			jest.runOnlyPendingTimers();
+			result.current.fetchAttributes();
 			await waitForNextUpdate();
 			result.current.handleChange( [
 				{ ...testAttributes[ 0 ], isDefault: false },
@@ -333,6 +342,7 @@ describe( 'useProductAttributes', () => {
 				}
 			);
 			jest.runOnlyPendingTimers();
+			result.current.fetchAttributes();
 			await waitForNextUpdate();
 			result.current.handleChange( [ { ...testAttributes[ 0 ] } ] );
 			expect( onChange ).toHaveBeenCalledWith(
@@ -368,6 +378,7 @@ describe( 'useProductAttributes', () => {
 				}
 			);
 			jest.runOnlyPendingTimers();
+			result.current.fetchAttributes();
 			await waitForNextUpdate();
 			result.current.handleChange( [
 				{ ...testAttributes[ 0 ], isDefault: true },
@@ -412,6 +423,7 @@ describe( 'useProductAttributes', () => {
 					},
 				}
 			);
+			result.current.fetchAttributes();
 			jest.runOnlyPendingTimers();
 			await waitForNextUpdate();
 			expect( result.current.attributes.length ).toBe( 2 );
@@ -442,6 +454,7 @@ describe( 'useProductAttributes', () => {
 					},
 				}
 			);
+			result.current.fetchAttributes();
 			jest.runOnlyPendingTimers();
 			await waitForNextUpdate();
 			expect( result.current.attributes.length ).toBe( 2 );
@@ -457,6 +470,7 @@ describe( 'useProductAttributes', () => {
 				isVariationAttributes: false,
 				productId: 123,
 			} );
+			result.current.fetchAttributes();
 			jest.runOnlyPendingTimers();
 			await waitForNextUpdate();
 			expect( result.current.attributes.length ).toBe( 1 );
@@ -483,6 +497,7 @@ describe( 'useProductAttributes', () => {
 					},
 				}
 			);
+			result.current.fetchAttributes();
 			jest.runOnlyPendingTimers();
 			await waitForNextUpdate();
 			expect( result.current.attributes.length ).toBe( 3 );

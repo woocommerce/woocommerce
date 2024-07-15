@@ -1,3 +1,9 @@
+---
+post_title: Cart and Checkout - Available Filters
+menu_title: Available Filters
+tags: reference
+---
+
 # Available filters <!-- omit in toc -->
 
 ## Table of Contents <!-- omit in toc -->
@@ -45,15 +51,16 @@ The following screenshot shows which parts the individual filters affect:
 
 The following [Totals Footer Item filter](./available-filters/totals-footer-item.md) is available:
 
--   [totalLabel](./available-filters/totals-footer-item.md#totallabel)
+-   [`totalLabel`](./available-filters/totals-footer-item.md#totallabel)
+-   [`totalValue`](./available-filters/totals-footer-item.md#totalvalue)
 
 ## Checkout and place order button filters
 
 The following [Checkout and place order button filters](./available-filters/checkout-and-place-order-button.md) are available:
 
--   [proceedToCheckoutButtonLabel](./available-filters/checkout-and-place-order-button.md#proceedtocheckoutbuttonlabel)
--   [proceedToCheckoutButtonLink](./available-filters/checkout-and-place-order-button.md#proceedtocheckoutbuttonlink)
--   [placeOrderButtonLabel](./available-filters/checkout-and-place-order-button.md#placeorderbuttonlabel)
+-   [`proceedToCheckoutButtonLabel`](./available-filters/checkout-and-place-order-button.md#proceedtocheckoutbuttonlabel)
+-   [`proceedToCheckoutButtonLink`](./available-filters/checkout-and-place-order-button.md#proceedtocheckoutbuttonlink)
+-   [`placeOrderButtonLabel`](./available-filters/checkout-and-place-order-button.md#placeorderbuttonlabel)
 
 ## Coupon filters
 
@@ -120,13 +127,3 @@ If you are logged in to the store as an administrator, you should be shown an er
 working correctly. The error will also be shown in your console.
 
 ![Troubleshooting](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-30-at-10.52.53.png)
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woo.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/available-filters.md)
-
-<!-- /FEEDBACK -->

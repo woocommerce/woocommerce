@@ -141,6 +141,17 @@
 		}
 	}
 
+	.woocommerce-inbox-note__action-button {
+		max-width: calc(100% - 80px);
+		overflow: hidden;
+
+		span {
+			display: inline-block;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	}
+
 	&.has-multiple-actions {
 		button.is-link {
 			padding: 6px 12px;

@@ -13,4 +13,5 @@ export type SchedulePublishModalProps = Omit<
 	value?: string;
 	onCancel?(): void;
 	onSchedule?( value?: string ): void;
+	isScheduling?: boolean;
 };

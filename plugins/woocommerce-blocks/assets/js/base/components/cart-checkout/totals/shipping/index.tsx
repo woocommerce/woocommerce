@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
@@ -85,9 +85,16 @@ export const TotalsShipping = ( {
 		shippingRates
 	);
 
+	const valueToDisplay =
+		totalShippingValue === 0 ? (
+			<strong>{ __( 'Free', 'woocommerce' ) }</strong>
+		) : (
+			totalShippingValue
+		);
+
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'wc-block-components-totals-shipping',
 				className
 			) }
@@ -97,7 +104,7 @@ export const TotalsShipping = ( {
 				value={
 					! shippingMethodsMissing && cartHasCalculatedShipping
 						? // if address is not complete, display the link to add an address.
-						  totalShippingValue
+						  valueToDisplay
 						: ( ! addressComplete || isCheckout ) && (
 								<ShippingPlaceholder
 									showCalculator={ showCalculator }

@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 
-test.describe( 'Analytics pages', () => {
+test.describe( 'Analytics pages', { tag: [ '@payments', '@services' ] }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	for ( const aPages of [

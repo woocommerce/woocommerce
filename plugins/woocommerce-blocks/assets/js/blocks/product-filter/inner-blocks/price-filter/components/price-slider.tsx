@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useCollectionData } from '@woocommerce/base-context/hooks';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -34,7 +34,7 @@ export const PriceSlider = ( { attributes }: EditProps ) => {
 		<input
 			className="min"
 			type="text"
-			value={ minPrice }
+			value={ formattedMinPrice }
 			onChange={ onChange }
 		/>
 	) : (
@@ -45,7 +45,7 @@ export const PriceSlider = ( { attributes }: EditProps ) => {
 		<input
 			className="max"
 			type="text"
-			value={ maxPrice }
+			value={ formattedMaxPrice }
 			onChange={ onChange }
 		/>
 	) : (
@@ -54,7 +54,7 @@ export const PriceSlider = ( { attributes }: EditProps ) => {
 
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				'wp-block-woocommerce-product-filter-price-content',
 				{
 					'wp-block-woocommerce-product-filter-price-content--inline':

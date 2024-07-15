@@ -34,6 +34,7 @@ class BlockRegistryTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-taxonomy-field' ), 'Taxonomy field not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-text-field' ), 'Text field not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-number-field' ), 'Number field not registered.' );
+		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-select-field' ), 'Select field not registered.' );
 	}
 
 	/**

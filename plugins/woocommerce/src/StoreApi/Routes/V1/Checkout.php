@@ -9,6 +9,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
+use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 /**
  * Checkout class.
@@ -44,6 +45,15 @@ class Checkout extends AbstractCartRoute {
 	 * @return string
 	 */
 	public function get_path() {
+		return self::get_path_regex();
+	}
+
+	/**
+	 * Get the path of this rest route.
+	 *
+	 * @return string
+	 */
+	public static function get_path_regex() {
 		return '/checkout';
 	}
 
@@ -78,7 +88,7 @@ class Checkout extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => array_merge(
 					[
-						'payment_data' => [
+						'payment_data'      => [
 							'description' => __( 'Data to pass through to the payment method when processing payment.', 'woocommerce' ),
 							'type'        => 'array',
 							'items'       => [
@@ -92,6 +102,10 @@ class Checkout extends AbstractCartRoute {
 									],
 								],
 							],
+						],
+						'customer_password' => [
+							'description' => __( 'Customer password for new accounts, if applicable.', 'woocommerce' ),
+							'type'        => 'string',
 						],
 					],
 					$this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE )
@@ -111,7 +125,6 @@ class Checkout extends AbstractCartRoute {
 	 */
 	public function get_response( \WP_REST_Request $request ) {
 		$this->load_cart_session( $request );
-		$this->cart_controller->calculate_totals();
 
 		$response    = null;
 		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
@@ -175,6 +188,12 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
+		/**
+		 * Before triggering validation, ensure totals are current and in turn, things such as shipping costs are present.
+		 * This is so plugins that validate other cart data (e.g. conditional shipping and payments) can access this data.
+		 */
+		$this->cart_controller->calculate_totals();
+
 		/**
 		 * Validate items etc are allowed in the order before the order is processed. This will fix violations and tell
 		 * the customer.
@@ -312,7 +331,7 @@ class Checkout extends AbstractCartRoute {
 	private function add_data_to_error_object( $error, $data, $http_status_code, bool $include_cart = false ) {
 		$data = array_merge( $data, [ 'status' => $http_status_code ] );
 		if ( $include_cart ) {
-			$data = array_merge( $data, [ 'cart' => wc()->api->get_endpoint_data( '/wc/store/v1/cart' ) ] );
+			$data = array_merge( $data, [ 'cart' => wc_get_container()->get( RestApiUtil::class )->get_endpoint_data( '/wc/store/v1/cart' ) ] );
 		}
 		$error->add_data( $data );
 		return $error;
@@ -419,7 +438,7 @@ class Checkout extends AbstractCartRoute {
 			if ( is_callable( [ $customer, $callback ] ) ) {
 				$customer->$callback( $value );
 			} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
-				$this->additional_fields_controller->persist_field_for_customer( "/billing/$key", $value, $customer );
+				$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer, 'billing' );
 			}
 		}
 
@@ -431,7 +450,7 @@ class Checkout extends AbstractCartRoute {
 			if ( is_callable( [ $customer, $callback ] ) ) {
 				$customer->$callback( $value );
 			} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
-				$this->additional_fields_controller->persist_field_for_customer( "/shipping/$key", $value, $customer );
+				$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer, 'shipping' );
 			}
 		}
 
@@ -514,7 +533,8 @@ class Checkout extends AbstractCartRoute {
 				$customer_id = $this->create_customer_account(
 					$request['billing_address']['email'],
 					$request['billing_address']['first_name'],
-					$request['billing_address']['last_name']
+					$request['billing_address']['last_name'],
+					$request['customer_password']
 				);
 
 				// Associate customer with the order. This is done before login to ensure the order is associated with
@@ -537,13 +557,23 @@ class Checkout extends AbstractCartRoute {
 				case 'registration-error-invalid-email':
 					throw new RouteException(
 						'registration-error-invalid-email',
-						__( 'Please provide a valid email address.', 'woocommerce' ),
+						esc_html__( 'Please provide a valid email address.', 'woocommerce' ),
 						400
 					);
 				case 'registration-error-email-exists':
 					throw new RouteException(
 						'registration-error-email-exists',
-						__( 'An account is already registered with your email address. Please log in before proceeding.', 'woocommerce' ),
+						sprintf(
+							// Translators: %s Email address.
+							esc_html__( 'An account is already registered with %s. Please log in or use a different email address.', 'woocommerce' ),
+							esc_html( $request['billing_address']['email'] )
+						),
+						400
+					);
+				case 'registration-error-empty-password':
+					throw new RouteException(
+						'registration-error-empty-password',
+						esc_html__( 'Please create a password for your account.', 'woocommerce' ),
 						400
 					);
 			}
@@ -598,10 +628,11 @@ class Checkout extends AbstractCartRoute {
 	 * @param string $user_email The email address to use for the new account.
 	 * @param string $first_name The first name to use for the new account.
 	 * @param string $last_name  The last name to use for the new account.
+	 * @param string $password   The password to use for the new account. If empty, a password will be generated.
 	 *
 	 * @return int User id if successful
 	 */
-	private function create_customer_account( $user_email, $first_name, $last_name ) {
+	private function create_customer_account( $user_email, $first_name, $last_name, $password = '' ) {
 		if ( empty( $user_email ) || ! is_email( $user_email ) ) {
 			throw new \Exception( 'registration-error-invalid-email' );
 		}
@@ -610,11 +641,20 @@ class Checkout extends AbstractCartRoute {
 			throw new \Exception( 'registration-error-email-exists' );
 		}
 
-		$username = wc_create_new_customer_username( $user_email );
+		// Handle password creation if not provided.
+		if ( empty( $password ) ) {
+			$password           = wp_generate_password();
+			$password_generated = true;
+		} else {
+			$password_generated = false;
+		}
 
-		// Handle password creation.
-		$password           = wp_generate_password();
-		$password_generated = true;
+		// This ensures `wp_generate_password` returned something (it is filterable and could be empty string).
+		if ( empty( $password ) ) {
+			throw new \Exception( 'registration-error-empty-password' );
+		}
+
+		$username = wc_create_new_customer_username( $user_email );
 
 		// Use WP_Error to handle registration errors.
 		$errors = new \WP_Error();

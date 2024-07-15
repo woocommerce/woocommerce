@@ -35,34 +35,27 @@ export function getUrlParameter( name: string ) {
 export function changeUrl( newUrl: string ) {
 	if ( filteringForPhpTemplate ) {
 		/**
-		 * We want to remove page number from URL whenever filters are changed.
-		 * This will move the user to the first page of results.
+		 * We may need to reset the current page when changing filters.
+		 * This is because the current page may not exist for this set
+		 * of filters and will 404 when the user navigates to it.
 		 *
-		 * There are following page number formats:
-		 * 1. query-{number}-page={number} (ex. query-1-page=2)
-		 * 	- ref: https://github.com/WordPress/gutenberg/blob/5693a62214b6c76d3dc5f3f69d8aad187748af79/packages/block-library/src/query-pagination-numbers/index.php#L18
-		 * 2. query-page={number} (ex. query-page=2)
-		 * 	- ref: same as above
-		 * 3. page/{number} (ex. page/2) (Default WordPress pagination format)
+		 * There are different pagination formats to consider, as documented here:
+		 * https://github.com/WordPress/gutenberg/blob/317eb8f14c8e1b81bf56972cca2694be250580e3/packages/block-library/src/query-pagination-numbers/index.php#L22-L85
 		 */
-		newUrl = newUrl.replace(
-			/(?:query-(?:\d+-)?page=(\d+))|(?:page\/(\d+))/g,
-			''
-		);
+		const url = new URL( newUrl );
+		// When pretty permalinks are enabled, the page number may be in the path name.
+		url.pathname = url.pathname.replace( /\/page\/[0-9]+/i, '' );
+		// When plain permalinks are enabled, the page number may be in the "paged" query parameter.
+		url.searchParams.delete( 'paged' );
+		// On posts and pages the page number will be in a query parameter that
+		// identifies which block we are paginating.
+		url.searchParams.forEach( ( _, key ) => {
+			if ( key.match( /^query(?:-[0-9]+)?-page$/ ) ) {
+				url.searchParams.delete( key );
+			}
+		} );
 
-		/**
-		 * If the URL ends with '?', we remove the trailing '?' from the URL.
-		 * The trailing '?' in a URL is unnecessary and can cause the page to
-		 * reload, which can negatively affect performance. By removing the '?',
-		 * we prevent this unnecessary reload. This is safe to do even if there
-		 * are query parameters, as they will not be affected by the removal
-		 * of a trailing '?'.
-		 */
-		if ( newUrl.endsWith( '?' ) ) {
-			newUrl = newUrl.slice( 0, -1 );
-		}
-
-		window.location.href = newUrl;
+		window.location.href = url.href;
 	} else {
 		window.history.replaceState( {}, '', newUrl );
 	}

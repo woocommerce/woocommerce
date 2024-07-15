@@ -1,6 +1,6 @@
 # ExPlat
 
-This packages includes a component and utility functions that can be used to run A/B Tests in WooCommerce dashboard and reports pages.
+This packages includes a component and utility functions that can be used to run A/B Tests in WooCommerce dashboard, report pages, and frontend pages.
 
 ## Installation
 

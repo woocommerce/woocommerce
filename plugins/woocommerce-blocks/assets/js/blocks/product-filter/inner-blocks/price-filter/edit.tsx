@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useBlockProps } from '@wordpress/block-editor';
+import { Disabled } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -16,7 +17,9 @@ const Edit = ( props: EditProps ) => {
 	return (
 		<div { ...blockProps }>
 			<Inspector { ...props } />
-			<PriceSlider { ...props } />
+			<Disabled>
+				<PriceSlider { ...props } />
+			</Disabled>
 		</div>
 	);
 };

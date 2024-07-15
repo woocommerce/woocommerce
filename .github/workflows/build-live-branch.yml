@@ -17,7 +17,7 @@ jobs:
         permissions:
             contents: read
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Get current version
               id: version
@@ -30,16 +30,16 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                pull-package-deps: '@woocommerce/plugin-woocommerce'
 
             - name: Prepare plugin zips
               id: prepare
               env:
                   CURRENT_VERSION: ${{ steps.version.outputs.version }}
-                  # Build with experimental blocks.
-                  WOOCOMMERCE_BLOCKS_PHASE: 3
               run: |
 
-                  # Current version must compare greather than any previously used current version for this PR.
+                  # Current version must compare greater than any previously used current version for this PR.
                   # Assume GH run IDs are monotonic.
                   VERSUFFIX="${GITHUB_RUN_ID}-g$(git rev-parse --short HEAD)"
 
@@ -52,12 +52,12 @@ jobs:
                   bash bin/build-zip.sh
 
                   mkdir "$GITHUB_WORKSPACE/zips"
-                  cp "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce.zip" "$GITHUB_WORKSPACE/zips/woocommerce.zip"
+                  mv "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce.zip" "$GITHUB_WORKSPACE/zips/woocommerce.zip"
                   cd "$GITHUB_WORKSPACE/zips"
-                  unzip woocommerce.zip
+                  unzip -qq woocommerce.zip
                   rm woocommerce.zip
                   mv woocommerce woocommerce-dev
-                  zip -q -r "woocommerce-dev.zip" "woocommerce-dev/"
+                  zip -q -r -9 "woocommerce-dev.zip" "woocommerce-dev/"
                   rm -fR "$GITHUB_WORKSPACE/zips/woocommerce-dev"
 
                   # Plugin data is passed as a JSON object.
@@ -66,7 +66,7 @@ jobs:
                   echo "plugin-data=$PLUGIN_DATA" >> $GITHUB_OUTPUT
 
             - name: Create plugins artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               if: steps.prepare.outputs.plugin-data != '{}'
               with:
                   name: plugins

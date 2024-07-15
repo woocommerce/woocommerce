@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { InnerBlocks } from '@wordpress/block-editor';
 import { cart } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
@@ -70,10 +70,7 @@ const settings = {
 			save: ( { attributes } ) => {
 				return (
 					<div
-						className={ classnames(
-							'is-loading',
-							attributes.className
-						) }
+						className={ clsx( 'is-loading', attributes.className ) }
 					>
 						<InnerBlocks.Content />
 					</div>

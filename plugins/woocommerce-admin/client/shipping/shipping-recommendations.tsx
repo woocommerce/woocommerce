@@ -82,7 +82,7 @@ export const ShippingRecommendationsList: React.FC = ( { children } ) => (
 		<CardFooter>
 			<Button
 				className="woocommerce-recommended-shipping-extensions__more_options_cta"
-				href="https://woo.com/product-category/woocommerce-extensions/shipping-methods/?utm_source=shipping_recommendations"
+				href="https://woocommerce.com/product-category/woocommerce-extensions/shipping-methods/?utm_source=shipping_recommendations"
 				target="_blank"
 				isTertiary
 			>
@@ -103,7 +103,11 @@ const ShippingRecommendations: React.FC = () => {
 		select( PLUGINS_STORE_NAME ).getActivePlugins()
 	);
 
-	if ( activePlugins.includes( 'woocommerce-services' ) ) {
+	if (
+		activePlugins.includes( 'woocommerce-services' ) ||
+		activePlugins.includes( 'woocommerce-shipping' ) ||
+		activePlugins.includes( 'woocommerce-tax' )
+	) {
 		return null;
 	}
 

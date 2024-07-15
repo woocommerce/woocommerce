@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
+import { Notice } from '@wordpress/notices';
 import { Page } from '@playwright/test';
-import { Admin } from '@wordpress/e2e-test-utils-playwright';
-import { cli } from '@woocommerce/e2e-utils';
+import { Admin, wpCLI } from '@woocommerce/e2e-utils';
 
 type Location = {
 	name: string;
@@ -32,30 +32,56 @@ export class LocalPickupUtils {
 
 	async saveLocalPickupSettings() {
 		await this.page.getByRole( 'button', { name: 'Save changes' } ).click();
+		await this.page.waitForFunction( () => {
+			return window.wp.data
+				.select( 'core/notices' )
+				.getNotices()
+				.some(
+					( notice: Notice ) =>
+						notice.status === 'success' &&
+						notice.content ===
+							'Local Pickup settings have been saved.'
+				);
+		} );
 	}
 
 	async enableLocalPickup() {
 		await this.openLocalPickupSettings();
 
-		await this.page.getByLabel( 'Enable local pickup' ).check();
+		// Since we can only save if the form is changed, check first if a change is needed.
+		if (
+			! ( await this.page
+				.getByLabel( 'Enable local pickup' )
+				.isChecked() )
+		) {
+			await this.page.getByLabel( 'Enable local pickup' ).check();
 
-		await this.saveLocalPickupSettings();
+			await this.saveLocalPickupSettings();
+		}
 	}
 
 	async disableLocalPickup() {
 		await this.openLocalPickupSettings();
 
-		await this.page.getByLabel( 'Enable local pickup' ).uncheck();
+		// Since we can only save if the form is changed, check first if a change is needed.
+		const enabled = this.page.getByLabel( 'Enable local pickup' );
+		if ( await enabled.isChecked() ) {
+			await enabled.uncheck();
 
-		await this.saveLocalPickupSettings();
+			await this.saveLocalPickupSettings();
+		}
 	}
 
 	async enableLocalPickupCosts() {
 		await this.openLocalPickupSettings();
 
-		await this.page
-			.getByLabel( 'Add a price for customers who choose local pickup' )
-			.check();
+		const addAPrice = this.page.getByLabel(
+			'Add a price for customers who choose local pickup'
+		);
+
+		if ( ! ( await addAPrice.isChecked() ) ) {
+			await addAPrice.check();
+		}
 
 		await this.saveLocalPickupSettings();
 	}
@@ -63,17 +89,26 @@ export class LocalPickupUtils {
 	async disableLocalPickupCosts() {
 		await this.openLocalPickupSettings();
 
-		await this.page
-			.getByLabel( 'Add a price for customers who choose local pickup' )
-			.uncheck();
+		// Since we can only save if the form is changed, check first if a change is needed.
+		const addAPrice = this.page.getByLabel(
+			'Add a price for customers who choose local pickup'
+		);
 
+		if ( await addAPrice.isChecked() ) {
+			await addAPrice.uncheck();
+
+			await this.saveLocalPickupSettings();
+		}
+	}
+
+	async setLocalPickupTitle( title: string ) {
+		await this.openLocalPickupSettings();
+		await this.page.getByLabel( 'Title' ).fill( title );
 		await this.saveLocalPickupSettings();
 	}
 
 	async deleteLocations() {
-		await cli(
-			`npm run wp-env run tests-cli -- wp option update pickup_location_pickup_locations ''`
-		);
+		await wpCLI( "option update pickup_location_pickup_locations ''" );
 	}
 
 	async deletePickupLocation() {
