@@ -27,7 +27,7 @@ jobs:
     # Since this is a monorepo, not every pull request or change is going to impact every project.
     # Instead of running CI tasks on all projects indiscriminately, we use a command to detect
     # which projects have changed and what kind of change occurred. This lets us build the
-    # matrices that we can use to run CI tasks only on the projects that need them.
+    # matrices that we can use to run CI tasks only on the projects that need them
     name: 'Build Project Jobs'
     runs-on: 'ubuntu-20.04'
     outputs:
