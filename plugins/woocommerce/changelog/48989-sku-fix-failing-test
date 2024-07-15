@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: No changelog entry is required, as this just changes a unit test to workaround an issue.
+

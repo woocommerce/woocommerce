@@ -2,6 +2,8 @@
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
 /**
@@ -116,6 +118,40 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$actual_order = $sut->get_last_order( $customer_1 );
 
 		$this->assertEquals( $last_valid_order->get_id(), $actual_order->get_id() );
+	}
+
+	/**
+	 * Even if the stored meta data is incorrect/corrupted in some fashion, it should not generally be possible to fetch
+	 * an order belonging to another user via the `get_last_customer_order` method.
+	 *
+	 * @return void
+	 */
+	public function test_get_last_customer_order_safety(): void {
+		$customer_a = CustomerHelper::create_customer( 'bill', 'basket', 'bill@buy.good' );
+		$customer_b = CustomerHelper::create_customer( 'ben', 'bumper', 'ben@boutique.shopper' );
+		$order_a    = OrderHelper::create_order( $customer_a->get_id() );
+		$order_b    = OrderHelper::create_order( $customer_b->get_id() );
+		$sut        = new WC_Customer_Data_Store();
+
+		$this->assertEquals(
+			$order_a->get_id(),
+			$sut->get_last_order( $customer_a )->get_id(),
+			'Last customer order fetched as expected.'
+		);
+
+		// Simulate a situation where a rogue plugin changes the cached last order information for Customer A, so it
+		// instead references an order placed by Customer B.
+		Users::update_site_user_meta(
+			$customer_a->get_id(),
+			'wc_last_order',
+			$order_b->get_id()
+		);
+
+		$this->assertEquals(
+			$order_a->get_id(),
+			$sut->get_last_order( $customer_a )->get_id(),
+			'Safeguards prevent fetching an order placed by another customer (it "self-corrects" and returns the actual last order).'
+		);
 	}
 
 	/**

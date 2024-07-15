@@ -3431,4 +3431,34 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 	}
 
+	/**
+	 * @testDox Creating an order with a draft status should not trigger the "woocommerce_new_order" action.
+	 */
+	public function test_create_draft_order_doesnt_trigger_hook() {
+
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$new_count = 0;
+
+		$callback = function () use ( &$new_count ) {
+			++$new_count;
+		};
+
+		add_action( 'woocommerce_new_order', $callback );
+
+		$draft_statuses = array( 'auto-draft', 'checkout-draft' );
+
+		$orders_data_store = new OrdersTableDataStore();
+
+		foreach ( $draft_statuses as $status ) {
+			$order = WC_Helper_Order::create_order( 1, null, array( 'status' => $status ) );
+			$orders_data_store->create( $order );
+		}
+
+		$this->assertEquals( 0, $new_count );
+
+		remove_action( 'woocommerce_new_order', $callback );
+	}
+
 }

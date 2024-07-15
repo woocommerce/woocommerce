@@ -88,7 +88,7 @@ class Checkout extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => array_merge(
 					[
-						'payment_data' => [
+						'payment_data'      => [
 							'description' => __( 'Data to pass through to the payment method when processing payment.', 'woocommerce' ),
 							'type'        => 'array',
 							'items'       => [
@@ -102,6 +102,10 @@ class Checkout extends AbstractCartRoute {
 									],
 								],
 							],
+						],
+						'customer_password' => [
+							'description' => __( 'Customer password for new accounts, if applicable.', 'woocommerce' ),
+							'type'        => 'string',
 						],
 					],
 					$this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE )
@@ -121,7 +125,6 @@ class Checkout extends AbstractCartRoute {
 	 */
 	public function get_response( \WP_REST_Request $request ) {
 		$this->load_cart_session( $request );
-		$this->cart_controller->calculate_totals();
 
 		$response    = null;
 		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
@@ -524,7 +527,8 @@ class Checkout extends AbstractCartRoute {
 				$customer_id = $this->create_customer_account(
 					$request['billing_address']['email'],
 					$request['billing_address']['first_name'],
-					$request['billing_address']['last_name']
+					$request['billing_address']['last_name'],
+					$request['customer_password']
 				);
 
 				// Associate customer with the order. This is done before login to ensure the order is associated with
@@ -547,13 +551,23 @@ class Checkout extends AbstractCartRoute {
 				case 'registration-error-invalid-email':
 					throw new RouteException(
 						'registration-error-invalid-email',
-						__( 'Please provide a valid email address.', 'woocommerce' ),
+						esc_html__( 'Please provide a valid email address.', 'woocommerce' ),
 						400
 					);
 				case 'registration-error-email-exists':
 					throw new RouteException(
 						'registration-error-email-exists',
-						__( 'An account is already registered with your email address. Please log in before proceeding.', 'woocommerce' ),
+						sprintf(
+							// Translators: %s Email address.
+							esc_html__( 'An account is already registered with %s. Please log in or use a different email address.', 'woocommerce' ),
+							esc_html( $request['billing_address']['email'] )
+						),
+						400
+					);
+				case 'registration-error-empty-password':
+					throw new RouteException(
+						'registration-error-empty-password',
+						esc_html__( 'Please create a password for your account.', 'woocommerce' ),
 						400
 					);
 			}
@@ -608,10 +622,11 @@ class Checkout extends AbstractCartRoute {
 	 * @param string $user_email The email address to use for the new account.
 	 * @param string $first_name The first name to use for the new account.
 	 * @param string $last_name  The last name to use for the new account.
+	 * @param string $password   The password to use for the new account. If empty, a password will be generated.
 	 *
 	 * @return int User id if successful
 	 */
-	private function create_customer_account( $user_email, $first_name, $last_name ) {
+	private function create_customer_account( $user_email, $first_name, $last_name, $password = '' ) {
 		if ( empty( $user_email ) || ! is_email( $user_email ) ) {
 			throw new \Exception( 'registration-error-invalid-email' );
 		}
@@ -620,11 +635,20 @@ class Checkout extends AbstractCartRoute {
 			throw new \Exception( 'registration-error-email-exists' );
 		}
 
-		$username = wc_create_new_customer_username( $user_email );
+		// Handle password creation if not provided.
+		if ( empty( $password ) ) {
+			$password           = wp_generate_password();
+			$password_generated = true;
+		} else {
+			$password_generated = false;
+		}
 
-		// Handle password creation.
-		$password           = wp_generate_password();
-		$password_generated = true;
+		// This ensures `wp_generate_password` returned something (it is filterable and could be empty string).
+		if ( empty( $password ) ) {
+			throw new \Exception( 'registration-error-empty-password' );
+		}
+
+		$username = wc_create_new_customer_username( $user_email );
 
 		// Use WP_Error to handle registration errors.
 		$errors = new \WP_Error();

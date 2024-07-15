@@ -9,9 +9,11 @@ const clickOnCommandPaletteOption = async ( { page, optionName } ) => {
 	// Press `Ctrl` + `K` to open the command palette.
 	await page.keyboard.press( cmdKeyCombo );
 
+	// Using a regex here because Gutenberg changes the text of the placeholder
 	await page
-		.getByLabel( 'Command palette' )
-		.locator( 'input' )
+		.getByPlaceholder(
+			/Search (?:commands(?: and settings)?|for commands)/
+		)
 		.fill( optionName );
 
 	// Click on the relevant option.

@@ -10,6 +10,7 @@ import { getSetting } from '@woocommerce/settings';
  * Internal dependencies
  */
 import { previewShippingRates } from './shipping-rates';
+import { API_SITE_CURRENCY, displayForMinorUnit } from './utils';
 
 /**
  * Prices from the API may change because of this display setting. This makes the response use either
@@ -81,16 +82,16 @@ export const previewCart: CartResponse = {
 				},
 			],
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
-				price: displayWithTax ? '12000' : '10000',
-				regular_price: displayWithTax ? '12000' : '10000',
-				sale_price: displayWithTax ? '12000' : '10000',
+				...API_SITE_CURRENCY,
+				price: displayForMinorUnit(
+					displayWithTax ? '12000' : '10000'
+				),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '120' : '100'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '12000' : '10000'
+				),
 				price_range: null,
 				raw_prices: {
 					precision: 6,
@@ -100,17 +101,11 @@ export const previewCart: CartResponse = {
 				},
 			},
 			totals: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
-				line_subtotal: '2000',
-				line_subtotal_tax: '400',
-				line_total: '2000',
-				line_total_tax: '400',
+				...API_SITE_CURRENCY,
+				line_subtotal: displayForMinorUnit( '2000' ),
+				line_subtotal_tax: displayForMinorUnit( '400' ),
+				line_total: displayForMinorUnit( '2000' ),
+				line_total_tax: displayForMinorUnit( '400' ),
 			},
 			extensions: {},
 			item_data: [],
@@ -156,16 +151,14 @@ export const previewCart: CartResponse = {
 				},
 			],
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
-				price: displayWithTax ? '2400' : '2000',
-				regular_price: displayWithTax ? '2400' : '2000',
-				sale_price: displayWithTax ? '2400' : '2000',
+				...API_SITE_CURRENCY,
+				price: displayForMinorUnit( displayWithTax ? '2400' : '2000' ),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '2400' : '2000'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '2400' : '2000'
+				),
 				price_range: null,
 				raw_prices: {
 					precision: 6,
@@ -175,17 +168,11 @@ export const previewCart: CartResponse = {
 				},
 			},
 			totals: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
-				line_subtotal: '2000',
-				line_subtotal_tax: '400',
-				line_total: '2000',
-				line_total_tax: '400',
+				...API_SITE_CURRENCY,
+				line_subtotal: displayForMinorUnit( '2000' ),
+				line_subtotal_tax: displayForMinorUnit( '400' ),
+				line_total: displayForMinorUnit( '2000' ),
+				line_total_tax: displayForMinorUnit( '400' ),
 			},
 			extensions: {},
 			item_data: [],
@@ -195,6 +182,7 @@ export const previewCart: CartResponse = {
 		{
 			id: 1,
 			name: __( 'Polo', 'woocommerce' ),
+			slug: 'polo',
 			parent: 0,
 			type: 'simple',
 			variation: '',
@@ -204,16 +192,16 @@ export const previewCart: CartResponse = {
 			description: __( 'Polo', 'woocommerce' ),
 			on_sale: false,
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
-				price: displayWithTax ? '24000' : '20000',
-				regular_price: displayWithTax ? '24000' : '20000',
-				sale_price: displayWithTax ? '12000' : '10000',
+				...API_SITE_CURRENCY,
+				price: displayForMinorUnit(
+					displayWithTax ? '24000' : '20000'
+				),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '24000' : '20000'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '12000' : '10000'
+				),
 				price_range: null,
 			},
 			price_html: '',
@@ -252,6 +240,7 @@ export const previewCart: CartResponse = {
 		{
 			id: 2,
 			name: __( 'Long Sleeve Tee', 'woocommerce' ),
+			slug: 'long-sleeve-tee',
 			parent: 0,
 			type: 'simple',
 			variation: '',
@@ -261,16 +250,16 @@ export const previewCart: CartResponse = {
 			description: __( 'Long Sleeve Tee', 'woocommerce' ),
 			on_sale: false,
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
-				price: displayWithTax ? '30000' : '25000',
-				regular_price: displayWithTax ? '30000' : '25000',
-				sale_price: displayWithTax ? '30000' : '25000',
+				...API_SITE_CURRENCY,
+				price: displayForMinorUnit(
+					displayWithTax ? '30000' : '25000'
+				),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '30000' : '25000'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '30000' : '25000'
+				),
 				price_range: null,
 			},
 			price_html: '',
@@ -310,6 +299,7 @@ export const previewCart: CartResponse = {
 		{
 			id: 3,
 			name: __( 'Hoodie with Zipper', 'woocommerce' ),
+			slug: 'hoodie-with-zipper',
 			parent: 0,
 			type: 'simple',
 			variation: '',
@@ -319,16 +309,16 @@ export const previewCart: CartResponse = {
 			description: __( 'Hoodie with Zipper', 'woocommerce' ),
 			on_sale: true,
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
-				price: displayWithTax ? '15000' : '12500',
-				regular_price: displayWithTax ? '30000' : '25000',
-				sale_price: displayWithTax ? '15000' : '12500',
+				...API_SITE_CURRENCY,
+				price: displayForMinorUnit(
+					displayWithTax ? '15000' : '12500'
+				),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '30000' : '25000'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '15000' : '12500'
+				),
 				price_range: null,
 			},
 			price_html: '',
@@ -369,6 +359,7 @@ export const previewCart: CartResponse = {
 		{
 			id: 4,
 			name: __( 'Hoodie with Logo', 'woocommerce' ),
+			slug: 'hoodie-with-logo',
 			parent: 0,
 			type: 'simple',
 			variation: '',
@@ -378,16 +369,14 @@ export const previewCart: CartResponse = {
 			description: __( 'Polo', 'woocommerce' ),
 			on_sale: false,
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
-				price: displayWithTax ? '4500' : '4250',
-				regular_price: displayWithTax ? '4500' : '4250',
-				sale_price: displayWithTax ? '4500' : '4250',
+				...API_SITE_CURRENCY,
+				price: displayForMinorUnit( displayWithTax ? '4500' : '4250' ),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '4500' : '4250'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '4500' : '4250'
+				),
 				price_range: null,
 			},
 			price_html: '',
@@ -427,6 +416,7 @@ export const previewCart: CartResponse = {
 		{
 			id: 5,
 			name: __( 'Hoodie with Pocket', 'woocommerce' ),
+			slug: 'hoodie-with-pocket',
 			parent: 0,
 			type: 'simple',
 			variation: '',
@@ -436,16 +426,14 @@ export const previewCart: CartResponse = {
 			description: __( 'Hoodie with Pocket', 'woocommerce' ),
 			on_sale: true,
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
-				price: displayWithTax ? '3500' : '3250',
-				regular_price: displayWithTax ? '4500' : '4250',
-				sale_price: displayWithTax ? '3500' : '3250',
+				...API_SITE_CURRENCY,
+				price: displayForMinorUnit( displayWithTax ? '3500' : '3250' ),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '4500' : '4250'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '3500' : '3250'
+				),
 				price_range: null,
 			},
 			price_html: '',
@@ -486,6 +474,7 @@ export const previewCart: CartResponse = {
 		{
 			id: 6,
 			name: __( 'T-Shirt', 'woocommerce' ),
+			slug: 't-shirt',
 			parent: 0,
 			type: 'simple',
 			variation: '',
@@ -495,16 +484,14 @@ export const previewCart: CartResponse = {
 			description: __( 'T-Shirt', 'woocommerce' ),
 			on_sale: false,
 			prices: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
-				price: displayWithTax ? '1800' : '1500',
-				regular_price: displayWithTax ? '1800' : '1500',
-				sale_price: displayWithTax ? '1800' : '1500',
+				...API_SITE_CURRENCY,
+				price: displayForMinorUnit( displayWithTax ? '1800' : '1500' ),
+				regular_price: displayForMinorUnit(
+					displayWithTax ? '1800' : '1500'
+				),
+				sale_price: displayForMinorUnit(
+					displayWithTax ? '1800' : '1500'
+				),
 				price_range: null,
 			},
 			price_html: '',
@@ -546,15 +533,9 @@ export const previewCart: CartResponse = {
 			id: 'fee',
 			name: __( 'Fee', 'woocommerce' ),
 			totals: {
-				currency_code: 'USD',
-				currency_symbol: '$',
-				currency_minor_unit: 2,
-				currency_decimal_separator: '.',
-				currency_thousand_separator: ',',
-				currency_prefix: '$',
-				currency_suffix: '',
-				total: '100',
-				total_tax: '20',
+				...API_SITE_CURRENCY,
+				total: displayForMinorUnit( '100' ),
+				total_tax: displayForMinorUnit( '20' ),
 			},
 		},
 	],
@@ -589,28 +570,22 @@ export const previewCart: CartResponse = {
 		phone: '',
 	},
 	totals: {
-		currency_code: 'USD',
-		currency_symbol: '$',
-		currency_minor_unit: 2,
-		currency_decimal_separator: '.',
-		currency_thousand_separator: ',',
-		currency_prefix: '$',
-		currency_suffix: '',
-		total_items: '4000',
-		total_items_tax: '800',
-		total_fees: '100',
-		total_fees_tax: '20',
+		...API_SITE_CURRENCY,
+		total_items: displayForMinorUnit( '4000' ),
+		total_items_tax: displayForMinorUnit( '800' ),
+		total_fees: displayForMinorUnit( '100' ),
+		total_fees_tax: displayForMinorUnit( '20' ),
 		total_discount: '0',
 		total_discount_tax: '0',
 		total_shipping: '0',
 		total_shipping_tax: '0',
-		total_tax: '820',
-		total_price: '4920',
+		total_tax: displayForMinorUnit( '820' ),
+		total_price: displayForMinorUnit( '4920' ),
 		tax_lines: [
 			{
 				name: __( 'Sales tax', 'woocommerce' ),
 				rate: '20%',
-				price: '820',
+				price: displayForMinorUnit( '820' ),
 			},
 		],
 	},

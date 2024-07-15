@@ -18,14 +18,14 @@ const SaveSectionWrapper = styled( SettingsSection )`
 `;
 
 const SaveSettings = () => {
-	const { isSaving, save } = useSettingsContext();
+	const { isSaving, save, isDirty } = useSettingsContext();
 
 	return (
 		<SaveSectionWrapper className={ 'submit' }>
 			<Button
 				variant="primary"
 				isBusy={ isSaving }
-				disabled={ isSaving }
+				disabled={ isSaving || ! isDirty }
 				onClick={ (
 					event: React.MouseEvent< HTMLButtonElement, MouseEvent >
 				) => {

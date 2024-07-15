@@ -298,7 +298,7 @@ export const createReducer = (
 					};
 
 				case TYPES.UPDATE_ITEM_ERROR:
-					const upateItemErrorRequestId = getRequestIdentifier(
+					const updateItemErrorRequestId = getRequestIdentifier(
 						payload.errorType,
 						payload.key,
 						payload.query
@@ -307,11 +307,11 @@ export const createReducer = (
 						...state,
 						errors: {
 							...state.errors,
-							[ upateItemErrorRequestId ]: payload.error,
+							[ updateItemErrorRequestId ]: payload.error,
 						},
 						requesting: {
 							...state.requesting,
-							[ upateItemErrorRequestId ]: false,
+							[ updateItemErrorRequestId ]: false,
 						},
 					};
 

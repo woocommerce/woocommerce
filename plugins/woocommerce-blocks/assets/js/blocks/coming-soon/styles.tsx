@@ -122,7 +122,7 @@ export const generateStyles = ( color = '#bea0f2' ) => {
     .woocommerce-coming-soon-header {
         height: 40px;
     }
-    .woocommerce-coming-soon-banner {
+    h1.wp-block-heading.woocommerce-coming-soon-banner {
         font-size: clamp(27px, 1.74rem + ((1vw - 3px) * 2), 48px);
         font-weight: 400;
         line-height: 58px;

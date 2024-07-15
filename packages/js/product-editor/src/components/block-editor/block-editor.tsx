@@ -297,6 +297,7 @@ export function BlockEditor( {
 			settings,
 			productTemplate,
 			productFormTemplate,
+			productId,
 		]
 	);
 

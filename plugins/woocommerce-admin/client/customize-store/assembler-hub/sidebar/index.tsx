@@ -28,7 +28,7 @@ import {
 } from '../components/sidebar';
 import { SidebarNavigationScreenLogo } from './sidebar-navigation-screen-logo';
 import { isPatternToolkitFullComposabilityFeatureFlagEnabled } from '../utils/is-full-composability-enabled';
-import { SidebarNavigationScreenHomepagePTK } from './sidebar-navigation-screen-homepage-ptk';
+import { SidebarNavigationScreenHomepagePTK } from './sidebar-navigation-screen-homepage-ptk/sidebar-navigation-screen-homepage-ptk';
 
 const getComponentByPathParams = (
 	params: string,

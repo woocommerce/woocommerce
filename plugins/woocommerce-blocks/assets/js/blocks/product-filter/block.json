@@ -33,6 +33,6 @@
 			"isPreview": true
 		}
 	},
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

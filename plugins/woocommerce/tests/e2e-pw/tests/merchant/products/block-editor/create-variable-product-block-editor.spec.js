@@ -8,6 +8,11 @@ const {
 } = require( '../../../../utils/product-block-editor' );
 
 const { variableProducts: utils } = require( '../../../../utils' );
+const attributes = require( './fixtures/attributes' );
+const tabs = require( './data/tabs' );
+const {
+	waitForGlobalAttributesLoaded,
+} = require( './helpers/wait-for-global-attributes-loaded' );
 
 const {
 	createVariableProduct,
@@ -26,48 +31,18 @@ const productData = {
 	summary: 'This is a product summary',
 };
 
-const attributesData = {
-	name: 'Size',
-	terms: [
-		{
-			name: 'Small',
-			slug: 'small',
-		},
-		{
-			name: 'Medium',
-			slug: 'medium',
-		},
-		{
-			name: 'Large',
-			slug: 'large',
-		},
-	],
-};
+const sizeAttribute = attributes.find(
+	( attribute ) => attribute.name === 'Size'
+);
 
-const tabs = [
-	{
-		name: 'General',
-		noteText:
-			"This product has options, such as size or color. You can manage each variation's images, downloads, and other details individually.",
-	},
-	{
-		name: 'Inventory',
-		noteText:
-			"This product has options, such as size or color. You can now manage each variation's inventory and other details individually.",
-	},
-	{
-		name: 'Shipping',
-		noteText:
-			"This product has options, such as size or color. You can now manage each variation's shipping settings and other details individually.",
-	},
-];
+const termsLength = sizeAttribute.terms.length;
 
 let productId_editVariations,
 	productId_deleteVariations,
 	productId_singleVariation;
 
 test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
-	test.describe( 'Create variable product', () => {
+	test.describe( 'Create variable products', () => {
 		test.beforeAll( async ( { browser } ) => {
 			productId_editVariations = await createVariableProduct(
 				productAttributes
@@ -124,7 +99,8 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 					.click();
 			} );
 
-			await test.step( 'Add attribute options', async () => {
+			let newAttrData;
+			await test.step( 'Create global attribute', async () => {
 				await page
 					.getByRole( 'heading', { name: 'Add variation options' } )
 					.isVisible();
@@ -132,30 +108,17 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 				await page.waitForLoadState( 'domcontentloaded' );
 
 				/*
-				 * AttributeTableRow is the row that contains
-				 * the attribute name and the options (terms).
-				 */
-				const rowSelector =
-					'.woocommerce-new-attribute-modal__table-row';
-
-				/*
 				 * Check the app loads the attributes,
 				 * based on the Spinner visibility.
 				 */
-				const spinnerLocator = page.locator(
-					`${ rowSelector } .components-spinner`
-				);
-				await spinnerLocator.waitFor( {
-					state: 'visible',
-				} );
-				await spinnerLocator.waitFor( { state: 'hidden' } );
+				await waitForGlobalAttributesLoaded( page );
 
 				// Attribute combobox input
 				const attributeInputLocator = page.locator(
 					'input[aria-describedby^="components-form-token-suggestions-howto-combobox-control"]'
 				);
 
-				await attributeInputLocator.fill( attributesData.name );
+				await attributeInputLocator.fill( sizeAttribute.name );
 
 				await page.locator( 'text=Create "Size"' ).click();
 
@@ -165,12 +128,14 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 						response
 							.url()
 							.includes(
-								`wp-json/wc/v3/products/attributes?name=${ attributesData.name }&generate_slug=true`
+								`wp-json/wc/v3/products/attributes?name=${ sizeAttribute.name }&generate_slug=true`
 							) && response.status() === 201
 				);
 
-				const newAttrData = await newAttrResponse.json();
+				newAttrData = await newAttrResponse.json();
+			} );
 
+			await test.step( 'Add new terms to the attribute', async () => {
 				const FormTokenFieldLocator = page.locator(
 					'td.woocommerce-new-attribute-modal__table-attribute-value-column'
 				);
@@ -180,7 +145,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 						'input[id^="components-form-token-input-"]'
 					);
 
-				for ( const term of attributesData.terms ) {
+				for ( const term of sizeAttribute.terms ) {
 					// Fill the input field with the option
 					await FormTokenFieldInputLocator.fill( term.name );
 					await FormTokenFieldInputLocator.press( 'Enter' );
@@ -199,27 +164,17 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 					);
 
 					/*
-					 * Check the option being added to the list,
-					 * by checking the token with validating state.
-					 */
-					const newValidatingTokenLocator =
-						FormTokenFieldLocator.locator( '.is-validating' );
-
-					await newValidatingTokenLocator.waitFor( {
-						state: 'visible',
-					} );
-
-					/*
 					 * Wait for the async POST request
 					 * that creates the new attribute term to finish.
 					 */
 					await page.waitForResponse( ( response ) => {
+						const urlToMatch = `/wp-json/wc/v3/products/attributes/${ newAttrData.id }/terms?name=${ term.name }&slug=${ term.slug }&_locale=user`;
+
 						return (
 							response
 								.url()
-								.includes(
-									`/wp-json/wc/v3/products/attributes/${ newAttrData.id }/terms?name=${ term.name }&slug=${ term.slug }&_locale=user`
-								) && response.status() === 201
+								.includes( encodeURI( urlToMatch ) ) &&
+							response.status() === 201
 						);
 					} );
 				}
@@ -235,7 +190,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 			await test.step( 'Add prices to variations', async () => {
 				await expect(
 					page.getByText(
-						'3 variations do not have prices. Variations that do not have prices will not be visible to customers.Set prices'
+						`${ termsLength } variations do not have prices. Variations that do not have prices will not be visible to customers.Set prices`
 					)
 				).toBeVisible();
 
@@ -249,10 +204,12 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 
 				await expect(
 					page.getByLabel( 'Dismiss this notice' )
-				).toContainText( '3 variations updated.' );
+				).toContainText( `${ termsLength } variations updated.` );
 
 				await expect(
-					page.getByRole( 'button', { name: 'Select all (3)' } )
+					page.getByRole( 'button', {
+						name: `Select all (${ termsLength })`,
+					} )
 				).toBeVisible();
 			} );
 
@@ -276,7 +233,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 
 				// Verify that the first message is the expected one
 				await expect( snackbarLocator.nth( 0 ) ).toHaveText(
-					`${ attributesData.terms.length } variations updated.`
+					`${ sizeAttribute.terms.length } variations updated.`
 				);
 
 				// Verify that the second message is the expected one
@@ -312,6 +269,16 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 
 			await getVariationsResponsePromise;
 
+			// Wait for response only to avoid flaky filling regular price below in Inventory tab
+			const waitResponse = page.waitForResponse(
+				( response ) =>
+					response
+						.url()
+						.includes(
+							'wp-json/wc-admin/options?options=woocommerce_dimension_unit'
+						) && response.status() === 200
+			);
+
 			await page
 				.locator( '.woocommerce-product-variations__table-body > div' )
 				.first()
@@ -323,15 +290,17 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 				.getByRole( 'tab', { name: 'General' } )
 				.click();
 
-			await page.getByLabel( 'Regular price', { exact: true } ).click();
-
 			await page
 				.getByLabel( 'Regular price', { exact: true } )
 				.waitFor( { state: 'visible' } );
 
+			await waitResponse;
+
+			await page.getByLabel( 'Regular price', { exact: true } ).click();
+
 			await page
 				.getByLabel( 'Regular price', { exact: true } )
-				.pressSequentially( '100' );
+				.fill( '100' );
 
 			await page
 				.locator( '.woocommerce-product-tabs' )

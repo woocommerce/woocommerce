@@ -2,7 +2,6 @@
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
-use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
 
 /**
  * CartUpdateCustomer class.

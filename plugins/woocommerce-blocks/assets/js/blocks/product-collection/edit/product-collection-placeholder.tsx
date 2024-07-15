@@ -19,7 +19,6 @@ import type {
 	CollectionName,
 	ProductCollectionEditComponentProps,
 } from '../types';
-import Icon from '../icon';
 
 const ProductCollectionPlaceholder = (
 	props: ProductCollectionEditComponentProps
@@ -47,10 +46,8 @@ const ProductCollectionPlaceholder = (
 		<div { ...blockProps }>
 			<Placeholder
 				className="wc-blocks-product-collection__placeholder"
-				icon={ Icon }
-				label={ __( 'Product Collection', 'woocommerce' ) }
 				instructions={ __(
-					"Choose a collection to get started. Don't worry, you can change and tweak this any time.",
+					'What products do you want to show?',
 					'woocommerce'
 				) }
 			>
