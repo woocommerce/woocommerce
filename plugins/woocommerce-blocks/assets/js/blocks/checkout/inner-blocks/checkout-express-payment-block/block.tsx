@@ -12,10 +12,12 @@ const Block = ( {
 	className,
 	buttonHeight,
 	buttonBorderRadius,
+	showButtonStyles,
 }: {
 	className?: string;
 	buttonHeight: string;
 	buttonBorderRadius: string;
+	showButtonStyles: boolean;
 } ): JSX.Element | null => {
 	const { cartNeedsPayment } = useStoreCart();
 
@@ -28,6 +30,7 @@ const Block = ( {
 			<CheckoutExpressPayment
 				buttonHeight={ buttonHeight }
 				buttonBorderRadius={ buttonBorderRadius }
+				showButtonStyles={ showButtonStyles }
 			/>
 		</div>
 	);

@@ -32,7 +32,7 @@ export const Edit = ( {
 		className?: string;
 		buttonHeight: string;
 		showButtonStyles: boolean;
-		buttonBorderRadius: number;
+		buttonBorderRadius: string;
 		lock: {
 			move: boolean;
 			remove: boolean;
@@ -136,6 +136,7 @@ export const Edit = ( {
 			<Block
 				buttonHeight={ buttonHeight }
 				buttonBorderRadius={ buttonBorderRadius }
+				showButtonStyles={ showButtonStyles }
 			/>
 		</div>
 	);

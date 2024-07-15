@@ -26,20 +26,25 @@ import { STORE_KEY as PAYMENT_STORE_KEY } from '../../../data/payment/constants'
 const ExpressPaymentMethods = ( {
 	buttonHeight,
 	buttonBorderRadius,
+	showButtonStyles,
 }: {
 	buttonHeight: string;
 	buttonBorderRadius: string;
+	showButtonStyles: boolean;
 } ) => {
 	const { isEditor } = useEditorContext();
 
 	const { hasDarkControls } = useCheckoutBlockContext();
 
-	// Get attributes set on the server
-	const buttonAttributes = {
-		height: buttonHeight || '48',
-		borderRadius: buttonBorderRadius || '4',
-		darkMode: hasDarkControls,
-	};
+	// API for passing styles to express payment buttons
+	const buttonAttributes = showButtonStyles
+		? {
+				height: buttonHeight,
+				borderRadius: buttonBorderRadius,
+				darkMode: hasDarkControls,
+		  }
+		: undefined;
+
 	const { activePaymentMethod, paymentMethodData } = useSelect(
 		( select ) => {
 			const store = select( PAYMENT_STORE_KEY );

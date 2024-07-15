@@ -18,9 +18,11 @@ import './style.scss';
 const CheckoutExpressPayment = ( {
 	buttonHeight,
 	buttonBorderRadius,
+	showButtonStyles,
 }: {
 	buttonHeight: string;
 	buttonBorderRadius: string;
+	showButtonStyles: boolean;
 } ) => {
 	const {
 		isCalculating,
@@ -105,6 +107,7 @@ const CheckoutExpressPayment = ( {
 						<ExpressPaymentMethods
 							buttonHeight={ buttonHeight }
 							buttonBorderRadius={ buttonBorderRadius }
+							showButtonStyles={ showButtonStyles }
 						/>
 					</div>
 				</div>
