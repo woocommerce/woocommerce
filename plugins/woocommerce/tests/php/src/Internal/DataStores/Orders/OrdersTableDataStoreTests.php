@@ -3525,7 +3525,6 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->sut->update( $order );
 		$order->save();
 
-
 		$this->assertEquals( 1, $new_count );
 
 		remove_action( 'woocommerce_new_order', $callback );

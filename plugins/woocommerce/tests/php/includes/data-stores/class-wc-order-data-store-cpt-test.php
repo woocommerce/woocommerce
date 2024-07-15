@@ -535,7 +535,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order_data_store_cpt->update( $order );
 		$order->save();
 
-
 		$this->assertEquals( 1, $new_count );
 
 		remove_action( 'woocommerce_new_order', $callback );
