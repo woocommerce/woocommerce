@@ -96,7 +96,13 @@ export function Edit( {
 		`dimensions_width-${ clientId }`,
 		async function dimensionsWidthValidator() {
 			if ( dimensions?.width && +dimensions.width <= 0 ) {
-				return __( 'Width must be greater than zero.', 'woocommerce' );
+				return {
+					message: __(
+						'Width must be greater than zero.',
+						'woocommerce'
+					),
+					context: clientId,
+				};
 			}
 		},
 		[ dimensions?.width ]
@@ -110,7 +116,13 @@ export function Edit( {
 		`dimensions_length-${ clientId }`,
 		async function dimensionsLengthValidator() {
 			if ( dimensions?.length && +dimensions.length <= 0 ) {
-				return __( 'Length must be greater than zero.', 'woocommerce' );
+				return {
+					message: __(
+						'Length must be greater than zero.',
+						'woocommerce'
+					),
+					context: clientId,
+				};
 			}
 		},
 		[ dimensions?.length ]
@@ -124,7 +136,13 @@ export function Edit( {
 		`dimensions_height-${ clientId }`,
 		async function dimensionsHeightValidator() {
 			if ( dimensions?.height && +dimensions.height <= 0 ) {
-				return __( 'Height must be greater than zero.', 'woocommerce' );
+				return {
+					message: __(
+						'Height must be greater than zero.',
+						'woocommerce'
+					),
+					context: clientId,
+				};
 			}
 		},
 		[ dimensions?.height ]
@@ -138,7 +156,13 @@ export function Edit( {
 		`weight-${ clientId }`,
 		async function weightValidator() {
 			if ( weight && +weight <= 0 ) {
-				return __( 'Weight must be greater than zero.', 'woocommerce' );
+				return {
+					message: __(
+						'Weight must be greater than zero.',
+						'woocommerce'
+					),
+					context: clientId,
+				};
 			}
 		},
 		[ weight ]
