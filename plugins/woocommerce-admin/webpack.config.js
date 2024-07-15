@@ -126,10 +126,7 @@ const webpackConfig = {
 					// See https://github.com/woocommerce/woocommerce-admin/pull/1004 and https://github.com/Automattic/woocommerce-services/pull/1522
 					amd: false,
 				},
-				exclude: [
-					// Exclude node_modules/.pnpm
-					/node_modules(\/|\\)\.pnpm(\/|\\)/,
-				],
+				exclude: /node_modules|build/,
 				use: {
 					loader: 'babel-loader',
 					options: {
