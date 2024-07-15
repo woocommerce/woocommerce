@@ -103,6 +103,7 @@ const getCoreConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							],
+							cacheDirectory: true,
 						},
 					},
 				},
@@ -674,7 +675,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 					test: /\.(j|t)sx?$/,
 					exclude: /node_modules/,
 					use: {
-						loader: 'babel-loader?cacheDirectory',
+						loader: 'babel-loader',
 						options: {
 							presets: [
 								[
@@ -697,6 +698,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 									: false,
 								'@babel/plugin-proposal-optional-chaining',
 							].filter( Boolean ),
+							cacheDirectory: true,
 						},
 					},
 				},
@@ -831,7 +833,7 @@ const getStylingConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					use: {
-						loader: 'babel-loader?cacheDirectory',
+						loader: 'babel-loader',
 						options: {
 							presets: [ '@wordpress/babel-preset-default' ],
 							plugins: [
@@ -843,6 +845,7 @@ const getStylingConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
+							cacheDirectory: true,
 						},
 					},
 				},
