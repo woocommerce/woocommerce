@@ -236,11 +236,7 @@
 						"tests/e2e-pw/**"
 					],
 					"testEnv": {
-						"start": "env:test",
-						"config": {
-							"phpVersion": "8.0",
-							"wpVersion": "latest"
-						}
+						"start": "env:test"
 					},
 					"events": [
 						"pull_request",
