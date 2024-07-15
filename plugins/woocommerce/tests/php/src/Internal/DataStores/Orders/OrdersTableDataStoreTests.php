@@ -3524,6 +3524,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( 0, $new_count );
 
 		$this->sut->update( $order );
+		$order->save();
 
 		$this->assertEquals( 1, $new_count );
 
