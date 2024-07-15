@@ -32,11 +32,15 @@
 		appearance: none;
 		background: none;
 		padding: em($gap) em($gap-smaller) 0;
-		color: currentColor;
+		color: $input-text-active;
 
 		&:focus {
 			outline: 0;
-			box-shadow: 0 0 0 1px currentColor;
+			box-shadow: 0 0 0 1px inherit;
+		}
+
+		.has-dark-controls & {
+			color: $input-text-dark;
 		}
 	}
 
@@ -49,7 +53,7 @@
 		top: 0;
 		transform-origin: top left;
 		transition: all 200ms ease;
-		color: currentColor;
+		color: $input-text-active;
 		z-index: 1;
 		margin: 0;
 		overflow: hidden;
@@ -73,6 +77,10 @@
 		top: 50%;
 		right: $gap-small;
 		pointer-events: none;
-		fill: currentColor;
+		fill: $input-text-active;
+
+		.has-dark-controls & {
+			fill: $input-text-dark;
+		}
 	}
 }
