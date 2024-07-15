@@ -229,10 +229,13 @@ class WC_Helper_Admin {
 			return;
 		}
 
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_check_subscription_modal_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_product_usage_notice_scripts' ) );
 	}
 
-	public static function enqueue_check_subscription_modal_scripts() {
+	/**
+	 * Enqueue scripts needed to display product usage notice (or modal).
+	 */
+	public static function enqueue_product_usage_notice_scripts() {
 		WCAdminAssets::register_style( 'woo-check-subscription', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-check-subscription', true );
 
