@@ -860,7 +860,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 			$this->error(
 				'product_invalid_global_unique_id',
-				__( 'Invalid or duplicated Unique ID.', 'woocommerce' ),
+				__( 'Invalid or duplicated GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
 				400,
 				array(
 					'resource_id' => $global_unique_id_found,

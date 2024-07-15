@@ -20,6 +20,7 @@ import { TextBlockAttributes } from './types';
 
 export function Edit( {
 	attributes,
+	clientId,
 	context: { postType },
 }: ProductEditorBlockEditProps< TextBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
@@ -127,7 +128,10 @@ export function Edit( {
 			input.setCustomValidity( customErrorMessage );
 
 			if ( ! input.validity.valid ) {
-				return input.validationMessage;
+				return {
+					message: customErrorMessage,
+					context: clientId,
+				};
 			}
 		},
 		[ type, required, pattern, minLength, maxLength, min, max ]
