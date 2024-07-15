@@ -262,6 +262,9 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'orders_count', $properties );
 	}
 
+	/**
+	 * Create sample taxes.
+	 */
 	protected function create_sample_taxes() {
 		global $wpdb;
 		wp_set_current_user( $this->user );
