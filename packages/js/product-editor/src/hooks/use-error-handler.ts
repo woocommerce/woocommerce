@@ -65,9 +65,7 @@ function getErrorPropsWithActions(
 					navigateTo( {
 						url: getUrl( errorContext ),
 					} );
-					setTimeout( () => {
-						focusByValidatorId( validatorId );
-					}, 100 );
+					focusByValidatorId( validatorId );
 				},
 			},
 		],
