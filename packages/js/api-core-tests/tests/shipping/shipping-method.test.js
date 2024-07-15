@@ -39,10 +39,7 @@ describe( 'Shipping methods API tests', () => {
 			expect( body.method_id ).toEqual( methodId );
 			expect( body.method_title ).toEqual( methodTitle );
 			expect( body.enabled ).toEqual( true );
-
-			if ( [ 'flat_rate', 'local_pickup' ].includes( methodId ) ) {
-				expect( body.settings.cost.value ).toEqual( cost );
-			}
+			expect( body.settings.cost.value || '' ).toEqual( cost || '' );
 
 			// Cleanup: Delete the shipping method
 			await shippingMethodsApi.delete.shippingMethod(

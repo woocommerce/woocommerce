@@ -10,7 +10,10 @@ import CountryInput from './country-input';
 import type { CountryInputProps } from './CountryInputProps';
 
 const BillingCountryInput = ( props: CountryInputProps ): JSX.Element => {
-	return <CountryInput countries={ ALLOWED_COUNTRIES } { ...props } />;
+	//  TODO - are errorMessage and errorId still relevant when select always has a value?
+	const { errorMessage: _, errorId: __, ...restOfProps } = props;
+
+	return <CountryInput countries={ ALLOWED_COUNTRIES } { ...restOfProps } />;
 };
 
 export default BillingCountryInput;

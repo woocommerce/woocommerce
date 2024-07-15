@@ -73,6 +73,16 @@ const paymentGatewaySuggestions = [
 		recommendation_priority: 1,
 	},
 	{
+		id: 'woocommerce_payments:bnpl',
+		title: 'Activate BNPL instantly on WooPayments',
+		content:
+			'The world’s favorite buy now, pay later options and many more are right at your fingertips with WooPayments — all from one dashboard, without needing multiple extensions and logins.',
+		image: 'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/wcpay-bnpl.svg',
+		plugins: [ 'woocommerce-payments' ],
+		is_visible: true,
+		recommendation_priority: 1,
+	},
+	{
 		id: 'eway',
 		title: 'Eway',
 		content:
@@ -86,7 +96,7 @@ const paymentGatewaySuggestions = [
 ];
 
 const paymentGatewaySuggestionsWithoutWCPay = paymentGatewaySuggestions.filter(
-	( p ) => p.title !== 'WooPayments'
+	( p ) => ! p.id.startsWith( 'woocommerce_payments' )
 );
 
 describe( 'PaymentGatewaySuggestions', () => {
@@ -131,6 +141,11 @@ describe( 'PaymentGatewaySuggestions', () => {
 				)
 				.textContent.includes( 'WooPayments' )
 		).toBe( true );
+
+		// WCPay BNPL suggestion should not be shown since WCPay is shown.
+		expect(
+			container.querySelector( '.woocommerce-wcpay-bnpl-suggestion' )
+		).toBeFalsy();
 	} );
 
 	test( 'should render all payment gateways except WCPay', () => {
@@ -172,7 +187,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		] );
 	} );
 
-	test( 'should the payment gateway offline options at the bottom', () => {
+	test( 'should render the payment gateway offline options at the bottom', () => {
 		const onComplete = jest.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
@@ -215,6 +230,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 					image: 'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/paypal.png',
 					plugins: [ 'woocommerce-paypal-payments' ],
 					is_visible: true,
+					settings_url: 'http://example.com',
 				},
 			],
 		} ) );
@@ -229,7 +245,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		expect( getByText( 'Finish setup' ) ).toBeInTheDocument();
 	} );
 
-	test( 'should show "category_additional" gateways after WCPay is set up', () => {
+	test( 'should show "category_additional" gateways and WCPay BNPL after WCPay is set up', () => {
 		const onComplete = jest.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
@@ -243,9 +259,10 @@ describe( 'PaymentGatewaySuggestions', () => {
 					plugins: [ 'woocommerce-payments' ],
 					is_visible: true,
 					needs_setup: false,
+					settings_url: 'http://example.com',
 				},
 			],
-			countryCode: 'US',
+			countryCode: 'US', // Country with WCPay BNPL.
 		} ) );
 
 		const { container } = render(
@@ -273,6 +290,11 @@ describe( 'PaymentGatewaySuggestions', () => {
 			'Cash on delivery',
 			'Direct bank transfer',
 		] );
+
+		// WCPay BNPL suggestion should be shown.
+		expect(
+			container.querySelector( '.woocommerce-wcpay-bnpl-suggestion' )
+		).toBeInTheDocument();
 	} );
 
 	test( 'should show "category_additional" gateways after a primary gateway (other than WCPay) is set up', () => {
@@ -291,6 +313,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 					image: 'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/paypal.png',
 					plugins: [ 'woocommerce-paypal-payments' ],
 					is_visible: true,
+					settings_url: 'http://example.com',
 				},
 			],
 			countryCode: 'US',
@@ -340,6 +363,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 					image: 'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/paypal.png',
 					plugins: [ 'woocommerce-paypal-payments' ],
 					is_visible: true,
+					settings_url: 'http://example.com',
 				},
 			],
 		} ) );
@@ -380,5 +404,42 @@ describe( 'PaymentGatewaySuggestions', () => {
 		expect(
 			recordEvent.mock.calls[ recordEvent.mock.calls.length - 1 ]
 		).toEqual( [ 'tasklist_payment_see_more', {} ] );
+	} );
+
+	test( 'should record event correctly when WCPay BNPL Get started is clicked', () => {
+		const onComplete = jest.fn();
+		const query = {};
+		useSelect.mockImplementation( () => ( {
+			isResolving: false,
+			getPaymentGateway: jest.fn(),
+			paymentGatewaySuggestions,
+			installedPaymentGateways: [
+				{
+					id: 'woocommerce_payments',
+					title: 'WooPayments',
+					plugins: [ 'woocommerce-payments' ],
+					is_visible: true,
+					needs_setup: false,
+					settings_url: 'http://example.com',
+				},
+			],
+			countryCode: 'US', // Country with WCPay BNPL.
+		} ) );
+
+		const { container } = render(
+			<PaymentGatewaySuggestions
+				onComplete={ onComplete }
+				query={ query }
+			/>
+		);
+
+		fireEvent.click(
+			container.querySelector(
+				'.woocommerce-wcpay-bnpl-suggestion__button'
+			)
+		);
+		expect(
+			recordEvent.mock.calls[ recordEvent.mock.calls.length - 1 ]
+		).toEqual( [ 'tasklist_payments_wcpay_bnpl_click' ] );
 	} );
 } );

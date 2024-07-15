@@ -24,7 +24,7 @@ export default function Delete( {
 		<ToolbarGroup>
 			<ToolbarButton
 				showTooltip={ true }
-				label={ __( 'Remove', 'woocommerce' ) }
+				label={ __( 'Delete', 'woocommerce' ) }
 				icon={ trash }
 				onClick={ () => {
 					removeBlock( clientId );
