@@ -143,17 +143,15 @@ export const Edit = ( {
 						} }
 					>
 						{ showPrice && (
-							<div className="wc-block-components-checkout-place-order-button__separator">
-								·
-							</div>
-						) }
-						{ showPrice && (
-							<div className="wc-block-components-checkout-place-order-button__price">
-								<FormattedMonetaryAmount
-									value={ cartTotals.total_price }
-									currency={ totalsCurrency }
-								/>
-							</div>
+							<>
+								<div className="wc-block-components-checkout-place-order-button__separator"></div>
+								<div className="wc-block-components-checkout-place-order-button__price">
+									<FormattedMonetaryAmount
+										value={ cartTotals.total_price }
+										currency={ totalsCurrency }
+									/>
+								</div>
+							</>
 						) }
 					</EditableButton>
 				</div>
