@@ -94,10 +94,17 @@ class Checkout extends AbstractBlock {
 	 * @return array|string
 	 */
 	protected function get_block_type_script( $key = null ) {
+		$dependencies = [];
+
+		// Load password strength meter script asynchronously if needed.
+		if ( ! is_user_logged_in() && 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
+			$dependencies[] = 'zxcvbn-async';
+		}
+
 		$script = [
 			'handle'       => 'wc-' . $this->block_name . '-block-frontend',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-frontend' ),
-			'dependencies' => [],
+			'dependencies' => $dependencies,
 		];
 		return $key ? $script[ $key ] : $script;
 	}
