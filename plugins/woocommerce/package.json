@@ -104,7 +104,7 @@
 			},
 			"tests": [
 				{
-					"name": "PHP: 7.4 WP: latest",
+					"name": "PHP: 8.0 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
@@ -122,7 +122,7 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "7.4",
+							"phpVersion": "8.0",
 							"wpVersion": "latest"
 						}
 					},
@@ -132,7 +132,7 @@
 					]
 				},
 				{
-					"name": "PHP: 8.0 WP: latest - 1",
+					"name": "PHP: 7.4 WP: latest - 1",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
@@ -150,7 +150,6 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.0",
 							"wpVersion": "latest-1"
 						}
 					},
@@ -160,7 +159,7 @@
 					]
 				},
 				{
-					"name": "PHP: 8.0 WP: latest - 2",
+					"name": "PHP: 7.4 WP: latest - 2",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
@@ -178,7 +177,6 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.0",
 							"wpVersion": "latest-2"
 						}
 					},
@@ -188,7 +186,7 @@
 					]
 				},
 				{
-					"name": "PHP: 8.0 WP: nightly",
+					"name": "PHP: 7.4 WP: nightly",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"optional": true,
@@ -207,7 +205,6 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.0",
 							"wpVersion": "nightly"
 						}
 					},
