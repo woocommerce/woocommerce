@@ -15,15 +15,7 @@ import { useSelect } from '@wordpress/data';
 import ExpressPaymentMethods from '../express-payment-methods';
 import './style.scss';
 
-const CheckoutExpressPayment = ( {
-	buttonHeight,
-	buttonBorderRadius,
-	showButtonStyles,
-}: {
-	buttonHeight: string;
-	buttonBorderRadius: string;
-	showButtonStyles: boolean;
-} ) => {
+const CheckoutExpressPayment = () => {
 	const {
 		isCalculating,
 		isProcessing,
@@ -104,11 +96,7 @@ const CheckoutExpressPayment = ( {
 						<StoreNoticesContainer
 							context={ noticeContexts.EXPRESS_PAYMENTS }
 						/>
-						<ExpressPaymentMethods
-							buttonHeight={ buttonHeight }
-							buttonBorderRadius={ buttonBorderRadius }
-							showButtonStyles={ showButtonStyles }
-						/>
+						<ExpressPaymentMethods />
 					</div>
 				</div>
 			</LoadingMask>

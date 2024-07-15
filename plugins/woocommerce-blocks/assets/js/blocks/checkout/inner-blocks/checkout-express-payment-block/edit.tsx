@@ -23,6 +23,7 @@ import clsx from 'clsx';
  */
 import Block from './block';
 import './editor.scss';
+import { ExpressCheckoutContext } from './context';
 
 export const Edit = ( {
 	attributes,
@@ -133,11 +134,11 @@ export const Edit = ( {
 					{ showControls() }
 				</PanelBody>
 			</InspectorControls>
-			<Block
-				buttonHeight={ buttonHeight }
-				buttonBorderRadius={ buttonBorderRadius }
-				showButtonStyles={ showButtonStyles }
-			/>
+			<ExpressCheckoutContext.Provider
+				value={ { showButtonStyles, buttonHeight, buttonBorderRadius } }
+			>
+				<Block />
+			</ExpressCheckoutContext.Provider>
 		</div>
 	);
 };
