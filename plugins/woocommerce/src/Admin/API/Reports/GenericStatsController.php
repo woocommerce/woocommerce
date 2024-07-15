@@ -46,7 +46,6 @@ abstract class GenericStatsController extends GenericController {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
-
 		return $params;
 	}
 
