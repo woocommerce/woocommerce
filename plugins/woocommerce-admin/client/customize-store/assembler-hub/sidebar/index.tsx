@@ -12,7 +12,7 @@ import { memo, useCallback, useContext } from '@wordpress/element';
 import { SidebarNavigationScreenColorPalette } from './sidebar-navigation-screen-color-palette';
 import { SidebarNavigationScreenFooter } from './sidebar-navigation-screen-footer';
 import { SidebarNavigationScreenHeader } from './sidebar-navigation-screen-header';
-import { SidebarNavigationScreenHomepage } from './sidebar-navigation-screen-homepage-ptk/sidebar-navigation-screen-homepage';
+import { SidebarNavigationScreenHomepage } from './sidebar-navigation-screen-homepage';
 import { SidebarNavigationScreenMain } from './sidebar-navigation-screen-main';
 import { SidebarNavigationScreenTypography } from './sidebar-navigation-screen-typography';
 // import { SidebarNavigationScreenPages } from './sidebar-navigation-screen-pages';
@@ -28,7 +28,7 @@ import {
 } from '../components/sidebar';
 import { SidebarNavigationScreenLogo } from './sidebar-navigation-screen-logo';
 import { isPatternToolkitFullComposabilityFeatureFlagEnabled } from '../utils/is-full-composability-enabled';
-import { SidebarNavigationScreenHomepagePTK } from './sidebar-navigation-screen-homepage-ptk';
+import { SidebarNavigationScreenHomepagePTK } from './sidebar-navigation-screen-homepage-ptk/sidebar-navigation-screen-homepage-ptk';
 
 const getComponentByPathParams = (
 	params: string,
