@@ -622,6 +622,7 @@ class Checkout extends AbstractCartRoute {
 	 * @param string $user_email The email address to use for the new account.
 	 * @param string $first_name The first name to use for the new account.
 	 * @param string $last_name  The last name to use for the new account.
+	 * @param string $password   The password to use for the new account. If empty, a password will be generated.
 	 *
 	 * @return int User id if successful
 	 */
