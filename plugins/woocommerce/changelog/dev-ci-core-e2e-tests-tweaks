@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+CI: Re-group PHPUnit and core E2E jobs.
