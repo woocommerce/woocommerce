@@ -204,13 +204,13 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$current_status = substr( $current_status, 3 );
 		}
 
-		$nonTriggeringOrderStatuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft', 'refunded', 'failed', 'cancelled');
+		$non_triggering_order_statuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft', 'refunded', 'failed', 'cancelled');
 
 		// This hook should be fired only if the new status is not one of the non-triggering statuses and the previous status was one of the non-triggering statuses.
 		if (
 			$current_status !== $previous_status
-			&& ! in_array( $current_status, $nonTriggeringOrderStatuses, true )
-			&& in_array( $previous_status, $nonTriggeringOrderStatuses, true )
+			&& ! in_array( $current_status, $non_triggering_order_statuses, true )
+			&& in_array( $previous_status, $non_triggering_order_statuses, true )
 		) {
 			do_action( 'woocommerce_new_order', $order->get_id(), $order );
 			return;

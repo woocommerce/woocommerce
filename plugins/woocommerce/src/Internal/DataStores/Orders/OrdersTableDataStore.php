@@ -2621,14 +2621,14 @@ FROM $order_meta_table
 		$order->apply_changes();
 		$this->clear_caches( $order );
 
-		$nonTriggeringOrderStatuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft', 'refunded', 'failed', 'cancelled');
+		$non_triggering_order_statuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft', 'refunded', 'failed', 'cancelled');
 
 		// For backwards compatibility, this hook should be fired only if the new status is not one of the non-triggering statuses and the previous status was one of the non-triggering statuses.
 		if (
 			! empty( $changes['status'] )
 			&& $changes['status'] !== $previous_status
-			&& ! in_array( $changes['status'], $nonTriggeringOrderStatuses, true )
-			&& in_array( $previous_status, $nonTriggeringOrderStatuses, true )
+			&& ! in_array( $changes['status'], $non_triggering_order_statuses, true )
+			&& in_array( $previous_status, $non_triggering_order_statuses, true )
 		) {
 			do_action( 'woocommerce_new_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			return;

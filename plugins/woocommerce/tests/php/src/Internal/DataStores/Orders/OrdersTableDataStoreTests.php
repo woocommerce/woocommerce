@@ -3474,7 +3474,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 		add_action( 'woocommerce_new_order', $callback );
 
-		$nonTriggeringOrderStatuses = array( 'checkout-draft', 'refunded', 'failed', 'cancelled' );
+		$non_triggering_order_statuses = array( 'checkout-draft', 'refunded', 'failed', 'cancelled' );
 
 		$orders_data_store = $this->sut;
 
@@ -3483,7 +3483,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 		$this->assertEquals( 0, $new_count );
 
-		foreach ( $nonTriggeringOrderStatuses as $status ) {
+		foreach ( $non_triggering_order_statuses as $status ) {
 			$order->set_status( $status );
 			$orders_data_store->update( $order );
 			$order->save();
@@ -3491,9 +3491,9 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 		$this->assertEquals( 0, $new_count );
 
-		$triggeringOrderStatuses = array( 'pending', 'on-hold', 'completed', 'processing' );
+		$triggering_order_statuses = array( 'pending', 'on-hold', 'completed', 'processing' );
 
-		foreach ( $triggeringOrderStatuses as $status ) {
+		foreach ( $triggering_order_statuses as $status ) {
 			$order->set_status( $status );
 			$orders_data_store->update( $order );
 			$order->set_status( 'checkout-draft' ); // Revert back to draft.
