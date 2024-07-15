@@ -141,7 +141,7 @@ woocommerce_blocks_env = ${ NODE_ENV }
 			},
 			minimizer: [
 				new TerserPlugin( {
-					parallel: 8,
+					parallel: true,
 					terserOptions: {
 						output: {
 							comments: /translators:/i,
@@ -247,7 +247,7 @@ const getMainConfig = ( options = {} ) => {
 			},
 			minimizer: [
 				new TerserPlugin( {
-					parallel: 8,
+					parallel: true,
 					terserOptions: {
 						output: {
 							comments: /translators:/i,
@@ -401,7 +401,7 @@ const getFrontConfig = ( options = {} ) => {
 			},
 			minimizer: [
 				new TerserPlugin( {
-					parallel: 8,
+					parallel: true,
 					terserOptions: {
 						output: {
 							comments: /translators:/i,
@@ -507,7 +507,7 @@ const getPaymentsConfig = ( options = {} ) => {
 			},
 			minimizer: [
 				new TerserPlugin( {
-					parallel: 8,
+					parallel: true,
 					terserOptions: {
 						output: {
 							comments: /translators:/i,
@@ -614,7 +614,7 @@ const getExtensionsConfig = ( options = {} ) => {
 			},
 			minimizer: [
 				new TerserPlugin( {
-					parallel: 8,
+					parallel: true,
 					terserOptions: {
 						output: {
 							comments: /translators:/i,
@@ -719,7 +719,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 			},
 			minimizer: [
 				new TerserPlugin( {
-					parallel: 8,
+					parallel: true,
 					terserOptions: {
 						output: {
 							comments: /translators:/i,
@@ -1091,7 +1091,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 			},
 			minimizer: [
 				new TerserPlugin( {
-					parallel: 8,
+					parallel: true,
 					terserOptions: {
 						output: {
 							comments: /translators:/i,
