@@ -38,7 +38,6 @@ const test = baseTest.extend( {
 		await api.delete( `coupons/${ coupon.id }`, { force: true } );
 	},
 } );
-test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'Coupon management', { tag: '@services' }, () => {
 	for ( const couponType of Object.keys( couponData ) ) {

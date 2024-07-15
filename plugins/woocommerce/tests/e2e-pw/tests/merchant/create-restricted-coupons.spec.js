@@ -95,7 +95,6 @@ const test = baseTest.extend( {
 		await api.delete( `products/${ product.id }`, { force: true } );
 	},
 } );
-test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'Restricted coupon management', { tag: '@services' }, () => {
 	for ( const couponType of Object.keys( couponData ) ) {

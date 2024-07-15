@@ -76,7 +76,6 @@ const test = baseTest.extend( {
 		} );
 	},
 } );
-test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'Merchant > Customer List', { tag: '@services' }, () => {
 	test.beforeEach( async ( { context } ) => {
