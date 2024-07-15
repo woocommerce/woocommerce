@@ -49,6 +49,7 @@ import {
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
 } from '../../utils/hero-pattern';
 import { useIsActiveNewNeutralVariation } from '../../hooks/use-is-active-new-neutral-variation';
+import { trackEvent } from '~/customize-store/tracking';
 
 /**
  * Adds a 'is-added' CSS class to each pattern preview element in the pattern list that matches a block's pattern name.
@@ -283,6 +284,11 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 			insertBlocks( cloneBlocks, insertableIndex, undefined, false );
 
 			blockToScroll.current = cloneBlocks[ 0 ].clientId;
+
+			trackEvent(
+				'customize_your_store_assembler_pattern_sidebar_click',
+				{ pattern: pattern.name }
+			);
 		},
 		[ insertBlocks, insertableIndex ]
 	);
@@ -316,8 +322,10 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 							`/customize-store/assembler-hub/homepage`,
 							{}
 						);
-
 						navigateTo( { url: homepageUrl } );
+						trackEvent(
+							'customize_your_store_assembler_pattern_sidebar_close'
+						);
 					} }
 					iconSize={ 18 }
 					icon={ close }
