@@ -1,6 +1,7 @@
 name: 'CI'
 on:
   pull_request:
+    types: [ opened, reopened, synchronize, ready_for_review ] # ready_for_review is required to run the tests that are skipped in draft mode
   push:
     branches:
       - 'trunk'
@@ -73,7 +74,6 @@ jobs:
             
             const child_process = require( 'node:child_process' );
             child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
-  
   
   project-lint-jobs:
     name: "Lint - ${{ matrix.projectName }} ${{ matrix.optional && ' (optional)' || ''}}"
