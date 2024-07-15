@@ -113,12 +113,25 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 		let timeoutId: ReturnType< typeof setTimeout >;
 
 		if ( ! isFirstRender.current && isEditing && fieldsRef.current ) {
-			const firstFieldKey = addressFormFields.fields[ 0 ].key;
+			const firstField = addressFormFields.fields.find(
+				( field ) => field.hidden === false
+			);
 
-			if ( firstFieldKey ) {
+			if ( ! firstField ) {
+				return;
+			}
+
+			const { id: firstFieldId } = createFieldProps(
+				firstField,
+				id || `${ instanceId }`,
+				addressType
+			);
+			const firstFieldEl = document.getElementById( firstFieldId );
+
+			if ( firstFieldEl ) {
 				// Focus the first field after a short delay to ensure the form is rendered.
 				timeoutId = setTimeout( () => {
-					fieldsRef.current[ firstFieldKey ]?.input?.focus();
+					firstFieldEl.focus();
 				}, 300 );
 			}
 		}
@@ -128,7 +141,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 		return () => {
 			clearTimeout( timeoutId );
 		};
-	}, [ isEditing, addressFormFields ] );
+	}, [ isEditing, addressFormFields, id, instanceId, addressType ] );
 
 	id = id || `${ instanceId }`;
 
