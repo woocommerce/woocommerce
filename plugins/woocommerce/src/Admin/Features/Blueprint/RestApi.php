@@ -44,9 +44,7 @@ class RestApi {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'import' ),
-					'permission_callback' => function () {
-						return true;
-					},
+					'permission_callback' => array( $this, 'check_permission' ),
 				),
 			)
 		);
@@ -58,9 +56,7 @@ class RestApi {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'export' ),
-					'permission_callback' => function () {
-						return true;
-					},
+					'permission_callback' => array( $this, 'check_permission' ),
 					'args'                => array(
 						'steps'         => array(
 							'description'       => 'A list of plugins to install',
@@ -87,6 +83,14 @@ class RestApi {
 				),
 			)
 		);
+	}
+
+	public function check_permission() {
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
 	}
 
 	/**
