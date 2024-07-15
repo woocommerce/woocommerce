@@ -9,7 +9,6 @@ config = {
 		{
 			name: 'default',
 			use: { ...devices[ 'Desktop Chrome' ] },
-			grepInvert: /@gutenberg/,
 		},
 	],
 };
