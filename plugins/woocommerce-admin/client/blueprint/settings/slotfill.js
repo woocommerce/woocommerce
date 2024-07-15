@@ -53,13 +53,14 @@ const Blueprint = () => {
 		} );
 
 		const link = document.createElement( 'a' );
+		let url = null;
 
 		if ( response.type === 'zip' ) {
 			link.href = response.data;
 			link.target = '_blank';
 		} else {
 			// Create a link element and trigger the download
-			const url = window.URL.createObjectURL(
+			url = window.URL.createObjectURL(
 				new Blob( [ JSON.stringify( response.data, null, 2 ) ] )
 			);
 			link.href = url;
@@ -69,6 +70,9 @@ const Blueprint = () => {
 		document.body.appendChild( link );
 		link.click();
 		document.body.removeChild( link );
+		if ( url ) {
+			window.URL.revokeObjectURL( url );
+		}
 		setExportEnabled( true );
 	};
 
