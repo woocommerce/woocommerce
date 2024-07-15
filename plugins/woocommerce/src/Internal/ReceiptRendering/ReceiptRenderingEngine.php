@@ -198,19 +198,35 @@ class ReceiptRenderingEngine {
 		 */
 		$data['css'] = apply_filters( 'woocommerce_printable_order_receipt_css', $css, $order );
 
-		ob_start();
-		include __DIR__ . '/Templates/order-receipt.php';
+		$default_template_path = __DIR__ . '/Templates/order-receipt.php';
+
 		/**
-		 * Filter to customize the rendered receipt template.
+		 * Filter the order receipt template path.
 		 *
-		 * @param string   $rendered_template The original rendered template.
-		 * @param array    $data The set of data that is used to render the receipt.
-		 * @param WC_Order $order The order for which the receipt is being generated.
-		 * @return string The updated rendered template.
-		 *
-		 * @since 9.1.0
+		 * @since 9.2.0
+		 * @hook wc_get_template
+		 * @param  string $template      The template path.
+		 * @param  string $template_name The template name.
+		 * @param  array  $args          The available data for the template.
+		 * @param string  $template_path The template path.
+		 * @param string  $default_path  The default template path.
 		 */
-		$rendered_template = apply_filters( 'woocommerce_printable_order_receipt_rendered_template', ob_get_contents(), $data, $order );
+		$template_path = apply_filters(
+			'wc_get_template',
+			$default_template_path,
+			'ReceiptRendering/order-receipt.php',
+			$data,
+			$default_template_path,
+			$default_template_path
+		);
+
+		if ( ! file_exists( $template_path ) ) {
+			$template_path = $default_template_path;
+		}
+
+		ob_start();
+		include $template_path;
+		$rendered_template = ob_get_contents();
 		ob_end_clean();
 
 		$file_name = $this->transient_files_engine->create_transient_file( $rendered_template, $expiration_date );
