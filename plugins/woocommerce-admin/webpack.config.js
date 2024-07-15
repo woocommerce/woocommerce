@@ -153,6 +153,7 @@ const webpackConfig = {
 								require.resolve( 'react-refresh/babel' ),
 						].filter( Boolean ),
 						cacheDir: true,
+						cacheCompression: false,
 					},
 				},
 			},
