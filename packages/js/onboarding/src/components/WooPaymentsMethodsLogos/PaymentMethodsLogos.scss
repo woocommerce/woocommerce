@@ -24,6 +24,17 @@
 	}
 }
 
-.wc_payment_gateways_wrapper .woocommerce-woopayments-payment-methods-logos {
-	padding: 0;
+.wc_payment_gateways_wrapper [data-gateway_id="pre_install_woocommerce_payments_promotion"] {
+	.woocommerce-woopayments-payment-methods-logos {
+		padding: 0;
+	}
+
+	@media only screen and (max-width: 768px) {
+		.wc-payment-gateway-method__name {
+			display: block;
+		}
+		.pre-install-payment-gateway__subtitle {
+			margin-left: 0;
+		}
+	}
 }
