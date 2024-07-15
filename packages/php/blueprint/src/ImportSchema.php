@@ -83,7 +83,7 @@ class ImportSchema {
 	 *
 	 * @return ImportSchema The created ImportSchema instance.
 	 */
-	public static function crate_from_zip( $zip_path ) {
+	public static function create_from_zip( $zip_path ) {
 		return new self( new ZipSchema( $zip_path ) );
 	}
 
