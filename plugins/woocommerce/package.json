@@ -132,7 +132,7 @@
 					]
 				},
 				{
-					"name": "PHP: 7.4 WP: latest - 1",
+					"name": "PHP WP: latest - 1",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
@@ -159,7 +159,7 @@
 					]
 				},
 				{
-					"name": "PHP: 7.4 WP: latest - 2",
+					"name": "PHP WP: latest - 2",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
@@ -186,7 +186,7 @@
 					]
 				},
 				{
-					"name": "PHP: 7.4 WP: nightly",
+					"name": "PHP WP: nightly",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"optional": true,
