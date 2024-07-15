@@ -29,7 +29,7 @@ import { useNumberInputProps } from '../../hooks/use-number-input-props';
 import { Label } from '../label/label';
 
 export type NumberProps = {
-	identifier?: string;
+	id?: string;
 	value: string;
 	onChange: ( selected: string ) => void;
 	label: string | JSX.Element;
@@ -53,7 +53,7 @@ const SHORT_DELAY = 100;
 export const NumberControl: React.FC< NumberProps > = forwardRef(
 	(
 		{
-			identifier,
+			id,
 			value,
 			onChange,
 			label,
@@ -76,12 +76,12 @@ export const NumberControl: React.FC< NumberProps > = forwardRef(
 			BaseControl,
 			'product_number_field'
 		) as string;
-		const id = identifier ?? instanceId;
+		const identifier = id ?? instanceId;
 		const [ isFocused, setIsFocused ] = useState( false );
 		const unfocusIfOutside = ( event: React.FocusEvent ) => {
 			if (
 				! document
-					.getElementById( id )
+					.getElementById( identifier )
 					?.parentElement?.contains( event.relatedTarget )
 			) {
 				setIsFocused( false );
@@ -144,7 +144,7 @@ export const NumberControl: React.FC< NumberProps > = forwardRef(
 				className={ classNames( {
 					'has-error': error,
 				} ) }
-				id={ id }
+				id={ identifier }
 				label={
 					isValidElement( label ) ? (
 						label
@@ -164,7 +164,7 @@ export const NumberControl: React.FC< NumberProps > = forwardRef(
 					step={ step }
 					disabled={ disabled }
 					autoComplete="off"
-					id={ id }
+					id={ identifier }
 					className="woocommerce-number-control"
 					suffix={
 						<>

@@ -180,22 +180,22 @@ export function Edit( {
 		...getDimensionsControlProps( 'width', 'A' ),
 		ref: dimensionsWidthRef,
 		onBlur: validateDimensionsWidth,
-		identifier: widthFieldId,
+		id: widthFieldId,
 	};
 	const dimensionsLengthProps = {
 		...getDimensionsControlProps( 'length', 'B' ),
 		ref: dimensionsLengthRef,
 		onBlur: validateDimensionsLength,
-		identifier: lengthFieldId,
+		id: lengthFieldId,
 	};
 	const dimensionsHeightProps = {
 		...getDimensionsControlProps( 'height', 'C' ),
 		ref: dimensionsHeightRef,
 		onBlur: validateDimensionsHeight,
-		identifier: heightFieldId,
+		id: heightFieldId,
 	};
 	const weightProps = {
-		identifier: weightFieldId,
+		id: weightFieldId,
 		name: 'weight',
 		value: weight ?? '',
 		onChange: setWeight,
