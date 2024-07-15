@@ -101,7 +101,7 @@ jobs:
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
   
   project-test-jobs:
-    name: "${{ matrix.name }}"
+    name: "${{ matrix.name }} ${{ github.event.pull_request.draft && ' - skipped in draft mode' || ''}}"
     runs-on: 'ubuntu-20.04'
     needs: [ 'project-jobs' ]
     if: ${{ needs.project-jobs.outputs.test-jobs != '[]' && !github.event.pull_request.draft }}
