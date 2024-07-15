@@ -80,7 +80,7 @@ class Controller extends GenericController implements ExportableInterface {
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param array        $report  Report data.
+	 * @param array            $report  Report data.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response
 	 */
@@ -228,13 +228,13 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                        = parent::get_collection_params();
-		$params['orderby']['enum']     = array(
+		$params                       = parent::get_collection_params();
+		$params['orderby']['enum']    = array(
 			'date',
 			'num_items_sold',
 			'net_total',
 		);
-		$params['product_includes']    = array(
+		$params['product_includes']   = array(
 			'description'       => __( 'Limit result set to items that have the specified product(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -244,7 +244,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['product_excludes']    = array(
+		$params['product_excludes']   = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified product(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -254,7 +254,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['variation_includes']  = array(
+		$params['variation_includes'] = array(
 			'description'       => __( 'Limit result set to items that have the specified variation(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -264,7 +264,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['variation_excludes']  = array(
+		$params['variation_excludes'] = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified variation(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -274,7 +274,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['coupon_includes']     = array(
+		$params['coupon_includes']    = array(
 			'description'       => __( 'Limit result set to items that have the specified coupon(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -284,7 +284,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['coupon_excludes']     = array(
+		$params['coupon_excludes']    = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified coupon(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -294,7 +294,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['tax_rate_includes']   = array(
+		$params['tax_rate_includes']  = array(
 			'description'       => __( 'Limit result set to items that have the specified tax rate(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -304,7 +304,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['tax_rate_excludes']   = array(
+		$params['tax_rate_excludes']  = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified tax rate(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -314,7 +314,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['status_is']           = array(
+		$params['status_is']          = array(
 			'description'       => __( 'Limit result set to items that have the specified order status.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
@@ -324,7 +324,7 @@ class Controller extends GenericController implements ExportableInterface {
 				'type' => 'string',
 			),
 		);
-		$params['status_is_not']       = array(
+		$params['status_is_not']      = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
@@ -334,7 +334,7 @@ class Controller extends GenericController implements ExportableInterface {
 				'type' => 'string',
 			),
 		);
-		$params['customer_type']       = array(
+		$params['customer_type']      = array(
 			'description'       => __( 'Limit result set to returning or new customers.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => '',
@@ -345,7 +345,7 @@ class Controller extends GenericController implements ExportableInterface {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['refunds']             = array(
+		$params['refunds']            = array(
 			'description'       => __( 'Limit result set to specific types of refunds.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => '',
@@ -358,14 +358,14 @@ class Controller extends GenericController implements ExportableInterface {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['extended_info']       = array(
+		$params['extended_info']      = array(
 			'description'       => __( 'Add additional piece of info about each coupon to the report.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order_includes']      = array(
+		$params['order_includes']     = array(
 			'description'       => __( 'Limit result set to items that have the specified order ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -374,7 +374,7 @@ class Controller extends GenericController implements ExportableInterface {
 				'type' => 'integer',
 			),
 		);
-		$params['order_excludes']      = array(
+		$params['order_excludes']     = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified order ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -383,7 +383,7 @@ class Controller extends GenericController implements ExportableInterface {
 				'type' => 'integer',
 			),
 		);
-		$params['attribute_is']        = array(
+		$params['attribute_is']       = array(
 			'description'       => __( 'Limit result set to orders that include products with the specified attributes.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -392,7 +392,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'default'           => array(),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['attribute_is_not']    = array(
+		$params['attribute_is_not']   = array(
 			'description'       => __( 'Limit result set to orders that don\'t include products with the specified attributes.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(

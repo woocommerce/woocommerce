@@ -237,15 +237,15 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                        = parent::get_collection_params();
-		$params['orderby']['enum']     = array(
+		$params                      = parent::get_collection_params();
+		$params['orderby']['enum']   = array(
 			'date',
 			'net_revenue',
 			'orders_count',
 			'items_sold',
 			'sku',
 		);
-		$params['match']               = array(
+		$params['match']             = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'all',
@@ -255,7 +255,7 @@ class Controller extends GenericController implements ExportableInterface {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['product_includes']    = array(
+		$params['product_includes']  = array(
 			'description'       => __( 'Limit result set to items that have the specified parent product(s).', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -265,7 +265,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['product_excludes']    = array(
+		$params['product_excludes']  = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified parent product(s).', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -275,7 +275,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['variations']          = array(
+		$params['variations']        = array(
 			'description'       => __( 'Limit result to items with specified variation ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -284,14 +284,14 @@ class Controller extends GenericController implements ExportableInterface {
 				'type' => 'integer',
 			),
 		);
-		$params['extended_info']       = array(
+		$params['extended_info']     = array(
 			'description'       => __( 'Add additional piece of info about each variation to the report.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['attribute_is']        = array(
+		$params['attribute_is']      = array(
 			'description'       => __( 'Limit result set to variations that include the specified attributes.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -300,7 +300,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'default'           => array(),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['attribute_is_not']    = array(
+		$params['attribute_is_not']  = array(
 			'description'       => __( 'Limit result set to variations that don\'t include the specified attributes.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -309,7 +309,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'default'           => array(),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['category_includes']   = array(
+		$params['category_includes'] = array(
 			'description'       => __( 'Limit result set to variations in the specified categories.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -318,7 +318,7 @@ class Controller extends GenericController implements ExportableInterface {
 				'type' => 'integer',
 			),
 		);
-		$params['category_excludes']   = array(
+		$params['category_excludes'] = array(
 			'description'       => __( 'Limit result set to variations not in the specified categories.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',

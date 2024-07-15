@@ -187,7 +187,7 @@ class Controller extends GenericStatsController {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$schema = parent::get_item_schema();
+		$schema          = parent::get_item_schema();
 		$schema['title'] = 'report_orders_stats';
 
 		// Products is not shown in intervals.
@@ -202,8 +202,8 @@ class Controller extends GenericStatsController {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                        = parent::get_collection_params();
-		$params['orderby']['enum']     = array(
+		$params                     = parent::get_collection_params();
+		$params['orderby']['enum']  = array(
 			'date',
 			'net_revenue',
 			'orders_count',
@@ -250,7 +250,7 @@ class Controller extends GenericStatsController {
 			'sanitize_callback' => 'wp_parse_id_list',
 
 		);
-		$params['product_excludes']    = array(
+		$params['product_excludes']  = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified product(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -259,7 +259,7 @@ class Controller extends GenericStatsController {
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['variation_includes']  = array(
+		$params['variation_includes'] = array(
 			'description'       => __( 'Limit result set to items that have the specified variation(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -269,7 +269,7 @@ class Controller extends GenericStatsController {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['variation_excludes']  = array(
+		$params['variation_excludes'] = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified variation(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -279,7 +279,7 @@ class Controller extends GenericStatsController {
 			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['coupon_includes']     = array(
+		$params['coupon_includes']   = array(
 			'description'       => __( 'Limit result set to items that have the specified coupon(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -288,7 +288,7 @@ class Controller extends GenericStatsController {
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['coupon_excludes']     = array(
+		$params['coupon_excludes']   = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified coupon(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -297,7 +297,7 @@ class Controller extends GenericStatsController {
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['tax_rate_includes']   = array(
+		$params['tax_rate_includes'] = array(
 			'description'       => __( 'Limit result set to items that have the specified tax rate(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -307,7 +307,7 @@ class Controller extends GenericStatsController {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['tax_rate_excludes']   = array(
+		$params['tax_rate_excludes'] = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified tax rate(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -317,7 +317,7 @@ class Controller extends GenericStatsController {
 			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['customer']            = array(
+		$params['customer']          = array(
 			'description'       => __( 'Alias for customer_type (deprecated).', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array(
@@ -326,7 +326,7 @@ class Controller extends GenericStatsController {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['customer_type']       = array(
+		$params['customer_type']     = array(
 			'description'       => __( 'Limit result set to orders that have the specified customer_type', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array(
@@ -335,7 +335,7 @@ class Controller extends GenericStatsController {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['refunds']             = array(
+		$params['refunds']           = array(
 			'description'       => __( 'Limit result set to specific types of refunds.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => '',
@@ -348,7 +348,7 @@ class Controller extends GenericStatsController {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['attribute_is']        = array(
+		$params['attribute_is']      = array(
 			'description'       => __( 'Limit result set to orders that include products with the specified attributes.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -357,7 +357,7 @@ class Controller extends GenericStatsController {
 			'default'           => array(),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['attribute_is_not']    = array(
+		$params['attribute_is_not']  = array(
 			'description'       => __( 'Limit result set to orders that don\'t include products with the specified attributes.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -366,7 +366,7 @@ class Controller extends GenericStatsController {
 			'default'           => array(),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['segmentby']           = array(
+		$params['segmentby']         = array(
 			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array(
