@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	useCheckoutAddress,
 	useStoreEvents,
@@ -11,54 +11,118 @@ import { ContactFormValues, getSetting } from '@woocommerce/settings';
 import {
 	StoreNoticesContainer,
 	CheckboxControl,
+	ValidatedTextInput,
 } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { CONTACT_FORM_KEYS } from '@woocommerce/block-settings';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 
-const Block = (): JSX.Element => {
-	const { customerId, shouldCreateAccount, additionalFields } = useSelect(
-		( select ) => {
-			const store = select( CHECKOUT_STORE_KEY );
-			return {
-				customerId: store.getCustomerId(),
-				shouldCreateAccount: store.getShouldCreateAccount(),
-				additionalFields: store.getAdditionalFields(),
-			};
-		}
-	);
-
-	const { __internalSetShouldCreateAccount, setAdditionalFields } =
+const CreateAccountUI = (): React.ReactElement | null => {
+	const { customerPassword, shouldCreateAccount } = useSelect( ( select ) => {
+		const store = select( CHECKOUT_STORE_KEY );
+		return {
+			customerPassword: store.getCustomerPassword(),
+			shouldCreateAccount: store.getShouldCreateAccount(),
+		};
+	} );
+	const { __internalSetShouldCreateAccount, __internalSetCustomerPassword } =
 		useDispatch( CHECKOUT_STORE_KEY );
+
+	// Work out what fields need to be displayed for the current shopper.
+	const allowGuestCheckout = getSetting( 'checkoutAllowsGuest', false );
+	const allowSignup = getSetting( 'checkoutAllowsSignup', false );
+	const generatePassword = getSetting( 'generatePassword', false );
+	const showCreateAccountCheckbox = allowGuestCheckout && allowSignup;
+	const showCreateAccountPassword = generatePassword
+		? false
+		: ( showCreateAccountCheckbox && shouldCreateAccount ) ||
+		  ! allowGuestCheckout;
+
+	if (
+		! allowGuestCheckout &&
+		! showCreateAccountCheckbox &&
+		! showCreateAccountPassword
+	) {
+		return null;
+	}
+
+	return (
+		<>
+			{ allowGuestCheckout && (
+				<p className="wc-block-checkout__guest-checkout-notice">
+					{ __(
+						'You are currently checking out as a guest.',
+						'woocommerce'
+					) }
+				</p>
+			) }
+			{ showCreateAccountCheckbox && (
+				<CheckboxControl
+					className="wc-block-checkout__create-account"
+					label={ sprintf(
+						/* translators: Store name */
+						__( 'Create an account with %s', 'woocommerce' ),
+						getSetting( 'siteTitle', '' )
+					) }
+					checked={ shouldCreateAccount }
+					onChange={ ( value ) => {
+						__internalSetShouldCreateAccount( value );
+						__internalSetCustomerPassword( '' );
+					} }
+				/>
+			) }
+			{ showCreateAccountPassword && (
+				<ValidatedTextInput
+					type="password"
+					label={ __( 'Create a password', 'woocommerce' ) }
+					className={ `wc-block-components-address-form__password` }
+					value={ customerPassword }
+					required={ true }
+					customValidityMessage={ (
+						validity: ValidityState
+					): string | undefined => {
+						if (
+							validity.valueMissing ||
+							validity.badInput ||
+							validity.typeMismatch
+						) {
+							return __(
+								'Please enter a valid password',
+								'woocommerce'
+							);
+						}
+					} }
+					onChange={ ( value: string ) =>
+						__internalSetCustomerPassword( value )
+					}
+				/>
+			) }
+		</>
+	);
+};
+
+const Block = (): JSX.Element => {
+	const { additionalFields, customerId } = useSelect( ( select ) => {
+		const store = select( CHECKOUT_STORE_KEY );
+		return {
+			additionalFields: store.getAdditionalFields(),
+			customerId: store.getCustomerId(),
+		};
+	} );
+
+	const { setAdditionalFields } = useDispatch( CHECKOUT_STORE_KEY );
 	const { billingAddress, setEmail } = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
-
 	const onChangeEmail = ( value: string ) => {
 		setEmail( value );
 		dispatchCheckoutEvent( 'set-email-address' );
 	};
-
-	const createAccountVisible =
-		! customerId &&
-		getSetting( 'checkoutAllowsGuest', false ) &&
-		getSetting( 'checkoutAllowsSignup', false );
-
-	const createAccountUI = createAccountVisible && (
-		<CheckboxControl
-			className="wc-block-checkout__create-account"
-			label={ __( 'Create an account?', 'woocommerce' ) }
-			checked={ shouldCreateAccount }
-			onChange={ ( value ) => __internalSetShouldCreateAccount( value ) }
-		/>
-	);
-
 	const onChangeForm = ( newAddress: ContactFormValues ) => {
 		const { email, ...additionalValues } = newAddress;
 		onChangeEmail( email );
 		setAdditionalFields( additionalValues );
 	};
-
 	const contactFormValues = {
 		email: billingAddress.email,
 		...additionalFields,
@@ -76,7 +140,7 @@ const Block = (): JSX.Element => {
 				values={ contactFormValues }
 				fields={ CONTACT_FORM_KEYS }
 			>
-				{ createAccountUI }
+				{ ! customerId && <CreateAccountUI /> }
 			</Form>
 		</>
 	);
