@@ -149,7 +149,7 @@ const webpackConfig = {
 								isHot &&
 								require.resolve( 'react-refresh/babel' ),
 						].filter( Boolean ),
-						cacheDir: true,
+						cacheDirectory: true,
 						cacheCompression: false,
 					},
 				},
