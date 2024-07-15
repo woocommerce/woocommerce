@@ -2741,6 +2741,12 @@ function wc_update_920_add_wc_hooked_blocks_version_option() {
 	$option_name       = 'woocommerce_hooked_blocks_version';
 	$option_value      = get_option( $option_name );
 	$active_theme_name = wp_get_theme()->get( 'Name' );
+
+	// If the option already exists, we don't need to do anything.
+	if ( false !== $option_value ) {
+		return;
+	}
+
 	/**
 	 * A list of theme slugs to execute this with.
 	 * We are applying this filter to allow for the list to be extended by third-parties who were already using it.
