@@ -2621,7 +2621,7 @@ FROM $order_meta_table
 		$order->apply_changes();
 		$this->clear_caches( $order );
 
-		$non_triggering_order_statuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft', 'refunded', 'failed', 'cancelled');
+		$non_triggering_order_statuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft', 'refunded', 'failed', 'cancelled' );
 
 		// For backwards compatibility, this hook should be fired only if the new status is not one of the non-triggering statuses and the previous status was one of the non-triggering statuses.
 		if (

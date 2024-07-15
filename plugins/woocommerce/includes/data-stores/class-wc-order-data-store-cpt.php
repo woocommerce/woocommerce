@@ -203,7 +203,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$previous_status = OrderUtil::remove_status_prefix( $previous_status );
 		$current_status  = OrderUtil::remove_status_prefix( $current_status );
 
-		$non_triggering_order_statuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft', 'refunded', 'failed', 'cancelled');
+		$non_triggering_order_statuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft', 'refunded', 'failed', 'cancelled' );
 
 		// This hook should be fired only if the new status is not one of the non-triggering statuses and the previous status was one of the non-triggering statuses.
 		if (
@@ -211,11 +211,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			&& ! in_array( $current_status, $non_triggering_order_statuses, true )
 			&& in_array( $previous_status, $non_triggering_order_statuses, true )
 		) {
-			do_action( 'woocommerce_new_order', $order->get_id(), $order );
+			do_action( 'woocommerce_new_order', $order->get_id(), $order );  // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			return;
 		}
 
-		do_action( 'woocommerce_update_order', $order->get_id(), $order );
+		do_action( 'woocommerce_update_order', $order->get_id(), $order );  // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	}
 
 	/**

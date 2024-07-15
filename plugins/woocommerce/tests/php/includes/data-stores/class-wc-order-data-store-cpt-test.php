@@ -511,5 +511,4 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		remove_action( 'woocommerce_new_order', $callback );
 	}
-
 }
