@@ -113,7 +113,7 @@ jobs:
     steps:
       - name: 'Quick exit in draft mode'
         if: ${{ github.event.pull_request.draft }}
-        run: exit 0
+        run: exit 78
 
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
