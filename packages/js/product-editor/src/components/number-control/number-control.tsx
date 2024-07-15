@@ -131,7 +131,9 @@ export const NumberControl: React.FC< NumberProps > = forwardRef(
 			};
 		}, [ increment, value ] );
 
-		const resetIncrement = () => setIncrement( 0 );
+		function resetIncrement() {
+			setIncrement( 0 );
+		}
 
 		function handleIncrement( thisStep: number ) {
 			const newValue = parseFloat( value || '0' ) + thisStep;
