@@ -92,22 +92,20 @@ const orderByPriority = (
 		return null;
 	}
 
-	// Both titles are found in the order list
 	if ( aIndex > -1 && bIndex > -1 ) {
 		return aIndex - bIndex;
 	}
 
-	// One title is not found in the order list, move it to the end
 	if ( aIndex === -1 && bIndex > -1 ) {
-		return 1; // Move a to the end
+		return 1;
 	}
 	if ( bIndex === -1 && aIndex > -1 ) {
-		return -1; // Move b to the end
+		return -1;
 	}
 };
 
 /**
- * Sorts patterns by category. For 'intro' and 'about' categories
+ * Sorts patterns by category and priority based on the orderPatternList object . For 'intro' and 'about' categories
  * prioritized DotCom Patterns. For intro category, it also prioritizes the "centered-content-with-image-below" pattern.
  * For other categories, it simply sorts patterns to prioritize Woo Patterns.
  */
