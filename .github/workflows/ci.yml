@@ -74,13 +74,6 @@ jobs:
             const child_process = require( 'node:child_process' );
             child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
 
-  evaluate-draft-mode:
-    name: 'Evaluate draft mode'
-    runs-on: 'ubuntu-20.04'
-    if: ${{ !github.event.pull_request.draft }}
-    steps:
-      - name: 'Skip tests'
-        run: echo "Skipping tests"
   
   project-lint-jobs:
     name: "Lint - ${{ matrix.projectName }} ${{ matrix.optional && ' (optional)' || ''}}"
@@ -121,6 +114,10 @@ jobs:
       matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.test-jobs ) }}
     steps:
+      - name: 'Quick exit in draft mode'
+        if: ${{ github.event.pull_request.draft }}
+        run: exit 1
+        
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
 
