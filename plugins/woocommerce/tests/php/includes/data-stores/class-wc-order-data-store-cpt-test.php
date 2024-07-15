@@ -511,4 +511,33 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		remove_action( 'woocommerce_new_order', $callback );
 	}
+
+	/**
+	 * @testDox Create a new order with processing status without saving and updating it should trigger the "woocommerce_new_order" action.
+	 */
+	public function test_update_new_processing_order_correctly_triggers_new_order_hook() {
+
+		$new_count = 0;
+
+		$callback = function () use ( &$new_count ) {
+			++$new_count;
+		};
+
+		add_action( 'woocommerce_new_order', $callback );
+
+		$order_data_store_cpt = new WC_Order_Data_Store_CPT();
+
+		$order = new WC_Order();
+		$order->set_status( 'processing' );
+
+		$this->assertEquals( 0, $new_count );
+
+		$order_data_store_cpt->update( $order );
+		$order->save();
+
+
+		$this->assertEquals( 1, $new_count );
+
+		remove_action( 'woocommerce_new_order', $callback );
+	}
 }
