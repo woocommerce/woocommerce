@@ -78,6 +78,12 @@ export function ValidationProvider< T >( {
 		return Promise.resolve( undefined );
 	}
 
+	async function getFieldByValidatorId(
+		validatorId: string
+	): Promise< HTMLElement > {
+		return fieldRefs.current[ validatorId ];
+	}
+
 	async function validateAll(
 		newData: Partial< T >
 	): Promise< ValidationErrors > {
@@ -107,6 +113,7 @@ export function ValidationProvider< T >( {
 		<ValidationContext.Provider
 			value={ {
 				errors,
+				getFieldByValidatorId,
 				registerValidator,
 				unRegisterValidator,
 				validateField,
