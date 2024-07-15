@@ -1,5 +1,4 @@
 const { test: baseTest, expect } = require( '@playwright/test' );
-const { request } = require( '@playwright/test' );
 const {
 	goToPageEditor,
 	fillPageTitle,
@@ -7,7 +6,6 @@ const {
 	getCanvas,
 	publishPage,
 } = require( '../../utils/editor' );
-const { encodeCredentials } = require( '../../utils/plugin-utils' );
 
 // some WooCommerce Patterns to use
 const wooPatterns = [
@@ -33,37 +31,8 @@ test.describe(
 		test( 'can insert WooCommerce patterns into page', async ( {
 			page,
 			testPage,
-			baseURL,
 		} ) => {
 			await goToPageEditor( { page } );
-
-			// check if Gutenberg is installed
-			const apiContext = await request.newContext( {
-				baseURL,
-				extraHTTPHeaders: {
-					Authorization: `Basic ${ encodeCredentials(
-						'admin',
-						'password'
-					) }`,
-					cookie: '',
-				},
-			} );
-			const listPluginsResponse = await apiContext.get(
-				`/wp-json/wp/v2/plugins`,
-				{
-					failOnStatusCode: true,
-				}
-			);
-			const pluginsList = await listPluginsResponse.json();
-			const gutenbergPlugin = pluginsList.find(
-				( { textdomain } ) => textdomain === 'gutenberg'
-			);
-			// if Gutenberg is active, wait for element before filling page title
-			if ( gutenbergPlugin ) {
-				await expect(
-					page.getByRole( 'button', { name: 'Set featured image' } )
-				).toBeVisible();
-			}
 
 			await fillPageTitle( page, testPage.title );
 
