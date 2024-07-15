@@ -1504,12 +1504,12 @@ class WC_Helper {
 	}
 
 	/**
-	 * Get the connected user's subscriptions.
+	 * Get rules for displaying notice regarding marketplace product usage.
 	 *
 	 * @return array
 	 */
-	public static function get_checked_products() {
-		$cache_key = '_woocommerce_helper_checked_products';
+	public static function get_product_usage_notice_rules() {
+		$cache_key = '_woocommerce_helper_product_usage_notice_rules';
 		$data      = get_transient( $cache_key );
 		if ( false !== $data ) {
 			return $data;

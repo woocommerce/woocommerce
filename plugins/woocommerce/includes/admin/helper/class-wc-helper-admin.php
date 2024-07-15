@@ -167,7 +167,7 @@ class WC_Helper_Admin {
 			return;
 		}
 
-		self::$checked_products = WC_Helper::get_checked_products();
+		self::$checked_products = WC_Helper::get_product_usage_notice_rules();
 		if ( empty( self::$checked_products ) ) {
 			return;
 		}
