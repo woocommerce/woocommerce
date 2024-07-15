@@ -17,8 +17,6 @@ const productData = {
 	salePrice: '90',
 };
 
-test.describe.configure( { mode: 'serial' } );
-
 test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Simple product form', () => {
 		test( 'renders each block without error', async ( { page } ) => {
