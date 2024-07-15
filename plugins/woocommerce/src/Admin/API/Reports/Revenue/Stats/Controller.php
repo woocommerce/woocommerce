@@ -254,6 +254,7 @@ class Controller extends GenericStatsController implements ExportableInterface {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+		unset( $params['fields'] );
 
 		return $params;
 	}

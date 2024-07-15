@@ -22,6 +22,15 @@ abstract class GenericStatsController extends GenericController {
 	 */
 	public function get_collection_params() {
 		$params             = parent::get_collection_params();
+		$params['fields']   = array(
+			'description'       => __( 'Limit stats fields to the specified items.', 'automatewoo' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_slug_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'string',
+			),
+		);
 		$params['interval'] = array(
 			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
 			'type'              => 'string',
@@ -36,6 +45,7 @@ abstract class GenericStatsController extends GenericController {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+
 
 		return $params;
 	}
