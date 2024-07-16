@@ -638,7 +638,7 @@ body.woocommerce-assembler {
 		& > .tour-kit-frame__arrow {
 			right: -5px;
 			&::before {
-				background: white;
+				background: #fff;
 				border-top: 1px solid var(--gutenberg-gray-300, #ddd);
 				border-right: 1px solid var(--gutenberg-gray-300, #ddd);
 			}
@@ -650,7 +650,7 @@ body.woocommerce-assembler {
 			&::before {
 				border-bottom: 1px solid var(--gutenberg-gray-300, #ddd);
 				border-left: 1px solid var(--gutenberg-gray-300, #ddd);
-				background: white;
+				background: #fff;
 			}
 		}
 	}
