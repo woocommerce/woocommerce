@@ -11,6 +11,8 @@ if ( class_exists( 'WC_Settings_Accounts', false ) ) {
 	return new WC_Settings_Accounts();
 }
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+
 /**
  * WC_Settings_Accounts.
  */
@@ -237,6 +239,25 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 		);
 
+		// Change settings when using the block based checkout.
+		if ( CartCheckoutUtils::is_checkout_block_default() ) {
+			$account_settings = array_filter(
+				$account_settings,
+				function ( $setting ) {
+					return 'woocommerce_registration_generate_username' !== $setting['id'];
+				},
+			);
+			$account_settings = array_map(
+				function ( $setting ) {
+					if ( 'woocommerce_registration_generate_password' === $setting['id'] ) {
+						unset( $setting['checkboxgroup'] );
+					}
+					return $setting;
+				},
+				$account_settings
+			);
+		}
+
 		/**
 		 * Filter account settings.
 		 *
@@ -270,12 +291,15 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				function updateInputs() {
 					const isChecked = checkboxes.some(cb => cb && cb.checked);
 					inputs.forEach(input => {
+						if ( ! input ) {
+							return;
+						}
 						input.disabled = !isChecked;
 						input.closest('td').classList.toggle("disabled", !isChecked);
 					});
 				}
 
-				checkboxes.forEach(cb => cb.addEventListener('change', updateInputs));
+				checkboxes.forEach(cb => cb && cb.addEventListener('change', updateInputs));
 				updateInputs(); // Initial state
 			});
 		</script>
