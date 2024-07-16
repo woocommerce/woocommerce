@@ -11,7 +11,6 @@ import { productFilterOptions } from '@woocommerce/icons';
 import './style.scss';
 import edit from './edit';
 import metadata from './block.json';
-import { stockStatusFilterIcon } from './icon';
 
 if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
