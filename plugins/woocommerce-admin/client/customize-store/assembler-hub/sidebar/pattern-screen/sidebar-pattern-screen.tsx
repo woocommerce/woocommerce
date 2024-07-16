@@ -52,6 +52,7 @@ import {
 	sortPatternsByCategory,
 	addIsAddedClassToPatternPreview,
 } from './utils';
+import { trackEvent } from '~/customize-store/tracking';
 
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const { patterns, isLoading } = usePatternsByCategory( category );
