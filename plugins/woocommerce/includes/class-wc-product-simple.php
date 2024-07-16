@@ -91,7 +91,7 @@ class WC_Product_Simple extends WC_Product {
 		/**
 		 * Filter product add to cart success message.
 		 *
-		 * @since 8.9.2
+		 * @since 9.2.0
 		 * @param string $text.
 		 * @param WC_Product_Simple $this Reference to the current WC_Product_Simple instance.
 		 */
