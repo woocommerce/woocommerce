@@ -127,8 +127,8 @@ const webpackConfig = {
 					amd: false,
 				},
 				exclude: [
+					/node_modules/,
 					path.resolve( __dirname, './build/' ),
-					path.resolve( __dirname, './node_modules/' ),
 					path.resolve( __dirname, './vendor/' ),
 				],
 				use: {

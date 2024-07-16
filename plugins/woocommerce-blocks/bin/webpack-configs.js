@@ -44,8 +44,8 @@ const getSharedPlugins = ( {
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
 			? new CircularDependencyPlugin( {
 					exclude: [
+						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
-						path.resolve( __dirname, '../node_modules/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					cwd: process.cwd(),
@@ -99,8 +99,8 @@ const getCoreConfig = ( options = {} ) => {
 				{
 					test: /\.(t|j)sx?$/,
 					exclude: [
+						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
-						path.resolve( __dirname, '../node_modules/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {
@@ -214,8 +214,8 @@ const getMainConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [
+						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
-						path.resolve( __dirname, '../node_modules/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {
@@ -356,8 +356,8 @@ const getFrontConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [
+						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
-						path.resolve( __dirname, '../node_modules/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {
@@ -479,8 +479,8 @@ const getPaymentsConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [
+						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
-						path.resolve( __dirname, '../node_modules/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {
@@ -591,8 +591,8 @@ const getExtensionsConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [
+						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
-						path.resolve( __dirname, '../node_modules/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {
@@ -703,8 +703,8 @@ const getSiteEditorConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [
+						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
-						path.resolve( __dirname, '../node_modules/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {
@@ -867,8 +867,8 @@ const getStylingConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [
+						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
-						path.resolve( __dirname, '../node_modules/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {
@@ -989,8 +989,8 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [
+						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
-						path.resolve( __dirname, '../node_modules/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: [
@@ -1077,8 +1077,8 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [
+						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
-						path.resolve( __dirname, '../node_modules/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {

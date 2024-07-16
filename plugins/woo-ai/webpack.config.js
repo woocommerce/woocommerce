@@ -15,8 +15,8 @@ module.exports = {
 				test: /\.tsx?$/,
 				use: 'ts-loader',
 				exclude: [
+					/node_modules/,
 					path.resolve( __dirname, './build/' ),
-					path.resolve( __dirname, './node_modules/' ),
 					path.resolve( __dirname, './vendor/' ),
 				],
 			},
