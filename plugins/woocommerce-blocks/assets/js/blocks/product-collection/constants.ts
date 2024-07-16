@@ -71,6 +71,7 @@ export const DEFAULT_ATTRIBUTES: Pick<
 	| 'displayLayout'
 	| 'queryContextIncludes'
 	| 'forcePageReload'
+	| 'syncWithFilters'
 > = {
 	query: DEFAULT_QUERY,
 	tagName: 'div',
@@ -81,6 +82,7 @@ export const DEFAULT_ATTRIBUTES: Pick<
 	},
 	queryContextIncludes: [ 'collection' ],
 	forcePageReload: false,
+	syncWithFilters: false,
 };
 
 export const DEFAULT_FILTERS: Pick<

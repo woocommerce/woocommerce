@@ -39,6 +39,10 @@
 			"type": "boolean",
 			"default": false
 		},
+		"syncWithFilters": {
+			"type": "boolean",
+			"default": false
+		},
 		"__privatePreviewState": {
 			"type": "object"
 		}
