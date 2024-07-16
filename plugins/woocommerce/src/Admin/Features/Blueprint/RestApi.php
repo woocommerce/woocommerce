@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blueprint\ExportSchema;
 use Automattic\WooCommerce\Blueprint\ImportSchema;
 use Automattic\WooCommerce\Blueprint\JsonResultFormatter;
 use Automattic\WooCommerce\Blueprint\ZipExportedSchema;
+use http\Exception\InvalidArgumentException;
 
 /**
  * Class RestApi
@@ -87,7 +88,7 @@ class RestApi {
 
 	public function check_permission() {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -126,6 +127,7 @@ class RestApi {
 	 * @return \WP_HTTP_Response The response object.
 	 */
 	public function import() {
+
 		// phpcs:ignore
 		if ( ! empty( $_FILES['file'] ) && $_FILES['file']['error'] === UPLOAD_ERR_OK ) {
 			// phpcs:ignore
@@ -135,14 +137,22 @@ class RestApi {
 				// phpcs:ignore
 				if ( $_FILES['file']['type'] === 'application/zip' ) {
 					// phpcs:ignore
-					$newpath = \wp_upload_dir()['path'] . '/' . $_FILES['file']['name'];
-					move_uploaded_file( $uploaded_file, $newpath );
-					$blueprint = ImportSchema::create_from_zip( $newpath );
+					if ( ! function_exists( 'wp_handle_upload' ) ) {
+						require_once ABSPATH . 'wp-admin/includes/file.php';
+					}
+
+					$movefile = \wp_handle_upload( $_FILES['file'], array( 'test_form' => false ) );
+
+					if ( $movefile && ! isset( $movefile['error'] ) ) {
+						$blueprint = ImportSchema::create_from_zip( $movefile['file'] );
+					} else {
+						throw new InvalidArgumentException( $movefile['error'] );
+					}
 				} else {
 					$blueprint = ImportSchema::create_from_json( $uploaded_file );
 				}
 			} catch ( \InvalidArgumentException $e ) {
-				return new \WP_REST_Response(
+				return new \WP_HTTP_Response(
 					array(
 						'status'  => 'error',
 						'message' => $e->getMessage(),
@@ -171,7 +181,7 @@ class RestApi {
 			);
 		}
 
-		return new \WP_REST_Response(
+		return new \WP_HTTP_Response(
 			array(
 				'status'  => 'error',
 				'message' => 'No file uploaded',

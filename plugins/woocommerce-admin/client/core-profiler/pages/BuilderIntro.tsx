@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -35,26 +36,31 @@ export const BuilderIntro = ( {
 		const formData = new FormData();
 		formData.append( 'file', file );
 
-		fetch( '/wp-json/blueprint/process', {
+		apiFetch( {
+			path: '/blueprint/process',
 			method: 'POST',
 			body: formData,
 		} )
-			.then( ( response ) => response.json() )
 			.then( ( data ) => {
+				// @ts-expect-error tmp
 				if ( data.status === 'success' ) {
 					setMessage(
 						'Schema imported successfully. Redirecting to ' +
+							// @ts-expect-error tmp
 							data.data.redirect
 					);
 
 					window.setTimeout( () => {
+						// @ts-expect-error tmp
 						window.location.href = data.data.redirect;
 					}, 2000 );
 				} else {
+					// @ts-expect-error tmp
 					setMessage( `Error: ${ data.message }` );
-
+					// @ts-expect-error tmp
 					if ( data?.data?.result ) {
 						setMessage(
+							// @ts-expect-error tmp
 							JSON.stringify( data.data.result, null, 2 )
 						);
 					}
@@ -63,6 +69,35 @@ export const BuilderIntro = ( {
 			.catch( ( error ) => {
 				setMessage( `Error: ${ error.message }` );
 			} );
+
+		// fetch( '/wp-json/blueprint/process', {
+		// 	method: 'POST',
+		// 	body: formData,
+		// } )
+		// 	.then( ( response ) => response.json() )
+		// 	.then( ( data ) => {
+		// 		if ( data.status === 'success' ) {
+		// 			setMessage(
+		// 				'Schema imported successfully. Redirecting to ' +
+		// 					data.data.redirect
+		// 			);
+
+		// 			window.setTimeout( () => {
+		// 				window.location.href = data.data.redirect;
+		// 			}, 2000 );
+		// 		} else {
+		// 			setMessage( `Error: ${ data.message }` );
+
+		// 			if ( data?.data?.result ) {
+		// 				setMessage(
+		// 					JSON.stringify( data.data.result, null, 2 )
+		// 				);
+		// 			}
+		// 		}
+		// 	} )
+		// 	.catch( ( error ) => {
+		// 		setMessage( `Error: ${ error.message }` );
+		// 	} );
 	};
 	return (
 		<>
