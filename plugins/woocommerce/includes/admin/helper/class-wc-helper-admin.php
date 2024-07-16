@@ -421,6 +421,14 @@ class WC_Helper_Admin {
 		return array();
 	}
 
+	/**
+	 * Check whether the screen and GET parameter matches a given rule.
+	 *
+	 * @param \WP_Screen $screen Current \WP_Screen object.
+	 * @param array      $rule   Product usage notice rule.
+	 *
+	 * @return bool
+	 */
 	private static function query_string_matches( $screen, $rule ) {
 		if ( empty( $rule['screens'][ $screen->id ]['qs'] ) ) {
 			return true;
@@ -435,6 +443,9 @@ class WC_Helper_Admin {
 		return true;
 	}
 
+	/**
+	 * AJAX handler for dismiss action of product usage notice.
+	 */
 	public static function check_subscription_dismissed() {
 		if ( ! check_ajax_referer( 'check_subscription_dismissed' ) ) {
 			wp_die( -1 );
@@ -459,6 +470,9 @@ class WC_Helper_Admin {
 		wp_die( 1 );
 	}
 
+	/**
+	 * AJAX handler for "remind later" action of product usage notice.
+	 */
 	public static function check_subscription_remind_later() {
 		if ( ! check_ajax_referer( 'check_subscription_remind_later' ) ) {
 			wp_die( -1 );
