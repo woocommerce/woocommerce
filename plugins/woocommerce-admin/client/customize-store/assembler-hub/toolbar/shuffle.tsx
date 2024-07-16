@@ -131,7 +131,7 @@ export default function Shuffle( { clientId }: { clientId: string } ) {
 					replaceBlocks( clientId, nextPattern.blocks );
 					trackEvent(
 						'customize_your_store_assembler_pattern_shuffle_click',
-						{ category: category, pattern: nextPattern.name }
+						{ category, pattern: nextPattern.name }
 					);
 				} }
 			>
