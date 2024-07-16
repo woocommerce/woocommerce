@@ -18,7 +18,7 @@ class WC_Product_Usage_Notice {
 	 *
 	 * @var string
 	 */
-	const CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_count_';
+	const DISMISSED_COUNT_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_count_';
 
 	/**
 	 * User meta key prefix to store timestamp of last dismissed product usage notice.
@@ -26,7 +26,7 @@ class WC_Product_Usage_Notice {
 	 *
 	 * @var string
 	 */
-	const CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_timestamp_';
+	const DISMISSED_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_timestamp_';
 
 	/**
 	 * User meta key prefix to store timestamp of last clicked remind later from
@@ -34,7 +34,7 @@ class WC_Product_Usage_Notice {
 	 *
 	 * @var string
 	 */
-	const CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_remind_later_timestamp_';
+	const REMIND_LATER_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_remind_later_timestamp_';
 
 	/**
 	 * User meta key prefix to store timestamp of last dismissed of any product
@@ -42,7 +42,7 @@ class WC_Product_Usage_Notice {
 	 *
 	 * @var string
 	 */
-	const CHECK_SUBSCRIPTION_LAST_DISMISSED_TIMESTAMP_META = '_woocommerce_helper_check_subscription_last_dismissed_timestamp';
+	const LAST_DISMISSED_TIMESTAMP_META = '_woocommerce_helper_check_subscription_last_dismissed_timestamp';
 
 	/**
 	 * Array of product usage notice rules from helper API.
@@ -116,7 +116,7 @@ class WC_Product_Usage_Notice {
 		$last_remind_later_ts = absint(
 			get_user_meta(
 				$user_id,
-				self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX . $product_id,
+				self::REMIND_LATER_TIMESTAMP_META_PREFIX . $product_id,
 				true
 			)
 		);
@@ -143,7 +143,7 @@ class WC_Product_Usage_Notice {
 		$dismiss_count = absint(
 			get_user_meta(
 				$user_id,
-				self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX . $product_id,
+				self::DISMISSED_COUNT_META_PREFIX . $product_id,
 				true
 			)
 		);
@@ -163,7 +163,7 @@ class WC_Product_Usage_Notice {
 		$global_last_dismissed_ts = absint(
 			get_user_meta(
 				$user_id,
-				self::CHECK_SUBSCRIPTION_LAST_DISMISSED_TIMESTAMP_META,
+				self::LAST_DISMISSED_TIMESTAMP_META,
 				true
 			)
 		);
@@ -190,7 +190,7 @@ class WC_Product_Usage_Notice {
 		$last_dismissed_ts = absint(
 			get_user_meta(
 				$user_id,
-				self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX . $product_id,
+				self::DISMISSED_TIMESTAMP_META_PREFIX . $product_id,
 				true
 			)
 		);
@@ -334,11 +334,11 @@ class WC_Product_Usage_Notice {
 			wp_die( -1 );
 		}
 
-		$dismiss_count = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX . $product_id, true ) );
-		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX . $product_id, $dismiss_count + 1 );
+		$dismiss_count = absint( get_user_meta( $user_id, self::DISMISSED_COUNT_META_PREFIX . $product_id, true ) );
+		update_user_meta( $user_id, self::DISMISSED_COUNT_META_PREFIX . $product_id, $dismiss_count + 1 );
 
-		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX . $product_id, time() );
-		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_LAST_DISMISSED_TIMESTAMP_META, time() );
+		update_user_meta( $user_id, self::DISMISSED_TIMESTAMP_META_PREFIX . $product_id, time() );
+		update_user_meta( $user_id, self::LAST_DISMISSED_TIMESTAMP_META, time() );
 
 		wp_die( 1 );
 	}
@@ -361,7 +361,7 @@ class WC_Product_Usage_Notice {
 			wp_die( -1 );
 		}
 
-		update_user_meta( $user_id, self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX . $product_id, time() );
+		update_user_meta( $user_id, self::REMIND_LATER_TIMESTAMP_META_PREFIX . $product_id, time() );
 
 		wp_die( 1 );
 	}
