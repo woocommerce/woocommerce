@@ -5,6 +5,7 @@ const {
 	insertBlock,
 	getCanvas,
 	publishPage,
+	closeChoosePatternModal,
 } = require( '../../utils/editor' );
 
 // some WooCommerce Patterns to use
@@ -33,6 +34,8 @@ test.describe(
 			testPage,
 		} ) => {
 			await goToPageEditor( { page } );
+
+			await closeChoosePatternModal( { page } );
 
 			await fillPageTitle( page, testPage.title );
 

@@ -5,6 +5,7 @@ const {
 	insertBlock,
 	getCanvas,
 	publishPage,
+	closeChoosePatternModal,
 } = require( '../../utils/editor' );
 
 const simpleProductName = 'Simplest Product';
@@ -145,6 +146,8 @@ test.describe(
 			testPage,
 		} ) => {
 			await goToPageEditor( { page } );
+
+			await closeChoosePatternModal( { page } );
 
 			await fillPageTitle( page, testPage.title );
 

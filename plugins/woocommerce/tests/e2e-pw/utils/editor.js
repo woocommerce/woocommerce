@@ -1,13 +1,12 @@
 const { expect } = require( '@playwright/test' );
 
-const closeWelcomeModal = async ( { page } ) => {
-	// Close welcome popup if prompted
-	try {
-		await page
-			.getByLabel( 'Close', { exact: true } )
-			.click( { timeout: 5000 } );
-	} catch ( error ) {
-		// Welcome modal wasn't present, skipping action.
+const closeChoosePatternModal = async ( { page } ) => {
+	const closeModal = page.getByRole( 'button', {
+		name: 'Close',
+		exact: true,
+	} );
+	if ( closeModal.isVisible( { timeout: 5000 } ) ) {
+		await closeModal.click();
 	}
 };
 
@@ -118,7 +117,7 @@ const publishPage = async ( page, pageTitle ) => {
 };
 
 module.exports = {
-	closeWelcomeModal,
+	closeChoosePatternModal,
 	goToPageEditor,
 	goToPostEditor,
 	disableWelcomeModal,
