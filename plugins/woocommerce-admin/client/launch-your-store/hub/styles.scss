@@ -2,6 +2,11 @@
 	min-width: 600px;
 	overflow: auto;
 
+	&.woocommerce-launch-your-store-success {
+		overflow-x: clip;
+		min-width: unset;
+	}
+
 	.woocommerce-layout__primary {
 		margin: 0;
 		padding: 0;
@@ -14,6 +19,11 @@
 			display: flex;
 			flex-direction: row;
 			background-color: #fcfcfc;
+			min-height: 100vh;
+
+			.customize-your-store-edit-site-resizable-frame__inner-content {
+				height: 100%;
+			}
 
 			.launch-your-store-layout__sidebar {
 				width: 380px;

@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Tests\Utilities;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
@@ -28,6 +30,65 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 
 		$this->mock_plugin_functions();
 		$this->sut = $this->get_instance_of( PluginUtil::class );
+	}
+
+	/**
+	 * @testdox `get_all_active_valid_plugins` gets the active plugins *that actually exist* and returns them
+	 *          as a list of absolute file paths.
+	 *
+	 * The tested function is just a wrapper around two core WP functions that are marked as "private" so this is
+	 * mostly just to ensure that there haven't been any breaking changes to those functions.
+	 */
+	public function test_get_all_active_valid_plugins() {
+		self::touch( WP_PLUGIN_DIR . '/test1/test1.php' );
+		self::touch( WP_PLUGIN_DIR . '/test2/test2_x.php' );
+		self::touch( WP_PLUGIN_DIR . '/test3/test3.php' );
+
+		$orig_local_plugins   = get_option( 'active_plugins' );
+		$orig_network_plugins = get_site_option( 'active_sitewide_plugins' );
+
+		update_option(
+			'active_plugins',
+			array(
+				'test1/test1.php',
+				'test2/test2.php',
+			)
+		);
+
+		update_site_option(
+			'active_sitewide_plugins',
+			array( 'test3/test3.php' )
+		);
+
+		$active_valid_plugins = $this->sut->get_all_active_valid_plugins();
+
+		if ( is_multisite() ) {
+			$this->assertCount( 2, $active_valid_plugins );
+			$this->assertContains( WP_PLUGIN_DIR . '/test3/test3.php', $active_valid_plugins );
+		} else {
+			$this->assertCount( 1, $active_valid_plugins );
+		}
+
+		$this->assertContains( WP_PLUGIN_DIR . '/test1/test1.php', $active_valid_plugins );
+
+		if ( false === $orig_local_plugins ) {
+			delete_option( 'active_plugins' );
+		} else {
+			update_option( 'active_plugins', $orig_local_plugins );
+		}
+
+		if ( false === $orig_network_plugins ) {
+			delete_site_option( 'active_sitewide_plugins' );
+		} else {
+			update_site_option( 'active_sitewide_plugins', $orig_network_plugins );
+		}
+
+		$this->rmdir( WP_PLUGIN_DIR . '/test1' );
+		$this->rmdir( WP_PLUGIN_DIR . '/test2' );
+		$this->rmdir( WP_PLUGIN_DIR . '/test3' );
+		$this->delete_folders( WP_PLUGIN_DIR . '/test1' );
+		$this->delete_folders( WP_PLUGIN_DIR . '/test2' );
+		$this->delete_folders( WP_PLUGIN_DIR . '/test3' );
 	}
 
 	/**
@@ -123,23 +184,23 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 		$this->reset_legacy_proxy_mocks();
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_plugins' => function() {
+				'get_plugins' => function () {
 					return array(
 						'woocommerce/woocommerce.php' => array( 'WC tested up to' => '1.0' ),
-						'jetpack/jetpack.php' => array( 'foo' => 'bar' ),
+						'jetpack/jetpack.php'         => array( 'foo' => 'bar' ),
 						'classic-editor/classic-editor.php' => array( 'foo' => 'bar' ),
 					);
 				},
 			)
 		);
 
-		// Unix style
+		// Unix style.
 		$this->assertEquals( 'woocommerce/woocommerce.php', $this->sut->get_wp_plugin_id( 'woocommerce/woocommerce.php' ) );
 		$this->assertEquals( 'woocommerce/woocommerce.php', $this->sut->get_wp_plugin_id( '6.9.2/woocommerce.php' ) );
 		$this->assertEquals( 'woocommerce/woocommerce.php', $this->sut->get_wp_plugin_id( '/srv/htdocs/woocommerce/latest/woocommerce.php' ) );
 		$this->assertEquals( 'woocommerce/woocommerce.php', $this->sut->get_wp_plugin_id( '../../../../wordpress/plugins/woocommerce/latest/woocommerce.php' ) );
 
-		// Windows style
+		// Windows style.
 		$this->assertEquals( 'woocommerce/woocommerce.php', $this->sut->get_wp_plugin_id( 'woocommerce\\woocommerce.php' ) );
 		$this->assertEquals( 'woocommerce/woocommerce.php', $this->sut->get_wp_plugin_id( '6.9.2\\woocommerce.php' ) );
 		$this->assertEquals( 'woocommerce/woocommerce.php', $this->sut->get_wp_plugin_id( 'D:\\WordPress\\plugins\\woocommerce\\6.9.2\\woocommerce.php' ) );
@@ -155,7 +216,7 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 	private function mock_plugin_functions() {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_plugins'      => function() {
+				'get_plugins'      => function () {
 					return array(
 						'woo_aware_1'     => array( 'WC tested up to' => '1.0' ),
 						'woo_aware_2'     => array( 'WC tested up to' => '2.0' ),
@@ -164,10 +225,10 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 						'not_woo_aware_2' => array( 'foo' => 'bar' ),
 					);
 				},
-				'is_plugin_active' => function( $plugin_name ) {
+				'is_plugin_active' => function ( $plugin_name ) {
 					return 'woo_aware_3' !== $plugin_name;
 				},
-				'get_plugin_data'  => function( $plugin_name ) {
+				'get_plugin_data'  => function ( $plugin_name ) {
 					return StringUtil::ends_with( $plugin_name, 'woo_aware_1' ) ?
 						array(
 							'WC tested up to' => '1.0',
@@ -177,5 +238,77 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 				},
 			)
 		);
+	}
+
+	/**
+	 * @testdox Test the `get_items_considered_incompatible` method.
+	 */
+	public function test_get_items_considered_incompatible() {
+		$this->reset_container_resolutions();
+
+		add_action(
+			'woocommerce_register_feature_definitions',
+			function ( $features_controller ) {
+				$features = array(
+					'test_feature_1' => array(
+						'name' => 'Test feature 1',
+						'plugins_are_incompatible_by_default' => true,
+					),
+					'test_feature_2' => array(
+						'name' => 'Test feature 2',
+						'plugins_are_incompatible_by_default' => false,
+					),
+					'test_feature_3' => array(
+						'name' => 'Test feature 2',
+					),
+				);
+
+				foreach ( $features as $slug => $definition ) {
+					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
+				}
+			},
+			20
+		);
+
+		$plugin_compatibility_info = array(
+			'compatible'   => array(
+				'compatible_1.php',
+				'compatible_2.php',
+			),
+			'incompatible' => array(
+				'incompatible_1.php',
+				'incompatible_2.php',
+			),
+			'uncertain'    => array(
+				'uncertain_1.php',
+				'uncertain_2.php',
+			),
+		);
+
+		$expected = array(
+			'incompatible_1.php',
+			'incompatible_2.php',
+			'uncertain_1.php',
+			'uncertain_2.php',
+		);
+
+		$actual = $this->sut->get_items_considered_incompatible( 'test_feature_1', $plugin_compatibility_info );
+
+		sort( $actual );
+		sort( $expected );
+		$this->assertEquals( $expected, $actual );
+
+		$expected = array(
+			'incompatible_1.php',
+			'incompatible_2.php',
+		);
+
+		$actual = $this->sut->get_items_considered_incompatible( 'test_feature_2', $plugin_compatibility_info );
+		sort( $actual );
+		$this->assertEquals( $expected, $actual );
+
+		$actual = $this->sut->get_items_considered_incompatible( 'test_feature_3', $plugin_compatibility_info );
+		sort( $actual );
+		$this->assertEquals( $expected, $actual );
 	}
 }

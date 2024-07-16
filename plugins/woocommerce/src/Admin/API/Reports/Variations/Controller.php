@@ -39,6 +39,7 @@ class Controller extends ReportsController implements ExportableInterface {
 	 */
 	protected $param_mapping = array(
 		'variations' => 'variation_includes',
+		'products'   => 'product_includes',
 	);
 
 	/**
@@ -381,6 +382,15 @@ class Controller extends ReportsController implements ExportableInterface {
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wp_validate_boolean',
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['products']            = array(
+			'description'       => __( 'Limit result to items with specified product ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
 		);
 
 		return $params;

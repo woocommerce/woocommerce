@@ -4522,8 +4522,8 @@ table {
 	display: flex;
 	align-items: center;
 
-	.page-title-action {
-		margin: 0 12px;
+	.page-title-action, .page-title-action:active {
+		margin: 7px 0 0 10px;
 	}
 }
 
@@ -5173,6 +5173,10 @@ img.help_tip {
 			float: none;
 		}
 
+		td.disabled {
+			opacity: 0.5;
+		}
+
 		fieldset {
 			margin-top: 4px;
 
@@ -5254,6 +5258,13 @@ img.help_tip {
 		.wc_payment_gateways_wrapper,
 		.wc_emails_wrapper {
 			padding: 0 15px 10px 0;
+		}
+
+		legend {
+			font-weight: 700;
+			line-height: 1.4;
+			padding: 5px 0 0;
+			margin: 0 0 8px !important;
 		}
 	}
 
@@ -6515,8 +6526,8 @@ img.help_tip {
 
 	.upload_image_button {
 		display: block;
-		width: 64px;
-		height: 64px;
+		width: 128px;
+		height: 128px;
 		float: left;
 		margin-right: 20px;
 		position: relative;
@@ -6537,8 +6548,8 @@ img.help_tip {
 			right: 0;
 			bottom: 0;
 			text-align: center;
-			line-height: 64px;
-			font-size: 64px;
+			line-height: 128px;
+			font-size: 128px;
 			font-weight: 400;
 			-webkit-font-smoothing: antialiased;
 		}
@@ -6643,6 +6654,12 @@ img.help_tip {
 	&.form-row-full {
 		clear: both;
 	}
+}
+
+.form-flex-box {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 
 /**

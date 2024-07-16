@@ -26,3 +26,4 @@ add_filter( 'woocommerce_admin_get_feature_config', function( $feature_config ) 
     }
 	return $feature_config;
 } );
+

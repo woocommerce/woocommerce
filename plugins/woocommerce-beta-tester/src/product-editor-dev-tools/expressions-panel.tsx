@@ -1,79 +1,88 @@
 /**
  * External dependencies
  */
-import { Product } from '@woocommerce/data';
-import { evaluate } from '@woocommerce/expression-evaluation';
-import { Button } from '@wordpress/components';
-import { useState } from 'react';
+import { useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import { ExpressionField } from './expression-field';
+
+type ExpressionItem = {
+	expression: string;
+	mode: 'view' | 'edit';
+};
 
 export function ExpressionsPanel( {
 	evaluationContext,
 }: {
-	evaluationContext: {
-		postType: string;
-		editedProduct: Product;
-	};
+	evaluationContext?: object;
 } ) {
-	const [ expressions, setExpressions ] = useState< Array< string > >( [] );
-	const [ expressionToAdd, setExpressionToAdd ] = useState< string >( '' );
+	const [ expressionItems, setExpressionItems ] = useState<
+		ExpressionItem[]
+	>( [] );
 
-	const handleExpressionToAddChange = (
-		event: React.ChangeEvent< HTMLTextAreaElement >
-	) => {
-		setExpressionToAdd( event.target.value );
-	};
+	function enterEditMode( index: number ) {
+		const newItems = [ ...expressionItems ];
+		newItems[ index ].mode = 'edit';
+		setExpressionItems( newItems );
+	}
 
-	const addExpression = () => {
-		setExpressions( [ ...expressions, expressionToAdd ] );
-		setExpressionToAdd( '' );
-	};
+	function cancelEdit( index: number ) {
+		const newItems = [ ...expressionItems ];
+		newItems[ index ].mode = 'view';
+		setExpressionItems( newItems );
+	}
 
-	const evaluateExpression = ( expression: string ) => {
-		let result;
+	function addExpression( expression: string ) {
+		setExpressionItems( [
+			...expressionItems,
+			{ expression, mode: 'view' },
+		] );
+	}
 
-		try {
-			result = evaluate( expression, evaluationContext );
-		} catch ( error ) {
-			result = error;
-		}
+	function updateExpression( index: number, expression: string ) {
+		const newItems = [ ...expressionItems ];
+		newItems[ index ].expression = expression;
+		newItems[ index ].mode = 'view';
+		setExpressionItems( newItems );
+	}
 
-		return String( result );
-	};
+	function removeExpression( index: number ) {
+		return () => {
+			const newItems = expressionItems.filter(
+				( item, i ) => i !== index
+			);
+			setExpressionItems( newItems );
+		};
+	}
 
 	return (
-		<div className="woocommerce-product-editor-dev-tools-expressions">
-			{ expressions.length === 0 && (
-				<div className="woocommerce-product-editor-dev-tools-expressions-list empty">
-					Enter an expression to evaluate below.
-				</div>
-			) }
-			{ expressions.length > 0 && (
-				<ul className="woocommerce-product-editor-dev-tools-expressions-list">
-					{ expressions.map( ( expression, index ) => (
-						<li key={ index }>
-							<div>
-								<span className="woocommerce-product-editor-dev-tools-expressions-list-prompt">
-									&gt;
-								</span>{ ' ' }
-								{ expression }
-							</div>
-							<div>
-								<span className="woocommerce-product-editor-dev-tools-expressions-list-prompt">
-									&lt;
-								</span>{ ' ' }
-								{ evaluateExpression( expression ) }
-							</div>
-						</li>
-					) ) }
-				</ul>
-			) }
-			<div className="woocommerce-product-editor-dev-tools-expression-editor">
-				<textarea
-					value={ expressionToAdd }
-					onChange={ handleExpressionToAddChange }
+		<ul className="woocommerce-product-editor-dev-tools-expressions-list">
+			{ expressionItems.map( ( expressionItem, index ) => (
+				<li key={ index }>
+					<ExpressionField
+						expression={ expressionItem.expression }
+						evaluationContext={ evaluationContext }
+						mode={ expressionItem.mode }
+						onEnterEdit={ () => enterEditMode( index ) }
+						onCancel={ () => cancelEdit( index ) }
+						onUpdate={ ( expression ) =>
+							updateExpression( index, expression )
+						}
+						onRemove={ removeExpression( index ) }
+					/>
+				</li>
+			) ) }
+			<li key={ expressionItems.length + 1 }>
+				<ExpressionField
+					evaluationContext={ evaluationContext }
+					mode={ 'edit' }
+					onUpdate={ ( expression ) => addExpression( expression ) }
+					updateLabel={ __( 'Add', 'woocommerce' ) }
 				/>
-				<Button onClick={ addExpression }>Add</Button>
-			</div>
-		</div>
+			</li>
+		</ul>
 	);
 }

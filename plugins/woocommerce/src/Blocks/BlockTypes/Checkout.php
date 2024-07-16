@@ -36,9 +36,9 @@ class Checkout extends AbstractBlock {
 		// This prevents the page redirecting when the cart is empty. This is so the editor still loads the page preview.
 		add_filter(
 			'woocommerce_checkout_redirect_empty_cart',
-			function( $return ) {
+			function ( $redirect_empty_cart ) {
 				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				return isset( $_GET['_wp-find-template'] ) ? false : $return;
+				return isset( $_GET['_wp-find-template'] ) ? false : $redirect_empty_cart;
 			}
 		);
 
@@ -94,10 +94,17 @@ class Checkout extends AbstractBlock {
 	 * @return array|string
 	 */
 	protected function get_block_type_script( $key = null ) {
+		$dependencies = [];
+
+		// Load password strength meter script asynchronously if needed.
+		if ( ! is_user_logged_in() && 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
+			$dependencies[] = 'zxcvbn-async';
+		}
+
 		$script = [
 			'handle'       => 'wc-' . $this->block_name . '-block-frontend',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-frontend' ),
-			'dependencies' => [],
+			'dependencies' => $dependencies,
 		];
 		return $key ? $script[ $key ] : $script;
 	}
@@ -354,6 +361,7 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ) );
 		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );
 		$this->asset_data_registry->add( 'forcedBillingAddress', 'billing_only' === get_option( 'woocommerce_ship_to_destination' ) );
+		$this->asset_data_registry->add( 'generatePassword', filter_var( get_option( 'woocommerce_registration_generate_password' ), FILTER_VALIDATE_BOOLEAN ) );
 		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled() );
 		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled() );
 		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled() );
@@ -377,7 +385,7 @@ class Checkout extends AbstractBlock {
 			$shipping_methods           = WC()->shipping()->get_shipping_methods();
 			$formatted_shipping_methods = array_reduce(
 				$shipping_methods,
-				function( $acc, $method ) {
+				function ( $acc, $method ) {
 					if ( in_array( $method->id, LocalPickupUtils::get_local_pickup_method_ids(), true ) ) {
 						return $acc;
 					}
@@ -405,7 +413,7 @@ class Checkout extends AbstractBlock {
 			$payment_methods           = $this->get_enabled_payment_gateways();
 			$formatted_payment_methods = array_reduce(
 				$payment_methods,
-				function( $acc, $method ) {
+				function ( $acc, $method ) {
 					$acc[] = [
 						'id'          => $method->id,
 						'title'       => $method->method_title,
@@ -427,7 +435,7 @@ class Checkout extends AbstractBlock {
 			$all_plugins             = \get_plugins(); // Note that `get_compatible_plugins_for_feature` calls `get_plugins` internally, so this is already in cache.
 			$incompatible_extensions = array_reduce(
 				$declared_extensions['incompatible'],
-				function( $acc, $item ) use ( $all_plugins ) {
+				function ( $acc, $item ) use ( $all_plugins ) {
 					$plugin      = $all_plugins[ $item ] ?? null;
 					$plugin_id   = $plugin['TextDomain'] ?? dirname( $item, 2 );
 					$plugin_name = $plugin['Name'] ?? $plugin_id;
@@ -465,7 +473,7 @@ class Checkout extends AbstractBlock {
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 		return array_filter(
 			$payment_gateways,
-			function( $payment_gateway ) {
+			function ( $payment_gateway ) {
 				return 'yes' === $payment_gateway->enabled;
 			}
 		);
@@ -500,7 +508,7 @@ class Checkout extends AbstractBlock {
 			$payment_methods[ $payment_method_group ] = array_values(
 				array_filter(
 					$saved_payment_methods,
-					function( $saved_payment_method ) use ( $payment_gateways ) {
+					function ( $saved_payment_method ) use ( $payment_gateways ) {
 						return in_array( $saved_payment_method['method']['gateway'], array_keys( $payment_gateways ), true );
 					}
 				)
