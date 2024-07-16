@@ -30,12 +30,14 @@ class Init extends RemoteSpecsEngine {
 		add_filter( 'option_woocommerce_gateway_order', array( __CLASS__, 'set_gateway_top_of_list' ) );
 		add_filter( 'default_option_woocommerce_gateway_order', array( __CLASS__, 'set_gateway_top_of_list' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_payment_method_promotions' ) );
+		add_action( 'update_option_woocommerce_default_country', array( $this, 'delete_specs_transient' ) );
 	}
 
 	/**
 	 * Possibly registers the pre install wc pay promoted gateway.
 	 *
 	 * @param array $gateways list of gateway classes.
+	 *
 	 * @return array list of gateway classes.
 	 */
 	public static function possibly_register_pre_install_wc_pay_promotion_gateway( $gateways ) {
