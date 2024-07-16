@@ -46,6 +46,7 @@ const getSharedPlugins = ( {
 					exclude: [
 						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../docs/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					cwd: process.cwd(),
@@ -101,6 +102,7 @@ const getCoreConfig = ( options = {} ) => {
 					exclude: [
 						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../docs/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {
@@ -216,6 +218,7 @@ const getMainConfig = ( options = {} ) => {
 					exclude: [
 						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../docs/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {
@@ -358,6 +361,7 @@ const getFrontConfig = ( options = {} ) => {
 					exclude: [
 						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../docs/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {
@@ -481,6 +485,7 @@ const getPaymentsConfig = ( options = {} ) => {
 					exclude: [
 						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../docs/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {
@@ -593,6 +598,7 @@ const getExtensionsConfig = ( options = {} ) => {
 					exclude: [
 						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../docs/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {
@@ -705,6 +711,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 					exclude: [
 						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../docs/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {
@@ -869,6 +876,7 @@ const getStylingConfig = ( options = {} ) => {
 					exclude: [
 						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../docs/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {
@@ -991,6 +999,7 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 					exclude: [
 						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../docs/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: [
@@ -1079,6 +1088,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 					exclude: [
 						/node_modules/,
 						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../docs/' ),
 						path.resolve( __dirname, '../vendor/' ),
 					],
 					use: {

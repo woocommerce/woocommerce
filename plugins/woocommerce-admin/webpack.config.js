@@ -129,6 +129,7 @@ const webpackConfig = {
 				exclude: [
 					/node_modules/,
 					path.resolve( __dirname, './build/' ),
+					path.resolve( __dirname, './docs/' ),
 					path.resolve( __dirname, './vendor/' ),
 				],
 				use: {
