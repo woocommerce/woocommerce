@@ -183,12 +183,12 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 			}
 		);
 		const pluginsList = await listPluginsResponse.json();
-		const gutenbergPlugin = pluginsList.find(
+		const withGutenbergPlugin = pluginsList.find(
 			( { textdomain } ) => textdomain === 'gutenberg'
 		);
 
-		// eslint-disable-next-line playwright/no-conditional-in-test
-		if ( gutenbergPlugin ) {
+		// if testing with Gutenberg, perform Gutenberg-specific testing
+		if ( withGutenbergPlugin ) {
 			// Get all the content between the header and the footer.
 			const homepageHTML = await page
 				.locator(
