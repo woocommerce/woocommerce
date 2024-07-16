@@ -48,6 +48,8 @@ class WC_Helper_Admin {
 	/**
 	 * User meta key prefix to store timestamp of last dismissed of any product
 	 * usage notices. There's no product ID in the meta key.
+	 *
+	 * @var string
 	 */
 	const CHECK_SUBSCRIPTION_LAST_DISMISSED_TIMESTAMP_META = '_woocommerce_helper_check_subscription_last_dismissed_timestamp';
 
