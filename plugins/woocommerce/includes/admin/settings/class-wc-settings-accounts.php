@@ -239,20 +239,22 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 		);
 
-		// Hide username setting when using the block based checkout.
+		// Change settings when using the block based checkout.
 		if ( CartCheckoutUtils::is_checkout_block_default() ) {
+			$account_settings = array_filter(
+				$account_settings,
+				function ( $setting ) {
+					return 'woocommerce_registration_generate_username' !== $setting['id'];
+				},
+			);
 			$account_settings = array_map(
 				function ( $setting ) {
-					switch ( $setting['id'] ) {
-						case 'woocommerce_registration_generate_username':
-							return array();
-						case 'woocommerce_registration_generate_password':
-							unset( $setting['checkboxgroup'] );
-							break;
+					if ( 'woocommerce_registration_generate_password' === $setting['id'] ) {
+						unset( $setting['checkboxgroup'] );
 					}
 					return $setting;
 				},
-				$account_settings,
+				$account_settings
 			);
 		}
 
@@ -297,7 +299,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					});
 				}
 
-				checkboxes.forEach(cb => cb.addEventListener('change', updateInputs));
+				checkboxes.forEach(cb => cb && cb.addEventListener('change', updateInputs));
 				updateInputs(); // Initial state
 			});
 		</script>
