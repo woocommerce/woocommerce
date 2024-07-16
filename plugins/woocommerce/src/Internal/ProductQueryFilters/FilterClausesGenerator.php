@@ -61,8 +61,13 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 			return $args;
 		}
 
+		$stock_statuses = array_intersect(
+			array_map( 'esc_sql', $stock_statuses ),
+			array_keys( wc_get_product_stock_status_options() )
+		);
+
 		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-		$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . implode( '","', array_map( 'esc_sql', $stock_statuses ) ) . '")';
+		$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . implode( '","', $stock_statuses ) . '")';
 
 		return $args;
 	}
