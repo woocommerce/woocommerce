@@ -3728,22 +3728,31 @@ function wc_get_price_html_from_text() {
 }
 
 /**
- * Get logout endpoint.
+ * Get the redirect URL after logging out. Defaults to the my account page.
+ *
+ * @since 9.2.0
+ * @return string
+ */
+function wc_get_logout_redirect_url() {
+	/**
+	 * Filters the logout redirect URL.
+	 *
+	 * @since 2.6.9
+	 * @param string $logout_url Logout URL.
+	 * @return string
+	 */
+	return apply_filters( 'woocommerce_logout_default_redirect_url', wc_get_page_permalink( 'myaccount' ) );
+}
+
+/**
+ * Get logout link.
  *
  * @since  2.6.9
- *
  * @param string $redirect Redirect URL.
- *
  * @return string
  */
 function wc_logout_url( $redirect = '' ) {
-	$redirect = $redirect ? $redirect : apply_filters( 'woocommerce_logout_default_redirect_url', wc_get_page_permalink( 'myaccount' ) );
-
-	if ( get_option( 'woocommerce_logout_endpoint' ) ) {
-		return wp_nonce_url( wc_get_endpoint_url( 'customer-logout', '', $redirect ), 'customer-logout' );
-	}
-
-	return wp_logout_url( $redirect );
+	return wp_logout_url( $redirect ? $redirect : wc_get_logout_redirect_url() );
 }
 
 /**
