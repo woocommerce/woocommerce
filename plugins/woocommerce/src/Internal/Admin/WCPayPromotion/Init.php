@@ -15,8 +15,6 @@ use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
  * WC Pay Promotion engine.
  */
 class Init extends RemoteSpecsEngine {
-	const EXPLAT_VARIATION_PREFIX = 'woocommerce_wc_pay_promotion_payment_methods_table_';
-
 	/**
 	 * Constructor.
 	 */
@@ -34,7 +32,7 @@ class Init extends RemoteSpecsEngine {
 	}
 
 	/**
-	 * Possibly registers the pre install wc pay promoted gateway.
+	 * Possibly registers the pre-install WooPayments promoted gateway.
 	 *
 	 * @param array $gateways list of gateway classes.
 	 *
