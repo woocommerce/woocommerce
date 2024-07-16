@@ -63,6 +63,7 @@ class WC_Helper {
 		include_once __DIR__ . '/class-wc-helper-admin.php';
 		include_once __DIR__ . '/class-wc-helper-subscriptions-api.php';
 		include_once __DIR__ . '/class-wc-helper-orders-api.php';
+		include_once __DIR__ . '/class-wc-product-usage-notice.php';
 	}
 
 	/**
