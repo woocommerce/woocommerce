@@ -11,6 +11,7 @@ const {
 	getSiteEditorConfig,
 	getStylingConfig,
 	getInteractivityAPIConfig,
+	getCartAndCheckoutFrontendConfig,
 } = require( './bin/webpack-configs.js' );
 
 // Only options shared between all configs should be defined here.
@@ -32,6 +33,11 @@ const sharedConfig = {
 		ignored: /node_modules/,
 	},
 	devtool: NODE_ENV === 'development' ? 'source-map' : false,
+};
+
+const CartAndCheckoutFrontendConfig = {
+	...sharedConfig,
+	...getCartAndCheckoutFrontendConfig( { alias: getAlias() } ),
 };
 
 // Core config for shared libraries.
@@ -95,6 +101,7 @@ const SiteEditorConfig = {
 };
 
 module.exports = [
+	CartAndCheckoutFrontendConfig,
 	CoreConfig,
 	MainConfig,
 	FrontendConfig,

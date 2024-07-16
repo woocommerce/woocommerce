@@ -269,6 +269,16 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 
 			await getVariationsResponsePromise;
 
+			// Wait for response only to avoid flaky filling regular price below in Inventory tab
+			const waitResponse = page.waitForResponse(
+				( response ) =>
+					response
+						.url()
+						.includes(
+							'wp-json/wc-admin/options?options=woocommerce_dimension_unit'
+						) && response.status() === 200
+			);
+
 			await page
 				.locator( '.woocommerce-product-variations__table-body > div' )
 				.first()
@@ -280,15 +290,17 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 				.getByRole( 'tab', { name: 'General' } )
 				.click();
 
-			await page.getByLabel( 'Regular price', { exact: true } ).click();
-
 			await page
 				.getByLabel( 'Regular price', { exact: true } )
 				.waitFor( { state: 'visible' } );
 
+			await waitResponse;
+
+			await page.getByLabel( 'Regular price', { exact: true } ).click();
+
 			await page
 				.getByLabel( 'Regular price', { exact: true } )
-				.pressSequentially( '100' );
+				.fill( '100' );
 
 			await page
 				.locator( '.woocommerce-product-tabs' )

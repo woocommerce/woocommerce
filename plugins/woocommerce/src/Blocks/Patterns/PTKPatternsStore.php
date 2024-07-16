@@ -11,11 +11,6 @@ use WP_Upgrader;
 class PTKPatternsStore {
 	const TRANSIENT_NAME = 'ptk_patterns';
 
-	// Some patterns need to be excluded because they have dependencies which
-	// are not installed by default (like Jetpack). Otherwise, the user
-	// would see an error when trying to insert them in the editor.
-	const EXCLUDED_PATTERNS = array( '13923', '14781', '14779', '13666', '13664', '13660', '13588', '14922', '14880', '13596', '13967', '13958', '15050', '15027' );
-
 	const CATEGORY_MAPPING = array(
 		'testimonials' => 'reviews',
 	);
@@ -121,17 +116,16 @@ class PTKPatternsStore {
 	}
 
 	/**
-	 * Filter patterns to exclude those with the given IDs.
+	 * Filter the patterns that have external dependencies.
 	 *
 	 * @param array $patterns The patterns to filter.
-	 * @param array $pattern_ids The pattern IDs to exclude.
 	 * @return array
 	 */
-	private function filter_patterns( array $patterns, array $pattern_ids ) {
+	private function filter_patterns( array $patterns ) {
 		return array_values(
 			array_filter(
 				$patterns,
-				function ( $pattern ) use ( $pattern_ids ) {
+				function ( $pattern ) {
 					if ( ! isset( $pattern['ID'] ) ) {
 						return true;
 					}
@@ -140,7 +134,11 @@ class PTKPatternsStore {
 						return false;
 					}
 
-					return ! in_array( (string) $pattern['ID'], $pattern_ids, true );
+					if ( $this->has_external_dependencies( $pattern ) ) {
+						return false;
+					}
+
+					return true;
 				}
 			)
 		);
@@ -194,6 +192,7 @@ class PTKPatternsStore {
 					'_woo_about',
 					'_woo_reviews',
 					'_woo_social_media',
+					'_woo_woocommerce',
 					'_dotcom_imported_intro',
 					'_dotcom_imported_about',
 					'_dotcom_imported_services',
@@ -212,7 +211,7 @@ class PTKPatternsStore {
 			return;
 		}
 
-		$patterns = $this->filter_patterns( $patterns, self::EXCLUDED_PATTERNS );
+		$patterns = $this->filter_patterns( $patterns );
 		$patterns = $this->map_categories( $patterns );
 
 		set_transient( self::TRANSIENT_NAME, $patterns );
@@ -251,5 +250,26 @@ class PTKPatternsStore {
 			},
 			$patterns
 		);
+	}
+
+	/**
+	 * Check if the pattern has external dependencies.
+	 *
+	 * @param array $pattern The pattern to check.
+	 *
+	 * @return bool
+	 */
+	private function has_external_dependencies( $pattern ) {
+		if ( ! isset( $pattern['dependencies'] ) || ! is_array( $pattern['dependencies'] ) ) {
+			return false;
+		}
+
+		foreach ( $pattern['dependencies'] as $dependency ) {
+			if ( 'woocommerce' !== $dependency ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

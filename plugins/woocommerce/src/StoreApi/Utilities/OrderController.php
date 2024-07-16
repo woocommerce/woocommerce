@@ -100,7 +100,6 @@ class OrderController {
 
 		// Ensure cart is current.
 		if ( $update_totals ) {
-			wc()->cart->calculate_shipping();
 			wc()->cart->calculate_totals();
 		}
 

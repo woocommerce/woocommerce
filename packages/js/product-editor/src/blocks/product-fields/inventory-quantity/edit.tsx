@@ -52,10 +52,13 @@ export function Edit( {
 		`stock_quantity-${ clientId }`,
 		async function stockQuantityValidator() {
 			if ( manageStock && stockQuantity && stockQuantity < 0 ) {
-				return __(
-					'Stock quantity must be a positive number.',
-					'woocommerce'
-				);
+				return {
+					message: __(
+						'Stock quantity must be a positive number.',
+						'woocommerce'
+					),
+					context: clientId,
+				};
 			}
 		},
 		[ manageStock, stockQuantity ]
