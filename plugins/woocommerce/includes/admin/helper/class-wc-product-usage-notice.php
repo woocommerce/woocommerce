@@ -229,18 +229,18 @@ class WC_Product_Usage_Notice {
 
 		$subscribe_url = add_query_arg( array(
 			'add-to-cart'  => self::$current_notice_rule['id'],
-			'utm_source'   => 'pu_' . self::$current_notice_rule['show_as'],
+			'utm_source'   => 'pu',
 			'utm_medium'   => 'product',
-			'utm_campaign' => 'pu',
+			'utm_campaign' => 'pu_modal_subscribe',
 		), 'https://woocommerce.com/cart/' );
 
 		$renew_url = add_query_arg( array(
 			'renew_product' => self::$current_notice_rule['id'],
 			'product_key'   => self::$current_notice_rule['state']['key'],
 			'order_id'      => self::$current_notice_rule['state']['order_id'],
-			'utm_source'    => 'pu_' . self::$current_notice_rule['show_as'],
+			'utm_source'    => 'pu',
 			'utm_medium'    => 'product',
-			'utm_campaign'  => 'pu',
+			'utm_campaign'  => 'pu_modal_renew',
 		), 'https://woocommerce.com/cart/' );
 
 		wp_localize_script(
