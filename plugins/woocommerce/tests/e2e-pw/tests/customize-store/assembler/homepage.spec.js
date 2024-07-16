@@ -188,6 +188,7 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 		);
 
 		// if testing with Gutenberg, perform Gutenberg-specific testing
+		// eslint-disable-next-line playwright/no-conditional-in-test
 		if ( withGutenbergPlugin ) {
 			// Get all the content between the header and the footer.
 			const homepageHTML = await page
@@ -201,24 +202,9 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 				await expect(
 					await element.getAttribute( 'class' )
 				).toMatchSnapshot( {
-					name: `gutenberg-selected-homepage-blocks-class-frontend-${ index }`,
-				} );
-				index++;
-			}
-		} else {
-			// Get all the content between the header and the footer.
-			const homepageHTML = await page
-				.locator(
-					'//header/following-sibling::*[following-sibling::footer]'
-				)
-				.all();
-
-			let index = 0;
-			for ( const element of homepageHTML ) {
-				await expect(
-					await element.getAttribute( 'class' )
-				).toMatchSnapshot( {
-					name: `selected-homepage-blocks-class-frontend-${ index }`,
+					name: `${
+						withGutenbergPlugin ? 'gutenberg' : ''
+					}-selected-homepage-blocks-class-frontend-${ index }`,
 				} );
 				index++;
 			}
