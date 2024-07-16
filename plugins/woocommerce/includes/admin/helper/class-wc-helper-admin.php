@@ -191,45 +191,134 @@ class WC_Helper_Admin {
 			return;
 		}
 
-		self::$current_notice_rule = self::current_notice_rule( $screen );
+		self::$current_notice_rule = self::get_current_notice_rule( $screen );
 		if ( empty( self::$current_notice_rule ) ) {
 			return;
 		}
 
 		$product_id = self::$current_notice_rule['id'];
 
-		// Check when the last time user clicked "remind later". If it's still
-		// in the wait period, don't show the nudge.
-		$last_remind_later_ts    = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX . $product_id, true ) );
-		$wait_after_remind_later = self::$current_notice_rule['wait_in_seconds_after_remind_later'];
-		if ( $last_remind_later_ts > 0 && ( time() - $last_remind_later_ts ) < $wait_after_remind_later ) {
-			return;
-		}
-
-		// Don't show the nudge after dismissed max_dismissals times.
-		$dismiss_count  = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX . $product_id, true ) );
-		$max_dismissals = self::$current_notice_rule['max_dismissals'];
-		if ( $dismiss_count >= $max_dismissals ) {
-			return;
-		}
-
-		// Check the global cooldown (any dismisses) period. If it's still in
-		// the wait period, don't show the nudge.
-		$global_last_dismissed_ts = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_LAST_DISMISSED_TIMESTAMP_META, true) );
-		$wait_after_any_dismisses = self::$product_usage_notice_rules['wait_in_seconds_after_any_dismisses'];
-		if ( $global_last_dismissed_ts > 0 && ( time() - $global_last_dismissed_ts ) < $wait_after_any_dismisses ) {
-			return;
-		}
-
-		// Check when the last time user dismissed the nudge. If it's still in
-		// the wait period, don't show the nudge.
-		$last_dismissed_ts  = absint( get_user_meta( $user_id, self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX . $product_id, true) );
-		$wait_after_dismiss = self::$current_notice_rule['wait_in_seconds_after_dismiss'];
-		if ( $last_dismissed_ts > 0 && ( time() - $last_dismissed_ts ) < $wait_after_dismiss ) {
+		if ( self::is_notice_throttled( $user_id, $product_id ) ) {
 			return;
 		}
 
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_product_usage_notice_scripts' ) );
+	}
+
+	/**
+	 * Check whether the user clicked "remind later" recently.
+	 *
+	 * @param int $user_id    User ID.
+	 * @param int $product_id Product ID.
+	 *
+	 * @return bool
+	 */
+	private static function is_remind_later_clicked_recently( int $user_id, int $product_id ): bool {
+		$last_remind_later_ts = absint(
+			get_user_meta(
+				$user_id,
+				self::CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX . $product_id,
+				true
+			)
+		);
+		if ( 0 === $last_remind_later_ts ) {
+			return false;
+		}
+
+		$seconds_since_clicked_remind_later = time() - $last_remind_later_ts;
+
+		$wait_after_remind_later = self::$current_notice_rule['wait_in_seconds_after_remind_later'];
+
+		return $seconds_since_clicked_remind_later < $wait_after_remind_later;
+	}
+
+	/**
+	 * Check whether the user has reached max dismissals of product usage notice.
+	 *
+	 * @param int $user_id    User ID.
+	 * @param int $product_id Product ID.
+	 *
+	 * @return bool
+	 */
+	private static function has_reached_max_dismissals( int $user_id, int $product_id ): bool {
+		$dismiss_count = absint(
+			get_user_meta(
+				$user_id,
+				self::CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX . $product_id,
+				true
+			)
+		);
+		$max_dismissals = self::$current_notice_rule['max_dismissals'];
+
+		return $dismiss_count >= $max_dismissals;
+	}
+
+	/**
+	 * Check whether the user dismissed any product usage notices recently.
+	 *
+	 * @param int $user_id User ID.
+	 *
+	 * @return bool
+	 */
+	private static function is_any_notices_dismissed_recently( int $user_id ): bool {
+		$global_last_dismissed_ts = absint(
+			get_user_meta(
+				$user_id,
+				self::CHECK_SUBSCRIPTION_LAST_DISMISSED_TIMESTAMP_META,
+				true
+			)
+		);
+		if ( 0 === $global_last_dismissed_ts ) {
+			return false;
+		}
+
+		$seconds_since_dismissed = time() - $global_last_dismissed_ts;
+
+		$wait_after_any_dismisses = self::$product_usage_notice_rules['wait_in_seconds_after_any_dismisses'];
+
+		return $seconds_since_dismissed < $wait_after_any_dismisses;
+	}
+
+	/**
+	 * Check whether the user dismissed given product usage notice recently.
+	 *
+	 * @param int $user_id    User ID.
+	 * @param int $product_id Product ID.
+	 *
+	 * @return bool
+	 */
+	private static function is_product_notice_dismissed_recently( int $user_id, int $product_id ): bool {
+		$last_dismissed_ts = absint(
+			get_user_meta(
+				$user_id,
+				self::CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX . $product_id,
+				true
+			)
+		);
+		if ( 0 === $last_dismissed_ts ) {
+			return false;
+		}
+
+		$seconds_since_dismissed = time() - $last_dismissed_ts;
+
+		$wait_after_dismiss = self::$current_notice_rule['wait_in_seconds_after_dismiss'];
+
+		return $seconds_since_dismissed < $wait_after_dismiss;
+	}
+
+	/**
+	 * Check whether current notice is throttled for the user and product.
+	 *
+	 * @param int $user_id    User ID.
+	 * @param int $product_id Product ID.
+	 *
+	 * @return bool
+	 */
+	private static function is_notice_throttled( int $user_id, int $product_id ): bool {
+		return self::is_remind_later_clicked_recently( $user_id, $product_id ) ||
+			self::has_reached_max_dismissals( $user_id, $product_id ) ||
+			self::is_any_notices_dismissed_recently( $user_id ) ||
+			self::is_product_notice_dismissed_recently( $user_id, $product_id );
 	}
 
 	/**
@@ -276,7 +365,14 @@ class WC_Helper_Admin {
 		);
 	}
 
-	private static function current_notice_rule( $screen ) {
+	/**
+	 * Get product usage notice rule from a given WP_Screen object.
+	 *
+	 * @param \WP_Screen Current \WP_Screen object.
+	 *
+	 * @return array
+	 */
+	private static function get_current_notice_rule( $screen ) {
 		foreach ( self::$product_usage_notice_rules['products'] as $product_id => $param ) {
 			if ( ! isset( $param['screens'][ $screen->id ] ) ) {
 				continue;
