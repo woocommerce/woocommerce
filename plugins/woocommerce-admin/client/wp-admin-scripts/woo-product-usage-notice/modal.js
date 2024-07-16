@@ -26,7 +26,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import extensionsSvg from './illustration.svg';
 import { dismissRequest, remindLaterRequest } from './actions';
 
-export default function CheckSubscriptionModal( {
+export default function ProductUsageNoticeModal( {
 	renewUrl,
 	subscribeUrl,
 	productId,
@@ -243,7 +243,7 @@ export default function CheckSubscriptionModal( {
 		<Modal
 			style={ { borderRadius: '2px' } }
 			onRequestClose={ dismiss }
-			className="woocommerce-check-subscription-modal"
+			className="woocommerce-product-usage-notice"
 		>
 			<Flex
 				gap={ 0 }

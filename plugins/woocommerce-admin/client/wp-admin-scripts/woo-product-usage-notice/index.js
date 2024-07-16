@@ -6,7 +6,7 @@ import { render } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import CheckSubscriptionModal from './modal';
+import ProductUsageNoticeModal from './modal';
 import './style.scss';
 
 const {
@@ -22,13 +22,13 @@ const {
 	colorScheme,
 	subscriptionState,
 	screenId,
-} = window.wooCheckSubscriptionData;
+} = window.wooProductUsageNotice;
 
 const container = document.createElement( 'div' );
-container.setAttribute( 'id', 'woo-check-subscription' );
+container.setAttribute( 'id', 'woo-product-usage-notice' );
 
 render(
-	<CheckSubscriptionModal
+	<ProductUsageNoticeModal
 		renewUrl={ renewUrl }
 		subscribeUrl={ subscribeUrl }
 		productId={ productId }

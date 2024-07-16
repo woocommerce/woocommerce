@@ -224,8 +224,8 @@ class WC_Product_Usage_Notice {
 	 * Enqueue scripts needed to display product usage notice (or modal).
 	 */
 	public static function enqueue_product_usage_notice_scripts() {
-		WCAdminAssets::register_style( 'woo-check-subscription', 'style', array( 'wp-components' ) );
-		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-check-subscription', true );
+		WCAdminAssets::register_style( 'woo-product-usage-notice', 'style', array( 'wp-components' ) );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-product-usage-notice', true );
 
 		$subscribe_url = add_query_arg( array(
 			'add-to-cart'  => self::$current_notice_rule['id'],
@@ -244,8 +244,8 @@ class WC_Product_Usage_Notice {
 		), 'https://woocommerce.com/cart/' );
 
 		wp_localize_script(
-			'wc-admin-woo-check-subscription',
-			'wooCheckSubscriptionData',
+			'wc-admin-woo-product-usage-notice',
+			'wooProductUsageNotice',
 			array(
 				'subscribeUrl'           => $subscribe_url,
 				'renewUrl'               => $renew_url,
