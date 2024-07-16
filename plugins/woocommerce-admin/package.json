@@ -30,7 +30,7 @@
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:bundle": "wireit",
 		"watch:build:project:feature-config": "WC_ADMIN_PHASE=development php ../woocommerce/bin/generate-feature-config.php",
-		"postinstall": "node ./bin/xstate5-react-script. && cp ./bin/modified-editsite-lock-unlock.js ./node_modules/@wordpress/edit-site/build-module/lock-unlock.js"
+		"postinstall": "node ./bin/xstate5-react-script && cp ./bin/modified-editsite-lock-unlock.js ./node_modules/@wordpress/edit-site/build-module/lock-unlock.js"
 	},
 	"lint-staged": {
 		"*.scss": [
