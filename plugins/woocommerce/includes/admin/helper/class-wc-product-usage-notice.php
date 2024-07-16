@@ -66,8 +66,8 @@ class WC_Product_Usage_Notice {
 	public static function load() {
 		add_action( 'current_screen', array( __CLASS__, 'maybe_show_product_usage_notice' ) );
 
-		add_action( 'wp_ajax_woocommerce_helper_check_subscription_dismissed', array( __CLASS__, 'check_subscription_dismissed' ) );
-		add_action( 'wp_ajax_woocommerce_helper_check_subscription_remind_later', array( __CLASS__, 'check_subscription_remind_later' ) );
+		add_action( 'wp_ajax_woocommerce_dismiss_product_usage_notice', array( __CLASS__, 'ajax_dismiss' ) );
+		add_action( 'wp_ajax_woocommerce_remind_later_product_usage_notice', array( __CLASS__, 'ajax_remind_later' ) );
 	}
 
 	/**
@@ -249,13 +249,13 @@ class WC_Product_Usage_Notice {
 			array(
 				'subscribeUrl'           => $subscribe_url,
 				'renewUrl'               => $renew_url,
-				'dismissAction'          => 'woocommerce_helper_check_subscription_dismissed',
-				'remindLaterAction'      => 'woocommerce_helper_check_subscription_remind_later',
+				'dismissAction'          => 'woocommerce_dismiss_product_usage_notice',
+				'remindLaterAction'      => 'woocommerce_remind_later_product_usage_notice',
 				'productId'              => self::$current_notice_rule['id'],
 				'productName'            => self::$current_notice_rule['name'],
 				'productRegularPrice'    => self::$current_notice_rule['regular_price'],
-				'dismissNonce'           => wp_create_nonce( 'check_subscription_dismissed' ),
-				'remindLaterNonce'       => wp_create_nonce( 'check_subscription_remind_later' ),
+				'dismissNonce'           => wp_create_nonce( 'dismiss_product_usage_notice' ),
+				'remindLaterNonce'       => wp_create_nonce( 'remind_later_product_usage_notice' ),
 				'showAs'                 => self::$current_notice_rule['show_as'],
 				'colorScheme'            => self::$current_notice_rule['color_scheme'],
 				'subscriptionState'      => self::$current_notice_rule['state'],
@@ -319,8 +319,8 @@ class WC_Product_Usage_Notice {
 	/**
 	 * AJAX handler for dismiss action of product usage notice.
 	 */
-	public static function check_subscription_dismissed() {
-		if ( ! check_ajax_referer( 'check_subscription_dismissed' ) ) {
+	public static function ajax_dismiss() {
+		if ( ! check_ajax_referer( 'dismiss_product_usage_notice' ) ) {
 			wp_die( -1 );
 		}
 
@@ -346,8 +346,8 @@ class WC_Product_Usage_Notice {
 	/**
 	 * AJAX handler for "remind later" action of product usage notice.
 	 */
-	public static function check_subscription_remind_later() {
-		if ( ! check_ajax_referer( 'check_subscription_remind_later' ) ) {
+	public static function ajax_remind_later() {
+		if ( ! check_ajax_referer( 'remind_later_product_usage_notice' ) ) {
 			wp_die( -1 );
 		}
 
