@@ -33,7 +33,6 @@ import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/
  */
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
-
 import { trackEvent } from '~/customize-store/tracking';
 import { CustomizeStoreContext } from '../..';
 import { Link } from '@woocommerce/components';
@@ -201,6 +200,10 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 											navigateTo( {
 												url: categoryUrl,
 											} );
+											trackEvent(
+												'customize_your_store_assembler_pattern_category_click',
+												{ category: categoryKey }
+											);
 										} }
 										as={ SidebarNavigationItem }
 										withChevron

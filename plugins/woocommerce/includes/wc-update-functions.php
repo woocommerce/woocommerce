@@ -2731,6 +2731,45 @@ function wc_update_910_add_launch_your_store_tour_option() {
 }
 
 /**
+ * Add woocommerce_hooked_blocks_version option for existing stores that are using a theme that supports the Block Hooks API
+ */
+function wc_update_920_add_wc_hooked_blocks_version_option() {
+	if ( ! wc_current_theme_is_fse_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
+		return;
+	}
+
+	$option_name  = 'woocommerce_hooked_blocks_version';
+	$option_value = get_option( $option_name );
+
+	// If the option already exists, we don't need to do anything.
+	if ( false !== $option_value ) {
+		return;
+	}
+
+	/**
+	 * A list of theme slugs to execute this with.
+	 * We are applying this filter to allow for the list to be extended by third-parties who were already using it.
+	 *
+	 * @since 8.4.0
+	 */
+	$theme_include_list               = apply_filters( 'woocommerce_hooked_blocks_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
+	$active_theme_name                = wp_get_theme()->get( 'Name' );
+	$should_set_hooked_blocks_version = in_array( $active_theme_name, $theme_include_list, true );
+
+	if ( $should_set_hooked_blocks_version ) {
+		// Set 8.4.0 as the version for existing stores that are using a theme that supports the Block Hooks API.
+		// This will ensure that the Block Hooks API is enabled for these stores and works as expected.
+		// Existing stores that aren't running approved block themes will not have the Block Hooks API enabled.
+		add_option( $option_name, '8.4.0' );
+	} else {
+		// For block themes that aren't approved themes set this option to "no" to completely disable hooked blocks.
+		// This means we can assume the absence of the option is when a site is switching from a classic theme to a block theme for the first time.
+		// Note: We have to use "no" instead of false since the latter is the default value for the option if it doesn't exist.
+		add_option( $option_name, 'no' );
+	}
+}
+
+/**
  * Remove user meta associated with the keys '_last_order', '_order_count' and '_money_spent'.
  *
  * New keys are now used for these, to improve compatibility with multisite networks.
