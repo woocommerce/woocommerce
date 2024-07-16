@@ -7,7 +7,8 @@ $blue: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
 	border-radius: 2px;
 	padding: 10px 20px;
 	text-align: center;
-	a.components-external-link {
+	display: block;
+	.components-external-link__contents {
 		text-decoration: none;
 	}
 }
