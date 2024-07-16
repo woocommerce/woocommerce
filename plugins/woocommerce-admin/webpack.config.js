@@ -130,7 +130,6 @@ const webpackConfig = {
 					/node_modules\/\.pnpm/,
 					path.resolve( __dirname, './build/' ),
 					path.resolve( __dirname, './docs/' ),
-					path.resolve( __dirname, './node_modules/' ),
 					path.resolve( __dirname, './vendor/' ),
 				],
 				use: {
