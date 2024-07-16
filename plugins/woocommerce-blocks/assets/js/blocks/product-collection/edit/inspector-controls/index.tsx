@@ -36,7 +36,10 @@ import {
 import { setQueryAttribute, getDefaultSettings } from '../../utils';
 import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
-import InheritQueryControl from './inherit-query-control';
+import {
+	InheritQueryControl,
+	FilterableControl,
+} from './inherit-query-control';
 import OrderByControl from './order-by-control';
 import OnSaleControl from './on-sale-control';
 import StockStatusControl from './stock-status-control';
@@ -48,7 +51,6 @@ import LayoutOptionsControl from './layout-options-control';
 import FeaturedProductsControl from './featured-products-control';
 import CreatedControl from './created-control';
 import PriceRangeControl from './price-range-control';
-import SyncWithFilters from './sync-with-filters-controls';
 
 const prepareShouldShowFilter =
 	( hideControls: FilterName[] ) => ( filter: FilterName ) => {
@@ -59,7 +61,7 @@ const ProductCollectionInspectorControls = (
 	props: ProductCollectionEditComponentProps
 ) => {
 	const { attributes, context, setAttributes } = props;
-	const { query, hideControls, displayLayout, syncWithFilters } = attributes;
+	const { query, hideControls, displayLayout, filterable } = attributes;
 
 	const tracksLocation = useTracksLocation( context.templateSlug );
 	const trackInteraction = ( filter: FilterName ) =>
@@ -80,6 +82,8 @@ const ProductCollectionInspectorControls = (
 	const showQueryControls = inherit === false;
 	const showInheritQueryControl =
 		isArchiveTemplate && shouldShowFilter( CoreFilterNames.INHERIT );
+	const showFilterableControl =
+		! isArchiveTemplate && shouldShowFilter( CoreFilterNames.FILTERABLE );
 	const showOrderControl =
 		showQueryControls && shouldShowFilter( CoreFilterNames.ORDER );
 	const showFeaturedControl = shouldShowFilter( CoreFilterNames.FEATURED );
@@ -115,11 +119,11 @@ const ProductCollectionInspectorControls = (
 				{ showInheritQueryControl && (
 					<InheritQueryControl { ...queryControlProps } />
 				) }
-				{ showSyncWithFiltersControl && (
-					<SyncWithFilters
-						syncWithFilters={ syncWithFilters }
-						trackInteraction={ trackInteraction }
+				{ showFilterableControl && (
+					<FilterableControl
 						setAttributes={ setAttributes }
+						trackInteraction={ trackInteraction }
+						filterable={ filterable }
 					/>
 				) }
 				<LayoutOptionsControl { ...displayControlProps } />
