@@ -31,7 +31,7 @@ import { objectHasProp } from '@woocommerce/types';
  */
 import { AddressFormProps, AddressFormFields } from './types';
 import prepareFormFields from './prepare-form-fields';
-import validateShippingCountry from './validate-shipping-country';
+import validateCountry from './validate-country';
 import customValidationHandler from './custom-validation-handler';
 import AddressLineFields from './address-line-fields';
 import { createFieldProps, getFieldData } from './utils';
@@ -93,11 +93,9 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 
 	// Maybe validate country when other fields change so user is notified that it's required.
 	useEffect( () => {
-		if (
-			addressType === 'shipping' &&
-			objectHasProp( values, 'country' )
-		) {
-			validateShippingCountry( values );
+		if ( objectHasProp( values, 'country' ) ) {
+			console.log( addressType, 'validating country!' );
+			validateCountry( addressType, values );
 		}
 	}, [ values, addressType ] );
 
@@ -181,6 +179,8 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 						addressType === 'shipping'
 							? ShippingCountryInput
 							: BillingCountryInput;
+
+					console.log( 'fieldProps', fieldProps );
 					return (
 						<Tag
 							key={ field.key }
