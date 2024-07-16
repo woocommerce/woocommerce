@@ -1006,8 +1006,6 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 						{
 							loader: require.resolve( 'babel-loader' ),
 							options: {
-								cacheDirectory:
-									process.env.BABEL_CACHE_DIRECTORY || true,
 								babelrc: false,
 								configFile: false,
 								presets: [
@@ -1025,6 +1023,7 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 									'@babel/plugin-proposal-optional-chaining',
 									'@babel/plugin-proposal-class-properties',
 								],
+								cacheDirectory: true,
 								cacheCompression: false,
 							},
 						},
