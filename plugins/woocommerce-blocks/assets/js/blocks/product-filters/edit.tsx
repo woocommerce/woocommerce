@@ -249,6 +249,10 @@ export const Edit = ( {
 									>
 										<ToggleGroupControlOption
 											value={ 'filter-icon-1' }
+											aria-label={ __(
+												'Filter icon 1',
+												'woocommerce'
+											) }
 											label={
 												<Icon
 													size={ 32 }
@@ -258,6 +262,10 @@ export const Edit = ( {
 										/>
 										<ToggleGroupControlOption
 											value={ 'filter-icon-2' }
+											aria-label={ __(
+												'Filter icon 2',
+												'woocommerce'
+											) }
 											label={
 												<Icon
 													size={ 32 }
@@ -267,6 +275,10 @@ export const Edit = ( {
 										/>
 										<ToggleGroupControlOption
 											value={ 'filter-icon-3' }
+											aria-label={ __(
+												'Filter icon 3',
+												'woocommerce'
+											) }
 											label={
 												<Icon
 													size={ 32 }
@@ -276,6 +288,10 @@ export const Edit = ( {
 										/>
 										<ToggleGroupControlOption
 											value={ 'filter-icon-4' }
+											aria-label={ __(
+												'Filter icon 4',
+												'woocommerce'
+											) }
 											label={
 												<Icon
 													size={ 32 }
