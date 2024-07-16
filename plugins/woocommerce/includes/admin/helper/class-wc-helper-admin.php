@@ -399,34 +399,34 @@ class WC_Helper_Admin {
 	 * @return array
 	 */
 	private static function get_current_notice_rule( $screen ) {
-		foreach ( self::$product_usage_notice_rules['products'] as $product_id => $param ) {
-			if ( ! isset( $param['screens'][ $screen->id ] ) ) {
+		foreach ( self::$product_usage_notice_rules['products'] as $product_id => $rule ) {
+			if ( ! isset( $rule['screens'][ $screen->id ] ) ) {
 				continue;
 			}
 
 			// Check query strings.
-			if ( ! self::query_string_matches( $screen, $param ) ) {
+			if ( ! self::query_string_matches( $screen, $rule ) ) {
 				continue;
 			}
 
 			$product_id = absint( $product_id );
 			$state      = WC_Helper::get_product_subscription_state( $product_id );
 			if ( $state['expired'] || $state['unregistered'] ) {
-				$param['id']    = $product_id;
-				$param['state'] = $state;
-				return $param;
+				$rule['id']    = $product_id;
+				$rule['state'] = $state;
+				return $rule;
 			}
 		}
 
 		return array();
 	}
 
-	private static function query_string_matches( $screen, $param ) {
-		if ( empty( $param['screens'][ $screen->id ]['qs'] ) ) {
+	private static function query_string_matches( $screen, $rule ) {
+		if ( empty( $rule['screens'][ $screen->id ]['qs'] ) ) {
 			return true;
 		}
 
-		$qs = $param['screens'][ $screen->id ]['qs'];
+		$qs = $rule['screens'][ $screen->id ]['qs'];
 		foreach ( $qs as $key => $val ) {
 			if ( empty( $_GET[ $key ] ) || $_GET[ $key ] !== $val ) {
 				return false;
