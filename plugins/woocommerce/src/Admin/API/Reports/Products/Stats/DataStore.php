@@ -21,6 +21,8 @@ class DataStore extends ProductsDataStore {
 	/**
 	 * Mapping columns to data type to return correct response types.
 	 *
+	 * @override ProductsDataStore::$column_types
+	 *
 	 * @var array
 	 */
 	protected $column_types = array(
@@ -37,6 +39,8 @@ class DataStore extends ProductsDataStore {
 	/**
 	 * Cache identifier.
 	 *
+	 * @override ProductsDataStore::$cache_key
+	 *
 	 * @var string
 	 */
 	protected $cache_key = 'products_stats';
@@ -44,12 +48,16 @@ class DataStore extends ProductsDataStore {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override ProductsDataStore::$context
+	 *
 	 * @var string
 	 */
 	protected $context = 'products_stats';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
+	 *
+	 * @override ProductsDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
 		$table_name           = self::get_db_table_name();
@@ -104,6 +112,8 @@ class DataStore extends ProductsDataStore {
 	 * Get the default query arguments to be used by get_data().
 	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
 	 *
+	 * @override ProductsDataStore::get_default_query_vars()
+	 *
 	 * @return array Query parameters.
 	 */
 	public function get_default_query_vars() {
@@ -117,6 +127,8 @@ class DataStore extends ProductsDataStore {
 	/**
 	 * Returns the report data based on parameters supplied by the user.
 	 *
+	 * @override ProductsDataStore::get_data()
+	 *
 	 * @param array $query_args  Query parameters.
 	 * @return stdClass|WP_Error Data.
 	 */
@@ -128,6 +140,8 @@ class DataStore extends ProductsDataStore {
 	/**
 	 * Returns the report data based on normalized parameters.
 	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @override ProductsDataStore::get_noncached_data()
 	 *
 	 * @see get_data
 	 * @see get_noncached_stats_data
@@ -225,6 +239,8 @@ class DataStore extends ProductsDataStore {
 
 	/**
 	 * Normalizes order_by clause to match to SQL query.
+	 *
+	 * @override ProductsDataStore::normalize_order_by()
 	 *
 	 * @param string $order_by Order by option requeste by user.
 	 * @return string

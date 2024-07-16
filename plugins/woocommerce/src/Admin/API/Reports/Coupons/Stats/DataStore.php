@@ -19,6 +19,8 @@ class DataStore extends CouponsDataStore {
 	/**
 	 * Mapping columns to data type to return correct response types.
 	 *
+	 * @override CouponsDataStore::$column_types
+	 *
 	 * @var array
 	 */
 	protected $column_types = array(
@@ -34,12 +36,16 @@ class DataStore extends CouponsDataStore {
 	/**
 	 * SQL columns to select in the db query.
 	 *
+	 * @override CouponsDataStore::$report_columns
+	 *
 	 * @var array
 	 */
 	protected $report_columns;
 
 	/**
 	 * Data store context used to pass to filters.
+	 *
+	 * @override CouponsDataStore::$context
 	 *
 	 * @var string
 	 */
@@ -48,12 +54,16 @@ class DataStore extends CouponsDataStore {
 	/**
 	 * Cache identifier.
 	 *
+	 * @override CouponsDataStore::get_default_query_vars()
+	 *
 	 * @var string
 	 */
 	protected $cache_key = 'coupons_stats';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
+	 *
+	 * @override CouponsDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
 		$table_name           = self::get_db_table_name();
@@ -109,6 +119,8 @@ class DataStore extends CouponsDataStore {
 	 * Get the default query arguments to be used by get_data().
 	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
 	 *
+	 * @override CouponsDataStore::get_default_query_vars()
+	 *
 	 * @return array Query parameters.
 	 */
 	public function get_default_query_vars() {
@@ -122,6 +134,8 @@ class DataStore extends CouponsDataStore {
 	/**
 	 * Returns the report data based on normalized parameters.
 	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @override CouponsDataStore::get_noncached_stats_data()
 	 *
 	 * @see get_data
 	 * @see get_noncached_stats_data

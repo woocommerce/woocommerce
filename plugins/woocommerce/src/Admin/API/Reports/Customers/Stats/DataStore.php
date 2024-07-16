@@ -16,6 +16,8 @@ class DataStore extends CustomersDataStore {
 	/**
 	 * Mapping columns to data type to return correct response types.
 	 *
+	 * @override CustomersDataStore::$column_types
+	 *
 	 * @var array
 	 */
 	protected $column_types = array(
@@ -28,6 +30,8 @@ class DataStore extends CustomersDataStore {
 	/**
 	 * Cache identifier.
 	 *
+	 * @override CustomersDataStore::$cache_key
+	 *
 	 * @var string
 	 */
 	protected $cache_key = 'customers_stats';
@@ -35,12 +39,16 @@ class DataStore extends CustomersDataStore {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override CustomersDataStore::$context
+	 *
 	 * @var string
 	 */
 	protected $context = 'customers_stats';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
+	 *
+	 * @override CustomersDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
 		$this->report_columns = array(
@@ -54,6 +62,8 @@ class DataStore extends CustomersDataStore {
 	/**
 	 * Returns the report data based on normalized parameters.
 	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @override CustomersDataStore::get_noncached_data()
 	 *
 	 * @see get_data
 	 * @param array $query_args Query parameters.

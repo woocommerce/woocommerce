@@ -17,6 +17,8 @@ class DataStore extends ReportsDataStore {
 	/**
 	 * Get stock counts for the whole store.
 	 *
+	 * @override ReportsDataStore::get_data()
+	 *
 	 * @param array $query Not used for the stock stats data store, but needed for the interface.
 	 * @return array Array of counts.
 	 */

@@ -90,6 +90,8 @@ class DataStore extends SqlQuery {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override SqlQuery::$context
+	 *
 	 * @var string
 	 */
 	protected $context = 'reports';
@@ -138,6 +140,8 @@ class DataStore extends SqlQuery {
 
 	/**
 	 * Class constructor.
+	 *
+	 * @override SqlQuery::__construct()
 	 */
 	public function __construct() {
 		self::set_db_table_name();

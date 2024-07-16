@@ -20,6 +20,8 @@ class DataStore extends DownloadsDataStore {
 	/**
 	 * Mapping columns to data type to return correct response types.
 	 *
+	 * @override DownloadsDataStore::$column_types
+	 *
 	 * @var array
 	 */
 	protected $column_types = array(
@@ -29,6 +31,8 @@ class DataStore extends DownloadsDataStore {
 	/**
 	 * Cache identifier.
 	 *
+	 * @override DownloadsDataStore::$cache_key
+	 *
 	 * @var string
 	 */
 	protected $cache_key = 'downloads_stats';
@@ -36,12 +40,16 @@ class DataStore extends DownloadsDataStore {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override DownloadsDataStore::$context
+	 *
 	 * @var string
 	 */
 	protected $context = 'downloads_stats';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
+	 *
+	 * @override DownloadsDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
 		$this->report_columns = array(
@@ -52,6 +60,8 @@ class DataStore extends DownloadsDataStore {
 	/**
 	 * Get the default query arguments to be used by get_data().
 	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
+	 *
+	 * @override DownloadsDataStore::default_query_args()
 	 *
 	 * @return array Query parameters.
 	 */
@@ -65,6 +75,8 @@ class DataStore extends DownloadsDataStore {
 	/**
 	 * Returns the report data based on normalized parameters.
 	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @override DownloadsDataStore::get_noncached_data()
 	 *
 	 * @see get_data
 	 * @see get_noncached_stats_data
@@ -147,6 +159,8 @@ class DataStore extends DownloadsDataStore {
 
 	/**
 	 * Normalizes order_by clause to match to SQL query.
+	 *
+	 * @override DownloadsDataStore::normalize_order_by()
 	 *
 	 * @param string $order_by Order by option requeste by user.
 	 * @return string
