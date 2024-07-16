@@ -144,4 +144,21 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( '1.0.0', get_option( 'woocommerce_hooked_blocks_version' ) );
 	}
+
+	/**
+	 * Test woocommerce_hooked_blocks_version option is not overwritten
+	 *
+	 * @return void
+	 */
+	public function test_wc_update_920_add_wc_hooked_blocks_version_option_block_hooks_version_not_present_for_classic_themes() {
+		switch_theme( 'storefront' );
+
+		delete_option( 'woocommerce_hooked_blocks_version' );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		wc_update_920_add_wc_hooked_blocks_version_option();
+
+		$this->assertEquals( null, get_option( 'woocommerce_hooked_blocks_version', null ) );
+	}
 }
