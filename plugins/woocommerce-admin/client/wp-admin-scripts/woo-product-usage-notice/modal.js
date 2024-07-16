@@ -43,7 +43,7 @@ export default function ProductUsageNoticeModal( {
 
 	useEffect( () => {
 		if ( isModalOpen ) {
-			recordEvent( 'check_subscription_modal_opened', {
+			recordEvent( 'product_usage_notice_opened', {
 				product_id: productId,
 				screen_id: screenId,
 			} );
@@ -61,7 +61,7 @@ export default function ProductUsageNoticeModal( {
 			},
 			() => {
 				setIsModalOpen( false );
-				recordEvent( 'check_subscription_modal_dismissed', {
+				recordEvent( 'product_usage_notice_dismissed', {
 					product_id: productId,
 					screen_id: screenId,
 				} );
@@ -77,7 +77,7 @@ export default function ProductUsageNoticeModal( {
 			},
 			() => {
 				setIsModalOpen( false );
-				recordEvent( 'check_subscription_modal_maybe_later_clicked', {
+				recordEvent( 'product_usage_notice_maybe_later_clicked', {
 					product_id: productId,
 					screen_id: screenId,
 				} );
@@ -86,14 +86,14 @@ export default function ProductUsageNoticeModal( {
 	};
 	const renew = () => {
 		setIsModalOpen( false );
-		recordEvent( 'check_subscription_modal_renew_clicked', {
+		recordEvent( 'product_usage_notice_renew_clicked', {
 			product_id: productId,
 			screen_id: screenId,
 		} );
 	};
 	const subscribe = () => {
 		setIsModalOpen( false );
-		recordEvent( 'check_subscription_modal_subscribe_clicked', {
+		recordEvent( 'product_usage_notice_subscribe_clicked', {
 			product_id: productId,
 			screen_id: screenId,
 		} );
