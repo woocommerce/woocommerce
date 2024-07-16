@@ -81,10 +81,11 @@ class WC_Product_Simple extends WC_Product {
 	 * @return string
 	 */
 	public function add_to_cart_success_message() {
-		/* translators: %s: Product title */
-		$text = $this->is_purchasable() && $this->is_in_stock() ? __( '&ldquo;%s&rdquo; has been added to your cart', 'woocommerce' ) : '';
+		$text = '';
 
-		if ( ! empty( $text ) ) {
+		if ( $this->is_purchasable() && $this->is_in_stock() ) {
+			/* translators: %s: Product title */
+			$text = __( '&ldquo;%s&rdquo; has been added to your cart', 'woocommerce' );
 			$text = sprintf( $text, $this->get_name() );
 		}
 
