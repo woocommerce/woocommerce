@@ -135,22 +135,6 @@ test.describe(
 			await api.put( 'payment_gateways/cod', {
 				enabled: true,
 			} );
-			// make sure there's no pre-existing customer that has the same email we're going to use for account creation
-			const { data: customersList } = await api.get( 'customers', {
-				email: newAccountEmail,
-			} );
-
-			if ( customersList && customersList.length ) {
-				const customerId = customersList[ 0 ].id;
-
-				console.log(
-					`Customer with email ${ newAccountEmail } exists! Deleting it before starting test...`
-				);
-
-				await api.delete( `customers/${ customerId }`, {
-					force: true,
-				} );
-			}
 			// make sure our customer user has a pre-defined billing/shipping address
 			await api.put( `customers/2`, {
 				shipping: {
@@ -281,6 +265,22 @@ test.describe(
 					},
 				],
 			} );
+			// make sure there's no pre-existing customer that has the same email we're going to use for account creation
+			const { data: customersList } = await api.get( 'customers', {
+				email: newAccountEmail,
+			} );
+
+			if ( customersList && customersList.length ) {
+				const customerId = customersList[ 0 ].id;
+
+				console.log(
+					`Customer with email ${ newAccountEmail } exists! Deleting it before starting test...`
+				);
+
+				await api.delete( `customers/${ customerId }`, {
+					force: true,
+				} );
+			}
 		} );
 
 		test( 'can see empty checkout block page', async ( {
@@ -929,7 +929,7 @@ test.describe(
 			);
 		} );
 
-		test( 'can create an account during checkout with custom password', async ( {
+		test.only( 'can create an account during checkout with custom password', async ( {
 			page,
 			testPage,
 			baseURL,
