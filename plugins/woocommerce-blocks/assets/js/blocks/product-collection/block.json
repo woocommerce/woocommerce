@@ -39,7 +39,7 @@
 			"type": "boolean",
 			"default": false
 		},
-		"syncWithFilters": {
+		"filterable": {
 			"type": "boolean",
 			"default": false
 		},

@@ -28,7 +28,7 @@ export interface ProductCollectionAttributes {
 	 */
 	queryContextIncludes: string[];
 	forcePageReload: boolean;
-	syncWithFilters: boolean;
+	filterable: boolean;
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	__privatePreviewState?: PreviewState;
 }
@@ -153,7 +153,7 @@ export enum CoreFilterNames {
 	STOCK_STATUS = 'stock-status',
 	TAXONOMY = 'taxonomy',
 	PRICE_RANGE = 'price-range',
-	SYNC_WITH_FILTERS = 'sync-with-filters',
+	FILTERABLE = 'filterable',
 }
 
 export type CollectionName = CoreCollectionNames | string;
