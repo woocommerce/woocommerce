@@ -51,7 +51,6 @@ import { useIsActiveNewNeutralVariation } from '../../hooks/use-is-active-new-ne
 import {
 	sortPatternsByCategory,
 	addIsAddedClassToPatternPreview,
-	orderByPriority,
 } from './utils';
 
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
