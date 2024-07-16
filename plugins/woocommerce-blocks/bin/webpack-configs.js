@@ -1187,4 +1187,3 @@ module.exports = {
 	getInteractivityAPIConfig,
 	getCartAndCheckoutFrontendConfig,
 };
-module.exports.parallelism = 4;
