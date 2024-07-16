@@ -200,7 +200,7 @@ class WC_Helper_Admin {
 	/**
 	 * Maybe show product usage notice in a given screen object.
 	 *
-	 * @param \WP_Screen Current \WP_Screen object.
+	 * @param \WP_Screen $screen Current \WP_Screen object.
 	 */
 	public static function maybe_show_product_usage_notice( $screen ) {
 		$user_id = get_current_user_id();
