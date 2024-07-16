@@ -1,9 +1,3 @@
-const SpeedMeasurePlugin = require( 'speed-measure-webpack-plugin' );
-const smp = new SpeedMeasurePlugin( {
-	//outputFormat: 'humanVerbose',
-	//loaderTopFiles: 10,
-} );
-
 /**
  * Internal dependencies
  */
@@ -107,13 +101,13 @@ const SiteEditorConfig = {
 };
 
 module.exports = [
-	smp.wrap( CartAndCheckoutFrontendConfig ),
-	smp.wrap( CoreConfig ),
-	smp.wrap( MainConfig ),
-	smp.wrap( FrontendConfig ),
-	smp.wrap( ExtensionsConfig ),
-	smp.wrap( PaymentsConfig ),
-	smp.wrap( SiteEditorConfig ),
-	smp.wrap( StylingConfig ),
-	smp.wrap( InteractivityConfig ),
+	CartAndCheckoutFrontendConfig,
+	CoreConfig,
+	MainConfig,
+	FrontendConfig,
+	ExtensionsConfig,
+	PaymentsConfig,
+	SiteEditorConfig,
+	StylingConfig,
+	InteractivityConfig,
 ];
