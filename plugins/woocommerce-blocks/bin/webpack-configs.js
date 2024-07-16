@@ -103,7 +103,10 @@ const getCoreConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							],
-							cacheDirectory: true,
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
 							cacheCompression: false,
 						},
 					},
@@ -219,7 +222,10 @@ const getMainConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
-							cacheDirectory: true,
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
 							cacheCompression: false,
 						},
 					},
@@ -369,7 +375,10 @@ const getFrontConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
-							cacheDirectory: true,
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
 							cacheCompression: false,
 						},
 					},
@@ -488,7 +497,10 @@ const getPaymentsConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
-							cacheDirectory: true,
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
 							cacheCompression: false,
 						},
 					},
@@ -596,7 +608,10 @@ const getExtensionsConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
-							cacheDirectory: true,
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
 							cacheCompression: false,
 						},
 					},
@@ -703,7 +718,10 @@ const getSiteEditorConfig = ( options = {} ) => {
 									: false,
 								'@babel/plugin-proposal-optional-chaining',
 							].filter( Boolean ),
-							cacheDirectory: true,
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
 							cacheCompression: false,
 						},
 					},
@@ -852,7 +870,10 @@ const getStylingConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
-							cacheDirectory: true,
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
 							cacheCompression: false,
 						},
 					},
@@ -978,7 +999,10 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 									'@babel/plugin-proposal-optional-chaining',
 									'@babel/plugin-proposal-class-properties',
 								],
-								cacheDirectory: true,
+								cacheDirectory: path.resolve(
+									__dirname,
+									'../../../node_modules/.cache/babel-loader'
+								),
 								cacheCompression: false,
 							},
 						},
@@ -1065,7 +1089,10 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
-							cacheDirectory: true,
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
 							cacheCompression: false,
 						},
 					},

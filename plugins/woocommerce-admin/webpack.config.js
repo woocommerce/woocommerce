@@ -150,7 +150,10 @@ const webpackConfig = {
 								isHot &&
 								require.resolve( 'react-refresh/babel' ),
 						].filter( Boolean ),
-						cacheDirectory: true,
+						cacheDirectory: path.resolve(
+							__dirname,
+							'../../node_modules/.cache/babel-loader'
+						),
 						cacheCompression: false,
 					},
 				},
