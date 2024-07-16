@@ -189,6 +189,12 @@ class Checkout extends AbstractCartRoute {
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		/**
+		 * Before triggering validation, ensure totals are current and in turn, things such as shipping costs are present.
+		 * This is so plugins that validate other cart data (e.g. conditional shipping and payments) can access this data.
+		 */
+		$this->cart_controller->calculate_totals();
+
+		/**
 		 * Validate items etc are allowed in the order before the order is processed. This will fix violations and tell
 		 * the customer.
 		 */
