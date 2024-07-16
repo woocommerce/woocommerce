@@ -43,6 +43,11 @@ const Blueprint = () => {
 	const exportBlueprint = async ( _steps ) => {
 		setExportEnabled( false );
 
+		const linkContainer = document.getElementById(
+			'download-link-container'
+		);
+		linkContainer.innerHTML = '';
+
 		const response = await apiFetch( {
 			path: '/blueprint/export',
 			method: 'POST',
@@ -53,6 +58,9 @@ const Blueprint = () => {
 		} );
 
 		const link = document.createElement( 'a' );
+		link.innerHTML =
+			'Click here in case download does not start automatically';
+
 		let url = null;
 
 		if ( response.type === 'zip' ) {
@@ -67,9 +75,9 @@ const Blueprint = () => {
 			link.setAttribute( 'download', 'woo-blueprint.json' );
 		}
 
-		document.body.appendChild( link );
+		linkContainer.appendChild( link );
+
 		link.click();
-		document.body.removeChild( link );
 		if ( url ) {
 			window.URL.revokeObjectURL( url );
 		}
@@ -132,6 +140,7 @@ const Blueprint = () => {
 			<p>
 				Export can take a few seconds depending on your network speed.
 			</p>
+			<div id="download-link-container"></div>
 			<Button
 				isPrimary
 				onClick={ () => {
