@@ -21,10 +21,34 @@ if ( ! defined( 'ABSPATH' ) ) {
  * an account on WooCommerce.com.
  */
 class WC_Helper_Admin {
+	/**
+	 * User meta key prefix to store dismiss counts per product. Product ID is
+	 * the suffix part.
+	 *
+	 * @var string
+	 */
 	const CHECK_SUBSCRIPTION_DISMISSED_COUNT_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_count_';
 
+	/**
+	 * User meta key prefix to store timestamp of last dismissed product usage notice.
+	 * Product ID is the suffix part.
+	 *
+	 * @var string
+	 */
 	const CHECK_SUBSCRIPTION_DISMISSED_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_dismissed_timestamp_';
+
+	/**
+	 * User meta key prefix to store timestamp of last clicked remind later from
+	 * product usage notice. Product ID is the suffix part.
+	 *
+	 * @var string
+	 */
 	const CHECK_SUBSCRIPTION_REMIND_LATER_TIMESTAMP_META_PREFIX = '_woocommerce_helper_check_subscription_remind_later_timestamp_';
+
+	/**
+	 * User meta key prefix to store timestamp of last dismissed of any product
+	 * usage notices. There's no product ID in the meta key.
+	 */
 	const CHECK_SUBSCRIPTION_LAST_DISMISSED_TIMESTAMP_META = '_woocommerce_helper_check_subscription_last_dismissed_timestamp';
 
 	/**
