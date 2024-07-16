@@ -21,7 +21,7 @@ module.exports = {
 		rules: [
 			{
 				test: /\.s?css$/,
-				exclude: [ /storybook\/wordpress/, /build-style\/*\/*.css/, /build/, /node_modules/, /vendor/ ],
+				exclude: [ /storybook\/wordpress/, /build-style\/*\/*.css/, /\//, /node_modules/, /\/(changelog|vendor|build|dist)\// ],
 				use: [
 					MiniCssExtractPlugin.loader,
 					'css-loader',
