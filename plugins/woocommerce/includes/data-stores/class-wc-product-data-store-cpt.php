@@ -734,24 +734,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( in_array( 'stock_quantity', $this->updated_props, true ) ) {
 			if ( $product->is_type( 'variation' ) ) {
-				/**
-				 * Action to signal that the value of 'stock_quantity' for a variation has changed.
-				 *
-				 * @since 3.0
-				 *
-				 * @param WC_Product $product The variation whose stock has changed.
-				 * @param int|float  $value   The new stock value.
-				 */
+				// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+				/** This action is documented in includes/wc-stock-functions.php */
 				do_action( 'woocommerce_variation_set_stock', $product, $product->get_stock_quantity() );
 			} else {
-				/**
-				 * Action to signal that the value of 'stock_quantity' for a product has changed.
-				 *
-				 * @since 3.0
-				 *
-				 * @param WC_Product $product The product whose stock has changed.
-				 * @param int|float  $value   The new stock value.
-				 */
+				// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+				/** This action is documented in includes/wc-stock-functions.php */
 				do_action( 'woocommerce_product_set_stock', $product, $product->get_stock_quantity() );
 			}
 		}

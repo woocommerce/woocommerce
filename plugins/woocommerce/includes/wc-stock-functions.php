@@ -60,9 +60,25 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 
 		// Fire actions to let 3rd parties know the stock changed.
 		if ( $product_with_stock->is_type( 'variation' ) ) {
-			do_action( 'woocommerce_variation_set_stock', $product_with_stock );
+			/**
+			 * Action to signal that the value of 'stock_quantity' for a variation has changed.
+			 *
+			 * @since 3.0
+			 *
+			 * @param WC_Product $product  The variation whose stock has changed.
+			 * @param int|float  $quantity The new stock quantity value.
+			 */
+			do_action( 'woocommerce_variation_set_stock', $product_with_stock, $stock_quantity );
 		} else {
-			do_action( 'woocommerce_product_set_stock', $product_with_stock );
+			/**
+			 * Action to signal that the value of 'stock_quantity' for a product has changed.
+			 *
+			 * @since 3.0
+			 *
+			 * @param WC_Product $product  The variation whose stock has changed.
+			 * @param int|float  $quantity The new stock quantity value.
+			 */
+			do_action( 'woocommerce_product_set_stock', $product_with_stock, $stock_quantity );
 		}
 
 		return $product_with_stock->get_stock_quantity();
