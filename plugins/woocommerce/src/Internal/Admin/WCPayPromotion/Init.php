@@ -53,21 +53,17 @@ class Init extends RemoteSpecsEngine {
 	 * @return boolean if promoted gateway should be registered.
 	 */
 	public static function can_show_promotion() {
-		// Check if WC Pay is enabled.
+		// Don't show if WooPayments is enabled.
 		if ( class_exists( '\WC_Payments' ) ) {
 			return false;
 		}
-		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
-			return false;
-		}
-		if ( ! apply_filters( 'woocommerce_allow_marketplace_suggestions', true ) ) {
-			return false;
-		}
 
+		// Don't show if there is no WooPayments promotion spec.
 		$wc_pay_spec = self::get_wc_pay_promotion_spec();
 		if ( ! $wc_pay_spec ) {
 			return false;
 		}
+
 		return true;
 	}
 
@@ -91,7 +87,9 @@ class Init extends RemoteSpecsEngine {
 	}
 
 	/**
-	 * Get WC Pay promotion spec.
+	 * Get WooPayments promotion spec.
+	 *
+	 * @return object|false WooPayments promotion spec or false if there isn't one.
 	 */
 	public static function get_wc_pay_promotion_spec() {
 		$promotions            = self::get_promotions();
@@ -109,25 +107,41 @@ class Init extends RemoteSpecsEngine {
 
 	/**
 	 * Go through the specs and run them.
+	 *
+	 * @return array List of promotions.
 	 */
 	public static function get_promotions() {
 		$locale = get_user_locale();
 
 		$specs   = self::get_specs();
 		$results = EvaluateSuggestion::evaluate_specs( $specs, array( 'source' => 'wc-wcpay-promotions' ) );
+		$specs_to_return = $results['suggestions'];
+		$specs_to_save   = null;
+
+		if ( empty( $specs_to_return ) ) {
+			// When specs are empty, replace it with defaults and save for 3 hours.
+			$specs_to_save   = DefaultPromotions::get_all();
+			$specs_to_return = EvaluateSuggestion::evaluate_specs( $specs_to_save )['suggestions'];
+		} elseif ( count( $results['errors'] ) > 0 ) {
+			// When specs are not empty but have errors, save for 3 hours.
+			$specs_to_save = $specs;
+		}
 
 		if ( count( $results['errors'] ) > 0 ) {
-			// Unlike payment gateway suggestions, we don't have a non-empty default set of promotions to fall back to.
-			// So just set the specs transient with expired time to 3 hours.
-			WCPayPromotionDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
 			self::log_errors( $results['errors'] );
 		}
 
-		return $results['suggestions'];
+		if ( $specs_to_save ) {
+			WCPayPromotionDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs_to_save ), 3 * HOUR_IN_SECONDS );
+		}
+
+		return $specs_to_return;
 	}
 
 	/**
 	 * Get merchant WooPay eligibility.
+	 *
+	 * @return boolean If merchant is eligible for WooPay.
 	 */
 	public static function is_woopay_eligible() {
 		$wcpay_promotion = self::get_wc_pay_promotion_spec();
@@ -144,11 +158,14 @@ class Init extends RemoteSpecsEngine {
 
 	/**
 	 * Get specs or fetch remotely if they don't exist.
+	 *
+	 * @return array List of specs.
 	 */
 	public static function get_specs() {
 		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
-			return array();
+			return DefaultPromotions::get_all();
 		}
+
 		return WCPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
 	}
 
