@@ -12,11 +12,13 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { sanitize } from 'dompurify';
 import { __ } from '@wordpress/i18n';
+import { WooPaymentMethodsLogos } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
  */
 import './payment-promotion-row.scss';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 function sanitizeHTML( html: string ) {
 	return {
@@ -116,6 +118,8 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 		return null;
 	}
 
+	const isWooPayEligible = getAdminSetting( 'isWooPayEligible', false );
+
 	return (
 		<>
 			{ columns.map( ( column ) => {
@@ -131,7 +135,20 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 								>
 									{ title }
 								</Link>
-								{ subTitleContent ? (
+								{ gatewayId ===
+									'pre_install_woocommerce_payments_promotion' && (
+									<div className="pre-install-payment-gateway__subtitle">
+										<WooPaymentMethodsLogos
+											maxElements={ 5 }
+											isWooPayEligible={
+												isWooPayEligible
+											}
+										/>
+									</div>
+								) }
+								{ gatewayId !==
+									'pre_install_woocommerce_payments_promotion' &&
+								subTitleContent ? (
 									<div
 										className="pre-install-payment-gateway__subtitle"
 										dangerouslySetInnerHTML={ sanitizeHTML(
