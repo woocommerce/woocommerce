@@ -21,7 +21,7 @@ export default function Delete( {
 	nextBlockClientId,
 }: {
 	clientId: string;
-	currentBlockName: string;
+	currentBlockName: string | undefined;
 	nextBlockClientId: string | undefined;
 } ) {
 	// @ts-expect-error missing type
