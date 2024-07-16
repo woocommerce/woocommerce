@@ -414,8 +414,10 @@ class DataStore extends ReportsDataStore {
 	 * @return array Query parameters.
 	 */
 	public function get_default_query_vars() {
-		$defaults            = parent::get_default_query_vars();
-		$defaults['orderby'] = 'date_registered';
+		$defaults                 = parent::get_default_query_vars();
+		$defaults['orderby']      = 'date_registered';
+		$defaults['order_before'] = TimeInterval::default_before();
+		$defaults['order_after']  = TimeInterval::default_after();
 
 		return $defaults;
 	}
