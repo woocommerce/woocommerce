@@ -18,12 +18,16 @@ class DataStore extends ReportsDataStore {
 	/**
 	 * Table used to get the data.
 	 *
+	 * @override ReportsDataStore::$table_name
+	 *
 	 * @var string
 	 */
 	protected static $table_name = 'wc_order_product_lookup';
 
 	/**
 	 * Cache identifier.
+	 *
+	 * @override ReportsDataStore::$cache_key
 	 *
 	 * @var string
 	 */
@@ -46,6 +50,8 @@ class DataStore extends ReportsDataStore {
 	/**
 	 * Mapping columns to data type to return correct response types.
 	 *
+	 * @override ReportsDataStore::$column_types
+	 *
 	 * @var array
 	 */
 	protected $column_types = array(
@@ -59,12 +65,16 @@ class DataStore extends ReportsDataStore {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override ReportsDataStore::$context
+	 *
 	 * @var string
 	 */
 	protected $context = 'categories';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
+	 *
+	 * @override ReportsDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
 		$table_name           = self::get_db_table_name();
@@ -143,6 +153,8 @@ class DataStore extends ReportsDataStore {
 	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
 	 *
+	 * @override ReportsDataStore::normalize_order_by()
+	 *
 	 * @param string $order_by Sorting criterion.
 	 * @return string
 	 */
@@ -202,6 +214,8 @@ class DataStore extends ReportsDataStore {
 	 * Get the default query arguments to be used by get_data().
 	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
 	 *
+	 * @override ReportsDataStore::get_default_query_vars()
+	 *
 	 * @return array Query parameters.
 	 */
 	public function get_default_query_vars() {
@@ -217,6 +231,8 @@ class DataStore extends ReportsDataStore {
 	 * Will be called by `get_data` if there is no data in cache.
 	 *
 	 * @see get_data
+	 * @override ReportsDataStore::get_noncached_data()
+	 *
 	 * @param array $query_args Query parameters.
 	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
@@ -286,6 +302,8 @@ class DataStore extends ReportsDataStore {
 
 	/**
 	 * Initialize query objects.
+	 *
+	 * @override ReportsDataStore::initialize_queries()
 	 */
 	protected function initialize_queries() {
 		global $wpdb;
