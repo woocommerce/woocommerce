@@ -13,11 +13,13 @@ use Automattic\WooCommerce\Blueprint\ResourceStorages\LocalPluginResourceStorage
 use Automattic\WooCommerce\Blueprint\ResourceStorages\LocalThemeResourceStorage;
 use Automattic\WooCommerce\Blueprint\ResourceStorages\OrgPluginResourceStorage;
 use Automattic\WooCommerce\Blueprint\ResourceStorages\OrgThemeResourceStorage;
+use Automattic\WooCommerce\Blueprint\Schemas\JsonSchema;
+use Automattic\WooCommerce\Blueprint\Schemas\ZipSchema;
 
 class BuiltInStepProcessors {
-	private bool $is_zip;
-	public function __construct( $is_zip = false ) {
-		$this->is_zip = $is_zip;
+	private JsonSchema $schema;
+	public function __construct( JsonSchema $schema ) {
+		$this->schema = $schema;
 	}
 
 	public function get_all() {
@@ -36,7 +38,7 @@ class BuiltInStepProcessors {
 		$storage = new ResourceStorages();
 		$storage->add_storage( new OrgPluginResourceStorage() );
 
-		if ( $this->is_zip ) {
+		if ( $this->schema instanceof ZipSchema ) {
 			$storage->add_storage( new LocalPluginResourceStorage( $this->schema->get_unzipped_path() ) );
 		}
 
@@ -46,7 +48,7 @@ class BuiltInStepProcessors {
 	private function create_install_themes_processor() {
 		$storage = new ResourceStorages();
 		$storage->add_storage( new OrgThemeResourceStorage() );
-		if ( $this->is_zip ) {
+		if ( $this->schema instanceof ZipSchema ) {
 			$storage->add_storage( new LocalThemeResourceStorage( $this->schema->get_unzipped_path() ) );
 		}
 

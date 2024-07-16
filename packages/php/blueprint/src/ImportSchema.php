@@ -44,7 +44,7 @@ class ImportSchema {
 			$this->validator = new Validator();
 		}
 
-		$this->builtin_step_processors = new BuiltInStepProcessors( $schema instanceof ZipSchema );
+		$this->builtin_step_processors = new BuiltInStepProcessors( $schema );
 	}
 
 	public function get_schema() {
