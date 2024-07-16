@@ -32,20 +32,20 @@ import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/
  * Internal dependencies
  */
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { SidebarNavigationScreen } from './sidebar-navigation-screen';
-
+import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
 import { trackEvent } from '~/customize-store/tracking';
-import { CustomizeStoreContext } from '..';
+import { CustomizeStoreContext } from '../..';
 import { Link } from '@woocommerce/components';
-import { PATTERN_CATEGORIES } from './pattern-screen/categories';
+import { PATTERN_CATEGORIES } from '../pattern-screen/categories';
 import { capitalize } from 'lodash';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
-import { useEditorBlocks } from '../hooks/use-editor-blocks';
-import { isTrackingAllowed } from '../utils/is-tracking-allowed';
+import { useEditorBlocks } from '../../hooks/use-editor-blocks';
+import { isTrackingAllowed } from '../../utils/is-tracking-allowed';
 import clsx from 'clsx';
+import './style.scss';
 
 const isActiveElement = ( path: string | undefined, category: string ) => {
 	if ( path?.includes( category ) ) {
@@ -200,6 +200,10 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 											navigateTo( {
 												url: categoryUrl,
 											} );
+											trackEvent(
+												'customize_your_store_assembler_pattern_category_click',
+												{ category: categoryKey }
+											);
 										} }
 										as={ SidebarNavigationItem }
 										withChevron

@@ -59,10 +59,13 @@ class BlockTemplatesRegistry {
 		}
 		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) ) {
 			$template_parts = array(
-				MiniCartTemplate::SLUG              => new MiniCartTemplate(),
-				CheckoutHeaderTemplate::SLUG        => new CheckoutHeaderTemplate(),
-				ProductFiltersOverlayTemplate::SLUG => new ProductFiltersOverlayTemplate(),
+				MiniCartTemplate::SLUG       => new MiniCartTemplate(),
+				CheckoutHeaderTemplate::SLUG => new CheckoutHeaderTemplate(),
 			);
+
+			if ( Features::is_enabled( 'experimental-blocks' ) ) {
+				$template_parts[ ProductFiltersOverlayTemplate::SLUG ] = new ProductFiltersOverlayTemplate();
+			}
 		} else {
 			$template_parts = array();
 		}
