@@ -16,7 +16,7 @@ class WC_Beta_Tester_Override_Coming_Soon_Options {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'init', array( $this, 'wc_beta_tester_override_coming_soon_options' ) );
+		$this->wc_beta_tester_override_coming_soon_options();
 	}
 
 	/**
