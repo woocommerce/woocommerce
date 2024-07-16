@@ -929,7 +929,7 @@ test.describe(
 			);
 		} );
 
-		test.only( 'can create an account during checkout with custom password', async ( {
+		test( 'can create an account during checkout with custom password', async ( {
 			page,
 			testPage,
 			baseURL,
