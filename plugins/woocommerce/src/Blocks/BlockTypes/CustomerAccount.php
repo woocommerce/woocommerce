@@ -34,6 +34,7 @@ class CustomerAccount extends AbstractBlock {
 			'anchor'   => 'core/navigation',
 			'area'     => 'header',
 			'callback' => 'should_unhook_block',
+			'version'  => '8.4.0',
 		),
 	);
 
