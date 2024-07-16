@@ -14,10 +14,7 @@ module.exports = {
 			{
 				test: /\.tsx?$/,
 				use: 'ts-loader',
-				include: [
-					path.resolve( __dirname, './src/' ),
-					path.resolve( __dirname, './test/' ),
-				],
+				include: [ path.resolve( __dirname, './src/' ) ],
 			},
 			{
 				test: /\.(png|jp(e*)g|svg|gif)$/,
