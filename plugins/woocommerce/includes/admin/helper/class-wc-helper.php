@@ -1517,7 +1517,7 @@ class WC_Helper {
 
 		// TODO: pass list of installed product IDs?
 		$request = WC_Helper_API::get(
-			'checked-products',
+			'product-usage-notice-rules',
 			array(
 				'authenticated' => false,
 			)
