@@ -17,8 +17,8 @@ import {
  */
 import {
 	CoreFilterNames,
-	ProductCollectionQuery,
-	QueryControlProps,
+	type ProductCollectionQuery,
+	type QueryControlProps,
 } from '../../types';
 import { DEFAULT_QUERY } from '../../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../../utils';
