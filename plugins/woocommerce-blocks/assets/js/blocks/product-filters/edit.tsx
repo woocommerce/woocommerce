@@ -303,12 +303,14 @@ export const Edit = ( {
 							) }
 						</>
 					) }
-					<ExternalLink
-						href={ templatePartEditUri }
-						className="wc-block-editor-product-filters__overlay-link"
-					>
-						{ __( 'Edit overlay', 'woocommerce' ) }
-					</ExternalLink>
+					{ attributes.overlay !== 'never' && (
+						<ExternalLink
+							href={ templatePartEditUri }
+							className="wc-block-editor-product-filters__overlay-link"
+						>
+							{ __( 'Edit overlay', 'woocommerce' ) }
+						</ExternalLink>
+					) }
 				</PanelBody>
 			</InspectorControls>
 			<InnerBlocks templateLock={ false } template={ updatedTemplate } />
