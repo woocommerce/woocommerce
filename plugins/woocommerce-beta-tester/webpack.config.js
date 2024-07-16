@@ -1,5 +1,6 @@
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
+const path = require("path");
 
 module.exports = {
 	...defaultConfig,
@@ -15,7 +16,11 @@ module.exports = {
 			{
 				test: /\.tsx?$/,
 				use: 'ts-loader',
-				exclude: /node_modules/,
+				exclude: [
+					path.resolve( __dirname, './build/' ),
+					path.resolve( __dirname, './node_modules/' ),
+					path.resolve( __dirname, './vendor/' ),
+				],
 			},
 		],
 	},

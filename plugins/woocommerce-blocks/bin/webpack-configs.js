@@ -43,7 +43,11 @@ const getSharedPlugins = ( {
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
 			? new CircularDependencyPlugin( {
-					exclude: [ /build/, /node_modules/ ],
+					exclude: [
+						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../node_modules/' ),
+						path.resolve( __dirname, '../vendor/' ),
+					],
 					cwd: process.cwd(),
 					failOnError: 'warn',
 			  } )
@@ -94,7 +98,11 @@ const getCoreConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(t|j)sx?$/,
-					exclude: [ /build/, /node_modules/ ],
+					exclude: [
+						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../node_modules/' ),
+						path.resolve( __dirname, '../vendor/' ),
+					],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -205,7 +213,11 @@ const getMainConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /build/, /node_modules/ ],
+					exclude: [
+						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../node_modules/' ),
+						path.resolve( __dirname, '../vendor/' ),
+					],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -343,7 +355,11 @@ const getFrontConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /build/, /node_modules/ ],
+					exclude: [
+						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../node_modules/' ),
+						path.resolve( __dirname, '../vendor/' ),
+					],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -462,7 +478,11 @@ const getPaymentsConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /build/, /node_modules/ ],
+					exclude: [
+						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../node_modules/' ),
+						path.resolve( __dirname, '../vendor/' ),
+					],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -570,7 +590,11 @@ const getExtensionsConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /build/, /node_modules/ ],
+					exclude: [
+						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../node_modules/' ),
+						path.resolve( __dirname, '../vendor/' ),
+					],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -678,7 +702,11 @@ const getSiteEditorConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /build/, /node_modules/ ],
+					exclude: [
+						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../node_modules/' ),
+						path.resolve( __dirname, '../vendor/' ),
+					],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -838,7 +866,11 @@ const getStylingConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /build/, /node_modules/ ],
+					exclude: [
+						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../node_modules/' ),
+						path.resolve( __dirname, '../vendor/' ),
+					],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -956,7 +988,11 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /build/, /node_modules/ ],
+					exclude: [
+						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../node_modules/' ),
+						path.resolve( __dirname, '../vendor/' ),
+					],
 					use: [
 						{
 							loader: require.resolve( 'babel-loader' ),
@@ -1040,7 +1076,11 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /build/, /node_modules/ ],
+					exclude: [
+						path.resolve( __dirname, '../build/' ),
+						path.resolve( __dirname, '../node_modules/' ),
+						path.resolve( __dirname, '../vendor/' ),
+					],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -1147,3 +1187,4 @@ module.exports = {
 	getInteractivityAPIConfig,
 	getCartAndCheckoutFrontendConfig,
 };
+module.exports.parallelism = 4;
