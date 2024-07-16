@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Blueprint\Schemas;
 
+use Automattic\WooCommerce\Blueprint\UseWPFunctions;
+
 class ZipSchema extends JsonSchema {
 	use UseWPFunctions;
 
