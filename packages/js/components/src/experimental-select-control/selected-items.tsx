@@ -2,14 +2,23 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { createElement } from '@wordpress/element';
+import {
+	createElement,
+	forwardRef,
+	useImperativeHandle,
+	useRef,
+} from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
  */
 import Tag from '../tag';
-import { getItemLabelType, getItemValueType } from './types';
+import {
+	getItemLabelType,
+	getItemValueType,
+	SelectedItemFocusHandle,
+} from './types';
 
 type SelectedItemsProps< ItemType > = {
 	isReadOnly: boolean;
@@ -22,21 +31,38 @@ type SelectedItemsProps< ItemType > = {
 		[ key: string ]: string;
 	};
 	onRemove: ( item: ItemType ) => void;
+	onBlur?: ( event: React.FocusEvent ) => void;
+	onSelectedItemsEnd?: () => void;
 };
 
-export const SelectedItems = < ItemType, >( {
-	isReadOnly,
-	items,
-	getItemLabel,
-	getItemValue,
-	getSelectedItemProps,
-	onRemove,
-}: SelectedItemsProps< ItemType > ) => {
+const PrivateSelectedItems = < ItemType, >(
+	{
+		isReadOnly,
+		items,
+		getItemLabel,
+		getItemValue,
+		getSelectedItemProps,
+		onRemove,
+		onBlur,
+		onSelectedItemsEnd,
+	}: SelectedItemsProps< ItemType >,
+	ref: React.ForwardedRef< SelectedItemFocusHandle >
+) => {
 	const classes = classnames(
 		'woocommerce-experimental-select-control__selected-items',
 		{
 			'is-read-only': isReadOnly,
 		}
+	);
+
+	const lastRemoveButtonRef = useRef< HTMLButtonElement >( null );
+
+	useImperativeHandle(
+		ref,
+		() => {
+			return () => lastRemoveButtonRef.current?.focus();
+		},
+		[]
 	);
 
 	if ( isReadOnly ) {
@@ -71,6 +97,42 @@ export const SelectedItems = < ItemType, >( {
 						onClick={ ( event ) => {
 							event.preventDefault();
 						} }
+						onKeyDown={ ( event ) => {
+							if (
+								event.key === 'ArrowLeft' ||
+								event.key === 'ArrowRight'
+							) {
+								const selectedItem = (
+									event.target as HTMLElement
+								 ).closest(
+									'.woocommerce-experimental-select-control__selected-item'
+								);
+								const sibling =
+									event.key === 'ArrowLeft'
+										? selectedItem?.previousSibling
+										: selectedItem?.nextSibling;
+								if ( sibling ) {
+									(
+										(
+											sibling as HTMLElement
+										 ).querySelector(
+											'.woocommerce-tag__remove'
+										) as HTMLElement
+									 )?.focus();
+								} else if (
+									event.key === 'ArrowRight' &&
+									onSelectedItemsEnd
+								) {
+									onSelectedItemsEnd();
+								}
+							} else if (
+								event.key === 'ArrowUp' ||
+								event.key === 'ArrowDown'
+							) {
+								event.preventDefault(); // prevent unwanted scroll
+							}
+						} }
+						onBlur={ onBlur }
 					>
 						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 						{ /* @ts-ignore Additional props are not required. */ }
@@ -78,6 +140,11 @@ export const SelectedItems = < ItemType, >( {
 							id={ getItemValue( item ) }
 							remove={ () => () => onRemove( item ) }
 							label={ getItemLabel( item ) }
+							ref={
+								index === items.length - 1
+									? lastRemoveButtonRef
+									: undefined
+							}
 						/>
 					</div>
 				);
@@ -85,3 +152,9 @@ export const SelectedItems = < ItemType, >( {
 		</div>
 	);
 };
+
+export const SelectedItems = forwardRef( PrivateSelectedItems ) as < ItemType >(
+	props: SelectedItemsProps< ItemType > & {
+		ref?: React.ForwardedRef< SelectedItemFocusHandle >;
+	}
+) => ReturnType< typeof PrivateSelectedItems >;
