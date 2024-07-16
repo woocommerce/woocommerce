@@ -4,13 +4,20 @@
 import { useMemo } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import clsx from 'clsx';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import type { CountryInputWithCountriesProps } from './CountryInputProps';
-import { Select } from '../select';
+import { Select, SelectOption } from '../select';
+
+const emptyCountryOption = {
+	label: __( 'Select a country', 'woocommerce' ),
+	value: '',
+	disabled: true,
+};
 
 export const CountryInput = ( {
 	className,
@@ -22,16 +29,17 @@ export const CountryInput = ( {
 	autoComplete = 'off',
 	required = false,
 }: CountryInputWithCountriesProps ): JSX.Element => {
-	const options = useMemo(
-		() =>
-			Object.entries( countries ).map(
+	const options = useMemo< SelectOption[] >( () => {
+		return [
+			emptyCountryOption,
+			...Object.entries( countries ).map(
 				( [ countryCode, countryName ] ) => ( {
 					value: countryCode,
 					label: decodeEntities( countryName ),
 				} )
 			),
-		[ countries ]
-	);
+		];
+	}, [ countries ] );
 
 	return (
 		<div

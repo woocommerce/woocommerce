@@ -9,11 +9,17 @@ import { useCallback, useId } from '@wordpress/element';
  */
 import './style.scss';
 
+export type SelectOption = {
+	value: string;
+	label: string;
+	disabled?: boolean;
+};
+
 type SelectProps = Omit<
 	React.SelectHTMLAttributes< HTMLSelectElement >,
 	'onChange'
 > & {
-	options: { value: string; label: string }[];
+	options: SelectOption[];
 	label: string;
 	onChange: ( newVal: string ) => void;
 };
@@ -56,6 +62,11 @@ export const Select = ( props: SelectProps ) => {
 							key={ option.value }
 							value={ option.value }
 							data-alternate-values={ `[${ option.label }]` }
+							disabled={
+								option.disabled !== undefined
+									? option.disabled
+									: false
+							}
 						>
 							{ option.label }
 						</option>
