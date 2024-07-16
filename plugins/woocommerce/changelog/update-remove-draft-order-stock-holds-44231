@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Updated block checkout and Store API stock handling so stock is only reserved when attempting payment for an order.
