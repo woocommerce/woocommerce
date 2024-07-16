@@ -2762,9 +2762,9 @@ function wc_update_920_add_wc_hooked_blocks_version_option() {
 		// Existing stores that aren't running approved block themes will not have the Block Hooks API enabled.
 		add_option( $option_name, '8.4.0' );
 	} else {
-		// For block themes that aren't approved themes set this option to "no" so we can disable the Block Hooks API.
-		// This will allow us to set a version when users switch from a classic theme to a block theme.
-		// We have to use "no" instead of false since the latter is the default value for the option if it doesn't exist.
+		// For block themes that aren't approved themes set this option to "no" to completely disable hooked blocks.
+		// This means we can assume the absence of the option is when a site is switching from a classic theme to a block theme for the first time.
+		// Note: We have to use "no" instead of false since the latter is the default value for the option if it doesn't exist.
 		add_option( $option_name, 'no' );
 	}
 }
