@@ -5,9 +5,9 @@ const closeChoosePatternModal = async ( { page } ) => {
 		name: 'Close',
 		exact: true,
 	} );
-	if ( closeModal.isVisible( { timeout: 5000 } ) ) {
+	await page.addLocatorHandler( closeModal, async () => {
 		await closeModal.click();
-	}
+	} );
 };
 
 const disableWelcomeModal = async ( { page } ) => {
