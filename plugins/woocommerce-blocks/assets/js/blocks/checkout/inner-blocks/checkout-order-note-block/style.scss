@@ -12,14 +12,13 @@
 
 
 .wc-block-checkout__add-note .wc-block-components-textarea {
-	border: 1px solid $universal-border-light;
 	margin-top: $gap;
 
 	&:focus {
 		background-color: #fff;
-		color: currentColor;
+		color: $input-text-active;
 		outline: 0;
-		box-shadow: 0 0 0 2px currentColor;
+		box-shadow: 0 0 0 1px $input-border-gray;
 	}
 }
 

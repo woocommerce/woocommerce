@@ -24,18 +24,17 @@ import { store as editSiteStore } from '@wordpress/edit-site/build-module/store'
 /**
  * Internal dependencies
  */
-import { isEqual } from 'lodash';
 import { CustomizeStoreContext } from './';
 import { BlockEditor } from './block-editor';
 import { HighlightedBlockContext } from './context/highlighted-block-context';
 import { useAddNoBlocksPlaceholder } from './hooks/block-placeholder/use-add-no-blocks-placeholder';
 import { useEditorBlocks } from './hooks/use-editor-blocks';
 import { useScrollOpacity } from './hooks/use-scroll-opacity';
-import { COLOR_PALETTES } from './sidebar/global-styles/color-palette-variations/constants';
 import {
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
 	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
 } from './utils/hero-pattern';
+import { useIsActiveNewNeutralVariation } from './hooks/use-is-active-new-neutral-variation';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
@@ -101,12 +100,9 @@ export const BlockEditorContainer = () => {
 	// @ts-expect-error No types for this exist yet.
 	const { user } = useContext( GlobalStylesContext );
 
-	useEffect( () => {
-		const isActiveNewNeutralVariation = isEqual(
-			COLOR_PALETTES[ 0 ].settings.color,
-			user.settings.color
-		);
+	const isActiveNewNeutralVariation = useIsActiveNewNeutralVariation();
 
+	useEffect( () => {
 		if ( ! isActiveNewNeutralVariation ) {
 			findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
 				blocks,
@@ -128,7 +124,12 @@ export const BlockEditorContainer = () => {
 				} );
 			}
 		);
-	}, [ blocks, updateBlockAttributes, user.settings.color ] );
+	}, [
+		blocks,
+		isActiveNewNeutralVariation,
+		updateBlockAttributes,
+		user.settings.color,
+	] );
 
 	// @ts-expect-error No types for this exist yet.
 	const { insertBlock, removeBlock } = useDispatch( blockEditorStore );

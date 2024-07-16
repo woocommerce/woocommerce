@@ -93,7 +93,7 @@ export const Transitional = ( {
 				<h2 className="woocommerce-customize-store__transitional-subheading">
 					{ isEntrepreneurFlow()
 						? __(
-								"Congratuations! You've successfully designed your store. Now you can go back to the Home screen to complete your store setup and start selling.",
+								"Congratulations! You've successfully designed your store. Now you can go back to the Home screen to complete your store setup and start selling.",
 								'woocommerce'
 						  )
 						: __(

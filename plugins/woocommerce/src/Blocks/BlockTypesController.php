@@ -32,6 +32,13 @@ final class BlockTypesController {
 	protected $asset_data_registry;
 
 	/**
+	 * Holds the registered blocks that have WooCommerce blocks as their parents.
+	 *
+	 * @var array List of registered blocks.
+	 */
+	private $registered_blocks_with_woocommerce_parents;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi          $asset_api Instance of the asset API.
@@ -65,6 +72,45 @@ final class BlockTypesController {
 				return $ret || $this->has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'cart' );
 			}
 		);
+	}
+
+	/**
+	 * Get registered blocks that have WooCommerce blocks as their parents. Adds the value to the
+	 * `registered_blocks_with_woocommerce_parents` cache if `init` has been fired.
+	 *
+	 * @return array Registered blocks with WooCommerce blocks as parents.
+	 */
+	public function get_registered_blocks_with_woocommerce_parent() {
+		// If init has run and the cache is already set, return it.
+		if ( did_action( 'init' ) && ! empty( $this->registered_blocks_with_woocommerce_parents ) ) {
+			return $this->registered_blocks_with_woocommerce_parents;
+		}
+
+		$registered_blocks = \WP_Block_Type_Registry::get_instance()->get_all_registered();
+
+		if ( ! is_array( $registered_blocks ) ) {
+			return array();
+		}
+
+		$this->registered_blocks_with_woocommerce_parents = array_filter(
+			$registered_blocks,
+			function ( $block ) {
+				if ( empty( $block->parent ) ) {
+					return false;
+				}
+				if ( ! is_array( $block->parent ) ) {
+					$block->parent = array( $block->parent );
+				}
+				$woocommerce_blocks = array_filter(
+					$block->parent,
+					function ( $parent_block_name ) {
+						return 'woocommerce' === strtok( $parent_block_name, '/' );
+					}
+				);
+				return ! empty( $woocommerce_blocks );
+			}
+		);
+		return $this->registered_blocks_with_woocommerce_parents;
 	}
 
 	/**
@@ -132,14 +178,15 @@ final class BlockTypesController {
 	}
 
 	/**
-	 * Add data- attributes to blocks when rendered if the block is under the woocommerce/ namespace.
+	 * Check if a block should have data attributes appended on render. If it's in an allowed namespace, or the block
+	 * has explicitly been added to the allowed block list, or if one of the block's parents is in the WooCommerce
+	 * namespace it can have data attributes.
 	 *
-	 * @param string $content Block content.
-	 * @param array  $block Parsed block data.
-	 * @return string
+	 * @param string $block_name Name of the block to check.
+	 *
+	 * @return boolean
 	 */
-	public function add_data_attributes( $content, $block ) {
-		$block_name      = $block['blockName'];
+	public function block_should_have_data_attributes( $block_name ) {
 		$block_namespace = strtok( $block_name ?? '', '/' );
 
 		/**
@@ -164,7 +211,25 @@ final class BlockTypesController {
 		 */
 		$allowed_blocks = (array) apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_block', array() );
 
-		if ( ! in_array( $block_namespace, $allowed_namespaces, true ) && ! in_array( $block_name, $allowed_blocks, true ) ) {
+		$blocks_with_woo_parents   = $this->get_registered_blocks_with_woocommerce_parent();
+		$block_has_woo_parent      = in_array( $block_name, array_keys( $blocks_with_woo_parents ), true );
+		$in_allowed_namespace_list = in_array( $block_namespace, $allowed_namespaces, true );
+		$in_allowed_block_list     = in_array( $block_name, $allowed_blocks, true );
+
+		return $block_has_woo_parent || $in_allowed_block_list || $in_allowed_namespace_list;
+	}
+
+	/**
+	 * Add data- attributes to blocks when rendered if the block is under the woocommerce/ namespace.
+	 *
+	 * @param string $content Block content.
+	 * @param array  $block Parsed block data.
+	 * @return string
+	 */
+	public function add_data_attributes( $content, $block ) {
+		$block_name = $block['blockName'];
+
+		if ( ! $this->block_should_have_data_attributes( $block_name ) ) {
 			return $content;
 		}
 
@@ -327,6 +392,7 @@ final class BlockTypesController {
 			$block_types[] = 'ProductFilter';
 			$block_types[] = 'ProductFilters';
 			$block_types[] = 'ProductFiltersOverlay';
+			$block_types[] = 'ProductFiltersOverlayNavigation';
 			$block_types[] = 'ProductFilterStockStatus';
 			$block_types[] = 'ProductFilterPrice';
 			$block_types[] = 'ProductFilterAttribute';

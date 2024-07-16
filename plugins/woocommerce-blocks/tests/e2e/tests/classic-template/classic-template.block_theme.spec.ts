@@ -255,7 +255,9 @@ test.describe( `${ blockData.name } Block `, () => {
 		const resetNotice = editor.page
 			.getByLabel( 'Dismiss this notice' )
 			.getByText( `"Single Product" reset.` );
-		const searchResults = editor.page.getByLabel( 'Actions' );
+		const searchResults = editor.page.getByLabel( 'Actions', {
+			exact: true,
+		} );
 		await expect.poll( async () => await searchResults.count() ).toBe( 1 );
 		await searchResults.first().click();
 		await editor.page.getByRole( 'menuitem', { name: 'Reset' } ).click();

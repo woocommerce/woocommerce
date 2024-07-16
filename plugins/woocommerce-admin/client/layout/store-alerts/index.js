@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Fragment, useState } from '@wordpress/element';
 import {
 	Button,
 	Card,
@@ -13,14 +13,23 @@ import {
 } from '@wordpress/components';
 import clsx from 'clsx';
 import interpolateComponents from '@automattic/interpolate-components';
-import { compose } from '@wordpress/compose';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import moment from 'moment';
 import { Icon, chevronLeft, chevronRight, close } from '@wordpress/icons';
-import { NOTES_STORE_NAME, QUERY_DEFAULTS } from '@woocommerce/data';
+import {
+	NOTES_STORE_NAME,
+	QUERY_DEFAULTS,
+	OPTIONS_STORE_NAME,
+	ONBOARDING_STORE_NAME,
+	useUserPreferences,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { Text } from '@woocommerce/experimental';
-import { navigateTo, parseAdminUrl } from '@woocommerce/navigation';
+import {
+	navigateTo,
+	parseAdminUrl,
+	getScreenFromPath,
+	isWCAdmin,
+} from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -29,66 +38,87 @@ import sanitizeHTML from '../../lib/sanitize-html';
 import StoreAlertsPlaceholder from './placeholder';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getScreenName } from '../../utils';
+import { hasTwoColumnLayout } from '../../homescreen/layout';
 
 import './style.scss';
 
-export class StoreAlerts extends Component {
-	constructor( props ) {
-		super( props );
+const ALERTS_QUERY = {
+	page: 1,
+	per_page: QUERY_DEFAULTS.pageSize,
+	type: 'error,update',
+	status: 'unactioned',
+};
 
-		this.state = {
-			currentIndex: 0,
-			alerts: props.alerts,
+function getUnactionedVisibleAlerts( alerts ) {
+	return ( alerts || [] ).filter(
+		( note ) => note.status === 'unactioned' && note.is_deleted !== true
+	);
+}
+
+export const StoreAlerts = () => {
+	const [ currentIndex, setCurrentIndex ] = useState( 0 );
+
+	const {
+		alerts = [],
+		isLoading,
+		defaultHomescreenLayout,
+		taskListComplete,
+		isTaskListHidden,
+		isLoadingTaskLists,
+	} = useSelect( ( select ) => {
+		const { getNotes, hasFinishedResolution } = select( NOTES_STORE_NAME );
+		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getTaskList, hasFinishedResolution: taskListFinishResolution } =
+			select( ONBOARDING_STORE_NAME );
+
+		return {
+			alerts: getUnactionedVisibleAlerts( getNotes( ALERTS_QUERY ) ),
+			isLoading: ! hasFinishedResolution( 'getNotes', [ ALERTS_QUERY ] ),
+			defaultHomescreenLayout:
+				getOption( 'woocommerce_default_homepage_layout' ) ||
+				'single_column',
+			taskListComplete: getTaskList( 'setup' )?.isComplete,
+			isTaskListHidden: getTaskList( 'setup' )?.isHidden,
+			isLoadingTaskLists: ! taskListFinishResolution( 'getTaskLists' ),
 		};
+	} );
 
-		this.previousAlert = this.previousAlert.bind( this );
-		this.nextAlert = this.nextAlert.bind( this );
-	}
+	const { triggerNoteAction, updateNote, removeNote } =
+		useDispatch( NOTES_STORE_NAME );
+	const { createNotice } = useDispatch( 'core/notices' );
 
-	componentDidUpdate( prevProps ) {
-		if ( prevProps.alerts !== this.props.alerts ) {
-			this.setState( { alerts: this.props.alerts } );
-		}
-	}
+	const userPrefs = useUserPreferences();
 
-	previousAlert( event ) {
+	function previousAlert( event ) {
 		event?.stopPropagation();
-		const { currentIndex } = this.state;
 
 		if ( currentIndex > 0 ) {
-			this.setState( {
-				currentIndex: currentIndex - 1,
-			} );
+			setCurrentIndex( currentIndex - 1 );
 		}
 	}
 
-	nextAlert( event ) {
+	function nextAlert( event ) {
 		event.stopPropagation();
-		const alerts = this.getAlerts();
-		const { currentIndex } = this.state;
 
 		if ( currentIndex < alerts.length - 1 ) {
-			this.setState( {
-				currentIndex: currentIndex + 1,
-			} );
+			setCurrentIndex( currentIndex + 1 );
 		}
 	}
 
-	renderActions( alert ) {
-		const { triggerNoteAction, updateNote, createNotice } = this.props;
-		const actions = alert.actions.map( ( action ) => {
+	function renderActions( alert ) {
+		const actions = alert.actions.map( ( action, idx ) => {
+			const variant = idx === 0 ? 'secondary' : 'tertiary';
 			return (
 				<Button
 					key={ action.name }
-					isPrimary={ action.primary }
-					isSecondary={ ! action.primary }
+					variant={ variant }
 					href={ action.url || undefined }
 					onClick={ async ( event ) => {
 						const url = event.currentTarget.getAttribute( 'href' );
 						event.preventDefault();
 
 						// navigate to previous alert to avoid an out of bounds error in case it's the last alert from the array
-						this.previousAlert();
+						previousAlert();
 						try {
 							await triggerNoteAction( alert.id, action.id );
 							if (
@@ -209,188 +239,150 @@ export class StoreAlerts extends Component {
 		}
 	}
 
-	getAlerts() {
-		return ( this.state.alerts || [] ).filter(
-			( note ) => note.status === 'unactioned'
-		);
+	if ( isLoadingTaskLists ) {
+		return null;
 	}
 
-	render() {
-		const alerts = this.getAlerts();
-		const preloadAlertCount = getAdminSetting( 'alertCount', 0, ( count ) =>
-			parseInt( count, 10 )
+	const preloadAlertCount = getAdminSetting( 'alertCount', 0, ( count ) =>
+		parseInt( count, 10 )
+	);
+
+	const isWCAdminPage = isWCAdmin();
+	const isHomescreen = isWCAdminPage && getScreenFromPath() === 'homescreen';
+
+	const hasTwoColumns = hasTwoColumnLayout(
+		userPrefs.homepage_layout,
+		defaultHomescreenLayout,
+		taskListComplete,
+		isTaskListHidden
+	);
+
+	if ( preloadAlertCount > 0 && isLoading ) {
+		return (
+			<StoreAlertsPlaceholder
+				className={ clsx( {
+					'is-wc-admin-page': isWCAdminPage,
+					'is-homescreen': isHomescreen,
+					'two-columns': hasTwoColumns && isHomescreen,
+				} ) }
+				hasMultipleAlerts={ preloadAlertCount > 1 }
+			/>
 		);
+	} else if ( alerts.length === 0 ) {
+		return null;
+	}
 
-		if ( preloadAlertCount > 0 && this.props.isLoading ) {
-			return (
-				<StoreAlertsPlaceholder
-					hasMultipleAlerts={ preloadAlertCount > 1 }
-				/>
-			);
-		} else if ( alerts.length === 0 ) {
-			return null;
-		}
+	const numberOfAlerts = alerts.length;
+	const alert = alerts[ currentIndex ];
+	const type = alert.type;
+	const className = clsx( 'woocommerce-store-alerts', {
+		'is-alert-error': type === 'error',
+		'is-alert-update': type === 'update',
+		'is-wc-admin-page': isWCAdminPage,
+		'is-homescreen': isHomescreen,
+		'two-columns': hasTwoColumns && isHomescreen,
+	} );
 
-		const { currentIndex } = this.state;
-		const numberOfAlerts = alerts.length;
-		const alert = alerts[ currentIndex ];
-		const type = alert.type;
-		const className = clsx( 'woocommerce-store-alerts', {
-			'is-alert-error': type === 'error',
-			'is-alert-update': type === 'update',
+	const onDismiss = async ( note ) => {
+		const screen = getScreenName();
+
+		recordEvent( 'inbox_action_dismiss', {
+			note_name: note.name,
+			note_title: note.title,
+			note_name_dismiss_all: false,
+			note_name_dismiss_confirmation: true,
+			screen,
 		} );
 
-		const onDismiss = async ( note ) => {
-			const screen = getScreenName();
-			const { createNotice, removeNote } = this.props;
+		const noteId = note.id;
 
-			recordEvent( 'inbox_action_dismiss', {
-				note_name: note.name,
-				note_title: note.title,
-				note_name_dismiss_all: false,
-				note_name_dismiss_confirmation: true,
-				screen,
-			} );
+		try {
+			await removeNote( noteId );
+			createNotice( 'success', __( 'Message dismissed', 'woocommerce' ) );
+		} catch ( e ) {
+			createNotice(
+				'error',
+				_n(
+					'Message could not be dismissed',
+					'Messages could not be dismissed',
+					1,
+					'woocommerce'
+				)
+			);
+		}
+	};
 
-			const noteId = note.id;
-
-			try {
-				await removeNote( noteId );
-				this.setState( {
-					alerts: this.state.alerts.filter(
-						( _alert ) => _alert.id !== noteId
-					),
-				} );
-				createNotice(
-					'success',
-					__( 'Message dismissed', 'woocommerce' )
-				);
-			} catch ( e ) {
-				createNotice(
-					'error',
-					_n(
-						'Message could not be dismissed',
-						'Messages could not be dismissed',
-						1,
-						'woocommerce'
-					)
-				);
-			}
-		};
-
-		return (
-			<Card className={ className } size={ null }>
+	return (
+		<Card className={ className } size={ null }>
+			<CardHeader
+				className="woocommerce-store-alerts__header"
+				isBorderless
+			>
+				<span className="woocommerce-store-alerts__title">
+					{ alert.title }
+				</span>
+				{ numberOfAlerts > 1 && (
+					<div className="woocommerce-store-alerts__pagination">
+						<span
+							className="woocommerce-store-alerts__pagination-label"
+							role="status"
+							aria-live="polite"
+						>
+							{ interpolateComponents( {
+								mixedString: __(
+									'{{current /}} of {{total /}}',
+									'woocommerce'
+								),
+								components: {
+									current: (
+										<Fragment>
+											{ currentIndex + 1 }
+										</Fragment>
+									),
+									total: (
+										<Fragment>{ numberOfAlerts }</Fragment>
+									),
+								},
+							} ) }
+						</span>
+						<Button
+							onClick={ previousAlert }
+							disabled={ currentIndex === 0 }
+							label={ __( 'Previous Alert', 'woocommerce' ) }
+						>
+							<Icon
+								icon={ chevronLeft }
+								className="arrow-left-icon"
+							/>
+						</Button>
+						<Button
+							onClick={ nextAlert }
+							disabled={ numberOfAlerts - 1 === currentIndex }
+							label={ __( 'Next Alert', 'woocommerce' ) }
+						>
+							<Icon
+								icon={ chevronRight }
+								className="arrow-right-icon"
+							/>
+						</Button>
+					</div>
+				) }
 				<Button
 					className="woocommerce-store-alerts__close"
 					onClick={ () => onDismiss( alert ) }
 				>
-					<Icon icon={ close } />
+					<Icon width="18" height="18" icon={ close } />
 				</Button>
-				<CardHeader isBorderless>
-					<Text
-						variant="title.medium"
-						as="h2"
-						size="24"
-						lineHeight="32px"
-					>
-						{ alert.title }
-					</Text>
-					{ numberOfAlerts > 1 && (
-						<div className="woocommerce-store-alerts__pagination">
-							<Button
-								onClick={ this.previousAlert }
-								disabled={ currentIndex === 0 }
-								label={ __( 'Previous Alert', 'woocommerce' ) }
-							>
-								<Icon
-									icon={ chevronLeft }
-									className="arrow-left-icon"
-								/>
-							</Button>
-							<span
-								className="woocommerce-store-alerts__pagination-label"
-								role="status"
-								aria-live="polite"
-							>
-								{ interpolateComponents( {
-									mixedString: __(
-										'{{current /}} of {{total /}}',
-										'woocommerce'
-									),
-									components: {
-										current: (
-											<Fragment>
-												{ currentIndex + 1 }
-											</Fragment>
-										),
-										total: (
-											<Fragment>
-												{ numberOfAlerts }
-											</Fragment>
-										),
-									},
-								} ) }
-							</span>
-							<Button
-								onClick={ this.nextAlert }
-								disabled={ numberOfAlerts - 1 === currentIndex }
-								label={ __( 'Next Alert', 'woocommerce' ) }
-							>
-								<Icon
-									icon={ chevronRight }
-									className="arrow-right-icon"
-								/>
-							</Button>
-						</div>
-					) }
-				</CardHeader>
-				<CardBody>
-					<div
-						className="woocommerce-store-alerts__message"
-						dangerouslySetInnerHTML={ sanitizeHTML(
-							alert.content
-						) }
-					/>
-				</CardBody>
-				<CardFooter isBorderless>
-					{ this.renderActions( alert ) }
-				</CardFooter>
-			</Card>
-		);
-	}
-}
-
-const ALERTS_QUERY = {
-	page: 1,
-	per_page: QUERY_DEFAULTS.pageSize,
-	type: 'error,update',
-	status: 'unactioned',
+			</CardHeader>
+			<CardBody>
+				<div
+					className="woocommerce-store-alerts__message"
+					dangerouslySetInnerHTML={ sanitizeHTML( alert.content ) }
+				/>
+			</CardBody>
+			<CardFooter isBorderless>{ renderActions( alert ) }</CardFooter>
+		</Card>
+	);
 };
 
-export default compose(
-	withSelect( ( select ) => {
-		const { getNotes, isResolving } = select( NOTES_STORE_NAME );
-
-		// Filter out notes that may have been marked actioned or not delayed after the initial request
-
-		const alerts = getNotes( ALERTS_QUERY );
-		const isLoading = isResolving( 'getNotes', [ ALERTS_QUERY ] );
-
-		return {
-			alerts,
-			isLoading,
-		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { triggerNoteAction, updateNote, removeNote } =
-			dispatch( NOTES_STORE_NAME );
-		const { createNotice } = dispatch( 'core/notices' );
-
-		return {
-			triggerNoteAction,
-			updateNote,
-			createNotice,
-			removeNote,
-		};
-	} )
-)( StoreAlerts );
+export default StoreAlerts;

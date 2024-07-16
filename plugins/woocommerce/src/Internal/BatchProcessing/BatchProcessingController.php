@@ -24,7 +24,7 @@ namespace Automattic\WooCommerce\Internal\BatchProcessing;
 /**
  * Class BatchProcessingController
  *
- * @package Automattic\WooCommerce\Internal\Updates.
+ * @package Automattic\WooCommerce\Internal\BatchProcessing.
  */
 class BatchProcessingController {
 	/*
@@ -528,7 +528,20 @@ class BatchProcessingController {
 	 * @since 9.1.0
 	 */
 	private function remove_or_retry_failed_processors(): void {
-		if ( as_has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
+		if ( ! did_action( 'wp_loaded' ) ) {
+			return;
+		}
+
+		$last_error = error_get_last();
+		if ( ! is_null( $last_error ) && in_array( $last_error['type'], array( E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ), true ) ) {
+			return;
+		}
+
+		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
+		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
+		$has_scheduled_action = function_exists( 'as_has_scheduled_action') ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
+
+		if ( call_user_func( $has_scheduled_action, self::WATCHDOG_ACTION_NAME ) ) {
 			return;
 		}
 
