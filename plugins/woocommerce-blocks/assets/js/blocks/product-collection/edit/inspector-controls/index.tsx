@@ -48,6 +48,7 @@ import LayoutOptionsControl from './layout-options-control';
 import FeaturedProductsControl from './featured-products-control';
 import CreatedControl from './created-control';
 import PriceRangeControl from './price-range-control';
+import SyncWithFilters from './sync-with-filters-controls';
 
 const prepareShouldShowFilter =
 	( hideControls: FilterName[] ) => ( filter: FilterName ) => {
@@ -58,7 +59,7 @@ const ProductCollectionInspectorControls = (
 	props: ProductCollectionEditComponentProps
 ) => {
 	const { attributes, context, setAttributes } = props;
-	const { query, hideControls, displayLayout } = attributes;
+	const { query, hideControls, displayLayout, syncWithFilters } = attributes;
 
 	const tracksLocation = useTracksLocation( context.templateSlug );
 	const trackInteraction = ( filter: FilterName ) =>
@@ -113,6 +114,13 @@ const ProductCollectionInspectorControls = (
 			>
 				{ showInheritQueryControl && (
 					<InheritQueryControl { ...queryControlProps } />
+				) }
+				{ showSyncWithFiltersControl && (
+					<SyncWithFilters
+						syncWithFilters={ syncWithFilters }
+						trackInteraction={ trackInteraction }
+						setAttributes={ setAttributes }
+					/>
 				) }
 				<LayoutOptionsControl { ...displayControlProps } />
 				<ColumnsControl { ...displayControlProps } />
