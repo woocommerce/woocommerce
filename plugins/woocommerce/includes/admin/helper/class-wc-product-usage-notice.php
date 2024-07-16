@@ -37,8 +37,8 @@ class WC_Product_Usage_Notice {
 	const REMIND_LATER_TIMESTAMP_META_PREFIX = '_woocommerce_product_usage_notice_remind_later_timestamp_';
 
 	/**
-	 * User meta key prefix to store timestamp of last dismissed of any product
-	 * usage notices. There's no product ID in the meta key.
+	 * User meta key to store timestamp of last dismissed of any product usage
+	 * notices. There's no product ID in the meta key.
 	 *
 	 * @var string
 	 */
