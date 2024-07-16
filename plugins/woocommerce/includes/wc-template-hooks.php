@@ -319,3 +319,8 @@ add_action( 'woocommerce_before_customer_login_form', 'woocommerce_output_all_no
 add_action( 'woocommerce_before_lost_password_form', 'woocommerce_output_all_notices', 10 );
 add_action( 'before_woocommerce_pay', 'woocommerce_output_all_notices', 10 );
 add_action( 'woocommerce_before_reset_password_form', 'woocommerce_output_all_notices', 10 );
+
+/**
+ * Hooked blocks.
+ */
+add_action( 'after_switch_theme', 'wc_set_hooked_blocks_version_on_theme_switch', 10, 2 );
