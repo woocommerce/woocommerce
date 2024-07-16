@@ -21,8 +21,6 @@ class Init extends RemoteSpecsEngine {
 	 * Constructor.
 	 */
 	public function __construct() {
-		include_once __DIR__ . '/WCPaymentGatewayPreInstallWCPayPromotion.php';
-
 		$is_payments_page = isset( $_GET['page'] ) && $_GET['page'] === 'wc-settings' && isset( $_GET['tab'] ) && $_GET['tab'] === 'checkout'; // phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! wp_is_json_request() && ! $is_payments_page ) {
 			return;
