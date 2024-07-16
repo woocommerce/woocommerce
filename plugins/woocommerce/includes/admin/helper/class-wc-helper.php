@@ -1515,7 +1515,6 @@ class WC_Helper {
 			return $data;
 		}
 
-		// TODO: pass list of installed product IDs?
 		$request = WC_Helper_API::get(
 			'product-usage-notice-rules',
 			array(
