@@ -11,7 +11,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getProductErrorMessageAndProps } from '../../../utils/get-product-error-message-and-props';
+import { useErrorHandler } from '../../../hooks/use-error-handler';
 import { recordProductEvent } from '../../../utils/record-product-event';
 import { useSaveDraft } from '../hooks/use-save-draft';
 import { SaveDraftButtonProps } from './types';
@@ -27,6 +27,8 @@ export function SaveDraftButton( {
 		useDispatch( 'core/notices' );
 
 	const { maybeShowFeedbackBar } = useFeedbackBar();
+
+	const { getProductErrorMessageAndProps } = useErrorHandler();
 
 	const saveDraftButtonProps = useSaveDraft( {
 		productStatus,
