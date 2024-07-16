@@ -148,7 +148,12 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 		}
 
 		$attribute_ids_for_and_filtering = array();
-		$all_terms                       = get_terms( array_keys( $chosen_attributes ), array( 'hide_empty' => false ) );
+		$all_terms                       = get_terms(
+			array(
+				'include'    => array_keys( $chosen_attributes ),
+				'hide_empty' => false,
+			)
+		);
 
 		foreach ( $chosen_attributes as $taxonomy => $data ) {
 			$current_attribute_terms    = $this->get_current_attribute_terms( $all_terms, $taxonomy, count( $chosen_attributes ) );
@@ -222,7 +227,7 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 
 		return array_filter(
 			$all_terms,
-			function( $term ) use ( $taxonomy ) {
+			function ( $term ) use ( $taxonomy ) {
 				return $term->taxonomy === $taxonomy;
 			}
 		);
@@ -263,11 +268,15 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 	 *
 	 * @param float  $price_filter Price filter to apply.
 	 * @param string $column Price being filtered (min or max).
-	 * @param string $operator Comparison operator for column.
+	 * @param string $operator Comparison operator for column. Accepts '>=' or '<='.
 	 * @return string Constructed query.
 	 */
 	private function get_price_filter_query_for_displayed_taxes( $price_filter, $column = 'min_price', $operator = '>=' ) {
 		global $wpdb;
+
+		if ( ! in_array( $operator, array( '>=', '<=' ), true ) ) {
+			return '';
+		}
 
 		// Select only used tax classes to avoid unwanted calculations.
 		$product_tax_classes = $wpdb->get_col( "SELECT DISTINCT tax_class FROM {$wpdb->wc_product_meta_lookup};" );
