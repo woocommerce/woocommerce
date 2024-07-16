@@ -18,7 +18,12 @@ const {
 const { getOrderIdFromUrl } = require( '../../utils/order' );
 
 const guestEmail = 'checkout-guest@example.com';
-const newAccountEmail = 'marge-test-account@example.com';
+const newAccountEmail = `marge-${ new Date()
+	.getTime()
+	.toString() }@woocommercecoree2etestsuite.com`;
+const newAccountEmailWithCustomPassword = `homer-${ new Date()
+	.getTime()
+	.toString() }@woocommercecoree2etestsuite.com`;
 const newAccountCustomPassword = 'supersecurepassword123';
 
 const simpleProductName = 'Very Simple Product';
@@ -233,6 +238,17 @@ test.describe(
 							}
 						);
 					}
+					if (
+						response.data[ i ].billing.email ===
+						newAccountEmailWithCustomPassword
+					) {
+						await api.delete(
+							`customers/${ response.data[ i ].id }`,
+							{
+								force: true,
+							}
+						);
+					}
 				}
 			} );
 		} );
@@ -265,22 +281,6 @@ test.describe(
 					},
 				],
 			} );
-			// make sure there's no pre-existing customer that has the same email we're going to use for account creation
-			const { data: customersList } = await api.get( 'customers', {
-				email: newAccountEmail,
-			} );
-
-			if ( customersList && customersList.length ) {
-				const customerId = customersList[ 0 ].id;
-
-				console.log(
-					`Customer with email ${ newAccountEmail } exists! Deleting it before starting test...`
-				);
-
-				await api.delete( `customers/${ customerId }`, {
-					force: true,
-				} );
-			}
 		} );
 
 		test( 'can see empty checkout block page', async ( {
@@ -981,9 +981,11 @@ test.describe(
 
 			// For flakiness, sometimes the email address is not filled
 			await page.getByLabel( 'Email address' ).click();
-			await page.getByLabel( 'Email address' ).fill( newAccountEmail );
+			await page
+				.getByLabel( 'Email address' )
+				.fill( newAccountEmailWithCustomPassword );
 			await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
-				newAccountEmail
+				newAccountEmailWithCustomPassword
 			);
 
 			// fill shipping address and check cash on delivery method
@@ -1020,7 +1022,9 @@ test.describe(
 
 			// Log in again.
 			await page.goto( '/my-account/' );
-			await page.locator( '#username' ).fill( newAccountEmail );
+			await page
+				.locator( '#username' )
+				.fill( newAccountEmailWithCustomPassword );
 			await page.locator( '#password' ).fill( newAccountCustomPassword );
 			await page.locator( 'text=Log in' ).click();
 			await expect(
