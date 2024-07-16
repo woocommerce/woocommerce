@@ -92,7 +92,7 @@ class WC_Product_Simple extends WC_Product {
 		 * Filter product add to cart success message.
 		 *
 		 * @since 9.2.0
-		 * @param string $text.
+		 * @param string $text The success message when a product is added to the cart.
 		 * @param WC_Product_Simple $this Reference to the current WC_Product_Simple instance.
 		 */
 		return apply_filters( 'woocommerce_product_add_to_cart_success_message', $text, $this );
