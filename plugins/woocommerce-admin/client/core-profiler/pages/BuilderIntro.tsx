@@ -36,6 +36,13 @@ export const BuilderIntro = ( {
 		const formData = new FormData();
 		formData.append( 'file', file );
 
+		if ( window?.wcSettings?.admin?.blueprint_upload_nonce ) {
+			formData.append(
+				'blueprint_upload_nonce',
+				window.wcSettings.admin.blueprint_upload_nonce
+			);
+		}
+
 		apiFetch( {
 			path: '/blueprint/process',
 			method: 'POST',

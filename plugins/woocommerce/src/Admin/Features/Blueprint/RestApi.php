@@ -128,6 +128,17 @@ class RestApi {
 	 */
 	public function import() {
 
+		// Check for nonce to prevent CSRF
+		if ( ! isset( $_POST['blueprint_upload_nonce'] ) || ! \wp_verify_nonce( $_POST['blueprint_upload_nonce'], 'blueprint_upload_nonce' ) ) {
+			return new \WP_HTTP_Response(
+				array(
+					'status'  => 'error',
+					'message' => __( 'Invalid nonce', 'woocommerce' ),
+				),
+				400
+			);
+		}
+
 		// phpcs:ignore
 		if ( ! empty( $_FILES['file'] ) && $_FILES['file']['error'] === UPLOAD_ERR_OK ) {
 			// phpcs:ignore

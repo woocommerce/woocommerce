@@ -27,6 +27,7 @@ declare global {
 					symbol: string;
 				};
 				currentUserId: number;
+				blueprint_upload_nonce?: string;
 			};
 		};
 		wcAdminFeatures: {

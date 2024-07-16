@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCTaxRates;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Importers\ImportSetWCPaymentGateways;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Importers\ImportSetWCShipping;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Importers\ImportSetWCTaxRates;
+use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 
@@ -35,6 +36,7 @@ class Init {
 		);
 		add_filter( 'wooblueprint_exporters', array( $this, 'add_woo_exporters' ) );
 		add_filter( 'wooblueprint_importers', array( $this, 'add_woo_importers' ) );
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'add_upload_nonce_to_settings' ) );
 	}
 
 	/**
@@ -83,5 +85,28 @@ class Init {
 				new ImportSetWCTaxRates(),
 			)
 		);
+	}
+
+	/**
+	 * Add upload nonce to global JS settings.
+	 *
+	 * The value can be accessed at wcSettings.admin.blueprint_upload_nonce
+	 *
+	 * @param array $settings
+	 *
+	 * @return array
+	 */
+	public function add_upload_nonce_to_settings( array $settings ) {
+		if ( ! is_admin() ) {
+			return $settings;
+		}
+
+		$page_id = PageController::get_instance()->get_current_screen_id();
+		if ( 'woocommerce_page_wc-admin' == $page_id ) {
+			$settings['blueprint_upload_nonce'] = wp_create_nonce( 'blueprint_upload_nonce' );
+			return $settings;
+		}
+
+		return $settings;
 	}
 }
