@@ -126,10 +126,7 @@ const webpackConfig = {
 				},
 				exclude: [
 					/node_modules\/\.pnpm/,
-					path.resolve( __dirname, './build/' ),
-					path.resolve( __dirname, './changelog/' ),
-					path.resolve( __dirname, './docs/' ),
-					path.resolve( __dirname, './vendor/' ),
+					/\/(changelog|build|docs|vendor)\//,
 				],
 				use: {
 					loader: 'babel-loader',
