@@ -9,6 +9,7 @@ import { createElement, useRef, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import {
+	ValidationError,
 	ValidationErrors,
 	ValidationProviderProps,
 	Validator,
@@ -64,15 +65,23 @@ export function ValidationProvider< T >( {
 			const result = validator( initialValue, newData );
 
 			return result.then( ( error ) => {
+				const errorWithValidatorId: ValidationError =
+					error !== undefined ? { validatorId, ...error } : undefined;
 				setErrors( ( currentErrors ) => ( {
 					...currentErrors,
-					[ validatorId ]: error,
+					[ validatorId ]: errorWithValidatorId,
 				} ) );
-				return error;
+				return errorWithValidatorId;
 			} );
 		}
 
 		return Promise.resolve( undefined );
+	}
+
+	async function getFieldByValidatorId(
+		validatorId: string
+	): Promise< HTMLElement > {
+		return fieldRefs.current[ validatorId ];
 	}
 
 	async function validateAll(
@@ -104,6 +113,7 @@ export function ValidationProvider< T >( {
 		<ValidationContext.Provider
 			value={ {
 				errors,
+				getFieldByValidatorId,
 				registerValidator,
 				unRegisterValidator,
 				validateField,

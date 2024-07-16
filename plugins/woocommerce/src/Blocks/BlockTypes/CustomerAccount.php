@@ -34,6 +34,7 @@ class CustomerAccount extends AbstractBlock {
 			'anchor'   => 'core/navigation',
 			'area'     => 'header',
 			'callback' => 'should_unhook_block',
+			'version'  => '8.4.0',
 		),
 	);
 
@@ -118,18 +119,26 @@ class CustomerAccount extends AbstractBlock {
 		$account_link = get_option( 'woocommerce_myaccount_page_id' ) ? wc_get_account_endpoint_url( 'dashboard' ) : wp_login_url();
 
 		$allowed_svg = array(
-			'svg'  => array(
+			'svg'    => array(
 				'class'   => true,
 				'xmlns'   => true,
 				'width'   => true,
 				'height'  => true,
 				'viewbox' => true,
 			),
-			'path' => array(
+			'path'   => array(
 				'd'         => true,
 				'fill'      => true,
 				'fill-rule' => true,
 				'clip-rule' => true,
+			),
+			'circle' => array(
+				'cx'           => true,
+				'cy'           => true,
+				'r'            => true,
+				'stroke'       => true,
+				'stroke-width' => true,
+				'fill'         => true,
 			),
 		);
 
@@ -158,14 +167,28 @@ class CustomerAccount extends AbstractBlock {
 		}
 
 		if ( self::DISPLAY_LINE === $attributes['iconStyle'] ) {
-			return '<svg class="' . $attributes['iconClass'] . '" xmlns="http://www.w3.org/2000/svg" viewBox="-0.5 -0.5 16 16" width="16" height="16">
-				<path fill-rule="evenodd" clip-rule="evenodd" d="M10.1919 3.69231C10.1919 4.90309 9.21039 5.88462 7.99961
-					5.88462C6.78884 5.88462 5.80731 4.90309 5.80731 3.69231C5.80731 2.48153 6.78884 1.5 7.99961 1.5C9.21039 
-					1.5 10.1919 2.48153 10.1919 3.69231ZM11.6919 3.69231C11.6919 5.73151 10.0388 7.38462 7.99961 7.38462C5.96041
-					7.38462 4.30731 5.73151 4.30731 3.69231C4.30731 1.6531 5.96041 0 7.99961 0C10.0388 0 11.6919 1.6531 11.6919
-					3.69231ZM11.6919 10.4615H4.30731C3.2877 10.4615 2.46115 11.2881 2.46115 12.3077V16H0.614998V12.3077C0.614998
-					10.2685 2.2681 8.61539 4.30731 8.61539H11.6919C13.7311 8.61539 15.3842 10.2685 15.3842 12.3077V16H13.5381V12.3077C13.5381 
-					11.2881 12.7115 10.4615 11.6919 10.4615Z" fill="currentColor"/>
+			return '<svg
+				width="12"
+				height="13"
+				viewBox="0 0 12 13"
+				fill="none"
+				class="' . $attributes['iconClass'] . '"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<circle
+					cx="6"
+					cy="3"
+					r="2.25"
+					stroke="currentColor"
+					stroke-width="1.5"
+					fill="none"
+				/>
+				<path
+					fill-rule="evenodd"
+					clip-rule="evenodd"
+					d="M3 8.5H9C9.82843 8.5 10.5 9.17157 10.5 10V13H12V10C12 8.34315 10.6569 7 9 7H3C1.34315 7 0 8.34314 0 10V13H1.5V10C1.5 9.17157 2.17157 8.5 3 8.5Z"
+					fill="currentColor"
+				/>
 			</svg>';
 		}
 
