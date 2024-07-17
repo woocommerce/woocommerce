@@ -41,6 +41,9 @@
 
 	.wc-block-components-radio-control__description-group {
 		@include font-size(smaller);
+		// Use balance, then pretty so that browser support for pretty is preferred, but falls back to balance if not supported.
+		text-wrap: balance;
+		text-wrap: pretty;
 	}
 
 	&--disabled {
