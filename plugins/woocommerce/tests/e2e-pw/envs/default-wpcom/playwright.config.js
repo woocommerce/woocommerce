@@ -8,9 +8,6 @@ config = {
 			name: 'default',
 			use: { ...devices[ 'Desktop Chrome' ] },
 		},
-		{
-			name: 'Core API tests',
-		},
 	],
 };
 
