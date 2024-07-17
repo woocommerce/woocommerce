@@ -86,8 +86,8 @@ export const Edit = ( {
 	}, [ clientId ] );
 
 	const defaultTemplate = [
-		[ 'woocommerce/checkout-fields-block', {}, [] ],
 		[ 'woocommerce/checkout-totals-block', {}, [] ],
+		[ 'woocommerce/checkout-fields-block', {}, [] ],
 	] as TemplateArray;
 
 	const toggleAttribute = ( key: keyof Attributes ): void => {
