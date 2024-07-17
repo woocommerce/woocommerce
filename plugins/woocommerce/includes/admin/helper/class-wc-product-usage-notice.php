@@ -11,6 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Product usage notice class.
+ */
 class WC_Product_Usage_Notice {
 	/**
 	 * User meta key prefix to store dismiss counts per product. Product ID is
@@ -147,6 +150,7 @@ class WC_Product_Usage_Notice {
 				true
 			)
 		);
+
 		$max_dismissals = self::$current_notice_rule['max_dismissals'];
 
 		return $dismiss_count >= $max_dismissals;
@@ -227,39 +231,45 @@ class WC_Product_Usage_Notice {
 		WCAdminAssets::register_style( 'woo-product-usage-notice', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-product-usage-notice', true );
 
-		$subscribe_url = add_query_arg( array(
-			'add-to-cart'  => self::$current_notice_rule['id'],
-			'utm_source'   => 'pu',
-			'utm_medium'   => 'product',
-			'utm_campaign' => 'pu_modal_subscribe',
-		), 'https://woocommerce.com/cart/' );
+		$subscribe_url = add_query_arg(
+			array(
+				'add-to-cart'  => self::$current_notice_rule['id'],
+				'utm_source'   => 'pu',
+				'utm_medium'   => 'product',
+				'utm_campaign' => 'pu_modal_subscribe',
+			),
+			'https://woocommerce.com/cart/'
+		);
 
-		$renew_url = add_query_arg( array(
-			'renew_product' => self::$current_notice_rule['id'],
-			'product_key'   => self::$current_notice_rule['state']['key'],
-			'order_id'      => self::$current_notice_rule['state']['order_id'],
-			'utm_source'    => 'pu',
-			'utm_medium'    => 'product',
-			'utm_campaign'  => 'pu_modal_renew',
-		), 'https://woocommerce.com/cart/' );
+		$renew_url = add_query_arg(
+			array(
+				'renew_product' => self::$current_notice_rule['id'],
+				'product_key'   => self::$current_notice_rule['state']['key'],
+				'order_id'      => self::$current_notice_rule['state']['order_id'],
+				'utm_source'    => 'pu',
+				'utm_medium'    => 'product',
+				'utm_campaign'  => 'pu_modal_renew',
+			),
+			'https://woocommerce.com/cart/'
+		);
 
 		wp_localize_script(
 			'wc-admin-woo-product-usage-notice',
 			'wooProductUsageNotice',
 			array(
-				'subscribeUrl'           => $subscribe_url,
-				'renewUrl'               => $renew_url,
-				'dismissAction'          => 'woocommerce_dismiss_product_usage_notice',
-				'remindLaterAction'      => 'woocommerce_remind_later_product_usage_notice',
-				'productId'              => self::$current_notice_rule['id'],
-				'productName'            => self::$current_notice_rule['name'],
-				'productRegularPrice'    => self::$current_notice_rule['regular_price'],
-				'dismissNonce'           => wp_create_nonce( 'dismiss_product_usage_notice' ),
-				'remindLaterNonce'       => wp_create_nonce( 'remind_later_product_usage_notice' ),
-				'showAs'                 => self::$current_notice_rule['show_as'],
-				'colorScheme'            => self::$current_notice_rule['color_scheme'],
-				'subscriptionState'      => self::$current_notice_rule['state'],
-				'screenId'               => get_current_screen()->id,
+				'subscribeUrl'        => $subscribe_url,
+				'renewUrl'            => $renew_url,
+				'dismissAction'       => 'woocommerce_dismiss_product_usage_notice',
+				'remindLaterAction'   => 'woocommerce_remind_later_product_usage_notice',
+				'productId'           => self::$current_notice_rule['id'],
+				'productName'         => self::$current_notice_rule['name'],
+				'productRegularPrice' => self::$current_notice_rule['regular_price'],
+				'dismissNonce'        => wp_create_nonce( 'dismiss_product_usage_notice' ),
+				'remindLaterNonce'    => wp_create_nonce( 'remind_later_product_usage_notice' ),
+				'showAs'              => self::$current_notice_rule['show_as'],
+				'colorScheme'         => self::$current_notice_rule['color_scheme'],
+				'subscriptionState'   => self::$current_notice_rule['state'],
+				'screenId'            => get_current_screen()->id,
 			)
 		);
 	}
@@ -267,7 +277,7 @@ class WC_Product_Usage_Notice {
 	/**
 	 * Get product usage notice rule from a given WP_Screen object.
 	 *
-	 * @param \WP_Screen Current \WP_Screen object.
+	 * @param \WP_Screen $screen Current \WP_Screen object.
 	 *
 	 * @return array
 	 */
@@ -309,9 +319,11 @@ class WC_Product_Usage_Notice {
 
 		$qs = $rule['screens'][ $screen->id ]['qs'];
 		foreach ( $qs as $key => $val ) {
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
 			if ( empty( $_GET[ $key ] ) || $_GET[ $key ] !== $val ) {
 				return false;
 			}
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		}
 		return true;
 	}
@@ -329,7 +341,7 @@ class WC_Product_Usage_Notice {
 			wp_die( -1 );
 		}
 
-		$product_id = absint( $_GET['product_id'] );
+		$product_id = absint( $_GET['product_id'] ?? 0 );
 		if ( ! $product_id ) {
 			wp_die( -1 );
 		}
@@ -356,7 +368,7 @@ class WC_Product_Usage_Notice {
 			wp_die( -1 );
 		}
 
-		$product_id = absint( $_GET['product_id'] );
+		$product_id = absint( $_GET['product_id'] ?? 0 );
 		if ( ! $product_id ) {
 			wp_die( -1 );
 		}
