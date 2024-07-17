@@ -61,17 +61,13 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 			return $args;
 		}
 
-		global $wpdb;
-
 		$stock_statuses = array_intersect(
 			array_map( 'esc_sql', $stock_statuses ),
 			array_keys( wc_get_product_stock_status_options() )
 		);
 
-		$placeholders = implode( ', ', array_fill( 0, count( $stock_statuses ), '%s' ) );
-
 		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-		$args['where'] .= $wpdb->prepare( " AND {$wpdb->wc_product_meta_lookup}.stock_status IN ({$placeholders})", $stock_statuses );
+		$args['where'] .= ' AND wc_product_meta_lookup.stock_status IN ("' . implode( '","', $stock_statuses ) . '")';
 
 		return $args;
 	}
@@ -104,7 +100,7 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 			if ( $adjust_for_taxes ) {
 				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price_filter, 'max_price', '>=' );
 			} else {
-				$args['where'] .= $wpdb->prepare( " AND {$wpdb->wc_product_meta_lookup}.max_price >= %f ", $min_price_filter );
+				$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price >= %f ', $min_price_filter );
 			}
 		}
 
@@ -114,8 +110,7 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 			if ( $adjust_for_taxes ) {
 				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price_filter, 'min_price', '<=' );
 			} else {
-				$args['where'] .= $wpdb->prepare( " AND {$wpdb->wc_product_meta_lookup}.min_price <= %f ", $max_price_filter );
-				dd( $args );
+				$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price <= %f ', $max_price_filter );
 			}
 		}
 
@@ -248,7 +243,7 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 		global $wpdb;
 
 		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} ON $wpdb->posts.ID = {$wpdb->wc_product_meta_lookup}.product_id ";
+			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
 		}
 		return $sql;
 	}
@@ -296,7 +291,7 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 		foreach ( $product_tax_classes as $tax_class ) {
 			$adjusted_price_filter = $this->adjust_price_filter_for_tax_class( $price_filter, $tax_class );
 			$or_queries[]          = $wpdb->prepare(
-				"( {$wpdb->wc_product_meta_lookup}.tax_class = %s AND {$wpdb->wc_product_meta_lookup}.`" . esc_sql( $column ) . '` ' . esc_sql( $operator ) . ' %f )',
+				'( wc_product_meta_lookup.tax_class = %s AND wc_product_meta_lookup.`' . esc_sql( $column ) . '` ' . esc_sql( $operator ) . ' %f )',
 				$tax_class,
 				$adjusted_price_filter
 			);
@@ -304,9 +299,9 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->prepare(
-			" AND (
-				{$wpdb->wc_product_meta_lookup}.tax_status = 'taxable' AND ( 0=1 OR " . implode( ' OR ', $or_queries ) . ")
-				OR ( {$wpdb->wc_product_meta_lookup}.tax_status != 'taxable' AND {$wpdb->wc_product_meta_lookup}.`" . esc_sql( $column ) . '` ' . esc_sql( $operator ) . ' %f )
+			' AND (
+				wc_product_meta_lookup.tax_status = "taxable" AND ( 0=1 OR ' . implode( ' OR ', $or_queries ) . ')
+				OR ( wc_product_meta_lookup.tax_status != "taxable" AND wc_product_meta_lookup.`' . esc_sql( $column ) . '` ' . esc_sql( $operator ) . ' %f )
 			) ',
 			$price_filter
 		);
