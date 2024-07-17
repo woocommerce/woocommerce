@@ -30,3 +30,4 @@ export { WooOnboardingTaskListHeader } from './components/WooOnboardingTaskListH
 export { WooOnboardingTask } from './components/WooOnboardingTask';
 export * from './utils/countries';
 export { Loader } from './components/Loader';
+export { WooPaymentMethodsLogos } from './components/WooPaymentsMethodsLogos';
