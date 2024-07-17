@@ -1053,7 +1053,7 @@ final class WooCommerce {
 	public function robots_txt( $output ) {
 		$path = ( ! empty( $site_url['path'] ) ) ? $site_url['path'] : '';
 
-		$lines       = explode( PHP_EOL, $output );
+		$lines       = preg_split( '/\r\n|\r|\n/', $output );
 		$agent_index = array_search( 'User-agent: *', $lines, true );
 
 		if ( false !== $agent_index ) {
