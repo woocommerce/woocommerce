@@ -1,10 +1,22 @@
 <?php
 declare( strict_types = 1 );
 
+namespace Automattic\WooCommerce\Tests\Logging;
+
+use Automattic\WooCommerce\Logging\RemoteLogger;
+
 /**
- * Class WC_Remote_Logger_Test.
+ * Class RemoteLoggerTest.
  */
-class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
+class RemoteLoggerTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * System under test.
+	 *
+	 * @var RemoteLogger;
+	 */
+	private $sut;
+
 
 	/**
 	 * Set up test
@@ -13,7 +25,8 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		include_once WC_ABSPATH . 'includes/class-wc-remote-logger.php';
+
+		$this->sut = wc_get_container()->get( RemoteLogger::class );
 
 		WC()->version = '9.2.0';
 	}
@@ -42,7 +55,7 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that remote logging is allowed when all conditions are met.
+	 * @testdox Test that remote logging is allowed when all conditions are met.
 	 */
 	public function test_remote_logging_allowed() {
 		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
@@ -74,12 +87,11 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$checker = new WC_Remote_Logger();
-		$this->assertTrue( $checker->is_remote_logging_allowed() );
+		$this->assertTrue( $this->sut->is_remote_logging_allowed() );
 	}
 
 	/**
-	 * Test that remote logging is not allowed when the feature flag is disabled.
+	 * @testdox Test that remote logging is not allowed when the feature flag is disabled.
 	 */
 	public function test_remote_logging_not_allowed_feature_flag_disabled() {
 		update_option( 'woocommerce_feature_remote_logging_enabled', 'no' );
@@ -99,12 +111,11 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 
 		set_transient( 'latest_woocommerce_version', '9.2.0', DAY_IN_SECONDS );
 
-		$checker = new WC_Remote_Logger();
-		$this->assertFalse( $checker->is_remote_logging_allowed() );
+		$this->assertFalse( $this->sut->is_remote_logging_allowed() );
 	}
 
 	/**
-	 * Test that remote logging is not allowed when user tracking is not opted in.
+	 * @testdox Test that remote logging is not allowed when user tracking is not opted in.
 	 */
 	public function test_remote_logging_not_allowed_tracking_opted_out() {
 		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
@@ -123,12 +134,11 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 
 		set_transient( 'latest_woocommerce_version', '9.2.0', DAY_IN_SECONDS );
 
-		$checker = new WC_Remote_Logger();
-		$this->assertFalse( $checker->is_remote_logging_allowed() );
+		$this->assertFalse( $this->sut->is_remote_logging_allowed() );
 	}
 
 	/**
-	 * Test that remote logging is not allowed when the WooCommerce version is outdated.
+	 * @testdox Test that remote logging is not allowed when the WooCommerce version is outdated.
 	 */
 	public function test_remote_logging_not_allowed_outdated_version() {
 		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
@@ -148,12 +158,11 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 		set_transient( 'latest_woocommerce_version', '9.2.0', DAY_IN_SECONDS );
 		WC()->version = '9.0.0';
 
-		$checker = new WC_Remote_Logger();
-		$this->assertFalse( $checker->is_remote_logging_allowed() );
+		$this->assertFalse( $this->sut->is_remote_logging_allowed() );
 	}
 
 	/**
-	 * Test that remote logging is not allowed when the variant assignment is high.
+	 * @testdox Test that remote logging is not allowed when the variant assignment is high.
 	 */
 	public function test_remote_logging_not_allowed_high_variant_assignment() {
 		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
@@ -178,7 +187,6 @@ class WC_Remote_Logger_Test extends \WC_Unit_Test_Case {
 
 		set_transient( 'latest_woocommerce_version', '9.2.0', DAY_IN_SECONDS );
 
-		$checker = new WC_Remote_Logger();
-		$this->assertFalse( $checker->is_remote_logging_allowed() );
+		$this->assertFalse( $this->sut->is_remote_logging_allowed() );
 	}
 }

@@ -1,6 +1,8 @@
 <?php
 declare( strict_types = 1 );
 
+namespace Automattic\WooCommerce\Logging;
+
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -10,11 +12,11 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  *
  * No personal information is logged, only error information and relevant context.
  *
- * @class WC_Remote_Logger
+ * @class Remote_Logger
  * @since 9.2.0
  * @package WooCommerce\Classes
  */
-class WC_Remote_Logger {
+class RemoteLogger {
 	/**
 	 * Determines if remote logging is allowed based on the following conditions:
 	 *
