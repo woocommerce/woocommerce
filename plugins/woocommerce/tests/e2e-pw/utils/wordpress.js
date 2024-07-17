@@ -24,16 +24,18 @@ const getVersionWPLatestMinusOne = async ( { core, github } ) => {
 	core.setOutput( 'version', latestMinus1 );
 };
 
-const getInstalledVersionWP = async () => {
-	const { stdout, stderr } = await execAsync(
-		`pnpm exec wp-env run tests-cli -- wp core version `
-	);
+const getInstalledWordPressVersion = async () => {
+	try {
+		const { stdout } = await execAsync(
+			`pnpm exec wp-env run tests-cli -- wp core version`
+		);
 
-	if ( stderr !== '' ) {
-		throw new Error( stderr );
+		return Number.parseInt( stdout.trim(), 10 );
+	} catch ( error ) {
+		throw new Error(
+			`Error getting WordPress version: ${ error.message }`
+		);
 	}
-
-	return Number.parseInt( stdout.trim(), 10 );
 };
 
-module.exports = { getVersionWPLatestMinusOne, getInstalledVersionWP };
+module.exports = { getVersionWPLatestMinusOne, getInstalledWordPressVersion };

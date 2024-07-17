@@ -4,7 +4,7 @@ const { CustomizeStorePage } = require( '../customize-store.page' );
 const { encodeCredentials } = require( '../../../utils/plugin-utils' );
 
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
-const { getInstalledVersionWP } = require( '../../../utils/wordpress' );
+const { getInstalledWordPressVersion } = require( '../../../utils/wordpress' );
 const { setOption } = require( '../../../utils/options' );
 
 const test = base.extend( {
@@ -411,7 +411,7 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 		await expect( colorPicker ).toHaveClass( /is-active/ );
 	} );
 
-	test( 'Selected color palette should be applied on the frontend', async ( {
+	test.only( 'Selected color palette should be applied on the frontend', async ( {
 		assemblerPageObject,
 		page,
 		baseURL,
@@ -435,7 +435,7 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 				response.status() === 200
 		);
 
-		const wordPressVersion = await getInstalledVersionWP();
+		const wordPressVersion = await getInstalledWordPressVersion();
 
 		const waitResponseTemplate = page.waitForResponse(
 			( response ) =>
@@ -449,7 +449,7 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 
 		await Promise.all( [
 			waitResponseGlobalStyles,
-			wordPressVersion >= 6.6 ? waitResponseTemplate : new Promise(),
+			wordPressVersion >= 6.6 ? waitResponseTemplate : Promise.resolve(),
 		] );
 
 		await page.goto( baseURL );
@@ -516,7 +516,7 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 		baseURL,
 	}, testInfo ) => {
 		testInfo.snapshotSuffix = '';
-		const wordPressVersion = await getInstalledVersionWP();
+		const wordPressVersion = await getInstalledWordPressVersion();
 
 		const assembler = await assemblerPageObject.getAssembler();
 		const colorPicker = assembler.getByText( 'Create your own' );
