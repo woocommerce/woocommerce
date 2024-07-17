@@ -22,6 +22,7 @@ type PluginSidebarProps = {
 	isActiveByDefault?: boolean;
 	name?: string;
 	title?: string;
+	smallScreenTitle: string;
 };
 
 export function PluginSidebar( { className, ...props }: PluginSidebarProps ) {
