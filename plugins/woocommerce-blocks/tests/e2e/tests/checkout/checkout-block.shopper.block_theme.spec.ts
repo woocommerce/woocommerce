@@ -71,7 +71,7 @@ test.describe( 'Shopper → Account (guest user)', () => {
 		baseURL,
 	} ) => {
 		//Get the login link from checkout page.
-		const loginLink = page.getByRole( 'link', { name: 'Log in.' } );
+		const loginLink = page.getByRole( 'link', { name: 'Log in' } );
 
 		await expect( loginLink ).toHaveAttribute(
 			'href',
@@ -85,10 +85,15 @@ test.describe( 'Shopper → Account (guest user)', () => {
 			path: 'wc/v3/settings/account/woocommerce_enable_signup_and_login_from_checkout',
 			data: { value: 'yes' },
 		} );
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/account/woocommerce_registration_generate_password',
+			data: { value: 'yes' },
+		} );
 
 		await page.reload();
 
-		const createAccount = page.getByLabel( 'Create an account?' );
+		const createAccount = page.getByLabel( 'Create an account' );
 		await createAccount.check();
 
 		const testEmail = `test-${ Date.now() }@example.com`;

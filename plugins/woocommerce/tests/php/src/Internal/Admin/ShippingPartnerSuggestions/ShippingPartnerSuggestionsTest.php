@@ -17,6 +17,13 @@ use WC_Unit_Test_Case;
 class ShippingPartnerSuggestionsTest extends WC_Unit_Test_Case {
 
 	/**
+	 * The mock logger.
+	 *
+	 * @var WC_Logger_Interface|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $mock_logger;
+
+	/**
 	 * Set up.
 	 */
 	public function setUp(): void {
@@ -59,16 +66,22 @@ class ShippingPartnerSuggestionsTest extends WC_Unit_Test_Case {
 				);
 			}
 		);
+
+		// Have a mock logger used by the suggestions rule evaluator.
+		$this->mock_logger = $this->getMockBuilder( 'WC_Logger_Interface' )->getMock();
+		add_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
 	}
 
 	/**
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		ShippingPartnerSuggestionsDataSourcePoller::get_instance()->delete_specs_transient();
 		remove_all_filters( 'transient_woocommerce_admin_' . ShippingPartnerSuggestionsDataSourcePoller::ID . '_specs' );
 		update_option( 'woocommerce_default_country', 'US' );
+		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
+
+		parent::tearDown();
 	}
 
 	/**
@@ -125,5 +138,46 @@ class ShippingPartnerSuggestionsTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_default_country', 'ZA' );
 		$suggestions = ShippingPartnerSuggestions::get_suggestions();
 		$this->assertEquals( 'mock-shipping-partner-1', $suggestions[0]->id );
+	}
+
+	/**
+	 * Test that suggestions rules evaluations are logged.
+	 */
+	public function test_suggestion_evaluations_are_logged() {
+		add_filter( 'woocommerce_admin_remote_specs_evaluator_should_log', '__return_true' );
+
+		$logger_debug_calls_args = array(
+			array(
+				'[mock-shipping-partner-1] base_location_country: passed',
+				array( 'source' => 'wc-shipping-partner-suggestions' ),
+			),
+			array(
+				'[mock-shipping-partner-2] base_location_country: failed',
+				array( 'source' => 'wc-shipping-partner-suggestions' ),
+			),
+		);
+		$this->mock_logger
+			->expects( $this->exactly( count( $logger_debug_calls_args ) ) )
+			->method( 'debug' )
+			->willReturnCallback(
+				function ( ...$args ) use ( &$logger_debug_calls_args ) {
+					$expected_args = array_shift( $logger_debug_calls_args );
+					$this->assertSame( $expected_args, $args );
+				}
+			);
+
+		update_option( 'woocommerce_default_country', 'ZA' );
+		ShippingPartnerSuggestions::get_suggestions();
+
+		remove_filter( 'woocommerce_admin_remote_specs_evaluator_should_log', '__return_true' );
+	}
+
+	/**
+	 * Overrides the WC logger.
+	 *
+	 * @return mixed
+	 */
+	public function override_wc_logger() {
+		return $this->mock_logger;
 	}
 }
