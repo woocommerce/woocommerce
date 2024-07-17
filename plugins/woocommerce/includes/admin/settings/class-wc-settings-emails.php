@@ -192,16 +192,16 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				),
 
                 array(
-                    'title'    => __( 'Footer text color', 'woocommerce' ),
-                    /* translators: %s: footer default color */
-                    'desc'     => sprintf( __( 'The footer text color. Default %s.', 'woocommerce' ), '<code>#3c3c3c</code>' ),
-                    'id'       => 'woocommerce_email_footer_text_color',
-                    'type'     => 'color',
-                    'css'      => 'width:6em;',
-                    'default'  => '#3c3c3c',
-                    'autoload' => false,
-                    'desc_tip' => true,
-                ),
+					'title'    => __( 'Footer text color', 'woocommerce' ),
+					/* translators: %s: footer default color */
+					'desc'     => sprintf( __( 'The footer text color. Default %s.', 'woocommerce' ), '<code>#3c3c3c</code>' ),
+					'id'       => 'woocommerce_email_footer_text_color',
+					'type'     => 'color',
+					'css'      => 'width:6em;',
+					'default'  => '#3c3c3c',
+					'autoload' => false,
+					'desc_tip' => true,
+				),
 
 				array(
 					'type' => 'sectionend',
