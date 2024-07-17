@@ -42,8 +42,22 @@ const ProductMVPFeedbackModalContainer = lazy( () =>
 export default function ProductPage() {
 	const { productId: productIdSearchParam } = useParams();
 
+	/**
+	 * Only register blocks and unregister them when the product page is being rendered or unmounted.
+	 * Note: Dependency array should stay empty.
+	 */
 	useEffect( () => {
 		document.body.classList.add( 'is-product-editor' );
+
+		const unregisterBlocks = initBlocks();
+
+		return () => {
+			document.body.classList.remove( 'is-product-editor' );
+			unregisterBlocks();
+		};
+	}, [] );
+
+	useEffect( () => {
 		registerPlugin( 'wc-admin-product-editor', {
 			// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 			scope: 'woocommerce-product-block-editor',
@@ -89,12 +103,8 @@ export default function ProductPage() {
 			},
 		} );
 
-		const unregisterBlocks = initBlocks();
-
 		return () => {
-			document.body.classList.remove( 'is-product-editor' );
 			unregisterPlugin( 'wc-admin-product-editor' );
-			unregisterBlocks();
 		};
 	}, [ productIdSearchParam ] );
 
