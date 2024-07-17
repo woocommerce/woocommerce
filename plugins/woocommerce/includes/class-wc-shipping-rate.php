@@ -257,6 +257,42 @@ class WC_Shipping_Rate {
 	}
 
 	/**
+	 * Get rate description.
+	 *
+	 * @since 9.2.0
+	 * @return string
+	 */
+	public function get_description() {
+		/**
+		 * Filter the shipping rate description.
+		 *
+		 * @since 9.2.0
+		 *
+		 * @param string            $description The current description.
+		 * @param WC_Shipping_Rate  $this        The shipping rate.
+		 */
+		return apply_filters( 'woocommerce_shipping_rate_description', $this->data['description'], $this );
+	}
+
+	/**
+	 * Get rate delivery time.
+	 *
+	 * @since 9.2.0
+	 * @return string
+	 */
+	public function get_delivery_time() {
+		/**
+		 * Filter the shipping rate delivery time.
+		 *
+		 * @since 9.2.0
+		 *
+		 * @param string            $delivery_time The current description.
+		 * @param WC_Shipping_Rate  $this          The shipping rate.
+		 */
+		return apply_filters( 'woocommerce_shipping_rate_delivery_time', $this->data['delivery_time'], $this );
+	}
+
+	/**
 	 * Add some meta data for this rate.
 	 *
 	 * @since 2.6.0
