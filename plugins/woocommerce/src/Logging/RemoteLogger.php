@@ -104,7 +104,7 @@ class RemoteLogger {
 
 		if ( ! empty( $plugin_info->version ) ) {
 			$latest_version = $plugin_info->version;
-			set_transient( $transient_key, $latest_version, DAY_IN_SECONDS );
+			set_transient( $transient_key, $latest_version, WEEK_IN_SECONDS );
 			return $latest_version;
 		}
 
