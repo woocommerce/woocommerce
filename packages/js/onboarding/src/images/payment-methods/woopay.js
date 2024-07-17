@@ -3,7 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 
-export const WooPay = () => (
+export default () => (
 	/* eslint-disable */
 	<svg
 		width="64"

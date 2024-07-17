@@ -185,6 +185,7 @@ class PTKPatternsStore {
 
 		$patterns = $this->ptk_client->fetch_patterns(
 			array(
+				// This is the site where the patterns are stored. Despite the 'wpcomstaging.com' domain suggesting a staging environment, this URL points to the production environment where stable versions of the patterns are maintained.
 				'site'       => 'wooblockpatterns.wpcomstaging.com',
 				'categories' => array(
 					'_woo_intro',
