@@ -229,18 +229,10 @@ test.describe(
 			await api.get( 'customers' ).then( async ( response ) => {
 				for ( let i = 0; i < response.data.length; i++ ) {
 					if (
-						response.data[ i ].billing.email === newAccountEmail
-					) {
-						await api.delete(
-							`customers/${ response.data[ i ].id }`,
-							{
-								force: true,
-							}
-						);
-					}
-					if (
-						response.data[ i ].billing.email ===
-						newAccountEmailWithCustomPassword
+						[
+							newAccountEmail,
+							newAccountEmailWithCustomPassword,
+						].includes( response.data[ i ].billing.email )
 					) {
 						await api.delete(
 							`customers/${ response.data[ i ].id }`,
