@@ -9,9 +9,7 @@ test( 'Load the home page', async ( { page } ) => {
 			.getByRole( 'link', { name: 'WooCommerce Core E2E Test' } )
 			.count()
 	).toBeGreaterThan( 0 );
-	await expect(
-		page.getByText( 'Proudly powered by WordPress' )
-	).toBeVisible();
+	await expect( page.getByText( /powered by WordPress/i ) ).toBeVisible();
 	expect( await page.title() ).toBe( 'WooCommerce Core E2E Test Suite' );
 	await expect(
 		page.getByRole( 'link', { name: 'WordPress' } )
