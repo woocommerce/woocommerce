@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 /**
  * Title: Product Filters
  * Slug: woocommerce-blocks/product-filters
