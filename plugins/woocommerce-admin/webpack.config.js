@@ -79,6 +79,7 @@ const wpAdminScripts = [
 	'woo-renew-subscription',
 	'woo-subscriptions-notice',
 	'woo-product-usage-notice',
+	'validation',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {

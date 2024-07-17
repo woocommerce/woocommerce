@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
 use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
 use WC_Meta_Data;
@@ -52,6 +53,8 @@ class Init {
 		array_push( $this->supported_product_types, 'variable' );
 		array_push( $this->supported_product_types, 'external' );
 		array_push( $this->supported_product_types, 'grouped' );
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'validation', true );
 
 		$this->redirection_controller = new RedirectionController();
 
