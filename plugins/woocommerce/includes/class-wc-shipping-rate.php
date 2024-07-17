@@ -19,6 +19,7 @@ class WC_Shipping_Rate {
 	 * Stores data for this rate.
 	 *
 	 * @since 3.2.0
+	 * @since 9.2.0 Added description and delivery_time.
 	 * @var   array
 	 */
 	protected $data = array(
