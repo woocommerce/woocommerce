@@ -411,7 +411,7 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 		await expect( colorPicker ).toHaveClass( /is-active/ );
 	} );
 
-	test.only( 'Selected color palette should be applied on the frontend', async ( {
+	test( 'Selected color palette should be applied on the frontend', async ( {
 		assemblerPageObject,
 		page,
 		baseURL,
