@@ -28,7 +28,7 @@
 		@include font-size(regular);
 		border-radius: $universal-border-radius;
 		width: 100%;
-		height: 100%;
+		height: 50px;
 		appearance: none;
 		background: none;
 		padding: em($gap) em($gap-smaller) 0;
@@ -46,7 +46,7 @@
 		position: absolute;
 		line-height: 1.25; // =20px when font-size is 16px.
 		left: em($gap-smaller);
-		top: 0;
+		top: 2px;
 		transform-origin: top left;
 		transition: all 200ms ease;
 		color: currentColor;

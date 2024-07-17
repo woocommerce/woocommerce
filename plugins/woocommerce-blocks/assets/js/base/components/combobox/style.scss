@@ -45,7 +45,7 @@
 			width: 100%;
 			opacity: initial;
 			border-radius: $universal-border-radius;
-			max-height: 52px;
+			height: 50px;
 
 			&[aria-expanded="true"],
 			&:focus {
@@ -155,7 +155,7 @@
 
 	.wc-block-components-combobox-control:has(input:-webkit-autofill) {
 		label {
-			transform: translateY(em($gap-smaller)) scale(0.875);
+			transform: translateY(#{$gap-smallest}) scale(0.75);
 		}
 	}
 
@@ -163,7 +163,7 @@
 	&:focus-within {
 		.wc-block-components-combobox-control
 		label.components-base-control__label {
-			transform: translateY(em($gap-smaller)) scale(0.875);
+			transform: translateY(#{$gap-smallest}) scale(0.75);
 		}
 	}
 
