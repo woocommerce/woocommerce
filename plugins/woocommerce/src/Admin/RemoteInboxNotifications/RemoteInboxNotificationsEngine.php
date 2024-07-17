@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\StoredStateSetupForProducts;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
 /**
  * Remote Inbox Notifications engine.
@@ -21,6 +22,8 @@ use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\StoredStateSetupForP
  * specs that are able to be triggered.
  */
 class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
+	use AccessiblePrivateMethods;
+
 	const STORED_STATE_OPTION_NAME = 'wc_remote_inbox_notifications_stored_state';
 	const WCA_UPDATED_OPTION_NAME  = 'wc_remote_inbox_notifications_wca_updated';
 
@@ -70,8 +73,8 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 		);
 
 		add_filter( 'woocommerce_get_note_from_db', array( __CLASS__, 'get_note_from_db' ), 10, 1 );
-		add_filter( 'woocommerce_debug_tools', array( __CLASS__, 'add_debug_tools' ) );
-		add_action(
+		self::add_filter( 'woocommerce_debug_tools', array( __CLASS__, 'add_debug_tools' ) );
+		self::add_action(
 			'wp_ajax_woocommerce_json_inbox_notifications_search',
 			array( __CLASS__, 'ajax_action_inbox_notification_search' )
 		);
@@ -254,7 +257,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	 *
 	 * @return mixed
 	 */
-	public static function add_debug_tools( $tools ) {
+	private static function add_debug_tools( $tools ) {
 		// Check if the feature flag is disabled.
 		if ( ! Features::is_enabled( 'remote-inbox-notifications' ) ) {
 			return false;
@@ -314,7 +317,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	 *
 	 * @return void
 	 */
-	public static function ajax_action_inbox_notification_search() {
+	private static function ajax_action_inbox_notification_search() {
 		global $wpdb;
 
 		check_ajax_referer( 'search-products', 'security' );
