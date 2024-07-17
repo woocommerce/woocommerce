@@ -40,6 +40,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		$this->cleanup_filters();
 
 		delete_option( 'woocommerce_feature_remote_logging_enabled' );
+		delete_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT );
 	}
 
 	/**
@@ -52,6 +53,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		remove_all_filters( 'option_woocommerce_allow_tracking' );
 		remove_all_filters( 'option_woocommerce_version' );
 		remove_all_filters( 'option_woocommerce_remote_variant_assignment' );
+		remove_all_filters( 'plugins_api' );
 	}
 
 	/**
@@ -109,7 +111,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		set_transient( 'latest_woocommerce_version', '9.2.0', DAY_IN_SECONDS );
+		set_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT, '9.2.0', DAY_IN_SECONDS );
 
 		$this->assertFalse( $this->sut->is_remote_logging_allowed() );
 	}
@@ -132,7 +134,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		set_transient( 'latest_woocommerce_version', '9.2.0', DAY_IN_SECONDS );
+		set_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT, '9.2.0', DAY_IN_SECONDS );
 
 		$this->assertFalse( $this->sut->is_remote_logging_allowed() );
 	}
@@ -155,7 +157,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		set_transient( 'latest_woocommerce_version', '9.2.0', DAY_IN_SECONDS );
+		set_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT, '9.2.0', DAY_IN_SECONDS );
 		WC()->version = '9.0.0';
 
 		$this->assertFalse( $this->sut->is_remote_logging_allowed() );
@@ -185,8 +187,50 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		set_transient( 'latest_woocommerce_version', '9.2.0', DAY_IN_SECONDS );
+		set_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT, '9.2.0', DAY_IN_SECONDS );
 
 		$this->assertFalse( $this->sut->is_remote_logging_allowed() );
+	}
+
+	/**
+	 * @testdox Test that the fetch_latest_woocommerce_version method retries fetching the latest WooCommerce version when the API call fails.
+	 */
+	public function test_fetch_latest_woocommerce_version_retry() {
+		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
+
+		add_filter(
+			'option_woocommerce_allow_tracking',
+			function () {
+				return 'yes';
+			}
+		);
+		add_filter(
+			'option_woocommerce_remote_variant_assignment',
+			function () {
+				return 5;
+			}
+		);
+
+		add_filter(
+			'plugins_api', // phpcs:ignore PEAR.Functions.FunctionCallSignature.MultipleArguments
+			function ( $result, $action, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+				return new \WP_Error();
+			},
+			10,
+			3
+		);
+
+		$this->sut->is_remote_logging_allowed();
+		$this->assertEquals( 1, get_transient( RemoteLogger::FETCH_LATEST_VERSION_RETRY ) );
+
+		$this->sut->is_remote_logging_allowed();
+		$this->assertEquals( 2, get_transient( RemoteLogger::FETCH_LATEST_VERSION_RETRY ) );
+
+		$this->sut->is_remote_logging_allowed();
+		$this->assertEquals( 3, get_transient( RemoteLogger::FETCH_LATEST_VERSION_RETRY ) );
+
+		// After 3 retries, the transient should not be updated.
+		$this->sut->is_remote_logging_allowed();
+		$this->assertEquals( 3, get_transient( RemoteLogger::FETCH_LATEST_VERSION_RETRY ) );
 	}
 }
