@@ -356,14 +356,7 @@ describe( 'Filter by Stock block', () => {
 			} );
 		} );
 
-		/**
-		 * @todo Fix this test and unskip it.
-		 *
-		 * This test is failing with the following notice:
-		 *
-		 * Found multiple elements with the role "combobox"
-		 */
-		test.skip( 'adds chosen option to another one that is clicked', async () => {
+		test( 'adds chosen option to another one that is clicked', async () => {
 			await waitFor( async () => {
 				const user = userEvent.setup();
 				const ratingParam = 'onbackorder';

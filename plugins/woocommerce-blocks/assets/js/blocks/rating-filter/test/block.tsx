@@ -293,11 +293,7 @@ describe( 'Filter by Rating block', () => {
 			} );
 		} );
 
-		/**
-		 * @todo This test is failing with the following notice:
-		 * Found multiple elements with the role "combobox"
-		 */
-		test.skip( 'adds chosen option to another one that is clicked', async () => {
+		test( 'adds chosen option to another one that is clicked', async () => {
 			await waitFor( async () => {
 				const ratingParam = '2';
 				const {

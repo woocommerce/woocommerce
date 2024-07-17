@@ -147,14 +147,7 @@ describe( 'Form Component', () => {
 		);
 	} );
 
-	/**
-	 * @todo Fix this test and unskip it.
-	 *
-	 * This test is failing with the following notice:
-	 *
-	 * expected document not to contain element, found <label for="1-state">County (optional)</label> instead
-	 */
-	test.skip( 'input fields update when changing the country', async () => {
+	test( 'input fields update when changing the country', async () => {
 		renderInCheckoutProvider( <WrappedAddressForm type="shipping" /> );
 
 		await act( async () => {
@@ -181,15 +174,7 @@ describe( 'Form Component', () => {
 		expect( screen.getByLabelText( /Postal code/ ) ).toBeInTheDocument();
 	} );
 
-	/**
-	 * @todo Fix this test and unskip it.
-	 *
-	 * This test is failing with the following notice:
-	 *
-	 * Expected: ""
-	 * Received: "Greater London"
-	 */
-	test.skip( 'input values are reset after changing the country', async () => {
+	test( 'input values are reset after changing the country', async () => {
 		renderInCheckoutProvider( <WrappedAddressForm type="shipping" /> );
 
 		await act( async () => {
