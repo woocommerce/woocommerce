@@ -1,11 +1,11 @@
 <?php
-declare( strict_types = 1 );
-
 /**
  * WooCommerce Product Usage Notice.
  *
  * @package WooCommerce\Admin\Helper
  */
+
+declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
