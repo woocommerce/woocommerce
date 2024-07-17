@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Run full e2e tests suite against Pressable and WPCOM websites.
