@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\ProductQueryFilters;
 
 use WC_Tax;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use WC_Cache_Helper;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -279,7 +280,13 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 		}
 
 		// Select only used tax classes to avoid unwanted calculations.
-		$product_tax_classes = $wpdb->get_col( "SELECT DISTINCT tax_class FROM {$wpdb->wc_product_meta_lookup};" );
+		$cache_key           = WC_Cache_Helper::get_cache_prefix( 'filter_clauses' ) . 'tax_classes';
+		$product_tax_classes = wp_cache_get( $cache_key );
+
+		if ( ! $product_tax_classes ) {
+			$product_tax_classes = $wpdb->get_col( "SELECT DISTINCT tax_class FROM {$wpdb->wc_product_meta_lookup};" );
+			wp_cache_set( $cache_key, $product_tax_classes );
+		}
 
 		if ( empty( $product_tax_classes ) ) {
 			return '';
