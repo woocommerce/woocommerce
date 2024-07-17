@@ -60,11 +60,6 @@ class WC_Shortcode_My_Account {
 			// Start output buffer since the html may need discarding for BW compatibility.
 			ob_start();
 
-			if ( isset( $wp->query_vars['customer-logout'] ) ) {
-				/* translators: %s: logout url */
-				wc_add_notice( sprintf( __( 'Are you sure you want to log out? <a href="%s">Confirm and log out</a>', 'woocommerce' ), wc_logout_url() ) );
-			}
-
 			// Collect notices before output.
 			$notices = wc_get_notices();
 
