@@ -3,6 +3,28 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 
+const defaultValidityMessage =
+	( label: string | undefined ) =>
+	( validity: ValidityState ): string | undefined => {
+		const fieldLabel = label
+			? label.toLowerCase()
+			: __( 'field', 'woocommerce' );
+
+		const invalidFieldMessage = sprintf(
+			/* translators: %s field label */
+			__( 'Please enter a valid %s', 'woocommerce' ),
+			fieldLabel
+		);
+
+		if (
+			validity.valueMissing ||
+			validity.badInput ||
+			validity.typeMismatch
+		) {
+			return invalidFieldMessage;
+		}
+	};
+
 /**
  * Converts an input's validityState to a string to display on the frontend.
  *
@@ -10,28 +32,22 @@ import { __, sprintf } from '@wordpress/i18n';
  * could be implemented in the future but are not currently used by the block checkout).
  */
 const getValidityMessageForInput = (
-	label: string,
-	inputElement: HTMLInputElement
+	label: string | undefined,
+	inputElement: HTMLInputElement,
+	customValidityMessage?: ( validity: ValidityState ) => string | undefined
 ): string => {
-	const { valid, customError, valueMissing, badInput, typeMismatch } =
-		inputElement.validity;
-
 	// No errors, or custom error - return early.
-	if ( valid || customError ) {
+	if ( inputElement.validity.valid || inputElement.validity.customError ) {
 		return inputElement.validationMessage;
 	}
 
-	const invalidFieldMessage = sprintf(
-		/* translators: %s field label */
-		__( 'Please enter a valid %s', 'woocommerce' ),
-		label.toLowerCase()
+	const validityMessageCallback =
+		customValidityMessage || defaultValidityMessage( label );
+
+	return (
+		validityMessageCallback( inputElement.validity ) ||
+		inputElement.validationMessage
 	);
-
-	if ( valueMissing || badInput || typeMismatch ) {
-		return invalidFieldMessage;
-	}
-
-	return inputElement.validationMessage || invalidFieldMessage;
 };
 
 export default getValidityMessageForInput;
