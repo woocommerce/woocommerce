@@ -91,8 +91,11 @@ const getCoreConfig = ( options = {} ) => {
 				return `${ paramCase( chunkData.chunk.name ) }.js`;
 			},
 			path: PATH_TO_BUILD,
-			library: [ 'wc', '[name]' ],
-			libraryTarget: 'this',
+			library: {
+				// Expose the exports of entry points so we can consume the libraries in window.wc.[modulename] with WooCommerceDependencyExtractionWebpackPlugin.
+				name: [ 'wc', '[name]' ],
+				type: 'window',
+			},
 			uniqueName: 'webpackWcBlocksCoreJsonp',
 		},
 		module: {
