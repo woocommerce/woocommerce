@@ -1,3 +1,6 @@
+const { promisify } = require( 'util' );
+const execAsync = promisify( require( 'child_process' ).exec );
+
 const getVersionWPLatestMinusOne = async ( { core, github } ) => {
 	const URL_WP_STABLE_VERSION_CHECK =
 		'https://api.wordpress.org/core/stable-check/1.0/';
@@ -21,4 +24,16 @@ const getVersionWPLatestMinusOne = async ( { core, github } ) => {
 	core.setOutput( 'version', latestMinus1 );
 };
 
-module.exports = { getVersionWPLatestMinusOne };
+const getInstalledVersionWP = async () => {
+	const { stdout, stderr } = await execAsync(
+		`pnpm exec wp-env run tests-cli -- wp core version `
+	);
+
+	if ( stderr !== '' ) {
+		throw new Error( stderr );
+	}
+
+	return Number.parseInt( stdout.trim(), 10 );
+};
+
+module.exports = { getVersionWPLatestMinusOne, getInstalledVersionWP };
