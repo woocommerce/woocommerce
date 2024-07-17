@@ -569,6 +569,10 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 		};
 
 		for ( const type of Object.keys( mapTypeFeatures ) ) {
+			await assembler.waitFor(
+				'.woocommerce-customize-store__color-panel-container'
+			);
+
 			await assembler
 				.locator(
 					'.woocommerce-customize-store__color-panel-container'
