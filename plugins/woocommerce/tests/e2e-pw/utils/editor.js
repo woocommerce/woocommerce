@@ -57,7 +57,7 @@ const insertBlock = async ( page, blockName ) => {
 	await page.getByLabel( 'Toggle block inserter' ).click();
 	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
-	await page.getByLabel( 'Toggle block inserter' ).click();
+	await page.getByLabel( 'Close block inserter' ).click();
 };
 
 const insertBlockByShortcut = async ( page, blockName ) => {
