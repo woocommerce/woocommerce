@@ -88,57 +88,89 @@ export function Edit( {
 		};
 	}
 
+	const widthFieldId = `dimensions_width-${ clientId }`;
+
 	const {
 		ref: dimensionsWidthRef,
 		error: dimensionsWidthValidationError,
 		validate: validateDimensionsWidth,
 	} = useValidation< Product >(
-		`dimensions_width-${ clientId }`,
+		widthFieldId,
 		async function dimensionsWidthValidator() {
 			if ( dimensions?.width && +dimensions.width <= 0 ) {
-				return __( 'Width must be greater than zero.', 'woocommerce' );
+				return {
+					message: __(
+						'Width must be greater than zero.',
+						'woocommerce'
+					),
+					context: clientId,
+				};
 			}
 		},
 		[ dimensions?.width ]
 	);
+
+	const lengthFieldId = `dimensions_length-${ clientId }`;
 
 	const {
 		ref: dimensionsLengthRef,
 		error: dimensionsLengthValidationError,
 		validate: validateDimensionsLength,
 	} = useValidation< Product >(
-		`dimensions_length-${ clientId }`,
+		lengthFieldId,
 		async function dimensionsLengthValidator() {
 			if ( dimensions?.length && +dimensions.length <= 0 ) {
-				return __( 'Length must be greater than zero.', 'woocommerce' );
+				return {
+					message: __(
+						'Length must be greater than zero.',
+						'woocommerce'
+					),
+					context: clientId,
+				};
 			}
 		},
 		[ dimensions?.length ]
 	);
+
+	const heightFieldId = `dimensions_height-${ clientId }`;
 
 	const {
 		ref: dimensionsHeightRef,
 		error: dimensionsHeightValidationError,
 		validate: validateDimensionsHeight,
 	} = useValidation< Product >(
-		`dimensions_height-${ clientId }`,
+		heightFieldId,
 		async function dimensionsHeightValidator() {
 			if ( dimensions?.height && +dimensions.height <= 0 ) {
-				return __( 'Height must be greater than zero.', 'woocommerce' );
+				return {
+					message: __(
+						'Height must be greater than zero.',
+						'woocommerce'
+					),
+					context: clientId,
+				};
 			}
 		},
 		[ dimensions?.height ]
 	);
+
+	const weightFieldId = `weight-${ clientId }`;
 
 	const {
 		ref: weightRef,
 		error: weightValidationError,
 		validate: validateWeight,
 	} = useValidation< Product >(
-		`weight-${ clientId }`,
+		weightFieldId,
 		async function weightValidator() {
 			if ( weight && +weight <= 0 ) {
-				return __( 'Weight must be greater than zero.', 'woocommerce' );
+				return {
+					message: __(
+						'Weight must be greater than zero.',
+						'woocommerce'
+					),
+					context: clientId,
+				};
 			}
 		},
 		[ weight ]
@@ -148,18 +180,22 @@ export function Edit( {
 		...getDimensionsControlProps( 'width', 'A' ),
 		ref: dimensionsWidthRef,
 		onBlur: validateDimensionsWidth,
+		id: widthFieldId,
 	};
 	const dimensionsLengthProps = {
 		...getDimensionsControlProps( 'length', 'B' ),
 		ref: dimensionsLengthRef,
 		onBlur: validateDimensionsLength,
+		id: lengthFieldId,
 	};
 	const dimensionsHeightProps = {
 		...getDimensionsControlProps( 'height', 'C' ),
 		ref: dimensionsHeightRef,
 		onBlur: validateDimensionsHeight,
+		id: heightFieldId,
 	};
 	const weightProps = {
+		id: weightFieldId,
 		name: 'weight',
 		value: weight ?? '',
 		onChange: setWeight,

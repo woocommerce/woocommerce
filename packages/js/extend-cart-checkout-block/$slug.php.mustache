@@ -20,6 +20,7 @@
  */
 add_action( 'woocommerce_blocks_loaded',
 	function () {
+		register_block_type_from_metadata( __DIR__ . '/build/js/checkout-newsletter-subscription-block' );
 		require_once __DIR__ . '/{{slug}}-blocks-integration.php';
 		add_action(
 			'woocommerce_blocks_cart_block_registration',
