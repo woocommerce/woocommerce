@@ -40,7 +40,6 @@ const ExpressPaymentMethods = () => {
 		  }
 		: undefined;
 
-	console.log( buttonAttributes );
 	const { activePaymentMethod, paymentMethodData } = useSelect(
 		( select ) => {
 			const store = select( PAYMENT_STORE_KEY );
@@ -143,6 +142,16 @@ const ExpressPaymentMethods = () => {
 		[ __internalSetExpressPaymentError, onExpressPaymentError ]
 	);
 
+	// In the editor, we apply styles to the button containers to show the changes of the height and border-radius controls,
+	// which would be passed to the payment APIs on the front-end
+	const stylesForButtonContainers =
+		isEditor && showButtonStyles
+			? {
+					height: `${ buttonHeight }px`,
+					borderRadius: `${ buttonBorderRadius }px`,
+			  }
+			: {};
+
 	/**
 	 * @todo Find a way to Memoize Express Payment Method Content
 	 *
@@ -158,7 +167,11 @@ const ExpressPaymentMethods = () => {
 					? paymentMethod.edit
 					: paymentMethod.content;
 				return isValidElement( expressPaymentMethod ) ? (
-					<li key={ id } id={ `express-payment-method-${ id }` }>
+					<li
+						key={ id }
+						id={ `express-payment-method-${ id }` }
+						style={ stylesForButtonContainers }
+					>
 						{ cloneElement( expressPaymentMethod, {
 							...paymentMethodInterface,
 							onClick: onExpressPaymentClick( id ),

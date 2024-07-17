@@ -1,16 +1,13 @@
 /**
  * External dependencies
  */
-import {
-	InspectorControls,
-	HeightControl,
-	useBlockProps,
-} from '@wordpress/block-editor';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import {
 	PanelBody,
 	RadioControl,
 	ToggleControl,
 	Notice,
+	TextControl,
 } from '@wordpress/components';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
 import { ADMIN_URL } from '@woocommerce/settings';
@@ -23,22 +20,14 @@ import clsx from 'clsx';
  */
 import Block from './block';
 import './editor.scss';
+import { ExpressCheckoutAttributes } from './types';
 import { ExpressCheckoutContext } from './context';
 
 export const Edit = ( {
 	attributes,
 	setAttributes,
 }: {
-	attributes: {
-		className?: string;
-		buttonHeight: string;
-		showButtonStyles: boolean;
-		buttonBorderRadius: string;
-		lock: {
-			move: boolean;
-			remove: boolean;
-		};
-	};
+	attributes: ExpressCheckoutAttributes;
 	setAttributes: ( attributes: Record< string, unknown > ) => undefined;
 } ): JSX.Element | null => {
 	const { paymentMethods, isInitialized } = useExpressPaymentMethods();
@@ -74,7 +63,7 @@ export const Edit = ( {
 					setAttributes( { buttonHeight: newValue } )
 				}
 			/>
-			<HeightControl
+			<TextControl
 				label={ __( 'Button Border Radius', 'woocommerce' ) }
 				value={ buttonBorderRadius }
 				onChange={ ( newValue: string ) =>
@@ -83,6 +72,8 @@ export const Edit = ( {
 					} )
 				}
 				type="number"
+				min={ 0 }
+				max={ 100 }
 			/>
 		</>
 	);
@@ -95,7 +86,6 @@ export const Edit = ( {
 			<Notice
 				status="info"
 				isDismissible={ false }
-				politeness="polite"
 				className="show-button-styles-notice"
 			>
 				<p className="wc-block-checkout__controls-text">
