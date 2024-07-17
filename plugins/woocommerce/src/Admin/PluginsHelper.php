@@ -706,7 +706,7 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Construct the subscritpion notice data based on user subscriptions data.
+	 * Construct the subscription notice data based on user subscriptions data.
 	 *
 	 * @param array  $all_subs all subscription data.
 	 * @param array  $subs_to_show filtered subscriptions as condition.
@@ -717,10 +717,19 @@ class PluginsHelper {
 	 */
 	public static function get_subscriptions_notice_data( array $all_subs, array $subs_to_show, int $total, array $messages, string $type ) {
 		if ( 1 < $total ) {
+			$hyperlink_url = add_query_arg(
+				array(
+					'utm_source'   => 'pu',
+					'utm_campaign' => 'pu_settings_screen_renew',
+
+				),
+				self::WOO_SUBSCRIPTION_PAGE_URL
+			);
+
 			$parsed_message = sprintf(
 				$messages['different_subscriptions'],
 				esc_attr( $total ),
-				esc_url( self::WOO_SUBSCRIPTION_PAGE_URL ),
+				esc_url( $hyperlink_url ),
 				esc_attr( $total ),
 			);
 
@@ -752,8 +761,11 @@ class PluginsHelper {
 		$expiry_date   = date_i18n( 'F jS', $subscription['expires'] );
 		$hyperlink_url = add_query_arg(
 			array(
-				'product_id' => $product_id,
-				'type'       => $type,
+				'product_id'   => $product_id,
+				'type'         => $type,
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'pu_settings_screen_renew',
+
 			),
 			self::WOO_SUBSCRIPTION_PAGE_URL
 		);
