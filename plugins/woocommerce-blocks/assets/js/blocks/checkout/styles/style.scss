@@ -40,6 +40,7 @@
 
 .wp-block-woocommerce-checkout.is-loading {
 	display: flex;
+	flex-direction: row-reverse;
 	flex-wrap: wrap;
 	margin: 0 auto $gap;
 	position: relative;

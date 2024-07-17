@@ -1,5 +1,6 @@
 .wc-block-components-sidebar-layout {
 	display: flex;
+	flex-direction: row-reverse;
 	flex-wrap: wrap;
 	margin: 0 auto $gap;
 	position: relative;
