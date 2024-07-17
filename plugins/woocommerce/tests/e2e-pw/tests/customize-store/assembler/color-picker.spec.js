@@ -441,7 +441,7 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 
 		await Promise.all( [
 			waitResponseGlobalStyles,
-			wordPressVersion >= 6.6
+			wordPressVersion < 6.6
 				? page.waitForResponse(
 						( response ) =>
 							response.url().includes(
