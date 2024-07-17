@@ -309,6 +309,7 @@ final class WooCommerce {
 		self::add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
+		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
 
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
 

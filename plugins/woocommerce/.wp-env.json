@@ -1,4 +1,5 @@
 {
+	"core": "WordPress/WordPress#6.5",
 	"phpVersion": "7.4",
 	"plugins": [
 		"."
