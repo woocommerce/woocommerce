@@ -408,7 +408,7 @@ class UpdatePatterns {
 			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woocommerce' ) );
 		}
 
-		return wp_json_file_decode( $patterns_dictionary, array( 'associative' => true ) );
+		return $patterns_dictionary;
 	}
 
 	/**
