@@ -63,7 +63,7 @@ class PatternsHelper {
 	/**
 	 * Upsert the patterns AI data.
 	 *
-	 * @param array $patterns_dictionary The patterns dictionary.
+	 * @param array $patterns_dictionary The patterns' dictionary.
 	 *
 	 * @return WP_Error|null
 	 */
@@ -92,7 +92,7 @@ class PatternsHelper {
 	 * @return array|WP_Error Returns pattern dictionary or WP_Error on failure.
 	 */
 	public static function get_patterns_dictionary( $pattern_slug = null ) {
-		$default_patterns_dictionary = include plugin_dir_path( __FILE__ ) . 'dictionary.php';
+		$default_patterns_dictionary = PatternsDictionary::get();
 
 		if ( empty( $default_patterns_dictionary ) ) {
 			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woocommerce' ) );

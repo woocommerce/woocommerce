@@ -402,7 +402,7 @@ class UpdatePatterns {
 	 * @return mixed|WP_Error|null
 	 */
 	public static function get_patterns_dictionary() {
-		$patterns_dictionary = include plugin_dir_path( __FILE__ ) . 'dictionary.php';
+		$patterns_dictionary = PatternsDictionary::get();
 
 		if ( empty( $patterns_dictionary ) ) {
 			return new WP_Error( 'missing_patterns_dictionary', __( 'The patterns dictionary is missing.', 'woocommerce' ) );
