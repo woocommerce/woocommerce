@@ -15,8 +15,6 @@
 
 Closes # .
 
-- [ ] I have added/updated relevant tests ( E2E, Unit, Integration etc.) to ensure my fix/feature works as intended, or this PR does not require tests.
-
 <!-- Begin testing instructions -->
 
 ### How to test the changes in this Pull Request:
