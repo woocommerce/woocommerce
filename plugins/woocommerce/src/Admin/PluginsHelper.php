@@ -934,8 +934,10 @@ class PluginsHelper {
 		if ( in_array( $notice_data['type'], array( 'single_manage', 'multiple_manage' ), true ) ) {
 			$button_link = add_query_arg(
 				array(
-					'product_id' => $notice_data['product_id'],
-					'type'       => 'expiring',
+					'product_id'   => $notice_data['product_id'],
+					'type'         => 'expiring',
+					'utm_source'   => 'pu',
+					'utm_campaign' => $allowed_link ? 'pu_settings_screen_renew' : 'pu_in_apps_screen_renew',
 				),
 				self::WOO_SUBSCRIPTION_PAGE_URL
 			);
