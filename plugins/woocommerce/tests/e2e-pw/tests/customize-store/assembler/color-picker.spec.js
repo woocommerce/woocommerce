@@ -437,19 +437,19 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 
 		const wordPressVersion = await getInstalledWordPressVersion();
 
-		const waitResponseTemplate = page.waitForResponse(
-			( response ) =>
-				response.url().includes(
-					// When CYS will support all block themes, this URL will change.
-					'wp-json/wp/v2/templates/twentytwentyfour//home'
-				) && response.status() === 200
-		);
-
 		await saveButton.click();
 
 		await Promise.all( [
 			waitResponseGlobalStyles,
-			wordPressVersion >= 6.6 ? waitResponseTemplate : Promise.resolve(),
+			wordPressVersion >= 6.6
+				? page.waitForResponse(
+						( response ) =>
+							response.url().includes(
+								// When CYS will support all block themes, this URL will change.
+								'wp-json/wp/v2/templates/twentytwentyfour//home'
+							) && response.status() === 200
+				  )
+				: Promise.resolve(),
 		] );
 
 		await page.goto( baseURL );
