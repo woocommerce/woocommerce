@@ -45,6 +45,7 @@
 		"<rootDir>/tests/js/setup-after-env.ts"
 	],
 	"testPathIgnorePatterns": [
+		"<rootDir>/bin/",
 		"<rootDir>/build/",
 		"<rootDir>/docs/",
 		"<rootDir>/node_modules/",
