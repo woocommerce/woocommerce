@@ -548,7 +548,7 @@ class CustomOrdersTableController {
 			$compatibility_info = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
 			$sync_complete      = 0 === $this->data_synchronizer->get_current_orders_pending_sync_count();
 			$disabled           = array();
-			// Changing something here? You might also want to look at `enable|disable` functions in Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\CLIRunner.
+			// Changing something here? You might also want to look at `enable|disable` functions in Automattic\WooCommerce\Database\Migrations\CustomOrderTable\CLIRunner.
 			$incompatible_plugins = $this->plugin_util->get_items_considered_incompatible( 'custom_order_tables', $compatibility_info );
 			$incompatible_plugins = array_diff( $incompatible_plugins, $this->plugin_util->get_plugins_excluded_from_compatibility_ui() );
 			if ( count( $incompatible_plugins ) > 0 ) {
