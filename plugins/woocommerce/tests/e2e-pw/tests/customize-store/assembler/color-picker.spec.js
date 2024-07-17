@@ -434,17 +434,9 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 				response.status() === 200
 		);
 
-		const waitResponseTemplate = page.waitForResponse(
-			( response ) =>
-				response.url().includes(
-					// When CYS will support all block themes, this URL will change.
-					'wp-json/wp/v2/templates/twentytwentyfour//home'
-				) && response.status() === 200
-		);
-
 		await saveButton.click();
 
-		await Promise.all( [ waitResponseGlobalStyles, waitResponseTemplate ] );
+		await Promise.all( [ waitResponseGlobalStyles ] );
 
 		await page.goto( baseURL );
 
@@ -507,35 +499,12 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 
 	test( 'Create "your own" pickers should be visible', async ( {
 		assemblerPageObject,
-		baseURL,
 	}, testInfo ) => {
 		testInfo.snapshotSuffix = '';
 		const assembler = await assemblerPageObject.getAssembler();
 		const colorPicker = assembler.getByText( 'Create your own' );
 
 		await colorPicker.click();
-
-		// Check if Gutenberg is installed
-		const apiContext = await request.newContext( {
-			baseURL,
-			extraHTTPHeaders: {
-				Authorization: `Basic ${ encodeCredentials(
-					'admin',
-					'password'
-				) }`,
-				cookie: '',
-			},
-		} );
-		const listPluginsResponse = await apiContext.get(
-			`/wp-json/wp/v2/plugins`,
-			{
-				failOnStatusCode: true,
-			}
-		);
-		const pluginsList = await listPluginsResponse.json();
-		const gutenbergPlugin = pluginsList.find(
-			( { textdomain } ) => textdomain === 'gutenberg'
-		);
 
 		const mapTypeFeatures = {
 			background: [ 'solid', 'gradient' ],
@@ -560,14 +529,6 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 			'.components-custom-gradient-picker__gradient-bar-background';
 
 		const mapFeatureSelectors = {
-			solid: customColorSelector,
-			text: customColorSelector,
-			background: customColorSelector,
-			default: customColorSelector,
-			hover: customColorSelector,
-			gradient: gradientColorSelector,
-		};
-		const mapFeatureSelectorsGutenberg = {
 			color: customColorSelector,
 			text: customColorSelector,
 			background: customColorSelector,
@@ -584,39 +545,20 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 				.getByText( type )
 				.click();
 
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( gutenbergPlugin ) {
-				for ( const feature of mapTypeFeaturesGutenberg[ type ] ) {
-					const container = assembler.locator(
-						'.block-editor-panel-color-gradient-settings__dropdown-content'
-					);
-					await container
-						.getByRole( 'tab', {
-							name: feature,
-						} )
-						.click();
+			for ( const feature of mapTypeFeaturesGutenberg[ type ] ) {
+				const container = assembler.locator(
+					'.block-editor-panel-color-gradient-settings__dropdown-content'
+				);
+				await container
+					.getByRole( 'tab', {
+						name: feature,
+					} )
+					.click();
 
-					const selector = mapFeatureSelectorsGutenberg[ feature ];
-					const featureSelector = container.locator( selector );
+				const selector = mapFeatureSelectors[ feature ];
+				const featureSelector = container.locator( selector );
 
-					await expect( featureSelector ).toBeVisible();
-				}
-			} else {
-				for ( const feature of mapTypeFeatures[ type ] ) {
-					const container = assembler.locator(
-						'.block-editor-panel-color-gradient-settings__dropdown-content'
-					);
-					await container
-						.getByRole( 'tab', {
-							name: feature,
-						} )
-						.click();
-
-					const selector = mapFeatureSelectors[ feature ];
-					const featureSelector = container.locator( selector );
-
-					await expect( featureSelector ).toBeVisible();
-				}
+				await expect( featureSelector ).toBeVisible();
 			}
 		}
 	} );
