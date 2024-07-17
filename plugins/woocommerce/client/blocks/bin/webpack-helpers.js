@@ -108,6 +108,10 @@ const requestToExternal = ( request ) => {
 	if ( wcDepMap[ request ] ) {
 		return wcDepMap[ request ];
 	}
+
+	if ( request === '@babel/runtime/regenerator' ) {
+		return null;
+	}
 };
 
 const requestToHandle = ( request ) => {
