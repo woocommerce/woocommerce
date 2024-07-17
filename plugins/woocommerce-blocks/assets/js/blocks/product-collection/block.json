@@ -53,6 +53,7 @@
 		"displayLayout": "displayLayout",
 		"queryContextIncludes": "queryContextIncludes",
 		"collection": "collection",
+		"filterable": "filterable",
 		"__privateProductCollectionPreviewState": "__privatePreviewState"
 	},
 	"usesContext": [ "templateSlug" ],
