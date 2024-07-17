@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: fix basic spec for multiple environments
