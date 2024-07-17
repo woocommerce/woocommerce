@@ -44,6 +44,11 @@
 		// Use balance, then pretty so that browser support for pretty is preferred, but falls back to balance if not supported.
 		text-wrap: balance;
 		text-wrap: pretty;
+
+		// This targets the rate *description* and prevents the rules applying to the delivery_time.
+		.wc-block-components-radio-control__description {
+			padding-right: $gap-small;
+		}
 	}
 
 	&--disabled {
