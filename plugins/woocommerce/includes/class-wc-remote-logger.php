@@ -30,7 +30,7 @@ class WC_Remote_Logger {
 			return false;
 		}
 
-		if ( ! $this->is_user_opted_in() ) {
+		if ( ! $this->is_tracking_opted_in() ) {
 			return false;
 		}
 
@@ -50,7 +50,7 @@ class WC_Remote_Logger {
 	 *
 	 * @return bool
 	 */
-	private function is_user_opted_in() {
+	private function is_tracking_opted_in() {
 		return 'yes' === get_option( 'woocommerce_allow_tracking', 'no' );
 	}
 
