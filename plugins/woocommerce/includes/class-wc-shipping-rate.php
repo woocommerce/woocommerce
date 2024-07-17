@@ -167,6 +167,26 @@ class WC_Shipping_Rate {
 	}
 
 	/**
+	 * Set rate description.
+	 *
+	 * @since 9.2.0
+	 * @param string $description Shipping rate description.
+	 */
+	public function set_description( $description ) {
+		$this->data['description'] = (string) $description;
+	}
+
+	/**
+	 * Set rate delivery time.
+	 *
+	 * @since 9.2.0
+	 * @param string $delivery_time Shipping rate delivery time.
+	 */
+	public function set_delivery_time( $delivery_time ) {
+		$this->data['delivery_time'] = (string) $delivery_time;
+	}
+
+	/**
 	 * Get ID for the rate. This is usually a combination of the method and instance IDs.
 	 *
 	 * @since 3.2.0
