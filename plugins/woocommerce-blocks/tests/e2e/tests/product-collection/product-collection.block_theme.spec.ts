@@ -1369,8 +1369,8 @@ test.describe( 'Product Collection', () => {
 					postType: 'wp_template',
 					canvas: 'edit',
 				} );
+
 				await editor.insertBlock( { name: legacyBlockName } );
-				await editor.canvas.locator( 'body' ).click();
 				await editor.saveSiteEditorEntities( {
 					isOnlyCurrentEntityDirty: true,
 				} );
