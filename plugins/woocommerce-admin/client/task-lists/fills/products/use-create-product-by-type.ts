@@ -3,7 +3,7 @@
  */
 import { useDispatch } from '@wordpress/data';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import { navigateTo } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
 import { loadExperimentAssignment } from '@woocommerce/explat';
 import { useState } from '@wordpress/element';
