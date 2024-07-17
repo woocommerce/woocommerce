@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Move remote logger to `./src` and improve `is_remote_logging_allowed()` logic
