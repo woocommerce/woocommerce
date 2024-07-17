@@ -233,8 +233,7 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/e2e-pw/**",
-						".wp-env.json"
+						"tests/e2e-pw/**"
 					],
 					"testEnv": {
 						"start": "env:test"
