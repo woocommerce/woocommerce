@@ -1,12 +1,13 @@
 <?php
-declare( strict_types = 1 );
-
 /**
  * Title: Product Filters
  * Slug: woocommerce-blocks/product-filters
  * Categories: WooCommerce
  * Block Types: woocommerce/active-filters, woocommerce/price-filter, woocommerce/attribute-filter, woocommerce/stock-filter
  */
+
+declare( strict_types = 1 );
+
 ?>
 
 <!-- wp:woocommerce/filter-wrapper {"filterType":"active-filters"} -->
