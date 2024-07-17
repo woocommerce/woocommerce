@@ -30,7 +30,7 @@ const getInstalledWordPressVersion = async () => {
 			`pnpm exec wp-env run tests-cli -- wp core version`
 		);
 
-		return Number.parseInt( stdout.trim(), 10 );
+		return Number.parseFloat( stdout.trim() );
 	} catch ( error ) {
 		throw new Error(
 			`Error getting WordPress version: ${ error.message }`
