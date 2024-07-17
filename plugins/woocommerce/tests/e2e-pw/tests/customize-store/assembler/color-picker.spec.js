@@ -1,7 +1,6 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
 const { CustomizeStorePage } = require( '../customize-store.page' );
-const { encodeCredentials } = require( '../../../utils/plugin-utils' );
 
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
