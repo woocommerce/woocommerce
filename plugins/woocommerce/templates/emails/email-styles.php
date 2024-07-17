@@ -25,6 +25,8 @@ $body      = get_option( 'woocommerce_email_body_background_color' );
 $base      = get_option( 'woocommerce_email_base_color' );
 $base_text = wc_light_or_dark( $base, '#202020', '#ffffff' );
 $text      = get_option( 'woocommerce_email_text_color' );
+$footer    = get_option( 'woocommerce_email_footer_text_color' );
+
 
 // Pick a contrasting color for links.
 $link_color = wc_hex_is_light( $base ) ? $base : $base_text;
@@ -97,7 +99,7 @@ body {
 
 #template_footer #credit {
 	border: 0;
-	color: <?php echo esc_attr( $text_lighter_40 ); ?>;
+	color: <?php echo esc_attr( $footer ); ?>;
 	font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
 	font-size: 12px;
 	line-height: 150%;
