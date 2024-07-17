@@ -308,7 +308,7 @@ final class WooCommerce {
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 
-		add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
+		self::add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
 
 		// These classes set up hooks on instantiation.
@@ -1050,7 +1050,7 @@ final class WooCommerce {
 	 *
 	 * @return string
 	 */
-	public function robots_txt( $output ) {
+	private function robots_txt( $output ) {
 		$path = ( ! empty( $site_url['path'] ) ) ? $site_url['path'] : '';
 
 		$lines       = preg_split( '/\r\n|\r|\n/', $output );
