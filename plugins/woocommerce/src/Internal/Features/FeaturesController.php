@@ -247,6 +247,17 @@ class FeaturesController {
 					'is_legacy'          => true,
 					'option_key'         => CustomOrdersTableController::HPOS_FTS_INDEX_OPTION,
 				),
+				'remote_logging'       => array(
+					'name'               => __( 'Remote Logging', 'woocommerce' ),
+					'description'        => __(
+						'Enable this feature to log errors and related data to Automattic servers for debugging purposes and to improve WooCommerce',
+						'woocommerce'
+					),
+					'enabled_by_default' => false,
+					'disable_ui'         => true,
+					'is_legacy'          => false,
+					'is_experimental'    => true,
+				),
 			);
 
 			foreach ( $legacy_features as $slug => $definition ) {
