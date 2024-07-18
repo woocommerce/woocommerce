@@ -149,19 +149,6 @@ function processPhpContents( $contents, $filename ) {
 				}
 			}
 
-			/*
-			 * Create a search-replace regex that will find "phpcs:ignore WordPress.<followed by alphanumeric characters and dots, except space>", if it finds two of these, add a comma in between them like this:
-			 *
-			 * phpcs:ignore WordPress.Security.NonceVerification.Missing WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			 * Becomes
-			 * phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			 *
-			 * Whereas
-			 * phpcs:ignore WordPress.Security.NonceVerification.Missing
-			 * Remains as is, etc.
-			 */
-			$line = formatPhpcsIgnoreComment( $line );
-
 			// Check for exception condition
 			if ( ! $tracked_changes && strpos( $line, 'WPCS:' ) !== false ) {
 				// Check if there's any unknown rule that isn't in any of the defined categories
@@ -177,6 +164,19 @@ function processPhpContents( $contents, $filename ) {
 				}
 			} else {
 				$line = str_replace( 'WPCS:', 'phpcs:ignore', $line ); // Replace the comment prefix
+
+				/*
+				 * Create a search-replace regex that will find "phpcs:ignore WordPress.<followed by alphanumeric characters and dots, except space>", if it finds two of these, add a comma in between them like this:
+				 *
+				 * phpcs:ignore WordPress.Security.NonceVerification.Missing WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				 * Becomes
+				 * phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				 *
+				 * Whereas
+				 * phpcs:ignore WordPress.Security.NonceVerification.Missing
+				 * Remains as is, etc.
+				 */
+				$line = formatPhpcsIgnoreComment( $line );
 			}
 		}
 		$newLines[] = $line;
