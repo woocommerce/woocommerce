@@ -33,6 +33,8 @@ import { useScrollOpacity } from './hooks/use-scroll-opacity';
 import {
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
 	findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate,
+	isFeaturedCategoryCoverImagePattern,
+	isJustArrivedFullHeroPattern,
 } from './utils/black-background-pattern-update-button';
 import { useIsActiveNewNeutralVariation } from './hooks/use-is-active-new-neutral-variation';
 
@@ -103,25 +105,40 @@ export const BlockEditorContainer = () => {
 	const isActiveNewNeutralVariation = useIsActiveNewNeutralVariation();
 
 	useEffect( () => {
+		const patternsWithBlackBackground = blocks.filter(
+			( block ) =>
+				isJustArrivedFullHeroPattern( block ) ||
+				isFeaturedCategoryCoverImagePattern( block )
+		);
+
 		if ( ! isActiveNewNeutralVariation ) {
-			findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
-				blocks,
-				( block: BlockInstance ) => {
-					updateBlockAttributes( block.clientId, {
-						style: {},
-					} );
+			patternsWithBlackBackground.forEach(
+				( patternsWithBlackBackgroundBlocks ) => {
+					findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
+						[ patternsWithBlackBackgroundBlocks ],
+						( block: BlockInstance ) => {
+							updateBlockAttributes( block.clientId, {
+								style: {},
+							} );
+						}
+					);
 				}
 			);
 			return;
 		}
-		findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
-			blocks,
-			( block: BlockInstance ) => {
-				updateBlockAttributes( block.clientId, {
-					style: PRODUCT_HERO_PATTERN_BUTTON_STYLE,
-					// This is necessary; otherwise, the style won't be applied on the frontend during the style variation change.
-					className: '',
-				} );
+
+		patternsWithBlackBackground.forEach(
+			( patternsWithBlackBackgroundBlocks ) => {
+				findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
+					[ patternsWithBlackBackgroundBlocks ],
+					( block: BlockInstance ) => {
+						updateBlockAttributes( block.clientId, {
+							style: PRODUCT_HERO_PATTERN_BUTTON_STYLE,
+							// This is necessary; otherwise, the style won't be applied on the frontend during the style variation change.
+							className: '',
+						} );
+					}
+				);
 			}
 		);
 	}, [
