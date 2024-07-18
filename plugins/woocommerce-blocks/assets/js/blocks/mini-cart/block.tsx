@@ -21,13 +21,7 @@ import {
 	isNumber,
 	isObject,
 } from '@woocommerce/types';
-import {
-	createRoot,
-	useCallback,
-	useEffect,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { sprintf, _n } from '@wordpress/i18n';
 import clsx from 'clsx';
 import type { Root } from 'react-dom/client';
