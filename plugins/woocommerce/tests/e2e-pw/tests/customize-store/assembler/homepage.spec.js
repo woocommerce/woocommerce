@@ -2,6 +2,7 @@ const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
+const { setFeatureFlag } = require( '../../../utils/features' );
 
 const test = base.extend( {
 	pageObject: async ( { page }, use ) => {
@@ -20,7 +21,7 @@ async function prepareAssembler( pageObject, baseURL ) {
 		.waitFor( { state: 'hidden' } );
 }
 
-test.skip( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
+test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -35,6 +36,13 @@ test.skip( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
+
+		await setFeatureFlag(
+			request,
+			baseURL,
+			'pattern-toolkit-full-composability',
+			false
+		);
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
