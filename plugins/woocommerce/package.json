@@ -590,14 +590,7 @@
 					"name": "Core e2e tests - default Pressable site",
 					"testType": "e2e",
 					"command": "test:e2e:with-env default-pressable",
-					"shardingArguments": [
-						"--shard=1/6",
-						"--shard=2/6",
-						"--shard=3/6",
-						"--shard=4/6",
-						"--shard=5/6",
-						"--shard=6/6"
-					],
+					"shardingArguments": [],
 					"changes": [],
 					"events": [
 						"daily-checks",
@@ -613,14 +606,7 @@
 					"name": "Core e2e tests - default WPCOM site",
 					"testType": "e2e",
 					"command": "test:e2e:with-env default-wpcom",
-					"shardingArguments": [
-						"--shard=1/6",
-						"--shard=2/6",
-						"--shard=3/6",
-						"--shard=4/6",
-						"--shard=5/6",
-						"--shard=6/6"
-					],
+					"shardingArguments": [],
 					"changes": [],
 					"events": [
 						"daily-checks",
