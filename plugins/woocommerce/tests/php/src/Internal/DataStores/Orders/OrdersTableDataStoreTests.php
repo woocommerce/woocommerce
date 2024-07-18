@@ -3478,6 +3478,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 		$order = new WC_Order();
 		$order->set_status( 'checkout-draft' );
+		$order->save();
 
 		$this->assertEquals( 0, $new_count );
 
