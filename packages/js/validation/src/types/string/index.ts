@@ -3,15 +3,12 @@
  */
 import { maxLength } from '../../keywords/max-length';
 import { minLength } from '../../keywords/min-length';
-import { StringSchema, ValidationError } from '../../types';
+import { StringSchema } from '../../types';
 import { validateKeywords } from '../../utils/validate-keywords';
-import { validateType } from '../../validators/validate-type';
+import { parse } from './parse';
 
 export function parseString( schema: StringSchema, data: unknown, path: string ) {
-    validateType( data, 'string', path );
-
-    // @todo Add coercion from numbers.
-    const parsed = data as string;
+    const parsed = parse( data, path );
 
     validateKeywords< string, StringSchema >(
         [
