@@ -364,8 +364,12 @@ jobs:
         if: ${{ !!env.FLAKY_REPORTS }}
         uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
         with:
-          path: './packages/report-flaky-tests/build/'
-          key: "${{ runner.os }}-report-flaky-tests-latest"
+          path: |
+            ./packages/report-flaky-tests/build/
+            ./packages/report-flaky-tests/build-module/
+            ./packages/report-flaky-tests/build-types/
+            ./packages/report-flaky-tests/node_modules/
+          key: "${{ runner.os }}-report-flaky-tests-dbf201449e9736f672b61e422787d47659db327a"
           restore-keys: '${{ runner.os }}-report-flaky-tests-'
 
       - name: 'Check if to build @wordpress/report-flaky-tests'
