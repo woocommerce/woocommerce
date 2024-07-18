@@ -1,6 +1,6 @@
 ---
 post_title: How to add a custom field to simple and variable products
-menu_title: Add Custom Fields to Products
+menu_title: Add custom fields to products
 tags: how-to
 ---
 

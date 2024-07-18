@@ -198,8 +198,34 @@ class ReceiptRenderingEngine {
 		 */
 		$data['css'] = apply_filters( 'woocommerce_printable_order_receipt_css', $css, $order );
 
+		$default_template_path = __DIR__ . '/Templates/order-receipt.php';
+
+		/**
+		 * Filter the order receipt template path.
+		 *
+		 * @since 9.2.0
+		 * @hook wc_get_template
+		 * @param  string $template      The template path.
+		 * @param  string $template_name The template name.
+		 * @param  array  $args          The available data for the template.
+		 * @param string  $template_path The template path.
+		 * @param string  $default_path  The default template path.
+		 */
+		$template_path = apply_filters(
+			'wc_get_template',
+			$default_template_path,
+			'ReceiptRendering/order-receipt.php',
+			$data,
+			$default_template_path,
+			$default_template_path
+		);
+
+		if ( ! file_exists( $template_path ) ) {
+			$template_path = $default_template_path;
+		}
+
 		ob_start();
-		include __DIR__ . '/Templates/order-receipt.php';
+		include $template_path;
 		$rendered_template = ob_get_contents();
 		ob_end_clean();
 

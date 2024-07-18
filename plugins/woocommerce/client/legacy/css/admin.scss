@@ -2698,12 +2698,13 @@ ul.wc_coupon_list_block {
 			color: #ccc;
 			display: inline-block;
 			cursor: pointer;
-			padding: 0 0 0.5em;
-			margin: 0 0 0 12px;
+			padding: 0;
+			margin: 0 0 6px 12px;
 			vertical-align: middle;
 			text-decoration: none;
 			line-height: 16px;
 			width: 16px;
+			height: 16px;
 			overflow: hidden;
 
 			&::before {
@@ -2744,11 +2745,14 @@ ul.wc_coupon_list_block {
 	}
 
 	tbody tr .wc-order-edit-line-item-actions {
-		visibility: hidden;
+		opacity: 0;
 	}
 
-	tbody tr:hover .wc-order-edit-line-item-actions {
-		visibility: visible;
+	tbody tr:focus-within,
+	tbody tr:hover {
+		.wc-order-edit-line-item-actions {
+			opacity: 1;
+		}
 	}
 
 	.wc-order-totals .wc-order-edit-line-item-actions {
@@ -6526,8 +6530,8 @@ img.help_tip {
 
 	.upload_image_button {
 		display: block;
-		width: 64px;
-		height: 64px;
+		width: 128px;
+		height: 128px;
 		float: left;
 		margin-right: 20px;
 		position: relative;
@@ -6548,8 +6552,8 @@ img.help_tip {
 			right: 0;
 			bottom: 0;
 			text-align: center;
-			line-height: 64px;
-			font-size: 64px;
+			line-height: 128px;
+			font-size: 128px;
 			font-weight: 400;
 			-webkit-font-smoothing: antialiased;
 		}
@@ -6654,6 +6658,12 @@ img.help_tip {
 	&.form-row-full {
 		clear: both;
 	}
+}
+
+.form-flex-box {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 
 /**

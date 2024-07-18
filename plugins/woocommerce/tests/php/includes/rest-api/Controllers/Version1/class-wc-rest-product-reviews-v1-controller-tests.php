@@ -75,6 +75,7 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 	 */
 	public function test_permissions_for_updating_product_reviews() {
 		$api_request = new WP_REST_Request( 'PUT', '/wc/v1/products/' . $this->product_id . '/reviews/' . $this->review_id );
+		$api_request->set_param( 'product_id', $this->product_id );
 		$api_request->set_param( 'id', $this->review_id );
 		$api_request->set_body( '{ "review": "Modified automatically." }' );
 
@@ -93,6 +94,7 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 
 		$nonexistent_product_id = $this->product_id * 10;
 		$api_request->set_route( "/wc/v1/products/{$nonexistent_product_id}/reviews/" . $this->review_id );
+		$api_request->set_param( 'product_id', $nonexistent_product_id );
 
 		$this->assertEquals(
 			'woocommerce_rest_product_invalid_id',
@@ -146,8 +148,8 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 		$request->set_param( 'id', $order_note_id );
 
 		$this->assertEquals(
-			'woocommerce_rest_cannot_delete',
-			$this->sut->delete_item_permissions_check( $request )->get_error_code(),
+			'woocommerce_rest_product_invalid_id',
+			$this->sut->delete_item( $request )->get_error_code(),
 			'Comments that are not product reviews cannot be deleted via this endpoint.'
 		);
 
@@ -163,8 +165,8 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 		$request->set_param( 'id', $comment_id );
 
 		$this->assertEquals(
-			'woocommerce_rest_cannot_delete',
-			$this->sut->delete_item_permissions_check( $request )->get_error_code(),
+			'woocommerce_rest_product_invalid_id',
+			$this->sut->delete_item( $request )->get_error_code(),
 			'Comments that are not product reviews (including other types of comments belonging to products) cannot be deleted via this endpoint.'
 		);
 	}
