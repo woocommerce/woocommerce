@@ -2574,7 +2574,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			);
 
 			// We have to clear the cache after a direct DB update.
-			$this->sut->clear_cached_data ( array( $refund->get_id() ) ) );
+			$this->sut->clear_cached_data( array( $refund->get_id() ) );
 		} else {
 			$wpdb->update(
 				$wpdb->posts,
