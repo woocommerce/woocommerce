@@ -489,8 +489,11 @@ function wc_get_low_stock_amount( WC_Product $product ) {
 	$low_stock_amount = $product->get_low_stock_amount();
 
 	if ( '' === $low_stock_amount && $product->is_type( 'variation' ) ) {
-		$product          = wc_get_product( $product->get_parent_id() );
-		$low_stock_amount = $product->get_low_stock_amount();
+		$parent_product = wc_get_product( $product->get_parent_id() );
+
+		if ( $parent_product instanceof WC_Product ) {
+			$low_stock_amount = $parent_product->get_low_stock_amount();
+		}
 	}
 
 	if ( '' === $low_stock_amount ) {
