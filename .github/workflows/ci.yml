@@ -387,7 +387,7 @@ jobs:
         shell: 'bash'
         run: |
           if [[ '${{ env.BUILD_REPORT_FLAKY_TESTS_UTILITY }}' == 'no' ]]; then
-            cd ./packages/report-flaky-tests && npm install --silent
+            npm install --silent
           else
             npm run build:packages
           fi
