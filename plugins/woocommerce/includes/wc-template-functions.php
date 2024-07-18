@@ -1608,6 +1608,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	$image_size        = apply_filters( 'woocommerce_gallery_image_size', $flexslider || $main_image ? 'woocommerce_single' : $thumbnail_size );
 	$full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
 	$thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
+	$thumbnail_srcset  = wp_get_attachment_image_srcset( $attachment_id, $thumbnail_size );
 	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
 	$alt_text          = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
 	$image             = wp_get_attachment_image(
@@ -1631,7 +1632,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 		)
 	);
 
-	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
+	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" data-thumb-srcset="' . esc_attr( $thumbnail_srcset ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
 }
 
 if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {
@@ -4018,3 +4019,45 @@ function wc_update_product_archive_title( $post_type_name, $post_type ) {
 add_filter( 'post_type_archive_title', 'wc_update_product_archive_title', 10, 2 );
 
 // phpcs:enable Generic.Commenting.Todo.TaskFound
+
+/**
+ * Set the version of the hooked blocks in the database. Used when WC is installed for the first time.
+ *
+ * @since 9.2.0
+ *
+ * @return void
+ */
+function wc_set_hooked_blocks_version() {
+	// Only set the version if the current theme is a block theme.
+	if ( ! wc_current_theme_is_fse_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
+		return;
+	}
+
+	$option_name = 'woocommerce_hooked_blocks_version';
+
+	if ( get_option( $option_name ) ) {
+		return;
+	}
+
+	add_option( $option_name, WC()->version );
+}
+
+/**
+ * If the user switches from a classic to a block theme and they haven't already got a woocommerce_hooked_blocks_version,
+ * set the version of the hooked blocks in the database, or as "no" to disable all block hooks then set as the latest WC version.
+ *
+ * @since 9.2.0
+ *
+ * @param string    $old_name Old theme name.
+ * @param \WP_Theme $old_theme Instance of the old theme.
+ * @return void
+ */
+function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
+	$option_name  = 'woocommerce_hooked_blocks_version';
+	$option_value = get_option( $option_name, false );
+
+	// Sites with the option value set to "no" have already been migrated, and block hooks have been disabled. Checking explicitly for false to avoid setting the option again.
+	if ( ! $old_theme->is_block_theme() && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) && false === $option_value ) {
+		add_option( $option_name, WC()->version );
+	}
+}

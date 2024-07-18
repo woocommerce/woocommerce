@@ -332,7 +332,7 @@ class WC_Admin_Webhooks {
 	private static function maybe_display_legacy_rest_api_warning() {
 		global $webhooks_table_list;
 
-		if ( ! is_null( wc()->api ) ) {
+		if ( WC()->legacy_rest_api_is_available() ) {
 			return;
 		}
 
