@@ -212,12 +212,12 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 * @param  string $input_id Input ID.
 	 */
 	public function search_box( $text, $input_id ) {
-		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitizeday, WordPress.Security.NonceVerification.Recommended
+		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
 		$input_id     = $input_id . '-search-input';
-		$search_query = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitizeday, WordPress.Security.NonceVerification.Recommended
+		$search_query = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 
 		echo '<p class="search-box">';
 		echo '<label class="screen-reader-text" for="' . esc_attr( $input_id ) . '">' . esc_html( $text ) . ':</label>';
@@ -251,8 +251,8 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 
 		$search = '';
 
-		if ( ! empty( $_REQUEST['s'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitizeday, WordPress.Security.NonceVerification.Recommended
-			$search = "AND description LIKE '%" . esc_sql( $wpdb->esc_like( wc_clean( wp_unslash( $_REQUEST['s'] ) ) ) ) . "%' "; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitizeday, WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_REQUEST['s'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
+			$search = "AND description LIKE '%" . esc_sql( $wpdb->esc_like( wc_clean( wp_unslash( $_REQUEST['s'] ) ) ) ) . "%' "; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 		}
 
 		// Get the API keys.

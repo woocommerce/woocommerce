@@ -845,7 +845,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 */
 		public static function save_fields( $options, $data = null ) {
 			if ( is_null( $data ) ) {
-				$data = $_POST; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitizeday, WordPress.Security.NonceVerification.Missing
+				$data = $_POST; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing
 			}
 			if ( empty( $data ) ) {
 				return false;

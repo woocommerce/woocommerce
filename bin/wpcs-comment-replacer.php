@@ -42,6 +42,8 @@ if ( $return_var !== 0 ) {
 	exit( 1 );
 }
 
+$GLOBALS['okay'] = [];
+
 // Array of directories to ignore
 $ignored_directories = [ 'node_modules', 'vendor', 'bin', 'build' ];
 
@@ -111,7 +113,6 @@ function processPhpContents( $contents, $filename ) {
 
 	$lines           = explode( "\n", $contents );
 	$newLines        = [];
-	$GLOBALS['okay'] = [];
 
 	$tracked_by_qit = [
 		'input var ok, sanitization ok' => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
@@ -122,6 +123,7 @@ function processPhpContents( $contents, $filename ) {
 		'csrf ok'                       => '', // Will be dynamically filled
 		'CSRF ok'                       => '', // Will be dynamically filled
 		'unprepared SQL ok'             => 'WordPress.DB.PreparedSQL.InterpolatedNotPrepared',
+		'Sanitization ok'               => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 		'sanitization ok'               => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 	];
 
@@ -220,7 +222,7 @@ function processReplacement( &$line, $old, &$new ) {
 		$right_side_of_line = substr( $right_side_of_line, 0, strpos( $right_side_of_line, '?>' ) );
 	}
 
-	if ( strpos( $right_side_of_line, 'okay' ) !== false ) {
+	if ( stripos( $right_side_of_line, 'okay' ) !== false ) {
 		$GLOBALS['okay'][] = $right_side_of_line;
 	}
 
