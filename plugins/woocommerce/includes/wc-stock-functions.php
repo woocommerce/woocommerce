@@ -42,8 +42,12 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 
 		// Fire actions to let 3rd parties know the stock is about to be changed.
 		if ( $product_with_stock->is_type( 'variation' ) ) {
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			/** This action is documented in includes/data-stores/class-wc-product-data-store-cpt.php */
 			do_action( 'woocommerce_variation_before_set_stock', $product_with_stock );
 		} else {
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			/** This action is documented in includes/data-stores/class-wc-product-data-store-cpt.php */
 			do_action( 'woocommerce_product_before_set_stock', $product_with_stock );
 		}
 
@@ -60,24 +64,12 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 
 		// Fire actions to let 3rd parties know the stock changed.
 		if ( $product_with_stock->is_type( 'variation' ) ) {
-			/**
-			 * Action to signal that the value of 'stock_quantity' for a variation has changed.
-			 *
-			 * @since 3.0
-			 *
-			 * @param WC_Product $product The variation whose stock has changed.
-			 * @param int|float  $stock   The new stock value.
-			 */
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			/** This action is documented in includes/data-stores/class-wc-product-data-store-cpt.php */
 			do_action( 'woocommerce_variation_set_stock', $product_with_stock, $new_stock );
 		} else {
-			/**
-			 * Action to signal that the value of 'stock_quantity' for a product has changed.
-			 *
-			 * @since 3.0
-			 *
-			 * @param WC_Product $product The variation whose stock has changed.
-			 * @param int|float  $stock   The new stock value.
-			 */
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			/** This action is documented in includes/data-stores/class-wc-product-data-store-cpt.php */
 			do_action( 'woocommerce_product_set_stock', $product_with_stock, $new_stock );
 		}
 
