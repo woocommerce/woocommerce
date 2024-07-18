@@ -20,7 +20,7 @@ if ( $argc < 2 ) {
 	exit( 1 );
 }
 
-$use_copy = true;
+$use_copy = false;
 
 $path = $argv[1];
 
@@ -116,13 +116,14 @@ function processPhpContents( $contents, $filename ) {
 		'Input var ok'                  => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 		'csrf ok'                       => '', // Will be dynamically filled
 		'CSRF ok'                       => '', // Will be dynamically filled
-		'unprepared SQL ok'             => 'WordPress.DB.PreparedSQL.NotPrepared',
+		'unprepared SQL ok'             => 'WordPress.DB.PreparedSQL.InterpolatedNotPrepared',
 		'sanitization ok'               => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 	];
 
 	$not_tracked_by_qit = [
 		'cache ok'      => 'WordPress.DB.DirectDatabaseQuery.NoCaching',
 		'DB call ok'    => 'WordPress.DB.DirectDatabaseQuery.DirectQuery',
+		'db call ok'    => 'WordPress.DB.DirectDatabaseQuery.DirectQuery',
 		'slow query ok' => '',
 		'override ok'   => '',
 	];
