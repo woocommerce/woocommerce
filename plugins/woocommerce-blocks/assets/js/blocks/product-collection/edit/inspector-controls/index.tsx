@@ -61,7 +61,7 @@ const ProductCollectionInspectorControls = (
 	props: ProductCollectionEditComponentProps
 ) => {
 	const { attributes, context, setAttributes } = props;
-	const { query, hideControls, displayLayout, filterable } = attributes;
+	const { query, hideControls, displayLayout } = attributes;
 
 	const tracksLocation = useTracksLocation( context.templateSlug );
 	const trackInteraction = ( filter: FilterName ) =>
@@ -121,9 +121,7 @@ const ProductCollectionInspectorControls = (
 				) }
 				{ showFilterableControl && (
 					<FilterableControl
-						setAttributes={ setAttributes }
-						trackInteraction={ trackInteraction }
-						filterable={ filterable }
+						{...queryControlProps}
 					/>
 				) }
 				<LayoutOptionsControl { ...displayControlProps } />

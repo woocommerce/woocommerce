@@ -16,7 +16,6 @@
 		"postId",
 		"queryContextIncludes",
 		"collection",
-		"filterable",
 		"__privateProductCollectionPreviewState"
 	],
 	"supports": {

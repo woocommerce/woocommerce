@@ -18,8 +18,6 @@ import {
 	CoreFilterNames,
 	type ProductCollectionQuery,
 	type QueryControlProps,
-	type ProductCollectionSetAttributes,
-	type TrackInteraction,
 } from '../../types';
 import { DEFAULT_QUERY } from '../../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../../utils';
@@ -90,14 +88,12 @@ const InheritQueryControl = ( {
 };
 
 const FilterableControl = ( {
-	setAttributes,
+	setQueryAttributes,
 	trackInteraction,
-	filterable,
-}: {
-	setAttributes: ProductCollectionSetAttributes;
-	trackInteraction: TrackInteraction;
-	filterable: boolean;
-} ) => {
+	query,
+}: QueryControlProps ) => {
+	const filterable = query?.filterable;
+
 	const defaultValue = useMemo(
 		() => getDefaultValueOfInheritQueryFromTemplate(), // TODO
 		[]
@@ -109,7 +105,7 @@ const FilterableControl = ( {
 			hasValue={ () => filterable !== defaultValue }
 			isShownByDefault
 			onDeselect={ () => {
-				setAttributes( {
+				setQueryAttributes( {
 					filterable: defaultValue,
 				} );
 				trackInteraction( CoreFilterNames.INHERIT );
@@ -121,7 +117,7 @@ const FilterableControl = ( {
 				help={ helpText }
 				checked={ !! filterable }
 				onChange={ ( value ) => {
-					setAttributes( {
+					setQueryAttributes( {
 						filterable: value,
 					} );
 					trackInteraction( CoreFilterNames.FILTERABLE );

@@ -94,6 +94,7 @@ export interface ProductCollectionQuery {
 	isProductCollectionBlock: boolean;
 	woocommerceHandPickedProducts: string[];
 	priceRange: undefined | PriceRange;
+	filterable: boolean;
 }
 
 export type ProductCollectionEditComponentProps =

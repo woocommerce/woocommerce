@@ -39,10 +39,6 @@
 			"type": "boolean",
 			"default": false
 		},
-		"filterable": {
-			"type": "boolean",
-			"default": false
-		},
 		"__privatePreviewState": {
 			"type": "object"
 		}
@@ -53,7 +49,6 @@
 		"displayLayout": "displayLayout",
 		"queryContextIncludes": "queryContextIncludes",
 		"collection": "collection",
-		"filterable": "filterable",
 		"__privateProductCollectionPreviewState": "__privatePreviewState"
 	},
 	"usesContext": [ "templateSlug" ],

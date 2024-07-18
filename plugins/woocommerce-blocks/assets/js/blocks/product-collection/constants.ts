@@ -62,6 +62,7 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 	woocommerceHandPickedProducts: [],
 	timeFrame: undefined,
 	priceRange: undefined,
+	filterable: false,
 };
 
 export const DEFAULT_ATTRIBUTES: Pick<
@@ -71,7 +72,6 @@ export const DEFAULT_ATTRIBUTES: Pick<
 	| 'displayLayout'
 	| 'queryContextIncludes'
 	| 'forcePageReload'
-	| 'filterable'
 > = {
 	query: DEFAULT_QUERY,
 	tagName: 'div',
@@ -82,7 +82,6 @@ export const DEFAULT_ATTRIBUTES: Pick<
 	},
 	queryContextIncludes: [ 'collection' ],
 	forcePageReload: false,
-	filterable: false,
 };
 
 export const DEFAULT_FILTERS: Pick<
