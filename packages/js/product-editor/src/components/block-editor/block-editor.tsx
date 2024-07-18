@@ -182,15 +182,13 @@ export function BlockEditor( {
 		};
 	}, [ settingsGlobal ] );
 
-	const { editedRecord: product } = useEntityRecord< Product >(
+	const { editedRecord: product, hasResolved } = useEntityRecord< Product >(
 		'postType',
 		postType,
 		productId,
 		// Only perform the query when the productId is valid.
 		{ enabled: productId !== -1 }
 	);
-
-	const hasResolved = !! product;
 
 	const productTemplateId = useMemo(
 		() =>

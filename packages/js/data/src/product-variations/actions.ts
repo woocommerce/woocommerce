@@ -3,6 +3,7 @@
  */
 import { apiFetch } from '@wordpress/data-controls';
 import { controls } from '@wordpress/data';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -44,6 +45,48 @@ export function generateProductVariationsSuccess( key: IdType ) {
 		type: TYPES.GENERATE_VARIATIONS_SUCCESS as const,
 		key,
 	};
+}
+
+type ConfigEntity = {
+	name: string;
+	kind: string;
+	baseURL: string;
+	baseURLParams: {
+		context: string;
+	};
+};
+
+/**
+ * Refreshes the data within the core entity data store of products without invalidating.
+ *
+ * @param {string|number} productId productId of product to refresh.
+ */
+export function* refreshProductVariationData( productId: string | number ) {
+	const configs: ConfigEntity[] = yield controls.select(
+		'core',
+		'getEntitiesConfig',
+		'postType'
+	);
+	const entityConfig = configs.find(
+		( config ) => config.name === 'product' && config.kind === 'postType'
+	);
+	if ( ! entityConfig ) {
+		return;
+	}
+	const path = addQueryArgs( entityConfig.baseURL + '/' + productId, {
+		...entityConfig.baseURLParams,
+	} );
+	const response: Product = yield apiFetch( {
+		path,
+		method: 'GET',
+	} );
+	yield controls.dispatch(
+		'core',
+		'receiveEntityRecords',
+		'postType',
+		'product',
+		[ response ]
+	);
 }
 
 export const generateProductVariations = function* (
@@ -92,6 +135,7 @@ export const generateProductVariations = function* (
 			method: 'POST',
 			data,
 		} );
+		yield refreshProductVariationData( urlParameters[ 0 ] );
 		yield generateProductVariationsSuccess( key );
 		return result;
 	} catch ( error ) {
