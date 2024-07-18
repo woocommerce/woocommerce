@@ -31,9 +31,6 @@ if ( ! is_dir( $path ) ) {
 // Copy directory to tmp using exec or similar.
 $tempnam = sys_get_temp_dir() . '/woocommerce';
 passthru( "rm -rf $tempnam" );
-register_shutdown_function( static function () use ( $tempnam ) {
-	passthru( "rm -rf $tempnam" );
-} );
 passthru( "cp -r $path $tempnam", $return_var );
 
 @unlink( $tempnam . '/woocommerce.zip' );
@@ -100,10 +97,14 @@ function validateAndProcessFile( $filename ) {
 
 		echo "Changes in $filename:\n";
 		printChanges( $originalContents, $updatedContents );
+		file_put_contents( $filename, $updatedContents );
 	}
 }
 
 function processPhpContents( $contents, $filename ) {
+	// Fix a typo.
+	$contents = str_replace( 'WordPress.XSS.EscapeOutput.OutputNotEscaped', 'WordPress.Security.EscapeOutput.OutputNotEscaped', $contents );
+
 	$lines    = explode( "\n", $contents );
 	$newLines = [];
 
@@ -126,7 +127,7 @@ function processPhpContents( $contents, $filename ) {
 	];
 
 	foreach ( $lines as $line ) {
-		$originalLine = $line;
+		$originalLine = $line; // Capture the original line for comparison later
 		if ( strpos( $line, 'WPCS:' ) !== false ) {
 			$GLOBALS['wpcs_stats']['wpcs_comments_found'] ++;
 			$tracked_changes     = false;
@@ -160,7 +161,7 @@ function processPhpContents( $contents, $filename ) {
 					throw new Exception( "No applicable changes could be made, and an unrecognized rule was found: $filename on line: $line" );
 				}
 			} else {
-				$line = str_replace( 'WPCS:', 'phpcs:ignore', $line );
+				$line = str_replace( 'WPCS:', 'phpcs:ignore', $line ); // Replace the comment prefix
 			}
 		}
 		$newLines[] = $line;
