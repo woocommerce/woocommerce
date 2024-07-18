@@ -6,7 +6,7 @@ const {
 	getCanvas,
 	publishPage,
 } = require( '../../utils/editor' );
-const {getInstalledWordPressVersion} = require("../../utils/wordpress");
+const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
 
 const simpleProductName = 'Simplest Product';
 const singleProductPrice = '555.00';
