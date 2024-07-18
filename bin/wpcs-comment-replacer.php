@@ -28,11 +28,28 @@ if ( ! is_dir( $path ) ) {
 	exit( 1 );
 }
 
+// Copy directory to tmp using exec or similar.
+$tempnam = sys_get_temp_dir() . '/woocommerce';
+passthru( "rm -rf $tempnam" );
+register_shutdown_function( static function () use ( $tempnam ) {
+	passthru( "rm -rf $tempnam" );
+} );
+passthru( "cp -r $path $tempnam", $return_var );
+
+@unlink( $tempnam . '/woocommerce.zip' );
+
+if ( $return_var !== 0 ) {
+	echo "Failed to copy directory to temp directory.\n";
+	exit( 1 );
+}
+
+unset( $path );
+
 // Array of directories to ignore
-$ignored_directories = [ 'node_modules', 'vendor' ];
+$ignored_directories = [ 'node_modules', 'vendor', 'bin', 'build' ];
 
 // Create a non-recursive directory iterator for the main directory
-$dir_iterator = new DirectoryIterator( $path );
+$dir_iterator = new DirectoryIterator( $tempnam );
 
 $GLOBALS['wpcs_stats'] = [
 	'wpcs_comments_found'    => 0,
@@ -174,7 +191,6 @@ function processReplacement( &$line, $old, &$new ) {
 	return false;
 }
 
-
 function printChanges( $original, $updated ) {
 	$originalLines = explode( "\n", $original );
 	$updatedLines  = explode( "\n", $updated );
@@ -191,4 +207,22 @@ function checkSyntax( $filename ) {
 	exec( "php -l " . escapeshellarg( $filename ), $output, $result );
 
 	return $result === 0; // Returns true if no syntax errors
+}
+
+// Zip the directory.
+passthru( sprintf( 'cd %s && zip -r woocommerce.zip woocommerce -x "*bin/*" "*build/*" "*vendor/*" "*tests/*"', sys_get_temp_dir() ), $return_var );
+
+if ( $return_var !== 0 ) {
+	echo "Failed to build zip.\n";
+	exit( 1 );
+}
+
+// Run QIT security test against this zip.
+passthru( sprintf( 'qit run:security woocommerce --zip="%s"', sys_get_temp_dir() . '/woocommerce.zip' ), $return_var );
+
+unlink( sys_get_temp_dir() . '/woocommerce.zip' );
+
+if ( $return_var !== 0 ) {
+	echo "Failed to run QIT security test.\n";
+	exit( 1 );
 }
