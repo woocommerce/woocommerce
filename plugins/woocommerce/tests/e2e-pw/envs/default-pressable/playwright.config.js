@@ -6,7 +6,7 @@ config = {
 	retries: 0,
 	projects: [
 		{
-			name: 'default',
+			name: 'default pressable',
 			use: { ...devices[ 'Desktop Chrome' ] },
 			testMatch: '**basic.spec.js',
 		},

@@ -91,7 +91,7 @@ export function DocumentOverviewSidebar() {
 				tabs={ [
 					{
 						name: 'list-view',
-						title: 'List View',
+						title: __( 'List View', 'woocommerce' ),
 						className:
 							'woocommerce-iframe-editor__document-overview-sidebar-tab-item',
 					},
