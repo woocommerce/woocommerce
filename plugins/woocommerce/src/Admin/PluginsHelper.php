@@ -969,8 +969,7 @@ class PluginsHelper {
 		$add_payment_method_link = add_query_arg(
 			array(
 				'utm_source'   => 'pu',
-				'utm_medium'   => 'notice',
-				'utm_campaign' => 'pu_notice_add_payment_method',
+				'utm_campaign' => $allowed_link ? 'pu_settings_screen_add_payment_method' : 'pu_in_apps_screen_add_payment_method',
 			),
 			self::WOO_ADD_PAYMENT_METHOD_URL
 		);
