@@ -75,9 +75,11 @@ const insertBlock = async ( page, blockName, wpVersion = null ) => {
 			} )
 			.click();
 	} else {
-		page.getByRole( 'button', {
-			name: 'Close block inserter',
-		} ).click();
+		await page
+			.getByRole( 'button', {
+				name: 'Close block inserter',
+			} )
+			.click();
 	}
 };
 
