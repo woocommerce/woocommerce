@@ -61,8 +61,8 @@ class WC_Report_Downloads extends WP_List_Table {
 		$this->prepare_items();
 
 		// Subtitle for permission if set.
-		if ( ! empty( $_GET['permission_id'] ) ) { // WPCS: input var ok.
-			$permission_id = absint( $_GET['permission_id'] ); // WPCS: input var ok.
+		if ( ! empty( $_GET['permission_id'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$permission_id = absint( $_GET['permission_id'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			// Load the permission, order, etc. so we can render more information.
 			$permission = null;
@@ -263,12 +263,12 @@ class WC_Report_Downloads extends WP_List_Table {
 	 * @return object
 	 */
 	protected function get_filter_vars() {
-		$product_id      = ! empty( $_GET['product_id'] ) ? absint( wp_unslash( $_GET['product_id'] ) ) : null; // WPCS: input var ok.
-		$download_id     = ! empty( $_GET['download_id'] ) ? wc_clean( wp_unslash( $_GET['download_id'] ) ) : null; // WPCS: input var ok.
-		$permission_id   = ! empty( $_GET['permission_id'] ) ? absint( wp_unslash( $_GET['permission_id'] ) ) : null; // WPCS: input var ok.
-		$order_id        = ! empty( $_GET['order_id'] ) ? absint( wp_unslash( $_GET['order_id'] ) ) : null; // WPCS: input var ok.
-		$user_id         = ! empty( $_GET['user_id'] ) ? absint( wp_unslash( $_GET['user_id'] ) ) : null; // WPCS: input var ok.
-		$user_ip_address = ! empty( $_GET['user_ip_address'] ) ? wc_clean( wp_unslash( $_GET['user_ip_address'] ) ) : null; // WPCS: input var ok.
+		$product_id      = ! empty( $_GET['product_id'] ) ? absint( wp_unslash( $_GET['product_id'] ) ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$download_id     = ! empty( $_GET['download_id'] ) ? wc_clean( wp_unslash( $_GET['download_id'] ) ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$permission_id   = ! empty( $_GET['permission_id'] ) ? absint( wp_unslash( $_GET['permission_id'] ) ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$order_id        = ! empty( $_GET['order_id'] ) ? absint( wp_unslash( $_GET['order_id'] ) ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$user_id         = ! empty( $_GET['user_id'] ) ? absint( wp_unslash( $_GET['user_id'] ) ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$user_ip_address = ! empty( $_GET['user_ip_address'] ) ? wc_clean( wp_unslash( $_GET['user_ip_address'] ) ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		return (object) array(
 			'product_id'      => $product_id,
@@ -330,7 +330,7 @@ class WC_Report_Downloads extends WP_List_Table {
 		$query_from  = apply_filters( 'woocommerce_report_downloads_query_from', $query_from );
 		$query_order = $wpdb->prepare( 'ORDER BY timestamp DESC LIMIT %d, %d;', ( $current_page - 1 ) * $per_page, $per_page );
 
-		$this->items     = $wpdb->get_results( "SELECT * {$query_from} {$query_order}" ); // WPCS: cache ok, db call ok, unprepared SQL ok.
-		$this->max_items = $wpdb->get_var( "SELECT COUNT( DISTINCT download_log_id ) {$query_from};" ); // WPCS: cache ok, db call ok, unprepared SQL ok.
+		$this->items     = $wpdb->get_results( "SELECT * {$query_from} {$query_order}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->max_items = $wpdb->get_var( "SELECT COUNT( DISTINCT download_log_id ) {$query_from};" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 }

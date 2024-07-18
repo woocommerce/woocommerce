@@ -105,7 +105,7 @@ class WC_Order_Item_Meta {
 		if ( $return ) {
 			return $output;
 		} else {
-			echo $output; // WPCS: XSS ok.
+			echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 

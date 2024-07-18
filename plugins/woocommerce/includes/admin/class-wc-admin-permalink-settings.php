@@ -170,20 +170,20 @@ class WC_Admin_Permalink_Settings {
 		}
 
 		// We need to save the options ourselves; settings api does not trigger save for the permalinks page.
-		if ( isset( $_POST['permalink_structure'], $_POST['wc-permalinks-nonce'], $_POST['woocommerce_product_category_slug'], $_POST['woocommerce_product_tag_slug'], $_POST['woocommerce_product_attribute_slug'] ) && wp_verify_nonce( wp_unslash( $_POST['wc-permalinks-nonce'] ), 'wc-permalinks' ) ) { // WPCS: input var ok, sanitization ok.
+		if ( isset( $_POST['permalink_structure'], $_POST['wc-permalinks-nonce'], $_POST['woocommerce_product_category_slug'], $_POST['woocommerce_product_tag_slug'], $_POST['woocommerce_product_attribute_slug'] ) && wp_verify_nonce( wp_unslash( $_POST['wc-permalinks-nonce'] ), 'wc-permalinks' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			wc_switch_to_site_locale();
 
 			$permalinks                   = (array) get_option( 'woocommerce_permalinks', array() );
-			$permalinks['category_base']  = wc_sanitize_permalink( wp_unslash( $_POST['woocommerce_product_category_slug'] ) ); // WPCS: input var ok, sanitization ok.
-			$permalinks['tag_base']       = wc_sanitize_permalink( wp_unslash( $_POST['woocommerce_product_tag_slug'] ) ); // WPCS: input var ok, sanitization ok.
-			$permalinks['attribute_base'] = wc_sanitize_permalink( wp_unslash( $_POST['woocommerce_product_attribute_slug'] ) ); // WPCS: input var ok, sanitization ok.
+			$permalinks['category_base']  = wc_sanitize_permalink( wp_unslash( $_POST['woocommerce_product_category_slug'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$permalinks['tag_base']       = wc_sanitize_permalink( wp_unslash( $_POST['woocommerce_product_tag_slug'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$permalinks['attribute_base'] = wc_sanitize_permalink( wp_unslash( $_POST['woocommerce_product_attribute_slug'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			// Generate product base.
-			$product_base = isset( $_POST['product_permalink'] ) ? wc_clean( wp_unslash( $_POST['product_permalink'] ) ) : ''; // WPCS: input var ok, sanitization ok.
+			$product_base = isset( $_POST['product_permalink'] ) ? wc_clean( wp_unslash( $_POST['product_permalink'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			if ( 'custom' === $product_base ) {
-				if ( isset( $_POST['product_permalink_structure'] ) ) { // WPCS: input var ok.
-					$product_base = preg_replace( '#/+#', '/', '/' . str_replace( '#', '', trim( wp_unslash( $_POST['product_permalink_structure'] ) ) ) ); // WPCS: input var ok, sanitization ok.
+				if ( isset( $_POST['product_permalink_structure'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+					$product_base = preg_replace( '#/+#', '/', '/' . str_replace( '#', '', trim( wp_unslash( $_POST['product_permalink_structure'] ) ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 				} else {
 					$product_base = '/';
 				}

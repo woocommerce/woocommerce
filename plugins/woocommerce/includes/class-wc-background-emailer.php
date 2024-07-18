@@ -117,7 +117,7 @@ class WC_Background_Emailer extends WC_Background_Process {
 		// Pass cookies through with the request so nonces function.
 		$cookies = array();
 
-		foreach ( $_COOKIE as $name => $value ) { // WPCS: input var ok.
+		foreach ( $_COOKIE as $name => $value ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			if ( 'PHPSESSID' === $name ) {
 				continue;
 			}

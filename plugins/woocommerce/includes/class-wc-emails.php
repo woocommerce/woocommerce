@@ -180,7 +180,7 @@ class WC_Emails {
 				)
 			);
 			if ( Constants::is_true( 'WP_DEBUG' ) ) {
-				trigger_error( $error, E_USER_WARNING ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+				trigger_error( $error, E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			}
 		}
 	}
@@ -337,7 +337,7 @@ class WC_Emails {
 
 		do_action( 'woocommerce_email_header', $email_heading, null );
 
-		echo wpautop( wptexturize( $message ) ); // WPCS: XSS ok.
+		echo wpautop( wptexturize( $message ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		do_action( 'woocommerce_email_footer', null );
 
@@ -517,14 +517,14 @@ class WC_Emails {
 
 				foreach ( $fields as $field ) {
 					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
-						echo $field['label'] . ': ' . $field['value'] . "\n"; // WPCS: XSS ok.
+						echo $field['label'] . ': ' . $field['value'] . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					}
 				}
 			} else {
 
 				foreach ( $fields as $field ) {
 					if ( isset( $field['label'] ) && isset( $field['value'] ) && $field['value'] ) {
-						echo '<p><strong>' . $field['label'] . ':</strong> ' . $field['value'] . '</p>'; // WPCS: XSS ok.
+						echo '<p><strong>' . $field['label'] . ':</strong> ' . $field['value'] . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					}
 				}
 			}

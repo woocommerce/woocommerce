@@ -466,7 +466,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					'%f', // shipping_tax_amount.
 					'%f', // product_gross_revenue.
 				)
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			/**
 			 * Fires when product's reports are updated.

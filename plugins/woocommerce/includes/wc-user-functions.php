@@ -390,7 +390,7 @@ AND im.meta_key IN ( '_product_id', '_variation_id' )
 AND im.meta_value != 0
 AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
 		"
-			); // WPCS: unprepared SQL ok.
+			); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 		$result = array_map( 'absint', $result );
 

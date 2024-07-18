@@ -27,7 +27,7 @@ echo esc_html__( 'The following note has been added to your order:', 'woocommerc
 
 echo "----------\n\n";
 
-echo wptexturize( $customer_note ) . "\n\n"; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+echo wptexturize( $customer_note ) . "\n\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 echo "----------\n\n";
 

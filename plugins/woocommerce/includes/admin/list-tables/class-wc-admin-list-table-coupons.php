@@ -204,8 +204,8 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 			foreach ( $types as $name => $type ) {
 				echo '<option value="' . esc_attr( $name ) . '"';
 
-				if ( isset( $_GET['coupon_type'] ) ) { // WPCS: input var ok.
-					selected( $name, wc_clean( wp_unslash( $_GET['coupon_type'] ) ) ); // WPCS: input var ok, sanitization ok.
+				if ( isset( $_GET['coupon_type'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+					selected( $name, wc_clean( wp_unslash( $_GET['coupon_type'] ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 				}
 
 				echo '>' . esc_html( $type ) . '</option>';
@@ -222,7 +222,7 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	protected function query_filters( $query_vars ) {
-		if ( ! empty( $_GET['coupon_type'] ) ) { // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_GET['coupon_type'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$query_vars['meta_key']   = 'discount_type'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			$query_vars['meta_value'] = wc_clean( wp_unslash( $_GET['coupon_type'] ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value, WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 		}

@@ -41,17 +41,17 @@ class WC_Shortcode_Checkout {
 		}
 
 		// Backwards compatibility with old pay and thanks link arguments.
-		if ( isset( $_GET['order'] ) && isset( $_GET['key'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( isset( $_GET['order'] ) && isset( $_GET['key'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 			wc_deprecated_argument( __CLASS__ . '->' . __FUNCTION__, '2.1', '"order" is no longer used to pass an order ID. Use the order-pay or order-received endpoint instead.' );
 
 			// Get the order to work out what we are showing.
-			$order_id = absint( $_GET['order'] ); // WPCS: input var ok.
+			$order_id = absint( $_GET['order'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$order    = wc_get_order( $order_id );
 
 			if ( $order && $order->has_status( 'pending' ) ) {
-				$wp->query_vars['order-pay'] = absint( $_GET['order'] ); // WPCS: input var ok.
+				$wp->query_vars['order-pay'] = absint( $_GET['order'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			} else {
-				$wp->query_vars['order-received'] = absint( $_GET['order'] ); // WPCS: input var ok.
+				$wp->query_vars['order-received'] = absint( $_GET['order'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			}
 		}
 
@@ -84,9 +84,9 @@ class WC_Shortcode_Checkout {
 		$order_id = absint( $order_id );
 
 		// Pay for existing order.
-		if ( isset( $_GET['pay_for_order'], $_GET['key'] ) && $order_id ) { // WPCS: input var ok, CSRF ok.
+		if ( isset( $_GET['pay_for_order'], $_GET['key'] ) && $order_id ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 			try {
-				$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // WPCS: input var ok, CSRF ok.
+				$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 				$order     = wc_get_order( $order_id );
 
 				// Order or payment link is invalid.
@@ -235,7 +235,7 @@ class WC_Shortcode_Checkout {
 		} elseif ( $order_id ) {
 
 			// Pay for order after checkout step.
-			$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // WPCS: input var ok, CSRF ok.
+			$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 			$order     = wc_get_order( $order_id );
 
 			if ( $order && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
@@ -268,7 +268,7 @@ class WC_Shortcode_Checkout {
 
 		// Get the order.
 		$order_id  = apply_filters( 'woocommerce_thankyou_order_id', absint( $order_id ) );
-		$order_key = apply_filters( 'woocommerce_thankyou_order_key', empty( $_GET['key'] ) ? '' : wc_clean( wp_unslash( $_GET['key'] ) ) ); // WPCS: input var ok, CSRF ok.
+		$order_key = apply_filters( 'woocommerce_thankyou_order_key', empty( $_GET['key'] ) ? '' : wc_clean( wp_unslash( $_GET['key'] ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
@@ -356,14 +356,14 @@ class WC_Shortcode_Checkout {
 		// Get checkout object.
 		$checkout = WC()->checkout();
 
-		if ( empty( $_POST ) && wc_notice_count( 'error' ) > 0 ) { // WPCS: input var ok, CSRF ok.
+		if ( empty( $_POST ) && wc_notice_count( 'error' ) > 0 ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing
 
 			wc_get_template( 'checkout/cart-errors.php', array( 'checkout' => $checkout ) );
 			wc_clear_notices();
 
 		} else {
 
-			$non_js_checkout = ! empty( $_POST['woocommerce_checkout_update_totals'] ); // WPCS: input var ok, CSRF ok.
+			$non_js_checkout = ! empty( $_POST['woocommerce_checkout_update_totals'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing
 
 			if ( wc_notice_count( 'error' ) === 0 && $non_js_checkout ) {
 				wc_add_notice( __( 'The order totals have been updated. Please confirm your order by pressing the "Place order" button at the bottom of the page.', 'woocommerce' ) );

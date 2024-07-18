@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
 					}
 				}
 				?>
-			</select> <?php echo wc_help_tip( __( 'This lets you choose which products are part of this group.', 'woocommerce' ) ); // WPCS: XSS ok. ?>
+			</select> <?php echo wc_help_tip( __( 'This lets you choose which products are part of this group.', 'woocommerce' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</p>
 	</div>
 
@@ -41,7 +41,7 @@ defined( 'ABSPATH' ) || exit;
 					}
 				}
 				?>
-			</select> <?php echo wc_help_tip( __( 'Upsells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce' ) ); // WPCS: XSS ok. ?>
+			</select> <?php echo wc_help_tip( __( 'Upsells are products which you recommend instead of the currently viewed product, for example, products that are more profitable or better quality or more expensive.', 'woocommerce' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</p>
 
 		<p class="form-field hide_if_grouped hide_if_external">
@@ -57,7 +57,7 @@ defined( 'ABSPATH' ) || exit;
 					}
 				}
 				?>
-			</select> <?php echo wc_help_tip( __( 'Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce' ) ); // WPCS: XSS ok. ?>
+			</select> <?php echo wc_help_tip( __( 'Cross-sells are products which you promote in the cart, based on the current product.', 'woocommerce' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</p>
 	</div>
 
