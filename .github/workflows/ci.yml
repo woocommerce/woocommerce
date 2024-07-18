@@ -372,7 +372,7 @@ jobs:
         if: ${{ !!env.FLAKY_REPORTS }}
         shell: 'bash'
         run: |
-          if [[ -f ./packages/report-flaky-tests/build/index.js ]]; then
+          if [[ ! -f ./packages/report-flaky-tests/build/index.js ]]; then
               echo "BUILD_REPORT_FLAKY_TESTS_UTILITY=yes" >> $GITHUB_ENV
           else
               echo "BUILD_REPORT_FLAKY_TESTS_UTILITY=no" >> $GITHUB_ENV
