@@ -4,13 +4,20 @@
 import { decodeEntities } from '@wordpress/html-entities';
 import { useCallback, useMemo, useEffect, useRef } from '@wordpress/element';
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import type { StateInputWithStatesProps } from './StateInputProps';
-import { Select } from '../select';
+import { Select, SelectOption } from '../select';
+
+const emptyStateOption: SelectOption = {
+	value: '',
+	label: __( 'Select a state', 'woocommerce' ),
+	disabled: true,
+};
 
 const optionMatcher = (
 	value: string,
@@ -36,16 +43,18 @@ const StateInput = ( {
 	required = false,
 }: StateInputWithStatesProps ): JSX.Element => {
 	const countryStates = states[ country ];
-	const options = useMemo(
-		() =>
-			countryStates
-				? Object.keys( countryStates ).map( ( key ) => ( {
-						value: key,
-						label: decodeEntities( countryStates[ key ] ),
-				  } ) )
-				: [],
-		[ countryStates ]
-	);
+	const options = useMemo< SelectOption[] >( () => {
+		if ( countryStates ) {
+			return [
+				emptyStateOption,
+				...Object.keys( countryStates ).map( ( key ) => ( {
+					value: key,
+					label: decodeEntities( countryStates[ key ] ),
+				} ) ),
+			];
+		}
+		return [];
+	}, [ countryStates ] );
 
 	/**
 	 * Handles state selection onChange events. Finds a matching state by key or value.
