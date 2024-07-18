@@ -39,7 +39,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	 */
 	public function __construct( \WC_Logger_Interface $logger = null ) {
 		if ( null === $logger ) {
-			$local_logger = wc_get_logger();
+			$this->local_logger = wc_get_logger();
 		}
 		$this->local_logger = $logger;
 	}
@@ -125,7 +125,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			);
 		} catch ( \Exception $e ) {
 			// Log the error locally if the remote logging fails.
-			$this->local_logger->error( 'Remote logging failed: ' . $e->getMessage(), $body );
+			$this->local_logger->error( 'Remote logging failed: ' . $e->getMessage() );
 		}
 
 		$this->record_log_timestamp();
