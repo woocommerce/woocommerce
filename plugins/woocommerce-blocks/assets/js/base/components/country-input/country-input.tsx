@@ -5,6 +5,7 @@ import { useMemo } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -12,6 +13,8 @@ import { __ } from '@wordpress/i18n';
 import './style.scss';
 import type { CountryInputWithCountriesProps } from './CountryInputProps';
 import { Select, SelectOption } from '../select';
+import { VALIDATION_STORE_KEY } from '../../../data';
+import { ValidationInputError } from '../../../../../packages/checkout';
 
 const emptyCountryOption: SelectOption = {
 	value: '',
@@ -28,6 +31,7 @@ export const CountryInput = ( {
 	value = '',
 	autoComplete = 'off',
 	required = false,
+	errorId,
 }: CountryInputWithCountriesProps ): JSX.Element => {
 	const options = useMemo< SelectOption[] >( () => {
 		return [ emptyCountryOption ].concat(
@@ -40,9 +44,19 @@ export const CountryInput = ( {
 		);
 	}, [ countries ] );
 
+	const { validationError, validationErrorId } = useSelect( ( select ) => {
+		const store = select( VALIDATION_STORE_KEY );
+		return {
+			validationError: store.getValidationError( errorId || '' ),
+			validationErrorId: store.getValidationErrorId( errorId || '' ),
+		};
+	} );
+
 	return (
 		<div
-			className={ clsx( className, 'wc-block-components-country-input' ) }
+			className={ clsx( className, 'wc-block-components-country-input', {
+				'has-error': validationErrorId,
+			} ) }
 		>
 			<Select
 				id={ id }
@@ -53,6 +67,11 @@ export const CountryInput = ( {
 				required={ required }
 				autoComplete={ autoComplete }
 			/>
+			{ validationError && (
+				<ValidationInputError
+					errorMessage={ validationError.message }
+				/>
+			) }
 		</div>
 	);
 };

@@ -96,7 +96,6 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 	// Maybe validate country when other fields change so user is notified that it's required.
 	useEffect( () => {
 		if ( objectHasProp( values, 'country' ) ) {
-			console.log( addressType, 'validating country!' );
 			validateCountry( addressType, values );
 		}
 	}, [ values, addressType ] );
@@ -216,8 +215,6 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 						addressType === 'shipping'
 							? ShippingCountryInput
 							: BillingCountryInput;
-
-					console.log( 'fieldProps', fieldProps );
 					return (
 						<Tag
 							key={ field.key }

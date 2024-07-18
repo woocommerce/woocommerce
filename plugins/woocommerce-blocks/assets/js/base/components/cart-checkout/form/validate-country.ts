@@ -16,17 +16,6 @@ const validateCountry = (
 	const hasValidationError =
 		select( VALIDATION_STORE_KEY ).getValidationError( validationErrorId );
 
-	console.log(
-		validationErrorId + ' validateCountry has validation error: ',
-		hasValidationError
-	);
-
-	console.log(
-		'will do error? ',
-		! values.country && ( values.city || values.state || values.postcode )
-			? 'true'
-			: 'false'
-	);
 	if (
 		! values.country &&
 		( values.city || values.state || values.postcode )
