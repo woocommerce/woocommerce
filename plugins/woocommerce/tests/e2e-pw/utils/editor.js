@@ -53,7 +53,7 @@ const fillPageTitle = async ( page, title ) => {
 	await ( await getCanvas( page ) ).getByLabel( 'Add title' ).fill( title );
 };
 
-const insertBlock = async ( page, blockName ) => {
+const insertBlock = async ( page, blockName, wpVersion = null ) => {
 	await page
 		.getByRole( 'button', {
 			name: 'Toggle block inserter',
@@ -63,18 +63,17 @@ const insertBlock = async ( page, blockName ) => {
 	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
 
-	const closeBtn = page.getByRole( 'button', {
-		name: 'Close block inserter',
-	} );
-	if ( await closeBtn.isVisible() ) {
-		await closeBtn.click();
-	} else {
+	if ( wpVersion && wpVersion <= 6.5 ) {
 		await page
 			.getByRole( 'button', {
 				name: 'Toggle block inserter',
 				expanded: true,
 			} )
 			.click();
+	} else {
+		page.getByRole( 'button', {
+			name: 'Close block inserter',
+		} ).click();
 	}
 };
 
