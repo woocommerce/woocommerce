@@ -480,7 +480,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		add_action( 'woocommerce_new_order', $callback );
 
-		$non_triggering_order_statuses = array( 'checkout-draft', 'refunded', 'failed', 'cancelled' );
+		$draft_statuses = array( 'auto-draft', 'draft', 'checkout-draft' );
 
 		$order_data_store_cpt = new WC_Order_Data_Store_CPT();
 
@@ -490,7 +490,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 0, $new_count );
 
-		foreach ( $non_triggering_order_statuses as $status ) {
+		foreach ( $draft_statuses as $status ) {
 			$order->set_status( $status );
 			$order_data_store_cpt->update( $order );
 			$order->save();
