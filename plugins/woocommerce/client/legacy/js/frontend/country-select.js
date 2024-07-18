@@ -104,12 +104,15 @@ jQuery( function( $ ) {
 			placeholder   = $statebox.attr( 'placeholder' ) || $statebox.attr( 'data-placeholder' ) || '',
 			$newstate;
 
+		if ( placeholder === wc_country_select_params.i18n_select_state_text ) {
+			placeholder = '';
+		}
+
 		if ( states[ country ] ) {
 			if ( $.isEmptyObject( states[ country ] ) ) {
 				$newstate = $( '<input type="hidden" />' )
 					.prop( 'id', input_id )
 					.prop( 'name', input_name )
-					.prop( 'placeholder', placeholder )
 					.attr( 'data-input-classes', input_classes )
 					.addClass( 'hidden ' + input_classes );
 				$parent.hide().find( '.select2-container' ).remove();
@@ -154,8 +157,8 @@ jQuery( function( $ ) {
 				$newstate = $( '<input type="text" />' )
 					.prop( 'id', input_id )
 					.prop( 'name', input_name )
-					.prop('placeholder', placeholder)
-					.attr('data-input-classes', input_classes )
+					.prop( 'placeholder', placeholder )
+					.attr( 'data-input-classes', input_classes )
 					.addClass( 'input-text  ' + input_classes );
 				$parent.show().find( '.select2-container' ).remove();
 				$statebox.replaceWith( $newstate );
