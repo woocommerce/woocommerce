@@ -3483,12 +3483,12 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( 0, $new_count );
 
 		foreach ( $draft_statuses as $status ) {
+			$current_status = $order->get_status( 'edit' );
 			$order->set_status( $status );
 			$this->sut->update( $order );
 			$order->save();
+			$this->assertEquals( 0, $new_count, 'Triggered new order hook changing status: ' . $current_status . ' -> ' . $status );
 		}
-
-		$this->assertEquals( 0, $new_count );
 
 		$triggering_order_statuses = array( 'pending', 'on-hold', 'completed', 'processing' );
 

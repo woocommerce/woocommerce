@@ -491,23 +491,31 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $new_count );
 
 		foreach ( $draft_statuses as $status ) {
+			$current_status = $order->get_status( 'edit' );
 			$order->set_status( $status );
 			$order_data_store_cpt->update( $order );
 			$order->save();
+			$this->assertEquals(
+				0,
+				$new_count,
+				'Triggered new order hook changing status: ' . $current_status . ' -> ' . $status
+			);
 		}
-
-		$this->assertEquals( 0, $new_count );
 
 		$triggering_order_statuses = array( 'pending', 'on-hold', 'completed', 'processing' );
 
 		foreach ( $triggering_order_statuses as $status ) {
+			$current_status = $order->get_status( 'edit' );
 			$order->set_status( $status );
 			$order_data_store_cpt->update( $order );
 			$order->set_status( 'checkout-draft' ); // Revert back to draft.
 			$order->save();
+			$this->assertEquals(
+				$new_count + 1,
+				$new_count,
+				'Failed to trigger new order hook changing status: ' . $current_status . ' -> ' . $status
+			);
 		}
-
-		$this->assertEquals( 4, $new_count );
 
 		remove_action( 'woocommerce_new_order', $callback );
 	}
