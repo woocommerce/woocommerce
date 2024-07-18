@@ -554,7 +554,7 @@ body.woocommerce-assembler {
 		bottom: 16px;
 		top: 16px;
 		left: 6px; // the default styles for this undersizes the width by 24px so we want to center this
-		padding-right: 6px;
+		padding: 0 4px 0 16px;
 	}
 
 	.edit-site-resizable-frame__handle {
