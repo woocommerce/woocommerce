@@ -220,6 +220,39 @@ class ProductCollectionPage {
 
 		return new URL( productResponse.url() );
 	}
+	async insertProductElements() {
+		// By default there are inner blocks:
+		// - woocommerce/product-image
+		// - core/post-title
+		// - woocommerce/product-price
+		// - woocommerce/product-button
+		// We're adding remaining ones
+		const productElements = [
+			{ name: 'woocommerce/product-rating', attributes: {} },
+			{ name: 'woocommerce/product-sku', attributes: {} },
+			{ name: 'woocommerce/product-stock-indicator', attributes: {} },
+			{ name: 'woocommerce/product-sale-badge', attributes: {} },
+			{
+				name: 'core/post-excerpt',
+				attributes: {
+					__woocommerceNamespace:
+						'woocommerce/product-collection/product-summary',
+				},
+			},
+			{
+				name: 'core/post-terms',
+				attributes: { term: 'product_tag' },
+			},
+			{
+				name: 'core/post-terms',
+				attributes: { term: 'product_cat' },
+			},
+		];
+
+		for ( const productElement of productElements ) {
+			await this.insertBlockInProductCollection( productElement );
+		}
+	}
 
 	async publishAndGoToFrontend() {
 		const postId = await this.editor.publishPost();
@@ -670,7 +703,7 @@ class ProductCollectionPage {
 
 	async getProductNames() {
 		const products = this.page.locator( '.wp-block-post-title' );
-		return products.allTextContents();
+		return await products.allTextContents();
 	}
 
 	/**

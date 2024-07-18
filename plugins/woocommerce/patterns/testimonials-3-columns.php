@@ -24,6 +24,10 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 	<h3 class="wp-block-heading alignwide"><?php echo esc_html( $main_header ); ?></h3>
 	<!-- /wp:heading -->
 
+	<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
+	<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
+	<!-- /wp:spacer -->
+
 	<!-- wp:columns {"align":"wide"} -->
 	<div class="wp-block-columns alignwide">
 		<!-- wp:column -->
@@ -37,7 +41,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph -->
-			<p>~ Sophia K.</p>
+			<p>Sophia K.</p>
 			<!-- /wp:paragraph -->
 		</div>
 		<!-- /wp:column -->
@@ -54,7 +58,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph -->
-			<p>~ Liam M.</p>
+			<p>Liam M.</p>
 			<!-- /wp:paragraph -->
 		</div>
 		<!-- /wp:column -->
@@ -70,7 +74,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph -->
-			<p>~ Ava L.</p>
+			<p>Ava L.</p>
 			<!-- /wp:paragraph -->
 		</div>
 		<!-- /wp:column -->
