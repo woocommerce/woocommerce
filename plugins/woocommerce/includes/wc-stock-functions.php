@@ -257,7 +257,7 @@ function wc_trigger_stock_change_notifications( $order, $changes ) {
 			 *     @type WC_Product $product  The product that is on backorder.
 			 *     @type int        $order_id The ID of the order.
 			 *     @type int|float  $quantity The amount of product on backorder.
-			 * }s
+			 * }
 			 */
 			do_action(
 				'woocommerce_product_on_backorder',
