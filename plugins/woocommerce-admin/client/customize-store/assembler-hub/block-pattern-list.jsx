@@ -26,7 +26,7 @@ import Iframe from './iframe';
 const WithToolTip = ( { showTooltip, title, children } ) => {
 	if ( showTooltip ) {
 		return (
-			<Tooltip text={ title }>
+			<Tooltip text={ title } style={ { top: '2px' } }>
 				<span>{ children }</span>
 			</Tooltip>
 		);
