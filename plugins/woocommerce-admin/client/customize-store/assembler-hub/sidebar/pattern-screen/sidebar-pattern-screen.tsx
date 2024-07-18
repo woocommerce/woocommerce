@@ -44,9 +44,9 @@ import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { PATTERN_CATEGORIES } from './categories';
 import { THEME_SLUG } from '~/customize-store/data/constants';
 import {
-	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
+	findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate,
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
-} from '../../utils/hero-pattern';
+} from '../../utils/black-background-pattern-update-button';
 import { useIsActiveNewNeutralVariation } from '../../hooks/use-is-active-new-neutral-variation';
 import {
 	sortPatternsByCategory,
@@ -69,14 +69,17 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		const patternWithPatchedProductHeroPattern =
 			patternsWithoutThemePatterns.map( ( pattern ) => {
 				if (
-					pattern.name !== 'woocommerce-blocks/just-arrived-full-hero'
+					pattern.name !==
+						'woocommerce-blocks/just-arrived-full-hero' &&
+					pattern.name !==
+						'woocommerce-blocks/featured-category-cover-image'
 				) {
 					return pattern;
 				}
 
 				if ( ! isActiveNewNeutralVariation ) {
 					const blocks =
-						findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+						findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 							pattern.blocks,
 							( block: BlockInstance ) => {
 								block.attributes.style = {};
@@ -86,7 +89,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 				}
 
 				const blocks =
-					findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+					findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 						pattern.blocks,
 						( block: BlockInstance ) => {
 							block.attributes.style =

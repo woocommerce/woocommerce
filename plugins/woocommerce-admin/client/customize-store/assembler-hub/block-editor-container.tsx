@@ -32,8 +32,8 @@ import { useEditorBlocks } from './hooks/use-editor-blocks';
 import { useScrollOpacity } from './hooks/use-scroll-opacity';
 import {
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
-	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
-} from './utils/hero-pattern';
+	findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate,
+} from './utils/black-background-pattern-update-button';
 import { useIsActiveNewNeutralVariation } from './hooks/use-is-active-new-neutral-variation';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
@@ -104,7 +104,7 @@ export const BlockEditorContainer = () => {
 
 	useEffect( () => {
 		if ( ! isActiveNewNeutralVariation ) {
-			findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+			findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 				blocks,
 				( block: BlockInstance ) => {
 					updateBlockAttributes( block.clientId, {
@@ -114,7 +114,7 @@ export const BlockEditorContainer = () => {
 			);
 			return;
 		}
-		findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+		findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 			blocks,
 			( block: BlockInstance ) => {
 				updateBlockAttributes( block.clientId, {
