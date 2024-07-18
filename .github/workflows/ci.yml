@@ -379,7 +379,7 @@ jobs:
           fi
 
       - name: 'Setup Node'
-        if: ${{ !!env.FLAKY_REPORTS && env.BUILD_REPORT_FLAKY_TESTS_UTILITY == 'yes' }}
+        if: ${{ !!env.FLAKY_REPORTS }}
         uses: ./.github/setup-node
 
       - name: 'Build package(s)'
