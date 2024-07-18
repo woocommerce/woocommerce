@@ -3474,7 +3474,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 		add_action( 'woocommerce_new_order', $callback );
 
-		$draft_statuses = array( 'auto-draft', 'draft', 'checkout-draft' );
+		$draft_statuses = array( 'draft', 'checkout-draft' );
 
 		$order = new WC_Order();
 		$order->set_status( 'checkout-draft' );

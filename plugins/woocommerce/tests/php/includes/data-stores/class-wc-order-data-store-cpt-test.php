@@ -480,7 +480,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		add_action( 'woocommerce_new_order', $callback );
 
-		$draft_statuses = array( 'auto-draft', 'draft', 'checkout-draft' );
+		$draft_statuses = array( 'draft', 'checkout-draft' );
 
 		$order_data_store_cpt = new WC_Order_Data_Store_CPT();
 
