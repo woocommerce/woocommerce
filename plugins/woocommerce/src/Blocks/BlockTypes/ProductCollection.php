@@ -524,7 +524,11 @@ class ProductCollection extends AbstractBlock {
 		// phpcs:ignore WordPress.DB.SlowDBQuery
 		$block_context_query['tax_query'] = ! empty( $query['tax_query'] ) ? $query['tax_query'] : array();
 
-		$is_exclude_applied_filters = ! ( $block->context['query']['inherit'] ?? false );
+		$inherit    = isset( $block->context['query'] ) && $block->context['query']['inherit'];
+		$filterable = isset( $block->context['filterable'] ) && $block->context['filterable'];
+
+
+		$is_exclude_applied_filters = !( ( $inherit || $filterable ) ?? false );
 
 		return $this->get_final_frontend_query( $block_context_query, $page, $is_exclude_applied_filters );
 	}
