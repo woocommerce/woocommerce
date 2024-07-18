@@ -94,7 +94,6 @@ function processPhpContents( $contents, $filename ) {
 		'input var ok, sanitization ok' => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 		'XSS ok'                        => 'WordPress.Security.EscapeOutput.OutputNotEscaped',
 		'input var ok'                  => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
-		// WordPress.Security.NonceVerification.Missing if $_POST or WordPress.Security.NonceVerification.Recommended if $_GET
 		'csrf ok'                       => '',
 		'CSRF ok'                       => '',
 		'unprepared SQL ok'             => 'WordPress.DB.PreparedSQL.NotPrepared',
@@ -102,13 +101,9 @@ function processPhpContents( $contents, $filename ) {
 	];
 
 	$not_tracked_by_qit = [
-		// WordPress.Security.NonceVerification.Missing if $_POST or WordPress.Security.NonceVerification.Recommended if $_GET
-		'csrf ok'       => '',
-		'CSRF ok'       => '',
 		'cache ok'      => 'WordPress.DB.DirectDatabaseQuery.NoCaching',
 		'DB call ok'    => 'WordPress.DB.DirectDatabaseQuery.DirectQuery',
 		'slow query ok' => '',
-		// Can't replace as this is dynamic on what it is escaping, eg: "WordPress.DB.SlowDBQuery.slow_db_query_meta_value", so we just add a generic phpcs:ignore.
 		'override ok'   => '',
 	];
 
@@ -122,13 +117,11 @@ function processPhpContents( $contents, $filename ) {
 		if ( strpos( $line, 'WPCS:' ) !== false ) {
 			$GLOBALS['wpcs_stats']['wpcs_comments_found'] ++;
 			$changed = false;
-			foreach ( $replacements as $type ) {
-				foreach ( $type as $old => $new ) {
-					$old_pos = strpos( $line, $old );
-					if ( $old_pos !== false ) {
-						// Check if $old is succeeded by a comma or a period, in which case include it to be removed.
-						if ( substr( $line, $old_pos + strlen( $old ), 1 ) === ',' || substr( $line, $old_pos + strlen( $old ), 1 ) === '.' ) {
-							$old .= substr( $line, $old_pos + strlen( $old ), 1 );
+			foreach ( $replacements as $type => $patterns ) {
+				foreach ( $patterns as $old => $new ) {
+					if ( $type === 'tracked_by_qit' || strpos( $line, $old ) !== false ) {
+						if ( $type === 'not_tracked_by_qit' && strpos( $line, $old ) !== false ) {
+							continue; // Skip replacement if line contains both tracked and not tracked patterns
 						}
 
 						if ( $old === 'csrf ok' || $old === 'CSRF ok' ) {
