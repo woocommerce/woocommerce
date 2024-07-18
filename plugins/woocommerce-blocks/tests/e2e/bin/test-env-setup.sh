@@ -7,7 +7,7 @@ head_dir=$(cd "$(dirname "$script_dir")" && cd ../../.. && pwd)
 relative_path=${script_dir#$head_dir/}
 
 # Remove the database snapshot if it exists.
-wp-env run tests-cli -- rm blocks_e2e.sql 2> /dev/null
+wp-env run tests-cli -- rm -f blocks_e2e.sql
 # Run the main script in the container for better performance.
 wp-env run tests-cli -- bash wp-content/plugins/woocommerce/blocks-bin/playwright/scripts/index.sh
 # Disable the LYS Coming Soon banner.
