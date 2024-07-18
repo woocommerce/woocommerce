@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Product Collection: Rename "Sync with current query" option to "Use page context" and make it working in non-archive context as well
