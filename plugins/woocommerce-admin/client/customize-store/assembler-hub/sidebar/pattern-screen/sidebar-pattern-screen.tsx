@@ -43,86 +43,16 @@ import './style.scss';
 import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { PATTERN_CATEGORIES } from './categories';
 import { THEME_SLUG } from '~/customize-store/data/constants';
-import { Pattern } from '~/customize-store/types/pattern';
 import {
 	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
 } from '../../utils/hero-pattern';
 import { useIsActiveNewNeutralVariation } from '../../hooks/use-is-active-new-neutral-variation';
-
-/**
- * Adds a 'is-added' CSS class to each pattern preview element in the pattern list that matches a block's pattern name.
- * This function iterates through an array of blocks added in the page, extracts the pattern name from each block's metadata,
- * and finds the corresponding pattern preview element in the pattern list by its ID. If found, the 'is-added' class is added to the element.
- */
-const addIsAddedClassToPatternPreview = (
-	patternListEl: HTMLElement,
-	blocks: BlockInstance[]
-) => {
-	patternListEl.querySelectorAll( '.is-added' ).forEach( ( element ) => {
-		element.classList.remove( 'is-added' );
-	} );
-
-	blocks.forEach( ( block ) => {
-		const patterName = block.attributes.metadata?.patternName;
-		if ( ! patterName ) {
-			return;
-		}
-
-		const element = patternListEl.querySelector( `[id="${ patterName }"]` );
-
-		if ( element ) {
-			element.classList.add( 'is-added' );
-		}
-	} );
-};
-
-/**
- * Sorts patterns by category. For 'intro' and 'about' categories
- * prioritized DotCom Patterns. For intro category, it also prioritizes the "centered-content-with-image-below" pattern.
- * For other categories, it simply sorts patterns to prioritize Woo Patterns.
- */
-const sortPatternsByCategory = (
-	patterns: Pattern[],
-	category: keyof typeof PATTERN_CATEGORIES
-) => {
-	const prefix = 'woocommerce-blocks';
-	if ( category === 'intro' || category === 'about' ) {
-		return patterns.sort( ( a, b ) => {
-			if (
-				a.name ===
-				'woocommerce-blocks/centered-content-with-image-below'
-			) {
-				return -1;
-			}
-
-			if (
-				b.name ===
-				'woocommerce-blocks/centered-content-with-image-below'
-			) {
-				return 1;
-			}
-
-			if ( a.name.includes( prefix ) && ! b.name.includes( prefix ) ) {
-				return 1;
-			}
-			if ( ! a.name.includes( prefix ) && b.name.includes( prefix ) ) {
-				return -1;
-			}
-			return 0;
-		} );
-	}
-
-	return patterns.sort( ( a, b ) => {
-		if ( a.name.includes( prefix ) && ! b.name.includes( prefix ) ) {
-			return -1;
-		}
-		if ( ! a.name.includes( prefix ) && b.name.includes( prefix ) ) {
-			return 1;
-		}
-		return 0;
-	} );
-};
+import {
+	sortPatternsByCategory,
+	addIsAddedClassToPatternPreview,
+} from './utils';
+import { trackEvent } from '~/customize-store/tracking';
 
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const { patterns, isLoading } = usePatternsByCategory( category );
@@ -283,6 +213,11 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 			insertBlocks( cloneBlocks, insertableIndex, undefined, false );
 
 			blockToScroll.current = cloneBlocks[ 0 ].clientId;
+
+			trackEvent(
+				'customize_your_store_assembler_pattern_sidebar_click',
+				{ pattern: pattern.name }
+			);
 		},
 		[ insertBlocks, insertableIndex ]
 	);
@@ -316,8 +251,10 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 							`/customize-store/assembler-hub/homepage`,
 							{}
 						);
-
 						navigateTo( { url: homepageUrl } );
+						trackEvent(
+							'customize_your_store_assembler_pattern_sidebar_close'
+						);
 					} }
 					iconSize={ 18 }
 					icon={ close }

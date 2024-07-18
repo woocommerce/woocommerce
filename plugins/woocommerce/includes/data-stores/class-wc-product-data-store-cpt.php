@@ -2237,23 +2237,26 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : null;
 			$price        = wc_format_decimal( get_post_meta( $id, '_price', true ) );
 			$sale_price   = wc_format_decimal( get_post_meta( $id, '_sale_price', true ) );
-			return array(
-				'product_id'       => absint( $id ),
-				'sku'              => get_post_meta( $id, '_sku', true ),
-				'global_unique_id' => get_post_meta( $id, '_global_unique_id', true ),
-				'virtual'          => 'yes' === get_post_meta( $id, '_virtual', true ) ? 1 : 0,
-				'downloadable'     => 'yes' === get_post_meta( $id, '_downloadable', true ) ? 1 : 0,
-				'min_price'        => reset( $price_meta ),
-				'max_price'        => end( $price_meta ),
-				'onsale'           => $sale_price && $price === $sale_price ? 1 : 0,
-				'stock_quantity'   => $stock,
-				'stock_status'     => get_post_meta( $id, '_stock_status', true ),
-				'rating_count'     => array_sum( array_map( 'intval', (array) get_post_meta( $id, '_wc_rating_count', true ) ) ),
-				'average_rating'   => get_post_meta( $id, '_wc_average_rating', true ),
-				'total_sales'      => get_post_meta( $id, 'total_sales', true ),
-				'tax_status'       => get_post_meta( $id, '_tax_status', true ),
-				'tax_class'        => get_post_meta( $id, '_tax_class', true ),
+			$product_data = array(
+				'product_id'     => absint( $id ),
+				'sku'            => get_post_meta( $id, '_sku', true ),
+				'virtual'        => 'yes' === get_post_meta( $id, '_virtual', true ) ? 1 : 0,
+				'downloadable'   => 'yes' === get_post_meta( $id, '_downloadable', true ) ? 1 : 0,
+				'min_price'      => reset( $price_meta ),
+				'max_price'      => end( $price_meta ),
+				'onsale'         => $sale_price && $price === $sale_price ? 1 : 0,
+				'stock_quantity' => $stock,
+				'stock_status'   => get_post_meta( $id, '_stock_status', true ),
+				'rating_count'   => array_sum( array_map( 'intval', (array) get_post_meta( $id, '_wc_rating_count', true ) ) ),
+				'average_rating' => get_post_meta( $id, '_wc_average_rating', true ),
+				'total_sales'    => get_post_meta( $id, 'total_sales', true ),
+				'tax_status'     => get_post_meta( $id, '_tax_status', true ),
+				'tax_class'      => get_post_meta( $id, '_tax_class', true ),
 			);
+			if ( get_option( 'woocommerce_schema_version', 0 ) >= 920 ) {
+				$product_data['global_unique_id'] = get_post_meta( $id, '_global_unique_id', true );
+			}
+			return $product_data;
 		}
 		return array();
 	}
