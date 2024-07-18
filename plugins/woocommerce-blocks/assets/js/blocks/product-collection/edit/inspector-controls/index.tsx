@@ -120,9 +120,7 @@ const ProductCollectionInspectorControls = (
 					<InheritQueryControl { ...queryControlProps } />
 				) }
 				{ showFilterableControl && (
-					<FilterableControl
-						{...queryControlProps}
-					/>
+					<FilterableControl { ...queryControlProps } />
 				) }
 				<LayoutOptionsControl { ...displayControlProps } />
 				<ColumnsControl { ...displayControlProps } />

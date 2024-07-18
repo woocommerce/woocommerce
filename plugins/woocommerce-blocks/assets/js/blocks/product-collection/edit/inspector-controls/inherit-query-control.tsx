@@ -88,7 +88,7 @@ const InheritQueryControl = ( {
 };
 
 const FilterableControl = ( {
-	setQueryAttributes,
+	setQueryAttribute,
 	trackInteraction,
 	query,
 }: QueryControlProps ) => {
@@ -105,7 +105,7 @@ const FilterableControl = ( {
 			hasValue={ () => filterable !== defaultValue }
 			isShownByDefault
 			onDeselect={ () => {
-				setQueryAttributes( {
+				setQueryAttribute( {
 					filterable: defaultValue,
 				} );
 				trackInteraction( CoreFilterNames.INHERIT );
@@ -117,7 +117,7 @@ const FilterableControl = ( {
 				help={ helpText }
 				checked={ !! filterable }
 				onChange={ ( value ) => {
-					setQueryAttributes( {
+					setQueryAttribute( {
 						filterable: value,
 					} );
 					trackInteraction( CoreFilterNames.FILTERABLE );
