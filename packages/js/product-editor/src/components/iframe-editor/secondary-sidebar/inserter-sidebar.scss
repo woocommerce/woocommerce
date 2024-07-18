@@ -4,6 +4,12 @@
 
 	&-content {
 		height: 100%;
+		@media only screen and (max-width: $break-medium) {
+			width: 100%;
+			position: absolute;
+			z-index: 100;
+			background-color: $studio-white;
+		}
 	}
 
 	/*

@@ -214,6 +214,7 @@ export const Toolbar = () => {
 						<Shuffle clientId={ selectedBlockClientId } />
 						<Delete
 							clientId={ selectedBlockClientId }
+							currentBlockName={ currentBlock?.name }
 							nextBlockClientId={ nextBlock?.clientId }
 						/>
 					</>
