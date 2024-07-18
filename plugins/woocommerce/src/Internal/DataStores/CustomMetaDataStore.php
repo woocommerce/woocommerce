@@ -5,8 +5,6 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores;
 
-use Automattic\WooCommerce\Caching\WPCacheEngine;
-
 /**
  * Implements functions similar to WP's add_metadata(), get_metadata(), and friends using a custom table.
  *
@@ -53,15 +51,6 @@ abstract class CustomMetaDataStore {
 	}
 
 	/**
-	 * Returns the cache group to store cached data in. This should be unique for the underlying data storage, e.g. table.
-	 *
-	 * @return string
-	 */
-	protected function get_cache_group() {
-		return $this->get_table_name();
-	}
-
-	/**
 	 * Returns an array of meta for an object.
 	 *
 	 * @param  \WC_Data $object WC_Data object.
@@ -91,18 +80,13 @@ abstract class CustomMetaDataStore {
 		$db_info = $this->get_db_info();
 		$meta_id = absint( $meta->id );
 
-		$successful = (bool) $wpdb->delete(
+		return (bool) $wpdb->delete(
 			$db_info['table'],
 			array(
 				$db_info['meta_id_field']   => $meta_id,
 				$db_info['object_id_field'] => $object->get_id(),
 			)
 		);
-		if ( $successful ) {
-			$this->invalidate_cache_for_objects( array( $object->get_id() ) );
-		}
-
-		return $successful;
 	}
 
 	/**
@@ -133,11 +117,7 @@ abstract class CustomMetaDataStore {
 		);
 		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_value,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 
-		$insert_id = $result ? (int) $wpdb->insert_id : false;
-		if ( false !== $insert_id ) {
-			$this->invalidate_cache_for_objects( array( $object->get_id() ) );
-		}
-		return $insert_id;
+		return $result ? (int) $wpdb->insert_id : false;
 	}
 
 	/**
@@ -173,11 +153,7 @@ abstract class CustomMetaDataStore {
 			'%d'
 		);
 
-		$is_successful = 1 === $result;
-		if ( $is_successful ) {
-			$this->invalidate_cache_for_objects( array( $object->get_id() ) );
-		}
-		return $is_successful;
+		return 1 === $result;
 	}
 
 	/**
@@ -286,25 +262,22 @@ abstract class CustomMetaDataStore {
 	}
 
 	/**
-	 * Return order meta data for multiple IDs. Results are cached.
+	 * Return order meta data for multiple IDs.
 	 *
-	 * @param array $ids List of order IDs.
+	 * @param array $object_ids List of object IDs.
 	 *
 	 * @return \stdClass[] DB Order objects or error.
 	 */
-	public function get_meta_data_for_object_ids( array $ids ): array {
+	public function get_meta_data_for_object_ids( array $object_ids ): array {
 		global $wpdb;
 
-		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
-		$meta_data          = $cache_engine->get_cached_objects( $ids, $this->get_cache_group() );
-		$meta_data          = array_filter( $meta_data );
-		$uncached_order_ids = array_diff( $ids, array_keys( $meta_data ) );
+		$meta_data = array();
 
-		if ( empty( $uncached_order_ids ) ) {
+		if ( empty( $object_ids ) ) {
 			return $meta_data;
 		}
 
-		$id_placeholder   = implode( ', ', array_fill( 0, count( $uncached_order_ids ), '%d' ) );
+		$id_placeholder   = implode( ', ', array_fill( 0, count( $object_ids ), '%d' ) );
 		$meta_table       = $this->get_table_name();
 		$object_id_column = $this->get_object_id_field();
 
@@ -312,7 +285,7 @@ abstract class CustomMetaDataStore {
 		$meta_rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT id, $object_id_column as object_id, meta_key, meta_value FROM $meta_table WHERE $object_id_column in ( $id_placeholder )",
-				$ids
+				$object_ids
 			)
 		);
 		// phpcs:enable
@@ -327,42 +300,8 @@ abstract class CustomMetaDataStore {
 				'meta_value' => $meta_row->meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			);
 		}
-		$cache_engine->cache_objects( $meta_data, 0, $this->get_cache_group() );
 
 		return $meta_data;
 	}
 
-	/**
-	 * Delete cached meta data for the given object_ids.
-	 *
-	 * @internal This method should only be used by internally and in cases where the CRUD operations of this datastore
-	 *           are bypassed for performance purposes. This interface is not guaranteed.
-	 *
-	 * @param array $object_ids The object_ids to delete cache for.
-	 *
-	 * @return bool[] Array of return values, grouped by the object_id. Each value is either true on success, or false
-	 *                if the contents were not deleted.
-	 */
-	public function invalidate_cache_for_objects( array $object_ids ): array {
-		$cache_engine  = wc_get_container()->get( WPCacheEngine::class );
-		$return_values = array();
-		foreach ( $object_ids as $object_id ) {
-			$return_values[ $object_id ] = $cache_engine->delete_cached_object( $object_id, $this->get_cache_group() );
-		}
-		return $return_values;
-	}
-
-	/**
-	 * Invalidate all the cache used by this data store.
-	 *
-	 * @internal This method should only be used by internally and in cases where the CRUD operations of this datastore
-	 *           are bypassed for performance purposes. This interface is not guaranteed.
-	 *
-	 * @return bool Whether the cache as fully invalidated.
-	 */
-	public function invalidate_all_cache(): bool {
-		$cache_engine = wc_get_container()->get( WPCacheEngine::class );
-
-		return $cache_engine->delete_cache_group( $this->get_cache_group() );
-	}
 }

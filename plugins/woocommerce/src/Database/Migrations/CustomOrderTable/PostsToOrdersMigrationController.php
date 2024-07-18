@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Caching\WPCacheEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * This is the main class used to perform the complete migration of orders
@@ -98,18 +99,14 @@ class PostsToOrdersMigrationController {
 			if ( null === $exception && empty( $errors ) ) {
 				continue;
 			}
-
 			$this->handle_migration_error( $order_post_ids, $errors, $exception, $using_transactions, $name );
-			if ( ! $using_transactions ) {
-				wc_get_container()->get( OrdersTableDataStore::class )->invalidate_cache_for_objects( $order_post_ids );
-			}
 			return;
 		}
 
 		if ( $using_transactions ) {
 			$this->commit_transaction();
 		}
-		wc_get_container()->get( OrdersTableDataStore::class )->invalidate_cache_for_objects( $order_post_ids );
+		$this->maybe_clear_order_datastore_cache_for_ids( $order_post_ids );
 	}
 
 	/**
@@ -149,6 +146,24 @@ class PostsToOrdersMigrationController {
 
 		if ( $using_transactions ) {
 			$this->rollback_transaction();
+		} else {
+			$this->maybe_clear_order_datastore_cache_for_ids( $order_post_ids );
+		}
+	}
+
+	/**
+	 * Clear the cache of order data for modified orders during migration if cache is enabled.
+	 *
+	 * @param array $order_post_ids List of order IDs of the orders to clear from cache.
+	 *
+	 * @return void
+	 */
+	private function maybe_clear_order_datastore_cache_for_ids( array $order_post_ids ) {
+		if ( OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
+			$orders_table_datastore = wc_get_container()->get( OrdersTableDataStore::class );
+			if ( is_callable( $orders_table_datastore, 'clear_caches' ) ) {
+				$orders_table_datastore->clear_cached_data( $order_post_ids );
+			}
 		}
 	}
 

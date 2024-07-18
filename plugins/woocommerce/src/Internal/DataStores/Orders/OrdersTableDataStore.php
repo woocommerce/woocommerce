@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Exception;
 use WC_Abstract_Order;
 use WC_Data;
@@ -539,24 +540,26 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	/**
 	 * Delete cached order data for the given object_ids.
 	 *
-	 * @internal This method should only be used by internally and in cases where the CRUD operations of this datastore
-	 *           are bypassed for performance purposes. This interface is not guaranteed.
-	 *
-	 * @param array $object_ids The IDs of the orders to remove cache.
+	 * @param array $order_ids The IDs of the orders to remove cache.
 	 *
 	 * @return bool[] Array of return values, grouped by the object_id. Each value is either true on success, or false
 	 *                if the contents were not deleted.
+	 *@internal This method should only be used by internally and in cases where the CRUD operations of this datastore
+	 *           are bypassed for performance purposes. This interface is not guaranteed.
+	 *
 	 */
-	public function invalidate_cache_for_objects( array $object_ids ): array {
+	public function clear_cached_data( array $order_ids ): array {
 		$cache_engine  = wc_get_container()->get( WPCacheEngine::class );
 		$return_values = array();
-		foreach ( $object_ids as $object_id ) {
-			$return_values[ $object_id ] = $cache_engine->delete_cached_object( $object_id, $this->get_cache_group() );
+		foreach ( $order_ids as $order_id ) {
+			$return_values[ $order_id ] = $cache_engine->delete_cached_object( $order_id, $this->get_cache_group() );
 		}
-		$successfully_deleted_cache_object_ids = array_keys( array_filter( $return_values ) );
-		$cache_deletion_results                = $this->data_store_meta->invalidate_cache_for_objects( $successfully_deleted_cache_object_ids );
-		foreach ( $cache_deletion_results as $object_id => $meta_cache_was_deleted ) {
-			$return_values[ $object_id ] = $return_values[ $object_id ] && $meta_cache_was_deleted;
+		if ( is_callable( $this->data_store_meta, 'clear_cached_data' ) ) {
+			$successfully_deleted_cache_order_ids = array_keys( array_filter( $return_values ) );
+			$cache_deletion_results                = $this->data_store_meta->clear_cached_data( $successfully_deleted_cache_order_ids );
+			foreach ( $cache_deletion_results as $order_id => $meta_cache_was_deleted ) {
+				$return_values[ $order_id ] = $return_values[ $order_id ] && $meta_cache_was_deleted;
+			}
 		}
 		return $return_values;
 	}
@@ -569,10 +572,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @return bool Whether the cache as fully invalidated.
 	 */
-	public function invalidate_all_cache(): bool {
+	public function clear_all_cached_data(): bool {
 		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
 		$orders_invalidated = $cache_engine->delete_cache_group( $this->get_cache_group() );
-		$meta_invalidated   = $this->data_store_meta->invalidate_all_cache();
+		$meta_invalidated   = $this->data_store_meta->clear_all_cached_data();
 
 		return $orders_invalidated && $meta_invalidated;
 	}
@@ -1197,17 +1200,19 @@ WHERE
 
 		$order_types = array();
 
-		$cache_engine = wc_get_container()->get( WPCacheEngine::class );
-		$order_data   = $cache_engine->get_cached_objects( $order_ids, $this->get_cache_group() );
-		foreach ( $order_data as $order_id => $order_datum ) {
-			if ( ! empty( $order_datum->type ) ) {
-				$order_types[ $order_id ] = $order_datum->type;
+		if ( OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
+			$cache_engine = wc_get_container()->get( WPCacheEngine::class );
+			$orders_data   = $cache_engine->get_cached_objects( $order_ids, $this->get_cache_group() );
+			foreach ( $orders_data as $order_id => $order_data ) {
+				if ( ! empty( $order_data->type ) ) {
+					$order_types[ $order_id ] = $order_data->type;
+				}
 			}
-		}
 
-		$order_ids = array_diff( $order_ids, array_keys( $order_types ) );
-		if ( empty( $order_ids ) ) {
-			return $order_types;
+			$order_ids = array_diff( $order_ids, array_keys( $order_types ) );
+			if ( empty( $order_ids ) ) {
+				return $order_types;
+			}
 		}
 
 		$orders_table          = self::get_orders_table_name();
@@ -1705,13 +1710,18 @@ WHERE
 			return array();
 		}
 
+		$using_datastore_cache = OrderUtil::custom_orders_table_datastore_cache_enabled();
 		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
-		$order_data         = $cache_engine->get_cached_objects( $ids, $this->get_cache_group() );
-		$uncached_order_ids = array();
-		foreach ( $order_data as $order_id => $cached_value ) {
-			if ( ! $cached_value ) {
-				$uncached_order_ids[] = $order_id;
+		if ( $using_datastore_cache ) {
+			$order_data         = $cache_engine->get_cached_objects( $ids, $this->get_cache_group() );
+			$uncached_order_ids = array();
+			foreach ( $order_data as $order_id => $cached_value ) {
+				if ( ! $cached_value ) {
+					$uncached_order_ids[] = $order_id;
+				}
 			}
+		} else {
+			$uncached_order_ids = $ids;
 		}
 
 		if ( count( $uncached_order_ids ) > 0 ) {
@@ -1758,7 +1768,7 @@ WHERE
 				$orders_to_add_to_cache[ $id ] = $order_data[ $id ];
 			}
 
-			if ( count( $orders_to_add_to_cache ) > 0 ) {
+			if ( count( $orders_to_add_to_cache ) > 0 && $using_datastore_cache ) {
 				$cache_engine->cache_objects( $orders_to_add_to_cache, 0, $this->get_cache_group() );
 			}
 		}
@@ -1966,7 +1976,7 @@ FROM $order_meta_table
 		$default_taxonomies = $this->init_default_taxonomies( $order, array() );
 		$this->set_custom_taxonomies( $order, $default_taxonomies );
 
-		$this->invalidate_cache_for_objects( array( $order->get_id() ) );
+		$this->clear_cached_data( array( $order->get_id() ) );
 	}
 
 	/**
@@ -2412,7 +2422,7 @@ FROM $order_meta_table
 				array( '%d' )
 			);
 
-			$this->invalidate_cache_for_objects( $child_order_ids );
+			$this->clear_cached_data( $child_order_ids );
 		} else {
 			foreach ( $child_order_ids as $child_order_id ) {
 				$child_order = wc_get_order( $child_order_id );
@@ -2470,7 +2480,7 @@ FROM $order_meta_table
 			wp_trash_post( $order->get_id() );
 		}
 
-		$this->invalidate_cache_for_objects( array( $order->get_id() ) );
+		$this->clear_cached_data( array( $order->get_id() ) );
 	}
 
 	/**
@@ -2585,7 +2595,7 @@ FROM $order_meta_table
 			$order_cache->remove( $order_id );
 		}
 
-		$this->invalidate_cache_for_objects( array( $order_id ) );
+		$this->clear_cached_data( array( $order_id ) );
 	}
 
 	/**
@@ -3180,7 +3190,7 @@ CREATE TABLE $meta_table (
 		} else {
 			$order_cache = wc_get_container()->get( OrderCache::class );
 			$order_cache->remove( $order->get_id() );
-			$this->invalidate_cache_for_objects( array( $order->get_id() ) );
+			$this->clear_cached_data( array( $order->get_id() ) );
 		}
 
 		return false;
