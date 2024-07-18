@@ -81,34 +81,36 @@ export const FontPairing = () => {
 				: FONT_PAIRINGS_WHEN_AI_IS_OFFLINE;
 		}
 
-		if ( ! trackingAllowed || ! isFontLibraryAvailable ) {
-			return FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING.map(
-				( pair ) => {
-					const fontFamilies = pair.settings.typography.fontFamilies;
+		const defaultFonts = FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING.map(
+			( pair ) => {
+				const fontFamilies = pair.settings.typography.fontFamilies;
 
-					const fonts = baseFontFamilies.theme.filter(
-						( baseFontFamily ) =>
-							fontFamilies.theme.some(
-								( themeFont ) =>
-									themeFont.fontFamily === baseFontFamily.name
-							)
-					);
+				const fonts = baseFontFamilies.theme.filter(
+					( baseFontFamily ) =>
+						fontFamilies.theme.some(
+							( themeFont ) =>
+								themeFont.fontFamily === baseFontFamily.name
+						)
+				);
 
-					return {
-						...pair,
-						settings: {
-							typography: {
-								fontFamilies: {
-									theme: fonts,
-								},
+				return {
+					...pair,
+					settings: {
+						typography: {
+							fontFamilies: {
+								theme: fonts,
 							},
 						},
-					};
-				}
-			);
+					},
+				};
+			}
+		);
+
+		if ( ! trackingAllowed || ! isFontLibraryAvailable ) {
+			return defaultFonts;
 		}
 
-		return FONT_PAIRINGS_WHEN_AI_IS_OFFLINE.map( ( pair ) => {
+		const customFonts = FONT_PAIRINGS_WHEN_AI_IS_OFFLINE.map( ( pair ) => {
 			const fontFamilies = pair.settings.typography.fontFamilies;
 			const fonts = custom.filter( ( customFont ) =>
 				fontFamilies.theme.some(
@@ -126,7 +128,9 @@ export const FontPairing = () => {
 					},
 				},
 			};
-		}, [] );
+		} );
+
+		return [ ...defaultFonts, ...customFonts ];
 	}, [
 		aiOnline,
 		aiSuggestions?.lookAndFeel,
