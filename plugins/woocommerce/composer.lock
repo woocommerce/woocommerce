@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6168e7a5d5f44ed218761127fd844abc",
+    "content-hash": "37a17bfeee7e4517f8169fc4c0754d86",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -4620,7 +4620,7 @@
         },
         {
             "name": "woocommerce/monorepo-plugin",
-            "version": "dev-update-action-sch-3.8.1",
+            "version": "dev-trunk",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",
