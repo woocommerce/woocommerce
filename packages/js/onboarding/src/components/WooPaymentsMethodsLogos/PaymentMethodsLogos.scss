@@ -1,0 +1,40 @@
+.woocommerce-woopayments-payment-methods-logos {
+	display: flex;
+	align-items: center;
+	padding: $gap-small 0;
+
+	svg {
+		width: 38px;
+ 		height: 24px;
+		margin-right: 8px;
+		border: 1px solid $gray-300;
+		border-radius: 3px;
+	}
+
+	&-count {
+		width: 38px;
+		height: 24px;
+		background-color: rgba($gray-700, 0.10);
+		color: $gray-900;
+		text-align: center;
+		line-height: 24px;
+		border-radius: 3px;
+		font-size: 11px;
+		font-weight: 600;
+	}
+}
+
+.wc_payment_gateways_wrapper [data-gateway_id="pre_install_woocommerce_payments_promotion"] {
+	.woocommerce-woopayments-payment-methods-logos {
+		padding: 0;
+	}
+
+	@media only screen and (max-width: 768px) {
+		.wc-payment-gateway-method__name {
+			display: block;
+		}
+		.pre-install-payment-gateway__subtitle {
+			margin-left: 0;
+		}
+	}
+}
