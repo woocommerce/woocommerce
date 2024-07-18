@@ -44,14 +44,16 @@ class WC_Shipping_Rate {
 	/**
 	 * Constructor.
 	 *
-	 * @param string  $id          Shipping rate ID.
-	 * @param string  $label       Shipping rate label.
-	 * @param integer $cost        Cost.
-	 * @param array   $taxes       Taxes applied to shipping rate.
-	 * @param string  $method_id   Shipping method ID.
-	 * @param int     $instance_id Shipping instance ID.
+	 * @param string  $id            Shipping rate ID.
+	 * @param string  $label         Shipping rate label.
+	 * @param integer $cost          Cost.
+	 * @param array   $taxes         Taxes applied to shipping rate.
+	 * @param string  $method_id     Shipping method ID.
+	 * @param int     $instance_id   Shipping instance ID.
+	 * @param string  $description   Shipping rate description.
+	 * @param string  $delivery_time Shipping rate delivery time.
 	 */
-	public function __construct( $id = '', $label = '', $cost = 0, $taxes = array(), $method_id = '', $instance_id = 0, $description = '', $delivery_time = '') {
+	public function __construct( $id = '', $label = '', $cost = 0, $taxes = array(), $method_id = '', $instance_id = 0, $description = '', $delivery_time = '' ) {
 		$this->set_id( $id );
 		$this->set_label( $label );
 		$this->set_cost( $cost );
