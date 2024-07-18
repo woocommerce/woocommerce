@@ -20,7 +20,7 @@ if ( $argc < 2 ) {
 	exit( 1 );
 }
 
-$use_copy = true;
+$use_copy = false;
 
 $path = $argv[1];
 
@@ -112,6 +112,7 @@ function processPhpContents( $contents, $filename ) {
 		'input var ok, sanitization ok' => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 		'XSS ok'                        => 'WordPress.Security.EscapeOutput.OutputNotEscaped',
 		'input var ok'                  => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
+		'input var okay'                  => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 		'Input var ok'                  => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 		'csrf ok'                       => '', // Will be dynamically filled
 		'CSRF ok'                       => '', // Will be dynamically filled
@@ -129,6 +130,7 @@ function processPhpContents( $contents, $filename ) {
 	foreach ( $lines as $line ) {
 		$originalLine = $line; // Capture the original line for comparison later
 		if ( strpos( $line, 'WPCS:' ) !== false ) {
+
 			$GLOBALS['wpcs_stats']['wpcs_comments_found'] ++;
 			$tracked_changes     = false;
 			$not_tracked_changes = false;
@@ -176,15 +178,23 @@ function processPhpContents( $contents, $filename ) {
 }
 
 function processReplacement( &$line, $old, &$new ) {
+	$right_side_of_line = substr( $line, strpos( $line, 'WPCS:' ) + 5 );
+	/* Right side of line should stop if it encounters "?>" */
+	if ( strpos( $right_side_of_line, '?>' ) !== false ) {
+		$right_side_of_line = substr( $right_side_of_line, 0, strpos( $right_side_of_line, '?>' ) );
+	}
+
 	$old_pos = strpos( $line, $old );
 	if ( $old_pos !== false ) {
-		if ( substr( $line, $old_pos + strlen( $old ), 1 ) === ',' || substr( $line, $old_pos + strlen( $old ), 1 ) === '.' ) {
-			$old .= substr( $line, $old_pos + strlen( $old ), 1 );
-		}
 		if ( $old === 'csrf ok' || $old === 'CSRF ok' ) {
 			$new = strpos( $line, '$_POST' ) !== false ? 'WordPress.Security.NonceVerification.Missing' : 'WordPress.Security.NonceVerification.Recommended';
 		}
-		$line = str_replace( $old, $new, $line );
+		if ( substr( $line, $old_pos + strlen( $old ), 1 ) === ',' || substr( $line, $old_pos + strlen( $old ), 1 ) === '.' ) {
+			$old .= substr( $line, $old_pos + strlen( $old ), 1 );
+		}
+		$right_side_of_line_original = $right_side_of_line;
+		$right_side_of_line = str_replace( $old, $new, $right_side_of_line );
+		$line = str_replace( $right_side_of_line_original, $right_side_of_line, $line );
 
 		return true;
 	}
