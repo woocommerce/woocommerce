@@ -278,7 +278,7 @@ class WC_Helper_Updater {
 			$renew_link = add_query_arg(
 				array(
 					'utm_source'   => 'pu',
-					'utm_campaign' => 'pu_plug_screen_renew',
+					'utm_campaign' => 'pu_plugin_screen_renew',
 				),
 				PluginsHelper::WOO_SUBSCRIPTION_PAGE_URL
 			);
