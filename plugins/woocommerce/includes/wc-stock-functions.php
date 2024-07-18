@@ -287,8 +287,8 @@ function wc_trigger_stock_change_notifications( $order, $changes ) {
  * This functionality was moved out of `wc_trigger_stock_change_notifications` in order to decouple it from orders,
  * since stock quantity can also be updated in other ways.
  *
- * @param WC_Product $product
- * @param int|float  $stock_quantity
+ * @param WC_Product $product        The product whose stock level has changed.
+ * @param int|float  $stock_quantity The new quantity of stock.
  *
  * @return void
  */
