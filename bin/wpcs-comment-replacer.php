@@ -94,8 +94,9 @@ function processPhpContents( $contents, $filename ) {
 		'input var ok, sanitization ok' => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 		'XSS ok'                        => 'WordPress.Security.EscapeOutput.OutputNotEscaped',
 		'input var ok'                  => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
-		'csrf ok'                       => '',
-		'CSRF ok'                       => '',
+		'Input var ok'                  => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
+		'csrf ok'                       => '', // Will be dynamically filled
+		'CSRF ok'                       => '', // Will be dynamically filled
 		'unprepared SQL ok'             => 'WordPress.DB.PreparedSQL.NotPrepared',
 		'sanitization ok'               => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 	];
@@ -107,34 +108,40 @@ function processPhpContents( $contents, $filename ) {
 		'override ok'   => '',
 	];
 
-	$replacements = [
-		'tracked_by_qit'     => $tracked_by_qit,
-		'not_tracked_by_qit' => $not_tracked_by_qit,
-	];
-
 	foreach ( $lines as $line ) {
 		$originalLine = $line;
 		if ( strpos( $line, 'WPCS:' ) !== false ) {
 			$GLOBALS['wpcs_stats']['wpcs_comments_found'] ++;
-			$changed = false;
-			foreach ( $replacements as $type => $patterns ) {
-				foreach ( $patterns as $old => $new ) {
-					if ( $type === 'tracked_by_qit' || strpos( $line, $old ) !== false ) {
-						if ( $type === 'not_tracked_by_qit' && strpos( $line, $old ) !== false ) {
-							continue; // Skip replacement if line contains both tracked and not tracked patterns
-						}
+			$tracked_changes     = false;
+			$not_tracked_changes = false;
 
-						if ( $old === 'csrf ok' || $old === 'CSRF ok' ) {
-							$new = strpos( $line, '$_POST' ) !== false ? 'WordPress.Security.NonceVerification.Missing' : 'WordPress.Security.NonceVerification.Recommended';
-						}
-
-						$line    = str_replace( $old, $new, $line );
-						$changed = true;
-					}
+			// Process tracked by QIT patterns
+			foreach ( $tracked_by_qit as $old => $new ) {
+				if ( processReplacement( $line, $old, $new ) ) {
+					$tracked_changes = true;
 				}
 			}
-			if ( ! $changed ) {
-				throw new Exception( "Unknown pattern detected in $filename on line: $line" );
+
+			// Process not tracked by QIT patterns only if there's a tracked change
+			if ( $tracked_changes ) {
+				foreach ( $not_tracked_by_qit as $old => $new ) {
+					processReplacement( $line, $old, $new ); // We don't need to check return as changes here are dependent on tracked changes
+				}
+			}
+
+			// Check for exception condition
+			if ( ! $tracked_changes && strpos( $line, 'WPCS:' ) !== false ) {
+				// Check if there's any unknown rule that isn't in any of the defined categories
+				$unrecognized = true;
+				foreach ( array_merge( $tracked_by_qit, $not_tracked_by_qit ) as $old => $new ) {
+					if ( strpos( $line, $old ) !== false ) {
+						$unrecognized = false;
+						break;
+					}
+				}
+				if ( $unrecognized ) {
+					throw new Exception( "No applicable changes could be made, and an unrecognized rule was found: $filename on line: $line" );
+				}
 			} else {
 				$line = str_replace( 'WPCS:', 'phpcs:ignore', $line );
 			}
@@ -149,6 +156,24 @@ function processPhpContents( $contents, $filename ) {
 
 	return implode( "\n", $newLines );
 }
+
+function processReplacement( &$line, $old, &$new ) {
+	$old_pos = strpos( $line, $old );
+	if ( $old_pos !== false ) {
+		if ( substr( $line, $old_pos + strlen( $old ), 1 ) === ',' || substr( $line, $old_pos + strlen( $old ), 1 ) === '.' ) {
+			$old .= substr( $line, $old_pos + strlen( $old ), 1 );
+		}
+		if ( $old === 'csrf ok' || $old === 'CSRF ok' ) {
+			$new = strpos( $line, '$_POST' ) !== false ? 'WordPress.Security.NonceVerification.Missing' : 'WordPress.Security.NonceVerification.Recommended';
+		}
+		$line = str_replace( $old, $new, $line );
+
+		return true;
+	}
+
+	return false;
+}
+
 
 function printChanges( $original, $updated ) {
 	$originalLines = explode( "\n", $original );
