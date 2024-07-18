@@ -1,9 +1,9 @@
 /**
  * Internal dependencies
  */
-import { ObjectSchema, ValidationError } from '../../types';
+import { ObjectSchema, ValidationError } from '../types';
 
-export function validateRequired( data: object, schema: ObjectSchema, path: string ): ValidationError[] {
+export function validateRequired( data: object, schema: ObjectSchema, path: string ) {
     const errors = [] as ValidationError[];
 
     if ( schema.required ) {
@@ -20,5 +20,7 @@ export function validateRequired( data: object, schema: ObjectSchema, path: stri
         }
     }
 
-    return errors;
+    if ( errors.length ) {
+        throw errors;
+    }
 };

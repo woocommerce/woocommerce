@@ -3,8 +3,8 @@
  */
 import { ObjectSchema, Data, ValidationError } from '../../types';
 import { parseString } from '../string';
-import { validateType } from '../validators/validate-type'
-import { validateRequired } from '../validators/validate-required'
+import { validateType } from '../../validators/validate-type'
+import { validateRequired } from '../../validators/validate-required'
 
 export function parseObject( schema: ObjectSchema, data: Data, path: string ) {
     validateType( data, 'object', path );
@@ -28,7 +28,11 @@ export function parseObject( schema: ObjectSchema, data: Data, path: string ) {
         }
     }
 
-    errors = [ ...errors, ...validateRequired( data, schema, path ) ];
+    try {
+        validateRequired( data, schema, path )
+    } catch ( e ) {
+        errors = [ ...errors, ...e as ValidationError[] ];
+    }
 
     if ( errors.length ) {
         throw errors;

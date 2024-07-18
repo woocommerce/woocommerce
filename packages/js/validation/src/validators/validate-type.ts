@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { ValidationError } from '../../types';
+import { ValidationError } from '../types';
 
 export function validateType( data: unknown, type: string, path: string ) {
     if ( typeof data !== type ) {
