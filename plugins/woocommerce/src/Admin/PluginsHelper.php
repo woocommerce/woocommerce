@@ -829,37 +829,7 @@ class PluginsHelper {
 		// When payment method is missing on WooCommerce.com.
 		$helper_notices = WC_Helper::get_notices();
 		if ( ! empty( $helper_notices['missing_payment_method_notice'] ) ) {
-			$add_payment_method_link = add_query_arg(
-				array(
-					'utm_source'   => 'pu',
-					'utm_medium'   => 'notice',
-					'utm_campaign' => 'pu_notice_add_payment_method',
-				),
-				self::WOO_ADD_PAYMENT_METHOD_URL
-			);
-			$description = $allowed_link
-				? sprintf(
-					/* translators: %s: WooCommerce.com URL to add payment method */
-					_n(
-						'Your WooCommerce extension subscription is missing a payment method for renewal. <a href="%s">Add a payment method</a> to ensure you continue receiving updates and streamlined support.',
-						'Your WooCommerce extension subscriptions are missing a payment method for renewal. <a href="%s">Add a payment method</a> to ensure you continue receiving updates and streamlined support.',
-						$total_expiring_subscriptions,
-						'woocommerce'
-					),
-					$add_payment_method_link
-				)
-				: _n(
-					'Your WooCommerce extension subscription is missing a payment method for renewal. Add a payment method to ensure you continue receiving updates and streamlined support.',
-					'Your WooCommerce extension subscriptions are missing a payment method for renewal. Add a payment method to ensure you continue receiving updates and streamlined support.',
-					$total_expiring_subscriptions,
-					'woocommerce'
-				);
-
-			return array(
-				'description' => $description,
-				'button_text' => __( 'Add payment method', 'woocommerce' ),
-				'button_link' => $add_payment_method_link,
-			);
+			return self::get_missing_payment_method_notice( $allowed_link, $total_expiring_subscriptions );
 		}
 
 		// Payment method is available but there are expiring subscriptions.
@@ -985,5 +955,47 @@ class PluginsHelper {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get the notice data for missing payment method.
+	 *
+	 * @param bool $allowed_link whether should show link on the notice or not.
+	 * @param int  $total_expiring_subscriptions total expiring subscriptions.
+	 *
+	 * @return array the notices data.
+	 */
+	public static function get_missing_payment_method_notice( $allowed_link = true, $total_expiring_subscriptions = 1 ) {
+		$add_payment_method_link = add_query_arg(
+			array(
+				'utm_source'   => 'pu',
+				'utm_medium'   => 'notice',
+				'utm_campaign' => 'pu_notice_add_payment_method',
+			),
+			self::WOO_ADD_PAYMENT_METHOD_URL
+		);
+		$description = $allowed_link
+			? sprintf(
+			/* translators: %s: WooCommerce.com URL to add payment method */
+				_n(
+					'Your WooCommerce extension subscription is missing a payment method for renewal. <a href="%s">Add a payment method</a> to ensure you continue receiving updates and streamlined support.',
+					'Your WooCommerce extension subscriptions are missing a payment method for renewal. <a href="%s">Add a payment method</a> to ensure you continue receiving updates and streamlined support.',
+					$total_expiring_subscriptions,
+					'woocommerce'
+				),
+				$add_payment_method_link
+			)
+			: _n(
+				'Your WooCommerce extension subscription is missing a payment method for renewal. Add a payment method to ensure you continue receiving updates and streamlined support.',
+				'Your WooCommerce extension subscriptions are missing a payment method for renewal. Add a payment method to ensure you continue receiving updates and streamlined support.',
+				$total_expiring_subscriptions,
+				'woocommerce'
+			);
+
+		return array(
+			'description' => $description,
+			'button_text' => __( 'Add payment method', 'woocommerce' ),
+			'button_link' => $add_payment_method_link,
+		);
 	}
 }
