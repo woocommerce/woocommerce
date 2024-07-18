@@ -28,6 +28,7 @@ use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
+use Automattic\WooCommerce\Logging\RemoteLogger;
 
 /**
  * Main WooCommerce Class.
@@ -401,6 +402,9 @@ final class WooCommerce {
 				$message,
 				$context
 			);
+
+			$remote_logger = wc_get_container()->get( RemoteLogger::class );
+			$remote_logger->log( WC_Log_Levels::CRITICAL, $message, $context );
 
 			/**
 			 * Action triggered when there are errors during shutdown.
