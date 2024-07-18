@@ -101,18 +101,23 @@ function validateAndProcessFile( $filename ) {
 	}
 }
 
+register_shutdown_function( static function () {
+	print_r( $GLOBALS['okay'] );
+} );
+
 function processPhpContents( $contents, $filename ) {
 	// Fix a typo.
 	$contents = str_replace( 'WordPress.XSS.EscapeOutput.OutputNotEscaped', 'WordPress.Security.EscapeOutput.OutputNotEscaped', $contents );
 
-	$lines    = explode( "\n", $contents );
-	$newLines = [];
+	$lines           = explode( "\n", $contents );
+	$newLines        = [];
+	$GLOBALS['okay'] = [];
 
 	$tracked_by_qit = [
 		'input var ok, sanitization ok' => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 		'XSS ok'                        => 'WordPress.Security.EscapeOutput.OutputNotEscaped',
-		'input var ok'                  => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 		'input var okay'                => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
+		'input var ok'                  => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 		'Input var ok'                  => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 		'csrf ok'                       => '', // Will be dynamically filled
 		'CSRF ok'                       => '', // Will be dynamically filled
@@ -213,6 +218,10 @@ function processReplacement( &$line, $old, &$new ) {
 	/* Right side of line should stop if it encounters "?>" */
 	if ( strpos( $right_side_of_line, '?>' ) !== false ) {
 		$right_side_of_line = substr( $right_side_of_line, 0, strpos( $right_side_of_line, '?>' ) );
+	}
+
+	if ( strpos( $right_side_of_line, 'okay' ) !== false ) {
+		$GLOBALS['okay'][] = $right_side_of_line;
 	}
 
 	$old_pos = strpos( $line, $old );
