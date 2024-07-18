@@ -378,9 +378,14 @@ jobs:
               echo "BUILD_REPORT_FLAKY_TESTS_UTILITY=no" >> $GITHUB_ENV
           fi
 
-      - name: 'Setup Node and build Gutenberg packages'
+      - name: 'Setup Node'
         if: ${{ !!env.FLAKY_REPORTS && env.BUILD_REPORT_FLAKY_TESTS_UTILITY == 'yes' }}
-        uses: ./.github/setup-node && npm run build:packages
+        uses: ./.github/setup-node
+
+      - name: 'Build Gutenberg packages'
+        if: ${{ !!env.FLAKY_REPORTS && env.BUILD_REPORT_FLAKY_TESTS_UTILITY == 'yes' }}
+        shell: 'bash'
+        run: npm run build:packages
 
       - name: 'Report flaky tests'
         if: ${{ !!env.FLAKY_REPORTS }}
