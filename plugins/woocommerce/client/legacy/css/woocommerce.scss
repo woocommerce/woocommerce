@@ -58,6 +58,33 @@ p.demo_store,
 	clear: both;
 }
 
+.asterisk {
+	display: inline-block;
+	height: 10px;
+	margin-left: 0.125rem;
+	position: relative;
+	width: 10px;
+
+	.asterisk-line {
+		background: red;
+		display: block;
+		height: 2px;
+		left: 0;
+		position: absolute;
+		top: 0;
+		transform-origin: center;
+		width: 11px;
+
+		&:nth-child(2) {
+			transform: rotate(60deg);
+		}
+
+		&:nth-child(3) {
+			transform: rotate(120deg);
+		}
+	}
+}
+
 /**
  * Main WooCommerce styles
  */

@@ -2846,22 +2846,29 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			'checked_value'     => '1',
 		);
 
-		$args = wp_parse_args( $args, $defaults );
-		$args = apply_filters( 'woocommerce_form_field_args', $args, $key, $value );
+		$args       = wp_parse_args( $args, $defaults );
+		$args       = apply_filters( 'woocommerce_form_field_args', $args, $key, $value );
+		$isRequired = (bool) $args['required'];
+		$required = $isRequired === true ? 'required' : '';
+		$asterisk = '';
+		$requireSpan = '';
+
+		if ( $isRequired ) {
+			$asterisk = '<span class="asterisk"><span class="asterisk-line"></span><span class="asterisk-line"></span><span class="asterisk-line"></span></span>';
+			$requireSpan = '<span class="screen-reader-text">' . esc_html__( 'required', 'woocommerce' ) . '</span>' . $asterisk;
+		}
 
 		if ( is_string( $args['class'] ) ) {
 			$args['class'] = array( $args['class'] );
 		}
 
-		if ( $args['required'] ) {
-			$args['class'][] = 'validate-required';
-			$required        = '&nbsp;<abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '">*</abbr>';
-		} else {
-			$required = '&nbsp;<span class="optional">(' . esc_html__( 'optional', 'woocommerce' ) . ')</span>';
-		}
-
 		if ( is_string( $args['label_class'] ) ) {
 			$args['label_class'] = array( $args['label_class'] );
+		}
+
+		if ( $isRequired ) {
+			$args['class'][] = 'validate-required';
+			$args['label_class'][] = 'required_field';
 		}
 
 		if ( is_null( $value ) ) {
@@ -2922,7 +2929,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				} else {
 					$data_label = ! empty( $args['label'] ) ? 'data-label="' . esc_attr( $args['label'] ) . '"' : '';
 
-					$field = '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="country_to_state country_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ? $args['placeholder'] : esc_attr__( 'Select a country / region&hellip;', 'woocommerce' ) ) . '" ' . $data_label . '><option value="">' . esc_html__( 'Select a country / region&hellip;', 'woocommerce' ) . '</option>';
+					$field = '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="country_to_state country_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ? $args['placeholder'] : esc_attr__( 'Select a country / region&hellip;', 'woocommerce' ) ) . '" ' . $data_label . $required . '><option value="">' . esc_html__( 'Select a country / region&hellip;', 'woocommerce' ) . '</option>';
 
 					foreach ( $countries as $ckey => $cvalue ) {
 						$field .= '<option value="' . esc_attr( $ckey ) . '" ' . selected( $value, $ckey, false ) . '>' . esc_html( $cvalue ) . '</option>';
@@ -2949,14 +2956,14 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				} elseif ( ! is_null( $for_country ) && is_array( $states ) ) {
 					$data_label = ! empty( $args['label'] ) ? 'data-label="' . esc_attr( $args['label'] ) . '"' : '';
 
-					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ? $args['placeholder'] : esc_html__( 'Select an option&hellip;', 'woocommerce' ) ) . '"  data-input-classes="' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . $data_label . '>
+					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ? $args['placeholder'] : esc_html__( 'Select an option&hellip;', 'woocommerce' ) ) . '"  data-input-classes="' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . $data_label . $required . '>
 						<option value="">' . esc_html__( 'Select an option&hellip;', 'woocommerce' ) . '</option>';
 
 					foreach ( $states as $ckey => $cvalue ) {
 						$field .= '<option value="' . esc_attr( $ckey ) . '" ' . selected( $value, $ckey, false ) . '>' . esc_html( $cvalue ) . '</option>';
 					}
 
-					$field .= '</select>';
+					$field .= $requireSpan . '</select>';
 
 				} else {
 
@@ -2987,7 +2994,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 					wp_kses_post( $args['label'] )
 				);
 
-				$field .= $required . '</label>';
+				$field .= '</label>';
 
 				break;
 			case 'text':
@@ -3002,7 +3009,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			case 'email':
 			case 'url':
 			case 'tel':
-				$field .= '<input type="' . esc_attr( $args['type'] ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '"  value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
+				$field .= '<input type="' . esc_attr( $args['type'] ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '"  value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes )  . esc_attr( $required ) .  ' />';
 
 				break;
 			case 'hidden':
@@ -3025,7 +3032,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 						$options .= '<option value="' . esc_attr( $option_key ) . '" ' . selected( $value, $option_key, false ) . '>' . esc_html( $option_text ) . '</option>';
 					}
 
-					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ) . '">
+					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ) . $required . '">
 							' . $options . '
 						</select>';
 				}
@@ -3048,7 +3055,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			$field_html = '';
 
 			if ( $args['label'] && 'checkbox' !== $args['type'] ) {
-				$field_html .= '<label for="' . esc_attr( $label_id ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) . '">' . wp_kses_post( $args['label'] ) . $required . '</label>';
+				$field_html .= '<label for="' . esc_attr( $label_id ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) . '">' . wp_kses_post( $args['label'] ) . $asterisk . '</label>';
 			}
 
 			$field_html .= '<span class="woocommerce-input-wrapper">' . $field;
@@ -3215,7 +3222,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 			$options    = $attributes[ $attribute ];
 		}
 
-		$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '"' . ( $required ? ' required' : '' ) . '>';
+		$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '"' . $required  . '>';
 		$html .= '<option value="">' . esc_html( $show_option_none_text ) . '</option>';
 
 		if ( ! empty( $options ) ) {
