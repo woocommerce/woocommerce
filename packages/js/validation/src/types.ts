@@ -28,3 +28,7 @@ export type ValidationError = {
     message: string;
     path: string;
 }
+
+export interface KeywordInterface< DataType, SchemaType > {
+    ( data: DataType, schema: SchemaType, path: string ): void;
+}

@@ -4,6 +4,7 @@
 import { maxLength } from '../../keywords/max-length';
 import { minLength } from '../../keywords/min-length';
 import { StringSchema, ValidationError } from '../../types';
+import { validateKeywords } from '../../utils/validate-keywords';
 import { validateType } from '../../validators/validate-type';
 
 export function parseString( schema: StringSchema, data: unknown, path: string ) {
@@ -11,23 +12,16 @@ export function parseString( schema: StringSchema, data: unknown, path: string )
 
     // @todo Add coercion from numbers.
     const parsed = data as string;
-    const errors = [] as ValidationError[];
-    const keywords = [
-        maxLength,
-        minLength,
-    ];
 
-    for ( const keyword of keywords ) {
-        try {
-            keyword( parsed, schema, path );
-        } catch (e) {
-            errors.push( e as ValidationError );
-        }
-    }
-
-    if ( errors.length ) {
-        throw errors;
-    }
+    validateKeywords< string, StringSchema >(
+        [
+            maxLength,
+            minLength,
+        ],
+        parsed,
+        schema,
+        path
+    );
 
     return parsed;
 }
