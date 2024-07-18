@@ -7,7 +7,7 @@
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce", "reset filter" ],
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"ancestor": [ "woocommerce/product-filter" ],
 	"supports": {
 		"interactivity": true,
