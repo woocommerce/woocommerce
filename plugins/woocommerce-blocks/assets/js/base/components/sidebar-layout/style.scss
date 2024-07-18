@@ -1,9 +1,12 @@
 .wc-block-components-sidebar-layout {
 	display: flex;
-	flex-direction: row-reverse;
 	flex-wrap: wrap;
 	margin: 0 auto $gap;
 	position: relative;
+
+	&:has(> :last-child.wp-block-woocommerce-checkout-fields-block) {
+		flex-direction: row-reverse;
+	}
 
 	.wc-block-must-login-prompt {
 		display: block;

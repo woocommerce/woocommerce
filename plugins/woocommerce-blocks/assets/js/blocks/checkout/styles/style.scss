@@ -40,10 +40,14 @@
 
 .wp-block-woocommerce-checkout.is-loading {
 	display: flex;
-	flex-direction: row-reverse;
 	flex-wrap: wrap;
 	margin: 0 auto $gap;
 	position: relative;
+
+	&:has(> :last-child.wp-block-woocommerce-checkout-fields-block) {
+		flex-direction: row-reverse;
+	}
+
 	.wp-block-woocommerce-checkout-totals-block {
 		width: 35%;
 		padding-left: math.percentage(math.div($gap-large, 1060px));
