@@ -42,6 +42,10 @@ class ProductFiltersTemplate extends AbstractTemplatePart {
 	 * @return string
 	 */
 	public function get_template_description() {
-		return __( 'Template used to display the Product Filters.', 'woocommerce' );
+		return __(
+			'This is the template part for the product filters
+displayed on different pages across your store.',
+			'woocommerce'
+		);
 	}
 }
