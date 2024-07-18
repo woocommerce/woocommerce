@@ -49,6 +49,11 @@
 		flex-shrink: 0;
 		height: 100%;
 		overflow: scroll;
+		@media only screen and (max-width: $break-medium) {
+			width: 100%;
+			position: absolute;
+			z-index: 100;
+		}
 	}
 
 	.block-editor-block-contextual-toolbar.is-fixed {
