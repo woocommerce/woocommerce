@@ -23,7 +23,7 @@ export function parseObject( schema: ObjectSchema, data: Data, path: string ) {
                 try {
                     parsed[ property ] = parseString( propertySchema, data[ property ], propertyPath );
                 } catch( e ) {
-                    errors.push( e as ValidationError ); 
+                    errors = [ ...errors,  ...e as ValidationError[] ]; 
                 }
         }
     }
