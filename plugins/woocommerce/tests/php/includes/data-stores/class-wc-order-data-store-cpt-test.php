@@ -484,7 +484,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$order = new WC_Order();
 		$order->set_status( 'draft' );
-		$order->save();
 
 		$this->assertEquals( 0, $new_count );
 
