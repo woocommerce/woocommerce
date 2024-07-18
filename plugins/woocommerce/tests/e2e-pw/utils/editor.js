@@ -63,6 +63,10 @@ const insertBlock = async ( page, blockName, wpVersion = null ) => {
 	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
 
+	// In WP 6.6 'Toggle block inserter' button closes the inserter as expected,
+	// but trying to immediately open it again will fail in Playwright, while manually it works.
+	// We have tests that insert multiple blocks and fail because of this.
+	// Using the new 'Close block inserter' button added in WP 6.6 works fine.
 	if ( wpVersion && wpVersion <= 6.5 ) {
 		await page
 			.getByRole( 'button', {
