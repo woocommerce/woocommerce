@@ -360,13 +360,27 @@ jobs:
           repository: WordPress/gutenberg
           ref: dbf201449e9736f672b61e422787d47659db327a
 
-      - name: 'Setup Node'
+      - name: 'Pick pre-built @wordpress/report-flaky-tests resources'
         if: ${{ !!env.FLAKY_REPORTS }}
-        uses: ./.github/setup-node
+        uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+        with:
+          path: './packages/report-flaky-tests/build/'
+          key: "${{ runner.os }}-report-flaky-tests-latest"
+          restore-keys: '${{ runner.os }}-report-flaky-tests-'
 
-      - name: 'Build Gutenberg packages'
+      - name: 'Check if to build @wordpress/report-flaky-tests'
         if: ${{ !!env.FLAKY_REPORTS }}
-        run: npm run build:packages
+        shell: 'bash'
+        run: |
+          if [[ -f ./packages/report-flaky-tests/build/index.js ]]; then
+              echo "BUILD_REPORT_FLAKY_TESTS_UTILITY=0" >> $GITHUB_ENV
+          else
+              echo "BUILD_REPORT_FLAKY_TESTS_UTILITY=1" >> $GITHUB_ENV
+          fi
+
+      - name: 'Setup Node and build Gutenberg packages'
+        if: ${{ !!env.FLAKY_REPORTS && env.BUILD_REPORT_FLAKY_TESTS_UTILITY }}
+        uses: ./.github/setup-node && npm run build:packages
 
       - name: 'Report flaky tests'
         if: ${{ !!env.FLAKY_REPORTS }}
