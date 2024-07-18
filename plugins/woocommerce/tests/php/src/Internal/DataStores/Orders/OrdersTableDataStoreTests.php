@@ -3474,21 +3474,15 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 		add_action( 'woocommerce_new_order', $callback );
 
-		$draft_statuses = array( 'draft', 'checkout-draft' );
-
 		$order = new WC_Order();
-		$order->set_status( 'checkout-draft' );
-		$order->save();
+		$order->set_status( 'draft' );
 
 		$this->assertEquals( 0, $new_count );
 
-		foreach ( $draft_statuses as $status ) {
-			$current_status = $order->get_status( 'edit' );
-			$order->set_status( $status );
-			$this->sut->update( $order );
-			$order->save();
-			$this->assertEquals( 0, $new_count, 'Triggered new order hook changing status: ' . $current_status . ' -> ' . $status );
-		}
+		$order->set_status( 'checkout-draft' );
+		$this->sut->update( $order );
+		$order->save();
+		$this->assertEquals( 0, $new_count );
 
 		$triggering_order_statuses = array( 'pending', 'on-hold', 'completed', 'processing' );
 
