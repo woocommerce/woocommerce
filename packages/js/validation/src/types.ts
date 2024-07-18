@@ -8,6 +8,7 @@ export type ObjectSchema = Property & {
     properties: {
         [key: string] : Property
     };
+    required?: string[];
 }
 
 export type StringSchema = Property & {

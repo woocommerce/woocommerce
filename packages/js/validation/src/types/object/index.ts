@@ -4,12 +4,13 @@
 import { ObjectSchema, Data, ValidationError } from '../../types';
 import { parseString } from '../string';
 import { validateType } from '../validators/validate-type'
+import { validateRequired } from '../validators/validate-required'
 
 export function parseObject( schema: ObjectSchema, data: Data, path: string ) {
     validateType( data, 'object', path );
 
     const parsed = {} as Data;
-    const errors = [] as ValidationError[];
+    let errors = [] as ValidationError[];
 
     console.log(data);
     const properties = Object.keys(  schema.properties ) as string[];
@@ -25,9 +26,9 @@ export function parseObject( schema: ObjectSchema, data: Data, path: string ) {
                     errors.push( e as ValidationError ); 
                 }
         }
-
-        // @todo check if in required array
     }
+
+    errors = [ ...errors, ...validateRequired( data, schema, path ) ];
 
     if ( errors.length ) {
         throw errors;
