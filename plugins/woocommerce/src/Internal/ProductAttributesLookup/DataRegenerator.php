@@ -63,9 +63,10 @@ class DataRegenerator {
 
 		$this->lookup_table_name = $wpdb->prefix . 'wc_product_attributes_lookup';
 
-		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_initiate_regeneration_entry_to_tools_array' ), 1, 999 );
-		self::add_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback', array( $this, 'run_regeneration_step_callback' ) );
-		self::add_action( 'woocommerce_installed', array( $this, 'run_woocommerce_installed_callback' ) );
+		// Hook targets.
+		self::mark_method_as_accessible( 'add_initiate_regeneration_entry_to_tools_array' );
+		self::mark_method_as_accessible( 'run_regeneration_step_callback' );
+		self::mark_method_as_accessible( 'run_woocommerce_installed_callback' );
 	}
 
 	/**
