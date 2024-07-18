@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import apiFetch from '@wordpress/api-fetch';
 import { WooHeaderItem, useAdminSidebarWidth } from '@woocommerce/admin-layout';
 import { useEntityId, useEntityRecord } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
@@ -38,6 +39,7 @@ import { Tabs } from '../tabs';
 import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
 import { useShowPrepublishChecks } from '../../hooks/use-show-prepublish-checks';
 import { HeaderProps, Image } from './types';
+import { validate } from '@woocommerce/validation';
 
 const PublishButton = lazy( () =>
 	import( './publish-button' ).then( ( module ) => ( {
@@ -85,6 +87,16 @@ export function Header( {
 	const { showPrepublishChecks } = useShowPrepublishChecks();
 
 	const sidebarWidth = useAdminSidebarWidth();
+
+	useEffect( () => {
+		apiFetch( {
+			path: '/wc/v3/products/',
+			method: 'OPTIONS',
+		} ).then( ( results ) => {
+			// @ts-ignore
+			validate( results.schema, product );
+		} );
+	}, [] );
 
 	useEffect( () => {
 		document
