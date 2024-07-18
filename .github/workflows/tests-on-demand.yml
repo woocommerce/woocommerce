@@ -13,5 +13,5 @@ jobs:
     name: 'Run tests'
     uses: ./.github/workflows/ci.yml
     with:
-      trigger: ${{ github.event.inputs.trigger }}
+      trigger: ${{ inputs.trigger }}
     secrets: inherit
