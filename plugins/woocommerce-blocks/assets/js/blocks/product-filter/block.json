@@ -9,7 +9,7 @@
 	"supports": {
 		"html": false,
 		"reusable": false,
-		"inserter": false
+		"inserter": true
 	},
 	"ancestor": [ "woocommerce/product-filters" ],
 	"usesContext": [ "query", "queryId" ],
