@@ -20,7 +20,7 @@ if ( $argc < 2 ) {
 	exit( 1 );
 }
 
-$use_copy = false;
+$use_copy = true;
 
 $path = $argv[1];
 
@@ -112,7 +112,7 @@ function processPhpContents( $contents, $filename ) {
 		'input var ok, sanitization ok' => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 		'XSS ok'                        => 'WordPress.Security.EscapeOutput.OutputNotEscaped',
 		'input var ok'                  => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
-		'input var okay'                  => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
+		'input var okay'                => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 		'Input var ok'                  => 'WordPress.Security.ValidatedSanitizedInput.InputNotSanitized',
 		'csrf ok'                       => '', // Will be dynamically filled
 		'CSRF ok'                       => '', // Will be dynamically filled
@@ -149,6 +149,19 @@ function processPhpContents( $contents, $filename ) {
 				}
 			}
 
+			/*
+			 * Create a search-replace regex that will find "phpcs:ignore WordPress.<followed by alphanumeric characters and dots, except space>", if it finds two of these, add a comma in between them like this:
+			 *
+			 * phpcs:ignore WordPress.Security.NonceVerification.Missing WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			 * Becomes
+			 * phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			 *
+			 * Whereas
+			 * phpcs:ignore WordPress.Security.NonceVerification.Missing
+			 * Remains as is, etc.
+			 */
+			$line = formatPhpcsIgnoreComment( $line );
+
 			// Check for exception condition
 			if ( ! $tracked_changes && strpos( $line, 'WPCS:' ) !== false ) {
 				// Check if there's any unknown rule that isn't in any of the defined categories
@@ -177,6 +190,23 @@ function processPhpContents( $contents, $filename ) {
 	return implode( "\n", $newLines );
 }
 
+function formatPhpcsIgnoreComment( $line ) {
+	if ( strpos( $line, 'phpcs:ignore' ) !== false ) {
+		// This regex matches the 'phpcs:ignore' followed by any number of WordPress rules
+		$pattern = '/(phpcs:ignore)((?:\s+WordPress\.[a-zA-Z0-9\.]+)+)/';
+
+		$line = preg_replace_callback( $pattern, function ( $matches ) {
+			// Split the rules by spaces and trim them
+			$rules = array_map( 'trim', explode( ' ', trim( $matches[2] ) ) );
+
+			// Join them back with a comma and a space
+			return $matches[1] . ' ' . implode( ', ', $rules );
+		}, $line );
+	}
+
+	return $line;
+}
+
 function processReplacement( &$line, $old, &$new ) {
 	$right_side_of_line = substr( $line, strpos( $line, 'WPCS:' ) + 5 );
 	/* Right side of line should stop if it encounters "?>" */
@@ -193,8 +223,8 @@ function processReplacement( &$line, $old, &$new ) {
 			$old .= substr( $line, $old_pos + strlen( $old ), 1 );
 		}
 		$right_side_of_line_original = $right_side_of_line;
-		$right_side_of_line = str_replace( $old, $new, $right_side_of_line );
-		$line = str_replace( $right_side_of_line_original, $right_side_of_line, $line );
+		$right_side_of_line          = str_replace( $old, $new, $right_side_of_line );
+		$line                        = str_replace( $right_side_of_line_original, $right_side_of_line, $line );
 
 		return true;
 	}
