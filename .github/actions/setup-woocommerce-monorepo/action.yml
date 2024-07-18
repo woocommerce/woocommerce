@@ -55,7 +55,7 @@ runs:
               key: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
               restore-keys: '${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-'
         - name: 'Cache: node cache'
-          if: ${{ inputs.pull-package-deps != 'false' && inputs.build != 'false' }}
+          if: ${{ inputs.pull-package-deps != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: './node_modules/.cache'
