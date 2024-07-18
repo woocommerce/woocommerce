@@ -1,7 +1,15 @@
 /**
  * Internal dependencies
  */
-import { Schema, Data } from "./types";
+import { ObjectSchema, Data } from "./types";
+import { parseObject } from './types/object';
 
-export function validate( schema: Schema, data: Data ) {
+export function parse( schema: ObjectSchema, data: Data ) {
+    try {
+        return parseObject( schema, data, '' );
+    } catch ( e ) {
+        return {
+            errors: e
+        };
+    }
 }

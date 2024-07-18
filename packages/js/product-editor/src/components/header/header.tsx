@@ -39,7 +39,7 @@ import { Tabs } from '../tabs';
 import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
 import { useShowPrepublishChecks } from '../../hooks/use-show-prepublish-checks';
 import { HeaderProps, Image } from './types';
-import { validate } from '@woocommerce/validation';
+import { parse } from '@woocommerce/validation';
 
 const PublishButton = lazy( () =>
 	import( './publish-button' ).then( ( module ) => ( {
@@ -94,7 +94,8 @@ export function Header( {
 			method: 'OPTIONS',
 		} ).then( ( results ) => {
 			// @ts-ignore
-			validate( results.schema, product );
+			const result = parse( results.schema, product );
+			console.log(result);
 		} );
 	}, [] );
 
