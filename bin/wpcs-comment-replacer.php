@@ -20,6 +20,8 @@ if ( $argc < 2 ) {
 	exit( 1 );
 }
 
+$use_copy = true;
+
 $path = $argv[1];
 
 // Check if the path exists and is a directory
@@ -40,13 +42,11 @@ if ( $return_var !== 0 ) {
 	exit( 1 );
 }
 
-unset( $path );
-
 // Array of directories to ignore
 $ignored_directories = [ 'node_modules', 'vendor', 'bin', 'build' ];
 
 // Create a non-recursive directory iterator for the main directory
-$dir_iterator = new DirectoryIterator( $tempnam );
+$dir_iterator = new DirectoryIterator( $use_copy ? $tempnam : $path );
 
 $GLOBALS['wpcs_stats'] = [
 	'wpcs_comments_found'    => 0,
@@ -208,6 +208,10 @@ function checkSyntax( $filename ) {
 	exec( "php -l " . escapeshellarg( $filename ), $output, $result );
 
 	return $result === 0; // Returns true if no syntax errors
+}
+
+if ( ! $use_copy ) {
+	return;
 }
 
 // Zip the directory.
