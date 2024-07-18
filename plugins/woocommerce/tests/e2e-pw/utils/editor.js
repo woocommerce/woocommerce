@@ -63,8 +63,11 @@ const insertBlock = async ( page, blockName ) => {
 	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
 
-	if ( await page.getByLabel( 'Close block inserter' ).isVisible() ) {
-		await page.getByLabel( 'Close block inserter' ).click();
+	const closeBtn = page.getByRole( 'button', {
+		name: 'Close block inserter',
+	} );
+	if ( await closeBtn.isVisible() ) {
+		await closeBtn.click();
 	} else {
 		await page
 			.getByRole( 'button', {
