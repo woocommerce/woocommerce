@@ -364,12 +364,8 @@ jobs:
         if: ${{ !!env.FLAKY_REPORTS }}
         uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
         with:
-          path: |
-            ./packages/report-flaky-tests/build/
-            ./packages/report-flaky-tests/build-module/
-            ./packages/report-flaky-tests/build-types/
-            ./packages/report-flaky-tests/node_modules/
-          key: "${{ runner.os }}-report-flaky-tests-dbf201449e9736f672b61e422787d47659db327a"
+          path: ./packages/report-flaky-tests/build/
+          key: "${{ runner.os }}-report-flaky-tests-TESTHASH"
           restore-keys: '${{ runner.os }}-report-flaky-tests-'
 
       - name: 'Check if to build @wordpress/report-flaky-tests'
@@ -386,10 +382,15 @@ jobs:
         if: ${{ !!env.FLAKY_REPORTS && env.BUILD_REPORT_FLAKY_TESTS_UTILITY == 'yes' }}
         uses: ./.github/setup-node
 
-      - name: 'Build Gutenberg packages'
-        if: ${{ !!env.FLAKY_REPORTS && env.BUILD_REPORT_FLAKY_TESTS_UTILITY == 'yes' }}
+      - name: 'Build package(s)'
+        if: ${{ !!env.FLAKY_REPORTS }}
         shell: 'bash'
-        run: npm run build:packages
+        run: |
+          if [[ '${{ env.BUILD_REPORT_FLAKY_TESTS_UTILITY }}' == 'no' ]]; then
+            cd ./packages/report-flaky-tests && npm install --silent
+          else
+            npm run build:packages
+          fi
 
       - name: 'Report flaky tests'
         if: ${{ !!env.FLAKY_REPORTS }}
