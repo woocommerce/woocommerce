@@ -54,10 +54,25 @@ const fillPageTitle = async ( page, title ) => {
 };
 
 const insertBlock = async ( page, blockName ) => {
-	await page.getByLabel( 'Toggle block inserter' ).click();
+	await page
+		.getByRole( 'button', {
+			name: 'Toggle block inserter',
+			expanded: false,
+		} )
+		.click();
 	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
-	await page.getByLabel( 'Close block inserter' ).click();
+
+	if ( await page.getByLabel( 'Close block inserter' ).isVisible() ) {
+		await page.getByLabel( 'Close block inserter' ).click();
+	} else {
+		await page
+			.getByRole( 'button', {
+				name: 'Toggle block inserter',
+				expanded: true,
+			} )
+			.click();
+	}
 };
 
 const insertBlockByShortcut = async ( page, blockName ) => {
