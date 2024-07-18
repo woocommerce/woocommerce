@@ -135,11 +135,15 @@ class RemoteLogger extends \WC_Log_Handler {
 	/**
 	 * Get formatted log data to be sent to the remote logging service.
 	 *
-	 * @param string $level Log level.
-	 * @param string $message Log message.
-	 * @param array  $context Optional. Additional information for log handlers.
+	 * This method formats the log data by sanitizing the message, adding default fields, and including additional context
+	 * such as backtrace, tags, and extra attributes. It also integrates with WC_Tracks to include blog and store details.
+	 * The formatted log data is then filtered before being sent to the remote logging service.
 	 *
-	 * @return array Formatted log data.
+	 * @param string $level   Log level (e.g., 'error', 'warning', 'info').
+	 * @param string $message Log message to be recorded.
+	 * @param array  $context Optional. Additional information for log handlers, such as 'backtrace', 'tags', 'extra', and 'error'.
+	 *
+	 * @return array Formatted log data ready to be sent to the remote logging service.
 	 */
 	public function get_formatted_log( $level, $message, $context = array() ) {
 		$log_data = array(
@@ -193,17 +197,18 @@ class RemoteLogger extends \WC_Log_Handler {
 		$log_data['extra'] = array_merge( $extra_attrs, $context );
 
 		/**
-		 * Filter the formatted log data before sending it to the remote logging service. Return non-array to prevent logging.
+		 * Filters the formatted log data before sending it to the remote logging service.
+		 * Returning a non-array value will prevent the log from being sent.
 		 *
 		 * @since 9.2.0
 		 *
-		 * @param $log_data The formatted log data.
-		 * @param string $level Log level.
-		 * @param string $message Log message.
-		 * @param array $context Original context.
+		 * @param array  $log_data The formatted log data.
+		 * @param string $level    The log level (e.g., 'error', 'warning').
+		 * @param string $message  The log message.
+		 * @param array  $context  The original context array.
 		 *
-		 * @return array Formatted log data.
-		*/
+		 * @return array The filtered log data.
+		 */
 		return apply_filters( 'woocommerce_remote_logger_formatted_log_data', $log_data, $level, $message, $context );
 	}
 
@@ -418,6 +423,10 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @return string The sanitized message.
 	 */
 	private function sanitize( $message ) {
+		if ( ! is_string( $message ) ) {
+			return $message;
+		}
+
 		$pattern           = '/\/.*(\/plugins\/' . preg_quote( dirname( WC_PLUGIN_BASENAME ), '/' ) . '.*|\/wp-.*)/i';
 		$sanitized_message = preg_replace( $pattern, '**$1', $message );
 		return $sanitized_message;
