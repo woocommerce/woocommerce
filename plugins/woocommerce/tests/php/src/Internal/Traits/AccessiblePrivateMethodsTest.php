@@ -425,7 +425,23 @@ class AccessiblePrivateMethodsTest extends \WC_Unit_Test_Case {
 		$this->expectException( \Error::class );
 		$this->expectExceptionMessage( get_class( $sut ) . '::' . "$method_name can't be called statically, did you mean '$proper_method_name'?" );
 
-		$sut::$method_name( 'some_action', function() {} );
+		$sut::$method_name( 'some_action', function () {} );
+	}
+
+	/**
+	 * @testdox The serialization of an object doesn't include information about the private methods made accessible.
+	 */
+	public function test_serialized_object_does_not_contain_accessible_methods_data() {
+		SerializableClass::init();
+		$instance = new SerializableClass();
+
+		$this->assertEquals( 'instance', $instance->private_instance_method() );
+		$this->assertEquals( 'static', $instance::private_static_method() );
+
+		//phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		$serialized = serialize( $instance );
+		$this->assertStringNotContainsString( 'private_instance_method', $serialized );
+		$this->assertStringNotContainsString( 'private_static_method', $serialized );
 	}
 }
 
@@ -445,6 +461,32 @@ class BaseClass {
 		if ( 'static_method_in_parent_class' === $name ) {
 			return 'Static argument: ' . $arguments[0];
 		}
+	}
+	//phpcs:enable Squiz.Commenting.FunctionComment.Missing
+}
+
+/**
+ * Class used to test serialization (instances of anonymous classes can't be serialized).
+ */
+class SerializableClass {
+	//phpcs:disable Squiz.Commenting.FunctionComment.Missing
+	use AccessiblePrivateMethods;
+
+	public function __construct() {
+		$this->mark_method_as_accessible( 'private_instance_method' );
+	}
+
+	//phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag
+	final public static function init() {
+		self::mark_static_method_as_accessible( 'private_static_method' );
+	}
+
+	private function private_instance_method() {
+		return 'instance';
+	}
+
+	private static function private_static_method() {
+		return 'static';
 	}
 	//phpcs:enable Squiz.Commenting.FunctionComment.Missing
 }
