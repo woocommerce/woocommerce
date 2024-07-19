@@ -973,7 +973,7 @@ class PluginsHelper {
 			),
 			self::WOO_ADD_PAYMENT_METHOD_URL
 		);
-		$description = $allowed_link
+		$description             = $allowed_link
 			? sprintf(
 			/* translators: %s: WooCommerce.com URL to add payment method */
 				_n(
