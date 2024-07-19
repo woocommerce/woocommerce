@@ -81,8 +81,23 @@ const ProductCollectionInspectorControls = (
 		isArchiveTemplate && shouldShowFilter( CoreFilterNames.INHERIT );
 	const showOrderControl =
 		showQueryControls && shouldShowFilter( CoreFilterNames.ORDER );
-	const showFeaturedControl = shouldShowFilter( CoreFilterNames.FEATURED );
 	const showOnSaleControl = shouldShowFilter( CoreFilterNames.ON_SALE );
+	const showStockStatusControl = shouldShowFilter(
+		CoreFilterNames.STOCK_STATUS
+	);
+	const showHandPickedProductsControl = shouldShowFilter(
+		CoreFilterNames.HAND_PICKED
+	);
+	const showKeywordControl = shouldShowFilter( CoreFilterNames.KEYWORD );
+	const showAttributesControl = shouldShowFilter(
+		CoreFilterNames.ATTRIBUTES
+	);
+	const showTaxonomyControls = shouldShowFilter( CoreFilterNames.TAXONOMY );
+	const showFeaturedControl = shouldShowFilter( CoreFilterNames.FEATURED );
+	const showCreatedControl = shouldShowFilter( CoreFilterNames.CREATED );
+	const showPriceRangeControl = shouldShowFilter(
+		CoreFilterNames.PRICE_RANGE
+	);
 
 	const setQueryAttributeBind = useMemo(
 		() => setQueryAttribute.bind( null, props ),
@@ -134,16 +149,30 @@ const ProductCollectionInspectorControls = (
 					{ showOnSaleControl && (
 						<OnSaleControl { ...queryControlProps } />
 					) }
-					<StockStatusControl { ...queryControlProps } />
-					<HandPickedProductsControl { ...queryControlProps } />
-					<KeywordControl { ...queryControlProps } />
-					<AttributesControl { ...queryControlProps } />
-					<TaxonomyControls { ...queryControlProps } />
+					{ showStockStatusControl && (
+						<StockStatusControl { ...queryControlProps } />
+					) }
+					{ showHandPickedProductsControl && (
+						<HandPickedProductsControl { ...queryControlProps } />
+					) }
+					{ showKeywordControl && (
+						<KeywordControl { ...queryControlProps } />
+					) }
+					{ showAttributesControl && (
+						<AttributesControl { ...queryControlProps } />
+					) }
+					{ showTaxonomyControls && (
+						<TaxonomyControls { ...queryControlProps } />
+					) }
 					{ showFeaturedControl && (
 						<FeaturedProductsControl { ...queryControlProps } />
 					) }
-					<CreatedControl { ...queryControlProps } />
-					<PriceRangeControl { ...queryControlProps } />
+					{ showCreatedControl && (
+						<CreatedControl { ...queryControlProps } />
+					) }
+					{ showPriceRangeControl && (
+						<PriceRangeControl { ...queryControlProps } />
+					) }
 				</ToolsPanel>
 			) : null }
 			<ProductCollectionFeedbackPrompt />
