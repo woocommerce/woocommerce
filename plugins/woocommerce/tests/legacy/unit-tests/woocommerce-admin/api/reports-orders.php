@@ -93,6 +93,8 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	public function test_get_reports_with_orphaned_refund() {
+		$this->markTestSkipped( 'Flaky: see https://github.com/woocommerce/woocommerce/issues/49630' );
+
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
 
