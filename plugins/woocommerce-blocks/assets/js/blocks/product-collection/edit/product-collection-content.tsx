@@ -23,7 +23,8 @@ import type {
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import {
-	getDefaultValueOfInheritQueryFromTemplate,
+	getDefaultValueOfInherit,
+	getDefaultValueOfFilterable,
 	useSetPreviewState,
 } from '../utils';
 import InspectorControls from './inspector-controls';
@@ -95,7 +96,8 @@ const ProductCollectionContent = ( {
 		...DEFAULT_ATTRIBUTES,
 		query: {
 			...( DEFAULT_ATTRIBUTES.query as ProductCollectionQuery ),
-			inherit: getDefaultValueOfInheritQueryFromTemplate(),
+			inherit: getDefaultValueOfInherit(),
+			filterable: getDefaultValueOfFilterable(),
 		},
 		...( attributes as Partial< ProductCollectionAttributes > ),
 		queryId,

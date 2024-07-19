@@ -20,7 +20,10 @@ import {
 	type QueryControlProps,
 } from '../../types';
 import { DEFAULT_QUERY } from '../../constants';
-import { getDefaultValueOfInheritQueryFromTemplate } from '../../utils';
+import {
+	getDefaultValueOfInherit,
+	getDefaultValueOfFilterable,
+} from '../../utils';
 
 const label = __( 'Use page context', 'woocommerce' );
 
@@ -43,10 +46,7 @@ const InheritQueryControl = ( {
 		}
 	);
 
-	const defaultValue = useMemo(
-		() => getDefaultValueOfInheritQueryFromTemplate(),
-		[]
-	);
+	const defaultValue = useMemo( () => getDefaultValueOfInherit(), [] );
 
 	return (
 		<ToolsPanelItem
@@ -94,10 +94,7 @@ const FilterableControl = ( {
 }: QueryControlProps ) => {
 	const filterable = query?.filterable;
 
-	const defaultValue = useMemo(
-		() => getDefaultValueOfInheritQueryFromTemplate(), // TODO
-		[]
-	);
+	const defaultValue = useMemo( () => getDefaultValueOfFilterable(), [] );
 
 	return (
 		<ToolsPanelItem
@@ -108,7 +105,7 @@ const FilterableControl = ( {
 				setQueryAttribute( {
 					filterable: defaultValue,
 				} );
-				trackInteraction( CoreFilterNames.INHERIT );
+				trackInteraction( CoreFilterNames.FILTERABLE );
 			} }
 		>
 			<ToggleControl
