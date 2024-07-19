@@ -168,7 +168,7 @@ function wc_nav_menu_item_classes( $menu_items ) {
 			$menu_id = (int) $menu_item->object_id;
 
 			// Unset active class for blog page.
-			if ( $page_for_posts === $menu_id ) {
+			if ( $page_for_posts === $menu_id && isset( $menu_item->object ) && 'page' === $menu_item->object ) {
 				$menu_items[ $key ]->current = false;
 
 				if ( in_array( 'current_page_parent', $classes, true ) ) {
