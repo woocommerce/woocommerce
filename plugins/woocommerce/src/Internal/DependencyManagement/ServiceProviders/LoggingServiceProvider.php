@@ -2,10 +2,10 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\Logging\RemoteLogger;
 use Automattic\WooCommerce\Internal\Admin\Logging\{ PageController, Settings };
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
+use Automattic\WooCommerce\Loggers\RemoteLogger;
 
 /**
  * LoggingServiceProvider class.

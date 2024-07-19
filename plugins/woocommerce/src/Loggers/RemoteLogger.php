@@ -1,7 +1,7 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Logging;
+namespace Automattic\WooCommerce\Loggers;
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
