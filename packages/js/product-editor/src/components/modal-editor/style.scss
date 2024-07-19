@@ -4,7 +4,11 @@ $modal-editor-height: 60px;
     width: 100%;
     height: 100%;
     max-height: calc( 100% - 40px );
-    margin: 20px;
+    margin: $gap-large;
+	@media only screen and (max-width: $break-mobile) {
+		margin: unset;
+		max-height: unset;
+	}
     border-radius: 8px;
 
     .components-modal__header {
