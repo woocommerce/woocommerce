@@ -208,7 +208,7 @@ class CustomOrdersTableController {
 	 */
 	public function hpos_data_caching_is_enabled(): bool {
 		return get_option( self::HPOS_DATASTORE_CACHING_ENABLED_OPTION ) === 'yes' &&
-		       $this->custom_orders_table_usage_is_enabled();
+			$this->custom_orders_table_usage_is_enabled();
 	}
 
 	/**
