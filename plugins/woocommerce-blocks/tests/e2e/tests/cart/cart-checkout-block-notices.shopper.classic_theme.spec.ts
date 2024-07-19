@@ -259,7 +259,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
-			page.getByText( `Coupon "${ INVALID_COUPON }" does not exist!`, {
+			page.getByText( 'Coupon is not valid.', {
 				exact: true,
 			} )
 		).toBeVisible();
