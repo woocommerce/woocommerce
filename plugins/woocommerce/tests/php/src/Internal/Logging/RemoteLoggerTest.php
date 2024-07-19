@@ -288,7 +288,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		$result  = $this->sut->get_formatted_log( $level, $message, $context );
 
 		$this->assertIsString( $result['trace'] );
-		$this->assertStringContainsString( '**/plugins/woocommerce/tests/php/src/Logging/RemoteLoggerTest.php', $result['trace'] );
+		$this->assertStringContainsString( '**/plugins/woocommerce/tests/php/src/Internal/Loggers/RemoteLoggerTest.php', $result['trace'] );
 	}
 
 
