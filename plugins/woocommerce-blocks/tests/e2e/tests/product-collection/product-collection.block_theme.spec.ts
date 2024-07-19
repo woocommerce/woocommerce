@@ -412,9 +412,7 @@ test.describe( 'Product Collection', () => {
 				const sidebarSettings =
 					await pageObject.locateSidebarSettings();
 				await expect(
-					sidebarSettings.locator(
-						SELECTORS.inheritQueryFromTemplateControl
-					)
+					sidebarSettings.locator( SELECTORS.usePageContextControl )
 				).toBeHidden();
 			} );
 
@@ -447,7 +445,7 @@ test.describe( 'Product Collection', () => {
 						await pageObject.locateSidebarSettings();
 					await expect(
 						sidebarSettings.locator(
-							SELECTORS.inheritQueryFromTemplateControl
+							SELECTORS.usePageContextControl
 						)
 					).toBeVisible();
 				} );
@@ -468,7 +466,7 @@ test.describe( 'Product Collection', () => {
 						await pageObject.locateSidebarSettings();
 					await expect(
 						sidebarSettings.locator(
-							SELECTORS.inheritQueryFromTemplateControl
+							SELECTORS.usePageContextControl
 						)
 					).toBeHidden();
 				} );
@@ -487,13 +485,11 @@ test.describe( 'Product Collection', () => {
 
 				// Inherit query from template should be visible & enabled by default
 				await expect(
-					sidebarSettings.locator(
-						SELECTORS.inheritQueryFromTemplateControl
-					)
+					sidebarSettings.locator( SELECTORS.usePageContextControl )
 				).toBeVisible();
 				await expect(
 					sidebarSettings.locator(
-						`${ SELECTORS.inheritQueryFromTemplateControl } input`
+						`${ SELECTORS.usePageContextControl } input`
 					)
 				).toBeChecked();
 
@@ -543,13 +539,11 @@ test.describe( 'Product Collection', () => {
 					await pageObject.locateSidebarSettings();
 
 				await expect(
-					sidebarSettings.locator(
-						SELECTORS.inheritQueryFromTemplateControl
-					)
+					sidebarSettings.locator( SELECTORS.usePageContextControl )
 				).toBeVisible();
 				await expect(
 					sidebarSettings.locator(
-						`${ SELECTORS.inheritQueryFromTemplateControl } input`
+						`${ SELECTORS.usePageContextControl } input`
 					)
 				).toBeChecked();
 
@@ -559,13 +553,11 @@ test.describe( 'Product Collection', () => {
 				await pageObject.chooseCollectionInTemplate( 'productCatalog' );
 
 				await expect(
-					sidebarSettings.locator(
-						SELECTORS.inheritQueryFromTemplateControl
-					)
+					sidebarSettings.locator( SELECTORS.usePageContextControl )
 				).toBeVisible();
 				await expect(
 					sidebarSettings.locator(
-						`${ SELECTORS.inheritQueryFromTemplateControl } input`
+						`${ SELECTORS.usePageContextControl } input`
 					)
 				).not.toBeChecked();
 			} );
@@ -794,7 +786,7 @@ test.describe( 'Product Collection', () => {
 
 			const sidebarSettings = await pageObject.locateSidebarSettings();
 			const input = sidebarSettings.locator(
-				`${ SELECTORS.inheritQueryFromTemplateControl } input`
+				`${ SELECTORS.usePageContextControl } input`
 			);
 
 			await expect( input ).toBeHidden();
@@ -824,7 +816,7 @@ test.describe( 'Product Collection', () => {
 
 			const sidebarSettings = await pageObject.locateSidebarSettings();
 			const input = sidebarSettings.locator(
-				`${ SELECTORS.inheritQueryFromTemplateControl } input`
+				`${ SELECTORS.usePageContextControl } input`
 			);
 
 			await expect( input ).toBeChecked();
