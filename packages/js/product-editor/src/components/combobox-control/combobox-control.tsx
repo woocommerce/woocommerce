@@ -85,10 +85,13 @@ export const ComboboxControl = forwardRef( function ForwardedComboboxControl(
 			 * on bluring
 			 */
 			function handleBlur( event: FocusEvent ) {
-				if ( inputElementRef.current ) {
-					inputElementRef.current.value = value;
-				}
-				onBlur?.( event as never );
+				onBlur?.( {
+					...event,
+					target: {
+						...event.target,
+						value,
+					},
+				} as never );
 			}
 
 			inputElementRef.current?.addEventListener( 'blur', handleBlur );
