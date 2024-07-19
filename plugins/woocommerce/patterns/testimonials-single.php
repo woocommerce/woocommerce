@@ -39,7 +39,7 @@ $description        = $content['descriptions'][0]['default'] ?? '';
 			<!-- /wp:paragraph -->
 
 			<!-- wp:paragraph -->
-			<p>– Monica P.</p>
+			<p>Monica P.</p>
 			<!-- /wp:paragraph -->
 		</div>
 		<!-- /wp:column -->

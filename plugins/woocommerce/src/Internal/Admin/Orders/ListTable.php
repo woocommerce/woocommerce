@@ -976,6 +976,14 @@ class ListTable extends WP_List_Table {
 			echo '<a href="#" class="order-preview" data-order-id="' . absint( $order->get_id() ) . '" title="' . esc_attr( __( 'Preview', 'woocommerce' ) ) . '">' . esc_html( __( 'Preview', 'woocommerce' ) ) . '</a>';
 			echo '<a href="' . esc_url( $this->get_order_edit_link( $order ) ) . '" class="order-view"><strong>#' . esc_attr( $order->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong></a>';
 		}
+
+		// Used for showing date & status next to order number/buyer name on small screens.
+		echo '<div class="order_date small-screen-only">';
+		$this->render_order_date_column( $order );
+		echo '</div>';
+		echo '<div class="order_status small-screen-only">';
+		$this->render_order_status_column( $order );
+		echo '</div>';
 	}
 
 	/**
