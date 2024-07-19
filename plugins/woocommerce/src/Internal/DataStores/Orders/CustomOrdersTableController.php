@@ -310,7 +310,6 @@ class CustomOrdersTableController {
 
 		delete_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
 		$this->data_synchronizer->delete_database_tables();
-		// @todo We can trigger cache clearing here
 	}
 
 	/**
@@ -323,6 +322,9 @@ class CustomOrdersTableController {
 	private function process_updated_option( $option, $old_value, $value ) {
 		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $option && 'no' === $value ) {
 			$this->data_synchronizer->cleanup_synchronization_state();
+		}
+		if ( self::HPOS_DATASTORE_CACHING_ENABLED_OPTION === $option && $old_value !== $value && 'yes' === $value ) {
+			$this->data_store->clear_all_cached_data();
 		}
 	}
 

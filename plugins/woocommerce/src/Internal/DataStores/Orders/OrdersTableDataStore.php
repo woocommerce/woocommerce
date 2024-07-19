@@ -556,7 +556,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 		if ( is_callable( $this->data_store_meta, 'clear_cached_data' ) ) {
 			$successfully_deleted_cache_order_ids = array_keys( array_filter( $return_values ) );
-			$cache_deletion_results                = $this->data_store_meta->clear_cached_data( $successfully_deleted_cache_order_ids );
+			$cache_deletion_results               = $this->data_store_meta->clear_cached_data( $successfully_deleted_cache_order_ids );
 			foreach ( $cache_deletion_results as $order_id => $meta_cache_was_deleted ) {
 				$return_values[ $order_id ] = $return_values[ $order_id ] && $meta_cache_was_deleted;
 			}
@@ -1202,7 +1202,7 @@ WHERE
 
 		if ( OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
 			$cache_engine = wc_get_container()->get( WPCacheEngine::class );
-			$orders_data   = $cache_engine->get_cached_objects( $order_ids, $this->get_cache_group() );
+			$orders_data  = $cache_engine->get_cached_objects( $order_ids, $this->get_cache_group() );
 			foreach ( $orders_data as $order_id => $order_data ) {
 				if ( ! empty( $order_data->type ) ) {
 					$order_types[ $order_id ] = $order_data->type;
@@ -1711,7 +1711,7 @@ WHERE
 		}
 
 		$using_datastore_cache = OrderUtil::custom_orders_table_datastore_cache_enabled();
-		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
+		$cache_engine          = wc_get_container()->get( WPCacheEngine::class );
 		if ( $using_datastore_cache ) {
 			$order_data         = $cache_engine->get_cached_objects( $ids, $this->get_cache_group() );
 			$uncached_order_ids = array();
