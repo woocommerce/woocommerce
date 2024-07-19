@@ -205,17 +205,27 @@ class Controller extends GenericController implements ExportableInterface {
 	public function get_collection_params() {
 		$params                       = parent::get_collection_params();
 		$params['orderby']['default'] = 'tax_rate_id';
-		$params['orderby']['enum']    = array(
-			'name',
-			'tax_rate_id',
-			'tax_code',
-			'rate',
-			'order_tax',
-			'total_tax',
-			'shipping_tax',
-			'orders_count',
+		/**
+		 * Filter to add or remove orderby params.
+		 *
+		 * @param array $orderby_enum Array of params permitted for orderby.
+		 *
+		 * @since 9.2.0
+		 */
+		$params['orderby']['enum'] = apply_filters(
+			'woocommerce_report_taxes_orderby_params',
+			array(
+				'name',
+				'tax_rate_id',
+				'tax_code',
+				'rate',
+				'order_tax',
+				'total_tax',
+				'shipping_tax',
+				'orders_count',
+			)
 		);
-		$params['taxes']              = array(
+		$params['taxes']           = array(
 			'description'       => __( 'Limit result set to items assigned one or more tax rates.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
