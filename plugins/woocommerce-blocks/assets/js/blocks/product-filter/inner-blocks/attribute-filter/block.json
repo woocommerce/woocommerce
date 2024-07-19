@@ -12,7 +12,7 @@
 	"supports": {
 		"interactivity": true,
 		"inserter": false,
-		"multiple": false,
+		"multiple": true,
 		"color": {
 			"text": true,
 			"background": false
