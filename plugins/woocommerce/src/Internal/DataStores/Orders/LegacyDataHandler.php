@@ -322,8 +322,12 @@ class LegacyDataHandler {
 		};
 		$update_data_store_func->call( $order, $data_store );
 
-		// Read order.
+		// Read order (without triggering sync).
+		$prevent_sync_on_read = fn() => false;
+
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', $prevent_sync_on_read, 999 );
 		$data_store->read( $order );
+		remove_filter( 'woocommerce_hpos_enable_sync_on_read', $prevent_sync_on_read );
 
 		return $order;
 	}
