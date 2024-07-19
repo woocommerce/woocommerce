@@ -10,6 +10,7 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { AddressLineFieldProps } from './types';
+import './style.scss';
 
 const AddressLine2Field = < T extends AddressFormValues | ContactFormValues >( {
 	field,
