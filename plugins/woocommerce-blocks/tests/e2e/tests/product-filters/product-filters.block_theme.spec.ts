@@ -530,7 +530,7 @@ test.describe( `${ blockData.name }`, () => {
 		const addBlockButton = block.getByRole( 'button', {
 			name: 'Add block',
 		} );
-		await addBlockButton.dispatchEvent( 'click' );
+		await addBlockButton.click();
 
 		for ( const filter of searchTerms ) {
 			await editor.page.getByPlaceholder( 'Search' ).fill( filter );
