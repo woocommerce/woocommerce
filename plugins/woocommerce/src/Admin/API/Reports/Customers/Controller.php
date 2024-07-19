@@ -305,32 +305,42 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                            = parent::get_collection_params();
-		$params['registered_before']       = array(
+		$params                       = parent::get_collection_params();
+		$params['registered_before']  = array(
 			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['registered_after']        = array(
+		$params['registered_after']   = array(
 			'description'       => __( 'Limit response to objects registered after (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']['default']      = 'date_registered';
-		$params['orderby']['enum']         = array(
-			'username',
-			'name',
-			'country',
-			'city',
-			'state',
-			'postcode',
-			'date_registered',
-			'date_last_active',
-			'orders_count',
-			'total_spend',
-			'avg_order_value',
+		$params['orderby']['default'] = 'date_registered';
+		/**
+		 * Filter to add or remove orderby params.
+		 *
+		 * @param array $orderby_enum Array of params permitted for orderby.
+		 *
+		 * @since 9.2.0
+		 */
+		$params['orderby']['enum']         = apply_filters(
+			'woocommerce_report_customers_orderby_params',
+			array(
+				'username',
+				'name',
+				'country',
+				'city',
+				'state',
+				'postcode',
+				'date_registered',
+				'date_last_active',
+				'orders_count',
+				'total_spend',
+				'avg_order_value',
+			)
 		);
 		$params['match']                   = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),
