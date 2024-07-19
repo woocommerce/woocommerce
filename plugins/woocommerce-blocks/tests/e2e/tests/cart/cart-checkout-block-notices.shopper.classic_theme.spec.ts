@@ -246,20 +246,15 @@ test.describe( 'Shopper → Notice Templates', () => {
 	} );
 
 	test( 'coupon inline notice is visible', async ( {
-		requestUtils,
 		frontendUtils,
 		page,
 	} ) => {
-		await requestUtils.activateTheme(
-			CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG
-		);
-
 		await frontendUtils.goToCartShortcode();
 		await page.getByPlaceholder( 'Coupon code' ).fill( INVALID_COUPON );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
-			page.getByText( 'Coupon is not valid.', {
+			page.getByText( `Coupon "${ INVALID_COUPON }" does not exist!`, {
 				exact: true,
 			} )
 		).toBeVisible();
@@ -270,7 +265,5 @@ test.describe( 'Shopper → Notice Templates', () => {
 		).toBeHidden();
 
 		await expect( page.locator( '.coupon-error-notice' ) ).toBeVisible();
-
-		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
 	} );
 } );
