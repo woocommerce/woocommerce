@@ -201,13 +201,23 @@ class Controller extends GenericStatsController {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                    = parent::get_collection_params();
-		$params['orderby']['enum'] = array(
-			'date',
-			'items_sold',
-			'total_sales',
-			'orders_count',
-			'products_count',
+		$params = parent::get_collection_params();
+		/**
+		 * Filter to add or remove orderby params.
+		 *
+		 * @param array $orderby_enum Array of params permitted for orderby.
+		 *
+		 * @since 9.2.0
+		 */
+		$params['orderby']['enum'] = apply_filters(
+			'woocommerce_report_taxes_stats_orderby_params',
+			array(
+				'date',
+				'items_sold',
+				'total_sales',
+				'orders_count',
+				'products_count',
+			)
 		);
 		$params['taxes']           = array(
 			'description'       => __( 'Limit result set to all items that have the specified term assigned in the taxes taxonomy.', 'woocommerce' ),
