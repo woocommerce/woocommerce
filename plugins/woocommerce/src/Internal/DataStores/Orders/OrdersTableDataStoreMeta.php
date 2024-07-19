@@ -61,7 +61,7 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 	 *
 	 * @return bool
 	 */
-	public function delete_meta( &$object, $meta ) : bool {
+	public function delete_meta( &$object, $meta ): bool {
 		global $wpdb;
 
 		if ( ! isset( $meta->id ) ) {

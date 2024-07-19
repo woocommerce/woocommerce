@@ -9,9 +9,9 @@ namespace Automattic\WooCommerce\Caching;
  */
 class RequestLevelCacheEngine implements CacheEngine {
 
-	const DEFAULT_GROUP = 'default';
-
 	/**
+	 * Multidimensional array containing the cached objects. Keyed by [ $blog_id ][ $group ][ $key ]
+	 *
 	 * @var array[][]|object[][]
 	 */
 	private $cache = array();
@@ -26,13 +26,9 @@ class RequestLevelCacheEngine implements CacheEngine {
 	 */
 	public function get_cached_object( string $key, string $group = '' ) {
 		$blog_id = get_current_blog_id();
-		if ( $group === '' ) {
-			$group = self::DEFAULT_GROUP;
-		}
 		if ( ! isset( $this->cache[ $blog_id ][ $group ][ $key ] ) ) {
 			return null;
 		}
-
 		if ( is_object( $this->cache[ $blog_id ][ $group ][ $key ] ) ) {
 			return clone $this->cache[ $blog_id ][ $group ][ $key ];
 		}
@@ -55,17 +51,12 @@ class RequestLevelCacheEngine implements CacheEngine {
 			return false;
 		}
 		$blog_id = get_current_blog_id();
-		if ( $group === '' ) {
-			$group = self::DEFAULT_GROUP;
-		}
-
 		if ( ! isset( $this->cache[ $blog_id ] ) ) {
 			$this->cache[ $blog_id ] = array();
 		}
 		if ( ! isset( $this->cache[ $blog_id ][ $group ] ) ) {
 			$this->cache[ $blog_id ][ $group ] = array();
 		}
-
 		if ( is_object( $object ) ) {
 			$object = clone $object;
 		}
@@ -88,9 +79,6 @@ class RequestLevelCacheEngine implements CacheEngine {
 			return false;
 		}
 		$blog_id = get_current_blog_id();
-		if ( $group === '' ) {
-			$group = self::DEFAULT_GROUP;
-		}
 		if ( ! isset( $this->cache[ $blog_id ][ $group ][ $key ] ) ) {
 			return false;
 		}
@@ -112,9 +100,6 @@ class RequestLevelCacheEngine implements CacheEngine {
 			return false;
 		}
 		$blog_id = get_current_blog_id();
-		if ( $group === '' ) {
-			$group = self::DEFAULT_GROUP;
-		}
 
 		return isset( $this->cache[ $blog_id ][ $group ][ $key ] );
 	}
@@ -128,9 +113,6 @@ class RequestLevelCacheEngine implements CacheEngine {
 	 */
 	public function delete_cache_group( string $group = '' ): bool {
 		$blog_id = get_current_blog_id();
-		if ( $group === '' ) {
-			$group = self::DEFAULT_GROUP;
-		}
 		if ( isset( $this->cache[ $blog_id ][ $group ] ) ) {
 			unset( $this->cache[ $blog_id ][ $group ] );
 		}
