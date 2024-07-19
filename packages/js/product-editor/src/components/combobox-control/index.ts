@@ -1,2 +1,2 @@
-export * from './custom-field-name-control';
+export * from './combobox-control';
 export * from './types';
