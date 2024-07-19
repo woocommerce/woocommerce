@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store, getContext, getElement } from '@woocommerce/interactivity';
+import { store, getContext, getElement } from '@wordpress/interactivity';
 import { formatPrice, getCurrency } from '@woocommerce/price-format';
 import { HTMLElementEvent } from '@woocommerce/types';
 

@@ -953,87 +953,6 @@ const getStylingConfig = ( options = {} ) => {
 	};
 };
 
-const getInteractivityAPIConfig = ( options = {} ) => {
-	const { alias, resolvePlugins = [] } = options;
-	return {
-		entry: {
-			'wc-interactivity': './assets/js/interactivity',
-		},
-		output: {
-			filename: '[name].js',
-			path: path.resolve( __dirname, '../build/' ),
-			library: [ 'wc', '__experimentalInteractivity' ],
-			libraryTarget: 'this',
-			chunkLoadingGlobal: 'webpackWcBlocksJsonpUNIQUE',
-		},
-		resolve: {
-			alias,
-			plugins: resolvePlugins,
-			extensions: [ '.js', '.ts', '.tsx' ],
-		},
-		plugins: [
-			...getSharedPlugins( {
-				bundleAnalyzerReportTitle: 'WP directives',
-				checkCircularDeps: false,
-				requestToExternalFn: ( request ) => {
-					if ( request === '@wordpress/interactivity' ) {
-						return undefined;
-					}
-					return defaultRequestToExternal( request );
-				},
-				requestToHandleFn: ( request ) => {
-					if ( request === '@wordpress/interactivity' ) {
-						return undefined;
-					}
-					return defaultRequestToHandle( request );
-				},
-				dewpFallbackToDefault: false,
-			} ),
-			new ProgressBarPlugin(
-				getProgressBarPluginConfig( 'WP directives' )
-			),
-		],
-		module: {
-			rules: [
-				{
-					test: /\.(j|t)sx?$/,
-					exclude: /node_modules/,
-					use: [
-						{
-							loader: require.resolve( 'babel-loader' ),
-							options: {
-								cacheDirectory: false,
-								babelrc: false,
-								configFile: false,
-								presets: [
-									'@babel/preset-typescript',
-									[
-										'@babel/preset-react',
-										{
-											runtime: 'automatic',
-											importSource: 'preact',
-										},
-									],
-								],
-								// Required until Webpack is updated to ^5.0.0
-								plugins: [
-									'@babel/plugin-proposal-optional-chaining',
-									'@babel/plugin-proposal-class-properties',
-								],
-								cacheDirectory: path.resolve(
-									__dirname,
-									'../../../node_modules/.cache/babel-loader'
-								),
-								cacheCompression: false,
-							},
-						},
-					],
-				},
-			],
-		},
-	};
-};
-
 const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 	let { fileSuffix } = options;
 	const { alias, resolvePlugins = [] } = options;
@@ -1191,6 +1110,5 @@ module.exports = {
 	getExtensionsConfig,
 	getSiteEditorConfig,
 	getStylingConfig,
-	getInteractivityAPIConfig,
 	getCartAndCheckoutFrontendConfig,
 };

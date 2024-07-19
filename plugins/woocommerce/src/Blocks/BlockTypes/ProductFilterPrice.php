@@ -97,7 +97,7 @@ final class ProductFilterPrice extends AbstractBlock {
 				array(
 					'title'      => $title,
 					'attributes' => array(
-						'data-wc-on--click' => "{$this->get_full_block_name()}::actions.reset",
+						'data-wp-on--click' => "{$this->get_full_block_name()}::actions.reset",
 					),
 				),
 			),
@@ -141,8 +141,8 @@ final class ProductFilterPrice extends AbstractBlock {
 		) = $attributes;
 
 		$wrapper_attributes = array(
-			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
-			'data-wc-context'     => wp_json_encode( $data ),
+			'data-wp-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+			'data-wp-context'     => wp_json_encode( $data ),
 			'data-has-filter'     => 'no',
 		);
 
@@ -165,13 +165,13 @@ final class ProductFilterPrice extends AbstractBlock {
 					name="min"
 					type="text"
 					value="%s"
-					data-wc-bind--value="state.formattedMinPrice"
-					data-wc-on--change="actions.updateProducts"
+					data-wp-bind--value="state.formattedMinPrice"
+					data-wp-on--change="actions.updateProducts"
 					pattern=""
 				/>',
 				wp_strip_all_tags( $formatted_min_price )
 			) : sprintf(
-				'<span data-wc-text="state.formattedMinPrice">%s</span>',
+				'<span data-wp-text="state.formattedMinPrice">%s</span>',
 				// Not escaped, as this is HTML.
 				$formatted_min_price
 			);
@@ -183,12 +183,12 @@ final class ProductFilterPrice extends AbstractBlock {
 					name="max"
 					type="text"
 					value="%s"
-					data-wc-bind--value="state.formattedMaxPrice"
-					data-wc-on--change="actions.updateProducts"
+					data-wp-bind--value="state.formattedMaxPrice"
+					data-wp-on--change="actions.updateProducts"
 				/>',
 				wp_strip_all_tags( $formatted_max_price )
 			) : sprintf(
-				'<span data-wc-text="state.formattedMaxPrice">%s</span>',
+				'<span data-wp-text="state.formattedMaxPrice">%s</span>',
 				// Not escaped, as this is HTML.
 				$formatted_max_price
 			);
@@ -213,7 +213,7 @@ final class ProductFilterPrice extends AbstractBlock {
 					<div
 						class="wp-block-woocommerce-product-filter-price-content-price-range-slider range"
 						style="<?php echo esc_attr( $range_style ); ?>"
-						data-wc-bind--style="state.rangeStyle"
+						data-wp-bind--style="state.rangeStyle"
 					>
 						<div class="range-bar"></div>
 						<input
@@ -223,10 +223,10 @@ final class ProductFilterPrice extends AbstractBlock {
 							min="<?php echo esc_attr( $min_range ); ?>"
 							max="<?php echo esc_attr( $max_range ); ?>"
 							value="<?php echo esc_attr( $min_price ); ?>"
-							data-wc-bind--min="context.minRange"
-							data-wc-bind--max="context.maxRange"
-							data-wc-bind--value="context.minPrice"
-							data-wc-on--change="actions.updateProducts"
+							data-wp-bind--min="context.minRange"
+							data-wp-bind--max="context.maxRange"
+							data-wp-bind--value="context.minPrice"
+							data-wp-on--change="actions.updateProducts"
 						>
 						<input
 							type="range"
@@ -235,10 +235,10 @@ final class ProductFilterPrice extends AbstractBlock {
 							min="<?php echo esc_attr( $min_range ); ?>"
 							max="<?php echo esc_attr( $max_range ); ?>"
 							value="<?php echo esc_attr( $max_price ); ?>"
-							data-wc-bind--min="context.minRange"
-							data-wc-bind--max="context.maxRange"
-							data-wc-bind--value="context.maxPrice"
-							data-wc-on--change="actions.updateProducts"
+							data-wp-bind--min="context.minRange"
+							data-wp-bind--max="context.maxRange"
+							data-wp-bind--value="context.maxPrice"
+							data-wp-on--change="actions.updateProducts"
 						>
 					</div>
 					<div class="wp-block-woocommerce-product-filter-price-content-right-input text">

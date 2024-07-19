@@ -5,7 +5,7 @@ import {
 	store,
 	getContext as getContextFn,
 	getElement,
-} from '@woocommerce/interactivity';
+} from '@wordpress/interactivity';
 import { StorePart } from '@woocommerce/utils';
 
 export interface ProductGalleryContext {

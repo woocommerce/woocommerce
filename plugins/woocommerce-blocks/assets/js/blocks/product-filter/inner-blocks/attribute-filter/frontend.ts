@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@woocommerce/interactivity';
-import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
+import { store, getContext } from '@wordpress/interactivity';
+import { DropdownContext } from '@wordpress/interactivity-components/dropdown';
 import { HTMLElementEvent } from '@woocommerce/types';
 
 /**

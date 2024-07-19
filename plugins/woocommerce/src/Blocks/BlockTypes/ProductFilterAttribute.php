@@ -101,8 +101,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 					return array(
 						'title'      => $term_object->name,
 						'attributes' => array(
-							'data-wc-on--click' => "$action_namespace::actions.removeFilter",
-							'data-wc-context'   => "$action_namespace::" . wp_json_encode(
+							'data-wp-on--click' => "$action_namespace::actions.removeFilter",
+							'data-wp-context'   => "$action_namespace::" . wp_json_encode(
 								array(
 									'value'         => $term,
 									'attributeSlug' => $product_attribute,
@@ -146,7 +146,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 				'<div %s></div>',
 				get_block_wrapper_attributes(
 					array(
-						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+						'data-wp-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
 						'data-has-filter'     => 'no',
 					)
 				),
@@ -198,8 +198,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 			'<div %1$s>%2$s%3$s</div>',
 			get_block_wrapper_attributes(
 				array(
-					'data-wc-context'     => wp_json_encode( $context ),
-					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+					'data-wp-context'     => wp_json_encode( $context ),
+					'data-wp-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
 					'data-has-filter'     => 'yes',
 				)
 			),

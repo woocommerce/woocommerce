@@ -118,11 +118,11 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	private function get_main_images_html( $context, $product_id ) {
 		$attributes = array(
 			'class'                  => 'wc-block-woocommerce-product-gallery-large-image__image',
-			'data-wc-bind--hidden'   => '!state.isSelected',
-			'data-wc-watch'          => 'callbacks.scrollInto',
-			'data-wc-bind--tabindex' => 'state.thumbnailTabIndex',
-			'data-wc-on--keydown'    => 'actions.onSelectedLargeImageKeyDown',
-			'data-wc-class--wc-block-woocommerce-product-gallery-large-image__image--active-image-slide' => 'state.isSelected',
+			'data-wp-bind--hidden'   => '!state.isSelected',
+			'data-wp-watch'          => 'callbacks.scrollInto',
+			'data-wp-bind--tabindex' => 'state.thumbnailTabIndex',
+			'data-wp-on--keydown'    => 'actions.onSelectedLargeImageKeyDown',
+			'data-wp-class--wc-block-woocommerce-product-gallery-large-image__image--active-image-slide' => 'state.isSelected',
 		);
 
 		if ( $context['fullScreenOnClick'] ) {
@@ -131,7 +131,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		if ( $context['hoverZoom'] ) {
 			$attributes['class']              .= ' wc-block-woocommerce-product-gallery-large-image__image--hoverZoom';
-			$attributes['data-wc-bind--style'] = 'state.styles';
+			$attributes['data-wp-bind--style'] = 'state.styles';
 		}
 
 		$main_images = ProductGalleryUtils::get_product_gallery_images(
@@ -187,10 +187,10 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		);
 
 		return array(
-			'data-wc-interactive'    => wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ) ),
-			'data-wc-context'        => wp_json_encode( $context, JSON_NUMERIC_CHECK ),
-			'data-wc-on--mousemove'  => 'actions.startZoom',
-			'data-wc-on--mouseleave' => 'actions.resetZoom',
+			'data-wp-interactive'    => wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ) ),
+			'data-wp-context'        => wp_json_encode( $context, JSON_NUMERIC_CHECK ),
+			'data-wp-on--mousemove'  => 'actions.startZoom',
+			'data-wp-on--mouseleave' => 'actions.resetZoom',
 		);
 	}
 
@@ -207,7 +207,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		}
 
 		return array(
-			'data-wc-on--click' => 'actions.openDialog',
+			'data-wp-on--click' => 'actions.openDialog',
 		);
 	}
 }

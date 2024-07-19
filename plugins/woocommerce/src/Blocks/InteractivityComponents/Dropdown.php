@@ -39,24 +39,24 @@ class Dropdown {
 
 		ob_start();
 		?>
-		<div data-wc-interactive='<?php echo esc_attr( $namespace ); ?>'>
-			<div class="wc-interactivity-dropdown" data-wc-on--click="actions.toggleIsOpen" data-wc-context='<?php echo esc_attr( wp_json_encode( $dropdown_context ) ); ?>' >
+		<div data-wp-interactive='<?php echo esc_attr( $namespace ); ?>'>
+			<div class="wc-interactivity-dropdown" data-wp-on--click="actions.toggleIsOpen" data-wp-context='<?php echo esc_attr( wp_json_encode( $dropdown_context ) ); ?>' >
 				<div class="wc-interactivity-dropdown__dropdown" tabindex="-1" >
 					<div class="wc-interactivity-dropdown__dropdown-selection" id="options-dropdown" tabindex="0" aria-haspopup="listbox">
-						<span class="wc-interactivity-dropdown__placeholder" data-wc-text="state.placeholderText">
+						<span class="wc-interactivity-dropdown__placeholder" data-wp-text="state.placeholderText">
 							<?php echo empty( $selected_items ) ? esc_html( $placeholder ) : ''; ?>
 						</span>
 						<?php if ( 'multiple' === $select_type ) { ?>
 							<div class="selected-options">
 								<template
-										data-wc-each="context.selectedItems"
-										data-wc-each-key="context.item.value"
+										data-wp-each="context.selectedItems"
+										data-wp-each-key="context.item.value"
 									>
 										<div class="wc-interactivity-dropdown__selected-badge">
-											<span class="wc-interactivity-dropdown__badge-text" data-wc-text="context.item.label"></span>
+											<span class="wc-interactivity-dropdown__badge-text" data-wp-text="context.item.label"></span>
 											<svg
-												data-wc-on--click="actions.unselectDropdownItem"
-												data-wc-on--click--parent-action="<?php echo esc_attr( $action ); ?>"
+												data-wp-on--click="actions.unselectDropdownItem"
+												data-wp-on--click--parent-action="<?php echo esc_attr( $action ); ?>"
 												class="wc-interactivity-dropdown__badge-remove"
 												width="24"
 												height="24"
@@ -72,13 +72,13 @@ class Dropdown {
 								<?php foreach ( $selected_items as $selected ) { ?>
 									<div
 										class="wc-interactivity-dropdown__selected-badge"
-										data-wc-key="<?php echo esc_attr( $selected['value'] ); ?>"
-										data-wc-each-child
+										data-wp-key="<?php echo esc_attr( $selected['value'] ); ?>"
+										data-wp-each-child
 									>
 											<span class="wc-interactivity-dropdown__badge-text"><?php echo esc_html( $selected['label'] ); ?></span>
 											<svg
-												data-wc-on--click="actions.unselectDropdownItem"
-												data-wc-on--click--parent-action="<?php echo esc_attr( $action ); ?>"
+												data-wp-on--click="actions.unselectDropdownItem"
+												data-wp-on--click--parent-action="<?php echo esc_attr( $action ); ?>"
 												class="wc-interactivity-dropdown__badge-remove"
 												width="24"
 												height="24"
@@ -102,7 +102,7 @@ class Dropdown {
 						class="wc-interactivity-dropdown__dropdown-list"
 						aria-labelledby="options-dropdown"
 						role="listbox"
-						data-wc-bind--hidden="!context.isOpen"
+						data-wp-bind--hidden="!context.isOpen"
 						<?php echo esc_attr( $dropdown_context['isOpen'] ? '' : 'hidden' ); ?>
 					>
 						<?php
@@ -113,12 +113,12 @@ class Dropdown {
 								class="wc-interactivity-dropdown__dropdown-option"
 								role="option"
 								tabindex="0"
-								data-wc-on--click--select-item="actions.selectDropdownItem"
-								data-wc-on--click--parent-action="<?php echo esc_attr( $action ); ?>"
-								data-wc-class--is-selected="state.isSelected"
+								data-wp-on--click--select-item="actions.selectDropdownItem"
+								data-wp-on--click--parent-action="<?php echo esc_attr( $action ); ?>"
+								data-wp-class--is-selected="state.isSelected"
 								class="components-form-token-field__suggestion"
-								data-wc-bind--aria-selected="state.isSelected"
-								data-wc-context='<?php echo wp_json_encode( $context ); ?>'
+								data-wp-bind--aria-selected="state.isSelected"
+								data-wp-context='<?php echo wp_json_encode( $context ); ?>'
 							>
 								<?php echo $item['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</div>

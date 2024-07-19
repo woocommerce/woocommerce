@@ -89,7 +89,7 @@ final class ProductFilter extends AbstractBlock {
 		$has_selected_filter = false;
 
 		while ( $tags->next_tag( 'div' ) ) {
-			$items = $tags->get_attribute( 'data-wc-context' ) ? json_decode( $tags->get_attribute( 'data-wc-context' ), true ) : null;
+			$items = $tags->get_attribute( 'data-wp-context' ) ? json_decode( $tags->get_attribute( 'data-wp-context' ), true ) : null;
 
 			// For checked box filters.
 			if ( $items && array_key_exists( 'items', $items ) ) {
@@ -115,13 +115,13 @@ final class ProductFilter extends AbstractBlock {
 		}
 
 		$attributes_data = array(
-			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
-			'data-wc-context'     => wp_json_encode( array( 'hasSelectedFilter' => $has_selected_filter ) ),
+			'data-wp-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+			'data-wp-context'     => wp_json_encode( array( 'hasSelectedFilter' => $has_selected_filter ) ),
 			'class'               => 'wc-block-product-filters',
 		);
 
 		if ( ! isset( $block->context['queryId'] ) ) {
-			$attributes_data['data-wc-navigation-id'] = $this->generate_navigation_id( $block );
+			$attributes_data['data-wp-navigation-id'] = $this->generate_navigation_id( $block );
 		}
 
 		$tags = new WP_HTML_Tag_Processor( $content );

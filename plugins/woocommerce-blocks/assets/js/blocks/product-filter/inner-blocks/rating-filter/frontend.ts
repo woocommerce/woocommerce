@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { getContext, store } from '@woocommerce/interactivity';
-import { CheckboxListContext } from '@woocommerce/interactivity-components/checkbox-list';
-import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
+import { getContext, store } from '@wordpress/interactivity';
+import { CheckboxListContext } from '@wordpress/interactivity-components/checkbox-list';
+import { DropdownContext } from '@wordpress/interactivity-components/dropdown';
 
 /**
  * Internal dependencies

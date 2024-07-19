@@ -83,7 +83,7 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 			const defaultRange = ( await page
 				.locator( '.wp-block-woocommerce-product-filter-price' )
-				.getAttribute( 'data-wc-context' ) ) as string;
+				.getAttribute( 'data-wp-context' ) ) as string;
 			const defaultMinRange = JSON.parse( defaultRange ).minRange;
 			const defaultMaxRange = JSON.parse( defaultRange ).maxRange;
 
@@ -121,7 +121,7 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 
 			const defaultRangePrice = ( await page
 				.locator( '.wp-block-woocommerce-product-filter-price' )
-				.getAttribute( 'data-wc-context' ) ) as string;
+				.getAttribute( 'data-wp-context' ) ) as string;
 
 			const defaultMinRange = JSON.parse( defaultRangePrice ).minRange;
 			const defaultMaxRange = JSON.parse( defaultRangePrice ).maxRange;

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { navigate as navigateFn } from '@woocommerce/interactivity';
+import { navigate as navigateFn } from '@wordpress/interactivity';
 import { getSetting } from '@woocommerce/settings';
 
 const isBlockTheme = getSetting< boolean >( 'isBlockTheme' );
