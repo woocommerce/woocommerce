@@ -63,13 +63,13 @@ const StateInput = ( {
 		return [];
 	}, [ countryStates ] );
 
-	const { validationError } = useSelect( ( select ) => {
+	const validationError = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
-		return {
-			validationError: store.getValidationError( errorId || '' ) || {
+		return (
+			store.getValidationError( errorId || '' ) || {
 				hidden: true,
-			},
-		};
+			}
+		);
 	} );
 
 	/**
