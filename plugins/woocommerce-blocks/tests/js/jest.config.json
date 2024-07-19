@@ -45,9 +45,12 @@
 		"<rootDir>/tests/js/setup-after-env.ts"
 	],
 	"testPathIgnorePatterns": [
-		"<rootDir>/tests/",
+		"<rootDir>/bin/",
+		"<rootDir>/build/",
+		"<rootDir>/docs/",
 		"<rootDir>/node_modules/",
-		"<rootDir>/vendor/"
+		"<rootDir>/vendor/",
+		"<rootDir>/tests/"
 	],
 	"transformIgnorePatterns": [ "node_modules/?!(simple-html-tokenizer|is-plain-obj|is-plain-object|memize)" ],
 	"testEnvironment": "jsdom",
@@ -55,5 +58,6 @@
 	"transform": {
 		"^.+\\.(js|ts|tsx)$": "<rootDir>/tests/js/jestPreprocess.js"
 	},
-	"verbose": true
+	"verbose": true,
+	"cacheDirectory": "<rootDir>/../../node_modules/.cache/jest"
 }
