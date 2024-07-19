@@ -62,7 +62,7 @@ $col    = 1;
 			<h3><?php echo esc_html( $address_title ); ?></h3>
 			<a href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address', $name ) ); ?>" class="edit">
 				<?php
-					echo sprintf(
+					printf(
 						/* translators: %s: Address title */
 						$address ? esc_html__( 'Edit %s', 'woocommerce' ) : esc_html__( 'Add %s', 'woocommerce' ),
 						esc_html( $address_title )
