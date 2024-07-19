@@ -353,7 +353,10 @@ class BatchProcessingController {
 	 */
 	public function get_enqueued_processors(): array {
 		$enqueued_processors = get_option( self::ENQUEUED_PROCESSORS_OPTION_NAME, array() );
+
 		if ( ! is_array( $enqueued_processors ) ) {
+			$this->logger->error( 'Could not fetch list of processors. Clearing up queue.', array( 'source' => 'batch-processing' ) );
+			delete_option( self::ENQUEUED_PROCESSORS_OPTION_NAME );
 			$enqueued_processors = array();
 		}
 
