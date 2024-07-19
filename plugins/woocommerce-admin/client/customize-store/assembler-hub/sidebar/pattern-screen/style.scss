@@ -9,6 +9,10 @@
 	padding: 16px 24px 24px 24px;
 	overflow: auto;
 
+	.block-editor-block-preview__container {
+		margin-bottom: 2px;
+	}
+
 	.woocommerce-customize-store-edit-site-layout__sidebar-extra__pattern__header {
 		display: flex;
 		align-items: center;
