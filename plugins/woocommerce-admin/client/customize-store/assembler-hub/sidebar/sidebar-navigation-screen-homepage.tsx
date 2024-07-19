@@ -120,9 +120,13 @@ export const SidebarNavigationScreenHomepage = ( {
 								const updatedBlocks =
 									findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 										parsedPattern.blocks,
-										( buttonBlock: BlockInstance ) => {
-											buttonBlock.attributes.style =
-												PRODUCT_HERO_PATTERN_BUTTON_STYLE;
+										( buttonBlocks: BlockInstance[] ) => {
+											buttonBlocks.forEach(
+												( buttonBlock ) => {
+													buttonBlock.attributes.style =
+														PRODUCT_HERO_PATTERN_BUTTON_STYLE;
+												}
+											);
 										}
 									);
 

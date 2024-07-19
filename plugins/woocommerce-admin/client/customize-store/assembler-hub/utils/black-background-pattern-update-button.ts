@@ -4,43 +4,49 @@
 import { BlockInstance } from '@wordpress/blocks';
 
 const updateFeaturedCategoryCoverImagePattern = (
-	featuredCategoryCoverImagePatternParentBlock: BlockInstance,
-	callback: ( buttonBlock: BlockInstance ) => void
+	featuredCategoryCoverImagePatternParentBlocks: BlockInstance[],
+	callback: ( buttonBlocks: BlockInstance[] ) => void
 ) => {
-	const coverBlock =
-		featuredCategoryCoverImagePatternParentBlock.innerBlocks.find(
-			( block ) => block.name === 'core/cover'
-		);
-
-	const buttonsBlock = coverBlock?.innerBlocks.find(
-		( block ) => block.name === 'core/buttons'
+	const coverBlocks = featuredCategoryCoverImagePatternParentBlocks.map(
+		( featuredCategoryCoverImagePatternParentBlock ) =>
+			featuredCategoryCoverImagePatternParentBlock.innerBlocks.find(
+				( block ) => block.name === 'core/cover'
+			)
 	);
 
-	const buttonBlock = buttonsBlock?.innerBlocks[ 0 ];
+	const parentButtonBlocks = coverBlocks.map( ( coverBlock ) =>
+		coverBlock?.innerBlocks.find(
+			( block ) => block.name === 'core/buttons'
+		)
+	);
 
-	if ( ! buttonBlock ) {
-		return;
-	}
+	const buttonBlocks = parentButtonBlocks.map(
+		( parentButtonBlock ) => parentButtonBlock?.innerBlocks[ 0 ]
+	);
 
-	callback( buttonBlock );
+	callback( buttonBlocks as BlockInstance[] );
 };
 
 const updateJustArrivedFullHeroPattern = (
-	justArrivedFullHeroPattern: BlockInstance,
-	callback: ( buttonBlock: BlockInstance ) => void
+	justArrivedFullHeroPatterns: BlockInstance[],
+	callback: ( buttonBlocks: BlockInstance[] ) => void
 ) => {
-	const buttonsBlock =
-		justArrivedFullHeroPattern?.innerBlocks[ 0 ].innerBlocks.find(
-			( block ) => block.name === 'core/buttons'
-		);
+	const parentButtonBlocks = justArrivedFullHeroPatterns.map(
+		( justArrivedFullHeroPattern ) =>
+			justArrivedFullHeroPattern?.innerBlocks[ 0 ].innerBlocks.find(
+				( block ) => block.name === 'core/buttons'
+			)
+	);
 
-	const buttonBlock = buttonsBlock?.innerBlocks[ 0 ];
+	const buttonBlocks = parentButtonBlocks
+		.map( ( parentButtonBlock ) => parentButtonBlock?.innerBlocks[ 0 ] )
+		.filter( Boolean );
 
-	if ( ! buttonBlock ) {
+	if ( ! buttonBlocks ) {
 		return;
 	}
 
-	callback( buttonBlock );
+	callback( buttonBlocks as BlockInstance[] );
 };
 
 export const isJustArrivedFullHeroPattern = ( block: BlockInstance ) =>
@@ -60,26 +66,26 @@ export const isFeaturedCategoryCoverImagePattern = ( block: BlockInstance ) =>
 export const findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate =
 	(
 		blocks: BlockInstance[],
-		callback: ( buttonBlock: BlockInstance ) => void
+		callback: ( buttonBlocks: BlockInstance[] ) => void
 	) => {
-		const justArrivedFullHeroPattern = blocks.find(
+		const justArrivedFullHeroPatterns = blocks.filter(
 			isJustArrivedFullHeroPattern
 		);
 
-		if ( justArrivedFullHeroPattern ) {
+		if ( justArrivedFullHeroPatterns ) {
 			updateJustArrivedFullHeroPattern(
-				justArrivedFullHeroPattern,
+				justArrivedFullHeroPatterns,
 				callback
 			);
 		}
 
-		const featuredCategoryCoverImagePattern = blocks.find(
+		const featuredCategoryCoverImagePatterns = blocks.filter(
 			isFeaturedCategoryCoverImagePattern
 		);
 
-		if ( featuredCategoryCoverImagePattern ) {
+		if ( featuredCategoryCoverImagePatterns ) {
 			updateFeaturedCategoryCoverImagePattern(
-				featuredCategoryCoverImagePattern,
+				featuredCategoryCoverImagePatterns,
 				callback
 			);
 		}

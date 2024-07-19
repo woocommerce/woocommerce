@@ -81,8 +81,11 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 					const blocks =
 						findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 							pattern.blocks,
-							( block: BlockInstance ) => {
-								block.attributes.style = {};
+							( patternBlocks: BlockInstance[] ) => {
+								patternBlocks.forEach(
+									( block: BlockInstance ) =>
+										( block.attributes.style = {} )
+								);
 							}
 						);
 					return { ...pattern, blocks };
@@ -91,9 +94,12 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 				const blocks =
 					findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 						pattern.blocks,
-						( block: BlockInstance ) => {
-							block.attributes.style =
-								PRODUCT_HERO_PATTERN_BUTTON_STYLE;
+						( patternBlocks: BlockInstance[] ) => {
+							patternBlocks.forEach(
+								( block ) =>
+									( block.attributes.style =
+										PRODUCT_HERO_PATTERN_BUTTON_STYLE )
+							);
 						}
 					);
 
@@ -213,16 +219,52 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 				( blockInstance: BlockInstance ) => cloneBlock( blockInstance )
 			);
 
-			insertBlocks( cloneBlocks, insertableIndex, undefined, false );
+			if ( ! isActiveNewNeutralVariation ) {
+				const updatedBlocks =
+					findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
+						cloneBlocks,
+						( patternBlocks: BlockInstance[] ) => {
+							patternBlocks.forEach(
+								( block: BlockInstance ) =>
+									( block.attributes.style = {} )
+							);
+						}
+					);
 
-			blockToScroll.current = cloneBlocks[ 0 ].clientId;
+				insertBlocks(
+					updatedBlocks,
+					insertableIndex,
+					undefined,
+					false
+				);
+				blockToScroll.current = updatedBlocks[ 0 ].clientId;
+			} else {
+				const updatedBlocks =
+					findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
+						cloneBlocks,
+						( patternBlocks: BlockInstance[] ) => {
+							patternBlocks.forEach(
+								( block ) =>
+									( block.attributes.style =
+										PRODUCT_HERO_PATTERN_BUTTON_STYLE )
+							);
+						}
+					);
+				insertBlocks(
+					updatedBlocks,
+					insertableIndex,
+					undefined,
+					false
+				);
+				blockToScroll.current = updatedBlocks[ 0 ].clientId;
+			}
 
 			trackEvent(
 				'customize_your_store_assembler_pattern_sidebar_click',
 				{ pattern: pattern.name }
 			);
 		},
-		[ insertBlocks, insertableIndex ]
+		[ insertBlocks, insertableIndex, isActiveNewNeutralVariation ]
 	);
 
 	return (
