@@ -94,7 +94,7 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 	 * @return int|false meta ID
 	 */
 	public function add_meta( &$object, $meta ) {
-		$insert_id = parent::add_meta( $object_id, $meta );
+		$insert_id = parent::add_meta( $object, $meta );
 		if ( false !== $insert_id ) {
 			$this->clear_cached_data( array( $object->get_id() ) );
 		}
