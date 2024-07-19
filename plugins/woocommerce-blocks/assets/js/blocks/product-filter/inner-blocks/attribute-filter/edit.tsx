@@ -38,6 +38,7 @@ import { AttributeCheckboxList } from './components/attribute-checkbox-list';
 import { AttributeDropdown } from './components/attribute-dropdown';
 import { attributeOptionsPreview } from './constants';
 import './style.scss';
+import { Inspector as NewInspector } from './inspector';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
@@ -340,6 +341,7 @@ const Edit = ( props: EditProps ) => {
 			isEditing={ isEditing }
 			blockProps={ blockProps }
 		>
+			<NewInspector { ...props } />
 			<Inspector { ...props } />
 			<Disabled>
 				{ displayStyle === 'dropdown' ? (

@@ -42,6 +42,10 @@
 		"isPreview": {
 			"type": "boolean",
 			"default": false
+		},
+		"sortOrder": {
+			"type": "string",
+			"default": "count-desc"
 		}
 	}
 }

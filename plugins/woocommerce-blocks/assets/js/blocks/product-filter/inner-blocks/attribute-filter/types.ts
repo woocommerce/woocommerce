@@ -3,13 +3,19 @@
  */
 import { BlockEditProps } from '@wordpress/blocks';
 
+/**
+ * Internal dependencies
+ */
+import { sortOrders } from './constants';
+
 export type BlockAttributes = {
 	attributeId: number;
 	showCounts: boolean;
-	queryType: string;
+	queryType: 'or' | 'and';
 	displayStyle: string;
 	selectType: string;
 	isPreview: boolean;
+	sortOrder: keyof typeof sortOrders;
 };
 
 export interface EditProps extends BlockEditProps< BlockAttributes > {
