@@ -338,6 +338,12 @@ jobs:
       issues: write
     
     steps:
+      - name: 'Checkout Gutenberg repository'
+        uses: actions/checkout@v4
+        with:
+          repository: WordPress/gutenberg
+          ref: dbf201449e9736f672b61e422787d47659db327a
+
       - uses: actions/download-artifact@v4
         id: download-artifact
         with:
@@ -353,22 +359,15 @@ jobs:
           # any output means there are reports
           echo "FLAKY_REPORTS=$(ls -A $downloadPath | head -1)" >> $GITHUB_ENV
 
-      - name: 'Checkout Gutenberg repository'
-        uses: actions/checkout@v4
-        if: ${{ !!env.FLAKY_REPORTS }}
-        with:
-          repository: WordPress/gutenberg
-          ref: dbf201449e9736f672b61e422787d47659db327a
-
       - name: 'Pick pre-built @wordpress/report-flaky-tests resources'
         if: ${{ !!env.FLAKY_REPORTS }}
         uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
         with:
           path: ./packages/report-flaky-tests/build/
-          key: "${{ runner.os }}-report-flaky-tests-TESTHASH"
+          key: "${{ runner.os }}-report-flaky-tests-dbf201449e9736f672b61e422787d47659db327a"
           restore-keys: '${{ runner.os }}-report-flaky-tests-'
 
-      - name: 'Check if to build @wordpress/report-flaky-tests'
+      - name: 'Check the build scope (full or minimal)'
         if: ${{ !!env.FLAKY_REPORTS }}
         shell: 'bash'
         run: |
