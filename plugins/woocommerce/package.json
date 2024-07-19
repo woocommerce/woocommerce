@@ -610,7 +610,8 @@
 					"changes": [],
 					"events": [
 						"daily-checks",
-						"on-demand"
+						"on-demand",
+						"some-new-trigger-only-this-branch-has"
 					],
 					"report": {
 						"resultsBlobName": "default-wpcom-core-e2e",
