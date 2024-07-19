@@ -1990,6 +1990,7 @@ p.demo_store,
 
 		td.actions .coupon .coupon-error-message {
 			color: $red;
+			flex-basis: 100%;
 			float: none;
 			font-size: 0.75em;
 			margin-bottom: 0;

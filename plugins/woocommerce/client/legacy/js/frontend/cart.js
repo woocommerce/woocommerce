@@ -581,7 +581,9 @@ jQuery( function ( $ ) {
 						'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success, .coupon-error-message'
 					).remove();
 					
-					if ( response.indexOf('woocommerce-error') === -1 ) {
+					// We only want to show coupon notices if they are not errors.
+					// Coupon errors are shown under the input.
+					if ( response.indexOf('woocommerce-error') === -1 && response.indexOf('is-error') === -1 ) {
 						show_notice( response );						
 					} else {
 						var $coupon_wrapper = $text_field.closest( '.coupon' );
