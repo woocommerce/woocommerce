@@ -349,11 +349,21 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'date',
-			'enum'              => array(
-				'date',
-				'net_revenue',
-				'orders_count',
-				'avg_order_value',
+			/**
+			 * Filter to add or remove orderby params.
+			 *
+			 * @param array $orderby_enum Array of params permitted for orderby.
+			 *
+			 * @since 9.2.0
+			 */
+			'enum'              => apply_filters(
+				'woocommerce_report_orders_stats_orderby_params',
+				array(
+					'date',
+					'net_revenue',
+					'orders_count',
+					'avg_order_value',
+				)
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
