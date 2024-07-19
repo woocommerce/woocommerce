@@ -128,7 +128,13 @@ test.describe( 'Merchant > Customer List', { tag: '@services' }, () => {
 						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
 						exact: true,
 					} )
-					.waitFor( { state: 'visible' } );
+					.waitFor();
+				await page
+					.getByRole( 'option', {
+						name: `${ customer.first_name } ${ customer.last_name }`,
+						exact: true,
+					} )
+					.waitFor();
 				await page
 					.getByRole( 'option', {
 						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,

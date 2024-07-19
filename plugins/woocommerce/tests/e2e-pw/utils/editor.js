@@ -50,16 +50,37 @@ const goToPostEditor = async ( { page } ) => {
 };
 
 const fillPageTitle = async ( page, title ) => {
-	await ( await getCanvas( page ) )
-		.getByRole( 'textbox', { name: 'Add title' } )
-		.fill( title );
+	await ( await getCanvas( page ) ).getByLabel( 'Add title' ).fill( title );
 };
 
-const insertBlock = async ( page, blockName ) => {
-	await page.getByLabel( 'Toggle block inserter' ).click();
+const insertBlock = async ( page, blockName, wpVersion = null ) => {
+	await page
+		.getByRole( 'button', {
+			name: 'Toggle block inserter',
+			expanded: false,
+		} )
+		.click();
 	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
-	await page.getByLabel( 'Toggle block inserter' ).click();
+
+	// In WP 6.6 'Toggle block inserter' button closes the inserter as expected,
+	// but trying to immediately open it again will fail in Playwright, while manually it works.
+	// We have tests that insert multiple blocks and fail because of this.
+	// Using the new 'Close block inserter' button added in WP 6.6 works fine.
+	if ( wpVersion && wpVersion <= 6.5 ) {
+		await page
+			.getByRole( 'button', {
+				name: 'Toggle block inserter',
+				expanded: true,
+			} )
+			.click();
+	} else {
+		await page
+			.getByRole( 'button', {
+				name: 'Close block inserter',
+			} )
+			.click();
+	}
 };
 
 const insertBlockByShortcut = async ( page, blockName ) => {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make the edit/delete actions of shipping/products in manual orders accessible

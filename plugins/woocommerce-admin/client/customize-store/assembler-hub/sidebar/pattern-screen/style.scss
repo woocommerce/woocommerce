@@ -3,9 +3,15 @@
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-	background-color: #f0f0f0;
-	padding: 25px;
+	background-color: #fff;
+	border-radius: 12px;
+	box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.05);
+	padding: 16px 24px 24px 24px;
 	overflow: auto;
+
+	.block-editor-block-preview__container {
+		margin-bottom: 2px;
+	}
 
 	.woocommerce-customize-store-edit-site-layout__sidebar-extra__pattern__header {
 		display: flex;
@@ -15,6 +21,7 @@
 
 		h1 {
 			font-size: 16px;
+			padding: 0;
 		}
 
 		span {

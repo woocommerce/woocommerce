@@ -11,7 +11,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getProductErrorMessageAndProps } from '../../../utils/get-product-error-message-and-props';
+import { useErrorHandler } from '../../../hooks/use-error-handler';
 import { usePreview } from '../hooks/use-preview';
 import { PreviewButtonProps } from './types';
 import { TRACKS_SOURCE } from '../../../constants';
@@ -22,6 +22,7 @@ export function PreviewButton( {
 	...props
 }: PreviewButtonProps ) {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
+	const { getProductErrorMessageAndProps } = useErrorHandler();
 
 	const previewButtonProps = usePreview( {
 		productStatus,

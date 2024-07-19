@@ -154,9 +154,10 @@ class Status extends AbstractOrderConfirmationBlock {
 	 */
 	protected function render_account_notice( $order = null ) {
 		if ( $order && $order->get_customer_id() && 'store-api' === $order->get_created_via() ) {
-			$nag = get_user_option( 'default_password_nag', $order->get_customer_id() );
+			$nag      = get_user_option( 'default_password_nag', $order->get_customer_id() );
+			$generate = get_option( 'woocommerce_registration_generate_password', false );
 
-			if ( $nag ) {
+			if ( $nag && ! $generate ) {
 				return wc_print_notice(
 					sprintf(
 						// translators: %s: site name.
