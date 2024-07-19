@@ -6,6 +6,7 @@ const {
 	getCanvas,
 	publishPage,
 } = require( '../../utils/editor' );
+const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
 
 // some WooCommerce Patterns to use
 const wooPatterns = [
@@ -35,9 +36,15 @@ test.describe(
 			await goToPageEditor( { page } );
 			await fillPageTitle( page, testPage.title );
 
+			const wordPressVersion = await getInstalledWordPressVersion();
+
 			for ( let i = 0; i < wooPatterns.length; i++ ) {
 				await test.step( `Insert ${ wooPatterns[ i ].name } pattern`, async () => {
-					await insertBlock( page, wooPatterns[ i ].name );
+					await insertBlock(
+						page,
+						wooPatterns[ i ].name,
+						wordPressVersion
+					);
 
 					await expect(
 						page.getByLabel( 'Dismiss this notice' ).filter( {
