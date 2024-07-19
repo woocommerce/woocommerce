@@ -115,7 +115,22 @@ export const SidebarNavigationScreenHomepage = ( {
 								}
 
 								if ( ! isActiveNewNeutralVariation ) {
-									return [ ...acc, ...parsedPattern.blocks ];
+									const updatedBlocks =
+										findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
+											parsedPattern.blocks,
+											(
+												buttonBlocks: BlockInstance[]
+											) => {
+												buttonBlocks.forEach(
+													( buttonBlock ) => {
+														buttonBlock.attributes.style =
+															{};
+													}
+												);
+											}
+										);
+
+									return [ ...acc, ...updatedBlocks ];
 								}
 								const updatedBlocks =
 									findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
