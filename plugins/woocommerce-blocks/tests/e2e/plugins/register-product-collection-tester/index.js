@@ -11,6 +11,7 @@ __experimentalRegisterProductCollection( {
 		query: {
 			perPage: 5,
 		},
+		hideControls: [ 'keyword', 'on-sale' ],
 	},
 } );
 

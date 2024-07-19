@@ -1468,6 +1468,30 @@ test.describe( 'Testing registerProductCollection', () => {
 				.locator( 'visible=true' );
 			await expect( products ).toHaveCount( 5 );
 		} );
+
+		test( 'hideControls allows to hide filters', async ( {
+			pageObject,
+			page,
+		} ) => {
+			await pageObject.goToProductCatalogAndInsertCollection(
+				'myCustomCollection'
+			);
+
+			const sidebarSettings = await pageObject.locateSidebarSettings();
+			const onsaleControl = sidebarSettings.getByLabel(
+				SELECTORS.onSaleControlLabel
+			);
+			await expect( onsaleControl ).toBeHidden();
+
+			await page
+				.getByRole( 'button', { name: 'Filters options' } )
+				.click();
+			const keywordControl = page.getByRole( 'menuitemcheckbox', {
+				name: 'Keyword',
+			} );
+
+			await expect( keywordControl ).toBeHidden();
+		} );
 	} );
 
 	test.describe( 'My Custom Collection with Preview', () => {
