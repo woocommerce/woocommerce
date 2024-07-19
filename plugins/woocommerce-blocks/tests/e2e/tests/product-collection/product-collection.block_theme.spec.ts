@@ -220,7 +220,6 @@ test.describe( 'Product Collection', () => {
 		test( 'Products can be filtered based on keyword.', async ( {
 			pageObject,
 		} ) => {
-			await pageObject.createNewPostAndInsertBlock();
 			await pageObject.addFilter( 'Keyword' );
 
 			await pageObject.setKeyword( 'Album' );
