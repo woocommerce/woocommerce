@@ -257,7 +257,7 @@ class FeaturesController {
 					'enabled_by_default' => false,
 					'is_legacy'          => true, // @todo #46023 This should be false so compatibility checks can be run.
 					'option_key'         => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
-        		),
+				),
 				'remote_logging'       => array(
 					'name'               => __( 'Remote Logging', 'woocommerce' ),
 					'description'        => __(
