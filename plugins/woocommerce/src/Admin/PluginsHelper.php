@@ -725,7 +725,7 @@ class PluginsHelper {
 			$hyperlink_url = add_query_arg(
 				array(
 					'utm_source'   => 'pu',
-					'utm_campaign' => 'pu_settings_screen_renew',
+					'utm_campaign' => 'expired' === $type ? 'pu_settings_screen_renew' : 'pu_settings_screen_enable_autorenew',
 
 				),
 				self::WOO_SUBSCRIPTION_PAGE_URL
@@ -769,7 +769,7 @@ class PluginsHelper {
 				'product_id'   => $product_id,
 				'type'         => $type,
 				'utm_source'   => 'pu',
-				'utm_campaign' => 'pu_settings_screen_renew',
+				'utm_campaign' => 'expired' === $type ? 'pu_settings_screen_renew' : 'pu_settings_screen_enable_autorenew',
 
 			),
 			self::WOO_SUBSCRIPTION_PAGE_URL
