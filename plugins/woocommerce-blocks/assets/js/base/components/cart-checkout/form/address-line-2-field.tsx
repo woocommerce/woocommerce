@@ -66,8 +66,8 @@ const AddressLine2Field = < T extends AddressFormValues | ContactFormValues >( {
 						tabIndex={ -1 }
 						className="wc-block-components-address-form__address_2-hidden-input"
 						aria-hidden="true"
-						aria-label={ props?.label }
-						autoComplete="address-line2"
+						aria-label={ field.label }
+						autoComplete={ field.autocomplete }
 						id={ props?.id }
 						value={ value }
 						onChange={ ( event ) =>
