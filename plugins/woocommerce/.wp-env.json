@@ -1,8 +1,7 @@
 {
+	"core": null,
 	"phpVersion": "7.4",
-	"plugins": [
-		"."
-	],
+	"plugins": [ "." ],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
 		"WP_DEBUG_LOG": true,
