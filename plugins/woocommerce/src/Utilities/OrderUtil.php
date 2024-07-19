@@ -41,7 +41,7 @@ final class OrderUtil {
 	 *
 	 * @return bool
 	 */
-	public static function custom_orders_table_datastore_cache_enabled() : bool {
+	public static function custom_orders_table_datastore_cache_enabled(): bool {
 		return wc_get_container()->get( CustomOrdersTableController::class )->hpos_data_caching_is_enabled();
 	}
 
