@@ -49,6 +49,10 @@ export class LogoPickerPage {
 			.click();
 	}
 
+	getPlaceholderPreview( assemblerLocator ) {
+		return assemblerLocator.locator( '.components-placeholder__preview' );
+	}
+
 	async resetLogo( baseURL ) {
 		const apiContext = await this.request.newContext( {
 			baseURL,
