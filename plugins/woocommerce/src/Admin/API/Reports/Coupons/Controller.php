@@ -197,13 +197,23 @@ class Controller extends GenericController implements ExportableInterface {
 	public function get_collection_params() {
 		$params                       = parent::get_collection_params();
 		$params['orderby']['default'] = 'coupon_id';
-		$params['orderby']['enum']    = array(
-			'coupon_id',
-			'code',
-			'amount',
-			'orders_count',
+		/**
+		 * Filter to add or remove orderby params.
+		 *
+		 * @param array $orderby_enum Array of params permitted for orderby.
+		 *
+		 * @since 9.2.0
+		 */
+		$params['orderby']['enum'] = apply_filters(
+			'woocommerce_report_coupons_orderby_params',
+			array(
+				'coupon_id',
+				'code',
+				'amount',
+				'orders_count',
+			)
 		);
-		$params['coupons']            = array(
+		$params['coupons']         = array(
 			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -212,7 +222,7 @@ class Controller extends GenericController implements ExportableInterface {
 				'type' => 'integer',
 			),
 		);
-		$params['extended_info']      = array(
+		$params['extended_info']   = array(
 			'description'       => __( 'Add additional piece of info about each coupon to the report.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
