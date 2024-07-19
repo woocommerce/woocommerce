@@ -15,7 +15,10 @@ import {
  * Internal dependencies
  */
 import { CheckoutPage } from '../checkout/checkout.page';
-import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
+import {
+	REGULAR_PRICED_PRODUCT_NAME,
+	INVALID_COUPON,
+} from '../checkout/constants';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	checkoutPageObject: async ( { page }, use ) => {
@@ -142,7 +145,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
 	} );
 
-	test( 'custom block notice templates are visible by template overwrite', async ( {
+	test( 'custom block notice templates, except for coupon errors, are visible by template overwrite', async ( {
 		requestUtils,
 		frontendUtils,
 		page,
@@ -174,10 +177,10 @@ test.describe( 'Shopper → Notice Templates', () => {
 			page.getByText( 'BLOCK ERROR NOTICE: Coupon code already applied!' )
 		).toBeVisible();
 
-		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is hidden.
 		await expect(
 			page.locator( '.wc-block-components-notice-banner.is-error svg' )
-		).toBeVisible();
+		).toBeHidden();
 
 		await page.getByLabel( 'Remove Polo from cart' ).click();
 
@@ -193,7 +196,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
 	} );
 
-	test( 'default block notice templates are visible by filter', async ( {
+	test( 'default block notice templates, except for coupon errors, are visible by filter', async ( {
 		requestUtils,
 		frontendUtils,
 		page,
@@ -223,10 +226,10 @@ test.describe( 'Shopper → Notice Templates', () => {
 			page.getByText( 'Coupon code already applied!' )
 		).toBeVisible();
 
-		// We're explicitly checking the CSS classes and that the SVG is visible.
+		// We're explicitly checking the CSS classes and that the SVG is hidden.
 		await expect(
 			page.locator( '.wc-block-components-notice-banner.is-error svg' )
-		).toBeVisible();
+		).toBeHidden();
 
 		await page.getByLabel( 'Remove Polo from cart' ).click();
 
@@ -238,6 +241,33 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await expect(
 			page.locator( '.wc-block-components-notice-banner.is-success svg' )
 		).toBeVisible();
+
+		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
+	} );
+
+	test( 'coupon inline notice is visible', async ( {
+		requestUtils,
+		frontendUtils,
+		page,
+	} ) => {
+		await requestUtils.activateTheme(
+			CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG
+		);
+
+		await frontendUtils.goToCartShortcode();
+		await page.getByPlaceholder( 'Coupon code' ).fill( INVALID_COUPON );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.getByText( 'BLOCK ERROR NOTICE: Coupon code already applied!' )
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is hidden.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-error svg' )
+		).toBeHidden();
+
+		await expect( page.locator( '.coupon-error-message' ) ).toBeVisible();
 
 		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
 	} );
