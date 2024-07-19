@@ -191,7 +191,8 @@ body.woocommerce-assembler {
 			}
 		}
 
-		.edit-site-sidebar-navigation-item.components-item .edit-site-sidebar-navigation-item__drilldown-indicator {
+		.edit-site-sidebar-navigation-item.components-item
+		.edit-site-sidebar-navigation-item__drilldown-indicator {
 			fill: #ccc;
 		}
 
@@ -553,7 +554,7 @@ body.woocommerce-assembler {
 		bottom: 16px;
 		top: 16px;
 		left: 6px; // the default styles for this undersizes the width by 24px so we want to center this
-		padding-right: 6px;
+		padding: 0 4px 0 16px;
 	}
 
 	.edit-site-resizable-frame__handle {
@@ -568,7 +569,9 @@ body.woocommerce-assembler {
 	}
 
 	.woocommerce-customize-store__block-editor,
-	.edit-site-layout:not(.is-full-canvas) .edit-site-layout__canvas > div .interface-interface-skeleton__content {
+	.edit-site-layout:not(.is-full-canvas)
+	.edit-site-layout__canvas > div
+	.interface-interface-skeleton__content {
 		border-radius: 12px;
 
 		.woocommerce-customize-store__block-editor,
@@ -634,6 +637,7 @@ body.woocommerce-assembler {
 		& > .tour-kit-frame__arrow {
 			right: -5px;
 			&::before {
+				background: #fff;
 				border-top: 1px solid var(--gutenberg-gray-300, #ddd);
 				border-right: 1px solid var(--gutenberg-gray-300, #ddd);
 			}
@@ -645,6 +649,7 @@ body.woocommerce-assembler {
 			&::before {
 				border-bottom: 1px solid var(--gutenberg-gray-300, #ddd);
 				border-left: 1px solid var(--gutenberg-gray-300, #ddd);
+				background: #fff;
 			}
 		}
 	}
@@ -789,7 +794,8 @@ body.woocommerce-assembler {
 	justify-content: space-between;
 }
 
-.components-dropdown-menu__menu	.woocommerce-customize-store__logo-menu-group.components-menu-group {
+.components-dropdown-menu__menu
+.woocommerce-customize-store__logo-menu-group.components-menu-group {
 	border-top: 0;
 	padding: 0 8px;
 

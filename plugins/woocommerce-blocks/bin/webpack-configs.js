@@ -103,6 +103,11 @@ const getCoreConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							],
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
+							cacheCompression: false,
 						},
 					},
 				},
@@ -217,7 +222,11 @@ const getMainConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
-							cacheDirectory: true,
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
+							cacheCompression: false,
 						},
 					},
 				},
@@ -366,7 +375,11 @@ const getFrontConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
-							cacheDirectory: true,
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
+							cacheCompression: false,
 						},
 					},
 				},
@@ -484,7 +497,11 @@ const getPaymentsConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
-							cacheDirectory: true,
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
+							cacheCompression: false,
 						},
 					},
 				},
@@ -591,7 +608,11 @@ const getExtensionsConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
-							cacheDirectory: true,
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
+							cacheCompression: false,
 						},
 					},
 				},
@@ -674,7 +695,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 					test: /\.(j|t)sx?$/,
 					exclude: /node_modules/,
 					use: {
-						loader: 'babel-loader?cacheDirectory',
+						loader: 'babel-loader',
 						options: {
 							presets: [
 								[
@@ -697,6 +718,11 @@ const getSiteEditorConfig = ( options = {} ) => {
 									: false,
 								'@babel/plugin-proposal-optional-chaining',
 							].filter( Boolean ),
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
+							cacheCompression: false,
 						},
 					},
 				},
@@ -831,7 +857,7 @@ const getStylingConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					use: {
-						loader: 'babel-loader?cacheDirectory',
+						loader: 'babel-loader',
 						options: {
 							presets: [ '@wordpress/babel-preset-default' ],
 							plugins: [
@@ -843,6 +869,11 @@ const getStylingConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
+							cacheCompression: false,
 						},
 					},
 				},
@@ -950,8 +981,6 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 						{
 							loader: require.resolve( 'babel-loader' ),
 							options: {
-								cacheDirectory:
-									process.env.BABEL_CACHE_DIRECTORY || true,
 								babelrc: false,
 								configFile: false,
 								presets: [
@@ -969,6 +998,11 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 									'@babel/plugin-proposal-optional-chaining',
 									'@babel/plugin-proposal-class-properties',
 								],
+								cacheDirectory: path.resolve(
+									__dirname,
+									'../../../node_modules/.cache/babel-loader'
+								),
+								cacheCompression: false,
 							},
 						},
 					],
@@ -1054,7 +1088,11 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							].filter( Boolean ),
-							cacheDirectory: true,
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
+							cacheCompression: false,
 						},
 					},
 				},
