@@ -48,7 +48,7 @@ function wc_template_redirect() {
 
 	// Redirect to edit account if trying to recover password whilst logged in.
 	if ( isset( $wp->query_vars['lost-password'] ) && is_user_logged_in() ) {
-		wp_safe_redirect( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) );
+		wp_safe_redirect( esc_url_raw( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) ) );
 		exit;
 	}
 
