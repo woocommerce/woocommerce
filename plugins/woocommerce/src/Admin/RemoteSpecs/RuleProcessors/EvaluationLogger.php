@@ -73,7 +73,7 @@ class EvaluationLogger {
 	 * Log the results.
 	 */
 	public function log() {
-		$should_log = false === defined( 'WC_ADMIN_DEBUG_RULE_EVALUATOR' ) || true !== constant( 'WC_ADMIN_DEBUG_RULE_EVALUATOR' );
+		$should_log = defined( 'WC_ADMIN_DEBUG_RULE_EVALUATOR' ) && true === constant( 'WC_ADMIN_DEBUG_RULE_EVALUATOR' );
 
 		/**
 		 * Filter to determine if the rule evaluator should log the results.

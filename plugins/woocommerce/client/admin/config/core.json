@@ -19,7 +19,7 @@
 		"navigation": true,
 		"onboarding": true,
 		"onboarding-tasks": true,
-		"pattern-toolkit-full-composability": false,
+		"pattern-toolkit-full-composability": true,
 		"product-pre-publish-modal": false,
 		"product-custom-fields": true,
 		"remote-inbox-notifications": true,
