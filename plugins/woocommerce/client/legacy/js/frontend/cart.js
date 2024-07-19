@@ -104,7 +104,7 @@ jQuery( function ( $ ) {
 		// Remove errors
 		if ( ! preserve_notices ) {
 			$(
-				'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success, .coupon-error-message'
+				'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success, .coupon-error-notice'
 			).remove();
 		}
 
@@ -140,7 +140,7 @@ jQuery( function ( $ ) {
 			// .woocommerce-cart-form is replaced with the new form.
 			var $old_coupon_error_msg = $( '#coupon_code' )
 					.closest( '.coupon' )
-					.find( '.coupon-error-message' );
+					.find( '.coupon-error-notice' );
 
 			$( '.woocommerce-cart-form' ).replaceWith( $new_form );
 			$( '.woocommerce-cart-form' )
@@ -213,7 +213,7 @@ jQuery( function ( $ ) {
 				return;
 			}
 			
-			$coupon_error_el = $( '<p class="coupon-error-message" id="coupon-error-message">' + msg + '</p>' );
+			$coupon_error_el = $( '<p class="coupon-error-notice" id="coupon-error-notice">' + msg + '</p>' );
 		} else {
 			$coupon_error_el = html_element;
 		}
@@ -225,7 +225,7 @@ jQuery( function ( $ ) {
 		$target.find( '#coupon_code' )
 			.addClass( 'has-error' )
 			.attr( 'aria-invalid', 'true' )
-			.attr( 'aria-describedby', 'coupon-error-message' );
+			.attr( 'aria-describedby', 'coupon-error-notice' );
 		$target.append( $coupon_error_el );
 	};	
 
@@ -578,7 +578,7 @@ jQuery( function ( $ ) {
 				dataType: 'html',
 				success: function ( response ) {
 					$(
-						'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success, .coupon-error-message'
+						'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success, .coupon-error-notice'
 					).remove();
 					
 					// We only want to show coupon notices if they are not errors.
@@ -654,7 +654,7 @@ jQuery( function ( $ ) {
 				.removeAttr( 'aria-invalid' )
 				.removeAttr( 'aria-describedby' )
 				.closest( '.coupon' )
-				.find( '.coupon-error-message' )
+				.find( '.coupon-error-notice' )
 				.remove();
 		},
 

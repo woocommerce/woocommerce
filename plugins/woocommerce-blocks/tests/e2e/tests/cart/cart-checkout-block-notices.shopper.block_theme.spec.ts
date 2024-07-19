@@ -272,6 +272,6 @@ test.describe( 'Shopper → Notice Templates', () => {
 			page.locator( '.wc-block-components-notice-banner.is-error svg' )
 		).toBeHidden();
 
-		await expect( page.locator( '.coupon-error-message' ) ).toBeVisible();
+		await expect( page.locator( '.coupon-error-notice' ) ).toBeVisible();
 	} );
 } );

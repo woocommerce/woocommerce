@@ -1307,7 +1307,7 @@ p.demo_store,
 	}
 
 	form.checkout_coupon {
-		.coupon-error-message {
+		.coupon-error-notice {
 			color: $red;
 			display: block;
 			font-size: 0.75em;
@@ -1988,7 +1988,7 @@ p.demo_store,
 			}
 		}
 
-		td.actions .coupon .coupon-error-message {
+		td.actions .coupon .coupon-error-notice {
 			color: $red;
 			flex-basis: 100%;
 			float: none;

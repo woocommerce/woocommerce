@@ -628,15 +628,15 @@ jQuery( function( $ ) {
 				.focus()
 				.addClass( 'has-error' )
 				.attr( 'aria-invalid', 'true' )
-				.attr( 'aria-describedby', 'coupon-error-message' );
-			$target.append( '<span class="coupon-error-message" id="coupon-error-message" role="alert">' + msg + '</span>' );
+				.attr( 'aria-describedby', 'coupon-error-notice' );
+			$target.append( '<span class="coupon-error-notice" id="coupon-error-notice" role="alert">' + msg + '</span>' );
 		},
 		remove_coupon_error: function( evt ) {
 			$( evt.currentTarget )
 				.removeClass( 'has-error' )
 				.removeAttr( 'aria-invalid' )
 				.removeAttr( 'aria-describedby' )
-				.next( '.coupon-error-message' )
+				.next( '.coupon-error-notice' )
 				.remove();
 		},
 		submit: function( evt ) {
