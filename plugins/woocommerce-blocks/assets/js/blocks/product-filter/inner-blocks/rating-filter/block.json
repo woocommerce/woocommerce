@@ -8,6 +8,7 @@
 	"supports": {
 		"interactivity": true,
 		"inserter": false,
+		"multiple": false,
 		"color": {
 			"background": false,
 			"text": true

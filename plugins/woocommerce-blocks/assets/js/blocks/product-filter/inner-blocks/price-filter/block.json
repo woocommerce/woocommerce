@@ -11,7 +11,8 @@
 	"ancestor": [ "woocommerce/product-filter" ],
 	"supports": {
 		"interactivity": true,
-		"inserter": false
+		"inserter": false,
+		"multiple": false
 	},
 	"usesContext": [ "query", "queryId" ],
 	"attributes": {
