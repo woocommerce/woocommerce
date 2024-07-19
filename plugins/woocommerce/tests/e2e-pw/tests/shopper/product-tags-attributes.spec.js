@@ -317,7 +317,13 @@ test.describe(
 				.click();
 
 			await expect(
-				page.getByRole( 'button', { name: 'Update', exact: true } )
+				// WP 6.6 updates the button text from "Update" to "Save", so we'll need to check for either.
+				page.getByRole( 'button', { name: 'Update', exact: true } ).or(
+					page.getByRole( 'button', {
+						name: 'Save',
+						exact: true,
+					} )
+				)
 			).toBeVisible();
 
 			// go to created page with products showcase

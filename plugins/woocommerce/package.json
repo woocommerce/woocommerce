@@ -593,7 +593,8 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks"
+						"daily-checks",
+						"on-demand"
 					],
 					"report": {
 						"resultsBlobName": "default-pressable-core-e2e",
@@ -608,7 +609,8 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks"
+						"daily-checks",
+						"on-demand"
 					],
 					"report": {
 						"resultsBlobName": "default-wpcom-core-e2e",
