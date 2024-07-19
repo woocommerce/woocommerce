@@ -19,20 +19,25 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { SidebarNavigationScreen } from './sidebar-navigation-screen';
+import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { useEditorBlocks } from '../hooks/use-editor-blocks';
-import { usePatternsByCategory } from '../hooks/use-patterns';
-import { HighlightedBlockContext } from '../context/highlighted-block-context';
-import { useEditorScroll } from '../hooks/use-editor-scroll';
-import { useSelectedPattern } from '../hooks/use-selected-pattern';
-import { findPatternByBlock } from './utils';
-import BlockPatternList from '../block-pattern-list';
+import { useEditorBlocks } from '../../hooks/use-editor-blocks';
+import { usePatternsByCategory } from '../../hooks/use-patterns';
+import { HighlightedBlockContext } from '../../context/highlighted-block-context';
+import { useEditorScroll } from '../../hooks/use-editor-scroll';
+import { useSelectedPattern } from '../../hooks/use-selected-pattern';
+import { findPatternByBlock } from '../utils';
+import {
+	__experimentalBlockPatternsList as BlockPatternList,
+	// @ts-expect-error No types for this exist yet.
+} from '@wordpress/block-editor';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
 import { footerTemplateId } from '~/customize-store/data/homepageTemplates';
 import { useSelect } from '@wordpress/data';
 import { trackEvent } from '~/customize-store/tracking';
+
+import './style.scss';
 
 const SUPPORTED_FOOTER_PATTERNS = [
 	'woocommerce-blocks/footer-with-3-menus',
