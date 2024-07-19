@@ -56,11 +56,15 @@ function getErrorPropsWithActions(
 	validatorId: string,
 	focusByValidatorId: ( validatorId: string ) => void
 ): ErrorProps {
+	const errorLinkLabel =
+		errorContext === 'inventory'
+			? __( 'View SKU field', 'woocommerce' )
+			: __( 'View error', 'woocommerce' );
 	return {
 		explicitDismiss: true,
 		actions: [
 			{
-				label: __( 'View error', 'woocommerce' ),
+				label: errorLinkLabel,
 				onClick: () => {
 					navigateTo( {
 						url: getUrl( errorContext ),
