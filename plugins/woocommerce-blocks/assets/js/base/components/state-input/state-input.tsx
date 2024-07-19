@@ -7,7 +7,7 @@ import {
 	ValidatedTextInput,
 	ValidationInputError,
 } from '@woocommerce/blocks-components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { clsx } from 'clsx';
@@ -18,12 +18,6 @@ import { clsx } from 'clsx';
 import './style.scss';
 import type { StateInputWithStatesProps } from './StateInputProps';
 import { Select, SelectOption } from '../select';
-
-const emptyStateOption: SelectOption = {
-	value: '',
-	label: __( 'Select a state', 'woocommerce' ),
-	disabled: true,
-};
 
 const optionMatcher = (
 	value: string,
@@ -51,7 +45,14 @@ const StateInput = ( {
 }: StateInputWithStatesProps ): JSX.Element => {
 	const countryStates = states[ country ];
 	const options = useMemo< SelectOption[] >( () => {
-		if ( countryStates ) {
+		if ( countryStates && Object.keys( countryStates ).length > 0 ) {
+			const emptyStateOption: SelectOption = {
+				value: '',
+				/* translators: %s will be the type of province depending on country, e.g "state" or "state/county" or "department" */
+				label: sprintf( __( 'Select a %s', 'woocommerce' ), label ),
+				disabled: true,
+			};
+
 			return [
 				emptyStateOption,
 				...Object.keys( countryStates ).map( ( key ) => ( {
@@ -61,7 +62,7 @@ const StateInput = ( {
 			];
 		}
 		return [];
-	}, [ countryStates ] );
+	}, [ countryStates, label ] );
 
 	const validationError = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );

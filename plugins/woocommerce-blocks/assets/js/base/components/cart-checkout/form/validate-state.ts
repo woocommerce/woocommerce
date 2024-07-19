@@ -6,6 +6,23 @@ import { ShippingAddress } from '@woocommerce/settings';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { __ } from '@wordpress/i18n';
 
+function previousString( initialValue?: string ) {
+	let lastValue = initialValue;
+
+	function track( value: string ) {
+		const currentValue = lastValue;
+
+		lastValue = value;
+
+		// Return the previous value
+		return currentValue;
+	}
+
+	return track;
+}
+
+const lastValue = previousString( '' );
+
 export const validateState = (
 	addressType: string,
 	values: ShippingAddress,
@@ -15,25 +32,32 @@ export const validateState = (
 	const hasValidationError =
 		select( VALIDATION_STORE_KEY ).getValidationError( validationErrorId );
 
-	if ( values.country && isRequired && ! values.state ) {
-		if ( hasValidationError ) {
+	const countryChanged = lastValue( values.country ) !== values.country;
+
+	if ( hasValidationError ) {
+		if ( ! isRequired || values.state ) {
+			// Validation error has been set, but its no longer required, or the state was provided, clear the error.
+			dispatch( VALIDATION_STORE_KEY ).clearValidationError(
+				validationErrorId
+			);
+		} else if ( ! countryChanged ) {
+			// Validation error has been set, there has not been a country set so show the error.
 			dispatch( VALIDATION_STORE_KEY ).showValidationError(
 				validationErrorId
 			);
-		} else {
-			dispatch( VALIDATION_STORE_KEY ).setValidationErrors( {
-				[ validationErrorId ]: {
-					message: __( 'Please select your state', 'woocommerce' ),
-					hidden: true,
-				},
-			} );
 		}
-	}
-
-	// If the user changed to a country that does not require a state, or a value was selected, clear the error.
-	if ( hasValidationError && ( ! isRequired || values.state ) ) {
-		dispatch( VALIDATION_STORE_KEY ).clearValidationError(
-			validationErrorId
-		);
+	} else if (
+		! hasValidationError &&
+		isRequired &&
+		! values.state &&
+		values.country
+	) {
+		// No validation has been set yet, if it's required, there is a country set and no state, set the error.
+		dispatch( VALIDATION_STORE_KEY ).setValidationErrors( {
+			[ validationErrorId ]: {
+				message: __( 'Please select your state', 'woocommerce' ),
+				hidden: true,
+			},
+		} );
 	}
 };
