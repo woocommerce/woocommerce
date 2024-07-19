@@ -1,5 +1,10 @@
-export const stockStatusFilterIcon = () => (
-	<svg
+/**
+ * External dependencies
+ */
+import { SVG, Path } from '@wordpress/primitives';
+
+const productFilterStockStatus = () => (
+	<SVG
 		width="24"
 		height="24"
 		viewBox="0 0 24 24"
@@ -22,12 +27,14 @@ export const stockStatusFilterIcon = () => (
 			stroke="currentColor"
 			strokeWidth="1.5"
 		/>
-		<path
+		<Path
 			d="M4.75 4.8999C4.75 4.20955 5.30964 3.6499 6 3.6499H8.34082C8.7889 3.6499 9.20271 3.88974 9.42544 4.27854L9.62184 4.62136C9.84457 5.01016 10.2584 5.25 10.7065 5.25H13C13.6904 5.25 14.25 5.80964 14.25 6.5V10.3999C14.25 11.0903 13.6904 11.6499 13 11.6499H6C5.30964 11.6499 4.75 11.0903 4.75 10.3999V4.8999Z"
 			stroke="currentColor"
 			strokeWidth="1.5"
 			strokeLinejoin="round"
 			fill="none"
 		/>
-	</svg>
+	</SVG>
 );
+
+export default productFilterStockStatus;
