@@ -5,7 +5,7 @@ config = {
 	...config,
 	projects: [
 		{
-			name: 'default',
+			name: 'default wpcom',
 			use: { ...devices[ 'Desktop Chrome' ] },
 			testMatch: '**basic.spec.js',
 		},

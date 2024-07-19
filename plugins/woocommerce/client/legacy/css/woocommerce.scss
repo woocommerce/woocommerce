@@ -80,14 +80,14 @@ p.demo_store,
 		text-align: center;
 		line-height: 1;
 		border-radius: 100%;
-		color: red !important; // Required for default theme compatibility
+		color: var(--wc-red) !important; // Required for default theme compatibility
 		text-decoration: none;
 		font-weight: 700;
 		border: 0;
 
 		&:hover {
 			color: #fff !important; // Required for default theme compatibility
-			background: red;
+			background: var(--wc-red);
 		}
 	}
 
@@ -1224,7 +1224,7 @@ p.demo_store,
 		}
 
 		.required {
-			color: red;
+			color: var(--wc-red);
 			font-weight: 700;
 			border: 0 !important;
 			text-decoration: none;
@@ -1265,13 +1265,13 @@ p.demo_store,
 
 		&.woocommerce-invalid {
 			label {
-				color: $red;
+				color: var(--wc-red);
 			}
 
 			.select2-container,
 			input.input-text,
 			select {
-				border-color: $red;
+				border-color: var(--wc-red);
 			}
 		}
 
@@ -1521,7 +1521,7 @@ p.demo_store,
 
 		.woocommerce-widget-layered-nav-list__item--chosen a::before {
 			@include iconbefore("\e013");
-			color: $red;
+			color: var(--wc-red);
 		}
 	}
 
@@ -1547,7 +1547,7 @@ p.demo_store,
 
 				&::before {
 					@include iconbefore("\e013");
-					color: $red;
+					color: var(--wc-red);
 					vertical-align: inherit;
 					margin-right: 0.5em;
 				}
@@ -1657,7 +1657,7 @@ p.demo_store,
 
 		li.chosen a::before {
 			@include iconbefore("\e013");
-			color: $red;
+			color: var(--wc-red);
 		}
 	}
 
@@ -1793,7 +1793,7 @@ p.demo_store,
 		}
 
 		.out-of-stock {
-			color: red;
+			color: var(--wc-red);
 		}
 	}
 
@@ -2290,7 +2290,7 @@ p.demo_store,
 
 .woocommerce-invalid {
 	#terms {
-		outline: 2px solid red;
+		outline: 2px solid var(--wc-red);
 		outline-offset: 2px;
 	}
 }

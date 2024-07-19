@@ -44,8 +44,8 @@ import { select, useSelect } from '@wordpress/data';
 import { trackEvent } from '~/customize-store/tracking';
 import {
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
-	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
-} from '../utils/hero-pattern';
+	findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate,
+} from '../utils/black-background-pattern-update-button';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 import { isTrackingAllowed } from '../utils/is-tracking-allowed';
@@ -115,14 +115,33 @@ export const SidebarNavigationScreenHomepage = ( {
 								}
 
 								if ( ! isActiveNewNeutralVariation ) {
-									return [ ...acc, ...parsedPattern.blocks ];
+									const updatedBlocks =
+										findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
+											parsedPattern.blocks,
+											(
+												buttonBlocks: BlockInstance[]
+											) => {
+												buttonBlocks.forEach(
+													( buttonBlock ) => {
+														buttonBlock.attributes.style =
+															{};
+													}
+												);
+											}
+										);
+
+									return [ ...acc, ...updatedBlocks ];
 								}
 								const updatedBlocks =
-									findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+									findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 										parsedPattern.blocks,
-										( buttonBlock: BlockInstance ) => {
-											buttonBlock.attributes.style =
-												PRODUCT_HERO_PATTERN_BUTTON_STYLE;
+										( buttonBlocks: BlockInstance[] ) => {
+											buttonBlocks.forEach(
+												( buttonBlock ) => {
+													buttonBlock.attributes.style =
+														PRODUCT_HERO_PATTERN_BUTTON_STYLE;
+												}
+											);
 										}
 									);
 

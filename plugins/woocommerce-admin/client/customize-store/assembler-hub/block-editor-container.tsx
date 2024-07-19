@@ -4,7 +4,6 @@
  * External dependencies
  */
 import {
-	privateApis as blockEditorPrivateApis,
 	store as blockEditorStore,
 	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/block-editor';
@@ -32,11 +31,9 @@ import { useEditorBlocks } from './hooks/use-editor-blocks';
 import { useScrollOpacity } from './hooks/use-scroll-opacity';
 import {
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
-	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
-} from './utils/hero-pattern';
+	findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate,
+} from './utils/black-background-pattern-update-button';
 import { useIsActiveNewNeutralVariation } from './hooks/use-is-active-new-neutral-variation';
-
-const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
 export const BlockEditorContainer = () => {
 	const settings = useSiteEditorSettings();
@@ -97,39 +94,42 @@ export const BlockEditorContainer = () => {
 	// @ts-expect-error No types for this exist yet.
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 
-	// @ts-expect-error No types for this exist yet.
-	const { user } = useContext( GlobalStylesContext );
-
 	const isActiveNewNeutralVariation = useIsActiveNewNeutralVariation();
 
 	useEffect( () => {
 		if ( ! isActiveNewNeutralVariation ) {
-			findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+			findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 				blocks,
-				( block: BlockInstance ) => {
-					updateBlockAttributes( block.clientId, {
+				( buttonBlocks: BlockInstance[] ) => {
+					const buttonBlockClientIds = buttonBlocks.map(
+						( { clientId } ) => clientId
+					);
+
+					updateBlockAttributes( buttonBlockClientIds, {
 						style: {},
 					} );
 				}
 			);
+
 			return;
 		}
-		findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+
+		findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 			blocks,
-			( block: BlockInstance ) => {
-				updateBlockAttributes( block.clientId, {
+			( buttonBlocks: BlockInstance[] ) => {
+				const buttonBlockClientIds = buttonBlocks.map(
+					( { clientId } ) => clientId
+				);
+				updateBlockAttributes( buttonBlockClientIds, {
 					style: PRODUCT_HERO_PATTERN_BUTTON_STYLE,
 					// This is necessary; otherwise, the style won't be applied on the frontend during the style variation change.
 					className: '',
 				} );
 			}
 		);
-	}, [
-		blocks,
-		isActiveNewNeutralVariation,
-		updateBlockAttributes,
-		user.settings.color,
-	] );
+		// Blocks are not part of the dependencies because we don't want to trigger this effect when the blocks change. This would cause an infinite loop.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ isActiveNewNeutralVariation, updateBlockAttributes ] );
 
 	// @ts-expect-error No types for this exist yet.
 	const { insertBlock, removeBlock } = useDispatch( blockEditorStore );

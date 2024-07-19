@@ -31,6 +31,7 @@ export function useTreeItem( {
 	onLastItemLoop,
 	onFirstItemLoop,
 	onTreeBlur,
+	onEscape,
 	...props
 }: TreeItemProps ) {
 	const nextLevel = level + 1;
