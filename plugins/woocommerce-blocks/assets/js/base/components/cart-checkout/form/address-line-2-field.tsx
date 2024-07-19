@@ -20,7 +20,7 @@ const AddressLine2Field = < T extends AddressFormValues | ContactFormValues >( {
 	const isFieldRequired = field?.required ?? false;
 
 	// Display the input field if it has a value or if it is required.
-	const [ isFieldVisible, setFieldVisible ] = useState(
+	const [ isFieldVisible, setIsFieldVisible ] = useState(
 		() => Boolean( value ) || isFieldRequired
 	);
 
@@ -44,7 +44,7 @@ const AddressLine2Field = < T extends AddressFormValues | ContactFormValues >( {
 					className={
 						'wc-block-components-address-form__address_2-toggle'
 					}
-					onClick={ () => setFieldVisible( true ) }
+						onClick={ () => setIsFieldVisible( true ) }
 				>
 					{ sprintf(
 						// translators: %s: address 2 field label.
