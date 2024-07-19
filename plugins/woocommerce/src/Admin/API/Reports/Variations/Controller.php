@@ -296,12 +296,22 @@ class Controller extends ReportsController implements ExportableInterface {
 			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'date',
-			'enum'              => array(
-				'date',
-				'net_revenue',
-				'orders_count',
-				'items_sold',
-				'sku',
+			/**
+			 * Filter to add or remove orderby params.
+			 *
+			 * @param array $orderby_enum Array of params permitted for orderby.
+			 *
+			 * @since 9.2.0
+			 */
+			'enum'              => apply_filters(
+				'woocommerce_report_variations_orderby_params',
+				array(
+					'date',
+					'net_revenue',
+					'orders_count',
+					'items_sold',
+					'sku',
+				)
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
