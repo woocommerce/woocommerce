@@ -603,14 +603,12 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - default WPCOM site",
+					"name": "My on demand job",
 					"testType": "e2e",
 					"command": "test:e2e:with-env default-wpcom",
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks",
-						"on-demand",
 						"some-new-trigger-only-this-branch-has"
 					],
 					"report": {
