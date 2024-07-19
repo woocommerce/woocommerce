@@ -192,7 +192,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		// Also grab the current status so we can compare.
 		$previous_status = get_post_status( $order->get_id() );
 		// If the order doesn't exist in the DB, we will consider it as new.
-		if ( ! $previous_status ) {
+		if ( ! $previous_status && $order->get_id() === 0 ) {
 			$previous_status = 'new';
 		}
 
