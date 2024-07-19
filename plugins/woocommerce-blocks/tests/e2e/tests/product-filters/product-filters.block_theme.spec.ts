@@ -507,4 +507,38 @@ test.describe( `${ blockData.name }`, () => {
 			await expect( productFilterAttributeBlockHeading ).toBeVisible();
 		} );
 	} );
+
+	test( 'should be able to be added to the Product Filters Parent wrapper block', async ( {
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+
+		const block = editor.canvas.getByLabel(
+			'Block: Product Filters (Experimental)'
+		);
+		await expect( block ).toBeVisible();
+
+		const searchTerms = [
+			'status (experimental)',
+			'price (experimental)',
+			'rating (experimental)',
+			'attribute (experimental)',
+			'active (experimental)',
+		];
+
+		const addBlockButton = block.getByRole( 'button', {
+			name: 'Add block',
+		} );
+		await addBlockButton.dispatchEvent( 'click' );
+
+		for ( const filter of searchTerms ) {
+			await editor.page.getByPlaceholder( 'Search' ).fill( filter );
+
+			const searchResult = editor.page.getByRole( 'option', {
+				name: filter.toLowerCase(),
+			} );
+			await expect( searchResult ).toBeVisible();
+		}
+	} );
 } );
