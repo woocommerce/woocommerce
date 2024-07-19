@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { FormTokenField as WPFormTokenField } from 'wordpress-components';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -39,7 +39,7 @@ const FormTokenField = ( {
 }: Props ) => {
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				'wc-blocks-components-form-token-field-wrapper',
 				className,
 				{

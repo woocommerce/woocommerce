@@ -3,7 +3,7 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Notice, ExternalLink } from '@wordpress/components';
-import { createInterpolateElement, useEffect } from '@wordpress/element';
+import { createInterpolateElement } from '@wordpress/element';
 import { Alert } from '@woocommerce/icons';
 import { Icon, chevronDown } from '@wordpress/icons';
 
@@ -15,7 +15,6 @@ import { SwitchToClassicShortcodeButton } from '../switch-to-classic-shortcode-b
 import './editor.scss';
 
 interface ExtensionNoticeProps {
-	toggleDismissedStatus: ( status: boolean ) => void;
 	block: 'woocommerce/cart' | 'woocommerce/checkout';
 	clientId: string;
 }
@@ -30,7 +29,6 @@ interface ExtensionNoticeProps {
  * - switch_to_classic_shortcode_undo
  */
 export function IncompatibleExtensionsNotice( {
-	toggleDismissedStatus,
 	block,
 	clientId,
 }: ExtensionNoticeProps ) {
@@ -40,10 +38,6 @@ export function IncompatibleExtensionsNotice( {
 		incompatibleExtensions,
 		incompatibleExtensionsCount,
 	] = useCombinedIncompatibilityNotice( block );
-
-	useEffect( () => {
-		toggleDismissedStatus( ! isVisible );
-	}, [ isVisible, toggleDismissedStatus ] );
 
 	if ( ! isVisible ) {
 		return null;

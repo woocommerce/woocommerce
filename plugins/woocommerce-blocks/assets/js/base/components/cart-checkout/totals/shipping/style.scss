@@ -7,6 +7,11 @@
 		border: 0;
 	}
 
+	.wc-block-components-totals-item strong {
+		text-transform: uppercase;
+	}
+
+
 	.wc-block-components-shipping-address {
 		margin-top: $gap;
 		display: block;
@@ -29,6 +34,11 @@
 
 	.wc-block-components-totals-shipping__change-address__link {
 		font-weight: normal;
+		background: none;
+		border: none;
+		padding: 0;
+		text-decoration: underline;
+		cursor: pointer;
 	}
 	.wc-block-components-totals-shipping__change-address-button {
 		@include link-button();

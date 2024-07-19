@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -484,9 +485,9 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	// Clear customer's order related caches.
 	if ( is_a( $order, 'WC_Order' ) ) {
 		$order_id = $order->get_id();
-		delete_user_meta( $order->get_customer_id(), '_money_spent' );
-		delete_user_meta( $order->get_customer_id(), '_order_count' );
-		delete_user_meta( $order->get_customer_id(), '_last_order' );
+		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_money_spent' );
+		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_order_count' );
+		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_last_order' );
 	} else {
 		$order_id = 0;
 	}
@@ -1063,6 +1064,7 @@ function wc_get_order_note( $data ) {
 			'content'       => $data->comment_content,
 			'customer_note' => (bool) get_comment_meta( $data->comment_ID, 'is_customer_note', true ),
 			'added_by'      => __( 'WooCommerce', 'woocommerce' ) === $data->comment_author ? 'system' : $data->comment_author,
+			'order_id'      => absint( $data->comment_post_ID ),
 		),
 		$data
 	);
@@ -1183,5 +1185,20 @@ function wc_create_order_note( $order_id, $note, $is_customer_note = false, $add
  * @return bool         True on success, false on failure.
  */
 function wc_delete_order_note( $note_id ) {
-	return wp_delete_comment( $note_id, true );
+	$note = wc_get_order_note( $note_id );
+	if ( $note && wp_delete_comment( $note_id, true ) ) {
+		/**
+		 * Action hook fired after an order note is deleted.
+		 *
+		 * @param int      $note_id Order note ID.
+		 * @param stdClass $note    Object with the deleted order note details.
+		 *
+		 * @since 9.1.0
+		 */
+		do_action( 'woocommerce_order_note_deleted', $note_id, $note );
+
+		return true;
+	}
+
+	return false;
 }

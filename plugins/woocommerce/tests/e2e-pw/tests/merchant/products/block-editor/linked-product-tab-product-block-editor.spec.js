@@ -18,7 +18,7 @@ const linkedProductsData = [],
 	productIds = [];
 let productId = 0;
 
-test.describe( 'General tab', () => {
+test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Linked product', () => {
 		test.beforeAll( async () => {
 			for ( let i = 1; i <= 5; i++ ) {
@@ -116,13 +116,6 @@ test.describe( 'General tab', () => {
 
 			await page
 				.locator( '.woocommerce-product-header__actions' )
-				.getByRole( 'button', {
-					name: 'Publish',
-				} )
-				.click();
-
-			await page
-				.locator( '.woocommerce-product-publish-panel__header' )
 				.getByRole( 'button', {
 					name: 'Publish',
 				} )

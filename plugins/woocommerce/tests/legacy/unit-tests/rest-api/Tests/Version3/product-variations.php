@@ -257,7 +257,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 404, $response->get_status() );
 	}
 
 	/**
@@ -400,13 +400,14 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 38, count( $properties ) );
+		$this->assertEquals( 40, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_modified', $properties );
 		$this->assertArrayHasKey( 'description', $properties );
 		$this->assertArrayHasKey( 'permalink', $properties );
 		$this->assertArrayHasKey( 'sku', $properties );
+		$this->assertArrayHasKey( 'global_unique_id', $properties );
 		$this->assertArrayHasKey( 'price', $properties );
 		$this->assertArrayHasKey( 'regular_price', $properties );
 		$this->assertArrayHasKey( 'sale_price', $properties );
@@ -567,7 +568,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 			'regular_price' => '4.99'
 		) ) );
 		$response  = $this->server->dispatch( $request );
-		
+
 		$variation = $response->get_data();
 		$product   = wc_get_product( $product->get_id() );
 		$children  = $product->get_children();

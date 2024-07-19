@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	createInterpolateElement,
 	useEffect,
@@ -88,7 +88,7 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'launch-store-sidebar__container',
 				props.className
 			) }

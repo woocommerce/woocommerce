@@ -13,7 +13,7 @@ import { useShortcut } from '@wordpress/keyboard-shortcuts';
  */
 import { useProductManager } from '../../../../hooks/use-product-manager';
 import { useProductScheduled } from '../../../../hooks/use-product-scheduled';
-import type { WPError } from '../../../../utils/get-product-error-message';
+import type { WPError } from '../../../../hooks/use-error-handler';
 import type { PublishButtonProps } from '../../publish-button';
 
 export function usePublish< T = Product >( {
@@ -59,10 +59,7 @@ export function usePublish< T = Product >( {
 	}
 
 	function getButtonText() {
-		if (
-			window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
-			isScheduled
-		) {
+		if ( isScheduled ) {
 			return __( 'Schedule', 'woocommerce' );
 		}
 

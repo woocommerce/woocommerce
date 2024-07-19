@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Load e2e test helper (child) themes via .wp-json instead of via WP-CLI.

@@ -86,4 +86,49 @@ class DatabaseUtilTest extends WC_Unit_Test_Case {
 		}
 		$this->assertTrue( $this->sut->fts_index_on_order_item_table_exists() );
 	}
+
+	/**
+	 * @testDox Insert or update works as expected.
+	 */
+	public function test_insert_or_update() {
+		global $wpdb;
+		$table_name   = $wpdb->posts;
+		$data         = array(
+			'post_title'   => 'Test Post',
+			'post_content' => 'Test Content',
+			'post_name'    => 'test-post',
+		);
+		$where        = array(
+			'post_title' => 'Test Post',
+			'post_name'  => 'test-post',
+		);
+		$format       = array( '%s', '%s', '%s' );
+		$format_where = array( '%s', '%s' );
+
+		$count_query   = "SELECT COUNT(*) FROM $table_name WHERE post_title = 'Test Post' AND post_name = 'test-post'";
+		$content_query = "SELECT post_content FROM $table_name WHERE post_title = 'Test Post' AND post_name = 'test-post'";
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Hardcoded query.
+		$this->assertEquals( 0, $wpdb->get_var( $count_query ) );
+
+		$result = $this->sut->insert_or_update( $table_name, $data, $where, $format, $format_where );
+		$this->assertEquals( 1, $result );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Hardcoded query.
+		$this->assertEquals( 'Test Content', $wpdb->get_var( $content_query ) );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Hardcoded query.
+		$this->assertEquals( 1, $wpdb->get_var( $count_query ) );
+
+		$data['post_content'] = 'Updated Content';
+		$result               = $this->sut->insert_or_update( $table_name, $data, $where, $format, $format_where );
+		$this->assertEquals( 1, $result );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Hardcoded query.
+		$this->assertEquals( 'Updated Content', $wpdb->get_var( $content_query ) );
+
+		$result = $this->sut->insert_or_update( $table_name, $data, $where, $format, $format_where );
+		$this->assertEquals( 0, $result ); // No row updated.
+		$this->assertTrue( false !== $result ); // Ensure boolean false.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Hardcoded query.
+		$this->assertEquals( 'Updated Content', $wpdb->get_var( $content_query ) );
+	}
 }

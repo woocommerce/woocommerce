@@ -127,9 +127,11 @@ class Tax extends Task {
 	 */
 	public function get_additional_data() {
 		return array(
-			'avalara_activated'         => PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
-			'tax_jar_activated'         => class_exists( 'WC_Taxjar' ),
-			'woocommerce_tax_countries' => self::get_automated_support_countries(),
+			'avalara_activated'              => PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
+			'tax_jar_activated'              => class_exists( 'WC_Taxjar' ),
+			'woocommerce_tax_activated'      => PluginsHelper::is_plugin_active( 'woocommerce-tax' ),
+			'woocommerce_shipping_activated' => PluginsHelper::is_plugin_active( 'woocommerce-shipping' ),
+			'woocommerce_tax_countries'      => self::get_automated_support_countries(),
 		);
 	}
 

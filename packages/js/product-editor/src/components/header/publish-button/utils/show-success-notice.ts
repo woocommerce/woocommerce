@@ -11,10 +11,7 @@ import type { Product, ProductStatus } from '@woocommerce/data';
 import { formatScheduleDatetime } from '../../../../utils';
 
 function getNoticeContent( product: Product, prevStatus?: ProductStatus ) {
-	if (
-		window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
-		product.status === 'future'
-	) {
+	if ( product.status === 'future' ) {
 		return sprintf(
 			// translators: %s: The datetime the product is scheduled for.
 			__( 'Product scheduled for %s.', 'woocommerce' ),

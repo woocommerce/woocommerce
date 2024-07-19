@@ -5,6 +5,9 @@
  * Categories: WooCommerce
  * Block Types: woocommerce/active-filters, woocommerce/price-filter, woocommerce/attribute-filter, woocommerce/stock-filter
  */
+
+declare( strict_types = 1 );
+
 ?>
 
 <!-- wp:woocommerce/filter-wrapper {"filterType":"active-filters"} -->

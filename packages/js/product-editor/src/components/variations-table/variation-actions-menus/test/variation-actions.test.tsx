@@ -72,7 +72,7 @@ describe( 'MultipleUpdateMenu', () => {
 		);
 		fireEvent.click( getByRole( 'button', { name: 'Quick update' } ) );
 		expect( queryByText( 'Update stock' ) ).toBeInTheDocument();
-		expect( queryByText( 'Set list price' ) ).toBeInTheDocument();
+		expect( queryByText( 'Set regular price' ) ).toBeInTheDocument();
 		expect( queryByText( 'Toggle visibility' ) ).toBeInTheDocument();
 	} );
 

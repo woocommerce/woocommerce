@@ -10,7 +10,6 @@ import {
 	AlignmentToolbar,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 
 /**
@@ -42,14 +41,12 @@ const TitleEdit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 						setAttributes( { headingLevel: newLevel } )
 					}
 				/>
-				{ isFeaturePluginBuild() && (
-					<AlignmentToolbar
-						value={ align }
-						onChange={ ( newAlign ) => {
-							setAttributes( { align: newAlign } );
-						} }
-					/>
-				) }
+				<AlignmentToolbar
+					value={ align }
+					onChange={ ( newAlign ) => {
+						setAttributes( { align: newAlign } );
+					} }
+				/>
 			</BlockControls>
 			<InspectorControls>
 				<PanelBody title={ __( 'Link settings', 'woocommerce' ) }>
@@ -84,17 +81,15 @@ const TitleEdit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 	);
 };
 
-const Title = isFeaturePluginBuild()
-	? compose( [
-			withProductSelector( {
-				icon: BLOCK_ICON,
-				label: BLOCK_TITLE,
-				description: __(
-					'Choose a product to display its title.',
-					'woocommerce'
-				),
-			} ),
-	  ] )( TitleEdit )
-	: TitleEdit;
+const Title = compose( [
+	withProductSelector( {
+		icon: BLOCK_ICON,
+		label: BLOCK_TITLE,
+		description: __(
+			'Choose a product to display its title.',
+			'woocommerce'
+		),
+	} ),
+] )( TitleEdit );
 
 export default Title;

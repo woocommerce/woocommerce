@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes a crash in the modal block editor when the Add button is clicked with Gutenberg 18.3.0 and later

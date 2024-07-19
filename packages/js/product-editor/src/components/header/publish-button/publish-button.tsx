@@ -14,7 +14,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { store as productEditorUiStore } from '../../../store/product-editor-ui';
-import { getProductErrorMessage } from '../../../utils/get-product-error-message';
+import { useErrorHandler } from '../../../hooks/use-error-handler';
 import { recordProductEvent } from '../../../utils/record-product-event';
 import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
 import { TRACKS_SOURCE } from '../../../constants';
@@ -27,11 +27,13 @@ export function PublishButton( {
 	productType = 'product',
 	isMenuButton,
 	isPrePublishPanelVisible = true,
+	visibleTab = 'general',
 	...props
 }: PublishButtonProps ) {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { maybeShowFeedbackBar } = useFeedbackBar();
 	const { openPrepublishPanel } = useDispatch( productEditorUiStore );
+	const { getProductErrorMessageAndProps } = useErrorHandler();
 
 	const [ editedStatus, , prevStatus ] = useEntityProp< Product[ 'status' ] >(
 		'postType',
@@ -61,27 +63,31 @@ export function PublishButton( {
 			}
 		},
 		onPublishError( error ) {
-			const message = getProductErrorMessage( error );
-			createErrorNotice( message );
+			const { message, errorProps } = getProductErrorMessageAndProps(
+				error,
+				visibleTab
+			);
+			createErrorNotice( message, errorProps );
 		},
 	} );
 
-	if (
-		productType === 'product' &&
-		window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
-		isMenuButton
-	) {
+	if ( productType === 'product' && isMenuButton ) {
 		function renderPublishButtonMenu(
 			menuProps: Dropdown.RenderProps
 		): React.ReactElement {
 			return (
-				<PublishButtonMenu { ...menuProps } postType={ productType } />
+				<PublishButtonMenu
+					{ ...menuProps }
+					postType={ productType }
+					visibleTab={ visibleTab }
+				/>
 			);
 		}
 
 		if (
 			editedStatus !== 'publish' &&
 			editedStatus !== 'future' &&
+			window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
 			isPrePublishPanelVisible
 		) {
 			function handlePrePublishButtonClick(
@@ -106,6 +112,7 @@ export function PublishButton( {
 					controls={ undefined }
 					onClick={ handlePrePublishButtonClick }
 					renderMenu={ renderPublishButtonMenu }
+					visibleTab={ visibleTab }
 				/>
 			);
 		}
@@ -116,6 +123,7 @@ export function PublishButton( {
 				postType={ productType }
 				controls={ undefined }
 				renderMenu={ renderPublishButtonMenu }
+				visibleTab={ visibleTab }
 			/>
 		);
 	}

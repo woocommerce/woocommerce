@@ -4,6 +4,7 @@
 import { __, isRTL } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { createElement, forwardRef, useContext } from '@wordpress/element';
+import { displayShortcut } from '@wordpress/keycodes';
 import { Ref } from 'react';
 import { undo as undoIcon, redo as redoIcon } from '@wordpress/icons';
 
@@ -24,6 +25,7 @@ function EditorHistoryUndo(
 			icon={ ! isRTL() ? undoIcon : redoIcon }
 			/* translators: button label text should, if possible, be under 16 characters. */
 			label={ __( 'Undo', 'woocommerce' ) }
+			shortcut={ displayShortcut.primary( 'z' ) }
 			// If there are no undo levels we don't want to actually disable this
 			// button, because it will remove focus for keyboard users.
 			// See: https://github.com/WordPress/gutenberg/issues/3486

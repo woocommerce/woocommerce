@@ -3,7 +3,7 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import { button as icon } from '@wordpress/icons';
-import { isExperimentalBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -12,7 +12,7 @@ import metadata from './block.json';
 import Edit from './edit';
 import save from './save';
 
-if ( isExperimentalBuild() ) {
+if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
 		icon,
 		edit: Edit,

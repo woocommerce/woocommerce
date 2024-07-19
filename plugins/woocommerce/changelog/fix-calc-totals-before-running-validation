@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure the Store API recalculates cart totals prior to running validation hooks.

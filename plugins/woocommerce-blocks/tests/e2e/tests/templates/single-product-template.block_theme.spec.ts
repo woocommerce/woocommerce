@@ -1,13 +1,12 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 test.describe( 'Single Product template', () => {
 	test( 'loads the Single Product template for a specific product', async ( {
 		admin,
 		editor,
-		editorUtils,
 		page,
 	} ) => {
 		const testData = {
@@ -38,7 +37,9 @@ test.describe( 'Single Product template', () => {
 			name: 'core/paragraph',
 			attributes: { content: userText },
 		} );
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 
 		// Verify edits are visible.
 		await page.goto( testData.permalink );
@@ -46,9 +47,9 @@ test.describe( 'Single Product template', () => {
 
 		// Revert edition.
 		await admin.visitSiteEditor( {
-			path: `/${ testData.templateType }/all`,
+			postType: testData.templateType,
 		} );
-		await editorUtils.revertTemplateCreation( testData.templateName );
+		await editor.revertTemplateCreation( testData.templateName );
 		await page.goto( testData.permalink );
 
 		// Verify the edits are no longer visible.

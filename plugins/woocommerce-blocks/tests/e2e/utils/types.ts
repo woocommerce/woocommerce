@@ -1,1 +1,6 @@
-export type TemplateType = 'wp_template' | 'wp_template_part';
+export type BlockData< T = unknown > = {
+	name: string;
+	slug: string;
+	mainClass: string;
+	selectors: Record< 'editor' | 'frontend', Record< string, unknown > >;
+} & ( T extends undefined ? Record< string, never > : T );

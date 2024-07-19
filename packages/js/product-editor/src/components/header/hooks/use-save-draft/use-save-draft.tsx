@@ -15,8 +15,10 @@ import { useShortcut } from '@wordpress/keyboard-shortcuts';
  * Internal dependencies
  */
 import { useValidations } from '../../../../contexts/validation-context';
-import { WPError } from '../../../../utils/get-product-error-message';
+import { WPError } from '../../../../hooks/use-error-handler';
 import { SaveDraftButtonProps } from '../../save-draft-button';
+import { recordProductEvent } from '../../../../utils/record-product-event';
+import { errorHandler } from '../../../../hooks/use-product-manager';
 
 export function useSaveDraft( {
 	productStatus,
@@ -72,6 +74,13 @@ export function useSaveDraft( {
 	// @ts-ignore
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
+	const productStatusMap: {
+		[ key in Product[ 'status' ] ]?: string;
+	} = {
+		publish: 'product_switch_draft',
+		draft: 'product_save_draft',
+	};
+
 	async function saveDraft() {
 		try {
 			await validate( { status: 'draft' } );
@@ -88,12 +97,19 @@ export function useSaveDraft( {
 				}
 			);
 
+			const eventName = productStatusMap[ productStatus ];
+			if ( eventName ) {
+				recordProductEvent( eventName, publishedProduct );
+			}
+
 			if ( onSaveSuccess ) {
 				onSaveSuccess( publishedProduct );
 			}
 		} catch ( error ) {
 			if ( onSaveError ) {
-				onSaveError( error as WPError );
+				onSaveError(
+					errorHandler( error as WPError, productStatus ) as WPError
+				);
 			}
 		}
 	}

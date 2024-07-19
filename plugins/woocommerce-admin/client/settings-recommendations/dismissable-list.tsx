@@ -7,7 +7,7 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { EllipsisMenu } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { createContext, useContext } from '@wordpress/element';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -75,10 +75,7 @@ export const DismissableList: React.FC< {
 	return (
 		<Card
 			size="medium"
-			className={ classNames(
-				'woocommerce-dismissable-list',
-				className
-			) }
+			className={ clsx( 'woocommerce-dismissable-list', className ) }
 		>
 			<OptionNameContext.Provider value={ dismissOptionName }>
 				{ children }

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { range } from 'lodash';
@@ -10,7 +10,7 @@ class ActivityCardPlaceholder extends Component {
 	render() {
 		const { className, hasAction, hasDate, hasSubtitle, lines } =
 			this.props;
-		const cardClassName = classnames(
+		const cardClassName = clsx(
 			'woocommerce-activity-card is-loading',
 			className
 		);

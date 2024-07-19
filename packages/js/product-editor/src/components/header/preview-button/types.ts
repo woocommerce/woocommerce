@@ -10,4 +10,5 @@ export type PreviewButtonProps = Omit<
 > & {
 	productStatus: Product[ 'status' ];
 	productType: string;
+	visibleTab?: string | null;
 };

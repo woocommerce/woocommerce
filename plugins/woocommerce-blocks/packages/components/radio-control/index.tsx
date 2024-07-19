@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useInstanceId } from '@wordpress/compose';
 import { useMemo } from '@wordpress/element';
 
@@ -34,7 +34,7 @@ const RadioControl = ( {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'wc-block-components-radio-control',
 				{
 					'wc-block-components-radio-control--highlight-checked--first-selected':

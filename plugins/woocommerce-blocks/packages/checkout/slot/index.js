@@ -1,40 +1,21 @@
 /**
  * External dependencies
  */
-import deprecated from '@wordpress/deprecated';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { Children, cloneElement } from '@wordpress/element';
+// It is very important to export this directly from the build module to avoid introducing side-effects
+// from importing the index of the @wordpress/components package.
+// eslint-disable-next-line -- When adding comments to imports it breaks the external/internal dependencies lint.
 import {
 	createSlotFill as baseCreateSlotFill,
-	__experimentalUseSlot,
-	useSlot as __useSlot, //eslint-disable-line
-} from 'wordpress-components';
+	useSlot,
+	useSlotFills,
+} from 'wordpress-components-slotfill/build-module/slot-fill';
 
 /**
  * Internal dependencies
  */
 import BlockErrorBoundary from '../components/error-boundary';
-
-/**
- * This function is used in case __experimentalUseSlot is removed and useSlot is not released, it tries to mock
- * the return value of that slot.
- *
- * @return {Object} The hook mocked return, currently:
- *                  fills, a null array of length 2.
- */
-const mockedUseSlot = () => {
-	/**
-	 * If we're here, it means useSlot was never graduated and __experimentalUseSlot is removed, so we should change our code.
-	 *
-	 */
-	deprecated( '__experimentalUseSlot', {
-		plugin: 'woocommerce-gutenberg-products-block',
-	} );
-	// We're going to mock its value
-	return {
-		fills: new Array( 2 ),
-	};
-};
 
 /**
  * Checks if this slot has any valid fills. A valid fill is one that isn't falsy.
@@ -45,23 +26,7 @@ const mockedUseSlot = () => {
 export const hasValidFills = ( fills ) =>
 	Array.isArray( fills ) && fills.filter( Boolean ).length > 0;
 
-/**
- * A hook that is used inside a slotFillProvider to return information on the a slot.
- *
- * @param {string} slotName The slot name to be hooked into.
- * @return {Object} slot data.
- */
-let useSlot;
-
-if ( typeof __useSlot === 'function' ) {
-	useSlot = __useSlot;
-} else if ( typeof __experimentalUseSlot === 'function' ) {
-	useSlot = __experimentalUseSlot;
-} else {
-	useSlot = mockedUseSlot;
-}
-
-export { useSlot };
+export { useSlot, useSlotFills };
 
 /**
  * Abstracts @wordpress/components createSlotFill, wraps Fill in an error boundary and passes down fillProps.
@@ -76,7 +41,7 @@ export const createSlotFill = ( slotName, onError = null ) => {
 
 	/**
 	 * A Fill that will get rendered inside associate slot.
-	 * If the code inside has a error, it would be caught ad removed.
+	 * If the code inside has a error, it would be caught and removed.
 	 * The error is only visible to admins.
 	 *
 	 * @param {Object} props          Items props.

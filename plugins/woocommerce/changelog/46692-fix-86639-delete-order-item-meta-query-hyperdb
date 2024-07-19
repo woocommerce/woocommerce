@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Update delete item meta query to format supported by wpdb::get_table_from_query()

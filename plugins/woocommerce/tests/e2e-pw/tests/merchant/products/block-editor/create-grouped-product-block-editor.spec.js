@@ -29,7 +29,7 @@ const groupedProductsData = [
 
 const productIds = [];
 
-test.describe( 'General tab', () => {
+test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Grouped product', () => {
 		test.beforeAll( async () => {
 			for ( const product of groupedProductsData ) {
@@ -109,13 +109,6 @@ test.describe( 'General tab', () => {
 
 			await page
 				.locator( '.woocommerce-product-header__actions' )
-				.getByRole( 'button', {
-					name: 'Publish',
-				} )
-				.click();
-
-			await page
-				.locator( '.woocommerce-product-publish-panel__header' )
 				.getByRole( 'button', {
 					name: 'Publish',
 				} )

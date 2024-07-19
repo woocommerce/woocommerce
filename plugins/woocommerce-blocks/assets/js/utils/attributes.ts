@@ -28,6 +28,7 @@ const attributeSettingToObject = ( attribute: AttributeSetting ) => {
 		name: attribute.attribute_name,
 		taxonomy: 'pa_' + attribute.attribute_name,
 		label: attribute.attribute_label,
+		orderby: attribute.attribute_orderby,
 	};
 };
 

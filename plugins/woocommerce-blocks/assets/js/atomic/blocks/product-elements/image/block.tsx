@@ -3,7 +3,7 @@
  */
 import { Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 import {
 	useInnerBlockLayoutContext,
@@ -115,7 +115,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	if ( ! product.id ) {
 		return (
 			<div
-				className={ classnames(
+				className={ clsx(
 					className,
 					'wc-block-components-product-image',
 					{
@@ -153,7 +153,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				className,
 				'wc-block-components-product-image',
 				{

@@ -333,25 +333,8 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 			);
 		}
 
-		const title = __(
-			'There was an error getting your orders. Please try again.',
-			'woocommerce'
-		);
-		const actionLabel = __( 'Reload', 'woocommerce' );
-		const actionCallback = () => {
-			// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
-			window.location.reload();
-		};
-
-		return (
-			<>
-				<EmptyContent
-					title={ title }
-					actionLabel={ actionLabel }
-					actionURL={ null }
-					actionCallback={ actionCallback }
-				/>
-			</>
+		throw new Error(
+			'Failed to load orders, raise error to trigger ErrorBoundary'
 		);
 	}
 	const customerList = customerItems

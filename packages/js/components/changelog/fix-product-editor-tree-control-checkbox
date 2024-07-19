@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes the styling of checkboxes in __experimentalTreeControl

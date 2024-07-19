@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
-import { cli } from '@woocommerce/e2e-utils';
+import { expect, test as base, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -21,8 +20,8 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 
 test.describe( 'Shopper → Coupon', () => {
 	test.beforeEach( async () => {
-		await cli(
-			`npm run wp-env run tests-cli -- wp wc shop_coupon create --code=single-use-coupon --discount_type=percent --amount=10 --usage_limit=1 --user=1`
+		await wpCLI(
+			'wc shop_coupon create --code=single-use-coupon --discount_type=percent --amount=10 --usage_limit=1 --user=1'
 		);
 	} );
 

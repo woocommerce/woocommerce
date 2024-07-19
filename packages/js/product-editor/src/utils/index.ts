@@ -15,6 +15,7 @@ import {
 	getProductStockStatusClass,
 } from './get-product-stock-status';
 import { getProductTitle } from './get-product-title';
+import { getEmptyStateSequentialNames } from './get-empty-state-names';
 import {
 	getProductVariationTitle,
 	getTruncatedProductVariationTitle,
@@ -42,6 +43,7 @@ export {
 	getCheckboxTracks,
 	getCurrencySymbolProps,
 	getDerivedProductType,
+	getEmptyStateSequentialNames,
 	getHeaderTitle,
 	getPermalinkParts,
 	getProductStatus,

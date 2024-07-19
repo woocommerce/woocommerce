@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed a bug that would cause incorrect pricing at checkout for very large amounts.

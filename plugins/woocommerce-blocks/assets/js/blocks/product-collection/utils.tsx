@@ -8,17 +8,30 @@ import { isWpVersion } from '@woocommerce/settings';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
 import { useLayoutEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import {
+	createBlock,
+	// @ts-expect-error Type definitions for this function are missing in Guteberg
+	createBlocksFromInnerBlocksTemplate,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import {
-	PreviewState,
 	ProductCollectionAttributes,
+	TProductCollectionOrder,
+	TProductCollectionOrderBy,
 	ProductCollectionQuery,
+	ProductCollectionDisplayLayout,
+	PreviewState,
 	SetPreviewState,
 } from './types';
-import { coreQueryPaginationBlockName } from './constants';
+import {
+	coreQueryPaginationBlockName,
+	DEFAULT_QUERY,
+	DEFAULT_ATTRIBUTES,
+	INNER_BLOCKS_TEMPLATE,
+} from './constants';
 import blockJson from './block.json';
 import {
 	LocationType,
@@ -96,26 +109,36 @@ export function getDefaultValueOfInheritQueryFromTemplate() {
 }
 
 /**
- * Add Product Collection block to the parent array of the Core Pagination block.
+ * Add Product Collection block to the parent or ancestor array of the Core Pagination block.
  * This enhancement allows the Core Pagination block to be available for the Product Collection block.
  */
-export const addProductCollectionBlockToParentOfPaginationBlock = () => {
+export const addProductCollectionToQueryPaginationParentOrAncestor = () => {
 	if ( isWpVersion( '6.1', '>=' ) ) {
 		addFilter(
 			'blocks.registerBlockType',
 			'woocommerce/add-product-collection-block-to-parent-array-of-pagination-block',
 			( blockSettings: Block, blockName: string ) => {
-				if (
-					blockName !== coreQueryPaginationBlockName ||
-					! blockSettings?.parent
-				) {
+				if ( blockName !== coreQueryPaginationBlockName ) {
 					return blockSettings;
 				}
 
-				return {
-					...blockSettings,
-					parent: [ ...blockSettings.parent, blockJson.name ],
-				};
+				if ( blockSettings?.ancestor ) {
+					return {
+						...blockSettings,
+						ancestor: [ ...blockSettings.ancestor, blockJson.name ],
+					};
+				}
+
+				// Below condition is to support WP >=6.4 where Pagination specifies the parent.
+				// Can be removed when minimum WP version is set to 6.5 and higher.
+				if ( blockSettings?.parent ) {
+					return {
+						...blockSettings,
+						parent: [ ...blockSettings.parent, blockJson.name ],
+					};
+				}
+
+				return blockSettings;
 			}
 		);
 	}
@@ -196,3 +219,35 @@ export const useSetPreviewState = ( {
 		setPreviewState,
 	] );
 };
+
+export const getDefaultQuery = (
+	currentQuery: ProductCollectionQuery
+): ProductCollectionQuery => ( {
+	...currentQuery,
+	orderBy: DEFAULT_QUERY.orderBy as TProductCollectionOrderBy,
+	order: DEFAULT_QUERY.order as TProductCollectionOrder,
+	inherit: getDefaultValueOfInheritQueryFromTemplate(),
+} );
+
+export const getDefaultDisplayLayout = () =>
+	DEFAULT_ATTRIBUTES.displayLayout as ProductCollectionDisplayLayout;
+
+export const getDefaultSettings = (
+	currentAttributes: ProductCollectionAttributes
+): Partial< ProductCollectionAttributes > => ( {
+	displayLayout: getDefaultDisplayLayout(),
+	query: getDefaultQuery( currentAttributes.query ),
+} );
+
+export const getDefaultProductCollection = () =>
+	createBlock(
+		blockJson.name,
+		{
+			...DEFAULT_ATTRIBUTES,
+			query: {
+				...DEFAULT_ATTRIBUTES.query,
+				inherit: getDefaultValueOfInheritQueryFromTemplate(),
+			},
+		},
+		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )
+	);

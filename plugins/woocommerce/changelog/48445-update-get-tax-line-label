@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Get tax line label instead of name in StoreAPI Order endpoint.

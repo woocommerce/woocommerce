@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useEffect, useState } from '@wordpress/element';
 import { EllipsisMenu } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
@@ -148,7 +148,7 @@ export const TaskListCompletedHeader: React.FC<
 	return (
 		<>
 			<div
-				className={ classnames(
+				className={ clsx(
 					'woocommerce-task-dashboard__container setup-task-list'
 				) }
 			>

@@ -3,7 +3,7 @@
  */
 import { _n, sprintf } from '@wordpress/i18n';
 import { SearchListItem } from '@woocommerce/editor-components/search-list-control';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -22,14 +22,10 @@ export const ProductTagItem = ( {
 
 	return (
 		<SearchListItem
-			className={ classNames(
-				'woocommerce-product-tags__item',
-				'has-count',
-				{
-					'is-searching': search.length > 0,
-					'is-skip-level': depth === 0 && item.parent !== 0,
-				}
-			) }
+			className={ clsx( 'woocommerce-product-tags__item', 'has-count', {
+				'is-searching': search.length > 0,
+				'is-skip-level': depth === 0 && item.parent !== 0,
+			} ) }
 			item={ item }
 			search={ search }
 			depth={ depth }

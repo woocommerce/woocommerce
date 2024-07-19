@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -24,7 +24,7 @@ export const Textarea = ( {
 	value = '',
 }: TextareaProps ): JSX.Element => (
 	<textarea
-		className={ classnames( 'wc-block-components-textarea', className ) }
+		className={ clsx( 'wc-block-components-textarea', className ) }
 		disabled={ disabled }
 		onChange={ ( event ) => {
 			onTextChange( event.target.value );

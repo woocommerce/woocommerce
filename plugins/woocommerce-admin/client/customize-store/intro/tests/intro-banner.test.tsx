@@ -46,6 +46,7 @@ describe( 'Intro Banners', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
@@ -85,6 +86,7 @@ describe( 'Intro Banners', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
@@ -130,6 +132,7 @@ describe( 'Intro Banners', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }

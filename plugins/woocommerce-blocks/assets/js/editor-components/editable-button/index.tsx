@@ -24,15 +24,9 @@ const EditableButton = ( {
 	onChange,
 	placeholder,
 	value,
+	children,
 	...props
 }: EditableButtonProps ) => {
-	/**
-	 * If the value contains a placeholder, e.g. "Place Order · <price/>", we need to change it,
-	 * e.g. to "Place Order · &lt;price/>", to ensure it is displayed correctly. This reflects the
-	 * default behaviour of the `RichText` component if we would type "<price/>" directly into it.
-	 */
-	value = value.replace( /</g, '&lt;' );
-
 	return (
 		<Button { ...props }>
 			<RichText
@@ -42,6 +36,7 @@ const EditableButton = ( {
 				placeholder={ placeholder }
 				onChange={ onChange }
 			/>
+			{ children }
 		</Button>
 	);
 };

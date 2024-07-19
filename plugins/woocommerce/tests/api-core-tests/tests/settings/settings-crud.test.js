@@ -1,14 +1,10 @@
 const { test, expect } = require( '@playwright/test' );
 const { API_BASE_URL } = process.env;
-const shouldSkip = API_BASE_URL != undefined;
+const shouldSkip = API_BASE_URL !== undefined;
 
-const exp = require( 'constants' );
-const { keys } = require( 'lodash' );
 const {
 	countries,
 	currencies,
-	externalCurrencies,
-	externalCountries,
 	stateOptions,
 } = require( '../../data/settings' );
 
@@ -677,7 +673,6 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					},
 				}
 			);
-			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
 
 			// retrieve the updated settings values
@@ -1339,9 +1334,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						id: 'woocommerce_enable_guest_checkout',
-						label: 'Guest checkout',
-						description:
-							'Allow customers to place orders without an account',
+						label: 'Checkout',
+						description: 'Enable guest checkout (recommended)',
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
@@ -1353,8 +1347,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_enable_checkout_login_reminder',
 						label: 'Login',
-						description:
-							'Allow customers to log into an existing account during checkout',
+						description: 'Enable log-in during checkout',
 						type: 'checkbox',
 						default: 'no',
 						value: 'no',
@@ -1366,8 +1359,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_enable_signup_and_login_from_checkout',
 						label: 'Account creation',
-						description:
-							'Allow customers to create an account during checkout',
+						description: 'During checkout',
 						type: 'checkbox',
 						default: 'no',
 						value: 'no',
@@ -1378,9 +1370,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						id: 'woocommerce_enable_myaccount_registration',
-						label: '',
-						description:
-							'Allow customers to create an account on the "My account" page',
+						label: 'Account creation',
+						description: 'On "My account" page',
 						type: 'checkbox',
 						default: 'no',
 						value: 'no',
@@ -1391,9 +1382,9 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						id: 'woocommerce_registration_generate_username',
-						label: '',
+						label: 'Account creation options',
 						description:
-							'When creating an account, automatically generate an account username for the customer based on their name, surname or email',
+							'Use email address as account login (recommended)',
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
@@ -1404,9 +1395,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						id: 'woocommerce_registration_generate_password',
-						label: '',
-						description:
-							'When creating an account, send the new user a link to set their password',
+						label: 'Account creation options',
+						description: 'Send password setup link (recommended)',
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
@@ -1422,11 +1412,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 							'Remove personal data from orders on request',
 						type: 'checkbox',
 						default: 'no',
-						tip: expect.stringContaining(
-							'When handling an <a href='
-						),
-						tip: expect.stringContaining(
-							'wp-admin/erase-personal-data.php">account erasure request</a>, should personal data within orders be retained or removed?'
+						tip: expect.stringMatching(
+							'When handling an <a href="[^"]*wp-admin/erase-personal-data.php">account erasure request</a>, should personal data within orders be retained or removed?'
 						),
 						value: 'no',
 					} ),
@@ -1440,11 +1427,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						description: 'Remove access to downloads on request',
 						type: 'checkbox',
 						default: 'no',
-						tip: expect.stringContaining(
-							'When handling an <a href='
-						),
-						tip: expect.stringContaining(
-							'wp-admin/erase-personal-data.php">account erasure request</a>, should access to downloadable files be revoked and download logs cleared?'
+						tip: expect.stringMatching(
+							'When handling an <a href="[^"]*wp-admin/erase-personal-data.php">account erasure request</a>, should access to downloadable files be revoked and download logs cleared?'
 						),
 						value: 'no',
 					} ),
@@ -1862,18 +1846,6 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						default: 'customer-logout',
 						tip: 'Endpoint for the triggering logout. You can add this to your menus via a custom link: yoursite.com/?customer-logout=true',
 						value: 'customer-logout',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_api_enabled',
-						label: 'Legacy API',
-						description: 'Enable the legacy REST API',
-						type: 'checkbox',
-						default: 'no',
-						value: 'no',
 					} ),
 				] )
 			);

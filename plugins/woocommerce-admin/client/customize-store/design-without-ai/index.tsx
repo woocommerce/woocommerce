@@ -4,6 +4,7 @@
 import { useMachine, useSelector } from '@xstate/react';
 import { AnyInterpreter, Sender } from 'xstate';
 import { useEffect, useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -31,6 +32,18 @@ export const DesignWithNoAiController = ( {
 	sendEventToParent?: Sender< customizeStoreStateMachineEvents >;
 	parentContext?: customizeStoreStateMachineContext;
 } ) => {
+	interface Theme {
+		is_block_theme?: boolean;
+	}
+
+	const currentTheme = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
+
+	const isBlockTheme = currentTheme?.is_block_theme;
+
 	const { versionEnabled } = useXStateInspect();
 	const [ , send, service ] = useMachine(
 		designWithNoAiStateMachineDefinition,
@@ -41,6 +54,9 @@ export const DesignWithNoAiController = ( {
 				...designWithNoAiStateMachineDefinition.context,
 				isFontLibraryAvailable:
 					parentContext?.isFontLibraryAvailable ?? false,
+				isPTKPatternsAPIAvailable:
+					parentContext?.isPTKPatternsAPIAvailable ?? false,
+				isBlockTheme,
 			},
 		}
 	);

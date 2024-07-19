@@ -376,6 +376,7 @@ class WC_Shortcode_My_Account {
 		do_action( 'password_reset', $user, $new_pass );
 
 		wp_set_password( $new_pass, $user->ID );
+		update_user_meta( $user->ID, 'default_password_nag', false );
 		self::set_reset_password_cookie();
 
 		if ( ! apply_filters( 'woocommerce_disable_password_change_notification', false ) ) {

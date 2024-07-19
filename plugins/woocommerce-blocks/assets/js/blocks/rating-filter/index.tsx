@@ -3,7 +3,7 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, starEmpty } from '@wordpress/icons';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { useBlockProps } from '@wordpress/block-editor';
 
 /**
@@ -34,7 +34,7 @@ registerBlockType( metadata, {
 		return (
 			<div
 				{ ...useBlockProps.save( {
-					className: classNames( 'is-loading', className ),
+					className: clsx( 'is-loading', className ),
 				} ) }
 			/>
 		);

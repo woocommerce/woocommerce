@@ -45,7 +45,7 @@ const formatNumber = ( val: number, currency: Currency ): string => {
 	return `${ whole }${ decimalSeparator }${ decimal }`;
 };
 
-const formatValueAsCurrency = (
+const formatNumberAsCurrency = (
 	val: number | undefined,
 	currency: Currency
 ) => {
@@ -70,71 +70,61 @@ const formatValueAsCurrency = (
 	return formattedNumber;
 };
 
+const convertCurrencyStringToNumber = (
+	currencyString = '',
+	currency: Currency
+): number | undefined => {
+	/**
+	 * 1. Remove all characters that are not numbers or the decimal separator.
+	 * 2. Replace the decimal separator with a period.
+	 */
+	const cleanedCurrencyString = currencyString
+		.replace(
+			new RegExp( `[^0-9\\${ currency.decimalSeparator || '' }]`, 'g' ),
+			''
+		)
+		.replace( new RegExp( `\\${ currency.decimalSeparator }`, 'g' ), '.' );
+
+	const parsedNumericValue = Number( cleanedCurrencyString );
+	if ( cleanedCurrencyString === '' || isNaN( parsedNumericValue ) ) {
+		return undefined;
+	}
+
+	/**
+	 * If the value is negative, return 0.
+	 */
+	if ( parsedNumericValue < 0 ) {
+		return 0;
+	}
+
+	return parsedNumericValue;
+};
+
 const PriceTextField: React.FC< PriceTextFieldProps > = ( {
 	value,
 	onChange,
 	label,
 } ) => {
-	const [ newValue, setNewValue ] = useState< number | undefined >( value );
+	const [ inputValue, setInputValue ] = useState< string >(
+		`${ value || '' }`
+	);
+
 	const currency = getCurrency();
-
-	const convertCurrencyStringToNumber = (
-		val: string
-	): number | undefined => {
-		/**
-		 * First, remove the currency symbol from the value.
-		 * For example, if the currency is USD, the value is $1,000.00
-		 * It should be converted to 1,000.00 before converting to a number.
-		 */
-		const valueWithoutCurrencySymbol = val
-			.replace( currency.prefix, '' )
-			.replace( currency.suffix, '' );
-
-		/**
-		 * Then, normalize the value to a number.
-		 * - Replace the decimal separator with a dot
-		 * - Remove the thousand separator
-		 *
-		 * For example, if the value is 1,000:00
-		 * - Replace the decimal separator with a dot: 1,000.00
-		 * - Remove the thousand separator: 1000.00
-		 */
-		let normalizedValue = valueWithoutCurrencySymbol;
-		if ( currency.decimalSeparator ) {
-			normalizedValue = normalizedValue.replace(
-				new RegExp( `\\${ currency.decimalSeparator }` ),
-				'.'
-			);
-		}
-		if ( currency.thousandSeparator ) {
-			normalizedValue = normalizedValue.replace(
-				new RegExp( `\\${ currency.thousandSeparator }`, 'g' ),
-				''
-			);
-		}
-
-		const parsedNumericValue = Number( normalizedValue );
-		if ( isNaN( parsedNumericValue ) ) {
-			return undefined;
-		}
-
-		/**
-		 * If the value is negative, return 0.
-		 */
-		if ( parsedNumericValue < 0 ) {
-			return 0;
-		}
-
-		return parsedNumericValue;
-	};
+	const parsedNumericValue = convertCurrencyStringToNumber(
+		inputValue,
+		currency
+	);
+	const formattedValue = formatNumberAsCurrency(
+		parsedNumericValue,
+		currency
+	);
 
 	const handleOnChange = ( val: string ) => {
-		const numberValue = convertCurrencyStringToNumber( val );
-		setNewValue( numberValue );
+		setInputValue( val );
 	};
 
 	const handleOnBlur = () => {
-		onChange( newValue );
+		onChange( parsedNumericValue );
 	};
 
 	/**
@@ -144,13 +134,13 @@ const PriceTextField: React.FC< PriceTextFieldProps > = ( {
 		event: React.KeyboardEvent< HTMLInputElement >
 	) => {
 		if ( event.key === 'Enter' ) {
-			onChange( newValue );
+			onChange( parsedNumericValue );
 		}
 	};
 
 	return (
 		<InputControl
-			value={ formatValueAsCurrency( newValue, currency ) }
+			value={ formattedValue }
 			onChange={ handleOnChange }
 			onBlur={ handleOnBlur }
 			onKeyDown={ handleEnterKeyPress }

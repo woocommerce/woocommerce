@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { isSiteEditorPage } from '@woocommerce/utils';
 import { usePrevious } from '@woocommerce/base-hooks';
 import { select } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
@@ -86,12 +85,6 @@ const InheritQueryControl = ( {
 		() => getDefaultValueOfInheritQueryFromTemplate(),
 		[]
 	);
-
-	// Hide the control if not in site editor.
-	const isSiteEditor = isSiteEditorPage( editSiteStore );
-	if ( ! isSiteEditor ) {
-		return null;
-	}
 
 	const currentTemplateId = editSiteStore.getEditedPostId() as string;
 	const helpText = getHelpTextForTemplate( currentTemplateId );

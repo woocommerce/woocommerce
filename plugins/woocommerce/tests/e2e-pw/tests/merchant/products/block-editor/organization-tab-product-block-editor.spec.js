@@ -21,7 +21,7 @@ const tagName = `my-tag-${ new Date().getTime().toString() }`;
 
 test.describe.configure( { mode: 'serial' } );
 
-test.describe( 'General tab', () => {
+test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Create product - Organization tab', () => {
 		let productId;
 
@@ -38,14 +38,6 @@ test.describe( 'General tab', () => {
 			await page
 				.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
 				.fill( productData.name );
-			await page
-				.locator(
-					'[data-template-block-id="basic-details"] .components-summary-control'
-				)
-				.last()
-				.fill( productData.summary );
-
-			await clickOnTab( 'Pricing', page );
 
 			const regularPrice = page
 				.locator( 'input[name="regular_price"]' )
@@ -61,11 +53,16 @@ test.describe( 'General tab', () => {
 			await salePrice.click();
 			await salePrice.fill( productData.salePrice );
 
+			await page
+				.locator(
+					'[data-template-block-id="basic-details"] .components-summary-control'
+				)
+				.last()
+				.fill( productData.summary );
+
 			await clickOnTab( 'Organization', page );
 
-			await page
-				.locator( '[id^="woocommerce-taxonomy-select-"]' )
-				.click();
+			await page.getByLabel( 'Categories' ).click();
 
 			await page.locator( 'text=Create new' ).click();
 
@@ -81,7 +78,7 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			await page.locator( '[id^="tag-field-"]' ).click();
+			await page.getByLabel( 'Tags' ).click();
 
 			await page.locator( 'text=Create new' ).click();
 
@@ -109,13 +106,6 @@ test.describe( 'General tab', () => {
 
 			await page
 				.locator( '.woocommerce-product-header__actions' )
-				.getByRole( 'button', {
-					name: 'Publish',
-				} )
-				.click();
-
-			await page
-				.locator( '.woocommerce-product-publish-panel__header' )
 				.getByRole( 'button', {
 					name: 'Publish',
 				} )

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useStyleProps } from '@woocommerce/base-hooks';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -19,7 +19,7 @@ const Block = ( props: Props ): JSX.Element => {
 
 	return (
 		<span
-			className={ classnames( props.className, styleProps.className ) }
+			className={ clsx( props.className, styleProps.className ) }
 			style={ styleProps.style }
 		>
 			{ props.label || defaultYourCartLabel }

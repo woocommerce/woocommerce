@@ -18,8 +18,8 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-expect-error No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 import {
-	privateApis as blockEditorPrivateApis,
 	__experimentalBlockPatternsList as BlockPatternList,
+	store as blockEditorStore,
 	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/block-editor';
 // @ts-expect-error Missing type in core-data.
@@ -37,19 +37,20 @@ import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { useSelect } from '@wordpress/data';
+import { select, useSelect } from '@wordpress/data';
 
 import { trackEvent } from '~/customize-store/tracking';
 import {
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
-	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
-} from '../utils/hero-pattern';
-import { isEqual } from 'lodash';
-import { COLOR_PALETTES } from './global-styles/color-palette-variations/constants';
+	findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate,
+} from '../utils/black-background-pattern-update-button';
+import { useIsActiveNewNeutralVariation } from '../hooks/use-is-active-new-neutral-variation';
 
-const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
-
-export const SidebarNavigationScreenHomepage = () => {
+export const SidebarNavigationScreenHomepage = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const { scroll } = useEditorScroll( {
 		editorSelector: '.woocommerce-customize-store__block-editor iframe',
 		scrollDirection: 'top',
@@ -59,16 +60,17 @@ export const SidebarNavigationScreenHomepage = () => {
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
 	const currentTemplate = useSelect(
-		( select ) =>
+		( sel ) =>
 			// @ts-expect-error No types for this exist yet.
-			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+			sel( coreStore ).__experimentalGetTemplateForLink( '/' ),
 		[]
 	);
 
 	const [ blocks, , onChange ] = useEditorBlocks(
 		'wp_template',
-		currentTemplate.id
+		currentTemplate?.id ?? ''
 	);
+
 	const onClickPattern = useCallback(
 		( pattern, selectedBlocks ) => {
 			if ( pattern === selectedPattern ) {
@@ -86,14 +88,7 @@ export const SidebarNavigationScreenHomepage = () => {
 
 	const isEditorLoading = useIsSiteEditorLoading();
 
-	// @ts-expect-error No types for this exist yet.
-	const { user } = useContext( GlobalStylesContext );
-
-	const isActiveNewNeutralVariation = useMemo(
-		() =>
-			isEqual( COLOR_PALETTES[ 0 ].settings.color, user.settings.color ),
-		[ user ]
-	);
+	const isActiveNewNeutralVariation = useIsActiveNewNeutralVariation();
 
 	const homePatterns = useMemo( () => {
 		return Object.entries( homeTemplates ).map(
@@ -104,15 +99,44 @@ export const SidebarNavigationScreenHomepage = () => {
 						title: templateName,
 						blocks: patterns.reduce(
 							( acc: BlockInstance[], pattern ) => {
+								const parsedPattern = unlock(
+									select( blockEditorStore )
+								).__experimentalGetParsedPattern(
+									pattern.name
+								);
+
+								if ( ! parsedPattern ) {
+									return acc;
+								}
+
 								if ( ! isActiveNewNeutralVariation ) {
-									return [ ...acc, ...pattern.blocks ];
+									const updatedBlocks =
+										findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
+											parsedPattern.blocks,
+											(
+												buttonBlocks: BlockInstance[]
+											) => {
+												buttonBlocks.forEach(
+													( buttonBlock ) => {
+														buttonBlock.attributes.style =
+															{};
+													}
+												);
+											}
+										);
+
+									return [ ...acc, ...updatedBlocks ];
 								}
 								const updatedBlocks =
-									findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
-										pattern.blocks,
-										( buttonBlock: BlockInstance ) => {
-											buttonBlock.attributes.style =
-												PRODUCT_HERO_PATTERN_BUTTON_STYLE;
+									findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
+										parsedPattern.blocks,
+										( buttonBlocks: BlockInstance[] ) => {
+											buttonBlocks.forEach(
+												( buttonBlock ) => {
+													buttonBlock.attributes.style =
+														PRODUCT_HERO_PATTERN_BUTTON_STYLE;
+												}
+											);
 										}
 									);
 
@@ -131,10 +155,17 @@ export const SidebarNavigationScreenHomepage = () => {
 					name: templateName,
 					title: templateName,
 					blocks: patterns.reduce(
-						( acc: BlockInstance[], pattern ) => [
-							...acc,
-							...pattern.blocks,
-						],
+						( acc: BlockInstance[], pattern ) => {
+							const parsedPattern = unlock(
+								select( blockEditorStore )
+							).__experimentalGetParsedPattern( pattern.name );
+
+							if ( ! parsedPattern ) {
+								return acc;
+							}
+
+							return [ ...acc, ...parsedPattern.blocks ];
+						},
 						[]
 					),
 					blockTypes: [ '' ],
@@ -196,6 +227,7 @@ export const SidebarNavigationScreenHomepage = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
+			onNavigateBackClick={ onNavigateBackClick }
 			description={ createInterpolateElement( sidebarMessage, {
 				EditorLink: (
 					<Link

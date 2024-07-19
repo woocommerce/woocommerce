@@ -8,12 +8,15 @@ import { apiFetch } from '@wordpress/data-controls';
  */
 import { API_NAMESPACE } from './constants';
 import {
-	setBlockTemplateLoggingThreshold,
 	setCronJobs,
 	setDBUpdateVersions,
 	setIsEmailDisabled,
 	setLoggingLevels,
+	updateCommandParams,
 } from './actions';
+import { UPDATE_BLOCK_TEMPLATE_LOGGING_THRESHOLD_ACTION_NAME } from '../commands/update-block-template-logging-threshold';
+import { UPDATE_COMING_SOON_MODE_ACTION_NAME } from '../commands/set-coming-soon-mode';
+import { TRIGGER_UPDATE_CALLBACKS_ACTION_NAME } from '../commands/trigger-update-callbacks';
 
 export function* getCronJobs() {
 	const path = `${ API_NAMESPACE }/tools/get-cron-list/v1`;
@@ -33,11 +36,19 @@ export function* getDBUpdateVersions() {
 	const path = `${ API_NAMESPACE }/tools/get-update-versions/v1`;
 
 	try {
-		const response = yield apiFetch( {
+		const dbUpdateVersions = yield apiFetch( {
 			path,
 			method: 'GET',
 		} );
-		yield setDBUpdateVersions( response );
+
+		dbUpdateVersions.reverse();
+		yield setDBUpdateVersions( dbUpdateVersions );
+		yield updateCommandParams( TRIGGER_UPDATE_CALLBACKS_ACTION_NAME, {
+			version:
+				Array.isArray( dbUpdateVersions ) && dbUpdateVersions.length > 0
+					? dbUpdateVersions[ 0 ]
+					: null,
+		} );
 	} catch ( error ) {
 		throw new Error( error );
 	}
@@ -76,11 +87,32 @@ export function* getBlockTemplateLoggingThreshold() {
 	const path = `${ API_NAMESPACE }/tools/get-block-template-logging-threshold/v1`;
 
 	try {
-		const response = yield apiFetch( {
+		const threshold = yield apiFetch( {
 			path,
 			method: 'GET',
 		} );
-		yield setBlockTemplateLoggingThreshold( response );
+		yield updateCommandParams(
+			UPDATE_BLOCK_TEMPLATE_LOGGING_THRESHOLD_ACTION_NAME,
+			{
+				threshold,
+			}
+		);
+	} catch ( error ) {
+		throw new Error( error );
+	}
+}
+
+export function* getComingSoonMode() {
+	const path = `${ API_NAMESPACE }/tools/get-force-coming-soon-mode/v1`;
+
+	try {
+		const mode = yield apiFetch( {
+			path,
+			method: 'GET',
+		} );
+		yield updateCommandParams( UPDATE_COMING_SOON_MODE_ACTION_NAME, {
+			mode: mode || 'disabled',
+		} );
 	} catch ( error ) {
 		throw new Error( error );
 	}

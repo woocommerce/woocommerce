@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useEffect } from '@wordpress/element';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -33,7 +33,7 @@ export const Snackbar = ( {
 
 	return (
 		<NoticeBanner
-			className={ classNames(
+			className={ clsx(
 				className,
 				'wc-block-components-notice-snackbar'
 			) }

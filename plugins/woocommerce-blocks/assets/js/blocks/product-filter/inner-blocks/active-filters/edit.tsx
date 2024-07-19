@@ -3,7 +3,7 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Disabled } from '@wordpress/components';
 
 /**
@@ -25,7 +25,7 @@ const Edit = ( props: EditProps ) => {
 			<Inspector { ...props } />
 			<Disabled>
 				<ul
-					className={ classNames( 'filter-list', {
+					className={ clsx( 'filter-list', {
 						'list-chips': displayStyle === 'chips',
 					} ) }
 				>

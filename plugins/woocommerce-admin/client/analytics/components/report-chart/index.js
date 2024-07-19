@@ -21,7 +21,6 @@ import {
 	getDateFormatsForInterval,
 	getIntervalForQuery,
 	getChartTypeForQuery,
-	getPreviousDate,
 } from '@woocommerce/date';
 import { CurrencyContext } from '@woocommerce/currency';
 
@@ -29,7 +28,12 @@ import { CurrencyContext } from '@woocommerce/currency';
  * Internal dependencies
  */
 import ReportError from '../report-error';
-import { getChartMode, getSelectedFilter, createDateFormatter } from './utils';
+import {
+	getChartMode,
+	getSelectedFilter,
+	createDateFormatter,
+	buildChartData,
+} from './utils';
 
 /**
  * Component that renders the chart in reports.
@@ -91,40 +95,16 @@ export class ReportChart extends Component {
 			query,
 			defaultDateRange
 		);
-		const chartData = primaryData.data.intervals.map( function (
-			interval,
-			index
-		) {
-			const secondaryDate = getPreviousDate(
-				interval.date_start,
-				primary.after,
-				secondary.after,
-				query.compare,
-				currentInterval
-			);
 
-			const secondaryInterval = secondaryData.data.intervals[ index ];
-			return {
-				date: formatDate( 'Y-m-d\\TH:i:s', interval.date_start ),
-				primary: {
-					label: `${ primary.label } (${ primary.range })`,
-					labelDate: interval.date_start,
-					value: interval.subtotals[ selectedChart.key ] || 0,
-				},
-				secondary: {
-					label: `${ secondary.label } (${ secondary.range })`,
-					labelDate: secondaryDate.format( 'YYYY-MM-DD HH:mm:ss' ),
-					value:
-						( secondaryInterval &&
-							secondaryInterval.subtotals[
-								selectedChart.key
-							] ) ||
-						0,
-				},
-			};
-		} );
-
-		return chartData;
+		return buildChartData(
+			primaryData,
+			secondaryData,
+			primary,
+			secondary,
+			query.compare,
+			selectedChart.key,
+			currentInterval
+		);
 	}
 
 	getTimeChartTotals() {
@@ -425,6 +405,7 @@ export default compose(
 			defaultDateRange,
 			fields,
 		} );
+
 		return {
 			...newProps,
 			primaryData,

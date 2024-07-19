@@ -26,6 +26,15 @@ const disableWelcomeModal = async ( { page } ) => {
 	}
 };
 
+const openEditorSettings = async ( { page } ) => {
+	// Open Settings sidebar if closed
+	if ( await page.getByLabel( 'Editor Settings' ).isVisible() ) {
+		console.log( 'Editor Settings is open, skipping action.' );
+	} else {
+		await page.getByLabel( 'Settings', { exact: true } ).click();
+	}
+};
+
 const getCanvas = async ( page ) => {
 	return page.frame( 'editor-canvas' ) || page;
 };
@@ -41,29 +50,54 @@ const goToPostEditor = async ( { page } ) => {
 };
 
 const fillPageTitle = async ( page, title ) => {
-	await ( await getCanvas( page ) )
-		.getByRole( 'textbox', { name: 'Add title' } )
-		.fill( title );
+	await ( await getCanvas( page ) ).getByLabel( 'Add title' ).fill( title );
 };
 
-const insertBlock = async ( page, blockName ) => {
-	const canvas = await getCanvas( page );
-	// Click the title to activate the block inserter.
-	await canvas.getByRole( 'textbox', { name: 'Add title' } ).click();
-	await canvas.getByLabel( 'Add block' ).click();
+const insertBlock = async ( page, blockName, wpVersion = null ) => {
+	await page
+		.getByRole( 'button', {
+			name: 'Toggle block inserter',
+			expanded: false,
+		} )
+		.click();
 	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
+
+	// In WP 6.6 'Toggle block inserter' button closes the inserter as expected,
+	// but trying to immediately open it again will fail in Playwright, while manually it works.
+	// We have tests that insert multiple blocks and fail because of this.
+	// Using the new 'Close block inserter' button added in WP 6.6 works fine.
+	if ( wpVersion && wpVersion <= 6.5 ) {
+		await page
+			.getByRole( 'button', {
+				name: 'Toggle block inserter',
+				expanded: true,
+			} )
+			.click();
+	} else {
+		await page
+			.getByRole( 'button', {
+				name: 'Close block inserter',
+			} )
+			.click();
+	}
 };
 
-const insertBlockByShortcut = async ( page, blockShortcut ) => {
+const insertBlockByShortcut = async ( page, blockName ) => {
 	const canvas = await getCanvas( page );
 	await canvas.getByRole( 'button', { name: 'Add default block' } ).click();
 	await canvas
 		.getByRole( 'document', {
 			name: 'Empty block; start writing or type forward slash to choose a block',
 		} )
-		.fill( blockShortcut );
-	await page.keyboard.press( 'Enter' );
+		.pressSequentially( `/${ blockName }` );
+	await expect(
+		page.getByRole( 'option', { name: blockName, exact: true } )
+	).toBeVisible();
+	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
+	await expect(
+		page.getByLabel( `Block: ${ blockName }` ).first()
+	).toBeVisible();
 };
 
 const transformIntoBlocks = async ( page ) => {
@@ -85,7 +119,9 @@ const transformIntoBlocks = async ( page ) => {
 };
 
 const publishPage = async ( page, pageTitle ) => {
-	await page.getByRole( 'button', { name: 'Publish', exact: true } ).click();
+	await page
+		.getByRole( 'button', { name: 'Publish', exact: true } )
+		.dispatchEvent( 'click' );
 	await page
 		.getByRole( 'region', { name: 'Editor publish' } )
 		.getByRole( 'button', { name: 'Publish', exact: true } )
@@ -100,6 +136,7 @@ module.exports = {
 	goToPageEditor,
 	goToPostEditor,
 	disableWelcomeModal,
+	openEditorSettings,
 	getCanvas,
 	fillPageTitle,
 	insertBlock,

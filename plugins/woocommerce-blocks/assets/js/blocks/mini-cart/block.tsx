@@ -28,7 +28,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { sprintf, _n } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -62,6 +62,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 		priceColor = defaultColorItem,
 		iconColor = defaultColorItem,
 		productCountColor = defaultColorItem,
+		productCountVisibility = 'greater_than_zero',
 	} = attributes;
 
 	const {
@@ -281,16 +282,13 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 					icon={ miniCartIcon }
 					iconColor={ iconColor }
 					productCountColor={ productCountColor }
+					productCountVisibility={ productCountVisibility }
 				/>
 			</button>
 			<Drawer
-				className={ classnames(
-					'wc-block-mini-cart__drawer',
-					'is-mobile',
-					{
-						'is-loading': cartIsLoading,
-					}
-				) }
+				className={ clsx( 'wc-block-mini-cart__drawer', 'is-mobile', {
+					'is-loading': cartIsLoading,
+				} ) }
 				isOpen={ isOpen }
 				onClose={ () => {
 					setIsOpen( false );

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
@@ -39,7 +39,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 			hidden={ currentView !== 'woocommerce/filled-cart-block' }
 		>
 			<SidebarLayout
-				className={ classnames( 'wc-block-cart', {
+				className={ clsx( 'wc-block-cart', {
 					'has-dark-controls': hasDarkControls,
 				} ) }
 			>

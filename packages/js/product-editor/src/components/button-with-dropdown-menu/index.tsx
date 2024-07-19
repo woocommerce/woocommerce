@@ -28,6 +28,7 @@ export function ButtonWithDropdownMenu( {
 	},
 	className,
 	renderMenu,
+	onToggle = () => {},
 	...props
 }: ButtonWithDropdownMenuProps ) {
 	return (
@@ -64,6 +65,7 @@ export function ButtonWithDropdownMenu( {
 						offset,
 					} }
 					defaultOpen={ defaultOpen }
+					onToggle={ onToggle }
 				>
 					{ renderMenu }
 				</DropdownMenu>

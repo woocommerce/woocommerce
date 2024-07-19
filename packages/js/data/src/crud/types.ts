@@ -43,6 +43,7 @@ type WithRequiredProperty< Type, Key extends keyof Type > = Type & {
 
 export type CrudActionOptions = {
 	optimisticQueryUpdate?: ItemQuery;
+	optimisticUrlParameters?: IdType[];
 };
 
 export type CrudActions<

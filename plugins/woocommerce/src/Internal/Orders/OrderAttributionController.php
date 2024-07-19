@@ -16,7 +16,6 @@ use WC_Customer;
 use WC_Log_Levels;
 use WC_Logger_Interface;
 use WC_Order;
-use WC_Tracks;
 
 /**
  * Class OrderAttributionController
@@ -96,6 +95,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 			return;
 		}
 
+		add_action( 'init', array( $this, 'on_init' ) );
+	}
+
+	/**
+	 * Hook into WordPress on init.
+	 */
+	public function on_init() {
 		// Bail if the feature is not enabled.
 		if ( ! $this->feature_controller->feature_is_enabled( 'order_attribution' ) ) {
 			return;
@@ -289,6 +295,15 @@ class OrderAttributionController implements RegisterHooksInterface {
 		$session_length = (int) apply_filters( 'wc_order_attribution_session_length_minutes', 30 );
 
 		/**
+		 * Filter to enable base64 encoding for cookie values.
+		 *
+		 * @since 9.0.0
+		 *
+		 * @param bool $use_base64_cookies True to enable base64 encoding, default is false.
+		 */
+		$use_base64_cookies = apply_filters( 'wc_order_attribution_use_base64_cookies', false );
+
+		/**
 		 * Filter to allow tracking.
 		 *
 		 * @since 8.5.0
@@ -302,6 +317,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 			'params' => array(
 				'lifetime'      => $lifetime,
 				'session'       => $session_length,
+				'base64'        => $use_base64_cookies,
 				'ajaxurl'       => admin_url( 'admin-ajax.php' ),
 				'prefix'        => $this->field_prefix,
 				'allowTracking' => 'yes' === $allow_tracking,
@@ -481,12 +497,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 			'customer_registered' => $order->get_customer_id() ? 'yes' : 'no',
 		);
 
-		$this->proxy->call_static(
-			WC_Tracks::class,
-			'record_event',
-			'order_attribution',
-			$tracks_data
-		);
+		if ( function_exists( 'wc_admin_record_tracks_event' ) ) {
+			wc_admin_record_tracks_event( 'order_attribution', $tracks_data );
+		}
 	}
 
 	/**
