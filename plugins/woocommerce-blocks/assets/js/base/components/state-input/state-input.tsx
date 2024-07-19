@@ -3,8 +3,14 @@
  */
 import { decodeEntities } from '@wordpress/html-entities';
 import { useCallback, useMemo, useEffect, useRef } from '@wordpress/element';
-import { ValidatedTextInput } from '@woocommerce/blocks-components';
+import {
+	ValidatedTextInput,
+	ValidationInputError,
+} from '@woocommerce/blocks-components';
 import { __ } from '@wordpress/i18n';
+import { useSelect } from '@wordpress/data';
+import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import { clsx } from 'clsx';
 
 /**
  * Internal dependencies
@@ -41,6 +47,7 @@ const StateInput = ( {
 	autoComplete = 'off',
 	value = '',
 	required = false,
+	errorId,
 }: StateInputWithStatesProps ): JSX.Element => {
 	const countryStates = states[ country ];
 	const options = useMemo< SelectOption[] >( () => {
@@ -55,6 +62,15 @@ const StateInput = ( {
 		}
 		return [];
 	}, [ countryStates ] );
+
+	const { validationError } = useSelect( ( select ) => {
+		const store = select( VALIDATION_STORE_KEY );
+		return {
+			validationError: store.getValidationError( errorId || '' ) || {
+				hidden: true,
+			},
+		};
+	} );
 
 	/**
 	 * Handles state selection onChange events. Finds a matching state by key or value.
@@ -97,18 +113,35 @@ const StateInput = ( {
 
 	if ( options.length > 0 ) {
 		return (
-			<Select
-				options={ options }
-				label={ label || '' }
-				className={ `wc-block-components-state-input ${
-					className || ''
-				}` }
-				id={ id }
-				onChange={ onChangeState }
-				value={ value }
-				autoComplete={ autoComplete }
-				required={ required }
-			/>
+			<div
+				className={ clsx(
+					className,
+					'wc-block-components-state-input',
+					{
+						'has-error': ! validationError.hidden,
+					}
+				) }
+			>
+				<Select
+					options={ options }
+					label={ label || '' }
+					className={ `${ className || '' }` }
+					id={ id }
+					onChange={ ( newValue ) => {
+						if ( required ) {
+						}
+						onChangeState( newValue );
+					} }
+					value={ value }
+					autoComplete={ autoComplete }
+					required={ required }
+				/>
+				{ validationError && validationError.hidden !== true && (
+					<ValidationInputError
+						errorMessage={ validationError.message }
+					/>
+				) }
+			</div>
 		);
 	}
 

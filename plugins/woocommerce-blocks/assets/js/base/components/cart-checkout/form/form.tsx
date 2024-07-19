@@ -36,6 +36,7 @@ import customValidationHandler from './custom-validation-handler';
 import AddressLineFields from './address-line-fields';
 import { createFieldProps, getFieldData } from './utils';
 import { Select } from '../../select';
+import { validateState } from './validate-state';
 
 /**
  * Checkout form.
@@ -93,12 +94,22 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 		}
 	}, [ onChange, addressFormFields, values ] );
 
-	// Maybe validate country when other fields change so user is notified that it's required.
+	// Maybe validate country and state when other fields change so user is notified that they're required.
 	useEffect( () => {
 		if ( objectHasProp( values, 'country' ) ) {
 			validateCountry( addressType, values );
 		}
-	}, [ values, addressType ] );
+
+		if ( objectHasProp( values, 'state' ) ) {
+			const stateField = addressFormFields.fields.find(
+				( f ) => f.key === 'state'
+			);
+
+			if ( stateField ) {
+				validateState( addressType, values, stateField.required );
+			}
+		}
+	}, [ values, addressType, addressFormFields ] );
 
 	// Changing country may change format for postcodes.
 	useEffect( () => {

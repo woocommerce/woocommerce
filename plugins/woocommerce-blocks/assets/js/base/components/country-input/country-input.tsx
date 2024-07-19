@@ -44,18 +44,19 @@ export const CountryInput = ( {
 		);
 	}, [ countries ] );
 
-	const { validationError, validationErrorId } = useSelect( ( select ) => {
+	const { validationError } = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
 		return {
-			validationError: store.getValidationError( errorId || '' ),
-			validationErrorId: store.getValidationErrorId( errorId || '' ),
+			validationError: store.getValidationError( errorId || '' ) || {
+				hidden: true,
+			},
 		};
 	} );
 
 	return (
 		<div
 			className={ clsx( className, 'wc-block-components-country-input', {
-				'has-error': validationErrorId,
+				'has-error': ! validationError.hidden,
 			} ) }
 		>
 			<Select
@@ -67,7 +68,7 @@ export const CountryInput = ( {
 				required={ required }
 				autoComplete={ autoComplete }
 			/>
-			{ validationError && (
+			{ validationError && validationError.hidden !== true && (
 				<ValidationInputError
 					errorMessage={ validationError.message }
 				/>
