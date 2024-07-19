@@ -4,7 +4,6 @@
  * External dependencies
  */
 import {
-	privateApis as blockEditorPrivateApis,
 	store as blockEditorStore,
 	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/block-editor';
