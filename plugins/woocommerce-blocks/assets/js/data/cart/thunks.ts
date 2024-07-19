@@ -55,6 +55,7 @@ export const receiveError =
 			if ( response.data?.cart ) {
 				dispatch.receiveCart( response?.data?.cart );
 			}
+			notifyCartErrors( [ response ] );
 		}
 	};
 
