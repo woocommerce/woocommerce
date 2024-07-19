@@ -544,9 +544,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @return bool[] Array of return values, grouped by the object_id. Each value is either true on success, or false
 	 *                if the contents were not deleted.
-	 *@internal This method should only be used by internally and in cases where the CRUD operations of this datastore
-	 *           are bypassed for performance purposes. This interface is not guaranteed.
 	 *
+	 * @internal This method should only be used by internally and in cases where the CRUD operations of this datastore
+	 *           are bypassed for performance purposes. This interface is not guaranteed.
 	 */
 	public function clear_cached_data( array $order_ids ): array {
 		$cache_engine  = wc_get_container()->get( WPCacheEngine::class );
