@@ -126,7 +126,7 @@ test.describe( 'Product Collection', () => {
 		} );
 	} );
 
-	test.describe( 'Product Collection Sidebar Settings', () => {
+	test.describe( 'Inspector Controls', () => {
 		test.beforeEach( async ( { pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock();
 		} );
@@ -402,72 +402,62 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 
-		test.describe( 'Sync with current template', () => {
-			test( 'should not be visible on posts', async ( {
-				pageObject,
-			} ) => {
+		test.describe( '"Use page context" control', () => {
+			test( 'should be visible on posts', async ( { pageObject } ) => {
 				await pageObject.createNewPostAndInsertBlock();
 
-				const sidebarSettings =
-					await pageObject.locateSidebarSettings();
 				await expect(
-					sidebarSettings.locator( SELECTORS.usePageContextControl )
-				).toBeHidden();
+					pageObject
+						.locateSidebarSettings()
+						.locator( SELECTORS.usePageContextControl )
+				).toBeVisible();
 			} );
 
-			const archiveTemplates = [
+			[
 				'woocommerce/woocommerce//archive-product',
 				'woocommerce/woocommerce//taxonomy-product_cat',
 				'woocommerce/woocommerce//taxonomy-product_tag',
 				'woocommerce/woocommerce//taxonomy-product_attribute',
 				'woocommerce/woocommerce//product-search-results',
-			];
-
-			const nonArchiveTemplates = [
-				'woocommerce/woocommerce//single-product',
-				'twentytwentyfour//home',
-				'twentytwentyfour//index',
-			];
-
-			archiveTemplates.map( async ( template ) => {
-				test( `should be visible in archive template: ${ template }`, async ( {
+			].forEach( ( slug ) => {
+				test( `should be visible in archive template: ${ slug }`, async ( {
 					pageObject,
 					editor,
 				} ) => {
-					await pageObject.goToEditorTemplate( template );
+					await pageObject.goToEditorTemplate( slug );
 					await pageObject.insertProductCollection();
 					await pageObject.chooseCollectionInTemplate();
 					await pageObject.focusProductCollection();
 					await editor.openDocumentSettingsSidebar();
 
-					const sidebarSettings =
-						await pageObject.locateSidebarSettings();
 					await expect(
-						sidebarSettings.locator(
-							SELECTORS.usePageContextControl
-						)
+						pageObject
+							.locateSidebarSettings()
+							.locator( SELECTORS.usePageContextControl )
 					).toBeVisible();
 				} );
 			} );
 
-			nonArchiveTemplates.map( async ( template ) => {
-				test( `should not be visible in non-archive template: ${ template }`, async ( {
+			[
+				'woocommerce/woocommerce//single-product',
+				'twentytwentyfour//home',
+				'twentytwentyfour//index',
+			].forEach( ( slug ) => {
+				test( `should be visible in non-archive template: ${ slug }`, async ( {
 					pageObject,
 					editor,
 				} ) => {
-					await pageObject.goToEditorTemplate( template );
+					await pageObject.goToEditorTemplate( slug );
 					await pageObject.insertProductCollection();
 					await pageObject.chooseCollectionInTemplate();
 					await pageObject.focusProductCollection();
 					await editor.openDocumentSettingsSidebar();
 
-					const sidebarSettings =
-						await pageObject.locateSidebarSettings();
 					await expect(
-						sidebarSettings.locator(
-							SELECTORS.usePageContextControl
-						)
-					).toBeHidden();
+						pageObject
+							.locateSidebarSettings()
+							.locator( SELECTORS.usePageContextControl )
+					).toBeVisible();
 				} );
 			} );
 
@@ -479,8 +469,7 @@ test.describe( 'Product Collection', () => {
 				await pageObject.focusProductCollection();
 				await editor.openDocumentSettingsSidebar();
 
-				const sidebarSettings =
-					await pageObject.locateSidebarSettings();
+				const sidebarSettings = pageObject.locateSidebarSettings();
 
 				// Inherit query from template should be visible & enabled by default
 				await expect(
@@ -534,8 +523,7 @@ test.describe( 'Product Collection', () => {
 				await pageObject.focusProductCollection();
 				await editor.openDocumentSettingsSidebar();
 
-				const sidebarSettings =
-					await pageObject.locateSidebarSettings();
+				const sidebarSettings = pageObject.locateSidebarSettings();
 
 				await expect(
 					sidebarSettings.locator( SELECTORS.usePageContextControl )
@@ -783,7 +771,7 @@ test.describe( 'Product Collection', () => {
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock( 'productCatalog' );
 
-			const sidebarSettings = await pageObject.locateSidebarSettings();
+			const sidebarSettings = pageObject.locateSidebarSettings();
 			const input = sidebarSettings.locator(
 				`${ SELECTORS.usePageContextControl } input`
 			);
@@ -813,7 +801,7 @@ test.describe( 'Product Collection', () => {
 			await pageObject.chooseCollectionInTemplate();
 			await editor.openDocumentSettingsSidebar();
 
-			const sidebarSettings = await pageObject.locateSidebarSettings();
+			const sidebarSettings = pageObject.locateSidebarSettings();
 			const input = sidebarSettings.locator(
 				`${ SELECTORS.usePageContextControl } input`
 			);
@@ -845,8 +833,7 @@ test.describe( 'Product Collection', () => {
 
 			test( 'On Sale', async ( { pageObject } ) => {
 				await pageObject.createNewPostAndInsertBlock( 'onSale' );
-				const sidebarSettings =
-					await pageObject.locateSidebarSettings();
+				const sidebarSettings = pageObject.locateSidebarSettings();
 				const input = sidebarSettings.getByLabel(
 					SELECTORS.onSaleControlLabel
 				);
@@ -856,8 +843,7 @@ test.describe( 'Product Collection', () => {
 
 			test( 'Featured', async ( { pageObject } ) => {
 				await pageObject.createNewPostAndInsertBlock( 'featured' );
-				const sidebarSettings =
-					await pageObject.locateSidebarSettings();
+				const sidebarSettings = pageObject.locateSidebarSettings();
 				const input = sidebarSettings.getByLabel(
 					SELECTORS.featuredControlLabel
 				);
