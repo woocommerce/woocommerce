@@ -6,6 +6,8 @@ import { decodeEntities } from '@wordpress/html-entities';
 import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
+import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import { ValidationInputError } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies
@@ -13,8 +15,6 @@ import { useSelect } from '@wordpress/data';
 import './style.scss';
 import type { CountryInputWithCountriesProps } from './CountryInputProps';
 import { Select, SelectOption } from '../select';
-import { VALIDATION_STORE_KEY } from '../../../data';
-import { ValidationInputError } from '../../../../../packages/checkout';
 
 const emptyCountryOption: SelectOption = {
 	value: '',
