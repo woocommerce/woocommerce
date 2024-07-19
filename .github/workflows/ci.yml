@@ -372,9 +372,9 @@ jobs:
         shell: 'bash'
         run: |
           if [[ ! -f ./packages/report-flaky-tests/build/index.js ]]; then
-              echo "BUILD_REPORT_FLAKY_TESTS_UTILITY=yes" >> $GITHUB_ENV
+              echo "PERFORM_FULL_BUILD=yes" >> $GITHUB_ENV
           else
-              echo "BUILD_REPORT_FLAKY_TESTS_UTILITY=no" >> $GITHUB_ENV
+              echo "PERFORM_FULL_BUILD=no" >> $GITHUB_ENV
           fi
 
       - name: 'Setup Node'
@@ -385,7 +385,7 @@ jobs:
         if: ${{ !!env.FLAKY_REPORTS }}
         shell: 'bash'
         run: |
-          if [[ '${{ env.BUILD_REPORT_FLAKY_TESTS_UTILITY }}' == 'no' ]]; then
+          if [[ '${{ env.PERFORM_FULL_BUILD }}' == 'no' ]]; then
             npm install --silent
           else
             npm run build:packages
