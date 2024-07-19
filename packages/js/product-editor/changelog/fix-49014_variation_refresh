@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Update invalidation logic of variation generation by adding a new refreshProductVariationData action to update the entity data store without invalidating.

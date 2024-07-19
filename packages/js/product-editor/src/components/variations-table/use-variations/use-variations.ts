@@ -309,11 +309,8 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	async function onDelete( variationId: number ) {
 		if ( isUpdating[ variationId ] ) return;
 
-		const {
-			deleteProductVariation,
-			invalidateResolutionForStore,
-			refreshProductVariationData,
-		} = dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+		const { deleteProductVariation, invalidateResolutionForStore } =
+			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
 		return deleteProductVariation< Promise< ProductVariation > >( {
 			product_id: productId,
@@ -323,7 +320,11 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
-			await refreshProductVariationData( productId );
+			await dispatch( 'core' ).invalidateResolution( 'getEntityRecord', [
+				'postType',
+				'product',
+				productId,
+			] );
 
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
@@ -419,11 +420,8 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		const { invalidateResolution: coreInvalidateResolution } =
 			dispatch( 'core' );
 
-		const {
-			batchUpdateProductVariations,
-			invalidateResolutionForStore,
-			refreshProductVariationData,
-		} = dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+		const { batchUpdateProductVariations, invalidateResolutionForStore } =
+			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
 		selectedVariationsRef.current = {};
 		setSelectedCount( 0 );
@@ -476,8 +474,11 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 		setIsUpdating( {} );
 
-		await refreshProductVariationData( productId );
-
+		await coreInvalidateResolution( 'getEntityRecord', [
+			'postType',
+			'product',
+			productId,
+		] );
 		await invalidateResolutionForStore();
 		await getCurrentVariationsPage( {
 			product_id: productId,

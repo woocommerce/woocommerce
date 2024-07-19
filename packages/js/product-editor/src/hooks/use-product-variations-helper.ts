@@ -158,6 +158,19 @@ export function useProductVariationsHelper() {
 				}
 			)
 			.then( async ( response ) => {
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
+				await dispatch( 'core' ).invalidateResolution(
+					'getEntityRecord',
+					[ 'postType', 'product', productId ]
+				);
+
+				await resolveSelect( 'core' ).getEntityRecord(
+					'postType',
+					'product',
+					productId
+				);
+
 				await dispatch(
 					EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 				).invalidateResolutionForStore();
