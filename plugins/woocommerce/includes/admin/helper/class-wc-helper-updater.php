@@ -268,8 +268,8 @@ class WC_Helper_Updater {
 			// Get the site subscriptions.
 			$site_subscriptions = array_filter(
 				WC_Helper::get_subscriptions(),
-				function( $subscription ) use ( $site_id ) {
-					return in_array( $site_id, $subscription['connections'] );
+				function ( $subscription ) use ( $site_id ) {
+					return in_array( $site_id, $subscription['connections'], true );
 				}
 			);
 		}
@@ -287,7 +287,7 @@ class WC_Helper_Updater {
 		$expired_subscription = current(
 			array_filter(
 				$subscriptions,
-				function( $subscription ) {
+				function ( $subscription ) {
 					return ! empty( $subscription['expired'] ) && ! $subscription['lifetime'];
 				}
 			)
@@ -296,7 +296,7 @@ class WC_Helper_Updater {
 		$expiring_subscription = current(
 			array_filter(
 				$subscriptions,
-				function( $subscription ) {
+				function ( $subscription ) {
 					return ! empty( $subscription['expiring'] ) && ! $subscription['autorenew'];
 				}
 			)
