@@ -220,7 +220,7 @@ class BatchProcessingController {
 	 * @return array Current state for the processor, or a "blank" state if none exists yet.
 	 */
 	private function get_process_details( BatchProcessorInterface $batch_processor ): array {
-		$defaults        = array(
+		$defaults = array(
 			'total_time_spent'    => 0,
 			'current_batch_size'  => $batch_processor->get_default_batch_size(),
 			'last_error'          => null,
@@ -228,10 +228,9 @@ class BatchProcessingController {
 			'batch_first_failure' => null,
 			'batch_last_failure'  => null,
 		);
-		$process_details = get_option( $this->get_processor_state_option_name( $batch_processor ), $defaults );
-		if ( ! is_array( $process_details ) ) {
-			$process_details = $defaults;
-		}
+
+		$process_details = get_option( $this->get_processor_state_option_name( $batch_processor ) );
+		$process_details = wp_parse_args( is_array( $process_details ) ? $process_details : array(), $defaults );
 
 		return $process_details;
 	}
