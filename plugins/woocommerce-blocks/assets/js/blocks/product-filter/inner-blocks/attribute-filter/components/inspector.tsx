@@ -20,8 +20,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { sortOrderOptions } from './constants';
-import { EditProps, BlockAttributes } from './types';
+import { sortOrderOptions } from '../constants';
+import { EditProps, BlockAttributes } from '../types';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
