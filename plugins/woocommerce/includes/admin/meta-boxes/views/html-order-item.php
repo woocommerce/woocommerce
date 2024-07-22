@@ -181,7 +181,7 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 	<td class="wc-order-edit-line-item" width="1%">
 		<div class="wc-order-edit-line-item-actions">
 			<?php if ( $order->is_editable() ) : ?>
-				<a class="edit-order-item tips" href="#" data-tip="<?php esc_attr_e( 'Edit item', 'woocommerce' ); ?>"></a><a class="delete-order-item tips" href="#" data-tip="<?php esc_attr_e( 'Delete item', 'woocommerce' ); ?>"></a>
+				<a class="edit-order-item tips" href="#" data-tip="<?php esc_attr_e( 'Edit item', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Edit item', 'woocommerce' ); ?>"></a><a class="delete-order-item tips" href="#" data-tip="<?php esc_attr_e( 'Delete item', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Delete item', 'woocommerce' ); ?>"></a>
 			<?php endif; ?>
 		</div>
 	</td>
