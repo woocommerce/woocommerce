@@ -28,13 +28,13 @@ import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/compon
 /**
  * Internal dependencies
  */
-import { SidebarNavigationScreen } from './sidebar-navigation-screen';
+import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { useEditorBlocks } from '../hooks/use-editor-blocks';
-import { useHomeTemplates } from '../hooks/use-home-templates';
+import { useEditorBlocks } from '../../hooks/use-editor-blocks';
+import { useHomeTemplates } from '../../hooks/use-home-templates';
 import { BlockInstance } from '@wordpress/blocks';
-import { useSelectedPattern } from '../hooks/use-selected-pattern';
-import { useEditorScroll } from '../hooks/use-editor-scroll';
+import { useSelectedPattern } from '../../hooks/use-selected-pattern';
+import { useEditorScroll } from '../../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { select, useSelect } from '@wordpress/data';
@@ -43,8 +43,9 @@ import { trackEvent } from '~/customize-store/tracking';
 import {
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
 	findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate,
-} from '../utils/black-background-pattern-update-button';
-import { useIsActiveNewNeutralVariation } from '../hooks/use-is-active-new-neutral-variation';
+} from '../../utils/black-background-pattern-update-button';
+import { useIsActiveNewNeutralVariation } from '../../hooks/use-is-active-new-neutral-variation';
+import './style.scss';
 
 export const SidebarNavigationScreenHomepage = ( {
 	onNavigateBackClick,
