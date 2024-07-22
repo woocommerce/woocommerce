@@ -160,7 +160,7 @@ jQuery( function( $ ) {
 		trigger_update_checkout: function( event ) {
 			wc_checkout_form.reset_update_checkout_timer();
 			wc_checkout_form.dirtyInput = false;
-			$( document.body ).trigger( 'update_checkout', { current_target: event.currentTarget } );
+			$( document.body ).trigger( 'update_checkout', { current_target: event ? event.currentTarget : null } );
 		},
 		maybe_update_checkout: function() {
 			var update_totals = true;
